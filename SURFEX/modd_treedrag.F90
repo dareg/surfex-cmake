@@ -24,7 +24,7 @@
 !*       0.   DECLARATIONS
 !        -----------------
 IMPLICIT NONE
-LOGICAL    ::     LTREEDRAG    ! flag used to  take into account tree drag in 
-!                              ! the atmospheric model instead of SURFEX.
+LOGICAL    ::     LTREEDRAG=.FALSE.    ! flag used to  take into account tree drag in 
+!                                      ! the atmospheric model instead of SURFEX.
 !
 END MODULE MODD_TREEDRAG
