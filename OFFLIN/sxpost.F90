@@ -308,7 +308,8 @@
 
 
         STOP
- 100    WRITE(NLUOUT,*) ' '
+ 100    CONTINUE
+        WRITE(NLUOUT,*) ' '
         WRITE(NLUOUT,*) ' ERROR WHEN READING ARTICLE',HREC
         WRITE(NLUOUT,*) ' '
         CLOSE(NLUOUT)
