@@ -1,0 +1,78 @@
+!     #########
+SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
+!**************************************************************************
+!
+!!    PURPOSE
+!!    -------
+!!        Check consistency orographies read from forcing file and from initial file
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!	P. Le Moigne   *Meteo France*	
+!!
+!
+USE MODI_INIT_IO_SURF_n
+USE MODI_READ_SURF
+USE MODI_END_IO_SURF_n
+USE MODI_GET_LUOUT
+USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_FORC_ATM,   ONLY : XZS
+USE MODD_SURF_CONF,  ONLY : CPROGNAME
+!         
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+USE MODI_ABOR1_SFX
+!
+IMPLICIT NONE
+!
+! global variables
+CHARACTER(LEN=6)    ,INTENT(IN)  :: HPROGRAM
+REAL                ,INTENT(IN)  :: PDELT_ZSMAX
+LOGICAL             ,INTENT(IN)  :: OSURFZS
+
+! local variables
+INTEGER                          :: ILUOUT
+INTEGER                          :: IRET
+REAL, DIMENSION(SIZE(XZS,1))     :: ZS1       ! orography read from FORCING.nc
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('COMPARE_OROGRAPHY',0,ZHOOK_HANDLE)
+CPROGNAME = HPROGRAM
+!
+! read orography
+! 
+!  orography from initial file
+CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
+CALL READ_SURF(HPROGRAM,'ZS', ZS1, IRET)
+CALL END_IO_SURF_n(HPROGRAM)
+!
+IF (OSURFZS) THEN
+  CALL GET_LUOUT('ASCII ',ILUOUT)
+  WRITE(ILUOUT,*)' OROGRAPHY READ FROM INITIAL FILE'
+  XZS(:) = ZS1(:)
+ELSEIF (MAXVAL(ABS(XZS(:)-ZS1(:))) > PDELT_ZSMAX) THEN
+  CALL GET_LUOUT('ASCII ',ILUOUT)
+  WRITE(ILUOUT,*)' DIFFERENCE OF OROGRAPHY TOO BIG BETWEEN FORCING AND INITIAL FILE'
+  WRITE(ILUOUT,*)' Maximum orography difference allowed (m) : ', PDELT_ZSMAX
+  WRITE(ILUOUT,*)' Maximum orography difference         (m) : ', MAXVAL(ABS(XZS(:)-ZS1(:)))
+  CALL ABOR1_SFX('COMPARE_OROGRAPHY: DIFFERENCE OF OROGRAPHY TOO BIG BETWEEN FORCING AND INITIAL FILE')
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('COMPARE_OROGRAPHY',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE COMPARE_OROGRAPHY

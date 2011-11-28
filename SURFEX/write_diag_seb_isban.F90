@@ -1,0 +1,1140 @@
+!     #########
+      SUBROUTINE WRITE_DIAG_SEB_ISBA_n(HPROGRAM)
+!     #################################
+!
+!!****  *WRITE_DIAG_SEB_ISBA* - writes the ISBA diagnostic fields
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!	V. Masson   *Meteo France*	
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    01/2004
+!!      B. Decharme 06/2009  key to write (or not) patch result
+!!      B. Decharme 08/2009  cumulative radiative budget
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_SURF_PAR,   ONLY : XUNDEF
+!
+USE MODD_CSTS,       ONLY : XRHOLW, XTT, XLMTT
+!
+USE MODD_DIAG_SURF_ATM_n,ONLY : LPROVAR_TO_DIAG, LRESET_BUDGETC
+!
+USE MODD_ISBA_n,     ONLY :   NPATCH, XPATCH, LFLOOD, CISBA, CHORT,   &
+                              LGLACIER, NGROUND_LAYER, LTEMP_ARP,     &
+                              NTEMPLAYER_ARP, TSNOW, XLE, XDG, XTG,   &
+                              XWG, XWGI, XWR, XICE_STO, CPHOTO, XLAI, &
+                              XD_ICE, XWSAT  
+!                            
+USE MODD_DIAG_ISBA_n,ONLY :   N2M, LSURF_BUDGET, LRAD_BUDGET, LCOEF,            &
+                              LSURF_VARS,LPATCH_BUDGET,                         &
+                              XAVG_RN, XAVG_H, XAVG_LE, XAVG_LEI, XAVG_GFLUX,   &
+                              XAVG_RI, XAVG_CD, XAVG_CH, XAVG_CE,               &
+                              XAVG_T2M, XAVG_Q2M, XAVG_HU2M,                    &
+                              XAVG_ZON10M, XAVG_MER10M, XAVG_Z0, XAVG_Z0H,      &
+                              XAVG_QS, XAVG_T2M_MIN, XAVG_T2M_MAX,              &
+                              XAVG_SWD, XAVG_SWU, XAVG_SWBD, XAVG_SWBU,         &
+                              XAVG_LWD, XAVG_LWU, XAVG_FMU, XAVG_FMV,           &
+                              XRN, XH, XGFLUX, XLEI,                            &
+                              XRI,XT2M, XQ2M, XHU2M, XZON10M, XMER10M,          &
+                              XZ0_WITH_SNOW, XZ0H_WITH_SNOW, XQS, XWIND10M,     &
+                              XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV, &
+                              XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,         &
+                              XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,       &
+                              XAVG_FMUC, XAVG_FMVC, XAVG_HU2M_MIN,              &
+                              XAVG_HU2M_MAX, XAVG_WIND10M, XAVG_WIND10M_MAX  
+
+!
+USE MODI_INIT_IO_SURF_n
+USE MODI_WRITE_SURF
+USE MODI_END_IO_SURF_n
+USE MODD_DIAG_EVAP_ISBA_n,ONLY :   LSURF_EVAP_BUDGET, LSURF_BUDGETC,              &
+                                   XRNC, XAVG_RNC, XHC, XAVG_HC,                  &
+                                   XLEC, XAVG_LEC, XGFLUXC, XAVG_GFLUXC,          &
+                                   XLEIC, XAVG_LEIC,                              &
+                                   XLEG, XLEGC, XAVG_LEG, XAVG_LEGC,              &
+                                   XLEGI, XLEGIC, XAVG_LEGI, XAVG_LEGIC,          &
+                                   XLEV, XLEVC, XAVG_LEV, XAVG_LEVC,              &
+                                   XLES, XLESC, XAVG_LES, XAVG_LESC,              &
+                                   XLER, XLERC, XAVG_LER, XAVG_LERC,              &
+                                   XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,          &
+                                   XEVAP, XEVAPC, XAVG_EVAP, XAVG_EVAPC,          &
+                                   XDRAIN, XDRAINC, XAVG_DRAIN, XAVG_DRAINC,      &
+                                   XRUNOFF, XRUNOFFC, XAVG_RUNOFF, XAVG_RUNOFFC,  &
+                                   XHORT, XHORTC, XAVG_HORT, XAVG_HORTC,          &
+                                   XDRIP, XDRIPC, XAVG_DRIP, XAVG_DRIPC,          &
+                                   XMELT, XMELTC, XAVG_MELT, XAVG_MELTC,          &
+                                   XIFLOOD, XIFLOODC, XAVG_IFLOOD, XAVG_IFLOODC,  &
+                                   XPFLOOD, XPFLOODC, XAVG_PFLOOD, XAVG_PFLOODC,  &
+                                   XLE_FLOOD, XLE_FLOODC, XAVG_LE_FLOOD,          &
+                                   XAVG_LE_FLOODC, XLEI_FLOOD, XLEI_FLOODC,       &
+                                   XAVG_LEI_FLOOD, XAVG_LEI_FLOODC,               &
+                                   XICEFLUXC, XAVG_ICEFLUXC,                      &
+                                   XRRVEG, XRRVEGC, XAVG_RRVEG, XAVG_RRVEGC  
+
+USE MODD_CH_ISBA_n,    ONLY : XDEP, CCH_DRY_DEP, LCH_BIO_FLUX, CCH_NAMES, NBEQ
+USE MODD_GR_BIOG_n,    ONLY : XFISO,XFMONO
+USE MODD_DST_n
+USE MODD_DST_SURF
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments
+!              -------------------------
+!
+CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+!
+!*       0.2   Declarations of local variables
+!              -------------------------------
+!
+INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
+CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be write
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=2)  :: YNUM
+!
+INTEGER           :: JSV, JSW
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+!         Initialisation for IO
+!
+IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',0,ZHOOK_HANDLE)
+CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+!
+!-------------------------------------------------------------------------------
+!
+!*       2.     Richardson number :
+!               -----------------
+!
+IF (N2M>=1) THEN
+  !
+  YRECFM='RI_ISBA'
+  YCOMMENT='Richardson number over tile nature'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+END IF
+!
+!*       3.     Energy fluxes :
+!               -------------
+!
+IF (LSURF_BUDGET) THEN
+  !
+  YRECFM='RN_ISBA'
+  YCOMMENT='Net radiation over tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='H_ISBA'
+  YCOMMENT='Sensible heat flux over tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LE_ISBA'
+  YCOMMENT='total latent heat flux over tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEI_ISBA'
+  YCOMMENT='sublimation latent heat flux over tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='GFLUX_ISBA'
+  YCOMMENT='Ground flux over tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_GFLUX(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  IF (LRAD_BUDGET) THEN
+    !
+    YRECFM='SWD_ISBA'
+    YCOMMENT='short wave downward radiation over tile nature'//' (W/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='SWU_ISBA'
+    YCOMMENT='short wave upward radiation over tile nature'//' (W/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWU(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWD_ISBA'
+    YCOMMENT='long wave downward radiation over tile nature'//' (W/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWU_ISBA'
+    YCOMMENT='long wave upward radiation over tile nature'//' (W/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWU(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    DO JSW=1, SIZE(XSWBD,2)
+      YNUM=ACHAR(48+JSW)
+      !
+      YRECFM='SWD_ISBA_'//YNUM
+      YCOMMENT='short wave downward radiation over tile nature for spectral band'//YNUM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWBD(:,JSW),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='SWU_ISBA_'//YNUM
+      YCOMMENT='short wave upward radiation over tile nature for spectral band'//YNUM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWBU(:,JSW),IRESP,HCOMMENT=YCOMMENT)
+      !
+    ENDDO
+    !
+  ENDIF
+  !
+  YRECFM='FMU_ISBA'
+  YCOMMENT='u component of wind stress'//' (kg/ms2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FMU(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='FMV_ISBA'
+  YCOMMENT='v component of wind stress'//' (kg/ms2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FMV(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+END IF
+!
+!*       4.    Specific Energy fluxes :(for each patch)
+!              ----------------------------------------
+!
+IF (LSURF_EVAP_BUDGET) THEN
+  !
+  YRECFM='LEG_ISBA'
+  YCOMMENT='bare ground evaporation for tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEG(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEGI_ISBA'
+  YCOMMENT='bare ground sublimation for tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEGI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEV_ISBA'
+  YCOMMENT='total vegetation evaporation for tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEV(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LES_ISBA'
+  YCOMMENT='vegetation sublimation for tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LES(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LER_ISBA'
+  YCOMMENT='evaporation due to interception for tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LER(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LETR_ISBA'
+  YCOMMENT='vegetation evapotranspiration for tile nature'//' (W/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETR(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='EVAP_ISBA'
+  YCOMMENT='total evaporative flux for tile nature'//' (Kg/m2/s)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_EVAP(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='DRAIN_ISBA'
+  YCOMMENT='drainage for tile nature'//' (Kg/m2/s)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_DRAIN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='RUNOFF_ISBA'
+  YCOMMENT='runoff for tile nature'//' (Kg/m2/s)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RUNOFF(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  IF(CHORT=='SGH')THEN
+    YRECFM='HORTON_ISBA'
+    YCOMMENT='horton runoff for tile nature'//' (Kg/m2/s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HORT(:),IRESP,HCOMMENT=YCOMMENT)
+  ENDIF
+  !
+  YRECFM='DRIVEG_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_DRIP(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='RRVEG_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RRVEG(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='SNOMLT_ISBA'
+  YCOMMENT='snow melting rate'//' (Kg/m2/s)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_MELT(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  IF(LFLOOD)THEN
+    !        
+    YRECFM='IFLOOD_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_IFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='PFLOOD_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_PFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LEF_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_FLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LEIF_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEI_FLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDIF
+  !
+ENDIF
+!
+!*       5.    Cumulated Energy fluxes
+!              -----------------------
+!
+IF (LSURF_BUDGETC) THEN
+  !
+  IF (LSURF_EVAP_BUDGET .OR. .NOT.LRESET_BUDGETC) THEN
+    !
+    YRECFM='LEGC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEGC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LEGIC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEGIC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LEVC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEVC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LESC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LESC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LERC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LERC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LETRC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETRC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='EVAPC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_EVAPC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='DRAINC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_DRAINC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='RUNOFFC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RUNOFFC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    IF(CHORT=='SGH')THEN
+      YRECFM='HORTONC_ISBA'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HORTC(:),IRESP,HCOMMENT=YCOMMENT)
+    ENDIF
+    !
+    YRECFM='DRIVEGC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_DRIPC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='RRVEGC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RRVEGC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='SNOMLTC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_MELTC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    IF(LGLACIER)THEN
+      YRECFM='ICE_FC_ISBA'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_ICEFLUXC(:),IRESP,HCOMMENT=YCOMMENT)
+    ENDIF
+    !
+    IF(LFLOOD)THEN
+      !
+      YRECFM='IFLOODC_ISBA'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_IFLOODC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='PFLOODC_ISBA'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_PFLOODC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEFC_ISBA'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_FLOODC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEIFC_ISBA'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEI_FLOODC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    ENDIF
+    !
+  ENDIF
+  !
+  YRECFM='RNC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_RNC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='HC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEIC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEIC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='GFLUXC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_GFLUXC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  IF (LRAD_BUDGET .OR. .NOT.LRESET_BUDGETC) THEN
+    !
+    YRECFM='SWDC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWDC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='SWUC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWUC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWDC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWDC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWUC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWUC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDIF
+  !
+  YRECFM='FMUC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/ms)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FMUC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='FMVC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/ms)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FMVC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF
+!
+!*       6.     parameters at 2 and 10 meters :
+!               -------------------------------
+!
+IF (N2M>=1) THEN
+  !
+  YRECFM='T2M_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_T2M(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='T2MMIN_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_T2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
+  XAVG_T2M_MIN(:)=XUNDEF
+  !
+  YRECFM='T2MMAX_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_T2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+  XAVG_T2M_MAX(:)=0.0
+  !
+  YRECFM='Q2M_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_Q2M(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='HU2M_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HU2M(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='HU2MMIN_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
+  XAVG_HU2M_MIN(:)=XUNDEF
+  !
+  YRECFM='HU2MMAX_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+  XAVG_HU2M_MAX(:)=-XUNDEF
+  !
+  YRECFM='ZON10M_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_ZON10M(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='MER10M_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_MER10M(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='W10M_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_WIND10M(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='W10MMAX_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_WIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+  XAVG_WIND10M_MAX(:)=0.0
+  !
+END IF
+!----------------------------------------------------------------------------
+!
+!*       7.     Transfer coefficients
+!               ---------------------
+!
+IF (LCOEF) THEN
+  !
+  YRECFM='CD_ISBA'
+  YCOMMENT='X_Y_'//YRECFM
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_CD(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='CH_ISBA'
+  YCOMMENT='X_Y_'//YRECFM
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_CH(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='CE_ISBA'
+  YCOMMENT='X_Y_'//YRECFM
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_CE(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='Z0_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (M)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_Z0(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='Z0H_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (M)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_Z0H(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF
+!
+!----------------------------------------------------------------------------
+!
+!*       8.     Surface humidity
+!               ----------------
+IF (LSURF_VARS) THEN
+  !
+  YRECFM='QS_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_QS(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF
+!
+!----------------------------------------------------------------------------
+!
+!*       9.     Diag of prognostic fields
+!               -------------------------
+!
+IF (LPROVAR_TO_DIAG) CALL PROVAR_TO_DIAG
+!
+!----------------------------------------------------------------------------
+!
+!User want (or not) patch output
+IF(LPATCH_BUDGET)THEN
+  !----------------------------------------------------------------------------
+  IF (NPATCH > 1) THEN
+    !----------------------------------------------------------------------------
+    !
+    !*      10.     Richardson number (for each patch)
+    !               -----------------
+    !
+    IF (N2M>=1) THEN
+      !
+      YRECFM='RI_PATCH'
+      YCOMMENT='X_Y_'//YRECFM
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRI(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    END IF
+    !
+    !*       11.     Energy fluxes :(for each patch)
+    !                -------------
+    !
+    IF (LSURF_BUDGET) THEN
+      !
+      YRECFM='RN_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRN(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='H_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XH(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LE_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLE(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEI_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLEI(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='GFLUX_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      IF (LRAD_BUDGET) THEN
+        !
+        YRECFM='SWD_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWD(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='SWU_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWU(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LWD_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWD(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LWU_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWU(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        DO JSW=1, SIZE(XSWBD,2)
+          YNUM=ACHAR(48+JSW)
+          !
+          YRECFM='SWD_PATCH'//YNUM
+          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XSWBD(:,JSW,:),IRESP,HCOMMENT=YCOMMENT)
+          !
+          YRECFM='SWU_PATCH'//YNUM
+          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XSWBU(:,JSW,:),IRESP,HCOMMENT=YCOMMENT)
+          !
+        ENDDO
+        !
+      ENDIF
+      !
+      YRECFM='FMU_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (kg/ms2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFMU(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='FMV_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (kg/ms2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFMV(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    END IF
+    !
+    !*       12.    Specific Energy fluxes :(for each patch)
+    !               ----------------------------------------
+    !
+    IF (LSURF_EVAP_BUDGET) THEN
+      !
+      YRECFM='LEG_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLEG(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEGI_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLEGI(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEV_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLEV(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LES_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLES(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LER_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLER(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LETR_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLETR(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='EVAP_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XEVAP(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='DRAIN_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XDRAIN(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='RUNOFF_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFF(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      IF(CHORT=='SGH')THEN
+        YRECFM='HORTON_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XHORT(:,:),IRESP,HCOMMENT=YCOMMENT)
+      ENDIF
+      !
+      YRECFM='DRIVEG_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XDRIP(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='RRVEG_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRRVEG(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='SNOMLT_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XMELT(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      IF(LFLOOD)THEN
+        !
+        YRECFM='IFLOOD_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XIFLOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='PFLOOD_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XPFLOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LEF_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_FLOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LEIF_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLEI_FLOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+      ENDIF
+      !
+    ENDIF
+    !
+    !*       13.    surface temperature parameters at 2 and 10 meters (for each patch):
+    !               -------------------------------------------------------------------
+    !
+    IF (N2M>=1) THEN
+      !
+      YRECFM='T2M_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (K)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='Q2M_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XQ2M(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='HU2M_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (PERCENT)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='ZON10M_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XZON10M(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='MER10M_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XMER10M(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='W10M_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    END IF
+    !
+    !*       14.    Cumulated Energy fluxes :(for each patch)
+    !               -----------------------------------------
+    !
+    IF (LSURF_BUDGETC) THEN
+      !
+      IF (LSURF_EVAP_BUDGET .OR. .NOT.LRESET_BUDGETC) THEN
+        !
+        YRECFM='LEGC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLEGC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LEGIC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLEGIC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LEVC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLEVC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LESC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLESC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LERC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLERC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LETRC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLETRC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='EVAPC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XEVAPC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='DRAINC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XDRAINC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='RUNOFFC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        IF(CHORT=='SGH')THEN
+          YRECFM='HORTONC_PATCH'
+          YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XHORTC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        ENDIF
+        !
+        YRECFM='DRIVEGC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XDRIPC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='RRVEGC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XRRVEGC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='SNOMLTC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XMELTC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        IF(LGLACIER)THEN
+          YRECFM='ICE_FC_PATCH'
+          YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XICEFLUXC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        ENDIF
+        !
+        IF(LFLOOD)THEN
+          !        
+          YRECFM='IFLOODC_PATCH'
+          YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XIFLOODC(:,:),IRESP,HCOMMENT=YCOMMENT)
+          !
+          YRECFM='PFLOODC_PATCH'
+          YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XPFLOODC(:,:),IRESP,HCOMMENT=YCOMMENT)
+          !
+          YRECFM='LEFC_PATCH'
+          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_FLOODC(:,:),IRESP,HCOMMENT=YCOMMENT)
+          !
+          YRECFM='LEIFC_PATCH'
+          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+          CALL WRITE_SURF(HPROGRAM,YRECFM,XLEI_FLOODC(:,:),IRESP,HCOMMENT=YCOMMENT)
+          !
+        ENDIF
+        !
+      ENDIF
+      !
+      YRECFM='RNC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRNC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='HC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XHC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLEC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='LEIC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLEIC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='GFLUXC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUXC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      IF (LRAD_BUDGET .OR. .NOT.LRESET_BUDGETC) THEN
+        !
+        YRECFM='SWDC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWDC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='SWUC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWUC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LWDC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWDC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='LWUC_PATCH'
+        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWUC(:,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+      ENDIF
+      !
+      YRECFM='FMUC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (kg/ms)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFMUC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='FMVC_PATCH'
+      YCOMMENT='X_Y_'//YRECFM//' (kg/ms)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFMVC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    ENDIF
+    !-------------------------------------------------------------------------------
+  ENDIF
+ENDIF
+!User want (or not) patch output
+!-------------------------------------------------------------------------------
+!
+!*       15.     chemical diagnostics:
+!               --------------------
+!
+IF (NBEQ>0 .AND. CCH_DRY_DEP=="WES89 ") THEN
+  !
+  DO JSV = 1,SIZE(CCH_NAMES,1)
+    YRECFM='DV_NAT_'//TRIM(CCH_NAMES(JSV))
+    WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_NAT_',JSV
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XDEP(:,JSV,:),IRESP,HCOMMENT=YCOMMENT)
+  END DO
+  !
+ENDIF
+!
+IF (NBEQ>0 .AND. LCH_BIO_FLUX) THEN
+  !
+  IF (ASSOCIATED(XFISO)) THEN
+    YRECFM='FISO'
+    WRITE(YCOMMENT,'(A21)')'FISO (molecules/m2/s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFISO(:),IRESP,HCOMMENT=YCOMMENT)
+  END IF
+  !
+  IF (ASSOCIATED(XFISO)) THEN
+    YRECFM='FMONO'
+    WRITE(YCOMMENT,'(A22)')'FMONO (molecules/m2/s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFMONO(:),IRESP,HCOMMENT=YCOMMENT)
+  END IF
+  !
+ENDIF
+!    
+IF (CDSTYN=='Y')THEN
+  !
+  DO JSV = 1,NDSTMDE ! for all dust modes
+    WRITE(YRECFM,'(A7,I3.3)')'FLX_DST',JSV
+    YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XSFDST(:,JSV,:),IRESP,HCOMMENT=YCOMMENT)
+  END DO
+  !
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+!         End of IO
+!
+CALL END_IO_SURF_n(HPROGRAM)
+IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',1,ZHOOK_HANDLE)
+!
+CONTAINS
+!
+!-------------------------------------------------------------------------------
+!
+SUBROUTINE PROVAR_TO_DIAG
+!
+REAL, DIMENSION(SIZE(XTG,1)) :: ZWORK, ZPATCH
+REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZDG
+CHARACTER(LEN=4 ) :: YLVL
+INTEGER :: JLAYER, JPATCH, IWORK
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N:PROVAR_TO_DIAG',0,ZHOOK_HANDLE)
+!
+! * soil temperatures (K)
+!
+IF(LTEMP_ARP)THEN
+  IWORK=NTEMPLAYER_ARP
+ELSEIF(CISBA/='DIF')THEN
+  IWORK=NGROUND_LAYER-1
+ELSE
+  IWORK=NGROUND_LAYER
+ENDIF
+!
+DO JLAYER=1,IWORK
+  !
+  ZWORK(:)=0.0
+  DO JPATCH=1,NPATCH
+    ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * XTG(:,JLAYER,JPATCH)
+  ENDDO
+  !
+  WRITE(YLVL,'(I4)') JLAYER
+  YRECFM='TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+  YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+END DO
+!
+! * soil soil thickness
+!
+ZDG(:,1,:) = XDG(:,1,:)
+IF(CISBA=='DIF')THEN
+  DO JLAYER=2,NGROUND_LAYER
+     ZDG(:,JLAYER,:) = XDG(:,JLAYER,:)-XDG(:,JLAYER-1,:)
+  ENDDO  
+ELSE
+  ZDG(:,2,:) = XDG(:,2,:)
+  IF(CISBA=='3-L')THEN
+    ZDG(:,3,:) = XDG(:,3,:)-XDG(:,2,:)
+  ENDIF
+ENDIF    
+!
+! * soil liquid water content (kg/m2)
+!
+DO JLAYER=1,NGROUND_LAYER
+  !
+  ZWORK(:)=0.0
+  DO JPATCH=1,NPATCH
+    ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * XWG(:,JLAYER,JPATCH) * ZDG(:,JLAYER,JPATCH) * XRHOLW 
+  ENDDO
+  !
+  WRITE(YLVL,'(I4)') JLAYER
+  YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+  YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+  !  
+END DO
+!
+! * soil ice water content (kg/m2)
+!
+IF(CISBA/='DIF')THEN
+  IWORK=NGROUND_LAYER-1 ! No ice in the FR 3-layers
+ELSE
+  IWORK=NGROUND_LAYER
+ENDIF
+!
+DO JLAYER=1,IWORK
+  !
+  ZWORK(:)=0.0
+  DO JPATCH=1,NPATCH
+    ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * XWGI(:,JLAYER,JPATCH) * ZDG(:,JLAYER,JPATCH) * XRHOLW
+  ENDDO
+  !
+  WRITE(YLVL,'(I4)') JLAYER
+  YRECFM='WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+  YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+  !  
+END DO
+!
+! * water intercepted on leaves (kg/m2)
+!
+ZWORK(:)=0.0
+DO JPATCH=1,NPATCH
+  ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * XWR(:,JPATCH)
+ENDDO
+!
+YRECFM='WR_ISBA'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+!
+! * Glacier ice storage (semi-prognostic) (kg/m2)
+!
+IF(LGLACIER)THEN
+  !
+  ZWORK(:)=0.0
+  DO JPATCH=1,NPATCH
+    ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * XICE_STO(:,JPATCH)
+  ENDDO    
+  !
+  YRECFM='ICE_STO_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF
+!
+! * Snow albedo (-) 
+!
+ZPATCH(:) = 0.0
+ZWORK (:) = 0.0
+DO JPATCH=1,NPATCH
+  WHERE(TSNOW%ALB(:,JPATCH)/=XUNDEF)
+    ZWORK (:) = ZWORK(:)  + XPATCH(:,JPATCH) * TSNOW%ALB(:,JPATCH)
+    ZPATCH(:) = ZPATCH(:) + XPATCH(:,JPATCH)
+  ENDWHERE
+ENDDO
+!
+WHERE(ZPATCH(:)>0.0)
+  ZWORK(:) = ZWORK(:) / ZPATCH(:)
+ELSEWHERE
+  ZWORK(:) = XUNDEF
+ENDWHERE
+!
+YRECFM='ASNOW_ISBA'
+YCOMMENT='X_Y_'//YRECFM//' (-)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+!  
+IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
+  !
+  ! * Snow reservoir (kg/m2) by layer
+  !
+  DO JLAYER = 1,TSNOW%NLAYER
+    !
+    ZWORK(:)=0.0
+    DO JPATCH=1,NPATCH
+      ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * TSNOW%WSNOW(:,JLAYER,JPATCH)
+    ENDDO
+    !
+    WRITE(YLVL,'(I4)') JLAYER
+    YRECFM='WSNOW_'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+    YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDDO
+  !
+  ! * Snow depth (m)
+  !
+  DO JLAYER = 1,TSNOW%NLAYER
+    !
+    ZWORK(:)=0.0
+    DO JPATCH=1,NPATCH
+      ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * TSNOW%WSNOW(:,JLAYER,JPATCH)/TSNOW%RHO(:,JLAYER,JPATCH)
+    ENDDO
+    !
+    WRITE(YLVL,'(I4)') JLAYER
+    YRECFM='DSNOW_'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+    YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDDO
+  !
+  ! * Snow temperature (k)
+  !    
+  DO JLAYER = 1,TSNOW%NLAYER
+    !
+    ZWORK (:) = 0.0
+    ZPATCH(:) = 0.0
+    DO JPATCH=1,NPATCH
+      WHERE(TSNOW%WSNOW(:,JLAYER,JPATCH)>0.)
+        ZWORK (:) = ZWORK (:) + XPATCH(:,JPATCH) * TSNOW%TEMP(:,JLAYER,JPATCH) 
+        ZPATCH(:) = ZPATCH(:) + XPATCH(:,JPATCH)
+      ENDWHERE
+    ENDDO
+    !
+    WHERE(ZPATCH(:)>0.0)
+      ZWORK(:) = ZWORK(:) / ZPATCH(:)
+    ELSEWHERE
+      ZWORK(:) = XUNDEF
+    ENDWHERE
+    !
+    WRITE(YLVL,'(I4)') JLAYER
+    YRECFM='TSNOW_'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+    YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (K)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDDO
+  !
+ENDIF
+!
+! * Leaf Area Index
+!
+IF(CPHOTO/='NON'.AND.CPHOTO/='AGS'.AND.CPHOTO/='AST')THEN
+  !            
+  ZWORK(:) = 0.0
+  DO JPATCH=1,NPATCH
+    ZWORK(:) = ZWORK(:) + XPATCH(:,JPATCH) * XLAI(:,JPATCH)
+  ENDDO
+  !
+  YRECFM='LAI_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (m2/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF  
+!
+IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N:PROVAR_TO_DIAG',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE PROVAR_TO_DIAG
+!
+END SUBROUTINE WRITE_DIAG_SEB_ISBA_n

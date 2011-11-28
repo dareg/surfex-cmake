@@ -1,0 +1,94 @@
+!     #########
+SUBROUTINE PREP_OCEAN_UNIF(KLUOUT,HSURF,PFIELD)
+!     #################################################################################
+!
+!!****  *PREP_OCEAN_UNIF* - prepares oceanic field from prescribed values
+!!
+!!    PURPOSE
+!!    -------
+!
+!!**  METHOD
+!!    ------
+!!
+!!    REFERENCE
+!!    ---------
+!!      
+!!
+!!    AUTHOR
+!!    ------
+!!     C. Lebeaupin Brossier
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    01/2008
+!!------------------------------------------------------------------
+!
+
+!
+USE MODD_PREP,       ONLY : CINTERP_TYPE
+USE MODD_PREP_SEAFLUX,   ONLY : XSST_UNIF
+USE MODD_OCEAN_GRID_n
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
+CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+REAL, POINTER, DIMENSION(:,:,:)   :: PFIELD    ! field to interpolate horizontally
+!
+!*      0.2    declarations of local variables
+REAL :: ZSSS_UNIF=37.6
+REAL :: ZGRADT,ZGRADS
+INTEGER :: JLEV
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!
+!-------------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('PREP_OCEAN_UNIF',0,ZHOOK_HANDLE)
+SELECT CASE(HSURF)
+!
+!*      3.1    oceanic temperature
+!
+  CASE('TEMP_OC')
+    ZGRADT=1.2/1000.
+    ALLOCATE(PFIELD(1,NOCKMIN:NOCKMAX,1))
+    PFIELD(:,NOCKMIN,:) = XSST_UNIF
+    DO JLEV=NOCKMIN+1,NOCKMAX
+      PFIELD(:,JLEV,:) = XSST_UNIF-ZGRADT*(XZHOC(JLEV)+1)
+    ENDDO
+!
+!*      3.2    oceanic salinity
+!
+  CASE('SALT_OC')
+    ZGRADS=-0.5/1000.
+    ALLOCATE(PFIELD(1,NOCKMIN:NOCKMAX,1))
+    PFIELD(:,NOCKMIN,:) = ZSSS_UNIF
+    DO JLEV=NOCKMIN+1,NOCKMAX
+      PFIELD(:,JLEV,:) = ZSSS_UNIF+ZGRADS*(XZHOC(JLEV)+1)
+    ENDDO
+!
+!*      3.3    oceanic currents
+!
+  CASE('UCUR_OC')
+    PFIELD = 0. 
+!
+  CASE('VCUR_OC')
+    PFIELD = 0. 
+!
+END SELECT
+!
+!*      4.     Interpolation method
+!              --------------------
+!
+CINTERP_TYPE='UNIF  '
+IF (LHOOK) CALL DR_HOOK('PREP_OCEAN_UNIF',1,ZHOOK_HANDLE)
+!
+!
+!-------------------------------------------------------------------------------------
+END SUBROUTINE PREP_OCEAN_UNIF

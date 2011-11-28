@@ -1,0 +1,451 @@
+!     #########
+      SUBROUTINE WRITE_DIAG_MISC_ISBA_n(HPROGRAM)
+!     #################################
+!
+!!****  *WRITE_DIAG_MISC_ISBA* - writes the ISBA diagnostic fields
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!	P. Le Moigne   *Meteo France*	
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    10/2004
+!!      B. Decharme    2008  Total Albedo, Total SWI and Floodplains
+!!      B. Decharme 06/2009  key to write (or not) patch result
+!!      A.L. Gibelin 04/09 : Add respiration diagnostics
+!!      A.L. Gibelin 05/09 : Add carbon spinup
+!!      A.L. Gibelin 07/09 : Suppress RDK and transform GPP as a diagnostic
+!!
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+USE MODI_INIT_IO_SURF_n
+USE MODI_WRITE_SURF
+USE MODI_END_IO_SURF_n
+USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER, NNBIOMASS,       &
+                                   CRUNOFF, CRAIN,                 &
+                                   XFSAT, XMUF,                    &
+                                   CPHOTO, CRESPSL, LFLOOD,        &
+                                   XFFLOOD, TSNOW,                 &
+                                   XTAU_WOOD, XINCREASE, XTURNOVER  
+!                                 
+USE MODD_DIAG_ISBA_n,     ONLY :   LPATCH_BUDGET, XTS, XAVG_TS, &
+                                   XTSRAD, XAVG_TSRAD  
+!                                 
+USE MODD_AGRI,            ONLY : LAGRIP
+USE MODD_DIAG_MISC_ISBA_n,ONLY :   LSURF_MISC_BUDGET,              &
+                                   LWOOD_SPIN, LSOILCARB_SPIN,     &
+                                   XHV  , XAVG_HV   ,              &
+                                   XSWI , XAVG_SWI  ,              &
+                                   XTSWI , XAVG_TSWI  ,            &
+                                   XDPSNG, XAVG_PSNG ,             &
+                                   XDPSNV, XAVG_PSNV ,             &
+                                   XDPSN , XAVG_PSN  ,             &
+                                   XSEUIL, XSOIL_TSWI,             &
+                                   XGPP, XRESP_AUTO, XRESP_ECO,    &
+                                   XALBT, XAVG_ALBT,               &
+                                   XTWSNOW, XAVG_TWSNOW,           &
+                                   XTDSNOW, XAVG_TDSNOW,           &
+                                   XTTSNOW, XAVG_TTSNOW,           &
+                                   XDFFG, XAVG_FFG ,               &
+                                   XDFFV, XAVG_FFV ,               &
+                                   XDFF , XAVG_FF  ,               &
+                                   XSOIL_TWG, XSOIL_TWGI,          &
+                                   XSNOWLIQ, XSNOWTEMP  
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments
+!              -------------------------
+!
+CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+!
+!*       0.2   Declarations of local variables
+!              -------------------------------
+!
+INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
+CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=2)  :: YLVL
+CHARACTER(LEN=20) :: YFORM
+!
+INTEGER           :: JLAYER, JNBIOMASS
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+!         Initialisation for IO
+!
+IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
+CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+!
+!-------------------------------------------------------------------------------
+!
+IF (LSURF_MISC_BUDGET) THEN
+  !
+  !*       2.     Miscellaneous fields :
+  !
+  !-------------------------------------------------------------------------------
+  !
+  !        2.1    Halstead coefficient
+  !               --------------------
+  !
+  YRECFM='HV_ISBA'
+  YCOMMENT='Halstead coefficient averaged over tile nature (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HV(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  !        2.2    Snow fractions
+  !               --------------
+  !
+  YRECFM='PSNG_ISBA'
+  YCOMMENT='snow fraction over ground averaged over tile nature (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_PSNG(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='PSNV_ISBA'
+  YCOMMENT='snow fraction over vegetation averaged over tile nature (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_PSNV(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='PSN_ISBA'
+  YCOMMENT='total snow fraction averaged over tile nature (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_PSN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  !        2.3    Total Albedo and surface temperature
+  !               ------------------------------------
+  !
+  YRECFM='TALB_ISBA'
+  YCOMMENT='total albedo over tile nature (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_ALBT(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
+    !        
+    YRECFM='TS_ISBA'
+    YCOMMENT='total surface temperature (isba+snow) over tile nature'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TS(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='TSRAD_ISBA'
+    YCOMMENT='total radiative surface temperature (isba+snow) over tile nature'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TSRAD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END IF
+  !
+  !        2.4    Soil Wetness Index and Water content
+  !               ------------------------------------
+  !
+  DO JLAYER=1,NGROUND_LAYER
+    !
+    WRITE(YLVL,'(I2)') JLAYER
+    !
+    YRECFM='SWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+    YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+    YFORM='(A29,I1.1,A4)'
+    IF (JLAYER >= 10)  YFORM='(A29,I2.2,A4)'
+    WRITE(YCOMMENT,FMT=YFORM) 'soil wetness index for layer ',JLAYER,' (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWI(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='TSWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+    YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+    YFORM='(A29,I1.1,A4)'
+    IF (JLAYER >= 10)  YFORM='(A29,I2.2,A4)'
+    WRITE(YCOMMENT,FMT=YFORM) 'total swi (liquid+solid) for layer ',JLAYER,' (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TSWI(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END DO
+  !
+  YRECFM='TSWI_T_ISBA'
+  YCOMMENT='total soil wetness index over the soil column (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='WGTOT_T_ISBA'
+  YCOMMENT='total water content (liquid+solid) over the soil column (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='WGI_T_ISBA'
+  YCOMMENT='total ice content (solid) over the soil column (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TWGI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  !        2.5    Snow outputs
+  !               -------------
+  !
+  YRECFM='WSNOW_T_ISBA'
+  YCOMMENT='Total_snow_reservoir (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TWSNOW(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='DSNOW_T_ISBA'
+  YCOMMENT='Total_snow_depth (m)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TDSNOW(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='TSNOW_T_ISBA'
+  YCOMMENT='Total_snow_temperature (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TTSNOW(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  !        2.6    SGH scheme
+  !               ----------
+  !
+  IF(CRUNOFF=='SGH ')THEN     
+    YRECFM='FSAT_ISBA'
+    YCOMMENT='topmodel saturation fraction (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFSAT(:),IRESP,HCOMMENT=YCOMMENT)
+  ENDIF
+  !
+  IF(CRAIN=='SGH ')THEN
+    YRECFM='MUF_ISBA'
+    YCOMMENT='fraction of the grid cell reached by the rainfall (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XMUF(:),IRESP,HCOMMENT=YCOMMENT)
+  ENDIF
+  !
+  !        2.7    Flooding scheme
+  !               ---------------
+  !
+  IF(LFLOOD)THEN
+    !
+    YRECFM='FFG_ISBA'
+    YCOMMENT='flood fraction over ground averaged over tile nature (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FFG(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='FFV_ISBA'
+    YCOMMENT='flood fraction over vegetation averaged over tile nature (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FFV(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='FF_ISBA'
+    YCOMMENT='total flood fraction averaged over tile nature (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='FFLOOD_ISBA'
+    YCOMMENT='Grdi-cell potential flood fraction (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDIF
+  !
+  !*       3.     Miscellaneous fields for each patch :
+  !               -------------------------------------
+  !
+  !----------------------------------------------------------------------------
+  !User wants (or not) patch output
+  IF(LPATCH_BUDGET)THEN
+    !----------------------------------------------------------------------------
+    !
+    !        3.1    Soil Wetness Index
+    !               ------------------
+    !
+    DO JLAYER=1,NGROUND_LAYER
+      !
+      WRITE(YLVL,'(I2)') JLAYER
+      !
+      YRECFM='SWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      YFORM='(A39,I1.1,A4)'
+      IF (JLAYER >= 10)  YFORM='(A39,I2.2,A4)'
+      WRITE(YCOMMENT,FMT=YFORM) 'soil wetness index per patch for layer ',JLAYER,' (-)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XSWI(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='TSWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      YFORM='(A39,I1.1,A4)'
+      IF (JLAYER >= 10)  YFORM='(A39,I2.2,A4)'
+      WRITE(YCOMMENT,FMT=YFORM) 'total swi (liquid+solid) per patch for layer ',JLAYER,' (-)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XTSWI(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    END DO
+    !
+    !        3.2    Snow fractions
+    !               --------------
+    !
+    YRECFM='PSNG'
+    YCOMMENT='snow fraction per patch over ground '
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XDPSNG(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='PSNV'
+    YCOMMENT='snow fraction per patch over vegetation'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XDPSNV(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='PSN'
+    YCOMMENT='total snow fraction per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XDPSN(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    !        3.3    Flood fractions
+    !               --------------
+    !
+    IF(LFLOOD)THEN
+      !        
+      YRECFM='FFG'
+      YCOMMENT='flood fraction per patch over ground '
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XDFFG(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='FFV'
+      YCOMMENT='flood fraction per patch over vegetation'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XDFFV(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='FF'
+      YCOMMENT='total flood fraction per patch'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XDFF(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    ENDIF
+    !
+    !        3.4    Total Albedo
+    !               ------------
+    !
+    YRECFM='TALB'
+    YCOMMENT='total albedo per patch'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBT(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
+      YRECFM='TS_PATCH'
+      YCOMMENT='total surface temperature (isba+snow) per patch'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XTS(:,:),IRESP,HCOMMENT=YCOMMENT)
+      YRECFM='TSRAD_PATCH'
+      YCOMMENT='total radiative surface temperature (isba+snow) per patch'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XTSRAD(:,:),IRESP,HCOMMENT=YCOMMENT)
+    ENDIF
+    !
+    !        3.5    Halstead coefficient
+    !               --------------------
+    !
+    YRECFM='HV'
+    YCOMMENT='Halstead coefficient per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XHV(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    !        3.6  Snow outputs 
+    !        -----------------
+    !
+    YRECFM='WSNOW_VEGT'
+    YCOMMENT='X_Y_WSNOW_VEG_TOT (kg/m2) per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTWSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='DSNOW_VEGT'
+    YCOMMENT='X_Y_DSNOW_VEG_TOT (m) per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTDSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='TSNOW_VEGT'
+    YCOMMENT='X_Y_TSNOW_VEG_TOT (k) per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTTSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
+      !
+      DO JLAYER=1,TSNOW%NLAYER
+        !
+        WRITE(YLVL,'(I2)') JLAYER
+        !
+        YRECFM='SNOWLIQ'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+        YFORM='(A17,I1.1,A4)'
+        IF (JLAYER >= 10)  YFORM='(A17,I2.2,A4)'
+        WRITE(YCOMMENT,FMT=YFORM) 'snow liquid water',JLAYER,' (m)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XSNOWLIQ(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+        YRECFM='SNOWTEMP'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+        YFORM='(A16,I1.1,A4)'
+        IF (JLAYER >= 10)  YFORM='(A16,I2.2,A4)'
+        WRITE(YCOMMENT,FMT=YFORM) 'snow temperature',JLAYER,' (K)'
+        CALL WRITE_SURF(HPROGRAM,YRECFM,XSNOWTEMP(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+        !
+      END DO
+      !        
+    ENDIF
+    !
+    IF (CPHOTO/='NON') THEN
+      !
+      !        3.7    Gross Primary Production
+      !               ------------------------
+      !
+      YRECFM='GPP'
+      YCOMMENT='gross primary production per patch (kgCO2/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XGPP(:,:),IRESP,HCOMMENT=YCOMMENT)
+      XGPP(:,:)=0.0
+      !
+      !        3.8    Autotrophic respiration
+      !               -----------------------
+      !
+      YRECFM='RESP_AUTO'
+      YCOMMENT='autotrophic respiration per patch (kgCO2/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRESP_AUTO(:,:),IRESP,HCOMMENT=YCOMMENT)
+      XRESP_AUTO(:,:)=0.0
+      !
+      !        3.9    Ecosystem respiration
+      !               ---------------------
+      !
+      YRECFM='RESP_ECO'
+      YCOMMENT='ecosystem respiration per patch (kgCO2/m2/s)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XRESP_ECO(:,:),IRESP,HCOMMENT=YCOMMENT)
+      XRESP_ECO(:,:)=0.0
+      !
+    END IF
+    !
+  END IF
+  !
+  IF (LAGRIP) THEN
+    !
+    !        2.8    Irrigation threshold
+    !               --------------------
+    !
+    YRECFM='IRRISEUIL'
+    YCOMMENT='irrigation threshold per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XSEUIL(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDIF
+  !
+  IF (CPHOTO=='NCB' .AND. LWOOD_SPIN) THEN
+    !
+    !        2.9   Wood spinup
+    !               -----------
+    !
+    DO JNBIOMASS=1,NNBIOMASS
+      !  
+      WRITE(YLVL,'(I2)') JNBIOMASS
+      YRECFM='INCREASE'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      YFORM='(A39,I1.1)'
+      IF (JNBIOMASS >= 10)  YFORM='(A27,I2.2)'
+      WRITE(YCOMMENT,FMT=YFORM) 'biomass increase per patch ',JNBIOMASS
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XINCREASE(:,JNBIOMASS,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    END DO
+    !
+    YRECFM='TAU_WOOD'
+    YCOMMENT='wood turnover time per patch'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTAU_WOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END IF
+  !
+  IF (CRESPSL=='CNT' .AND. LSOILCARB_SPIN) THEN
+    !
+    !        2.10   Soil carbon spinup
+    !               ------------------
+    !
+    DO JNBIOMASS=1,NNBIOMASS
+      !
+      WRITE(YLVL,'(I2)') JNBIOMASS
+      !
+      YRECFM='TURNOVER'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      YFORM='(A39,I1.1)'
+      IF (JNBIOMASS >= 10)  YFORM='(A27,I2.2)'
+      WRITE(YCOMMENT,FMT=YFORM) 'biomass turnover per patch ',JNBIOMASS
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XTURNOVER(:,JNBIOMASS,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    END DO
+    !
+  ENDIF
+  !
+ENDIF
+!User want (or not) Miscellaneous fields LSURF_MISC_BUDGET
+!
+!         End of IO
+!
+CALL END_IO_SURF_n(HPROGRAM)
+IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_DIAG_MISC_ISBA_n

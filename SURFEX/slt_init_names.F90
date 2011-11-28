@@ -1,0 +1,105 @@
+!     #########
+SUBROUTINE SLT_INIT_NAMES (KLUOUT,HSV,KSLTEQ,KSV_SLTBEG,KSV_SLTEND,OVARSIG,ORGFIX,HSLTYN)
+!!    ###########################################
+!!
+!!*** *SLT_INIT_NAMES*
+!!
+!!    PURPOSE
+!!    -------
+!!      Read and filter all chemical species into the CSV array
+!!     initialize NSV_CHSBEG and  NSV_CHSEND index for the begin and the ending chemical index
+!!     
+!!
+!!    REFERENCE
+!!    ---------
+!!    Modified ch_init_names (february 2005)    
+!!
+!!    AUTHOR
+!!    ------
+!!    P. Tulet CNRM
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!-------------------------------------------------------------------------------
+!
+!*       0.     DECLARATIONS
+!               ------------
+USE MODD_SLT_SURF, ONLY : JPMODE_SLT
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+
+INTEGER,                         INTENT(IN)  :: KLUOUT   ! output listing channel
+CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
+                                                         ! with character # for chemistry
+INTEGER,                         INTENT(OUT) :: KSLTEQ     ! number of sea salt related variables
+INTEGER,                         INTENT(OUT) :: KSV_SLTBEG  ! first sea salt related scalar
+INTEGER,                         INTENT(OUT) :: KSV_SLTEND  ! last  sea salt related scalar
+LOGICAL,                         INTENT(OUT) :: OVARSIG  !type of standard deviation
+LOGICAL,                         INTENT(OUT) :: ORGFIX   !type of mean radius
+CHARACTER(LEN=*), INTENT(OUT), OPTIONAL      :: HSLTYN      ! sea salt or not
+!
+!*      0.2    declarations of local variables
+INTEGER :: JSV  !! loop on scalar variables
+CHARACTER(LEN=4) :: YRC1
+CHARACTER(LEN=2) :: YRC2
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+
+!Initialize output variables
+IF (LHOOK) CALL DR_HOOK('SLT_INIT_NAMES',0,ZHOOK_HANDLE)
+KSLTEQ = 0
+KSV_SLTBEG=0
+KSV_SLTEND=0
+OVARSIG = .FALSE.
+ORGFIX  = .TRUE.
+IF(PRESENT(HSLTYN))HSLTYN='N'
+
+DO JSV=1, SIZE(HSV)
+  YRC1= HSV(JSV)(1:4)
+  YRC2 = HSV(JSV)(5:6)
+  IF (YRC1 == 'SLTM') THEN
+  IF (HSV(JSV)(5:5) == '6') OVARSIG = .TRUE.
+  IF (HSV(JSV)(5:5) == '0') ORGFIX  = .FALSE.
+     KSLTEQ = KSLTEQ + 1
+     IF (KSLTEQ == 1) THEN
+        KSV_SLTBEG=JSV
+        IF(PRESENT(HSLTYN))HSLTYN='Y'
+     ENDIF !Check on first time
+  ELSE !Not sea salt variables
+     !DO NOTHING
+  ENDIF
+ENDDO
+!
+! Set the output list of scalar to the input list of scalars
+
+! Get the index of the last sea salt relevant tracer
+KSV_SLTEND = KSV_SLTBEG + KSLTEQ -1
+!
+! Get number of sea salt modes. Each mode represents
+! 3 moments, so 9 sea salt tracers represents 3 modes.
+! 3 sea salt tracers represents 1 mode
+IF (OVARSIG) THEN
+ JPMODE_SLT = INT((KSV_SLTEND - KSV_SLTBEG +1) / 3.)
+ELSE IF (ORGFIX) THEN
+ JPMODE_SLT = INT((KSV_SLTEND - KSV_SLTBEG +1) )
+ELSE
+ JPMODE_SLT = INT((KSV_SLTEND - KSV_SLTBEG +1) / 2.)
+END IF
+IF (LHOOK) CALL DR_HOOK('SLT_INIT_NAMES',1,ZHOOK_HANDLE)
+
+
+END SUBROUTINE SLT_INIT_NAMES
