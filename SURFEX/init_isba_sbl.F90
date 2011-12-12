@@ -157,6 +157,7 @@ REAL, DIMENSION(SIZE(PTA))   ::ZGAMMA
 REAL, DIMENSION(SIZE(PTA))   ::ZRGL
 REAL, DIMENSION(SIZE(PTA))   ::ZRSMIN
 REAL, DIMENSION(SIZE(PTA))   ::ZDELTA
+REAL, DIMENSION(SIZE(PTA))   ::ZF5
 REAL, DIMENSION(SIZE(PTA))   ::ZWRMAX
 REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_ZON
 REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_MER
@@ -257,10 +258,11 @@ ZQA(:) = PQA(:) / PRHOA(:)
     !Wind speed
     ZWIND = SQRT(PU**2+PV**2)
     !We compute ZCD, ZCH and ZRI
+    ZF5(:)=1.0
     CALL DRAG(HISBA, PTSNOW%SCHEME, HCPSURF, ZTS, ZWG, ZWGI, ZEXNS, ZEXNA, PTA,   &
                 ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS,                                 &
                 ZVEG, ZZ0, ZZ0EFF, ZZ0H, PWFC(:,1), PWSAT(:,1), ZPSNG, ZPSNV,       &
-                PZREF, PUREF, ZP_SLOPE_COS, ZDELTA,                                 &
+                PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5,                            &
                 ZRESA, ZCH, ZCD, ZCDN, ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS,            &
                 ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS, ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA     )  
     !Initialisation of T, Q, Wind and TKE on all canopy levels

@@ -1,7 +1,7 @@
 !     #########
-SUBROUTINE SOILSTRESS( HISBA, PF2,                                 &
+SUBROUTINE SOILSTRESS( HISBA, PF2,                                   &
                   PROOTFRAC, PWSAT, PWFC, PWWILT,                    &
-                  PWG, PWGI, PF2WGHT                                 )  
+                  PWG, PWGI, PF2WGHT, PF5                             )  
 !     ####################################################################
 !
 !!****  *SOILSTRESS*  
@@ -74,6 +74,9 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PROOTFRAC, PWSAT, PWFC, PWWILT,       &
 !                                     PWGI      = soil frozen volumetric water content (m3/m3)
 !
 REAL, DIMENSION(:), INTENT(OUT)  :: PF2      ! water stress coefficient
+!
+REAL, DIMENSION(:), INTENT(OUT)  :: PF5      ! water stress coefficient for Hv (based on F2):
+!                                            ! Verify that Etv=>0 as F2=>0
 !
 REAL, DIMENSION(:,:), INTENT(OUT):: PF2WGHT  ! water stress coefficient profile (ISBA-DF)
 !
@@ -194,6 +197,13 @@ ELSE
 !
 !
 ENDIF
+!
+! Function to cause Etv to approach 0 as F2 goes to 0:
+! (to lessen the effect, one could use
+!  f5 = f2**a (where  0 < a < 1)
+!
+PF5(:) = PF2(:)
+!
 IF (LHOOK) CALL DR_HOOK('SOILSTRESS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

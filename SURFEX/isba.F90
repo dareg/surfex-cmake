@@ -648,6 +648,9 @@ REAL, DIMENSION(SIZE(PWR)) :: ZWRMAX    ! maximum canopy water interception
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZF2       ! water stress coefficient
 !
+REAL, DIMENSION(SIZE(PWR)) :: ZF5       ! water stress coefficient (based on F2)
+!                                       ! to enforce Etv=>0 as F2=>0
+!
 REAL, DIMENSION(SIZE(PWR)) :: ZDWGI1, ZDWGI2 ! Liquid equivalent volumetric soil
 !                                              ice content time tendencies (m3/m3)
 !
@@ -718,6 +721,7 @@ ZALBT       (:) = XUNDEF
 ZSOILHCAPZ(:,:) = XUNDEF
 ZSOILCONDZ(:,:) = XUNDEF
 ZF2WGHT   (:,:) = XUNDEF
+ZF5         (:) = XUNDEF
 !
 ! Save surface and sub-surface temperature values at beginning of time step for 
 ! budget and flux calculations:
@@ -788,9 +792,9 @@ CALL WET_LEAVES_FRAC(PWR, PVEG, PWRMAX_CF, PZ0_WITH_SNOW, PLAI, ZWRMAX, ZDELTA)
 !*      5.0    Plant stress due to soil water deficit
 !              --------------------------------------
 !
-CALL SOILSTRESS(HISBA, ZF2,              &
+CALL SOILSTRESS(HISBA, ZF2,                &
          PROOTFRAC, PWSAT, PWFC, PWWILT,   &
-         PWG, PWGI, ZF2WGHT                )  
+         PWG, PWGI, ZF2WGHT, ZF5           )  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -852,7 +856,7 @@ CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF,                                         &
     PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
     PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
     PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
-    PDIRCOSZW, ZDELTA, PRESA,                                                   &
+    PDIRCOSZW, ZDELTA, ZF5, PRESA,                                              &
     PCH, PCD, PCDN, PRI, PHUG, ZHUGI, PHV, PHU, PCPS, PQS,                      &
     PFFG, PFFV, PFF, PFFG_NOSNOW, PFFV_NOSNOW,                                  &
     ZLEG_DELTA, ZLEGI_DELTA                                                     )  
@@ -897,7 +901,7 @@ CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, HDIF, OTEMP_ARP, PTSTEP, PSODELX, 
            PCD, PVMOD, PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC,                        &
            ZVMOD_IC, PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                   &
            PLAI, PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,&
-           PRS, ZCS, PCG, PCT, PSNOWSWE(:,1), ZT2M, ZTSM,                       &
+           ZF5, PRS, ZCS, PCG, PCT, PSNOWSWE(:,1), ZT2M, ZTSM,                  &
            PPSN, PPSNV, PPSNG, ZFROZEN1, PTAUICE,                               &
            ZALBT, ZEMIST, ZQSAT, ZDQSAT, ZSNOW_THRUFAL,                         &
            PRN, PH, PLE, PLEG, PLEGI, PLEV,                                     &

@@ -4,7 +4,7 @@
                       PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,           &
                       PPS, PRS, PVEG, PZ0, PZ0EFF, PZ0H,                 &
                       PWFC, PWSAT, PPSNG, PPSNV, PZREF, PUREF,           &
-                      PDIRCOSZW, PDELTA, PRA,                            &
+                      PDIRCOSZW, PDELTA, PF5, PRA,                       &
                       PCH, PCD, PCDN, PRI, PHUG, PHUGI,                  &
                       PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF,              &
                       PFFG_NOSNOW, PFFV_NOSNOW,                          &
@@ -69,13 +69,14 @@
 !!      (B.Decharme) 03/06/08 flooding scheme
 !!      (A.Boone)    03/15/10 Add delta fnctions to force LEG ans LEGI=0
 !!                            when hug(i)Qsat < Qa and Qsat > Qa
+!!      (A.Boone)    21/11/11 Add Rs_max limit for dry conditions with Etv
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,     ONLY : XPI, XCPD, XCPV
-USE MODD_ISBA_PAR, ONLY : XWGMIN
+USE MODD_ISBA_PAR, ONLY : XWGMIN, XRS_MAX
 USE MODD_SURF_ATM, ONLY : LDRAG_COEF_ARP, XRIMAX, LRRGUST_ARP, XRRSCALE,   &
                             XRRGAMMA, XUTILGUST, LCPL_ARP  
 !
@@ -148,6 +149,8 @@ REAL, DIMENSION(:), INTENT(IN)   :: PWFC, PWSAT, PPSNG, PPSNV, PZREF, PUREF
 REAL, DIMENSION(:), INTENT(IN)    :: PDELTA
 !                                     PDELTA = fraction of the foliage covered
 !                                              by intercepted water
+REAL, DIMENSION(:), INTENT(IN)    :: PF5
+!                                     PF5 = water stress function for Hv
 REAL, DIMENSION(:), INTENT(IN)    :: PDIRCOSZW 
 ! Cosinus of the angle between the normal to the surface and the vertical
 REAL, DIMENSION(:), INTENT(INOUT) :: PRA
@@ -191,10 +194,12 @@ REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
 !                                              ZVMOD = wind modulus with minimum threshold
                                   ZFP,           &
 !                                              ZFP = working variable                               
-                                 ZRRCOR  
+                                 ZZHV,           &
+!                                              ZDELTACOND = condensation delta fn for Hv
+                                 ZRRCOR 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness                               
-
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -274,9 +279,12 @@ END WHERE
 !*       3.     HALSTEAD COEFFICIENT (RELATIVE HUMIDITY OF THE VEGETATION)
 !               ----------------------------------------------------------
 !
-PHV(:) = 1. - MAX(0.,SIGN(1.,ZQSAT(:)-PQA(:)))        &
-             *PRS(:)*(1.-PDELTA(:)) / (PRA(:)+PRS(:))  
+ZZHV(:)       = MAX(0.,SIGN(1.,ZQSAT(:)-PQA(:))) ! condensation on foilage if = 1
 !
+PHV(:)        = PDELTA(:) + (1.- PDELTA(:))*                                    &
+                ( PRA(:) + PRS(:)*(1.0 - ZZHV(:)) )*                            &
+                ( (1/(PRA(:)+PRS(:))) - (ZZHV(:)*(1.-PF5(:))/(PRA(:)+XRS_MAX)) )
+
 !-------------------------------------------------------------------------------
 !
 !*       4.     GRID-AVERAGED HUMIDITY OF THE SURFACE
@@ -384,8 +392,9 @@ ENDIF
 !               ----------------------------------------------------------
 !
 !
-PHV(:) = 1. - MAX(0.,SIGN(1.,ZQSAT(:)-PQA(:)))        &
-             *PRS(:)*(1.-PDELTA(:)) / (PRA(:)+PRS(:))  
+PHV(:)        = PDELTA(:) + (1.- PDELTA(:))*                                       &
+                ( PRA(:) + PRS(:)*(1.0 - ZZHV(:)) )*                               &
+                ( (1/(PRA(:)+PRS(:))) - (ZZHV(:)*(1.-PF5(:))/(PRA(:)+XRS_MAX)) )
 IF (LHOOK) CALL DR_HOOK('DRAG',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

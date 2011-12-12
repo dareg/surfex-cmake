@@ -5,7 +5,7 @@
                           PVMODP, PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,     &
                           PLAI, PVEG, PHUG, PHUI, PHV,                         &
                           PLEG_DELTA, PLEGI_DELTA, PDELTA, PRA,                &
-                          PRS, PCS, PCG, PCT, PSNOWSWE, PT2M, PTSM,            &
+                          PF5, PRS, PCS, PCG, PCT, PSNOWSWE, PT2M, PTSM,       &
                           PPSN, PPSNV, PPSNG, PFROZEN1,                        &
                           PTAUICE,                                             &
                           PALBT, PEMIST, PQSAT, PDQSAT, PSNOW_THRUFAL,         &
@@ -83,6 +83,7 @@
 !!      (B. Decharme)09/2009  Close the energy budget with the D95 snow scheme
 !!      (A.Boone)    03/2010  Add delta fnctions to force LEG ans LEGI=0
 !!                            when hug(i)Qsat < Qa and Qsat > Qa
+!!      (A.Boone)    11/2011  Add RS_max limit to Etv
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -91,7 +92,7 @@
 USE MODD_CSTS,       ONLY : XSTEFAN, XCPD, XLSTT, XLVTT, XCL, XTT, XPI, XDAY, &
                             XCI, XRHOLI, XLMTT, XRHOLW, XG, XCL, XCONDI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_ISBA_PAR,   ONLY : XWGMIN, XSPHSOIL, XDRYWGHT
+USE MODD_ISBA_PAR,   ONLY : XWGMIN, XSPHSOIL, XDRYWGHT, XRS_MAX
 !
 USE MODE_THERMOS
 !
@@ -145,7 +146,7 @@ REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PTA, PQA, PVMODP, PRHOA
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PEXNS, PEXNA
 REAL, DIMENSION(:), INTENT(IN)   :: PVEG, PLAI
-REAL, DIMENSION(:), INTENT(IN)   :: PHUG, PHUI, PHV, PDELTA, PRA, PRS
+REAL, DIMENSION(:), INTENT(IN)   :: PHUG, PHUI, PHV, PDELTA, PRA, PRS, PF5
 REAL, DIMENSION(:), INTENT(IN)   :: PPSN, PPSNV, PPSNG, PFROZEN1, PTAUICE
 REAL, DIMENSION(:), INTENT(IN)   :: PALBT, PEMIST
 REAL, DIMENSION(:), INTENT(IN)   :: PQSAT, PDQSAT
@@ -153,6 +154,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PLEG_DELTA, PLEGI_DELTA
 !                                     PVEG = fraction of vegetation
 !                                     PHUG = relative humidity of the soil
 !                                     PHV = Halstead coefficient
+!                                     PF5 = water stress numerical correction factor (based on F2)
 !                                     PDELTA = fraction of the foliage covered
 !                                              by intercepted water
 !                                     PRA = aerodynamic surface resistance for
@@ -450,8 +452,9 @@ DO JJ=1,SIZE(PTG,1)
 !                                            latent heat of evapotranspiration
 !                                            
   ZZHV(JJ)     = MAX(0., SIGN(1.,PQSAT(JJ) - PQA(JJ)))
-  PLETR(JJ)    = ZZHV(JJ) * (1. - PDELTA(JJ)) * PLVTT(JJ) * PVEG(JJ)*(1-ZPSNV(JJ))   &
-              * ZWORK2(JJ) / (PRA(JJ) + PRS(JJ))
+  PLETR(JJ)    = ZZHV(JJ) * (1. - PDELTA(JJ)) * PLVTT(JJ) * PVEG(JJ)*(1-ZPSNV(JJ))          &
+               * ZWORK2(JJ) *( (1/(PRA(JJ) + PRS(JJ))) - ((1.-PF5(JJ))/(PRA(JJ) + XRS_MAX)) )
+
 !
   PLER(JJ)     = PLEV(JJ) - PLETR(JJ)
 !

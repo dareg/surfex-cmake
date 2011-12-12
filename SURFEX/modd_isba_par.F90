@@ -22,6 +22,7 @@
 !!      (V.Masson)     05/10/98+ add XCDZ0EFF, XRHOSMIN, XRHOSMAX
 !!      (V.Masson)     15/03/99 add number of layers
 !!      (A.Boone)      02/05/02 add ISBA-ES parameters
+!!      (A.Boone)      21/11/11 add Rsmax
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -46,6 +47,10 @@ REAL, PARAMETER       :: XCDZ0EFF = 0.8
 ! VEG and low LAI, such as wintertime)
 !
 REAL, PARAMETER       :: XVEGMIN   = 0.95
+!
+! Maximum stomatal resistance (s m-1)
+!
+REAL, PARAMETER       :: XRS_MAX   = 5000. 
 !
 !--------------------------------------------------------------------------------
 ! Soil:

@@ -48,16 +48,18 @@ SUBROUTINE VEG( PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN,              &
 !!     (P.Jabouille)  13/11/96    mininum value for ZF1
 !!     (V. Masson)    28/08/98    add PF2 for Calvet (1998) CO2 computations
 !!     (V. Masson)    01/03/03    puts PF2 in a separate routine
+!!     (A. Boone)     21/1&/11    Rs_max in MODD_ISBA_PAR
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_ISBA_PAR, ONLY : XRS_MAX
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK       ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1      ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
@@ -96,7 +98,6 @@ REAL, PARAMETER                :: ZDENOM_MIN  = 1.E-6 ! minimum denominator:
 !                                                     ! numerical factor to prevent division by 0
 REAL, PARAMETER                :: ZFACTR_MIN  = 1.E-3 ! minimum value for some parameters
 !                                                     ! to prevent from being too small 
-REAL, PARAMETER                :: ZRS_MAX     = 5000. ! maximum canopy resistance (s m-1)
 REAL, PARAMETER                :: ZRS_MIN     = 1.E-4 ! minimum canopy resistance (s m-1)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('VEG',0,ZHOOK_HANDLE)
 ZF(:)  = 0.55*2.*PSW_RAD(:) / (PRGL(:)+ ZDENOM_MIN ) / ( PLAI(:)+  ZDENOM_MIN )
-ZF1(:) = ( ZF(:) + PRSMIN(:)/ZRS_MAX) /( 1. + ZF(:) )
+ZF1(:) = ( ZF(:) + PRSMIN(:)/XRS_MAX) /( 1. + ZF(:) )
 ZF1(:) = MAX( ZF1(:), ZDENOM_MIN  )
 !
 !-------------------------------------------------------------------------------
@@ -146,7 +147,7 @@ ZF4(:) = MAX( 1.0 - 0.0016*(298.15-PTA(:))**2, ZFACTR_MIN )
 PRS(:) = PRSMIN(:) / ( PLAI(:)+ ZDENOM_MIN )          &
             / ZF1(:) / PF2(:) /ZF3(:) / ZF4(:)  
 !
-PRS(:) = MIN( PRS(:), ZRS_MAX)
+PRS(:) = MIN( PRS(:), XRS_MAX)
 PRS(:) = MAX( PRS(:), ZRS_MIN)
 IF (LHOOK) CALL DR_HOOK('VEG',1,ZHOOK_HANDLE)
 !

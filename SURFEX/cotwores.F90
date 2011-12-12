@@ -59,11 +59,13 @@ SUBROUTINE COTWORES(PTSTEP, PANF, PABC, PPOI, PAN, PANDAY,                     &
 !!      A.L. Gibelin   06/09 : add RESP_LEAF
 !!      A.L. Gibelin   07/09 : ensure coherence between cotwores and cotworestress
 !!      A.L. Gibelin   07/09 : Suppress PPST and PPSTF as outputs, and diagnose GPP
+!!      A. Boone       11/11 : add rsmax to MODD_ISBA_PAR
 !!
 !-------------------------------------------------------------------------------
 !
 !
 USE MODD_CSTS,     ONLY : XMD, XTT, XRHOLW, XLVTT
+USE MODD_ISBA_PAR, ONLY : XRS_MAX
 USE MODD_CO2V_PAR, ONLY : XPARCF, XRDCF, XCONDCTMIN, XDMAX_AGS, XMCO2
 !
 USE MODI_CCETR
@@ -158,7 +160,6 @@ REAL,DIMENSION(:),INTENT(OUT):: PRESP_LEAF
 !
 REAL, PARAMETER                :: ZDENOM_MIN  = 1.E-6 ! minimum denominator:
 !                                                     ! numerical factor to prevent division by 0
-REAL, PARAMETER                :: ZRS_MAX     = 5000. ! maximum canopy resistance (s m-1)
 REAL, PARAMETER                :: ZRS_MIN     = 1.E-4 ! minimum canopy resistance (s m-1)
 !
 INTEGER                     :: JINT ! index for loops
@@ -323,7 +324,7 @@ ZXTGS(:) = ZTGS(:)*PLAI(:)
 !
 ! Canopy resistance from Ags:
 !
-PRS(:) = MIN( 1.0/(ZXTGS(:)+ZDENOM_MIN), ZRS_MAX)
+PRS(:) = MIN( 1.0/(ZXTGS(:)+ZDENOM_MIN), XRS_MAX)
 PRS(:) = MAX( PRS(:), ZRS_MIN)
 IF (LHOOK) CALL DR_HOOK('COTWORES',1,ZHOOK_HANDLE)
 !
