@@ -1,5 +1,5 @@
   !     ########################################################################
-      SUBROUTINE DEFAULT_SSO(HROUGH,PFRACZ0)
+      SUBROUTINE DEFAULT_SSO(HROUGH,PFRACZ0,PCOEFBE)
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for 
@@ -40,6 +40,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 CHARACTER(LEN=4), INTENT(OUT) :: HROUGH
 REAL, INTENT(OUT) :: PFRACZ0
+REAL, INTENT(OUT) :: PCOEFBE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.1   Declarations of arguments
@@ -50,6 +51,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('DEFAULT_SSO',0,ZHOOK_HANDLE)
 HROUGH = "BE04"
 PFRACZ0 = 2.
+PCOEFBE = 2.
 IF (LHOOK) CALL DR_HOOK('DEFAULT_SSO',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE DEFAULT_SSO

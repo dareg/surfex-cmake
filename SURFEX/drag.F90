@@ -195,11 +195,11 @@ REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
                                   ZFP,           &
 !                                              ZFP = working variable                               
                                  ZZHV,           &
-!                                              ZDELTACOND = condensation delta fn for Hv
+!                                              ZZHV = condensation delta fn for Hv
                                  ZRRCOR 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!                                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness                               
+!                                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness                          
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE                      
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:

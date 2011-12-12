@@ -69,7 +69,7 @@ USE MODD_SURF_ATM_n,     ONLY : CSEA,      CWATER,      CTOWN,      CNATURE,    
 USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH, XAOSIP, XAOSIM, XAOSJP, XAOSJM, &
                                 XHO2IP, XHO2IM, XHO2JP, XHO2JM,         &
                                 XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, &
-                                XZ0REL, XZ0EFFJPDIR, XFRACZ0                                 
+                                XZ0REL, XZ0EFFJPDIR, XFRACZ0, XCOEFBE
 USE MODD_CH_SURF_n,      ONLY : CCH_NAMES, LCH_EMIS, LRW_CH_EMIS, &
                                 LCH_SURF_EMIS, CCHEM_SURF_FILE, CAER_NAMES  
 USE MODD_SV_n,           ONLY : NBEQ, CSV, NSV_CHSBEG, NSV_CHSEND, &
@@ -243,7 +243,7 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_SSO(CROUGH,XFRACZ0)
+ CALL DEFAULT_SSO(CROUGH,XFRACZ0,XCOEFBE)
  CALL DEFAULT_CH_SURF_ATM(CCHEM_SURF_FILE,LCH_SURF_EMIS)
  CALL DEFAULT_DIAG_SURF_ATM(N2M,L2M_MIN_ZS,LSURF_BUDGET,LRAD_BUDGET, &
                               LCOEF, LSURF_VARS,LFRAC,XDIAG_TSTEP,     &
