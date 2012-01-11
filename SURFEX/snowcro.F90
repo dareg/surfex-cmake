@@ -298,7 +298,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SNOWCRO',0,ZHOOK_HANDLE)
 OCOND_GRAIN=.TRUE.
 ODRIFT_GRAIN=.TRUE.
-OCOND_YEN=.FALSE. !(if TRUE : use of the Yen (1981) thermal conductivity paramztrization ; 
+OCOND_YEN=.TRUE.!FALSE. !(if TRUE : use of the Yen (1981) thermal conductivity paramztrization ; 
 !                   otherwise, use the default ISBA-ES thermal conductivity parametrization)
 !
 PGRNDFLUX=0.
@@ -1299,12 +1299,25 @@ REAL, DIMENSION(SIZE(PSNOWRHO),3)   :: ZALB,ZALB_TOP,ZALB_BOT
 !
 ! calibration coefficients for albedo computation
 ! for grains effects:
+! REAL, PARAMETER :: D1=1., D2=3., D3=4., X=99.,VALB2=.96, VALB3=1.58,&
+!                     VALB4=.94,VALB5=.95,VALB6=15.4,VALB7=346.3, VALB8=32.31,  &
+!                     VALB9=.88, VALB10=.175,VALB11=.7,VDIOP1=2.3E-3, &
+!                     VRPRE1=.5,VRPRE2=1. 
+! ! for ageing effects:
+! REAL, PARAMETER :: VAGING_SOIL=90. , VAGING_GLACIER=900. , VPRES1=87000.
+
+! modifs SM 20110805 tests SIberie - albedo
 REAL, PARAMETER :: D1=1., D2=3., D3=4., X=99.,VALB2=.96, VALB3=1.58,&
-                    VALB4=.94,VALB5=.95,VALB6=15.4,VALB7=346.3, VALB8=32.31,  &
-                    VALB9=.88, VALB10=.175,VALB11=.7,VDIOP1=2.3E-3, &
-                    VRPRE1=.5,VRPRE2=1. 
+                   VALB4=.92,VALB5=.90,VALB6=15.4,VALB7=346.3, VALB8=32.31,&  
+                   VALB9=.88, VALB10=.200,VALB11=.6,VDIOP1=2.3E-3, &
+                   VRPRE1=.5,VRPRE2=1.5
 ! for ageing effects:
-REAL, PARAMETER :: VAGING_SOIL=90. , VAGING_GLACIER=900. , VPRES1=87000.
+REAL, PARAMETER :: VAGING_SOIL=60., VAGING_GLACIER=900. , VPRES1=87000.
+REAL, PARAMETER :: Z_SWE_ALB=5.
+REAL  :: Z_RATE_SURF 
+! end modifs SM 20110805 tests SIberie - albedo
+
+
 ! for spectral distribution and thickness effects
 REAL, PARAMETER :: VSPEC1=.71, VSPEC2=.21 , VSPEC3=.08
 ! modif SM 20110519
@@ -1471,17 +1484,27 @@ REAL, DIMENSION(SIZE(PSNOWRHO,2),3)   :: ZBETA
 REAL, DIMENSION(3)   :: ZALB,ZALB_TOP,ZALB_BOT,ZOPTICALPATH
 ! calibration coefficients for albedo computation
 ! for grains effects:
-REAL, PARAMETER :: D1=1., D2=3., D3=4., X=99.,VALB2=.96, VALB3=1.58,&
-                    VALB4=.94,VALB5=.95,VALB6=15.4,VALB7=346.3, VALB8=32.31,  &
-                    VALB9=.88, VALB10=.175,VALB11=.7,VDIOP1=2.3E-3, &
-                    VRPRE1=.5,VRPRE2=1. 
-! for ageing effects:
-REAL, PARAMETER :: VAGING_SOIL=90. , VAGING_GLACIER=900. , VPRES1=87000.
+! REAL, PARAMETER :: D1=1., D2=3., D3=4., X=99.,VALB2=.96, VALB3=1.58,&
+!                     VALB4=.94,VALB5=.95,VALB6=15.4,VALB7=346.3, VALB8=32.31,  &
+!                     VALB9=.88, VALB10=.175,VALB11=.7,VDIOP1=2.3E-3, &
+!                     VRPRE1=.5,VRPRE2=1. 
+! ! for ageing effects:
+! REAL, PARAMETER :: VAGING_SOIL=90. , VAGING_GLACIER=900. , VPRES1=87000.
 ! for spectral distribution and thickness effects
 REAL, PARAMETER :: VSPEC1=.71, VSPEC2=.21 , VSPEC3=.08
-! modif SM 20110519
-!REAL, PARAMETER :: VSPEC1=.68, VSPEC2=.25 , VSPEC3=.07
-! end modif SM 20110519
+
+
+! modifs SM 20110805 tests SIberie - albedo
+REAL, PARAMETER :: D1=1., D2=3., D3=4., X=99.,VALB2=.96, VALB3=1.58,&
+                   VALB4=.92,VALB5=.90,VALB6=15.4,VALB7=346.3, VALB8=32.31,&  
+                   VALB9=.88, VALB10=.200,VALB11=.6,VDIOP1=2.3E-3, &
+                   VRPRE1=.5,VRPRE2=1.5
+! for ageing effects:
+REAL, PARAMETER :: VAGING_SOIL=60., VAGING_GLACIER=900. , VPRES1=87000.
+REAL, PARAMETER :: Z_SWE_ALB=5.
+REAL  :: Z_RATE_SURF 
+! end modifs SM 20110805 tests SIberie - albedo
+
 ! for thickness effects
 REAL, PARAMETER :: VW1=.80, VW2=.20 , VD1=.02, VD2=.01
 !
@@ -1560,6 +1583,14 @@ ZPROJLAT=1./MAX(UEPSI,COS(PZENITH(JJ)))
                VW2*(1.- min(1.,max(0.,(PSNOWDZ(JJ,1)-VD1)/VD2))))*ZALB_BOT(3) 
 !                
   ZALB_NEW=VSPEC1*ZALB(1)+VSPEC2*ZALB(2)+VSPEC3*ZALB(3)
+  
+! modif_EB test albedo ponderation basee sur SWE 5mm redondant avec ci-dessus
+Z_RATE_SURF=MIN(1.,PSNOWDZ(JJ,1)*PSNOWRHO(JJ,1)/Z_SWE_ALB)
+ZALB(1)=Z_RATE_SURF*ZALB_TOP(1) +(1.-Z_RATE_SURF)*ZALB_BOT(1)
+ZALB(2)=Z_RATE_SURF*ZALB_TOP(2) +(1.-Z_RATE_SURF)*ZALB_BOT(2)
+ZALB(3)=Z_RATE_SURF*ZALB_TOP(3) +(1.-Z_RATE_SURF)*ZALB_BOT(3)
+ZALB_NEW=VSPEC1*ZALB(1)+VSPEC2*ZALB(2)+VSPEC3*ZALB(3)  
+  
 !
 ! 2. Extinction of net shortwave radiation
 ! ----------------------------------------
