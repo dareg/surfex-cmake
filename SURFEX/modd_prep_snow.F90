@@ -43,7 +43,7 @@ REAL, PARAMETER  :: XWSNOW_CLIM_GRAD = - 0.08 * 300.     * (-0.0065)
 ! Parameters for snow field uniforn initialization
 !
 LOGICAL :: LSNOW_FRAC_TOT
-INTEGER, PARAMETER :: NSNOW_LAYER_MAX = 20
+INTEGER, PARAMETER :: NSNOW_LAYER_MAX = 50
 !
 !--------------------------------------------------------------------------
 !
