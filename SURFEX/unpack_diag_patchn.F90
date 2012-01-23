@@ -268,7 +268,7 @@ ELSE
   IF (CPHOTO/='NON') THEN
     DO JJ=1,KSIZE
       JI                              = KMASK             (JJ)
-      XIACAN(JI,:,KPATCH) = XP_IACAN(JI,:)
+      XIACAN(JI,:,KPATCH) = XP_IACAN(JJ,:)
     ENDDO
   ENDIF
   !
