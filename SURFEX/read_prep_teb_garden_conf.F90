@@ -205,9 +205,14 @@ END SELECT
 !  ---------------------------------------------
 !
 IF (LEN_TRIM(HFILETYPE)==0 .AND. .NOT. OUNIF) THEN
-  IF (HVAR(1:2)/='TG' .AND. HVAR(1:2)/='WG') THEN
+  IF (HVAR(1:2)/='TG' .AND. HVAR(1:2)/='WG' .OR. HVAR(1:3)=='WGI') THEN
     IF (HVAR(1:2)/='ZS') WRITE(KLUOUT,*) 'NO FILE FOR FIELD ',HVAR, &
                                         ': UNIFORM DEFAULT FIELD IS PRESCRIBED'
+    IF (HVAR(1:3)=='WGI') THEN
+      XHUGI_SURF = 0.
+      XHUGI_ROOT = 0.
+      XHUGI_DEEP = 0.
+    ENDIF                                         
     OUNIF = .TRUE.
     IF (LHOOK) CALL DR_HOOK('READ_PREP_TEB_GARDEN_CONF',1,ZHOOK_HANDLE)
     RETURN
