@@ -94,8 +94,8 @@ ZTRAD_PATCH    = 0.0
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
-CALL UPDATE_RAD_ISBA_n(TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,XZ0, &
-                         XALBNIR,XALBVIS,XALBUV,XEMIS,                 &
+CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,&
+                         XZ0,XALBNIR,XALBVIS,XALBUV,XEMIS,             &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH     )  
 !
 !*       3.     radiative surface temperature

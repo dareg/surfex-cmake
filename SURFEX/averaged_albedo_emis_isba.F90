@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA(HALBEDO,PZENITH,&
-                                 PVEG,PZ0,PLAI,PTG1,        &
+      SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA(OFLOOD, HALBEDO, &
+                                 PZENITH,PVEG,PZ0,PLAI,PTG1,&
                                  PPATCH,                    &
                                  PSW_BANDS,                 &
                                  PALBNIR_VEG,PALBVIS_VEG,   &
@@ -53,7 +53,7 @@ USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
 USE MODD_TYPE_SNOW
 !
-USE MODD_ISBA_n,    ONLY : XPSN,LFLOOD,XFF,XEMISF
+USE MODD_ISBA_n,    ONLY : XPSN,XFF,XEMISF
 !
 USE MODI_ALBEDO
 USE MODI_AVERAGE_RAD
@@ -68,6 +68,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+LOGICAL,                INTENT(IN)   :: OFLOOD
 CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 ! Albedo dependance with surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
@@ -144,7 +145,7 @@ PTSRAD  (:)  =0.
 !    
 !* Initialization of albedo for each wavelength, emissivity and snow/flood fractions
 !
-CALL UPDATE_RAD_ISBA_n(TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,        &
+CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI, &
                          PZ0,PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,&
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH        )  
 !
@@ -152,13 +153,13 @@ CALL UPDATE_RAD_ISBA_n(TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,        &
 !
 DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !
-   ZEMIS(:) = PEMIS_ECO(:,JPATCH)
+  ZEMIS(:) = PEMIS_ECO(:,JPATCH)
 !   
-   IF(LFLOOD.AND.(TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO'))THEN
-     WHERE(XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
-          ZEMIS(:) = ((1.-XFF(:,JPATCH)-XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + XFF(:,JPATCH)*XEMISF(:,JPATCH))/(1.-XPSN(:,JPATCH))
+  IF(OFLOOD.AND.(TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO'))THEN
+    WHERE(XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
+      ZEMIS(:) = ((1.-XFF(:,JPATCH)-XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + XFF(:,JPATCH)*XEMISF(:,JPATCH))/(1.-XPSN(:,JPATCH))
     ENDWHERE   
-   ENDIF
+  ENDIF
 !
   IF (TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA') THEN
     ZTRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)

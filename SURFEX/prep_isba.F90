@@ -227,7 +227,7 @@ ALLOCATE(XDIR_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 ALLOCATE(XSCA_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 XDIR_ALB_WITH_SNOW = 0.0
 XSCA_ALB_WITH_SNOW = 0.0
-CALL AVERAGED_ALBEDO_EMIS_ISBA(CALBEDO, ZZENITH,                       &
+CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
                                  XVEG,XZ0,XLAI,XTG(:,1,:),               &
                                  XPATCH, ZSW_BANDS,                      &
                                  XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &

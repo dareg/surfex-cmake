@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE UPDATE_RAD_ISBA_n(HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0,      &
+SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
                                PALBNIR,PALBVIS,PALBUV,PEMIS,               &
                                PDIR_ALB_WITH_SNOW,PSCA_ALB_WITH_SNOW,PEMIST)  
 !     ####################################################################
@@ -31,8 +31,7 @@ SUBROUTINE UPDATE_RAD_ISBA_n(HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0,      &
 USE MODD_TYPE_SNOW
 !
 USE MODD_ISBA_n,    ONLY : NSIZE_NATURE_P,NR_NATURE_P,      &
-                             NPATCH,                          &
-                             LFLOOD,XTG,TSNOW,XPSNG,XPSNV_A,  &
+                             NPATCH,XTG,TSNOW,XPSNG,XPSNV_A,  &
                              XPSNV,XPSN,XFFLOOD,XFF,XFFG,XFFV,&
                              XALBF,XEMISF,XDIR_ALB_WITH_SNOW, &
                              XSCA_ALB_WITH_SNOW,XFFROZEN  
@@ -59,6 +58,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+LOGICAL,                INTENT(IN)   :: OFLOOD
 CHARACTER(LEN=*),       INTENT(IN)   :: HSNOW
 !
 REAL, DIMENSION(:),     INTENT(IN)   :: PZENITH   ! Zenithal angle at t+1
@@ -177,7 +177,7 @@ IF ( HSNOW=='EBA' ) CALL UNPACK_SAME_RANK(IMASK(:),ZPSNV_A(:),XPSNV_A(:,KPATCH),
 !
 ! Flood fractions and properties
 !
-IF(LFLOOD)THEN   
+IF(OFLOOD)THEN   
   CALL TREAT_FLOOD(KSIZE,KPATCH,IMASK,ZPSNG,ZPSNV,ZLAI,ZVEG,&
                 ZALBF_DIR,ZALBF_SCA,ZEMISF,ZFF)
 ELSE
