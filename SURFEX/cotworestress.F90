@@ -397,7 +397,7 @@ DO JINT = 1, SIZE(PABC)
  !
 ! kgCO2/kgair m/s
    ZTAN(:) = ZTAN(:) + ZAN0(:)*PPOI(JINT) 
-   ZTGS(:) = ZTGS(:) + ZGS0(:)*PPOI(JINT) 
+   ZTGS(:) = ZTGS(:) + ZGS0(:)*PPOI(JINT)
 !
 END DO
 

@@ -25,6 +25,7 @@
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : cumulated diag
+!!      Juan        6/12/2011: parallel bug , remove local ANY(XAVG_ZON10M) test
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -153,7 +154,7 @@ YCOMMENT='X_Y_'//YRECFM//' (-)'
 !
 CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
 !
-IF ( ANY(XAVG_ZON10M(:)/= XUNDEF) ) THEN
+!JUAN IF ( ANY(XAVG_ZON10M(:)/= XUNDEF) ) THEN
   !
   YRECFM='ZON10M'
   YCOMMENT='X_Y_'//YRECFM//' (M/S)'
@@ -175,7 +176,7 @@ IF ( ANY(XAVG_ZON10M(:)/= XUNDEF) ) THEN
   !
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_WIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
   !
-ENDIF
+!JUAN ENDIF
 !
 IF (L2M_MIN_ZS) THEN
   YRECFM='T2M_MIN_ZS'
