@@ -509,9 +509,9 @@ CALL AVERAGE_FLUX(XPATCH,                                             &
 !
 ! Albedo, Emissivity and fraction at time t+1
 !
-CALL UPDATE_RAD_ISBA_n(TSNOW%SCHEME,PZENITH2,PSW_BANDS,XVEG,XLAI,XZ0, &
-                         XALBNIR,XALBVIS,XALBUV,XEMIS,                  &
-                         ZDIR_ALB_TILE,ZSCA_ALB_TILE,ZEMIS_TILE         )  
+CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,       &
+                       XVEG, XLAI, XZ0, XALBNIR ,XALBVIS, XALBUV, XEMIS,&
+                       ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE         )  
 !
 CALL AVERAGE_RAD(XPATCH,                                               &
                    ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &

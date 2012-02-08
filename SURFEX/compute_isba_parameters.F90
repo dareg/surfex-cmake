@@ -1112,7 +1112,7 @@ PSCA_ALB = XUNDEF
 PEMIS    = XUNDEF
 PTSRAD   = XUNDEF
 !
-CALL AVERAGED_ALBEDO_EMIS_ISBA(CALBEDO, PZENITH,                       &
+CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                 &
                                  XVEG,XZ0,XLAI,ZTG1,                     &
                                  XPATCH,                                 &
                                  PSW_BANDS,                              &
