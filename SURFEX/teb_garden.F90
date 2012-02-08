@@ -493,15 +493,6 @@ ZQA(:) = PQA(:) * QSAT(PTA(:),PPS(:)) / QSAT(ZTA(:),PPA(:))
 !
 !-------------------------------------------------------------------------------
 !
-!*      1.3    Set physical values for points where there is no garden
-!              -------------------------------------------------------
-!
-! This way, ISBA can run without problem for these points
-!
-CALL FLAG_TEB_GARDEN_n(1)
-
-!-------------------------------------------------------------------------------
-!
 !*      5.     Grid-averaged albedo and emissivity of green areas
 !              --------------------------------------------------
 !
@@ -511,7 +502,14 @@ ZEMIS_GARDEN  = XUNDEF
 ZTS_GARDEN    = XUNDEF
 !
 IF (LGARDEN) THEN
- CALL GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,     &
+!
+!*      5.1    Set physical values for points where there is no garden
+!              -------------------------------------------------------
+!
+! This way, ISBA can run without problem for these points
+!    
+  CALL FLAG_TEB_GARDEN_n(1)
+  CALL GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,     &
                         ZTS_GARDEN, ZEMIS_GARDEN, ZALB_GARDEN )
 ENDIF
 !
