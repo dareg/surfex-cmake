@@ -109,6 +109,7 @@ USE MODI_GARDEN_PROPERTIES
 USE MODI_GARDEN
 USE MODI_TEB
 USE MODI_AVG_URBAN_FLUXES
+USE MODI_FLAG_TEB_GARDEN_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -338,7 +339,6 @@ REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_ROAD        ! solar rad received by roads
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WALL        ! solar rad received by walls
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_GARDEN      ! solar rad received by gardens
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_SNOW_ROAD   ! solar rad received by snow on roads
-REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_AGG_ROAD    ! aggregated solar rad received by roads
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_GARDEN      ! IR rad received by gardens
 !
@@ -377,7 +377,6 @@ REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_B_COEF
 REAL, DIMENSION(SIZE(PTA))  :: ZUW_ROAD           ! momentum flux for roads
 REAL, DIMENSION(SIZE(PTA))  :: ZUW_GARDEN         ! momentum flux for green areas
 REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_ROAD        !
-REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_GARDEN      !
 !
 REAL, DIMENSION(SIZE(PTA))  :: ZAC_AGG_GARDEN     ! aggreg. aeodynamic resistance for green areas
 REAL, DIMENSION(SIZE(PTA))  :: ZHU_AGG_GARDEN     ! aggreg. relative humidity for green areas
@@ -492,6 +491,15 @@ ZTSSNOW_ROAD (:) = PTSSNOW_ROAD (:)
 ZTA(:) = PTA(:) * PEXNS(:) / PEXNA(:)
 ZQA(:) = PQA(:) * QSAT(PTA(:),PPS(:)) / QSAT(ZTA(:),PPA(:))
 !
+!-------------------------------------------------------------------------------
+!
+!*      1.3    Set physical values for points where there is no garden
+!              -------------------------------------------------------
+!
+! This way, ISBA can run without problem for these points
+!
+CALL FLAG_TEB_GARDEN_n(1)
+
 !-------------------------------------------------------------------------------
 !
 !*      5.     Grid-averaged albedo and emissivity of green areas

@@ -255,13 +255,6 @@ ZLEIFLOOD     = 0.
 ZFFG_NOSNOW   = 0.
 ZFFV_NOSNOW   = 0.
 !
-!*      1.3    Set physical values for points where there is no garden
-!              -------------------------------------------------------
-!
-! This way, ISBA can run without problem for these points
-!
-CALL FLAG_TEB_GARDEN_n(1)
-!
 !-------------------------------------------------------------------------------
 !
 !*      2.     Treatment of green areas
