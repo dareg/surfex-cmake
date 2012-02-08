@@ -449,17 +449,22 @@ CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','VEGTYPE: vegetation type','NAT',CFNAM_VEG
        CFTYP_VEGTYPE,XUNIF_VEGTYPE,XPAR_VEGTYPE,LDATA_VEGTYPE)  
 !
 IF (LDATA_VEGTYPE) THEN 
-  IF (MAXVAL(ABS(SUM(XPAR_VEGTYPE,2)-1.))>1.E-6) THEN
+  !
+  IF (ANY(XPAR_VEGTYPE(:,:).LT.0. .OR. XPAR_VEGTYPE(:,:).GT.1.) .OR. &
+     ANY(SUM(XPAR_VEGTYPE(:,:),2).LE.0.) ) THEN
     WRITE(ILUOUT,*) ' '
     WRITE(ILUOUT,*) '******************************************************************************'
     WRITE(ILUOUT,*) '* Error in ISBA data field preparation                                       *'
-    WRITE(ILUOUT,*) '* Sum of XPAR_VEGTYPE on all vegtypes is not equal to 1. for all grid point *'
-    WRITE(ILUOUT,*) '* MAXVAL of SUM(XPAR_VEGTYPE,2) =', MAXVAL(SUM(XPAR_VEGTYPE,2))
-    WRITE(ILUOUT,*) '* MAXLOC of SUM(XPAR_VEGTYPE,2) =', MAXLOC(SUM(XPAR_VEGTYPE,2))
+    WRITE(ILUOUT,*) '* Some XPAR_VEGTYPE are < 0. or > 1. '
+    WRITE(ILUOUT,*) '* MAXVAL AND MAXLOC of XPAR_VEGTYPE =', MAXVAL(XPAR_VEGTYPE),MAXLOC(XPAR_VEGTYPE)
+    WRITE(ILUOUT,*) '* MINVAL AND MINLOC of XPAR_VEGTYPE =', MINVAL(XPAR_VEGTYPE),MINLOC(XPAR_VEGTYPE)
     WRITE(ILUOUT,*) '******************************************************************************'
     WRITE(ILUOUT,*) ' '
-    CALL ABOR1_SFX('PGD_ISBA_PAR: SUM OF ALL XPAR_VEGTYPE MUST BE 1.')
-  ENDIF
+    CALL ABOR1_SFX('PGD_ISBA_PAR:ALL XPAR_VEGTYPE MUST BE FROM 0. TO 1.')
+  ELSE
+    XPAR_VEGTYPE(:,:) = XPAR_VEGTYPE(:,:) / SPREAD(SUM(XPAR_VEGTYPE(:,:),2),2,NVEGTYPE)
+  ENDIF 
+  !          
 ENDIF
 !
 CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','VEG: vegetation fraction','NAT',CFNAM_VEG,CFTYP_VEG,XUNIF_VEG,XPAR_VEG,LDATA_VEG) 
