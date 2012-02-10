@@ -142,6 +142,12 @@ SELECT CASE (ICENTER)
         HINMODEL = 'ARPEGE'
         HGRIDTYPE= 'GAUSS     '
 
+      CASE('reduced_gg')  
+        WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Arpege model'
+        WRITE (KLUOUT,'(A)') 'but reduced grid'
+        HINMODEL = 'ARPEGE'
+        HGRIDTYPE= 'GAUSS     '
+
       CASE('regular_ll')  
         WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Mocage model'
         HINMODEL = 'MOCAGE'
