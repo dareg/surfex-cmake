@@ -119,6 +119,8 @@ SELECT CASE(HSURF)
      IF (GGARDEN) THEN
        YSURF = 'TWN_'//HSURF(1:3)
      ELSE
+       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+       CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')
        YSURF = HSURF
      END IF
 !* reading of the profile and its depth definition
@@ -153,6 +155,8 @@ SELECT CASE(HSURF)
        IPATCH = 1             
        YRECFM = 'TWN_WR'
      ELSE
+       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+       CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')             
        YRECFM = 'PATCH_NUMBER'
        CALL READ_SURF(HFILETYPE,YRECFM,IPATCH,IRESP)
        YRECFM = 'WR'
