@@ -58,8 +58,6 @@ REAL,   DIMENSION(:), INTENT(INOUT) :: PSST    ! sst
 !
 !*      0.2    declarations of local variables
 !
-INTEGER                                  :: IDECADE  ! decade of simulation
-INTEGER                                  :: JTIME    ! decade of simulation
 INTEGER                                  :: JXP
 REAL, DIMENSION(SIZE(PSST))              :: ZSST, ZSST0
 REAL                                     :: ZSDTJX
@@ -67,69 +65,71 @@ REAL                                     :: ZDT, ZALPHA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
-!
 IF (LHOOK) CALL DR_HOOK('SST_UPDATE',0,ZHOOK_HANDLE)
+!
 IF (.NOT.LTZTIME_DONE) THEN
    LTZTIME_DONE = .TRUE.
-   JSX = 0
+   JSX = 1
    TZTIME%TDATE%YEAR  = TTIME%TDATE%YEAR
    TZTIME%TDATE%MONTH = TTIME%TDATE%MONTH
    TZTIME%TDATE%DAY   = TTIME%TDATE%DAY
    TZTIME%TIME        = TTIME%TIME
 ENDIF
-
+!
 ZSST0(:) = XSST_INI(:)
-
+!
 IF ( TEMPORAL_LTS ( TTIME, TDATA_SST(1) ) ) THEN
-
-   CALL TEMPORAL_DISTS ( TDATA_SST(1)%TDATE%YEAR,TDATA_SST(1)%TDATE%MONTH,   &
-                           TDATA_SST(1)%TDATE%DAY ,TDATA_SST(1)%TIME,          &
-                           TZTIME%TDATE%YEAR   ,TZTIME%TDATE%MONTH,            &
-                           TZTIME%TDATE%DAY    ,TZTIME%TIME,                   &
-                           ZSDTJX                                              )  
-
-   CALL TEMPORAL_DISTS ( TTIME%TDATE%YEAR   ,TTIME%TDATE%MONTH,              &
-                           TTIME%TDATE%DAY    ,TTIME%TIME,                     &
-                           TZTIME%TDATE%YEAR   ,TZTIME%TDATE%MONTH,            &
-                           TZTIME%TDATE%DAY    ,TZTIME%TIME,                   &
-                           ZDT                                                 )  
-!
-    ZALPHA = ZDT / ZSDTJX
-!
-    ZSST(:)= ZSST0(:)+(XDATA_SST(:,1)-ZSST0(:))*ZALPHA
-
+  !
+  CALL TEMPORAL_DISTS ( TDATA_SST(1)%TDATE%YEAR,TDATA_SST(1)%TDATE%MONTH, &
+                        TDATA_SST(1)%TDATE%DAY ,TDATA_SST(1)%TIME,        &
+                        TZTIME%TDATE%YEAR   ,TZTIME%TDATE%MONTH,          &
+                        TZTIME%TDATE%DAY    ,TZTIME%TIME,                 &
+                        ZSDTJX                                            )  
+  !
+  CALL TEMPORAL_DISTS ( TTIME%TDATE%YEAR   ,TTIME%TDATE%MONTH,           &
+                        TTIME%TDATE%DAY    ,TTIME%TIME,                  &
+                        TZTIME%TDATE%YEAR  ,TZTIME%TDATE%MONTH,          &
+                        TZTIME%TDATE%DAY   ,TZTIME%TIME,                 &
+                        ZDT                                              )  
+  !
+  ZALPHA = ZDT / ZSDTJX
+  !
+  ZSST(:)= ZSST0(:)+(XDATA_SST(:,1)-ZSST0(:))*ZALPHA
+  !
 ELSE IF ( .NOT. TEMPORAL_LTS ( TTIME, TDATA_SST(NTIME) ) ) THEN
+  !
   ZSST(:) = XDATA_SST(:,NTIME)
+  !
 ELSE
-  JXP = JSX + 1
-    IF( .NOT. TEMPORAL_LTS ( TTIME, TDATA_SST(JXP) ) ) THEN
-    JSX = JSX +1
-    JXP = JSX +1
-    !WRITE(*,FMT='(" SST INTERPOLATED " ,&
-    !& " BETWEEN SST_DATA ",I2," AND ",I2)') JSX,JXP
-    CALL TEMPORAL_DISTS ( TDATA_SST(JXP)%TDATE%YEAR,TDATA_SST(JXP)%TDATE%MONTH,   &
-                            TDATA_SST(JXP)%TDATE%DAY ,TDATA_SST(JXP)%TIME,          &
-                            TDATA_SST(JSX)%TDATE%YEAR ,TDATA_SST(JSX)%TDATE%MONTH,  &
-                            TDATA_SST(JSX)%TDATE%DAY  ,TDATA_SST(JSX)%TIME,         &
-                            ZSDTJX                                            )  
-    END IF
-!
-    CALL TEMPORAL_DISTS ( TTIME%TDATE%YEAR   ,TTIME%TDATE%MONTH,                  &
-                            TTIME%TDATE%DAY    ,TTIME%TIME,                         &
-                            TDATA_SST(JSX)%TDATE%YEAR,TDATA_SST(JSX)%TDATE%MONTH,   &
-                            TDATA_SST(JSX)%TDATE%DAY ,TDATA_SST(JSX)%TIME,          &
-                            ZDT                                             )  
-!
-    ZALPHA = ZDT / ZSDTJX
+  !
+  DO
+    JXP = JSX + 1
+    IF ( TEMPORAL_LTS( TTIME, TDATA_SST(JXP)) ) EXIT
+    JSX = JSX + 1
+  ENDDO
+  !  
+  CALL TEMPORAL_DISTS ( TDATA_SST(JXP)%TDATE%YEAR,TDATA_SST(JXP)%TDATE%MONTH,   &
+                        TDATA_SST(JXP)%TDATE%DAY ,TDATA_SST(JXP)%TIME,          &
+                        TDATA_SST(JSX)%TDATE%YEAR ,TDATA_SST(JSX)%TDATE%MONTH,  &
+                        TDATA_SST(JSX)%TDATE%DAY  ,TDATA_SST(JSX)%TIME,         &
+                        ZSDTJX                                            )  
+  !
+  CALL TEMPORAL_DISTS ( TTIME%TDATE%YEAR   ,TTIME%TDATE%MONTH,                  &
+                        TTIME%TDATE%DAY    ,TTIME%TIME,                         &
+                        TDATA_SST(JSX)%TDATE%YEAR,TDATA_SST(JSX)%TDATE%MONTH,   &
+                        TDATA_SST(JSX)%TDATE%DAY ,TDATA_SST(JSX)%TIME,          &
+                        ZDT                                             )  
+  !
+  ZALPHA = ZDT / ZSDTJX
 
-!
-    ZSST(:)= XDATA_SST(:,JSX)+(XDATA_SST(:,JXP)-XDATA_SST(:,JSX))*ZALPHA
-                       
+  !
+  ZSST(:)= XDATA_SST(:,JSX)+(XDATA_SST(:,JXP)-XDATA_SST(:,JSX))*ZALPHA
+  !                
 END IF
-
-PSST(:) = ZSST(:)
-IF (LHOOK) CALL DR_HOOK('SST_UPDATE',1,ZHOOK_HANDLE)
 !
+PSST(:) = ZSST(:)
+!
+IF (LHOOK) CALL DR_HOOK('SST_UPDATE',1,ZHOOK_HANDLE)
 !-----------------------------------------------------------------
 !
 END SUBROUTINE SST_UPDATE
