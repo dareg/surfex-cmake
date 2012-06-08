@@ -1,0 +1,18 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe LFI
+      SUBROUTINE LFIPXF ( KREP, KNUMER, KNUMEX, CDCFGX, 
+     S                      KLAREX, KXCNEX,
+     S                      KFACEX, KNUTRA, CDNOMA, KLONG )
+      USE LFIMOD, ONLY : LFICOM_DEFAULT,
+     S                   LFICOM_DEFAULT_INIT,
+     S                   NEW_LFI_DEFAULT
+      IMPLICIT NONE
+      CHARACTER CDNOMA*(*)
+      CHARACTER CDCFGX*(*)
+      INTEGER KREP, KNUMER, KNUMEX, KLAREX, KXCNEX, KFACEX, KNUTRA
+      INTEGER KLONG
+      IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
+      CALL LFIPXF_MT (LFICOM_DEFAULT, KREP, KNUMER, KNUMEX, CDCFGX, 
+     S                KLAREX, KXCNEX,
+     S                KFACEX, KNUTRA, CDNOMA, KLONG )
+      END SUBROUTINE
+

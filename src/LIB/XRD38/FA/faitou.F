@@ -1,0 +1,17 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FAITOU(KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, 
+     S                  LDERFA, LDIMST, KNIMES, KNBARP, KNBARI, 
+     S                  CDNOMC )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+      INTEGER KREP, KNUMER, KNIMES, KNBARP, KNBARI
+      LOGICAL LDNOMM, LDERFA, LDIMST
+      CHARACTER CDNOMF*(*), CDSTTU*(*), CDNOMC*(*)
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FAITOU_MT (FA_COM_DEFAULT, KREP, KNUMER, LDNOMM, CDNOMF, 
+     S                CDSTTU, LDERFA, LDIMST, KNIMES, KNBARP, KNBARI, 
+     S                CDNOMC )
+      END SUBROUTINE
+

@@ -1,0 +1,15 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe LFI
+      SUBROUTINE LFIENG ( KNUMER, KNIMES, KCODE, LDFATA, 
+     S                      CDMESS, CDNSPR,CDACTI )
+      USE LFIMOD, ONLY : LFICOM_DEFAULT,
+     S                   LFICOM_DEFAULT_INIT,
+     S                   NEW_LFI_DEFAULT
+      IMPLICIT NONE
+      INTEGER KNUMER, KNIMES, KCODE
+      LOGICAL LDFATA
+      CHARACTER  CDNSPR*(*), CDMESS*(*), CDACTI*(*)
+      IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
+      CALL LFIENG_MT (LFICOM_DEFAULT, KNUMER, KNIMES, KCODE, LDFATA, 
+     S                      CDMESS, CDNSPR,CDACTI )
+      END SUBROUTINE
+

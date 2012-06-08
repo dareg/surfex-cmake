@@ -1,0 +1,11 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FANERG(KNIVAU )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+      INTEGER KNIVAU
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FANERG_MT (FA_COM_DEFAULT, KNIVAU )
+      END SUBROUTINE
+

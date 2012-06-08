@@ -1,0 +1,17 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FANION(KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, 
+     S                      LDEXIS,
+     S                      LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+      INTEGER KREP, KNUMER, KNIVAU, KNGRIB, KNBITS, KSTRON, KPUILA
+      LOGICAL LDCOSP, LDEXIS
+      CHARACTER CDPREF*(*), CDSUFF*(*)
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FANION_MT (FA_COM_DEFAULT, KREP, KNUMER, CDPREF, KNIVAU, 
+     S                CDSUFF, LDEXIS,
+     S                LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA )
+      END SUBROUTINE
+

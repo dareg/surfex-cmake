@@ -1,0 +1,11 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FAMISO(LDEBUG )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+      LOGICAL LDEBUG
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FAMISO_MT (FA_COM_DEFAULT, LDEBUG )
+      END SUBROUTINE
+

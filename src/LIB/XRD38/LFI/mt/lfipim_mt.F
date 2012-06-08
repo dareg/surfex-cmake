@@ -1,0 +1,358 @@
+C Jan-2011 P. Marguinaud Thread-safe LFI
+      SUBROUTINE LFIPIM_MT (LFI, KREP ,KRANG, KRANGM, KRGPIM, 
+     S                      KRGPIF, KRGFOR, KNPILE, KRETIN )
+      USE LFIMOD, ONLY : LFICOM
+      USE PARKIND1, ONLY : JPRB
+      USE YOMHOOK , ONLY : LHOOK, DR_HOOK
+C****
+C        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
+C     GESTION DES REQUETES D'ALLOCATION D'UNE PAIRE DE PAGES D'INDEX
+C     SUPPLEMENTAIRE ( APPELS PAR LFIECR, LFILEC... ), ET LECTURE
+C     EVENTUELLE SUR FICHIER D'ARTICLE(S) D'INDEX CORRESPONDANT(S) .
+C**
+C    ARGUMENTS : KREP   (SORTIE) ==> CODE-REPONSE DU SOUS-PROGRAMME;
+C                KRANG  (ENTREE) ==> RANG ( DANS LA TABLE *LFI%NUMERO* )
+C                                    DE L'UNITE LOGIQUE CONCERNEE;
+C                KRANGM (SORTIE) ==> RANG ( DANS LA TABLE *LFI%MRGPIM* )
+C                                    DE LA P.P.I. AFFECTEE;
+C                                    ( ZERO SI PAS DE P.P.I. ALLOUEE )
+C                KRGPIM (SORTIE) ==> RANG ( DANS LES TABLES DECRIVANT
+C                                    LES PAIRES DE PAGES D'INDEX ) DE
+C                                    LA P.P.I. SUPPLEMENTAIRE ALLOUEE,
+C                                    ZERO SI PAS DE P.P.I. ALLOUEE;
+C                KRGPIF (ENTREE) ==> RANG ( DANS LE FICHIER ) DE LA
+C                                    P.P.I. SUPPLEMENTAIRE;
+C                KRGFOR (ENTREE) ==> RANG ( DANS LE FICHIER ) D'UNE
+C                                    EVENTUELLE P.P.I. A CONSERVER;
+C                KNPILE (ENTREE) ==> NOMBRE D'ARTICLES D'INDEX A LIRE
+C                                    ( 0==>RIEN, 1==>NOMS, 2==>LES 2 );
+C                KRETIN (SORTIE) ==> CODE-RETOUR INTERNE.
+C
+C     SI L'ON NE TROUVE PLUS DE P.P.I. LIBRE, ON "RECYCLE" LA P.P.I.
+C     ASSOCIEE AU PLUS GRAND RANG DANS LA TABLE *LFI%MRGPIM*,
+C         EXCEPTION FAITE DE LA PREMIERE, DE LA DERNIERE, ET DE CELLE
+C     DE RANG *KRGFOR* DANS LE FICHIER,
+C     CECI POUR ASSURER QUE LORS D'UNE EXPLORATION DES P.P.I.,
+C     ON NE REUTILISE PAS L'EMPLACEMENT D'UNE P.P.I. QU'ON A DEJA
+C     EXPLOREE, OU QU'ON DOIT GARDER POUR LA LOGIQUE DU TRAITEMENT.
+C        LE "FORCAGE" N'EST EFFECTIF QUE SI LE RANG DANS LE FICHIER EST
+C     BIEN CELUI D'UNE P.P.I, MAIS NI LA PREMIERE NI LA DERNIERE
+C     EN RANG DANS LE FICHIER.
+C*
+C         LE VERROUILLAGE EVENTUEL DE L'UNITE LOGIQUE DE RANG *KRANG*
+C     DOIT AVOIR ETE FAIT EN AMONT, AVANT L'APPEL A CE SOUS-PROGRAMME.
+C
+C        Noter que la P.P.I. peut etre "multiple", et qu'elle occupe
+C     autant de P.P.I. "elementaires" (de longueur LFI%JPLARD par page) ,
+C     ces P.P.I. "elementaires" etant necessairement consecutives...
+C        Dans ce cas KRGPIM designe le rang de la PREMIERE P.P.I. ele-
+C     mentaire concernee.
+C
+#ifndef f77
+#include "precision.h"
+#endif
+C
+      TYPE(LFICOM) :: LFI
+      INTEGER KREP ,KRANG, KRANGM, KRGPIM, KRGPIF, KRGFOR, KNPILE
+      INTEGER IRANG, INUMER, INPPIM, IFACTM, IRGPIM, IRANGM, ICOMPT, J
+      INTEGER JR, IREC, INAPHY, IRETOU, INIMES, KRETIN, IRETIN
+C
+      LOGICAL LLAUX1, LLAUX2, LLADON
+C
+#include "lficom2.h"
+#include "lficom_mt.h"
+C**
+C     1.  -  CONTROLES DES PARAMETRES D'APPEL, PUIS INITIALISATIONS.
+C-----------------------------------------------------------------------
+C
+      REAL(KIND=JPRB) :: ZHOOK_HANDLE
+      IF (LHOOK) CALL DR_HOOK('LFIPIM_MT',0,ZHOOK_HANDLE)
+      KRANGM=0
+      KRGPIM=0
+      IRETOU=0
+      INAPHY=0
+      LLADON=.FALSE.
+C
+      IF (KRANG.LE.0.OR.KRANG.GT.LFI%JPNXFI.OR.KRGPIF.LE.0.OR.
+     S    KNPILE.LT.0.OR.KNPILE.GT.2) THEN
+        KREP=-16
+        GOTO 1001
+      ELSE
+        IRANG=KRANG
+        INUMER=LFI%NUMERO(KRANG)
+C
+        IF (INUMER.LT.0) THEN
+          KREP=-16
+          GOTO 1001
+        ENDIF
+C
+      ENDIF
+C
+      INPPIM=LFI%NPPIMM(IRANG)
+      IFACTM=LFI%MFACTM(IRANG)
+C**
+C     2.  -  RECHERCHE D'UNE P.P.I. SUPPLEMENTAIRE .
+C-----------------------------------------------------------------------
+C
+      IF (INPPIM.LE.0) THEN
+        KREP=-16
+        GOTO 1001
+      ELSEIF (INPPIM.LT.LFI%JPNPIA) THEN
+C*
+C     2.1 - CAS OU L'UNE DES P.P.I. PREALLOUEES AU FICHIER EST
+C           DISPONIBLE.
+C-----------------------------------------------------------------------
+C
+        IRGPIM=IRANG+INPPIM*LFI%JPNXFI
+        INPPIM=INPPIM+1
+        IRANGM=INPPIM
+        LFI%NPPIMM(IRANG)=INPPIM
+        GOTO 300
+      ELSEIF (LFI%JPNPIS.GT.0) THEN
+C*
+C     2.2 - PLUS DE P.P.I. PREALLOUEE LIBRE; RECHERCHE DANS
+C           LES P.P.I. ALLOUABLES DYNAMIQUEMENT.
+C-----------------------------------------------------------------------
+C
+C           VERROUILLAGE EVENTUEL POUR L'UTILISATION DE *LFI%NPISAF*
+C
+         IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERGLA,'ON')
+C
+        IF (LFI%NPISAF.LT.LFI%JPNPIS) THEN
+          ICOMPT=0
+C
+          DO 221 J=LFI%JPNPIA*LFI%JPNXFI+1,LFI%JPNXPI
+C
+          IF (LFI%MCOPIF(J).EQ.LFI%JPNIL) THEN
+            ICOMPT=ICOMPT+1
+C
+            IF (ICOMPT.EQ.IFACTM) THEN
+              IRGPIM=J+1-IFACTM
+              GOTO 222
+            ENDIF
+C
+          ELSE
+            ICOMPT=0
+          ENDIF
+C
+  221     CONTINUE
+C
+C              Chou blanc... on deverrouille globalement.
+C
+           IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERGLA,'OFF')
+          IF (IFACTM.GT.1) GOTO 230
+C
+C              CAS D'INCOHERENCE DES TABLES DU LOGICIEL !
+C
+          KREP=-16
+          GOTO 1001
+C
+  222     CONTINUE
+C
+C            UNE P.P.I. "LIBRE", eventuellement Multiple, A ETE TROUVEE.
+C
+          LFI%NPISAF=LFI%NPISAF+IFACTM
+C
+          DO 223 JR=IRGPIM,IRGPIM+IFACTM-1
+          LFI%MCOPIF(JR)=IRANG
+  223     CONTINUE
+C
+C         ON DEVERROUILLE "GLOBALEMENT", CAR CE QUI SUIT ALORS
+C         NE CONCERNE PLUS QUE LE FICHIER.
+C
+           IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERGLA,'OFF')
+          INPPIM=INPPIM+1
+          IRANGM=INPPIM
+          LFI%NPPIMM(IRANG)=INPPIM
+          LFI%MRGPIM(INPPIM,IRANG)=IRGPIM
+          GOTO 300
+C
+        ELSE
+C
+C            CAS OU IL N'Y A PLUS DE P.P.I. "LIBRE" .
+C         ON DEVERROUILLE "GLOBALEMENT", CAR CE QUI SUIT ALORS
+C         NE CONCERNE PLUS QUE LE FICHIER.
+C
+           IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERGLA,'OFF')
+        ENDIF
+C
+      ENDIF
+C
+  230 CONTINUE
+C*
+C     2.3 - PLUS DE P.P.I. ( PREALLOUEE OU NON ) LIBRE.
+C-----------------------------------------------------------------------
+C
+C         ON VA DONC RECYCLER LA P.P.I. ALLOUEE AU FICHIER
+C       QUI SOIT ASSOCIEE AU PLUS GRAND RANG DANS LA TABLE *LFI%MRGPIM*,
+C       TOUT EN N'ETANT NI LA PREMIERE, NI LA DERNIERE, NI CELLE DE
+C       RANG *KRGFOR* DANS LE FICHIER .
+C        C'est pour etre sur de trouver une telle page que l'on a besoin
+C     d'avoir LFI%JPNPIA superieur ou egal a 4.
+C
+      IRANGM=INPPIM
+C
+  231 CONTINUE
+C
+      IF (IRANGM.EQ.LFI%NPODPI(IRANG).OR.
+     S    LFI%MRGPIF(LFI%MRGPIM(IRANGM,IRANG)).EQ.KRGFOR) THEN
+        IRANGM=IRANGM-1
+        GOTO 231
+      ENDIF
+C
+      IRGPIM=LFI%MRGPIM(IRANGM,IRANG)
+      LLAUX1=LFI%LECRPI(IRGPIM,1)
+      LLAUX2=LFI%LECRPI(IRGPIM,2).AND.LFI%LPHASP(IRGPIM)
+C
+C          SI NECESSAIRE, ON REECRIT SUR LE FICHIER
+C       LA OU LES PAGES D'INDEX qu'on va reutiliser.
+C
+      IF (LLAUX1.OR.LLAUX2) THEN
+        CALL LFIREC_MT (LFI, LFI%MRGPIF(IRGPIM),IRANG,IREC)
+C
+        IF (LLAUX1) THEN
+          INAPHY=IREC
+          CALL LFIECC_MT (LFI, KREP,INUMER,IREC,
+     S                    LFI%CNOMAR(IXC(1,IRGPIM)),
+     S                    LFI%NBWRIT(IRANG),IFACTM,IRETIN)
+C
+          IF (IRETIN.NE.0) THEN
+            GOTO 903
+          ENDIF
+C
+          INAPHY=0
+        ENDIF
+C
+        IF (LLAUX2) THEN
+          CALL LFIECX_MT (LFI, KREP,IRANG,IREC+1,
+     S                    LFI%MLGPOS(IXM(1,IRGPIM)),LLADON,
+     S                    IRETIN)
+C
+          IF (IRETIN.EQ.1) THEN
+            GOTO 903
+          ELSEIF (IRETIN.EQ.2) THEN
+            GOTO 904
+          ELSEIF (IRETIN.NE.0) THEN
+            GOTO 1001
+          ENDIF
+C
+        ENDIF
+C
+      ENDIF
+C
+  300 CONTINUE
+C**
+C     3.  -  MISE A JOUR DE TABLES, NE NECESSITANT PAS LA PROTECTION DU
+C            VERROU GLOBAL; A PARTIR DU MOMENT OU *LFI%MCOPIF* A ETE MIS A
+C            JOUR, LE SIMPLE VERROUILLAGE DE L'UNITE LOGIQUE SUFFIT.
+C             ( ET EST CENSE AVOIR ETE FAIT DANS LE SOUS-PROGRAMME
+C               APPELANT, EN MODE MULTI )
+C-----------------------------------------------------------------------
+C
+      LFI%LECRPI(IRGPIM,1)=.FALSE.
+      LFI%LECRPI(IRGPIM,2)=.FALSE.
+      LFI%LPHASP(IRGPIM)=.FALSE.
+      LFI%MRGPIF(IRGPIM)=KRGPIF
+C**
+C     4.  -  MISE EN MEMOIRE EVENTUELLE D'ARTICLE(S) D'INDEX
+C            CORRESPONDANT A LA NOUVELLE P.P.I.
+C-----------------------------------------------------------------------
+C
+      IF (KNPILE.NE.0) THEN
+        CALL LFIREC_MT (LFI, KRGPIF,IRANG,IREC)
+        INAPHY=IREC
+        CALL LFILCC_MT (LFI, KREP,INUMER,IREC,LFI%CNOMAR(IXC(1,IRGPIM)),
+     S               LFI%NBREAD(IRANG),IFACTM,IRETIN)
+C
+        IF (IRETIN.NE.0) THEN
+          GOTO 904
+        ENDIF
+C
+        IF (KNPILE.EQ.2) THEN
+C
+C             PHASAGE DIRECT, SANS APPEL AU SOUS-PROGRAMME "LFIPHA" .
+C
+          INAPHY=IREC+1
+          CALL LFILDO_MT (LFI, KREP,INUMER,IREC+1,
+     S                    LFI%MLGPOS(IXM(1,IRGPIM)),
+     S                    LFI%NBREAD(IRANG),IFACTM,IRETIN)
+C
+          IF (IRETIN.NE.0) THEN
+            GOTO 904
+          ENDIF
+C
+          LFI%LPHASP(IRGPIM)=.TRUE.
+C
+        ENDIF
+C
+      ENDIF
+C
+      KREP=0
+      KRANGM=IRANGM
+      KRGPIM=IRGPIM
+      GOTO 1001
+C**
+C     9.  - CI-DESSOUS, ETIQUETTES DE BRANCHEMENT EN CAS D'ERREUR E/S.
+C-----------------------------------------------------------------------
+C
+  903 CONTINUE
+      IRETOU=1
+      CLACTI='WRITE'
+      GOTO 909
+C
+  904 CONTINUE
+C
+C        "DESALLOCATION" DE LA P.P.I. SUITE A ERREUR EN LECTURE
+C     DE L'ARTICLE D'INDEX "NOMS".
+C
+      IF (INPPIM.GT.LFI%JPNPIA) THEN
+         IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERGLA,'ON')
+        LFI%NPISAF=LFI%NPISAF-IFACTM
+C
+        DO 906 JR=IRGPIM,IRGPIM+IFACTM-1
+        LFI%MCOPIF(JR)=LFI%JPNIL
+  906   CONTINUE
+C
+         IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERGLA,'OFF')
+      ENDIF
+C
+      LFI%NPPIMM(IRANG)=INPPIM-1
+      IRETOU=2
+      CLACTI='READ'
+C
+  909 CONTINUE
+C
+C       ON FORCE LE CODE-REPONSE A ETRE POSITIF.
+C
+      KREP=IABS (KREP)
+      IF (INAPHY.NE.0) LFI%NUMAPH(IRANG)=INAPHY
+C**
+C    10.  -  PHASE TERMINALE : MESSAGERIE INTERNE EVENTUELLE,
+C            VIA LE SOUS-PROGRAMME "LFIEMS", PUIS RETOUR.
+C-----------------------------------------------------------------------
+C
+ 1001 CONTINUE
+      LLFATA=LLMOER (KREP,KRANG)
+C
+      IF (KREP.EQ.0) THEN
+        KRETIN=0
+      ELSEIF (KREP.GT.0) THEN
+        KRETIN=IRETOU
+      ELSE
+        KRETIN=3
+      ENDIF
+C
+      IF (LFI%LMISOP.OR.LLFATA) THEN
+        INIMES=2
+        CLNSPR='LFIPIM'
+        WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KRANG='',I3,
+     S       '', KRANGM='',I3,'', KRGPIM='',I3,'', KRGPIF='',I4,
+     S       '', KRGFOR='',I4,'', KNPILE='',I2,'', KRETIN='',I2)')
+     S    KREP,KRANG,KRANGM,KRGPIM,KRGPIF,KRGFOR,KNPILE,KRETIN
+        CALL LFIEMS_MT (LFI, INUMER,INIMES,KREP,.FALSE.,
+     S                  CLMESS,CLNSPR,CLACTI)
+      ENDIF
+C
+      IF (LHOOK) CALL DR_HOOK('LFIPIM_MT',1,ZHOOK_HANDLE)
+      END
+

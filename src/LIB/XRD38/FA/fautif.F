@@ -1,0 +1,12 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FAUTIF(KREP, KNUMER, CDIDEN )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+      INTEGER KREP, KNUMER
+      CHARACTER CDIDEN*(*)
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FAUTIF_MT (FA_COM_DEFAULT, KREP, KNUMER, CDIDEN )
+      END SUBROUTINE
+

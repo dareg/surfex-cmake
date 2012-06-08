@@ -1,0 +1,19 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe LFI
+      SUBROUTINE LFIREE ( KREP, KRANG, CDNOMA, KLONG, KRPIEX, 
+     S                    KARTEX,
+     S                    KLONEX, KRPIEC, KARTEC, KPOSEC, KDTROU,
+     S                    KLONUT, KRETIN )
+      USE LFIMOD, ONLY : LFICOM_DEFAULT,
+     S                   LFICOM_DEFAULT_INIT,
+     S                   NEW_LFI_DEFAULT
+      IMPLICIT NONE
+      CHARACTER CDNOMA*(*)
+      INTEGER KREP, KRANG, KLONG, KRPIEX, KARTEX, KLONEX, KRPIEC, KARTEC
+      INTEGER KPOSEC, KDTROU, KLONUT, KRETIN
+      IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
+      CALL LFIREE_MT (LFICOM_DEFAULT, KREP, KRANG, CDNOMA, KLONG, 
+     S                KRPIEX, KARTEX,
+     S                KLONEX, KRPIEC, KARTEC, KPOSEC, KDTROU,
+     S                KLONUT, KRETIN )
+      END SUBROUTINE
+

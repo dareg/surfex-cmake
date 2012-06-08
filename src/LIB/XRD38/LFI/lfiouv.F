@@ -1,0 +1,17 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe LFI
+      SUBROUTINE LFIOUV ( KREP, KNUMER, LDNOMM, CDNOMF, 
+     S                      CDSTTO, LDERFA,
+     S                      LDIMST, KNIMES, KNBARP, KNBARI )
+      USE LFIMOD, ONLY : LFICOM_DEFAULT,
+     S                   LFICOM_DEFAULT_INIT,
+     S                   NEW_LFI_DEFAULT
+      IMPLICIT NONE
+      INTEGER KREP, KNUMER, KNIMES, KNBARP, KNBARI
+      LOGICAL LDNOMM, LDERFA, LDIMST
+      CHARACTER CDNOMF*(*), CDSTTO*(*)
+      IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
+      CALL LFIOUV_MT (LFICOM_DEFAULT, KREP, KNUMER, LDNOMM, CDNOMF, 
+     S                      CDSTTO, LDERFA,
+     S                      LDIMST, KNIMES, KNBARP, KNBARI )
+      END SUBROUTINE
+

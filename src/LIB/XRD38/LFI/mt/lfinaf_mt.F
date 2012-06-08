@@ -1,0 +1,101 @@
+C Jan-2011 P. Marguinaud Thread-safe LFI
+      SUBROUTINE LFINAF_MT (LFI, KREP, KNUMER, KNALDO, KNTROU, 
+     S                      KNARES, KNAMAX )
+      USE LFIMOD, ONLY : LFICOM
+      USE PARKIND1, ONLY : JPRB
+      USE YOMHOOK , ONLY : LHOOK, DR_HOOK
+C****
+C        SOUS-PROGRAMME DONNANT DES NOMBRES D'ARTICLES LOGIQUES DIVERS
+C     ( DE DONNEES, "TROUS", POSSIBLE, MAXIMUM ) POUR UNE UNITE LOGIQUE
+C     OUVERTE POUR LE LOGICIEL DE FICHIERS INDEXES *LFI* .
+C**
+C    ARGUMENTS : KREP   (SORTIE) ==> CODE-REPONSE DU SOUS-PROGRAMME;
+C                KNUMER (ENTREE) ==> LFI%NUMERO DE L'UNITE LOGIQUE;
+C                KNALDO (SORTIE) ==> NOMBRE D'ARTICLES LOGIQUES
+C                                  *DE DONNEES* (TROUS EXCLUS) PRESENTS;
+C                KNTROU (SORTIE) ==> NOMBRE D'ARTICLES LOGIQUES QUI SONT
+C                                    DEVENUS DES "TROUS", PAR SUITE DE
+C                                    REECRITURES D'ARTICLES PLUS LONGUES
+C                                    QU'INITIALEMENT, ET QUI N'ONT PAS
+C                                    PU ETRE (ENCORE) RECYCLES;
+C                KNARES (SORTIE) ==> NOMBRE D'ARTICLES LOGIQUES POUVANT
+C                                    ETRE ECRITS DANS LA PARTIE "PRERER-
+C                                    VEE" DE L'INDEX (TROUS COMPRIS);
+C                KNAMAX (SORTIE) ==> NOMBRE D'ARTICLES LOGIQUES MAXIMUM
+C                                    POUVANT ETRE ECRITS SUR L'UNITE
+C                                    LOGIQUE, EN "DEBORDANT" AU MAXIMUM
+C                                   DE LA PARTIE PRERESERVEE DE L'INDEX.
+C                                    ( TROUS COMPRIS )
+C
+#ifndef f77
+#include "precision.h"
+#endif
+C
+      TYPE(LFICOM) :: LFI
+      INTEGER KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX
+      INTEGER IRANG, IREP, IFACTM, ILARPH, INALPP, INIMES
+C
+#include "lficom2.h"
+#include "lficom_mt.h"
+C**
+C     1.  -  CONTROLES DU PARAMETRE D'APPEL, PUIS INITIALISATIONS.
+C-----------------------------------------------------------------------
+C
+      REAL(KIND=JPRB) :: ZHOOK_HANDLE
+      IF (LHOOK) CALL DR_HOOK('LFINAF_MT',0,ZHOOK_HANDLE)
+      CALL LFINUM_MT (LFI, KNUMER,IRANG)
+C
+      IF (IRANG.EQ.0) THEN
+        KNTROU=0
+        KNALDO=0
+        KNARES=0
+        KNAMAX=0
+        IREP=-1
+        GOTO 1001
+      ENDIF
+C
+       IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERRUE(IRANG),'ON')
+C**
+C     2.  -  CALCUL DIRECT DES ARGUMENTS DE SORTIE DU SOUS-PROGRAMME.
+C-----------------------------------------------------------------------
+C
+      IFACTM=LFI%MFACTM(IRANG)
+      ILARPH=LFI%JPLARD*IFACTM
+      INALPP=LFI%JPNAPP*IFACTM
+      KNTROU=LFI%MDES1D(IXM(LFI%JPNTRU,IRANG))+LFI%NBTROU(IRANG)
+      KNALDO=LFI%MDES1D(IXM(LFI%JPNALO,IRANG))-KNTROU
+      KNARES=INALPP*LFI%MDES1D(IXM(LFI%JPNPIR,IRANG))
+      KNAMAX=KNARES+INALPP*(ILARPH-LFI%JPLDOC)
+      IREP=0
+C**
+C    10.  -  PHASE TERMINALE : MESSAGERIE, AVEC "ABORT" EVENTUEL,
+C            VIA LE SOUS-PROGRAMME "LFIEMS" .
+C-----------------------------------------------------------------------
+C
+ 1001 CONTINUE
+      KREP=IREP
+      LLFATA=LLMOER (IREP,IRANG)
+C
+      IF (IRANG.NE.0) THEN
+        LFI%NDEROP(IRANG)=12
+        LFI%NDERCO(IRANG)=IREP
+         IF (LFI%LMULTI) CALL LFIVER_MT (LFI, LFI%VERRUE(IRANG),'OFF')
+      ENDIF
+C
+      IF (LLFATA.OR.IXNIMS (IRANG).EQ.2) THEN
+        INIMES=2
+      ELSE
+        IF (LHOOK) CALL DR_HOOK('LFINAF_MT',1,ZHOOK_HANDLE)
+        RETURN
+      ENDIF
+C
+      CLNSPR='LFINAF'
+      WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,
+     S       '', KNALDO='',I6,'', KNTROU='',I6,'', KNARES='',I6,
+     S       '', KNAMAX='',I6)') KREP,KNUMER,KNALDO,KNTROU,KNARES,KNAMAX
+      CALL LFIEMS_MT (LFI, KNUMER,INIMES,IREP,LLFATA,
+     S                CLMESS,CLNSPR,CLACTI)
+C
+      IF (LHOOK) CALL DR_HOOK('LFINAF_MT',1,ZHOOK_HANDLE)
+      END
+

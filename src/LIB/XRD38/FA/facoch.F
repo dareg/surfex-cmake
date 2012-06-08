@@ -1,0 +1,14 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FACOCH(KREP, KNUME1, KNUME2, 
+     S                  CDPREF, KNIVAU, CDSUFF )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+      INTEGER KREP, KNUME1, KNUME2, KNIVAU
+      CHARACTER CDPREF*(*), CDSUFF*(*)
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FACOCH_MT (FA_COM_DEFAULT, KREP, KNUME1, KNUME2, 
+     S                CDPREF, KNIVAU, CDSUFF )
+      END SUBROUTINE
+

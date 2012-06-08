@@ -1,0 +1,38 @@
+C Jan-2011 P. Marguinaud Thread-safe LFI
+      SUBROUTINE LFIVER_MT (LFI, PVEROU, CDSENS )
+      USE LFIMOD, ONLY : LFICOM
+      USE PARKIND1, ONLY : JPRB
+      USE YOMHOOK , ONLY : LHOOK, DR_HOOK
+C****
+C        CE S/P EST CHARGE, EN MODE MULTI-TASKING, DE TOUTES LES
+C        ACTIONS CONCERNANT LES "VERROUS" .
+C**
+C     ARGUMENTS : PVEROU ==> VERROU CONCERNE;
+C                 CDSENS ==> SUFFIXE DE L'ACTION SOUHAITEE.
+C                            ('ASGN','ON','OFF','REL')
+C
+#ifndef f77
+#include "precision.h"
+#endif
+C
+      TYPE(LFICOM) :: LFI
+      CHARACTER CDSENS*(*)
+C
+      INTEGER INUMER, IREP, INIMES
+C
+      REAL PVEROU
+#include "lficom_mt.h"
+C
+        REAL(KIND=JPRB) :: ZHOOK_HANDLE
+        IF (LHOOK) CALL DR_HOOK('LFIVER_MT',0,ZHOOK_HANDLE)
+        INUMER=LFI%JPNIL
+        INIMES=0
+        IREP=-3
+        LLFATA=LFI%NERFAG.NE.2
+        CLNSPR='LFIVER'
+        CALL LFIEMS_MT (LFI, INUMER,INIMES,IREP,LLFATA,CLMESS,
+     S                  CLNSPR,CLACTI)
+C
+      IF (LHOOK) CALL DR_HOOK('LFIVER_MT',1,ZHOOK_HANDLE)
+      END
+

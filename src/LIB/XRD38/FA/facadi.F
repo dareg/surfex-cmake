@@ -1,0 +1,31 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe FA
+      SUBROUTINE FACADI(KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO, 
+     S                    PSLOPO,
+     S                    PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,
+     S                    KNOZPA, PSINLA, KNIVER, PREFER, PAHYBR,
+     S                    PBHYBR, LDMODC, LDREDF, KPHASE, KRANGC,
+     S                    KLNOMC, KGARDE )
+      USE FA_MOD, ONLY : FA_COM_DEFAULT,
+     S                   FA_COM_DEFAULT_INIT,
+     S                   NEW_FA_DEFAULT
+      IMPLICIT NONE
+#include "precision.h"
+      INTEGER KTYPTR, KTRONC, KNLATI, KNXLON, KNIVER, KREP, KPHASE
+      INTEGER KRANGC, KLNOMC, KGARDE
+      INTEGER KNLOPA (FA_COM_DEFAULT%JPXPAH), 
+     S        KNOZPA (FA_COM_DEFAULT%JPXIND)
+      REAL (KIND=JPDBLR) PSLAPO, PCLOPO, PSLOPO, PCODIL, PREFER
+      REAL (KIND=JPDBLR) PSINLA (FA_COM_DEFAULT%JPXGEO), 
+     S                   PAHYBR (0:KNIVER)
+      REAL (KIND=JPDBLR) PBHYBR (0:KNIVER)
+      CHARACTER CDNOMC*(*)
+      LOGICAL LDREDF, LDMODC
+      IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
+      CALL FACADI_MT (FA_COM_DEFAULT, KREP, CDNOMC, KTYPTR, PSLAPO, 
+     S                PCLOPO, PSLOPO,
+     S                PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,
+     S                KNOZPA, PSINLA, KNIVER, PREFER, PAHYBR,
+     S                PBHYBR, LDMODC, LDREDF, KPHASE, KRANGC,
+     S                KLNOMC, KGARDE )
+      END SUBROUTINE
+

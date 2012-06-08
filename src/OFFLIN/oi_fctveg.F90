@@ -1,0 +1,84 @@
+SUBROUTINE OI_FCTVEG(IH,PVEG,&
+   VGAT1,VGAT2,VGAT3,VGBT1,VGBT2,VGBT3,VGCT1,VGCT2,  &
+   VGAH1,VGAH2,VGAH3,VGBH1,VGBH2,VGBH3,VGCH1,VGCH2,&
+   SIGT2MP,SIGHP2,&
+   G1,G2,G3,G4,&
+   VGST,VGSH,VGPT1,VGPH1,VGPT2,VGPH2)  
+!
+!****-------------------------------------------------------------------
+!
+USE MODD_ASSIM, ONLY : SIGHP1, SIGT2MR, SIGH2MR, SIGT2MO, SIGH2MO 
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+INTEGER :: J
+INTEGER :: IH
+!
+REAL ,INTENT(IN) :: VGAT1(24),VGAT2(24),VGAT3(24)
+REAL ,INTENT(IN) :: VGBT1(24),VGBT2(24),VGBT3(24)
+REAL ,INTENT(IN) :: VGCT1(24),VGCT2(24)
+REAL ,INTENT(IN) :: VGAH1(24),VGAH2(24),VGAH3(24)
+REAL ,INTENT(IN) :: VGBH1(24),VGBH2(24),VGBH3(24)
+REAL ,INTENT(IN) :: VGCH1(24),VGCH2(24)
+REAL ,INTENT(IN) :: SIGT2MP(24),SIGHP2(24)
+!
+REAL :: PVEG
+REAL :: SIGH2MP
+!
+REAL :: VGST,VGSH,VGPT1,VGPH1,VGPT2,VGPH2
+!
+REAL :: G1,G2,G3,G4
+REAL :: PX1,PY1,PX2,PY2,PX3,PY3,PX4,PY4
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!**---------------------------------------------------------------------
+!**  1. Initialisation des polynomes bruts et des champs de reference.
+!**     -------------------------------------------------------------
+!
+! fonction definissant la dependance par rapport aux erreurs d'observation
+!REAL :: G
+!REAL :: PX,PY
+!G ( PX,PY ) = PX**2 / (PX**2 + PY**2 + (PX*PY)**2)
+!
+! ecart-type d'erreurs de prevision sur H2m
+!
+IF (LHOOK) CALL DR_HOOK('OI_FCTVEG',0,ZHOOK_HANDLE)
+SIGH2MP  = SIGHP1 + SIGHP2(IH)*PVEG
+!
+!G1 = G(SIGH2MO/SIGH2MP(IH,PVEG),SIGT2MO/SIGT2MP(IH))
+PX1 = SIGH2MO/SIGH2MP
+PY1 = SIGT2MO/SIGT2MP(IH)
+G1  = PX1**2 / (PX1**2 + PY1**2 + (PX1*PY1)**2)
+!
+!G2= G(SIGH2MR/SIGH2MP(IH,PVEG),SIGT2MR/SIGT2MP(IH))
+PX2 = SIGH2MR/SIGH2MP
+PY2 = SIGT2MR/SIGT2MP(IH)          
+G2  = PX2**2 / (PX2**2 + PY2**2 + (PX2*PY2)**2)
+!
+!G3= G(SIGT2MO/SIGT2MP(IH),SIGH2MO/SIGH2MP(IH,PVEG))
+PX3 = SIGT2MO/SIGT2MP(IH)
+PY3 = SIGH2MO/SIGH2MP
+G3  = PX3**2 / (PX3**2 + PY3**2 + (PX3*PY3)**2)
+!
+!G4= G(SIGT2MR/SIGT2MP(KH),SIGH2MR/SIGH2MP(IH,PVEG))
+PX4 = SIGT2MR/SIGT2MP(IH)
+PY4 = SIGH2MR/SIGH2MP          
+G4  = PX4**2 / (PX4**2 + PY4**2 + (PX4*PY4)**2)
+!
+! polynomes de base pour la dependance par rapport a l'indice de vegetation
+!
+VGST  = (1.0 - PVEG)*(VGAT1(IH) + VGAT2(IH)*PVEG + VGAT3(IH)*PVEG**2)
+VGSH  = (1.0 - PVEG)*(VGAH1(IH) + VGAH2(IH)*PVEG + VGAH3(IH)*PVEG**2)
+VGPT1 = (1.0 - PVEG)*(VGBT1(IH) + VGBT2(IH)*PVEG + VGBT3(IH)*PVEG**2)
+VGPH1 = (1.0 - PVEG)*(VGBH1(IH) + VGBH2(IH)*PVEG + VGBH3(IH)*PVEG**2)
+VGPT2 = PVEG*(VGCT1(IH) + VGCT2(IH)*PVEG)
+VGPH2 = PVEG*(VGCH1(IH) + VGCH2(IH)*PVEG)
+IF (LHOOK) CALL DR_HOOK('OI_FCTVEG',1,ZHOOK_HANDLE)
+!
+!**---------------------------------------------------------------------
+END SUBROUTINE OI_FCTVEG
+

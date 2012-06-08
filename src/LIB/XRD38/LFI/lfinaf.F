@@ -1,0 +1,13 @@
+C Jan-2011 P. Marguinaud Interface to thread-safe LFI
+      SUBROUTINE LFINAF ( KREP, KNUMER, KNALDO, KNTROU, 
+     S                      KNARES, KNAMAX )
+      USE LFIMOD, ONLY : LFICOM_DEFAULT,
+     S                   LFICOM_DEFAULT_INIT,
+     S                   NEW_LFI_DEFAULT
+      IMPLICIT NONE
+      INTEGER KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX
+      IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
+      CALL LFINAF_MT (LFICOM_DEFAULT, KREP, KNUMER, KNALDO, KNTROU, 
+     S                      KNARES, KNAMAX )
+      END SUBROUTINE
+
