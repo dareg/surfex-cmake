@@ -12,10 +12,10 @@ then
 #                                                        #
 ##########################################################
 echo 
-echo '--->' WARNING :: "profile_mesonh"
-echo '--->' vous avez deja initialise votre variable d environnement '\$SRC_SURFEX'
+echo '--->' WARNING :: "profile_surfex"
+echo '--->' environment variable already initialized:  '\$SRC_SURFEX'
 echo '--->' '\$SRC_SURFEX="'\$SRC_SURFEX'"'
-echo '--->' '"check your environnment profile_mesonh" !!!! '
+echo '--->' 'check your environnment profile_surfex or do export SRC_SURFEX="" !!!! '
 echo 
 fi
 ##########################################################

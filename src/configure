@@ -244,11 +244,11 @@ cp profile_surfex profile_surfex-${XYZ}
 #
 if [ ${MVWORK} == "YES" ] ; then
    if [ "x${WORKDIR}" == "x" ] ; then
-     echo "ATTENTION :: configure !!!!!"
+     echo "CAUTION :: configure !!!!!"
      echo
-     echo '  ---> vous n avez pas initialiser la variable $WORKDIR ' 
-     echo '  ---> ou seront stoké les binaires et cas tests '
-     echo '  ---> initialisez la et relance "./configure"' 
+     echo '  ---> variable $WORKDIR is not initialized ' 
+     echo '  ---> where binaries and test cases will be stored '
+     echo '  ---> initialize it et launch again "./configure"' 
      exit 1
    fi 
    if [ -d $WORKDIR ] && [ ${LOCAL} == ${LOCAL##/work} ] ; then
@@ -308,7 +308,7 @@ echo  BIN_TOOLS=${BIN_TOOLS}
 echo 
 echo  "---> XYZ=${XYZ}"
 echo
-echo "création du fichier -->  ../conf/profile_surfex-${XYZ}"
+echo "creation of file -->  ../conf/profile_surfex-${XYZ}"
 echo 
 ##########################################################
 #                                                        #
@@ -318,17 +318,19 @@ echo
 else
 clear
 echo 
-echo "ATTENTION :: configure !!!!!"
+echo "CAUTION :: configure !!!!!"
 echo
-echo '  ---> vous avez déjà initialisé votre environnement SURFEX sur cette version'
+echo '  ---> your SURFEX environment is already initialized on this version'
 echo '  ---> $XYZ="'$XYZ'"'
 echo 
-echo "Vérifiez votre fichier '.profile'" ou "'.bashrc'"  !!!
+echo "Verify your file '.profile'" or "'.bash_profile'"  !!!
 echo 
-echo "  ---> mettez en commentaire la ligne '. ../profile_surfex...' "
-echo "  ---> relogger vous sur une autre session et relancer ./configure "
+echo "  ---> you can..."
+echo " -----> comment the line '. ../profile_surfex...' "
+echo " -----> do export XYZ=\"\" to reinitialize this variable "
+echo " -----> open another terminal and launch again ./configure "
 echo 
-echo "Fichier 'profile_surfex' non modifié !!! "
+echo "File 'profile_surfex' not modified !!! "
 echo 
 exit 1
 fi 
