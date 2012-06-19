@@ -36,7 +36,7 @@
 USE MODD_PREP_TEB,   ONLY : CFILE_TEB, CTYPE, CFILEPGD_TEB, CTYPEPGD,                   &
                               CFILE_WS, CTYPE_WS, XWS_ROOF, XWS_ROAD,                   &
                               CFILE_TS, CTYPE_TS, XTS_ROOF, XTS_ROAD, XTS_WALL,         &
-                              XTI_BLD, XTI_ROAD,                                        &
+                              XTI_BLD, XTI_ROAD, XQ_CAN,                                &
                               XWS_ROAD_DEF, XWS_ROOF_DEF, XTI_BLD_DEF  
 
 USE MODN_PREP_TEB,   ONLY : LTEB_CANOPY
@@ -85,6 +85,8 @@ XTI_BLD  = XUNDEF
 XWS_ROOF_DEF = 0.
 XWS_ROAD_DEF = 0.
 XTI_BLD_DEF  = 17. + XTT
+!
+XQ_CAN = 0.
 !
 LTEB_CANOPY = .FALSE.
 IF (LHOOK) CALL DR_HOOK('DEFAULT_PREP_TEB',1,ZHOOK_HANDLE)
