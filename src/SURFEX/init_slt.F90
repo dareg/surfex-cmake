@@ -10,7 +10,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 
 !PASSED VARIABLES
-CHARACTER(LEN=*)      :: HPROGRAM              !Passing unit
+CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM              !Passing unit
 !
 !LOCAL VARIABLES
 CHARACTER(LEN=4)    :: CRGUNITS              ! type of log-normal geometric mean radius
