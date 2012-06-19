@@ -529,13 +529,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
             CFILEOUT_LFI= ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG)
             CFILEOUT_FA = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.fa')
             IF (CTIMESERIES_FILETYPE=='FA    ') THEN 
-              IDATEF(1)=IYEAR
-              IDATEF(2)=IMONTH
-              IDATEF(3)=IDAY
-              IDATEF(4)=NINT(ZTIME/3600.) 
-              IDATEF(5)=NINT(ZTIME/60.) - IDATEF(4) * 60 
-              IDATEF(6)=1 
-              IDATEF(7:11)=0                      
+              IDATEF(1)= IYEAR
+              IDATEF(2)= IMONTH
+              IDATEF(3)= IDAY
+              IDATEF(4)= ZTIME/3600 
+              IDATEF(5)= ZTIME/60 - IDATEF(4) * 60  
+              IDATEF(6)= ZTIME - IDATEF(4) * 3600 - IDATEF(5) * 60
+              IDATEF(7:11) = 0                      
               CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'NEW',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC) 
               CALL FANDAR(IRET,NUNIT_FA,IDATEF)
             END IF
