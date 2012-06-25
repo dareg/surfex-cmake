@@ -176,7 +176,7 @@ REAL, DIMENSION(NDLIM), PARAMETER   :: ZDLIM = &
 REAL,DIMENSION(SIZE(PDG,1),SIZE(PDG,3)) :: ZDG_WATER
 !
 LOGICAL            :: LWORK
-!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 ! init
 !
