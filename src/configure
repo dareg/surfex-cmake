@@ -125,7 +125,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 'Linux lx'*|'Linux sx'*|'Linux px'*) #CNRM
                 export     ARCH=${ARCH:-LXgfortran}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
-                export OPTLEVEL=${OPTLEVEL:-DEBUG}
+                export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFAUTO}
 		export NEED_NCARG=${NEED_NCARG:-NO}
