@@ -327,11 +327,14 @@ DO JL=1,INL
 !       Put remainding infiltration into the next layer (m)
         ZINFILTC(JJ) = ZINFILTC(JJ) - ZINFLAYER(JJ,JL)
 !       Possible negative infiltration  (m s-1)
-        ZINFNEG(JJ,JL) = MIN(0.0,PPG(JJ)*PDZG(JJ,JL)/PDG(JJ,IDEPTH))
-!        
+        ZINFNEG(JJ,JL) = MIN(0.0,PPG(JJ)*PDZG(JJ,JL)/PDG(JJ,IDEPTH))     
      ENDIF
    ENDDO
 ENDDO
+!
+!Fast(temporal)-response runoff (surface excess) (kg m2 s-1):
+!special case : if infiltration > total soil capacity
+PHORTON(:)=(PHORTON(:)+ZINFILTC(:)/PTSTEP)*XRHOLW
 !
 !
 ! 3. Initialise matric potential and hydraulic conductivity at "t"
@@ -428,7 +431,7 @@ ENDDO
 !    -------------------------------------------------
 !     
 !surface layer:
-ZFRC  (:,1) = ZWFLUX(:,1) - PLEG(:) + ZINFNEG(:,1)
+ZFRC  (:,1) = ZWFLUX(:,1) - PLEG(:) - PF2WGHT(:,1)*PLETR(:) + ZINFNEG(:,1)
 ZAMTRX(:,1) = 0.0
 ZBMTRX(:,1) = (PDZG(:,1)/PTSTEP) - ZWGHT*ZDFLUXDT1(:,1)
 ZCMTRX(:,1) = -ZWGHT*ZDFLUXDT2(:,1)
