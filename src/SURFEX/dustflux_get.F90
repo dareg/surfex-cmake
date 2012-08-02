@@ -96,7 +96,7 @@ ZFLX_MSS_VRT_DST_TTL_WBN(:) = 0.d0
 ! Old Alf Grini code: bug on DEAD detected ? 
 ! Modification proposed by M. Mokhtari.. Accepted for all cases
 !  if (CVERMOD=='CMDVER') then
-ZGWC_THR(:) = MIN(0.14,MAX(0.02,3. * PCLAY(:) * (0.17d0 + 0.14d0 * PCLAY(:))))
+ZGWC_THR(:) = MIN(0.14,MAX(0.02,3. * PCLAY(:) * (0.17 + 0.14 * PCLAY(:))))
 !ZGWC_THR(:) = PCLAY(:) * (0.17d0 + 0.14d0 * PCLAY(:))
 !  else 
 ! gwc_thr=mss_frc_cly*(0.17d0+0.14d0*mss_frc_cly) ! [m3 m-3] FMB99 p. 155 (14)
