@@ -71,8 +71,8 @@ REAL, PARAMETER                 :: UPOURC=100.
 ! Parameters for Marbouty's function
 !
 REAL, PARAMETER                 ::  VTANG1=40.              
-REAL, PARAMETER                 ::  VTANG2=22.              
-REAL, PARAMETER                 ::  VTANG3=6.              
+REAL, PARAMETER                 ::  VTANG2=6.              
+REAL, PARAMETER                 ::  VTANG3=22.              
 REAL, PARAMETER                 ::  VTANG4=.7               
 REAL, PARAMETER                 ::  VTANG5=.3               
 REAL, PARAMETER                 ::  VTANG6=6.               
