@@ -262,9 +262,12 @@ CALL OPEN_FILE(HPROGRAM,IGLB,YFILENAME,'UNFORMATTED',           &
 !
 GSWAP = .FALSE.
 !
-JLAT  = 1
+JLAT  = 0
 !
 DO 
+!
+  JLAT = JLAT + 1
+  IF (JLAT==361) EXIT
 !
   IF(JLAT==1)THEN ! Initialise work interger and array
     IWORK          = 0
@@ -467,8 +470,6 @@ DO
 !-------------------------------------------------------------------------------
   END DO
 !-------------------------------------------------------------------------------
-  JLAT = JLAT + 1
-  IF (JLAT==361) EXIT
 END DO
 !
 !-------------------------------------------------------------------------------

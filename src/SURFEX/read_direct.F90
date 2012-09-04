@@ -260,15 +260,14 @@ CALL OPEN_FILE(HPROGRAM,IGLB,YFILENAME,'UNFORMATTED',           &
 !
 GSWAP = .FALSE.
 !
-JLAT = 1
+JLAT = 0
 !
 DO 
 !
-  IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) THEN 
-    JLAT = JLAT + 1
-    IF (JLAT==361) EXIT
-    CYCLE
-  ENDIF
+  JLAT = JLAT + 1
+  IF (JLAT==361) EXIT
+!
+  IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) CYCLE
 !
   ZLATMIN = (JLAT-180)/2. - 0.5
   ZLATMAX = (JLAT-180)/2.
@@ -472,8 +471,6 @@ DO
 !-------------------------------------------------------------------------------
   END DO
 !-------------------------------------------------------------------------------
-  JLAT = JLAT + 1
-  IF (JLAT==361) EXIT
 END DO
 !
 !-------------------------------------------------------------------------------
