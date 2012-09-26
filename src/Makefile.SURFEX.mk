@@ -116,8 +116,10 @@ DIR_HOOK     +=  LIB/drhook_CY31R2.032
 INC_HOOK = -I$(B)LIB/drhook_CY31R2.032
 #
 ifdef DIR_HOOK
-LIBS       += $(DIR_HOOK)/libdrhook.a 
-LIBS       += $(DIR_HOOK)/libmpi_serial.a
+LIBS       += $(DIR_HOOK)/libdrhook.a $(DIR_HOOK)/libodbdummy.a
+#$(DIR_HOOK)/libodbdummy.a 
+#$(DIR_HOOK)/libodbmain.a
+#LIBS       += $(DIR_HOOK)/libmpi_serial.a
 INC        += $(INC_HOOK)
 VPATH      += $(DIR_HOOK)
 endif
@@ -152,6 +154,135 @@ DIR_MASTER += $(DIR_FM)
 #CPPFLAGS   += $(CPPFLAGS_FM)
 INC        += $(INC_FM)
 endif
+##########################################################
+#           Source MPIVIDE                               #
+##########################################################
+#
+ifndef VER_MPI
+VER_MPI=MPIVIDE
+endif
+#VER_MPI=MPIVIDE,LAMMPI,LAMMPI-IB,MPICH-IB
+#
+#   MPIVIDE
+#
+ifeq "$(VER_MPI)" "MPIVIDE"
+DIR_MPI               += LIB/MPIvide
+INC_MPI                = -I$(B)$(DIR_MPI)
+DIR_MASTER            += $(DIR_MPI)
+OBJS_LISTE_MASTER     += mpivide.o
+INC                   += $(INC_MPI)
+mpivide.o  : CPPFLAGS  = -DFUJI \
+                        -I$(DIR_MPI)/include
+VPATH                 += $(DIR_MPI)
+endif
+#
+#   LAMMPI
+#
+ifeq "$(VER_MPI)" "LAMMPI"
+# Standard Lam mpi
+#INC_MPI     = -I$(B)/opt/lam/include
+#LIB_MPI     = -L/opt/lam/lib   -lmpi -llammpi++ -llammpio -llamf77mpi -lmpi -llam -lpthread -ldl
+# default 64 bits SUSE 9 version
+INC_MPI     = -I$(B)/usr/include
+LIB_MPI     = -lmpi -llammpi++ -llammpio -llamf77mpi -lmpi -llam -lpthread -ldl -lutil 
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+#
+#   LAMMPI-IB
+#
+ifeq "$(VER_MPI)" "LAMMPI-IB"
+INC_MPI     = -I/home/sila/LAM-7.1.1/include
+LIB_MPI     = -L/usr/local/ibgd/driver/infinihost/lib64 -L/home/sila/LAM-7.1.1/lib \
+-llammpio -llamf77mpi -lmpi -llam -lutil -lmosal -lmpga -lmtl_common -lvapi -ldl  -lpthread
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+#
+#   MPICH-IB
+#
+ifeq "$(VER_MPI)" "MPICH-IB"
+INC_MPI     = -I/usr/local/ibgd/mpi/osu/f95/mvapich-0.9.5/include
+LIB_MPI     = -L/usr/local/ibgd/driver/infinihost/lib64 \
+                 -L/usr/local/ibgd/mpi/osu/f95/mvapich-0.9.5/lib \
+                 -lmpich -lmtl_common -lvapi -lmosal -lmpga -lpthread
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+#
+#   MPICH-2 CNRM
+#
+ifeq "$(VER_MPI)" "MPICH2"
+INC_MPI     = -I/usr/include
+LIB_MPI     = -lmpichf90 -lmpich 
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+
+#
+#   OPENMPI 1.1 CNRM
+#
+ifeq "$(VER_MPI)" "OMPICNRM"
+MPI_ROOT=/opt/openmpi
+INC_MPI = -I${MPI_ROOT}/include  -I${MPI_ROOT}/include/openmpi/ompi -I${MPI_ROOT}/lib64
+LIB_MPI     = -L${MPI_ROOT}/lib64 -lmpi -lopen-rte -lopen-pal -lutil -lnsl -ldl -Wl,--export-dynamic -lm -lutil -lnsl -ldl
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+
+#
+#   OPENMPI 1.1 BPROC + OPENIB + IFORT
+#
+ifeq "$(VER_MPI)" "OMPIIFORT"
+MPI_ROOT=/home/sila/DEV/OPEN-MPI-11-IFORT-BPROC-OPENIB
+INC_MPI     = -I${MPI_ROOT}/include -I${MPI_ROOT}/include/openmpi/ompi -I${MPI_ROOT}/lib
+LIB_MPI     = -L${MPI_ROOT}/lib -lmpi -lorte -lopal -lutil -lnsl -ldl -Wl,--export-dynamic -lm -lutil -lnsl -ldl
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+
+#
+#   OPENMPI 1.1.4 IFORT BPROC
+#
+ifeq "$(VER_MPI)" "OMPI114IFORT"
+MPI_ROOT=/home/sila/DEV/OPEN-MPI-114-IFORT-BPROC-OPENIB
+INC_MPI     = -I${MPI_ROOT}/include -I${MPI_ROOT}/include/openmpi/ompi -I${MPI_ROOT}/lib
+LIB_MPI     = -L${MPI_ROOT}/lib -lmpi -lorte -lopal -lutil -lnsl -ldl -Wl,--export-dynamic -lm -lutil -lnsl -ldl
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+
+#
+#   OPENMPI 1.2.2 G95 BPROC
+#
+ifeq "$(VER_MPI)" "OMPI122G95"
+MPI_ROOT=/home/sila/DEV/OPEN-MPI-122-G95-BPROC-OPENIB
+INC_MPI     = -I${MPI_ROOT}/include -I${MPI_ROOT}/include/openmpi/ompi -I${MPI_ROOT}/lib
+LIB_MPI     = -L${MPI_ROOT}/lib -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -Wl,--export-dynamic -lm -lutil -lnsl -ldl
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+#
+#   OPENMPI12X
+#
+ifeq "$(VER_MPI)" "OMPI12X"
+INC_MPI     = -I${MPI_ROOT}/include -I${MPI_ROOT}/include/openmpi/ompi -I${MPI_ROOT}/lib
+LIB_MPI     = -L${MPI_ROOT}/lib -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -Wl,--export-dynamic -lm -lutil -lnsl -ldl
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+#
+#   MPI for SGI-ICE 
+#
+ifeq "$(VER_MPI)" "MPIICE"
+INC_MPI     = 
+LIB_MPI     = -lmpi
+INC            += $(INC_MPI)
+LIBS           += $(LIB_MPI)
+endif
+
+
+ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)
 ##########################################################
 #           Librairie GRIBEX                             #
 ##########################################################
@@ -285,7 +416,8 @@ NSOURCE=8
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST MAIN_CARB_SPINUP MAIN_WOOD_SPINUP
+PROG_LIST += PGD PREP OFFLINE
+#PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST MAIN_CARB_SPINUP MAIN_WOOD_SPINUP
 endif
 #
 ifeq "$(VER_USER)" "FORC"
