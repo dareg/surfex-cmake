@@ -120,7 +120,7 @@ C Nb de pts sur un parallele
       FA%NSEC2GG(2,KRANGC)=FA%NXLOPA(KRANGC)
 C Nb de pts sur une longitude
       FA%NSEC2GG(3,KRANGC)=INLAT
-      ZLATPRE=ASIN(MAX(-1.,MIN(1.,FA%SINLAT(1,KRANGC))))
+      ZLATPRE=ASIN(MAX(-ONE,MIN(ONE,FA%SINLAT(1,KRANGC))))
 C Latitude (1/1000 degre) du premier pt de grille
       FA%NSEC2GG(4,KRANGC)=ZRAMDE*ZLATPRE
 C Longitude (1/1000 degre) du premier pt de grille
