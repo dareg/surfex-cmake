@@ -48,6 +48,8 @@ USE MODD_SV_n,           ONLY : NBEQ,NSV_CHSBEG,NSV_CHSEND, &
 USE MODD_CH_SURF_n,      ONLY : LCH_SURF_EMIS
 USE MODD_CH_EMIS_FIELD_n,ONLY : TSEMISS
 !
+USE MODD_SURFEX_MPI, ONLY : XTIME_SEA, XTIME_WATER, XTIME_NATURE, XTIME_TOWN
+!
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_AVERAGE_FLUX
 USE MODI_AVERAGE_RAD
@@ -72,6 +74,10 @@ USE MODI_COUPLING_SEA_n
 USE MODI_COUPLING_TOWN_n
 !
 IMPLICIT NONE
+!
+#ifdef OL
+INCLUDE 'mpif.h'
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -168,6 +174,8 @@ REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZFRAC_TILE     ! fraction of each surface
 REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
 REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 !
+DOUBLE PRECISION :: XTIME0
+!
 INTEGER :: IINDEXEND
 INTEGER :: INBTS, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -251,6 +259,10 @@ CALL RW_PRECIP_n(HPROGRAM,PRAIN,PSNOW)
 ! Call ALMA interfaces for sea, water, nature and town here...
 !--------------------------------------------------------------------------------------
 !
+#ifdef OL
+XTIME0 = MPI_WTIME()
+#endif
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -267,6 +279,11 @@ IF(GSEA)THEN
 !
 ENDIF
 !
+#ifdef OL
+XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
+XTIME0 = MPI_WTIME()
+#endif
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! INLAND WATER Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -280,6 +297,12 @@ IF(GWATER)THEN
   CALL TREAT_SURF(JTILE,NSIZE_WATER,NR_WATER)
 !
 ENDIF 
+!
+#ifdef OL
+XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
+XTIME0 = MPI_WTIME()
+#endif
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -293,6 +316,11 @@ IF(GNATURE)THEN
   CALL TREAT_SURF(JTILE,NSIZE_NATURE,NR_NATURE)
 !
 ENDIF 
+!
+#ifdef OL
+XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
+XTIME0 = MPI_WTIME()
+#endif
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
@@ -308,7 +336,10 @@ IF(GTOWN)THEN
 !
 ENDIF 
 !
-
+#ifdef OL
+XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
+#endif
+!
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -573,5 +604,3 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:TREAT_SURF',1,ZHOOK_HANDLE)
 END SUBROUTINE TREAT_SURF
 !=======================================================================================
 END SUBROUTINE COUPLING_SURF_ATM_n
-
-

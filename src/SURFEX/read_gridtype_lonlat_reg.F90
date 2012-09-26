@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_LONLAT_REG(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP)
+      SUBROUTINE READ_GRIDTYPE_LONLAT_REG(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
 !!****  *READ_GRIDTYPE_LONLAT_REG* - routine to initialise the horizontal grid
@@ -56,6 +56,9 @@ LOGICAL,                INTENT(IN)    :: OREAD      ! flag to read the grid
 INTEGER,                INTENT(IN)    :: KSIZE      ! estimated size of PGRID_PAR
 REAL, DIMENSION(KSIZE), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                INTENT(OUT)   :: KRESP      ! error return code
+CHARACTER(LEN=1),       INTENT(IN)    :: HDIR       ! reading directive
+!                                                   ! 'A' : all field
+!                                                   ! 'H' : field on this processor only
 !
 !
 !*       0.2   Declarations of local variables
@@ -80,14 +83,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_LONLAT_REG',0,ZHOOK_HANDLE)
-CALL READ_SURF(HPROGRAM,'LONMIN',ZLONMIN,KRESP)
-CALL READ_SURF(HPROGRAM,'LONMAX',ZLONMAX,KRESP)
-CALL READ_SURF(HPROGRAM,'LATMIN',ZLATMIN,KRESP)
-CALL READ_SURF(HPROGRAM,'LATMAX',ZLATMAX,KRESP)
-CALL READ_SURF(HPROGRAM,'NLON',ILON,KRESP)
-CALL READ_SURF(HPROGRAM,'NLAT',ILAT,KRESP)
-CALL READ_SURF(HPROGRAM,'REG_LON',ZLON,KRESP)
-CALL READ_SURF(HPROGRAM,'REG_LAT',ZLAT,KRESP)
+CALL READ_SURF(HPROGRAM,'LONMIN',ZLONMIN,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LONMAX',ZLONMAX,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LATMIN',ZLATMIN,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LATMAX',ZLATMAX,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'NLON',ILON,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'NLAT',ILAT,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'REG_LON',ZLON,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'REG_LAT',ZLAT,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !

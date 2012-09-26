@@ -33,9 +33,13 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+USE MODD_SURFEX_MPI, ONLY : NWG_SIZE, WLOG_MPI
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
+!
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
 USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER, NNBIOMASS,       &
                                    CRUNOFF, CRAIN, CISBA, LTR_ML,  &
@@ -150,7 +154,9 @@ IF (LSURF_MISC_BUDGET) THEN
   !               ------------------------------------
   !
   IF(CISBA=='DIF')THEN
-    IWORK = MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
+    !
+    IWORK = NWG_SIZE
+    !
     DO JLAYER = 1,NGROUND_LAYER
      DO JJ=1,SIZE(NWG_LAYER,1)
         IDEPTH=MAXVAL(NWG_LAYER(JJ,:),NWG_LAYER(JJ,:)/=NUNDEF)

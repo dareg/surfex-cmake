@@ -69,9 +69,9 @@ SUBROUTINE flake_interface (KI, &
 !
 ! Modules used:
 
-USE modd_data_parameters , ONLY : &
-      ireals,                   &! KIND-type parameter for real variables
-      iintegers                  ! KIND-type parameter for "normal" integer variables  
+!USE modd_data_parameters , ONLY : &
+!      ireals,                   &! KIND-type parameter for real variables
+!      iintegers                  ! KIND-type parameter for "normal" integer variables  
 
 USE modd_flake_derivedtypes         ! Definitions of several derived TYPEs
 
@@ -149,9 +149,9 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN)  :: KI              ! number of points
 !
-INTEGER (KIND = iintegers) :: i ! DO loop index
+INTEGER :: i ! DO loop index
 !
-REAL (KIND = ireals), DIMENSION(KI), INTENT(IN) ::   &
+REAL, DIMENSION(KI), INTENT(IN) ::   &
     dMsnowdt_in                       ,  &! The rate of snow accumulation [kg m^{-2} s^{-1}]
     I_atm_in                          ,  &! Solar radiation flux at the surface [W m^{-2}]
     Q_atm_lw_in                       ,  &! Long-wave radiation flux from the atmosphere [W m^{-2}]
@@ -162,7 +162,7 @@ REAL (KIND = ireals), DIMENSION(KI), INTENT(IN) ::   &
     q_a_in                            ,  &! Air specific humidity at z=height_tq_in
     P_a_in                                ! Surface air pressure [N m^{-2} = kg m^{-1} s^{-2}]  
 
-REAL (KIND = ireals), DIMENSION(KI), INTENT(IN) ::   &
+REAL, DIMENSION(KI), INTENT(IN) ::   &
     depth_w                           ,  &! The lake depth [m]
     fetch                             ,  &! Typical wind fetch [m]
     depth_bs                          ,  &! Depth of the thermally active layer of the bottom sediments [m]
@@ -181,17 +181,17 @@ CHARACTER(LEN=3) ::  hflk_flux     ! 'DEF'/'WAT' compute the surface fluxes with
 !
 !  Input/Output (procedure arguments)
 
-REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  :: &
+REAL, DIMENSION(KI), INTENT(INOUT)  :: &
     albedo_water                        ,  &! Water surface albedo with respect to the solar radiation
     albedo_ice                          ,  &! Ice surface albedo with respect to the solar radiation
     albedo_snow                             ! Snow surface albedo with respect to the solar radiation  
 
-REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT) ::  &
+REAL, DIMENSION(KI), INTENT(INOUT) ::  &
     extincoef_water                       ,  &! extintion coefficient of water
     extincoef_ice                         ,  &! extintion coefficient of ice
     extincoef_snow                            ! extintion coefficient of snow   
 
-REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  :: &
+REAL, DIMENSION(KI), INTENT(INOUT)  :: &
     T_snow                        ,  &! Temperature at the air-snow interface [K] 
     T_ice                         ,  &! Temperature at the snow-ice or air-ice interface [K]
     T_mnw                         ,  &! Mean temperature of the water column [K]
@@ -207,7 +207,7 @@ REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  :: &
 
 !  Output (procedure arguments)
 
-REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  ::    &
+REAL, DIMENSION(KI), INTENT(INOUT)  ::    &
     Q_sensible             ,  &! Sensible heat flux [W m^{-2}]
     Q_latent               ,  &! Latent heat flux [W m^{-2}]
     Q_momentum             ,  &! Momentum flux [N m^{-2}]
@@ -225,8 +225,8 @@ REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  ::    &
 !
 INTEGER  :: JL                  ! loop counter on horizontal points
 
-REAL (KIND = ireals) :: T_sfc_n ! Surface temperature at the new time step [K]
-REAL (KIND = ireals), DIMENSION(KI) ::    &
+REAL :: T_sfc_n ! Surface temperature at the new time step [K]
+REAL, DIMENSION(KI) ::    &
     Q_watvap                      ! Flux of water vapour [kg m^{-2} s^{-1}]  
 
 TYPE (opticpar_medium), DIMENSION(KI) ::  &
@@ -249,7 +249,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FLAKE_INTERFACE',0,ZHOOK_HANDLE)
 albedo_ice   = albedo_whiteice_ref 
 !albedo_ice(:)   = EXP(-c_albice_MR*(tpl_T_f-T_sfc(:))/tpl_T_f)
-!albedo_ice(:)   = albedo_whiteice_ref*(1._ireals-albedo_ice) + albedo_blueice_ref*albedo_ice
+!albedo_ice(:)   = albedo_whiteice_ref*(1.-albedo_ice) + albedo_blueice_ref*albedo_ice
 ! Snow is not considered
 albedo_snow(:)  = albedo_ice(:)  
 !------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ H_POINT_LOOP: DO JL = 1,KI ! begin of loop on horizontal points
    
 opticpar_water(JL) = opticpar_medium(1,                       &
       (/1., (0.,i=2,nband_optic_max)/),            &
-      (/extincoef_water(JL), (1.E+10_ireals,i=2,nband_optic_max)/))  
+      (/extincoef_water(JL), (1.E+10,i=2,nband_optic_max)/))  
    T_snow_p_flk = T_snow(JL)
    T_ice_p_flk  = T_ice(JL)
    T_mnw_p_flk  = T_mnw(JL)
@@ -350,16 +350,16 @@ opticpar_water(JL) = opticpar_medium(1,                       &
    IF(h_ice_p_flk.GE.h_Ice_min_flk) THEN         ! Ice exists
      IF(h_snow_p_flk.GE.h_Snow_min_flk) THEN     ! There is snow above the ice
        Q_snow_flk = Q_w_flk
-       Q_ice_flk  = 0._ireals
-       Q_w_flk    = 0._ireals
+       Q_ice_flk  = 0.
+       Q_w_flk    = 0.
      ELSE                                        ! No snow above the ice
-       Q_snow_flk = 0._ireals
+       Q_snow_flk = 0.
        Q_ice_flk  = Q_w_flk
-       Q_w_flk    = 0._ireals
+       Q_w_flk    = 0.
      END IF
    ELSE                                          ! No ice-snow cover
-       Q_snow_flk = 0._ireals
-       Q_ice_flk  = 0._ireals
+       Q_snow_flk = 0.
+       Q_ice_flk  = 0.
    END IF
    
 !------------------------------------------------------------------------------

@@ -34,9 +34,9 @@ MODULE modd_flake_derivedtypes
 !
 ! Modules used:
 
-USE modd_data_parameters , ONLY : &
-    ireals                   ,  &! KIND-type parameter for real variables 
-    iintegers                    ! KIND-type parameter for "normal" integer variables  
+!USE modd_data_parameters , ONLY : &
+!    ireals                   ,  &! KIND-type parameter for real variables 
+!    iintegers                    ! KIND-type parameter for "normal" integer variables  
 
 !==============================================================================
 
@@ -50,14 +50,14 @@ IMPLICIT NONE
 !  in the exponential decay law for the radiation flux.
 !  A storage for a ten-band approximation is allocated,
 !  although a smaller number of bands is actually used.
-INTEGER (KIND = iintegers), PARAMETER ::  &
-    nband_optic_max = 10_iintegers  
+INTEGER , PARAMETER ::  &
+    nband_optic_max = 10  
 
 !  Define TYPE "opticpar_medium"
 TYPE opticpar_medium
-  INTEGER (KIND = iintegers)                        ::    &
+  INTEGER                         ::    &
       nband_optic                                            ! Number of wave-length bands  
-  REAL (KIND = ireals), DIMENSION (nband_optic_max) ::    &
+  REAL , DIMENSION (nband_optic_max) ::    &
       frac_optic                                         ,  &! Fractions of total radiation flux 
       extincoef_optic                                        ! Extinction coefficients   
 END TYPE opticpar_medium

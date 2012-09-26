@@ -126,11 +126,6 @@ REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surf
 !
 REAL, DIMENSION(SIZE(PSFTH))    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
-REAL, DIMENSION(SIZE(PSFTH))    :: ZSFTH   ! surface temperature flux per m2 of actual surface
-REAL, DIMENSION(SIZE(PSFTQ))    :: ZSFTQ   ! surface water vapor flux per m2 of actual surface
-REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) &
-                                  :: ZSFTS   ! surface scalar flux per m2 of actual surface  
-REAL, DIMENSION(SIZE(PSFCO2))   :: ZSFCO2  ! surface CO2 flux per m2 of actual surface
 REAL, DIMENSION(SIZE(PDIR_SW,1),SIZE(PSW_BANDS))::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(SIZE(PSCA_SW,1),SIZE(PSW_BANDS))::ZSCA_SW ! incoming diffuse SW radiation
@@ -260,7 +255,7 @@ CALL COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                                
                PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
                PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                   &
                ZRAIN, ZSNOW, ZLW, ZDIR_SW, ZSCA_SW, PSW_BANDS, ZPS, ZPA,                     &
-               ZSFTQ, ZSFTH, ZSFTS, ZSFCO2, PSFU, PSFV,                                      &
+               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &
                PPEW_A_COEF, PPEW_B_COEF,                                                     &
                PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
@@ -271,11 +266,11 @@ CALL COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                                
 !*      6.     Modification of turbulent energy and gaz fluxes
 !              -----------------------------------------------
 !
-PSFTH (:)  = ZSFTH (:) * Z3D_TOT_SURF(:)
-PSFTQ (:)  = ZSFTQ (:) * Z3D_TOT_SURF(:)
-PSFCO2(:)  = ZSFCO2(:) * Z3D_TOT_SURF(:)
+PSFTH (:)  = PSFTH (:) * Z3D_TOT_SURF(:)
+PSFTQ (:)  = PSFTQ (:) * Z3D_TOT_SURF(:)
+PSFCO2(:)  = PSFCO2(:) * Z3D_TOT_SURF(:)
 DO JSV=1,SIZE(PSFTS,2)
-  PSFTS(:,JSV)  = ZSFTS(:,JSV) * Z3D_TOT_SURF(:)
+  PSFTS(:,JSV)  = PSFTS(:,JSV) * Z3D_TOT_SURF(:)
 END DO
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_OROGRAPHY_N',1,ZHOOK_HANDLE)
 !

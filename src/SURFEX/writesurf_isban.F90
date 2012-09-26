@@ -43,6 +43,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NWG_SIZE, WLOG_MPI
+!
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
 USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL,       &
@@ -62,7 +64,6 @@ USE MODD_DST_SURF
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITESURF_GR_SNOW
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -87,6 +88,7 @@ CHARACTER(LEN=25) :: YFORM          ! Writing format
 INTEGER :: JJ, JLAYER, JP, JNBIOMASS, JNLITTER, JNSOILCARB, JNLITTLEVS  ! loop counter on levels
 INTEGER :: IWORK   ! Work integer
 INTEGER :: JSV
+INTEGER           :: INFOMPI, JL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -115,7 +117,7 @@ END DO
 !* soil liquid water contents
 !
 IF(CISBA=='DIF')THEN
-  IWORK=MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
+  IWORK = NWG_SIZE
 ELSE
   IWORK=NGROUND_LAYER
 ENDIF

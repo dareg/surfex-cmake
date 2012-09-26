@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SUNPOS (KYEAR, KMONTH, KDAY, PTIME, PLON, PLAT, PTSUN, PZENITH, PAZIMSOL)
+      SUBROUTINE SUNPOS (KSIZE_OMP, KYEAR, KMONTH, KDAY, PTIME, &
+                         PLON, PLAT, PTSUN, PZENITH, PAZIMSOL)
 !     ####################################################################################
 !
 !!****  *SUNPOS * - routine to compute the position of the sun
@@ -49,15 +50,24 @@
 !              ------------
 !
 USE MODD_CSTS,          ONLY : XPI, XDAY
-!
+USE MODD_SURFEX_OMP, ONLY : NINDX1,NINDX2,NBLOCK,NBLOCKTOT, INIT_DIM, RESET_DIM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+#ifdef AIX64
+USE OMP_LIB
+#endif
+!
 IMPLICIT NONE
+!
+#ifndef AIX64
+INCLUDE 'omp_lib.h'
+#endif
 !
 !*       0.1   Declarations of dummy arguments :
 !
+INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_OMP
 INTEGER,                      INTENT(IN)   :: KYEAR      ! current year                        
 INTEGER,                      INTENT(IN)   :: KMONTH     ! current month                        
 INTEGER,                      INTENT(IN)   :: KDAY       ! current day                        
@@ -92,7 +102,7 @@ REAL                                       :: ZTSIDER, &
                                                 ZSINDEL, &!azimuthal angle
                                                 ZCOSDEL !azimuthal angle  
 !                                            
-INTEGER                                    :: JI, JJ
+INTEGER                                    :: JI, JJ, INKPROMA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -132,7 +142,17 @@ ZSINDEL = SIN(ZDECSOL)
 ZCOSDEL = COS(ZDECSOL)
 !-------------------------------------------------------------------------------
 !
-DO JJ=1,SIZE(PLON)
+!$OMP PARALLEL PRIVATE(INKPROMA)
+!
+!$ NBLOCK = OMP_GET_THREAD_NUM()
+!
+IF (NBLOCK==NBLOCKTOT) THEN
+  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1,NINDX2)
+ELSE
+  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1,NINDX2)
+ENDIF
+!
+DO JJ = NINDX1,NINDX2
 !
 !*       3.    LOADS THE ZLAT, ZLON ARRAYS
 !              ---------------------------
@@ -140,14 +160,11 @@ DO JJ=1,SIZE(PLON)
   ZLAT(JJ) = PLAT(JJ)*(XPI/180.)
   ZLON(JJ) = PLON(JJ)*(XPI/180.)
 !
-
 !-------------------------------------------------------------------------------
-!
 !
 !*       4.    COMPUTE THE TRUE SOLAR TIME
 !              ----------------------------
 !
-
   ZTUT(JJ) = ZUT - ZTSIDER + ZLON(JJ)*((180./XPI)/15.0)
 !
   PTSUN(JJ) = MOD(PTIME -ZTSIDER*3600. +PLON(JJ)*240., XDAY)
@@ -187,6 +204,11 @@ DO JJ=1,SIZE(PLON)
   ENDIF
 !
 ENDDO
+!
+CALL RESET_DIM(SIZE(PLAT),INKPROMA,NINDX1,NINDX2)
+!
+!$OMP END PARALLEL
+!
 IF (LHOOK) CALL DR_HOOK('SUNPOS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

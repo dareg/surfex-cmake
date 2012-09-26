@@ -35,6 +35,7 @@
 !
 USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NFULL, CMASK, LOPEN
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, WLOG_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -55,13 +56,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_FA_N',0,ZHOOK_HANDLE)
+!
+!$OMP BARRIER
+!
 NFULL = 0
 !
 CMASK = '      '
 !
-IF (LOPEN) THEN
+IF (NRANK==NPIO .AND. LOPEN) THEN
+!$OMP SINGLE         
   CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+!$OMP END SINGLE
 END IF
+!
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_FA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

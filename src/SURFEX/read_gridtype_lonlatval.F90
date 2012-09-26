@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_LONLATVAL(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP)
+      SUBROUTINE READ_GRIDTYPE_LONLATVAL(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
 !!****  *READ_GRIDTYPE_IGN* - routine to initialise the horizontal grid
@@ -56,6 +56,9 @@ LOGICAL,                INTENT(IN)    :: OREAD      ! flag to read the grid
 INTEGER,                INTENT(IN)    :: KSIZE      ! estimated size of PGRID_PAR
 REAL, DIMENSION(KSIZE), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                INTENT(OUT)   :: KRESP      ! error return code
+CHARACTER(LEN=1),       INTENT(IN)    :: HDIR       ! reading directive
+!                                                   ! 'A' : all field
+!                                                   ! 'H' : field on this processor only
 !
 !
 !*       0.2   Declarations of local variables
@@ -76,11 +79,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_LONLATVAL',0,ZHOOK_HANDLE)
-CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP)
-CALL READ_SURF(HPROGRAM,'XY',ZY,KRESP)
+CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
 !
-CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP)
-CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP)
+CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !

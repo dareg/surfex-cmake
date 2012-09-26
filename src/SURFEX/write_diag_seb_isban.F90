@@ -29,6 +29,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NWG_SIZE, WLOG_MPI
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
 !
 USE MODD_CSTS,       ONLY : XRHOLW, XTT, XLMTT
@@ -58,11 +60,11 @@ USE MODD_DIAG_ISBA_n,ONLY :   N2M, LSURF_BUDGET, LRAD_BUDGET, LCOEF,            
                               XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,       &
                               XAVG_FMUC, XAVG_FMVC, XAVG_HU2M_MIN,              &
                               XAVG_HU2M_MAX, XAVG_WIND10M, XAVG_WIND10M_MAX  
-
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
+!
 USE MODD_DIAG_EVAP_ISBA_n,ONLY :   LSURF_EVAP_BUDGET, LSURF_BUDGETC,              &
                                    XRNC, XAVG_RNC, XHC, XAVG_HC,                  &
                                    XLEC, XAVG_LEC, XGFLUXC, XAVG_GFLUXC,          &
@@ -957,8 +959,8 @@ ZWG (:,:)=0.0
 ZWGI(:,:)=0.0
 !  
 IF(CISBA=='DIF')THEN
-!        
-  IWORK = MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
+!   
+  IWORK = NWG_SIZE
 !
   DO JPATCH=1,NPATCH
      DO JLAYER=1,NGROUND_LAYER

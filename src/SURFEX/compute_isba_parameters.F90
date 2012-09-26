@@ -50,6 +50,12 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NWG_LAYER_TOT, NWG_SIZE,  NPIO, NCOMM, NPROC, NRANK, WLOG_MPI
+!
+USE MODD_IO_SURF_ASC,  ONLY : NMASK_asc => NMASK
+USE MODD_IO_SURF_FA ,  ONLY : NMASK_fa => NMASK
+USE MODD_IO_SURF_LFI,  ONLY : NMASK_lfi => NMASK
+!
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
                           NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOM,         &
@@ -139,10 +145,16 @@ USE MODI_COMMON_PARTS2
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
 USE MODI_DIAG_ISBA_INIT_n
 !
+USE MODI_GATHER_AND_WRITE_MPI
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifdef OL
+INCLUDE "mpif.h"
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -175,6 +187,10 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IDECADE  ! decade of simulation
 !
 INTEGER :: JPATCH  ! loop counter on tiles
+!
+INTEGER :: IDIM_FULL, JL
+!
+INTEGER           :: INFOMPI
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG1 ! work array for surface temperature
@@ -233,6 +249,31 @@ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,                           &
                         PRE25=XRE25,PCE_NITRO=XCE_NITRO,PCF_NITRO=XCF_NITRO,   &
                         PCNA_NITRO=XCNA_NITRO,PD_ICE=XD_ICE,TPSEED=TSEED,      &
                         TPREAP=TREAP,PWATSUP=XWATSUP,PIRRIG=XIRRIG             )
+!
+IF(CISBA=='DIF')THEN
+  IDIM_FULL = SIZE(NWG_LAYER_TOT,1)
+!$OMP SINGLE
+  DEALLOCATE(NWG_LAYER_TOT)
+  ALLOCATE(NWG_LAYER_TOT(IDIM_FULL,SIZE(NWG_LAYER,2)))
+!$OMP END SINGLE        
+  DO JL = 1,SIZE(NWG_LAYER,2)
+    IF (HPROGRAM=='ASCII ') THEN
+      CALL GATHER_AND_WRITE_MPI(NWG_LAYER(:,JL),NWG_LAYER_TOT(:,JL),NMASK_asc)
+    ELSEIF (HPROGRAM=='LFI   ') THEN
+      CALL GATHER_AND_WRITE_MPI(NWG_LAYER(:,JL),NWG_LAYER_TOT(:,JL),NMASK_lfi)
+    ELSEIF (HPROGRAM=='FA    ') THEN
+      CALL GATHER_AND_WRITE_MPI(NWG_LAYER(:,JL),NWG_LAYER_TOT(:,JL),NMASK_fa)
+    ENDIF
+  ENDDO
+  NWG_SIZE = 0
+  IF (NRANK==NPIO) NWG_SIZE=MAXVAL(NWG_LAYER_TOT(:,:),NWG_LAYER_TOT(:,:)/=NUNDEF)
+  IF (NPROC>1) THEN
+!$OMP SINGLE    
+    CALL MPI_BCAST(NWG_SIZE,KIND(NWG_SIZE)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+!$OMP END SINGLE
+  ENDIF  
+  !
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

@@ -35,11 +35,8 @@ SUBROUTINE COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                            
 !!     B. Decharme  11/2009 Implicit coupling ok with all snow scheme
 !!-------------------------------------------------------------------
 !
-USE MODD_ISBA_n,     ONLY : XTSTEP, TSNOW
+USE MODD_ISBA_n,     ONLY : XTSTEP
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_CSTS,       ONLY : XP00, XRD, XCPD
-!
-! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -123,24 +120,16 @@ REAL    :: ZTSTEP  ! surface time step
 REAL, DIMENSION(SIZE(PSFTH))    :: ZSFTH   ! surface temperature flux 
 REAL, DIMENSION(SIZE(PSFTQ))    :: ZSFTQ   ! surface water vapor flux 
 REAL, DIMENSION(SIZE(PSFCO2))   :: ZSFCO2  ! surface CO2 flux 
-REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) &
-                                  :: ZSFTS   ! surface scalar flux   
+REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) :: ZSFTS   ! surface scalar flux   
 REAL, DIMENSION(SIZE(PSFU))     :: ZSFU    ! zonal momentum flux
 REAL, DIMENSION(SIZE(PSFU))     :: ZSFV    ! meridian momentum flux
 REAL, DIMENSION(SIZE(PTRAD))    :: ZTRAD   ! surface radiative temperature
 REAL, DIMENSION(SIZE(PTRAD))    :: ZEMIS   ! surface emissivity
 REAL, DIMENSION(SIZE(PDIR_ALB,1),SIZE(PDIR_ALB,2)) :: ZDIR_ALB! direct surface albedo
 REAL, DIMENSION(SIZE(PSCA_ALB,1),SIZE(PSCA_ALB,2)) :: ZSCA_ALB! diffuse surface albedo
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEW_A_COEF ! implicit coefficients
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEW_B_COEF ! needed if HCOUPLING='I'
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPET_A_COEF
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEQ_A_COEF
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPET_B_COEF
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEQ_B_COEF
 !
 REAL, DIMENSION(SIZE(PTRAD))    :: ZWORK_LW  ! work array for mean upward longwave surface flux
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
 !
 !-------------------------------------------------------------------------------------
 !
@@ -198,7 +187,7 @@ DO JT=1,IT
                  ZTRAD, ZDIR_ALB, ZSCA_ALB, ZEMIS,                                           &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+                 'OK'                                                                        ) 
 !
   PSFTQ    = PSFTQ    + ZSFTQ    / ZT
   PSFTH    = PSFTH    + ZSFTH    / ZT

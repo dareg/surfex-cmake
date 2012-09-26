@@ -60,8 +60,7 @@ YCOMMENT=' '
 !
 CALL READ_SURF(HPROGRAM,YRECFM,NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
-!
-CDUMMY_NAME(:) = '                     '
+CDUMMY_NAME(:) = '                    '
 CDUMMY_AREA(:) = '   '
 
 !-------------------------------------------------------------------------------
