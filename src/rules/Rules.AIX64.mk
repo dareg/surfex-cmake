@@ -5,14 +5,15 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -q64 -qsigtrap -qfloat=nans \
+#OPT_BASE  = -q64 -qsigtrap -qfloat=nans \
             -qflttrap=enable:overflow:zerodivide:invalid \
             -qautodbl=dbl4 -qzerosize -g -qstrict -qfullpath -qspillsize=32648 \
-            -qinitauto=0 -qdpc=e -qmaxmem=-1 -qnoescape 
-            
+            -qinitauto=0 -qdpc=e -qmaxmem=-1 -qnoescape
+OPT_BASE = -g -w -qsmp=omp -qrealsize=8 -qnoescape -q64 -qextname \
+	   -NS32648 -qmaxmem=-1 -bbigtoc
 OPT_PERF0 = -O0 -qnooptimize
-OPT_PERF2 = -O2
-OPT_PERF3 = -O3 -qarch=pwr6 -qstrict
+OPT_PERF2 = -O2 
+OPT_PERF2 = -O3 -qarch=pwr6 -qstrict
 OPT_CHECK = -C
 OPT_I8    = -qintsize=8
 #
@@ -60,7 +61,7 @@ FC = $(F90)
 # vargas / c1a underscore management 
 #
 ifneq "$(findstring c1a,$(shell uname -n))" ""
-LDFLAGS   =  $(OPT) 
+LDFLAGS   =  $(OPT) -brename:.fminbits_in_word_,.fminbits_in_word__ -bloadmap:exec.log.out
 else
 LDFLAGS   =  $(OPT) -brename:.flush,.flush_ 
 endif
@@ -89,7 +90,11 @@ CNAME_GRIBEX=""
 #DIR_SURFEX      += ARCH_SRC/surfex 
 #DIR_SURCOUCHE   += ARCH_SRC/bug_surcouche
 #
-include Makefile.MESONH.mk
+include Makefile.SURFEX.mk
+#
+INC += -I/usr/lpp/xlf/include
+VPATH += /usr/lpp/xlf/include
+CPPFLAGS += -DAIX64
 #
 ##########################################################
 #                                                        #
@@ -106,5 +111,4 @@ $(OBJS_O1) : OPT = $(OPT_BASE) $(OPT_PERF1)
 #OBJS_O0 += spll_compute_exner_from_ground3d.o  spll_compute_exner_from_ground1d.o spll_modi_set_rsou.o spll_set_rsou.o
 OBJS_O0 += spll_compute_exner_from_ground1d.o 
 $(OBJS_O0) : OPT = $(OPT_BASE) $(OPT_PERF0)
-
-
+#

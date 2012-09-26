@@ -7,11 +7,10 @@ ifneq "$(findstring brodie,$(shell uname -n))" ""
 OBJDIR_PATH=${workdir}
 endif
 #
-#OPT_LIST = -R5 -Wf"-pvctl fullmsg -O infomsg -L fmtlist" -Wf"-L transform" -Wf"-L summary"
-#OPT_BASE = -dw -Wf,'-A dbl4' -to $(OBJDIR) -P stack -Wf"-pvctl noassume loopcnt=1500000 vwork=stack " $(OPT_LIST)
-OPT_BASE = -dw -Wf,-Nesc,'-A dbl4' -P stack -Wf"-pvctl noassume loopcnt=1500000 vwork=stack " $(OPT_LIST)
+OPT_BASE = -pi -dw -Wf,-Nesc -Wf\"-A idbl4\" -Popenmp -Wf\"-pvctl loopcnt=10000000 shape=10000000\"
+#-Wf"-pvctl fullmsg -O infomsg -L fmtlist" -Wf"-L transform" -Wf"-L summary"
 OPT_PERF0 = -C debug 
-OPT_PERF2 = -C vsafe 
+OPT_PERF2 = -C vsafe
 OPT_PERF3 = -C vopt
 OPT_PERF4 = -C hopt
 OPT_CHECK = -ePR -Wf"-init stack=nan" -Wf"-init heap=nan"
@@ -35,6 +34,12 @@ ifeq "$(OPTLEVEL)" "O2"
 OPT       = $(OPT_BASE) $(OPT_PERF2) 
 OPT0      = $(OPT_BASE) $(OPT_PERF0) 
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF2)
+endif
+#
+ifeq "$(OPTLEVEL)" "O3"
+OPT       = $(OPT_BASE) $(OPT_PERF3) 
+OPT0      = $(OPT_BASE) $(OPT_PERF0)
+OPT_NOCB  = $(OPT_BASE) $(OPT_PERF3)
 endif
 #
 ifeq "$(OPTLEVEL)" "O2PROF"
@@ -66,15 +71,15 @@ spll_set_ref.o spll_surf_solar_sum.o spll_test_double_double.o spll_trid.o
 $(OBJS2) :  OPT =  $(OPT_BASE)  $(OPT_PERF2) 
 endif
 
-F90 = sxmpif90 -clear
-F90FLAGS  =    $(OPT) 
+F90 = sxmpif90 
+F90FLAGS  = $(OPT)
 F77 = $(F90)     
 F77FLAGS  =    -f0 $(OPT)
 FX90 = $(F90)        
 FX90FLAGS =    -f0 $(OPT)
 # 
-#LDFLAGS   +=  $(OPT) -Wl"-h lib_cyclic -h nodefs" 
-LDFLAGS   +=  $(OPT) -Wl"-h lib_cyclic " 
+LDFLAGS += $(OPT) -Wl,-Z,1G 
+#
 #
 # preprocessing flags 
 #
@@ -99,7 +104,9 @@ CNAME_GRIBEX=sxmpif90
 ##########################################################
 #DIR_SURFEX      += ARCH_SRC/surfex
 #
-include Makefile.MESONH.mk
+include Makefile.SURFEX.mk
+#
+INC += -I/SX/opt/sxf90/${SXF90VERSION}/include
 #
 ##########################################################
 #                                                        #
