@@ -103,6 +103,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             --------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP',0,ZHOOK_HANDLE)
+!
 CALL ALLOC_SURFEX(1)
 !
 !     1.1     initializations

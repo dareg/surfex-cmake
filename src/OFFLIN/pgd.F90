@@ -94,7 +94,6 @@ USE MODI_GET_LUOUT
 !
 IMPLICIT NONE
 !
-!
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
@@ -103,6 +102,7 @@ INTEGER            :: ILUNAM
 LOGICAL            :: GFOUND
 !
 CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PGD'   ! name of the listing
+INTEGER :: ILEVEL, INFOMPI
 !
 INTEGER            :: IRET      
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -110,6 +110,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD',0,ZHOOK_HANDLE)
+!
 CALL ALLOC_SURFEX(1)
 CALL GOTO_SURFEX(1,.TRUE.)
 !
@@ -183,6 +184,7 @@ WRITE(*,*) '    ----------------------'
       !
 CLOSE(ILUOUT)
 CALL DEALLOC_SURFEX
+!
 IF (LHOOK) CALL DR_HOOK('PGD',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -98,20 +98,21 @@ LOGICAL          :: LLIMIT_QAIR = .FALSE. ! .T. : Qair always <= Qsat(Tair)
                                           ! .F. : No limitation
 
 ! * For offline driver with openMP
-INTEGER         :: NPROMA                 ! Size of openMP packets
 INTEGER         :: NI,NJ                  ! Domain size
 !
+REAL            :: XIO_FRAC = 1.            ! fraction of ISIZE deduced to I/O
+CHARACTER(LEN=4) :: YALG_MPI = "LIN "       ! type of distribution algorithm for MPI
 !-------------------------------------------------------------------------------
 !
 !*       1.    NAMELISTS
 !              ---------
 !
 NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE, &
-                          CPGDFILE, CPREPFILE, CSURFFILE,                          &
-                          LPRINT, LRESTART, LINQUIRE,                              &
-                          XTSTEP_SURF, XTSTEP_OUTPUT,                              &
-                          LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
-                          NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ  
+                        CPGDFILE, CPREPFILE, CSURFFILE,                          &
+                        LPRINT, LRESTART, LINQUIRE,                              &
+                        XTSTEP_SURF, XTSTEP_OUTPUT,                              &
+                        LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
+                        NB_READ_FORC, LLAND_USE, NI, NJ, XIO_FRAC, YALG_MPI
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE

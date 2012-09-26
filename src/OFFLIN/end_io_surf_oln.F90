@@ -54,6 +54,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_OL_N',0,ZHOOK_HANDLE)
+!
+!$MPI BARRIER
+!
 LMASK = .FALSE.
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_OL_N',1,ZHOOK_HANDLE)
 !

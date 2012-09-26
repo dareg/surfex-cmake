@@ -1,8 +1,6 @@
 !     ######spl
 MODULE MODE_WRITE_SURF_BIN
 !
-USE MODI_UNPACK_SAME_RANK
-USE MODI_INIT_WRITE_BIN
 INTERFACE WRITE_SURF0_BIN
         MODULE PROCEDURE WRITE_SURFX0_BIN
         MODULE PROCEDURE WRITE_SURFN0_BIN
@@ -30,9 +28,6 @@ CONTAINS
 !
 USE MODI_ERROR_WRITE_SURF_BIN
 !
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, CMASK
-!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -44,12 +39,13 @@ CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! name of the article to be read
 REAL,               INTENT(IN) :: PFIELD   ! the real scalar to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
-!-------------------------------------------------------------------------------
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX0_BIN',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 !plm WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
@@ -61,8 +57,9 @@ RETURN
 !
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX0_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFX0_BIN
 !
 !     #############################################################
@@ -72,9 +69,6 @@ END SUBROUTINE WRITE_SURFX0_BIN
 !!****  * - routine to write an integer
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, NMASK, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -87,12 +81,13 @@ CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
-!-------------------------------------------------------------------------------
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN0_BIN',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 !plm WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
@@ -105,7 +100,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN0_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFN0_BIN
 !
 !     #############################################################
@@ -115,9 +110,6 @@ END SUBROUTINE WRITE_SURFN0_BIN
 !!****  * - routine to write a logical
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -130,12 +122,13 @@ CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
-!-------------------------------------------------------------------------------
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL0_BIN',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 !plm WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
@@ -148,9 +141,9 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL0_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFL0_BIN
-
+!
 !     #############################################################
       SUBROUTINE WRITE_SURFC0_BIN(HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
@@ -158,9 +151,6 @@ END SUBROUTINE WRITE_SURFL0_BIN
 !!****  * - routine to write a character
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -173,12 +163,13 @@ CHARACTER(LEN=16),  INTENT(IN)  :: HREC      ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
-!----------------------------------------------------------------------------
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFC0_BIN',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 !plm WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
@@ -191,7 +182,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFC0_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFC0_BIN
 !
 !     #############################################################
@@ -200,16 +191,20 @@ END SUBROUTINE WRITE_SURFC0_BIN
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
-USE MODI_ERROR_WRITE_SURF_BIN
-USE MODI_UNPACK_SAME_RANK2
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_BIN,        ONLY : NMASK, NFULL, CMASK
 USE MODD_WRITE_BIN,          ONLY : CVAR, NVAR, NIND, NWRITE
+!
+USE MODI_ERROR_WRITE_SURF_BIN
+USE MODI_GATHER_AND_WRITE_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
@@ -221,31 +216,110 @@ CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=4), DIMENSION(NFULL)    :: ZWORK   ! work array read in the file
 LOGICAL                           :: LWFL=.FALSE.
+REAL(KIND=4), DIMENSION(NFULL)    :: ZWORK   ! work array read in the file
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
-CALL INIT_WRITE_BIN(HREC,1,LWFL)
+CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
 !
-IF (LWFL) THEN
-  CALL UNPACK_SAME_RANK2(NMASK,PFIELD,ZWORK(:))
-  WRITE(NIND,ERR=100,REC=NWRITE) ZWORK
+IF (NRANK==NPIO) THEN
+  !
+  XTIME0 = MPI_WTIME()
+  !
+!$OMP SINGLE
+  !  
+  CALL INIT_WRITE_BIN(HREC,1,LWFL)
+  !
+  IF (LWFL) THEN 
+    WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
+  ENDIF
+  !
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)  
+  !
+!$OMP END SINGLE NOWAIT
+  !  
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+  !
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',1,ZHOOK_HANDLE)
-RETURN
 !
-100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
 END SUBROUTINE WRITE_SURFX1_BIN
+!
+!     #############################################################
+      SUBROUTINE WRITE_SURFX2_BIN(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  * - routine to fill a write 2D array for the externalised surface 
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
+!
+USE MODD_IO_SURF_BIN,        ONLY : NMASK, NFULL
+USE MODD_WRITE_BIN,          ONLY : CVAR, NVAR, NIND, NWRITE
+!
+USE MODI_ERROR_WRITE_SURF_BIN
+USE MODI_GATHER_AND_WRITE_MPI
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+INCLUDE "mpif.h"
+!
+!*      0.1   Declarations of arguments
+!
+CHARACTER(LEN=16),        INTENT(IN) :: HREC     ! name of the article to be read
+REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
+INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
+CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+                                                 ! 'H' : field with
+                                                 !       horizontal spatial dim.
+                                                 ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+! 
+LOGICAL :: LWFL=.FALSE.
+REAL(KIND=4), DIMENSION(NFULL,SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
+DOUBLE PRECISION   :: XTIME0
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+!
+IF (NRANK==NPIO) THEN
+  !
+  XTIME0 = MPI_WTIME()
+  !    
+!$OMP SINGLE
+  !  
+  CALL INIT_WRITE_BIN(HREC,SIZE(PFIELD,2),LWFL)
+  !
+  IF (LWFL) THEN
+    WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
+  ENDIF
+  !
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+  !
+!$OMP END SINGLE NOWAIT
+  !  
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+  !  
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX2_BIN
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN1_BIN(HREC,KFIELD,KRESP,HCOMMENT,HDIR)
@@ -254,10 +328,6 @@ END SUBROUTINE WRITE_SURFX1_BIN
 !!****  * - routine to write an integer array
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-USE MODI_UNPACK_SAME_RANK2
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, NMASK, NFULL, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -274,13 +344,13 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
 !INTEGER, DIMENSION(NFULL) :: IWORK  ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!---------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN1_BIN',0,ZHOOK_HANDLE)
+!
 KRESP = 0
 !
 !plm IF (HREC(1:8)=="EMISTIME") THEN
@@ -303,7 +373,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN1_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFN1_BIN
 !
 !     #############################################################
@@ -313,9 +383,6 @@ END SUBROUTINE WRITE_SURFN1_BIN
 !!****  * - routine to write a logical array
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -332,12 +399,12 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL1_BIN',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 !plm WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
@@ -350,62 +417,8 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL1_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFL1_BIN
-!
-!     #############################################################
-      SUBROUTINE WRITE_SURFX2_BIN(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
-!     #############################################################
-!
-!!****  * - routine to fill a write 2D array for the externalised surface 
-!
-USE MODI_ERROR_WRITE_SURF_BIN
-USE MODI_UNPACK_SAME_RANK2
-!
-USE MODD_IO_SURF_BIN,        ONLY : NMASK, NFULL
-USE MODD_WRITE_BIN,          ONLY : CVAR, NVAR, NIND, NWRITE
-!
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1   Declarations of arguments
-!
-CHARACTER(LEN=16),        INTENT(IN) :: HREC     ! name of the article to be read
-REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
-INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
-                                                 ! 'H' : field with
-                                                 !       horizontal spatial dim.
-                                                 ! '-' : no horizontal dim.
-!
-!*      0.2   Declarations of local variables
-! 
-REAL(KIND=4), DIMENSION(NFULL,SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
-LOGICAL :: LWFL=.FALSE.
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',0,ZHOOK_HANDLE)
-KRESP=0
-!
-CALL INIT_WRITE_BIN(HREC,SIZE(PFIELD,2),LWFL)
-!
-IF (LWFL) THEN
-  CALL UNPACK_SAME_RANK2(NMASK,PFIELD,ZWORK(:,:))
-  WRITE(NIND,ERR=100,REC=NWRITE) ZWORK
-ENDIF
-!
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',1,ZHOOK_HANDLE)
-RETURN
-!
-100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-END SUBROUTINE WRITE_SURFX2_BIN
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFT0_BIN(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
@@ -414,9 +427,6 @@ END SUBROUTINE WRITE_SURFX2_BIN
 !!****  * - routine to write a date
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -437,7 +447,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 !
 INTEGER, DIMENSION(3) :: ITDATE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT0_BIN',0,ZHOOK_HANDLE)
 KRESP=0
 !
@@ -463,7 +473,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT0_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFT0_BIN
 !
 !     #############################################################
@@ -473,9 +483,6 @@ END SUBROUTINE WRITE_SURFT0_BIN
 !!****  * - routine to write a date
 !
 USE MODI_ERROR_WRITE_SURF_BIN
-!
-!USE MODD_WRITE_BIN, ONLY : NWRITE
-!USE MODD_IO_SURF_BIN,        ONLY : NUNIT, CMASK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -496,7 +503,7 @@ CHARACTER(LEN=100),      INTENT(IN)  :: HCOMMENT ! comment string
 !
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT2_BIN',0,ZHOOK_HANDLE)
 KRESP=0
 !
@@ -522,7 +529,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT2_BIN',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFT2_BIN
 
 END MODULE MODE_WRITE_SURF_BIN

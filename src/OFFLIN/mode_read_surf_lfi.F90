@@ -1,5 +1,37 @@
 MODULE MODE_READ_SURF_LFI
 !
+!!    PURPOSE
+!!    -------
+!
+!       The purpose of READ_SURF_LFI is
+!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!     
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!
+!!      S.Malardel      *METEO-FRANCE*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!      original                                                     01/08/03
+!----------------------------------------------------------------------------
+!
 INTERFACE READ_SURF0_LFI
         MODULE PROCEDURE READ_SURFX0_LFI
         MODULE PROCEDURE READ_SURFN0_LFI
@@ -23,47 +55,10 @@ CONTAINS
       SUBROUTINE READ_SURFX0_LFI(HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  *READX0* - routine to read a real scalar
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READX0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -82,17 +77,17 @@ CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX0_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL FMREADX0(CFILE_LFI,HREC,CLUOUT_LFI,1,PFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
 CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX0_LFI',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFX0_LFI
 !
 !     #############################################################
@@ -100,112 +95,119 @@ END SUBROUTINE READ_SURFX0_LFI
 !     #############################################################
 !
 !!****  *READX1* - routine to fill a real 1D array for the externalised surface 
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READ_SURFX1 is
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI, ONLY : CFILE_LFI, CLUOUT_LFI, NMASK, NFULL, &
+                             LMNH_COMPATIBLE  
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-USE MODI_PACK_SAME_RANK
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, NMASK, NFULL, &
-                                      LMNH_COMPATIBLE  
+USE MODI_READ_AND_SEND_MPI
+USE MODI_GET_SURF_UNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_GET_SURF_UNDEF
-!
 IMPLICIT NONE
+!
+INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
 CHARACTER(LEN=16),   INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:), INTENT(OUT) :: PFIELD   ! array containing the data field
+REAL, DIMENSION(:),  INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
 CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
-
-!
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16):: YREC
+CHARACTER(LEN=16) :: YREC
+REAL              :: ZUNDEF  ! default value
+INTEGER           :: IGRID   ! position of data on grid
+INTEGER           :: ILENCH  ! length of comment string
+INTEGER           :: IVERSION, IBUGFIX
+INTEGER           :: I, INFOMPI
+!
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+DOUBLE PRECISION   :: XTIME0
 REAL, DIMENSION(:),   ALLOCATABLE :: ZWORK   ! work array read in the file
-REAL                              :: ZUNDEF  ! default value
-INTEGER          :: IGRID   ! position of data on grid
-INTEGER          :: ILENCH  ! length of comment string
-INTEGER          :: IVERSION, IBUGFIX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX1_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
-YREC = HREC
+XTIME0 = MPI_WTIME()
 !
-!---------------------------------------------------------------------------
-!* patch to read some test files done before version 3.5
-!  this should be removed once all tests with reading lfi files done with 923
-!  configuration (with these early versions) are finished.
-!
-IF (HREC(1:2)=='D_') THEN
-  CALL FMREADN0(CFILE_LFI,'VERSION',CLUOUT_LFI,1,IVERSION,IGRID,ILENCH,HCOMMENT,KRESP)
-  CALL FMREADN0(CFILE_LFI,'BUG',CLUOUT_LFI,1,IBUGFIX,IGRID,ILENCH,HCOMMENT,KRESP)
-  IF (IVERSION<=2 .OR. (IVERSION==3 .AND. IBUGFIX<=5)) YREC = 'DATA_'//HREC(3:12)
-END IF
-!---------------------------------------------------------------------------
-!
-IF (HDIR=='H' .OR. HDIR=='A') THEN
-  ALLOCATE(ZWORK(NFULL))
-  IF (.NOT. LMNH_COMPATIBLE) THEN
-    CALL FMREADX1(CFILE_LFI,YREC,CLUOUT_LFI,NFULL,ZWORK,IGRID,ILENCH,HCOMMENT,KRESP)
+IF (NRANK==NPIO) THEN
+  !
+  IF (HDIR=='H' .OR. HDIR=='A') THEN
+    ALLOCATE(ZWORK(NFULL))
   ELSE
-    CALL READ_IN_LFI_X1_FOR_MNH(YREC,ZWORK,KRESP,HCOMMENT,HDIR)
+    ALLOCATE(ZWORK(SIZE(PFIELD)))
+  ENDIF
+  !
+!$OMP SINGLE        
+  !  
+  YREC = HREC
+  !
+  !---------------------------------------------------------------------------
+  !* patch to read some test files done before version 3.5
+  !  this should be removed once all tests with reading lfi files done with 923
+  !  configuration (with these early versions) are finished.
+  !
+  IF (HREC(1:2)=='D_') THEN
+    CALL FMREADN0(CFILE_LFI,'VERSION',CLUOUT_LFI,1,IVERSION,IGRID,ILENCH,HCOMMENT,KRESP)
+    CALL FMREADN0(CFILE_LFI,'BUG',CLUOUT_LFI,1,IBUGFIX,IGRID,ILENCH,HCOMMENT,KRESP)
+    IF (IVERSION<=2 .OR. (IVERSION==3 .AND. IBUGFIX<=5)) YREC = 'DATA_'//HREC(3:12)
+  END IF
+  !---------------------------------------------------------------------------
+  !
+  IF (HDIR=='H' .OR. HDIR=='A') THEN
+    IF (.NOT. LMNH_COMPATIBLE) THEN
+      CALL FMREADX1(CFILE_LFI,YREC,CLUOUT_LFI,NFULL,ZWORK,IGRID,ILENCH,HCOMMENT,KRESP)
+    ELSE
+      CALL READ_IN_LFI_X1_FOR_MNH(YREC,ZWORK,KRESP,HCOMMENT,HDIR)
+    END IF
+  ELSE
+    CALL FMREADX1(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(ZWORK),ZWORK,IGRID,ILENCH,HCOMMENT,KRESP)
   END IF
   CALL ERROR_READ_SURF_LFI(YREC,KRESP)
-  CALL PACK_SAME_RANK(NMASK,ZWORK(:),PFIELD)
-  CALL GET_SURF_UNDEF(ZUNDEF)
-  WHERE(PFIELD==999.) PFIELD=ZUNDEF
-  DEALLOCATE(ZWORK)
+  !
+!$OMP END SINGLE COPYPRIVATE(ZWORK,HCOMMENT,KRESP)
+  !  
 ELSE
-  CALL FMREADX1(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(PFIELD),PFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
-  CALL ERROR_READ_SURF_LFI(YREC,KRESP)
-END IF
+  ALLOCATE(ZWORK(0))
+ENDIF
+!
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+!
+IF (HDIR=='A') THEN  ! no distribution on other tasks
+  IF ( NRANK==NPIO ) THEN
+    XTIME0 = MPI_WTIME()
+    PFIELD(:) = ZWORK(1:SIZE(PFIELD))
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
+!$OMP SINGLE    
+  PFIELD(:) = ZWORK(1:SIZE(PFIELD))
+  IF (NPROC>1) THEN
+    XTIME0 = MPI_WTIME()
+    CALL MPI_BCAST(PFIELD,SIZE(PFIELD)*KIND(PFIELD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+!$OMP END SINGLE COPYPRIVATE(PFIELD)    
+ELSE
+  CALL READ_AND_SEND_MPI(ZWORK,PFIELD,NMASK)
+ENDIF
+!
+DEALLOCATE(ZWORK)
+!
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX1_LFI',1,ZHOOK_HANDLE)
 !
 CONTAINS
@@ -215,46 +217,12 @@ CONTAINS
 !     #############################################################
 !
 !!****  * - routine to fill a read 2D array for the externalised surface 
-!!
-!!    PURPOSE
-!!    -------
 !
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. Masson      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, &
+                                    NIU, NIB, NIE, NJU, NJB, NJE
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, &
-                                      NIU, NIB, NIE, NJU, NJB, NJE  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -274,14 +242,13 @@ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
 !
 !*      0.2   Declarations of local variables
 ! 
+CHARACTER(LEN=16)   :: YREC1D
+INTEGER :: JI, JJ
+INTEGER :: ILEN
+INTEGER :: IGRID, ILENCH
 REAL, DIMENSION(:),   ALLOCATABLE :: ZWORK1D! 1D work array read in the file
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK2D ! work array read in a MNH file
-INTEGER :: JI, JJ
-CHARACTER(LEN=16)   :: YREC1D
-INTEGER             :: ILEN
-INTEGER :: IGRID, ILENCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX1_LFI:READ_IN_LFI_X1_FOR_MNH',0,ZHOOK_HANDLE)
 !
@@ -364,13 +331,10 @@ DEALLOCATE(ZWORK2D)
 !  
 CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
-!
-!----------------------------------------------------------------------------
-!----------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX1_LFI:READ_IN_LFI_X1_FOR_MNH',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE READ_IN_LFI_X1_FOR_MNH
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE READ_SURFX1_LFI
 !
 !     #############################################################
@@ -378,113 +342,125 @@ END SUBROUTINE READ_SURFX1_LFI
 !     #############################################################
 !
 !!****  *READX2* - routine to fill a real 2D array for the externalised surface 
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READ_SURFX2 is
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI, ONLY : CFILE_LFI, CLUOUT_LFI, NMASK, NFULL, &
+                             LMNH_COMPATIBLE  
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-USE MODI_PACK_SAME_RANK
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, NMASK, NFULL, &
-                                      LMNH_COMPATIBLE  
+USE MODI_READ_AND_SEND_MPI
+USE MODI_GET_SURF_UNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_GET_SURF_UNDEF
-!
 IMPLICIT NONE
+!
+INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
 CHARACTER(LEN=16),        INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD   ! array containing the data field
+REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
 CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
                                                   ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=16):: YREC
+CHARACTER(LEN=16) :: YREC
+REAL              :: ZUNDEF  ! default value
+INTEGER           :: IGRID   ! position of data on grid
+INTEGER           :: ILENCH  ! length of comment string
+INTEGER           :: IVERSION, IBUGFIX
+INTEGER           :: I, INFOMPI
+!
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+DOUBLE PRECISION   :: XTIME0
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK   ! work array read in the file
-REAL                              :: ZUNDEF  ! default value
-INTEGER          :: IGRID   ! position of data on grid
-INTEGER          :: ILENCH  ! length of comment string
-INTEGER          :: IVERSION, IBUGFIX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX2_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
-YREC = HREC
+XTIME0 = MPI_WTIME()
 !
-!---------------------------------------------------------------------------
-!* patch to read some test files done before version 3.5
-!  this should be removed once all tests with reading lfi files done with 923
-!  configuration (with these early versions) are finished.
-!
-IF (HREC(1:2)=='D_') THEN
-  CALL FMREADN0(CFILE_LFI,'VERSION',CLUOUT_LFI,1,IVERSION,IGRID,ILENCH,HCOMMENT,KRESP)
-  CALL FMREADN0(CFILE_LFI,'BUG',CLUOUT_LFI,1,IBUGFIX,IGRID,ILENCH,HCOMMENT,KRESP)
-  IF (IVERSION<=2 .OR. (IVERSION==3 .AND. IBUGFIX<=5)) YREC = 'DATA_'//HREC(3:12)
-  IF (YREC(13:15)=='SOI') YREC=YREC(1:15)//'L'
-  IF (YREC(12:14)=='SOI') YREC=YREC(1:14)//'L'
-END IF
-!---------------------------------------------------------------------------
-
-IF (HDIR=='H' .OR. HDIR=='A') THEN
-  ALLOCATE(ZWORK(NFULL,SIZE(PFIELD,2)))
-  IF (.NOT. LMNH_COMPATIBLE) THEN
+IF (NRANK==NPIO) THEN
+  !
+  IF (HDIR=='H' .OR. HDIR=='A') THEN
+    ALLOCATE(ZWORK(NFULL,SIZE(PFIELD,2)))
+  ELSE
+    ALLOCATE(ZWORK(SIZE(PFIELD,1),SIZE(PFIELD,2)))
+  ENDIF
+  !
+!$OMP SINGLE        
+  !  
+  YREC = HREC
+  !
+  !---------------------------------------------------------------------------
+  !* patch to read some test files done before version 3.5
+  !  this should be removed once all tests with reading lfi files done with 923
+  !  configuration (with these early versions) are finished.
+  !
+  IF (HREC(1:2)=='D_') THEN
+    CALL FMREADN0(CFILE_LFI,'VERSION',CLUOUT_LFI,1,IVERSION,IGRID,ILENCH,HCOMMENT,KRESP)
+    CALL FMREADN0(CFILE_LFI,'BUG',CLUOUT_LFI,1,IBUGFIX,IGRID,ILENCH,HCOMMENT,KRESP)
+    IF (IVERSION<=2 .OR. (IVERSION==3 .AND. IBUGFIX<=5)) YREC = 'DATA_'//HREC(3:12)
+    IF (YREC(13:15)=='SOI') YREC=YREC(1:15)//'L'
+    IF (YREC(12:14)=='SOI') YREC=YREC(1:14)//'L'
+  END IF
+  !---------------------------------------------------------------------------
+  !
+  IF (HDIR=='H' .OR. HDIR=='A') THEN
+    IF (.NOT. LMNH_COMPATIBLE) THEN
+      CALL FMREADX2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(ZWORK),ZWORK(:,:),IGRID,ILENCH,HCOMMENT,KRESP)
+     ELSE
+      CALL READ_IN_LFI_X2_FOR_MNH(YREC,ZWORK,KRESP,HCOMMENT,HDIR)
+    END IF
+  ELSE
     CALL FMREADX2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(ZWORK),ZWORK(:,:),IGRID,ILENCH,HCOMMENT,KRESP)
-   ELSE
-    CALL READ_IN_LFI_X2_FOR_MNH(YREC,ZWORK,KRESP,HCOMMENT,HDIR)
   END IF
   CALL ERROR_READ_SURF_LFI(YREC,KRESP)
-  CALL PACK_SAME_RANK(NMASK,ZWORK,PFIELD(:,:))
+  !
+!$OMP END SINGLE COPYPRIVATE(ZWORK,HCOMMENT,KRESP)
+  !  
+ELSE
+  ALLOCATE(ZWORK(0,0))
+ENDIF
+!
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+!
+IF (HDIR=='A') THEN  ! no distribution on other tasks
+  IF ( NRANK==NPIO ) THEN          
+    XTIME0 = MPI_WTIME()
+    PFIELD(:,:) = ZWORK(1:SIZE(PFIELD,1),:)
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
+!$OMP SINGLE          
+  PFIELD(:,:) = ZWORK(1:SIZE(PFIELD,1),:)
+  IF (NPROC>1) THEN
+    XTIME0 = MPI_WTIME()
+    CALL MPI_BCAST(PFIELD,SIZE(PFIELD)*KIND(PFIELD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+!$OMP END SINGLE COPYPRIVATE(PFIELD)    
+ELSE
+  CALL READ_AND_SEND_MPI(ZWORK,PFIELD,NMASK)
+ENDIF
+!
+DEALLOCATE(ZWORK)
+!
+IF (HDIR=='H' .OR. HDIR=='A') THEN
   CALL GET_SURF_UNDEF(ZUNDEF)
   WHERE(PFIELD==999.) PFIELD=ZUNDEF
-  DEALLOCATE(ZWORK)
-ELSE
-  CALL FMREADX2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(PFIELD),PFIELD(:,:),IGRID,ILENCH,HCOMMENT,KRESP)
-  CALL ERROR_READ_SURF_LFI(YREC,KRESP)
-END IF
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX2_LFI',1,ZHOOK_HANDLE)
 !
 CONTAINS
@@ -494,46 +470,12 @@ CONTAINS
 !     #############################################################
 !
 !!****  * - routine to fill a read 2D array for the externalised surface 
-!!
-!!    PURPOSE
-!!    -------
 !
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. Masson      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, &
+                                    NIU, NIB, NIE, NJU, NJB, NJE
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, &
-                                      NIU, NIB, NIE, NJU, NJB, NJE  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -550,17 +492,16 @@ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 ! 
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWORK3D ! work array read in a MNH file
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK2D
 INTEGER :: JI, JJ
 INTEGER :: IGRID, ILENCH
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWORK3D ! work array read in a MNH file
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK2D
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX2_LFI:READ_IN_LFI_X2_FOR_MNH',0,ZHOOK_HANDLE)
+!
 ALLOCATE(ZWORK3D(NIU,NJU,SIZE(PFIELD,2)))
 ZWORK3D(:,:,:) = 999.
 !
@@ -606,10 +547,8 @@ DEALLOCATE(ZWORK3D)
 CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX2_LFI:READ_IN_LFI_X2_FOR_MNH',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_IN_LFI_X2_FOR_MNH
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFX2_LFI
 !
 !     #############################################################
@@ -617,53 +556,22 @@ END SUBROUTINE READ_SURFX2_LFI
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READN0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
 !!      B. Decharme 07/2011 : Grdid dimension only read in pgd file
-!----------------------------------------------------------------------------
 !
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI, ONLY : CFILE_LFI, CLUOUT_LFI, CFILEPGD_LFI, &
+                             LMNH_COMPATIBLE, NIU, NIB, NIE, NJU, NJB, NJE
+!
+USE MODD_SURFEX_OMP, ONLY : NBLOCK
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, CFILEPGD_LFI, &
-                                      LMNH_COMPATIBLE, NIU, NIB, NIE, NJU, NJB, NJE  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
@@ -674,16 +582,16 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-INTEGER          :: IGRID   ! position of data on grid
-INTEGER          :: ILENCH  ! length of comment string
-CHARACTER(LEN=40):: YGRID
-INTEGER          :: IIMAX, IJMAX
-INTEGER          :: INB ! number of articles in the file
-INTEGER          :: IRESP
+CHARACTER(LEN=40) :: YGRID
+INTEGER           :: IGRID   ! position of data on grid
+INTEGER           :: ILENCH  ! length of comment string
+INTEGER           :: IIMAX, IJMAX
+INTEGER           :: INB ! number of articles in the file
+INTEGER           :: IRESP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFN0_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL FMREADN0(CFILE_LFI,HREC,CLUOUT_LFI,1,KFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
@@ -699,8 +607,8 @@ IF (HREC/='DIM_FULL') RETURN
 ! READ PGD FILE
 !-----------------------------------------------------------------------------------------------------
 !
-IF(CFILE_LFI/=CFILEPGD_LFI)THEN
-   CALL FMOPEN(CFILEPGD_LFI,'OLD',CLUOUT_LFI,0,1,1,INB,IRESP)
+IF (CFILE_LFI/=CFILEPGD_LFI) THEN
+  CALL FMOPEN(CFILEPGD_LFI,'OLD',CLUOUT_LFI,0,1,1,INB,IRESP)
 ENDIF
 !
 CALL FMREADC0(CFILEPGD_LFI,'GRID_TYPE ',CLUOUT_LFI,1,YGRID,IGRID,ILENCH,HCOMMENT,KRESP)
@@ -730,7 +638,6 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFN0_LFI',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFN0_LFI
 !
 !     #############################################################
@@ -738,87 +645,98 @@ END SUBROUTINE READ_SURFN0_LFI
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READN0 is
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, NMASK, NFULL
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-USE MODI_PACK_SAME_RANK
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, NMASK, NFULL
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+INCLUDE "mpif.h"
+!
 !*      0.1   Declarations of arguments
 !
 CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
-INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD   ! the integer to be read
+INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
 CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
-INTEGER, DIMENSION(:), ALLOCATABLE :: IWORK  ! work array read in the file
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
+INTEGER          :: I, INFOMPI
+!
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+INTEGER, DIMENSION(:), ALLOCATABLE :: IWORK  ! work array read in the file
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!---------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFN1_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
-IF (HDIR=='H' .OR. HDIR=='A')  THEN
-  ALLOCATE(IWORK(NFULL))
-  CALL FMREADN1(CFILE_LFI,HREC,CLUOUT_LFI,NFULL,IWORK,IGRID,ILENCH,HCOMMENT,KRESP)
+XTIME0 = MPI_WTIME()
+!
+IF (NRANK==NPIO) THEN
+  !
+  IF (HDIR=='H' .OR. HDIR=='A') THEN
+    ALLOCATE(IWORK(NFULL))
+  ELSE
+    ALLOCATE(IWORK(SIZE(KFIELD)))
+  ENDIF
+  !
+!$OMP SINGLE        
+  !  
+  IF (HDIR=='H' .OR. HDIR=='A')  THEN
+    CALL FMREADN1(CFILE_LFI,HREC,CLUOUT_LFI,NFULL,IWORK,IGRID,ILENCH,HCOMMENT,KRESP)
+  ELSE
+    CALL FMREADN1(CFILE_LFI,HREC,CLUOUT_LFI,SIZE(IWORK),IWORK(:),IGRID,ILENCH,HCOMMENT,KRESP)
+  END IF
+  !
+!$OMP END SINGLE COPYPRIVATE(IWORK,HCOMMENT,KRESP)  
+  !  
   CALL ERROR_READ_SURF_LFI(HREC,KRESP)
-  CALL PACK_SAME_RANK(NMASK,IWORK(:),KFIELD)
-  DEALLOCATE(IWORK)
+  !
+ENDIF
+!
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+!
+IF (HDIR=='A') THEN  ! no distribution on other tasks
+  IF ( NRANK==NPIO ) THEN
+    XTIME0 = MPI_WTIME()
+    KFIELD(:) = IWORK(1:SIZE(KFIELD))
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
+!$OMP SINGLE     
+  KFIELD(:) = IWORK(1:SIZE(KFIELD))
+  IF (NPROC>1) THEN
+    XTIME0 = MPI_WTIME()
+    CALL MPI_BCAST(KFIELD,SIZE(KFIELD)*KIND(KFIELD)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+!$OMP END SINGLE COPYPRIVATE(KFIELD)    
 ELSE
-  CALL FMREADN1(CFILE_LFI,HREC,CLUOUT_LFI,SIZE(KFIELD),KFIELD(:),IGRID,ILENCH,HCOMMENT,KRESP)
-  CALL ERROR_READ_SURF_LFI(HREC,KRESP)
-END IF
+  CALL READ_AND_SEND_MPI(IWORK,KFIELD,NMASK)
+ENDIF
+!
+!$OMP SINGLE
+DEALLOCATE(IWORK)
+!$OMP END SINGLE
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFN1_LFI',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE READ_SURFN1_LFI
 !
 !     #############################################################
@@ -826,46 +744,11 @@ END SUBROUTINE READ_SURFN1_LFI
 !     #############################################################
 !
 !!****  *READC0* - routine to read a character
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READC0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -884,155 +767,29 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFC0_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL FMREADC0(CFILE_LFI,HREC,CLUOUT_LFI,1,HFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
 CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFC0_LFI',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFC0_LFI
-!
-!     #############################################################
-      SUBROUTINE READ_SURFL1_LFI(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
-!     #############################################################
-!
-!!****  *READL1* - routine to read a logical array
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READL1 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODI_FMREAD
-USE MODI_ERROR_READ_SURF_LFI
-USE MODI_ABOR1_SFX
-USE MODI_GET_LUOUT
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1   Declarations of arguments
-!
-CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
-LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD   ! array containing the data field
-INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
-                                                ! 'H' : field with
-                                                !       horizontal spatial dim.
-                                                ! '-' : no horizontal dim.
-!
-!*      0.2   Declarations of local variables
-!
-INTEGER :: ILUOUT
-INTEGER          :: IGRID   ! position of data on grid
-INTEGER          :: ILENCH  ! length of comment string
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
-!
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL1_LFI',0,ZHOOK_HANDLE)
-KRESP=0
-!
-IF (HDIR=='H' .OR. HDIR=='A') THEN
-  CALL GET_LUOUT('LFI   ',ILUOUT)
-  WRITE(ILUOUT,*) 'Error: 1D logical vector for reading on an horizontal grid:'
-  WRITE(ILUOUT,*) 'this option is not coded in READ_SURFL1_LFI'
-  CALL ABOR1_SFX('MODE_READ_SURF_LFI: 1D LOGICAL VECTOR FOR READING NOT CODED IN READ_SURFL1_LFI')
-END IF
-!
-CALL FMREADL1(CFILE_LFI,HREC,CLUOUT_LFI,SIZE(OFIELD),OFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
-!
-KRESP=0
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL1_LFI',1,ZHOOK_HANDLE)
-!
-!-------------------------------------------------------------------------------
-END SUBROUTINE READ_SURFL1_LFI
-!
 !
 !     #############################################################
       SUBROUTINE READ_SURFL0_LFI(HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READL0* - routine to read a logical
-!!
-!!    PURPOSE
-!!    -------
 !
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1051,65 +808,109 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL0_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL FMREADL0(CFILE_LFI,HREC,CLUOUT_LFI,1,OFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
 CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL0_LFI',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFL0_LFI
+!
+!     #############################################################
+      SUBROUTINE READ_SURFL1_LFI(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  *READL1* - routine to read a logical array
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
+!
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI
+!
+USE MODI_FMREAD
+USE MODI_ERROR_READ_SURF_LFI
+USE MODI_ABOR1_SFX
+USE MODI_GET_LUOUT
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+INCLUDE "mpif.h"
+!
+!*      0.1   Declarations of arguments
+!
+CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
+LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD   ! array containing the data field
+INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+                                                ! 'H' : field with
+                                                !       horizontal spatial dim.
+                                                ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+!
+INTEGER :: ILUOUT
+INTEGER :: IGRID   ! position of data on grid
+INTEGER :: ILENCH  ! length of comment string
+INTEGER :: INFOMPI
+DOUBLE PRECISION   :: XTIME0
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL1_LFI',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+XTIME0 = MPI_WTIME()
+!
+IF (NRANK==NPIO) THEN
+  !
+!$OMP SINGLE
+  !   
+  IF (HDIR=='H') THEN
+    CALL GET_LUOUT('LFI   ',ILUOUT)
+    WRITE(ILUOUT,*) 'Error: 1D logical vector for reading on an horizontal grid:'
+    WRITE(ILUOUT,*) 'this option is not coded in READ_SURFL1_LFI'
+    CALL ABOR1_SFX('MODE_READ_SURF_LFI: 1D LOGICAL VECTOR FOR READING NOT CODED IN READ_SURFL1_LFI')
+  END IF
+  !
+  CALL FMREADL1(CFILE_LFI,HREC,CLUOUT_LFI,SIZE(OFIELD),OFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
+  !
+!$OMP END SINGLE COPYPRIVATE(OFIELD,HCOMMENT,KRESP)
+  !
+  CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+  !
+ENDIF
+!
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+!
+IF (NPROC>1 .AND. HDIR/='A') THEN
+  XTIME0 = MPI_WTIME()
+!$OMP SINGLE
+  CALL MPI_BCAST(OFIELD,SIZE(OFIELD),MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
+!$OMP END SINGLE COPYPRIVATE(OFIELD)   
+  XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0) 
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL1_LFI',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE READ_SURFL1_LFI
 !
 !     #############################################################
       SUBROUTINE READ_SURFT0_LFI(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT0* - routine to read a date
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READT0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. MASSON      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     18/08/97
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,  ONLY : CFILE_LFI, CLUOUT_LFI  
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, &
-                                      NIU, NIB, NIE, NJU, NJB, NJE  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1134,9 +935,9 @@ INTEGER, DIMENSION(3) :: ITDATE
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT0_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 YREC=TRIM(HREC)//'%TDATE'
@@ -1150,9 +951,8 @@ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 KYEAR  = ITDATE(1)
 KMONTH = ITDATE(2)
 KDAY   = ITDATE(3)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT0_LFI',1,ZHOOK_HANDLE)
-
-!-------------------------------------------------------------------------------
 !
 END SUBROUTINE READ_SURFT0_LFI
 !
@@ -1161,47 +961,11 @@ END SUBROUTINE READ_SURFT0_LFI
 !     #############################################################
 !
 !!****  *READT0* - routine to read a date
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READT0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. MASSON      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     18/08/97
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI  
 !
 USE MODI_FMREAD
 USE MODI_ERROR_READ_SURF_LFI
-!
-USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI, &
-                                      NIU, NIB, NIE, NJU, NJB, NJE  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1210,7 +974,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=16),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(OUT) :: KDAY     ! day
@@ -1221,15 +985,14 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !*      0.2   Declarations of local variables
 !
 CHARACTER(LEN=16)     :: YREC     ! Name of the article to be read
-INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
-!
 INTEGER          :: ILUOUT
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
+INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT1_LFI',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 YREC=TRIM(HREC)//'%TDATE'
