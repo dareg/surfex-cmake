@@ -222,10 +222,11 @@ INL = KMAX_LAYER
 !
 ZLOG10 = LOG(10.0)
 !
-PDRAIN  (:) = 0.0
-PHORTON (:) = 0.0
-ZINFILTC(:) = 0.0
-ZEXCESS (:) = 0.0
+PDRAIN    (:) = 0.0
+PHORTON   (:) = 0.0
+ZINFILTC  (:) = 0.0
+ZEXCESS   (:) = 0.0
+ZINFILTMAX(:) = 0.0
 !
 ZINFNEG  (:,:) = 0.0
 ZINFLAYER(:,:) = 0.0
@@ -234,11 +235,15 @@ ZFRZ     (:,:) = 0.0
 !
 ZWSAT    (:,:) = XUNDEF
 ZCAPACITY(:,:) = XUNDEF
-!
+ZPSI     (:,:) = XUNDEF
+ZK       (:,:) = XUNDEF
+ZVAPCOND (:,:) = XUNDEF
+ZKI      (:,:) = XUNDEF
 ZSOL     (:,:) = XUNDEF
 ZNU      (:,:) = XUNDEF
 ZHEAD    (:,:) = XUNDEF
 ZWFLUX   (:,:) = XUNDEF
+ZWFLUXN  (:,:) = XUNDEF
 ZDFLUXDT1(:,:) = XUNDEF
 ZDFLUXDT2(:,:) = XUNDEF
 ZAMTRX   (:,:) = XUNDEF
@@ -271,7 +276,7 @@ DO JL=1,INL
 !       Old : 10.**(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL))))
         ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL)))))
 !
-!       Fimple volumetric water holding capacity estimate for wetting front penetration
+!       Simple volumetric water holding capacity estimate for wetting front penetration
         ZCAPACITY(JJ,JL) = MAX(0.0,ZWSAT(JJ,JL)-PWG(JJ,JL))*PDZG(JJ,JL)
 
 !       Linear (in time) sub-grid drainage term (input in m s-1 herein)
@@ -327,7 +332,7 @@ DO JL=1,INL
 !       Put remainding infiltration into the next layer (m)
         ZINFILTC(JJ) = ZINFILTC(JJ) - ZINFLAYER(JJ,JL)
 !       Possible negative infiltration  (m s-1)
-        ZINFNEG(JJ,JL) = MIN(0.0,PPG(JJ)*PDZG(JJ,JL)/PDG(JJ,IDEPTH))     
+        ZINFNEG(JJ,JL) = MIN(0.0,PPG(JJ)*PDZG(JJ,JL)/PDG(JJ,IDEPTH))
      ENDIF
    ENDDO
 ENDDO
@@ -343,14 +348,15 @@ PHORTON(:)=(PHORTON(:)+ZINFILTC(:)/PTSTEP)*XRHOLW
 DO JL=1,INL
    DO JJ=1,INI    
      IDEPTH=KWG_LAYER(JJ)
-     IF(JL<=IDEPTH)THEN             
+     IF(JL<=IDEPTH)THEN
 !       Matric potential (m) :
+!       psi=mpotsat*(w/wsat)**(-bcoef)
         ZS          = MIN(1.0,PWG(JJ,JL)/ZWSAT(JJ,JL))
         ZLOG        = PBCOEF(JJ,JL)*LOG(ZS)
         ZPSI(JJ,JL) = PMPOTSAT(JJ,JL)*EXP(-ZLOG)
-!       Hydraulic conductivity (m s-1):
-        ZS        = MAX(1.0,ZPSI(JJ,JL)/PMPOTSAT(JJ,JL))
-        ZLOG      = (2.0+3.0/PBCOEF(JJ,JL))*LOG(ZS)
+!       Hydraulic conductivity from matric potential (m s-1):
+!       k=frz*condsat*(psi/mpotsat)**(-2-3/bcoef)
+        ZLOG      = -ZLOG*(2.0+3.0/PBCOEF(JJ,JL))
         ZK(JJ,JL) = ZFRZ(JJ,JL)*PCONDSAT(JJ,JL)*EXP(-ZLOG)
      ENDIF
    ENDDO
@@ -363,7 +369,6 @@ ENDDO
 ZVAPCOND(:,:) = VAPCONDCF(PTG,PPS,PWG,PWGI,ZPSI,PWSAT,PWFC,PQSAT,PQSATI,KWG_LAYER,INL)
 ZVAPCOND(:,:) = ZFRZ(:,:)*ZVAPCOND(:,:)
 !
-
 ! 5. Linearized water flux: values at "t"
 !    ------------------------------------
 !    calculate flux at the beginning of the time step:
@@ -392,7 +397,7 @@ DO JL=1,INL
 !
 !       Total Sub-surface soil water fluxes (m s-1): (+ up, - down) using Darcy's
 !       Law with an added linear drainage term:
-        ZWFLUX(JJ,IDEPTH) = -ZNU(JJ,IDEPTH) *ZHEAD(JJ,IDEPTH) - ZKI(JJ,IDEPTH) - ZSGDRAIN(JJ,IDEPTH)         
+        ZWFLUX(JJ,IDEPTH) = -ZNU(JJ,IDEPTH) *ZHEAD(JJ,IDEPTH) - ZKI(JJ,IDEPTH) - ZSGDRAIN(JJ,IDEPTH)
 !
       ENDIF
 !
@@ -440,16 +445,11 @@ ZCMTRX(:,1) = -ZWGHT*ZDFLUXDT2(:,1)
 DO JL=2,INL
    DO JJ=1,INI   
       IDEPTH=KWG_LAYER(JJ)
-      IF(JL<IDEPTH)THEN
+      IF(JL<=IDEPTH)THEN
         ZFRC  (JJ,JL) = ZWFLUX (JJ,JL) - ZWFLUX(JJ,JL-1) - PF2WGHT(JJ,JL)*PLETR(JJ) + ZINFNEG(JJ,JL)
         ZAMTRX(JJ,JL) = ZWGHT*ZDFLUXDT1(JJ,JL-1)
         ZBMTRX(JJ,JL) = (PDZG(JJ,JL)/PTSTEP) - ZWGHT*(ZDFLUXDT1(JJ,JL)-ZDFLUXDT2(JJ,JL-1))       
         ZCMTRX(JJ,JL) = -ZWGHT*ZDFLUXDT2(JJ,JL)
-      ELSEIF(JL==IDEPTH)THEN !Last layers
-        ZFRC  (JJ,IDEPTH) = ZWFLUX (JJ,IDEPTH) - ZWFLUX(JJ,IDEPTH-1) - PF2WGHT(JJ,IDEPTH)*PLETR(JJ) + ZINFNEG(JJ,IDEPTH)
-        ZAMTRX(JJ,IDEPTH) = ZWGHT*ZDFLUXDT1(JJ,IDEPTH-1)
-        ZBMTRX(JJ,IDEPTH) = (PDZG(JJ,IDEPTH)/PTSTEP) - ZWGHT*(ZDFLUXDT1(JJ,IDEPTH)-ZDFLUXDT2(JJ,IDEPTH-1))       
-        ZCMTRX(JJ,IDEPTH) = 0.0      
       ENDIF
    ENDDO
 ENDDO

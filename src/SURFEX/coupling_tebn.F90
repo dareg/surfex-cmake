@@ -32,11 +32,14 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!                  10/2005 (G.Pigeon) transfer of domestic heating
 !!      S. Riette   06/2009 Initialisation of XT, XQ, XU and XTKE on canopy levels
 !!      S. Riette   01/2010 Use of interpol_sbl to compute 10m wind diagnostic
+!!      B. Decharme 09/2012 New wind implicitation
 !!---------------------------------------------------------------
 !
 !
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XLVTT, XPI
 USE MODD_SURF_PAR,     ONLY : XUNDEF
+!
+USE MODD_SURF_ATM,     ONLY : CIMPLICIT_WIND
 !
 USE MODD_TEB_n,        ONLY : TTIME,LCANOPY,CZ0H,                                      &
                               XT_CANYON, XQ_CANYON, XTI_BLD,                           &
@@ -564,7 +567,8 @@ ZQ_CANYON(:) = XQ_CANYON(:)
 !
 ZLESNOW_ROOF(:) = 0.
 ZLESNOW_ROAD(:) = 0.
-CALL TEB_GARDEN      (CZ0H, HCOUPLING, TTIME, ZT_CANYON, ZQ_CANYON, ZU_CANYON,         &
+CALL TEB_GARDEN      (CZ0H, HCOUPLING, CIMPLICIT_WIND,                                 &
+                      TTIME, ZT_CANYON, ZQ_CANYON, ZU_CANYON,                          &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &
                       XTI_BLD,                                                         &
                       XT_ROOF, XT_ROAD, XT_WALL, XWS_ROOF,XWS_ROAD,                    &

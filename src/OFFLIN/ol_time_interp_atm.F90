@@ -1,7 +1,7 @@
 !     #########
 SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,                               &
-                                 PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
-                                 PCO2,PDIR                                         )  
+                               PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
+                               PCO2,PDIR                                         )  
 !**************************************************************************
 !
 !!    PURPOSE
@@ -82,54 +82,64 @@ CHARACTER(LEN=100) :: YFILE_FORCING='FORCING.nc'
 INTEGER,DIMENSION(2) :: ISTART,ICOUNT,ISTRIDE
 REAL,DIMENSION(:,:),ALLOCATABLE ::ZPAS
 INTEGER :: ILUOUT
+REAL :: ZPI, ZNB_ATM, ZSURF_STEP,ZCOEF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !========================================================================
 !
 IF (LHOOK) CALL DR_HOOK('OL_TIME_INTERP_ATM',0,ZHOOK_HANDLE)
 CALL GET_LUOUT('OFFLIN',ILUOUT)
 !
+ZPI = XPI/180.
+ZNB_ATM = KNB_ATM*1.
+ZSURF_STEP = KSURF_STEP*1.-1.
+ZCOEF = ZSURF_STEP / ZNB_ATM
+!
+WHERE(PTA(1,:)/=XUNDEF)
+!        
 ! Compute wind components
 !
 ! zonal wind
-ZU1 = PWIND  (1,:) * SIN(PDIR(1,:)*XPI/180.)
-ZV1 = PWIND  (1,:) * COS(PDIR(1,:)*XPI/180.)
-ZU2 = PWIND  (2,:) * SIN(PDIR(2,:)*XPI/180.)
-ZV2 = PWIND  (2,:) * COS(PDIR(2,:)*XPI/180.)
+  ZU1 = PWIND  (1,:) * SIN(PDIR(1,:)*ZPI)
+  ZV1 = PWIND  (1,:) * COS(PDIR(1,:)*ZPI)
+  ZU2 = PWIND  (2,:) * SIN(PDIR(2,:)*ZPI)
+  ZV2 = PWIND  (2,:) * COS(PDIR(2,:)*ZPI)
 !
 ! Compute variation from atmospheric time step J and J+1
 !
-ZDELTA_TA    (:)=(PTA    (2,:)-PTA    (1,:))/(1.*KNB_ATM)
-ZDELTA_QA    (:)=(PQA    (2,:)-PQA    (1,:))/(1.*KNB_ATM)
-ZDELTA_U     (:)=(ZU2      (:)-ZU1      (:))/(1.*KNB_ATM)
-ZDELTA_V     (:)=(ZV2      (:)-ZV1      (:))/(1.*KNB_ATM)
-ZDELTA_RAIN  (:)=(PRAIN  (2,:)-PRAIN  (1,:))/(1.*KNB_ATM)
-ZDELTA_SNOW  (:)=(PSNOW  (2,:)-PSNOW  (1,:))/(1.*KNB_ATM)
-ZDELTA_DIR_SW(:)=(PDIR_SW(2,:)-PDIR_SW(1,:))/(1.*KNB_ATM)
-ZDELTA_SCA_SW(:)=(PSCA_SW(2,:)-PSCA_SW(1,:))/(1.*KNB_ATM)
-ZDELTA_LW    (:)=(PLW    (2,:)-PLW    (1,:))/(1.*KNB_ATM)
-ZDELTA_PS    (:)=(PPS    (2,:)-PPS    (1,:))/(1.*KNB_ATM)
-ZDELTA_CO2   (:)=(PCO2   (2,:)-PCO2   (1,:))/(1.*KNB_ATM)
+  ZDELTA_TA    (:)=(PTA    (2,:)-PTA    (1,:))*ZCOEF
+  ZDELTA_QA    (:)=(PQA    (2,:)-PQA    (1,:))*ZCOEF
+  ZDELTA_U     (:)=(ZU2      (:)-ZU1      (:))*ZCOEF
+  ZDELTA_V     (:)=(ZV2      (:)-ZV1      (:))*ZCOEF
+  ZDELTA_RAIN  (:)=(PRAIN  (2,:)-PRAIN  (1,:))*ZCOEF
+  ZDELTA_SNOW  (:)=(PSNOW  (2,:)-PSNOW  (1,:))*ZCOEF
+  ZDELTA_DIR_SW(:)=(PDIR_SW(2,:)-PDIR_SW(1,:))*ZCOEF
+  ZDELTA_SCA_SW(:)=(PSCA_SW(2,:)-PSCA_SW(1,:))*ZCOEF
+  ZDELTA_LW    (:)=(PLW    (2,:)-PLW    (1,:))*ZCOEF
+  ZDELTA_PS    (:)=(PPS    (2,:)-PPS    (1,:))*ZCOEF
+  ZDELTA_CO2   (:)=(PCO2   (2,:)-PCO2   (1,:))*ZCOEF
 !
-XRAIN (:)= PRAIN(1,:)
-XSNOW (:)= PSNOW(1,:)
+  XRAIN (:)= PRAIN(1,:)
+  XSNOW (:)= PSNOW(1,:)
 !
-XTA    (:)= PTA    (1,:)+(KSURF_STEP*1.-1.)*ZDELTA_TA    (:)
-XQA    (:)= PQA    (1,:)+(KSURF_STEP*1.-1.)*ZDELTA_QA    (:)
-XU     (:)= ZU1      (:)+(KSURF_STEP*1.-1.)*ZDELTA_U     (:)
-XV     (:)= ZV1      (:)+(KSURF_STEP*1.-1.)*ZDELTA_V     (:)
-XLW    (:)= PLW    (1,:)+(KSURF_STEP*1.-1.)*ZDELTA_LW    (:)
-XPS    (:)= PPS    (1,:)+(KSURF_STEP*1.-1.)*ZDELTA_PS    (:)
-XCO2   (:)= PCO2   (1,:)+(KSURF_STEP*1.-1.)*ZDELTA_CO2   (:)
+  XTA    (:)= PTA    (1,:)+ZDELTA_TA    (:)
+  XQA    (:)= PQA    (1,:)+ZDELTA_QA    (:)
+  XU     (:)= ZU1      (:)+ZDELTA_U     (:)
+  XV     (:)= ZV1      (:)+ZDELTA_V     (:)
+  XLW    (:)= PLW    (1,:)+ZDELTA_LW    (:)
+  XPS    (:)= PPS    (1,:)+ZDELTA_PS    (:)
+  XCO2   (:)= PCO2   (1,:)+ZDELTA_CO2   (:)
 !
 ! Only 1 band
-XDIR_SW(:,1)= PDIR_SW(1,:)+(KSURF_STEP*1.-1.)*ZDELTA_DIR_SW(:)
-XSCA_SW(:,1)= PSCA_SW(1,:)+(KSURF_STEP*1.-1.)*ZDELTA_SCA_SW(:)
+  XDIR_SW(:,1)= PDIR_SW(1,:)+ZDELTA_DIR_SW(:)
+  XSCA_SW(:,1)= PSCA_SW(1,:)+ZDELTA_SCA_SW(:)
 !
 ! air density
-XRHOA (:) = XPS(:) / (XRD * XTA (:) * ( 1.+((XRV/XRD)-1.)*XQA (:) ) + XG * XZREF)
+  XRHOA (:) = XPS(:) / (XRD * XTA (:) * ( 1.+((XRV/XRD)-1.)*XQA (:) ) + XG * XZREF)
 !
 ! humidity in kg/m3
-XQA(:) = XQA(:) * XRHOA(:)
+  XQA(:) = XQA(:) * XRHOA(:)
+!
+ENDWHERE
 !
 ! Check No value data
 !---------------------
@@ -163,7 +173,10 @@ IF (MINVAL(XPS)    .EQ.XUNDEF) THEN            ! No surface Pressure
 ENDIF
 !
 !* forcing level pressure from hydrostatism
-XPA = XPS - XRHOA * XG * XZREF
+WHERE(XPS(:)/=XUNDEF)
+  XPA = XPS - XRHOA * XG * XZREF
+ENDWHERE
+!
 IF (LHOOK) CALL DR_HOOK('OL_TIME_INTERP_ATM',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE OL_TIME_INTERP_ATM

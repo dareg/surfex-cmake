@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE GARDEN(TPTIME, PPEW_A_COEF, PPEW_B_COEF,                            &
+    SUBROUTINE GARDEN(HIMPLICIT_WIND, TPTIME, PPEW_A_COEF, PPEW_B_COEF,              &
                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
                 PTSTEP, PZ_LOWCAN,                                                   &
                 PT_LOWCAN, PQ_LOWCAN, PEXNS, PRHOA, PCO2, PPS, PRR, PSR, PZENITH,    &
@@ -119,6 +119,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    Declarations of arguments
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
 !
 TYPE(DATE_TIME)     , INTENT(IN)    :: TPTIME             ! current date and time from teb
 REAL, DIMENSION(:)  , INTENT(IN)    :: PPEW_A_COEF        ! implicit coefficients
@@ -275,6 +279,7 @@ XTSRAD = PTS_GARDEN
   CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, HRAIN, CHORT, &
             CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, &
             CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
+            HIMPLICIT_WIND,                                            &
             XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,        &
             PQ_LOWCAN, PEXNS, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,    &
             PSW, PLW, PU_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,&

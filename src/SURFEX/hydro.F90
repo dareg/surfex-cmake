@@ -3,7 +3,7 @@
                          OFLOOD, PTSTEP, PVEGTYPE,                          &
                          PRR, PSR, PLEV, PLETR, PLEG, PLES,                 &
                          PRUNOFFB, PWDRAIN,                                 &
-                         PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCT,           &
+                         PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT,      &
                          PVEG, PWRMAX, PMELT, PDWGI1, PDWGI2, PLEGI,        &
                          PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,      &
                          PPSNV, PPSNG,                                      &
@@ -74,6 +74,7 @@
 !!                                         For *usual* sized time steps, time step
 !!                                         NOT split.
 !!                     08/11 (B. Decharme) DIF optimization
+!!                     09/12 (B. Decharme) Bug in wg2 ice energy budget
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -134,12 +135,13 @@ REAL, DIMENSION(:), INTENT(IN)    :: PRR, PSR, PLEV, PLETR, PLEG, PLES
 REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFB ! slope of the runoff curve
 REAL, DIMENSION(:), INTENT(IN)    :: PWDRAIN  ! minimum Wg for drainage (m3/m3)
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PC1, PC2, PWGEQ, PCT
+REAL, DIMENSION(:), INTENT(IN)    :: PC1, PC2, PWGEQ, PCG, PCT
 REAL, DIMENSION(:,:), INTENT(IN)  :: PC3
 !                                      soil coefficients
 !                                      C1, C2 = coefficients for the moisture calculations
 !                                      C3 = coefficient for WG2 calculation
 !                                      PWGEQ = equilibrium surface volumetric moisture
+!                                      PCG = soil heat capacity
 !                                      PCT = grid-averaged heat capacity
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PRUNOFFD, PWRMAX
@@ -269,7 +271,7 @@ REAL, DIMENSION(:), INTENT(IN)     :: PTDIURN
 !
 !
 INTEGER                         :: JJ, JL      ! loop control                                       
-INTEGER                         :: JNDT, JDT   ! Time splitting indicies
+INTEGER                         :: INDT, JDT   ! Time splitting indicies
 INTEGER                         :: INI, INL, IDEPTH ! (ISBA-DF option)
 !
 REAL                            :: ZTSTEP      ! maximum time split time step (<= PTSTEP)
@@ -307,7 +309,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO',0,ZHOOK_HANDLE)
 JDT    = 0
-JNDT   = 0
+INDT   = 0
 ZTSTEP = 0.0
 !
 ZPG(:)           = 0.0
@@ -489,14 +491,14 @@ IF (HISBA=='DIF') THEN
 ! 15 minutes to an hour for example)
 ! ------------------------------------------------------------------
 !
-  JNDT = 1
+  INDT = 1
   IF(PTSTEP>=ZRICHARDSDTMAX)THEN
-    JNDT = MAX(2,NINT(PTSTEP/ZRICHARDSDTMAX))
+    INDT = MAX(2,NINT(PTSTEP/ZRICHARDSDTMAX))
   ENDIF
 !
-  ZTSTEP  = PTSTEP/REAL(JNDT)
+  ZTSTEP  = PTSTEP/REAL(INDT)
 !
-  DO JDT     = 1,JNDT
+  DO JDT     = 1,INDT
     CALL HYDRO_SOILDIF(ZTSTEP,                                      &
                 PBCOEF, PWSAT, PCONDSAT, PMPOTSAT,                  &
                 PWFC, PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG,         &
@@ -504,8 +506,8 @@ IF (HISBA=='DIF') THEN
                 PWDRAIN, ZDRAIN, ZHORTON, HKSAT, HSOM, PWWILT,      &
                 HHORT, PFSAT, KWG_LAYER, INL, KLAYER_HORT           )  
 !
-    PDRAIN (:)  = PDRAIN (:) + ZDRAIN (:)/REAL(JNDT)
-    PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(JNDT)
+    PDRAIN (:)  = PDRAIN (:) + ZDRAIN (:)/REAL(INDT)
+    PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(INDT)
   ENDDO
 !
 ELSE
@@ -516,8 +518,8 @@ ELSE
                   PWDRAIN,                                         &
                   PC1, PC2, PC3, PC4B, PC4REF, PWGEQ,              &
                   PD_G(:,2), ZDG, ZWSAT_AVG, ZWFC_AVG,             &
-                  PDWGI1, PDWGI2, ZLEGI, PD_G(:,1), PCT,           &
-                  PTG(:,1),                                        &
+                  PDWGI1, PDWGI2, ZLEGI, PD_G(:,1), PCG, PCT,      &
+                  PTG(:,1), PTG(:,2),                              &
                   PWG(:,1), PWG(:,2), ZWG,                         &
                   PWGI(:,1), PWGI(:,2),                            &
                   PDRAIN,HKSAT,ZWWILT_AVG                          )

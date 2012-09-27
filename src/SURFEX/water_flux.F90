@@ -45,6 +45,7 @@
 !!      (P. LeMoigne) 29/03/04  use z0h for diagnostics (ice)
 !!      (P. LeMoigne) 20/06/07  minimum wind speed and/or shear
 !!      B. Decharme    06/2009 limitation of Ri
+!!      B. Decharme    09/2012 limitation of Ri in surface_ri.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -53,8 +54,6 @@
 USE MODD_CSTS,       ONLY : XG, XCPD, XLSTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SNOW_PAR,   ONLY : XZ0SN, XZ0HSN
-!
-USE MODD_SURF_ATM,   ONLY : XRIMAX
 !
 USE MODI_SURFACE_RI
 USE MODI_SURFACE_AERO_COND
@@ -155,9 +154,7 @@ PQSAT(:) = QSAT(PSST(:),PPS(:))
 !              -----------------
 !
 CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,PQA,  &
-                  PZREF, PUREF, ZDIRCOSZW,PVMOD,PRI)  
-!
-PRI(:) = MIN(PRI(:),XRIMAX)
+                  PZREF, PUREF, ZDIRCOSZW,PVMOD,PRI)
 !
 !       2.2    Detection of sea ice
 !              --------------------

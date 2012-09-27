@@ -53,6 +53,8 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!      A.L. Gibelin 07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
 !!        S.Lafont   01/2011 : add PTSTEP as arg of diag_misc
+!!       B.Decharme  09/2012 : Bug in hydro_glacier calculation with ES or Crocus
+!!                             New wind implicitation
 !!
 !!-------------------------------------------------------------------
 !
@@ -81,10 +83,10 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 LFLOOD, XFFLOOD, XPIFLOOD, LTEMP_ARP, XSODELX,           &
                                 LVEGUPD, NLAYER_HORT, NLAYER_DUN  
 !
-USE MODD_SURF_ATM, ONLY : LNOSOF
+USE MODD_SURF_ATM,    ONLY : LNOSOF, CIMPLICIT_WIND
 !
-USE MODD_DST_n,       ONLY: XSFDST, XSFDSTM, XEMISRADIUS_DST, XEMISSIG_DST
-USE MODD_SLT_n,       ONLY: XSFSLT, XEMISRADIUS_SLT, XEMISSIG_SLT
+USE MODD_DST_n,       ONLY : XSFDST, XSFDSTM, XEMISRADIUS_DST, XEMISSIG_DST
+USE MODD_SLT_n,       ONLY : XSFSLT, XEMISRADIUS_SLT, XEMISSIG_SLT
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 USE MODE_DSLT_SURF
@@ -795,7 +797,8 @@ CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML,                                   &
 !
 CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, CRAIN, CHORT, CC1DRY, CSCOND,      &
           TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TTIME, LFLOOD, LTEMP_ARP,&
-          LGLACIER, PTSTEP, XCGMAX, ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA,&
+          LGLACIER, PTSTEP, CIMPLICIT_WIND,                                               &
+          XCGMAX, ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA,                  &
           ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, ZP_SNOW, ZP_ZENITH, ZP_GLOBAL_SW, ZP_LW,      &
           ZP_WIND, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,            &
           ZP_PET_B_COEF, ZP_PEQ_B_COEF,  XP_RSMIN, XP_RGL, XP_GAMMA, XP_CV, XP_RUNOFFD,   &
@@ -836,7 +839,7 @@ ZP_TRAD=XP_TSRAD
 !
 IF(LGLACIER)THEN
 !           
-  CALL HYDRO_GLACIER(PTSTEP,XP_SRSFC,XP_SNOWRHO,XP_SNOWSWE,XP_ICE_STO,XP_ICEFLUX)
+  CALL HYDRO_GLACIER(PTSTEP,ZP_SNOW,XP_SNOWRHO,XP_SNOWSWE,XP_ICE_STO,XP_ICEFLUX)
 !     
 ENDIF
 !

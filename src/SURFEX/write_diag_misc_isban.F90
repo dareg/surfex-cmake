@@ -28,6 +28,7 @@
 !!      A.L. Gibelin 05/09 : Add carbon spinup
 !!      A.L. Gibelin 07/09 : Suppress RDK and transform GPP as a diagnostic
 !!      D. Carrer    04/11 : Add FAPAR and effective LAI
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !!
 !-------------------------------------------------------------------------------
 !
@@ -86,7 +87,7 @@ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YLVL
 CHARACTER(LEN=20) :: YFORM
 !
-INTEGER           :: JLAYER, JNBIOMASS, IWORK, JJ, IDEPTH
+INTEGER           :: JLAYER, JNBIOMASS, JJ, IDEPTH
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -150,7 +151,6 @@ IF (LSURF_MISC_BUDGET) THEN
   !               ------------------------------------
   !
   IF(CISBA=='DIF')THEN
-    IWORK = MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
     DO JLAYER = 1,NGROUND_LAYER
      DO JJ=1,SIZE(NWG_LAYER,1)
         IDEPTH=MAXVAL(NWG_LAYER(JJ,:),NWG_LAYER(JJ,:)/=NUNDEF)
@@ -160,11 +160,9 @@ IF (LSURF_MISC_BUDGET) THEN
         ENDIF
       ENDDO 
     ENDDO
-  ELSE
-    IWORK = NGROUND_LAYER
   ENDIF         
   !
-  DO JLAYER=1,IWORK
+  DO JLAYER=1,NGROUND_LAYER
     !
     WRITE(YLVL,'(I2)') JLAYER
     !
@@ -233,7 +231,7 @@ IF (LSURF_MISC_BUDGET) THEN
     YRECFM='WGI_D_ISBA'
     YCOMMENT='total ice content (solid) over the deep soil (kg/m2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDEEP_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
-    !   
+    !
   ENDIF
   !
   !        2.5    Snow outputs
@@ -304,7 +302,7 @@ IF (LSURF_MISC_BUDGET) THEN
     !        3.1    Soil Wetness Index
     !               ------------------
     !
-    DO JLAYER=1,IWORK
+    DO JLAYER=1,NGROUND_LAYER
       !
       WRITE(YLVL,'(I2)') JLAYER
       !

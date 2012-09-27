@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE URBAN_FLUXES(                                                  &
+    SUBROUTINE URBAN_FLUXES(HIMPLICIT_WIND,                                     &
                        PT_CANYON, PQ_CANYON,                                    &
                        PT_LOWCAN, PQ_LOWCAN,                                    &
                        PTS_ROOF,PTS_ROAD,PTS_WALL,                              &
@@ -70,6 +70,7 @@
 !!                           functions of w'theta' instead of w'T'
 !!                     17/10 (G. Pigeon)  computation of anthropogenic heat due
 !!                            to domestic heating
+!!      Modified    09/2012 : B. Decharme New wind implicitation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -85,6 +86,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PT_CANYON    ! canyon air temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PQ_CANYON    ! canyon air specific humidity
@@ -214,6 +219,10 @@ REAL, DIMENSION(SIZE(PTA))  :: ZWALL_BLT
 !
 REAL, DIMENSION(SIZE(PTA))  :: ZH_ROOF_SNOWFREE
 REAL, DIMENSION(SIZE(PTA))  :: ZRN_ROOF_SNOWFREE
+!
+REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR2 ! square of friction velocity (m2/s2)
+REAL, DIMENSION(SIZE(PTA))  :: ZVMOD   ! Wind
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -336,8 +345,28 @@ PLE_ROOF (:) = PLEW_ROOF   (:) * PDF_ROOF(:)  + PLESNOW_ROOF(:) * PDN_ROOF(:)
 !*      5.     Momentum fluxes
 !              ---------------
 !
-PUSTAR_TOWN(:) = SQRT(  (PCD(:)*PVMOD(:)*PPEW_B_COEF(:))/                 &
-                          (1.0-PRHOA(:)*PCD(:)*PVMOD(:)*PPEW_A_COEF(:))     )  
+ZUSTAR2(:) = 0.0
+ZVMOD  (:) = PVMOD(:)
+!
+IF(HIMPLICIT_WIND=='OLD')THEN 
+! old implicitation
+  ZUSTAR2(:) = (PCD(:)*PVMOD(:)*PPEW_B_COEF(:))/    &
+               (1.0-PRHOA(:)*PCD(:)*PVMOD(:)*PPEW_A_COEF(:))
+ELSE
+! new implicitation
+  ZUSTAR2(:) = (PCD(:)*PVMOD(:)*(2.*PPEW_B_COEF(:)-PVMOD(:)))/ &
+               (1.0-2.0*PRHOA(:)*PCD(:)*PVMOD(:)*PPEW_A_COEF(:))
+!                   
+  ZVMOD(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+  ZVMOD(:) = MAX(ZVMOD(:),0.)
+!
+  WHERE(PPEW_A_COEF(:)/= 0.)
+        ZUSTAR2(:) = MAX( ( ZVMOD(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+  ENDWHERE
+!               
+ENDIF
+!
+PUSTAR_TOWN(:) = SQRT(ZUSTAR2(:))
 !
 !-------------------------------------------------------------------------------
 !

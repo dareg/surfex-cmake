@@ -24,6 +24,8 @@
 !!      Original    01/2004
 !!      B. Decharme 06/2009  key to write (or not) patch result
 !!      B. Decharme 08/2009  cumulative radiative budget
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
+!!                             Bug in local variables declaration in PROVAR_TO_DIAG
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -223,11 +225,11 @@ IF (LSURF_EVAP_BUDGET) THEN
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LES(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='LER_ISBA'
-  YCOMMENT='evaporation due to interception for tile nature'//' (W/m2)'
+  YCOMMENT='canopy direct evaporation for tile nature'//' (W/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LER(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='LETR_ISBA'
-  YCOMMENT='vegetation evapotranspiration for tile nature'//' (W/m2)'
+  YCOMMENT='vegetation transpiration for tile nature'//' (W/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETR(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='EVAP_ISBA'
@@ -912,7 +914,9 @@ CONTAINS
 SUBROUTINE PROVAR_TO_DIAG
 !
 REAL, DIMENSION(SIZE(XTG,1))             :: ZPATCH, ZWORK
-REAL, DIMENSION(SIZE(XTG,1),SIZE(XDG,2)) :: ZTG, ZWG, ZWGI
+REAL, DIMENSION(SIZE(XTG,1),SIZE(XTG,2)) :: ZTG
+REAL, DIMENSION(SIZE(XWG,1),SIZE(XWG,2)) :: ZWG
+REAL, DIMENSION(SIZE(XWG,1),SIZE(XWG,2)) :: ZWGI
 REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZDG
 !
 !
@@ -957,36 +961,30 @@ ZWG (:,:)=0.0
 ZWGI(:,:)=0.0
 !  
 IF(CISBA=='DIF')THEN
-!        
-  IWORK = MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
 !
   DO JPATCH=1,NPATCH
      DO JLAYER=1,NGROUND_LAYER
         DO JJ=1,INI 
 !
-!          liquid water content
+!          liquid and ice water content
            IDEPTH=NWG_LAYER(JJ,JPATCH)
            IF(JLAYER<=IDEPTH)THEN        
              ZWG (JJ,JLAYER)=ZWG (JJ,JLAYER)+XPATCH(JJ,JPATCH)*XWG (JJ,JLAYER,JPATCH)*XDZG(JJ,JLAYER,JPATCH)*XRHOLW
+             ZWGI(JJ,JLAYER)=ZWGI(JJ,JLAYER)+XPATCH(JJ,JPATCH)*XWGI(JJ,JLAYER,JPATCH)*XDZG(JJ,JLAYER,JPATCH)*XRHOLW
            ELSE
              ZWG (JJ,JLAYER)=XUNDEF
+             ZWGI(JJ,JLAYER)=XUNDEF
            ENDIF
-!           
-!          ice water content
-           ZWGI(JJ,JLAYER)=ZWGI(JJ,JLAYER)+XPATCH(JJ,JPATCH)*XWGI(JJ,JLAYER,JPATCH)*XDZG(JJ,JLAYER,JPATCH)*XRHOLW
-!           
+!                      
         ENDDO
      ENDDO
   ENDDO
 !  
 ELSE
-!        
-  IWORK = NGROUND_LAYER
 !  
   ZDG(:,1,:) = XDG(:,1,:)
   ZDG(:,2,:) = XDG(:,2,:)
   IF(CISBA=='3-L')THEN
-    IWORK = NGROUND_LAYER
     ZDG(:,3,:) = XDG(:,3,:)-XDG(:,2,:)
   ENDIF
 !
@@ -1003,7 +1001,7 @@ ENDIF
 !
 ! * soil liquid water content (kg/m2)
 !
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'

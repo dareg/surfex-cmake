@@ -55,6 +55,7 @@
 !!    S. Lafont      03/09 : change unit of RE25
 !!    S. Faroux      03/09 : irrigated crops are assumed C4 crops
 !!    S. Lafont      09/11 : Reco bare soil is 0; corrected comments
+!!    B. Decharme    07/12 : Ponderation coefficient for cumulative root fraction of evergreen forest
 !!
 !----------------------------------------------------------------------------
 !
@@ -514,7 +515,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !            -------------------------------------------------------
 !
     IF (PRESENT(PROOT_EXTINCTION)) THEN
-      PROOT_EXTINCTION(JLOOP,:)= 0.0 ! no vegetation
+      PROOT_EXTINCTION(JLOOP,:)= 0.943 ! no vegetation (default value)
       IF(PTYPE(JLOOP,NVT_TREE)>0. )  PROOT_EXTINCTION(JLOOP,NVT_TREE)= 0.966
       IF(PTYPE(JLOOP,NVT_CONI)>0. )  PROOT_EXTINCTION(JLOOP,NVT_CONI)= 0.943
       IF(PTYPE(JLOOP,NVT_EVER)>0. )  PROOT_EXTINCTION(JLOOP,NVT_EVER)= 0.962
@@ -530,8 +531,10 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !*    7.16   Ponderation coefficient between formulations for cumulative root fraction
 !            -------------------------------------------------------------------------
 !
-    IF (PRESENT(PROOT_LIN)) PROOT_LIN(JLOOP,:)= 0.05
-    
+    IF (PRESENT(PROOT_LIN)) THEN
+      PROOT_LIN(JLOOP,:)= 0.05
+      IF(PTYPE(JLOOP,NVT_EVER)>0. )  PROOT_LIN(JLOOP,NVT_EVER)= 0.25
+    ENDIF        
 !
 !-------------------------------------------------------------------------------
 !

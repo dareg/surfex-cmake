@@ -36,6 +36,7 @@
 !!      A.L. Gibelin   03/09 : modifications for CENTURY model 
 !!      A.L. Gibelin    04/2009 : BIOMASS and RESP_BIOMASS arrays 
 !!      A.L. Gibelin    06/2009 : Soil carbon variables for CNT option
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !!
 !-------------------------------------------------------------------------------
 !
@@ -46,14 +47,13 @@
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                   NNLITTER, NNLITTLEVS, NNSOILCARB,   &
-                                  CPHOTO, CISBA, CRESPSL, XTSRAD_NAT, &
+                                  CPHOTO, CRESPSL, XTSRAD_NAT,        &
                                   XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
                                   XRESA, XANFM, XAN, XLE, XANDAY,     &
                                   XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
                                   XLITTER, XSOILCARB, XLIGNIN_STRUC,  &
                                   LFLOOD, XZ0_FLOOD, LTEMP_ARP,       &
-                                  NTEMPLAYER_ARP, LGLACIER, XICE_STO, &
-                                  NWG_LAYER  
+                                  NTEMPLAYER_ARP, LGLACIER, XICE_STO  
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XZ0SN
@@ -138,20 +138,14 @@ ALLOCATE(XWGI(ILU,NGROUND_LAYER,NPATCH))
 XWG (:,:,:)=XUNDEF
 XWGI(:,:,:)=XUNDEF
 !
-IF(CISBA=='DIF')THEN
-  IWORK=MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
-ELSE
-  IWORK=NGROUND_LAYER
-ENDIF
-!
-DO JL=1,IWORK
+DO JL=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JL
   YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
    XWG(:,JL,:)=ZWORK
 END DO
 !
-DO JL=1,IWORK
+DO JL=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JL
   YRECFM='WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)

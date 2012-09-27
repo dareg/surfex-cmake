@@ -41,6 +41,7 @@
 !!    -------------
 !!      Original    02/2006
 !       S. Riette   06/2010 PSSO_STDEV and PTWSNOW added
+!       B. Decharme 09/2012 Argument added in GET_FLUX_n
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -160,8 +161,8 @@ END IF
 !
 IF ( PRESENT(PT2M) .OR. PRESENT(PQ2M) ) THEN
    !
-   CALL GET_FLUX_n(HPROGRAM, KI, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD2, ZFIELD3, &
-                                 ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4           )
+   CALL GET_FLUX_n(HPROGRAM, KI, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD2, &
+                                 ZFIELD3, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4  )
    !
    IF (PRESENT(PT2M)   ) PT2M    = ZFIELD2
    IF (PRESENT(PQ2M)   ) PQ2M    = ZFIELD3

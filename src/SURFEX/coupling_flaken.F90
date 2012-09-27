@@ -34,11 +34,13 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      B. Decharme 01/2010 Add XTT in water_flux
 !!      V. Masson   11/2011 Ch limited to 1.E-7 in all cases and Cd coming from
 !!                          Flake_interface routine if computed by flake
+!!      B. Decharme 09/2012 New wind implicitation
 !!------------------------------------------------------------------
 !
+USE MODD_SURF_ATM, ONLY : CIMPLICIT_WIND
 !
-USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XLVTT, XKARMAN, XTT
-USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XKARMAN, XTT
+USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODD_FLAKE_n,  ONLY :   TTIME         , XEMIS         , XWATER_DEPTH  , &
                             XWATER_FETCH  , XT_BS         , XDEPTH_BS     , &
@@ -141,8 +143,8 @@ REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral 
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
@@ -162,6 +164,7 @@ REAL, DIMENSION(SIZE(PTA))  :: ZGLOBAL_SW    ! Solar radiation flux at the surfa
 REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Air specific humidity (kg/kg)
 !
 REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR ! friction velocity (m/s)
+REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR2! square of friction velocity (m2/s2)
 REAL, DIMENSION(SIZE(PTA))  :: ZSFM   ! flux of momentum (Pa)
 !
 REAL, DIMENSION(SIZE(PTA))  :: ZRESA_WATER ! aerodynamical resistance
@@ -240,15 +243,32 @@ IF (CFLK_FLUX=='DEF') THEN
                   PPS, ZQSAT,                                     &
                   PSFTH, PSFTQ, ZUSTAR,                           &
                   ZCD, ZCDN, ZCH, ZRI, ZRESA_WATER, ZZ0H          )  
-    WHERE (ZWIND(:)>0.)
-!      ZSFM(:) = - PRHOA(:) * ZUSTAR(:)**2 
-      ZUSTAR(:) = SQRT(  (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:))/                &
-                          (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))     )  
-      ZSFM(:) = - PRHOA(:) * ZUSTAR(:)**2 
+!
+    IF(CIMPLICIT_WIND=='OLD')THEN    
+!     old implicitation (m2/s2)
+      ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:))/            &
+                   (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:)) 
+    ELSE
+!     new implicitation (m2/s2)            
+      ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*(2.*PPEW_B_COEF(:)-ZWIND(:))) /&
+                   (1.0-2.0*PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:)) 
+!                   
+      ZWIND(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+      ZWIND(:) = MAX(ZWIND(:),0.)
+!
+      WHERE(PPEW_A_COEF(:)/= 0.)
+            ZUSTAR2(:) = MAX( ( ZWIND(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+      ENDWHERE
+!                   
+    ENDIF
+!    
+    WHERE (ZWIND(:)>0.)            
+      ZSFM(:) = - PRHOA(:) * ZUSTAR2(:)
       PSFU(:) = ZSFM(:) * PU(:) / ZWIND(:)
       PSFV(:) = ZSFM(:) * PV(:) / ZWIND(:)
     END WHERE
-  ! PSFTQ become temporarly the flux of heat flux (W/m2)
+!    
+!   PSFTQ become temporarly the flux of heat flux (W/m2)
     PSFTQ = PSFTQ * XLVTT
 !
 ENDIF
@@ -293,7 +313,8 @@ CALL FLAKE_INTERFACE( KI, &
 ! Surface heat and momentum fluxes
                        PSFTH, PSFTQ, ZSFM, ZZ0, ZZ0H, ZRI, XUSTAR, ZCD,     &
 ! Flags              
-                       LSEDIMENTS, CFLK_FLUX, PPEW_A_COEF, PPEW_B_COEF, PRHOA )
+                       LSEDIMENTS, CFLK_FLUX, PPEW_A_COEF, PPEW_B_COEF,     &
+                       PRHOA, CIMPLICIT_WIND                                )
 !
 IF (CFLK_FLUX=='FLK') then 
     XZ0 = ZZ0

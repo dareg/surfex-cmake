@@ -39,7 +39,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n    ,     ONLY : NSIZE_FULL
+USE MODD_SURF_ATM_n,         ONLY : NSIZE_FULL
 !
 USE MODD_SURF_ATM,           ONLY : LRW_PRECIP,LSAVE_PRECIP
 USE MODD_DIAG_SURF_ATM_n,    ONLY : XRW_RAIN, XRW_SNOW

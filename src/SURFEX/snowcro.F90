@@ -1,5 +1,5 @@
 !     ##########################################################################
-      SUBROUTINE SNOWCRO(HSNOWRES, TPTIME, OGLACIER,                    &
+      SUBROUTINE SNOWCRO(HSNOWRES, TPTIME, OGLACIER, HIMPLICIT_WIND,     &
                PPEW_A_COEF, PPEW_B_COEF,                                 &
                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
                PSNOWSWE,PSNOWRHO,PSNOWHEAT,PSNOWALB,                     &
@@ -11,7 +11,7 @@
                PSOILCOND,PD_G,                                           &
                PSNOWLIQ,PSNOWTEMP,PSNOWDZ,                               &
                PTHRUFAL,PGRNDFLUX,PEVAPCOR,PRNSNOW,PHSNOW,PGFLUXSNOW,    &
-               PHPSNOW,PLES3L,PLEL3L,PEVAP,                              &
+               PHPSNOW,PLES3L,PLEL3L,PEVAP,PRI,                          &
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,               &
                PPERMSNOWFRAC,PZENITH,  PXLAT, PXLON                      ) 
 !     ##########################################################################
@@ -84,6 +84,7 @@
 !!                                          the SNOW-3L code. This includes the dynamic handling
 !!                                          of snow layers and the inclusion of snow metamorphism
 !!                                          rules similar to the original Crocus implementation.
+!!      Modified by B. Decharme  (09/2012): New wind implicitation
 !!
 !-------------------------------------------------------------------------------
 !
@@ -121,6 +122,10 @@ LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow a
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                   ! False = No specific treatment
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PPS, PTA, PSW_RAD, PQA,                       &
                                         PVMOD, PLW_RAD, PSR, PRR 
@@ -161,8 +166,8 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHO
 REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                   &
                                         PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
                                         PPEQ_B_COEF  
-!                                      PPEW_A_COEF = wind coefficient
-!                                      PPEW_B_COEF = wind coefficient
+!                                      PPEW_A_COEF = wind coefficient (m2s/kg)
+!                                      PPEW_B_COEF = wind coefficient (m/s)
 !                                      PPET_A_COEF = A-air temperature coefficient
 !                                      PPET_B_COEF = B-air temperature coefficient
 !                                      PPEQ_A_COEF = A-air specific humidity coefficient
@@ -220,6 +225,10 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCHSNOW, PEMISNOW, PSNOWHMASS
 !                                      PSNOWHMASS  = heat content change due to mass
 !                                                    changes in snowpack (J/m2): for budget
 !                                                    calculations only.
+!
+REAL, DIMENSION(:), INTENT(OUT)   :: PRI
+!                                      PRI = Ridcharson number
+!
 REAL, DIMENSION(:), INTENT(IN)    :: PZENITH ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)    :: PXLAT,PXLON ! LAT/LON after packing
 !
@@ -492,7 +501,7 @@ PHPSNOW(:)     = PRR(:)*XCL*(MAX(XTT,PTA(:))-XTT)    ! (W/m2)
 ! Surface Energy Budget calculations using ISBA linearized form
 ! and standard ISBA turbulent transfer formulation
 !
-CALL SNOWCROEBUD(HSNOWRES,                                                   &
+CALL SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                    &
                  PPEW_A_COEF, PPEW_B_COEF,                                    &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,          &
                  ZSNOWDZMIN,                                                  &
@@ -503,7 +512,7 @@ CALL SNOWCROEBUD(HSNOWRES,                                                   &
                  PSNOWDZ(:,1),PSNOWDZ(:,2),PSNOWALB,PZ0,         PZ0EFF,PZ0H, &
                  ZSFCFRZ,ZRADSINK(:,1),PHPSNOW,                               &
                  ZCT,PEMISNOW,PRHOA,ZTSTERM1,ZTSTERM2,ZRA,PCDSNOW,PCHSNOW,    &
-                 ZQSAT, ZDQSAT, ZRSRA, ZVMOD_IC,                              &
+                 ZQSAT, ZDQSAT, ZRSRA, ZVMOD_IC, PRI,                         &
                  ZPET_A_COEF_T,ZPEQ_A_COEF_T,ZPET_B_COEF_T,ZPEQ_B_COEF_T      ) 
 !
 ! Heat transfer: simple diffusion along the thermal gradient
@@ -1723,7 +1732,7 @@ END SUBROUTINE SNOWCROTHRM
 !####################################################################
 !####################################################################
 !####################################################################
-      SUBROUTINE SNOWCROEBUD(HSNOWRES,                                                  &
+      SUBROUTINE SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                   &
                              PPEW_A_COEF, PPEW_B_COEF,                                   &
                              PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,         &
                              PSNOWDZMIN,                                                 &
@@ -1733,7 +1742,7 @@ END SUBROUTINE SNOWCROTHRM
                              PSNOWDZ1,PSNOWDZ2,PALBT,PZ0,PZ0EFF,PZ0H,                    &
                              PSFCFRZ,PRADSINK,PHPSNOW,                                   &
                              PCT,PEMIST,PRHOA,PTSTERM1,PTSTERM2,PRA,PCDSNOW,PCHSNOW,     &
-                             PQSAT,PDQSAT,PRSRA,PVMOD_IC,                                &
+                             PQSAT,PDQSAT,PRSRA,PVMOD_IC, PRI,                           &
                              PPET_A_COEF_T,PPEQ_A_COEF_T,PPET_B_COEF_T,PPEQ_B_COEF_T     ) 
 !
 !!    PURPOSE
@@ -1749,6 +1758,9 @@ END SUBROUTINE SNOWCROTHRM
 !                                vapor exchanges is equal to 1. as soon as
 !                                there is condensation
 !
+!!      Modified by B. Decharme 09/12  new wind implicitation
+!
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,     ONLY : XCPD, XRHOLW, XSTEFAN, XLVTT, XLSTT, XRHOLW
 USE MODD_SNOW_PAR, ONLY : X_RI_MAX, XEMISSN
 !
@@ -1770,11 +1782,15 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES ! type of sfc resistance
 !                                      method. Option to limit Ri number
 !                                      for very stable conditions
 !
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!
 REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                   &
                                         PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
                                         PPEQ_B_COEF  
-!                                      PPEW_A_COEF = wind coefficient
-!                                      PPEW_B_COEF = wind coefficient
+!                                      PPEW_A_COEF = wind coefficient (m2s/kg)
+!                                      PPEW_B_COEF = wind coefficient (m/s)
 !                                      PPET_A_COEF = A-air temperature coefficient
 !                                      PPET_B_COEF = B-air temperature coefficient
 !                                      PPEQ_A_COEF = A-air specific humidity coefficient
@@ -1798,6 +1814,8 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PVMOD_IC,                        &
                                       PPET_A_COEF_T, PPEQ_A_COEF_T,    &
                                       PPET_B_COEF_T, PPEQ_B_COEF_T 
 !
+REAL, DIMENSION(:), INTENT(OUT)   :: PRI
+!
 !
 !*      0.2    declarations of local variables
 !
@@ -1815,8 +1833,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! ---------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCROEBUD',0,ZHOOK_HANDLE)
-PQSAT(:)  = QSATI(PTS(:),PPS(:))
 !
+ZRI   (:) = XUNDEF
+!
+PQSAT (:) =  QSATI(PTS(:),PPS(:))
 PDQSAT(:) = DQSATI(PTS(:),PPS(:),PQSAT(:))
 !
 !
@@ -1841,6 +1861,8 @@ CALL SURFACE_RI(PTS, PQSAT, PEXNS, PEXNA, PTA, PQA,                  &
 !
 IF(HSNOWRES=='RIL') ZRI(:) = MIN(X_RI_MAX, ZRI(:))
 !
+PRI(:)=ZRI(:)
+!
 ! Surface aerodynamic resistance for heat transfers
 !
 CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW)
@@ -1855,10 +1877,17 @@ CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0EFF, PZ0H, PCDSNOW, ZCDN)
 ! Modify flux-form implicit coupling coefficients:
 ! - wind components:
 !
-ZUSTAR2(:)     = (PRHOA(:)*PCDSNOW(:)*PVMOD(:)*PPEW_B_COEF(:))/        &
-                  (1.0-PRHOA(:)*PCDSNOW(:)*PVMOD(:)*PPEW_A_COEF(:))  
+IF(HIMPLICIT_WIND=='OLD')THEN
+! old implicitation
+  ZUSTAR2(:) = (PCDSNOW(:)*PVMOD(:)*PPEW_B_COEF(:))/           &
+               (1.0-PRHOA(:)*PCDSNOW(:)*PVMOD(:)*PPEW_A_COEF(:)) 
+ELSE                 
+! new implicitation
+  ZUSTAR2(:) = (PCDSNOW(:)*PVMOD(:)*(2.*PPEW_B_COEF(:)-PVMOD(:)))  &
+             / (1.0-2.0*PRHOA(:)*PCDSNOW(:)*PVMOD(:)*PPEW_A_COEF(:))
+ENDIF               
 !
-ZVMOD(:)       = PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+ZVMOD(:)       = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
 ZVMOD(:)       = MAX(ZVMOD(:),0.)
 !
 PVMOD_IC(:) =  ZVMOD(:) ! implicit wind speed: used to compute implicit wind stress
@@ -1902,7 +1931,7 @@ ZSCONDA(:)  = (ZSNOWDZM1(:)*PSCOND1(:) + ZSNOWDZM2(:)*PSCOND2(:))/           &
 !
 ! - specific humidity:
 !
-Z_CCOEF(:)       = 1.0 - PPET_A_COEF(:)*PRSRA(:)
+Z_CCOEF(:)       = 1.0 - PPEQ_A_COEF(:)*PRSRA(:)
 !
 PPEQ_A_COEF_T(:) = - PPEQ_A_COEF(:)*PRSRA(:)*PDQSAT(:)/Z_CCOEF(:)
 !

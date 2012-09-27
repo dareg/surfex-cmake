@@ -44,6 +44,7 @@
 !!      (P. LeMoigne) 29/03/04  bug in the heat flux computation
 !!      (P. LeMoigne) 09/02/06  Z0H as output
 !!      B. Decharme    06/2009 limitation of Ri
+!!      Modified        09/2009  B. Decharme: limitation of Ri in surface_ri.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -52,7 +53,7 @@
 USE MODD_CSTS,       ONLY : XG, XCPD
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM,   ONLY : LDRAG_COEF_ARP, LRRGUST_ARP, XRRSCALE, &
-                              XRRGAMMA, XUTILGUST, XRIMAX     
+                              XRRGAMMA, XUTILGUST     
 USE MODD_SNOW_PAR,   ONLY : XZ0SN, XZ0HSN
 !
 USE MODI_SURFACE_RI
@@ -151,9 +152,8 @@ PQSAT(:) = QSAT(PTICE(:),PPS(:))
 !
 
 CALL SURFACE_RI(PTICE,PQSAT,PEXNS,PEXNA,PTA,PQA, &
-                  PZREF, PUREF, ZDIRCOSZW,PVMOD,PRI)  
-!
-PRI(:) = MIN(PRI(:),XRIMAX)
+                  PZREF, PUREF, ZDIRCOSZW,PVMOD,PRI)
+!                  
 !
 !       2.2    Z0 for  sea ice
 !              --------------------

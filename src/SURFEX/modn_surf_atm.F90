@@ -29,8 +29,9 @@ USE MODD_SURF_ATM, ONLY : XCISMIN, XVMODMIN, LALDTHRES, &
                             LVZIUSTAR0_ARP, LRRGUST_ARP,  &
                             XVZIUSTAR0,XRZHZ0M,           &
                             XRRSCALE, XRRGAMMA,           &
-                            XUTILGUST,LCPL_ARP, LQVNPLUS  
-!!
+                            XUTILGUST, LCPL_ARP, LQVNPLUS,&
+                            CIMPLICIT_WIND
+!
 !-----------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -47,7 +48,7 @@ NAMELIST /NAM_SURF_ATM/XCISMIN, XVMODMIN, LALDTHRES, &
                          LVZIUSTAR0_ARP, LRRGUST_ARP,  &
                          XVZIUSTAR0,XRZHZ0M,           &
                          XRRSCALE, XRRGAMMA,           &
-                         XUTILGUST, LCPL_ARP, LQVNPLUS  
-
+                         XUTILGUST, LCPL_ARP, LQVNPLUS,&
+                         CIMPLICIT_WIND
 !
 END MODULE MODN_SURF_ATM

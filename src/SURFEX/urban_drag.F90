@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE URBAN_DRAG(HZ0H,PTSTEP, PT_CANYON, PQ_CANYON, PU_CANYON,     &
+    SUBROUTINE URBAN_DRAG(HZ0H, HIMPLICIT_WIND, PTSTEP,                     &
+                          PT_CANYON, PQ_CANYON, PU_CANYON,                  &
                           PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,       &
                           PTS_ROOF, PTS_ROAD, PTS_WALL, PTS_GARDEN,         &
                           PDELT_SNOW_ROOF, PDELT_SNOW_ROAD,                 &
@@ -62,6 +63,7 @@
 !             04 (A. Lemonsu) z0h=z0m for resistance canyon-atmosphere
 !          03/08 (S. Leroyer) debug PU_CAN (1. * H/3)
 !          12/08 (S. Leroyer) option (HZ0H) for z0h applied on roof, road and town
+!!         09/12 B. Decharme new wind implicitation
 !! 
 !-------------------------------------------------------------------------------
 !
@@ -84,6 +86,11 @@ IMPLICIT NONE
 !
 !
 CHARACTER(LEN=6),   INTENT(IN)    :: HZ0H           ! TEB option for z0h roof & road
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!
 REAL,               INTENT(IN)    :: PTSTEP         ! time-step
 REAL, DIMENSION(:), INTENT(IN)    :: PT_CANYON      ! canyon air temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PQ_CANYON      ! canyon air specific humidity.
@@ -125,10 +132,10 @@ REAL, DIMENSION(:), INTENT(IN)    :: PWS_ROOF_MAX   ! maximum deepness of roof
 REAL, DIMENSION(:), INTENT(IN)    :: PWS_ROAD_MAX   ! and water reservoirs (kg/m2)
 !
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF    ! implicit coefficients
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF    ! for wind coupling
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF_LOWCAN ! implicit coefficients for wind coupling
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF_LOWCAN ! between low canyon wind and road
+REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF    ! implicit coefficients (m2s/kg)
+REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF    ! for wind coupling     (m/s)
+REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF_LOWCAN ! implicit coefficients for wind coupling (m2s/kg)
+REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF_LOWCAN ! between low canyon wind and road (m/s)
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PQSAT_ROOF     ! qsat(Ts)
 REAL, DIMENSION(:), INTENT(OUT)   :: PQSAT_ROAD     ! qsat(Ts)
@@ -189,6 +196,9 @@ REAL, DIMENSION(SIZE(PTA)) :: ZCDN         ! any surf. neutral exch. coef.  (not
 REAL, DIMENSION(SIZE(PTA)) :: ZU_STAR, ZW_STAR !! 
 REAL, DIMENSION(SIZE(PTA)) :: ZQ0              !! 
 !
+REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR2      ! square of friction velocity (m2/s2
+REAL, DIMENSION(SIZE(PTA)) :: ZVMOD        ! module of the horizontal wind at t+1
+!
 ! for calculation of momentum fluxes
 REAL, DIMENSION(SIZE(PTA)) :: ZLMO         ! Monin-Obukhov length
 REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_ROAD  ! friction velocity for roads
@@ -207,6 +217,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('URBAN_DRAG',0,ZHOOK_HANDLE)
+!
 ZZ0_ROOF(:)    = 0.15                      ! z0 for roofs
 ZZ0_ROAD(:)    = MIN(0.05,0.1*PZ_LOWCAN(:))! z0 for roads
 !
@@ -419,9 +430,31 @@ DO JJ=1,SIZE(PTA)
 !* neutral case, as guess
 !
   ZCDN(JJ) = (XKARMAN/LOG(PZ_LOWCAN(JJ)/ZZ0_ROAD(JJ)))**2
-
-  PUW_ROAD(JJ) = - (ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_B_COEF_LOWCAN(JJ))/              &
-                   (1.0-PRHOA(JJ)*ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
+!
+  ZUSTAR2(JJ)=XUNDEF
+  ZVMOD  (JJ)=PU_LOWCAN(JJ)
+!
+  IF(HIMPLICIT_WIND=='OLD')THEN
+!   old implicitation
+    ZUSTAR2(JJ) = (ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_B_COEF_LOWCAN(JJ))/              &
+                  (1.0-PRHOA(JJ)*ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
+  ELSE
+!   new implicitation
+    ZUSTAR2(JJ) = (ZCD(JJ)*PU_LOWCAN(JJ)*(2.*PPEW_B_COEF_LOWCAN(JJ)-PU_LOWCAN(JJ)))/  &
+                  (1.0-2.0*PRHOA(JJ)*ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
+!                   
+    ZVMOD(JJ) = PRHOA(JJ)*PPEW_A_COEF_LOWCAN(JJ)*ZUSTAR2(JJ) + PPEW_B_COEF_LOWCAN(JJ)
+    ZVMOD(JJ) = MAX(ZVMOD(JJ),0.)
+!
+    IF(PPEW_A_COEF_LOWCAN(JJ)/= 0.)THEN
+          ZUSTAR2(JJ) = MAX( ( ZVMOD(JJ) - PPEW_B_COEF_LOWCAN(JJ) ) / (PRHOA(JJ)*PPEW_A_COEF_LOWCAN(JJ)), 0.)
+    ENDIF
+!              
+  ENDIF
+!
+  PUW_ROAD(JJ) = - ZUSTAR2(JJ)
+!
+!
   PDUWDU_ROAD(JJ) = 0. ! implicitation already taken into account in PUW_ROAD
 !
 !*      9.2    For roofs
@@ -440,10 +473,31 @@ DO JJ=1,SIZE(PTA)
 !*      9.3    For town
 !              --------
 !
-  PUSTAR_TOWN(JJ) = SQRT(  (PCD(JJ)*PVMOD(JJ)*PPEW_B_COEF(JJ))/                 &
-                        (1.0-PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ))     )
+  ZUSTAR2(JJ)=XUNDEF
+  ZVMOD  (JJ)=PVMOD(JJ)
+!  
+  IF(HIMPLICIT_WIND=='OLD')THEN
+!   old implicitation
+    ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*PPEW_B_COEF(JJ))/            &
+                  (1.0-PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ))
+  ELSE
+!   new implicitation
+    ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*(2.*PPEW_B_COEF(JJ)-PVMOD(JJ)))/ &
+                  (1.0-2.0*PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ)) 
+!                   
+    ZVMOD(JJ) = PRHOA(JJ)*PPEW_A_COEF(JJ)*ZUSTAR2(JJ) + PPEW_B_COEF(JJ)
+    ZVMOD(JJ) = MAX(ZVMOD(JJ),0.)
+!
+    IF(PPEW_A_COEF(JJ)/= 0.)THEN
+          ZUSTAR2(JJ) = MAX( ( ZVMOD(JJ) - PPEW_B_COEF(JJ) ) / (PRHOA(JJ)*PPEW_A_COEF(JJ)), 0.)
+    ENDIF
+!                        
+  ENDIF
+!
+  PUSTAR_TOWN(JJ) = SQRT(ZUSTAR2(JJ))
 !
 ENDDO
+!
 IF (LHOOK) CALL DR_HOOK('URBAN_DRAG',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

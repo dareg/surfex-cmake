@@ -44,6 +44,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !!      A.L. Gibelin   04/09 : change BSLAI_NITRO initialisation
 !!      A.L. Gibelin   04/09 : modifications for CENTURY model 
 !!      A.L. Gibelin   06/09 : soil carbon initialisation
+!!      Modified by B. Decharme  (09/2012): Bug in exponential profile calculation with DIF
 !!
 !-------------------------------------------------------------------------------
 !
@@ -182,6 +183,7 @@ REAL, DIMENSION(SIZE(PTSRAD))     :: ZTSRAD_NAT !radiative temperature
 !
 REAL, DIMENSION(:),   ALLOCATABLE :: ZM, ZWORK
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZF
+LOGICAL                           :: LWORK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -329,28 +331,35 @@ ENDIF
 !
 !  CKSAT used in hydro_soildif.F90 and hydro_soil.F90 and soil.F90
 IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN 
-  !
+!
   IF(CISBA=='DIF') THEN
+!          
     ALLOCATE(ZWORK(KI))
     ZWORK(:) = XUNDEF
-    ZF(:,:) = 4.0/MERGE(XDROOT(:,:),XDG2(:,:),XDROOT(:,:)>0.0) 
-  ELSE
-    WHERE (ZF(:,:)==XUNDEF) ZF(:,:) =  4.0/XDG(:,2,:)
-  ENDIF
-  ZF(:,:)=MIN(ZF(:,:),XF_DECAY)
-  !
-  IF(CISBA=='DIF') THEN
-    !   
+    ZF(:,:)  = XUNDEF          
     DO JPATCH=1,NPATCH    
       IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
-      ZWORK(:) = MERGE(XDROOT(:,JPATCH),XDG2(:,JPATCH),XDROOT(:,JPATCH)>0.0)      
+      DO JILU=1,KI
+         IF(XPATCH(JILU,JPATCH)>0.0)THEN
+           !no profile for non vegetated area : f and root = 0.0
+           LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
+           ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
+           ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
+           ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
+         ENDIF
+      ENDDO
       CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
-                              XCONDSAT(:,:,JPATCH))   
+                              XCONDSAT(:,:,JPATCH))
     ENDDO  
     DEALLOCATE(ZWORK)
-
-  !Exponential decay for ISBA-FR option
+!
+! Exponential decay for ISBA-FR option
   ELSE
+!
+    WHERE(ZF(:,:)==XUNDEF) 
+          ZF(:,:) = 4.0/XDG(:,2,:)
+    ENDWHERE
+    ZF(:,:)=MIN(ZF(:,:),XF_DECAY)
 !
     DO JPATCH=1,NPATCH
        IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE

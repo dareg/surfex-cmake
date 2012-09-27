@@ -45,6 +45,7 @@
 !!    -------------
 !!      Original     1/06/2006
 !!      B. Decharme    06/2009 limitation of Ri
+!!      B. Decharme    09/2012 Bug in Ri calculation and limitation of Ri in surface_ri.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -55,7 +56,6 @@ USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, XPI, &
 USE MODD_SEAFLUX_n
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_WATER_PAR
-USE MODD_SURF_ATM, ONLY : XRIMAX
 !
 USE MODI_SURFACE_RI
 USE MODI_WIND_THRESHOLD
@@ -462,9 +462,7 @@ ENDDO
 !
 ZDIRCOSZW(:) = 1.
 CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQASAT,  &
-                  PZREF,PUREF,ZDIRCOSZW,ZVMOD,PRI)  
-!
-PRI(:) = MIN(PRI(:),XRIMAX)
+                  PZREF,PUREF,ZDIRCOSZW,PVMOD,PRI)  
 !
 !       5.2     Aerodynamical conductance and resistance
 !             

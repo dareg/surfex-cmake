@@ -41,6 +41,7 @@ SUBROUTINE URBAN_EXCH_COEF(HZ0H, PZ0_O_Z0H, PTG, PQS, PEXNS, PEXNA, PTA, PQA,   
 !!      Original    01/2009    from urban_drag.f90 (modified by S.  Leroyer at CMC)
 !         01/2009 (S. Leroyer) option (HZ0H) for z0h applied on roof, road and town
 !!      B. Decharme    06/2009 limitation of Ri
+!!      B. Decharme    09/2009 limitation of Ri in surface_ri.F90
 !
 !-------------------------------------------------------------------------------
 
@@ -48,8 +49,6 @@ USE MODI_SURFACE_RI
 USE MODI_SURFACE_CD
 USE MODI_SURFACE_AERO_COND
 USE MODI_WIND_THRESHOLD
-!
-USE MODD_SURF_ATM,   ONLY : XRIMAX
 !
 USE MODD_CSTS, ONLY : XKARMAN
 !
@@ -117,8 +116,6 @@ IF (HZ0H=='MASC95') THEN
 !
   CALL SURFACE_RI(PTG, PQS, PEXNS, PEXNA, PTA, PQA,   &
                     PZREF, PUREF, ZDIRCOSZW, PVMOD, PRI )  
-!
-  PRI(:) = MIN(PRI(:),XRIMAX)
 !
   CALL SURFACE_CD(PRI, PZREF, PUREF, PZ0, ZZ0H, PCD, PCDN)
 !

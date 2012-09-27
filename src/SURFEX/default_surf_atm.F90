@@ -1,11 +1,12 @@
 !     #########
-      SUBROUTINE DEFAULT_SURF_ATM(POUT_TSTEP, PCISMIN, PVMODMIN, OALDTHRES,           &
+      SUBROUTINE DEFAULT_SURF_ATM(POUT_TSTEP, PCISMIN, PVMODMIN, OALDTHRES,             &
                                     ODRAG_COEF_ARP, OALDZ0H, ONOSOF, ORW_PRECIP,        &
                                     PEDB, PEDC, PEDD, PEDK, PUSURIC, PUSURID, PUSURICL, &
                                     PVCHRNK, PVZ0CM, PRIMAX, PDELTA_MAX, PWINDMIN,      &
                                     OVZIUSTAR0_ARP, PRZHZ0M,                            &
                                     PVZIUSTAR0, ORRGUST_ARP, PRRSCALE, PRRGAMMA,        &
-                                    PUTILGUST, OCPL_ARP, OQVNPLUS, OVERTSHIFT    )  
+                                    PUTILGUST, OCPL_ARP, OQVNPLUS, OVERTSHIFT,          &
+                                    HIMPLICIT_WIND                                      )
 !     ########################################################################
 !
 !!****  *DEFAULT_SURF_ATM* - routine to set default values for the choice of surface schemes
@@ -81,6 +82,8 @@ REAL,              INTENT(OUT) :: PUTILGUST
 LOGICAL,           INTENT(OUT) :: OCPL_ARP
 LOGICAL,           INTENT(OUT) :: OQVNPLUS
 LOGICAL,           INTENT(OUT) :: ORW_PRECIP       ! flag used to Read/Write precipitation forcing 
+CHARACTER(LEN=*),  INTENT(OUT) :: HIMPLICIT_WIND   ! wind implicitation option : OLD or NEW
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                                    from/into the restart file for ARPEGE/ALADIN run  
 !
@@ -90,6 +93,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DEFAULT_SURF_ATM',0,ZHOOK_HANDLE)
+!
 POUT_TSTEP = XUNDEF
 !
 PCISMIN   = 6.7E-5
@@ -126,6 +130,9 @@ PRRGAMMA = 0.8
 PUTILGUST = 0.125
 OCPL_ARP=.FALSE.
 OQVNPLUS=.FALSE.
+!
+HIMPLICIT_WIND = 'NEW'
+!
 IF (LHOOK) CALL DR_HOOK('DEFAULT_SURF_ATM',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

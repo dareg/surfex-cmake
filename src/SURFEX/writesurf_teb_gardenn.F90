@@ -33,16 +33,17 @@
 !!                            the soil (diffusion version)
 !!      B. Decharme  2008    : Floodplains
 !!      B. Decharme  01/2009 : Optional Arpege deep soil temperature write
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_GARDEN_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL,       &
+USE MODD_TEB_GARDEN_n, ONLY :   NGROUND_LAYER, CPHOTO, CRESPSL,              &
                                 NNBIOMASS, NNLITTER, NNSOILCARB, NNLITTLEVS, &
                                 XTG, XWG, XWGI, XWR, XLAI, TSNOW,            &
                                 XRESA, XAN, XANFM, XLE, XANDAY,              &
-                                XRESP_BIOMASS, XBIOMASS, NWG_LAYER,          &
+                                XRESP_BIOMASS, XBIOMASS,                     &
                                 XLITTER, XSOILCARB, XLIGNIN_STRUC                                
 !
 USE MODD_SURF_PAR, ONLY : NUNDEF
@@ -77,8 +78,6 @@ INTEGER :: JLAYER ! loop counter on soil layers
 !
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 !
-INTEGER :: IWORK   ! Work integer
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -90,9 +89,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_GARDEN_N',0,ZHOOK_HANDLE)
 ALLOCATE(ZWORK(SIZE(XTG,1),SIZE(XTG,3)))
 !* soil temperatures
 !
-IWORK=NGROUND_LAYER
-!
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='TWN_TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   YFORM='(A11,I1.1,A4)'
@@ -105,13 +102,7 @@ END DO
 !
 !* soil liquid water content
 !
-IF(CISBA=='DIF')THEN
-  IWORK=MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
-ELSE
-  IWORK=NGROUND_LAYER
-ENDIF
-!
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='TWN_WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   YFORM='(A11,I1.1,A8)'
@@ -124,7 +115,7 @@ END DO
 !
 !* soil ice water content
 !
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='TWN_WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   YFORM='(A12,I1.1,A8)'

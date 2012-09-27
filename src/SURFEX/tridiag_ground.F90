@@ -54,6 +54,8 @@
 !!     MODIFICATIONS
 !!     -------------
 !!       Original        May 13, 1998
+!!       Modified :
+!!       B. Decharme  08/12 Loop optimization
 !! ---------------------------------------------------------------------
 !
 !*       0. DECLARATIONS
@@ -76,8 +78,10 @@ REAL,    DIMENSION(:,:), INTENT(OUT) :: PX  ! solution of A.X = Y
 !
 !*       0.2 declarations of local variables
 !
+INTEGER           :: JI             ! number of point loop control
 INTEGER           :: JK             ! vertical loop control
-INTEGER           :: IN             ! number of vertical levels
+INTEGER           :: INI            ! number of point
+INTEGER           :: INL            ! number of vertical levels
 !
 REAL, DIMENSION(SIZE(PA,1)           ) :: ZDET ! work array
 REAL, DIMENSION(SIZE(PA,1),SIZE(PA,2)) :: ZW   ! work array
@@ -85,7 +89,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! ---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIDIAG_GROUND',0,ZHOOK_HANDLE)
-IN=SIZE(PX,2)
+INI=SIZE(PX,1)
+INL=SIZE(PX,2)
 !
 !*       1.  levels going up
 !            ---------------
@@ -100,11 +105,12 @@ PX  (:,1) = PY(:,1) / ZDET(:)
 !*       1.2 other levels
 !            ------------
 !
-DO JK=2,IN
-  ZW(:,JK)    = PC(:,JK-1)/ZDET(:)
-  ZDET(:)       = PB(:,JK  ) - PA(:,JK)*ZW(:,JK)
-
-  PX  (:,JK)    = ( PY(:,JK) - PA(:,JK)*PX(:,JK-1) ) / ZDET(:)
+DO JK=2,INL
+   DO JI=1,INI
+      ZW  (JI,JK)  = PC(JI,JK-1)/ZDET(JI)
+      ZDET(JI)     = PB(JI,JK  ) - PA(JI,JK)*ZW(JI,JK)
+      PX  (JI,JK)  = ( PY(JI,JK) - PA(JI,JK)*PX(JI,JK-1) ) / ZDET(JI)
+   END DO
 END DO
 !
 !-------------------------------------------------------------------------------
@@ -112,8 +118,10 @@ END DO
 !*       2.  levels going down
 !            -----------------
 !
-DO JK=IN-1,1,-1
-  PX  (:,JK) = PX(:,JK) - ZW(:,JK+1)*PX(:,JK+1)
+DO JK=INL-1,1,-1
+   DO JI=1,INI
+      PX  (JI,JK) = PX(JI,JK) - ZW(JI,JK+1)*PX(JI,JK+1)
+   END DO
 END DO
 IF (LHOOK) CALL DR_HOOK('TRIDIAG_GROUND',1,ZHOOK_HANDLE)
 !

@@ -30,6 +30,7 @@ SUBROUTINE UNPACK_DIAG_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH,    &
 !!      Modified    01/2010 by B. Decharme : new diag
 !!      Modified      04-09 by A.L. Gibelin : Add carbon diagnostics
 !!      Modified      05-09 by A.L. Gibelin : Add carbon spinup
+!!      Modified    08/2012 by B. Decharme : optimization
 !!
 !!------------------------------------------------------------------
 !
@@ -127,10 +128,8 @@ IF (KNPATCH==1) THEN
     XFMU   (:, KPATCH)    = XP_FMU        (:)
     XFMV   (:, KPATCH)    = XP_FMV        (:)
     !
-    DO JSW=1,SIZE(XSWBD,2)
-      XSWBD   (:, JSW, KPATCH) = XP_SWBD  (:,JSW)
-      XSWBU   (:, JSW, KPATCH) = XP_SWBU  (:,JSW)
-    END DO
+    XSWBD   (:, :, KPATCH) = XP_SWBD  (:,:)
+    XSWBU   (:, :, KPATCH) = XP_SWBU  (:,:)
     !
   END IF
   !
@@ -260,16 +259,20 @@ ELSE
   !
   IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
     DO JJ=1,KSIZE
-      JI                              = KMASK             (JJ)
-      TSNOW%TEMP(JI,:,KPATCH)            = XP_SNOWTEMP(JJ,:)
-      TSNOW%TS    (JI,KPATCH)            = XP_SNOWTEMP(JJ,1)
-    END DO          
+      JI                       = KMASK             (JJ)
+      TSNOW%TS    (JI,KPATCH)  = XP_SNOWTEMP(JJ,1)
+      DO JSW=1,SIZE(TSNOW%TEMP,2)
+        TSNOW%TEMP(JI,JSW,KPATCH)  = XP_SNOWTEMP(JJ,JSW)
+      ENDDO
+    ENDDO          
   ENDIF
   !  
   IF (CPHOTO/='NON') THEN
     DO JJ=1,KSIZE
-      JI                              = KMASK             (JJ)
-      XIACAN(JI,:,KPATCH) = XP_IACAN(JJ,:)
+      JI                  = KMASK   (JJ)
+      DO JSW=1,SIZE(XIACAN,2)
+         XIACAN(JI,JSW,KPATCH) = XP_IACAN(JJ,JSW)
+      ENDDO
     ENDDO
   ENDIF
   !

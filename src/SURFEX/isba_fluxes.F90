@@ -85,6 +85,8 @@
 !!      (A.Boone)    03/2010  Add delta fnctions to force LEG ans LEGI=0
 !!                            when hug(i)Qsat < Qa and Qsat > Qa
 !!      (A.Boone)    11/2011  Add RS_max limit to Etv
+!!      (B. Decharme)07/2012  Time spliting for soil ice
+!!      (B. Decharme)07/2012  Error in restore flux calculation (only for diag)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -359,8 +361,17 @@ REAL, PARAMETER             :: ZEFFIC_MIN = 0.01 ! (-)   (0 <= ZEFFIC_MIN << 1)
 !                                                                that it keeps very small values of ice from persisting
 !                                                                over long periods of time as they approach zero.
 !                                                                If it is zero, then this effect off.
+!
+REAL, PARAMETER :: ZTIMEMAX = 900.  ! s  Maximum timescale for ice soil dif
+!
+REAL            :: ZTSTEP      ! maximum time split time step (<= PTSTEP)
+!                              ! ONLY used for DIF option.
+!
 INTEGER         :: JJ
-REAL, DIMENSION(SIZE(PLAI))          :: ZWORK1, ZWORK2, ZWORK3
+INTEGER         :: INDT, JDT   ! Time splitting indicies
+!
+REAL, DIMENSION(SIZE(PLAI))          :: ZWORK1, ZWORK2, ZWORK3, ZWGI_EXCESS
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -394,6 +405,7 @@ ZMATPOT(:)      = 0.0
 ZWSAT_AVGZ(:)   = XUNDEF
 !
 PWGI_EXCESS(:)  = 0.0
+ZWGI_EXCESS(:)  = 0.0
 !
 ! If ISBA-ES option in use, then snow covered surface
 ! fluxes calculated outside of this routine, so set
@@ -516,7 +528,9 @@ IF (HISBA /= 'DIF') THEN
 !
    PRESTORE(:) = 2.0*XPI*(PTG(:,1)-PT2M(:))/(PCT(:)*XDAY)  
 !
-   IF(OTEMP_ARP)PRESTORE(:)=PRESTORE(:)/(PSODELX(1)*(PSODELX(1)+PSODELX(2)))
+   IF(OTEMP_ARP)THEN
+      PRESTORE(:)=2.0*XPI*(PTG(:,1)-PTG(:,2))/(PCT(:)*XDAY*PSODELX(1)*(PSODELX(1)+PSODELX(2)))
+   ENDIF
 !
 ELSE
 !
@@ -524,10 +538,8 @@ ELSE
 ! and sub-surface layers:
 !
   DO JJ=1,SIZE(PTG,1)
-    ZCONDAVG(JJ) = (PD_G(JJ,1)*PSOILCONDZ(JJ,1) + (PD_G(JJ,2)-PD_G(JJ,1))*PSOILCONDZ(JJ,2))/     &
-               PD_G(JJ,2)
-!
-    PRESTORE(JJ) = 2.*ZCONDAVG(JJ)*(PTG(JJ,1)-PT2M(JJ))/PD_G(JJ,2)
+    ZCONDAVG(JJ) = (PDZG(JJ,1)*PSOILCONDZ(JJ,1) + PDZG(JJ,2)*PSOILCONDZ(JJ,2))/PD_G(JJ,2)
+    PRESTORE(JJ) = 2.*ZCONDAVG(JJ)*(PTG(JJ,1)-PTG(JJ,2))/PD_G(JJ,2)
   ENDDO
 !
 ENDIF
@@ -614,10 +626,18 @@ IF (HISBA == 'DIF') THEN
 !
    ZLEGI(:) = (1.0-PPSNG(:)-PFFG(:))*PLEGI(:)
 !
-   CALL ICE_SOILDIF(PTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,     &
-                    PSOILHCAPZ, PWSATZ, PMPOTSATZ, PBCOEFZ, &
-                    PTG, PWGI, PWG, KWG_LAYER,              &
-                    PDELTAT,  PDZG,  PWGI_EXCESS            )
+   INDT = MAX(1,NINT(PTSTEP/ZTIMEMAX))
+!
+   ZTSTEP = PTSTEP/REAL(INDT)
+!
+  DO JDT = 1,INDT
+     CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,     &
+                      PSOILHCAPZ, PWSATZ, PMPOTSATZ, PBCOEFZ, &
+                      PTG, PWGI, PWG, KWG_LAYER,              &
+                      PDELTAT,  PDZG,  ZWGI_EXCESS            )
+
+     PWGI_EXCESS(:) = PWGI_EXCESS(:) + ZWGI_EXCESS(:)/REAL(INDT)
+  ENDDO                      
 !
 ELSE
 !

@@ -24,6 +24,7 @@ SUBROUTINE PREP_PERM_SNOW(TPSNOW,PTG,PPERM_SNOW_FRAC,KSNOW)
 !!      Original    01/2004
 !!      B. Decharme 03/2009: Consistency with Arpege permanent
 !!                                          snow/ice treatment
+!!      B. Decharme 07/2012: 3-L or Crocus adjustments
 !!------------------------------------------------------------------
 !
 
@@ -31,7 +32,8 @@ USE MODD_TYPE_SNOW
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODD_SNOW_PAR,       ONLY : XRHOSMAX, XANSMAX, XANSMIN, &
-                                XAGLAMAX, XAGLAMIN, XHGLA
+                                XAGLAMAX, XAGLAMIN, XHGLA,  &
+                                XRHOSMAX_ES
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
@@ -73,7 +75,9 @@ REAL, DIMENSION(:),   ALLOCATABLE   :: ZPSN        ! permanent snow fraction
 LOGICAL, DIMENSION(:),  ALLOCATABLE :: LWORK
 INTEGER                             :: IWORK
 !
+REAL              ::ZRHOSMAX
 REAL              ::ZAGE_NOW
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -86,8 +90,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('PREP_PERM_SNOW',0,ZHOOK_HANDLE)
+!
+ZRHOSMAX=XRHOSMAX
+IF(TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO')THEN
+  ZRHOSMAX=XRHOSMAX_ES
+ENDIF
+!
 ALLOCATE(ZPSN(SIZE(PTG,1)))
-ZPSN(:) = MIN ( PPERM_SNOW_FRAC(:,NVT_SNOW) , 0.999 )
+ZPSN(:) = MIN ( PPERM_SNOW_FRAC(:,NVT_SNOW) , 0.9999 )
 !
 !* if no permanent snow present
 !
@@ -106,16 +116,18 @@ ZWSNOW_PERM(:) = WSNOW_FROM_SNOW_FRAC_GROUND(ZPSN)
 !
 IF(LGLACIER)THEN
 !  limited to 33.3 meters of aged snow
-   ZWSNOW_PERM(:) = MIN(ZWSNOW_PERM(:),XHGLA * XRHOSMAX )
+   ZWSNOW_PERM(:) = MIN(ZWSNOW_PERM(:),XHGLA * ZRHOSMAX )
 ELSE
 !  limited to 2. meters of aged snow
-   ZWSNOW_PERM(:) = MIN(ZWSNOW_PERM(:),2.0 * XRHOSMAX )
+   ZWSNOW_PERM(:) = MIN(ZWSNOW_PERM(:),2.0 * ZRHOSMAX )
 ENDIF
 !
 !* permanent snow can be added only if deep soil temperature is below 5 C
 !  (glaciers on subgrid mountains tops that are contained in the grid mesh are neglected)
 !
-WHERE(PTG(:,SIZE(PTG,2))>XTT+5.) ZWSNOW_PERM(:) = 0.
+IF(.NOT.LGLACIER)THEN
+  WHERE(PTG(:,SIZE(PTG,2))>XTT+5.) ZWSNOW_PERM(:) = 0.
+ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
@@ -139,7 +151,7 @@ DO JLAYER=1,TPSNOW%NLAYER
   ENDIF
 !
   WHERE(LWORK(:))
-    TPSNOW%RHO(:,JLAYER,KSNOW) = XRHOSMAX
+    TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX
   END WHERE
 !
 !* albedo
@@ -161,7 +173,7 @@ CALL GREGODSTRATI(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,   &
                      TTIME%TIME,ZAGE_NOW)
 DO JLAYER=1,TPSNOW%NLAYER/4
   WHERE(LWORK(:))
-            !TPSNOW%RHO(:,JLAYER,KSNOW) = XRHOSMAX*         &
+            !TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX*         &
             !      (1.+ FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER)) 
            TPSNOW%GRAN1(:,JLAYER,KSNOW) = MIN(-1.,-99.*     &
                   (1.-4*FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER))) 
@@ -173,7 +185,7 @@ DO JLAYER=1,TPSNOW%NLAYER/4
 END DO
 DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
   WHERE(LWORK(:))
-           !TPSNOW%RHO(:,JLAYER,KSNOW) = XRHOSMAX*         &
+           !TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX*         &
            !       (1.+ FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER)) 
            TPSNOW%GRAN1(:,JLAYER,KSNOW) = 99. 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 0.0003 
@@ -208,7 +220,7 @@ ZD(:) = 0.
 DO JLAYER=1,TPSNOW%NLAYER
   ZD(:) = ZD(:) + TPSNOW%WSNOW(:,JLAYER,KSNOW)/TPSNOW%RHO(:,JLAYER,KSNOW)
 END DO
-ZD(:) = ZD(:) + (ZWSNOW_PERM(:)-ZWSNOW(:))/XRHOSMAX
+ZD(:) = ZD(:) + (ZWSNOW_PERM(:)-ZWSNOW(:))/ZRHOSMAX
 !
 !* modified snow content profile
 !
@@ -232,7 +244,7 @@ SELECT CASE(TPSNOW%SCHEME)
         TPSNOW%WSNOW(:,JLAYER,KSNOW) = ZDEPTH(:,JLAYER) * TPSNOW%RHO(:,JLAYER,KSNOW)
       END WHERE
       WHERE(ZWSNOW(:)==0. .AND. TPSNOW%WSNOW(:,JLAYER,KSNOW)/=XUNDEF)
-        TPSNOW%WSNOW(:,JLAYER,KSNOW) = ZDEPTH(:,JLAYER) * XRHOSMAX
+        TPSNOW%WSNOW(:,JLAYER,KSNOW) = ZDEPTH(:,JLAYER) * ZRHOSMAX
       END WHERE
    END DO
    DEALLOCATE(ZDEPTH)

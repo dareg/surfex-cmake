@@ -45,7 +45,8 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,ONLY : XRV, XRD, XG
+USE MODD_CSTS,     ONLY : XRV, XRD, XG
+USE MODD_SURF_ATM, ONLY : XRIMAX
 USE MODI_WIND_THRESHOLD
 !
 !
@@ -96,6 +97,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                                 at the surface
 !
 IF (LHOOK) CALL DR_HOOK('SURFACE_RI',0,ZHOOK_HANDLE)
+!
 ZTHVA(:)=PTA(:)/PEXNA(:)*( 1.+(XRV/XRD-1.)*PQA(:) )   
 ZTHVS(:)=PTG(:)/PEXNS(:)*( 1.+(XRV/XRD-1.)*PQS(:) )
 !                                                 
@@ -105,6 +107,9 @@ ZVMOD(:) = WIND_THRESHOLD(PVMOD(:),PUREF(:))
 PRI(:) = XG * PDIRCOSZW(:) * PUREF(:) * PUREF(:)              &
           * (ZTHVA(:)-ZTHVS(:)) / (0.5 * (ZTHVA(:)+ZTHVS(:)) )  &
           / (ZVMOD(:)*ZVMOD(:)) /PZREF(:)  
+!
+PRI(:) = MIN(PRI(:),XRIMAX)
+!
 IF (LHOOK) CALL DR_HOOK('SURFACE_RI',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
