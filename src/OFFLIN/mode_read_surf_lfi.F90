@@ -111,7 +111,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -132,7 +134,9 @@ INTEGER           :: ILENCH  ! length of comment string
 INTEGER           :: IVERSION, IBUGFIX
 INTEGER           :: I, INFOMPI
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 DOUBLE PRECISION   :: XTIME0
 REAL, DIMENSION(:),   ALLOCATABLE :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -141,7 +145,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX1_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 IF (NRANK==NPIO) THEN
   !
@@ -184,21 +190,29 @@ ELSE
   ALLOCATE(ZWORK(0))
 ENDIF
 !
+#ifndef NOMPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
+#ifndef NOMPI          
     XTIME0 = MPI_WTIME()
+#endif
     PFIELD(:) = ZWORK(1:SIZE(PFIELD))
+#ifndef NOMPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
 !$OMP SINGLE    
   PFIELD(:) = ZWORK(1:SIZE(PFIELD))
   IF (NPROC>1) THEN
+#ifndef NOMPI
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(PFIELD,SIZE(PFIELD)*KIND(PFIELD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif
   ENDIF
 !$OMP END SINGLE COPYPRIVATE(PFIELD)    
 ELSE
@@ -358,7 +372,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -379,7 +395,9 @@ INTEGER           :: ILENCH  ! length of comment string
 INTEGER           :: IVERSION, IBUGFIX
 INTEGER           :: I, INFOMPI
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 DOUBLE PRECISION   :: XTIME0
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -388,7 +406,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX2_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 IF (NRANK==NPIO) THEN
   !
@@ -433,21 +453,29 @@ ELSE
   ALLOCATE(ZWORK(0,0))
 ENDIF
 !
+#ifndef NOMPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
-  IF ( NRANK==NPIO ) THEN          
+  IF ( NRANK==NPIO ) THEN    
+#ifndef NOMPI          
     XTIME0 = MPI_WTIME()
+#endif    
     PFIELD(:,:) = ZWORK(1:SIZE(PFIELD,1),:)
+#ifndef NOMPI    
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
 !$OMP SINGLE          
   PFIELD(:,:) = ZWORK(1:SIZE(PFIELD,1),:)
   IF (NPROC>1) THEN
+#ifndef NOMPI            
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(PFIELD,SIZE(PFIELD)*KIND(PFIELD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif    
   ENDIF
 !$OMP END SINGLE COPYPRIVATE(PFIELD)    
 ELSE
@@ -571,8 +599,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-INCLUDE "mpif.h"
-!
 !*      0.1   Declarations of arguments
 !
 CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
@@ -659,7 +685,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -677,7 +705,9 @@ INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
 INTEGER          :: I, INFOMPI
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 INTEGER, DIMENSION(:), ALLOCATABLE :: IWORK  ! work array read in the file
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -686,7 +716,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFN1_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 IF (NRANK==NPIO) THEN
   !
@@ -710,21 +742,29 @@ IF (NRANK==NPIO) THEN
   !
 ENDIF
 !
+#ifndef NOMPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
+#ifndef NOMPI          
     XTIME0 = MPI_WTIME()
+#endif    
     KFIELD(:) = IWORK(1:SIZE(KFIELD))
+#ifndef NOMPI    
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif 
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
 !$OMP SINGLE     
   KFIELD(:) = IWORK(1:SIZE(KFIELD))
   IF (NPROC>1) THEN
+#ifndef NOMPI           
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(KFIELD,SIZE(KFIELD)*KIND(KFIELD)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif     
   ENDIF
 !$OMP END SINGLE COPYPRIVATE(KFIELD)    
 ELSE
@@ -841,7 +881,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -866,7 +908,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL1_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 IF (NRANK==NPIO) THEN
   !
@@ -887,14 +931,18 @@ IF (NRANK==NPIO) THEN
   !
 ENDIF
 !
+#ifndef NOMPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
 !
 IF (NPROC>1 .AND. HDIR/='A') THEN
+#ifndef NOMPI        
   XTIME0 = MPI_WTIME()
 !$OMP SINGLE
   CALL MPI_BCAST(OFIELD,SIZE(OFIELD),MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
 !$OMP END SINGLE COPYPRIVATE(OFIELD)   
   XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0) 
+#endif
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL1_LFI',1,ZHOOK_HANDLE)

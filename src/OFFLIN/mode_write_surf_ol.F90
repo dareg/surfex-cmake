@@ -360,7 +360,9 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -407,7 +409,9 @@ IF (GKNOWN) RETURN
 !
 IF (NRANK==NPIO) THEN 
   !
+#ifndef NOMPI  
   XTIME0 = MPI_WTIME()
+#endif
   !  
 !$OMP SINGLE
   !    
@@ -438,16 +442,20 @@ IF (NRANK==NPIO) THEN
   ! 
 !$OMP END SINGLE COPYPRIVATE(IFILE_ID,IVAR_ID,YNAME,INDIMS,IDIMIDS,IDIMLEN,KRESP)
   !  
+#ifndef NOMPI  
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
   !  
 ENDIF
 !
 IF (NPROC>1) THEN
+#ifndef NOMPI        
   XTIME0 = MPI_WTIME()
 !$OMP SINGLE  
   CALL MPI_BCAST(IFILE_ID,KIND(IFILE_ID)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 !$OMP END SINGLE COPYPRIVATE(IFILE_ID)
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
+#endif
 ENDIF
 !
 IF (IFILE_ID/=0) THEN
@@ -503,7 +511,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
+#ifndef NOMPI  
   XTIME0 = MPI_WTIME()
+#endif
   !
 !$OMP SINGLE
   !
@@ -532,7 +542,9 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !
+#ifndef NOMPI  
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
   !  
 ENDIF
 !
@@ -565,7 +577,9 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -599,7 +613,9 @@ KRESP=0
 !
 IF (NRANK==NPIO) THEN
   !
+#ifndef NOMPI  
   XTIME0 = MPI_WTIME()
+#endif
   !  
 !$OMP SINGLE
   !  
@@ -630,16 +646,20 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE COPYPRIVATE(IFILE_ID,IVAR_ID,YNAME,INDIMS,IDIMIDS,IDIMLEN,KRESP)
   !
+#ifndef NOMPI  
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
   !  
 ENDIF
 !
 IF (NPROC>1) THEN
+#ifndef NOMPI        
   XTIME0 = MPI_WTIME()
 !$OMP SINGLE  
   CALL MPI_BCAST(IFILE_ID,KIND(IFILE_ID)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 !$OMP END SINGLE COPYPRIVATE(IFILE_ID)
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)  
+#endif
 ENDIF
 !
 IF (IFILE_ID/=0) THEN
@@ -695,7 +715,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
+#ifndef NOMPI  
   XTIME0 = MPI_WTIME()
+#endif
   !   
 !$OMP SINGLE
   !   
@@ -726,7 +748,9 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !
+#ifndef NOMPI  
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
   !  
 ENDIF
 !
@@ -789,7 +813,9 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -817,7 +843,10 @@ KRESP=0
 !
 IF ( NRANK==NPIO ) THEN
   !
+#ifndef NOMPI  
   XTIME0 = MPI_WTIME()
+#endif
+
   !
 !$OMP SINGLE
   !   
@@ -848,7 +877,9 @@ IF ( NRANK==NPIO ) THEN
   !
 !$OMP END SINGLE
   !   
+#ifndef NOMPI  
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
   !
 ENDIF
 !

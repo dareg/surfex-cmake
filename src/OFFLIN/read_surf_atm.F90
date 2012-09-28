@@ -52,7 +52,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE 'mpif.h'
+#endif
 !
 ! global variables
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PFIELD
@@ -92,7 +94,9 @@ CALL GATHER_AND_WRITE_MPI(PFIELD,ZFIELD)
 !
 IF (NRANK==NPIO) THEN
   !
-  XTIME0 = MPI_WTIME()  
+#ifndef NOMPI
+  XTIME0 = MPI_WTIME() 
+#endif 
   !  
   IF (HPROGRAM == 'ASCII ') THEN
     !
@@ -176,7 +180,9 @@ IF (NRANK==NPIO) THEN
     !
   ENDIF
   !
+#ifndef NOMPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
   !  
 ENDIF
 !

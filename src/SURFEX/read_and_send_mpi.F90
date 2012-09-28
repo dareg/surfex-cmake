@@ -55,7 +55,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef OL
+#ifndef NOMPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -66,7 +66,9 @@ INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
 INTEGER, DIMENSION(NSIZE) :: IINTER
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 INTEGER :: ICPT
 INTEGER :: I,J
 INTEGER :: INFOMPI
@@ -84,7 +86,7 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC-1
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME0 = MPI_WTIME()
 #endif
     !
@@ -101,7 +103,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !  
     IF (I<NPROC) THEN
@@ -121,7 +123,7 @@ ELSE
   ! 
   IDX_R = IDX_R + 1
   !  
-#ifdef OL
+#ifndef NOMPI
   IINTER(:) = 0
   !  
   XTIME0 = MPI_WTIME()
@@ -159,7 +161,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef OL
+#ifndef NOMPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -170,7 +172,9 @@ INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
 REAL, DIMENSION(NSIZE) :: ZINTER
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 INTEGER :: ICPT
 INTEGER :: I,J
 INTEGER :: INFOMPI
@@ -188,7 +192,7 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC
     !
-#ifdef OL
+#ifndef NOMPI
     XTIME0 = MPI_WTIME()
 #endif
     !
@@ -205,7 +209,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !
     IF (I<NPROC) THEN
@@ -225,7 +229,7 @@ ELSE
   !  
   IDX_R = IDX_R + 1
   !
-#ifdef OL
+#ifndef NOMPI
   ZINTER(:) = 0
   !
   XTIME0 = MPI_WTIME()
@@ -263,7 +267,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef OL
+#ifndef NOMPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -274,7 +278,9 @@ INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
 REAL, DIMENSION(NSIZE,SIZE(PWORK2,2)) :: ZINTER
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 INTEGER :: ICPT
 INTEGER :: I,J, K
 INTEGER :: INFOMPI
@@ -293,7 +299,7 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME0 = MPI_WTIME()
 #endif    
     !
@@ -310,7 +316,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !
     IF (I<NPROC) THEN
@@ -330,7 +336,7 @@ ELSE
   !
   IDX_R = IDX_R + 1
   !
-#ifdef OL
+#ifndef NOMPI
   ZINTER(:,:) = 0
   !
   XTIME0 = MPI_WTIME()
@@ -367,7 +373,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef OL
+#ifndef NOMPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -378,7 +384,9 @@ INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
 REAL, DIMENSION(NSIZE,SIZE(PWORK2,2),SIZE(PWORK2,3)) :: ZINTER
 !
+#ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 INTEGER :: ICPT
 INTEGER :: I,J
 INTEGER :: INFOMPI
@@ -397,7 +405,7 @@ IF (NRANK==NPIO) THEN
   !  
   DO I=1,NPROC
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME0 = MPI_WTIME()
 #endif    
     ! 
@@ -414,7 +422,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifdef OL    
+#ifndef NOMPI    
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !    
     IF (I<NPROC) THEN
@@ -434,7 +442,7 @@ ELSE
   !  
   IDX_R = IDX_R + 1
   !
-#ifdef OL
+#ifndef NOMPI
   ZINTER(:,:,:) = 0.
   !
   XTIME0 = MPI_WTIME()  

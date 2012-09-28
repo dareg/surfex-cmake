@@ -43,7 +43,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE "mpif.h"
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -70,8 +72,10 @@ CALL GATHER_AND_WRITE_MPI(KIN,IIN)
 IF (NRANK==NPIO) KOUT = SUM(IIN)
 !
 IF (NPROC>1) THEN
-!$OMP SINGLE        
+!$OMP SINGLE    
+#ifndef NOMPI
   CALL MPI_BCAST(KOUT,KIND(KOUT)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
 !$OMP END SINGLE COPYPRIVATE(KOUT)
 ENDIF
 !
