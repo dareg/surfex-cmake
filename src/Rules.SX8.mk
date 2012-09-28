@@ -71,7 +71,12 @@ spll_set_ref.o spll_surf_solar_sum.o spll_test_double_double.o spll_trid.o
 $(OBJS2) :  OPT =  $(OPT_BASE)  $(OPT_PERF2) 
 endif
 
-F90 = sxmpif90 
+ifeq "$(VER_MPI)" "NOMPI"
+F90 = sxf90
+else         
+F90 = sxmpif90
+endif
+
 F90FLAGS  = $(OPT)
 F77 = $(F90)     
 F77FLAGS  =    -f0 $(OPT)

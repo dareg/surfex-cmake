@@ -112,17 +112,26 @@ endif
 ##########################################################
 #           Librairie DR_HOOK                            #
 ##########################################################
+ifeq "$(VER_MPI)" "NOMPI"
 DIR_HOOK     +=  LIB/drhook_CY31R2.032
 INC_HOOK = -I$(B)LIB/drhook_CY31R2.032
+else
+DIR_HOOK     +=  LIB/drhook_CY31R2.032_mpi
+INC_HOOK = -I$(B)LIB/drhook_CY31R2.032_mpi
+endif
 #
 ifdef DIR_HOOK
 LIBS       += $(DIR_HOOK)/libdrhook.a $(DIR_HOOK)/libodbdummy.a
 #$(DIR_HOOK)/libodbdummy.a 
 #$(DIR_HOOK)/libodbmain.a
-#LIBS       += $(DIR_HOOK)/libmpi_serial.a
 INC        += $(INC_HOOK)
 VPATH      += $(DIR_HOOK)
 endif
+#
+ifeq "$(VER_MPI)" "NOMPI"
+LIBS       += $(DIR_HOOK)/libmpi_serial.a
+endif
+
 ##########################################################
 #           Source XRD                                   #
 ##########################################################
@@ -301,7 +310,11 @@ ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)
 ##########################################################
 ifneq "$(ARCH)" "BG"
 # Gribapi bypass on BG for the moment
+ifeq "$(VER_MPI)" "NOMPI"
 DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}
+else
+DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}-mpi
+endif
 GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}${MNH_INT}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 endif
@@ -322,7 +335,11 @@ endif
 #  
 #
 ifeq "$(VER_CDF)" "CDFAUTO"
+ifeq "$(VER_MPI)" "NOMPI"
 DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}
+else
+DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}-mpi
+endif
 CDF_PATH?=${DIR_CDF}-${ARCH}${MNH_INT}
 CDF_INC?=${CDF_PATH}/include/netcdf.inc
 #

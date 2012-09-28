@@ -39,10 +39,10 @@ OPT_NOCB  = $(OPT_BASE) $(OPT_PERF0)
 endif
 #
 #  
-ifeq "$(VER_MPI)" "MPIAUTO"
-F90 = mpif90
-else         
+ifeq "$(VER_MPI)" "NOMPI"
 F90 = gfortran
+else         
+F90 = mpif90
 endif
 #
 F90FLAGS      =  $(OPT) 
@@ -74,6 +74,10 @@ CNAME_GRIBEX=_gfortran
 ##########################################################
 #
 include Makefile.SURFEX.mk
+#
+ifeq "$(VER_MPI)" "NOMPI"
+CPPFLAGS += -DNOMPI
+endif
 #
 ##########################################################
 #                                                        #

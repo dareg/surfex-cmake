@@ -344,6 +344,9 @@ ifeq "$(F90)" "ifort"
 ARCHOOK="ifort32"
 else
 ARCHOOK=$(ARCH)
+ifeq "$(VER_MPI)" "NOMPI"
+ARCHOOK=$(ARCH)_nompi
+endif
 endif
 endif
 endif

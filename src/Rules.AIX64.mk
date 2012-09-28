@@ -47,8 +47,13 @@ OPT0      = $(OPT_BASE) $(OPT_PERF0)
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF3)
 endif
 #
-#            
+#         
+ifeq "$(VER_MPI)" "NOMPI"
+F90 = xlf95_r
+else         
 F90 = mpxlf95_r
+endif
+
 F90FLAGS =       $(OPT) -qfree=f90 -qsuffix=f=f90 
 F77 = $(F90)
 F77FLAGS      =  $(OPT) -qfixed
