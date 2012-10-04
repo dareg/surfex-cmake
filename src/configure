@@ -298,9 +298,9 @@ if [ "$TARG" == "Linux yuki" -o "$TARG" == "Linux tori"  ] ; then
           ln -s /usr/local/SX/grib_api/* .
     fi
   else
-    if [ ! -d grib_api-${VERSION_GRIBAPI}-${ARCH}${MNH_INT}-mpi ] ; then
-	  mkdir grib_api-${VERSION_GRIBAPI}-${ARCH}${MNH_INT}-mpi
-	  cd grib_api-${VERSION_GRIBAPI}-${ARCH}${MNH_INT}-mpi
+    if [ ! -d grib_api-${VERSION_GRIBAPI}-mpi-${ARCH}${MNH_INT} ] ; then
+	  mkdir grib_api-${VERSION_GRIBAPI}-mpi-${ARCH}${MNH_INT}
+	  cd grib_api-${VERSION_GRIBAPI}-mpi-${ARCH}${MNH_INT}
           ln -s /usr/local/SX/grib_api/* .
     fi	  
   fi
@@ -319,7 +319,6 @@ else
     fi
   fi
 fi
-[ ! -d $LOCAL/src/LIB/grib_api-${VERSION_GRIBAPI}-mpi ] && cd $LOCAL/src/LIB && cp -rf grib_api-${VERSION_GRIBAPI} grib_api-${VERSION_GRIBAPI}-mpi
 #
 #  Install DR_HOOK
 #
