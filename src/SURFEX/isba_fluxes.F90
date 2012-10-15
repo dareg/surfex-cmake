@@ -87,6 +87,7 @@
 !!      (A.Boone)    11/2011  Add RS_max limit to Etv
 !!      (B. Decharme)07/2012  Time spliting for soil ice
 !!      (B. Decharme)07/2012  Error in restore flux calculation (only for diag)
+!!      (B. Decharme)10/2012  Melt rate with D95 computed using max(XTAU,PTSTEP)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -96,6 +97,7 @@ USE MODD_CSTS,       ONLY : XSTEFAN, XCPD, XLSTT, XLVTT, XCL, XTT, XPI, XDAY, &
                             XCI, XRHOLI, XLMTT, XRHOLW, XG, XCL, XCONDI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_ISBA_PAR,   ONLY : XWGMIN, XSPHSOIL, XDRYWGHT, XRS_MAX
+USE MODD_SNOW_PAR,   ONLY : XTAU_SMELT
 !
 USE MODE_THERMOS
 !
@@ -345,10 +347,6 @@ REAL, PARAMETER             :: ZINSOLFRZ_VEG = 0.20  ! (-)       Vegetation inso
 !
 REAL, PARAMETER             :: ZINSOLFRZ_LAI = 30.0  ! (m2 m-2)  Vegetation insolation coefficient
 !
-REAL, PARAMETER             :: ZTAU_SNOWMELT = 300.  ! (s)       Snow Melt timescale: needed to
-!                                                                prevent time step dependence of melt
-!                                                                when snow fraction < unity. 
-!
 REAL, PARAMETER             :: ZTWGHT     = 0.50 ! (-)   (0 < ZTWGHT <= 1/2)
 !                                                                Weight for averaging the actual and flux corrected
 !                                                                temperature depressions. Default is 1/2
@@ -565,7 +563,7 @@ IF( (HSNOW_ISBA == 'D95' .OR. HSNOW_ISBA == 'EBA') .AND. HISBA /= 'DIF' )THEN
 !                                            of course when SNOWSWE > 0.
 !
       WHERE ( ZTN(:) > XTT .AND. PSNOWSWE(:) > 0.0 )
-        PMELT(:) = ZPSN(:)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*ZTAU_SNOWMELT)
+        PMELT(:) = ZPSN(:)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*MAX(XTAU_SMELT,PTSTEP))
       END WHERE
 !
 !                                            close the energy budget: cannot melt 
