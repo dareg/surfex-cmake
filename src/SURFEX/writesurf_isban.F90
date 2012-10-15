@@ -37,24 +37,23 @@
 !!      A.L. Gibelin 04/2009 : BIOMASS and RESP_BIOMASS arrays 
 !!      A.L. Gibelin 06/2009 : Soil carbon variables for CNT option
 !!      B. Decharme  07/2011 : land_use semi-prognostic variables
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !!
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURFEX_MPI, ONLY : NWG_SIZE, WLOG_MPI
-!
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
-USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL,       &
+USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CPHOTO, CRESPSL,              &
                           NNBIOMASS, NNLITTER, NNSOILCARB, NNLITTLEVS, &
                           XTG, XWG, XWGI, XWR, XLAI, TSNOW, XTSRAD_NAT,&
                           XRESA, XAN, XANFM, XLE, XANDAY, TTIME,       &
                           XRESP_BIOMASS, XBIOMASS, XPATCH, XDG,        &
                           XLITTER, XSOILCARB, XLIGNIN_STRUC, LFLOOD,   &
                           XZ0_FLOOD, LTEMP_ARP, NTEMPLAYER_ARP,        &
-                          LGLACIER, XICE_STO, NWG_LAYER
+                          LGLACIER, XICE_STO
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM
 !
@@ -64,6 +63,7 @@ USE MODD_DST_SURF
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITESURF_GR_SNOW
+!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -88,7 +88,6 @@ CHARACTER(LEN=25) :: YFORM          ! Writing format
 INTEGER :: JJ, JLAYER, JP, JNBIOMASS, JNLITTER, JNSOILCARB, JNLITTLEVS  ! loop counter on levels
 INTEGER :: IWORK   ! Work integer
 INTEGER :: JSV
-INTEGER           :: INFOMPI, JL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -116,13 +115,7 @@ END DO
 !
 !* soil liquid water contents
 !
-IF(CISBA=='DIF')THEN
-  IWORK = NWG_SIZE
-ELSE
-  IWORK=NGROUND_LAYER
-ENDIF
-!
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
    WRITE(YLVL,'(I4)') JLAYER     
    YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    YFORM='(A6,I1.1,A8)'
@@ -133,7 +126,7 @@ END DO
 !
 !* soil ice water contents
 !
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
    WRITE(YLVL,'(I4)') JLAYER     
    YRECFM='WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    YFORM='(A7,I1.1,A8)'

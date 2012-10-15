@@ -34,12 +34,13 @@ SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING,                              
 !!      B. Decharme 09/2009 Radiative properties at time t+1 in order to close
 !                           the energy budget between surfex and the atmosphere 
 !!      B. Decharme 01/2010 Add XTT
+!!      B. Decharme 09/2012 New wind implicitation
 !!----------------------------------------------------------------------------
 !
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XTT, XDAY, XTTS
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM,   ONLY : LCPL_ESM
+USE MODD_SURF_ATM,   ONLY : LCPL_ESM, CIMPLICIT_WIND
 USE MODD_WATER_PAR
 !
 USE MODD_WATFLUX_n,    ONLY : CWAT_ALB,XTS, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
@@ -129,8 +130,8 @@ REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral 
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
@@ -149,6 +150,7 @@ REAL, DIMENSION(KI)  :: ZRI        ! Richardson number
 REAL, DIMENSION(KI)  :: ZHU        ! Near surface relative humidity
 REAL, DIMENSION(KI)  :: ZRESA_WATER! aerodynamical resistance
 REAL, DIMENSION(KI)  :: ZUSTAR     ! friction velocity (m/s)
+REAL, DIMENSION(KI)  :: ZUSTAR2    ! square of friction velocity (m2/s2)
 REAL, DIMENSION(KI)  :: ZZ0H       ! heat roughness length over sea
 REAL, DIMENSION(KI)  :: ZQSAT      ! humidity at saturation
 REAL, DIMENSION(KI)  :: ZQA        ! specific humidity (kg/kg)
@@ -187,6 +189,7 @@ ZRI        (:) = XUNDEF
 ZHU        (:) = XUNDEF
 ZRESA_WATER(:) = XUNDEF
 ZUSTAR     (:) = XUNDEF
+ZUSTAR2    (:) = XUNDEF
 ZZ0H       (:) = XUNDEF
 ZQSAT      (:) = XUNDEF
 ZEMIS      (:) = XUNDEF
@@ -234,14 +237,29 @@ CALL WATER_FLUX(XZ0, PTA, ZEXNA, PRHOA, XTS, ZEXNS, ZQA, PRAIN,           &
 !
 ! Momentum fluxes
 !
-ZUSTAR(:) = SQRT(  (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:))/                &
-                    (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))     )  
+IF(CIMPLICIT_WIND=='OLD')THEN
+! old implicitation
+  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:)) /          &
+               (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
+ELSE
+! new implicitation
+  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*(2.*PPEW_B_COEF(:)-ZWIND(:))) /&
+               (1.0-2.0*PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
+!                   
+  ZWIND(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+  ZWIND(:) = MAX(ZWIND(:),0.)
+!
+  WHERE(PPEW_A_COEF(:)/= 0.)
+        ZUSTAR2(:) = MAX( ( ZWIND(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+  ENDWHERE
+!              
+ENDIF
 !
 PSFU = 0.
 PSFV = 0.
 WHERE (ZWIND(:)>0.)
-  PSFU(:) = - PRHOA(:) * ZUSTAR(:)**2 * PU(:) / ZWIND(:)
-  PSFV(:) = - PRHOA(:) * ZUSTAR(:)**2 * PV(:) / ZWIND(:)
+  PSFU(:) = - PRHOA(:) * ZUSTAR2(:) * PU(:) / ZWIND(:)
+  PSFV(:) = - PRHOA(:) * ZUSTAR2(:) * PV(:) / ZWIND(:)
 END WHERE
 !
 ! CO2 flux

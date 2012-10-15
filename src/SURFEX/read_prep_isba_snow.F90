@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_PREP_ISBA_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE)
+      SUBROUTINE READ_PREP_ISBA_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,OUNIF)
 !     #######################################################
 !
 !!****  *READ_PREP_ISBA_SNOW* - routine to read the configuration for snow
@@ -33,6 +33,7 @@
 !!     V. Vionnet   06/2008 - Flag for snow metamorphism
 !                           - Preparation of uniform snow fields : density, temperture,albedo,grain types
 !!                          - Flag to avtivate new maximal liquid water holding capacity : formulation used by Crocus
+!!     B. Decharme  07/2012 Bug init uniform snow
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -74,6 +75,7 @@ CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
 INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
 CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
 CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -81,6 +83,8 @@ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, &
                                     XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
 INTEGER           :: JLAYER
+!
+LOGICAL           :: LFILE
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
@@ -107,8 +111,8 @@ IF (LNAM_READ) THEN
   LSNOW_IDEAL = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.
   !
-  XWSNOW(:) = 0.
-  XRSNOW(:) = XRHOSMAX   
+  XWSNOW(:) = XUNDEF
+  XRSNOW(:) = XUNDEF  
   XTSNOW(:) = XTT  
   XASNOW = XANSMIN
   XSG1SNOW(:) = XUNDEF
@@ -152,6 +156,15 @@ IF (LNAM_READ) THEN
     CALL ABOR1_SFX('READ_PREP_ISBA_SNOW: NUMBER OF SNOW LAYERS MUST BE INCREASED IN NAMELIST DECLARATION')
   ENDIF
   !
+  IF(NSNOW_LAYER>=3)THEN
+    IF(XWSNOW(1)/=XUNDEF.AND.ANY(XWSNOW(2:NSNOW_LAYER)==XUNDEF))THEN
+      WHERE(XWSNOW(2:NSNOW_LAYER)==XUNDEF)XWSNOW(2:NSNOW_LAYER)=0.0
+    ENDIF
+    IF(XRSNOW(1)/=XUNDEF.AND.ANY(XRSNOW(2:NSNOW_LAYER)==XUNDEF))THEN
+      WHERE(XRSNOW(2:NSNOW_LAYER)==XUNDEF)XRSNOW(2:NSNOW_LAYER)=XRSNOW(1)
+    ENDIF    
+  ENDIF
+  !
   ALLOCATE(XWSNOW_p(NSNOW_LAYER))
   ALLOCATE(XRSNOW_p(NSNOW_LAYER))
   ALLOCATE(XTSNOW_p(NSNOW_LAYER))
@@ -175,7 +188,7 @@ IF (LNAM_READ) THEN
     DO JLAYER=1,NSNOW_LAYER
       IF ((XSG1SNOW_p (JLAYER)==XUNDEF .OR. XSG2SNOW_p(JLAYER)==XUNDEF .OR. &
            XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF) &
-           .AND. XWSNOW_p(JLAYER).NE.0.) THEN
+           .AND. XWSNOW_p(JLAYER).NE.0. .AND. XWSNOW_p(JLAYER)/=XUNDEF ) THEN
         WRITE(ILUOUT,*) '----------------------------'
         WRITE(ILUOUT,*) 'WSNOW/=0 AND ONE OF SG1SNOW,'
         WRITE(ILUOUT,*) 'SG2SNOW, HISTSNOW OR AGESNOW'
@@ -203,10 +216,29 @@ HSNOW = CSNOW
 !
 KSNOW_LAYER = NSNOW_LAYER
 !
-IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 ) THEN
-  IF (PRESENT(HFILE)) HFILE = CFILE_SNOW
-  IF (PRESENT(HFILETYPE)) HFILETYPE = CTYPE_SNOW
-END IF
+IF(ALL(XWSNOW_p(:)==XUNDEF).AND.PRESENT(OUNIF))THEN
+    OUNIF=.FALSE.
+ELSEIF(PRESENT(OUNIF))THEN
+    OUNIF=.TRUE.
+ENDIF
+!
+LFILE=(LEN_TRIM(CFILE_SNOW)>0.AND.LEN_TRIM(CTYPE_SNOW)>0)
+!
+IF(PRESENT(HFILE))THEN 
+  IF(LFILE)THEN
+     HFILE = CFILE_SNOW
+  ELSE
+     HFILE = '                         '
+  ENDIF
+ENDIF
+IF(PRESENT(HFILETYPE))THEN 
+  IF(LFILE)THEN
+     HFILETYPE = CTYPE_SNOW
+  ELSE
+     HFILETYPE = '      '
+  ENDIF
+ENDIF
+IF (LFILE.AND.PRESENT(OUNIF)) OUNIF=.FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('READ_PREP_ISBA_SNOW',1,ZHOOK_HANDLE)
 !

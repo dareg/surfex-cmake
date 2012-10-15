@@ -4,7 +4,7 @@ SUBROUTINE COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                   &
             PPOI, PCSP, PTG, PF2, PSW_RAD, PRA, PQA, PQSAT, PLE,      &
             PPSNV, PDELTA, PLAI, PRHOA, PZENITH, PFZERO, PEPSO,       &
             PGAMM, PQDGAMM, PGMES,  PGC, PQDGMES, PT1GMES, PT2GMES,   &
-            PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,                         &
+            PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, PFFV,                   &
             PIACAN_SUNLIT, PIACAN_SHADE, PFRAC_SUN, PIACAN,           &
             PABC, PAN, PANDAY, PRS, PANFM, PGPP, PANF, PRESP_LEAF     ) 
 !   #########################################################################
@@ -63,6 +63,7 @@ SUBROUTINE COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                   &
 !!        S. Lafont    03/11 : Correct a bug fopr grassland below wilting point
 !!      D. Carrer      04/11 : new radiative transfert 
 !!      A. Boone       11/11 : add rsmax to MODD_ISBA_PAR
+!!      B. Decharme    05/12 : Bug : flood fraction in COTWORES
 !!
 !-------------------------------------------------------------------------------
 !
@@ -164,6 +165,8 @@ REAL,DIMENSION(:),    INTENT(IN)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PGMES, PGC, 
 !                                                photosynthetic capacity: maximum temperature
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PIACAN_SUNLIT, PIACAN_SHADE, PFRAC_SUN
+!
+REAL, DIMENSION(:), INTENT(IN)      :: PFFV ! Floodplain fraction over vegetation
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PIACAN ! PAR in the canopy at different gauss level
 !
@@ -451,12 +454,12 @@ PANF(:)= ZTAN(:)
 !
 ! Net assimilation over canopy
 !
-PAN(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:))*PANF(:)*ZLAI(:)
+PAN(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*PANF(:)*ZLAI(:)
 !
 ! Dark respiration over canopy (does not depend on radiation, 
 ! no need to integrate over vertical dimension)
 !
-PRESP_LEAF(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:))*ZRDK(:)*ZLAI(:)
+PRESP_LEAF(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*ZRDK(:)*ZLAI(:)
 !
 ! Gross primary production over canopy
 !

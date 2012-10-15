@@ -32,6 +32,7 @@
 !!    B. Decharme  06/2008  limit of coast coverage under which the coast is replaced by sea or inland water
 !!    B. Decharme  06/2009  remove lack and sea as the user want
 !!    B. Decharme  07/2009  compatibility between Surfex and Orca (Nemo) grid (Earth Model)
+!!    B. Decharme  07/2012  if sea or water imposed to 1 in a grid cell: no extrapolation
 !!
 !----------------------------------------------------------------------------
 !
@@ -440,8 +441,16 @@ ELSE
   '*********************************************************************'
   NSIZE(:) = 1
   WHERE (XWATER(:).NE.0. .AND. ZWATER(:).EQ.0.) NSIZE(:)=0
+! if water imposed to 1 in a grid cell: no extrapolation          
   DO JL=1,SIZE(XCOVER,1)
-    IF (XWATER(JL).EQ.0.) NSIZE(JL)=-1
+     IF(XWATER(JL)==1.0)THEN
+        ZCOVER_WATER(JL,1)=0.0
+        ZCOVER_WATER(JL,2)=1.0
+        ZCOVER_WATER(JL,3:JPCOVER)=0.0
+        NSIZE(JL)=1
+     ELSEIF(XWATER(JL)==0.0)THEN
+        NSIZE(JL)=-1
+     ENDIF
   ENDDO
   DO JCOVER=1,JPCOVER
     WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER
@@ -458,8 +467,15 @@ ELSE
   '*********************************************************************'
   NSIZE(:) = 1
   WHERE (XSEA(:).NE.0. .AND. ZSEA(:).EQ.0.) NSIZE(:)=0
+! if sea imposed to 1 in a grid cell: no extrapolation          
   DO JL=1,SIZE(XCOVER,1)
-    IF (XSEA(JL).EQ.0.) NSIZE(JL)=-1
+     IF(XSEA(JL)==1.0)THEN
+        ZCOVER_SEA(JL,1)=1.0
+        ZCOVER_SEA(JL,2:JPCOVER)=0.0
+        NSIZE(JL)=1
+     ELSEIF(XSEA(JL)==0.0)THEN
+        NSIZE(JL)=-1
+     ENDIF
   ENDDO
   DO JCOVER=1,JPCOVER
     WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER

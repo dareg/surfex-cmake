@@ -24,6 +24,7 @@ SUBROUTINE PREP_HOR_ISBA_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPG
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!      P. Le Moigne 03/2007, Ajout initialisation par ascllv
 !!      B. Decharme  01/2009, Optional Arpege deep soil temperature initialization
+!!      B. Decharme  07/2012, Bug init uniform snow
 !!------------------------------------------------------------------
 !
 !
@@ -78,6 +79,8 @@ CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
 !
 CHARACTER(LEN=6)              :: YFILETYPE ! type of input file
 CHARACTER(LEN=28)             :: YFILE     ! name of file
+CHARACTER(LEN=6)              :: YFILETYPE_SNOW ! type of input file
+CHARACTER(LEN=28)             :: YFILE_SNOW     ! name of file
 CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
 CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizontally
@@ -89,6 +92,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZDG       ! out T grid (x, output soil gr
 INTEGER                       :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
+LOGICAL                       :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: INI, INL, JJ, JL! Work integer
@@ -114,12 +118,20 @@ INI=SIZE(XLAT)
 !*      2.     Snow variables case?
 !
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_ISBA_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE,YFILETYPE)
-  IF (LEN_TRIM(YFILE)>0 .AND. LEN_TRIM(YFILETYPE)>0) GUNIF = .FALSE.
+  CALL READ_PREP_ISBA_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE_SNOW,YFILETYPE_SNOW,GUNIF_SNOW)
+  IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE_SNOW)==0.AND.LEN_TRIM(YFILETYPE_SNOW)==0)THEN
+    IF(LEN_TRIM(YFILE)/=0.AND.LEN_TRIM(YFILETYPE)/=0)THEN
+       YFILE_SNOW    =YFILE
+       YFILETYPE_SNOW=YFILETYPE
+    ELSE
+       GUNIF_SNOW=.TRUE.
+       IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0
+    ENDIF
+  ENDIF
   CALL PREP_HOR_SNOW_FIELDS(HPROGRAM, HSURF,                     &
-                            YFILE, YFILETYPE,                    &
+                            YFILE_SNOW, YFILETYPE_SNOW,          &
                             YFILEPGD, YFILEPGDTYPE,              &
-                            ILUOUT, GUNIF, NPATCH,               &
+                            ILUOUT, GUNIF_SNOW, NPATCH,          &
                             INI,TSNOW, TTIME,                    &
                             XWSNOW, XRSNOW, XTSNOW, XASNOW,      &
                             LSNOW_IDEAL, XSG1SNOW,               &
@@ -150,8 +162,8 @@ ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   ') 
    CALL PREP_ISBA_EXTERN(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_ISBA_BUFFER(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
-!ELSE
-!   CALL ABOR1_SFX('PREP_HOR_ISBA_FIELD: data file type not supported : '//YFILETYPE)
+ELSE
+   CALL ABOR1_SFX('PREP_HOR_ISBA_FIELD: data file type not supported : '//YFILETYPE)
 END IF
 !
 !-------------------------------------------------------------------------------------

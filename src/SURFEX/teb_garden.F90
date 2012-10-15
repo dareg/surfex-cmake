@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE TEB_GARDEN (HZ0H, HCOUPLING, TPTIME,                           &
+    SUBROUTINE TEB_GARDEN (HZ0H, HCOUPLING, HIMPLICIT_WIND, TPTIME,           &
                      PT_CANYON, PQ_CANYON, PU_CANYON,                         &
                      PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,              &
                      PTI_BLD,                                                 &
@@ -125,6 +125,11 @@ CHARACTER(LEN=6)    , INTENT(IN)    :: HZ0H               ! TEB option for z0h r
 CHARACTER(LEN=*)    , INTENT(IN)    :: HCOUPLING          ! type of coupling
                                                           ! 'E' : explicit
                                                           ! 'I' : implicit
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!                                                          
 TYPE(DATE_TIME)     , INTENT(IN)    :: TPTIME             ! current date and time from teb
 !                                                         
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PT_CANYON          ! canyon air temperature
@@ -618,7 +623,7 @@ IF (LGARDEN) THEN
 !*      9.2    Call ISBA for green areas
 !              -------------------------
 !
-  CALL GARDEN(TPTIME, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN,                      &
+  CALL GARDEN(HIMPLICIT_WIND, TPTIME, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN,      &
               ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                  &
               PTSTEP, PZ_LOWCAN,                                                   &
               PT_LOWCAN, PQ_LOWCAN, PEXNS, PRHOA, PCO2, PPS, PRR, PSR, PZENITH,    &
@@ -657,7 +662,8 @@ ENDIF
 !*     10.     Treatment of built covers
 !              -------------------------
 !
-  CALL TEB  (HZ0H, HCOUPLING, PT_CANYON, PQ_CANYON, PU_CANYON,        &
+  CALL TEB  (HZ0H, HCOUPLING, HIMPLICIT_WIND,                         &
+             PT_CANYON, PQ_CANYON, PU_CANYON,                         &
              PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,              &
              PTI_BLD,                                                 &
              PT_ROOF, PT_ROAD, PT_WALL, PWS_ROOF, PWS_ROAD,           &

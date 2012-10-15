@@ -5,8 +5,8 @@
                          PWDRAIN,                                           &
                          PC1, PC2, PC3, PC4B, PC4REF, PWGEQ,                &
                          PD_G2, PD_G3, PWSAT, PWFC,                         &
-                         PDWGI1, PDWGI2, PLEGI, PD_G1, PCT,                 &
-                         PTG,                                               &
+                         PDWGI1, PDWGI2, PLEGI, PD_G1, PCG, PCT,            &
+                         PTG, PTG2,                                         &
                          PWG1, PWG2, PWG3, PWGI1, PWGI2,                    &
                          PDRAIN, HKSAT, PWWILT                              )  
 !     #####################################################################
@@ -63,6 +63,7 @@
 !!                                      single bulk-soil option...i.e. for
 !!                                      cases when HISBA=2-L or d2>=d3 (HISBA=3-L)
 !!                                      for tighter water budget closure 
+!!                  07/08/12 B. Decharme : Soil ice energy conservation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -99,12 +100,13 @@ REAL, DIMENSION(:), INTENT(IN)    :: PLETR, PLEG, PPG, PEVAPCOR
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PWDRAIN  ! minimum Wg for drainage (m3 m-3)
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PC1, PC2, PWGEQ, PCT
+REAL, DIMENSION(:), INTENT(IN)    :: PC1, PC2, PWGEQ, PCG, PCT
 REAL, DIMENSION(:,:), INTENT(IN)  :: PC3
 !                                      soil coefficients
 !                                      C1, C2 = coefficients for the moisture calculations (-)
 !                                      C3     = coefficient for drainage calculation (m)
 !                                      PWGEQ  = equilibrium surface volumetric moisture (m3 m-3)
+!                                      PCG    = soil heat capacity
 !                                      PCT    = grid-averaged heat capacity (K m2 J-1)
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PD_G2, PD_G3, PWSAT, PWFC
@@ -127,8 +129,9 @@ REAL, DIMENSION(:), INTENT(IN)    :: PDWGI1, PDWGI2, PLEGI
 !                                      PLEGI  = surface soil ice sublimation (W m-2)
 !
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PTG
-!                                      PTG = surface temperature at 't' (K)
+REAL, DIMENSION(:), INTENT(INOUT) :: PTG, PTG2
+!                                    PTG  = surface temperature at 't' (K)
+!                                    PTG2 = soil temperature at 't' (K)
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PWG1, PWG2, PWG3, PWGI1, PWGI2
 REAL, DIMENSION(:), INTENT(OUT)   :: PDRAIN
@@ -497,9 +500,12 @@ DO JJ=1,SIZE(PTG)
 ! Make sure that ice has not dropped below
 ! zero due to sublimation (as above).
 !
+  ZEXCESSFC(JJ)= 0.0
+!
   ZEXCESSF(JJ) = MAX(0.0, -PWGI2(JJ))
   PWG2(JJ)     = PWG2(JJ)  - ZEXCESSF(JJ)
   PWGI2(JJ)    = PWGI2(JJ) + ZEXCESSF(JJ)
+  ZEXCESSFC(JJ)= ZEXCESSFC(JJ) - ZEXCESSF(JJ)
 !
 ! Budget check of minimum threshold for liquid
 ! water as for surface: MUCH LESS likely
@@ -509,10 +515,21 @@ DO JJ=1,SIZE(PTG)
   ZEXCESSF(JJ) = MAX(0.0, XWGMIN - PWG2(JJ))
   PWGI2(JJ)    = PWGI2(JJ)  - ZEXCESSF(JJ)
   PWG2(JJ)     = PWG2(JJ)   + ZEXCESSF(JJ)
+  ZEXCESSFC(JJ)= ZEXCESSFC(JJ) + ZEXCESSF(JJ)
 !
 ! removes very small values due to computation precision
 !
-  IF (PWGI2(JJ) < 1.0E-10 * PTSTEP) PWGI2(JJ) = 0.
+  IF (PWGI2(JJ) < 1.0E-10 * PTSTEP) THEN
+      ZEXCESSF(JJ) = PWGI2(JJ)
+      PWG2 (JJ)    = PWG2(JJ) + ZEXCESSF(JJ)
+      PWGI2(JJ)    = 0.
+      ZEXCESSFC(JJ)= ZEXCESSFC(JJ) + ZEXCESSF(JJ)
+  ENDIF
+!
+! Cummulative phase change for the ice/liquid budget corrections:
+!
+  PTG2(JJ)       = PTG2(JJ) - ZEXCESSFC(JJ)*XLMTT*PCG(JJ)*XRHOLW*(PD_G2(JJ)-PD_G1(JJ))
+!
 !
 ENDDO
 IF (LHOOK) CALL DR_HOOK('HYDRO_SOIL',1,ZHOOK_HANDLE)

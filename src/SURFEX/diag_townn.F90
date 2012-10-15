@@ -29,12 +29,14 @@ SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : new diag
+!!      Modified    09/2012 : new PLEI diag required by atmospheric model
 !!------------------------------------------------------------------
 !
 
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : CTOWN
+USE MODD_CSTS,       ONLY : XTT
 !
 USE MODI_DIAG_TEB_n
 USE MODI_DIAG_IDEAL_n
@@ -91,11 +93,12 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHU2M_MIN! Minimum relative humidity at 2m (-
 REAL, DIMENSION(:), INTENT(OUT) :: PHU2M_MAX! Maximum relative humidity at 2m (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M ! wind at 10m (m/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M_MAX! Maximum wind at 10m (m/s)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
 !
 !*      0.2    declarations of local variables
 !
+REAL, DIMENSION(SIZE(PRN)) :: ZDELTA
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
@@ -107,8 +110,14 @@ IF (CTOWN=='TEB   ') THEN
 !
 ! new diag not yet inplemeted for TEB (these diag are required for the climate model)
 !
+! Ok with atmospheric model but LEI (latent heat of sublimation) must by implemented in TEB
+  PLEI(:) = XUNDEF
+  WHERE(PLE(:)/=XUNDEF)
+     ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-PT2M(:)))
+     PLEI  (:) = PLE(:) * ZDELTA(:)
+  ENDWHERE
+!
   PTS      = XUNDEF
-  PLEI     = XUNDEF
   PRNC     = XUNDEF
   PHC      = XUNDEF
   PLEC     = XUNDEF

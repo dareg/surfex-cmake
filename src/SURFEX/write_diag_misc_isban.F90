@@ -34,11 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURFEX_MPI, ONLY : NWG_SIZE, WLOG_MPI
-!
-USE MODI_INIT_IO_SURF_n
-USE MODI_WRITE_SURF
-USE MODI_END_IO_SURF_n
+USE MODD_SURFEX_MPI, ONLY : NWG_SIZE
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
 USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER, NNBIOMASS,       &
@@ -70,6 +66,10 @@ USE MODD_DIAG_MISC_ISBA_n,ONLY :   LSURF_MISC_BUDGET,                   &
                                    XSNOWLIQ, XSNOWTEMP, XDLAI_EFFC,     &
                                    XFAPAR, XFAPIR, XDFAPARC, XDFAPIRC,  &
                                    XFAPAR_BS, XFAPIR_BS
+!
+USE MODI_INIT_IO_SURF_n
+USE MODI_WRITE_SURF
+USE MODI_END_IO_SURF_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -156,7 +156,7 @@ IF (LSURF_MISC_BUDGET) THEN
   IF(CISBA=='DIF')THEN
     !
     IWORK = NWG_SIZE
-    !
+    !          
     DO JLAYER = 1,NGROUND_LAYER
      DO JJ=1,SIZE(NWG_LAYER,1)
         IDEPTH=MAXVAL(NWG_LAYER(JJ,:),NWG_LAYER(JJ,:)/=NUNDEF)
@@ -167,7 +167,7 @@ IF (LSURF_MISC_BUDGET) THEN
       ENDDO 
     ENDDO
   ELSE
-    IWORK = NGROUND_LAYER
+    IWORK = NGROUND_LAYER    
   ENDIF         
   !
   DO JLAYER=1,IWORK
@@ -239,7 +239,7 @@ IF (LSURF_MISC_BUDGET) THEN
     YRECFM='WGI_D_ISBA'
     YCOMMENT='total ice content (solid) over the deep soil (kg/m2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDEEP_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
-    !   
+    !
   ENDIF
   !
   !        2.5    Snow outputs

@@ -271,8 +271,11 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !       The unsaturated conductivity function is computed using LOG/EXP transformation
 !
         ZS           = MIN(1.,ZWSAT(JJ,JL)/PWSAT(JJ,JL))
-        ZLOG         = (2.0*PBCOEF(JJ,JL)+3.0)*LOG(ZS)
-        ZIMAX_ICE(JJ)=ZIMAX_ICE(JJ)+PDZG(JJ,JL)*ZFRZ*PCONDSAT(JJ,JL)*EXP(ZLOG)
+!       Matric potential psi=mpotsat*(w/wsat)**(-bcoef) (m)
+        ZLOG         = PBCOEF(JJ,JL)*LOG(ZS)
+!       Hydraulic conductivity k=frz*condsat*(psi/mpotsat)**(-2-3/bcoef) (m s-1)
+        ZLOG         = -(2.0+3.0/PBCOEF(JJ,JL))*ZLOG
+        ZIMAX_ICE(JJ)= ZIMAX_ICE(JJ)+PDZG(JJ,JL)*ZFRZ*PCONDSAT(JJ,JL)*EXP(-ZLOG)
 !       
         ZDEPTH(JJ) = PD_G(JJ,JL)
 !

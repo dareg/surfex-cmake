@@ -6,12 +6,12 @@
                          PLETR, PEVAP, PGFLUX, PLVTT, PLSTT,                     &
                          PUSTAR,                                                 &
                          PLES3L, PLEL3L, PEVAP3L,                                &
-                         PSNOWALB,                                               &
+                         PRI3L, PALB3L,                                          &
                          PRNSNOW, PHSNOW,  PHPSNOW,                              &
                          PGFLUXSNOW, PUSTARSNOW,                                 &
                          PGRNDFLUX, PLESL,                                       &
                          PEMISNOW,                                               &
-                         PSNOWTEMP, PTS_RAD, PTS, PSNOWHMASS,                    &
+                         PSNOWTEMP, PTS_RAD, PTS, PRI, PSNOWHMASS,               &
                          PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
                          PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
                          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTS_RAD_SNOWFREE,     &
@@ -50,6 +50,8 @@
 !!      Original    10/03/95 
 !!      B. Decharme 01/2009  Floodplains 
 !!      B. Decharme 01/2010  Effective surface temperature (for diag)
+!!      B. Decharme 09/2012  Bug total sublimation flux: no PLESL
+
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -99,7 +101,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PPSNV      ! fraction of the the veg.
 !
 ! Prognostic variables:
 !
-REAL, DIMENSION(:),   INTENT(IN) :: PSNOWALB   ! Snow albedo
+REAL, DIMENSION(:),   INTENT(IN) :: PALB3L      ! Snow albedo
+REAL, DIMENSION(:),   INTENT(IN) :: PRI3L       ! Snow Ridcharson number
 ! 
 ! Diagnostics:
 !
@@ -178,6 +181,9 @@ REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX_ISBA! flux through the ground
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PFFG,PFFV,PFF
 REAL, DIMENSION(:), INTENT(INOUT) :: PLE_FLOOD, PLEI_FLOOD ! Flood evaporation
+!
+REAL, DIMENSION(:),   INTENT(OUT) :: PRI       ! Total Ridcharson number
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
@@ -209,7 +215,7 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 !
 ! Effective surface radiating temperature:
 !
-  PALBT(:)     = PALB(:)*(1.-PPSN(:)) + PPSN(:)*PSNOWALB(:)
+  PALBT(:)     = PALB(:)*(1.-PPSN(:)) + PPSN(:)*PALB3L(:)
   PEMIST(:)    = PEMIS(:)*(1.-PPSN(:)) + PPSN(:)*PEMISNOW(:)
   PTS_RAD(:)   = ( ((1.-PPSN(:))*PEMIS(:)   *PTS_RAD_SNOWFREE(:)**4 +             &
                           PPSN(:) *PEMISNOW(:)*PSNOWTEMP(:,1)**4  )/     &
@@ -261,11 +267,15 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 !
 ! Total sublimation flux:
 !
-  PLEI(:)      = PLES(:) + PLESL(:) + PLEGI(:) + PLEI_FLOOD(:)
+  PLEI(:)      = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
 ! Total FLUX into snow/soil/vegetation surface:
 !
   PGFLUX(:)    = PRN(:) - PH(:) - PLE(:) + PHPSNOW(:) 
+!
+! Ridcharson number:
+!
+  PRI(:)       = (1.-PPSN(:))  * PRI(:)   + PPSN(:) * PRI3L(:)  
 !
 ELSE
 !

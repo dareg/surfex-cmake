@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE TEB  (HZ0H, HCOUPLING, PT_CANYON, PQ_CANYON, PU_CANYON,        &
+    SUBROUTINE TEB  (HZ0H, HCOUPLING, HIMPLICIT_WIND,                         &
+                     PT_CANYON, PQ_CANYON, PU_CANYON,                         &
                      PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,              &
                      PTI_BLD,                                                 &
                      PT_ROOF, PT_ROAD, PT_WALL, PWS_ROOF,PWS_ROAD,            &
@@ -318,6 +319,7 @@
 !!     21 / 10 / 2003   P. Tulet    output aerodynamical resistance
 !!     01 / 07 / 2005   P.Le Moigne Exner functions as arguments to urban_fluxes
 !!     17 / 10 / 2005   (G. Pigeon) computation of anthropogenic heat from domestic heating
+!!     25 / 09 / 2012   B. Decharme new wind implicitation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -357,6 +359,11 @@ CHARACTER(LEN=6), INTENT(IN)      :: HZ0H          ! TEB option for z0h roof & r
 CHARACTER(LEN=*)  , INTENT(IN)    :: HCOUPLING     ! type of coupling
                                                    ! 'E' : explicit
                                                    ! 'I' : implicit
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!                                                   
 REAL, DIMENSION(:), INTENT(INOUT) :: PT_CANYON     ! canyon air temperature
 REAL, DIMENSION(:), INTENT(INOUT) :: PQ_CANYON     ! canyon air specific humidity
 REAL, DIMENSION(:), INTENT(IN)    :: PU_CANYON     ! canyon hor. wind
@@ -671,7 +678,8 @@ ZWS_ROAD_MAX(:) = ZWS_ROAD_MAX(:) * PDF_ROAD(:)
 !*      3.     Surface drag
 !              ------------
 !
-CALL URBAN_DRAG(HZ0H, PTSTEP, PT_CANYON, PQ_CANYON, PU_CANYON,       &
+CALL URBAN_DRAG(HZ0H, HIMPLICIT_WIND, PTSTEP,                        &
+                PT_CANYON, PQ_CANYON, PU_CANYON,                     &
                 PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,          &
                 ZTS_ROOF, ZTS_ROAD, ZTS_WALL,                        &
                 PTS_GARDEN, PDN_ROOF, PDN_ROAD,                      &
@@ -808,7 +816,8 @@ CALL ROAD_LAYER_E_BUDGET(PT_ROAD, ZTS_WALL, PQSAT_ROAD,                &
 !*      15.    Fluxes over built surfaces
 !              --------------------------
 !
-CALL URBAN_FLUXES   (PT_CANYON, PQ_CANYON,                                    &
+CALL URBAN_FLUXES   (HIMPLICIT_WIND,                                          &
+                     PT_CANYON, PQ_CANYON,                                    &
                      PT_LOWCAN, PQ_LOWCAN,                                    &
                      PT_ROOF(:,1),PT_ROAD(:,1),PT_WALL(:,1),                  &
                      PPEW_A_COEF, PPEW_B_COEF,                                &

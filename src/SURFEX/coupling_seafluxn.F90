@@ -35,11 +35,12 @@ SUBROUTINE COUPLING_SEAFLUX_n(HPROGRAM, HCOUPLING,                              
 !!      Modified    05/2009 : V. Masson : implicitation of momentum fluxes
 !!      Modified    09/2009 : B. Decharme Radiative properties at time t+1
 !!      Modified    01/2010 : B. Decharme Add XTTS
+!!      Modified    09/2012 : B. Decharme New wind implicitation
 !!---------------------------------------------------------------------
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XLVTT, XTTS, XDAY
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM,   ONLY : LCPL_ESM
+USE MODD_SURF_ATM,   ONLY : LCPL_ESM, CIMPLICIT_WIND
 !
 USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
 USE MODD_SEAFLUX_n,  ONLY : XSST, XTICE, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
@@ -139,8 +140,8 @@ REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral 
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
@@ -162,6 +163,7 @@ REAL, DIMENSION(KI) :: ZRI        ! Richardson number
 REAL, DIMENSION(KI) :: ZHU        ! Near surface relative humidity
 REAL, DIMENSION(KI) :: ZRESA_SEA  ! aerodynamical resistance
 REAL, DIMENSION(KI) :: ZUSTAR     ! friction velocity (m/s)
+REAL, DIMENSION(KI) :: ZUSTAR2    ! square of friction velocity (m2/s2)
 REAL, DIMENSION(KI) :: ZZ0H       ! heat roughness length over sea
 REAL, DIMENSION(KI) :: ZQSAT      ! humidity at saturation
 REAL, DIMENSION(KI) :: ZQA        ! specific humidity (kg/kg)
@@ -206,6 +208,7 @@ ZRI      (:) = XUNDEF
 ZHU      (:) = XUNDEF
 ZRESA_SEA(:) = XUNDEF
 ZUSTAR   (:) = XUNDEF
+ZUSTAR2  (:) = XUNDEF
 ZZ0H     (:) = XUNDEF
 ZQSAT    (:) = XUNDEF
 ZEMIS    (:) = XUNDEF
@@ -306,14 +309,29 @@ END SELECT
 !
 ! Momentum fluxes
 !
-ZUSTAR(:) = SQRT(  (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:))/                &
-                    (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))     )  
+IF(CIMPLICIT_WIND=='OLD')THEN
+! old implicitation (m2/s2)
+  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:)) /            &
+              (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
+ELSE
+! new implicitation (m2/s2)
+  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*(2.*PPEW_B_COEF(:)-ZWIND(:))) /&
+              (1.0-2.0*PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
+!                   
+  ZWIND(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+  ZWIND(:) = MAX(ZWIND(:),0.)
+!
+  WHERE(PPEW_A_COEF(:)/= 0.)
+        ZUSTAR2(:) = MAX( ( ZWIND(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+  ENDWHERE
+!              
+ENDIF
 !
 PSFU = 0.
 PSFV = 0.
 WHERE (ZWIND(:)>0.)
-  PSFU(:) = - PRHOA(:) * ZUSTAR(:)**2 * ZU(:) / ZWIND(:)
-  PSFV(:) = - PRHOA(:) * ZUSTAR(:)**2 * ZV(:) / ZWIND(:)
+  PSFU(:) = - PRHOA(:) * ZUSTAR2(:) * ZU(:) / ZWIND(:)
+  PSFV(:) = - PRHOA(:) * ZUSTAR2(:) * ZV(:) / ZWIND(:)
 END WHERE
 !
 ! CO2 flux

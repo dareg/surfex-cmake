@@ -2,7 +2,7 @@
 SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
                                PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2,        &
                                PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,      &
-                               PLW1,PLW2,PSNOW1,PRAIN1,                  &
+                               PLW1,PLW2,PSNOW2,PRAIN2,                  &
                                PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2         )  
 !**************************************************************************
 !
@@ -78,7 +78,7 @@ INTEGER,INTENT(IN) :: KSURF_STEP, KNB_ATM
 INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_OMP
 REAL, DIMENSION(:),INTENT(IN) :: PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2
 REAL, DIMENSION(:),INTENT(IN) :: PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,PLW1,PLW2
-REAL, DIMENSION(:),INTENT(IN) :: PSNOW1,PRAIN1,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2
+REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2
 
 ! local variables
 REAL :: ZDTA, ZDQA, ZDDIR_SW, ZDSCA_SW, ZDLW,  &
@@ -112,50 +112,54 @@ ENDIF
 !
 DO J = NINDX1,NINDX2
   !
-  ! Compute wind components
-  !
-  ! zonal wind
-  ZU1 = PWIND1(J) * SIN(PDIR1(J)*ZPI)
-  ZV1 = PWIND1(J) * COS(PDIR1(J)*ZPI)
-  ZU2 = PWIND2(J) * SIN(PDIR2(J)*ZPI)
-  ZV2 = PWIND2(J) * COS(PDIR2(J)*ZPI)
-  !
-  ZDU = (ZU2-ZU1)*ZCOEF
-  ZDV = (ZV2-ZV1)*ZCOEF
-  !
-  ! Compute variation from atmospheric time step J and J+1
-  !
-  ZDTA     = (PTA2    (J)-PTA1    (J))*ZCOEF
-  ZDQA     = (PQA2    (J)-PQA1    (J))*ZCOEF
-  ZDLW     = (PLW2    (J)-PLW1    (J))*ZCOEF
-  ZDPS     = (PPS2    (J)-PPS1    (J))*ZCOEF
-  ZDCO2    = (PCO22   (J)-PCO21   (J))*ZCOEF
-  !
-  ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
-  ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
-  !
-  !  
-  XU    (J)= ZU1     + ZDU  
-  XV    (J)= ZV1     + ZDV  
-  !
-  XTA   (J)= PTA1    (J)+ ZDTA 
-  XQA   (J)= PQA1    (J)+ ZDQA 
-  XLW   (J)= PLW1    (J)+ ZDLW 
-  XPS   (J)= PPS1    (J)+ ZDPS 
-  XCO2  (J)= PCO21   (J)+ ZDCO2
-  !
-  XDIR_SW(J,1)= PDIR_SW1(J)+ZDDIR_SW
-  XSCA_SW(J,1)= PSCA_SW1(J)+ZDSCA_SW
-  !
-  !
-  XRAIN (J)= PRAIN1(J)
-  XSNOW (J)= PSNOW1(J)
-  !
-  !
-  XRHOA(J) = XPS(J) / ( XTA(J)*XRD * ( 1.+((XRV/XRD)-1.)*XQA(J) ) + XZREF(J)*XG )
-  !
-  ! humidity in kg/m3
-  XQA(J) = XQA(J) * XRHOA(J)
+  IF (PTA1(J)/=XUNDEF) THEN
+    ! 
+    ! Compute wind components
+    !
+    ! zonal wind
+    ZU1 = PWIND1(J) * SIN(PDIR1(J)*ZPI)
+    ZV1 = PWIND1(J) * COS(PDIR1(J)*ZPI)
+    ZU2 = PWIND2(J) * SIN(PDIR2(J)*ZPI)
+    ZV2 = PWIND2(J) * COS(PDIR2(J)*ZPI)
+    !
+    ZDU = (ZU2-ZU1)*ZCOEF
+    ZDV = (ZV2-ZV1)*ZCOEF
+    !
+    ! Compute variation from atmospheric time step J and J+1
+    !
+    ZDTA     = (PTA2    (J)-PTA1    (J))*ZCOEF
+    ZDQA     = (PQA2    (J)-PQA1    (J))*ZCOEF
+    ZDLW     = (PLW2    (J)-PLW1    (J))*ZCOEF
+    ZDPS     = (PPS2    (J)-PPS1    (J))*ZCOEF
+    ZDCO2    = (PCO22   (J)-PCO21   (J))*ZCOEF
+    !
+    ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
+    ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
+    !
+    !  
+    XU    (J)= ZU1     + ZDU  
+    XV    (J)= ZV1     + ZDV  
+    !
+    XTA   (J)= PTA1    (J)+ ZDTA 
+    XQA   (J)= PQA1    (J)+ ZDQA 
+    XLW   (J)= PLW1    (J)+ ZDLW 
+    XPS   (J)= PPS1    (J)+ ZDPS 
+    XCO2  (J)= PCO21   (J)+ ZDCO2
+    !
+    XDIR_SW(J,1)= PDIR_SW1(J)+ZDDIR_SW
+    XSCA_SW(J,1)= PSCA_SW1(J)+ZDSCA_SW
+    !
+    !
+    XRAIN (J)= PRAIN2(J)
+    XSNOW (J)= PSNOW2(J)
+    !
+    !
+    XRHOA(J) = XPS(J) / ( XTA(J)*XRD * ( 1.+((XRV/XRD)-1.)*XQA(J) ) + XZREF(J)*XG )
+    !
+    ! humidity in kg/m3
+    XQA(J) = XQA(J) * XRHOA(J)
+    !
+  ENDIF
   !
 ENDDO
 !
@@ -197,7 +201,9 @@ IF (MINVAL(XPS)    .EQ.XUNDEF) THEN            ! No surface Pressure
 ENDIF
 !
 !* forcing level pressure from hydrostatism
-XPA(:) = XPS(:) - XRHOA(:) * XZREF(:) * XG
+WHERE(XPS(:)/=XUNDEF)
+  XPA(:) = XPS(:) - XRHOA(:) * XZREF(:) * XG
+ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('OL_TIME_INTERP_ATM',1,ZHOOK_HANDLE)
 !

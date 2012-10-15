@@ -54,8 +54,14 @@
 !                              (avoids rare but possible oscillatory behavior)
 !                              Also, add minimum (numerical) melt/freeze efficieny to prevent
 !                              prolonged periods of small ice amounts approaching zero.
-!      Modified    05/2010     Decharme
-!                              Possibility to use Brook and Corey or Van Genuchten
+!
+!!      Modified    01/06/11   Boone
+!                              Use apparent heat capacity linearization for freezing
+!                              (when temperature depenence on ice change is direct)
+!                              Do away with efficiency coefficients as they acted to provide
+!                              numerical stability: not needed as apparent heat capacity increases
+!                              the effective heat capacity thus increasing stability.
+!                              NOTE: for now considers Brooks & Corey type water retention.
 !
 !      Modified    08/2011     Decharme
 !                              Optimization
@@ -171,6 +177,7 @@ DO JL=1,INL
 !
 !     Calculate maximum temperature for ice based on Gibbs free energy: first
 !     compute soil water potential using Brook and Corey (1966) model:
+!     psi=mpotsat*(w/wsat)**(-bcoef)
 !
       ZWORK = PWG(JJ,JL)/PWSATZ(JJ,JL)
       ZLOG  = PBCOEFZ(JJ,JL)*LOG(ZWORK)
@@ -194,7 +201,7 @@ DO JL=1,INL
       ENDIF
 !
 !     *Melt* ice if energy and ice available:
-      ZPHASEM  = (PTSTEP/PTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.,ZDELTAT),ZWGIM*XLMTT*XRHOLW)
+      ZPHASEM  = (PTSTEP/PTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.0,ZDELTAT),ZWGIM*XLMTT*XRHOLW)
 !
 !     *Freeze* liquid water if energy and water available:
       ZPHASEF  = (PTSTEP/PTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.0,-ZDELTAT),MAX(0.0,ZWGM-ZWGMAX)*XLMTT*XRHOLW)

@@ -11,6 +11,7 @@
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!                  08/2009 : TIME_BUDGETC for all Tile
+!       B. decharme 09/2012 : XQS_TILE not initialize
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -125,6 +126,7 @@ XHU2M_MIN_TILE= XUNDEF
 XHU2M_MAX_TILE= XUNDEF
 XZON10M_TILE  = XUNDEF
 XMER10M_TILE  = XUNDEF
+XQS_TILE      = XUNDEF
 XZ0_TILE      = XUNDEF
 XZ0H_TILE     = XUNDEF
 XSWD_TILE     = XUNDEF

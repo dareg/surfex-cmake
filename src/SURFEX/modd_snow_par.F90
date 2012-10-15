@@ -67,6 +67,11 @@ REAL, SAVE       :: XZ0SN
 !
 REAL, SAVE       :: XZ0HSN
 !
+! Snow Melt timescale with D95 (s): needed to prevent time step 
+! dependence of melt when snow fraction < unity.
+!
+REAL, SAVE       :: XTAU_SMELT
+!
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
 !--------------------------------------------------------------------------------

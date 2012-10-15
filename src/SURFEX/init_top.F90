@@ -88,7 +88,7 @@ REAL,    DIMENSION(:), INTENT(INOUT) :: PM
 REAL, DIMENSION(SIZE(PM)) :: ZD_TOP, ZWSAT_AVG, ZWWILT_AVG
 !                            ZD_TOP  = Topmodel active layer
 !
-REAL                  :: ZXI, ZPHI, ZNU, ZTI_MEAN, ZTI_MIN, ZTI_MAX, ZTI_STD
+REAL                  :: ZXI, ZPHI, ZNU, ZTI_MEAN, ZTI_MIN, ZTI_MAX, ZTI_STD, ZTI_SKEW
 !                        ZTI_MEAN= ti mean after regression
 !                        ZXI     = ti pdf parameter
 !                        ZPHI    = ti pdf parameter
@@ -248,15 +248,23 @@ DO I=1,INI
 !
 !    Calculate topographic index pdf parameters 
 !
+!    Numerical problem especialy over Greenland
      IF(PTI_SKEW(I)<=0.2)THEN
-!           
+!     
+       ZTI_SKEW=0.2
+!       
        WRITE(KLUOUT,*)'TI_SKEW is too low or negatif (=',PTI_SKEW(I),'),' 
        WRITE(KLUOUT,*)'then PHI is too big for the grid-cell',I,'So,GAMMA(PHI) -> +inf.'
        WRITE(KLUOUT,*)'The applied solution is to put TI_SKEW = 0.2'
+       IF(ZTI_STD<1.0)THEN
+         WRITE(KLUOUT,*)'In addition TI_STD is too low (=',ZTI_STD,'),' 
+         WRITE(KLUOUT,*)'The applied solution is to put TI_STD = 1.0'
+         ZTI_STD=1.0
+       ENDIF               
 !
        ZAR  = ZAR +1.0
 !     
-       ZXI  = 0.2*ZTI_STD/X2 
+       ZXI  = ZTI_SKEW*ZTI_STD/X2 
        ZPHI = (ZTI_STD/ZXI)**X2
 !
      ELSE

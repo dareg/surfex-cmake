@@ -54,6 +54,7 @@
 !!                  11/2009  (S.Senesi) returns precipitation intercepted by  
 !                               the vegetation 
 !!                  07/2011  (B. Decharme) delete SGH for very fine precipitation
+!!                  09/2012  (B. Decharme) Computation efficiency for HRAIN=='SGH'
 !
 !-------------------------------------------------------------------------------
 !
@@ -112,6 +113,8 @@ REAL, DIMENSION(SIZE(PVEG)) :: ZWR ! for time stability scheme
 !
 REAL, DIMENSION(SIZE(PVEG)) :: ZRUIR, ZRUIR2 ! dripping from the vegetation
 !
+REAL                        :: ZLIM
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -159,7 +162,9 @@ IF(HRAIN=='SGH')THEN
 !
 !  Subgrid dripping from Wr
 !
-   WHERE(PRRVEG(:)*PTSTEP>X001.AND.PWR(:)>0.0)
+   ZLIM=X001/PTSTEP
+!
+   WHERE(PRRVEG(:)>ZLIM.AND.PWR(:)>0.0)
         ZRUIR(:) = PRRVEG(:)*EXP(PMUF(:)*(PWR(:)-PWRMAX(:))/(PRRVEG(:)*PTSTEP))
         ZRUIR(:) = MIN(ZRUIR(:),PWR(:)/PTSTEP) 
    ENDWHERE
@@ -176,7 +181,7 @@ IF(HRAIN=='SGH')THEN
 !    the predicted Wr* at the midle of the time step for time numerical stability 
 !    (<=> Runge-Kutta order 1 rang 1)
 !
-     WHERE(PRRVEG(:)*PTSTEP>X001.AND.ZWR(:)<=0.0)
+     WHERE(PRRVEG(:)>ZLIM.AND.ZWR(:)<=0.0)
            ZRUIR(:) = PRRVEG(:)*EXP(PMUF(:)*(PWR(:)-PWRMAX(:))/(PRRVEG(:)*PTSTEP/2.))
            ZRUIR(:) = MIN(ZRUIR(:),PWR(:)/(PTSTEP/2.))
            ZWR  (:) = PWR(:)-PTSTEP*ZRUIR(:)/2.
@@ -185,7 +190,7 @@ IF(HRAIN=='SGH')THEN
 !
 !    Calculate the corrected dripping from the predicted Wr*
 !
-     WHERE(PRRVEG(:)*PTSTEP>X001.AND.ZWR(:)>0.0)
+     WHERE(PRRVEG(:)>ZLIM.AND.ZWR(:)>0.0)
           ZRUIR(:) = PRRVEG(:)*EXP(PMUF(:)*(ZWR(:)-PWRMAX(:))/(PRRVEG(:)*PTSTEP))
           ZRUIR(:) = MIN(ZRUIR(:),PWR(:)/PTSTEP) 
      ENDWHERE

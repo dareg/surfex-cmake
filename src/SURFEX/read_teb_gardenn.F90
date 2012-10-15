@@ -33,6 +33,7 @@
 !!      READ_SURF for general reading : 08/2003 (S.Malardel)
 !!      B. Decharme  2008    : Floodplains
 !!      B. Decharme  01/2009 : Optional Arpege deep soil temperature read
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,8 +41,8 @@
 !
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
-USE MODD_TEB_GARDEN_n,   ONLY : NGROUND_LAYER, NWG_LAYER, NPATCH,   &
-                                CPHOTO, CISBA, CRESPSL, NNBIOMASS,  &
+USE MODD_TEB_GARDEN_n,   ONLY : NGROUND_LAYER, NPATCH,              &
+                                CPHOTO, CRESPSL, NNBIOMASS,         &
                                 XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
                                 XRESA, XANFM, XANF, XAN, XLE, XANDAY,&
                                 XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
@@ -116,14 +117,8 @@ END DO
 !
 !* soil liquid water content
 !
-IF(CISBA=='DIF')THEN
-  IWORK=MAXVAL(NWG_LAYER(:,:),NWG_LAYER(:,:)/=NUNDEF)
-ELSE
-  IWORK=NGROUND_LAYER
-ENDIF
-!
 ALLOCATE(XWG(ILU,IWORK,NPATCH))
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='TWN_WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
@@ -133,7 +128,7 @@ END DO
 !* soil ice water content
 !
 ALLOCATE(XWGI(ILU,IWORK,NPATCH))
-DO JLAYER=1,IWORK
+DO JLAYER=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='TWN_WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)

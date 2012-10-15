@@ -14,7 +14,8 @@ SUBROUTINE flake_interface (KI, &
 ! Surface heat and momentum fluxes                       
                                Q_sensible, Q_latent ,Q_momentum, z0, z0t, Ri, ustar, Cd_a,        &
 ! Switches to configure FLake runs
-                               lflk_botsed, hflk_flux, PPEW_A_COEF, PPEW_B_COEF, rho_a )  
+                               lflk_botsed, hflk_flux, PPEW_A_COEF, PPEW_B_COEF, rho_a,           &
+                               HIMPLICIT_WIND                                                     )  
 !------------------------------------------------------------------------------
 !
 ! Description:
@@ -175,6 +176,10 @@ REAL, DIMENSION(KI), INTENT(IN) ::   &
     rho_a                             ,  &! Air density (kg m ^{-3}) (from forcing atm. data)  
     emis_water                            ! Water surface emissivity
 !
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!
 LOGICAL ::  lflk_botsed ! Switch, .TRUE. -> use the bottom-sediment scheme 
 CHARACTER(LEN=3) ::  hflk_flux     ! 'DEF'/'WAT' compute the surface fluxes with water_flux/flake
 
@@ -226,6 +231,9 @@ REAL, DIMENSION(KI), INTENT(INOUT)  ::    &
 INTEGER  :: JL                  ! loop counter on horizontal points
 
 REAL :: T_sfc_n ! Surface temperature at the new time step [K]
+REAL :: ustar2  ! square of air friction velocity (m2/s2)  
+REAL :: zvmod   ! wind at t+1  
+
 REAL, DIMENSION(KI) ::    &
     Q_watvap                      ! Flux of water vapour [kg m^{-2} s^{-1}]  
 
@@ -330,10 +338,25 @@ opticpar_water(JL) = opticpar_medium(1,                       &
       Cd_a(JL) = - Q_momentum(JL) / rho_a(JL) / U_a_in(JL)**2 
       ! 2nd step : friction velocity (for air) computed with future wind speed
       !            (the latter computed using implicit coefficients)
-      ustar(JL) = sqrt ((Cd_a(JL)*U_a_in(JL)*PPEW_B_COEF(JL))/                &
-                          (1.0-rho_a(JL)*Cd_a(JL)*U_a_in(JL)*PPEW_A_COEF(JL)) )  
+      ustar2 = 0.0
+      zvmod  = U_a_in(JL)
+      IF(HIMPLICIT_WIND=='OLD')THEN
+      !  old implicitation
+         ustar2 = (Cd_a(JL)*U_a_in(JL)*PPEW_B_COEF(JL))/            &
+                  (1.0-rho_a(JL)*Cd_a(JL)*U_a_in(JL)*PPEW_A_COEF(JL))
+      ELSE
+      !  new implicitation
+         ustar2 = (Cd_a(JL)*U_a_in(JL)*(2.*PPEW_B_COEF(JL)-U_a_in(JL)))/ &
+                  (1.0-2.0*rho_a(JL)*Cd_a(JL)*U_a_in(JL)*PPEW_A_COEF(JL))
+         zvmod  = rho_a(JL)*PPEW_A_COEF(JL)*ustar2 + PPEW_B_COEF(JL)
+         zvmod  = max(0.0,zvmod)
+         IF(PPEW_A_COEF(JL)/= 0.)THEN
+           ustar2 = max((zvmod-PPEW_B_COEF(JL))/(rho_a(JL)*PPEW_A_COEF(JL)),0.0)
+         ENDIF
+      ENDIF
+      ustar(JL) =sqrt(ustar2)
       ! 3rd step : momentum flux computed with the future wind speed
-      Q_momentum(JL) = - rho_a(JL) * ustar(JL)**2
+      Q_momentum(JL) = - rho_a(JL) * ustar2
 
    END IF
    u_star_w_flk = SQRT(-Q_momentum(JL)/tpl_rho_w_r)

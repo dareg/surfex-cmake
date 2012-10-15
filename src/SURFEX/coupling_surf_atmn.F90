@@ -75,7 +75,7 @@ USE MODI_COUPLING_TOWN_n
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef OL
 INCLUDE 'mpif.h'
 #endif
 !
@@ -259,7 +259,7 @@ CALL RW_PRECIP_n(HPROGRAM,PRAIN,PSNOW)
 ! Call ALMA interfaces for sea, water, nature and town here...
 !--------------------------------------------------------------------------------------
 !
-#ifndef NOMPI
+#ifdef OL
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -279,7 +279,7 @@ IF(GSEA)THEN
 !
 ENDIF
 !
-#ifndef NOMPI
+#ifdef OL
 XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
 XTIME0 = MPI_WTIME()
 #endif
@@ -298,7 +298,7 @@ IF(GWATER)THEN
 !
 ENDIF 
 !
-#ifndef NOMPI
+#ifdef OL
 XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
 XTIME0 = MPI_WTIME()
 #endif
@@ -317,7 +317,7 @@ IF(GNATURE)THEN
 !
 ENDIF 
 !
-#ifndef NOMPI
+#ifdef OL
 XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
 XTIME0 = MPI_WTIME()
 #endif
@@ -336,7 +336,7 @@ IF(GTOWN)THEN
 !
 ENDIF 
 !
-#ifndef NOMPI
+#ifdef OL
 XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
 #endif
 !
@@ -374,11 +374,12 @@ CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !* adds friction due to subscale orography to momentum fluxes
+!  but only over continental area
 !
 IF (CROUGH=="Z01D" .OR. CROUGH=="Z04D") THEN
-  CALL SSO_Z0_FRICTION_n(PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
+  CALL SSO_Z0_FRICTION_n(XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
 ELSE IF (CROUGH=="BE04") THEN
-  CALL SSO_BE04_FRICTION_n(PTSTEP,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+  CALL SSO_BE04_FRICTION_n(PTSTEP,XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

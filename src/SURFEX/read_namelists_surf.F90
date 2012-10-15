@@ -14,7 +14,8 @@ USE MODD_SURF_ATM,       ONLY : XCISMIN, XVMODMIN, LALDTHRES,             &
                                    XWINDMIN, LVZIUSTAR0_ARP,                &
                                    XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
                                    XRRSCALE, XRRGAMMA, XUTILGUST, LCPL_ARP, &
-                                   LQVNPLUS, LVERTSHIFT  
+                                   LQVNPLUS, LVERTSHIFT,                    &
+                                   CIMPLICIT_WIND  
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE                                    
 !
@@ -43,7 +44,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_SURF',0,ZHOOK_HANDLE)
-CALL DEFAULT_SURF_ATM(ZOUT_TSTEP,XCISMIN,XVMODMIN,LALDTHRES,    &
+CALL DEFAULT_SURF_ATM(ZOUT_TSTEP,XCISMIN,XVMODMIN,LALDTHRES,      &
                          LDRAG_COEF_ARP, LALDZ0H, LNOSOF,         &
                          LRW_PRECIP, XEDB, XEDC, XEDD, XEDK,      &
                          XUSURIC, XUSURID, XUSURICL,              &
@@ -52,7 +53,7 @@ CALL DEFAULT_SURF_ATM(ZOUT_TSTEP,XCISMIN,XVMODMIN,LALDTHRES,    &
                          LVZIUSTAR0_ARP,                          &
                          XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
                          XRRSCALE, XRRGAMMA,XUTILGUST, LCPL_ARP,  &
-                         LQVNPLUS, LVERTSHIFT                     )   
+                         LQVNPLUS, LVERTSHIFT, CIMPLICIT_WIND     )
 !                       
 CALL DEFAULT_WRITE_SURF_ATM(LNOWRITE_CANOPY, LNOWRITE_TEXFILE)
 !

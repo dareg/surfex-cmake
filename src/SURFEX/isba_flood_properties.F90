@@ -32,6 +32,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original      25/05/08 
+!!      Modified      09/2009  B. Decharme: limitation of Ri in surface_ri.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -49,7 +50,7 @@ USE MODI_WIND_THRESHOLD
 USE MODE_SURF_FLOOD_FRAC
 USE MODE_THERMOS
 !
-USE MODD_SURF_ATM,    ONLY : LDRAG_COEF_ARP, XVCHRNK, XVZ0CM, XRIMAX
+USE MODD_SURF_ATM,    ONLY : LDRAG_COEF_ARP, XVCHRNK, XVZ0CM
 !
 USE MODI_PACK_SAME_RANK
 USE MODI_UNPACK_SAME_RANK
@@ -171,6 +172,11 @@ ZFFV_NOSNOW(:) = FLOOD_FRAC_VEG(ZLAI,ZPSNV,ZFFLOOD)
 !       2.     roughness length
 !              ----------------
 !
+! * Richardson number (and possible limitation)
+!
+CALL SURFACE_RI(ZTG,ZQSAT,ZEXNS,ZEXNA,ZTA,ZQA,  &
+                  ZZREF,ZUREF,ZDIRCOSZW,ZVMOD,ZRI)  
+!
 ! * Wind threshold
 !
 ZVMOD(:)=WIND_THRESHOLD(ZVMOD(:),ZUREF(:))
@@ -178,13 +184,6 @@ ZVMOD(:)=WIND_THRESHOLD(ZVMOD(:),ZUREF(:))
 ! * Saturated specified humidity near the water surface
 !
 ZQSAT(:) = QSAT(ZTG(:),ZPS(:))
-!
-! * Richardson number (and possible limitation)
-!
-CALL SURFACE_RI(ZTG,ZQSAT,ZEXNS,ZEXNA,ZTA,ZQA,  &
-                  ZZREF,ZUREF,ZDIRCOSZW,ZVMOD,ZRI)  
-!
-ZRI(:) = MIN(ZRI(:),XRIMAX)
 !
 ! * Detection of flood ice
 !

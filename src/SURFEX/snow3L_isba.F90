@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, TPTIME, PTSTEP, PVEGTYPE,      &
+SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,                &
+                         TPTIME, PTSTEP, PVEGTYPE,                                           &
                          PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                            &
                          PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                         &
                          PTG, PCG, PCT, PSOILCONDZ,                                          &
@@ -13,7 +14,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, TPTIME, PTSTEP, PV
                          PUSTARSNOW,                                                         &
                          PPSN, PSRSFC, PRRSFC, PSMELTFLUX,                                   &
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
-                         PSNOWHMASS,PZENITH, PLAT, PLON                                    )  
+                         PSNOWHMASS, PRI, PZENITH, PLAT, PLON                                )  
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -101,9 +102,15 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
 !                                      'DEF' = Default: Louis (ISBA: Noilhan and Mahfouf 1996)
 !                                      'RIL' = Limit Richarson number under very stable 
 !                                              conditions (currently testing)
+!
 LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow and ice, 
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!
 TYPE(DATE_TIME), INTENT(IN)         :: TPTIME     ! current date and time
 !
 !
@@ -212,6 +219,10 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ, PSNOWTEMP, PSNOWDZ
 !                                      PSNOWLIQ  = Snow layer(s) liquid water content (m)
 !                                      PSNOWTEMP = Snow layer(s) temperature (m)
 !                                      PSNOWDZ   = Snow layer(s) thickness (m)
+!
+REAL, DIMENSION(:), INTENT(OUT)     :: PRI
+!                                      PRI = Ridcharson number
+!
 ! ajout_EB pour prendre en compte angle zenithal du soleil dans LRAD
 ! puis plus tard dans LALB
 REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
@@ -265,6 +276,7 @@ PRRSFC(:)      = PRR(:)         ! so initialize here if SNOW3L not used:
 PEMISNOW(:)    = 1.0
 PSMELTFLUX(:)  = 0.0
 PCDSNOW(:)     = 0.0
+PRI(:)         = XUNDEF
 !
 ZSNOW(:)       = 0.0
 ZSNOWSWE_1D(:) = 0.0
@@ -447,6 +459,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_HPSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_LES3L
 REAL, DIMENSION(KSIZE1)        :: ZP_LEL3L
 REAL, DIMENSION(KSIZE1)        :: ZP_EVAP
+REAL, DIMENSION(KSIZE1)        :: ZP_RI
 REAL, DIMENSION(KSIZE1)        :: ZP_EMISNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_CDSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_USTARSNOW
@@ -555,32 +568,34 @@ WHERE(ZP_SNOWSWE(:,:)>0.) &
 !  
 IF (HSNOW_ISBA=='CRO') THEN 
 
-  CALL SNOWCRO(HSNOWRES, TPTIME, OGLACIER, ZP_PEW_A_COEF, ZP_PEW_B_COEF,  &
-             ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,  &
-             ZP_SNOWSWE,ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,              &
-             ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWHIST, ZP_SNOWAGE, PTSTEP, &
-             ZP_PS, ZP_SRSNOW, ZP_RRSNOW ,ZP_PSN3L, ZP_TA, ZP_TG,         &
-             ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,      &
-             ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,  &
-             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G,ZP_SNOWLIQ,           &
-             ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX, ZP_EVAPCOR, &
-             ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,      &
-             ZP_LEL3L, ZP_EVAP, ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,      &
+  CALL SNOWCRO(HSNOWRES, TPTIME, OGLACIER, HIMPLICIT_WIND,                 &
+             ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
+             ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,   &
+             ZP_SNOWSWE,ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,               &
+             ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWHIST, ZP_SNOWAGE, PTSTEP,  &
+             ZP_PS, ZP_SRSNOW, ZP_RRSNOW ,ZP_PSN3L, ZP_TA, ZP_TG,          &
+             ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,       &
+             ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,   &
+             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G,ZP_SNOWLIQ,            &
+             ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX, ZP_EVAPCOR,  &
+             ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,       &
+             ZP_LEL3L, ZP_EVAP, ZP_RI, ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,&
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_VEGTYPE, ZP_ZENITH, ZP_LAT, ZP_LON)    
 
 ELSE 
 
-  CALL SNOW3L(HSNOWRES, TPTIME, OGLACIER, ZP_PEW_A_COEF, ZP_PEW_B_COEF,   &
-             ZP_PET_A_COEF, ZP_PEQ_A_COEF,ZP_PET_B_COEF, ZP_PEQ_B_COEF,   &
-             ZP_SNOWSWE, ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,             &
-             ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWHIST, ZP_SNOWAGE, PTSTEP, &
-             ZP_PS, ZP_SRSNOW, ZP_RRSNOW, ZP_PSN3L, ZP_TA,ZP_TG,          &
-             ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,      &
-             ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,  &
-             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G, ZP_SNOWLIQ,          &
-             ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX ,ZP_EVAPCOR, &
-             ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,      &
-             ZP_LEL3L, ZP_EVAP, ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,      &
+  CALL SNOW3L(HSNOWRES, TPTIME, OGLACIER, HIMPLICIT_WIND,                  &
+             ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
+             ZP_PET_A_COEF, ZP_PEQ_A_COEF,ZP_PET_B_COEF, ZP_PEQ_B_COEF,    &
+             ZP_SNOWSWE, ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,              &
+             ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWHIST, ZP_SNOWAGE, PTSTEP,  &
+             ZP_PS, ZP_SRSNOW, ZP_RRSNOW, ZP_PSN3L, ZP_TA,ZP_TG,           &
+             ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,       &
+             ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,   &
+             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G, ZP_SNOWLIQ,           &
+             ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX ,ZP_EVAPCOR,  &
+             ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,       &
+             ZP_LEL3L, ZP_EVAP, ZP_RI, ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,&
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_VEGTYPE, ZP_ZENITH, ZP_LAT, ZP_LON)  
 
 ENDIF
@@ -631,6 +646,7 @@ DO JJ=1,KSIZE1
   PLES3L    (JI)   = ZP_LES3L    (JJ)
   PLEL3L    (JI)   = ZP_LEL3L    (JJ)
   PEVAP     (JI)   = ZP_EVAP     (JJ)
+  PRI       (JI)   = ZP_RI       (JJ)
   PEMISNOW  (JI)   = ZP_EMISNOW  (JJ)
   PCDSNOW   (JI)   = ZP_CDSNOW   (JJ)
   PUSTARSNOW(JI)   = ZP_USTARSNOW(JJ)

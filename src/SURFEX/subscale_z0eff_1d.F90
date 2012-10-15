@@ -33,6 +33,7 @@
 !!
 !!    Original    18/12/95
 !!                22/12/97 (V Masson) call with dummy arguments
+!!                24/08/12 (B Decharme) optimization (loop into subroutine)
 !!
 !----------------------------------------------------------------------------
 !
@@ -74,7 +75,6 @@ LOGICAL, DIMENSION(:), INTENT(IN), OPTIONAL :: OMASK ! mask where computations
 !
 LOGICAL, DIMENSION(SIZE(PZ0EFFIM)) :: GMASK
 !
-INTEGER         :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -91,47 +91,55 @@ END IF
 !
 !*    1.     Computations from A/S and h/2
 !            -----------------------------
-!
-DO JJ=1,SIZE(PHO2JP) 
-  IF (GMASK(JJ)) THEN        
-    CALL GET_Z0EFF(PZ0VEG(JJ),PHO2JP(JJ),PAOSJP(JJ),PZ0EFFJP(JJ))
-    CALL GET_Z0EFF(PZ0VEG(JJ),PHO2JM(JJ),PAOSJM(JJ),PZ0EFFJM(JJ))
-    CALL GET_Z0EFF(PZ0VEG(JJ),PHO2IM(JJ),PAOSIM(JJ),PZ0EFFIM(JJ))
-    CALL GET_Z0EFF(PZ0VEG(JJ),PHO2IP(JJ),PAOSIP(JJ),PZ0EFFIP(JJ))
-  ENDIF
-!
-ENDDO
+!      
+CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2JP(:),PAOSJP(:),PZ0EFFJP(:))
+CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2JM(:),PAOSJM(:),PZ0EFFJM(:))
+CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2IM(:),PAOSIM(:),PZ0EFFIM(:))
+CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2IP(:),PAOSIP(:),PZ0EFFIP(:))
 !
 IF (LHOOK) CALL DR_HOOK('SUBSCALE_Z0EFF_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 CONTAINS
 !
-SUBROUTINE GET_Z0EFF(PZ0,PHO,PAO,PZ0EFF)
+SUBROUTINE GET_Z0EFF(OCOMPUT,PZ0,PHO,PAO,PZ0EFF)
 !
 IMPLICIT NONE
 !
-REAL, INTENT(IN) :: PZ0
-REAL, INTENT(IN) :: PHO
-REAL, INTENT(IN) :: PAO
-REAL, INTENT(OUT):: PZ0EFF
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOMPUT
+REAL,    DIMENSION(:), INTENT(IN) :: PZ0
+REAL,    DIMENSION(:), INTENT(IN) :: PHO
+REAL,    DIMENSION(:), INTENT(IN) :: PAO
+REAL,    DIMENSION(:), INTENT(OUT):: PZ0EFF
 !
-REAL :: ZLOC1,ZLOC2,ZLOC3
+LOGICAL, DIMENSION(SIZE(PZ0)) :: LWORK1
+!
+REAL    :: ZLOC1,ZLOC2,ZLOC3
+INTEGER :: JJ, INI
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SUBSCALE_Z0EFF_1D:GET_ZOEFF',0,ZHOOK_HANDLE)
 !
-IF ( PHO > PZ0 .AND. (PZ0.NE.0..OR.PAO.NE.0.)) THEN 
-  ZLOC1  = XCDZ0EFF/(2.*XKARMAN**2)*PAO
-  IF ( PZ0 > 0. ) THEN
-    ZLOC2 = 1./(ALOG(PHO/PZ0))**2
-  ELSE
-    ZLOC2 = 0.
-  ENDIF 
-  ZLOC3  = SQRT(1./(ZLOC1+ZLOC2))
-  PZ0EFF = PHO * EXP(-ZLOC3)
-ELSE
-  PZ0EFF = PZ0 
-ENDIF
+INI=SIZE(PZ0)
+!
+LWORK1(:)=(PHO(:)>PZ0(:).AND.(PZ0(:)/=0.0.OR.PAO(:)/=0.0))
+!
+DO JJ=1,INI
+  IF (OCOMPUT(JJ)) THEN
+    IF (LWORK1(JJ)) THEN 
+      ZLOC1  = (XCDZ0EFF/(2.*XKARMAN**2))*PAO(JJ)
+      IF ( PZ0(JJ) > 0. ) THEN
+        ZLOC2 = 1./(ALOG(PHO(JJ)/PZ0(JJ)))**2
+      ELSE
+        ZLOC2 = 0.
+      ENDIF 
+      ZLOC3  = SQRT(1./(ZLOC1+ZLOC2))
+      PZ0EFF(JJ) = PHO(JJ) * EXP(-ZLOC3)
+    ELSE
+      PZ0EFF(JJ) = PZ0(JJ) 
+    ENDIF
+  ENDIF
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('SUBSCALE_Z0EFF_1D:GET_ZOEFF',1,ZHOOK_HANDLE)
 !

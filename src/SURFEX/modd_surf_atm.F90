@@ -29,6 +29,7 @@
 !
 !!      B.Decharme     04/2009 Add flag used to Read/Write precipitation forcing from/into the restart file for ARPEGE/ALADIN run
 !!      B.Decharme     08/2009 Add flag used to know if you use SURFEX in the Earth System Model
+!!      B. Decharme    09/2012 New wind implicitation key option
 !
 IMPLICIT NONE
 !
@@ -44,7 +45,6 @@ LOGICAL    :: LNOSOF   ! No parameterization of Subgrid Orography effects on atm
 LOGICAL    :: LVERTSHIFT  ! vertical shift from atmospheric orography to surface orography
 !
 LOGICAL    :: LRW_PRECIP       ! flag used to Read/Write precipitation forcing from/into the restart file for ARPEGE/ALADIN run
-LOGICAL    :: LINIT_PRECIP     ! used with LRW_PRECIP
 LOGICAL    :: LSAVE_PRECIP     ! used with LRW_PRECIP
 !
 LOGICAL    :: LVZIUSTAR0_ARP   ! activate aladin formulation for zoh over sea
@@ -53,6 +53,10 @@ LOGICAL    :: LCPL_ARP         ! activate aladin formulation for Cp and L
 LOGICAL    :: LQVNPLUS         ! An option for the resolution of the surface temperature equation
 !
 LOGICAL    :: LCPL_ESM         ! Earth System Model Coupling key
+!
+CHARACTER(LEN=3) :: CIMPLICIT_WIND ! wind implicitation option
+!                                  ! 'OLD' = direct
+!                                  ! 'NEW' = Taylor serie, order 1
 !
 REAL       :: XEDB
 REAL       :: XEDC

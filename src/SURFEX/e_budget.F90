@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, PSODELX,       &
-                            PUREF, PPEW_A_COEF, PPEW_B_COEF,                     &
+      SUBROUTINE E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,  &
+                            PSODELX, PUREF, PPEW_A_COEF, PPEW_B_COEF,            &
                             PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,  &
                             PVMOD, PCD,                                          &
                             PTG, PTSTEP, PSNOWALBM,                              &
@@ -77,6 +77,7 @@
 !!      (B. Decharme)        09/09 When LCPL_ARP, do not calculate x2 each coef
 !!      (A.Boone)            03/10 Add delta fnctions to force LEG ans LEGI=0
 !!                                 when hug(i)Qsat < Qa and Qsat > Qa
+!!      (B. Decharme)        09/12 new wind implicitation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -93,7 +94,6 @@ USE MODE_THERMOS
 !
 USE MODI_SOIL_HEATDIF 
 USE MODI_SOIL_TEMP_ARP
-!USE MODI_WIND_THRESHOLD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -116,6 +116,11 @@ CHARACTER(LEN=*),    INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 LOGICAL, INTENT(IN)               :: OFLOOD    ! Activation of the flooding scheme
 LOGICAL, INTENT(IN)               :: OTEMP_ARP ! True  = time-varying force-restore soil temperature (as in ARPEGE)
                                                ! False = No time-varying force-restore soil temperature (Default)
+!
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+!                                                     ! 'OLD' = direct
+!                                                     ! 'NEW' = Taylor serie, order 1
+!                                               
 REAL, DIMENSION(:), INTENT (IN)   ::  PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
                                                
 !
@@ -143,8 +148,8 @@ REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PPS, PRHOA, PTA, PQA, PCD,
 REAL, DIMENSION(:), INTENT(IN)  :: PPEW_A_COEF, PPEW_B_COEF,                   &
                                      PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
                                      PPEQ_B_COEF  
-!                                  PPEW_A_COEF = A-wind coefficient
-!                                  PPEW_B_COEF = B-wind coefficient
+!                                  PPEW_A_COEF = A-wind coefficient (m2s/kg)
+!                                  PPEW_B_COEF = B-wind coefficient (m/s)
 !                                  PPET_A_COEF = A-air temperature coefficient
 !                                  PPET_B_COEF = B-air temperature coefficient
 !                                  PPEQ_A_COEF = A-air specific humidity coefficient
@@ -256,12 +261,9 @@ REAL, DIMENSION(SIZE(PALB)) ::  ZCONDAVG, ZTERM2, ZTERM1
 !
 ! implicit atmospheric coupling coefficients: (modified-form)
 !
-REAL, DIMENSION(SIZE(PALB)) :: ZPEW_A_COEF, ZPEW_B_COEF,                   &
-                                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF,      &
-                                 ZPEQ_B_COEF, Z_CCOEF, ZHUMS, ZHUMA, ZLAVG,  &
-                                 ZHUMSD, ZHUMAD 
-!                              ZPEW_A_COEF = A-wind coefficient
-!                              ZPEW_B_COEF = B-wind coefficient
+REAL, DIMENSION(SIZE(PALB)) :: ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF,      &
+                               ZPEQ_B_COEF, Z_CCOEF, ZHUMS, ZHUMA, ZLAVG,  &
+                               ZHUMSD, ZHUMAD 
 !                              ZPET_A_COEF = A-air temperature coefficient
 !                              ZPET_B_COEF = B-air temperature coefficient
 !                              ZPEQ_A_COEF = A-air specific humidity coefficient
@@ -269,8 +271,8 @@ REAL, DIMENSION(SIZE(PALB)) :: ZPEW_A_COEF, ZPEW_B_COEF,                   &
 !                              Z_CCOEF     = C-working variable
 !
 REAL, DIMENSION(SIZE(PALB)) :: ZUSTAR2, ZVMOD
-!                              ZUSTAR2 = friction
-!                              ZVMOD   = wind modulus
+!                              ZUSTAR2 = friction     (m2/s2)
+!                              ZVMOD   = wind modulus (m/s)
 REAL, DIMENSION(SIZE(PALB)) :: ZXCPV_XCL_AVG, ZPTG_OLD
 REAL, DIMENSION(SIZE(PALB)) :: ZCNHUMA, ZPEQA2, ZDPQB, ZCDQSAT, ZINCR, ZTRAD, &
                                 ZCHUMS, ZCHUMA, ZPETA2, ZPETB2,ZTEMP, ZFGNFRZ, &
@@ -308,19 +310,20 @@ PDQSAT(:) = DQSAT(PTG(:,1),PPS(:),PQSAT(:))
 ! Modify flux-form implicit coupling coefficients:
 ! - wind components:
 !
-ZTEMP(:) = PRHOA(:)*PCD(:)*PVMOD(:)
-ZUSTAR2(:)     = (ZTEMP(:) * PPEW_B_COEF(:)) /  (1.0- ZTEMP(:) *PPEW_A_COEF(:)) 
+ZTEMP  (:) = PCD(:)*PVMOD(:)
 !
-ZVMOD(:)    = PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+IF(HIMPLICIT_WIND=='OLD')THEN
+! old implicitation (m2/s2)
+  ZUSTAR2(:) = ZTEMP(:) * PPEW_B_COEF(:) / (1.0- ZTEMP(:)*PRHOA(:)*PPEW_A_COEF(:)) 
+ELSE
+! new implicitation (m2/s2)
+  ZUSTAR2(:) = ZTEMP(:) * (2.*PPEW_B_COEF(:)-PVMOD(:)) / (1.0-2.0*ZTEMP(:)*PRHOA(:)*PPEW_A_COEF(:)) 
+ENDIF
+!
+!wind modulus at t+1 (m/s)
+ZVMOD  (:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
 !
 ZVMOD = MAX(ZVMOD,0.)
-!
-WHERE (PPEW_A_COEF(:) /= 0.) &
-  ZUSTAR2(:) = MAX( ( ZVMOD(:) - PPEW_B_COEF(:) ) / PPEW_A_COEF(:), 0.)  
-!
-! Modify the aerodynamic resistance with the new wind speed:
-!
-!PRA(:)      = PRA(:)*WIND_THRESHOLD(PVMOD,PUREF)/WIND_THRESHOLD(ZVMOD,PUREF)
 !
 ZRORA(:)    = PRHOA(:) / PRA(:)
 !

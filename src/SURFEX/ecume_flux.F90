@@ -44,6 +44,8 @@
 !!      Modified        01/2006  C. Lebeaupin (adapted from  A. Pirani's code)
 !!      Modified     20/07/2009  S. Belamari
 !!      Modified        08/2009  B. Decharme: limitation of Ri
+!!      Modified        09/2012  B. Decharme: CD correction
+!!      Modified        09/2012  B. Decharme: limitation of Ri in surface_ri.F90
 !!!
 !-------------------------------------------------------------------------------
 
@@ -56,8 +58,6 @@ USE MODD_SEAFLUX_n
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SNOW_PAR,   ONLY : XZ0SN, XZ0HSN
 USE MODD_WATER_PAR
-!
-USE MODD_SURF_ATM,   ONLY : XRIMAX
 !
 USE MODI_WIND_THRESHOLD
 USE MODI_SURFACE_RI
@@ -133,35 +133,35 @@ REAL, DIMENSION(SIZE(PTA))        :: ZDELTAU10N,ZDELTAT10N,ZDELTAQ10N
                                                ! vert. gradients (10-m, neutral)
 REAL, DIMENSION(SIZE(PTA))        :: ZCHN,ZCEN ! neutral coef. for T,Q
 REAL, DIMENSION(SIZE(PTA))        :: ZD0
-
+!
 REAL    :: ZETV,ZRDSRV     ! thermodynamic constants
 REAL    :: ZLMOU,ZLMOT     ! Obukhovs stability param. z/l for U, T/Q
 REAL    :: ZPSI_U,ZPSI_T   ! PSI funct. for U, T/Q
 REAL    :: ZLMOMIN,ZLMOMAX ! min/max value of Obukhovs stability parameter z/l
 REAL    :: ZCHIC,ZCHIK,ZEPS,ZLOGHS10,ZLOGTS10,ZPI,ZPIS2,ZPSIC,ZPSIK, &
              ZSQR3,ZZDQ,ZZDTH  
-
+!
 REAL    :: ZALFAC,ZCPLW,ZDQSDT,ZDTMP,ZDWAT,ZP00,ZTAC,ZWW
                                 ! to compute rainfall impact & Webb correction
-
+!
 INTEGER :: NITERFL         ! maximum number of iterations (5 or 6)
 INTEGER :: JLON, JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
-
+!
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ECUME_FLUX',0,ZHOOK_HANDLE)
+!
 NITERFL = 6
-
+!
 IF(LPWG) THEN
    CALL ABOR1_SFX('Ecume_flux : Correction of fluxes due to gustiness was removed, LPWG should be at false')           
 ENDIF
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       1.   AUXILIARY CONSTANTS & ARRAY INITIALISATION BY UNDEFINED VALUES.
 !       --------------------------------------------------------------------
-
+!
 ZLMOMIN = -200.0
 ZLMOMAX = 0.25
 ZP00    = 1013.25E+02
@@ -171,9 +171,9 @@ ZSQR3   = SQRT(3.0)
 ZEPS    = 1.E-12
 ZETV    = XRV/XRD-1.0
 ZRDSRV  = XRD/XRV
-
+!
 ZDIRCOSZW(:)=1.
-
+!
 PCD (:) = XUNDEF
 PCH (:) = XUNDEF
 PCE (:) = XUNDEF
@@ -184,63 +184,63 @@ ZQSR(:) = XUNDEF
 ZTAU(:) = XUNDEF
 ZHF (:) = XUNDEF
 ZEF (:) = XUNDEF
-
+!
 PSFTH (:) = XUNDEF
 PSFTQ (:) = XUNDEF
 PUSTAR(:) = XUNDEF
 PRESA (:) = XUNDEF
 PRI   (:) = XUNDEF
-
+!
 ZWG    (:) = 0.0
 ZTAUR  (:) = 0.0
 ZRF    (:) = 0.0
 ZEFWEBB(:) = 0.0
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       2.   INITIALISATIONS BEFORE ITERATIVE LOOP.
 !       -------------------------------------------
-
+!
 ZVMOD (:) = WIND_THRESHOLD(PVMOD(:),PUREF(:))   !set a minimum value to wind
-
+!
 !       2.1. Specific humidity at saturation
-
+!
 PQSAT (:) = QSAT_SEAWATER(PSST(:),PPS(:))                       !at sea surface
 ZPA   (:) = XP00*(PEXNA(:)**(XCPD/XRD))
 ZQSATA(:) = QSAT(PTA(:),ZPA(:))                                 !at atm. level
-
+!
 !       2.2. Gradients at the air-sea interface
-
+!
 ZDU (:) = ZVMOD(:)              !one assumes u is measured / sea surface current
 ZDTH(:) = PTA(:)/PEXNA(:)-PSST(:)/PEXNS(:)
 ZDQ (:) = PQA(:)-PQSAT(:)
-
+!
 !       2.3. Initial guess
-
+!
 ZD0(:) = 1.2+6.3E-03*MAX(ZDU(:)-10.0,0.0)
 !
 !IF(LPWG) ZWG(:) = 0.0                  !no gustiness initial guess
-!
-ZDUWG(:) = (ZDU(:)**2+ZWG(:)**2)**0.5
+!ZDUWG(:) = SQRT(ZDU(:)**2+ZWG(:)**2)
+ZDUWG     (:) = ZDU  (:)
 ZDELTAU10N(:) = ZDUWG(:)
 ZDELTAT10N(:) = ZDTH (:)*ZD0(:)
 ZDELTAQ10N(:) = ZDQ  (:)
-
+!
 !       2.4. Latent heat of vaporisation
-
+!
 ZLV(:) = XLVTT+(XCPV-XCL)*(PSST(:)-XTT)                 !at sea surface
 ZLR(:) = XLVTT+(XCPV-XCL)*(PTA(:)-XTT)                  !at atm.level
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       3.   ITERATIVE LOOP TO COMPUTE U*, T*, Q*.
 !       ------------------------------------------
-
+!
 DO JJ=1,NITERFL
   DO JLON=1,SIZE(PTA)
-
+!
 !       3.1. Neutral coefficient for wind speed cdn (ECUME_v0 formulation)
-
+!
     IF (ZDELTAU10N(JLON) <= 16.8) THEN
       PCDN(JLON) = 1.3013E-03                          &
                   + (-1.2719E-04 * ZDELTAU10N(JLON)   ) &
@@ -255,9 +255,9 @@ DO JJ=1,NITERFL
     ELSE
       PCDN(JLON) = 1.7828E-03
     ENDIF
-
+!
 !       3.2. Neutral coefficient for temperature chn (ECUME_v0 formulation)
-
+!
     IF (ZDELTAU10N(JLON) <= 33.0) THEN
       ZCHN(JLON) = 1.2536E-03                          &
                   + (-1.2455E-04 * ZDELTAU10N(JLON)   ) &
@@ -268,9 +268,9 @@ DO JJ=1,NITERFL
     ELSE
       ZCHN(JLON) = 3.1374E-03
     ENDIF
-
+!
 !       3.3. Neutral coefficient for humidity cen (ECUME_v0 formulation)
-
+!
     IF (ZDELTAU10N(JLON) <= 29.0) THEN
       ZCEN(JLON) = 1.2687E-03                          &
                   + (-1.1384E-04 * ZDELTAU10N(JLON)   ) &
@@ -285,19 +285,18 @@ DO JJ=1,NITERFL
       ZCEN(JLON) = 1.7232E-03
     ENDIF
     ZCEN(JLON) = ZCEN(JLON)*(1.0-XICHCE)+ZCHN(JLON)*XICHCE
-
-
+!
 !       3.4. Scaling parameters and roughness lenght
-
+!
     ZUSR(JLON) = SQRT(PCDN(JLON))*ZDELTAU10N(JLON)
     ZTSR(JLON) = ZCHN(JLON)/SQRT(PCDN(JLON))*ZDELTAT10N(JLON)
     ZQSR(JLON) = ZCEN(JLON)/SQRT(PCDN(JLON))*ZDELTAQ10N(JLON)
     PZ0SEA(JLON) = 10.0/EXP(XKARMAN*ZDELTAU10N(JLON)/ZUSR(JLON))
-
+!
 !       3.5. Gustiness factor ZWG following Mondon & Redelsperger (1998)
-
+!
 !       3.6. Obukhovs stability param. z/l following Liu et al. (JAS, 1979)
-
+!
 ! For U
     ZLMOU = PUREF(JLON)*XG*XKARMAN*(ZTSR(JLON)/(PTA(JLON)) &
        +ZETV*ZQSR(JLON)/(1.0+ZETV*PQA(JLON)))/MAX(ZUSR(JLON),ZEPS)**2  
@@ -305,10 +304,10 @@ DO JJ=1,NITERFL
     ZLMOT = ZLMOU*PZREF(JLON)/PUREF(JLON)
     ZLMOU = MAX(MIN(ZLMOU,ZLMOMAX),ZLMOMIN)
     ZLMOT = MAX(MIN(ZLMOT,ZLMOMAX),ZLMOMIN)
-
+!
 !       3.7. Stability function psi (see Liu et al, 1979 ; Dyer and Hicks, 1970)
 !            Modified to include convective form following Fairall (unpublished)
-
+!
 !   For U
     IF (ZLMOU == 0.0) THEN
       ZPSI_U = 0.0
@@ -341,9 +340,9 @@ DO JJ=1,NITERFL
       ZPSI_T = ZPSIC+(ZPSIK-ZPSIC)/(1.0+ZLMOT**2)
                                                 !match Kansas & free-conv. forms
     ENDIF
-
+!
 !       3.8. Update ZDELTAU10N, ZDELTAT10N and ZDELTAQ10N
-
+!
     ZLOGHS10 = LOG(PUREF(JLON)/10.0)
     ZLOGTS10 = LOG(PZREF(JLON)/10.0)
     ZDUWG(JLON) = (ZDU(JLON)**2+ZWG(JLON)**2)**0.5
@@ -353,16 +352,16 @@ DO JJ=1,NITERFL
 
   ENDDO
 ENDDO
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       4.   COMPUTATION OF EXCHANGE COEFFICIENTS AND TURBULENT FLUXES.
 !       ---------------------------------------------------------------
-
+!
 DO JLON=1,SIZE(PTA)
-
+!
 !       4.1. Exchange coefficients PCD, PCH, PCE
-
+!
   ZZDTH = 0.5* &
            ((1.0+SIGN(1.0,ZDTH(JLON)))*MAX(ZDTH(JLON),ZEPS) &
            +(1.0-SIGN(1.0,ZDTH(JLON)))*MIN(ZDTH(JLON),-ZEPS))  
@@ -372,33 +371,32 @@ DO JLON=1,SIZE(PTA)
   PCD(JLON) = (ZUSR(JLON)/ZDUWG(JLON))**2
   PCH(JLON) = ZUSR(JLON)*ZTSR(JLON)/(ZDUWG(JLON)*ZZDTH)
   PCE(JLON) = ZUSR(JLON)*ZQSR(JLON)/(ZDUWG(JLON)*ZZDQ)
-
+!
 !       4.2. Surface turbulent fluxes
 !            (ATM CONV.: ZTAU<<0 ; ZHF,ZEF<0 if atm looses heat)
-
+!
   ZTAU(JLON) = -PRHOA(JLON)*PCD(JLON)*ZDUWG(JLON)**2
   ZHF (JLON) = -PRHOA(JLON)*XCPD*PCH(JLON)*ZDUWG(JLON)*ZDTH(JLON)
   ZEF (JLON) = -PRHOA(JLON)*ZLV(JLON)*PCE(JLON)*ZDUWG(JLON)*ZDQ(JLON)
-
-
+!
 ENDDO
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       5.   COMPUTATION OF FLUX CORRECTIONS DUE TO RAINFALL.
 !            (ATM conv: ZRF<0 if atm. looses heat, ZTAUR<<0)
 !       -----------------------------------------------------
 
 IF(LPRECIP) THEN
   DO JLON=1,SIZE(PTA)
-
+!
 !       5.1. Momentum flux due to rainfall (ZTAUR, N/m2)
-
+!
 ! See pp3752 in FBR96.
     ZTAUR(JLON) = -PRAIN(JLON)*ZDUWG(JLON)
-
+!
 !       5.2. Sensible heat flux due to rainfall (ZRF, W/m2)
-
+!
 ! See Eq.12 in GoF95, with ZCPLW as specific heat of water (J/kg/K), ZDWAT as
 ! water vapor diffusivity (Eq.13-3 of Pruppacher and Klett, 1978), ZDTMP as
 ! heat diffusivity, ZDQSDT from Clausius-Clapeyron relation and ZALFAC as
@@ -418,12 +416,12 @@ IF(LPRECIP) THEN
 
   ENDDO
 ENDIF
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       6.   COMPUTATION OF WEBB CORRECTION TO LATENT HEAT FLUX (ZEFWEBB, W/m2).
 !       ------------------------------------------------------------------------
-
+!
 ! See Eq.21 and Eq.22 in FBR96.
 IF (LPWEBB) THEN
   DO JLON=1,SIZE(PTA)
@@ -433,39 +431,42 @@ IF (LPWEBB) THEN
     ZEFWEBB(JLON) = PRHOA(JLON)*ZWW*ZLV(JLON)*PQA(JLON)
   ENDDO
 ENDIF
-
+!
 !-------------------------------------------------------------------------------
-
+!
 !       7.   FINAL STEP : TOTAL SURFACE FLUXES AND DERIVED DIAGNOSTICS. 
 !       ---------------------------------------------------------------
-
-!       7.1. Richardson number
-
-CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQSATA, &
-                 PZREF, PUREF, ZDIRCOSZW,ZVMOD,PRI)  
 !
-PRI(:) = MIN(PRI(:),XRIMAX)
+!       7.1. Richardson number
+!
+CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQSATA, &
+                PZREF,PUREF,ZDIRCOSZW,PVMOD,PRI    )  
 !
 !       7.2. Friction velocity which contains correction du to rain
-
+!
 ZUSTAR2(:)=-(ZTAU(:)+ZTAUR(:))/PRHOA(:)
+!
+IF(LPRECIP) THEN
+  PCD(:)=ZUSTAR2(:)/(ZDUWG(:)**2)
+ENDIF
+!
 PUSTAR(:)=SQRT(ZUSTAR2(:))
-
+!
 !       7.3. Aerodynamical conductance and resistance
-
+!
 ZAC(:)=PCH(:)*ZVMOD(:)
 PRESA(:)=1./ZAC(:)
-
+!
 !       7.4. Total surface fluxes
-
+!
 PSFTH(:)=ZHF(:)+ZRF(:)
 PSFTQ(:)=(ZEF(:)+ZEFWEBB(:))/ZLV(:)
-
+!
 !       7.5. Z0H over water
-
+!
 PZ0HSEA(:)=PZ0SEA(:)
+!
 IF (LHOOK) CALL DR_HOOK('ECUME_FLUX',1,ZHOOK_HANDLE)
-
 !-------------------------------------------------------------------------------
 
 END SUBROUTINE ECUME_FLUX

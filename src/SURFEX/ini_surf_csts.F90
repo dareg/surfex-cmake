@@ -42,7 +42,8 @@ USE MODD_WATER_PAR
 USE MODD_FLOOD_PAR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX, &
                            XAGLAMIN, XAGLAMAX, XHGLA, &
-                           XWSNV, XZ0SN, XZ0HSN  
+                           XWSNV, XZ0SN, XZ0HSN,      &
+                           XTAU_SMELT
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -63,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XALBWAT, XALBCOEF_TA96, XALBSCA_WAT, XEMISWAT, &
                         XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XCFFV,  &
-                        XZ0SN, XZ0HSN  
+                        XZ0SN, XZ0HSN, XTAU_SMELT  
 !
 !-------------------------------------------------------------------------------
 !*	 1. Default values
@@ -127,6 +128,11 @@ XZ0SN = 0.001
 ! Roughness length for heat of pure snow surface (m)
 !
 XZ0HSN = 0.0001
+!
+! Snow Melt timescale with D95 (s): needed to prevent time step 
+! dependence of melt when snow fraction < unity.
+!
+XTAU_SMELT = 300.
 !
 !-------------------------------------------------------------------------------
 !*	 2. User values

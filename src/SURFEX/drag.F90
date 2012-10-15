@@ -70,6 +70,7 @@
 !!      (A.Boone)    03/15/10 Add delta fnctions to force LEG ans LEGI=0
 !!                            when hug(i)Qsat < Qa and Qsat > Qa
 !!      (A.Boone)    21/11/11 Add Rs_max limit for dry conditions with Etv
+!!      (B. Decharme)   09/12 limitation of Ri in surface_ri.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -77,7 +78,7 @@
 !
 USE MODD_CSTS,     ONLY : XPI, XCPD, XCPV
 USE MODD_ISBA_PAR, ONLY : XWGMIN, XRS_MAX
-USE MODD_SURF_ATM, ONLY : LDRAG_COEF_ARP, XRIMAX, LRRGUST_ARP, XRRSCALE,   &
+USE MODD_SURF_ATM, ONLY : LDRAG_COEF_ARP, LRRGUST_ARP, XRRSCALE,   &
                             XRRGAMMA, XUTILGUST, LCPL_ARP  
 !
 USE MODI_SURFACE_RI
@@ -345,7 +346,7 @@ CALL SURFACE_RI(PTG, PQS, PEXNS, PEXNA, PTA, PQA,                    &
 !*       6.5    LIMITATION OF RICHARDSON NUMBER
 !               -------------------------------
 !
-PRI(:) = MIN(PRI(:),XRIMAX)
+!Now done directly in SURFACE_RI subroutine
 !
 !-------------------------------------------------------------------------------
 !*       7.0     DRAG COEFFICIENT FOR HEAT AND MOMENTUM TRANSFERS
