@@ -32,9 +32,20 @@ IMPLICIT NONE
 !
 !* variables for each patch
 !
-CHARACTER(LEN=200), DIMENSION(8)  :: XNETCDF_FILENAME_IN= &
+CHARACTER(LEN=200), DIMENSION(19) :: XNETCDF_FILENAME_IN= &
                                        (/'PARAMS.nc                  ',&
                                          'FORCING.nc                 ',&
+                                         'Forc_TA.nc                 ',&
+                                         'Forc_QA.nc                 ',&
+                                         'Forc_PS.nc                 ',&
+                                         'Forc_DIR_SW.nc             ',&
+                                         'Forc_SCA_SW.nc             ',&
+                                         'Forc_LW.nc                 ',&
+                                         'Forc_RAIN.nc               ',&
+                                         'Forc_SNOW.nc               ',&
+                                         'Forc_WIND.nc               ',&
+                                         'Forc_DIR.nc                ',& 
+                                         'Forc_CO2.nc                ',&
                                          'SXPOST.nc                  ',&
                                          'LAND_USE.nc                ',&
                                          'ISBA_VEG_EVOLUTION_P.OUT.nc',&
