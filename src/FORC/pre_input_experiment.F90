@@ -51,7 +51,6 @@ USE MODI_ALLOC_SURFEX
 USE MODI_GOTO_SURFEX
 USE MODI_DEALLOC_SURFEX
 USE MODI_CREATE_FILE
-USE MODI_SUNPOS
 USE MODI_WRITE_SURF
 USE MODI_WRITE_NETCDF
 USE MODI_DEF_VAR_NETCDF
@@ -122,9 +121,6 @@ INTEGER,DIMENSION(2)              :: IDDIM,IDIMS
 CHARACTER(LEN=100) ,DIMENSION(2)  :: YNAME_DIM
 CHARACTER(LEN=100) ,DIMENSION(2)  :: YATT_TITLE,YATT
 !
-!
-REAL, DIMENSION(:),    ALLOCATABLE :: ZZENITH, ZAZIM, ZTSUN
-!
 INTEGER                                 :: JT ! loop counter on times
 REAL(KIND=4), DIMENSION(:), ALLOCATABLE :: ZF ! field to write
 CHARACTER(LEN=12) ::  YEXPER    ! experiment name
@@ -141,7 +137,6 @@ INTEGER           :: NUMBER_GRID_CELLS
 INTEGER           :: NUMBER_OF_TIME_STEPS_INPUT
 INTEGER           :: NUMBER_OF_TIME_STEPS_FINAL
 INTEGER           :: FIRST_TIME_STEP_FINAL, LAST_TIME_STEP_FINAL
-INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 REAL              :: ZATM_FORC_STEP, ZDEN
 LOGICAL           :: LSPLIT_NC
 CHARACTER(LEN=6)  :: YFORCING_FILETYPE       ! output file type:'ASCII ', 'BINARY', 'NETCDF'
@@ -246,13 +241,6 @@ CALL DEFAULT_DIAG_SURF_ATM(N2M, LSURF_BUDGET, L2M_MIN_ZS, LRAD_BUDGET, &
 !
 CALL INI_CSTS
 ! 
-ALLOCATE(ZTSUN(INI))
-ALLOCATE(ZZENITH(INI))
-ALLOCATE(ZAZIM(INI))
-!
-ALLOCATE(ISIZE_OMP(0:0))
-ISIZE_OMP(0) = INI
-!
 IF (YFORCING_FILETYPE == 'NETCDF') THEN
   !
   ALLOCATE(ZTIME(INPTS))
@@ -307,13 +295,6 @@ DO IYEAR=IYEAR1,IYEAR2
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
-!----------------------------------------------------------------------------
-!     
-!        3.5    solar time computation
-!               ----------------------
-CALL SUNPOS ( ISIZE_OMP, TDTCUR%TDATE%YEAR, TDTCUR%TDATE%MONTH, TDTCUR%TDATE%DAY, TDTCUR%TIME, &
-               ZLON, ZLAT, ZTSUN, ZZENITH, ZAZIM)
-!
 !----------------------------------------------------------------------------
 !
 IF (YFORCING_FILETYPE == 'BINARY') THEN
@@ -613,12 +594,6 @@ IF (YFORCING_FILETYPE=='NETCDF') THEN
 ELSE
   DEALLOCATE(ZF)
 ENDIF
-!
-DEALLOCATE(ZTSUN)
-DEALLOCATE(ZZENITH)
-DEALLOCATE(ZAZIM)
-!
-DEALLOCATE(ISIZE_OMP)
 !
 IF (LHOOK) CALL DR_HOOK('PRE_INPUT_EXPERIMENT',1,ZHOOK_HANDLE)
 END
