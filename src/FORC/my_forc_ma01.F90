@@ -1,50 +1,4 @@
-!===================================================================================
-!===================================================================================
-MODULE MODI_MY_FORC_MA01
-!===================================================================================
-INTERFACE
-!===================================================================================
-        SUBROUTINE MY_FORC_MA01(HEXPER,KNI,KNPTS,PTSTEP_FORC,      &
-                   KYEAR,KMONTH,KDAY,PTIME,                        &
-                   PLON, PLAT, PZS, PZREF, PUREF,                  &
-                   PTA, PQA, PPS, PWINDSPEED, PWINDDIR,            &
-                   PDIR_SW, PSCA_SW, PLW, PRAIN, PSNOW, PCO2       )
-
-CHARACTER(LEN=12), INTENT(IN):: HEXPER    ! experiment name
-INTEGER, INTENT(IN)          :: KNI       ! number of grid cells
-INTEGER, INTENT(IN)          :: KNPTS     ! number of forcing instants
-REAL,    INTENT(IN)          :: PTSTEP_FORC  ! time step of atm. forcing data (s)
-INTEGER, INTENT(OUT)         :: KYEAR     ! year  of simulation begining
-INTEGER, INTENT(OUT)         :: KMONTH    ! month of simulation begining
-INTEGER, INTENT(OUT)         :: KDAY      ! day   of simulation begining
-REAL,    INTENT(OUT)         :: PTIME     ! time  of simulation begining (s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PCO2      ! CO2 concentration (kg/m3) 
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PDIR_SW   ! Solar direct   radiation (W/m2)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PSCA_SW   ! Solar diffused radiation (W/m2)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PLW       ! Longwave radiation (W/m2)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PWINDSPEED! Wind speed (m/s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PWINDDIR  ! Wind dir. (deg. from N, clockwise)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PRAIN     ! rain rate (kg/m2/s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PSNOW     ! snow rate (kg/m2/s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PTA       ! temperature (K)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PQA       ! humidity (kg/kg)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PPS       ! pressure (Pa)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PZREF     ! height of temperature forcing (m)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PUREF     ! height of wind forcing (m)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PZS       ! orography (m)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PLON      ! longitude (degrees)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PLAT      ! latitude  (degrees)
-
-END SUBROUTINE MY_FORC_MA01
-!===================================================================================
-END INTERFACE
-!===================================================================================
-END MODULE MODI_MY_FORC_MA01
-!===================================================================================
-!===================================================================================
-
-
-SUBROUTINE MY_FORC_MA01(HEXPER,KNI,KNPTS,PTSTEP_FORC,              &
+SUBROUTINE MY_FORC_MA01(HEXPER,KNI,KNPTS,                          &
                    KYEAR,KMONTH,KDAY,PTIME,                        &
                    PLON, PLAT, PZS, PZREF, PUREF,                  &
                    PTA, PQA, PPS, PWINDSPEED, PWINDDIR,            &
@@ -82,25 +36,24 @@ IMPLICIT NONE
 CHARACTER(LEN=12), INTENT(IN) :: HEXPER    ! experiment name
 INTEGER, INTENT(IN)          :: KNI       ! number of grid cells
 INTEGER, INTENT(IN)          :: KNPTS     ! number of forcing instants
-REAL,    INTENT(IN)          :: PTSTEP_FORC  ! time step of atm. forcing data (s)
 INTEGER, INTENT(OUT)         :: KYEAR     ! year  of simulation begining
 INTEGER, INTENT(OUT)         :: KMONTH    ! month of simulation begining
 INTEGER, INTENT(OUT)         :: KDAY      ! day   of simulation begining
 REAL,    INTENT(OUT)         :: PTIME     ! time  of simulation begining (s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PCO2      ! CO2 concentration (kg/m3) 
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PDIR_SW   ! Solar direct   radiation (W/m2)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PSCA_SW   ! Solar diffused radiation (W/m2)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PLW       ! Longwave radiation (W/m2)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PWINDSPEED! Wind speed (m/s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PWINDDIR  ! Wind dir. (deg. from N, clockwise)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PRAIN     ! rain rate (kg/m2/s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PSNOW     ! snow rate (kg/m2/s)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PTA       ! temperature (K)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PQA       ! humidity (kg/kg)
-REAL, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PPS       ! pressure (Pa)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PZREF     ! height of temperature forcing (m)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PUREF     ! height of wind forcing (m)
-REAL, DIMENSION(KNI),       INTENT(OUT) :: PZS       ! orography (m)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PCO2      ! CO2 concentration (kg/m3) 
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PDIR_SW   ! Solar direct   radiation (W/m2)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PSCA_SW   ! Solar diffused radiation (W/m2)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PLW       ! Longwave radiation (W/m2)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PWINDSPEED! Wind speed (m/s)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PWINDDIR  ! Wind dir. (deg. from N, clockwise)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PRAIN     ! rain rate (kg/m2/s)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PSNOW     ! snow rate (kg/m2/s)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PTA       ! temperature (K)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PQA       ! humidity (kg/kg)
+REAL*4, DIMENSION(KNPTS,KNI), INTENT(OUT) :: PPS       ! pressure (Pa)
+REAL*4, DIMENSION(KNI),       INTENT(OUT) :: PZREF     ! height of temperature forcing (m)
+REAL*4, DIMENSION(KNI),       INTENT(OUT) :: PUREF     ! height of wind forcing (m)
+REAL*4, DIMENSION(KNI),       INTENT(OUT) :: PZS       ! orography (m)
 REAL, DIMENSION(KNI),       INTENT(OUT) :: PLON      ! longitude (degrees)
 REAL, DIMENSION(KNI),       INTENT(OUT) :: PLAT      ! latitude  (degrees)
 !
@@ -119,7 +72,7 @@ REAL :: ZWIND, ZT, ZQ, ZK, ZD, ZPRES, ZRG, ZWINDDIR, ZRAT
 REAL :: z1,z2,z3,z4,z5,z6
 REAL :: ZAVOGADRO, ZBOLTZ, ZMD, ZMV, ZRD, ZRV, ZRHOA
 
-REAL, DIMENSION(KNPTS,KNI) :: ZU, ZV ! wind components
+REAL*4, DIMENSION(KNPTS,KNI) :: ZU, ZV ! wind components
 !
 INTEGER :: I ! loop counters
 !
@@ -262,7 +215,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_MY_FORC_MA01:MY_FORC_MA01',1,ZHOOK_HANDLE)
 CONTAINS 
 !----------------------------------------------------------------------------
 SUBROUTINE FILL_DATA(PF)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PF
+REAL*4, DIMENSION(:,:), INTENT(INOUT) :: PF
 INTEGER :: JI ! loop counter on points
 INTEGER :: JL ! loop counter on time instants
 INTEGER :: JM ! loop counter on missing points
