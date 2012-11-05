@@ -74,7 +74,7 @@ DO ICOVER=1,NBCOVERS
     READ(11,REC=IREC) ZVEGTYPE(:)
     WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tree'//CSEP//'  Coni'//CSEP//&
         '  Ever'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'
-    WRITE(12,FMT="(I9,12('"//CSEP//"',F6.2)))") JCOVER,ZVEGTYPE(:)
+    WRITE(12,FMT="(I9,12('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
     !
     DO JVEGTYPE=1,SIZE(ZVEGTYPE)
       IF (ZVEGTYPE(JVEGTYPE).NE.0.) THEN
@@ -189,7 +189,7 @@ DO ICOVER=1,NBCOVERS
       READ(11,REC=IREC) ZVEGTYPE(:)
       WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tree'//CSEP//'  Coni'//CSEP//&
         '  Ever'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'
-      WRITE(12,FMT="(I9,12('"//CSEP//"',F6.2)))") JCOVER,ZVEGTYPE(:)
+      WRITE(12,FMT="(I9,12('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
       !
       DO JVEGTYPE=1,SIZE(ZVEGTYPE)
         IF (ZVEGTYPE(JVEGTYPE).NE.0.) THEN
@@ -314,7 +314,7 @@ DO ICOVER=1,NBCOVERS
   !
   IF (ZNATURE.GT.0.) THEN
     READ(12,FMT=*) HPOUB
-    READ(12,FMT=*),JCOVER,ZVEGTYPE(:)          
+    READ(12,FMT=*) JCOVER,ZVEGTYPE(:)          
     IREC = IREC+1
     WRITE(11,REC=IREC) ZVEGTYPE(:)
     !
@@ -421,7 +421,7 @@ DO ICOVER=1,NBCOVERS
     !WRITE(12,FMT=*) ''
     IF (ZGRD.NE.0 .AND. ZNATURE.EQ.0) THEN
       READ(12,FMT=*) HPOUB
-      READ(12,FMT=*),JCOVER,ZVEGTYPE(:)          
+      READ(12,FMT=*) JCOVER,ZVEGTYPE(:)          
       IREC = IREC+1
       WRITE(11,REC=IREC) ZVEGTYPE(:)
       !
