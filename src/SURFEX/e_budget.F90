@@ -14,7 +14,7 @@
                             PD_G, PDZG, PDZDIF, PSOILCONDZ, PSOILHCAPZ,          &
                             PALBT, PEMIST, PQSAT, PDQSAT,                        &
                             PFROZEN1, PTDEEP, PGAMMAT,                           &
-                            PTA_IC, PQA_IC, PVMOD_IC,                            &
+                            PTA_IC, PQA_IC, PUSTAR2_IC,                          &
                             PSNOWFREE_ALB_VEG, PPSNV_A,PSNOWFREE_ALB_SOIL,       &
                             PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT    )  
 !     ##########################################################################
@@ -208,10 +208,10 @@ REAL, DIMENSION(:), INTENT(INOUT)   :: PLEG_DELTA, PLEGI_DELTA
 !                                      PLEG_DELTA = soil evaporation delta fn
 !                                      PLEGI_DELTA = soil evaporation delta fn
 !
-REAL, DIMENSION(:), INTENT (OUT)   :: PQA_IC, PTA_IC, PVMOD_IC
+REAL, DIMENSION(:), INTENT (OUT)   :: PQA_IC, PTA_IC, PUSTAR2_IC
 !                                     PTA_IC = near-ground air temperature
 !                                     PQA_IC = near-ground air specific humidity
-!                                     PVMOD_IC = near-ground wind speed
+!                                     PUSTAR2_IC = near-ground wind friction (m2/s2)
 !                                           (modified if implicit coupling with
 !                                            atmosphere used)
 !
@@ -321,9 +321,12 @@ ELSE
 ENDIF
 !
 !wind modulus at t+1 (m/s)
-ZVMOD  (:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+ZVMOD(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+ZVMOD(:) = MAX(ZVMOD(:),0.)
 !
-ZVMOD = MAX(ZVMOD,0.)
+WHERE(PPEW_A_COEF(:)/= 0.)
+      ZUSTAR2(:) = MAX( ( ZVMOD(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+ENDWHERE
 !
 ZRORA(:)    = PRHOA(:) / PRA(:)
 !
@@ -631,7 +634,7 @@ PQA_IC(:) =  ZPEQ_A_COEF(:)*PTG(:,1)   + ZPEQ_B_COEF(:)
 !
 PTA_IC(:) =  ZPET_A_COEF(:)*PTG(:,1)   + ZPET_B_COEF(:)
 !
-PVMOD_IC(:) =  ZVMOD(:)
+PUSTAR2_IC(:) =  ZUSTAR2(:)
 !
 !--------------------------------------------------------------------------------------
 !*       8.     Update of LSTT and LVTT for Arpege

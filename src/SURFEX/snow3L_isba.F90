@@ -62,6 +62,9 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,   
 !!      Modified by B. Decharme  (03/2009): Consistency with Arpege permanent
 !!                                          snow/ice treatment
 !!      Modified by A. Boone     (04/2010): Implicit coupling with atmosphere permitted.
+!!
+!!      Modified by B. Decharme  (04/2010): check suspicious low temperature for ES and CROCUS
+!!
 !-------------------------------------------------------------------------------
 !
 USE MODD_CSTS,       ONLY : XTT, XPI, XDAY, XLMTT
@@ -74,6 +77,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODI_SNOW3L
 USE MODI_SNOWCRO
 !
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -226,14 +230,17 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PRI
 ! ajout_EB pour prendre en compte angle zenithal du soleil dans LRAD
 ! puis plus tard dans LALB
 REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
-REAL, DIMENSION(:), INTENT(IN)      ::  PLAT
-REAL, DIMENSION(:), INTENT(IN)      ::  PLON
+REAL, DIMENSION(:), INTENT(IN)      :: PLAT
+REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
 !*      0.2    declarations of local variables
 !
-INTEGER :: JWRK, JJ                        ! Loop control
+REAL, PARAMETER                     :: ZCHECK_TEMP = 100.0 
+!                                      Limit to check suspicious low temperature (K)
 !
-INTEGER                             :: INLVLS  ! maximum number of snow layers
+INTEGER                             :: JWRK, JJ ! Loop control
+!
+INTEGER                             :: INLVLS   ! maximum number of snow layers
 !
 REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL, &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD  
@@ -402,8 +409,26 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
   ENDIF 
 !
 ! ===============================================================
+! check suspicious low temperature
+!
+  DO JWRK=1,INLVLS
+     DO JJ=1,SIZE(PSNOWSWE,1)
+        IF(PSNOWSWE(JJ,JWRK)>0.0.AND.PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
+           write(*,*) 'Suspicious low temperature :',JJ,JWRK,PSNOWTEMP(JJ,JWRK)
+           write(*,*) 'XLAT=',PLAT(JJ),'XLON=',PLON(JJ)
+           write(*,*) PSNOWSWE (JJ,1:INLVLS)
+           write(*,*) PSNOWDZ  (JJ,1:INLVLS)
+           write(*,*) PSNOWRHO (JJ,1:INLVLS)
+           write(*,*) PSNOWTEMP(JJ,1:INLVLS)
+           CALL ABOR1_SFX('SNOW3L_ISBA: erreur tempe snow')                
+        ENDIF
+     ENDDO
+  ENDDO
+!
+! ===============================================================
 !
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',1,ZHOOK_HANDLE)
 !
 CONTAINS

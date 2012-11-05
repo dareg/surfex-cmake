@@ -1,8 +1,8 @@
 !     ######spl
       SUBROUTINE ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP,           &
                           PTSTEP, PSODELX,                                     &
-                          PCD, PVMOD, PSW_RAD, PLW_RAD, PTA, PQA,              &
-                          PVMODP, PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,     &
+                          PSW_RAD, PLW_RAD, PTA, PQA, PUSTAR2,                 &
+                          PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,             &
                           PLAI, PVEG, PHUG, PHUI, PHV,                         &
                           PLEG_DELTA, PLEGI_DELTA, PDELTA, PRA,                &
                           PF5, PRS, PCS, PCG, PCT, PSNOWSWE, PT2M, PTSM,       &
@@ -136,13 +136,14 @@ REAL, INTENT (IN)                :: PTSTEP ! model time step (s)
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
 !
-                                       
-REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PTA, PQA, PVMODP, PRHOA
+REAL, DIMENSION(:), INTENT (IN)  :: PUSTAR2
+!                                     wind friction after implicitation (m2/s2)
+!
+REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PTA, PQA, PRHOA
 !                                     PSW_RAD = incoming solar radiation
 !                                     PLW_RAD = atmospheric infrared radiation
 !                                     PTA = near-ground air temperature
 !                                     PQA = near-ground air specific humidity
-!                                     PVMODP = near-ground wind speed
 !                                     PRHOA = near-ground air density
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PEXNS, PEXNA
@@ -188,11 +189,6 @@ REAL, DIMENSION(:), INTENT (IN)  :: PCS, PCG, PCT, PT2M, PTSM, PSNOWSWE
 !                                              of time step (K)
 !                                     PSNOWSWE = equivalent water content of
 !                                              the snow reservoir (kg m-2)
-!
-REAL, DIMENSION(:), INTENT(IN)   :: PCD, PVMOD
-!                                     PCD = drag coefficient for momentum
-!                                     PVMOD = module of the surface tangential
-!                                             wind
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PSNOW_THRUFAL
 !                                     PSNOW_THRUFAL = rate that liquid water leaves snow pack: 
@@ -507,7 +503,7 @@ DO JJ=1,SIZE(PTG,1)
 !               -----------------
 !
 !
-  PUSTAR(JJ) = SQRT( PCD(JJ) * PVMOD(JJ) * PVMODP(JJ) )
+  PUSTAR(JJ) = SQRT(PUSTAR2(JJ))
 !
 ENDDO
 

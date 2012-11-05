@@ -695,8 +695,8 @@ REAL, DIMENSION(SIZE(PWG,1))             :: ZWGI_EXCESS! Soil ice excess water c
 !
 ! Other :
 !
-REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZVMOD_IC ! TA, QA and Wind speed updated values
-!                                                      ! if implicit coupling with atmosphere used.
+REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
+!                                                        ! if implicit coupling with atmosphere used.
 REAL, DIMENSION(SIZE(PWR)) :: ZTDIURN ! Ice maximum penetration depth for restore (m)
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
@@ -722,7 +722,7 @@ ZCS(:)          = XUNDEF
 !
 ZTA_IC(:)       = XUNDEF
 ZQA_IC(:)       = XUNDEF
-ZVMOD_IC(:)     = XUNDEF
+ZUSTAR2_IC(:)   = 0.0
 !
 ZTDIURN     (:) = 0.0
 ZWGI_EXCESS (:) = 0.0
@@ -868,7 +868,7 @@ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             
         PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, PEMIS, PALB, PRESA,          &
         PCT, PPSN, PPSNV, PPSNG, PGRNDFLUX, PSMELTFLUX, ZSNOW_THRUFAL,          &
         PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
-        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP, PGAMMAT, ZTA_IC, ZQA_IC, ZVMOD_IC,     &
+        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP, PGAMMAT, ZTA_IC, ZQA_IC, ZUSTAR2_IC,   &
         PSNOWFREE_ALB_VEG, PPSNV_A, PSNOWFREE_ALB_SOIL,                         &
         PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT)  
 !
@@ -886,8 +886,8 @@ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             
 !*******************************************************************************
 !
 CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP, PTSTEP, PSODELX,       &
-           PCD, PVMOD, PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC,                        &
-           ZVMOD_IC, PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                   &
+           PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC, ZUSTAR2_IC,                        &
+           PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                             &
            PLAI, PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,&
            ZF5, PRS, ZCS, PCG, PCT, PSNOWSWE(:,1), ZT2M, ZTSM,                  &
            PPSN, PPSNV, PPSNG, ZFROZEN1, PTAUICE, ZWGI_EXCESS,                  &

@@ -276,9 +276,9 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZLIQHEATXS,
 !                                                 flux (W m-2)
 !                                      ZLWUPSNOW = upwelling longwave raaditive flux (W m-2)
 !
-REAL, DIMENSION(SIZE(PTA))          :: ZVMOD_IC, ZTA_IC, ZQA_IC,                                   &
+REAL, DIMENSION(SIZE(PTA))          :: ZUSTAR2_IC, ZTA_IC, ZQA_IC,                                   &
                                         ZPET_A_COEF_T, ZPEQ_A_COEF_T, ZPET_B_COEF_T, ZPEQ_B_COEF_T  
-!                                      ZVMOD_IC      = implicit lowest atmospheric level wind speed
+!                                      ZUSTAR2_IC    = implicit lowest atmospheric level friction (m2/s2)
 !                                      ZTA_IC        = implicit lowest atmospheric level air temperature
 !                                      ZQA_IC        = implicit lowest atmospheric level specific humidity
 !                                      ZPET_A_COEF_T = transformed A-air temperature coefficient
@@ -305,6 +305,11 @@ LOGICAL                         ::LP ! flag  to print gridpoints diagnostics
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('SNOWCRO',0,ZHOOK_HANDLE)
+!
+ZUSTAR2_IC = 0.0
+ZTA_IC     = 0.0
+ZQA_IC     = 0.0
+!
 OCOND_GRAIN=.TRUE.
 ODRIFT_GRAIN=.TRUE.
 OCOND_YEN=.TRUE.!FALSE. !(if TRUE : use of the Yen (1981) thermal conductivity paramztrization ; 
@@ -512,7 +517,7 @@ CALL SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                    &
                  PSNOWDZ(:,1),PSNOWDZ(:,2),PSNOWALB,PZ0,         PZ0EFF,PZ0H, &
                  ZSFCFRZ,ZRADSINK(:,1),PHPSNOW,                               &
                  ZCT,PEMISNOW,PRHOA,ZTSTERM1,ZTSTERM2,ZRA,PCDSNOW,PCHSNOW,    &
-                 ZQSAT, ZDQSAT, ZRSRA, ZVMOD_IC, PRI,                         &
+                 ZQSAT, ZDQSAT, ZRSRA, ZUSTAR2_IC, PRI,                         &
                  ZPET_A_COEF_T,ZPEQ_A_COEF_T,ZPET_B_COEF_T,ZPEQ_B_COEF_T      ) 
 !
 ! Heat transfer: simple diffusion along the thermal gradient
@@ -529,8 +534,8 @@ CALL SNOWCROSOLVT(PTSTEP,ZSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,                &
 !*       8.     Surface fluxes
 !               --------------
 !
-CALL SNOWCROFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,           &
-                 PCDSNOW,PVMOD,ZVMOD_IC,                             &
+CALL SNOWCROFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,            &
+                 ZUSTAR2_IC,                                           &
                  PTSTEP,PSNOWALB,PSW_RAD,PEMISNOW,ZLWUPSNOW,PLW_RAD, &
                  ZTA_IC,ZSFCFRZ,ZQA_IC,PHPSNOW,                      &
                  ZSNOWTEMPO1,ZSNOWFLUX,ZCT,ZRADSINK(:,1),            &
@@ -1742,7 +1747,7 @@ END SUBROUTINE SNOWCROTHRM
                              PSNOWDZ1,PSNOWDZ2,PALBT,PZ0,PZ0EFF,PZ0H,                    &
                              PSFCFRZ,PRADSINK,PHPSNOW,                                   &
                              PCT,PEMIST,PRHOA,PTSTERM1,PTSTERM2,PRA,PCDSNOW,PCHSNOW,     &
-                             PQSAT,PDQSAT,PRSRA,PVMOD_IC, PRI,                           &
+                             PQSAT,PDQSAT,PRSRA,PUSTAR2_IC, PRI,                           &
                              PPET_A_COEF_T,PPEQ_A_COEF_T,PPET_B_COEF_T,PPEQ_B_COEF_T     ) 
 !
 !!    PURPOSE
@@ -1810,7 +1815,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PTSTERM1, PTSTERM2, PEMIST, PRA,         &
                                       PCT, PSFCFRZ, PCDSNOW, PCHSNOW,          &
                                       PQSAT, PDQSAT, PRSRA 
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PVMOD_IC,                        &
+REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR2_IC,                        &
                                       PPET_A_COEF_T, PPEQ_A_COEF_T,    &
                                       PPET_B_COEF_T, PPEQ_B_COEF_T 
 !
@@ -1890,7 +1895,12 @@ ENDIF
 ZVMOD(:)       = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
 ZVMOD(:)       = MAX(ZVMOD(:),0.)
 !
-PVMOD_IC(:) =  ZVMOD(:) ! implicit wind speed: used to compute implicit wind stress
+WHERE(PPEW_A_COEF(:)/= 0.)
+      ZUSTAR2(:) = MAX( ( ZVMOD(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+ENDWHERE
+!
+! implicit wind friction
+PUSTAR2_IC(:) =  ZUSTAR2(:)
 !
 ! 3. Calculate linearized surface energy budget components:
 ! ---------------------------------------------------------
@@ -2500,8 +2510,8 @@ END SUBROUTINE SNOWCROREFRZ
 !####################################################################
 !####################################################################
 !####################################################################
-      SUBROUTINE SNOWCROFLUX(PSNOWTEMP,PSNOWDZ,PEXNS,PEXNA,         &
-                             PCD,PVMOD,PVMOD_IC,                     &
+      SUBROUTINE SNOWCROFLUX(PSNOWTEMP,PSNOWDZ,PEXNS,PEXNA,          &
+                             PUSTAR2_IC,                             &
                              PTSTEP,PALBT,PSW_RAD,PEMIST,PLWUPSNOW,  &
                              PLW_RAD,PTA,PSFCFRZ,PQA,PHPSNOW,        &
                              PSNOWTEMPO1,PSNOWFLUX,PCT,PRADSINK,     &
@@ -2532,7 +2542,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PSNOWDZ, PSNOWTEMPO1, PSNOWFLUX, PCT, &
 REAL, DIMENSION(:), INTENT(IN)      :: PALBT, PSW_RAD, PEMIST, PLW_RAD,      &
                                         PTA, PSFCFRZ, PQA,                    &
                                         PHPSNOW, PQSAT, PDQSAT, PRSRA,        &
-                                        PCD, PVMOD, PVMOD_IC 
+                                        PUSTAR2_IC 
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PSNOWTEMP
 !
@@ -2664,7 +2674,8 @@ PEVAP(:)     = ZEVAPC(:)
 ! 5. Friction velocity
 ! --------------------
 !
-PUSTAR(:) = SQRT( PCD(:) * PVMOD(:) * PVMOD_IC(:)) 
+PUSTAR(:) = SQRT(PUSTAR2_IC(:)) 
+!
 IF (LHOOK) CALL DR_HOOK('SNOWCROFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
