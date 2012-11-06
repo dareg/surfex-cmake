@@ -31,6 +31,19 @@ REAL, PARAMETER :: XSMALL_DUMMY = -99999.0 ! Small value
 !
 REAL, PARAMETER :: XC_SMALL=0.01 ! Small value for the lake depth
 !
+REAL :: XAUXT_SNOW = 273.15
+REAL :: XAUXT_ICE = 273.15
+REAL :: XAUXT_MNW = 273.15
+REAL :: XAUXT_WML = 273.15
+REAL :: XAUXT_BOT = 273.15
+REAL :: XAUXT_B1 = 273.15
+REAL :: XAUXCT = 0.0
+REAL :: XAUXH_SNOW = 0.0
+REAL :: XAUXH_ICE = 0.0
+REAL :: XAUXH_ML = 0.0
+REAL :: XAUXH_B1 = 0.0
+REAL :: XAUXT_SFC = 273.15
+!
 !REAL, PARAMETER :: XT_DUMMY=273.15, & ! Dummy value for temperature
 !                   XC_DUMMY=0.0,    & ! Dummy value for the shape-factor
 !                   XH_DUMMY=0.0       ! Dummy value for depth

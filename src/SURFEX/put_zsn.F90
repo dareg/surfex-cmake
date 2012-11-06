@@ -33,9 +33,11 @@
 !-------------------------------------------------------------------------------
 !      
 USE MODD_SURF_ATM_n, ONLY : NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
-                              NR_WATER,    NR_TOWN,    NR_NATURE, &
-                              CWATER, NSIZE_SEA, NR_SEA,         &
-                            CSEA, CNATURE, CWATER, CTOWN    
+                            NR_WATER,    NR_TOWN,    NR_NATURE,    &
+                            CWATER, NSIZE_SEA, NR_SEA,             &
+                            CSEA, CNATURE, CWATER, CTOWN,          &
+                            NDIM_FULL, NSIZE_FULL, XNATURE, XSEA,  &
+                            XWATER, XTOWN
 !
 !*       0.    DECLARATIONS
 !              ------------
@@ -53,6 +55,8 @@ USE MODI_PUT_ZS_SEA_n
 USE MODI_PUT_ZS_SURF_ATM_n
 !
 USE MODI_PUT_ZS_TOWN_n
+USE MODI_GET_SIZE_FULL_n
+USE MODI_GET_1D_MASK
 !
 IMPLICIT NONE
 !
@@ -104,7 +108,7 @@ CONTAINS
 SUBROUTINE PACK_ZS(KSIZE,KMASK,YTYPE)
 !
 INTEGER, INTENT(IN)               :: KSIZE
-INTEGER, INTENT(IN), DIMENSION(:) :: KMASK
+INTEGER, POINTER, DIMENSION(:)    :: KMASK
 CHARACTER(LEN=1), INTENT(IN)      :: YTYPE
 !
 REAL, DIMENSION(KSIZE) :: ZP_ZS
@@ -114,6 +118,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! input arguments:
 !
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_N:PACK_ZS',0,ZHOOK_HANDLE)
+!
+IF (.NOT.ASSOCIATED(KMASK)) THEN
+  ALLOCATE(KMASK (KSIZE))
+  IF (KSIZE>0) THEN
+    CALL GET_SIZE_FULL_n(HPROGRAM,NDIM_FULL,NSIZE_FULL)
+    IF (YTYPE=='W') THEN
+      CALL GET_1D_MASK( KSIZE, NSIZE_FULL, XWATER, KMASK)
+    ELSEIF (YTYPE=='N') THEN
+      CALL GET_1D_MASK( KSIZE, NSIZE_FULL, XNATURE, KMASK)
+    ELSEIF (YTYPE=='T') THEN
+      CALL GET_1D_MASK( KSIZE, NSIZE_FULL, XTOWN, KMASK)
+    ELSEIF (YTYPE=='S') THEN
+      CALL GET_1D_MASK( KSIZE, NSIZE_FULL, XSEA, KMASK)
+    ENDIF     
+  ENDIF
+ENDIF
 !
 DO JJ=1,KSIZE
   ZP_ZS(JJ)         = PZS         (KMASK(JJ))
