@@ -80,11 +80,25 @@ DIR_TRIP += LIB/TRIP
 #
 ifdef DIR_TRIP
 DIR_MASTER += $(DIR_TRIP)
-CPPFLAGS   += $(CPPFLAGS_TROIP)
+CPPFLAGS   += $(CPPFLAGS_TRIP)
 #VER_SURFEX=SURFEX-7-2-0
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MYSRC)
 
 #OBJS_NOCB +=  spll_mode_cover_301_573.o 
+
+$(OBJS0): OPT = $(OPT0) 
+
+endif
+##########################################################
+#           Source TOPD                                 #
+##########################################################
+#
+DIR_TOPD += LIB/TOPD
+#CPPFLAGS_TOPD=
+#
+ifdef DIR_TOPD
+DIR_MASTER += $(DIR_TOPD)
+CPPFLAGS   += $(CPPFLAGS_TOPD)
 
 $(OBJS0): OPT = $(OPT0) 
 
