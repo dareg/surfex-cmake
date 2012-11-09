@@ -82,6 +82,10 @@ USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,  
 USE MODD_SURFEX_OMP, ONLY :  NINDX1, NINDX2, NBLOCK, NBLOCKTOT, &
                              INIT_DIM, RESET_DIM, NWORK, XWORK, XWORK2
 !
+USE MODD_COUPLING_TOPD, ONLY : NNB_TOPD, NNB_STP_RESTART, LBUDGET_TOPD, LTOPD_STEP, &
+                               LCOUPL_TOPD, NTOPD_STEP, NYEAR, NMONTH, NDAY, NH, NM
+USE MODD_TOPODYN, ONLY : XTOPD_STEP, NNB_TOPD_STEP, XQTOT, XQB_RUN, XQB_DR
+!
 USE MODE_POS_SURF
 !
 USE MODN_IO_OFFLINE
@@ -123,6 +127,10 @@ USE MODI_GATHER_AND_WRITE_MPI
 USE MODI_CLOSE_FILEIN_OL
 USE MODI_CLOSE_FILEOUT_OL
 USE MODI_DEALLOC_SURFEX
+!
+USE MODI_WRITE_DISCHARGE_FILE
+USE MODI_WRITE_BUDGET_COUPL_ROUT
+USE MODI_PREP_RESTART_COUPL_TOPD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -401,6 +409,20 @@ INB_STEP_ATM  = INT(ZDURATION / ZTSTEP)
 INB_ATM       = INT(ZTSTEP / XTSTEP_SURF)
 NSTEP_OUTPUT  = INT(ZDURATION / XTSTEP_OUTPUT)
 !
+XTOPD_STEP = 0
+NNB_TOPD_STEP = 0
+NTOPD_STEP = 0
+IF ( LCOUPL_TOPD ) THEN
+  !
+  XTOPD_STEP = FLOAT(NNB_TOPD)* XTSTEP_SURF
+  NNB_TOPD_STEP = INT( ZDURATION / XTOPD_STEP )
+  !
+  IF ( NNB_STP_RESTART==0 .AND. .NOT.LRESTART ) NNB_STP_RESTART = -1
+  !
+  NTOPD_STEP = 1
+  !
+ENDIF
+!
 !       allocation of variables
 !
 IBANDS = 1
@@ -565,7 +587,6 @@ CALL INIT_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,IMONTH,&
                         ZDURATION,ITRIP_MONTH,ITRIP_COUNT,XZENITH,      &
                         XSW_BANDS,XEMIS,XTSRAD,XDIR_ALB,XSCA_ALB        )  
 !
-!
 ! --------------------------------------------------------------------------------------
 !
 NWRITE = 0
@@ -668,7 +689,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
     END WHERE
     !
     ! updates time
-    ZTIMEC= ZTIMEC+ XTSTEP_SURF
+    ZTIMEC= ZTIMEC+XTSTEP_SURF
+    IF (LCOUPL_TOPD) LTOPD_STEP = ( MOD((((JFORC_STEP-1)*INB_ATM)+JSURF_STEP),NNB_TOPD) == 0 )
     !
     ! run Surface
     !
@@ -731,6 +753,72 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     XTIME1 =  MPI_WTIME()
     ! ecrit Surface
+    !
+    IF ( LCOUPL_TOPD .AND. LTOPD_STEP ) THEN
+      !
+      IF (.NOT.ALLOCATED(NYEAR))  ALLOCATE(NYEAR(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NMONTH)) ALLOCATE(NMONTH(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NDAY))   ALLOCATE(NDAY(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NH))     ALLOCATE(NH(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NM))     ALLOCATE(NM(NNB_TOPD_STEP))
+      !
+      NYEAR (NTOPD_STEP) = IYEAR
+      NMONTH(NTOPD_STEP) = IMONTH
+      NDAY  (NTOPD_STEP) = IDAY
+      NH    (NTOPD_STEP) = INT(ZTIME/3600.)
+      NM    (NTOPD_STEP) = INT((ZTIME-NH(NTOPD_STEP)*3600.)/60.)
+      !
+      IF ( NM(NTOPD_STEP)==60 ) THEN
+        !
+        NM(NTOPD_STEP) = 0
+        NH(NTOPD_STEP) = NH(NTOPD_STEP)+1
+        !
+      ENDIF
+      !
+      IF ( NH(NTOPD_STEP)==24 ) THEN
+        !
+        NH  (NTOPD_STEP) = 0
+        NDAY(NTOPD_STEP) = NDAY(NTOPD_STEP)+1
+        !
+        !!AJOUT BEC 
+        SELECT CASE (NMONTH(NTOPD_STEP))
+          CASE(4,6,9,11)
+            IF ( NDAY(NTOPD_STEP)==31 ) THEN
+              NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+              NDAY  (NTOPD_STEP) = 1
+            ENDIF
+          CASE(1,3,5,7:8,10)
+            IF ( NDAY(NTOPD_STEP)==32 ) THEN
+              NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+              NDAY  (NTOPD_STEP) = 1
+            ENDIF
+          CASE(12)
+            IF ( NDAY(NTOPD_STEP)==32 ) THEN
+              NYEAR (NTOPD_STEP) = NYEAR(NTOPD_STEP)+1
+              NMONTH(NTOPD_STEP) = 1
+              NDAY  (NTOPD_STEP) = 1
+            ENDIF
+          CASE(2)
+            IF( MOD(NYEAR(NTOPD_STEP),4)==0 .AND. MOD(NYEAR(NTOPD_STEP),100)/=0 .OR. MOD(NYEAR(NTOPD_STEP),400)==0 ) THEN 
+              IF (NDAY(NTOPD_STEP)==30) THEN
+                NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+                NDAY  (NTOPD_STEP) = 1
+              ENDIF
+            ELSE
+              IF (NDAY(NTOPD_STEP)==29) THEN
+                NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+                NDAY  (NTOPD_STEP) = 1
+              ENDIF
+            ENDIF
+        END SELECT
+        !
+      ENDIF
+      !
+      ! * 2. Stocking date of each time step
+      !
+      NTOPD_STEP = NTOPD_STEP + 1 
+      !     
+    ENDIF
     !
     IF (MOD(ZTIMEC,XTSTEP_OUTPUT) == 0. .AND. CTIMESERIES_FILETYPE/='NONE  ') THEN
       !
@@ -837,6 +925,20 @@ DO JFORC_STEP=1,INB_STEP_ATM
       CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
       !
 !$OMP END PARALLEL
+      !
+      IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) THEN
+        !
+        ! Writing of file resulting of coupling with TOPMODEL or routing ****
+        CALL WRITE_DISCHARGE_FILE(CSURF_FILETYPE,'q_total.txt','FORMATTED',&
+                                  NYEAR,NMONTH,NDAY,NH,NM,XQTOT)
+        CALL WRITE_DISCHARGE_FILE(CSURF_FILETYPE,'q_runoff.txt','FORMATTED',&
+                                  NYEAR,NMONTH,NDAY,NH,NM,XQB_RUN)
+        CALL WRITE_DISCHARGE_FILE(CSURF_FILETYPE,'q_drainage.txt','FORMATTED',&
+                                  NYEAR,NMONTH,NDAY,NH,NM,XQB_DR)
+        ! Writing of budget files 
+        IF (LBUDGET_TOPD) CALL WRITE_BUDGET_COUPL_ROUT
+        !
+      ENDIF
       !
       XTIME1 =  MPI_WTIME()
       !
@@ -975,7 +1077,10 @@ IF ( LRESTART ) THEN
     END IF
     !* add informations in the file
     IF (CSURF_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
+    !
   ENDIF
+  !
+  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) CALL PREP_RESTART_COUPL_TOPD(CSURF_FILETYPE,INI)
   !
 END IF
 !
