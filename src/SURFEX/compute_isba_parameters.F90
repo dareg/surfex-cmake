@@ -112,13 +112,18 @@ USE MODD_AGRI_n,         ONLY : NIRRINUM, XTHRESHOLDSPT, LIRRIDAY, LIRRIGATE
 USE MODD_DIAG_ISBA_n,      ONLY : LPATCH_BUDGET
 USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_DIAG_ALBEDO
 !
-USE MODD_SURF_ATM,         ONLY : LCPL_ESM
+USE MODD_SURF_ATM,    ONLY : LCPL_ESM
+USE MODD_SURF_ATM_n,  ONLY : NDIM_FULL
 !
 USE MODD_SGH_PAR,        ONLY : NDIMTAB, XICE_DEPH_MAX, XF_DECAY
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
+!
+USE MODD_DUMMY_EXP_PROFILE,ONLY : XF_PARAM, XC_DEPTH_RATIO
+USE MODD_TOPODYN, ONLY : NNCAT, NMESHT
+USE MODD_SURF_ATM_n, ONLY : NR_NATURE, NDIM_FULL
 !
 USE MODD_DST_n
 USE MODD_SLT_n
@@ -145,8 +150,14 @@ USE MODI_READ_ISBA_CANOPY_n
 USE MODI_COMMON_PARTS2
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
 USE MODI_DIAG_ISBA_INIT_n
+USE MODI_INIT_SURF_TOPD
 !
 USE MODI_GATHER_AND_WRITE_MPI
+!
+USE MODI_PACK_SAME_RANK
+USE MODI_ISBA_TO_TOPD
+USE MODI_OPEN_FILE
+USE MODI_CLOSE_FILE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -200,6 +211,9 @@ REAL, DIMENSION(SIZE(PTSRAD))     :: ZTSRAD_NAT !radiative temperature
 REAL, DIMENSION(:),   ALLOCATABLE :: ZM, ZWORK
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZF
 LOGICAL                           :: LWORK
+!
+REAL, DIMENSION(NDIM_FULL)   :: ZF_PARAM, ZC_DEPTH_RATIO
+INTEGER           :: IUNIT       ! unit of f/dc map file
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -315,13 +329,13 @@ ENDIF
 !
 !Topmodel
 !  
-IF (CKSAT=='SGH' .AND. HINIT/='PRE') THEN
+IF ((CKSAT=='SGH' .OR. CKSAT=='EXP') .AND. HINIT/='PRE') THEN
   ALLOCATE(ZF(KI,NPATCH))
   ZF (:,:) = XUNDEF
 ENDIF
 !
 !CRUNOFF used in hydro_sgh and isba_sgh_update
-IF(CRUNOFF=='SGH ') THEN 
+IF( CRUNOFF=='SGH ') THEN 
 !
   ALLOCATE(XTAB_FSAT(KI,NDIMTAB))
   ALLOCATE(XTAB_WTOP(KI,NDIMTAB))
@@ -371,48 +385,86 @@ ENDIF
 ! 
 !
 !  CKSAT used in hydro_soildif.F90 and hydro_soil.F90 and soil.F90
-IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN 
+IF ( HINIT/='PRE' ) THEN
   !
-  IF(CISBA=='DIF') THEN
+  IF( CKSAT=='SGH' )THEN 
     !
-    ALLOCATE(ZWORK(KI))
-    ZWORK(:) = XUNDEF
-    ZF(:,:)  = XUNDEF          
-    DO JPATCH=1,NPATCH    
-      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
-      DO JILU=1,KI
-         IF(XPATCH(JILU,JPATCH)>0.0)THEN
-           !no profile for non vegetated area : f and root = 0.0
-           LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
-           ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
-           ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
-           ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
-         ENDIF
-      ENDDO
-      CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
-                              XCONDSAT(:,:,JPATCH))
-    ENDDO  
-    DEALLOCATE(ZWORK)
+    IF(CISBA=='DIF') THEN
+      !
+      ALLOCATE(ZWORK(KI))
+      ZWORK(:) = XUNDEF
+      ZF(:,:)  = XUNDEF          
+      DO JPATCH=1,NPATCH    
+        IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
+        DO JILU=1,KI
+          IF(XPATCH(JILU,JPATCH)>0.0)THEN
+            !no profile for non vegetated area : f and root = 0.0
+            LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
+            ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
+            ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
+            ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
+          ENDIF
+        ENDDO
+        CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
+                                XCONDSAT(:,:,JPATCH))
+      ENDDO  
+      DEALLOCATE(ZWORK)
+      !
+      !Exponential decay for ISBA-FR option
+    ELSE
+      !
+      WHERE(ZF(:,:)==XUNDEF) ZF(:,:) = 4.0/XDG(:,2,:)
+      ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
+      !
+      ALLOCATE(XF_PARAM (KI))
+      ALLOCATE(XC_DEPTH_RATIO (KI))
+      XF_PARAM(:) = ZF(:,1)
+      XC_DEPTH_RATIO(:) = 1.25
+      !
+      DO JPATCH=1,NPATCH
+        IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+          CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH),   &
+                                  XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),      &
+                                  XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),XKSAT_ICE(:,JPATCH))  
+      ENDDO                       
+      ! 
+    ENDIF
+    !  
+    DEALLOCATE(ZF)
     !
-    !Exponential decay for ISBA-FR option
-  ELSE
+  ELSEIF ( CKSAT=='EXP' .AND. CISBA=='3-L' ) THEN
     !
-    WHERE(ZF(:,:)==XUNDEF) 
-      ZF(:,:) = 4.0/XDG(:,2,:)
-    ENDWHERE
-    ZF(:,:)=MIN(ZF(:,:),XF_DECAY)
+    ALLOCATE(XF_PARAM (KI))
+    ALLOCATE(XC_DEPTH_RATIO (KI))
+    !
+    CALL OPEN_FILE('ASCII ',IUNIT,HFILE='carte_f_dc.txt',HFORM='FORMATTED',HACTION='READ ')
+    DO JILU=1,NDIM_FULL
+      READ(IUNIT,*) ZF_PARAM(JILU), ZC_DEPTH_RATIO(JILU)
+    ENDDO
+    CALL CLOSE_FILE('ASCII ',IUNIT)
+    CALL PACK_SAME_RANK(NR_NATURE,ZF_PARAM,XF_PARAM)
+    CALL PACK_SAME_RANK(NR_NATURE,ZC_DEPTH_RATIO,XC_DEPTH_RATIO)
     !
     DO JPATCH=1,NPATCH
-      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-        CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH),   &
-                                XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),      &
-                                XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),XKSAT_ICE(:,JPATCH))  
-     ENDDO                       
-     ! 
+      WHERE (XF_PARAM(:)/=XUNDEF)
+        ZF(:,JPATCH) = XF_PARAM(:)
+      ELSEWHERE
+        ZF(:,JPATCH) = 4.0/XDG(:,2,JPATCH)
+        ZF(:,JPATCH) = MIN(ZF(:,JPATCH),XF_DECAY)
+      ENDWHERE
+    ENDDO
+    !
+    DO JPATCH=1,NPATCH
+      CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH), &
+                             XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),   &
+                             XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),                &
+                             XKSAT_ICE(:,JPATCH))  
+    ENDDO    
+    !
+    DEALLOCATE(ZF)
+    !    
   ENDIF
-  !  
-  DEALLOCATE(ZF)
-  !
+  ! 
 ENDIF
 !
 !
@@ -613,6 +665,10 @@ DEALLOCATE(ZTG1)
 IF(NPATCH<=1) LPATCH_BUDGET=.FALSE.
 !
 CALL DIAG_ISBA_INIT_n(HPROGRAM,KI,KSW)
+!
+!-------------------------------------------------------------------------------
+!
+CALL INIT_SURF_TOPD(HPROGRAM,NDIM_FULL)
 !
 !-------------------------------------------------------------------------------
 !

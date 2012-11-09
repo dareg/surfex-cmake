@@ -87,6 +87,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
+USE MODI_PGD_TOPD
 !
 IMPLICIT NONE
 !
@@ -492,6 +493,10 @@ CALL PGD_FIELD                                                                  
 LECOCLIMAP = OECOCLIMAP
 !
 CALL PGD_ISBA_PAR(HPROGRAM)
+!
+!-------------------------------------------------------------------------------
+!
+CALL PGD_TOPD(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

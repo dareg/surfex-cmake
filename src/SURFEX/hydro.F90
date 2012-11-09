@@ -84,6 +84,8 @@ USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
+USE MODD_COUPLING_TOPD, ONLY : LCOUPL_TOPD, XAS_NATURE, XATOP, XRUNOFF_TOP
+!
 USE MODI_HYDRO_VEG
 USE MODI_HYDRO_SNOW
 USE MODI_HYDRO_SOIL
@@ -380,7 +382,7 @@ ENDIF
 !
 CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                              &
                  ZRR, ZLEV, ZLETR, PVEG, ZPSNV,                    &
-                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG                  )  
+                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG                  ) 
 !
 !-------------------------------------------------------------------------------
 !
@@ -431,7 +433,7 @@ CALL HYDRO_SGH(HISBA,HRUNOFF,HRAIN,HHORT,         &
                  PPIFLOOD, PIFLOOD, PPFLOOD,      &
                  PRUNOFFB, PRUNOFFD, PTDIURN,     &
                  PSOILWGHT, OFLOOD, KLAYER_HORT,  &
-                 KLAYER_DUN                       )                  
+                 KLAYER_DUN                       )         
 !
 !-------------------------------------------------------------------------------
 !
@@ -547,7 +549,19 @@ ELSE
       PWG(:,3) = MAX( PWG(:,3), XWGMIN                 )
     END IF
   ENDIF
-!
+  !
+  IF (LCOUPL_TOPD) THEN
+    !runoff topo cumule (kg/m²)
+    WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + (PRUNOFF(:)+ PHORTON(:))*XATOP(:)*PTSTEP
+    IF (HRUNOFF=='TOPD') THEN     
+      WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + ZDUNNE(:)*PTSTEP
+      ! ZDUNNE contains only saturated pixels on mesh so only catchment
+    ELSE
+      WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + ZDUNNE(:)*XATOP(:)*PTSTEP  
+      ! ZDUNNE concerns all the mesh so not only catchment =>*XATOP
+    ENDIF
+  ENDIF
+  !
 ENDIF
 !
 !-------------------------------------------------------------------------------

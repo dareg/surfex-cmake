@@ -41,12 +41,10 @@ USE MODD_ISBA_n, ONLY : XSSO_SLOPE, XEMIS_NAT, XTSRAD_NAT, XZS
 USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
 !
 USE MODI_FORCING_VERT_SHIFT
-! 
+USE MODI_COUPLING_ISBA_CANOPY_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_COUPLING_ISBA_CANOPY_n
 !
 IMPLICIT NONE
 !
@@ -238,11 +236,13 @@ ZLW(:) =  PLW(:)                                *     1./Z3D_TOT_SURF(:)&
 !
 ! correction for RAIN flux.
 !
-ZRAIN(:) = PRAIN(:) / Z3D_TOT_SURF(:)
+ZRAIN(:) = PRAIN(:)
+!ZRAIN(:) = PRAIN(:) / Z3D_TOT_SURF(:)
 !
 ! correction for SNOW flux.
 !
-ZSNOW(:) = PSNOW(:) / Z3D_TOT_SURF(:)
+ZSNOW(:) = PSNOW(:)
+!ZSNOW(:) = PSNOW(:) / Z3D_TOT_SURF(:)
 !
 !-------------------------------------------------------------------------------------
 !

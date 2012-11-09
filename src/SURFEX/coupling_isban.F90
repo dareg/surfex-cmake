@@ -84,6 +84,7 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 LVEGUPD, NLAYER_HORT, NLAYER_DUN  
 !
 USE MODD_SURF_ATM,    ONLY : LNOSOF, CIMPLICIT_WIND
+USE MODD_SURF_ATM_n,  ONLY : NDIM_FULL
 !
 USE MODD_DST_n,       ONLY : XSFDST, XSFDSTM, XEMISRADIUS_DST, XEMISSIG_DST
 USE MODD_SLT_n,       ONLY : XSFSLT, XEMISRADIUS_SLT, XEMISSIG_SLT
@@ -205,6 +206,7 @@ USE MODI_CH_BVOCEM_n
 USE MODI_CH_DEP_ISBA
 USE MODI_DSLT_DEP
 USE MODI_COUPLING_DST_n
+USE MODI_COUPLING_SURF_TOPD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -519,6 +521,10 @@ CALL AVERAGE_DIAG_EVAP_ISBA_n
 ! Miscellaneous diagnostics (stored in MODD_DIAG_MISC_ISBA_n)
 !
 CALL AVERAGE_DIAG_MISC_ISBA_n
+!
+!--------------------------------------------------------------------------------------
+!
+CALL COUPLING_SURF_TOPD(HPROGRAM,NDIM_FULL)
 !
 ! --------------------------------------------------------------------------------------
 ! Snow/Flood fractions, albedo and emissivity update :
