@@ -41,6 +41,7 @@ SUBROUTINE FAPAIR(PABC, PIA, PLAI, PXMUS, PSSA_SUP, PSSA_INF, &
 !-------------------------------------------------------------------------------
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XI0
+USE MODD_CO2V_PAR,   ONLY : XK_SUP, XK_INF, XXSI_SUP, XXSI_INF 
 !
 USE MODI_CCETR_PAIR  
 !
@@ -77,7 +78,9 @@ REAL, DIMENSION(:,:), OPTIONAL, INTENT(OUT) :: PFRAC_SUN     ! fraction of sunli
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(SIZE(PLAI))   :: ZXIA, ZXIA_SUP
+REAL, DIMENSION(SIZE(PLAI))   :: ZXIA, ZXIA_SUP, ZKMUSP_SUP, ZKMUSP_INF
+REAL, DIMENSION(SIZE(PLAI))   :: ZB_DR_SUP, ZB_DR_INF, ZOMEGA_DR_SUP, ZOMEGA_DR_INF, &
+                                 ZOMEGA_DF_SUP, ZOMEGA_DF_INF
 !                                ZXIA  = abs. radiation of vegetation
 REAL, DIMENSION(SIZE(PLAI))   :: ZTR, ZFD_SKY, ZFD_VEG, ZFD_SUP, ZLAI_EFF0, ZLAI_EFF
 !                                ZTR = transmittance       
@@ -88,7 +91,8 @@ REAL, DIMENSION(SIZE(PLAI))   :: ZTR, ZFD_SKY, ZFD_VEG, ZFD_SUP, ZLAI_EFF0, ZLAI
 !                                 ZLAI_SHADE = LAI of shaded leaves
 !REAL, DIMENSION(SIZE(PLAI))    :: ZRN_SUNLIT, ZRN_SHADE
 REAL, DIMENSION(SIZE(PLAI),SIZE(PABC)) :: ZIACAN, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN
-REAL                           :: ZABC, ZWEIGHT, ZCOEF,  ZRATIO, ZTAU
+REAL                           :: ZABC, ZWEIGHT, ZCOEF,  ZRATIO, ZTAU, ZSUP, ZINF, &
+                                  ZSSA_SUP, ZSSA_INF, ZB_DF_SUP, ZB_DF_INF
 !                                            ZABC    = abscissa needed for integration
 !                                                     of net assimilation and stomatal 
 !                                                     conductance over canopy depth 
@@ -143,9 +147,39 @@ DO I=1,SIZE(PIA)
       !if clear sky, the diffuse fraction depends on aerosol load
       ZFD_SKY(I) = (1. - ZTAU) /(1. - (1.-PXMUS(I))*ZTAU)
     ENDIF
-    IF (PABC(SIZE(PABC)).GT.0.8) ZFD_VEG(I) = MIN(ZFD_SKY(I),1.)
   ENDIF
 END DO
+!
+IF (PABC(SIZE(PABC)).GT.0.8) ZFD_VEG(:) = MIN(ZFD_SKY(:),1.)
+!
+! set param sup / inf
+!
+ZSSA_SUP = SQRT(1.-PSSA_SUP)
+ZSSA_INF = SQRT(1.-PSSA_INF)
+!
+ZSUP = - 0.461 * XXSI_SUP + 3.8
+ZINF = - 0.461 * XXSI_INF + 3.8
+!
+DO I=1,SIZE(PIA)
+  IF (PIA(I).NE.0.) THEN
+    ZKMUSP_SUP(I) = EXP(-XK_SUP*(ACOS(PXMUS(I)))**ZSUP)
+    ZKMUSP_INF(I) = EXP(-XK_INF*(ACOS(PXMUS(I)))**ZINF)
+    ! direct case
+    ! Directional albedo of upper/lower layer
+    ZB_DR_SUP(I) = 1.-(1.-ZSSA_SUP)/(1.+2.*PXMUS(I)*ZSSA_SUP) 
+    ZB_DR_INF(I) = 1.-(1.-ZSSA_SUP)/(1.+2.*PXMUS(I)*ZSSA_INF)
+    ! CLUMPING INDEX 
+    ZOMEGA_DR_SUP(I) = 1. / (1.+ PB_SUP(I)*ZKMUSP_SUP(I))
+    ZOMEGA_DR_INF(I) = 1. / (1.+ PB_INF(I)*ZKMUSP_INF(I))
+    ! diffus case
+    ! CLUMPING INDEX
+    ZOMEGA_DF_SUP(I) = (1.+PB_SUP(I)/2.)/(1.+PB_SUP(I))
+    ZOMEGA_DF_INF(I) = (1.+PB_INF(I)/2.)/(1.+PB_INF(I))
+  ENDIF
+ENDDO
+!
+ZB_DF_SUP = 1.-(1.-ZSSA_SUP)/(1.+ ZSSA_SUP)
+ZB_DF_INF = 1.-(1.-ZSSA_INF)/(1.+ ZSSA_INF)
 !
 ! Integration over the canopy: SIZE(PABC) increments
 ! are used to approximate the integral. And to calculate 
@@ -156,10 +190,18 @@ DO JINT = SIZE(PABC),1,-1
   IF (JINT.LT.SIZE(PABC)) ZABC = PABC(JINT+1)
   ZWEIGHT = ZABC - PABC(JINT)
   !
-  !  Compute transmittance of each level  
-  CALL CCETR_PAIR (JINT, PABC(JINT), ZABC, PSSA_SUP, PSSA_INF,        &
-                  PB_SUP, PB_INF, PIA, PXMUS, PLAI, PALB_VEG, PALB_SOIL, &
-                  ZFD_SKY, ZFD_VEG, ZTR, ZXIA, ZLAI_EFF0                 )
+  IF (PABC(JINT).GT.0.8) THEN
+    !  Compute transmittance of each level  
+    CALL CCETR_PAIR (JINT, PABC(JINT), ZABC, PIA, PXMUS, ZB_DR_SUP, &
+                     ZOMEGA_DR_SUP, ZOMEGA_DF_SUP, ZB_DF_SUP, PLAI, &
+                     PALB_VEG, PALB_SOIL, ZFD_SKY, ZFD_VEG, ZTR,    &
+                     ZXIA, ZLAI_EFF0              )
+  ELSE
+    CALL CCETR_PAIR (JINT, PABC(JINT), ZABC, PIA, PXMUS, ZB_DR_INF, &
+                     ZOMEGA_DR_INF, ZOMEGA_DF_INF, ZB_DF_INF, PLAI, &
+                     PALB_VEG, PALB_SOIL, ZFD_SKY, ZFD_VEG, ZTR,    &
+                     ZXIA, ZLAI_EFF0              )
+  ENDIF          
   ! 
   DO I=1,SIZE(PIA)
     !
