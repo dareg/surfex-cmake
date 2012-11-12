@@ -46,18 +46,18 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : CNATURE
 USE MODD_ISBA_n, ONLY : NPATCH, TTIME, XCOVER, XZS, CISBA, CPEDOTF,  &
                           CPHOTO, LTR_ML, CRUNOFF, XCLAY, XSAND,     &
-                          XSOM, LSOM,                                &                          
+                          XSOM, LSOM, LNOF,                          &                          
                           NGROUND_LAYER, NNBIOMASS,                  &
                           XAOSIP, XAOSIM, XAOSJP, XAOSJM,            &
                           XHO2IP, XHO2IM, XHO2JP, XHO2JM,            &
                           XSSO_SLOPE, XSSO_STDEV, XRUNOFFB,          &
                           XZ0EFFJPDIR, LCOVER, LECOCLIMAP, LCTI,     &
                           XWDRAIN, XTI_MIN, XTI_MAX, XTI_MEAN,       &
-                          XTI_STD, XTI_SKEW, XSOILGRID   
+                          XTI_STD, XTI_SKEW, XSOILGRID, XPH, XFERT  
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 USE MODD_GR_BIOG_n,   ONLY : XISOPOT, XMONOPOT
-USE MODD_CH_ISBA_n,   ONLY : LCH_BIO_FLUX
+USE MODD_CH_ISBA_n,   ONLY : LCH_BIO_FLUX, LCH_NO_FLUX
 !
 USE MODI_READ_SURF
 USE MODI_READ_GRID
@@ -258,6 +258,36 @@ ELSE
   ALLOCATE(XSOM (0,1))
 !
 ENDIF
+!
+IF (IVERSION>=7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
+   YRECFM='NO'
+   CALL READ_SURF(HPROGRAM,YRECFM,LNOF,IRESP)
+ELSE
+   LNOF = .FALSE.
+ENDIF
+!
+!SOILNOX
+!
+IF (LCH_NO_FLUX) THEN
+  !
+  IF (LNOF) THEN
+    !
+    ALLOCATE(XPH(NDIM))
+    YRECFM='PH'
+    CALL READ_SURF(HPROGRAM,YRECFM,XPH(:),IRESP)
+    !
+    ALLOCATE(XFERT(NDIM))
+    YRECFM='FERT'
+    CALL READ_SURF(HPROGRAM,YRECFM,XFERT(:),IRESP)
+    !
+  ELSE
+    CALL ABOR1_SFX("READ_PGD_ISBAn: WITH LCH_NO_FLUX=T, PH AND FERT FIELDS ARE GIVEN AT PGD STEP")
+  ENDIF
+  !
+ELSE
+  ALLOCATE(XPH (0))
+  ALLOCATE(XFERT(0))
+END IF
 !
 !* subgrid-scale orography parameters to compute dynamical roughness length
 !

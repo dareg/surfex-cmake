@@ -6,7 +6,9 @@
                                    HSOM_TOP, HSOM_SUB, HSOMFILETYPE, PUNIF_SOM, OIMP_SOM,   &
                                    HCTI, HCTIFILETYPE, OIMP_CTI,                            &
                                    HRUNOFFB, HRUNOFFBFILETYPE, PUNIF_RUNOFFB,               &
-                                   HWDRAIN,  HWDRAINFILETYPE , PUNIF_WDRAIN, PSOILGRID      )  
+                                   HWDRAIN,  HWDRAINFILETYPE , PUNIF_WDRAIN, PSOILGRID,     &
+                                   HPH, HPHFILETYPE, PUNIF_PH, HFERT, HFERTFILETYPE,        &
+                                   PUNIF_FERT      )  
 !     ##############################################################
 !
 !!**** *READ_NAM_PGD_ISBA* reads namelist for ISBA
@@ -92,6 +94,12 @@ CHARACTER(LEN=6),    INTENT(OUT)   :: HSOMFILETYPE  ! organic matter data file t
 REAL,                INTENT(OUT)   :: PUNIF_SOM     ! uniform value of organic matter (%)
 LOGICAL,             INTENT(OUT)   :: OIMP_SOM      ! Imposed maps of organic matter
 REAL, DIMENSION(:),  INTENT(OUT)   :: PSOILGRID     ! Soil layer thickness for DIF
+CHARACTER(LEN=28),   INTENT(OUT)   :: HPH           ! file name for pH
+CHARACTER(LEN=28),   INTENT(OUT)   :: HFERT         ! file name for fertilisation rate
+CHARACTER(LEN=6),    INTENT(OUT)   :: HPHFILETYPE   ! pH data file type
+CHARACTER(LEN=6),    INTENT(OUT)   :: HFERTFILETYPE ! fertilisation data file type
+REAL,                INTENT(OUT)   :: PUNIF_PH      ! uniform value of pH
+REAL,                INTENT(OUT)   :: PUNIF_FERT    ! uniform value of fertilisation rate
 !
 !
 !*    0.2    Declaration of local variables
@@ -115,11 +123,15 @@ CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
 CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
 CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+CHARACTER(LEN=28)        :: YPH              ! file name for pH
+CHARACTER(LEN=28)        :: YFERT            ! file name for fertilisation rate
 CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
 CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
 CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
 CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
 CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
+CHARACTER(LEN=6)         :: YPHFILETYPE      ! pH data file type
+CHARACTER(LEN=6)         :: YFERTFILETYPE    ! fertilisation data file type
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand from another PGD file
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay from another PGD file
 LOGICAL                  :: LIMP_CTI         ! Imposed values for topographic index statistics from another PGD file
@@ -127,6 +139,8 @@ REAL                     :: XUNIF_SAND    ! uniform value of sand fraction
 REAL                     :: XUNIF_CLAY    ! uniform value of clay fraction
 REAL                     :: XUNIF_RUNOFFB ! uniform value of subgrid runoff coefficient
 REAL                     :: XUNIF_WDRAIN  ! uniform value of subgrid drainage coefficient
+REAL                     :: XUNIF_PH      ! uniform value of pH
+REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 REAL, DIMENSION(150)     :: XSOILGRID     ! Soil layer thickness for DIF
 !
@@ -144,7 +158,9 @@ NAMELIST/NAM_ISBA/ NPATCH, NGROUND_LAYER, CISBA, CPEDO_FUNCTION, CPHOTO,   &
                    YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,  &
                    YCTI, YCTIFILETYPE, LIMP_CTI,                           &
                    YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,              &
-                   YWDRAIN,  YWDRAINFILETYPE,  XUNIF_WDRAIN, XSOILGRID   
+                   YWDRAIN,  YWDRAINFILETYPE,  XUNIF_WDRAIN, XSOILGRID,    &
+                   YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,       &
+                   XUNIF_FERT   
 !
 !-------------------------------------------------------------------------------
 !
@@ -167,6 +183,8 @@ XUNIF_SAND       = 0.33
 XUNIF_SOM        = XUNDEF
 XUNIF_RUNOFFB    = 0.5
 XUNIF_WDRAIN     = 0.
+XUNIF_PH        = XUNDEF
+XUNIF_FERT      = XUNDEF
 !
 YCLAY            = '                          '
 YSAND            = '                          '
@@ -175,13 +193,17 @@ YSOM_SUB         = '                          '
 YCTI             = '                          '
 YRUNOFFB         = '                          '
 YWDRAIN          = '                          '
+YPH              = '                          '
+YFERT            = '                          '
 !
 YCLAYFILETYPE    = '      '
 YSANDFILETYPE    = '      '
-YSOMFILETYPE  = '      '
+YSOMFILETYPE     = '      '
 YCTIFILETYPE     = '      '
 YRUNOFFBFILETYPE = '      '
 YWDRAINFILETYPE  = '      ' 
+YPHFILETYPE      = '      '
+YPHFILETYPE      = '      '
 !
 LIMP_CLAY        = .FALSE.
 LIMP_SAND        = .FALSE.
@@ -233,6 +255,14 @@ OIMP_SAND        = LIMP_SAND        ! Imposed values for SAND
 OIMP_CLAY        = LIMP_CLAY        ! Imposed values for CLAY
 OIMP_SOM         = LIMP_SOM         ! Imposed values for organic matter
 OIMP_CTI         = LIMP_CTI         ! Imposed values for topographic index statistics
+!
+HPH           = YPH           ! file name for pH value
+HFERT         = YFERT         ! file name for fertilisation data
+HPHFILETYPE   = YPHFILETYPE   ! pH data file type
+HFERTFILETYPE = YFERTFILETYPE ! Fertilisation data file type
+PUNIF_PH      = XUNIF_PH      ! uniform value of pH
+PUNIF_FERT    = XUNIF_FERT    ! uniform value of fertilisation rate
+!
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

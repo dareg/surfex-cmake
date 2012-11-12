@@ -114,6 +114,12 @@ CHARACTER(LEN=28)        :: YSOM_SUB      ! file name for organic matter
 CHARACTER(LEN=6)         :: YSOMFILETYPE  ! organic matter data file type
 REAL                     :: XUNIF_SOM     ! uniform value of organic matter (%)
 LOGICAL                  :: LIMP_SOM      ! Imposed maps of organic matter
+CHARACTER(LEN=28)        :: YPH           ! file name for pH
+CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+REAL                     :: XUNIF_PH      ! uniform value of pH
+REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -139,7 +145,9 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,   &
                        YCTI, YCTIFILETYPE, LIMP_CTI,                            &
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,               &
-                       YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID      )  
+                       YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,     &
+                       YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,        &
+                       XUNIF_FERT                                )  
 !
 NPATCH        = IPATCH
 NGROUND_LAYER = IGROUND_LAYER

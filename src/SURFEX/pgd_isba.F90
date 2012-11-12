@@ -49,8 +49,9 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 CPEDOTF, XCOVER, LCOVER, XZS,            &
                                 XZ0EFFJPDIR, CPHOTO, LTR_ML,             &
-                                XCLAY, XSAND, XSOM, LSOM,                &
-                                XRUNOFFB, XWDRAIN, LECOCLIMAP, XSOILGRID 
+                                XCLAY, XSAND, XSOM, LSOM, LNOF,          &
+                                XRUNOFFB, XWDRAIN, LECOCLIMAP, XSOILGRID,&
+                                XPH, XFERT 
 USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE
 !
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
@@ -69,6 +70,7 @@ USE MODI_WRITE_COVER_TEX_ISBA
 USE MODI_WRITE_COVER_TEX_ISBA_PAR
 USE MODI_PGD_TOPO_INDEX
 USE MODI_PGD_ISBA_PAR
+USE MODI_PGD_TOPD
 !
 USE MODI_READ_SURF
 USE MODI_INIT_IO_SURF_n
@@ -87,7 +89,6 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
-USE MODI_PGD_TOPD
 !
 IMPLICIT NONE
 !
@@ -149,6 +150,12 @@ LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay
 LOGICAL                  :: LIMP_SOM         ! Imposed maps of organic matter
 LOGICAL                  :: LIMP_CTI         ! Imposed maps of topographic index statistics
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil grid reference for DIF
+CHARACTER(LEN=28)        :: YPH           ! file name for pH
+CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+REAL                     :: XUNIF_PH      ! uniform value of pH
+REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -169,7 +176,9 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,    &
                        YCTI, YCTIFILETYPE, LIMP_CTI,                             &
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                &
-                       YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID       )  
+                       YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,      &
+                       YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,         &
+                       XUNIF_FERT                          )  
 !
 NPATCH        = IPATCH
 NGROUND_LAYER = IGROUND_LAYER
@@ -465,6 +474,23 @@ ELSE
 !
   ALLOCATE(XSOM (0,1))
 !
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+!*    8.bis  pH and fertlisation data
+!             --------------------------
+!
+IF((LEN_TRIM(YPHFILETYPE)/=0.OR.XUNIF_PH/=XUNDEF) .AND. (LEN_TRIM(YFERTFILETYPE)/=0.OR.XUNIF_FERT/=XUNDEF)) THEN
+  !
+  ALLOCATE(XPH(ILU))
+  ALLOCATE(XFERT(ILU))
+  !
+  LNOF = .TRUE.
+  !
+  CALL PGD_FIELD(HPROGRAM,'pH value','NAT',YPH,YPHFILETYPE,XUNIF_PH,XPH(:))
+  CALL PGD_FIELD(HPROGRAM,'fertilisation','NAT',YFERT,YFERTFILETYPE,XUNIF_FERT,XFERT(:))
+  !
 ENDIF
 !
 !-------------------------------------------------------------------------------
