@@ -236,13 +236,11 @@ ZLW(:) =  PLW(:)                                *     1./Z3D_TOT_SURF(:)&
 !
 ! correction for RAIN flux.
 !
-ZRAIN(:) = PRAIN(:)
-!ZRAIN(:) = PRAIN(:) / Z3D_TOT_SURF(:)
+ZRAIN(:) = PRAIN(:) / Z3D_TOT_SURF(:)
 !
 ! correction for SNOW flux.
 !
-ZSNOW(:) = PSNOW(:)
-!ZSNOW(:) = PSNOW(:) / Z3D_TOT_SURF(:)
+ZSNOW(:) = PSNOW(:) / Z3D_TOT_SURF(:)
 !
 !-------------------------------------------------------------------------------------
 !
