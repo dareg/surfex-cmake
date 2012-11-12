@@ -1,8 +1,8 @@
 !     ######spl
       SUBROUTINE ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP,           &
                           PTSTEP, PSODELX,                                     &
-                          PCD, PVMOD, PSW_RAD, PLW_RAD, PTA, PQA,              &
-                          PVMODP, PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,     &
+                          PSW_RAD, PLW_RAD, PTA, PQA, PUSTAR2,                 &
+                          PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,             &
                           PLAI, PVEG, PHUG, PHUI, PHV,                         &
                           PLEG_DELTA, PLEGI_DELTA, PDELTA, PRA,                &
                           PF5, PRS, PCS, PCG, PCT, PSNOWSWE, PT2M, PTSM,       &
@@ -87,6 +87,7 @@
 !!      (A.Boone)    11/2011  Add RS_max limit to Etv
 !!      (B. Decharme)07/2012  Time spliting for soil ice
 !!      (B. Decharme)07/2012  Error in restore flux calculation (only for diag)
+!!      (B. Decharme)10/2012  Melt rate with D95 computed using max(XTAU,PTSTEP)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -96,6 +97,7 @@ USE MODD_CSTS,       ONLY : XSTEFAN, XCPD, XLSTT, XLVTT, XCL, XTT, XPI, XDAY, &
                             XCI, XRHOLI, XLMTT, XRHOLW, XG, XCL, XCONDI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_ISBA_PAR,   ONLY : XWGMIN, XSPHSOIL, XDRYWGHT, XRS_MAX
+USE MODD_SNOW_PAR,   ONLY : XTAU_SMELT
 !
 USE MODE_THERMOS
 !
@@ -134,13 +136,14 @@ REAL, INTENT (IN)                :: PTSTEP ! model time step (s)
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
 !
-                                       
-REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PTA, PQA, PVMODP, PRHOA
+REAL, DIMENSION(:), INTENT (IN)  :: PUSTAR2
+!                                     wind friction after implicitation (m2/s2)
+!
+REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PTA, PQA, PRHOA
 !                                     PSW_RAD = incoming solar radiation
 !                                     PLW_RAD = atmospheric infrared radiation
 !                                     PTA = near-ground air temperature
 !                                     PQA = near-ground air specific humidity
-!                                     PVMODP = near-ground wind speed
 !                                     PRHOA = near-ground air density
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PEXNS, PEXNA
@@ -186,11 +189,6 @@ REAL, DIMENSION(:), INTENT (IN)  :: PCS, PCG, PCT, PT2M, PTSM, PSNOWSWE
 !                                              of time step (K)
 !                                     PSNOWSWE = equivalent water content of
 !                                              the snow reservoir (kg m-2)
-!
-REAL, DIMENSION(:), INTENT(IN)   :: PCD, PVMOD
-!                                     PCD = drag coefficient for momentum
-!                                     PVMOD = module of the surface tangential
-!                                             wind
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PSNOW_THRUFAL
 !                                     PSNOW_THRUFAL = rate that liquid water leaves snow pack: 
@@ -344,10 +342,6 @@ REAL                            :: ZEPS1
 REAL, PARAMETER             :: ZINSOLFRZ_VEG = 0.20  ! (-)       Vegetation insolation coefficient
 !
 REAL, PARAMETER             :: ZINSOLFRZ_LAI = 30.0  ! (m2 m-2)  Vegetation insolation coefficient
-!
-REAL, PARAMETER             :: ZTAU_SNOWMELT = 300.  ! (s)       Snow Melt timescale: needed to
-!                                                                prevent time step dependence of melt
-!                                                                when snow fraction < unity. 
 !
 REAL, PARAMETER             :: ZTWGHT     = 0.50 ! (-)   (0 < ZTWGHT <= 1/2)
 !                                                                Weight for averaging the actual and flux corrected
@@ -509,7 +503,7 @@ DO JJ=1,SIZE(PTG,1)
 !               -----------------
 !
 !
-  PUSTAR(JJ) = SQRT( PCD(JJ) * PVMOD(JJ) * PVMODP(JJ) )
+  PUSTAR(JJ) = SQRT(PUSTAR2(JJ))
 !
 ENDDO
 
@@ -565,7 +559,7 @@ IF( (HSNOW_ISBA == 'D95' .OR. HSNOW_ISBA == 'EBA') .AND. HISBA /= 'DIF' )THEN
 !                                            of course when SNOWSWE > 0.
 !
       WHERE ( ZTN(:) > XTT .AND. PSNOWSWE(:) > 0.0 )
-        PMELT(:) = ZPSN(:)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*ZTAU_SNOWMELT)
+        PMELT(:) = ZPSN(:)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*MAX(XTAU_SMELT,PTSTEP))
       END WHERE
 !
 !                                            close the energy budget: cannot melt 

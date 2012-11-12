@@ -36,10 +36,18 @@ SUBROUTINE START_LAKE_OF(KDAY, KMONTH, PLON, PLAT, PDEPTH, &   ! IN
 !                 so eq. to the dummy value)  
 !         PT_SFC - the surface temperature, K (the diagnostic value, so just for information)
 ! WRITES FILES: no
+!
+!------------------------------------------------------------------------------------------------------------
+!         Modified   07/2012, P. Le Moigne : In case there's a lake but no climatic data
+!                                    associated then fill with neighbour existing data
+!                                    instead of aborting
 !------------------------------------------------------------------------------------------------------------
 !
 USE MODD_DATA_LAKE, ONLY : CLAKELTA, NLONG, NLATG, XFIRSTLAT, &
-                           XC_SMALL, NGRADDEPTH_LTA, XCENTRGRADDEPTH_LTA
+                           XC_SMALL, NGRADDEPTH_LTA, XCENTRGRADDEPTH_LTA, &
+                           XAUXT_SNOW, XAUXT_ICE, XAUXT_MNW, XAUXT_WML, XAUXT_BOT, &
+                           XAUXT_B1, XAUXCT, XAUXH_SNOW, XAUXH_ICE, XAUXH_ML, &
+                           XAUXH_B1, XAUXT_SFC
 !
 USE MODI_ABOR1_SFX
 !
@@ -76,11 +84,13 @@ REAL, INTENT(OUT) :: PT_SNOW, &  ! the snow temperature, K (no snow at present, 
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(1,1) :: ZWT_SNOW, ZWT_ICE, ZWT_MNW, ZWT_WML, ZWT_BOT, ZWT_B1, ZWCT, & ! Lake values
-                         ZWH_SNOW, ZWH_ICE, ZWH_ML, ZWH_B1, ZWT_SFC                  ! to read from NetCDF
+                         ZWH_SNOW, ZWH_ICE, ZWH_ML, ZWH_B1, ZWT_SFC                  ! to read from NetCDF                 
 REAL :: ZFT_SNOW, ZFT_ICE, ZFT_MNW, ZFT_WML, ZFT_BOT, ZFT_B1, ZFCT, &
         ZFH_SNOW, ZFH_ICE, ZFH_ML, ZFH_B1, ZFT_SFC
 REAL, DIMENSION(NGRADDEPTH_LTA) :: ZDISTD
 REAL :: ZWLON, ZWLAT, ZWDEPTH
+!
+LOGICAL :: LEXIST
 !
  INTEGER :: ID_LAKELTA, ID_MONTH, &  ! IDs for NetCDF 
             ID_DEC, ID_LON, ID_LAT, ID_DEPTH, &
@@ -218,25 +228,41 @@ IRET = NF_CLOSE(ID_LAKELTA)
 !
 !*      9.     Make output
 !
-IF (ZWT_SNOW(1,1).EQ.ZFT_SNOW .OR. ZWT_ICE(1,1).EQ.ZFT_ICE .OR. ZWT_MNW(1,1).EQ.ZFT_MNW .OR. &
-    ZWT_WML(1,1).EQ.ZFT_WML .OR. ZWT_BOT(1,1).EQ.ZFT_BOT .OR. ZWT_B1(1,1).EQ.ZFT_B1 .OR. &
-    ZWCT(1,1).EQ.ZFCT .OR. ZWH_SNOW(1,1).EQ.ZFH_SNOW .OR. ZWH_ICE(1,1).EQ.ZFH_ICE .OR. &
-    ZWH_ML(1,1).EQ.ZFH_ML .OR. ZWH_B1(1,1).EQ.ZFH_B1 .OR. ZWT_SFC(1,1).EQ.ZFT_SFC) THEN
-  CALL ABOR1_SFX("START_LAKE_OF: FINDING NO LAKE DATA VALUES IN CLI_LAKE FILE")
-ELSE
-  PT_SNOW = ZWT_SNOW(1,1)
-  PT_ICE = ZWT_ICE(1,1) 
-  PT_MNW = ZWT_MNW(1,1) 
-  PT_WML = ZWT_WML(1,1)
-  PT_BOT = ZWT_BOT(1,1)
-  PT_B1 = ZWT_B1(1,1)
-  PCT = ZWCT(1,1) 
-  PH_SNOW = ZWH_SNOW(1,1)
-  PH_ICE = ZWH_ICE(1,1)
-  PH_ML = ZWH_ML(1,1)
-  PH_B1 = ZWH_B1(1,1)
-  PT_SFC = ZWT_SFC(1,1)
+
+LEXIST=(ZWT_SNOW(1,1).NE.ZFT_SNOW .AND. ZWT_ICE(1,1).NE.ZFT_ICE .AND. ZWT_MNW(1,1).NE.ZFT_MNW .AND. &
+        ZWT_WML(1,1).NE.ZFT_WML .AND. ZWT_BOT(1,1).NE.ZFT_BOT .AND. ZWT_B1(1,1).NE.ZFT_B1 .AND. &
+        ZWCT(1,1).NE.ZFCT .AND. ZWH_SNOW(1,1).NE.ZFH_SNOW .AND. ZWH_ICE(1,1).NE.ZFH_ICE .AND. &
+         ZWH_ML(1,1).NE.ZFH_ML .AND. ZWH_B1(1,1).NE.ZFH_B1 .AND. ZWT_SFC(1,1).NE.ZFT_SFC)
+
+IF (LEXIST) THEN
+  !
+  XAUXT_SNOW = ZWT_SNOW(1,1)
+  XAUXT_ICE = ZWT_ICE(1,1) 
+  XAUXT_MNW = ZWT_MNW(1,1) 
+  XAUXT_WML = ZWT_WML(1,1)
+  XAUXT_BOT = ZWT_BOT(1,1)
+  XAUXT_B1 = ZWT_B1(1,1)
+  XAUXCT = ZWCT(1,1) 
+  XAUXH_SNOW = ZWH_SNOW(1,1)
+  XAUXH_ICE = ZWH_ICE(1,1)
+  XAUXH_ML = ZWH_ML(1,1)
+  XAUXH_B1 = ZWH_B1(1,1)
+  XAUXT_SFC = ZWT_SFC(1,1)
+  !
 ENDIF
+!
+PT_SNOW = XAUXT_SNOW 
+PT_ICE  = XAUXT_ICE 
+PT_MNW  = XAUXT_MNW 
+PT_WML  = XAUXT_WML 
+PT_BOT  = XAUXT_BOT 
+PT_B1   = XAUXT_B1  
+PCT     = XAUXCT 
+PH_SNOW = XAUXH_SNOW 
+PH_ICE  = XAUXH_ICE 
+PH_ML   = XAUXH_ML 
+PH_B1   = XAUXH_B1 
+PT_SFC  = XAUXT_SFC
 !
 IF (LHOOK) CALL DR_HOOK('START_LAKE_OF',1,ZHOOK_HANDLE)
 !

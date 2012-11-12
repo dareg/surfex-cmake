@@ -41,6 +41,7 @@
 !!                              _ Routine to compute average grain
 !                       type when snow depth< 3 cm. 
 !     S. Morin          02/2011 - Add routines for Crocus
+!     A. Boone          02/2012 - Add optimization of do-loops.
 !                             
 !-----------------------------------------------------------------------------
 !
@@ -897,10 +898,11 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDZ
 !
 !*      0.1    declarations of local variables
 !
-INTEGER JJ
+INTEGER                           :: JJ, JI
 !
-INTEGER                           :: INLVLS
-     
+INTEGER                           :: INLVLS, INI
+!   
+REAL, DIMENSION(SIZE(PSNOW))      :: ZWORK
 !
 ! ISBA-ES snow grid parameters
 !
@@ -926,6 +928,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',0,ZHOOK_HANDLE)
 INLVLS = SIZE(PSNOWDZ(:,:),2)
+INI    = SIZE(PSNOWDZ(:,:),1)
+!
+ZWORK(:)  = 0.0
 !
 ! 1. Calculate current grid for 3-layer (default) configuration):
 ! ---------------------------------------------------------------
@@ -969,7 +974,9 @@ IF(INLVLS == 3)THEN
 !
 ELSE IF(INLVLS>3 .AND. INLVLS<10) THEN
       DO JJ=1,INLVLS
-      PSNOWDZ(:,JJ)  = PSNOW(:)/INLVLS
+         DO JI=1,INI
+            PSNOWDZ(JI,JJ)  = PSNOW(JI)/INLVLS
+         ENDDO
       ENDDO
 !
      PSNOWDZ(:,INLVLS) = PSNOWDZ(:,INLVLS) + (PSNOWDZ(:,1) - MIN(0.05, PSNOWDZ(:,1)))
@@ -1114,18 +1121,24 @@ ELSE
       PSNOWDZ(:,4) = MIN(0.03*PSNOW(:),PSNOW(:)/INLVLS)
       PSNOWDZ(:,5) = MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS)
       PSNOWDZ(:,INLVLS)=MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
+      ZWORK(:) = SUM(PSNOWDZ(:,1:5))    
       DO JJ=6,INLVLS-1,1
-         PSNOWDZ(:,JJ) = (PSNOW(:) - SUM(PSNOWDZ(:,1:5))-PSNOWDZ(:,INLVLS)) &
-          /(INLVLS-6) 
-      END DO
+         DO JI=1,INI
+            PSNOWDZ(JI,JJ) = (PSNOW(JI) - ZWORK(JI) -PSNOWDZ(JI,INLVLS)) &
+                 /(INLVLS-6) 
+         ENDDO
+      ENDDO
 !
 ENDIF
 !
 DO JJ=1,INLVLS
-  WHERE(PSNOW(:)==XUNDEF)
-    PSNOWDZ(:,JJ) = XUNDEF
-  END WHERE
-END DO
+   DO JI=1,INI
+      IF(PSNOW(JI)==XUNDEF)THEN
+         PSNOWDZ(JI,JJ) = XUNDEF
+      ENDIF
+   ENDDO
+ENDDO
+!
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOW3LGRID_2D
@@ -1170,7 +1183,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWDZ
 INTEGER JJ
 !
 INTEGER                           :: INLVLS
-     
+!
+REAL                              :: ZWORK
 !
 ! ISBA-ES snow grid parameters
 !
@@ -1181,7 +1195,7 @@ REAL, PARAMETER, DIMENSION(10)    :: ZSGCOEF3  = (/0.025, 0.033, 0.043,&
       
 ! Minimum total snow depth at which surface layer thickness is constant:
 !
-REAL, PARAMETER                   :: ZSNOWTRANS = 0.20                ! (m)
+REAL, PARAMETER                   :: ZSNOWTRANS  = 0.20                ! (m)
 REAL, PARAMETER                   :: ZSNOWTRANS1 = 0.40                ! (m)
 REAL, PARAMETER                   :: ZSNOWTRANS2 = 0.6061                ! (m)
 REAL, PARAMETER                   :: ZSNOWTRANS3 = 0.7143               ! (m)
@@ -1234,7 +1248,7 @@ IF(INLVLS == 3)THEN
 !plm
 ELSE IF(INLVLS>3 .AND. INLVLS<10) THEN
       DO JJ=1,INLVLS
-      PSNOWDZ(JJ)  = PSNOW/INLVLS
+         PSNOWDZ(JJ)  = PSNOW/INLVLS
       ENDDO
 !
      PSNOWDZ(INLVLS) = PSNOWDZ(INLVLS) + (PSNOWDZ(1) - MIN(0.05, PSNOWDZ(1)))
@@ -1332,8 +1346,9 @@ ELSE
       PSNOWDZ(4) = MIN(0.03*PSNOW,PSNOW/INLVLS)
       PSNOWDZ(5) = MIN(0.05*PSNOW,PSNOW/INLVLS)
       PSNOWDZ(INLVLS)=MIN(0.05*PSNOW,PSNOW/INLVLS) 
+      ZWORK = SUM(PSNOWDZ(1:5))          
       DO JJ=6,INLVLS-1,1
-         PSNOWDZ(JJ) = (PSNOW - SUM(PSNOWDZ(1:5))-PSNOWDZ(INLVLS)) &
+         PSNOWDZ(JJ) = (PSNOW - ZWORK -PSNOWDZ(INLVLS)) &
           /(INLVLS-6) 
       END DO
 !
@@ -1607,55 +1622,62 @@ USE PARKIND1  ,ONLY : JPRB
 !
 !       0.2 declaration of local variables
 !
-         INTEGER JJ
-         INTEGER                              :: INLVLS
+         INTEGER                              :: JI, JJ
+         INTEGER                              :: INLVLS, INI
 !
          REAL, DIMENSION(SIZE(PSNOWGRAN1,1)) ::KGRAN1, KGRAN2, KHIST    
          REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         
 !       0.3 initialization         
 !
-        IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAVGRAIN',0,ZHOOK_HANDLE)
-        INLVLS    = SIZE(PSNOWGRAN1,2) 
-        KGRAN1(:) = 0.0
-        KGRAN2(:) = 0.0
-        KHIST(:)  = 0.0
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAVGRAIN',0,ZHOOK_HANDLE)
+INLVLS    = SIZE(PSNOWGRAN1,2) 
+INI       = SIZE(PSNOWGRAN1,1) 
+KGRAN1(:) = 0.0
+KGRAN2(:) = 0.0
+KHIST(:)  = 0.0
 !
 !      
 !         
 DO JJ=1,INLVLS
-        WHERE(PNDENT(:)==0.0 .AND. PNVIEU(:)==0.0)
-              KGRAN1(:) = 1.0
-              KGRAN2(:) = 1.0 
-              KHIST(:)  = 1.0
-        ELSEWHERE(PNDENT(:)>=PNVIEU(:))      ! more dendritic than non dendritic snow layer
-                WHERE(PSNOWGRAN1(:,JJ)<0.0)
-                  KGRAN1(:)=KGRAN1(:)+PSNOWGRAN1(:,JJ)
-                  KGRAN2(:)=KGRAN2(:)+PSNOWGRAN2(:,JJ)
-                ENDWHERE  
-        ELSEWHERE                              ! more non dendritic than dendritic snow layers  
-                WHERE(PSNOWGRAN1(:,JJ)>=0)
-                  KGRAN1(:) = KGRAN1(:)+PSNOWGRAN1(:,JJ)
-                  KGRAN2(:) = KGRAN2(:)+PSNOWGRAN2(:,JJ)
-                  KHIST(:)  = KHIST(:)+PSNOWHIST(:,JJ) 
-                ENDWHERE  
-        ENDWHERE
-END DO      
+   DO JI=1,INI
+      IF(PNDENT(JI)==0.0 .AND. PNVIEU(JI)==0.0)THEN
+         KGRAN1(JI)    = 1.0
+         KGRAN2(JI)    = 1.0 
+         KHIST(JI)     = 1.0
+      ELSEIF(PNDENT(JI)>=PNVIEU(JI))THEN      ! more dendritic than non dendritic snow layer
+         IF(PSNOWGRAN1(JI,JJ)<0.0)THEN
+            KGRAN1(JI) = KGRAN1(JI)+PSNOWGRAN1(JI,JJ)
+            KGRAN2(JI) = KGRAN2(JI)+PSNOWGRAN2(JI,JJ)
+         ENDIF
+      ELSE                              ! more non dendritic than dendritic snow layers  
+         IF(PSNOWGRAN1(JI,JJ)>=0)THEN
+            KGRAN1(JI) = KGRAN1(JI)+PSNOWGRAN1(JI,JJ)
+            KGRAN2(JI) = KGRAN2(JI)+PSNOWGRAN2(JI,JJ)
+            KHIST(JI)  = KHIST(JI)+PSNOWHIST(JI,JJ) 
+         ENDIF
+      ENDIF
+   ENDDO
+ENDDO
+!
 DO JJ=1,INLVLS
-        WHERE(PNDENT(:)==0.0 .AND. PNVIEU(:)==0.0)
-                KGRAN1(:)=1.0
-        ELSEWHERE(PNDENT(:)>=PNVIEU(:))
-                ZSNOWGRAN1N(:,JJ)= KGRAN1(:)/PNDENT(:)   
-                ZSNOWGRAN2N(:,JJ)= KGRAN2(:)/PNDENT(:)
-                ZSNOWHISTN(:,JJ) = 0.0
-        ELSEWHERE
-                ZSNOWGRAN1N(:,JJ)= KGRAN1(:)/PNVIEU(:)
-                ZSNOWGRAN2N(:,JJ)= KGRAN2(:)/PNVIEU(:)
-                ZSNOWHISTN(:,JJ) = KHIST(:)/PNVIEU(:)
-        ENDWHERE
-END DO
-        IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAVGRAIN',1,ZHOOK_HANDLE)
-        END SUBROUTINE SNOW3LAVGRAIN         
+   DO JI=1,INI
+      IF(PNDENT(JI)==0.0 .AND. PNVIEU(JI)==0.0)THEN
+         KGRAN1(JI)        =1.0
+      ELSEIF(PNDENT(JI)>=PNVIEU(JI))THEN
+         ZSNOWGRAN1N(JI,JJ)= KGRAN1(JI)/PNDENT(JI)   
+         ZSNOWGRAN2N(JI,JJ)= KGRAN2(JI)/PNDENT(JI)
+         ZSNOWHISTN(JI,JJ) = 0.0
+      ELSE
+         ZSNOWGRAN1N(JI,JJ)= KGRAN1(JI)/PNVIEU(JI)
+         ZSNOWGRAN2N(JI,JJ)= KGRAN2(JI)/PNVIEU(JI)
+         ZSNOWHISTN(JI,JJ) = KHIST(JI) /PNVIEU(JI)
+      ENDIF
+   ENDDO
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAVGRAIN',1,ZHOOK_HANDLE)
+END SUBROUTINE SNOW3LAVGRAIN         
 !        
 !####################################################################
 !####################################################################
@@ -1696,7 +1718,6 @@ END FUNCTION SNOW3LDIFTYP
 !####################################################################
 !####################################################################
 !####################################################################
-
 
 END MODULE MODE_SNOW3L
 
