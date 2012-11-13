@@ -82,7 +82,7 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 WRITE(ILUOUT,*) 'Debut init_surf_topo_n'
 !
 IF (LCOUPL_TOPD .AND. TSNOW%SCHEME/='3-L') &
-  CALL ABOR1_SFX("PGD_TOPD: coupling with topmodel only runs with TSNOW%SCHEME=3-L")
+  CALL ABOR1_SFX("INIT_SURF_TOPD: coupling with topmodel only runs with TSNOW%SCHEME=3-L")
 !
 IF (LCOUPL_TOPD) THEN
   !
