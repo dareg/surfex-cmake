@@ -44,6 +44,7 @@
 !!      P Le Moigne  09/2005 AGS modifs of L. Jarlan
 !!      A.L. Gibelin 07/2009 : Suppress GPP and PPST as outputs
 !!                             GPP is calculated in cotwores.f90 and cotworestress.f90
+!!      B. Decharme   2012   : optimization
 !!
 !-------------------------------------------------------------------------------
 !
@@ -79,8 +80,6 @@ REAL, DIMENSION(:), INTENT(IN)  :: PFZERO, PEPSO, PANMAX, PGMEST, PGC, PDMAX
 !                                      PEPSO     = maximum initial quantum use efficiency 
 !                                                  (kgCO2 J-1 PAR)
 !                                      PGAMM     = CO2 conpensation concentration (kgCO2 kgAir-1)
-!                                      PQDGAMM   = Q10 function for CO2 conpensation 
-!                                                  concentration
 !                                      PANMAX    = maximum net assimilation
 !                                      PGMEST    = temperature response 
 !                                                  of mesophyll conductance
@@ -228,15 +227,17 @@ DO ITER = 1, 3
     ZGSC(JJ) = ZGSC(JJ) + XAIRTOH2O*ZLEF(JJ)*( (ZCSP(JJ) +      &
                 ZCI(JJ))/(2.0*(ZCSP(JJ) - ZCI(JJ))) )
     !
-    IF (ITER==3) CYCLE
+    IF (ITER<3) THEN
     !
-    ZGS(JJ) = 1.6*ZGSC(JJ)
+      ZGS(JJ) = 1.6*ZGSC(JJ)
     !
     ! compute transpiration (kgH2O kgAir-1 m s-1) from specific
     ! humidity deficit
     !
     ! Eq. 3.5
-    ZLEF(JJ) = ZGS(JJ)*PDS(JJ)
+      ZLEF(JJ) = ZGS(JJ)*PDS(JJ)
+    !
+    ENDIF
     !
   ENDDO
   !

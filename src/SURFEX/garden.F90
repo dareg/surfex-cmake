@@ -55,7 +55,7 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, &
                                   CISBA, CPHOTO, LTR_ML, CRUNOFF, CC1DRY,  &
                                   CSCOND, NNBIOMASS, CRESPSL, CALBEDO,     &
                                   CSOILFRZ, CDIFSFCOND, CCPSURF,           &
-                                  CKSAT, CSOM, CHORT, CSNOWRES, TSNOW,     &
+                                  CKSAT, CSOC, CHORT, CSNOWRES, TSNOW,     &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
                                   XGAMMA, XCV, XRGL, XRUNOFFD,             &
                                   XZ0, XZ0_O_Z0H, XRUNOFFB, XWDRAIN,       &
@@ -89,7 +89,10 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, &
                                   XALBNIR_TVEG, XALBVIS_TVEG,              &
                                   XALBNIR_TSOIL, XLAI_EFFC,                &
                                   XALBVIS_TSOIL, XFAPARC, XFAPIRC, XMUS,   &
-                                  NLAYER_HORT, NLAYER_DUN
+                                  NLAYER_HORT, NLAYER_DUN,                 &
+                                  LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS,   &
+                                  XSPINMAXW, NNBYEARSPINS, NNBYEARSPINW,   &
+                                  NNBYEARSOLD, NSPINS, NSPINW
 !
 USE MODD_AGRI_GARDEN_n,     ONLY: LIRRIGATE, LIRRIDAY, XTHRESHOLDSPT
 USE MODD_DIAG_TEB_GARDEN_n, ONLY: XCG, XC1, XC2, XWGEQ, XCT, XRS,           &
@@ -103,7 +106,8 @@ USE MODD_DIAG_TEB_GARDEN_n, ONLY: XCG, XC1, XC2, XWGEQ, XCT, XRS,           &
                                   XSNOWFREE_ALB, XTS, XTSRAD, XRRVEG, XALBT,&
                                   XEMIST, XGPP, XRESP_AUTO, XRESP_ECO,      &
                                   XFAPAR, XFAPIR, XFAPAR_BS, XFAPIR_BS,     &
-                                  XDFAPARC, XDFAPIRC, XDLAI_EFFC  
+                                  XDFAPARC, XDFAPIRC, XDLAI_EFFC,           &
+                                  XIRRIG_FLUX  
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE
@@ -112,6 +116,7 @@ USE MODE_THERMOS
 USE MODI_FLAG_TEB_GARDEN_n
 USE MODI_FLAG_DIAG_TEB_GARDEN
 USE MODI_CARBON_EVOL
+USE MODI_CARBON_SPINUP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -226,6 +231,8 @@ REAL, DIMENSION(SIZE(PPS)) :: ZLEIFLOOD
 REAL, DIMENSION(SIZE(PPS)) :: ZFFG_NOSNOW
 REAL, DIMENSION(SIZE(PPS)) :: ZFFV_NOSNOW
 !
+REAL :: ZTIME
+!
 LOGICAL :: GMASK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -268,6 +275,16 @@ ZFFV_NOSNOW   = 0.
 !*      2.     Treatment of green areas
 !              ------------------------
 !
+!* Actualization of soil and wood carbon spinup
+!
+IF(LSPINUPCARBS.OR.LSPINUPCARBW)THEN
+  ZTIME=TPTIME%TIME-PTSTEP
+  CALL CARBON_SPINUP(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY,ZTIME,          &
+                     LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,   &
+                     NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, CPHOTO,    &
+                     CRESPSL, NSPINS, NSPINW                             )
+ENDIF
+!
 !radiative temperature diagnostic
 !-------------------------------
 !
@@ -276,7 +293,7 @@ XTSRAD = PTS_GARDEN
 !*      2.2    Call ISBA for green areas
 !              -------------------------
 !
-  CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, HRAIN, CHORT, &
+  CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT, &
             CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, &
             CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
             HIMPLICIT_WIND,                                            &
@@ -324,7 +341,7 @@ XTSRAD = PTS_GARDEN
             PAC_AGG_GARDEN, PHU_AGG_GARDEN, XFAPARC(:,1), XFAPIRC(:,1),&
             XMUS(:,1), XLAI_EFFC(:,1), XAN(:,1), XANDAY(:,1),          &
             ZRESP_BIOMASS_INST, XIACAN, XANF(:,1), XGPP, XFAPAR,       &
-            XFAPIR, XFAPAR_BS, XFAPIR_BS )
+            XFAPIR, XFAPAR_BS, XFAPIR_BS, XIRRIG_FLUX                  )
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=XSNOWTEMP(:,1)
 !
@@ -341,11 +358,14 @@ ENDIF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2(:)=0.
+PSFCO2    (:)=0.
+XRESP_ECO (:)=0.
+XRESP_AUTO(:)=0.
 !
-IF (CPHOTO/='NON' .AND. CRESPSL/='NON') THEN
-  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                                     &
+IF ( CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:,1)/=XUNDEF) ) THEN
+  CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, NSPINS,                      &
                    PRHOA, XTG(:,:,1), XWG(:,:,1), XWFC, XWWILT, XWSAT, XSAND,   &
+                   XDG(:,:,1),XDZG(:,:,1), NWG_LAYER(:,1),                      &
                    XRE25(:,1), XLAI(:,1), ZRESP_BIOMASS_INST, XTURNOVER(:,:,1), &
                    XLITTER(:,:,:,1), XLIGNIN_STRUC(:,:,1) , XSOILCARB(:,:,1),   &
                    XRESP_AUTO, XRESP_ECO                       )  

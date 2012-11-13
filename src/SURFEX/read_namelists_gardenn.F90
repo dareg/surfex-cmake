@@ -32,6 +32,8 @@ LOGICAL                           :: GGLACIER
 LOGICAL                           :: GTRIP
 LOGICAL                           :: GFLOOD
 LOGICAL                           :: GVEGUPD
+LOGICAL                           :: GSPINUPCARBS
+LOGICAL                           :: GSPINUPCARBW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                      
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_GARDEN_N',0,ZHOOK_HANDLE)
@@ -39,9 +41,10 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_GARDEN_N',0,ZHOOK_HANDLE)
 CALL DEFAULT_ISBA(XTSTEP, XOUT_TSTEP,                            &
                      CROUGH,CRUNOFF,CALBEDO,CSCOND,              &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
-                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOM,       &
+                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
                      CTOPREG, HRAIN, CHORT, GFLOOD, GTRIP,       &
-                     GGLACIER, GCANOPY_DRAG, GVEGUPD             )      
+                     GGLACIER, GCANOPY_DRAG, GVEGUPD,            &
+                     GSPINUPCARBS, GSPINUPCARBW                  )      
 !
 CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
 CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)

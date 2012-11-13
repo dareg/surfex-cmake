@@ -35,6 +35,7 @@
 !!                             useless parameters
 !!      A.L. Gibelin 04/2009 : add parameters for PHOTO='NCB'
 !!      A.L. Gibelin 06/2009 : add parameters for RESPSL='CNT'
+!!      B. Decahrme  05/2012 : Add XCC_NITRO and XBIOMASST_LIM (optimization)
 !!
 !-------------------------------------------------------------------------------
 !
@@ -53,7 +54,7 @@ INTEGER                              :: NGROUND_CO2_GAUS_LAYERS
 REAL, PARAMETER                      :: XMCO2 = 44.0E-3, XMC   = 12.0E-3
 !                                       molecular mass of CO2, 
 !                                       and C (Carbon), respectively
-!                                       (used for conversions) 
+!                                       (used for conversions in kg) 
 !
 REAL, PARAMETER                      :: XDMAX_AGS = 0.045
 !                                       maximum specific humidity deficit (kg kg-1)
@@ -66,7 +67,7 @@ REAL, PARAMETER                      :: XRACCF = 1.00
 !                                       Factor for aerodynamic resistance for CO2
 !
 REAL, PARAMETER                      :: XPCCO2 = 0.40
-!	                                	proportion of Carbon in dry plant biomass
+!	                              	proportion of Carbon in dry plant biomass (kgC/kgDM)
 !
 REAL, PARAMETER                      :: XIAOPT = 500.,  XDSPOPT = 0.0
 !	                                	optimum/initial values for absorbed global 
@@ -185,6 +186,15 @@ REAL, PARAMETER               :: XCA_NIT = 0.38
 REAL, PARAMETER               :: XCC_NIT = 0.753846
 !                                Proportion of active biomass for 1t ha-1
 !                                of total above-ground biomass [-]
+!
+REAL, PARAMETER               :: XCC_NITRO = 0.31425531725
+!                                coef c for biomass in kg/m2
+!                                Old : XCC_NIT/10.**XCA_NIT in nitro_decline.F90
+!
+REAL, PARAMETER               :: XBIOMASST_LIM = 4.7540042445E-2
+!                                threshold value for leaf biomass and total 
+!                                above ground biomass in nitrogen dilution theory
+!                                Old : XCC_NITRO**(1.0/XCA_NIT) in nitro_decline.F90
 !
 !
 ! Nitrogen option with allocation of carbon (YPHOTO='NCB') parameters:

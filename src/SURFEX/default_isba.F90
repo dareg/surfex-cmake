@@ -2,9 +2,10 @@
       SUBROUTINE DEFAULT_ISBA(PTSTEP, POUT_TSTEP,                     &
                               HROUGH, HRUNOFF, HALBEDO, HSCOND,       &
                               HC1DRY, HSOILFRZ, HDIFSFCOND, HSNOWRES, &
-                              HCPSURF, PCGMAX, PCDRAG, HKSAT, HSOM,   &
+                              HCPSURF, PCGMAX, PCDRAG, HKSAT, HSOC,   &
                               HTOPREG, HRAIN, HHORT, OFLOOD, OTRIP,   &
-                              OGLACIER, OCANOPY_DRAG, OVEGUPD         )  
+                              OGLACIER, OCANOPY_DRAG, OVEGUPD,        &
+                              OSPINUPCARBS, OSPINUPCARBW              )  
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA
@@ -107,9 +108,9 @@ CHARACTER(LEN=3), INTENT(OUT) :: HKSAT     ! SOIL HYDRAULIC CONDUCTIVITY PROFILE
 !                                          ! 'DEF'  = ISBA homogenous soil
 !                                          ! 'SGH'  = ksat exponential decay
 !
-CHARACTER(LEN=3), INTENT(OUT) :: HSOM      ! SOIL ORGANIC MATTER PROFILE OPTION
+CHARACTER(LEN=3), INTENT(OUT) :: HSOC      ! SOIL ORGANIC CARBON PROFILE OPTION
 !                                          ! 'DEF'  = ISBA homogenous soil
-!                                          ! 'SGH'  = SOM profile effect
+!                                          ! 'SGH'  = SOC profile effect
 !
 CHARACTER(LEN=3), INTENT(OUT) :: HRAIN     ! Rainfall spatial distribution
                                            ! 'DEF' = No rainfall spatial distribution
@@ -136,6 +137,10 @@ LOGICAL, INTENT(OUT)          :: OVEGUPD   ! T: update vegetation parameters
                                            !    every decade
                                            ! F: keep vegetation parameters
                                            !    constant in time
+!
+LOGICAL, INTENT(OUT)          :: OSPINUPCARBS ! T: carbon spinup soil
+LOGICAL, INTENT(OUT)          :: OSPINUPCARBW ! T: carbon spinup wood
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
@@ -160,7 +165,7 @@ HCPSURF    = 'DRY'
 HRUNOFF    = "WSAT"
 HTOPREG    = 'DEF'
 HKSAT      = 'DEF'
-HSOM       = 'DEF'
+HSOC       = 'DEF'
 HRAIN      = 'DEF'
 HHORT      = 'DEF'
 !
@@ -176,6 +181,10 @@ OGLACIER = .FALSE.
 OCANOPY_DRAG = .FALSE.
 !
 OVEGUPD = .TRUE.
+!
+OSPINUPCARBS = .FALSE.
+OSPINUPCARBW = .FALSE.
+!
 IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

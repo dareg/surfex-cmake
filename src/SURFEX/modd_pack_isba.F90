@@ -260,14 +260,14 @@ REAL, POINTER, DIMENSION(:)    :: XP_EPSO       ! maximum initial quantum use
 !                                                   ! efficiency                              (mg J-1 PAR)
 REAL, POINTER, DIMENSION(:)    :: XP_GAMM       ! CO2 conpensation concentration          (ppmv)
 !$OMP THREADPRIVATE(XP_GAMM)
-REAL, POINTER, DIMENSION(:)    :: XP_QDGAMM     ! Q10 function for CO2 conpensation 
+REAL, POINTER, DIMENSION(:)    :: XP_QDGAMM     ! Log of Q10 function for CO2 conpensation 
 !$OMP THREADPRIVATE(XP_QDGAMM)
 !                                                   ! concentration                           (-)
 REAL, POINTER, DIMENSION(:)    :: XP_GMES       ! mesophyll conductance                   (m s-1)
 !$OMP THREADPRIVATE(XP_GMES)
 REAL, POINTER, DIMENSION(:)    :: XP_RE25       ! Ecosystem respiration parameter         (kg m-2 s-1)
 !$OMP THREADPRIVATE(XP_RE25)
-REAL, POINTER, DIMENSION(:)    :: XP_QDGMES     ! Q10 function for mesophyll conductance  (-)
+REAL, POINTER, DIMENSION(:)    :: XP_QDGMES     ! Log of Q10 function for mesophyll conductance  (-)
 !$OMP THREADPRIVATE(XP_QDGMES)
 REAL, POINTER, DIMENSION(:)    :: XP_T1GMES     ! reference temperature for computing 
 !$OMP THREADPRIVATE(XP_T1GMES)
@@ -281,7 +281,7 @@ REAL, POINTER, DIMENSION(:)    :: XP_T2GMES     ! reference temperature for comp
 !                                                   ! temperature                             (K)
 REAL, POINTER, DIMENSION(:)    :: XP_AMAX       ! leaf photosynthetic capacity            (kg m-2 s-1)
 !$OMP THREADPRIVATE(XP_AMAX)
-REAL, POINTER, DIMENSION(:)    :: XP_QDAMAX     ! Q10 function for leaf photosynthetic 
+REAL, POINTER, DIMENSION(:)    :: XP_QDAMAX     ! Log of Q10 function for leaf photosynthetic 
 !$OMP THREADPRIVATE(XP_QDAMAX)
 !                                                   ! capacity                                (-)
 REAL, POINTER, DIMENSION(:)    :: XP_T1AMAX     ! reference temperature for computing 

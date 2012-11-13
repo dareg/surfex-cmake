@@ -42,7 +42,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA,                       
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
                               XPATCH, XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,        &
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
-                              XWSAT, XWFC, XWWILT, XW33, XRUNOFFD   
+                              XWSAT, XWFC, XWWILT, XW33, XRUNOFFD, CSOC, XFRACSOC   
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -117,10 +117,11 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Fraction for each patch
 !
-YRECFM='PATCH'
-YCOMMENT='fraction for each patch (-)'
-!
-CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
+IF(.NOT.LFANOCOMPACT.OR.LPREP)THEN
+  YRECFM='PATCH'
+  YCOMMENT='fraction for each patch (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
+ENDIF
 !-------------------------------------------------------------------------------
 !
 !* Soil depth for each patch
@@ -190,6 +191,20 @@ IF(CISBA=='DIF')THEN
      CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
   END DO
 !
+!* SOC fraction for each layer
+!
+  IF(CSOC=='SGH')THEN
+    DO JL=1,SIZE(XDG,2)
+     IF (JL<10) THEN
+       WRITE(YRECFM,FMT='(A7,I1)') 'FRACSOC',JL
+     ELSE
+       WRITE(YRECFM,FMT='(A7,I2)') 'FRACSOC',JL          
+     ENDIF  
+     YCOMMENT='SOC fraction by layer (-)'
+     CALL WRITE_SURF(HPROGRAM,YRECFM,XFRACSOC(:,JL),IRESP,HCOMMENT=YCOMMENT)
+    END DO
+  ENDIF
+!
 ! Moisture threshold for bare soil evaporation
 !
   YRECFM='W33'
@@ -249,7 +264,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0REL(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Runoff soil ice depth for each patch
 !
-IF(CHORT=='SGH')THEN
+IF(CHORT=='SGH'.AND.CISBA/='DIF')THEN
   YRECFM='DICE'
   YCOMMENT='soil ice depth for runoff (m)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XD_ICE(:,:),IRESP,HCOMMENT=YCOMMENT)

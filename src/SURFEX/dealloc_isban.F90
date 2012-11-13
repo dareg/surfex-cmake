@@ -26,7 +26,7 @@ SUBROUTINE DEALLOC_ISBA_n
 
 !
 USE MODD_ISBA_n,      ONLY : LCOVER, XCOVER, XZS, XZ0EFFJPDIR, XCLAY, XSAND,       &
-                               XSOM, XRUNOFFB,                                     &
+                               XSOC, XRUNOFFB,                                     &
                                XAOSIP, XAOSIM, XAOSJP, XAOSJM,                     &
                                XHO2IP, XHO2IM, XHO2JP, XHO2JM,                     &
                                XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM,             &
@@ -58,7 +58,8 @@ USE MODD_ISBA_n,      ONLY : LCOVER, XCOVER, XZS, XZ0EFFJPDIR, XCLAY, XSAND,    
                                XSCA_ALB_WITH_SNOW,XFFG,XFFV,XFF,XALBF,XEMISF,      &
                                XCPL_EFLOOD,XCPL_PFLOOD,XCPL_IFLOOD,XCPL_DRAIN,     &
                                XCPL_RUNOFF, XCPL_ICEFLUX, XICE_STO, XFFROZEN,      &
-                               XDG_OLD,XPATCH_OLD,XABC,XPOI
+                               XDG_OLD,XPATCH_OLD,XABC,XPOI,XFRACSOC
+
 USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 XPAR_ROOTFRAC, XPAR_VEG, XPAR_Z0, XPAR_EMIS, XPAR_DICE, &
                                 XPAR_RSMIN, XPAR_GAMMA, XPAR_WRMAX_CF, XPAR_RGL, &
@@ -97,7 +98,7 @@ IF (ASSOCIATED(XZS        )) DEALLOCATE(XZS    )
 IF (ASSOCIATED(XZ0EFFJPDIR)) DEALLOCATE(XZ0EFFJPDIR)
 IF (ASSOCIATED(XCLAY      )) DEALLOCATE(XCLAY  )
 IF (ASSOCIATED(XSAND      )) DEALLOCATE(XSAND  )
-IF (ASSOCIATED(XSOM       )) DEALLOCATE(XSOM   )
+IF (ASSOCIATED(XSOC       )) DEALLOCATE(XSOC   )
 IF (ASSOCIATED(XRUNOFFB   )) DEALLOCATE(XRUNOFFB)
 !
 IF (ASSOCIATED(XAOSIP))     DEALLOCATE( XAOSIP)
@@ -222,6 +223,7 @@ IF(ASSOCIATED(XMUF))         DEALLOCATE(XMUF)
 IF(ASSOCIATED(XFSAT))        DEALLOCATE(XFSAT)
 IF(ASSOCIATED(XD_ICE))       DEALLOCATE(XD_ICE)
 IF(ASSOCIATED(XKSAT_ICE))    DEALLOCATE(XKSAT_ICE)
+IF(ASSOCIATED(XFRACSOC))     DEALLOCATE(XFRACSOC)
 !
 IF(ASSOCIATED(XFFLOOD))      DEALLOCATE(XFFLOOD)
 IF(ASSOCIATED(XPIFLOOD))     DEALLOCATE(XPIFLOOD)
@@ -284,6 +286,7 @@ IF(ASSOCIATED(XPAR_CNA_NITRO  )) DEALLOCATE(XPAR_CNA_NITRO  )
 IF(ASSOCIATED(LPAR_STRESS     )) DEALLOCATE(LPAR_STRESS     )
 IF(ASSOCIATED(XPAR_IRRIG      )) DEALLOCATE(XPAR_IRRIG      )
 IF(ASSOCIATED(XPAR_WATSUP     )) DEALLOCATE(XPAR_WATSUP     )
+!-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DEALLOC_ISBA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------
 !

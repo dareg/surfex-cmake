@@ -71,10 +71,11 @@ USE MODD_TEB_GARDEN_n,    ONLY: CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO
                                 XCE_NITRO, XCF_NITRO, XFAPARC, XFAPIRC, XLAI_EFFC,  &
                                 XCNA_NITRO, XBSLAI_NITRO, CCPSURF, TSEED,           &
                                 TREAP, XWATSUP, XIRRIG, XCGMAX, XCDRAG,             &
-                                CKSAT, CSOM, CTOPREG, CHORT,                        &
+                                CKSAT, CSOC, CTOPREG, CHORT,                        &
                                 XD_ICE, XKSAT_ICE, XPCPS, XPLVTT, XPLSTT, LCANOPY,  &
                                 XPSN, XPSNG, XPSNV, XPSNV_A, LPAR_GARDEN,           &
-                                NLAYER_HORT, NLAYER_DUN 
+                                NLAYER_HORT, NLAYER_DUN, LSPINUPCARBS,              &
+                                LSPINUPCARBW, NNBYEARSOLD, NSPINS, NSPINW
 !
 USE MODD_CH_TEB_n,        ONLY: CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,       &
                                 CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,    &
@@ -210,9 +211,10 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_ISBA(XTSTEP, ZOUT_TSTEP,                           &
                      CROUGH,CRUNOFF,CALBEDO,CSCOND,              &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
-                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOM,       &
+                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
                      CTOPREG, YRAIN, CHORT, GFLOOD, GTRIP,       &
-                     GGLACIER, GCANOPY_DRAG, GVEGUPD             )                  
+                     GGLACIER, GCANOPY_DRAG, GVEGUPD,            &
+                     LSPINUPCARBS, LSPINUPCARBW                  )
  !
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)
@@ -417,6 +419,14 @@ DO JVEGTYPE=1,NVEGTYPE
   END WHERE
 ENDDO
 !
+!* initialization of carbon scheme
+!
+NNBYEARSOLD = 0
+NSPINS      = 1
+NSPINW      = 1
+!
+LSPINUPCARBW = .FALSE.
+LSPINUPCARBS = .FALSE.
 !-------------------------------------------------------------------------------
 !
 CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
@@ -447,8 +457,8 @@ CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH
 !
 !------------------------------------------------------------------------------- 
 !
-IF(CISBA=='DIF'.AND.CSOM=='SGH')THEN
-  CALL ABOR1_SFX('SUBGRID Soil organic matter effect (CSOM) NOT YET IMPLEMENTED FOR GARDEN')
+IF(CISBA=='DIF'.AND.CSOC=='SGH')THEN
+  CALL ABOR1_SFX('SUBGRID Soil organic matter effect (CSOC) NOT YET IMPLEMENTED FOR GARDEN')
 ENDIF
 !
 IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN 
@@ -456,7 +466,7 @@ IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN
   ALLOCATE(ZF(KI,NPATCH))
   ZF (:,:) = XUNDEF
   !  
-  !Soil organic matter effect and/or Exponential decay for DIF option 
+  !Soil organic carbon effect and/or Exponential decay for DIF option 
   IF(CISBA=='DIF') THEN
     ALLOCATE(ZWORK(KI))
     ZWORK(:) = XUNDEF

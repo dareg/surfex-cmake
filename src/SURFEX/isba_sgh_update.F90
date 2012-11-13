@@ -46,7 +46,7 @@
 USE MODD_ISBA_n,      ONLY : NGROUND_LAYER, NPATCH, XPATCH, XWG, XWWILT,  &
                              XWSAT, XTAB_FSAT, XTAB_WTOP,                 &
                              XTI_MEAN, XSOILWGHT, XRUNOFFD,               &
-                             NSIZE_NATURE_P, NLAYER_DUN
+                             NSIZE_NATURE_P, NLAYER_DUN, XWGI
 !
 USE MODD_ISBA_GRID_n, ONLY : XMESH_SIZE
 !
@@ -57,6 +57,11 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+!
+!------------------waiting for MEB-------------------------!
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
+USE MODD_SNOW_PAR , ONLY : XWSNV
+!------------------waiting for MEB-------------------------!
 !
 IMPLICIT NONE
 !
@@ -170,7 +175,13 @@ IF(HRUNOFF=='SGH')THEN
           ZD_TOP    (JJ) = ZD_TOP    (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)
           ZWSAT_AVG (JJ) = ZWSAT_AVG (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWSAT (JJ,JL)
           ZWWILT_AVG(JJ) = ZWWILT_AVG(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWWILT(JJ,JL)
-          ZW_TOP    (JJ) = ZW_TOP    (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWG(JJ,JL,JPATCH)
+          !------------------waiting for MEB-------------------------!
+          IF(LSNOW_FRAC_TOT.OR.XWSNV<0.1)THEN
+            ZW_TOP(JJ) = ZW_TOP(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWG(JJ,JL,JPATCH)
+          ELSE
+            ZW_TOP(JJ) = ZW_TOP(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*(XWG(JJ,JL,JPATCH)+XWGI(JJ,JL,JPATCH))
+          ENDIF
+          !------------------waiting for MEB-------------------------!
         ENDDO
       ENDDO
     ENDDO

@@ -142,11 +142,11 @@ TYPE TEB_GARDEN_t
 !                                                      ! natural surface fraction
   INTEGER                          :: NGROUND_LAYER    ! number of ground layers
 !
-  REAL, POINTER, DIMENSION(:)      :: XSOILGRID      ! Soil layer grid as reference for DIF
-  INTEGER                              :: NNBIOMASS    ! number of biomass pools
-  INTEGER                              :: NNLITTER     ! number of litter pools
-  INTEGER                              :: NNLITTLEVS   ! number of litter levels
-  INTEGER                              :: NNSOILCARB   ! number of soil carbon pools  
+  REAL, POINTER, DIMENSION(:)      :: XSOILGRID        ! Soil layer grid as reference for DIF
+  INTEGER                          :: NNBIOMASS        ! number of biomass pools
+  INTEGER                          :: NNLITTER         ! number of litter pools
+  INTEGER                          :: NNLITTLEVS       ! number of litter levels
+  INTEGER                          :: NNSOILCARB       ! number of soil carbon pools  
 !
 !-------------------------------------------------------------------------------
 !
@@ -252,11 +252,11 @@ TYPE TEB_GARDEN_t
   REAL, POINTER, DIMENSION(:,:)    :: XEPSO         ! maximum initial quantum use             
 !                                                     ! efficiency                              (mg J-1 PAR)
   REAL, POINTER, DIMENSION(:,:)    :: XGAMM         ! CO2 conpensation concentration          (ppm)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM       ! Q10 function for CO2 conpensation 
+  REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM       ! Log of Q10 function for CO2 conpensation 
 !                                                     ! concentration                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XGMES         ! mesophyll conductance                   (m s-1)
   REAL, POINTER, DIMENSION(:,:)    :: XRE25         ! Ecosystem respiration parameter         (kg/kg.m.s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDGMES       ! Q10 function for mesophyll conductance  (-)
+  REAL, POINTER, DIMENSION(:,:)    :: XQDGMES       ! Log of Q10 function for mesophyll conductance  (-)
   REAL, POINTER, DIMENSION(:,:)    :: XT1GMES       ! reference temperature for computing 
 !                                                     ! compensation concentration function for 
 !                                                     ! mesophyll conductance: minimum
@@ -266,7 +266,7 @@ TYPE TEB_GARDEN_t
 !                                                     ! mesophyll conductance: maximum
 !                                                     ! temperature                             (K)
   REAL, POINTER, DIMENSION(:,:)    :: XAMAX         ! leaf photosynthetic capacity            (mg m-2 s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDAMAX       ! Q10 function for leaf photosynthetic 
+  REAL, POINTER, DIMENSION(:,:)    :: XQDAMAX       ! Log of Q10 function for leaf photosynthetic 
 !                                                     ! capacity                                (-)
   REAL, POINTER, DIMENSION(:,:)    :: XT1AMAX       ! reference temperature for computing 
 !                                                     ! compensation concentration function for 
@@ -441,6 +441,22 @@ TYPE TEB_GARDEN_t
 !
 !-------------------------------------------------------------------------------
 !
+! - Soil and wood carbon spinup (ISBA-CC, YRESPSL = 'CNT')
+!
+  LOGICAL                        :: LSPINUPCARBS  ! T: do the soil carb spinup, F: no
+  LOGICAL                        :: LSPINUPCARBW  ! T: do the wood carb spinup, F: no  
+  REAL                           :: XSPINMAXS     ! number of times CARBON_SOIL subroutine is
+                                                  ! called for each timestep in simulation during
+                                                  ! acceleration procedure number
+  REAL                           :: XSPINMAXW     ! max number of times the wood is accelerated                                                
+  INTEGER                        :: NNBYEARSPINS   ! first year of the simulation
+  INTEGER                        :: NNBYEARSPINW   ! nbr years needed to reaches equilibrium
+  INTEGER                        :: NNBYEARSOLD    ! nbr years executed at curent time step
+  INTEGER                        :: NSPINS  ! number of times the soil is accelerated
+  INTEGER                        :: NSPINW  ! number of times the wood is accelerated 
+!
+!-------------------------------------------------------------------------------
+!
 ! - Irrigation, seeding and reaping
 !
   TYPE (DATE_TIME), POINTER, DIMENSION(:,:)  :: TSEED          ! date of seeding
@@ -471,9 +487,9 @@ TYPE TEB_GARDEN_t
 !                                          ! 'DEF' = default value 
 !                                          ! 'SGH' = profil exponentiel
 !                                           
-  CHARACTER(LEN=3)               :: CSOM   ! soil organic matter effect
+  CHARACTER(LEN=3)               :: CSOC   ! soil organic carbon effect
 !                                          ! 'DEF' = default value 
-!                                          ! 'SGH' = soil organic matter profil
+!                                          ! 'SGH' = SOC profil
 !
   CHARACTER(LEN=3)               :: CHORT  ! Horton runoff
                                            ! 'DEF' = no Horton runoff
@@ -834,6 +850,26 @@ REAL, POINTER, DIMENSION(:,:,:)   :: XLIGNIN_STRUC=>NULL()
 !$OMP THREADPRIVATE(XLIGNIN_STRUC)
 REAL, POINTER, DIMENSION(:,:,:)   :: XTURNOVER=>NULL()
 !$OMP THREADPRIVATE(XTURNOVER)
+!
+LOGICAL, POINTER :: LSPINUPCARBS=>NULL()
+!$OMP THREADPRIVATE(LSPINUPCARBS)
+LOGICAL, POINTER :: LSPINUPCARBW=>NULL()
+!$OMP THREADPRIVATE(LSPINUPCARBW)
+REAL, POINTER :: XSPINMAXS=>NULL()
+!$OMP THREADPRIVATE(XSPINMAXS)
+REAL, POINTER :: XSPINMAXW=>NULL()
+!$OMP THREADPRIVATE(XSPINMAXW)
+INTEGER, POINTER :: NNBYEARSPINS=>NULL()
+!$OMP THREADPRIVATE(NNBYEARSPINS)
+INTEGER, POINTER :: NNBYEARSPINW=>NULL()
+!$OMP THREADPRIVATE(NNBYEARSPINW)
+INTEGER, POINTER :: NNBYEARSOLD=>NULL()
+!$OMP THREADPRIVATE(NNBYEARSOLD)
+INTEGER, POINTER :: NSPINS=>NULL()
+!$OMP THREADPRIVATE(NSPINS)
+INTEGER, POINTER :: NSPINW=>NULL()
+!$OMP THREADPRIVATE(NSPINW)
+!
 TYPE (DATE_TIME), POINTER, DIMENSION(:,:) :: TSEED=>NULL()
 !$OMP THREADPRIVATE(TSEED)
 TYPE (DATE_TIME), POINTER, DIMENSION(:,:) :: TREAP=>NULL()
@@ -862,8 +898,8 @@ CHARACTER(LEN=3), POINTER      :: CTOPREG=>NULL()
 !$OMP THREADPRIVATE(CTOPREG)
 CHARACTER(LEN=3), POINTER      :: CKSAT=>NULL()
 !$OMP THREADPRIVATE(CKSAT)
-CHARACTER(LEN=3), POINTER      :: CSOM=>NULL()
-!$OMP THREADPRIVATE(CSOM)
+CHARACTER(LEN=3), POINTER      :: CSOC=>NULL()
+!$OMP THREADPRIVATE(CSOC)
 CHARACTER(LEN=3), POINTER      :: CHORT=>NULL()
 !$OMP THREADPRIVATE(CHORT)
 !
@@ -1222,6 +1258,17 @@ XLITTER=>TEB_GARDEN_MODEL(KTO)%XLITTER
 XSOILCARB=>TEB_GARDEN_MODEL(KTO)%XSOILCARB
 XLIGNIN_STRUC=>TEB_GARDEN_MODEL(KTO)%XLIGNIN_STRUC
 XTURNOVER=>TEB_GARDEN_MODEL(KTO)%XTURNOVER
+!
+LSPINUPCARBS=>TEB_GARDEN_MODEL(KTO)%LSPINUPCARBS
+LSPINUPCARBW=>TEB_GARDEN_MODEL(KTO)%LSPINUPCARBW
+XSPINMAXS=>TEB_GARDEN_MODEL(KTO)%XSPINMAXS
+XSPINMAXW=>TEB_GARDEN_MODEL(KTO)%XSPINMAXW
+NNBYEARSPINS=>TEB_GARDEN_MODEL(KTO)%NNBYEARSPINS
+NNBYEARSPINW=>TEB_GARDEN_MODEL(KTO)%NNBYEARSPINW
+NNBYEARSOLD=>TEB_GARDEN_MODEL(KTO)%NNBYEARSOLD
+NSPINS=>TEB_GARDEN_MODEL(KTO)%NSPINS
+NSPINW=>TEB_GARDEN_MODEL(KTO)%NSPINW
+!
 TSEED=>TEB_GARDEN_MODEL(KTO)%TSEED
 TREAP=>TEB_GARDEN_MODEL(KTO)%TREAP
 XWATSUP=>TEB_GARDEN_MODEL(KTO)%XWATSUP
@@ -1238,7 +1285,7 @@ XPSN=>TEB_GARDEN_MODEL(KTO)%XPSN
 !
 CTOPREG=>TEB_GARDEN_MODEL(KTO)%CTOPREG
 CKSAT=>TEB_GARDEN_MODEL(KTO)%CKSAT
-CSOM=>TEB_GARDEN_MODEL(KTO)%CSOM
+CSOC=>TEB_GARDEN_MODEL(KTO)%CSOC
 CHORT=>TEB_GARDEN_MODEL(KTO)%CHORT
 !
 XD_ICE=>TEB_GARDEN_MODEL(KTO)%XD_ICE
@@ -1437,12 +1484,21 @@ TEB_GARDEN_MODEL(:)%NNBIOMASS=0
 TEB_GARDEN_MODEL(:)%NNLITTER=0
 TEB_GARDEN_MODEL(:)%NNLITTLEVS=0
 TEB_GARDEN_MODEL(:)%NNSOILCARB=0
+TEB_GARDEN_MODEL(:)%LSPINUPCARBS=.FALSE.
+TEB_GARDEN_MODEL(:)%LSPINUPCARBW=.FALSE.
+TEB_GARDEN_MODEL(:)%XSPINMAXS=0.
+TEB_GARDEN_MODEL(:)%XSPINMAXW=0.
+TEB_GARDEN_MODEL(:)%NNBYEARSPINS=0
+TEB_GARDEN_MODEL(:)%NNBYEARSPINW=0
+TEB_GARDEN_MODEL(:)%NNBYEARSOLD=0
+TEB_GARDEN_MODEL(:)%NSPINS=1
+TEB_GARDEN_MODEL(:)%NSPINW=1
 TEB_GARDEN_MODEL(:)%XCGMAX=0.
 TEB_GARDEN_MODEL(:)%XCDRAG=0.
 TEB_GARDEN_MODEL(:)%CRUNOFF=' '
 TEB_GARDEN_MODEL(:)%CTOPREG=' '
 TEB_GARDEN_MODEL(:)%CKSAT=' '
-TEB_GARDEN_MODEL(:)%CSOM=' '
+TEB_GARDEN_MODEL(:)%CSOC=' '
 TEB_GARDEN_MODEL(:)%CHORT=' '
 TEB_GARDEN_MODEL(:)%CTYPE_HVEG=' '
 TEB_GARDEN_MODEL(:)%CTYPE_LVEG=' '

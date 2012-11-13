@@ -32,7 +32,7 @@
 !!      B. Decharme      2008 : add XWDRAIN
 !!      B. Decharme   06/2009 : add topographic index statistics
 !!      A.L. Gibelin 04/2009 : dimension NBIOMASS for ISBA-A-gs
-!!
+!!      B. Decharme  07/2012  : files of data for permafrost area and for SOC top and sub soil
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -46,14 +46,15 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : CNATURE
 USE MODD_ISBA_n, ONLY : NPATCH, TTIME, XCOVER, XZS, CISBA, CPEDOTF,  &
                           CPHOTO, LTR_ML, CRUNOFF, XCLAY, XSAND,     &
-                          XSOM, LSOM, LNOF,                          &                          
+                          XSOC, LSOCP, LNOF,                         &                          
                           NGROUND_LAYER, NNBIOMASS,                  &
                           XAOSIP, XAOSIM, XAOSJP, XAOSJM,            &
                           XHO2IP, XHO2IM, XHO2JP, XHO2JM,            &
                           XSSO_SLOPE, XSSO_STDEV, XRUNOFFB,          &
                           XZ0EFFJPDIR, LCOVER, LECOCLIMAP, LCTI,     &
                           XWDRAIN, XTI_MIN, XTI_MAX, XTI_MEAN,       &
-                          XTI_STD, XTI_SKEW, XSOILGRID, XPH, XFERT  
+                          XTI_STD, XTI_SKEW, XSOILGRID, XPH, XFERT,  &
+                          LPERM, XPERM  
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 USE MODD_GR_BIOG_n,   ONLY : XISOPOT, XMONOPOT
@@ -231,31 +232,53 @@ DO JLAYER=2,NGROUND_LAYER
   XSAND(:,JLAYER)=XSAND(:,1)
 END DO
 !
-!* organic matter
+!* Soil organic carbon profile
 !
-IF (IVERSION>=7) THEN
-   YRECFM='OM'
-   CALL READ_SURF(HPROGRAM,YRECFM,LSOM,IRESP)
+IF (IVERSION>=7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+   YRECFM='SOCP'
+   CALL READ_SURF(HPROGRAM,YRECFM,LSOCP,IRESP)
 ELSE
-   LSOM=.FALSE.
+   LSOCP=.FALSE.
 ENDIF
 !
-IF(LSOM)THEN
+IF(LSOCP)THEN
 !  
-  ALLOCATE(XSOM (NDIM,NGROUND_LAYER))
+  ALLOCATE(XSOC (NDIM,NGROUND_LAYER))
 !
-  YRECFM='SOM_TOP'
-  CALL READ_SURF(HPROGRAM,YRECFM,XSOM(:,1),IRESP)
-  YRECFM='SOM_SUB'
-  CALL READ_SURF(HPROGRAM,YRECFM,XSOM(:,2),IRESP)
+  YRECFM='SOC_TOP'
+  CALL READ_SURF(HPROGRAM,YRECFM,XSOC(:,1),IRESP)
+  YRECFM='SOC_SUB'
+  CALL READ_SURF(HPROGRAM,YRECFM,XSOC(:,2),IRESP)
 !
   DO JLAYER=2,NGROUND_LAYER
-    XSOM (:,JLAYER)=XSOM (:,2)
+    XSOC (:,JLAYER)=XSOC (:,2)
   END DO
 !
 ELSE
 !  
-  ALLOCATE(XSOM (0,1))
+  ALLOCATE(XSOC (0,1))
+!
+ENDIF
+!
+!* permafrost distribution
+!
+IF (IVERSION>=7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+   YRECFM='PERMAFROST'
+   CALL READ_SURF(HPROGRAM,YRECFM,LPERM,IRESP)
+ELSE
+   LPERM=.FALSE.
+ENDIF
+!
+IF(LPERM)THEN
+!  
+  ALLOCATE(XPERM (NDIM))
+!
+  YRECFM='PERM'
+  CALL READ_SURF(HPROGRAM,YRECFM,XPERM(:),IRESP)
+!
+ELSE
+!  
+  ALLOCATE(XPERM (0))
 !
 ENDIF
 !

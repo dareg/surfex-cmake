@@ -15,9 +15,10 @@
                          PWG, PWGI, PTG, KWG_LAYER,                         &
                          PDRAIN, PRUNOFF,                                   &
                          PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,  &
-                         HKSAT, HSOM, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, &
+                         HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, &
                          PD_ICE, PHORTON, PDRIP, PFFG, PFFV , PFFLOOD,      &
-                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PTDIURN        )  
+                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PTDIURN,       & 
+                         PIRRIG_FLUX        )  
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -75,6 +76,8 @@
 !!                                         NOT split.
 !!                     08/11 (B. Decharme) DIF optimization
 !!                     09/12 (B. Decharme) Bug in wg2 ice energy budget
+!!                     10/12 (B. Decharme) EVAPCOR snow correction in DIF
+!!                                         Add diag IRRIG_FLUX
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -229,14 +232,15 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PWATSUP
 REAL   ,DIMENSION(:),INTENT(IN)    :: PTHRESHOLD
 LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
 LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
+REAL   ,DIMENSION(:),INTENT(OUT)   :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
 !
 CHARACTER(LEN=*),     INTENT(IN)   :: HKSAT   ! soil hydraulic profil option
 !                                             ! 'DEF'  = ISBA homogenous soil
 !                                             ! 'SGH'  = ksat exponential decay
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HSOM    ! soil organic matter profil option
+CHARACTER(LEN=*),     INTENT(IN)   :: HSOC    ! soil organic carbon profil option
 !                                             ! 'DEF'  = ISBA homogenous soil
-!                                             ! 'SGH'  = SOM profile
+!                                             ! 'SGH'  = SOC profile
 !
 CHARACTER(LEN=*), INTENT(IN)       :: HRAIN   ! Rainfall spatial distribution
                                               ! 'DEF' = No rainfall spatial distribution
@@ -282,7 +286,7 @@ REAL                            :: ZTSTEP      ! maximum time split time step (<
 REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                          &
                                    ZLEV, ZLEG, ZLEGI, ZLETR, ZPSNV,                &
                                    ZRR, ZDG, ZWG, ZWSAT_AVG, ZWWILT_AVG, ZWFC_AVG, &
-                                   ZDRAIN, ZHORTON 
+                                   ZDRAIN, ZHORTON, ZEVAPCOR 
 !                                      Prognostic variables of ISBA at 't-dt'
 !                                      ZPG = total water reaching the ground
 !                                      ZPG_MELT = snowmelt reaching the ground 
@@ -296,6 +300,8 @@ REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                       
 !                                 ZWSAT_AVG, ZWWILT_AVG, ZWFC_AVG = Average water and ice content
 !                                      values over the soil depth D2 (for calculating surface runoff)
 !                                 ZDRAIN and ZHORTON are working variables only used for DIF option
+!                                 ZEVAPCOR = correction if evaporation from snow exceeds
+!                                               actual amount on the surface [m/s]
 !
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZQSAT, ZQSATI, ZTI, ZPS
 !                                           For specific humidity at saturation computation (ISBA-DIF)
@@ -317,6 +323,7 @@ ZTSTEP = 0.0
 ZPG(:)           = 0.0
 ZPG_MELT(:)      = 0.0
 ZDUNNE(:)        = 0.0
+ZEVAPCOR(:)      = 0.0
 !
 ZWSAT_AVG(:)     = 0.0
 ZWWILT_AVG(:)    = 0.0
@@ -368,10 +375,13 @@ END IF
 !
 !* irrigation
 !
+PIRRIG_FLUX(:)=0.0
+!
 IF (SIZE(LIRRIGATE)>0) THEN
    WHERE (LIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
-      ZRR(:) = ZRR(:) + PWATSUP(:) / XDAY
-      LIRRIDAY(:) = .TRUE.
+      PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
+      ZRR        (:) = ZRR(:) + PWATSUP(:) / XDAY
+      LIRRIDAY   (:) = .TRUE.           
    END WHERE
 ENDIF
 !
@@ -480,9 +490,10 @@ IF (HISBA=='DIF') THEN
 ! Soil water sink terms: convert from (W m-2) and (kg m-2 s-1) to (m s-1)
 ! ------------------------------------------------------------------
 !
-  ZPG  (:) =  ZPG  (:)        / XRHOLW
-  ZLEG (:) =  ZLEG (:)        /(XRHOLW*XLVTT)
-  ZLETR(:) = (ZLETR(:)/PF2(:))/(XRHOLW*XLVTT)
+  ZPG     (:) =  ZPG    (:)        / XRHOLW
+  ZEVAPCOR(:) = PEVAPCOR(:)        / XRHOLW
+  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*XLVTT)
+  ZLETR   (:) = (ZLETR  (:)/PF2(:))/(XRHOLW*XLVTT)
 !
 ! -----------------------------------------------------------------
 ! Time splitting for *very large time steps* since Richard's Eq is very
@@ -502,10 +513,10 @@ IF (HISBA=='DIF') THEN
 !
   DO JDT     = 1,INDT
     CALL HYDRO_SOILDIF(ZTSTEP,                                      &
-                PBCOEF, PWSAT, PCONDSAT, PMPOTSAT,                  &
-                PWFC, PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG,         &
+                PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,            &
+                PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG, ZEVAPCOR,     &
                 PF2WGHT, PWG, PWGI, PTG, PPS, ZQSAT, ZQSATI,        &
-                PWDRAIN, ZDRAIN, ZHORTON, HKSAT, HSOM, PWWILT,      &
+                PWDRAIN, ZDRAIN, ZHORTON, HKSAT, HSOC, PWWILT,      &
                 HHORT, PFSAT, KWG_LAYER, INL, KLAYER_HORT           )  
 !
     PDRAIN (:)  = PDRAIN (:) + ZDRAIN (:)/REAL(INDT)

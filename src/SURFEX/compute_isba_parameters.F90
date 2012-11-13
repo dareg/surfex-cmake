@@ -59,7 +59,7 @@ USE MODD_IO_SURF_LFI,  ONLY : NMASK_lfi => NMASK
 !
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
-                          NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOM,         &
+                          NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOC,         &
                           XWWILT, XWFC, XW33, XWSAT,                          &
                           XCOVER, XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,      &
                           XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
@@ -87,7 +87,7 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           XCE_NITRO, XCF_NITRO,                               &
                           XCNA_NITRO, XBSLAI_NITRO, CCPSURF, TSEED,           &
                           TREAP, XWATSUP, XIRRIG, XCGMAX,                     &
-                          CKSAT, CTOPREG, CRAIN, CSOM,                        &
+                          CKSAT, CTOPREG, CRAIN, LSOCP, CSOC, XFRACSOC,       &
                           XTI_MIN, XTI_MAX, XTI_MEAN, XTI_STD, XTI_SKEW,      &
                           XTAB_FSAT, XTAB_WTOP, XD_ICE, XKSAT_ICE,            &
                           XFSAT, XMUF, LTRIP, LFLOOD, XFFLOOD, XFFROZEN,      &
@@ -151,6 +151,7 @@ USE MODI_COMMON_PARTS2
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
 USE MODI_DIAG_ISBA_INIT_n
 USE MODI_INIT_SURF_TOPD
+USE MODI_ISBA_SOC_PARAMETERS
 !
 USE MODI_GATHER_AND_WRITE_MPI
 !
@@ -321,15 +322,52 @@ CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH
 !
 !-------------------------------------------------------------------------------
 !
-!Soil organic matter effect and/or Exponential decay for DIF option
-!
-IF(CISBA=='DIF' .AND. CSOM=='SGH') THEN
-  CALL ABOR1_SFX('ORGANIC MATTER EFFECT (CSOM) NOT YET IMPLEMENTED')
+IF(CISBA=='DIF') THEN
+  !
+  IF( CKSAT=='SGH' )THEN 
+    !
+    ALLOCATE(ZWORK(KI))
+    ALLOCATE(ZF(KI,NPATCH))
+    ZWORK(:) = XUNDEF
+    ZF(:,:)  = XUNDEF          
+    DO JPATCH=1,NPATCH    
+      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
+      DO JILU=1,KI
+        IF(XPATCH(JILU,JPATCH)>0.0)THEN
+          !no profile for non vegetated area : f and root = 0.0
+          LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
+          ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
+          ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
+          ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
+        ENDIF
+      ENDDO
+      CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
+                              XCONDSAT(:,:,JPATCH))
+    ENDDO  
+    DEALLOCATE(ZWORK)
+    DEALLOCATE(ZF)
+  ENDIF
+  !  
+  IF(CSOC=='SGH')THEN   
+    IF(.NOT.LSOCP)THEN
+      CALL ABOR1_SFX('CSOC=SGH can be activated only if SOC data given in PGD fields')
+    ENDIF
+    ALLOCATE(XFRACSOC(KI,NGROUND_LAYER))
+    XFRACSOC(:,:)=0.0
+    CALL ISBA_SOC_PARAMETERS(XPATCH,XDG,XSOC,XBCOEF,XMPOTSAT,   &
+                             XCONDSAT,XWSAT,XHCAPSOIL,XCONDDRY, &
+                             XCONDSLD,XW33,XWFC,XWWILT,XFRACSOC )
+  ELSE
+    ALLOCATE(XFRACSOC(0,0))
+  ENDIF
+! 
+ELSE
+  ALLOCATE(XFRACSOC(0,0))
 ENDIF
 !
 !Topmodel
 !  
-IF ((CKSAT=='SGH' .OR. CKSAT=='EXP') .AND. HINIT/='PRE') THEN
+IF ((CKSAT=='SGH' .OR. CKSAT=='EXP') .AND. HINIT/='PRE' .AND. CISBA/='DIF') THEN
   ALLOCATE(ZF(KI,NPATCH))
   ZF (:,:) = XUNDEF
 ENDIF
@@ -383,55 +421,29 @@ ELSE
 !                  
 ENDIF  
 ! 
-!
-!  CKSAT used in hydro_soildif.F90 and hydro_soil.F90 and soil.F90
-IF ( HINIT/='PRE' ) THEN
+!Exponential decay for ISBA-FR option
+!CKSAT used in hydro_soil.F90 and soil.F90
+IF(HINIT/='PRE'.AND.CISBA/='DIF')THEN 
   !
-  IF( CKSAT=='SGH' )THEN 
+  IF(CKSAT=='SGH') THEN
     !
-    IF(CISBA=='DIF') THEN
-      !
-      ALLOCATE(ZWORK(KI))
-      ZWORK(:) = XUNDEF
-      ZF(:,:)  = XUNDEF          
-      DO JPATCH=1,NPATCH    
-        IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
-        DO JILU=1,KI
-          IF(XPATCH(JILU,JPATCH)>0.0)THEN
-            !no profile for non vegetated area : f and root = 0.0
-            LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
-            ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
-            ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
-            ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
-          ENDIF
-        ENDDO
-        CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
-                                XCONDSAT(:,:,JPATCH))
-      ENDDO  
-      DEALLOCATE(ZWORK)
-      !
-      !Exponential decay for ISBA-FR option
-    ELSE
-      !
-      WHERE(ZF(:,:)==XUNDEF) ZF(:,:) = 4.0/XDG(:,2,:)
-      ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
-      !
-      ALLOCATE(XF_PARAM (KI))
-      ALLOCATE(XC_DEPTH_RATIO (KI))
-      XF_PARAM(:) = ZF(:,1)
-      XC_DEPTH_RATIO(:) = 1.25
-      !
-      DO JPATCH=1,NPATCH
-        IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-          CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH),   &
-                                  XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),      &
-                                  XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),XKSAT_ICE(:,JPATCH))  
-      ENDDO                       
-      ! 
-    ENDIF
-    !  
-    DEALLOCATE(ZF)
+    WHERE(ZF(:,:)==XUNDEF.AND.XDG(:,2,:)/=XUNDEF) 
+      ZF(:,:) = 4.0/XDG(:,2,:)
+    ENDWHERE
+    ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
     !
+    ALLOCATE(XF_PARAM (KI))
+    ALLOCATE(XC_DEPTH_RATIO (KI))
+    XF_PARAM(:) = ZF(:,1)
+    XC_DEPTH_RATIO(:) = 1.25
+    !
+    DO JPATCH=1,NPATCH
+      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+        CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH),   &
+                                XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),      &
+                                XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),XKSAT_ICE(:,JPATCH))  
+    ENDDO                       
+    ! 
   ELSEIF ( CKSAT=='EXP' .AND. CISBA=='3-L' ) THEN
     !
     ALLOCATE(XF_PARAM (KI))

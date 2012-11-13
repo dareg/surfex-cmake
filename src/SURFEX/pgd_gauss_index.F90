@@ -75,18 +75,25 @@ CHARACTER(LEN=28)        :: YZS               ! file name for orography
 CHARACTER(LEN=28)        :: YSAND             ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY             ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI              ! file name for topographic index
+CHARACTER(LEN=28)        :: YPERM             ! file name for permafrost map
+CHARACTER(LEN=28)        :: YSOC_TOP          ! file name for organic carbon
+CHARACTER(LEN=28)        :: YSOC_SUB          ! file name for organic carbon
 !
 LOGICAL                  :: LIMP_COVER        ! Imposed values for Cover from another PGD file
 LOGICAL                  :: LIMP_ZS           ! Imposed orography from another PGD file
 LOGICAL                  :: LIMP_SAND         ! Imposed maps of Sand from another PGD file
 LOGICAL                  :: LIMP_CLAY         ! Imposed maps of Clay from another PGD file
 LOGICAL                  :: LIMP_CTI          ! Imposed values for topographic index statistics from another PGD file
+LOGICAL                  :: LIMP_PERM         ! Imposed values for topographic index statistics from another PGD file
+LOGICAL                  :: LIMP_SOC          ! Imposed maps of organic carbon
 !
 LOGICAL                  :: LUNIF_COVER
 LOGICAL                  :: LUNIF_ZS
 LOGICAL                  :: LUNIF_SAND
 LOGICAL                  :: LUNIF_CLAY
 LOGICAL                  :: LUNIF_CTI
+LOGICAL                  :: LUNIF_PERM
+LOGICAL                  :: LUNIF_SOC
 LOGICAL                  :: LSTOP_PGD
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -104,16 +111,19 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 CALL READ_NAM_PGD_GAUSS_INDEX(HPROGRAM,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,  &
-                                YINDEX_100KM,YCOVER,YZS,YCLAY,YSAND,YCTI,      &
-                                LIMP_COVER,LIMP_ZS,LIMP_CLAY,LIMP_SAND,        &
-                                LIMP_CTI,LUNIF_COVER,LUNIF_ZS,LUNIF_SAND,      &
-                                LUNIF_CLAY,LUNIF_CTI, LSTOP_PGD                )  
+                              YINDEX_100KM,YCOVER,YZS,YCLAY,YSAND,YCTI,      &
+                              YPERM,YSOC_TOP,YSOC_SUB,                       &
+                              LIMP_COVER,LIMP_ZS,LIMP_CLAY,LIMP_SAND,        &
+                              LIMP_CTI,LIMP_PERM,LIMP_SOC,                   &
+                              LUNIF_COVER,LUNIF_ZS,LUNIF_SAND,LUNIF_CLAY,    &
+                              LUNIF_CTI,LUNIF_PERM,LUNIF_SOC,                &
+                              LSTOP_PGD                                      )  
 !
 !-------------------------------------------------------------------------------
 !*    3.      Check consitensy
 !-------------------------------------------------------------------------------
 !
-IF(LIMP_COVER.AND.LIMP_ZS.AND.LIMP_CLAY.AND.LIMP_SAND.AND.LIMP_CTI)THEN
+IF(LIMP_COVER.AND.LIMP_ZS.AND.LIMP_CLAY.AND.LIMP_SAND.AND.LIMP_CTI.AND.LIMP_PERM.AND.LIMP_SOC)THEN
   WRITE(ILUOUT,*) '*****************************************************'
   WRITE(ILUOUT,*)'All pgd fields are imposed from another PGD file      '
   WRITE(ILUOUT,*)'Consequently, Gauss indexes are not calculated or read'
@@ -122,7 +132,7 @@ IF(LIMP_COVER.AND.LIMP_ZS.AND.LIMP_CLAY.AND.LIMP_SAND.AND.LIMP_CTI)THEN
   RETURN
 ENDIF
 !
-IF(LUNIF_COVER.AND.LUNIF_ZS.AND.LUNIF_CLAY.AND.LUNIF_SAND.AND.LUNIF_CTI)THEN
+IF(LUNIF_COVER.AND.LUNIF_ZS.AND.LUNIF_CLAY.AND.LUNIF_SAND.AND.LUNIF_CTI.AND.LUNIF_PERM.AND.LUNIF_SOC)THEN
   WRITE(ILUOUT,*) '*****************************************************'
   WRITE(ILUOUT,*)'All pgd fields are prescribed                         '
   WRITE(ILUOUT,*)'Consequently, Gauss indexes are not calculated or read'
@@ -202,6 +212,33 @@ LNOPERFORM=(LUNIF_CTI.OR.LIMP_CTI)
 IF(LEN_TRIM(YCTI)/=0.AND..NOT.LNOPERFORM)THEN
 !
   CALL GAUSS_INDEX(HPROGRAM,YCTI,YFLAG,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,YINDEX_100KM,YRES_COMP)
+!  
+ENDIF
+!
+LNOPERFORM=(LUNIF_PERM.OR.LIMP_PERM)
+!
+IF(LEN_TRIM(YPERM)/=0.AND..NOT.LNOPERFORM)THEN
+!
+  CALL GAUSS_INDEX(HPROGRAM,YPERM,YFLAG,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,YINDEX_100KM,YRES_COMP)
+!  
+ENDIF
+!
+LNOPERFORM=(LUNIF_SOC.OR.LIMP_SOC)
+!
+IF((LEN_TRIM(YSOC_TOP)==0.AND.LEN_TRIM(YSOC_SUB)/=0).OR.(LEN_TRIM(YSOC_TOP)/=0.AND.LEN_TRIM(YSOC_SUB)==0))THEN
+  WRITE(ILUOUT,*) ' '
+  WRITE(ILUOUT,*) '***********************************************************'
+  WRITE(ILUOUT,*) '* Error in soil organic carbon preparation                *'
+  WRITE(ILUOUT,*) '* If used, sub and top soil input file must be given      *'
+  WRITE(ILUOUT,*) '***********************************************************'
+  WRITE(ILUOUT,*) ' '
+  CALL ABOR1_SFX('GAUSS_INDEX: TOP AND SUB SOC INPUT FILE REQUIRED')        
+ENDIF
+!
+IF(LEN_TRIM(YSOC_TOP)/=0.AND.LEN_TRIM(YSOC_SUB)/=0.AND..NOT.LNOPERFORM)THEN
+!
+  CALL GAUSS_INDEX(HPROGRAM,YSOC_TOP,YFLAG,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,YINDEX_100KM,YRES_COMP)
+  CALL GAUSS_INDEX(HPROGRAM,YSOC_SUB,YFLAG,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,YINDEX_100KM,YRES_COMP)
 !  
 ENDIF
 !

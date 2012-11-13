@@ -188,7 +188,7 @@ IF (IINDEX/=0) IBITS=64
 !
 IF(YTYPE=='INTEGER')THEN
   IF(HFIELD=='CTI'.OR.HFIELD=='sand fraction'.OR. &
-     HFIELD=='clay fraction'.OR.HFIELD=='organic matter')THEN
+     HFIELD=='clay fraction'.OR.HFIELD=='organic carbon')THEN
     ZFACT=100.0
   ELSEIF (HFIELD=='water depth') THEN
     ZFACT=10.0

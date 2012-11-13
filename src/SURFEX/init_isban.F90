@@ -47,6 +47,7 @@ SUBROUTINE INIT_ISBA_n    (HPROGRAM,HINIT,OLAND_USE,                    &
 !!      A.L. Gibelin   04/09 : modifications for CENTURY model 
 !!      A.L. Gibelin   06/09 : soil carbon initialisation
 !!      B. Decharme    07/11 : read pgd+prep
+!!      R. Alkama      05/12 : new carbon spinup
 !!
 !-------------------------------------------------------------------------------
 !
@@ -59,16 +60,17 @@ USE MODD_ISBA_n,   ONLY : CROUGH ,CISBA, CPHOTO, CRUNOFF, CALBEDO, CSCOND,    &
                           TSNOW, TTIME, XTSTEP, XOUT_TSTEP,                   &
                           LTRIP, LFLOOD, LGLACIER, LVEGUPD, LCANOPY_DRAG,     &
                           CCPSURF, CHORT, XCGMAX, XCDRAG, CKSAT,              &
-                          CSOM, CTOPREG, CRAIN
+                          CSOC, CTOPREG, CRAIN, LSPINUPCARBS,                 &
+                          LSPINUPCARBW, NNBYEARSOLD, NSPINS, NSPINW
 !
 USE MODD_CH_ISBA_n,      ONLY : LCH_BIO_FLUX, CCH_DRY_DEP  
 
 USE MODD_DIAG_ISBA_n,    ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET,          &
                                   XDIAG_TSTEP, LPGD,  L2M_MIN_ZS, LCOEF, &
                                   LSURF_VARS, LPATCH_BUDGET  
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGETC
-USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET, LSURF_DIAG_ALBEDO,     &
-                                    LWOOD_SPIN, LSOILCARB_SPIN  
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGETC, &
+                                  LWATER_BUDGET
+USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET, LSURF_DIAG_ALBEDO, LSURF_MISC_DIF  
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_AGRI,           ONLY : LAGRIP
 !
@@ -169,17 +171,19 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_ISBA(XTSTEP, XOUT_TSTEP,                           &
                      CROUGH,CRUNOFF,CALBEDO,CSCOND,              &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
-                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOM,       &
+                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
                      CTOPREG, CRAIN, CHORT, LFLOOD, LTRIP,       &
-                     LGLACIER, LCANOPY_DRAG, LVEGUPD             )  
+                     LGLACIER, LCANOPY_DRAG, LVEGUPD,            &
+                     LSPINUPCARBS, LSPINUPCARBW                  )
  !                  
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)                  
  CALL DEFAULT_DIAG_ISBA(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,   &
                         LCOEF,LSURF_VARS,LSURF_EVAP_BUDGET,        &
                         LSURF_MISC_BUDGET,LSURF_BUDGETC,           &
-                        LPATCH_BUDGET,LWOOD_SPIN, LSOILCARB_SPIN,  &
-                        LPGD,LRESET_BUDGETC,XDIAG_TSTEP    )  
+                        LSURF_MISC_DIF,LPATCH_BUDGET,              &
+                        LPGD,LRESET_BUDGETC,LWATER_BUDGET,         &
+                        XDIAG_TSTEP                                )  
  !
 ENDIF
 !
@@ -193,7 +197,11 @@ CALL READ_ISBA_CONF_n(HPROGRAM)
 !*       1.     Reading of configuration:
 !               -------------------------
 !
-!* initialization of snow scheme
+!* initialization of snow and carbon schemes
+!
+NNBYEARSOLD = 0
+NSPINS      = 1
+NSPINW      = 1
 !
 IF (HINIT=='PRE') THEN 
   CALL READ_PREP_ISBA_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER) 
@@ -213,9 +221,10 @@ IF (HINIT=='PRE') THEN
   ENDIF
 
 ELSEIF (HINIT=='ALL') THEN
-
+!
   CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
   CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+!
   IF (IVERSION<6) THEN
     CRESPSL='DEF'
   ELSE  
@@ -223,9 +232,13 @@ ELSEIF (HINIT=='ALL') THEN
     CALL READ_SURF(HPROGRAM,'NLITTER',NNLITTER,IRESP)
     CALL READ_SURF(HPROGRAM,'NLITTLEVS',NNLITTLEVS,IRESP)
     CALL READ_SURF(HPROGRAM,'NSOILCARB',NNSOILCARB,IRESP)
+    IF(IVERSION>=7.AND.(LSPINUPCARBS.OR.LSPINUPCARBW))THEN
+      CALL READ_SURF(HPROGRAM,'NBYEARSOLD',NNBYEARSOLD,IRESP)
+    ENDIF
   ENDIF
+!
   CALL END_IO_SURF_n(HPROGRAM)
-
+!
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -246,7 +259,7 @@ SELECT CASE (HINIT)
   CASE ('PRE')
     CALL PREP_CTRL_ISBA(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
                           LSURF_EVAP_BUDGET,LSURF_MISC_BUDGET,LSURF_BUDGETC,     &
-                          LPATCH_BUDGET,LWOOD_SPIN,LSOILCARB_SPIN,ILUOUT )    
+                          LPATCH_BUDGET,LSURF_MISC_DIF,ILUOUT                    )    
     IF (LNAM_READ) CALL READ_NAM_PREP_ISBA_n(HPROGRAM)                        
     CALL READ_ISBA_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,TTIME)
 
@@ -281,6 +294,12 @@ IF ( CPHOTO/='NCB' .AND. CRESPSL=='CNT') THEN
 ENDIF
 IF (HINIT=='PRE' .AND. TSNOW%SCHEME.NE.'3-L' .AND. TSNOW%SCHEME.NE.'CRO' .AND. CISBA=='DIF') THEN
     CALL ABOR1_SFX("INIT_ISBAN: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
+ENDIF
+IF(CPHOTO/='NCB'.AND.LSPINUPCARBW)THEN
+  CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND LSPINUPCARBW (if not NCB must be false)')
+ENDIF
+IF(CRESPSL/='CNT'.AND.LSPINUPCARBS)THEN
+  CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CRESPSL AND LSPINUPCARBS (if not CNT must be false)')
 ENDIF
 !
 CALL END_IO_SURF_n(HPROGRAM)

@@ -135,9 +135,26 @@ TYPE ISBA_t
   LOGICAL                        :: LECOCLIMAP ! T: parameters computed from ecoclimap
 !                                              ! F: they are read in the file
 !
-  LOGICAL                        :: LCTI
-  LOGICAL                        :: LSOM
-  LOGICAL                        :: LNOF
+  LOGICAL                        :: LCTI       ! Topographic index data
+  LOGICAL                        :: LSOCP      ! Soil organic carbon profile data
+  LOGICAL                        :: LPERM      ! Permafrost distribution data
+  LOGICAL                        :: LNOF  
+!-------------------------------------------------------------------------------
+!
+! Soil and wood carbon spin up 
+!
+  LOGICAL                        :: LSPINUPCARBS  ! T: do the soil carb spinup, F: no
+  LOGICAL                        :: LSPINUPCARBW  ! T: do the wood carb spinup, F: no  
+  REAL                           :: XSPINMAXS     ! max number of times CARBON_SOIL subroutine is
+                                                  ! called for each timestep in simulation during
+                                                  ! acceleration procedure number
+  REAL                           :: XSPINMAXW     ! max number of times the wood is accelerated                                                  
+  INTEGER                        :: NNBYEARSPINS   ! nbr years needed to reaches soil equilibrium 
+  INTEGER                        :: NNBYEARSPINW   ! nbr years needed to reaches wood equilibrium
+  INTEGER                        :: NNBYEARSOLD    ! nbr years executed at curent time step
+  INTEGER                        :: NSPINS    ! number of times the soil is accelerated
+  INTEGER                        :: NSPINW    ! number of times the wood is accelerated
+
 !-------------------------------------------------------------------------------
 !
 ! Mask and number of grid elements containing patches/tiles:
@@ -268,11 +285,11 @@ TYPE ISBA_t
   REAL, POINTER, DIMENSION(:,:)    :: XEPSO         ! maximum initial quantum use             
 !                                                     ! efficiency                              (mg J-1 PAR)
   REAL, POINTER, DIMENSION(:,:)    :: XGAMM         ! CO2 conpensation concentration          (ppm)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM       ! Q10 function for CO2 conpensation 
+  REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM       ! Log of Q10 function for CO2 conpensation 
 !                                                     ! concentration                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XGMES         ! mesophyll conductance                   (m s-1)
   REAL, POINTER, DIMENSION(:,:)    :: XRE25         ! Ecosystem respiration parameter         (kg/kg.m.s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDGMES       ! Q10 function for mesophyll conductance  (-)
+  REAL, POINTER, DIMENSION(:,:)    :: XQDGMES       ! Log of Q10 function for mesophyll conductance  (-)
   REAL, POINTER, DIMENSION(:,:)    :: XT1GMES       ! reference temperature for computing 
 !                                                     ! compensation concentration function for 
 !                                                     ! mesophyll conductance: minimum
@@ -282,7 +299,7 @@ TYPE ISBA_t
 !                                                     ! mesophyll conductance: maximum
 !                                                     ! temperature                             (K)
   REAL, POINTER, DIMENSION(:,:)    :: XAMAX         ! leaf photosynthetic capacity            (mg m-2 s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDAMAX       ! Q10 function for leaf photosynthetic 
+  REAL, POINTER, DIMENSION(:,:)    :: XQDAMAX       ! Log of Q10 function for leaf photosynthetic 
 !                                                     ! capacity                                (-)
   REAL, POINTER, DIMENSION(:,:)    :: XT1AMAX       ! reference temperature for computing 
 !                                                     ! compensation concentration function for 
@@ -328,7 +345,8 @@ TYPE ISBA_t
 !
   REAL, POINTER, DIMENSION(:,:)    :: XSAND          ! sand fraction                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XCLAY          ! clay fraction                           (-)
-  REAL, POINTER, DIMENSION(:,:)    :: XSOM           ! % of soil organic matter                (%)
+  REAL, POINTER, DIMENSION(:,:)    :: XSOC           ! soil organic carbon content             (kg/m2)
+  REAL, POINTER, DIMENSION(:)      :: XPERM          ! permafrost distribution                 (-)
 
   REAL, POINTER, DIMENSION(:)      :: XWDRAIN        ! continuous drainage parameter           (-)
   REAL, POINTER, DIMENSION(:)      :: XTAUICE        ! soil freezing characteristic timescale  (s)
@@ -501,9 +519,9 @@ TYPE ISBA_t
 !                                          ! 'DEF' = default value 
 !                                          ! 'SGH' = profil exponentiel
 !                                           
-  CHARACTER(LEN=3)               :: CSOM   ! soil organic matter effect
+  CHARACTER(LEN=3)               :: CSOC   ! soil organic carbon effect
 !                                          ! 'DEF' = default value 
-!                                          ! 'SGH' = soil organic matter profil
+!                                          ! 'SGH' = soil SOC profil
 !
   CHARACTER(LEN=3)               :: CRAIN  ! Rainfall spatial distribution
                                            ! 'DEF' = No rainfall spatial distribution
@@ -540,6 +558,9 @@ TYPE ISBA_t
 !                                            
   REAL, POINTER, DIMENSION(:)    :: XMUF  ! fraction of the grid cell reached by the rainfall
   REAL, POINTER, DIMENSION(:)    :: XFSAT ! Topmodel or dt92 saturated fraction
+!
+  REAL, POINTER, DIMENSION(:,:)  :: XFRACSOC ! Fraction of organic carbon in each soil layer
+!
 !-------------------------------------------------------------------------------
 !
 ! - Snow and flood fractions and total albedo at time t:
@@ -628,8 +649,28 @@ LOGICAL, POINTER :: LECOCLIMAP=>NULL()
 !$OMP THREADPRIVATE(LECOCLIMAP)
 LOGICAL, POINTER :: LCTI=>NULL()
 !$OMP THREADPRIVATE(LCTI)
-LOGICAL, POINTER :: LSOM=>NULL()
-!$OMP THREADPRIVATE(LSOM)
+LOGICAL, POINTER :: LSOCP=>NULL()
+!$OMP THREADPRIVATE(LSOCP)
+LOGICAL, POINTER :: LPERM=>NULL()
+!$OMP THREADPRIVATE(LPERM)
+LOGICAL, POINTER :: LSPINUPCARBS=>NULL()
+!$OMP THREADPRIVATE(LSPINUPCARBS)
+LOGICAL, POINTER :: LSPINUPCARBW=>NULL()
+!$OMP THREADPRIVATE(LSPINUPCARBW)
+REAL, POINTER :: XSPINMAXS=>NULL()
+!$OMP THREADPRIVATE(XSPINMAXS)
+REAL, POINTER :: XSPINMAXW=>NULL()
+!$OMP THREADPRIVATE(XSPINMAXW)
+INTEGER, POINTER :: NNBYEARSPINS=>NULL()
+!$OMP THREADPRIVATE(NNBYEARSPINS)
+INTEGER, POINTER :: NNBYEARSPINW=>NULL()
+!$OMP THREADPRIVATE(NNBYEARSPINW)
+INTEGER, POINTER :: NNBYEARSOLD=>NULL()
+!$OMP THREADPRIVATE(NNBYEARSOLD)
+INTEGER, POINTER :: NSPINS=>NULL()
+!$OMP THREADPRIVATE(NSPINS)
+INTEGER, POINTER :: NSPINW=>NULL()
+!$OMP THREADPRIVATE(NSPINW)
 LOGICAL, POINTER :: LNOF=>NULL()
 !$OMP THREADPRIVATE(LNOF)
 INTEGER, POINTER, DIMENSION(:)   :: NSIZE_NATURE_P=>NULL()
@@ -804,8 +845,10 @@ REAL, POINTER, DIMENSION(:,:)    :: XSAND=>NULL()
 !$OMP THREADPRIVATE(XSAND)
 REAL, POINTER, DIMENSION(:,:)    :: XCLAY=>NULL()
 !$OMP THREADPRIVATE(XCLAY)
-REAL, POINTER, DIMENSION(:,:)    :: XSOM=>NULL()
-!$OMP THREADPRIVATE(XSOM)
+REAL, POINTER, DIMENSION(:,:)    :: XSOC=>NULL()
+!$OMP THREADPRIVATE(XSOC)
+REAL, POINTER, DIMENSION(:)    :: XPERM=>NULL()
+!$OMP THREADPRIVATE(XPERM)
 REAL, POINTER, DIMENSION(:)      :: XRUNOFFB=>NULL()
 !$OMP THREADPRIVATE(XRUNOFFB)
 REAL, POINTER, DIMENSION(:)      :: XWDRAIN=>NULL()
@@ -976,8 +1019,8 @@ CHARACTER(LEN=3), POINTER      :: CTOPREG=>NULL()
 !$OMP THREADPRIVATE(CTOPREG)
 CHARACTER(LEN=3), POINTER      :: CKSAT=>NULL()
 !$OMP THREADPRIVATE(CKSAT)
-CHARACTER(LEN=3), POINTER      :: CSOM=>NULL()
-!$OMP THREADPRIVATE(CSOM)
+CHARACTER(LEN=3), POINTER      :: CSOC=>NULL()
+!$OMP THREADPRIVATE(CSOC)
 CHARACTER(LEN=3), POINTER      :: CRAIN=>NULL()
 !$OMP THREADPRIVATE(CRAIN)
 CHARACTER(LEN=3), POINTER      :: CHORT=>NULL()
@@ -1007,6 +1050,8 @@ REAL, POINTER, DIMENSION(:,:)  :: XD_ICE=>NULL()
 !$OMP THREADPRIVATE(XD_ICE)
 REAL, POINTER, DIMENSION(:,:)  :: XKSAT_ICE=>NULL()
 !$OMP THREADPRIVATE(XKSAT_ICE)
+REAL, POINTER, DIMENSION(:,:)  :: XFRACSOC=>NULL()
+!$OMP THREADPRIVATE(XFRACSOC)
 !
 INTEGER, POINTER :: NLAYER_HORT=>NULL()
 !$OMP THREADPRIVATE(NLAYER_HORT)
@@ -1137,7 +1182,8 @@ ISBA_MODEL(KFROM)%XCNA_NITRO=>XCNA_NITRO
 ISBA_MODEL(KFROM)%XBSLAI_NITRO=>XBSLAI_NITRO
 ISBA_MODEL(KFROM)%XSAND=>XSAND
 ISBA_MODEL(KFROM)%XCLAY=>XCLAY
-ISBA_MODEL(KFROM)%XSOM=>XSOM
+ISBA_MODEL(KFROM)%XSOC=>XSOC
+ISBA_MODEL(KFROM)%XPERM=>XPERM
 ISBA_MODEL(KFROM)%XRUNOFFB=>XRUNOFFB
 ISBA_MODEL(KFROM)%XWDRAIN=>XWDRAIN
 ISBA_MODEL(KFROM)%XTAUICE=>XTAUICE
@@ -1231,6 +1277,7 @@ ISBA_MODEL(KFROM)%XTAB_WTOP=>XTAB_WTOP
 !                          
 ISBA_MODEL(KFROM)%XD_ICE=>XD_ICE
 ISBA_MODEL(KFROM)%XKSAT_ICE=>XKSAT_ICE
+ISBA_MODEL(KFROM)%XFRACSOC=>XFRACSOC
 !
 !Flood scheme
 !
@@ -1268,7 +1315,17 @@ LCANOPY=>ISBA_MODEL(KTO)%LCANOPY
 LCANOPY_DRAG=>ISBA_MODEL(KTO)%LCANOPY_DRAG
 LECOCLIMAP=>ISBA_MODEL(KTO)%LECOCLIMAP
 LCTI=>ISBA_MODEL(KTO)%LCTI
-LSOM=>ISBA_MODEL(KTO)%LSOM
+LSOCP=>ISBA_MODEL(KTO)%LSOCP
+LPERM=>ISBA_MODEL(KTO)%LPERM
+LSPINUPCARBS=>ISBA_MODEL(KTO)%LSPINUPCARBS
+LSPINUPCARBW=>ISBA_MODEL(KTO)%LSPINUPCARBW
+XSPINMAXS=>ISBA_MODEL(KTO)%XSPINMAXS
+XSPINMAXW=>ISBA_MODEL(KTO)%XSPINMAXW
+NNBYEARSPINS=>ISBA_MODEL(KTO)%NNBYEARSPINS
+NNBYEARSPINW=>ISBA_MODEL(KTO)%NNBYEARSPINW
+NNBYEARSOLD=>ISBA_MODEL(KTO)%NNBYEARSOLD
+NSPINS=>ISBA_MODEL(KTO)%NSPINS
+NSPINW=>ISBA_MODEL(KTO)%NSPINW
 LNOF=>ISBA_MODEL(KTO)%LNOF
 NSIZE_NATURE_P=>ISBA_MODEL(KTO)%NSIZE_NATURE_P
 NR_NATURE_P=>ISBA_MODEL(KTO)%NR_NATURE_P
@@ -1365,7 +1422,8 @@ XCNA_NITRO=>ISBA_MODEL(KTO)%XCNA_NITRO
 XBSLAI_NITRO=>ISBA_MODEL(KTO)%XBSLAI_NITRO
 XSAND=>ISBA_MODEL(KTO)%XSAND
 XCLAY=>ISBA_MODEL(KTO)%XCLAY
-XSOM=>ISBA_MODEL(KTO)%XSOM
+XSOC=>ISBA_MODEL(KTO)%XSOC
+XPERM=>ISBA_MODEL(KTO)%XPERM
 XRUNOFFB=>ISBA_MODEL(KTO)%XRUNOFFB
 XWDRAIN=>ISBA_MODEL(KTO)%XWDRAIN
 XTAUICE=>ISBA_MODEL(KTO)%XTAUICE
@@ -1454,7 +1512,6 @@ XICE_STO=>ISBA_MODEL(KTO)%XICE_STO
 !
 CTOPREG=>ISBA_MODEL(KTO)%CTOPREG
 CKSAT=>ISBA_MODEL(KTO)%CKSAT
-CSOM=>ISBA_MODEL(KTO)%CSOM
 CRAIN=>ISBA_MODEL(KTO)%CRAIN
 CHORT=>ISBA_MODEL(KTO)%CHORT
 !
@@ -1471,6 +1528,7 @@ XTAB_WTOP=>ISBA_MODEL(KTO)%XTAB_WTOP
 !
 XD_ICE=>ISBA_MODEL(KTO)%XD_ICE
 XKSAT_ICE=>ISBA_MODEL(KTO)%XKSAT_ICE
+XFRACSOC=>ISBA_MODEL(KTO)%XFRACSOC
 !
 NLAYER_HORT=>ISBA_MODEL(KTO)%NLAYER_HORT
 NLAYER_DUN=>ISBA_MODEL(KTO)%NLAYER_DUN
@@ -1588,7 +1646,6 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XBSLAI_NITRO)
   NULLIFY(ISBA_MODEL(J)%XSAND)
   NULLIFY(ISBA_MODEL(J)%XCLAY)
-  NULLIFY(ISBA_MODEL(J)%XSOM)
   NULLIFY(ISBA_MODEL(J)%XRUNOFFB)
   NULLIFY(ISBA_MODEL(J)%XWDRAIN)
   NULLIFY(ISBA_MODEL(J)%XTAUICE)
@@ -1703,7 +1760,17 @@ ISBA_MODEL(:)%LCANOPY=.FALSE.
 ISBA_MODEL(:)%LCANOPY_DRAG=.FALSE.
 ISBA_MODEL(:)%LECOCLIMAP=.FALSE.
 ISBA_MODEL(:)%LCTI=.FALSE.
-ISBA_MODEL(:)%LSOM=.FALSE.
+ISBA_MODEL(:)%LSOCP=.FALSE.
+ISBA_MODEL(:)%LPERM=.FALSE.
+ISBA_MODEL(:)%LSPINUPCARBS=.FALSE.
+ISBA_MODEL(:)%LSPINUPCARBW=.FALSE.
+ISBA_MODEL(:)%XSPINMAXS=0.
+ISBA_MODEL(:)%XSPINMAXW=0.
+ISBA_MODEL(:)%NNBYEARSPINS=0
+ISBA_MODEL(:)%NNBYEARSPINW=0
+ISBA_MODEL(:)%NNBYEARSOLD=0
+ISBA_MODEL(:)%NSPINS=1
+ISBA_MODEL(:)%NSPINW=1
 ISBA_MODEL(:)%LNOF=.FALSE.
 ISBA_MODEL(:)%NPATCH=0
 ISBA_MODEL(:)%NGROUND_LAYER=0
@@ -1719,7 +1786,7 @@ ISBA_MODEL(:)%XCDRAG=0.
 ISBA_MODEL(:)%CRUNOFF=' '
 ISBA_MODEL(:)%CTOPREG=' '
 ISBA_MODEL(:)%CKSAT=' '
-ISBA_MODEL(:)%CSOM=' '
+ISBA_MODEL(:)%CSOC=' '
 ISBA_MODEL(:)%CRAIN=' '
 ISBA_MODEL(:)%CHORT=' '
 ISBA_MODEL(:)%NLAYER_HORT=0

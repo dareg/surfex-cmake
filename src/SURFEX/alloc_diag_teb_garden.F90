@@ -44,6 +44,7 @@ ALLOCATE(XHORT                   (KLU                     ))
 ALLOCATE(XDRIP                   (KLU                     )) 
 ALLOCATE(XRRVEG                  (KLU                     )) 
 ALLOCATE(XMELT                   (KLU                     )) 
+ALLOCATE(XIRRIG_FLUX             (KLU                     ))
 !
 ALLOCATE(XCG                     (KLU                     )) 
 ALLOCATE(XC1                     (KLU                     )) 

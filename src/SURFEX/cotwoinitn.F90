@@ -52,6 +52,7 @@
 !!      A.L. Gibelin  04/2009    TAU_WOOD for NCB option 
 !!      A.L. Gibelin  04/2009    Suppress useless GPP and RDK arguments 
 !!      A.L. Gibelin  07/2009    Suppress PPST and PPSTF as outputs
+!!      B. Decharme   05/2012 : Optimization
 !!
 !-------------------------------------------------------------------------------
 !
@@ -110,9 +111,9 @@ REAL,DIMENSION(:),INTENT(OUT)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,  &
 !                                     PEPSO     = maximum initial quantum use efficiency 
 !                                                 (kgCO2 kgAir-1 J-1 PAR)
 !                                     PGAMM     = CO2 conpensation concentration (kgCO2 kgAir-1)
-!                                     PQDGAMM   = Q10 function for CO2 conpensation 
+!                                     PQDGAMM   = Log of Q10 function for CO2 conpensation 
 !                                                 concentration
-!                                     PQDGMES   = Q10 function for mesophyll conductance 
+!                                     PQDGMES   = Log of Q10 function for mesophyll conductance 
 !                                     PT1GMES   = reference temperature for computing 
 !                                                 compensation concentration function for 
 !                                                 mesophyll conductance: minimum temperature 
@@ -120,7 +121,7 @@ REAL,DIMENSION(:),INTENT(OUT)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,  &
 !                                                 compensation concentration function for 
 !                                                 mesophyll conductance: maximum temperature
 !                                     PAMAX     = leaf photosynthetic capacity (Units of kgCO2 kgAir-1 m s-1)
-!                                     PQDAMAX   = Q10 function for leaf photosynthetic capacity
+!                                     PQDAMAX   = Log of Q10 function for leaf photosynthetic capacity
 !                                     PT1AMAX   = reference temperature for computing 
 !                                                 compensation concentration function for leaf 
 !                                                 photosynthetic capacity: minimum temperature
@@ -154,6 +155,7 @@ REAL, DIMENSION(SIZE(PANMAX))     :: ZCO2INIT3, ZCO2INIT4, ZCO2INIT5
 !                                    optimum temperature for determining maximum 
 !                                    photosynthesis rate, and soil water stress (none)
 REAL, DIMENSION(SIZE(PDMAX))      :: ZDMAX
+REAL, DIMENSION(SIZE(PDMAX))      :: ZWORK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                    Local variable in order to initialise DMAX
 !                                    following Calvet, 2000 (AST or LST cases)
@@ -237,6 +239,10 @@ DO JCLASS=1,NVEGTYPE
   !
 END DO
 !
+PQDGAMM(:)=LOG(PQDGAMM(:))
+PQDGMES(:)=LOG(PQDGMES(:))
+PQDAMAX(:)=LOG(PQDAMAX(:))
+!
 !
 ! INITIALIZE VARIOUS VARIABLES FOR CO2 MODEL:
 ! -------------------------------------------
@@ -244,14 +250,23 @@ END DO
 !
 ! compute temperature responses:
 !
-ZGAMMT(:) = PGAMM(:)*(PQDGAMM(:)**(0.1*(ZTOPT(:)-25.0)))
+!before optimization (with non log PQDGAMM) : 
+!ZGAMMT(:) = PGAMM(:)*(PQDGAMM(:)**(0.1*(ZTOPT(:)-25.0)))
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PQDGAMM(:)
+ZGAMMT(:) = PGAMM(:)*EXP(ZWORK(:))
 !
-ZANMAX(:) = ( PAMAX(:)*PQDAMAX(:)**(0.1*(ZTOPT(:)-25.0)) )    &
-               /( (1.0+EXP(0.3*(PT1AMAX(:)-ZTOPT(:))))*         &
+!before optimization (with non log PQDAMAX) :
+!ZANMAX(:) = ( PAMAX(:)*PQDAMAX(:)**(0.1*(ZTOPT(:)-25.0)) ) / ...
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PQDAMAX(:)
+ZANMAX(:) = ( PAMAX(:)*EXP(ZWORK(:)) )                   &
+               /( (1.0+EXP(0.3*(PT1AMAX(:)-ZTOPT(:))))*  &
                   (1.0+EXP(0.3*(ZTOPT(:)-PT2AMAX(:)))) )  
 !
-ZGMEST(:) = ( PGMES(:)*PQDGMES(:)**(0.1*(ZTOPT(:)-25.0)) )    &
-               /( (1.0+EXP(0.3*(PT1GMES(:)-ZTOPT(:))))*               &
+!before optimization (with non log PQDGMES) :
+!ZGMEST(:) = ( PGMES(:)*PQDGMES(:)**(0.1*(ZTOPT(:)-25.0)) )    &
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PQDGMES(:)
+ZGMEST(:) = ( PGMES(:)*EXP(ZWORK(:)) )                   &
+               /( (1.0+EXP(0.3*(PT1GMES(:)-ZTOPT(:))))*  &
                   (1.0+EXP(0.3*(ZTOPT(:)-PT2GMES(:)))) )  
 !
 !

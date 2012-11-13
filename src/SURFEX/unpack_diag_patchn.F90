@@ -63,6 +63,8 @@ USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW, XP_SMELTFLUX, 
                                   XP_LE_FLOOD, XP_LEI_FLOOD, XP_ICEFLUX,        &
                                   XP_RRVEG, XP_GPP, XP_RESP_AUTO, XP_RESP_ECO,  &
                                   XP_FAPAR, XP_FAPIR, XP_FAPAR_BS, XP_FAPIR_BS, &
+                                  XP_IRRIG_FLUX,XP_DWG,XP_DWGI,XP_DSWE,         &
+                                  XP_WATBUD,                                    &                                  
                                   XBLOCK_SIMPLE, XBLOCK_GROUND, XBLOCK_SNOW,    &
                                   XBLOCK_KSW, XBLOCK_ABC, XBLOCK_0, XBLOCK_00
 !
@@ -311,6 +313,7 @@ XP_SNOWFREE_ALB => NULL()
 XP_HORT         => NULL()
 XP_DRIP         => NULL()
 XP_RRVEG        => NULL()
+XP_IRRIG_FLUX   => NULL()
 !
 XP_SWBD         => NULL()
 XP_SWBU         => NULL()
@@ -396,6 +399,10 @@ XP_TDSNOW       => NULL()
 !
 XP_ICEFLUX      => NULL()
 !
+XP_DWG          => NULL()
+XP_DWGI         => NULL()
+XP_DSWE         => NULL()
+XP_WATBUD       => NULL()
 !
 DEALLOCATE(XBLOCK_SIMPLE)
 DEALLOCATE(XBLOCK_GROUND)

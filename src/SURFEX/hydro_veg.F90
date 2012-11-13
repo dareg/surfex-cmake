@@ -55,6 +55,7 @@
 !                               the vegetation 
 !!                  07/2011  (B. Decharme) delete SGH for very fine precipitation
 !!                  09/2012  (B. Decharme) Computation efficiency for HRAIN=='SGH'
+!!                  10/2012  (B. Decharme) PPG intent(out)
 !
 !-------------------------------------------------------------------------------
 !
@@ -94,14 +95,15 @@ REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PWRMAX
 REAL, DIMENSION(:), INTENT(IN)    :: PPSNV
 !                                      PPSNV = vegetation covered by snow
 !
-REAL, DIMENSION(:), INTENT(INOUT) ::  PPG, PWR
+REAL, DIMENSION(:), INTENT(INOUT) :: PWR
 !                                      PWR = liquid water retained on the foliage
 !                                             of the vegetation at time 't+dt'
-!                                      PPG = total water reaching the ground
 !
-REAL, DIMENSION(:), INTENT(OUT)  ::  PDRIP
-!                                    PDRIP = Dripping from the vegetation
-REAL, DIMENSION(:), INTENT(OUT)  :: PRRVEG  !Precip. intercepted by vegetation (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT)   :: PPG,PDRIP
+!                                      PPG   = total water reaching the ground
+!                                      PDRIP = Dripping from the vegetation
+REAL, DIMENSION(:), INTENT(OUT)   :: PRRVEG  
+!                                      PRRVEG = Precip. intercepted by vegetation (kg/m2/s)
 !
 !
 !*      0.2    declarations of local variables
@@ -229,7 +231,7 @@ PWR(:)   = MIN(PWR(:), PWRMAX(:))
 !precipitation plus the vegetation runoff (we also consider the
 !negative runoff).
 !
-PPG(:) = PPG(:) + (1.-PVEG(:)*(1-PPSNV(:))) * PRR(:) + ZRUIR(:) + ZRUIR2(:)
+PPG(:) = (1.-PVEG(:)*(1-PPSNV(:))) * PRR(:) + ZRUIR(:) + ZRUIR2(:)
 !
 PDRIP(:) = ZRUIR(:) + ZRUIR2(:)
 IF (LHOOK) CALL DR_HOOK('HYDRO_VEG',1,ZHOOK_HANDLE)

@@ -1,8 +1,9 @@
 !     #########
       SUBROUTINE HYDRO_SOILDIF(PTSTEP,                                              &
                                PBCOEF,PWSAT,PCONDSAT,PMPOTSAT,PWFC,PDG,PDZG,PDZDIF, &
-                               PPG,PLETR,PLEG,PF2WGHT,PWG,PWGI,PTG,PPS,PQSAT,PQSATI,&
-                               PWDRAIN,PDRAIN,PHORTON,HKSAT,HSOM,PWWILT,HHORT,PFSAT,&
+                               PPG,PLETR,PLEG,PEVAPCOR,PF2WGHT,                     &                              
+                               PWG,PWGI,PTG,PPS,PQSAT,PQSATI,PWDRAIN,               &
+                               PDRAIN,PHORTON,HKSAT,HSOC,PWWILT,HHORT,PFSAT,        &
                                KWG_LAYER,KMAX_LAYER,KLAYER_HORT                     )
 !     ##########################################################################
 !
@@ -65,8 +66,9 @@
 !!    -------------
 !!      Original    16/02/00 Boone
 !!      Modif       04/2010  B.Decharme: geometric mean for interfacial conductivity
-!!                                       Brook and Corey or Van Genuchten 
+!!                                       Brook and Corey 
 !!      Modif       08/2011  B.Decharme: Optimization using global loops
+!!                  10/12    B.Decharme: EVAPCOR snow correction in DIF
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -85,7 +87,7 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                    :: PTSTEP ! Model time step (s)
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PWDRAIN, PFSAT
+REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PEVAPCOR, PWDRAIN, PFSAT
 !                                      PPS    = surface pressure (Pa)
 !                                      PPG    = throughfall rate: 
 !                                               rate at which water reaches the surface
@@ -93,6 +95,8 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PWDRAIN, PFSAT
 !                                               drip, etc...) (m/s)
 !                                      PLETR  = transpiration rate (m/s)
 !                                      PLEG   = bare-soil evaporation rate (m/s)
+!                                      PEVAPCOR = correction for any excess evaporation 
+!                                                from snow as it completely ablates (m/s)
 !                                      PWDRAIN= minimum Wg for drainage (m3 m-3)
 !                                      PFSAT  = Saturated fraction
 !
@@ -137,9 +141,9 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HKSAT    ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSOM     ! soil organic matter profil option
+CHARACTER(LEN=*),     INTENT(IN)    :: HSOC     ! soil organic carbon profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
-!                                               ! 'SGH'  = SOM profile
+!                                               ! 'SGH'  = SOC profile
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWWILT
 !                                      PWWILT = wilting point volumetric water
@@ -252,7 +256,7 @@ ZCMTRX   (:,:) = XUNDEF
 !
 ZSGDRAIN (:,:) = 0.0    
 ZWWILT   (:,:) = XWGMIN
-IF(HKSAT=='SGH'.OR.HSOM=='SGH')THEN
+IF(HKSAT=='SGH'.OR.HSOC=='SGH')THEN
   ZWWILT  (:,:) = PWWILT(:,:)
 ENDIF        
 !
@@ -332,7 +336,7 @@ DO JL=1,INL
 !       Put remainding infiltration into the next layer (m)
         ZINFILTC(JJ) = ZINFILTC(JJ) - ZINFLAYER(JJ,JL)
 !       Possible negative infiltration  (m s-1)
-        ZINFNEG(JJ,JL) = MIN(0.0,PPG(JJ)*PDZG(JJ,JL)/PDG(JJ,IDEPTH))
+        ZINFNEG(JJ,JL) = (MIN(0.0,PPG(JJ))+PEVAPCOR(JJ))*PDZG(JJ,JL)/PDG(JJ,IDEPTH)
      ENDIF
    ENDDO
 ENDDO

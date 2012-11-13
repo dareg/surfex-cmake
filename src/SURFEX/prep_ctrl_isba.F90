@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE PREP_CTRL_ISBA(K2M,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET,OCOEF,OSURF_VARS,&
                                   OSURF_EVAP_BUDGET,OSURF_MISC_BUDGET,OSURF_BUDGETC,     &
-                                  OPATCH_BUDGET,OWOOD_SPIN,OSOILCARB_SPIN,KLUOUT)  
+                                  OPATCH_BUDGET,OSURF_MISC_DIF,KLUOUT                    )  
 !     #################################################################################################################
 !
 !!****  *PREP_CTRL_ISBA* - routine to check that diagnostics are switched off
@@ -58,8 +58,7 @@ LOGICAL,  INTENT(INOUT) :: OSURF_EVAP_BUDGET  ! flag for surface evaporation bud
 LOGICAL,  INTENT(INOUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
 LOGICAL,  INTENT(INOUT) :: OSURF_BUDGETC      ! flag for cumulated surface budget
 LOGICAL,  INTENT(INOUT) :: OPATCH_BUDGET      ! flaf for surface budget by patch
-LOGICAL,  INTENT(INOUT) :: OWOOD_SPIN         ! flag for wood spinup
-LOGICAL,  INTENT(INOUT) :: OSOILCARB_SPIN     ! flag for soil carbon spinup
+LOGICAL,  INTENT(INOUT) :: OSURF_MISC_DIF     ! flag for surface miscellaneous dif variables
 INTEGER,  INTENT(IN)    :: KLUOUT             ! unit number
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -81,8 +80,7 @@ OSURF_BUDGETC     = .FALSE.
 OPATCH_BUDGET     = .FALSE.
 OSURF_EVAP_BUDGET = .FALSE.
 OSURF_MISC_BUDGET = .FALSE.
-OWOOD_SPIN        = .FALSE.
-OSOILCARB_SPIN    = .FALSE.
+OSURF_MISC_DIF    = .FALSE.
 !
 WRITE(KLUOUT,*)'ISBA DIAGNOSTICS DESACTIVATED'
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_ISBA',1,ZHOOK_HANDLE)

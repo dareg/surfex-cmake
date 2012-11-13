@@ -2,8 +2,9 @@
       SUBROUTINE DEFAULT_DIAG_ISBA(K2M,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET, &
                                    OCOEF,OSURF_VARS,OSURF_EVAP_BUDGET,      &
                                    OSURF_MISC_BUDGET,OSURF_BUDGETC,         &
-                                   OPATCH_BUDGET,OWOOD_SPIN,OSOILCARB_SPIN, &
-                                   OPGD,ORESET_BUDGETC,PDIAG_TSTEP          )  
+                                   OSURF_MISC_DIF,OPATCH_BUDGET,            &
+                                   OPGD,ORESET_BUDGETC,OWATER_BUDGET,       &
+                                   PDIAG_TSTEP                              )  
 !     #################################################################################################################
 !
 !!****  *DEFAULT_DIAG_ISBA* - routine to set default values for the choice of diagnostics
@@ -35,6 +36,9 @@
 !!      Modified by P. Le Moigne, 11/2004: add budget switch 
 !!      Modified by B. Decharme , 06/2009: add patch budget switch 
 !!      Modified by A.L. Gibelin, 04/2009: add carbon spinup
+!!      Modified by B. Decharme , 05/2012: move carbon spinup to NAM_SPINUP_CARB
+!!                                         add miscellaneous field key for dif
+!!                                         add isba water budget key
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -61,11 +65,11 @@ LOGICAL,  INTENT(OUT) :: OSURF_VARS
 LOGICAL,  INTENT(OUT) :: OSURF_EVAP_BUDGET  ! flag for surface evaporation budget
 LOGICAL,  INTENT(OUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
 LOGICAL,  INTENT(OUT) :: OSURF_BUDGETC      ! flag for cumulated surface budget
+LOGICAL,  INTENT(OUT) :: OSURF_MISC_DIF     ! flag for surface miscellaneous dif variables
 LOGICAL,  INTENT(OUT) :: OPATCH_BUDGET      ! flag for patch output
-LOGICAL,  INTENT(OUT) :: OWOOD_SPIN         ! flag for wood spinup
-LOGICAL,  INTENT(OUT) :: OSOILCARB_SPIN     ! flag for soil carbon spinup
 LOGICAL,  INTENT(OUT) :: OPGD               ! flag for PGD fields
 LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC     ! flag for cumulated surface budget
+LOGICAL,  INTENT(OUT) :: OWATER_BUDGET      ! flag for isba water budget
 REAL,     INTENT(OUT) :: PDIAG_TSTEP        ! time-step for writing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -86,16 +90,16 @@ OSURF_VARS        = .FALSE.
 !
 OSURF_EVAP_BUDGET = .FALSE.
 OSURF_MISC_BUDGET = .FALSE.
+OSURF_MISC_DIF    = .FALSE.
 !
 OSURF_BUDGETC     = .FALSE.
 !
 OPATCH_BUDGET     = .TRUE.
 !
-OWOOD_SPIN        = .FALSE.
-OSOILCARB_SPIN    = .FALSE.
-!
 OPGD              = .FALSE.
 ORESET_BUDGETC    = .FALSE.
+!
+OWATER_BUDGET     = .FALSE.
 !
 PDIAG_TSTEP       = XUNDEF
 IF (LHOOK) CALL DR_HOOK('DEFAULT_DIAG_ISBA',1,ZHOOK_HANDLE)

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HSOM, HRAIN, HHORT, &
+      SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HSOC, HRAIN, HHORT, &
                       HC1DRY, HSCOND, HSNOW_ISBA, HSNOWRES, HCPSURF, HSOILFRZ,   &
                       HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
                       HIMPLICIT_WIND, PCGMAX, PZREF, PUREF, PDIRCOSZW,           &
@@ -36,7 +36,8 @@
                       PUSTAR_ISBA, PLER_ISBA, PLE_ISBA, PLEI_ISBA, PGFLUX_ISBA,  &
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
-                      PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS           )                     
+                      PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
+                      PIRRIG_FLUX                                                )                     
 !     ##########################################################################
 !
 !
@@ -111,6 +112,7 @@
 !!                                  of time step for total albedo calculation
 !!                            Bug : flood fraction in COTWORES
 !!                            new wind implicitation
+!!                            Irrigation rate diag
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -171,9 +173,9 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HRUNOFF    ! surface runoff formulation
 CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
-CHARACTER(LEN=*),     INTENT(IN)  :: HSOM       ! soil organic matter profil option
+CHARACTER(LEN=*),     INTENT(IN)  :: HSOC       ! soil organic carbon profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
-!                                               ! 'SGH'  = SOM profile
+!                                               ! 'SGH'  = SOC profile
 CHARACTER(LEN=*),     INTENT(IN)  :: HRAIN      ! Rainfall spatial distribution
                                                 ! 'DEF' = No rainfall spatial distribution
                                                 ! 'SGH' = Rainfall exponential spatial distribution
@@ -393,9 +395,9 @@ REAL, DIMENSION(:),    INTENT(IN) :: PFZERO     ! ideal value of F, no photo-
 REAL, DIMENSION(:),    INTENT(IN) :: PEPSO      ! maximum initial quantum use
 !                                               ! efficiency (mg J-1 PAR)
 REAL, DIMENSION(:),    INTENT(IN) :: PGAMM      ! CO2 conpensation concentration (ppmv)
-REAL, DIMENSION(:),    INTENT(IN) :: PQDGAMM    ! Q10 function for CO2 conpensation 
+REAL, DIMENSION(:),    INTENT(IN) :: PQDGAMM    ! Log of Q10 function for CO2 conpensation 
 !                                               ! concentration
-REAL, DIMENSION(:),    INTENT(IN) :: PQDGMES    ! Q10 function for mesophyll conductance 
+REAL, DIMENSION(:),    INTENT(IN) :: PQDGMES    ! Log of Q10 function for mesophyll conductance 
 REAL, DIMENSION(:),    INTENT(IN) :: PT1GMES    ! reference temperature for computing 
 !                                               ! compensation concentration function for 
 !                                               ! mesophyll conductance: minimum
@@ -405,7 +407,7 @@ REAL, DIMENSION(:),    INTENT(IN) :: PT2GMES    ! reference temperature for comp
 !                                               ! mesophyll conductance: maximum
 !                                               ! temperature
 REAL, DIMENSION(:),    INTENT(IN) :: PAMAX      ! leaf photosynthetic capacity (kgCO2 m-2 s-1)
-REAL, DIMENSION(:),    INTENT(IN) :: PQDAMAX    ! Q10 function for leaf photosynthetic capacity
+REAL, DIMENSION(:),    INTENT(IN) :: PQDAMAX    ! Log of Q10 function for leaf photosynthetic capacity
 REAL, DIMENSION(:),    INTENT(IN) :: PT1AMAX    ! reference temperature for computing 
 !                                               ! compensation concentration function for leaf 
 !                                               ! photosynthetic capacity: minimum
@@ -584,6 +586,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PDRAIN     ! drainage
 REAL, DIMENSION(:), INTENT(OUT) :: PRUNOFF    ! runoff
 REAL, DIMENSION(:), INTENT(OUT) :: PMELT      ! melting rate of the snow (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PMELTADV   ! advection heat flux from snowmelt (W/m2)
+REAL ,DIMENSION(:), INTENT(OUT) :: PIRRIG_FLUX! irrigation rate (kg/m2/s)
 !
 ! The following surface fluxes are from snow-free portion of grid
 ! box when the ISBA-ES option is ON. Otherwise, they are equal
@@ -696,7 +699,7 @@ REAL, DIMENSION(SIZE(PWG,1))             :: ZWGI_EXCESS! Soil ice excess water c
 ! Other :
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
-!                                                        ! if implicit coupling with atmosphere used.
+!                                                      ! if implicit coupling with atmosphere used.
 REAL, DIMENSION(SIZE(PWR)) :: ZTDIURN ! Ice maximum penetration depth for restore (m)
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
@@ -937,8 +940,9 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, OGLACIER, OFLOOD, PTSTEP, PVEGTYPE,      
      PWFC, PWWILT, ZF2WGHT, ZF2, PD_G, PDZG, PDZDIF, PPS,                       &
      PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF,                                &
      PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,                          &
-     HKSAT, HSOM, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
-     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, ZTDIURN           )
+     HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
+     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, ZTDIURN,          &
+     PIRRIG_FLUX                                                                )
 !
 PDRAIN(:)=PDRAIN(:)+ZWGI_EXCESS(:)
 !

@@ -28,6 +28,14 @@
 !!      A.L. Gibelin 05/09 : Add carbon spinup
 !!      A.L. Gibelin 07/09 : Suppress RDK and transform GPP as a diagnostic
 !!      D. Carrer    04/11 : Add FAPAR and effective LAI
+!!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
+!!      B. Decharme  09/12 : Carbon fluxes in diag_evap
+!!      B. Decharme  09/12   New diag for DIF:
+!!                           F2 stress
+!!                           Root zone swi, wg and wgi
+!!                           swi, wg and wgi comparable to ISBA-FR-DG2 and DG3 layers
+!!                           active layer thickness over permafrost
+!!                           frozen layer thickness over non-permafrost
 !!
 !-------------------------------------------------------------------------------
 !
@@ -41,20 +49,17 @@ USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER, NNBIOMASS,       &
                                    CRUNOFF, CRAIN, CISBA, LTR_ML,  &
                                    XMUF, NWG_LAYER,                &
                                    CPHOTO, CRESPSL, LFLOOD,        &
-                                   XFFLOOD, XPIFLOOD, TSNOW,       &
-                                   XTAU_WOOD, XINCREASE, XTURNOVER  
+                                   XFFLOOD, XPIFLOOD, TSNOW  
 !                                 
 USE MODD_DIAG_ISBA_n,     ONLY :   LPATCH_BUDGET, XTS, XAVG_TS,    &
                                    XTSRAD, XAVG_TSRAD  
 !                                 
 USE MODD_AGRI,            ONLY :   LAGRIP
-USE MODD_DIAG_MISC_ISBA_n,ONLY :   LSURF_MISC_BUDGET,                   &
-                                   LWOOD_SPIN, LSOILCARB_SPIN,          &
+USE MODD_DIAG_MISC_ISBA_n,ONLY :   LSURF_MISC_BUDGET, LSURF_MISC_DIF,   &
                                    XHV, XAVG_HV, XSWI, XAVG_SWI,        &
                                    XTSWI, XAVG_TSWI, XDPSNG, XAVG_PSNG, &
                                    XDPSNV, XAVG_PSNV, XDPSN, XAVG_PSN,  &
-                                   XSEUIL, XSOIL_TSWI, XGPP, XRESP_AUTO,&
-                                   XRESP_ECO, XALBT, XAVG_ALBT,         &
+                                   XSEUIL, XSOIL_TSWI, XALBT, XAVG_ALBT,&                                   
                                    XTWSNOW, XAVG_TWSNOW, XTDSNOW,       &
                                    XAVG_TDSNOW,XTTSNOW, XAVG_TTSNOW,    &
                                    XDFFG, XAVG_FFG, XDFFV, XAVG_FFV,    &
@@ -62,10 +67,12 @@ USE MODD_DIAG_MISC_ISBA_n,ONLY :   LSURF_MISC_BUDGET,                   &
                                    XDFSAT , XAVG_FSAT,                  &
                                    XSURF_TSWI, XSURF_TWG, XSURF_TWGI,   &
                                    XROOT_TSWI, XROOT_TWG, XROOT_TWGI,   &
-                                   XDEEP_TSWI, XDEEP_TWG, XDEEP_TWGI,   &
+                                   XFRD2_TSWI, XFRD2_TWG, XFRD2_TWGI,   &
+                                   XFRD3_TSWI, XFRD3_TWG, XFRD3_TWGI,   &                                   
                                    XSNOWLIQ, XSNOWTEMP, XDLAI_EFFC,     &
                                    XFAPAR, XFAPIR, XDFAPARC, XDFAPIRC,  &
-                                   XFAPAR_BS, XFAPIR_BS
+                                   XFAPAR_BS, XFAPIR_BS, XALT, XAVG_ALT,&
+                                   XFLT, XAVG_FLT, XAVG_LAI
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -150,9 +157,9 @@ IF (LSURF_MISC_BUDGET) THEN
     !
   END IF
   !
-  !        2.4    Soil Wetness Index and Water content
-  !               ------------------------------------
-  !
+  !        2.4    Soil Wetness Index, Water content and active layer depth
+  !               --------------------------------------------------------
+  !  
   IF(CISBA=='DIF')THEN
     !
     IWORK = NWG_SIZE
@@ -202,19 +209,7 @@ IF (LSURF_MISC_BUDGET) THEN
   YCOMMENT='total ice content (solid) over the soil column (kg/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TWGI(:),IRESP,HCOMMENT=YCOMMENT)
   !
-  IF(CISBA=='DIF')THEN
-    !
-    YRECFM='TSWI_S_ISBA'
-    YCOMMENT='total soil wetness index over the surface (-)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WGTOT_S_ISBA'
-    YCOMMENT='total water content (liquid+solid) over the surface (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWG(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WGI_S_ISBA'
-    YCOMMENT='total ice content (solid) over the surface (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+  IF(CISBA=='DIF'.AND.LSURF_MISC_DIF)THEN
     !
     YRECFM='TSWI_R_ISBA'
     YCOMMENT='total soil wetness index over the root zone (-)'
@@ -227,20 +222,52 @@ IF (LSURF_MISC_BUDGET) THEN
     YRECFM='WGI_R_ISBA'
     YCOMMENT='total ice content (solid) over the root zone (kg/m2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+    !    
+    YRECFM='TSWI_S_ISBA'
+    YCOMMENT='total soil wetness index over the surface (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='TSWI_D_ISBA'
-    YCOMMENT='total soil wetness index over the deep soil (-)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XDEEP_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+    YRECFM='WG_S_ISBA'
+    YCOMMENT='liquid water content over the surface (m3/m3)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWG(:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='WGTOT_D_ISBA'
-    YCOMMENT='total water content (liquid+solid) over the deep soil (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XDEEP_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+    YRECFM='WGI_S_ISBA'
+    YCOMMENT='ice content over the surface (m3/m3)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
     !
-    YRECFM='WGI_D_ISBA'
-    YCOMMENT='total ice content (solid) over the deep soil (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XDEEP_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+    YRECFM='TSWI_D2_ISBA'
+    YCOMMENT='total soil wetness index over comparable FR-DG2 reservoir (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='WG_D2_ISBA'
+    YCOMMENT='liquid water content over comparable FR-DG2 reservoir (m3/m3)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='WGI_D2_ISBA'
+    YCOMMENT='ice content over comparable FR-DG2 reservoir (m3/m3)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+    !
+    YRECFM='TSWI_D3_ISBA'
+    YCOMMENT='total soil wetness index over comparable FR-DG3 reservoir (-)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='WG_D3_ISBA'
+    YCOMMENT='liquid water content over comparable FR-DG3 reservoir (m3/m3)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='WGI_D3_ISBA'
+    YCOMMENT='ice content over comparable FR-DG3 reservoir (m3/m3)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
     !
   ENDIF
+  !
+  YRECFM='ALT_ISBA'
+  YCOMMENT='active layer thickness over permafrost (m)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_ALT(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='FLT_ISBA'
+  YCOMMENT='frozen layer thickness over non-permafrost (m)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FLT(:),IRESP,HCOMMENT=YCOMMENT)
   !
   !        2.5    Snow outputs
   !               -------------
@@ -299,6 +326,15 @@ IF (LSURF_MISC_BUDGET) THEN
     !
   ENDIF
   !
+  !        2.8    Total LAI
+  !               ---------
+  !
+  IF(CPHOTO/='NON')THEN        
+    YRECFM='LAI_ISBA'
+    YCOMMENT='leaf area index (m2/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LAI(:),IRESP,HCOMMENT=YCOMMENT)
+  ENDIF
+  !  
   !*       3.     Miscellaneous fields for each patch :
   !               -------------------------------------
   !
@@ -307,8 +343,8 @@ IF (LSURF_MISC_BUDGET) THEN
   IF(LPATCH_BUDGET)THEN
     !----------------------------------------------------------------------------
     !
-    !        3.1    Soil Wetness Index
-    !               ------------------
+    !        3.1    Soil Wetness Index and active layer depth
+    !               -----------------------------------------   
     !
     DO JLAYER=1,IWORK
       !
@@ -328,6 +364,18 @@ IF (LSURF_MISC_BUDGET) THEN
       !
     END DO
     !
+    IF(CISBA=='DIF')THEN
+      !
+      YRECFM='ALT_PATCH'
+      YCOMMENT='active layer thickness over permafrost per patch (m)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XALT(:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='FLT_PATCH'
+      YCOMMENT='frozen layer thickness over non-permafrost per patch (m)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFLT(:,:),IRESP,HCOMMENT=YCOMMENT) 
+      !
+    ENDIF
+    !    
     !        3.2    Snow fractions
     !               --------------
     !
@@ -432,34 +480,6 @@ IF (LSURF_MISC_BUDGET) THEN
       !        
     ENDIF
     !
-    IF (CPHOTO/='NON') THEN
-      !
-      !        3.7    Gross Primary Production
-      !               ------------------------
-      !
-      YRECFM='GPP'
-      YCOMMENT='gross primary production per patch (kgCO2/m2)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XGPP(:,:),IRESP,HCOMMENT=YCOMMENT)
-      XGPP(:,:)=0.0
-      !
-      !        3.8    Autotrophic respiration
-      !               -----------------------
-      !
-      YRECFM='RESP_AUTO'
-      YCOMMENT='autotrophic respiration per patch (kgCO2/m2)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XRESP_AUTO(:,:),IRESP,HCOMMENT=YCOMMENT)
-      XRESP_AUTO(:,:)=0.0
-      !
-      !        3.9    Ecosystem respiration
-      !               ---------------------
-      !
-      YRECFM='RESP_ECO'
-      YCOMMENT='ecosystem respiration per patch (kgCO2/m2)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XRESP_ECO(:,:),IRESP,HCOMMENT=YCOMMENT)
-      XRESP_ECO(:,:)=0.0
-      !
-    END IF
-    !
   END IF
   !
   IF (LAGRIP) THEN
@@ -470,47 +490,6 @@ IF (LSURF_MISC_BUDGET) THEN
     YRECFM='IRRISEUIL'
     YCOMMENT='irrigation threshold per patch'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XSEUIL(:,:),IRESP,HCOMMENT=YCOMMENT)
-    !
-  ENDIF
-  !
-  IF (CPHOTO=='NCB' .AND. LWOOD_SPIN) THEN
-    !
-    !        2.9   Wood spinup
-    !               -----------
-    !
-    DO JNBIOMASS=1,NNBIOMASS
-      !  
-      WRITE(YLVL,'(I2)') JNBIOMASS
-      YRECFM='INCREASE'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-      YFORM='(A39,I1.1)'
-      IF (JNBIOMASS >= 10)  YFORM='(A27,I2.2)'
-      WRITE(YCOMMENT,FMT=YFORM) 'biomass increase per patch ',JNBIOMASS
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XINCREASE(:,JNBIOMASS,:),IRESP,HCOMMENT=YCOMMENT)
-      !
-    END DO
-    !
-    YRECFM='TAU_WOOD'
-    YCOMMENT='wood turnover time per patch'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XTAU_WOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
-    !
-  END IF
-  !
-  IF (CRESPSL=='CNT' .AND. LSOILCARB_SPIN) THEN
-    !
-    !        2.10   Soil carbon spinup
-    !               ------------------
-    !
-    DO JNBIOMASS=1,NNBIOMASS
-      !
-      WRITE(YLVL,'(I2)') JNBIOMASS
-      !
-      YRECFM='TURNOVER'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-      YFORM='(A39,I1.1)'
-      IF (JNBIOMASS >= 10)  YFORM='(A27,I2.2)'
-      WRITE(YCOMMENT,FMT=YFORM) 'biomass turnover per patch ',JNBIOMASS
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XTURNOVER(:,JNBIOMASS,:),IRESP,HCOMMENT=YCOMMENT)
-      !
-    END DO
     !
   ENDIF
   !

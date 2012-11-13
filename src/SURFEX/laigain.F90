@@ -62,7 +62,7 @@ REAL,DIMENSION(:),INTENT(INOUT):: PANDAY   ! daily net CO2 assimilation (kgCO2 m
 REAL,DIMENSION(:),INTENT(INOUT):: PLAI     ! LAI as a function of time:
 !                                          ! as a function of growth,
 !                                          ! decay, assimilation.
-REAL,DIMENSION(:),INTENT(INOUT):: PBIOMASS ! total dry canopy biomass 
+REAL,DIMENSION(:),INTENT(INOUT):: PBIOMASS ! total dry canopy biomass (kgDM m-2)
 !
 !*      0.2    declarations of local variables
 !

@@ -109,11 +109,16 @@ REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil layer thickness for DIF
 !
 ! Not used in TEB garden
 !
-CHARACTER(LEN=28)        :: YSOM_TOP      ! file name for organic matter
-CHARACTER(LEN=28)        :: YSOM_SUB      ! file name for organic matter
-CHARACTER(LEN=6)         :: YSOMFILETYPE  ! organic matter data file type
-REAL                     :: XUNIF_SOM     ! uniform value of organic matter (%)
-LOGICAL                  :: LIMP_SOM      ! Imposed maps of organic matter
+CHARACTER(LEN=28)        :: YSOC_TOP      ! file name for organic carbon
+CHARACTER(LEN=28)        :: YSOC_SUB      ! file name for organic carbon
+CHARACTER(LEN=28)        :: YPERM         ! file name for permafrost distribution
+CHARACTER(LEN=6)         :: YSOCFILETYPE  ! organic carbon data file type
+CHARACTER(LEN=6)         :: YPERMFILETYPE ! permafrost distribution data file type
+REAL                     :: XUNIF_SOC_TOP ! uniform value of organic carbon top soil (kg/m2)
+REAL                     :: XUNIF_SOC_SUB ! uniform value of organic carbon sub soil (kg/m2)
+REAL                     :: XUNIF_PERM    ! uniform permafrost distribution
+LOGICAL                  :: LIMP_SOC      ! Imposed maps of organic carbon
+LOGICAL                  :: LIMP_PERM     ! Imposed maps of permafrost distribution
 CHARACTER(LEN=28)        :: YPH           ! file name for pH
 CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
 CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
@@ -142,8 +147,9 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YISBA, YPEDOTF, YPHOTO,  GTR_ML,                         &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,             &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,             &
-                       YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,   &
-                       YCTI, YCTIFILETYPE, LIMP_CTI,                            &
+                       YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,         &
+                       XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,   &
+                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,             &                       
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,               &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,     &
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,        &
