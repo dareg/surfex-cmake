@@ -869,8 +869,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
           CFILEOUT_LFI= ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG)
           CFILEOUT_FA = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.fa')
           !
-          IF (CTIMESERIES_FILETYPE=='FA    ') THEN 
-            LFANOCOMPACT = .TRUE.
+          IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+            LFANOCOMPACT = LDIAG_FA_NOCOMPACT                  
             IDATEF(1)= IYEAR_OUT
             IDATEF(2)= IMONTH_OUT
             IDATEF(3)= IDAY_OUT
