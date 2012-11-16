@@ -26,8 +26,9 @@ REAL*8, DIMENSION(2) :: ZTRAFFIC, ZINDUSTRY
 INTEGER*4, DIMENSION(2):: ISEED, IREAP
 REAL*8, DIMENSION(12) :: ZVEGTYPE
 REAL*8, DIMENSION(36) :: ZLAI
+REAL*8, DIMENSION(36) :: ZALB_SOIL_NIR, ZALB_SOIL_VIS, ZALB_VEG_NIR, ZALB_VEG_VIS
 CHARACTER(LEN=4),DIMENSION(12) :: CVEGTYPE
-CHARACTER(LEN=1), PARAMETER :: CSEP='|'
+CHARACTER(LEN=1), PARAMETER :: CSEP=' '
 
 DATA CVEGTYPE/'  No','Rock','Snow','Tree','Coni','Ever','  C3','  C4',' Irr',&
                 'Gras','Trog','Park'/
@@ -74,7 +75,45 @@ DO ICOVER=1,NBCOVERS
     READ(11,REC=IREC) ZVEGTYPE(:)
     WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tree'//CSEP//'  Coni'//CSEP//&
         '  Ever'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'
-    WRITE(12,FMT="(I9,12('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
+    WRITE (12,FMT="(I9,12('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
+    !
+    IF (KFILE<=2) THEN
+      DO J=1,3
+        IREC = IREC+1
+        READ(11,REC=IREC) ZALB_SOIL_NIR((J-1)*12+1:J*12)
+      ENDDO
+      DO J=1,3
+        IREC = IREC+1
+        READ(11,REC=IREC) ZALB_SOIL_VIS((J-1)*12+1:J*12)
+      ENDDO 
+      WRITE (12,FMT="(A)") ' mean ALB_SOIL_NIR (36 10-day periods)'
+      WRITE(12,FMT="(A)") '          '//CSEP//'      '//CSEP//' Jan  '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Feb '//CSEP//'      '//CSEP//'      '//CSEP//'  Mar '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Apr '//CSEP//'      '
+      WRITE(12,FMT="(I9,'"//CSEP//"',12('"//CSEP//"',F6.4))") JCOVER,ZALB_SOIL_NIR(1:12)
+      WRITE(12,FMT="(A)") '          '//CSEP//'      '//CSEP//' May  '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Jun '//CSEP//'      '//CSEP//'      '//CSEP//'  Jul '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Aug '//CSEP//'      '
+      WRITE(12,FMT="(I9,'"//CSEP//"',12('"//CSEP//"',F6.4))") JCOVER,ZALB_SOIL_NIR(13:24)
+      WRITE(12,FMT="(A)") '          '//CSEP//'      '//CSEP//' Sep  '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Oct '//CSEP//'      '//CSEP//'      '//CSEP//'  Nov '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Dec '//CSEP//'      '
+      WRITE(12,FMT="(I9,'"//CSEP//"',12('"//CSEP//"',F6.4))") JCOVER,ZALB_SOIL_NIR(25:36)  
+          !
+      WRITE (12,FMT="(A)") ' mean ALB_SOIL_VIS (36 10-day periods)'
+      WRITE(12,FMT="(A)") '          '//CSEP//'      '//CSEP//' Jan  '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Feb '//CSEP//'      '//CSEP//'      '//CSEP//'  Mar '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Apr '//CSEP//'      '        
+      WRITE(12,FMT="(I9,'"//CSEP//"',12('"//CSEP//"',F6.4))") JCOVER,ZALB_SOIL_VIS(1:12)
+      WRITE(12,FMT="(A)") '          '//CSEP//'      '//CSEP//' May  '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Jun '//CSEP//'      '//CSEP//'      '//CSEP//'  Jul '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Aug '//CSEP//'      '        
+      WRITE(12,FMT="(I9,'"//CSEP//"',12('"//CSEP//"',F6.4))") JCOVER,ZALB_SOIL_VIS(13:24)
+      WRITE(12,FMT="(A)") '          '//CSEP//'      '//CSEP//' Sep  '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Oct '//CSEP//'      '//CSEP//'      '//CSEP//'  Nov '//CSEP//'      '&
+          //CSEP//'      '//CSEP//'  Dec '//CSEP//'      '        
+      WRITE(12,FMT="(I9,'"//CSEP//"',12('"//CSEP//"',F6.4))") JCOVER,ZALB_SOIL_VIS(25:36)  
+    ENDIF   
     !
     DO JVEGTYPE=1,SIZE(ZVEGTYPE)
       IF (ZVEGTYPE(JVEGTYPE).NE.0.) THEN
@@ -116,11 +155,53 @@ DO ICOVER=1,NBCOVERS
             WRITE(12,FMT="(A)") '         |    HT|'
             WRITE(12,FMT="(I9,'"//CSEP//"',A6,'"//CSEP//"',F3.0)") JCOVER,CVEGTYPE(JVEGTYPE),ZHT
           ENDIF
-        ENDIF
+          IF (KFILE<=2) THEN
+            DO J=1,3
+              IREC = IREC+1
+              READ(11,REC=IREC) ZALB_VEG_NIR((J-1)*12+1:J*12)
+            ENDDO
+            DO J=1,3
+              IREC = IREC+1
+              READ(11,REC=IREC) ZALB_VEG_VIS((J-1)*12+1:J*12)
+            ENDDO  
+            WRITE (12,FMT="(A)") '         '//CSEP//' mean ALB_VEG_NIR (36 10-day periods)'
+            WRITE(12,FMT="(A)") '         '//CSEP//'      '//CSEP//'      '//CSEP//' Jan  '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Feb '//CSEP//'      '//CSEP//'      '//CSEP//'  Mar '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Apr '//CSEP//'      '            
+            WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F6.4))") JCOVER,CVEGTYPE(JVEGTYPE),&
+                  ZALB_VEG_NIR(1:12)
+            WRITE(12,FMT="(A)") '         '//CSEP//'      '//CSEP//'      '//CSEP//' May  '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Jun '//CSEP//'      '//CSEP//'      '//CSEP//'  Jul '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Aug '//CSEP//'      '            
+            WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F6.4))") JCOVER,CVEGTYPE(JVEGTYPE),&
+                  ZALB_VEG_NIR(13:24)
+            WRITE(12,FMT="(A)") '         '//CSEP//'      '//CSEP//'      '//CSEP//' Sep  '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Oct '//CSEP//'      '//CSEP//'      '//CSEP//'  Nov '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Dec '//CSEP//'      '            
+            WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F6.4))") JCOVER,CVEGTYPE(JVEGTYPE),&
+                  ZALB_VEG_NIR(25:36)   
+            !
+            WRITE (12,FMT="(A)") '         '//CSEP//' mean ALB_VEG_VIS (36 10-day periods)'
+            WRITE(12,FMT="(A)") '         '//CSEP//'      '//CSEP//'      '//CSEP//' Jan  '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Feb '//CSEP//'      '//CSEP//'      '//CSEP//'  Mar '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Apr '//CSEP//'      '                 
+            WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F6.4))") JCOVER,CVEGTYPE(JVEGTYPE),&
+                  ZALB_VEG_VIS(1:12)
+            WRITE(12,FMT="(A)") '         '//CSEP//'      '//CSEP//'      '//CSEP//' May  '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Jun '//CSEP//'      '//CSEP//'      '//CSEP//'  Jul '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Aug '//CSEP//'      '                   
+            WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F6.4))") JCOVER,CVEGTYPE(JVEGTYPE),&
+                  ZALB_VEG_VIS(13:24)
+            WRITE(12,FMT="(A)") '         '//CSEP//'      '//CSEP//'      '//CSEP//' Sep  '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Oct '//CSEP//'      '//CSEP//'      '//CSEP//'  Nov '//CSEP//'      '&
+            //CSEP//'      '//CSEP//'  Dec '//CSEP//'      '     
+            WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F6.4))") JCOVER,CVEGTYPE(JVEGTYPE),&
+                  ZALB_VEG_VIS(25:36) 
+          ENDIF 
+        ENDIF          
         IF (JVEGTYPE.EQ.8 .AND. KFILE.EQ.1 .OR. JVEGTYPE.EQ.9 .AND. KFILE.EQ.2) THEN
           IREC = IREC+1
           READ(11,REC=IREC) ISEED, IREAP, ZWATSUP, ZIRRIG
-            if (jcover==38) print*,ISEED          
           WRITE(12,FMT="(A)") '         | IRRIG|Seed_M|Seed_D|Reap_M|Reap_D|Watsup| Irrig'          
           IF (ISEED(1).NE.1E+9) THEN
             WRITE(12,FMT="(I9,'"//CSEP//"',A6,4('"//CSEP//"',I6),2('"//CSEP//"',F6.0))")  &
@@ -270,6 +351,7 @@ REAL*8, DIMENSION(2) :: ZTRAFFIC, ZINDUSTRY
 INTEGER, DIMENSION(2):: ISEED, IREAP
 REAL*8, DIMENSION(12) :: ZVEGTYPE
 REAL*8, DIMENSION(36) :: ZLAI
+REAL*8, DIMENSION(36) :: ZALB_SOIL_NIR, ZALB_SOIL_VIS, ZALB_VEG_NIR, ZALB_VEG_VIS
 CHARACTER(LEN=4),DIMENSION(12) :: CVEGTYPE
 CHARACTER(LEN=200) :: HPOUB
 
@@ -318,6 +400,35 @@ DO ICOVER=1,NBCOVERS
     IREC = IREC+1
     WRITE(11,REC=IREC) ZVEGTYPE(:)
     !
+    IF (KFILE<=2) THEN
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) JCOVER, ZALB_SOIL_NIR(1:12)
+      IREC = IREC+1      
+      WRITE(11,REC=IREC) ZALB_SOIL_NIR(1:12)
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) JCOVER, ZALB_SOIL_NIR(13:24)
+      IREC = IREC+1      
+      WRITE(11,REC=IREC) ZALB_SOIL_NIR(13:24)      
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) JCOVER, ZALB_SOIL_NIR(25:36)
+      IREC = IREC+1      
+      WRITE(11,REC=IREC) ZALB_SOIL_NIR(25:36)      
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) JCOVER, ZALB_SOIL_VIS(1:12)
+      IREC = IREC+1      
+      WRITE(11,REC=IREC) ZALB_SOIL_VIS(1:12)      
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) JCOVER, ZALB_SOIL_VIS(13:24)
+      IREC = IREC+1      
+      WRITE(11,REC=IREC) ZALB_SOIL_VIS(13:24)        
+      READ(12,FMT=*) HPOUB
+      READ(12,FMT=*) JCOVER, ZALB_SOIL_VIS(25:36)
+      IREC = IREC+1      
+      WRITE(11,REC=IREC) ZALB_SOIL_VIS(25:36)       
+    ENDIF     
+    !
     DO JVEGTYPE=1,SIZE(ZVEGTYPE)
       IF (ZVEGTYPE(JVEGTYPE).NE.0.) THEN
         JAN = IAN
@@ -357,6 +468,36 @@ DO ICOVER=1,NBCOVERS
             IREC = IREC+1              
             WRITE(11,REC=IREC) ZHT
           ENDIF
+          !
+          IF (KFILE<=2) THEN
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZALB_VEG_NIR(1:12)
+            !
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZALB_VEG_NIR(13:24)
+            !
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZALB_VEG_NIR(25:36)  
+            DO J=1,3
+              IREC = IREC+1
+              WRITE(11,REC=IREC) ZALB_VEG_NIR((J-1)*12+1:J*12)
+            ENDDO   
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZALB_VEG_VIS(1:12)
+            !
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZALB_VEG_VIS(13:24)
+            !
+            READ(12,FMT=*) HPOUB
+            READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZALB_VEG_VIS(25:36)  
+            DO J=1,3
+              IREC = IREC+1
+              WRITE(11,REC=IREC) ZALB_VEG_VIS((J-1)*12+1:J*12)
+            ENDDO     
+          ENDIF       
+          !
         ENDIF
         IF (JVEGTYPE.EQ.8 .AND. KFILE.EQ.1 .OR. JVEGTYPE.EQ.9 .AND. KFILE.EQ.2) THEN
           READ(12,FMT=*) HPOUB
