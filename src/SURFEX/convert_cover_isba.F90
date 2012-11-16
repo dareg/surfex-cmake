@@ -54,6 +54,8 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEGTYPE,   &
                                   XDATA_RGL, XDATA_RSMIN,                 &
                                   XDATA_ALBNIR_VEG, XDATA_ALBVIS_VEG,     &
                                   XDATA_ALBUV_VEG, XDATA_DICE,            &
+                                  XDATA_ALB_VEG_NIR, XDATA_ALB_VEG_VIS,   &
+                                  XDATA_ALB_SOIL_NIR, XDATA_ALB_SOIL_VIS, &                                  
                                   XDATA_GMES, XDATA_BSLAI, XDATA_LAIMIN,  &
                                   XDATA_SEFOLD, XDATA_GC, XDATA_WRMAX_CF, &
                                   XDATA_STRESS,                           &
@@ -69,6 +71,8 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEGTYPE,   &
 
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
 USE MODD_TYPE_DATE_SURF
+!
+USE MODD_ISBA_n,         ONLY : CALBEDO
 !
 USE MODI_AV_PGD
 !
@@ -252,12 +256,25 @@ IF (PRESENT(PD_ICE)) &
 !
 !---------------------------------------------------------------------------------
 !
-IF (PRESENT(PALBNIR_VEG)) &
-  CALL AV_PGD (PALBNIR_VEG,PCOVER ,XDATA_ALBNIR_VEG(:,:),YVEG,'ARI',KDECADE=KDECADE)  
-IF (PRESENT(PALBVIS_VEG)) &
-  CALL AV_PGD (PALBVIS_VEG,PCOVER ,XDATA_ALBVIS_VEG(:,:),YVEG,'ARI',KDECADE=KDECADE)  
+IF (PRESENT(PALBNIR_VEG)) THEN
+  IF (CALBEDO=='CM13') THEN
+    CALL AV_PGD (PALBVIS_VEG,PCOVER,XDATA_ALB_VEG_NIR(:,KDECADE,:),YVEG,'ARI',KDECADE=KDECADE)      
+  ELSE   
+    CALL AV_PGD (PALBNIR_VEG,PCOVER ,XDATA_ALBNIR_VEG(:,:),YVEG,'ARI',KDECADE=KDECADE)  
+  ENDIF
+ENDIF
+!
+IF (PRESENT(PALBVIS_VEG)) THEN
+  IF (CALBEDO=='CM13') THEN
+    CALL AV_PGD (PALBVIS_VEG,PCOVER,XDATA_ALB_VEG_VIS(:,KDECADE,:),YVEG,'ARI',KDECADE=KDECADE)      
+  ELSE     
+    CALL AV_PGD (PALBVIS_VEG,PCOVER ,XDATA_ALBVIS_VEG(:,:),YVEG,'ARI',KDECADE=KDECADE)  
+  ENDIF
+ENDIF
+!
 IF (PRESENT(PALBUV_VEG)) &
-  CALL AV_PGD (PALBUV_VEG, PCOVER ,XDATA_ALBUV_VEG (:,:),YVEG,'ARI',KDECADE=KDECADE)  
+  CALL AV_PGD (PALBUV_VEG, PCOVER ,XDATA_ALBUV_VEG (:,:),YVEG,'ARI',KDECADE=KDECADE)
+!  
 ! parameters for "stress option"
 IF (HPHOTO == 'AST' .OR. HPHOTO == 'LST' .OR. HPHOTO == 'NIT' .OR.  HPHOTO == 'NCB')  THEN
 

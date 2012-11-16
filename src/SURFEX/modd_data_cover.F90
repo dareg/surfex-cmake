@@ -71,6 +71,11 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_ALBNIR_VEG ! near infra-red albedo
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_ALBVIS_VEG ! visible albedo
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_ALBUV_VEG  ! UV albedo
 !
+REAL, DIMENSION(:,:,:), ALLOCATABLE ::  XDATA_ALB_VEG_NIR  ! near infra-red albedo
+REAL, DIMENSION(:,:,:), ALLOCATABLE ::  XDATA_ALB_VEG_VIS  ! visible albedo
+REAL, DIMENSION(:,:,:), ALLOCATABLE ::  XDATA_ALB_SOIL_NIR ! near infra-red albedo
+REAL, DIMENSION(:,:,:), ALLOCATABLE ::  XDATA_ALB_SOIL_VIS ! visible albedo
+!
 ! - vegetation: default option (Jarvis) and general parameters:
 !
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_VEG    ! veg. fraction   (monthly)
