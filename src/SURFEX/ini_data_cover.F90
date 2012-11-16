@@ -142,7 +142,7 @@ IMPLICIT NONE
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-INTEGER         :: JCOVER       ! loop counters on covers and decades
+INTEGER         :: JCOVER, JVEGTYPE       ! loop counters on covers and decades
 INTEGER         :: ICPT_SEA, ICPT_WATER
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -846,6 +846,17 @@ DO JCOVER = 1, JPCOVER
   !
   IF (XDATA_TOWN(JCOVER)==0.) CYCLE
   XDATA_CAN_HW_RATIO(JCOVER) = 0.5 * XDATA_WALL_O_HOR(JCOVER) / (1.-XDATA_BLD (JCOVER))
+  !
+  IF (XDATA_GARDEN(JCOVER)/=0.) THEN
+    DO JVEGTYPE=1,NVEGTYPE
+      IF (XDATA_VEGTYPE(JCOVER,JVEGTYPE)/=0.) THEN
+        XDATA_ALB_SOIL_NIR(JCOVER,:,JVEGTYPE) = 0.3
+        XDATA_ALB_SOIL_VIS(JCOVER,:,JVEGTYPE) = 0.1
+        XDATA_ALB_VEG_NIR (JCOVER,:,JVEGTYPE) = 0.3
+        XDATA_ALB_VEG_VIS (JCOVER,:,JVEGTYPE) = 0.1    
+      ENDIF
+    ENDDO
+  ENDIF
   !
 END DO
 !
