@@ -210,7 +210,7 @@ CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
 !
 INTEGER                :: ISIZE
 LOGICAL                :: LWFL=.FALSE.
-REAL, DIMENSION(NFULL) :: ZWORK   ! work array read in the file
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD))) :: ZWORK   ! work array read in the file
 DOUBLE PRECISION       :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -289,7 +289,7 @@ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
 ! 
 INTEGER :: ISIZE
 LOGICAL :: LWFL=.FALSE.
-REAL, DIMENSION(NFULL,SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
 DOUBLE PRECISION  :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

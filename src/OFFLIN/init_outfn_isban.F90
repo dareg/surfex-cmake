@@ -196,7 +196,8 @@ DO JLAYER=1,INLVLS
     CALL DEF_VAR_NETCDF(IFILE_ID, 'SGRAN1_VEG'//YLVL, 'Snow_grain_parameter1_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
     CALL DEF_VAR_NETCDF(IFILE_ID, 'SGRAN2_VEG'//YLVL, 'Snow_grain_parameter2_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
     CALL DEF_VAR_NETCDF(IFILE_ID, 'SHIST_VEG'//YLVL,  'Snow_historical_param_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'SAGE_VEG'//YLVL,   'Snow_age_param_layer_'//YLVL       , IDDIM, YATT_TITLE, (/'-'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'SAGE_VEG'//YLVL,   'Snow_age_param_layer_'//YLVL       , IDDIM, YATT_TITLE,&
+         (/'days since snowfall'/))
   ENDIF
 ENDDO
 !

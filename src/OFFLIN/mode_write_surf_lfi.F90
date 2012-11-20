@@ -257,7 +257,7 @@ LOGICAL                  :: GKNOWN
 INTEGER                  :: JI, JJ
 DOUBLE PRECISION         :: XTIME0
 REAL                     :: ZUNDEF  ! default value
-REAL, DIMENSION(NFULL)   :: ZWORK   ! work array read in the file
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD)))   :: ZWORK   ! work array read in the file
 REAL, DIMENSION(NIU,NJU) :: ZWORK2D ! work array read in a MNH file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -430,7 +430,7 @@ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
 LOGICAL          :: GKNOWN
 DOUBLE PRECISION :: XTIME0
 REAL             :: ZUNDEF  ! default value
-REAL, DIMENSION(NFULL,SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX2_LFI',0,ZHOOK_HANDLE)
@@ -565,7 +565,7 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
 !*      0.2   Declarations of local variables
 !
 LOGICAL          :: GKNOWN
-INTEGER, DIMENSION(NFULL) :: IWORK  ! work array read in the file
+INTEGER, DIMENSION(MAX(NFULL,SIZE(KFIELD))) :: IWORK  ! work array read in the file
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

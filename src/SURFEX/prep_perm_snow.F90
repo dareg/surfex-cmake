@@ -25,6 +25,7 @@ SUBROUTINE PREP_PERM_SNOW(TPSNOW,PTG,PPERM_SNOW_FRAC,KSNOW)
 !!      B. Decharme 03/2009: Consistency with Arpege permanent
 !!                                          snow/ice treatment
 !!      B. Decharme 07/2012: 3-L or Crocus adjustments
+!!      M. Lafaysse 09/2012: adaptation with new snow age in Crocus
 !!------------------------------------------------------------------
 !
 
@@ -49,8 +50,6 @@ USE MODE_SNOW3L
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_GREGODSTRATI
 !
 IMPLICIT NONE
 !
@@ -169,8 +168,7 @@ DO JLAYER=1,TPSNOW%NLAYER
 END DO
 !
 IF (TPSNOW%SCHEME=='CRO') THEN
-CALL GREGODSTRATI(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,   &
-                     TTIME%TIME,ZAGE_NOW)
+
 DO JLAYER=1,TPSNOW%NLAYER/4
   WHERE(LWORK(:))
             !TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX*         &
@@ -179,7 +177,7 @@ DO JLAYER=1,TPSNOW%NLAYER/4
                   (1.-4*FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER))) 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 50. 
            TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
-           TPSNOW%AGE(:,JLAYER,KSNOW) = ZAGE_NOW-365.*FLOAT(JLAYER-1)/ &
+           TPSNOW%AGE(:,JLAYER,KSNOW) = 365.*FLOAT(JLAYER-1)/ &
                                         FLOAT(TPSNOW%NLAYER)
   END WHERE
 END DO
@@ -190,7 +188,7 @@ DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
            TPSNOW%GRAN1(:,JLAYER,KSNOW) = 99. 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 0.0003 
            TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
-           TPSNOW%AGE(:,JLAYER,KSNOW) = ZAGE_NOW-3650.*FLOAT(JLAYER-1)/ &
+           TPSNOW%AGE(:,JLAYER,KSNOW) = 3650.*FLOAT(JLAYER-1)/ &
                                         FLOAT(TPSNOW%NLAYER) 
   END WHERE
 END DO

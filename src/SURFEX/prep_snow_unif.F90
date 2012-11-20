@@ -26,6 +26,7 @@ SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      M. Lafaysse adaptation with new snow age
 !!------------------------------------------------------------------
 !
 !
@@ -36,7 +37,6 @@ USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_PREP_SNOW,      ONLY : NGRID_LEVEL
 !
 USE MODI_SNOW_T_WLIQ_TO_HEAT
-USE MODI_GREGODSTRATI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -64,7 +64,6 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW !
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW, ZRSNOW
-REAL :: ZAGE_NOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -148,9 +147,6 @@ SELECT CASE(HSURF(1:3))
     ELSE
       PFIELD(1,:,1) = PUNIF_AGESNOW(1)
     ENDIF           
-    CALL GREGODSTRATI(TPTIME%TDATE%YEAR,TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY,  & 
-                      TPTIME%TIME,ZAGE_NOW)
-    WHERE (PFIELD(1,:,1).NE.XUNDEF) PFIELD(1,:,1) = ZAGE_NOW - PFIELD(1,:,1)
   !
 END SELECT
 !

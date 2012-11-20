@@ -51,6 +51,16 @@ REAL, SAVE       :: XANSMAX
 REAL, SAVE       :: XAGLAMIN
 REAL, SAVE       :: XAGLAMAX
 ! 
+! Prescribed ice albedo in 3 spectral bands for glacier simulation with CROCUS scheme.
+REAL, SAVE       :: XALBICE1,XALBICE2,XALBICE3
+!
+
+! Density threshold for ice detection in CROCUS scheme.
+REAL, SAVE       :: XRHOTHRESHOLD_ICE
+
+!for ageing effects
+REAL, SAVE      :: XVAGING_NOGLACIER, XVAGING_GLACIER
+
 ! Height (m) of aged snow in glacier case (allows Pn=1)
 !
 REAL, SAVE       :: XHGLA
@@ -67,6 +77,12 @@ REAL, SAVE       :: XZ0SN
 !
 REAL, SAVE       :: XZ0HSN
 !
+! Roughness length ratio between ice and snow
+REAL, SAVE       :: XZ0ICEZ0SNOW
+!
+! Logicals for snowdrift and sublimation
+LOGICAL,SAVE    :: LSNOWDRIFT, LSNOWDRIFT_SUBLIM
+
 ! Snow Melt timescale with D95 (s): needed to prevent time step 
 ! dependence of melt when snow fraction < unity.
 !
@@ -131,7 +147,8 @@ REAL, PARAMETER                      :: XSNOWCRITD = 0.03  ! (m)
 !                                       
 ! ISBA-ES Minimum total snow depth for model 
 !
-REAL, PARAMETER                      :: XSNOWDMIN = 0.000001  ! (m)
+! REAL, PARAMETER                      :: XSNOWDMIN = 0.000001  ! (m)
+REAL, PARAMETER                      :: XSNOWDMIN = 4E-5  ! (m)
 !                                       
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
@@ -143,6 +160,38 @@ REAL, PARAMETER                      :: XWSNOWHOLDMAX2   = 0.10  ! (-)
 REAL, PARAMETER                      :: XWSNOWHOLDMAX1   = 0.03  ! (-)
 REAL, PARAMETER                      :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
 !
+
+!--------------------------------------------------------------------------------
+! Calibration coefficients for CROCUS albedo computation
+!--------------------------------------------------------------------------------
+! for grains effects:
+! REAL, PARAMETER :: XD1=1., XD2=3., XD3=4., XX=99.,XVALB2=.96, XVALB3=1.58,&
+!                     XVALB4=.94,XVALB5=.95,XVALB6=15.4,XVALB7=346.3, XVALB8=32.31,  &
+!                     XVALB9=.88, XVALB10=.175,XVALB11=.7,XVDIOP1=2.3E-3, &
+!                     XVRPRE1=.5,XVRPRE2=1. 
+! ! for ageing effects:
+! REAL, PARAMETER :: XVAGING_SOIL=90. , XVAGING_GLACIER=900. , XVPRES1=87000.
+
+! modifs SM 20110805 tests SIberie - albedo
+REAL, PARAMETER :: XD1=1., XD2=3., XD3=4., XX=99.,XVALB2=.96, XVALB3=1.58,&
+                   XVALB4=.92,XVALB5=.90,XVALB6=15.4,XVALB7=346.3, XVALB8=32.31,&  
+                   XVALB9=.88,XVALB10=.200,XVALB11=.6,XVDIOP1=2.3E-3, &
+                   XVRPRE1=.5,XVRPRE2=1.5
+! for ageing effects:
+REAL, PARAMETER :: XVPRES1=87000.
+! REAL, PARAMETER :: XZ_SWE_ALB=5.
+! end modifs SM 20110805 tests SIberie - albedo
+
+
+! for spectral distribution and thickness effects
+REAL, PARAMETER :: XVSPEC1=.71, XVSPEC2=.21 , XVSPEC3=.08
+! modif SM 20110519
+!REAL, PARAMETER :: XVSPEC1=.68, XVSPEC2=.25 , XVSPEC3=.07
+! end modif SM 20110519
+! for thickness effects
+REAL, PARAMETER :: XVW1=.80, XVW2=.20 , XVD1=.02, XVD2=.01
+!--------------------------------------------------------------------------------
+
 END MODULE MODD_SNOW_PAR
 
 

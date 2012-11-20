@@ -307,7 +307,7 @@ LOGICAL                :: GKNOWN
 INTEGER                :: I,INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 REAL                   :: ZMEAN, ZCOUNT
 DOUBLE PRECISION       :: XTIME0
-REAL, DIMENSION(NFULL) :: ZWORK   ! work array read in the file
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD))) :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB)        :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',0,ZHOOK_HANDLE)
@@ -418,7 +418,7 @@ LOGICAL           :: GKNOWN
 INTEGER           :: I, JL ! loop counter
 INTEGER           :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 DOUBLE PRECISION  :: XTIME0
-REAL, DIMENSION(NFULL,SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
 REAL, DIMENSION(SIZE(PFIELD,2))       :: ZMEAN, ZCOUNT
 REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
@@ -529,7 +529,7 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
 CHARACTER(LEN=16)         :: YNAME ! Field Name
 LOGICAL                   :: GKNOWN
 INTEGER                   :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
-INTEGER, DIMENSION(NFULL) :: IWORK  ! work array read in the file
+INTEGER, DIMENSION(MAX(NFULL,SIZE(KFIELD))) :: IWORK  ! work array read in the file
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB)           :: ZHOOK_HANDLE
 !

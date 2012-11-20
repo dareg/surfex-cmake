@@ -88,6 +88,8 @@ USE MODD_TOPODYN, ONLY : XTOPD_STEP, NNB_TOPD_STEP, XQTOT, XQB_RUN, XQB_DR
 !
 USE MODE_POS_SURF
 !
+USE MODE_CRODEBUG
+!
 USE MODN_IO_OFFLINE
 !
 USE MODI_ALLOC_SURFEX
@@ -586,6 +588,8 @@ XTIME0 = MPI_WTIME()
 CALL INIT_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,IMONTH,&
                         ZDURATION,ITRIP_MONTH,ITRIP_COUNT,XZENITH,      &
                         XSW_BANDS,XEMIS,XTSRAD,XDIR_ALB,XSCA_ALB        )  
+!
+CALL INIT_CRODEBUG()
 !
 ! --------------------------------------------------------------------------------------
 !
