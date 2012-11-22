@@ -62,16 +62,16 @@ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
-REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
-REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+CHARACTER(LEN=6), DIMENSION(:), INTENT(IN)  :: HSV       ! name of all scalar variables
+REAL,             DIMENSION(:),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(:),  INTENT(IN)  :: PRHOA     ! air density
+REAL,             DIMENSION(:),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(:),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+REAL,             DIMENSION(:), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(:),  INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(:),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)

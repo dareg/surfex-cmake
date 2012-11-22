@@ -94,15 +94,8 @@ REAL, DIMENSION(JPCOVER,KPATCH      ) :: ZRSMIN,ZGAMMA,ZRGL,ZCV,             &
                                            ZALBNIR_VEG,ZALBVIS_VEG,ZALBUV_VEG, &
                                            ZGMES,ZBSLAI,ZLAIMIN,ZSEFOLD,       &
                                            ZH_TREE, ZGC, ZZ0_O_Z0H,            &
-                                           ZWRMAX_CF, ZDMAX, ZRE25,            &
-                                           ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,   &
-                                           ZWATSUP, ZIRRIG  
-TYPE(DATE_TIME), DIMENSION(JPCOVER,KPATCH)  :: TZSEED, TZREAP                                         
-REAL, DIMENSION(JPCOVER,NVEGTYPE    ) :: ZVEGTYPE
+                                           ZWRMAX_CF, ZDMAX, ZRE25  
 REAL, DIMENSION(JPCOVER,KLAYER,KPATCH):: ZDG, ZROOTFRAC
-REAL, DIMENSION(JPCOVER,KPATCH)       :: ZDROOT
-REAL, DIMENSION(JPCOVER,KPATCH)       :: ZDG2
-INTEGER, DIMENSION(JPCOVER,KPATCH)    :: IWG_LAYER
 LOGICAL, DIMENSION(JPCOVER,KPATCH, 12   ) :: GSTRESS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -111,6 +104,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_ISBA_PAR',0,ZHOOK_HANDLE)
 IF (NTEX==0 .AND. LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_ISBA_PAR',1,ZHOOK_HANDLE)
 IF (NTEX==0) RETURN
+ !ALLOCATE (TZSEED (JPCOVER,KPATCH) , TZREAP  (JPCOVER,KPATCH) )
 GLINE=.FALSE.
 !
 ZCOVER(:,:) = 0.
@@ -123,17 +117,13 @@ END DO
 CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,HPHOTO, 'NAT',                    &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
-                        PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &
-                        PDG2=ZDG2,PZ0_O_Z0H=ZZ0_O_Z0H,                   &
+                        PDG=ZDG,PZ0_O_Z0H=ZZ0_O_Z0H,                     &
                         PALBNIR_VEG=ZALBNIR_VEG,PALBVIS_VEG=ZALBVIS_VEG, &
                         PALBUV_VEG=ZALBUV_VEG,                           &
-                        PVEGTYPE=ZVEGTYPE,PROOTFRAC=ZROOTFRAC,           &
+                        PROOTFRAC=ZROOTFRAC,                             &
                         PGMES=ZGMES,PBSLAI=ZBSLAI,PLAIMIN=ZLAIMIN,       &
                         PSEFOLD=ZSEFOLD,PGC=ZGC,PDMAX=ZDMAX,             &
-                        PH_TREE=ZH_TREE,PRE25=ZRE25,PCE_NITRO=ZCE_NITRO, &
-                        PCF_NITRO=ZCF_NITRO,PCNA_NITRO=ZCNA_NITRO,       &
-                        TPSEED=TZSEED,TPREAP=TZREAP,PWATSUP=ZWATSUP,     &
-                        PIRRIG=ZIRRIG                                    )  
+                        PH_TREE=ZH_TREE,PRE25=ZRE25                       )  
 !
 DO J=1,12
   CALL CONVERT_COVER_ISBA(HISBA,3*J-1,ZCOVER,HPHOTO, 'NAT',                &

@@ -53,8 +53,8 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
-REAL,DIMENSION(KI), INTENT(IN) :: PTS_IN
-REAL,DIMENSION(KI), INTENT(IN) :: PITM
+REAL,DIMENSION(:), INTENT(IN) :: PTS_IN
+REAL,DIMENSION(:), INTENT(IN) :: PITM
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
@@ -66,12 +66,12 @@ CHARACTER(LEN=10)           :: YVAR    ! Name of the prognostic variable (in LFI
 CHARACTER(LEN=100)          :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                     :: IRESP,I
 REAL                        :: ZFMAX,ZFMIN,ZFMEAN
-REAL, DIMENSION (KI)        :: ZT2INC
-REAL, DIMENSION (KI)        :: ZTCLS
-REAL, DIMENSION (KI)        :: ZSST
-REAL, DIMENSION (KI)        :: PSST
-REAL, DIMENSION (KI)        :: PTS
-REAL, DIMENSION (KI)        :: ZSSTINC
+REAL, DIMENSION (SIZE(PTS_IN))        :: ZT2INC
+REAL, DIMENSION (SIZE(PTS_IN))        :: ZTCLS
+REAL, DIMENSION (SIZE(PTS_IN))        :: ZSST
+REAL, DIMENSION (SIZE(PTS_IN))        :: PSST
+REAL, DIMENSION (SIZE(PTS_IN))        :: PTS
+REAL, DIMENSION (SIZE(PTS_IN))        :: ZSSTINC
 REAL,ALLOCATABLE,DIMENSION(:)    :: PLON
 REAL,ALLOCATABLE,DIMENSION(:)    :: PLAT
 REAL,ALLOCATABLE,DIMENSION(:)    :: ZALT

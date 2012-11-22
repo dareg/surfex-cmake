@@ -33,13 +33,13 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PSSO_STDEV! Subgrid scale orography standard dev. (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
+REAL, DIMENSION(:),      INTENT(IN)    :: PSSO_STDEV! Subgrid scale orography standard dev. (m)
 
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
 !
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(:,:), INTENT(INOUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(:,:), INTENT(INOUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
@@ -60,7 +60,7 @@ REAL            :: C_AVAR                 ! = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT
 !                                         ! (unit: m^{1+C_N2}  =  m^-1.8)
 !
 INTEGER                  :: JL            ! loop counter on canopy heights
-REAL, DIMENSION(KI,KLVL) :: ZSSO_DRAG     ! drag due to subgrid-scale orogaphy
+REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZSSO_DRAG     ! drag due to subgrid-scale orogaphy
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------

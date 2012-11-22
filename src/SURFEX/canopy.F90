@@ -38,25 +38,25 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
-REAL, DIMENSION(KI), INTENT(IN)    :: PHEIGHT   ! canopy height                       (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDENSITY  ! canopy density                  (-)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PCDRAG
+REAL, DIMENSION(:,:), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
+REAL, DIMENSION(:), INTENT(IN)    :: PHEIGHT   ! canopy height                       (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDENSITY  ! canopy density                  (-)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PCDRAG
 !
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
 !
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PAIRVOL   ! Fraction of air for each canopy level total volume
+REAL, DIMENSION(:,:), INTENT(IN)    :: PAIRVOL   ! Fraction of air for each canopy level total volume
 !
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PSV       ! vertical surface of building
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSV       ! vertical surface of building
                                                      ! (walls) for each canopy level
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC     !
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC     !
 !
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables

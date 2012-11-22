@@ -38,6 +38,9 @@
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+#ifdef MNH
+USE MODI_PGD_GRID_IO_INIT_MNH
+#endif
 IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments

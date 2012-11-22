@@ -48,12 +48,12 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of horizontal points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
-REAL, DIMENSION(KI),      INTENT(IN)    :: PH        ! maximum canopy height                 (m)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PZFORC    ! height of wind forcing                (m)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PZ        ! heights of canopy levels              (m)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PZF       ! heights of bottom of canopy levels    (m)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PDZ       ! depth   of canopy levels              (m)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PDZF      ! depth between canopy levels           (m)
+REAL, DIMENSION(:),      INTENT(IN)    :: PH        ! maximum canopy height                 (m)
+REAL, DIMENSION(:),      INTENT(IN)    :: PZFORC    ! height of wind forcing                (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PZ        ! heights of canopy levels              (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PZF       ! heights of bottom of canopy levels    (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PDZ       ! depth   of canopy levels              (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PDZF      ! depth between canopy levels           (m)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

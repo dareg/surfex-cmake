@@ -49,8 +49,8 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
-REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! roughness length for momentum (m)
-REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! roughness length for heat     (m)
+REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0     ! roughness length for momentum (m)
+REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0H    ! roughness length for heat     (m)
 !
 !
 !*       0.2   Declarations of local variables

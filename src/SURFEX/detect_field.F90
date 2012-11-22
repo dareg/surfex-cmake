@@ -37,6 +37,9 @@
 !*       0.    DECLARATIONS
 !
 !
+#ifdef MNH
+USE MODI_DETECT_FIELD_MNH
+#endif
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK

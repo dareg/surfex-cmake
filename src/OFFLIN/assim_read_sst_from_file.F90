@@ -46,19 +46,20 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN)  :: KI
-REAL,DIMENSION(KI), INTENT(INOUT) :: PSST
-REAL,DIMENSION(KI), INTENT(IN)  :: PITM
+REAL,DIMENSION(:), INTENT(INOUT) :: PSST
+REAL,DIMENSION(:), INTENT(IN)  :: PITM
 CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
+REAL, DIMENSION (SIZE(PSST)) :: ZSST
+REAL, DIMENSION (SIZE(PSST)) :: PTS
+!
 CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
 INTEGER              :: IRESP
 REAL                 :: ZFMAX,ZFMIN,ZFMEAN
-REAL, DIMENSION (KI) :: ZSST
-REAL, DIMENSION (KI) :: PTS
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',0,ZHOOK_HANDLE)

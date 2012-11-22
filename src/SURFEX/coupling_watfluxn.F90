@@ -86,81 +86,81 @@ REAL,                INTENT(IN)  :: PTIME     ! current time since midnight (UTC
 INTEGER,             INTENT(IN)  :: KI        ! number of points
 INTEGER,             INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,             INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+REAL, DIMENSION(:), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
 REAL,                INTENT(IN)  :: PTSTEP    ! atmospheric time-step                 (s)
-REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
-REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+REAL, DIMENSION(:), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+REAL, DIMENSION(:), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
 !
-REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
-REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
-REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
-REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
+REAL, DIMENSION(:), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+REAL, DIMENSION(:), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+REAL, DIMENSION(:), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+REAL, DIMENSION(:,:),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
-REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
-REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
-REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
+CHARACTER(LEN=6), DIMENSION(:),INTENT(IN):: HSV  ! name of all scalar variables
+REAL, DIMENSION(:), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+REAL, DIMENSION(:), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+REAL, DIMENSION(:,:),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
+REAL, DIMENSION(:,:),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
-REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
-REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
-REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
-REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+REAL, DIMENSION(:),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
+REAL, DIMENSION(:), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+REAL, DIMENSION(:), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
+REAL, DIMENSION(:), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(:), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
-REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
-REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
-REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
-REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
-REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+REAL, DIMENSION(:), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+REAL, DIMENSION(:), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+REAL, DIMENSION(:), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(:), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
 !
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
-REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(:,:),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
-REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
-REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
-REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
-REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+REAL, DIMENSION(:), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+REAL, DIMENSION(:,:),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
+REAL, DIMENSION(:,:),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
+REAL, DIMENSION(:), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
-REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
-REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
-REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
-REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
-REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+REAL, DIMENSION(:), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+REAL, DIMENSION(:), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
+REAL, DIMENSION(:), INTENT(IN) :: PPET_A_COEF
+REAL, DIMENSION(:), INTENT(IN) :: PPEQ_A_COEF
+REAL, DIMENSION(:), INTENT(IN) :: PPET_B_COEF
+REAL, DIMENSION(:), INTENT(IN) :: PPEQ_B_COEF
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(KI)  :: ZEXNA      ! Exner function at forcing level
-REAL, DIMENSION(KI)  :: ZEXNS      ! Exner function at surface level
-REAL, DIMENSION(KI)  :: ZWIND      ! Wind
-REAL, DIMENSION(KI)  :: ZCD        ! Drag coefficient
-REAL, DIMENSION(KI)  :: ZCDN       ! Neutral Drag coefficient
-REAL, DIMENSION(KI)  :: ZCH        ! Heat transfer coefficient
-REAL, DIMENSION(KI)  :: ZRI        ! Richardson number
-REAL, DIMENSION(KI)  :: ZHU        ! Near surface relative humidity
-REAL, DIMENSION(KI)  :: ZRESA_WATER! aerodynamical resistance
-REAL, DIMENSION(KI)  :: ZUSTAR     ! friction velocity (m/s)
-REAL, DIMENSION(KI)  :: ZUSTAR2    ! square of friction velocity (m2/s2)
-REAL, DIMENSION(KI)  :: ZZ0H       ! heat roughness length over sea
-REAL, DIMENSION(KI)  :: ZQSAT      ! humidity at saturation
-REAL, DIMENSION(KI)  :: ZQA        ! specific humidity (kg/kg)
-REAL, DIMENSION(KI)  :: ZEMIS      ! Emissivity at time t
-REAL, DIMENSION(KI)  :: ZTRAD      ! Radiative temperature at time t
-REAL, DIMENSION(KI)  :: ZSFTH_ICE  ! Sea ice flux of heat
-REAL, DIMENSION(KI)  :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
+REAL, DIMENSION(SIZE(PTA))  :: ZEXNA      ! Exner function at forcing level
+REAL, DIMENSION(SIZE(PTA))  :: ZEXNS      ! Exner function at surface level
+REAL, DIMENSION(SIZE(PTA))  :: ZWIND      ! Wind
+REAL, DIMENSION(SIZE(PTA))  :: ZCD        ! Drag coefficient
+REAL, DIMENSION(SIZE(PTA))  :: ZCDN       ! Neutral Drag coefficient
+REAL, DIMENSION(SIZE(PTA))  :: ZCH        ! Heat transfer coefficient
+REAL, DIMENSION(SIZE(PTA))  :: ZRI        ! Richardson number
+REAL, DIMENSION(SIZE(PTA))  :: ZHU        ! Near surface relative humidity
+REAL, DIMENSION(SIZE(PTA))  :: ZRESA_WATER! aerodynamical resistance
+REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR     ! friction velocity (m/s)
+REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR2    ! square of friction velocity (m2/s2)
+REAL, DIMENSION(SIZE(PTA))  :: ZZ0H       ! heat roughness length over sea
+REAL, DIMENSION(SIZE(PTA))  :: ZQSAT      ! humidity at saturation
+REAL, DIMENSION(SIZE(PTA))  :: ZQA        ! specific humidity (kg/kg)
+REAL, DIMENSION(SIZE(PTA))  :: ZEMIS      ! Emissivity at time t
+REAL, DIMENSION(SIZE(PTA))  :: ZTRAD      ! Radiative temperature at time t
+REAL, DIMENSION(SIZE(PTA))  :: ZSFTH_ICE  ! Sea ice flux of heat
+REAL, DIMENSION(SIZE(PTA))  :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
 !
-REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t
-REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
+REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS)) :: ZDIR_ALB   ! Direct albedo at time t
+REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS)) :: ZSCA_ALB   ! Diffuse albedo at time t
 !
 REAL                       :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
 REAL                       :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST

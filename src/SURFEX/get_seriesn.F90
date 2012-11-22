@@ -51,18 +51,19 @@ IMPLICIT NONE
 CHARACTER(LEN=6),       INTENT(IN)     :: HPROGRAM
 INTEGER,                INTENT(IN)     :: KI        ! Number of points
 INTEGER,                INTENT(IN)     :: KS        ! Number of points
-REAL, DIMENSION(KI,KS), INTENT(OUT)    :: PFIELD    ! output field
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PFIELD    ! output field
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+REAL, DIMENSION(SIZE(XTS),SIZE(PFIELD,2)) :: ZINF
+INTEGER, DIMENSION(SIZE(PFIELD,1))        :: IMASK
+REAL, DIMENSION(SIZE(PFIELD,1))           :: ZOUT
+REAL, DIMENSION(SIZE(XTS))    :: ZAUX
+!
 INTEGER :: ILUOUT
 INTEGER :: IS
-REAL, DIMENSION(SIZE(XTS),KS) :: ZINF
-INTEGER, DIMENSION(KI)        :: IMASK
-REAL, DIMENSION(KI)           :: ZOUT
-REAL, DIMENSION(SIZE(XTS))    :: ZAUX
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------

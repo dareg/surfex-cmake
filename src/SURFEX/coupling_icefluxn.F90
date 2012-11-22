@@ -39,27 +39,27 @@ IMPLICIT NONE
 !
 INTEGER,             INTENT(IN)  :: KI        ! number of points
 !
-REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
-REAL, DIMENSION(KI), INTENT(IN)  :: PEXNA     ! Exner function at atm. level
-REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
-REAL, DIMENSION(KI), INTENT(IN)  :: PTICE     ! Ice Surface Temperature
-REAL, DIMENSION(KI), INTENT(IN)  :: PEXNS     ! Exner function at sea surface
-REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
-REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
-REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
-REAL, DIMENSION(KI), INTENT(IN)  :: PWIND     ! module of wind at atm. wind level
-REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! atm. level for temp. and humidity
-REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! atm. level for wind
-REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
-REAL, DIMENSION(KI), INTENT(IN)  :: PTWAT     ! Water Surface Temperature
+REAL, DIMENSION(:), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+REAL, DIMENSION(:), INTENT(IN)  :: PEXNA     ! Exner function at atm. level
+REAL, DIMENSION(:), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+REAL, DIMENSION(:), INTENT(IN)  :: PTICE     ! Ice Surface Temperature
+REAL, DIMENSION(:), INTENT(IN)  :: PEXNS     ! Exner function at sea surface
+REAL, DIMENSION(:), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+REAL, DIMENSION(:), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)  :: PWIND     ! module of wind at atm. wind level
+REAL, DIMENSION(:), INTENT(IN)  :: PZREF     ! atm. level for temp. and humidity
+REAL, DIMENSION(:), INTENT(IN)  :: PUREF     ! atm. level for wind
+REAL, DIMENSION(:), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+REAL, DIMENSION(:), INTENT(IN)  :: PTWAT     ! Water Surface Temperature
 REAL,               INTENT(IN)  :: PTT       ! temperature of freezing point
 !
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 !
 !*      0.2    declarations of local variables
 !
-INTEGER, DIMENSION(KI)           :: IMASK
+INTEGER, DIMENSION(SIZE(PTA))    :: IMASK
 INTEGER                          :: JJ, ISIZE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

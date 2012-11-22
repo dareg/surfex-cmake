@@ -37,6 +37,9 @@
 #ifdef OL
 USE MODI_SUM_ON_ALL_PROCS_OL
 #endif
+#ifdef MNH
+USE MODI_SUM_ON_ALL_PROCS_MNH
+#endif
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK

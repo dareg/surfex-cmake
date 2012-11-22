@@ -54,26 +54,26 @@ INTEGER,                  INTENT(IN)    :: KIMPL     ! implicitation code:
 !                                                    !     coefficients for all variables
 !                                                    ! 2 : computes temporal evolution of the
 !                                                    !     variables
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PK        ! mixing exchange coefficient           (m2/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDKDDVDZ  ! derivative of mixing coefficient as a
+REAL, DIMENSION(:,:), INTENT(IN)    :: PK        ! mixing exchange coefficient           (m2/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDKDDVDZ  ! derivative of mixing coefficient as a
 !                                                    ! function of vertical gradient of wind
 !                                                    ! (at mid levels)                       (m2)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_F  ! surface flux w'Th'                    (mK/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_F   ! tendency of wind due to canopy drag   (K/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_FDF! formal derivative of the tendency of
+REAL, DIMENSION(:),      INTENT(IN)    :: PSFLUX_F  ! surface flux w'Th'                    (mK/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_F   ! tendency of wind due to canopy drag   (K/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_FDF! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! deltaZ between canopy half levels,
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! deltaZ between canopy half levels,
 !                                                    ! located at full levels                (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZF      ! deltaZ between canopy (full) levels,
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDZF      ! deltaZ between canopy (full) levels,
 !                                                    ! located at half levels                (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PEXT      ! external forcing at full levels
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDEXTDV   ! derivative of external forcing as a
+REAL, DIMENSION(:,:), INTENT(IN)    :: PEXT      ! external forcing at full levels
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDEXTDV   ! derivative of external forcing as a
 !                                                    ! function of vertical variable
 !                                                    ! (at full levels)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PF        ! pot. temp. at canopy levels           (K)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PWF       ! turbulent flux (at half levels)       (mK/s)
-REAL, DIMENSION(KI), OPTIONAL, INTENT(OUT)   :: PALFA     !  V+(1) = alfa F(1) + beta
-REAL, DIMENSION(KI), OPTIONAL, INTENT(OUT)   :: PBETA     !  V+(1) = alfa F(1) + beta
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PF        ! pot. temp. at canopy levels           (K)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PWF       ! turbulent flux (at half levels)       (mK/s)
+REAL, DIMENSION(:), OPTIONAL, INTENT(OUT)   :: PALFA     !  V+(1) = alfa F(1) + beta
+REAL, DIMENSION(:), OPTIONAL, INTENT(OUT)   :: PBETA     !  V+(1) = alfa F(1) + beta
 !
 !
 !*       0.2   Declarations of local variables
@@ -81,16 +81,16 @@ REAL, DIMENSION(KI), OPTIONAL, INTENT(OUT)   :: PBETA     !  V+(1) = alfa F(1) +
 !
 INTEGER                     :: JLAYER   ! loop counter on layers
 !
-REAL, DIMENSION(KI,KLVL)   :: ZDFDZ    ! dTh/dz at mid levels
-REAL, DIMENSION(KI,KLVL)   :: ZWORK    ! work variable : wind at futur instant 
-!                                      ! (or past at the end of the routine)
-REAL, DIMENSION(KI,KLVL)   :: ZF       ! turbulent flux at mid levels
-REAL, DIMENSION(KI,KLVL)   :: ZDFDDVDZ ! derivative of turbulent flux as a
-!                                      ! function of vertical gradient of wind variable
-!                                      ! (at mid levels)
-REAL, DIMENSION(KI)         :: ZDFADT  ! dTHa/dt   at forcing level
-REAL, DIMENSION(KI)         :: ZDWFDZ  ! dw'Th'/dz at forcing level
-REAL, DIMENSION(KI)         :: ZALFA, ZBETA
+REAL, DIMENSION(SIZE(PK,1),SIZE(PK,2))   :: ZDFDZ    ! dTh/dz at mid levels
+REAL, DIMENSION(SIZE(PK,1),SIZE(PK,2))   :: ZWORK    ! work variable : wind at futur instant 
+!                                                    ! (or past at the end of the routine)
+REAL, DIMENSION(SIZE(PK,1),SIZE(PK,2))   :: ZF       ! turbulent flux at mid levels
+REAL, DIMENSION(SIZE(PK,1),SIZE(PK,2))   :: ZDFDDVDZ ! derivative of turbulent flux as a
+!                                                    ! function of vertical gradient of wind variable
+!                                                    ! (at mid levels)
+REAL, DIMENSION(SIZE(PK,1))         :: ZDFADT  ! dTHa/dt   at forcing level
+REAL, DIMENSION(SIZE(PK,1))         :: ZDWFDZ  ! dw'Th'/dz at forcing level
+REAL, DIMENSION(SIZE(PK,1))         :: ZALFA, ZBETA
 LOGICAL                     :: LIMPL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

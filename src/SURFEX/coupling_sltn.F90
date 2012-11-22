@@ -25,15 +25,15 @@ IMPLICIT NONE
 !INPUT
 INTEGER, INTENT(IN)                :: KI             !I Number of sea points
 INTEGER, INTENT(IN)                :: KSLT           !I Number of sea salt emission variables
-REAL, DIMENSION(KI),      INTENT(IN)  :: PWIND       !I wind velocity
-REAL, DIMENSION(KI,KSLT), INTENT(OUT) :: PSFSLT      !Out: mole particles per mole air m/s *(MWdst/MWair*rhoair)(index #1)
+REAL, DIMENSION(:),      INTENT(IN)  :: PWIND       !I wind velocity
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSFSLT      !Out: mole particles per mole air m/s *(MWdst/MWair*rhoair)(index #1)
                                                      !Out: kg/m2/s (index #2)
                                                      !Out: moles m6/moles air m/s *(MWdst/MWair*rhoair)(index #3)
 !LOCAL VARIABLES
-REAL,DIMENSION(KI,3)  :: ZSFSLT_MDE       ! sea salt flux from modes
+REAL,DIMENSION(SIZE(PWIND),3)  :: ZSFSLT_MDE       ! sea salt flux from modes
 INTEGER               :: JN, JI           !Counter for sea salt modes
-REAL, DIMENSION(KI)   :: DZSPEED 
-INTEGER, DIMENSION(KI):: WCL
+REAL, DIMENSION(SIZE(PWIND))   :: DZSPEED 
+INTEGER, DIMENSION(SIZE(PWIND)):: WCL
 REAL                  :: ZCONVERTFACM0_SLT
 REAL                  :: ZCONVERTFACM3_SLT
 REAL                  :: ZCONVERTFACM6_SLT

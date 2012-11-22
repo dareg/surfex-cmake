@@ -51,6 +51,10 @@ USE MODI_CLOSE_AUX_IO_SURF_LFI
 USE MODI_CLOSE_AUX_IO_SURF_OL
 #endif
 !
+#ifdef MNH
+USE MODI_MNHCLOSE_AUX_IO_SURF
+#endif
+!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments

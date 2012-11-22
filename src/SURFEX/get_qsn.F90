@@ -49,7 +49,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
-REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! roughness length for momentum (m)
+REAL, DIMENSION(:),  INTENT(OUT)    :: PQS     ! roughness length for momentum (m)
 !
 !
 !*       0.2   Declarations of local variables

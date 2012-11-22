@@ -50,7 +50,7 @@ IMPLICIT NONE
 CHARACTER(LEN=6),    INTENT(IN)  :: HWATER ! name of the scheme for inland water
 CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover
-REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+REAL, DIMENSION(:), INTENT(IN)  :: PZS     ! orography
 !
 !
 !*       0.2   Declarations of local variables

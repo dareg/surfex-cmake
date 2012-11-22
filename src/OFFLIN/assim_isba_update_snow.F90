@@ -27,7 +27,7 @@ SUBROUTINE ASSIM_ISBA_UPDATE_SNOW(HPROGRAM, KI, PSWE, HTEST )
  IMPLICIT NONE
  CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
  INTEGER,             INTENT(IN) :: KI
- REAL, DIMENSION(KI), INTENT(IN) :: PSWE
+ REAL, DIMENSION(:), INTENT(IN) :: PSWE
  CHARACTER(LEN=2),    INTENT(IN) :: HTEST     ! must be equal to 'OK'
 !
 !    Declarations of local variables
@@ -37,9 +37,8 @@ SUBROUTINE ASSIM_ISBA_UPDATE_SNOW(HPROGRAM, KI, PSWE, HTEST )
  CHARACTER(LEN=10)               :: YVAR    ! Name of the prognostic variable (in LFI file)
  CHARACTER(LEN=100)              :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
  INTEGER                         :: IRESP
- REAL, DIMENSION(KI)             :: ZSWE     ! Snow before update
- REAL, DIMENSION(KI)             :: ZSWEINC  ! Snow increment
-!
+ REAL, DIMENSION(SIZE(PSWE))     :: ZSWE     ! Snow before update
+ REAL, DIMENSION(SIZE(PSWE))     :: ZSWEINC  ! Snow increment
 !
 ! ----------------------------------------------------------------------------------
 !

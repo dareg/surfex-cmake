@@ -67,75 +67,78 @@ INTEGER,                  INTENT(IN)    :: KIMPL     ! implicitation code:
 !                                                    !     coefficients for all variables
 !                                                    ! 2 : computes temporal evolution of the
 !                                                    !     variables
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZZ       ! Mixing length generic profile at mid levels (-)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PWIND     ! wind speed                            (m/s)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PTA       ! Air temperature                       (K)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PQA       ! Air humidity                          (kg/m3)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PPA       ! Pressure at forcing level             (Pa)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! Air density at forcing level          (kg/m3)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_U  ! surface flux u'w'                     (m2/s2)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_T  ! surface flux w'T'                     (Km/s)
-REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_Q  ! surface flux w'q'                     (kg/m2/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_UDU! formal derivative of the tendency of
-!                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_EDE! formal derivative of the tendency of
-!                                                    ! TKE  due to canopy drag               (1/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_T   ! tendency of Temp due to canopy drag   (T/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_TDT! formal derivative of the tendency of
-!                                                    ! Temp due to canopy drag               (1/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_Q   ! tendency of Hum. due to canopy drag   (kg/m3/s)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_QDQ! formal derivative of the tendency of
-!                                                    ! Hum. due to canopy drag               (1/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PZZ          ! Mixing length generic profile at mid levels (-)
+REAL, DIMENSION(:),      INTENT(IN)    :: PWIND     ! wind speed                            (m/s)
+REAL, DIMENSION(:),      INTENT(IN)    :: PTA       ! Air temperature                       (K)
+REAL, DIMENSION(:),      INTENT(IN)    :: PQA       ! Air humidity                          (kg/m3)
+REAL, DIMENSION(:),      INTENT(IN)    :: PPA       ! Pressure at forcing level             (Pa)
+REAL, DIMENSION(:),      INTENT(IN)    :: PRHOA     ! Air density at forcing level          (kg/m3)
+REAL, DIMENSION(:),      INTENT(IN)    :: PSFLUX_U  ! surface flux u'w'                     (m2/s2)
+REAL, DIMENSION(:),      INTENT(IN)    :: PSFLUX_T  ! surface flux w'T'                     (Km/s)
+REAL, DIMENSION(:),      INTENT(IN)    :: PSFLUX_Q  ! surface flux w'q'                     (kg/m2/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_U      ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_UDU   ! formal derivative of the tendency of
+!                                                   ! wind due to canopy drag               (1/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_E      ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_EDE   ! formal derivative of the tendency of
+!                                                   ! TKE  due to canopy drag               (1/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_T      ! tendency of Temp due to canopy drag   (T/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_TDT   ! formal derivative of the tendency of
+!                                                   ! Temp due to canopy drag               (1/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_Q      ! tendency of Hum. due to canopy drag   (kg/m3/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_QDQ   ! formal derivative of the tendency of
+!                                                   ! Hum. due to canopy drag               (1/s)
 !
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PU        ! wind speed at canopy levels           (m/s)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PTKE      ! TKE at canopy levels                  (m2/s2)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PT        ! Temperature at canopy levels          (K)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PQ        ! Humidity    at canopy levels          (kg/m3)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PLMO      ! Monin-Obhukov length                  (m)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PLM       ! mixing length                         (m)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PLEPS     ! dissipative length                    (m)
-REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PP        ! Pressure    at canopy levels          (Pa)
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PUSTAR    ! friction velocity at forcing level    (m/s)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PU        ! wind speed at canopy levels           (m/s)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PTKE      ! TKE at canopy levels                  (m2/s2)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PT        ! Temperature at canopy levels          (K)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PQ        ! Humidity    at canopy levels          (kg/m3)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PLMO      ! Monin-Obhukov length                  (m)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PLM       ! mixing length                         (m)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PLEPS     ! dissipative length                    (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PP        ! Pressure    at canopy levels          (Pa)
+REAL, DIMENSION(:),      INTENT(OUT)   :: PUSTAR    ! friction velocity at forcing level    (m/s)
 !
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFAU   ! V+(1) = alfa u'w'(1) + beta
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETAU   ! V+(1) = alfa u'w'(1) + beta
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFATH  ! Th+(1) = alfa w'th'(1) + beta
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETATH  ! Th+(1) = alfa w'th'(1) + beta
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFAQ   ! Q+(1) = alfa w'q'(1) + beta
-REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETAQ   ! Q+(1) = alfa w'q'(1) + beta
+REAL, DIMENSION(:),      INTENT(OUT)   :: PALFAU   ! V+(1) = alfa u'w'(1) + beta
+REAL, DIMENSION(:),      INTENT(OUT)   :: PBETAU   ! V+(1) = alfa u'w'(1) + beta
+REAL, DIMENSION(:),      INTENT(OUT)   :: PALFATH  ! Th+(1) = alfa w'th'(1) + beta
+REAL, DIMENSION(:),      INTENT(OUT)   :: PBETATH  ! Th+(1) = alfa w'th'(1) + beta
+REAL, DIMENSION(:),      INTENT(OUT)   :: PALFAQ   ! Q+(1) = alfa w'q'(1) + beta
+REAL, DIMENSION(:),      INTENT(OUT)   :: PBETAQ   ! Q+(1) = alfa w'q'(1) + beta
 !
 LOGICAL, OPTIONAL, INTENT(IN) :: ONEUTRAL
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZK                 ! mixing coefficient
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZDKDDVDZ           ! formal derivative of mixing coefficient according to variable vertical gradient
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZTH                ! potential temperature at full levels
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZEXN               ! Exner function        at full levels
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZUW                ! friction at mid levels
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZFORC_TH           ! tendency of Temp due to canopy drag   (T/s)
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZDFORC_THDTH       ! formal derivative of the tendency of
+!                                                              ! Temp due to canopy drag               (1/s)
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZWTH               ! w'Th' at mid levels
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZWQ                ! w'q'  at mid levels
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZSFTH              ! heat flux at atmospheric forcing level
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZSFRV              ! vapor flux at atmospheric forcing level
+REAL, DIMENSION(SIZE(PZZ,1),SIZE(PZZ,2)) :: ZRHOA              ! air density profile
+!
+REAL, DIMENSION(SIZE(PZZ,1))   :: ZTHA               ! potential temperature at forcing level
+REAL, DIMENSION(SIZE(PZZ,1))   :: ZSFLUX_TH          ! Surface flux w'Th' (mK/s)
+!
+REAL                 :: ZZ0                ! a value of z0 just for first time-step init.
+!
 LOGICAL :: GNEUTRAL
 !
 INTEGER :: JLAYER                              ! loop counter on layers
 INTEGER :: JI                                  ! loop counter
-!
-REAL, DIMENSION(KI,KLVL) :: ZK                 ! mixing coefficient
-REAL, DIMENSION(KI,KLVL) :: ZDKDDVDZ           ! formal derivative of mixing coefficient according to variable vertical gradient
-REAL, DIMENSION(KI,KLVL) :: ZTH                ! potential temperature at full levels
-REAL, DIMENSION(KI)      :: ZTHA               ! potential temperature at forcing level
-REAL, DIMENSION(KI,KLVL) :: ZEXN               ! Exner function        at full levels
-REAL, DIMENSION(KI,KLVL) :: ZUW                ! friction at mid levels
-REAL, DIMENSION(KI)      :: ZSFLUX_TH          ! Surface flux w'Th'                    (mK/s)
-REAL, DIMENSION(KI,KLVL) :: ZFORC_TH           ! tendency of Temp due to canopy drag   (T/s)
-REAL, DIMENSION(KI,KLVL) :: ZDFORC_THDTH       ! formal derivative of the tendency of
-!                                              ! Temp due to canopy drag               (1/s)
-REAL, DIMENSION(KI,KLVL) :: ZWTH               ! w'Th' at mid levels
-REAL, DIMENSION(KI,KLVL) :: ZWQ                ! w'q'  at mid levels
-REAL, DIMENSION(KI,KLVL) :: ZSFTH              ! heat flux at atmospheric forcing level
-REAL, DIMENSION(KI,KLVL) :: ZSFRV              ! vapor flux at atmospheric forcing level
-REAL                     :: ZZ0                ! a value of z0 just for first time-step init.
-REAL, DIMENSION(KI,KLVL) :: ZRHOA              ! air density profile
+!        
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CANOPY_EVOL',0,ZHOOK_HANDLE)

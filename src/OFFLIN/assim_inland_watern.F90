@@ -53,26 +53,29 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
-REAL,DIMENSION(KI), INTENT(IN) :: PTS_O
-REAL,DIMENSION(KI), INTENT(IN) :: PITM
+REAL,DIMENSION(:), INTENT(IN) :: PTS_O
+REAL,DIMENSION(:), INTENT(IN) :: PITM
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-CHARACTER(LEN=10)                :: YVAR    ! Name of the prognostic variable (in LFI file)
-CHARACTER(LEN=100)               :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
-INTEGER                          :: IRESP,I
-REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
-REAL, DIMENSION(KI)              :: ZLSTINC
-REAL, DIMENSION(KI)              :: ZLST
-REAL, DIMENSION(KI)              :: ZTP
+REAL, DIMENSION(SIZE(PTS_O))              :: ZLSTINC
+REAL, DIMENSION(SIZE(PTS_O))              :: ZLST
+REAL, DIMENSION(SIZE(PTS_O))              :: ZTP
+!
 REAL,ALLOCATABLE,DIMENSION(:)    :: ZLON
 REAL,ALLOCATABLE,DIMENSION(:)    :: ZLAT
 REAL,ALLOCATABLE,DIMENSION(:)    :: ZALT
 REAL,ALLOCATABLE,DIMENSION(:)    :: ZLST_IN
 LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP_LST
+!
+CHARACTER(LEN=10)                :: YVAR    ! Name of the prognostic variable (in LFI file)
+CHARACTER(LEN=100)               :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
+INTEGER                          :: IRESP,I
+!
+REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',0,ZHOOK_HANDLE)
 
