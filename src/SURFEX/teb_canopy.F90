@@ -41,56 +41,55 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
-REAL, DIMENSION(:),      INTENT(IN)    :: PBLD        ! building density                    (-)
-REAL, DIMENSION(:),      INTENT(IN)    :: PBLD_HEIGHT ! building height                     (m)
-REAL, DIMENSION(:),      INTENT(IN)    :: PWALL_O_HOR ! wall surf. / hor. surf.             (-)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PBLD        ! building density                    (-)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PBLD_HEIGHT ! building height                     (m)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PWALL_O_HOR ! wall surf. / hor. surf.             (-)
 
-REAL, DIMENSION(:,:), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
 !
-REAL, DIMENSION(:),      INTENT(IN)    :: PPA       ! air pressure                          (Pa)
-REAL, DIMENSION(:),      INTENT(IN)    :: PRHOA     ! air density                           (kg/m3)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PPA       ! air pressure                          (Pa)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! air density                           (kg/m3)
 !
-REAL, DIMENSION(:),      INTENT(IN)    :: PDUWDU_ROAD  ! derivative of road friction flux   (m/s)
-REAL, DIMENSION(:),      INTENT(IN)    :: PUW_ROOF  ! friction flux for roof surfaces       (m2/s2)
-REAL, DIMENSION(:),      INTENT(IN)    :: PDUWDU_ROOF  ! derivative of roof friction flux   (m/s)
-REAL, DIMENSION(:),      INTENT(IN)    :: PH_WALL   ! flux of heat for wall surfaces        (W/m2)
-REAL, DIMENSION(:),      INTENT(IN)    :: PH_ROOF   ! flux of heat for roof surfaces        (W/m2)
-REAL, DIMENSION(:),      INTENT(IN)    :: PE_ROOF   ! flux of vapor for roof surfaces       (kg/m2/s)
-REAL, DIMENSION(:),      INTENT(IN)    :: PAC_ROAD  ! road aerodynamical conductance        ()
-REAL, DIMENSION(:),      INTENT(IN)    :: PAC_ROAD_WAT ! road water aerodynamical conductance        ()
+REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_ROAD  ! derivative of road friction flux   (m/s)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PUW_ROOF  ! friction flux for roof surfaces       (m2/s2)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_ROOF  ! derivative of roof friction flux   (m/s)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PH_WALL   ! flux of heat for wall surfaces        (W/m2)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PH_ROOF   ! flux of heat for roof surfaces        (W/m2)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PE_ROOF   ! flux of vapor for roof surfaces       (kg/m2/s)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PAC_ROAD  ! road aerodynamical conductance        ()
+REAL, DIMENSION(KI),      INTENT(IN)    :: PAC_ROAD_WAT ! road water aerodynamical conductance        ()
 !
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_T   ! tendency of Temp due to canopy drag   (T/s)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_TDT! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_T   ! tendency of Temp due to canopy drag   (T/s)
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_TDT! formal derivative of the tendency of
 !                                                    ! Temp due to canopy drag               (1/s)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_Q   ! tendency of Temp due to canopy drag   (kg/m3/s)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_QDQ! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_Q   ! tendency of Temp due to canopy drag   (kg/m3/s)
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_QDQ! formal derivative of the tendency of
 !                                                    ! Temp due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZCDRAG    ! drag coefficient in canopy
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZSH       ! horizontal surface of building
-                                      ! (road&roof) for each canopy level
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZSV       ! vertical surface of building
-                                      ! (walls) for each canopy level
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZFORC
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZDENSITY
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZP        ! pressure              at full levels
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZEXN      ! Exner function        at full levels
-!
 INTEGER                  :: JLAYER    ! loop counter on canopy heights
 !         
+REAL, DIMENSION(KI,KLVL) :: ZCDRAG    ! drag coefficient in canopy
+REAL, DIMENSION(KI,KLVL) :: ZSH       ! horizontal surface of building
+                                      ! (road&roof) for each canopy level
+REAL, DIMENSION(KI,KLVL) :: ZSV       ! vertical surface of building
+                                      ! (walls) for each canopy level
+REAL, DIMENSION(KI,KLVL) :: ZFORC
+REAL, DIMENSION(KI,KLVL) :: ZDENSITY
+REAL, DIMENSION(KI,KLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
+REAL, DIMENSION(KI,KLVL) :: ZP        ! pressure              at full levels
+REAL, DIMENSION(KI,KLVL) :: ZEXN      ! Exner function        at full levels
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------

@@ -40,36 +40,35 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
-REAL, DIMENSION(:),      INTENT(IN)    :: PHEIGHT     ! canopy height                       (m)
-REAL, DIMENSION(:),      INTENT(IN)    :: PCANOPY_DENSITY ! canopy density                  (-)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZ        ! heights of canopy levels              (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PHEIGHT     ! canopy height                       (m)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PCANOPY_DENSITY ! canopy density                  (-)
 
-REAL, DIMENSION(:,:), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PTKE      ! Tke  for each canopy layer            (m2/s2)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PU        ! wind for each canopy layer            (m/s)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PTKE      ! Tke  for each canopy layer            (m2/s2)
 !
-REAL, DIMENSION(:),      INTENT(IN)    :: PUW_GROUND  ! friction flux for ground surface       (m2/s2)
-REAL, DIMENSION(:),      INTENT(IN)    :: PDUWDU_GROUND  ! derivative of ground friction flux   (m/s)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PUW_GROUND  ! friction flux for ground surface       (m2/s2)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_GROUND  ! derivative of ground friction flux   (m/s)
 !
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZCDRAG    ! drag coefficient in canopy
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZDENSITY  ! vegetation density for each canopy level
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZSV       ! vertical surface for each canopy level
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZFORC
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
-!
 INTEGER                  :: JLAYER    ! loop counter on canopy heights
 !         
+REAL, DIMENSION(KI,KLVL) :: ZCDRAG    ! drag coefficient in canopy
+REAL, DIMENSION(KI,KLVL) :: ZDENSITY  ! vegetation density for each canopy level
+REAL, DIMENSION(KI,KLVL) :: ZSV       ! vertical surface for each canopy level
+REAL, DIMENSION(KI,KLVL) :: ZFORC
+REAL, DIMENSION(KI,KLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------

@@ -67,12 +67,12 @@ REAL,                             INTENT(IN)  :: PDURATION
 INTEGER,                          INTENT(OUT) :: KTRIP_MONTH ! current output month (UTC)
 INTEGER,                          INTENT(OUT) :: KTRIP_COUNT ! current TRIP counter
 !
-REAL,             DIMENSION(:),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(:), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(:),  INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(:),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KI), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

@@ -52,14 +52,14 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover
-REAL, DIMENSION(:), INTENT(OUT) :: PAOSIP  ! subgrid orographic A/S, dir i+
-REAL, DIMENSION(:), INTENT(OUT) :: PAOSIM  ! subgrid orographic A/S, dir i-
-REAL, DIMENSION(:), INTENT(OUT) :: PAOSJP  ! subgrid orographic A/S, dir j+
-REAL, DIMENSION(:), INTENT(OUT) :: PAOSJM  ! subgrid orographic A/S, dir j-
-REAL, DIMENSION(:), INTENT(OUT) :: PHO2IP  ! subgrid orographic h/2, dir i+
-REAL, DIMENSION(:), INTENT(OUT) :: PHO2IM  ! subgrid orographic h/2, dir i-
-REAL, DIMENSION(:), INTENT(OUT) :: PHO2JP  ! subgrid orographic h/2, dir j+
-REAL, DIMENSION(:), INTENT(OUT) :: PHO2JM  ! subgrid orographic h/2, dir j-
+REAL, DIMENSION(KI), INTENT(OUT) :: PAOSIP  ! subgrid orographic A/S, dir i+
+REAL, DIMENSION(KI), INTENT(OUT) :: PAOSIM  ! subgrid orographic A/S, dir i-
+REAL, DIMENSION(KI), INTENT(OUT) :: PAOSJP  ! subgrid orographic A/S, dir j+
+REAL, DIMENSION(KI), INTENT(OUT) :: PAOSJM  ! subgrid orographic A/S, dir j-
+REAL, DIMENSION(KI), INTENT(OUT) :: PHO2IP  ! subgrid orographic h/2, dir i+
+REAL, DIMENSION(KI), INTENT(OUT) :: PHO2IM  ! subgrid orographic h/2, dir i-
+REAL, DIMENSION(KI), INTENT(OUT) :: PHO2JP  ! subgrid orographic h/2, dir j+
+REAL, DIMENSION(KI), INTENT(OUT) :: PHO2JM  ! subgrid orographic h/2, dir j-
 !
 !
 !*       0.2   Declarations of local variables

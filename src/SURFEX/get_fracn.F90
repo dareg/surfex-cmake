@@ -50,10 +50,10 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),     INTENT(IN)            :: HPROGRAM
 INTEGER,              INTENT(IN)            :: KI      ! number of points
-REAL, DIMENSION(:),  INTENT(OUT)           :: PSEA    ! sea    fraction
-REAL, DIMENSION(:),  INTENT(OUT)           :: PWATER  ! water  fraction
-REAL, DIMENSION(:),  INTENT(OUT)           :: PNATURE ! nature fraction
-REAL, DIMENSION(:),  INTENT(OUT)           :: PTOWN   ! town   fraction
+REAL, DIMENSION(KI),  INTENT(OUT)           :: PSEA    ! sea    fraction
+REAL, DIMENSION(KI),  INTENT(OUT)           :: PWATER  ! water  fraction
+REAL, DIMENSION(KI),  INTENT(OUT)           :: PNATURE ! nature fraction
+REAL, DIMENSION(KI),  INTENT(OUT)           :: PTOWN   ! town   fraction
 !
 !
 !*       0.2   Declarations of local variables

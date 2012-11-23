@@ -54,19 +54,19 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),    INTENT(IN)     :: HPROGRAM
 INTEGER,             INTENT(IN)     :: KI        ! Number of points
-REAL, DIMENSION(:),  INTENT(OUT)    :: PRN       ! Net radiation at surface    (W/m2)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PH        ! Sensible heat flux          (W/m2)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PLE       ! Total Latent heat flux      (W/m2)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PLEI      ! Solid Latent heat flux      (W/m2)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PGFLUX    ! Net soil-vegetation flux    (W/m2)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PT2M      ! Air temperature at 2 meters (K)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PQ2M      ! Air humidity at 2 meters    (kg/kg)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PHU2M     ! Air relative humidity at 2 meters (-)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PZON10M   ! zonal Wind at 10 meters     (m/s)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PMER10M   ! meridian Wind at 10 meters  (m/s)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PRN       ! Net radiation at surface    (W/m2)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PH        ! Sensible heat flux          (W/m2)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PLE       ! Total Latent heat flux      (W/m2)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PLEI      ! Solid Latent heat flux      (W/m2)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PGFLUX    ! Net soil-vegetation flux    (W/m2)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PT2M      ! Air temperature at 2 meters (K)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PQ2M      ! Air humidity at 2 meters    (kg/kg)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PHU2M     ! Air relative humidity at 2 meters (-)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PZON10M   ! zonal Wind at 10 meters     (m/s)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PMER10M   ! meridian Wind at 10 meters  (m/s)
 !
-REAL, DIMENSION(:),  INTENT(OUT) :: PSURFLWNET   ! LW net at the surface
-REAL, DIMENSION(:),  INTENT(OUT) :: PSURFSWNET   ! SW net at the surface
+REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFLWNET   ! LW net at the surface
+REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFSWNET   ! SW net at the surface
 !
 !
 !*       0.2   Declarations of local variables

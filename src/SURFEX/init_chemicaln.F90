@@ -59,7 +59,7 @@ IMPLICIT NONE
 !
 INTEGER,                          INTENT(IN) :: KLUOUT
 INTEGER,                          INTENT(IN) :: KSV      ! number of scalars
-CHARACTER(LEN=6), DIMENSION(:), INTENT(IN) :: HSV      ! name of all scalar variables
+CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
 INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
 CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
 INTEGER,                         INTENT(OUT) :: KBAER    ! number of aerosol variables

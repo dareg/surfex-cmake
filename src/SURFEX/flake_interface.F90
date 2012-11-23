@@ -152,7 +152,7 @@ INTEGER, INTENT(IN)  :: KI              ! number of points
 !
 INTEGER :: i ! DO loop index
 !
-REAL, DIMENSION(:), INTENT(IN) ::   &
+REAL, DIMENSION(KI), INTENT(IN) ::   &
     dMsnowdt_in                       ,  &! The rate of snow accumulation [kg m^{-2} s^{-1}]
     I_atm_in                          ,  &! Solar radiation flux at the surface [W m^{-2}]
     Q_atm_lw_in                       ,  &! Long-wave radiation flux from the atmosphere [W m^{-2}]
@@ -163,7 +163,7 @@ REAL, DIMENSION(:), INTENT(IN) ::   &
     q_a_in                            ,  &! Air specific humidity at z=height_tq_in
     P_a_in                                ! Surface air pressure [N m^{-2} = kg m^{-1} s^{-2}]  
 
-REAL, DIMENSION(:), INTENT(IN) ::   &
+REAL, DIMENSION(KI), INTENT(IN) ::   &
     depth_w                           ,  &! The lake depth [m]
     fetch                             ,  &! Typical wind fetch [m]
     depth_bs                          ,  &! Depth of the thermally active layer of the bottom sediments [m]
@@ -186,17 +186,17 @@ CHARACTER(LEN=3) ::  hflk_flux     ! 'DEF'/'WAT' compute the surface fluxes with
 !
 !  Input/Output (procedure arguments)
 
-REAL, DIMENSION(:), INTENT(INOUT)  :: &
+REAL, DIMENSION(KI), INTENT(INOUT)  :: &
     albedo_water                        ,  &! Water surface albedo with respect to the solar radiation
     albedo_ice                          ,  &! Ice surface albedo with respect to the solar radiation
     albedo_snow                             ! Snow surface albedo with respect to the solar radiation  
 
-REAL, DIMENSION(:), INTENT(INOUT) ::  &
+REAL, DIMENSION(KI), INTENT(INOUT) ::  &
     extincoef_water                       ,  &! extintion coefficient of water
     extincoef_ice                         ,  &! extintion coefficient of ice
     extincoef_snow                            ! extintion coefficient of snow   
 
-REAL, DIMENSION(:), INTENT(INOUT)  :: &
+REAL, DIMENSION(KI), INTENT(INOUT)  :: &
     T_snow                        ,  &! Temperature at the air-snow interface [K] 
     T_ice                         ,  &! Temperature at the snow-ice or air-ice interface [K]
     T_mnw                         ,  &! Mean temperature of the water column [K]
@@ -212,7 +212,7 @@ REAL, DIMENSION(:), INTENT(INOUT)  :: &
 
 !  Output (procedure arguments)
 
-REAL, DIMENSION(:), INTENT(INOUT)  ::    &
+REAL, DIMENSION(KI), INTENT(INOUT)  ::    &
     Q_sensible             ,  &! Sensible heat flux [W m^{-2}]
     Q_latent               ,  &! Latent heat flux [W m^{-2}]
     Q_momentum             ,  &! Momentum flux [N m^{-2}]
@@ -234,10 +234,10 @@ REAL :: T_sfc_n ! Surface temperature at the new time step [K]
 REAL :: ustar2  ! square of air friction velocity (m2/s2)  
 REAL :: zvmod   ! wind at t+1  
 
-REAL, DIMENSION(SIZE(T_sfc)) ::    &
+REAL, DIMENSION(KI) ::    &
     Q_watvap                      ! Flux of water vapour [kg m^{-2} s^{-1}]  
 
-TYPE (opticpar_medium), DIMENSION(SIZE(T_sfc)) ::  &
+TYPE (opticpar_medium), DIMENSION(KI) ::  &
     opticpar_water                       ,  &! Optical characteristics of water
     opticpar_ice                         ,  &! Optical characteristics of ice
     opticpar_snow                            ! Optical characteristics of snow   

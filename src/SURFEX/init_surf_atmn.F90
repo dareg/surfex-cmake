@@ -163,16 +163,16 @@ LOGICAL,                          INTENT(IN)  :: OLAND_USE !
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(:), INTENT(IN)  :: HSV       ! name of all scalar variables
-REAL,             DIMENSION(:),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
-REAL,             DIMENSION(:),  INTENT(IN)  :: PRHOA     ! air density
-REAL,             DIMENSION(:),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(:),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
-REAL,             DIMENSION(:), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(:),  INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(:),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -193,10 +193,10 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: ICH      ! unit of input chemical file
 !
 REAL, DIMENSION(:,:), ALLOCATABLE                       :: ZFRAC_TILE     ! fraction of each surface type
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE  ! diffuse albedo
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC)                 :: ZEMIS_TILE     ! emissivity
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC)                 :: ZTSRAD_TILE    ! radiative temperature
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE  ! diffuse albedo
+REAL, DIMENSION(KI,NTILESFC)                 :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,NTILESFC)                 :: ZTSRAD_TILE    ! radiative temperature
 !
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_ZENITH   ! zenithal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_AZIM     ! azimuthal angle
@@ -213,6 +213,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',0,ZHOOK_HANDLE)
+!
+!
 CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN

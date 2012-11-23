@@ -46,12 +46,31 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
  IMPLICIT NONE
  CHARACTER(LEN=6),    INTENT(IN)            :: HPROGRAM     ! program calling surf. schemes
  INTEGER,             INTENT(IN)            :: KI
- REAL, DIMENSION(:), INTENT(IN)            :: PT2M
- REAL, DIMENSION(:), INTENT(IN)            :: PHU2M
+ REAL, DIMENSION(KI), INTENT(IN)            :: PT2M
+ REAL, DIMENSION(KI), INTENT(IN)            :: PHU2M
  CHARACTER(LEN=2),    INTENT(IN)            :: HTEST        ! must be equal to 'OK'
+
+ INTEGER                                    :: NOBS
+ CHARACTER(LEN=28)                          :: YNAMELIST = 'OPTIONS.nam                 '
 !
 !    Declarations of local variables
 !
+ CHARACTER(LEN=3), PARAMETER                :: YINIT     = 'ALL'
+ CHARACTER(LEN=6)                           :: YPROGRAM  = 'LFI   '
+ CHARACTER(LEN=6)                           :: YPROGRAM2 = 'FA    '
+ INTEGER                                    :: OBSCOUNT
+ CHARACTER(LEN=1)                           :: LCHAR
+ INTEGER                                    :: IYEAR                      ! current year (UTC)
+ INTEGER                                    :: IMONTH                     ! current month (UTC)
+ INTEGER                                    :: IDAY                       ! current day (UTC)
+ INTEGER                                    :: IHOUR                      ! current hour (UTC)
+ REAL                                       :: ZTIME                      ! current time since start of the run (s)
+ REAL                                       :: PTSTEP_OUTPUT,PTSTEP_FORC  ! OUPUT step, Duration and FORCING Step
+ INTEGER                                    :: IRESP,PATCH_NUMBER         ! return code
+ INTEGER                                    :: ILOBS                      ! Namelist unit number
+ TYPE (DATE_TIME)                           :: TTIME                      ! Current date and time
+ INTEGER                                    :: NBOUTPUT                   ! Number of time step
+ INTEGER                                    :: ISTEP                      ! 
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: YF                         ! Vector of model observations (averaged)
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE        :: YF_PATCH                   ! vector of model observations (for each pacth)
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE        :: XF                         ! Vector of forecast control variables
@@ -76,43 +95,18 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
  REAL, DIMENSION (:,:),ALLOCATABLE          :: XPATCH                     ! Fraction covered by each patch
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: SIMMOD                     ! Control variables (for B propagation)
  REAL,DIMENSION(:,:),ALLOCATABLE            :: VECT                       ! The analysed variable
-!
- REAL                                       :: ZTIME                      ! current time since start of the run (s)
- REAL                                       :: PTSTEP_OUTPUT,PTSTEP_FORC  ! OUPUT step, Duration and FORCING Step 
-!
- CHARACTER(LEN=3), PARAMETER                :: YINIT     = 'ALL'
- CHARACTER(LEN=28)                          :: YNAMELIST = 'OPTIONS.nam                 '
- CHARACTER(LEN=6)                           :: YPROGRAM  = 'LFI   '
- CHARACTER(LEN=6)                           :: YPROGRAM2 = 'FA    '
- CHARACTER(LEN=1)                           :: LCHAR
  CHARACTER(LEN=200)                         :: NMFILE_CANARI              ! Name of the observation, perturbed or reference file
  CHARACTER(LEN=9)                           :: HFNAME
  CHARACTER(LEN=17)                          :: LFNAME
-!
- INTEGER                                    :: NOBS
- INTEGER                                    :: OBSCOUNT
- INTEGER                                    :: IYEAR                      ! current year (UTC)
- INTEGER                                    :: IMONTH                     ! current month (UTC)
- INTEGER                                    :: IDAY                       ! current day (UTC)
- INTEGER                                    :: IHOUR                      ! current hour (UTC)
- INTEGER                                    :: IRESP,PATCH_NUMBER         ! return code
- INTEGER                                    :: ILOBS                      ! Namelist unit number
- INTEGER                                    :: NBOUTPUT                   ! Number of time step
- INTEGER                                    :: ISTEP                      ! 
  INTEGER                                    :: IND                        
- INTEGER                                    :: LTEST          
-!
- TYPE (DATE_TIME)                           :: TTIME                      ! Current date and time              
+ INTEGER                                    :: LTEST                       
 !
 ! Local Matrix for Analysis calculation
 !
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: K1
  REAL,DIMENSION(:,:),ALLOCATABLE            :: ZX,ZB,ZP
  REAL,DIMENSION(:,:),ALLOCATABLE            :: YOWR
-
- REAL,DIMENSION(:),ALLOCATABLE              :: PT2M_O
- REAL,DIMENSION(:),ALLOCATABLE              :: PHU2M_O
- REAL,DIMENSION(:),ALLOCATABLE              :: PEPES
+ INTEGER                                    :: I,J,K,KK,L
 ! 
  REAL,DIMENSION(:),ALLOCATABLE              :: TPRT                      ! The perturbation amplitude
  REAL,DIMENSION(:),ALLOCATABLE              :: XSIGMA                    ! covariance of background errors if B is fixed
@@ -120,18 +114,20 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
  CHARACTER(LEN=3),DIMENSION(:),ALLOCATABLE  :: XVAR ! X is ctrl          ! Name of control variables (syntax of surfex in PREP.txt file )
  CHARACTER(LEN=100),DIMENSION(:),ALLOCATABLE:: PREFIX                    ! The prefix of the control variables (in PREP.txt file) 
  CHARACTER(LEN=10),DIMENSION(:),ALLOCATABLE :: XOBS                     ! Identifier for simulated observations
+ CHARACTER(LEN=3)                           :: YREAD
 !
- INTEGER                                    :: I,J,K,KK,L
  INTEGER                                    :: NDIM
 
  INTEGER                                    :: ILUOUT                    ! ascii output unit number
  INTEGER                                    :: ILUNAM                    ! namelist unit number
- INTEGER                                    :: ISTAT       
- INTEGER                                    :: COMPT  
- CHARACTER(LEN=3)                           :: YREAD
-!
+ INTEGER                                    :: ISTAT                    
  LOGICAL                                    :: GFOUND                    ! return logical when reading namelist
+ 
+ REAL,DIMENSION(:),ALLOCATABLE              :: PT2M_O
+ REAL,DIMENSION(:),ALLOCATABLE              :: PHU2M_O
+ REAL,DIMENSION(:),ALLOCATABLE              :: PEPES
 
+ INTEGER                                    :: COMPT 
  REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 
  IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',0,ZHOOK_HANDLE)

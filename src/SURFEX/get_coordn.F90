@@ -50,7 +50,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI         ! horizontal dim. of cover
-REAL, DIMENSION(:), INTENT(OUT) :: PLON, PLAT
+REAL, DIMENSION(KI), INTENT(OUT) :: PLON, PLAT
 !
 !
 !*       0.2   Declarations of local variables

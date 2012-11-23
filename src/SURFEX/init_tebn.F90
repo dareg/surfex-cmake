@@ -119,16 +119,16 @@ CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT       ! choice of field
 INTEGER,                            INTENT(IN)  :: KI          ! number of points
 INTEGER,                            INTENT(IN)  :: KSV         ! number of scalars
 INTEGER,                            INTENT(IN)  :: KSW         ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(:),   INTENT(IN)  :: HSV         ! name of all scalar variables
-REAL,             DIMENSION(:),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
-REAL,             DIMENSION(:),    INTENT(IN)  :: PRHOA       ! air density
-REAL,             DIMENSION(:),    INTENT(IN)  :: PZENITH     ! solar zenithal angle
-REAL,             DIMENSION(:),    INTENT(IN)  :: PAZIM       ! solar azimuthal angle (rad from N, clock)
-REAL,             DIMENSION(:),   INTENT(IN)  :: PSW_BANDS   ! middle wavelength of each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB    ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB    ! diffuse albedo for each band
-REAL,             DIMENSION(:),    INTENT(OUT) :: PEMIS       ! emissivity
-REAL,             DIMENSION(:),    INTENT(OUT) :: PTSRAD      ! radiative temperature
+CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV         ! name of all scalar variables
+REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI),    INTENT(IN)  :: PRHOA       ! air density
+REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH     ! solar zenithal angle
+REAL,             DIMENSION(KI),    INTENT(IN)  :: PAZIM       ! solar azimuthal angle (rad from N, clock)
+REAL,             DIMENSION(KSW),   INTENT(IN)  :: PSW_BANDS   ! middle wavelength of each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB    ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB    ! diffuse albedo for each band
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS       ! emissivity
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD      ! radiative temperature
 INTEGER,                            INTENT(IN)  :: KYEAR       ! current year (UTC)
 INTEGER,                            INTENT(IN)  :: KMONTH      ! current month (UTC)
 INTEGER,                            INTENT(IN)  :: KDAY        ! current day (UTC)
@@ -142,15 +142,6 @@ CHARACTER(LEN=2),                   INTENT(IN)  :: HTEST       ! must be equal t
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-!              local variables for urban green areas
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS))         :: ZDIR_ALB_GARDEN  ! direct  albedo for each band
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS))         :: ZSCA_ALB_GARDEN  ! diffuse albedo for each band
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS))         :: ZDIR_SW          ! direct  SW for each band
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS))         :: ZSCA_SW          ! diffuse SW for each band
-REAL, DIMENSION(SIZE(PZENITH))             :: ZEMIS_GARDEN     ! emissivity
-REAL, DIMENSION(SIZE(PZENITH))             :: ZALB_GARDEN      ! albedo
-REAL, DIMENSION(SIZE(PZENITH))             :: ZTS_GARDEN       ! radiative temperature
-!
 INTEGER                         :: ILU              ! sizes of TEB arrays
 INTEGER                         :: ILUOUT           ! unit of output listing file
 INTEGER                         :: IRESP            ! return code
@@ -161,6 +152,14 @@ INTEGER                         :: JSWB             ! loop on shortwave spectral
 REAL, DIMENSION(:), ALLOCATABLE :: ZDIR_ALB         ! direct town albedo
 REAL, DIMENSION(:), ALLOCATABLE :: ZSCA_ALB         ! diffuse town albedo
 !
+!              local variables for urban green areas
+REAL, DIMENSION(KI,KSW)         :: ZDIR_ALB_GARDEN  ! direct  albedo for each band
+REAL, DIMENSION(KI,KSW)         :: ZSCA_ALB_GARDEN  ! diffuse albedo for each band
+REAL, DIMENSION(KI,KSW)         :: ZDIR_SW          ! direct  SW for each band
+REAL, DIMENSION(KI,KSW)         :: ZSCA_SW          ! diffuse SW for each band
+REAL, DIMENSION(KI)             :: ZEMIS_GARDEN     ! emissivity
+REAL, DIMENSION(KI)             :: ZALB_GARDEN      ! albedo
+REAL, DIMENSION(KI)             :: ZTS_GARDEN       ! radiative temperature
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------

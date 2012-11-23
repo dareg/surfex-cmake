@@ -58,23 +58,23 @@ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling s
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 !
-REAL,             DIMENSION(:),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(:),   INTENT(IN)  :: PSW_BANDS ! short-wave spectral bands
+REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KSW),   INTENT(IN)  :: PSW_BANDS ! short-wave spectral bands
 !
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(:),    INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(:),    INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NPATCH) :: ZDIR_ALB_PATCH
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NPATCH) :: ZSCA_ALB_PATCH
-REAL, DIMENSION(SIZE(PZENITH),NPATCH)     :: ZEMIS_PATCH
-REAL, DIMENSION(SIZE(PZENITH),NPATCH)     :: ZTRAD_PATCH
-REAL, DIMENSION(SIZE(PZENITH))            :: ZEMIS     ! emissivity
+REAL, DIMENSION(KI,KSW,NPATCH) :: ZDIR_ALB_PATCH
+REAL, DIMENSION(KI,KSW,NPATCH) :: ZSCA_ALB_PATCH
+REAL, DIMENSION(KI,NPATCH)     :: ZEMIS_PATCH
+REAL, DIMENSION(KI,NPATCH)     :: ZTRAD_PATCH
+REAL, DIMENSION(KI)            :: ZEMIS     ! emissivity
 !
 INTEGER           :: JPATCH ! loop on patches
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

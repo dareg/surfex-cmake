@@ -50,7 +50,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI          ! horizontal dim. of cover
-REAL, DIMENSION(:), INTENT(OUT) :: PSSO_SLOPE  ! subgrid slope
+REAL, DIMENSION(KI), INTENT(OUT) :: PSSO_SLOPE  ! subgrid slope
 !
 !
 !*       0.2   Declarations of local variables

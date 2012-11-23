@@ -63,47 +63,46 @@ INTEGER,                  INTENT(IN)    :: KIMPL     ! implicitation code:
 !                                                    !     coefficients for all variables
 !                                                    ! 2 : computes temporal evolution of the
 !                                                    !     variables
-REAL, DIMENSION(:),      INTENT(IN)    :: PWIND     ! wind speed                            (m/s)
-REAL, DIMENSION(:),      INTENT(IN)    :: PRHOA     ! Air density at forcing level          (kg/m3)
-REAL, DIMENSION(:),      INTENT(IN)    :: PSFLUX_U  ! surface flux u'w'                     (m2/s2)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI),      INTENT(IN)    :: PWIND     ! wind speed                            (m/s)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! Air density at forcing level          (kg/m3)
+REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_U  ! surface flux u'w'                     (m2/s2)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
 !
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PZ        ! heights of canopy levels              (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PU        ! wind speed at canopy levels           (m/s)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PTKE      ! TKE at canopy levels                  (m2/s2)
-REAL, DIMENSION(:),      INTENT(OUT)   :: PUSTAR    ! friction velocity at forcing level    (m/s)
-REAL, DIMENSION(:),      INTENT(OUT)   :: PALFAU   ! V+(1) = alfa u'w'(1) + beta
-REAL, DIMENSION(:),      INTENT(OUT)   :: PBETAU   ! V+(1) = alfa u'w'(1) + beta
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PZ        ! heights of canopy levels              (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZF       ! heights of bottom of canopy levels    (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! depth   of canopy levels              (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZF      ! depth between canopy levels           (m)
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PU        ! wind speed at canopy levels           (m/s)
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PTKE      ! TKE at canopy levels                  (m2/s2)
+REAL, DIMENSION(KI),      INTENT(OUT)   :: PUSTAR    ! friction velocity at forcing level    (m/s)
+REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFAU   ! V+(1) = alfa u'w'(1) + beta
+REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETAU   ! V+(1) = alfa u'w'(1) + beta
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZK       ! mixing coefficient
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZDKDDVDZ ! formal derivative of mixing coefficient according to variable vertical gradient
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZEXN     ! Exner function        at full levels
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZUW      ! friction at mid levels
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZTH      ! temperature(meaningless here)
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZWTH     ! heat  flux (supposed equal to zero)
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZWQ      ! vapor flux (supposed equal to zero)
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZLEPS    ! Dissipative length at full levels
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZZ       ! height above displacement height
-REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZLM      ! Mixing      length at mid levels
-REAL, DIMENSION(SIZE(PZ,1))   :: ZUSTAR   ! friction velocity (estimated from
-!                                ! fluxes at atmospheric forcing level)
-REAL                     :: ZZ0      ! a value of z0 just for first time-step init.
-!
 INTEGER :: JLAYER                 ! loop counter on layers
 INTEGER :: JI                     ! loop counter
 !
+REAL, DIMENSION(KI,KLVL) :: ZK       ! mixing coefficient
+REAL, DIMENSION(KI,KLVL) :: ZDKDDVDZ ! formal derivative of mixing coefficient according to variable vertical gradient
+REAL, DIMENSION(KI,KLVL) :: ZEXN     ! Exner function        at full levels
+REAL, DIMENSION(KI,KLVL) :: ZUW      ! friction at mid levels
+REAL, DIMENSION(KI,KLVL) :: ZTH      ! temperature(meaningless here)
+REAL, DIMENSION(KI,KLVL) :: ZWTH     ! heat  flux (supposed equal to zero)
+REAL, DIMENSION(KI,KLVL) :: ZWQ      ! vapor flux (supposed equal to zero)
+REAL, DIMENSION(KI,KLVL) :: ZLEPS    ! Dissipative length at full levels
+REAL, DIMENSION(KI,KLVL) :: ZZ       ! height above displacement height
+REAL, DIMENSION(KI,KLVL) :: ZLM      ! Mixing      length at mid levels
+REAL, DIMENSION(KI)      :: ZUSTAR   ! friction velocity (estimated from
+!                                    ! fluxes at atmospheric forcing level)
+!
+REAL                     :: ZZ0      ! a value of z0 just for first time-step init.
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

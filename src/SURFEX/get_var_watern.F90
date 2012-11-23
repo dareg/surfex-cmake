@@ -48,9 +48,9 @@ IMPLICIT NONE
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 CHARACTER(LEN=6),     INTENT(IN)     :: HWATER
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
-REAL, DIMENSION(:),  INTENT(OUT)    :: PQS     ! surface humidity
-REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0     ! surface roughness length
-REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
 !
 !
 !*       0.2   Declarations of local variables

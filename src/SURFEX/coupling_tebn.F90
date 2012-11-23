@@ -33,6 +33,7 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!      S. Riette   06/2009 Initialisation of XT, XQ, XU and XTKE on canopy levels
 !!      S. Riette   01/2010 Use of interpol_sbl to compute 10m wind diagnostic
 !!      B. Decharme 09/2012 New wind implicitation
+!!      J. Escobar  09/2012 SIZE(PTA) not allowed without-interface , replace by KI
 !!---------------------------------------------------------------
 !
 !
@@ -101,55 +102,55 @@ REAL,                INTENT(IN)  :: PTIME     ! current time since midnight (UTC
 INTEGER,             INTENT(IN)  :: KI        ! number of points
 INTEGER,             INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,             INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-REAL, DIMENSION(:), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
 REAL,                INTENT(IN)  :: PTSTEP    ! atmospheric time-step                 (s)
-REAL, DIMENSION(:), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
-REAL, DIMENSION(:), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
 !
-REAL, DIMENSION(:), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
-REAL, DIMENSION(:), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
-REAL, DIMENSION(:), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
-REAL, DIMENSION(:,:),INTENT(IN) :: PSV     ! scalar variables
+REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(:),INTENT(IN):: HSV  ! name of all scalar variables
-REAL, DIMENSION(:), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
-REAL, DIMENSION(:), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
-REAL, DIMENSION(:,:),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
+CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(:,:),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
+REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(:),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
-REAL, DIMENSION(:), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
-REAL, DIMENSION(:), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
-REAL, DIMENSION(:), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(:), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
-REAL, DIMENSION(:), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
-REAL, DIMENSION(:), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
-REAL, DIMENSION(:), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
-REAL, DIMENSION(:), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
-REAL, DIMENSION(:), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
 !
-REAL, DIMENSION(:), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
-REAL, DIMENSION(:), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(:), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
-REAL, DIMENSION(:,:),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
-REAL, DIMENSION(:), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
-REAL, DIMENSION(:,:),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
-REAL, DIMENSION(:,:),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
-REAL, DIMENSION(:), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
+REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
+REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
-REAL, DIMENSION(:), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
-REAL, DIMENSION(:), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
-REAL, DIMENSION(:), INTENT(IN) :: PPET_A_COEF
-REAL, DIMENSION(:), INTENT(IN) :: PPEQ_A_COEF
-REAL, DIMENSION(:), INTENT(IN) :: PPET_B_COEF
-REAL, DIMENSION(:), INTENT(IN) :: PPEQ_B_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !
@@ -157,166 +158,166 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 INTEGER                     :: JSWB        ! loop counter on shortwave spectral bands
 !         
-REAL, DIMENSION(SIZE(PTA))  :: ZQA         ! specific humidity                 (kg/kg)
-REAL, DIMENSION(SIZE(PTA))  :: ZEXNA       ! Exner function at forcing level
-REAL, DIMENSION(SIZE(PTA))  :: ZEXNS       ! Exner function at surface level
-REAL, DIMENSION(SIZE(PTA))  :: ZWIND       ! wind
+REAL, DIMENSION(KI)  :: ZQA         ! specific humidity                 (kg/kg)
+REAL, DIMENSION(KI)  :: ZEXNA       ! Exner function at forcing level
+REAL, DIMENSION(KI)  :: ZEXNS       ! Exner function at surface level
+REAL, DIMENSION(KI)  :: ZWIND       ! wind
 !
 ! Ouput Diagnostics:
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZU_CANYON   ! wind in canyon
-REAL, DIMENSION(SIZE(PTA))  :: ZT_CANYON   ! temperature in canyon
-REAL, DIMENSION(SIZE(PTA))  :: ZQ_CANYON   ! specific humidity in canyon
+REAL, DIMENSION(KI)  :: ZU_CANYON   ! wind in canyon
+REAL, DIMENSION(KI)  :: ZT_CANYON   ! temperature in canyon
+REAL, DIMENSION(KI)  :: ZQ_CANYON   ! specific humidity in canyon
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZRN_ROOF    ! net radiation on roof
-REAL, DIMENSION(SIZE(PTA))  :: ZH_ROOF     ! sensible heat flux on roof
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_ROOF    ! latent heat flux on roof
-REAL, DIMENSION(SIZE(PTA))  :: ZLEW_ROOF   ! latent heat flux on snowfree roof
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_ROOF ! storage flux in roof
-REAL, DIMENSION(SIZE(PTA))  :: ZRUNOFF_ROOF! water runoff from roof
-REAL, DIMENSION(SIZE(PTA))  :: ZRN_ROAD    ! net radiation on road
-REAL, DIMENSION(SIZE(PTA))  :: ZH_ROAD     ! sensible heat flux on road
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_ROAD    ! latent heat flux on road
-REAL, DIMENSION(SIZE(PTA))  :: ZLEW_ROAD   ! latent heat flux on snowfree road
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_ROAD ! storage flux in road
-REAL, DIMENSION(SIZE(PTA))  :: ZRUNOFF_ROAD! water runoff from road
-REAL, DIMENSION(SIZE(PTA))  :: ZRN_WALL    ! net radiation on walls
-REAL, DIMENSION(SIZE(PTA))  :: ZH_WALL     ! sensible heat flux on walls
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_WALL    ! latent heat flux on walls
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_WALL ! storage flux in walls
-REAL, DIMENSION(SIZE(PTA))  :: ZRN_GARDEN  ! net radiation on green areas
-REAL, DIMENSION(SIZE(PTA))  :: ZH_GARDEN   ! sensible heat flux on green areas
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_GARDEN  ! latent heat flux on green areas
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_GARDEN!storage flux in green areas
-REAL, DIMENSION(SIZE(PTA))  :: ZRN_BLT     ! net radiation on built surf 
-REAL, DIMENSION(SIZE(PTA))  :: ZH_BLT      ! sensible heat flux on built surf 
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_BLT     ! latent heat flux on built surf 
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_BLT  ! storage flux in built surf 
-REAL, DIMENSION(SIZE(PTA))  :: ZRN_GRND    ! net radiation on ground built surf
-REAL, DIMENSION(SIZE(PTA))  :: ZH_GRND     ! sensible heat flux on ground built surf
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_GRND    ! latent heat flux on ground built surf
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_GRND ! storage flux in ground built surf
-REAL, DIMENSION(SIZE(PTA))  :: ZRNSNOW_ROOF  ! net radiation over snow
-REAL, DIMENSION(SIZE(PTA))  :: ZHSNOW_ROOF   ! sensible heat flux over snow
-REAL, DIMENSION(SIZE(PTA))  :: ZLESNOW_ROOF  ! latent heat flux over snow
-REAL, DIMENSION(SIZE(PTA))  :: ZGSNOW_ROOF   ! flux under the snow
-REAL, DIMENSION(SIZE(PTA))  :: ZMELT_ROOF    ! snow melt
-REAL, DIMENSION(SIZE(PTA))  :: ZRNSNOW_ROAD  ! net radiation over snow
-REAL, DIMENSION(SIZE(PTA))  :: ZHSNOW_ROAD   ! sensible heat flux over snow
-REAL, DIMENSION(SIZE(PTA))  :: ZLESNOW_ROAD  ! latent heat flux over snow
-REAL, DIMENSION(SIZE(PTA))  :: ZGSNOW_ROAD   ! flux under the snow
-REAL, DIMENSION(SIZE(PTA))  :: ZMELT_ROAD    ! snow melt
+REAL, DIMENSION(KI)  :: ZRN_ROOF    ! net radiation on roof
+REAL, DIMENSION(KI)  :: ZH_ROOF     ! sensible heat flux on roof
+REAL, DIMENSION(KI)  :: ZLE_ROOF    ! latent heat flux on roof
+REAL, DIMENSION(KI)  :: ZLEW_ROOF   ! latent heat flux on snowfree roof
+REAL, DIMENSION(KI)  :: ZGFLUX_ROOF ! storage flux in roof
+REAL, DIMENSION(KI)  :: ZRUNOFF_ROOF! water runoff from roof
+REAL, DIMENSION(KI)  :: ZRN_ROAD    ! net radiation on road
+REAL, DIMENSION(KI)  :: ZH_ROAD     ! sensible heat flux on road
+REAL, DIMENSION(KI)  :: ZLE_ROAD    ! latent heat flux on road
+REAL, DIMENSION(KI)  :: ZLEW_ROAD   ! latent heat flux on snowfree road
+REAL, DIMENSION(KI)  :: ZGFLUX_ROAD ! storage flux in road
+REAL, DIMENSION(KI)  :: ZRUNOFF_ROAD! water runoff from road
+REAL, DIMENSION(KI)  :: ZRN_WALL    ! net radiation on walls
+REAL, DIMENSION(KI)  :: ZH_WALL     ! sensible heat flux on walls
+REAL, DIMENSION(KI)  :: ZLE_WALL    ! latent heat flux on walls
+REAL, DIMENSION(KI)  :: ZGFLUX_WALL ! storage flux in walls
+REAL, DIMENSION(KI)  :: ZRN_GARDEN  ! net radiation on green areas
+REAL, DIMENSION(KI)  :: ZH_GARDEN   ! sensible heat flux on green areas
+REAL, DIMENSION(KI)  :: ZLE_GARDEN  ! latent heat flux on green areas
+REAL, DIMENSION(KI)  :: ZGFLUX_GARDEN!storage flux in green areas
+REAL, DIMENSION(KI)  :: ZRN_BLT     ! net radiation on built surf 
+REAL, DIMENSION(KI)  :: ZH_BLT      ! sensible heat flux on built surf 
+REAL, DIMENSION(KI)  :: ZLE_BLT     ! latent heat flux on built surf 
+REAL, DIMENSION(KI)  :: ZGFLUX_BLT  ! storage flux in built surf 
+REAL, DIMENSION(KI)  :: ZRN_GRND    ! net radiation on ground built surf
+REAL, DIMENSION(KI)  :: ZH_GRND     ! sensible heat flux on ground built surf
+REAL, DIMENSION(KI)  :: ZLE_GRND    ! latent heat flux on ground built surf
+REAL, DIMENSION(KI)  :: ZGFLUX_GRND ! storage flux in ground built surf
+REAL, DIMENSION(KI)  :: ZRNSNOW_ROOF  ! net radiation over snow
+REAL, DIMENSION(KI)  :: ZHSNOW_ROOF   ! sensible heat flux over snow
+REAL, DIMENSION(KI)  :: ZLESNOW_ROOF  ! latent heat flux over snow
+REAL, DIMENSION(KI)  :: ZGSNOW_ROOF   ! flux under the snow
+REAL, DIMENSION(KI)  :: ZMELT_ROOF    ! snow melt
+REAL, DIMENSION(KI)  :: ZRNSNOW_ROAD  ! net radiation over snow
+REAL, DIMENSION(KI)  :: ZHSNOW_ROAD   ! sensible heat flux over snow
+REAL, DIMENSION(KI)  :: ZLESNOW_ROAD  ! latent heat flux over snow
+REAL, DIMENSION(KI)  :: ZGSNOW_ROAD   ! flux under the snow
+REAL, DIMENSION(KI)  :: ZMELT_ROAD    ! snow melt
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZRN           ! net radiation over town
-REAL, DIMENSION(SIZE(PTA))  :: ZH            ! sensible heat flux over town
-REAL, DIMENSION(SIZE(PTA))  :: ZLE           ! latent heat flux over town
-REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX        ! flux through the ground
-REAL, DIMENSION(SIZE(PTA))  :: ZQF_BLD       ! domestic heating
-REAL, DIMENSION(SIZE(PTA))  :: ZQF_BLDWFR    ! domestic heating
-REAL, DIMENSION(SIZE(PTA))  :: ZFLX_BLD      ! flux from bld
-REAL, DIMENSION(SIZE(PTA))  :: ZTI_BLD_EQ    ! internal temperature witout heating
-REAL, DIMENSION(SIZE(PTA))  :: ZTI_BLDWFR    ! internal temperature witout F/R
-REAL, DIMENSION(SIZE(PTA))  :: ZDQS_TOWN     ! storage inside town materials
-REAL, DIMENSION(SIZE(PTA))  :: ZQF_TOWN      ! total anthropogenic heat
-REAL, DIMENSION(SIZE(PTA))  :: ZEVAP         ! evaporation (km/m2/s)
-REAL, DIMENSION(SIZE(PTA))  :: ZRUNOFF       ! runoff over the ground
-REAL, DIMENSION(SIZE(PTA))  :: ZCD           ! drag coefficient
-REAL, DIMENSION(SIZE(PTA))  :: ZCDN          ! neutral drag coefficient
-REAL, DIMENSION(SIZE(PTA))  :: ZCH           ! heat drag
-REAL, DIMENSION(SIZE(PTA))  :: ZRI           ! Richardson number
-REAL, DIMENSION(SIZE(PTA))  :: ZUW_GRND      ! momentum flux for ground built surf
-REAL, DIMENSION(SIZE(PTA))  :: ZUW_ROOF      ! momentum flux for roofs
-REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_GRND   !
-REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_ROOF   !
-REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR        ! friction velocity
+REAL, DIMENSION(KI)  :: ZRN           ! net radiation over town
+REAL, DIMENSION(KI)  :: ZH            ! sensible heat flux over town
+REAL, DIMENSION(KI)  :: ZLE           ! latent heat flux over town
+REAL, DIMENSION(KI)  :: ZGFLUX        ! flux through the ground
+REAL, DIMENSION(KI)  :: ZQF_BLD       ! domestic heating
+REAL, DIMENSION(KI)  :: ZQF_BLDWFR    ! domestic heating
+REAL, DIMENSION(KI)  :: ZFLX_BLD      ! flux from bld
+REAL, DIMENSION(KI)  :: ZTI_BLD_EQ    ! internal temperature witout heating
+REAL, DIMENSION(KI)  :: ZTI_BLDWFR    ! internal temperature witout F/R
+REAL, DIMENSION(KI)  :: ZDQS_TOWN     ! storage inside town materials
+REAL, DIMENSION(KI)  :: ZQF_TOWN      ! total anthropogenic heat
+REAL, DIMENSION(KI)  :: ZEVAP         ! evaporation (km/m2/s)
+REAL, DIMENSION(KI)  :: ZRUNOFF       ! runoff over the ground
+REAL, DIMENSION(KI)  :: ZCD           ! drag coefficient
+REAL, DIMENSION(KI)  :: ZCDN          ! neutral drag coefficient
+REAL, DIMENSION(KI)  :: ZCH           ! heat drag
+REAL, DIMENSION(KI)  :: ZRI           ! Richardson number
+REAL, DIMENSION(KI)  :: ZUW_GRND      ! momentum flux for ground built surf
+REAL, DIMENSION(KI)  :: ZUW_ROOF      ! momentum flux for roofs
+REAL, DIMENSION(KI)  :: ZDUWDU_GRND   !
+REAL, DIMENSION(KI)  :: ZDUWDU_ROOF   !
+REAL, DIMENSION(KI)  :: ZUSTAR        ! friction velocity
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZDIR_ALB      ! direct albedo of town
-REAL, DIMENSION(SIZE(PTA))  :: ZSCA_ALB      ! diffuse albedo of town
+REAL, DIMENSION(KI)  :: ZDIR_ALB      ! direct albedo of town
+REAL, DIMENSION(KI)  :: ZSCA_ALB      ! diffuse albedo of town
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZH_TRAFFIC    ! anthropogenic sensible
+REAL, DIMENSION(KI)  :: ZH_TRAFFIC    ! anthropogenic sensible
 !                                            ! heat fluxes due to traffic
-REAL, DIMENSION(SIZE(PTA))  :: ZLE_TRAFFIC   ! anthropogenic latent
+REAL, DIMENSION(KI)  :: ZLE_TRAFFIC   ! anthropogenic latent
 !                                            ! heat fluxes due to traffic
-REAL, DIMENSION(SIZE(PTA))  :: ZRESA_TOWN    ! aerodynamical resistance
-REAL, DIMENSION(SIZE(PTA))  :: ZAC_ROAD      ! road aerodynamical conductance
-REAL, DIMENSION(SIZE(PTA))  :: ZAC_GARDEN    ! green area aerodynamical conductance
-REAL, DIMENSION(SIZE(PTA))  :: ZAC_GRND      ! ground built surf aerodynamical conductance
-REAL, DIMENSION(SIZE(PTA))  :: ZAC_ROAD_WAT  ! road water aerodynamical conductance
-REAL, DIMENSION(SIZE(PTA))  :: ZAC_GARDEN_WAT! green area water aerodynamical conductance
-REAL, DIMENSION(SIZE(PTA))  :: ZAC_GRND_WAT  ! ground built surf water aerodynamical conductance
+REAL, DIMENSION(KI)  :: ZRESA_TOWN    ! aerodynamical resistance
+REAL, DIMENSION(KI)  :: ZAC_ROAD      ! road aerodynamical conductance
+REAL, DIMENSION(KI)  :: ZAC_GARDEN    ! green area aerodynamical conductance
+REAL, DIMENSION(KI)  :: ZAC_GRND      ! ground built surf aerodynamical conductance
+REAL, DIMENSION(KI)  :: ZAC_ROAD_WAT  ! road water aerodynamical conductance
+REAL, DIMENSION(KI)  :: ZAC_GARDEN_WAT! green area water aerodynamical conductance
+REAL, DIMENSION(KI)  :: ZAC_GRND_WAT  ! ground built surf water aerodynamical conductance
 !
 REAL                        :: ZBEGIN_TRAFFIC_TIME ! start traffic time (solar time, s)
 REAL                        :: ZEND_TRAFFIC_TIME   ! end traffic time   (solar time, s)
-REAL, DIMENSION(SIZE(PTA))  :: ZDIR_SW       ! total direct SW
-REAL, DIMENSION(SIZE(PTA))  :: ZSCA_SW       ! total diffuse SW
-REAL, DIMENSION(SIZE(PTA))  :: ZPEW_A_COEF   ! implicit coefficients
-REAL, DIMENSION(SIZE(PTA))  :: ZPEW_B_COEF   ! needed if HCOUPLING='I'
+REAL, DIMENSION(KI)  :: ZDIR_SW       ! total direct SW
+REAL, DIMENSION(KI)  :: ZSCA_SW       ! total diffuse SW
+REAL, DIMENSION(KI)  :: ZPEW_A_COEF   ! implicit coefficients
+REAL, DIMENSION(KI)  :: ZPEW_B_COEF   ! needed if HCOUPLING='I'
 !
 !***** CANOPY  *****
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI)        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+REAL, DIMENSION(KI)        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
+REAL, DIMENSION(KI)        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(SIZE(PTA))        :: ZE_ROOF
-REAL, DIMENSION(SIZE(PTA))        :: ZE_GRND
-REAL, DIMENSION(SIZE(PTA))        :: ZT_LOWCAN  ! temperature at lowest canyon level (K)
-REAL, DIMENSION(SIZE(PTA))        :: ZQ_LOWCAN  ! humidity    at lowest canyon level (kg/kg)
-REAL, DIMENSION(SIZE(PTA))        :: ZU_LOWCAN  ! wind        at lowest canyon level (m/s)
-REAL, DIMENSION(SIZE(PTA))        :: ZZ_LOWCAN  ! height      of lowest canyon level (m)
-REAL, DIMENSION(SIZE(PTA))        :: ZPEW_A_COEF_LOWCAN   ! implicit coefficients for wind coupling
-REAL, DIMENSION(SIZE(PTA))        :: ZPEW_B_COEF_LOWCAN   ! between first canopy level and road
-REAL, DIMENSION(SIZE(PTA))        :: ZTA        ! temperature at canyon level just above roof (K)
-REAL, DIMENSION(SIZE(PTA))        :: ZPA        ! pressure    at canyon level just above roof (K)
-REAL, DIMENSION(SIZE(PTA))        :: ZUA        ! wind        at canyon level just above roof (m/s)
-REAL, DIMENSION(SIZE(PTA))        :: ZUREF      ! height      of canyon level just above roof (m)
-REAL, DIMENSION(SIZE(PTA))        :: ZZREF      ! height      of canyon level just above roof (m)
-REAL, DIMENSION(SIZE(PTA))        :: ZLAMBDA_F  ! frontal density (-)
-REAL, DIMENSION(SIZE(PTA))        :: ZLMO       ! Monin-Obukhov length at canopy height (m)
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZL         ! Mixing length generic profile at mid levels
-REAL, DIMENSION(SIZE(PTA))        :: ZCOEF
+REAL, DIMENSION(KI)        :: ZE_ROOF
+REAL, DIMENSION(KI)        :: ZE_GRND
+REAL, DIMENSION(KI)        :: ZT_LOWCAN  ! temperature at lowest canyon level (K)
+REAL, DIMENSION(KI)        :: ZQ_LOWCAN  ! humidity    at lowest canyon level (kg/kg)
+REAL, DIMENSION(KI)        :: ZU_LOWCAN  ! wind        at lowest canyon level (m/s)
+REAL, DIMENSION(KI)        :: ZZ_LOWCAN  ! height      of lowest canyon level (m)
+REAL, DIMENSION(KI)        :: ZPEW_A_COEF_LOWCAN   ! implicit coefficients for wind coupling
+REAL, DIMENSION(KI)        :: ZPEW_B_COEF_LOWCAN   ! between first canopy level and road
+REAL, DIMENSION(KI)        :: ZTA        ! temperature at canyon level just above roof (K)
+REAL, DIMENSION(KI)        :: ZPA        ! pressure    at canyon level just above roof (K)
+REAL, DIMENSION(KI)        :: ZUA        ! wind        at canyon level just above roof (m/s)
+REAL, DIMENSION(KI)        :: ZUREF      ! height      of canyon level just above roof (m)
+REAL, DIMENSION(KI)        :: ZZREF      ! height      of canyon level just above roof (m)
+REAL, DIMENSION(KI)        :: ZLAMBDA_F  ! frontal density (-)
+REAL, DIMENSION(KI)        :: ZLMO       ! Monin-Obukhov length at canopy height (m)
+REAL, DIMENSION(KI,NLVL)   :: ZL         ! Mixing length generic profile at mid levels
+REAL, DIMENSION(KI)        :: ZCOEF
 !
-REAL, DIMENSION(SIZE(PTA))        :: ZALFAU   ! V+(1) = alfa u'w'(1) + beta
-REAL, DIMENSION(SIZE(PTA))        :: ZBETAU   ! V+(1) = alfa u'w'(1) + beta
-REAL, DIMENSION(SIZE(PTA))        :: ZALFAT   ! Th+(1) = alfa w'th'(1) + beta
-REAL, DIMENSION(SIZE(PTA))        :: ZBETAT   ! Th+(1) = alfa w'th'(1) + beta
-REAL, DIMENSION(SIZE(PTA))        :: ZALFAQ   ! Q+(1) = alfa w'q'(1) + beta
-REAL, DIMENSION(SIZE(PTA))        :: ZBETAQ   ! Q+(1) = alfa w'q'(1) + beta
+REAL, DIMENSION(KI)        :: ZALFAU   ! V+(1) = alfa u'w'(1) + beta
+REAL, DIMENSION(KI)        :: ZBETAU   ! V+(1) = alfa u'w'(1) + beta
+REAL, DIMENSION(KI)        :: ZALFAT   ! Th+(1) = alfa w'th'(1) + beta
+REAL, DIMENSION(KI)        :: ZBETAT   ! Th+(1) = alfa w'th'(1) + beta
+REAL, DIMENSION(KI)        :: ZALFAQ   ! Q+(1) = alfa w'q'(1) + beta
+REAL, DIMENSION(KI)        :: ZBETAQ   ! Q+(1) = alfa w'q'(1) + beta
 !***** CANOPY  *****
-REAL, DIMENSION(SIZE(PTA))        :: ZWAKE      ! reduction of average wind speed
+REAL, DIMENSION(KI)        :: ZWAKE      ! reduction of average wind speed
                                                 ! in canyon due to direction average.
 !
 ! absorbed solar and infra-red radiation by road, wall and roof
 !                                                      
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_ROAD
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_WALL
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_ROOF
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_GARDEN
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_SNOW_ROAD
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_SNOW_ROOF
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_SNOW_ROAD
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_SNOW_ROOF
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_ROAD
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_WALL
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_ROOF
-REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_GARDEN
+REAL, DIMENSION(KI) :: ZABS_SW_ROAD
+REAL, DIMENSION(KI) :: ZABS_SW_WALL
+REAL, DIMENSION(KI) :: ZABS_SW_ROOF
+REAL, DIMENSION(KI) :: ZABS_SW_GARDEN
+REAL, DIMENSION(KI) :: ZABS_SW_SNOW_ROAD
+REAL, DIMENSION(KI) :: ZABS_SW_SNOW_ROOF
+REAL, DIMENSION(KI) :: ZABS_LW_SNOW_ROAD
+REAL, DIMENSION(KI) :: ZABS_LW_SNOW_ROOF
+REAL, DIMENSION(KI) :: ZABS_LW_ROAD
+REAL, DIMENSION(KI) :: ZABS_LW_WALL
+REAL, DIMENSION(KI) :: ZABS_LW_ROOF
+REAL, DIMENSION(KI) :: ZABS_LW_GARDEN
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M
-REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M_MAX
-REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MIN
-REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MAX
-REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MIN
-REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MAX
+REAL, DIMENSION(KI)  :: ZWIND10M
+REAL, DIMENSION(KI)  :: ZWIND10M_MAX
+REAL, DIMENSION(KI)  :: ZT2M_MIN
+REAL, DIMENSION(KI)  :: ZT2M_MAX
+REAL, DIMENSION(KI)  :: ZHU2M_MIN
+REAL, DIMENSION(KI)  :: ZHU2M_MAX
 !
 REAL                       :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
 REAL                       :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST
@@ -352,7 +353,7 @@ DO JSWB=1,KSW
   ENDDO
 END DO
 !
-DO JJ=1,SIZE(PTA)
+DO JJ=1,KI
 ! specific humidity (conversion from kg/m3 to kg/kg)
 !
   ZQA(JJ) = PQA(JJ) / PRHOA(JJ)

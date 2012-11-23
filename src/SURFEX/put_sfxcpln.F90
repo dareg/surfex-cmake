@@ -67,29 +67,29 @@ CHARACTER(LEN=6),        INTENT(IN)  :: HPROGRAM
 INTEGER,                 INTENT(IN)  :: KI      ! number of points
 INTEGER,                 INTENT(IN)  :: KSW     ! number of bands
 !
-REAL, DIMENSION(:),      INTENT(IN) :: PZENITH
-REAL, DIMENSION(:),     INTENT(IN) :: PSW_BANDS ! mean wavelength of each shortwave band (m)
+REAL, DIMENSION(KI),      INTENT(IN) :: PZENITH
+REAL, DIMENSION(KSW),     INTENT(IN) :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 !
-REAL, DIMENSION(:),     INTENT(OUT) :: PTSRAD   ! Total radiative temperature see by the atmosphere
-REAL, DIMENSION(:),     INTENT(OUT) :: PEMIS    ! Total emissivity see by the atmosphere
-REAL, DIMENSION(:,:), INTENT(OUT) :: PDIR_ALB ! Total direct albedo see by the atmosphere
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSCA_ALB ! Total diffus albedo see by the atmosphere
+REAL, DIMENSION(KI),     INTENT(OUT) :: PTSRAD   ! Total radiative temperature see by the atmosphere
+REAL, DIMENSION(KI),     INTENT(OUT) :: PEMIS    ! Total emissivity see by the atmosphere
+REAL, DIMENSION(KI,KSW), INTENT(OUT) :: PDIR_ALB ! Total direct albedo see by the atmosphere
+REAL, DIMENSION(KI,KSW), INTENT(OUT) :: PSCA_ALB ! Total diffus albedo see by the atmosphere
 !
-REAL, DIMENSION(:),     INTENT(IN   ), OPTIONAL :: PICE        ! Sea/Ice fraction
-REAL, DIMENSION(:),     INTENT(INOUT), OPTIONAL :: PSST        ! SST
-REAL, DIMENSION(:),     INTENT(INOUT), OPTIONAL :: PALB_SEAICE ! Sea_ice albedo
-REAL, DIMENSION(:),     INTENT(IN   ), OPTIONAL :: PUMER       ! U sea current
-REAL, DIMENSION(:),     INTENT(IN   ), OPTIONAL :: PVMER       ! V sea current
-REAL, DIMENSION(:),     INTENT(IN   ), OPTIONAL :: PTICE       ! Sea ice temperature
+REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PICE        ! Sea/Ice fraction
+REAL, DIMENSION(KI),     INTENT(INOUT), OPTIONAL :: PSST        ! SST
+REAL, DIMENSION(KI),     INTENT(INOUT), OPTIONAL :: PALB_SEAICE ! Sea_ice albedo
+REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PUMER       ! U sea current
+REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PVMER       ! V sea current
+REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PTICE       ! Sea ice temperature
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(PZENITH)) :: ZSEA    ! fraction of sea
-REAL, DIMENSION(SIZE(PZENITH)) :: ZWATER  ! fraction of water
-REAL, DIMENSION(SIZE(PZENITH)) :: ZNATURE ! fraction of nature
-REAL, DIMENSION(SIZE(PZENITH)) :: ZTOWN   ! fraction of town
+REAL, DIMENSION(KI) :: ZSEA    ! fraction of sea
+REAL, DIMENSION(KI) :: ZWATER  ! fraction of water
+REAL, DIMENSION(KI) :: ZNATURE ! fraction of nature
+REAL, DIMENSION(KI) :: ZTOWN   ! fraction of town
 !
 INTEGER :: ILU, ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

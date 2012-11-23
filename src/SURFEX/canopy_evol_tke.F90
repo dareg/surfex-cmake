@@ -53,46 +53,45 @@ IMPLICIT NONE
 INTEGER,                  INTENT(IN)    :: KI        ! number of horizontal points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
 REAL,                     INTENT(IN)    :: PTSTEP    ! time-step                             (s)
-REAL, DIMENSION(:),      INTENT(IN)    :: PRHOA     ! Air density                           (kg/m3)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZ        ! Z at full levels                      (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PZF       ! Z at half levels                      (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZ       ! deltaZ between canopy half levels,
+REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! Air density                           (kg/m3)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZ        ! Z at full levels                      (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZF       ! Z at half levels                      (m)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZ       ! deltaZ between canopy half levels,
 !                                                    ! located at full levels                (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDZF      ! deltaZ between canopy (full) levels,
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDZF      ! deltaZ between canopy (full) levels,
 !                                                    ! located at half levels                (m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PFORC_E   ! tendency of wind due to canopy drag   (m2/s3)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PFORC_E   ! tendency of wind due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PU        ! wind speed at canopy levels           (m/s)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PTH       ! pot. temp. at canopy levels           (K)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PUW       ! turbulent flux (at half levels)       (m2/s2)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PWTH      ! w'Th' flux (at half levels)           (mK/s)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PWQ       ! w'q'  flux (at half levels)           (kg/m2/s)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PLEPS     ! dissipative length (full levels)      (m)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PTKE      ! TKE at canopy levels   
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PU        ! wind speed at canopy levels           (m/s)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PTH       ! pot. temp. at canopy levels           (K)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PUW       ! turbulent flux (at half levels)       (m2/s2)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PWTH      ! w'Th' flux (at half levels)           (mK/s)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PWQ       ! w'q'  flux (at half levels)           (kg/m2/s)
+REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PLEPS     ! dissipative length (full levels)      (m)
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PTKE      ! TKE at canopy levels   
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZDUDZ    ! dU/dz at mid levels
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZDP      ! dynamical production at full levels
-!                                                    ! (at full levels)
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZTP      ! thermal   production at full levels
-!                                                    ! (at full levels)
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZDISS_O_TKE ! dissipation/TKE ratio at full levels
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZF          ! turbulent flux at mid levels
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZDFDDVDZ    ! derivative of turbulent flux as a
-!                                                       ! function of vertical gradient of wind variable
-!                                                       ! (at mid levels)
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZEXT        ! external forcing at full levels
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZDEXTDV     ! derivative of external forcing as a
-!                                                       ! function of vertical variable
-!                                                       ! (at full levels)
-REAL, DIMENSION(SIZE(PU,1),SIZE(PU,2))   :: ZTKE        ! TKE     at canopy levels (work var.)
-!
 INTEGER                    :: JLAYER   ! loop counter on layers
 !
+REAL, DIMENSION(KI,KLVL)   :: ZDUDZ    ! dU/dz at mid levels
+REAL, DIMENSION(KI,KLVL)   :: ZDP      ! dynamical production at full levels
+!                                      ! (at full levels)
+REAL, DIMENSION(KI,KLVL)   :: ZTP      ! thermal   production at full levels
+!                                      ! (at full levels)
+REAL, DIMENSION(KI,KLVL)   :: ZDISS_O_TKE ! dissipation/TKE ratio at full levels
+REAL, DIMENSION(KI,KLVL)   :: ZF       ! turbulent flux at mid levels
+REAL, DIMENSION(KI,KLVL)   :: ZDFDDVDZ ! derivative of turbulent flux as a
+!                                      ! function of vertical gradient of wind variable
+!                                      ! (at mid levels)
+REAL, DIMENSION(KI,KLVL)   :: ZEXT     ! external forcing at full levels
+REAL, DIMENSION(KI,KLVL)   :: ZDEXTDV  ! derivative of external forcing as a
+!                                      ! function of vertical variable
+!                                      ! (at full levels)
+REAL, DIMENSION(KI,KLVL)   :: ZTKE     ! TKE     at canopy levels (work var.)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

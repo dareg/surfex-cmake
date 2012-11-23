@@ -58,27 +58,27 @@ IMPLICIT NONE
 CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                INTENT(IN)  :: KI        ! number of points
 INTEGER,                INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-REAL, DIMENSION(:),     INTENT(IN) :: PZENITH   ! zenithal angle       (radian from the vertical)
-REAL, DIMENSION(:),     INTENT(IN) :: PSW_BANDS ! mean wavelength of each shortwave band (m)
+REAL, DIMENSION(KI),     INTENT(IN) :: PZENITH   ! zenithal angle       (radian from the vertical)
+REAL, DIMENSION(KSW),    INTENT(IN) :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 !
-REAL, DIMENSION(:),    INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
-REAL, DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each spectral band  (-)
-REAL, DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each spectral band (-)
-REAL, DIMENSION(:),    INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+REAL, DIMENSION(KI),    INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+REAL, DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each spectral band  (-)
+REAL, DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each spectral band (-)
+REAL, DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
 !*      0.2    declarations of local variables
 !
-! Tile outputs:
-!
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC) :: ZTRAD_TILE     ! radiative surface temperature
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC) :: ZEMIS_TILE     ! emissivity
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
-!
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
-!
 INTEGER :: JTILE                        ! loop on type of surface
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
+!
+! Tile outputs:
+!
+REAL, DIMENSION(KI,NTILESFC) :: ZTRAD_TILE     ! radiative surface temperature
+REAL, DIMENSION(KI,NTILESFC) :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
+!
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------

@@ -55,12 +55,12 @@ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling s
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 !
-REAL,             DIMENSION(:),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
 !
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(:),    INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(:),    INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !

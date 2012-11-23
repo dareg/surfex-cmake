@@ -178,15 +178,15 @@ LOGICAL,                          INTENT(IN)  :: OLAND_USE !
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(:), INTENT(IN)  :: HSV       ! name of all scalar variables
-REAL,             DIMENSION(:),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
-REAL,             DIMENSION(:),  INTENT(IN)  :: PRHOA     ! air density
-REAL,             DIMENSION(:),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(:), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(:),  INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(:),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 !
 CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
@@ -196,7 +196,7 @@ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 
 !
 REAL, DIMENSION(NDIM_FULL)   :: ZF_PARAM, ZC_DEPTH_RATIO
 !
-REAL, DIMENSION(SIZE(PTSRAD))     :: ZTSRAD_NAT !radiative temperature
+REAL, DIMENSION(KI)     :: ZTSRAD_NAT !radiative temperature
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG1 ! work array for surface temperature

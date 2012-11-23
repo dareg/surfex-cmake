@@ -59,12 +59,12 @@ INTEGER, INTENT(INOUT)               :: KTRIP    ! number of Trip timestep count
 REAL,    INTENT(IN)                  :: PTIME    ! current time since start of the run (s)
 REAL,    INTENT(IN)                  :: PDURATION! duration of run                     (s)
 !
-REAL,             DIMENSION(:),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(:), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(:,:),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(:),  INTENT(OUT) :: PEMIS     ! emissivity
-REAL,             DIMENSION(:),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 !
 !*      0.2    declarations of local variables
 !

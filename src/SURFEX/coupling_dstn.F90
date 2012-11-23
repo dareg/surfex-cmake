@@ -37,7 +37,9 @@ SUBROUTINE COUPLING_DST_n(  &
 !ALF GRINI <alf.grini@cnrm.meteo.fr>  2005
 ! Modification P. Tulet introduce friction velocity for mode repartition upon 
 ! Alfaro et al, 1998 (Geo. Res. Lett.)
-
+!
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
+!
 USE MODD_CSTS, ONLY : XRD                      ! [J/K/kg] The universal gas constant  
        
 USE MODD_PACK_ISBA, ONLY : XP_VEGTYPE_PATCH    ! Fraction of all vegtypes for all patches  
@@ -62,29 +64,29 @@ CHARACTER(LEN=*), INTENT(IN)       :: HPROGRAM       !I Name of program
 INTEGER, INTENT(IN)                :: KI             !I Number of points in patch
 INTEGER, INTENT(IN)                :: KDST           !I Number of dust emission variables
 INTEGER, INTENT(IN)                :: KPATCH         !I Number of patch we are working on 
-REAL, DIMENSION(:), INTENT(IN)    :: PCLAY          !I [frc] mass fraction clay
-REAL, DIMENSION(:), INTENT(IN)    :: PPS            !I [Pa] surface pressure
-REAL, DIMENSION(:), INTENT(IN)    :: PQA            !I [kg/kg] atmospheric specific humidity
-REAL, DIMENSION(:), INTENT(IN)    :: PRA            !I [s/m] surface resistance
-REAL, DIMENSION(:), INTENT(IN)    :: PRHOA          !I [kg/m3] atmospheric density
-REAL, DIMENSION(:), INTENT(IN)    :: PSAND          !I [frc] mass fraction sand
-REAL, DIMENSION(:), INTENT(IN)    :: PSFTH          !I [W/m2] surface sensible heat flux
-REAL, DIMENSION(:), INTENT(IN)    :: PSFTQ          !I [kg/m2/sec] water vapor flux
-REAL, DIMENSION(:), INTENT(IN)    :: PTA            !I [K] Atmospheric temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PTG            !I [K] Ground temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PU             !I [m/s] zonal wind at atmospheric height 
-REAL, DIMENSION(:), INTENT(IN)    :: PUREF          !I [m] reference height of wind
-REAL, DIMENSION(:), INTENT(IN)    :: PV             !I [m/s] meridional wind at atmospheric height
-REAL, DIMENSION(:), INTENT(IN)    :: PWG            !I [m3/m3] ground volumetric water content
-REAL, DIMENSION(:), INTENT(IN)    :: PWSAT          !I [m3/m3] saturation volumetric water content
-REAL, DIMENSION(:), INTENT(IN)    :: PZREF          !I [m] reference height of wind
-REAL, DIMENSION(:), INTENT(IN)    :: PCD            !I [] Drag coefficient
-REAL, DIMENSION(:), INTENT(IN)    :: PRI            !I [] Richardson number from isba
-REAL, DIMENSION(:), INTENT(IN)    :: PZ0H_WITH_SNOW !I [frc] Z0 heat with snow
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSFDST      !O [kg/m2/sec] flux of dust for a patch
+REAL, DIMENSION(KI), INTENT(IN)    :: PCLAY          !I [frc] mass fraction clay
+REAL, DIMENSION(KI), INTENT(IN)    :: PPS            !I [Pa] surface pressure
+REAL, DIMENSION(KI), INTENT(IN)    :: PQA            !I [kg/kg] atmospheric specific humidity
+REAL, DIMENSION(KI), INTENT(IN)    :: PRA            !I [s/m] surface resistance
+REAL, DIMENSION(KI), INTENT(IN)    :: PRHOA          !I [kg/m3] atmospheric density
+REAL, DIMENSION(KI), INTENT(IN)    :: PSAND          !I [frc] mass fraction sand
+REAL, DIMENSION(KI), INTENT(IN)    :: PSFTH          !I [W/m2] surface sensible heat flux
+REAL, DIMENSION(KI), INTENT(IN)    :: PSFTQ          !I [kg/m2/sec] water vapor flux
+REAL, DIMENSION(KI), INTENT(IN)    :: PTA            !I [K] Atmospheric temperature
+REAL, DIMENSION(KI), INTENT(IN)    :: PTG            !I [K] Ground temperature
+REAL, DIMENSION(KI), INTENT(IN)    :: PU             !I [m/s] zonal wind at atmospheric height 
+REAL, DIMENSION(KI), INTENT(IN)    :: PUREF          !I [m] reference height of wind
+REAL, DIMENSION(KI), INTENT(IN)    :: PV             !I [m/s] meridional wind at atmospheric height
+REAL, DIMENSION(KI), INTENT(IN)    :: PWG            !I [m3/m3] ground volumetric water content
+REAL, DIMENSION(KI), INTENT(IN)    :: PWSAT          !I [m3/m3] saturation volumetric water content
+REAL, DIMENSION(KI), INTENT(IN)    :: PZREF          !I [m] reference height of wind
+REAL, DIMENSION(KI), INTENT(IN)    :: PCD            !I [] Drag coefficient
+REAL, DIMENSION(KI), INTENT(IN)    :: PRI            !I [] Richardson number from isba
+REAL, DIMENSION(KI), INTENT(IN)    :: PZ0H_WITH_SNOW !I [frc] Z0 heat with snow
+REAL, DIMENSION(KI,KDST), INTENT(OUT) :: PSFDST      !O [kg/m2/sec] flux of dust for a patch
   
 !LOCAL VARIABLES
-REAL, DIMENSION(SIZE(PTA),NVEGNO_DST,NDSTMDE) :: ZSFDST_TILE  ![kg/m2] flux of dust for each vegetation types and each mode
+REAL, DIMENSION(KI,NVEGNO_DST,NDSTMDE) :: ZSFDST_TILE  ![kg/m2] flux of dust for each vegetation types and each mode
 INTEGER                            :: JVEG           ![idx] counter for vegetation types
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 

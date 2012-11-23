@@ -50,16 +50,16 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
-REAL,DIMENSION(:), INTENT(IN) :: PT2M_O
+REAL,DIMENSION(KI), INTENT(IN) :: PT2M_O
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-REAL, DIMENSION (SIZE(PT2M_O)) :: ZTRD3
-REAL, DIMENSION (SIZE(PT2M_O)) :: ZT2INC
-REAL, DIMENSION (SIZE(PT2M_O)) :: ZTCLS
+REAL, DIMENSION (KI) :: ZTRD3
+REAL, DIMENSION (KI) :: ZT2INC
+REAL, DIMENSION (KI) :: ZTCLS
 CHARACTER(LEN=10)    :: YVAR    ! Name of the prognostic variable (in LFI file)
 CHARACTER(LEN=100)   :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 CHARACTER(LEN=3)     :: YREAD

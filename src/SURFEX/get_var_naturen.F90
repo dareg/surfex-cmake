@@ -52,13 +52,13 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
-REAL, DIMENSION(:),  INTENT(OUT)    :: PQS     ! surface humidity
-REAL, DIMENSION(:),  INTENT(OUT)    :: PSNG    ! snow fraction over ground
-REAL, DIMENSION(:),  INTENT(OUT)    :: PSNV    ! snow fraction over vegetation
-REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0EFF  ! effective roughness length (z0v+z0rel)
-REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0     ! surface roughness length
-REAL, DIMENSION(:),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
-REAL, DIMENSION(:),  INTENT(OUT)    :: PTWSNOW ! Snow total reservoir
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PSNG    ! snow fraction over ground
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PSNV    ! snow fraction over vegetation
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0EFF  ! effective roughness length (z0v+z0rel)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PTWSNOW ! Snow total reservoir
 !
 !
 !*       0.2   Declarations of local variables

@@ -31,17 +31,17 @@ SUBROUTINE ASSIM_ISBA_UPDATE_SNOW(YPROGRAM, KI, PSWE, PSWE_ORIG, LINITSNOW, LINC
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: YPROGRAM  ! program calling surf. schemes
  INTEGER,             INTENT(IN)    :: KI
- REAL, DIMENSION(:),  INTENT(IN)    :: PSWE
- REAL, DIMENSION(:),  INTENT(INOUT) :: PSWE_ORIG
+ REAL, DIMENSION(KI),  INTENT(IN)    :: PSWE
+ REAL, DIMENSION(KI),  INTENT(INOUT) :: PSWE_ORIG
  LOGICAL,             INTENT(IN)    :: LINITSNOW
  LOGICAL,             INTENT(IN)    :: LINC
  CHARACTER(LEN=2),    INTENT(IN)    :: HTEST     ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !
- REAL, DIMENSION(SIZE(PSWE))       :: ZSWE     ! Snow before update
- REAL, DIMENSION(SIZE(PSWE))       :: ZSWEINC
- REAL, DIMENSION(SIZE(PSWE))       :: PTS
+ REAL, DIMENSION(KI)       :: ZSWE     ! Snow before update
+ REAL, DIMENSION(KI)       :: ZSWEINC
+ REAL, DIMENSION(KI)       :: PTS
  CHARACTER(LEN=10)                 :: YVAR    ! Name of the prognostic variable (in LFI file)
  CHARACTER(LEN=100)                :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
  INTEGER                           :: IRESP
