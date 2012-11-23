@@ -106,7 +106,7 @@ CALL IO_BUFF_CLEAN_n
 !
 ZT2INC(:) = PT2M_O(:) - ZTCLS(:)
 
-PRINT *,'Mean T2m increments  ',SUM(ZT2INC)/KI
+PRINT *,'Mean T2m increments over TOWN ',SUM(ZT2INC)/KI
 
 !
 ! c) Temperature analysis of TOWN points
@@ -118,7 +118,9 @@ END WHERE
 
 WRITE(*,*) 'Mean T_ROAD3 increments over TOWN ',SUM(ZT2INC)/KI
 
+#ifdef LFI
 CFILEOUT_LFI=CPREPFILE
+#endif
 CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
 CALL INIT_IO_SURF_n(YPROGRAM,'TOWN  ','SURF  ','WRITE')
 

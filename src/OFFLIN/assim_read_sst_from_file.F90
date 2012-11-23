@@ -44,22 +44,20 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: YPROGRAM  ! program calling surf. schemes
-INTEGER,            INTENT(IN)  :: KI
-REAL,DIMENSION(:), INTENT(INOUT) :: PSST
-REAL,DIMENSION(:), INTENT(IN)  :: PITM
-CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
+CHARACTER(LEN=6),   INTENT(IN)    :: YPROGRAM  ! program calling surf. schemes
+INTEGER,            INTENT(IN)    :: KI
+REAL,DIMENSION(:),  INTENT(OUT)   :: PSST
+REAL,DIMENSION(:),  INTENT(IN)    :: PITM
+CHARACTER(LEN=2),   INTENT(IN)    :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-REAL, DIMENSION (SIZE(PSST)) :: ZSST
-REAL, DIMENSION (SIZE(PSST)) :: PTS
-!
 CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
 INTEGER              :: IRESP
 REAL                 :: ZFMAX,ZFMIN,ZFMEAN
+REAL, DIMENSION (SIZE(PSST)) :: PTS
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',0,ZHOOK_HANDLE)
@@ -75,9 +73,9 @@ END IF
 #ifdef FA
 CFILEIN_FA = 'SST_SIC'        ! input SST and SIC analysis  
 CDNOMC     = 'CADRE SST'      ! new frame name 
+WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
 #endif
 !
-WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
 !
 !  Open FA file
 !
@@ -87,10 +85,10 @@ CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
 !
 IF ( LECSST ) THEN
   ! SST field interpolated from ECMWF SST ANALYSIS to model domain
-  CALL READ_SURF(YPROGRAM2,'SURFSEA.TEMPERA',ZSST,IRESP)
+  CALL READ_SURF(YPROGRAM2,'SURFSEA.TEMPERA',PSST,IRESP)
 ELSE
   ! Surface temperature from boundary in SST_SIC
-  CALL READ_SURF(YPROGRAM2,'SURFTEMPERATURE',ZSST,IRESP)
+  CALL READ_SURF(YPROGRAM2,'SURFTEMPERATURE',PSST,IRESP)
 ENDIF
 !
 !  Close SST_SIC file
@@ -99,31 +97,31 @@ CALL END_IO_SURF_n(YPROGRAM2)
 CALL IO_BUFF_CLEAN_n
 WRITE(*,*) 'READ SST_SIC OK'
 
-ZFMIN = MINVAL(ZSST)
-ZFMAX = MAXVAL(ZSST)
-ZFMEAN = SUM(ZSST)/FLOAT(KI)
+ZFMIN = MINVAL(PSST)
+ZFMAX = MAXVAL(PSST)
+ZFMEAN = SUM(PSST)/FLOAT(KI)
 
 IF ( LECSST ) THEN
   WRITE(*,*) '  ECMWF_SST_SIC'
   WRITE(*,'("  SURFSEA.TEMPERA - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
   ! Replace -9999. with UNDEF
-  WHERE ( ZSST(:)< 0. )
-    ZSST(:) = XUNDEF
+  WHERE ( PSST(:)< 0. )
+    PSST(:) = XUNDEF
   END WHERE
 ELSE
   WRITE(*,*) '  Boundary file'
   WRITE(*,'("  SURFTEMPERATURE - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
   ! To avoid surface temperatures influenced by land, NATURE points are replaced with UNDEF
   WHERE ( PTS(:)/=XUNDEF .OR. PITM(:)>0.5 )
-    ZSST(:) = XUNDEF
+    PSST(:) = XUNDEF
   END WHERE
 ENDIF
 
-ZFMIN = MINVAL(ZSST)
-ZFMAX = MAXVAL(ZSST)
-ZFMEAN = SUM(ZSST)/FLOAT(KI)
+ZFMIN = MINVAL(PSST)
+ZFMAX = MAXVAL(PSST)
+ZFMEAN = SUM(PSST)/FLOAT(KI)
 WRITE(*,*) '  Replaced land by UNDEF '
-WRITE(*,'("  ZSST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
+WRITE(*,'("  SST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_READ_SST_FROM_FILE',1,ZHOOK_HANDLE)
 !
