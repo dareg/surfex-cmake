@@ -31,6 +31,7 @@ SUBROUTINE COUPLING_WATFLUX_OROG_n(HPROGRAM, HCOUPLING,                         
 !!    -------------
 !!      Original    01/2004
 !!      B. Decharme   2008   reset the subgrid topographic effect on the forcing
+!!      J. Escobar    09/2012  SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------
 !
 USE MODD_CSTS,   ONLY : XCPD, XRD, XP00
@@ -117,14 +118,14 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
-REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+REAL, DIMENSION(KI)  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+REAL, DIMENSION(KI)  ::  ZPET_B_COEF   ! 2nd explicit coefficient
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZTA    ! Temperature at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZPA    ! Pressure    at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZPS    ! Pressure    at surface orography
+REAL, DIMENSION(KI)  :: ZQA    ! Humidity    at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface orography
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:

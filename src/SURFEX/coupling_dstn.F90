@@ -37,7 +37,9 @@ SUBROUTINE COUPLING_DST_n(  &
 !ALF GRINI <alf.grini@cnrm.meteo.fr>  2005
 ! Modification P. Tulet introduce friction velocity for mode repartition upon 
 ! Alfaro et al, 1998 (Geo. Res. Lett.)
-
+!
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
+!
 USE MODD_CSTS, ONLY : XRD                      ! [J/K/kg] The universal gas constant  
        
 USE MODD_PACK_ISBA, ONLY : XP_VEGTYPE_PATCH    ! Fraction of all vegtypes for all patches  
@@ -84,7 +86,7 @@ REAL, DIMENSION(KI), INTENT(IN)    :: PZ0H_WITH_SNOW !I [frc] Z0 heat with snow
 REAL, DIMENSION(KI,KDST), INTENT(OUT) :: PSFDST      !O [kg/m2/sec] flux of dust for a patch
   
 !LOCAL VARIABLES
-REAL, DIMENSION(SIZE(PTA),NVEGNO_DST,NDSTMDE) :: ZSFDST_TILE  ![kg/m2] flux of dust for each vegetation types and each mode
+REAL, DIMENSION(KI,NVEGNO_DST,NDSTMDE) :: ZSFDST_TILE  ![kg/m2] flux of dust for each vegetation types and each mode
 INTEGER                            :: JVEG           ![idx] counter for vegetation types
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 

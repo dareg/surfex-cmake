@@ -33,8 +33,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
+#ifdef MNH
+USE MODI_MNHGET_DESFM_n
+#endif
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

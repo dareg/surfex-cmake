@@ -33,6 +33,7 @@ SUBROUTINE COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                            
 !!     A. Bogatchev 09/2005 EBA snow option
 !!     A. Boone     11/2009 Exner correction for Offline T-B coef
 !!     B. Decharme  11/2009 Implicit coupling ok with all snow scheme
+!!      J. Escobar  09/2012 : SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------------
 !
 USE MODD_ISBA_n,     ONLY : XTSTEP, TSNOW
@@ -120,27 +121,26 @@ INTEGER :: IT      ! total number of surface timesteps in one atmospheric timest
 REAL    :: ZT      ! total number of surface timesteps in one atmospheric timestep
 REAL    :: ZTSTEP  ! surface time step
 !
-REAL, DIMENSION(SIZE(PSFTH))    :: ZSFTH   ! surface temperature flux 
-REAL, DIMENSION(SIZE(PSFTQ))    :: ZSFTQ   ! surface water vapor flux 
-REAL, DIMENSION(SIZE(PSFCO2))   :: ZSFCO2  ! surface CO2 flux 
-REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) &
-                                  :: ZSFTS   ! surface scalar flux   
-REAL, DIMENSION(SIZE(PSFU))     :: ZSFU    ! zonal momentum flux
-REAL, DIMENSION(SIZE(PSFU))     :: ZSFV    ! meridian momentum flux
-REAL, DIMENSION(SIZE(PTRAD))    :: ZTRAD   ! surface radiative temperature
-REAL, DIMENSION(SIZE(PTRAD))    :: ZEMIS   ! surface emissivity
-REAL, DIMENSION(SIZE(PDIR_ALB,1),SIZE(PDIR_ALB,2)) :: ZDIR_ALB! direct surface albedo
-REAL, DIMENSION(SIZE(PSCA_ALB,1),SIZE(PSCA_ALB,2)) :: ZSCA_ALB! diffuse surface albedo
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEW_A_COEF ! implicit coefficients
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEW_B_COEF ! needed if HCOUPLING='I'
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPET_A_COEF
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEQ_A_COEF
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPET_B_COEF
-REAL, DIMENSION(SIZE(PSFTH))    :: ZPEQ_B_COEF
+REAL, DIMENSION(KI)    :: ZSFTH   ! surface temperature flux 
+REAL, DIMENSION(KI)    :: ZSFTQ   ! surface water vapor flux 
+REAL, DIMENSION(KI)    :: ZSFCO2  ! surface CO2 flux 
+REAL, DIMENSION(KI,KSV):: ZSFTS   ! surface scalar flux   
+REAL, DIMENSION(KI)     :: ZSFU    ! zonal momentum flux
+REAL, DIMENSION(KI)     :: ZSFV    ! meridian momentum flux
+REAL, DIMENSION(KI)    :: ZTRAD   ! surface radiative temperature
+REAL, DIMENSION(KI)    :: ZEMIS   ! surface emissivity
+REAL, DIMENSION(KI,KSW) :: ZDIR_ALB! direct surface albedo
+REAL, DIMENSION(KI,KSW) :: ZSCA_ALB! diffuse surface albedo
+REAL, DIMENSION(KI)    :: ZPEW_A_COEF ! implicit coefficients
+REAL, DIMENSION(KI)    :: ZPEW_B_COEF ! needed if HCOUPLING='I'
+REAL, DIMENSION(KI)    :: ZPET_A_COEF
+REAL, DIMENSION(KI)    :: ZPEQ_A_COEF
+REAL, DIMENSION(KI)    :: ZPET_B_COEF
+REAL, DIMENSION(KI)    :: ZPEQ_B_COEF
 !
-REAL, DIMENSION(SIZE(PTRAD))    :: ZWORK_LW  ! work array for mean upward longwave surface flux
+REAL, DIMENSION(KI)    :: ZWORK_LW  ! work array for mean upward longwave surface flux
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
 !
 !-------------------------------------------------------------------------------------
 !

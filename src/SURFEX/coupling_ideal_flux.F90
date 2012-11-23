@@ -41,6 +41,7 @@ SUBROUTINE COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -134,15 +135,15 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*       0.2   declarations of local variables
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZZ0     ! roughness length
-REAL, DIMENSION(SIZE(PTA))  :: ZLMO    ! Monin-Obuhkov length
-REAL, DIMENSION(SIZE(PTA))  :: ZTHA    ! air potential temperature
-REAL, DIMENSION(SIZE(PTA))  :: ZRVA    ! water vapor mixing ratio
-REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR  ! friction velocity
-REAL, DIMENSION(SIZE(PTA))  :: ZWIND   ! wind
-REAL, DIMENSION(SIZE(PTA))  :: ZQ0     ! surface temperature flux (mK/s)
-REAL, DIMENSION(SIZE(PTA))  :: ZE0     ! surface vapor flux (mkg/kg/s)
-REAL, DIMENSION(SIZE(PTA))  :: ZQA     ! specific humidity (kg/kg)
+REAL, DIMENSION(KI)  :: ZZ0     ! roughness length
+REAL, DIMENSION(KI)  :: ZLMO    ! Monin-Obuhkov length
+REAL, DIMENSION(KI)  :: ZTHA    ! air potential temperature
+REAL, DIMENSION(KI)  :: ZRVA    ! water vapor mixing ratio
+REAL, DIMENSION(KI)  :: ZUSTAR  ! friction velocity
+REAL, DIMENSION(KI)  :: ZWIND   ! wind
+REAL, DIMENSION(KI)  :: ZQ0     ! surface temperature flux (mK/s)
+REAL, DIMENSION(KI)  :: ZE0     ! surface vapor flux (mkg/kg/s)
+REAL, DIMENSION(KI)  :: ZQA     ! specific humidity (kg/kg)
 !
 REAL                        :: ZALPHA  ! interpolation coefficient
 INTEGER                     :: IHOURF  ! number of hours since midnight

@@ -39,6 +39,10 @@
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+#ifdef MNH
+USE MODI_DEFAULT_SCHEMES_MNH
+#endif
+!
 IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments

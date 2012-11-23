@@ -31,6 +31,7 @@ SUBROUTINE COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                          
 !!      Original    09/2007
 !!      S. Riette   06/2009 Initialisation of XT, XQ, XU and XTKE on canopy levels
 !!      S. Riette   01/2010 Use of interpol_sbl to compute 10m wind diagnostic
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !----------------------------------------------------------------
 !
 USE MODD_CSTS,          ONLY : XCPD
@@ -133,63 +134,63 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !* forcing variables
 !
-REAL, DIMENSION(SIZE(PTA))     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
-REAL, DIMENSION(SIZE(PTA))     :: ZTA      ! temperature                                   (K)
-REAL, DIMENSION(SIZE(PTA))     :: ZPA      ! pressure                                      (Pa)
-REAL, DIMENSION(SIZE(PTA))     :: ZZREF    ! temperature forcing level                     (m)
-REAL, DIMENSION(SIZE(PTA))     :: ZUREF    ! wind        forcing level                     (m)
-REAL, DIMENSION(SIZE(PTA))     :: ZU       ! zonal wind                                    (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZV       ! meridian wind                                 (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZQA      ! specific humidity                             (kg/m3)
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF ! specific humidity implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+REAL, DIMENSION(KI)     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+REAL, DIMENSION(KI)     :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
+REAL, DIMENSION(KI)     :: ZTA      ! temperature                                   (K)
+REAL, DIMENSION(KI)     :: ZPA      ! pressure                                      (Pa)
+REAL, DIMENSION(KI)     :: ZZREF    ! temperature forcing level                     (m)
+REAL, DIMENSION(KI)     :: ZUREF    ! wind        forcing level                     (m)
+REAL, DIMENSION(KI)     :: ZU       ! zonal wind                                    (m/s)
+REAL, DIMENSION(KI)     :: ZV       ! meridian wind                                 (m/s)
+REAL, DIMENSION(KI)     :: ZQA      ! specific humidity                             (kg/m3)
+REAL, DIMENSION(KI)     :: ZPEQ_A_COEF ! specific humidity implicit
+REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
 !
 !
 ! canopy turbulence scheme
 !
-REAL, DIMENSION(SIZE(PTA))        :: ZCANOPY   ! height of canopy   (m)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI)        :: ZCANOPY   ! height of canopy   (m)
+REAL, DIMENSION(KI)        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+REAL, DIMENSION(KI)        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
+REAL, DIMENSION(KI)        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZLMO      ! MO length
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZLM       ! mixing length
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZLEPS     ! dissipative length
-REAL, DIMENSION(SIZE(PTA))     :: ZH           ! canopy height (m)
-REAL, DIMENSION(SIZE(PTA))     :: ZUSTAR       ! friction velocity including drag effect (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZUSTAR_GROUND! friction velocity at ground only (ISBA) (m/s)
+REAL, DIMENSION(KI,NLVL)   :: ZLMO      ! MO length
+REAL, DIMENSION(KI,NLVL)   :: ZLM       ! mixing length
+REAL, DIMENSION(KI,NLVL)   :: ZLEPS     ! dissipative length
+REAL, DIMENSION(KI)     :: ZH           ! canopy height (m)
+REAL, DIMENSION(KI)     :: ZUSTAR       ! friction velocity including drag effect (m/s)
+REAL, DIMENSION(KI)     :: ZUSTAR_GROUND! friction velocity at ground only (ISBA) (m/s)
 !
-REAL, DIMENSION(SIZE(PTA))     :: ZPET_A_COEF ! temperature implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPET_B_COEF ! coefficients (K)
-REAL, DIMENSION(SIZE(PTA))     :: ZPEW_A_COEF ! wind implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPEW_B_COEF ! coefficients (m/s)
+REAL, DIMENSION(KI)     :: ZPET_A_COEF ! temperature implicit
+REAL, DIMENSION(KI)     :: ZPET_B_COEF ! coefficients (K)
+REAL, DIMENSION(KI)     :: ZPEW_A_COEF ! wind implicit
+REAL, DIMENSION(KI)     :: ZPEW_B_COEF ! coefficients (m/s)
 !
-REAL, DIMENSION(SIZE(PTA))   :: ZALFAU   ! V+(1) = - alfa rho u'w'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZBETAU   ! V+(1) = - alfa rho u'w'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZALFATH  ! Th+(1) = - alfa rho w'th'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+REAL, DIMENSION(KI)   :: ZALFAU   ! V+(1) = - alfa rho u'w'(1) + beta
+REAL, DIMENSION(KI)   :: ZBETAU   ! V+(1) = - alfa rho u'w'(1) + beta
+REAL, DIMENSION(KI)   :: ZALFATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+REAL, DIMENSION(KI)   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+REAL, DIMENSION(KI)   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+REAL, DIMENSION(KI)   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 !
 CHARACTER(LEN=1) :: GCOUPLING
 !
-REAL, DIMENSION(SIZE(PTA))   ::ZCANOPY_DENSITY
-REAL, DIMENSION(SIZE(PTA))   ::ZUW_GROUND
-REAL, DIMENSION(SIZE(PTA))   ::ZDUWDU_GROUND
+REAL, DIMENSION(KI)   ::ZCANOPY_DENSITY
+REAL, DIMENSION(KI)   ::ZUW_GROUND
+REAL, DIMENSION(KI)   ::ZDUWDU_GROUND
 !
-REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZZ        ! height above displacement height
+REAL, DIMENSION(KI,NLVL)   :: ZZ        ! height above displacement height
 !
 INTEGER                      :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

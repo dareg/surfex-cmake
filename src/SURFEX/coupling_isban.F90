@@ -55,7 +55,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!        S.Lafont   01/2011 : add PTSTEP as arg of diag_misc
 !!       B.Decharme  09/2012 : Bug in hydro_glacier calculation with ES or Crocus
 !!                             New wind implicitation
-!!
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------------
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI
@@ -279,38 +279,38 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !* forcing variables
 !
-REAL, DIMENSION(SIZE(PTA))     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZDIR     ! wind direction                        (rad from N clockwise)
-REAL, DIMENSION(SIZE(PTA))     :: ZEXNA    ! Exner function at lowest atmospheric level    (-)
-REAL, DIMENSION(SIZE(PTA))     :: ZEXNS    ! Exner function at surface                     (-)
-REAL, DIMENSION(SIZE(PTA))     :: ZALFA    ! Wind direction                                (-)
-REAL, DIMENSION(SIZE(PTA))     :: ZQA      ! specific humidity                             (kg/kg)
-REAL, DIMENSION(SIZE(PTA))     :: ZCO2     ! CO2 concentration                             (kg/kg)
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF ! specific humidity implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+REAL, DIMENSION(KI)     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+REAL, DIMENSION(KI)     :: ZDIR     ! wind direction                        (rad from N clockwise)
+REAL, DIMENSION(KI)     :: ZEXNA    ! Exner function at lowest atmospheric level    (-)
+REAL, DIMENSION(KI)     :: ZEXNS    ! Exner function at surface                     (-)
+REAL, DIMENSION(KI)     :: ZALFA    ! Wind direction                                (-)
+REAL, DIMENSION(KI)     :: ZQA      ! specific humidity                             (kg/kg)
+REAL, DIMENSION(KI)     :: ZCO2     ! CO2 concentration                             (kg/kg)
+REAL, DIMENSION(KI)     :: ZPEQ_A_COEF ! specific humidity implicit
+REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
 ! Patch outputs:
 !
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFTH_TILE     ! surface heat flux (W/m2)
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFTQ_TILE     ! surface vapor flux (kg/m2/s)
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFCO2_TILE    ! surface CO2 flux positive toward the atmosphere (m/s*kg/kg)
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFU_TILE      ! zonal momentum flux
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFV_TILE      ! meridian momentum flux
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZTRAD_TILE     ! radiative surface temperature
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZEMIS_TILE     ! emissivity
-REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NPATCH) :: ZDIR_ALB_TILE  ! direct albedo
-REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NPATCH) :: ZSCA_ALB_TILE  ! diffuse albedo
-REAL, DIMENSION(SIZE(PTA),SIZE(PSV,2),NPATCH) :: ZSFTS_TILE     ! scalar surface flux
+REAL, DIMENSION(KI,NPATCH) :: ZSFTH_TILE     ! surface heat flux (W/m2)
+REAL, DIMENSION(KI,NPATCH) :: ZSFTQ_TILE     ! surface vapor flux (kg/m2/s)
+REAL, DIMENSION(KI,NPATCH) :: ZSFCO2_TILE    ! surface CO2 flux positive toward the atmosphere (m/s*kg/kg)
+REAL, DIMENSION(KI,NPATCH) :: ZSFU_TILE      ! zonal momentum flux
+REAL, DIMENSION(KI,NPATCH) :: ZSFV_TILE      ! meridian momentum flux
+REAL, DIMENSION(KI,NPATCH) :: ZTRAD_TILE     ! radiative surface temperature
+REAL, DIMENSION(KI,NPATCH) :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,KSW,NPATCH) :: ZDIR_ALB_TILE  ! direct albedo
+REAL, DIMENSION(KI,KSW,NPATCH) :: ZSCA_ALB_TILE  ! diffuse albedo
+REAL, DIMENSION(KI,KSV,NPATCH) :: ZSFTS_TILE     ! scalar surface flux
 !
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_DRAIN     ! For the coupling with TRIP
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_RUNOFF    ! For the coupling with TRIP
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_EFLOOD    ! For the coupling with TRIP
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_PFLOOD    ! For the coupling with TRIP
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_IFLOOD    ! For the coupling with TRIP
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_ICEFLUX
+REAL, DIMENSION(KI, NPATCH) :: ZCPL_DRAIN     ! For the coupling with TRIP
+REAL, DIMENSION(KI, NPATCH) :: ZCPL_RUNOFF    ! For the coupling with TRIP
+REAL, DIMENSION(KI, NPATCH) :: ZCPL_EFLOOD    ! For the coupling with TRIP
+REAL, DIMENSION(KI, NPATCH) :: ZCPL_PFLOOD    ! For the coupling with TRIP
+REAL, DIMENSION(KI, NPATCH) :: ZCPL_IFLOOD    ! For the coupling with TRIP
+REAL, DIMENSION(KI, NPATCH) :: ZCPL_ICEFLUX
 !
 ! for chemical computations
 !
-REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZSW_FORBIO
+REAL, DIMENSION(KI, NPATCH) :: ZSW_FORBIO
 !
 REAL                       :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
 REAL                       :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST
@@ -403,7 +403,7 @@ ENDDO
 !
 !* number of shortwave spectral bands
 !
-ISWB = SIZE(PSW_BANDS)
+ISWB = KSW
 !
 !* irrigation
 !
@@ -554,7 +554,7 @@ REAL, DIMENSION(KSIZE) :: ZP_DIR     ! wind direction                        (ra
 REAL, DIMENSION(KSIZE) :: ZP_QA      ! air specific humidity forcing         (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_TA      ! air temperature forcing               (K)
 REAL, DIMENSION(KSIZE) :: ZP_CO2     ! CO2 concentration in the air          (kg/kg)
-REAL, DIMENSION(KSIZE,SIZE(PSV,2)) :: ZP_SV      ! scalar concentration in the air       (kg/kg)
+REAL, DIMENSION(KSIZE,KSV) :: ZP_SV      ! scalar concentration in the air       (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH  ! zenithal angle        radian from the vertical)
 REAL, DIMENSION(KSIZE) :: ZP_PEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KSIZE) :: ZP_PEW_B_COEF ! needed if HCOUPLING='I'
@@ -572,7 +572,7 @@ REAL, DIMENSION(KSIZE) :: ZP_PA      ! pressure at forcing level             (Pa
 REAL, DIMENSION(KSIZE) :: ZP_ZS      ! atmospheric model orography           (m)
 REAL, DIMENSION(KSIZE) :: ZP_SFTQ    ! flux of water vapor <w'q'>            (kg.m-2.s-1)
 REAL, DIMENSION(KSIZE) :: ZP_SFTH    ! flux of temperature <w'T'>            (W/m2)
-REAL, DIMENSION(KSIZE,SIZE(PSV,2)) :: ZP_SFTS    ! flux of scalar      <w'sv'>           (mkg/kg/s)
+REAL, DIMENSION(KSIZE,KSV) :: ZP_SFTS    ! flux of scalar      <w'sv'>           (mkg/kg/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFCO2   ! flux of CO2 positive toward the atmosphere (m/s*kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_USTAR   ! friction velocity                     (m/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFU     ! zonal momentum flux                   (pa)

@@ -33,6 +33,7 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, HCOUPLING,                       
 !!      modified    05/2004 by P. LeMoigne: vertical shift of implicit
 !!                          coefficients
 !!      B. Decharme   2008   reset the subgrid topographic effect on the forcing
+!!      J. Escobar  09/2012 : SIZE(PTA) not allowed without-interface , replace by KI
 !----------------------------------------------------------------
 !
 USE MODD_CSTS,   ONLY : XSTEFAN, XCPD, XRD, XP00
@@ -117,31 +118,30 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
-REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZTA    ! Temperature at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZPA    ! Pressure    at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZPS    ! Pressure    at surface orography
+REAL, DIMENSION(KI)  :: ZQA    ! Humidity    at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface orography
 !
 !
-REAL, DIMENSION(SIZE(PSFTH))    :: Z3D_TOT_SURF ! ratio between actual surface
+REAL, DIMENSION(KI)     :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
-REAL, DIMENSION(SIZE(PSFTH))    :: ZSFTH   ! surface temperature flux per m2 of actual surface
-REAL, DIMENSION(SIZE(PSFTQ))    :: ZSFTQ   ! surface water vapor flux per m2 of actual surface
-REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) &
-                                  :: ZSFTS   ! surface scalar flux per m2 of actual surface  
-REAL, DIMENSION(SIZE(PSFCO2))   :: ZSFCO2  ! surface CO2 flux per m2 of actual surface
-REAL, DIMENSION(SIZE(PDIR_SW,1),SIZE(PSW_BANDS))::ZDIR_SW ! incoming direct SW radiation
+REAL, DIMENSION(KI)     :: ZSFTH   ! surface temperature flux per m2 of actual surface
+REAL, DIMENSION(KI)     :: ZSFTQ   ! surface water vapor flux per m2 of actual surface
+REAL, DIMENSION(KI,KSV) :: ZSFTS   ! surface scalar flux per m2 of actual surface  
+REAL, DIMENSION(KI)   :: ZSFCO2  ! surface CO2 flux per m2 of actual surface
+REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
-REAL, DIMENSION(SIZE(PSCA_SW,1),SIZE(PSW_BANDS))::ZSCA_SW ! incoming diffuse SW radiation
+REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
 !                                                         ! per m2 of actual surface
-REAL, DIMENSION(SIZE(PLW))      :: ZLW     ! incoming LW radiation per m2 of actual surface
+REAL, DIMENSION(KI)      :: ZLW     ! incoming LW radiation per m2 of actual surface
 !
-REAL, DIMENSION(SIZE(PRAIN))    :: ZRAIN   ! liquid precipitation per m2 of actual surface
-REAL, DIMENSION(SIZE(PSNOW))    :: ZSNOW   ! solid  precipitation per m2 of actual surface
+REAL, DIMENSION(KI)    :: ZRAIN   ! liquid precipitation per m2 of actual surface
+REAL, DIMENSION(KI)    :: ZSNOW   ! solid  precipitation per m2 of actual surface
 !
-REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
-REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+REAL, DIMENSION(KI)  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+REAL, DIMENSION(KI)  ::  ZPET_B_COEF   ! 2nd explicit coefficient
 !
 INTEGER                         :: ISWB    ! number of shortwave spectral bands
 INTEGER                         :: JSWB    ! loop on shortwave spectral bands

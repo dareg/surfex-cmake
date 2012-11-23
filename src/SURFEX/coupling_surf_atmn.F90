@@ -30,6 +30,7 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!! Modified    09/2012 : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
@@ -146,27 +147,27 @@ INTEGER :: JTILE                        ! loop on type of surface
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
 INTEGER :: ISWB                         ! number of shortwave spectral bands
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZPEW_A_COEF ! implicit coefficients
-REAL, DIMENSION(SIZE(PTA))  :: ZPEW_B_COEF ! needed if HCOUPLING='I'
-REAL, DIMENSION(SIZE(PTA))  :: ZPET_A_COEF
-REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_A_COEF
-REAL, DIMENSION(SIZE(PTA))  :: ZPET_B_COEF
-REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_B_COEF
+REAL, DIMENSION(KI)  :: ZPEW_A_COEF ! implicit coefficients
+REAL, DIMENSION(KI)  :: ZPEW_B_COEF ! needed if HCOUPLING='I'
+REAL, DIMENSION(KI)  :: ZPET_A_COEF
+REAL, DIMENSION(KI)  :: ZPEQ_A_COEF
+REAL, DIMENSION(KI)  :: ZPET_B_COEF
+REAL, DIMENSION(KI)  :: ZPEQ_B_COEF
 !
 ! Tile outputs:
 !
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFTH_TILE     ! surface heat flux (Km/s)
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFTQ_TILE     ! surface vapor flux (kgm/kg/s)
-REAL, DIMENSION(SIZE(PTA),SIZE(PSV,2),NTILESFC) :: ZSFTS_TILE ! scalar surface flux
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFCO2_TILE    ! surface CO2 flux
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFU_TILE      ! zonal momentum flux
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFV_TILE      ! meridian momentum flux
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZTRAD_TILE     ! radiative surface temperature
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZEMIS_TILE     ! emissivity
-REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
+REAL, DIMENSION(KI,NTILESFC) :: ZSFTH_TILE     ! surface heat flux (Km/s)
+REAL, DIMENSION(KI,NTILESFC) :: ZSFTQ_TILE     ! surface vapor flux (kgm/kg/s)
+REAL, DIMENSION(KI,KSV,NTILESFC) :: ZSFTS_TILE ! scalar surface flux
+REAL, DIMENSION(KI,NTILESFC) :: ZSFCO2_TILE    ! surface CO2 flux
+REAL, DIMENSION(KI,NTILESFC) :: ZSFU_TILE      ! zonal momentum flux
+REAL, DIMENSION(KI,NTILESFC) :: ZSFV_TILE      ! meridian momentum flux
+REAL, DIMENSION(KI,NTILESFC) :: ZTRAD_TILE     ! radiative surface temperature
+REAL, DIMENSION(KI,NTILESFC) :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
 !
-REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
-REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 !
 INTEGER :: IINDEXEND
 INTEGER :: INBTS, JI
@@ -203,7 +204,7 @@ JTILE     = 0
 !
 ! Number of shortwave spectral bands
 !
-ISWB = SIZE(PSW_BANDS)
+ISWB = KSW
 !
 ! Initialization: Outputs to atmosphere over each tile:
 !
@@ -391,7 +392,7 @@ REAL, DIMENSION(KSIZE) :: ZP_PS       ! pressure at atmospheric model surface (P
 REAL, DIMENSION(KSIZE) :: ZP_PA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KSIZE) :: ZP_ZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KSIZE) :: ZP_CO2      ! CO2 concentration in the air          (kg/m3)
-REAL, DIMENSION(KSIZE,SIZE(PSV,2)) :: ZP_SV       ! scalar concentration in the air
+REAL, DIMENSION(KSIZE,KSV) :: ZP_SV       ! scalar concentration in the air
 REAL, DIMENSION(KSIZE) :: ZP_SNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KSIZE) :: ZP_RAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -400,7 +401,7 @@ REAL, DIMENSION(KSIZE) :: ZP_SFTQ     ! flux of water vapor                   (k
 REAL, DIMENSION(KSIZE) :: ZP_SFU      ! zonal momentum flux                   (m/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFV      ! meridian momentum flux                (m/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFCO2    ! flux of CO2                           (kg/m2/s)
-REAL, DIMENSION(KSIZE,SIZE(PSV,2)) :: ZP_SFTS     ! flux of scalar
+REAL, DIMENSION(KSIZE,KSV) :: ZP_SFTS     ! flux of scalar
 !
 REAL, DIMENSION(KSIZE) :: ZP_TRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KSIZE,ISWB) :: ZP_DIR_ALB  ! direct albedo for each spectral band  (-)

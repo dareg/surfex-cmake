@@ -186,10 +186,10 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: ICH      ! unit of input chemical file
 !
 REAL, DIMENSION(:,:), ALLOCATABLE                       :: ZFRAC_TILE     ! fraction of each surface type
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
-REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE  ! diffuse albedo
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC)                 :: ZEMIS_TILE     ! emissivity
-REAL, DIMENSION(SIZE(PZENITH),NTILESFC)                 :: ZTSRAD_TILE    ! radiative temperature
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
+REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE  ! diffuse albedo
+REAL, DIMENSION(KI,NTILESFC)                 :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,NTILESFC)                 :: ZTSRAD_TILE    ! radiative temperature
 !
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_ZENITH   ! zenithal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_AZIM     ! azimuthal angle
@@ -425,7 +425,7 @@ IF (NSIZE_TOWN  >0)CALL GET_1D_MASK( NSIZE_TOWN,   NSIZE_FULL, XTOWN  , NR_TOWN 
 IF (NSIZE_NATURE>0)CALL GET_1D_MASK( NSIZE_NATURE, NSIZE_FULL, XNATURE, NR_NATURE)
 !
 !* number of shortwave spectral bands
-ISWB=SIZE(PSW_BANDS)
+ISWB=KSW
 !
 !* tile number
 ALLOCATE(ZFRAC_TILE(NSIZE_FULL,NTILESFC))
@@ -600,7 +600,7 @@ IF (SIZE(PCO2)>0) &
      ZP_CO2   (JJ)     = PCO2        (KMASK(JJ))  
 IF (SIZE(PRHOA)>0) &
      ZP_RHOA  (JJ)     = PRHOA       (KMASK(JJ))  
-IF (SIZE(PZENITH)>0) &
+IF (KI>0) &
      ZP_ZENITH(JJ)     = PZENITH     (KMASK(JJ))  
 IF (SIZE(PAZIM  )>0) &
      ZP_AZIM  (JJ)     = PAZIM       (KMASK(JJ))  

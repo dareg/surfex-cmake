@@ -35,6 +35,7 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      V. Masson   11/2011 Ch limited to 1.E-7 in all cases and Cd coming from
 !!                          Flake_interface routine if computed by flake
 !!      B. Decharme 09/2012 New wind implicitation
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!------------------------------------------------------------------
 !
 USE MODD_SURF_ATM, ONLY : CIMPLICIT_WIND
@@ -156,30 +157,30 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 INTEGER                     :: ISWB   ! number of shortwave spectral bands
 INTEGER                     :: JSWB   ! loop counter on shortwave spectral bands
 !         
-REAL, DIMENSION(SIZE(PTA))  :: ZEXNA  ! Exner function at forcing level
-REAL, DIMENSION(SIZE(PTA))  :: ZEXNS  ! Exner function at surface level
+REAL, DIMENSION(KI)  :: ZEXNA  ! Exner function at forcing level
+REAL, DIMENSION(KI)  :: ZEXNS  ! Exner function at surface level
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZWIND  ! Wind
-REAL, DIMENSION(SIZE(PTA))  :: ZGLOBAL_SW    ! Solar radiation flux at the surface (W/m2) 
-REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Air specific humidity (kg/kg)
+REAL, DIMENSION(KI)  :: ZWIND  ! Wind
+REAL, DIMENSION(KI)  :: ZGLOBAL_SW    ! Solar radiation flux at the surface (W/m2) 
+REAL, DIMENSION(KI)  :: ZQA    ! Air specific humidity (kg/kg)
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR ! friction velocity (m/s)
-REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR2! square of friction velocity (m2/s2)
-REAL, DIMENSION(SIZE(PTA))  :: ZSFM   ! flux of momentum (Pa)
+REAL, DIMENSION(KI)  :: ZUSTAR ! friction velocity (m/s)
+REAL, DIMENSION(KI)  :: ZUSTAR2! square of friction velocity (m2/s2)
+REAL, DIMENSION(KI)  :: ZSFM   ! flux of momentum (Pa)
 !
-REAL, DIMENSION(SIZE(PTA))  :: ZRESA_WATER ! aerodynamical resistance
+REAL, DIMENSION(KI)  :: ZRESA_WATER ! aerodynamical resistance
 !
 !salgado only for inline diagnostics - not used for the moment
 !                                      flake don't have it
-REAL, DIMENSION(SIZE(PTA))  :: ZCD    ! Drag coefficient
-REAL, DIMENSION(SIZE(PTA))  :: ZCDN   ! Neutral Drag coefficient
-REAL, DIMENSION(SIZE(PTA))  :: ZCH    ! Heat transfer coefficient
-REAL, DIMENSION(SIZE(PTA))  :: ZRI    ! Richardson number
-REAL, DIMENSION(SIZE(PTA))  :: ZHU    ! Near surface relative humidity
-REAL, DIMENSION(SIZE(PTA))  :: ZZ0    ! roughness length
-REAL, DIMENSION(SIZE(PTA))  :: ZZ0H   ! heat roughness length
-REAL, DIMENSION(SIZE(PTA))  :: ZQSAT  ! humidity at saturation
-REAL, DIMENSION(SIZE(PTA))  :: ZTSTEP ! time-step
+REAL, DIMENSION(KI)  :: ZCD    ! Drag coefficient
+REAL, DIMENSION(KI)  :: ZCDN   ! Neutral Drag coefficient
+REAL, DIMENSION(KI)  :: ZCH    ! Heat transfer coefficient
+REAL, DIMENSION(KI)  :: ZRI    ! Richardson number
+REAL, DIMENSION(KI)  :: ZHU    ! Near surface relative humidity
+REAL, DIMENSION(KI)  :: ZZ0    ! roughness length
+REAL, DIMENSION(KI)  :: ZZ0H   ! heat roughness length
+REAL, DIMENSION(KI)  :: ZQSAT  ! humidity at saturation
+REAL, DIMENSION(KI)  :: ZTSTEP ! time-step
 REAL                       :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
 REAL                       :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST
 REAL                       :: ZCONVERTFACM6_SLT, ZCONVERTFACM6_DST
@@ -190,7 +191,7 @@ REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t ,
 REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
 REAL, DIMENSION(KI)     :: ZEMIS      ! Emissivity at time t
 REAL, DIMENSION(KI)     :: ZTRAD      ! Radiative temperature at time t
-REAL, DIMENSION(SIZE(PTA))  :: ZALB   ! surface albedo
+REAL, DIMENSION(KI)  :: ZALB   ! surface albedo
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------

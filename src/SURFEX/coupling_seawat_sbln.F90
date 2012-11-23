@@ -111,31 +111,31 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                     
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 LOGICAL, INTENT(IN) :: OSBL
-REAL, DIMENSION(:), INTENT(IN) :: PSST
-REAL, DIMENSION(:), INTENT(INOUT) :: PZ0
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PZ
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PXU
+REAL, DIMENSION(KI), INTENT(IN) :: PSST
+REAL, DIMENSION(KI), INTENT(INOUT) :: PZ0
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PZ
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PXU
 INTEGER, INTENT(IN) :: KLVL
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PTKE
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PT
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PQ
-REAL, DIMENSION(:), INTENT(INOUT) :: PLMO
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PZF
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PDZ
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PDZF
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PP
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PTKE
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PT
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PQ
+REAL, DIMENSION(KI), INTENT(INOUT) :: PLMO
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PZF
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PDZ
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PDZF
+REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PP
 INTEGER, INTENT(IN) :: K2M
-REAL, DIMENSION(:), INTENT(INOUT) :: PT2M
-REAL, DIMENSION(:), INTENT(INOUT) :: PQ2M
-REAL, DIMENSION(:), INTENT(INOUT) :: PHU2M
-REAL, DIMENSION(:), INTENT(INOUT) :: PZON10M
-REAL, DIMENSION(:), INTENT(INOUT) :: PMER10M
-REAL, DIMENSION(:), INTENT(INOUT) :: PWIND10M
-REAL, DIMENSION(:), INTENT(INOUT) :: PWIND10M_MAX
-REAL, DIMENSION(:), INTENT(INOUT) :: PT2M_MIN
-REAL, DIMENSION(:), INTENT(INOUT) :: PT2M_MAX
-REAL, DIMENSION(:), INTENT(INOUT) :: PHU2M_MIN
-REAL, DIMENSION(:), INTENT(INOUT) :: PHU2M_MAX
+REAL, DIMENSION(KI), INTENT(INOUT) :: PT2M
+REAL, DIMENSION(KI), INTENT(INOUT) :: PQ2M
+REAL, DIMENSION(KI), INTENT(INOUT) :: PHU2M
+REAL, DIMENSION(KI), INTENT(INOUT) :: PZON10M
+REAL, DIMENSION(KI), INTENT(INOUT) :: PMER10M
+REAL, DIMENSION(KI), INTENT(INOUT) :: PWIND10M
+REAL, DIMENSION(KI), INTENT(INOUT) :: PWIND10M_MAX
+REAL, DIMENSION(KI), INTENT(INOUT) :: PT2M_MIN
+REAL, DIMENSION(KI), INTENT(INOUT) :: PT2M_MAX
+REAL, DIMENSION(KI), INTENT(INOUT) :: PHU2M_MIN
+REAL, DIMENSION(KI), INTENT(INOUT) :: PHU2M_MAX
 !
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
@@ -154,53 +154,53 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !* forcing variables
 !
-REAL, DIMENSION(SIZE(PTA))     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
-REAL, DIMENSION(SIZE(PTA))     :: ZTA      ! temperature                                   (K)
-REAL, DIMENSION(SIZE(PTA))     :: ZPA      ! pressure                                      (Pa)
-REAL, DIMENSION(SIZE(PTA))     :: ZZREF    ! temperature forcing level                     (m)
-REAL, DIMENSION(SIZE(PTA))     :: ZUREF    ! wind        forcing level                     (m)
-REAL, DIMENSION(SIZE(PTA))     :: ZU       ! zonal wind                                    (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZV       ! meridian wind                                 (m/s)
-REAL, DIMENSION(SIZE(PTA))     :: ZQA      ! specific humidity                             (kg/m3)
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF ! specific humidity implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+REAL, DIMENSION(KI)     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+REAL, DIMENSION(KI)     :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
+REAL, DIMENSION(KI)     :: ZTA      ! temperature                                   (K)
+REAL, DIMENSION(KI)     :: ZPA      ! pressure                                      (Pa)
+REAL, DIMENSION(KI)     :: ZZREF    ! temperature forcing level                     (m)
+REAL, DIMENSION(KI)     :: ZUREF    ! wind        forcing level                     (m)
+REAL, DIMENSION(KI)     :: ZU       ! zonal wind                                    (m/s)
+REAL, DIMENSION(KI)     :: ZV       ! meridian wind                                 (m/s)
+REAL, DIMENSION(KI)     :: ZQA      ! specific humidity                             (kg/m3)
+REAL, DIMENSION(KI)     :: ZPEQ_A_COEF ! specific humidity implicit
+REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
 !
 !
 ! SBL turbulence scheme
 !
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
-REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI)        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+REAL, DIMENSION(KI)        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
+REAL, DIMENSION(KI)        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
+REAL, DIMENSION(KI,KLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,KLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,KLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,KLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,KLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,KLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,KLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,KLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZLMO      ! MO length
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZLM       ! mixing length
-REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZLEPS     ! dissipative length
-REAL, DIMENSION(SIZE(PTA))     :: ZH           ! canopy height (m)
-REAL, DIMENSION(SIZE(PTA))     :: ZUSTAR       ! friction velocity (m/s)
+REAL, DIMENSION(KI,KLVL)   :: ZLMO      ! MO length
+REAL, DIMENSION(KI,KLVL)   :: ZLM       ! mixing length
+REAL, DIMENSION(KI,KLVL)   :: ZLEPS     ! dissipative length
+REAL, DIMENSION(KI)     :: ZH           ! canopy height (m)
+REAL, DIMENSION(KI)     :: ZUSTAR       ! friction velocity (m/s)
 !
-REAL, DIMENSION(SIZE(PTA))     :: ZPET_A_COEF ! temperature implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPET_B_COEF ! coefficients (K)
-REAL, DIMENSION(SIZE(PTA))     :: ZPEW_A_COEF ! wind implicit
-REAL, DIMENSION(SIZE(PTA))     :: ZPEW_B_COEF ! coefficients (m/s)
+REAL, DIMENSION(KI)     :: ZPET_A_COEF ! temperature implicit
+REAL, DIMENSION(KI)     :: ZPET_B_COEF ! coefficients (K)
+REAL, DIMENSION(KI)     :: ZPEW_A_COEF ! wind implicit
+REAL, DIMENSION(KI)     :: ZPEW_B_COEF ! coefficients (m/s)
 
-REAL, DIMENSION(SIZE(PTA))   :: ZALFAU   ! V+(1) = - alfa rho u'w'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZBETAU   ! V+(1) = - alfa rho u'w'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZALFATH  ! Th+(1) = - alfa rho w'th'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
-REAL, DIMENSION(SIZE(PTA))   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+REAL, DIMENSION(KI)   :: ZALFAU   ! V+(1) = - alfa rho u'w'(1) + beta
+REAL, DIMENSION(KI)   :: ZBETAU   ! V+(1) = - alfa rho u'w'(1) + beta
+REAL, DIMENSION(KI)   :: ZALFATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+REAL, DIMENSION(KI)   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+REAL, DIMENSION(KI)   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+REAL, DIMENSION(KI)   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 !
 CHARACTER(LEN=1) :: GCOUPLING
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

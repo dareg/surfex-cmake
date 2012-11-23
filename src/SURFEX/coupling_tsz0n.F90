@@ -30,6 +30,7 @@ SUBROUTINE COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                 
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      Modified    09/2012 : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!------------------------------------------------------------------
 !
 !
@@ -114,23 +115,23 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(SIZE(PTA),NGROUND_LAYER,NPATCH) :: ZTG   ! soil temperature
-REAL, DIMENSION(SIZE(PTA),NGROUND_LAYER,NPATCH) :: ZWG   ! soil water content
-REAL, DIMENSION(SIZE(PTA),NGROUND_LAYER,NPATCH) :: ZWGI  ! soil ice content
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZWR   ! interception reservoir
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZRESA ! aerodynamical resistance
-REAL, DIMENSION(SIZE(PTA),TSNOW%NLAYER,NPATCH) :: ZWSNOW! snow reservoir
-REAL, DIMENSION(SIZE(PTA),TSNOW%NLAYER,NPATCH) :: ZRHOSN! snow density
-REAL, DIMENSION(SIZE(PTA),TSNOW%NLAYER,NPATCH) :: ZHEASN! snow heat content
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZALBSN! snow albedo
-REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZEMISN! snow emissivity
+REAL, DIMENSION(KI,NGROUND_LAYER,NPATCH) :: ZTG   ! soil temperature
+REAL, DIMENSION(KI,NGROUND_LAYER,NPATCH) :: ZWG   ! soil water content
+REAL, DIMENSION(KI,NGROUND_LAYER,NPATCH) :: ZWGI  ! soil ice content
+REAL, DIMENSION(KI,NPATCH) :: ZWR   ! interception reservoir
+REAL, DIMENSION(KI,NPATCH) :: ZRESA ! aerodynamical resistance
+REAL, DIMENSION(KI,TSNOW%NLAYER,NPATCH) :: ZWSNOW! snow reservoir
+REAL, DIMENSION(KI,TSNOW%NLAYER,NPATCH) :: ZRHOSN! snow density
+REAL, DIMENSION(KI,TSNOW%NLAYER,NPATCH) :: ZHEASN! snow heat content
+REAL, DIMENSION(KI,NPATCH) :: ZALBSN! snow albedo
+REAL, DIMENSION(KI,NPATCH) :: ZEMISN! snow emissivity
 !
-REAL, DIMENSION(SIZE(PTA))     :: ZPEW_A_COEF ! implicit coefficients
-REAL, DIMENSION(SIZE(PTA))     :: ZPEW_B_COEF ! needed if HCOUPLING='I'
-REAL, DIMENSION(SIZE(PTA))     :: ZPET_A_COEF
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF
-REAL, DIMENSION(SIZE(PTA))     :: ZPET_B_COEF
-REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF
+REAL, DIMENSION(KI)     :: ZPEW_A_COEF ! implicit coefficients
+REAL, DIMENSION(KI)     :: ZPEW_B_COEF ! needed if HCOUPLING='I'
+REAL, DIMENSION(KI)     :: ZPET_A_COEF
+REAL, DIMENSION(KI)     :: ZPEQ_A_COEF
+REAL, DIMENSION(KI)     :: ZPET_B_COEF
+REAL, DIMENSION(KI)     :: ZPEQ_B_COEF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !

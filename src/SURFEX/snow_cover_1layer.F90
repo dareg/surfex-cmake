@@ -50,6 +50,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    08/09/98 
+!!      J. Escobar 24/10/2012 : BUF PGI10.X , rewrite some 1 line WHERE statement
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -350,7 +351,9 @@ ENDDO
 !              -----------------
 !
 ZDQSATI = DQSATI(ZTS_SNOW(:),PPS(:),ZQSAT(:))
-WHERE (GSNOWMASK(:) .AND. ZWSNOW(:)>=ZWSNOW_MIN) ZDQSAT(:) = ZDQSATI(:)
+WHERE (GSNOWMASK(:) .AND. ZWSNOW(:)>=ZWSNOW_MIN)
+  ZDQSAT(:) = ZDQSATI(:)
+END WHERE
 !
 !*      3.1    coefficients from Temperature tendency
 !              --------------------------------------
@@ -461,7 +464,9 @@ PMELT(:) = ZMELT(:) * ZSNOW_D(:)
 !              ------------
 !
 ZQSATI = QSATI(PTSNOW(:),PPS(:))
-WHERE (GFLUXMASK(:)) ZQSAT(:) = ZQSATI(:)
+WHERE (GFLUXMASK(:)) 
+   ZQSAT(:) = ZQSATI(:)
+END WHERE
 !
 !*      5.1    net radiation (with Ts lin. extrapolation)
 !              -------------
@@ -554,7 +559,9 @@ WHERE ( PWSNOW(:)<ZWSNOW_MIN .AND. PMELT(:)>0. .AND. PSR(:)==0. )
   PWSNOW(:)=0.
 END WHERE
 !
-WHERE ( PWSNOW(:)<1.E-8 * PTSTEP ) PWSNOW(:) = 0.
+WHERE ( PWSNOW(:)<1.E-8 * PTSTEP ) 
+   PWSNOW(:) = 0.
+END WHERE
 !
 !-------------------------------------------------------------------------------
 !

@@ -179,7 +179,7 @@ INTEGER :: JPATCH  ! loop counter on tiles
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG1 ! work array for surface temperature
-REAL, DIMENSION(SIZE(PTSRAD))     :: ZTSRAD_NAT !radiative temperature
+REAL, DIMENSION(KI)     :: ZTSRAD_NAT !radiative temperature
 !
 REAL, DIMENSION(:),   ALLOCATABLE :: ZM, ZWORK
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZF
