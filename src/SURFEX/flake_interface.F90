@@ -131,7 +131,8 @@ USE mode_sfcflx          , ONLY :    &
 
 USE modd_flake_configure, ONLY : lflk_botsed_use 
 !==============================================================================
-
+!
+USE MODI_WIND_THRESHOLD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -181,7 +182,7 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation optio
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
 LOGICAL ::  lflk_botsed ! Switch, .TRUE. -> use the bottom-sediment scheme 
-CHARACTER(LEN=3) ::  hflk_flux     ! 'DEF'/'WAT' compute the surface fluxes with water_flux/flake
+CHARACTER(LEN=5) ::  hflk_flux     ! 'DEF  '/'FLAKE'/'ECUME' compute the surface fluxes if = 'FLAKE'
 
 !
 !  Input/Output (procedure arguments)
@@ -232,10 +233,10 @@ INTEGER  :: JL                  ! loop counter on horizontal points
 
 REAL :: T_sfc_n ! Surface temperature at the new time step [K]
 REAL :: ustar2  ! square of air friction velocity (m2/s2)  
-REAL :: zvmod   ! wind at t+1  
-
+REAL :: zvmod   ! wind at t+1   
 REAL, DIMENSION(KI) ::    &
-    Q_watvap                      ! Flux of water vapour [kg m^{-2} s^{-1}]  
+    Q_watvap, &                      ! Flux of water vapour [kg m^{-2} s^{-1}] 
+    zwind             ! thresholded wind
 
 TYPE (opticpar_medium), DIMENSION(KI) ::  &
     opticpar_water                       ,  &! Optical characteristics of water
@@ -271,6 +272,8 @@ opticpar_ice   = opticpar_ice_opaque   ! Opaque ice
 opticpar_snow  = opticpar_snow_opaque  ! Opaque snow
 !
 lflk_botsed_use = lflk_botsed
+!
+zwind = WIND_THRESHOLD(U_a_in,height_u_in)
 !
 H_POINT_LOOP: DO JL = 1,KI ! begin of loop on horizontal points
 !------------------------------------------------------------------------------
@@ -318,7 +321,7 @@ opticpar_water(JL) = opticpar_medium(1,                       &
 !  Compute the surface friction velocity and fluxes of sensible and latent heat 
 !------------------------------------------------------------------------------
    
-   IF (hflk_flux=='FLK') THEN
+   IF (hflk_flux=='FLAKE') THEN
            z0t(JL)=1.E-7  ! bug correction V. Masson: default value if
                           ! computations cannot be done in SfxFlx_momsenlat
       Q_momentum(JL) = - rho_a(JL) * ustar(JL)**2
@@ -335,7 +338,7 @@ opticpar_water(JL) = opticpar_medium(1,                       &
       ! It is retrieved assumed a relationship between momentum flux
       !  and previous time-step wind : Q_mom = - rho_a * Cd_a * U_a_in**2
       !
-      Cd_a(JL) = - Q_momentum(JL) / rho_a(JL) / U_a_in(JL)**2 
+      Cd_a(JL) = - Q_momentum(JL) / rho_a(JL) / zwind(JL)**2 
       ! 2nd step : friction velocity (for air) computed with future wind speed
       !            (the latter computed using implicit coefficients)
       ustar2 = 0.0
@@ -360,9 +363,6 @@ opticpar_water(JL) = opticpar_medium(1,                       &
 
    END IF
    u_star_w_flk = SQRT(-Q_momentum(JL)/tpl_rho_w_r)
-
-   ! V. MAsson : simulation d'une riviere: on force un melange + important
-!   u_star_w_flk = max(u_star_w_flk, 1.)
    
 !------------------------------------------------------------------------------
 !  Compute heat fluxes Q_snow_flk, Q_ice_flk, Q_w_flk

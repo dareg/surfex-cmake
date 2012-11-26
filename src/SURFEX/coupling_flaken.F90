@@ -35,12 +35,12 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      V. Masson   11/2011 Ch limited to 1.E-7 in all cases and Cd coming from
 !!                          Flake_interface routine if computed by flake
 !!      B. Decharme 09/2012 New wind implicitation
-!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
+!!      P. Le Moigne 10/2012 ECUME option for FLake. Remove wind threshold
 !!------------------------------------------------------------------
 !
 USE MODD_SURF_ATM, ONLY : CIMPLICIT_WIND
 !
-USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XKARMAN, XTT
+USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XKARMAN, XTT, XTTS
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODD_FLAKE_n,  ONLY :   TTIME         , XEMIS         , XWATER_DEPTH  , &
@@ -53,7 +53,8 @@ USE MODD_FLAKE_n,  ONLY :   TTIME         , XEMIS         , XWATER_DEPTH  , &
                             XH_SNOW       , XH_ICE        , XH_ML         , &
                             XH_B1         , XTS           , XZ0           , &
                             XUSTAR        , LSEDIMENTS    , CFLK_FLUX     , &
-                            CFLK_ALB         
+                            CFLK_ALB      , XICHCE        , LPRECIP       , &
+                            LPWEBB
 !                          
 !salgado - keep the same ch_ routines and modules used in watflux_n
 USE MODD_CH_WATFLUX_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
@@ -69,13 +70,13 @@ USE MODE_DSLT_SURF
 USE MODE_THERMOS
 ! 
 USE MODI_WATER_FLUX
+USE MODI_ECUME_SEAFLUX
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_DIAG_INLINE_FLAKE_n 
 USE MODI_DIAG_MISC_FLAKE_n
 USE MODI_CH_AER_DEP
 USE MODI_CH_DEP_WATER
 USE MODI_DSLT_DEP
-USE MODI_WIND_THRESHOLD
 USE MODI_FLAKE_ALBEDO
 USE MODI_UPDATE_RAD_SEAWAT
 USE MODI_ABOR1_SFX
@@ -154,9 +155,13 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
-INTEGER                     :: ISWB   ! number of shortwave spectral bands
-INTEGER                     :: JSWB   ! loop counter on shortwave spectral bands
-!         
+REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t , 
+REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
+!
+REAL, DIMENSION(KI)     :: ZEMIS      ! Emissivity at time t
+REAL, DIMENSION(KI)     :: ZTRAD      ! Radiative temperature at time t
+REAL, DIMENSION(KI)  :: ZALB   ! surface albedo
+!
 REAL, DIMENSION(KI)  :: ZEXNA  ! Exner function at forcing level
 REAL, DIMENSION(KI)  :: ZEXNS  ! Exner function at surface level
 !
@@ -175,24 +180,30 @@ REAL, DIMENSION(KI)  :: ZRESA_WATER ! aerodynamical resistance
 REAL, DIMENSION(KI)  :: ZCD    ! Drag coefficient
 REAL, DIMENSION(KI)  :: ZCDN   ! Neutral Drag coefficient
 REAL, DIMENSION(KI)  :: ZCH    ! Heat transfer coefficient
+REAL, DIMENSION(KI)  :: ZCE    ! Heat transfer coefficient
 REAL, DIMENSION(KI)  :: ZRI    ! Richardson number
 REAL, DIMENSION(KI)  :: ZHU    ! Near surface relative humidity
 REAL, DIMENSION(KI)  :: ZZ0    ! roughness length
 REAL, DIMENSION(KI)  :: ZZ0H   ! heat roughness length
 REAL, DIMENSION(KI)  :: ZQSAT  ! humidity at saturation
 REAL, DIMENSION(KI)  :: ZTSTEP ! time-step
+!
+REAL, DIMENSION(KI)     :: ZMASK      !
+!
 REAL                       :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
 REAL                       :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST
 REAL                       :: ZCONVERTFACM6_SLT, ZCONVERTFACM6_DST
 !
+INTEGER                     :: ISWB   ! number of shortwave spectral bands
+INTEGER                     :: JSWB   ! loop counter on shortwave spectral bands
+!  
+INTEGER                 :: ISIZE_WATER! number of points of lake water 
+INTEGER                 :: ISIZE_ICE  ! and of lake ice
+!
 INTEGER                     :: ILUOUT ! output logical unit
 !
-REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t , 
-REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
-REAL, DIMENSION(KI)     :: ZEMIS      ! Emissivity at time t
-REAL, DIMENSION(KI)     :: ZTRAD      ! Radiative temperature at time t
-REAL, DIMENSION(KI)  :: ZALB   ! surface albedo
-
+LOGICAL                 :: GPWG = .FALSE.
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
@@ -218,8 +229,6 @@ ZEXNA(:)     = (PPA(:)/XP00)**(XRD/XCPD)
 !
 ZWIND(:) = SQRT(PU(:)**2+PV(:)**2)
 !
-ZWIND(:) = WIND_THRESHOLD(ZWIND(:),PUREF)
-!
 ZQA(:) = PQA/PRHOA
 !
 PSFTS(:,:) = 0.
@@ -234,16 +243,35 @@ TTIME%TIME = TTIME%TIME + PTSTEP
 CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 !----------------------------------------
+ZMASK(:) = XTS(:) - XTTS
+ISIZE_WATER = COUNT(ZMASK(:)>=0.)
+ISIZE_ICE = SIZE(XTS) - ISIZE_WATER
+!
 PSFU = 0.
 PSFV = 0.
 ZSFM = 0.
-IF (CFLK_FLUX=='DEF') THEN
-    CALL WATER_FLUX(XZ0,                                        &
-                  PTA, ZEXNA, PRHOA, XTS, ZEXNS, PQA,PRAIN, PSNOW,&
-                  XTT, ZWIND, PZREF, PUREF,                       &
-                  PPS, ZQSAT,                                     &
-                  PSFTH, PSFTQ, ZUSTAR,                           &
-                  ZCD, ZCDN, ZCH, ZRI, ZRESA_WATER, ZZ0H          )  
+!
+SELECT CASE (CFLK_FLUX)
+   CASE ('DEF  ')
+    CALL WATER_FLUX(XZ0,                                           &
+                  PTA, ZEXNA, PRHOA, XTS, ZEXNS, PQA,PRAIN, PSNOW, &
+                  XTT, ZWIND, PZREF, PUREF,                        &
+                  PPS, ZQSAT,                                      &
+                  PSFTH, PSFTQ, ZUSTAR,                            &
+                  ZCD, ZCDN, ZCH, ZRI, ZRESA_WATER, ZZ0H           )  
+
+  CASE ('ECUME')
+    CALL ECUME_SEAFLUX(XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,         &
+                      PTA, ZEXNA ,PRHOA, XTS, ZEXNS, ZQA, PRAIN,   &
+                      PSNOW,                                       &
+                      ZWIND, PZREF, PUREF,                         &
+                      PPS, XICHCE, LPRECIP,LPWEBB, GPWG, ZQSAT,    &
+                      PSFTH, PSFTQ, ZUSTAR,                        &
+                      ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_WATER, ZZ0H  )
+
+END SELECT
+!
+IF (CFLK_FLUX=='DEF  ' .OR. CFLK_FLUX=='ECUME') THEN
 !
     IF(CIMPLICIT_WIND=='OLD')THEN    
 !     old implicitation (m2/s2)
@@ -253,6 +281,8 @@ IF (CFLK_FLUX=='DEF') THEN
 !     new implicitation (m2/s2)            
       ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*(2.*PPEW_B_COEF(:)-ZWIND(:))) /&
                    (1.0-2.0*PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:)) 
+            
+
 !                   
       ZWIND(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
       ZWIND(:) = MAX(ZWIND(:),0.)
@@ -272,11 +302,13 @@ IF (CFLK_FLUX=='DEF') THEN
 !   PSFTQ become temporarly the flux of heat flux (W/m2)
     PSFTQ = PSFTQ * XLVTT
 !
+ELSE
+   ZUSTAR(:) = XUSTAR(:)
 ENDIF
 !
 !--------------------------------------------------------------------------------------
 ! Call FLake 
-! to compute Fluxes over water if CFLK_FLUX=='FLK'
+! to compute Fluxes over water if CFLK_FLUX=='FLAKE'
 ! to actualize FLake variables, namely water surface temperature
 !--------------------------------------------------------------------------------------
 !
@@ -312,12 +344,12 @@ CALL FLAKE_INTERFACE( KI, &
                        XT_SNOW, XT_ICE, XT_MNW, XT_WML, XT_BOT, XT_B1, XCT, &
                        XH_SNOW, XH_ICE, XH_ML, XH_B1, XTS,                  &
 ! Surface heat and momentum fluxes
-                       PSFTH, PSFTQ, ZSFM, ZZ0, ZZ0H, ZRI, XUSTAR, ZCD,     &
+                       PSFTH, PSFTQ, ZSFM, ZZ0, ZZ0H, ZRI, ZUSTAR, ZCD,     &
 ! Flags              
                        LSEDIMENTS, CFLK_FLUX, PPEW_A_COEF, PPEW_B_COEF,     &
                        PRHOA, CIMPLICIT_WIND                                )
 !
-IF (CFLK_FLUX=='FLK') then 
+IF (CFLK_FLUX=='FLAKE') then 
     XZ0 = ZZ0
 ENDIF
 !
@@ -327,7 +359,9 @@ ENDIF
 !
 ! Momentum fluxes
 !
-IF (CFLK_FLUX=='FLK') THEN
+IF (CFLK_FLUX=='FLAKE') THEN
+   PSFU = 0.
+   PSFV = 0.
   WHERE (ZWIND(:)>0.)
     PSFU(:) = ZSFM(:) * PU(:) / ZWIND(:)
     PSFV(:) = ZSFM(:) * PV(:) / ZWIND(:)
@@ -344,8 +378,11 @@ IF (CFLK_FLUX=='FLK') THEN
   ZRESA_WATER (:) = XCPD * PRHOA(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:)) &
                      / (PSFTH(:) * ZEXNS(:))  
   END WHERE
-  !                               
+  !
 ENDIF
+!                               
+XUSTAR(:) = ZUSTAR(:)
+!                               
 ! flux of water vapor (kg/m2/s)
 PSFTQ = PSFTQ / XLVTT
 !
@@ -430,10 +467,10 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (CFLK_FLUX=='FLK') THEN  !compute some variables not present in FLake code
+IF (CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake code
   ZCH = 1.E-7
 !
-  WHERE (ABS((XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2)
+  WHERE (ABS((XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2 .AND. ZWIND(:)/=0.)
      ZCH = MAX(1.E-7,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
   END WHERE
 !

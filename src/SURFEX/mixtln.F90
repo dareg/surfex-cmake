@@ -30,6 +30,17 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original     02/2008
+!!     01/2012 : H. Giordani, P. Peyrille
+!!                       Add FLAGS: 
+!!                       LREL_TS: relaxation on T, S
+!!                       LREL_CUR: damping on current
+!!                       FOR LREL_CUR: implicit and explicit codinf is made
+!!                       for conveniency, DTREL=Ucur term, DSREL=VCURterm
+!!                Corrections:
+!!                   coriolis terms in current equation, 
+!!                   richardson nb in diapycnal mixing, 
+!!                   remove threshold value for mixing tendency
+!!    07/2012, P. Le Moigne : CMO1D phasing
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -38,13 +49,18 @@
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
 USE MODD_SEAFLUX_n, ONLY : XSEABATHY
-USE MODD_SEAFLUX_GRID_n, ONLY : XLAT
 USE MODD_OCEAN_n
 USE MODD_OCEAN_GRID_n
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
+! Module containing relaxation fields
+USE MODD_OCEAN_REL_n , ONLY : XSEAT_REL, XSEAS_REL, XTAU_REL, &
+                            LREL_CUR, LREL_TS, &
+                            XQCORR, LFLX_CORR, LDIAPYCNAL,&
+                            XSEAU_REL, XSEAV_REL
 !
+USE MODD_SEAFLUX_GRID_n, ONLY :  XLAT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -67,6 +83,12 @@ REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVT,ADVS !advection horiz. temperature and 
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVU,ADVV !advection horiz. of current
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVE      !advection of turbulent kinetic energy
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT,ZSEAS,ZSEAE,ZSEAV,ZSEAU
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT_REL,ZSEAS_REL,ZSEAV_REL,ZSEAU_REL
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZTDTREL  ! Tendancy derived from  relxation (K/s)
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSDTREL  ! ---- salinity   ---------- (%/s)
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZUDTREL  ! Tendancy term derived from relaxation on U current (m/s2)
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZVDTREL  !  ------------------------------------    V        (m/s2)
+!
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZLE,ZKMEL,ZKMELM
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZKMES,ZKMED,ZKMEWM,ZKMEWS
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZA, ZB, ZC, ZA2, ZB2, ZC2, ZYT, ZYS, ZYE        !matrices pour resolution numérique
@@ -82,20 +104,23 @@ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX)   :: ZAI,ZBI,ZCI     !matrices pour resoluti
 COMPLEX, DIMENSION(NOCKMIN:NOCKMAX)   :: ZAU,ZBU,ZCU,ZYU !matrices pour resolution numérique
 COMPLEX, DIMENSION(NOCKMIN:NOCKMAX)   :: ZOMU,ZWU
 !
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZDTFSOL
+REAL :: ZDTFNSOL
+!
 REAL :: ZSFU, ZSFV, ZFNSOL, ZFSOL, ZSFTEAU, ZLAT
 REAL :: ZSEAHMO, ZSEATEMP
 !
 REAL :: ZSEUIL,ZEMIN,ZEMAX,ZTEST
-REAL :: ZSSTENDMAX                     !maximum value for the SST tendance (K/s)
 !
 REAL :: ZF, ZEWS
 REAL :: ZALG
 REAL :: ZEE,ZPOT,ZXLME,ZXLPE,ZXROD,ZAUX,ZXDL
-REAL :: ZDU,ZDV,ZRICH,ZDRHODZ,ZTRELAX
+REAL :: ZDU,ZDV,ZRICH,ZDRHODZ
 REAL :: ZT1, ZT2, ZT3, ZS1, ZS2
 !
 INTEGER :: BINF,BSUP
 INTEGER :: J,JJ,JPT,JIN,IKHML
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
@@ -108,8 +133,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MIXTL_N',0,ZHOOK_HANDLE)
 BINF=NOCKMIN+1
 BSUP=NOCKMAX
-!
-ZSSTENDMAX=1./(5.*60.) !maximum = 1°C/ 5mn
 !
 ZSEUIL=2.23E-3
 ZTEST=0.
@@ -147,6 +170,12 @@ DO JPT=1,SIZE(PFSOL)
     ZSEAU(J)=XSEAU(JPT,J)
     ZSEAV(J)=XSEAV(JPT,J)    
     ZSEAE(J)=XSEAE(JPT,J)
+    !
+    ZSEAU_REL(J)=XSEAU_REL(JPT,J)
+    ZSEAV_REL(J)=XSEAV_REL(JPT,J)
+    ZSEAT_REL(J)=XSEAT_REL(JPT,J)
+    ZSEAS_REL(J)=XSEAS_REL(JPT,J)
+    !
     IF (J>=BINF .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO=ZSEAHMO-XDZ1(J)
   ENDDO
 
@@ -163,8 +192,20 @@ DO JPT=1,SIZE(PFSOL)
     ADVV(J)=0.
     ADVE(J)=0.
     ZZDRHO(J)=(ZSEAT(J)-ZT1)*(ZT2+ZT3*(ZSEAT(J)-ZT1)) + ZS2*(ZSEAS(J)-ZS1)
+    ZUDTREL(J)=0.
+    ZVDTREL(J)=0.
+    ZTDTREL(J)=0.
+    ZSDTREL(J)=0.
+    ZDTFSOL(J)=0.
   ENDDO
-
+  ZDTFNSOL=0.
+!
+! Control print
+!IF (LREL_CUR)  WRITE(*,*) "WARNING :: Damping on current will be done"
+!IF (LREL_TS)  WRITE(*,*) "WARNING :: Relaxation on T, S ocean will be done "
+!IF (LDIAPYCNAL)  WRITE(*,*) "WARNING :: diapycnal mixing has been activated"
+!IF (LFLX_CORR) WRITE(*,*) "WARNING :: ocean fluxes correctin has been activated"
+!
 !------------------------------------------------------------------------------
 !
 !       2.     Oceanic vertical mixing 
@@ -187,15 +228,28 @@ DO JPT=1,SIZE(PFSOL)
     ZDRHODZ=(ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
     ZDU=ZSEAU(J+1)-ZSEAU(J)
     ZDV=ZSEAV(J+1)-ZSEAV(J)
-    IF (ZDU**2+ZDV**2.NE.0.) ZRICH=-ZALG*ZDRHODZ / (ZDU**2+ZDV**2) / XK4(J)
+!! Modif PP - HG : flag diapycnal
+    IF (LDIAPYCNAL) THEN
+      IF((ZDU*ZDU+ZDV*ZDV).LE.1.E-7) THEN 
+        ZRICH = 0.8
+      ELSE
+        ZRICH = -ZALG*ZDRHODZ/(ZDU**2+ZDV**2)/XK4(J)
+      ENDIF    
 !coefficient de mélange aux ondes internes
-!    ZKMEWM(J)=1.E-3
-!    ZKMEWS(J)=1.E-4
+      ZKMEWM(J)=1.E-3
+      ZKMEWS(J)=1.E-4
 !coefficient de mélange du au cisaillement
-!    IF(ZRICH>7.) ZKMES(J) = 0.
-!    IF((ZRICH<=7.).AND.(ZRICH>=0.)) ZKMES(J) = &
-!       &5.E-3*(1.-(ZRICH/0.7)*(ZRICH/0.7))**3
-!    IF(ZRICH<0.) ZKMES(J) = 5.E-3
+      IF(ZRICH>7.) THEN
+        ZKMES(J) = 0.
+      ELSEIF(ZRICH>=0.) THEN
+        ZKMES(J) = 5.E-3*(1.-(ZRICH/0.7)*(ZRICH/0.7))**3
+      ELSE
+        ZKMES(J) = 5.E-3
+      ENDIF
+    ENDIF
+    !plm si ldiapycnal=F zkmes non modofie et zrich ne sert a rien !
+    !plm ELSE
+    !plm  ZRICH=-ZALG*ZDRHODZ / (ZDU**2+ZDV**2) / XK4(J)   
   ENDDO
 !
 !       2.b    Mixing length and coefficient 
@@ -267,6 +321,35 @@ DO JPT=1,SIZE(PFSOL)
 !!       2.c    Numerical resolution of evolution equations
 !!              -------------------------------------------
 !
+  DO J=BINF,BSUP
+    IF (LREL_CUR) THEN
+      ZUDTREL(J) =  - (ZSEAU(J)-ZSEAU_REL(J))  / XTAU_REL 
+      ZVDTREL(J) =  - (ZSEAV(J)-ZSEAV_REL(J))  / XTAU_REL 
+    ENDIF
+    ! flux solaire
+    ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
+  ENDDO
+!
+  IF (LFLX_CORR) THEN
+    ! NO relaxation
+    ! Barnier correction on surface fluxes          
+    ! flux non solaire corrige
+    ZTDTREL(BINF) =  XQCORR *(ZSEAT_REL(BINF)-ZSEAT(BINF)) / (XRHOSW*XCPSW)
+    ZFNSOL = ZFNSOL + ZTDTREL(BINF)
+  ELSEIF (LREL_TS) THEN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! RELAXATION IS MADE INSTEAD OF FLUX CORRECTION
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
+    DO J=BINF,BSUP
+      ! flux non solaire
+      ZTDTREL(J) =  - (ZSEAT(J)-ZSEAT_REL(J)) / XTAU_REL
+      ZSDTREL(J) =  - (ZSEAS(J)-ZSEAS_REL(J)) / XTAU_REL
+    ENDDO
+  ENDIF
+
+  ! flux non solaire
+  ZDTFNSOL = ZFNSOL/XDZ2(BINF) 
+!
 !simple coef a, b, c at NOCKMIN+1 level
   ZC(BINF)= XOCEAN_TSTEP*XK2(BINF)*(ZKMEL(BINF)+ZKMES(BINF)+ZKMEWS(BINF)+ZKMED(BINF))              
   ZB(BINF)= 1.-ZC(BINF)
@@ -281,18 +364,24 @@ DO JPT=1,SIZE(PFSOL)
   ZOMS(BINF) = 1./ZB(BINF)
   ZOMU(BINF) = 1./ZBU(BINF)
 !coef yt, ys and yu at NOCKMIN+1 level
-  ZYT(BINF)=ZSEAT(BINF) + XOCEAN_TSTEP * ((ZFNSOL+XRAY(BINF)*ZFSOL) / XDZ2(BINF) + ADVT(BINF))  
-  ZYS(BINF)=ZSEAS(BINF) + XOCEAN_TSTEP * ( ZSEAS(BINF)*ZSFTEAU      / XDZ2(BINF) + ADVS(BINF)) 
+  ZYT(BINF) = ZSEAT(BINF) + XOCEAN_TSTEP * (ZDTFNSOL + ZDTFSOL(BINF) + ADVT(BINF))
+  ZYS(BINF) = ZSEAS(BINF) + XOCEAN_TSTEP * ( ZSEAS(BINF)*ZSFTEAU      / XDZ2(BINF) + ADVS(BINF))
+! Modif. PP. relaxation towards ref. profile
+! If LREL_TS, relaxation on temp, salinity  
+  IF (LREL_TS) THEN
+    ZYT(BINF) = ZYT(BINF) + XOCEAN_TSTEP * ZTDTREL(BINF)  
+    ZYS(BINF) = ZYS(BINF) + XOCEAN_TSTEP * ZSDTREL(BINF) 
+  ENDIF
   ZUC(BINF,1)=ZSEAU(BINF)*(1.,0.)+ZSEAV(BINF)*(0.,1.)
-  ZYU(BINF)=ZUC(BINF,1) + XOCEAN_TSTEP * ( ZUC(BINF,1) * ZF*(1-XGAMA) * (0.,-1.) - &
-             (ZSFU*(1.,0.) + ZSFV*(0.,1.))/XDZ2(BINF)/XRHOSW + ADVU(BINF)*(1.,0.) + ADVV(BINF)*(0.,1.) ) 
+  ZYU(BINF) = ZUC(BINF,1) + XOCEAN_TSTEP * ( ZUC(BINF,1) * ZF*(1-XGAMA) * (0.,-1.) - &
+         (ZSFU*(1.,0.) + ZSFV*(0.,1.))/XDZ2(BINF)/XRHOSW + ADVU(BINF)*(1.,0.) + ADVV(BINF)*(0.,1.) )
+! damping on current if LREL_CUR=T  in explicit scheme         
+  IF (LREL_CUR) ZYU(BINF) = ZYU(BINF) + XOCEAN_TSTEP*(ZUDTREL(BINF)*(1.,0.)+ ZVDTREL(BINF)*(0.,1.))
 !wt, ws, wu from OMT, OMS, OMU, ZY
   ZWT(BINF) = ZOMT(BINF)*ZYT(BINF)
   ZWS(BINF) = ZOMS(BINF)*ZYS(BINF)
   ZWU(BINF) = ZOMU(BINF)*ZYU(BINF)
 !*Evolution of the square root of TKE computation of density gradient
-  ZTRELAX     = XDZ1(BINF)**2/(MAX(1.E-10,ZKMEL(BINF)))
-  ZTRELAX     = MIN(XOCEAN_TSTEP,ZTRELAX) 
   ZDRHODZ=(ZZDRHO(BINF)-ZZDRHO(BINF+1))/XDZ1(BINF)
   ZDU=ZSEAU(BINF+1)-ZSEAU(BINF)
   ZDV=ZSEAV(BINF+1)-ZSEAV(BINF)
@@ -300,7 +389,7 @@ DO JPT=1,SIZE(PFSOL)
   ZPDY(BINF) = XCKL*ZLE(BINF) * XK4(BINF)*(ZDU**2+ZDV**2)
 !coef a2, b2, c2 at NOCKMIN and BSUP levels
   ZC2(BINF)=XOCEAN_TSTEP*XK3(BINF)*ZKMELM(BINF+1)
-  ZB2(BINF)=1. - ZC2(BINF) + XOCEAN_TSTEP*ZSEAE(BINF) * (1./ZLE(BINF)/XZCE + 1./ZTRELAX)                                  
+  ZB2(BINF)=1. - ZC2(BINF) + XOCEAN_TSTEP*ZSEAE(BINF) * 1./ZLE(BINF)/XZCE                            
 !OME at NOCKMIN from B2 
   ZOME(BINF) = 1./ZB2(BINF)
 !Y3 coef at NOCKMIN
@@ -329,17 +418,21 @@ DO JPT=1,SIZE(PFSOL)
     ZOMU(J)   = 1./(ZBU(J) - ZAU(J) * ZOMU(J-1) * ZCU(J-1)) 
     ZOMS(J)   = 1./(ZB(J)  - ZA(J)  * ZOMS(J-1) * ZC(J-1)) 
 
-    ZYT(J)    = ZSEAT(J) + XOCEAN_TSTEP * ( XRAY(J)*ZFSOL/XDZ2(J) + ADVT(J))
+    ZYT(J)    = ZSEAT(J) + XOCEAN_TSTEP * (ZDTFSOL(J) + ADVT(J))
     ZYS(J)    = ZSEAS(J) + XOCEAN_TSTEP * (                         ADVS(J))
+    IF (LREL_TS) THEN
+      ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZTDTREL(J)
+      ZYS(J) = ZYS(J) + XOCEAN_TSTEP * ZSDTREL(J)
+    ENDIF
     ZUC(J,1)  = ZSEAU(J)*(1.,0.) + ZSEAV(J)*(0.,1.)
-    ZYU(J)    = ZUC(J,1) + XOCEAN_TSTEP * (ZUC(J,1)*ZF*(1.-XGAMA)*(0.,-1.) + ADVU(J)*(1.,0.) + ADVV(J)*(0.,1.)) 
-
+    ZYU(J)    = ZUC(J,1) + XOCEAN_TSTEP * (ZUC(J,1)*ZF*(1.-XGAMA)*(0.,-1.) + ADVU(J)*(1.,0.) + ADVV(J)*(0.,1.))
+    ! damping on current if LREL_CUR=T explicit
+    ! Pareil V,UREF da,s relawxation
+    IF (LREL_CUR) ZYU(J) = ZYU(J) + XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.)+ZVDTREL(J)*(0.,1.))  
     ZWT(J)    = ZOMT(J) * (ZYT(J)- ZA(J) *ZWT(J-1))
     ZWS(J)    = ZOMS(J) * (ZYS(J)- ZA(J) *ZWS(J-1))
     ZWU(J)    = ZOMU(J) * (ZYU(J)- ZAU(J)*ZWU(J-1))
 
-    ZTRELAX   = XDZ1(J)**2/(MAX(1.E-10,ZKMEL(J)))
-    ZTRELAX   = MIN(XOCEAN_TSTEP,ZTRELAX) 
     ZDRHODZ   = (ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
 
     ZDU       = ZSEAU(J+1)-ZSEAU(J)
@@ -350,7 +443,7 @@ DO JPT=1,SIZE(PFSOL)
 
     ZC2(J)    = XOCEAN_TSTEP*XK3(J)*ZKMELM(J+1)
     ZA2(J)    = XOCEAN_TSTEP*XK2(J)*ZKMELM(J)
-    ZB2(J)    = 1. - ZA2(J) - ZC2(J) + XOCEAN_TSTEP * ZSEAE(J) * (1./ZLE(J)/XZCE + 1./ZTRELAX)
+    ZB2(J)    = 1. - ZA2(J) - ZC2(J) + XOCEAN_TSTEP * ZSEAE(J) * 1./ZLE(J)/XZCE
 
     ZOME(J)   = 1. / (ZB2(J) - ZA2(J)*ZOME(J-1)*ZC2(J-1)) 
     ZYE(J)    = ZSEAE(J) + XOCEAN_TSTEP * (0.5 * ZSEAE(J)**2/ZLE(J)/XZCE + ADVE(J)) + ZPTH(J) + ZPDY(J)
@@ -367,10 +460,17 @@ DO JPT=1,SIZE(PFSOL)
   ZOMT(BSUP)   = 1./(ZB(BSUP)-ZA(BSUP)*ZOMT(BSUP-1)*ZC(BSUP-1))
   ZOMU(BSUP)=1./(ZBU(BSUP)-ZAU(BSUP)*ZOMU(BSUP-1)*ZCU(BSUP-1))
   ZOMS(BSUP)=1./(ZB(BSUP)-ZA(BSUP)*ZOMS(BSUP-1)*ZC(BSUP-1))
-  ZYT(BSUP)=ZSEAT(BSUP) + XOCEAN_TSTEP * ( XRAY(BSUP)*ZFSOL/XDZ2(BSUP) + ADVT(BSUP) ) 
+  ZYT(BSUP)=ZSEAT(BSUP) + XOCEAN_TSTEP * ( ZDTFSOL(BSUP) + ADVT(BSUP) ) 
   ZYS(BSUP)=ZSEAS(BSUP) + XOCEAN_TSTEP * ( ADVS(BSUP) )   
+  IF (LREL_TS) THEN
+    ZYT(BSUP) = ZYT(BSUP) + XOCEAN_TSTEP * ZTDTREL(BSUP)  
+    ZYS(BSUP) = ZYS(BSUP) + XOCEAN_TSTEP * ZSDTREL(BSUP)
+  ENDIF
   ZUC(BSUP,1)=ZSEAU(BSUP)*(1.,0.)+ZSEAV(BSUP)*(0.,1.)
   ZYU(BSUP)=ZUC(BSUP,1) + XOCEAN_TSTEP * ( ZUC(BSUP,1) * ZF*(1.-XGAMA)*(0.,-1.) + ADVU(BSUP)*(1.,0.) + ADVV(BSUP)*(0.,1.) )
+  ! damping on current if LREL_CUR=T explicit
+  ! Pareil V,UREF da,s relawxation
+  IF (LREL_CUR) ZYU(BSUP) = ZYU(BSUP) + XOCEAN_TSTEP * (ZUDTREL(BSUP)*(1.,0.)+ZVDTREL(BSUP)*(0.,1.))
   ZWT(BSUP)=ZOMT(BSUP)*(ZYT(BSUP)-ZA(BSUP)*ZWT(BSUP-1))
   ZWS(BSUP)=ZOMS(BSUP)*(ZYS(BSUP)-ZA(BSUP)*ZWS(BSUP-1))
   ZWU(BSUP)=ZOMU(BSUP)*(ZYU(BSUP)-ZAU(BSUP)*ZWU(BSUP-1))
@@ -406,27 +506,23 @@ DO JPT=1,SIZE(PFSOL)
     ZTENDE(J)=(ZE(J)*ZE(J)-ZSEAE(J)**2)/XOCEAN_TSTEP
     ZDIFFV(J)=ZTENDE(J) - ZSEAE(J)*(ZPDY(J) + ZPTH(J))
     !
-    IF ((ABS(ZT(BINF)-ZSEAT(BINF))/XOCEAN_TSTEP)<=ZSSTENDMAX) THEN !secure if mixt crash
-      ZSEAU(J)  = ZU(J)
-      ZSEAV(J)  = ZV(J)
-      ZSEAT(J)  = ZT(J)
-      ZSEAS(J)  = ZS(J)
-      ZSEAE(J)  = ZE(J)
-    ENDIF
+    ZSEAU(J)  = ZU(J)
+    ZSEAV(J)  = ZV(J)
+    ZSEAT(J)  = ZT(J)
+    ZSEAS(J)  = ZS(J)
+    ZSEAE(J)  = ZE(J)
   ENDDO
 !
 !------------------------------------------------------------------------------
 !!       3.     New oceanic profiles
 !!              --------------------
 !!
-  IF ((ABS(ZT(BINF)-ZSEAT(BINF))/XOCEAN_TSTEP)<=ZSSTENDMAX) THEN !secure if mixt crash
-    IF (LPROGSST) XSEATEND(JPT)=(ZT(BINF)-ZSEAT(BINF))/XOCEAN_TSTEP
-    ZSEAU(NOCKMIN)  = ZU(BINF)
-    ZSEAV(NOCKMIN)  = ZV(BINF)
-    ZSEAT(NOCKMIN)  = ZT(BINF)
-    ZSEAS(NOCKMIN)  = ZS(BINF)
-    ZSEAE(NOCKMIN)  = ZE(BINF)
-  ENDIF
+  IF (LPROGSST) XSEATEND(JPT)=(ZT(BINF)-ZSEAT(BINF))/XOCEAN_TSTEP
+  ZSEAU(NOCKMIN)  = ZU(BINF)
+  ZSEAV(NOCKMIN)  = ZV(BINF)
+  ZSEAT(NOCKMIN)  = ZT(BINF)
+  ZSEAS(NOCKMIN)  = ZS(BINF)
+  ZSEAE(NOCKMIN)  = ZE(BINF)
 
   !bathymetrie
   DO J=BINF,BSUP
@@ -456,9 +552,12 @@ DO JPT=1,SIZE(PFSOL)
     XSEAT(JPT,J)=ZSEAT(J)
     XSEAS(JPT,J)=ZSEAS(J)
     XSEAU(JPT,J)=ZSEAU(J)
-    XSEAV(JPT,J)=ZSEAV(J)    
+    XSEAV(JPT,J)=ZSEAV(J)
     XSEAE(JPT,J)=ZSEAE(J)
+    XDTFSOL(JPT,J) = ZDTFSOL(J)
   ENDDO
+
+  XDTFNSOL(JPT) = ZDTFNSOL
 
 ENDDO
 !  

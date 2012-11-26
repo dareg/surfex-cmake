@@ -1,7 +1,8 @@
 !     #########
-    SUBROUTINE ECUME_FLUX(PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,PVMOD,&
-                            PZREF,PUREF,PPS,PQSAT,PSFTH,PSFTQ,PUSTAR,   &
-                            PCD,PCDN,PCH,PCE,PRI,PRESA,PRAIN,PZ0HSEA    )  
+    SUBROUTINE ECUME_FLUX(PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,PVMOD, &
+                            PZREF,PUREF,PPS,PICHCE,OPRECIP,OPWEBB,OPWG,&
+                            PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE, &
+                            PRI,PRESA,PRAIN,PZ0HSEA    )  
 !###############################################################################
 !!
 !!****  *ECUME_FLUX*
@@ -46,6 +47,7 @@
 !!      Modified        08/2009  B. Decharme: limitation of Ri
 !!      Modified        09/2012  B. Decharme: CD correction
 !!      Modified        09/2012  B. Decharme: limitation of Ri in surface_ri.F90
+!!      Modified        10/2012  P. Le Moigne: extra inputs for FLake use
 !!!
 !-------------------------------------------------------------------------------
 
@@ -54,7 +56,6 @@
 
 USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, &
                               XLVTT, XCL, XCPD, XCPV, XRHOLW, XTT,XP00  
-USE MODD_SEAFLUX_n
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SNOW_PAR,   ONLY : XZ0SN, XZ0HSN
 USE MODD_WATER_PAR
@@ -85,6 +86,11 @@ REAL, DIMENSION(:), INTENT(IN)    :: PPS       ! air pressure at sea surf. (Pa)
 REAL, DIMENSION(:), INTENT(IN)    :: PRAIN     ! precipitation rate (kg/s/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PEXNA     ! Exner function at atm. level
 REAL, DIMENSION(:), INTENT(IN)    :: PEXNS     ! Exner function at sea surface
+
+REAL,               INTENT(IN)    :: PICHCE    !
+LOGICAL,            INTENT(IN)    :: OPRECIP   !
+LOGICAL,            INTENT(IN)    :: OPWEBB    !
+LOGICAL,            INTENT(IN)    :: OPWG      !
 
 REAL, DIMENSION(:), INTENT(INOUT) :: PZ0SEA    ! roughness length over the ocean
 
@@ -153,8 +159,8 @@ IF (LHOOK) CALL DR_HOOK('ECUME_FLUX',0,ZHOOK_HANDLE)
 !
 NITERFL = 6
 !
-IF(LPWG) THEN
-   CALL ABOR1_SFX('Ecume_flux : Correction of fluxes due to gustiness was removed, LPWG should be at false')           
+IF(OPWG) THEN
+   CALL ABOR1_SFX('Ecume_flux : Correction of fluxes due to gustiness was removed, OPWG should be at false')           
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -219,7 +225,7 @@ ZDQ (:) = PQA(:)-PQSAT(:)
 !
 ZD0(:) = 1.2+6.3E-03*MAX(ZDU(:)-10.0,0.0)
 !
-!IF(LPWG) ZWG(:) = 0.0                  !no gustiness initial guess
+!IF(OPWG) ZWG(:) = 0.0                  !no gustiness initial guess
 !ZDUWG(:) = SQRT(ZDU(:)**2+ZWG(:)**2)
 ZDUWG     (:) = ZDU  (:)
 ZDELTAU10N(:) = ZDUWG(:)
@@ -284,7 +290,7 @@ DO JJ=1,NITERFL
     ELSE
       ZCEN(JLON) = 1.7232E-03
     ENDIF
-    ZCEN(JLON) = ZCEN(JLON)*(1.0-XICHCE)+ZCHN(JLON)*XICHCE
+    ZCEN(JLON) = ZCEN(JLON)*(1.0-PICHCE)+ZCHN(JLON)*PICHCE
 !
 !       3.4. Scaling parameters and roughness lenght
 !
@@ -387,7 +393,7 @@ ENDDO
 !            (ATM conv: ZRF<0 if atm. looses heat, ZTAUR<<0)
 !       -----------------------------------------------------
 
-IF(LPRECIP) THEN
+IF(OPRECIP) THEN
   DO JLON=1,SIZE(PTA)
 !
 !       5.1. Momentum flux due to rainfall (ZTAUR, N/m2)
@@ -423,7 +429,7 @@ ENDIF
 !       ------------------------------------------------------------------------
 !
 ! See Eq.21 and Eq.22 in FBR96.
-IF (LPWEBB) THEN
+IF (OPWEBB) THEN
   DO JLON=1,SIZE(PTA)
     ZWW = -(1.0+ZETV)*(PCE(JLON)*ZDUWG(JLON)*ZDQ(JLON)) &
            -(1.0+(1.0+ZETV)*PQA(JLON))*              &
@@ -446,7 +452,7 @@ CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQSATA, &
 !
 ZUSTAR2(:)=-(ZTAU(:)+ZTAUR(:))/PRHOA(:)
 !
-IF(LPRECIP) THEN
+IF(OPRECIP) THEN
   PCD(:)=ZUSTAR2(:)/(ZDUWG(:)**2)
 ENDIF
 !

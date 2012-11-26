@@ -2,7 +2,8 @@
     SUBROUTINE ECUME_SEAFLUX(PZ0SEA,PMASK,KSIZE_WATER,KSIZE_ICE,      &
                               PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,         &
                               PRAIN,PSNOW,PVMOD,PZREF,PUREF,PPS,      &
-                              PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,  &
+                              PICHCE,OPRECIP,OPWEBB, OPWG, PQSAT,     &
+                              PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,        &
                               PCE,PRI,PRESA,PZ0HSEA) 
 !     #######################################################################
 !
@@ -72,6 +73,11 @@ REAL, DIMENSION(:), INTENT(IN)    :: PEXNS ! Exner function at sea surface
 REAL, DIMENSION(:), INTENT(IN)    :: PPS   ! air pressure at sea surface (Pa)
 REAL, DIMENSION(:), INTENT(IN)    :: PRAIN ! precipitation rate (kg/s/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PSNOW ! snow rate (kg/s/m2)
+!
+REAL,               INTENT(IN)    :: PICHCE ! 
+LOGICAL,            INTENT(IN)    :: OPRECIP! 
+LOGICAL,            INTENT(IN)    :: OPWEBB ! 
+LOGICAL,            INTENT(IN)    :: OPWG   ! 
 !
 REAL, DIMENSION(:), INTENT(INOUT)    :: PZ0SEA! roughness length over the ocean
 !                                                                                 
@@ -205,9 +211,10 @@ END DO
 !
 IF (YTYPE=='W') THEN
   !
-  CALL ECUME_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,&
-         ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,&
-         ZW_CD,ZW_CDN,ZW_CH,ZW_CE,ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA)   
+  CALL ECUME_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,        &
+         ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,PICHCE,OPRECIP,OPWEBB,OPWG,&
+         ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,ZW_CD,ZW_CDN,ZW_CH,ZW_CE,     &
+         ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA)   
   !
 ELSEIF (YTYPE=='I') THEN
   !
