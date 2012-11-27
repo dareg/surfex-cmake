@@ -662,20 +662,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZSNOW(:,ID_FORC+1),ZRAIN(:,ID_FORC+1),   &
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
-                            ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )  
-    !   CALL OL_TIME_INTERP_ATM(JSURF_STEP,INB_ATM,                               &
-    !                           transpose(ZTA(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZQA(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZWIND(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZDIR_SW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZSCA_SW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZLW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZSNOW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZRAIN(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZPS(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZCO2(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZDIR(:,ID_FORC:ID_FORC+1)) )      
-    
+                            ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()        
     ! coherence between solar zenithal angle and radiation
