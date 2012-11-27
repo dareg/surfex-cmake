@@ -73,9 +73,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INI_CSTS',0,ZHOOK_HANDLE)
 XPI         = 2.*ASIN(1.)
 XKARMAN     = 0.4
+XBOLTZ      = 1.380658E-23
 XLIGHTSPEED = 299792458.
 XPLANCK     = 6.6260755E-34
-XBOLTZ      = 1.380658E-23
 XAVOGADRO   = 6.0221367E+23
 !
 !-------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ XTH00 = 300.
 !*	 5.     RADIATION CONSTANTS
 !	        -------------------
 !
-XSTEFAN = 2.* XPI**5 * XBOLTZ**4 / (15.* XLIGHTSPEED**2 * XPLANCK**3)
+XSTEFAN = 2.* XPI**5 * XBOLTZ**2 * XBOLTZ**2 / (15.* XLIGHTSPEED**2 * XPLANCK**3)
 XI0     = 1370.
 !
 !-------------------------------------------------------------------------------
