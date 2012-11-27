@@ -121,8 +121,8 @@ SELECT CASE (INVARDIMS)
 
 END SELECT
 !
-IF(ILENDIM/=IL) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points &
-				in netcdf file for variable '//TRIM(HSURF))
+IF(ILENDIM/=IL) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
+                                'in netcdf file for variable '//TRIM(HSURF))
 !
 ! Read 1D variable
 IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
