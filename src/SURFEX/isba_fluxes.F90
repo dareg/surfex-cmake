@@ -88,6 +88,8 @@
 !!      (B. Decharme)07/2012  Time spliting for soil ice
 !!      (B. Decharme)07/2012  Error in restore flux calculation (only for diag)
 !!      (B. Decharme)10/2012  Melt rate with D95 computed using max(XTAU,PTSTEP)
+!!                            Same for soil ice if ISBA-FR
+!!                            Bug on TG2 calculation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -327,10 +329,12 @@ REAL, DIMENSION(SIZE(PLAI)) ::  ZNEXTSNOW
 !                               ZNEXTSNOW = Futur snow reservoir to close the
 !                                           energy budget (see hydro_snow.f90)
 !
-REAL, DIMENSION(SIZE(PLAI)) ::  ZCONDAVG, ZWSAT_AVGZ
+REAL, DIMENSION(SIZE(PLAI)) ::  ZCONDAVG, ZWSAT_AVGZ, ZTAUICE
 !                               ZCONDAVG   = average thermal conductivity of surface
 !                                            and sub-surface layers (W m-1 K-1)
 !                               ZWSAT_AVGZ = soil column average porosity (m3 m-3)
+!                               ZTAUICE    = Caracteristic time for ice in force-restore 
+!                                            if Ptstep > 3300s
 !
 !
 !*      0.2    local arrays for EBA scheme
@@ -639,7 +643,9 @@ ELSE
 !               ---------------------------------------
 !
   ZKSOIL       = (0.5 * SQRT(XCONDI*XCI*XRHOLI*XDAY/XPI))/XLMTT
-
+!
+  ZTAUICE (:) = MAX(PTSTEP,PTAUICE(:))
+!
   DO JJ=1,SIZE(PTG,1)
 !-------------------------------------------------------------------------------
 !*       5.     EFFECT OF THE MELTING/FREEZING 
@@ -721,7 +727,7 @@ ELSE
 !
 ! Melting of ice/freezing of water:
 !
-    ZWGI1(JJ) = PWGI(JJ,1) + (PTSTEP/PTAUICE(JJ))*(1.0-ZPSNG(JJ))*        &
+    ZWGI1(JJ) = PWGI(JJ,1) + (PTSTEP/ZTAUICE(JJ))*(1.0-ZPSNG(JJ))*        &
               (ZFREEZING(JJ) - ZICE_MELT(JJ))/ZWORK2(JJ) 
 !
 !
@@ -847,24 +853,26 @@ ELSE
 !*       6.5    Deep-part of deep-soil Ice reservoir evolution
 !               ----------------------------------------------
 !
-    ZWIT(JJ)   = ZWIM(JJ) + (PTSTEP/PTAUICE(JJ))*(1.0-ZPSNG(JJ))*       &
+    ZWIT(JJ)   = ZWIM(JJ) + (PTSTEP/ZTAUICE(JJ))*(1.0-ZPSNG(JJ))*       &
                ((ZFREEZING(JJ) - ZICE_MELT(JJ))/ ZWORK2(JJ))
 !
     ZWIT(JJ)   = MAX( ZWIT(JJ) , 0.             )
     ZWIT(JJ)   = MIN( ZWIT(JJ) , ZWSAT_AVGZ(JJ)-XWGMIN)
 !
 !
-!*       6.6    Effect on temperature
-!               ---------------------
-!
-    PTG(JJ,2) = PTG(JJ,2) + (ZWIT(JJ)-ZWIM(JJ))*XLMTT*PCG(JJ)*ZWORK2(JJ)
-!
-!*       6.7    Add reservoir evolution from surface freezing (WI2 contains WI1)
+!*       6.6    Add reservoir evolution from surface freezing (WI2 contains WI1)
 !               ----------------------------------------------------------------
 !
     ZWGI2(JJ)  = (1.-ZWORK1(JJ))*ZWIT(JJ) +  ZWORK1(JJ)*ZWGI1(JJ)
 !
     PDWGI2(JJ) = ZWGI2(JJ) - PWGI(JJ,2)
+!
+!
+!*       6.7    Effect on temperature
+!               ---------------------
+!
+    PTG(JJ,2) = PTG(JJ,2) + PDWGI2(JJ)*XLMTT*PCG(JJ)*XRHOLW*PD_G(JJ,2)
+!    
   ENDDO
 ENDIF
 !
