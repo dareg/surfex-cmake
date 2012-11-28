@@ -143,7 +143,9 @@ USE OMP_LIB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE 'mpif.h'
+#endif
 !
 #ifndef AIX64
 INCLUDE 'omp_lib.h'
@@ -242,13 +244,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*     0.1.   MPI and dr_hook initializations
 !
+#ifndef NOMPI
 CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
+#endif
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
 !
+#ifndef NOMPI
 NCOMM = MPI_COMM_WORLD
 CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
 CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
+#endif
 !
 !$OMP PARALLEL
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
@@ -260,7 +266,9 @@ CALL WLOG_MPI(' ')
 !
 CALL WLOG_MPI('NBLOCKTOT ',KLOG=NBLOCKTOT)
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !
 !*      0.3.   Open ascii file for writing
@@ -346,9 +354,13 @@ IF (NRANK==NPIO) THEN
   !
 ENDIF
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('READ NAMELISTS ',PLOG=XTIME)
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !       forcing file handling
 !
@@ -370,11 +382,15 @@ CALL WLOG_MPI('TIME_COMM_READ init_index ',PLOG=XTIME_COMM_READ)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('INIT_INDEX_MPI ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !       configuration of run
 !
@@ -388,10 +404,14 @@ CALL WLOG_MPI('TIME_COMM_READ forc conf ',PLOG=XTIME_COMM_READ)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('OL_READ_ATM_CONF ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !*     time steps coherence check 
 !
@@ -481,9 +501,13 @@ IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
 !      computes initial air co2 concentration and  density
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('COMPARE_OROGRAPHY SUNPOS ',PLOG=XTIME)
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !* opens forcing files (if ASCII or BINARY)
 !
@@ -499,18 +523,24 @@ CALL WLOG_MPI('TIME_COMM_READ forc ',PLOG=XTIME_COMM_READ)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('OL_READ_ATM0 ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 XCO2(:)  = ZCO2(:,1)
 XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * XZREF )
 !                 
 !       surface Initialisation     
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('CO2 RHOA ',PLOG=XTIME)
 !
 CALL IO_BUFF_CLEAN_n
@@ -526,7 +556,9 @@ ENDDO
 !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME,XTIME0)
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !$ NBLOCK = OMP_GET_THREAD_NUM()
 !
@@ -553,7 +585,9 @@ CALL INIT_SURF_ATM_n(CSURF_FILETYPE, YINIT, LLAND_USE,                      &
 !
 CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('INIT_SURF_ATM ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
@@ -580,8 +614,9 @@ CALL INIT_SURF_LANDUSE_n(CSURF_FILETYPE,YINIT,LLAND_USE,             &
                        IYEAR, IMONTH, IDAY, ZTIME,                   &
                        YATMFILE, YATMFILETYPE, YTEST                 )
 !
-!
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 ! Initialyse the SURFACE-TRIP interface
 !
@@ -595,9 +630,13 @@ CALL INIT_CRODEBUG()
 !
 NWRITE = 0
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('INIT FINISHED ',PLOG=XTIME)
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !*      2.    Temporal loops
 !
 XTIME_CALC(:) = 0.
@@ -605,7 +644,9 @@ XTIME_WRITE(:) = 0.
 !
 DO JFORC_STEP=1,INB_STEP_ATM
   !
+#ifndef NOMPI  
   XTIME1 = MPI_WTIME()
+#endif
   ! read Forcing
   !
   !indice of forcing line in forcing arrays
@@ -637,20 +678,26 @@ DO JFORC_STEP=1,INB_STEP_ATM
                      ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
 
+#ifndef NOMPI  
   XTIME_CALC(1) = XTIME_CALC(1) + (MPI_WTIME() - XTIME1)
   XTIME1 = MPI_WTIME()
+#endif
   !
   DO JSURF_STEP=1,INB_ATM
     !
     ! time interpolation of the forcing
     !
+#ifndef NOMPI    
     XTIME1 = MPI_WTIME()
+#endif
     CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME, &
                 ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
     CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME+XTSTEP_SURF, & 
                 ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+#ifndef NOMPI                
     XTIME_CALC(2) = XTIME_CALC(2) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
+#endif
     !interpolation between beginning and end of current forcing time step
     CALL OL_TIME_INTERP_ATM(JSURF_STEP,INB_ATM,ISIZE_OMP,            &
                             ZTA(:,ID_FORC),ZTA(:,ID_FORC+1),         &
@@ -663,8 +710,10 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
                             ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
+#ifndef NOMPI                            
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
-    XTIME1 = MPI_WTIME()        
+    XTIME1 = MPI_WTIME()    
+#endif
     ! coherence between solar zenithal angle and radiation
     !
     ZSW(:) = 0.
@@ -685,13 +734,17 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     ! run Surface
     !
-    XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1)    
+#ifndef NOMPI    
+    XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1) 
+#endif   
     !
     CALL IO_BUFF_CLEAN_n
     !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
     !
+#ifndef NOMPI    
     XTIME1 = MPI_WTIME()    
+#endif
     !    
 !$ NBLOCK = OMP_GET_THREAD_NUM()
     !
@@ -728,11 +781,15 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
     !
+#ifndef NOMPI    
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
+#endif
     !
 !$OMP END PARALLEL
     !
-    XTIME1 = MPI_WTIME()       
+#ifndef NOMPI    
+    XTIME1 = MPI_WTIME()  
+#endif
     CALL COUPLING_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,  &
                               ITRIP_MONTH,ITRIP_COUNT,ZTIME+XTSTEP_SURF, &
                               ZDURATION,XZENITH,XSW_BANDS,XEMIS,XTSRAD,  &
@@ -740,9 +797,11 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     ZTIME = ZTIME + XTSTEP_SURF
     CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
+#ifndef NOMPI    
     XTIME_CALC(6) = XTIME_CALC(6) + (MPI_WTIME() - XTIME1)
     !
     XTIME1 =  MPI_WTIME()
+#endif    
     ! ecrit Surface
     !
     IF ( LCOUPL_TOPD .AND. LTOPD_STEP ) THEN
@@ -881,7 +940,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !
       ENDIF
       !
+#ifndef NOMPI      
       XTIME_WRITE(1) = XTIME_WRITE(1) + (MPI_WTIME() - XTIME1)
+#endif      
       !      
       CALL IO_BUFF_CLEAN_n
       !
@@ -903,15 +964,23 @@ DO JFORC_STEP=1,INB_STEP_ATM
         CALL GOTO_SURFEX(NBLOCK,.TRUE.)
       ENDIF
       !
+#ifndef NOMPI      
       XTIME1 =  MPI_WTIME()
+#endif      
       CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+#ifndef NOMPI      
       XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
       XTIME1 =  MPI_WTIME()
+#endif      
       CALL DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE)
+#ifndef NOMPI      
       XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
       XTIME1 =  MPI_WTIME()
+#endif      
       CALL WRITE_DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL')
+#ifndef NOMPI      
       XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
+#endif      
       !
       CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
       !
@@ -931,7 +1000,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !
       ENDIF
       !
+#ifndef NOMPI      
       XTIME1 =  MPI_WTIME()
+#endif      
       !
       IF (NRANK==NPIO) THEN
         IF (CTIMESERIES_FILETYPE=='FA    ') THEN
@@ -940,7 +1011,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !* add informations in the file
         IF (CTIMESERIES_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
       ENDIF
+#ifndef NOMPI      
       XTIME_WRITE(5) = XTIME_WRITE(5) + (MPI_WTIME() - XTIME1)
+#endif      
       !
     ENDIF
     !
@@ -962,7 +1035,9 @@ END DO
 !
 !$OMP PARALLEL PRIVATE(XTIME)
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 !
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('OL_READ_ATM ',PLOG=XTIME_CALC(1))
@@ -1202,7 +1277,9 @@ IF (ASSOCIATED(XWORK2)) DEALLOCATE(XWORK2)
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',1,ZHOOK_HANDLE)
 !
+#ifndef NOMPI
 CALL MPI_FINALIZE(INFOMPI)
+#endif
 !
 ! --------------------------------------------------------------------------------------
 !
