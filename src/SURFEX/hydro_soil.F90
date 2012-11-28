@@ -528,7 +528,7 @@ DO JJ=1,SIZE(PTG)
 !
 ! Cummulative phase change for the ice/liquid budget corrections:
 !
-  PTG2(JJ)       = PTG2(JJ) - ZEXCESSFC(JJ)*XLMTT*PCG(JJ)*XRHOLW*(PD_G2(JJ)-PD_G1(JJ))
+  PTG2(JJ) = PTG2(JJ) - ZEXCESSFC(JJ)*XLMTT*PCG(JJ)*XRHOLW*PD_G2(JJ)
 !
 !
 ENDDO
