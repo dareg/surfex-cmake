@@ -79,11 +79,20 @@ REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFV    ! meridian stress (Pa)
 REAL, DIMENSION(:)  ,INTENT(OUT)    :: PSEATEMP! sea surface temperature (K)
 !*      0.2    declarations of local variables
 !
+COMPLEX, DIMENSION(NOCKMIN:NOCKMAX,2) :: ZUC           ! vecteur vent en ecriture complexe
+COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAI, ZBI, ZCI     !matrices pour resolution numérique
+COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAU, ZBU, ZCU, ZYU !matrices pour resolution numérique
+COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZOMU,ZWU
+!
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT, ZSEAS, ZSEAE, ZSEAV, ZSEAU
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT_REL, ZSEAS_REL, ZSEAV_REL, ZSEAU_REL
+!
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZA, ZB, ZC, ZA2, ZB2, ZC2, ZYT, ZYS, ZYE        !matrices pour resolution numérique
+!
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVT,ADVS !advection horiz. temperature and salinity
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVU,ADVV !advection horiz. of current
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVE      !advection of turbulent kinetic energy
-REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT,ZSEAS,ZSEAE,ZSEAV,ZSEAU
-REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT_REL,ZSEAS_REL,ZSEAV_REL,ZSEAU_REL
+!
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZTDTREL  ! Tendancy derived from  relxation (K/s)
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSDTREL  ! ---- salinity   ---------- (%/s)
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZUDTREL  ! Tendancy term derived from relaxation on U current (m/s2)
@@ -91,20 +100,14 @@ REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZVDTREL  !  --------------------------------
 !
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZLE,ZKMEL,ZKMELM
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZKMES,ZKMED,ZKMEWM,ZKMEWS
-REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZA, ZB, ZC, ZA2, ZB2, ZC2, ZYT, ZYS, ZYE        !matrices pour resolution numérique
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZPTH,ZPDY
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZTENDE,ZDIFFV
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZOMT, ZOMS, ZOME !vector for matrix inversion
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZWT, ZWS, ZWE
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZU,ZV,ZT,ZS,ZE
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZZDRHO
-!
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX,2) :: ZUC           ! vecteur vent en ecriture complexe
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX)   :: ZAI,ZBI,ZCI     !matrices pour resolution numérique
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX)   :: ZAU,ZBU,ZCU,ZYU !matrices pour resolution numérique
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX)   :: ZOMU,ZWU
-!
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZDTFSOL
+!
 REAL :: ZDTFNSOL
 !
 REAL :: ZSFU, ZSFV, ZFNSOL, ZFSOL, ZSFTEAU, ZLAT
@@ -118,7 +121,7 @@ REAL :: ZEE,ZPOT,ZXLME,ZXLPE,ZXROD,ZAUX,ZXDL
 REAL :: ZDU,ZDV,ZRICH,ZDRHODZ
 REAL :: ZT1, ZT2, ZT3, ZS1, ZS2
 !
-INTEGER :: BINF,BSUP
+INTEGER :: IUP,IBOT
 INTEGER :: J,JJ,JPT,JIN,IKHML
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -131,12 +134,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MIXTL_N',0,ZHOOK_HANDLE)
-BINF=NOCKMIN+1
-BSUP=NOCKMAX
+IUP=NOCKMIN+1
+IBOT=NOCKMAX
 !
 ZSEUIL=2.23E-3
-ZTEST=0.
-IKHML=1
 ZEMIN=1.E-3
 ZEMAX=0.1
 !
@@ -153,34 +154,38 @@ ZALG = XG / XRHOSW
 !iterations on grid points
 DO JPT=1,SIZE(PFSOL)
 !
+  ZTEST=0.
+  IKHML=1
+!
   !simplified variables inside this loop
-  ZLAT=XLAT(JPT)
-  ZFSOL=PFSOL(JPT)
-  ZFNSOL=PFNSOL(JPT)
-  ZSFTEAU=PSFTEAU(JPT)
-  ZSFU=PSFU(JPT)
-  ZSFV=PSFV(JPT)
-  ZEWS=SQRT(ZSFU**2+ZSFV**2)/XRHOSW
-  ZF=4.*XPI*SIN(ZLAT*XPI/180.)/86400.
+  ZLAT    = XLAT   (JPT)
+  ZFSOL   = PFSOL  (JPT)
+  ZFNSOL  = PFNSOL (JPT)
+  ZSFTEAU = PSFTEAU(JPT)
+  ZSFU    = PSFU   (JPT)
+  ZSFV    = PSFV   (JPT)
+  ZEWS    = SQRT(ZSFU**2+ZSFV**2)/XRHOSW
+  ZF      = 4.*XPI*SIN(ZLAT*XPI/180.)/86400.
 
   ZSEAHMO=0.
-  DO J=BINF-1,BSUP
-    ZSEAT(J)=XSEAT(JPT,J)
-    ZSEAS(J)=XSEAS(JPT,J)
-    ZSEAU(J)=XSEAU(JPT,J)
-    ZSEAV(J)=XSEAV(JPT,J)    
-    ZSEAE(J)=XSEAE(JPT,J)
+  DO J=IUP-1,IBOT
+    ZSEAT(J) = XSEAT(JPT,J)
+    ZSEAS(J) = XSEAS(JPT,J)
+    ZSEAU(J) = XSEAU(JPT,J)
+    ZSEAV(J) = XSEAV(JPT,J)    
+    ZSEAE(J) = XSEAE(JPT,J)
     !
-    ZSEAU_REL(J)=XSEAU_REL(JPT,J)
-    ZSEAV_REL(J)=XSEAV_REL(JPT,J)
-    ZSEAT_REL(J)=XSEAT_REL(JPT,J)
-    ZSEAS_REL(J)=XSEAS_REL(JPT,J)
+    ZSEAU_REL(J) = XSEAU_REL(JPT,J)
+    ZSEAV_REL(J) = XSEAV_REL(JPT,J)
+    ZSEAT_REL(J) = XSEAT_REL(JPT,J)
+    ZSEAS_REL(J) = XSEAS_REL(JPT,J)
     !
-    IF (J>=BINF .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO=ZSEAHMO-XDZ1(J)
+    IF (J>=IUP .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO = ZSEAHMO-XDZ1(J)
   ENDDO
+  XSEAHMO(JPT) = ZSEAHMO
 
  !precalculation of DRHO
-  DO J=BINF-1,BSUP
+  DO J=IUP-1,IBOT
     ZU(J)=0.
     ZV(J)=0.
     ZT(J)=0.
@@ -214,7 +219,7 @@ DO JPT=1,SIZE(PFSOL)
 !!       2.a    Diapycnal mixing
 !!              ----------------
 !!
-  DO J=BSUP-1,BINF,-1
+  DO J=IBOT-1,IUP,-1
     ZKMES(J) =0.
     ZKMEWM(J)=0.
     ZKMEWS(J)=0.
@@ -224,38 +229,41 @@ DO JPT=1,SIZE(PFSOL)
       ZTEST=1.
     ENDIF
   ENDDO
-  DO J=IKHML,BSUP-1
-    ZDRHODZ=(ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
-    ZDU=ZSEAU(J+1)-ZSEAU(J)
-    ZDV=ZSEAV(J+1)-ZSEAV(J)
-!! Modif PP - HG : flag diapycnal
-    IF (LDIAPYCNAL) THEN
+  
+  !! Modif PP - HG : flag diapycnal
+  IF (LDIAPYCNAL) THEN
+    !
+    DO J=IKHML,IBOT-1
+      ZDRHODZ=(ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
+      ZDU=ZSEAU(J+1)-ZSEAU(J)
+      ZDV=ZSEAV(J+1)-ZSEAV(J)
       IF((ZDU*ZDU+ZDV*ZDV).LE.1.E-7) THEN 
         ZRICH = 0.8
       ELSE
         ZRICH = -ZALG*ZDRHODZ/(ZDU**2+ZDV**2)/XK4(J)
-      ENDIF    
+      ENDIF  
 !coefficient de mélange aux ondes internes
       ZKMEWM(J)=1.E-3
       ZKMEWS(J)=1.E-4
 !coefficient de mélange du au cisaillement
-      IF(ZRICH>7.) THEN
+      IF(ZRICH>0.7) THEN
         ZKMES(J) = 0.
       ELSEIF(ZRICH>=0.) THEN
         ZKMES(J) = 5.E-3*(1.-(ZRICH/0.7)*(ZRICH/0.7))**3
       ELSE
         ZKMES(J) = 5.E-3
       ENDIF
-    ENDIF
+    ENDDO
     !plm si ldiapycnal=F zkmes non modofie et zrich ne sert a rien !
     !plm ELSE
-    !plm  ZRICH=-ZALG*ZDRHODZ / (ZDU**2+ZDV**2) / XK4(J)   
-  ENDDO
+    !plm  ZRICH=-ZALG*ZDRHODZ / (ZDU**2+ZDV**2) / XK4(J) 
+    !  
+  ENDIF
 !
 !       2.b    Mixing length and coefficient 
 !              -----------------------------
 !
-  DO J=BINF,BSUP-1
+  DO J=IUP,IBOT-1
 
     ZEE=ZSEAE(J)**2/ZALG
     ZXROD=(ZZDRHO(J)+ ZZDRHO(J+1))*0.5   
@@ -263,7 +271,7 @@ DO JPT=1,SIZE(PFSOL)
     ZXLME=0.
     ZPOT=0.
     JIN=J
-    DO JJ=J+1,BSUP
+    DO JJ=J+1,IBOT
       ZAUX=ZPOT + XDZ2(JJ)*(ZZDRHO(JJ)-ZXROD)
       IF (ZAUX<ZEE) THEN
         JIN=JJ
@@ -275,7 +283,7 @@ DO JPT=1,SIZE(PFSOL)
       ZXLME=2.*(XZ2(J)-XZHOC(J+1))/(ZZDRHO(J+1)-ZXROD)/ZALG
       ZXLME=SQRT(ZXLME)*ZSEAE(J)
     ELSE
-      IF (JIN/=BSUP) THEN
+      IF (JIN/=IBOT) THEN
         ZXDL=(ZEE-ZPOT)/(ZZDRHO(JIN+1)-ZXROD)
         ZXLME=ZXLME+ZXDL
       ENDIF
@@ -307,12 +315,12 @@ DO JPT=1,SIZE(PFSOL)
   
   ENDDO
 
-  ZLE(BSUP)=ZLE(BSUP-1)
-  ZKMEL(BSUP)=XCKL*ZLE(BSUP)*ZSEAE(BSUP)
+  ZLE(IBOT)=ZLE(IBOT-1)
+  ZKMEL(IBOT)=XCKL*ZLE(IBOT)*ZSEAE(IBOT)
 
   !first coef at all levels: because needed at j+1 further
-  ZKMELM(BINF)=ZKMEL(BINF)
-  DO J=BINF+1,BSUP
+  ZKMELM(IUP)=ZKMEL(IUP)
+  DO J=IUP+1,IBOT
     ZKMELM(J)= (ZKMEL(J)+ZKMEL(J-1))/2.
   ENDDO
 
@@ -321,7 +329,7 @@ DO JPT=1,SIZE(PFSOL)
 !!       2.c    Numerical resolution of evolution equations
 !!              -------------------------------------------
 !
-  DO J=BINF,BSUP
+  DO J=IUP,IBOT
     IF (LREL_CUR) THEN
       ZUDTREL(J) =  - (ZSEAU(J)-ZSEAU_REL(J))  / XTAU_REL 
       ZVDTREL(J) =  - (ZSEAV(J)-ZSEAV_REL(J))  / XTAU_REL 
@@ -330,186 +338,130 @@ DO JPT=1,SIZE(PFSOL)
     ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
   ENDDO
 !
-  IF (LFLX_CORR) THEN
-    ! NO relaxation
-    ! Barnier correction on surface fluxes          
-    ! flux non solaire corrige
-    ZTDTREL(BINF) =  XQCORR *(ZSEAT_REL(BINF)-ZSEAT(BINF)) / (XRHOSW*XCPSW)
-    ZFNSOL = ZFNSOL + ZTDTREL(BINF)
-  ELSEIF (LREL_TS) THEN
+  IF (LREL_TS) THEN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! RELAXATION IS MADE INSTEAD OF FLUX CORRECTION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
-    DO J=BINF,BSUP
+    DO J=IUP,IBOT
       ! flux non solaire
       ZTDTREL(J) =  - (ZSEAT(J)-ZSEAT_REL(J)) / XTAU_REL
       ZSDTREL(J) =  - (ZSEAS(J)-ZSEAS_REL(J)) / XTAU_REL
     ENDDO
   ENDIF
-
-  ! flux non solaire
-  ZDTFNSOL = ZFNSOL/XDZ2(BINF) 
 !
-!simple coef a, b, c at NOCKMIN+1 level
-  ZC(BINF)= XOCEAN_TSTEP*XK2(BINF)*(ZKMEL(BINF)+ZKMES(BINF)+ZKMEWS(BINF)+ZKMED(BINF))              
-  ZB(BINF)= 1.-ZC(BINF)
-!v coef a, b, c at NOCKMIN+1 level
-  ZCI(BINF)=XOCEAN_TSTEP*XK2(BINF)*(ZKMEL(BINF)+ZKMES(BINF)+ZKMEWM(BINF)+ZKMED(BINF))
-  ZBI(BINF)= 1.-ZCI(BINF)
-!c coef a, b, c at NOCKMIN+1 level
-  ZCU(BINF)=ZCI(BINF)*(1.,0.)
-  ZBU(BINF)=ZBI(BINF)*(1.,0.)+(0.,1.)*ZF*XGAMA * XOCEAN_TSTEP
-!omt (temperature), oms (salinity), omu from ZB and ZBC at NOCKMIN+1 level
-  ZOMT(BINF) = 1./ZB(BINF)
-  ZOMS(BINF) = 1./ZB(BINF)
-  ZOMU(BINF) = 1./ZBU(BINF)
-!coef yt, ys and yu at NOCKMIN+1 level
-  ZYT(BINF) = ZSEAT(BINF) + XOCEAN_TSTEP * (ZDTFNSOL + ZDTFSOL(BINF) + ADVT(BINF))
-  ZYS(BINF) = ZSEAS(BINF) + XOCEAN_TSTEP * ( ZSEAS(BINF)*ZSFTEAU      / XDZ2(BINF) + ADVS(BINF))
-! Modif. PP. relaxation towards ref. profile
-! If LREL_TS, relaxation on temp, salinity  
-  IF (LREL_TS) THEN
-    ZYT(BINF) = ZYT(BINF) + XOCEAN_TSTEP * ZTDTREL(BINF)  
-    ZYS(BINF) = ZYS(BINF) + XOCEAN_TSTEP * ZSDTREL(BINF) 
+  IF (LFLX_CORR) THEN
+    ! NO relaxation
+    ! Barnier correction on surface fluxes          
+    ! flux non solaire corrige
+    ZTDTREL(IUP) =  XQCORR *(ZSEAT_REL(IUP)-ZSEAT(IUP)) / (XRHOSW*XCPSW)
+    ZFNSOL = ZFNSOL + ZTDTREL(IUP)
   ENDIF
-  ZUC(BINF,1)=ZSEAU(BINF)*(1.,0.)+ZSEAV(BINF)*(0.,1.)
-  ZYU(BINF) = ZUC(BINF,1) + XOCEAN_TSTEP * ( ZUC(BINF,1) * ZF*(1-XGAMA) * (0.,-1.) - &
-         (ZSFU*(1.,0.) + ZSFV*(0.,1.))/XDZ2(BINF)/XRHOSW + ADVU(BINF)*(1.,0.) + ADVV(BINF)*(0.,1.) )
-! damping on current if LREL_CUR=T  in explicit scheme         
-  IF (LREL_CUR) ZYU(BINF) = ZYU(BINF) + XOCEAN_TSTEP*(ZUDTREL(BINF)*(1.,0.)+ ZVDTREL(BINF)*(0.,1.))
-!wt, ws, wu from OMT, OMS, OMU, ZY
-  ZWT(BINF) = ZOMT(BINF)*ZYT(BINF)
-  ZWS(BINF) = ZOMS(BINF)*ZYS(BINF)
-  ZWU(BINF) = ZOMU(BINF)*ZYU(BINF)
-!*Evolution of the square root of TKE computation of density gradient
-  ZDRHODZ=(ZZDRHO(BINF)-ZZDRHO(BINF+1))/XDZ1(BINF)
-  ZDU=ZSEAU(BINF+1)-ZSEAU(BINF)
-  ZDV=ZSEAV(BINF+1)-ZSEAV(BINF)
-  ZPTH(BINF) = XCKL*ZLE(BINF) * ZALG*ZDRHODZ
-  ZPDY(BINF) = XCKL*ZLE(BINF) * XK4(BINF)*(ZDU**2+ZDV**2)
-!coef a2, b2, c2 at NOCKMIN and BSUP levels
-  ZC2(BINF)=XOCEAN_TSTEP*XK3(BINF)*ZKMELM(BINF+1)
-  ZB2(BINF)=1. - ZC2(BINF) + XOCEAN_TSTEP*ZSEAE(BINF) * 1./ZLE(BINF)/XZCE                            
-!OME at NOCKMIN from B2 
-  ZOME(BINF) = 1./ZB2(BINF)
-!Y3 coef at NOCKMIN
-  ZYE(BINF)=ZSEAE(BINF) + XOCEAN_TSTEP * &
-             (0.5 *ZSEAE(BINF)**2/ZLE(BINF)/XZCE &
-             + ZEWS/XDZ1(BINF) + ADVE(BINF)) + ZPTH(BINF) + ZPDY(BINF) 
-!WE from OME and Y3
-  ZWE(BINF) = ZOME(BINF)*ZYE(BINF)
-
+!
+! flux non solaire
+  ZDTFNSOL = ZFNSOL/XDZ2(IUP) 
+!
 !!
 !loop on levels
-  DO J=BINF+1,BSUP-1
-    ZC(J)     = XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWS(J)   + ZKMED(J)) 
-    ZA(J)     = XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWS(J-1) + ZKMED(J-1)) 
-    ZB(J)     = 1. - ZA(J) - ZC(J)
+  ZA (:) = 0.
+  ZAI(:) = 0.
+  ZA2(:) = 0.
+  ZC (:) = 0.
+  ZCI(:) = 0.
+  ZC2(:) = 0.
+  DO J=IUP,IBOT
 
-    ZCI(J)    = XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWM(J)   +ZKMED(J)) 
-    ZAI(J)    = XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWM(J-1) + ZKMED(J-1)) 
-    ZBI(J)    = 1.-ZAI(J)-ZCI(J)
+    IF (J<IBOT) THEN
+      IF (J>IUP) THEN
+        ZA (J) = XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWS(J-1) + ZKMED(J-1)) 
+        ZAI(J) = XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWM(J-1) + ZKMED(J-1))
+        ZA2(J) = XOCEAN_TSTEP * XK2(J) * ZKMELM(J)
+      ENDIF
+      ZC (J) = XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWS(J)   + ZKMED(J)) 
+      ZCI(J) = XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWM(J)   + ZKMED(J))
+      ZC2(J) = XOCEAN_TSTEP * XK3(J) * ZKMELM(J+1)
+    ENDIF
+  
+    ZB (J) = 1. - ZA (J) - ZC (J)
+    ZBI(J) = 1. - ZAI(J) - ZCI(J)
+    ZB2(J) = 1. - ZA2(J) - ZC2(J) + XOCEAN_TSTEP * ZSEAE(J)/ZLE(J)/XZCE
 
-    ZCU(J)    = ZCI(J)*(1.,0.)
-    ZAU(J)    = ZAI(J)*(1.,0.)    
-    ZBU(J)    = ZBI(J)*(1.,0.)+(0.,1.) * ZF*XGAMA * XOCEAN_TSTEP
+    ZAU(J)    = ZAI(J) * (1.,0.) 
+    ZCU(J)    = ZCI(J) * (1.,0.) 
+    ZBU(J)    = ZBI(J) * (1.,0.) + XOCEAN_TSTEP * ZF * XGAMA * (0.,1.)
     
-    ZOMT(J)   = 1./(ZB(J)  - ZA(J)  * ZOMT(J-1) * ZC(J-1)) 
-    ZOMU(J)   = 1./(ZBU(J) - ZAU(J) * ZOMU(J-1) * ZCU(J-1)) 
-    ZOMS(J)   = 1./(ZB(J)  - ZA(J)  * ZOMS(J-1) * ZC(J-1)) 
 
-    ZYT(J)    = ZSEAT(J) + XOCEAN_TSTEP * (ZDTFSOL(J) + ADVT(J))
-    ZYS(J)    = ZSEAS(J) + XOCEAN_TSTEP * (                         ADVS(J))
+    ZOMT(J)   = 1./(ZB (J) - ZA (J) * ZOMT(J-1) * ZC (J-1)) 
+    ZOMS(J)   = 1./(ZB (J) - ZA (J) * ZOMS(J-1) * ZC (J-1))    
+    ZOMU(J)   = 1./(ZBU(J) - ZAU(J) * ZOMU(J-1) * ZCU(J-1)) 
+    ZOME(J)   = 1./(ZB2(J) - ZA2(J) * ZOME(J-1) * ZC2(J-1))
+ 
+
+    ZYT(J)    = ZSEAT(J) + XOCEAN_TSTEP * (ZDTFSOL(J) + ADVT(J)) 
+    ZYS(J)    = ZSEAS(J) + XOCEAN_TSTEP * (             ADVS(J))  
     IF (LREL_TS) THEN
-      ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZTDTREL(J)
+      IF (.NOT.LFLX_CORR) ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZTDTREL(J)
       ZYS(J) = ZYS(J) + XOCEAN_TSTEP * ZSDTREL(J)
     ENDIF
+    
     ZUC(J,1)  = ZSEAU(J)*(1.,0.) + ZSEAV(J)*(0.,1.)
     ZYU(J)    = ZUC(J,1) + XOCEAN_TSTEP * (ZUC(J,1)*ZF*(1.-XGAMA)*(0.,-1.) + ADVU(J)*(1.,0.) + ADVV(J)*(0.,1.))
-    ! damping on current if LREL_CUR=T explicit
-    ! Pareil V,UREF da,s relawxation
-    IF (LREL_CUR) ZYU(J) = ZYU(J) + XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.)+ZVDTREL(J)*(0.,1.))  
-    ZWT(J)    = ZOMT(J) * (ZYT(J)- ZA(J) *ZWT(J-1))
-    ZWS(J)    = ZOMS(J) * (ZYS(J)- ZA(J) *ZWS(J-1))
-    ZWU(J)    = ZOMU(J) * (ZYU(J)- ZAU(J)*ZWU(J-1))
+    ! damping on current if LREL_CUR=T in explicit scheme
+    IF (LREL_CUR) ZYU(J) = ZYU(J) + XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.) + ZVDTREL(J)*(0.,1.))  
 
-    ZDRHODZ   = (ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
+    IF (J<IBOT) THEN
+      ZDRHODZ   = (ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
+      ZDU       = ZSEAU(J+1)-ZSEAU(J)
+      ZDV       = ZSEAV(J+1)-ZSEAV(J)
 
-    ZDU       = ZSEAU(J+1)-ZSEAU(J)
-    ZDV       = ZSEAV(J+1)-ZSEAV(J)
+      ZPTH(J)   = XCKL * ZLE(J) * ZALG * ZDRHODZ
+      ZPDY(J)   = XCKL * ZLE(J) * XK4(J) * (ZDU**2+ZDV**2)
+    ELSE
+      ZPTH(J) = ZPTH(J-1)
+      ZPDY(J) = ZPDY(J-1)
+    ENDIF
 
-    ZPTH(J)   = XCKL*ZLE(J)*ZALG*ZDRHODZ
-    ZPDY(J)   = XCKL*ZLE(J)*XK4(J)*(ZDU**2+ZDV**2)
-
-    ZC2(J)    = XOCEAN_TSTEP*XK3(J)*ZKMELM(J+1)
-    ZA2(J)    = XOCEAN_TSTEP*XK2(J)*ZKMELM(J)
-    ZB2(J)    = 1. - ZA2(J) - ZC2(J) + XOCEAN_TSTEP * ZSEAE(J) * 1./ZLE(J)/XZCE
-
-    ZOME(J)   = 1. / (ZB2(J) - ZA2(J)*ZOME(J-1)*ZC2(J-1)) 
     ZYE(J)    = ZSEAE(J) + XOCEAN_TSTEP * (0.5 * ZSEAE(J)**2/ZLE(J)/XZCE + ADVE(J)) + ZPTH(J) + ZPDY(J)
-    ZWE(J)    = ZOME(J) * (ZYE(J) - ZA2(J)*ZWE(J-1))
+
+    IF (J==IUP) THEN
+      ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZDTFNSOL
+      ZYS(J) = ZYS(J) + XOCEAN_TSTEP * ZSEAS(IUP) * ZSFTEAU / XDZ2(IUP)
+      ZYU(J) = ZYU(J) - XOCEAN_TSTEP * ( ZSFU*(1.,0.) + ZSFV*(0.,1.) ) / XDZ2(IUP) / XRHOSW
+      ZYE(J) = ZYE(J) + XOCEAN_TSTEP * ZEWS / XDZ1(IUP)
+    ENDIF
+
+
+    ZWT(J)    = ZOMT(J) * (ZYT(J)- ZA (J)*ZWT(J-1))
+    ZWS(J)    = ZOMS(J) * (ZYS(J)- ZA (J)*ZWS(J-1))
+    ZWU(J)    = ZOMU(J) * (ZYU(J)- ZAU(J)*ZWU(J-1))
+    ZWE(J)    = ZOME(J) * (ZYE(J)- ZA2(J)*ZWE(J-1))
+
   ENDDO
-!
-!what leaves at BSUP level
-  ZA(BSUP)  = 0.
-  ZB(BSUP)  = 1.-ZA(BSUP)
-  ZAI(BSUP)= 0.
-  ZBI(BSUP)  = 1.-ZAI(BSUP)
-  ZAU(BSUP)  = ZAI(BSUP)*(1.,0.)
-  ZBU(BSUP)  = ZBI(BSUP)  *(1.,0.)+XOCEAN_TSTEP * ZF*XGAMA*(0.,1.)
-  ZOMT(BSUP)   = 1./(ZB(BSUP)-ZA(BSUP)*ZOMT(BSUP-1)*ZC(BSUP-1))
-  ZOMU(BSUP)=1./(ZBU(BSUP)-ZAU(BSUP)*ZOMU(BSUP-1)*ZCU(BSUP-1))
-  ZOMS(BSUP)=1./(ZB(BSUP)-ZA(BSUP)*ZOMS(BSUP-1)*ZC(BSUP-1))
-  ZYT(BSUP)=ZSEAT(BSUP) + XOCEAN_TSTEP * ( ZDTFSOL(BSUP) + ADVT(BSUP) ) 
-  ZYS(BSUP)=ZSEAS(BSUP) + XOCEAN_TSTEP * ( ADVS(BSUP) )   
-  IF (LREL_TS) THEN
-    ZYT(BSUP) = ZYT(BSUP) + XOCEAN_TSTEP * ZTDTREL(BSUP)  
-    ZYS(BSUP) = ZYS(BSUP) + XOCEAN_TSTEP * ZSDTREL(BSUP)
-  ENDIF
-  ZUC(BSUP,1)=ZSEAU(BSUP)*(1.,0.)+ZSEAV(BSUP)*(0.,1.)
-  ZYU(BSUP)=ZUC(BSUP,1) + XOCEAN_TSTEP * ( ZUC(BSUP,1) * ZF*(1.-XGAMA)*(0.,-1.) + ADVU(BSUP)*(1.,0.) + ADVV(BSUP)*(0.,1.) )
-  ! damping on current if LREL_CUR=T explicit
-  ! Pareil V,UREF da,s relawxation
-  IF (LREL_CUR) ZYU(BSUP) = ZYU(BSUP) + XOCEAN_TSTEP * (ZUDTREL(BSUP)*(1.,0.)+ZVDTREL(BSUP)*(0.,1.))
-  ZWT(BSUP)=ZOMT(BSUP)*(ZYT(BSUP)-ZA(BSUP)*ZWT(BSUP-1))
-  ZWS(BSUP)=ZOMS(BSUP)*(ZYS(BSUP)-ZA(BSUP)*ZWS(BSUP-1))
-  ZWU(BSUP)=ZOMU(BSUP)*(ZYU(BSUP)-ZAU(BSUP)*ZWU(BSUP-1))
-  ZPTH(BSUP)=ZPTH(BSUP-1)
-  ZPDY(BSUP)=ZPDY(BSUP-1)
-  ZA2(BSUP)= 0.
-  ZB2(BSUP)=1. - ZA2(BSUP) + XOCEAN_TSTEP * ZSEAE(BSUP)/ZLE(BSUP)/XZCE
-  ZOME(BSUP)=1./(ZB2(BSUP)-ZA2(BSUP)*ZOME(BSUP-1)*ZC2(BSUP-1))
-  ZYE(BSUP)    = ZSEAE(BSUP) + XOCEAN_TSTEP * (0.5 * ZSEAE(BSUP)**2/ZLE(BSUP)/XZCE + ADVE(BSUP)) + ZPTH(BSUP)+ZPDY(BSUP) 
-  ZWE(BSUP)=ZOME(BSUP)*(ZYE(BSUP)-ZA(BSUP)*ZWE(BSUP-1))
 !
 !---------------------------------------------------------------------------------------------------
 !
-  ZUC(BSUP,2)=ZWU(BSUP)
-  ZT(BSUP)=ZWT(BSUP)
-  ZS(BSUP)=ZWS(BSUP)
-  ZE(BSUP)=ZWE(BSUP)
-  DO J=BSUP-1,BINF,-1
-    ZUC(J,2)=ZWU(J)-ZOMU(J)*ZCU(J)*ZUC(J+1,2)
-    ZT(J)=ZWT(J)-ZOMT(J)*ZC(J)*ZT(J+1)
-    ZS(J)=ZWS(J)-ZOMS(J)*ZC(J)*ZS(J+1)
-    ZE(J)=ZWE(J)-ZOME(J)*ZC2(J)*ZE(J+1)
+  DO J=IBOT,IUP,-1
+    ZT (J)   = ZWT(J) - ZC (J) * ZOMT(J) * ZT (J+1)
+    ZS (J)   = ZWS(J) - ZC (J) * ZOMS(J) * ZS (J+1)
+    ZUC(J,2) = ZWU(J) - ZCU(J) * ZOMU(J) * ZUC(J+1,2)
+    ZE (J)   = ZWE(J) - ZC2(J) * ZOME(J) * ZE (J+1)
   ENDDO
 !
 !
-  DO J=BINF,BSUP
-    ZU(J)  = REAL(ZUC(J,2))
+  DO J=IUP,IBOT
+    ZU(J)  = REAL (ZUC(J,2))
     ZV(J)  = AIMAG(ZUC(J,2))
+    !
     ZE(J)  = MAX(ZEMIN,ZE(J))
   ! Transformation to preserve E <EMAX; secure if mixt crash
     ZE(J)  = MIN(ZE(J),ZEMAX)
   !bilan TKE
-    ZTENDE(J)=(ZE(J)*ZE(J)-ZSEAE(J)**2)/XOCEAN_TSTEP
-    ZDIFFV(J)=ZTENDE(J) - ZSEAE(J)*(ZPDY(J) + ZPTH(J))
+    !ZTENDE(J) = (ZE(J)*ZE(J)-ZSEAE(J)**2)/XOCEAN_TSTEP
+    !ZDIFFV(J) = ZTENDE(J) - ZSEAE(J)*(ZPDY(J) + ZPTH(J))
     !
+    ZSEAT(J)  = ZT(J)
+    ZSEAS(J)  = ZS(J)    
     ZSEAU(J)  = ZU(J)
     ZSEAV(J)  = ZV(J)
-    ZSEAT(J)  = ZT(J)
-    ZSEAS(J)  = ZS(J)
     ZSEAE(J)  = ZE(J)
   ENDDO
 !
@@ -517,43 +469,41 @@ DO JPT=1,SIZE(PFSOL)
 !!       3.     New oceanic profiles
 !!              --------------------
 !!
-  IF (LPROGSST) XSEATEND(JPT)=(ZT(BINF)-ZSEAT(BINF))/XOCEAN_TSTEP
-  ZSEAU(NOCKMIN)  = ZU(BINF)
-  ZSEAV(NOCKMIN)  = ZV(BINF)
-  ZSEAT(NOCKMIN)  = ZT(BINF)
-  ZSEAS(NOCKMIN)  = ZS(BINF)
-  ZSEAE(NOCKMIN)  = ZE(BINF)
+  IF (LPROGSST) XSEATEND(JPT) = (ZT(IUP)-ZSEAT(IUP)) / XOCEAN_TSTEP
+  ZSEAT(NOCKMIN)  = ZT(IUP)
+  ZSEAS(NOCKMIN)  = ZS(IUP)  
+  ZSEAU(NOCKMIN)  = ZU(IUP)
+  ZSEAV(NOCKMIN)  = ZV(IUP)
+  ZSEAE(NOCKMIN)  = ZE(IUP)
 
   !bathymetrie
-  DO J=BINF,BSUP
+  DO J=IUP,IBOT
     IF (XSEABATH(JPT,J)==0.) THEN
+      ZSEAT(J)  = ZSEAT(J-1) 
+      ZSEAS(J)  = ZSEAS(J-1)            
       ZSEAU(J)  = ZSEAU(J-1)
       ZSEAV(J)  = ZSEAV(J-1)
-      ZSEAT(J)  = ZSEAT(J-1) 
-      ZSEAS(J)  = ZSEAS(J-1)
       ZSEAE(J)  = ZSEAE(J-1)
     ENDIF
   ENDDO
 !
 !SST diagnosticed with 1D oceanic model
-  ZSEATEMP=ZSEAT(BINF)+XTT
+  ZSEATEMP = ZSEAT(IUP) + XTT
+  PSEATEMP(JPT) = ZSEATEMP
 !
-  XSEAHMO(JPT)=ZSEAHMO
-  PSEATEMP(JPT)=ZSEATEMP
-
-  DO J=BINF,BSUP
-    XLE(JPT,J)=ZLE(J)
-    XLK(JPT,J)=ZLE(J)
-    XKMEL(JPT,J)=ZKMEL(J)
-    XKMELM(JPT,J)=ZKMELM(J)
+  DO J=IUP,IBOT
+    XLE   (JPT,J) = ZLE   (J)
+    XLK   (JPT,J) = ZLE   (J)
+    XKMEL (JPT,J) = ZKMEL (J)
+    XKMELM(JPT,J) = ZKMELM(J)
   ENDDO
 
-  DO J=BINF-1,BSUP
-    XSEAT(JPT,J)=ZSEAT(J)
-    XSEAS(JPT,J)=ZSEAS(J)
-    XSEAU(JPT,J)=ZSEAU(J)
-    XSEAV(JPT,J)=ZSEAV(J)
-    XSEAE(JPT,J)=ZSEAE(J)
+  DO J=IUP-1,IBOT
+    XSEAT(JPT,J) = ZSEAT(J)
+    XSEAS(JPT,J) = ZSEAS(J)
+    XSEAU(JPT,J) = ZSEAU(J)
+    XSEAV(JPT,J) = ZSEAV(J)
+    XSEAE(JPT,J) = ZSEAE(J)
     XDTFSOL(JPT,J) = ZDTFSOL(J)
   ENDDO
 
