@@ -1,3 +1,4 @@
+!
 ! *****************************************************************************************
 PROGRAM SODA
 ! ******************************************************************************************
@@ -34,6 +35,8 @@ PROGRAM SODA
 !!    Original         04/2012
 !!
 !----------------------------------------------------------------------------
+!
+USE MODD_SURFEX_OMP, ONLY : NINDX1, NINDX2, NWORK, XWORK, XWORK2
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
@@ -194,6 +197,13 @@ else
 endif
 
 
+! Reading all namelist (also assimilation)
+CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
+
+! Go to SURFEX
+CALL GOTO_SURFEX(1,.TRUE.)
+CALL GOTO_TRIP(1,.TRUE.)
+
 ! Initialize time information
 IYEAR    = NUNDEF
 IMONTH   = NUNDEF
@@ -204,18 +214,16 @@ CALL READ_SURF(CSURF_FILETYPE,'DIM_FULL  ',INI,  IRESP)
 CALL READ_SURF(CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
 CALL END_IO_SURF_n(CSURF_FILETYPE)
 
+NINDX2 = INI
+ALLOCATE(NWORK(INI))
+ALLOCATE(XWORK(INI))
+ALLOCATE(XWORK2(INI,10))
+
 IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 ZTIME  = TTIME%TIME
 IF (ZTIME > NDAYSEC) ZTIME = ZTIME - NDAYSEC
-
-! Reading all namelist (also assimilation)
-CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
-
-! Go to SURFEX
-CALL GOTO_SURFEX(1,.TRUE.)
-CALL GOTO_TRIP(1,.TRUE.)
 
 KSW=0
 KSV=0
@@ -387,6 +395,10 @@ WRITE(*,*) '    | SODA ENDS CORRECTLY |'
 WRITE(*,*) '    -----------------------'
 !
 CLOSE(ILUOUT)
+!
+DEALLOCATE(NWORK)
+DEALLOCATE(XWORK)
+DEALLOCATE(XWORK2)
 !
 CALL DEALLOC_SURFEX
 IF (LHOOK) CALL DR_HOOK('SODA',1,ZHOOK_HANDLE)

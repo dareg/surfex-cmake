@@ -111,11 +111,13 @@ IF (CTOWN=='TEB   ') THEN
 ! new diag not yet inplemeted for TEB (these diag are required for the climate model)
 !
 ! Ok with atmospheric model but LEI (latent heat of sublimation) must by implemented in TEB
-  PLEI(:) = XUNDEF
-  WHERE(PLE(:)/=XUNDEF)
-     ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-PT2M(:)))
-     PLEI  (:) = PLE(:) * ZDELTA(:)
-  ENDWHERE
+  IF (SIZE(PLEI)>0) THEN
+    PLEI(:) = XUNDEF
+    WHERE(PLE(:)/=XUNDEF)
+      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-PT2M(:)))
+      PLEI  (:) = PLE(:) * ZDELTA(:)
+    ENDWHERE
+  ENDIF
 !
   PTS      = XUNDEF
   PRNC     = XUNDEF
@@ -133,7 +135,7 @@ IF (CTOWN=='TEB   ') THEN
   PT2M_MAX = 0.0
   PHU2M_MIN= XUNDEF
   PHU2M_MAX= -XUNDEF
-  PWIND10M_MAX = 0.0          
+  PWIND10M_MAX = 0.0      
   PT2M_MIN = MIN(PT2M(:),PT2M_MIN(:))
   PT2M_MAX = MAX(PT2M(:),PT2M_MAX(:))
   PHU2M_MIN= MIN(PHU2M(:),PHU2M_MIN(:))
