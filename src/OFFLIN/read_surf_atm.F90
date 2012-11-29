@@ -104,20 +104,20 @@ IF (NRANK==NPIO) THEN
       REWIND(KINIT)
       DO I=1,KNB
         IF (NNI_FORC==1) THEN
-          READ(UNIT=KINIT,FMT='(F20.5)') ZWORK
+          READ(UNIT=KINIT,FMT=*) ZWORK
           ZFIELD(:,I) = ZWORK
         ELSE
-          READ(UNIT=KINIT,FMT='(50(F20.5))') ZFIELD(:,I)
+          READ(UNIT=KINIT,FMT=*) ZFIELD(:,I)
         END IF
       ENDDO
     ELSE
       ZFIELD(:,1) = ZFIELD(:,KNB)
       DO I=2,KNB
         IF (NNI_FORC==1) THEN
-          READ(UNIT=KINIT,FMT='(F20.5)') ZWORK
+          READ(UNIT=KINIT,FMT=*) ZWORK
           ZFIELD(:,I) = ZWORK
         ELSE
-          READ(UNIT=KINIT,FMT='(50(F20.5))') ZFIELD(:,I)
+          READ(UNIT=KINIT,FMT=*) ZFIELD(:,I)
         END IF
       ENDDO
     ENDIF
