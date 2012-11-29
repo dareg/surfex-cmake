@@ -343,9 +343,13 @@ else
 ifeq "$(F90)" "ifort"
 ARCHOOK="ifort32"
 else
+ifeq "$(F90)" "LXpgi"
+ARCHOOK="linux"
+else
 ARCHOOK=$(ARCH)
 ifeq "$(VER_MPI)" "NOMPI"
 ARCHOOK=$(ARCH)_nompi
+endif
 endif
 endif
 endif
@@ -369,6 +373,10 @@ ifeq "$(F90)" "ifort"
 ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
 	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -convert big-endian -assume byterecl convert_ecoclimap_param.f90 && ./a.out
 else
+ifeq "$(F90)" "pgf90"
+${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -byteswapio convert_ecoclimap_param.f90  && ./a.out
+else
 ifeq "$(ARCH)" "SX8"
 ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
 	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && qsub job_ecoclimap_sx8
@@ -379,6 +387,7 @@ ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
 else
 ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
 	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -fconvert=swap convert_ecoclimap_param.f90 && ./a.out
+endif
 endif
 endif
 endif

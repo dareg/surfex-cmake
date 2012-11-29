@@ -113,6 +113,10 @@ include Makefile.SURFEX.mk
 #
 INC += -I/SX/opt/sxf90/${SXF90VERSION}/include
 #
+ifeq "$(VER_MPI)" "NOMPI"
+CPPFLAGS += -DNOMPI
+endif
+#
 ##########################################################
 #                                                        #
 # extra VPATH, Compilation flag modification             #

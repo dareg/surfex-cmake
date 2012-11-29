@@ -101,6 +101,10 @@ INC += -I/usr/lpp/xlf/include
 VPATH += /usr/lpp/xlf/include
 CPPFLAGS += -DAIX64
 #
+ifeq "$(VER_MPI)" "NOMPI"
+CPPFLAGS += -DNOMPI
+endif
+#
 ##########################################################
 #                                                        #
 # extra VPATH, Compilation flag modification             #
