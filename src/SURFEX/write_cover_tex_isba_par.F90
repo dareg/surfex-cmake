@@ -96,6 +96,9 @@ REAL, DIMENSION(JPCOVER,KPATCH      ) :: ZRSMIN,ZGAMMA,ZRGL,ZCV,             &
                                            ZH_TREE, ZGC, ZZ0_O_Z0H,            &
                                            ZWRMAX_CF, ZDMAX, ZRE25  
 REAL, DIMENSION(JPCOVER,KLAYER,KPATCH):: ZDG, ZROOTFRAC
+REAL, DIMENSION(JPCOVER,KPATCH)       :: ZDROOT
+REAL, DIMENSION(JPCOVER,KPATCH)       :: ZDG2
+INTEGER, DIMENSION(JPCOVER,KPATCH)    :: IWG_LAYER
 LOGICAL, DIMENSION(JPCOVER,KPATCH, 12   ) :: GSTRESS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -104,7 +107,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_ISBA_PAR',0,ZHOOK_HANDLE)
 IF (NTEX==0 .AND. LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_ISBA_PAR',1,ZHOOK_HANDLE)
 IF (NTEX==0) RETURN
- !ALLOCATE (TZSEED (JPCOVER,KPATCH) , TZREAP  (JPCOVER,KPATCH) )
+!
 GLINE=.FALSE.
 !
 ZCOVER(:,:) = 0.
@@ -117,7 +120,8 @@ END DO
 CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,HPHOTO, 'NAT',                    &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
-                        PDG=ZDG,PZ0_O_Z0H=ZZ0_O_Z0H,                     &
+                        PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &
+                        PDG2=ZDG2,PZ0_O_Z0H=ZZ0_O_Z0H,                   &
                         PALBNIR_VEG=ZALBNIR_VEG,PALBVIS_VEG=ZALBVIS_VEG, &
                         PALBUV_VEG=ZALBUV_VEG,                           &
                         PROOTFRAC=ZROOTFRAC,                             &
