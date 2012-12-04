@@ -439,7 +439,11 @@ DO JPT=1,SIZE(PFSOL)
 !
 !---------------------------------------------------------------------------------------------------
 !
-  DO J=IBOT,IUP,-1
+  ZT(IBOT)    = ZWT(IBOT)
+  ZS(IBOT)    = ZWS(IBOT)  
+  ZUC(IBOT,2) = ZWU(IBOT)
+  ZE(IBOT)    = ZWE(IBOT)  
+  DO J=IBOT-1,IUP,-1
     ZT (J)   = ZWT(J) - ZC (J) * ZOMT(J) * ZT (J+1)
     ZS (J)   = ZWS(J) - ZC (J) * ZOMS(J) * ZS (J+1)
     ZUC(J,2) = ZWU(J) - ZCU(J) * ZOMU(J) * ZUC(J+1,2)
