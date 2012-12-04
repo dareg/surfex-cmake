@@ -54,6 +54,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:) :: XCONN    ! pixels reference number and
                                                 ! connections between
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: NLINE    ! second index of the pixel in the array 
                                                 ! XCONN
+REAL, ALLOCATABLE, DIMENSION(:,:)   :: XTANB    ! pixels topographic slope (Tan(Beta))
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: XSLOP    ! pixels topographic slope/length flow
 
 !Variables à priori inutiles

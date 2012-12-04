@@ -59,7 +59,7 @@ USE MODD_TOPODYN,       ONLY : CCAT, NNCAT, NNB_TOPD_STEP, XTOPD_STEP,&
                                NLINE,  XDMAXT,&
                                XTOPD, XDRIV, XDHIL, XTIME_TOPD,&
                                XDGRD, XSPEEDG, XTIME_TOPD_DRAIN,&
-                               XQTOT, XSLOP, XDAREA,&
+                               XQTOT, XTANB, XSLOP, XDAREA,&
                                XLAMBDA, XCONN, XQB_DR, XQB_RUN
 !
 USE MODD_TOPD_PAR, ONLY : NDIM
@@ -195,13 +195,14 @@ ENDDO
 !               -----------
 IF (HPROGRAM/='PGD') THEN
   !
+  ALLOCATE(XTANB(NNCAT,NMESHT))
   ALLOCATE(XSLOP(NNCAT,NMESHT))
   ALLOCATE(XDAREA(NNCAT,NMESHT))
   ALLOCATE(XLAMBDA(NNCAT,NMESHT))
   !
   DO JCAT=1,NNCAT
     CALL READ_SLOPE_FILE(HPROGRAM,YFILESLO(JCAT),'FORMATTED',NNMC(JCAT),&
-                         XSLOP(JCAT,:),XDAREA(JCAT,:),XLAMBDA(JCAT,:))
+                       XTANB(JCAT,:),XSLOP(JCAT,:),XDAREA(JCAT,:),XLAMBDA(JCAT,:))
   ENDDO
   !
   !*      6       River Distance file

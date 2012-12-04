@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !     #######################     
-      SUBROUTINE READ_SLOPE_FILE(HPROGRAM,HFILE,HFORM,KNMC,PSLOP,PDAREA,PLAMBDA)
+      SUBROUTINE READ_SLOPE_FILE(HPROGRAM,HFILE,HFORM,KNMC,PTANB,PSLOP,PDAREA,PLAMBDA)
 !     #######################
 !
 !!****  *READ_SLOPE_FILE*  
@@ -60,6 +60,7 @@ CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM    !
 CHARACTER(LEN=*),  INTENT(IN)  :: HFILE       ! File to be read
 CHARACTER(LEN=*),  INTENT(IN)  :: HFORM       ! Format of the file to be read
 INTEGER,           INTENT(IN)  :: KNMC        ! Number of pixels in the catchment
+REAL, DIMENSION(:),  INTENT(OUT)   :: PTANB    ! pixels topographic slope(tan(beta)
 REAL, DIMENSION(:),  INTENT(OUT)   :: PSLOP   ! pixels topographic slope/length flow
 REAL, DIMENSION(:),  INTENT(OUT)   :: PDAREA  ! drainage area (aire drainee)
 REAL, DIMENSION(:),  INTENT(OUT)   :: PLAMBDA ! pure topographic index
@@ -88,7 +89,7 @@ READ(IUNIT,*)
 !
 DO JJ=1,KNMC
   !
-  READ(IUNIT,*,END=110) IWRK, ZWRK, PSLOP(JJ), ZWRK, PDAREA(JJ)
+   READ(IUNIT,*,END=110) IWRK, PTANB(JJ), PSLOP(JJ), ZWRK, PDAREA(JJ)
   PLAMBDA(JJ) = LOG(PDAREA(JJ)/PSLOP(JJ))
   !
 ENDDO

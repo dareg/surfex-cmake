@@ -278,6 +278,7 @@ IF( CKSAT=='SGH' .OR. CKSAT=='EXP' ) THEN
   !
   !ludo calcul des profondeur efficaces
   !ZRTOP_D2(:) = 1.
+  !ALLOCATE(XC_DEPTH_RATIO(SIZE(XC_DEPTH_RATIO_i)))
   !XC_DEPTH_RATIO(:) = XC_DEPTH_RATIO_i(:)
   !ZRTOP_D2(:) = XC_DEPTH_RATIO(:)
   !valeur patch 1 (idem wsat wfc) a voir cas ou il existe plusieurs patchs 
@@ -386,6 +387,7 @@ IF( CKSAT=='EXP' .OR. CKSAT=='SGH' ) THEN
   !ludo test
   ALLOCATE(ZF_PARAM_FULL(KI))
   ALLOCATE(ZF_PARAMT(NNCAT,NMESHT))
+  ALLOCATE(XF_PARAM(SIZE(XF_PARAM_i)))
   XF_PARAM(:) = XF_PARAM_i(:)
   CALL UNPACK_SAME_RANK(NR_NATURE,XF_PARAM(:),ZF_PARAM_FULL)
   CALL ISBA_TO_TOPD(ZF_PARAM_FULL,ZF_PARAMT)

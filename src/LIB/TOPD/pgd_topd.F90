@@ -59,6 +59,7 @@ USE MODI_MAKE_MASK_ISBA_TO_TOPD
 USE MODI_WRITE_FILE_MASKTOPD
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
+USE MODI_TOPD_TO_ISBA_SLOPE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -293,7 +294,11 @@ IF (LCOUPL_TOPD) THEN
   !
   CALL WRITE_FILE_MASKTOPD(NDIM_FULL)
   !
-  !*        3.0  Compute F and DC for each ISBA mesh
+  !*        3.0 Compute Mean slope over each ISBA_MESH
+  !            ----------------------------------------------------------------------
+  CALL TOPD_TO_ISBA_SLOPE(NDIM_FULL)
+  !
+  !*        4.0  Compute F and DC for each ISBA mesh
   !            ----------------------------------------------------------------------
   !
   ALLOCATE(NNBV_IN_MESH(NDIM_FULL,NNCAT))
