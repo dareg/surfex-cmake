@@ -4407,7 +4407,7 @@ ENDDO
 !
 
 IF (LSNOWDRIFT_SUBLIM) THEN
-	ZQSATI(:)= QSATI(PTA(:),PPS(:))
+  ZQSATI(:)= QSATI(PTA(:),PPS(:))
 END IF
 ! 1. Computation of drift and induced settling and metamorphism
 ! ------------------
@@ -4420,58 +4420,57 @@ DO JJ=1, SIZE(PSNOW)
 !   initialization decay coeff
       ZPROFEQU=0.
   DO JST=1, INLVLS_USE(JJ)
-!  mobility index computation of a layer as a function of its properties
-      IF(PSNOWGRAN1(JJ,JST) < 0.) THEN        
-!     dendritic case              
-          ZRMOB=0.34*(0.5+0.75*(-PSNOWGRAN1(JJ,JST)/99.)-0.5* & 
-          PSNOWGRAN2(JJ,JST)/99.)+   &
-          0.66*(1.25-1.25*(MAX(PSNOWRHO(JJ,JST),VROMIN)/1000.-VROMIN/1000.) / VMOB1) 
-      ELSE
-!     non dendritic case         
-          ZRMOB=0.34*(VMOB2-VMOB2*PSNOWGRAN1(JJ,JST)/99.-VMOB3*  &
-          PSNOWGRAN2(JJ,JST)*10000./100.)+    &
-          0.66*(1.25-1.25*(MAX(PSNOWRHO(JJ,JST),VROMIN)/1000.-VROMIN/1000.) / VMOB1)
-      ENDIF
-!     correction in case of former wet snow
-      IF (PSNOWHIST(JJ,JST) >= 2) ZRMOB = MIN(ZRMOB, VMOB4)
+! mobility index computation of a layer as a function of its properties
+    IF(PSNOWGRAN1(JJ,JST) < 0.) THEN        
+!   dendritic case              
+      ZRMOB=0.34*(0.5+0.75*(-PSNOWGRAN1(JJ,JST)/99.)-0.5* & 
+      PSNOWGRAN2(JJ,JST)/99.)+   &
+      0.66*(1.25-1.25*(MAX(PSNOWRHO(JJ,JST),VROMIN)/1000.-VROMIN/1000.) / VMOB1) 
+    ELSE
+!   non dendritic case         
+      ZRMOB=0.34*(VMOB2-VMOB2*PSNOWGRAN1(JJ,JST)/99.-VMOB3*  &
+      PSNOWGRAN2(JJ,JST)*10000./100.)+    &
+      0.66*(1.25-1.25*(MAX(PSNOWRHO(JJ,JST),VROMIN)/1000.-VROMIN/1000.) / VMOB1)
+    ENDIF
+!   correction in case of former wet snow
+    IF (PSNOWHIST(JJ,JST) >= 2) ZRMOB = MIN(ZRMOB, VMOB4)
 !      
-!     computation of drift index supposing no overburden snow
-      ZRDRIFT = ZRMOB - (VDRIFT1 *exp(-VDRIFT2*ZFF(JJ))-1.)
-!     update the decay coeff by half the current layer
-      ZPROFEQU = ZPROFEQU  +0.5 * PSNOWDZ(JJ,JST) *0.1 * (VDRIFT3-ZRDRIFT)
-!     computation of the drift index inclunding the decay by overburden snow 
-      ZRT = max(0.,ZRDRIFT * exp(-ZPROFEQU*100))
-!     modif_EB exit loop if there is no drift
-      IF (ZRDRIFT <= 0.) EXIT
+!   computation of drift index supposing no overburden snow
+    ZRDRIFT = ZRMOB - (VDRIFT1 *exp(-VDRIFT2*ZFF(JJ))-1.)
+!   update the decay coeff by half the current layer
+    ZPROFEQU = ZPROFEQU  +0.5 * PSNOWDZ(JJ,JST) *0.1 * (VDRIFT3-ZRDRIFT)
+!   computation of the drift index inclunding the decay by overburden snow 
+    ZRT = max(0.,ZRDRIFT * exp(-ZPROFEQU*100))
+!   modif_EB exit loop if there is no drift
+    IF (ZRDRIFT <= 0.) EXIT
 
-      IF (LSNOWDRIFT_SUBLIM) THEN
+    IF (LSNOWDRIFT_SUBLIM .AND. JST==1) THEN
 !      
-	IF (JST==1)  THEN
-	! modif_EB cas specifique surface pour blowing snow sublimation        
+      ! modif_EB cas specifique surface pour blowing snow sublimation        
 
-	! computation of wind speed threshold QSATI and RH withe respect to ice
-		ZVT=-LOG((ZRMOB+1.)/VDRIFT1)/VDRIFT2
-		ZRHI=PQA(JJ)/ZQSATI(JJ)
-	! computation of sublimation rate according to Gordon's PhD
-		ZQS=0.0018*(XTT/PTA(JJ))**4*ZVT*PRHOA(JJ)*ZQSATI(JJ)* &
-		(1.-ZRHI)*(ZFF(JJ)/ZVT)**3.6
-	!       write(*,*) 'surface Vt vent*coef  ZRDRIFT ZRMOB :',ZVT,&
-	!       ZFF(JJ),ZRDRIFT,ZRMOB 
-	!       write(*,*) 'V>Vt ZQS   :',ZQS
-		!surface depth decrease in case of blowing snow sublimation
-	!       write(*,*) 'V>Vt DSWE DZ Z:',- MAX(0.,ZQS)*PTSTEP/COEF_FF,&
-	!       - MAX(0.,ZQS)*PTSTEP/COEF_FF/PSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST)
-	! 2 lignes ci-dessous a valider pour avoir sublim drift
-		PSNOWDZ(JJ,JST)=MAX(0.5*PSNOWDZ(JJ,JST),PSNOWDZ(JJ,JST) - &
-		MAX(0.,ZQS)*PTSTEP/COEF_FF/PSNOWRHO(JJ,JST))
-		
-	ENDIF
-	!     modif_EB enhancement of snow transformation in case of sublimation      
-	ZQS_EFFECT= (MIN(3.,MAX(0.,ZQS)/ZQS_REF)) * ZRT
-	ZWIND_EFFECT= COEF_EFFECT * ZRT
-	ZDRIFT_EFFECT= (ZQS_EFFECT+ZWIND_EFFECT)* PTSTEP/COEF_FF/ VTIME
-	!     write(*,*) 'ZQS_EFFECT,ZWIND_EFFECT,ZDRIFT_EFFECT:',ZQS_EFFECT,ZWIND_EFFECT,ZDRIFT_EFFECT
-      ENDIF
+      ! computation of wind speed threshold QSATI and RH withe respect to ice
+      ZVT=-LOG((ZRMOB+1.)/VDRIFT1)/VDRIFT2
+      ZRHI=PQA(JJ)/ZQSATI(JJ)
+      ! computation of sublimation rate according to Gordon's PhD
+      ZQS=0.0018*(XTT/PTA(JJ))**4*ZVT*PRHOA(JJ)*ZQSATI(JJ)* &
+           (1.-ZRHI)*(ZFF(JJ)/ZVT)**3.6
+      !       write(*,*) 'surface Vt vent*coef  ZRDRIFT ZRMOB :',ZVT,&
+      !       ZFF(JJ),ZRDRIFT,ZRMOB 
+      !       write(*,*) 'V>Vt ZQS   :',ZQS
+      !       surface depth decrease in case of blowing snow sublimation
+      !       write(*,*) 'V>Vt DSWE DZ Z:',- MAX(0.,ZQS)*PTSTEP/COEF_FF,&
+      !       - MAX(0.,ZQS)*PTSTEP/COEF_FF/PSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST)
+      !       2 lignes ci-dessous a valider pour avoir sublim drift
+      PSNOWDZ(JJ,JST)=MAX(0.5*PSNOWDZ(JJ,JST),PSNOWDZ(JJ,JST) - &
+                      MAX(0.,ZQS)*PTSTEP/COEF_FF/PSNOWRHO(JJ,JST))
+    ELSE
+      ZQS=0.
+    ENDIF
+    !     modif_EB enhancement of snow transformation in case of sublimation      
+    ZQS_EFFECT= (MIN(3.,MAX(0.,ZQS)/ZQS_REF)) * ZRT
+    ZWIND_EFFECT= COEF_EFFECT * ZRT
+    ZDRIFT_EFFECT= (ZQS_EFFECT+ZWIND_EFFECT)* PTSTEP/COEF_FF/ VTIME
+    !     write(*,*) 'ZQS_EFFECT,ZWIND_EFFECT,ZDRIFT_EFFECT:',ZQS_EFFECT,ZWIND_EFFECT,ZDRIFT_EFFECT
 
 !     settling by wind transport only in case of not too dense snow
       IF(PSNOWRHO(JJ,JST) < VROMAX) THEN
