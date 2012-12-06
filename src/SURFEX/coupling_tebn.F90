@@ -650,11 +650,11 @@ ZE_GRND = ZLE_GRND / XLVTT
 !-------------------------------------------------------------------------------------
 !
 WHERE (XROAD(:)+XGARDEN(:).NE.0.)
-        ZAC_GRND(:) = (XROAD(:)*ZAC_ROAD(:) + XGARDEN(:)*ZAC_GARDEN(:)) / (XROAD(:)+XGARDEN(:))
-        ZAC_GRND_WAT(:) = (XROAD(:)*ZAC_ROAD_WAT(:) + XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (XROAD(:)+XGARDEN(:))
+  ZAC_GRND(:) = (XROAD(:)*ZAC_ROAD(:) + XGARDEN(:)*ZAC_GARDEN(:)) / (XROAD(:)+XGARDEN(:))
+  ZAC_GRND_WAT(:) = (XROAD(:)*ZAC_ROAD_WAT(:) + XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (XROAD(:)+XGARDEN(:))
 ELSEWHERE
-        ZAC_GRND(:) = 0.
-        ZAC_GRND_WAT(:) = 0.
+  ZAC_GRND(:) = 0.
+  ZAC_GRND_WAT(:) = 0.        
 ENDWHERE
 !
 ZSFLUX_U (:) = ZUW_GRND(:) * (1.-XBLD(:))
@@ -815,6 +815,11 @@ CALL DIAG_MISC_TEB_n(PTSTEP, ZDQS_TOWN, ZQF_BLD, ZQF_BLDWFR, ZQF_TOWN,         &
 !-------------------------------------------------------------------------------------
 !          
 IF (LCANOPY) THEN
+  ZT2M_MIN(:) = XUNDEF
+  ZT2M_MAX(:) = XUNDEF
+  ZHU2M_MIN(:) = XUNDEF
+  ZHU2M_MAX(:) = XUNDEF
+  ZWIND10M_MAX(:) = XUNDEF
   IF (N2M>0) CALL INIT_2M_10M( XP(:,2), XT(:,2), XQ(:,2),  XU, XZ, &
                                PU, PV, ZWIND, PRHOA,               &
                                XT2M, XQ2M, XHU2M, XZON10M, XMER10M,&
