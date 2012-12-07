@@ -488,7 +488,7 @@ ENDIF
 !
 IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
      CALL VEGETATION_UPDATE(PTSTEP,TTIME,XCOVER,                       &
-                         CISBA,LECOCLIMAP, CPHOTO, 'NAT',                &
+                         CISBA,LECOCLIMAP, CPHOTO, LAGRIP, 'NAT',        &
                          XLAI,XVEG,XZ0,                                  &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                   &
                          XRSMIN,XGAMMA,XWRMAX_CF,                        &

@@ -94,6 +94,7 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, &
                                   XSPINMAXW, NNBYEARSPINS, NNBYEARSPINW,   &
                                   NNBYEARSOLD, NSPINS, NSPINW
 !
+USE MODD_AGRI_GARDEN, ONLY : LAGRIP
 USE MODD_AGRI_GARDEN_n,     ONLY: LIRRIGATE, LIRRIDAY, XTHRESHOLDSPT
 USE MODD_DIAG_TEB_GARDEN_n, ONLY: XCG, XC1, XC2, XWGEQ, XCT, XRS,           &
                                   XCH, XCD, XCDN, XRI, XHU, XHUG,           &
@@ -379,7 +380,7 @@ END IF
 !
 IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,                        &
-                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, 'GRD',       &
+                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, LAGRIP, 'GRD',       &
                          XLAI,XVEG,XZ0,                                  &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                   &
                          XRSMIN,XGAMMA,XWRMAX_CF,                        &

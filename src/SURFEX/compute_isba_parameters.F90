@@ -206,7 +206,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZF
 INTEGER :: IDIM_FULL, JL
 INTEGER           :: JILU     ! loop increment
 INTEGER           :: ILUOUT   ! unit of output listing file
-INTEGER           :: IDECADE  ! decade of simulation
+INTEGER           :: IDECADE, IDECADE2  ! decade of simulation
 INTEGER :: JPATCH  ! loop counter on tiles
 INTEGER           :: IUNIT       ! unit of f/dc map file
 INTEGER           :: INFOMPI
@@ -246,9 +246,11 @@ ELSE
   IDECADE = 1
 END IF
 !
-CALL INIT_ISBA_MIXPAR(CISBA,XCOVER,CPHOTO,'NAT')
+IDECADE2 = IDECADE
 !
-CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,                           &
+CALL INIT_ISBA_MIXPAR(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,'NAT')
+!
+CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,           &
                         'NAT',PVEG=XVEG,PLAI=XLAI,                             &
                         PRSMIN=XRSMIN,PGAMMA=XGAMMA,PWRMAX_CF=XWRMAX_CF,       &
                         PRGL=XRGL,PCV=XCV,PSOILGRID=XSOILGRID,                 &
@@ -639,7 +641,7 @@ DO JPATCH=1,NPATCH
   ZTG1(:,JPATCH) = XTG(:,1,JPATCH)
 END DO
 !
-CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,'NAT',&
+CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,'NAT',&
                           PWG1 = ZWG1, &
                           PALBNIR_SOIL=XALBNIR_SOIL, &
                           PALBVIS_SOIL=XALBVIS_SOIL, &

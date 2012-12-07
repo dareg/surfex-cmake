@@ -1,6 +1,6 @@
 !     #########
     SUBROUTINE VEGETATION_UPDATE(PTSTEP,TTIME,PCOVER,                 &
-                       HISBA,OECOCLIMAP, HPHOTO, HSFTYPE,             &
+                       HISBA,OECOCLIMAP, HPHOTO, OAGRIP, HSFTYPE,     &
                        PLAI,PVEG,PZ0,                                 &
                        PALBNIR,PALBVIS,PALBUV,PEMIS,                  &
                        PRSMIN,PGAMMA,PWRMAX_CF,                       &
@@ -58,6 +58,7 @@ USE MODD_TYPE_DATE_SURF
 !
 USE MODD_TEB_n,   ONLY : XGARDEN
 !
+USE MODI_INIT_ISBA_MIXPAR
 USE MODI_CONVERT_PATCH_ISBA
 USE MODI_INIT_FROM_DATA_GRDN_n
 USE MODI_SUBSCALE_Z0EFF
@@ -78,6 +79,7 @@ TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
 REAL,   DIMENSION(:,:), INTENT(IN)  :: PCOVER  ! cover types
 CHARACTER(LEN=*),     INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+LOGICAL,              INTENT(IN)    :: OAGRIP
 CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
 LOGICAL,              INTENT(IN)    :: OECOCLIMAP ! T if ecoclimap is used
 !
@@ -140,7 +142,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PIRRIG   ! irrigated fraction
 !
 !*      0.2    declarations of local variables
 !
-INTEGER                                  :: IDECADE  ! decade of simulation
+INTEGER                                  :: IDECADE, IDECADE2  ! decade of simulation
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
@@ -152,6 +154,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE',0,ZHOOK_HANDLE)
 IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
+IDECADE2 = IDECADE
 !
 !*      2.2    From ecoclimap
 !              --------------
@@ -161,9 +164,10 @@ IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
-      CALL UPDATE_DATA_COVER(TTIME%TDATE%YEAR)
-      CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,PCOVER,HPHOTO,     &
-                           HSFTYPE, PVEG=PVEG,                   &
+      CALL UPDATE_DATA_COVER(TTIME%TDATE%YEAR)  
+      IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(HISBA,IDECADE,IDECADE2,PCOVER,HPHOTO,HSFTYPE)
+      CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,HPHOTO,     &
+                           OAGRIP,HSFTYPE, PVEG=PVEG,                   &
                            PLAI=PLAI,PRSMIN=PRSMIN,PGAMMA=PGAMMA,&
                            PWRMAX_CF=PWRMAX_CF,                  &
                            PRGL=PRGL,PCV=PCV,PZ0=PZ0,            &

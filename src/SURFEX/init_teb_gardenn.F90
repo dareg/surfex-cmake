@@ -295,7 +295,7 @@ END IF
 !-----------------------------------------------------------------------------------------------------
 !
 IF (.NOT. LPAR_GARDEN) THEN        
-  CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,                         &
+  CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE,XCOVER,CPHOTO,LAGRIP,          &
                         'GRD',PVEG=XVEG,PLAI=XLAI,                             &
                         PRSMIN=XRSMIN,PGAMMA=XGAMMA,PWRMAX_CF=XWRMAX_CF,       &
                         PRGL=XRGL,PCV=XCV,PSOILGRID=XSOILGRID,                 &
