@@ -2,7 +2,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(YPROGRAM, KI,                     &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,                   &
-                                PTS_O,    PT2M_O, PHU2M_O,        &
+                                PTS_O,    PT2M_O, PHU2M_O, PSWE,  &
                                 HTEST )
 
 ! ------------------------------------------------------------------------------------------
@@ -71,6 +71,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(YPROGRAM, KI,                     &
  REAL, DIMENSION(KI), INTENT(IN) :: PTS_O
  REAL, DIMENSION(KI), INTENT(IN) :: PT2M_O
  REAL, DIMENSION(KI), INTENT(IN) :: PHU2M_O
+ REAL, DIMENSION(KI), INTENT(OUT):: PSWE
  CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
  INTEGER                                  :: IDAT
@@ -190,6 +191,9 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(YPROGRAM, KI,                     &
  CALL READ_SURF(YPROGRAM,'DG2',       PD2,   IRESP)
  CALL READ_SURF(YPROGRAM,'LAI',       PLAI,  IRESP)
  CALL READ_SURF(YPROGRAM,'VEG',       PVEG,  IRESP)
+
+ ! Set PIVEG (SURFIND.VEG.DOMI) since it is not available
+ PIVEG = 0.0
 
  !   Find current time
  !
@@ -357,6 +361,9 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(YPROGRAM, KI,                     &
                 PIVEG,PARG,PD2,PSAB,PLAI,PRSMIN,PZ0H,                  &
                 PTSC,PTPC,PWSC,PWPC,PSNC,                              &
                 PGELAT,PGELAM,PGEMU)  
+
+! Update snow
+ PSWE=ZSNS
 
 !
 !  Perform soil moiture analyses

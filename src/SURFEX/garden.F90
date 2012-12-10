@@ -91,6 +91,7 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, &
                                   XALBVIS_TSOIL, XFAPARC, XFAPIRC, XMUS,   &
                                   NLAYER_HORT, NLAYER_DUN
 !
+USE MODD_AGRI_GARDEN, ONLY : LAGRIP
 USE MODD_AGRI_GARDEN_n,     ONLY: LIRRIGATE, LIRRIDAY, XTHRESHOLDSPT
 USE MODD_DIAG_TEB_GARDEN_n, ONLY: XCG, XC1, XC2, XWGEQ, XCT, XRS,           &
                                   XCH, XCD, XCDN, XRI, XHU, XHUG,           &
@@ -324,7 +325,7 @@ XTSRAD = PTS_GARDEN
             PAC_AGG_GARDEN, PHU_AGG_GARDEN, XFAPARC(:,1), XFAPIRC(:,1),&
             XMUS(:,1), XLAI_EFFC(:,1), XAN(:,1), XANDAY(:,1),          &
             ZRESP_BIOMASS_INST, XIACAN, XANF(:,1), XGPP, XFAPAR,       &
-            XFAPIR, XFAPAR_BS, XFAPIR_BS )
+            XFAPIR, XFAPAR_BS, XFAPIR_BS                  )
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=XSNOWTEMP(:,1)
 !
@@ -341,10 +342,10 @@ ENDIF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2(:)=0.
+PSFCO2    (:)=0.
 !
-IF (CPHOTO/='NON' .AND. CRESPSL/='NON') THEN
-  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                                     &
+IF ( CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:,1)/=XUNDEF) ) THEN
+  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                      &
                    PRHOA, XTG(:,:,1), XWG(:,:,1), XWFC, XWWILT, XWSAT, XSAND,   &
                    XRE25(:,1), XLAI(:,1), ZRESP_BIOMASS_INST, XTURNOVER(:,:,1), &
                    XLITTER(:,:,:,1), XLIGNIN_STRUC(:,:,1) , XSOILCARB(:,:,1),   &
@@ -359,7 +360,7 @@ END IF
 !
 IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,                        &
-                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, 'GRD',       &
+                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, LAGRIP, 'GRD',  &
                          XLAI,XVEG,XZ0,                                  &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                   &
                          XRSMIN,XGAMMA,XWRMAX_CF,                        &

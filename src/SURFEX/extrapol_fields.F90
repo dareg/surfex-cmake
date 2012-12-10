@@ -33,14 +33,17 @@ SUBROUTINE EXTRAPOL_FIELDS(HPROGRAM,KLUOUT)
 !!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
+USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
+USE MODD_ISBA_GRID_n,    ONLY : NDIM
 USE MODD_ISBA_n,         ONLY : XCOVER, CISBA, CPHOTO 
+!
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                                &
                                 XDATA_IRRIG, XDATA_WATSUP,                              &
                                 XDATA_GARDEN, XDATA_NATURE,                             &
                                 XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,                   &
                                 XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN
 !                                
-USE MODD_DATA_ISBA_n,    ONLY : XPAR_LAI, XPAR_H_TREE, XPAR_ROOT_DEPTH,           &
+USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_LAI, XPAR_H_TREE, XPAR_ROOT_DEPTH,    &
                                 XPAR_GROUND_DEPTH, XPAR_IRRIG, XPAR_WATSUP,       &
                                 LDATA_VEGTYPE, LDATA_LAI, LDATA_H_TREE, LDATA_DG, &
                                 LDATA_IRRIG, LDATA_WATSUP, LDATA_ROOTFRAC,        &
@@ -67,6 +70,7 @@ INTEGER,                INTENT(IN)    :: KLUOUT
 !            ------------------------------
 !
 CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG, YDIF
+REAL, DIMENSION(NDIM,36,NVEGTYPE) :: ZWORK
 INTEGER :: JTIME
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -89,12 +93,15 @@ IF (.NOT.LDATA_LAI) THEN
   DO JTIME=1,36 
 !    
 !   ECOCLIMAP spatial distribution field
-    CALL AV_PGD(XPAR_LAI(:,JTIME,:),XCOVER,XDATA_LAI(:,JTIME,:),YVEG,'ARI',KDECADE=JTIME)
+    CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_LAI(:,JTIME,:),YVEG,'ARI',KDECADE=JTIME)
 !
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user 
-    CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'LAI: leaf area index',XPAR_LAI(:,JTIME,:))
+    CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'LAI: leaf area index',ZWORK(:,JTIME,:))
 !    
   ENDDO
+!
+  CALL GOTO_NTIME(NTIME,ZWORK,XPAR_LAI)
+!
   LDATA_LAI=.TRUE.
 !  
 ENDIF
@@ -136,11 +143,15 @@ ENDIF
 IF (.NOT.LDATA_IRRIG) THEN
   DO JTIME=1,36
 !   ECOCLIMAP spatial distribution field       
-    CALL AV_PGD(XPAR_IRRIG(:,JTIME,:),XCOVER,XDATA_IRRIG,YVEG,'ARI',KDECADE=JTIME)
+    CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_IRRIG,YVEG,'ARI',KDECADE=JTIME)
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user  
     CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'IRRIG  ', XPAR_IRRIG(:,JTIME,:))
   ENDDO
+!
+  CALL GOTO_NTIME(NTIME,ZWORK,XPAR_IRRIG)
+!
   LDATA_IRRIG=.TRUE.
+!
 ENDIF
 !
 !   WATSUP
@@ -148,14 +159,38 @@ ENDIF
 IF (.NOT.LDATA_WATSUP) THEN
   DO JTIME=1,36
 !   ECOCLIMAP spatial distribution field       
-    CALL AV_PGD(XPAR_WATSUP(:,JTIME,:),XCOVER,XDATA_WATSUP,YVEG,'ARI',KDECADE=JTIME)  
+    CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_WATSUP,YVEG,'ARI',KDECADE=JTIME)  
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user  
     CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'WATSUP  ', XPAR_WATSUP(:,JTIME,:))
   ENDDO
+!
+  CALL GOTO_NTIME(NTIME,ZWORK,XPAR_WATSUP)
+!  
   LDATA_WATSUP=.TRUE.
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('EXTRAPOL_FIELDS',1,ZHOOK_HANDLE)
+!
+CONTAINS 
+!
+SUBROUTINE GOTO_NTIME(KTIME,PWORK,PPAR_DATA)
+!
+INTEGER, INTENT(IN) :: KTIME
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PWORK
+REAL, DIMENSION(:,:,:), INTENT(OUT) :: PPAR_DATA
+!
+IF (KTIME==1) THEN
+  PPAR_DATA(:,1,:) = SUM(PWORK(:,:,:),2)/36.
+ELSEIF (KTIME==2) THEN
+  PPAR_DATA(:,1,:) = (SUM(PWORK(:,1:8,:),2) + SUM(PWORK(:,27:36,:),2))/18.
+  PPAR_DATA(:,2,:) = SUM(PWORK(:,9:26,:),2)/18.
+ELSEIF (KTIME==12) THEN
+  DO JTIME=1,12
+    PPAR_DATA(:,JTIME,:) = SUM(PWORK(:,(JTIME-1)*3+1:JTIME*3,:),2)/3.
+  ENDDO
+ENDIF
+!
+END SUBROUTINE GOTO_NTIME
 !
 !-------------------------------------------------------------------------------
 END SUBROUTINE EXTRAPOL_FIELDS

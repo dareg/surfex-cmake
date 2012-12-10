@@ -41,17 +41,16 @@
 !
 USE MODD_SURF_ATM_n, ONLY : CNATURE
 USE MODD_ISBA_n, ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA,&
-                        CPEDOTF, CPHOTO, LTR_ML,                &
-                        XCLAY, XSAND, XSOM,                     &                          
+                        CPEDOTF, CPHOTO, LTR_ML, XRM_PATCH,     &
+                        XCLAY, XSAND, XSOM,                     & 
                         XAOSIP, XAOSIM, XAOSJP, XAOSJM,         &
                         XHO2IP, XHO2IM, XHO2JP, XHO2JM,         &
-                        XSSO_SLOPE,                             &
+                        XSSO_SLOPE, XSOILGRID,                  &
                         XRUNOFFB, XWDRAIN,                      &
                         XTI_MIN, XTI_MAX, XTI_MEAN, XTI_STD,    &
                         XTI_SKEW, XZS,XCOVER,                   &
                         XZ0EFFJPDIR,                            &
-                        LCOVER, LECOCLIMAP, LCTI, LSOM,         &
-                        XSOILGRID 
+                        LCOVER, LECOCLIMAP, LCTI, LSOM
 !
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR
 !
@@ -109,6 +108,12 @@ YRECFM='TR_ML'
 YCOMMENT=YRECFM
 CALL WRITE_SURF(HPROGRAM,YRECFM,LTR_ML,IRESP,HCOMMENT=YCOMMENT)
 !
+!* threshold to remove little fractions of patches
+!
+YRECFM='RM_PATCH'
+YCOMMENT=YRECFM
+CALL WRITE_SURF(HPROGRAM,YRECFM,XRM_PATCH,IRESP,HCOMMENT=YCOMMENT)
+
 !* number of soil layers
 !
 YRECFM='GROUND_LAYER'
@@ -178,7 +183,7 @@ YRECFM='SAND'
 YCOMMENT='X_Y_SAND'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XSAND(:,1),IRESP,HCOMMENT=YCOMMENT)
 !
-!* organic matter
+!* soil organic carbon
 !
 YRECFM='OM'
 YCOMMENT=''
@@ -186,13 +191,14 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,LSOM,IRESP,HCOMMENT=YCOMMENT)
 !
 IF(LSOM)THEN
   !        
-  YCOMMENT='X_Y_SOM'
-  YRECFM='SOM_TOP'
+  YCOMMENT='X_Y_SOC'
+  YRECFM='SOC_TOP'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XSOM(:,1),IRESP,HCOMMENT=YCOMMENT)
-  YRECFM='SOM_SUB'
+  YRECFM='SOC_SUB'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XSOM(:,2),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
+!
 !
 !* subgrid-scale orography parameters to compute dynamical roughness length
 !

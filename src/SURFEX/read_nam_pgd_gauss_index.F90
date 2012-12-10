@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_NAM_PGD_GAUSS_INDEX(HPROGRAM,OINDEX_STORE,HINDEX_1KM,HINDEX_10KM,  &
+      SUBROUTINE READ_NAM_PGD_GAUSS_INDEX(HPROGRAM,OINDEX_STORE,HINDEX_1KM,HINDEX_10KM,    &
                                             HINDEX_100KM,HCOVER,HZS,HCLAY,HSAND,HCTI,      &
                                             OIMP_COVER,OIMP_ZS,OIMP_CLAY,OIMP_SAND,        &
                                             OIMP_CTI,OUNIF_COVER,OUNIF_ZS,OUNIF_SAND,      &
@@ -134,6 +134,7 @@ CHARACTER(LEN=3)         :: CISBA            ! ISBA option
 CHARACTER(LEN=4)         :: CPEDOTF          !
 CHARACTER(LEN=3)         :: CPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
+REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
@@ -224,7 +225,7 @@ CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YZSFILETYPE, XUNIF_ZS, &
 IF(CNATURE=='ISBA')THEN
 !
    CALL READ_NAM_PGD_ISBA(HPROGRAM, NPATCH, NGROUND_LAYER, CISBA, CPEDOTF,             &
-                            CPHOTO, GTR_ML,                                            &
+                            CPHOTO, GTR_ML, ZRM_PATCH,                                 &
                             YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,               &
                             YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,               &
                             YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,     &
@@ -281,6 +282,7 @@ OUNIF_ZS    = (XUNIF_ZS/=XUNDEF)
 OUNIF_SAND  = (XUNIF_SAND/=XUNDEF)
 OUNIF_CLAY  = (XUNIF_CLAY/=XUNDEF)
 OUNIF_CTI   = (LEN_TRIM(YCTI)==0)
+!
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_GAUSS_INDEX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

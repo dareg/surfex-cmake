@@ -1,3 +1,4 @@
+!
 ! *****************************************************************************************
 PROGRAM SODA
 ! ******************************************************************************************
@@ -194,6 +195,13 @@ else
 endif
 
 
+! Reading all namelist (also assimilation)
+CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
+
+! Go to SURFEX
+CALL GOTO_SURFEX(1,.TRUE.)
+CALL GOTO_TRIP(1,.TRUE.)
+
 ! Initialize time information
 IYEAR    = NUNDEF
 IMONTH   = NUNDEF
@@ -209,13 +217,6 @@ IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 ZTIME  = TTIME%TIME
 IF (ZTIME > NDAYSEC) ZTIME = ZTIME - NDAYSEC
-
-! Reading all namelist (also assimilation)
-CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
-
-! Go to SURFEX
-CALL GOTO_SURFEX(1,.TRUE.)
-CALL GOTO_TRIP(1,.TRUE.)
 
 KSW=0
 KSV=0

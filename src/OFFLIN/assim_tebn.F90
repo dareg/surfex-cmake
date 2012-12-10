@@ -57,13 +57,13 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !-------------------------------------------------------------------------------------
 !
+REAL, DIMENSION (KI) :: ZTRD3
+REAL, DIMENSION (KI) :: ZT2INC
+REAL, DIMENSION (KI) :: ZTCLS
 CHARACTER(LEN=10)    :: YVAR    ! Name of the prognostic variable (in LFI file)
 CHARACTER(LEN=100)   :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 CHARACTER(LEN=3)     :: YREAD
 INTEGER              :: IRESP
-REAL, DIMENSION (KI) :: ZTRD3
-REAL, DIMENSION (KI) :: ZT2INC
-REAL, DIMENSION (KI) :: ZTCLS
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_TEB_N',0,ZHOOK_HANDLE)
@@ -106,7 +106,7 @@ CALL IO_BUFF_CLEAN_n
 !
 ZT2INC(:) = PT2M_O(:) - ZTCLS(:)
 
-PRINT *,'Mean T2m increments  ',SUM(ZT2INC)/KI
+PRINT *,'Mean T2m increments over TOWN ',SUM(ZT2INC)/KI
 
 !
 ! c) Temperature analysis of TOWN points
@@ -118,7 +118,9 @@ END WHERE
 
 WRITE(*,*) 'Mean T_ROAD3 increments over TOWN ',SUM(ZT2INC)/KI
 
+#ifdef LFI
 CFILEOUT_LFI=CPREPFILE
+#endif
 CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
 CALL INIT_IO_SURF_n(YPROGRAM,'TOWN  ','SURF  ','WRITE')
 

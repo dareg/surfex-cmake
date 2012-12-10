@@ -1,10 +1,10 @@
 !     #########
       SUBROUTINE READ_NAM_PGD_ISBA(HPROGRAM, KPATCH, KGROUND_LAYER,                         &
-                                   HISBA, HPEDOTF, HPHOTO, OTR_ML,                          &
+                                   HISBA, HPEDOTF, HPHOTO, OTR_ML, PRM_PATCH,               &
                                    HCLAY, HCLAYFILETYPE, PUNIF_CLAY, OIMP_CLAY,             &
                                    HSAND, HSANDFILETYPE, PUNIF_SAND, OIMP_SAND,             &
                                    HSOM_TOP, HSOM_SUB, HSOMFILETYPE, PUNIF_SOM, OIMP_SOM,   &
-                                   HCTI, HCTIFILETYPE, OIMP_CTI,                            &
+                                   HCTI, HCTIFILETYPE, OIMP_CTI,                            &         
                                    HRUNOFFB, HRUNOFFBFILETYPE, PUNIF_RUNOFFB,               &
                                    HWDRAIN,  HWDRAINFILETYPE , PUNIF_WDRAIN, PSOILGRID      )  
 !     ##############################################################
@@ -40,6 +40,7 @@
 !!    12/2008 E. Martin   : files of data for subgrid drainage 
 !!                          and subgridrunoff
 !!    06/2009 B. Decharme : files of data for topographic index
+!! 
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -69,6 +70,7 @@ CHARACTER(LEN=3),    INTENT(OUT)   :: HISBA         ! ISBA option
 CHARACTER(LEN=4),    INTENT(OUT)   :: HPEDOTF       ! Pedo-transfert function for DIF
 CHARACTER(LEN=3),    INTENT(OUT)   :: HPHOTO        ! photosynthesis option
 LOGICAL,             INTENT(OUT)   :: OTR_ML        ! new radiative transfert
+REAL,                INTENT(OUT)   :: PRM_PATCH     ! threshold to remove little fractions of patches
 CHARACTER(LEN=28),   INTENT(OUT)   :: HSAND         ! file name for sand fraction
 CHARACTER(LEN=28),   INTENT(OUT)   :: HCLAY         ! file name for clay fraction
 CHARACTER(LEN=28),   INTENT(OUT)   :: HCTI          ! file name for topographic index
@@ -86,11 +88,11 @@ REAL,                INTENT(OUT)   :: PUNIF_WDRAIN  ! uniform value of subgrid d
 LOGICAL,             INTENT(OUT)   :: OIMP_SAND     ! Imposed values for Sand
 LOGICAL,             INTENT(OUT)   :: OIMP_CLAY     ! Imposed values for Clay
 LOGICAL,             INTENT(OUT)   :: OIMP_CTI      ! Imposed values for topographic index statistics
-CHARACTER(LEN=28),   INTENT(OUT)   :: HSOM_TOP      ! file name for organic matter
-CHARACTER(LEN=28),   INTENT(OUT)   :: HSOM_SUB      ! file name for organic matter
-CHARACTER(LEN=6),    INTENT(OUT)   :: HSOMFILETYPE  ! organic matter data file type
-REAL,                INTENT(OUT)   :: PUNIF_SOM     ! uniform value of organic matter (%)
-LOGICAL,             INTENT(OUT)   :: OIMP_SOM      ! Imposed maps of organic matter
+CHARACTER(LEN=28),   INTENT(OUT)   :: HSOM_TOP      ! file name for organic carbon
+CHARACTER(LEN=28),   INTENT(OUT)   :: HSOM_SUB      ! file name for organic carbon
+CHARACTER(LEN=6),    INTENT(OUT)   :: HSOMFILETYPE  ! organic carbon data file type
+REAL,                INTENT(OUT)   :: PUNIF_SOM     ! uniform value of organic carbon matter (kg/m2)
+LOGICAL,             INTENT(OUT)   :: OIMP_SOM      ! Imposed maps of organic carbon
 REAL, DIMENSION(:),  INTENT(OUT)   :: PSOILGRID     ! Soil layer thickness for DIF
 !
 !
@@ -110,6 +112,7 @@ CHARACTER(LEN=3)         :: CISBA            ! ISBA option
 CHARACTER(LEN=4)         :: CPEDO_FUNCTION   ! Pedo-transfert function for DIF
 CHARACTER(LEN=3)         :: CPHOTO           ! photosynthesis option
 LOGICAL                  :: LTR_ML           ! new radiative transfert
+REAL                     :: XRM_PATCH        ! threshold to remove little fractions of patches
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
@@ -130,19 +133,19 @@ REAL                     :: XUNIF_WDRAIN  ! uniform value of subgrid drainage co
 !
 REAL, DIMENSION(150)     :: XSOILGRID     ! Soil layer thickness for DIF
 !
-CHARACTER(LEN=28)        :: YSOM_TOP      ! file name for organic matter
-CHARACTER(LEN=28)        :: YSOM_SUB      ! file name for organic matter
-CHARACTER(LEN=6)         :: YSOMFILETYPE  ! organic matter data file type
-REAL                     :: XUNIF_SOM     ! uniform value of organic matter (%)
-LOGICAL                  :: LIMP_SOM      ! Imposed maps of organic matter
+CHARACTER(LEN=28)        :: YSOM_TOP      ! file name for organic carbon expressed in kg/m2
+CHARACTER(LEN=28)        :: YSOM_SUB      ! file name for organic carbon expressed in kg/m2
+CHARACTER(LEN=6)         :: YSOMFILETYPE  ! organic carbon data file type
+REAL                     :: XUNIF_SOM     ! uniform value of organic matter (kg/m2)
+LOGICAL                  :: LIMP_SOM      ! Imposed maps of organic carbon
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_ISBA/ NPATCH, NGROUND_LAYER, CISBA, CPEDO_FUNCTION, CPHOTO,   &
-                   LTR_ML, YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,    &
-                   YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,            &
+                   LTR_ML, XRM_PATCH, YCLAY, YCLAYFILETYPE, XUNIF_CLAY,    &
+                   LIMP_CLAY, YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND, &
                    YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,  &
-                   YCTI, YCTIFILETYPE, LIMP_CTI,                           &
+                   YCTI, YCTIFILETYPE, LIMP_CTI,                           &                
                    YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,              &
                    YWDRAIN,  YWDRAINFILETYPE,  XUNIF_WDRAIN, XSOILGRID   
 !
@@ -160,6 +163,7 @@ CPEDO_FUNCTION = 'CH78'
 CPHOTO         = 'NON'
 LTR_ML         = .FALSE.
 XSOILGRID(:)   = XUNDEF
+XRM_PATCH      = 0.0
 !#####################
 !
 XUNIF_CLAY       = 0.33
@@ -178,7 +182,7 @@ YWDRAIN          = '                          '
 !
 YCLAYFILETYPE    = '      '
 YSANDFILETYPE    = '      '
-YSOMFILETYPE  = '      '
+YSOMFILETYPE     = '      '
 YCTIFILETYPE     = '      '
 YRUNOFFBFILETYPE = '      '
 YWDRAINFILETYPE  = '      ' 
@@ -211,16 +215,17 @@ HISBA            = CISBA            ! ISBA option
 HPEDOTF          = CPEDO_FUNCTION   ! Pedo-transfert function for DIF
 HPHOTO           = CPHOTO           ! photosynthesis option
 OTR_ML           = LTR_ML           ! new radiative transfert
+PRM_PATCH        = XRM_PATCH        ! threshol to remove little fractions of patches
 HSAND            = YSAND            ! file name for sand fraction
 HCLAY            = YCLAY            ! file name for clay fraction
-HSOM_TOP         = YSOM_TOP         ! file name for organic matter
-HSOM_SUB         = YSOM_SUB         ! file name for organic matter
+HSOM_TOP         = YSOM_TOP         ! file name for organic carbon
+HSOM_SUB         = YSOM_SUB         ! file name for organic carbon
 HCTI             = YCTI             ! file name for topographic index
 HRUNOFFB         = YRUNOFFB         ! file name for subgrid runoff
 HWDRAIN          = YWDRAIN          ! file name for subgrid drainage
 HSANDFILETYPE    = YSANDFILETYPE    ! sand data file type
 HCLAYFILETYPE    = YCLAYFILETYPE    ! clay data file type
-HSOMFILETYPE     = YSOMFILETYPE     ! organic matter data file type
+HSOMFILETYPE     = YSOMFILETYPE     ! organic carbon data file type
 HCTIFILETYPE     = YCTIFILETYPE     ! topographic index data file type
 HRUNOFFBFILETYPE = YRUNOFFBFILETYPE ! subgrid runoff data file type
 HWDRAINFILETYPE  = YWDRAINFILETYPE  ! subgrid drainage data file type
@@ -231,8 +236,9 @@ PUNIF_RUNOFFB    = XUNIF_RUNOFFB    ! uniform value of subgrid runoff coefficien
 PUNIF_WDRAIN     = XUNIF_WDRAIN     ! uniform value of subgrid drainage coefficient
 OIMP_SAND        = LIMP_SAND        ! Imposed values for SAND
 OIMP_CLAY        = LIMP_CLAY        ! Imposed values for CLAY
-OIMP_SOM         = LIMP_SOM         ! Imposed values for organic matter
+OIMP_SOM         = LIMP_SOM         ! Imposed values for organic carbon
 OIMP_CTI         = LIMP_CTI         ! Imposed values for topographic index statistics
+!
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

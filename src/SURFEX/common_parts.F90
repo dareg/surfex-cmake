@@ -1,6 +1,7 @@
 !#############################################################
 SUBROUTINE COMMON_PARTS(HPROGRAM, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH,        &
                         PVEGTYPE, PPATCH, PVEGTYPE_PATCH, KSIZE_NATURE_P, KR_NATURE_P,  &
+                        PRM_PATCH, &
                         ODEEPSOIL, OPHYSDOMC, PTDEEP_CLI, PGAMMAT_CLI, PTDEEP, PGAMMAT, &
                         OAGRIP, PTHRESHOLD, KIRRINUM, OIRRIDAY, OIRRIGATE, PTHRESHOLDSPT, &
                         HPHOTO, HINIT, OTR_ML, KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
@@ -106,6 +107,8 @@ REAL, DIMENSION(:,:), POINTER :: PPATCH
 REAL, DIMENSION(:,:,:), POINTER :: PVEGTYPE_PATCH
 INTEGER, DIMENSION(:), POINTER :: KSIZE_NATURE_P
 INTEGER, DIMENSION(:,:), POINTER :: KR_NATURE_P
+!
+REAL, INTENT(IN) :: PRM_PATCH
 !
 LOGICAL, INTENT(IN) :: ODEEPSOIL
 LOGICAL, INTENT(IN) :: OPHYSDOMC
@@ -253,7 +256,7 @@ REAL, DIMENSIOn(:,:), INTENT(IN) :: PCF_NITRO
 !              -------------------------------
 !
 INTEGER :: JPATCH  ! loop counter on tiles
-INTEGER :: JILU    ! loop increment
+INTEGER :: JILU,JP, JMAXLOC    ! loop increment
 INTEGER :: JLAYER  ! loop counter on layers
 !
 INTEGER :: ICH     ! unit of input chemistry file
@@ -281,6 +284,24 @@ CALL SURF_PATCH(KPATCH,PVEGTYPE,PPATCH,PVEGTYPE_PATCH)
 !
 !*       2.5    Masks for tiles
 !               ---------------
+!
+IF (PRM_PATCH/=0.) THEN
+  !
+  WRITE(KLUOUT,*) " REMOVE PATCH below 5 % add to dominant patch " 
+  ! remove small fraction of PATCHES and add to MAIN PATCH
+  DO JP = 1,KI
+    !1) find most present patch maximum value 
+    JMAXLOC = MAXVAL(MAXLOC(PPATCH(JP,:)))
+    !2) FIND small value of cover 
+    DO JPATCH = 1,KPATCH
+      IF ( PPATCH(JP,JPATCH)<PRM_PATCH ) THEN
+        PPATCH(JP,JMAXLOC) = PPATCH(JP,JMAXLOC) + PPATCH(JP,JPATCH)
+        PPATCH(JP,JPATCH) = 0.0
+       ENDIF
+    ENDDO
+  ENDDO
+  !
+ENDIF
 !
 DO JPATCH=1,KPATCH
   KSIZE_NATURE_P(JPATCH) = COUNT(PPATCH(:,JPATCH) > 0.0)
