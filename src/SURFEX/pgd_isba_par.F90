@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_ISBA_PAR(HPROGRAM)
+      SUBROUTINE PGD_ISBA_PAR(HPROGRAM,KTIME)
 !     ##############################################################
 !
 !!**** *PGD_ISBA_PAR* monitor for averaging and interpolations of cover fractions
@@ -64,7 +64,7 @@ USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 LDATA_CE_NITRO,LDATA_CF_NITRO, LDATA_CNA_NITRO,&
                                 LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,              &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH,             &
-                                LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN, NTIME
+                                LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -86,7 +86,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-!
+INTEGER, INTENT(OUT) :: KTIME
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -104,6 +104,8 @@ LOGICAL               :: GPAR_STRESS   ! type of stress
 INTEGER, PARAMETER :: NTIME_MAX    = 36
 INTEGER, PARAMETER :: NGROUND_MAX  = 150
 INTEGER, PARAMETER :: NVEGTYPE_MAX = 12
+!
+REAL :: NTIME
 !
 REAL, DIMENSION(NVEGTYPE_MAX)   :: XSTRESS   ! 1. if defensive /0. if offensive
 !
@@ -405,6 +407,8 @@ CALL POSNAM(ILUNAM,'NAM_DATA_ISBA',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_ISBA)
 !
 CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+!
+KTIME = NTIME
 !
 ALLOCATE(XPAR_VEGTYPE     (NDIM,NVEGTYPE))
 ALLOCATE(XPAR_LAI         (NDIM,NTIME,NVEGTYPE))
