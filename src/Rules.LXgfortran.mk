@@ -5,7 +5,7 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  =  -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid  -fbacktrace -fconvert=swap
+OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid  -fbacktrace -fconvert=swap
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
@@ -39,12 +39,11 @@ OPT_NOCB  = $(OPT_BASE) $(OPT_PERF0)
 endif
 #
 #  
-FC = gfortran 
-#ifeq "$(VER_MPI)" "MPIAUTO"
-#F90 = mpif90
-#else         
+ifeq "$(VER_MPI)" "NOMPI"
 F90 = gfortran
-#endif
+else         
+F90 = mpif90
+endif
 #
 F90FLAGS      =  $(OPT) 
 F77 = $(F90)
@@ -52,7 +51,7 @@ F77FLAGS      =  $(OPT)
 FX90 = $(F90)
 FX90FLAGS     =  $(OPT) 
 #
-LDFLAGS   =   -Wl,-warn-once
+LDFLAGS   =   -Wl,-warn-once -fopenmp
 #
 # preprocessing flags 
 #
@@ -75,6 +74,10 @@ CNAME_GRIBEX=_gfortran
 ##########################################################
 #
 include Makefile.SURFEX.mk
+#
+ifeq "$(VER_MPI)" "NOMPI"
+CPPFLAGS += -DNOMPI
+endif
 #
 ##########################################################
 #                                                        #

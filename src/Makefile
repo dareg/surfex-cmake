@@ -336,17 +336,28 @@ endif
 ##########################################################
 ifeq "$(F90)" "gfortran"
 ARCHOOK="linuxgfortran"
-#ARCHOOK="linuxgfortran_ubuntu"
 else 
+ifeq "$(F90)" "mpif90"
+ARCHOOK="linuxmpif90"
+else
 ifeq "$(F90)" "ifort"
 ARCHOOK="ifort32"
-#ARCHOOK="ifort32_ubuntu"
+else
+ifeq "$(F90)" "LXpgi"
+ARCHOOK="linux"
+else
+ARCHOOK=$(ARCH)
+ifeq "$(VER_MPI)" "NOMPI"
+ARCHOOK=$(ARCH)_nompi
+endif
+endif
+endif
 endif
 endif
 
 drhook : $(DIR_HOOK)/parkind1.mod
 $(DIR_HOOK)/parkind1.mod : 
-	cd ${DIR_HOOK} && ./configure ARCH=$(ARCHOOK) -a $ARCH && make ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make 
+	cd ${DIR_HOOK} && ./configure ARCH=$(ARCHOOK) -a $(ARCHOOK) && make ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make 
 
 cleandrhook : 
 	cd ${DIR_HOOK} && rm -f *.mod *.a
@@ -357,13 +368,27 @@ cleandrhook :
 ##########################################################
 ecoclimap:${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin
 
-ifeq "$(F90)" "gfortran"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -fconvert=swap convert_ecoclimap_param.f90 && ./a.out
-else 
+
 ifeq "$(F90)" "ifort"
 ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
 	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -convert big-endian -assume byterecl convert_ecoclimap_param.f90 && ./a.out
+else
+ifeq "$(F90)" "pgf90"
+${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -byteswapio convert_ecoclimap_param.f90  && ./a.out
+else
+ifeq "$(ARCH)" "SX8"
+${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && qsub job_ecoclimap_sx8
+else
+ifeq "$(ARCH)" "AIX64"
+${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && llsubmit job_ecoclimap_aix64
+else
+${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -fconvert=swap convert_ecoclimap_param.f90 && ./a.out
+endif
+endif
 endif
 endif
 
