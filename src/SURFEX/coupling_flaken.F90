@@ -75,7 +75,6 @@ USE MODI_DIAG_MISC_FLAKE_n
 USE MODI_CH_AER_DEP
 USE MODI_CH_DEP_WATER
 USE MODI_DSLT_DEP
-USE MODI_WIND_THRESHOLD
 USE MODI_FLAKE_ALBEDO
 USE MODI_UPDATE_RAD_SEAWAT
 USE MODI_ABOR1_SFX
@@ -218,8 +217,6 @@ ZEXNA(:)     = (PPA(:)/XP00)**(XRD/XCPD)
 !
 ZWIND(:) = SQRT(PU(:)**2+PV(:)**2)
 !
-ZWIND(:) = WIND_THRESHOLD(ZWIND(:),PUREF)
-!
 ZQA(:) = PQA/PRHOA
 !
 PSFTS(:,:) = 0.
@@ -328,6 +325,8 @@ ENDIF
 ! Momentum fluxes
 !
 IF (CFLK_FLUX=='FLK') THEN
+  PSFU = 0.
+  PSFV = 0.        
   WHERE (ZWIND(:)>0.)
     PSFU(:) = ZSFM(:) * PU(:) / ZWIND(:)
     PSFV(:) = ZSFM(:) * PV(:) / ZWIND(:)
@@ -433,7 +432,7 @@ ENDIF
 IF (CFLK_FLUX=='FLK') THEN  !compute some variables not present in FLake code
   ZCH = 1.E-7
 !
-  WHERE (ABS((XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2)
+  WHERE (ABS((XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2 .AND. ZWIND(:)/=0.)
      ZCH = MAX(1.E-7,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
   END WHERE
 !

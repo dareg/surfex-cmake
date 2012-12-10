@@ -131,7 +131,8 @@ USE mode_sfcflx          , ONLY :    &
 
 USE modd_flake_configure, ONLY : lflk_botsed_use 
 !==============================================================================
-
+!
+USE MODI_WIND_THRESHOLD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -235,7 +236,8 @@ REAL (KIND = ireals) :: ustar2  ! square of air friction velocity (m2/s2)
 REAL (KIND = ireals) :: zvmod   ! wind at t+1  
 
 REAL (KIND = ireals), DIMENSION(KI) ::    &
-    Q_watvap                      ! Flux of water vapour [kg m^{-2} s^{-1}]  
+    Q_watvap, &                      ! Flux of water vapour [kg m^{-2} s^{-1}]  
+        zwind             ! thresholded wind
 
 TYPE (opticpar_medium), DIMENSION(KI) ::  &
     opticpar_water                       ,  &! Optical characteristics of water
@@ -271,6 +273,8 @@ opticpar_ice   = opticpar_ice_opaque   ! Opaque ice
 opticpar_snow  = opticpar_snow_opaque  ! Opaque snow
 !
 lflk_botsed_use = lflk_botsed
+!
+zwind = WIND_THRESHOLD(U_a_in,height_u_in)
 !
 H_POINT_LOOP: DO JL = 1,KI ! begin of loop on horizontal points
 !------------------------------------------------------------------------------
@@ -335,7 +339,7 @@ opticpar_water(JL) = opticpar_medium(1,                       &
       ! It is retrieved assumed a relationship between momentum flux
       !  and previous time-step wind : Q_mom = - rho_a * Cd_a * U_a_in**2
       !
-      Cd_a(JL) = - Q_momentum(JL) / rho_a(JL) / U_a_in(JL)**2 
+      Cd_a(JL) = - Q_momentum(JL) / rho_a(JL) / zwind(JL)**2 
       ! 2nd step : friction velocity (for air) computed with future wind speed
       !            (the latter computed using implicit coefficients)
       ustar2 = 0.0
