@@ -69,6 +69,7 @@ TYPE ISBA_t
 !                                          ! 'NIT'
 !                                          ! 'NCB'
   LOGICAL                        :: LTR_ML ! new radiative transfert
+  REAL                           :: XRM_PATCH ! threshold to remove little fractions of patches 
   CHARACTER(LEN=4)               :: CALBEDO  ! albedo type
 !                                          ! 'DRY ' 
 !                                          ! 'EVOL' 
@@ -619,6 +620,8 @@ CHARACTER(LEN=3), POINTER :: CPHOTO=>NULL()
 !$OMP THREADPRIVATE(CPHOTO)
 LOGICAL,          POINTER :: LTR_ML=>NULL()
 !$OMP THREADPRIVATE(LTR_ML)
+REAL,             POINTER :: XRM_PATCH=>NULL()
+!$OMP THREADPRIVATE(XRM_PATCH)
 CHARACTER(LEN=4), POINTER :: CALBEDO=>NULL()
 !$OMP THREADPRIVATE(CALBEDO)
 CHARACTER(LEN=4), POINTER :: CRUNOFF=>NULL()
@@ -1307,6 +1310,7 @@ CISBA=>ISBA_MODEL(KTO)%CISBA
 CPEDOTF=>ISBA_MODEL(KTO)%CPEDOTF
 CPHOTO=>ISBA_MODEL(KTO)%CPHOTO
 LTR_ML=>ISBA_MODEL(KTO)%LTR_ML
+XRM_PATCH=>ISBA_MODEL(KTO)%XRM_PATCH
 CALBEDO=>ISBA_MODEL(KTO)%CALBEDO
 CRUNOFF=>ISBA_MODEL(KTO)%CRUNOFF
 CSCOND=>ISBA_MODEL(KTO)%CSCOND
@@ -1758,6 +1762,7 @@ ISBA_MODEL(:)%CISBA=' '
 ISBA_MODEL(:)%CPEDOTF=' '
 ISBA_MODEL(:)%CPHOTO=' '
 ISBA_MODEL(:)%LTR_ML=.FALSE.
+ISBA_MODEL(:)%XRM_PATCH=0.0
 ISBA_MODEL(:)%CALBEDO=' '
 ISBA_MODEL(:)%CSCOND=' '
 ISBA_MODEL(:)%CC1DRY=' '

@@ -144,6 +144,7 @@ CHARACTER(LEN=3)         :: CISBA            ! ISBA option
 CHARACTER(LEN=4)         :: CPEDOTF          !
 CHARACTER(LEN=3)         :: CPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
+REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
@@ -250,7 +251,7 @@ CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YZSFILETYPE, XUNIF_ZS, &
 IF(CNATURE=='ISBA')THEN
 !
    CALL READ_NAM_PGD_ISBA(HPROGRAM, NPATCH, NGROUND_LAYER, CISBA, CPEDOTF,             &
-                            CPHOTO, GTR_ML,                                            &
+                            CPHOTO, GTR_ML, ZRM_PATCH,                                 &
                             YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,               &
                             YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,               &
                             YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,           &

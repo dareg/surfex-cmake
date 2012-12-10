@@ -46,7 +46,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : CNATURE
 USE MODD_ISBA_n, ONLY : NPATCH, TTIME, XCOVER, XZS, CISBA, CPEDOTF,  &
                           CPHOTO, LTR_ML, CRUNOFF, XCLAY, XSAND,     &
-                          XSOC, LSOCP, LNOF,                         &                          
+                          XSOC, LSOCP, LNOF, XRM_PATCH,              &                          
                           NGROUND_LAYER, NNBIOMASS,                  &
                           XAOSIP, XAOSIM, XAOSJP, XAOSJM,            &
                           XHO2IP, XHO2IM, XHO2JP, XHO2JM,            &
@@ -130,6 +130,7 @@ ENDIF
 !
 YRECFM='PHOTO'
 CALL READ_SURF(HPROGRAM,YRECFM,CPHOTO,IRESP)
+!
 !* new radiative transfert
 !
 IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
@@ -139,6 +140,17 @@ IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
   !
 ELSE 
   LTR_ML = .FALSE.
+ENDIF
+!
+!* threshold to remove little fractions of patches
+!
+IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+  !
+  YRECFM='RM_PATCH'
+  CALL READ_SURF(HPROGRAM,YRECFM,XRM_PATCH,IRESP)
+  !
+ELSE 
+  XRM_PATCH = 0.0
 ENDIF
 !
 !* number of soil layers

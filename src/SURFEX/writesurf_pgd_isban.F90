@@ -41,7 +41,7 @@
 !
 USE MODD_SURF_ATM_n, ONLY : CNATURE
 USE MODD_ISBA_n, ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA,&
-                        CPEDOTF, CPHOTO, LTR_ML,                &
+                        CPEDOTF, CPHOTO, LTR_ML, XRM_PATCH,     &
                         XCLAY, XSAND, XSOC,                     &                          
                         XAOSIP, XAOSIM, XAOSJP, XAOSJM,         &
                         XHO2IP, XHO2IM, XHO2JP, XHO2JM,         &
@@ -109,6 +109,12 @@ YRECFM='TR_ML'
 YCOMMENT=YRECFM
 CALL WRITE_SURF(HPROGRAM,YRECFM,LTR_ML,IRESP,HCOMMENT=YCOMMENT)
 !
+!* threshold to remove little fractions of patches
+!
+YRECFM='RM_PATCH'
+YCOMMENT=YRECFM
+CALL WRITE_SURF(HPROGRAM,YRECFM,XRM_PATCH,IRESP,HCOMMENT=YCOMMENT)
+
 !* number of soil layers
 !
 YRECFM='GROUND_LAYER'

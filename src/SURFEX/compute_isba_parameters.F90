@@ -60,7 +60,7 @@ USE MODD_IO_SURF_LFI,  ONLY : NMASK_lfi => NMASK
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
                           NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOC,         &
-                          XWWILT, XWFC, XW33, XWSAT,                          &
+                          XWWILT, XWFC, XW33, XWSAT, XRM_PATCH,               &
                           XCOVER, XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,      &
                           XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
                           XZ0, XZ0_O_Z0H, XABC, XPOI, XANMAX, XFZERO, XEPSO,  &
@@ -295,6 +295,7 @@ ENDIF
 !
 CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
                   XVEGTYPE, XPATCH, XVEGTYPE_PATCH, NSIZE_NATURE_P, NR_NATURE_P,    &
+                  XRM_PATCH, &
                   LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, XTDEEP, XGAMMAT,   &
                   LAGRIP, XTHRESHOLD, NIRRINUM, LIRRIDAY, LIRRIGATE, XTHRESHOLDSPT, &
                   CPHOTO, HINIT, LTR_ML, NNBIOMASS, PCO2, PRHOA, XABC, XPOI,  &

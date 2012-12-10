@@ -88,6 +88,7 @@ CHARACTER(LEN=3)         :: YISBA            ! ISBA option
 CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo-transfert function for DIF
 CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
+REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
@@ -144,7 +145,7 @@ CPEDOTF       = '   '
 CPHOTO        = '   '
 !
 CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
-                       YISBA, YPEDOTF, YPHOTO,  GTR_ML,                         &
+                       YISBA, YPEDOTF, YPHOTO,  GTR_ML, ZRM_PATCH,              &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,             &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,             &
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,         &

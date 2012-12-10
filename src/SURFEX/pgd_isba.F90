@@ -48,7 +48,7 @@ USE MODD_PGDWORK,        ONLY : CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 CPEDOTF, XCOVER, LCOVER, XZS,            &
-                                XZ0EFFJPDIR, CPHOTO, LTR_ML,             &
+                                XZ0EFFJPDIR, CPHOTO, LTR_ML, XRM_PATCH,  &
                                 XCLAY, XSAND, XSOC, LSOCP, LNOF,         &
                                 XRUNOFFB, XWDRAIN, LECOCLIMAP,           &
                                 XSOILGRID, LPERM, XPERM, XPH, XFERT 
@@ -127,6 +127,7 @@ CHARACTER(LEN=3)         :: YISBA            ! ISBA option
 CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo transfert function for DIF
 CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
+REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon top soil
@@ -175,7 +176,7 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !             -------------------
 !
 CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
-                       YISBA,  YPEDOTF, YPHOTO, GTR_ML,                          &
+                       YISBA,  YPEDOTF, YPHOTO, GTR_ML, ZRM_PATCH,               &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,              &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,          &
@@ -192,6 +193,7 @@ CISBA         = YISBA
 CPEDOTF       = YPEDOTF
 CPHOTO        = YPHOTO
 LTR_ML        = GTR_ML
+XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
 !
 !-------------------------------------------------------------------------------
 !
