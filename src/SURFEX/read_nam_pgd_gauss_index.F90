@@ -174,13 +174,8 @@ REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon t
 REAL                     :: XUNIF_SOC_SUB    ! uniform value of organic carbon sub soil (kg/m2)
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil layer thickness for DIF
 !
-! Not yet implemented
+! NO flux
 !
-CHARACTER(LEN=28)        :: YSOM_TOP      ! file name for organic matter
-CHARACTER(LEN=28)        :: YSOM_SUB      ! file name for organic matter
-CHARACTER(LEN=6)         :: YSOMFILETYPE  ! organic matter data file type
-REAL                     :: XUNIF_SOM     ! uniform value of organic matter (%)
-LOGICAL                  :: LIMP_SOM      ! Imposed maps of organic matter
 CHARACTER(LEN=28)        :: YPH           ! file name for pH
 CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
 CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
