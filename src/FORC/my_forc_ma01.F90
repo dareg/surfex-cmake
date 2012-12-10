@@ -125,7 +125,7 @@ INTEGER :: I ! loop counters
 !
 !============================================================================
 !
-REAL    :: XPI=4.*ATAN(1.)
+REAL    :: XPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      
 !      
@@ -133,6 +133,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !            ------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_MY_FORC_MA01:MY_FORC_MA01',0,ZHOOK_HANDLE)
+!
+XPI = 4. * ATAN(1.)
+!
 KDAY    = 17          ! starting day 
 KMONTH  = 06          ! starting month
 KYEAR   = 2001        ! starting year

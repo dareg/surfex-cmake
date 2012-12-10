@@ -123,7 +123,7 @@ REAL, DIMENSION(KNPTS,KNI) :: ZU, ZV ! wind components
 !
 INTEGER :: I ! loop counters
 !
-REAL    :: XPI=4.*ATAN(1.)
+REAL    :: XPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !      
@@ -131,6 +131,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !            ------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_MY_FORC_CDP9697:MY_FORC_CDP9697',0,ZHOOK_HANDLE)
+!
+XPI = 4. * ATAN(1.)
+!
 KDAY    = 06          ! starting day 
 KMONTH  = 10          ! starting month
 KYEAR   = 1996        ! starting year
