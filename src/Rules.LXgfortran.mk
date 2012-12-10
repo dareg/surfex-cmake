@@ -5,7 +5,7 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid  -fbacktrace -fconvert=swap
+OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid  -fbacktrace -fconvert=swap
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
@@ -42,7 +42,7 @@ endif
 ifeq "$(VER_MPI)" "NOMPI"
 F90 = gfortran
 else         
-F90 = mpif90
+F90 = mpif90 -fopenmp 
 endif
 #
 F90FLAGS      =  $(OPT) 
@@ -51,7 +51,7 @@ F77FLAGS      =  $(OPT)
 FX90 = $(F90)
 FX90FLAGS     =  $(OPT) 
 #
-LDFLAGS   =   -Wl,-warn-once -fopenmp
+LDFLAGS   =   -Wl,-warn-once
 #
 # preprocessing flags 
 #

@@ -7,7 +7,7 @@ ifneq "$(findstring brodie,$(shell uname -n))" ""
 OBJDIR_PATH=${workdir}
 endif
 #
-OPT_BASE = -pi -dw -Wf,-Nesc -Wf\"-A idbl4\" -Popenmp -Wf\"-pvctl loopcnt=10000000 shape=10000000\"
+OPT_BASE = -pi -dw -Wf,-Nesc -Wf\"-A idbl4\" -Wf\"-pvctl loopcnt=10000000 shape=10000000\"
 #-Wf"-pvctl fullmsg -O infomsg -L fmtlist" -Wf"-L transform" -Wf"-L summary"
 OPT_PERF0 = -C debug 
 OPT_PERF2 = -C vsafe
@@ -74,7 +74,7 @@ endif
 ifeq "$(VER_MPI)" "NOMPI"
 F90 = sxf90
 else         
-F90 = sxmpif90
+F90 = sxmpif90 -Popenmp 
 endif
 
 F90FLAGS  = $(OPT)
@@ -101,7 +101,7 @@ CPPFLAGS_MNH       = -DMNH
 #
 #ARCH_GRIBEX=NEC
 TARGET_GRIBEX=NEC
-CNAME_GRIBEX=sxmpif90
+CNAME_GRIBEX=sxmpif90 -Popenmp 
 ##########################################################
 #                                                        #
 # Source of MESONH PACKAGE  Distribution                 #
