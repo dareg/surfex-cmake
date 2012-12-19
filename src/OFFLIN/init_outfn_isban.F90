@@ -939,7 +939,6 @@ ELSEIF(LPGD)THEN
     CALL DEF_VAR_NETCDF(IFILE_ID,'DG2_DIF'   ,'DG2_depth_in_ISBA-DIF'                    ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     CALL DEF_VAR_NETCDF(IFILE_ID,'RUNOFFD'   ,'Runoff_depth_in_ISBA-DIF'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     CALL DEF_VAR_NETCDF(IFILE_ID,'DTOT_DIF'  ,'Total_soil_depth_for_moisture_in_ISBA-DIF',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
-    CALL DEF_VAR_NETCDF(IFILE_ID,'W33'     ,'moisture threshold for bare soil evaporation',IDDIM(1:2),YATT_TITLE,(/'m3/m3'/))
     DO JLAYER=1,INLVLD
       WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
       CALL DEF_VAR_NETCDF(IFILE_ID,'ROOTFRAC'//YLVL,'root_fraction_layer_'//YLVL ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))           
