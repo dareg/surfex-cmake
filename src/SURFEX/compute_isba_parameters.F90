@@ -51,10 +51,11 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
                           NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOM,         &
-                          XWWILT, XWFC, XWSAT,                                &
+                          XWWILT, XWFC, XWSAT, XRM_PATCH,                     &
                           XCOVER, XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,      &
                           XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
                           XZ0, XZ0_O_Z0H, XABC, XPOI, XANMAX, XFZERO, XEPSO,  &
@@ -106,7 +107,7 @@ USE MODD_AGRI_n,         ONLY : NIRRINUM, XTHRESHOLDSPT, LIRRIDAY, LIRRIGATE
 USE MODD_DIAG_ISBA_n,      ONLY : LPATCH_BUDGET
 USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_DIAG_ALBEDO
 !
-USE MODD_SURF_ATM,         ONLY : LCPL_ESM
+USE MODD_SURF_ATM,    ONLY : LCPL_ESM
 !
 USE MODD_SGH_PAR,        ONLY : NDIMTAB, XICE_DEPH_MAX, XF_DECAY
 !
@@ -170,19 +171,20 @@ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: JILU     ! loop increment
-INTEGER           :: ILUOUT   ! unit of output listing file
-!
-INTEGER           :: IDECADE  ! decade of simulation
-!
-INTEGER :: JPATCH  ! loop counter on tiles
+REAL, DIMENSION(KI)     :: ZTSRAD_NAT !radiative temperature
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG1 ! work array for surface temperature
-REAL, DIMENSION(KI)     :: ZTSRAD_NAT !radiative temperature
 !
 REAL, DIMENSION(:),   ALLOCATABLE :: ZM, ZWORK
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZF
+!
+INTEGER :: IDIM_FULL, JL
+INTEGER           :: JILU     ! loop increment
+INTEGER           :: ILUOUT   ! unit of output listing file
+INTEGER           :: IDECADE, IDECADE2  ! decade of simulation
+INTEGER :: JPATCH  ! loop counter on tiles
+!
 LOGICAL                           :: LWORK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -218,9 +220,11 @@ ELSE
   IDECADE = 1
 END IF
 !
-CALL INIT_ISBA_MIXPAR(CISBA,XCOVER,CPHOTO,'NAT')
+IDECADE2 = IDECADE
 !
-CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,                           &
+CALL INIT_ISBA_MIXPAR(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,'NAT')
+!
+CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,           &
                         'NAT',PVEG=XVEG,PLAI=XLAI,                             &
                         PRSMIN=XRSMIN,PGAMMA=XGAMMA,PWRMAX_CF=XWRMAX_CF,       &
                         PRGL=XRGL,PCV=XCV,PSOILGRID=XSOILGRID,                 &
@@ -240,6 +244,7 @@ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,                           &
 !
 CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
                   XVEGTYPE, XPATCH, XVEGTYPE_PATCH, NSIZE_NATURE_P, NR_NATURE_P,    &
+                  XRM_PATCH, &
                   LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, XTDEEP, XGAMMAT,   &
                   LAGRIP, XTHRESHOLD, NIRRINUM, LIRRIDAY, LIRRIGATE, XTHRESHOLDSPT, &
                   CPHOTO, HINIT, LTR_ML, NNBIOMASS, PCO2, PRHOA, XABC, XPOI,  &
@@ -265,6 +270,9 @@ CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH
                   XCE_NITRO, XCNA_NITRO, XCF_NITRO                            )  
 !
 !-------------------------------------------------------------------------------
+!
+!*       2.10   Soil carbon
+!               -----------                        
 !
 !Soil organic matter effect and/or Exponential decay for DIF option
 !
@@ -381,6 +389,7 @@ ENDIF
 IF (HINIT == 'ALL' .AND. CRESPSL=='CNT' .AND. CPHOTO == 'NCB') THEN
   CALL CARBON_INIT(NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB)
 ENDIF
+!
 !
 !Rainfall spatial distribution
 !CRAIN used in HYDRO_VEG and HYDRO_SGH and ISBA_SGH_UPDATE
@@ -537,7 +546,7 @@ DO JPATCH=1,NPATCH
   ZTG1(:,JPATCH) = XTG(:,1,JPATCH)
 END DO
 !
-CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,'NAT',&
+CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,'NAT',&
                           PWG1 = ZWG1, &
                           PALBNIR_SOIL=XALBNIR_SOIL, &
                           PALBVIS_SOIL=XALBVIS_SOIL, &
