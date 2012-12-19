@@ -284,9 +284,8 @@ TYPE TEB_GREENROOF_PGD_t
                                                      ! diffusion coefficient                   (-)
   REAL, POINTER, DIMENSION(:,:)  :: XWFC             ! field capacity volumetric water content
                                                      ! profile                             (m3/m3)
-  REAL, POINTER, DIMENSION(:,:)    :: XW33           ! volumetric water content profile        (m3/m3)                  
   REAL, POINTER, DIMENSION(:,:)  :: XWWILT           ! wilting point volumetric water content 
-                                                     ! profile                             (m3/m3)               
+                                                     ! profile         
   REAL, POINTER, DIMENSION(:,:)  :: XWSAT            ! porosity profile                      (m3/m3) 
   REAL, POINTER, DIMENSION(:,:)  :: XBCOEF           ! soil water CH78 b-parameter             (-)
   REAL, POINTER, DIMENSION(:,:)  :: XCONDSAT         ! hydraulic conductivity at saturation    (m/s)
@@ -584,8 +583,6 @@ REAL, POINTER, DIMENSION(:)       :: XPCOEF=>NULL()
 !$OMP THREADPRIVATE(XPCOEF)
 REAL, POINTER, DIMENSION(:,:)     :: XWFC=>NULL()
 !$OMP THREADPRIVATE(XWFC)
-REAL, POINTER, DIMENSION(:,:)    :: XW33=>NULL()
-!$OMP THREADPRIVATE(XW33)
 REAL, POINTER, DIMENSION(:,:)     :: XWWILT=>NULL()
 !$OMP THREADPRIVATE(XWWILT)
 REAL, POINTER, DIMENSION(:,:)     :: XWSAT=>NULL()
@@ -848,7 +845,6 @@ TEB_GREENROOF_PGD_MODEL(KFROM)%XC4REF=>XC4REF
 TEB_GREENROOF_PGD_MODEL(KFROM)%XACOEF=>XACOEF
 TEB_GREENROOF_PGD_MODEL(KFROM)%XPCOEF=>XPCOEF
 TEB_GREENROOF_PGD_MODEL(KFROM)%XWFC=>XWFC
-TEB_GREENROOF_PGD_MODEL(KFROM)%XW33=>XW33
 TEB_GREENROOF_PGD_MODEL(KFROM)%XWWILT=>XWWILT
 TEB_GREENROOF_PGD_MODEL(KFROM)%XWSAT=>XWSAT
 TEB_GREENROOF_PGD_MODEL(KFROM)%XBCOEF=>XBCOEF
@@ -951,7 +947,6 @@ XC4REF=>TEB_GREENROOF_PGD_MODEL(KTO)%XC4REF
 XACOEF=>TEB_GREENROOF_PGD_MODEL(KTO)%XACOEF
 XPCOEF=>TEB_GREENROOF_PGD_MODEL(KTO)%XPCOEF
 XWFC=>TEB_GREENROOF_PGD_MODEL(KTO)%XWFC
-XW33=>TEB_GREENROOF_PGD_MODEL(KTO)%XW33
 XWWILT=>TEB_GREENROOF_PGD_MODEL(KTO)%XWWILT
 XWSAT=>TEB_GREENROOF_PGD_MODEL(KTO)%XWSAT
 XBCOEF=>TEB_GREENROOF_PGD_MODEL(KTO)%XBCOEF
@@ -1061,7 +1056,6 @@ NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XC4REF)
 NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XACOEF)
 NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XPCOEF)
 NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XWFC)
-NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XW33)
 NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XWWILT)
 NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XWSAT)
 NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XBCOEF)

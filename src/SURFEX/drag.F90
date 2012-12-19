@@ -3,7 +3,7 @@
                       PTG, PWG, PWGI,                                    &
                       PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,           &
                       PPS, PRS, PVEG, PZ0, PZ0EFF, PZ0H,                 &
-                      PWFC, PW33, PWSAT, PPSNG, PPSNV, PZREF, PUREF,     &
+                      PWFC, PWSAT, PPSNG, PPSNV, PZREF, PUREF,           &
                       PDIRCOSZW, PDELTA, PF5, PRA,                       &
                       PCH, PCD, PCDN, PRI, PHUG, PHUGI,                  &
                       PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF,              &
@@ -128,14 +128,13 @@ REAL, DIMENSION(:), INTENT(IN)   :: PEXNA, PTA, PVMOD, PQA, PRR, PSR, PPS
 !                                     PSR = snow rate             
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PRS, PVEG, PZ0, PZ0H, PZ0EFF
-REAL, DIMENSION(:), INTENT(IN)   :: PWFC, PW33, PWSAT, PPSNG, PPSNV, PZREF, PUREF
+REAL, DIMENSION(:), INTENT(IN)   :: PWFC, PWSAT, PPSNG, PPSNV, PZREF, PUREF
 !                                     PRS = stomatal resistance
 !                                     PVEG = vegetation fraction
 !                                     PZ0  = roughness length for momentum
 !                                     PZ0H = roughness length for heat
 !                                     PZ0EFF= effective roughness length
 !                                     PWFC = field capacity volumetric water content
-!                                     PW33 = volumetric water content at -0.33 bar
 !                                     PWSAT = volumetric water content at saturation
 !                                     PPSNG = fraction of the bare ground covered
 !                                             by snow
@@ -190,7 +189,7 @@ REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
 !                                              ZQSAT = specific humidity at saturation
                                  ZAC,            &
 !                                              ZAC = aerodynamical conductance
-                                 ZWFC, ZWFC0,    &
+                                 ZWFC,           &
 !                                              ZWFC = field capacity in presence of ice
                                  ZVMOD,          &
 !                                              ZVMOD = wind modulus with minimum threshold
@@ -217,7 +216,6 @@ PHU(:)   =0.
 !
 ZQSAT(:)    =0.
 ZWFC(:)     =0.
-ZWFC0(:)    =0.
 PRI(:)      =0.
 !
 ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
@@ -231,17 +229,12 @@ ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !                                         the superficial soil moisture and the
 !                                         field capacity of the ground
 !
-IF(HISBA == 'DIF')THEN
-  ZWFC0(:)=PW33(:)
-ELSE
-  ZWFC0(:)=PWFC(:)
-ENDIF
 !
-ZWFC(:)  = ZWFC0(:)*(PWSAT(:)-PWGI(:))/PWSAT(:)
+ZWFC(:)  = PWFC(:)*(PWSAT(:)-PWGI(:))/PWSAT(:)
 !
 PHUG(:)  = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
 
-ZWFC(:)  = ZWFC0(:)*MAX(XWGMIN, PWSAT(:)-PWG(:))/PWSAT(:)
+ZWFC(:)  = PWFC(:)*MAX(XWGMIN, PWSAT(:)-PWG(:))/PWSAT(:)
 !
 PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 !

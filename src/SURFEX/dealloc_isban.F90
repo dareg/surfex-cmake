@@ -31,7 +31,7 @@ USE MODD_ISBA_n,      ONLY : LCOVER, XCOVER, XZS, XZ0EFFJPDIR, XCLAY, XSAND,    
                                XHO2IP, XHO2IM, XHO2JP, XHO2JM,                     &
                                XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM,             &
                                XZ0REL, XSSO_SLOPE,                                 &
-                               XWWILT, XWFC, XW33, XWSAT,                          &
+                               XWWILT, XWFC, XWSAT,                                &
                                XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,              &
                                XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
                                XZ0, XZ0_O_Z0H,                                     &
@@ -176,7 +176,6 @@ IF (ASSOCIATED(XTDEEP )) DEALLOCATE(XTDEEP )
 IF (ASSOCIATED(XGAMMAT)) DEALLOCATE(XGAMMAT)
 IF (ASSOCIATED(XWWILT)) DEALLOCATE(XWWILT)
 IF (ASSOCIATED(XWFC  )) DEALLOCATE(XWFC  )
-IF (ASSOCIATED(XW33  )) DEALLOCATE(XW33  )
 IF (ASSOCIATED(XWSAT )) DEALLOCATE(XWSAT )
 IF (ASSOCIATED(XTAUICE)) DEALLOCATE(XTAUICE)
 IF (ASSOCIATED(XBCOEF)) DEALLOCATE(XBCOEF)

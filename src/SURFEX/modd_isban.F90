@@ -388,9 +388,6 @@ TYPE ISBA_t
 !                                                    ! diffusion coefficient                   (-)
   REAL, POINTER, DIMENSION(:,:)    :: XWFC           ! field capacity volumetric water content
 !                                                    ! profile                                 (m3/m3)
-  REAL, POINTER, DIMENSION(:,:)    :: XW33           ! volumetric water content profile        (m3/m3)
-!                                                      at -0.33 bar (-3.365m)
-!                                                    ! profile                                 (m3/m3)
   REAL, POINTER, DIMENSION(:,:)    :: XWWILT         ! wilting point volumetric water content 
 !                                                    ! profile                                 (m3/m3)
   REAL, POINTER, DIMENSION(:,:)    :: XWSAT          ! porosity profile                        (m3/m3) 
@@ -900,8 +897,6 @@ REAL, POINTER, DIMENSION(:)      :: XPCOEF=>NULL()
 !$OMP THREADPRIVATE(XPCOEF)
 REAL, POINTER, DIMENSION(:,:)    :: XWFC=>NULL()
 !$OMP THREADPRIVATE(XWFC)
-REAL, POINTER, DIMENSION(:,:)    :: XW33=>NULL()
-!$OMP THREADPRIVATE(XW33)
 REAL, POINTER, DIMENSION(:,:)    :: XWWILT=>NULL()
 !$OMP THREADPRIVATE(XWWILT)
 REAL, POINTER, DIMENSION(:,:)    :: XWSAT=>NULL()
@@ -1216,7 +1211,6 @@ ISBA_MODEL(KFROM)%XC4REF=>XC4REF
 ISBA_MODEL(KFROM)%XACOEF=>XACOEF
 ISBA_MODEL(KFROM)%XPCOEF=>XPCOEF
 ISBA_MODEL(KFROM)%XWFC=>XWFC
-ISBA_MODEL(KFROM)%XW33=>XW33
 ISBA_MODEL(KFROM)%XWWILT=>XWWILT
 ISBA_MODEL(KFROM)%XWSAT=>XWSAT
 ISBA_MODEL(KFROM)%XBCOEF=>XBCOEF
@@ -1459,7 +1453,6 @@ XC4REF=>ISBA_MODEL(KTO)%XC4REF
 XACOEF=>ISBA_MODEL(KTO)%XACOEF
 XPCOEF=>ISBA_MODEL(KTO)%XPCOEF
 XWFC=>ISBA_MODEL(KTO)%XWFC
-XW33=>ISBA_MODEL(KTO)%XW33
 XWWILT=>ISBA_MODEL(KTO)%XWWILT
 XWSAT=>ISBA_MODEL(KTO)%XWSAT
 XBCOEF=>ISBA_MODEL(KTO)%XBCOEF
@@ -1684,7 +1677,6 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XACOEF)
   NULLIFY(ISBA_MODEL(J)%XPCOEF)
   NULLIFY(ISBA_MODEL(J)%XWFC)
-  NULLIFY(ISBA_MODEL(J)%XW33)
   NULLIFY(ISBA_MODEL(J)%XWWILT)
   NULLIFY(ISBA_MODEL(J)%XWSAT)
   NULLIFY(ISBA_MODEL(J)%XBCOEF)

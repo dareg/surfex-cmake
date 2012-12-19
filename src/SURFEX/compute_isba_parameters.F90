@@ -60,7 +60,7 @@ USE MODD_IO_SURF_LFI,  ONLY : NMASK_lfi => NMASK
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
                           NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOC,         &
-                          XWWILT, XWFC, XW33, XWSAT, XRM_PATCH,               &
+                          XWWILT, XWFC, XWSAT, XRM_PATCH,                     &
                           XCOVER, XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,      &
                           XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
                           XZ0, XZ0_O_Z0H, XABC, XPOI, XANMAX, XFZERO, XEPSO,  &
@@ -310,7 +310,7 @@ CALL INIT_VEG_PGD_n(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MON
                   XAOSIP, XAOSIM, XAOSJP, XAOSJM, XHO2IP, XHO2IM, XHO2JP,     &
                   XHO2JM, XZ0, XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, XZ0REL,&
                   XCLAY, XSAND, CPEDOTF,                                      &
-                  XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XW33, XWSAT,      &
+                  XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XWSAT,            &
                   XTAUICE, XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF, &
                   XC4REF, XPCPS, XPLVTT, XPLSTT,                              &
                   CSCOND, CISBA, XHCAPSOIL, XCONDDRY, XCONDSLD, CCPSURF,      &
@@ -356,7 +356,7 @@ IF(CISBA=='DIF') THEN
     XFRACSOC(:,:)=0.0
     CALL ISBA_SOC_PARAMETERS(XPATCH,XDG,XSOC,XBCOEF,XMPOTSAT,   &
                              XCONDSAT,XWSAT,XHCAPSOIL,XCONDDRY, &
-                             XCONDSLD,XW33,XWFC,XWWILT,XFRACSOC )
+                             XCONDSLD,XWFC,XWWILT,XFRACSOC )
   ELSE
     ALLOCATE(XFRACSOC(0,0))
   ENDIF

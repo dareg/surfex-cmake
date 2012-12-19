@@ -58,7 +58,7 @@ USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
                                      CISBA_GR, CRUNOFF_GR, CSCOND_GR,         &
                                      CKSAT_GR, CHORT_GR,                      &
                                      NLAYER_GR, NLAYER_HORT_GR, NLAYER_DUN_GR,&
-                                     TSNOW, XSOILWGHT, XW33,                 &
+                                     TSNOW, XSOILWGHT,                        &
                                      XVEGTYPE, NWG_LAYER, XDZG, XDZDIF,       &
                                      XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
                                      XGAMMA, XCV, XRGL, XRUNOFFD,             &
@@ -379,7 +379,7 @@ CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR, CSOC_GR, &
           XDMAX, XAH, XBH, PCO2, XGMES, XPOI, XFZERO, XEPSO, XGAMM,   &
           XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX,&
           XT2AMAX, XABC, XDG, XDZG, XDZDIF, NWG_LAYER, XROOTFRAC,  &
-          XWFC, XW33, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,     &
+          XWFC, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,        &
           XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, PMUF, ZFF,&
           ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &

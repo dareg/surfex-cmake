@@ -115,7 +115,7 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_EPSO, XP_GAMM, XP_QDGAMM, XP_QDGMES, XP_T1GMES,&
                              XP_T2GMES, XP_AMAX, XP_QDAMAX, XP_T1AMAX,         &
                              XP_T2AMAX, XP_DG, XP_ROOTFRAC, XP_WFC, XP_WWILT,  &
-                             XP_W33, XP_WSAT, XP_BCOEF, XP_CONDSAT, XP_MPOTSAT,&
+                             XP_WSAT, XP_BCOEF, XP_CONDSAT, XP_MPOTSAT,        &
                              XP_HCAPSOIL, XP_CONDDRY, XP_CONDSLD,              &
                              XP_D_ICE, XP_KSAT_ICE, XP_SOILWGHT,               &
                              XP_MUF, XP_FSAT, XP_FF, XP_FFG, XP_FFV,           &
@@ -867,7 +867,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSC
           XP_THRESHOLD, XP_LIRRIGATE, XP_LIRRIDAY, LP_STRESS, XP_GC, XP_F2I, XP_DMAX,     &
           XP_AH, XP_BH, ZP_CO2, XP_GMES, XPOI, XP_FZERO, XP_EPSO, XP_GAMM, XP_QDGAMM,     &
           XP_QDGMES, XP_T1GMES, XP_T2GMES, XP_AMAX, XP_QDAMAX,  XP_T1AMAX, XP_T2AMAX,     &
-          XABC, XP_DG, XP_DZG, XP_DZDIF, NK_WG_LAYER, XP_ROOTFRAC, XP_WFC, XP_W33,        &
+          XABC, XP_DG, XP_DZG, XP_DZDIF, NK_WG_LAYER, XP_ROOTFRAC, XP_WFC,                &
           XP_WWILT, XP_WSAT, XP_BCOEF, XP_CONDSAT, XP_MPOTSAT, XP_HCAPSOIL, XP_CONDDRY,   &
           XP_CONDSLD, XP_D_ICE, XP_KSAT_ICE, XP_MUF, XP_FF, XP_FFG, XP_FFV, ZP_FFGNOS,    &
           ZP_FFVNOS, XP_FFROZEN, XP_ALBF, XP_EMISF, XP_FFLOOD, XP_PIFLOOD, XP_IFLOOD,     &

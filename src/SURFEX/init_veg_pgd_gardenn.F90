@@ -10,7 +10,7 @@ SUBROUTINE INIT_VEG_PGD_GARDEN_n(HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,   
                         KSV_DSTBEG, KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
                         HDSTNAMES, HSLTNAMES, HCHEM_SURF_FILE,                      &
                         PCLAY, PSAND, HPEDOTF,                                      &
-                        PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PW33, PWSAT,      &
+                        PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT,            &
                         PTAUICE, PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PACOEF, PPCOEF, &
                         PC4REF, PPCPS, PPLVTT, PPLSTT,                              &
                         HSCOND, HISBA, PHCAPSOIL, PCONDDRY, PCONDSLD, HCPSURF,      &
@@ -131,7 +131,6 @@ REAL, DIMENSION(:,:), POINTER :: PMPOTSAT
 REAL, DIMENSION(:,:), POINTER :: PBCOEF
 REAL, DIMENSION(:,:), POINTER :: PWWILT
 REAL, DIMENSION(:,:), POINTER :: PWFC
-REAL, DIMENSION(:,:), POINTER :: PW33
 REAL, DIMENSION(:,:), POINTER :: PWSAT
 REAL, DIMENSION(:), POINTER :: PTAUICE
 REAL, DIMENSION(:), POINTER :: PCGSAT
@@ -292,7 +291,7 @@ CALL INIT_VEG_PGD_n(HPROGRAM, KLUOUT, KI, 1, KGROUND_LAYER, KMONTH,   &
                   ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM, ZHO2IP, ZHO2IM, ZHO2JP,     &
                   ZHO2JM, ZZ0, ZZ0EFFIP, ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, ZZ0REL,&
                   PCLAY, PSAND, HPEDOTF,                                      &
-                  ZCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PW33, PWSAT,      &
+                  ZCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT,            &
                   PTAUICE, PCGSAT, ZC1SAT, ZC2REF, ZC3, PC4B, PACOEF, PPCOEF, &
                   ZC4REF, ZPCPS, ZPLVTT, ZPLSTT,                              &
                   HSCOND, HISBA, PHCAPSOIL, PCONDDRY, PCONDSLD, HCPSURF,      &

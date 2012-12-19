@@ -73,7 +73,7 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XF2I, XGC, XAH, XBH, XDMAX,              &
                                   XDG, XROOTFRAC, XDZG, XDZDIF, NWG_LAYER, & 
                                   XTG, XWG, XWGI, XPCPS,                   &
-                                  XPLVTT, XPLSTT, XWFC, XW33, XWWILT, XWSAT,&
+                                  XPLVTT, XPLSTT, XWFC, XWWILT, XWSAT,     &
                                   XBCOEF, XCONDSAT, XMPOTSAT, XHCAPSOIL,   &
                                   XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
                                   XCONDDRY, XCONDSLD, XRE25,               &
@@ -393,7 +393,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT,  &
           XDMAX, XAH, XBH, PCO2, XGMES, XPOI, XFZERO, XEPSO, XGAMM,   &
           XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX,&
           XT2AMAX, XABC, XDG, XDZG, XDZDIF, NWG_LAYER, XROOTFRAC,     &
-          XWFC, XW33, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,     &
+          XWFC, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,           &
           XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, PMUF, ZFF,&
           ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &

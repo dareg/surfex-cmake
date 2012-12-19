@@ -391,9 +391,6 @@ REAL, POINTER, DIMENSION(:)    :: XP_PCOEF       ! 'Force-Restore' surface verti
 REAL, POINTER, DIMENSION(:,:)  :: XP_WFC         ! field capacity volumetric water content
 !$OMP THREADPRIVATE(XP_WFC)
 !                                                    ! profile                                 (m3/m3)
-REAL, POINTER, DIMENSION(:,:)  :: XP_W33         ! volumetric water content at 0.33 bar
-!$OMP THREADPRIVATE(XP_W33)
-!                                                    ! profile                                 (m3/m3)
 
 REAL, POINTER, DIMENSION(:,:)  :: XP_WWILT       ! wilting point volumetric water content 
 !$OMP THREADPRIVATE(XP_WWILT)

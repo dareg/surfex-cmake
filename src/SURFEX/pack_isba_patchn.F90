@@ -40,7 +40,7 @@ USE MODD_ISBA_n,      ONLY : NGROUND_LAYER,  NNBIOMASS, NNLITTER, NNSOILCARB,   
                                XCV, XRGL, XVEGTYPE_PATCH, XDG, XRUNOFFD, XRUNOFFB,  &
                                XWDRAIN, XTAUICE, XZ0REL, XGAMMAT, NWG_LAYER,        &
                                XC1SAT, XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF,   &
-                               XWFC, XW33, XWWILT, XWSAT, XBCOEF, XWR, XTG, XWG,    &
+                               XWFC, XWWILT, XWSAT, XBCOEF, XWR, XTG, XWG,          &
                                XWGI, XLAI, XRESA, XVEG, XTDEEP, TSNOW, XROOTFRAC,   &
                                XCONDSAT, XMPOTSAT, XCGSAT, XHCAPSOIL,               &
                                XCONDDRY, XCONDSLD, XRSMIN, XBSLAI, XLAIMIN,         &
@@ -87,7 +87,7 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_CV, XP_RGL, XP_VEGTYPE_PATCH, XP_DG, XP_RUNOFFD, XP_RUNOFFB,   &
                                XP_WDRAIN, XP_TAUICE, XP_Z0REL, XP_GAMMAT, NK_WG_LAYER,           &
                                XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF, XP_PCOEF,  &
-                               XP_WFC, XP_W33, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG, &
+                               XP_WFC, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG,         &
                                XP_WGI, XP_LAI, XP_RESA, XP_VEG, XP_TDEEP, XP_ROOTFRAC, XP_DZG,   &
                                XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                                XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
@@ -302,8 +302,6 @@ ISIZE_GROUND = ISIZE_GROUND + 1
 XP_SAND         => XBLOCK_GROUND(:,:,ISIZE_GROUND)
 ISIZE_GROUND = ISIZE_GROUND + 1
 XP_WFC          => XBLOCK_GROUND(:,:,ISIZE_GROUND)
-ISIZE_GROUND = ISIZE_GROUND + 1
-XP_W33          => XBLOCK_GROUND(:,:,ISIZE_GROUND)
 ISIZE_GROUND = ISIZE_GROUND + 1
 XP_WWILT        => XBLOCK_GROUND(:,:,ISIZE_GROUND)
 ISIZE_GROUND = ISIZE_GROUND + 1
@@ -862,7 +860,6 @@ IF (NPATCH==1) THEN
   XP_CLAY         (:,:)  =    XCLAY         (:, :)
   XP_SAND         (:,:)  =    XSAND         (:, :) 
   XP_WFC          (:, :) =    XWFC          (:, :)
-  XP_W33          (:, :) =    XW33          (:, :)
   XP_WWILT        (:, :) =    XWWILT        (:, :)
   XP_WSAT         (:, :) =    XWSAT         (:, :)
   XP_CONDSAT      (:, :) =    XCONDSAT      (:, :, 1)  
@@ -1107,7 +1104,6 @@ ELSE
       XP_CLAY         (JJ,JK)  =    XCLAY         (JI, JK)
       XP_SAND         (JJ,JK)  =    XSAND         (JI, JK)
       XP_WFC          (JJ,JK)  =    XWFC          (JI, JK)
-      XP_W33          (JJ,JK)  =    XW33          (JI, JK)
       XP_WWILT        (JJ,JK)  =    XWWILT        (JI, JK)
       XP_WSAT         (JJ,JK)  =    XWSAT         (JI, JK)    
       XP_CONDSAT      (JJ,JK)  =    XCONDSAT      (JI, JK, KPATCH)      

@@ -40,7 +40,7 @@ USE MODD_TEB_n,           ONLY: TTIME, XGARDEN
 USE MODD_TEB_VEG_n,       ONLY: CISBA, CPEDOTF, CPHOTO, CSCOND, LTR_ML, NNBIOMASS,  &
                                 CCPSURF, CKSAT, CSOC
 USE MODD_TEB_GARDEN_n,    ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     &
-                                XCLAY, XSAND, XWWILT, XWFC, XWSAT, XW33,            &
+                                XCLAY, XSAND, XWWILT, XWFC, XWSAT,                  &
                                 XVEG, XRSMIN, XGAMMA, XRGL, XCV, XLAI,              &
                                 XDG, XZ0, XZ0_O_Z0H, XABC, XPOI,                    &
                                 XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,               &
@@ -267,7 +267,7 @@ CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NGROUND_LAYER, TTIME%TDATE%MONT
                         NSV_DSTBEG, NSV_DSTEND, NSLTEQ, NSV_SLTBEG, NSV_SLTEND,     &
                         CDSTNAMES, CSLTNAMES, CCHEM_SURF_FILE,                      &
                         XCLAY, XSAND, CPEDOTF,                                      &
-                        XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XW33, XWSAT,      &
+                        XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XWSAT,            &
                         XTAUICE, XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF, &
                         XC4REF, XPCPS, XPLVTT, XPLSTT,                              &
                         CSCOND, CISBA, XHCAPSOIL, XCONDDRY, XCONDSLD, CCPSURF,      &

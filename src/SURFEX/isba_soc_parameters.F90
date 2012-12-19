@@ -1,7 +1,7 @@
 !     #########################
 SUBROUTINE ISBA_SOC_PARAMETERS (PPATCH,PDG,PSOC,PBCOEF,PMPOTSAT,  &
                                 PCONDSAT,PWSAT,PHCAPSOIL,PCONDDRY,&
-                                PCONDSLD,PW33,PWFC,PWWILT,PFRACSOC)
+                                PCONDSLD,PWFC,PWWILT,PFRACSOC     )
 !     ########################################################################
 !
 !!****  *ISBA_SOC_PARAMETERS*  
@@ -60,7 +60,7 @@ REAL, DIMENSION(:,:,:),INTENT(INOUT) :: PCONDSAT
 !
 REAL, DIMENSION(:,:),  INTENT(INOUT) :: PBCOEF,PMPOTSAT,    &
                                         PHCAPSOIL,PCONDDRY, &
-                                        PCONDSLD,PW33
+                                        PCONDSLD
 !
 REAL, DIMENSION(:,:),  INTENT(INOUT) :: PWSAT,PWFC,PWWILT
 !
@@ -75,7 +75,6 @@ REAL, DIMENSION(2), PARAMETER :: ZMPOTSAT = (/-1.03,-1.01/)     !Peatland matric
 REAL, DIMENSION(2), PARAMETER :: ZWSAT    = (/0.93,0.83/)       !Peatland porosity                      (-)
 REAL, DIMENSION(2), PARAMETER :: ZSY      = (/0.655,0.125/)     !Peatland specific yield                (-)
 REAL, DIMENSION(2), PARAMETER :: ZWWILT   = (/0.06,0.24/)       !Peatland wilting point                 (-)
-REAL,               PARAMETER :: ZPSI0    = -0.1019977334       !Matric potential at 1kPa               (m)
 REAL,               PARAMETER :: ZHCAPSOIL= 2.51E+6             !Peatland heat capacity                 (J.m–3.K–1)
 REAL,               PARAMETER :: ZCONDDRY = 0.05                !Peatland dry thermal conductivity      (W.m–1.K–1)
 REAL,               PARAMETER :: ZCONDSLD = 0.25                !Peatland solid conductivity            (W.m–1.K–1)
@@ -99,7 +98,7 @@ REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2))  :: ZDG_SOIL, ZDZG_SOIL, ZRHO_SOC, ZMID
 !
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2))  :: ZPEAT_BCOEF,ZPEAT_MPOTSAT,&
                                              ZPEAT_WSAT,ZPEAT_WFC,     &
-                                             ZPEAT_WWILT, ZPEAT_W33
+                                             ZPEAT_WWILT
 !
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3))  :: ZPEAT_CONDSAT, ZMID_CONDSAT
 !
@@ -134,7 +133,6 @@ ZPEAT_MPOTSAT(:,:  )=0.0
 ZPEAT_WSAT   (:,:  )=0.0
 ZPEAT_WFC    (:,:  )=0.0
 ZPEAT_WWILT  (:,:  )=0.0
-ZPEAT_W33    (:,:  )=0.0
 ZPEAT_CONDSAT(:,:,:)=0.0
 !
 PFRACSOC (:,:)=XUNDEF
@@ -257,9 +255,6 @@ DO JL=1,INL
 !
       ZPEAT_WFC    (JI,JL)=ZPEAT_WSAT(JI,JL)-ZSY(1)*EXP(ZF_SY*ZREFDEPTH)
 !
-      ZPEAT_W33    (JI,JL)=ZPEAT_WSAT(JI,JL)*EXP(-LOG(ZPSI0/ZPEAT_MPOTSAT(JI,JL))/ZPEAT_BCOEF(JI,JL))
-      ZPEAT_W33    (JI,JL)=MAX(ZPEAT_W33(JI,JL),ZPEAT_WFC(JI,JL))
-!
       DO JP=1,INP
          IF(PPATCH(JI,JP)/=XUNDEF)THEN
            ZREFDEPTH=MIN(ZPEAT_PROFILE,MAX(ZMOSS_DEPTH,ZMID_CONDSAT(JI,JL,JP)))
@@ -289,7 +284,6 @@ DO JL=1,INL
        PWSAT    (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWSAT    (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WSAT   (JI,JL)  
        PWFC     (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWFC     (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WFC    (JI,JL)
        PWWILT   (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWWILT   (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WWILT  (JI,JL)  
-       PW33     (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PW33     (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_W33    (JI,JL)   
        DO JP=1,INP
           IF(PPATCH(JI,JP)/=XUNDEF)THEN
             PCONDSAT (JI,JL,JP) = (1.0-PFRACSOC(JI,JL))*PCONDSAT(JI,JL,JP)+PFRACSOC(JI,JL)*ZPEAT_CONDSAT(JI,JL,JP)

@@ -41,7 +41,7 @@ USE MODD_PACK_ISBA, ONLY :   LBLOCK_SIMPLE, LBLOCK_0, TBLOCK_SIMPLE, TBLOCK_0, X
                              XP_CV, XP_RGL, XP_VEGTYPE_PATCH, XP_DG, XP_RUNOFFD, XP_RUNOFFB,   &
                              XP_WDRAIN, XP_TAUICE, XP_Z0REL, XP_GAMMAT, NK_WG_LAYER,           &
                              XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF, XP_PCOEF,  &
-                             XP_WFC, XP_W33, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG, &
+                             XP_WFC, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG,         &
                              XP_WGI, XP_LAI, XP_RESA, XP_VEG, XP_TDEEP, XP_ROOTFRAC, XP_DZG,   &
                              XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                              XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
@@ -422,7 +422,6 @@ XP_TDEEP        => NULL()
 XP_CLAY         => NULL() 
 XP_SAND         => NULL() 
 XP_WFC          => NULL()
-XP_W33          => NULL()
 XP_WWILT        => NULL()
 XP_WSAT         => NULL()
 XP_CONDSAT      => NULL()

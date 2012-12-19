@@ -3,7 +3,7 @@
                                PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW,                       &
                                PZREF, PUREF, PTG, PPATCH, PWG, PWGI, PZ0, PSSO_SLOPE,           &
                                PRESA, PVEG, PLAI, PWR, PRGL, PRSMIN, PGAMMA, PWRMAX_CF,         &
-                               PZ0_O_Z0H, PWFC, PW33, PWSAT, PTSNOW, PZ, PT, PQ, PWIND, PTKE, PP)  
+                               PZ0_O_Z0H, PWFC, PWSAT, PTSNOW, PZ, PT, PQ, PWIND, PTKE, PP)  
 !     #################################################################################
 !
 !!****  *INIT_WATER_SBL* - inits water SBL profiles
@@ -91,7 +91,6 @@ REAL, DIMENSION(:,:), INTENT(IN):: PZ0_O_Z0H ! ratio of surface roughness length
 !                                            ! (momentum to heat)                      (-)
 REAL, DIMENSION(:,:), INTENT(IN):: PWFC      ! field capacity volumetric water content
 !                                            ! profile                                 (m3/m3)
-REAL, DIMENSION(:,:), INTENT(IN):: PW33      ! volumetric water content at -0.33 bar   (m3/m3)
 REAL, DIMENSION(:,:), INTENT(IN):: PWSAT     ! porosity profile                        (m3/m3) 
 TYPE(SURF_SNOW)     , INTENT(IN):: PTSNOW    ! snow state
 REAL, DIMENSION(:,:), INTENT(IN):: PZ        ! height of middle of each level grid   (m)
@@ -270,7 +269,7 @@ ZF5    (:) = 1.0
 !We compute ZCD, ZCH and ZRI
 CALL DRAG(HISBA, PTSNOW%SCHEME, HCPSURF, ZTS, ZWG, ZWGI, ZEXNS, ZEXNA, PTA,   &
           ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS,                                 &
-          ZVEG, ZZ0, ZZ0EFF, ZZ0H, PWFC(:,1), PW33(:,1), PWSAT(:,1),          &
+          ZVEG, ZZ0, ZZ0EFF, ZZ0H, PWFC(:,1), PWSAT(:,1),                     &
           ZPSNG, ZPSNV, PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5,              &
           ZRESA, ZCH, ZCD, ZCDN, ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS,            &
           ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS, ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA     )  
