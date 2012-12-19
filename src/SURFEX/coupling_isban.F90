@@ -55,9 +55,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!        S.Lafont   01/2011 : add PTSTEP as arg of diag_misc
 !!       B.Decharme  09/2012 : Bug in hydro_glacier calculation with ES or Crocus
 !!                             New wind implicitation
-!!                             New soil carbon spinup and diag
-!!                             Isba budget
-!!
+!!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------------
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI
@@ -112,7 +110,7 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_EPSO, XP_GAMM, XP_QDGAMM, XP_QDGMES, XP_T1GMES,&
                              XP_T2GMES, XP_AMAX, XP_QDAMAX, XP_T1AMAX,         &
                              XP_T2AMAX, XP_DG, XP_ROOTFRAC, XP_WFC, XP_WWILT,  &
-                             XP_W33, XP_WSAT, XP_BCOEF, XP_CONDSAT, XP_MPOTSAT,&
+                             XP_WSAT, XP_BCOEF, XP_CONDSAT, XP_MPOTSAT,        &
                              XP_HCAPSOIL, XP_CONDDRY, XP_CONDSLD,              &
                              XP_D_ICE, XP_KSAT_ICE, XP_SOILWGHT,               &
                              XP_MUF, XP_FSAT, XP_FF, XP_FFG, XP_FFV,           &
@@ -260,7 +258,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                    
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2 positive toward the atmosphere (m/s*kg/kg)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
@@ -294,7 +292,7 @@ REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
 !
 REAL, DIMENSION(KI,NPATCH) :: ZSFTH_TILE     ! surface heat flux (W/m2)
 REAL, DIMENSION(KI,NPATCH) :: ZSFTQ_TILE     ! surface vapor flux (kg/m2/s)
-REAL, DIMENSION(KI,NPATCH) :: ZSFCO2_TILE    ! surface CO2 flux positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(KI,NPATCH) :: ZSFCO2_TILE    ! surface CO2 flux positive toward the atmosphere (m/s*kg/kg)
 REAL, DIMENSION(KI,NPATCH) :: ZSFU_TILE      ! zonal momentum flux
 REAL, DIMENSION(KI,NPATCH) :: ZSFV_TILE      ! meridian momentum flux
 REAL, DIMENSION(KI,NPATCH) :: ZTRAD_TILE     ! radiative surface temperature
@@ -470,7 +468,7 @@ ENDIF
 !
 IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
      CALL VEGETATION_UPDATE(PTSTEP,TTIME,XCOVER,                       &
-                         CISBA,LECOCLIMAP, CPHOTO, LAGRIP, 'NAT',        &
+                         CISBA,LECOCLIMAP, CPHOTO, 'NAT',                &
                          XLAI,XVEG,XZ0,                                  &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                   &
                          XRSMIN,XGAMMA,XWRMAX_CF,                        &
@@ -522,7 +520,7 @@ CALL AVERAGE_DIAG_EVAP_ISBA_n
 !
 CALL AVERAGE_DIAG_MISC_ISBA_n
 !
-!--------------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------
 ! Snow/Flood fractions, albedo and emissivity update :
 ! --------------------------------------------------------------------------------------
 !
@@ -545,7 +543,7 @@ SUBROUTINE TREAT_PATCH(KSIZE,KMASK)
 IMPLICIT NONE
 !
 INTEGER, INTENT(IN)               :: KSIZE
-INTEGER, INTENT(IN), DIMENSION(KI) :: KMASK
+INTEGER, INTENT(IN), DIMENSION(:) :: KMASK
 !
 REAL, DIMENSION(KSIZE) :: ZP_ZREF    ! height of T,q forcing                 (m)
 REAL, DIMENSION(KSIZE) :: ZP_UREF    ! height of wind forcing                (m)
@@ -575,7 +573,7 @@ REAL, DIMENSION(KSIZE) :: ZP_ZS      ! atmospheric model orography           (m)
 REAL, DIMENSION(KSIZE) :: ZP_SFTQ    ! flux of water vapor <w'q'>            (kg.m-2.s-1)
 REAL, DIMENSION(KSIZE) :: ZP_SFTH    ! flux of temperature <w'T'>            (W/m2)
 REAL, DIMENSION(KSIZE,KSV) :: ZP_SFTS    ! flux of scalar      <w'sv'>           (mkg/kg/s)
-REAL, DIMENSION(KSIZE) :: ZP_SFCO2   ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(KSIZE) :: ZP_SFCO2   ! flux of CO2 positive toward the atmosphere (m/s*kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_USTAR   ! friction velocity                     (m/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFU     ! zonal momentum flux                   (pa)
 REAL, DIMENSION(KSIZE) :: ZP_SFV     ! meridian momentum flux                (pa)
@@ -603,17 +601,10 @@ REAL, DIMENSION(KSIZE) :: ZP_FFVNOS   !Floodplain fraction over vegetation witho
 !
 REAL, DIMENSION(KSIZE,NNBIOMASS) :: ZP_RESP_BIOMASS_INST         ! instantaneous biomass respiration (kgCO2/kgair m/s)
 !
-!*  Aggregated coeffs for evaporative flux calculations
+! Aggregated coeffs for evaporative flux calculations
 !
 REAL, DIMENSION(KSIZE) :: ZP_AC_AGG      ! aggregated aerodynamic resistance
 REAL, DIMENSION(KSIZE) :: ZP_HU_AGG      ! aggregated relative humidity
-!
-!*  ISBA water and energy budget
-!
-REAL, DIMENSION(KSIZE) :: ZP_WG_INI
-REAL, DIMENSION(KSIZE) :: ZP_WGI_INI
-REAL, DIMENSION(KSIZE) :: ZP_WR_INI
-REAL, DIMENSION(KSIZE) :: ZP_SWE_INI
 !
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -689,7 +680,7 @@ ELSE
    ZP_ALFA(JJ)       = ZALFA       (JI)
   ENDDO
 !
-  DO JK=1,KSV
+  DO JK=1,SIZE(PSV,2)
 !cdir nodep
 !cdir unroll=8
     DO JJ=1,KSIZE
@@ -747,11 +738,7 @@ IF(LNOSOF)ZP_SLOPE_COS(:) = 1.0
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF(LFLOOD)THEN
-  WHERE(XP_FFLOOD(:)==0.0) 
-    XP_Z0FLOOD(:) = XZ0SN
-    ZP_FFGNOS (:) = 0.0
-    ZP_FFVNOS (:) = 0.0
-  ENDWHERE
+  WHERE (XP_FFLOOD(:)==0.0) XP_Z0FLOOD(:) = XZ0SN
   INI_FLOOD =COUNT(XP_FFLOOD(:)>0.0)
   IF (INI_FLOOD>0) &
     CALL ISBA_FLOOD_PROPERTIES(INI_FLOOD,ZP_TA,ZP_EXNA,ZP_RHOA,XP_TG(:,1), &
@@ -824,7 +811,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, CRAIN, CHORT, CC1DRY, CSC
           XP_THRESHOLD, XP_LIRRIGATE, XP_LIRRIDAY, LP_STRESS, XP_GC, XP_F2I, XP_DMAX,     &
           XP_AH, XP_BH, ZP_CO2, XP_GMES, XPOI, XP_FZERO, XP_EPSO, XP_GAMM, XP_QDGAMM,     &
           XP_QDGMES, XP_T1GMES, XP_T2GMES, XP_AMAX, XP_QDAMAX,  XP_T1AMAX, XP_T2AMAX,     &
-          XABC, XP_DG, XP_DZG, XP_DZDIF, NK_WG_LAYER, XP_ROOTFRAC, XP_WFC, XP_W33,        &
+          XABC, XP_DG, XP_DZG, XP_DZDIF, NK_WG_LAYER, XP_ROOTFRAC, XP_WFC,                &
           XP_WWILT, XP_WSAT, XP_BCOEF, XP_CONDSAT, XP_MPOTSAT, XP_HCAPSOIL, XP_CONDDRY,   &
           XP_CONDSLD, XP_D_ICE, XP_KSAT_ICE, XP_MUF, XP_FF, XP_FFG, XP_FFV, ZP_FFGNOS,    &
           ZP_FFVNOS, XP_FFROZEN, XP_ALBF, XP_EMISF, XP_FFLOOD, XP_PIFLOOD, XP_IFLOOD,     &
@@ -842,7 +829,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, CRAIN, CHORT, CC1DRY, CSC
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS                                        )  
+          XP_FAPAR_BS, XP_FAPIR_BS                                                        )  
 !
 ZP_TRAD=XP_TSRAD
 !
@@ -878,8 +865,8 @@ END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
-  CALL VEGETATION_EVOL(CPHOTO, CRESPSL, CALBEDO, LAGRIP, LTR_ML,           &
-                       PTSTEP, KMONTH, KDAY, PTIME, XP_LAT, ZP_RHOA,              & 
+  CALL VEGETATION_EVOL(CPHOTO, CRESPSL, CALBEDO, LAGRIP, LTR_ML,                  &
+                       PTSTEP, KMONTH, KDAY, PTIME, XP_LAT, ZP_RHOA,              &
                        XP_TG, XP_ALBNIR_VEG, XP_ALBVIS_VEG, XP_ALBUV_VEG,         &
                        XP_ALBNIR_SOIL, XP_ALBVIS_SOIL, XP_ALBUV_SOIL,             &
                        XP_VEGTYPE_PATCH, XP_SEFOLD, XP_ANMAX, XP_H_TREE, XP_BSLAI,&
@@ -898,13 +885,11 @@ END IF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-ZP_SFCO2    (:)=0.
-XP_RESP_ECO (:)=0.
-XP_RESP_AUTO(:)=0.
+ZP_SFCO2(:)=0.
 !
-IF ( CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XP_LAI(:)/=XUNDEF) ) THEN
-  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                  &
-                   ZP_RHOA, XP_TG, XP_WG, XP_WFC, XP_WWILT, XP_WSAT, XP_SAND,&             
+IF (CPHOTO/='NON' .AND. CRESPSL/='NON') THEN
+  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                                  &
+                   ZP_RHOA, XP_TG, XP_WG, XP_WFC, XP_WWILT, XP_WSAT, XP_SAND,&
                    XP_RE25, XP_LAI, ZP_RESP_BIOMASS_INST, XP_TURNOVER,       &
                    XP_LITTER, XP_LIGNIN_STRUC , XP_SOILCARB,                 &
                    XP_RESP_AUTO, XP_RESP_ECO                                 )  
@@ -1073,11 +1058,11 @@ CALL DIAG_EVAP_ISBA_n(PTSTEP,KMASK,KSIZE,JPATCH)
 ! Isba offline diagnostics for miscellaneous terms over each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_MISC_ISBA_n(PTSTEP, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML, PTIME,   &
-                      KSIZE, JPATCH, KMASK, ZP_RHOA, XP_THRESHOLD,     &
+CALL DIAG_MISC_ISBA_n(PTSTEP, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML, PTIME,    &
+                      KSIZE, JPATCH, KMASK, ZP_RHOA, XP_THRESHOLD,            &
                       XP_PSN, XP_PSNG, XP_PSNV, XP_FF, XP_FFG, XP_FFV,        &
                       XP_WG, XP_WGI, XP_WFC, XP_WWILT, XP_SNOWSWE, XP_SNOWRHO,&
-                      XP_FAPARC, XP_FAPIRC, XP_LAI_EFFC, XP_MUS, XP_FSAT      )                  
+                      XP_FAPARC, XP_FAPIRC, XP_LAI_EFFC, XP_MUS, XP_FSAT       )                  
 !
 ! Unpack ISBA diagnostics (modd_diag_isban) for each patch:ISIZE_MAX = MAXVAL(NSIZE_NATURE_P)
 

@@ -42,7 +42,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA,                       
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
                               XPATCH, XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,        &
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
-                              XWSAT, XWFC, XWWILT, XW33, XRUNOFFD   
+                              XWSAT, XWFC, XWWILT, XRUNOFFD   
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -189,12 +189,6 @@ IF(CISBA=='DIF')THEN
      ENDDO
      CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
   END DO
-!
-! Moisture threshold for bare soil evaporation
-!
-  YRECFM='W33'
-  YCOMMENT='moisture threshold for bare soil evaporation (m3/m3)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XW33(:,1),IRESP,HCOMMENT=YCOMMENT)
 !
 ENDIF        
 !

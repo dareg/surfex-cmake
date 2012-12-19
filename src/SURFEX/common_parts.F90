@@ -1,7 +1,6 @@
 !#############################################################
 SUBROUTINE COMMON_PARTS(HPROGRAM, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH,        &
                         PVEGTYPE, PPATCH, PVEGTYPE_PATCH, KSIZE_NATURE_P, KR_NATURE_P,  &
-                        PRM_PATCH, &
                         ODEEPSOIL, OPHYSDOMC, PTDEEP_CLI, PGAMMAT_CLI, PTDEEP, PGAMMAT, &
                         OAGRIP, PTHRESHOLD, KIRRINUM, OIRRIDAY, OIRRIGATE, PTHRESHOLDSPT, &
                         HPHOTO, HINIT, OTR_ML, KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
@@ -16,7 +15,7 @@ SUBROUTINE COMMON_PARTS(HPROGRAM, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH,    
                         PAOSIP, PAOSIM, PAOSJP, PAOSJM, PHO2IP, PHO2IM, PHO2JP,     &
                         PHO2JM, PZ0, PZ0EFFIP, PZ0EFFIM, PZ0EFFJP, PZ0EFFJM, PZ0REL,&
                         PCLAY, PSAND, HPEDOTF,                                      &
-                        PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PW33, PWSAT,      &
+                        PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT,            &
                         PTAUICE, PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PACOEF, PPCOEF, &
                         PC4REF, PPCPS, PPLVTT, PPLSTT,                              &
                         HSCOND, HISBA, PHCAPSOIL, PCONDDRY, PCONDSLD, HCPSURF,      &
@@ -107,8 +106,6 @@ REAL, DIMENSION(:,:), POINTER :: PPATCH
 REAL, DIMENSION(:,:,:), POINTER :: PVEGTYPE_PATCH
 INTEGER, DIMENSION(:), POINTER :: KSIZE_NATURE_P
 INTEGER, DIMENSION(:,:), POINTER :: KR_NATURE_P
-!
-REAL, INTENT(IN) :: PRM_PATCH
 !
 LOGICAL, INTENT(IN) :: ODEEPSOIL
 LOGICAL, INTENT(IN) :: OPHYSDOMC
@@ -202,7 +199,6 @@ REAL, DIMENSION(:,:), POINTER :: PMPOTSAT
 REAL, DIMENSION(:,:), POINTER :: PBCOEF
 REAL, DIMENSION(:,:), POINTER :: PWWILT
 REAL, DIMENSION(:,:), POINTER :: PWFC
-REAL, DIMENSION(:,:), POINTER :: PW33
 REAL, DIMENSION(:,:), POINTER :: PWSAT
 REAL, DIMENSION(:), POINTER :: PTAUICE
 REAL, DIMENSION(:), POINTER :: PCGSAT
@@ -256,7 +252,7 @@ REAL, DIMENSIOn(:,:), INTENT(IN) :: PCF_NITRO
 !              -------------------------------
 !
 INTEGER :: JPATCH  ! loop counter on tiles
-INTEGER :: JILU,JP, JMAXLOC    ! loop increment
+INTEGER :: JILU    ! loop increment
 INTEGER :: JLAYER  ! loop counter on layers
 !
 INTEGER :: ICH     ! unit of input chemistry file
@@ -284,24 +280,6 @@ CALL SURF_PATCH(KPATCH,PVEGTYPE,PPATCH,PVEGTYPE_PATCH)
 !
 !*       2.5    Masks for tiles
 !               ---------------
-!
-IF (PRM_PATCH/=0.) THEN
-  !
-  WRITE(KLUOUT,*) " REMOVE PATCH below 5 % add to dominant patch " 
-  ! remove small fraction of PATCHES and add to MAIN PATCH
-  DO JP = 1,KI
-    !1) find most present patch maximum value 
-    JMAXLOC = MAXVAL(MAXLOC(PPATCH(JP,:)))
-    !2) FIND small value of cover 
-    DO JPATCH = 1,KPATCH
-      IF ( PPATCH(JP,JPATCH)<PRM_PATCH ) THEN
-        PPATCH(JP,JMAXLOC) = PPATCH(JP,JMAXLOC) + PPATCH(JP,JPATCH)
-        PPATCH(JP,JPATCH) = 0.0
-       ENDIF
-    ENDDO
-  ENDDO
-  !
-ENDIF
 !
 DO JPATCH=1,KPATCH
   KSIZE_NATURE_P(JPATCH) = COUNT(PPATCH(:,JPATCH) > 0.0)
@@ -490,7 +468,6 @@ ALLOCATE(PMPOTSAT (KI,KGROUND_LAYER))
 ALLOCATE(PBCOEF   (KI,KGROUND_LAYER))
 ALLOCATE(PWWILT   (KI,KGROUND_LAYER)) ! wilting point
 ALLOCATE(PWFC     (KI,KGROUND_LAYER)) ! field capacity
-ALLOCATE(PW33     (KI,KGROUND_LAYER)) ! water content at (-0.33bar ~ -3.365m)
 ALLOCATE(PWSAT    (KI,KGROUND_LAYER)) ! saturation
 ALLOCATE(PTAUICE  (KI))
 !        
@@ -502,9 +479,15 @@ DO JLAYER=1,KGROUND_LAYER
    ENDDO   
    PWSAT (:,JLAYER) = WSAT_FUNC (PCLAY(:,JLAYER),PSAND(:,JLAYER),HPEDOTF)
    PWWILT(:,JLAYER) = WWILT_FUNC(PCLAY(:,JLAYER),PSAND(:,JLAYER),HPEDOTF)
-   PWFC  (:,JLAYER) = WFC_FUNC  (PCLAY(:,JLAYER),PSAND(:,JLAYER),HPEDOTF)
-   PW33  (:,JLAYER) = W33_FUNC  (PCLAY(:,JLAYER),PSAND(:,JLAYER),HPEDOTF)
 END DO
+!
+IF (HISBA=='2-L' .OR. HISBA=='3-L') THEN
+  !  field capacity at hydraulic conductivity = 0.1mm/day
+  PWFC  (:,:) = WFC_FUNC  (PCLAY(:,:),PSAND(:,:),HPEDOTF)
+ELSE IF (HISBA=='DIF') THEN
+  !  field capacity at water potential = 0.33bar        
+  PWFC  (:,:) = W33_FUNC  (PCLAY(:,:),PSAND(:,:),HPEDOTF)
+END IF
 !
 PTAUICE(:) = XTAU_ICE
 !

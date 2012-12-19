@@ -17,7 +17,7 @@
                       PF2I, PDMAX, PAH, PBH, PCSP, PGMES, PPOI, PFZERO, PEPSO,   &
                       PGAMM, PQDGAMM, PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, &
                       PT1AMAX, PT2AMAX, PABC, PD_G, PDZG, PDZDIF, KWG_LAYER,     &
-                      PROOTFRAC, PWFC, PW33, PWWILT, PWSAT, PBCOEF, PCONDSAT,    &
+                      PROOTFRAC, PWFC, PWWILT, PWSAT, PBCOEF, PCONDSAT,          &
                       PMPOTSAT, PHCAPSOIL, PCONDDRY, PCONDSLD, PD_ICE, PKSAT_ICE,&
                       PMUF, PFF, PFFG, PFFV, PFFG_NOSNOW, PFFV_NOSNOW, PFFROZEN, &
                       PFALB, PFEMIS, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD,        &
@@ -429,7 +429,6 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PDZDIF     ! distance between consecuativ
 INTEGER, DIMENSION(:),INTENT(IN)    :: KWG_LAYER  ! Number of soil moisture layers (DIF option)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PROOTFRAC  ! root fraction                        (-)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWFC       ! field capacity profile               (m3/m3)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PW33       ! vater content at -0.33 bar           (m3/m3)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWWILT     ! wilting point profile                (m3/m3)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWSAT      ! porosity profile                     (m3/m3)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PBCOEF     ! soil water CH78 b-parameter          (-)
@@ -850,7 +849,7 @@ ENDIF
 CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF,                                           &
     PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
     PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
-    PWFC(:,1), PW33(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,               &
+    PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
     PDIRCOSZW, ZDELTA, ZF5, PRESA,  PCH, PCD, PCDN, PRI, PHUG, ZHUGI,           &
     PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF, PFFG_NOSNOW, PFFV_NOSNOW,             &
     ZLEG_DELTA, ZLEGI_DELTA                                                     )  

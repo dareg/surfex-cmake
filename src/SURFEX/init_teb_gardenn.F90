@@ -45,7 +45,7 @@ USE MODD_TEB_n,           ONLY: TTIME, XTSTEP, XCOVER, XGARDEN
 USE MODD_TEB_GARDEN_n,    ONLY: CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                                 CSCOND, CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
                                 CRESPSL, LTR_ML, NNBIOMASS, NNLITTER, NNLITTLEVS,   &
-                                NNSOILCARB, XCLAY, XSAND, XWWILT, XWFC, XW33, XWSAT,&
+                                NNSOILCARB, XCLAY, XSAND, XWWILT, XWFC, XWSAT,      &
                                 XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,              &
                                 XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
                                 XSOILGRID, XZ0, XZ0_O_Z0H,                          &
@@ -74,7 +74,7 @@ USE MODD_TEB_GARDEN_n,    ONLY: CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO
                                 CKSAT, CSOM, CTOPREG, CHORT,                        &
                                 XD_ICE, XKSAT_ICE, XPCPS, XPLVTT, XPLSTT, LCANOPY,  &
                                 XPSN, XPSNG, XPSNV, XPSNV_A, LPAR_GARDEN,           &
-                                NLAYER_HORT, NLAYER_DUN
+                                NLAYER_HORT, NLAYER_DUN 
 !
 USE MODD_CH_TEB_n,        ONLY: CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,       &
                                 CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,    &
@@ -212,7 +212,7 @@ IF (LNAM_READ) THEN
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
                      CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOM,       &
                      CTOPREG, YRAIN, CHORT, GFLOOD, GTRIP,       &
-                     GGLACIER, GCANOPY_DRAG, GVEGUPD             )
+                     GGLACIER, GCANOPY_DRAG, GVEGUPD             )                  
  !
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)
@@ -293,7 +293,7 @@ END IF
 !-----------------------------------------------------------------------------------------------------
 !
 IF (.NOT. LPAR_GARDEN) THEN        
-  CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE,XCOVER,CPHOTO,LAGRIP,          &
+  CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,XCOVER,CPHOTO,                         &
                         'GRD',PVEG=XVEG,PLAI=XLAI,                             &
                         PRSMIN=XRSMIN,PGAMMA=XGAMMA,PWRMAX_CF=XWRMAX_CF,       &
                         PRGL=XRGL,PCV=XCV,PSOILGRID=XSOILGRID,                 &
@@ -421,7 +421,6 @@ ENDDO
 !
 CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
                   XVEGTYPE, XPATCH, XVEGTYPE_PATCH, NSIZE_NATURE_P, NR_NATURE_P,    &
-                  0.0, &
                   LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, XTDEEP, XGAMMAT,   &
                   LAGRIP, XTHRESHOLD, NIRRINUM, LIRRIDAY, LIRRIGATE, XTHRESHOLDSPT, &
                   CPHOTO, HINIT, LTR_ML, NNBIOMASS, PCO2, PRHOA, XABC, XPOI,  &
@@ -436,7 +435,7 @@ CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH
                   XAOSIP, XAOSIM, XAOSJP, XAOSJM, XHO2IP, XHO2IM, XHO2JP,     &
                   XHO2JM, XZ0, XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, XZ0REL,&
                   XCLAY, XSAND, CPEDOTF,                                      &
-                  XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XW33, XWSAT,      &
+                  XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XWSAT,            &
                   XTAUICE, XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF, &
                   XC4REF, XPCPS, XPLVTT, XPLSTT,                              &
                   CSCOND, CISBA, XHCAPSOIL, XCONDDRY, XCONDSLD, CCPSURF,      &
@@ -457,7 +456,7 @@ IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN
   ALLOCATE(ZF(KI,NPATCH))
   ZF (:,:) = XUNDEF
   !  
-  !Soil organic carbon effect and/or Exponential decay for DIF option 
+  !Soil organic matter effect and/or Exponential decay for DIF option 
   IF(CISBA=='DIF') THEN
     ALLOCATE(ZWORK(KI))
     ZWORK(:) = XUNDEF

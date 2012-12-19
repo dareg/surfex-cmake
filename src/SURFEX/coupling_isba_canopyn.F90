@@ -38,7 +38,7 @@ USE MODD_CSTS,          ONLY : XCPD
 USE MODD_ISBA_n,        ONLY : LCANOPY, LCANOPY_DRAG, CROUGH, XZ0, XLAI, XPATCH, &
                                XSSO_STDEV, XSSO_SLOPE, XZ0_O_Z0H, XTG, CISBA,    &
                                TSNOW, CCPSURF, XWFC, XVEG, XGAMMA, XRSMIN, XWR,  &
-                               XWRMAX_CF, XRESA, XRGL, XWSAT, XWG, XWGI, XW33
+                               XWRMAX_CF, XRESA, XRGL, XWSAT, XWG, XWGI
 USE MODD_ISBA_CANOPY_n, ONLY : XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP
 USE MODD_DIAG_ISBA_n,   ONLY : N2M, XAVG_T2M, XAVG_Q2M, XAVG_HU2M,               &
                                XAVG_ZON10M, XAVG_MER10M, XAVG_WIND10M,           &
@@ -225,7 +225,7 @@ IF (LCANOPY) THEN
                        PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW,                         &
                        PZREF, PUREF, XTG(:,1,:), XPATCH, XWG(:,1,:), XWGI(:,1,:),         &
                        XZ0, XSSO_SLOPE, XRESA, XVEG, XLAI, XWR, XRGL, XRSMIN,             &
-                       XGAMMA, XWRMAX_CF, XZ0_O_Z0H, XWFC, XW33, XWSAT, TSNOW, XZ,        &
+                       XGAMMA, XWRMAX_CF, XZ0_O_Z0H, XWFC, XWSAT, TSNOW, XZ,              &
                        XT, XQ, XU, XTKE, XP)
   ENDIF
 !

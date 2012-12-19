@@ -347,8 +347,6 @@ TYPE TEB_GARDEN_t
 !                                                    ! diffusion coefficient                   (-)
   REAL, POINTER, DIMENSION(:,:)    :: XWFC           ! field capacity volumetric water content
 !                                                      ! profile                                 (m3/m3)
-  REAL, POINTER, DIMENSION(:,:)    :: XW33           ! volumetric water content profile        (m3/m3)
-!                                                      at -0.33 bar (-3.365m)
   REAL, POINTER, DIMENSION(:,:)    :: XWWILT         ! wilting point volumetric water content 
 !                                                      ! profile                                 (m3/m3)
   REAL, POINTER, DIMENSION(:,:)    :: XWSAT          ! porosity profile                        (m3/m3) 
@@ -762,8 +760,6 @@ REAL, POINTER, DIMENSION(:)      :: XPCOEF=>NULL()
 !$OMP THREADPRIVATE(XPCOEF)
 REAL, POINTER, DIMENSION(:,:)    :: XWFC=>NULL()
 !$OMP THREADPRIVATE(XWFC)
-REAL, POINTER, DIMENSION(:,:)    :: XW33=>NULL()
-!$OMP THREADPRIVATE(XW33)
 REAL, POINTER, DIMENSION(:,:)    :: XWWILT=>NULL()
 !$OMP THREADPRIVATE(XWWILT)
 REAL, POINTER, DIMENSION(:,:)    :: XWSAT=>NULL()
@@ -1002,7 +998,6 @@ TEB_GARDEN_MODEL(KFROM)%XC4REF=>XC4REF
 TEB_GARDEN_MODEL(KFROM)%XACOEF=>XACOEF
 TEB_GARDEN_MODEL(KFROM)%XPCOEF=>XPCOEF
 TEB_GARDEN_MODEL(KFROM)%XWFC=>XWFC
-TEB_GARDEN_MODEL(KFROM)%XW33=>XW33
 TEB_GARDEN_MODEL(KFROM)%XWWILT=>XWWILT
 TEB_GARDEN_MODEL(KFROM)%XWSAT=>XWSAT
 TEB_GARDEN_MODEL(KFROM)%XBCOEF=>XBCOEF
@@ -1186,7 +1181,6 @@ XC4REF=>TEB_GARDEN_MODEL(KTO)%XC4REF
 XACOEF=>TEB_GARDEN_MODEL(KTO)%XACOEF
 XPCOEF=>TEB_GARDEN_MODEL(KTO)%XPCOEF
 XWFC=>TEB_GARDEN_MODEL(KTO)%XWFC
-XW33=>TEB_GARDEN_MODEL(KTO)%XW33
 XWWILT=>TEB_GARDEN_MODEL(KTO)%XWWILT
 XWSAT=>TEB_GARDEN_MODEL(KTO)%XWSAT
 XBCOEF=>TEB_GARDEN_MODEL(KTO)%XBCOEF
@@ -1371,7 +1365,6 @@ DO J=1,KMODEL
   NULLIFY(TEB_GARDEN_MODEL(J)%XACOEF)
   NULLIFY(TEB_GARDEN_MODEL(J)%XPCOEF)
   NULLIFY(TEB_GARDEN_MODEL(J)%XWFC)
-  NULLIFY(TEB_GARDEN_MODEL(J)%XW33)
   NULLIFY(TEB_GARDEN_MODEL(J)%XWWILT)
   NULLIFY(TEB_GARDEN_MODEL(J)%XWSAT)
   NULLIFY(TEB_GARDEN_MODEL(J)%XBCOEF)
