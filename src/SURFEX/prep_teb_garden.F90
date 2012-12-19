@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_TEB_GARDEN(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,OCANOPY)
+SUBROUTINE PREP_TEB_GARDEN(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
 !!****  *PREP_TEB_GARDEN* - Prepares ISBA fields
@@ -33,27 +33,23 @@ SUBROUTINE PREP_TEB_GARDEN(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,
 USE MODI_PREP_HOR_TEB_GARDEN_FIELD
 USE MODI_PREP_VER_TEB_GARDEN
 !
-USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
-USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
-USE MODD_TEB_GARDEN_n,   ONLY : TSNOW, XRESA, XLAI, CPHOTO, CRESPSL,          &
-                                  XAN, XANFM, XANDAY, XLE,                      &
-                                  NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB,  &
-                                  XBSLAI, XBSLAI_NITRO, XBIOMASS, XRESP_BIOMASS,&
-                                  XLITTER, XSOILCARB, XLIGNIN_STRUC,            &
-                                  NPATCH, XWSAT, XWG, XWGI, CISBA, XTG, LCANOPY,&
-                                  XPATCH, XVEGTYPE_PATCH  
-!
-USE MODD_DEEPSOIL,    ONLY : LPHYSDOMC
+USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CRESPSL,                              &
+                                NNBIOMASS,                                    &
+                                CISBA
+USE MODD_TEB_GARDEN_n,   ONLY : XRESA, XLAI,                                  &
+                                XAN, XANFM, XANDAY, XLE,                      &
+                                XBSLAI, XBSLAI_NITRO, XBIOMASS, XRESP_BIOMASS,&
+                                XWSAT, XWG, XWGI, XTG, XVEGTYPE
+                                ! A FAIRE :
+                                ! IL FAUT RAJOUTER TSNOW
+                                ! ----------------------
 USE MODD_CSTS,        ONLY : XTT
 USE MODD_SNOW_PAR,    ONLY : XZ0SN
 USE MODD_ISBA_PAR,    ONLY : XWGMIN
-!
-USE MODD_TEB_GRID_n,  ONLY : CGRID, XGRID_PAR, XLAT, XLON
 USE MODD_CO2V_PAR,    ONLY : XANFMINIT, XCA_NIT, XCC_NIT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_PREP,        ONLY : XZS_LS
 !
 USE MODN_PREP_ISBA
 USE MODE_POS_SURF
@@ -70,12 +66,9 @@ CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
 CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
 CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
 CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
-LOGICAL,            INTENT(IN)  :: OCANOPY     ! option canopy
-!
 !
 !*      0.2    declarations of local variables
 !
-INTEGER :: JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -110,9 +103,11 @@ CALL PREP_HOR_TEB_GARDEN_FIELD(HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE
 !*      2.5    Snow variables
 !
 CALL PREP_HOR_TEB_GARDEN_FIELD(HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+
 !
 !*      2.6    LAI
 !
+IF (CPHOTO/='NON' .AND. CPHOTO/='AGS' .AND. CPHOTO/='LST')  &
 CALL PREP_HOR_TEB_GARDEN_FIELD(HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !-------------------------------------------------------------------------------------
@@ -122,31 +117,25 @@ CALL PREP_HOR_TEB_GARDEN_FIELD(HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE
 ! If whole ice reservoir is empty (grib from ecmwf case) and surface temperature is
 ! lower than -10°C, then ice content is maximum and water content minimum
 !
-DO JP=1,NPATCH
-   IF (ALL(XWGI(:,:,JP)==0.)) THEN
-      WHERE(XTG(:,1:SIZE(XWG,2),JP) < XTT-10.)
-         XWGI(:,:,JP) = XWSAT(:,:)-XWGMIN
-         XWG (:,:,JP) = XWGMIN
+   IF (ALL(XWGI(:,:)==0.)) THEN
+      WHERE(XTG(:,1:SIZE(XWG,2)) < XTT-10.)
+         XWGI(:,:) = XWSAT(:,:)-XWGMIN
+         XWG (:,:) = XWGMIN
       END WHERE
    ENDIF
-ENDDO
 !
 ! No ice for force restore third layer:
 IF (CISBA == '3-L') THEN
-   DO JP=1,NPATCH
-      WHERE(XWG(:,3,JP) /= XUNDEF)
-        XWG(:,3,JP)  = MIN(XWG(:,3,JP)+XWGI(:,3,JP),XWSAT(:,3))
-        XWGI(:,3,JP) = 0.
+      WHERE(XWG(:,3) /= XUNDEF)
+        XWG(:,3)  = MIN(XWG(:,3)+XWGI(:,3),XWSAT(:,3))
+        XWGI(:,3) = 0.
       END WHERE
-   ENDDO
 ENDIF
 !
 ! Total water content should not exceed saturation:
-DO JP=1,NPATCH
-   WHERE(XWG(:,:,JP) /= XUNDEF .AND. (XWG(:,:,JP) + XWGI(:,:,JP)) > XWSAT(:,:) )
-      XWGI(:,:,JP) = XWSAT(:,:) - XWG(:,:,JP)
+   WHERE(XWG(:,:) /= XUNDEF .AND. (XWG(:,:) + XWGI(:,:)) > XWSAT(:,:) )
+      XWGI(:,:) = XWSAT(:,:) - XWG(:,:)
    END WHERE
-ENDDO
 !
 !-------------------------------------------------------------------------------------
 !
@@ -161,7 +150,7 @@ ENDIF
 !
 !*      5.     Half prognostic fields
 !
-ALLOCATE(XRESA(SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XRESA(SIZE(XLAI,1)))
 XRESA = 100.
 !
 !-------------------------------------------------------------------------------------
@@ -170,65 +159,51 @@ XRESA = 100.
 !
 IF (CPHOTO /= 'NON') THEN
 !
-   ALLOCATE(XAN(SIZE(XLAI,1),SIZE(XLAI,2)))
+   ALLOCATE(XAN(SIZE(XLAI,1)))
    XAN = 0.
 !
-   ALLOCATE(XANDAY(SIZE(XLAI,1),SIZE(XLAI,2)))
+   ALLOCATE(XANDAY(SIZE(XLAI,1)))
    XANDAY = 0.
 !
-   ALLOCATE(XANFM(SIZE(XLAI,1),SIZE(XLAI,2)))
+   ALLOCATE(XANFM(SIZE(XLAI,1)))
    XANFM = XANFMINIT
 !
-   ALLOCATE(XLE(SIZE(XLAI,1),SIZE(XLAI,2)))
+   ALLOCATE(XLE(SIZE(XLAI,1)))
    XLE = 0.
 !
 ENDIF
 !
 IF (CPHOTO == 'AGS' .OR. CPHOTO == 'AST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XBIOMASS(:,1,:) = 0.
+   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS))
+   XBIOMASS(:,1) = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
+   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS))
+   XRESP_BIOMASS(:,:) = 0.
 !
 ELSEIF (CPHOTO == 'LAI' .OR. CPHOTO == 'LST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XBIOMASS(:,1,:) = XLAI(:,:) * XBSLAI(:,:)
+   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS))
+   XBIOMASS(:,1) = XLAI(:) * XBSLAI(:)
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
+   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS))
+   XRESP_BIOMASS(:,:) = 0.
 !
 ELSEIF (CPHOTO == 'NIT' .OR. CPHOTO == 'NCB') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XBIOMASS(:,1,:) = XLAI(:,:) * XBSLAI_NITRO(:,:)
-   XBIOMASS(:,2,:) = MAX( 0., (XBIOMASS(:,1,:)/ (XCC_NIT/10.**XCA_NIT))  &
-                              **(1.0/(1.0-XCA_NIT)) - XBIOMASS(:,1,:) )  
-   XBIOMASS(:,3:NNBIOMASS,:) = 0.
+   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS))
+   XBIOMASS(:,1) = XLAI(:) * XBSLAI_NITRO(:)
+   XBIOMASS(:,2) = MAX( 0., (XBIOMASS(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
+                              **(1.0/(1.0-XCA_NIT)) - XBIOMASS(:,1) )  
+   XBIOMASS(:,3:NNBIOMASS) = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
+   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS))
+   XRESP_BIOMASS(:,:) = 0.
 !
 ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
-!*      7.     Isba-CC prognostic fields
-!
-IF (CRESPSL == 'CNT') THEN
-!
-   ALLOCATE(XLITTER(SIZE(XLAI,1),NNLITTER,NNLITTLEVS,SIZE(XLAI,2)))
-   XLITTER(:,:,:,:) = 0.
-!
-   ALLOCATE(XSOILCARB(SIZE(XLAI,1),NNSOILCARB,SIZE(XLAI,2)))
-   XSOILCARB(:,:,:) = 0.
-!
-   ALLOCATE(XLIGNIN_STRUC(SIZE(XLAI,1),NNLITTLEVS,SIZE(XLAI,2)))
-   XLIGNIN_STRUC(:,:,:) = 0.
-!
-ENDIF
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

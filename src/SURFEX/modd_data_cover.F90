@@ -31,6 +31,7 @@
 !!      V. Masson   01/2004  surface externalization
 !!      P Le Moigne 09/2005 AGS modifs of L. Jarlan
 !!      P Le Moigne 06/2006 seeding and irrigation
+!!      G Pigeon    08/2012 ROUGH_ROOF, ROUGH_WALL
 !!----------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -39,7 +40,7 @@ USE MODD_TYPE_DATE_SURF
 !
 IMPLICIT NONE
 !
-LOGICAL :: LREAD_DATA_COVER ! true if ecoclimap(2) parameters are read in binary files
+LOGICAL :: LREAD_DATA_COVER    ! true if ecoclimap(2) parameters are read in binary files
 LOGICAL :: LDATA_IRRIG    ! true if ecoclimap2 irrigation parameters have been modified by user
 LOGICAL :: LCLIM_LAI =.FALSE.  ! F: uses current year LAI (if between 2002 and 2006). 
 !                              ! T: uses average of LAI  (average is done using the 5 years) 
@@ -99,7 +100,7 @@ REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_ROOT_LIN       ! ponderation coeffi
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_BSLAI   ! ratio d(biomass)/d(lai)
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_LAIMIN  ! minimum LAI
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_SEFOLD  ! e-folding time for senescence (s)
-REAL, DIMENSION(:,:),  ALLOCATABLE :: XDATA_H_TREE   ! height of vegetation
+REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_H_TREE  ! height of vegetation
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_GMES    ! mesophyll conductance (m s-1)
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RE25    ! Ecosystem Respiration parameter (kg.m2.s-1)
 !
@@ -215,6 +216,43 @@ REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_H_INDUSTRY  ! anthropogenic sensible
 !                                                      ! heat fluxes due to factories
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_LE_INDUSTRY ! anthropogenic latent
 !                                                      ! heat fluxes due to factories
+REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_HC_FLOOR     ! heat capacity of floor layers [J m-3 K-1]
+REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_TC_FLOOR     ! thermal conductivity of floor layers [W m-1 K-1]
+REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_D_FLOOR      ! thickness of floor layers [m]
+!
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_TCOOL_TARGET ! cooling setpoint of indoor air
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_THEAT_TARGET ! heating setpoint of indoor air
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_F_WASTE_CAN  ! fraction of waste heat released into the canyon
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_EFF_HEAT     ! efficiency of the heating system
+!
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_QIN          ! internal heat gains [W m-2(floor)]
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_QIN_FRAD     ! radiant fraction of internal heat gains
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_SHGC         ! solar transmitance of windows
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_U_WIN        ! glazing thermal resistance [K m W-2]
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_GR           ! glazing ratio
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_SHGC_SH      ! solar transmitance of windows
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_FLOOR_HEIGHT ! building floor height [m]
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_INF          ! infiltration/ventilation flow rate [AC/H]
+!
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_F_WATER_COND
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_QIN_FLAT
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_HR_TARGET
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_V_VENT
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_CAP_SYS_HEAT
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_CAP_SYS_RAT
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_T_ADP
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_M_SYS_RAT
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_COP_RAT      ! COP of the cooling system
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_T_SIZE_MAX
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_T_SIZE_MIN
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_SHADE
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_NATVENT
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_ROUGH_ROOF
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_ROUGH_WALL
+!
+! urban vegetation parameters
+!
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_FRAC_GR     ! fraction of greenroof
 !
 !-------------------------------------------------------------------------------
 !

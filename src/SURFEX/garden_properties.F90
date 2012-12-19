@@ -29,14 +29,16 @@
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE MODD_TEB_GARDEN_n,      ONLY : CISBA, TSNOW, XALBNIR, XALBVIS, XALBUV,    &
+USE MODD_TEB_VEG_n,         ONLY : CISBA, LTR_ML
+USE MODD_TEB_GARDEN_n,      ONLY : TSNOW, XALBNIR, XALBVIS, XALBUV,    &
                                    XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,      &
                                    XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,   &
-                                   XVEG, XLAI, XZ0, XEMIS, XTG, LTR_ML,       &
-                                   XPSN, XPSNV, XPSNG, XPSNV_A, XALBNIR_TVEG, &
-                                   XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL  
-USE MODD_DIAG_TEB_GARDEN_n, ONLY : XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,     &
-                                   XSNOWFREE_ALB                                   
+                                   XALBNIR_TVEG, XALBVIS_TVEG,       &
+                                   XALBNIR_TSOIL, XALBVIS_TSOIL,   &                                   
+                                   XVEG, XLAI, XZ0, XEMIS, XTG,       &
+                                   XPSN, XPSNV, XPSNG, XPSNV_A,  &
+                                   XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,     &
+                                   XSNOWFREE_ALB  
 !
 USE MODI_ISBA_PROPERTIES
 !
@@ -72,34 +74,31 @@ REAL, DIMENSION(SIZE(PALB))    :: ZASNOW    ! snow albedo
 REAL, DIMENSION(SIZE(PALB))    :: ZENOSNOW  ! snow-free surface emissivity
 REAL, DIMENSION(SIZE(PALB))    :: ZESNOW    ! snow emissivity
 !
-INTEGER  :: JP ! patch number
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
-!* only one patch for gardens
 IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
-JP = 1
 !
-CALL ISBA_PROPERTIES(CISBA, LTR_ML, TSNOW, 1,                                     &
-                     PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                            &
-                     XALBNIR(:,JP), XALBVIS(:,JP), XALBUV(:,JP),                  &
-                     XALBNIR_VEG(:,JP), XALBVIS_VEG(:,JP), XALBUV_VEG(:,JP),      &
-                     XALBNIR_SOIL(:,JP), XALBVIS_SOIL(:,JP), XALBUV_SOIL(:,JP),   &
-                     XVEG(:,JP), XLAI(:,JP), XZ0(:,JP), XEMIS(:,JP),XTG(:,JP,JP), &
+CALL ISBA_PROPERTIES(CISBA, LTR_ML, TSNOW, 1,                            &
+                     PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                   &
+                     XALBNIR(:), XALBVIS(:), XALBUV(:),                  &
+                     XALBNIR_VEG(:), XALBVIS_VEG(:), XALBUV_VEG(:),      &
+                     XALBNIR_SOIL(:), XALBVIS_SOIL(:), XALBUV_SOIL(:),   &
+                     XVEG(:), XLAI(:), XZ0(:), XEMIS(:),XTG(:,1),          &
                      ZASNOW, ZANOSNOW, ZESNOW, ZENOSNOW, ZTSSNOW, ZTSNOSNOW,      &
                      XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,                       &
                      XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,    &
-                     XPSN(:,JP), XPSNV_A(:,JP), XPSNG(:,JP), XPSNV(:,JP)          )  
+                     XPSN(:), XPSNV_A(:), XPSNG(:), XPSNV(:)          )  
 !
 XSNOWFREE_ALB = ZANOSNOW
 !
 !* averaged albedo
-PALB =  XPSN(:,JP) * ZASNOW              + (1.-XPSN(:,JP)) * ZANOSNOW
+PALB =  XPSN(:) * ZASNOW              + (1.-XPSN(:)) * ZANOSNOW
 !* averaged emissivity
-PEMIS=  XPSN(:,JP) * ZESNOW              + (1.-XPSN(:,JP)) * ZENOSNOW
+PEMIS=  XPSN(:) * ZESNOW              + (1.-XPSN(:)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
-PTS  =((XPSN(:,JP) * ZESNOW * ZTSSNOW**4 + (1.-XPSN(:,JP)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+PTS  =((XPSN(:) * ZESNOW * ZTSSNOW**4 + (1.-XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

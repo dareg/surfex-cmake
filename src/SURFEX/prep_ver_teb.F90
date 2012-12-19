@@ -25,8 +25,9 @@ SUBROUTINE PREP_VER_TEB
 !
 
 !
-USE MODD_TEB_n,   ONLY : XZS, XT_CANYON, XQ_CANYON, XT_ROAD, XT_ROOF, XT_WALL, &
-                          TSNOW_ROOF, TSNOW_ROAD, XTI_ROAD, XD_WALL, XD_ROOF  
+USE MODD_TEB_n,   ONLY : XZS, XT_CANYON, XQ_CANYON, XT_ROAD, XT_ROOF, XT_WALL_A, XT_WALL_B, &
+                          TSNOW_ROOF, TSNOW_ROAD, XTI_ROAD, XD_WALL, XD_ROOF, CBEM
+USE MODD_BEM_n,   ONLY : XT_FLOOR, XT_MASS, XD_FLOOR                          
 USE MODD_PREP,   ONLY : XZS_LS, XT_CLIM_GRAD
 USE MODD_CSTS,   ONLY : XRD, XG, XP00
 !
@@ -90,9 +91,11 @@ END DO
 !* surface temperature shift is given by climatological gradient
 !* shift of temperatures within the wall is attenuated
 !* shift is zero from internal wall to half of wall
-DO JL=1,SIZE(XT_WALL,2)
-  XT_WALL(:,JL) = XT_WALL(:,JL) + XT_CLIM_GRAD  * (XZS - XZS_LS) &
-                                   * MAX(1.-2.*ZGRID(:,JL)/ZD(:),0.)  
+DO JL=1,SIZE(XT_WALL_A,2)
+  XT_WALL_A(:,JL) = XT_WALL_A(:,JL) + XT_CLIM_GRAD  * (XZS - XZS_LS) &
+                                     * MAX(1.-2.*ZGRID(:,JL)/ZD(:),0.)  
+  XT_WALL_B(:,JL) = XT_WALL_B(:,JL) + XT_CLIM_GRAD  * (XZS - XZS_LS) &
+                                     * MAX(1.-2.*ZGRID(:,JL)/ZD(:),0.)  
 END DO
 !
 DEALLOCATE(ZD)
@@ -121,6 +124,59 @@ END DO
 !
 DEALLOCATE(ZD)
 DEALLOCATE(ZGRID)
+!
+!
+IF (CBEM=='BEM') THEN
+  !
+  !*      1.6bis Floor Temperature profile
+  !
+  !* Floor grid
+  ALLOCATE(ZD   (SIZE(XD_FLOOR,1)))
+  ALLOCATE(ZGRID(SIZE(XD_FLOOR,1),SIZE(XD_FLOOR,2)))
+  ZGRID(:,:) = 0.
+  ZD   (:)   = 0.
+  !
+  DO JL=1,SIZE(XD_FLOOR,2)
+    ZGRID(:,JL) = ZD(:) + XD_FLOOR(:,JL)/2.
+    ZD   (:)    = ZD(:) + XD_FLOOR(:,JL)
+  END DO
+  !
+  !* deep ground temperature shift is given by climatological gradient
+  !* shift of temperatures within the floor is attenuated
+  !* shift is zero from internal floor layer to half of floor
+  DO JL=1,SIZE(XT_FLOOR,2)
+    XT_FLOOR(:,JL) = XT_FLOOR(:,JL) + XT_CLIM_GRAD  * (XZS - XZS_LS) &
+                                   * MAX(2.*ZGRID(:,JL)/ZD(:)-1.,0.)
+  END DO
+  !
+  DEALLOCATE(ZD)
+  DEALLOCATE(ZGRID)
+  !
+  !*      1.6bis Mass Temperature profile
+  !
+  !* mass grid
+  ALLOCATE(ZD   (SIZE(XD_FLOOR,1)))
+  ALLOCATE(ZGRID(SIZE(XD_FLOOR,1),SIZE(XD_FLOOR,2)))
+  ZGRID(:,:) = 0.
+  ZD   (:)   = 0.
+  !
+  DO JL=1,SIZE(XD_FLOOR,2)
+    ZGRID(:,JL) = ZD(:) + XD_FLOOR(:,JL)/2.
+    ZD   (:)    = ZD(:) + XD_FLOOR(:,JL)
+  END DO
+  !
+  !* deep ground temperature shift is given by climatological gradient
+  !* shift of temperatures within the floor is attenuated
+  !* shift is zero from internal floor layer to half of floor
+  DO JL=1,SIZE(XT_MASS,2)
+    XT_MASS(:,JL) = XT_MASS(:,JL) + XT_CLIM_GRAD  * (XZS - XZS_LS) &
+                                   * MAX(2.*ZGRID(:,JL)/ZD(:)-1.,0.)
+  END DO
+  !
+  DEALLOCATE(ZD)
+  DEALLOCATE(ZGRID)
+  !
+ENDIF
 !
 !*      1.7    Snow variables
 !

@@ -27,7 +27,7 @@
 !
 IMPLICIT NONE
 !      
-INTEGER, PARAMETER                  :: JPVAR = 400             ! maximum number of fields to write      
+INTEGER, PARAMETER                  :: JPVAR = 600             ! maximum number of fields to write      
 CHARACTER(LEN=16), DIMENSION(JPVAR) :: CVAR='                ' ! names of fields to write
 CHARACTER(LEN=16), DIMENSION(JPVAR) :: CVARN='                ' ! names of fields to write
 INTEGER, DIMENSION(JPVAR)           :: NVAR                    ! unit number associated to CVAR elements

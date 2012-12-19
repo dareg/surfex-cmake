@@ -269,7 +269,7 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !
 !     #######################
       SUBROUTINE READ_EXTERN_ISBA(HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                                  KLUOUT,KNI,HFIELD,PFIELD,PDEPTH)
+                                  KLUOUT,KNI,HFIELD,HNAME,PFIELD,PDEPTH)
 !     #######################
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
@@ -293,6 +293,7 @@ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 INTEGER,              INTENT(IN)    :: KNI       ! number of points
 CHARACTER(LEN=7),     INTENT(IN)    :: HFIELD    ! field name
+CHARACTER(LEN=*),     INTENT(IN)    :: HNAME     ! field name in the file
 REAL, DIMENSION(:,:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:,:), POINTER       :: PDEPTH    ! middle depth of each layer
 !
@@ -311,6 +312,7 @@ INTEGER           :: JLAYER         ! loop counter
 INTEGER           :: IPATCH         ! number of patch
 INTEGER           :: JPATCH         ! loop counter
 INTEGER           :: JVEGTYPE       ! loop counter
+LOGICAL           :: GTEB           ! TEB field
 !
 REAL,  DIMENSION(:,:,:), ALLOCATABLE :: ZFIELD ! field read, one level, all patches
 REAL,  DIMENSION(:,:),   ALLOCATABLE :: ZWORK  ! field read, one level, all patches
@@ -331,9 +333,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_ISBA',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,*) ' | Reading ',HFIELD,' in externalized file'
 !
+GTEB = (HNAME(1:3)=='TWN' .OR. HNAME(1:3)=='TEB')
+!
 !------------------------------------------------------------------------------
 !
-IF (HFIELD(1:3)=='TWN') THEN
+IF (GTEB) THEN
   CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
 ELSE
   CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'NATURE')
@@ -342,13 +346,13 @@ ENDIF
 !* Read number of soil layers
 !
 YRECFM='GROUND_LAYER'
-IF (HFIELD(1:3)=='TWN') YRECFM='TWN_LAYER'
+IF (GTEB) YRECFM='TWN_LAYER'
 CALL READ_SURF(HFILEPGDTYPE,YRECFM,ILAYER,IRESP)
 !
 !* number of tiles
 !
 IPATCH=1
-IF (HFIELD(1:3)/='TWN') THEN
+IF (.NOT. GTEB) THEN
   YRECFM='PATCH_NUMBER'
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
 END IF
@@ -356,7 +360,7 @@ END IF
 !* soil scheme
 !
 YRECFM='ISBA'
-IF (HFIELD(1:3)=='TWN') YRECFM='TWN_ISBA'
+IF (GTEB) YRECFM='TWN_ISBA'
 CALL READ_SURF(HFILEPGDTYPE,YRECFM,YISBA,IRESP)
 !
 YRECFM='VERSION'
@@ -370,7 +374,7 @@ IF (IVERSION>=7) THEN
   !* Pedo-transfert function
   !
   YRECFM='PEDOTF'
-  IF (HFIELD(1:3)=='TWN') YRECFM='TWN_PEDOTF'
+  IF (GTEB) YRECFM='TWN_PEDOTF'
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,YPEDOTF,IRESP)
   !
 ELSE
@@ -389,7 +393,7 @@ ENDIF
 !
 ALLOCATE(ZCLAY(KNI))
 YRECFM='CLAY'
-IF (HFIELD(1:3)=='TWN') YRECFM='TWN_CLAY'
+IF (GTEB) YRECFM='TWN_CLAY'
 CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZCLAY(:),IRESP,HDIR='A')
 !
 !-------------------------------------------------------------------------------
@@ -399,7 +403,7 @@ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZCLAY(:),IRESP,HDIR='A')
 !
 ALLOCATE(ZSAND(KNI))
 YRECFM='SAND'
-IF (HFIELD(1:3)=='TWN') YRECFM='TWN_SAND'
+IF (GTEB) YRECFM='TWN_SAND'
 CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZSAND(:),IRESP,HDIR='A')
 !
 !-------------------------------------------------------------------------------
@@ -414,7 +418,7 @@ IF(YISBA=='DIF') THEN
   ZSOILGRID=XUNDEF
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
     YRECFM='SOILGRID'
-    IF (HFIELD(1:3)=='TWN') YRECFM='TWN_SOILGRID'
+    IF (GTEB) YRECFM='TWN_SOILGRID'
     CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZSOILGRID,IRESP,HDIR='-')
   ELSE
     ZSOILGRID(1:ILAYER) = XOPTIMGRID(1:ILAYER)
@@ -423,7 +427,7 @@ ELSE
   ALLOCATE(ZSOILGRID(0))
 ENDIF
 !
-IF ((HFIELD=='TG    ' .OR. HFIELD=='TWN_TG') .AND. (YISBA=='2-L' .OR. YISBA=='3-L')) THEN
+IF ((HFIELD=='TG    ') .AND. (YISBA=='2-L' .OR. YISBA=='3-L')) THEN
   ALLOCATE(PDEPTH    (KNI,ILAYER,NVEGTYPE))
   DO JVEGTYPE=1,NVEGTYPE
     PDEPTH(:,1,JVEGTYPE) = 0.
@@ -432,7 +436,7 @@ IF ((HFIELD=='TG    ' .OR. HFIELD=='TWN_TG') .AND. (YISBA=='2-L' .OR. YISBA=='3-
   END DO
 ELSE
   YNAT='NAT'
-  IF (HFIELD(1:3)=='TWN') YNAT='GRD'
+  IF (GTEB) YNAT='GRD'
   CALL READ_EXTERN_DEPTH(HFILEPGDTYPE,KLUOUT,YISBA,YNAT,HFIELD,KNI,ILAYER,IPATCH,&
                          ZSOILGRID,PDEPTH,IVERSION)
 END IF
@@ -452,7 +456,7 @@ ZWORK(:,:) = XUNDEF
 ! *.  Read soil variable profile
 !     --------------------------
 !
-IF (HFIELD(1:3)=='TWN') THEN
+IF (GTEB) THEN
   CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'TOWN  ')
 ELSE
   CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')
@@ -460,7 +464,7 @@ ENDIF
 !
 DO JLAYER=1,ILAYER
   WRITE(YLVL,'(I4)') JLAYER
-  YRECFM=TRIM(HFIELD)//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+  YRECFM=TRIM(HNAME)//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HFILETYPE,YRECFM,ZWORK(:,:),IRESP,HDIR='A')
   DO JPATCH=1,IPATCH
     ZVAR(:,JLAYER,JPATCH)=ZWORK(:,JPATCH)
@@ -476,8 +480,7 @@ DEALLOCATE(ZWORK)
 !     ------------------------------------------------
 !
 !* In case of force-restore ISBA, adds one layer at bottom of surface layer
-IF ((HFIELD=='WG    ' .OR. HFIELD=='TWN_WG  ' .OR. HFIELD=='TWN_WGI ' .OR. HFIELD=='WGI   ') &
-     .AND. (YISBA=='2-L' .OR. YISBA=='3-L')) THEN
+IF ((HFIELD=='WG    ' .OR. HFIELD=='WGI   ') .AND. (YISBA=='2-L' .OR. YISBA=='3-L')) THEN
   ALLOCATE(ZFIELD(KNI,ILAYER,IPATCH))
   ZFIELD(:,:,:) = ZVAR(:,:,:)
   DEALLOCATE(ZVAR)
@@ -500,8 +503,7 @@ END IF
 ALLOCATE(ZFIELD(KNI,ILAYER,IPATCH))
 ZFIELD = ZVAR
 !
-IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ' &
-  .OR. HFIELD=='TWN_WG  ' .OR. HFIELD=='TWN_WGI ') THEN
+IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
   !
   ! Compute ISBA model constants
   !
@@ -518,7 +520,7 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ' &
 
   ZFIELD(:,:,:) = XUNDEF
   !
-  IF (HFIELD=='WG    '.OR. HFIELD=='TWN_WG  ') THEN
+  IF (HFIELD=='WG    ') THEN
     DO JPATCH=1,IPATCH
       DO JLAYER=1,ILAYER
         WHERE(ZVAR(:,JLAYER,JPATCH)/=XUNDEF)
@@ -528,7 +530,7 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ' &
         END WHERE
       END DO
     END DO
-  ELSE IF (HFIELD=='WGI   '.OR. HFIELD=='TWN_WGI ') THEN
+  ELSE IF (HFIELD=='WGI   ') THEN
     DO JPATCH=1,IPATCH
       DO JLAYER=1,ILAYER
         WHERE(ZVAR(:,JLAYER,JPATCH)/=XUNDEF) &

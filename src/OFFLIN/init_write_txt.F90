@@ -32,11 +32,11 @@ USE MODD_IO_SURF_TXT,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_TXT,  ONLY:NUNIT0, NVAR, CVAR, CVARN, JPVAR, NIND
 USE MODD_DIAG_SURF_ATM_n, ONLY:LSELECT, CSELECT
 !
+USE MODI_ABOR1_SFX
+USE MODI_TEST_RECORD_LEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -77,8 +77,7 @@ ELSE
 !
   IF (.NOT.LSELECT) THEN
 !
-    IF ( (HREC(1:2)/='D_'                          ) .AND.  &
-          (HREC(5:7)/='_OC'                          ) .AND.  & 
+    IF ( (HREC(5:7)/='_OC'                          ) .AND.  & 
           (HREC(4:6)/='_OC'                          ) .AND.  &           
           (HREC(1:3)/='SEA'                          ) .AND.  &    
           (HREC(1:2)/='DX'                           ) .AND.  &
@@ -98,8 +97,8 @@ ELSE
           (HREC(1:3)/='SWU'                          ) .AND.  &
           (HREC(1:3)/='LWD'                          ) .AND.  &
           (HREC(1:3)/='LWU'                          ) .AND.  &
-          (HREC(1:3)/='ALB'                          ) .AND.  &
-          (HREC(1:2)/='DG'                           ) .AND.  &
+          !(HREC(1:3)/='ALB'                          ) .AND.  &
+          !(HREC(1:2)/='DG'                           ) .AND.  &
           (HREC(1:5)/='DROOT'                        ) .AND.  &
           (HREC(1:4)/='DTOT'                         ) .AND.  &
           (HREC(1:7)/='RUNOFFD'                      ) .AND.  &
@@ -109,15 +108,15 @@ ELSE
           (HREC(1:3)/='W33'                          ) .AND.  &
           (HREC(1:5)/='WWILT'                        ) .AND.  &
           (HREC(1:4)/='DICE'                         ) .AND.  &
-          (HREC(1:2)/='CV'                           ) .AND.  &
-          (HREC(1:5)/='GAMMA'                        ) .AND.  &
-          (HREC(1:5)/='RSMIN'                        ) .AND.  &
-          (HREC(1:5)/='WRMAX'                        ) .AND.  &
-          (HREC(1:5)/='Z0REL'                        ) .AND.  &
-          (HREC(1:5)/='Z0SEA'                        ) .AND.  &
-          (HREC(1:7)/='Z0WATER'                      ) .AND.  &
+          !(HREC(1:2)/='CV'                           ) .AND.  &
+          !(HREC(1:5)/='GAMMA'                        ) .AND.  &
+          !(HREC(1:5)/='RSMIN'                        ) .AND.  &
+          !(HREC(1:5)/='WRMAX'                        ) .AND.  &
+          !(HREC(1:5)/='Z0REL'                        ) .AND.  &
+          !(HREC(1:5)/='Z0SEA'                        ) .AND.  &
+          !(HREC(1:7)/='Z0WATER'                      ) .AND.  &
           (HREC(4:6)/='_ZS'                          ) .AND.  &
-          (HREC(1:7)/='VEGTYPE'                      ) .AND.  &
+          !(HREC(1:7)/='VEGTYPE'                      ) .AND.  &
           (HREC(1:5)/='COVER'                        ) .AND.  &
           (HREC(1:5)/='IRRIG'                        ) .AND.  &
           (HREC(1:4)/='TI_R'                         ) .AND.  &
@@ -128,6 +127,7 @@ ELSE
           (HREC(1:4)/='FMV_'                         ) .AND.  &
           (HREC(1:6)/='DRIVEG'                       ) .AND.  &
           (HREC(1:5)/='RRVEG'                        ) .AND.  &
+          (HREC(1:8)/='BLD_DESC'                     ) .AND.  &
           (HREC(1:2)/='Z0'                           )        ) THEN  
 
       IVAR = IVAR+1
@@ -156,15 +156,9 @@ ELSE
       IFIELD=IFIELD+1
     ENDDO
   
-    LMATCH=.FALSE.
-    DO JFIELD=1,IFIELD
-      IF ( TRIM(CSELECT(JFIELD))==TRIM(HREC) )  THEN
-        LMATCH=.TRUE.
-        EXIT
-      ENDIF
-    ENDDO
+    CALL TEST_RECORD_LEN("ASCII",HREC,LMATCH)
 
-    IF ( LMATCH ) THEN
+    IF (.NOT. LMATCH ) THEN
 
       IVAR = IVAR+1
       IF (IVAR-NUNIT0>JPVAR) THEN

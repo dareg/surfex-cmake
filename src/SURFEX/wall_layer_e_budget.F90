@@ -1,16 +1,17 @@
 !   ##########################################################################
-    SUBROUTINE WALL_LAYER_E_BUDGET(PTS_ROAD, PT_WALL,                  &
-                                   PT_CANYON, PQ_CANYON,               &
-                                   PTS_GARDEN,                         &
-                                   PTA, PQA, PPS,                      &
-                                   PLW_RAD,  PTSTEP,                   &
-                                   PHC_WALL,PTC_WALL,PD_WALL,          &
-                                   PTI_BLD, PTI_BLDWFR, PAC_BLD,       &
-                                   PTSNOW_ROAD, PRHOA, PAC_WALL,       &
-                                   PABS_SW_WALL, PABS_LW_WALL,         &
-                                   PLW_W_TO_W, PLW_R_TO_W, PLW_G_TO_W, &
-                                   PLW_S_TO_W, PLW_NR_TO_W,            &
-                                   PDQS_WALL, PQF_WALL, PFLX_BLD_WALL  )
+    SUBROUTINE WALL_LAYER_E_BUDGET(HBEM, PT_WALL, PTS_WALL_B, PTI_WALL_B, PTSTEP,          &
+                                   PHC_WALL, PTC_WALL, PD_WALL, PDN_ROAD, PRHOA, PAC_WALL, &
+                                   PAC_BLD, PTI_BLD, PLW_RAD, PPS, PEXNS,     &
+                                   PABS_SW_WALL, PT_CANYON, PTS_ROAD, PTSNOW_ROAD,         &
+                                   PTS_GARDEN, PTS_MASS, PTS_FLOOR, PEMIS_WALL,            &
+                                   PLW_WA_TO_WB, PLW_R_TO_W, PLW_G_TO_W, PLW_NR_TO_W,      &
+                                   PLW_WIN_TO_W, PLW_S_TO_W,                               &
+                                   PT_WIN1,                                                &
+                                   PFLX_BLD_WALL, PDQS_WALL, PT_WIN2, PABS_LW_WALL,        &
+                                   PEMIT_LW_WALL, PH_WALL, PIMB_WALL, PF_WALL_MASS,        &
+                                   PF_WALL_FLOOR, PF_WALL_WIN, PRADHT_IN, PRAD_ROOF_WALL,  &
+                                   PRAD_WALL_WIN, PRAD_WALL_FLOOR,                         &
+                                   PRAD_WALL_MASS, PCONV_WALL_BLD, PLOAD_IN_WALL ) 
 !   ##########################################################################
 !
 !!****  *ROAD_WALL_LAYER_E_BUDGET*  
@@ -89,14 +90,19 @@
 !!                           for very strong evaporation (all reservoir emptied
 !!                           in one time-step)
 !!                     02/11 (V. Masson) splits the routine for road and walls separately
+!!                     01/12 (V. Masson) separates the 2 walls
+!!                     09/12 (G. Pigeon) modif internal convective coef convection
+!!                     10/12 (G. Pigeon) add solar heat gain of indoor wall
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,ONLY : XCPD
+USE MODD_CSTS,ONLY : XCPD, XSTEFAN
 !
-USE MODI_TRIDIAG_GROUND
+USE MODI_LAYER_E_BUDGET_GET_COEF
+USE MODI_LAYER_E_BUDGET
+USE MODE_CONV_DOE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -105,324 +111,277 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROAD     ! road surface temperature
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL    ! wall layers temperatures
-REAL, DIMENSION(:), INTENT(IN)    :: PT_CANYON    ! air canyon temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PQ_CANYON    ! and specific humidity
-REAL, DIMENSION(:), INTENT(IN)    :: PTS_GARDEN   ! green area surface temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PTA          ! atmospheric air temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PQA          ! and specific humidity at roof level
-REAL, DIMENSION(:), INTENT(IN)    :: PPS          ! pressure at the surface
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_RAD      ! atmospheric infrared radiation
-REAL,               INTENT(IN)    :: PTSTEP     ! time step
+REAL, DIMENSION(:),   INTENT(IN)  :: PTS_WALL_B ! opposite wall surface temperature
+REAL, DIMENSION(:),   INTENT(IN)  :: PTI_WALL_B ! opposite wall internal temperature
+REAL,               INTENT(IN)    :: PTSTEP       ! time step
+CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHC_WALL     ! heat capacity for wall layers
 REAL, DIMENSION(:,:), INTENT(IN)  :: PTC_WALL     ! thermal conductivity for wall layers
 REAL, DIMENSION(:,:), INTENT(IN)  :: PD_WALL      ! depth of wall layers
-REAL, DIMENSION(:), INTENT(IN)    :: PTI_BLD      ! inside building temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PTI_BLDWFR   ! inside building temperature without heating
+REAL, DIMENSION(:), INTENT(IN)    :: PDN_ROAD     ! snow-covered fraction on roads
+REAL, DIMENSION(:), INTENT(IN)    :: PRHOA        ! rho
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_WALL     ! aerodynamical conductance [m/s]
+!                                                 ! between wall and canyon
 REAL, DIMENSION(:), INTENT(IN)    :: PAC_BLD      ! aerodynamical conductance
                                                   ! inside the building itself
-REAL, DIMENSION(:), INTENT(IN)    :: PTSNOW_ROAD  ! road snow temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PRHOA        ! rho
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_WALL     ! aerodynamical conductance
-!                                                 ! between wall and canyon
+REAL, DIMENSION(:), INTENT(IN)    :: PTI_BLD      ! inside building temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_RAD      ! atmospheric infrared radiation
+REAL, DIMENSION(:), INTENT(IN)    :: PPS          ! pressure at the surface
+REAL, DIMENSION(:), INTENT(IN)    :: PEXNS        ! surface Exner function
 REAL, DIMENSION(:), INTENT(IN)    :: PABS_SW_WALL ! absorbed solar radiation
-REAL, DIMENSION(:), INTENT(OUT)   :: PABS_LW_WALL ! absorbed infrared rad.
+REAL, DIMENSION(:), INTENT(IN)    :: PT_CANYON    ! air canyon temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROAD     ! road surface temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PTSNOW_ROAD  ! road snow temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PTS_GARDEN   ! green area surface temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PTS_MASS     ! surface mass temperature  [K]
+REAL, DIMENSION(:), INTENT(IN)    :: PTS_FLOOR    ! floor layers temperatures [K]
+REAL, DIMENSION(:), INTENT(IN)    :: PEMIS_WALL   ! wall emissivity
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_W_TO_W    ! LW interactions wall  -> wall 
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_R_TO_W    ! LW interactions road  -> wall 
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_G_TO_W    ! LW interactions green -> wall 
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_S_TO_W    ! LW interactions sky   -> wall 
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_NR_TO_W   ! LW interactions road(snow) -> wall 
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_WA_TO_WB ! LW interactions wall  -> opposite wall
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_R_TO_W   ! LW interactions road -> wall ; DEF formulation 
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_G_TO_W   ! LW interactions garden -> wall ; DEF formulation
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_S_TO_W   ! LW interactions sky   -> wall 
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_NR_TO_W  ! LW interactions road(snow) -> wall 
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_WIN_TO_W ! Radiative heat trasfer coeff wall-window 
+                                                  ! [W K-1 m-2]
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PDQS_WALL     !heat storage inside the wall 
-REAL, DIMENSION(:), INTENT(INOUT) :: PQF_WALL      !flux from bld to wall due to space heating
-REAL, DIMENSION(:), INTENT(INOUT) :: PFLX_BLD_WALL !flux from bld to wall
+REAL, DIMENSION(:), INTENT(IN)    :: PT_WIN1      ! outdoor window temperature [K]
+REAL, DIMENSION(:), INTENT(OUT)   :: PFLX_BLD_WALL! flux from bld to wall
+REAL, DIMENSION(:), INTENT(INOUT) :: PDQS_WALL    ! heat storage inside the wall 
+REAL, DIMENSION(:), INTENT(IN)    :: PT_WIN2      ! indoor window temperature [K]
+REAL, DIMENSION(:), INTENT(OUT)   :: PABS_LW_WALL ! absorbed infrared rad. [W m-2(wall)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_WALL  ! LW flux emitted by the wall [W m-2(wall)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PH_WALL      ! Sensible heat flux from wall to air [W/m²(wall)]
+                                                  ! wall = facade - glazing
+REAL, DIMENSION(:), INTENT(OUT)   :: PIMB_WALL    ! wall residual energy imbalance 
+                                                  ! for verification [W m-2]
+REAL, DIMENSION(:),   INTENT(IN)  :: PF_WALL_FLOOR ! View factor wall-floor
+REAL, DIMENSION(:),   INTENT(IN)  :: PF_WALL_MASS  ! View factor wall-mass
+REAL, DIMENSION(:),   INTENT(IN)  :: PF_WALL_WIN   ! View factor wall-win
+REAL, DIMENSION(:),   INTENT(IN)  :: PRADHT_IN     ! Indoor radiant heat transfer coefficient
+                                                    ! [W K-1 m-2]
+REAL, DIMENSION(:), INTENT(IN)    :: PRAD_ROOF_WALL ! rad. fluxes from roof to wall [W m-2(roof)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WALL_WIN  ! rad. fluxes from wall to win  [W m-2(wall)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WALL_FLOOR! rad. fluxes from wall to floor [W m-2(wall)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WALL_MASS ! rad. fluxes from wall to mass [W m-2(wall)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_WALL_BLD ! conv. fluxes from wall to bld [W m-2(wall)]
+
+REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_IN_WALL  ! LOAD from solar heat gain + rad int. gains  W/m² [Wall]
+
+
 !
 !*      0.2    declarations of local variables
 !
 !
-REAL :: ZIMPL=0.5      ! implicit coefficient
-REAL :: ZEXPL=0.5      ! explicit coefficient
+REAL :: ZIMPL=1.0      ! implicit coefficient
+REAL :: ZEXPL=0.0      ! explicit coefficient
 !
-REAL, DIMENSION(SIZE(PTA),SIZE(PT_WALL,2)) ::  ZA,& ! lower diag.
+REAL, DIMENSION(SIZE(PPS),SIZE(PT_WALL,2)) ::  ZA,& ! lower diag.
                                                ZB,& ! main  diag.
                                                ZC,& ! upper diag.
-                                               ZY,& ! r.h.s.
-                                               ZX   ! solution
-
+                                               ZY   ! r.h.s.                       
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZRHO_AC_W   ! rho * conductance (for walls)
-REAL, DIMENSION(SIZE(PTA),SIZE(PT_WALL,2)) :: ZMTC_O_D_WALL
-! mean thermal conductivity over distance between 2 layers
-REAL, DIMENSION(SIZE(PTA),SIZE(PT_WALL,2)) :: ZHC_D_WALL
+REAL, DIMENSION(SIZE(PPS)) :: ZMTC_O_D_WALL_IN
+REAL, DIMENSION(SIZE(PPS)) :: ZDF_ROAD    ! Road snow free fraction
+REAL, DIMENSION(SIZE(PPS)) :: ZRHO_ACF_W  ! rho * conductance
+!                                         !     * snow-free f.
+!
 ! thermal capacity times layer depth
-REAL, DIMENSION(SIZE(PTA)) :: ZTS_WALL    ! wall surface temperature
-REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZEI_WALL  ! internal energy of walls
-REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZPEI_WALL ! internal energy of walls at time t+
-REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZTI_WALL    !temperature of internal wall layer at time t
-REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZFLX_BLD_WALL_EQ !heat flux between inside of
-                                                   !the building and the wall without heating
+REAL, DIMENSION(SIZE(PPS)) :: ZTS_WALL       ! wall surface temperature
+REAL, DIMENSION(SIZE(PPS)) :: ZTI_WALL       ! wall indoor surface temperature
+REAL, DIMENSION(SIZE(PPS)) :: ZTI_WALL_CONV  ! wall indoor surface temperature for conv. flux
+REAL, DIMENSION(SIZE(PPS)) :: ZT_SKY         ! sky temperature [K]
 !
+REAL, DIMENSION(SIZE(PPS)) :: ZTI_ROOF       ! Indoor roof temperature [K]
+REAL, DIMENSION(SIZE(PPS)) :: ZDIF_RAD_WALL_ROOF !diff between the rad flux that should receive the wall from the roof
+                                                 ! and what it really receives [W m-2(bld)]
+REAL, DIMENSION(SIZE(PPS)) :: ZRAD_WALL_ROOF     ! rad flux between the wall and the roof computed for the wall balance
+REAL, DIMENSION(SIZE(PPS)) :: ZF_WALL_WALL       ! View factor wall-wall inside the building
+REAL, DIMENSION(SIZE(PPS)) :: ZCHTC_IN_WALL  ! indoor convective heat transfer coeff wall [W m-2 K-1]
 INTEGER :: IWALL_LAYER           ! number of wall layers
-INTEGER :: ILAYER                ! current layer
-INTEGER :: JLAYER, JJ            ! loop counter
+INTEGER :: JJ                    ! loop counter
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WALL_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !
-!*      1.     Layer thermal properties
-!              ------------------------
-!
-!*      1.1    Walls
-!              -----
+CALL LAYER_E_BUDGET_GET_COEF( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
+                              ZA, ZB, ZC, ZY )
 !
 IWALL_LAYER = SIZE(PT_WALL,2)
-ZMTC_O_D_WALL(:,:) = 0.
 !
-DO JLAYER=1,IWALL_LAYER-1
-!
-  DO JJ=1,SIZE(PT_WALL,1)
-!
-    ZMTC_O_D_WALL(JJ,JLAYER) = 2./(  PD_WALL(JJ,JLAYER  )/PTC_WALL(JJ,JLAYER  ) &
-                                + PD_WALL(JJ,JLAYER+1)/PTC_WALL(JJ,JLAYER+1) )
-    ZHC_D_WALL   (JJ,JLAYER) = PHC_WALL(JJ,JLAYER) * PD_WALL (JJ,JLAYER)
+DO JJ=1,SIZE(PDN_ROAD)
+  !
+  ZDF_ROAD(JJ) = 1. - PDN_ROAD(JJ)
+  !
+  ZTS_WALL(JJ) = PT_WALL(JJ,1)
+  ZTI_WALL(JJ) = PT_WALL(JJ, IWALL_LAYER)
+  !
+  !*      2.1    outdoor convective flux properties 
+  !              ----------------------------------
+  !
+  ZRHO_ACF_W (JJ) = PRHOA(JJ) * PAC_WALL(JJ)
+  !
+  !*      2.2    Sky temperature
+  !              ---------------
+  !
+  ZT_SKY(JJ) = (PLW_RAD(JJ)/XSTEFAN)**0.25
+  !  
+  !*      2.3    indoor average thermal conductivity
+  !              -----------------------------------
+  !
+  IF (HBEM .EQ. "DEF") THEN
+    ZMTC_O_D_WALL_IN(JJ) = 2. * PTC_WALL(JJ,IWALL_LAYER) / PD_WALL (JJ,IWALL_LAYER)
+    ZMTC_O_D_WALL_IN(JJ) = 1./(  1./ZMTC_O_D_WALL_IN(JJ)  + 1./(XCPD*PRHOA(JJ)*PAC_BLD(JJ)))
+  ENDIF
+ENDDO  
+  !  
+  !*      2.4    indoor convective coefficient
+  !              -----------------------------
+  !
+  ZCHTC_IN_WALL(:) = CHTC_VERT_DOE(PT_WALL(:,IWALL_LAYER), PTI_BLD(:))
+  DO JJ=1,SIZE(ZCHTC_IN_WALL)
+     ZCHTC_IN_WALL(JJ) = MAX(1., ZCHTC_IN_WALL(JJ))
   ENDDO
-!
-END DO
-!
-DO JJ=1,SIZE(PT_WALL,1)
-  ZMTC_O_D_WALL(JJ,IWALL_LAYER) = 2. * PTC_WALL(JJ,IWALL_LAYER) &
-                                  / PD_WALL (JJ,IWALL_LAYER)
-  ZMTC_O_D_WALL(JJ,IWALL_LAYER) = 1./(  1./ZMTC_O_D_WALL(JJ,IWALL_LAYER)    &
-                                   + 1./(XCPD*PRHOA(JJ)*PAC_BLD(JJ))      )
-!
-  ZHC_D_WALL   (JJ,IWALL_LAYER) = PHC_WALL(JJ,IWALL_LAYER) &
-                             * PD_WALL (JJ,IWALL_LAYER)
-ENDDO
-!
-!-------------------------------------------------------------------------------
-!
-!*      2.    Preliminaries
-!             -------------
-!
-!*      storage current temperature of internal wall layer
-ZTI_WALL(:)=PT_WALL(:,IWALL_LAYER)
-!
-!
-!*      2.3    Surface temperatures
-!              --------------------
-!
-ZTS_WALL(:) = PT_WALL(:,1)
-!
-DO JJ=1,SIZE(PT_WALL,1)
-!*      2.2    flux properties
-  ZRHO_AC_W (JJ) = PRHOA(JJ) * PAC_WALL(JJ)
-!*      2.5    internal energy of walls/roads at the current time step
-  ZEI_WALL(JJ)=PHC_WALL(JJ,1)*PD_WALL(JJ,1)*PT_WALL(JJ,1)
-!
-ENDDO
-!
-DO JLAYER=2,IWALL_LAYER
-  DO JJ=1,SIZE(PT_WALL,1)
-      ZEI_WALL(JJ)=ZEI_WALL(JJ)+(PHC_WALL(JJ,JLAYER)*PD_WALL(JJ,JLAYER)* &
-                          PT_WALL(JJ,JLAYER))
-   ENDDO
-END DO                                
-!
-!-------------------------------------------------------------------------------
-!
-!*      3.    Inside wall layer coefficients
-!             ------------------------------
-!
-!
-DO JJ=1,SIZE(PT_WALL,1)
-!
-  ZA(JJ,1) =   0.
 
-  ZB(JJ,1) =   ZHC_D_WALL(JJ,IWALL_LAYER) / PTSTEP                     &
-     + ZIMPL * (   ZMTC_O_D_WALL(JJ,IWALL_LAYER  )                     &
-                 + ZMTC_O_D_WALL(JJ,IWALL_LAYER-1)                     &
-               )
-
-  ZC(JJ,1) =                                                           &
-       ZIMPL * ( - ZMTC_O_D_WALL(JJ,IWALL_LAYER-1)                     &
-               )
 !
-  ZY(JJ,1) =   ZHC_D_WALL(JJ,IWALL_LAYER) / PTSTEP                          &
-                                             * PT_WALL(JJ,IWALL_LAYER)      &
-                 + ZMTC_O_D_WALL(JJ,IWALL_LAYER) * PTI_BLDWFR(JJ)           &
-     + ZEXPL * ( - ZMTC_O_D_WALL(JJ,IWALL_LAYER  )                          &
-                       * PT_WALL(JJ,IWALL_LAYER  )                          &
-                 - ZMTC_O_D_WALL(JJ,IWALL_LAYER-1)                          &
-                       * PT_WALL(JJ,IWALL_LAYER  )                          &
-                 + ZMTC_O_D_WALL(JJ,IWALL_LAYER-1)                          &
-                       * PT_WALL(JJ,IWALL_LAYER-1)                          &
-               )
 !-------------------------------------------------------------------------------
 !
 !*      3.    Outer wall layer coefficients
+!             ------------------------------
+!
+DO JJ=1,SIZE(PT_WALL,1)
+  !
+  ZB(JJ,1) = ZB(JJ,1) + ZIMPL * XCPD/PEXNS(JJ) * ZRHO_ACF_W(JJ)
+  !
+  ZY(JJ,1) = ZY(JJ,1) + PABS_SW_WALL(JJ)  &
+                      + XCPD/PEXNS(JJ) * ZRHO_ACF_W(JJ) * ( PT_CANYON(JJ) - ZEXPL * ZTS_WALL(JJ) )
+  !
+  !
+  ZB(JJ,1) = ZB(JJ,1) &
+             + ZIMPL * ( PLW_S_TO_W(JJ) + PLW_WA_TO_WB(JJ)                &
+                       + ZDF_ROAD(JJ)*PLW_R_TO_W(JJ) +  PLW_G_TO_W(JJ)    &
+                       + PDN_ROAD(JJ) *   PLW_NR_TO_W(JJ)                 &
+                       + PLW_WIN_TO_W(JJ)  )    
+  !
+  ZY(JJ,1) = ZY(JJ,1) + &
+                         PLW_S_TO_W(JJ) * (ZT_SKY(JJ)     - ZEXPL * ZTS_WALL(JJ))  &
+                       + PLW_WA_TO_WB(JJ) * (PTS_WALL_B(JJ) - ZEXPL * ZTS_WALL(JJ))  &
+       + ZDF_ROAD(JJ) *  PLW_R_TO_W(JJ)  * (PTS_ROAD(JJ)   - ZEXPL * ZTS_WALL(JJ))  &
+                       + PLW_G_TO_W(JJ)  * (PTS_GARDEN(JJ) - ZEXPL * ZTS_WALL(JJ)) &
+       + PDN_ROAD(JJ) *  PLW_NR_TO_W(JJ) * (PTSNOW_ROAD(JJ)- ZEXPL * ZTS_WALL(JJ))  &
+                       + PLW_WIN_TO_W(JJ) * (PT_WIN1(JJ)    - ZEXPL * ZTS_WALL(JJ))  
+
+  !
+ENDDO
+!
+!-------------------------------------------------------------------------------
+!
+!*      4.    Inside wall layer coefficients
 !             -----------------------------
 !
-!
-  ZA(JJ,IWALL_LAYER) =                                                      &
-       ZIMPL * ( - ZMTC_O_D_WALL(JJ,1)                                      &
-               )
-
-  ZB(JJ,IWALL_LAYER) =   ZHC_D_WALL(JJ,1)/PTSTEP                            &
-     + ZIMPL * ( -          4. *ZTS_WALL(JJ)**3 * PLW_W_TO_W(JJ)            &
-                 + ZRHO_AC_W(JJ) * XCPD                                     &
-                 + ZMTC_O_D_WALL(JJ,1)                                      &
-               )
-
-  ZC(JJ,IWALL_LAYER) = 0.
-
-  ZY(JJ,IWALL_LAYER) =   ZHC_D_WALL(JJ,1)/PTSTEP*ZTS_WALL(JJ)                &
-                 + PABS_SW_WALL(JJ)                                          &
-                 + PLW_RAD     (JJ)    * PLW_S_TO_W (JJ)                     &
-                 + ZTS_WALL    (JJ)**4 * PLW_W_TO_W (JJ)                     &
-                 + PTS_ROAD    (JJ)**4 * PLW_R_TO_W (JJ)                     &
-                 + PTSNOW_ROAD (JJ)**4 * PLW_NR_TO_W(JJ)                     &
-                 + PTS_GARDEN  (JJ)**4 * PLW_G_TO_W (JJ)                     &
-                 + ZRHO_AC_W(JJ) * XCPD * PT_CANYON(JJ)                      &
-     + ZIMPL * (                                                             &
-                 - 4.*ZTS_WALL(JJ)**4 * PLW_W_TO_W(JJ)                       &
-               )                                                             &
-     + ZEXPL * (   ZMTC_O_D_WALL(JJ,1) * PT_WALL(JJ,2)                       &
-                 - ZMTC_O_D_WALL(JJ,1) * PT_WALL(JJ,1)                       &
-                 - ZRHO_AC_W(JJ) * XCPD *ZTS_WALL(JJ)                        &
-               )
-
-END DO
-!
-!-------------------------------------------------------------------------------
-!
-!*      5.     Other wall layers coefficients
-!              ------------------------------
-!
-DO JLAYER=2,IWALL_LAYER-1
-
-  ILAYER=IWALL_LAYER-JLAYER+1
-
-  DO JJ=1,SIZE(PT_WALL,1)
-
-    ZA(JJ,ILAYER) =                                                       &
-         ZIMPL * ( - ZMTC_O_D_WALL(JJ,JLAYER  )                           &
-                 )
-
-    ZB(JJ,ILAYER) =   ZHC_D_WALL(JJ,JLAYER)/PTSTEP                        &
-       + ZIMPL * (   ZMTC_O_D_WALL(JJ,JLAYER  )                           &
-                   + ZMTC_O_D_WALL(JJ,JLAYER-1)                           &
-                 )
-
-    ZC(JJ,ILAYER) =                                                       &
-         ZIMPL * ( - ZMTC_O_D_WALL(JJ,JLAYER-1)                           &
-                 )
-!
-    ZY(JJ,ILAYER) =   ZHC_D_WALL(JJ,JLAYER)/PTSTEP * PT_WALL(JJ,JLAYER)  &
-        + ZEXPL * (    ZMTC_O_D_WALL(JJ,JLAYER  ) * PT_WALL(JJ,JLAYER+1) &
-                     - ZMTC_O_D_WALL(JJ,JLAYER  ) * PT_WALL(JJ,JLAYER  ) &
-                     - ZMTC_O_D_WALL(JJ,JLAYER-1) * PT_WALL(JJ,JLAYER  ) &
-                     + ZMTC_O_D_WALL(JJ,JLAYER-1) * PT_WALL(JJ,JLAYER-1) &
-                  )
-  ENDDO
-END DO
-!
-!-------------------------------------------------------------------------------
-!
-!*      6.     Tri-diagonal system resolution
-!              ------------------------------
-!
-CALL TRIDIAG_GROUND(ZA,ZB,ZC,ZY,ZX)
-!
-DO JLAYER=1,IWALL_LAYER
-  ILAYER=IWALL_LAYER-JLAYER+1
-  PT_WALL(:,JLAYER) = ZX(:,ILAYER)
-END DO  
-!
-!-------------------------------------------------------------------------------
-!
-!*     7.  computation of flux between bld and wall without heating
-!          --------------------------------------------------------
-!
 DO JJ=1,SIZE(PT_WALL,1)
-
-  ! computation of flux between bld and wall without heating
-  ZFLX_BLD_WALL_EQ(JJ)=ZMTC_O_D_WALL(JJ,IWALL_LAYER)*(PTI_BLDWFR(JJ) &
-                                  -ZIMPL*ZTI_WALL(JJ) &
-                                  -ZEXPL*PT_WALL(JJ,IWALL_LAYER) &
-                                         )
-!
-!*    11. computation of heat fluxes with heating
-!
-  ZY(JJ,1) =   ZHC_D_WALL(JJ,IWALL_LAYER) / PTSTEP                          &
-                                             * PT_WALL(JJ,IWALL_LAYER)      &
-                 + ZMTC_O_D_WALL(JJ,IWALL_LAYER) * PTI_BLD(JJ)              &
-     + ZEXPL * ( - ZMTC_O_D_WALL(JJ,IWALL_LAYER  )                          &
-                       * PT_WALL(JJ,IWALL_LAYER  )                          &
-                 - ZMTC_O_D_WALL(JJ,IWALL_LAYER-1)                          &
-                       * PT_WALL(JJ,IWALL_LAYER  )                          &
-                 + ZMTC_O_D_WALL(JJ,IWALL_LAYER-1)                          &
-                       * PT_WALL(JJ,IWALL_LAYER-1)                          &
-               )
-ENDDO
-!               
-CALL TRIDIAG_GROUND(ZA,ZB,ZC,ZY,ZX)
-!
-DO JLAYER=1,IWALL_LAYER
-  ILAYER=IWALL_LAYER-JLAYER+1
-  PT_WALL(:,JLAYER) = ZX(:,ILAYER)
-END DO 
-!
-DO JJ=1,SIZE(PT_WALL,1)
-  PFLX_BLD_WALL(JJ)=ZMTC_O_D_WALL(JJ,IWALL_LAYER)*(PTI_BLD(JJ)       &
-                                  -ZIMPL*ZTI_WALL(JJ)            &
-                                  -ZEXPL*PT_WALL(JJ,IWALL_LAYER) &
-                                         )
-!
-  PQF_WALL(JJ)=PFLX_BLD_WALL(JJ)-ZFLX_BLD_WALL_EQ(JJ)
-!
-ENDDO
-!-------------------------------------------------------------------------------
-!
-!*     12.    Wall absorbed infra-red radiation on snow-free surfaces
-!             -------------------------------------------------------
-!
-!* radiative surface temperature used during the enrgy balance (linearized at t+)
-!
-DO JJ=1,SIZE(ZTS_WALL)
-!
-  ZTS_WALL(JJ) = (ZTS_WALL(JJ)**4 + 4.*ZIMPL*ZTS_WALL(JJ)**3 * (PT_WALL(JJ,1) - ZTS_WALL(JJ)))**0.25
-!
-!* absorbed LW
-
-  PABS_LW_WALL       (JJ) = PLW_S_TO_W (JJ)*PLW_RAD      (JJ)         &
-                       + PLW_W_TO_W (JJ)*ZTS_WALL     (JJ)**4        &
-                       + PLW_R_TO_W (JJ)*PTS_ROAD     (JJ)**4        &
-                       + PLW_G_TO_W (JJ)*PTS_GARDEN   (JJ)**4        &
-                       + PLW_NR_TO_W(JJ)*PTSNOW_ROAD  (JJ)**4
-!
-ENDDO
-!-------------------------------------------------------------------------------
-!
-!
-!*      13     heat storage inside walls
-!              -------------------------
-!
-!       13.1   internal energy of the walls at the next time step
-!              --------------------------------------------------
-!
-ZPEI_WALL(:)=PHC_WALL(:,1)*PD_WALL(:,1)*PT_WALL(:,1)
-DO JLAYER=2,IWALL_LAYER
-    ZPEI_WALL(:)=ZPEI_WALL(:)+(PHC_WALL(:,JLAYER)*PD_WALL(:,JLAYER)* &
-                        PT_WALL(:,JLAYER))
+  !                
+  IF (HBEM=="DEF") THEN
+    !
+    ZB(JJ,IWALL_LAYER) = ZB(JJ,IWALL_LAYER) + ZIMPL * ZMTC_O_D_WALL_IN(JJ)
+    !
+    ZY(JJ,IWALL_LAYER) = ZY(JJ,IWALL_LAYER) &
+                        + ZMTC_O_D_WALL_IN(JJ) * PTI_BLD(JJ) &
+                        - ZEXPL * ZMTC_O_D_WALL_IN(JJ) * PT_WALL(JJ,IWALL_LAYER)
+    !
+  ELSEIF (HBEM=="BEM") THEN
+    !
+    ZF_WALL_WALL (JJ) = 1. - PF_WALL_MASS(JJ) - PF_WALL_WIN(JJ) - 2.*PF_WALL_FLOOR(JJ) 
+    !
+     ZB(JJ,IWALL_LAYER) = ZB(JJ,IWALL_LAYER) + ZIMPL *               &
+                        (ZCHTC_IN_WALL(JJ) * 4./3. + PRADHT_IN(JJ) *           &
+                         (  PF_WALL_MASS(JJ) +     PF_WALL_WIN  (JJ) &
+                          + ZF_WALL_WALL(JJ) + 2 * PF_WALL_FLOOR(JJ)))
+    !
+    ZTI_ROOF(JJ) = PRAD_ROOF_WALL(JJ) / PRADHT_IN(JJ) + PT_WALL(JJ,IWALL_LAYER)
+    ZY(JJ,IWALL_LAYER) = ZY(JJ,IWALL_LAYER) +  &
+        ZCHTC_IN_WALL(JJ) * (PTI_BLD(JJ) - 1./3. * PT_WALL(JJ, IWALL_LAYER) * (4 * ZEXPL -1)) + &
+        PRADHT_IN(JJ) * ( &
+           PF_WALL_MASS (JJ) * (PTS_MASS(JJ)  - ZEXPL * PT_WALL(JJ,IWALL_LAYER)) + &
+           PF_WALL_WIN  (JJ) * (PT_WIN2 (JJ)  - ZEXPL * PT_WALL(JJ,IWALL_LAYER)) + &
+           PF_WALL_FLOOR(JJ) * (PTS_FLOOR(JJ) - ZEXPL * PT_WALL(JJ,IWALL_LAYER)) + &
+           ZF_WALL_WALL (JJ) * (PTI_WALL_B(JJ)- ZEXPL * PT_WALL(JJ,IWALL_LAYER)) + &
+           PF_WALL_FLOOR(JJ) * (ZTI_ROOF(JJ) - ZEXPL * PT_WALL(JJ,IWALL_LAYER)) )+ &
+           PLOAD_IN_WALL(JJ)
+    !
+  ENDIF
+  !
 END DO
 !
-!       13.2   heat storage flux inside walls 
-!              ------------------------------
+!-------------------------------------------------------------------------------
 !
-PDQS_WALL(:)=(ZPEI_WALL(:)-ZEI_WALL(:))/PTSTEP
+!*      5.    heat conduction calculation
+!             ---------------------------
+!
+CALL LAYER_E_BUDGET( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
+                     ZA, ZB, ZC, ZY, PDQS_WALL )
+!
+!-------------------------------------------------------------------------------
+!
+!*   6.   diagnostics of flux echanged with the wall
+!         ------------------------------------------
+!
+!
+!* radiative surface temperature used during the energy balance
+ZTS_WALL(:) = ZIMPL * PT_WALL(:,1) + ZEXPL * ZTS_WALL(:)
+!
+PABS_LW_WALL(:) = PLW_S_TO_W  (:) * (ZT_SKY     (:) - ZTS_WALL(:)) + &
+     ZDF_ROAD(:) *PLW_R_TO_W  (:) * (PTS_ROAD   (:) - ZTS_WALL(:)) + &
+                  PLW_G_TO_W  (:) * (PTS_GARDEN (:) - ZTS_WALL(:)) + &
+                  PLW_WA_TO_WB(:) * (PTS_WALL_B (:) - ZTS_WALL(:)) + &
+                  PLW_WIN_TO_W(:) * (PT_WIN1    (:) - ZTS_WALL(:)) + &
+     PDN_ROAD(:) *PLW_NR_TO_W (:) * (PTSNOW_ROAD(:) - ZTS_WALL(:))
+!
+!* emitted lw flux
+PEMIT_LW_WALL(:) = XSTEFAN * PT_WALL(:,1)**4 + &
+                   (1 - PEMIS_WALL(:))/PEMIS_WALL(:) * PABS_LW_WALL(:)
+!
+!* sensible heat flux to outdoor
+PH_WALL(:) = ZRHO_ACF_W(:) * XCPD/PEXNS(:) *  &
+             ( ZIMPL*PT_WALL(:,1) + ZEXPL*ZTS_WALL(:) - PT_CANYON(:) )
+!
+IF (HBEM=='BEM') THEN
+    !
+    !compute ZTI_WALL used in flux calculation
+    ZTI_WALL_CONV(:) = 4./3. * ZIMPL * PT_WALL(:,IWALL_LAYER) + 1./3. * ZTI_WALL(:) * (4 * ZEXPL -1.)
+    ZTI_WALL(:) = ZEXPL * ZTI_WALL(:) + ZIMPL * PT_WALL(:,IWALL_LAYER) 
+    !
+    !compute IR exchanged fluxes with the roof in the wall balance
+    ZRAD_WALL_ROOF(:)  = PRADHT_IN(:)     * (ZTI_WALL(:) - ZTI_ROOF(:))
+    !compute the difference with the IR flux echanged between roof and wall for
+    !the roof balance, this difference will be added to the floor 
+    ZDIF_RAD_WALL_ROOF(:)  = ZRAD_WALL_ROOF(:) + PRAD_ROOF_WALL(:)
+
+    !compute exchanged fluxes with other surfaces for which the balance is done after
+    PRAD_WALL_FLOOR(:) = PRADHT_IN(:)     * (ZTI_WALL(:) - PTS_FLOOR(:))
+    ! contribution of the difference between the flux from the wall/flux from
+    ! the roof
+    PRAD_WALL_FLOOR(:) = PRAD_WALL_FLOOR(:) + ZDIF_RAD_WALL_ROOF(:) 
+    PRAD_WALL_MASS(:)  = PRADHT_IN(:)     * (ZTI_WALL(:) - PTS_MASS(:))
+    PRAD_WALL_WIN(:)   = PRADHT_IN(:)     * (ZTI_WALL(:) - PT_WIN2(:))
+    PCONV_WALL_BLD(:)  = ZCHTC_IN_WALL  (:) * (ZTI_WALL_CONV(:) - PTI_BLD (:))
+    !
+    !
+    PFLX_BLD_WALL  (:) = -PCONV_WALL_BLD(:) &
+       + PF_WALL_FLOOR(:) * PRAD_ROOF_WALL(:)                             &
+       + PRADHT_IN(:) *(PF_WALL_MASS (:) * (PTS_MASS (:) - ZTI_WALL(:)) &
+                       + PF_WALL_WIN  (:) * (PT_WIN2 (:)  - ZTI_WALL(:)) &
+                       + PF_WALL_FLOOR(:) * (PTS_FLOOR(:) - ZTI_WALL(:)) )
+!
+!* wall energy residual imbalance for verification
+!  -----------------------------------------------
+  PIMB_WALL(:) = PABS_SW_WALL(:) + PABS_LW_WALL(:)  &
+               - PDQS_WALL(:) - PH_WALL(:)         &
+               + PFLX_BLD_WALL(:)
+!
+!
+END IF
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WALL_LAYER_E_BUDGET',1,ZHOOK_HANDLE)

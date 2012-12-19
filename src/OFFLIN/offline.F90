@@ -11,6 +11,9 @@ PROGRAM OFFLINE
 !   2.c Run surface
 !   2.d Write prognostics and diagnostics variables
 !
+! modifications 
+! 09/2012 G. Pigeon: coherence between radiation and zenith angle because of
+!                    trouble with radiation received by wall in TEB
 ! -------------------------------------------------
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
@@ -52,7 +55,7 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XPET_B_COEF ,&
                             XPEQ_B_COEF  
 !
-USE MODD_SURF_CONF,  ONLY : CPROGNAME
+USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
 USE MODD_IO_SURF_ASC,ONLY : CFILEIN,CFILEIN_SAVE,CFILEOUT,CFILEPGD
 USE MODD_SURF_PAR
@@ -217,6 +220,7 @@ INTEGER                           :: INB
 CHARACTER(LEN=14)                 :: YTAG                
 LOGICAL                           :: GFOUND              ! return logical when reading namelist
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
+REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
 !
 ! Inquiry mode arrays:
 !
@@ -249,6 +253,8 @@ CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
 #endif
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
+!
+CSOFTWARE='OFFLINE'
 !
 #ifndef NOMPI
 NCOMM = MPI_COMM_WORLD
@@ -496,6 +502,7 @@ IF (.NOT.ALLOCATED(ZRAIN))ALLOCATE(ZRAIN  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZPS))ALLOCATE(ZPS    (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR))ALLOCATE(ZDIR   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZCOEF))ALLOCATE(ZCOEF   (INI))
 !
 IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
@@ -714,19 +721,32 @@ DO JFORC_STEP=1,INB_STEP_ATM
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()    
 #endif
+    !
+    ! coherence between solar zenithal angle and radiation
+    ! when solar beam close to horizontal -> reduction of direct radiation to
+    ! the benefit of scattered radiation
+    ! when pi/2 - 0.1 < ZENITH < pi/2 - 0.05 => weight of direct to scattered radiation decreases linearly with zenith 
+    ! when pi/2 - 0.05 < ZENITH => all the direct radiation is converted to scattered radiation
     ! coherence between solar zenithal angle and radiation
     !
-    ZSW(:) = 0.
+    ZCOEF(:) = (XPI/2. - XZENITH(:) - 0.05) / 0.05
+    ZCOEF(:) = MAX(MIN(ZCOEF,1.),0.)
     DO JLOOP=1,SIZE(XDIR_SW,2)
-      ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
-    END DO
-    WHERE (ZSW(:)>0.)
-      XZENITH  = MIN (XZENITH ,XPI/2.-0.01)
-      XZENITH2 = MIN (XZENITH2,XPI/2.-0.01)
-    ELSEWHERE
-      XZENITH  = MAX (XZENITH ,XPI/2.)
-      XZENITH2 = MAX (XZENITH2,XPI/2.)
-    END WHERE
+      XSCA_SW(:,JLOOP) = XSCA_SW(:,JLOOP) + XDIR_SW(:,JLOOP) * (1 - ZCOEF)
+      XDIR_SW(:,JLOOP) = XDIR_SW(:,JLOOP) * ZCOEF(:)
+    ENDDO   
+    !ZSW(:) = 0.
+    !DO JLOOP=1,SIZE(XDIR_SW,2)
+    !  ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
+    !END DO
+    !WHERE (ZSW(:)>0.)
+    !  XZENITH  = MIN (XZENITH ,XPI/2.-0.01)
+    !  XZENITH2 = MIN (XZENITH2,XPI/2.-0.01)
+    !ELSEWHERE
+    !  XZENITH  = MAX (XZENITH ,XPI/2.)
+    !  XZENITH2 = MAX (XZENITH2,XPI/2.)
+    !END WHERE
+    
     !
     ! updates time
     ZTIMEC= ZTIMEC+XTSTEP_SURF
@@ -760,6 +780,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       CALL GOTO_SURFEX(NBLOCK,.TRUE.)
     ENDIF
     !
+
     CALL COUPLING_SURF_ATM_n(CSURF_FILETYPE, 'E', ZTIMEC,                    &
            XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, ISCAL, IBANDS, &
            XTSUN(NINDX1:NINDX2), XZENITH(NINDX1:NINDX2),                     &

@@ -29,6 +29,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!!      G. Pigeon   09/2012: add CH_BEM option for outdoor conv. coef 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -104,6 +105,7 @@ IF (LNAM_READ) THEN
  IF (GFOUND) READ(UNIT=INAM,NML=NAM_CH_TEBn)
  !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CZ0H',CZ0H,'MASC95','BRUT82','KAND07')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CCH_BEM',CCH_BEM,'','DOE-2')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CCH_DRY_DEP',CCH_DRY_DEP,'      ','WES89 ','NONE  ')
  !
  !* close namelist file

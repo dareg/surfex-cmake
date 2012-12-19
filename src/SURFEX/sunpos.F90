@@ -18,7 +18,7 @@
 !!    ------
 !!      The cosine and sinus of the zenithal solar angle  and the azimuthal 
 !!    solar angle are computed from the true universal time, valid for the (XLAT,
-!!    XLON) location, and from the solar declination angle of the day. There
+!!    XLON) location, and from the solar declination aPD_ICE(:)ngle of the day. There
 !!    is a special convention to define the azimuthal solar angle.
 !!     
 !!    EXTERNAL
@@ -189,7 +189,7 @@ DO JJ = NINDX1,NINDX2
 !
 !-------------------------------------------------------------------------------
 !
-!*       6.    COMPUTE THE AZINUTHAL SOLAR ANGLE (PAZIMSOL)
+!*       6.    COMPUTE THE AZIMUTHAL SOLAR ANGLE (PAZIMSOL)
 !              --------------------------------------------
 !
   IF (ZSINZEN(JJ)/=0.) THEN
@@ -198,9 +198,9 @@ DO JJ = NINDX1,NINDX2
     ZCOSAZI(JJ)  = (-SIN(ZLAT(JJ))*ZCOSDEL*COS(ZSOLANG(JJ))      &
                        +COS(ZLAT(JJ))*ZSINDEL                       &
                       ) / ZSINZEN(JJ)  
-    PAZIMSOL(JJ) = XPI - ATAN2(ZSINAZI(JJ),ZCOSAZI(JJ))
+    PAZIMSOL(JJ) = ATAN2(ZSINAZI(JJ),ZCOSAZI(JJ))
   ELSE
-    PAZIMSOL(JJ) = 0.
+    PAZIMSOL(JJ) = XPI
   ENDIF
 !
 ENDDO

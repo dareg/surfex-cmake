@@ -56,7 +56,7 @@ USE MODI_GET_LUOUT
 USE MODE_GRIDTYPE_GAUSS
 
 USE MODI_TREAT_FIELD
-USE MODI_INTERPOL_FIELD
+USE MODI_INTERPOL_FIELD2D
 USE MODI_CONVERT_COVER_FRAC
 !
 USE MODI_READ_LCOVER
@@ -114,7 +114,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZWATER !prescribed fractions and ECOCLIMAP
 REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
 REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER
-REAL                             :: ZDEF
+REAL, DIMENSION(JPCOVER)         :: ZDEF
 CHARACTER(LEN=10)                :: YFIELD
 !
 CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
@@ -249,11 +249,8 @@ ELSE
 !*    4.      Interpolation if some points are not initialized (no data for these points) (same time)
 !             ---------------------------------------------------------------------------------------
 !
-  DO JCOVER=1,JPCOVER
-    WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER
-    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XCOVER(:,JCOVER),YFIELD)
-  ENDDO
-!
+  WRITE(YFIELD,FMT='(A)') 'covers'
+  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,XCOVER(:,:),YFIELD)
 !
 !-------------------------------------------------------------------------------
 !
@@ -412,10 +409,9 @@ ELSE
   DO JL=1,SIZE(XCOVER,1)
     IF (XNATURE(JL).EQ.0.) NSIZE(JL)=-1
   ENDDO
-  DO JCOVER=1,JPCOVER
-    WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER
-    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZCOVER_NATURE(:,JCOVER),YFIELD)
-  ENDDO
+  ZDEF(:)=0.
+  ZDEF(4)=1.  ! if not enough covers are present, cover 4 assumed
+  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_NATURE(:,:),YFIELD,ZDEF)  
 
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -428,10 +424,9 @@ ELSE
   DO JL=1,SIZE(XCOVER,1)
     IF (XTOWN(JL).EQ.0.) NSIZE(JL)=-1
   ENDDO
-  DO JCOVER=1,JPCOVER
-    WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER
-    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN  (:,JCOVER),YFIELD)
-  ENDDO
+  ZDEF(:)=0.
+  ZDEF(7)=1.  ! if not enough covers are present, cover 7 assumed
+  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN (:,:),YFIELD,ZDEF)  
 
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -452,12 +447,9 @@ ELSE
         NSIZE(JL)=-1
      ENDIF
   ENDDO
-  DO JCOVER=1,JPCOVER
-    WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER
-    ZDEF=0.
-    IF (JCOVER==2) ZDEF=1.  ! if not enough covers are present, cover 002 assumed
-    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZCOVER_WATER (:,JCOVER),YFIELD,PDEF=ZDEF)
-  ENDDO
+  ZDEF(:)=0.
+  ZDEF(2)=1.  ! if not enough covers are present, cover 002 assumed
+  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_WATER (:,:),YFIELD,PDEF=ZDEF)
 
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -477,12 +469,9 @@ ELSE
         NSIZE(JL)=-1
      ENDIF
   ENDDO
-  DO JCOVER=1,JPCOVER
-    WRITE(YFIELD,FMT='(A,I3.3)') 'cover ',JCOVER
-    ZDEF=0.
-    IF (JCOVER==1) ZDEF=1.  ! if not enough covers are present, cover 001 assumed
-    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZCOVER_SEA (:,JCOVER),YFIELD,PDEF=ZDEF)
-  ENDDO
+  ZDEF(:)=0.
+  ZDEF(1)=1.  ! if not enough covers are present, cover 001 assumed
+  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_SEA (:,:),YFIELD,PDEF=ZDEF)
   !
   XCOVER(:,:) = XCOVER(:,:) + 0.001 * ( ZCOVER_NATURE(:,:) + ZCOVER_TOWN(:,:) + &
                                         ZCOVER_WATER (:,:) + ZCOVER_SEA (:,:) )

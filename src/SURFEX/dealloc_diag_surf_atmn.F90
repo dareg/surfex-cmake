@@ -25,7 +25,7 @@ USE MODD_DIAG_SURF_ATM_n,ONLY : XRN_TILE, XH_TILE, XLE_TILE, XGFLUX_TILE,       
                                   XAVG_T2M, XAVG_TS, XAVG_Q2M, XAVG_HU2M,           &
                                   XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,XAVG_HU2M_MIN_ZS, &
                                   XPS,XRHOA, XDIAG_TRAD, XDIAG_EMIS,                &
-                                  XAVG_ZON10M, XAVG_MER10M, XAVG_LEIC,              &
+                                  XAVG_ZON10M, XAVG_MER10M, XAVG_SFCO2, XAVG_LEIC,  &
                                   XAVG_Z0, XAVG_Z0H, XRW_RAIN, XRW_SNOW,  XAVG_RNC, &
                                   XAVG_HC, XAVG_LEC, XAVG_GFLUXC, XAVG_SWDC,        &
                                   XAVG_SWUC, XAVG_LWDC, XAVG_LWUC, XAVG_FMUC,       &
@@ -98,6 +98,7 @@ DEALLOCATE(XAVG_Q2M    )
 DEALLOCATE(XAVG_HU2M   )
 DEALLOCATE(XAVG_ZON10M )
 DEALLOCATE(XAVG_MER10M )
+DEALLOCATE(XAVG_SFCO2  )
 DEALLOCATE(XAVG_T2M_MIN_ZS    )
 DEALLOCATE(XAVG_Q2M_MIN_ZS    )
 DEALLOCATE(XAVG_HU2M_MIN_ZS   )

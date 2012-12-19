@@ -75,7 +75,7 @@ USE MODD_DIAG_ISBA_n,    ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,           
                                 XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,      &
                                 XAVG_FMUC, XAVG_FMVC, XAVG_TS, XAVG_TSRAD,       &
                                 XAVG_HU2M_MIN, XAVG_HU2M_MAX, XWIND10M,          &
-                                XAVG_WIND10M, XAVG_WIND10M_MAX  
+                                XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2  
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGETC,&
                                   LWATER_BUDGET,                                   &
@@ -1150,6 +1150,7 @@ IF (N2M>=1) THEN
   ALLOCATE(XAVG_MER10M       (KLU))
   ALLOCATE(XAVG_WIND10M      (KLU))
   ALLOCATE(XAVG_WIND10M_MAX  (KLU))
+  ALLOCATE(XAVG_SFCO2        (KLU))
   XAVG_RI      = XUNDEF
   XAVG_T2M     = XUNDEF
   XAVG_T2M_MIN = XUNDEF
@@ -1162,6 +1163,7 @@ IF (N2M>=1) THEN
   XAVG_MER10M  = XUNDEF
   XAVG_WIND10M = XUNDEF
   XAVG_WIND10M_MAX = 0.0
+  XAVG_SFCO2       = XUNDEF
   !
   ALLOCATE(XRI     (KLU,NPATCH))
   ALLOCATE(XT2M    (KLU,NPATCH))

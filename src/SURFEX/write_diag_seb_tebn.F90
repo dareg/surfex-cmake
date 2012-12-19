@@ -34,9 +34,11 @@ USE MODD_DIAG_TEB_n,ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET,          &
                              XRN, XH, XLE, XGFLUX,                    &
                              XRI, XCD, XCH, XCE, XZ0, XZ0H,           &
                              XT2M, XQ2M, XHU2M,                       &
-                             XZON10M, XMER10M, XQS,                   &
+                             XZON10M, XMER10M, XSFCO2, XQS,           &
                              XSWD, XSWU, XSWBD, XSWBU,                &
                              XLWD, XLWU, XFMU, XFMV  
+USE MODD_DIAG_UTCI_TEB_n, ONLY : LUTCI, XUTCI_IN, XUTCI_OUTSUN,       &
+                                 XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE
                            
 USE MODD_CH_TEB_n,  ONLY : XDEP, CCH_DRY_DEP, CCH_NAMES, NBEQ 
 !
@@ -240,6 +242,33 @@ YCOMMENT='X_Y_'//YRECFM//' (M/S)'
 !
 CALL WRITE_SURF(HPROGRAM,YRECFM,XMER10M(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='SFCO2_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (KG/M2/S)'
+!
+CALL WRITE_SURF(HPROGRAM,YRECFM,XSFCO2(:),IRESP,HCOMMENT=YCOMMENT)
+!
+END IF
+!
+IF (LUTCI .AND. N2M >0) THEN
+  YRECFM='UTCI_IN'
+  YCOMMENT='UTCI for person indoor'//' (°C)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCI_IN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='UTCI_OUTSUN'
+  YCOMMENT='UTCI for person at sun'//' (°C)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCI_OUTSUN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='UTCI_OUTSHAD'
+  YCOMMENT='UTCI for person in shade'//' (°C)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCI_OUTSHADE(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='TRAD_SUN'
+  YCOMMENT='Mean radiant temperature seen by person at sun'//' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XTRAD_SUN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='TRAD_SHADE'
+  YCOMMENT='Mean radiant temperature seen by person in shade'//' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XTRAD_SHADE(:),IRESP,HCOMMENT=YCOMMENT)
 END IF
 !
 !

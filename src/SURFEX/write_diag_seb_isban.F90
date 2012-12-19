@@ -68,8 +68,8 @@ USE MODD_DIAG_ISBA_n,ONLY :   N2M, LSURF_BUDGET, LRAD_BUDGET, LCOEF,            
                               XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,         &
                               XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,       &
                               XAVG_FMUC, XAVG_FMVC, XAVG_HU2M_MIN,              &
-                              XAVG_HU2M_MAX, XAVG_WIND10M, XAVG_WIND10M_MAX  
-
+                              XAVG_HU2M_MAX, XAVG_WIND10M, XAVG_WIND10M_MAX,    &  
+                              XAVG_SFCO2
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -617,6 +617,10 @@ IF (N2M>=1) THEN
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_WIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
   XAVG_WIND10M_MAX(:)=0.0
   !
+  YRECFM='SFCO2_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (KG/M2/S)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SFCO2(:),IRESP,HCOMMENT=YCOMMENT)
+  !  
 END IF
 !----------------------------------------------------------------------------
 !

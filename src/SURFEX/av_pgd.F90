@@ -133,7 +133,7 @@ END MODULE MODI_AV_PGD
 !            -----------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER,     ONLY : XDATA_SEA, XDATA_WATER, XDATA_VEGTYPE  
+USE MODD_DATA_COVER,     ONLY : XDATA_SEA, XDATA_WATER, XDATA_VEGTYPE, XDATA_BLD_HEIGHT 
 USE MODD_DATA_COVER_n,   ONLY : XDATA_NATURE, XDATA_TOWN, XDATA_BLD, XDATA_GARDEN
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TREE, NVT_CONI, NVT_EVER, XCDREF
 !
@@ -169,6 +169,7 @@ REAL                            :: ZWEIGHT
 REAL, DIMENSION(SIZE(PCOVER,1)) :: ZCOVER_WEIGHT
 REAL                            :: ZDATA
 REAL, DIMENSION(SIZE(PCOVER,1)) :: ZSUM_COVER_WEIGHT
+REAL, DIMENSION(SIZE(PCOVER,1)) :: ZWEIGHT_MAX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -195,6 +196,7 @@ END IF
 PFIELD(:)=XUNDEF
 !
 ZWORK(:)=0.
+ZWEIGHT_MAX(:)=0.
 ZSUM_COVER_WEIGHT(:)=0.
 !-------------------------------------------------------------------------------
 DO JCOVER=1,ICOVER
@@ -224,6 +226,10 @@ DO JCOVER=1,ICOVER
 
        CASE('BLD')
          ZWEIGHT=XDATA_TOWN  (JCOVER) *        XDATA_BLD(JCOVER)
+
+       CASE('BLV')  !* building Volume
+         ZWEIGHT=XDATA_TOWN  (JCOVER) *        XDATA_BLD(JCOVER) &
+                                      * XDATA_BLD_HEIGHT(JCOVER)
 
        CASE('STR')
          ZWEIGHT=XDATA_TOWN  (JCOVER) * ( 1. - XDATA_BLD(JCOVER) )
@@ -294,8 +300,20 @@ DO JCOVER=1,ICOVER
 !
 !-------------------------------------------------------------------------------
 !
+!*    3.7    Majoritary averaging
+!            --------------------
+!
+  CASE('MAJ' )
+!
+    WHERE(ZCOVER_WEIGHT(:)>ZWEIGHT_MAX(:))
+      ZWEIGHT_MAX(:) = ZCOVER_WEIGHT(:)
+      ZWORK      (:) = ZDATA
+    END WHERE
+!
+!-------------------------------------------------------------------------------
+!
   CASE DEFAULT
-    CALL ABOR1_SFX('AV_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED')
+    CALL ABOR1_SFX('AV_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED : "'//HATYPE//'"')
 !
   END SELECT
 !
@@ -343,6 +361,17 @@ END DO
 !
     WHERE ( ZSUM_COVER_WEIGHT(:) >0. )
       PFIELD(:) = ZDZ(:) * EXP( - SQRT(ZSUM_COVER_WEIGHT(:)/ZWORK(:)) )
+    END WHERE
+!
+!-------------------------------------------------------------------------------
+!
+!*    4.4    Majoritary averaging
+!            --------------------
+!
+  CASE('MAJ' )
+!
+    WHERE ( ZSUM_COVER_WEIGHT(:) >0. )
+      PFIELD(:) = ZWORK(:)
     END WHERE
 !
 !-------------------------------------------------------------------------------

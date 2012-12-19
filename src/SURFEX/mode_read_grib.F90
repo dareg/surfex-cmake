@@ -1892,4 +1892,63 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T_TEB',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_GRIB_T_TEB
 !-------------------------------------------------------------------
+!     #######################
+      SUBROUTINE READ_GRIB_TF_TEB(HGRIB,KLUOUT,HINMODEL,PTI,PMASK,PTF,PD)
+!     #######################
+!
+USE MODD_SURF_PAR,   ONLY : XUNDEF
+!
+IMPLICIT NONE
+!
+!* dummy arguments
+!  ---------------
+CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
+CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+REAL,                 INTENT(IN)    :: PTI       ! internal temperature
+REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
+REAL, DIMENSION(:,:), POINTER       :: PTF       ! field to initialize
+REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
+!
+!* local variables
+!  ---------------
+INTEGER(KIND=kindOfInt)           :: IRET      ! return code
+REAL,    DIMENSION(:), POINTER    :: ZFIELD => NULL()    ! field to read
+INTEGER                           :: JL         ! layer loop counter
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!--------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TF_TEB',0,ZHOOK_HANDLE)
+WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading temperature for building floor'
+!
+! 1.  Deep soil temperature
+!     ---------------------
+!
+WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading deep soil temperature'
+!
+CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+!
+ALLOCATE(PTF(SIZE(ZFIELD),3))
+ALLOCATE(PD (SIZE(ZFIELD),3))
+!
+PTF(:,2) = ZFIELD(:)
+PD (:,2) = 0.5           ! deep temperature depth assumed at half of the floor
+!
+DEALLOCATE(ZFIELD)
+!
+! 2.  level 1 is the internal building temperature
+!     -----------------------
+!
+PTF(:,1) = PTI
+PD (:,1) = 0.
+!
+! 3.  Assumes uniform temperature profile below
+!     -----------------------------------------
+!
+PTF(:,3) = PTF(:,2)
+PD (:,3) = 1.          ! deep temperature value
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TF_TEB',1,ZHOOK_HANDLE)
+!------------------------------------------------------------------------------
+END SUBROUTINE READ_GRIB_TF_TEB
+!-------------------------------------------------------------------
 END MODULE MODE_READ_GRIB

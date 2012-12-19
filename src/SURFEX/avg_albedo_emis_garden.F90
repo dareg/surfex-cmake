@@ -1,7 +1,6 @@
 !     #########
       SUBROUTINE AVG_ALBEDO_EMIS_GARDEN(HALBEDO,          &
                                  PVEG,PZ0,PLAI,PTG1,        &
-                                 PPATCH,                    &
                                  PSW_BANDS,                 &
                                  PALBNIR_VEG,PALBVIS_VEG,   &
                                  PALBUV_VEG,                &
@@ -60,7 +59,6 @@ USE MODD_TEB_GARDEN_n,    ONLY : TSNOW, XPSN, XPSNV_A, XPSNG, XPSNV
 !
 USE MODI_ALBEDO
 USE MODI_ALBEDO_FROM_NIR_VIS
-USE MODI_AVERAGE_RAD
 USE MODI_ISBA_SNOW_FRAC
 !
 !
@@ -79,25 +77,24 @@ CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 !   "WET " = constant albedo value for wet soil
 !   "MEAN" = constant albedo value for medium soil wetness
 !
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PVEG        ! vegetation fraction
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0         ! roughness length
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAI        ! leaf area index
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PTG1        ! soil surface temperature
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PPATCH      ! tile fraction
+REAL, DIMENSION(:),   INTENT(IN)   :: PVEG        ! vegetation fraction
+REAL, DIMENSION(:),   INTENT(IN)   :: PZ0         ! roughness length
+REAL, DIMENSION(:),   INTENT(IN)   :: PLAI        ! leaf area index
+REAL, DIMENSION(:),   INTENT(IN)   :: PTG1        ! soil surface temperature
 REAL, DIMENSION(:),     INTENT(IN)   :: PSW_BANDS   ! middle wavelength of each band 
 
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBNIR_VEG ! near-infra-red albedo of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS_VEG ! visible albedo of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV_VEG  ! UV albedo of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBNIR_SOIL! near-infra-red albedo of soil
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS_SOIL! visible albedo of soil
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV_SOIL ! UV albedo of soil
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PEMIS_ECO   ! emissivity (soil+vegetation)
+REAL, DIMENSION(:),   INTENT(IN)   :: PALBNIR_VEG ! near-infra-red albedo of vegetation
+REAL, DIMENSION(:),   INTENT(IN)   :: PALBVIS_VEG ! visible albedo of vegetation
+REAL, DIMENSION(:),   INTENT(IN)   :: PALBUV_VEG  ! UV albedo of vegetation
+REAL, DIMENSION(:),   INTENT(IN)   :: PALBNIR_SOIL! near-infra-red albedo of soil
+REAL, DIMENSION(:),   INTENT(IN)   :: PALBVIS_SOIL! visible albedo of soil
+REAL, DIMENSION(:),   INTENT(IN)   :: PALBUV_SOIL ! UV albedo of soil
+REAL, DIMENSION(:),   INTENT(IN)   :: PEMIS_ECO   ! emissivity (soil+vegetation)
 TYPE(SURF_SNOW),        INTENT(IN)   :: TPSNOW      ! prognostic snow cover
 !
-REAL, DIMENSION(:,:),   INTENT(OUT)  :: PALBNIR_ECO ! near-infra-red albedo (soil+vegetation)
-REAL, DIMENSION(:,:),   INTENT(OUT)  :: PALBVIS_ECO ! visible albedo (soil+vegetation)
-REAL, DIMENSION(:,:),   INTENT(OUT)  :: PALBUV_ECO  ! UV albedo (soil+vegetation)
+REAL, DIMENSION(:),   INTENT(OUT)  :: PALBNIR_ECO ! near-infra-red albedo (soil+vegetation)
+REAL, DIMENSION(:),   INTENT(OUT)  :: PALBVIS_ECO ! visible albedo (soil+vegetation)
+REAL, DIMENSION(:),   INTENT(OUT)  :: PALBUV_ECO  ! UV albedo (soil+vegetation)
 !
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PDIR_ALB    ! averaged direct albedo  (per wavelength)
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PSCA_ALB    ! averaged diffuse albedo (per wavelength)
@@ -109,18 +106,10 @@ REAL, DIMENSION(:),     INTENT(OUT)  :: PTSRAD      ! averaged radiaitve temp.
 !            ------------------------------
 !
 !
-REAL, DIMENSION(SIZE(PALBNIR_VEG,1)) :: ZALBNIR_PATCH ! near-infra-red albedo with snow
-REAL, DIMENSION(SIZE(PALBVIS_VEG,1)) :: ZALBVIS_PATCH ! visible albedo with snow
-REAL, DIMENSION(SIZE(PALBUV_VEG, 1)) :: ZALBUV_PATCH  ! UV albedo with snow
-REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZDIR_ALB_PATCH 
-!                                                     ! direct albedo
-REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA_ALB_PATCH 
-!                                                     ! diffuse albedo
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTRAD_PATCH   ! Tsrad
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
+REAL, DIMENSION(SIZE(PALBNIR_VEG)) :: ZALBNIR ! near-infra-red albedo with snow
+REAL, DIMENSION(SIZE(PALBVIS_VEG)) :: ZALBVIS ! visible albedo with snow
+REAL, DIMENSION(SIZE(PALBUV_VEG )) :: ZALBUV  ! UV albedo with snow
 !
-INTEGER :: JPATCH ! loop on patches
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -138,72 +127,61 @@ CALL ALBEDO(HALBEDO,                                    &
 !*    2.      averaged albedo and emis. on natural continental surfaces (with prognostic snow)
 !             ---------------------------------------------------------
 !
-ZALBNIR_PATCH(:)=0.
-ZALBVIS_PATCH(:)=0.
-ZALBUV_PATCH (:)=0.
-ZDIR_ALB_PATCH(:,:,:)=0.
-ZSCA_ALB_PATCH(:,:,:)=0.
-ZEMIS_PATCH   (:,:)=0.
-ZTRAD_PATCH   (:,:)=0.
+ZALBNIR(:)=0.
+ZALBVIS(:)=0.
+ZALBUV (:)=0.
 !
 PDIR_ALB(:,:)=0.
 PSCA_ALB(:,:)=0.
 PEMIS   (:)  =0.
 PTSRAD  (:)  =0.
 !   
-DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !
-  CALL ISBA_SNOW_FRAC(TSNOW%SCHEME,                        &
-         TSNOW%WSNOW(:,:,JPATCH), TSNOW%RHO(:,:,JPATCH),     &
-         TSNOW%ALB  (:,JPATCH),                              &
-         PVEG(:,JPATCH), PLAI(:,JPATCH), PZ0(:,JPATCH),      &
-         XPSN(:,JPATCH), XPSNV_A(:,JPATCH),                  &
-         XPSNG(:,JPATCH), XPSNV(:,JPATCH) )  
+  CALL ISBA_SNOW_FRAC(TSNOW%SCHEME,           &
+         TSNOW%WSNOW(:,:,1), TSNOW%RHO(:,:,1),&
+         TSNOW%ALB  (:,1),                    &
+         PVEG(:), PLAI(:), PZ0(:),            &
+         XPSN(:), XPSNV_A(:),                 &
+         XPSNG(:), XPSNV(:)                   )
 !
- WHERE (PVEG(:,JPATCH)/=XUNDEF)
+ WHERE (PVEG(:)/=XUNDEF)
 !
 ! albedo on this tile
 !
-    ZALBNIR_PATCH(:) = (1.-XPSN(:,JPATCH))*PALBNIR_ECO(:,JPATCH) &
-                        +    XPSN(:,JPATCH) *TPSNOW%ALB (:,JPATCH)  
+    ZALBNIR(:) = (1.-XPSN(:))*PALBNIR_ECO(:) &
+                +    XPSN(:) *TPSNOW%ALB (:,1)  
       
-    ZALBVIS_PATCH(:) = (1.-XPSN(:,JPATCH))*PALBVIS_ECO(:,JPATCH) &
-                        +    XPSN(:,JPATCH) *TPSNOW%ALB (:,JPATCH)  
+    ZALBVIS(:) = (1.-XPSN(:))*PALBVIS_ECO(:) &
+                +    XPSN(:) *TPSNOW%ALB (:,1)  
       
-    ZALBUV_PATCH(:)  = (1.-XPSN(:,JPATCH))*PALBUV_ECO (:,JPATCH) &
-                        +    XPSN(:,JPATCH) *TPSNOW%ALB (:,JPATCH)  
+    ZALBUV(:)  = (1.-XPSN(:))*PALBUV_ECO (:) &
+                +    XPSN(:) *TPSNOW%ALB (:,1)  
   END WHERE
 !
 !* albedo for each wavelength
 !
-  CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS,ZALBNIR_PATCH, ZALBVIS_PATCH, ZALBUV_PATCH,  &
-                             ZDIR_ALB_PATCH(:,:,JPATCH), ZSCA_ALB_PATCH(:,:,JPATCH) )  
+  CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS,ZALBNIR, ZALBVIS, ZALBUV,  &
+                           PDIR_ALB(:,:), PSCA_ALB(:,:)         )  
 !
 ! emissivity
 !
-  WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF)
-    ZEMIS_PATCH(:,JPATCH)   = (1.-XPSN(:,JPATCH))*PEMIS_ECO  (:,JPATCH) &
-                               +    XPSN(:,JPATCH) *XEMISSN  
+  WHERE (PEMIS_ECO(:)/=XUNDEF)
+    PEMIS(:)   = (1.-XPSN(:))*PEMIS_ECO  (:) &
+                +    XPSN(:) *XEMISSN  
   END WHERE
 !
 !* radiative surface temperature
 !
   IF (TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA') THEN
-    ZTRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
+    PTSRAD(:) = PTG1(:)
   ELSE IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
-    WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF)
-      ZTRAD_PATCH(:,JPATCH) =( ( (1.-XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
-                                  +    XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
-                               / ZEMIS_PATCH(:,JPATCH)**0.25  
+    WHERE (PEMIS_ECO(:)/=XUNDEF)
+    PTSRAD(:) =( ( (1.-XPSN(:))*PEMIS      (:)       *PTG1     (:)**4         &
+                  +    XPSN(:) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
+                             / PEMIS(:)**0.25  
     END WHERE
   END IF
-END DO
 !
-!* averaged fields
-!
-CALL AVERAGE_RAD(PPATCH,                                                   &
-                   ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH, &
-                   PDIR_ALB,       PSCA_ALB,       PEMIS,       PTSRAD       )  
 IF (LHOOK) CALL DR_HOOK('AVG_ALBEDO_EMIS_GARDEN',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

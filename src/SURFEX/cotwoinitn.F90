@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE COTWOINIT_n(PVEGTYPE,PGMES,PCO2,PGC,PDMAX,                 &
+      SUBROUTINE COTWOINIT_n(HPHOTO,PVEGTYPE,PGMES,PCO2,PGC,PDMAX,            &
                             PABC,PPOI,PANMAX,                                 &
                             PFZERO,PEPSO,PGAMM,PQDGAMM,PQDGMES,PT1GMES,       &
                             PT2GMES,PAMAX,PQDAMAX,PT1AMAX,PT2AMAX,PAH,PBH,    &
@@ -64,7 +64,6 @@ USE MODD_CO2V_PAR,       ONLY : XTOPT, XFZERO1, XFZERO2, XEPSO, XGAMM, XQDGAMM, 
                                   XQDAMAX, XT1AMAX, XT2AMAX, XAH, XBH,            &
                                   XDSPOPT, XIAOPT, XAW, XBW, XMCO2, XMC, XTAU_WOOD  
 ! 
-USE MODD_ISBA_n,         ONLY : CPHOTO
 USE MODI_COTWO  
 !
 !*       0.     DECLARATIONS
@@ -79,7 +78,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
+CHARACTER(LEN=3),   INTENT(IN)   :: HPHOTO      ! type of photosynthesis
 REAL,DIMENSION(:,:),INTENT(IN)   :: PVEGTYPE
 !                                     PVEGTYPE = fraction of each
 !                                     vegetation classification index;
@@ -212,7 +211,7 @@ DO JCLASS=1,NVEGTYPE
   END IF
   !
   ZTOPT  (:) = ZTOPT  (:) + XTOPT  (ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  IF (CPHOTO == 'AGS' .OR. CPHOTO == 'LAI') THEN
+  IF (HPHOTO == 'AGS' .OR. HPHOTO == 'LAI') THEN
      PFZERO (:) = PFZERO (:) + XFZERO1 (ICO2TYPE) * PVEGTYPE(:,JCLASS)
   ELSE
      IF((JCLASS==NVT_TREE) .OR. (JCLASS==NVT_CONI) .OR. (JCLASS==NVT_EVER)) THEN
@@ -282,7 +281,7 @@ ZGMEST(:) = ZGMEST(:)*ZCO2INIT5(:)
 !
 ! Initialise DMAX following Calvet (2000) in the case of 'AST' or 'LST' photosynthesis option
 !
-IF((CPHOTO=='AST').OR.(CPHOTO=='LST').OR.(CPHOTO=='NIT').OR.(CPHOTO=='NCB')) THEN
+IF((HPHOTO=='AST').OR.(HPHOTO=='LST').OR.(HPHOTO=='NIT').OR.(HPHOTO=='NCB')) THEN
    ZDMAX(:) = EXP((LOG(ZGMEST(:)*1000.)-PAH(:))/PBH(:))/1000.
 ELSE
    ZDMAX(:) = PDMAX(:)

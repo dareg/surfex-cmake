@@ -54,86 +54,86 @@ TYPE DATA_TEB_GARDEN_t
   INTEGER                       :: NTIME               ! number of time data
 !                                                      ! for VEG, LAI, EMIS, Z0
 !
-! Input Parameters, per patch:
+! Input Parameters:
 !
 ! - vegetation + bare soil:
 !
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_Z0_O_Z0H         ! ratio of surface roughness lengths
+  REAL, POINTER, DIMENSION(:) :: XDATA_Z0_O_Z0H         ! ratio of surface roughness lengths
 !                                                      ! (momentum to heat)                      (-)
-  REAL, POINTER, DIMENSION(:,:,:) :: XDATA_EMIS             ! surface emissivity                      (-)
-  REAL, POINTER, DIMENSION(:,:,:) :: XDATA_Z0               ! surface roughness length                (m)
+  REAL, POINTER, DIMENSION(:,:) :: XDATA_EMIS             ! surface emissivity                      (-)
+  REAL, POINTER, DIMENSION(:,:) :: XDATA_Z0               ! surface roughness length                (m)
 !
 ! - vegetation:
 !
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_ALBNIR_VEG       ! vegetation near-infra-red albedo        (-)
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_ALBVIS_VEG       ! vegetation visible albedo               (-)
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_ALBUV_VEG        ! vegetation UV albedo                    (-)
+  REAL, POINTER, DIMENSION(:) :: XDATA_ALBNIR_VEG       ! vegetation near-infra-red albedo        (-)
+  REAL, POINTER, DIMENSION(:) :: XDATA_ALBVIS_VEG       ! vegetation visible albedo               (-)
+  REAL, POINTER, DIMENSION(:) :: XDATA_ALBUV_VEG        ! vegetation UV albedo                    (-)
 !
 ! - vegetation: default option (Jarvis) and general parameters:
 !
-  REAL, POINTER, DIMENSION(:,:,:) :: XDATA_VEG            ! vegetation cover fraction               (-)
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_WRMAX_CF         ! coefficient for maximum water 
+  REAL, POINTER, DIMENSION(:,:) :: XDATA_VEG            ! vegetation cover fraction               (-)
+  REAL, POINTER, DIMENSION(:) :: XDATA_WRMAX_CF         ! coefficient for maximum water 
 !                                                      ! interception 
 !                                                      ! storage capacity on the vegetation      (-)
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_RSMIN            ! minimum stomatal resistance             (s/m)
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_GAMMA            ! coefficient for the calculation
+  REAL, POINTER, DIMENSION(:) :: XDATA_RSMIN            ! minimum stomatal resistance             (s/m)
+  REAL, POINTER, DIMENSION(:) :: XDATA_GAMMA            ! coefficient for the calculation
 !                                                      ! of the surface stomatal
 !                                                      ! resistance
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_CV               ! vegetation thermal inertia coefficient  (K m2/J)
-  REAL, POINTER, DIMENSION(:,:) :: XDATA_RGL              ! maximum solar radiation
+  REAL, POINTER, DIMENSION(:) :: XDATA_CV               ! vegetation thermal inertia coefficient  (K m2/J)
+  REAL, POINTER, DIMENSION(:) :: XDATA_RGL              ! maximum solar radiation
 !                                                      ! usable in photosynthesis                (W/m2)
-  REAL, POINTER, DIMENSION(:,:,:) :: XDATA_ROOTFRAC       ! root fraction profile ('DIF' option)
+  REAL, POINTER, DIMENSION(:,:) :: XDATA_ROOTFRAC       ! root fraction profile ('DIF' option)
 !
 !-------------------------------------------------------------------------------
 !
 ! - vegetation: Ags parameters ('AGS', 'LAI', 'AST', 'LST', 'NIT', 'NCB' options)
 !
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_BSLAI        ! ratio d(biomass)/d(lai)                 (kg/m2)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_LAIMIN       ! minimum LAI (Leaf Area Index)           (m2/m2)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_SEFOLD       ! e-folding time for senescence           (s)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_H_TREE       ! height of trees                         (m)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_GMES         ! mesophyll conductance                   (m s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_RE25         ! Ecosystem respiration parameter         (kg m2 s-1)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_BSLAI        ! ratio d(biomass)/d(lai)                 (kg/m2)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_LAIMIN       ! minimum LAI (Leaf Area Index)           (m2/m2)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_SEFOLD       ! e-folding time for senescence           (s)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_H_TREE       ! height of trees                         (m)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_GMES         ! mesophyll conductance                   (m s-1)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_RE25         ! Ecosystem respiration parameter         (kg m2 s-1)
 !
 !-------------------------------------------------------------------------------
 !
 ! - vegetation: Ags Stress parameters ('AST', 'LST', 'NIT', 'NCB' options)
 !
-  LOGICAL, POINTER, DIMENSION(:,:) :: LDATA_STRESS       ! vegetation response type to water
+  LOGICAL, POINTER, DIMENSION(:) :: LDATA_STRESS       ! vegetation response type to water
 !                                                     ! stress (true:defensive false:offensive) (-)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_F2I          ! critical normilized soil water 
+  REAL, POINTER, DIMENSION(:)    :: XDATA_F2I          ! critical normilized soil water 
 !                                                     ! content for stress parameterisation
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_GC           ! cuticular conductance                   (m s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_DMAX         ! maximum air saturation deficit
+  REAL, POINTER, DIMENSION(:)    :: XDATA_GC           ! cuticular conductance                   (m s-1)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_DMAX         ! maximum air saturation deficit
 !                                                     ! tolerate by vegetation                  (kg/kg)
 !
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_BSLAI_ST     ! ratio d(biomass)/d(lai)                 (kg/m2)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_SEFOLD_ST    ! e-folding time for senescence           (s)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_GMES_ST      ! mesophyll conductance                   (m s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_GC_ST        ! cuticular conductance                   (m s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_DMAX_ST      ! maximum air saturation deficit
+  REAL, POINTER, DIMENSION(:)    :: XDATA_BSLAI_ST     ! ratio d(biomass)/d(lai)                 (kg/m2)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_SEFOLD_ST    ! e-folding time for senescence           (s)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_GMES_ST      ! mesophyll conductance                   (m s-1)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_GC_ST        ! cuticular conductance                   (m s-1)
+  REAL, POINTER, DIMENSION(:)    :: XDATA_DMAX_ST      ! maximum air saturation deficit
 !-------------------------------------------------------------------------------
 !
 ! - vegetation: Ags Nitrogen-model parameters ('NIT', 'NCB' option)
 !
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_CE_NITRO       ! leaf aera ratio sensitivity to 
+  REAL, POINTER, DIMENSION(:)    :: XDATA_CE_NITRO       ! leaf aera ratio sensitivity to 
 !                                                       ! nitrogen concentration                (m2/kg)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_CF_NITRO       ! lethal minimum value of leaf area
+  REAL, POINTER, DIMENSION(:)    :: XDATA_CF_NITRO       ! lethal minimum value of leaf area
 !                                                       ! ratio                                 (m2/kg)
-  REAL, POINTER, DIMENSION(:,:)    :: XDATA_CNA_NITRO      ! nitrogen concentration of active 
+  REAL, POINTER, DIMENSION(:)    :: XDATA_CNA_NITRO      ! nitrogen concentration of active 
 !                                                       ! biomass                               (kg/kg)
 !
 !-------------------------------------------------------------------------------
 !
 ! - soil: primary parameters
 !
-  REAL, POINTER, DIMENSION(:,:,:)  :: XDATA_DG            ! soil layer thicknesses                  (m)
+  REAL, POINTER, DIMENSION(:,:)  :: XDATA_DG            ! soil layer thicknesses                  (m)
 !                                                      ! NOTE: in Force-Restore mode, the 
 !                                                      ! uppermost layer thickness is superficial
 !                                                      ! and is only explicitly used for soil 
 !                                                      ! water phase changes                     (m)
 !
-  REAL, POINTER,DIMENSION(:,:)     :: XDATA_DICE       ! depth of the soil column for the calculation
+  REAL, POINTER,DIMENSION(:)     :: XDATA_DICE       ! depth of the soil column for the calculation
 !                                                        of the frozen soil fraction (m)
 !
 ! - bare soil albedo
@@ -152,7 +152,7 @@ TYPE DATA_TEB_GARDEN_t
 !
 !- Vegetation: Ags Prognostic (YPHOTO = ('LAI', 'LST', 'NIT', or 'NCB') or prescribed (YPHOTO='NON', 'AGS' or 'AST')
 !
-  REAL, POINTER, DIMENSION(:,:,:)     :: XDATA_LAI          ! Leaf Area Index                         (m2/m2)
+  REAL, POINTER, DIMENSION(:,:)     :: XDATA_LAI          ! Leaf Area Index                         (m2/m2)
 !
 !-------------------------------------------------------------------------------
 !
@@ -177,17 +177,17 @@ REAL, POINTER, DIMENSION(:)      :: XDATA_H_HVEG=>NULL()
 !$OMP THREADPRIVATE(XDATA_H_HVEG)
 REAL, POINTER, DIMENSION(:,:)    :: XDATA_VEGTYPE=>NULL()
 !$OMP THREADPRIVATE(XDATA_VEGTYPE)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_Z0_O_Z0H=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_Z0_O_Z0H=>NULL()
 !$OMP THREADPRIVATE(XDATA_Z0_O_Z0H)
-REAL, POINTER, DIMENSION(:,:,:) :: XDATA_EMIS=>NULL()
+REAL, POINTER, DIMENSION(:,:) :: XDATA_EMIS=>NULL()
 !$OMP THREADPRIVATE(XDATA_EMIS)
-REAL, POINTER, DIMENSION(:,:,:) :: XDATA_Z0=>NULL()
+REAL, POINTER, DIMENSION(:,:) :: XDATA_Z0=>NULL()
 !$OMP THREADPRIVATE(XDATA_Z0)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_ALBNIR_VEG=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_ALBNIR_VEG=>NULL()
 !$OMP THREADPRIVATE(XDATA_ALBNIR_VEG)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_ALBVIS_VEG=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_ALBVIS_VEG=>NULL()
 !$OMP THREADPRIVATE(XDATA_ALBVIS_VEG)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_ALBUV_VEG=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_ALBUV_VEG=>NULL()
 !$OMP THREADPRIVATE(XDATA_ALBUV_VEG)
 REAL, POINTER, DIMENSION(:) :: XDATA_ALBNIR_SOIL=>NULL()
 !$OMP THREADPRIVATE(XDATA_ALBNIR_SOIL)
@@ -207,61 +207,61 @@ REAL, POINTER, DIMENSION(:) :: XDATA_ALBVIS_WET=>NULL()
 !$OMP THREADPRIVATE(XDATA_ALBVIS_WET)
 REAL, POINTER, DIMENSION(:) :: XDATA_ALBUV_WET=>NULL()
 !$OMP THREADPRIVATE(XDATA_ALBUV_WET)
-REAL, POINTER, DIMENSION(:,:,:) :: XDATA_VEG=>NULL()
+REAL, POINTER, DIMENSION(:,:) :: XDATA_VEG=>NULL()
 !$OMP THREADPRIVATE(XDATA_VEG)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_WRMAX_CF=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_WRMAX_CF=>NULL()
 !$OMP THREADPRIVATE(XDATA_WRMAX_CF)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_RSMIN=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_RSMIN=>NULL()
 !$OMP THREADPRIVATE(XDATA_RSMIN)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_GAMMA=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_GAMMA=>NULL()
 !$OMP THREADPRIVATE(XDATA_GAMMA)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_CV=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_CV=>NULL()
 !$OMP THREADPRIVATE(XDATA_CV)
-REAL, POINTER, DIMENSION(:,:) :: XDATA_RGL=>NULL()
+REAL, POINTER, DIMENSION(:) :: XDATA_RGL=>NULL()
 !$OMP THREADPRIVATE(XDATA_RGL)
-REAL, POINTER, DIMENSION(:,:,:) :: XDATA_ROOTFRAC=>NULL()
+REAL, POINTER, DIMENSION(:,:) :: XDATA_ROOTFRAC=>NULL()
 !$OMP THREADPRIVATE(XDATA_ROOTFRAC)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_BSLAI=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_BSLAI=>NULL()
 !$OMP THREADPRIVATE(XDATA_BSLAI)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_LAIMIN=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_LAIMIN=>NULL()
 !$OMP THREADPRIVATE(XDATA_LAIMIN)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_SEFOLD=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_SEFOLD=>NULL()
 !$OMP THREADPRIVATE(XDATA_SEFOLD)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_H_TREE=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_H_TREE=>NULL()
 !$OMP THREADPRIVATE(XDATA_H_TREE)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_GMES=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_GMES=>NULL()
 !$OMP THREADPRIVATE(XDATA_GMES)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_RE25=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_RE25=>NULL()
 !$OMP THREADPRIVATE(XDATA_RE25)
-LOGICAL, POINTER, DIMENSION(:,:) :: LDATA_STRESS=>NULL()
+LOGICAL, POINTER, DIMENSION(:) :: LDATA_STRESS=>NULL()
 !$OMP THREADPRIVATE(LDATA_STRESS)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_F2I=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_F2I=>NULL()
 !$OMP THREADPRIVATE(XDATA_F2I)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_GC=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_GC=>NULL()
 !$OMP THREADPRIVATE(XDATA_GC)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_DMAX=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_DMAX=>NULL()
 !$OMP THREADPRIVATE(XDATA_DMAX)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_BSLAI_ST=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_BSLAI_ST=>NULL()
 !$OMP THREADPRIVATE(XDATA_BSLAI_ST)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_SEFOLD_ST=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_SEFOLD_ST=>NULL()
 !$OMP THREADPRIVATE(XDATA_SEFOLD_ST)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_GMES_ST=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_GMES_ST=>NULL()
 !$OMP THREADPRIVATE(XDATA_GMES_ST)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_GC_ST=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_GC_ST=>NULL()
 !$OMP THREADPRIVATE(XDATA_GC_ST)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_DMAX_ST=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_DMAX_ST=>NULL()
 !$OMP THREADPRIVATE(XDATA_DMAX_ST)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_CE_NITRO=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_CE_NITRO=>NULL()
 !$OMP THREADPRIVATE(XDATA_CE_NITRO)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_CF_NITRO=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_CF_NITRO=>NULL()
 !$OMP THREADPRIVATE(XDATA_CF_NITRO)
-REAL, POINTER, DIMENSION(:,:)    :: XDATA_CNA_NITRO=>NULL()
+REAL, POINTER, DIMENSION(:)    :: XDATA_CNA_NITRO=>NULL()
 !$OMP THREADPRIVATE(XDATA_CNA_NITRO)
-REAL, POINTER, DIMENSION(:,:,:)  :: XDATA_DG=>NULL()
+REAL, POINTER, DIMENSION(:,:)  :: XDATA_DG=>NULL()
 !$OMP THREADPRIVATE(XDATA_DG)
-REAL, POINTER, DIMENSION(:,:)     :: XDATA_DICE=>NULL()
+REAL, POINTER, DIMENSION(:)     :: XDATA_DICE=>NULL()
 !$OMP THREADPRIVATE(XDATA_DICE)
-REAL, POINTER, DIMENSION(:,:,:)     :: XDATA_LAI=>NULL()
+REAL, POINTER, DIMENSION(:,:)     :: XDATA_LAI=>NULL()
 !$OMP THREADPRIVATE(XDATA_LAI)
 
 CONTAINS

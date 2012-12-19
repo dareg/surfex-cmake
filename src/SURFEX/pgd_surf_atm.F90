@@ -29,6 +29,7 @@
 !!    ------------
 !!
 !!    Original     13/10/03
+!!      A. Lemonsu      05/2009         Ajout de la clef LGARDEN pour TEB
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -36,13 +37,13 @@
 !
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_PGD_GRID,        ONLY : LLATLONMASK
-USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CWATER, CTOWN,   &
-                                   XSEA, XWATER,                   &
-                                   NDIM_NATURE, NDIM_SEA,          &
-                                   NDIM_TOWN,NDIM_WATER,           &
-                                   LECOCLIMAP, LWATER_TO_NATURE,   &
-                                   LTOWN_TO_ROCK, LGARDEN, NDIM_FULL,&
-                                   NSIZE_FULL
+USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CWATER, CTOWN,     &
+                                 XSEA, XWATER,                     &
+                                 NDIM_NATURE, NDIM_SEA,            &
+                                 NDIM_TOWN,NDIM_WATER,             &
+                                 LECOCLIMAP, LWATER_TO_NATURE,     &
+                                 LTOWN_TO_ROCK, LGARDEN, NDIM_FULL,&
+                                 NSIZE_FULL
 USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR, XLAT, &
                                  XLON, XMESH_SIZE, XJPDIR   
 USE MODD_CH_SURF_n,       ONLY : LCH_EMIS, LRW_CH_EMIS

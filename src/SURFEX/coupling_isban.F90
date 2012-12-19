@@ -57,7 +57,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                             New wind implicitation
 !!                             New soil carbon spinup and diag
 !!                             Isba budget
-!!
+!!      C. de Munck  11/2011 : added local variable ZSOILCONDZ for ISBA call
 !!-------------------------------------------------------------------
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI
@@ -69,7 +69,7 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 CSCOND, CC1DRY, CRUNOFF, CPHOTO, LTR_ML, CISBA, XPATCH,  &
                                 TTIME, CALBEDO, XCOVER, XLAI, XVEG, XZ0, XEMIS,          &
                                 XALBNIR, XALBVIS, XALBUV, XEMIS_NAT,  XTSRAD_NAT,        &
-                                XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,                    &
+                                XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG, NGROUND_LAYER,     &
                                 XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,                    &
                                 XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,                 &
                                 XALBNIR_WET, XALBVIS_WET, XALBUV_WET, XWG, XWSAT,        &
@@ -530,7 +530,7 @@ PTRAD = XTSRAD_NAT
 !
 ! Any additional diagnostics (stored in MODD_DIAG_ISBA_n)
 !
-CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF)
+CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2)
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
@@ -642,6 +642,10 @@ REAL, DIMENSION(KSIZE) :: ZP_WGI_INI
 REAL, DIMENSION(KSIZE) :: ZP_WR_INI
 REAL, DIMENSION(KSIZE) :: ZP_SWE_INI
 !
+! miscellaneous
+!
+REAL, DIMENSION(KSIZE,NGROUND_LAYER) :: ZP_SOILCONDZ ! ISBA-DF Soil conductivity  
+!                                                    ! profile  [W/(m K)]
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -743,6 +747,7 @@ ENDIF
 !
 CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
 !
+
 ! Pack chemistry input and prognostic variables (modd_ch_isban) for each patch:
 !
 IF (NBEQ>0) THEN
@@ -791,6 +796,7 @@ ELSE
   ZP_FFVNOS  = 0.0
 ENDIF
 !
+
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Surface Roughness lengths (m):
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -879,7 +885,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSC
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX                                         )  
+          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_SOILCONDZ                           )  
 !
 ZP_TRAD=XP_TSRAD
 !

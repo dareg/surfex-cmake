@@ -182,7 +182,7 @@ END IF
 !
 !* snow mantel
 !
-CALL WRITESURF_GR_SNOW(HPROGRAM,'VEG',TSNOW)
+CALL WRITESURF_GR_SNOW(HPROGRAM,'VEG','     ',TSNOW)
 !
 !
 !* key and/or field usefull to make an external prep

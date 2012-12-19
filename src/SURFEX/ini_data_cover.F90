@@ -34,6 +34,7 @@
 !!    Original    15/12/97
 !!    F.solmon    01/06/00 adaptation for patch approach
 !!    B.Decharme  01/03/09 Arrange cover by user
+!!    G.Pigeon      08/12 add ROUGH_WALL/ROUGH_ROOF
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -76,18 +77,26 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_GMES_ST, XDATA_BSLAI_ST, XDATA_SEFOLD_ST,   &
                                   XDATA_GC_ST, XDATA_DMAX_ST, TDATA_SEED,           &
                                   TDATA_REAP, XDATA_WATSUP, XDATA_IRRIG,            &
-                                  XDATA_LAI_ALL_YEARS, LREAD_DATA_COVER
+                                  XDATA_LAI_ALL_YEARS, LREAD_DATA_COVER,            &
+                                  XDATA_HC_FLOOR, XDATA_TC_FLOOR, XDATA_D_FLOOR,    & 
+                                  XDATA_TCOOL_TARGET, XDATA_THEAT_TARGET,           &
+                                  XDATA_F_WASTE_CAN, XDATA_EFF_HEAT, XDATA_QIN,     &
+                                  XDATA_QIN_FRAD, XDATA_SHGC, XDATA_U_WIN, XDATA_GR,&
+                                  XDATA_SHGC_SH, XDATA_FLOOR_HEIGHT, XDATA_INF,     &
+                                  XDATA_F_WATER_COND, XDATA_QIN_FLAT,               &
+                                  XDATA_HR_TARGET, XDATA_V_VENT, XDATA_CAP_SYS_HEAT,&
+                                  XDATA_CAP_SYS_RAT, XDATA_T_ADP, XDATA_M_SYS_RAT,  &
+                                  XDATA_COP_RAT, XDATA_T_SIZE_MAX, XDATA_T_SIZE_MIN,&
+                                  XDATA_SHADE, XDATA_NATVENT, XDATA_ROUGH_ROOF,     &
+                                  XDATA_ROUGH_WALL, XDATA_FRAC_GR
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
                                   NVT_TREE, NVT_CONI, NVT_EVER, NVT_C3,   &
                                   NVT_C4, NVT_IRR, NVT_GRAS, NVT_TROG,    &
-                                  NVT_PARK, NURBTYPE, NUR_DENSE,          &
-                                  NUR_SUB, NUR_ZIC, NUR_PORT, NUR_RAR,    &
-                                  NUR_AIRPT, NUR_MINES, NUR_PARK,         &
-                                  NUR_SPORT, JPCOVER, NDATA_ROAD_LAYER,   &
+                                  NVT_PARK, JPCOVER, NDATA_ROAD_LAYER,    &
                                   NDATA_WALL_LAYER, NDATA_ROOF_LAYER,     &
-                                  CNAMES, NBARE_SOIL, NROCK, NSEA, NWATER,&
-                                  NPERMSNOW  
+                                  NDATA_FLOOR_LAYER, CNAMES, NBARE_SOIL,  &
+                                  NROCK, NSEA, NWATER, NPERMSNOW  
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
@@ -221,18 +230,6 @@ NVT_IRR   = 9      ! irrigated crops
 NVT_GRAS  =10      ! grassland
 NVT_TROG  =11      ! tropical grassland
 NVT_PARK  =12      ! peat bogs, parks and gardens (irrigated grass)
-!
-NURBTYPE = 9
-!
-NUR_DENSE = 13     ! urban dense
-NUR_SUB   = 14     ! suburban
-NUR_ZIC   = 15     ! industries
-NUR_PORT  = 16     ! port facilities
-NUR_RAR   = 17     ! road and rail
-NUR_AIRPT = 18     ! airports
-NUR_MINES = 19     ! mines
-NUR_PARK  = 20     ! park
-NUR_SPORT = 21     ! leisure areas
 !
 !*    2.1    leaf area index
 !            ---------------
@@ -668,6 +665,7 @@ XDATA_EMIS_WALL (:) = XUNDEF
 NDATA_ROOF_LAYER=3
 NDATA_ROAD_LAYER=3
 NDATA_WALL_LAYER=3
+NDATA_FLOOR_LAYER=3
 !-------------------------------------------------------------------------------
 !
 !*    3.5    heat capacity for artificial surfaces
@@ -684,6 +682,10 @@ XDATA_HC_ROAD (:,:) = XUNDEF
 ALLOCATE(XDATA_HC_WALL(JPCOVER,NDATA_WALL_LAYER))
 !
 XDATA_HC_WALL (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_HC_FLOOR(JPCOVER,NDATA_FLOOR_LAYER))
+!
+XDATA_HC_FLOOR (:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -702,6 +704,10 @@ ALLOCATE(XDATA_TC_WALL(JPCOVER,NDATA_WALL_LAYER))
 !
 XDATA_TC_WALL (:,:) = XUNDEF
 !
+ALLOCATE(XDATA_TC_FLOOR(JPCOVER,NDATA_FLOOR_LAYER))
+!
+XDATA_TC_FLOOR (:,:) = XUNDEF
+!
 !-------------------------------------------------------------------------------
 !
 !*    3.7    depth for artificial surfaces layers
@@ -718,6 +724,10 @@ XDATA_D_ROAD (:,:) = XUNDEF
 ALLOCATE(XDATA_D_WALL(JPCOVER,NDATA_WALL_LAYER))
 !
 XDATA_D_WALL (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_D_FLOOR(JPCOVER,NDATA_FLOOR_LAYER))
+!
+XDATA_D_FLOOR (:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -760,15 +770,90 @@ XDATA_CAN_HW_RATIO (:) = XUNDEF
 !*    3.12   anthropogenic fluxes
 !            --------------------
 !
-ALLOCATE(XDATA_H_TRAFFIC(JPCOVER))
-ALLOCATE(XDATA_LE_TRAFFIC(JPCOVER))
-ALLOCATE(XDATA_H_INDUSTRY(JPCOVER))
+ALLOCATE(XDATA_H_TRAFFIC  (JPCOVER))
+ALLOCATE(XDATA_LE_TRAFFIC (JPCOVER))
+ALLOCATE(XDATA_H_INDUSTRY (JPCOVER))
 ALLOCATE(XDATA_LE_INDUSTRY(JPCOVER))
 !
 XDATA_H_TRAFFIC  (:) = XUNDEF
 XDATA_LE_TRAFFIC (:) = XUNDEF
 XDATA_H_INDUSTRY (:) = XUNDEF
 XDATA_LE_INDUSTRY(:) = XUNDEF
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.13   For TEB-BEM
+!            ------------
+!
+ALLOCATE(XDATA_TCOOL_TARGET (JPCOVER))
+ALLOCATE(XDATA_THEAT_TARGET (JPCOVER))
+!
+XDATA_TCOOL_TARGET (:) = XUNDEF
+XDATA_THEAT_TARGET (:) = XUNDEF
+!
+ALLOCATE(XDATA_F_WASTE_CAN (JPCOVER))
+ALLOCATE(XDATA_EFF_HEAT    (JPCOVER))
+ALLOCATE(XDATA_QIN         (JPCOVER))
+ALLOCATE(XDATA_QIN_FRAD    (JPCOVER))
+ALLOCATE(XDATA_SHGC        (JPCOVER))
+ALLOCATE(XDATA_U_WIN       (JPCOVER))
+ALLOCATE(XDATA_GR          (JPCOVER))
+ALLOCATE(XDATA_SHGC_SH     (JPCOVER))
+ALLOCATE(XDATA_FLOOR_HEIGHT(JPCOVER))
+ALLOCATE(XDATA_INF         (JPCOVER))
+!
+XDATA_F_WASTE_CAN (:) = XUNDEF
+XDATA_EFF_HEAT    (:) = XUNDEF
+XDATA_QIN         (:) = XUNDEF
+XDATA_QIN_FRAD    (:) = XUNDEF
+XDATA_SHGC        (:) = XUNDEF
+XDATA_U_WIN       (:) = XUNDEF
+XDATA_GR          (:) = XUNDEF
+XDATA_SHGC_SH     (:) = XUNDEF
+XDATA_FLOOR_HEIGHT(:) = XUNDEF
+XDATA_INF         (:) = XUNDEF
+!
+ALLOCATE(XDATA_F_WATER_COND(JPCOVER))
+ALLOCATE(XDATA_QIN_FLAT    (JPCOVER))
+ALLOCATE(XDATA_HR_TARGET   (JPCOVER))
+ALLOCATE(XDATA_V_VENT      (JPCOVER))
+ALLOCATE(XDATA_CAP_SYS_HEAT(JPCOVER))
+ALLOCATE(XDATA_CAP_SYS_RAT (JPCOVER))
+ALLOCATE(XDATA_T_ADP       (JPCOVER))
+ALLOCATE(XDATA_M_SYS_RAT   (JPCOVER))
+ALLOCATE(XDATA_COP_RAT     (JPCOVER))
+ALLOCATE(XDATA_T_SIZE_MAX  (JPCOVER))
+ALLOCATE(XDATA_T_SIZE_MIN  (JPCOVER))
+ALLOCATE(XDATA_SHADE       (JPCOVER))
+ALLOCATE(XDATA_NATVENT     (JPCOVER))
+!
+XDATA_F_WATER_COND(:) = XUNDEF
+XDATA_QIN_FLAT    (:) = XUNDEF
+XDATA_HR_TARGET   (:) = XUNDEF
+XDATA_V_VENT      (:) = XUNDEF
+XDATA_CAP_SYS_HEAT(:) = XUNDEF
+XDATA_CAP_SYS_RAT (:) = XUNDEF
+XDATA_T_ADP       (:) = XUNDEF
+XDATA_M_SYS_RAT   (:) = XUNDEF
+XDATA_COP_RAT     (:) = XUNDEF
+XDATA_T_SIZE_MAX  (:) = XUNDEF
+XDATA_T_SIZE_MIN  (:) = XUNDEF
+XDATA_SHADE       (:) = 0.
+XDATA_NATVENT     (:) = 0.
+!
+ALLOCATE(XDATA_ROUGH_ROOF (JPCOVER))
+ALLOCATE(XDATA_ROUGH_WALL (JPCOVER))
+XDATA_ROUGH_ROOF(:) = XUNDEF 
+XDATA_ROUGH_WALL(:) = XUNDEF
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.13   For greenroof
+!            -------------
+!
+ALLOCATE(XDATA_FRAC_GR (JPCOVER))
+!
+XDATA_FRAC_GR (:) = 0.
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -845,8 +930,44 @@ DO JCOVER = 1, JPCOVER
   ENDIF
   !
   IF (XDATA_TOWN(JCOVER)==0.) CYCLE
+  !
   XDATA_CAN_HW_RATIO(JCOVER) = 0.5 * XDATA_WALL_O_HOR(JCOVER) / (1.-XDATA_BLD (JCOVER))
   !
+  XDATA_HC_FLOOR(JCOVER,:) = 2016000.
+  XDATA_TC_FLOOR(JCOVER,:) = 1.95
+  XDATA_D_FLOOR(JCOVER,1) = 0.01
+  XDATA_D_FLOOR(JCOVER,2) = 0.04
+  XDATA_D_FLOOR(JCOVER,3) = 0.10
+  !
+  XDATA_TCOOL_TARGET(JCOVER) = 297.16
+  XDATA_THEAT_TARGET(JCOVER) = 292.16
+  XDATA_F_WASTE_CAN(JCOVER)  = 1.0
+  XDATA_EFF_HEAT(JCOVER)     = 0.9
+  XDATA_QIN(JCOVER)          = 5.8
+  XDATA_QIN_FRAD(JCOVER)     = 0.2
+  XDATA_QIN_FLAT(JCOVER)     = 0.2
+  XDATA_SHGC(JCOVER)         = 0.763
+  XDATA_U_WIN(JCOVER)        = 2.716
+  XDATA_GR(JCOVER)           = 0.3
+  XDATA_SHGC_SH(JCOVER)      = 0.763
+  XDATA_FLOOR_HEIGHT(JCOVER) = 3.0
+  XDATA_INF(JCOVER)          = 0.5
+  XDATA_F_WATER_COND(JCOVER) = 0.
+  XDATA_QIN_FLAT(JCOVER)     = 0.2
+  XDATA_HR_TARGET(JCOVER)    = 0.5
+  XDATA_V_VENT(JCOVER)       = 0.0
+  XDATA_CAP_SYS_HEAT(JCOVER) = 100.
+  XDATA_CAP_SYS_RAT(JCOVER)  = 90.
+  XDATA_T_ADP(JCOVER)        = 285.66
+  XDATA_M_SYS_RAT(JCOVER)    = 0.0067
+  XDATA_COP_RAT(JCOVER)      = 2.5
+  XDATA_T_SIZE_MAX(JCOVER)   = 301.95
+  XDATA_T_SIZE_MIN(JCOVER)   = 268.96
+  XDATA_SHADE(JCOVER)        = 0.0
+  XDATA_NATVENT(JCOVER)      = 0.0  
+  XDATA_ROUGH_ROOF(JCOVER)   = 1.52  
+  XDATA_ROUGH_WALL(JCOVER)   = 1.52  
+  !  
   IF (XDATA_GARDEN(JCOVER)/=0.) THEN
     DO JVEGTYPE=1,NVEGTYPE
       IF (XDATA_VEGTYPE(JCOVER,JVEGTYPE)/=0.) THEN

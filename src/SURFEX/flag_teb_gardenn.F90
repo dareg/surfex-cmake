@@ -39,12 +39,13 @@
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 USE MODD_TEB_n,          ONLY : XGARDEN
-USE MODD_TEB_GARDEN_n,   ONLY : NGROUND_LAYER, NPATCH,              &
-                                CPHOTO, CISBA, CRESPSL,             &
+USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CISBA, CRESPSL
+USE MODD_TEB_GARDEN_n,   ONLY : NGROUND_LAYER,                      &
                                 XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
                                 XRESA, XANFM, XAN, XLE, XANDAY,     &
                                 XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
-                                XLITTER, XSOILCARB, XLIGNIN_STRUC  
+                                XSNOWFREE_ALB, XSNOWFREE_ALB_VEG,   &
+                                XSNOWFREE_ALB_SOIL
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -65,7 +66,7 @@ INTEGER, INTENT(IN) :: KFLAG ! 1 : to put physical values to run ISBA afterwards
 !              -------------------------------
 !
 REAL :: ZWR, ZTG, ZWG, ZRESA, ZANFM, ZDEF
-INTEGER :: JL1, JL2, JPATCH ! loop counter on layers
+INTEGER :: JL1, JL2 ! loop counter on layers
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -93,70 +94,65 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !     
-DO JPATCH=1,NPATCH
   !
   DO JL1=1,NGROUND_LAYER
     WHERE (XGARDEN(:)==0.) 
-      XTG (:,JL1,JPATCH) = ZTG
-      XWG (:,JL1,JPATCH) = ZWG
-      XWGI(:,JL1,JPATCH) = ZDEF
+      XTG (:,JL1) = ZTG
+      XWG (:,JL1) = ZWG
+      XWGI(:,JL1) = ZDEF
     END WHERE
   END DO
   !
   WHERE (XGARDEN(:)==0.) 
-    XWR  (:,JPATCH) = ZWR
-    XRESA(:,JPATCH) = ZRESA
+    XWR  (:) = ZWR
+    XRESA(:) = ZRESA
   END WHERE
   !
   IF (CPHOTO/='NON') THEN
     !
     WHERE (XGARDEN(:)==0.)
-      XANFM (:,JPATCH) = ZANFM              
-      XAN   (:,JPATCH) = ZDEF
-      XANDAY(:,JPATCH) = ZDEF
-      XLE   (:,JPATCH) = ZDEF
+      XANFM (:) = ZANFM              
+      XAN   (:) = ZDEF
+      XANDAY(:) = ZDEF
+      XLE   (:) = ZDEF
     END WHERE
     !
     IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
       !
-      WHERE (XGARDEN(:)==0.) XLAI(:,JPATCH) = ZDEF
+      WHERE (XGARDEN(:)==0.) XLAI(:) = ZDEF
       !
     ELSE IF (CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
       !
       DO JL1=1,SIZE(XBIOMASS,2)
         WHERE (XGARDEN(:)==0.)
-          XBIOMASS     (:,JL1,JPATCH) = ZDEF
-          XRESP_BIOMASS(:,JL1,JPATCH) = ZDEF
+          XBIOMASS     (:,JL1) = ZDEF
+          XRESP_BIOMASS(:,JL1) = ZDEF
         END WHERE
-      END DO
-      !
-    END IF
-    !
-    IF (CRESPSL=='CNT') THEN
-      !
-      DO JL2=1,SIZE(XLITTER,3)
-        DO JL1=1,SIZE(XLITTER,2)
-          WHERE(XGARDEN(:)==0.) XLITTER  (:,JL1,JL2,JPATCH) = ZDEF
-        END DO
-      END DO
-      DO JL1=1,SIZE(XSOILCARB,2)
-        WHERE(XGARDEN(:)==0.)   XSOILCARB    (:,JL1,JPATCH) = ZDEF
-      END DO
-      DO JL1=1,SIZE(XLIGNIN_STRUC,2)
-        WHERE(XGARDEN(:)==0.)   XLIGNIN_STRUC(:,JL1,JPATCH) = ZDEF
       END DO
       !
     END IF
     !
   ENDIF
   !
-END DO
 !
 !-------------------------------------------------------------------------------
 !
 !* Flag snow characteristics
 !
 CALL FLAG_GR_SNOW(KFLAG,XGARDEN(:)==0.,TSNOW)
+!
+!
+!* snow-free characteristics
+!
+IF (KFLAG==1) THEN
+  WHERE (XGARDEN==0.) XSNOWFREE_ALB      = 0.2
+  WHERE (XGARDEN==0.) XSNOWFREE_ALB_VEG  = 0.2
+  WHERE (XGARDEN==0.) XSNOWFREE_ALB_SOIL = 0.2
+ELSEIF (KFLAG==2) THEN
+  WHERE (XGARDEN==0.) XSNOWFREE_ALB      = XUNDEF
+  WHERE (XGARDEN==0.) XSNOWFREE_ALB_VEG  = XUNDEF
+  WHERE (XGARDEN==0.) XSNOWFREE_ALB_SOIL = XUNDEF
+END IF
 !
 !-------------------------------------------------------------------------------
 !

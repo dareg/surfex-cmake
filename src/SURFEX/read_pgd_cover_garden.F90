@@ -29,6 +29,8 @@
 !!    ------------
 !!
 !!    Original     05/03/09
+!!
+!!    A. Lemonsu        05/2009         Key for vegetation in TEB (TEB-Veg)
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -52,7 +54,7 @@ IMPLICIT NONE
 !            ------------------------------
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
-LOGICAL,           INTENT(OUT) :: OGARDEN          ! T: Definition of urban green areas
+LOGICAL,           INTENT(OUT) :: OGARDEN          ! T: Urban green areas
 !
 !
 !*    0.2    Declaration of local variables
@@ -73,6 +75,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.    defaults
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_PGD_COVER_GARDEN',0,ZHOOK_HANDLE)
+!
 LGARDEN = .FALSE.
 !
 !------------------------------------------------------------------------------

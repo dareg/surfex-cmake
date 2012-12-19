@@ -36,7 +36,7 @@
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_TEB_n
 USE MODI_END_IO_SURF_n
-!
+USE MODI_GOTO_TEB
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -64,6 +64,7 @@ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
+CALL GOTO_TEB(1)
 CALL WRITESURF_PGD_TEB_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
