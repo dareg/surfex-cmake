@@ -69,6 +69,7 @@ TYPE ISBA_t
 !                                          ! 'NIT'
 !                                          ! 'NCB'
   LOGICAL                        :: LTR_ML ! new radiative transfert
+  REAL                           :: XRM_PATCH ! threshold to remove little fractions of patches 
   CHARACTER(LEN=4)               :: CALBEDO  ! albedo type
 !                                          ! 'DRY ' 
 !                                          ! 'EVOL' 
@@ -135,8 +136,9 @@ TYPE ISBA_t
   LOGICAL                        :: LECOCLIMAP ! T: parameters computed from ecoclimap
 !                                              ! F: they are read in the file
 !
-  LOGICAL                        :: LCTI
-  LOGICAL                        :: LSOM
+  LOGICAL                        :: LCTI       ! Topographic index data
+  LOGICAL                        :: LSOM      ! Soil organic carbon profile data
+!
 !-------------------------------------------------------------------------------
 !
 ! Mask and number of grid elements containing patches/tiles:
@@ -267,11 +269,11 @@ TYPE ISBA_t
   REAL, POINTER, DIMENSION(:,:)    :: XEPSO         ! maximum initial quantum use             
 !                                                     ! efficiency                              (mg J-1 PAR)
   REAL, POINTER, DIMENSION(:,:)    :: XGAMM         ! CO2 conpensation concentration          (ppm)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM       ! Q10 function for CO2 conpensation 
+  REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM       ! Log of Q10 function for CO2 conpensation 
 !                                                     ! concentration                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XGMES         ! mesophyll conductance                   (m s-1)
   REAL, POINTER, DIMENSION(:,:)    :: XRE25         ! Ecosystem respiration parameter         (kg/kg.m.s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDGMES       ! Q10 function for mesophyll conductance  (-)
+  REAL, POINTER, DIMENSION(:,:)    :: XQDGMES       ! Log of Q10 function for mesophyll conductance  (-)
   REAL, POINTER, DIMENSION(:,:)    :: XT1GMES       ! reference temperature for computing 
 !                                                     ! compensation concentration function for 
 !                                                     ! mesophyll conductance: minimum
@@ -281,7 +283,7 @@ TYPE ISBA_t
 !                                                     ! mesophyll conductance: maximum
 !                                                     ! temperature                             (K)
   REAL, POINTER, DIMENSION(:,:)    :: XAMAX         ! leaf photosynthetic capacity            (mg m-2 s-1)
-  REAL, POINTER, DIMENSION(:,:)    :: XQDAMAX       ! Q10 function for leaf photosynthetic 
+  REAL, POINTER, DIMENSION(:,:)    :: XQDAMAX       ! Log of Q10 function for leaf photosynthetic 
 !                                                     ! capacity                                (-)
   REAL, POINTER, DIMENSION(:,:)    :: XT1AMAX       ! reference temperature for computing 
 !                                                     ! compensation concentration function for 
@@ -327,7 +329,7 @@ TYPE ISBA_t
 !
   REAL, POINTER, DIMENSION(:,:)    :: XSAND          ! sand fraction                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XCLAY          ! clay fraction                           (-)
-  REAL, POINTER, DIMENSION(:,:)    :: XSOM           ! % of soil organic matter                (%)
+  REAL, POINTER, DIMENSION(:,:)    :: XSOM           ! soil organic carbon content             (kg/m2)
 
   REAL, POINTER, DIMENSION(:)      :: XWDRAIN        ! continuous drainage parameter           (-)
   REAL, POINTER, DIMENSION(:)      :: XTAUICE        ! soil freezing characteristic timescale  (s)
@@ -346,7 +348,7 @@ TYPE ISBA_t
   INTEGER, POINTER, DIMENSION(:,:) :: NWG_LAYER      ! Number of soil moisture layers for DIF
   REAL, POINTER, DIMENSION(:,:)    :: XDROOT         ! effective root depth for DIF (m)
   REAL, POINTER, DIMENSION(:,:)    :: XDG2           ! root depth for DIF as 3-L (m)
-!  
+!
 !-------------------------------------------------------------------------------
 !
 ! - soil: Secondary parameters: hydrology
@@ -494,9 +496,9 @@ TYPE ISBA_t
 !                                          ! 'DEF' = default value 
 !                                          ! 'SGH' = profil exponentiel
 !                                           
-  CHARACTER(LEN=3)               :: CSOM   ! soil organic matter effect
+  CHARACTER(LEN=3)               :: CSOM   ! soil organic carbon effect
 !                                          ! 'DEF' = default value 
-!                                          ! 'SGH' = soil organic matter profil
+!                                          ! 'SGH' = soil SOC profil
 !
   CHARACTER(LEN=3)               :: CRAIN  ! Rainfall spatial distribution
                                            ! 'DEF' = No rainfall spatial distribution
@@ -533,6 +535,9 @@ TYPE ISBA_t
 !                                            
   REAL, POINTER, DIMENSION(:)    :: XMUF  ! fraction of the grid cell reached by the rainfall
   REAL, POINTER, DIMENSION(:)    :: XFSAT ! Topmodel or dt92 saturated fraction
+!
+  REAL, POINTER, DIMENSION(:,:)  :: XFRACSOM ! Fraction of organic carbon in each soil layer
+!
 !-------------------------------------------------------------------------------
 !
 ! - Snow and flood fractions and total albedo at time t:
@@ -589,6 +594,8 @@ CHARACTER(LEN=3), POINTER :: CPHOTO=>NULL()
 !$OMP THREADPRIVATE(CPHOTO)
 LOGICAL,          POINTER :: LTR_ML=>NULL()
 !$OMP THREADPRIVATE(LTR_ML)
+REAL,             POINTER :: XRM_PATCH=>NULL()
+!$OMP THREADPRIVATE(XRM_PATCH)
 CHARACTER(LEN=4), POINTER :: CALBEDO=>NULL()
 !$OMP THREADPRIVATE(CALBEDO)
 CHARACTER(LEN=4), POINTER :: CRUNOFF=>NULL()
@@ -992,6 +999,8 @@ REAL, POINTER, DIMENSION(:,:)  :: XD_ICE=>NULL()
 !$OMP THREADPRIVATE(XD_ICE)
 REAL, POINTER, DIMENSION(:,:)  :: XKSAT_ICE=>NULL()
 !$OMP THREADPRIVATE(XKSAT_ICE)
+REAL, POINTER, DIMENSION(:,:)  :: XFRACSOM=>NULL()
+!$OMP THREADPRIVATE(XFRACSOM)
 !
 INTEGER, POINTER :: NLAYER_HORT=>NULL()
 !$OMP THREADPRIVATE(NLAYER_HORT)
@@ -1213,6 +1222,7 @@ ISBA_MODEL(KFROM)%XTAB_WTOP=>XTAB_WTOP
 !                          
 ISBA_MODEL(KFROM)%XD_ICE=>XD_ICE
 ISBA_MODEL(KFROM)%XKSAT_ICE=>XKSAT_ICE
+ISBA_MODEL(KFROM)%XFRACSOM=>XFRACSOM
 !
 !Flood scheme
 !
@@ -1234,6 +1244,7 @@ CISBA=>ISBA_MODEL(KTO)%CISBA
 CPEDOTF=>ISBA_MODEL(KTO)%CPEDOTF
 CPHOTO=>ISBA_MODEL(KTO)%CPHOTO
 LTR_ML=>ISBA_MODEL(KTO)%LTR_ML
+XRM_PATCH=>ISBA_MODEL(KTO)%XRM_PATCH
 CALBEDO=>ISBA_MODEL(KTO)%CALBEDO
 CRUNOFF=>ISBA_MODEL(KTO)%CRUNOFF
 CSCOND=>ISBA_MODEL(KTO)%CSCOND
@@ -1449,6 +1460,7 @@ XTAB_WTOP=>ISBA_MODEL(KTO)%XTAB_WTOP
 !
 XD_ICE=>ISBA_MODEL(KTO)%XD_ICE
 XKSAT_ICE=>ISBA_MODEL(KTO)%XKSAT_ICE
+XFRACSOM=>ISBA_MODEL(KTO)%XFRACSOM
 !
 NLAYER_HORT=>ISBA_MODEL(KTO)%NLAYER_HORT
 NLAYER_DUN=>ISBA_MODEL(KTO)%NLAYER_DUN
@@ -1566,7 +1578,6 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XBSLAI_NITRO)
   NULLIFY(ISBA_MODEL(J)%XSAND)
   NULLIFY(ISBA_MODEL(J)%XCLAY)
-  NULLIFY(ISBA_MODEL(J)%XSOM)
   NULLIFY(ISBA_MODEL(J)%XRUNOFFB)
   NULLIFY(ISBA_MODEL(J)%XWDRAIN)
   NULLIFY(ISBA_MODEL(J)%XTAUICE)
@@ -1663,6 +1674,7 @@ ISBA_MODEL(:)%CISBA=' '
 ISBA_MODEL(:)%CPEDOTF=' '
 ISBA_MODEL(:)%CPHOTO=' '
 ISBA_MODEL(:)%LTR_ML=.FALSE.
+ISBA_MODEL(:)%XRM_PATCH=0.0
 ISBA_MODEL(:)%CALBEDO=' '
 ISBA_MODEL(:)%CSCOND=' '
 ISBA_MODEL(:)%CC1DRY=' '
