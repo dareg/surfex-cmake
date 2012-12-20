@@ -11,6 +11,9 @@ PROGRAM OFFLINE
 !   2.c Run surface
 !   2.d Write prognostics and diagnostics variables
 !
+! modifications 
+! 09/2012 G. Pigeon: coherence between radiation and zenith angle because of
+!                    trouble with radiation received by wall in TEB
 ! -------------------------------------------------
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
@@ -52,7 +55,7 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XPET_B_COEF ,&
                             XPEQ_B_COEF  
 !
-USE MODD_SURF_CONF,  ONLY : CPROGNAME
+USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
 USE MODD_IO_SURF_ASC,ONLY : CFILEIN,CFILEIN_SAVE,CFILEOUT,CFILEPGD
 USE MODD_SURF_PAR
@@ -82,7 +85,13 @@ USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,  
 USE MODD_SURFEX_OMP, ONLY :  NINDX1, NINDX2, NBLOCK, NBLOCKTOT, &
                              INIT_DIM, RESET_DIM, NWORK, XWORK, XWORK2
 !
+USE MODD_COUPLING_TOPD, ONLY : NNB_TOPD, NNB_STP_RESTART, LBUDGET_TOPD, LTOPD_STEP, &
+                               LCOUPL_TOPD, NTOPD_STEP, NYEAR, NMONTH, NDAY, NH, NM
+USE MODD_TOPODYN, ONLY : XTOPD_STEP, NNB_TOPD_STEP, XQTOT, XQB_RUN, XQB_DR
+!
 USE MODE_POS_SURF
+!
+USE MODE_CRODEBUG
 !
 USE MODN_IO_OFFLINE
 !
@@ -124,6 +133,10 @@ USE MODI_CLOSE_FILEIN_OL
 USE MODI_CLOSE_FILEOUT_OL
 USE MODI_DEALLOC_SURFEX
 !
+USE MODI_WRITE_DISCHARGE_FILE
+USE MODI_WRITE_BUDGET_COUPL_ROUT
+USE MODI_PREP_RESTART_COUPL_TOPD
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -133,7 +146,9 @@ USE OMP_LIB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
 INCLUDE 'mpif.h'
+#endif
 !
 #ifndef AIX64
 INCLUDE 'omp_lib.h'
@@ -205,6 +220,7 @@ INTEGER                           :: INB
 CHARACTER(LEN=14)                 :: YTAG                
 LOGICAL                           :: GFOUND              ! return logical when reading namelist
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
+REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
 !
 ! Inquiry mode arrays:
 !
@@ -232,13 +248,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*     0.1.   MPI and dr_hook initializations
 !
+#ifndef NOMPI
 CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
+#endif
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
 !
+CSOFTWARE='OFFLINE'
+!
+#ifndef NOMPI
 NCOMM = MPI_COMM_WORLD
 CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
 CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
+#endif
 !
 !$OMP PARALLEL
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
@@ -250,7 +272,9 @@ CALL WLOG_MPI(' ')
 !
 CALL WLOG_MPI('NBLOCKTOT ',KLOG=NBLOCKTOT)
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !
 !*      0.3.   Open ascii file for writing
@@ -336,9 +360,13 @@ IF (NRANK==NPIO) THEN
   !
 ENDIF
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('READ NAMELISTS ',PLOG=XTIME)
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !       forcing file handling
 !
@@ -360,11 +388,15 @@ CALL WLOG_MPI('TIME_COMM_READ init_index ',PLOG=XTIME_COMM_READ)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('INIT_INDEX_MPI ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !       configuration of run
 !
@@ -378,10 +410,14 @@ CALL WLOG_MPI('TIME_COMM_READ forc conf ',PLOG=XTIME_COMM_READ)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('OL_READ_ATM_CONF ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !*     time steps coherence check 
 !
@@ -400,6 +436,20 @@ ENDIF
 INB_STEP_ATM  = INT(ZDURATION / ZTSTEP)
 INB_ATM       = INT(ZTSTEP / XTSTEP_SURF)
 NSTEP_OUTPUT  = INT(ZDURATION / XTSTEP_OUTPUT)
+!
+XTOPD_STEP = 0
+NNB_TOPD_STEP = 0
+NTOPD_STEP = 0
+IF ( LCOUPL_TOPD ) THEN
+  !
+  XTOPD_STEP = FLOAT(NNB_TOPD)* XTSTEP_SURF
+  NNB_TOPD_STEP = INT( ZDURATION / XTOPD_STEP )
+  !
+  IF ( NNB_STP_RESTART==0 .AND. .NOT.LRESTART ) NNB_STP_RESTART = -1
+  !
+  NTOPD_STEP = 1
+  !
+ENDIF
 !
 !       allocation of variables
 !
@@ -452,14 +502,19 @@ IF (.NOT.ALLOCATED(ZRAIN))ALLOCATE(ZRAIN  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZPS))ALLOCATE(ZPS    (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR))ALLOCATE(ZDIR   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZCOEF))ALLOCATE(ZCOEF   (INI))
 !
 IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
 !      computes initial air co2 concentration and  density
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('COMPARE_OROGRAPHY SUNPOS ',PLOG=XTIME)
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !* opens forcing files (if ASCII or BINARY)
 !
@@ -475,18 +530,24 @@ CALL WLOG_MPI('TIME_COMM_READ forc ',PLOG=XTIME_COMM_READ)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('OL_READ_ATM0 ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 XCO2(:)  = ZCO2(:,1)
 XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * XZREF )
 !                 
 !       surface Initialisation     
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('CO2 RHOA ',PLOG=XTIME)
 !
 CALL IO_BUFF_CLEAN_n
@@ -502,7 +563,9 @@ ENDDO
 !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME,XTIME0)
 !
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 !$ NBLOCK = OMP_GET_THREAD_NUM()
 !
@@ -529,7 +592,9 @@ CALL INIT_SURF_ATM_n(CSURF_FILETYPE, YINIT, LLAND_USE,                      &
 !
 CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('INIT_SURF_ATM ',PLOG=XTIME)
 CALL WLOG_MPI(' ')
@@ -556,8 +621,9 @@ CALL INIT_SURF_LANDUSE_n(CSURF_FILETYPE,YINIT,LLAND_USE,             &
                        IYEAR, IMONTH, IDAY, ZTIME,                   &
                        YATMFILE, YATMFILETYPE, YTEST                 )
 !
-!
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !
 ! Initialyse the SURFACE-TRIP interface
 !
@@ -565,14 +631,19 @@ CALL INIT_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,IMONTH,&
                         ZDURATION,ITRIP_MONTH,ITRIP_COUNT,XZENITH,      &
                         XSW_BANDS,XEMIS,XTSRAD,XDIR_ALB,XSCA_ALB        )  
 !
+CALL INIT_CRODEBUG()
 !
 ! --------------------------------------------------------------------------------------
 !
 NWRITE = 0
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 CALL WLOG_MPI('INIT FINISHED ',PLOG=XTIME)
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
+#endif
 !*      2.    Temporal loops
 !
 XTIME_CALC(:) = 0.
@@ -580,7 +651,9 @@ XTIME_WRITE(:) = 0.
 !
 DO JFORC_STEP=1,INB_STEP_ATM
   !
+#ifndef NOMPI  
   XTIME1 = MPI_WTIME()
+#endif
   ! read Forcing
   !
   !indice of forcing line in forcing arrays
@@ -612,20 +685,26 @@ DO JFORC_STEP=1,INB_STEP_ATM
                      ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
 
+#ifndef NOMPI  
   XTIME_CALC(1) = XTIME_CALC(1) + (MPI_WTIME() - XTIME1)
   XTIME1 = MPI_WTIME()
+#endif
   !
   DO JSURF_STEP=1,INB_ATM
     !
     ! time interpolation of the forcing
     !
+#ifndef NOMPI    
     XTIME1 = MPI_WTIME()
+#endif
     CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME, &
                 ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
     CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME+XTSTEP_SURF, & 
                 ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+#ifndef NOMPI                
     XTIME_CALC(2) = XTIME_CALC(2) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
+#endif
     !interpolation between beginning and end of current forcing time step
     CALL OL_TIME_INTERP_ATM(JSURF_STEP,INB_ATM,ISIZE_OMP,            &
                             ZTA(:,ID_FORC),ZTA(:,ID_FORC+1),         &
@@ -634,51 +713,50 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZDIR_SW(:,ID_FORC),ZDIR_SW(:,ID_FORC+1), &
                             ZSCA_SW(:,ID_FORC),ZSCA_SW(:,ID_FORC+1), &
                             ZLW(:,ID_FORC),ZLW(:,ID_FORC+1),         &
-                           ZSNOW(:,ID_FORC),ZRAIN(:,ID_FORC),       &
+                            ZSNOW(:,ID_FORC+1),ZRAIN(:,ID_FORC+1),   &
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
-                            ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )  
-    !   CALL OL_TIME_INTERP_ATM(JSURF_STEP,INB_ATM,                               &
-    !                           transpose(ZTA(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZQA(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZWIND(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZDIR_SW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZSCA_SW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZLW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZSNOW(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZRAIN(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZPS(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZCO2(:,ID_FORC:ID_FORC+1)),&
-    !                           transpose(ZDIR(:,ID_FORC:ID_FORC+1)) )      
-    
+                            ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
+#ifndef NOMPI                            
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
-    XTIME1 = MPI_WTIME()        
+    XTIME1 = MPI_WTIME()    
+#endif
+    !
+    ! coherence between solar zenithal angle and radiation
+    ! when solar beam close to horizontal -> reduction of direct radiation to
+    ! the benefit of scattered radiation
+    ! when pi/2 - 0.1 < ZENITH < pi/2 - 0.05 => weight of direct to scattered radiation decreases linearly with zenith 
+    ! when pi/2 - 0.05 < ZENITH => all the direct radiation is converted to scattered radiation
     ! coherence between solar zenithal angle and radiation
     !
-    ZSW(:) = 0.
+    ZCOEF(:) = (XPI/2. - XZENITH(:) - 0.05) / 0.05
+    ZCOEF(:) = MAX(MIN(ZCOEF,1.),0.)
     DO JLOOP=1,SIZE(XDIR_SW,2)
-      ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
-    END DO
-    WHERE (ZSW(:)>0.)
-      XZENITH  = MIN (XZENITH ,XPI/2.-0.01)
-      XZENITH2 = MIN (XZENITH2,XPI/2.-0.01)
-    ELSEWHERE
-      XZENITH  = MAX (XZENITH ,XPI/2.)
-      XZENITH2 = MAX (XZENITH2,XPI/2.)
-    END WHERE
+      XSCA_SW(:,JLOOP) = XSCA_SW(:,JLOOP) + XDIR_SW(:,JLOOP) * (1 - ZCOEF)
+      XDIR_SW(:,JLOOP) = XDIR_SW(:,JLOOP) * ZCOEF(:)
+    ENDDO   
+    !ZSW(:) = 0.
+    !DO JLOOP=1,SIZE(XDIR_SW,2)
+    !  ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
+    !END DO    
     !
     ! updates time
-    ZTIMEC= ZTIMEC+ XTSTEP_SURF
+    ZTIMEC= ZTIMEC+XTSTEP_SURF
+    IF (LCOUPL_TOPD) LTOPD_STEP = ( MOD((((JFORC_STEP-1)*INB_ATM)+JSURF_STEP),NNB_TOPD) == 0 )
     !
     ! run Surface
     !
-    XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1)    
+#ifndef NOMPI    
+    XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1) 
+#endif   
     !
     CALL IO_BUFF_CLEAN_n
     !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
     !
+#ifndef NOMPI    
     XTIME1 = MPI_WTIME()    
+#endif
     !    
 !$ NBLOCK = OMP_GET_THREAD_NUM()
     !
@@ -694,6 +772,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       CALL GOTO_SURFEX(NBLOCK,.TRUE.)
     ENDIF
     !
+
     CALL COUPLING_SURF_ATM_n(CSURF_FILETYPE, 'E', ZTIMEC,                    &
            XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, ISCAL, IBANDS, &
            XTSUN(NINDX1:NINDX2), XZENITH(NINDX1:NINDX2),                     &
@@ -715,11 +794,15 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
     !
+#ifndef NOMPI    
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
+#endif
     !
 !$OMP END PARALLEL
     !
-    XTIME1 = MPI_WTIME()       
+#ifndef NOMPI    
+    XTIME1 = MPI_WTIME()  
+#endif
     CALL COUPLING_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,  &
                               ITRIP_MONTH,ITRIP_COUNT,ZTIME+XTSTEP_SURF, &
                               ZDURATION,XZENITH,XSW_BANDS,XEMIS,XTSRAD,  &
@@ -727,10 +810,78 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     ZTIME = ZTIME + XTSTEP_SURF
     CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
+#ifndef NOMPI    
     XTIME_CALC(6) = XTIME_CALC(6) + (MPI_WTIME() - XTIME1)
     !
     XTIME1 =  MPI_WTIME()
+#endif    
     ! ecrit Surface
+    !
+    IF ( LCOUPL_TOPD .AND. LTOPD_STEP ) THEN
+      !
+      IF (.NOT.ALLOCATED(NYEAR))  ALLOCATE(NYEAR(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NMONTH)) ALLOCATE(NMONTH(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NDAY))   ALLOCATE(NDAY(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NH))     ALLOCATE(NH(NNB_TOPD_STEP))
+      IF (.NOT.ALLOCATED(NM))     ALLOCATE(NM(NNB_TOPD_STEP))
+      !
+      NYEAR (NTOPD_STEP) = IYEAR
+      NMONTH(NTOPD_STEP) = IMONTH
+      NDAY  (NTOPD_STEP) = IDAY
+      NH    (NTOPD_STEP) = INT(ZTIME/3600.)
+      NM    (NTOPD_STEP) = INT((ZTIME-NH(NTOPD_STEP)*3600.)/60.)
+      !
+      IF ( NM(NTOPD_STEP)==60 ) THEN
+        !
+        NM(NTOPD_STEP) = 0
+        NH(NTOPD_STEP) = NH(NTOPD_STEP)+1
+        !
+      ENDIF
+      !
+      IF ( NH(NTOPD_STEP)==24 ) THEN
+        !
+        NH  (NTOPD_STEP) = 0
+        NDAY(NTOPD_STEP) = NDAY(NTOPD_STEP)+1
+        !
+        !!AJOUT BEC 
+        SELECT CASE (NMONTH(NTOPD_STEP))
+          CASE(4,6,9,11)
+            IF ( NDAY(NTOPD_STEP)==31 ) THEN
+              NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+              NDAY  (NTOPD_STEP) = 1
+            ENDIF
+          CASE(1,3,5,7:8,10)
+            IF ( NDAY(NTOPD_STEP)==32 ) THEN
+              NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+              NDAY  (NTOPD_STEP) = 1
+            ENDIF
+          CASE(12)
+            IF ( NDAY(NTOPD_STEP)==32 ) THEN
+              NYEAR (NTOPD_STEP) = NYEAR(NTOPD_STEP)+1
+              NMONTH(NTOPD_STEP) = 1
+              NDAY  (NTOPD_STEP) = 1
+            ENDIF
+          CASE(2)
+            IF( MOD(NYEAR(NTOPD_STEP),4)==0 .AND. MOD(NYEAR(NTOPD_STEP),100)/=0 .OR. MOD(NYEAR(NTOPD_STEP),400)==0 ) THEN 
+              IF (NDAY(NTOPD_STEP)==30) THEN
+                NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+                NDAY  (NTOPD_STEP) = 1
+              ENDIF
+            ELSE
+              IF (NDAY(NTOPD_STEP)==29) THEN
+                NMONTH(NTOPD_STEP) = NMONTH(NTOPD_STEP)+1
+                NDAY  (NTOPD_STEP) = 1
+              ENDIF
+            ENDIF
+        END SELECT
+        !
+      ENDIF
+      !
+      ! * 2. Stocking date of each time step
+      !
+      NTOPD_STEP = NTOPD_STEP + 1 
+      !     
+    ENDIF
     !
     IF (MOD(ZTIMEC,XTSTEP_OUTPUT) == 0. .AND. CTIMESERIES_FILETYPE/='NONE  ') THEN
       !
@@ -781,14 +932,14 @@ DO JFORC_STEP=1,INB_STEP_ATM
           CFILEOUT_LFI= ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG)
           CFILEOUT_FA = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.fa')
           !
-          IF (CTIMESERIES_FILETYPE=='FA    ') THEN 
-            LFANOCOMPACT = .TRUE.
+          IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+            LFANOCOMPACT = LDIAG_FA_NOCOMPACT                  
             IDATEF(1)= IYEAR_OUT
             IDATEF(2)= IMONTH_OUT
             IDATEF(3)= IDAY_OUT
-            IDATEF(4)= ZTIME_OUT/3600
-            IDATEF(5)= ZTIME_OUT/60 - IDATEF(4) * 60 
-            IDATEF(6)= ZTIME_OUT - IDATEF(4) * 3600 - IDATEF(5) * 60
+            IDATEF(4)= NINT(ZTIME_OUT/3600.)
+            IDATEF(5)= NINT(ZTIME_OUT/60.) - IDATEF(4) * 60 
+            IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
             IDATEF(7:11) = 0
             CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
             CALL FANDAR(IRET,NUNIT_FA,IDATEF)
@@ -802,7 +953,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !
       ENDIF
       !
+#ifndef NOMPI      
       XTIME_WRITE(1) = XTIME_WRITE(1) + (MPI_WTIME() - XTIME1)
+#endif      
       !      
       CALL IO_BUFF_CLEAN_n
       !
@@ -824,21 +977,45 @@ DO JFORC_STEP=1,INB_STEP_ATM
         CALL GOTO_SURFEX(NBLOCK,.TRUE.)
       ENDIF
       !
+#ifndef NOMPI      
       XTIME1 =  MPI_WTIME()
+#endif      
       CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+#ifndef NOMPI      
       XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
       XTIME1 =  MPI_WTIME()
+#endif      
       CALL DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE)
+#ifndef NOMPI      
       XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
       XTIME1 =  MPI_WTIME()
+#endif      
       CALL WRITE_DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL')
+#ifndef NOMPI      
       XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
+#endif      
       !
       CALL RESET_DIM(INI,INKPROMA,NINDX1,NINDX2)
       !
 !$OMP END PARALLEL
       !
+      IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) THEN
+        !
+        ! Writing of file resulting of coupling with TOPMODEL or routing ****
+        CALL WRITE_DISCHARGE_FILE(CSURF_FILETYPE,'q_total.txt','FORMATTED',&
+                                  NYEAR,NMONTH,NDAY,NH,NM,XQTOT)
+        CALL WRITE_DISCHARGE_FILE(CSURF_FILETYPE,'q_runoff.txt','FORMATTED',&
+                                  NYEAR,NMONTH,NDAY,NH,NM,XQB_RUN)
+        CALL WRITE_DISCHARGE_FILE(CSURF_FILETYPE,'q_drainage.txt','FORMATTED',&
+                                  NYEAR,NMONTH,NDAY,NH,NM,XQB_DR)
+        ! Writing of budget files 
+        IF (LBUDGET_TOPD) CALL WRITE_BUDGET_COUPL_ROUT
+        !
+      ENDIF
+      !
+#ifndef NOMPI      
       XTIME1 =  MPI_WTIME()
+#endif      
       !
       IF (NRANK==NPIO) THEN
         IF (CTIMESERIES_FILETYPE=='FA    ') THEN
@@ -847,7 +1024,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !* add informations in the file
         IF (CTIMESERIES_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
       ENDIF
+#ifndef NOMPI      
       XTIME_WRITE(5) = XTIME_WRITE(5) + (MPI_WTIME() - XTIME1)
+#endif      
       !
     ENDIF
     !
@@ -869,7 +1048,9 @@ END DO
 !
 !$OMP PARALLEL PRIVATE(XTIME)
 !
+#ifndef NOMPI
 XTIME = (MPI_WTIME() - XTIME0)
+#endif
 !
 CALL WLOG_MPI(' ')
 CALL WLOG_MPI('OL_READ_ATM ',PLOG=XTIME_CALC(1))
@@ -927,9 +1108,9 @@ IF ( LRESTART ) THEN
       IDATEF(1)= IYEAR_OUT
       IDATEF(2)= IMONTH_OUT
       IDATEF(3)= IDAY_OUT
-      IDATEF(4)= ZTIME_OUT/3600
-      IDATEF(5)= ZTIME_OUT/60 - IDATEF(4) * 60 
-      IDATEF(6)= ZTIME_OUT - IDATEF(4) * 3600 - IDATEF(5) * 60
+      IDATEF(4)= NINT(ZTIME_OUT/3600.)
+      IDATEF(5)= NINT(ZTIME_OUT/60.) - IDATEF(4) * 60 
+      IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
       IDATEF(7:11) = 0            
       CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
       CALL FANDAR(IRET,NUNIT_FA,IDATEF)
@@ -975,7 +1156,10 @@ IF ( LRESTART ) THEN
     END IF
     !* add informations in the file
     IF (CSURF_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
+    !
   ENDIF
+  !
+  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) CALL PREP_RESTART_COUPL_TOPD(CSURF_FILETYPE,INI)
   !
 END IF
 !
@@ -1106,7 +1290,9 @@ IF (ASSOCIATED(XWORK2)) DEALLOCATE(XWORK2)
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',1,ZHOOK_HANDLE)
 !
+#ifndef NOMPI
 CALL MPI_FINALIZE(INFOMPI)
+#endif
 !
 ! --------------------------------------------------------------------------------------
 !

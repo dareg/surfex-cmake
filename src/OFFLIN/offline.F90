@@ -738,15 +738,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !ZSW(:) = 0.
     !DO JLOOP=1,SIZE(XDIR_SW,2)
     !  ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
-    !END DO
-    !WHERE (ZSW(:)>0.)
-    !  XZENITH  = MIN (XZENITH ,XPI/2.-0.01)
-    !  XZENITH2 = MIN (XZENITH2,XPI/2.-0.01)
-    !ELSEWHERE
-    !  XZENITH  = MAX (XZENITH ,XPI/2.)
-    !  XZENITH2 = MAX (XZENITH2,XPI/2.)
-    !END WHERE
-    
+    !END DO    
     !
     ! updates time
     ZTIMEC= ZTIMEC+XTSTEP_SURF
