@@ -215,7 +215,7 @@ REAL, DIMENSION(:), INTENT (OUT)   :: PQA_IC, PTA_IC, PUSTAR2_IC
 !                                           (modified if implicit coupling with
 !                                            atmosphere used)
 !
-REAL, DIMENSION(:), INTENT(INOUT)   :: PRA
+REAL, DIMENSION(:), INTENT(IN)   :: PRA
 !                                     PRA = aerodynamic surface resistance for
 !                                           heat transfers
 !
@@ -502,7 +502,7 @@ ZPETB2(:) = ZPET_B_COEF(:)/PEXNA(:)
 ! NOTE for now, the meltwater advection term (heat source/sink)
 ! is OFF because the corresponding energy should be compensated for
 ! (but code is retained for possible future activation).
-
+!
 ZA(:) = 1. / PTSTEP + PCT(:) *                            &
          ((ZFNSNOW(:) *                                    &
            ( 4.*ZTRAD(:) + ZRORA(:)*ZCPS(:)*ZPETA2(:) ))   &
@@ -516,8 +516,6 @@ ZC(:) = 2. * XPI * PTG(:,2) / XDAY + PCT(:) *              &
        ( ZRORA(:)*ZCPS(:)*ZPETB2(:)                         &
        + PSW_RAD(:)*(1.-PALBT(:)) + PLW_RAD(:)*PEMIST(:))   &
        - (ZCHUMS(:)*PQSAT(:) - ZCHUMA(:)*ZPEQ_B_COEF(:)))           
-!
-
 !
 IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO' .OR. HISBA == 'DIF')THEN                                 
 !
@@ -581,6 +579,7 @@ IF(HISBA == 'DIF')THEN
 !
 ! First determine terms needed for implicit linearization of surface:
 !
+
    ZCONDAVG(:) = (PDZG(:,1)*PSOILCONDZ(:,1) + PDZG(:,2)*PSOILCONDZ(:,2))/PD_G(:,2)  
    ZA(:)       = ZA(:) - (2. * XPI / XDAY) + 2.*ZCONDAVG(:)*PCT(:)/PD_G(:,2)  
    ZTERM2(:)   = 2.*ZCONDAVG(:)*PCT(:)/(ZA(:)*PD_G(:,2))

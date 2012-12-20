@@ -25,7 +25,7 @@
                                    PCAP_SYS_RAT, PT_ADP, PM_SYS_RAT,   &
                                    PCOP_RAT, PT_SIZE_MAX, PT_SIZE_MIN, &
                                    PSHADE, PNATVENT, PROUGH_ROOF,      &
-                                   PROUGH_WALL, PFRAC_GR               )
+                                   PROUGH_WALL               )
 !     ##############################################################
 !
 !!**** *CONVERT_PATCH_TEB* compilation of conver_cover_isba, pgd_isba_par and
@@ -86,10 +86,9 @@ USE MODD_DATA_COVER,     ONLY : XDATA_Z0_TOWN, XDATA_ALB_ROOF,                  
                                 XDATA_CAP_SYS_RAT, XDATA_T_ADP, XDATA_M_SYS_RAT,  &
                                 XDATA_COP_RAT, XDATA_T_SIZE_MAX, XDATA_T_SIZE_MIN,&
                                 XDATA_SHADE, XDATA_NATVENT, XDATA_ROUGH_ROOF,     &
-                              XDATA_ROUGH_WALL, XDATA_FRAC_GR
+                              XDATA_ROUGH_WALL
 USE MODD_DATA_TEB_n
 USE MODD_DATA_BEM_n
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : LDATA_FRAC_GR, XPAR_FRAC_GR
 !
 USE MODD_TEB_n,          ONLY : LGARDEN, CBLD_ATYPE
 USE MODD_BLD_DESCRIPTION, ONLY : NDESC_ROOF_LAYER, NDESC_WALL_LAYER, &
@@ -167,7 +166,6 @@ REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PSHADE
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PNATVENT
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_ROOF
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_WALL
-REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PFRAC_GR
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -805,17 +803,6 @@ IF (PRESENT(PROUGH_WALL)) THEN
     CALL INI_DATA_PARAM_TEB(NPAR_BLDCODE,PROUGH_WALL=PROUGH_WALL)
   ELSE
     CALL AV_PGD (PROUGH_WALL ,PCOVER ,XDATA_ROUGH_WALL (:),YAREA,YAVG)  
-  ENDIF  
-ENDIF
-
-!
-!     GREEN ROOFS FRACTION
-!     --------------------------
-IF (PRESENT(PFRAC_GR)) THEN
-  IF (LDATA_FRAC_GR) THEN
-    PFRAC_GR=XPAR_FRAC_GR
-  ELSE
-    CALL AV_PGD (PFRAC_GR ,PCOVER ,XDATA_FRAC_GR(:),'BLD','ARI')
   ENDIF  
 ENDIF
 ! 

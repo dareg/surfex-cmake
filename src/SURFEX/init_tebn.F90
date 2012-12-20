@@ -326,7 +326,7 @@ IF (HINIT/='PGD') THEN
     XGARDEN(:) = 0.
     XFRAC_GR (:) = 0.
     ZDEF_ROAD_DIR = 0.
-    CALL CONVERT_PATCH_TEB(XCOVER, ZDEF_ROAD_DIR, PGARDEN=XGARDEN  )
+    CALL CONVERT_PATCH_TEB(XCOVER, ZDEF_ROAD_DIR,PGARDEN=XGARDEN)
   ENDDO
 ENDIF
 !
@@ -450,8 +450,7 @@ DO JPATCH=1,NTEB_PATCH
                       PWALL_O_HOR=XWALL_O_HOR,PBLD=XBLD, PROAD_DIR=XROAD_DIR,    &
                       PH_TRAFFIC=XH_TRAFFIC, PLE_TRAFFIC=XLE_TRAFFIC,            &
                       PH_INDUSTRY=XH_INDUSTRY, PLE_INDUSTRY=XLE_INDUSTRY,        &
-                      PROUGH_ROOF = XROUGH_ROOF, PROUGH_WALL = XROUGH_WALL,      &
-                      PFRAC_GR=XFRAC_GR                                          )
+                      PROUGH_ROOF = XROUGH_ROOF, PROUGH_WALL = XROUGH_WALL       )
   !
   !-------------------------------------------------------------------------------
   !

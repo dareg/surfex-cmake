@@ -38,7 +38,7 @@ USE MODD_TEB_n,             ONLY: XCOVER
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO
 USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS, NLAYER_GR,      &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
-                                  XGAMMA, XCV, XRGL,                       &
+                                  XGAMMA, XCV, XRGL, XFRAC_GR,             &
                                   XZ0, XDG2, XDROOT, NWG_LAYER,            &
                                   XGMES, XSOILGRID_GR,                     &
                                   XBSLAI, XLAIMIN, XSEFOLD,                &
@@ -51,6 +51,8 @@ USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS, NLAYER_GR,      &
                                   XVEGTYPE,                                &
                                   XD_ICE, XDG, XH_TREE, XRE25, XROOTFRAC,  &
                                   XZ0_O_Z0H
+!
+USE MODD_DATA_COVER,     ONLY : XDATA_FRAC_GR
 !
 USE MODI_CONVERT_PATCH_ISBA
 !
@@ -121,6 +123,8 @@ IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_TEB_GREENROOF',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 !
+  CALL AV_PGD (XFRAC_GR ,XCOVER ,XDATA_FRAC_GR(:),'BLD','ARI')
+
   CALL CONVERT_PATCH_ISBA(CISBA,KDECADE,KDECADE,XCOVER,CPHOTO,.FALSE.,         &
                         'GRD',PVEG=ZVEG,PLAI=ZLAI,                             &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF,       &
