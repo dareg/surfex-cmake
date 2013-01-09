@@ -46,7 +46,6 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
-USE MODD_DATA_ISBA_n,    ONLY : NTIME
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 CPEDOTF, XCOVER, LCOVER, XZS,            &
                                 XZ0EFFJPDIR, CPHOTO, LTR_ML, XRM_PATCH,  &
@@ -580,7 +579,7 @@ CALL PGD_FIELD                                                                  
 !
 LECOCLIMAP = OECOCLIMAP
 !
-CALL PGD_ISBA_PAR(HPROGRAM,NTIME)
+CALL PGD_ISBA_PAR(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
