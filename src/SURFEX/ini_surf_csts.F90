@@ -43,8 +43,6 @@ USE MODD_FLOOD_PAR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX, &
                            XAGLAMIN, XAGLAMAX, XHGLA, &
                            XWSNV, XZ0SN, XZ0HSN, &
-                           XALBICE1, XALBICE2, XALBICE3, &
-                           XRHOTHRESHOLD_ICE,XZ0ICEZ0SNOW, &
                            XTAU_SMELT
 !
 USE MODI_GET_LUOUT

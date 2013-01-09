@@ -23,6 +23,7 @@
 !!    -------------
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
+!!      S.Bielli    11/2012 : write HU2M_WAT mis placed
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
