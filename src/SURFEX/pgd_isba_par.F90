@@ -64,7 +64,7 @@ USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 LDATA_CE_NITRO,LDATA_CF_NITRO, LDATA_CNA_NITRO,&
                                 LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,              &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH,             &
-                                LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN,
+                                LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN, &
                                 NTIME_n=>NTIME
 !
 USE MODI_GET_LUOUT
