@@ -64,7 +64,8 @@ USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 LDATA_CE_NITRO,LDATA_CF_NITRO, LDATA_CNA_NITRO,&
                                 LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,              &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH,             &
-                                LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN, NTIME
+                                LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN,
+                                NTIME_n=>NTIME
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -101,6 +102,7 @@ LOGICAL               :: GPAR_STRESS   ! type of stress
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
+INTEGER :: NTIME
 INTEGER, PARAMETER :: NTIME_MAX    = 36
 INTEGER, PARAMETER :: NGROUND_MAX  = 150
 INTEGER, PARAMETER :: NVEGTYPE_MAX = 12
@@ -405,6 +407,8 @@ CALL POSNAM(ILUNAM,'NAM_DATA_ISBA',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_ISBA)
 !
 CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+!
+NTIME_n = NTIME
 !
 !-------------------------------------------------------------------------------
 IF (NVEGTYPE_MAX < NVEGTYPE) THEN
