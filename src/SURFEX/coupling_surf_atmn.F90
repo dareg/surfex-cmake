@@ -30,22 +30,25 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      Modified    09/2011 by S.Queguiner: Add total CO2 surface flux (anthropo+biogenic) as diagnostic
+!!      Modified    11/2011 by S.Queguiner: Add total Chemical surface flux (anthropo) as diagnostic
 !!-------------------------------------------------------------
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_CSTS,           ONLY : XP00, XCPD, XRD
+USE MODD_CSTS,           ONLY : XP00, XCPD, XRD, XAVOGADRO
+USE MODD_SURF_ATM_GRID_n,ONLY : XLON
 USE MODD_SURF_ATM_n,     ONLY : NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
                                 NR_SEA,    NR_WATER,    NR_TOWN,    NR_NATURE,    &
                                 XSEA,      XWATER,      XTOWN,      XNATURE,      &
-                                TTIME
+                                TTIME, NSIZE_FULL
 USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 USE MODD_SV_n,           ONLY : NBEQ,NSV_CHSBEG,NSV_CHSEND, &
                                 NDSTEQ,NSV_DSTBEG,NSV_DSTEND,&
-                                NAEREQ,NSV_AERBEG,NSV_AEREND
+                                NAEREQ,NSV_AERBEG,NSV_AEREND, CSV
 !
-USE MODD_CH_SURF_n,      ONLY : LCH_SURF_EMIS
+USE MODD_CH_SURF_n,      ONLY : LCH_SURF_EMIS, LCH_EMIS, CCH_EMIS
 USE MODD_CH_EMIS_FIELD_n,ONLY : TSEMISS
 !
 USE MODD_SURFEX_MPI, ONLY : XTIME_SEA, XTIME_WATER, XTIME_NATURE, XTIME_TOWN
@@ -55,6 +58,8 @@ USE MODI_AVERAGE_FLUX
 USE MODI_AVERAGE_RAD
 USE MODI_DIAG_INLINE_SURF_ATM_n
 USE MODI_CH_EMISSION_FLUX_n
+USE MODI_CH_EMISSION_SNAP_n
+USE MODI_CH_EMISSION_TO_ATM_n
 USE MODI_SSO_Z0_FRICTION_n
 USE MODI_SSO_BE04_FRICTION_n
 !
@@ -221,8 +226,8 @@ ZDIR_ALB_TILE(:,:,:)  = XUNDEF
 ZSCA_ALB_TILE(:,:,:)  = XUNDEF
 ZEMIS_TILE(:,:)       = XUNDEF
 ZSFTQ_TILE(:,:)       = XUNDEF
-ZSFTS_TILE(:,:,:)     = XUNDEF
-ZSFCO2_TILE(:,:)      = XUNDEF
+ZSFTS_TILE(:,:,:)     = 0.
+ZSFCO2_TILE(:,:)      = 0.
 ZSFU_TILE(:,:)        = XUNDEF
 ZSFV_TILE(:,:)        = XUNDEF
 !
@@ -351,20 +356,49 @@ CALL AVERAGE_FLUX(ZFRAC_TILE,                              &
                   PSFTH, PSFTQ, PSFTS, PSFCO2,             &
                   PSFU, PSFV                               )
 !
-IF ((NBEQ > 0).AND.(LCH_SURF_EMIS)) THEN 
-  IF (NSV_AEREND < 0)  THEN
-   IINDEXEND = NSV_CHSEND ! case only gas chemistry
-  ELSE
-   IINDEXEND = NSV_AEREND ! case aerosol + gas chemistry
-  ENDIF
-  INBTS=0
-  DO JI=1,SIZE(TSEMISS)
-    IF (SIZE(TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(TSEMISS(JI)%NETIMES)
-  ENDDO
-  CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! Chemical Emissions:                  
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+IF ((NBEQ > 0).AND.(LCH_SURF_EMIS)) THEN
+  IF (CCH_EMIS=='AGGR') THEN
+    IF (NSV_AEREND < 0)  THEN
+      IINDEXEND = NSV_CHSEND ! case only gas chemistry
+    ELSE
+      IINDEXEND = NSV_AEREND ! case aerosol + gas chemistry
+    ENDIF
+    INBTS=0
+    DO JI=1,SIZE(TSEMISS)
+      IF (SIZE(TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(TSEMISS(JI)%NETIMES)
+    ENDDO
+    CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+  ELSE IF (CCH_EMIS=='SNAP') THEN
+    CALL CH_EMISSION_SNAP_n(HPROGRAM,NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,XLON)
+    CALL CH_EMISSION_TO_ATM_n(PSFTS,PRHOA)
+  END IF
 END IF
 !
+WHERE(PSFTS(:,:)==XUNDEF)  PSFTS(:,:)=0.
+! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! CO2 Flux : adds biogenic and anthropogenic emissions
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! CO2 FLUXES  : PSFTS  in molecules/m2/s
+!               PSFCO2 in kgCO2/kgair*m/s = *PRHOA kgCO2/m2/s
+!               PSFCO2 in kgCO2/m2/s      = *Navogadro*1E3/Mco2(44g/mol) molecules/m2/s
 !
+DO JI=1,SIZE(PSV,2)
+  IF(TRIM(ADJUSTL(CSV(JI)))=="CO2") THEN
+    ! CO2 Flux (Antrop + biog) (molec*m2/s)
+    PSFTS(:,JI) = PSFTS(:,JI) + PSFCO2(:)*PRHOA(:)*(XAVOGADRO/44.)*1E3
+    ! CO2 Flux (Antrop + biog) (kgCO2/kgair*m/s)
+    PSFCO2(:)   = PSFTS(:,JI)/(PRHOA(:)*(XAVOGADRO/44.)*1E3)
+  END IF
+END DO
+!
+!
+! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! Radiative fluxes
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
                  ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                  PDIR_ALB,      PSCA_ALB,      PEMIS,      PTRAD       )

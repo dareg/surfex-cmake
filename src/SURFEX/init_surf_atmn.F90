@@ -42,6 +42,7 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!     (B.Decharme)  04/2009  Read precipitation forcing from the restart file for ARPEGE/ALADIN run
 !!     (A. Lemonsu)    2009   New key read for urban green areas
 !!     (B.Decharme)  07/2011  Read pgd+prep
+!!     (S. Queguiner)  2011   Modif chemistry (2.4)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -72,7 +73,8 @@ USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH, XAOSIP, XAOSIM, XAOSJP, XAOSJM, &
                                 XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, &
                                 XZ0REL, XZ0EFFJPDIR, XFRACZ0, XCOEFBE
 USE MODD_CH_SURF_n,      ONLY : CCH_NAMES, LCH_EMIS, LRW_CH_EMIS, &
-                                LCH_SURF_EMIS, CCHEM_SURF_FILE, CAER_NAMES  
+                                LCH_SURF_EMIS, CCHEM_SURF_FILE, CAER_NAMES,&
+                                CCH_EMIS
 USE MODD_SV_n,           ONLY : NBEQ, CSV, NSV_CHSBEG, NSV_CHSEND, &
                                 NSV_DSTBEG, NSV_DSTEND, NDSTEQ,    &
                                 NSV_SLTBEG, NSV_SLTEND, NSLTEQ,    &
@@ -124,6 +126,7 @@ USE MODI_WRITE_COVER_TEX_END
 USE MODI_INIT_CHEMICAL_n
 USE MODI_CH_INIT_DEPCONST
 USE MODI_CH_INIT_EMISSION_n
+USE MODI_CH_INIT_SNAP_n
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_READ_PRECIP_n
@@ -191,6 +194,7 @@ INTEGER           :: JTILE    ! loop counter on tiles
 INTEGER           :: IRESP    ! error return code
 INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: ICH      ! unit of input chemical file
+INTEGER           :: IVERSION, IBUGFIX       ! surface version
 !
 REAL, DIMENSION(:,:), ALLOCATABLE                       :: ZFRAC_TILE     ! fraction of each surface type
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
@@ -295,6 +299,9 @@ END SELECT
 CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
 CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
 !
+CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+!
 !         reading
 !
 CALL READ_SURF(HPROGRAM,'SEA   ',CSEA   ,IRESP)
@@ -366,7 +373,38 @@ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
 !        2.4 Initialize Chemical Emissions
 !
 CALL READ_SURF(HPROGRAM,'CH_EMIS',LCH_EMIS,IRESP)
-IF (LCH_EMIS) LRW_CH_EMIS = .TRUE.
+!
+IF (LCH_EMIS) THEN
+  !
+  IF ( IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3 ) THEN
+    CCH_EMIS='AGGR'
+  ELSE
+    CALL READ_SURF(HPROGRAM,'CH_EMIS_OPT',CCH_EMIS,IRESP)
+  END IF
+  !
+  IF (CCH_EMIS=='AGGR') LRW_CH_EMIS = .TRUE.
+  !
+  IF (NBEQ > 0) THEN
+    !
+    CALL OPEN_NAMELIST(HPROGRAM,ICH,HFILE=CCHEM_SURF_FILE)
+    !
+    IF (LCH_SURF_EMIS) THEN
+      IF (CCH_EMIS=='AGGR') THEN
+        CALL CH_INIT_EMISSION_n(HPROGRAM,NSIZE_FULL,ICH,PRHOA) 
+      ELSE
+        CALL CH_INIT_SNAP_n(HPROGRAM,NSIZE_FULL,HINIT,ICH,PRHOA)
+      END IF
+    ENDIF
+    !
+    !*       2.5 Initialization of dry deposition scheme (chemistry)
+    !    
+    IF (HINIT=='ALL') CALL CH_INIT_DEPCONST(ICH,ILUOUT,CSV(NSV_CHSBEG:NSV_CHSEND))
+    !
+    CALL CLOSE_NAMELIST(HPROGRAM,ICH)
+    !
+  ENDIF
+  !
+END IF
 !
 !*       2.5 Subgrid orography
 !
@@ -407,18 +445,6 @@ CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
 !
 IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(HPROGRAM,KSW)
 !
-!         reading
-
-IF (NBEQ > 0) THEN
-  CALL OPEN_NAMELIST(HPROGRAM,ICH,HFILE=CCHEM_SURF_FILE)
-  IF (LCH_SURF_EMIS) CALL CH_INIT_EMISSION_n(HPROGRAM,NSIZE_FULL,ICH,PRHOA)
-!
-!*       Initialization of dry deposition scheme (chemistry)
-!
-  CALL CH_INIT_DEPCONST(ICH,ILUOUT,CSV(NSV_CHSBEG:NSV_CHSEND))
-  CALL CLOSE_NAMELIST(HPROGRAM,ICH)
-!
-END IF
 !
 !*       Canopy fields if Beljaars et al 2004 parameterization is used
 !

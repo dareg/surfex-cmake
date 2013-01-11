@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE BUILD_PRONOSLIST_n(TPEMISS,TPPRONOS,KCH,KLUOUT,KVERB)
+      SUBROUTINE BUILD_PRONOSLIST_n(KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
 !!    #######################################################################
 !!
 !!*** *BUILD_PRONOSLIST*
@@ -30,7 +30,7 @@ USE MODI_CH_OPEN_INPUTB
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 USE MODD_TYPE_EFUTIL
-USE MODD_SV_n,  ONLY: NBEQ,  CSV, NSV_CHSBEG, NSV_CHSEND,NSV_AERBEG, NSV_AEREND
+USE MODD_SV_n,  ONLY: CSV
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -45,7 +45,8 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
-TYPE(EMISSVAR_T), DIMENSION(:),INTENT(IN)  :: TPEMISS
+INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
+CHARACTER(LEN=6), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
 TYPE(PRONOSVAR_T),             POINTER     :: TPPRONOS
 INTEGER,                       INTENT(IN)  :: KCH     ! logical unit of input chemistry file
 INTEGER,                       INTENT(IN)  :: KLUOUT  ! output listing channel
@@ -72,19 +73,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !     ---------------------
 !
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
-IF (KVERB >= 6) THEN
-  WRITE(KLUOUT,*) '********     SUBROUTINE (CHIMIE): BUILD_PRONOSLIST     ********'
-END IF
+!
 !
 ! CNAMES points on chemical variables name
-IF (NSV_AEREND > 0) THEN
-CNAMES => CSV(NSV_CHSBEG:NSV_AEREND)
-IEQ = NSV_AEREND - NSV_CHSBEG + 1
-ELSE
-CNAMES => CSV(NSV_CHSBEG:NSV_CHSEND)
-IEQ = NSV_CHSEND  - NSV_CHSBEG + 1
-END IF
-
+CNAMES => CSV
+IEQ = SIZE(CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !
@@ -109,7 +102,6 @@ DO
 !Extract pronostic variable name
   INDX = INDEX(YINPLINE,' ')
   YPRO_NAME = YINPLINE(1:INDX-1)
-  WRITE(KLUOUT,*) 'YPRO_NAME = ',YPRO_NAME
 !
 ! search the variable in CNAMES, STOP if not FOUND
   GFOUND = .FALSE.
@@ -169,8 +161,8 @@ DO
 !
 ! check EMIS species name
     GFOUND = .FALSE.
-    DO JI=1,SIZE(TPEMISS)
-      IF (TPEMISS(JI)%CNAME == YEMIS_NAME) THEN
+    DO JI=1,KEMIS_NBR
+      IF (HEMIS_NAME(JI) == YEMIS_NAME) THEN
         GFOUND = .TRUE.
         CURRENT%NEFINDEX(INBCOEFF) = JI
         EXIT
@@ -190,17 +182,17 @@ END DO
 TPPRONOS => HEAD
 !
 IF (KVERB >= 6) THEN
-  WRITE(KLUOUT,*) 'BUILD_PRONOSLIST: Affichage resultats'
+  WRITE(KLUOUT,*) 'BUILD_PRONOSLIST: Aggregation results'
   CURRENT=>HEAD
   DO WHILE(ASSOCIATED(CURRENT))
-    WRITE(KLUOUT,*) 'BUILD_PRONOSLIST: Species ',TRIM(CNAMES(CURRENT%NAMINDEX)),' (index ',&
-            CURRENT%NAMINDEX,' in CNAMES)'  
+    WRITE(KLUOUT,*) 'Emission for Atmospheric Chemical Species ',TRIM(CNAMES(CURRENT%NAMINDEX)),' (index ',&
+            CURRENT%NAMINDEX,' in CSV)'  
+    WRITE(KLUOUT,*) 'is aggregated with the following weights from the Emission Inventory Species:'
     DO JI=1,CURRENT%NBCOEFF
-      WRITE(KLUOUT,*) CURRENT%XCOEFF(JI),TPEMISS(CURRENT%NEFINDEX(JI))%CNAME
+      WRITE(KLUOUT,*) CURRENT%XCOEFF(JI),HEMIS_NAME(CURRENT%NEFINDEX(JI))
     END DO
     CURRENT=>CURRENT%NEXT
   END DO
-  WRITE(KLUOUT,*) '******** END SUBROUTINE (CHIMIE): BUILD_PRONOSLIST     ********'
 END IF
 
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',1,ZHOOK_HANDLE)

@@ -42,8 +42,8 @@
 !                       type when snow depth< 3 cm. 
 !     S. Morin          02/2011 - Add routines for Crocus
 !     A. Boone          02/2012 - Add optimization of do-loops.
-!                             
-!-----------------------------------------------------------------------------
+!     M. Lafaysse       01/2013 - Remove SNOWCROWLIQMAX routines (not used)
+!----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !
@@ -53,12 +53,6 @@ INTERFACE SNOW3LWLIQMAX
   MODULE PROCEDURE SNOW3LWLIQMAX_2D
   MODULE PROCEDURE SNOW3LWLIQMAX_1D
 END INTERFACE
-INTERFACE SNOWCROWLIQMAX
-  MODULE PROCEDURE SNOWCROWLIQMAX_3D
-  MODULE PROCEDURE SNOWCROWLIQMAX_2D
-  MODULE PROCEDURE SNOWCROWLIQMAX_1D
-END INTERFACE
-!
 INTERFACE SNOW3LHOLD
   MODULE PROCEDURE SNOW3LHOLD_3D
   MODULE PROCEDURE SNOW3LHOLD_2D
@@ -232,119 +226,6 @@ PWLIQMAX(:) = ZHOLDMAXR(:)*ZSNOWRHO(:)
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LWLIQMAX_1D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOW3LWLIQMAX_1D
-!####################################################################
-!####################################################################
-      FUNCTION SNOWCROWLIQMAX_3D(PSNOWRHO) RESULT(PWLIQMAX)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the maximum liquid water holding capacity of
-!     snow layer(s).
-!
-USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
-USE MODD_SNOW_PAR, ONLY : XRHOSMAX_ES
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:,:,:), INTENT(IN)                                  :: PSNOWRHO ! (kg/m3)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PWLIQMAX ! (kg/m3)
-!
-!*      0.2    declarations of local variables
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: ZSNOWRHO
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------
-! Evaluate capacity using upper density limit:
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROWLIQMAX_3D',0,ZHOOK_HANDLE)
-ZSNOWRHO(:,:,:) = MIN(XRHOSMAX_ES, PSNOWRHO(:,:,:))
-
-! Maximum liquid water holding capacity of the snow (kg/m3):
-PWLIQMAX(:,:,:)  = 0.05*XRHOLW*(1-ZSNOWRHO(:,:,:)/XRHOLI)
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROWLIQMAX_3D',1,ZHOOK_HANDLE)
-!
-END FUNCTION SNOWCROWLIQMAX_3D
-!####################################################################
-      FUNCTION SNOWCROWLIQMAX_2D(PSNOWRHO) RESULT(PWLIQMAX)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the maximum liquid water holding capacity of
-!     snow layer(s).
-!
-USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
-USE MODD_SNOW_PAR, ONLY : XRHOSMAX_ES
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWRHO ! (kg/m3)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PWLIQMAX ! (kg/m3)
-!
-!*      0.2    declarations of local variables
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!----------------------------------------------------------------------
-! Evaluate capacity using upper density limit:
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROWLIQMAX_2D',0,ZHOOK_HANDLE)
-ZSNOWRHO(:,:) = MIN(XRHOSMAX_ES, PSNOWRHO(:,:))
-!
-! Maximum liquid water holding capacity of the snow (kg/m3):
-PWLIQMAX(:,:)  = 0.05*XRHOLW*(1-ZSNOWRHO(:,:)/XRHOLI)   
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROWLIQMAX_2D',1,ZHOOK_HANDLE)
-!
-END FUNCTION SNOWCROWLIQMAX_2D
-!####################################################################
-      FUNCTION SNOWCROWLIQMAX_1D(PSNOWRHO) RESULT(PWLIQMAX)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the maximum liquid water holding capacity of
-!     snow layer(s).
-!
-USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
-USE MODD_SNOW_PAR, ONLY : XRHOSMAX_ES   
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:), INTENT(IN)  :: PSNOWRHO ! (kg/m3)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO)) :: PWLIQMAX ! (kg/m3)
-!
-!*      0.2    declarations of local variables
-!
-REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZSNOWRHO
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!----------------------------------------------------------------------
-! Evaluate capacity using upper density limit:
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROWLIQMAX_1D',0,ZHOOK_HANDLE)
-ZSNOWRHO(:) = MIN(XRHOSMAX_ES, PSNOWRHO(:))
-!
-! Maximum liquid water holding capacity of the snow (kg/m3):
-PWLIQMAX(:)  = 0.05*XRHOLW*(1-ZSNOWRHO(:)/XRHOLI)      
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROWLIQMAX_1D',1,ZHOOK_HANDLE)
-!
-END FUNCTION SNOWCROWLIQMAX_1D
-!####################################################################
 !####################################################################
 !####################################################################
       FUNCTION SNOW3LHOLD_3D(PSNOWRHO,PSNOWDZ) RESULT(PWHOLDMAX)
@@ -547,6 +428,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! computation of water holding capacity based on Crocus, 
 !taking into account the conversion between wet and dry density - 
 !S. Morin/V. Vionnet 2010 12 09
+
+! PWHOLDMAX is expressed in m water for each layer
+! In short, PWHOLDMAX = XPERCENTAGEPORE * porosity * PSNOWDZ .
+! The porosity is computed as (rho_ice - (rho_snow - lwc))/(rho_ice)
+! where everything has to be in kg m-3 units. In practice, since
+! PSNOWLIQ is expressed in m water, expressing the lwc in kg m-3
+! is achieved as PSNOWLIQ*XRHOLW/PSNOWDZ. After some rearranging one
+! obtains the equation given above.
+! Note that equation (19) in Vionnet et al., GMD 2012, is wrong,
+! because it does not take into account the fact that liquid water
+! content has to be substracted from total density to compute the
+! porosity.
+
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_3D',0,ZHOOK_HANDLE)
 PWHOLDMAX(:,:,:) = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)    
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_3D',1,ZHOOK_HANDLE)
@@ -577,6 +471,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! computation of water holding capacity based on Crocus, 
 !taking into account the conversion between wet and dry density - 
 !S. Morin/V. Vionnet 2010 12 09
+
+! PWHOLDMAX is expressed in m water for each layer
+! In short, PWHOLDMAX = XPERCENTAGEPORE * porosity * PSNOWDZ .
+! The porosity is computed as (rho_ice - (rho_snow - lwc))/(rho_ice)
+! where everything has to be in kg m-3 units. In practice, since
+! PSNOWLIQ is expressed in m water, expressing the lwc in kg m-3
+! is achieved as PSNOWLIQ*XRHOLW/PSNOWDZ. After some rearranging one
+! obtains the equation given above.
+! Note that equation (19) in Vionnet et al., GMD 2012, is wrong,
+! because it does not take into account the fact that liquid water
+! content has to be substracted from total density to compute the
+! porosity.
+
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_2D',0,ZHOOK_HANDLE)
 PWHOLDMAX(:,:) = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)    
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_2D',1,ZHOOK_HANDLE)
@@ -609,6 +516,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! computation of water holding capacity based on Crocus, 
 !taking into account the conversion between wet and dry density -
 !S. Morin/V. Vionnet 2010 12 09
+
+! PWHOLDMAX is expressed in m water for each layer
+! In short, PWHOLDMAX = XPERCENTAGEPORE * porosity * PSNOWDZ .
+! The porosity is computed as (rho_ice - (rho_snow - lwc))/(rho_ice)
+! where everything has to be in kg m-3 units. In practice, since
+! PSNOWLIQ is expressed in m water, expressing the lwc in kg m-3
+! is achieved as PSNOWLIQ*XRHOLW/PSNOWDZ. After some rearranging one
+! obtains the equation given above.
+! Note that equation (19) in Vionnet et al., GMD 2012, is wrong,
+! because it does not take into account the fact that liquid water
+! content has to be substracted from total density to compute the
+! porosity.
+
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_1D',0,ZHOOK_HANDLE)
 PWHOLDMAX(:) = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)  
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_1D',1,ZHOOK_HANDLE)
@@ -639,6 +559,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! computation of water holding capacity based on Crocus, 
 !taking into account the conversion between wet and dry density - 
 !S. Morin/V. Vionnet 2010 12 09
+
+! PWHOLDMAX is expressed in m water for each layer
+! In short, PWHOLDMAX = XPERCENTAGEPORE * porosity * PSNOWDZ .
+! The porosity is computed as (rho_ice - (rho_snow - lwc))/(rho_ice)
+! where everything has to be in kg m-3 units. In practice, since
+! PSNOWLIQ is expressed in m water, expressing the lwc in kg m-3
+! is achieved as PSNOWLIQ*XRHOLW/PSNOWDZ. After some rearranging one
+! obtains the equation given above.
+! Note that equation (19) in Vionnet et al., GMD 2012, is wrong,
+! because it does not take into account the fact that liquid water
+! content has to be substracted from total density to compute the
+! porosity.
+
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',0,ZHOOK_HANDLE)
 PWHOLDMAX = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW) 
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',1,ZHOOK_HANDLE)
