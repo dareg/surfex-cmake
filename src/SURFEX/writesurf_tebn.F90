@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_TEB_n(HPROGRAM,KPATCH)
+      SUBROUTINE WRITESURF_TEB_n(HPROGRAM,KPATCH,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_TEB_n* - writes TEB fields
@@ -66,7 +66,8 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
-
+CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
+!                                             ! 'ALL' : all fields are written
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -192,10 +193,14 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XTI_BLD(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* outdoor window temperature
 !
-YRECFM=YPATCH//'T_WIN1'
-YRECFM=ADJUSTL(YRECFM)
-YCOMMENT='T_WIN1 (K)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XT_WIN1(:),IRESP,HCOMMENT=YCOMMENT)
+IF (HWRITE/='ALL' .OR. CBEM=='BEM') THEN
+  !
+  YRECFM=YPATCH//'T_WIN1'
+  YRECFM=ADJUSTL(YRECFM)
+  YCOMMENT='T_WIN1 (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XT_WIN1(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF
 !
 IF (CBEM=='BEM') THEN
 !* internal building specific humidity

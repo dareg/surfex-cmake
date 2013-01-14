@@ -209,65 +209,69 @@ IF (LSURF_MISC_BUDGET) THEN
   YCOMMENT='total ice content (solid) over the soil column (kg/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TWGI(:),IRESP,HCOMMENT=YCOMMENT)
   !
-  IF(CISBA=='DIF'.AND.LSURF_MISC_DIF)THEN
+  IF(CISBA=='DIF') THEN
     !
-    YRECFM='TSWI_R_ISBA'
-    YCOMMENT='total soil wetness index over the root zone (-)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+    IF (LSURF_MISC_DIF)THEN
+      !
+      YRECFM='TSWI_R_ISBA'
+      YCOMMENT='total soil wetness index over the root zone (-)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WGTOT_R_ISBA'
+      YCOMMENT='total water content (liquid+solid) over the root zone (kg/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WGI_R_ISBA'
+      YCOMMENT='total ice content (solid) over the root zone (kg/m2)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+      !    
+      YRECFM='TSWI_S_ISBA'
+      YCOMMENT='total soil wetness index over the surface (-)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WG_S_ISBA'
+      YCOMMENT='liquid water content over the surface (m3/m3)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WGI_S_ISBA'
+      YCOMMENT='ice content over the surface (m3/m3)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+      !
+      YRECFM='TSWI_D2_ISBA'
+      YCOMMENT='total soil wetness index over comparable FR-DG2 reservoir (-)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WG_D2_ISBA'
+      YCOMMENT='liquid water content over comparable FR-DG2 reservoir (m3/m3)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WGI_D2_ISBA'
+      YCOMMENT='ice content over comparable FR-DG2 reservoir (m3/m3)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+      !
+      YRECFM='TSWI_D3_ISBA'
+      YCOMMENT='total soil wetness index over comparable FR-DG3 reservoir (-)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WG_D3_ISBA'
+      YCOMMENT='liquid water content over comparable FR-DG3 reservoir (m3/m3)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='WGI_D3_ISBA'
+      YCOMMENT='ice content over comparable FR-DG3 reservoir (m3/m3)'
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+      !
+    ENDIF
     !
-    YRECFM='WGTOT_R_ISBA'
-    YCOMMENT='total water content (liquid+solid) over the root zone (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWG(:),IRESP,HCOMMENT=YCOMMENT)
+    YRECFM='ALT_ISBA'
+    YCOMMENT='active layer thickness over permafrost (m)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_ALT(:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='WGI_R_ISBA'
-    YCOMMENT='total ice content (solid) over the root zone (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
-    !    
-    YRECFM='TSWI_S_ISBA'
-    YCOMMENT='total soil wetness index over the surface (-)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WG_S_ISBA'
-    YCOMMENT='liquid water content over the surface (m3/m3)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWG(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WGI_S_ISBA'
-    YCOMMENT='ice content over the surface (m3/m3)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
-    !
-    YRECFM='TSWI_D2_ISBA'
-    YCOMMENT='total soil wetness index over comparable FR-DG2 reservoir (-)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WG_D2_ISBA'
-    YCOMMENT='liquid water content over comparable FR-DG2 reservoir (m3/m3)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TWG(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WGI_D2_ISBA'
-    YCOMMENT='ice content over comparable FR-DG2 reservoir (m3/m3)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD2_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
-    !
-    YRECFM='TSWI_D3_ISBA'
-    YCOMMENT='total soil wetness index over comparable FR-DG3 reservoir (-)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WG_D3_ISBA'
-    YCOMMENT='liquid water content over comparable FR-DG3 reservoir (m3/m3)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TWG(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='WGI_D3_ISBA'
-    YCOMMENT='ice content over comparable FR-DG3 reservoir (m3/m3)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XFRD3_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
+    YRECFM='FLT_ISBA'
+    YCOMMENT='frozen layer thickness over non-permafrost (m)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FLT(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF
-  !
-  YRECFM='ALT_ISBA'
-  YCOMMENT='active layer thickness over permafrost (m)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_ALT(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='FLT_ISBA'
-  YCOMMENT='frozen layer thickness over non-permafrost (m)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FLT(:),IRESP,HCOMMENT=YCOMMENT)
   !
   !        2.5    Snow outputs
   !               -------------
