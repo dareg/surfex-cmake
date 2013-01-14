@@ -444,9 +444,11 @@ DO JJ=1,SIZE(PTA)
   !*      8.5    aerodynamical conductance for window
   !              ------------------------------------
   !
-  ZCHTCN_WIN = CHTC_VERT_DOE(PTS_WIN, PT_CANYON)
-  PAC_WIN = 0.5 * (CHTC_SMOOTH_LEE_DOE(ZCHTCN_WIN, PU_CANYON) + &
-                   CHTC_SMOOTH_WIND_DOE(ZCHTCN_WIN, PU_CANYON) ) / PRHOA / XCPD
+  ZCHTCN_WIN(JJ) = CHTC_VERT_DOE(PTS_WIN(JJ), PT_CANYON(JJ))
+  !
+  PAC_WIN(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) + &
+                   CHTC_SMOOTH_WIND_DOE(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) ) &
+                   / PRHOA(JJ) / XCPD
   !
   !-------------------------------------------------------------------------------
   !
