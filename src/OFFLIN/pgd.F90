@@ -103,7 +103,6 @@ INTEGER            :: ILUNAM
 LOGICAL            :: GFOUND
 !
 CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PGD'   ! name of the listing
-INTEGER :: ILEVEL, INFOMPI
 !
 INTEGER            :: IRET      
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
