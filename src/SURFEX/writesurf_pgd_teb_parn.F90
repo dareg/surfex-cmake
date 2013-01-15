@@ -39,7 +39,7 @@ USE MODD_DATA_TEB_n,          ONLY : NPAR_ROAD_LAYER, NPAR_WALL_LAYER,          
                                      NPAR_ROOF_LAYER,                                &
                                      NPAR_BLDTYPE, NPAR_BLD_AGE, NPAR_USETYPE,       &
                                      XPAR_Z0_TOWN, XPAR_BLD,                         &
-                                     XPAR_GARDEN, XPAR_ROAD_DIR,                     &
+                                     XPAR_GARDEN, XPAR_ROAD_DIR, XPAR_GREENROOF,     &
                                      XPAR_ALB_ROOF,                                  &
                                      XPAR_EMIS_ROOF, XPAR_HC_ROOF, XPAR_TC_ROOF,     &
                                      XPAR_D_ROOF, XPAR_ALB_ROAD, XPAR_EMIS_ROAD,     &
@@ -58,7 +58,7 @@ USE MODD_DATA_TEB_n,          ONLY : NPAR_ROAD_LAYER, NPAR_WALL_LAYER,          
                                      LDATA_WALL_O_HOR,                               &
                                      LDATA_H_TRAFFIC, LDATA_LE_TRAFFIC,              &
                                      LDATA_H_INDUSTRY, LDATA_LE_INDUSTRY ,           &
-                                     LDATA_GARDEN, LDATA_BLDTYPE,                    &
+                                     LDATA_GARDEN, LDATA_BLDTYPE, LDATA_GREENROOF,   &
                                      LDATA_ROAD_DIR, LDATA_USETYPE, LDATA_BLD_AGE,   &
                                      LDATA_ROUGH_ROOF, LDATA_ROUGH_WALL,             &
                                      XPAR_ROUGH_ROOF, XPAR_ROUGH_WALL
@@ -92,7 +92,7 @@ USE MODD_DATA_TEB_GARDEN_n,   ONLY : NTIME,                                     
                                      XDATA_LAI_HVEG , XDATA_LAI_LVEG ,               &
                                      XDATA_H_HVEG  
 USE MODD_TEB_GREENROOF_n,     ONLY : NTIME_GR,NLAYER_GR,CTYP_GR, LPAR_GREENROOF
-USE MODD_DATA_TEB_GREENROOF_n,ONLY : XPAR_FRAC_GR, XPAR_OM_GR, XPAR_CLAY_GR,         &
+USE MODD_DATA_TEB_GREENROOF_n,ONLY : XPAR_OM_GR, XPAR_CLAY_GR,                       &
                                      XPAR_SAND_GR, XPAR_LAI_GR
 !
 USE MODI_WRITE_SURF
@@ -186,6 +186,15 @@ IF (LDATA_GARDEN) THEN
   YRECFM='D_GARDEN'
   YCOMMENT='X_Y_'//YRECFM//' (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XPAR_GARDEN,IRESP,YCOMMENT)
+ENDIF
+!
+YRECFM='L_GREENROOF'
+YCOMMENT=YRECFM
+CALL WRITE_SURF(HPROGRAM,YRECFM,LDATA_GREENROOF,IRESP,HCOMMENT=YCOMMENT)
+IF (LDATA_GREENROOF) THEN
+  YRECFM='D_GREENROOF'
+  YCOMMENT='X_Y_'//YRECFM//' (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XPAR_GREENROOF,IRESP,YCOMMENT)
 ENDIF
 !
 YRECFM='L_ROAD_DIR'
@@ -768,11 +777,6 @@ IF (LGREENROOF .AND. LPAR_GREENROOF) THEN
   YRECFM='D_TYPE_GR'
   YCOMMENT='X_Y_TYPE_GR'
   CALL WRITE_SURF(HPROGRAM,YRECFM,CTYP_GR,IRESP,HCOMMENT=YCOMMENT)
-!
-! Fraction of green roof
-  YRECFM='D_FRAC_GR'
-  YCOMMENT='X_Y_D_FRAC_GR'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XPAR_FRAC_GR(:),IRESP,HCOMMENT=YCOMMENT)
 !
 ! Fraction of OM in green roof layer
   DO JLAYER=1,NLAYER_GR

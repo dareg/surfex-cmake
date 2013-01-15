@@ -42,7 +42,7 @@ USE MODD_TEB_GRID_n,           ONLY : NDIM
 USE MODD_TEB_n,                ONLY : LECOCLIMAP
 USE MODD_TEB_GREENROOF_n,      ONLY : NLAYER_GR, NTIME_GR, CTYP_GR
 USE MODD_TEB_VEG,              ONLY : NLAYER_GR_MAX, NTIME_GR_MAX
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : XPAR_FRAC_GR, XPAR_OM_GR, XPAR_CLAY_GR, XPAR_SAND_GR, XPAR_LAI_GR
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : XPAR_OM_GR, XPAR_CLAY_GR, XPAR_SAND_GR, XPAR_LAI_GR
 !
 USE MODD_PGDWORK,              ONLY : CATYPE
 !
@@ -88,7 +88,6 @@ CHARACTER(LEN=5)                            :: YTYP_GR        ! type of green ro
 !
 ! uniform value
 !
-REAL                                       :: ZUNIF_FRAC_GR    ! fraction of green roof
 REAL,DIMENSION(NLAYER_GR_MAX)              :: ZUNIF_OM_GR      ! fraction of organic matter (OM) in green roof layer
 REAL,DIMENSION(NLAYER_GR_MAX)              :: ZUNIF_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
 REAL,DIMENSION(NLAYER_GR_MAX)              :: ZUNIF_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
@@ -96,7 +95,6 @@ REAL,DIMENSION(NTIME_GR_MAX)               :: ZUNIF_LAI_GR     ! LAI of green ro
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28)                          :: YFNAM_FRAC_GR    ! fraction of green roof
 CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_OM_GR      ! fraction of organic matter (OM) in green roof layer
 CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
 CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
@@ -104,7 +102,6 @@ CHARACTER(LEN=28),DIMENSION(NTIME_GR_MAX)  :: YFNAM_LAI_GR     ! LAI  of green r
 !
 ! type of files containing data
 !
-CHARACTER(LEN=6 )                          :: YFTYP_FRAC_GR    ! fraction of green roof
 CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_OM_GR      ! fraction of organic matter (OM) in green roof layer
 CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
 CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
@@ -122,19 +119,16 @@ ILAYER_GR        = 0
 ITIME_GR         = 0
 YTYP_GR          = '     '           
 !
-ZUNIF_FRAC_GR    = XUNDEF
 ZUNIF_OM_GR      = XUNDEF
 ZUNIF_CLAY_GR    = XUNDEF
 ZUNIF_SAND_GR    = XUNDEF
 ZUNIF_LAI_GR     = XUNDEF
 !
-YFNAM_FRAC_GR    = '                            '
 YFNAM_OM_GR      = '                            '
 YFNAM_CLAY_GR    = '                            '
 YFNAM_SAND_GR    = '                            '
 YFNAM_LAI_GR     = '                            '
 !
-YFTYP_FRAC_GR    = '      '
 YFTYP_OM_GR      = '      '
 YFTYP_CLAY_GR    = '      '
 YFTYP_SAND_GR    = '      '
@@ -146,12 +140,9 @@ YFTYP_LAI_GR     = '      '
 !             -------------------------------------------
 !
 CALL READ_NAM_PGD_TEB_GREENROOF(HPROGRAM, ITIME_GR,ILAYER_GR,YTYP_GR,                     &
-                                ZUNIF_FRAC_GR, ZUNIF_OM_GR, ZUNIF_CLAY_GR, ZUNIF_SAND_GR, &
-                                ZUNIF_LAI_GR,                                             &
-                                YFNAM_FRAC_GR, YFNAM_OM_GR, YFNAM_CLAY_GR, YFNAM_SAND_GR, &
-                                YFNAM_LAI_GR,                                             &
-                                YFTYP_FRAC_GR, YFTYP_OM_GR, YFTYP_CLAY_GR, YFTYP_SAND_GR, &
-                                YFTYP_LAI_GR)
+                                ZUNIF_OM_GR, ZUNIF_CLAY_GR, ZUNIF_SAND_GR, ZUNIF_LAI_GR,  &
+                                YFNAM_OM_GR, YFNAM_CLAY_GR, YFNAM_SAND_GR, YFNAM_LAI_GR,  &
+                                YFTYP_OM_GR, YFTYP_CLAY_GR, YFTYP_SAND_GR, YFTYP_LAI_GR)
 !
 NTIME_GR           = ITIME_GR
 NLAYER_GR          = ILAYER_GR
@@ -163,7 +154,6 @@ CTYP_GR            = YTYP_GR
 CALL TEST_NAM_VAR_SURF(ILUOUT,'CTYP_GR',CTYP_GR,'GRASS','SEDUM')
 !
 !
-ALLOCATE(XPAR_FRAC_GR     (NDIM          ))
 ALLOCATE(XPAR_OM_GR       (NDIM,NLAYER_GR))
 ALLOCATE(XPAR_CLAY_GR     (NDIM,NLAYER_GR))
 ALLOCATE(XPAR_SAND_GR     (NDIM,NLAYER_GR))
@@ -176,8 +166,6 @@ ALLOCATE(XPAR_LAI_GR      (NDIM,NTIME_GR ))
 !
 CATYPE = 'ARI'
 !
-CALL PGD_FIELD(HPROGRAM,'FRAC_GR: fraction of green roof','BLD',YFNAM_FRAC_GR,   &
-               YFTYP_FRAC_GR,ZUNIF_FRAC_GR,XPAR_FRAC_GR(:))
 !
 DO JLAYER_GR=1,NLAYER_GR
  CALL PGD_FIELD(HPROGRAM,'OM_GR: fraction of OM in GR layer','BLD',YFNAM_OM_GR(JLAYER_GR),   &

@@ -13,7 +13,7 @@
                                 PF_WATER_COND, PQIN_FLAT, PHR_TARGET, PV_VENT,      &
                                 PCAP_SYS_HEAT, PCAP_SYS_RAT, PT_ADP, PM_SYS_RAT,    &
                                 PCOP_RAT, PT_SIZE_MAX, PT_SIZE_MIN, PSHADE,         &
-                                PNATVENT, PROUGH_ROOF, PROUGH_WALL)
+                                PNATVENT, PROUGH_ROOF, PROUGH_WALL, PGREENROOF      )
 
 !     #########################
 !
@@ -124,6 +124,7 @@ REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PSHADE
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PNATVENT
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_ROOF
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_WALL
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PGREENROOF
 !
 !*    0.2    Declaration of local variables
 !      ------------------------------
@@ -318,6 +319,10 @@ DO JLOOP=1,SIZE(KTYPE)
 !
     IF (PRESENT(PV_VENT)) THEN
       PV_VENT(JLOOP) = XDESC_V_VENT(IINDEX)
+    ENDIF
+    !
+    IF (PRESENT(PGREENROOF)) THEN
+      PGREENROOF(JLOOP) = XDESC_GREENROOF(IINDEX)
     ENDIF
 !
 !

@@ -309,12 +309,10 @@ PRN_ROAD(:) = PRN_ROAD(:) * PDF_ROAD(:) + PRNSNOW_ROAD(:) * PDN_ROAD(:)
 !
 ! sensible heat flux
 !
-PH_ROAD  (:) = PH_ROAD (:) * PDF_ROAD(:) + PHSNOW_ROAD(:) * PDN_ROAD(:)   &
-              + PH_TRAFFIC(:) / PROAD(:)
+PH_ROAD  (:) = PH_ROAD (:) * PDF_ROAD(:) + PHSNOW_ROAD(:) * PDN_ROAD(:)
 ! total latent heat of evaporation from  the road (snow free + snow)
 !
-PLE_ROAD (:) = PLEW_ROAD(:) * PDF_ROAD(:) + PLESNOW_ROAD(:) * PDN_ROAD(:) &
-              + PLE_TRAFFIC(:) / PROAD(:)
+PLE_ROAD (:) = PLEW_ROAD(:) * PDF_ROAD(:) + PLESNOW_ROAD(:) * PDN_ROAD(:)
 !
 !*      4.2    Roofs
 !              -----
@@ -337,16 +335,15 @@ PRN_ROOF       (:) = (1.-PFRAC_GR(:)) * PRN_STRLROOF(:) + PFRAC_GR(:) * PRN_GREE
 !
 ! sensible heat flux
 !
-PH_STRLROOF    (:) = PH_ROOF(:) * PDF_ROOF(:) + PHSNOW_ROOF(:)  * PDN_ROOF(:)    &
-                   + (1 - PF_WASTE_CAN(:)) * PH_WASTE(:) / PBLD(:)               &
-                   +  PH_INDUSTRY(:)/PBLD(:)
-PH_ROOF        (:) = (1.-PFRAC_GR(:)) * PH_STRLROOF(:) + PFRAC_GR(:) * PH_GREENROOF(:)
+PH_STRLROOF    (:) = PH_ROOF(:) * PDF_ROOF(:) + PHSNOW_ROOF(:)  * PDN_ROOF(:)
+PH_ROOF        (:) = (1.-PFRAC_GR(:)) * PH_STRLROOF(:) + PFRAC_GR(:) * PH_GREENROOF(:) &
+                   + (1 - PF_WASTE_CAN(:)) * PH_WASTE(:) / PBLD(:)
 !
 ! total latent heat of evaporation from the roof (snow free + snow)
 !
-PLE_STRLROOF   (:) = PLEW_ROOF(:) * PDF_ROOF(:)  + PLESNOW_ROOF(:) * PDN_ROOF(:) &
-                   + (1 - PF_WASTE_CAN(:)) * PLE_WASTE(:)/PBLD(:) +  PLE_INDUSTRY(:)/PBLD(:)
-PLE_ROOF       (:) = (1.-PFRAC_GR(:)) * PLE_STRLROOF(:) + PFRAC_GR(:) * PLE_GREENROOF(:)
+PLE_STRLROOF   (:) = PLEW_ROOF(:) * PDF_ROOF(:)  + PLESNOW_ROOF(:) * PDN_ROOF(:)
+PLE_ROOF       (:) = (1.-PFRAC_GR(:)) * PLE_STRLROOF(:) + PFRAC_GR(:) * PLE_GREENROOF(:) &
+                   + (1 - PF_WASTE_CAN(:)) * PLE_WASTE(:)/PBLD(:)
 !
 !-------------------------------------------------------------------------------
 !

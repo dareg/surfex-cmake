@@ -50,7 +50,7 @@ USE MODD_TEB_n,        ONLY : CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,     
                               XWS_ROOF, XWS_ROAD,                                      &
                               TSNOW_ROOF, TSNOW_ROAD,                                  &
                               XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
-                              XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XROAD,               &
+                              XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XROAD, XGREENROOF,   &
                               XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,                 &
                               XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND,              &
                               XALB_ROOF, XEMIS_ROOF, XHC_ROOF,XTC_ROOF, XD_ROOF,       &
@@ -85,7 +85,6 @@ USE MODD_TEB_CANOPY_n, ONLY : XZ, XU, NLVL, XTKE, XT, XQ,                       
 USE MODD_DIAG_TEB_n,   ONLY : N2M, XZON10M, XMER10M
 USE MODD_DIAG_UTCI_TEB_n, ONLY : LUTCI, XUTCI_IN, XUTCI_OUTSUN,          &
                                  XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE
-USE MODD_TEB_GREENROOF_n, ONLY : XFRAC_GR
 USE MODD_DST_n,        ONLY : XEMISRADIUS_DST, XEMISSIG_DST
 USE MODD_SLT_n,        ONLY : XEMISRADIUS_SLT, XEMISSIG_SLT
 USE MODD_DST_SURF
@@ -759,7 +758,7 @@ CALL TEB_GARDEN      (CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,               
                       ZH_TRAFFIC, ZLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,              &
                       PTSTEP,                                                          &
                       XZ0_TOWN,                                                        &
-                      XBLD, XGARDEN, XROAD_DIR, XROAD, XFRAC_GR,                       &
+                      XBLD, XGARDEN, XROAD_DIR, XROAD, XGREENROOF,                     &
                       XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,                         &
                       XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND,                      &
                       XALB_ROOF, XEMIS_ROOF,                                           &
@@ -942,8 +941,8 @@ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_GRND ,ZDUWDU_GRND )
 CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_UW_ROOF ,ZUW_ROOF)
 CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_ROOF ,ZDUWDU_ROOF)
 CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WALL ,0.5*(ZH_WALL_A+ZH_WALL_B))
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,ZH_ROOF)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,ZLE_ROOF/XLVTT)
+CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+XH_INDUSTRY))
+CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+XLE_INDUSTRY)/XLVTT)
 !
 !-------------------------------------------------------------------------------------
 ! Computes the impact of canopy and surfaces on air

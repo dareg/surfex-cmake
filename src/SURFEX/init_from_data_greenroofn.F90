@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE INIT_FROM_DATA_GREENROOF_n(KDECADE, HPHOTO,                              &
-                                            PFRAC_GR, POM_GR, PSAND_GR, PCLAY_GR, PVEG,   &
+                                            POM_GR, PSAND_GR, PCLAY_GR, PVEG,             &
                                             PLAI,PRSMIN,PGAMMA,PWRMAX_CF,                 &
                                             PRGL,PCV,PDG,PD_ICE,PZ0,PZ0_O_Z0H,            &
                                             PALBNIR_VEG,PALBVIS_VEG,PALBUV_VEG,           &
@@ -47,7 +47,7 @@
 !            -----------
 !
 USE MODD_TEB_GREENROOF_n,      ONLY :NTIME_GR
-USE MODD_DATA_TEB_GREENROOF_n, ONLY :XPAR_FRAC_GR, XPAR_OM_GR,            &
+USE MODD_DATA_TEB_GREENROOF_n, ONLY :XPAR_OM_GR,                          &
                                      XPAR_SAND_GR, XPAR_CLAY_GR,          &
                                      XPAR_LAI, XPAR_H_TREE, XPAR_VEGTYPE, &
                                      XPAR_VEG, XPAR_Z0, XPAR_Z0_O_Z0H,    &
@@ -77,7 +77,6 @@ IMPLICIT NONE
 INTEGER,                INTENT(IN)    :: KDECADE
 CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 !
-REAL, DIMENSION(:),     OPTIONAL, INTENT(OUT)   :: PFRAC_GR
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PSAND_GR
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PCLAY_GR
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: POM_GR
@@ -141,7 +140,6 @@ ITIME = NTIME_GR
 !
 !*    2.0     fields for greenroofs
 !             ---------------------
-IF (PRESENT(PFRAC_GR)) PFRAC_GR(:)   = XPAR_FRAC_GR(:)
 !
 IF (PRESENT(POM_GR))   POM_GR(:,:)   = XPAR_OM_GR(:,:)
 !

@@ -98,6 +98,14 @@ YRECFM='ROAD_DIRECTION'
 YCOMMENT='Road direction'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XROAD_DIR(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='GARDEN_FRAC'
+YCOMMENT='Garden fraction (-)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XGARDEN(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='GREENROOF_FRAC'
+YCOMMENT='Greenroof fraction (-)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XGREENROOF(:),IRESP,HCOMMENT=YCOMMENT)
+!
 !-------------------------------------------------------------------------------
 !
 !         Building parameters

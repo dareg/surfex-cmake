@@ -25,9 +25,8 @@ USE MODD_TEB_n, ONLY : NROOF_LAYER, NWALL_LAYER, NROAD_LAYER, XGARDEN,     &
                        XALB_ROAD, XEMIS_ROAD, XHC_ROAD, XTC_ROAD, XD_ROAD, &
                        XALB_WALL, XEMIS_WALL, XHC_WALL, XTC_WALL, XD_WALL, &
                        XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY, &
-                       XROUGH_ROOF, XROUGH_WALL
+                       XROUGH_ROOF, XROUGH_WALL, XGREENROOF
 
-USE MODD_TEB_GREENROOF_n, ONLY : XFRAC_GR
 
 USE MODD_CSTS,            ONLY : XCPD, XPI, XP00, XRD, XSTEFAN
 USE MODD_TEB_GRID_n,      ONLY : XLAT, XLON
@@ -502,7 +501,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !
     CALL URBAN_SOLAR_ABS(YBEM, CROAD_DIR, CWALL_OPT,               &
                      ZDIR_SW, ZSCA_SW, ZZENITH, ZAZIM,             &
-                     XBLD, ZGARDEN, XROAD_DIR, XROAD, XFRAC_GR,    &
+                     XBLD, ZGARDEN, XROAD_DIR, XROAD, XGREENROOF,  &
                      XWALL_O_HOR, XCAN_HW_RATIO,                   &
                      XALB_ROOF,                                    &
                      XALB_ROAD, XSVF_ROAD, XALB_WALL, XSVF_WALL,   &
@@ -563,7 +562,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
              ZPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, ZRHOA, ZLW_RAD,        &
              ZRR, ZSR, ZZREF, ZZREF, ZU_CANYON,                       &
              XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
-             PPTSTEP, XZ0_TOWN, XBLD, ZGARDEN, XROAD, XFRAC_GR,       &
+             PPTSTEP, XZ0_TOWN, XBLD, ZGARDEN, XROAD, XGREENROOF,     &
              XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO, XWALL_O_GRND,   &
              ZDF_ROOF, ZDN_ROOF, ZDF_ROAD,                            &
              ZDN_ROAD, ZQSAT_ROOF, ZQSAT_ROAD, ZDELT_ROOF, ZDELT_ROAD,&

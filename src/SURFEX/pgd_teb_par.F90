@@ -66,8 +66,9 @@ USE MODD_DATA_TEB_n, ONLY : NPAR_ROAD_LAYER_n => NPAR_ROAD_LAYER,          &
                             LDATA_H_INDUSTRY, LDATA_LE_INDUSTRY ,          &
                             LDATA_GARDEN, LDATA_BLDTYPE,                   &
                             LDATA_ROAD_DIR, LDATA_USETYPE, LDATA_BLD_AGE,  &
-                            LDATA_ROUGH_ROOF, LDATA_ROUGH_WALL, &
-                            XPAR_ROUGH_ROOF, XPAR_ROUGH_WALL
+                            LDATA_ROUGH_ROOF, LDATA_ROUGH_WALL,            &
+                            XPAR_ROUGH_ROOF, XPAR_ROUGH_WALL,              &
+                            LDATA_GREENROOF, XPAR_GREENROOF
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -136,18 +137,21 @@ REAL                                    :: XUNIF_BLD_HEIGHT   ! buildings height
 REAL                                    :: XUNIF_WALL_O_HOR   ! wall surf. / hor. surf.          (-)
 REAL                                    :: XUNIF_Z0_TOWN      ! roughness length for momentum    (m)
 REAL                                    :: XUNIF_GARDEN       ! fraction of veg in the streets   (-)
+REAL                                    :: XUNIF_GREENROOF    ! fraction of greenroofs on roofs  (-)
 REAL                                    :: XUNIF_ROAD_DIR     ! road direction (° from North, clockwise)
 CHARACTER(LEN=28)                       :: CFNAM_BLD          ! file name for BLD 
 CHARACTER(LEN=28)                       :: CFNAM_BLD_HEIGHT   ! file name for BLD_HEIGHT
 CHARACTER(LEN=28)                       :: CFNAM_WALL_O_HOR   ! file name for WALL_O_HOR
 CHARACTER(LEN=28)                       :: CFNAM_Z0_TOWN      ! file name for Z0_TOWN
 CHARACTER(LEN=28)                       :: CFNAM_GARDEN       ! file name for GARDEN  
+CHARACTER(LEN=28)                       :: CFNAM_GREENROOF    ! file name for GREENROOF
 CHARACTER(LEN=28)                       :: CFNAM_ROAD_DIR     ! file name for ROAD_DIR  
 CHARACTER(LEN=6)                        :: CFTYP_BLD          ! file type for BLD 
 CHARACTER(LEN=6)                        :: CFTYP_BLD_HEIGHT   ! file type for BLD_HEIGHT
 CHARACTER(LEN=6)                        :: CFTYP_WALL_O_HOR   ! file type for WALL_O_HOR
 CHARACTER(LEN=6)                        :: CFTYP_Z0_TOWN      ! file type for Z0_TOWN
 CHARACTER(LEN=6)                        :: CFTYP_GARDEN       ! file type for GARDEN  
+CHARACTER(LEN=6)                        :: CFTYP_GREENROOF    ! file type for GREENROOF
 CHARACTER(LEN=6)                        :: CFTYP_ROAD_DIR     ! file type for ROAD_DIR
 !
 ! Roof parameters
@@ -248,7 +252,7 @@ NAMELIST/NAM_DATA_TEB/      NPAR_ROOF_LAYER, NPAR_ROAD_LAYER, NPAR_WALL_LAYER,&
                               XUNIF_WALL_O_HOR,                               &
                               XUNIF_H_TRAFFIC, XUNIF_LE_TRAFFIC,              &
                               XUNIF_H_INDUSTRY, XUNIF_LE_INDUSTRY,            &
-                              XUNIF_GARDEN,                                   &
+                              XUNIF_GARDEN, XUNIF_GREENROOF,                  &
                               XUNIF_ROAD_DIR,                                 &
                               CFNAM_ALB_ROOF,                                 &
                               CFNAM_EMIS_ROOF, CFNAM_HC_ROOF, CFNAM_TC_ROOF,  &
@@ -260,7 +264,7 @@ NAMELIST/NAM_DATA_TEB/      NPAR_ROOF_LAYER, NPAR_ROAD_LAYER, NPAR_WALL_LAYER,&
                               CFNAM_WALL_O_HOR,                               &
                               CFNAM_H_TRAFFIC, CFNAM_LE_TRAFFIC,              &
                               CFNAM_H_INDUSTRY, CFNAM_LE_INDUSTRY,            &
-                              CFNAM_GARDEN, CFNAM_ROAD_DIR,                   &
+                              CFNAM_GARDEN, CFNAM_ROAD_DIR, CFNAM_GREENROOF,  &
                               CFTYP_ALB_ROOF,                                 &
                               CFTYP_EMIS_ROOF, CFTYP_HC_ROOF, CFTYP_TC_ROOF,  &
                               CFTYP_D_ROOF, CFTYP_ALB_ROAD, CFTYP_EMIS_ROAD,  &
@@ -271,7 +275,7 @@ NAMELIST/NAM_DATA_TEB/      NPAR_ROOF_LAYER, NPAR_ROAD_LAYER, NPAR_WALL_LAYER,&
                               CFTYP_WALL_O_HOR,                               &
                               CFTYP_H_TRAFFIC, CFTYP_LE_TRAFFIC,              &
                               CFTYP_H_INDUSTRY, CFTYP_LE_INDUSTRY,            &
-                              CFTYP_GARDEN, CFTYP_ROAD_DIR,                   &
+                              CFTYP_GARDEN, CFTYP_ROAD_DIR, CFTYP_GREENROOF,  &
                               XUNIF_ROUGH_ROOF, CFNAM_ROUGH_ROOF, CFTYP_ROUGH_ROOF, &
                               XUNIF_ROUGH_WALL, CFNAM_ROUGH_WALL, CFTYP_ROUGH_WALL
 
@@ -313,6 +317,7 @@ XUNIF_LE_TRAFFIC   = XUNDEF
 XUNIF_H_INDUSTRY   = XUNDEF
 XUNIF_LE_INDUSTRY  = XUNDEF
 XUNIF_GARDEN       = XUNDEF
+XUNIF_GREENROOF    = XUNDEF
 XUNIF_ROAD_DIR     = XUNDEF
 XUNIF_ROUGH_ROOF   = XUNDEF
 XUNIF_ROUGH_WALL   = XUNDEF
@@ -350,6 +355,7 @@ CFNAM_H_INDUSTRY   = '                            '
 CFNAM_LE_INDUSTRY  = '                            '
 
 CFNAM_GARDEN       = '                            '
+CFNAM_GREENROOF    = '                            '
 CFNAM_ROAD_DIR     = '                            '
 
 CFTYP_BLDTYPE      = '      '
@@ -381,6 +387,7 @@ CFTYP_LE_TRAFFIC   = '      '
 CFTYP_H_INDUSTRY   = '      '
 CFTYP_LE_INDUSTRY  = '      '
 CFTYP_GARDEN       = '      '
+CFTYP_GREENROOF    = '      '
 CFTYP_ROAD_DIR     = '      '
 !
 
@@ -449,6 +456,7 @@ ALLOCATE(XPAR_LE_TRAFFIC  (NDIM))
 ALLOCATE(XPAR_H_INDUSTRY  (NDIM))
 ALLOCATE(XPAR_LE_INDUSTRY (NDIM))
 ALLOCATE(XPAR_GARDEN      (NDIM))
+ALLOCATE(XPAR_GREENROOF   (NDIM))
 ALLOCATE(XPAR_ROAD_DIR    (NDIM))
 !
 ALLOCATE(XPAR_HC_ROOF     (NDIM,NPAR_ROOF_LAYER))
@@ -657,7 +665,7 @@ IF (.NOT.LDATA_ROUGH_ROOF) DEALLOCATE(XPAR_ROUGH_ROOF)
 CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'ROUGH_WALL','TWN',CFNAM_ROUGH_WALL,CFTYP_ROUGH_WALL,XUNIF_ROUGH_WALL ,&
         XPAR_ROUGH_WALL,LDATA_ROUGH_WALL)
 IF (.NOT.LDATA_ROUGH_WALL) DEALLOCATE(XPAR_ROUGH_WALL)
-!
+
 !-------------------------------------------------------------------------------
 !
 !* coherence checks
@@ -673,6 +681,15 @@ CALL COHERENCE_THERMAL_DATA('WALL',LDATA_HC_WALL,LDATA_TC_WALL,LDATA_D_WALL)
 CALL INI_VAR_FROM_DATA_0D(HPROGRAM,'ARI','ROAD_DIR   ','TWN',CFNAM_ROAD_DIR  ,CFTYP_ROAD_DIR    ,XUNIF_ROAD_DIR   ,&
         XPAR_ROAD_DIR, LDATA_ROAD_DIR    )
 IF (.NOT.LDATA_ROAD_DIR) DEALLOCATE(XPAR_ROAD_DIR)
+!
+!-------------------------------------------------------------------------------
+!
+!* greenroof fraction
+!
+CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'GREENROOF','BLD',CFNAM_GREENROOF,CFTYP_GREENROOF,XUNIF_GREENROOF ,&
+        XPAR_GREENROOF,LDATA_GREENROOF)
+IF (.NOT.LDATA_GREENROOF) DEALLOCATE(XPAR_GREENROOF)
+!
 !-------------------------------------------------------------------------------
 !
 !* gardens

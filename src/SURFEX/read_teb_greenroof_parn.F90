@@ -42,7 +42,7 @@ USE MODD_TEB_GRID_n,           ONLY : NDIM
 USE MODD_DATA_COVER_PAR,       ONLY : NVEGTYPE, NVT_GRAS, NVT_TROG
 USE MODD_TEB_GREENROOF_n,      ONLY : NLAYER_GR, CTYP_GR, NTIME_GR,                                &
                                       XSAND_GR, XCLAY_GR
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : XPAR_FRAC_GR, XPAR_LAI_GR,                                &
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : XPAR_LAI_GR,                                              &
                                       XPAR_OM_GR, XPAR_SAND_GR, XPAR_CLAY_GR,                   & 
                                       XPAR_VEG, XPAR_LAI,XPAR_RSMIN,XPAR_GAMMA,XPAR_WRMAX_CF,   &
                                       XPAR_RGL,XPAR_CV,XPAR_DG,XPAR_Z0,XPAR_Z0_O_Z0H,           &
@@ -107,10 +107,6 @@ CALL READ_SURF(HPROGRAM,YRECFM,NLAYER_GR,IRESP)
 YRECFM='D_TYPE_GR'
 CALL READ_SURF(HPROGRAM,YRECFM,CTYP_GR,IRESP)
 !
-! Read fraction of green roof 
-ALLOCATE(XPAR_FRAC_GR   (NDIM))
-YRECFM='D_FRAC_GR'
-CALL READ_SURF(HPROGRAM,YRECFM,XPAR_FRAC_GR,IRESP)
 !
 ! Read green roof OM fraction
 ALLOCATE(XPAR_OM_GR     (NDIM,NLAYER_GR))

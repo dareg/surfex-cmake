@@ -40,7 +40,7 @@ USE MODD_DATA_TEB_n, ONLY :   NPAR_ROOF_LAYER, NPAR_WALL_LAYER, NPAR_ROAD_LAYER,
                               NPAR_BLDTYPE, NPAR_USETYPE,                        &
                               NPAR_BLDCODE, NPAR_BLD_AGE,                        &
                               XPAR_Z0_TOWN, XPAR_BLD,                            &
-                              XPAR_GARDEN, XPAR_ROAD_DIR,                        &
+                              XPAR_GARDEN, XPAR_ROAD_DIR, XPAR_GREENROOF,        &
                               XPAR_ALB_ROOF,                                     &
                               XPAR_EMIS_ROOF, XPAR_HC_ROOF, XPAR_TC_ROOF,        &
                               XPAR_D_ROOF, XPAR_ALB_ROAD, XPAR_EMIS_ROAD,        &
@@ -59,7 +59,7 @@ USE MODD_DATA_TEB_n, ONLY :   NPAR_ROOF_LAYER, NPAR_WALL_LAYER, NPAR_ROAD_LAYER,
                               LDATA_WALL_O_HOR,                                  &
                               LDATA_H_TRAFFIC, LDATA_LE_TRAFFIC,                 &
                               LDATA_H_INDUSTRY, LDATA_LE_INDUSTRY ,              &
-                              LDATA_GARDEN, LDATA_BLDTYPE,                       &
+                              LDATA_GARDEN, LDATA_BLDTYPE, LDATA_GREENROOF,      &
                               LDATA_ROAD_DIR, LDATA_USETYPE, LDATA_BLD_AGE,      &
                               LDATA_ROUGH_ROOF, LDATA_ROUGH_WALL,                &
                               XPAR_ROUGH_WALL, XPAR_ROUGH_ROOF
@@ -135,6 +135,7 @@ IF (IVERSION<7 .AND. .NOT.LECOCLIMAP) THEN
   LDATA_Z0_TOWN     = .TRUE.
   LDATA_BLD         = .TRUE.
   LDATA_GARDEN      = .TRUE.
+  LDATA_GREENROOF   = .TRUE.
   LDATA_ROAD_DIR    = .FALSE.
   LDATA_ALB_ROOF    = .TRUE.
   LDATA_EMIS_ROOF   = .TRUE.
@@ -177,11 +178,14 @@ ELSEIF (IVERSION>=7) THEN
     YRECFM='L_GARDEN'
     CALL READ_SURF(HPROGRAM,YRECFM,LDATA_GARDEN,IRESP)
   ENDIF
-  IF (IVERSION==7 .AND. IBUGFIX<=1) THEN
+  IF (IVERSION==7 .AND. IBUGFIX<=2) THEN
     LDATA_ROAD_DIR = .FALSE.
+    LDATA_GREENROOF= .FALSE.
   ELSE
     YRECFM='L_ROAD_DIR'
     CALL READ_SURF(HPROGRAM,YRECFM,LDATA_ROAD_DIR,IRESP)
+    YRECFM='L_GREENROOF'
+    CALL READ_SURF(HPROGRAM,YRECFM,LDATA_GREENROOF,IRESP)
   END IF
   YRECFM='L_ALB_ROOF'
   CALL READ_SURF(HPROGRAM,YRECFM,LDATA_ALB_ROOF,IRESP)
@@ -368,6 +372,12 @@ IF (IVERSION>=6) THEN
     CALL READ_FIELD(YRECFM,XPAR_GARDEN,HDIRIN)
   ENDIF
 !
+ENDIF
+!
+IF (LDATA_GREENROOF) THEN
+  ALLOCATE(XPAR_GREENROOF    (NDIM))
+  YRECFM='D_GREENROOF'
+  CALL READ_FIELD(YRECFM,XPAR_GREENROOF,HDIRIN)
 ENDIF
 !
 IF (LDATA_ROAD_DIR) THEN

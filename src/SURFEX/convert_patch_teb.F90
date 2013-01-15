@@ -25,7 +25,7 @@
                                    PCAP_SYS_RAT, PT_ADP, PM_SYS_RAT,   &
                                    PCOP_RAT, PT_SIZE_MAX, PT_SIZE_MIN, &
                                    PSHADE, PNATVENT, PROUGH_ROOF,      &
-                                   PROUGH_WALL               )
+                                   PROUGH_WALL, PGREENROOF             )
 !     ##############################################################
 !
 !!**** *CONVERT_PATCH_TEB* compilation of conver_cover_isba, pgd_isba_par and
@@ -86,7 +86,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_Z0_TOWN, XDATA_ALB_ROOF,                  
                                 XDATA_CAP_SYS_RAT, XDATA_T_ADP, XDATA_M_SYS_RAT,  &
                                 XDATA_COP_RAT, XDATA_T_SIZE_MAX, XDATA_T_SIZE_MIN,&
                                 XDATA_SHADE, XDATA_NATVENT, XDATA_ROUGH_ROOF,     &
-                              XDATA_ROUGH_WALL
+                              XDATA_ROUGH_WALL, XDATA_FRAC_GR
 USE MODD_DATA_TEB_n
 USE MODD_DATA_BEM_n
 !
@@ -166,6 +166,7 @@ REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PSHADE
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PNATVENT
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_ROOF
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_WALL
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PGREENROOF
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -730,6 +731,18 @@ IF (PRESENT(PCOP_RAT)) THEN
     CALL INI_DATA_PARAM_TEB(NPAR_BLDCODE,PCOP_RAT=PCOP_RAT)
   ELSE
     CALL AV_PGD (PCOP_RAT ,PCOVER ,XDATA_COP_RAT(:),'TWN','ARI')
+  ENDIF  
+ENDIF
+!
+!     GREENROOF FRACTION
+!     ------------------
+IF (PRESENT(PGREENROOF)) THEN
+  IF (LDATA_GREENROOF) THEN
+    PGREENROOF=XPAR_GREENROOF
+  ELSEIF (LDATA_BLDTYPE) THEN
+    CALL INI_DATA_PARAM_TEB(NPAR_BLDCODE,PGREENROOF=PGREENROOF)
+  ELSE
+    CALL AV_PGD (PGREENROOF,PCOVER ,XDATA_FRAC_GR(:),'BLD','ARI')
   ENDIF  
 ENDIF
 !

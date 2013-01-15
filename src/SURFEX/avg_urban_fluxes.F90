@@ -282,10 +282,10 @@ DO JJ=1,SIZE(PROAD)
   PRN_GRND(JJ)    = ZROAD  (JJ) * PRN_ROAD  (JJ)  +  ZGARDEN(JJ) * PRN_GARDEN(JJ)
 !
   PH_GRND (JJ)    = ZROAD  (JJ) * PH_ROAD   (JJ)  +  ZGARDEN(JJ) * PH_GARDEN (JJ)       &
-                 +  PH_TRAFFIC(JJ)  
+                 +  PH_TRAFFIC(JJ) /  (1.-PBLD (JJ))
 !
   PLE_GRND(JJ)    = ZROAD  (JJ) * PLE_ROAD  (JJ)  +  ZGARDEN(JJ) * PLE_GARDEN(JJ)       &
-                 +  PLE_TRAFFIC(JJ)  
+                 +  PLE_TRAFFIC(JJ) / (1.-PBLD (JJ))
 !
   PGFLUX_GRND(JJ) = ZROAD  (JJ) * PGFLUX_ROAD  (JJ)  +  ZGARDEN(JJ) * PGFLUX_GARDEN(JJ)
 !

@@ -48,7 +48,7 @@ USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF,                                     &
                                 XTSTEP, XOUT_TSTEP, TTIME, XCOVER,                       &
                                 XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
-                                XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR,                      &
+                                XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XGREENROOF,          &
                                 XROAD, XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,          &
                                 XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND, XWALL_O_BLD, &
                                 XALB_ROOF, XEMIS_ROOF, XHC_ROOF,XTC_ROOF, XD_ROOF,       &
@@ -92,7 +92,6 @@ USE MODD_CH_TEB_n,        ONLY: XDEP, CCH_DRY_DEP, CSV, CCH_NAMES,              
                                 NSV_DSTBEG, NSV_DSTEND, NDSTEQ, CDSTNAMES,               &
                                 NSV_SLTBEG, NSV_SLTEND, NSLTEQ, CSLTNAMES  
 
-USE MODD_TEB_GREENROOF_n, ONLY: XFRAC_GR
 
 USE MODD_CHS_AEROSOL,     ONLY: LVARSIGI, LVARSIGJ
 USE MODD_DST_SURF,        ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST 
@@ -315,53 +314,6 @@ ILU = SIZE(XCOVER,1)
 ALLOCATE(XTEB_PATCH(ILU,NTEB_PATCH))
 CALL CONVERT_TEB(XCOVER,XTEB_PATCH)
 !
-!*      4.      Case of Urban green areas
-!               -------------------------
-!
-IF (HINIT/='PGD') THEN
-  DO JPATCH=1,NTEB_PATCH
-    CALL GOTO_TEB(JPATCH)
-    ALLOCATE(XGARDEN      (ILU))
-    ALLOCATE(XFRAC_GR     (ILU))    
-    XGARDEN(:) = 0.
-    XFRAC_GR (:) = 0.
-    ZDEF_ROAD_DIR = 0.
-    CALL CONVERT_PATCH_TEB(XCOVER, ZDEF_ROAD_DIR,PGARDEN=XGARDEN)
-  ENDDO
-ENDIF
-!
-!*      7.      Case of urban green areas
-!               -------------------------
-!
-IF (LGARDEN) THEN
-  !
-  DO JPATCH=1,NTEB_PATCH
-    CALL GOTO_TEB(JPATCH)    
-    IF (JPATCH==1) THEN
-      CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-      CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
-      CALL INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
-      CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,KI,KSV,HSV,IVERSION,PCO2,PRHOA)
-      ! Case of urban green roofs
-      IF (LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,KI,KSV,HSV,IVERSION,PCO2,PRHOA)
-      CALL END_IO_SURF_n(HPROGRAM)
-    ENDIF
-    !
-    CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! change input file name to pgd name
-    CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')       
-    CALL INIT_TEB_GARDEN_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
-  ! Case of urban green roofs
-    IF (LGREENROOF) CALL INIT_TEB_GREENROOF_n(HPROGRAM,HINIT,KI,KSV,PSW_BANDS)
-    CALL END_IO_SURF_n(HPROGRAM)
-  ENDDO
-  !
-ENDIF
-!
-IF (HINIT=='PGD') THEN
-  IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',1,ZHOOK_HANDLE)
-  RETURN
-END IF
-!
 CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
@@ -378,6 +330,7 @@ IF (HINIT=='ALL') THEN
     CALL READ_SURF(HPROGRAM,'WALL_OPT',CWALL_OPT,IRESP)
   END IF
 END IF
+CALL END_IO_SURF_n(HPROGRAM)
 !-----------------------------------------------------------------------------------
 !
 !*              LOOP ON TEB PATCHES
@@ -423,6 +376,8 @@ DO JPATCH=1,NTEB_PATCH
   ALLOCATE(XD_WALL      (ILU,NWALL_LAYER))
   ALLOCATE(XROUGH_ROOF      (ILU))
   ALLOCATE(XROUGH_WALL      (ILU))
+  ALLOCATE(XGREENROOF       (ILU))
+  ALLOCATE(XGARDEN          (ILU))
   !
   XROAD_DIR(:) = 0.
   XROAD    (:) = 0.
@@ -435,7 +390,7 @@ DO JPATCH=1,NTEB_PATCH
     ZDEF_ROAD_DIR = 180. * FLOAT(JPATCH-1) / FLOAT(NTEB_PATCH)
   END IF
   !
-  CALL CONVERT_PATCH_TEB(XCOVER, ZDEF_ROAD_DIR,                                    &
+  CALL CONVERT_PATCH_TEB(XCOVER, ZDEF_ROAD_DIR,                                  &
                       PZ0_TOWN=XZ0_TOWN,                                         &
                       PALB_ROOF=XALB_ROOF,                                       &
                       PEMIS_ROOF=XEMIS_ROOF,PHC_ROOF=XHC_ROOF,PTC_ROOF=XTC_ROOF, &
@@ -448,9 +403,11 @@ DO JPATCH=1,NTEB_PATCH
                       PD_WALL=XD_WALL,                                           &
                       PBLD_HEIGHT=XBLD_HEIGHT,                                   &
                       PWALL_O_HOR=XWALL_O_HOR,PBLD=XBLD, PROAD_DIR=XROAD_DIR,    &
+                      PGARDEN=XGARDEN,                                           &
                       PH_TRAFFIC=XH_TRAFFIC, PLE_TRAFFIC=XLE_TRAFFIC,            &
                       PH_INDUSTRY=XH_INDUSTRY, PLE_INDUSTRY=XLE_INDUSTRY,        &
-                      PROUGH_ROOF = XROUGH_ROOF, PROUGH_WALL = XROUGH_WALL       )
+                      PROUGH_ROOF = XROUGH_ROOF, PROUGH_WALL = XROUGH_WALL,      &
+                      PGREENROOF = XGREENROOF                                    )
   !
   !-------------------------------------------------------------------------------
   !
@@ -478,6 +435,25 @@ DO JPATCH=1,NTEB_PATCH
   CALL INIT_BEM_n(ILUOUT)
   !
   !-------------------------------------------------------------------------------
+  !
+  !*      7.      Case of urban green areas
+  !               -------------------------
+  !
+  IF (LGARDEN) THEN
+  !
+    CALL GOTO_TEB(JPATCH)    
+    IF (JPATCH==1) THEN
+      CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+      CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
+      CALL INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
+      CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+      ! Case of urban green roofs
+      IF (LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+      CALL END_IO_SURF_n(HPROGRAM)
+    ENDIF
+    !
+  ENDIF
+!-------------------------------------------------------------------------------
 END DO ! end of loop on TEB patches
 !-------------------------------------------------------------------------------
 !
@@ -494,10 +470,15 @@ END IF
 !
 !         Initialisation for IO
 !
+CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
 !*       9.     Prognostic fields:
 !               -----------------
+!
+!               -------------------------
+!
+
 !
 !*              LOOP ON TEB PATCHES
 !               -------------------
@@ -505,6 +486,7 @@ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 DO JPATCH=1,NTEB_PATCH
   CALL GOTO_TEB(JPATCH)
 !
+!* TEB fields
   CALL READ_TEB_n(HPROGRAM,JPATCH)
 !
   ALLOCATE(XAC_ROOF    (ILU))
@@ -518,6 +500,15 @@ DO JPATCH=1,NTEB_PATCH
   ALLOCATE(XDELT_ROOF  (ILU))
   ALLOCATE(XDELT_ROAD  (ILU))
 !
+!* Case of urban green areas
+  IF (LGARDEN) THEN
+!    CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! change input file name to pgd name
+!    CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')       
+    CALL INIT_TEB_GARDEN_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
+  ! Case of urban green roofs
+    IF (LGREENROOF) CALL INIT_TEB_GREENROOF_n(HPROGRAM,HINIT,KI,KSV,PSW_BANDS)
+!    CALL END_IO_SURF_n(HPROGRAM)
+  ENDIF
 !-------------------------------------------------------------------------------
 !
 !*      10.     Infra-red Radiative fields:
@@ -560,7 +551,7 @@ DO JPATCH=1,NTEB_PATCH
                         ZEMIS_GARDEN, ZTS_GARDEN,      &
                         ZEMIS_GREENROOF, ZTS_GREENROOF,&
                         TSNOW_ROOF,TSNOW_ROAD,         &
-                        XROAD, XFRAC_GR, XGARDEN,      &
+                        XROAD, XGREENROOF, XGARDEN,    &
                         XBLD,XWALL_O_HOR,              &
                         XSVF_ROAD,XSVF_WALL,           &
                         XSVF_GARDEN,                   &
@@ -574,8 +565,8 @@ DO JPATCH=1,NTEB_PATCH
   ALLOCATE(ZDIR_ALB(ILU))
   ALLOCATE(ZSCA_ALB(ILU))
 !
-  CALL AVERAGED_ALBEDO_TEB(CBEM,CROAD_DIR,CWALL_OPT,PZENITH,PAZIM,   &
-                       XBLD, XGARDEN, XROAD_DIR, XROAD, XFRAC_GR,  &
+  CALL AVERAGED_ALBEDO_TEB(CBEM,CROAD_DIR,CWALL_OPT,PZENITH,PAZIM, &
+                       XBLD, XGARDEN, XROAD_DIR, XROAD, XGREENROOF,&
                        XWALL_O_HOR, XCAN_HW_RATIO,                 &
                        XALB_ROOF,                                  &
                        XALB_ROAD, XSVF_ROAD,                       &

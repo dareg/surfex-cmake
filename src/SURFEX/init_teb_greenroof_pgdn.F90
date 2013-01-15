@@ -36,9 +36,9 @@ SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT, KI, KSV, HSV, KVERSION, PCO2
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
-USE MODD_TEB_n,                ONLY: TTIME
+USE MODD_TEB_n,                ONLY: TTIME, XGREENROOF
 USE MODD_TEB_VEG_n,       ONLY: CPEDOTF, CPHOTO, NNBIOMASS, CCPSURF
-USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, XFRAC_GR, XPCPS, XPLVTT, XPLSTT,           &
+USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     &
                                      CISBA_GR, CSCOND_GR, CKSAT_GR, LTR_ML_GR,           &
                                      XCLAY_GR, XSAND_GR, XOM_GR,                         &
                                      XWWILT, XWFC, XWSAT,                                &
@@ -172,7 +172,7 @@ IF (.NOT. LPAR_GREENROOF) THEN
   CALL CONVERT_PATCH_TEB_GREENROOF(KI,IDECADE)
 ELSE
  CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,CPHOTO,                     &
-                                 XFRAC_GR, XOM_GR,                   &
+                                 XOM_GR,                             &
                                  XSAND_GR, XCLAY_GR, XVEG,           &
                                  XLAI,XRSMIN,XGAMMA,XWRMAX_CF,       &
                                  XRGL,XCV,XDG,XD_ICE,XZ0,XZ0_O_Z0H,  &
@@ -183,14 +183,14 @@ ELSE
                                  XDMAX, XF2I, LSTRESS, XH_TREE,XRE25,&
                                  XCE_NITRO,XCF_NITRO,XCNA_NITRO      )  
   IF (CISBA_GR=='DIF') THEN
-    WHERE(XFRAC_GR(:)/=0.)
+    WHERE(XGREENROOF(:)/=0.)
       NWG_LAYER(:)=NLAYER_GR 
       XDG2  (:)=0.0
       XDROOT(:)=0.0
     ENDWHERE
     DO JLAYER=NLAYER_GR,1,-1
       DO JILU=1,KI
-        IF(XFRAC_GR(JILU)/=0..AND.XROOTFRAC(JILU,JLAYER)>=1.0)THEN
+        IF(XGREENROOF(JILU)/=0..AND.XROOTFRAC(JILU,JLAYER)>=1.0)THEN
           XDG2  (JILU)=XDG(JILU,JLAYER)
           XDROOT(JILU)=XDG(JILU,JLAYER)
         ENDIF
@@ -199,7 +199,7 @@ ELSE
   ENDIF                                 
 END IF
 !
-WHERE (XFRAC_GR(:)==0.)
+WHERE (XGREENROOF(:)==0.)
   ! GARDEN default values /may need changing for green roofs
   XOM_GR     (:,1) = 0.5
   XOM_GR     (:,2) = 0.5
@@ -222,7 +222,7 @@ WHERE (XFRAC_GR(:)==0.)
   XEMIS      (:  ) = 0.94
 END WHERE
 IF (CPHOTO/='NON') THEN
-  WHERE (XFRAC_GR(:)==0.)
+  WHERE (XGREENROOF(:)==0.)
     XGMES      (:  ) = 0.020
     XBSLAI     (:  ) = 0.36
     XLAIMIN    (:  ) = 0.3
@@ -232,12 +232,12 @@ IF (CPHOTO/='NON') THEN
     XGC        (:  ) = 0.00025
   END WHERE
   IF (CPHOTO/='AGS' .AND. CPHOTO/='LAI') THEN
-    WHERE (XFRAC_GR(:)==0.)     
+    WHERE (XGREENROOF(:)==0.)     
       XDMAX      (:  ) = 0.1
       XF2I       (:  ) = 0.3
     END WHERE
     IF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
-      WHERE (XFRAC_GR(:)==0.)          
+      WHERE (XGREENROOF(:)==0.)          
         XCE_NITRO  (:  ) = 7.68
         XCF_NITRO  (:  ) = -4.33
         XCNA_NITRO (:  ) = 1.3
@@ -247,34 +247,34 @@ IF (CPHOTO/='NON') THEN
 ENDIF  
 IF(CISBA_GR/='DIF')THEN
   DO JLAYER=1,NLAYER_GR
-    WHERE (XFRAC_GR(:)==0.)
+    WHERE (XGREENROOF(:)==0.)
       XDG(:,JLAYER)=0.2*JLAYER
     END WHERE
   ENDDO
 ELSE
-  WHERE (XFRAC_GR(:)==0.) 
+  WHERE (XGREENROOF(:)==0.) 
     XDG(:,1)=0.01
     XDG(:,2)=0.04
     XROOTFRAC(:,1)=0.
     XROOTFRAC(:,2)=0.
   END WHERE        
   DO JLAYER=3,NLAYER_GR
-    WHERE (XFRAC_GR(:)==0.)
+    WHERE (XGREENROOF(:)==0.)
       XDG(:,JLAYER)=0.1*(JLAYER-2)
       XROOTFRAC(:,JLAYER)=0.
     END WHERE
   ENDDO               
-  WHERE (XFRAC_GR(:)==0.) 
+  WHERE (XGREENROOF(:)==0.) 
     NWG_LAYER(:)=NLAYER_GR
     XDROOT   (:)=0.0
     XDG2     (:)=XDG(:,NLAYER_GR-1)
   ENDWHERE    
 ENDIF  
-WHERE (XFRAC_GR(:)==0.) 
+WHERE (XGREENROOF(:)==0.) 
   XD_ICE(:)=0.8*XDG(:,2)
 END WHERE  
 DO JVEGTYPE=1,NVEGTYPE
-  WHERE (XFRAC_GR(:)==0.)
+  WHERE (XGREENROOF(:)==0.)
     XVEGTYPE(:,JVEGTYPE)=0.
     XVEGTYPE(:,1)=1.
   END WHERE

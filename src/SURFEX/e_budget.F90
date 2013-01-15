@@ -328,6 +328,8 @@ WHERE(PPEW_A_COEF(:)/= 0.)
       ZUSTAR2(:) = MAX( ( ZVMOD(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
 ENDWHERE
 !
+ZUSTAR2(:) = MAX(ZUSTAR2(:),0.)
+!
 ZRORA(:)    = PRHOA(:) / PRA(:)
 !
 !                                              terms za, zb, and zc for the
