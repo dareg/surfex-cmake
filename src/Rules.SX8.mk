@@ -73,18 +73,36 @@ $(OBJS2) :  OPT =  $(OPT_BASE)  $(OPT_PERF2)
 endif
 
 ifneq "$(OPTLEVEL)" "DEBUG"
-OBJSD += spll_default_alb_eco1_01.o spll_default_alb_eco1_02.o \
-spll_default_alb_eco1_03.o spll_default_alb_eco1_04.o \
-spll_default_alb_eco1_05.o spll_default_alb_eco1_06.o \
-spll_default_alb_eco1_07.o spll_default_alb_eco1_08.o \
-spll_default_alb_eco1_09.o spll_default_alb_eco1_10.o \
-spll_default_alb_eco1_11.o spll_default_alb_eco1_12.o \
-spll_default_alb_eco2_01.o spll_default_alb_eco2_02.o \
-spll_default_alb_eco2_03.o spll_default_alb_eco2_04.o \
-spll_default_alb_eco2_05.o spll_default_alb_eco2_06.o \
-spll_default_alb_eco2_07.o spll_default_alb_eco2_08.o \
-spll_default_alb_eco2_09.o spll_default_alb_eco2_10.o \
-spll_default_alb_eco2_11.o spll_default_alb_eco2_12.o \
+OBJSD += spll_default_alb_eco1_01_1.o spll_default_alb_eco1_02_1.o \
+spll_default_alb_eco1_03_1.o spll_default_alb_eco1_04_1.o \
+spll_default_alb_eco1_05_1.o spll_default_alb_eco1_06_1.o \
+spll_default_alb_eco1_07_1.o spll_default_alb_eco1_08_1.o \
+spll_default_alb_eco1_09_1.o spll_default_alb_eco1_10_1.o \
+spll_default_alb_eco1_11_1.o spll_default_alb_eco1_12_1.o \
+spll_default_alb_eco1_01_2.o spll_default_alb_eco1_02_2.o \
+spll_default_alb_eco1_03_2.o spll_default_alb_eco1_04_2.o \
+spll_default_alb_eco1_05_2.o spll_default_alb_eco1_06_2.o \
+spll_default_alb_eco1_07_2.o spll_default_alb_eco1_08_2.o \
+spll_default_alb_eco1_09_2.o spll_default_alb_eco1_10_2.o \
+spll_default_alb_eco1_11_2.o spll_default_alb_eco1_12_2.o \
+spll_default_alb_eco2_01_1.o spll_default_alb_eco2_02_1.o \
+spll_default_alb_eco2_03_1.o spll_default_alb_eco2_04_1.o \
+spll_default_alb_eco2_05_1.o spll_default_alb_eco2_06_1.o \
+spll_default_alb_eco2_07_1.o spll_default_alb_eco2_08_1.o \
+spll_default_alb_eco2_09_1.o spll_default_alb_eco2_10_1.o \
+spll_default_alb_eco2_11_1.o spll_default_alb_eco2_12_1.o \
+spll_default_alb_eco2_01_2.o spll_default_alb_eco2_02_2.o \
+spll_default_alb_eco2_03_2.o spll_default_alb_eco2_04_2.o \
+spll_default_alb_eco2_05_2.o spll_default_alb_eco2_06_2.o \
+spll_default_alb_eco2_07_2.o spll_default_alb_eco2_08_2.o \
+spll_default_alb_eco2_09_2.o spll_default_alb_eco2_10_2.o \
+spll_default_alb_eco2_11_2.o spll_default_alb_eco2_12_2.o \
+spll_default_alb_eco2_01_3.o spll_default_alb_eco2_02_3.o \
+spll_default_alb_eco2_03_3.o spll_default_alb_eco2_04_3.o \
+spll_default_alb_eco2_05_3.o spll_default_alb_eco2_06_3.o \
+spll_default_alb_eco2_07_3.o spll_default_alb_eco2_08_3.o \
+spll_default_alb_eco2_09_3.o spll_default_alb_eco2_10_3.o \
+spll_default_alb_eco2_11_3.o spll_default_alb_eco2_12_3.o \
 spll_default_lai_eco1_01.o spll_default_lai_eco1_02.o \
 spll_default_lai_eco1_03.o spll_default_lai_eco1_04.o \
 spll_default_lai_eco1_05.o spll_default_lai_eco1_06.o \
@@ -121,7 +139,7 @@ spll_default_lai_eco2_y2006_05.o spll_default_lai_eco2_y2006_06.o \
 spll_default_lai_eco2_y2006_07.o spll_default_lai_eco2_y2006_08.o \
 spll_default_lai_eco2_y2006_09.o spll_default_lai_eco2_y2006_10.o \
 spll_default_lai_eco2_y2006_11.o spll_default_lai_eco2_y2006_12.o
-$(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF1)
+$(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF0)
 endif
 
 ifeq "$(VER_MPI)" "NOMPI"
