@@ -9,7 +9,8 @@ endif
 #
 OPT_BASE = -pi -dw -Wf,-Nesc -Wf\"-A idbl4\" -Popenmp -Wf\"-pvctl loopcnt=10000000 shape=10000000\"
 #-Wf"-pvctl fullmsg -O infomsg -L fmtlist" -Wf"-L transform" -Wf"-L summary"
-OPT_PERF0 = -C debug 
+OPT_PERF0 = -C debug
+OPT_PERF1 = -C ssafe
 OPT_PERF2 = -C vsafe
 OPT_PERF3 = -C vopt
 OPT_PERF4 = -C hopt
@@ -69,6 +70,58 @@ spll_ini_radiations_ecmwf.o spll_mass_leak.o spll_mode_sum_ll.o spll_modi_sum_ll
 spll_p_abs.o spll_reduce_sum_0dd_ll.o spll_reduce_sum_1dd_ll.o spll_relaxdef.o \
 spll_set_ref.o spll_surf_solar_sum.o spll_test_double_double.o spll_trid.o
 $(OBJS2) :  OPT =  $(OPT_BASE)  $(OPT_PERF2) 
+endif
+
+ifneq "$(OPTLEVEL)" "DEBUG"
+OBJSD += spll_default_alb_eco1_01.o spll_default_alb_eco1_02.o \
+spll_default_alb_eco1_03.o spll_default_alb_eco1_04.o \
+spll_default_alb_eco1_05.o spll_default_alb_eco1_06.o \
+spll_default_alb_eco1_07.o spll_default_alb_eco1_08.o \
+spll_default_alb_eco1_09.o spll_default_alb_eco1_10.o \
+spll_default_alb_eco1_11.o spll_default_alb_eco1_12.o \
+spll_default_alb_eco2_01.o spll_default_alb_eco2_02.o \
+spll_default_alb_eco2_03.o spll_default_alb_eco2_04.o \
+spll_default_alb_eco2_05.o spll_default_alb_eco2_06.o \
+spll_default_alb_eco2_07.o spll_default_alb_eco2_08.o \
+spll_default_alb_eco2_09.o spll_default_alb_eco2_10.o \
+spll_default_alb_eco2_11.o spll_default_alb_eco2_12.o \
+spll_default_lai_eco1_01.o spll_default_lai_eco1_02.o \
+spll_default_lai_eco1_03.o spll_default_lai_eco1_04.o \
+spll_default_lai_eco1_05.o spll_default_lai_eco1_06.o \
+spll_default_lai_eco1_07.o spll_default_lai_eco1_08.o \
+spll_default_lai_eco1_09.o spll_default_lai_eco1_10.o \
+spll_default_lai_eco1_11.o spll_default_lai_eco1_12.o \
+spll_default_lai_eco2_y2002_01.o spll_default_lai_eco2_y2002_02.o \
+spll_default_lai_eco2_y2002_03.o spll_default_lai_eco2_y2002_04.o \
+spll_default_lai_eco2_y2002_05.o spll_default_lai_eco2_y2002_06.o \
+spll_default_lai_eco2_y2002_07.o spll_default_lai_eco2_y2002_08.o \
+spll_default_lai_eco2_y2002_09.o spll_default_lai_eco2_y2002_10.o \
+spll_default_lai_eco2_y2002_11.o spll_default_lai_eco2_y2002_12.o \
+spll_default_lai_eco2_y2003_01.o spll_default_lai_eco2_y2003_02.o \
+spll_default_lai_eco2_y2003_03.o spll_default_lai_eco2_y2003_04.o \
+spll_default_lai_eco2_y2003_05.o spll_default_lai_eco2_y2003_06.o \
+spll_default_lai_eco2_y2003_07.o spll_default_lai_eco2_y2003_08.o \
+spll_default_lai_eco2_y2003_09.o spll_default_lai_eco2_y2003_10.o \
+spll_default_lai_eco2_y2003_11.o spll_default_lai_eco2_y2003_12.o \
+spll_default_lai_eco2_y2004_01.o spll_default_lai_eco2_y2004_02.o \
+spll_default_lai_eco2_y2004_03.o spll_default_lai_eco2_y2004_04.o \
+spll_default_lai_eco2_y2004_05.o spll_default_lai_eco2_y2004_06.o \
+spll_default_lai_eco2_y2004_07.o spll_default_lai_eco2_y2004_08.o \
+spll_default_lai_eco2_y2004_09.o spll_default_lai_eco2_y2004_10.o \
+spll_default_lai_eco2_y2004_11.o spll_default_lai_eco2_y2004_12.o \
+spll_default_lai_eco2_y2005_01.o spll_default_lai_eco2_y2005_02.o \
+spll_default_lai_eco2_y2005_03.o spll_default_lai_eco2_y2005_04.o \
+spll_default_lai_eco2_y2005_05.o spll_default_lai_eco2_y2005_06.o \
+spll_default_lai_eco2_y2005_07.o spll_default_lai_eco2_y2005_08.o \
+spll_default_lai_eco2_y2005_09.o spll_default_lai_eco2_y2005_10.o \
+spll_default_lai_eco2_y2005_11.o spll_default_lai_eco2_y2005_12.o \
+spll_default_lai_eco2_y2006_01.o spll_default_lai_eco2_y2006_02.o \
+spll_default_lai_eco2_y2006_03.o spll_default_lai_eco2_y2006_04.o \
+spll_default_lai_eco2_y2006_05.o spll_default_lai_eco2_y2006_06.o \
+spll_default_lai_eco2_y2006_07.o spll_default_lai_eco2_y2006_08.o \
+spll_default_lai_eco2_y2006_09.o spll_default_lai_eco2_y2006_10.o \
+spll_default_lai_eco2_y2006_11.o spll_default_lai_eco2_y2006_12.o
+$(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF1)
 endif
 
 ifeq "$(VER_MPI)" "NOMPI"
