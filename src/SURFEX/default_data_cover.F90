@@ -1,4 +1,4 @@
-SUBROUTINE DEFAULT_DATA_COVER
+SUBROUTINE DEFAULT_DATA_COVER_1
  
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
@@ -1605,6 +1605,17 @@ XDATA_ROOT_DEPTH(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF &
          /)
+
+END SUBROUTINE DEFAULT_DATA_COVER_1
+
+SUBROUTINE DEFAULT_DATA_COVER_2
+
+USE MODD_SURF_PAR
+USE MODD_DATA_COVER_PAR
+USE MODD_DATA_COVER
+
+IMPLICIT NONE
+
 !-------------------------------------------------------------------                                                    
 XDATA_ROOT_DEPTH(:,  7) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3208,4 +3219,4 @@ WHERE(XDATA_VEGTYPE(:, 9)>0.        ) TDATA_REAP(:,  9)%TDATE%DAY =01
 !-------------------------------------------------------------------                                                    
 WHERE(XDATA_VEGTYPE(:, 9)>0.        ) TDATA_REAP(:,  9)%TDATE%MONTH =08
 !-------------------------------------------------------------------                                                    
-END SUBROUTINE DEFAULT_DATA_COVER
+END SUBROUTINE DEFAULT_DATA_COVER_2
