@@ -461,10 +461,12 @@ IF (NRANK==NPIO) THEN
     ZMEAN (:)=0.0
     ZCOUNT(:)=0.0
     DO I=1,NFULL
-      WHERE(ZWORK(I,:)/=XUNDEF)
-        ZMEAN (:)=ZMEAN(:)+ZWORK(I,:)
-        ZCOUNT(:)=ZCOUNT(:)+1.0
-      ENDWHERE
+      DO JL=1,SIZE(ZWORK,2)
+        IF(ZWORK(I,JL)/=XUNDEF) THEN
+          ZMEAN (JL)=ZMEAN(JL)+ZWORK(I,JL)
+          ZCOUNT(JL)=ZCOUNT(JL)+1.0
+        ENDIF
+      ENDDO
     ENDDO
     WHERE(ZCOUNT(:)>0.0)ZMEAN(:)=ZMEAN(:)/ZCOUNT(:)        
     DO JL=1,SIZE(ZWORK,2)
