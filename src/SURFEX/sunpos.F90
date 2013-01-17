@@ -50,7 +50,7 @@
 !              ------------
 !
 USE MODD_CSTS,          ONLY : XPI, XDAY
-USE MODD_SURFEX_OMP, ONLY : NINDX1,NINDX2,NBLOCK,NBLOCKTOT, INIT_DIM, RESET_DIM
+USE MODD_SURFEX_OMP, ONLY : NBLOCK, NBLOCKTOT, INIT_DIM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -103,6 +103,7 @@ REAL                                       :: ZTSIDER, &
                                                 ZCOSDEL !azimuthal angle  
 !                                            
 INTEGER                                    :: JI, JJ, INKPROMA
+INTEGER    :: IINDX1, IINDX2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -147,12 +148,12 @@ ZCOSDEL = COS(ZDECSOL)
 !$ NBLOCK = OMP_GET_THREAD_NUM()
 !
 IF (NBLOCK==NBLOCKTOT) THEN
-  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1,NINDX2)
+  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,IINDX1,IINDX2)
 ELSE
-  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1,NINDX2)
+  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,IINDX1,IINDX2)
 ENDIF
 !
-DO JJ = NINDX1,NINDX2
+DO JJ = IINDX1,IINDX2
 !
 !*       3.    LOADS THE ZLAT, ZLON ARRAYS
 !              ---------------------------
@@ -204,8 +205,6 @@ DO JJ = NINDX1,NINDX2
   ENDIF
 !
 ENDDO
-!
-CALL RESET_DIM(SIZE(PLAT),INKPROMA,NINDX1,NINDX2)
 !
 !$OMP END PARALLEL
 !
