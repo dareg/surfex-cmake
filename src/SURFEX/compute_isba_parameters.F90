@@ -164,7 +164,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef OL
+#ifndef NOMPI
 INCLUDE "mpif.h"
 #endif
 !
