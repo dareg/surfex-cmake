@@ -348,6 +348,11 @@ CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Infiltration","Taux de renouvelleme
 CALL READ_HYP_IN_CSVFILE("Ventilation Mecanique Controlee","Taux de renouvellement d_air",IHYP)
 ALLOCATE(XDESC_V_VENT(NDESC_CODE))
 CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Ventilation Mecanique Controlee","Taux de renouvellement d_air",XDESC_V_VENT)
+!
+!* Greenroof fraction
+CALL READ_HYP_IN_CSVFILE("Toits vegetalises","Implantation",IHYP)
+ALLOCATE(XDESC_GREENROOF(NDESC_CODE))
+CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Toits vegetalises","Implantation",XDESC_GREENROOF)
 !-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
