@@ -47,7 +47,7 @@
 !            -----------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM_GRID_n,  ONLY : CGRID, XGRID_PAR, NGRID_PAR
+USE MODD_SURF_ATM_GRID_n,  ONLY : CGRID, XGRID_PAR, NGRID_PAR, NNEAR
 USE MODD_SURF_ATM_n,       ONLY : NSIZE_FULL, NDIM_FULL
 !
 USE MODI_GET_INTERP_HALO
@@ -89,9 +89,6 @@ REAL, DIMENSION(0:KNPTS,SIZE(PFIELD,2)) :: ZNVAL  ! 3 corresponding field values
 REAL, DIMENSION(SIZE(PFIELD,2))         :: ZSUM
 !
 INTEGER                          :: INEAR_NBR      ! number of points to scan
-INTEGER, DIMENSION(:,:), ALLOCATABLE :: INEAR      ! points to scan
-INTEGER                              :: ILIST      ! number of points to interpolate
-LOGICAL, DIMENSION(:), ALLOCATABLE   :: GLIST      ! list   of points to interpolate
 INTEGER                          :: JLIST          ! loop counter on points to interpolate
 INTEGER                          :: ICOUNT         ! counter
 INTEGER                          :: INPTS
@@ -108,32 +105,33 @@ CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
 !
 INEAR_NBR = (2*IHALO+1)**2
 !
-ALLOCATE(GLIST(IL))
-GLIST = (KCODE==0)
-ILIST = COUNT(GLIST)
-ALLOCATE(INEAR(ILIST,INEAR_NBR))
-!
 !
 ALLOCATE(IINDEX(IL))
 IINDEX(:) = 0
 !
 !
-CALL GET_NEAR_MESHES(CGRID,NGRID_PAR,NSIZE_FULL,XGRID_PAR,INEAR_NBR,GLIST,ILIST,INEAR)
+IF (.NOT.ASSOCIATED(NNEAR)) THEN
+  ALLOCATE(NNEAR(IL,INEAR_NBR))
+  NNEAR(:,:) = 0
+  print*,'get_near_meshes in',shape(NNEAR)
+  CALL GET_NEAR_MESHES(CGRID,NGRID_PAR,NSIZE_FULL,XGRID_PAR,INEAR_NBR,NNEAR)
+  print*,'get_near_meshes out'
+ENDIF
 !
-JLIST = 0
 DO JL=1,IL
+
   IF (KCODE(JL)/=0) CYCLE
-  JLIST = JLIST + 1
+
   ZNDIST (1:KNPTS) = 1.E20
   ZNDIST (0) = 0.
   ZNVAL(0:KNPTS,:) = 0.
   !
   ICOUNT = 0
   DO JD=1,INEAR_NBR
-    IF (INEAR(JLIST,JD)>0) THEN
-      IF (KCODE(INEAR(JLIST,JD))>0) THEN  
+    IF (NNEAR(JL,JD)>0) THEN
+      IF (KCODE(NNEAR(JL,JD))>0) THEN  
         ICOUNT = ICOUNT+1
-        IINDEX(ICOUNT) = INEAR(JLIST,JD)
+        IINDEX(ICOUNT) = NNEAR(JL,JD)
       END IF
     END IF
   END DO
