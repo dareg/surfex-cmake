@@ -356,7 +356,6 @@ PABS_SW_ROOF      (:) = 0.
 PABS_SW_ROAD      (:) = 0.
 PABS_SW_WALL_A    (:) = 0.
 PABS_SW_WALL_B    (:) = 0.
-ZTRAN_WIN         (:) = PTRAN_WIN(:)
 PABS_SW_GARDEN    (:) = 0.
 PABS_SW_GREENROOF (:) = 0.
 PABS_SW_SNOW_ROOF (:) = 0.
@@ -507,6 +506,8 @@ ENDDO
 !              -------------------------------------
 !
 IF (HBEM=='BEM') THEN
+    !
+    ZTRAN_WIN         (:) = PTRAN_WIN(:)
     !
     G_EFF_SHAD(:) = OSHADE(:)                              .AND. &
           (ZDIR_SW_WALL(:) + ZSCA_SW_WALL(:) > XWIN_SW_MAX) 

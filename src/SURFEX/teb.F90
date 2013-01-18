@@ -708,16 +708,25 @@ ZTS_ROOF    (:)=PT_ROOF     (:,1)
 !*      1.4    load on indoor walls
 !              -------------------------
 !
-ZLOAD_IN_ROOF = PF_FLOOR_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
+IF (HBEM=='BEM') THEN
+  !
+  ZLOAD_IN_ROOF = PF_FLOOR_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
            / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD ) ! W/m² [ROOF]
-ZLOAD_IN_FLOOR = PF_FLOOR_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
+  ZLOAD_IN_FLOOR = PF_FLOOR_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
            / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD )
-ZLOAD_IN_MASS = PF_MASS_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
+  ZLOAD_IN_MASS = PF_MASS_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
            / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD )
-ZLOAD_IN_WALL = PF_WALL_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
+  ZLOAD_IN_WALL = PF_WALL_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
            / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD )
-ZLOAD_IN_WIN = PF_WIN_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
+  ZLOAD_IN_WIN = PF_WIN_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
            / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD )
+ELSE
+  ZLOAD_IN_ROOF = 0.
+  ZLOAD_IN_FLOOR = 0.
+  ZLOAD_IN_MASS = 0.
+  ZLOAD_IN_WALL = 0.
+  ZLOAD_IN_WIN = 0.
+ENDIF
 !-------------------------------------------------------------------------------
 !
 !*      2.     Snow-covered surfaces relative effects
@@ -874,6 +883,7 @@ CALL ROAD_LAYER_E_BUDGET(PT_ROAD, PTSTEP, PHC_ROAD, PTC_ROAD, PD_ROAD,       &
                          PEMIS_ROAD, PEMIT_LW_ROAD, ZDQS_ROAD, PABS_LW_ROAD, &
                          PH_ROAD, PLEW_ROAD, ZIMB_ROAD, PRR                  )
 !
+print*,'teb2 ',PH_ROAD(20)
 CALL FACADE_E_BUDGET(HWALL_OPT, HBEM,                                    &
                      PT_WALL_A, PT_WALL_B, PTSTEP,                       &
                      PHC_WALL, PTC_WALL, PD_WALL,                        &
@@ -1004,6 +1014,7 @@ CALL URBAN_FLUXES   (HIMPLICIT_WIND, OCANOPY, PT_CANYON,                      &
                      PGFLUX_BLT, ZMELT_BLT, PQF_BLD, PFLX_BLD, PDQS_TOWN,     &
                      PQF_TOWN, PUSTAR_TOWN, PHVAC_COOL, PHVAC_HEAT            )
 !
+print*,'teb3 ',PH_ROAD(20)
 !
 ! Water transfer from snow reservoir to water reservoir in case of snow melt
 !
