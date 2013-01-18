@@ -113,9 +113,7 @@ IINDEX(:) = 0
 IF (.NOT.ASSOCIATED(NNEAR)) THEN
   ALLOCATE(NNEAR(IL,INEAR_NBR))
   NNEAR(:,:) = 0
-  print*,'get_near_meshes in',shape(NNEAR)
   CALL GET_NEAR_MESHES(CGRID,NGRID_PAR,NSIZE_FULL,XGRID_PAR,INEAR_NBR,NNEAR)
-  print*,'get_near_meshes out'
 ENDIF
 !
 DO JL=1,IL
