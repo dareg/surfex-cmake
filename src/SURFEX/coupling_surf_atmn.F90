@@ -80,7 +80,7 @@ USE MODI_COUPLING_TOWN_n
 !
 IMPLICIT NONE
 !
-#ifdef OL
+#ifndef NOMPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -264,7 +264,7 @@ CALL RW_PRECIP_n(HPROGRAM,PRAIN,PSNOW)
 ! Call ALMA interfaces for sea, water, nature and town here...
 !--------------------------------------------------------------------------------------
 !
-#ifdef OL
+#ifndef NOMPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -284,7 +284,7 @@ IF(GSEA)THEN
 !
 ENDIF
 !
-#ifdef OL
+#ifndef NOMPI
 XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
 XTIME0 = MPI_WTIME()
 #endif
@@ -303,7 +303,7 @@ IF(GWATER)THEN
 !
 ENDIF 
 !
-#ifdef OL
+#ifndef NOMPI
 XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
 XTIME0 = MPI_WTIME()
 #endif
@@ -322,7 +322,7 @@ IF(GNATURE)THEN
 !
 ENDIF 
 !
-#ifdef OL
+#ifndef NOMPI
 XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
 XTIME0 = MPI_WTIME()
 #endif
@@ -341,7 +341,7 @@ IF(GTOWN)THEN
 !
 ENDIF 
 !
-#ifdef OL
+#ifndef NOMPI
 XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
 #endif
 !
