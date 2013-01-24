@@ -232,6 +232,9 @@ IF (GMASK) THEN
                        PINCREASE, PTURNOVER                               )
     CALL LAIGAIN(ZBSLAI_NITRO, PLAIMIN, PVEG, ZBIOMASS_LEAF, PLAI, PANDAY)
   ENDIF
+  ! CASE CPHOTO=AST reinitialise  PANDAY and PANFM 
+  PANDAY=0.0
+  PANFM =0.0  
 ENDIF
 !
 !
