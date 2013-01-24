@@ -604,7 +604,6 @@ REAL, DIMENSION(SIZE(PTA)) :: ZWALL_O_GRND        ! wall surface over (road+gree
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZTS_GARDEN          ! surface temperature of urban green areas at t
 REAL, DIMENSION(SIZE(PTA)) :: ZTS_GREENROOF       ! surface temperature of urban greenroofs at t
-REAL, DIMENSION(SIZE(PTA)) :: ZCOND_GR            ! thermal conductivity of greenroof bottom layer
 REAL, DIMENSION(SIZE(PTA)) :: ZMTC_O_GR_R1        ! mean thermal conductivity over distance 
 !                                                 ! between two layers (bottom GR & roof)
 !
@@ -903,20 +902,13 @@ IF (LGREENROOF) THEN
                 PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF,PGFLUX_GREENROOF,           &
                 ZSFCO2_GREENROOF,ZEVAP_GREENROOF, ZUW_GREENROOF,                     &
                 PAC_GREENROOF,ZQSAT_GREENROOF,ZTS_GREENROOF,                         &
-                ZAC_AGG_GREENROOF, ZHU_AGG_GREENROOF,ZCOND_GR,PRUNOFF_GREENROOF,     &
-                PDRAIN_GREENROOF                                                     )  
+                ZAC_AGG_GREENROOF, ZHU_AGG_GREENROOF,PG_GREENROOF_ROOF,              &
+                PRUNOFF_GREENROOF, PDRAIN_GREENROOF                                  )  
 !
   PAC_GREENROOF_WAT(:) = PAC_GREENROOF(:)
   PABS_SW_GREENROOF(:) = (1.-ZALB_GREENROOF(:)) * (ZDIR_SW+ZSCA_SW)
   PABS_LW_GREENROOF(:) = ZEMIS_GREENROOF * PLW_RAD - XSTEFAN * ZEMIS_GREENROOF * ZTS_GREENROOF**4
 
-  ! estimation of heat conduction flux between bottom of greenroof and roof layer 1
-  ZMTC_O_GR_R1 (:) = 2. * ZCOND_GR(:) / (XDG(:,NLAYER_GR)-XDG(:,NLAYER_GR-1))  
-  !                        
-  PG_GREENROOF_ROOF (:) = ZMTC_O_GR_R1 (:) * (XTG(:,NLAYER_GR) - PT_ROOF(:,1))
-  ! mieux vaudrait calculer ce flux avec le TG recalculé dans soil_heatdif : A FAIRE 
-  ! vérifier que bilan d'énergie fermé 
-!
 ELSE
 !
  PRN_GREENROOF    (:) = 0.

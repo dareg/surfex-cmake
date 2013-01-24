@@ -79,6 +79,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !
+!*      1.     Set physical values for points where there is no garden
+!              -------------------------------------------------------
+!
+! This way, ISBA can run without problem for these points
+!
+CALL FLAG_TEB_GARDEN_n(1)
+!
+!
+!*      2.     Computes several properties of gardens
+!              --------------------------------------
+!
 CALL ISBA_PROPERTIES(CISBA, LTR_ML, TSNOW, 1,                            &
                      PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                   &
                      XALBNIR(:), XALBVIS(:), XALBUV(:),                  &

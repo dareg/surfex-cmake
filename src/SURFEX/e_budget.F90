@@ -13,10 +13,11 @@
                             PGRNDFLUX, PSMELTFLUX, PSNOW_THRUFAL,                &
                             PD_G, PDZG, PDZDIF, PSOILCONDZ, PSOILHCAPZ,          &
                             PALBT, PEMIST, PQSAT, PDQSAT,                        &
-                            PFROZEN1, PTDEEP, PGAMMAT,                           &
+                            PFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,               &
                             PTA_IC, PQA_IC, PUSTAR2_IC,                          &
                             PSNOWFREE_ALB_VEG, PPSNV_A,PSNOWFREE_ALB_SOIL,       &
-                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT    )  
+                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT,   &
+                            PDEEP_FLUX                                           )  
 !     ##########################################################################
 !
 !!****  *E_BUDGET*  
@@ -78,6 +79,7 @@
 !!      (A.Boone)            03/10 Add delta fnctions to force LEG ans LEGI=0
 !!                                 when hug(i)Qsat < Qa and Qsat > Qa
 !!      (B. Decharme)        09/12 new wind implicitation
+!!      (V. Masson)          01/13 Deep soil flux implicitation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -172,11 +174,17 @@ REAL, DIMENSION(:), INTENT(IN)   :: PPSNV, PPSNG
 REAL, DIMENSION(:), INTENT(IN)     :: PFROZEN1
 !                                     PFROZEN1 = ice fraction in supurficial soil
 !
-REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP, PGAMMAT
-!                                     PTDEEP   = Deep soil temperature (prescribed)
-!                                                which models heating/cooling from
-!                                                below the diurnal wave penetration
-!                                                (surface temperature) depth.
+REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP_A, PTDEEP_B, PGAMMAT
+!                                      PTDEEP_A = Deep soil temperature
+!                                                 coefficient depending on flux
+!                                      PTDEEP_B = Deep soil temperature (prescribed)
+!                                               which models heating/cooling from
+!                                               below the diurnal wave penetration
+!                                               (surface temperature) depth. If it
+!                                               is FLAGGED as undefined, then the zero
+!                                               flux lower BC is applied.
+!                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+!                                              (with PDEEP_FLUX in W/m2)
 !                                     PGAMMAT  = Deep soil heat transfer coefficient:
 !                                                assuming homogeneous soil so that
 !                                                this can be prescribed in units of 
@@ -245,6 +253,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PDELTAT
 !                                    PDELTAT = change in temperature over the time
 !                                              step before adjustment owing to phase 
 !                                              changes (K)
+REAL, DIMENSION(:), INTENT(OUT)   :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
 !
 !*      0.2    declarations of local variables
 !
@@ -593,8 +602,8 @@ IF(HISBA == 'DIF')THEN
 !
 ! Determine the soil temperatures:
 !
-   CALL SOIL_HEATDIF(PTSTEP,PD_G,PDZG,PDZDIF,PSOILCONDZ,      &
-                     PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP,PTG  )  
+   CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
+                     PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
 !
 ! Compute the change in temperature over the time
 ! step before adjustment owing to phase changes (K)
@@ -607,14 +616,14 @@ ELSE
 !
    IF(OTEMP_ARP)THEN
 !
-      CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP,PSODELX,PTG)
+      CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP_B,PSODELX,PTG)
 !
    ELSE
 !
       PTG(:,1) = ( PTG(:,1)*ZB(:) + ZC(:) ) / ZA(:)
 !
-      WHERE(PTDEEP(:) /= XUNDEF .AND. PGAMMAT(:) /= XUNDEF)
-            PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*(PTG(:,1) + PGAMMAT(:)*PTDEEP(:)))/ &
+      WHERE(PTDEEP_B(:) /= XUNDEF .AND. PGAMMAT(:) /= XUNDEF)
+            PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*(PTG(:,1) + PGAMMAT(:)*PTDEEP_B(:)))/ &
                          (1.+(PTSTEP/XDAY)*(1.0+PGAMMAT(:)))  
       ELSEWHERE
             PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*PTG(:,1))/                          &

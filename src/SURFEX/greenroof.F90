@@ -7,7 +7,7 @@
                 PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF,PGFLUX_GREENROOF,           &
                 PSFCO2,PEVAP_GREENROOF, PUW_GREENROOF,                               &
                 PAC_GREENROOF,PQSAT_GREENROOF,PTS_GREENROOF,                         &
-                PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,PCOND_GR,                       &
+                PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,PDEEP_FLUX,                     &
                 PRUNOFF_GREENROOF, PDRAIN_GREENROOF                                  )  
 !   ##################################################################################
 !
@@ -47,13 +47,14 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_SURF_PAR,             ONLY: XUNDEF
 USE MODD_TYPE_DATE_SURF,       ONLY: DATE_TIME
 USE MODD_CSTS,                 ONLY: XCPD
 USE MODD_TEB_n,                ONLY: LECOCLIMAP, XCOVER, XT_ROOF
 USE MODD_TEB_GRID_n,        ONLY: XLAT, XLON
 USE MODD_TEB_VEG_n,            ONLY: CPHOTO, CC1DRY, NNBIOMASS, CRESPSL, &
                                      CALBEDO, CSOILFRZ, CDIFSFCOND, CCPSURF,  &
-                                     CSNOWRES, XCGMAX
+                                     CSNOWRES, XCGMAX, CISBA
 USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
                                      CISBA_GR, CRUNOFF_GR, CSCOND_GR,         &
                                      CKSAT_GR, CHORT_GR,                      &
@@ -65,7 +66,7 @@ USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
                                      XZ0, XZ0_O_Z0H, XRUNOFFB_GR, XWDRAIN_GR, &
                                      XCGSAT, XC1SAT, XC2REF, XC3, XC4B,       &
                                      XC4REF, XACOEF, XPCOEF, XTAUICE,         &
-                                     XTDEEP, XGAMMAT, XWR, XRESA, XAN,        &
+                                     XWR, XRESA, XAN,                         &
                                      XANFM, XANDAY, XABC, XPOI,               &
                                      XFZERO, XEPSO, XGAMM, XQDGAMM,           &
                                      XGMES, XQDGMES, XT1GMES, XT2GMES,        &
@@ -93,7 +94,9 @@ USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE_GREENROOF
 USE MODI_VEGETATION_EVOL
+USE MODI_CARBON_EVOL
 USE MODE_THERMOS
+USE MODI_ROOF_IMPL_COEF
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -143,7 +146,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT_GREENROOF       ! saturation humidi
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PTS_GREENROOF         ! greenroof radiative surface temp. (snow free)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG_GREENROOF     ! aggreg. aeodynamic resistance for greenroofs for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG_GREENROOF     ! aggreg. relative humidity for greenroofs for latent heat flux
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PCOND_GR              ! Thermal conductivity of the bottom layer of the greenroof
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GREENROOF     ! greenroof surface runoff
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GREENROOF      ! greenroof total (vertical) drainage
 !
@@ -168,8 +171,6 @@ REAL, DIMENSION(SIZE(PPS),NNBIOMASS) :: ZRESP_BIOMASS_INST  ! instantaneous biom
 !
 REAL, DIMENSION(SIZE(PPS))           :: ZTA          ! estimate of air temperature at future time
 !                                                    ! step as if modified by ISBA flux alone.
-REAL, DIMENSION(SIZE(PPS),SIZE(XTG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
-!                                                    ! profile  [W/(m K)]
 !
 !   desactivated diag
 !
@@ -250,11 +251,9 @@ REAL, DIMENSION(SIZE(PPS)) :: ZLAI_EFFC
 REAL, DIMENSION(SIZE(PPS)) :: ZMUS
 REAL, DIMENSION(SIZE(PPS)) :: ZFAPAR_BS
 REAL, DIMENSION(SIZE(PPS)) :: ZFAPIR_BS
-REAL, DIMENSION(SIZE(PPS)) :: ZDFAPARC
-REAL, DIMENSION(SIZE(PPS)) :: ZDFAPIRC
-REAL, DIMENSION(SIZE(PPS)) :: ZDLAI_EFFC
 REAL, DIMENSION(SIZE(PPS)) :: ZIRRIG_FLUX
-REAL, DIMENSION(0,0)         :: ZLITTER, ZSOILCARB, ZLIGNIN_STRUC, ZTURNOVER
+REAL, DIMENSION(0,0,0)     :: ZLITTER
+REAL, DIMENSION(0,0)       :: ZSOILCARB, ZLIGNIN_STRUC, ZTURNOVER
 !
 !  surfaces relative fractions
 !
@@ -280,6 +279,12 @@ REAL, DIMENSION(SIZE(PPS)) :: ZTHRESHOLDSPT
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIGATE
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIDAY
 !
+!  variables for deep soil
+!
+REAL, DIMENSION(SIZE(PPS)) :: ZGAMMAT  ! not used
+REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
+REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_B
+!
 REAL, DIMENSION(0) :: ZAOSIP  ! A/S for increasing x
 REAL, DIMENSION(0) :: ZAOSIM  ! A/S for decreasing x
 REAL, DIMENSION(0) :: ZAOSJP  ! A/S for increasing y
@@ -300,8 +305,6 @@ TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 INTEGER                    :: ILU
 !
 
-REAL, DIMENSION(0,1) :: ZALPHA,ZNVG,ZMVG,ZLVG,ZWRESVG
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -349,6 +352,11 @@ ZTHRESHOLDSPT = 0.
 GIRRIGATE     = .FALSE.
 GIRRIDAY      = .FALSE.
 !
+!* deep soil implicitation with roof
+!
+ZGAMMAT = XUNDEF
+CALL ROOF_IMPL_COEF(PTSTEP,ZTDEEP_A,ZTDEEP_B)
+!
 !-------------------------------------------------------------------------------
 !
 !*      9.     Treatment of green areas
@@ -373,7 +381,7 @@ CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR, CSOC_GR, &
           XSNOWFREE_ALB, XWRMAX_CF, XVEG, XLAI, XEMIS, XZ0,           &
           XZ0/XZ0_O_Z0H, XVEGTYPE, XZ0, XRUNOFFB_GR, XCGSAT, XC1SAT,     &
           XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF, XTAUICE, XWDRAIN_GR,&
-          XT_ROOF(:,1), XGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,            &
+          ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &
           XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL, ZIRRIG, ZWATSUP,     &
           ZTHRESHOLDSPT, GIRRIGATE, GIRRIDAY, LSTRESS, XGC, XF2I,     &
           XDMAX, XAH, XBH, PCO2, XGMES, XPOI, XFZERO, XEPSO, XGAMM,   &
@@ -400,9 +408,8 @@ CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR, CSOC_GR, &
           PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          ZSOILCONDZ  )  
+          PDEEP_FLUX                                                  )  
 !
-PCOND_GR(:)          = ZSOILCONDZ(:,NLAYER_GR)
 PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
 PDRAIN_GREENROOF(:)  = ZDRAIN(:)
 
@@ -415,10 +422,11 @@ IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
 !
 PSFCO2(:)=0.
 !
-IF (CPHOTO/='NON' .AND. CRESPSL/='NON') THEN
+IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
   ! faire intervenir le type de vegetation du greenroof ? (CTYP_GR)
-  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                         &
+  CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, 1,               &
                      PRHOA, XTG, XWG, XWFC, XWWILT, XWSAT, XSAND_GR,&
+                     XDG, XDZG, NWG_LAYER,                          &                   
                      XRE25, XLAI, ZRESP_BIOMASS_INST, ZTURNOVER,    &
                      ZLITTER, ZLIGNIN_STRUC , ZSOILCARB,            &
                      ZRESP_AUTO, ZRESP_ECO                          )  

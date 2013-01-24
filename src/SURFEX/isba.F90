@@ -11,7 +11,8 @@
                       PALBVIS_TSOIL, PALB, PWRMAX_CF, PVEG, PLAI, PEMIS,         &
                       PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PVEGTYPE, PZ0EFF, PRUNOFFB, &
                       PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PC4REF, PACOEF, PPCOEF, &
-                      PTAUICE, PWDRAIN, PTDEEP, PGAMMAT, PPSN, PPSNG, PPSNV,     &
+                      PTAUICE, PWDRAIN, PTDEEP_A, PTDEEP_B, PGAMMAT,             &
+                      PPSN, PPSNG, PPSNV,                                        &
                       PPSNV_A, PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL, PIRRIG,    &
                       PWATSUP, PTHRESHOLD, LIRRIGATE, LIRRIDAY, OSTRESSDEF, PGC, &
                       PF2I, PDMAX, PAH, PBH, PCSP, PGMES, PPOI, PFZERO, PEPSO,   &
@@ -37,7 +38,7 @@
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
                       PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
-                      PIRRIG_FLUX, PSOILCONDZ                                    )                     
+                      PIRRIG_FLUX, PDEEP_FLUX                                    )                     
 !     ##########################################################################
 !
 !
@@ -344,10 +345,18 @@ REAL, DIMENSION(:), INTENT(IN)  :: PTAUICE    ! characteristic time scale for ph
 REAL, DIMENSION(:), INTENT(IN)  :: PWDRAIN    ! minimum Wg for drainage (m3/m3)
 !
 !
-REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP     ! Deep soil temperature (prescribed)
-!                                             ! which models heating/cooling from
-!                                             ! below the diurnal wave penetration
-!                                             ! (surface temperature) depth.
+REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP_A, PTDEEP_B     
+                                              ! Deep soil temperature (prescribed)
+!                                      PTDEEP_A = Deep soil temperature
+!                                                 coefficient depending on flux
+!                                      PTDEEP_B = Deep soil temperature (prescribed)
+!                                               which models heating/cooling from
+!                                               below the diurnal wave penetration
+!                                               (surface temperature) depth. If it
+!                                               is FLAGGED as undefined, then the zero
+!                                               flux lower BC is applied.
+!                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+!                                              (with PDEEP_FLUX in W/m2)
 REAL, DIMENSION(:), INTENT(IN)  :: PGAMMAT    ! Deep soil heat transfer coefficient:
 !                                             ! assuming homogeneous soil so that
 !                                             ! this can be prescribed in units of 
@@ -632,7 +641,8 @@ REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR    ! Fapir of vegetation
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPAR_BS ! Fapar of bare soil
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR_BS ! Fapir of bare soil
 !
-REAL, DIMENSION(:,:),INTENT(OUT) ::  PSOILCONDZ ! ISBA-DF Soil conductivity profile  [W/(m K)]
+REAL, DIMENSION(:),     INTENT(OUT) :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+
 !
 !*      0.2    declarations of local variables
 !
@@ -690,6 +700,8 @@ REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZFRAC_SUN  ! fraction of sunlit leaves
 !                                                              
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILHCAPZ ! ISBA-DF Soil heat capacity 
 !                                                      ! profile [J/(m3 K)]
+REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
+!                                                      ! profile  [W/(m K)]
 !
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZF2WGHT    ! water stress factor
 !
@@ -733,7 +745,7 @@ ZALBT       (:) = XUNDEF
 ZRI3L       (:) = XUNDEF
 !
 ZSOILHCAPZ(:,:) = XUNDEF
-PSOILCONDZ(:,:) = XUNDEF
+ZSOILCONDZ(:,:) = XUNDEF
 ZF2WGHT   (:,:) = XUNDEF
 !
 PRS         (:)   = 0.0
@@ -765,7 +777,7 @@ ELSE
 !
    CALL SOILDIF (HSCOND, HDIFSFCOND, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
      PCG, PCGMAX, PCT, ZFROZEN1, PD_G, PTG, PWG, PWGI, KWG_LAYER, PHCAPSOIL,    &
-     PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, ZSOILHCAPZ        )
+     PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ        )
 !
 ENDIF
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -777,7 +789,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,         
            TPTIME, PTSTEP,                                                      &
            PVEGTYPE, PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                   &
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                          &
-           PTG(:,1), PCG, PCT, PSOILCONDZ(:,1),                                 &
+           PTG(:,1), PCG, PCT, ZSOILCONDZ(:,1),                                 &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR, PSR,                    &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,                               &
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G(:,1),       &
@@ -867,10 +879,11 @@ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             
         PTA, PQA, PPS, PRHOA, PEXNS,PEXNA, PCPS, PLVTT, PLSTT,  PVEG,           &
         PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, PEMIS, PALB, PRESA,          &
         PCT, PPSN, PPSNV, PPSNG, PGRNDFLUX, PSMELTFLUX, ZSNOW_THRUFAL,          &
-        PD_G, PDZG, PDZDIF, PSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
-        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP, PGAMMAT, ZTA_IC, ZQA_IC, ZUSTAR2_IC,   &
+        PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
+        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
+        ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
         PSNOWFREE_ALB_VEG, PPSNV_A, PSNOWFREE_ALB_SOIL,                         &
-        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT)  
+        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT, PDEEP_FLUX           )
 !
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -894,7 +907,7 @@ CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP, PTSTEP, PSODELX,       
            ZALBT, ZEMIST, ZQSAT, ZDQSAT, ZSNOW_THRUFAL,                         &
            PRN, PH, PLE, PLEG, PLEGI, PLEV, PLES, PLER, PLETR, PEVAP, PGFLUX,   &
            PMELTADV, PMELT, PRESTORE, PUSTAR, ZTS_RAD, ZDWGI1, ZDWGI2, ZDELTAT, &
-           PSOILCONDZ, ZSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF, PD_G, PDZG, PTG,    &
+           ZSOILCONDZ, ZSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF, PD_G, PDZG, PTG,    &
            PWGI, PWG, KWG_LAYER, PSRSFC, PPSNV_A, PFFG, PFFV, PFF, PFFROZEN,    &
            PLE_FLOOD, PLEI_FLOOD, PSNOWTEMP(:,1), ZTDIURN                       )  
 !

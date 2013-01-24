@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSION, PCO2, PRHOA)
 !#############################################################
 !
 !!****  *INIT_TEB_GARDEN_PGD_n* - routine to initialize ISBA
@@ -93,6 +93,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
+LOGICAL,                            INTENT(IN)  :: OREAD_PGD ! flag to read PGD fields in the file
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSV       ! number of scalars
 CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
@@ -130,12 +131,13 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !* allocation of urban green area variables
 !
-CALL ALLOCATE_TEB_GARDEN_PGD(KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
+CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
 !
 !
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
+IF (OREAD_PGD) &
 CALL READ_PGD_TEB_GARDEN_n(HPROGRAM,KVERSION)
 !
 !

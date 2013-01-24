@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE ALLOCATE_TEB_GARDEN_PGD(KLU,KVEGTYPE,KGROUND_LAYER, KDIMTAB)  
+    SUBROUTINE ALLOCATE_TEB_GARDEN_PGD(OALLOC,KLU,KVEGTYPE,KGROUND_LAYER, KDIMTAB)  
 !   ##########################################################################
 !
 USE MODD_TEB_GARDEN_n
@@ -10,6 +10,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+LOGICAL, INTENT(IN) :: OALLOC ! True if constant PGD fields must be allocated
 INTEGER, INTENT(IN) :: KLU
 INTEGER, INTENT(IN) :: KVEGTYPE
 INTEGER, INTENT(IN) :: KGROUND_LAYER
@@ -18,18 +19,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
-! Mask and number of grid elements containing tiles:
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN_PGD',0,ZHOOK_HANDLE)
-ALLOCATE(XVEGTYPE                (KLU,KVEGTYPE            ))
 !
 !-------------------------------------------------------------------------------
 !
-! Input Parameters:
+! - Physiographic field that can evolve prognostically
 !
-! - vegetation + bare soil:
-!
-ALLOCATE(XZ0_O_Z0H               (KLU                     )) 
+ALLOCATE(XLAI                    (KLU                     ))
+ALLOCATE(XVEG                    (KLU                     )) 
 ALLOCATE(XEMIS                   (KLU                     )) 
 ALLOCATE(XZ0                     (KLU                     )) 
 !
@@ -39,9 +37,26 @@ ALLOCATE(XALBNIR_VEG             (KLU                     ))
 ALLOCATE(XALBVIS_VEG             (KLU                     )) 
 ALLOCATE(XALBUV_VEG              (KLU                     )) 
 !
+IF (.NOT. OALLOC) THEN
+  IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN_PGD',1,ZHOOK_HANDLE)
+  RETURN
+END IF
+!-------------------------------------------------------------------------------
+!
+! Mask and number of grid elements containing tiles:
+ALLOCATE(XVEGTYPE                (KLU,KVEGTYPE            ))
+!
+!-------------------------------------------------------------------------------
+!
+! Input Parameters:
+!
+! - vegetation + bare soil:
+!
+ALLOCATE(XZ0_O_Z0H               (KLU                     )) 
+
+!
 ! - vegetation: default option (Jarvis) and general parameters:
 !
-ALLOCATE(XVEG                    (KLU                     )) 
 ALLOCATE(XWRMAX_CF               (KLU                     )) 
 ALLOCATE(XGAMMA                  (KLU                     )) 
 ALLOCATE(XCV                     (KLU                     )) 
@@ -51,12 +66,6 @@ ALLOCATE(XROOTFRAC               (KLU,KGROUND_LAYER       ))
 ALLOCATE(NWG_LAYER               (KLU                     ))
 ALLOCATE(XDROOT                  (KLU                     ))
 ALLOCATE(XDG2                    (KLU                     ))
-!
-!-------------------------------------------------------------------------------
-!
-! - LAI: Physiographic prescribed field (YPHOTO='NON', 'AGS' or 'LST')
-!
-ALLOCATE(XLAI                    (KLU                    ))
 !
 !-------------------------------------------------------------------------------
 !

@@ -139,7 +139,7 @@ CALL PACK_PGD(HPROGRAM, 'TOWN  ',                    &
 !             -------------------
 !
 LECOCLIMAP = OECOCLIMAP
-CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,CBLD_ATYPE)
+CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,LGREENROOF,CBLD_ATYPE)
 !
 !-------------------------------------------------------------------------------
 !

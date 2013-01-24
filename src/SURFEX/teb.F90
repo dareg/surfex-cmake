@@ -883,7 +883,6 @@ CALL ROAD_LAYER_E_BUDGET(PT_ROAD, PTSTEP, PHC_ROAD, PTC_ROAD, PD_ROAD,       &
                          PEMIS_ROAD, PEMIT_LW_ROAD, ZDQS_ROAD, PABS_LW_ROAD, &
                          PH_ROAD, PLEW_ROAD, ZIMB_ROAD, PRR                  )
 !
-print*,'teb2 ',PH_ROAD(20)
 CALL FACADE_E_BUDGET(HWALL_OPT, HBEM,                                    &
                      PT_WALL_A, PT_WALL_B, PTSTEP,                       &
                      PHC_WALL, PTC_WALL, PD_WALL,                        &
@@ -1014,7 +1013,6 @@ CALL URBAN_FLUXES   (HIMPLICIT_WIND, OCANOPY, PT_CANYON,                      &
                      PGFLUX_BLT, ZMELT_BLT, PQF_BLD, PFLX_BLD, PDQS_TOWN,     &
                      PQF_TOWN, PUSTAR_TOWN, PHVAC_COOL, PHVAC_HEAT            )
 !
-print*,'teb3 ',PH_ROAD(20)
 !
 ! Water transfer from snow reservoir to water reservoir in case of snow melt
 !

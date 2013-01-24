@@ -41,7 +41,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original    05/2009
-!!    C. de Munck    10/2011  added local variable ZSOILCONDZ for ISBA call
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -64,7 +63,7 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XZ0, XZ0_O_Z0H, XRUNOFFB, XWDRAIN,       &
                                   XCGSAT, XC1SAT, XC2REF, XC3, XC4B,       &
                                   XC4REF, XACOEF, XPCOEF, XTAUICE,         &
-                                  XTDEEP, XGAMMAT, XWR, XRESA, XAN,        &
+                                  XWR, XRESA, XAN,                         &
                                   XANFM, XANDAY, XABC, XPOI,               &
                                   XFZERO, XEPSO, XGAMM, XQDGAMM,           &
                                   XGMES, XQDGMES, XT1GMES, XT2GMES,        &
@@ -81,8 +80,8 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XALBNIR, XALBVIS, XALBUV,                &
                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XALBNIR_TVEG, XALBVIS_TVEG,    &
-                                  XALBNIR_TSOIL, XALBVIS_TSOIL,  &                                  
+                                  XALBNIR_TVEG, XALBVIS_TVEG,              &
+                                  XALBNIR_TSOIL, XALBVIS_TSOIL,            & 
                                   XLE, XANF, XSAND, XSOILWGHT,             &
                                   XPSN, XPSNV, XPSNG, XPSNV_A,             &
                                   XLAI_EFFC, XFAPARC, XFAPIRC, XMUS,       &
@@ -169,8 +168,7 @@ REAL, DIMENSION(SIZE(PPS),NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
 !                                 ! step as if modified by ISBA flux alone.
-REAL, DIMENSION(SIZE(PPS),SIZE(XTG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
-!                                                      ! profile  [W/(m K)]
+REAL, DIMENSION(SIZE(PPS)) :: ZDEEP_FLUX ! heat flux at base of the deep soil
 !
 !   desactivated diag
 !
@@ -282,6 +280,11 @@ REAL, DIMENSION(SIZE(PPS)) :: ZTHRESHOLDSPT
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIGATE
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIDAY
 !
+!  variables for deep soil temperature
+REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
+REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_B
+REAL, DIMENSION(SIZE(PPS)) :: ZGAMMAT
+!
 REAL, DIMENSION(0) :: ZAOSIP  ! A/S for increasing x
 REAL, DIMENSION(0) :: ZAOSIM  ! A/S for decreasing x
 REAL, DIMENSION(0) :: ZAOSJP  ! A/S for increasing y
@@ -350,13 +353,9 @@ ZTHRESHOLDSPT = 0.
 GIRRIGATE     = .FALSE.
 GIRRIDAY      = .FALSE.
 !
-!
-!*      1.3    Set physical values for points where there is no garden
-!              -------------------------------------------------------
-!
-! This way, ISBA can run without problem for these points
-!
-CALL FLAG_TEB_GARDEN_n(1)
+ZTDEEP_A = XUNDEF
+ZTDEEP_B = XUNDEF
+ZGAMMAT  = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -374,17 +373,17 @@ CALL FLAG_TEB_GARDEN_n(1)
 CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT,  &
           CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ,  &
           CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,    &
-          HIMPLICIT_WIND, &
+          HIMPLICIT_WIND,                                             &
           XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,         &
           PQ_LOWCAN, PEXNS, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
           PSW, PLW, PU_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &
           PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, XRSMIN, XRGL, XGAMMA,&
           XCV, XRUNOFFD, XSOILWGHT, NLAYER_HORT, NLAYER_DUN,          &
-          XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,       &
+          XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,   &
           XSNOWFREE_ALB, XWRMAX_CF, XVEG, XLAI, XEMIS, XZ0,           &
           XZ0/XZ0_O_Z0H, XVEGTYPE, XZ0, XRUNOFFB, XCGSAT, XC1SAT,     &
           XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF, XTAUICE, XWDRAIN,&
-          XTDEEP, XGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,               &
+          ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &
           XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL, ZIRRIG, ZWATSUP,     &
           ZTHRESHOLDSPT, GIRRIGATE, GIRRIDAY, LSTRESS, XGC, XF2I,     &
           XDMAX, XAH, XBH, PCO2, XGMES, XPOI, XFZERO, XEPSO, XGAMM,   &
@@ -411,7 +410,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT,  &
           PAC_AGG_GARDEN, PHU_AGG_GARDEN, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          ZSOILCONDZ  )                                                           
+          ZDEEP_FLUX                                                  )                                                           
 !
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=ZSNOWTEMP(:,1)

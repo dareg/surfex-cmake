@@ -57,7 +57,6 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                             New wind implicitation
 !!                             New soil carbon spinup and diag
 !!                             Isba budget
-!!      C. de Munck  11/2011 : added local variable ZSOILCONDZ for ISBA call
 !!-------------------------------------------------------------------
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI
@@ -644,8 +643,8 @@ REAL, DIMENSION(KSIZE) :: ZP_SWE_INI
 !
 ! miscellaneous
 !
-REAL, DIMENSION(KSIZE,NGROUND_LAYER) :: ZP_SOILCONDZ ! ISBA-DF Soil conductivity  
-!                                                    ! profile  [W/(m K)]
+REAL, DIMENSION(KSIZE)               :: ZP_DEEP_FLUX ! Flux at the bottom of the soil
+REAL, DIMENSION(KSIZE)               :: ZP_TDEEP_A   ! coefficient for implicitation of Tdeep
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -774,6 +773,11 @@ IF(LNOSOF)ZP_SLOPE_COS(:) = 1.0
 ! (see update_frac_alb_emis_isban.f90) in order to close the energy budget
 ! between surfex and the atmosphere. This fact do not change the offline runs.
 !
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! No implicitation of Tdeep
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ZP_TDEEP_A = 0.
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Flood properties 
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -862,7 +866,8 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSC
           ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL, XP_SNOWFREE_ALB, XP_WRMAX_CF, XP_VEG, XP_LAI, &
           XP_EMIS, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_VEGTYPE_PATCH, XP_Z0EFF,         &
           XP_RUNOFFB, XP_CGSAT, XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF,    &
-          XP_PCOEF, XP_TAUICE, XP_WDRAIN, XP_TDEEP, XP_GAMMAT, XP_PSN, XP_PSNG, XP_PSNV,  &
+          XP_PCOEF, XP_TAUICE, XP_WDRAIN, ZP_TDEEP_A, XP_TDEEP, XP_GAMMAT,                &
+          XP_PSN, XP_PSNG, XP_PSNV,                                                       &
           XP_PSNV_A, XP_SNOWFREE_ALB_VEG, XP_SNOWFREE_ALB_SOIL, XP_IRRIG, XP_WATSUP,      &
           XP_THRESHOLD, XP_LIRRIGATE, XP_LIRRIDAY, LP_STRESS, XP_GC, XP_F2I, XP_DMAX,     &
           XP_AH, XP_BH, ZP_CO2, XP_GMES, XPOI, XP_FZERO, XP_EPSO, XP_GAMM, XP_QDGAMM,     &
@@ -885,7 +890,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSC
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_SOILCONDZ                           )  
+          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX                           )  
 !
 ZP_TRAD=XP_TSRAD
 !

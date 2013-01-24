@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,OREAD_PGD, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
 !#############################################################
 !
 !!****  *INIT_TEB_GREENROOF_PGD_n* - routine to initialize ISBA
@@ -94,6 +94,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
+LOGICAL,                            INTENT(IN)  :: OREAD_PGD ! flag to read PGD fields in the file
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSV       ! number of scalars
 CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
@@ -150,13 +151,13 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
+IF (OREAD_PGD) &
 CALL READ_PGD_TEB_GREENROOF_n(HPROGRAM,KVERSION)
 !
 !
 !* allocation of green roofs variables
 !
-CALL ALLOCATE_TEB_GREENROOF_PGD(KI, NVEGTYPE, NLAYER_GR, NDIMTAB)  
-!
+CALL ALLOCATE_TEB_GREENROOF_PGD(OREAD_PGD, KI, NVEGTYPE, NLAYER_GR, NDIMTAB)
 !
 !*       2.2    Physiographic data fields from land cover:
 !               -----------------------------------------
@@ -196,7 +197,7 @@ ELSE
         ENDIF
       ENDDO
     ENDDO
-  ENDIF                                 
+  ENDIF
 END IF
 !
 WHERE (XGREENROOF(:)==0.)

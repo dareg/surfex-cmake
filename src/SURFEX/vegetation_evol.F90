@@ -388,6 +388,7 @@ IF (GMASK) THEN
   !
   ! Evolution of effective roughness length due to new surface roughness length
   !
+  IF (SIZE(PAOSIP)>0) &
   CALL SUBSCALE_Z0EFF(PAOSIP,PAOSIM,PAOSJP,PAOSJM,         &
                       PHO2IP,PHO2IM,PHO2JP,PHO2JM,PZ0,     &
                       PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM  ) 

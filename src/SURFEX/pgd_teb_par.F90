@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TEB_PAR(HPROGRAM,OGARDEN,HBLD_ATYPE)
+      SUBROUTINE PGD_TEB_PAR(HPROGRAM,OGARDEN,OGREENROOF,HBLD_ATYPE)
 !     ##############################################################
 !
 !!**** *PGD_TEB_PAR* monitor for averaging and interpolations of cover fractions
@@ -94,6 +94,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(IN)    :: OGARDEN      ! T if urban green areas
+LOGICAL,             INTENT(IN)    :: OGREENROOF   ! T if greenroofs option is activated
 CHARACTER(LEN=3),    INTENT(OUT)   :: HBLD_ATYPE    ! Type of building averaging
 !
 !
@@ -686,9 +687,25 @@ IF (.NOT.LDATA_ROAD_DIR) DEALLOCATE(XPAR_ROAD_DIR)
 !
 !* greenroof fraction
 !
-CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'GREENROOF','BLD',CFNAM_GREENROOF,CFTYP_GREENROOF,XUNIF_GREENROOF ,&
+IF (OGREENROOF) THEN
+  CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'GREENROOF','BLD',CFNAM_GREENROOF,CFTYP_GREENROOF,XUNIF_GREENROOF ,&
         XPAR_GREENROOF,LDATA_GREENROOF)
-IF (.NOT.LDATA_GREENROOF) DEALLOCATE(XPAR_GREENROOF)
+  IF (.NOT.LDATA_GREENROOF) DEALLOCATE(XPAR_GREENROOF)
+ELSE IF ( (XUNIF_GREENROOF/=0. .AND. XUNIF_GREENROOF/=XUNDEF) .OR. LEN_TRIM(CFNAM_GREENROOF)/=0) THEN
+  WRITE(ILUOUT,*) '---------------------------------------------'
+  WRITE(ILUOUT,*) ' You chose not to include greenroofs in urban areas : LGREENROOF=.FALSE.     '
+  WRITE(ILUOUT,*) ' But            '
+  IF (XUNIF_GREENROOF/=0. .AND. XUNIF_GREENROOF/=XUNDEF) THEN
+    WRITE(ILUOUT,*) ' You also chose a greenroof fraction that is not zero : XUNIF_GREENROOF=',XUNIF_GREENROOF
+  ELSE
+    WRITE(ILUOUT,*) ' You also chose a greenroof fraction that is not zero : CFNAM_GREENROOF=',CFNAM_GREENROOF
+  END IF
+  WRITE(ILUOUT,*) '- - - - - - - - - - - - - - - - - - - - - - -'
+  WRITE(ILUOUT,*) ' Please choose either:'
+  WRITE(ILUOUT,*) ' LGREENROOF=.TRUE. or set GREENROOF fraction to zero (XUNIF_GREENROOF=0.) in namelist PGD_TEB_PAR'
+  WRITE(ILUOUT,*) '---------------------------------------------'
+  CALL ABOR1_SFX('PGD_TEB_PAR: GREENROOF flag and GREENROOF fraction not coherent')
+END IF
 !
 !-------------------------------------------------------------------------------
 !
