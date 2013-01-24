@@ -1,0 +1,2153 @@
+1
+abor1_sfx.F90
+adapt_horibl_surf.F90
+add_forecast_to_date_surf.F90
+albedo.F90
+albedo_from_nir_vis.F90
+albedo_mk10.F90
+albedo_ta96.F90
+allocate_gr_snow.F90
+allocate_physio.F90
+allocate_teb_garden.F90
+allocate_teb_garden_pgd.F90
+2c2
+<     SUBROUTINE ALLOCATE_TEB_GARDEN_PGD(OALLOC,KLU,KVEGTYPE,KGROUND_LAYER, KDIMTAB)  
+---
+>     SUBROUTINE ALLOCATE_TEB_GARDEN_PGD(KLU,KVEGTYPE,KGROUND_LAYER, KDIMTAB)  
+13d12
+< LOGICAL, INTENT(IN) :: OALLOC ! True if constant PGD fields must be allocated
+21a21
+> ! Mask and number of grid elements containing tiles:
+23a24
+> ALLOCATE(XVEGTYPE                (KLU,KVEGTYPE            ))
+27c28
+< ! - Physiographic field that can evolve prognostically
+---
+> ! Input Parameters:
+29,30c30,32
+< ALLOCATE(XLAI                    (KLU                     ))
+< ALLOCATE(XVEG                    (KLU                     )) 
+---
+> ! - vegetation + bare soil:
+> !
+> ALLOCATE(XZ0_O_Z0H               (KLU                     )) 
+40,57d41
+< IF (.NOT. OALLOC) THEN
+<   IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN_PGD',1,ZHOOK_HANDLE)
+<   RETURN
+< END IF
+< !-------------------------------------------------------------------------------
+< !
+< ! Mask and number of grid elements containing tiles:
+< ALLOCATE(XVEGTYPE                (KLU,KVEGTYPE            ))
+< !
+< !-------------------------------------------------------------------------------
+< !
+< ! Input Parameters:
+< !
+< ! - vegetation + bare soil:
+< !
+< ALLOCATE(XZ0_O_Z0H               (KLU                     )) 
+< 
+< !
+59a44
+> ALLOCATE(XVEG                    (KLU                     )) 
+68a54,59
+> !
+> !-------------------------------------------------------------------------------
+> !
+> ! - LAI: Physiographic prescribed field (YPHOTO='NON', 'AGS' or 'LST')
+> !
+> ALLOCATE(XLAI                    (KLU                    ))
+allocate_teb_greenroof.F90
+allocate_teb_greenroof_pgd.F90
+2c2
+<     SUBROUTINE ALLOCATE_TEB_GREENROOF_PGD(OALLOC,KLU,KVEGTYPE,KLAYER_GR, KDIMTAB)  
+---
+>     SUBROUTINE ALLOCATE_TEB_GREENROOF_PGD(KLU,KVEGTYPE,KLAYER_GR, KDIMTAB)  
+13d12
+< LOGICAL, INTENT(IN) :: OALLOC ! True if constant PGD fields must be allocated
+21a21,22
+> ! Mask and number of grid elements containing tiles:
+> !
+22a24,25
+> ALLOCATE(XVEGTYPE                (KLU,KVEGTYPE            ))
+> !
+25c28
+< ! - Physiographic field that can evolve prognostically
+---
+> ! Input Parameters:
+27,28c30,32
+< ALLOCATE(XLAI                    (KLU                     ))
+< ALLOCATE(XVEG                    (KLU                     )) 
+---
+> ! - vegetation + bare soil:
+> !
+> ALLOCATE(XZ0_O_Z0H               (KLU                     )) 
+38,54d41
+< IF (.NOT. OALLOC) THEN
+<   IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN_PGD',1,ZHOOK_HANDLE)
+<   RETURN
+< END IF
+< !-------------------------------------------------------------------------------
+< ! Mask and number of grid elements containing tiles:
+< !
+< ALLOCATE(XVEGTYPE                (KLU,KVEGTYPE            ))
+< !
+< !-------------------------------------------------------------------------------
+< !
+< ! Input Parameters:
+< !
+< ! - vegetation + bare soil:
+< !
+< ALLOCATE(XZ0_O_Z0H               (KLU                     )) 
+< !
+56a44
+> ALLOCATE(XVEG                    (KLU                     )) 
+65a54,59
+> !
+> !-------------------------------------------------------------------------------
+> !
+> ! - LAI: Physiographic prescribed field (YPHOTO='NON', 'AGS' or 'LST')
+> !
+> ALLOCATE(XLAI                    (KLU                    ))
+alloc_diag_surf_atmn.F90
+alloc_diag_teb_greenroof.F90
+alloc_surfex.F90
+75c75
+<                                 TEB_GARDEN_PGD_ALLOC, TEB_GARDEN_PGD_EVOL_ALLOC
+---
+>                                 TEB_GARDEN_PGD_ALLOC
+82,83c82
+<                                    TEB_GREENROOF_ALLOC,          &
+<                                    TEB_GREENROOF_PGD_EVOL_ALLOC
+---
+>                                    TEB_GREENROOF_ALLOC
+167d165
+< CALL TEB_GARDEN_PGD_EVOL_ALLOC(KMODEL,NTEB_PATCH_MAX)
+177d174
+< CALL TEB_GREENROOF_PGD_EVOL_ALLOC(KMODEL,NTEB_PATCH_MAX)
+arrange_cover.F90
+average1_cover.F90
+average1_cti.F90
+average1_ldb.F90
+average1_mesh.F90
+average1_orography.F90
+average2_cover.F90
+average2_cti.F90
+average2_ldb.F90
+average2_mesh.F90
+average2_orography.F90
+averaged_albedo_emis_isba.F90
+averaged_albedo_teb.F90
+average_diag_evap_isban.F90
+average_diag.F90
+average_diag_isban.F90
+average_diag_misc_isban.F90
+averaged_tsrad_teb.F90
+average_flux.F90
+average_rad.F90
+avg_albedo_emis_garden.F90
+avg_albedo_emis_greenroof.F90
+avg_urban_fluxes.F90
+av_pgd.F90
+av_pgd_param.F90
+bem.F90
+bem_morpho.F90
+bilin.F90
+bldcode.F90
+bld_e_budget.F90
+build_emisstabn.F90
+build_pronoslistn.F90
+canopy_evol.F90
+canopy_evol_field.F90
+canopy_evol_neutral.F90
+canopy_evol_temp.F90
+canopy_evol_tke.F90
+canopy_evol_wind.F90
+canopy.F90
+canopy_grid.F90
+canopy_grid_update.F90
+carbon_evol.F90
+carbon_init.F90
+carbon_litter.F90
+carbon_soil.F90
+carbon_spinup.F90
+ccetr.F90
+ccetr_pair.F90
+ch_aer_dep.F90
+ch_aer_emission.F90
+ch_aer_velgrav1d.F90
+ch_bvocemn.F90
+ch_conversion_factor.F90
+ch_dep_isba.F90
+ch_dep_town.F90
+ch_dep_water.F90
+ch_emission_fluxn.F90
+ch_emission_snapn.F90
+ch_emission_to_atmn.F90
+ch_init_depconst.F90
+ch_init_dep_isban.F90
+ch_init_emissionn.F90
+ch_init_names.F90
+ch_init_snapn.F90
+ch_open_inputb.F90
+circumsolar_rad.F90
+clean_prep_output_grid.F90
+cli_lake.F90
+close_aux_io_surf_asc.F90
+close_aux_io_surf.F90
+close_aux_io_surf_fa.F90
+close_file_asc.F90
+close_file.F90
+close_file_fa.F90
+close_namelist_asc.F90
+close_namelist.F90
+close_namelist_fa.F90
+cls_tq.F90
+cls_wind.F90
+co2_initn.F90
+co2_teb_greenroof_initn.F90
+coare30_flux.F90
+coare30_seaflux.F90
+coef_ver_interp_lin_surf.F90
+compute_isba_parameters.F90
+conserv_global_mass.F90
+control_moist_func.F90
+control_temp_func.F90
+convert_cover_ch_isba.F90
+convert_cover_frac.F90
+convert_cover_isba.F90
+convert_patch_garden.F90
+convert_patch_isba.F90
+convert_patch_teb.F90
+convert_patch_teb_greenroof.F90
+convert_teb.F90
+cotwo.F90
+cotwoinitn.F90
+cotwores.F90
+coupling_dstn.F90
+coupling_flaken.F90
+coupling_flake_orographyn.F90
+coupling_icefluxn.F90
+coupling_ideal_flux.F90
+coupling_inland_watern.F90
+coupling_isba_canopyn.F90
+coupling_isban.F90
+59a60
+> !!      C. de Munck  11/2011 : added local variable ZSOILCONDZ for ISBA call
+646,647c647,648
+< REAL, DIMENSION(KSIZE)               :: ZP_DEEP_FLUX ! Flux at the bottom of the soil
+< REAL, DIMENSION(KSIZE)               :: ZP_TDEEP_A   ! coefficient for implicitation of Tdeep
+---
+> REAL, DIMENSION(KSIZE,NGROUND_LAYER) :: ZP_SOILCONDZ ! ISBA-DF Soil conductivity  
+> !                                                    ! profile  [W/(m K)]
+776,780d776
+< !
+< ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+< ! No implicitation of Tdeep
+< ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+< ZP_TDEEP_A = 0.
+869,870c865
+<           XP_PCOEF, XP_TAUICE, XP_WDRAIN, ZP_TDEEP_A, XP_TDEEP, XP_GAMMAT,                &
+<           XP_PSN, XP_PSNG, XP_PSNV,                                                       &
+---
+>           XP_PCOEF, XP_TAUICE, XP_WDRAIN, XP_TDEEP, XP_GAMMAT, XP_PSN, XP_PSNG, XP_PSNV,  &
+893c888
+<           XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX                           )  
+---
+>           XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_SOILCONDZ                           )  
+coupling_isba_orographyn.F90
+coupling_isba_svatn.F90
+coupling_naturen.F90
+coupling_seafluxn.F90
+coupling_seaflux_orogn.F90
+coupling_sean.F90
+coupling_seawat_sbln.F90
+coupling_sltn.F90
+coupling_surf_atmn.F90
+coupling_tebn.F90
+coupling_teb_orographyn.F90
+coupling_townn.F90
+coupling_tsz0n.F90
+coupling_watfluxn.F90
+coupling_watflux_orogn.F90
+cover301_573.F90
+dealloc_diag_surf_atmn.F90
+dealloc_flaken.F90
+dealloc_ideal_flux.F90
+dealloc_inland_watern.F90
+dealloc_isban.F90
+dealloc_naturen.F90
+dealloc_seafluxn.F90
+dealloc_sean.F90
+dealloc_surf_atmn.F90
+dealloc_surfex.F90
+83c83
+<                                 TEB_GARDEN_PGD_DEALLO, TEB_GARDEN_PGD_EVOL_DEALLO
+---
+>                                 TEB_GARDEN_PGD_DEALLO
+90d89
+<                                    TEB_GREENROOF_PGD_EVOL_DEALLO,&
+173d171
+< CALL TEB_GARDEN_PGD_EVOL_DEALLO
+183d180
+< CALL TEB_GREENROOF_PGD_EVOL_DEALLO
+dealloc_tebn.F90
+dealloc_townn.F90
+dealloc_watfluxn.F90
+deepsoil_update.F90
+default_agri.F90
+default_alb_eco1.F90
+default_alb_eco2.F90
+default_assim.F90
+default_ch_bio_flux.F90
+default_ch_dep.F90
+default_ch_surf_atm.F90
+default_crocus.F90
+default_data_cover.F90
+default_deepsoil.F90
+default_diag_flake.F90
+default_diag_ideal.F90
+default_diag_isba.F90
+default_diag_seaflux.F90
+default_diag_surf_atm.F90
+default_diag_teb.F90
+default_diag_watflux.F90
+default_dst.F90
+default_flake.F90
+default_greenroof.F90
+default_grid.F90
+default_ideal_flux.F90
+default_isba.F90
+default_lai_eco1.F90
+default_lai_eco2.F90
+default_prep_flake.F90
+default_prep_isba.F90
+default_prep_seaflux.F90
+default_prep_teb.F90
+default_prep_teb_garden.F90
+default_prep_teb_greenroof.F90
+default_prep_watflux.F90
+default_schemes.F90
+default_seaflux.F90
+default_slt.F90
+default_sso.F90
+default_surf_atm.F90
+default_teb.F90
+default_teb_veg.F90
+default_watflux.F90
+default_write_surf_atm.F90
+detect_field.F90
+diag_cpl_esm_isba.F90
+diag_cpl_esm_sea.F90
+diag_cpl_esm_water.F90
+diag_evap_isban.F90
+diag_flake_initn.F90
+diag_flaken.F90
+diag_ideal_initn.F90
+diag_idealn.F90
+diag_inland_watern.F90
+diag_inline_flaken.F90
+diag_inline_isban.F90
+diag_inline_oceann.F90
+diag_inline_seafluxn.F90
+diag_inline_surf_atmn.F90
+diag_inline_tebn.F90
+diag_inline_watfluxn.F90
+diag_isba_initn.F90
+diag_isban.F90
+diag_misc_flaken.F90
+diag_misc_isban.F90
+diag_misc_teb_initn.F90
+diag_misc_tebn.F90
+diag_naturen.F90
+diag_seaflux_initn.F90
+diag_seafluxn.F90
+diag_sean.F90
+diag_surf_atmn.F90
+diag_surf_budgetc_sea.F90
+diag_surf_budgetc_water.F90
+diag_surf_budget_isba.F90
+diag_surf_budget_sea.F90
+diag_surf_budget_teb.F90
+diag_surf_budget_water.F90
+diag_teb_garden_initn.F90
+diag_teb_greenroof_initn.F90
+diag_teb_initn.F90
+diag_tebn.F90
+diag_townn.F90
+diag_watflux_initn.F90
+diag_watfluxn.F90
+dif_layer.F90
+drag.F90
+dry_wet_soil_albedos.F90
+dslt_dep.F90
+dslt_init_modes.F90
+dslt_init_names.F90
+dslt_velgrav1d.F90
+dustflux_get.F90
+dustflux_get_mb.F90
+dx_air_cooling_coil_cv.F90
+e_budget.F90
+16c16
+<                             PFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,               &
+---
+>                             PFROZEN1, PTDEEP, PGAMMAT,                           &
+19,20c19
+<                             PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT,   &
+<                             PDEEP_FLUX                                           )  
+---
+>                             PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT    )  
+82d80
+< !!      (V. Masson)          01/13 Deep soil flux implicitation
+177,187c175,179
+< REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP_A, PTDEEP_B, PGAMMAT
+< !                                      PTDEEP_A = Deep soil temperature
+< !                                                 coefficient depending on flux
+< !                                      PTDEEP_B = Deep soil temperature (prescribed)
+< !                                               which models heating/cooling from
+< !                                               below the diurnal wave penetration
+< !                                               (surface temperature) depth. If it
+< !                                               is FLAGGED as undefined, then the zero
+< !                                               flux lower BC is applied.
+< !                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+< !                                              (with PDEEP_FLUX in W/m2)
+---
+> REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP, PGAMMAT
+> !                                     PTDEEP   = Deep soil temperature (prescribed)
+> !                                                which models heating/cooling from
+> !                                                below the diurnal wave penetration
+> !                                                (surface temperature) depth.
+256d247
+< REAL, DIMENSION(:), INTENT(OUT)   :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+605,606c596,597
+<    CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
+<                      PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
+---
+>    CALL SOIL_HEATDIF(PTSTEP,PD_G,PDZG,PDZDIF,PSOILCONDZ,      &
+>                      PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP,PTG  )  
+619c610
+<       CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP_B,PSODELX,PTG)
+---
+>       CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP,PSODELX,PTG)
+625,626c616,617
+<       WHERE(PTDEEP_B(:) /= XUNDEF .AND. PGAMMAT(:) /= XUNDEF)
+<             PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*(PTG(:,1) + PGAMMAT(:)*PTDEEP_B(:)))/ &
+---
+>       WHERE(PTDEEP(:) /= XUNDEF .AND. PGAMMAT(:) /= XUNDEF)
+>             PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*(PTG(:,1) + PGAMMAT(:)*PTDEEP(:)))/ &
+ecoclimap2_lai.F90
+ecume_flux.F90
+ecume_seaflux.F90
+emis_from_veg.F90
+end_io_surf_ascn.F90
+end_io_surf_fan.F90
+end_io_surfn.F90
+error_read_surf_asc.F90
+error_read_surf_fa.F90
+error_write_surf_asc.F90
+error_write_surf_fa.F90
+exp_decay_soil_dif.F90
+exp_decay_soil_fr.F90
+extrapol_fields.F90
+facade_e_budget.F90
+fapair.F90
+flag_diag_update.F90
+flag_gr_snow.F90
+flag_teb_gardenn.F90
+flag_update.F90
+flake_albedo.F90
+flake_interface.F90
+floor_layer_e_budget.F90
+forcing_vert_shift.F90
+gammas.F90
+garden.F90
+43a44
+> !!    C. de Munck    10/2011  added local variable ZSOILCONDZ for ISBA call
+66c67
+<                                   XWR, XRESA, XAN,                         &
+---
+>                                   XTDEEP, XGAMMAT, XWR, XRESA, XAN,        &
+83,84c84,85
+<                                   XALBNIR_TVEG, XALBVIS_TVEG,              &
+<                                   XALBNIR_TSOIL, XALBVIS_TSOIL,            & 
+---
+>                                   XALBNIR_TVEG, XALBVIS_TVEG,    &
+>                                   XALBNIR_TSOIL, XALBVIS_TSOIL,  &                                  
+171c172,173
+< REAL, DIMENSION(SIZE(PPS)) :: ZDEEP_FLUX ! heat flux at base of the deep soil
+---
+> REAL, DIMENSION(SIZE(PPS),SIZE(XTG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
+> !                                                      ! profile  [W/(m K)]
+283,287d284
+< !  variables for deep soil temperature
+< REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
+< REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_B
+< REAL, DIMENSION(SIZE(PPS)) :: ZGAMMAT
+< !
+356,358c353,359
+< ZTDEEP_A = XUNDEF
+< ZTDEEP_B = XUNDEF
+< ZGAMMAT  = XUNDEF
+---
+> !
+> !*      1.3    Set physical values for points where there is no garden
+> !              -------------------------------------------------------
+> !
+> ! This way, ISBA can run without problem for these points
+> !
+> CALL FLAG_TEB_GARDEN_n(1)
+376c377
+<           HIMPLICIT_WIND,                                             &
+---
+>           HIMPLICIT_WIND, &
+382c383
+<           XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,   &
+---
+>           XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,       &
+386c387
+<           ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &
+---
+>           XTDEEP, XGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,               &
+413c414
+<           ZDEEP_FLUX                                                  )                                                           
+---
+>           ZSOILCONDZ  )                                                           
+garden_properties.F90
+82,92d81
+< !*      1.     Set physical values for points where there is no garden
+< !              -------------------------------------------------------
+< !
+< ! This way, ISBA can run without problem for these points
+< !
+< CALL FLAG_TEB_GARDEN_n(1)
+< !
+< !
+< !*      2.     Computes several properties of gardens
+< !              --------------------------------------
+< !
+garden_soil_depth.F90
+gather_and_write_mpi.F90
+gather_and_write_mpi_k4.F90
+gauss_index.F90
+get_1d_mask.F90
+get_adjacent_meshes.F90
+get_adj_mes_cart.F90
+get_adj_mes_conf_proj.F90
+get_adj_mes_gauss.F90
+get_adj_mes_ign.F90
+get_adj_mes_lonlat_reg.F90
+get_adj_mes_lonlatval.F90
+get_aosn.F90
+get_coordn.F90
+get_covern.F90
+get_current_teb_patch.F90
+get_default_namn.F90
+get_dim_fulln.F90
+get_fluxn.F90
+get_fracn.F90
+get_grid_coord_cartesian.F90
+get_grid_coord_conf_proj.F90
+get_grid_coord.F90
+get_grid_coord_gauss.F90
+get_grid_coord_ign.F90
+get_grid_coord_lonlat_reg.F90
+get_grid_coord_lonlatval.F90
+get_grid_dim_cartesian.F90
+get_grid_dim_conf_proj.F90
+get_grid_dim.F90
+get_grid_dim_gauss.F90
+get_grid_dim_ign.F90
+get_grid_dim_lonlat_reg.F90
+get_grid_dim_lonlatval.F90
+get_interp_halo.F90
+get_isba_confn.F90
+get_jcovern.F90
+get_latlonmaskn.F90
+get_lcovern.F90
+get_lonlatn.F90
+get_luout.F90
+get_mesh_dim_cartesian.F90
+get_mesh_dim_conf_proj.F90
+get_mesh_dim.F90
+get_mesh_dim_gauss.F90
+get_mesh_dim_ign.F90
+get_mesh_dim_lonlat_reg.F90
+get_mesh_dim_lonlatval.F90
+get_mesh_index_conf_proj.F90
+get_mesh_index.F90
+get_mesh_index_gauss.F90
+get_mesh_index_ign.F90
+get_mesh_index_lonlat_reg.F90
+get_mesh_index_lonlatval.F90
+get_near_meshes_cartesian.F90
+get_near_meshes_conf_proj.F90
+get_near_meshes.F90
+get_near_meshes_gauss.F90
+get_near_meshes_ign.F90
+get_near_meshes_lonlat_reg.F90
+get_near_meshes_lonlatval.F90
+get_qsn.F90
+get_seriesn.F90
+get_sfxcpln.F90
+get_size_fulln.F90
+get_sson.F90
+get_sso_stdevn.F90
+get_surf_atm_sso_rough.F90
+get_surf_grid_dimn.F90
+get_surf_maskn.F90
+get_surf_sizen.F90
+get_surf_undef.F90
+get_surf_varn.F90
+get_teb_depths.F90
+get_type_dimn.F90
+get_var_naturen.F90
+get_var_sean.F90
+get_var_townn.F90
+get_var_watern.F90
+get_vegtype_2_patch_mask.F90
+get_xyall_ign.F90
+get_z0n.F90
+get_zsn.F90
+goto_surfex.F90
+goto_teb.F90
+goto_wrapper_flake.F90
+goto_wrapper_ideal.F90
+goto_wrapper_isba.F90
+goto_wrapper_ocean.F90
+goto_wrapper_seaflux.F90
+goto_wrapper_surfatm.F90
+goto_wrapper_teb.F90
+40a41
+> CALL TEB_GARDEN_PGD_GOTO_MODEL(KFROM, KTO, LKFROM)
+43a45
+> CALL TEB_GREENROOF_PGD_GOTO_MODEL(KFROM, KTO, LKFROM)
+55d56
+< CALL TEB_GARDEN_PGD_EVOL_GOTO_MODEL(KFROM, KTO, LKFROM, ICURRENT_PATCH, KTO_PATCH)
+57d57
+< CALL TEB_GREENROOF_PGD_EVOL_GOTO_MODEL(KFROM, KTO, LKFROM, ICURRENT_PATCH, KTO_PATCH)
+60d59
+< CALL TEB_GARDEN_PGD_GOTO_MODEL(KFROM, KTO, LKFROM)
+62d60
+< CALL TEB_GREENROOF_PGD_GOTO_MODEL(KFROM, KTO, LKFROM)
+goto_wrapper_watflux.F90
+green_from_lai.F90
+greenroof.F90
+10c10
+<                 PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,PDEEP_FLUX,                     &
+---
+>                 PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,PCOND_GR,                       &
+50d49
+< USE MODD_SURF_PAR,             ONLY: XUNDEF
+57c56
+<                                      CSNOWRES, XCGMAX, CISBA
+---
+>                                      CSNOWRES, XCGMAX
+69c68
+<                                      XWR, XRESA, XAN,                         &
+---
+>                                      XTDEEP, XGAMMAT, XWR, XRESA, XAN,        &
+97d95
+< USE MODI_CARBON_EVOL
+99d96
+< USE MODI_ROOF_IMPL_COEF
+149c146
+< REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
+---
+> REAL, DIMENSION(:)  , INTENT(OUT)   :: PCOND_GR              ! Thermal conductivity of the bottom layer of the greenroof
+173a171,172
+> REAL, DIMENSION(SIZE(PPS),SIZE(XTG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
+> !                                                    ! profile  [W/(m K)]
+253a253,255
+> REAL, DIMENSION(SIZE(PPS)) :: ZDFAPARC
+> REAL, DIMENSION(SIZE(PPS)) :: ZDFAPIRC
+> REAL, DIMENSION(SIZE(PPS)) :: ZDLAI_EFFC
+255,256c257
+< REAL, DIMENSION(0,0,0)     :: ZLITTER
+< REAL, DIMENSION(0,0)       :: ZSOILCARB, ZLIGNIN_STRUC, ZTURNOVER
+---
+> REAL, DIMENSION(0,0)         :: ZLITTER, ZSOILCARB, ZLIGNIN_STRUC, ZTURNOVER
+282,287d282
+< !  variables for deep soil
+< !
+< REAL, DIMENSION(SIZE(PPS)) :: ZGAMMAT  ! not used
+< REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
+< REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_B
+< !
+307a303,304
+> REAL, DIMENSION(0,1) :: ZALPHA,ZNVG,ZMVG,ZLVG,ZWRESVG
+> !
+355,359d351
+< !* deep soil implicitation with roof
+< !
+< ZGAMMAT = XUNDEF
+< CALL ROOF_IMPL_COEF(PTSTEP,ZTDEEP_A,ZTDEEP_B)
+< !
+384c376
+<           ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &
+---
+>           XT_ROOF(:,1), XGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,            &
+411c403
+<           PDEEP_FLUX                                                  )  
+---
+>           ZSOILCONDZ  )  
+412a405
+> PCOND_GR(:)          = ZSOILCONDZ(:,NLAYER_GR)
+425c418
+< IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
+---
+> IF (CPHOTO/='NON' .AND. CRESPSL/='NON') THEN
+427c420
+<   CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, 1,               &
+---
+>   CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                         &
+429d421
+<                      XDG, XDZG, NWG_LAYER,                          &                   
+greenroof_properties.F90
+grid_from_file.F90
+grid_modif_cartesian.F90
+grid_modif_conf_proj.F90
+grid_modif.F90
+heatcapz.F90
+hor_extrapol_surf.F90
+horibl_surf.F90
+hor_interpol_arome.F90
+hor_interpol_buffer.F90
+hor_interpol_cartesian.F90
+hor_interpol_conf_proj.F90
+hor_interpol.F90
+hor_interpol_gauss.F90
+hor_interpol_latlon.F90
+hor_interpol_none.F90
+hor_interpol_rotlatlon.F90
+hvac_autosize.F90
+hydro_dt92.F90
+hydro.F90
+hydro_glacier.F90
+hydro_sgh.F90
+hydro_snow.F90
+hydro_soildif.F90
+hydro_soil.F90
+hydro_veg.F90
+ice_sea_flux.F90
+ice_soildif.F90
+ini_assim.F90
+ini_csts.F90
+ini_cturbs.F90
+ini_data_cover.F90
+ini_data_param.F90
+ini_data_param_teb.F90
+ini_data_rootfrac.F90
+ini_data_soil.F90
+ini_ocean_csts.F90
+ini_ssowork.F90
+ini_surf_csts.F90
+init_bemn.F90
+init_chemicaln.F90
+init_dst.F90
+init_flaken.F90
+init_from_data_grdnn.F90
+init_from_data_greenroofn.F90
+init_from_data_seafluxn.F90
+init_garden_optionsn.F90
+init_ideal_flux.F90
+init_inland_watern.F90
+init_io_surf_ascn.F90
+init_io_surf_fan.F90
+init_io_surf_maskn.F90
+init_io_surfn.F90
+init_isba_landuse.F90
+init_isba_mixpar.F90
+init_isban.F90
+init_isba_sbl.F90
+init_naturen.F90
+init_pgd_surf_atm.F90
+init_read_data_cover.F90
+init_seafluxn.F90
+init_sean.F90
+init_slt.F90
+init_snow_lw.F90
+init_surf_atmn.F90
+init_teb_gardenn.F90
+init_teb_garden_pgdn.F90
+2c2
+< SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+---
+> SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+96d95
+< LOGICAL,                            INTENT(IN)  :: OREAD_PGD ! flag to read PGD fields in the file
+134c133
+< CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
+---
+> CALL ALLOCATE_TEB_GARDEN_PGD(KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
+140d138
+< IF (OREAD_PGD) &
+init_teb_greenroofn.F90
+init_teb_greenroof_pgdn.F90
+2c2
+< SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,OREAD_PGD, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+---
+> SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+97d96
+< LOGICAL,                            INTENT(IN)  :: OREAD_PGD ! flag to read PGD fields in the file
+154d152
+< IF (OREAD_PGD) &
+160c158,159
+< CALL ALLOCATE_TEB_GREENROOF_PGD(OREAD_PGD, KI, NVEGTYPE, NLAYER_GR, NDIMTAB)
+---
+> CALL ALLOCATE_TEB_GREENROOF_PGD(KI, NVEGTYPE, NLAYER_GR, NDIMTAB)  
+> !
+200c199
+<   ENDIF
+---
+>   ENDIF                                 
+init_tebn.F90
+44d43
+< USE MODD_IO_SURF_ASC,ONLY: CMASK
+107,108d105
+< USE MODD_TEB_GARDEN_n,    ONLY : XLAI_GARDEN => XLAI
+< USE MODD_TEB_GREENROOF_n, ONLY : XLAI_GREENROOF => XLAI, NLAYER_GR
+447,454c444,453
+<     CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+<     CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
+<     IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
+<     CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+<     ! Case of urban green roofs
+<     IF (LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,(JPATCH==1), &
+<                                                   KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+<     CALL END_IO_SURF_n(HPROGRAM)
+---
+>     CALL GOTO_TEB(JPATCH)    
+>     IF (JPATCH==1) THEN
+>       CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+>       CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
+>       CALL INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
+>       CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+>       ! Case of urban green roofs
+>       IF (LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+>       CALL END_IO_SURF_n(HPROGRAM)
+>     ENDIF
+init_teb_veg_optionsn.F90
+init_top.F90
+init_townn.F90
+init_veg_gardenn.F90
+init_vegn.F90
+init_veg_pgd_gardenn.F90
+init_veg_pgdn.F90
+init_water_sbl.F90
+init_watfluxn.F90
+ini_var_from_data_0d.F90
+ini_var_from_data.F90
+ini_var_from_patch.F90
+ini_var_from_vegtype_data.F90
+interp_grid.F90
+interpol_field2d.F90
+interpol_field.F90
+interpol_npts.F90
+interpol_quadra.F90
+interpol_sbl.F90
+interpol_splines.F90
+interpol_sst_mth.F90
+interpol_ts_water_mth.F90
+io_buff_cleann.F90
+io_buffn.F90
+irrigation_update.F90
+isba_albedo.F90
+isba_budget.F90
+isba_budget_init.F90
+isba_canopy.F90
+isba.F90
+14,15c14
+<                       PTAUICE, PWDRAIN, PTDEEP_A, PTDEEP_B, PGAMMAT,             &
+<                       PPSN, PPSNG, PPSNV,                                        &
+---
+>                       PTAUICE, PWDRAIN, PTDEEP, PGAMMAT, PPSN, PPSNG, PPSNV,     &
+41c40
+<                       PIRRIG_FLUX, PDEEP_FLUX                                    )                     
+---
+>                       PIRRIG_FLUX, PSOILCONDZ                                    )                     
+348,359c347,350
+< REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP_A, PTDEEP_B     
+<                                               ! Deep soil temperature (prescribed)
+< !                                      PTDEEP_A = Deep soil temperature
+< !                                                 coefficient depending on flux
+< !                                      PTDEEP_B = Deep soil temperature (prescribed)
+< !                                               which models heating/cooling from
+< !                                               below the diurnal wave penetration
+< !                                               (surface temperature) depth. If it
+< !                                               is FLAGGED as undefined, then the zero
+< !                                               flux lower BC is applied.
+< !                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+< !                                              (with PDEEP_FLUX in W/m2)
+---
+> REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP     ! Deep soil temperature (prescribed)
+> !                                             ! which models heating/cooling from
+> !                                             ! below the diurnal wave penetration
+> !                                             ! (surface temperature) depth.
+644,645c635
+< REAL, DIMENSION(:),     INTENT(OUT) :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+< 
+---
+> REAL, DIMENSION(:,:),INTENT(OUT) ::  PSOILCONDZ ! ISBA-DF Soil conductivity profile  [W/(m K)]
+703,704d692
+< REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
+< !                                                      ! profile  [W/(m K)]
+748c736
+< ZSOILCONDZ(:,:) = XUNDEF
+---
+> PSOILCONDZ(:,:) = XUNDEF
+780c768
+<      PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ        )
+---
+>      PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, ZSOILHCAPZ        )
+792c780
+<            PTG(:,1), PCG, PCT, ZSOILCONDZ(:,1),                                 &
+---
+>            PTG(:,1), PCG, PCT, PSOILCONDZ(:,1),                                 &
+882,884c870,871
+<         PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
+<         ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
+<         ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
+---
+>         PD_G, PDZG, PDZDIF, PSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
+>         ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP, PGAMMAT, ZTA_IC, ZQA_IC, ZUSTAR2_IC,   &
+886c873
+<         PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT, PDEEP_FLUX           )
+---
+>         PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT)  
+910c897
+<            ZSOILCONDZ, ZSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF, PD_G, PDZG, PTG,    &
+---
+>            PSOILCONDZ, ZSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF, PD_G, PDZG, PTG,    &
+isba_flood_properties.F90
+isba_fluxes.F90
+isba_properties.F90
+isba_sgh_update.F90
+isba_snow_agr.F90
+isba_snow_frac.F90
+isba_soc_parameters.F90
+laigain.F90
+lailoss.F90
+latlon_grid.F90
+latlon_gridtype_cartesian.F90
+latlon_gridtype_conf_proj.F90
+latlon_gridtype_gauss.F90
+latlon_gridtype_ign.F90
+latlon_gridtype_lonlat_reg.F90
+latlon_gridtype_lonlatval.F90
+latlonmask_cartesian.F90
+latlonmask_conf_proj.F90
+latlonmask.F90
+latlonmask_ign.F90
+latlonmask_lonlat_reg.F90
+latlonmask_lonlatval.F90
+latlontoxy1d.F90
+layer_e_budget.F90
+layer_e_budget_get_coef.F90
+mass_layer_e_budget.F90
+mixtln.F90
+mkflag_snow.F90
+mod1dn.F90
+modd_agri.F90
+modd_agrin.F90
+modd_arch.F90
+modd_assim.F90
+modd_atm_cst.F90
+modd_bem_cst.F90
+modd_bemn.F90
+modd_bld_description.F90
+modd_bvoc_par.F90
+modd_canopy_turb.F90
+modd_ch_emis_fieldn.F90
+modd_ch_isba.F90
+modd_ch_isban.F90
+modd_chs_aerosol.F90
+modd_ch_seafluxn.F90
+modd_ch_snapn.F90
+modd_ch_surf.F90
+modd_ch_surfn.F90
+modd_ch_tebn.F90
+modd_ch_watfluxn.F90
+modd_co2v_par.F90
+modd_csts.F90
+modd_cturbs.F90
+modd_data_bemn.F90
+modd_data_cover.F90
+modd_data_covern.F90
+modd_data_cover_par.F90
+modd_data_isban.F90
+modd_data_lake.F90
+modd_data_parameters.F90
+modd_data_seafluxn.F90
+modd_data_teb_gardenn.F90
+modd_data_teb_greenroofn.F90
+modd_data_tebn.F90
+modd_data_tsz0n.F90
+modd_deepsoil.F90
+modd_diag_evap_isban.F90
+modd_diag_flaken.F90
+modd_diag_idealn.F90
+modd_diag_isban.F90
+modd_diag_misc_flaken.F90
+modd_diag_misc_isban.F90
+modd_diag_misc_tebn.F90
+modd_diag_oceann.F90
+modd_diag_seafluxn.F90
+modd_diag_surf_atmn.F90
+modd_diag_teb_gardenn.F90
+modd_diag_teb_greenroofn.F90
+modd_diag_tebn.F90
+modd_diag_utci_tebn.F90
+modd_diag_watfluxn.F90
+modd_dstmbl.F90
+modd_dstn.F90
+modd_dst_surf.F90
+modd_dummy_surf_fieldsn.F90
+modd_emis_gr_fieldn.F90
+modd_emis_nox.F90
+modd_flake_albedo_ref.F90
+modd_flake_configure.F90
+modd_flake_derivedtypes.F90
+modd_flake_gridn.F90
+modd_flaken.F90
+modd_flake_parameters.F90
+modd_flake_paramoptic_ref.F90
+modd_flake_sbln.F90
+modd_flood_par.F90
+modd_forc_atm.F90
+modd_get_mesh_index_conf_proj.F90
+modd_get_mesh_index_gauss.F90
+modd_get_mesh_index_ign.F90
+modd_get_mesh_index_lonlat_reg.F90
+modd_get_mesh_index_lonlatval.F90
+modd_gr_biog_gardenn.F90
+modd_gr_biog_greenroofn.F90
+modd_gr_biogn.F90
+modd_grid_arome.F90
+modd_grid_buffer.F90
+modd_grid_cartesian.F90
+modd_grid_conf_proj.F90
+modd_grid_gauss.F90
+modd_grid_grib.F90
+modd_grid_latlonregul.F90
+modd_grid_rotlatlon.F90
+modd_ideal_flux.F90
+modd_idealn.F90
+modd_ign.F90
+modd_io_buffn.F90
+modd_io_surf_asc.F90
+modd_io_surf_fa.F90
+modd_isba_canopyn.F90
+modd_isba_gridn.F90
+modd_isban.F90
+modd_isba_par.F90
+modd_mask.F90
+modd_ocean_csts.F90
+modd_ocean_gridn.F90
+modd_oceann.F90
+modd_ocean_reln.F90
+modd_pack_ch_isba.F90
+modd_pack_diag_isba.F90
+modd_pack_isba.F90
+modd_pgd_grid.F90
+modd_pgdwork.F90
+modd_point_overlay.F90
+modd_prep.F90
+modd_prep_flake.F90
+modd_prep_isba.F90
+modd_prep_seaflux.F90
+modd_prep_snow.F90
+modd_prep_teb.F90
+modd_prep_teb_garden.F90
+modd_prep_teb_greenroof.F90
+modd_prep_watflux.F90
+modd_read_namelist.F90
+modd_seaflux_gridn.F90
+modd_seafluxn.F90
+modd_seaflux_sbln.F90
+modd_sgh_par.F90
+modd_sltn.F90
+modd_slt_surf.F90
+modd_snow_metamo.F90
+modd_snow_par.F90
+modd_splines.F90
+modd_sso_canopyn.F90
+modd_surf_atm.F90
+modd_surf_atm_gridn.F90
+modd_surf_atmn.F90
+modd_surf_atm_sson.F90
+modd_surf_conf.F90
+modd_surfex_mpi.F90
+modd_surfex_omp.F90
+modd_surf_par.F90
+modd_svn.F90
+modd_teb_canopyn.F90
+modd_teb_gardenn.F90
+89a90,94
+>   REAL, POINTER, DIMENSION(:) :: XALBNIR           ! near-infra-red albedo                   (-)
+>   REAL, POINTER, DIMENSION(:) :: XALBVIS           ! visible albedo                          (-)
+>   REAL, POINTER, DIMENSION(:) :: XALBUV            ! UV albedo                               (-)
+>   REAL, POINTER, DIMENSION(:) :: XEMIS             ! surface emissivity                      (-)
+>   REAL, POINTER, DIMENSION(:) :: XZ0               ! surface roughness length                (m)
+100a106
+>   REAL, POINTER, DIMENSION(:) :: XVEG              ! vegetation cover fraction               (-)
+161c167,172
+< 
+---
+> !-------------------------------------------------------------------------------
+> !
+> ! - Vegetation: Ags Prognostic (YPHOTO = ('LAI', 'LST', or 'NIT') or prescribed (YPHOTO='NON', 'AGS' or 'LST')
+> !
+>   REAL, POINTER, DIMENSION(:)     :: XLAI          ! Leaf Area Index                         (m2/m2)
+> !
+276,291d286
+< !
+< TYPE TEB_GARDEN_PGD_EVOL_t
+< !!-------------------------------------------------------------------------------
+< !
+< ! - Vegetation: Ags Prognostic (YPHOTO = ('LAI', 'LST', or 'NIT') or prescribed (YPHOTO='NON', 'AGS' or 'LST')
+< !
+<   REAL, POINTER, DIMENSION(:) :: XLAI          ! Leaf Area Index                         (m2/m2)
+<   REAL, POINTER, DIMENSION(:) :: XVEG          ! vegetation cover fraction               (-)
+<   REAL, POINTER, DIMENSION(:) :: XALBNIR       ! near-infra-red albedo                   (-)
+<   REAL, POINTER, DIMENSION(:) :: XALBVIS       ! visible albedo                          (-)
+<   REAL, POINTER, DIMENSION(:) :: XALBUV        ! UV albedo                               (-)
+<   REAL, POINTER, DIMENSION(:) :: XEMIS         ! surface emissivity                      (-)
+<   REAL, POINTER, DIMENSION(:) :: XZ0           ! surface roughness length                (m)
+< !
+< !-------------------------------------------------------------------------------
+< END TYPE TEB_GARDEN_PGD_EVOL_t
+292a288
+> !-------------------------------------------------------------------------------
+363d358
+< TYPE(TEB_GARDEN_PGD_EVOL_t),ALLOCATABLE, TARGET, SAVE :: TEB_GARDEN_PGD_EVOL_MODEL(:,:)
+806a802,806
+> TEB_GARDEN_PGD_MODEL(KFROM)%XALBNIR=>XALBNIR
+> TEB_GARDEN_PGD_MODEL(KFROM)%XALBVIS=>XALBVIS
+> TEB_GARDEN_PGD_MODEL(KFROM)%XALBUV=>XALBUV
+> TEB_GARDEN_PGD_MODEL(KFROM)%XEMIS=>XEMIS
+> TEB_GARDEN_PGD_MODEL(KFROM)%XZ0=>XZ0
+811a812
+> TEB_GARDEN_PGD_MODEL(KFROM)%XVEG=>XVEG
+821a823
+> TEB_GARDEN_PGD_MODEL(KFROM)%XLAI=>XLAI
+906a909,913
+> XALBNIR=>TEB_GARDEN_PGD_MODEL(KTO)%XALBNIR
+> XALBVIS=>TEB_GARDEN_PGD_MODEL(KTO)%XALBVIS
+> XALBUV=>TEB_GARDEN_PGD_MODEL(KTO)%XALBUV
+> XEMIS=>TEB_GARDEN_PGD_MODEL(KTO)%XEMIS
+> XZ0=>TEB_GARDEN_PGD_MODEL(KTO)%XZ0
+911a919
+> XVEG=>TEB_GARDEN_PGD_MODEL(KTO)%XVEG
+921a930
+> XLAI=>TEB_GARDEN_PGD_MODEL(KTO)%XLAI
+1018a1028,1032
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XALBNIR)
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XALBVIS)
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XALBUV)
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XEMIS)
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XZ0)
+1023a1038
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XVEG)
+1031a1047
+>   NULLIFY(TEB_GARDEN_PGD_MODEL(J)%XLAI)
+1111,1171d1126
+< 
+< 
+< 
+< SUBROUTINE TEB_GARDEN_PGD_EVOL_GOTO_MODEL(KFROM, KTO, LKFROM, KFROM_PATCH, KTO_PATCH)
+< LOGICAL, INTENT(IN) :: LKFROM
+< INTEGER, INTENT(IN) :: KFROM, KTO
+< INTEGER, INTENT(IN) :: KFROM_PATCH, KTO_PATCH
+< REAL(KIND=JPRB) :: ZHOOK_HANDLE
+< !
+< ! Save current state for allocated arrays
+< IF (LKFROM) THEN
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XALBNIR=>XALBNIR
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XALBVIS=>XALBVIS
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XALBUV=>XALBUV
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XEMIS=>XEMIS
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XZ0=>XZ0
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XVEG=>XVEG
+< TEB_GARDEN_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XLAI=>XLAI
+< ENDIF
+< !
+< ! Current model is set to model KTO
+< IF (LHOOK) CALL DR_HOOK('MODD_TEB_GARDEN_PGD_EVOL_N:TEB_GARDEN_PGD_EVOL_GOTO_MODEL',0,ZHOOK_HANDLE)
+< XALBNIR=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XALBNIR
+< XALBVIS=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XALBVIS
+< XALBUV=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XALBUV
+< XEMIS=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XEMIS
+< XZ0=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XZ0
+< XVEG=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XVEG
+< XLAI=>TEB_GARDEN_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XLAI
+< IF (LHOOK) CALL DR_HOOK('MODD_TEB_GARDEN_PGD_EVOL_N:TEB_GARDEN_PGD_EVOL_GOTO_MODEL',1,ZHOOK_HANDLE)
+< !
+< END SUBROUTINE TEB_GARDEN_PGD_EVOL_GOTO_MODEL
+< 
+< SUBROUTINE TEB_GARDEN_PGD_EVOL_ALLOC(KMODEL,KPATCH)
+< INTEGER, INTENT(IN) :: KMODEL,KPATCH
+< INTEGER :: J, JP
+< REAL(KIND=JPRB) :: ZHOOK_HANDLE
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GARDEN_PGD_EVOL_N:TEB_GARDEN_PGD_EVOL_ALLOC",0,ZHOOK_HANDLE)
+< ALLOCATE(TEB_GARDEN_PGD_EVOL_MODEL(KMODEL,KPATCH))
+< DO J=1,KMODEL
+<  DO JP=1,KPATCH
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XALBNIR)
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XALBVIS)
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XALBUV)
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XEMIS)
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XZ0)
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XVEG)
+<   NULLIFY(TEB_GARDEN_PGD_EVOL_MODEL(J,JP)%XLAI)
+<  END DO
+< ENDDO
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GARDEN_PGD_EVOL_N:TEB_GARDEN_PGD_EVOL_ALLOC",1,ZHOOK_HANDLE)
+< END SUBROUTINE TEB_GARDEN_PGD_EVOL_ALLOC
+< 
+< SUBROUTINE TEB_GARDEN_PGD_EVOL_DEALLO
+< REAL(KIND=JPRB) :: ZHOOK_HANDLE
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GARDEN_PGD_EVOL_N:TEB_GARDEN_PGD_EVOL_DEALLO",0,ZHOOK_HANDLE)
+< IF (ALLOCATED(TEB_GARDEN_PGD_EVOL_MODEL)) DEALLOCATE(TEB_GARDEN_PGD_EVOL_MODEL)
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GARDEN_PGD_EVOL_N:TEB_GARDEN_PGD_EVOL_DEALLO",1,ZHOOK_HANDLE)
+< END SUBROUTINE TEB_GARDEN_PGD_EVOL_DEALLO
+< 
+< 
+modd_teb_greenroofn.F90
+135c135,139
+< 
+---
+>   REAL, POINTER, DIMENSION(:)   :: XALBNIR           ! near-infra-red albedo                   (-)
+>   REAL, POINTER, DIMENSION(:)   :: XALBVIS           ! visible albedo                          (-)
+>   REAL, POINTER, DIMENSION(:)   :: XALBUV            ! UV albedo                               (-)
+>   REAL, POINTER, DIMENSION(:)   :: XEMIS             ! surface emissivity                      (-)
+>   REAL, POINTER, DIMENSION(:)   :: XZ0               ! surface roughness length                (m)
+146a151
+>   REAL, POINTER, DIMENSION(:)   :: XVEG              ! vegetation cover fraction               (-)
+304,307d308
+< ! - SGH scheme
+< !
+<   REAL, POINTER, DIMENSION(:)    :: XD_ICE          ! depth of the soil column for the calculation
+<                                                     ! of the frozen soil fraction (m)
+313,324d313
+< TYPE TEB_GREENROOF_PGD_EVOL_t
+< ! - Vegetation: Ags Prognostic (YPHOTO = ('LAI', 'LST', or 'NIT') or prescribed (YPHOTO='NON', 'AGS' or 'LST')
+< !
+<   REAL, POINTER, DIMENSION(:)   :: XLAI              ! Leaf Area Index                         (m2/m2)
+<   REAL, POINTER, DIMENSION(:)   :: XVEG              ! vegetation cover fraction               (-)
+<   REAL, POINTER, DIMENSION(:)   :: XALBNIR           ! near-infra-red albedo                   (-)
+<   REAL, POINTER, DIMENSION(:)   :: XALBVIS           ! visible albedo                          (-)
+<   REAL, POINTER, DIMENSION(:)   :: XALBUV            ! UV albedo                               (-)
+<   REAL, POINTER, DIMENSION(:)   :: XEMIS             ! surface emissivity                      (-)
+<   REAL, POINTER, DIMENSION(:)   :: XZ0               ! surface roughness length                (m)
+< !
+< END TYPE TEB_GREENROOF_PGD_EVOL_t
+354c343,346
+< 
+---
+> ! - Vegetation: Ags Prognostic (YPHOTO = ('LAI', 'LST', or 'NIT') or prescribed (YPHOTO='NON', 'AGS' or 'LST')
+> !
+>   REAL, POINTER, DIMENSION(:)    :: XLAI             ! Leaf Area Index                         (m2/m2)
+> !
+373a366,367
+>   REAL, POINTER, DIMENSION(:)    :: XD_ICE          ! depth of the soil column for the calculation
+>                                                     ! of the frozen soil fraction (m)
+397d390
+< TYPE(TEB_GREENROOF_PGD_EVOL_t),ALLOCATABLE, TARGET, SAVE :: TEB_GREENROOF_PGD_EVOL_MODEL(:,:)
+776a770,774
+> TEB_GREENROOF_PGD_MODEL(KFROM)%XALBNIR=>XALBNIR
+> TEB_GREENROOF_PGD_MODEL(KFROM)%XALBVIS=>XALBVIS
+> TEB_GREENROOF_PGD_MODEL(KFROM)%XALBUV=>XALBUV
+> TEB_GREENROOF_PGD_MODEL(KFROM)%XEMIS=>XEMIS
+> TEB_GREENROOF_PGD_MODEL(KFROM)%XZ0=>XZ0
+781a780
+> TEB_GREENROOF_PGD_MODEL(KFROM)%XVEG=>XVEG
+855d853
+< TEB_GREENROOF_PGD_MODEL(KFROM)%XD_ICE=>XD_ICE
+872a871,875
+> XALBNIR=>TEB_GREENROOF_PGD_MODEL(KTO)%XALBNIR
+> XALBVIS=>TEB_GREENROOF_PGD_MODEL(KTO)%XALBVIS
+> XALBUV=>TEB_GREENROOF_PGD_MODEL(KTO)%XALBUV
+> XEMIS=>TEB_GREENROOF_PGD_MODEL(KTO)%XEMIS
+> XZ0=>TEB_GREENROOF_PGD_MODEL(KTO)%XZ0
+877a881
+> XVEG=>TEB_GREENROOF_PGD_MODEL(KTO)%XVEG
+951d954
+< XD_ICE=>TEB_GREENROOF_PGD_MODEL(KTO)%XD_ICE
+975a979,983
+> NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XALBNIR)
+> NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XALBVIS)
+> NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XALBUV)
+> NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XEMIS)
+> NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XZ0)
+980a989
+> NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XVEG)
+1054d1062
+< NULLIFY(TEB_GREENROOF_PGD_MODEL(J)%XD_ICE)
+1068,1128d1075
+< 
+< SUBROUTINE TEB_GREENROOF_PGD_EVOL_GOTO_MODEL(KFROM, KTO, LKFROM, KFROM_PATCH, KTO_PATCH)
+< LOGICAL, INTENT(IN) :: LKFROM
+< INTEGER, INTENT(IN) :: KFROM, KTO
+< INTEGER, INTENT(IN) :: KFROM_PATCH, KTO_PATCH
+< REAL(KIND=JPRB) :: ZHOOK_HANDLE
+< !
+< ! Save current state for allocated arrays
+< IF (LKFROM) THEN
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XALBNIR=>XALBNIR
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XALBVIS=>XALBVIS
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XALBUV=>XALBUV
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XEMIS=>XEMIS
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XZ0=>XZ0
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XVEG=>XVEG
+< TEB_GREENROOF_PGD_EVOL_MODEL(KFROM,KFROM_PATCH)%XLAI=>XLAI
+< ENDIF
+< !
+< ! Current model is set to model KTO
+< IF (LHOOK) CALL DR_HOOK('MODD_TEB_GREENROOF_N:TEB_GREENROOF_PGD_EVOL_GOTO_MODEL',0,ZHOOK_HANDLE)
+< XALBNIR=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XALBNIR
+< XALBVIS=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XALBVIS
+< XALBUV=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XALBUV
+< XEMIS=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XEMIS
+< XZ0=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XZ0
+< XVEG=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XVEG
+< XLAI=>TEB_GREENROOF_PGD_EVOL_MODEL(KTO,KTO_PATCH)%XLAI
+< IF (LHOOK) CALL DR_HOOK('MODD_TEB_GREENROOF_N:TEB_GREENROOF_PGD_EVOL_GOTO_MODEL',1,ZHOOK_HANDLE)
+< !
+< END SUBROUTINE TEB_GREENROOF_PGD_EVOL_GOTO_MODEL
+< 
+< SUBROUTINE TEB_GREENROOF_PGD_EVOL_ALLOC(KMODEL,KPATCH)
+< INTEGER, INTENT(IN) :: KMODEL, KPATCH
+< INTEGER :: J, JP
+< REAL(KIND=JPRB) :: ZHOOK_HANDLE
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GREENROOF_N:TEB_GREENROOF_PGD_EVOL_ALLOC",0,ZHOOK_HANDLE)
+< ALLOCATE(TEB_GREENROOF_PGD_EVOL_MODEL(KMODEL,KPATCH))
+< DO J=1,KMODEL
+<  DO JP=1,KPATCH
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XALBNIR)
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XALBVIS)
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XALBUV)
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XEMIS)
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XZ0)
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XVEG)
+< NULLIFY(TEB_GREENROOF_PGD_EVOL_MODEL(J,JP)%XLAI)
+<  ENDDO
+< ENDDO
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GREENROOF_N:TEB_GREENROOF_PGD_EVOL_ALLOC",1,ZHOOK_HANDLE)
+< END SUBROUTINE TEB_GREENROOF_PGD_EVOL_ALLOC
+< 
+< SUBROUTINE TEB_GREENROOF_PGD_EVOL_DEALLO
+< REAL(KIND=JPRB) :: ZHOOK_HANDLE
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GREENROOF_N:TEB_GREENROOF_PGD_EVOL_DEALLO",0,ZHOOK_HANDLE)
+< IF (ALLOCATED(TEB_GREENROOF_PGD_EVOL_MODEL)) DEALLOCATE(TEB_GREENROOF_PGD_EVOL_MODEL)
+< IF (LHOOK) CALL DR_HOOK("MODD_TEB_GREENROOF_N:TEB_GREENROOF_PGD_EVOL_DEALLO",1,ZHOOK_HANDLE)
+< END SUBROUTINE TEB_GREENROOF_PGD_EVOL_DEALLO
+< 
+< 
+< 
+< 
+1141a1089
+> TEB_GREENROOF_MODEL(KFROM,KFROM_PATCH)%XLAI=>XLAI
+1158a1107
+> TEB_GREENROOF_MODEL(KFROM,KFROM_PATCH)%XD_ICE=>XD_ICE
+1169a1119
+> XLAI=>TEB_GREENROOF_MODEL(KTO,KTO_PATCH)%XLAI
+1186a1137
+> XD_ICE=>TEB_GREENROOF_MODEL(KTO,KTO_PATCH)%XD_ICE
+1204a1156
+>   NULLIFY(TEB_GREENROOF_MODEL(J,JP)%XLAI)
+1214a1167
+>   NULLIFY(TEB_GREENROOF_MODEL(J,JP)%XD_ICE)
+modd_teb_gridn.F90
+modd_tebn.F90
+modd_teb_par.F90
+modd_teb_veg.F90
+modd_teb_vegn.F90
+modd_timing.F90
+modd_treedrag.F90
+modd_type_date_surf.F90
+modd_type_efutil.F90
+modd_type_snow.F90
+modd_ver_interp_lin_surf.F90
+modd_water_par.F90
+modd_watflux_gridn.F90
+modd_watfluxn.F90
+modd_watflux_sbln.F90
+modd_write_cover_tex.F90
+modd_write_surf_atm.F90
+mode_aer_surf.F90
+mode_char2real.F90
+mode_coare30_psi.F90
+mode_conv_DOE.F90
+mode_coupling_canopy.F90
+mode_crodebug.F90
+mode_dslt_surf.F90
+mode_dstmblutl.F90
+mode_fasurfex.F90
+mode_flake.F90
+mode_gauss_index.F90
+mode_geo_gauss.F90
+mode_gridtype_cartesian.F90
+mode_gridtype_conf_proj.F90
+mode_gridtype_gauss.F90
+mode_gridtype_ign.F90
+mode_gridtype_lonlat_reg.F90
+mode_gridtype_lonlatval.F90
+mode_hydro_dif.F90
+mode_modeln_surfex_handler.F90
+mode_modeln_teb_handler.F90
+mode_pos_surf.F90
+mode_psychro.F90
+mode_read_buffer.F90
+mode_read_cdf.F90
+mode_read_extern.F90
+mode_read_grib.F90
+mode_read_netcdf_mercator.F90
+mode_read_surf_asc.F90
+mode_read_surf_fa.F90
+mode_sbls.F90
+mode_sfcflx.F90
+mode_sltmbl.F90
+mode_snow3l.F90
+mode_soil.F90
+mode_splines.F90
+mode_split_grid_parameter.F90
+mode_surf_flood_frac.F90
+mode_surf_snow_frac.F90
+mode_thermos.F90
+mode_write_cover_tex.F90
+mode_write_surf_asc.F90
+mode_write_surf_fa.F90
+modn_agri.F90
+modn_assim.F90
+modn_chs_orilam.F90
+modn_deepsoil.F90
+modn_dst.F90
+modn_flaken.F90
+modn_ideal_flux.F90
+modn_idealn.F90
+modn_isban.F90
+modn_pgd_grid.F90
+modn_pgd_schemes.F90
+modn_prep_flake.F90
+modn_prep_garden_snow.F90
+modn_prep_greenroof_snow.F90
+modn_prep_isba_carbon.F90
+modn_prep_isba.F90
+modn_prep_isba_snow.F90
+modn_prep_seaflux.F90
+modn_prep_surf_atm.F90
+modn_prep_teb.F90
+modn_prep_teb_garden.F90
+modn_prep_teb_greenroof.F90
+modn_prep_teb_snow.F90
+modn_prep_watflux.F90
+modn_seafluxn.F90
+modn_slt.F90
+modn_soiltemp_arp.F90
+modn_sson.F90
+modn_surf_atm.F90
+modn_surf_atmn.F90
+modn_teb_greenroofn.F90
+modn_tebn.F90
+modn_teb_vegn.F90
+modn_treedrag.F90
+modn_watfluxn.F90
+modn_write_cover_tex.F90
+modn_write_surf_atm.F90
+mr98.F90
+nitro_decline.F90
+ocean_mercatorvergrid.F90
+old_name.F90
+open_aux_io_surf_asc.F90
+open_aux_io_surf.F90
+open_aux_io_surf_fa.F90
+open_file_asc.F90
+open_file.F90
+open_file_fa.F90
+open_namelist_asc.F90
+open_namelist.F90
+open_namelist_fa.F90
+pack_ch_isba_patchn.F90
+pack_diag_patch_get_sizen.F90
+pack_diag_patchn.F90
+pack_grid_cartesian.F90
+pack_grid_conf_proj.F90
+pack_grid.F90
+pack_grid_gauss.F90
+pack_grid_ign.F90
+pack_grid_lonlat_reg.F90
+pack_grid_lonlatval.F90
+pack_isba_patch_get_sizen.F90
+pack_isba_patchn.F90
+pack_pgd.F90
+pack_pgd_isba.F90
+pack_pgd_seaflux.F90
+pack_pgd_soil.F90
+pack_same_rank.F90
+param_cls.F90
+permafrost_depth.F90
+pgd_bathyfield.F90
+pgd_bem_par.F90
+pgd_chemistry.F90
+pgd_chemistry_snap.F90
+pgd_cover.F90
+pgd_dummy.F90
+pgd_ecoclimap2_data.F90
+pgd_field.F90
+pgd_flake.F90
+pgd_frac.F90
+pgd_gauss_index.F90
+pgd_grid.F90
+pgd_grid_io_init.F90
+pgd_grid_surf_atm.F90
+pgd_inland_water.F90
+pgd_isba.F90
+pgd_isba_par.F90
+pgd_nature.F90
+pgd_orography.F90
+pgd_sea.F90
+pgd_seaflux.F90
+pgd_seaflux_par.F90
+pgd_snap_temp_profile.F90
+pgd_surf_atm.F90
+pgd_teb.F90
+142c142
+< CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,LGREENROOF,CBLD_ATYPE)
+---
+> CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,CBLD_ATYPE)
+pgd_teb_garden_par.F90
+pgd_teb_greenroof.F90
+pgd_teb_greenroof_par.F90
+pgd_teb_par.F90
+2c2
+<       SUBROUTINE PGD_TEB_PAR(HPROGRAM,OGARDEN,OGREENROOF,HBLD_ATYPE)
+---
+>       SUBROUTINE PGD_TEB_PAR(HPROGRAM,OGARDEN,HBLD_ATYPE)
+97d96
+< LOGICAL,             INTENT(IN)    :: OGREENROOF   ! T if greenroofs option is activated
+690,691c689
+< IF (OGREENROOF) THEN
+<   CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'GREENROOF','BLD',CFNAM_GREENROOF,CFTYP_GREENROOF,XUNIF_GREENROOF ,&
+---
+> CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'GREENROOF','BLD',CFNAM_GREENROOF,CFTYP_GREENROOF,XUNIF_GREENROOF ,&
+693,708c691
+<   IF (.NOT.LDATA_GREENROOF) DEALLOCATE(XPAR_GREENROOF)
+< ELSE IF ( (XUNIF_GREENROOF/=0. .AND. XUNIF_GREENROOF/=XUNDEF) .OR. LEN_TRIM(CFNAM_GREENROOF)/=0) THEN
+<   WRITE(ILUOUT,*) '---------------------------------------------'
+<   WRITE(ILUOUT,*) ' You chose not to include greenroofs in urban areas : LGREENROOF=.FALSE.     '
+<   WRITE(ILUOUT,*) ' But            '
+<   IF (XUNIF_GREENROOF/=0. .AND. XUNIF_GREENROOF/=XUNDEF) THEN
+<     WRITE(ILUOUT,*) ' You also chose a greenroof fraction that is not zero : XUNIF_GREENROOF=',XUNIF_GREENROOF
+<   ELSE
+<     WRITE(ILUOUT,*) ' You also chose a greenroof fraction that is not zero : CFNAM_GREENROOF=',CFNAM_GREENROOF
+<   END IF
+<   WRITE(ILUOUT,*) '- - - - - - - - - - - - - - - - - - - - - - -'
+<   WRITE(ILUOUT,*) ' Please choose either:'
+<   WRITE(ILUOUT,*) ' LGREENROOF=.TRUE. or set GREENROOF fraction to zero (XUNIF_GREENROOF=0.) in namelist PGD_TEB_PAR'
+<   WRITE(ILUOUT,*) '---------------------------------------------'
+<   CALL ABOR1_SFX('PGD_TEB_PAR: GREENROOF flag and GREENROOF fraction not coherent')
+< END IF
+---
+> IF (.NOT.LDATA_GREENROOF) DEALLOCATE(XPAR_GREENROOF)
+pgd_teb_veg.F90
+pgd_topo_index.F90
+pgd_town.F90
+pgd_tsz0_par.F90
+pgd_watflux.F90
+prep_buffer_grid.F90
+prep_ctrl_flake.F90
+prep_ctrl_ideal.F90
+prep_ctrl_isba.F90
+prep_ctrl_seaflux.F90
+prep_ctrl_surf_atm.F90
+prep_ctrl_teb.F90
+prep_ctrl_watflux.F90
+prep_flake_ascllv.F90
+prep_flake_buffer.F90
+prep_flake_extern.F90
+prep_flake.F90
+prep_flake_grib.F90
+prep_flake_sbl.F90
+prep_flake_unif.F90
+prep_grib_grid.F90
+prep_grid_cartesian.F90
+prep_grid_conf_proj.F90
+prep_grid_extern.F90
+prep_grid_gauss.F90
+prep_grid_lonlat_reg.F90
+prep_hor_flake_field.F90
+prep_hor_isba_field.F90
+prep_hor_ocean_field.F90
+prep_hor_ocean_fields.F90
+prep_hor_seaflux_field.F90
+prep_hor_snow_field.F90
+prep_hor_snow_fields.F90
+prep_hor_teb_field.F90
+prep_hor_teb_garden_field.F90
+prep_hor_teb_greenroof_field.F90
+prep_hor_watflux_field.F90
+prep_inland_water.F90
+prep_isba_ascllv.F90
+prep_isba_buffer.F90
+prep_isba_canopy.F90
+prep_isba_extern.F90
+prep_isba.F90
+prep_isba_grib.F90
+prep_isba_netcdf.F90
+prep_isba_unif.F90
+prep_nature.F90
+prep_ocean_ascllv.F90
+prep_ocean_netcdf.F90
+prep_ocean_unif.F90
+prep_output_grid.F90
+prep_perm_snow.F90
+prep_sea.F90
+prep_seaflux_buffer.F90
+prep_seaflux_extern.F90
+prep_seaflux.F90
+prep_seaflux_grib.F90
+prep_seaflux_netcdf.F90
+prep_seaflux_sbl.F90
+prep_seaflux_unif.F90
+prep_snow_buffer.F90
+prep_snow_extern.F90
+prep_snow_grib.F90
+prep_snow_unif.F90
+prep_sso_canopy.F90
+prep_sst_init.F90
+prep_surf_atm.F90
+prep_teb_buffer.F90
+prep_teb_canopy.F90
+prep_teb_extern.F90
+prep_teb.F90
+prep_teb_garden_ascllv.F90
+prep_teb_garden_buffer.F90
+prep_teb_garden_extern.F90
+prep_teb_garden.F90
+prep_teb_garden_grib.F90
+prep_teb_garden_unif.F90
+prep_teb_greenroof_ascllv.F90
+prep_teb_greenroof_buffer.F90
+prep_teb_greenroof_extern.F90
+prep_teb_greenroof.F90
+prep_teb_greenroof_grib.F90
+prep_teb_greenroof_unif.F90
+prep_teb_grib.F90
+prep_teb_unif.F90
+prep_town.F90
+prep_ver_flake.F90
+prep_ver_isba.F90
+prep_ver_seaflux.F90
+prep_ver_snow.F90
+prep_ver_teb.F90
+prep_ver_teb_garden.F90
+prep_ver_teb_greenroof.F90
+prep_ver_watflux.F90
+prep_watflux_buffer.F90
+prep_watflux_extern.F90
+prep_watflux.F90
+prep_watflux_grib.F90
+prep_watflux_sbl.F90
+prep_watflux_unif.F90
+pt_by_pt_treatment.F90
+put_in_time.F90
+put_on_all_vegtypes.F90
+put_pgd_grid.F90
+put_rad_sean.F90
+put_rad_watn.F90
+put_sfxcpln.F90
+put_zs_inland_watern.F90
+put_zs_naturen.F90
+put_zsn.F90
+put_zs_sean.F90
+put_zs_surf_atmn.F90
+put_zs_townn.F90
+radiative_transfert.F90
+read_all_namelists.F90
+read_and_send_mpi.F90
+read_arrange_cover.F90
+read_ascllv.F90
+read_assim_conf.F90
+read_binllv.F90
+read_binllvfast.F90
+read_bld_description.F90
+read_buffer.F90
+read_cover_garden.F90
+read_covern.F90
+read_covers_param.F90
+read_csvdata_teb.F90
+read_default_dst.F90
+read_default_flaken.F90
+read_default_idealn.F90
+read_default_isban.F90
+read_default_seafluxn.F90
+read_default_slt.F90
+read_default_surf_atm.F90
+read_default_surf_atmn.F90
+read_default_tebn.F90
+read_default_teb_vegn.F90
+read_default_watfluxn.F90
+read_direct.F90
+read_direct_gauss.F90
+read_dst_conf.F90
+read_dummyn.F90
+read_eco2_irrig.F90
+read_flake_confn.F90
+read_flake_date.F90
+read_flaken.F90
+read_flake_sbln.F90
+read_from_surfex_file.F90
+read_grid.F90
+read_gridtype_cartesian.F90
+read_gridtype_conf_proj.F90
+read_gridtype.F90
+read_gridtype_gauss.F90
+read_gridtype_ign.F90
+read_gridtype_lonlat_reg.F90
+read_gridtype_lonlatval.F90
+read_gr_snow.F90
+readhead.F90
+read_ideal_confn.F90
+read_ideal_flux_conf.F90
+read_isba_canopyn.F90
+read_isba_conf.F90
+read_isba_confn.F90
+read_isba_date.F90
+read_isban.F90
+read_latlon.F90
+read_lclim_lai.F90
+read_lcover.F90
+read_lecoclimap.F90
+read_namelists_assim.F90
+read_namelists_dst.F90
+read_namelists_flaken.F90
+read_namelists_ideal.F90
+read_namelists_idealn.F90
+read_namelists_isba.F90
+read_namelists_isban.F90
+read_namelists_seafluxn.F90
+read_namelists_slt.F90
+read_namelists_surf.F90
+read_namelists_surfn.F90
+read_namelists_tebn.F90
+read_namelists_watfluxn.F90
+read_nam_grid_cartesian.F90
+read_nam_grid_conf_proj.F90
+read_nam_grid_gauss.F90
+read_nam_grid_ign.F90
+read_nam_grid_lonlat_reg.F90
+read_nam_grid_lonlatval.F90
+read_nam_gridtype.F90
+read_nam_pgd_chemistry.F90
+read_nam_pgd_cover.F90
+read_nam_pgd_dummy.F90
+read_nam_pgd_gauss_index.F90
+read_nam_pgd_isba.F90
+read_nam_pgd_orography.F90
+read_nam_pgd_seabathy.F90
+read_nam_pgd_teb.F90
+read_nam_pgd_teb_greenroof.F90
+read_nam_prep_flaken.F90
+read_nam_prep_gardenn.F90
+read_nam_prep_greenroofn.F90
+read_nam_prep_isban.F90
+read_nam_prep_seafluxn.F90
+read_nam_prep_surfn.F90
+read_nam_prep_tebn.F90
+read_nam_prep_watfluxn.F90
+read_nam_write_cover_tex.F90
+read_netcdf.F90
+read_oceann.F90
+read_pgd_arrange_cover.F90
+read_pgd_cover_garden.F90
+read_pgd_flaken.F90
+read_pgd_isban.F90
+read_pgd_isba_parn.F90
+read_pgd_schemes.F90
+read_pgd_seafluxn.F90
+read_pgd_seaflux_parn.F90
+read_pgd_teb_gardenn.F90
+read_pgd_teb_garden_parn.F90
+read_pgd_teb_greenroofn.F90
+read_pgd_teb_greenroof_parn.F90
+read_pgd_tebn.F90
+read_pgd_teb_parn.F90
+read_pgd_tsz0_parn.F90
+read_pgd_watfluxn.F90
+read_precipn.F90
+read_pre_flake_dat_conf.F90
+read_prep_file_date.F90
+read_prep_flake_conf.F90
+read_prep_garden_snow.F90
+read_prep_greenroof_snow.F90
+read_prep_isba_carbon.F90
+read_prep_isba_conf.F90
+read_prep_isba_date_conf.F90
+read_prep_isba_snow.F90
+read_prep_seaflux_conf.F90
+read_prep_surf_atm_conf.F90
+read_prep_teb_conf.F90
+read_prep_teb_date_conf.F90
+read_prep_teb_garden_conf.F90
+read_prep_teb_greenroof_conf.F90
+read_prep_teb_snow.F90
+read_prep_watflux_conf.F90
+read_pre_seaf_dat_conf.F90
+read_pre_surfa_dat_conf.F90
+read_pre_watf_dat_conf.F90
+read_seaflux_confn.F90
+read_seaflux_date.F90
+read_seafluxn.F90
+read_seaflux_sbln.F90
+read_slt_conf.F90
+read_sso_canopyn.F90
+read_sson.F90
+read_surf_atm_conf.F90
+read_surf_atm_confn.F90
+read_surf_atm_date.F90
+read_surf.F90
+read_surf_isba_parn.F90
+read_teb_canopyn.F90
+read_teb_confn.F90
+read_teb_date.F90
+read_teb_gardenn.F90
+read_teb_greenroofn.F90
+122c122
+<   YRECFM=HPATCH//'TWN_GR_WI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+---
+>   YRECFM=HPATCH//'TWN_GR_WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+137,139c137
+<   YRECFM = HPATCH//'TWN_GR_LAI'
+<   YRECFM=ADJUSTL(YRECFM)
+<   CALL READ_SURF(HPROGRAM,YRECFM,XLAI(:),IRESP)
+---
+>   XLAI(:) = 0.
+read_teb_greenroof_parn.F90
+read_tebn.F90
+read_teb_patch.F90
+read_teb_veg_confn.F90
+read_watflux_confn.F90
+read_watflux_date.F90
+read_watfluxn.F90
+read_watflux_sbln.F90
+readwrite_emis_fieldn.F90
+refresh_pgdwork.F90
+regular_grid_spawn.F90
+rmc01_surf.F90
+road_layer_e_budget.F90
+roof_impl_coef.F90
+roof_layer_e_budget.F90
+rw_precipn.F90
+second_sfx.F90
+set_rough.F90
+set_surfex_filein.F90
+set_surfex_file_name_asc.F90
+set_surfex_file_name_fa.F90
+sm10.F90
+snow3l.F90
+snow3L_isba.F90
+snow_cover_1layer.F90
+snowcro.F90
+snowcroupgrid.F90
+snow_heat_to_t_wliq.F90
+snow_t_wliq_to_heat.F90
+soil_albedo.F90
+soildif.F90
+soilemisnon.F90
+soil.F90
+soilgrid.F90
+soil_heatdif.F90
+2,3c2,3
+<       SUBROUTINE SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,                          &
+<                               PSOILHCAPZ,PCT,PTERM1,PTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX)  
+---
+>       SUBROUTINE SOIL_HEATDIF(PTSTEP,PD_G,PDZG,PDZDIF,PSOILCONDZ,             &
+>                               PSOILHCAPZ,PCT,PTERM1,PTERM2,PTDEEP,PTG         )  
+76c76
+< REAL, DIMENSION(:), INTENT(IN)      :: PCT, PTERM1, PTERM2, PTDEEP_A, PTDEEP_B
+---
+> REAL, DIMENSION(:), INTENT(IN)      :: PCT, PTERM1, PTERM2, PTDEEP
+82,84c82
+< !                                      PTDEEP_A = Deep soil temperature
+< !                                                 coefficient depending on flux
+< !                                      PTDEEP_B = Deep soil temperature (prescribed)
+---
+> !                                      PTDEEP = Deep soil temperature (prescribed)
+90,91d87
+< !                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+< !                                              (with PDEEP_FLUX in W/m2)
+93c89
+< REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ, PSOILHCAPZ
+---
+> REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ, PSOILHCAPZ, PD_G
+95a92
+> !                                      PD_G       = depth of bottom of soil layer (m)
+103,104d99
+< REAL, DIMENSION(:), INTENT(OUT)     :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+< !
+179,193c174,176
+< 
+< !ZDEEP_FLUX=ZDTERM(:,INLVLD)*(ZTGM(:,INLVLD)-ZTDEEP(:))
+< !ZTDEEP=PTDEEP_A*ZDEEP_FLUX+PTDEEP_B
+< !
+< !ZDEEP_FLUX=ZDTERM(:,INLVLD)*(ZTGM(:,INLVLD)-PTDEEP_A*ZDEEP_FLUX-PTDEEP_B)
+< !ZDEEP_FLUX=ZDTERM(:,INLVLD)*(ZTGM(:,INLVLD)-PTDEEP_B)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
+< !
+< !
+< WHERE(PTDEEP_B(:) /= XUNDEF)
+< !   ZBMTRX(:,INLVLD) =  ZCTERM(:,INLVLD) + ZDTERM(:,INLVLD-1) + ZDTERM(:,INLVLD)
+< !   ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) + ZDTERM(:,INLVLD)*PTDEEP(:)
+<    ZBMTRX(:,INLVLD) =  ZCTERM(:,INLVLD) + ZDTERM(:,INLVLD-1) &
+<                      + ZDTERM(:,INLVLD)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
+<    ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) &
+<                      + ZDTERM(:,INLVLD)*PTDEEP_B(:)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
+---
+> WHERE(PTDEEP(:) /= XUNDEF)
+>    ZBMTRX(:,INLVLD) =  ZCTERM(:,INLVLD) + ZDTERM(:,INLVLD-1) + ZDTERM(:,INLVLD)
+>    ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) + ZDTERM(:,INLVLD)*PTDEEP(:)
+211,219d193
+< !
+< !* Deep soil Flux
+< !
+< PDEEP_FLUX(:) = 0.
+< WHERE(PTDEEP_B(:) /= XUNDEF)
+<   PDEEP_FLUX=ZDTERM(:,INLVLD)*(ZTGM(:,INLVLD)-PTDEEP_B)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
+< END WHERE
+< !
+< 
+soilstress.F90
+soil_temp_arp.F90
+soiltemp_arp_par.F90
+spinup_max.F90
+split_grid_cartesian.F90
+split_grid_conf_proj.F90
+split_grid.F90
+sso_be04_frictionn.F90
+sso_beljaars04.F90
+sso.F90
+sso_z0_frictionn.F90
+sst_update.F90
+start_lake_of.F90
+stores_hvac_autosize.F90
+subscale_aos.F90
+subscale_z0eff_1d.F90
+subscale_z0eff.F90
+substract_to_date_surf.F90
+sum_on_all_procs.F90
+sunpos.F90
+surface_aero_cond.F90
+surface_cdch_1darp.F90
+surface_cd.F90
+surface_ri.F90
+surf_patch.F90
+surf_version.F90
+sw_daycycle.F90
+teb_canopy.F90
+teb.F90
+885a886
+> print*,'teb2 ',PH_ROAD(20)
+1015a1017
+> print*,'teb3 ',PH_ROAD(20)
+teb_garden.F90
+606a607
+> REAL, DIMENSION(SIZE(PTA)) :: ZCOND_GR            ! thermal conductivity of greenroof bottom layer
+905,906c906,907
+<                 ZAC_AGG_GREENROOF, ZHU_AGG_GREENROOF,PG_GREENROOF_ROOF,              &
+<                 PRUNOFF_GREENROOF, PDRAIN_GREENROOF                                  )  
+---
+>                 ZAC_AGG_GREENROOF, ZHU_AGG_GREENROOF,ZCOND_GR,PRUNOFF_GREENROOF,     &
+>                 PDRAIN_GREENROOF                                                     )  
+911a913,919
+>   ! estimation of heat conduction flux between bottom of greenroof and roof layer 1
+>   ZMTC_O_GR_R1 (:) = 2. * ZCOND_GR(:) / (XDG(:,NLAYER_GR)-XDG(:,NLAYER_GR-1))  
+>   !                        
+>   PG_GREENROOF_ROOF (:) = ZMTC_O_GR_R1 (:) * (XTG(:,NLAYER_GR) - PT_ROOF(:,1))
+>   ! mieux vaudrait calculer ce flux avec le TG recalculé dans soil_heatdif : A FAIRE 
+>   ! vérifier que bilan d'énergie fermé 
+> !
+tebgrid.F90
+teb_morpho.F90
+temporal_dists.F90
+temporal_lts.F90
+test_nam_var_surf.F90
+test_record_len.F90
+thermal_layers_conf.F90
+thrmcondz.F90
+town_presence.F90
+trad_body.F90
+treat_bathyfield.F90
+treat_field.F90
+treat_global_lake_depth.F90
+tridiag_ground.F90
+tridiag_surf.F90
+tsz0.F90
+unpack_ch_isba_patchn.F90
+unpack_diag_patchn.F90
+unpack_isba_patchn.F90
+unpack_same_rank2.F90
+unpack_same_rank.F90
+update_data_cover.F90
+update_data_fracn.F90
+update_esm_flaken.F90
+update_esm_isban.F90
+update_esm_seafluxn.F90
+update_esm_surf_atmn.F90
+update_esm_watfluxn.F90
+update_rad_isban.F90
+update_rad_seawat.F90
+urban_drag.F90
+urban_exch_coef.F90
+urban_fluxes.F90
+urban_hydro.F90
+urban_lw_coef.F90
+urban_snow_evol.F90
+urban_solar_abs.F90
+utci_approx.F90
+utci_teb.F90
+vegetation_evol.F90
+391d390
+<   IF (SIZE(PAOSIP)>0) &
+vegetation_update.F90
+vegetation_update_garden.F90
+vegetation_update_greenroof.F90
+veg.F90
+veg_from_lai.F90
+vegtype_grid_to_patch_grid.F90
+vegtype_to_patch.F90
+ver_interp_lin3d_surf.F90
+ver_interp_lin_surf.F90
+wall_layer_e_budget.F90
+water_flux.F90
+wet_leaves_frac.F90
+window_data.F90
+window_e_budget.F90
+window_shading_availability.F90
+window_shading.F90
+wind_threshold.F90
+write_bld_description.F90
+write_cover_tex_cover.F90
+write_cover_tex_end.F90
+write_cover_tex_isba.F90
+write_cover_tex_isba_par.F90
+write_cover_tex_start.F90
+write_cover_tex_teb.F90
+write_cover_tex_water.F90
+write_data.F90
+write_diag_ch_snapn.F90
+write_diag_flaken.F90
+write_diag_inland_watern.F90
+write_diag_isban.F90
+write_diag_misc_flaken.F90
+write_diag_misc_isban.F90
+write_diag_misc_tebn.F90
+write_diag_naturen.F90
+write_diag_pgd_grdnn.F90
+write_diag_pgd_isban.F90
+write_diag_pgd_tebn.F90
+write_diag_seafluxn.F90
+write_diag_sean.F90
+write_diag_seb_flaken.F90
+write_diag_seb_isban.F90
+write_diag_seb_oceann.F90
+write_diag_seb_seafluxn.F90
+write_diag_seb_surf_atmn.F90
+write_diag_seb_tebn.F90
+write_diag_seb_watfluxn.F90
+write_diag_surf_atmn.F90
+write_diag_tebn.F90
+write_diag_townn.F90
+write_diag_watfluxn.F90
+write_dst_conf.F90
+write_ecoclimap2_data.F90
+write_flaken.F90
+write_grid.F90
+write_gridtype_cartesian.F90
+write_gridtype_conf_proj.F90
+write_gridtype_gauss.F90
+write_gridtype_ign.F90
+write_gridtype_lonlat_reg.F90
+write_gridtype_lonlatval.F90
+write_header_fa.F90
+write_inland_watern.F90
+write_isban.F90
+write_naturen.F90
+write_pgd_flaken.F90
+write_pgd_inland_watern.F90
+write_pgd_isban.F90
+write_pgd_naturen.F90
+write_pgd_seafluxn.F90
+write_pgd_sean.F90
+write_pgd_surf_atmn.F90
+write_pgd_tebn.F90
+write_pgd_townn.F90
+write_pgd_watfluxn.F90
+write_seafluxn.F90
+write_sean.F90
+writesurf_atm_confn.F90
+write_surf_atmn.F90
+writesurf_ch_emisn.F90
+writesurf_covern.F90
+writesurf_dummyn.F90
+write_surf.F90
+writesurf_flake_confn.F90
+writesurf_flaken.F90
+writesurf_flake_sbln.F90
+writesurf_gr_snow.F90
+writesurf_isba_canopyn.F90
+writesurf_isba_confn.F90
+writesurf_isban.F90
+writesurf_oceann.F90
+writesurf_pgd_flaken.F90
+writesurf_pgd_isban.F90
+writesurf_pgd_isba_parn.F90
+writesurf_pgd_seafluxn.F90
+writesurf_pgd_seaf_parn.F90
+writesurf_pgd_teb_greenroofn.F90
+writesurf_pgd_tebn.F90
+writesurf_pgd_teb_parn.F90
+writesurf_pgd_teb_vegn.F90
+writesurf_pgd_tsz0_parn.F90
+writesurf_pgd_watfluxn.F90
+writesurf_precipn.F90
+writesurf_seaflux_confn.F90
+writesurf_seafluxn.F90
+writesurf_seaflux_sbln.F90
+writesurf_snapn.F90
+writesurf_sso_canopyn.F90
+writesurf_sson.F90
+writesurf_teb_canopyn.F90
+writesurf_teb_confn.F90
+writesurf_teb_gardenn.F90
+writesurf_teb_greenroofn.F90
+127c127
+<   YRECFM=HPATCH//'TWN_GR_WI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+---
+>   YRECFM=HPATCH//'TWN_GR_WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+131c131
+<   WRITE(YCOMMENT,YFORM) 'X_Y_TWN_GR_WI',JLAYER,' (m3/m3)'
+---
+>   WRITE(YCOMMENT,YFORM) 'X_Y_TWN_GR_WGI',JLAYER,' (m3/m3)'
+writesurf_tebn.F90
+writesurf_watflux_confn.F90
+writesurf_watfluxn.F90
+writesurf_watflux_sbln.F90
+write_tebn.F90
+write_townn.F90
+write_watfluxn.F90
+z0eff.F90
+z0rel_1d.F90
+z0v_from_lai.F90
+zoom_pgd_cover.F90
+zoom_pgd_inland_water.F90
+zoom_pgd_isba.F90
+zoom_pgd_isba_full.F90
+zoom_pgd_nature.F90
+zoom_pgd_orography.F90
+zoom_pgd_sea.F90
+zoom_pgd_seaflux.F90
+zoom_pgd_surf_atm.F90
+zoom_pgd_teb.F90
+zoom_pgd_town.F90
+zsfilter.F90
