@@ -196,7 +196,8 @@ CONTAINS
                      + 0.3055907979*PSAND**(1./3.)-0.1202046909*PCLAY**(1./3.)
      CASE ('CO84')
        WHERE(PCLAY/=XUNDEF) &
-         W33_FUNC_2D = 0.3558-0.279327*PSAND+0.2729689*PCLAY-0.236929*(PCLAY**2) 
+         W33_FUNC_2D = 0.2016592588-0.5785747196*PSAND+0.1113006987*PCLAY    &
+                     + 0.4305771483*PSAND**(1./3.)-0.0080618093*PCLAY**(1./3.) 
    END SELECT
    
    WHERE (PCLAY==XUNDEF) W33_FUNC_2D = XUNDEF
@@ -447,6 +448,7 @@ CONTAINS
    IF (LHOOK) CALL DR_HOOK('MODE_SOIL:PCOEF_FUNC_2D',1,ZHOOK_HANDLE)
    !
    END FUNCTION PCOEF_FUNC_2D
+   
 !                                                          
 !
 !-------------------------------------------------------------------------------
@@ -542,7 +544,8 @@ CONTAINS
                      + 0.3055907979*PSAND**(1./3.)-0.1202046909*PCLAY**(1./3.)
      CASE ('CO84')
        WHERE(PCLAY/=XUNDEF) &
-         W33_FUNC_1D = 0.3558-0.279327*PSAND+0.2729689*PCLAY-0.236929*(PCLAY**2) 
+         W33_FUNC_1D = 0.2016592588-0.5785747196*PSAND+0.1113006987*PCLAY    &
+                     + 0.4305771483*PSAND**(1./3.)-0.0080618093*PCLAY**(1./3.) 
    END SELECT
    
    WHERE (PCLAY==XUNDEF) W33_FUNC_1D = XUNDEF
