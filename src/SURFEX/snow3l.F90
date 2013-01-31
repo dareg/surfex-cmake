@@ -1492,6 +1492,8 @@ WHERE(PPEW_A_COEF(:)/= 0.)
 ENDWHERE
 !
 ! implicit wind friction
+ZUSTAR2(:) = MAX(ZUSTAR2(:),0.)
+!
 PUSTAR2_IC(:) =  ZUSTAR2(:)
 !
 ! 3. Calculate linearized surface energy budget components:
