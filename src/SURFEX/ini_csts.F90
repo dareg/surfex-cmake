@@ -110,7 +110,7 @@ XTH00 = 300.
 !*	 5.     RADIATION CONSTANTS
 !	        -------------------
 !
-XSTEFAN = 2.* XPI**5 * XBOLTZ**2 * XBOLTZ**2 / (15.* XLIGHTSPEED**2 * XPLANCK**3)
+XSTEFAN = 2.* XPI**5 * XBOLTZ**4 / (15.* XLIGHTSPEED**2 * XPLANCK**3)
 XI0     = 1370.
 !
 !-------------------------------------------------------------------------------
