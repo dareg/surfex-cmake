@@ -178,7 +178,7 @@ TYPE DIAG_SURF_ATM_t
   REAL, POINTER, DIMENSION(:) :: XRW_RAIN       ! Init/End rainfall rate   (kg/m2/s)
   REAL, POINTER, DIMENSION(:) :: XRW_SNOW       ! Init/End snowfall rate   (kg/m2/s)
 !                                   
-  CHARACTER(LEN=12), POINTER, DIMENSION(:) :: CSELECT  ! Name of ouput fields if LSELECT=true
+  CHARACTER(LEN=16), POINTER, DIMENSION(:) :: CSELECT  ! Name of ouput fields if LSELECT=true
 !
 !------------------------------------------------------------------------------
 !
@@ -215,7 +215,7 @@ LOGICAL, POINTER :: LPROVAR_TO_DIAG=>NULL()
 !$OMP THREADPRIVATE(LPROVAR_TO_DIAG)
 LOGICAL, POINTER :: LSELECT=>NULL()
 !$OMP THREADPRIVATE(LSELECT)
-CHARACTER(LEN=12), DIMENSION(:), POINTER :: CSELECT=>NULL()
+CHARACTER(LEN=16), DIMENSION(:), POINTER :: CSELECT=>NULL()
 !$OMP THREADPRIVATE(CSELECT)
 TYPE(DATE_TIME), POINTER :: TIME_BUDGETC=>NULL()
 !$OMP THREADPRIVATE(TIME_BUDGETC)
