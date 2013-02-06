@@ -77,7 +77,7 @@ INTEGER,           INTENT(IN)  :: KTEB_PATCH ! patch number being written
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=5)  :: YPATCH         ! Prefix for current patch
+CHARACTER(LEN=3)  :: YPATCH         ! Prefix for current patch
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -89,8 +89,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_TEB_N',0,ZHOOK_HANDLE)
 CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
-YPATCH = '     '
-IF (NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'TEB',KTEB_PATCH,'_'
+YPATCH = '   '
+IF (NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'T',KTEB_PATCH,'_'
 !-------------------------------------------------------------------------------
 !
 IF (LSURF_MISC_BUDGET) THEN

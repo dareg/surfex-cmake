@@ -91,7 +91,7 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IDECADE  ! decade of simulation
 !
 INTEGER :: JTEB_PATCH  ! loop counter on TEB patches
-CHARACTER(LEN=5) :: YPATCH ! patch identificator
+CHARACTER(LEN=3) :: YPATCH ! patch identificator
 !
 REAL, DIMENSION(KI)               :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(KI)               :: ZTG1 ! work array for surface temperature
@@ -148,9 +148,9 @@ ENDIF
 !* allocation of urban green area variables
 !
 !
-  YPATCH='     '
+  YPATCH='   '
   CALL GET_CURRENT_TEB_PATCH(JTEB_PATCH)
-  IF (NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'TEB',JTEB_PATCH,'_'
+  IF (NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'T',JTEB_PATCH,'_'
 !
   CALL READ_TEB_GARDEN_n(HPROGRAM,YPATCH)
 !

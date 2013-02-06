@@ -81,7 +81,7 @@ INTEGER           :: ILU          ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
 !
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=5)  :: YPATCH         ! suffix if more than 1 patch
+CHARACTER(LEN=3)  :: YPATCH         ! suffix if more than 1 patch
 !
 INTEGER           :: IVERSION, IBUGFIX
 LOGICAL           :: GOLD_NAME      ! name of temperatures in old versions of SURFEX
@@ -97,8 +97,8 @@ IF (LHOOK) CALL DR_HOOK('READ_TEB_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_TOWN'
 CALL GET_TYPE_DIM_n('TOWN  ',ILU)
 !
-YPATCH='     '
-IF (NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'TEB',KPATCH,'_'
+YPATCH='   '
+IF (NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'T',KPATCH,'_'
 !  
 CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
 CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)

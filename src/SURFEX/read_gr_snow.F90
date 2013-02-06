@@ -60,7 +60,7 @@ CHARACTER(LEN=6),   INTENT(IN)           :: HPROGRAM  ! calling program
 CHARACTER (LEN=*),  INTENT(IN)           :: HSURFTYPE ! generic name used for
                                                       ! snow characteristics
                                                       ! storage in file
-CHARACTER (LEN=5),  INTENT(IN)           :: HPREFIX   ! generic name for patch
+CHARACTER (LEN=3),  INTENT(IN)           :: HPREFIX   ! generic name for patch
 !                                                     ! identification                      
 INTEGER,            INTENT(IN)           :: KLU       ! horizontal size of snow var.
 INTEGER,            INTENT(IN)           :: KPATCH    ! number of tiles

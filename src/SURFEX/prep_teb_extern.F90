@@ -63,7 +63,7 @@ LOGICAL                              :: GTEB      ! flag if TEB fields are prese
 INTEGER                              :: IPATCH    ! number of soil temperature patches
 INTEGER                              :: ITEB_PATCH! number of TEB patches in file
 INTEGER                              :: ICURRENT_PATCH! current TEB patch to be initialized
-CHARACTER(LEN=5)                     :: YPATCH    ! indentificator for TEB patch
+CHARACTER(LEN=3)                     :: YPATCH    ! indentificator for TEB patch
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -124,9 +124,9 @@ ELSE
 !
     CALL READ_TEB_PATCH(HFILEPGDTYPE,ITEB_PATCH)
     CALL GET_CURRENT_TEB_PATCH(ICURRENT_PATCH)
-    YPATCH='     '
+    YPATCH='   '
     IF (ITEB_PATCH>1) THEN
-      WRITE(YPATCH,FMT='(A,I1,A)') 'TEB',MIN(ICURRENT_PATCH,ITEB_PATCH),'_'
+      WRITE(YPATCH,FMT='(A,I1,A)') 'T',MIN(ICURRENT_PATCH,ITEB_PATCH),'_'
     END IF
 !---------------------------------------------------------------------------------------
     SELECT CASE(HSURF)

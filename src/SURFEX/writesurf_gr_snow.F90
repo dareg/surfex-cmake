@@ -55,7 +55,7 @@ CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program
 CHARACTER (LEN=*),  INTENT(IN) :: HSURFTYPE  ! generic name used for
                                              ! snow characteristics
                                              ! storage in file
-CHARACTER (LEN=5),  INTENT(IN) :: HPREFIX    ! generic name of prefix for
+CHARACTER (LEN=3),  INTENT(IN) :: HPREFIX    ! generic name of prefix for
                                              ! patch identification
 TYPE(SURF_SNOW),    INTENT(IN) :: TPSNOW     ! snow characteristics
 !
