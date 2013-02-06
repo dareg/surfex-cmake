@@ -67,7 +67,7 @@ INTEGER           :: IRESP          ! Error code after redding
 !
 CHARACTER(LEN=4)  :: YLVL
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=14) :: YFORM          ! Writing format
 REAL, DIMENSION(:),ALLOCATABLE  :: ZWORK      ! 1D array to write data in file
 !

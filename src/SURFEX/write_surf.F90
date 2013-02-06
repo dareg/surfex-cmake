@@ -192,7 +192,7 @@ CHARACTER(LEN=100),INTENT(IN) :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -326,7 +326,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL
 CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
@@ -444,7 +444,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL1
 INTEGER            :: IL2
 CHARACTER(LEN=1)   :: YDIR
@@ -563,7 +563,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 CHARACTER(LEN=100) :: YCOMMENT
 INTEGER            :: IL1
 INTEGER            :: IL2
@@ -698,7 +698,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -829,7 +829,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL
 CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
@@ -949,7 +949,7 @@ CHARACTER(LEN=100),  INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 CHARACTER(LEN=40)  :: YFIELD
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
@@ -1083,7 +1083,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1213,7 +1213,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL
 CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
@@ -1335,7 +1335,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 REAL    :: ZTIME
 DOUBLE PRECISION   :: XTIME0
 INTEGER :: IDAY
@@ -1462,7 +1462,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 INTEGER :: IL1
 REAL ,   DIMENSION(SIZE(TFIELD,1)) :: ZTIME
 INTEGER, DIMENSION(SIZE(TFIELD,1)) :: IDAY
@@ -1567,7 +1567,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16)  :: YREC
+CHARACTER(LEN=12)  :: YREC
 INTEGER :: IL1, IL2
 REAL ,   DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: ZTIME
 INTEGER, DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: IDAY

@@ -76,7 +76,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

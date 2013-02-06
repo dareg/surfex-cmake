@@ -38,7 +38,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,               INTENT(IN)  :: PFIELD   ! the real scalar to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
@@ -93,7 +93,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KFIELD   ! the integer scalar to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
@@ -148,7 +148,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD   ! the integer scalar to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
@@ -206,7 +206,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),   INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,             INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
@@ -366,7 +366,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),   INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
@@ -583,7 +583,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),    INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),    INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,              INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),   INTENT(IN) :: HCOMMENT
@@ -773,7 +773,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(IN)  :: HCOMMENT
@@ -935,7 +935,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
 INTEGER,            INTENT(IN)  :: KMONTH   ! month
 INTEGER,            INTENT(IN)  :: KDAY     ! day
@@ -945,7 +945,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=16) :: YRECFM    ! Name of the article to be written
+CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be written
 INTEGER :: IFILE_ID, IVAR_ID, JRET, JWRK
 INTEGER :: JLEN
 INTEGER,DIMENSION(3) :: ITDATE  ! work array read in the file

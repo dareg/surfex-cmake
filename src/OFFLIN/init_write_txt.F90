@@ -40,7 +40,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=16),   INTENT(IN)     :: HREC    
+CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 LOGICAL,             INTENT(INOUT)  :: OWFL
 INTEGER                             :: IP, IVAR, IFIELD, JFIELD
 LOGICAL                             :: LMATCH

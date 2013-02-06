@@ -95,7 +95,7 @@ REAL, DIMENSION(:), POINTER :: ZHO2IP
 REAL, DIMENSION(:), POINTER :: ZHO2IM
 REAL, DIMENSION(:), POINTER :: ZHO2JP
 REAL, DIMENSION(:), POINTER :: ZHO2JM
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_OROGRAPHY',0,ZHOOK_HANDLE)

@@ -152,7 +152,7 @@ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YREC           ! Name of the article to be read
+CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -866,59 +866,59 @@ IF (LSURF_BUDGETC) THEN
       !
       IF(LPATCH_BUDGET)THEN
         !
-        YREC='RNC_PATCH'
+        YREC='RNC_P'
         CALL READ_SURF(HPROGRAM,YREC,XRNC    ,IRESP)
-        YREC='HC_PATCH'
+        YREC='HC_P'
         CALL READ_SURF(HPROGRAM,YREC,XHC     ,IRESP)
-        YREC='LEC_PATCH'
+        YREC='LEC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLEC    ,IRESP)
-        YREC='LEIC_PATCH'
+        YREC='LEIC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLEIC   ,IRESP)        
-        YREC='GFLUXC_PATCH'
+        YREC='GFLUXC_P'
         CALL READ_SURF(HPROGRAM,YREC,XGFLUXC ,IRESP)
-        YREC='LEGC_PATCH'
+        YREC='LEGC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLEGC   ,IRESP)
-        YREC='LEGIC_PATCH'
+        YREC='LEGIC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLEGIC  ,IRESP)
-        YREC='LEVC_PATCH'
+        YREC='LEVC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLEVC   ,IRESP)
-        YREC='LESC_PATCH'
+        YREC='LESC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLESC   ,IRESP)
         IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN  
-          YREC='LESLC_PATCH'
+          YREC='LESLC_P'
           CALL READ_SURF(HPROGRAM,YREC,XLESLC,IRESP)        
         ELSE
           XLESLC = 0.0
         ENDIF
-        YREC='LERC_PATCH'
+        YREC='LERC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLERC   ,IRESP)
-        YREC='LETRC_PATCH'
+        YREC='LETRC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLETRC  ,IRESP)
-        YREC='EVAPC_PATCH'
+        YREC='EVAPC_P'
         CALL READ_SURF(HPROGRAM,YREC,XEVAPC  ,IRESP)
-        YREC='DRAINC_PATCH'
+        YREC='DRAINC_P'
         CALL READ_SURF(HPROGRAM,YREC,XDRAINC ,IRESP)
-        YREC='RUNOFFC_PATCH'
+        YREC='RUNOFFC_P'
         CALL READ_SURF(HPROGRAM,YREC,XRUNOFFC,IRESP)
-        YREC='DRIVEGC_PATCH'
+        YREC='DRIVEGC_P'
         CALL READ_SURF(HPROGRAM,YREC,XDRIPC,IRESP)
-        YREC='RRVEGC_PATCH'
+        YREC='RRVEGC_P'
         CALL READ_SURF(HPROGRAM,YREC,XRRVEGC,IRESP)
-        YREC='SNOMLTC_PATCH'
+        YREC='SNOMLTC_P'
         CALL READ_SURF(HPROGRAM,YREC,XMELTC,IRESP)
         IF (LAGRIP) THEN
-           YREC='IRRIGC_PATCH'
+           YREC='IRRIGC_P'
            CALL READ_SURF(HPROGRAM,YREC,XIRRIG_FLUXC,IRESP)
         ELSE
            XIRRIG_FLUXC = 0.0
         ENDIF
         !
         IF(CPHOTO/='NON')THEN
-          YREC='GPPC_PATCH'
+          YREC='GPPC_P'
           CALL READ_SURF(HPROGRAM,YREC,XGPPC,IRESP)
-          YREC='RC_AUTO_PATCH'
+          YREC='RC_AUTO_P'
           CALL READ_SURF(HPROGRAM,YREC,XRESPC_AUTO,IRESP)
-          YREC='RC_ECO_PATCH'
+          YREC='RC_ECO_P'
           CALL READ_SURF(HPROGRAM,YREC,XRESPC_ECO,IRESP)  
         ELSE
           XGPPC      =0.0
@@ -926,39 +926,39 @@ IF (LSURF_BUDGETC) THEN
           XRESPC_ECO =0.0
         ENDIF
         !
-        YREC='SWDC_PATCH'
+        YREC='SWDC_P'
         CALL READ_SURF(HPROGRAM,YREC,XSWDC,IRESP)
-        YREC='SWUC_PATCH'
+        YREC='SWUC_P'
         CALL READ_SURF(HPROGRAM,YREC,XSWUC,IRESP)
-        YREC='LWDC_PATCH'
+        YREC='LWDC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLWDC,IRESP)
-        YREC='LWUC_PATCH'
+        YREC='LWUC_P'
         CALL READ_SURF(HPROGRAM,YREC,XLWUC,IRESP)
-        YREC='FMUC_PATCH'
+        YREC='FMUC_P'
         CALL READ_SURF(HPROGRAM,YREC,XFMUC,IRESP)
-        YREC='FMVC_PATCH'
+        YREC='FMVC_P'
         CALL READ_SURF(HPROGRAM,YREC,XFMVC,IRESP)
         !
         IF(LGLACIER)THEN
-           YREC='ICE_FC_PATCH'         
+           YREC='ICE_FC_P'         
            CALL READ_SURF(HPROGRAM,YREC,XICEFLUXC,IRESP)      
         ENDIF
         !
         IF(CHORT=='SGH'.OR.CISBA=='DIF')THEN
-          YREC='HORTONC_PATCH'
+          YREC='HORTONC_P'
           CALL READ_SURF(HPROGRAM,YREC,XHORTC    ,IRESP)
         ELSE
           XHORTC     = 0.0
         ENDIF
         !
         IF(LFLOOD)THEN
-          YREC='IFLOODC_PATCH'
+          YREC='IFLOODC_P'
           CALL READ_SURF(HPROGRAM,YREC,XIFLOODC,IRESP)
-          YREC='PFLOODC_PATCH'
+          YREC='PFLOODC_P'
           CALL READ_SURF(HPROGRAM,YREC,XPFLOODC,IRESP)
-          YREC='LEFC_PATCH'
+          YREC='LEFC_P'
           CALL READ_SURF(HPROGRAM,YREC,XLE_FLOODC,IRESP)
-          YREC='LEIFC_PATCH'
+          YREC='LEIFC_P'
           CALL READ_SURF(HPROGRAM,YREC,XLEI_FLOODC,IRESP)
         ELSE
           XIFLOODC       = 0.0
@@ -968,15 +968,15 @@ IF (LSURF_BUDGETC) THEN
         ENDIF
         !  
         IF(LWATER_BUDGET)THEN 
-          YREC='DWGC_PATCH'
+          YREC='DWGC_P'
           CALL READ_SURF(HPROGRAM,YREC,XDWGC,IRESP)
-          YREC='DWGIC_PATCH'
+          YREC='DWGIC_P'
           CALL READ_SURF(HPROGRAM,YREC,XDWGIC,IRESP)
-          YREC='DWRC_PATCH'
+          YREC='DWRC_P'
           CALL READ_SURF(HPROGRAM,YREC,XDWRC,IRESP)
-          YREC='DSWEC_PATCH'
+          YREC='DSWEC_P'
           CALL READ_SURF(HPROGRAM,YREC,XDSWEC,IRESP)
-          YREC='WATBUDC_PATCH'
+          YREC='WATBUDC_P'
           CALL READ_SURF(HPROGRAM,YREC,XWATBUDC,IRESP)
         ENDIF
         !

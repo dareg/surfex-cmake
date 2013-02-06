@@ -33,7 +33,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KDATA
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
@@ -63,7 +63,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     INTEGER,DIMENSION(KSIZE),INTENT(IN):: KDATA
 !
@@ -95,7 +95,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     REAL,INTENT(IN)                   :: PDATA
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
@@ -125,7 +125,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     REAL,DIMENSION(KSIZE),INTENT(IN)  :: PDATA
 !
@@ -157,7 +157,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     LOGICAL,INTENT(IN)                :: LDATA
 !
     REAL(KIND=8),DIMENSION(1)         :: ZDONNE
@@ -191,7 +191,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     LOGICAL,DIMENSION(KSIZE),INTENT(IN) :: LDATA
 !
@@ -227,7 +227,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     CHARACTER,DIMENSION(KSIZE),INTENT(IN) :: CDATA
 !
@@ -259,7 +259,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     INTEGER,DIMENSION(KSIZE),INTENT(OUT) :: KDATA
 !
@@ -291,7 +291,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(OUT)               :: KDATA
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
@@ -321,7 +321,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     REAL,DIMENSION(KSIZE),INTENT(OUT) :: PDATA
 !
@@ -353,7 +353,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     REAL,INTENT(OUT)                  :: PDATA
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
@@ -383,7 +383,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     LOGICAL,DIMENSION(KSIZE),INTENT(OUT)  :: LDATA
 !
@@ -416,7 +416,7 @@ CONTAINS
     INTEGER,INTENT(INOUT)             :: KREP
 !
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     LOGICAL,INTENT(OUT)               :: LDATA
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
@@ -446,7 +446,7 @@ CONTAINS
 !
     INTEGER,INTENT(INOUT)             :: KREP
     INTEGER,INTENT(IN)                :: KN
-    CHARACTER(LEN=16),INTENT(IN)      :: CNOMC
+    CHARACTER(LEN=12),INTENT(IN)      :: CNOMC
     INTEGER,INTENT(IN)                :: KSIZE
     CHARACTER,DIMENSION(KSIZE),INTENT(OUT)  :: CDATA
 !

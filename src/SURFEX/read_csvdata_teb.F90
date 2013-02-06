@@ -65,6 +65,7 @@ CHARACTER(LEN=28), INTENT(IN) :: HFILE    ! file to read
 !
 INTEGER            :: ILUNAM       ! logical unit of the file
 INTEGER            :: ILUOUT       ! logical unit of the output listing file
+CHARACTER(LEN=400) :: YSTRING
 CHARACTER(LEN=80)  :: YSTRING1, YSTRING2, YSTRING3, YSTRING4, &
                       YSTRING5, YSTRING6, YSTRING7, YSTRING8, YSTRING9
 CHARACTER(LEN=30), DIMENSION(:),   ALLOCATABLE :: YUSE_NAME ! building's use name
@@ -136,14 +137,18 @@ DO
   YSTRING4=' '
   YSTRING5=' '
   YSTRING6=' '
-  READ(ILUNAM,END=98,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, YSTRING6
+!* reads the record
+  READ(ILUNAM,END=98,FMT='(A400)') YSTRING
+!* analyses if the record has been written in French convention 
+  CALL FRENCH_TO_ENGLISH(YSTRING)
+!* reads the string
+  IF (LEN_TRIM(YSTRING)>0) &
+  READ(YSTRING,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, YSTRING6
   IF (YSTRING1=='DATE' .AND. YSTRING2(4:)=='plage de date') THEN
-    BACKSPACE(ILUNAM)
-    READ(ILUNAM,FMT=*) YSTRING1, YSTRING2, NDESC_AGE_LIST(:)
+    READ(YSTRING,FMT=*) YSTRING1, YSTRING2, NDESC_AGE_LIST(:)
   END IF
   IF (YSTRING1=='DATE' .AND. YSTRING2(:)=='Date maximum') THEN
-    BACKSPACE(ILUNAM)
-    READ(ILUNAM,FMT=*) YSTRING1, YSTRING2, NDESC_AGE_DATE(:)
+    READ(YSTRING,FMT=*) YSTRING1, YSTRING2, NDESC_AGE_DATE(:)
   END IF
 END DO
 !
@@ -170,12 +175,20 @@ DO
   YSTRING4=' '
   YSTRING5=' '
   YSTRING6=' '
-  READ(ILUNAM,END=99,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, YSTRING6
+!* reads the record
+  READ(ILUNAM,END=99,FMT='(A400)') YSTRING
+!* analyses if the record has been written in French convention 
+  CALL FRENCH_TO_ENGLISH(YSTRING)
+!* reads the string
+  IF (LEN_TRIM(YSTRING)>0) &
+  READ(YSTRING,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, YSTRING6
 
   IF (YSTRING1=='TYPES USAGES' .AND. YSTRING4=='TYPES BATIMENTS') THEN
     ! reads both use and building types
     DO JBLD=1,MAX(NDESC_BLD,NDESC_USE)
-      READ(ILUNAM,FMT=*) YSTRING1, I1, YSTRING3, YSTRING4, I2, YSTRING6
+      READ(ILUNAM,FMT='(A400)') YSTRING
+      CALL FRENCH_TO_ENGLISH(YSTRING)
+      READ(YSTRING,FMT=*) YSTRING1, I1, YSTRING3, YSTRING4, I2, YSTRING6
     ! updates building types
       IF (JBLD<=NDESC_BLD) THEN
         YBLD_NAME(JBLD) = YSTRING4
@@ -450,12 +463,18 @@ CHARACTER(LEN=80) :: YERROR
 !
 REWIND(ILUNAM)
 DO
-YSTRING1 = ''
-YSTRING2 = ''
-READ(ILUNAM,END=101,FMT=*) YSTRING1, YSTRING2
+  YSTRING1 = ''
+  YSTRING2 = ''
+!* reads the record
+ READ(ILUNAM,END=101,FMT='(A400)') YSTRING
+!* analyses if the record has been written in French convention 
+  CALL FRENCH_TO_ENGLISH(YSTRING)
+!* reads the string
+  IF (LEN_TRIM(YSTRING)>0) &
+  READ(YSTRING,FMT=*) YSTRING1, YSTRING2
+
   IF (TRIM(YSTRING1)==TRIM(HCODE1)) THEN
-    BACKSPACE(ILUNAM)
-    READ(ILUNAM,*) YSTRING1, KDATA
+    READ(YSTRING,*) YSTRING1, KDATA
     REWIND(ILUNAM)
     RETURN
   END IF
@@ -476,13 +495,19 @@ LOGICAL           :: GCODE2
 !
 REWIND(ILUNAM)
 DO
-YSTRING1 = ''
-YSTRING2 = ''
-READ(ILUNAM,END=101,FMT=*) YSTRING1, YSTRING2
+  YSTRING1 = ''
+  YSTRING2 = ''
+!* reads the record
+  READ(ILUNAM,END=101,FMT='(A400)') YSTRING
+!* analyses if the record has been written in French convention 
+  CALL FRENCH_TO_ENGLISH(YSTRING)
+!* reads the string
+  IF (LEN_TRIM(YSTRING)>0) &
+  READ(YSTRING,FMT=*) YSTRING1, YSTRING2
+
   GCODE2 = TRIM(YSTRING2)==TRIM(HCODE2)
   IF (TRIM(YSTRING1)==TRIM(HCODE1) .AND. GCODE2) THEN
-    BACKSPACE(ILUNAM)
-    READ(ILUNAM,*) YSTRING1, YSTRING2, KDATA
+    READ(YSTRING,*) YSTRING1, YSTRING2, KDATA
     REWIND(ILUNAM)
     RETURN
   END IF
@@ -509,7 +534,6 @@ LOGICAL                          :: GFOUND ! correct record has been found
 CHARACTER(LEN=80)                :: YTYPE  ! type of building or building's use
 !                                          ! in the csv file record
 CHARACTER(LEN=100)               :: YERROR ! Character string for error message
-CHARACTER(LEN=400)               :: YSTRING! Record read in the csv file
 INTEGER                          :: IN1 ! number of building type or use
 INTEGER                          :: IN2 ! number of construction dates
 !
@@ -538,7 +562,13 @@ DO
   YSTRING6=' '
   YSTRING7=' '
   YSTRING8=' '
-  READ(ILUNAM,END=100,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, YSTRING6, YSTRING7
+!* reads the record
+  READ(ILUNAM,END=100,FMT='(A400)') YSTRING
+!* analyses if the record has been written in French convention 
+  CALL FRENCH_TO_ENGLISH(YSTRING)
+!* reads the string
+  IF (LEN_TRIM(YSTRING)>0) &
+  READ(YSTRING,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, YSTRING6, YSTRING7
   !
   IF (YTYPE_OF_DATA=='EQUIPMENT' .OR. YTYPE_OF_DATA=='USE') THEN
     GFOUND = TRIM(YSTRING1)==TRIM(HCODE_ELEMENT) .AND. TRIM(YSTRING6)==TRIM(HCODE_ELEMENT2) &
@@ -551,11 +581,6 @@ DO
   END IF
 
   IF (GFOUND) THEN
-    BACKSPACE(ILUNAM)
-!* reads the record
-    READ(ILUNAM,END=100,FMT='(A400)') YSTRING
-!* analyses if the record has been written in French convention 
-    CALL FRENCH_TO_ENGLISH(YSTRING)
 !* reads the data in the record
   IF (YTYPE_OF_DATA=='EQUIPMENT' .OR. YTYPE_OF_DATA=='USE') THEN
     READ(YSTRING,FMT=*) YSTRING1, YSTRING2, YSTRING3, YSTRING4, YSTRING5, &

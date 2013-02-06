@@ -72,7 +72,7 @@ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YREC           ! Name of the article to be read
+CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

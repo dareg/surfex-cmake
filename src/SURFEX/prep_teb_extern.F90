@@ -45,7 +45,7 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZDEPTH_TOT     ! total depth of surface
 !
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZD  ! intermediate array
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILAYER         ! number of layers
 INTEGER           :: JLAYER         ! loop counter

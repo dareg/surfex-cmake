@@ -58,7 +58,7 @@ CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! choice of fields to initialize
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=16) :: YRECFM       ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM       ! Name of the article to be read
 CHARACTER(LEN=3)  :: YREAD
 INTEGER :: ILU     ! 1D physical dimension
 INTEGER :: IRESP   ! Error code after redding

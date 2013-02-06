@@ -71,7 +71,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16), INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
 INTEGER,           INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
@@ -82,7 +82,7 @@ CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFX0_FA',0,ZHOOK_HANDLE)
@@ -132,7 +132,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),   INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),   INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN)  :: KL       ! number of points
 REAL, DIMENSION(KL), INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -171,10 +171,10 @@ IF (NRANK==NPIO) THEN
 !$OMP SINGLE        
   !
   YPREF=HREC(1:3)
-  YSUFF=HREC(4:16) 
+  YSUFF=HREC(4:12) 
   !
   IF (YPREF=='CLS' .OR. YPREF=='SUR' .OR. YPREF=='PRO' .OR. YPREF=='ATM') THEN
-    CALL FACILE(KRESP,NUNIT_FA,HREC(1:4),0,HREC(5:16),ZWORK2,.FALSE.)
+    CALL FACILE(KRESP,NUNIT_FA,HREC(1:4),0,HREC(5:12),ZWORK2,.FALSE.)
     IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
     DO J=1,NDGUX
       DO I=1,NDLUX
@@ -255,7 +255,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),        INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),        INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN)  :: KL1      ! number of points
 INTEGER,                  INTENT(IN)  :: KL2      ! 2nd dimension
 REAL, DIMENSION(KL1,KL2), INTENT(OUT) :: PFIELD   ! array containing the data field
@@ -362,7 +362,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
@@ -373,7 +373,7 @@ CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 REAL(KIND=JPRB)  :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFN0_FA',0,ZHOOK_HANDLE)
@@ -422,7 +422,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
 INTEGER, DIMENSION(KL), INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -435,7 +435,7 @@ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
 !
 CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 !
@@ -533,7 +533,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC      ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
@@ -542,7 +542,7 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
 !
 CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 CHARACTER,DIMENSION(40) :: YFIELD
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
@@ -588,7 +588,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
@@ -597,7 +597,7 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -648,7 +648,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
 LOGICAL, DIMENSION(KL), INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -661,7 +661,7 @@ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
 !
 CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER           :: INFOMPI
@@ -733,7 +733,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
 INTEGER,            INTENT(OUT) :: KMONTH   ! month
 INTEGER,            INTENT(OUT) :: KDAY     ! day
@@ -745,7 +745,7 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL          :: GKNOWN
 INTEGER, DIMENSION(3) :: ITDATE
@@ -799,7 +799,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER                                  :: KL1, KL2
 INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KMONTH   ! month
@@ -812,7 +812,7 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 CHARACTER(LEN=50) :: YCOMMENT
 CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=16) :: YNAME ! Field Name
+CHARACTER(LEN=12) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE

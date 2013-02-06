@@ -78,7 +78,7 @@ INTEGER,           INTENT(IN)  :: KTEB_PATCH ! patch number being written
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=5)  :: YPATCH         ! Prefix for current patch
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

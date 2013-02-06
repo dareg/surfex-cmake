@@ -67,7 +67,7 @@ CHARACTER(LEN=5),  INTENT(IN)  :: HPATCH   ! current teb patch
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=14) :: YFORM          ! Writing format
 CHARACTER(LEN=4 ) :: YLVL

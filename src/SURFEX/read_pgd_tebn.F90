@@ -72,7 +72,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IVERSION
 INTEGER           :: IBUGFIX
 !

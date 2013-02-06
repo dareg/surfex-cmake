@@ -12,23 +12,23 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be written
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL,            INTENT(OUT) :: ONOWRITE ! flag for article to be written
 !
-CHARACTER(LEN=16) :: YREC
+CHARACTER(LEN=12) :: YREC
 INTEGER :: IFIELD,JFIELD
 INTEGER :: ILUOUT  ! listing logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:TEST_RECORD_LEN',0,ZHOOK_HANDLE)
-IF (LEN_TRIM(HREC)>16) THEN
+IF (LEN_TRIM(HREC)>12) THEN
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
   WRITE(ILUOUT,*) '----------------------------------------------'
   WRITE(ILUOUT,*) 'Error occured when writing a field            '
   WRITE(ILUOUT,*) 'The name of the field is too long             '
-  WRITE(ILUOUT,*) 'The name must not be longer than 16 characters'
+  WRITE(ILUOUT,*) 'The name must not be longer than 12 characters'
   WRITE(ILUOUT,*) 'Please shorten the name of your field         '
-  WRITE(ILUOUT,FMT='(A32,A16,A1)') ' The field name currently is : "',HREC,'"'
+  WRITE(ILUOUT,FMT='(A32,A12,A1)') ' The field name currently is : "',HREC,'"'
   WRITE(ILUOUT,*) '----------------------------------------------'
   CALL ABOR1_SFX('TEST_RECORD_LEN: FIELD NAME TOO LONG --> '//HREC)
 END IF

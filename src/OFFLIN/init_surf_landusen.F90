@@ -93,7 +93,7 @@ REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 INTEGER           :: JLAYER
 INTEGER           :: ILU          ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=4)  :: YLVL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

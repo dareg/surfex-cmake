@@ -44,7 +44,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! field to read or write
+CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! field to read or write
 CHARACTER(LEN=1),   INTENT(IN) :: HACTION  ! 'R' : file being read
                                            ! 'W' : file being written
 !

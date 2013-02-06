@@ -109,7 +109,7 @@ CHARACTER(LEN=1),  INTENT(IN)  :: HDIRIN
 !
 INTEGER           :: ILUOUT         ! output listing logical unit
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: JLAYER         ! loop index
 !
 INTEGER           :: IVERSION       ! surface version

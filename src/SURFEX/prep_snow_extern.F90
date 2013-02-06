@@ -58,7 +58,7 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZDEPTH       ! thickness of each layer (m
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZGRID        ! normalized input grid
 !
 LOGICAL                           :: GTOWN          ! town variables written in the file
-CHARACTER(LEN=16)                 :: YRECFM         ! record name
+CHARACTER(LEN=12)                 :: YRECFM         ! record name
 INTEGER                           :: IRESP          ! error return code
 INTEGER                           :: IVEGTYPE       ! actual number of vegtypes
 INTEGER                           :: JLAYER         ! loop on snow vertical grids

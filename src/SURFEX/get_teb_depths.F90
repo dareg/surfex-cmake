@@ -67,9 +67,9 @@ REAL,    DIMENSION(:,:), ALLOCATABLE :: ZD     ! depth of surface layers
 
 INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX        ! surface bugfix version
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=16) :: YRECFM1        ! Name of the article to be read
-CHARACTER(LEN=16) :: YRECFM2        ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM1        ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM2        ! Name of the article to be read
 CHARACTER(LEN=3)  :: YAREA          ! Area where field is to be averaged
 INTEGER           :: IRESP          ! reading return code
 LOGICAL           :: GDATA          ! T if depth is to be read in the file

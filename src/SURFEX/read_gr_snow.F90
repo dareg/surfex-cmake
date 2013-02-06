@@ -72,7 +72,7 @@ CHARACTER (LEN=1),  INTENT(IN), OPTIONAL :: HDIR      ! type of reading
 !*       0.2   declarations of local variables
 !
 INTEGER             :: IRESP               ! Error code after redding
-CHARACTER(LEN=16)   :: YRECFM              ! Name of the article to be read
+CHARACTER(LEN=12)   :: YRECFM              ! Name of the article to be read
 !
 CHARACTER (LEN=100) :: YFMT                ! format for writing
 INTEGER             :: ISURFTYPE_LEN       ! 

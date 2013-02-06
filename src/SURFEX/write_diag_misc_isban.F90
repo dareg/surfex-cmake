@@ -92,7 +92,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YLVL
 CHARACTER(LEN=20) :: YFORM
@@ -370,11 +370,11 @@ IF (LSURF_MISC_BUDGET) THEN
     !
     IF(CISBA=='DIF')THEN
       !
-      YRECFM='ALT_PATCH'
+      YRECFM='ALT_P'
       YCOMMENT='active layer thickness over permafrost per patch (m)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XALT(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
-      YRECFM='FLT_PATCH'
+      YRECFM='FLT_P'
       YCOMMENT='frozen layer thickness over non-permafrost per patch (m)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XFLT(:,:),IRESP,HCOMMENT=YCOMMENT) 
       !
@@ -399,7 +399,7 @@ IF (LSURF_MISC_BUDGET) THEN
     !               ----------
     !
     IF(CRUNOFF=='DT92')THEN     
-      YRECFM='FSAT_PATCH'
+      YRECFM='FSAT_P'
       YCOMMENT='Soil saturated fraction per patch (-)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XDFSAT(:,:),IRESP,HCOMMENT=YCOMMENT)
     ENDIF
@@ -409,15 +409,15 @@ IF (LSURF_MISC_BUDGET) THEN
     !
     IF(LFLOOD)THEN
       !        
-      YRECFM='FFG_PATCH'
+      YRECFM='FFG_P'
       YCOMMENT='flood fraction per patch over ground '
       CALL WRITE_SURF(HPROGRAM,YRECFM,XDFFG(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
-      YRECFM='FFV_PATCH'
+      YRECFM='FFV_P'
       YCOMMENT='flood fraction per patch over vegetation'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XDFFV(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
-      YRECFM='FF_PATCH'
+      YRECFM='FF_P'
       YCOMMENT='total flood fraction per patch'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XDFF(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
@@ -432,10 +432,10 @@ IF (LSURF_MISC_BUDGET) THEN
     CALL WRITE_SURF(HPROGRAM,YRECFM,XALBT(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
     IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
-      YRECFM='TS_PATCH'
+      YRECFM='TS_P'
       YCOMMENT='total surface temperature (isba+snow) per patch'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XTS(:,:),IRESP,HCOMMENT=YCOMMENT)
-      YRECFM='TSRAD_PATCH'
+      YRECFM='TSRAD_P'
       YCOMMENT='total radiative surface temperature (isba+snow) per patch'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XTSRAD(:,:),IRESP,HCOMMENT=YCOMMENT)
     ENDIF

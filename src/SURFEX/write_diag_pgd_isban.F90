@@ -71,7 +71,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,3)) :: ZWORK ! Work array
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YLVLV, YPAS
 !
