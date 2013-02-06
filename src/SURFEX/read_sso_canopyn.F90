@@ -108,7 +108,7 @@ ELSE
   !* altitudes
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A4)') 'SSO_CAN_Z',JLAYER,'    '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'SSO_CAN_Z',JLAYER,' '
     CALL READ_SURF(HPROGRAM,YRECFM,XZ(:,JLAYER),IRESP)
   END DO
   !
@@ -126,13 +126,13 @@ ELSE
     !
     !* wind in canopy
     DO JLAYER=1,NLVL
-      WRITE(YRECFM,'(A9,I2.2,A4)') 'SSO_CAN_U',JLAYER,'    '
+      WRITE(YRECFM,'(A9,I2.2,A1)') 'SSO_CAN_U',JLAYER,' '
       CALL READ_SURF(HPROGRAM,YRECFM,XU(:,JLAYER),IRESP)
     END DO
     !
     !* Tke in canopy
     DO JLAYER=1,NLVL
-      WRITE(YRECFM,'(A9,I2.2,A4)') 'SSO_CAN_E',JLAYER,'    '
+      WRITE(YRECFM,'(A9,I2.2,A1)') 'SSO_CAN_E',JLAYER,' '
       CALL READ_SURF(HPROGRAM,YRECFM,XTKE(:,JLAYER),IRESP)
     END DO
     !
