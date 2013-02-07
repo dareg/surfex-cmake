@@ -169,7 +169,7 @@ IF (.NOT. GTOWN) THEN
   TSNOW%SCHEME='1-L'
   CALL ALLOCATE_GR_SNOW(TSNOW,ILU,1)
 ELSE
-  CALL READ_GR_SNOW(HPROGRAM,'GARD',HPATCH,ILU,1,TSNOW  )
+  CALL READ_GR_SNOW(HPROGRAM,'GD',HPATCH,ILU,1,TSNOW  )
 ENDIF
 !
 !-------------------------------------------------------------------------------

@@ -141,7 +141,7 @@ END IF
 !
 !* snow mantel
 !
-CALL READ_GR_SNOW(HPROGRAM,'GROO',HPATCH,ILU,1,TSNOW  )! GROO:GreenROOf 
+CALL READ_GR_SNOW(HPROGRAM,'GR',HPATCH,ILU,1,TSNOW  )! GROO:GreenROOf 
 !
 !-------------------------------------------------------------------------------
 !
