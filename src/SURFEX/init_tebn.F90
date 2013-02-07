@@ -412,6 +412,12 @@ DO JPATCH=1,NTEB_PATCH
                       PROUGH_ROOF = XROUGH_ROOF, PROUGH_WALL = XROUGH_WALL,      &
                       PGREENROOF = XGREENROOF                                    )
   !
+  IF (.NOT. LGREENROOF .AND. MAXVAL(XGREENROOF)>0. ) THEN !<== A paralleliser pour un stop propre
+    WRITE(ILUOUT,*) 'You choose NOT to have greenroofs, BUT your greenroof fraction is not zero'
+    WRITE(ILUOUT,*) 'Please activate the greenroof option (and rerun the SURFEX suite from the PGD step)'
+    WRITE(ILUOUT,*) 'Or be sure NOT to have any greenroofs in your area'
+    CALL ABOR1_SFX('INIT_TEBN: GREENROOF OPTION NOT ACTIVATED WHILE GREENROOFS ARE PRESENT')
+  ENDIF
   !-------------------------------------------------------------------------------
   !
   !*       5.     Sky-view-factors:
