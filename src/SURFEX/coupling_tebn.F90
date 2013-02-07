@@ -532,13 +532,6 @@ ELSEWHERE
   ZLE_TRAFFIC (:) = 0.   
 END WHERE
 !
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  Reinitialize shading of windows when changing day
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!
-IF (CBEM=='BEM') &
-WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
-!
 !--------------------------------------------------------------------------------------
 !  Canyon forcing for TEB
 !--------------------------------------------------------------------------------------
@@ -736,6 +729,14 @@ END IF
 ZLESNOW_ROOF(:) = 0.
 ZLESNOW_ROAD(:) = 0.
 ZG_GREENROOF_ROOF(:) = 0.
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!  Reinitialize shading of windows when changing day
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+IF (CBEM=='BEM') &
+WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
+!
 !
 CALL TEB_GARDEN      (CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,                      &
                       TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
@@ -1144,11 +1145,10 @@ IF (LUTCI .AND. N2M >0) THEN
       ZU_UTCI(JJ) = ZWIND(JJ)
     ENDIF
   ENDDO
-           
- CALL UTCI_TEB(XT_CANYON, XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZREF_SW_GRND,&
-     ZREF_SW_FAC, ZSCA_SW, ZDIR_SW, PZENITH, ZEMIT_LW_FAC, ZEMIT_LW_GRND, PLW,   &
-     ZT_RAD_IND, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XUTCI_IN, XUTCI_OUTSUN,         &
-     XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE                                      )
+ CALL UTCI_TEB(XT_CANYON, XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND,&
+     ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC, ZAVG_EMIT_LW_GRND, PLW,   &
+     ZAVG_T_RAD_IND, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XUTCI_IN, XUTCI_OUTSUN,         &
+     XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE                                      )       
 ELSE IF (LUTCI) THEN
   XUTCI_IN(:) = XUNDEF
   XUTCI_OUTSUN(:) = XUNDEF
