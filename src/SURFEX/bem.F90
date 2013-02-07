@@ -473,6 +473,7 @@ ENDDO
 !
 DO JJ=1,SIZE(PT_CANYON)
   ! *first guess of indoor temperature
+
   ZTI_BLD(JJ) = PTI_BLD(JJ)                                          &
           + PTSTEP/(ZRHOI(JJ) * XCPD * PBLD_HEIGHT(JJ))              & 
           * (  PWALL_O_BLD(JJ) * PCONV_WALL_BLD(JJ)                        &
@@ -564,6 +565,10 @@ DO JJ=1,SIZE(PT_CANYON)
      PLE_WASTE   (JJ) = 0.0     
      PFAN_POWER  (JJ) = 0.0    
      PHVAC_HEAT  (JJ) = 0.0
+     !
+     PM_SYS  (JJ) = 0.0
+     PCOP    (JJ) = 0.0
+     PCAP_SYS(JJ) = 0.0
      !
   ! *If natural surventilation INACTIVE
   ELSE 
@@ -696,7 +701,6 @@ DO JJ=1,SIZE(PT_CANYON)
           PLE_WASTE(JJ) = 0. 
         ENDIF
         !!!!
-
         !
         !         From EP Engineering Reference (p. 647)
         PFAN_POWER(JJ) = PM_SYS(JJ) * ZFAN_AP(JJ) * ZFAN_EFF(JJ) * ZRHOI(JJ)
