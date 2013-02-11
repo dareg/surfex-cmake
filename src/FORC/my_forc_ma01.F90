@@ -78,7 +78,7 @@ INTEGER :: I ! loop counters
 !
 !============================================================================
 !
-REAL    :: XPI=4.*ATAN(1.)
+REAL    :: XPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      
 !      
@@ -91,6 +91,7 @@ KMONTH  = 06          ! starting month
 KYEAR   = 2001        ! starting year
 PTIME   = 27000.       ! starting time (s)
 !
+XPI=4.*ATAN(1.)
 !-----------------------------------------------------------------------------
 !      
 !      3.    grid definition
