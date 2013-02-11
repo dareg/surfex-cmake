@@ -1,5 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSION, PCO2, PRHOA)
+SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSION, KBUGFIX, &
+        PCO2, PRHOA)
 !#############################################################
 !
 !!****  *INIT_TEB_GARDEN_PGD_n* - routine to initialize ISBA
@@ -98,6 +99,7 @@ INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSV       ! number of scalars
 CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
 INTEGER,                            INTENT(IN)  :: KVERSION  ! version number of the file being read
+INTEGER,                            INTENT(IN)  :: KBUGFIX
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PRHOA       ! air density
 !
@@ -138,7 +140,7 @@ CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)
 !               ---------------------------------
 !
 IF (OREAD_PGD) &
-CALL READ_PGD_TEB_GARDEN_n(HPROGRAM,KVERSION)
+CALL READ_PGD_TEB_GARDEN_n(HPROGRAM,KVERSION,KBUGFIX)
 !
 !
 !*       2.3    Physiographic data fields from land cover:
