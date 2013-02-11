@@ -271,7 +271,7 @@ ENDIF
 DO JL=1,SIZE(XVEGTYPE_PATCH,2)
   WRITE(YPAS,'(I2)') JL 
   YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-  WRITE(YRECFM,FMT='(A11)') 'VEGTYPE_P'//YLVLV
+  WRITE(YRECFM,FMT='(A9)') 'VEGTY_P'//YLVLV
   YCOMMENT='fraction of each vegetation type for each patch'//' (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XVEGTYPE_PATCH(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
 END DO
@@ -310,19 +310,19 @@ IF (LSURF_DIAG_ALBEDO) THEN
 !* Soil albedos
 !
 !
-   YRECFM='ALBNIR_SOIL'
+   YRECFM='ALBNIR_S'
    YCOMMENT='soil near-infra-red albedo (-)'
    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBNIR_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
-   YRECFM='ALBVIS_SOIL'
+   YRECFM='ALBVIS_S'
    YCOMMENT='soil visible albedo (-)'
    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBVIS_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
-   YRECFM='ALBUV_SOIL'
+   YRECFM='ALBUV_S'
    YCOMMENT='soil UV albedo (-)'
    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBUV_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
