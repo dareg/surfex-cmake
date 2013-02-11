@@ -76,7 +76,7 @@ REAL*4, DIMENSION(KNPTS,KNI) :: ZU, ZV ! wind components
 !
 INTEGER :: I ! loop counters
 !
-REAL    :: XPI=4.*ATAN(1.)
+REAL    :: XPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !      
@@ -89,6 +89,7 @@ KMONTH  = 10          ! starting month
 KYEAR   = 1996        ! starting year
 PTIME   = 0.          ! starting time (s)
 !
+XPI=4.*ATAN(1.)
 !-----------------------------------------------------------------------------
 !      
 !      3.    grid definition
