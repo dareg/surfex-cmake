@@ -83,6 +83,7 @@ REAL, POINTER,     DIMENSION(:,:)   :: ZFIELD ! field to interpolate horizontall
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUT ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZVEGTYPE_PATCH ! vegtype for each patch
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZW        ! work array (x, fine   soil grid)
+REAL, ALLOCATABLE, DIMENSION(:)     :: ZSUM
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZF        ! work array (x, output soil grid)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZDG       ! out T grid (x, output soil grid)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZPATCH    ! work array for patches
@@ -92,6 +93,7 @@ INTEGER                             :: ILUOUT    ! output listing logical unit
 LOGICAL                             :: GUNIF     ! flag for prescribed uniform field
 INTEGER                             :: JVEGTYPE  ! loop on vegtypes
 INTEGER                             :: JLAYER    ! loop on layers
+INTEGER                             :: JI
 INTEGER                             :: IWORK     ! Work integer
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -181,13 +183,20 @@ DEALLOCATE(ZFIELD)
 !*      6.     Transformation from vegtype grid to averaged grid
 !
 ALLOCATE(ZW (SIZE(ZFIELDOUT,1),SIZE(ZFIELDOUT,2)))
+ALLOCATE(ZSUM (SIZE(ZFIELDOUT,1)))
 ZW = 0.
-DO JVEGTYPE=1,NVEGTYPE
-  DO JLAYER=1,SIZE(ZW,2)
-    ZW(:,JLAYER) = ZW(:,JLAYER) + XVEGTYPE(:,JVEGTYPE) * ZFIELDOUT(:,JLAYER,JVEGTYPE)
-  END DO
-END DO
 !
+DO JLAYER=1,SIZE(ZW,2)
+  ZSUM(:) = SUM(XVEGTYPE(:,:),2,ZFIELDOUT(:,JLAYER,:)/=XUNDEF)
+  DO JVEGTYPE=1,NVEGTYPE
+    WHERE (ZFIELDOUT(:,JLAYER,JVEGTYPE)/=XUNDEF) 
+      ZW(:,JLAYER) = ZW(:,JLAYER) + XVEGTYPE(:,JVEGTYPE) * ZFIELDOUT(:,JLAYER,JVEGTYPE) / ZSUM(:)
+    END WHERE
+  END DO
+  DO JI=1,SIZE(ZW,1)
+    IF (ALL(ZFIELDOUT(JI,JLAYER,:)==XUNDEF)) ZW(JI,JLAYER) = XUNDEF
+  ENDDO
+END DO
 !
 !-------------------------------------------------------------------------------------
 !
@@ -257,6 +266,7 @@ SELECT CASE (HSURF)
   !
  CASE('LAI    ') 
   !* LAI is updated only if present and pertinent (evolutive LAI) in input file
+
    WHERE (ZW(:,1)/=XUNDEF) XLAI(:) = ZW(:,1)
   !
 END SELECT

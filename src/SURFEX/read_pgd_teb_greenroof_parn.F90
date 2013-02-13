@@ -79,6 +79,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER           :: IVERSION, IBUGFIX
 INTEGER                               :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
@@ -97,10 +98,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_PAR_N',0,ZHOOK_HANDLE)
 !
-YRECFM='TWN_GR_NTIME'
+YRECFM='VERSION'
+CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+!
+YRECFM='BUG'
+CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+!
+YRECFM='TWN_GR_TIME'
+IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GR_NTIME'
 CALL READ_SURF(HPROGRAM,YRECFM,NTIME_GR,IRESP)
 !
 YRECFM='TWN_GR_LAYER'
+IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GR_LAYER'
 CALL READ_SURF(HPROGRAM,YRECFM,NLAYER_GR,IRESP)
 !
 ! Read type of green roof
