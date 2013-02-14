@@ -47,7 +47,7 @@ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !*      0.2   Declarations of local variables
 !
 LOGICAL          :: GKNOWN
-CHARACTER(LEN=12):: YNAME                  ! Field Name
+CHARACTER(LEN=18):: YNAME                  ! Field Name
 INTEGER          :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 REAL(KIND=JPRB)  :: ZHOOK_HANDLE
 !
@@ -107,7 +107,7 @@ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12):: YNAME                  ! Field Name
+CHARACTER(LEN=18):: YNAME                  ! Field Name
 LOGICAL          :: GKNOWN
 INTEGER          :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 REAL(KIND=JPRB)  :: ZHOOK_HANDLE
@@ -168,7 +168,7 @@ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12):: YNAME ! Field Name
+CHARACTER(LEN=18):: YNAME ! Field Name
 LOGICAL          :: GKNOWN
 INTEGER          :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 REAL(KIND=JPRB)  :: ZHOOK_HANDLE
@@ -230,7 +230,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
 !*      0.2   Declarations of local variables
 !
 CHARACTER,DIMENSION(40)  :: YFIELD
-CHARACTER(LEN=12)        :: YNAME ! Field Name
+CHARACTER(LEN=18)        :: YNAME ! Field Name
 LOGICAL                  :: GKNOWN
 INTEGER                  :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 REAL(KIND=JPRB)          :: ZHOOK_HANDLE
@@ -527,8 +527,8 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
-!
-CHARACTER(LEN=12)         :: YNAME ! Field Name
+! 
+CHARACTER(LEN=18)         :: YNAME! Field Nam
 LOGICAL                   :: GKNOWN
 INTEGER                   :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 INTEGER, DIMENSION(MAX(NFULL,SIZE(KFIELD))) :: IWORK  ! work array read in the file
@@ -628,7 +628,7 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12):: YNAME ! Field Name
+CHARACTER(LEN=18):: YNAME ! Field Name
 LOGICAL          :: GKNOWN
 INTEGER          :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 DOUBLE PRECISION :: XTIME0
@@ -712,7 +712,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)     :: YNAME ! Field Name
+CHARACTER(LEN=18)     :: YNAME ! Field Name
 LOGICAL               :: GKNOWN
 INTEGER               :: IRET
 INTEGER               :: IHOUR, IMIN
@@ -804,7 +804,7 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12):: YNAME ! Field Name
+CHARACTER(LEN=18):: YNAME ! Field Name
 LOGICAL          :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
 DOUBLE PRECISION :: XTIME0
