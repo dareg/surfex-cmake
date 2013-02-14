@@ -337,7 +337,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_ISBA',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,*) ' | Reading ',HFIELD,' in externalized file'
 !
-GTEB = (HNAME(1:3)=='TWN' .OR. HNAME(1:3)=='TEB' .OR. HNAME(1:3)=='GD_')
+GTEB = (HNAME(1:3)=='TWN' .OR. HNAME(1:3)=='GD_' .OR. HNAME(1:3)=='GR_' &
+        .OR. HNAME(4:6)=='GD_' .OR. HNAME(4:6)=='GR_')
 !
 !------------------------------------------------------------------------------
 !
@@ -388,7 +389,6 @@ IF (IVERSION>=7) THEN
     YRECFM='TWN_PEDOTF'
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_PEDOTF'
   ENDIF
-  IF (GTEB) YRECFM='TWN_PEDOTF'
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,YPEDOTF,IRESP)
   !
 ELSE

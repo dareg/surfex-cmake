@@ -79,8 +79,11 @@ INTEGER                             :: JPATCH         ! loop counter for patch
 CHARACTER(LEN=12)                   :: YSURF          ! type of field
 INTEGER                             :: ITEB_PATCH     ! number of TEB patches in file
 INTEGER                             :: ICURRENT_PATCH ! current TEB patch to be initialized
+INTEGER                             :: IVERSION       ! SURFEX version
+INTEGER                             :: IBUGFIX        ! SURFEX bug version
+LOGICAL                             :: GOLD_NAME      ! old name flag for temperatures
 CHARACTER(LEN=3)                    :: YPATCH         ! indentificator for TEB patch
-LOGICAL                             :: GGARDEN        ! T if gardens are present in the file
+LOGICAL                             :: GGREENROOF     ! T if gardens are present in the file
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -95,6 +98,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GREENROOF_EXTERN',0,ZHOOK_HANDLE)
 CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
+!
+!* reading of version of the file being read
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
+GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
 !------------------------------------------------------------------------------
 !
@@ -115,7 +123,7 @@ IF (GTEB) THEN
   END IF
 END IF
 !
-! A FAIRE : VERIFIER QUE LES MODIFS DES PATCH/GTEB/GGARDEN SONT CORRECTES
+! A FAIRE : VERIFIER QUE LES MODIFS DES PATCH/GTEB/GGREENROOF SONT CORRECTES
 !---------------------------------------------------------------------------------------
 !
 !*      3.     Transformation into physical quantity to be interpolated
@@ -139,15 +147,15 @@ SELECT CASE(HSURF)
 !
   CASE('TG    ','WG    ','WGI   ')
 !* choice if one reads garden fields (if present) or ISBA fields
-     GGARDEN = .FALSE.
-     IF (GTEB) CALL READ_SURF(HFILEPGDTYPE,'GARDEN',GGARDEN,IRESP)
+     GGREENROOF = .FALSE.
+     IF (GTEB) CALL READ_SURF(HFILEPGDTYPE,'LGREENROOF',GGREENROOF,IRESP)
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-     IF (GGARDEN) THEN
-       YSURF = 'TWN_'//HSURF(1:3)
+     IF (GGREENROOF) THEN
+        YSURF = 'GR_'//HSURF(1:3)  
+        YSURF=YPATCH//YSURF      
      ELSE
        YSURF = HSURF
      END IF
-     IF (GGARDEN) YSURF=YPATCH//YSURF
      YSURF=ADJUSTL(YSURF)
 !* reading of the profile and its depth definition
      CALL READ_EXTERN_ISBA(HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,INI,&
@@ -177,12 +185,13 @@ SELECT CASE(HSURF)
   CASE('WR     ')
      ALLOCATE(PFIELD(INI,1,NVEGTYPE))
      !* choice if one reads garden fields (if present) or ISBA fields
-     GGARDEN = .FALSE.
-     IF (GTEB) CALL READ_SURF(HFILEPGDTYPE,'GARDEN',GGARDEN,IRESP)
+     GGREENROOF = .FALSE.
+     IF (GTEB) CALL READ_SURF(HFILEPGDTYPE,'LGREENROOF',GGREENROOF,IRESP)
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-     IF (GGARDEN) THEN
+     IF (GGREENROOF) THEN
        IPATCH = 1             
-       YRECFM = 'TWN_WR'
+       YRECFM = 'GD_WR'
+       YRECFM=YPATCH//YRECFM
        CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'TOWN  ')
      ELSE
        YRECFM = 'PATCH_NUMBER'
@@ -192,7 +201,6 @@ SELECT CASE(HSURF)
        CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')
        YRECFM = 'WR'
      END IF
-     IF (GGARDEN) YRECFM=YPATCH//YRECFM
      YRECFM=ADJUSTL(YRECFM)
      ALLOCATE(ZFIELD(INI,1,IPATCH))
      CALL READ_SURF(HFILETYPE,YRECFM,ZFIELD(:,1,:),IRESP,HDIR='A')

@@ -74,8 +74,11 @@ REAL, DIMENSION(:,:,:), POINTER     :: ZD             ! depth of field in the so
 REAL, DIMENSION(:,:), POINTER       :: ZD1            ! depth of field in the soil, one patch
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT           !
 INTEGER                             :: JPATCH         ! loop counter for patch
-INTEGER                             :: ITEB_PATCH! number of TEB patches in file
-INTEGER                             :: ICURRENT_PATCH! current TEB patch to be initialized
+INTEGER                             :: ITEB_PATCH     ! number of TEB patches in file
+INTEGER                             :: ICURRENT_PATCH ! current TEB patch to be initialized
+INTEGER                             :: IVERSION       ! SURFEX version
+INTEGER                             :: IBUGFIX        ! SURFEX bug version
+LOGICAL                             :: GOLD_NAME      ! old name flag for temperatures
 CHARACTER(LEN=12)                   :: YSURF     ! type of field
 CHARACTER(LEN=3)                    :: YPATCH    ! indentificator for TEB patch
 LOGICAL                         :: GTEB      ! flag if TEB fields are present
@@ -99,6 +102,11 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN_EXTERN',0,ZHOOK_HANDLE)
 !              ---------------
 !
 CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
+!
+!* reading of version of the file being read
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
+GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
 CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
@@ -141,7 +149,8 @@ SELECT CASE(HSURF)
     IF (GTEB) CALL READ_SURF(HFILEPGDTYPE,'GARDEN',GGARDEN,IRESP)
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
     IF (GGARDEN) THEN
-      YSURF = 'TWN_'//HSURF(1:3)
+      YSURF = 'GD_'//HSURF(1:3)
+      IF (GOLD_NAME) YSURF = 'TWN_'//HSURF(1:3)
       YSURF = YPATCH//YSURF
     ELSE
       YSURF = HSURF
@@ -179,8 +188,9 @@ SELECT CASE(HSURF)
      IF (GTEB) CALL READ_SURF(HFILEPGDTYPE,'GARDEN',GGARDEN,IRESP)
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
      IF (GGARDEN) THEN
-       IPATCH = 1             
-       YRECFM = 'TWN_WR'
+       IPATCH = 1    
+       YRECFM = 'GD_WR'
+       IF (GOLD_NAME) YRECFM = 'TWN_WR'
        YRECFM = YPATCH//YRECFM
        CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'TOWN  ')
      ELSE            

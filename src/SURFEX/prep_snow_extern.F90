@@ -60,11 +60,14 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZGRID        ! normalized input grid
 LOGICAL                           :: GTOWN          ! town variables written in the file
 CHARACTER(LEN=12)                 :: YRECFM         ! record name
 INTEGER                           :: IRESP          ! error return code
+INTEGER                           :: IVERSION       ! SURFEX version
+LOGICAL                           :: GOLD_NAME      ! old name flag 
+INTEGER                           :: IBUGFIX        ! SURFEX bug version
 INTEGER                           :: IVEGTYPE       ! actual number of vegtypes
 INTEGER                           :: JLAYER         ! loop on snow vertical grids
 INTEGER                           :: INI
 CHARACTER(LEN=8)                  :: YAREA          ! area treated ('ROOF','ROAD','VEG ')
-CHARACTER(LEN=5)                  :: YPREFIX        ! prefix to identify patch
+CHARACTER(LEN=3)                  :: YPREFIX        ! prefix to identify patch
 INTEGER                           :: IPATCH         ! number of input patch
 INTEGER                           :: ITEB_PATCH     ! number of input patch for TEB
 INTEGER                           :: ICURRENT_TEB_PATCH ! current patch for TEB
@@ -87,12 +90,12 @@ YAREA(1:4) = HSURF(7:10)
 IF (YAREA(1:4)=='VEG ') THEN
   IVEGTYPE = NVEGTYPE
   YMASK = 'NATURE'
-  YPREFIX = '     '  
+  YPREFIX = '   '  
 ELSE
   IVEGTYPE = 1
   YMASK    = 'TOWN  '
   IPATCH   = 1
-  YPREFIX = '     '  
+  YPREFIX = '   '  
 END IF
 !
 !*      1.     Preparation of IO for reading in the file
@@ -104,14 +107,23 @@ END IF
 !
 CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,YMASK)
 !
+!* reading of version of the file being read
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
+GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
+!
 IF (YAREA(1:4)=='VEG ') THEN
   YRECFM = 'PATCH_NUMBER'
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
 ELSE
-  CALL READ_TEB_PATCH(HFILETYPE,ITEB_PATCH)
+  IF (.NOT.GOLD_NAME) THEN
+     IF (YAREA(1:4)=='ROOF') YAREA(1:4) = 'RF  '
+     IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
+   ENDIF
+  CALL READ_TEB_PATCH(HFILEPGDTYPE,ITEB_PATCH)
   IF (ITEB_PATCH>1) THEN
     CALL GET_CURRENT_TEB_PATCH(ICURRENT_TEB_PATCH)
-    WRITE(YPREFIX,FMT='(A,I1,A)') 'TEB',MIN(ICURRENT_TEB_PATCH,ITEB_PATCH),'_'
+    WRITE(YPREFIX,FMT='(A,I1,A)') 'T',MIN(ICURRENT_TEB_PATCH,ITEB_PATCH),'_'
   END IF  
 END IF
 !
@@ -127,7 +139,7 @@ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !*      4.     Reading of snow data
 !              ---------------------
 !
-IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA') THEN
+IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)=='RD') THEN
   CALL TOWN_PRESENCE(HFILEPGDTYPE,GTOWN)
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   IF (.NOT. GTOWN) THEN
