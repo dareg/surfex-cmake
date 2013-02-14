@@ -94,7 +94,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !  Their value must be defined as XUNDEF.
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GREENROOF_EXTERN',0,ZHOOK_HANDLE)
-CALL OPEN_AUX_IO_SURF(HFILE,HFILEPGDTYPE,'TOWN  ')
+CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
 !
 !------------------------------------------------------------------------------
 !

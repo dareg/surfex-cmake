@@ -72,7 +72,7 @@ LOGICAL          :: LWRITE_COORD = .FALSE. ! write lat/lon of the target grid
 LOGICAL          :: LOUT_TIMENAME = .FALSE.! change the name of output file at the end of a day
                                            ! (ex: 19860502_00h00 -> 19860501_24h00)
 !
-LOGICAL          :: LDIAG_FA_NOCOMPACT = .TRUE. ! fa compaction for diagnostic files
+LOGICAL          :: LDIAG_FA_NOCOMPACT = .FALSE. ! fa compaction for diagnostic files
 !
 !*    Time steps
 !     ----------
