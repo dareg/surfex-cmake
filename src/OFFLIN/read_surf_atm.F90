@@ -64,11 +64,10 @@ INTEGER,INTENT(IN)               :: KINIT
 CHARACTER(LEN=6)    ,INTENT(IN)  :: HPROGRAM
 
 ! local variables
-INTEGER                          :: I,INI, J
+INTEGER                          :: I, INI, J, I1
 CHARACTER(LEN=4), DIMENSION(:), ALLOCATABLE  :: YF
 CHARACTER(LEN=4) :: YWORK
 DOUBLE PRECISION :: XTIME0
-REAL*4, DIMENSION(:), ALLOCATABLE :: ZFIELD4
 REAL*4                            :: ZWORK4
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZFIELD
 REAL                              :: ZWORK
@@ -81,12 +80,10 @@ IF (NRANK==NPIO) THEN
   INI = SIZE(NINDEX)
   ALLOCATE(ZFIELD(INI,SIZE(PFIELD,2)))
   IF (HPROGRAM == 'BINARY') THEN
-    ALLOCATE(ZFIELD4(INI))          
     ALLOCATE(YF(INI))
   ENDIF
 ELSE
   ALLOCATE(ZFIELD(0,0)) 
-  ALLOCATE(ZFIELD4(0))
   ALLOCATE(YF(0))
 ENDIF
 !
@@ -101,82 +98,44 @@ IF (NRANK==NPIO) THEN
   IF (HPROGRAM == 'ASCII ') THEN
     !
     IF (KFORC_STEP .EQ. 1) THEN
+      I1 = 1
       REWIND(KINIT)
-      DO I=1,KNB
-        IF (NNI_FORC==1) THEN
-          READ(UNIT=KINIT,FMT=*) ZWORK
-          ZFIELD(:,I) = ZWORK
-        ELSE
-          READ(UNIT=KINIT,FMT=*) ZFIELD(:,I)
-        END IF
-      ENDDO
     ELSE
+      I1 = 2
       ZFIELD(:,1) = ZFIELD(:,KNB)
-      DO I=2,KNB
-        IF (NNI_FORC==1) THEN
-          READ(UNIT=KINIT,FMT=*) ZWORK
-          ZFIELD(:,I) = ZWORK
-        ELSE
-          READ(UNIT=KINIT,FMT=*) ZFIELD(:,I)
-        END IF
-      ENDDO
     ENDIF
+    DO I=I1,KNB
+      IF (NNI_FORC==1) THEN
+        READ(UNIT=KINIT,FMT=*) ZWORK
+        ZFIELD(:,I) = ZWORK
+      ELSE
+        READ(UNIT=KINIT,FMT=*) ZFIELD(:,I)
+      END IF
+    ENDDO
     !
   ELSE IF (HPROGRAM == 'BINARY') THEN
     !
-    IF (KFORC_STEP .EQ. 1) THEN
+    IF (KFORC_STEP .EQ. 1) THEN    
+      I1 = 1
       GSWAP = .FALSE.
-      DO I=1,KNB
-        IF (LITTLE_ENDIAN_ARCH) THEN
-          IF (NNI_FORC==1) THEN
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) YWORK
-            YF(:) = YWORK
-          ELSE
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) YF(:)
-          END IF
-          ZFIELD(:,I) = YF(:)
-        ELSE
-          IF (NNI_FORC==1) THEN
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) ZWORK4
-            ZFIELD4(:) = ZWORK4
-          ELSE
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) ZFIELD4(:)
-          END IF
-          ZFIELD(:,I) = ZFIELD4(:)
-        ENDIF
-        IF (     ANY(ABS(ZFIELD(:,I))>0. .AND. ABS(ZFIELD(:,I))<1.E-30) &
-            .OR. ANY(ABS(ZFIELD(:,I))>1.E6)                       ) THEN  
-          CALL ABOR1_SFX('READ_SURF_ATM: SWAP SET IN YOUR PARAMS_CONFIG FILE SEEMS '//&
-            'INAPPROPRIATE - VERIFY ')  
-        END IF
-      ENDDO
     ELSE
+      I1 = 2
       ZFIELD(:,1) = ZFIELD(:,KNB)
-      DO I=2,KNB
-        IF (LITTLE_ENDIAN_ARCH) THEN
-          IF (NNI_FORC==1) THEN
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) YWORK
-            YF(:) = YWORK
-          ELSE
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) YF(:)
-          END IF
-          ZFIELD(:,I) = YF(:)
-        ELSE
-          IF (NNI_FORC==1) THEN
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) ZWORK4
-            ZFIELD4(:) = ZWORK4
-          ELSE
-            READ(UNIT=KINIT,REC=KFORC_STEP+I-1) ZFIELD4(:)
-          END IF                
-          ZFIELD(:,I) = ZFIELD4(:)
-        ENDIF
-        IF (     ANY(ABS(ZFIELD(:,I))>0. .AND. ABS(ZFIELD(:,I))<1.E-30) &
-            .OR. ANY(ABS(ZFIELD(:,I))>1.E6)                       ) THEN  
-          CALL ABOR1_SFX('READ_SURF_ATM: SWAP SET IN YOUR PARAMS_CONFIG FILE SEEMS '//&
-            'INAPPROPRIATE - VERIFY  ')  
-        END IF
-      ENDDO
     ENDIF
+    DO I=I1,KNB
+      IF (NNI_FORC==1) THEN
+        READ(UNIT=KINIT,REC=KFORC_STEP+I-1) YWORK
+        YF(:) = YWORK
+      ELSE
+        READ(UNIT=KINIT,REC=KFORC_STEP+I-1) YF(:)
+      END IF
+      ZFIELD(:,I) = YF(:)
+      IF (     ANY(ABS(ZFIELD(:,I))>0. .AND. ABS(ZFIELD(:,I))<1.E-30) &
+          .OR. ANY(ABS(ZFIELD(:,I))>1.E6)                       ) THEN  
+        CALL ABOR1_SFX('READ_SURF_ATM: SWAP SET IN YOUR PARAMS_CONFIG FILE SEEMS '//&
+          'INAPPROPRIATE - VERIFY  ')  
+      END IF  
+    ENDDO
     !
   ENDIF
   !
@@ -191,7 +150,6 @@ CALL READ_AND_SEND_MPI(ZFIELD,PFIELD)
 DEALLOCATE(ZFIELD)
 IF (HPROGRAM=='BINARY') THEN
   DEALLOCATE(YF)
-  DEALLOCATE(ZFIELD4)
 ENDIF
 !
 LPARTR=.FALSE.
