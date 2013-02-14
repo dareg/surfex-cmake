@@ -67,7 +67,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12), INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
 INTEGER,           INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
@@ -117,7 +117,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),   INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
@@ -127,7 +127,7 @@ CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
                                              ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12) :: YREC
+CHARACTER(LEN=18) :: YREC
 REAL              :: ZUNDEF  ! default value
 INTEGER           :: IGRID   ! position of data on grid
 INTEGER           :: ILENCH  ! length of comment string
@@ -245,7 +245,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),     INTENT(OUT):: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),       INTENT(OUT):: HCOMMENT ! comment string
@@ -256,7 +256,7 @@ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
 !
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=12)   :: YREC1D
+CHARACTER(LEN=4)   :: YREC1D
 INTEGER :: JI, JJ
 INTEGER :: ILEN
 INTEGER :: IGRID, ILENCH
@@ -378,7 +378,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
@@ -512,7 +512,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT):: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),       INTENT(OUT):: HCOMMENT ! comment string
@@ -601,7 +601,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
@@ -691,7 +691,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
@@ -797,7 +797,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
@@ -838,7 +838,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
@@ -887,7 +887,7 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
@@ -967,7 +967,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
 INTEGER,            INTENT(OUT) :: KMONTH   ! month
 INTEGER,            INTENT(OUT) :: KDAY     ! day
@@ -977,7 +977,7 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
+CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
 INTEGER, DIMENSION(3) :: ITDATE
 !
 INTEGER          :: IGRID   ! position of data on grid
@@ -1022,7 +1022,7 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),     INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(OUT) :: KDAY     ! day
@@ -1032,7 +1032,7 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
+CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
 INTEGER          :: ILUOUT
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
