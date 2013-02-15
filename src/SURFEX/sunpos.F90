@@ -143,7 +143,7 @@ ZSINDEL = SIN(ZDECSOL)
 ZCOSDEL = COS(ZDECSOL)
 !-------------------------------------------------------------------------------
 !
-!$OMP PARALLEL PRIVATE(INKPROMA)
+!$OMP PARALLEL PRIVATE(INKPROMA,IINDX1,IINDX2)
 !
 !$ NBLOCK = OMP_GET_THREAD_NUM()
 !

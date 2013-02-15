@@ -37,6 +37,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODI_TEBGRID
 !
 IMPLICIT NONE
@@ -138,13 +139,17 @@ ELSE
 
 END IF
 !
+DO JOUT=1,IOUT
+  WHERE (PD(:,1)==XUNDEF)  PD_OUT(:,JOUT) = XUNDEF
+END DO
 !-------------------------------------------------------------------------------
 !
 !* Averaging of the Heat Capacity and the Thermal conductivity
 !
 ZW=1./PTC(:,:)
 CALL AV_THERMAL_DATA(PHC,ZW,PHC_OUT,ZW_OUT)
-PTC_OUT=1./ZW_OUT
+PTC_OUT=XUNDEF
+WHERE (ZW_OUT/=XUNDEF) PTC_OUT=1./ZW_OUT
 !
 !-------------------------------------------------------------------------------
 CONTAINS
@@ -165,6 +170,12 @@ INTEGER :: JL ! loop counter on spatial points
 REAL    :: ZEPS=1.E-6
 !
 DO JL=1,SIZE(PF1,1)
+ IF (PD(JL,1)==XUNDEF) THEN
+   PF1_OUT(JL,:) = XUNDEF
+   PF2_OUT(JL,:) = XUNDEF
+   CYCLE
+ END IF
+ !
  ZF1 = 0.
  ZF2 = 0.
  ZS  = 0.

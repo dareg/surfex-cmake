@@ -335,12 +335,12 @@ END IF
 ! Validation case : experimental values for Nancy 2011 case
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! Substrate layer
-DO JLAYER=1,13
+DO JLAYER=1,4
     XCONDDRY (:,JLAYER) = 0.15
     XHCAPSOIL(:,JLAYER) = 1342000.
 ENDDO
 ! Drainage layer
-DO JLAYER=14,18
+DO JLAYER=5,6
     XCONDDRY (:,JLAYER) = 0.09
     XHCAPSOIL(:,JLAYER) = 331500.
 ENDDO
@@ -375,7 +375,7 @@ END DO
 ! Validation case : experimental values for Nancy 2011 case
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! Substrate layer
-DO JLAYER=1,13
+DO JLAYER=1,4
   XWSAT   (:,JLAYER) = 0.674     ! Value tested
   XCONDSAT(:,JLAYER) = 2.162E-3  ! Value tested
   XMPOTSAT(:,JLAYER) = -0.932    ! Value tested
@@ -384,7 +384,7 @@ DO JLAYER=1,13
   XWFC    (:,JLAYER) = 0.37      ! from OBS-NANCY
 ENDDO
 ! Drainage layer
-DO JLAYER=14,18
+DO JLAYER=5,6
    XWSAT   (:,JLAYER) = 0.9       ! Value tested
    XCONDSAT(:,JLAYER) = 3.32E-3   ! Value tested
    XMPOTSAT(:,JLAYER) = -0.121    ! Value tested
@@ -392,9 +392,6 @@ DO JLAYER=14,18
    XWWILT  (:,JLAYER) = 0.15      ! sert à initialiser le WG ds la couche
    XWFC    (:,JLAYER) = 0.37      ! sert à initialiser le WG ds la couche
 ENDDO
-!        
-!
-!
 !-------------------------------------------------------------------------------
 !
 !*       6.1    Initialize of the SGH scheme:'

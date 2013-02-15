@@ -82,8 +82,6 @@
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,     ONLY : XCPD
 !
-!
-!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -429,15 +427,15 @@ IF (HBEM == "DEF") THEN
              + 0.5*PWALL_O_HOR(:)/PBLD(:) * ( PH_WALL_B(:) + PLE_WALL_B(:) + PDQS_WALL_B(:) - PRN_WALL_B(:) )
 ELSEIF (HBEM == "BEM") THEN
   PQF_BLD(:) = PQIN(:)*PN_FLOOR(:) + PHVAC_COOL(:) + PHVAC_HEAT(:)
+  PFLX_BLD(:)=  PFLX_BLD_ROOF(:) + 0.5*PWALL_O_HOR(:)/PBLD(:)*PFLX_BLD_WALL_A(:) &
+            +                    0.5*PWALL_O_HOR(:)/PBLD(:)*PFLX_BLD_WALL_B(:) &
+            + PFLX_BLD_FLOOR(:) + PFLX_BLD_MASS(:)  
 ENDIF
 !
 PQF_TOWN(:)= PBLD(:)*PQF_BLD(:) + PH_TRAFFIC(:) + PH_INDUSTRY(:) + PLE_TRAFFIC(:) + PLE_INDUSTRY(:)
 !
 !Flux from the building to its structure -> we need to add the component to the
 !floor, the mass and the window
-PFLX_BLD(:)=  PFLX_BLD_ROOF(:) + 0.5*PWALL_O_HOR(:)/PBLD(:)*PFLX_BLD_WALL_A(:) &
-            +                    0.5*PWALL_O_HOR(:)/PBLD(:)*PFLX_BLD_WALL_B(:) &
-            + PFLX_BLD_FLOOR(:) + PFLX_BLD_MASS(:)
 !
 !
 IF (LHOOK) CALL DR_HOOK('URBAN_FLUXES',1,ZHOOK_HANDLE)
