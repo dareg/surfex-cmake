@@ -1077,7 +1077,7 @@ CALL AVG_URBAN_FLUXES(PTS_TOWN, PEMIS_TOWN,                                    &
                      PGARDEN_O_GRND, PROAD_O_GRND,                             &
                      PEMIS_ROAD, PESNOW_ROAD, PEMIS_WALL, ZEMIS_GARDEN, OCANOPY)
 !
-PSFCO2(:) = PGARDEN(:) * ZSFCO2_GARDEN(:)  ! no CO2 flux from built and road yet.
+PSFCO2(:) = PGARDEN(:) * ZSFCO2_GARDEN(:) + PBLD(:) * PFRAC_GR(:) * ZSFCO2_GREENROOF(:) ! no CO2 flux from built and road yet.
 !
 !-------------------------------------------------------------------------------
 !

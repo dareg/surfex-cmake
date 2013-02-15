@@ -424,25 +424,6 @@ IF (LTR_ML) THEN
   ENDIF
 ENDIF
 !
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-! Diagnostic of respiration carbon fluxes and soil carbon evolution
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!
-PSFCO2(:)=0.
-ZRESP_ECO (:)=0.
-ZRESP_AUTO(:)=0.
-!
-IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
-  CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, 1,             &
-                   PRHOA, XTG, XWG, XWFC, XWWILT, XWSAT, XSAND,   &
-                   XDG, XDZG, NWG_LAYER,                          &                   
-                   XRE25, XLAI, ZRESP_BIOMASS_INST, ZTURNOVER,    &
-                   ZLITTER, ZLIGNIN_STRUC , ZSOILCARB,            &
-                   ZRESP_AUTO, ZRESP_ECO                          )
-  ! calculation of vegetation CO2 flux
-  PSFCO2(:) = - ZGPP(:) + ZRESP_ECO(:)
-END IF
-!
 ! --------------------------------------------------------------------------------------
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
@@ -470,6 +451,26 @@ IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT') THEN
                        XANFM, XANDAY, XBIOMASS, XRESP_BIOMASS,             &
                        ZRESP_BIOMASS_INST, ZINCREASE, ZTURNOVER             )         
 END IF
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! Diagnostic of respiration carbon fluxes and soil carbon evolution
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+PSFCO2(:)=0.
+ZRESP_ECO (:)=0.
+ZRESP_AUTO(:)=0.
+!
+IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
+  CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, 1,             &
+                   PRHOA, XTG, XWG, XWFC, XWWILT, XWSAT, XSAND,   &
+                   XDG, XDZG, NWG_LAYER,                          &                   
+                   XRE25, XLAI, ZRESP_BIOMASS_INST, ZTURNOVER,    &
+                   ZLITTER, ZLIGNIN_STRUC , ZSOILCARB,            &
+                   ZRESP_AUTO, ZRESP_ECO                          )
+  ! calculation of vegetation CO2 flux
+  PSFCO2(:) = - ZGPP(:) + ZRESP_ECO(:)
+END IF
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !*      4.     Set undefined values for points where there is no garden
