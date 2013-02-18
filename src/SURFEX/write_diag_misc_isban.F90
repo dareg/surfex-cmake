@@ -45,7 +45,7 @@
 USE MODD_SURFEX_MPI, ONLY : NWG_SIZE
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
-USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER, NNBIOMASS,       &
+USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER,       &
                                    CRUNOFF, CRAIN, CISBA, LTR_ML,  &
                                    XMUF, NWG_LAYER,                &
                                    CPHOTO, CRESPSL, LFLOOD,        &
@@ -97,7 +97,7 @@ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YLVL
 CHARACTER(LEN=20) :: YFORM
 !
-INTEGER           :: JLAYER, JNBIOMASS, IWORK, JJ, IDEPTH
+INTEGER           :: JLAYER, IWORK, JJ, IDEPTH
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

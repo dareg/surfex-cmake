@@ -185,18 +185,18 @@ DO JLAYER=1,INLVLS
   WRITE(YPAS,'(I3)') JLAYER
   YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
   !
-  CALL DEF_VAR_NETCDF(IFILE_ID, 'WSNOW_VEG'//YLVL, 'Snow_Water_Equivalent_layer_'//YLVL, IDDIM, YATT_TITLE, (/'Kg/m2'/))
-  CALL DEF_VAR_NETCDF(IFILE_ID, 'RSNOW_VEG'//YLVL, 'Snow_density_layer_'//YLVL ,         IDDIM, YATT_TITLE, (/'Kg/m3'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'WSN_VEG'//YLVL, 'Snow_Water_Equivalent_layer_'//YLVL, IDDIM, YATT_TITLE, (/'Kg/m2'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'RSN_VEG'//YLVL, 'Snow_density_layer_'//YLVL ,         IDDIM, YATT_TITLE, (/'Kg/m3'/))
   IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN   
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'HSNOW_VEG'//YLVL,  'Snow_heat_layer'//YLVL,              IDDIM, YATT_TITLE, (/'J/m2'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'HSN_VEG'//YLVL,  'Snow_heat_layer'//YLVL,              IDDIM, YATT_TITLE, (/'J/m2'/))
   ELSE
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'TSNOW_VEG'//YLVL,  'Snow_temp_layer'//YLVL,              IDDIM, YATT_TITLE, (/'K'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'TSN_VEG'//YLVL,  'Snow_temp_layer'//YLVL,              IDDIM, YATT_TITLE, (/'K'/))
   ENDIF
   IF (TSNOW%SCHEME=='CRO') THEN   
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'SGRAN1_VEG'//YLVL, 'Snow_grain_parameter1_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'SGRAN2_VEG'//YLVL, 'Snow_grain_parameter2_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'SHIST_VEG'//YLVL,  'Snow_historical_param_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'SAGE_VEG'//YLVL,   'Snow_age_param_layer_'//YLVL       , IDDIM, YATT_TITLE,&
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'SG1_VEG'//YLVL, 'Snow_grain_parameter1_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'SG2_VEG'//YLVL, 'Snow_grain_parameter2_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'SHI_VEG'//YLVL,  'Snow_historical_param_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'SAG_VEG'//YLVL,   'Snow_age_param_layer_'//YLVL       , IDDIM, YATT_TITLE,&
          (/'days since snowfall'/))
   ENDIF
 ENDDO
@@ -213,7 +213,7 @@ IF (CPHOTO == 'NIT' .OR. CPHOTO == 'NCB') THEN
   DO JNBIOMASS=1,INBIOMASS
     WRITE(YPAS,'(I3)') JNBIOMASS
     YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'BIOMASS'//YLVL, 'Plant biomass'//YLVL, IDDIM, YATT_TITLE, (/'kgDM/m2'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'BIOMA'//YLVL, 'Plant biomass'//YLVL, IDDIM, YATT_TITLE, (/'kgDM/m2'/))
   END DO
 ENDIF
 !
@@ -308,15 +308,15 @@ IF (N2M>0) THEN
   !
   IF(LPATCH_BUDGET) THEN
     YATT='K'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'T2M_PATCH'   ,'2m_Temperature'        ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'T2M_P'   ,'2m_Temperature'        ,IDDIM,YATT_TITLE,YATT)
     YATT='kg/kg'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'Q2M_PATCH'   ,'2m_Specific_Humidity'  ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'Q2M_P'   ,'2m_Specific_Humidity'  ,IDDIM,YATT_TITLE,YATT)
     YATT='(-)'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'HU2M_PATCH'  ,'2m_Relative_Humidity'  ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'HU2M_P'  ,'2m_Relative_Humidity'  ,IDDIM,YATT_TITLE,YATT)
     YATT='m/s'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'ZON10M_PATCH','10m_Zonal_wind'        ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'MER10M_PATCH','10m_Meridian_Wind'     ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'W10M_PATCH'  ,'10m_Wind'              ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'ZON10M_P','10m_Zonal_wind'        ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'MER10M_P','10m_Meridian_Wind'     ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'W10M_P'  ,'10m_Wind'              ,IDDIM,YATT_TITLE,YATT)
   ENDIF
   !
 ENDIF
@@ -344,22 +344,22 @@ IF (LSURF_BUDGET)  THEN
   IF (LPATCH_BUDGET) THEN
     !
     YATT = 'W/m2'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'RN_PATCH'        ,'Net_Radiation'                               ,IDDIM,YATT_TITLE,YATT)    
-    CALL DEF_VAR_NETCDF(IFILE_ID,'H_PATCH'         ,'Sensible_Heat_Flux'                          ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_PATCH'        ,'Total_Latent_Heat_Flux'                      ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEI_PATCH'       ,'Sublimatiob_Latent_Heat_Flux'                ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUX_PATCH'     ,'Ground_Heat_Flux'                            ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RN_P'        ,'Net_Radiation'                               ,IDDIM,YATT_TITLE,YATT)    
+    CALL DEF_VAR_NETCDF(IFILE_ID,'H_P'         ,'Sensible_Heat_Flux'                          ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_P'        ,'Total_Latent_Heat_Flux'                      ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEI_P'       ,'Sublimatiob_Latent_Heat_Flux'                ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUX_P'     ,'Ground_Heat_Flux'                            ,IDDIM,YATT_TITLE,YATT)
     !
     IF(LRAD_BUDGET) THEN
-      CALL DEF_VAR_NETCDF(IFILE_ID,'SWD_PATCH'    ,'Downward_SW       '                           ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'SWU_PATCH'    ,'Upward_SW         '                           ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LWD_PATCH'    ,'Downward_LW       '                           ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LWU_PATCH'    ,'Upward_LW         '                           ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWD_P'    ,'Downward_SW       '                           ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWU_P'    ,'Upward_SW         '                           ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWD_P'    ,'Downward_LW       '                           ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWU_P'    ,'Upward_LW         '                           ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     !
     YATT = 'Pa'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'FMU_PATCH'      ,'Zonal_Wind_Stress '                           ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'FMV_PATCH'      ,'Merid_Wind_Stress '                           ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'FMU_P'      ,'Zonal_Wind_Stress '                           ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'FMV_P'      ,'Merid_Wind_Stress '                           ,IDDIM,YATT_TITLE,YATT)
     !
   ENDIF
   !
@@ -419,63 +419,51 @@ IF (LSURF_EVAP_BUDGET) THEN
   !
   IF(LPATCH_BUDGET) THEN      
     YATT = 'W/m2'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEG_PATCH'    ,'Ground_Evaporation_Heat_Flux'                        ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEGI_PATCH'   ,'Soil_Ice_Sublimation'                                ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEV_PATCH'    ,'Vegetation_Evaporation_Heat_Flux'                    ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LES_PATCH'    ,'Snow_Sublimation_Heat_Flux'                          ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEG_P'    ,'Ground_Evaporation_Heat_Flux'                        ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEGI_P'   ,'Soil_Ice_Sublimation'                                ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEV_P'    ,'Vegetation_Evaporation_Heat_Flux'                    ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LES_P'    ,'Snow_Sublimation_Heat_Flux'                          ,IDDIM,YATT_TITLE,YATT)
     IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') &
-       CALL DEF_VAR_NETCDF(IFILE_ID,'LESL_PATCH'   ,'Snow_Evaporation_Heat_Flux'                       ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LER_PATCH'    ,'Canopy_Direct_Evaporation_Heat_Flux'                 ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LETR_PATCH'   ,'Vegetation_Transpiration_Heat_Flux'                  ,IDDIM,YATT_TITLE,YATT)
+       CALL DEF_VAR_NETCDF(IFILE_ID,'LESL_P'   ,'Snow_Evaporation_Heat_Flux'                       ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LER_P'    ,'Canopy_Direct_Evaporation_Heat_Flux'                 ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LETR_P'   ,'Vegetation_Transpiration_Heat_Flux'                  ,IDDIM,YATT_TITLE,YATT)
     YATT = 'kg/m2s'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP_PATCH'   ,'Evapotranspiration'                                  ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'DRAIN_PATCH'  ,'Soil_Drainage_Flux'                                  ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'RUNOFF_PATCH' ,'Supersaturation_Runoff'                              ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'HORTON_PATCH' ,'Horton_Surface_Runoff'                               ,IDDIM,YATT_TITLE,YATT)  
-    CALL DEF_VAR_NETCDF(IFILE_ID,'DRIVEG_PATCH' ,'Dripping_from_the_vegetation_reservoir'              ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP_P'   ,'Evapotranspiration'                                  ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'DRAIN_P'  ,'Soil_Drainage_Flux'                                  ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RUNOFF_P' ,'Supersaturation_Runoff'                              ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'HORTON_P' ,'Horton_Surface_Runoff'                               ,IDDIM,YATT_TITLE,YATT)  
+    CALL DEF_VAR_NETCDF(IFILE_ID,'DRIVEG_P' ,'Dripping_from_the_vegetation_reservoir'              ,IDDIM,YATT_TITLE,YATT)
     !
-    CALL DEF_VAR_NETCDF(IFILE_ID,'RRVEG_PATCH'  ,'Precipitation_Intercepted_by_Vegetation'             ,IDDIM,YATT_TITLE,YATT)    
-    CALL DEF_VAR_NETCDF(IFILE_ID,'SNOMLT_PATCH' ,'Snow_melt_flux'                                      ,IDDIM,YATT_TITLE,YATT)
-    IF(LAGRIP) CALL DEF_VAR_NETCDF(IFILE_ID,'IRRIG_PATCH'  ,'Irrigation_rate'                          ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RRVEG_P'  ,'Precipitation_Intercepted_by_Vegetation'             ,IDDIM,YATT_TITLE,YATT)    
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SNOMLT_P' ,'Snow_melt_flux'                                      ,IDDIM,YATT_TITLE,YATT)
+    IF(LAGRIP) CALL DEF_VAR_NETCDF(IFILE_ID,'IRRIG_P'  ,'Irrigation_rate'                          ,IDDIM,YATT_TITLE,YATT)
     !
     IF(LFLOOD)THEN
       YATT = 'kg/m2s'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'IFLOOD_PATCH' ,'Floodplains_infiltration'                          ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'PFLOOD_PATCH' ,'Precipitation_intercepted_by_the_floodplains'      ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'IFLOOD_P' ,'Floodplains_infiltration'                          ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'PFLOOD_P' ,'Precipitation_intercepted_by_the_floodplains'      ,IDDIM,YATT_TITLE,YATT)
       YATT = 'W/m2'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LEF_PATCH'    ,'Floodplains_evaporation_Heat_Flux'                 ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LEIF_PATCH'   ,'Floodplains_Frozen_evaporation_Heat_Flux'          ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LEF_P'    ,'Floodplains_evaporation_Heat_Flux'                 ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LEIF_P'   ,'Floodplains_Frozen_evaporation_Heat_Flux'          ,IDDIM,YATT_TITLE,YATT)
     ENDIF 
     IF(CPHOTO/='NON')THEN
       YATT = 'kgCO2/m2/s'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'GPP_PATCH'     ,'gross_primary_production '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'R_AUTO_PATCH'  ,'autotrophic_respiration  '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'R_ECO_PATCH'   ,'ecosystem_respiration    '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'GPP_P'     ,'gross_primary_production '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'R_AUTO_P'  ,'autotrophic_respiration  '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'R_ECO_P'   ,'ecosystem_respiration    '  ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     IF(LWATER_BUDGET)THEN 
       YATT = 'kg/m2s'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DWG_PATCH'     ,'change_in_liquid_soil_moisture  '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DWGI_PATCH'    ,'change_in_solid_soil_moisture   '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DWR_PATCH'     ,'change_in_water_on_canopy       '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DSWE_PATCH'    ,'change_in_snow_water_equivalent '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'WATBUD_PATCH'  ,'isba_water_budget_as_residue    '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DWG_P'     ,'change_in_liquid_soil_moisture  '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DWGI_P'    ,'change_in_solid_soil_moisture   '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DWR_P'     ,'change_in_water_on_canopy       '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DSWE_P'    ,'change_in_snow_water_equivalent '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'WATBUD_P'  ,'isba_water_budget_as_residue    '  ,IDDIM,YATT_TITLE,YATT)
     ENDIF    
     !
   ENDIF
   !
 ENDIF
-!
-IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN   
-   YATT = 'K'
-   IF (LSURF_MISC_BUDGET) THEN
-     CALL DEF_VAR_NETCDF(IFILE_ID,'TS_ISBA' ,'Surface_Temperature_(isba+snow3l)    ' ,JDIM, YATT_TITLE,YATT)
-   ENDIF
-   IF (LPATCH_BUDGET) THEN
-     CALL DEF_VAR_NETCDF(IFILE_ID,'TS_PATCH' ,'Surface_Temperature_(isba+snow3l)'   ,IDDIM,YATT_TITLE,YATT)
-     CALL DEF_VAR_NETCDF(IFILE_ID,'TTSRAD_PATCH' ,'total_radiative_surface_Temperature_(isba+snow3l)',IDDIM,YATT_TITLE,YATT)
-   ENDIF
-ENDIF
-!
 !
 IF (LSURF_MISC_BUDGET) THEN
   !
@@ -527,8 +515,8 @@ IF (LSURF_MISC_BUDGET) THEN
     YATT = 'K'          
     CALL DEF_VAR_NETCDF(IFILE_ID,'TS_ISBA' ,'Surface_Temperature_(isba+snow3l)    ' ,JDIM, YATT_TITLE,YATT)
     IF (LPATCH_BUDGET) THEN
-      CALL DEF_VAR_NETCDF(IFILE_ID,'TS_PATCH' ,'Surface_Temperature_(isba+snow3l)'   ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'TTSRAD_PATCH' ,'total_radiative_surface_Temperature_(isba+snow3l)',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'TS_P' ,'Surface_Temperature_(isba+snow3l)'   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'TTSRAD_P' ,'total_radiative_surface_Temperature_(isba+snow3l)',IDDIM,YATT_TITLE,YATT)
     ENDIF
   ENDIF
   !
@@ -584,34 +572,34 @@ IF (LSURF_MISC_BUDGET) THEN
   IF(LPATCH_BUDGET)THEN
     ! 
     YATT (1)='-'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'PSNG_PATCH' ,'snow_fraction_per_patch_over_ground'    ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'PSNV_PATCH' ,'snow_fraction_per_patch_over_vegetation',IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'PSN_PATCH'  ,'total_snow_fraction_per_patch'          ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'TALB_PATCH' ,'total_albedo_per_patch'                 ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'HV_PATCH'   ,'Halstead_coefficient_per_patch'         ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'PSNG_P' ,'snow_fraction_per_patch_over_ground'    ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'PSNV_P' ,'snow_fraction_per_patch_over_vegetation',IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'PSN_P'  ,'total_snow_fraction_per_patch'          ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'TALB_P' ,'total_albedo_per_patch'                 ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'HV_P'   ,'Halstead_coefficient_per_patch'         ,IDDIM,YATT_TITLE,YATT)
     YATT      (1)='kg/m2'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'WSNOW_VEGT_PATCH','Total_snow_reservoir_per_patch '   ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'WSNOW_VEGT_P','Total_snow_reservoir_per_patch '   ,IDDIM,YATT_TITLE,YATT)
     YATT      (1)='m'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'DSNOW_VEGT_PATCH','Total_snow_depth_per_patch '       ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'DSNOW_VEGT_P','Total_snow_depth_per_patch '       ,IDDIM,YATT_TITLE,YATT)
     YATT      (1)='K'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'TSNOW_VEGT_PATCH','Total_snow_temperature_per_patch ' ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'TSNOW_VEGT_P','Total_snow_temperature_per_patch ' ,IDDIM,YATT_TITLE,YATT)
    ! 
     IF(CRUNOFF=='SGH '.OR.CRUNOFF=='DT92')THEN
       YATT(1)='-'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'FSAT_PATCH','Soil_saturated_fraction_per_patch',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'FSAT_P','Soil_saturated_fraction_per_patch',IDDIM,YATT_TITLE,YATT)
     ENDIF
     !
     IF(CISBA=='DIF')THEN
       YATT = 'm'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'ALT_PATCH' ,'permafrost_active_layer_thickness_per_patch    ',IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'FLT_PATCH' ,'non-permafrost_frozen_layer_thickness_per_patch',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'ALT_P' ,'permafrost_active_layer_thickness_per_patch    ',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'FLT_P' ,'non-permafrost_frozen_layer_thickness_per_patch',IDDIM,YATT_TITLE,YATT)
     ENDIF
     !
     IF(LFLOOD)THEN
       YATT(1)='-'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'FFG_PATCH','flood_frac_per_patch_over_ground',IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'FFV_PATCH','flood_frac_per_patch_over_veg'   ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'FF_PATCH' ,'total_flood_fraction_per_patch'  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'FFG_P','flood_frac_per_patch_over_ground',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'FFV_P','flood_frac_per_patch_over_veg'   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'FF_P' ,'total_flood_fraction_per_patch'  ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     ! 
     IF (LTR_ML) THEN
@@ -756,64 +744,64 @@ IF (LSURF_BUDGETC) THEN
   !
   IF(LPATCH_BUDGET)THEN      
     YATT='J/m2'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'RNC_PATCH'    ,'Cumulated_Net_Radiation'                            ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'HC_PATCH'     ,'Cumulated_Sensible_Heat_Flux'                       ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEC_PATCH'    ,'Cumulated_Total_Latent_Heat_Flux'                   ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEIC_PATCH'   ,'Cumulated_Sublimation_Latent_Heat_Flux'             ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUXC_PATCH' ,'Cumulated_Ground_Heat_Flux'                         ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEGC_PATCH'   ,'Cumulated_Ground_Evaporation_Heat_Flux'             ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEGIC_PATCH'  ,'Cumulated_Soil_Ice_Sublimation'                     ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LEVC_PATCH'   ,'Cumulated_Vegetation_Evaporation_Heat_Flux'         ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LESC_PATCH'   ,'Cumulated_Snow_Sublimation_Heat_Flux'               ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RNC_P'    ,'Cumulated_Net_Radiation'                            ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'HC_P'     ,'Cumulated_Sensible_Heat_Flux'                       ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEC_P'    ,'Cumulated_Total_Latent_Heat_Flux'                   ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEIC_P'   ,'Cumulated_Sublimation_Latent_Heat_Flux'             ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUXC_P' ,'Cumulated_Ground_Heat_Flux'                         ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEGC_P'   ,'Cumulated_Ground_Evaporation_Heat_Flux'             ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEGIC_P'  ,'Cumulated_Soil_Ice_Sublimation'                     ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEVC_P'   ,'Cumulated_Vegetation_Evaporation_Heat_Flux'         ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LESC_P'   ,'Cumulated_Snow_Sublimation_Heat_Flux'               ,IDDIM,YATT_TITLE,YATT)
     IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') &
-       CALL DEF_VAR_NETCDF(IFILE_ID,'LESLC_PATCH'  ,'Cumulated_Snow_Evaporation_Heat_Flux'            ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LERC_PATCH'   ,'Cumulated_Canopy_Direct_Evaporation_Heat_Flux'      ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'LETRC_PATCH'  ,'Cumulated_Vegetation_Transpiration_Heat_Flux'       ,IDDIM,YATT_TITLE,YATT)
+       CALL DEF_VAR_NETCDF(IFILE_ID,'LESLC_P'  ,'Cumulated_Snow_Evaporation_Heat_Flux'            ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LERC_P'   ,'Cumulated_Canopy_Direct_Evaporation_Heat_Flux'      ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LETRC_P'  ,'Cumulated_Vegetation_Transpiration_Heat_Flux'       ,IDDIM,YATT_TITLE,YATT)
     IF(LRAD_BUDGET)THEN
-      CALL DEF_VAR_NETCDF(IFILE_ID,'SWDC_PATCH' ,'Cumulated_Downward_SW       '                       ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'SWUC_PATCH' ,'Cumulated_Upward_SW         '                       ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LWDC_PATCH' ,'Cumulated_Downward_LW       '                       ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LWUC_PATCH' ,'Cumulated_Upward_LW         '                       ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWDC_P' ,'Cumulated_Downward_SW       '                       ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWUC_P' ,'Cumulated_Upward_SW         '                       ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWDC_P' ,'Cumulated_Downward_LW       '                       ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWUC_P' ,'Cumulated_Upward_LW         '                       ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     !
     YATT='Pa.s'
-    CALL DEF_VAR_NETCDF(IFILE_ID,'FMUC_PATCH'   ,'Cumulated_Zonal_Wind_Stress '                       ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'FMVC_PATCH'   ,'Cumulated_Merid_Wind_Stress '                       ,IDDIM,YATT_TITLE,YATT)  
+    CALL DEF_VAR_NETCDF(IFILE_ID,'FMUC_P'   ,'Cumulated_Zonal_Wind_Stress '                       ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'FMVC_P'   ,'Cumulated_Merid_Wind_Stress '                       ,IDDIM,YATT_TITLE,YATT)  
     YATT='kg/m2'  
-    CALL DEF_VAR_NETCDF(IFILE_ID,'EVAPC_PATCH'  ,'Cumulated_Evapotranspiration'                       ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'DRAINC_PATCH' ,'Cumulated_Soil_Drainage_Flux'                       ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'RUNOFFC_PATCH','Cumulated_Supersaturation_Runoff'                   ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'HORTONC_PATCH','Cumulated_Horton_Runoff'                            ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'DRIVEGC_PATCH','Cumulated_Dripping_from_the_vegetation_reservoir'   ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'SNOMLTC_PATCH','Cumulated_Snow_melt_flux'                           ,IDDIM,YATT_TITLE,YATT)
-    CALL DEF_VAR_NETCDF(IFILE_ID,'RRVEGC_PATCH' ,'Cumulated_Precipitation_Intercepted_by_Vegetation'  ,IDDIM,YATT_TITLE,YATT)
-    IF(LAGRIP) CALL DEF_VAR_NETCDF(IFILE_ID,'IRRIGC_PATCH' ,'Cumulated_irrigation_rate'               ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'EVAPC_P'  ,'Cumulated_Evapotranspiration'                       ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'DRAINC_P' ,'Cumulated_Soil_Drainage_Flux'                       ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RUNOFFC_P','Cumulated_Supersaturation_Runoff'                   ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'HORTONC_P','Cumulated_Horton_Runoff'                            ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'DRIVEGC_P','Cumulated_Dripping_from_the_vegetation_reservoir'   ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SNOMLTC_P','Cumulated_Snow_melt_flux'                           ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RRVEGC_P' ,'Cumulated_Precipitation_Intercepted_by_Vegetation'  ,IDDIM,YATT_TITLE,YATT)
+    IF(LAGRIP) CALL DEF_VAR_NETCDF(IFILE_ID,'IRRIGC_P' ,'Cumulated_irrigation_rate'               ,IDDIM,YATT_TITLE,YATT)
     !
     IF(LGLACIER) THEN
       YATT='kg/m2'  
-      CALL DEF_VAR_NETCDF(IFILE_ID,'ICE_FC_PATCH' ,'Cumulated_Glacier_ice_flux'                         ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'ICE_FC_P' ,'Cumulated_Glacier_ice_flux'                         ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     IF(LFLOOD) THEN
       YATT='kg/m2'  
-      CALL DEF_VAR_NETCDF(IFILE_ID,'IFLOODC_PATCH','Cumulated_Floodplains_infiltration'                    ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'PFLOODC_PATCH','Cumulated_Precipitation_intercepted_by_the_floodplains',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'IFLOODC_P','Cumulated_Floodplains_infiltration'                    ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'PFLOODC_P','Cumulated_Precipitation_intercepted_by_the_floodplains',IDDIM,YATT_TITLE,YATT)
       YATT='J/m2'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LEFC_PATCH'   ,'Cumulated_Floodplains_evaporation_Heat_Flux'        ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'LEIFC_PATCH'  ,'Cumulated_Floodplains_Frozen_evaporation_Heat_Flux' ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LEFC_P'   ,'Cumulated_Floodplains_evaporation_Heat_Flux'        ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LEIFC_P'  ,'Cumulated_Floodplains_Frozen_evaporation_Heat_Flux' ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     IF(CPHOTO/='NON')THEN
       YATT = 'kgCO2/m2'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'GPPC_PATCH'     ,'Cumulated_gross_primary_production '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'RC_AUTO_PATCH'   ,'Cumulated_autotrophic_respiration  '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'RC_ECO_PATCH'    ,'Cumulated_ecosystem_respiration    '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'GPPC_P'     ,'Cumulated_gross_primary_production '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'RC_AUTO_P'   ,'Cumulated_autotrophic_respiration  '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'RC_ECO_P'    ,'Cumulated_ecosystem_respiration    '  ,IDDIM,YATT_TITLE,YATT)
     ENDIF
     IF(LWATER_BUDGET)THEN 
       YATT = 'kg/m2'
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DWGC_PATCH'     ,'Cumulated_change_in_liquid_soil_moisture  '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DWGIC_PATCH'    ,'Cumulated_change_in_solid_soil_moisture   '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DWRC_PATCH'     ,'Cumulated_change_in_canopy_water          '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'DSWEC_PATCH'    ,'Cumulated_change_in_snow_water_equivalent '  ,IDDIM,YATT_TITLE,YATT)
-      CALL DEF_VAR_NETCDF(IFILE_ID,'WATBUDC_PATCH'  ,'Cumulated_isba_water_budget_as_residue    '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DWGC_P'     ,'Cumulated_change_in_liquid_soil_moisture  '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DWGIC_P'    ,'Cumulated_change_in_solid_soil_moisture   '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DWRC_P'     ,'Cumulated_change_in_canopy_water          '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DSWEC_P'    ,'Cumulated_change_in_snow_water_equivalent '  ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'WATBUDC_P'  ,'Cumulated_isba_water_budget_as_residue    '  ,IDDIM,YATT_TITLE,YATT)
     ENDIF
   ENDIF
   !  
