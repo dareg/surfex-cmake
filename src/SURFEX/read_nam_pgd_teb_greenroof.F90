@@ -124,7 +124,7 @@ NAMELIST/NAM_DATA_TEB_GREENROOF/ NTIME_GR,NLAYER_GR,                            
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GREENROOF_PAR',0,ZHOOK_HANDLE)
 !
 NTIME_GR         = 12
-NLAYER_GR        = 18
+NLAYER_GR        = 6
 CTYP_GR          = 'GRASS'           ! Grasses - graminoïds
 !
 XUNIF_OM_GR      = XUNDEF
