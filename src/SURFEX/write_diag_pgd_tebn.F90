@@ -77,7 +77,6 @@ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !         Geometric parameters
 !
-!
 YRECFM='BLD'
 YCOMMENT='building fraction (-)'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XBLD(:),IRESP,HCOMMENT=YCOMMENT)
@@ -94,7 +93,7 @@ YRECFM='Z0_TOWN'
 YCOMMENT='Town roughness length (m)'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0_TOWN(:),IRESP,HCOMMENT=YCOMMENT)
 !
-YRECFM='ROAD_DIR'
+YRECFM='XROAD_DIR'
 YCOMMENT='Road direction'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XROAD_DIR(:),IRESP,HCOMMENT=YCOMMENT)
 !
@@ -170,7 +169,6 @@ YRECFM='ROUGH_WALL'
 YCOMMENT='Wall roughness'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XROUGH_WALL(:),IRESP,HCOMMENT=YCOMMENT)
 !
-!
 !-------------------------------------------------------------------------------
 !
 !         Road parameters
@@ -221,7 +219,6 @@ YRECFM='LE_INDUSTRY'
 YCOMMENT='INDUSTRY Latent Flux'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_INDUSTRY(:),IRESP,HCOMMENT=YCOMMENT)
 !
-!
 !-------------------------------------------------------------------------------
 !
 !         Building Energy Model parameters
@@ -249,6 +246,7 @@ IF (CBEM=='BEM') THEN
      CALL WRITE_SURF(HPROGRAM,YRECFM,XD_FLOOR(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
    END DO
 ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !         End of IO
