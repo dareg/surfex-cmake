@@ -393,7 +393,7 @@ IF (SIZE(PT1,2)==3) THEN
        !if root layers
        DO JI=1,SIZE(PT1,1)
          DO JL=2,NGROUND_LAYER
-           IF(XROOTFRAC(JI,JL,JPATCH)>=1.0)THEN 
+           IF(XROOTFRAC(JI,JL,JPATCH)<=1.0)THEN 
              PT2(JI,JL,JPATCH) = PT1(JI,2,JPATCH)
              EXIT
            ENDIF
