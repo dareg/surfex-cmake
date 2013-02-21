@@ -40,6 +40,7 @@
         CHARACTER(LEN=1)                  ::   PATCHFLAG
         CHARACTER(LEN=2)                  ::   YPAS,YLVL
         CHARACTER(LEN=10)                 ::   CGRID_TYPE
+        CHARACTER(LEN=6)                  ::   CMASK_SAVE
         LOGICAL                           ::   GFOUND
         LOGICAL                           ::   LINITS ! true if PGD has been run
         LOGICAL                           ::   LINITP ! true if PREP has been run
@@ -180,6 +181,7 @@
        DO IF=1,IFIELD
 
          READ(45,'(A1,1X,A6,1X,A16)') PATCHFLAG,CMASK,HREC
+         CMASK_SAVE = CMASK
 
          IF (PATCHFLAG == '+') THEN
            INJ = INI * IPATCH
@@ -204,7 +206,7 @@
          IC=IC+1
          
          IF (LINITP) CFILEIN = 'PREP.txt'
-         CALL INIT_IO_SURF_n('ASCII ',CMASK,'SURF  ','READ ')
+         CALL INIT_IO_SURF_n('ASCII ',CMASK_SAVE,'SURF  ','READ ')
          CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
          IF (.NOT.GFOUND .AND. LINITP)THEN
            ! Search now in PGD file
