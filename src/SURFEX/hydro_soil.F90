@@ -266,7 +266,7 @@ DO JJ=1,SIZE(PTG)
 !
 ENDDO
 !
-IF(HKSAT=='SGH') THEN
+IF(HKSAT=='SGH' .OR. HKSAT=='EXP') THEN
   ZWLIM2(:)=ZWWILT(:)
   ZWLIM3(:)=PWWILT(:)
 ELSE
@@ -451,7 +451,7 @@ DO JJ=1,SIZE(PTG)
 ! Make sure that ice has not raised above 
 ! saturation (minus XWGMIN) due to sublimation.
 ! If it has, then melt the needed frozen water 
-! (thus cooling the layer) to ensure sublimation 
+! (thus cooling the layer) to ensure sublimation
 ! is accomodated, then extract this from frozen water store.
 !
   ZEXCESSF(JJ) = MIN(0.0, PWSAT(JJ) - XWGMIN - PWGI1(JJ))
@@ -532,6 +532,7 @@ DO JJ=1,SIZE(PTG)
 !
 !
 ENDDO
+!
 IF (LHOOK) CALL DR_HOOK('HYDRO_SOIL',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

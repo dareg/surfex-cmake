@@ -5,7 +5,7 @@
 ##########################################################
 #OBJDIR_PATH=${WORKDIR}
 #
-OPT_BASE   =  -r8 -g -Ktrap=fp -fpic -Mbackslash -Munixlogical -byteswapio
+OPT_BASE   =  -r8 -g -Ktrap=fp -fpic -Mbackslash -Munixlogical
 OPT_PERF0  =  -O0 -Kieee
 OPT_PERF2  =  -O2 -Kieee
 #OPT_CUDA  =  -O2 -Mcuda=keepgpu -ta=nvidia,cc20,cuda3.1,host,time -Minfo=accel,intensity,all,ccff  
@@ -92,11 +92,7 @@ CNAME_GRIBEX=_pgf77
 
 OBJS_NOCB +=  spll_isba.o
 #
-include Makefile.SURFEX.mk
-#
-ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
-endif
+include Makefile.MESONH.mk
 #
 ##########################################################
 #                                                        #

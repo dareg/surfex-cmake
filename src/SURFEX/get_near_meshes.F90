@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_NEAR_MESHES(HGRID,KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+      SUBROUTINE GET_NEAR_MESHES(HGRID,KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 !     ##############################################################
 !
 !!**** *GET_NEAR_MESHES* get the near grid mesh indices
@@ -49,11 +49,7 @@ INTEGER,                         INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                         INTENT(IN)    :: KL        ! number of points
 INTEGER,                         INTENT(IN)    :: KNEAR_NBR ! number of nearest points wanted
 REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
-LOGICAL, DIMENSION(KL),          INTENT(IN)    :: OLIST     ! position in complete array of points
-!                                                           ! for which one wants near mesh indices
-INTEGER,                         INTENT(IN)    :: KLIST     ! number of points for which one 
-                                                            ! wants near mesh indices
-INTEGER, DIMENSION(KLIST,KNEAR_NBR),INTENT(OUT):: KNEAR     ! near mesh indices
+INTEGER, DIMENSION(:,:),POINTER :: KNEAR     ! near mesh indices
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
@@ -65,22 +61,22 @@ IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES',0,ZHOOK_HANDLE)
 SELECT CASE (HGRID)
 !     
   CASE("CONF PROJ ")
-    CALL GET_NEAR_MESHES_CONF_PROJ(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+    CALL GET_NEAR_MESHES_CONF_PROJ(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("CARTESIAN ")
-    CALL GET_NEAR_MESHES_CARTESIAN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+    CALL GET_NEAR_MESHES_CARTESIAN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("LONLAT REG")
-    CALL GET_NEAR_MESHES_LONLAT_REG(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+    CALL GET_NEAR_MESHES_LONLAT_REG(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("GAUSS     ")
-    CALL GET_NEAR_MESHES_GAUSS(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+    CALL GET_NEAR_MESHES_GAUSS(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("IGN       ")
-    CALL GET_NEAR_MESHES_IGN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+    CALL GET_NEAR_MESHES_IGN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("LONLATVAL ")
-    CALL GET_NEAR_MESHES_LONLATVAL(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+    CALL GET_NEAR_MESHES_LONLATVAL(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("NONE      ")
     KNEAR(:,:) = 0

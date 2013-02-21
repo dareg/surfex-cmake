@@ -78,7 +78,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 INTEGER           :: JTIME          ! loop index
 INTEGER           :: JLAYER         ! loop index
@@ -236,11 +236,11 @@ IF (LDATA_ROOTFRAC) THEN
   DEALLOCATE(ZWORK)
 ENDIF
 !
-YRECFM='L_GROUND_DEPTH'
+YRECFM='L_GROUND_DPT'
 YCOMMENT=YRECFM
 CALL WRITE_SURF(HPROGRAM,YRECFM,LDATA_GROUND_DEPTH,IRESP,HCOMMENT=YCOMMENT)
 IF (LDATA_GROUND_DEPTH) THEN
-  YRECFM='D_GROUND_DEPTH'
+  YRECFM='D_GROUND_DPT'
   YCOMMENT='X_Y_'//YRECFM
   CALL WRITE_SURF(HPROGRAM,YRECFM,XPAR_GROUND_DEPTH(:,:),IRESP,HCOMMENT=YCOMMENT)
 ENDIF

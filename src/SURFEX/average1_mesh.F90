@@ -36,11 +36,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_PGDWORK,       ONLY : XSUMVAL, NSIZE, CATYPE
+USE MODD_PGDWORK,       ONLY : XSUMVAL, NSIZE, CATYPE, &
+                               NVALNBR, NVALCOUNT, XVALLIST, JPVALMAX
 USE MODD_DATA_COVER_PAR,ONLY : XCDREF
 !
 USE MODI_GET_MESH_INDEX
 USE MODD_POINT_OVERLAY
+USE MODI_ABOR1_SFX
 !
 !
 !
@@ -62,8 +64,11 @@ REAL, DIMENSION(:),      INTENT(IN)    :: PVALUE  ! value of the point to add
 !
 INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
                                          ! 0 indicates the point is out of the domain
-!
+INTEGER :: JVAL         ! loop counter on encoutered values
 INTEGER :: JLOOP        ! loop index on input arrays
+REAL    :: ZEPS=1.E-10  ! a small value
+LOGICAL :: GFOUND       ! T : Value already found in this grid point
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -105,6 +110,23 @@ DO WHILE(MAXVAL(XNUM).NE.0)
         XSUMVAL(IINDEX(JLOOP))=XSUMVAL(IINDEX(JLOOP))+1./PVALUE(JLOOP)
       CASE ('CDN')
         XSUMVAL(IINDEX(JLOOP))=XSUMVAL(IINDEX(JLOOP))+1./(LOG(XCDREF/PVALUE(JLOOP)))**2
+      CASE ('MAJ')
+        GFOUND=.FALSE.
+        DO JVAL=1,NVALNBR(IINDEX(JLOOP))
+          IF (ABS( XVALLIST(IINDEX(JLOOP),JVAL) - PVALUE(JLOOP)) < ZEPS) THEN
+            NVALCOUNT(IINDEX(JLOOP),JVAL) = NVALCOUNT(IINDEX(JLOOP),JVAL) + 1
+            GFOUND=.TRUE.
+            EXIT
+          END IF
+        END DO
+        IF (.NOT. GFOUND) THEN
+          IF (NVALNBR(IINDEX(JLOOP))==JPVALMAX) &
+            CALL ABOR1_SFX('TOO MANY DIFFERENT VALUES TO AGGREGATE WITH THE MAJORITY RULE')
+          NVALNBR(IINDEX(JLOOP)) = NVALNBR(IINDEX(JLOOP)) +1
+          JVAL = NVALNBR(IINDEX(JLOOP))
+          NVALCOUNT(IINDEX(JLOOP),JVAL) = 1
+          XVALLIST (IINDEX(JLOOP),JVAL) = PVALUE(JLOOP)
+        END IF
     END SELECT
 !
   ENDDO

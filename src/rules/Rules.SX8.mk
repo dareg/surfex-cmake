@@ -7,7 +7,7 @@ ifneq "$(findstring brodie,$(shell uname -n))" ""
 OBJDIR_PATH=${workdir}
 endif
 #
-OPT_BASE = -pi -dw -Wf,-Nesc -Wf\"-A idbl4\" -Wf\"-pvctl loopcnt=10000000 shape=10000000\"
+OPT_BASE = -pi -dw -Wf,-Nesc -Wf\"-A idbl4\" -Popenmp -Wf\"-pvctl loopcnt=10000000 shape=10000000\"
 #-Wf"-pvctl fullmsg -O infomsg -L fmtlist" -Wf"-L transform" -Wf"-L summary"
 OPT_PERF0 = -C debug 
 OPT_PERF2 = -C vsafe
@@ -71,12 +71,7 @@ spll_set_ref.o spll_surf_solar_sum.o spll_test_double_double.o spll_trid.o
 $(OBJS2) :  OPT =  $(OPT_BASE)  $(OPT_PERF2) 
 endif
 
-ifeq "$(VER_MPI)" "NOMPI"
-F90 = sxf90
-else         
-F90 = sxmpif90 -Popenmp 
-endif
-
+F90 = sxmpif90 
 F90FLAGS  = $(OPT)
 F77 = $(F90)     
 F77FLAGS  =    -f0 $(OPT)
@@ -101,7 +96,7 @@ CPPFLAGS_MNH       = -DMNH
 #
 #ARCH_GRIBEX=NEC
 TARGET_GRIBEX=NEC
-CNAME_GRIBEX=sxmpif90 -Popenmp 
+CNAME_GRIBEX=sxmpif90
 ##########################################################
 #                                                        #
 # Source of MESONH PACKAGE  Distribution                 #
@@ -112,10 +107,6 @@ CNAME_GRIBEX=sxmpif90 -Popenmp
 include Makefile.SURFEX.mk
 #
 INC += -I/SX/opt/sxf90/${SXF90VERSION}/include
-#
-ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
-endif
 #
 ##########################################################
 #                                                        #

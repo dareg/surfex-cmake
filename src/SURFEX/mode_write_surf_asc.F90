@@ -26,20 +26,19 @@ CONTAINS
 !
 !!****  * - routine to write a real scalar
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-!
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 REAL,               INTENT(IN) :: PFIELD   ! the real scalar to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
@@ -48,8 +47,9 @@ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 LOGICAL         :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
@@ -66,7 +66,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX0_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFX0_ASC
 !
 !     #############################################################
@@ -75,20 +75,19 @@ END SUBROUTINE WRITE_SURFX0_ASC
 !
 !!****  * - routine to write an integer
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-!
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NMASK, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
@@ -97,8 +96,9 @@ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
@@ -111,10 +111,11 @@ WRITE(NUNIT,FMT=*,ERR=100) KFIELD
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN0_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFN0_ASC
 !
 !     #############################################################
@@ -123,20 +124,19 @@ END SUBROUTINE WRITE_SURFN0_ASC
 !
 !!****  * - routine to write a logical
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-!
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
@@ -145,8 +145,9 @@ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
@@ -159,10 +160,11 @@ WRITE(NUNIT,FMT=*,ERR=100) OFIELD
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL0_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFL0_ASC
 !
 !     #############################################################
@@ -171,20 +173,19 @@ END SUBROUTINE WRITE_SURFL0_ASC
 !
 !!****  * - routine to write a character
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-!
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC      ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
@@ -193,8 +194,9 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
 !
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!----------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFC0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
@@ -204,13 +206,14 @@ IF (GKNOWN) RETURN
 WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
 WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
 WRITE(NUNIT,FMT='(A40)',ERR=100) HFIELD
-
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFC0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFC0_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFC0_ASC
 !
 !     #############################################################
@@ -219,60 +222,176 @@ END SUBROUTINE WRITE_SURFC0_ASC
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-USE MODI_UNPACK_SAME_RANK
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE, WLOG_MPI
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NMASK, NFULL, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
+USE MODI_GATHER_AND_WRITE_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),   INTENT(IN) :: HREC     ! name of the article to be read
-REAL, DIMENSION(:), INTENT(IN) :: PFIELD   ! array containing the data field
+CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
+REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
 CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
-REAL, DIMENSION(NFULL) :: ZWORK   ! work array read in the file
-LOGICAL          :: GKNOWN
+INTEGER :: ISIZE, J
+LOGICAL :: GKNOWN
+DOUBLE PRECISION   :: XTIME0
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD))) :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
+!$OMP SINGLE
+!
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
+!
+!$OMP END SINGLE COPYPRIVATE(GKNOWN)
+!
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
+IF (HDIR=='-') THEN
+  ISIZE = SIZE(PFIELD)
+  ZWORK(1:ISIZE) = PFIELD
+ELSE
+  ISIZE = SIZE(ZWORK)
+  CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+ENDIF
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifndef NOMPI  
+  XTIME0 = MPI_WTIME()
+#endif  
+  !
+!$OMP SINGLE
+  !  
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//HREC
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT='(50D20.8)',IOSTAT=KRESP) ZWORK(1:ISIZE)
+  !
+!$OMP END SINGLE COPYPRIVATE(KRESP)
+  !  
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !
+#ifndef NOMPI
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
+  !
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX1_ASC
+!
+!     #############################################################
+      SUBROUTINE WRITE_SURFX2_ASC(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  * - routine to fill a write 2D array for the externalised surface 
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE, WLOG_MPI
+!
+USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NMASK, NFULL, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
+USE MODI_GATHER_AND_WRITE_MPI
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
+INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
+CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+                                                 ! 'H' : field with
+                                                 !       horizontal spatial dim.
+                                                 ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+! 
+integer :: me
+INTEGER :: ISIZE
+LOGICAL :: GKNOWN=.FALSE.
+DOUBLE PRECISION   :: XTIME0
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+!$OMP SINGLE
+!
+CALL IO_BUFF_n(HREC,'W',GKNOWN)
+!
+!$OMP END SINGLE COPYPRIVATE(GKNOWN)
+!
+IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',1,ZHOOK_HANDLE)
+IF (GKNOWN) RETURN
 !
 IF (HDIR=='-') THEN
-  WRITE(NUNIT,FMT='(50D20.8)',ERR=100) PFIELD
+  ISIZE = SIZE(PFIELD,1)
+  ZWORK(1:ISIZE,:) = PFIELD(:,:)
 ELSE
-  CALL UNPACK_SAME_RANK(NMASK,PFIELD,ZWORK(:))
-  WRITE(NUNIT,FMT='(50D20.8)',ERR=100) ZWORK
-END IF
+  ISIZE = SIZE(ZWORK,1)
+  CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',1,ZHOOK_HANDLE)
-RETURN
+IF (NRANK==NPIO) THEN
+  !
+#ifndef NOMPI  
+  XTIME0 = MPI_WTIME()
+#endif  
+  !
+!$OMP SINGLE
+  !    
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//HREC
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT='(50D20.8)',IOSTAT=KRESP) ZWORK(1:ISIZE,:)
+  !
+!$OMP END SINGLE COPYPRIVATE(KRESP)
+  !  
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !
+#ifndef NOMPI
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif  
+  !  
+ENDIF
 !
-100 CONTINUE
-CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-END SUBROUTINE WRITE_SURFX1_ASC
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX2_ASC
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN1_ASC(HREC,KFIELD,KRESP,HCOMMENT,HDIR)
@@ -280,21 +399,26 @@ END SUBROUTINE WRITE_SURFX1_ASC
 !
 !!****  * - routine to write an integer array
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-USE MODI_UNPACK_SAME_RANK
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NMASK, NFULL, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
+USE MODI_GATHER_AND_WRITE_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),      INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
@@ -302,37 +426,59 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
-INTEGER, DIMENSION(NFULL) :: IWORK  ! work array read in the file
-LOGICAL          :: GKNOWN
+INTEGER :: ISIZE
+LOGICAL :: GKNOWN
+INTEGER, DIMENSION(MAX(NFULL,SIZE(KFIELD))) :: IWORK  ! work array read in the file
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!---------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN1_ASC',0,ZHOOK_HANDLE)
+!
 KRESP = 0
 !
+!$OMP SINGLE
+!
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
+!
+!$OMP END SINGLE COPYPRIVATE(GKNOWN)
+!
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN1_ASC',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-!
-IF (HDIR=='H' .AND. HREC/="-") THEN
-  CALL UNPACK_SAME_RANK(NMASK,KFIELD,IWORK(:))
-  WRITE(NUNIT,FMT='(100I8)',ERR=100) IWORK
+IF (HDIR=='-' .OR. HREC=='-') THEN
+  ISIZE = SIZE(KFIELD)
+  IWORK(1:ISIZE) = KFIELD
 ELSE
-  WRITE(NUNIT,FMT='(100I8)',ERR=100) KFIELD
-END IF
+  ISIZE = SIZE(IWORK)
+  CALL GATHER_AND_WRITE_MPI(KFIELD,IWORK,NMASK)
+ENDIF
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifndef NOMPI  
+  XTIME0 = MPI_WTIME()
+#endif
+  !  
+!$OMP SINGLE
+  !   
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//HREC
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT='(100I8)',IOSTAT=KRESP) IWORK(1:ISIZE)
+  !
+!$OMP END SINGLE COPYPRIVATE(KRESP)
+  !  
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !
+#ifndef NOMPI  
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
+  !  
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN1_ASC',1,ZHOOK_HANDLE)
-RETURN
 !
-100 CONTINUE
-CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN1_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
 END SUBROUTINE WRITE_SURFN1_ASC
 !
 !     #############################################################
@@ -341,20 +487,25 @@ END SUBROUTINE WRITE_SURFN1_ASC
 !
 !!****  * - routine to write a logical array
 !
-USE MODI_ERROR_WRITE_SURF_ASC
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),      INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:),  INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
@@ -362,93 +513,50 @@ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
-!IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',1,ZHOOK_HANDLE)
-
 !*      0.2   Declarations of local variables
 !
 LOGICAL          :: GKNOWN
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',0,ZHOOK_HANDLE)
-KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
-IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',1,ZHOOK_HANDLE)
-IF (GKNOWN) RETURN
-!
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-WRITE(NUNIT,FMT=*,ERR=100) OFIELD
+IF (NRANK==NPIO) THEN
+  !
+#ifndef NOMPI  
+  XTIME0 = MPI_WTIME()
+#endif  
+  !
+  KRESP=0
+  !
+!$OMP SINGLE
+  !
+  CALL IO_BUFF_n(HREC,'W',GKNOWN)
+  !
+!$OMP END SINGLE COPYPRIVATE(GKNOWN)
+  !
+  IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',1,ZHOOK_HANDLE)
+  IF (GKNOWN) RETURN
+  !
+!$OMP SINGLE
+  !  
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//HREC
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) OFIELD
+  !
+!$OMP END SINGLE COPYPRIVATE(KRESP)  
+  !
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !  
+#ifndef NOMPI  
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif  
+  !
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',1,ZHOOK_HANDLE)
-RETURN
 !
-100 CONTINUE
-CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
 END SUBROUTINE WRITE_SURFL1_ASC
-!
-!     #############################################################
-      SUBROUTINE WRITE_SURFX2_ASC(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
-!     #############################################################
-!
-!!****  * - routine to fill a write 2D array for the externalised surface 
-!
-USE MODI_ERROR_WRITE_SURF_ASC
-USE MODI_UNPACK_SAME_RANK
-!
-USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NMASK, NFULL, CMASK
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
-!
-IMPLICIT NONE
-!
-!*      0.1   Declarations of arguments
-!
-CHARACTER(LEN=16),        INTENT(IN) :: HREC     ! name of the article to be read
-REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
-INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
-                                                 ! 'H' : field with
-                                                 !       horizontal spatial dim.
-                                                 ! '-' : no horizontal dim.
-!
-!*      0.2   Declarations of local variables
-! 
-REAL, DIMENSION(NFULL,SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
-LOGICAL          :: GKNOWN
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',0,ZHOOK_HANDLE)
-KRESP=0
-!
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
-IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',1,ZHOOK_HANDLE)
-IF (GKNOWN) RETURN
-!
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//HREC
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-!
-IF (HDIR=='-') THEN
-  WRITE(NUNIT,FMT='(50D20.8)',ERR=100) PFIELD
-ELSE
-  CALL UNPACK_SAME_RANK(NMASK,PFIELD,ZWORK(:,:))
-  WRITE(NUNIT,FMT='(50D20.8)',ERR=100) ZWORK
-END IF
-!
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',1,ZHOOK_HANDLE)
-RETURN
-!
-100 CONTINUE
-CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-END SUBROUTINE WRITE_SURFX2_ASC
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFT0_ASC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
@@ -456,20 +564,19 @@ END SUBROUTINE WRITE_SURFX2_ASC
 !
 !!****  * - routine to write a date
 !
-USE MODI_ERROR_WRITE_SURF_ASC
-!
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
 INTEGER,            INTENT(IN)  :: KMONTH   ! month
 INTEGER,            INTENT(IN)  :: KDAY     ! day
@@ -479,11 +586,12 @@ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-INTEGER, DIMENSION(3) :: ITDATE
 LOGICAL               :: GKNOWN
+INTEGER, DIMENSION(3) :: ITDATE
 REAL(KIND=JPRB)       :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 CALL IO_BUFF_n(HREC,'W',GKNOWN)
@@ -508,7 +616,7 @@ RETURN
 100 CONTINUE
 CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT0_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE WRITE_SURFT0_ASC
 !
 !     #############################################################
@@ -517,20 +625,25 @@ END SUBROUTINE WRITE_SURFT0_ASC
 !
 !!****  * - routine to write a date
 !
-USE MODI_ERROR_WRITE_SURF_ASC
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),     INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),     INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(IN) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(IN) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(IN) :: KDAY     ! day
@@ -540,36 +653,56 @@ CHARACTER(LEN=100),    INTENT(IN) :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
 LOGICAL                           :: GKNOWN
+INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT1_ASC',0,ZHOOK_HANDLE)
-KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
-IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT1_ASC',1,ZHOOK_HANDLE)
-IF (GKNOWN) RETURN
-!
-ITDATE(1,:) = KYEAR  (:)
-ITDATE(2,:) = KMONTH (:)
-ITDATE(3,:) = KDAY   (:)
-
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//TRIM(HREC)//'%TDATE'
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-WRITE(NUNIT,FMT=*,ERR=100) ITDATE(:,:)
-!
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//TRIM(HREC)//'%TIME'
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-WRITE(NUNIT,FMT=*,ERR=100) PTIME
+IF (NRANK==NPIO) THEN
+  !
+#ifndef NOMPI  
+  XTIME0 = MPI_WTIME()
+#endif  
+  !  
+  KRESP=0
+  !
+!$OMP SINGLE
+  !    
+  CALL IO_BUFF_n(HREC,'W',GKNOWN)
+  !
+!$OMP END SINGLE COPYPRIVATE(GKNOWN)
+  !
+  IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT1_ASC',1,ZHOOK_HANDLE)
+  IF (GKNOWN) RETURN
+  !
+!$OMP SINGLE
+  !  
+  ITDATE(1,:) = KYEAR  (:)
+  ITDATE(2,:) = KMONTH (:)
+  ITDATE(3,:) = KDAY   (:)
+  !
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//TRIM(HREC)//'%TDATE'
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) ITDATE(:,:)
+  !
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//TRIM(HREC)//'%TIME'
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) PTIME
+  !
+!$OMP END SINGLE COPYPRIVATE(KRESP)
+  !   
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !
+#ifndef NOMPI  
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif  
+  !
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT1_ASC',1,ZHOOK_HANDLE)
-RETURN
 !
-100 CONTINUE
-CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT1_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
 END SUBROUTINE WRITE_SURFT1_ASC
 !
 !     #############################################################
@@ -578,20 +711,25 @@ END SUBROUTINE WRITE_SURFT1_ASC
 !
 !!****  * - routine to write a date
 !
-USE MODI_ERROR_WRITE_SURF_ASC
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, CMASK
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_WRITE_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),       INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),       INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KYEAR    ! year
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KMONTH   ! month
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KDAY     ! day
@@ -601,34 +739,54 @@ CHARACTER(LEN=100),      INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
 LOGICAL          :: GKNOWN
+INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT2_ASC',0,ZHOOK_HANDLE)
-KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
-IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT2_ASC',1,ZHOOK_HANDLE)
-IF (GKNOWN) RETURN
+IF (NRANK==NPIO) THEN
+  !
+#ifndef NOMPI  
+  XTIME0 = MPI_WTIME()
+#endif  
+  !  
+  KRESP=0
+  !
+!$OMP SINGLE
+  !
+  CALL IO_BUFF_n(HREC,'W',GKNOWN) 
+  !
+!$OMP END SINGLE COPYPRIVATE(GKNOWN)
+  !
+  IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT2_ASC',1,ZHOOK_HANDLE)
+  IF (GKNOWN) RETURN
+  !
+!$OMP SINGLE
+  !    
+  ITDATE(1,:,:) = KYEAR  (:,:)
+  ITDATE(2,:,:) = KMONTH (:,:)
+  ITDATE(3,:,:) = KDAY   (:,:)
+  !
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//TRIM(HREC)//'%TDATE'
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) ITDATE(:,:,:)
+  !
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//TRIM(HREC)//'%TIME'
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) PTIME
+  !
+!$OMP END SINGLE  
+  !
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !
+#ifndef NOMPI  
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif  
+  !
+ENDIF
 !
-ITDATE(1,:,:) = KYEAR  (:,:)
-ITDATE(2,:,:) = KMONTH (:,:)
-ITDATE(3,:,:) = KDAY   (:,:)
-
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//TRIM(HREC)//'%TDATE'
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-WRITE(NUNIT,FMT=*,ERR=100) ITDATE(:,:,:)
-!
-WRITE(NUNIT,FMT=*,ERR=100) '&'//CMASK//' '//TRIM(HREC)//'%TIME'
-WRITE(NUNIT,FMT='(A50)',ERR=100) HCOMMENT(1:50)
-WRITE(NUNIT,FMT=*,ERR=100) PTIME
-!
-IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT2_ASC',1,ZHOOK_HANDLE)
-RETURN
-!
-100 CONTINUE
-CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT2_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFT2_ASC

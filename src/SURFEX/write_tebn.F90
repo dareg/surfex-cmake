@@ -36,12 +36,14 @@
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODD_DIAG_SURF_ATM_n, ONLY: LSELECT
+USE MODD_TEB_n,           ONLY : NTEB_PATCH
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_TEB_n
 USE MODI_WRITESURF_TEB_CONF_n
 USE MODI_END_IO_SURF_n
 USE MODI_WRITESURF_TEB_CANOPY_n
-!
+USE MODI_GOTO_TEB
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,6 +59,7 @@ CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUND
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER :: JPATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -70,8 +73,13 @@ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !               ---------------------------
 !
 CALL WRITESURF_TEB_CONF_n(HPROGRAM)
-CALL WRITESURF_TEB_n(HPROGRAM)
-!        
+!
+DO JPATCH=1,NTEB_PATCH
+  CALL GOTO_TEB(JPATCH)
+  CALL WRITESURF_TEB_n(HPROGRAM,JPATCH,HWRITE)
+END DO
+!     
+CALL GOTO_TEB(1)
 IF ((.NOT.LNOWRITE_CANOPY).OR.LSELECT) CALL WRITESURF_TEB_CANOPY_n(HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

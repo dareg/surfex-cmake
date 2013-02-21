@@ -38,9 +38,12 @@ USE MODD_TYPE_DATE_SURF
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
-USE MODD_TEB_n,          ONLY : XCOVER, XZS,                           &
-                                  NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
-                                  TTIME, LCOVER, LECOCLIMAP  
+USE MODD_TEB_n,          ONLY : XCOVER, XZS, CBEM,                     &
+                                NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
+                                TTIME, LCOVER, LECOCLIMAP, NTEB_PATCH, &
+                                CBLD_ATYPE, LGARDEN,                   &
+                                LGREENROOF
+USE MODD_BEM_n,          ONLY : NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
 USE MODD_TEB_GRID_n,     ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 !
 !
@@ -69,7 +72,9 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+INTEGER           :: IVERSION
+INTEGER           :: IBUGFIX
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -83,6 +88,18 @@ CALL GET_TYPE_DIM_n('TOWN  ',NDIM)
 !*       2.     Other dimension initializations:
 !               --------------------------------
 !
+CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+!
+!* number of TEB patches
+!
+IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<=2) THEN
+  NTEB_PATCH=1
+ELSE
+  YRECFM='TEB_PATCH'
+  CALL READ_SURF(HPROGRAM,YRECFM,NTEB_PATCH,IRESP)
+END IF
+!
 !* number of road and roof layers
 !
 YRECFM='ROAD_LAYER'
@@ -95,6 +112,40 @@ YRECFM='WALL_LAYER'
 CALL READ_SURF(HPROGRAM,YRECFM,NWALL_LAYER,IRESP)
 !
 !
+!* type of averaging for Buildings (to allow ascendant compatibility)
+!* type of Building Energy Model
+!
+IF (IVERSION<7 .OR.( IVERSION==7 .AND. IBUGFIX<=2)) THEN
+  CBLD_ATYPE='ARI'
+  CBEM = 'DEF'
+ELSE
+  YRECFM='BLD_ATYPE'
+  CALL READ_SURF(HPROGRAM,YRECFM,CBLD_ATYPE,IRESP)
+  YRECFM='BEM'
+  CALL READ_SURF(HPROGRAM,YRECFM,CBEM,IRESP)
+END IF
+!
+IF (CBEM=="BEM") THEN
+  YRECFM='FLOOR_LAYER'
+  CALL READ_SURF(HPROGRAM,YRECFM,NFLOOR_LAYER,IRESP)
+  YRECFM='COOL_COIL'
+  CALL READ_SURF(HPROGRAM,YRECFM,CCOOL_COIL,IRESP)
+  YRECFM='HEAT_COIL'
+  CALL READ_SURF(HPROGRAM,YRECFM,CHEAT_COIL,IRESP)
+  YRECFM='AUTOSIZE'
+  CALL READ_SURF(HPROGRAM,YRECFM,LAUTOSIZE,IRESP)
+ENDIF
+!
+!* Case of urban green roofs
+!
+IF (LGARDEN) THEN
+  IF (IVERSION<7 .OR.( IVERSION==7 .AND. IBUGFIX<=2)) THEN
+    LGREENROOF = .FALSE.
+  ELSE
+    YRECFM='LGREENROOF'
+    CALL READ_SURF(HPROGRAM,YRECFM,LGREENROOF,IRESP)
+  END IF
+ENDIF
 !
 !
 !*       3.     Physiographic data fields:

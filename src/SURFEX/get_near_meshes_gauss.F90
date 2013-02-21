@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_NEAR_MESHES_GAUSS(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+      SUBROUTINE GET_NEAR_MESHES_GAUSS(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 !     ##############################################################
 !
 !!**** *GET_NEAR_MESHES_GAUSS* get the near grid mesh indices
@@ -42,11 +42,7 @@ INTEGER,                         INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                         INTENT(IN)    :: KL        ! number of points
 INTEGER,                         INTENT(IN)    :: KNEAR_NBR ! number of nearest points wanted
 REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
-LOGICAL, DIMENSION(KL),          INTENT(IN)    :: OLIST     ! position in complete array of points
-!                                                           ! for which one wants near mesh indices
-INTEGER,                         INTENT(IN)    :: KLIST     ! number of points for which one 
-                                                            ! wants near mesh indices
-INTEGER, DIMENSION(KLIST,KNEAR_NBR),INTENT(OUT):: KNEAR     ! near mesh indices
+INTEGER, DIMENSION(:,:),POINTER :: KNEAR     ! near mesh indices
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables

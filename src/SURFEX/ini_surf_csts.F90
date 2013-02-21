@@ -42,7 +42,7 @@ USE MODD_WATER_PAR
 USE MODD_FLOOD_PAR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX, &
                            XAGLAMIN, XAGLAMAX, XHGLA, &
-                           XWSNV, XZ0SN, XZ0HSN,      &
+                           XWSNV, XZ0SN, XZ0HSN, &
                            XTAU_SMELT
 !
 USE MODI_GET_LUOUT

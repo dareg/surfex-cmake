@@ -35,38 +35,44 @@ FUNCTION CONTROL_TEMP_FUNC (PTEMP_IN) RESULT (PTEMPFUNC_RESULT)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    23/06/09
+!!      B. Decharme 05/2012 : Optimization and ISBA-DIF coupling
 !!      
 !-------------------------------------------------------------------------------
 
 !
 !*       0.     DECLARATIONS
 !               ------------
-
-USE MODD_CSTS, ONLY : XTT
-
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
-
-!*       0.1 input
-
-! temperature (K)
-REAL, DIMENSION(:), INTENT(IN)                           :: PTEMP_IN
-
-!*       0.2 result
-
-! temperature control factor
-REAL, DIMENSION(SIZE(PTEMP_IN))                          :: PTEMPFUNC_RESULT
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)  :: PTEMP_IN ! temperature (K)
+!
+!*      0.2    declarations of local variables
+!
+REAL                            :: ZCOEF1
+REAL, PARAMETER                 :: ZCOEF2 = 10.0
+REAL, PARAMETER                 :: ZCOEF3 = 30.0
+!
+REAL, DIMENSION(SIZE(PTEMP_IN)) :: PTEMPFUNC_RESULT ! temperature control factor
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
+!
 !
 !*       1 Calculates temperature control factor
 !
 IF (LHOOK) CALL DR_HOOK('CONTROL_TEMP_FUNC',0,ZHOOK_HANDLE)
-PTEMPFUNC_RESULT(:) = EXP( 0.69 * ( PTEMP_IN(:) - (XTT+30.) ) / 10. )
+!
+ZCOEF1 = LOG(2.0)
+!
+PTEMPFUNC_RESULT(:) = EXP( (ZCOEF1/ZCOEF2) * (PTEMP_IN(:)-ZCOEF3) )
+!
 PTEMPFUNC_RESULT(:) = MIN( 1., PTEMPFUNC_RESULT(:) )
+!
 IF (LHOOK) CALL DR_HOOK('CONTROL_TEMP_FUNC',1,ZHOOK_HANDLE)
 
 END FUNCTION CONTROL_TEMP_FUNC

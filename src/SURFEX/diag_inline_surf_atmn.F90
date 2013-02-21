@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_SURF_ATM_n (PHW, PHT, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV)
+       SUBROUTINE DIAG_INLINE_SURF_ATM_n (PHW, PHT, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 !     ###############################################################################!
 !!****  *DIAG_INLINE_SURF_ATM_n * - Computes diagnostics during SURF_ATM time-step
 !!
@@ -27,7 +27,7 @@
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : LCOEF, XDIAG_UREF, XDIAG_ZREF, &
                                  XPS, XRHOA, XDIAG_TRAD, XDIAG_EMIS,&
-                                 XSSO_FMU, XSSO_FMV
+                                 XSSO_FMU, XSSO_FMV, XAVG_SFCO2
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -44,6 +44,7 @@ REAL, DIMENSION(:), INTENT(IN)       :: PTRAD  ! radiative temperature at t (K)
 REAL, DIMENSION(:), INTENT(IN)       :: PEMIS  ! emissivity at t (-)
 REAL, DIMENSION(:), INTENT(IN)       :: PSFU   ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(:), INTENT(IN)       :: PSFV   ! meridian momentum flux                (Pa)
+REAL, DIMENSION(:), INTENT(IN)       :: PSFCO2 ! CO2 flux                              (kg/m2/s)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
@@ -63,6 +64,9 @@ XDIAG_EMIS = PEMIS
 !
 XSSO_FMU   = PSFU
 XSSO_FMV   = PSFV
+!
+XAVG_SFCO2 = PSFCO2
+!
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SURF_ATM_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------
 !

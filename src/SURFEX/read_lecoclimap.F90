@@ -20,7 +20,7 @@ LOGICAL,              INTENT(OUT)   :: OECOCLIMAP! flag for ecoclimap
 !* local variables
 !  ---------------
 !
-CHARACTER(LEN=16) :: YRECFM     ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
 INTEGER           :: IRESP      ! reading return code
 !
 INTEGER           :: IVERSION   ! surface version
@@ -36,7 +36,7 @@ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 YRECFM='BUG'
 CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
-IF (IVERSION<1 .OR. IVERSION==1 .AND. IBUGFIX==0) THEN
+IF (IVERSION<1 .OR. (IVERSION==1 .AND. IBUGFIX==0)) THEN
   OECOCLIMAP = .TRUE.
 ELSE
   YRECFM='ECOCLIMAP'

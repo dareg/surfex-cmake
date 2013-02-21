@@ -57,7 +57,7 @@ CHARACTER(LEN=3),  INTENT(IN)  :: HWRITE   ! 'PREP' : does not write SBL XUNDEF 
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 !
 INTEGER :: JLAYER  ! loop counter on layers
@@ -87,7 +87,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,NLVL,IRESP,HCOMMENT=YCOMMENT)
 !* altitudes
 !
 DO JLAYER=1,NLVL
-  WRITE(YRECFM,'(A9,I2.2,A5)') 'TEB_CAN_Z',JLAYER,'     '
+  WRITE(YRECFM,'(A9,I2.2,A1)') 'TEB_CAN_Z',JLAYER,' '
   YCOMMENT='altitudes of canopy levels (m)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XZ(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
 END DO
@@ -97,7 +97,7 @@ IF (HWRITE/='PRE') THEN
   !* wind in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A5)') 'TEB_CAN_U',JLAYER,'     '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'TEB_CAN_U',JLAYER,' '
     YCOMMENT='wind at canopy levels (m/s)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XU(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO
@@ -105,7 +105,7 @@ IF (HWRITE/='PRE') THEN
   !* temperature in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A5)') 'TEB_CAN_T',JLAYER,'     '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'TEB_CAN_T',JLAYER,' '
     YCOMMENT='temperature at canopy levels (K)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XT(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO
@@ -113,7 +113,7 @@ IF (HWRITE/='PRE') THEN
   !* humidity in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A5)') 'TEB_CAN_Q',JLAYER,'     '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'TEB_CAN_Q',JLAYER,' '
     YCOMMENT='humidity at canopy levels (kg/m3)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XQ(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO
@@ -121,7 +121,7 @@ IF (HWRITE/='PRE') THEN
   !* Tke in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A5)') 'TEB_CAN_E',JLAYER,'     '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'TEB_CAN_E',JLAYER,' '
     YCOMMENT='Tke at canopy levels (m2/s2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XTKE(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO
@@ -129,7 +129,7 @@ IF (HWRITE/='PRE') THEN
   !* Monin-Obhukov length
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A10,I2.2,A4)') 'TEB_CAN_MO',JLAYER,'    '
+    WRITE(YRECFM,'(A10,I2.2)') 'TEB_CAN_MO',JLAYER
     YCOMMENT='Monin-Obukhov length (m)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XLMO(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO
@@ -138,7 +138,7 @@ IF (HWRITE/='PRE') THEN
   !
   IF (ASSOCIATED(XLM)) THEN
     DO JLAYER=1,NLVL
-      WRITE(YRECFM,'(A10,I2.2,A4)') 'TEB_CAN_LM',JLAYER,'    '
+      WRITE(YRECFM,'(A10,I2.2)') 'TEB_CAN_LM',JLAYER
       YCOMMENT='mixing length (m)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XLM(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
    END DO
@@ -148,7 +148,7 @@ IF (HWRITE/='PRE') THEN
   !
   IF (ASSOCIATED(XLEPS)) THEN
     DO JLAYER=1,NLVL
-      WRITE(YRECFM,'(A10,I2.2,A4)') 'TEB_CAN_LE',JLAYER,'    '
+      WRITE(YRECFM,'(A10,I2.2)') 'TEB_CAN_LE',JLAYER
       YCOMMENT='mixing length (m)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XLEPS(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
     END DO
@@ -157,7 +157,7 @@ IF (HWRITE/='PRE') THEN
   !* Air pressure in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A5)') 'TEB_CAN_P',JLAYER,'     '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'TEB_CAN_P',JLAYER,' '
     YCOMMENT='Pressure at canopy levels (Pa)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XP(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO

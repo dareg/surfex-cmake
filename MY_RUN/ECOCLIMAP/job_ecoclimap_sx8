@@ -16,13 +16,13 @@ export F_FILEINF=yes     # or detail  # I/O measurement
 cd $tmpdir
 pwd
 #
-cp $HOME/VERIF/trunk/MY_RUN/ECOCLIMAP/a.out .
-cp $HOME/VERIF/trunk/MY_RUN/ECOCLIMAP/*.dat .
+cp $HOME/EXPORT_v7_2_PAR/trunk/MY_RUN/ECOCLIMAP/a.out .
+cp $HOME/EXPORT_v7_2_PAR/trunk/MY_RUN/ECOCLIMAP/*.dat .
 #
 ./a.out
 #
 ls -l
 #
-mv *.bin $HOME/VERIF/trunk/MY_RUN/ECOCLIMAP
+mv *.bin $HOME/EXPORT_v7_2_PAR/trunk/MY_RUN/ECOCLIMAP
 #
 /usr/local/bin/ja

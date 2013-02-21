@@ -3,7 +3,7 @@
                                PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW,                       &
                                PZREF, PUREF, PTG, PPATCH, PWG, PWGI, PZ0, PSSO_SLOPE,           &
                                PRESA, PVEG, PLAI, PWR, PRGL, PRSMIN, PGAMMA, PWRMAX_CF,         &
-                               PZ0_O_Z0H, PWFC, PWSAT, PTSNOW, PZ, PT, PQ, PWIND, PTKE, PP      )  
+                               PZ0_O_Z0H, PWFC, PWSAT, PTSNOW, PZ, PT, PQ, PWIND, PTKE, PP)  
 !     #################################################################################
 !
 !!****  *INIT_WATER_SBL* - inits water SBL profiles

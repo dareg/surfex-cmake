@@ -23,6 +23,7 @@ then
 	echo " > cdp9697       : dataset on Col de Porte 1996-1997         "
 	echo " > Alp_for_0203  : dataset on forest alpine site 0203   "
 	echo " > Alqueva0206   : dataset on lake Alqueva between 2002 and 2006   "
+	echo " > safran        : dataset for safran"
 	echo " > "
 	echo " > use one of the following instructions: "
 	echo " > "
@@ -33,13 +34,14 @@ then
 	echo " > 2_prepare_files.bash cdp9697 "
 	echo " > 2_prepare_files.bash Alp_for_0203 "
 	echo " > 2_prepare_files.bash Alqueva0206 "
+	echo " > 2_prepare_files.bash safran "
 	exit
 fi
 #------------------------------------------------------------
 if [ ! -f ../../exe/PRE_INPUT_EXPERIMENT-${XYZ} ]
 then
 	echo " "
-	echo " you need to compile with VER_USER=FORC first "
+	echo " you need to compile with VER_USER=FORC and to run profile_surfex....FORC... before "
 	echo " "
 	exit
 fi
@@ -47,6 +49,7 @@ fi
 mkdir ${SRC_SURFEX}/MY_RUN/KTEST/$1    > $HOME/.bidon 2>&1
 cp ${SRC_SURFEX}/MY_RUN/NAMELIST/$1/MY_PARAM.nam .
 /bin/vi MY_PARAM.nam
+export OMP_NUM_THREADS=1
 ../../exe/PRE_INPUT_EXPERIMENT-${XYZ}
 rm -f fort.1*
 
@@ -66,7 +69,7 @@ cd ${SRC_SURFEX}/MY_RUN/KTEST/$1
 
 if [ ! "$outfmt" ]
 then
-	mv ${SRC_SURFEX}/MY_RUN/FORCING/FORCING.nc .
+	mv ${SRC_SURFEX}/MY_RUN/FORCING/*FORCING.nc .
 fi
 
 if [ "$outfmt_ascii" ]
@@ -85,7 +88,9 @@ fi
 if [ "$outfmt_netcdf" ]
 then
 	ls -l ${SRC_SURFEX}/MY_RUN/FORCING/*.nc
-	mv ${SRC_SURFEX}/MY_RUN/FORCING/FORCING.nc .
+	mv ${SRC_SURFEX}/MY_RUN/FORCING/*FORCING.nc .
+	mv ${SRC_SURFEX}/MY_RUN/FORCING/*PARAMS.nc .
+	mv ${SRC_SURFEX}/MY_RUN/FORCING/*Forc_*.nc .
 fi
 
 if [ "$outfmt" ] && [ ! "$outfmt_netcdf" ] && [ ! "$outfmt_ascii" ] && [ ! "$outfmt_binary" ]
@@ -109,7 +114,7 @@ fi
 	cp ${SRC_SURFEX}/MY_RUN/NAMELIST/$1/OPTIONS.nam  .
 	
 	echo "====================================================================================="
-	echo " > input files moved to ${SURFEX_EXPERIMENT}/rundir/$1        "
+	echo " > input files moved to ${SRC_SURFEX}/MY_RUN/KTEST/$1        "
 	echo "====================================================================================="
 
 

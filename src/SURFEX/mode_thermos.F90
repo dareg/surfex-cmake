@@ -36,7 +36,12 @@
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+INTERFACE PSAT
+  MODULE PROCEDURE PSAT_0D
+  MODULE PROCEDURE PSAT_1D
+END INTERFACE
 INTERFACE QSAT
+  MODULE PROCEDURE QSATW_0D         
   MODULE PROCEDURE QSATW_1D
   MODULE PROCEDURE QSATW_2D
 END INTERFACE
@@ -55,7 +60,175 @@ INTERFACE DQSATI
 END INTERFACE
 CONTAINS
 !-------------------------------------------------------------------------------
+!     ######################################
+      FUNCTION PSAT_0D(PT) RESULT(PPSAT)
+!     ######################################
+!-------------------------------------------------------------------------------
 !
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, INTENT(IN)                :: PT     ! Temperature (Kelvin)
+REAL                            :: PPSAT  ! saturation vapor 
+                                          ! specific humidity
+                                          ! with respect to
+                                          ! water (kg/kg)
+REAL(KIND=JPRB) :: ZHOOK_HANDLE                                          
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_0D',0,ZHOOK_HANDLE)
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+PPSAT = EXP( XALPW - XBETAW/PT - XGAMW*LOG(PT)  )
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_0D',1,ZHOOK_HANDLE)
+!
+END FUNCTION PSAT_0D
+!-------------------------------------------------------------------------------
+!     ######################################
+      FUNCTION PSAT_1D(PT) RESULT(PPSAT)
+!     ######################################
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, DIMENSION(:), INTENT(IN)                :: PT     ! Temperature (Kelvin)
+REAL, DIMENSION(SIZE(PT))                     :: PPSAT  ! saturation vapor pressure (Pa)
+!
+INTEGER                         :: JJ !loop index
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_1D',0,ZHOOK_HANDLE)
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+!cdir nodep
+DO JJ=1,SIZE(PT)
+  PPSAT(JJ) = EXP( XALPW - XBETAW/PT(JJ) - XGAMW*LOG(PT(JJ))  )
+ENDDO
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_1D',1,ZHOOK_HANDLE)
+!
+END FUNCTION PSAT_1D
+!-------------------------------------------------------------------------------
+!     ######################################
+      FUNCTION QSATW_0D(PT,PP) RESULT(PQSAT)
+!     ######################################
+!
+!!****  *QSATW * - function to compute saturation vapor humidity from
+!!                 temperature
+!!
+!!    PURPOSE
+!!    -------
+!       The purpose of this function is to compute the saturation vapor 
+!     pressure from temperature 
+!      
+!
+!!**  METHOD
+!!    ------
+!!       Given temperature T (PT), the saturation vapor pressure es(T)
+!!    (FOES(PT)) is computed by integration of the Clapeyron equation
+!!    from the triple point temperature Tt (XTT) and the saturation vapor 
+!!    pressure of the triple point es(Tt) (XESTT), i.e  
+!!     
+!!         es(T)= EXP( alphaw - betaw /T - gammaw Log(T) )
+!!  
+!!     with :
+!!       alphaw (XALPW) = LOG(es(Tt))+ betaw/Tt + gammaw Log(Tt) 
+!!       betaw (XBETAW) = Lv(Tt)/Rv + gammaw Tt
+!!       gammaw (XGAMW) = (Cl -Cpv) /Rv
+!!
+!!      Then, the specific humidity at saturation is deduced.
+!!  
+!!
+!!    EXTERNAL
+!!    --------
+!!      NONE
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!      Module MODD_CST : comtains physical constants
+!!        XALPW   : Constant for saturation vapor pressure function
+!!        XBETAW  : Constant for saturation vapor pressure function
+!!        XGAMW   : Constant for saturation vapor pressure function  
+!!      
+!!    REFERENCE
+!!    ---------
+!!      Book2 of documentation of Meso-NH 
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!	V. Masson       * Meteo France *
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    21/09/98 
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, INTENT(IN)                :: PT     ! Temperature (Kelvin)
+REAL, INTENT(IN)                :: PP     ! Pressure (Pa)
+REAL                            :: PQSAT  ! saturation vapor 
+                                                        ! specific humidity
+                                                        ! with respect to
+                                                        ! water (kg/kg)
+!
+!*       0.2   Declarations of local variables
+!
+REAL                           :: ZFOES  ! saturation vapor 
+                                                        ! pressure
+                                                        ! (Pascal) 
+!
+REAL                           :: ZWORK1
+REAL                           :: ZWORK2
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_0D',0,ZHOOK_HANDLE)
+!
+ZWORK2 = XRD/XRV
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+ZFOES = EXP( XALPW - XBETAW/PT - XGAMW*LOG(PT)  )
+ZWORK1    = ZFOES/PP
+!
+!*       2.    COMPUTE SATURATION HUMIDITY
+!              ---------------------------
+!
+PQSAT = ZWORK2*ZWORK1 / (1.+(ZWORK2-1.)*ZWORK1)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_0D',1,ZHOOK_HANDLE)
+!
+END FUNCTION QSATW_0D
 !-------------------------------------------------------------------------------
 !
 !     ######################################

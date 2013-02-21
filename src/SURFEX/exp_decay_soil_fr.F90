@@ -44,7 +44,7 @@
 USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_SGH_PAR, ONLY : X2                                
 USE MODD_CSTS,    ONLY : XDAY
-!
+USE MODD_DUMMY_EXP_PROFILE,ONLY : XC_DEPTH_RATIO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -88,7 +88,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PKSAT_ICE
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PF))         :: ZD_G_TOT, ZC_DEPTH, ZKSAT_NOEXP
+REAL, DIMENSION(SIZE(PF))         :: ZD_G_TOT, ZC_DEPTH, ZKSAT_NOEXP, ZC_DEPTH_RATIO
 !                                    ZD_G_TOT = depth of the soil column (m)
 !                                    ZC_DEPTH = assumed as the depth where the vertical 
 !                                               satured hydraulic conductivities reach
@@ -107,11 +107,18 @@ IF(HISBA=='3-L')ZD_G_TOT(:) = PD_G(:,3)
 !
 ZKSAT_NOEXP(:) = PCONDSAT(:,2)
 !
+IF (ALLOCATED(XC_DEPTH_RATIO)) THEN
+  ZC_DEPTH_RATIO(:) = XC_DEPTH_RATIO(:)
+ELSE
+  ZC_DEPTH_RATIO(:) = 1.
+ENDIF
+!
 WHERE(ZD_G_TOT(:)/=XUNDEF)
 !
 !compacted depth
 !
-ZC_DEPTH(:) = PD_G(:,2)
+ZC_DEPTH(:) = PD_G(:,2)*ZC_DEPTH_RATIO(:)
+!ZC_DEPTH(:) = PD_G(:,2)
 !
 !surface hydraulic conductivity at saturation
 !

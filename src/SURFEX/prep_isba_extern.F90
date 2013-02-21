@@ -60,7 +60,7 @@ REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: INI            ! total 1D dimension
 INTEGER           :: IPATCH         ! number of patch
@@ -118,7 +118,7 @@ SELECT CASE(HSURF)
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !* reading of the profile and its depth definition
      CALL READ_EXTERN_ISBA(HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                           KLUOUT,INI,HSURF,ZFIELD,ZD)
+                           KLUOUT,INI,HSURF,HSURF,ZFIELD,ZD)
 ! 
      ALLOCATE(ZFIELD1(SIZE(ZFIELD,1),SIZE(ZFIELD,2)))
      ALLOCATE(ZD1(SIZE(ZFIELD,1),SIZE(ZFIELD,2)))

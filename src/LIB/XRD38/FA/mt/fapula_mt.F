@@ -97,6 +97,7 @@ C
 C
       REAL (KIND=JPDBLR) ZEPS, ZZ, ZXMW, ZYMW, ZWSUM, ZX, ZY
       REAL (KIND=JPDBLR) ZK, ZP, ZBETA1, ZSUM1, ZSUM2
+      REAL (KIND=JPDBLR), PARAMETER :: NINE = 9.999
       REAL (KIND=JPDBLR), DIMENSION(:), ALLOCATABLE    :: ZW, ZNORM
 C
       LOGICAL LLMLAM
@@ -300,8 +301,8 @@ C
 C     Et finalement, la puissance de laplacien, arrondie en un
 C     nombre entier de milliemes.
       ZP = -ZBETA1
-      ZP = MAX(-9.999D0, MIN(9.999D0, ZP))
-      KPULAP = NINT( ZP * 1000.0D0 )
+      ZP = MAX(-NINE, MIN(NINE, ZP))
+      KPULAP = NINT( ZP * 1000.0 )
 C**
 C    10.  -  PHASE TERMINALE : MESSAGERIE EVENTUELLE,
 C            VIA LE SOUS-PROGRAMME "FAIPAR" .

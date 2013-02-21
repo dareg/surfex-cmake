@@ -39,7 +39,8 @@
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
-USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE
+USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE, CATYPE,      &
+                                NVALNBR, NVALCOUNT, XVALLIST, JPVALMAX
 USE MODD_SURF_ATM_n,     ONLY : XNATURE, XSEA, XTOWN, XWATER
 !
 USE MODI_GET_LUOUT
@@ -88,6 +89,7 @@ INTEGER                        :: IDIM   !
 !
 CHARACTER(LEN=20)   :: YFIELD
 CHARACTER(LEN=6)    :: YMASK
+INTEGER             :: INPTS     ! number of points used for interpolation
 REAL, DIMENSION(NL) :: ZFIELD    ! physiographic field on full grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -122,6 +124,17 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   NSIZE    (:) = 0.
   XSUMVAL  (:) = 0.
+  INPTS        = 3
+!
+  IF (CATYPE=='MAJ') THEN
+    ALLOCATE(NVALNBR  (NL))
+    ALLOCATE(NVALCOUNT(NL,JPVALMAX))
+    ALLOCATE(XVALLIST (NL,JPVALMAX))
+    NVALNBR   = 0
+    NVALCOUNT = 0
+    XVALLIST  = XUNDEF
+    INPTS     = 1
+  END IF
 !
   YFIELD = '                    '
   YFIELD = HFIELD(1:MIN(LEN(HFIELD),20))
@@ -139,6 +152,8 @@ IF (LEN_TRIM(HFILE)/=0) THEN
       WHERE ((XTOWN(:)+XNATURE(:))==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('TWN')
       WHERE (XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+    CASE ('BLD')
+      WHERE (XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1              
     CASE ('NAT')
       WHERE (XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('SEA')
@@ -154,7 +169,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   IF(HFIELD.NE."water depth") THEN
     IF (PUNIF/=XUNDEF) THEN
-      CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD,PDEF=PUNIF)
+      CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD,PDEF=PUNIF,KNPTS=INPTS)
     ELSE
       CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD)
     END IF          
@@ -162,6 +177,11 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   DEALLOCATE(NSIZE    )
   DEALLOCATE(XSUMVAL  )
+  IF (CATYPE=='MAJ') THEN
+    DEALLOCATE(NVALNBR  )
+    DEALLOCATE(NVALCOUNT)
+    DEALLOCATE(XVALLIST )
+  END IF
 !
 !-------------------------------------------------------------------------------
 !
@@ -199,6 +219,8 @@ SELECT CASE (HAREA)
           YMASK = 'LAND  '
   CASE ('TWN')
           YMASK = 'TOWN  '
+    CASE ('BLD')
+          YMASK = 'TOWN '              
   CASE ('NAT')
           YMASK = 'NATURE'
   CASE ('SEA')

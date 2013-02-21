@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HSOM, HRAIN, HHORT, &
+      SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HSOC, HRAIN, HHORT, &
                       HC1DRY, HSCOND, HSNOW_ISBA, HSNOWRES, HCPSURF, HSOILFRZ,   &
                       HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
                       HIMPLICIT_WIND, PCGMAX, PZREF, PUREF, PDIRCOSZW,           &
@@ -11,7 +11,8 @@
                       PALBVIS_TSOIL, PALB, PWRMAX_CF, PVEG, PLAI, PEMIS,         &
                       PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PVEGTYPE, PZ0EFF, PRUNOFFB, &
                       PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PC4REF, PACOEF, PPCOEF, &
-                      PTAUICE, PWDRAIN, PTDEEP, PGAMMAT, PPSN, PPSNG, PPSNV,     &
+                      PTAUICE, PWDRAIN, PTDEEP_A, PTDEEP_B, PGAMMAT,             &
+                      PPSN, PPSNG, PPSNV,                                        &
                       PPSNV_A, PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL, PIRRIG,    &
                       PWATSUP, PTHRESHOLD, LIRRIGATE, LIRRIDAY, OSTRESSDEF, PGC, &
                       PF2I, PDMAX, PAH, PBH, PCSP, PGMES, PPOI, PFZERO, PEPSO,   &
@@ -36,7 +37,8 @@
                       PUSTAR_ISBA, PLER_ISBA, PLE_ISBA, PLEI_ISBA, PGFLUX_ISBA,  &
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
-                      PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS           )                     
+                      PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
+                      PIRRIG_FLUX, PDEEP_FLUX                                    )                     
 !     ##########################################################################
 !
 !
@@ -111,6 +113,7 @@
 !!                                  of time step for total albedo calculation
 !!                            Bug : flood fraction in COTWORES
 !!                            new wind implicitation
+!!                            Irrigation rate diag
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -171,9 +174,9 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HRUNOFF    ! surface runoff formulation
 CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
-CHARACTER(LEN=*),     INTENT(IN)  :: HSOM       ! soil organic matter profil option
+CHARACTER(LEN=*),     INTENT(IN)  :: HSOC       ! soil organic carbon profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
-!                                               ! 'SGH'  = SOM profile
+!                                               ! 'SGH'  = SOC profile
 CHARACTER(LEN=*),     INTENT(IN)  :: HRAIN      ! Rainfall spatial distribution
                                                 ! 'DEF' = No rainfall spatial distribution
                                                 ! 'SGH' = Rainfall exponential spatial distribution
@@ -342,10 +345,18 @@ REAL, DIMENSION(:), INTENT(IN)  :: PTAUICE    ! characteristic time scale for ph
 REAL, DIMENSION(:), INTENT(IN)  :: PWDRAIN    ! minimum Wg for drainage (m3/m3)
 !
 !
-REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP     ! Deep soil temperature (prescribed)
-!                                             ! which models heating/cooling from
-!                                             ! below the diurnal wave penetration
-!                                             ! (surface temperature) depth.
+REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP_A, PTDEEP_B     
+                                              ! Deep soil temperature (prescribed)
+!                                      PTDEEP_A = Deep soil temperature
+!                                                 coefficient depending on flux
+!                                      PTDEEP_B = Deep soil temperature (prescribed)
+!                                               which models heating/cooling from
+!                                               below the diurnal wave penetration
+!                                               (surface temperature) depth. If it
+!                                               is FLAGGED as undefined, then the zero
+!                                               flux lower BC is applied.
+!                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+!                                              (with PDEEP_FLUX in W/m2)
 REAL, DIMENSION(:), INTENT(IN)  :: PGAMMAT    ! Deep soil heat transfer coefficient:
 !                                             ! assuming homogeneous soil so that
 !                                             ! this can be prescribed in units of 
@@ -393,9 +404,9 @@ REAL, DIMENSION(:),    INTENT(IN) :: PFZERO     ! ideal value of F, no photo-
 REAL, DIMENSION(:),    INTENT(IN) :: PEPSO      ! maximum initial quantum use
 !                                               ! efficiency (mg J-1 PAR)
 REAL, DIMENSION(:),    INTENT(IN) :: PGAMM      ! CO2 conpensation concentration (ppmv)
-REAL, DIMENSION(:),    INTENT(IN) :: PQDGAMM    ! Q10 function for CO2 conpensation 
+REAL, DIMENSION(:),    INTENT(IN) :: PQDGAMM    ! Log of Q10 function for CO2 conpensation 
 !                                               ! concentration
-REAL, DIMENSION(:),    INTENT(IN) :: PQDGMES    ! Q10 function for mesophyll conductance 
+REAL, DIMENSION(:),    INTENT(IN) :: PQDGMES    ! Log of Q10 function for mesophyll conductance 
 REAL, DIMENSION(:),    INTENT(IN) :: PT1GMES    ! reference temperature for computing 
 !                                               ! compensation concentration function for 
 !                                               ! mesophyll conductance: minimum
@@ -405,7 +416,7 @@ REAL, DIMENSION(:),    INTENT(IN) :: PT2GMES    ! reference temperature for comp
 !                                               ! mesophyll conductance: maximum
 !                                               ! temperature
 REAL, DIMENSION(:),    INTENT(IN) :: PAMAX      ! leaf photosynthetic capacity (kgCO2 m-2 s-1)
-REAL, DIMENSION(:),    INTENT(IN) :: PQDAMAX    ! Q10 function for leaf photosynthetic capacity
+REAL, DIMENSION(:),    INTENT(IN) :: PQDAMAX    ! Log of Q10 function for leaf photosynthetic capacity
 REAL, DIMENSION(:),    INTENT(IN) :: PT1AMAX    ! reference temperature for computing 
 !                                               ! compensation concentration function for leaf 
 !                                               ! photosynthetic capacity: minimum
@@ -583,6 +594,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PDRAIN     ! drainage
 REAL, DIMENSION(:), INTENT(OUT) :: PRUNOFF    ! runoff
 REAL, DIMENSION(:), INTENT(OUT) :: PMELT      ! melting rate of the snow (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PMELTADV   ! advection heat flux from snowmelt (W/m2)
+REAL ,DIMENSION(:), INTENT(OUT) :: PIRRIG_FLUX! irrigation rate (kg/m2/s)
 !
 ! The following surface fluxes are from snow-free portion of grid
 ! box when the ISBA-ES option is ON. Otherwise, they are equal
@@ -628,6 +640,9 @@ REAL, DIMENSION(:),     INTENT(OUT) :: PFAPAR    ! Fapar of vegetation
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR    ! Fapir of vegetation
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPAR_BS ! Fapar of bare soil
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR_BS ! Fapir of bare soil
+!
+REAL, DIMENSION(:),     INTENT(OUT) :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+
 !
 !*      0.2    declarations of local variables
 !
@@ -695,7 +710,7 @@ REAL, DIMENSION(SIZE(PWG,1))             :: ZWGI_EXCESS! Soil ice excess water c
 ! Other :
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
-!                                                        ! if implicit coupling with atmosphere used.
+!                                                      ! if implicit coupling with atmosphere used.
 REAL, DIMENSION(SIZE(PWR)) :: ZTDIURN ! Ice maximum penetration depth for restore (m)
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
@@ -713,7 +728,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA',0,ZHOOK_HANDLE)
 !
-
 PC1(:)          = XUNDEF
 PC2(:)          = XUNDEF
 PWGEQ(:)        = XUNDEF
@@ -752,7 +766,7 @@ ZALB3L(:)=PSNOWALB(:)
 !              ---------------
 !
 IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
-!
+
    CALL SOIL (HC1DRY, HSCOND, HSNOW_ISBA, PSNOWRHO(:,1), PVEG, PCGSAT, PCGMAX,  &
      PC1SAT, PC2REF, PACOEF, PPCOEF, PCV, PPSN, PPSNG, PPSNV, PFFG, PFFV, PFF,  &
      PCG, PC1, PC2, PWGEQ, PCT, ZCS, ZFROZEN1, PTG(:,1), PWG, PWGI,             &
@@ -766,8 +780,7 @@ ELSE
      PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ        )
 !
 ENDIF
-!
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      3.0    Explicit snow scheme
 !              --------------------
@@ -826,7 +839,7 @@ ENDIF
 ZQSAT=QSAT(PTG(:,1),PPS(:))
 !
 IF (HPHOTO=='NON') THEN
-   CALL VEG(PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN, PGAMMA, ZF2, PRS)
+  CALL VEG(PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN, PGAMMA, ZF2, PRS)
 ELSE IF (MAXVAL(PGMES).NE.XUNDEF .OR. MINVAL(PGMES).NE.XUNDEF) THEN
   CALL COTWORES(PTSTEP, HPHOTO, OTR_ML, GSHADE,                         &
             PVEGTYPE, OSTRESSDEF, PAH, PBH, PF2I, PDMAX,                &
@@ -867,9 +880,10 @@ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             
         PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, PEMIS, PALB, PRESA,          &
         PCT, PPSN, PPSNV, PPSNG, PGRNDFLUX, PSMELTFLUX, ZSNOW_THRUFAL,          &
         PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
-        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP, PGAMMAT, ZTA_IC, ZQA_IC, ZUSTAR2_IC,   &
+        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
+        ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
         PSNOWFREE_ALB_VEG, PPSNV_A, PSNOWFREE_ALB_SOIL,                         &
-        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT)  
+        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT, PDEEP_FLUX           )
 !
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -936,8 +950,9 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, OGLACIER, OFLOOD, PTSTEP, PVEGTYPE,      
      PWFC, PWWILT, ZF2WGHT, ZF2, PD_G, PDZG, PDZDIF, PPS,                       &
      PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF,                                &
      PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,                          &
-     HKSAT, HSOM, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
-     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, ZTDIURN           )
+     HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
+     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, ZTDIURN,          &
+     PIRRIG_FLUX                                                                )
 !
 PDRAIN(:)=PDRAIN(:)+ZWGI_EXCESS(:)
 !
@@ -949,7 +964,7 @@ PDRAIN(:)=PDRAIN(:)+ZWGI_EXCESS(:)
 !* add snow component to output radiative parameters and fluxes in case 
 !  of 3-L snow scheme
 !
-
+!
 CALL ISBA_SNOW_AGR( HSNOW_ISBA,                                   &
           ZEMIST, ZALBT,                                          &
           PPSN, PPSNG, PPSNV,                                     &

@@ -61,6 +61,7 @@ USE MODD_TEB_n,   ONLY : XGARDEN
 USE MODI_INIT_ISBA_MIXPAR
 USE MODI_CONVERT_PATCH_ISBA
 USE MODI_INIT_FROM_DATA_GRDN_n
+USE MODI_INIT_FROM_DATA_GREENROOF_n
 USE MODI_SUBSCALE_Z0EFF
 USE MODI_ALBEDO
 USE MODI_UPDATE_DATA_COVER
@@ -183,45 +184,50 @@ IDECADE2 = IDECADE
                            PCNA_NITRO=PCNA_NITRO,                &
                            TPSEED=TPSEED, TPREAP=TPREAP,         &
                            PWATSUP=PWATSUP,PIRRIG=PIRRIG     ) 
-      IF (HSFTYPE=='GRD') THEN
+      IF (HSFTYPE=='GRD'.OR.HSFTYPE=='GNR') THEN
         WHERE (XGARDEN(:)==0.)
-          PVEG(:,1)=0.
-          PLAI(:,1)=0.
-          PRSMIN(:,1)=40.
-          PGAMMA(:,1)=0.
-          PWRMAX_CF(:,1)=0.2
-          PRGL(:,1)=100.
-          PCV(:,1)=2.E-5
-          PZ0(:,1)=0.013
-          PALBNIR_VEG(:,1)=0.30
-          PALBVIS_VEG(:,1)=0.30
-          PALBUV_VEG(:,1)=0.06
-          PEMIS(:,1)=0.94
+          PVEG       (:,1) = 0.
+          PLAI       (:,1) = 0.
+          PRSMIN     (:,1) = 40.
+          PGAMMA     (:,1) = 0.
+          PWRMAX_CF  (:,1) = 0.2
+          PRGL       (:,1) = 100.
+          PCV        (:,1) = 2.E-5
+          PZ0        (:,1) = 0.013
+          PALBNIR_VEG(:,1) = 0.30
+          PALBVIS_VEG(:,1) = 0.30
+          PALBUV_VEG (:,1) = 0.06
+          PEMIS      (:,1) = 0.94                
         END WHERE
         IF (HPHOTO/='NON') THEN
           WHERE (XGARDEN(:)==0.)
-            PLAIMIN(:,1)=0.3                  
-            PBSLAI(:,1)=0.36
-            PSEFOLD(:,1)=90*86400.            
-            PGMES(:,1)=0.020
-            PGC(:,1)=0.00025
+            PGMES      (:,1) = 0.020
+            PBSLAI     (:,1) = 0.36
+            PLAIMIN    (:,1) = 0.3
+            PSEFOLD    (:,1) = 90*86400.
+            PGC        (:,1) = 0.00025                  
           END WHERE
           IF (HPHOTO/='AGS' .AND. HPHOTO/='LAI') THEN
-            WHERE (XGARDEN(:)==0.) PF2I(:,1)=0.3
+            WHERE (XGARDEN(:)==0.) PF2I       (:,1) = 0.3
             IF (HPHOTO=='NIT' .OR. HPHOTO=='NCB') THEN
               WHERE (XGARDEN(:)==0.)
-                PCE_NITRO(:,1)=7.68
-                PCF_NITRO(:,1)=-4.33
-                PCNA_NITRO(:,1)=1.3
+                PCE_NITRO  (:,1) = 7.68
+                PCF_NITRO  (:,1) = -4.33
+                PCNA_NITRO (:,1) = 1.3                      
               END WHERE
             ENDIF
           ENDIF
         ENDIF
       ENDIF
-     
+  
     ELSEIF (HSFTYPE=='GRD') THEN
-      CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,           &
-                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS    )  
+      CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,                                      &
+                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
+     
+    ELSEIF (HSFTYPE=='GNR') THEN
+      CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,HPHOTO,                                 &
+                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
+
     ENDIF
     IF (HSFTYPE=='NAT') THEN
 !* albedo

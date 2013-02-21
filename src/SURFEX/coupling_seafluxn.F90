@@ -36,15 +36,17 @@ SUBROUTINE COUPLING_SEAFLUX_n(HPROGRAM, HCOUPLING,                              
 !!      Modified    09/2009 : B. Decharme Radiative properties at time t+1
 !!      Modified    01/2010 : B. Decharme Add XTTS
 !!      Modified    09/2012 : B. Decharme New wind implicitation
+!!      Modified    10/2012 : P. Le Moigne CMO1D update
 !!---------------------------------------------------------------------
 !
-USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XLVTT, XTTS, XDAY
+USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XLVTT, XTT, XTTS, XDAY
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM,   ONLY : LCPL_ESM, CIMPLICIT_WIND
 !
 USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
 USE MODD_SEAFLUX_n,  ONLY : XSST, XTICE, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
-                              CSEA_ALB, CSEA_FLUX, XUMER, XVMER, LINTERPOL_SST  
+                              CSEA_ALB, CSEA_FLUX, XUMER, XVMER, LINTERPOL_SST, &
+                              XICHCE, LPRECIP, LPWEBB , LPWG
 
 USE MODD_OCEAN_n, ONLY : LMERCATOR                            
 USE MODD_CH_SEAFLUX_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
@@ -71,6 +73,9 @@ USE MODD_SLT_SURF
 USE MODD_DST_n,    ONLY: XEMISRADIUS_DST, XEMISSIG_DST
 USE MODD_SLT_n,    ONLY: XEMISRADIUS_SLT, XEMISSIG_SLT
 ! 
+USE MODD_SEAFLUX_GRID_n, ONLY : XLAT
+USE MODD_OCEAN_GRID_n,   ONLY : NOCKMIN
+USE MODD_OCEAN_REL_n,      ONLY : XSEAT_REL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -149,7 +154,10 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
-!        
+!     
+REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t
+REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
+!
 REAL, DIMENSION(KI) :: ZEXNA      ! Exner function at forcing level
 REAL, DIMENSION(KI) :: ZEXNS      ! Exner function at surface level
 REAL, DIMENSION(KI) :: ZU         ! zonal wind
@@ -172,19 +180,19 @@ REAL, DIMENSION(KI) :: ZTRAD      ! Radiative temperature at time t
 REAL, DIMENSION(KI) :: ZSFTH_ICE  ! Sea ice flux of heat
 REAL, DIMENSION(KI) :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
 !
-REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t
-REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
-!
 REAL, DIMENSION(KI)              :: ZMASK
+!
 REAL                             :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
 REAL                             :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST
 REAL                             :: ZCONVERTFACM6_SLT, ZCONVERTFACM6_DST
+!
 INTEGER                          :: ISIZE_WATER  ! number of points of sea water 
 INTEGER                          :: ISIZE_ICE    ! and of sea ice
 !
 INTEGER                          :: ISWB       ! number of shortwave spectral bands
 INTEGER                          :: JSWB       ! loop counter on shortwave spectral bands
 INTEGER                          :: ISLT       ! number of sea salt variable
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
@@ -247,9 +255,7 @@ ZQA(:) = PQA(:) / PRHOA(:)
 ! update sea surface temperature
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (LSST_DATA) THEN
-   CALL SST_UPDATE(XSST, TTIME)
-ENDIF
+IF (LSST_DATA .AND. (.NOT. LMERCATOR)) CALL SST_UPDATE(XSST, TTIME)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Time evolution
@@ -289,7 +295,7 @@ SELECT CASE (CSEA_FLUX)
                       PTA, ZEXNA ,PRHOA, XSST, ZEXNS, ZQA, PRAIN,     &
                       PSNOW,                                          &
                       ZWIND, PZREF, PUREF,                            &
-                      PPS, ZQSAT,                                     &
+                      PPS, XICHCE, LPRECIP, LPWEBB, LPWG, ZQSAT,      &
                       PSFTH, PSFTQ, ZUSTAR,                           &
                       ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H       )  
 
@@ -336,7 +342,14 @@ END WHERE
 !
 ! CO2 flux
 !
-PSFCO2(:)       =  0.0    !! Assumes no emission over oceans !!!!!
+! PSFCO2 = E * deltapCO2 
+! According to Wanninkhof (medium hypothesis) : 
+! E = 1.13.10^-3 * WIND^2 CO2mol.m-2.yr-1.µatm-1 
+!   = 1.13.10^-3 * WIND^2 * Mco2.10^-3 * (1/365*24*3600)
+! deltapCO2 = -8.7 µatm (Table 1 half hypothesis)
+
+PSFCO2(:) = - ZWIND(:)**2 * 1.13E-3 * 8.7 * 44.E-3 / ( 365*24*3600 )
+!
 !
 !-------------------------------------------------------------------------------------
 !radiative properties at time t
@@ -442,8 +455,17 @@ ENDIF
 ! OCEANIC COUPLING
 !-------------------------------------------------------------------------------
   IF (LMERCATOR) THEN
-    CALL MOD1D_n(PTIME,PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),&
-                   PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),XSST(:))  
+
+    ! Update SST reference profile for relaxation purpose
+    IF (LSST_DATA) CALL SST_UPDATE(XSEAT_REL(:,NOCKMIN+1), TTIME)
+    !
+    ! Convert to degree C for ocean model
+    XSEAT_REL(:,NOCKMIN+1) = XSEAT_REL(:,NOCKMIN+1) - XTT
+    !
+    CALL MOD1D_n(HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
+                 PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
+                 PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),XSST(:))
+   
   ENDIF
 !
 !-------------------------------------------------------------------------------

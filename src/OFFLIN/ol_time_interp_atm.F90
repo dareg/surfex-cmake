@@ -1,7 +1,9 @@
-!     #########
-SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,                               &
-                               PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
-                               PCO2,PDIR                                         )  
+!     ######spl
+SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
+                               PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2,        &
+                               PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,      &
+                               PLW1,PLW2,PSNOW2,PRAIN2,                  &
+                               PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2         )  
 !**************************************************************************
 !
 !!    PURPOSE
@@ -32,12 +34,10 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,                              
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    06/2003
-
-!          
 !
 USE MODD_CSTS,       ONLY : XPI, XRD, XRV, XG
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_FORC_ATM,  ONLY: XTA       ,&! air temperature forcing               (K)
+USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               (K)
                             XQA       ,&! air specific humidity forcing         (kg/m3)
                             XRHOA     ,&! air density forcing                   (kg/m3)
                             XZS       ,&! orography                             (m)
@@ -53,40 +53,44 @@ USE MODD_FORC_ATM,  ONLY: XTA       ,&! air temperature forcing               (K
                             XSNOW     ,&! snow precipitation                    (kg/m2/s)
                             XRAIN     ,&! liquid precipitation                  (kg/m2/s)
                             XZREF       ! height of T,q forcing                 (m)  
-
-USE MODI_GET_LUOUT
+USE MODD_SURFEX_OMP, ONLY : NINDX1,NINDX2,NBLOCK,NBLOCKTOT, INIT_DIM, RESET_DIM
 !
+USE MODI_GET_LUOUT
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_ABOR1_SFX
+#ifdef AIX64
+USE OMP_LIB
+#endif
 !
 IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
-
+!
+#ifndef AIX64
+INCLUDE 'omp_lib.h'
+#endif
+!
 ! global variables
-REAL, DIMENSION(:,:),INTENT(IN) :: PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,PCO2,PDIR
-INTEGER,INTENT(IN)   :: KSURF_STEP,KNB_ATM
+INTEGER,INTENT(IN) :: KSURF_STEP, KNB_ATM
+INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_OMP
+REAL, DIMENSION(:),INTENT(IN) :: PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2
+REAL, DIMENSION(:),INTENT(IN) :: PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,PLW1,PLW2
+REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2
 
 ! local variables
-REAL, DIMENSION(SIZE(PTA,2)) :: ZDELTA_TA,ZDELTA_QA,                   &
-                                  ZDELTA_DIR_SW,ZDELTA_SCA_SW,ZDELTA_LW, &
-                                  ZDELTA_SNOW,ZDELTA_RAIN,ZDELTA_PS,     &
-                                  ZDELTA_CO2,ZDELTA_U, ZDELTA_V,         &
-                                  ZU1, ZV1, ZU2, ZV2  
-INTEGER:: INI,IFIRST,INB
-INTEGER :: IFILE_ID,IVAR_ID,IRET,INBDIM,INB_FORC,INI_ID,ITIME_ID,JWRK
-CHARACTER(LEN=100) :: YFILE_FORCING='FORCING.nc'
-INTEGER,DIMENSION(2) :: ISTART,ICOUNT,ISTRIDE
-REAL,DIMENSION(:,:),ALLOCATABLE ::ZPAS
+REAL :: ZDTA, ZDQA, ZDDIR_SW, ZDSCA_SW, ZDLW,  &
+        ZDPS, ZDCO2, ZDU, ZDV, ZU1, ZV1, ZU2, ZV2 
+REAL :: ZPI, ZNB_ATM, ZSURF_STEP, ZCOEF
+INTEGER :: J, INKPROMA
 INTEGER :: ILUOUT
-REAL :: ZPI, ZNB_ATM, ZSURF_STEP,ZCOEF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !========================================================================
 !
 IF (LHOOK) CALL DR_HOOK('OL_TIME_INTERP_ATM',0,ZHOOK_HANDLE)
+!
 CALL GET_LUOUT('OFFLIN',ILUOUT)
 !
 ZPI = XPI/180.
@@ -94,52 +98,77 @@ ZNB_ATM = KNB_ATM*1.
 ZSURF_STEP = KSURF_STEP*1.-1.
 ZCOEF = ZSURF_STEP / ZNB_ATM
 !
-WHERE(PTA(1,:)/=XUNDEF)
-!        
-! Compute wind components
+!$OMP PARALLEL PRIVATE(INKPROMA,J,ZU1,ZU2,ZV1,ZV2,ZDU,ZDV,ZDTA, &
+!$OMP ZDQA,ZDLW,ZDPS,ZDCO2,ZDDIR_SW,ZDSCA_SW)
 !
-! zonal wind
-  ZU1 = PWIND  (1,:) * SIN(PDIR(1,:)*ZPI)
-  ZV1 = PWIND  (1,:) * COS(PDIR(1,:)*ZPI)
-  ZU2 = PWIND  (2,:) * SIN(PDIR(2,:)*ZPI)
-  ZV2 = PWIND  (2,:) * COS(PDIR(2,:)*ZPI)
+!$ NBLOCK = OMP_GET_THREAD_NUM()
 !
-! Compute variation from atmospheric time step J and J+1
+IF (NBLOCK==NBLOCKTOT) THEN
+  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1,NINDX2)
+ELSE
+  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1,NINDX2)
+ENDIF
 !
-  ZDELTA_TA    (:)=(PTA    (2,:)-PTA    (1,:))*ZCOEF
-  ZDELTA_QA    (:)=(PQA    (2,:)-PQA    (1,:))*ZCOEF
-  ZDELTA_U     (:)=(ZU2      (:)-ZU1      (:))*ZCOEF
-  ZDELTA_V     (:)=(ZV2      (:)-ZV1      (:))*ZCOEF
-  ZDELTA_RAIN  (:)=(PRAIN  (2,:)-PRAIN  (1,:))*ZCOEF
-  ZDELTA_SNOW  (:)=(PSNOW  (2,:)-PSNOW  (1,:))*ZCOEF
-  ZDELTA_DIR_SW(:)=(PDIR_SW(2,:)-PDIR_SW(1,:))*ZCOEF
-  ZDELTA_SCA_SW(:)=(PSCA_SW(2,:)-PSCA_SW(1,:))*ZCOEF
-  ZDELTA_LW    (:)=(PLW    (2,:)-PLW    (1,:))*ZCOEF
-  ZDELTA_PS    (:)=(PPS    (2,:)-PPS    (1,:))*ZCOEF
-  ZDELTA_CO2   (:)=(PCO2   (2,:)-PCO2   (1,:))*ZCOEF
+DO J = NINDX1,NINDX2
+  !
+  IF (PTA1(J)/=XUNDEF) THEN
+    ! 
+    ! Compute wind components
+    !
+    ! zonal wind
+    ZU1 = PWIND1(J) * SIN(PDIR1(J)*ZPI)
+    ZU2 = PWIND2(J) * SIN(PDIR2(J)*ZPI)
+    ZDU = (ZU2-ZU1)*ZCOEF
+    XU(J) = ZU1 + ZDU
+    !
+    ZV1 = PWIND1(J) * COS(PDIR1(J)*ZPI) 
+    ZV2 = PWIND2(J) * COS(PDIR2(J)*ZPI)
+    ZDV = (ZV2-ZV1)*ZCOEF
+    XV(J) = ZV1 + ZDV
+    !    
+    ! Compute variation from atmospheric time step J and J+1
+    !
+    ZDTA     = (PTA2(J)-PTA1(J))*ZCOEF
+    XTA(J) = PTA1(J) + ZDTA
+    !
+    ZDQA     = (PQA2(J)-PQA1(J))*ZCOEF
+    XQA(J) = PQA1(J) + ZDQA
+    !
+    ZDLW     = (PLW2(J)-PLW1(J))*ZCOEF
+    XLW(J) = PLW1(J) + ZDLW
+    !
+    ZDPS     = (PPS2(J)-PPS1(J))*ZCOEF
+    XPS(J) = PPS1(J) + ZDPS
+    !
+    ZDCO2    = (PCO22(J)-PCO21(J))*ZCOEF
+    XCO2(J) = PCO21(J) + ZDCO2
+    !
+    ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
+    XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
+    !
+    ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
+    XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
+    !
+    !
+    XRAIN (J)= PRAIN2(J)
+    XSNOW (J)= PSNOW2(J)
+    !
+    !
+    XRHOA(J) = XPS(J) / ( XTA(J)*XRD * ( 1.+((XRV/XRD)-1.)*XQA(J) ) + XZREF(J)*XG )
+    !
+    ! humidity in kg/m3
+    XQA(J) = XQA(J) * XRHOA(J)
+    !
+  ENDIF
+  !
+ENDDO
 !
-  XRAIN (:)= PRAIN(1,:)
-  XSNOW (:)= PSNOW(1,:)
+CALL RESET_DIM(SIZE(PTA1),INKPROMA,NINDX1,NINDX2)
 !
-  XTA    (:)= PTA    (1,:)+ZDELTA_TA    (:)
-  XQA    (:)= PQA    (1,:)+ZDELTA_QA    (:)
-  XU     (:)= ZU1      (:)+ZDELTA_U     (:)
-  XV     (:)= ZV1      (:)+ZDELTA_V     (:)
-  XLW    (:)= PLW    (1,:)+ZDELTA_LW    (:)
-  XPS    (:)= PPS    (1,:)+ZDELTA_PS    (:)
-  XCO2   (:)= PCO2   (1,:)+ZDELTA_CO2   (:)
+!$OMP END PARALLEL
 !
-! Only 1 band
-  XDIR_SW(:,1)= PDIR_SW(1,:)+ZDELTA_DIR_SW(:)
-  XSCA_SW(:,1)= PSCA_SW(1,:)+ZDELTA_SCA_SW(:)
 !
 ! air density
-  XRHOA (:) = XPS(:) / (XRD * XTA (:) * ( 1.+((XRV/XRD)-1.)*XQA (:) ) + XG * XZREF)
-!
-! humidity in kg/m3
-  XQA(:) = XQA(:) * XRHOA(:)
-!
-ENDWHERE
 !
 ! Check No value data
 !---------------------
@@ -174,7 +203,7 @@ ENDIF
 !
 !* forcing level pressure from hydrostatism
 WHERE(XPS(:)/=XUNDEF)
-  XPA = XPS - XRHOA * XG * XZREF
+  XPA(:) = XPS(:) - XRHOA(:) * XZREF(:) * XG
 ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('OL_TIME_INTERP_ATM',1,ZHOOK_HANDLE)

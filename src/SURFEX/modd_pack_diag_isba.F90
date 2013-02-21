@@ -284,15 +284,16 @@ REAL, POINTER, DIMENSION(:) :: XP_ICEFLUX
 !$OMP THREADPRIVATE(XP_ICEFLUX)
 REAL, POINTER, DIMENSION(:) :: XP_RRVEG     ! precipitation intercepted by the vegetation   (kg/m2/s)
 !$OMP THREADPRIVATE(XP_RRVEG)
-
+REAL, POINTER, DIMENSION(:) :: XP_IRRIG_FLUX! irrigation rate                               (kg/m2/s)
+!$OMP THREADPRIVATE(XP_IRRIG_FLUX)
 !
 !------------------------------------------------------------------------------
 !
-REAL, POINTER, DIMENSION(:) :: XP_GPP         ! Gross primary production
+REAL, POINTER, DIMENSION(:) :: XP_GPP         ! Gross primary production (kgCO2/m2/s)
 !$OMP THREADPRIVATE(XP_GPP)
-REAL, POINTER, DIMENSION(:) :: XP_RESP_AUTO   ! Autotrophic respiration
+REAL, POINTER, DIMENSION(:) :: XP_RESP_AUTO   ! Autotrophic respiration  (kgCO2/m2/s)
 !$OMP THREADPRIVATE(XP_RESP_AUTO)
-REAL, POINTER, DIMENSION(:) :: XP_RESP_ECO    ! Ecosystem respiration
+REAL, POINTER, DIMENSION(:) :: XP_RESP_ECO    ! Ecosystem respiration    (kgCO2/m2/s)
 !$OMP THREADPRIVATE(XP_RESP_ECO)
 REAL, POINTER, DIMENSION(:) :: XP_FAPAR       ! Fapar of vegetation
 !$OMP THREADPRIVATE(XP_FAPAR)
@@ -302,6 +303,19 @@ REAL, POINTER, DIMENSION(:) :: XP_FAPAR_BS    ! Fapar of bare soil
 !$OMP THREADPRIVATE(XP_FAPAR_BS)
 REAL, POINTER, DIMENSION(:) :: XP_FAPIR_BS    ! Fapir of bare soil
 !$OMP THREADPRIVATE(XP_FAPIR_BS)
+!
+!------------------------------------------------------------------------------
+!
+REAL, POINTER, DIMENSION(:) :: XP_DWG         ! liquid soil moisture time tendencies  (kg/m2/s)
+!$OMP THREADPRIVATE(XP_DWG)
+REAL, POINTER, DIMENSION(:) :: XP_DWGI        ! solid soil moisture time tendencies   (kg/m2/s)
+!$OMP THREADPRIVATE(XP_DWGI)
+REAL, POINTER, DIMENSION(:) :: XP_DWR         ! canopy water time tendencies          (kg/m2/s)
+!$OMP THREADPRIVATE(XP_DWR)
+REAL, POINTER, DIMENSION(:) :: XP_DSWE        ! snow water equivalent time tendencies (kg/m2/s)
+!$OMP THREADPRIVATE(XP_DSWE)
+REAL, POINTER, DIMENSION(:) :: XP_WATBUD      ! ISBA water budget                     (kg/m2/s)
+!$OMP THREADPRIVATE(XP_WATBUD)
 !
 !------------------------------------------------------------------------------
 !

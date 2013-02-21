@@ -33,9 +33,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC
+USE MODD_SURFEX_OMP, ONLY : NBLOCK, NBLOCKTOT
+USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
+!
 USE MODI_GET_LUOUT
 USE MODI_CLOSE_FILE
-USE MODD_SURF_CONF, ONLY : CPROGNAME
 !      
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -50,7 +53,8 @@ CHARACTER(LEN=*),  INTENT(IN)  :: YTEXT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=6)  :: YPROGRAM      
+CHARACTER(LEN=6)  :: YPROGRAM   
+CHARACTER(LEN=20) :: YSTRING
 INTEGER           :: ILUOUT         ! logical unit of output file      
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -67,11 +71,13 @@ YPROGRAM = CPROGNAME
 CALL GET_LUOUT(YPROGRAM,ILUOUT)
 !
 IF (YPROGRAM=='ASCII ' .OR. YPROGRAM=='TEXTE ' .OR. YPROGRAM=='BINARY') THEN
+   IF ( NPROC>1 .OR. NBLOCKTOT>1 ) &
+     WRITE(*,*)"MPI TASK NUMBER = ",NRANK,", OMP THREAD NUMBER = ",NBLOCK
    WRITE(*,*)YTEXT
-   WRITE(*,*)'---------------------------------------------------------------------------'
-   WRITE(*,*) 'MORE DETAILS ABOUT THE CRASH IN THE OUTPUT LISTING: SEE THE FILE NAMED    '
-   WRITE(*,*) 'LISTING_[NAME OF THE RUNNING .EXE: PGD, PREP, OFFLINE].txt              '
-   WRITE(*,*)'---------------------------------------------------------------------------'
+   YSTRING='LISTING_'//TRIM(CSOFTWARE)//'.txt'
+   WRITE(*,*)'-------------------------------------------------------------------------------'
+   WRITE(*,*) 'MORE DETAILS ABOUT THE CRASH IN THE OUTPUT LISTING FILE: ', TRIM(YSTRING)
+   WRITE(*,*)'-------------------------------------------------------------------------------'   
 ENDIF
 !
 WRITE(ILUOUT,*) '---------------------------------------------------------------------------'

@@ -21,6 +21,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    02/2008
+!!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!------------------------------------------------------------------
 !
 USE MODD_OCEAN_CSTS
@@ -83,6 +84,8 @@ IF (LDIAG_OCEAN) THEN
          ENDIF
      ENDDO
      XSEAHMO(JPT)=MIN(XSEAHMO(JPT),-XSEABATHY(JPT))
+!
+     IHMOLEVEL(JPT)=NOCKMAX
 !
      DO J=IK1,NOCKMAX
        IF (-XZHOC(J)>XSEAHMO(JPT)) THEN

@@ -38,8 +38,11 @@ LOGICAL, SAVE           :: LFANOCOMPACT=.FALSE.
 LOGICAL, SAVE           :: LPREP       =.FALSE.
 !      
 INTEGER, DIMENSION(:), POINTER :: NMASK     ! 1D mask to read only interesting
+!$OMP THREADPRIVATE(NMASK)
 CHARACTER(LEN=6)               :: CMASK     ! surface mask type
+!$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL     ! total number of points of surface
+!$OMP THREADPRIVATE(NFULL)
 INTEGER                        :: NFULL_EXT ! total number of points including the extension zone (ALADIN)
 INTEGER                        :: NDGL,NDLON,NDLUX,NDGUX        ! dimensions of ALADIN domain
 REAL                           :: PERPK,PEBETA,PELON0,PELAT0,  &! grid projection parameters

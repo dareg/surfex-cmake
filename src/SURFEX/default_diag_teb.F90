@@ -1,7 +1,6 @@
 !     #########
       SUBROUTINE DEFAULT_DIAG_TEB (K2M,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET,OCOEF,OSURF_VARS, &
-                                   OSURF_MISC_BUDGET,OSURF_BUDGETC, ORESET_BUDGETC,          &
-                                   OPGD,OPGD_FIX,PDIAG_TSTEP                  )  
+                                   OSURF_MISC_BUDGET,OUTCI,OPGD,OPGD_FIX,PDIAG_TSTEP         )  
 !     #################################################################################################################
 !
 !!****  *DEFAULT_DIAG_TEB * - routine to set default values for the choice of diagnostics
@@ -55,8 +54,7 @@ LOGICAL,  INTENT(OUT) :: ORAD_BUDGET        ! flag for radiative budget
 LOGICAL,  INTENT(OUT) :: OCOEF
 LOGICAL,  INTENT(OUT) :: OSURF_VARS
 LOGICAL,  INTENT(OUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
-LOGICAL,  INTENT(OUT) :: OSURF_BUDGETC      ! flag for cumulated surface budget
-LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC     ! flag for cumulated surface budget
+LOGICAL,  INTENT(OUT) :: OUTCI              ! flag for UTCI fields
 LOGICAL,  INTENT(OUT) :: OPGD               ! flag for PGD fields
 LOGICAL,  INTENT(OUT) :: OPGD_FIX           ! flag for PGD fields
 REAL,     INTENT(OUT) :: PDIAG_TSTEP        ! time-step for writing
@@ -80,8 +78,7 @@ OSURF_VARS        = .FALSE.
 !
 OSURF_MISC_BUDGET = .FALSE.
 !
-OSURF_BUDGETC     = .FALSE.
-ORESET_BUDGETC    = .FALSE.
+OUTCI             = .FALSE.
 !
 OPGD              = .FALSE.
 OPGD_FIX          = .TRUE.

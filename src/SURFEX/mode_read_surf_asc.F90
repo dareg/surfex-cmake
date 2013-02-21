@@ -1,4 +1,36 @@
 MODULE MODE_READ_SURF_ASC
+!!
+!!    PURPOSE
+!!    -------
+!
+!       The purpose of READ_SURF_ASC is
+!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!     
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!
+!!      S.Malardel      *METEO-FRANCE*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!      original                                                     01/08/03
+!----------------------------------------------------------------------------
 !
 INTERFACE READ_SURF0_ASC
         MODULE PROCEDURE READ_SURFX0_ASC
@@ -24,73 +56,35 @@ CONTAINS
       SUBROUTINE READ_SURFX0_ASC(HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  *READX0* - routine to read a real scalar
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READX0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_ASC, ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
-USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
-USE MODD_SURF_PAR
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16), INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
 INTEGER,           INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-LOGICAL :: GFOUND
 CHARACTER(LEN=50):: YCOMMENT
 CHARACTER(LEN=6) :: YMASK
+LOGICAL          :: GFOUND
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 YMASK=CMASK
@@ -99,19 +93,19 @@ IF (GKNOWN) YMASK='FULL  '
 !
 CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) PFIELD
-
+!
 HCOMMENT = YCOMMENT
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFX0_ASC
 !
 !     #############################################################
@@ -119,120 +113,126 @@ END SUBROUTINE READ_SURFX0_ASC
 !     #############################################################
 !
 !!****  *READX1* - routine to fill a real 1D array for the externalised surface 
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READ_SURFX1 is
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
+USE MODD_IO_SURF_ASC,  ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
 !
 USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
-USE MODI_PACK_SAME_RANK
 !
-USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
-USE MODD_SURF_PAR
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),   INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:), INTENT(OUT) :: PFIELD   ! array containing the data field
+CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
+REAL, DIMENSION(:), INTENT(OUT)  :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
 CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
-
-!
 !*      0.2   Declarations of local variables
 !
-LOGICAL                           :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
-REAL, DIMENSION(:),   ALLOCATABLE :: ZWORK   ! work array read in the file
-
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
+INTEGER           :: I, INFOMPI
+!
+DOUBLE PRECISION   :: XTIME0
+REAL, DIMENSION(:),   ALLOCATABLE   :: ZWORK   ! work array read in the file
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX1_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
+#ifndef NOMPI
+XTIME0 = MPI_WTIME()
+#endif
 !
-IF (HDIR=='A') THEN
-  CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
-  IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT)
+IF (NRANK==NPIO) THEN
+  !  
+  IF (HDIR=='-' .OR. HDIR=='A') THEN
+    ALLOCATE(ZWORK(SIZE(PFIELD)))
+  ELSE
+    ALLOCATE(ZWORK(NFULL))
+  END IF          
+  !
+!$OMP SINGLE      
+  !
+  IF (HDIR=='A') THEN
+    CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
+    IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT)
+  ELSE
+    YMASK=CMASK
+    CALL IO_BUFF_n(HREC,'R',GKNOWN)
+    IF (GKNOWN) YMASK='FULL  '
+    CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+  END IF
+  !
+  READ(NUNIT,FMT=*,IOSTAT=KRESP)
+  READ(NUNIT,FMT='(A50)',IOSTAT=KRESP) YCOMMENT
+  READ(NUNIT,FMT=*,IOSTAT=KRESP) ZWORK
+  !
+  HCOMMENT = YCOMMENT
+  !
+!$OMP END SINGLE COPYPRIVATE(ZWORK,HCOMMENT,KRESP)
+  !
 ELSE
-  YMASK=CMASK
-  CALL IO_BUFF_n(HREC,'R',GKNOWN)
-  IF (GKNOWN) YMASK='FULL  '
-!
-  CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
-END IF
-
-IF (HDIR=='-' .OR. HDIR=='A') THEN
-  ALLOCATE(ZWORK(SIZE(PFIELD)))
-ELSE
-  ALLOCATE(ZWORK(NFULL))
-END IF
-
-READ(NUNIT,FMT=*,END=100)
-READ(NUNIT,FMT='(A50)') YCOMMENT
-READ(NUNIT,FMT=*,ERR=100) ZWORK
-
-HCOMMENT = YCOMMENT
-!
-IF (HDIR=='-' .OR. HDIR=='A') THEN
-  PFIELD = ZWORK
-ELSE
-  CALL PACK_SAME_RANK(NMASK,ZWORK(:),PFIELD)
+  ALLOCATE(ZWORK(0))
 ENDIF
-!  
+!
+#ifndef NOMPI
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+!
+IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+!
+IF (HDIR=='A') THEN  ! no distribution on other tasks
+  IF ( NRANK==NPIO ) THEN
+#ifndef NOMPI          
+    XTIME0 = MPI_WTIME()
+#endif    
+    PFIELD(:) = ZWORK(1:SIZE(PFIELD))
+#ifndef NOMPI    
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif    
+  ENDIF
+ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
+!$OMP SINGLE    
+  IF (NRANK==NPIO) PFIELD(:) = ZWORK(1:SIZE(PFIELD))
+#ifndef NOMPI
+  IF (NPROC>1) THEN
+    XTIME0 = MPI_WTIME()
+    CALL MPI_BCAST(PFIELD,SIZE(PFIELD)*KIND(PFIELD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)   
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+#endif    
+!$OMP END SINGLE COPYPRIVATE(PFIELD)
+ELSE
+  CALL READ_AND_SEND_MPI(ZWORK,PFIELD,NMASK)
+ENDIF
+!
 DEALLOCATE(ZWORK)
 !  
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX1_ASC',1,ZHOOK_HANDLE)
-RETURN
-100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX1_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE READ_SURFX1_ASC
 !
 !     #############################################################
@@ -240,118 +240,126 @@ END SUBROUTINE READ_SURFX1_ASC
 !     #############################################################
 !
 !!****  *READX2* - routine to fill a real 2D array for the externalised surface 
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READ_SURFX2 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
-USE MODI_PACK_SAME_RANK
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
-USE MODD_SURF_PAR
+!
+USE MODE_POS_SURF
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),        INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD   ! array containing the data field
+CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
+REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
 CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
                                                   ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 ! 
-LOGICAL                           :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
+INTEGER           :: I, INFOMPI
+!
+DOUBLE PRECISION   :: XTIME0
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK   ! work array read in the file
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX2_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
-IF (HDIR=='A') THEN
-  CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
-  IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT)
-ELSE
-  YMASK=CMASK
-  CALL IO_BUFF_n(HREC,'R',GKNOWN)
-  IF (GKNOWN) YMASK='FULL  '
+#ifndef NOMPI
+XTIME0 = MPI_WTIME()
+#endif
+!
+IF (NRANK==NPIO) THEN
   !
-  CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
-END IF
-
-IF (HDIR=='-' .OR. HDIR=='A') THEN
-  ALLOCATE(ZWORK(SIZE(PFIELD,1),SIZE(PFIELD,2)))
+  IF (HDIR=='-' .OR. HDIR=='A') THEN
+    ALLOCATE(ZWORK(SIZE(PFIELD,1),SIZE(PFIELD,2)))
+  ELSE
+    ALLOCATE(ZWORK(NFULL,SIZE(PFIELD,2)))
+  END IF        
+  !
+!$OMP SINGLE         
+  !
+  IF (HDIR=='A') THEN
+    CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
+    IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT)
+  ELSE
+    YMASK=CMASK
+    CALL IO_BUFF_n(HREC,'R',GKNOWN)
+    IF (GKNOWN) YMASK='FULL  '
+    CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+  END IF
+  !
+  READ(NUNIT,FMT=*,IOSTAT=KRESP)
+  READ(NUNIT,FMT='(A50)',IOSTAT=KRESP) YCOMMENT
+  READ(NUNIT,FMT=*,IOSTAT=KRESP) ZWORK
+  !
+  HCOMMENT = YCOMMENT
+  !
+!$OMP END SINGLE COPYPRIVATE(ZWORK,HCOMMENT,KRESP)
+  !
 ELSE
-  ALLOCATE(ZWORK(NFULL,SIZE(PFIELD,2)))
-END IF
-
-READ(NUNIT,FMT=*,END=100)
-READ(NUNIT,FMT='(A50)') YCOMMENT
-READ(NUNIT,FMT=*,ERR=100) ZWORK
-
-HCOMMENT = YCOMMENT
+  ALLOCATE(ZWORK(0,0))
+ENDIF
 !
-IF (HDIR=='-' .OR. HDIR=='A') THEN
-  PFIELD = ZWORK
+#ifndef NOMPI
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+!
+IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+!
+IF (HDIR=='A') THEN
+  IF ( NRANK==NPIO ) THEN
+#ifndef NOMPI
+    XTIME0 = MPI_WTIME()
+#endif
+    PFIELD(:,:) = ZWORK(1:SIZE(PFIELD,1),:)
+#ifndef NOMPI
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif
+  ENDIF
+ELSEIF (HDIR=='-') THEN
+!$OMP SINGLE    
+  IF (NRANK==NPIO) PFIELD(:,:) = ZWORK(1:SIZE(PFIELD),:)
+#ifndef NOMPI       
+  IF (NPROC>1) THEN
+    XTIME0 = MPI_WTIME()
+    CALL MPI_BCAST(PFIELD,SIZE(PFIELD)*KIND(PFIELD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)   
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+#endif    
+!$OMP END SINGLE COPYPRIVATE(PFIELD)
 ELSE
-  CALL PACK_SAME_RANK(NMASK,ZWORK(:,:),PFIELD)
-END IF
-
-!  
+  CALL READ_AND_SEND_MPI(ZWORK,PFIELD,NMASK)
+ENDIF
+!
 DEALLOCATE(ZWORK)
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX2_ASC',1,ZHOOK_HANDLE)
-RETURN
-100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX2_ASC',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFX2_ASC
 !
 !     #############################################################
@@ -359,74 +367,36 @@ END SUBROUTINE READ_SURFX2_ASC
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READN0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, CMASK
-USE MODD_SURF_PAR
 !
+USE MODE_POS_SURF
 !
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-LOGICAL :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 YMASK=CMASK
@@ -435,14 +405,15 @@ IF (GKNOWN) YMASK='FULL  '
 !
 CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) KFIELD
-
+!
 HCOMMENT = YCOMMENT
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',1,ZHOOK_HANDLE)
@@ -454,113 +425,126 @@ END SUBROUTINE READ_SURFN0_ASC
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
-!!
-!!    PURPOSE
-!!    -------
 !
-!       The purpose of READN0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
-USE MODI_PACK_SAME_RANK
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
-USE MODD_SURF_PAR
+!
+USE MODE_POS_SURF
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_n
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
-INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD   ! the integer to be read
+CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
 CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
-!
 !*      0.2   Declarations of local variables
 !
-LOGICAL                            :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
-INTEGER, DIMENSION(:), ALLOCATABLE :: IWORK  ! work array read in the file
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
+INTEGER           :: I, INFOMPI
+!
+INTEGER, DIMENSION(:), ALLOCATABLE  :: IWORK   ! work array read in the file
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
+DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!---------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN1_ASC',0,ZHOOK_HANDLE)
-KRESP = 0
+!  
+KRESP=0
 !
-YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
-IF (GKNOWN) YMASK='FULL  '
+#ifndef NOMPI
+XTIME0 = MPI_WTIME()
+#endif
 !
-IF (HDIR=="-" .OR. HDIR=='A') THEN
-  CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
-!  IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
-  READ(NUNIT,FMT=*,END=100)
-  READ(NUNIT,FMT='(A50)') YCOMMENT
-  READ(NUNIT,FMT=*,ERR=100) KFIELD
-
-ELSE
-  CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)        
-
-  ALLOCATE(IWORK(NFULL))
-
-  READ(NUNIT,FMT=*,END=100)
-  READ(NUNIT,FMT='(A50)') YCOMMENT
-  READ(NUNIT,FMT=*,ERR=100) IWORK
-
+IF (NRANK==NPIO) THEN
   !
-  CALL PACK_SAME_RANK(NMASK,IWORK(:),KFIELD)
-  !  
-  DEALLOCATE(IWORK)
+  IF (HDIR=='-' .OR. HDIR=='A') THEN
+    ALLOCATE(IWORK(SIZE(KFIELD)))
+  ELSE
+    ALLOCATE(IWORK(NFULL))
+  END IF        
+  !
+!$OMP SINGLE        
+  !
+  IF (HDIR=='A') THEN
+    CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
+    IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT)
+  ELSE
+    YMASK=CMASK
+    CALL IO_BUFF_n(HREC,'R',GKNOWN)
+    IF (GKNOWN) YMASK='FULL  '
+    CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+  END IF
+  !
+  READ(NUNIT,FMT=*,IOSTAT=KRESP)
+  READ(NUNIT,FMT='(A50)',IOSTAT=KRESP) YCOMMENT
+  READ(NUNIT,FMT=*,IOSTAT=KRESP) IWORK
+  !
+  HCOMMENT = YCOMMENT
+  !
+!$OMP END SINGLE COPYPRIVATE(IWORK,HCOMMENT,KRESP)
+  !
+ELSE
+  ALLOCATE(IWORK(0))
 ENDIF
-
-HCOMMENT = YCOMMENT
+!
+#ifndef NOMPI
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+!
+IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+!
+IF (HDIR=='A') THEN
+  IF ( NRANK==NPIO ) THEN
+#ifndef NOMPI          
+    XTIME0 = MPI_WTIME()
+#endif
+    KFIELD(:) = IWORK(1:SIZE(KFIELD))
+#ifndef NOMPI    
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+#endif    
+  ENDIF
+ELSEIF (HDIR=='-') THEN
+!$OMP SINGLE    
+  IF (NRANK==NPIO) KFIELD(:) = IWORK(1:SIZE(KFIELD))
+#ifndef NOMPI     
+  IF (NPROC>1) THEN
+    XTIME0 = MPI_WTIME()
+    CALL MPI_BCAST(KFIELD,SIZE(KFIELD)*KIND(KFIELD)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)   
+    XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+  ENDIF
+#endif    
+!$OMP END SINGLE COPYPRIVATE(KFIELD)
+ELSE
+  CALL READ_AND_SEND_MPI(IWORK,KFIELD,NMASK)
+ENDIF
+!
+DEALLOCATE(IWORK)
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN1_ASC',1,ZHOOK_HANDLE)
-RETURN
-100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN1_ASC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
+!
 END SUBROUTINE READ_SURFN1_ASC
 !
 !     #############################################################
@@ -568,71 +552,36 @@ END SUBROUTINE READ_SURFN1_ASC
 !     #############################################################
 !
 !!****  *READC0* - routine to read a character
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READC0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE MODE_POS_SURF
 !
 USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC      ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
 !
 !*      0.2   Declarations of local variables
 !
-LOGICAL           :: GFOUND
 CHARACTER(LEN=50):: YCOMMENT
 CHARACTER(LEN=6) :: YMASK
+LOGICAL          :: GFOUND
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 YMASK=CMASK
@@ -645,183 +594,50 @@ IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used fo
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT='(A40)',ERR=100) HFIELD
-
+!
 HCOMMENT = YCOMMENT
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFC0_ASC
-!
-!     #############################################################
-      SUBROUTINE READ_SURFL1_ASC(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
-!     #############################################################
-!
-!!****  *READL1* - routine to read a logical array
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READL1 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
-!
-USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
-!
-IMPLICIT NONE
-!
-!*      0.1   Declarations of arguments
-!
-CHARACTER(LEN=16),      INTENT(IN)  :: HREC     ! name of the article to be read
-LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD   ! array containing the data field
-INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
-                                                ! 'H' : field with
-                                                !       horizontal spatial dim.
-                                                ! '-' : no horizontal dim.
-!
-!*      0.2   Declarations of local variables
-!
-LOGICAL           :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
-!
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL1_ASC',0,ZHOOK_HANDLE)
-KRESP=0
-!
-YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
-IF (GKNOWN) YMASK='FULL  '
-!
-CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
-IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
-!
-READ(NUNIT,FMT=*,END=100)
-READ(NUNIT,FMT='(A50)') YCOMMENT
-READ(NUNIT,FMT=*,ERR=100) OFIELD
-
-HCOMMENT = YCOMMENT
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL1_ASC',1,ZHOOK_HANDLE)
-RETURN
-100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
-IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL1_ASC',1,ZHOOK_HANDLE)
-!
-!-------------------------------------------------------------------------------
-END SUBROUTINE READ_SURFL1_ASC
-!
 !
 !     #############################################################
       SUBROUTINE READ_SURFL0_ASC(HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READL0* - routine to read a logical
-!!
-!!    PURPOSE
-!!    -------
-!
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      S.Malardel      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     01/08/03
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE MODE_POS_SURF
 !
 USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
+LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
@@ -836,75 +652,132 @@ IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used fo
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) OFIELD
-
+!
 HCOMMENT = YCOMMENT
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFL0_ASC
+!
+!     #############################################################
+      SUBROUTINE READ_SURFL1_ASC(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  *READL1* - routine to read a logical array
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
+!
+USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
+!
+USE MODE_POS_SURF
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+LOGICAL, DIMENSION(:),  INTENT(OUT) :: OFIELD   ! array containing the data field
+INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+                                                ! 'H' : field with
+                                                !       horizontal spatial dim.
+                                                ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+!
+CHARACTER(LEN=50):: YCOMMENT
+CHARACTER(LEN=6) :: YMASK
+LOGICAL          :: GFOUND
+LOGICAL          :: GKNOWN
+INTEGER          :: INFOMPI
+DOUBLE PRECISION :: XTIME0
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL1_ASC',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+#ifndef NOMPI
+XTIME0 = MPI_WTIME()
+#endif
+!
+IF (NRANK==NPIO) THEN
+  !
+!$OMP SINGLE
+  ! 
+  YMASK=CMASK
+  CALL IO_BUFF_n(HREC,'R',GKNOWN)
+  IF (GKNOWN) YMASK='FULL  '
+  !
+  CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+  IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
+  !
+  READ(NUNIT,FMT=*,IOSTAT=KRESP)
+  READ(NUNIT,FMT='(A50)',IOSTAT=KRESP) YCOMMENT
+  READ(NUNIT,FMT=*,IOSTAT=KRESP) OFIELD
+  !
+  HCOMMENT = YCOMMENT
+  !
+!$OMP END SINGLE COPYPRIVATE(OFIELD,HCOMMENT,KRESP)
+  !
+ENDIF
+!
+#ifndef NOMPI
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+!
+IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+!
+#ifndef NOMPI
+IF (NPROC>1 .AND. HDIR/='A') THEN
+!$OMP SINGLE 
+  XTIME0 = MPI_WTIME()
+  CALL MPI_BCAST(OFIELD,SIZE(OFIELD),MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
+  XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
+!$OMP END SINGLE COPYPRIVATE(OFIELD)
+ENDIF
+#endif
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL1_ASC',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE READ_SURFL1_ASC
+!
 !
 !     #############################################################
       SUBROUTINE READ_SURFT0_ASC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT0* - routine to read a date
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READT0 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. MASSON      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     18/08/97
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
-USE MODD_SURF_PAR
 !
+USE MODE_POS_SURF
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
 INTEGER,            INTENT(OUT) :: KMONTH   ! month
 INTEGER,            INTENT(OUT) :: KDAY     ! day
@@ -914,13 +787,12 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-LOGICAL               :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3) :: ITDATE
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
@@ -929,38 +801,32 @@ YMASK=CMASK
 CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-!-------------------------------------------------------------------------------
-!
 CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
 !IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) ITDATE(:)
-
+!
 KYEAR  = ITDATE(1)
 KMONTH = ITDATE(2)
 KDAY   = ITDATE(3)
-
-!-------------------------------------------------------------------------------
 !
 CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) PTIME
-
-!-------------------------------------------------------------------------------
 !
 HCOMMENT = YCOMMENT
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',1,ZHOOK_HANDLE)
-!
-!-------------------------------------------------------------------------------
 !
 END SUBROUTINE READ_SURFT0_ASC
 !
@@ -969,75 +835,37 @@ END SUBROUTINE READ_SURFT0_ASC
 !     #############################################################
 !
 !!****  *READT2* - routine to read a date
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READT2 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. MASSON      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     18/08/97
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
-USE MODD_SURF_PAR
 !
+USE MODE_POS_SURF
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(OUT) :: KDAY     ! day
 REAL,    DIMENSION(:), INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
 CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
-
+!
 !*      0.2   Declarations of local variables
 !
-LOGICAL               :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',0,ZHOOK_HANDLE)
 KRESP=0
@@ -1046,99 +874,53 @@ YMASK=CMASK
 CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-!-------------------------------------------------------------------------------
-!
 CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
-!-------------------------------------------------------------------------------
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) ITDATE(:,:)
-
+!
 KYEAR  (:) = ITDATE(1,:)
 KMONTH (:) = ITDATE(2,:)
 KDAY   (:) = ITDATE(3,:)
-
-!-------------------------------------------------------------------------------
 !
 CALL POSNAM(NUNIT,CMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) PTIME
-
-!-------------------------------------------------------------------------------
 !
 HCOMMENT = YCOMMENT
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',1,ZHOOK_HANDLE)
 !
-!-------------------------------------------------------------------------------
-!
 END SUBROUTINE READ_SURFT1_ASC
-!
 !
 !     #############################################################
       SUBROUTINE READ_SURFT2_ASC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT2* - routine to read a date
-!!
-!!    PURPOSE
-!!    -------
-!
-!       The purpose of READT2 is
-!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!     
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!
-!!      V. MASSON      *METEO-FRANCE*
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!
-!!      original                                                     18/08/97
-!----------------------------------------------------------------------------
-!
-!*      0.    DECLARATIONS
-!             ------------
-!
-USE MODE_POS_SURF
-USE MODI_ERROR_READ_SURF_ASC
 !
 USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
-USE MODD_SURF_PAR
 !
+USE MODE_POS_SURF
+!
+USE MODI_IO_BUFF_n
+USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_IO_BUFF_n
 !
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=16),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KDAY     ! day
@@ -1148,51 +930,45 @@ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-LOGICAL               :: GFOUND
-CHARACTER(LEN=50):: YCOMMENT
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=6)  :: YMASK
+LOGICAL           :: GFOUND
+LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
-CHARACTER(LEN=6) :: YMASK
-LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',0,ZHOOK_HANDLE)
+!
 KRESP=0
 !
 YMASK=CMASK
 CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-!-------------------------------------------------------------------------------
-!
 CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
-
+!
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) ITDATE(:,:,:)
-
+!
 KYEAR  (:,:) = ITDATE(1,:,:)
 KMONTH (:,:) = ITDATE(2,:,:)
 KDAY   (:,:) = ITDATE(3,:,:)
-
-!-------------------------------------------------------------------------------
 !
 CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
 
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
 READ(NUNIT,FMT=*,ERR=100) PTIME
-
-!-------------------------------------------------------------------------------
 !
 HCOMMENT = YCOMMENT
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',1,ZHOOK_HANDLE)
 RETURN
+!
 100 CONTINUE
 CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',1,ZHOOK_HANDLE)
-!
-!-------------------------------------------------------------------------------
 !
 END SUBROUTINE READ_SURFT2_ASC
 !

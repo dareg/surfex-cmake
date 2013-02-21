@@ -57,7 +57,7 @@ LOGICAL,           INTENT(IN)  :: OWRITE   ! flag to write canopy terms
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 !
 INTEGER :: JLAYER  ! loop counter on layers
@@ -87,7 +87,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,NLVL,IRESP,HCOMMENT=YCOMMENT)
 !* altitudes
 !
 DO JLAYER=1,NLVL
-  WRITE(YRECFM,'(A9,I2.2,A4)') 'SSO_CAN_Z',JLAYER,'    '
+  WRITE(YRECFM,'(A9,I2.2,A1)') 'SSO_CAN_Z',JLAYER,' '
   YCOMMENT='altitudes of canopy levels (m)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XZ(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
 END DO
@@ -97,7 +97,7 @@ IF (HWRITE/='PRE') THEN
   !* wind in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A4)') 'SSO_CAN_U',JLAYER,'    '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'SSO_CAN_U',JLAYER,' '
     YCOMMENT='wind at canopy levels (m/s)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XU(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO
@@ -105,7 +105,7 @@ IF (HWRITE/='PRE') THEN
   !* Tke in canopy
   !
   DO JLAYER=1,NLVL
-    WRITE(YRECFM,'(A9,I2.2,A4)') 'SSO_CAN_E',JLAYER,'    '
+    WRITE(YRECFM,'(A9,I2.2,A1)') 'SSO_CAN_E',JLAYER,' '
     YCOMMENT='Tke at canopy levels (m2/s2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XTKE(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   END DO

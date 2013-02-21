@@ -1,5 +1,5 @@
 !################################################################
-SUBROUTINE READ_GRIDTYPE_GAUSS(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP)
+SUBROUTINE READ_GRIDTYPE_GAUSS(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !################################################################
 !
 !!****  *READ_GRIDTYPE_GAUSS* - routine to initialise the horizontal grid
@@ -56,6 +56,9 @@ LOGICAL,                INTENT(IN)    :: OREAD      ! flag to read the grid
 INTEGER,                INTENT(IN)    :: KSIZE      ! estimated size of PGRID_PAR
 REAL, DIMENSION(KSIZE), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                INTENT(OUT)   :: KRESP      ! error return code
+CHARACTER(LEN=1),       INTENT(IN)    :: HDIR       ! reading directive
+!                                                   ! 'A' : all field
+!                                                   ! 'H' : field on this processor only
 !
 !
 !*       0.2   Declarations of local variables
@@ -83,23 +86,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
-CALL READ_SURF(HPROGRAM,'LAPO',ZLAPO, KRESP)
-CALL READ_SURF(HPROGRAM,'LOPO',ZLOPO,KRESP)
-CALL READ_SURF(HPROGRAM,'CODIL',ZCODIL,KRESP)
+CALL READ_SURF(HPROGRAM,'LAPO',ZLAPO, KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LOPO',ZLOPO,KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'CODIL',ZCODIL,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
-CALL READ_SURF(HPROGRAM,'NLATI',INLATI,KRESP)
+CALL READ_SURF(HPROGRAM,'NLATI',INLATI,KRESP,HDIR=HDIR)
 ALLOCATE(INLOPA(INLATI))
 CALL READ_SURF(HPROGRAM,'NLOPA',INLOPA(:),KRESP,HDIR='-')
-CALL READ_SURF(HPROGRAM,'LATGAUSS',ZLAT(:),KRESP)
-CALL READ_SURF(HPROGRAM,'LONGAUSS',ZLON(:),KRESP)
-CALL READ_SURF(HPROGRAM,'LAT_G_XY',ZLAT_XY(:),KRESP)
-CALL READ_SURF(HPROGRAM,'LON_G_XY',ZLON_XY(:),KRESP)
-CALL READ_SURF(HPROGRAM,'MESHGAUSS',ZMESH_SIZE(:),KRESP)
+CALL READ_SURF(HPROGRAM,'LATGAUSS',ZLAT(:),KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LONGAUSS',ZLON(:),KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LAT_G_XY',ZLAT_XY(:),KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'LON_G_XY',ZLON_XY(:),KRESP,HDIR=HDIR)
+CALL READ_SURF(HPROGRAM,'MESHGAUSS',ZMESH_SIZE(:),KRESP,HDIR=HDIR)
 !---------------------------------------------------------------------------
 !
 !*       4.    All this information stored into pointer PGRID_PAR

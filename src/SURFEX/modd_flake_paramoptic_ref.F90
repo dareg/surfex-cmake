@@ -48,9 +48,9 @@ MODULE modd_flake_paramoptic_ref
 !
 ! Modules used:
 
-USE modd_data_parameters, ONLY :      &
-    ireals                       ,  &! KIND-type parameter for real variables 
-    iintegers                        ! KIND-type parameter for "normal" integer variables  
+!USE modd_data_parameters, ONLY :      &
+!    ireals                       ,  &! KIND-type parameter for real variables 
+!    iintegers                        ! KIND-type parameter for "normal" integer variables  
 
 USE modd_flake_derivedtypes, ONLY :   &
     nband_optic_max              ,  &! Maximum value of the wave-length bands
@@ -64,39 +64,39 @@ IMPLICIT NONE
 !
 ! Declarations
  
-INTEGER (KIND = iintegers), PRIVATE ::  &! Help variable(s)
+INTEGER , PRIVATE ::  &! Help variable(s)
     i                                      ! DO loop index  
 
 !  Optical characteristics for water, ice and snow.
 !  The simplest one-band approximation is used as a reference.
 TYPE (opticpar_medium), PARAMETER ::                            &
     opticpar_water_ref = opticpar_medium(1,                       &! Water (reference)
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-      (/3._ireals, (1.E+10_ireals,i=2,nband_optic_max)/))      , &
+      (/1., (0.,i=2,nband_optic_max)/),            &
+      (/3., (1.E+10,i=2,nband_optic_max)/))      , &
     opticpar_water_trans = opticpar_medium(2,                              &! Transparent Water (two-band)
-      (/0.10_ireals, 0.90_ireals, (0._ireals,i=3,nband_optic_max)/),      &
-      (/2.0_ireals, 0.20_ireals, (1.E+10_ireals,i=3,nband_optic_max)/)) , &
+      (/0.10, 0.90, (0.,i=3,nband_optic_max)/),      &
+      (/2.0, 0.20, (1.E+10,i=3,nband_optic_max)/)) , &
 !_nu  opticpar_water_trans = opticpar_medium(1,                    & ! Transparent Water (one-band)
-!_nu    (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-!_nu    (/0.30_ireals, (1.E+10_ireals,i=2,nband_optic_max)/))    , &
+!_nu    (/1., (0.,i=2,nband_optic_max)/),            &
+!_nu    (/0.30, (1.E+10,i=2,nband_optic_max)/))    , &
     opticpar_whiteice_ref = opticpar_medium(1,                    &! White ice
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),               &
-      (/17.1_ireals, (1.E+10_ireals,i=2,nband_optic_max)/))    , &
+      (/1., (0.,i=2,nband_optic_max)/),               &
+      (/17.1, (1.E+10,i=2,nband_optic_max)/))    , &
     opticpar_blueice_ref = opticpar_medium(1,                     &! Blue ice
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-      (/8.4_ireals, (1.E+10_ireals,i=2,nband_optic_max)/))     , &
+      (/1., (0.,i=2,nband_optic_max)/),            &
+      (/8.4, (1.E+10,i=2,nband_optic_max)/))     , &
     opticpar_drysnow_ref = opticpar_medium(1,                     &! Dry snow 
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-      (/25.0_ireals, (1.E+10_ireals,i=2,nband_optic_max)/))    , &
+      (/1., (0.,i=2,nband_optic_max)/),            &
+      (/25.0, (1.E+10,i=2,nband_optic_max)/))    , &
     opticpar_meltingsnow_ref = opticpar_medium(1,                 &! Melting snow 
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-      (/15.0_ireals, (1.E+10_ireals,i=2,nband_optic_max)/))    , &
+      (/1., (0.,i=2,nband_optic_max)/),            &
+      (/15.0, (1.E+10,i=2,nband_optic_max)/))    , &
     opticpar_ice_opaque = opticpar_medium(1,                      &! Opaque ice
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-      (/1.0E+07_ireals, (1.E+10_ireals,i=2,nband_optic_max)/)) , &
+      (/1., (0.,i=2,nband_optic_max)/),            &
+      (/1.0E+07, (1.E+10,i=2,nband_optic_max)/)) , &
     opticpar_snow_opaque = opticpar_medium(1,                     &! Opaque snow
-      (/1._ireals, (0._ireals,i=2,nband_optic_max)/),            &
-      (/1.0E+07_ireals, (1.E+10_ireals,i=2,nband_optic_max)/))   
+      (/1., (0.,i=2,nband_optic_max)/),            &
+      (/1.0E+07, (1.E+10,i=2,nband_optic_max)/))   
 
 !==============================================================================
 

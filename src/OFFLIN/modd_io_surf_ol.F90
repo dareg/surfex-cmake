@@ -34,6 +34,7 @@ IMPLICIT NONE
 !* variables for each patch
 !
 INTEGER, DIMENSION(:),POINTER :: NMASK
+!$OMP THREADPRIVATE(NMASK)
 INTEGER                       :: NSTEP_OUTPUT
 LOGICAL                       :: LMASK = .FALSE.
 LOGICAL                       :: LPARTR,LPARTW

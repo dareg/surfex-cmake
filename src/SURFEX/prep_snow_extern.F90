@@ -27,6 +27,8 @@ USE MODI_INTERP_GRID
 USE MODI_READ_GR_SNOW
 USE MODI_READ_SURF
 USE MODI_SNOW_T_WLIQ_TO_HEAT
+USE MODI_GET_CURRENT_TEB_PATCH
+USE MODI_READ_TEB_PATCH
 !
 IMPLICIT NONE
 !
@@ -56,13 +58,19 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZDEPTH       ! thickness of each layer (m
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZGRID        ! normalized input grid
 !
 LOGICAL                           :: GTOWN          ! town variables written in the file
-CHARACTER(LEN=16)                 :: YRECFM         ! record name
+CHARACTER(LEN=12)                 :: YRECFM         ! record name
 INTEGER                           :: IRESP          ! error return code
+INTEGER                           :: IVERSION       ! SURFEX version
+LOGICAL                           :: GOLD_NAME      ! old name flag 
+INTEGER                           :: IBUGFIX        ! SURFEX bug version
 INTEGER                           :: IVEGTYPE       ! actual number of vegtypes
 INTEGER                           :: JLAYER         ! loop on snow vertical grids
 INTEGER                           :: INI
-CHARACTER(LEN=4)                  :: YAREA          ! area treated ('ROOF','ROAD','VEG ')
+CHARACTER(LEN=8)                  :: YAREA          ! area treated ('ROOF','ROAD','VEG ')
+CHARACTER(LEN=3)                  :: YPREFIX        ! prefix to identify patch
 INTEGER                           :: IPATCH         ! number of input patch
+INTEGER                           :: ITEB_PATCH     ! number of input patch for TEB
+INTEGER                           :: ICURRENT_TEB_PATCH ! current patch for TEB
 INTEGER                           :: JPATCH         ! loop on patch
 CHARACTER(LEN=6)                  :: YMASK          ! type of tile mask
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -76,15 +84,18 @@ IF (LHOOK) CALL DR_HOOK('PREP_SNOW_EXTERN',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------
 !
-YAREA = HSURF(7:10)
+YAREA='        '
+YAREA(1:4) = HSURF(7:10)
 !
-IF (YAREA=='VEG ') THEN
+IF (YAREA(1:4)=='VEG ') THEN
   IVEGTYPE = NVEGTYPE
   YMASK = 'NATURE'
+  YPREFIX = '   '  
 ELSE
   IVEGTYPE = 1
   YMASK    = 'TOWN  '
   IPATCH   = 1
+  YPREFIX = '   '  
 END IF
 !
 !*      1.     Preparation of IO for reading in the file
@@ -96,9 +107,24 @@ END IF
 !
 CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,YMASK)
 !
-IF (YAREA=='VEG ') THEN
+!* reading of version of the file being read
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
+GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
+!
+IF (YAREA(1:4)=='VEG ') THEN
   YRECFM = 'PATCH_NUMBER'
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
+ELSE
+  IF (.NOT.GOLD_NAME) THEN
+     IF (YAREA(1:4)=='ROOF') YAREA(1:4) = 'RF  '
+     IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
+   ENDIF
+  CALL READ_TEB_PATCH(HFILEPGDTYPE,ITEB_PATCH)
+  IF (ITEB_PATCH>1) THEN
+    CALL GET_CURRENT_TEB_PATCH(ICURRENT_TEB_PATCH)
+    WRITE(YPREFIX,FMT='(A,I1,A)') 'T',MIN(ICURRENT_TEB_PATCH,ITEB_PATCH),'_'
+  END IF  
 END IF
 !
 !-------------------------------------------------------------------------------------
@@ -113,7 +139,7 @@ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !*      4.     Reading of snow data
 !              ---------------------
 !
-IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA') THEN
+IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)=='RD') THEN
   CALL TOWN_PRESENCE(HFILEPGDTYPE,GTOWN)
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   IF (.NOT. GTOWN) THEN
@@ -121,17 +147,19 @@ IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA') THEN
     CALL ALLOCATE_GR_SNOW(TZSNOW,INI,IPATCH)
   ELSE
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
-    CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),INI,IPATCH,TZSNOW,HDIR='A')
+    CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   ENDIF
 ELSE
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
-  CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),INI,IPATCH,TZSNOW,HDIR='A')
+  CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW,HDIR='A')
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 ENDIF
 !
-IF (TZSNOW%NLAYER.LT.KLAYER) THEN
+IF (TZSNOW%NLAYER.GT.KLAYER) THEN
+  TZSNOW%NLAYER=KLAYER
+ELSEIF (TZSNOW%NLAYER.LT.KLAYER) THEN
   CALL ABOR1_SFX("PREP_SNOW_EXTERN: SNOW NLAYER IN EXTERN FILE MUST BE GROWER THAN CURRENT NLAYER")
 ENDIF
 !
@@ -231,13 +259,13 @@ SELECT CASE (HSURF(1:3))
 
       CASE ('3-L','CRO')
         !* input physical variable
-        IF (HSURF(1:1)=='R') ZFIELD(:,:,:) = TZSNOW%RHO (:,:,:)
-        IF (HSURF(1:1)=='H') ZFIELD(:,:,:) = TZSNOW%HEAT(:,:,:)
+        IF (HSURF(1:1)=='R') ZFIELD(:,:,:) = TZSNOW%RHO (:,1:TZSNOW%NLAYER,:)
+        IF (HSURF(1:1)=='H') ZFIELD(:,:,:) = TZSNOW%HEAT(:,1:TZSNOW%NLAYER,:)
         !
         IF (OSNOW_IDEAL) THEN
           ALLOCATE(ZFIELD_FINE(INI,KLAYER,IPATCH))
-          IF (HSURF(1:1)=='R') ZFIELD_FINE(:,:,:) = ZFIELD(:,1:KLAYER,:)
-          IF (HSURF(1:1)=='H') ZFIELD_FINE(:,:,:) = ZFIELD(:,1:KLAYER,:)
+          IF (HSURF(1:1)=='R') ZFIELD_FINE(:,:,:) = ZFIELD(:,:,:)
+          IF (HSURF(1:1)=='H') ZFIELD_FINE(:,:,:) = ZFIELD(:,:,:)
           ALLOCATE(PFIELD(INI,KLAYER,IVEGTYPE))
           CALL PUT_ON_ALL_VEGTYPES(INI,KLAYER,IPATCH,IVEGTYPE,ZFIELD_FINE,PFIELD)
         ELSE

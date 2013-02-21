@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SUNPOS (KYEAR, KMONTH, KDAY, PTIME, PLON, PLAT, PTSUN, PZENITH, PAZIMSOL)
+      SUBROUTINE SUNPOS (KSIZE_OMP, KYEAR, KMONTH, KDAY, PTIME, &
+                         PLON, PLAT, PTSUN, PZENITH, PAZIMSOL)
 !     ####################################################################################
 !
 !!****  *SUNPOS * - routine to compute the position of the sun
@@ -17,7 +18,7 @@
 !!    ------
 !!      The cosine and sinus of the zenithal solar angle  and the azimuthal 
 !!    solar angle are computed from the true universal time, valid for the (XLAT,
-!!    XLON) location, and from the solar declination angle of the day. There
+!!    XLON) location, and from the solar declination aPD_ICE(:)ngle of the day. There
 !!    is a special convention to define the azimuthal solar angle.
 !!     
 !!    EXTERNAL
@@ -49,15 +50,24 @@
 !              ------------
 !
 USE MODD_CSTS,          ONLY : XPI, XDAY
-!
+USE MODD_SURFEX_OMP, ONLY : NBLOCK, NBLOCKTOT, INIT_DIM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+#ifdef AIX64
+USE OMP_LIB
+#endif
+!
 IMPLICIT NONE
+!
+#ifndef AIX64
+INCLUDE 'omp_lib.h'
+#endif
 !
 !*       0.1   Declarations of dummy arguments :
 !
+INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_OMP
 INTEGER,                      INTENT(IN)   :: KYEAR      ! current year                        
 INTEGER,                      INTENT(IN)   :: KMONTH     ! current month                        
 INTEGER,                      INTENT(IN)   :: KDAY       ! current day                        
@@ -92,7 +102,8 @@ REAL                                       :: ZTSIDER, &
                                                 ZSINDEL, &!azimuthal angle
                                                 ZCOSDEL !azimuthal angle  
 !                                            
-INTEGER                                    :: JI, JJ
+INTEGER                                    :: JI, JJ, INKPROMA
+INTEGER    :: IINDX1, IINDX2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -132,7 +143,17 @@ ZSINDEL = SIN(ZDECSOL)
 ZCOSDEL = COS(ZDECSOL)
 !-------------------------------------------------------------------------------
 !
-DO JJ=1,SIZE(PLON)
+!$OMP PARALLEL PRIVATE(INKPROMA,IINDX1,IINDX2)
+!
+!$ NBLOCK = OMP_GET_THREAD_NUM()
+!
+IF (NBLOCK==NBLOCKTOT) THEN
+  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,IINDX1,IINDX2)
+ELSE
+  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,IINDX1,IINDX2)
+ENDIF
+!
+DO JJ = IINDX1,IINDX2
 !
 !*       3.    LOADS THE ZLAT, ZLON ARRAYS
 !              ---------------------------
@@ -140,14 +161,11 @@ DO JJ=1,SIZE(PLON)
   ZLAT(JJ) = PLAT(JJ)*(XPI/180.)
   ZLON(JJ) = PLON(JJ)*(XPI/180.)
 !
-
 !-------------------------------------------------------------------------------
-!
 !
 !*       4.    COMPUTE THE TRUE SOLAR TIME
 !              ----------------------------
 !
-
   ZTUT(JJ) = ZUT - ZTSIDER + ZLON(JJ)*((180./XPI)/15.0)
 !
   PTSUN(JJ) = MOD(PTIME -ZTSIDER*3600. +PLON(JJ)*240., XDAY)
@@ -172,7 +190,7 @@ DO JJ=1,SIZE(PLON)
 !
 !-------------------------------------------------------------------------------
 !
-!*       6.    COMPUTE THE AZINUTHAL SOLAR ANGLE (PAZIMSOL)
+!*       6.    COMPUTE THE AZIMUTHAL SOLAR ANGLE (PAZIMSOL)
 !              --------------------------------------------
 !
   IF (ZSINZEN(JJ)/=0.) THEN
@@ -181,12 +199,15 @@ DO JJ=1,SIZE(PLON)
     ZCOSAZI(JJ)  = (-SIN(ZLAT(JJ))*ZCOSDEL*COS(ZSOLANG(JJ))      &
                        +COS(ZLAT(JJ))*ZSINDEL                       &
                       ) / ZSINZEN(JJ)  
-    PAZIMSOL(JJ) = XPI - ATAN2(ZSINAZI(JJ),ZCOSAZI(JJ))
+    PAZIMSOL(JJ) = ATAN2(ZSINAZI(JJ),ZCOSAZI(JJ))
   ELSE
-    PAZIMSOL(JJ) = 0.
+    PAZIMSOL(JJ) = XPI
   ENDIF
 !
 ENDDO
+!
+!$OMP END PARALLEL
+!
 IF (LHOOK) CALL DR_HOOK('SUNPOS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

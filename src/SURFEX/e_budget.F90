@@ -13,10 +13,11 @@
                             PGRNDFLUX, PSMELTFLUX, PSNOW_THRUFAL,                &
                             PD_G, PDZG, PDZDIF, PSOILCONDZ, PSOILHCAPZ,          &
                             PALBT, PEMIST, PQSAT, PDQSAT,                        &
-                            PFROZEN1, PTDEEP, PGAMMAT,                           &
+                            PFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,               &
                             PTA_IC, PQA_IC, PUSTAR2_IC,                          &
                             PSNOWFREE_ALB_VEG, PPSNV_A,PSNOWFREE_ALB_SOIL,       &
-                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT    )  
+                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT,   &
+                            PDEEP_FLUX                                           )  
 !     ##########################################################################
 !
 !!****  *E_BUDGET*  
@@ -78,6 +79,7 @@
 !!      (A.Boone)            03/10 Add delta fnctions to force LEG ans LEGI=0
 !!                                 when hug(i)Qsat < Qa and Qsat > Qa
 !!      (B. Decharme)        09/12 new wind implicitation
+!!      (V. Masson)          01/13 Deep soil flux implicitation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -172,11 +174,17 @@ REAL, DIMENSION(:), INTENT(IN)   :: PPSNV, PPSNG
 REAL, DIMENSION(:), INTENT(IN)     :: PFROZEN1
 !                                     PFROZEN1 = ice fraction in supurficial soil
 !
-REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP, PGAMMAT
-!                                     PTDEEP   = Deep soil temperature (prescribed)
-!                                                which models heating/cooling from
-!                                                below the diurnal wave penetration
-!                                                (surface temperature) depth.
+REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP_A, PTDEEP_B, PGAMMAT
+!                                      PTDEEP_A = Deep soil temperature
+!                                                 coefficient depending on flux
+!                                      PTDEEP_B = Deep soil temperature (prescribed)
+!                                               which models heating/cooling from
+!                                               below the diurnal wave penetration
+!                                               (surface temperature) depth. If it
+!                                               is FLAGGED as undefined, then the zero
+!                                               flux lower BC is applied.
+!                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
+!                                              (with PDEEP_FLUX in W/m2)
 !                                     PGAMMAT  = Deep soil heat transfer coefficient:
 !                                                assuming homogeneous soil so that
 !                                                this can be prescribed in units of 
@@ -215,7 +223,7 @@ REAL, DIMENSION(:), INTENT (OUT)   :: PQA_IC, PTA_IC, PUSTAR2_IC
 !                                           (modified if implicit coupling with
 !                                            atmosphere used)
 !
-REAL, DIMENSION(:), INTENT(INOUT)   :: PRA
+REAL, DIMENSION(:), INTENT(IN)   :: PRA
 !                                     PRA = aerodynamic surface resistance for
 !                                           heat transfers
 !
@@ -245,6 +253,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PDELTAT
 !                                    PDELTAT = change in temperature over the time
 !                                              step before adjustment owing to phase 
 !                                              changes (K)
+REAL, DIMENSION(:), INTENT(OUT)   :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
 !
 !*      0.2    declarations of local variables
 !
@@ -327,6 +336,8 @@ ZVMOD(:) = MAX(ZVMOD(:),0.)
 WHERE(PPEW_A_COEF(:)/= 0.)
       ZUSTAR2(:) = MAX( ( ZVMOD(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
 ENDWHERE
+!
+ZUSTAR2(:) = MAX(ZUSTAR2(:),0.)
 !
 ZRORA(:)    = PRHOA(:) / PRA(:)
 !
@@ -502,7 +513,7 @@ ZPETB2(:) = ZPET_B_COEF(:)/PEXNA(:)
 ! NOTE for now, the meltwater advection term (heat source/sink)
 ! is OFF because the corresponding energy should be compensated for
 ! (but code is retained for possible future activation).
-
+!
 ZA(:) = 1. / PTSTEP + PCT(:) *                            &
          ((ZFNSNOW(:) *                                    &
            ( 4.*ZTRAD(:) + ZRORA(:)*ZCPS(:)*ZPETA2(:) ))   &
@@ -516,8 +527,6 @@ ZC(:) = 2. * XPI * PTG(:,2) / XDAY + PCT(:) *              &
        ( ZRORA(:)*ZCPS(:)*ZPETB2(:)                         &
        + PSW_RAD(:)*(1.-PALBT(:)) + PLW_RAD(:)*PEMIST(:))   &
        - (ZCHUMS(:)*PQSAT(:) - ZCHUMA(:)*ZPEQ_B_COEF(:)))           
-!
-
 !
 IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO' .OR. HISBA == 'DIF')THEN                                 
 !
@@ -581,6 +590,7 @@ IF(HISBA == 'DIF')THEN
 !
 ! First determine terms needed for implicit linearization of surface:
 !
+
    ZCONDAVG(:) = (PDZG(:,1)*PSOILCONDZ(:,1) + PDZG(:,2)*PSOILCONDZ(:,2))/PD_G(:,2)  
    ZA(:)       = ZA(:) - (2. * XPI / XDAY) + 2.*ZCONDAVG(:)*PCT(:)/PD_G(:,2)  
    ZTERM2(:)   = 2.*ZCONDAVG(:)*PCT(:)/(ZA(:)*PD_G(:,2))
@@ -592,8 +602,8 @@ IF(HISBA == 'DIF')THEN
 !
 ! Determine the soil temperatures:
 !
-   CALL SOIL_HEATDIF(PTSTEP,PD_G,PDZG,PDZDIF,PSOILCONDZ,      &
-                     PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP,PTG  )  
+   CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
+                     PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
 !
 ! Compute the change in temperature over the time
 ! step before adjustment owing to phase changes (K)
@@ -606,14 +616,14 @@ ELSE
 !
    IF(OTEMP_ARP)THEN
 !
-      CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP,PSODELX,PTG)
+      CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP_B,PSODELX,PTG)
 !
    ELSE
 !
       PTG(:,1) = ( PTG(:,1)*ZB(:) + ZC(:) ) / ZA(:)
 !
-      WHERE(PTDEEP(:) /= XUNDEF .AND. PGAMMAT(:) /= XUNDEF)
-            PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*(PTG(:,1) + PGAMMAT(:)*PTDEEP(:)))/ &
+      WHERE(PTDEEP_B(:) /= XUNDEF .AND. PGAMMAT(:) /= XUNDEF)
+            PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*(PTG(:,1) + PGAMMAT(:)*PTDEEP_B(:)))/ &
                          (1.+(PTSTEP/XDAY)*(1.0+PGAMMAT(:)))  
       ELSEWHERE
             PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*PTG(:,1))/                          &

@@ -26,20 +26,25 @@
 !!      P. Le Moigne 04/2006: special HACTION='GTMSK' to initialize
 !!                            a mask different of 'FULL ' in order 
 !!                            to read dimensions only.
+!!      S. Faroux 06/2012 : implementations for MPI
 !
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_IO_SURF_ASC,ONLY:NUNIT,CFILEIN,CFILEOUT,NMASK,NLUOUT,NFULL,CMASK, &
-                          LOPEN_READ
+USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NSIZE, NPIO
+!
+USE MODD_IO_SURF_ASC,ONLY: NUNIT,CFILEIN,CFILEOUT,NMASK,NLUOUT,NFULL,CMASK, &
+                           LOPEN_READ
+!
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
+USE MODI_GET_DIM_FULL_n
+USE MODI_GET_SIZE_FULL_n
+USE MODI_GET_TYPE_DIM_n
 USE MODI_INIT_IO_SURF_MASK_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_GET_TYPE_DIM_n
 !
 IMPLICIT NONE
 !
@@ -53,35 +58,60 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT('ASCII ',NLUOUT)
 !
-LOPEN_READ=.FALSE.
+!$OMP BARRIER
+!
+IF (NRANK==NPIO) LOPEN_READ=.FALSE.
 !
 NUNIT=20
 !
 IF (HACTION=='GTMSK') THEN
-   OPEN(UNIT=NUNIT,FILE=CFILEIN,FORM='FORMATTED')
-   CMASK = HMASK
-   IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',1,ZHOOK_HANDLE)
-   RETURN
+  IF (NRANK==NPIO) THEN
+!$OMP SINGLE
+    OPEN(UNIT=NUNIT,FILE=CFILEIN,FORM='FORMATTED')
+!$OMP END SINGLE
+  ENDIF
+  CMASK = HMASK
+  IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',1,ZHOOK_HANDLE)
+  RETURN
 ENDIF
 !
 IF (HACTION == 'READ ') THEN
-   OPEN(UNIT=NUNIT,FILE=CFILEIN,FORM='FORMATTED')
-   LOPEN_READ=.TRUE. 
-   IF (HMASK == 'FULL  ') THEN
-      CMASK = HMASK
-      CALL READ_SURF('ASCII ','DIM_FULL',ILU,IRET)
-      NFULL = ILU
-   ENDIF
+  IF (NRANK==NPIO) THEN 
+!$OMP SINGLE          
+    OPEN(UNIT=NUNIT,FILE=CFILEIN,FORM='FORMATTED')
+!$OMP END SINGLE     
+    LOPEN_READ=.TRUE.
+  ENDIF
+  ! NFULL must be known even if HMASK/=FULL because it's no longer 
+  ! updated in init_io_surf_maskn.
+  CMASK = 'FULL ' 
+  CALL READ_SURF('ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
 ELSE
-   OPEN(UNIT=NUNIT,FILE=CFILEOUT,FORM='FORMATTED')
+  IF (NRANK==NPIO) THEN
+!$OMP SINGLE          
+    OPEN(UNIT=NUNIT,FILE=CFILEOUT,FORM='FORMATTED')
+!$OMP END SINGLE     
+  ENDIF
+  ! NFULL must be known in every case. 
+  CALL GET_DIM_FULL_n(NFULL)
+ENDIF
+!
+! nindex is needed for call to get_size_full_n. In init_index_mpi, 
+! it's not initialized for first readings.  
+IF (.NOT.ALLOCATED(NINDEX)) THEN
+  ALLOCATE(NINDEX(NFULL))
+  NINDEX(:) = 0
 ENDIF
 !
 !------------------------------------------------------------------------------
 !
-IL = NFULL
-CALL GET_TYPE_DIM_n(HMASK,IL)
+! MASK is sized according to the mpi task running
+CALL GET_SIZE_FULL_n('ASCII ',NFULL,ILU)
+IF (ILU>NSIZE) NSIZE = ILU
 !
-CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, NFULL, NMASK)
+IL = ILU
+CALL GET_TYPE_DIM_n(HMASK,IL)
+CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

@@ -33,6 +33,10 @@ USE MODD_ISBA_PAR,  ONLY : XWGMIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_SGH_PAR,   ONLY : XHORT_DEPTH
 !
+USE MODD_SURF_PAR,  ONLY : XUNDEF
+USE MODD_SURF_ATM_n, ONLY : NR_NATURE
+USE MODD_COUPLING_TOPD, ONLY : LCOUPL_TOPD, XAS_NATURE, XATOP
+!
 USE MODI_HYDRO_DT92
 !
 USE MODE_HYDRO_DIF
@@ -144,6 +148,8 @@ REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)) :: ZNOFRZ, ZWSAT
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPTH
 !
+REAL, DIMENSION(SIZE(PPG))                 :: ZRUNOFF_TOPD
+!
 REAL                                       :: ZEFFICE, ZLOG10, ZLOG, ZS, ZD_H, ZFRZ
 !
 INTEGER                                    :: INI, INL, JJ, JL, IDEPTH
@@ -183,6 +189,9 @@ ZIF_MAX(:)  = 0.0
 ZPG_WORK(:)   = 0.0
 ZRUISDT(:)    = 0.0
 !
+!HRUNOFF = TOPD DUNNE calculation
+ZRUNOFF_TOPD(:) = 0.0
+!
 !to limit numerical artifacts
 ZPG_INI(:) = PPG(:) + PPG_MELT(:)
 !
@@ -195,7 +204,7 @@ INL=MAXVAL(KWG_LAYER(:))
 !*           1. Surface saturated fraction
 !            -----------------------------
 !
-IF(HRUNOFF=='DT92')THEN
+IF( HRUNOFF=='DT92' .OR. HRUNOFF == 'TOPD' )THEN
 !
 ! Calculate the layer average water content for the sub-grid
 ! surface runoff computation: use PRUNOFFD as the depth over which
@@ -392,7 +401,7 @@ IF(HRUNOFF=='SGH ')THEN
 !
   PDUNNE(:) = MAX(PPG(:),0.0) * MAX(PFSAT(:)-PFFLOOD(:),0.0)
 !
-ELSEIF (HRUNOFF=='DT92')THEN
+ELSEIF (HRUNOFF=='DT92' .OR. HRUNOFF=='TOPD')THEN
 !
 !*       Dumenil et Todini (1992)  RUNOFF SCHEME
 !        ---------------------------------------         
@@ -401,6 +410,14 @@ ELSEIF (HRUNOFF=='DT92')THEN
 !
   ZPG_WORK(:) = PPG(:) - PHORTON(:) - PPFLOOD(:)
 !
+  IF ( LCOUPL_TOPD.AND.HRUNOFF == 'TOPD' )THEN
+    !
+    WHERE ( XATOP(:)/=0. .AND. XAS_NATURE(:)/=XUNDEF )
+      ZRUNOFF_TOPD(:) = MAX(PPG(:),0.0) * MAX(XAS_NATURE(:),0.0)
+    ENDWHERE
+    !
+  ENDIF
+  !
   CALL HYDRO_DT92(PTSTEP,                                &
                   PRUNOFFB, ZWWILT_AVG,                  &
                   PRUNOFFD, ZWSAT_AVG,                   &
@@ -408,10 +425,15 @@ ELSEIF (HRUNOFF=='DT92')THEN
                   ZPG_WORK, ZRUISDT                      )
 !
   PDUNNE(:) = ZRUISDT(:)*PRUNOFFD(:)*XRHOLW/PTSTEP
+  !
+  IF (LCOUPL_TOPD.AND.HRUNOFF == 'TOPD') THEN
+    PDUNNE(:) = ZRUNOFF_TOPD(:) +  PDUNNE(:)*(1-XATOP(:))
+  ENDIF
+  !
   IF(OFLOOD)THEN
     WHERE(PFFLOOD(:)>=PFSAT(:).AND.PFFLOOD(:)>0.0)PDUNNE(:) = 0.0
   ENDIF   
-!
+  !
 ELSE
 ! 
 ! Default case (no subgrid runoff)
@@ -441,7 +463,7 @@ IF(OFLOOD)THEN
 !
 ! calculate the maximum flood infiltration
 !
-  ZIF_MAX(:) = (1.- ZFROZEN(:))* ZIMAX    (:)*XRHOLW &   !unfrozen soil
+  ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX(:)*XRHOLW &   !unfrozen soil
              +      ZFROZEN(:) * ZIMAX_ICE(:)*XRHOLW     !frozen soil
 !
   PIFLOOD(:)=MAX(0.0,(PFFLOOD(:)-PFSAT(:)))*MIN(PPIFLOOD(:),ZIF_MAX(:))

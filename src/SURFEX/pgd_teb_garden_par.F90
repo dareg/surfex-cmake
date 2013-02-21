@@ -38,11 +38,13 @@
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
 USE MODD_SURF_PAR,          ONLY : XUNDEF
 USE MODD_TEB_GRID_n,        ONLY : NDIM
-USE MODD_TEB_GARDEN_n,      ONLY : CISBA, CPHOTO, NPATCH, NGROUND_LAYER, LPAR_GARDEN,              &
-                                     CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG  
-USE MODD_DATA_TEB_GARDEN_n, ONLY : XDATA_FRAC_HVEG, XDATA_FRAC_LVEG, XDATA_FRAC_NVEG,           &
-                                     XDATA_LAI_HVEG , XDATA_LAI_LVEG ,                            &
-                                     XDATA_H_HVEG, NTIME_n => NTIME
+USE MODD_TEB_VEG_n,         ONLY : CISBA, CPHOTO
+USE MODD_TEB_GARDEN_n,      ONLY : NGROUND_LAYER, LPAR_GARDEN,              &
+                                   CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG  
+USE MODD_DATA_TEB_GARDEN_n, ONLY : XDATA_FRAC_HVEG, XDATA_FRAC_LVEG,        &
+                                   XDATA_FRAC_NVEG,                         &
+                                   XDATA_LAI_HVEG , XDATA_LAI_LVEG ,        &
+                                   XDATA_H_HVEG, NTIME_n => NTIME
 !
 USE MODD_PGDWORK,           ONLY : CATYPE
 !

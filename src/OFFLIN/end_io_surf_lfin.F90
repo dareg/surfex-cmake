@@ -35,6 +35,7 @@
 !
 USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI, CFILE_LFI, NFULL, CMASK
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -55,13 +56,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_LFI_N',0,ZHOOK_HANDLE)
+!
+!$OMP BARRIER
+!
 NFULL = 0
 !
 CMASK = '      '
 !
-CALL FMCLOS(CFILE_LFI,'KEEP',CLUOUT_LFI,IRET)
+IF (NRANK==NPIO) THEN
+!$OMP SINGLE 
+  CALL FMCLOS(CFILE_LFI,'KEEP',CLUOUT_LFI,IRET)
+!$OMP END SINGLE
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_LFI_N',1,ZHOOK_HANDLE)
-
+!
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE END_IO_SURF_LFI_n

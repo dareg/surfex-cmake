@@ -42,7 +42,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears 
                                     ! at the open of the file in LFI  routines 
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be written
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be written
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=80) :: YNAME          ! emitted species name
 !

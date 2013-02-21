@@ -1,7 +1,6 @@
 !     #########
-    SUBROUTINE BLD_E_BUDGET(OTI_EVOL, PTSTEP, PBLD, PWALL_O_HOR,           &
-                              PRHOA, PT_ROOF, PT_WALL, PTI_BLD, PAC_BLD,     &
-                              PTI_BLD_EQ,PTI_BLDWFR)  
+    SUBROUTINE BLD_E_BUDGET( OTI_EVOL, PTSTEP, PBLD, PWALL_O_HOR,      &
+                             PRHOA, PT_ROOF, PT_WALL, PTI_BLD, PTS_FLOOR )  
 !   ##########################################################################
 !
 !!****  *BLD_E_BUDGET*  
@@ -10,7 +9,7 @@
 !!    -------
 !
 !     Computes the evoultion of the temperature of inside building air
-!         
+        
 !     
 !!**  METHOD
 !     ------
@@ -56,13 +55,14 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    24/08/00 
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,ONLY : XTT, XCPD, XDAY
-!
+USE MODD_SURF_PAR,ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -70,7 +70,6 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
-!
 !
 LOGICAL,              INTENT(IN)   :: OTI_EVOL      ! true --> internal temp. of
 !                                                   !      of buildings evolves
@@ -83,16 +82,11 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PRHOA         ! air density
 REAL, DIMENSION(:,:), INTENT(IN)   :: PT_ROOF       ! roof layers temperatures
 REAL, DIMENSION(:,:), INTENT(IN)   :: PT_WALL       ! wall layers temperatures
 REAL, DIMENSION(:),   INTENT(INOUT):: PTI_BLD       ! building air temperature
-REAL, DIMENSION(:),   INTENT(INOUT):: PTI_BLD_EQ    ! building air temperature
-  ! computed with its equation evolution
-REAL, DIMENSION(:),   INTENT(INOUT):: PTI_BLDWFR    ! building air temperature
-                                                    ! without force restore
-REAL, DIMENSION(:),   INTENT(OUT)  :: PAC_BLD       ! aerodynamical conductance
-                                                    ! inside building itself
+                                                    ! computed with its equation evolution
+REAL, DIMENSION(:),   INTENT(IN)  :: PTS_FLOOR     ! floor surface temperature
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PTI_BLD)) :: ZT_FLOOR     ! floor temperature
 !
 REAL                           :: ZTAU         ! temporal filter period
 !
@@ -100,59 +94,45 @@ INTEGER                        :: IROOF        ! number of roof layers
 INTEGER                        :: IWALL        ! number of wall layers
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('BLD_E_BUDGET',0,ZHOOK_HANDLE)
 !
 !*      1.   initializations
 !            ---------------
 !
-IF (LHOOK) CALL DR_HOOK('BLD_E_BUDGET',0,ZHOOK_HANDLE)
 IROOF = SIZE(PT_ROOF,2)
 IWALL = SIZE(PT_WALL,2)
 !
-ZT_FLOOR (:) = 19. + XTT
+!!! 27/01/2012 passé dans TEB
+!! PTS_FLOOR(:)= 19. + XTT
+!!! 27/01/2012 passé dans TEB
 !
-!
-!*      2.   inside conductance FOR SURFACES
-!            ------------------
-!
-!* (normalized by rho Cp for convenience)
-!
-PAC_BLD(:) = 1. / 0.123 / (XCPD * PRHOA(:))
-!
-!*      3.   no evolution of interior temperature if OTI_EVOL=.FALSE.
+!*      2.   no evolution of interior temperature if OTI_EVOL=.FALSE.
 !            --------------------------------------------------------
 !
 IF (.NOT. OTI_EVOL .AND. LHOOK) CALL DR_HOOK('BLD_E_BUDGET',1,ZHOOK_HANDLE)
 IF (.NOT. OTI_EVOL) RETURN
 !
-!*      4.   evolution of the internal temperature
+!*      3.   evolution of the internal temperature
 !            -------------------------------------
 !
-ZTAU=XDAY
+ZTAU = XDAY
 !
 WHERE (PBLD(:) .GT. 0.)
-PTI_BLD(:) = PTI_BLD(:) * (ZTAU-PTSTEP)/ZTAU                   &
-              + (   PT_ROOF(:,IROOF) * PBLD       (:)            &
-                  + PT_WALL(:,IWALL) * PWALL_O_HOR(:)            &
-                  + ZT_FLOOR(:)      * PBLD       (:)         )  &
-               /(  2. * PBLD(:)  +  PWALL_O_HOR(:) ) * PTSTEP / ZTAU  
-PTI_BLD_EQ(:)=PTI_BLD(:)
-PTI_BLDWFR(:)=(PT_ROOF(:,IROOF)*PBLD(:)&
-                + PT_WALL(:,IWALL)*PWALL_O_HOR(:)&
-                + ZT_FLOOR(:)*PBLD(:)       )&
-                /(2.*PBLD(:)+PWALL_O_HOR(:))  
+  PTI_BLD(:) = PTI_BLD(:) * (ZTAU-PTSTEP)/ZTAU       &
+            + ( PT_ROOF(:,IROOF) * PBLD       (:)    &
+              + PT_WALL(:,IWALL) * PWALL_O_HOR(:)    &
+              + PTS_FLOOR(:)      * PBLD       (:) )  &
+             / (  2. * PBLD(:)  +  PWALL_O_HOR(:) ) * PTSTEP / ZTAU
 ELSEWHERE
-PTI_BLD   (:) = ZT_FLOOR(:)
-PTI_BLD_EQ(:) = ZT_FLOOR(:)
-PTI_BLDWFR(:) = ZT_FLOOR(:)
+  PTI_BLD   (:) = PTS_FLOOR(:)
 ENDWHERE
 !
 !
 !*      5.   internal temperature set to a minimum value (heating)
 !            -----------------------------------------------------
 ! 
-PTI_BLD(:) = MAX( PTI_BLD(:) , 19. + XTT )
+PTI_BLD(:) = MAX( PTI_BLD(:) , PTS_FLOOR (:) )
+!
 IF (LHOOK) CALL DR_HOOK('BLD_E_BUDGET',1,ZHOOK_HANDLE)
-!
 !-------------------------------------------------------------------------------
-!
 END SUBROUTINE BLD_E_BUDGET

@@ -68,7 +68,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YNUM
 !
@@ -314,6 +314,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XQ2M(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='HU2M_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
+!
 CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='HU2MMIN_WAT'
@@ -327,7 +328,6 @@ YCOMMENT='X_Y_'//YRECFM//' (-)'
 !
 CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
 XHU2M_MAX(:)=-XUNDEF
-!
 !
 YRECFM='ZON10M_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'

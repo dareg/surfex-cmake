@@ -96,15 +96,17 @@ MODULE mode_flake
 !
 ! Modules used:
 
-USE modd_data_parameters , ONLY : &
-    ireals                   ,  &! KIND-type parameter for real variables
-    iintegers                    ! KIND-type parameter for "normal" integer variables  
+!USE modd_data_parameters , ONLY : &
+!    ireals                   ,  &! KIND-type parameter for real variables
+!    iintegers                    ! KIND-type parameter for "normal" integer variables  
 
 !==============================================================================
 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+!
+USE MODD_SURFEX_OMP, ONLY : NBLOCK
 !
 IMPLICIT NONE
 
@@ -121,62 +123,90 @@ IMPLICIT NONE
 !  FLake variables of type REAL
 
 !  Temperatures at the previous time step ("p") and the updated temperatures ("n") 
-REAL (KIND = ireals) ::           &
-    T_mnw_p_flk, T_mnw_n_flk      ,  &! Mean temperature of the water column [K] 
-    T_snow_p_flk, T_snow_n_flk    ,  &! Temperature at the air-snow interface [K] 
-    T_ice_p_flk, T_ice_n_flk      ,  &! Temperature at the snow-ice or air-ice interface [K] 
-    T_wML_p_flk, T_wML_n_flk      ,  &! Mixed-layer temperature [K] 
-    T_bot_p_flk, T_bot_n_flk      ,  &! Temperature at the water-bottom sediment interface [K] 
-    T_B1_p_flk, T_B1_n_flk            ! Temperature at the bottom of the upper layer of the sediments [K]   
+REAL :: T_mnw_p_flk, T_mnw_n_flk      ! Mean temperature of the water column [K] 
+!$OMP THREADPRIVATE(T_mnw_p_flk, T_mnw_n_flk)
+REAL :: T_snow_p_flk, T_snow_n_flk    ! Temperature at the air-snow interface [K] 
+!$OMP THREADPRIVATE(T_snow_p_flk, T_snow_n_flk)
+REAL :: T_ice_p_flk, T_ice_n_flk      ! Temperature at the snow-ice or air-ice interface [K] 
+!$OMP THREADPRIVATE(T_ice_p_flk, T_ice_n_flk) 
+REAL :: T_wML_p_flk, T_wML_n_flk      ! Mixed-layer temperature [K] 
+!$OMP THREADPRIVATE(T_wML_p_flk, T_wML_n_flk)
+REAL :: T_bot_p_flk, T_bot_n_flk      ! Temperature at the water-bottom sediment interface [K] 
+!$OMP THREADPRIVATE(T_bot_p_flk, T_bot_n_flk)
+REAL :: T_B1_p_flk, T_B1_n_flk        ! Temperature at the bottom of the upper layer of the sediments [K]   
+!$OMP THREADPRIVATE(T_B1_p_flk, T_B1_n_flk) 
 
 !  Thickness of various layers at the previous time step ("p") and the updated values ("n") 
-REAL (KIND = ireals) ::           &
-    h_snow_p_flk, h_snow_n_flk    ,  &! Snow thickness [m]
-    h_ice_p_flk, h_ice_n_flk      ,  &! Ice thickness [m]
-    h_ML_p_flk, h_ML_n_flk        ,  &! Thickness of the mixed-layer [m] 
-    H_B1_p_flk, H_B1_n_flk            ! Thickness of the upper layer of bottom sediments [m]   
+REAL :: h_snow_p_flk, h_snow_n_flk    ! Snow thickness [m]*
+!$OMP THREADPRIVATE(h_snow_p_flk, h_snow_n_flk)
+REAL :: h_ice_p_flk, h_ice_n_flk      ! Ice thickness [m]
+!$OMP THREADPRIVATE(h_ice_p_flk, h_ice_n_flk)
+REAL :: h_ML_p_flk, h_ML_n_flk        ! Thickness of the mixed-layer [m] 
+!$OMP THREADPRIVATE(h_ML_p_flk, h_ML_n_flk)  
+REAL :: H_B1_p_flk, H_B1_n_flk        ! Thickness of the upper layer of bottom sediments [m]   
+!$OMP THREADPRIVATE(H_B1_p_flk, H_B1_n_flk)
 
 !  The shape factor(s) at the previous time step ("p") and the updated value(s) ("n") 
-REAL (KIND = ireals) ::           &
-    C_T_p_flk, C_T_n_flk          ,  &! Shape factor (thermocline)
-    C_TT_flk                      ,  &! Dimensionless parameter (thermocline)
-    C_Q_flk                       ,  &! Shape factor with respect to the heat flux (thermocline)
-    C_I_flk                       ,  &! Shape factor (ice)
-    C_S_flk                           ! Shape factor (snow)  
+REAL :: C_T_p_flk, C_T_n_flk          ! Shape factor (thermocline)
+!$OMP THREADPRIVATE(C_T_p_flk, C_T_n_flk)  
+REAL :: C_TT_flk                      ! Dimensionless parameter (thermocline)
+!$OMP THREADPRIVATE(C_TT_flk)
+REAL :: C_Q_flk                       ! Shape factor with respect to the heat flux (thermocline)
+!$OMP THREADPRIVATE(C_Q_flk)
+REAL :: C_I_flk                       ! Shape factor (ice)
+!$OMP THREADPRIVATE(C_I_flk)
+REAL :: C_S_flk                       ! Shape factor (snow) 
+!$OMP THREADPRIVATE(C_S_flk) 
 
 !  Derivatives of the shape functions
-REAL (KIND = ireals) ::           &
-    Phi_T_pr0_flk                 ,  &! d\Phi_T(0)/d\zeta   (thermocline)
-    Phi_I_pr0_flk                 ,  &! d\Phi_I(0)/d\zeta_I (ice)
-    Phi_I_pr1_flk                 ,  &! d\Phi_I(1)/d\zeta_I (ice)
-    Phi_S_pr0_flk                     ! d\Phi_S(0)/d\zeta_S (snow)  
+REAL :: Phi_T_pr0_flk                 ! d\Phi_T(0)/d\zeta   (thermocline)
+!$OMP THREADPRIVATE(Phi_T_pr0_flk) 
+REAL :: Phi_I_pr0_flk                 ! d\Phi_I(0)/d\zeta_I (ice)
+!$OMP THREADPRIVATE(Phi_I_pr0_flk)
+REAL :: Phi_I_pr1_flk                 ! d\Phi_I(1)/d\zeta_I (ice)
+!$OMP THREADPRIVATE(Phi_I_pr1_flk)
+REAL :: Phi_S_pr0_flk                 ! d\Phi_S(0)/d\zeta_S (snow)  
+!$OMP THREADPRIVATE(Phi_S_pr0_flk)  
 
 !  Heat and radiation fluxes
-REAL (KIND = ireals) ::           &
-    Q_snow_flk                    ,  &! Heat flux through the air-snow interface [W m^{-2}]
-    Q_ice_flk                     ,  &! Heat flux through the snow-ice or air-ice interface [W m^{-2}]
-    Q_w_flk                       ,  &! Heat flux through the ice-water or air-water interface [W m^{-2}]
-    Q_bot_flk                     ,  &! Heat flux through the water-bottom sediment interface [W m^{-2}]
-    I_atm_flk                     ,  &! Radiation flux at the lower boundary of the atmosphere [W m^{-2}],
+REAL :: Q_snow_flk                    ! Heat flux through the air-snow interface [W m^{-2}]
+!$OMP THREADPRIVATE(Q_snow_flk)  
+REAL :: Q_ice_flk                     ! Heat flux through the snow-ice or air-ice interface [W m^{-2}]
+!$OMP THREADPRIVATE(Q_ice_flk)  
+REAL :: Q_w_flk                       ! Heat flux through the ice-water or air-water interface [W m^{-2}]
+!$OMP THREADPRIVATE(Q_w_flk) 
+REAL :: Q_bot_flk                     ! Heat flux through the water-bottom sediment interface [W m^{-2}]
+!$OMP THREADPRIVATE(Q_bot_flk)   
+REAL :: I_atm_flk                     ! Radiation flux at the lower boundary of the atmosphere [W m^{-2}],
                                     ! i.e. the incident radiation flux with no regard for the surface albedo.
-    I_snow_flk                    ,  &! Radiation flux through the air-snow interface [W m^{-2}]
-    I_ice_flk                     ,  &! Radiation flux through the snow-ice or air-ice interface [W m^{-2}]
-    I_w_flk                       ,  &! Radiation flux through the ice-water or air-water interface [W m^{-2}]
-    I_h_flk                       ,  &! Radiation flux through the mixed-layer-thermocline interface [W m^{-2}]
-    I_bot_flk                     ,  &! Radiation flux through the water-bottom sediment interface [W m^{-2}]
-    I_intm_0_h_flk                ,  &! Mean radiation flux over the mixed layer [W m^{-1}]
-    I_intm_h_D_flk                ,  &! Mean radiation flux over the thermocline [W m^{-1}]
-    Q_star_flk                        ! A generalized heat flux scale [W m^{-2}]  
+!$OMP THREADPRIVATE(I_atm_flk)                                  
+REAL :: I_snow_flk                    ! Radiation flux through the air-snow interface [W m^{-2}]
+!$OMP THREADPRIVATE(I_snow_flk)  
+REAL :: I_ice_flk                     ! Radiation flux through the snow-ice or air-ice interface [W m^{-2}]
+!$OMP THREADPRIVATE(I_ice_flk)  
+REAL :: I_w_flk                       ! Radiation flux through the ice-water or air-water interface [W m^{-2}]
+!$OMP THREADPRIVATE(I_w_flk)  
+REAL :: I_h_flk                       ! Radiation flux through the mixed-layer-thermocline interface [W m^{-2}]
+!$OMP THREADPRIVATE(I_h_flk)
+REAL :: I_bot_flk                     ! Radiation flux through the water-bottom sediment interface [W m^{-2}]
+!$OMP THREADPRIVATE(I_bot_flk)
+REAL :: I_intm_0_h_flk                ! Mean radiation flux over the mixed layer [W m^{-1}]
+!$OMP THREADPRIVATE(I_intm_0_h_flk)   
+REAL :: I_intm_h_D_flk                ! Mean radiation flux over the thermocline [W m^{-1}]
+!$OMP THREADPRIVATE(I_intm_h_D_flk)   
+REAL :: Q_star_flk                        ! A generalized heat flux scale [W m^{-2}]  
+!$OMP THREADPRIVATE(Q_star_flk)  
 
 !  Velocity scales
-REAL (KIND = ireals) ::           &
-    u_star_w_flk                  ,  &! Friction velocity in the surface layer of lake water [m s^{-1}]
-    w_star_sfc_flk                    ! Convective velocity scale,   
+REAL :: u_star_w_flk                  ! Friction velocity in the surface layer of lake water [m s^{-1}]
+!$OMP THREADPRIVATE(u_star_w_flk)   
+REAL :: w_star_sfc_flk                 ! Convective velocity scale,   
                                     ! using a generalized heat flux scale [m s^{-1}]
+!$OMP THREADPRIVATE(w_star_sfc_flk)                                  
 
 !  The rate of snow accumulation
-REAL (KIND = ireals) ::           &
-    dMsnowdt_flk                      ! The rate of snow accumulation [kg m^{-2} s^{-1}]  
+REAL :: dMsnowdt_flk                      ! The rate of snow accumulation [kg m^{-2} s^{-1}]  
+!$OMP THREADPRIVATE(dMsnowdt_flk)
 
 !==============================================================================
 ! Procedures 
@@ -256,7 +286,7 @@ IMPLICIT NONE
 
 !  Input (procedure arguments)
 
-REAL (KIND = ireals), INTENT(IN) ::   &
+REAL, INTENT(IN) ::   &
     depth_w                           ,  &! The lake depth [m]
     albedo_water                      ,  &! Albedo of the water surface 
     albedo_ice                        ,  &! Albedo of the ice surface
@@ -269,7 +299,7 @@ TYPE (opticpar_medium), INTENT(IN) ::  &
 
 
 !  Local variables of type INTEGER
-INTEGER (KIND = iintegers) ::  &! Help variable(s)
+INTEGER  ::  &! Help variable(s)
     i                             ! DO loop index  
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -280,8 +310,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
   IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_RADFLUX',0,ZHOOK_HANDLE)
   IF(h_ice_p_flk.GE.h_Ice_min_flk) THEN            ! Ice exists
     IF(h_snow_p_flk.GE.h_Snow_min_flk) THEN        ! There is snow above the ice
-      I_snow_flk = I_atm_flk*(1._ireals-albedo_snow) 
-      I_bot_flk = 0._ireals
+      I_snow_flk = I_atm_flk*(1.-albedo_snow) 
+      I_bot_flk = 0.
       DO i=1, opticpar_snow%nband_optic
         I_bot_flk = I_bot_flk +                     &
           opticpar_snow%frac_optic(i)*EXP(-opticpar_snow%extincoef_optic(i)*h_snow_p_flk)   
@@ -289,9 +319,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
       I_ice_flk  = I_snow_flk*I_bot_flk
     ELSE                                           ! No snow above the ice 
       I_snow_flk = I_atm_flk  
-      I_ice_flk  = I_atm_flk*(1._ireals-albedo_ice)
+      I_ice_flk  = I_atm_flk*(1.-albedo_ice)
     END IF 
-    I_bot_flk = 0._ireals
+    I_bot_flk = 0.
     DO i=1, opticpar_ice%nband_optic
       I_bot_flk = I_bot_flk +                       &
         opticpar_ice%frac_optic(i)*EXP(-opticpar_ice%extincoef_optic(i)*h_ice_p_flk)   
@@ -300,11 +330,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
   ELSE                                             ! No ice-snow cover
     I_snow_flk   = I_atm_flk  
     I_ice_flk    = I_atm_flk
-    I_w_flk      = I_atm_flk*(1._ireals-albedo_water)
+    I_w_flk      = I_atm_flk*(1.-albedo_water)
   END IF 
 
   IF(h_ML_p_flk.GE.h_ML_min_flk) THEN           ! Radiation flux at the bottom of the mixed layer
-    I_bot_flk = 0._ireals
+    I_bot_flk = 0.
     DO i=1, opticpar_water%nband_optic
       I_bot_flk = I_bot_flk +             &
         opticpar_water%frac_optic(i)*EXP(-opticpar_water%extincoef_optic(i)*h_ML_p_flk)   
@@ -314,7 +344,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     I_h_flk = I_w_flk
   END IF
 
-  I_bot_flk = 0._ireals                         ! Radiation flux at the lake bottom
+  I_bot_flk = 0.                       ! Radiation flux at the lake bottom
   DO i=1, opticpar_water%nband_optic
     I_bot_flk = I_bot_flk +               &
       opticpar_water%frac_optic(i)*EXP(-opticpar_water%extincoef_optic(i)*depth_w)   
@@ -322,11 +352,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
   I_bot_flk = I_w_flk*I_bot_flk
 
   IF(h_ML_p_flk.GE.h_ML_min_flk) THEN           ! Integral-mean radiation flux over the mixed layer
-    I_intm_0_h_flk = 0._ireals
+    I_intm_0_h_flk = 0.
     DO i=1, opticpar_water%nband_optic
       I_intm_0_h_flk = I_intm_0_h_flk +                                &
         opticpar_water%frac_optic(i)/opticpar_water%extincoef_optic(i)*  &
-        (1._ireals - EXP(-opticpar_water%extincoef_optic(i)*h_ML_p_flk))  
+        (1. - EXP(-opticpar_water%extincoef_optic(i)*h_ML_p_flk))  
     END DO 
     I_intm_0_h_flk = I_w_flk*I_intm_0_h_flk/h_ML_p_flk
   ELSE
@@ -334,7 +364,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
   END IF
 
   IF(h_ML_p_flk.LE.depth_w-h_ML_min_flk) THEN   ! Integral-mean radiation flux over the thermocline
-    I_intm_h_D_flk = 0._ireals 
+    I_intm_h_D_flk = 0. 
     DO i=1, opticpar_water%nband_optic
       I_intm_h_D_flk = I_intm_h_D_flk +                                &
         opticpar_water%frac_optic(i)/opticpar_water%extincoef_optic(i)*  &
@@ -427,7 +457,7 @@ IMPLICIT NONE
 
 !  Input (procedure arguments)
 
-REAL (KIND = ireals), INTENT(IN) ::   &
+REAL, INTENT(IN) ::   &
     depth_w                           ,  &! The lake depth [m]
     depth_bs                          ,  &! Depth of the thermally active layer of bottom sediments [m]
     T_bs                              ,  &! Temperature at the outer edge of 
@@ -441,7 +471,7 @@ REAL (KIND = ireals), INTENT(IN) ::   &
 
 !  Output (procedure arguments)
 
-REAL (KIND = ireals), INTENT(OUT) ::  &
+REAL, INTENT(OUT) ::  &
     T_sfc_n                               ! Updated surface temperature [K]   
                                         ! (equal to the updated value of either T_ice, T_snow or T_wML)
 
@@ -453,11 +483,11 @@ LOGICAL ::          &
     l_ice_meltabove     ! Switch, .TRUE. = snow/ice melting from above takes place  
 
 !  Local variables of type INTEGER
-INTEGER (KIND = iintegers) :: &
+INTEGER  :: &
     i                             ! Loop index  
 
 !  Local variables of type REAL
-REAL (KIND = ireals) ::    &
+REAL ::    &
     d_T_mnw_dt             ,  &! Time derivative of T_mnw [K s^{-1}] 
     d_T_ice_dt             ,  &! Time derivative of T_ice [K s^{-1}] 
     d_T_bot_dt             ,  &! Time derivative of T_bot [K s^{-1}] 
@@ -469,13 +499,13 @@ REAL (KIND = ireals) ::    &
     d_C_T_dt                   ! Time derivative of C_T [s^{-1}]  
 
 !  Local variables of type REAL
-REAL (KIND = ireals) ::    &
+REAL ::    &
     N_T_mean               ,  &! The mean buoyancy frequency in the thermocline [s^{-1}] 
     ZM_h_scale             ,  &! The ZM96 equilibrium SBL depth scale [m] 
     conv_equil_h_scale         ! The equilibrium CBL depth scale [m]  
 
 !  Local variables of type REAL
-REAL (KIND = ireals) :: &
+REAL :: &
     h_ice_threshold     ,  &! If h_ice<h_ice_threshold, use quasi-equilibrium ice model 
     flk_str_1           ,  &! Help storage variable
     flk_str_2           ,  &! Help storage variable
@@ -502,15 +532,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 
 IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_DRIVER',0,ZHOOK_HANDLE)
-d_T_mnw_dt   = 0._ireals 
-d_T_ice_dt   = 0._ireals 
-d_T_bot_dt   = 0._ireals 
-d_T_B1_dt    = 0._ireals 
-d_h_snow_dt  = 0._ireals 
-d_h_ice_dt   = 0._ireals 
-d_h_ML_dt    = 0._ireals 
-d_H_B1_dt    = 0._ireals 
-d_C_T_dt     = 0._ireals 
+d_T_mnw_dt   = 0. 
+d_T_ice_dt   = 0. 
+d_T_bot_dt   = 0. 
+d_T_B1_dt    = 0. 
+d_h_snow_dt  = 0. 
+d_h_ice_dt   = 0. 
+d_h_ML_dt    = 0. 
+d_H_B1_dt    = 0. 
+d_C_T_dt     = 0. 
 T_snow_n_flk = T_snow_p_flk   
 T_ice_n_flk  = T_ice_p_flk    
 T_wML_n_flk  = T_wML_p_flk   
@@ -545,20 +575,20 @@ IF(h_ice_p_flk.GE.h_Ice_min_flk) THEN    ! Ice exists
   IF(h_ML_p_flk.LE.h_ML_min_flk) THEN    ! Mixed-layer depth is zero, compute flux 
     Q_w_flk = -tpl_kappa_w*(T_bot_p_flk-T_wML_p_flk)/depth_w  ! Flux with linear T(z) 
     Phi_T_pr0_flk = Phi_T_pr0_1*C_T_p_flk-Phi_T_pr0_2         ! d\Phi(0)/d\zeta (thermocline)
-    Q_w_flk = Q_w_flk*MAX(Phi_T_pr0_flk, 1._ireals)           ! Account for an increased d\Phi(0)/d\zeta 
+    Q_w_flk = Q_w_flk*MAX(Phi_T_pr0_flk, 1.)           ! Account for an increased d\Phi(0)/d\zeta 
   ELSE                    
-    Q_w_flk = 0._ireals                  ! Mixed-layer depth is greater than zero, set flux to zero
+    Q_w_flk = 0.                  ! Mixed-layer depth is greater than zero, set flux to zero
   END IF   
 END IF   
 
 ! A generalized heat flux scale 
-Q_star_flk = Q_w_flk + I_w_flk + I_h_flk - 2._ireals*I_intm_0_h_flk
+Q_star_flk = Q_w_flk + I_w_flk + I_h_flk - 2.*I_intm_0_h_flk
 
 ! Heat flux through the water-bottom sediment interface
 IF(lflk_botsed_use) THEN
   Q_bot_flk = -tpl_kappa_w*(T_B1_p_flk-T_bot_p_flk)/MAX(H_B1_p_flk, H_B1_min_flk)*Phi_B1_pr0
 ELSE  
-  Q_bot_flk = 0._ireals   ! The bottom-sediment scheme is not used
+  Q_bot_flk = 0.   ! The bottom-sediment scheme is not used
 END IF
 
 
@@ -592,7 +622,7 @@ l_ice_meltabove = .FALSE.
 
 Ice_exist: IF(h_ice_p_flk.LT.h_Ice_min_flk) THEN   ! Ice does not exist 
 
-  l_ice_create = T_wML_p_flk.LE.(tpl_T_f+c_small_flk).AND.Q_w_flk.LT.0._ireals
+  l_ice_create = T_wML_p_flk.LE.(tpl_T_f+c_small_flk).AND.Q_w_flk.LT.0.
   IF(l_ice_create) THEN                            ! Ice does not exist but should be created
     d_h_ice_dt = -Q_w_flk/tpl_rho_I/tpl_L_f                                  
     h_ice_n_flk = h_ice_p_flk + d_h_ice_dt*del_time                          ! Advance h_ice 
@@ -600,7 +630,7 @@ Ice_exist: IF(h_ice_p_flk.LT.h_Ice_min_flk) THEN   ! Ice does not exist
     d_h_snow_dt = dMsnowdt_flk/tpl_rho_S_min 
     h_snow_n_flk = h_snow_p_flk + d_h_snow_dt*del_time                       ! Advance h_snow
     Phi_I_pr1_flk = Phi_I_pr1_lin                                     &
-                    + Phi_I_ast_MR*MIN(1._ireals, h_ice_n_flk/H_Ice_max)       ! d\Phi_I(1)/d\zeta_I (ice)  
+                    + Phi_I_ast_MR*MIN(1., h_ice_n_flk/H_Ice_max)       ! d\Phi_I(1)/d\zeta_I (ice)  
     R_H_icesnow = Phi_I_pr1_flk/Phi_S_pr0_lin*tpl_kappa_I/flake_snowheatconduct(h_snow_n_flk) &
                   * h_snow_n_flk/MAX(h_ice_n_flk, h_Ice_min_flk)  
     T_snow_n_flk = T_ice_n_flk + R_H_icesnow*(T_ice_n_flk-tpl_T_f)           ! Snow temperature
@@ -619,14 +649,14 @@ ELSE Ice_exist                                     ! Ice exists
                                                            ! T_snow = T_ice if snow is absent 
     IF(l_snow_exists) THEN   ! There is snow above the ice
       flk_str_1 = Q_snow_flk + I_snow_flk - I_ice_flk        ! Atmospheric forcing
-      IF(flk_str_1.GE.0._ireals) THEN  ! Melting of snow and ice from above
+      IF(flk_str_1.GE.0.) THEN  ! Melting of snow and ice from above
         l_ice_meltabove = .TRUE.
         d_h_snow_dt = (-flk_str_1/tpl_L_f+dMsnowdt_flk)/flake_snowdensity(h_snow_p_flk)
         d_h_ice_dt  = -(I_ice_flk - I_w_flk - Q_w_flk)/tpl_L_f/tpl_rho_I 
       END IF 
     ELSE                     ! No snow above the ice
       flk_str_1 = Q_ice_flk + I_ice_flk - I_w_flk - Q_w_flk  ! Atmospheric forcing + heating from the water
-      IF(flk_str_1.GE.0._ireals) THEN  ! Melting of ice from above, snow accumulation may occur
+      IF(flk_str_1.GE.0.) THEN  ! Melting of ice from above, snow accumulation may occur
         l_ice_meltabove = .TRUE.
         d_h_ice_dt  = -flk_str_1/tpl_L_f/tpl_rho_I 
         d_h_snow_dt = dMsnowdt_flk/tpl_rho_S_min
@@ -646,22 +676,22 @@ ELSE Ice_exist                                     ! Ice exists
     d_h_snow_dt = flake_snowdensity(h_snow_p_flk)  
     IF(d_h_snow_dt.LT.tpl_rho_S_max) THEN    ! Account for d\rho_S/dt
      flk_str_1 = h_snow_p_flk*tpl_Gamma_rho_S/tpl_rho_w_r
-     flk_str_1 = flk_str_1/(1._ireals-flk_str_1)
+     flk_str_1 = flk_str_1/(1.-flk_str_1)
     ELSE                                     ! Snow density is equal to its maximum value, d\rho_S/dt=0
-     flk_str_1 = 0._ireals
+     flk_str_1 = 0.
     END IF
-    d_h_snow_dt = dMsnowdt_flk/d_h_snow_dt/(1._ireals+flk_str_1)       ! Snow accumulation
+    d_h_snow_dt = dMsnowdt_flk/d_h_snow_dt/(1.+flk_str_1)       ! Snow accumulation
     h_snow_n_flk = h_snow_p_flk + d_h_snow_dt*del_time                         ! Advance h_snow
     
     Phi_I_pr0_flk = h_ice_p_flk/H_Ice_max                              ! h_ice relative to its maximum value
-    C_I_flk = C_I_lin - C_I_MR*(1._ireals+Phi_I_ast_MR)*Phi_I_pr0_flk  ! Shape factor (ice)
+    C_I_flk = C_I_lin - C_I_MR*(1.+Phi_I_ast_MR)*Phi_I_pr0_flk  ! Shape factor (ice)
     Phi_I_pr1_flk = Phi_I_pr1_lin + Phi_I_ast_MR*Phi_I_pr0_flk         ! d\Phi_I(1)/d\zeta_I (ice)
     Phi_I_pr0_flk = Phi_I_pr0_lin - Phi_I_pr0_flk                      ! d\Phi_I(0)/d\zeta_I (ice)
 
-    h_ice_threshold = MAX(1._ireals, 2._ireals*C_I_flk*tpl_c_I*(tpl_T_f-T_ice_p_flk)/tpl_L_f)
+    h_ice_threshold = MAX(1., 2.*C_I_flk*tpl_c_I*(tpl_T_f-T_ice_p_flk)/tpl_L_f)
     h_ice_threshold = Phi_I_pr0_flk/C_I_flk*tpl_kappa_I/tpl_rho_I/tpl_c_I*h_ice_threshold
     h_ice_threshold = SQRT(h_ice_threshold*del_time)                   ! Threshold value of h_ice
-    h_ice_threshold = MIN(0.9_ireals*H_Ice_max, MAX(h_ice_threshold, h_Ice_min_flk))
+    h_ice_threshold = MIN(0.9*H_Ice_max, MAX(h_ice_threshold, h_Ice_min_flk))
                                                                        ! h_ice(threshold) < 0.9*H_Ice_max
 
     IF(h_ice_p_flk.LT.h_ice_threshold) THEN  ! Use a quasi-equilibrium ice model
@@ -682,7 +712,7 @@ ELSE Ice_exist                                     ! Ice exists
       h_ice_n_flk = h_ice_p_flk  + d_h_ice_dt*del_time                         ! Advance h_ice
 
       R_TI_icesnow = tpl_c_I*(tpl_T_f-T_ice_p_flk)/tpl_L_f         ! Dimensionless parameter
-      R_Tstar_icesnow = 1._ireals - C_I_flk                        ! Dimensionless parameter
+      R_Tstar_icesnow = 1. - C_I_flk                        ! Dimensionless parameter
       IF(l_snow_exists) THEN  ! There is snow above the ice
         R_H_icesnow = Phi_I_pr1_flk/Phi_S_pr0_lin*tpl_kappa_I/flake_snowheatconduct(h_snow_p_flk) &
                       * h_snow_p_flk/h_ice_p_flk  
@@ -693,27 +723,27 @@ ELSE Ice_exist                                     ! Ice exists
 ! of the effect of snow density in particular. 
 !_dm 
 !_nu        R_Tstar_icesnow = R_Tstar_icesnow                                                           &
-!_nu                        + (1._ireals+C_S_lin*h_snow_p_flk/h_ice_p_flk)*R_H_icesnow*R_rho_c_icesnow
+!_nu                        + (1.+C_S_lin*h_snow_p_flk/h_ice_p_flk)*R_H_icesnow*R_rho_c_icesnow
 !_dev
 
         R_Tstar_icesnow = R_Tstar_icesnow*R_TI_icesnow             ! Dimensionless parameter
 
 !_dev
 !_nu        R_Tstar_icesnow = R_Tstar_icesnow                                                         &
-!_nu                        + (1._ireals-R_rho_c_icesnow)*tpl_c_I*T_ice_p_flk/tpl_L_f
+!_nu                        + (1.-R_rho_c_icesnow)*tpl_c_I*T_ice_p_flk/tpl_L_f
 !_dev
         flk_str_2 = Q_snow_flk+I_snow_flk-I_w_flk                  ! Atmospheric fluxes
-        flk_str_1  = C_I_flk*h_ice_p_flk + (1._ireals+C_S_lin*R_H_icesnow)*R_rho_c_icesnow*h_snow_p_flk
-        d_T_ice_dt = -(1._ireals-2._ireals*C_S_lin)*R_H_icesnow*(tpl_T_f-T_ice_p_flk)              &
+        flk_str_1  = C_I_flk*h_ice_p_flk + (1.+C_S_lin*R_H_icesnow)*R_rho_c_icesnow*h_snow_p_flk
+        d_T_ice_dt = -(1.-2.*C_S_lin)*R_H_icesnow*(tpl_T_f-T_ice_p_flk)              &
                      * tpl_c_S*dMsnowdt_flk                          ! Effect of snow accumulation  
       ELSE                    ! No snow above the ice
         R_Tstar_icesnow = R_Tstar_icesnow*R_TI_icesnow             ! Dimensionless parameter
         flk_str_2 = Q_ice_flk+I_ice_flk-I_w_flk                    ! Atmospheric fluxes
         flk_str_1  = C_I_flk*h_ice_p_flk
-        d_T_ice_dt = 0._ireals
+        d_T_ice_dt = 0.
       END IF 
       d_T_ice_dt = d_T_ice_dt + tpl_kappa_I*(tpl_T_f-T_ice_p_flk)/h_ice_p_flk*Phi_I_pr0_flk       &
-                   * (1._ireals-R_Tstar_icesnow)                     ! Add flux due to heat conduction  
+                   * (1.-R_Tstar_icesnow)                     ! Add flux due to heat conduction  
       d_T_ice_dt = d_T_ice_dt - R_Tstar_icesnow*Q_w_flk            ! Add flux from water to ice
       d_T_ice_dt = d_T_ice_dt + flk_str_2                          ! Add atmospheric fluxes
       d_T_ice_dt = d_T_ice_dt/tpl_rho_I/tpl_c_I                    ! Total forcing
@@ -721,7 +751,7 @@ ELSE Ice_exist                                     ! Ice exists
       T_ice_n_flk = T_ice_p_flk + d_T_ice_dt*del_time                          ! Advance T_ice
     END IF
 
-    Phi_I_pr1_flk = MIN(1._ireals, h_ice_n_flk/H_Ice_max)          ! h_ice relative to its maximum value
+    Phi_I_pr1_flk = MIN(1., h_ice_n_flk/H_Ice_max)          ! h_ice relative to its maximum value
     Phi_I_pr1_flk = Phi_I_pr1_lin + Phi_I_ast_MR*Phi_I_pr1_flk     ! d\Phi_I(1)/d\zeta_I (ice)
     R_H_icesnow = Phi_I_pr1_flk/Phi_S_pr0_lin*tpl_kappa_I/flake_snowheatconduct(h_snow_n_flk) &
                    *h_snow_n_flk/MAX(h_ice_n_flk, h_Ice_min_flk)  
@@ -740,19 +770,19 @@ T_ice_n_flk =  MIN(T_ice_n_flk,  tpl_T_f)
 
 !_tmp
 ! Security, avoid too low values (these constraints are used for debugging purposes)
-  T_snow_n_flk = MAX(T_snow_n_flk, 73.15_ireals)  
-  T_ice_n_flk =  MAX(T_ice_n_flk,  73.15_ireals)    
+  T_snow_n_flk = MAX(T_snow_n_flk, 73.15)  
+  T_ice_n_flk =  MAX(T_ice_n_flk,  73.15)    
 !_tmp
 
 ! Remove too thin ice and/or snow
 IF(h_ice_n_flk.LT.h_Ice_min_flk)  THEN        ! Check ice
-  h_ice_n_flk = 0._ireals       ! Ice is too thin, remove it, and
+  h_ice_n_flk = 0.       ! Ice is too thin, remove it, and
   T_ice_n_flk = tpl_T_f         ! set T_ice to the freezing point.
-  h_snow_n_flk = 0._ireals      ! Remove snow when there is no ice, and
+  h_snow_n_flk = 0.      ! Remove snow when there is no ice, and
   T_snow_n_flk = tpl_T_f        ! set T_snow to the freezing point.
   l_ice_create = .FALSE.        ! "Exotic" case, ice has been created but proved to be too thin
 ELSE IF(h_snow_n_flk.LT.h_Snow_min_flk) THEN  ! Ice exists, check snow
-  h_snow_n_flk = 0._ireals      ! Snow is too thin, remove it, 
+  h_snow_n_flk = 0.      ! Snow is too thin, remove it, 
   T_snow_n_flk = T_ice_n_flk    ! and set the snow temperature equal to the ice temperature.
 END IF
 
@@ -761,7 +791,7 @@ END IF
 !  Compute the mean temperature of the water column.
 !------------------------------------------------------------------------------
 
-IF(l_ice_create) Q_w_flk = 0._ireals     ! Ice has just been created, set Q_w to zero
+IF(l_ice_create) Q_w_flk = 0.     ! Ice has just been created, set Q_w to zero
 d_T_mnw_dt = (Q_w_flk - Q_bot_flk + I_w_flk - I_bot_flk)/tpl_rho_w_r/tpl_c_w/depth_w
 T_mnw_n_flk = T_mnw_p_flk + d_T_mnw_dt*del_time   ! Advance T_mnw
 T_mnw_n_flk = MAX(T_mnw_n_flk, tpl_T_f)           ! Limit T_mnw by the freezing point 
@@ -781,27 +811,27 @@ HTC_Water: IF(h_ice_n_flk.GE.h_Ice_min_flk) THEN    ! Ice exists
 
   IF(l_ice_create) THEN                  ! Ice has just been created 
     IF(h_ML_p_flk.GE.depth_w-h_ML_min_flk) THEN    ! h_ML=D when ice is created 
-      h_ML_n_flk = 0._ireals                 ! Set h_ML to zero 
+      h_ML_n_flk = 0.                 ! Set h_ML to zero 
       C_T_n_flk = C_T_min                    ! Set C_T to its minimum value 
     ELSE                                          ! h_ML<D when ice is created 
       h_ML_n_flk = h_ML_p_flk                ! h_ML remains unchanged 
       C_T_n_flk = C_T_p_flk                  ! C_T (thermocline) remains unchanged 
     END IF 
-    T_bot_n_flk = T_wML_n_flk - (T_wML_n_flk-T_mnw_n_flk)/C_T_n_flk/(1._ireals-h_ML_n_flk/depth_w)
+    T_bot_n_flk = T_wML_n_flk - (T_wML_n_flk-T_mnw_n_flk)/C_T_n_flk/(1.-h_ML_n_flk/depth_w)
                                              ! Update the bottom temperature 
 
   ELSE IF(T_bot_p_flk.LT.tpl_T_r) THEN   ! Ice exists and T_bot < T_r, molecular heat transfer 
     h_ML_n_flk = h_ML_p_flk                  ! h_ML remains unchanged 
     C_T_n_flk = C_T_p_flk                    ! C_T (thermocline) remains unchanged 
-    T_bot_n_flk = T_wML_n_flk - (T_wML_n_flk-T_mnw_n_flk)/C_T_n_flk/(1._ireals-h_ML_n_flk/depth_w)
+    T_bot_n_flk = T_wML_n_flk - (T_wML_n_flk-T_mnw_n_flk)/C_T_n_flk/(1.-h_ML_n_flk/depth_w)
                                              ! Update the bottom temperature 
 
   ELSE                                   ! Ice exists and T_bot = T_r, convection due to bottom heating 
     T_bot_n_flk = tpl_T_r                      ! T_bot is equal to the temperature of maximum density 
     IF(h_ML_p_flk.GE.c_small_flk) THEN   ! h_ML > 0 
       C_T_n_flk = C_T_p_flk                     ! C_T (thermocline) remains unchanged 
-      h_ML_n_flk = depth_w*(1._ireals-(T_wML_n_flk-T_mnw_n_flk)/(T_wML_n_flk-T_bot_n_flk)/C_T_n_flk)
-      h_ML_n_flk = MAX(h_ML_n_flk, 0._ireals)   ! Update the mixed-layer depth  
+      h_ML_n_flk = depth_w*(1.-(T_wML_n_flk-T_mnw_n_flk)/(T_wML_n_flk-T_bot_n_flk)/C_T_n_flk)
+      h_ML_n_flk = MAX(h_ML_n_flk, 0.)   ! Update the mixed-layer depth  
     ELSE                                 ! h_ML = 0 
       h_ML_n_flk = h_ML_p_flk                   ! h_ML remains unchanged 
       C_T_n_flk = (T_wML_n_flk-T_mnw_n_flk)/(T_wML_n_flk-T_bot_n_flk) 
@@ -815,10 +845,10 @@ ELSE HTC_Water                                      ! Open water
 
 ! Generalised buoyancy flux scale and convective velocity scale
   flk_str_1 = flake_buoypar(T_wML_p_flk)*Q_star_flk/tpl_rho_w_r/tpl_c_w                    
-  IF(flk_str_1.LT.0._ireals) THEN       
-    w_star_sfc_flk = (-flk_str_1*h_ML_p_flk)**(1._ireals/3._ireals)  ! Convection     
+  IF(flk_str_1.LT.0.) THEN       
+    w_star_sfc_flk = (-flk_str_1*h_ML_p_flk)**(1./3.)  ! Convection     
   ELSE 
-    w_star_sfc_flk = 0._ireals                                       ! Neutral or stable stratification
+    w_star_sfc_flk = 0.                                       ! Neutral or stable stratification
   END IF 
 
 !_dm
@@ -828,26 +858,26 @@ ELSE HTC_Water                                      ! Open water
 ! that interpolates between the two asymptotic limits.
 !_dm
   conv_equil_h_scale = -Q_w_flk/MAX(I_w_flk, c_small_flk)
-  IF(conv_equil_h_scale.GT.0._ireals .AND. conv_equil_h_scale.LT.1._ireals  &
+  IF(conv_equil_h_scale.GT.0. .AND. conv_equil_h_scale.LT.1.  &
       .AND. T_wML_p_flk.GT.tpl_T_r) THEN   ! The equilibrium CBL depth scale is only used above T_r  
-    conv_equil_h_scale = SQRT(6._ireals*conv_equil_h_scale)                 &
-                         + 2._ireals*conv_equil_h_scale/(1._ireals-conv_equil_h_scale)  
+    conv_equil_h_scale = SQRT(6.*conv_equil_h_scale)                 &
+                         + 2.*conv_equil_h_scale/(1.-conv_equil_h_scale)  
     conv_equil_h_scale = MIN(depth_w, conv_equil_h_scale/extincoef_water_typ)
   ELSE
-    conv_equil_h_scale = 0._ireals       ! Set the equilibrium CBL depth to zero
+    conv_equil_h_scale = 0.       ! Set the equilibrium CBL depth to zero
   END IF
 
 ! Mean buoyancy frequency in the thermocline
-  N_T_mean = flake_buoypar(0.5_ireals*(T_wML_p_flk+T_bot_p_flk))*(T_wML_p_flk-T_bot_p_flk)
+  N_T_mean = flake_buoypar(0.5*(T_wML_p_flk+T_bot_p_flk))*(T_wML_p_flk-T_bot_p_flk)
   IF(h_ML_p_flk.LE.depth_w-h_ML_min_flk) THEN
     N_T_mean = SQRT(N_T_mean/(depth_w-h_ML_p_flk))  ! Compute N                   
   ELSE 
-    N_T_mean = 0._ireals                            ! h_ML=D, set N to zero
+    N_T_mean = 0.                            ! h_ML=D, set N to zero
   END IF 
 
 ! The rate of change of C_T
-  d_C_T_dt = MAX(w_star_sfc_flk, u_star_w_flk, u_star_min_flk)**2_iintegers
-  d_C_T_dt = N_T_mean*(depth_w-h_ML_p_flk)**2_iintegers       &
+  d_C_T_dt = MAX(w_star_sfc_flk, u_star_w_flk, u_star_min_flk)**2
+  d_C_T_dt = N_T_mean*(depth_w-h_ML_p_flk)**2       &
              / c_relax_C/d_C_T_dt                               ! Relaxation time scale for C_T  
   d_C_T_dt = (C_T_max-C_T_min)/MAX(d_C_T_dt, c_small_flk)     ! Rate-of-change of C_T 
   !rsal:
@@ -857,9 +887,9 @@ ELSE HTC_Water                                      ! Open water
 ! using different formulations for convection and wind mixing
 
   C_TT_flk = C_TT_1*C_T_p_flk-C_TT_2         ! C_TT, using C_T at the previous time step
-  C_Q_flk = 2._ireals*C_TT_flk/C_T_p_flk     ! C_Q using C_T at the previous time step
+  C_Q_flk = 2.*C_TT_flk/C_T_p_flk     ! C_Q using C_T at the previous time step
 
-  Mixing_regime: IF(flk_str_1.LT.0._ireals) THEN  ! Convective mixing 
+  Mixing_regime: IF(flk_str_1.LT.0.) THEN  ! Convective mixing 
 
     C_T_n_flk = C_T_p_flk + d_C_T_dt*del_time                        ! Update C_T, assuming dh_ML/dt>0
     C_T_n_flk = MIN(C_T_max, MAX(C_T_n_flk, C_T_min))                ! Limit C_T 
@@ -877,15 +907,15 @@ ELSE HTC_Water                                      ! Open water
 
       ELSE                                   ! Use a complete entrainment equation 
         R_H_icesnow     = depth_w/h_ML_p_flk
-        R_rho_c_icesnow = R_H_icesnow-1._ireals
+        R_rho_c_icesnow = R_H_icesnow-1.
         R_TI_icesnow    = C_T_p_flk/C_TT_flk
-        R_Tstar_icesnow = (R_TI_icesnow/2._ireals-1._ireals)*R_rho_c_icesnow + 1._ireals
-        d_h_ML_dt = -Q_star_flk*(R_Tstar_icesnow*(1._ireals+c_cbl_1)-1._ireals) - Q_bot_flk
+        R_Tstar_icesnow = (R_TI_icesnow/2.-1.)*R_rho_c_icesnow + 1.
+        d_h_ML_dt = -Q_star_flk*(R_Tstar_icesnow*(1.+c_cbl_1)-1.) - Q_bot_flk
         d_h_ML_dt = d_h_ML_dt/tpl_rho_w_r/tpl_c_w                        ! Q_* and Q_b flux terms
         flk_str_2 = (depth_w-h_ML_p_flk)*(T_wML_p_flk-T_bot_p_flk)*C_TT_2/C_TT_flk*d_C_T_dt 
         d_h_ML_dt = d_h_ML_dt + flk_str_2                                 ! Add dC_T/dt term
-        flk_str_2 = I_bot_flk + (R_TI_icesnow-1._ireals)*I_h_flk - R_TI_icesnow*I_intm_h_D_flk
-        flk_str_2 = flk_str_2 + (R_TI_icesnow-2._ireals)*R_rho_c_icesnow*(I_h_flk-I_intm_0_h_flk)
+        flk_str_2 = I_bot_flk + (R_TI_icesnow-1.)*I_h_flk - R_TI_icesnow*I_intm_h_D_flk
+        flk_str_2 = flk_str_2 + (R_TI_icesnow-2.)*R_rho_c_icesnow*(I_h_flk-I_intm_0_h_flk)
         flk_str_2 = flk_str_2/tpl_rho_w_r/tpl_c_w
         d_h_ML_dt = d_h_ML_dt + flk_str_2                                 ! Add radiation terms
         flk_str_2 = -c_cbl_2*R_Tstar_icesnow*Q_star_flk/tpl_rho_w_r/tpl_c_w/MAX(w_star_sfc_flk, c_small_flk)
@@ -913,7 +943,7 @@ ELSE HTC_Water                                      ! Open water
 !_dm
 
 !_dbg
-! IF(d_h_ML_dt.LT.0._ireals) THEN 
+! IF(d_h_ML_dt.LT.0.) THEN 
 !   WRITE*, 'FLake: negative d_h_ML_dt during convection, = ', d_h_ML_dt
 !   WRITE*, '                d_h_ML_dt*del_time = ', MAX(d_h_ML_dt, c_small_flk)*del_time
 !   WRITE*, '         u_*       = ', u_star_w_flk   
@@ -937,10 +967,10 @@ ELSE HTC_Water                                      ! Open water
   ELSE Mixing_regime                              ! Wind mixing
 
     d_h_ML_dt = MAX(u_star_w_flk, u_star_min_flk)                        ! The surface friction velocity
-    ZM_h_scale = (ABS(par_Coriolis)/c_sbl_ZM_n + N_T_mean/c_sbl_ZM_i)*d_h_ML_dt**2_iintegers
+    ZM_h_scale = (ABS(par_Coriolis)/c_sbl_ZM_n + N_T_mean/c_sbl_ZM_i)*d_h_ML_dt**2
     ZM_h_scale = ZM_h_scale + flk_str_1/c_sbl_ZM_s
     ZM_h_scale = MAX(ZM_h_scale, c_small_flk)
-    ZM_h_scale = d_h_ML_dt**3_iintegers/ZM_h_scale 
+    ZM_h_scale = d_h_ML_dt**3/ZM_h_scale 
     ZM_h_scale = MAX(h_ML_min_flk, MIN(ZM_h_scale, h_ML_max_flk))        ! The ZM96 SBL depth scale 
     ZM_h_scale = MAX(ZM_h_scale, conv_equil_h_scale)                     ! Equilibrium mixed-layer depth 
 
@@ -982,33 +1012,33 @@ ELSE HTC_Water                                      ! Open water
 
     IF(h_ML_n_flk.GT.h_ML_p_flk) THEN   ! Mixed-layer deepening 
       R_H_icesnow     = h_ML_p_flk/depth_w
-      R_rho_c_icesnow = 1._ireals-R_H_icesnow 
-      R_TI_icesnow    = 0.5_ireals*C_T_p_flk*R_rho_c_icesnow+C_TT_flk*(2._ireals*R_H_icesnow-1._ireals)
-      R_Tstar_icesnow = (0.5_ireals+C_TT_flk-C_Q_flk)/R_TI_icesnow
-      R_TI_icesnow    = (1._ireals-C_T_p_flk*R_rho_c_icesnow)/R_TI_icesnow
+      R_rho_c_icesnow = 1.-R_H_icesnow 
+      R_TI_icesnow    = 0.5*C_T_p_flk*R_rho_c_icesnow+C_TT_flk*(2.*R_H_icesnow-1.)
+      R_Tstar_icesnow = (0.5+C_TT_flk-C_Q_flk)/R_TI_icesnow
+      R_TI_icesnow    = (1.-C_T_p_flk*R_rho_c_icesnow)/R_TI_icesnow
      
       d_T_bot_dt = (Q_w_flk-Q_bot_flk+I_w_flk-I_bot_flk)/tpl_rho_w_r/tpl_c_w
       d_T_bot_dt = d_T_bot_dt - C_T_p_flk*(T_wML_p_flk-T_bot_p_flk)*d_h_ML_dt
       d_T_bot_dt = d_T_bot_dt*R_Tstar_icesnow/depth_w                   ! Q+I fluxes and dh_ML/dt term
 
-      flk_str_2 = I_intm_h_D_flk - (1._ireals-C_Q_flk)*I_h_flk - C_Q_flk*I_bot_flk
+      flk_str_2 = I_intm_h_D_flk - (1.-C_Q_flk)*I_h_flk - C_Q_flk*I_bot_flk
       flk_str_2 = flk_str_2*R_TI_icesnow/(depth_w-h_ML_p_flk)/tpl_rho_w_r/tpl_c_w
       d_T_bot_dt = d_T_bot_dt + flk_str_2                               ! Add radiation-flux term
 
-      flk_str_2 = (1._ireals-C_TT_2*R_TI_icesnow)/C_T_p_flk
+      flk_str_2 = (1.-C_TT_2*R_TI_icesnow)/C_T_p_flk
       flk_str_2 = flk_str_2*(T_wML_p_flk-T_bot_p_flk)*d_C_T_dt
       d_T_bot_dt = d_T_bot_dt + flk_str_2                               ! Add dC_T/dt term
       
     ELSE                                ! Mixed-layer retreat or stationary state
-      d_T_bot_dt = 0._ireals                                            ! dT_bot/dt=0
+      d_T_bot_dt = 0.                                            ! dT_bot/dt=0
     END IF
 
     T_bot_n_flk = T_bot_p_flk + d_T_bot_dt*del_time                      ! Update T_bot  
     T_bot_n_flk = MAX(T_bot_n_flk, tpl_T_f)           ! Security, limit T_bot by the freezing point
     flk_str_2 = (T_bot_n_flk-tpl_T_r)*flake_buoypar(T_mnw_n_flk)
-    IF(flk_str_2.LT.0._ireals) T_bot_n_flk = tpl_T_r  ! Security, avoid T_r crossover 
-    T_wML_n_flk = C_T_n_flk*(1._ireals-h_ML_n_flk/depth_w)
-    T_wML_n_flk = (T_mnw_n_flk-T_bot_n_flk*T_wML_n_flk)/(1._ireals-T_wML_n_flk)
+    IF(flk_str_2.LT.0.) T_bot_n_flk = tpl_T_r  ! Security, avoid T_r crossover 
+    T_wML_n_flk = C_T_n_flk*(1.-h_ML_n_flk/depth_w)
+    T_wML_n_flk = (T_mnw_n_flk-T_bot_n_flk*T_wML_n_flk)/(1.-T_wML_n_flk)
     T_wML_n_flk = MAX(T_wML_n_flk, tpl_T_f)           ! Security, limit T_wML by the freezing point
 
   ELSE                                              ! Mixing down to the lake bottom 
@@ -1038,22 +1068,22 @@ END IF HTC_Water
 Sediment: IF(lflk_botsed_use) THEN   ! The bottom-sediment scheme is used
   
   IF(H_B1_p_flk.GE.depth_bs-H_B1_min_flk) THEN   ! No T(z) maximum (no thermal wave) 
-    H_B1_p_flk = 0._ireals                       ! Set H_B1_p to zero
+    H_B1_p_flk = 0.                       ! Set H_B1_p to zero
     T_B1_p_flk = T_bot_p_flk                     ! Set T_B1_p to the bottom temperature
   END IF 
 
-  flk_str_1 = 2._ireals*Phi_B1_pr0/(1._ireals-C_B1)*tpl_kappa_w/tpl_rho_w_r/tpl_c_w*del_time
+  flk_str_1 = 2.*Phi_B1_pr0/(1.-C_B1)*tpl_kappa_w/tpl_rho_w_r/tpl_c_w*del_time
   h_ice_threshold = SQRT(flk_str_1)                              ! Threshold value of H_B1
-  h_ice_threshold = MIN(0.9_ireals*depth_bs, h_ice_threshold)    ! Limit H_B1
-  flk_str_2 = C_B2/(1._ireals-C_B2)*(T_bs-T_B1_p_flk)/(depth_bs-H_B1_p_flk)
+  h_ice_threshold = MIN(0.9*depth_bs, h_ice_threshold)    ! Limit H_B1
+  flk_str_2 = C_B2/(1.-C_B2)*(T_bs-T_B1_p_flk)/(depth_bs-H_B1_p_flk)
 
   IF(H_B1_p_flk.LT.h_ice_threshold) THEN  ! Use a truncated equation for H_B1(t)
-    H_B1_n_flk = SQRT(H_B1_p_flk**2_iintegers+flk_str_1)  ! Advance H_B1
+    H_B1_n_flk = SQRT(H_B1_p_flk**2+flk_str_1)  ! Advance H_B1
     d_H_B1_dt = (H_B1_n_flk-H_B1_p_flk)/del_time          ! Re-compute dH_B1/dt 
   ELSE                                    ! Use a full equation for H_B1(t)
     flk_str_1 = (Q_bot_flk+I_bot_flk)/H_B1_p_flk/tpl_rho_w_r/tpl_c_w
-    flk_str_1 = flk_str_1 - (1._ireals-C_B1)*(T_bot_n_flk-T_bot_p_flk)/del_time
-    d_H_B1_dt = (1._ireals-C_B1)*(T_bot_p_flk-T_B1_p_flk)/H_B1_p_flk + C_B1*flk_str_2
+    flk_str_1 = flk_str_1 - (1.-C_B1)*(T_bot_n_flk-T_bot_p_flk)/del_time
+    d_H_B1_dt = (1.-C_B1)*(T_bot_p_flk-T_B1_p_flk)/H_B1_p_flk + C_B1*flk_str_2
     d_H_B1_dt = flk_str_1/d_H_B1_dt
     H_B1_n_flk = H_B1_p_flk + d_H_B1_dt*del_time          ! Advance H_B1
   END IF 
@@ -1077,15 +1107,15 @@ Sediment: IF(lflk_botsed_use) THEN   ! The bottom-sediment scheme is used
 ! Then, the time derivatives are zero, and the sign of the bottom heat flux depends on 
 ! whether T_bot is smaller or greater than T_bs.
 ! This is, of course, an oversimplified scheme.
-!_nu  d_H_B1_dt = 0._ireals
-!_nu  d_T_B1_dt = 0._ireals
+!_nu  d_H_B1_dt = 0.
+!_nu  d_T_B1_dt = 0.
 !_nu  H_B1_n_flk = H_B1_p_flk + d_H_B1_dt*del_time   ! Advance H_B1
 !_nu  T_B1_n_flk = T_B1_p_flk + d_T_B1_dt*del_time   ! Advance T_B1
 !_nu  
 
   l_snow_exists = H_B1_n_flk.GE.depth_bs-H_B1_min_flk                     &! H_B1 reached depth_bs, or
                .OR. H_B1_n_flk.LT.H_B1_min_flk                              &! H_B1 decreased to zero, or
-               .OR.(T_bot_n_flk-T_B1_n_flk)*(T_bs-T_B1_n_flk).LE.0._ireals   ! there is no T(z) maximum  
+               .OR.(T_bot_n_flk-T_B1_n_flk)*(T_bs-T_B1_n_flk).LE.0.   ! there is no T(z) maximum  
   IF(l_snow_exists) THEN      
     H_B1_n_flk = depth_bs                     ! Set H_B1 to the depth of the thermally active layer
     T_B1_n_flk = T_bs                         ! Set T_B1 to the climatological temperature 
@@ -1105,7 +1135,7 @@ END IF Sediment
 
 ! In case of unstable stratification, force mixing down to the bottom
 flk_str_2 = (T_wML_n_flk-T_bot_n_flk)*flake_buoypar(T_mnw_n_flk)
-IF(flk_str_2.LT.0._ireals) THEN 
+IF(flk_str_2.LT.0.) THEN 
 
 !_dbg
 ! WRITE*, 'FLake: inverse (unstable) stratification !!! '
@@ -1155,7 +1185,7 @@ END SUBROUTINE flake_driver
 ! Version %I% from %G% extracted: %H%
 !------------------------------------------------------------------------------
 
-!SURFEX REAL (KIND = ireals) FUNCTION flake_buoypar (T_water)
+!SURFEX REAL  FUNCTION flake_buoypar (T_water)
 FUNCTION flake_buoypar (T_water)
 
 !------------------------------------------------------------------------------
@@ -1208,11 +1238,11 @@ IMPLICIT NONE
 ! Declarations
  
 !  Input (function argument) 
-REAL (KIND = ireals), INTENT(IN) :: &
+REAL , INTENT(IN) :: &
     T_water                             ! Water temperature [K]  
 
 !  Output (function result) 
-REAL (KIND = ireals)              :: &
+REAL               :: &
     flake_buoypar                       ! Buoyancy parameter [m s^{-2} K^{-1}]  
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -1239,7 +1269,7 @@ END FUNCTION flake_buoypar
 ! Version %I% from %G% extracted: %H%
 !------------------------------------------------------------------------------
 
-!SURFEX REAL (KIND = ireals) FUNCTION flake_snowdensity (h_snow)
+!SURFEX REAL  FUNCTION flake_snowdensity (h_snow)
 FUNCTION flake_snowdensity (h_snow)
 
 !------------------------------------------------------------------------------
@@ -1294,11 +1324,11 @@ IMPLICIT NONE
 ! Declarations
  
 !  Input (function argument) 
-REAL (KIND = ireals), INTENT(IN) :: &
+REAL , INTENT(IN) :: &
     h_snow                              ! Snow thickness [m]  
 
 !  Output (function result) 
-REAL (KIND = ireals)              :: &
+REAL               :: &
     flake_snowdensity                   ! Snow density [kg m^{-3}]  
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -1310,7 +1340,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !  Security. Ensure that the expression in () does not become negative at a very large h_snow.
   IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_SNOWDENSITY',0,ZHOOK_HANDLE)
-  flake_snowdensity = MAX( c_small_flk, (1._ireals - h_snow*tpl_Gamma_rho_S/tpl_rho_w_r) )
+  flake_snowdensity = MAX( c_small_flk, (1. - h_snow*tpl_Gamma_rho_S/tpl_rho_w_r) )
   flake_snowdensity = MIN( tpl_rho_S_max, tpl_rho_S_min/flake_snowdensity )
 IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_SNOWDENSITY',1,ZHOOK_HANDLE)
 
@@ -1327,7 +1357,7 @@ END FUNCTION flake_snowdensity
 ! Version %I% from %G% extracted: %H%
 !------------------------------------------------------------------------------
 
-!SURFEX REAL (KIND = ireals) FUNCTION flake_snowheatconduct (h_snow)
+!SURFEX REAL  FUNCTION flake_snowheatconduct (h_snow)
 FUNCTION flake_snowheatconduct (h_snow)
 
 !------------------------------------------------------------------------------
@@ -1381,11 +1411,11 @@ IMPLICIT NONE
 ! Declarations
  
 !  Input (function argument) 
-REAL (KIND = ireals), INTENT(IN) :: &
+REAL , INTENT(IN) :: &
     h_snow                              ! Snow thickness [m]  
 
 !  Output (function result) 
-REAL (KIND = ireals)              :: &
+REAL               :: &
     flake_snowheatconduct               ! Snow heat conductivity [J m^{-1} s^{-1} K^{-1} = kg m s^{-3} K^{-1}]  
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 

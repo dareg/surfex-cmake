@@ -36,7 +36,6 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_PGD_GRID,   ONLY : XMESHLENGTH
 USE MODD_PGDWORK,    ONLY : NSSO
 !
@@ -44,7 +43,6 @@ USE MODI_GET_LUOUT
 USE MODI_INI_SSOWORK
 !
 USE MODE_GAUSS_INDEX
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -83,29 +81,6 @@ INTEGER, DIMENSION(:), ALLOCATABLE :: IINDEX ! mesh index of all input points
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISSOX  ! X submesh index in their mesh of all input points
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISSOY  ! Y submesh index in their mesh of all input points
 !
-!*    0.3    Declaration of namelist
-!            -----------------------
-!
-CHARACTER(LEN=28)        :: YINDEX_1KM        ! file name for gauss index at 1km
-CHARACTER(LEN=28)        :: YINDEX_10KM       ! file name for gauss index at 10km
-CHARACTER(LEN=28)        :: YINDEX_100KM      ! file name for gauss index at 100km
-CHARACTER(LEN=28)        :: YCOVER            ! file name for cover types
-CHARACTER(LEN=28)        :: YZS               ! file name for orography
-CHARACTER(LEN=28)        :: YSAND             ! file name for sand fraction
-CHARACTER(LEN=28)        :: YCLAY             ! file name for clay fraction
-CHARACTER(LEN=28)        :: YCTI              ! file name for topographic index
-!
-LOGICAL                  :: LIMP_COVER        ! Imposed values for Cover from another PGD file
-LOGICAL                  :: LIMP_ZS           ! Imposed orography from another PGD file
-LOGICAL                  :: LIMP_SAND         ! Imposed maps of Sand from another PGD file
-LOGICAL                  :: LIMP_CLAY         ! Imposed maps of Clay from another PGD file
-LOGICAL                  :: LIMP_CTI          ! Imposed values for topographic index statistics from another PGD file
-!
-LOGICAL                  :: LUNIF_COVER
-LOGICAL                  :: LUNIF_ZS
-LOGICAL                  :: LUNIF_SAND
-LOGICAL                  :: LUNIF_CLAY
-LOGICAL                  :: LUNIF_CTI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------

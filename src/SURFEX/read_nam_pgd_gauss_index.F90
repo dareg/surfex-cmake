@@ -1,9 +1,12 @@
 !     #########
       SUBROUTINE READ_NAM_PGD_GAUSS_INDEX(HPROGRAM,OINDEX_STORE,HINDEX_1KM,HINDEX_10KM,    &
                                             HINDEX_100KM,HCOVER,HZS,HCLAY,HSAND,HCTI,      &
+                                            HPERM,HSOC_TOP,HSOC_SUB,                       & 
                                             OIMP_COVER,OIMP_ZS,OIMP_CLAY,OIMP_SAND,        &
-                                            OIMP_CTI,OUNIF_COVER,OUNIF_ZS,OUNIF_SAND,      &
-                                            OUNIF_CLAY,OUNIF_CTI,OSTOP_PGD                 )  
+                                            OIMP_CTI,OIMP_PERM,OIMP_SOC,                   &
+                                            OUNIF_COVER,OUNIF_ZS,OUNIF_SAND,               &
+                                            OUNIF_CLAY,OUNIF_CTI,OUNIF_PERM,OUNIF_SOC,     &
+                                            OSTOP_PGD                 )  
 !     ####################################################################################
 !!
 !!    PURPOSE
@@ -74,16 +77,23 @@ CHARACTER(LEN=28),   INTENT(OUT)   :: HZS
 CHARACTER(LEN=28),   INTENT(OUT)   :: HCLAY
 CHARACTER(LEN=28),   INTENT(OUT)   :: HSAND
 CHARACTER(LEN=28),   INTENT(OUT)   :: HCTI
+CHARACTER(LEN=28),   INTENT(OUT)   :: HPERM
+CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_TOP
+CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_SUB
 LOGICAL,             INTENT(OUT)   :: OIMP_COVER
 LOGICAL,             INTENT(OUT)   :: OIMP_ZS
 LOGICAL,             INTENT(OUT)   :: OIMP_CLAY
 LOGICAL,             INTENT(OUT)   :: OIMP_SAND
 LOGICAL,             INTENT(OUT)   :: OIMP_CTI
+LOGICAL,             INTENT(OUT)   :: OIMP_PERM
+LOGICAL,             INTENT(OUT)   :: OIMP_SOC
 LOGICAL,             INTENT(OUT)   :: OUNIF_COVER
 LOGICAL,             INTENT(OUT)   :: OUNIF_ZS 
 LOGICAL,             INTENT(OUT)   :: OUNIF_SAND
 LOGICAL,             INTENT(OUT)   :: OUNIF_CLAY
 LOGICAL,             INTENT(OUT)   :: OUNIF_CTI
+LOGICAL,             INTENT(OUT)   :: OUNIF_PERM
+LOGICAL,             INTENT(OUT)   :: OUNIF_SOC
 LOGICAL,             INTENT(OUT)   :: OSTOP_PGD
 !
 !
@@ -138,29 +148,40 @@ REAL                     :: ZRM_PATCH        ! threshold to remove little fracti
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
+CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
 CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
 CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon
+CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon
 CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
 CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
 CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
+CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
 CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
 CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
+CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand from another PGD file
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay from another PGD file
 LOGICAL                  :: LIMP_CTI         ! Imposed values for topographic index statistics from another PGD file
+LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
+LOGICAL                  :: LIMP_SOC         ! Imposed maps of organic carbon
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction
 REAL                     :: XUNIF_RUNOFFB    ! uniform value of subgrid runoff coefficient
 REAL                     :: XUNIF_WDRAIN     ! uniform value of subgrid drainage coefficient
+REAL                     :: XUNIF_PERM       ! uniform value of permafrost distribution
+REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon top soil (kg/m2)
+REAL                     :: XUNIF_SOC_SUB    ! uniform value of organic carbon sub soil (kg/m2)
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil layer thickness for DIF
 !
-! Not yet implemented
+! NO flux
 !
-CHARACTER(LEN=28)        :: YSOM_TOP      ! file name for organic matter
-CHARACTER(LEN=28)        :: YSOM_SUB      ! file name for organic matter
-CHARACTER(LEN=6)         :: YSOMFILETYPE  ! organic matter data file type
-REAL                     :: XUNIF_SOM     ! uniform value of organic matter (%)
-LOGICAL                  :: LIMP_SOM      ! Imposed maps of organic matter
+CHARACTER(LEN=28)        :: YPH           ! file name for pH
+CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+REAL                     :: XUNIF_PH      ! uniform value of pH
+REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 !*    0.6    Declaration of gauss namelist
 !            -----------------------------
@@ -228,10 +249,13 @@ IF(CNATURE=='ISBA')THEN
                             CPHOTO, GTR_ML, ZRM_PATCH,                                 &
                             YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,               &
                             YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,               &
-                            YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,     &
-                            YCTI, YCTIFILETYPE, LIMP_CTI,                              &
+                            YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,           &
+                            XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,     &
+                            YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,               & 
                             YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                 &
-                            YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID        )  
+                            YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,       &
+                            YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,          &
+                            XUNIF_FERT                                )  
 !
 ENDIF
 !
@@ -270,18 +294,25 @@ HZS    = YZS
 HCLAY  = YCLAY
 HSAND  = YSAND
 HCTI   = YCTI
+HPERM  = YPERM
+HSOC_TOP  = YSOC_TOP
+HSOC_SUB  = YSOC_SUB
 !
 OIMP_COVER = LIMP_COVER
 OIMP_ZS    = LIMP_ZS
 OIMP_CLAY  = LIMP_CLAY
 OIMP_SAND  = LIMP_SAND
 OIMP_CTI   = LIMP_CTI
+OIMP_PERM  = LIMP_PERM
+OIMP_SOC   = LIMP_SOC
 !
 OUNIF_COVER = (ANY(XUNIF_COVER/=0.))
 OUNIF_ZS    = (XUNIF_ZS/=XUNDEF)
 OUNIF_SAND  = (XUNIF_SAND/=XUNDEF)
 OUNIF_CLAY  = (XUNIF_CLAY/=XUNDEF)
 OUNIF_CTI   = (LEN_TRIM(YCTI)==0)
+OUNIF_PERM  = (XUNIF_PERM/=XUNDEF)
+OUNIF_SOC   = (XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_TOP/=XUNDEF)
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_GAUSS_INDEX',1,ZHOOK_HANDLE)
 !

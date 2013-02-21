@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE NITRO_DECLINE(HPHOTO, HRESPSL, OTR_ML,                     &
+SUBROUTINE NITRO_DECLINE(HPHOTO, HRESPSL, OTR_ML, KSPINW ,            &
                 PBSLAI_NITRO, PSEFOLD, PGMES, PANMAX, PANDAY,         &
                 PLAT, PLAIMIN, PVEGTYPE, PTAU_WOOD,                   &
                 PANFM, PLAI, PBIOMASS, PRESP_BIOMASS, PBIOMASS_LEAF,  &
@@ -50,16 +50,20 @@ SUBROUTINE NITRO_DECLINE(HPHOTO, HRESPSL, OTR_ML,                     &
 !!      A.L. Gibelin 04/2009 : BIOMASS and RESP_BIOMASS arrays
 !!      A.L. Gibelin 04/2009 : Suppress unused arguments
 !!      A.L. Gibelin 04/2009 : Suppress unused modules and add ONLY
-!!      A.L. Gibelin 04/2009 :  adaptation to SURFEX environment
-!!      A.   Barbu   01/2011 :  modification of active biomass,leaf reservoir (see nitro_decline.f90)
-!!
+!!      A.L. Gibelin 04/2009 : adaptation to SURFEX environment
+!!      A.   Barbu   01/2011 : modification of active biomass,leaf reservoir (see nitro_decline.f90)
+!!      C.   Delire  04/2012 : spinup wood carbon
+!!      B.   Decharme 05/2012 : Optimization
+!!                              ZCC_NITRO and ZBIOMASST_LIM in modd_co2v_par.F90
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,           ONLY : XPI, XDAY
-USE MODD_CO2V_PAR,       ONLY : XPCCO2, XCC_NIT, XCA_NIT, XMC, XMCO2 
+USE MODD_CO2V_PAR,       ONLY : XPCCO2, XCC_NIT, XCA_NIT, XMC, &
+                                XMCO2, XCC_NITRO, XBIOMASST_LIM 
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TREE, NVT_EVER, NVT_CONI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -80,6 +84,7 @@ CHARACTER(LEN=3),     INTENT(IN) :: HRESPSL          ! Soil Respiration
 !                                                    ! 'PRM' = Rivalland PhD Thesis (2003)
 !                                                    ! 'CNT' = CENTURY model (Gibelin 2008)
 LOGICAL,              INTENT(IN) :: OTR_ML           ! new TR
+INTEGER, INTENT(IN)              :: KSPINW           ! wood spinup
 !
 REAL,   DIMENSION(:), INTENT(IN) :: PBSLAI_NITRO     ! ratio of biomass to LAI
 REAL,   DIMENSION(:), INTENT(IN) :: PSEFOLD          ! e-folding time for senescence (s)
@@ -90,21 +95,18 @@ REAL,   DIMENSION(:), INTENT(IN) :: PLAT             ! latitude of each grid poi
 REAL,   DIMENSION(:), INTENT(IN) :: PLAIMIN          ! minimum LAI
 REAL, DIMENSION(:,:), INTENT(IN) :: PVEGTYPE         ! fraction of each vegetation
 REAL,   DIMENSION(:), INTENT(IN) :: PTAU_WOOD        ! residence time in wood (s)
+REAL,   DIMENSION(:), INTENT(IN) :: PLAI             ! leaf area index (LAI) 
 !
 REAL,   DIMENSION(:), INTENT(INOUT) :: PANFM         ! maximum leaf assimilation
-REAL,   DIMENSION(:), INTENT(INOUT) :: PLAI          ! leaf area index (LAI) 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PBIOMASS      ! biomass reservoirs
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PRESP_BIOMASS ! cumulated daily biomass respiration
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PRESP_BIOMASS ! cumulated daily biomass respiration (kgDM m-2 day-1)
 !
 REAL,   DIMENSION(:), INTENT(OUT)   :: PBIOMASS_LEAF ! temporary leaf biomass
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PINCREASE     ! increment of biomass
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PTURNOVER     ! biomass turnover going into litter
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PTURNOVER     ! biomass turnover going into litter (gC m-2 s-1)
 !
 !*      0.2    declarations of local variables
 !
-REAL                            :: ZCC_NITRO       ! c coefficient for nitrogen dilution
-REAL                            :: ZBIOMASST_LIM   ! threshold value of ZBIOMASST 
-!                                                   in nitrogen dilution theory
 REAL                            :: ZBMCOEF
 REAL,    DIMENSION(SIZE(PLAI))  :: ZXSEFOLD        ! e-folding time for senescence corrected (days)
 REAL,    DIMENSION(SIZE(PLAI))  :: ZLAIB_NITRO     ! LAI correction parameter used in sefold calculation
@@ -113,10 +115,16 @@ REAL,    DIMENSION(SIZE(PLAI))  :: ZBIOMASST       ! leaf + active structural bi
 !
 REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZINCREASE
 REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZBIOMASS      ! temporary biomass reservoirs
-REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZDECLINE      ! biomass decline (storage+mortality)
-REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZSTORAGE      ! storage (part of decline)
+REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZDECLINE      ! biomass decline (storage+mortality) (kgDM m-2 day-1)
+REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZSTORAGE      ! storage (part of decline kgDM m-2 day-1)
 REAL, DIMENSION(SIZE(PLAI))                   :: ZMORT_LEAF    ! leaf mortality
+!
+REAL, DIMENSION(SIZE(PLAI))                   :: ZWORK
+LOGICAL, DIMENSION(SIZE(PLAI))                :: LMASK_ASSIM, LMASK_VEGTYP
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+INTEGER :: JSPIN, JI, INI
 !
 ! correspondence between array indices and biomass compartments
 ! LEAF = 1
@@ -132,8 +140,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! -------------------
 !
 IF (LHOOK) CALL DR_HOOK('NITRO_DECLINE',0,ZHOOK_HANDLE)
-ZCC_NITRO           = 0.0
-ZBIOMASST_LIM       = 0.0
+!
+INI = SIZE(PLAI)
+!
 ZXSEFOLD(:)         = 0.0
 ZLAIB_NITRO(:)      = 0.0
 ZBIOMASST(:)        = 0.0
@@ -164,9 +173,7 @@ PBIOMASS_LEAF(:) = PBIOMASS(:,1)
 ! 2 - Evolution of leaf biomass and senescence calculations
 ! ---------------------------------------------------------
 !
-! coef c for biomass in kg/m2
-!
-ZCC_NITRO = XCC_NIT/10.**XCA_NIT
+! coef c for biomass in kg/m2 now in modd_co2v_par.F90 (XCC_NITRO)
 !
 ! LAI correction for shadow effect
 IF (OTR_ML) THEN
@@ -178,8 +185,14 @@ ENDIF
 !
 ! leaf life expectancy
 !
-ZXSEFOLD(:) = PSEFOLD(:) * MIN(1.0, PANFM(:)/PANMAX(:)) * &
-              MAX(((PGMES(:)*1000.)**0.321)*PLAI(:)/ZLAIB_NITRO(:), 1.) / XDAY  
+ZWORK(:) = 0.0
+WHERE(PGMES(:)>0.0)
+      ZWORK(:) = 0.321*LOG(PGMES(:)*1000.)
+      ZWORK(:) = EXP(ZWORK(:))*PLAI(:)/ZLAIB_NITRO(:)
+ENDWHERE
+! before optimization
+!ZXSEFOLD(:)= PSEFOLD(:) * MAX(((PGMES(:)*1000.)**0.321)*PLAI(:)/ZLAIB_NITRO(:), 1.) * ...
+ZXSEFOLD(:) = PSEFOLD(:) * MAX(1.0,ZWORK(:)) * MIN(1.0,PANFM(:)/PANMAX(:)) / XDAY
 !
 ! avoid possible but unlikely division by zero
 !
@@ -213,6 +226,12 @@ ZASSIM(:) = PANDAY(:)*ZBMCOEF
 ! 3 - Evolution of active structural biomass
 ! ------------------------------------------
 !
+ZWORK(:) = 0.0
+WHERE(PBIOMASS_LEAF(:)>0.0)
+      ZWORK(:) = (1.0/(1.0-XCA_NIT))*LOG(PBIOMASS_LEAF(:)/XCC_NITRO)
+      ZWORK(:) = EXP(ZWORK(:))
+ENDWHERE
+!
 WHERE (ZASSIM(:) >= ZDECLINE(:,1))
   !
   ! 3.1 - Growing phase : plant nitrogen decline theory
@@ -220,7 +239,9 @@ WHERE (ZASSIM(:) >= ZDECLINE(:,1))
   ! the growth allometric law is applied
   ! repartition of total biomass    
   !
-  ZBIOMASST(:) = MAX(PBIOMASS_LEAF(:), (PBIOMASS_LEAF(:)/ZCC_NITRO)**(1.0/(1.0-XCA_NIT)))  
+  !before optimization
+  !ZBIOMASST(:)= MAX(PBIOMASS_LEAF(:), (PBIOMASS_LEAF(:)/XCC_NITRO)**(1.0/(1.0-XCA_NIT)))  
+  ZBIOMASST(:) = MAX(PBIOMASS_LEAF(:), ZWORK(:))
   !
   ! active structural biomass increment and storage
   !
@@ -261,10 +282,21 @@ ZSTORAGE (:,1) = MAX(0.0,ZSTORAGE(:,1))
 ! 3.4 - Mass conservation : leaf biomass sensecence must be >= structural storage
 !
 WHERE( ZSTORAGE(:,1) > ZDECLINE(:,1))
-  !
   ZDECLINE(:,2)    = PBIOMASS(:,2) * (1.0 - EXP(-1.0*XDAY/PSEFOLD(:)))
   ZBIOMASST(:)     = PBIOMASS(:,1) + PBIOMASS(:,2) - ZDECLINE(:,2) - PRESP_BIOMASS(:,2)  
-  PBIOMASS_LEAF(:) = ZCC_NITRO * (ZBIOMASST(:)**(1.0-XCA_NIT))
+END WHERE
+!
+ZWORK(:) = 0.0
+WHERE( ZBIOMASST(:) > 0.0)
+      ZWORK(:) = (1.0-XCA_NIT)*LOG(ZBIOMASST(:))
+      ZWORK(:) = EXP(ZWORK(:))
+ENDWHERE
+!
+WHERE( ZSTORAGE(:,1) > ZDECLINE(:,1))
+  !   
+  !before optimization
+  !PBIOMASS_LEAF(:)= ZCC_NITRO * (ZBIOMASST(:)**(1.0-XCA_NIT))
+  PBIOMASS_LEAF(:) = XCC_NITRO * ZWORK(:)
   ZBIOMASS(:,2)    = ZBIOMASST(:)  - PBIOMASS_LEAF(:)
   ZDECLINE(:,1)    = PBIOMASS(:,1) - PBIOMASS_LEAF(:)
   ZSTORAGE(:,1)    = ZBIOMASS(:,2) - PBIOMASS(:,2) + ZDECLINE(:,2) + PRESP_BIOMASS(:,2)  
@@ -291,10 +323,10 @@ IF (HPHOTO=='NIT') THEN
   ZDECLINE(:,3) = ZBIOMASS(:,3)*(1.0-EXP(-1.0*XDAY/PSEFOLD(:)))          
   !
   ! threshold value for leaf biomass and total above ground biomass in nitrogen
-  ! dilution theory
-  ZBIOMASST_LIM = ZCC_NITRO**(1.0/XCA_NIT)
+  ! dilution theory now in modd_co2v_par.F90 (XBIOMASST_LIM)
+  !
   ! emergency deep structural biomass
-  WHERE((ZBIOMASST(:) <= ZBIOMASST_LIM) .AND. (ZXSEFOLD(:) > 1.0))
+  WHERE((ZBIOMASST(:) <= XBIOMASST_LIM) .AND. (ZXSEFOLD(:) > 1.0))
     ZBIOMASS(:,3) = ZBIOMASS(:,3) + ZMORT_LEAF(:)
   END WHERE
   !
@@ -318,10 +350,12 @@ ELSEIF (HPHOTO=='NCB') THEN
     ZDECLINE(:,6) = 0.
   END WHERE
   !
-  !
   ! 4.2.2 - storage (part of decline used as input for other reservoirs)
   !
-  WHERE (ZASSIM(:) >= ZDECLINE(:,1))
+  LMASK_ASSIM (:)=(ZASSIM(:) >= ZDECLINE(:,1))
+  LMASK_VEGTYP(:)=(PVEGTYPE(:,NVT_TREE)+PVEGTYPE(:,NVT_CONI)+PVEGTYPE(:,NVT_EVER)>=0.5)
+  !
+  WHERE (LMASK_ASSIM(:))
     !
     ! Remaining mortality is stored in roots.
     ZINCREASE(:,4)   = ZMORT_LEAF(:)
@@ -333,22 +367,6 @@ ELSEIF (HPHOTO=='NCB') THEN
     ZSTORAGE(:,2)    = ZDECLINE(:,2)
     ZSTORAGE(:,3)    = ZDECLINE(:,3)
     !   
-    WHERE (PVEGTYPE(:,NVT_TREE)+PVEGTYPE(:,NVT_CONI)+PVEGTYPE(:,NVT_EVER) >= 0.5)
-      ! Woody
-      ZSTORAGE(:,4)  = ZDECLINE(:,4)
-      !
-      ZINCREASE(:,4) = ZINCREASE(:,4) + 0.3* (ZSTORAGE(:,2) + ZSTORAGE(:,3))
-      ZINCREASE(:,5) =                  0.7* (ZSTORAGE(:,2) + ZSTORAGE(:,3))
-      ZINCREASE(:,6) = ZSTORAGE(:,4)
-      !
-    ELSE WHERE
-      ! Herbaceous
-      ZSTORAGE(:,4)  = 0.
-      !
-      ZINCREASE(:,4) = ZINCREASE(:,4) + ZSTORAGE(:,2) + ZSTORAGE(:,3)
-      !
-    END WHERE
-    !
   ELSEWHERE
     !
     ! Senescence, a part of mortality is stored in roots, limited by assimilation rate.
@@ -357,7 +375,25 @@ ELSEIF (HPHOTO=='NCB') THEN
     ZSTORAGE(:,1)    = ZSTORAGE(:,1) + ZINCREASE(:,4)
     ZMORT_LEAF(:)    = ZMORT_LEAF(:) - ZINCREASE(:,4)
     !   
-    WHERE (PVEGTYPE(:,NVT_TREE)+PVEGTYPE(:,NVT_CONI)+PVEGTYPE(:,NVT_EVER) >= 0.5)
+  END WHERE
+  !
+  WHERE(LMASK_ASSIM(:).AND.LMASK_VEGTYP(:))
+      ! Woody
+      ZSTORAGE(:,4)  = ZDECLINE(:,4)
+      !
+      ZINCREASE(:,4) = ZINCREASE(:,4) + 0.3* (ZSTORAGE(:,2) + ZSTORAGE(:,3))
+      ZINCREASE(:,5) =                  0.7* (ZSTORAGE(:,2) + ZSTORAGE(:,3))
+      ZINCREASE(:,6) = ZSTORAGE(:,4)
+      !
+  ELSEWHERE(LMASK_ASSIM(:).AND..NOT.LMASK_VEGTYP(:))
+      ! Herbaceous
+      ZSTORAGE(:,4)  = 0.
+      !
+      ZINCREASE(:,4) = ZINCREASE(:,4) + ZSTORAGE(:,2) + ZSTORAGE(:,3)
+      !
+  END WHERE
+  !
+  WHERE (.NOT.LMASK_ASSIM(:).AND.LMASK_VEGTYP(:))
       ! Woody
       ! Senescence, only a part of decline is used as storage
       ZSTORAGE(:,2)  = 0.5*ZDECLINE(:,2)
@@ -367,15 +403,13 @@ ELSEIF (HPHOTO=='NCB') THEN
       ZINCREASE(:,5) = ZSTORAGE(:,2) + ZSTORAGE(:,3)
       ZINCREASE(:,6) = ZSTORAGE(:,4)
       !
-    ELSE WHERE
+  ELSEWHERE(.NOT.LMASK_ASSIM(:).AND..NOT.LMASK_VEGTYP(:))
       !  Herbaceous
       ! Senescence, no storage
       ZSTORAGE(:,2)  = 0.
       ZSTORAGE(:,3)  = 0.
       ZSTORAGE(:,4)  = 0.
       !
-    END WHERE
-    !
   END WHERE
   !
   ZSTORAGE(:,5) = 0.
@@ -423,16 +457,26 @@ ELSEIF (HPHOTO=='NCB') THEN
   !
   ZBIOMASS(:,4) = PBIOMASS(:,4) + ZINCREASE(:,4) - ZDECLINE(:,4) - PRESP_BIOMASS(:,4)
   !
-  WHERE (PVEGTYPE(:,NVT_TREE)+PVEGTYPE(:,NVT_CONI)+PVEGTYPE(:,NVT_EVER) >= 0.5)
-    ! Woody
-    ZBIOMASS(:,5) = PBIOMASS(:,5) + ZINCREASE(:,5) - ZDECLINE(:,5)
-    ZBIOMASS(:,6) = PBIOMASS(:,6) + ZINCREASE(:,6) - ZDECLINE(:,6)
-  ELSEWHERE   
-    ! Herbaceous
-    ZBIOMASS(:,5) = 0.
-    ZBIOMASS(:,6) = 0.
-  END WHERE
-  !
+!
+  ZBIOMASS(:,5) = PBIOMASS(:,5)
+  ZBIOMASS(:,6) = PBIOMASS(:,6)
+!
+  DO JSPIN = 1, KSPINW
+    DO JI = 1,INI
+       IF(LMASK_VEGTYP(JI))THEN
+         !Woody
+         ZBIOMASS(JI,5) = ZBIOMASS(JI,5) + ZINCREASE(JI,5) - ZDECLINE(JI,5)
+         ZBIOMASS(JI,6) = ZBIOMASS(JI,6) + ZINCREASE(JI,6) - ZDECLINE(JI,6)
+         ZDECLINE(JI,5) = ZBIOMASS(JI,5)*(1.0-EXP((-1.0*XDAY)/PTAU_WOOD(JI)))
+         ZDECLINE(JI,6) = ZBIOMASS(JI,6)*(1.0-EXP((-1.0*XDAY)/PTAU_WOOD(JI)))
+       ELSE   
+         !Herbaceous
+         ZBIOMASS(JI,5) = 0.
+         ZBIOMASS(JI,6) = 0.
+       ENDIF
+    ENDDO
+  ENDDO
+!
   PBIOMASS(:,4) = ZBIOMASS(:,4)
   PBIOMASS(:,5) = ZBIOMASS(:,5)
   PBIOMASS(:,6) = ZBIOMASS(:,6)
@@ -440,7 +484,7 @@ ELSEIF (HPHOTO=='NCB') THEN
   PRESP_BIOMASS(:,4) = 0.0
   !
   PINCREASE(:,:) = ZINCREASE(:,:)
-  !  
+!  
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('NITRO_DECLINE',1,ZHOOK_HANDLE)

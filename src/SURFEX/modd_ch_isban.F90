@@ -42,6 +42,8 @@ TYPE CH_ISBA_t
   REAL, DIMENSION(:,:),   POINTER :: XSOILRC_O3 =>NULL()            ! for O3
   LOGICAL                         :: LCH_BIO_FLUX           ! flag for the calculation of
                                                             ! biogenic fluxes
+  LOGICAL                         :: LCH_NO_FLUX            ! flag for the calculation of
+                                                            ! biogenic NO fluxes
   CHARACTER(LEN=6), DIMENSION(:), POINTER :: CSV =>NULL()           ! name of the scalar var.
   INTEGER    :: NSV_CHSBEG, NSV_CHSEND                      ! chemical begin and ending
                                                             ! index of the HSV/CSV array
@@ -81,6 +83,8 @@ REAL, DIMENSION(:,:),   POINTER :: XSOILRC_O3=>NULL()
 !$OMP THREADPRIVATE(XSOILRC_O3)
 LOGICAL, POINTER :: LCH_BIO_FLUX=>NULL()
 !$OMP THREADPRIVATE(LCH_BIO_FLUX)
+LOGICAL, POINTER :: LCH_NO_FLUX=>NULL()
+!$OMP THREADPRIVATE(LCH_NO_FLUX)
 CHARACTER(LEN=6), DIMENSION(:), POINTER :: CSV=>NULL()
 !$OMP THREADPRIVATE(CSV)
 INTEGER, POINTER :: NSV_CHSBEG=>NULL(), NSV_CHSEND=>NULL()
@@ -136,6 +140,7 @@ XDEP=>CH_ISBA_MODEL(KTO)%XDEP
 XSOILRC_SO2=>CH_ISBA_MODEL(KTO)%XSOILRC_SO2
 XSOILRC_O3=>CH_ISBA_MODEL(KTO)%XSOILRC_O3
 LCH_BIO_FLUX=>CH_ISBA_MODEL(KTO)%LCH_BIO_FLUX
+LCH_NO_FLUX=>CH_ISBA_MODEL(KTO)%LCH_NO_FLUX
 CSV=>CH_ISBA_MODEL(KTO)%CSV
 NSV_CHSBEG=>CH_ISBA_MODEL(KTO)%NSV_CHSBEG
 NSV_CHSEND=>CH_ISBA_MODEL(KTO)%NSV_CHSEND
@@ -165,6 +170,7 @@ ALLOCATE(CH_ISBA_MODEL(KMODEL))
 CH_ISBA_MODEL(:)%CCHEM_SURF_FILE=' '
 CH_ISBA_MODEL(:)%CCH_DRY_DEP=' '
 CH_ISBA_MODEL(:)%LCH_BIO_FLUX=.FALSE.
+CH_ISBA_MODEL(:)%LCH_NO_FLUX=.FALSE.
 CH_ISBA_MODEL(:)%NBEQ=0
 CH_ISBA_MODEL(:)%NDSTEQ=0
 CH_ISBA_MODEL(:)%NAEREQ=0

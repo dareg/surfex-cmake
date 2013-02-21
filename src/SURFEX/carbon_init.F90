@@ -30,6 +30,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    15/06/09
+!!      B. Decharme   2012    variable must be allocated once by run
 !!
 !-------------------------------------------------------------------------------
 !
@@ -60,7 +61,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('CARBON_INIT',0,ZHOOK_HANDLE)
 !
 !*	 1.     ALLOCATION
-!	
+!
+IF (ALLOCATED(XCN)) THEN
+  IF (LHOOK) CALL DR_HOOK('CARBON_INIT',1,ZHOOK_HANDLE)
+  RETURN
+END IF
+!
 ALLOCATE(XCN(KNBIOMASS))
 ALLOCATE(XLC(KNBIOMASS))
 ALLOCATE(XFRAC_LITTER(KNBIOMASS,KNLITTER))
@@ -97,8 +103,8 @@ XFRAC_LITTER(:,2) = 1. - XFRAC_LITTER(:,1)
 !               ----------------
 !        
 ! Residence times in litter pools (s)
-XTAU_LITTER(1) = .066*365.*86400.
-XTAU_LITTER(2) = .245*365.*86400.
+XTAU_LITTER(1) = 0.066*365.0*86400.0
+XTAU_LITTER(2) = 0.245*365.0*86400.0
 !  
 ! Fraction of litter decomposition flux that goes into soil.
 ! The rest goes into the atmosphere
@@ -106,24 +112,24 @@ XFRAC_SOILCARB(:,:,:) = XUNDEF
 ! 
 ! Structural litter: lignin fraction goes into slow pool + respiration,
 !                    rest into active pool + respiration.
-XFRAC_SOILCARB(2,1,1) = .55
-XFRAC_SOILCARB(2,1,2) = .45
-XFRAC_SOILCARB(2,2,1) = .7
-XFRAC_SOILCARB(2,2,2) = .7
+XFRAC_SOILCARB(2,1,1) = 0.55
+XFRAC_SOILCARB(2,1,2) = 0.45
+XFRAC_SOILCARB(2,2,1) = 0.70
+XFRAC_SOILCARB(2,2,2) = 0.70
 !  
 ! Metabolic litter: all goes into active pool + respiration,
 !                   nothing into slow or passive pool.
-XFRAC_SOILCARB(1,1,1) = .45
-XFRAC_SOILCARB(1,1,2) = .45
+XFRAC_SOILCARB(1,1,1) = 0.45
+XFRAC_SOILCARB(1,1,2) = 0.45
 !   
 !
 !*	 4.     SOIL CONSTANTS
 !               --------------
 !  
 ! Residence times in carbon pools (s)
-XTAU_SOILCARB(1) = .149*365.*86400.
-XTAU_SOILCARB(2) = 5.48*365.*86400.
-XTAU_SOILCARB(3) = 241.*365.*86400.
+XTAU_SOILCARB(1) = 0.149*365.0*86400.0
+XTAU_SOILCARB(2) = 5.480*365.0*86400.0
+XTAU_SOILCARB(3) = 241.0*365.0*86400.0
 !
 IF (LHOOK) CALL DR_HOOK('CARBON_INIT',1,ZHOOK_HANDLE)
 !

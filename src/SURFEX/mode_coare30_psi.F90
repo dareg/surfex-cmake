@@ -46,8 +46,6 @@ FUNCTION PSIFUNCTU(PZL) RESULT(PSIFCTU)
 !
 !       MODIFICATIONS
 !       -------------
-!        M.Hamrud      01-Oct-2003 CY28 Cleaning
-!        M.Hamrud      01-Oct-2003 CY28 Cleaning
 !-------------------------------------------------------------------------------
 IMPLICIT NONE
 !

@@ -47,7 +47,7 @@ USE MODD_DIAG_SURF_ATM_n,  ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET, LCOEF,         
                                   XAVG_FMUC, XAVG_FMVC, XAVG_T2M_MIN,            &
                                   XAVG_T2M_MAX, XAVG_LEIC, XDIAG_TRAD,           &
                                   XDIAG_EMIS, XAVG_HU2M_MIN, XAVG_HU2M_MAX,      &
-                                  XAVG_WIND10M, XAVG_WIND10M_MAX  
+                                  XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : CGRID
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -72,7 +72,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YNUM
 !
@@ -115,6 +115,10 @@ IF (N2M>=1.OR.LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   YRECFM='EMIS'
   YCOMMENT='X_Y_'//YRECFM//' (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDIAG_EMIS(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='SFCO2'
+  YCOMMENT='X_Y_'//YRECFM//' (KG/M2/S)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SFCO2(:),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
 !

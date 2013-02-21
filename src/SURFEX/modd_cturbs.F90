@@ -19,7 +19,7 @@
 !!
 !!     AUTHOR
 !!     ------
-!1       Joan Cuxart         * INM  and Meteo-France *
+!1       Joan Cuxart         * Meteo-France *
 !!
 !!     MODIFICATIONS
 !!     -------------

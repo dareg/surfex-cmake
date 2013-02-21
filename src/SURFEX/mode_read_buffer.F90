@@ -953,5 +953,85 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_T_TEB',1,ZHOOK_HANDLE)
 !--------------------------------------------------------------------------------
 !
 END SUBROUTINE READ_BUFFER_T_TEB
-
+!-------------------------------------------------------------------
+!
+!     #######################
+      SUBROUTINE READ_BUFFER_TF_TEB(KLUOUT,HINMODEL,PTI,PFIELD,PD)
+!     #######################
+!
+!
+USE MODD_GRID_BUFFER,  ONLY : NNI
+USE MODD_SURF_PAR,   ONLY : XUNDEF
+!
+USE MODI_READ_BUFFER
+!
+IMPLICIT NONE
+!
+!* dummy arguments
+!  ---------------
+!
+INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
+CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+REAL,                 INTENT(IN)    :: PTI       ! internal temperature
+REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
+REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
+!
+!
+!* local variables
+!  ---------------
+!
+REAL,    DIMENSION(:), POINTER    :: ZFIELD    ! field to read
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!--------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_TF_TEB',0,ZHOOK_HANDLE)
+WRITE  (KLUOUT,'(A)') ' | Reading soil temperature'
+!
+!--------------------------------------------------------------------------------
+!
+! 1.  Allocate soil temperature profile
+!     ---------------------------------
+!
+ALLOCATE(PFIELD(NNI,3))
+ALLOCATE(PD    (NNI,3))
+!
+!--------------------------------------------------------------------------------
+!
+! 2.  use building internal temperature as first level
+!     -----------------------
+!
+ALLOCATE (ZFIELD(NNI))
+!
+PFIELD(:,1) = PTI
+PD    (:,1) = 0.
+DEALLOCATE(ZFIELD)
+!
+!--------------------------------------------------------------------------------
+!
+! 3.  Deep soil temperature
+!     ---------------------
+!
+ALLOCATE (ZFIELD(NNI))
+CALL READ_BUFFER_T2(KLUOUT,HINMODEL,ZFIELD)
+!
+PFIELD(:,2) = ZFIELD(:)
+PD    (:,2) = 0.5         ! deep temperature depth assumed at half of the floor
+DEALLOCATE(ZFIELD)
+!
+!--------------------------------------------------------------------------------
+!
+! 4.  Assumes uniform temperature profile below
+!     -----------------------------------------
+!
+PFIELD(:,3) = PFIELD(:,2)
+PD    (:,3) = 1.          ! temperature profile down to depth of the floor
+!
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_TF_TEB',1,ZHOOK_HANDLE)
+!
+!--------------------------------------------------------------------------------
+!
+END SUBROUTINE READ_BUFFER_TF_TEB
+!-------------------------------------------------------------------
 END MODULE MODE_READ_BUFFER

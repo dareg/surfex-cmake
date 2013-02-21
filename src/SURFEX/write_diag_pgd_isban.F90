@@ -42,7 +42,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA,                       
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
                               XPATCH, XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,        &
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
-                              XWSAT, XWFC, XWWILT, XRUNOFFD   
+                              XWSAT, XWFC, XWWILT, XRUNOFFD, CSOC, XFRACSOC   
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -71,7 +71,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,3)) :: ZWORK ! Work array
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YLVLV, YPAS
 !
@@ -117,10 +117,11 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Fraction for each patch
 !
-YRECFM='PATCH'
-YCOMMENT='fraction for each patch (-)'
-!
-CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
+IF(.NOT.LFANOCOMPACT.OR.LPREP)THEN
+  YRECFM='PATCH'
+  YCOMMENT='fraction for each patch (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
+ENDIF
 !-------------------------------------------------------------------------------
 !
 !* Soil depth for each patch
@@ -190,6 +191,20 @@ IF(CISBA=='DIF')THEN
      CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
   END DO
 !
+!* SOC fraction for each layer
+!
+  IF(CSOC=='SGH')THEN
+    DO JL=1,SIZE(XDG,2)
+     IF (JL<10) THEN
+       WRITE(YRECFM,FMT='(A7,I1)') 'FRACSOC',JL
+     ELSE
+       WRITE(YRECFM,FMT='(A7,I2)') 'FRACSOC',JL          
+     ENDIF  
+     YCOMMENT='SOC fraction by layer (-)'
+     CALL WRITE_SURF(HPROGRAM,YRECFM,XFRACSOC(:,JL),IRESP,HCOMMENT=YCOMMENT)
+    END DO
+  ENDIF
+!
 ENDIF        
 !
 !-------------------------------------------------------------------------------
@@ -243,7 +258,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0REL(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Runoff soil ice depth for each patch
 !
-IF(CHORT=='SGH')THEN
+IF(CHORT=='SGH'.AND.CISBA/='DIF')THEN
   YRECFM='DICE'
   YCOMMENT='soil ice depth for runoff (m)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XD_ICE(:,:),IRESP,HCOMMENT=YCOMMENT)
@@ -256,7 +271,7 @@ ENDIF
 DO JL=1,SIZE(XVEGTYPE_PATCH,2)
   WRITE(YPAS,'(I2)') JL 
   YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-  WRITE(YRECFM,FMT='(A11)') 'VEGTYPE_P'//YLVLV
+  WRITE(YRECFM,FMT='(A9)') 'VEGTY_P'//YLVLV
   YCOMMENT='fraction of each vegetation type for each patch'//' (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XVEGTYPE_PATCH(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
 END DO
@@ -295,19 +310,19 @@ IF (LSURF_DIAG_ALBEDO) THEN
 !* Soil albedos
 !
 !
-   YRECFM='ALBNIR_SOIL'
+   YRECFM='ALBNIR_S'
    YCOMMENT='soil near-infra-red albedo (-)'
    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBNIR_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
-   YRECFM='ALBVIS_SOIL'
+   YRECFM='ALBVIS_S'
    YCOMMENT='soil visible albedo (-)'
    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBVIS_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
-   YRECFM='ALBUV_SOIL'
+   YRECFM='ALBUV_S'
    YCOMMENT='soil UV albedo (-)'
    CALL WRITE_SURF(HPROGRAM,YRECFM,XALBUV_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !

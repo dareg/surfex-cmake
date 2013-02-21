@@ -38,27 +38,23 @@
 !              ------------
 !
 USE MODD_SURF_PAR,          ONLY : XUNDEF
-USE MODD_TEB_GARDEN_n,      ONLY : NGROUND_LAYER, CHORT, CPHOTO, TSNOW, XABC
+USE MODD_TEB_VEG_n,         ONLY : CHORT, CPHOTO
+USE MODD_TEB_GARDEN_n,      ONLY : NGROUND_LAYER, TSNOW, XABC
 USE MODD_TYPE_DATE_SURF
-USE MODD_AGRI_GARDEN,       ONLY : LAGRIP
 USE MODD_DIAG_SURF_ATM_n,   ONLY : LREAD_BUDGETC
 USE MODD_DIAG_TEB_n,        ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS
-USE MODD_DIAG_MISC_TEB_n,   ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC,&
-   LRESET_BUDGETC, LSURF_MISC_BUDGET  
+USE MODD_DIAG_MISC_TEB_n,   ONLY : LSURF_MISC_BUDGET  
 USE MODD_DIAG_TEB_GARDEN_n, ONLY : XRN, XH, XGFLUX, XLEI, XRI, XCD, XCDN, XCH, XCE, &
-   XTS, XTSRAD, XFAPAR, XFAPIR, XFAPAR_BS, XFAPIR_BS, XDFAPARC, XDFAPIRC,    &
-   XZ0_WITH_SNOW, XZ0H_WITH_SNOW, XZ0EFF, XQS,      &
-   XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV,&
-   XLEG, XLEGI, XLEV, XLES, XLER, XLETR, XEVAP,     &
-   XDRAIN, XRUNOFF, XHORT, XDRIP, XMELT,            &
-   XRRVEG, XHV,  XSWI, XTSWI, XTWSNOW,              &
-   XTDSNOW, XSEUIL, XGPP, XRESP_AUTO, XRESP_ECO,    &
-   XALBT, XEMIST, XSNOWFREE_ALB,    &
-   XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,           &
-   XCG, XC1, XC2, XWGEQ, XCT, XRS, XHU, XHUG,       &
-   XRESTORE, XUSTAR, XDLAI_EFFC, XIACAN, &
-   XSNOWTEMP, XSNOWLIQ, XSNOWDZ, XSNOWHMASS,        &
-   XMELTADV, XIACAN  
+                                   XTS, XTSRAD, XFAPAR, XFAPIR, XFAPAR_BS, XFAPIR_BS, &
+                                   XDFAPARC, XDFAPIRC, XZ0_WITH_SNOW, XZ0H_WITH_SNOW, &
+                                   XZ0EFF, XQS, XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
+                                   XFMU, XFMV, XLEG, XLEGI, XLEV, XLES, XLER, XLETR, &
+                                   XEVAP, XDRAIN, XRUNOFF, XHORT, XDRIP, XMELT, XRRVEG, &
+                                   XHV,  XSWI, XTSWI, XTWSNOW, XTDSNOW, XSEUIL, XGPP, &
+                                   XRESP_AUTO, XRESP_ECO, XALBT, XEMIST, XCG, XC1, XC2, &
+                                   XWGEQ, XCT, XRS, XHU, XHUG, XRESTORE, XUSTAR, XDLAI_EFFC, & 
+                                   XIACAN, XSNOWTEMP, XSNOWLIQ, XSNOWDZ, XSNOWHMASS,        &
+                                   XMELTADV, XIACAN, XIRRIG_FLUX  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -76,7 +72,7 @@ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16) :: YREC           ! Name of the article to be read
+CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -115,6 +111,7 @@ ALLOCATE(XHORT   (KLU))
 ALLOCATE(XDRIP   (KLU)) 
 ALLOCATE(XRRVEG  (KLU)) 
 ALLOCATE(XMELT   (KLU)) 
+ALLOCATE(XIRRIG_FLUX(KLU))
 !
 XLEI        = XUNDEF
 XLEG        = XUNDEF
@@ -130,6 +127,7 @@ XHORT       = XUNDEF
 XDRIP       = XUNDEF
 XRRVEG      = XUNDEF
 XMELT       = XUNDEF
+XIRRIG_FLUX = XUNDEF
 !
 ALLOCATE(XCG     (KLU)) 
 ALLOCATE(XC1     (KLU)) 
@@ -178,16 +176,10 @@ XMELTADV    = XUNDEF
 ALLOCATE(XHV     (KLU))
 ALLOCATE(XALBT   (KLU)) 
 ALLOCATE(XEMIST  (KLU)) 
-ALLOCATE(XSNOWFREE_ALB           (KLU)) 
-ALLOCATE(XSNOWFREE_ALB_VEG       (KLU)) 
-ALLOCATE(XSNOWFREE_ALB_SOIL      (KLU))
 !
 XHV               = XUNDEF
 XALBT             = XUNDEF
 XEMIST            = XUNDEF
-XSNOWFREE_ALB     = XUNDEF
-XSNOWFREE_ALB_VEG = XUNDEF
-XSNOWFREE_ALB_SOIL= XUNDEF
 !
 ALLOCATE(XFAPAR    (KLU))
 ALLOCATE(XFAPIR    (KLU))
@@ -296,9 +288,9 @@ XRESP_ECO    = XUNDEF
   ALLOCATE(XSEUIL(KLU))
   !
   XSEUIL         = XUNDEF
-IF (LHOOK) CALL DR_HOOK('DIAG_TEB_GARDEN_INIT_N',1,ZHOOK_HANDLE)
 !END IF
 !
+IF (LHOOK) CALL DR_HOOK('DIAG_TEB_GARDEN_INIT_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !

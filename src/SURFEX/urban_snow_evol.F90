@@ -1,7 +1,7 @@
 !     #########
-    SUBROUTINE URBAN_SNOW_EVOL(                                               &
+    SUBROUTINE URBAN_SNOW_EVOL(                                                 &
                        PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,                         &
-                       PTS_ROOF,PTS_ROAD,PTS_WALL, PTS_GARDEN,                  &
+                       PTS_ROOF,PTS_ROAD,PTS_WALL_A, PTS_WALL_B,                &
                        HSNOW_ROOF,                                              &
                        PWSNOW_ROOF, PTSNOW_ROOF, PRSNOW_ROOF, PASNOW_ROOF,      &
                        PTSSNOW_ROOF, PESNOW_ROOF,                               &
@@ -19,9 +19,8 @@
                        PMELT_ROOF,                                              &
                        PRNSNOW_ROAD, PHSNOW_ROAD, PLESNOW_ROAD, PGSNOW_ROAD,    &
                        PMELT_ROAD,                                              &
-                       PLW_W_TO_NR , PLW_R_TO_NR , PLW_G_TO_NR ,                &
-                       PLW_NR_TO_NR, PLW_S_TO_NR,                               &
-                       PDQS_SNOW_ROOF, PDQS_SNOW_ROAD                           )  
+                       PLW_WA_TO_NR , PLW_WB_TO_NR, PLW_S_TO_NR, PLW_WIN_TO_NR, &
+                       PDQS_SNOW_ROOF, PDQS_SNOW_ROAD, PT_WIN1                  )  
 !   ##########################################################################
 !
 !!****  *URBAN_SNOW_EVOL*  
@@ -75,6 +74,8 @@ USE MODE_SURF_SNOW_FRAC
 !
 USE MODI_SNOW_COVER_1LAYER
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -88,8 +89,8 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PQ_LOWCAN  ! LOWCAN air specific humidity
 REAL, DIMENSION(:),   INTENT(IN)    :: PU_LOWCAN  ! LOWCAN hor. wind
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_ROOF   ! roof surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_ROAD   ! road surface temperature
-REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL   ! wall surface temperature
-REAL, DIMENSION(:),   INTENT(IN)    :: PTS_GARDEN ! green area surface temperature
+REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL_A ! wall surface temperature
+REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL_B ! wall surface temperature
 CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ROOF ! snow roof scheme
 !                                                 ! 'NONE'
 !                                                 ! 'D95 '
@@ -130,7 +131,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZ_LOWCAN  ! height of forcing
 REAL, DIMENSION(:), INTENT(IN)    :: PDN_ROOF          ! snow-covered roof frac.
 REAL, DIMENSION(:), INTENT(IN)    :: PABS_SW_SNOW_ROOF ! SW absorbed by roof snow
 REAL, DIMENSION(:), INTENT(OUT)   :: PABS_LW_SNOW_ROOF ! absorbed IR rad by snow on roof
-REAL, DIMENSION(:), INTENT(IN)    :: PDN_ROAD          ! snow-covered road frac.
+REAL, DIMENSION(:), INTENT(INOUT) :: PDN_ROAD          ! snow-covered road frac.
 REAL, DIMENSION(:), INTENT(IN)    :: PABS_SW_SNOW_ROAD ! SW absorbed by road snow
 REAL, DIMENSION(:), INTENT(OUT)   :: PABS_LW_SNOW_ROAD ! absorbed IR rad by snow on road
 !
@@ -145,13 +146,13 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PLESNOW_ROAD ! latent heat flux over snow
 REAL, DIMENSION(:), INTENT(OUT)   :: PGSNOW_ROAD  ! flux under the snow
 REAL, DIMENSION(:), INTENT(OUT)   :: PMELT_ROAD   ! snow melt
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_W_TO_NR         ! LW contrib. wall       -> road(snow)
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_R_TO_NR         ! LW contrib. road       -> road(snow)
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_G_TO_NR         ! LW contrib. green      -> road(snow)
-REAL, DIMENSION(:), INTENT(IN)    :: PLW_NR_TO_NR        ! LW contrib. road(snow) -> road(snow)
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_WA_TO_NR        ! LW contrib. wall       -> road(snow)
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_WB_TO_NR        ! LW contrib. wall       -> road(snow)
 REAL, DIMENSION(:), INTENT(IN)    :: PLW_S_TO_NR         ! LW contrib. sky        -> road(snow)
+REAL, DIMENSION(:), INTENT(IN)    :: PLW_WIN_TO_NR       ! LW contrib. win       -> road(snow)
 REAL, DIMENSION(:), INTENT(OUT)   :: PDQS_SNOW_ROOF ! Heat storage in snowpack on roofs
 REAL, DIMENSION(:), INTENT(OUT)   :: PDQS_SNOW_ROAD ! Heat storage in snowpack on roads
+REAL, DIMENSION(:), INTENT(IN)    :: PT_WIN1        ! Window surface temperature
 !
 !*      0.2    declarations of local variables
 !
@@ -165,6 +166,8 @@ REAL, DIMENSION(SIZE(PTA)) :: ZLW2_ROOF   ! 4th power of
 
 REAL, DIMENSION(SIZE(PTA)) :: ZSR_ROOF    ! snow fall on roof snow (kg/s/m2 of snow)
 REAL, DIMENSION(SIZE(PTA)) :: ZSR_ROAD    ! snow fall on road snow (kg/s/m2 of snow)
+!
+REAL, DIMENSION(SIZE(PTA)) :: ZT_SKY      ! sky temperature
 !
 ! flags to call to snow routines
 !
@@ -251,27 +254,28 @@ END IF
 !              -----
 !
 IF ( GSNOW_ROAD ) THEN
+  !
+  ZT_SKY(:) = (PLW_RAD(:)/XSTEFAN)**0.25
 !
-  ZLW1_ROAD(:) =  PLW_W_TO_NR (:) * PTS_WALL  (:)**4 &
-                  + PLW_R_TO_NR (:) * PTS_ROAD  (:)**4 &
-                  + PLW_G_TO_NR (:) * PTS_GARDEN(:)**4 &
-                  + PLW_S_TO_NR (:) * PLW_RAD   (:)  
-  ZLW2_ROAD(:) =  PLW_NR_TO_NR(:)
-!
-!* The global amount of snow on roads is supposed located on a
-!  fraction of the road surface. All computations are then
-!  done only for each m2 of snow, and not for each m2 of road.
-!
+  ZLW1_ROAD(:) = PLW_S_TO_NR  (:) * (ZT_SKY    (:) - PTSNOW_ROAD(:,1)) &
+               + PLW_WA_TO_NR (:) * (PTS_WALL_A(:) - PTSNOW_ROAD(:,1)) &
+               + PLW_WB_TO_NR (:) * (PTS_WALL_B(:) - PTSNOW_ROAD(:,1)) &
+               + PLW_WIN_TO_NR(:) * (PT_WIN1   (:) - PTSNOW_ROAD(:,1))
+  ZLW2_ROAD(:) =  0.0
+  !
+  !* The global amount of snow on roads is supposed located on a
+  !  fraction of the road surface. All computations are then
+  !  done only for each m2 of snow, and not for each m2 of road.
+  !
   DO JL=1,SIZE(PWSNOW_ROAD,2)
     WHERE (PDN_ROAD(:)>0.) PWSNOW_ROAD(:,JL) = PWSNOW_ROAD(:,JL) / PDN_ROAD(:)
   END DO
   ZSR_ROAD=0.
   WHERE (PDN_ROAD(:)>0.) ZSR_ROAD   (:) = PSR   (:) / PDN_ROAD(:)
-!
-!
-!* call to snow mantel scheme
-!
-  IF (HSNOW_ROAD=='1-L')                                                      &
+  !
+  !* call to snow mantel scheme
+  !
+  IF (HSNOW_ROAD=='1-L')                                                        &
     CALL SNOW_COVER_1LAYER(PTSTEP, XANSMIN_ROAD, XANSMAX_ROAD, XANS_TODRY_ROAD, &
                            XRHOSMIN_ROAD, XRHOSMAX_ROAD, XANS_T_ROAD, .FALSE.,  &
                            0., XWCRN_ROAD,                                      &
@@ -290,6 +294,8 @@ IF ( GSNOW_ROAD ) THEN
   DO JL=1,SIZE(PWSNOW_ROAD,2)
     PWSNOW_ROAD(:,JL) = PWSNOW_ROAD(:,JL) * PDN_ROAD(:)
   END DO
+!
+  WHERE (PTSNOW_ROAD(:,1) .EQ. XUNDEF) PDN_ROAD(:) = 0.0
 !
 END IF
 IF (LHOOK) CALL DR_HOOK('URBAN_SNOW_EVOL',1,ZHOOK_HANDLE)

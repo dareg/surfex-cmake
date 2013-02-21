@@ -46,8 +46,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
-CHARACTER(LEN=16), INTENT(IN)  :: HRECIN   ! name of field to be read
-CHARACTER(LEN=16), INTENT(OUT) :: HRECOUT  ! name of field to be read is old file
+CHARACTER(LEN=12), INTENT(IN)  :: HRECIN   ! name of field to be read
+CHARACTER(LEN=12), INTENT(OUT) :: HRECOUT  ! name of field to be read is old file
 !
 !
 !*       0.2   Declarations of local variables

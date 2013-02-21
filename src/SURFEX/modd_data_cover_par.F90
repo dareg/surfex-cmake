@@ -65,19 +65,6 @@ INTEGER                                :: NVT_PARK
 !                         C3 CULTures types, NO vegetation, ROCKs,
 !                         IRRigated crops, irrigated PARKs gardens or peat bogs)
 !
-INTEGER                                :: NURBTYPE
-! number of vegetation types
-!
-INTEGER                                :: NUR_DENSE
-INTEGER                                :: NUR_SUB
-INTEGER                                :: NUR_ZIC
-INTEGER                                :: NUR_PORT
-INTEGER                                :: NUR_RAR
-INTEGER                                :: NUR_AIRPT
-INTEGER                                :: NUR_MINES
-INTEGER                                :: NUR_PARK
-INTEGER                                :: NUR_SPORT
-!
 !---------------------------------------------------------------------------------
 !
 ! Ecosystem corresponding to bare soil or permanent snow
@@ -105,6 +92,7 @@ INTEGER                                :: NTILESFC = 4
 INTEGER                                :: NDATA_ROOF_LAYER
 INTEGER                                :: NDATA_ROAD_LAYER
 INTEGER                                :: NDATA_WALL_LAYER
+INTEGER                                :: NDATA_FLOOR_LAYER
 !
 !---------------------------------------------------------------------------------
 !* names of all ecosystems

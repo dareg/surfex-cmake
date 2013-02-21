@@ -33,16 +33,14 @@ IMPLICIT NONE
 
 TYPE IO_BUFF_t
 
-CHARACTER(LEN=16), DIMENSION(3000) :: CREC   ! list of records already read/written
+CHARACTER(LEN=12), DIMENSION(3000) :: CREC   ! list of records already read/written
 INTEGER                            :: NREC   ! number of records read/written
 
 END TYPE IO_BUFF_t
 !
 TYPE(IO_BUFF_t), ALLOCATABLE, TARGET, SAVE :: IO_BUFF_MODEL(:)
-CHARACTER(LEN=16), DIMENSION(:),    POINTER :: CREC=> NULL()
-!$OMP THREADPRIVATE(CREC)
+CHARACTER(LEN=12), DIMENSION(:),    POINTER :: CREC=> NULL()
 INTEGER,                            POINTER :: NREC=> NULL()
-!$OMP THREADPRIVATE(NREC)
 !
 CONTAINS
 SUBROUTINE IO_BUFF_GOTO_MODEL(KFROM, KTO, LKFROM)

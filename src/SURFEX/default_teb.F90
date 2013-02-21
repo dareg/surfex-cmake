@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DEFAULT_TEB(HZ0H,PTSTEP,POUT_TSTEP)
+      SUBROUTINE DEFAULT_TEB(HZ0H,PTSTEP,POUT_TSTEP, HCH_BEM)
 !     ########################################################################
 !
 !!****  *DEFAULT_TEB* - routine to set default values for the configuration for TEB scheme
@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!!      modified    08/2012 G. Pigeon, add HCH_BEM for building conv. coef. 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -46,6 +47,7 @@ IMPLICIT NONE
 !
 !
 CHARACTER(LEN=6),  INTENT(OUT) :: HZ0H       ! TEB option for z0h roof & road
+CHARACTER(LEN=5),  INTENT(OUT) :: HCH_BEM    ! TEB option building conv. coef.
 REAL,              INTENT(OUT) :: PTSTEP     ! time step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time step for writing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -59,6 +61,7 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_TEB',0,ZHOOK_HANDLE)
 HZ0H       = 'MASC95'
 PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
+HCH_BEM    = ''
 IF (LHOOK) CALL DR_HOOK('DEFAULT_TEB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -90,6 +90,20 @@ $(OBJS0): OPT = $(OPT0)
 
 endif
 ##########################################################
+#           Source TOPD                                 #
+##########################################################
+#
+DIR_TOPD += LIB/TOPD
+#CPPFLAGS_TOPD=
+#
+ifdef DIR_TOPD
+DIR_MASTER += $(DIR_TOPD)
+CPPFLAGS   += $(CPPFLAGS_TOPD)
+
+$(OBJS0): OPT = $(OPT0) 
+
+endif
+##########################################################
 #           Source LFI                                   #
 ##########################################################
 DIR_LFIC      += LIB/LFI_COMPRESS/src
@@ -433,8 +447,8 @@ NSOURCE=8
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE
-#PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST MAIN_CARB_SPINUP MAIN_WOOD_SPINUP
+PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST
+#PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST
 endif
 #
 ifeq "$(VER_USER)" "FORC"

@@ -37,13 +37,13 @@
 !
 USE MODD_CSTS,              ONLY : XDAY
 USE MODD_SURF_PAR,          ONLY : XUNDEF
+USE MODD_ISBA_PAR,          ONLY : XOPTIMGRID, NOPTIMLAYER
 USE MODD_DATA_COVER_PAR,    ONLY : NVT_TREE, NVT_CONI, NVT_EVER, NVT_C3, &
                                      NVT_C4, NVT_IRR, NVT_TROG, NVT_GRAS,  &
                                      NVT_PARK, NVT_ROCK, NVT_NO, NVT_SNOW, &
                                      NVEGTYPE  
 USE MODD_TEB_GRID_n,        ONLY : NDIM
-USE MODD_TEB_GARDEN_n,      ONLY : NPATCH, NGROUND_LAYER,                                       &
-                                     CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG,                          &
+USE MODD_TEB_GARDEN_n,      ONLY : NGROUND_LAYER, CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG,     &
                                      XSAND, XCLAY  
 USE MODD_DATA_TEB_GARDEN_n, ONLY : NTIME,                                                       &
                                      XDATA_FRAC_HVEG, XDATA_FRAC_LVEG, XDATA_FRAC_NVEG,           &
@@ -66,7 +66,7 @@ USE MODI_Z0V_FROM_LAI
 USE MODI_EMIS_FROM_VEG
 USE MODI_DRY_WET_SOIL_ALBEDOS
 USE MODI_SOIL_ALBEDO
-!
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -82,9 +82,9 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !              -------------------------------
 !
 INTEGER                               :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=16)                     :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
-INTEGER                               :: JI             ! loop index
+INTEGER                               :: JI, JLAYER     ! loop index
 INTEGER                               :: JTIME          ! loop index
 !
 REAL, DIMENSION(NDIM,3)               :: ZDATA_RSMIN
@@ -171,21 +171,21 @@ END DO
 !*       2.    Definition of ISBA parameters
 !              -----------------------------
 !
-ALLOCATE(XDATA_LAI        (NDIM,NPATCH,NTIME))
-ALLOCATE(XDATA_VEG        (NDIM,NPATCH,NTIME))
-ALLOCATE(XDATA_RSMIN      (NDIM,NPATCH))
-ALLOCATE(XDATA_GAMMA      (NDIM,NPATCH))
-ALLOCATE(XDATA_WRMAX_CF   (NDIM,NPATCH))
-ALLOCATE(XDATA_RGL        (NDIM,NPATCH))
-ALLOCATE(XDATA_CV         (NDIM,NPATCH))
-ALLOCATE(XDATA_DG         (NDIM,NGROUND_LAYER,NPATCH))
-ALLOCATE(XDATA_ROOTFRAC   (NDIM,NGROUND_LAYER,NPATCH))
-ALLOCATE(XDATA_DICE       (NDIM,NPATCH))
-ALLOCATE(XDATA_Z0         (NDIM,NPATCH,NTIME))
-ALLOCATE(XDATA_Z0_O_Z0H   (NDIM,NPATCH))
-ALLOCATE(XDATA_ALBNIR_VEG (NDIM,NPATCH))
-ALLOCATE(XDATA_ALBVIS_VEG (NDIM,NPATCH))
-ALLOCATE(XDATA_ALBUV_VEG  (NDIM,NPATCH))
+ALLOCATE(XDATA_LAI        (NDIM,NTIME))
+ALLOCATE(XDATA_VEG        (NDIM,NTIME))
+ALLOCATE(XDATA_RSMIN      (NDIM))
+ALLOCATE(XDATA_GAMMA      (NDIM))
+ALLOCATE(XDATA_WRMAX_CF   (NDIM))
+ALLOCATE(XDATA_RGL        (NDIM))
+ALLOCATE(XDATA_CV         (NDIM))
+ALLOCATE(XDATA_DG         (NDIM,NGROUND_LAYER))
+ALLOCATE(XDATA_ROOTFRAC   (NDIM,NGROUND_LAYER))
+ALLOCATE(XDATA_DICE       (NDIM))
+ALLOCATE(XDATA_Z0         (NDIM,NTIME))
+ALLOCATE(XDATA_Z0_O_Z0H   (NDIM))
+ALLOCATE(XDATA_ALBNIR_VEG (NDIM))
+ALLOCATE(XDATA_ALBVIS_VEG (NDIM))
+ALLOCATE(XDATA_ALBUV_VEG  (NDIM))
 ALLOCATE(XDATA_ALBNIR_SOIL(NDIM))
 ALLOCATE(XDATA_ALBVIS_SOIL(NDIM))
 ALLOCATE(XDATA_ALBUV_SOIL (NDIM))
@@ -195,61 +195,61 @@ ALLOCATE(XDATA_ALBUV_DRY  (NDIM))
 ALLOCATE(XDATA_ALBNIR_WET (NDIM))
 ALLOCATE(XDATA_ALBVIS_WET (NDIM))
 ALLOCATE(XDATA_ALBUV_WET  (NDIM))
-ALLOCATE(XDATA_EMIS       (NDIM,NPATCH,NTIME))
+ALLOCATE(XDATA_EMIS       (NDIM,NTIME))
 ALLOCATE(XDATA_VEGTYPE    (NDIM,NVEGTYPE))
-ALLOCATE(XDATA_GMES       (NDIM,NPATCH))
-ALLOCATE(XDATA_RE25       (NDIM,NPATCH))
-ALLOCATE(XDATA_BSLAI      (NDIM,NPATCH))
-ALLOCATE(XDATA_LAIMIN     (NDIM,NPATCH))
-ALLOCATE(XDATA_SEFOLD     (NDIM,NPATCH))
-ALLOCATE(XDATA_GC         (NDIM,NPATCH))
-ALLOCATE(XDATA_DMAX       (NDIM,NPATCH))
-ALLOCATE(XDATA_F2I        (NDIM,NPATCH))
-ALLOCATE(LDATA_STRESS     (NDIM,NPATCH))
-ALLOCATE(XDATA_H_TREE     (NDIM,NPATCH))
-ALLOCATE(XDATA_CE_NITRO   (NDIM,NPATCH))
-ALLOCATE(XDATA_CF_NITRO   (NDIM,NPATCH))
-ALLOCATE(XDATA_CNA_NITRO  (NDIM,NPATCH))
+ALLOCATE(XDATA_GMES       (NDIM))
+ALLOCATE(XDATA_RE25       (NDIM))
+ALLOCATE(XDATA_BSLAI      (NDIM))
+ALLOCATE(XDATA_LAIMIN     (NDIM))
+ALLOCATE(XDATA_SEFOLD     (NDIM))
+ALLOCATE(XDATA_GC         (NDIM))
+ALLOCATE(XDATA_DMAX       (NDIM))
+ALLOCATE(XDATA_F2I        (NDIM))
+ALLOCATE(LDATA_STRESS     (NDIM))
+ALLOCATE(XDATA_H_TREE     (NDIM))
+ALLOCATE(XDATA_CE_NITRO   (NDIM))
+ALLOCATE(XDATA_CF_NITRO   (NDIM))
+ALLOCATE(XDATA_CNA_NITRO  (NDIM))
 !
-XDATA_LAI        (:,:,:) = XUNDEF
-XDATA_VEG        (:,:,:) = XUNDEF
-XDATA_RSMIN        (:,:) = XUNDEF
-XDATA_GAMMA        (:,:) = XUNDEF
-XDATA_WRMAX_CF     (:,:) = XUNDEF
-XDATA_RGL          (:,:) = XUNDEF
-XDATA_CV           (:,:) = XUNDEF
-XDATA_DG         (:,:,:) = XUNDEF
-XDATA_DICE       (:,:)   = XUNDEF
-XDATA_ROOTFRAC   (:,:,:) = XUNDEF
-XDATA_Z0         (:,:,:) = XUNDEF
-XDATA_Z0_O_Z0H     (:,:) = XUNDEF
-XDATA_ALBNIR_VEG   (:,:) = XUNDEF
-XDATA_ALBVIS_VEG   (:,:) = XUNDEF
-XDATA_ALBUV_VEG    (:,:) = XUNDEF
-XDATA_ALBNIR_SOIL    (:) = XUNDEF
-XDATA_ALBVIS_SOIL    (:) = XUNDEF
-XDATA_ALBUV_SOIL     (:) = XUNDEF
-XDATA_ALBNIR_DRY     (:) = XUNDEF
-XDATA_ALBVIS_DRY     (:) = XUNDEF
-XDATA_ALBUV_DRY      (:) = XUNDEF
-XDATA_ALBNIR_WET     (:) = XUNDEF
-XDATA_ALBVIS_WET     (:) = XUNDEF
-XDATA_ALBUV_WET      (:) = XUNDEF
-XDATA_EMIS       (:,:,:) = XUNDEF
-XDATA_VEGTYPE      (:,:) = XUNDEF
-XDATA_GMES         (:,:) = XUNDEF
-XDATA_RE25         (:,:) = XUNDEF
-XDATA_BSLAI        (:,:) = XUNDEF
-XDATA_LAIMIN       (:,:) = XUNDEF
-XDATA_SEFOLD       (:,:) = XUNDEF
-XDATA_GC           (:,:) = XUNDEF
-XDATA_DMAX         (:,:) = XUNDEF
-XDATA_F2I          (:,:) = XUNDEF
-LDATA_STRESS       (:,:) = .FALSE.
-XDATA_H_TREE       (:,:) = XUNDEF
-XDATA_CE_NITRO     (:,:) = XUNDEF
-XDATA_CF_NITRO     (:,:) = XUNDEF
-XDATA_CNA_NITRO    (:,:) = XUNDEF
+XDATA_LAI        (:,:) = XUNDEF
+XDATA_VEG        (:,:) = XUNDEF
+XDATA_RSMIN        (:) = XUNDEF
+XDATA_GAMMA        (:) = XUNDEF
+XDATA_WRMAX_CF     (:) = XUNDEF
+XDATA_RGL          (:) = XUNDEF
+XDATA_CV           (:) = XUNDEF
+XDATA_DG         (:,:) = XUNDEF
+XDATA_DICE       (:)   = XUNDEF
+XDATA_ROOTFRAC   (:,:) = XUNDEF
+XDATA_Z0         (:,:) = XUNDEF
+XDATA_Z0_O_Z0H     (:) = XUNDEF
+XDATA_ALBNIR_VEG   (:) = XUNDEF
+XDATA_ALBVIS_VEG   (:) = XUNDEF
+XDATA_ALBUV_VEG    (:) = XUNDEF
+XDATA_ALBNIR_SOIL  (:) = XUNDEF
+XDATA_ALBVIS_SOIL  (:) = XUNDEF
+XDATA_ALBUV_SOIL   (:) = XUNDEF
+XDATA_ALBNIR_DRY   (:) = XUNDEF
+XDATA_ALBVIS_DRY   (:) = XUNDEF
+XDATA_ALBUV_DRY    (:) = XUNDEF
+XDATA_ALBNIR_WET   (:) = XUNDEF
+XDATA_ALBVIS_WET   (:) = XUNDEF
+XDATA_ALBUV_WET    (:) = XUNDEF
+XDATA_EMIS       (:,:) = XUNDEF
+XDATA_VEGTYPE    (:,:) = XUNDEF
+XDATA_GMES         (:) = XUNDEF
+XDATA_RE25         (:) = XUNDEF
+XDATA_BSLAI        (:) = XUNDEF
+XDATA_LAIMIN       (:) = XUNDEF
+XDATA_SEFOLD       (:) = XUNDEF
+XDATA_GC           (:) = XUNDEF
+XDATA_DMAX         (:) = XUNDEF
+XDATA_F2I          (:) = XUNDEF
+LDATA_STRESS       (:) = .FALSE.
+XDATA_H_TREE       (:) = XUNDEF
+XDATA_CE_NITRO     (:) = XUNDEF
+XDATA_CF_NITRO     (:) = XUNDEF
+XDATA_CNA_NITRO    (:) = XUNDEF
 !
 ! Vegtypes
 XDATA_VEGTYPE(:,:) = 0.
@@ -274,16 +274,16 @@ CALL DRY_WET_SOIL_ALBEDOS(XSAND(:,1),XCLAY(:,1),                             &
                           XDATA_ALBNIR_WET,XDATA_ALBVIS_WET,XDATA_ALBUV_WET  )  
 !
 ! Height of trees
-XDATA_H_TREE  (:,1) = XDATA_H_HVEG(:)
+XDATA_H_TREE  (:) = XDATA_H_HVEG(:)
 !
 ! Critical normilized soil water content for stress parameterisation
-XDATA_F2I     (:,1) = 0.3
+XDATA_F2I     (:) = 0.3
 !
 ! Ratio between roughness length for momentum and heat
-XDATA_Z0_O_Z0H(:,1) = 10.
+XDATA_Z0_O_Z0H(:) = 10.
 !
 ! Defensive/offensive strategy (1/0)
-LDATA_STRESS  (:,1) = .FALSE. 
+LDATA_STRESS  (:) = .FALSE. 
 !
 DO JI=1,NDIM
 !
@@ -309,17 +309,17 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_PARK)>0. )  ZDATA_ALBUV_VEG(JI,2)= 0.0450
 
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.) THEN
-  XDATA_ALBNIR_VEG(JI,1) =  ( ZDATA_ALBNIR_VEG(JI,1)*XDATA_FRAC_HVEG(JI)   &
-                              + ZDATA_ALBNIR_VEG(JI,2)*XDATA_FRAC_LVEG(JI) ) &
-                            / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
+  XDATA_ALBNIR_VEG(JI) =  ( ZDATA_ALBNIR_VEG(JI,1)*XDATA_FRAC_HVEG(JI)   &
+                            + ZDATA_ALBNIR_VEG(JI,2)*XDATA_FRAC_LVEG(JI) ) &
+                          / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
 !
-  XDATA_ALBVIS_VEG(JI,1) =  ( ZDATA_ALBVIS_VEG(JI,1)*XDATA_FRAC_HVEG(JI)   &
-                              + ZDATA_ALBVIS_VEG(JI,2)*XDATA_FRAC_LVEG(JI) ) &
-                            / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
+  XDATA_ALBVIS_VEG(JI) =  ( ZDATA_ALBVIS_VEG(JI,1)*XDATA_FRAC_HVEG(JI)   &
+                            + ZDATA_ALBVIS_VEG(JI,2)*XDATA_FRAC_LVEG(JI) ) &
+                          / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
 ! 
-  XDATA_ALBUV_VEG (JI,1) =  ( ZDATA_ALBUV_VEG (JI,1)*XDATA_FRAC_HVEG(JI)   &
-                              + ZDATA_ALBUV_VEG (JI,2)*XDATA_FRAC_LVEG(JI) ) &
-                            / ( XDATA_FRAC_HVEG (JI)+XDATA_FRAC_LVEG(JI)   )  
+  XDATA_ALBUV_VEG (JI) =  ( ZDATA_ALBUV_VEG (JI,1)*XDATA_FRAC_HVEG(JI)   &
+                            + ZDATA_ALBUV_VEG (JI,2)*XDATA_FRAC_LVEG(JI) ) &
+                          / ( XDATA_FRAC_HVEG (JI)+XDATA_FRAC_LVEG(JI)   )  
  ENDIF
 !
 ! Soil albedo
@@ -339,9 +339,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_TROG)>0. )  ZDATA_RSMIN(JI,2)= 120.
  IF(XDATA_VEGTYPE(JI,NVT_C4  )>0. )  ZDATA_RSMIN(JI,2)= 120.
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)              &
-    XDATA_RSMIN(JI,1) =  ( ZDATA_RSMIN(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                         + ZDATA_RSMIN(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                       / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_RSMIN(JI) =  ( ZDATA_RSMIN(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                       + ZDATA_RSMIN(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                     / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Gamma parameter
  ZDATA_GAMMA(JI,:)= 0.
@@ -349,9 +349,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_GAMMA(JI,1)= 0.04
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_GAMMA(JI,1)= 0.04
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)              &
-    XDATA_GAMMA(JI,1) =  ( ZDATA_GAMMA(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                         + ZDATA_GAMMA(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                       / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_GAMMA(JI) =  ( ZDATA_GAMMA(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                       + ZDATA_GAMMA(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                     / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Wrmax_cf
  ZDATA_WRMAX_CF(JI,:)= 0.2
@@ -359,9 +359,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_WRMAX_CF(JI,1)= 0.1
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_WRMAX_CF(JI,1)= 0.1
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                    &
-    XDATA_WRMAX_CF(JI,1) =  ( ZDATA_WRMAX_CF(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                            + ZDATA_WRMAX_CF(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                          / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
+    XDATA_WRMAX_CF(JI) =  ( ZDATA_WRMAX_CF(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                          + ZDATA_WRMAX_CF(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                        / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
 !
 ! Rgl
  ZDATA_RGL(JI,:)= 100.
@@ -369,9 +369,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_RGL(JI,1)= 30.
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_RGL(JI,1)= 30.
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)            &
-    XDATA_RGL(JI,1) =  ( ZDATA_RGL(JI,1)*XDATA_FRAC_HVEG(JI)       &
-                       + ZDATA_RGL(JI,2)*XDATA_FRAC_LVEG(JI)     ) &
-                     / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_RGL(JI) =  ( ZDATA_RGL(JI,1)*XDATA_FRAC_HVEG(JI)       &
+                     + ZDATA_RGL(JI,2)*XDATA_FRAC_LVEG(JI)     ) &
+                   / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Cv
  ZDATA_CV(JI,:)= 2.E-5
@@ -379,9 +379,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_CV(JI,1)= 1.E-5
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_CV(JI,1)= 1.E-5
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)           &
-    XDATA_CV(JI,1) =  ( ZDATA_CV(JI,1)*XDATA_FRAC_HVEG(JI)        &
-                      + ZDATA_CV(JI,2)*XDATA_FRAC_LVEG(JI)      ) &
-                    / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_CV(JI) =  ( ZDATA_CV(JI,1)*XDATA_FRAC_HVEG(JI)        &
+                    + ZDATA_CV(JI,2)*XDATA_FRAC_LVEG(JI)      ) &
+                  / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Mesophyll conductance (m s-1)
  ZDATA_GMES(JI,:)=0.020
@@ -392,18 +392,18 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_C4  )>0. )  ZDATA_GMES(JI,2)= 0.003
  IF(XDATA_VEGTYPE(JI,NVT_IRR )>0. )  ZDATA_GMES(JI,2)= 0.003
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)             &
-    XDATA_GMES(JI,1) =  ( ZDATA_GMES(JI,1)*XDATA_FRAC_HVEG(JI)      &
-                        + ZDATA_GMES(JI,2)*XDATA_FRAC_LVEG(JI)    ) &
-                      / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_GMES(JI) =  ( ZDATA_GMES(JI,1)*XDATA_FRAC_HVEG(JI)      &
+                      + ZDATA_GMES(JI,2)*XDATA_FRAC_LVEG(JI)    ) &
+                    / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Ecosystem Respiration (kg/kg.m.s-1)
  ZDATA_RE25(JI,:)= 3.0E-7  
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_RE25(JI,1)= 1.5E-7
  IF(XDATA_VEGTYPE(JI,NVT_C4  )>0. )  ZDATA_RE25(JI,2)= 2.5E-7
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)             &
-    XDATA_RE25(JI,1) =  ( ZDATA_RE25(JI,1)*XDATA_FRAC_HVEG(JI)      &
-                        + ZDATA_RE25(JI,2)*XDATA_FRAC_LVEG(JI)    ) &
-                      / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_RE25(JI) =  ( ZDATA_RE25(JI,1)*XDATA_FRAC_HVEG(JI)      &
+                      + ZDATA_RE25(JI,2)*XDATA_FRAC_LVEG(JI)    ) &
+                    / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Cuticular conductance (m s-1)
  ZDATA_GC(JI,:)=0.00025
@@ -411,9 +411,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_GC(JI,1)= 0.
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_GC(JI,1)= 0.00015        
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)           &
-    XDATA_GC(JI,1) =  ( ZDATA_GC(JI,1)*XDATA_FRAC_HVEG(JI)        &
-                      + ZDATA_GC(JI,2)*XDATA_FRAC_LVEG(JI)      ) &
-                    / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_GC(JI) =  ( ZDATA_GC(JI,1)*XDATA_FRAC_HVEG(JI)        &
+                    + ZDATA_GC(JI,2)*XDATA_FRAC_LVEG(JI)      ) &
+                  / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Ratio d(biomass)/d(lai) (kg/m2)
  ZDATA_BSLAI(JI,:)=0.36 
@@ -424,9 +424,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_C4  )>0. )  ZDATA_BSLAI(JI,2)= 0.06
  IF(XDATA_VEGTYPE(JI,NVT_IRR )>0. )  ZDATA_BSLAI(JI,2)= 0.06
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)              &
-    XDATA_BSLAI(JI,1) =  ( ZDATA_BSLAI(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                         + ZDATA_BSLAI(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                       / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_BSLAI(JI) =  ( ZDATA_BSLAI(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                       + ZDATA_BSLAI(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                     / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! Maximum air saturation deficit tolerate by vegetation (kg/kg)
  ZDATA_DMAX(JI,:) = 0.1
@@ -434,9 +434,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_DMAX(JI,1)= 0.1
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_DMAX(JI,1)= 0.1
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)             &
-    XDATA_DMAX(JI,1) =  ( ZDATA_DMAX(JI,1)*XDATA_FRAC_HVEG(JI)      &
-                        + ZDATA_DMAX(JI,2)*XDATA_FRAC_LVEG(JI)    ) &
-                      / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
+    XDATA_DMAX(JI) =  ( ZDATA_DMAX(JI,1)*XDATA_FRAC_HVEG(JI)      &
+                      + ZDATA_DMAX(JI,2)*XDATA_FRAC_LVEG(JI)    ) &
+                    / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) )  
 !
 ! e-folding time for senescence (days)
  ZDATA_SEFOLD(JI,:)=90. * XDAY
@@ -447,18 +447,18 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_C4  )>0. )  ZDATA_SEFOLD(JI,2)=  60.* XDAY
  IF(XDATA_VEGTYPE(JI,NVT_IRR )>0. )  ZDATA_SEFOLD(JI,2)=  60.* XDAY
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                &
-    XDATA_SEFOLD(JI,1) =  ( ZDATA_SEFOLD(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                          + ZDATA_SEFOLD(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                        / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)  )  
+    XDATA_SEFOLD(JI) =  ( ZDATA_SEFOLD(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                        + ZDATA_SEFOLD(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                      / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)  )  
 !
 ! Minimum LAI (m2/m2)
  ZDATA_LAIMIN (JI,:) = 0.3
  IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_LAIMIN (JI,1) = 1.0
  IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_LAIMIN (JI,1) = 1.0
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                &
-    XDATA_LAIMIN(JI,1) =  ( ZDATA_LAIMIN(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                          + ZDATA_LAIMIN(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                        / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)  )  
+    XDATA_LAIMIN(JI) =  ( ZDATA_LAIMIN(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                        + ZDATA_LAIMIN(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                      / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)  )  
 !
 ! Leaf aera ratio sensitivity to nitrogen concentration
  ZDATA_CE_NITRO(JI,:)=7.68
@@ -469,9 +469,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_GRAS)>0. )  ZDATA_CE_NITRO(JI,2)= 5.56
  IF(XDATA_VEGTYPE(JI,NVT_PARK)>0. )  ZDATA_CE_NITRO(JI,2)= 5.56
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                    &
-    XDATA_CE_NITRO(JI,1) =  ( ZDATA_CE_NITRO(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                            + ZDATA_CE_NITRO(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                          / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
+    XDATA_CE_NITRO(JI) =  ( ZDATA_CE_NITRO(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                          + ZDATA_CE_NITRO(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                        / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
 !
 ! Lethal minimum value of leaf area ratio
  ZDATA_CF_NITRO(JI,:)=-4.33
@@ -482,9 +482,9 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_GRAS)>0. )  ZDATA_CF_NITRO(JI,2)=  6.73
  IF(XDATA_VEGTYPE(JI,NVT_PARK)>0. )  ZDATA_CF_NITRO(JI,2)=  6.73
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                    &
-    XDATA_CF_NITRO(JI,1) =  ( ZDATA_CF_NITRO(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                            + ZDATA_CF_NITRO(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                          / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
+    XDATA_CF_NITRO(JI) =  ( ZDATA_CF_NITRO(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                          + ZDATA_CF_NITRO(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                        / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)    )  
 !
 ! Nitrogen concentration of active biomass
  ZDATA_CNA_NITRO(JI,:)=1.3
@@ -494,53 +494,64 @@ DO JI=1,NDIM
  IF(XDATA_VEGTYPE(JI,NVT_C4  )>0. )  ZDATA_CNA_NITRO(JI,2)= 1.9
  IF(XDATA_VEGTYPE(JI,NVT_IRR )>0. )  ZDATA_CNA_NITRO(JI,2)= 1.9
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                      &
-    XDATA_CNA_NITRO(JI,1) =  ( ZDATA_CNA_NITRO(JI,1)*XDATA_FRAC_HVEG(JI)     &
-                             + ZDATA_CNA_NITRO(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
-                           / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)     )  
+    XDATA_CNA_NITRO(JI) =  ( ZDATA_CNA_NITRO(JI,1)*XDATA_FRAC_HVEG(JI)     &
+                           + ZDATA_CNA_NITRO(JI,2)*XDATA_FRAC_LVEG(JI)   ) &
+                         / ( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI)     )  
 !
 ! Ground layers
- ZDATA_DG(JI,1,:) = 0.01
- ZDATA_DG(JI,2,:) = 1.50
- ZDATA_DG(JI,3,:) = 2.00
- IF(XDATA_VEGTYPE(JI,NVT_TREE)>0. )  ZDATA_DG(JI,2,1)= 2.0
- IF(XDATA_VEGTYPE(JI,NVT_TREE)>0. )  ZDATA_DG(JI,3,1)= 3.0
- IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_DG(JI,2,1)= 2.0
- IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_DG(JI,3,1)= 3.0
- IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_DG(JI,2,1)= 2.0
- IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_DG(JI,3,1)= 3.0
- IF(XDATA_VEGTYPE(JI,NVT_NO  )>0. )  ZDATA_DG(JI,2,3)= 0.5
- IF(XDATA_VEGTYPE(JI,NVT_NO  )>0. )  ZDATA_DG(JI,3,3)= 1.0
- IF(XDATA_VEGTYPE(JI,NVT_ROCK)>0. )  ZDATA_DG(JI,2,3)= 0.5
- IF(XDATA_VEGTYPE(JI,NVT_ROCK)>0. )  ZDATA_DG(JI,3,3)= 1.0
- IF(XDATA_VEGTYPE(JI,NVT_SNOW)>0. )  ZDATA_DG(JI,2,3)= 0.5
- IF(XDATA_VEGTYPE(JI,NVT_SNOW)>0. )  ZDATA_DG(JI,3,3)= 1.0
- XDATA_DG(JI,:,1) =    ZDATA_DG(JI,:,1)*XDATA_FRAC_HVEG(JI)   &
-                       + ZDATA_DG(JI,:,2)*XDATA_FRAC_LVEG(JI)   &
+ IF (NGROUND_LAYER<=3) THEN
+   ZDATA_DG(JI,1,:) = 0.01
+   ZDATA_DG(JI,2,:) = 1.50
+   ZDATA_DG(JI,3,:) = 2.00
+   IF(XDATA_VEGTYPE(JI,NVT_TREE)>0. )  ZDATA_DG(JI,2,1)= 2.0
+   IF(XDATA_VEGTYPE(JI,NVT_TREE)>0. )  ZDATA_DG(JI,3,1)= 3.0
+   IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_DG(JI,2,1)= 2.0
+   IF(XDATA_VEGTYPE(JI,NVT_CONI)>0. )  ZDATA_DG(JI,3,1)= 3.0
+   IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_DG(JI,2,1)= 2.0
+   IF(XDATA_VEGTYPE(JI,NVT_EVER)>0. )  ZDATA_DG(JI,3,1)= 3.0
+   IF(XDATA_VEGTYPE(JI,NVT_NO  )>0. )  ZDATA_DG(JI,2,3)= 0.5
+   IF(XDATA_VEGTYPE(JI,NVT_NO  )>0. )  ZDATA_DG(JI,3,3)= 1.0
+   IF(XDATA_VEGTYPE(JI,NVT_ROCK)>0. )  ZDATA_DG(JI,2,3)= 0.5
+   IF(XDATA_VEGTYPE(JI,NVT_ROCK)>0. )  ZDATA_DG(JI,3,3)= 1.0
+   IF(XDATA_VEGTYPE(JI,NVT_SNOW)>0. )  ZDATA_DG(JI,2,3)= 0.5
+   IF(XDATA_VEGTYPE(JI,NVT_SNOW)>0. )  ZDATA_DG(JI,3,3)= 1.0
+   XDATA_DG(JI,:) =    ZDATA_DG(JI,:,1)*XDATA_FRAC_HVEG(JI)   &
+                       + ZDATA_DG(JI,:,2)*XDATA_FRAC_LVEG(JI) &
                        + ZDATA_DG(JI,:,3)*XDATA_FRAC_NVEG(JI)  
+ ELSEIF (NGROUND_LAYER<=NOPTIMLAYER) THEN
+   XDATA_DG(JI,:) = XOPTIMGRID(:)
+ ELSE
+   CALL ABOR1_SFX("READ_PGD_TEB_GARDEN_PAR: WITH MORE THAN 14 SOIL LAYERS, "//&
+     "WITHOUT ECOCLIMAP, GARDEN CANNOT RUN")
+ ENDIF 
 !
 ! Root fractions
- XDATA_ROOTFRAC(JI,1,:) = 0.20
- XDATA_ROOTFRAC(JI,2,:) = 0.20
- XDATA_ROOTFRAC(JI,3,:) = 0.20
+ XDATA_ROOTFRAC(JI,NGROUND_LAYER) = 1.
+ XDATA_ROOTFRAC(JI,1) = 0.20
+ IF (NGROUND_LAYER>2) THEN
+   DO JLAYER = NGROUND_LAYER-1,2,-1
+     XDATA_ROOTFRAC(JI,JLAYER) = XDATA_ROOTFRAC(JI,JLAYER+1)-0.8/(NGROUND_LAYER-1)
+   ENDDO
+ ENDIF
 !
- XDATA_DICE(JI,1) = XDATA_DG(JI,2,1)
+ XDATA_DICE(JI) = XDATA_DG(JI,2)
 !
  DO JTIME=1,NTIME
 ! Leaf Area Index
  IF (XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI) .GT. 0.)                           &
-     XDATA_LAI     (JI,1,JTIME) = ( XDATA_LAI_HVEG(JI,JTIME)*XDATA_FRAC_HVEG(JI)  &
-                                  + XDATA_LAI_LVEG(JI,JTIME)*XDATA_FRAC_LVEG(JI)) &
-                                 /( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI))  
+     XDATA_LAI     (JI,JTIME) = ( XDATA_LAI_HVEG(JI,JTIME)*XDATA_FRAC_HVEG(JI)  &
+                                + XDATA_LAI_LVEG(JI,JTIME)*XDATA_FRAC_LVEG(JI)) &
+                               /( XDATA_FRAC_HVEG(JI)+XDATA_FRAC_LVEG(JI))  
 ! Fraction of vegetation
-  XDATA_VEG     (JI,1,JTIME) = VEG_FROM_LAI  (XDATA_LAI    (JI,1,JTIME),       &
-                                                XDATA_VEGTYPE(JI,:))  
+  XDATA_VEG     (JI,JTIME) = VEG_FROM_LAI  (XDATA_LAI    (JI,JTIME),       &
+                                            XDATA_VEGTYPE(JI,:))  
 ! Roughness length for momentum
-  XDATA_Z0      (JI,1,JTIME) = Z0V_FROM_LAI  (XDATA_LAI    (JI,1,JTIME),       &
-                                                XDATA_H_TREE (JI,1),             &
-                                                XDATA_VEGTYPE(JI,:))  
+  XDATA_Z0      (JI,JTIME) = Z0V_FROM_LAI  (XDATA_LAI    (JI,JTIME),       &
+                                            XDATA_H_TREE (JI),           &
+                                            XDATA_VEGTYPE(JI,:))  
 ! Emissivity
-  XDATA_EMIS    (JI,1,JTIME) = EMIS_FROM_VEG (XDATA_VEG    (JI,1,JTIME),       &
-                                                XDATA_VEGTYPE(JI,:))  
+  XDATA_EMIS    (JI,JTIME) = EMIS_FROM_VEG (XDATA_VEG    (JI,JTIME),       &
+                                            XDATA_VEGTYPE(JI,:))  
  END DO
 !
 ENDDO

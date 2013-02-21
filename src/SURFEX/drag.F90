@@ -229,6 +229,7 @@ ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !                                         the superficial soil moisture and the
 !                                         field capacity of the ground
 !
+!
 ZWFC(:)  = PWFC(:)*(PWSAT(:)-PWGI(:))/PWSAT(:)
 !
 PHUG(:)  = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )

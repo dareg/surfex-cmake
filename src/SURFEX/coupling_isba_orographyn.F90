@@ -33,7 +33,6 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, HCOUPLING,                       
 !!      modified    05/2004 by P. LeMoigne: vertical shift of implicit
 !!                          coefficients
 !!      B. Decharme   2008   reset the subgrid topographic effect on the forcing
-!!      J. Escobar  09/2012 : SIZE(PTA) not allowed without-interface , replace by KI
 !----------------------------------------------------------------
 !
 USE MODD_CSTS,   ONLY : XSTEFAN, XCPD, XRD, XP00
@@ -42,12 +41,10 @@ USE MODD_ISBA_n, ONLY : XSSO_SLOPE, XEMIS_NAT, XTSRAD_NAT, XZS
 USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
 !
 USE MODI_FORCING_VERT_SHIFT
-! 
+USE MODI_COUPLING_ISBA_CANOPY_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-USE MODI_COUPLING_ISBA_CANOPY_n
 !
 IMPLICIT NONE
 !
@@ -125,12 +122,8 @@ REAL, DIMENSION(KI)  :: ZQA    ! Humidity    at forcing height above surface oro
 REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface orography
 !
 !
-REAL, DIMENSION(KI)     :: Z3D_TOT_SURF ! ratio between actual surface
+REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
-REAL, DIMENSION(KI)     :: ZSFTH   ! surface temperature flux per m2 of actual surface
-REAL, DIMENSION(KI)     :: ZSFTQ   ! surface water vapor flux per m2 of actual surface
-REAL, DIMENSION(KI,KSV) :: ZSFTS   ! surface scalar flux per m2 of actual surface  
-REAL, DIMENSION(KI)   :: ZSFCO2  ! surface CO2 flux per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
@@ -260,7 +253,7 @@ CALL COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                                
                PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
                PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                   &
                ZRAIN, ZSNOW, ZLW, ZDIR_SW, ZSCA_SW, PSW_BANDS, ZPS, ZPA,                     &
-               ZSFTQ, ZSFTH, ZSFTS, ZSFCO2, PSFU, PSFV,                                      &
+               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &
                PPEW_A_COEF, PPEW_B_COEF,                                                     &
                PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
@@ -271,11 +264,11 @@ CALL COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                                
 !*      6.     Modification of turbulent energy and gaz fluxes
 !              -----------------------------------------------
 !
-PSFTH (:)  = ZSFTH (:) * Z3D_TOT_SURF(:)
-PSFTQ (:)  = ZSFTQ (:) * Z3D_TOT_SURF(:)
-PSFCO2(:)  = ZSFCO2(:) * Z3D_TOT_SURF(:)
+PSFTH (:)  = PSFTH (:) * Z3D_TOT_SURF(:)
+PSFTQ (:)  = PSFTQ (:) * Z3D_TOT_SURF(:)
+PSFCO2(:)  = PSFCO2(:) * Z3D_TOT_SURF(:)
 DO JSV=1,SIZE(PSFTS,2)
-  PSFTS(:,JSV)  = ZSFTS(:,JSV) * Z3D_TOT_SURF(:)
+  PSFTS(:,JSV)  = PSFTS(:,JSV) * Z3D_TOT_SURF(:)
 END DO
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_OROGRAPHY_N',1,ZHOOK_HANDLE)
 !

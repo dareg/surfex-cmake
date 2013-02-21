@@ -38,6 +38,9 @@ SUBROUTINE INIT_SURF_TRIP_n(HPROGRAM, KI, KSW, ORESTART, KYEAR,     &
 !
 USE MODD_CSTS,       ONLY : XDAY
 !
+USE MODD_SURFEX_MPI, ONLY : NPROC
+USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
+!
 USE MODI_GET_LUOUT
 USE MODI_GET_CONF_ISBA_n
 !
@@ -65,7 +68,7 @@ INTEGER,                          INTENT(OUT) :: KTRIP_MONTH ! current output mo
 INTEGER,                          INTENT(OUT) :: KTRIP_COUNT ! current TRIP counter
 !
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+REAL,             DIMENSION(KI), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
@@ -103,6 +106,9 @@ IF(.NOT.LTRIP)THEN
   ENDIF
 !
 ELSE
+!
+ IF (NPROC>1) CALL ABOR1_SFX('INIT_SURF_TRIPN: TRIP CANNOT RUN WITH MORE THAN 1 MPI TASK') 
+ IF (NBLOCKTOT>1) CALL ABOR1_SFX("INIT_SURF_TRIPN: TRIP CANNOT RUN WITH NUMEROUS OPENMP BLOCKS")
 !
  KTRIP_MONTH=0
  IF(PDURATION/XDAY<=31.)THEN

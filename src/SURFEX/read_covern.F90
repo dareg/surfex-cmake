@@ -70,7 +70,7 @@ INTEGER           :: IRESP          ! Error code after redding
 ! 
 INTEGER           :: IVERSION       ! surface version
 !
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

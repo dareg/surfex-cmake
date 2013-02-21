@@ -62,7 +62,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 !              -------------------------------
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDATA_SST
-CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=1)  :: YDIR
 INTEGER           :: ILUOUT

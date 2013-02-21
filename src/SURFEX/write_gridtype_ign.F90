@@ -79,6 +79,7 @@ CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT, &
 !
 !---------------------------------------------------------------------------
 !
+
 !*       2.    Writing of the grid definition parameters
 !              -----------------------------------------
 !

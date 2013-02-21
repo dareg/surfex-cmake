@@ -156,6 +156,11 @@ SELECT CASE (HSFTYPE)
        ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*XPAR_VEG(:,KDECADE,JVEGTYPE)
      END DO
 
+   CASE('BAR','GRB')
+     DO JVEGTYPE=1,NVEGTYPE
+       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*(1.-XPAR_VEG(:,KDECADE,JVEGTYPE))
+     END DO
+     
     CASE('DVG','GDV') ! for diffusion scheme only, average only on vegetated area
      DO JVEGTYPE=1,NVEGTYPE
        WHERE ( SUM(XPAR_LAI(:,:,JVEGTYPE),2) .GT. 0.0) &

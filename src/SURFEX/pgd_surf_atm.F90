@@ -29,6 +29,7 @@
 !!    ------------
 !!
 !!    Original     13/10/03
+!!      A. Lemonsu      05/2009         Ajout de la clef LGARDEN pour TEB
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -36,16 +37,16 @@
 !
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_PGD_GRID,        ONLY : LLATLONMASK
-USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CWATER, CTOWN,   &
-                                   XSEA, XWATER,                   &
-                                   NDIM_NATURE, NDIM_SEA,          &
-                                   NDIM_TOWN,NDIM_WATER,           &
-                                   LECOCLIMAP, LWATER_TO_NATURE,   &
-                                   LTOWN_TO_ROCK, LGARDEN, NDIM_FULL,&
-                                   NSIZE_FULL
+USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CWATER, CTOWN,     &
+                                 XSEA, XWATER,                     &
+                                 NDIM_NATURE, NDIM_SEA,            &
+                                 NDIM_TOWN,NDIM_WATER,             &
+                                 LECOCLIMAP, LWATER_TO_NATURE,     &
+                                 LTOWN_TO_ROCK, LGARDEN, NDIM_FULL,&
+                                 NSIZE_FULL
 USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR, XLAT, &
                                  XLON, XMESH_SIZE, XJPDIR   
-USE MODD_CH_SURF_n,       ONLY : LCH_EMIS, LRW_CH_EMIS
+USE MODD_CH_SURF_n,       ONLY : LCH_EMIS, LRW_CH_EMIS, CCH_EMIS
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_PGD_ARRANGE_COVER
@@ -68,6 +69,7 @@ USE MODI_PGD_INLAND_WATER
 USE MODI_PGD_SEA
 USE MODI_PGD_DUMMY
 USE MODI_PGD_CHEMISTRY
+USE MODI_PGD_CHEMISTRY_SNAP
 USE MODI_WRITE_COVER_TEX_END
 USE MODI_INIT_READ_DATA_COVER
 !
@@ -189,8 +191,13 @@ CALL PGD_DUMMY(HPROGRAM)
 !*   10.      Chemical Emission fields
 !             ------------------------
 !
-CALL PGD_CHEMISTRY(HPROGRAM,LCH_EMIS)
-LRW_CH_EMIS = .FALSE.
+CALL READ_NAM_PGD_CHEMISTRY(HPROGRAM,CCH_EMIS)
+IF (CCH_EMIS=='SNAP') THEN
+  CALL PGD_CHEMISTRY_SNAP(HPROGRAM,LCH_EMIS)
+ELSE IF (CCH_EMIS=='AGGR') THEN
+  CALL PGD_CHEMISTRY(HPROGRAM,LCH_EMIS)
+  LRW_CH_EMIS = .FALSE.
+ENDIF
 !_______________________________________________________________________________
 !
 !*   11.     Writing in cover latex file

@@ -37,9 +37,9 @@ MODULE modd_flake_albedo_ref
 !
 ! Modules used:
 
-USE modd_data_parameters, ONLY :      &
-    ireals                       ,  &! KIND-type parameter for real variables 
-    iintegers                        ! KIND-type parameter for "normal" integer variables  
+!USE modd_data_parameters, ONLY :      &
+!    ireals                       ,  &! KIND-type parameter for real variables 
+!    iintegers                        ! KIND-type parameter for "normal" integer variables  
 
 !==============================================================================
 
@@ -50,16 +50,16 @@ IMPLICIT NONE
 ! Declarations
  
 !  Albedo for water, ice and snow.
-REAL (KIND = ireals), PARAMETER ::        &
-    albedo_water_ref       = 0.07_ireals  ,  &! Water
-    albedo_whiteice_ref    = 0.60_ireals  ,  &! White ice
-    albedo_blueice_ref     = 0.10_ireals  ,  &! Blue ice
-    albedo_drysnow_ref     = 0.60_ireals  ,  &! Dry snow 
-    albedo_meltingsnow_ref = 0.10_ireals      ! Melting snow   
+REAL , PARAMETER ::        &
+    albedo_water_ref       = 0.07  ,  &! Water
+    albedo_whiteice_ref    = 0.60  ,  &! White ice
+    albedo_blueice_ref     = 0.10  ,  &! Blue ice
+    albedo_drysnow_ref     = 0.60  ,  &! Dry snow 
+    albedo_meltingsnow_ref = 0.10      ! Melting snow   
 
 !  Empirical parameters.
-REAL (KIND = ireals), PARAMETER :: &
-    c_albice_MR = 95.6_ireals          ! Constant in the interpolation formula for   
+REAL , PARAMETER :: &
+    c_albice_MR = 95.6          ! Constant in the interpolation formula for   
                                      ! the ice albedo (Mironov and Ritter 2004)
 
 !==============================================================================

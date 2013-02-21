@@ -51,10 +51,15 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NWG_LAYER_TOT, NWG_SIZE,  NPIO, NCOMM, NPROC, NRANK, WLOG_MPI
+!
+USE MODD_IO_SURF_ASC,  ONLY : NMASK_asc => NMASK
+USE MODD_IO_SURF_FA ,  ONLY : NMASK_fa => NMASK
+USE MODD_IO_SURF_LFI,  ONLY : NMASK_lfi => NMASK
 !
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
-                          NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOM,         &
+                          NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOC,         &
                           XWWILT, XWFC, XWSAT, XRM_PATCH,                     &
                           XCOVER, XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,      &
                           XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
@@ -82,7 +87,7 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           XCE_NITRO, XCF_NITRO,                               &
                           XCNA_NITRO, XBSLAI_NITRO, CCPSURF, TSEED,           &
                           TREAP, XWATSUP, XIRRIG, XCGMAX,                     &
-                          CKSAT, CTOPREG, CRAIN, CSOM,                        &
+                          CKSAT, CTOPREG, CRAIN, LSOCP, CSOC, XFRACSOC,       &
                           XTI_MIN, XTI_MAX, XTI_MEAN, XTI_STD, XTI_SKEW,      &
                           XTAB_FSAT, XTAB_WTOP, XD_ICE, XKSAT_ICE,            &
                           XFSAT, XMUF, LTRIP, LFLOOD, XFFLOOD, XFFROZEN,      &
@@ -92,7 +97,7 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           XPSNV_A, XFF, XFFG, XFFV, XPCPS, XPLVTT, XPLSTT,    &
                           LCANOPY, LCANOPY_DRAG, XDIR_ALB_WITH_SNOW,          &
                           XSCA_ALB_WITH_SNOW, XALBF, XEMISF, XCPL_ICEFLUX,    &
-                          NLAYER_HORT, NLAYER_DUN
+                          NLAYER_HORT, NLAYER_DUN, XF_PARAM, XC_DEPTH_RATIO
 !
 USE MODD_CH_ISBA_n, ONLY : CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,         &
                            CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,      &
@@ -108,12 +113,16 @@ USE MODD_DIAG_ISBA_n,      ONLY : LPATCH_BUDGET
 USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_DIAG_ALBEDO
 !
 USE MODD_SURF_ATM,    ONLY : LCPL_ESM
+USE MODD_SURF_ATM_n,  ONLY : NDIM_FULL
 !
 USE MODD_SGH_PAR,        ONLY : NDIMTAB, XICE_DEPH_MAX, XF_DECAY
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
+!
+USE MODD_TOPODYN, ONLY : NNCAT, NMESHT
+USE MODD_SURF_ATM_n, ONLY : NR_NATURE, NDIM_FULL
 !
 USE MODD_DST_n
 USE MODD_SLT_n
@@ -124,7 +133,7 @@ USE MODI_INIT_IO_SURF_n
 USE MODI_ALLOCATE_PHYSIO
 USE MODI_INIT_ISBA_MIXPAR
 USE MODI_CONVERT_PATCH_ISBA
-USE MODI_COMMON_PARTS
+USE MODI_INIT_VEG_PGD_n
 USE MODI_INIT_TOP
 USE MODI_EXP_DECAY_SOIL_DIF
 USE MODI_EXP_DECAY_SOIL_FR
@@ -137,14 +146,27 @@ USE MODI_END_IO_SURF_n
 USE MODI_READ_ISBA_n
 USE MODI_INIT_ISBA_LANDUSE
 USE MODI_READ_ISBA_CANOPY_n
-USE MODI_COMMON_PARTS2
+USE MODI_INIT_VEG_n
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
 USE MODI_DIAG_ISBA_INIT_n
+USE MODI_INIT_SURF_TOPD
+USE MODI_ISBA_SOC_PARAMETERS
+!
+USE MODI_GATHER_AND_WRITE_MPI
+!
+USE MODI_READ_AND_SEND_MPI
+USE MODI_ISBA_TO_TOPD
+USE MODI_OPEN_FILE
+USE MODI_CLOSE_FILE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -171,6 +193,8 @@ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+REAL, DIMENSION(NDIM_FULL)   :: ZF_PARAM, ZC_DEPTH_RATIO
+!
 REAL, DIMENSION(KI)     :: ZTSRAD_NAT !radiative temperature
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWG1 ! work array for surface water content
@@ -184,6 +208,8 @@ INTEGER           :: JILU     ! loop increment
 INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IDECADE, IDECADE2  ! decade of simulation
 INTEGER :: JPATCH  ! loop counter on tiles
+INTEGER           :: IUNIT       ! unit of f/dc map file
+INTEGER           :: INFOMPI
 !
 LOGICAL                           :: LWORK
 !
@@ -240,9 +266,39 @@ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,           &
                         PCNA_NITRO=XCNA_NITRO,PD_ICE=XD_ICE,TPSEED=TSEED,      &
                         TPREAP=TREAP,PWATSUP=XWATSUP,PIRRIG=XIRRIG             )
 !
+IF(CISBA=='DIF')THEN
+  IDIM_FULL = SIZE(NWG_LAYER_TOT,1)
+!$OMP SINGLE
+  DEALLOCATE(NWG_LAYER_TOT)
+  ALLOCATE(NWG_LAYER_TOT(IDIM_FULL,SIZE(NWG_LAYER,2)))
+!$OMP END SINGLE        
+  DO JL = 1,SIZE(NWG_LAYER,2)
+    IF (HPROGRAM=='ASCII ') THEN
+      CALL GATHER_AND_WRITE_MPI(NWG_LAYER(:,JL),NWG_LAYER_TOT(:,JL),NMASK_asc)
+    ELSEIF (HPROGRAM=='LFI   ') THEN
+      CALL GATHER_AND_WRITE_MPI(NWG_LAYER(:,JL),NWG_LAYER_TOT(:,JL),NMASK_lfi)
+    ELSEIF (HPROGRAM=='FA    ') THEN
+      CALL GATHER_AND_WRITE_MPI(NWG_LAYER(:,JL),NWG_LAYER_TOT(:,JL),NMASK_fa)
+    ELSE
+      CALL ABOR1_SFX("COMPUTE_ISBA_PARAMETERS: WITH CISBA=DIF, THE GATHERING OF "//&
+         "NWG_LAYER FOR ALL PROCS MUST BE IMPLEMENTED IN AROME AND MESONH CASES ")
+    ENDIF
+  ENDDO
+  NWG_SIZE = 0
+  IF (NRANK==NPIO) NWG_SIZE=MAXVAL(NWG_LAYER_TOT(:,:),NWG_LAYER_TOT(:,:)/=NUNDEF)
+  IF (NPROC>1) THEN
+!$OMP SINGLE   
+#ifndef NOMPI
+    CALL MPI_BCAST(NWG_SIZE,KIND(NWG_SIZE)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
+!$OMP END SINGLE
+  ENDIF  
+  !
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
-CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
+CALL INIT_VEG_PGD_n(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
                   XVEGTYPE, XPATCH, XVEGTYPE_PATCH, NSIZE_NATURE_P, NR_NATURE_P,    &
                   XRM_PATCH, &
                   LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, XTDEEP, XGAMMAT,   &
@@ -271,24 +327,58 @@ CALL COMMON_PARTS(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH
 !
 !-------------------------------------------------------------------------------
 !
-!*       2.10   Soil carbon
-!               -----------                        
-!
-!Soil organic matter effect and/or Exponential decay for DIF option
-!
-IF(CISBA=='DIF' .AND. CSOM=='SGH') THEN
-  CALL ABOR1_SFX('ORGANIC MATTER EFFECT (CSOM) NOT YET IMPLEMENTED')
+IF(CISBA=='DIF') THEN
+  !
+  IF( CKSAT=='SGH' )THEN 
+    !
+    ALLOCATE(ZWORK(KI))
+    ALLOCATE(ZF(KI,NPATCH))
+    ZWORK(:) = XUNDEF
+    ZF(:,:)  = XUNDEF          
+    DO JPATCH=1,NPATCH    
+      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
+      DO JILU=1,KI
+        IF(XPATCH(JILU,JPATCH)>0.0)THEN
+          !no profile for non vegetated area : f and root = 0.0
+          LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
+          ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
+          ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
+          ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
+        ENDIF
+      ENDDO
+      CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
+                              XCONDSAT(:,:,JPATCH))
+    ENDDO  
+    DEALLOCATE(ZWORK)
+    DEALLOCATE(ZF)
+  ENDIF
+  !  
+  IF(CSOC=='SGH')THEN   
+    IF(.NOT.LSOCP)THEN
+      CALL ABOR1_SFX('CSOC=SGH can be activated only if SOC data given in PGD fields')
+    ENDIF
+    ALLOCATE(XFRACSOC(KI,NGROUND_LAYER))
+    XFRACSOC(:,:)=0.0
+    CALL ISBA_SOC_PARAMETERS(XPATCH,XDG,XSOC,XBCOEF,XMPOTSAT,   &
+                             XCONDSAT,XWSAT,XHCAPSOIL,XCONDDRY, &
+                             XCONDSLD,XWFC,XWWILT,XFRACSOC )
+  ELSE
+    ALLOCATE(XFRACSOC(0,0))
+  ENDIF
+! 
+ELSE
+  ALLOCATE(XFRACSOC(0,0))
 ENDIF
 !
 !Topmodel
 !  
-IF (CKSAT=='SGH' .AND. HINIT/='PRE') THEN
+IF ((CKSAT=='SGH' .OR. CKSAT=='EXP') .AND. HINIT/='PRE' .AND. CISBA/='DIF') THEN
   ALLOCATE(ZF(KI,NPATCH))
   ZF (:,:) = XUNDEF
 ENDIF
 !
 !CRUNOFF used in hydro_sgh and isba_sgh_update
-IF(CRUNOFF=='SGH ') THEN 
+IF( CRUNOFF=='SGH ') THEN 
 !
   ALLOCATE(XTAB_FSAT(KI,NDIMTAB))
   ALLOCATE(XTAB_WTOP(KI,NDIMTAB))
@@ -336,50 +426,71 @@ ELSE
 !                  
 ENDIF  
 ! 
-!
-!  CKSAT used in hydro_soildif.F90 and hydro_soil.F90 and soil.F90
-IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN 
-!
-  IF(CISBA=='DIF') THEN
-!          
-    ALLOCATE(ZWORK(KI))
-    ZWORK(:) = XUNDEF
-    ZF(:,:)  = XUNDEF          
-    DO JPATCH=1,NPATCH    
-      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE 
-      DO JILU=1,KI
-         IF(XPATCH(JILU,JPATCH)>0.0)THEN
-           !no profile for non vegetated area : f and root = 0.0
-           LWORK=(XDROOT(JILU,JPATCH)==0.0.OR.XDROOT(JILU,JPATCH)==XUNDEF)
-           ZF   (JILU,JPATCH) = MIN(XF_DECAY,4.0/MAX(0.01,XDROOT(JILU,JPATCH)))
-           ZF   (JILU,JPATCH) = MERGE(0.0,ZF    (JILU,JPATCH),LWORK) 
-           ZWORK(JILU       ) = MERGE(0.0,XDROOT(JILU,JPATCH),LWORK)
-         ENDIF
-      ENDDO
-      CALL EXP_DECAY_SOIL_DIF(ZF(:,JPATCH),XDG(:,:,JPATCH),NWG_LAYER(:,JPATCH),ZWORK(:),&
-                              XCONDSAT(:,:,JPATCH))
-    ENDDO  
-    DEALLOCATE(ZWORK)
-!
-! Exponential decay for ISBA-FR option
-  ELSE
-!
-    WHERE(ZF(:,:)==XUNDEF) 
-          ZF(:,:) = 4.0/XDG(:,2,:)
+!Exponential decay for ISBA-FR option
+!CKSAT used in hydro_soil.F90 and soil.F90
+IF(HINIT/='PRE'.AND.CISBA/='DIF')THEN 
+  !
+  IF(CKSAT=='SGH') THEN
+    !
+    WHERE(ZF(:,:)==XUNDEF.AND.XDG(:,2,:)/=XUNDEF) 
+      ZF(:,:) = 4.0/XDG(:,2,:)
     ENDWHERE
-    ZF(:,:)=MIN(ZF(:,:),XF_DECAY)
-!
+    ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
+    !
+    ALLOCATE(XF_PARAM (KI))
+    ALLOCATE(XC_DEPTH_RATIO (KI))
+    XF_PARAM(:) = ZF(:,1)
+    XC_DEPTH_RATIO(:) = 1.25
+    !
     DO JPATCH=1,NPATCH
-       IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-       CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH),    &
+      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+        CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH),   &
                                 XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),      &
                                 XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),XKSAT_ICE(:,JPATCH))  
     ENDDO                       
-! 
+    ! 
+  ELSEIF ( CKSAT=='EXP' .AND. CISBA=='3-L' ) THEN
+    !
+    ALLOCATE(XF_PARAM (KI))
+    ALLOCATE(XC_DEPTH_RATIO (KI))
+    XF_PARAM(:) = XUNDEF
+    XC_DEPTH_RATIO(:) = XUNDEF
+    !
+    IF (HPROGRAM/='AROME ' .AND. HPROGRAM/='MESONH ') THEN
+      !
+      CALL OPEN_FILE('ASCII ',IUNIT,HFILE='carte_f_dc.txt',HFORM='FORMATTED',HACTION='READ ')
+      DO JILU=1,NDIM_FULL
+        READ(IUNIT,*) ZF_PARAM(JILU), ZC_DEPTH_RATIO(JILU)
+      ENDDO
+      CALL CLOSE_FILE('ASCII ',IUNIT)
+      CALL READ_AND_SEND_MPI(ZF_PARAM,XF_PARAM,NR_NATURE)
+      CALL READ_AND_SEND_MPI(ZC_DEPTH_RATIO,XC_DEPTH_RATIO,NR_NATURE)
+      !
+    ELSE
+      WRITE(ILUOUT,*) "COMPUTE_ISBA_PARAMETERS: WITH CKSAT=EXP, IN NOT OFFLINE "//&
+                      "MODE, TOPMODEL FILE FOR F_PARAM IS NOT READ "
+    ENDIF
+    !
+    DO JPATCH=1,NPATCH
+      WHERE (XF_PARAM(:)/=XUNDEF)
+        ZF(:,JPATCH) = XF_PARAM(:)
+      ELSEWHERE
+        ZF(:,JPATCH) = 4.0/XDG(:,2,JPATCH)
+        ZF(:,JPATCH) = MIN(ZF(:,JPATCH),XF_DECAY)
+      ENDWHERE
+    ENDDO
+    !
+    DO JPATCH=1,NPATCH
+      CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH), &
+                             XDG(:,:,JPATCH),XD_ICE(:,JPATCH),XC4REF(:,JPATCH),   &
+                             XC3(:,:,JPATCH),XCONDSAT(:,:,JPATCH),                &
+                             XKSAT_ICE(:,JPATCH))  
+    ENDDO    
+    !
+    DEALLOCATE(ZF)
+    !    
   ENDIF
-  !  
-  DEALLOCATE(ZF)
-  !
+  ! 
 ENDIF
 !
 !
@@ -389,7 +500,6 @@ ENDIF
 IF (HINIT == 'ALL' .AND. CRESPSL=='CNT' .AND. CPHOTO == 'NCB') THEN
   CALL CARBON_INIT(NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB)
 ENDIF
-!
 !
 !Rainfall spatial distribution
 !CRAIN used in HYDRO_VEG and HYDRO_SGH and ISBA_SGH_UPDATE
@@ -531,7 +641,7 @@ XSCA_ALB_WITH_SNOW = 0.0
 !
 !-------------------------------------------------------------------------------
 !
-CALL COMMON_PARTS2(NPATCH, KI, LCANOPY, CROUGH, TSNOW, &
+CALL INIT_VEG_n(NPATCH, KI, LCANOPY, CROUGH, TSNOW, &
                    CPHOTO, XLAIMIN, XH_TREE, XVEGTYPE_PATCH, XLAI, XZ0, XVEG, XEMIS, &
                    LTR_ML, XFAPARC, XFAPIRC, XLAI_EFFC, XMUS, &
                    XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, XALBNIR, XALBVIS, XALBUV, &
@@ -581,6 +691,10 @@ DEALLOCATE(ZTG1)
 IF(NPATCH<=1) LPATCH_BUDGET=.FALSE.
 !
 CALL DIAG_ISBA_INIT_n(HPROGRAM,KI,KSW)
+!
+!-------------------------------------------------------------------------------
+!
+CALL INIT_SURF_TOPD(HPROGRAM,NDIM_FULL)
 !
 !-------------------------------------------------------------------------------
 !

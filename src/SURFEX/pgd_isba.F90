@@ -46,13 +46,12 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
-USE MODD_DATA_ISBA_n,    ONLY : NTIME
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 CPEDOTF, XCOVER, LCOVER, XZS,            &
                                 XZ0EFFJPDIR, CPHOTO, LTR_ML, XRM_PATCH,  &
-                                XCLAY, XSAND, XSOM, LSOM,          &
+                                XCLAY, XSAND, XSOC, LSOCP, LNOF,         &
                                 XRUNOFFB, XWDRAIN, LECOCLIMAP,           &
-                                XSOILGRID 
+                                XSOILGRID, LPERM, XPERM, XPH, XFERT 
 USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE
 !
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
@@ -71,6 +70,7 @@ USE MODI_WRITE_COVER_TEX_ISBA
 USE MODI_WRITE_COVER_TEX_ISBA_PAR
 USE MODI_PGD_TOPO_INDEX
 USE MODI_PGD_ISBA_PAR
+USE MODI_PGD_TOPD
 !
 USE MODI_READ_SURF
 USE MODI_INIT_IO_SURF_n
@@ -130,28 +130,38 @@ LOGICAL                  :: GTR_ML           ! new radiative transfert
 REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
 CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
 CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
-CHARACTER(LEN=28)        :: YSOM_TOP         ! file name for organic carbon top soil
-CHARACTER(LEN=28)        :: YSOM_SUB         ! file name for organic carbon sub soil
+CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon top soil
+CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon sub soil
 CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
 CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
 CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
 CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
 CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
-CHARACTER(LEN=6)         :: YSOMFILETYPE     ! organic carbon data file type
+CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
 CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
 CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
 CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
 CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction  (-)
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction  (-)
-REAL                     :: XUNIF_SOM        ! uniform value of organic carbon  (kg/m2)
+REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon top soil (kg/m2)
+REAL                     :: XUNIF_SOC_SUB    ! uniform value of organic carbon sub soil (kg/m2)
 REAL                     :: XUNIF_RUNOFFB    ! uniform value of subgrid runoff coefficient
 REAL                     :: XUNIF_WDRAIN     ! uniform subgrid drainage parameter
+REAL                     :: XUNIF_PERM       ! uniform permafrost distribution
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay
-LOGICAL                  :: LIMP_SOM         ! Imposed maps of organic carbon
+LOGICAL                  :: LIMP_SOC         ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_CTI         ! Imposed maps of topographic index statistics
+LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil grid reference for DIF
+CHARACTER(LEN=28)        :: YPH           ! file name for pH
+CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+REAL                     :: XUNIF_PH      ! uniform value of pH
+REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -169,10 +179,13 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YISBA,  YPEDOTF, YPHOTO, GTR_ML, ZRM_PATCH,               &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,              &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
-                       YSOM_TOP, YSOM_SUB, YSOMFILETYPE, XUNIF_SOM, LIMP_SOM,    &
-                       YCTI, YCTIFILETYPE, LIMP_CTI,                             &                     
+                       YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,          &
+                       XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,    &
+                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,              &                       
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                &
-                       YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID    )  
+                       YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,      &
+                       YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,         &
+                       XUNIF_FERT                          )  
 !
 NPATCH        = IPATCH
 NGROUND_LAYER = IGROUND_LAYER
@@ -408,69 +421,137 @@ END DO
 !*    9.      organic carbon profile
 !             ----------------------
 !
-IF(LEN_TRIM(YSOMFILETYPE)/=0.OR.(XUNIF_SOM/=XUNDEF))THEN
+IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF))THEN
 !
-  ALLOCATE(XSOM(ILU,NGROUND_LAYER))
+  ALLOCATE(XSOC(ILU,NGROUND_LAYER))
 !
-  LSOM=.TRUE.
+  LSOCP=.TRUE.
 !
-  IF(LIMP_SOM)THEN
+  IF((LEN_TRIM(YSOC_TOP)==0.AND.LEN_TRIM(YSOC_SUB)/=0).OR.(LEN_TRIM(YSOC_TOP)/=0.AND.LEN_TRIM(YSOC_SUB)==0))THEN
+    WRITE(ILUOUT,*) ' '
+    WRITE(ILUOUT,*) '***********************************************************'
+    WRITE(ILUOUT,*) '* Error in soil organic carbon preparation                *'
+    WRITE(ILUOUT,*) '* If used, sub and top soil input file must be given      *'
+    WRITE(ILUOUT,*) '***********************************************************'
+    WRITE(ILUOUT,*) ' '
+    CALL ABOR1_SFX('PGD_ISBA: TOP AND SUB SOC INPUT FILE REQUIRED')        
+  ENDIF
+!
+  IF(LIMP_SOC)THEN
 !
 !   Topsoil
 !
-    IF(YSOMFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOM')
+    IF(YSOCFILETYPE=='NETCDF')THEN
+       CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOC')
     ELSE
 #ifdef ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YSOM_TOP)//'.txt')
+       CFILEIN     = ADJUSTL(ADJUSTR(YSOC_TOP)//'.txt')
 #endif
 #ifdef FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOM_TOP)//'.fa')
+       CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOC_TOP)//'.fa')
 #endif
 #ifdef LFI
-       CFILEIN_LFI = ADJUSTL(YSOM_TOP)
+       CFILEIN_LFI = ADJUSTL(YSOC_TOP)
 #endif
-       CALL INIT_IO_SURF_n(YSOMFILETYPE,'NATURE','ISBA  ','READ ')
+       CALL INIT_IO_SURF_n(YSOCFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
-    CALL READ_SURF(YSOMFILETYPE,'SOM_TOP',XSOM(:,1),IRESP) 
+    CALL READ_SURF(YSOCFILETYPE,'SOC_TOP',XSOC(:,1),IRESP) 
 !
-    CALL END_IO_SURF_n(YSOMFILETYPE)
+    CALL END_IO_SURF_n(YSOCFILETYPE)
 !
 !   Subsoil
 !
-    IF(YSOMFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOM')
+    IF(YSOCFILETYPE=='NETCDF')THEN
+       CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOC')
     ELSE
 #ifdef ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YSOM_SUB)//'.txt')
+       CFILEIN     = ADJUSTL(ADJUSTR(YSOC_SUB)//'.txt')
 #endif
 #ifdef FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOM_SUB)//'.fa')
+       CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOC_SUB)//'.fa')
 #endif
 #ifdef LFI
-       CFILEIN_LFI = ADJUSTL(YSOM_SUB)
+       CFILEIN_LFI = ADJUSTL(YSOC_SUB)
 #endif
-       CALL INIT_IO_SURF_n(YSOMFILETYPE,'NATURE','ISBA  ','READ ')
+       CALL INIT_IO_SURF_n(YSOCFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
-    CALL READ_SURF(YSOMFILETYPE,'SOM_SUB',XSOM(:,2),IRESP) 
+    CALL READ_SURF(YSOCFILETYPE,'SOC_SUB',XSOC(:,2),IRESP) 
 !
-    CALL END_IO_SURF_n(YSOMFILETYPE)
+    CALL END_IO_SURF_n(YSOCFILETYPE)
 !
   ELSE
-    CALL PGD_FIELD(HPROGRAM,'organic carbon','NAT',YSOM_TOP,YSOMFILETYPE,XUNIF_SOM,XSOM(:,1))
-    CALL PGD_FIELD(HPROGRAM,'organic carbon','NAT',YSOM_SUB,YSOMFILETYPE,XUNIF_SOM,XSOM(:,2))
+    CALL PGD_FIELD(HPROGRAM,'organic carbon','NAT',YSOC_TOP,YSOCFILETYPE,XUNIF_SOC_TOP,XSOC(:,1))
+    CALL PGD_FIELD(HPROGRAM,'organic carbon','NAT',YSOC_SUB,YSOCFILETYPE,XUNIF_SOC_SUB,XSOC(:,2))
   ENDIF
 !
   DO JLAYER=2,NGROUND_LAYER
-    XSOM(:,JLAYER) = XSOM(:,2)
+    XSOC(:,JLAYER) = XSOC(:,2)
   END DO
 !
 ELSE
 !
-  ALLOCATE(XSOM(0,1))
+  LSOCP=.FALSE.
+  ALLOCATE(XSOC(0,0))
 !
+ENDIF
+!
+!*    10.     Permafrost distribution
+!             -----------------------
+!
+IF(LEN_TRIM(YPERM)/=0.OR.XUNIF_PERM/=XUNDEF)THEN
+!
+  ALLOCATE(XPERM(ILU))
+!
+  LPERM=.TRUE.
+!
+  IF(LIMP_PERM)THEN
+!
+    IF(YPERMFILETYPE=='NETCDF')THEN
+       CALL ABOR1_SFX('Use another format than netcdf for permafrost input file with LIMP_PERM')
+    ELSE
+#ifdef ASC
+       CFILEIN     = ADJUSTL(ADJUSTR(YPERM)//'.txt')
+#endif
+#ifdef FA
+       CFILEIN_FA  = ADJUSTL(ADJUSTR(YPERM)//'.fa')
+#endif
+#ifdef LFI
+       CFILEIN_LFI = ADJUSTL(YPERM)
+#endif
+       CALL INIT_IO_SURF_n(YPERMFILETYPE,'NATURE','ISBA  ','READ ')
+    ENDIF     
+!   
+    CALL READ_SURF(YPERMFILETYPE,'PERM',XPERM(:),IRESP) 
+!
+    CALL END_IO_SURF_n(YPERMFILETYPE)
+  ELSE
+    CALL PGD_FIELD(HPROGRAM,'permafrost','NAT',YPERM,YPERMFILETYPE,XUNIF_PERM,XPERM(:))
+  ENDIF
+!
+ELSE
+!
+  LPERM=.FALSE.  
+  ALLOCATE(XPERM(0))
+!
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+!*    11.  pH and fertlisation data
+!             --------------------------
+!
+IF((LEN_TRIM(YPHFILETYPE)/=0.OR.XUNIF_PH/=XUNDEF) .AND. (LEN_TRIM(YFERTFILETYPE)/=0.OR.XUNIF_FERT/=XUNDEF)) THEN
+  !
+  ALLOCATE(XPH(ILU))
+  ALLOCATE(XFERT(ILU))
+  !
+  LNOF = .TRUE.
+  !
+  CALL PGD_FIELD(HPROGRAM,'pH value','NAT',YPH,YPHFILETYPE,XUNIF_PH,XPH(:))
+  CALL PGD_FIELD(HPROGRAM,'fertilisation','NAT',YFERT,YFERTFILETYPE,XUNIF_FERT,XFERT(:))
+  !
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -498,7 +579,11 @@ CALL PGD_FIELD                                                                  
 !
 LECOCLIMAP = OECOCLIMAP
 !
-CALL PGD_ISBA_PAR(HPROGRAM,NTIME)
+CALL PGD_ISBA_PAR(HPROGRAM)
+!
+!-------------------------------------------------------------------------------
+!
+CALL PGD_TOPD(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -22,6 +22,7 @@ SUBROUTINE PREP_HOR_OCEAN_FIELDS(HPROGRAM,HSURF,HFILE,HFILETYPE,KLUOUT,OUNIF)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2008
+!!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!------------------------------------------------------------------
 !
 !
@@ -30,6 +31,7 @@ USE MODD_OCEAN_CSTS,     ONLY : XRHOSWREF
 USE MODD_SEAFLUX_n
 USE MODD_OCEAN_GRID_n, ONLY : NOCKMIN,NOCKMAX,XDZ1,XZHOC
 USE MODD_OCEAN_n
+USE MODD_OCEAN_REL_n
 !
 USE MODI_PREP_HOR_OCEAN_FIELD
 !
@@ -105,6 +107,11 @@ IF (IL/=0) THEN
   XKMELM(:,:) =XUNDEF
   ALLOCATE(XSEATEND   (SIZE(XSEAT,1)))
   XSEATEND(:) =XUNDEF
+  !
+  ALLOCATE(XDTFNSOL   (SIZE(XSEAT,1)))
+  XDTFNSOL(:) = XUNDEF
+  ALLOCATE(XDTFSOL    (SIZE(XSEAT,1),NOCKMIN:NOCKMAX))
+  XDTFSOL(:,:)= XUNDEF  
 !!----------------------------------------------------------------------------
 !!
 !!*      6.     Treatment of bathymetry indice and 
@@ -118,6 +125,13 @@ IF (IL/=0) THEN
         XSEAV(J,JLEV)  = XUNDEF
         XSEAT(J,JLEV)  = XUNDEF
         XSEAS(J,JLEV)  = XUNDEF
+        !
+        XSEAT_REL(J,JLEV)  = XUNDEF
+        XSEAS_REL(J,JLEV)  = XUNDEF
+        !
+        XSEAU_REL(J,JLEV)  = XUNDEF
+        XSEAV_REL(J,JLEV)  = XUNDEF
+        !        
       ENDIF 
     ENDDO
   ENDDO

@@ -33,14 +33,10 @@ SUBROUTINE COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                            
 !!     A. Bogatchev 09/2005 EBA snow option
 !!     A. Boone     11/2009 Exner correction for Offline T-B coef
 !!     B. Decharme  11/2009 Implicit coupling ok with all snow scheme
-!!      J. Escobar  09/2012 : SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------------
 !
-USE MODD_ISBA_n,     ONLY : XTSTEP, TSNOW
+USE MODD_ISBA_n,     ONLY : XTSTEP
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_CSTS,       ONLY : XP00, XRD, XCPD
-!
-! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -116,11 +112,6 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
-INTEGER :: JT      ! time loop counter
-INTEGER :: IT      ! total number of surface timesteps in one atmospheric timestep
-REAL    :: ZT      ! total number of surface timesteps in one atmospheric timestep
-REAL    :: ZTSTEP  ! surface time step
-!
 REAL, DIMENSION(KI)    :: ZSFTH   ! surface temperature flux 
 REAL, DIMENSION(KI)    :: ZSFTQ   ! surface water vapor flux 
 REAL, DIMENSION(KI)    :: ZSFCO2  ! surface CO2 flux 
@@ -131,14 +122,13 @@ REAL, DIMENSION(KI)    :: ZTRAD   ! surface radiative temperature
 REAL, DIMENSION(KI)    :: ZEMIS   ! surface emissivity
 REAL, DIMENSION(KI,KSW) :: ZDIR_ALB! direct surface albedo
 REAL, DIMENSION(KI,KSW) :: ZSCA_ALB! diffuse surface albedo
-REAL, DIMENSION(KI)    :: ZPEW_A_COEF ! implicit coefficients
-REAL, DIMENSION(KI)    :: ZPEW_B_COEF ! needed if HCOUPLING='I'
-REAL, DIMENSION(KI)    :: ZPET_A_COEF
-REAL, DIMENSION(KI)    :: ZPEQ_A_COEF
-REAL, DIMENSION(KI)    :: ZPET_B_COEF
-REAL, DIMENSION(KI)    :: ZPEQ_B_COEF
 !
 REAL, DIMENSION(KI)    :: ZWORK_LW  ! work array for mean upward longwave surface flux
+!
+INTEGER :: JT      ! time loop counter
+INTEGER :: IT      ! total number of surface timesteps in one atmospheric timestep
+REAL    :: ZT      ! total number of surface timesteps in one atmospheric timestep
+REAL    :: ZTSTEP  ! surface time step
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -198,7 +188,7 @@ DO JT=1,IT
                  ZTRAD, ZDIR_ALB, ZSCA_ALB, ZEMIS,                                           &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+                 'OK'                                                                        ) 
 !
   PSFTQ    = PSFTQ    + ZSFTQ    / ZT
   PSFTH    = PSFTH    + ZSFTH    / ZT

@@ -72,6 +72,8 @@ LOGICAL          :: LWRITE_COORD = .FALSE. ! write lat/lon of the target grid
 LOGICAL          :: LOUT_TIMENAME = .FALSE.! change the name of output file at the end of a day
                                            ! (ex: 19860502_00h00 -> 19860501_24h00)
 !
+LOGICAL          :: LDIAG_FA_NOCOMPACT = .FALSE. ! fa compaction for diagnostic files
+!
 !*    Time steps
 !     ----------
 !
@@ -101,17 +103,19 @@ LOGICAL          :: LLIMIT_QAIR = .FALSE. ! .T. : Qair always <= Qsat(Tair)
 INTEGER         :: NPROMA                 ! Size of openMP packets
 INTEGER         :: NI,NJ                  ! Domain size
 !
+REAL            :: XIO_FRAC = 1.            ! fraction of ISIZE deduced to I/O
+CHARACTER(LEN=4) :: YALG_MPI = "LIN "       ! type of distribution algorithm for MPI
 !-------------------------------------------------------------------------------
 !
 !*       1.    NAMELISTS
 !              ---------
 !
 NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE, &
-                          CPGDFILE, CPREPFILE, CSURFFILE,                          &
-                          LPRINT, LRESTART, LINQUIRE,                              &
-                          XTSTEP_SURF, XTSTEP_OUTPUT,                              &
-                          LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
-                          NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ  
+                        CPGDFILE, CPREPFILE, CSURFFILE,                          &
+                        LPRINT, LRESTART, LINQUIRE,                              &
+                        XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
+                        LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
+                        NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC, YALG_MPI
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE

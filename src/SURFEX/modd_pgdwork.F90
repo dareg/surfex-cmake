@@ -26,6 +26,7 @@
 !!                  25/07/97 directional z0 computations
 !!                  15/03/99 add XSUMCOVER
 !!                  03/2004  externalization
+!!                  01/2012  add aggregation with the MAJORITY rule
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -78,6 +79,20 @@ REAL, DIMENSION(:), ALLOCATABLE   :: XMEAN_WORK
 REAL, DIMENSION(:), ALLOCATABLE   :: XSTD_WORK
 REAL, DIMENSION(:), ALLOCATABLE   :: XSKEW_WORK
 !
+!
+!*        0.4    Variables for the Majority aggregation rule
+!                -------------------------------------------
+!
+INTEGER, PARAMETER :: JPVALMAX=20  ! Maximum number of different values 
+!                                  ! in each grid mesh
+INTEGER, DIMENSION(:),   ALLOCATABLE :: NVALNBR
+!                                  ! number of different values 
+!                                  ! in each grid mesh
+INTEGER, DIMENSION(:,:), ALLOCATABLE :: NVALCOUNT
+!                                  ! Number of times each value has been 
+!                                  ! counted in each grid mesh
+REAL,    DIMENSION(:,:), ALLOCATABLE :: XVALLIST
+!                                  ! List of Values encountered in each grid mesh
 !-------------------------------------------------------------------------------
 !
 END MODULE MODD_PGDWORK

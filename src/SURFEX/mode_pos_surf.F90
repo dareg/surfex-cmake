@@ -39,15 +39,14 @@ CONTAINS
 !!
 !!    REFERENCE
 !!    ----------
-!!       ECMWF Research Department documentation of the IFS
+!!       ECMWF Research Department documentation of the IFS (Hamrud)
 !!
 !!    AUTHOR
 !!    -------
-!!       Mats Hamrud *ECMWF*
+!!    I. Mallet  15/10/01 
 !!
 !!    MODIFICATIONS
 !!    --------------
-!!       Original : 22/06/93
 !!       I. Mallet  15/10/01     adaptation to MesoNH (F90 norm)
 !------------------------------------------------------------------------------
 !

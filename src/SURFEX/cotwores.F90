@@ -64,6 +64,7 @@ SUBROUTINE COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                   &
 !!      D. Carrer      04/11 : new radiative transfert 
 !!      A. Boone       11/11 : add rsmax to MODD_ISBA_PAR
 !!      B. Decharme    05/12 : Bug : flood fraction in COTWORES
+!!                                   Optimization
 !!
 !-------------------------------------------------------------------------------
 !
@@ -144,11 +145,11 @@ REAL,DIMENSION(:),    INTENT(IN)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PGMES, PGC, 
 !                                    PEPSO     = maximum initial quantum use efficiency 
 !                                                (kgCO2 J-1 PAR)
 !                                    PGAMM     = CO2 conpensation concentration (ppmv)
-!                                    PQDGAMM   = Q10 function for CO2 conpensation 
+!                                    PQDGAMM   = Log of Q10 function for CO2 conpensation 
 !                                                concentration
 !                                    PGMES     = mesophyll conductance (m s-1)
 !                                    PGC       = cuticular conductance (m s-1)
-!                                    PQDGMES   = Q10 function for mesophyll conductance 
+!                                    PQDGMES   = Log of Q10 function for mesophyll conductance 
 !                                    PT1GMES   = reference temperature for computing 
 !                                                compensation concentration function for 
 !                                                mesophyll conductance: minimum temperature 
@@ -156,7 +157,7 @@ REAL,DIMENSION(:),    INTENT(IN)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PGMES, PGC, 
 !                                                compensation concentration function for 
 !                                                mesophyll conductance: maximum temperature
 !                                    PAMAX     = leaf photosynthetic capacity (kg m-2 s-1)
-!                                    PQDAMAX   = Q10 function for leaf photosynthetic capacity
+!                                    PQDAMAX   = Log of Q10 function for leaf photosynthetic capacity
 !                                    PT1AMAX   = reference temperature for computing 
 !                                                compensation concentration function for leaf 
 !                                                photosynthetic capacity: minimum temperature
@@ -238,6 +239,10 @@ REAL :: ZABC, ZWEIGHT
 !                                                     conductance over canopy depth 
 !                                                     (working scalar)
 !
+REAL, DIMENSION(SIZE(PLAI))    :: ZWORK !Work array
+!
+LOGICAL, DIMENSION(SIZE(PLAI)) :: LHERB, LWOOD, LF2_INF_F2I
+!
 INTEGER, DIMENSION(1)          :: IDMAX
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -288,70 +293,80 @@ ELSEIF (HPHOTO=='AST' .OR. HPHOTO=='LST' .OR. HPHOTO=='NIT' .OR. HPHOTO=='NCB') 
   !  
   ZDMAX(:)  = PDMAX(:)
   !
+  LHERB      (:) = (PVEGTYPE(:,NVT_TREE) + PVEGTYPE(:,NVT_EVER) + PVEGTYPE(:,NVT_CONI)<0.5)
+  LWOOD      (:) = (.NOT.LHERB (:))
+  LF2_INF_F2I(:) = (PF2(:)<PF2I(:))
+  !
   ! -HERBACEOUS-
   !
-  WHERE (PVEGTYPE(:,NVT_TREE) + PVEGTYPE(:,NVT_EVER) + PVEGTYPE(:,NVT_CONI)<0.5)
-    !  
-    WHERE (OSTRESSDEF(:))
-      ZDMAX(:) = XDMAXN
-    ELSEWHERE
-      ZDMAX(:) = XDMAXX
-    END WHERE
-    !
-    ! PAH and PBH are original coefficients of Calvet 2000
-    WHERE (PF2(:) >= PF2I(:))
-      ZDMAXSTAR(:) = EXP((LOG(ZGMEST(:)*1000.)-PAH(:))/PBH(:))/1000.
-      ZDMAX(:) = ZDMAXSTAR(:) - (ZDMAXSTAR(:)-ZDMAX(:))*(1.-PF2(:))/(1.-PF2I(:))
-    END WHERE
-    !
-    ZGMEST(:) = EXP(PAH(:)+PBH(:)*LOG(ZDMAX(:)*1000.))/1000.
-    !
-    WHERE (PF2(:) < PF2I(:))
-      WHERE (OSTRESSDEF(:))
-        ZGMEST(:) = ZGMEST(:) * PF2(:)/PF2I(:)
-      ELSEWHERE
-        ZDMAX(:) = ZDMAX(:) * PF2(:)/PF2I(:)
-      END WHERE
-    END WHERE
-    !
-    ! to limit photosynthesis under wilting point
-    WHERE (.NOT.OSTRESSDEF(:) .AND. ZDMAX(:)<=XDMAXN)
-      ZDMAX(:)  = XDMAXN
-      ZGMEST(:) = (EXP(PAH(:)+PBH(:)*LOG(XDMAXN*1000.))/1000.)*PF2(:)/PF2I(:)
-    END WHERE
-    !
-  ELSEWHERE
-    !
-    ! -WOODY-
-    !
+  WHERE (LHERB(:).AND.OSTRESSDEF(:))
+    ZDMAX(:) = XDMAXN
+  ENDWHERE
+  WHERE(LHERB(:).AND..NOT.OSTRESSDEF(:))
+    ZDMAX(:) = XDMAXX
+  ENDWHERE
+  !
+  ! PAH and PBH are original coefficients of Calvet 2000
+  WHERE(LHERB(:).AND.(.NOT.LF2_INF_F2I(:)))
+    ZDMAXSTAR(:) = EXP((LOG(ZGMEST(:)*1000.)-PAH(:))/PBH(:))/1000.
+    ZDMAX(:) = ZDMAXSTAR(:) - (ZDMAXSTAR(:)-ZDMAX(:))*(1.-PF2(:))/(1.-PF2I(:))
+  ENDWHERE
+  !
+  WHERE(LHERB(:))
+        ZGMEST(:) = EXP(PAH(:)+PBH(:)*LOG(ZDMAX(:)*1000.))/1000.
+  ENDWHERE
+  !
+  WHERE (LHERB(:).AND.LF2_INF_F2I(:).AND.OSTRESSDEF(:))
+      ZGMEST(:) = ZGMEST(:) * PF2(:)/PF2I(:)
+  ENDWHERE
+  WHERE(LHERB(:).AND.LF2_INF_F2I(:).AND.(.NOT.OSTRESSDEF(:)))
+      ZDMAX(:) = ZDMAX(:) * PF2(:)/PF2I(:)
+  ENDWHERE
+  !
+  ! to limit photosynthesis under wilting point
+  WHERE (LHERB(:).AND.(.NOT.OSTRESSDEF(:)).AND.ZDMAX(:)<=XDMAXN)
+    ZDMAX(:)  = XDMAXN
+    ZGMEST(:) = (EXP(PAH(:)+PBH(:)*LOG(XDMAXN*1000.))/1000.)*PF2(:)/PF2I(:)
+  ENDWHERE
+  !
+  ! -WOODY-
+  !
+  WHERE(LWOOD(:))
     ZFZEROSTAR(:) = ( XAW  - LOG(ZGMEST(:)*1000.) )/XBW
-    !
-    WHERE (OSTRESSDEF(:))
-      ZGMESTN(:) = ZGMEST(:)
-    ELSEWHERE
-      ZGMESTN(:) = EXP(XASW - XBW*ZFZEROSTAR(:))/1000.
-    END WHERE
-    !
-    WHERE (PF2(:) < PF2I(:)) 
-      ZGMESTN(:) = ZGMESTN(:)*PF2(:)/PF2I(:)
-      WHERE (OSTRESSDEF(:)) ZGMESTN(:) = MAX( 1.0E-10, ZGMESTN(:) )
-    END WHERE
-    !
+  ENDWHERE
+  !
+  WHERE (LWOOD(:).AND.OSTRESSDEF(:))
+    ZGMESTN(:) = ZGMEST(:)
+  ENDWHERE
+  WHERE(LWOOD(:).AND.(.NOT.OSTRESSDEF(:)))
+    ZGMESTN(:) = EXP(XASW - XBW*ZFZEROSTAR(:))/1000.
+  ENDWHERE
+  !
+  WHERE (LWOOD(:).AND.LF2_INF_F2I(:)) 
+    ZGMESTN(:) = ZGMESTN(:)*PF2(:)/PF2I(:)
+  ENDWHERE
+  !
+  WHERE (LWOOD(:).AND.LF2_INF_F2I(:).AND.OSTRESSDEF(:)) 
+    ZGMESTN(:) = MAX( 1.0E-10, ZGMESTN(:) )
+  ENDWHERE
+  !
+  WHERE(LWOOD(:))
     ZFZERON(:) = (XASW - LOG(ZGMESTN(:)*1000.))/XBW
-    !
-    WHERE (PF2(:) >= PF2I(:))
-      ZFZERO(:) = ZFZEROSTAR(:)
-      WHERE ( OSTRESSDEF(:))
-        ZFZERO(:) = ZFZERO(:) - (ZFZERO(:)-ZFZERON(:))*(1.-PF2(:))/(1.-PF2I(:))  
-      ELSEWHERE
-        ZGMEST(:) = ZGMEST(:) - (ZGMEST(:)-ZGMESTN(:))*(1.-PF2(:))/(1.-PF2I(:))  
-      END WHERE
-    ELSEWHERE 
-      ZFZERO(:) = MIN(.95, ZFZERON(:))
-      ZGMEST(:) = ZGMESTN(:)
-    END WHERE
-    !
-  END WHERE
+  ENDWHERE
+  !
+  WHERE(LWOOD(:).AND.(.NOT.LF2_INF_F2I(:)).AND.OSTRESSDEF(:))
+    ZFZERO(:) = ZFZEROSTAR(:)
+    ZFZERO(:) = ZFZERO(:) - (ZFZERO(:)-ZFZERON(:))*(1.-PF2(:))/(1.-PF2I(:))  
+  ENDWHERE    
+  WHERE(LWOOD(:).AND.(.NOT.LF2_INF_F2I(:)).AND.(.NOT.OSTRESSDEF(:)))
+    ZFZERO(:) = ZFZEROSTAR(:)
+    ZGMEST(:) = ZGMEST(:) - (ZGMEST(:)-ZGMESTN(:))*(1.-PF2(:))/(1.-PF2I(:))  
+  ENDWHERE    
+  !
+  WHERE(LWOOD(:).AND.LF2_INF_F2I(:))
+    ZFZERO(:) = MIN(.95, ZFZERON(:))
+    ZGMEST(:) = ZGMESTN(:)
+  ENDWHERE    
   !
 ENDIF
 !
@@ -359,7 +374,10 @@ ENDIF
 !
 ! compensation point (ppm): temperature response
 !
-ZGAMMT(:) = PGAMM(:)*PQDGAMM(:)**(0.1*(ZTSPC(:)-25.0))
+!before optimization (with non log PQDGAMM) : 
+!ZGAMMT(:) = PGAMM(:)*PQDGAMM(:)**(0.1*(ZTSPC(:)-25.0))
+ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * PQDGAMM(:)
+ZGAMMT(:) = PGAMM(:) * EXP(ZWORK(:))
 !
 ! specific humidity deficit (kg kg-1)
 !
@@ -373,11 +391,18 @@ ZXMUS(:) = MAX(COS(PZENITH(:)),0.01)
 ! Compute temperature response functions:
 !
 ! kg/m2/s
-ZANMAX(:) =  PAMAX(:)*PQDAMAX(:)**(0.1*(ZTSPC(:)-25.0))   &
-                 /( (1.0+EXP(0.3*(PT1AMAX(:)-ZTSPC(:))))* (1.0+EXP(0.3*(ZTSPC(:)-PT2AMAX(:)))) )  
+!before optimization (with non log PQDAMAX) : 
+!ZANMAX(:) = ( PAMAX(:)*PQDAMAX(:)**(0.1*(ZTSPC(:)-25.0)) ) / ...
+ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * PQDAMAX(:)
+ZANMAX(:) = ( PAMAX(:) * EXP(ZWORK(:))  ) &
+          / ( (1.0+EXP(0.3*(PT1AMAX(:)-ZTSPC(:))))* (1.0+EXP(0.3*(ZTSPC(:)-PT2AMAX(:)))) )  
+!                 
 ! m/s
-ZGMEST(:) = ( ZGMEST(:)*PQDGMES(:)**(0.1*(ZTSPC(:)-25.0)) )    &
-                /( (1.0+EXP(0.3*(PT1GMES(:)-ZTSPC(:))))*  (1.0+EXP(0.3*(ZTSPC(:)-PT2GMES(:)))) )  
+!before optimization (with non log PQDGMES) : 
+!ZGMEST(:) = ( ZGMEST(:)*PQDGMES(:)**(0.1*(ZTSPC(:)-25.0)) ) / ...
+ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * PQDGMES(:)
+ZGMEST(:) = ( ZGMEST(:) * EXP(ZWORK(:)) ) &
+          / ( (1.0+EXP(0.3*(PT1GMES(:)-ZTSPC(:))))*  (1.0+EXP(0.3*(ZTSPC(:)-PT2GMES(:)))) )  
 !
 !
 ! Integration over the canopy: SIZE(PABC) increments

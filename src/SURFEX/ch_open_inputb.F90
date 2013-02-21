@@ -74,8 +74,6 @@ IF (LHOOK) CALL DR_HOOK('CH_OPEN_INPUTB',0,ZHOOK_HANDLE)
 REWIND(KCHANNEL)
 !
 ! open the input file
-WRITE(KLUOUT,*) "CH_OPEN_INPUTB: opened channel ", KCHANNEL, &
-                  " for input chemistry file "  
 !
 ! read general comment line and print it
 READ(KCHANNEL,"(A)") YIN
@@ -88,7 +86,7 @@ ENDDO search_key
 !
 ! read specific comment line and print it
 WRITE(KLUOUT,*) &
-     "Keyword ", HKEYWORD(1:8), " has been found, the specific comment is:"  
+     "Keyword ", HKEYWORD(1:8), " has been found in chemistry data file, the specific comment is:"  
 READ(KCHANNEL,"(A)") YIN
 WRITE(KLUOUT, *) YIN
 !

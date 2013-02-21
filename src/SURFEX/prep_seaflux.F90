@@ -22,6 +22,7 @@ SUBROUTINE PREP_SEAFLUX(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!    -------------
 !!      Original    01/2004
 !!      S. Riette   06/2009 PREP_SEAFLUX_SBL has no more argument
+!!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!------------------------------------------------------------------
 !
 !
@@ -42,6 +43,8 @@ USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 USE MODD_OCEAN_n,        ONLY : LMERCATOR, LCURRENT
 USE MODD_SEAFLUX_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
 !
+USE MODD_OCEAN_REL_n, ONLY : XTAU_REL,LREL_CUR,LREL_TS, LFLUX_NULL, &
+                           XQCORR,LFLX_CORR,LDIAPYCNAL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -83,6 +86,16 @@ CALL PREP_OUTPUT_GRID(ILUOUT,CGRID,XGRID_PAR,XLAT,XLON)
 LSBL = LSEA_SBL
 LMERCATOR = LOCEAN_MERCATOR
 LCURRENT  = LOCEAN_CURRENT
+! Relaxation-forcing parameters
+XTAU_REL   = XTIME_REL
+XQCORR     = XCORFLX
+!
+LREL_CUR   = LCUR_REL
+LREL_TS    = LTS_REL
+LFLUX_NULL = LZERO_FLUX
+LFLX_CORR  = LCORR_FLUX
+LDIAPYCNAL = LDIAPYC
+!
 !-------------------------------------------------------------------------------------
 !
 !*      2.     Reading and horizontal interpolations

@@ -1,6 +1,6 @@
 !     #########
-    SUBROUTINE MOD1D_n(PTIME,PLW,PSCA_SW,PDIR_SW,&
-           PSFTH,PSFTQ,PSFU,PSFV,PRAIN,PSST)  
+    SUBROUTINE MOD1D_n(HPROGRAM,PTIME,PEMIS,PDIR_ALB,PSCA_ALB,PLW,PSCA_SW,&
+                       PDIR_SW, PSFTH,PSFTQ,PSFU,PSFV,PRAIN,PSST )           
 !     #######################################################################
 !
 !!****  *MOD1D_n*  
@@ -33,6 +33,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original     02/2008
+!!      Modified     07/2012, P. Le Moigne : CMO1D phasing
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -47,6 +48,8 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_MIXTL_n
 USE MODI_DIAG_INLINE_OCEAN_n
 !
+USE MODD_OCEAN_REL_n , ONLY : LFLUX_NULL
+USE MODI_GET_LUOUT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -57,7 +60,11 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
 REAL                ,INTENT(IN)       :: PTIME   ! current time since midnight in second
+REAL, DIMENSION(:)  ,INTENT(IN)       :: PEMIS    ! emissivity
+REAL, DIMENSION(:,:),INTENT(IN)       :: PDIR_ALB ! direct albedo
+REAL, DIMENSION(:,:),INTENT(IN)       :: PSCA_ALB ! scattered albedo
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PLW     ! longwave radiation on horizontal surface (W/m2)
 REAL, DIMENSION(:,:),INTENT(IN)       :: PSCA_SW ! diffuse solar radiation on horizontal surface (W/m2)
 REAL, DIMENSION(:,:),INTENT(IN)       :: PDIR_SW ! direct solar radiation on horizontal surface (W/m2)
@@ -77,14 +84,21 @@ REAL, DIMENSION(SIZE(PSFTH)) :: ZFSOL,ZFNSOL !total solar and non-solar fluxes (
 REAL, DIMENSION(SIZE(PSFTH)) :: ZSFTEAU      !fresh water flux(kg/m2/s)
 REAL, DIMENSION(SIZE(PSFTH)) :: ZLV          !latent heat
 !
+REAL, DIMENSION(SIZE(PSFTH)) :: ZLWU         !long waves upward fluxes (W/m2)
+REAL, DIMENSION(SIZE(PDIR_ALB,1),SIZE(PDIR_ALB,2)) :: ZSWU
+                                             !shortwave upward fluxes (W/m2)
+!
 REAL, DIMENSION(SIZE(PSFTH)) :: ZSEATEMP     !surface temperature (K)
 !
-LOGICAL :: GCALLMIXT, GTIMEOK
+LOGICAL         :: GCALLMIXT, GTIMEOK
+INTEGER         :: ILUOUT              ! output listing logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MOD1D_N',0,ZHOOK_HANDLE)
+!
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ITIME=INT(PTIME)
 NOCEAN_STEP=INT(XOCEAN_TSTEP)
@@ -100,21 +114,34 @@ IF (GCALLMIXT) THEN
 !________________________________________________________________________
 !Computation of solar, non solar and fresh water fluxes
   DO JPT=1,SIZE(PSFTH)
-    ZFSOL(JPT)=(SUM(PDIR_SW(JPT,:))+SUM(PSCA_SW(JPT,:)))/(XRHOSW*XCPSW)
+ !SW Flux up
+    ZSWU(JPT,:)= PDIR_SW(JPT,:) * PDIR_ALB(JPT,:) + PSCA_SW(JPT,:)*PSCA_ALB(JPT,:)
+ !Net solar flux  
+    ZFSOL(JPT)=(SUM(PDIR_SW(JPT,:))+SUM(PSCA_SW(JPT,:))-SUM(ZSWU(JPT,:)))/(XRHOSW*XCPSW)
+ !Calcul flux LW UP
+    ZLWU(JPT)= PEMIS(JPT)*XSTEFAN*PSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
+   
     IF (PSST(JPT)<=(XTT-2)) THEN
-      ZFNSOL(JPT)=(-PLW(JPT)-PSFTH(JPT)-(XLSTT*PSFTQ(JPT)))/(XRHOSW*XCPSW)
+      ZFNSOL(JPT)=(PLW(JPT)-ZLWU(JPT)-PSFTH(JPT)-(XLSTT*PSFTQ(JPT)))/(XRHOSW*XCPSW)
       ZSFTEAU(JPT)=PSFTQ(JPT)/XRHOSWREF
     ELSE
       ZLV(JPT)=XLVTT+(XCPV-XCL)*(PSST(JPT)-XTT)
-      ZFNSOL(JPT)=(-PLW(JPT)-PSFTH(JPT)-(ZLV(JPT)*PSFTQ(JPT)))/(XRHOSW*XCPSW)
+      ZFNSOL(JPT)=(PLW(JPT)-ZLWU(JPT)-PSFTH(JPT)-(ZLV(JPT)*PSFTQ(JPT)))/(XRHOSW*XCPSW)
       ZSFTEAU(JPT)=(PSFTQ(JPT)-PRAIN(JPT))/XRHOSWREF
-    ENDIF
+    ENDIF  
   ENDDO
 !__________________________________________________________________________
 !
 !        2. Call oceanic TKE model
 !           ----------------------
 !
+  IF (LFLUX_NULL) THEN
+     WRITE(ILUOUT,*) 'Caution : SURFACE FLUX ARE SET TO 0 '
+     ZFSOL(:)   = 0.
+     ZFNSOL(:)  = 0.
+     ZSFTEAU(:) = 0.
+  END IF
+
   CALL MIXTL_n(ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP)
 !
 !---------------------------------------------------------------------------
@@ -122,7 +149,7 @@ IF (GCALLMIXT) THEN
 !
   IF (LPROGSST) THEN 
     PSST(:)=ZSEATEMP(:)
-    !WRITE(0,*) '**SST CHANGED FOR THE ',NOCTCOUNT,'TIME BY FIRST LEVEL OCEANIC MODEL TEMPERATURE AT ', ITIME,' s **'
+    !WRITE(ILUOUT,*) '**SST CHANGED FOR THE ',NOCTCOUNT,'TIME BY FIRST LEVEL OCEANIC MODEL TEMPERATURE AT ', ITIME,' s **'
   ENDIF
   !
 ENDIF

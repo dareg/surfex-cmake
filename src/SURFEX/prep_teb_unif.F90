@@ -25,16 +25,18 @@ SUBROUTINE PREP_TEB_UNIF(KLUOUT,HSURF,PFIELD)
 !
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_PREP,       ONLY : CINTERP_TYPE
-USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF,               &
+USE MODD_PREP,       ONLY : CINTERP_TYPE, XZS_LS
+USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XGRID_FLOOR,    &
                               XWS_ROOF, XWS_ROAD, XTS_ROAD, XTS_ROOF, XTS_WALL, &
-                              XTI_BLD, XTI_ROAD, XT_CAN, XQ_CAN  
+                              XTI_BLD, XTI_ROAD, XT_CAN, XQ_CAN, XHUI_BLD
+USE MODD_CSTS, ONLY : XG, XP00
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
+USE MODE_THERMOS
 !
 IMPLICIT NONE
 !
@@ -43,10 +45,13 @@ IMPLICIT NONE
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
 CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
 REAL, POINTER, DIMENSION(:,:)   :: PFIELD    ! field to interpolate horizontally
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
+REAL, DIMENSION(:), ALLOCATABLE :: ZPS       ! surface pressure
+REAL, DIMENSION(:), ALLOCATABLE :: ZTI_BLD   ! indoor building temperature
+REAL, PARAMETER                 :: ZRHOA=1.19! air volumic mass at 20°C and 1015hPa
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
@@ -67,7 +72,7 @@ SELECT CASE(HSURF)
 
 !*      3.2    Profile of temperatures in walls
 
-  CASE('T_WALL ')
+  CASE('T_WALLA','T_WALLB')
     ALLOCATE(PFIELD(1,SIZE(XGRID_WALL)))
     CALL PUT_UNIF_ON_REF_GRID('WALL',XGRID_WALL)
 
@@ -76,6 +81,16 @@ SELECT CASE(HSURF)
   CASE('T_ROOF ')
     ALLOCATE(PFIELD(1,SIZE(XGRID_ROOF)))
     CALL PUT_UNIF_ON_REF_GRID('ROOF',XGRID_ROOF)
+
+!*      3.4bis Profile of temperatures in floors
+
+  CASE('T_FLOOR')
+    ALLOCATE(PFIELD(1,SIZE(XGRID_FLOOR)))
+    CALL PUT_UNIF_ON_REF_GRID('FLOO',XGRID_FLOOR)
+
+  CASE('T_MASS')
+    ALLOCATE(PFIELD(1,SIZE(XGRID_FLOOR)))
+    CALL PUT_UNIF_ON_REF_GRID('MASS',XGRID_FLOOR)
 
 !*      3.4    Other quantities
 
@@ -91,19 +106,31 @@ SELECT CASE(HSURF)
     ALLOCATE(PFIELD(1,1))
     PFIELD = XTI_BLD
 
+  CASE('QI_BLD  ')
+    ALLOCATE(PFIELD(SIZE(XZS_LS),1))
+    ALLOCATE(ZPS(SIZE(XZS_LS)))
+    ALLOCATE(ZTI_BLD(SIZE(XZS_LS)))
+    ZPS = XP00 - ZRHOA*XG*XZS_LS
+    ZTI_BLD = XTI_BLD
+    PFIELD(:,1) = XHUI_BLD * QSAT(ZTI_BLD, ZPS)
+    DEALLOCATE(ZPS)
+    DEALLOCATE(ZTI_BLD)
+
+  CASE('T_WIN1  ')
+    ALLOCATE(PFIELD(1,1))
+    PFIELD = XTS_WALL
+
+  CASE('T_WIN2  ')
+    ALLOCATE(PFIELD(1,1))
+    PFIELD = XTI_BLD
+
   CASE('TI_ROAD')
     ALLOCATE(PFIELD(1,1))
     PFIELD = XTI_ROAD
 
   CASE('T_CAN  ')
     ALLOCATE(PFIELD(1,1))
-    IF (XTS_ROAD/=XUNDEF) THEN
-      PFIELD = XTS_ROAD
-    ELSE IF (XTS_WALL/=XUNDEF) THEN
-      PFIELD = XTS_WALL
-    ELSE IF (XTS_ROOF/=XUNDEF) THEN
-      PFIELD = XTS_ROOF
-    ENDIF    
+    PFIELD = XT_CAN
 
   CASE('Q_CAN  ')
     ALLOCATE(PFIELD(1,1))
@@ -151,14 +178,18 @@ SELECT CASE(HSURFTYPE)
     ZTS = XTS_ROAD
   CASE('WALL')
     ZTS = XTS_WALL
+  CASE('FLOO')
+    ZTS = XTI_BLD
+  CASE('MASS')
+    ZTS = XTI_BLD
 END SELECT
 
 !* get deep road or building interior temperature
 
 SELECT CASE(HSURFTYPE)
-  CASE('ROOF', 'WALL')
+  CASE('ROOF', 'WALL', 'MASS')
     ZTI = XTI_BLD
-  CASE('ROAD')
+  CASE('ROAD', 'FLOO')
     IF (XTI_ROAD/= XUNDEF) THEN
       ZTI = XTI_ROAD
     ELSE

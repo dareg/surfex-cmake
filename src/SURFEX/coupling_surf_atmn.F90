@@ -30,30 +30,36 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
-!! Modified    09/2012 : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
+!!      Modified    09/2011 by S.Queguiner: Add total CO2 surface flux (anthropo+biogenic) as diagnostic
+!!      Modified    11/2011 by S.Queguiner: Add total Chemical surface flux (anthropo) as diagnostic
 !!-------------------------------------------------------------
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_CSTS,           ONLY : XP00, XCPD, XRD
+USE MODD_CSTS,           ONLY : XP00, XCPD, XRD, XAVOGADRO
+USE MODD_SURF_ATM_GRID_n,ONLY : XLON
 USE MODD_SURF_ATM_n,     ONLY : NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
                                 NR_SEA,    NR_WATER,    NR_TOWN,    NR_NATURE,    &
                                 XSEA,      XWATER,      XTOWN,      XNATURE,      &
-                                TTIME
+                                TTIME, NSIZE_FULL
 USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 USE MODD_SV_n,           ONLY : NBEQ,NSV_CHSBEG,NSV_CHSEND, &
                                 NDSTEQ,NSV_DSTBEG,NSV_DSTEND,&
-                                NAEREQ,NSV_AERBEG,NSV_AEREND
+                                NAEREQ,NSV_AERBEG,NSV_AEREND, CSV
 !
-USE MODD_CH_SURF_n,      ONLY : LCH_SURF_EMIS
+USE MODD_CH_SURF_n,      ONLY : LCH_SURF_EMIS, LCH_EMIS, CCH_EMIS
 USE MODD_CH_EMIS_FIELD_n,ONLY : TSEMISS
+!
+USE MODD_SURFEX_MPI, ONLY : XTIME_SEA, XTIME_WATER, XTIME_NATURE, XTIME_TOWN
 !
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_AVERAGE_FLUX
 USE MODI_AVERAGE_RAD
 USE MODI_DIAG_INLINE_SURF_ATM_n
 USE MODI_CH_EMISSION_FLUX_n
+USE MODI_CH_EMISSION_SNAP_n
+USE MODI_CH_EMISSION_TO_ATM_n
 USE MODI_SSO_Z0_FRICTION_n
 USE MODI_SSO_BE04_FRICTION_n
 !
@@ -73,6 +79,10 @@ USE MODI_COUPLING_SEA_n
 USE MODI_COUPLING_TOWN_n
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE 'mpif.h'
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -169,6 +179,8 @@ REAL, DIMENSION(KI,NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 !
+DOUBLE PRECISION :: XTIME0
+!
 INTEGER :: IINDEXEND
 INTEGER :: INBTS, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -204,7 +216,7 @@ JTILE     = 0
 !
 ! Number of shortwave spectral bands
 !
-ISWB = KSW
+ISWB = SIZE(PSW_BANDS)
 !
 ! Initialization: Outputs to atmosphere over each tile:
 !
@@ -214,8 +226,8 @@ ZDIR_ALB_TILE(:,:,:)  = XUNDEF
 ZSCA_ALB_TILE(:,:,:)  = XUNDEF
 ZEMIS_TILE(:,:)       = XUNDEF
 ZSFTQ_TILE(:,:)       = XUNDEF
-ZSFTS_TILE(:,:,:)     = XUNDEF
-ZSFCO2_TILE(:,:)      = XUNDEF
+ZSFTS_TILE(:,:,:)     = 0.
+ZSFCO2_TILE(:,:)      = 0.
 ZSFU_TILE(:,:)        = XUNDEF
 ZSFV_TILE(:,:)        = XUNDEF
 !
@@ -252,6 +264,10 @@ CALL RW_PRECIP_n(HPROGRAM,PRAIN,PSNOW)
 ! Call ALMA interfaces for sea, water, nature and town here...
 !--------------------------------------------------------------------------------------
 !
+#ifndef NOMPI
+XTIME0 = MPI_WTIME()
+#endif
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -268,6 +284,11 @@ IF(GSEA)THEN
 !
 ENDIF
 !
+#ifndef NOMPI
+XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
+XTIME0 = MPI_WTIME()
+#endif
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! INLAND WATER Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -281,6 +302,12 @@ IF(GWATER)THEN
   CALL TREAT_SURF(JTILE,NSIZE_WATER,NR_WATER)
 !
 ENDIF 
+!
+#ifndef NOMPI
+XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
+XTIME0 = MPI_WTIME()
+#endif
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -294,6 +321,11 @@ IF(GNATURE)THEN
   CALL TREAT_SURF(JTILE,NSIZE_NATURE,NR_NATURE)
 !
 ENDIF 
+!
+#ifndef NOMPI
+XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
+XTIME0 = MPI_WTIME()
+#endif
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
@@ -309,7 +341,10 @@ IF(GTOWN)THEN
 !
 ENDIF 
 !
-
+#ifndef NOMPI
+XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
+#endif
+!
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -321,20 +356,49 @@ CALL AVERAGE_FLUX(ZFRAC_TILE,                              &
                   PSFTH, PSFTQ, PSFTS, PSFCO2,             &
                   PSFU, PSFV                               )
 !
-IF ((NBEQ > 0).AND.(LCH_SURF_EMIS)) THEN 
-  IF (NSV_AEREND < 0)  THEN
-   IINDEXEND = NSV_CHSEND ! case only gas chemistry
-  ELSE
-   IINDEXEND = NSV_AEREND ! case aerosol + gas chemistry
-  ENDIF
-  INBTS=0
-  DO JI=1,SIZE(TSEMISS)
-    IF (SIZE(TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(TSEMISS(JI)%NETIMES)
-  ENDDO
-  CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! Chemical Emissions:                  
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+IF ((NBEQ > 0).AND.(LCH_SURF_EMIS)) THEN
+  IF (CCH_EMIS=='AGGR') THEN
+    IF (NSV_AEREND < 0)  THEN
+      IINDEXEND = NSV_CHSEND ! case only gas chemistry
+    ELSE
+      IINDEXEND = NSV_AEREND ! case aerosol + gas chemistry
+    ENDIF
+    INBTS=0
+    DO JI=1,SIZE(TSEMISS)
+      IF (SIZE(TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(TSEMISS(JI)%NETIMES)
+    ENDDO
+    CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+  ELSE IF (CCH_EMIS=='SNAP') THEN
+    CALL CH_EMISSION_SNAP_n(HPROGRAM,NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,XLON)
+    CALL CH_EMISSION_TO_ATM_n(PSFTS,PRHOA)
+  END IF
 END IF
 !
+WHERE(PSFTS(:,:)==XUNDEF)  PSFTS(:,:)=0.
+! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! CO2 Flux : adds biogenic and anthropogenic emissions
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! CO2 FLUXES  : PSFTS  in molecules/m2/s
+!               PSFCO2 in kgCO2/kgair*m/s = *PRHOA kgCO2/m2/s
+!               PSFCO2 in kgCO2/m2/s      = *Navogadro*1E3/Mco2(44g/mol) molecules/m2/s
 !
+DO JI=1,SIZE(PSV,2)
+  IF(TRIM(ADJUSTL(CSV(JI)))=="CO2") THEN
+    ! CO2 Flux (Antrop + biog) (molec*m2/s)
+    PSFTS(:,JI) = PSFTS(:,JI) + PSFCO2(:)*PRHOA(:)*(XAVOGADRO/44.)*1E3
+    ! CO2 Flux (Antrop + biog) (kgCO2/kgair*m/s)
+    PSFCO2(:)   = PSFTS(:,JI)/(PRHOA(:)*(XAVOGADRO/44.)*1E3)
+  END IF
+END DO
+!
+!
+! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+! Radiative fluxes
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
                  ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                  PDIR_ALB,      PSCA_ALB,      PEMIS,      PTRAD       )
@@ -344,7 +408,7 @@ CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !* adds friction due to subscale orography to momentum fluxes
-!  but only over continental area 
+!  but only over continental area
 !
 IF (CROUGH=="Z01D" .OR. CROUGH=="Z04D") THEN
   CALL SSO_Z0_FRICTION_n(XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
@@ -356,7 +420,7 @@ END IF
 ! Inline diagnostics for full surface
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL DIAG_INLINE_SURF_ATM_n(PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV)
+CALL DIAG_INLINE_SURF_ATM_n(PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
@@ -368,7 +432,7 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN)               :: KTILE
 INTEGER, INTENT(IN)               :: KSIZE
-INTEGER, INTENT(IN), DIMENSION(:) :: KMASK
+INTEGER, INTENT(IN), DIMENSION(KI) :: KMASK
 !
 REAL, DIMENSION(KSIZE) :: ZP_TSUN     ! solar time                    (s from midnight)
 REAL, DIMENSION(KSIZE) :: ZP_ZREF     ! height of T,q forcing                 (m)
@@ -575,5 +639,3 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:TREAT_SURF',1,ZHOOK_HANDLE)
 END SUBROUTINE TREAT_SURF
 !=======================================================================================
 END SUBROUTINE COUPLING_SURF_ATM_n
-
-

@@ -517,7 +517,7 @@ ENDIF
 !               --------------
 ! Including vertical diffusion limiting factor for surface soil ice:
 !
-IF(HKSAT=='SGH')THEN
+IF(HKSAT=='SGH' .OR. HKSAT=='EXP')THEN
 !
 ! Adjusted root-zone soil water content
 !

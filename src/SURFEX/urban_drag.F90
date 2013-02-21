@@ -19,7 +19,8 @@
                           PAC_WALL, PAC_ROAD, PAC_ROAD_WAT, PAC_TOP,        &
                           PAC_GARDEN, PRI,                                  &
                           PUW_ROAD, PUW_ROOF, PDUWDU_ROAD, PDUWDU_ROOF,     &
-                          PUSTAR_TOWN                                       ) 
+                          PUSTAR_TOWN, OCANOPY, PTS_WIN, PAC_WIN, HCH_BEM,  &
+                          PROUGH_ROOF, PROUGH_WALL                          ) 
 !   ##########################################################################
 !
 !!****  *URBAN_DRAG*  
@@ -64,7 +65,11 @@
 !          03/08 (S. Leroyer) debug PU_CAN (1. * H/3)
 !          12/08 (S. Leroyer) option (HZ0H) for z0h applied on roof, road and town
 !!         09/12 B. Decharme new wind implicitation
-!! 
+!          11/11 (G. Pigeon) apply only urban_exch_coef when necessary if
+!                            canopy/no canopy
+!          09/12 (G. Pigeon) add new formulation for outdoor conv. coef for
+!                            wall/roof/window
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -76,6 +81,7 @@ USE MODD_CSTS,ONLY : XLVTT, XPI, XCPD, XG, XKARMAN
 !USE MODE_SBLS
 USE MODE_THERMOS
 USE MODI_URBAN_EXCH_COEF
+USE MODE_CONV_DOE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -166,6 +172,13 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PDUWDU_ROAD    !
 REAL, DIMENSION(:), INTENT(OUT)   :: PDUWDU_ROOF    ! 
 REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR_TOWN    ! Fraction velocity for town
 !
+LOGICAL, INTENT(IN)               :: OCANOPY        ! is canopy active
+REAL, DIMENSION(:), INTENT(OUT)   :: PAC_WIN        ! aerodynamical conductance for window
+REAL, DIMENSION(:), INTENT(IN)    :: PTS_WIN        ! window outdoor surface temp
+CHARACTER(LEN=5), INTENT(IN)      :: HCH_BEM        ! BEM option for convective heat transfer coef.
+REAL, DIMENSION(:), INTENT(IN)    :: PROUGH_ROOF    ! roughness coef for the roof
+REAL, DIMENSION(:), INTENT(IN)    :: PROUGH_WALL    ! roughness coef for the wall
+!
 !*      0.2    declarations of local variables
 !
 !
@@ -174,8 +187,6 @@ REAL, DIMENSION(SIZE(PTA)) :: ZQ_TOWN      ! town averaged hum.
 REAL, DIMENSION(SIZE(PTA)) :: ZAVDELT_ROOF ! averaged water frac.
 REAL, DIMENSION(SIZE(PTA)) :: ZQ_ROOF      ! roof spec. hum.
 REAL, DIMENSION(SIZE(PTA)) :: ZZ0_ROOF     ! roof roughness length
-REAL, DIMENSION(SIZE(PTA)) :: ZAVDELT_ROAD ! averaged water frac.
-REAL, DIMENSION(SIZE(PTA)) :: ZQ_ROAD      ! road spec. hum.
 REAL, DIMENSION(SIZE(PTA)) :: ZZ0_ROAD     ! road roughness length
 REAL, DIMENSION(SIZE(PTA)) :: ZW_CAN       ! ver. wind in canyon
 REAL, DIMENSION(SIZE(PTA)) :: ZRI          ! Richardson number
@@ -186,7 +197,8 @@ REAL, DIMENSION(SIZE(PTA)) :: ZCH_ROOF     ! drag coefficient for heat
 REAL, DIMENSION(SIZE(PTA)) :: ZRA_TOP      ! aerodynamical resistance
 REAL, DIMENSION(SIZE(PTA)) :: ZCH_TOP      ! drag coefficient for heat
 REAL, DIMENSION(SIZE(PTA)) :: ZRA_ROAD     ! aerodynamical resistance
-REAL, DIMENSION(SIZE(PTA)) :: ZCH_ROAD     ! drag coefficient for heat
+REAL, DIMENSION(SIZE(PTA)) :: ZCH_ROAD     ! drag coeifficient for heat
+REAL, DIMENSION(SIZE(PTA)) :: ZCD_ROAD     ! road  surf. exchange coefficient
 REAL, DIMENSION(SIZE(PTA)) :: ZAC          ! town aerodynamical conductance (not used)
 REAL, DIMENSION(SIZE(PTA)) :: ZRA          ! town aerodynamical resistance  (not used)
 REAL, DIMENSION(SIZE(PTA)) :: ZCH          ! town drag coefficient for heat (not used)
@@ -205,13 +217,18 @@ REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_ROAD  ! friction velocity for roads
 REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_ROOF  ! friction velocity for roofs
 REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_TOWN  !
 !
+REAL, DIMENSION(SIZE(PTA)) :: ZZ0_TOP      ! roughness length for zac_top calculation
+REAL, DIMENSION(SIZE(PTA)) :: ZCHTCN_WIN   ! natural convective heat transfer coef. for window [W/(m².K)]
+REAL, DIMENSION(SIZE(PTA)) :: ZCHTCN_ROOF  ! natural convective heat transfer coef. for roof [W/(m².K)]
+REAL, DIMENSION(SIZE(PTA)) :: ZCHTCS_ROOF  ! forced convective heat transfer coef. for smooth roof [W/(m².K)]
+REAL, DIMENSION(SIZE(PTA)) :: ZCHTCN_WALL  ! natural convective heat transfer coef. for wall [W/(m².K)]
+REAL, DIMENSION(SIZE(PTA)) :: ZCHTCS_WALL  ! forced natural convective heat transfer coef. for smooth wall [W/(m².K)]
+!
 INTEGER                   ::  JLOOP, JJ            !! 
 !
 REAL :: ZZ0_O_Z0H = 200.  ! z0/z0h ratio used in Mascart (1995) formulation.
 !                         ! It is set to the maximum value acceptable by
 !                         ! formulation. Observed values are often larger in cities.
-!
-REAL, DIMENSION(SIZE(PTA)) :: ZZ0_TOP      ! roughness length for zac_top calculation
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -301,18 +318,26 @@ ENDDO
 !*      5.     Momentum drag coefficient
 !              -------------------------
 !
-CALL URBAN_EXCH_COEF(HZ0H, ZZ0_O_Z0H, ZTS_TOWN, ZQ_TOWN, PEXNS, PEXNA, PTA, PQA, &
-                      PZREF+ PBLD_HEIGHT/3.,PUREF+PBLD_HEIGHT/3.,PVMOD,PZ0_TOWN, &
-                      PRI, PCD, PCDN, ZAC, ZRA, ZCH                              )
+IF (.NOT. OCANOPY) THEN
+  CALL URBAN_EXCH_COEF(HZ0H, ZZ0_O_Z0H, ZTS_TOWN, ZQ_TOWN, PEXNS, PEXNA, PTA, PQA, &
+                        PZREF+ PBLD_HEIGHT/3.,PUREF+PBLD_HEIGHT/3.,PVMOD,PZ0_TOWN, &
+                        PRI, PCD, PCDN, ZAC, ZRA, ZCH                              )
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
 !*      6.     Drag coefficient for heat fluxes between roofs and atmosphere
 !              -------------------------------------------------------------
 !
-CALL URBAN_EXCH_COEF(HZ0H, ZZ0_O_Z0H, PTS_ROOF, ZQ_ROOF, PEXNS, PEXNA, PTA, PQA, &
-                      PZREF, PUREF, PVMOD, ZZ0_ROOF,                             &
-                      ZRI, ZCD, ZCDN, PAC_ROOF, ZRA_ROOF, ZCH_ROOF               )
+IF (HCH_BEM == "DOE-2") THEN
+   ZCHTCN_ROOF = CHTC_UP_DOE(PTS_ROOF, PTA)
+   ZCHTCS_ROOF = CHTC_SMOOTH_WIND_DOE(ZCHTCN_ROOF, PVMOD)
+   PAC_ROOF = CHTC_ROUGH_DOE(ZCHTCN_ROOF, ZCHTCS_ROOF, PROUGH_ROOF) / PRHOA / XCPD
+ELSE
+   CALL URBAN_EXCH_COEF(HZ0H, ZZ0_O_Z0H, PTS_ROOF, ZQ_ROOF, PEXNS, PEXNA, PTA, PQA, &
+                        PZREF, PUREF, PVMOD, ZZ0_ROOF,                              &
+                        ZRI, ZCD, ZCDN, PAC_ROOF, ZRA_ROOF, ZCH_ROOF               )
+ENDIF
 !
 !
 DO JJ=1,SIZE(PTA)
@@ -335,34 +360,35 @@ ENDDO
 !* Because air/air exchanges are considered, roughness length for heat is set
 !  equal to roughness length for momentum.
 !
-CALL URBAN_EXCH_COEF('MASC95', 1., PT_CANYON, PQ_CANYON, PEXNS, PEXNA, PTA, PQA, &
-                      PZREF+PBLD_HEIGHT-PZ_LOWCAN,PUREF+PBLD_HEIGHT-PZ_LOWCAN,   &
-                      PVMOD, ZZ0_TOP,                                            &
-                      ZRI, ZCD, ZCDN, PAC_TOP, ZRA_TOP, ZCH_TOP                  )
+IF (.NOT. OCANOPY) THEN
+  CALL URBAN_EXCH_COEF('MASC95', 1., PT_CANYON, PQ_CANYON, PEXNS, PEXNA, PTA, PQA, &
+                        PZREF+PBLD_HEIGHT-PZ_LOWCAN,PUREF+PBLD_HEIGHT-PZ_LOWCAN,   &
+                        PVMOD, ZZ0_TOP,                                            &
+                        ZRI, ZCD, ZCDN, PAC_TOP, ZRA_TOP, ZCH_TOP                  )
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
 !*      8.     Drag coefficient for heat fluxes between walls, road and canyon
 !              ---------------------------------------------------------------
 !
+!*      8.1    aerodynamical conductance for walls
+!              -----------------------------------
 !
-!cdir expand(qsat,qsatw_0d)
-DO JJ=1,SIZE(PTA)
+IF (HCH_BEM == "DOE-2") THEN
+  DO JJ=1,SIZE(PTA)
+    ZCHTCN_WALL(JJ) = CHTC_VERT_DOE(PTS_WALL(JJ), PT_CANYON(JJ))
+    ZCHTCS_WALL(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE(ZCHTCN_WALL(JJ), PU_CANYON(JJ)) + &
+                             CHTC_SMOOTH_WIND_DOE(ZCHTCN_WALL(JJ), PU_CANYON(JJ)) )
+                      
+    PAC_WALL(JJ) = CHTC_ROUGH_DOE(ZCHTCN_WALL(JJ), ZCHTCS_WALL(JJ), PROUGH_WALL(JJ)) / XCPD / PRHOA(JJ)
+  END DO
+ELSE
+  PAC_WALL(:) = ( 11.8 + 4.2 * PU_CANYON(:) ) / XCPD / PRHOA(:)
+END IF
 !
-!*      8.2    Vertical wind speed in canyon = ustar
-!              -----------------------------
-!
-  ZU_STAR(JJ) = SQRT (PCD(JJ)) * PVMOD(JJ)
-!
-!*      8.3    aerodynamical conductance for roads or walls
-!              --------------------------------------------
-!
-  ZAVDELT_ROAD(JJ) = PDELT_ROAD(JJ) * PDELT_SNOW_ROAD(JJ)
-!
-  ZQ_ROAD(JJ) = PQSAT_ROAD(JJ) * ZAVDELT_ROAD(JJ)
-
-!
-ENDDO
+!*      8.2    aerodynamical conductance for roads
+!              -----------------------------------
 !
 ZW_STAR(:) = 0.
 ZQ0(:)     = 0.
@@ -370,18 +396,15 @@ ZQ0(:)     = 0.
 !
 DO JLOOP=1,3
  !
-  ZW_CAN(:)   = ZW_STAR(:) + ZU_STAR(:)
+  ZW_CAN(:)   = ZW_STAR(:)
   !
   !
   CALL URBAN_EXCH_COEF(HZ0H, ZZ0_O_Z0H, PTS_ROAD, PQ_LOWCAN, PEXNS, PEXNA,  &
                         PT_LOWCAN, PQ_LOWCAN,                               &
                         PZ_LOWCAN, PZ_LOWCAN, PU_CANYON+ZW_CAN, ZZ0_ROAD,   &
-                        ZRI, ZCD, ZCDN, PAC_ROAD, ZRA_ROAD, ZCH_ROAD        )
+                        ZRI, ZCD_ROAD, ZCDN, PAC_ROAD, ZRA_ROAD, ZCH_ROAD   )
   !
   DO JJ=1,SIZE(PTA)
-
-    PAC_WALL(JJ) = ( 11.8 + 4.2 * SQRT(PU_CANYON(JJ)**2 + ZW_CAN(JJ)**2) ) &
-                    / XCPD / PRHOA(JJ)
 
     ZQ0(JJ)     = (PTS_WALL  (JJ) - PT_CANYON(JJ)) * PAC_WALL  (JJ) * PWALL_O_GRND(JJ)
 
@@ -406,96 +429,105 @@ END DO
 !              --------------------------------------------------------------
 !
 DO JJ=1,SIZE(PTA)
-!
+  !
   ZLE_MAX(JJ)     = PWS_ROAD(JJ) / PTSTEP * XLVTT
   ZLE    (JJ)     = ( PQSAT_ROAD(JJ) - PQ_LOWCAN(JJ) )                   &
                    *   PAC_ROAD(JJ) * PDELT_ROAD(JJ) * XLVTT * PRHOA(JJ)
-!
+  !
   PAC_ROAD_WAT(JJ) = PAC_ROAD(JJ)
-!
+  !
   IF (PDELT_ROAD(JJ)==0.) PAC_ROAD_WAT(JJ) = 0.
-!
+  !
   IF (ZLE(JJ)>0.) PAC_ROAD_WAT(JJ) = PAC_ROAD(JJ) * MIN ( 1. , ZLE_MAX(JJ)/ZLE(JJ) )
-!
-
-!-------------------------------------------------------------------------------
-!
-!*      9.     Momentum fluxes
-!              ---------------
-!
-!*      9.1    For roads
-!              ---------
-!
-!* road friction
-!* neutral case, as guess
-!
-  ZCDN(JJ) = (XKARMAN/LOG(PZ_LOWCAN(JJ)/ZZ0_ROAD(JJ)))**2
-!
-  ZUSTAR2(JJ)=XUNDEF
-  ZVMOD  (JJ)=PU_LOWCAN(JJ)
-!
-  IF(HIMPLICIT_WIND=='OLD')THEN
-!   old implicitation
-    ZUSTAR2(JJ) = (ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_B_COEF_LOWCAN(JJ))/              &
-                  (1.0-PRHOA(JJ)*ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
-  ELSE
-!   new implicitation
-    ZUSTAR2(JJ) = (ZCD(JJ)*PU_LOWCAN(JJ)*(2.*PPEW_B_COEF_LOWCAN(JJ)-PU_LOWCAN(JJ)))/  &
-                  (1.0-2.0*PRHOA(JJ)*ZCD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
-!                   
-    ZVMOD(JJ) = PRHOA(JJ)*PPEW_A_COEF_LOWCAN(JJ)*ZUSTAR2(JJ) + PPEW_B_COEF_LOWCAN(JJ)
-    ZVMOD(JJ) = MAX(ZVMOD(JJ),0.)
-!
-    IF(PPEW_A_COEF_LOWCAN(JJ)/= 0.)THEN
-          ZUSTAR2(JJ) = MAX( ( ZVMOD(JJ) - PPEW_B_COEF_LOWCAN(JJ) ) / (PRHOA(JJ)*PPEW_A_COEF_LOWCAN(JJ)), 0.)
+  !
+  !
+  !*      8.5    aerodynamical conductance for window
+  !              ------------------------------------
+  !
+  ZCHTCN_WIN(JJ) = CHTC_VERT_DOE(PTS_WIN(JJ), PT_CANYON(JJ))
+  !
+  PAC_WIN(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) + &
+                   CHTC_SMOOTH_WIND_DOE(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) ) &
+                   / PRHOA(JJ) / XCPD
+  !
+  !-------------------------------------------------------------------------------
+  !
+  !*      9.     Momentum fluxes
+  !              ---------------
+  !
+  !*      9.1    For roads
+  !              ---------
+  !
+  !* road friction
+  !
+  IF (OCANOPY) THEN
+    !
+    ZUSTAR2(JJ)=XUNDEF
+    !
+    IF(HIMPLICIT_WIND=='OLD')THEN
+      !   old implicitation
+      ZUSTAR2(JJ) = (ZCD_ROAD(JJ)*PU_LOWCAN(JJ)*PPEW_B_COEF_LOWCAN(JJ))/              &
+                    (1.0-PRHOA(JJ)*ZCD_ROAD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
+    ELSE
+      !   new implicitation
+      ZUSTAR2(JJ) = (ZCD_ROAD(JJ)*PU_LOWCAN(JJ)*(2.*PPEW_B_COEF_LOWCAN(JJ)-PU_LOWCAN(JJ)))/  &
+                    (1.0-2.0*PRHOA(JJ)*ZCD_ROAD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
+      !                   
+      ZVMOD(JJ) = PRHOA(JJ)*PPEW_A_COEF_LOWCAN(JJ)*ZUSTAR2(JJ) + PPEW_B_COEF_LOWCAN(JJ)
+      ZVMOD(JJ) = MAX(ZVMOD(JJ),0.)
+      !
+      IF(PPEW_A_COEF_LOWCAN(JJ)/= 0.)THEN
+        ZUSTAR2(JJ) = MAX( ( ZVMOD(JJ) - PPEW_B_COEF_LOWCAN(JJ) ) / (PRHOA(JJ)*PPEW_A_COEF_LOWCAN(JJ)), 0.)
+      ENDIF
+      !              
     ENDIF
-!              
-  ENDIF
-!
-  PUW_ROAD(JJ) = - ZUSTAR2(JJ)
-!
-!
-  PDUWDU_ROAD(JJ) = 0. ! implicitation already taken into account in PUW_ROAD
-!
-!*      9.2    For roofs
-!              ---------
-!
-!* roof friction
-!* neutral case, as guess
-!
-!
-  ZUSTAR_ROOF(JJ) = PVMOD(JJ) * XKARMAN / LOG(PZREF(JJ)/ZZ0_ROOF(JJ))
-!
-  PUW_ROOF(JJ)    = - ZUSTAR_ROOF(JJ)**2
-  PDUWDU_ROOF(JJ) = 0.
-  IF (PVMOD(JJ)/=0.) PDUWDU_ROOF(JJ) = 2. * PUW_ROOF(JJ) / PVMOD(JJ)
-!
-!*      9.3    For town
-!              --------
-!
-  ZUSTAR2(JJ)=XUNDEF
-  ZVMOD  (JJ)=PVMOD(JJ)
-!  
-  IF(HIMPLICIT_WIND=='OLD')THEN
-!   old implicitation
-    ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*PPEW_B_COEF(JJ))/            &
-                  (1.0-PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ))
+    !
+    PUW_ROAD(JJ) = - ZUSTAR2(JJ)
+    !
+    PDUWDU_ROAD(JJ) = 0. ! implicitation already taken into account in PUW_ROAD
+    !
+    !*      9.2    For roofs
+    !              ---------
+    !
+    !* roof friction
+    !* neutral case, as guess
+    !
+    !
+    ZUSTAR_ROOF(JJ) = PVMOD(JJ) * XKARMAN / LOG(PZREF(JJ)/ZZ0_ROOF(JJ))
+    !
+    PUW_ROOF(JJ)    = - ZUSTAR_ROOF(JJ)**2
+    PDUWDU_ROOF(JJ) = 0.
+    IF (PVMOD(JJ)/=0.) PDUWDU_ROOF(JJ) = 2. * PUW_ROOF(JJ) / PVMOD(JJ)
+    !
   ELSE
-!   new implicitation
-    ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*(2.*PPEW_B_COEF(JJ)-PVMOD(JJ)))/ &
-                  (1.0-2.0*PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ)) 
-!                   
-    ZVMOD(JJ) = PRHOA(JJ)*PPEW_A_COEF(JJ)*ZUSTAR2(JJ) + PPEW_B_COEF(JJ)
-    ZVMOD(JJ) = MAX(ZVMOD(JJ),0.)
-!
-    IF(PPEW_A_COEF(JJ)/= 0.)THEN
-          ZUSTAR2(JJ) = MAX( ( ZVMOD(JJ) - PPEW_B_COEF(JJ) ) / (PRHOA(JJ)*PPEW_A_COEF(JJ)), 0.)
+    !
+    !*      9.3    For town
+    !              --------
+    !
+    ZUSTAR2(JJ)=XUNDEF
+    !  
+    IF(HIMPLICIT_WIND=='OLD')THEN
+      !   old implicitation
+      ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*PPEW_B_COEF(JJ))/            &
+                    (1.0-PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ))
+    ELSE
+      !   new implicitation
+      ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*(2.*PPEW_B_COEF(JJ)-PVMOD(JJ)))/ &
+                    (1.0-2.0*PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ)) 
+      !                   
+      ZVMOD(JJ) = PRHOA(JJ)*PPEW_A_COEF(JJ)*ZUSTAR2(JJ) + PPEW_B_COEF(JJ)
+      ZVMOD(JJ) = MAX(ZVMOD(JJ),0.)
+      !
+      IF(PPEW_A_COEF(JJ)/= 0.)THEN
+        ZUSTAR2(JJ) = MAX( ( ZVMOD(JJ) - PPEW_B_COEF(JJ) ) / (PRHOA(JJ)*PPEW_A_COEF(JJ)), 0.)
+      ENDIF
+      !                        
     ENDIF
-!                        
+    !
+    PUSTAR_TOWN(JJ) = SQRT(ZUSTAR2(JJ))
+    !
   ENDIF
-!
-  PUSTAR_TOWN(JJ) = SQRT(ZUSTAR2(JJ))
-!
+  !
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('URBAN_DRAG',1,ZHOOK_HANDLE)

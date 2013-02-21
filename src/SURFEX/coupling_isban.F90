@@ -57,7 +57,6 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                             New wind implicitation
 !!                             New soil carbon spinup and diag
 !!                             Isba budget
-!!
 !!-------------------------------------------------------------------
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI
@@ -69,7 +68,7 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 CSCOND, CC1DRY, CRUNOFF, CPHOTO, LTR_ML, CISBA, XPATCH,  &
                                 TTIME, CALBEDO, XCOVER, XLAI, XVEG, XZ0, XEMIS,          &
                                 XALBNIR, XALBVIS, XALBUV, XEMIS_NAT,  XTSRAD_NAT,        &
-                                XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,                    &
+                                XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG, NGROUND_LAYER,     &
                                 XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,                    &
                                 XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,                 &
                                 XALBNIR_WET, XALBVIS_WET, XALBUV_WET, XWG, XWSAT,        &
@@ -81,11 +80,14 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 XHO2IP, XHO2IM, XHO2JP, XHO2JM, TSNOW, CRESPSL,          &
                                 XCE_NITRO, XCF_NITRO, XCNA_NITRO, LECOCLIMAP, CCPSURF,   &
                                 TSEED, TREAP, XWATSUP, XIRRIG, XCGMAX,                   &
-                                CKSAT, CSOM, CHORT, CRAIN, XMUF, XFSAT, LTRIP,           &
+                                CKSAT, CSOC, CHORT, CRAIN, XMUF, XFSAT, LTRIP,           &
                                 LFLOOD, XFFLOOD, XPIFLOOD, LTEMP_ARP, XSODELX,           &
-                                LVEGUPD, NLAYER_HORT, NLAYER_DUN  
+                                LVEGUPD, NLAYER_HORT, NLAYER_DUN,                        &
+                                LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,        &
+                                NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, NSPINS, NSPINW  
 !
 USE MODD_SURF_ATM,    ONLY : LNOSOF, CIMPLICIT_WIND
+USE MODD_SURF_ATM_n,  ONLY : NDIM_FULL
 !
 USE MODD_DST_n,       ONLY : XSFDST, XSFDSTM, XEMISRADIUS_DST, XEMISSIG_DST
 USE MODD_SLT_n,       ONLY : XSFSLT, XEMISRADIUS_SLT, XEMISSIG_SLT
@@ -153,12 +155,13 @@ USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA,        &
                                 XP_HORT, XP_DRIP, XP_RRVEG, XP_IACAN,          &
                                 XP_GPP, XP_FAPAR, XP_FAPIR, XP_FAPAR_BS,       &
-                                XP_FAPIR_BS, XP_ICEFLUX, XP_RESP_AUTO,         &
-                                XP_RESP_ECO  
+                                XP_FAPIR_BS, XP_ICEFLUX, XP_IRRIG_FLUX,        &
+                                XP_RESP_AUTO, XP_RESP_ECO, XP_DWG, XP_DWGI,    &
+                                XP_DWR, XP_DSWE, XP_WATBUD  
 !                         
 USE MODD_PACK_CH_ISBA,   ONLY : XP_SOILRC_SO2, XP_SOILRC_O3, XP_DEP
 
-USE MODD_CH_ISBA_n,      ONLY : CSV, CCH_DRY_DEP, LCH_BIO_FLUX, XDEP,             &
+USE MODD_CH_ISBA_n,      ONLY : CSV, CCH_DRY_DEP, LCH_BIO_FLUX, XDEP, LCH_NO_FLUX,&
                                   NBEQ, NSV_CHSBEG, NSV_CHSEND,                   &
                                   NSV_DSTBEG, NSV_DSTEND, NAEREQ, NDSTEQ, NSLTEQ, &
                                   NSV_AERBEG, NSV_AEREND, NSV_SLTBEG, NSV_SLTEND  
@@ -191,6 +194,7 @@ USE MODI_ISBA_FLOOD_PROPERTIES
 USE MODI_DIAG_CPL_ESM_ISBA
 USE MODI_HYDRO_GLACIER
 USE MODI_ISBA_ALBEDO
+USE MODI_CARBON_SPINUP
 USE MODI_PACK_ISBA_PATCH_n    
 USE MODI_PACK_ISBA_PATCH_GET_SIZE_n
 USE MODI_PACK_CH_ISBA_PATCH_n     
@@ -204,9 +208,13 @@ USE MODI_ABOR1_SFX
 USE MODI_AVERAGE_DIAG_EVAP_ISBA_n
 USE MODI_AVERAGE_DIAG_MISC_ISBA_n
 USE MODI_CH_BVOCEM_n
+USE MODI_SOILEMISNO_n
 USE MODI_CH_DEP_ISBA
 USE MODI_DSLT_DEP
 USE MODI_COUPLING_DST_n
+USE MODI_COUPLING_SURF_TOPD
+USE MODI_ISBA_BUDGET_INIT
+USE MODI_ISBA_BUDGET
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -426,6 +434,15 @@ IF (LDEEPSOIL) THEN
    CALL DEEPSOIL_UPDATE(TTIME%TDATE%MONTH)
 ENDIF
 !
+!* Actualization of soil and wood carbon spinup
+!
+IF(LSPINUPCARBS.OR.LSPINUPCARBW)THEN
+  CALL CARBON_SPINUP(TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME,       &
+                     LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,   &
+                     NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, CPHOTO,    &
+                     CRESPSL, NSPINS, NSPINW                             )
+ENDIF
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Time evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -512,17 +529,21 @@ PTRAD = XTSRAD_NAT
 !
 ! Any additional diagnostics (stored in MODD_DIAG_ISBA_n)
 !
-CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF)
+CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2)
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
-CALL AVERAGE_DIAG_EVAP_ISBA_n
+CALL AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
 !
 ! Miscellaneous diagnostics (stored in MODD_DIAG_MISC_ISBA_n)
 !
 CALL AVERAGE_DIAG_MISC_ISBA_n
 !
 !--------------------------------------------------------------------------------------
+!
+CALL COUPLING_SURF_TOPD(HPROGRAM,NDIM_FULL)
+!
+! --------------------------------------------------------------------------------------
 ! Snow/Flood fractions, albedo and emissivity update :
 ! --------------------------------------------------------------------------------------
 !
@@ -532,6 +553,11 @@ CALL AVERAGE_DIAG_MISC_ISBA_n
 !
 IF (NBEQ>0 .AND. LCH_BIO_FLUX) THEN
  CALL CH_BVOCEM_n(ZSW_FORBIO,PRHOA,PSFTS)
+ENDIF
+!
+!SOILNOX
+IF (LCH_NO_FLUX) THEN
+  CALL SOILEMISNO_n(PU,PV)
 ENDIF
 !
 !==========================================================================================
@@ -615,6 +641,10 @@ REAL, DIMENSION(KSIZE) :: ZP_WGI_INI
 REAL, DIMENSION(KSIZE) :: ZP_WR_INI
 REAL, DIMENSION(KSIZE) :: ZP_SWE_INI
 !
+! miscellaneous
+!
+REAL, DIMENSION(KSIZE)               :: ZP_DEEP_FLUX ! Flux at the bottom of the soil
+REAL, DIMENSION(KSIZE)               :: ZP_TDEEP_A   ! coefficient for implicitation of Tdeep
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -716,6 +746,7 @@ ENDIF
 !
 CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
 !
+
 ! Pack chemistry input and prognostic variables (modd_ch_isban) for each patch:
 !
 IF (NBEQ>0) THEN
@@ -742,6 +773,11 @@ IF(LNOSOF)ZP_SLOPE_COS(:) = 1.0
 ! (see update_frac_alb_emis_isban.f90) in order to close the energy budget
 ! between surfex and the atmosphere. This fact do not change the offline runs.
 !
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! No implicitation of Tdeep
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ZP_TDEEP_A = 0.
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Flood properties 
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -764,6 +800,7 @@ ELSE
   ZP_FFVNOS  = 0.0
 ENDIF
 !
+
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Surface Roughness lengths (m):
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -805,10 +842,20 @@ CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML,                                   &
                    ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL                      )  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! Intialize computation of ISBA water and energy budget
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+CALL ISBA_BUDGET_INIT(CISBA,TSNOW%SCHEME,            &
+                      XP_WG,XP_WGI,XP_WR,XP_SNOWSWE, &
+                      XP_DG, XP_DZG, ZP_WG_INI,      &
+                      ZP_WGI_INI, ZP_WR_INI,         &
+                      ZP_SWE_INI                     )
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Over Natural Land Surfaces:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, CRAIN, CHORT, CC1DRY, CSCOND,      &
+CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSCOND,      &
           TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TTIME, LFLOOD, LTEMP_ARP,&
           LGLACIER, PTSTEP, CIMPLICIT_WIND,                                               &
           XCGMAX, ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA,                  &
@@ -819,7 +866,8 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, CRAIN, CHORT, CC1DRY, CSC
           ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL, XP_SNOWFREE_ALB, XP_WRMAX_CF, XP_VEG, XP_LAI, &
           XP_EMIS, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_VEGTYPE_PATCH, XP_Z0EFF,         &
           XP_RUNOFFB, XP_CGSAT, XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF,    &
-          XP_PCOEF, XP_TAUICE, XP_WDRAIN, XP_TDEEP, XP_GAMMAT, XP_PSN, XP_PSNG, XP_PSNV,  &
+          XP_PCOEF, XP_TAUICE, XP_WDRAIN, ZP_TDEEP_A, XP_TDEEP, XP_GAMMAT,                &
+          XP_PSN, XP_PSNG, XP_PSNV,                                                       &
           XP_PSNV_A, XP_SNOWFREE_ALB_VEG, XP_SNOWFREE_ALB_SOIL, XP_IRRIG, XP_WATSUP,      &
           XP_THRESHOLD, XP_LIRRIGATE, XP_LIRRIDAY, LP_STRESS, XP_GC, XP_F2I, XP_DMAX,     &
           XP_AH, XP_BH, ZP_CO2, XP_GMES, XPOI, XP_FZERO, XP_EPSO, XP_GAMM, XP_QDGAMM,     &
@@ -842,7 +890,7 @@ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOM, CRAIN, CHORT, CC1DRY, CSC
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS                                        )  
+          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX                           )  
 !
 ZP_TRAD=XP_TSRAD
 !
@@ -855,6 +903,17 @@ IF(LGLACIER)THEN
   CALL HYDRO_GLACIER(PTSTEP,ZP_SNOW,XP_SNOWRHO,XP_SNOWSWE,XP_ICE_STO,XP_ICEFLUX)
 !     
 ENDIF
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! Calculation of ISBA water and energy budget (and time tendencies of each reservoir)
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+CALL ISBA_BUDGET(CISBA,TSNOW%SCHEME,LGLACIER,PTSTEP,          &
+                 XP_WG,XP_WGI,XP_WR,XP_SNOWSWE,XP_DG,XP_DZG,  & 
+                 ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,ZP_SWE_INI,   &
+                 ZP_RAIN,ZP_SNOW,XP_EVAP,XP_DRAIN,XP_RUNOFF,  &
+                 XP_IFLOOD,XP_PFLOOD,XP_ICEFLUX,XP_IRRIG_FLUX,&
+                 XP_DWG,XP_DWGI,XP_DWR,XP_DSWE,XP_WATBUD      )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Evolution of soil albedo, when depending on surface soil wetness:
@@ -878,8 +937,9 @@ END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
-  CALL VEGETATION_EVOL(CPHOTO, CRESPSL, CALBEDO, LAGRIP, LTR_ML,           &
-                       PTSTEP, KMONTH, KDAY, PTIME, XP_LAT, ZP_RHOA,              & 
+  CALL VEGETATION_EVOL(CISBA, CPHOTO, CRESPSL, CALBEDO, LAGRIP, LTR_ML,           &
+                       PTSTEP, KMONTH, KDAY, NSPINW, PTIME, XP_LAT, ZP_RHOA,      &
+                       XP_DG, XP_DZG, NK_WG_LAYER,                                &                       
                        XP_TG, XP_ALBNIR_VEG, XP_ALBVIS_VEG, XP_ALBUV_VEG,         &
                        XP_ALBNIR_SOIL, XP_ALBVIS_SOIL, XP_ALBUV_SOIL,             &
                        XP_VEGTYPE_PATCH, XP_SEFOLD, XP_ANMAX, XP_H_TREE, XP_BSLAI,&
@@ -903,8 +963,9 @@ XP_RESP_ECO (:)=0.
 XP_RESP_AUTO(:)=0.
 !
 IF ( CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XP_LAI(:)/=XUNDEF) ) THEN
-  CALL CARBON_EVOL(CRESPSL, CPHOTO, PTSTEP,                  &
-                   ZP_RHOA, XP_TG, XP_WG, XP_WFC, XP_WWILT, XP_WSAT, XP_SAND,&             
+  CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, NSPINS,                   &
+                   ZP_RHOA, XP_TG, XP_WG, XP_WFC, XP_WWILT, XP_WSAT, XP_SAND,&
+                   XP_DG, XP_DZG, NK_WG_LAYER,                               &                   
                    XP_RE25, XP_LAI, ZP_RESP_BIOMASS_INST, XP_TURNOVER,       &
                    XP_LITTER, XP_LIGNIN_STRUC , XP_SOILCARB,                 &
                    XP_RESP_AUTO, XP_RESP_ECO                                 )  
@@ -1067,17 +1128,18 @@ CALL DIAG_INLINE_ISBA_n(ZP_TA, ZP_TRAD, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V
 ! Isba offline diagnostics for each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_EVAP_ISBA_n(PTSTEP,KMASK,KSIZE,JPATCH)
+CALL DIAG_EVAP_ISBA_n(CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Isba offline diagnostics for miscellaneous terms over each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_MISC_ISBA_n(PTSTEP, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML, PTIME,   &
-                      KSIZE, JPATCH, KMASK, ZP_RHOA, XP_THRESHOLD,     &
+CALL DIAG_MISC_ISBA_n(PTSTEP, CISBA, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML,    &
+                      PTIME, KSIZE, JPATCH, KMASK, XP_THRESHOLD,              &
                       XP_PSN, XP_PSNG, XP_PSNV, XP_FF, XP_FFG, XP_FFV,        &
                       XP_WG, XP_WGI, XP_WFC, XP_WWILT, XP_SNOWSWE, XP_SNOWRHO,&
-                      XP_FAPARC, XP_FAPIRC, XP_LAI_EFFC, XP_MUS, XP_FSAT      )                  
+                      XP_FAPARC, XP_FAPIRC, XP_LAI_EFFC, XP_MUS, XP_FSAT,     &
+                      XP_DG, XP_TG       )                  
 !
 ! Unpack ISBA diagnostics (modd_diag_isban) for each patch:ISIZE_MAX = MAXVAL(NSIZE_NATURE_P)
 

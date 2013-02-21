@@ -1,9 +1,10 @@
 !     #########
-SUBROUTINE DIAG_MISC_ISBA_n(PTSTEP, HPHOTO, HSNOW, OAGRIP, OTR_ML, PTIME, &
-                            KSIZE, KPATCH, KMASK, PRHOA, PSEUIL,          &
+SUBROUTINE DIAG_MISC_ISBA_n(PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
+                            PTIME, KSIZE, KPATCH, KMASK, PSEUIL,          &
                             PPSN, PPSNG, PPSNV, PFF, PFFG, PFFV,          &
                             PWG, PWGI, PWFC, PWWILT, PWSNOW, PRSNOW,      &
-                            PFAPARC, PFAPIRC, PLAI_EFFC, PMUS, PFSAT      )  
+                            PFAPARC, PFAPIRC, PLAI_EFFC, PMUS, PFSAT,     &
+                            PDG, PTG                                      )  
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-ISBA_n * - additional diagnostics for ISBA
@@ -30,9 +31,10 @@ SUBROUTINE DIAG_MISC_ISBA_n(PTSTEP, HPHOTO, HSNOW, OAGRIP, OTR_ML, PTIME, &
 !!                            Add total SWI
 !!      S. Lafont    03/2009 : change unit of carbon output in kg/m2/s
 !!      A.L. Gibelin 04/2009 : Add respiration diagnostics
-!!      A.L. Gibelin 05/2009 : Add carbon spinup
 !!      A.L. Gibelin 07/2009 : Suppress RDK and transform GPP as a diagnostic
-!!        S. Lafont 01/2011 : accumulate carbon variable between 2 outputs
+!!        S. Lafont  01/2011 : accumulate carbon variable between 2 outputs
+!!       B. Decharme 05/2012 : Carbon fluxes in diag_evap
+!!       B. Decharme 05/2012 : Active and frozen layers thickness for dif
 !!
 !!------------------------------------------------------------------
 !
@@ -40,20 +42,18 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODD_PACK_DIAG_ISBA,      ONLY : XP_HV, XP_SWI, XP_ALBT, XP_TSWI,     &
                                      XP_TWSNOW, XP_TDSNOW, XP_SNOWTEMP,   &
-                                     XP_GPP, XP_RESP_AUTO, XP_RESP_ECO,   &
                                      XP_SNOWLIQ,                          &
                                      XP_FAPAR, XP_FAPIR, XP_FAPAR_BS,     &
                                      XP_FAPIR_BS 
 !                                     
 USE MODD_DIAG_MISC_ISBA_n,    ONLY : LSURF_MISC_BUDGET,                       &
-                                     LWOOD_SPIN, LSOILCARB_SPIN,              &
                                      XHV, XSWI, XDPSNG, XDPSNV, XDPSN, XSEUIL,&
-                                     XGPP, XRESP_AUTO, XRESP_ECO,             &
                                      XALBT, XTSWI, XDFF, XDFFG,               &
                                      XDFFV, XTWSNOW, XTDSNOW, XTTSNOW,        &
                                      XSNOWLIQ, XSNOWTEMP, XDLAI_EFFC,         &
                                      XFAPAR, XFAPIR, XDFAPARC, XDFAPIRC,      &
-                                     XFAPAR_BS, XFAPIR_BS, XDFSAT
+                                     XFAPAR_BS, XFAPIR_BS, XDFSAT, XALT,      &
+                                     XFLT
 USE MODD_TYPE_SNOW
 !
 !
@@ -65,6 +65,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
+CHARACTER(LEN=*), INTENT(IN)      :: HISBA         ! ISBA scheme
 CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
 CHARACTER(LEN=*), INTENT(IN)      :: HSNOW         ! snow scheme
 LOGICAL, INTENT(IN)               :: OAGRIP
@@ -72,7 +73,6 @@ LOGICAL, INTENT(IN)               :: OTR_ML
 REAL,    INTENT(IN)               :: PTIME   ! current time since midnight
 INTEGER, INTENT(IN)               :: KSIZE, KPATCH
 INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
-REAL, DIMENSION(:), INTENT(IN)    :: PRHOA         ! air density for unit change
 REAL, DIMENSION(:), INTENT(IN)    :: PSEUIL
 !    
 !Snow/flood fraction at t
@@ -89,6 +89,9 @@ REAL, DIMENSION(:,:),  INTENT(IN) :: PWFC          ! field capacity profile (m3/
 REAL, DIMENSION(:,:),  INTENT(IN) :: PWWILT        ! wilting point  profile (m3/m3)
 REAL, DIMENSION(:,:),  INTENT(IN) :: PWSNOW        ! snow reservoir (kg/m2)
 REAL, DIMENSION(:,:),  INTENT(IN) :: PRSNOW        ! snow density (kg/m3)
+!
+REAL, DIMENSION(:,:),  INTENT(IN) :: PDG           ! soil layer depth
+REAL, DIMENSION(:,:),  INTENT(IN) :: PTG           ! soil temperature
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PFAPARC
 REAL, DIMENSION(:), INTENT(INOUT) :: PFAPIRC
@@ -196,21 +199,7 @@ IF (LSURF_MISC_BUDGET) THEN
 ! cosine of solar zenith angle 
 !
 
-  IF (HPHOTO/='NON') THEN
-     !
-!cdir nodep
-     DO JJ=1,KSIZE
-        JI                     =  KMASK         (JJ)
-        !
-        ! Transform units from kgCO2/kgair m/s to kgCO2/m2/s
-        ! 
-        XGPP       (JI, KPATCH)  =  XGPP       (JI, KPATCH)+  XP_GPP       (JJ) * PRHOA(JJ)*PTSTEP
-        XRESP_AUTO (JI, KPATCH)  =  XRESP_AUTO (JI, KPATCH)+  XP_RESP_AUTO (JJ) * PRHOA(JJ)*PTSTEP
-        XRESP_ECO  (JI, KPATCH)  =  XRESP_ECO  (JI, KPATCH)+  XP_RESP_ECO  (JJ) * PRHOA(JJ)*PTSTEP
-        !
-     END DO
-     !
-     IF (OTR_ML) THEN
+  IF (HPHOTO/='NON'.AND.OTR_ML) THEN
        !
 !cdir nodep
        DO JJ=1,KSIZE
@@ -246,8 +235,10 @@ IF (LSURF_MISC_BUDGET) THEN
          ENDDO
        ENDIF
        !
-     ENDIF
-     !
+  ENDIF
+  !
+  IF(HISBA=='DIF')THEN
+    CALL COMPUT_COLD_LAYERS_THICK
   ENDIF
   !
 END IF
@@ -264,7 +255,110 @@ IF (OAGRIP) THEN
 !
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------------
 !
+CONTAINS
+!
+SUBROUTINE COMPUT_COLD_LAYERS_THICK
+!
+! Comput active layer (ALT) and frozen layer (FLT) theaknesses 
+! using linear interpolation between two nodes :
+!       ALT = depth to zero centigrade isotherm in permafrost
+!       FLT = depth to zero centigrade isotherm in non-permafrost
+!
+USE MODD_CSTS, ONLY : XTT
+USE MODD_SURF_PAR, ONLY : NUNDEF
+!
+IMPLICIT NONE
+!
+REAL, DIMENSION(KSIZE,SIZE(PDG,2)) :: ZNODE
+INTEGER, DIMENSION(KSIZE)          :: IUP_ALT, IDOWN_ALT
+INTEGER, DIMENSION(KSIZE)          :: IUP_FLT, IDOWN_FLT
+!
+REAL    :: ZTG_UP, ZTG_DOWN
+REAL    :: ZUP, ZDOWN
+REAL    :: ZALT, ZFLT, ZSLOPE
+!
+INTEGER :: JJ, JI, JL, INL
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N:COMPUT_COLD_LAYERS_THICK',0,ZHOOK_HANDLE)
+!
+INL=SIZE(PDG,2)
+!
+XALT(:,KPATCH)=0.0   
+!
+IUP_ALT  (:)=0
+IDOWN_ALT(:)=0
+IUP_FLT  (:)=0
+IDOWN_FLT(:)=0
+!
+!Surface soil layer
+!
+ZNODE(:,1)=0.5*PDG(:,1)
+WHERE(PTG(:,1)>XTT.AND.PTG(:,2)<=XTT.AND.PTG(:,3)<=XTT)
+      IUP_ALT  (:)=1
+      IDOWN_ALT(:)=2
+ENDWHERE
+WHERE(PTG(:,1)<XTT.AND.PTG(:,2)>=XTT.AND.PTG(:,3)>=XTT)
+      IUP_FLT  (:)=1
+      IDOWN_FLT(:)=2
+ENDWHERE
+!
+!Middle soil layer
+!
+DO JL=2,INL-1
+   DO JJ=1,KSIZE 
+      ZNODE(JJ,JL)=0.5*(PDG(JJ,JL)+PDG(JJ,JL-1))
+      IF(PTG(JJ,JL-1)>XTT.AND.PTG(JJ,JL)>XTT.AND.PTG(JJ,JL+1)<=XTT)THEN
+        IUP_ALT  (JJ)=JL
+        IDOWN_ALT(JJ)=JL+1
+      ENDIF
+      IF(PTG(JJ,JL-1)<XTT.AND.PTG(JJ,JL)<XTT.AND.PTG(JJ,JL+1)>=XTT)THEN
+        IUP_FLT  (JJ)=JL
+        IDOWN_FLT(JJ)=JL+1
+      ENDIF      
+   ENDDO
+ENDDO
+!
+!Last soil layer
+!
+ZNODE(:,INL)=0.5*(PDG(:,INL)+PDG(:,INL-1))
+WHERE(PTG(:,INL)>XTT)IDOWN_ALT(:)=NUNDEF
+WHERE(PTG(:,INL)<XTT)IDOWN_FLT(:)=NUNDEF
+!
+DO JJ=1,KSIZE
+!
+   ZALT  =0.0
+   IF(IDOWN_ALT(JJ)>0.AND.IDOWN_ALT(JJ)<=INL)THEN
+     ZTG_UP    = PTG  (JJ,IUP_ALT  (JJ))
+     ZTG_DOWN  = PTG  (JJ,IDOWN_ALT(JJ))
+     ZUP       = ZNODE(JJ,IUP_ALT  (JJ))
+     ZDOWN     = ZNODE(JJ,IDOWN_ALT(JJ))
+     ZSLOPE    = (ZUP-ZDOWN)/(ZTG_UP-ZTG_DOWN)
+     ZALT      = ZDOWN+(XTT-ZTG_DOWN)*ZSLOPE
+   ENDIF
+!
+   ZFLT  =0.0
+   IF(IDOWN_FLT(JJ)>0.AND.IDOWN_FLT(JJ)<=INL)THEN
+     ZTG_UP    = PTG  (JJ,IUP_FLT  (JJ))
+     ZTG_DOWN  = PTG  (JJ,IDOWN_FLT(JJ))
+     ZUP       = ZNODE(JJ,IUP_FLT  (JJ))
+     ZDOWN     = ZNODE(JJ,IDOWN_FLT(JJ))
+     ZSLOPE    = (ZUP-ZDOWN)/(ZTG_UP-ZTG_DOWN)
+     ZFLT      = ZDOWN+(XTT-ZTG_DOWN)*ZSLOPE
+   ENDIF
+!
+   JI              =  KMASK(JJ)
+   XALT(JI,KPATCH) =  ZALT 
+   XFLT(JI,KPATCH) =  ZFLT 
+!
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N:COMPUT_COLD_LAYERS_THICK',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE COMPUT_COLD_LAYERS_THICK
 !-------------------------------------------------------------------------------------
 !
 END SUBROUTINE DIAG_MISC_ISBA_n

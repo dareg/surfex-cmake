@@ -1,6 +1,8 @@
 !     #########
-    SUBROUTINE VEGETATION_EVOL(HPHOTO, HRESPSL, HALBEDO, OAGRIP, OTR_ML,  &
-                               PTSTEP, KMONTH, KDAY, PTIME, PLAT, PRHOA,  &
+    SUBROUTINE VEGETATION_EVOL(HISBA, HPHOTO, HRESPSL, HALBEDO, OAGRIP,   &
+                               OTR_ML, PTSTEP, KMONTH, KDAY, KSPINW,      &
+                               PTIME, PLAT, PRHOA,                        &
+                               PDG, PDZG, KWG_LAYER,                      &
                                PTG, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
                                PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,   &
                                PVEGTYPE, PSEFOLD, PANMAX, PH_TREE, PBSLAI,& 
@@ -10,8 +12,8 @@
                                PAOSJM, PHO2IP, PHO2IM, PHO2JP, PHO2JM,    &
                                PZ0EFFIP, PZ0EFFIM, PZ0EFFJP, PZ0EFFJM,    &
                                PLAI, PVEG, PZ0, PALBNIR, PALBVIS, PALBUV, &
-                               PEMIS, PANFM, PANDAY, PBIOMASS, PRESP_BIOMASS, &
-                               PRESP_BIOMASS_INST, PINCREASE, PTURNOVER   )  
+                               PEMIS, PANFM, PANDAY, PBIOMASS, PRESP_BIOMASS,&
+                               PRESP_BIOMASS_INST, PINCREASE, PTURNOVER )  
 !   ###############################################################
 !!****  *VEGETATION EVOL*
 !!
@@ -49,7 +51,8 @@
 !!      P Le Moigne  09/2005 : AGS modifs of L. Jarlan
 !!      A.L. Gibelin 04/2009 : BIOMASS and RESP_BIOMASS arrays
 !!      A.L. Gibelin 04/2009 : Add NCB option 
-!!      D. Carrer    01/2012 : epresentation of nitrogen dilution fct of CO2 (from Calvet et al. 2008)
+!!      D. Carrer    01/2012 : representation of nitrogen dilution fct of CO2 (from Calvet et al. 2008)
+!!      B. Decharme  05/2012 : Optimization and ISBA-DIF coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -79,6 +82,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+CHARACTER(LEN=3),     INTENT(IN)    :: HISBA   ! type of ISBA version:
+!                                              ! '2-L' (default)
+!                                              ! '3-L'
+!                                              ! 'DIF'
 CHARACTER(LEN=3),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 !                                              ! 'NON'
 !                                              ! 'AGS'
@@ -98,9 +105,14 @@ LOGICAL,              INTENT(IN)    :: OTR_ML  ! new radiative transfert
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 INTEGER,              INTENT(IN)    :: KMONTH  ! current month
 INTEGER,              INTENT(IN)    :: KDAY    ! current day
+INTEGER,              INTENT(IN)    :: KSPINW ! spinup wood
 REAL,                 INTENT(IN)    :: PTIME   ! current time since midnight
 REAL,   DIMENSION(:), INTENT(IN)    :: PLAT    ! latitude of each grid point
 REAL,   DIMENSION(:), INTENT(IN)    :: PRHOA   ! air density
+!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDG           ! Depth of Bottom of Soil layers       (m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PDZG          ! soil layers thicknesses (DIF option) (m)
+INTEGER, DIMENSION(:),INTENT(IN)    :: KWG_LAYER     ! Number of soil moisture layers (DIF option)
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTG     ! soil layer average temperatures (K)
 REAL,   DIMENSION(:), INTENT(IN)    :: PALBVIS_VEG ! visible, near infra-red and UV
@@ -158,11 +170,11 @@ REAL,   DIMENSION(:), INTENT(INOUT) :: PEMIS   ! snow-free emissivity
 REAL,   DIMENSION(:), INTENT(INOUT) :: PANFM              ! maximum leaf assimilation
 REAL,   DIMENSION(:), INTENT(INOUT) :: PANDAY             ! daily net CO2 assimilation
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PBIOMASS           ! biomass of day-1
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PRESP_BIOMASS      ! daily cumulated respiration of biomass (kg/m2/day)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PRESP_BIOMASS      ! daily cumulated respiration of biomass (kgDM/m2/day)
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PRESP_BIOMASS_INST ! instantaneous respiration of biomass (kgCO2/kgair m/s)
 !
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PINCREASE          ! increment of biomass
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PTURNOVER          ! biomass turnover going into litter
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PINCREASE          ! increment of biomass (gC m-2 s-1)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PTURNOVER          ! biomass turnover going into litter (gC m-2 s-1)
 !
 !*      0.2    declarations of local variables
 !
@@ -174,9 +186,20 @@ REAL,    DIMENSION(SIZE(PLAI)) :: ZCO2, ZCNA_NITRO   ! fct of CO2
 REAL,    DIMENSION(SIZE(PLAI)) ::  ZCNAREF, ZPARAM
 INTEGER, DIMENSION(1)          :: IDMAX
 !
+REAL, PARAMETER                   :: ZCOEF1 = 10.0
+REAL, PARAMETER                   :: ZCOEF2 = 25.0
+REAL, PARAMETER                   :: ZDEPTH = 1.0   !Temp depth m
+REAL                              :: ZLOG2
+!
+REAL, DIMENSION(SIZE(PTG,1))      :: ZTG_VEG      ! surface temperature   (C)
+REAL, DIMENSION(SIZE(PTG,1))      :: ZTG_SOIL     ! soil temperature   (C)
+REAL, DIMENSION(SIZE(PTG,1))      :: ZDG_SOIL     ! soil depth for DIF (m)
+REAL                              :: ZWGHT_SOIL   ! Weight for DIF (m)
+!
 LOGICAL, DIMENSION(SIZE(PLAI))    :: GMASK_AGRI
 LOGICAL                           :: GMASK
-INTEGER                           :: JWRK, JJ
+INTEGER                           :: INI, INL, JI, JL, IDEPTH
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
@@ -185,6 +208,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -------------
 !
 IF (LHOOK) CALL DR_HOOK('VEGETATION_EVOL',0,ZHOOK_HANDLE)
+!
+INI=SIZE(PTG,1)
+INL=SIZE(PTG,2)
+!
+ZLOG2 = LOG(2.0)
+!
+ZTG_SOIL (:) = 0.0
 !
 ! Mask where vegetation evolution is performed (just before solar midnight)
 GMASK = ( PTIME - PTSTEP < 0. ) .AND. ( PTIME >= 0. )
@@ -212,64 +242,91 @@ IF (GMASK) THEN
     PBIOMASS(:,1) = ZBIOMASS_LEAF(:)
   ELSE IF (HPHOTO=='NIT' .OR. HPHOTO=='NCB') THEN
     ! ratio of biomass to LAI with representation of nitrogen dilution fct of CO2
-    DO JJ = 1, SIZE(PLAI)
-      IDMAX = MAXLOC(PVEGTYPE(JJ,:))
-      ZCNAREF(JJ) = XCNAREF(IDMAX(1))
-      ZPARAM (JJ) = XPARAM (IDMAX(1))
+    DO JI = 1,INI
+      IDMAX = MAXLOC(PVEGTYPE(JI,:))
+      ZCNAREF(JI) = XCNAREF(IDMAX(1))
+      ZPARAM (JI) = XPARAM (IDMAX(1))
       !--------representation of nitrogen dilution fct of CO2 (Calvet et al. 2008)-------------
-      IF ( (PCE_NITRO (JJ)*PCNA_NITRO(JJ)+PCF_NITRO (JJ))/=0. .AND. ZCNAREF(JJ).NE.0. ) THEN 
-        ZCO2        (JJ) = P_CO2(JJ)/1.e-6/XMCO2*XMD  ! (ppmm ->  ppm)
-        ZCNA_NITRO  (JJ) = ZCNAREF(JJ)*EXP(-0.048*EXP(ZPARAM(JJ)-ZCNAREF(JJ)/6.3)*ALOG(ZCO2(JJ)/371.))
-        ZBSLAI_NITRO(JJ) = 1. / (PCE_NITRO(JJ)*PCNA_NITRO(JJ)+PCF_NITRO(JJ))
+      IF ( (PCE_NITRO (JI)*PCNA_NITRO(JI)+PCF_NITRO (JI))/=0. .AND. ZCNAREF(JI).NE.0. ) THEN 
+        ZCO2        (JI) = P_CO2(JI)/1.e-6/XMCO2*XMD  ! (ppmm ->  ppm)
+        ZCNA_NITRO  (JI) = ZCNAREF(JI)*EXP(-0.048*EXP(ZPARAM(JI)-ZCNAREF(JI)/6.3)*ALOG(ZCO2(JI)/371.))
+        ZBSLAI_NITRO(JI) = 1. / (PCE_NITRO(JI)*PCNA_NITRO(JI)+PCF_NITRO(JI))
       ELSE
-        ZBSLAI_NITRO(JJ) = PBSLAI_NITRO(JJ)
+        ZBSLAI_NITRO(JI) = PBSLAI_NITRO(JI)
       ENDIF
-    ENDDO      
-    CALL NITRO_DECLINE(HPHOTO, HRESPSL, OTR_ML,                             &
-                       ZBSLAI_NITRO, PSEFOLD, PGMES, PANMAX, PANDAY,        &
-                       PLAT, PLAIMIN, PVEGTYPE, PTAU_WOOD,                  &
-                       PANFM, PLAI, PBIOMASS, PRESP_BIOMASS, ZBIOMASS_LEAF, &
-                       PINCREASE, PTURNOVER                               )
-    CALL LAIGAIN(ZBSLAI_NITRO, PLAIMIN, PVEG, ZBIOMASS_LEAF, PLAI, PANDAY)
+    ENDDO   
+    PINCREASE(:,:)=0.0
+    PTURNOVER(:,:)=0.0
+    IF(ANY(PLAI(:)/=XUNDEF))THEN
+      CALL NITRO_DECLINE(HPHOTO, HRESPSL, OTR_ML, KSPINW,                     &
+                         ZBSLAI_NITRO, PSEFOLD, PGMES, PANMAX, PANDAY,        &
+                         PLAT, PLAIMIN, PVEGTYPE, PTAU_WOOD,                  &
+                         PANFM, PLAI, PBIOMASS, PRESP_BIOMASS, ZBIOMASS_LEAF, &
+                         PINCREASE, PTURNOVER                               )
+      CALL LAIGAIN(ZBSLAI_NITRO, PLAIMIN, PVEG, ZBIOMASS_LEAF, PLAI, PANDAY)
+    ENDIF
   ENDIF
   ! CASE CPHOTO=AST reinitialise  PANDAY and PANFM 
   PANDAY=0.0
-  PANFM =0.0  
+  PANFM =0.0    
 ENDIF
 !
 !
 IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB') THEN
   !
-  ! 5 - Respiration of structural biomass pools
+  ! * convert soil temperature from K to C (over 1m depth for DIF)
   !
-  PRESP_BIOMASS(:,2) = PRESP_BIOMASS(:,2)  + PBIOMASS(:,2) * XRESPFACTOR_NIT &
-       * 2.0**((PTG(:,1)-XTT-25.)/10.0) * PTSTEP  
-
+  ZTG_VEG(:) = PTG(:,1)-XTT
+  !
+  IF(HISBA/='DIF')THEN        
+    ZTG_SOIL(:) = PTG(:,2)-XTT   
+  ELSE       
+    DO JI=1,INI
+       IDEPTH=KWG_LAYER(JI)
+       ZDG_SOIL(JI)=MIN(ZDEPTH,PDG(JI,IDEPTH))
+    ENDDO  
+    DO JL=1,INL
+       DO JI=1,INI     
+          ZWGHT_SOIL=MIN(PDZG(JI,JL),MAX(0.0,ZDG_SOIL(JI)-PDG(JI,JL)+PDZG(JI,JL)))        
+          ZTG_SOIL(JI)=ZTG_SOIL(JI)+(PTG(JI,JL)-XTT)*ZWGHT_SOIL/ZDG_SOIL(JI)
+       ENDDO
+    ENDDO 
+  ENDIF
+  !
+  !
+  ! * Respiration of structural biomass pools
+  !
+  PRESP_BIOMASS(:,2) = PRESP_BIOMASS(:,2) + PBIOMASS(:,2) * XRESPFACTOR_NIT    &
+                                          * EXP((ZLOG2/ZCOEF1)*(ZTG_VEG(:)-ZCOEF2)) * PTSTEP  
+  ! before optimization                   * 2.0**((PTG(:,2)-XTT-ZCOEF2)/ZCOEF1) * PTSTEP               
+  !
   IF (HPHOTO == 'NIT') THEN
     !
     PRESP_BIOMASS(:,3) = PRESP_BIOMASS(:,3) + PBIOMASS(:,3) * XRESPFACTOR_NIT &
-       * 2.0**((PTG(:,2)-XTT-25.)/10.0) * PTSTEP  
+                                            * EXP((ZLOG2/ZCOEF1)*(ZTG_SOIL(:)-ZCOEF2)) * PTSTEP  
+  ! before optimization                     * 2.0**((PTG(:,2)-XTT-ZCOEF2)/ZCOEF1) * PTSTEP               
     !
   ELSEIF (HPHOTO == 'NCB') THEN
     !
     PRESP_BIOMASS(:,2) = MIN(PRESP_BIOMASS(:,2), PBIOMASS(:,2))
     ! 
     PRESP_BIOMASS(:,3) = PRESP_BIOMASS(:,3) + PBIOMASS(:,3) * MAX( 0., &
-        XCOEFF_MAINT_RESP_ZERO * (1. + XSLOPE_MAINT_RESP*(PTG(:,1)-XTT))) * PTSTEP  
+        XCOEFF_MAINT_RESP_ZERO * (1. + XSLOPE_MAINT_RESP*ZTG_VEG(:))) * PTSTEP  
     PRESP_BIOMASS(:,3) = MIN(PRESP_BIOMASS(:,3), PBIOMASS(:,3))
     ! 
     PRESP_BIOMASS(:,4) = PRESP_BIOMASS(:,4) + PBIOMASS(:,4) * MAX( 0., &
-        XCOEFF_MAINT_RESP_ZERO * (1. + XSLOPE_MAINT_RESP*(PTG(:,2)-XTT))) * PTSTEP  
+        XCOEFF_MAINT_RESP_ZERO * (1. + XSLOPE_MAINT_RESP*ZTG_SOIL(:))) * PTSTEP  
     PRESP_BIOMASS(:,4) = MIN(PRESP_BIOMASS(:,4), PBIOMASS(:,4))
     !
   ENDIF
   !
-  ! Instantaneous respiration (kgCO2/kgair m/s)
+  ! * Instantaneous respiration (kgCO2/kgair m/s)
   !
-  DO JWRK=2,SIZE(PRESP_BIOMASS,2)
-      PRESP_BIOMASS_INST(:,JWRK) = (PRESP_BIOMASS(:,JWRK) - ZRESP_BIOMASS_LAST(:,JWRK)) &
+  DO JL=2,SIZE(PRESP_BIOMASS,2)
+      PRESP_BIOMASS_INST(:,JL) = (PRESP_BIOMASS(:,JL) - ZRESP_BIOMASS_LAST(:,JL)) &
                                      * XPCCO2*XMCO2/(PTSTEP*PRHOA(:)*XMC)  
   ENDDO
+!  
 ENDIF
 
 !*      3.     Agricultural practices
@@ -334,6 +391,7 @@ IF (GMASK) THEN
   !
   ! Evolution of effective roughness length due to new surface roughness length
   !
+  IF (SIZE(PAOSIP)>0) &
   CALL SUBSCALE_Z0EFF(PAOSIP,PAOSIM,PAOSJP,PAOSJM,         &
                       PHO2IP,PHO2IM,PHO2JP,PHO2JM,PZ0,     &
                       PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM  ) 

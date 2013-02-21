@@ -35,9 +35,9 @@ MODULE modd_flake_configure
 !
 ! Modules used:
 
-USE modd_data_parameters , ONLY : &
-    ireals                   ,  &! KIND-type parameter for real variables 
-    iintegers                    ! KIND-type parameter for "normal" integer variables  
+!USE modd_data_parameters , ONLY : &
+!    ireals                   ,  &! KIND-type parameter for real variables 
+!    iintegers                    ! KIND-type parameter for "normal" integer variables  
 
 !==============================================================================
 
@@ -64,8 +64,8 @@ LOGICAL :: &
 !------------<Dutra> -----------------
  
 
-REAL (KIND = ireals), PARAMETER :: &
-    rflk_depth_bs_ref = 10.0_ireals    ! Reference value of the depth of the thermally active  
+REAL , PARAMETER :: &
+    rflk_depth_bs_ref = 10.0    ! Reference value of the depth of the thermally active  
                                      ! layer of bottom sediments [m].
                                      ! This value is used to (formally) define
                                      ! the depth penetrated by the thermal wave

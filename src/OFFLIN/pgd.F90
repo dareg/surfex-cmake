@@ -63,6 +63,7 @@
 USE MODD_IO_SURF_ASC
 USE MODD_IO_SURF_FA
 USE MODD_IO_SURF_LFI
+USE MODD_SURF_CONF
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 !      
@@ -94,7 +95,6 @@ USE MODI_GET_LUOUT
 !
 IMPLICIT NONE
 !
-!
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
@@ -110,7 +110,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD',0,ZHOOK_HANDLE)
+!
 CALL ALLOC_SURFEX(1)
+CSOFTWARE='PGD    '
 CALL GOTO_SURFEX(1,.TRUE.)
 !
 !*    1.      Set default names and parallelized I/O
@@ -183,6 +185,7 @@ WRITE(*,*) '    ----------------------'
       !
 CLOSE(ILUOUT)
 CALL DEALLOC_SURFEX
+!
 IF (LHOOK) CALL DR_HOOK('PGD',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

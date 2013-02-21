@@ -42,6 +42,7 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!     (B.Decharme)  04/2009  Read precipitation forcing from the restart file for ARPEGE/ALADIN run
 !!     (A. Lemonsu)    2009   New key read for urban green areas
 !!     (B.Decharme)  07/2011  Read pgd+prep
+!!     (S. Queguiner)  2011   Modif chemistry (2.4)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -72,7 +73,8 @@ USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH, XAOSIP, XAOSIM, XAOSJP, XAOSJM, &
                                 XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, &
                                 XZ0REL, XZ0EFFJPDIR, XFRACZ0, XCOEFBE
 USE MODD_CH_SURF_n,      ONLY : CCH_NAMES, LCH_EMIS, LRW_CH_EMIS, &
-                                LCH_SURF_EMIS, CCHEM_SURF_FILE, CAER_NAMES  
+                                LCH_SURF_EMIS, CCHEM_SURF_FILE, CAER_NAMES,&
+                                CCH_EMIS
 USE MODD_SV_n,           ONLY : NBEQ, CSV, NSV_CHSBEG, NSV_CHSEND, &
                                 NSV_DSTBEG, NSV_DSTEND, NDSTEQ,    &
                                 NSV_SLTBEG, NSV_SLTEND, NSLTEQ,    &
@@ -80,7 +82,7 @@ USE MODD_SV_n,           ONLY : NBEQ, CSV, NSV_CHSBEG, NSV_CHSEND, &
 USE MODD_DST_SURF,       ONLY : NDSTMDE, NDST_MDEBEG, LVARSIG_DST, LRGFIX_DST 
 USE MODD_SLT_SURF,       ONLY : NSLTMDE, NSLT_MDEBEG, LVARSIG_SLT, LRGFIX_SLT                                
 USE MODD_SURF_ATM_GRID_n,ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, &
-                                NGRID_PAR
+                                NGRID_PAR, XGRID_FULL_PAR
 
 USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET,     &
                                 LRAD_BUDGET, LCOEF, XDIAG_TSTEP,   &
@@ -94,6 +96,10 @@ USE MODD_DATA_COVER,     ONLY : LCLIM_LAI, NYEAR, XDATA_LAI_ALL_YEARS, XDATA_LAI
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_CHS_AEROSOL,    ONLY : LVARSIGI, LVARSIGJ
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE  
+!
+USE MODD_SURFEX_MPI, ONLY : XTIME_INIT_SEA, XTIME_INIT_WATER, XTIME_INIT_NATURE, XTIME_INIT_TOWN, &
+                            NRANK, NPIO, NWG_LAYER_TOT
+USE MODD_SURFEX_OMP, ONLY : NINDX2, NWORK, XWORK, XWORK2
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_DEFAULT_SSO
@@ -111,6 +117,7 @@ USE MODI_SUBSCALE_Z0EFF
 USE MODI_READ_SSO_CANOPY_n
 USE MODI_READ_DUMMY_n
 USE MODI_READ_GRID
+USE MODI_READ_GRIDTYPE
 USE MODI_END_IO_SURF_n
 USE MODI_PREP_CTRL_SURF_ATM
 USE MODI_AVERAGE_RAD
@@ -119,6 +126,7 @@ USE MODI_WRITE_COVER_TEX_END
 USE MODI_INIT_CHEMICAL_n
 USE MODI_CH_INIT_DEPCONST
 USE MODI_CH_INIT_EMISSION_n
+USE MODI_CH_INIT_SNAP_n
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_READ_PRECIP_n
@@ -140,12 +148,14 @@ USE MODI_WRITE_COVER_TEX_COVER
 USE MODI_GET_LUOUT
 USE MODI_SET_SURFEX_FILEIN
 !
-!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-!
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE 'mpif.h'
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -184,6 +194,7 @@ INTEGER           :: JTILE    ! loop counter on tiles
 INTEGER           :: IRESP    ! error return code
 INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: ICH      ! unit of input chemical file
+INTEGER           :: IVERSION, IBUGFIX       ! surface version
 !
 REAL, DIMENSION(:,:), ALLOCATABLE                       :: ZFRAC_TILE     ! fraction of each surface type
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
@@ -199,10 +210,15 @@ REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_DIR_ALB  ! direct albedo
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_SCA_ALB  ! diffuse albedo
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_EMIS     ! emissivity
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSRAD    ! radiative temperature
+!
+DOUBLE PRECISION :: XTIME0
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',0,ZHOOK_HANDLE)
+!
+!
 CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
@@ -283,6 +299,9 @@ END SELECT
 CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
 CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
 !
+CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+!
 !         reading
 !
 CALL READ_SURF(HPROGRAM,'SEA   ',CSEA   ,IRESP)
@@ -291,6 +310,12 @@ CALL READ_SURF(HPROGRAM,'NATURE',CNATURE,IRESP)
 CALL READ_SURF(HPROGRAM,'TOWN  ',CTOWN  ,IRESP)
 !
 CALL READ_SURF(HPROGRAM,'DIM_FULL  ',NDIM_FULL,  IRESP)
+IF (HINIT=='PRE') THEN
+  NINDX2 = NDIM_FULL
+  ALLOCATE(NWORK(NDIM_FULL))
+  ALLOCATE(XWORK(NDIM_FULL))
+  ALLOCATE(XWORK2(NDIM_FULL,2))
+ENDIF  
 CALL READ_SURF(HPROGRAM,'DIM_SEA   ',NDIM_SEA,   IRESP)
 CALL READ_SURF(HPROGRAM,'DIM_NATURE',NDIM_NATURE,IRESP)
 CALL READ_SURF(HPROGRAM,'DIM_WATER ',NDIM_WATER, IRESP)
@@ -327,6 +352,17 @@ ALLOCATE(XZ0EFFJPDIR(NSIZE_FULL))
 CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP,XZ0EFFJPDIR)
 NGRID_PAR=SIZE(XGRID_PAR)
 !
+IF (NRANK==NPIO) THEN
+  !
+  IF (.NOT.ASSOCIATED(XGRID_FULL_PAR)) THEN
+    CALL READ_GRIDTYPE(HPROGRAM,CGRID,NGRID_PAR,NDIM_FULL,.FALSE.,HDIR='A')
+    ALLOCATE(XGRID_FULL_PAR(NGRID_PAR))
+    CALL READ_GRIDTYPE(HPROGRAM,CGRID,NGRID_PAR,NDIM_FULL,.TRUE.,&
+                       XGRID_FULL_PAR,IRESP,HDIR='A')
+  ENDIF
+  !
+ENDIF
+!
 !*       2.4     Allocation of chemical species name, chemical index of HSV array 
 !
 CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
@@ -337,7 +373,38 @@ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
 !        2.4 Initialize Chemical Emissions
 !
 CALL READ_SURF(HPROGRAM,'CH_EMIS',LCH_EMIS,IRESP)
-IF (LCH_EMIS) LRW_CH_EMIS = .TRUE.
+!
+IF (LCH_EMIS) THEN
+  !
+  IF ( IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3 ) THEN
+    CCH_EMIS='AGGR'
+  ELSE
+    CALL READ_SURF(HPROGRAM,'CH_EMIS_OPT',CCH_EMIS,IRESP)
+  END IF
+  !
+  IF (CCH_EMIS=='AGGR') LRW_CH_EMIS = .TRUE.
+  !
+  IF (NBEQ > 0) THEN
+    !
+    CALL OPEN_NAMELIST(HPROGRAM,ICH,HFILE=CCHEM_SURF_FILE)
+    !
+    IF (LCH_SURF_EMIS) THEN
+      IF (CCH_EMIS=='AGGR') THEN
+        CALL CH_INIT_EMISSION_n(HPROGRAM,NSIZE_FULL,ICH,PRHOA) 
+      ELSE
+        CALL CH_INIT_SNAP_n(HPROGRAM,NSIZE_FULL,HINIT,ICH,PRHOA)
+      END IF
+    ENDIF
+    !
+    !*       2.5 Initialization of dry deposition scheme (chemistry)
+    !    
+    IF (HINIT=='ALL') CALL CH_INIT_DEPCONST(ICH,ILUOUT,CSV(NSV_CHSBEG:NSV_CHSEND))
+    !
+    CALL CLOSE_NAMELIST(HPROGRAM,ICH)
+    !
+  ENDIF
+  !
+END IF
 !
 !*       2.5 Subgrid orography
 !
@@ -378,18 +445,6 @@ CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
 !
 IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(HPROGRAM,KSW)
 !
-!         reading
-
-IF (NBEQ > 0) THEN
-  CALL OPEN_NAMELIST(HPROGRAM,ICH,HFILE=CCHEM_SURF_FILE)
-  IF (LCH_SURF_EMIS) CALL CH_INIT_EMISSION_n(HPROGRAM,NSIZE_FULL,ICH,PRHOA)
-!
-!*       Initialization of dry deposition scheme (chemistry)
-!
-  CALL CH_INIT_DEPCONST(ICH,ILUOUT,CSV(NSV_CHSBEG:NSV_CHSEND))
-  CALL CLOSE_NAMELIST(HPROGRAM,ICH)
-!
-END IF
 !
 !*       Canopy fields if Beljaars et al 2004 parameterization is used
 !
@@ -425,7 +480,7 @@ IF (NSIZE_TOWN  >0)CALL GET_1D_MASK( NSIZE_TOWN,   NSIZE_FULL, XTOWN  , NR_TOWN 
 IF (NSIZE_NATURE>0)CALL GET_1D_MASK( NSIZE_NATURE, NSIZE_FULL, XNATURE, NR_NATURE)
 !
 !* number of shortwave spectral bands
-ISWB=KSW
+ISWB=SIZE(PSW_BANDS)
 !
 !* tile number
 ALLOCATE(ZFRAC_TILE(NSIZE_FULL,NTILESFC))
@@ -439,6 +494,10 @@ ZDIR_ALB_TILE = XUNDEF
 ZSCA_ALB_TILE = XUNDEF
 ZEMIS_TILE    = XUNDEF
 ZTSRAD_TILE   = XUNDEF
+!
+#ifndef NOMPI
+XTIME0 = MPI_WTIME()
+#endif
 !
 !*       6.     Initialization of sea
 !               ---------------------
@@ -461,6 +520,10 @@ IF (NDIM_SEA>0) &
 !
 CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_SEA,NR_SEA)  
 !
+#ifndef NOMPI
+XTIME_INIT_SEA = XTIME_INIT_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
+XTIME0 = MPI_WTIME()
+#endif
 !
 !*       7.     Initialization of lakes
 !               -----------------------
@@ -481,8 +544,12 @@ IF (NDIM_WATER>0) &
                            KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                            'OK'                                               )
 !
-CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_WATER,NR_WATER)  
+CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_WATER,NR_WATER)
 !
+#ifndef NOMPI
+XTIME_INIT_WATER = XTIME_INIT_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
+XTIME0 = MPI_WTIME()
+#endif
 !
 !*       8.     Initialization of vegetation scheme
 !               -----------------------------------
@@ -494,6 +561,10 @@ ZFRAC_TILE(:,JTILE) = XNATURE(:)
 ! pack variables which are arguments to this routine
 CALL PACK_SURF_INIT_ARG(NSIZE_NATURE,NR_NATURE)
 !
+!$OMP SINGLE
+ALLOCATE(NWG_LAYER_TOT(NDIM_FULL,1))
+!$OMP END SINGLE
+!
 ! initialization
 IF (NDIM_NATURE>0) &
   CALL INIT_NATURE_n(HPROGRAM,HINIT,OLAND_USE,NSIZE_NATURE,KSV,KSW,     &
@@ -503,8 +574,13 @@ IF (NDIM_NATURE>0) &
                      KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                      'OK'                                               )
 !
+!
 CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_NATURE,NR_NATURE)  
 !
+#ifndef NOMPI
+XTIME_INIT_NATURE = XTIME_INIT_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
+XTIME0 = MPI_WTIME()
+#endif
 !
 !*       9.     Initialization of urban scheme
 !               ------------------------------
@@ -528,6 +604,9 @@ IF (NDIM_TOWN>0) &
 !
 CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_TOWN,NR_TOWN)  
 !
+#ifndef NOMPI
+XTIME_INIT_TOWN = XTIME_INIT_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
+#endif
 !
 !
 !*      10.     Output radiative fields
@@ -565,7 +644,7 @@ SUBROUTINE PACK_SURF_INIT_ARG(KSIZE,KMASK)
 !
 INTEGER, INTENT(IN)               :: KSIZE
 INTEGER, INTENT(IN), DIMENSION(:) :: KMASK
-INTEGER JJ
+INTEGER :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! input arguments:
@@ -600,7 +679,7 @@ IF (SIZE(PCO2)>0) &
      ZP_CO2   (JJ)     = PCO2        (KMASK(JJ))  
 IF (SIZE(PRHOA)>0) &
      ZP_RHOA  (JJ)     = PRHOA       (KMASK(JJ))  
-IF (KI>0) &
+IF (SIZE(PZENITH)>0) &
      ZP_ZENITH(JJ)     = PZENITH     (KMASK(JJ))  
 IF (SIZE(PAZIM  )>0) &
      ZP_AZIM  (JJ)     = PAZIM       (KMASK(JJ))  

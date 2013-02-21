@@ -38,14 +38,16 @@
 !
 USE MODI_READ_PREP_SURF_ATM_CONF
 !
-USE MODN_PREP_TEB
-USE MODD_PREP_TEB, ONLY : CFILE_TEB, CTYPE, CFILEPGD_TEB, CTYPEPGD,                   &
-                            CFILE_WS, CTYPE_WS, XWS_ROOF, XWS_ROAD,                   &
-                            XTS_ROOF, XTS_ROAD, XTS_WALL, XTI_BLD, XTI_ROAD,          &
-                            XT_CAN, XQ_CAN, XWS_ROOF_DEF, XWS_ROAD_DEF, XTI_BLD_DEF  
+USE MODN_PREP_TEB, ONLY : CFILE_TS, CTYPE_TS
+USE MODD_PREP_TEB, ONLY : CFILE_TEB, CTYPE, CFILEPGD_TEB, CTYPEPGD,                 &
+                          CFILE_WS, CTYPE_WS, XWS_ROOF, XWS_ROAD,                   &
+                          XTS_ROOF, XTS_ROAD, XTS_WALL, XTI_BLD, XTI_ROAD,          &
+                          XT_CAN, XQ_CAN, XWS_ROOF_DEF, XWS_ROAD_DEF, XTI_BLD_DEF,  &
+                          XHUI_BLD_DEF, XHUI_BLD  
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
+USE MODE_THERMOS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -105,7 +107,7 @@ SELECT CASE (HVAR)
       HFILE     = CFILE_WS
       HFILETYPE = CTYPE_WS
     END IF
-  CASE ('T_ROOF ','T_ROAD ','T_WALL ')
+  CASE ('T_ROOF ','T_ROAD ','T_WALL ','T_FLOOR', 'T_MASS')
     IF (LEN_TRIM(CFILE_TS)>0 .AND. LEN_TRIM(CTYPE_TS)>0 ) THEN
       HFILE     = CFILE_TS
       HFILETYPE = CTYPE_TS
@@ -141,18 +143,26 @@ SELECT CASE (HVAR)
     OUNIF = (XWS_ROOF/=XUNDEF) 
   CASE ('WS_ROAD')
     OUNIF = (XWS_ROAD/=XUNDEF) 
+  CASE ('TI_BLD ')
+    OUNIF = (XTI_BLD/=XUNDEF)  
+  CASE ('TI_ROAD')
+    OUNIF = (XTI_ROAD/=XUNDEF)    
   CASE ('T_ROAD ')
     OUNIF = (XTS_ROAD/=XUNDEF) 
+  CASE ('T_WALL ','T_WALLA','T_WALLB')
+    OUNIF = (XTS_WALL/=XUNDEF)     
   CASE ('T_ROOF ')
     OUNIF = (XTS_ROOF/=XUNDEF) 
-  CASE ('T_WALL ')
-    OUNIF = (XTS_WALL/=XUNDEF) 
-  CASE ('TI_BLD ')
-    OUNIF = (XTI_BLD /=XUNDEF) 
-  CASE ('TI_ROAD')
-    OUNIF = (XTI_ROAD/=XUNDEF) 
-  CASE('T_CAN')
-    OUNIF = (XTS_ROAD/=XUNDEF) .OR. (XTS_WALL/=XUNDEF) .OR. (XTS_ROOF/=XUNDEF)    
+  CASE ('T_FLOOR')
+    OUNIF = (XTI_ROAD/=XUNDEF)     
+  CASE ('T_MASS') 
+    OUNIF = (XTI_BLD/=XUNDEF)
+  CASE ('T_WIN1') 
+    OUNIF = (XTS_WALL/=XUNDEF)
+  CASE ('T_WIN2') 
+    OUNIF = (XTI_BLD/=XUNDEF)
+  CASE ('QI_BLD ')
+    OUNIF = (XHUI_BLD/=XUNDEF .AND. XTI_BLD/=XUNDEF)     
 END SELECT
 !
 !-------------------------------------------------------------------------------
@@ -160,9 +170,9 @@ END SELECT
 !* building temperature available for temperature profiles when file is present
 !  ----------------------------------------------------------------------------
 !
-IF (LEN_TRIM(HFILETYPE)>0 .AND. .NOT. OUNIF) THEN
-  IF (HVAR=='T_ROOF ' .OR. HVAR=='T_WALL' .OR. HVAR=='TI_BLD' .AND. XTI_BLD==XUNDEF) XTI_BLD=XTI_BLD_DEF
-END IF
+!IF (LEN_TRIM(HFILETYPE)>0 .AND. .NOT. OUNIF) THEN
+!  IF (HVAR=='T_ROOF ' .OR. HVAR=='T_WALL' .OR. HVAR=='TI_BLD' .AND. XTI_BLD==XUNDEF) XTI_BLD=XTI_BLD_DEF
+!END IF
 !
 !-------------------------------------------------------------------------------
 !
@@ -183,12 +193,34 @@ IF (LEN_TRIM(HFILETYPE)==0 .AND. .NOT. OUNIF) THEN
       XTI_BLD  = XTI_BLD_DEF
       OUNIF = .TRUE.
     CASE ('Q_CAN  ')
-      XQ_CAN  = 0.
+      IF (XT_CAN/=XUNDEF) THEN
+         XQ_CAN = XHUI_BLD_DEF * QSAT(XT_CAN, 100000.)
+         OUNIF = .TRUE.
+      ELSE 
+         CALL ABOR1_SFX("READ_PREP_TEB_CONF: DON'T KNOW HOW TO INITIALIZE Q_CAN ")
+      END IF            
+    CASE ('T_CAN  ')  
+      IF (XTS_ROAD/=XUNDEF) THEN
+        XT_CAN = XTS_ROAD
+      ELSE IF (XTS_WALL/=XUNDEF) THEN
+        XT_CAN = XTS_WALL
+      ELSE IF (XTS_ROOF/=XUNDEF) THEN
+        XT_CAN = XTS_ROOF
+      ELSE
+        CALL ABOR1_SFX('READ_PREP_TEB_CONF: AN INPUT VALUE IS REQUIRED FOR '//HVAR)
+      END IF 
+    CASE ('T_WIN1  ')
+      IF (XTS_WALL==XUNDEF) THEN
+         CALL ABOR1_SFX('READ_PREP_TEB_CONF: AN INPUT VALUE IS REQUIRED FOR TS_WALL TO INITIALIZE T_WIN1')
+      ELSE 
+         OUNIF = .TRUE.
+      ENDIF
+    CASE ('T_WIN2  ') 
+      XTI_BLD  = XTI_BLD_DEF
       OUNIF = .TRUE.
-    CASE ('T_CAN  ')
-      IF (XTS_ROAD==XUNDEF .AND. XTS_WALL==XUNDEF .AND. XTS_ROOF/=XUNDEF) THEN
-        CALL ABOR1_SFX('READ_PREP_TEB_CONF: AN INPUT VALUE IS REQUIRED FOR '//HVAR)            
-      END IF
+    CASE ('QI_BLD  ') 
+      XHUI_BLD  = XHUI_BLD_DEF
+      OUNIF = .TRUE.
     CASE ('DATE   ')
       IF (LHOOK) CALL DR_HOOK('READ_PREP_TEB_CONF',1,ZHOOK_HANDLE)
       RETURN

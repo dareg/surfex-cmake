@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_NEAR_MESHES_IGN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,OLIST,KLIST,KNEAR)
+      SUBROUTINE GET_NEAR_MESHES_IGN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 !     ##############################################################
 !
 !!**** *GET_NEAR_MESHES_IGN* get the near grid mesh indices
@@ -43,20 +43,64 @@ INTEGER,                         INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                         INTENT(IN)    :: KL        ! number of points
 INTEGER,                         INTENT(IN)    :: KNEAR_NBR ! number of nearest points wanted
 REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
-LOGICAL, DIMENSION(KL),          INTENT(IN)    :: OLIST     ! position in complete array of points
-!                                                           ! for which one wants near mesh indices
-INTEGER,                         INTENT(IN)    :: KLIST     ! number of points for which one 
-                                                            ! wants near mesh indices
-INTEGER, DIMENSION(KLIST,KNEAR_NBR),INTENT(OUT) :: KNEAR    ! near mesh indices
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+INTEGER, DIMENSION(:,:),POINTER :: KNEAR    ! near mesh indices
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
+REAL, DIMENSION(KL,KL) :: ZDIS
+REAL,DIMENSION(KL)    :: ZX
+REAL,DIMENSION(KL)    :: ZY
+REAL,DIMENSION(KL)    :: ZDX
+REAL,DIMENSION(KL)    :: ZDY
+REAL, DIMENSION(KL) :: ZDMAX
+INTEGER, DIMENSION(KL) :: ID0
+INTEGER :: JP1, JP2, JN
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN',0,ZHOOK_HANDLE)
+!
+CALL GET_GRIDTYPE_IGN(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY)
+!
 KNEAR  (:,:) = 0
+!
+! calcul de la distance de tous les points 2 à 2
+!
+ZDIS = 1.E20
+!
+DO JP1=1,KL
+  DO JP2=1,KL
+    ZDIS(JP1,JP2) = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
+  ENDDO
+  ZDMAX(JP1) = MAXVAL(ZDIS(JP1,:)) + 1.
+  ZDIS(JP1,JP1) = ZDMAX(JP1)
+ENDDO
+!
+! on prend les knear_nbr premiers, pour chaque
+!
+DO JN=1,KNEAR_NBR
+  !
+  ID0(:) = 0
+  !
+  IF (JN<KL) THEN
+    !
+    DO JP1=1,KL
+      ID0(JP1) = MAXVAL(MINLOC(ZDIS(JP1,:)))
+    ENDDO         
+    !
+    DO JP1=1,KL
+      !
+      KNEAR(JP1,JN) = ID0(JP1)
+      ZDIS(JP1,ID0(JP1)) = ZDMAX(JP1)
+      !
+    ENDDO
+    !
+  ENDIF
+  !
+ENDDO
+!
 IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -38,8 +38,11 @@ INTEGER                :: NUNIT_LFI      ! logical unit of surface file (LFI par
 INTEGER                :: NLUOUT         ! logical unit of output file
 !
 INTEGER, DIMENSION(:), POINTER :: NMASK ! 1D mask to read only interesting
+!$OMP THREADPRIVATE(NMASK)
 CHARACTER(LEN=6)               :: CMASK ! surface mask type
+!$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL     = NUNDEF ! total number fo points of surface
+!$OMP THREADPRIVATE(NFULL)
 INTEGER                        :: NFULL_AUX = NUNDEF ! total number fo points of surface (Auxilarry file for prep)
 INTEGER                        :: NFULL_SURF= NUNDEF ! total number fo points of surface (PGD, PREP or SURFace prognostic file)
 !

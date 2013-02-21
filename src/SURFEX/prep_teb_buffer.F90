@@ -33,7 +33,8 @@ USE MODI_INTERP_GRID
 !
 USE MODD_PREP,       ONLY : CINTERP_TYPE
 USE MODD_GRID_BUFFER,  ONLY : NNI
-USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XTI_BLD, XTI_ROAD
+USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XGRID_FLOOR, &
+                            XTI_BLD, XTI_ROAD, XHUI_BLD, XTI_BLD_DEF
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
@@ -56,6 +57,7 @@ CHARACTER(LEN=6)                :: YINMODEL ! model from which BUFFER originates
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D ! 1D field read
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD   ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD             ! depth of field in the soil
+REAL                            :: ZTI_BLD  ! internal building temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -66,6 +68,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_BUFFER',0,ZHOOK_HANDLE)
 CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUF)
 !
+IF (HSURF=='T_FLOOR' .OR. HSURF=='T_WALL' .OR. HSURF=='T_ROOF' .OR.  HSURF=='T_WIN2' .OR. HSURF=='TI_BLD') THEN
+   ZTI_BLD = XTI_BLD_DEF
+   IF (XTI_BLD/=XUNDEF) ZTI_BLD=XTI_BLD
+ENDIF
 !---------------------------------------------------------------------------------------
 SELECT CASE(HSURF)
 !---------------------------------------------------------------------------------------
@@ -96,22 +102,52 @@ SELECT CASE(HSURF)
        ZFIELD(:,2:) = XTI_ROAD 
      END IF
      CALL TEB_PROFILE_BUFFER(XGRID_ROAD)
+!
+!*      3.bis     Profile of temperatures in floors
+!                 --------------------------------
+
+  CASE('T_FLOOR')
+     !* reading of the profile and its depth definition
+     SELECT CASE(YINMODEL)
+       CASE('ALADIN')
+         CALL READ_BUFFER_TF_TEB(KLUOUT,YINMODEL,ZTI_BLD,ZFIELD,ZD)
+     END SELECT
+     !* if deep road temperature is prescribed
+     IF (XTI_ROAD/=XUNDEF) THEN
+       ZFIELD(:,2:) = XTI_ROAD 
+     END IF
+     CALL TEB_PROFILE_BUFFER(XGRID_FLOOR)
 
 !*      4.     Profile of temperatures in walls
 !              --------------------------------
 
-  CASE('T_WALL')
-     CALL READ_BUFFER_T_TEB(KLUOUT,YINMODEL,XTI_BLD,ZFIELD,ZD)
+  CASE('T_WALLA','T_WALLB')
+     CALL READ_BUFFER_T_TEB(KLUOUT,YINMODEL,ZTI_BLD,ZFIELD,ZD)
      CALL TEB_PROFILE_BUFFER(XGRID_WALL)
-
+        
+  CASE('T_WIN1')
+    SELECT CASE (YINMODEL)
+      CASE ('ALADIN')
+        CALL READ_BUFFER_TS(KLUOUT,YINMODEL,ZFIELD1D)
+        ALLOCATE(PFIELD(NNI,1))
+        PFIELD(:,1) = ZFIELD1D(:)
+        DEALLOCATE(ZFIELD1D)
+    END SELECT
 
 !*      5.     Profile of temperatures in roofs
 !              --------------------------------
 
   CASE('T_ROOF')    
-     CALL READ_BUFFER_T_TEB(KLUOUT,YINMODEL,XTI_BLD,ZFIELD,ZD)
+     CALL READ_BUFFER_T_TEB(KLUOUT,YINMODEL,ZTI_BLD,ZFIELD,ZD)
      CALL TEB_PROFILE_BUFFER(XGRID_ROOF)
 
+!*      5.bis    Profile of temperatures in thermal mass
+!              -----------------------------------------
+!    
+  CASE('T_MASS')
+     ALLOCATE(PFIELD(NNI,3))
+     PFIELD(:,:) = ZTI_BLD
+     CALL TEB_PROFILE_BUFFER(XGRID_FLOOR)
 !
 !*      6.     Canyon air temperature
 !              ----------------------
@@ -132,7 +168,7 @@ SELECT CASE(HSURF)
     SELECT CASE (YINMODEL)
       CASE ('ALADIN')
         ALLOCATE(PFIELD(NNI,1))
-        PFIELD(:,1) = 0.
+        PFIELD(:,1) = 0.01
     END SELECT
 
 !
@@ -151,12 +187,20 @@ SELECT CASE(HSURF)
      END IF
 
 
-!*      9.     Building temperature
+!*      9.     Building temperatures/moisture
 !              --------------------
 
   CASE('TI_BLD ')    
      ALLOCATE(PFIELD(NNI,1))
-     PFIELD = XTI_BLD
+     PFIELD(:,:) = ZTI_BLD
+!
+  CASE('T_WIN2')
+     ALLOCATE(PFIELD(NNI,1))
+     PFIELD(:,:) = ZTI_BLD
+
+  CASE('QI_BLD ')
+     ALLOCATE(PFIELD(NNI,1))
+     PFIELD(:,1) = XUNDEF
 
 !*     10.     Other quantities (water reservoirs)
 !              ----------------

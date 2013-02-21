@@ -56,7 +56,8 @@ USE MODD_FLAKE_n,  ONLY : XCOVER          , TTIME         , XTSTEP        , &
                             XH_SNOW       , XH_ICE        , XH_ML         , &
                             XH_B1         , XTS           , LSEDIMENTS    , &
                             CSNOW_FLK     , CFLK_FLUX     , CFLK_ALB      , &
-                            LSBL  
+                            LSBL          , XICHCE        , LPRECIP       , &
+                            LPWEBB
 
 
 
@@ -117,7 +118,7 @@ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+CHARACTER(LEN=6), DIMENSION(KI), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -177,7 +178,8 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_FLAKE(XTSTEP,XOUT_TSTEP,LSEDIMENTS,CSNOW_FLK,CFLK_FLUX,CFLK_ALB)
+ CALL DEFAULT_FLAKE(XTSTEP,XOUT_TSTEP,LSEDIMENTS,CSNOW_FLK,CFLK_FLUX,CFLK_ALB,&
+                    XICHCE,LPRECIP,LPWEBB)
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_DIAG_FLAKE(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
                          LWATER_PROFILE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP,  &

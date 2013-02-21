@@ -1,6 +1,6 @@
 !     #########
-SUBROUTINE CARBON_SOIL (PTSTEP, PSAND,                                        &
-                          PSOILCARBON_INPUT, PCONTROL_TEMP, PCONTROL_MOIST,     &
+SUBROUTINE CARBON_SOIL (PTSTEP, PSAND,                                      &
+                          PSOILCARBON_INPUT, PCONTROL_TEMP, PCONTROL_MOIST, &
                           PSOILCARB, PRESP_HETERO_SOIL)  
 
 !   ###############################################################
@@ -37,6 +37,7 @@ SUBROUTINE CARBON_SOIL (PTSTEP, PSAND,                                        &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    23/06/09
+!!      B. Decharme 05/2012 : Optimization
 !!
 !-------------------------------------------------------------------------------
 !
@@ -89,10 +90,13 @@ REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2))                   :: ZFRAC_
 REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2))                   :: ZFLUXTOT
 ! fluxes between carbon pools (gC/m**2)
 REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2),SIZE(PSOILCARB,2)) :: ZFLUX
+!
+REAL, DIMENSION(SIZE(PSOILCARB,1))                                     :: ZWORK ! Work array
+!
 ! dimensions
-INTEGER                                                           :: INSOILCARB
+INTEGER                                                           :: INI, INSOILCARB
 ! indices
-INTEGER                                                           :: K,KK
+INTEGER                                                           :: JI, JL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! correspondence between array indices and litter levels
@@ -107,107 +111,91 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       1 Initialisations
 !
-
 !
 !*       1.1 dimensions
 !
 IF (LHOOK) CALL DR_HOOK('CARBON_SOIL',0,ZHOOK_HANDLE)
+!
+INI        = SIZE(PSOILCARB,1)
 INSOILCARB = SIZE(PSOILCARB,2)
-
 !
 !*       1.2 get soil "constants"
 !
-
-!*       1.2.1 flux fractions between carbon pools: depend on soil texture, 
-!       recalculated each time
-
+!*       1.2.1 flux fractions between carbon pools: depend on soil texture, recalculated each time
+!
 !*       1.2.1.1 from active pool: depends on soil texture
-
+!
 ZFRAC_CARB(:,1,1) = 0.0
 ZFRAC_CARB(:,1,3) = 0.004
 ZFRAC_CARB(:,1,2) = 1. - ( .85 - .68 * (1.-PSAND(:)) ) - ZFRAC_CARB(:,1,3)
-
+!
 !*       1.2.1.2 from slow pool
-
+!
 ZFRAC_CARB(:,2,2) = .0
 ZFRAC_CARB(:,2,1) = .42
 ZFRAC_CARB(:,2,3) = .03
-
+!
 !*       1.2.1.3 from passive pool
-
+!
 ZFRAC_CARB(:,3,3) = .0
 ZFRAC_CARB(:,3,1) = .45
 ZFRAC_CARB(:,3,2) = .0
-
-
 !
 !*       1.3 set output to zero
 !
-
 PRESP_HETERO_SOIL(:) = 0.0
-
+!
 !
 !*       2 input into carbon pools
 !
-
 ZDT = PTSTEP/XDAY
-
+!
 PSOILCARB(:,:) = PSOILCARB(:,:) + PSOILCARBON_INPUT(:,:) * ZDT
-
+!
 !
 !*       3 fluxes within carbon reservoirs + respiration
 !
-
-!
 !*       3.1 determine fraction of flux that is respiration
 !     diagonal elements of frac_carb are zero
-
-ZFRAC_RESP(:,:) = 1. - ZFRAC_CARB(:,:,1) - ZFRAC_CARB(:,:,2) - &
-                   ZFRAC_CARB(:,:,3)   
-
+!
+ZFRAC_RESP(:,:) = 1. - ZFRAC_CARB(:,:,1) - ZFRAC_CARB(:,:,2) - ZFRAC_CARB(:,:,3)   
 !
 !*       3.2 calculate fluxes
 !
-
-
 !*       3.2.1 flux out of pools
-
-DO K = 1, INSOILCARB
-
-  ! determine total flux out of pool
-
-  ZFLUXTOT(:,K) = PTSTEP/XTAU_SOILCARB(K) * PSOILCARB(:,K) * &
-                   PCONTROL_MOIST(:,2) * PCONTROL_TEMP(:,2)  
-
-  IF ( K .EQ. 1 ) THEN
-    ZFLUXTOT(:,K) = ZFLUXTOT(:,K) * ( 1. - .75 * (1.-PSAND(:)) )
-  ENDIF
-
-  ! decrease this carbon pool
-
-  PSOILCARB(:,K) = PSOILCARB(:,K) - ZFLUXTOT(:,K)
-
-  ! fluxes towards the other pools (k -> kk)
-
-  DO KK = 1, INSOILCARB
-    ZFLUX(:,K,KK) = ZFRAC_CARB(:,K,KK) * ZFLUXTOT(:,K)
-  ENDDO
-
+!
+!soil property dependance (1.0-0.75*(1.0-PSAND(:)))
+ZWORK(:)=0.25+0.75*PSAND(:)
+!
+! determine total flux out of pool
+ZFLUXTOT(:,1) = PTSTEP/XTAU_SOILCARB(1)*PSOILCARB(:,1)*PCONTROL_MOIST(:,2)*PCONTROL_TEMP(:,2)*ZWORK(:) 
+ZFLUXTOT(:,2) = PTSTEP/XTAU_SOILCARB(2)*PSOILCARB(:,2)*PCONTROL_MOIST(:,2)*PCONTROL_TEMP(:,2) 
+ZFLUXTOT(:,3) = PTSTEP/XTAU_SOILCARB(3)*PSOILCARB(:,3)*PCONTROL_MOIST(:,2)*PCONTROL_TEMP(:,2) 
+!
+!decrease this carbon pool
+PSOILCARB(:,:) = PSOILCARB(:,:) - ZFLUXTOT(:,:)
+!
+!fluxes towards the other pools (k -> kk)
+DO JL=1,INSOILCARB
+   DO JI=1,INI
+      ZFLUX(JI,1,JL) = ZFRAC_CARB(JI,1,JL) * ZFLUXTOT(JI,1)
+      ZFLUX(JI,2,JL) = ZFRAC_CARB(JI,2,JL) * ZFLUXTOT(JI,2)
+      ZFLUX(JI,3,JL) = ZFRAC_CARB(JI,3,JL) * ZFLUXTOT(JI,3)
+   ENDDO
 ENDDO
-
+!
 !*       3.2.2 respiration
-
-PRESP_HETERO_SOIL(:) = &
-       ( ZFRAC_RESP(:,1) * ZFLUXTOT(:,1) + &
-         ZFRAC_RESP(:,2) * ZFLUXTOT(:,2) + &
-         ZFRAC_RESP(:,3) * ZFLUXTOT(:,3)  ) / ZDT  
-
+!
+PRESP_HETERO_SOIL(:) = ( ZFRAC_RESP(:,1) * ZFLUXTOT(:,1) +         &
+                         ZFRAC_RESP(:,2) * ZFLUXTOT(:,2) +         &
+                         ZFRAC_RESP(:,3) * ZFLUXTOT(:,3)  ) / ZDT  
+!
 !*       3.2.3 add fluxes to active, slow, and passive pools
-
-DO K = 1, INSOILCARB
-  PSOILCARB(:,K) = PSOILCARB(:,K) + &
-                    ZFLUX(:,1,K) + ZFLUX(:,3,K) + ZFLUX(:,2,K)  
-ENDDO
+!
+PSOILCARB(:,1) = PSOILCARB(:,1) + ZFLUX(:,1,1) + ZFLUX(:,2,1) + ZFLUX(:,3,1)  
+PSOILCARB(:,2) = PSOILCARB(:,2) + ZFLUX(:,1,2) + ZFLUX(:,2,2) + ZFLUX(:,3,2)  
+PSOILCARB(:,3) = PSOILCARB(:,3) + ZFLUX(:,1,3) + ZFLUX(:,2,3) + ZFLUX(:,3,3)  
+!
 IF (LHOOK) CALL DR_HOOK('CARBON_SOIL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE CARBON_SOIL

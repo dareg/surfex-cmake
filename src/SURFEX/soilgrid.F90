@@ -45,6 +45,7 @@
 !!    -------------
 !!      Original     12/04/03
 !!      new version :10/08/2011
+!!      modif       :   09/2012 soildepth can reach 12m (permafrost)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -176,7 +177,8 @@ REAL, DIMENSION(NDLIM), PARAMETER   :: ZDLIM = &
 REAL,DIMENSION(SIZE(PDG,1),SIZE(PDG,3)) :: ZDG_WATER
 !
 LOGICAL            :: LWORK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB)    :: ZHOOK_HANDLE
+!
 !-------------------------------------------------------------------------------
 ! init
 !
@@ -193,8 +195,10 @@ DO JPATCH=1,IPATCH
         ZDG_WATER(JJ,JPATCH)=MIN(1.0,PSOILDEPTH(JJ,JPATCH))
       ELSEIF(PSOILDEPTH(JJ,JPATCH)>=5.50.AND.PSOILDEPTH(JJ,JPATCH)<6.50)THEN
               ZDG_WATER(JJ,JPATCH)=5.50
-      ELSEIF(PSOILDEPTH(JJ,JPATCH)>=6.50.AND.PSOILDEPTH(JJ,JPATCH)<XUNDEF)THEN
+      ELSEIF(PSOILDEPTH(JJ,JPATCH)>=6.50.AND.PSOILDEPTH(JJ,JPATCH)<10.50)THEN
               ZDG_WATER(JJ,JPATCH)=8.00
+      ELSEIF(PSOILDEPTH(JJ,JPATCH)>=10.50.AND.PSOILDEPTH(JJ,JPATCH)<XUNDEF)THEN
+              ZDG_WATER(JJ,JPATCH)=12.00              
       ELSE
         DO JL=1,NDLIM-1         
            IF(PSOILDEPTH(JJ,JPATCH)>=ZDLIM(JL).AND.PSOILDEPTH(JJ,JPATCH)<ZDLIM(JL+1))THEN
@@ -225,7 +229,8 @@ DO JPATCH=1,IPATCH
              ZDG_WATER(JJ,JPATCH)==2.0.OR.&
              ZDG_WATER(JJ,JPATCH)==3.0.OR.&
              ZDG_WATER(JJ,JPATCH)==5.0.OR.&
-             ZDG_WATER(JJ,JPATCH)==8.0    )
+             ZDG_WATER(JJ,JPATCH)==8.0.OR.&
+             ZDG_WATER(JJ,JPATCH)==12.0   )
       ! 
       IF (LWORK) THEN    
         DO JL=2,INL      

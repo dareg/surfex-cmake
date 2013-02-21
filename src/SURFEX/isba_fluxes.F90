@@ -89,7 +89,7 @@
 !!      (B. Decharme)07/2012  Error in restore flux calculation (only for diag)
 !!      (B. Decharme)10/2012  Melt rate with D95 computed using max(XTAU,PTSTEP)
 !!                            Same for soil ice if ISBA-FR
-!!                            Bug on TG2 calculation
+!                             Bug on TG2 calculation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -872,7 +872,7 @@ ELSE
 !               ---------------------
 !
     PTG(JJ,2) = PTG(JJ,2) + PDWGI2(JJ)*XLMTT*PCG(JJ)*XRHOLW*PD_G(JJ,2)
-!    
+!
   ENDDO
 ENDIF
 !

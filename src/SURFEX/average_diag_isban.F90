@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG_ISBA_n(PHW,PHT)
+      SUBROUTINE AVERAGE_DIAG_ISBA_n(PHW,PHT,PSFCO2)
 !     #######################################
 !
 !
@@ -60,7 +60,7 @@ USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,            &
                                XAVG_LWUC, XAVG_FMUC, XAVG_FMVC, XTS, XAVG_TS, &
                                XTSRAD, XAVG_TSRAD,                            &
                                XAVG_HU2M_MIN, XAVG_HU2M_MAX, XAVG_WIND10M,    &
-                               XAVG_WIND10M_MAX, XWIND10M  
+                               XAVG_WIND10M_MAX, XWIND10M, XAVG_SFCO2  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -72,7 +72,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PHW    ! atmospheric level height for wind
 REAL, DIMENSION(:), INTENT(IN)       :: PHT    ! atmospheric level height
-!
+REAL, DIMENSION(:), INTENT(IN)       :: PSFCO2 ! CO2 flux
 !
 !*      0.2    declarations of local variables
 !
@@ -239,6 +239,8 @@ IF (N2M>=1) THEN
   XAVG_Q2M(:)  = 0.
   XAVG_HU2M(:)  = 0.
   XAVG_RI(:)  = 0.
+  !
+  XAVG_SFCO2(:)  = PSFCO2(:)
   !
   DO JPATCH=1,SIZE(XPATCH,2)
     WHERE (ZSUMPATCH(:) > 0.)

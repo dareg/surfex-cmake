@@ -1,5 +1,5 @@
 !     #########################
-SUBROUTINE EXP_DECAY_SOIL_DIF (PF,PD_G,KWG_LAYER,PDROOT,PCONDSAT,PSOM_DEPTH,PSOM_CONDSAT)
+SUBROUTINE EXP_DECAY_SOIL_DIF (PF,PD_G,KWG_LAYER,PDROOT,PCONDSAT)
 !     ##########################################################
 !
 !!****  *EXP_DECAY_SOIL_DIF*  
@@ -53,9 +53,6 @@ INTEGER, DIMENSION(:), INTENT(IN ) :: KWG_LAYER
 REAL, DIMENSION(:),  INTENT(IN   ) :: PDROOT        !root depth
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PCONDSAT      !hydraulic conductivity at saturation (m s-1)
 !
-REAL, DIMENSION(:),  INTENT(IN   ), OPTIONAL :: PSOM_DEPTH    !depth of soil organic matter
-REAL, DIMENSION(:),INTENT(OUT), OPTIONAL     :: PSOM_CONDSAT  !hydraulic conductivity at saturation (m s-1)
-!
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PD_G(:,:),1))                   :: ZC_DEPTH
@@ -99,18 +96,6 @@ DO I=1,INI
      ZC_DEPTH(I)=PDROOT(I)
    ENDIF
 ENDDO
-!   
-!-------------------------------------------------------------------------------
-! Exponential conductivity at the depth reaches by soil organic matter 
-!-------------------------------------------------------------------------------
-!
-IF(PRESENT(PSOM_CONDSAT))THEN
-  DO I=1,INI
-     IF(PDROOT(I)/=XUNDEF.AND.KWG_LAYER(I)/=NUNDEF)THEN
-       PSOM_CONDSAT(I)=PCONDSAT(I,1)*EXP(PF(I)*(ZC_DEPTH(I)-PSOM_DEPTH(I)))
-     ENDIF
-  ENDDO
-ENDIF
 !
 !-------------------------------------------------------------------------------
 ! Exponential conductivity of heach mid point layer 
