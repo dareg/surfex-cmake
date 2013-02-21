@@ -130,7 +130,7 @@ DO JJ=1,SIZE(ZCHTC_IN_MASS)
    ZCHTC_IN_MASS(JJ) = MAX(1., ZCHTC_IN_MASS(JJ))
 ENDDO
 !
-CALL LAYER_E_BUDGET_GET_COEF( PT_MASS, PTSTEP, ZIMPL, PHC_MASS, PTC_MASS, PD_MASS, &
+ CALL LAYER_E_BUDGET_GET_COEF( PT_MASS, PTSTEP, ZIMPL, PHC_MASS, PTC_MASS, PD_MASS, &
                               ZA, ZB, ZC, ZY )
 !
 ZTS_MASS(:) = PT_MASS(:,1) 
@@ -144,7 +144,7 @@ ZY(:,1) = ZY(:,1)  &
    + PF_MASS_FLOOR (:) * (PRAD_ROOF_MASS(:) +PRAD_FLOOR_MASS(:)) &
    + PLOAD_MASS(:)
 !
-CALL LAYER_E_BUDGET( PT_MASS, PTSTEP, ZIMPL, PHC_MASS, PTC_MASS, PD_MASS, &
+ CALL LAYER_E_BUDGET( PT_MASS, PTSTEP, ZIMPL, PHC_MASS, PTC_MASS, PD_MASS, &
                      ZA, ZB, ZC, ZY, PDQS_MASS )
 !
 !*      calculation of temperature used in energy balance calculation

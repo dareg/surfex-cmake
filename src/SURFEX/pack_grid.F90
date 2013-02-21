@@ -51,8 +51,8 @@ IMPLICIT NONE
 !            ------------------------
 !
 INTEGER, DIMENSION(:), INTENT(IN) :: KMASK      ! mask used
-CHARACTER(LEN=10),     INTENT(IN) :: HGRID1     ! input grid type
-CHARACTER(LEN=10),     INTENT(OUT):: HGRID2     ! output grid type
+ CHARACTER(LEN=10),     INTENT(IN) :: HGRID1     ! input grid type
+ CHARACTER(LEN=10),     INTENT(OUT):: HGRID2     ! output grid type
 REAL,    DIMENSION(:), POINTER    :: PGRID_PAR1 ! parameters of input grid
 REAL,    DIMENSION(:), POINTER    :: PGRID_PAR2 ! parameters of output packed grid
 !

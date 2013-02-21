@@ -16,7 +16,7 @@ CONTAINS
 !     ####################
 IMPLICIT NONE
 INTEGER, INTENT(IN)           :: status
-CHARACTER(LEN=80), INTENT(IN) :: line
+ CHARACTER(LEN=80), INTENT(IN) :: line
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 include 'netcdf.inc'
@@ -112,7 +112,7 @@ IMPLICIT NONE
 INTEGER,INTENT(IN) :: KCDF_ID !netcdf file identifiant
 INTEGER,INTENT(IN) :: IDVAR   !variable to read identifiant
 REAL,DIMENSION(:),INTENT(OUT) :: PDIM1,PDIM2 !dimensions for PVALU2D array
-CHARACTER(len=80),INTENT(OUT) :: HDIM1NAME,HDIM2NAME     !dimensions names
+ CHARACTER(len=80),INTENT(OUT) :: HDIM1NAME,HDIM2NAME     !dimensions names
 REAL, INTENT(OUT) :: PMISSVALUE
 REAL,DIMENSION(:,:),INTENT(OUT) :: PVALU2D !value array
 !
@@ -230,8 +230,8 @@ DO J1=1,NVARDIMLEN(1)
   ENDDO
 ENDDO
 !
-CALL GET1DCDF(KCDF_ID,NVARDIMID(1),ZMISS1,PDIM1)
-CALL GET1DCDF(KCDF_ID,NVARDIMID(2),ZMISS2,PDIM2)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(1),ZMISS1,PDIM1)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(2),ZMISS2,PDIM2)
 HDIM1NAME=NVARDIMNAM(1)
 HDIM2NAME=NVARDIMNAM(2)
 IF (ALLOCATED(ZVALU2D  ))  DEALLOCATE(ZVALU2D)
@@ -251,7 +251,7 @@ IMPLICIT NONE
 INTEGER,INTENT(IN) :: KCDF_ID !netcdf file identifiant
 INTEGER,INTENT(IN) :: IDVAR   !variable to read identifiant
 REAL,DIMENSION(:),INTENT(OUT) :: PDIM1,PDIM2,PDIM3 !dimensions for PVALU2D array
-CHARACTER(len=80),INTENT(OUT) :: HDIM1NAME,HDIM2NAME,HDIM3NAME    !dimensions names
+ CHARACTER(len=80),INTENT(OUT) :: HDIM1NAME,HDIM2NAME,HDIM3NAME    !dimensions names
 REAL, INTENT(OUT) :: PMISSVALUE
 REAL,DIMENSION(:,:,:),INTENT(OUT) :: PVALU3D !value array
 !
@@ -374,9 +374,9 @@ DO J1=1,NVARDIMLEN(1)
   ENDDO
 ENDDO
 !
-CALL GET1DCDF(KCDF_ID,NVARDIMID(1),ZMISS1,PDIM1)
-CALL GET1DCDF(KCDF_ID,NVARDIMID(2),ZMISS2,PDIM2)
-CALL GET1DCDF(KCDF_ID,NVARDIMID(3),ZMISS3,PDIM3)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(1),ZMISS1,PDIM1)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(2),ZMISS2,PDIM2)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(3),ZMISS3,PDIM3)
 HDIM1NAME=NVARDIMNAM(1)
 HDIM2NAME=NVARDIMNAM(2)
 HDIM3NAME=NVARDIMNAM(3)
@@ -394,8 +394,8 @@ END SUBROUTINE GET3DCDF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 INTEGER,           INTENT(OUT):: KDIM        ! value of dimension to get
 !
 integer :: status
@@ -526,8 +526,8 @@ USE MODD_SURF_PAR
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 !
 integer :: status
 integer :: kcdf_id
@@ -696,8 +696,8 @@ END SUBROUTINE PREP_NETCDF_GRID
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 REAL, DIMENSION(:), INTENT(OUT) :: PLON,PLAT ! Longitudes/latitudes in netcdf file 
 REAL, DIMENSION(:), INTENT(OUT) :: PVAL      ! value to get
 !
@@ -892,8 +892,8 @@ END SUBROUTINE READ_LATLONVAL_CDF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 REAL, DIMENSION(:), INTENT(OUT) :: PLON,PLAT ! Longitudes/latitudes in netcdf file 
 REAL, DIMENSION(:), INTENT(OUT) :: PDEP      ! depth in netcdf file
 REAL, DIMENSION(:,:), INTENT(OUT) :: PVAL      ! value to get
@@ -1160,8 +1160,8 @@ USE MODD_PREP,       ONLY : CINTERP_TYPE
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 REAL, POINTER,DIMENSION(:) :: PFIELD      ! value to get
 !
 REAL,DIMENSION(:), ALLOCATABLE :: ZLATI
@@ -1232,8 +1232,8 @@ USE MODD_PREP,       ONLY : CINTERP_TYPE
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 REAL, POINTER, DIMENSION(:)   :: PFIELD      ! value to get
 !
 REAL,DIMENSION(:), ALLOCATABLE :: ZLATI

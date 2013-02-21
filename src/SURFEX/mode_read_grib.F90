@@ -19,7 +19,7 @@ USE MODD_GRID_GRIB, ONLY : CGRIB_FILE, NIDX
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*), INTENT(IN) :: HGRIB
+ CHARACTER(LEN=*), INTENT(IN) :: HGRIB
 !
 INTEGER(KIND=kindOfInt) :: IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -31,7 +31,7 @@ IF (CGRIB_FILE==HGRIB) RETURN
 !
 CGRIB_FILE=HGRIB
 !
-CALL GRIB_INDEX_CREATE(NIDX,HGRIB,'indicatorOfParameter',IRET)
+ CALL GRIB_INDEX_CREATE(NIDX,HGRIB,'indicatorOfParameter',IRET)
 IF (IRET/=0) CALL ABOR1_SFX("MODE_READ_GRIB:MAKE_GRIB_INDEX: error while creating the grib index")
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:MAKE_GRIB_INDEX',1,ZHOOK_HANDLE)
@@ -174,7 +174,7 @@ USE MODD_GRID_GRIB, ONLY : NIDX
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*), INTENT(IN) :: HGRIB      ! name of the GRIB file
+ CHARACTER(LEN=*), INTENT(IN) :: HGRIB      ! name of the GRIB file
 INTEGER, INTENT(IN) :: KLUOUT
 INTEGER,INTENT(IN)    :: KPARAM ! Parameter to read
 INTEGER(KIND=kindOfInt), INTENT(OUT)  :: KRET
@@ -198,13 +198,13 @@ IF (PRESENT(KLEV1)) ILEV1=KLEV1
 ILEV2=-2
 IF (PRESENT(KLEV2)) ILEV2=KLEV2
 !
-CALL MAKE_GRIB_INDEX(HGRIB)
+ CALL MAKE_GRIB_INDEX(HGRIB)
 !
 IFOUND=0
 KRET=0
 !
-CALL GRIB_INDEX_SELECT(NIDX,'indicatorOfParameter',KPARAM,KRET)
-CALL GRIB_NEW_FROM_INDEX(NIDX,IGRIB,KRET)
+ CALL GRIB_INDEX_SELECT(NIDX,'indicatorOfParameter',KPARAM,KRET)
+ CALL GRIB_NEW_FROM_INDEX(NIDX,IGRIB,KRET)
 IF (KRET.EQ.0) CALL GET_GRIB_MESSAGE(KLUOUT,ILTYPE,ILEV1,ILEV2,IGRIB,IFOUND)
 !
 IF (PRESENT(KPARAM2)) THEN
@@ -255,9 +255,9 @@ END SUBROUTINE READ_GRIB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PMASK     ! Land mask
 !
 INTEGER(KIND=kindOfInt)                 :: IRET      ! return code
@@ -302,9 +302,9 @@ USE MODD_CSTS,       ONLY : XG
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PZS       ! 
 !
 INTEGER(KIND=kindOfInt)                           :: IRET      ! return code
@@ -341,9 +341,9 @@ END SUBROUTINE READ_GRIB_ZS
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PZSL      ! 
 !
@@ -351,7 +351,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_ZS_LAND',0,ZHOOK_HANDLE)
 !
-CALL READ_GRIB_ZS(HGRIB,KLUOUT,HINMODEL,PZSL)
+ CALL READ_GRIB_ZS(HGRIB,KLUOUT,HINMODEL,PZSL)
 !
 IF (SIZE(PMASK)==SIZE(PZSL)) &
   WHERE (PMASK(:)/=1.) PZSL = 0.
@@ -365,9 +365,9 @@ END SUBROUTINE READ_GRIB_ZS_LAND
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PZSS      ! 
 !
@@ -393,9 +393,9 @@ END SUBROUTINE READ_GRIB_ZS_SEA
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PT        ! 
 !
 INTEGER(KIND=kindOfInt)                           :: IRET      ! return code
@@ -449,9 +449,9 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PTS       ! 
 !
@@ -459,7 +459,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TS',0,ZHOOK_HANDLE)
 !
-CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PTS)
+ CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PTS)
 !
 IF (SIZE(PMASK)==SIZE(PTS)) &
   WHERE (PMASK(:)/=1.) PTS = XUNDEF
@@ -475,9 +475,9 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PSST      ! 
 !
@@ -505,9 +505,9 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PT2       ! 
 !
@@ -550,7 +550,7 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN) :: KLUOUT
 INTEGER, INTENT(IN) :: KLEV
-CHARACTER(LEN=*), INTENT(IN) :: HROUT
+ CHARACTER(LEN=*), INTENT(IN) :: HROUT
 INTEGER, INTENT(INOUT) :: KLTYPE
 INTEGER, INTENT(IN) :: KLEV1
 INTEGER, INTENT(IN) :: KLEV2
@@ -587,7 +587,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 IMPLICIT NONE
 !
 INTEGER, INTENT(IN) :: KLUOUT
-CHARACTER(LEN=*), INTENT(IN) :: HROUT
+ CHARACTER(LEN=*), INTENT(IN) :: HROUT
 INTEGER, INTENT(IN) :: KNLAYERDEEP
 REAL, DIMENSION(:), INTENT(IN) :: PDIN
 REAL, DIMENSION(:,:), INTENT(IN) :: PFIELDIN
@@ -595,7 +595,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PMASK
 REAL, DIMENSION(:,:), POINTER :: PFIELDOUT
 REAL, DIMENSION(:,:), POINTER :: PDOUT
 !
-CHARACTER(LEN=20) :: FMT0
+ CHARACTER(LEN=20) :: FMT0
 INTEGER :: JL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -630,9 +630,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PTG       ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -660,7 +660,7 @@ ALLOCATE(ZD(5))
 ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
-CALL READ_GRIB(HGRIB,KLUOUT,139,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,139,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
 !
 IF (IRET== 0) THEN
   CALL PUT_LAYER_DEPTH(KLUOUT,1,'READ_GRIB_TG_ECMWF',ILTYPE,ILEV1,ILEV2,4,0.07,0.07,ZD(1))
@@ -675,7 +675,7 @@ ENDIF
 ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
-CALL READ_GRIB(HGRIB,KLUOUT,236,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,236,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
 !
 IF (IRET == 0) THEN
   INLAYERDEEP = 4
@@ -691,7 +691,7 @@ ENDIF
 ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
-CALL READ_GRIB(HGRIB,KLUOUT,183,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,183,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
 !
 IF (IRET == 0) THEN      
   CALL PUT_LAYER_DEPTH(KLUOUT,3,'READ_GRIB_TG_ECMWF',ILTYPE,ILEV1,ILEV2,INLAYERDEEP,0.72,0.42,ZD(3))
@@ -706,7 +706,7 @@ ENDIF
 ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
-CALL READ_GRIB(HGRIB,KLUOUT,170,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,170,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
 !
 IF (IRET== 0) THEN         
   CALL PUT_LAYER_DEPTH(KLUOUT,2,'READ_GRIB_TG_ECMWF',ILTYPE,ILEV1,ILEV2,INLAYERDEEP,0.21,0.42,ZD(2))
@@ -729,7 +729,7 @@ ENDIF
 !--------------------------------------------------------------------------------
 ! 6.  Set temperature profile and layer thicknesses
 !     ----------------------------------------------
-CALL FILL_PFIELD(KLUOUT,'READ_GRIB_TG_ECMWF',INLAYERDEEP,ZD,ZTG,PMASK,PTG,PD)
+ CALL FILL_PFIELD(KLUOUT,'READ_GRIB_TG_ECMWF',INLAYERDEEP,ZD,ZTG,PMASK,PTG,PD)
 DEALLOCATE(ZD)
 DEALLOCATE(ZTG)
 !
@@ -767,9 +767,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PWG       ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -798,7 +798,7 @@ ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
 IPAR=39
-CALL READ_GRIB(HGRIB,KLUOUT,140,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
+ CALL READ_GRIB(HGRIB,KLUOUT,140,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
 !
 IF (IRET == 0) THEN 
   CALL PUT_LAYER_DEPTH(KLUOUT,1,'READ_GRIB_WG_ECMWF_1',ILTYPE,ILEV1,ILEV2,4,0.07,0.07,ZD(1))
@@ -816,7 +816,7 @@ ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
 IPAR=42
-CALL READ_GRIB(HGRIB,KLUOUT,237,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
+ CALL READ_GRIB(HGRIB,KLUOUT,237,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
 !
 IF (IRET == 0) THEN   
   INLAYERDEEP = 4
@@ -835,7 +835,7 @@ ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
 IPAR=41
-CALL READ_GRIB(HGRIB,KLUOUT,184,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
+ CALL READ_GRIB(HGRIB,KLUOUT,184,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
 !
 IF (IRET == 0) THEN
   CALL PUT_LAYER_DEPTH(KLUOUT,3,'READ_GRIB_WG_ECMWF_1',ILTYPE,ILEV1,ILEV2,INLAYERDEEP,0.72,0.42,ZD(3))
@@ -853,7 +853,7 @@ ILTYPE= -1
 ILEV1 = -1
 ILEV2 = -1
 IPAR=40
-CALL READ_GRIB(HGRIB,KLUOUT,171,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
+ CALL READ_GRIB(HGRIB,KLUOUT,171,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2,KPARAM2=IPAR)
 !
 IF (IRET == 0) THEN
   CALL PUT_LAYER_DEPTH(KLUOUT,2,'READ_GRIB_WG_ECMWF_1',ILTYPE,ILEV1,ILEV2,INLAYERDEEP,0.21,0.42,ZD(2))
@@ -867,7 +867,7 @@ ENDIF
 !
 !--------------------------------------------------------------------------------
 !
-CALL FILL_PFIELD(KLUOUT,'READ_GRIB_WG_ECMWF_1',INLAYERDEEP,ZD,ZWG,PMASK,PWG,PD)
+ CALL FILL_PFIELD(KLUOUT,'READ_GRIB_WG_ECMWF_1',INLAYERDEEP,ZD,ZWG,PMASK,PWG,PD)
 DEALLOCATE(ZD)
 DEALLOCATE(ZWG)
 !
@@ -933,9 +933,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), OPTIONAL, POINTER :: PWG   ! INPUT contains (water+ice) profil
                                                  ! OUTPUT contains only water profil
@@ -953,8 +953,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:HARMONIZE_GRIB_WG_WGI_ECMWF',0,ZHOOK_HANDLE)
 !
-CALL READ_GRIB_TG_ECMWF(HGRIB,KLUOUT,HINMODEL,PMASK,ZTG,ZDT)
-CALL READ_GRIB_WG_ECMWF_1(HGRIB,KLUOUT,HINMODEL,PMASK,ZWG,ZD)
+ CALL READ_GRIB_TG_ECMWF(HGRIB,KLUOUT,HINMODEL,PMASK,ZTG,ZDT)
+ CALL READ_GRIB_WG_ECMWF_1(HGRIB,KLUOUT,HINMODEL,PMASK,ZWG,ZD)
 !
 IF (SIZE(ZTG,2) .LT. SIZE(ZWG,2)) THEN
   WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:HARMONIZE_GRIB_WG_WGI_ECMWF: '
@@ -1006,9 +1006,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer     
@@ -1023,11 +1023,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_ECMWF',0,ZHOOK_HANDLE)
 !
-CALL HARMONIZE_GRIB_WG_WGI_ECMWF(HGRIB,KLUOUT,HINMODEL,PMASK,PWG=PFIELD,PD=PD)
+ CALL HARMONIZE_GRIB_WG_WGI_ECMWF(HGRIB,KLUOUT,HINMODEL,PMASK,PWG=PFIELD,PD=PD)
 !
 ! 1.  Get soil type to compute SWI
 !     ----------------------------
-CALL READ_GRIB(HGRIB,KLUOUT,43,IRET,ZSLT)
+ CALL READ_GRIB(HGRIB,KLUOUT,43,IRET,ZSLT)
 !--------------------------------------------------------------------------------
 ALLOCATE (ZWFC(SIZE(PFIELD,1)))
 ALLOCATE (ZWWILT(SIZE(PFIELD,1)))
@@ -1099,9 +1099,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -1115,11 +1115,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WGI_ECMWF',0,ZHOOK_HANDLE)
 !
-CALL HARMONIZE_GRIB_WG_WGI_ECMWF(HGRIB,KLUOUT,HINMODEL,PMASK,PD=PD,PWGI=PFIELD)
+ CALL HARMONIZE_GRIB_WG_WGI_ECMWF(HGRIB,KLUOUT,HINMODEL,PMASK,PD=PD,PWGI=PFIELD)
 !
 ! 1.  Get soil type to compute WSAT
 !     ----------------------------
-CALL READ_GRIB(HGRIB,KLUOUT,43,IRET,ZSLT)
+ CALL READ_GRIB(HGRIB,KLUOUT,43,IRET,ZSLT)
 !--------------------------------------------------------------------------------
 ALLOCATE (ZWSAT(SIZE(PFIELD,1)))
 ZWSAT(:)=0.
@@ -1181,9 +1181,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PTG       ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PDT       ! thickness of each layer
@@ -1201,7 +1201,7 @@ WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_METEO_FRANCE: | Reading soil 
 !--------------------------------------------------------------------------------
 ! 2.  Search and read level 1 (and its depth)
 !     ---------------------------------------
-CALL READ_GRIB_TS(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+ CALL READ_GRIB_TS(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
 !
 ALLOCATE(PTG(SIZE(ZFIELD),3))
 ALLOCATE(PDT(SIZE(ZFIELD),3))
@@ -1211,7 +1211,7 @@ PDT(:,1) = 0.
 !--------------------------------------------------------------------------------
 ! 3.  Deep soil temperature
 !     ---------------------
-CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+ CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
 !
 PTG(:,2) = ZFIELD(:)
 PDT(:,2) = 0.2         ! deep temperature depth assumed equal to 0.2m
@@ -1233,9 +1233,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER         :: PSAND     ! field to initialize
 REAL, DIMENSION(:), POINTER         :: PCLAY     ! thickness of each layer
 LOGICAL, INTENT(OUT)                :: GISBA     ! T: surface scheme in file is ISBA
@@ -1251,7 +1251,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SAND_CLAY_METEO_FRANCE',0,ZHOO
 !
 IF (HINMODEL == 'ARPEGE' .OR. HINMODEL == 'MOCAGE') IPAR=171
 IF (HINMODEL == 'ALADIN') IPAR=128
-CALL READ_GRIB(HGRIB,KLUOUT,IPAR,IRET,PCLAY)
+ CALL READ_GRIB(HGRIB,KLUOUT,IPAR,IRET,PCLAY)
 !
 ! if not available, the model is not ISBA (IWMODE=1)
 IF (IRET /= 0) THEN
@@ -1266,7 +1266,7 @@ END IF
 !     ------------------------------------------
 IF (HINMODEL == 'ARPEGE' .OR. HINMODEL == 'MOCAGE') IPAR=172
 IF (HINMODEL == 'ALADIN') IPAR=129
-CALL READ_GRIB(HGRIB,KLUOUT,IPAR,IRET,PSAND)
+ CALL READ_GRIB(HGRIB,KLUOUT,IPAR,IRET,PSAND)
 !
 ! if not available, the model is not ISBA (IWMODE=1)
 IF (GISBA) THEN
@@ -1291,9 +1291,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -1318,7 +1318,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_METEO_FRANCE',0,ZHOOK_HANDL
 !
 ! 1.  Search and read clay and sand fractions if available
 !     ----------------------------------------------------
-CALL READ_GRIB_SAND_CLAY_METEO_FRANCE(HGRIB,KLUOUT,HINMODEL,ZSAND,ZCLAY,GISBA)
+ CALL READ_GRIB_SAND_CLAY_METEO_FRANCE(HGRIB,KLUOUT,HINMODEL,ZSAND,ZCLAY,GISBA)
 !-------------------------------------------------------------------------------
 IF (GISBA) THEN
   ALLOCATE(PFIELD(SIZE(ZSAND),3))
@@ -1443,9 +1443,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -1468,7 +1468,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WGI_METEO_FRANCE',0,ZHOOK_HAND
 !
 ! 1.  Search and read clay fraction if available
 !     ------------------------------------------
-CALL READ_GRIB_SAND_CLAY_METEO_FRANCE(HGRIB,KLUOUT,HINMODEL,ZSAND,ZCLAY,GISBA)
+ CALL READ_GRIB_SAND_CLAY_METEO_FRANCE(HGRIB,KLUOUT,HINMODEL,ZSAND,ZCLAY,GISBA)
 !-------------------------------------------------------------------------------
 IF (GISBA) THEN
   ALLOCATE(PFIELD(SIZE(ZSAND),2))
@@ -1584,9 +1584,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PTG       ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PDT       ! thickness of each layer
@@ -1607,7 +1607,7 @@ WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_HIRLAM: | Reading soil temper
 !     -----------------------
 ILEV1 = 904
 ILEV2 = -1
-CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,ZFIELD,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,ZFIELD,KLEV1=ILEV1,KLEV2=ILEV2)
 IF (IRET /= 0 ) THEN
   CALL ABOR1_SFX('MODE_READ_GRIB: SOIL TEMPERATURE LEVEL 1 MISSING (READ_GRIB_TG_HIRLAM)')
 END IF
@@ -1623,7 +1623,7 @@ WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_HIRLAM: | Reading deep soil te
 !
 ILEV1 = 954
 ILEV2 = -1
-CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,ZFIELD,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,ZFIELD,KLEV1=ILEV1,KLEV2=ILEV2)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('MODE_READ_GRIB: DEEP SOIL TEMPERATURE MISSING (READ_GRIB_TG_HIRLAM)')
 END IF
@@ -1659,9 +1659,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), INTENT(IN)      :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -1693,7 +1693,7 @@ ALLOCATE(ZD(2))
 ILTYPE=105
 ILEV1=904
 ILEV2=-1
-CALL READ_GRIB(HGRIB,KLUOUT,86,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,86,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
 IF (IRET /= 0 ) THEN
   CALL ABOR1_SFX('MODE_READ_GRIB: SOIL MOISTURE LEVEL 1 MISSING (READ_GRIB_WG_HIRLAM)')
 END IF
@@ -1711,7 +1711,7 @@ ZWG(:,1) = ZWG(:,1) / ZD(1)      ! convert units to m3/m3
 ILTYPE=105
 ILEV1=954
 ILEV2=-1
-CALL READ_GRIB(HGRIB,KLUOUT,86,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
+ CALL READ_GRIB(HGRIB,KLUOUT,86,IRET,ZFIELD,KLTYPE=ILTYPE,KLEV1=ILEV1,KLEV2=ILEV2)
 IF (IRET /= 0 ) THEN
   CALL ABOR1_SFX('MODE_READ_GRIB: SOIL MOISTURE LEVEL 2 MISSING (READ_GRIB_WG_HIRLAM)')
 END IF
@@ -1727,7 +1727,7 @@ WRITE  (KLUOUT,'(A)') 'WARNING MODE_READ_GRIB: ZWG3 AND ZWG4 SET TO 0. (READ_GRI
 !--------------------------------------------------------------------------------
 ! 3.  Set water content profile and layer thicknesses
 !     -----------------------------------------------
-CALL FILL_PFIELD(KLUOUT,'READ_GRIB_WG_HIRLAM',INLAYERDEEP,ZD,ZWG,PMASK,PFIELD,PD)
+ CALL FILL_PFIELD(KLUOUT,'READ_GRIB_WG_HIRLAM',INLAYERDEEP,ZD,ZWG,PMASK,PFIELD,PD)
 DEALLOCATE(ZD)
 DEALLOCATE(ZWG)
 !--------------------------------------------------------------------------------
@@ -1755,7 +1755,7 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -1789,9 +1789,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), OPTIONAL, POINTER :: PSNV    ! field to initialize
 REAL, DIMENSION(:), OPTIONAL, POINTER :: PSNVD   ! field to initialize
@@ -1851,9 +1851,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL,                 INTENT(IN)    :: PTI       ! internal temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PT        ! field to initialize
@@ -1868,7 +1868,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T_TEB',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_T_TEB: | Reading temperature for buildings'
 !
-CALL READ_GRIB_TS(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+ CALL READ_GRIB_TS(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
 !
 ALLOCATE(PT(SIZE(ZFIELD),3))
 ALLOCATE(PD(SIZE(ZFIELD),3))
@@ -1902,9 +1902,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL,                 INTENT(IN)    :: PTI       ! internal temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:,:), POINTER       :: PTF       ! field to initialize
@@ -1925,7 +1925,7 @@ WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading temperature fo
 !
 WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading deep soil temperature'
 !
-CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+ CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
 !
 ALLOCATE(PTF(SIZE(ZFIELD),3))
 ALLOCATE(PD (SIZE(ZFIELD),3))

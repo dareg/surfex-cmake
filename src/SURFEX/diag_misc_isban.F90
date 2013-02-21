@@ -65,9 +65,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
-CHARACTER(LEN=*), INTENT(IN)      :: HISBA         ! ISBA scheme
-CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
-CHARACTER(LEN=*), INTENT(IN)      :: HSNOW         ! snow scheme
+ CHARACTER(LEN=*), INTENT(IN)      :: HISBA         ! ISBA scheme
+ CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
+ CHARACTER(LEN=*), INTENT(IN)      :: HSNOW         ! snow scheme
 LOGICAL, INTENT(IN)               :: OAGRIP
 LOGICAL, INTENT(IN)               :: OTR_ML
 REAL,    INTENT(IN)               :: PTIME   ! current time since midnight

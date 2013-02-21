@@ -72,24 +72,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_GAUSS',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI)
+ CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI)
 !
 ALLOCATE(INLOPA(INLATI))
-CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA(:),PLAT=ZLAT,PLON=ZLON)
+ CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA(:),PLAT=ZLAT,PLON=ZLON)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Computation of pseudo latitude and pseudo longitude limits for each mesh
 !              ------------------------------------------------------------------------
 !
-CALL GAUSS_GRID_LIMITS(INLATI,INLOPA,ZXINF,ZXSUP,ZYINF,ZYSUP)
+ CALL GAUSS_GRID_LIMITS(INLATI,INLOPA,ZXINF,ZXSUP,ZYINF,ZYSUP)
 !
 !-----------------------------------------------------------------------------
 !
 !*       3.    Map factor
 !              ----------
 !
-CALL MAP_FACTOR_GAUSS(ZLAPO,ZLOPO,ZCODIL,ZLAT,ZLON,ZMAP)
+ CALL MAP_FACTOR_GAUSS(ZLAPO,ZLOPO,ZCODIL,ZLAT,ZLON,ZMAP)
 !
 !-----------------------------------------------------------------------------
 !

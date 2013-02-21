@@ -136,13 +136,13 @@ OZ0EFFJ(:)=.FALSE.
 !*    1.2    Grid dimension (meters)
 !            -----------------------
 !
-CALL GET_MESH_DIM(CGRID,NGRID_PAR,NL,XGRID_PAR,ZDX,ZDY,XMESH_SIZE)
+ CALL GET_MESH_DIM(CGRID,NGRID_PAR,NL,XGRID_PAR,ZDX,ZDY,XMESH_SIZE)
 !
 !
 !*    1.3    Left, top, right and bottom adjacent gris meshes
 !            ------------------------------------------------
 !
-CALL GET_ADJACENT_MESHES(CGRID,NGRID_PAR,NL,XGRID_PAR,ILEFT,IRIGHT,ITOP,IBOTTOM)
+ CALL GET_ADJACENT_MESHES(CGRID,NGRID_PAR,NL,XGRID_PAR,ILEFT,IRIGHT,ITOP,IBOTTOM)
 !
 !
 !*    1.4    Mean slopes between 2 grid meshes

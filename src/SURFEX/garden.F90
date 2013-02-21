@@ -106,7 +106,7 @@ IMPLICIT NONE
 !
 !*      0.1    Declarations of arguments
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 TYPE(DATE_TIME)     , INTENT(IN)    :: TPTIME             ! current date and time from teb
@@ -148,7 +148,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG_GARDEN     ! aggreg. relative hum
 !
 !*      0.2    Declarations of local variables
 !
-CHARACTER(LEN=3)     :: HRAIN      ! Rainfall spatial distribution
+ CHARACTER(LEN=3)     :: HRAIN      ! Rainfall spatial distribution
                                    ! 'DEF' = No rainfall spatial distribution
                                    ! 'SGH' = Rainfall exponential spatial distribution
 LOGICAL              :: OFLOOD     ! Activation of the flooding scheme
@@ -370,7 +370,7 @@ ZGAMMAT  = XUNDEF
 !              -------------------------
 !
 !
-CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT,  &
+ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT,  &
           CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ,  &
           CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,    &
           HIMPLICIT_WIND,                                             &
@@ -479,7 +479,7 @@ END IF
 ! This way, these points are clearly flaged, and one will not try to interpret
 ! the values for those points
 !
-CALL FLAG_TEB_GARDEN_n(2)
+ CALL FLAG_TEB_GARDEN_n(2)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !

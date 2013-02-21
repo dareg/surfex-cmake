@@ -48,7 +48,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*)    , INTENT(IN)   :: HSNOW      ! ISBA snow scheme
+ CHARACTER(LEN=*)    , INTENT(IN)   :: HSNOW      ! ISBA snow scheme
 LOGICAL,              INTENT(IN)   :: OTR_ML
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PDIR_SW            ! direct incoming solar radiation
@@ -114,7 +114,7 @@ IF (OTR_ML) THEN
   PALBVIS_TSOIL(:) = ( 1.-PPSNG(:)-PFFG(:))*PALBVIS_SOIL(:) + PPSNG(:)*PSNOWALB(:) + PFFG(:)*PFALB(:)
 ENDIF
 !
-CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS, PALBNIR, PALBVIS, PALBUV,         &
+ CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS, PALBNIR, PALBVIS, PALBUV,         &
                            ZDIR_ALB_WITHOUT_SNOW, ZSCA_ALB_WITHOUT_SNOW )  
 !
 !* total shortwave incoming radiation

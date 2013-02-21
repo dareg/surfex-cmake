@@ -177,12 +177,12 @@ REAL, DIMENSION(KI), INTENT(IN) ::   &
     rho_a                             ,  &! Air density (kg m ^{-3}) (from forcing atm. data)  
     emis_water                            ! Water surface emissivity
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
 LOGICAL ::  lflk_botsed ! Switch, .TRUE. -> use the bottom-sediment scheme 
-CHARACTER(LEN=5) ::  hflk_flux     ! 'DEF  '/'FLAKE'/'ECUME' compute the surface fluxes if = 'FLAKE'
+ CHARACTER(LEN=5) ::  hflk_flux     ! 'DEF  '/'FLAKE'/'ECUME' compute the surface fluxes if = 'FLAKE'
 
 !
 !  Input/Output (procedure arguments)

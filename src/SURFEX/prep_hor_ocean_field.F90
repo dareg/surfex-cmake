@@ -49,13 +49,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
-CHARACTER(LEN=7)                :: HSURF   ! type of field
-CHARACTER(LEN=28),  INTENT(IN), OPTIONAL :: HNCVARNAME!var to read 
+ CHARACTER(LEN=7)                :: HSURF   ! type of field
+ CHARACTER(LEN=28),  INTENT(IN), OPTIONAL :: HNCVARNAME!var to read 
 !
 !
 !*      0.2    declarations of local variables

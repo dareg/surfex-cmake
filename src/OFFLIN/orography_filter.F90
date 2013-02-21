@@ -47,7 +47,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=10),    INTENT(IN)    :: HGRID    ! type of grid
+ CHARACTER(LEN=10),    INTENT(IN)    :: HGRID    ! type of grid
 REAL, DIMENSION(:),   POINTER       :: PGRID_PAR! lits of parameters used to define the grid
 REAL, DIMENSION(:),   INTENT(IN)    :: PSEA     ! sea  fraction
 INTEGER,              INTENT(IN)    :: KZSFILTER! number of filter iteration
@@ -71,7 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !            -----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OROGRAPHY_FILTER',0,ZHOOK_HANDLE)
-CALL GET_GRID_DIM(HGRID,SIZE(PGRID_PAR),PGRID_PAR,GRECT,IX,IY)
+ CALL GET_GRID_DIM(HGRID,SIZE(PGRID_PAR),PGRID_PAR,GRECT,IX,IY)
 !
 !-------------------------------------------------------------------------------
 !

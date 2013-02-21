@@ -52,7 +52,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 INTEGER,               INTENT(IN)     :: KLUOUT   ! output listing logical unit
-CHARACTER(LEN=4),      INTENT(IN)     :: HCOORTYPE! type of coordinate
+ CHARACTER(LEN=4),      INTENT(IN)     :: HCOORTYPE! type of coordinate
 REAL,   DIMENSION(:),  INTENT(IN)     :: PLAT_IN  ! input lat. of each grid mesh.
 REAL,   DIMENSION(:),  INTENT(IN)     :: PLON_IN  ! input lon. of each grid mesh.
 REAL,   DIMENSION(:),  INTENT(IN)     :: PFIELD_IN! input field on grid mesh

@@ -63,16 +63,16 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
-CHARACTER(LEN=*),  INTENT(IN) :: HFIELD    ! field name for prints
-CHARACTER(LEN=3),  INTENT(IN) :: HAREA     ! area where field is defined
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
+ CHARACTER(LEN=*),  INTENT(IN) :: HFIELD    ! field name for prints
+ CHARACTER(LEN=3),  INTENT(IN) :: HAREA     ! area where field is defined
 !                                          ! 'ALL' : everywhere
 !                                          ! 'NAT' : on nature
 !                                          ! 'TWN' : on town
 !                                          ! 'SEA' : on sea
 !                                          ! 'WAT' : on inland waters
-CHARACTER(LEN=28), INTENT(IN) :: HFILE     ! data file name
-CHARACTER(LEN=6),  INTENT(IN) :: HFILETYPE ! data file type
+ CHARACTER(LEN=28), INTENT(IN) :: HFILE     ! data file name
+ CHARACTER(LEN=6),  INTENT(IN) :: HFILETYPE ! data file type
 REAL,              INTENT(IN) :: PUNIF     ! prescribed uniform value for field
 REAL, DIMENSION(:),INTENT(OUT):: PFIELD    ! physiographic field
 LOGICAL, OPTIONAL, INTENT(OUT) :: OPRESENT
@@ -87,8 +87,8 @@ INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field 
 INTEGER                        :: IDIM   !
 
 !
-CHARACTER(LEN=20)   :: YFIELD
-CHARACTER(LEN=6)    :: YMASK
+ CHARACTER(LEN=20)   :: YFIELD
+ CHARACTER(LEN=6)    :: YMASK
 INTEGER             :: INPTS     ! number of points used for interpolation
 REAL, DIMENSION(NL) :: ZFIELD    ! physiographic field on full grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -105,7 +105,7 @@ IF (PRESENT(OPRESENT)) OPRESENT=.TRUE.
 !*    2.      Output listing logical unit
 !             ---------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -233,7 +233,7 @@ SELECT CASE (HAREA)
           RETURN
 END SELECT
 
-CALL GET_TYPE_DIM_n(YMASK,IDIM)
+ CALL GET_TYPE_DIM_n(YMASK,IDIM)
 IF (IDIM/=SIZE(PFIELD)) THEN
    WRITE(ILUOUT,*)'Wrong dimension of MASK: ',IDIM,SIZE(PFIELD)
    CALL ABOR1_SFX('PGD_FIELD: WRONG DIMENSION OF MASK')
@@ -241,8 +241,8 @@ ENDIF
 
 ALLOCATE(IMASK(IDIM))
 ILU=0
-CALL GET_SURF_MASK_n(YMASK,IDIM,IMASK,ILU,ILUOUT)
-CALL PACK_SAME_RANK(IMASK,ZFIELD(:),PFIELD(:))
+ CALL GET_SURF_MASK_n(YMASK,IDIM,IMASK,ILU,ILUOUT)
+ CALL PACK_SAME_RANK(IMASK,ZFIELD(:),PFIELD(:))
 DEALLOCATE(IMASK)
 IF (LHOOK) CALL DR_HOOK('PGD_FIELD',1,ZHOOK_HANDLE)
 

@@ -57,7 +57,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
 LOGICAL,                          INTENT(IN)  :: ORESTART    
 INTEGER,                          INTENT(IN)  :: KI         ! Surfex grid dimension
 INTEGER,                          INTENT(IN)  :: KSW        ! Number of spectral bands
@@ -77,7 +77,7 @@ REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperatu
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=10) :: YGRID
+ CHARACTER(LEN=10) :: YGRID
 !
 LOGICAL :: LTRIP
 LOGICAL :: LFLOOD
@@ -89,13 +89,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_TRIP_N',0,ZHOOK_HANDLE)
-CALL INI_CSTS
+ CALL INI_CSTS
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! * 1. Get ISBA configuration
 !      
-CALL GET_CONF_ISBA_n(LTRIP,LFLOOD,YGRID,IDIMTAB)
+ CALL GET_CONF_ISBA_n(LTRIP,LFLOOD,YGRID,IDIMTAB)
 !
 ! * 2. Initialyse TRIP
 !

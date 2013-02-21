@@ -56,15 +56,15 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
-CHARACTER(LEN=10),  INTENT(IN)  :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
+ CHARACTER(LEN=10),  INTENT(IN)  :: HGRID      ! type of horizontal grid
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 REAL, DIMENSION(:), INTENT(IN)  :: PLAT       ! latitude  (degrees)
 REAL, DIMENSION(:), INTENT(IN)  :: PLON       ! longitude (degrees)
 REAL, DIMENSION(:), INTENT(IN)  :: PMESH_SIZE ! horizontal mesh size (m2)
 INTEGER,            INTENT(OUT) :: KRESP      ! error return code
 REAL, DIMENSION(:), INTENT(IN) , OPTIONAL :: PDIR ! heading of main axis of grid compared to North (degrees)
-CHARACTER(LEN=1),    INTENT(IN), OPTIONAL :: HDIR ! type of field :
+ CHARACTER(LEN=1),    INTENT(IN), OPTIONAL :: HDIR ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
                                                   ! 'A' : (complete) field with
@@ -74,8 +74,8 @@ CHARACTER(LEN=1),    INTENT(IN), OPTIONAL :: HDIR ! type of field :
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=1) :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=1) :: YDIR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
@@ -84,7 +84,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_GRID',0,ZHOOK_HANDLE)
 YCOMMENT='GRID TYPE'
-CALL WRITE_SURF(HPROGRAM,'GRID_TYPE',HGRID,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'GRID_TYPE',HGRID,KRESP,YCOMMENT)
 !
 !---------------------------------------------------------------------------
 !

@@ -92,12 +92,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,                            INTENT(IN)  :: OREAD_PGD ! flag to read PGD fields in the file
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSV       ! number of scalars
-CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
 INTEGER,                            INTENT(IN)  :: KVERSION  ! version number of the file being read
 INTEGER,                            INTENT(IN)  :: KBUGFIX
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
@@ -124,7 +124,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_PGD_n',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -133,14 +133,14 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !* allocation of urban green area variables
 !
-CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
+ CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
 !
 !
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
 IF (OREAD_PGD) &
-CALL READ_PGD_TEB_GARDEN_n(HPROGRAM,KVERSION,KBUGFIX)
+ CALL READ_PGD_TEB_GARDEN_n(HPROGRAM,KVERSION,KBUGFIX)
 !
 !
 !*       2.3    Physiographic data fields from land cover:
@@ -260,7 +260,7 @@ DO JVEGTYPE=1,NVEGTYPE
   END WHERE
 ENDDO
 !
-CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NGROUND_LAYER, TTIME%TDATE%MONTH,    &
+ CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NGROUND_LAYER, TTIME%TDATE%MONTH,    &
                         XVEGTYPE, XTDEEP, XGAMMAT, CPHOTO, HINIT, LTR_ML,           &
                         NNBIOMASS, PCO2, PRHOA, XABC, XPOI,                         &
                         XGMES, XGC, XDMAX, XANMAX, XFZERO, XEPSO, XGAMM, XQDGAMM,   &

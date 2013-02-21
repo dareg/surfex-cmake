@@ -50,16 +50,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
-CHARACTER(LEN=3),  INTENT(IN)  :: HWRITE   ! 'PREP' : does not write SBL XUNDEF fields
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=3),  INTENT(IN)  :: HWRITE   ! 'PREP' : does not write SBL XUNDEF fields
 !                                          ! 'ALL' : all fields are written
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 !
 INTEGER :: JLAYER  ! loop counter on layers
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -73,7 +73,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITESURF_WATFLUX_SBL_N',0,ZHOOK_HANDLE)
 YRECFM='WAT_SBL'
 YCOMMENT='flag to use SBL levels'
-CALL WRITE_SURF(HPROGRAM,YRECFM,LSBL,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,LSBL,IRESP,HCOMMENT=YCOMMENT)
 !
 IF (.NOT. LSBL .AND. LHOOK) CALL DR_HOOK('WRITESURF_WATFLUX_SBL_N',1,ZHOOK_HANDLE)
 IF (.NOT. LSBL) RETURN
@@ -82,7 +82,7 @@ IF (.NOT. LSBL) RETURN
 !
 YRECFM='WAT_SBL_LVL'
 YCOMMENT='number of SBL levels'
-CALL WRITE_SURF(HPROGRAM,YRECFM,NLVL,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,NLVL,IRESP,HCOMMENT=YCOMMENT)
 !
 !* altitudes
 !

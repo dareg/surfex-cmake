@@ -86,8 +86,8 @@ INCLUDE 'mpif.h'
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 REAL,                INTENT(IN)  :: PTIMEC    ! cumulated time since beginning of simulation
@@ -109,7 +109,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -148,7 +148,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !
 !*      0.2    declarations of local variables
@@ -198,7 +198,7 @@ END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 TTIME%TIME = TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+ CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries: Tile related operations
@@ -258,7 +258,7 @@ END IF
 ! Initialize/Save precip and zenith field for a ARPEGE/ALADIN run
 !--------------------------------------------------------------------------------------
 !
-CALL RW_PRECIP_n(HPROGRAM,PRAIN,PSNOW)
+ CALL RW_PRECIP_n(HPROGRAM,PRAIN,PSNOW)
 !
 !--------------------------------------------------------------------------------------
 ! Call ALMA interfaces for sea, water, nature and town here...
@@ -349,7 +349,7 @@ XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL AVERAGE_FLUX(ZFRAC_TILE,                              &
+ CALL AVERAGE_FLUX(ZFRAC_TILE,                              &
                   ZSFTH_TILE, ZSFTQ_TILE,                  &
                   ZSFTS_TILE, ZSFCO2_TILE,                 &
                   ZSFU_TILE, ZSFV_TILE,                    &
@@ -399,7 +399,7 @@ END DO
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Radiative fluxes
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
+ CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
                  ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                  PDIR_ALB,      PSCA_ALB,      PEMIS,      PTRAD       )
 !
@@ -420,7 +420,7 @@ END IF
 ! Inline diagnostics for full surface
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL DIAG_INLINE_SURF_ATM_n(PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
+ CALL DIAG_INLINE_SURF_ATM_n(PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================

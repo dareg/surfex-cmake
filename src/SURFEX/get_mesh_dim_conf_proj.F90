@@ -69,7 +69,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_CONF_PROJ',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
+ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATOR,ZLONOR,                   &
                               PX=ZX,PY=ZY,PDX=PDX,PDY=PDY      )  
 !
@@ -78,14 +78,14 @@ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR,ZX,ZY,ZLAT,ZLON)
+ CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR,ZX,ZY,ZLAT,ZLON)
 !
 !-----------------------------------------------------------------------------
 !
 !*       3.    Compute grif size
 !              -----------------
 !
-CALL MAP_FACTOR_CONF_PROJ(ZLAT0,ZRPK,ZLAT,ZMAP)
+ CALL MAP_FACTOR_CONF_PROJ(ZLAT0,ZRPK,ZLAT,ZMAP)
 !
 PDX(:) = PDX(:) / ZMAP(:)
 PDY(:) = PDY(:) / ZMAP(:)

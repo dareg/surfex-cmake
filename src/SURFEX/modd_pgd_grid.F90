@@ -28,7 +28,7 @@ IMPLICIT NONE
 !*       0.   DECLARATIONS
 !             ------------
 !
-CHARACTER(LEN=10)           :: CGRID       ! type of grid
+ CHARACTER(LEN=10)           :: CGRID       ! type of grid
 INTEGER                     :: NL          ! number of points of the surface fields
 LOGICAL, DIMENSION(720,360) :: LLATLONMASK ! mask where data are to be read
 REAL, POINTER, DIMENSION(:) :: XGRID_PAR   ! lits of parameters used to define the grid

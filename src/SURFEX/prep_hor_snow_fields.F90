@@ -50,12 +50,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! file type
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! file type
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
 INTEGER,            INTENT(IN)  :: KPATCH    ! patch number for output scheme
@@ -78,7 +78,7 @@ REAL,DIMENSION(:,:),INTENT(IN), OPTIONAL  :: PPATCH ! fraction of each patch
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=10)                   :: YSNSURF   ! type of field
+ CHARACTER(LEN=10)                   :: YSNSURF   ! type of field
 REAL,ALLOCATABLE,DIMENSION(:,:,:)   :: ZW        ! total snow content
 REAL,ALLOCATABLE,DIMENSION(:,:)     :: ZWRHO     ! total snow content from rho profile alone
 REAL,ALLOCATABLE,DIMENSION(:,:,:)   :: ZD        ! total snow depth
@@ -107,7 +107,7 @@ ENDIF
 !
 !*      1.     Allocation of output field
 !
-CALL ALLOCATE_GR_SNOW(TPSNOW,KL,KPATCH)
+ CALL ALLOCATE_GR_SNOW(TPSNOW,KL,KPATCH)
 !
 !---------------------------------------------------------------------------
 !
@@ -116,7 +116,7 @@ CALL ALLOCATE_GR_SNOW(TPSNOW,KL,KPATCH)
 ALLOCATE(ZW(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='WWW'//HSURF
-CALL PREP_HOR_SNOW_FIELD(HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE, &
+ CALL PREP_HOR_SNOW_FIELD(HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE, &
                          KLUOUT, OUNIF, YSNSURF, KPATCH, KL, TPSNOW, TPTIME, &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_ASNOW, &
                          OSNOW_IDEAL, PUNIF_SG1SNOW,                         &
@@ -130,7 +130,7 @@ CALL PREP_HOR_SNOW_FIELD(HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE, &
 ALLOCATE(ZD(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='DEP'//HSURF
-CALL PREP_HOR_SNOW_FIELD(HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE, &
+ CALL PREP_HOR_SNOW_FIELD(HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE, &
                          KLUOUT, OUNIF, YSNSURF, KPATCH, KL, TPSNOW, TPTIME, &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_ASNOW, &
                          OSNOW_IDEAL, PUNIF_SG1SNOW,                         &
@@ -162,7 +162,7 @@ ENDIF
 !
 !* density profile
 YSNSURF='RHO'//HSURF
-CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
+ CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,   &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_ASNOW, &
                          OSNOW_IDEAL, PUNIF_SG1SNOW,                         &
@@ -227,7 +227,7 @@ ENDIF
 !
 !* albedo
 YSNSURF='ALB'//HSURF
-CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
+ CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,   &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_ASNOW, &
                          OSNOW_IDEAL, PUNIF_SG1SNOW,                         &
@@ -236,7 +236,7 @@ CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
 !
 !* heat in snowpack profile
 YSNSURF='HEA'//HSURF
-CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
+ CALL PREP_HOR_SNOW_FIELD(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,     &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,   &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_ASNOW, &
                          OSNOW_IDEAL, PUNIF_SG1SNOW,                         &

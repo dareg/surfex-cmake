@@ -158,12 +158,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
-CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT       ! choice of fields to initialize
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT       ! choice of fields to initialize
 INTEGER,                            INTENT(IN)  :: KI          ! number of points
 INTEGER,                            INTENT(IN)  :: KSV         ! number of scalars
 INTEGER,                            INTENT(IN)  :: KSW         ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV         ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV         ! name of all scalar variables
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PRHOA       ! air density
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH     ! solar zenithal angle
@@ -179,9 +179,9 @@ INTEGER,                            INTENT(IN)  :: KDAY        ! current day (UT
 REAL,                               INTENT(IN)  :: PTIME       ! current time since
                                                                !  midnight (UTC, s)
 !
-CHARACTER(LEN=28),                  INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),                   INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=2),                   INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=28),                  INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=2),                   INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -218,7 +218,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('INIT_TEBN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -250,12 +250,12 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
-CALL READ_DEFAULT_TEB_n(HPROGRAM)
+ CALL READ_DEFAULT_TEB_n(HPROGRAM)
 !
 !*       1.     Reading of configuration:
 !               -------------------------
 !
-CALL READ_TEB_CONF_n(HPROGRAM)
+ CALL READ_TEB_CONF_n(HPROGRAM)
 !
 !* initialization of snow scheme
 !
@@ -296,32 +296,32 @@ END SELECT
 !
 !         Initialisation for IO
 !
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
-CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
 !
 !         Reading of the fields
 !
-CALL READ_COVER_GARDEN(HPROGRAM,LGARDEN)
+ CALL READ_COVER_GARDEN(HPROGRAM,LGARDEN)
 !
-CALL READ_PGD_TEB_n(HPROGRAM)
+ CALL READ_PGD_TEB_n(HPROGRAM)
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 ! 
 !*        Fraction of each patch in the grid mesh
 !
 ILU = SIZE(XCOVER,1)
 !
 ALLOCATE(XTEB_PATCH(ILU,NTEB_PATCH))
-CALL CONVERT_TEB(XCOVER,XTEB_PATCH)
+ CALL CONVERT_TEB(XCOVER,XTEB_PATCH)
 !
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
-CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
 !
 !* reads what is the option defined for road orientations & walls
 !
@@ -333,7 +333,7 @@ IF (HINIT=='ALL') THEN
     CALL READ_SURF(HPROGRAM,'WALL_OPT',CWALL_OPT,IRESP)
   END IF
 END IF
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 !-----------------------------------------------------------------------------------
 !
 !*              LOOP ON TEB PATCHES
@@ -466,7 +466,7 @@ END DO ! end of loop on TEB patches
 !
 !* if only physiographic fields are to be initialized, stop here.
 !
-CALL WRITE_COVER_TEX_TEB
+ CALL WRITE_COVER_TEX_TEB
 !
 IF (HINIT/='ALL') THEN
   IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',1,ZHOOK_HANDLE)
@@ -477,8 +477,8 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
 !*       9.     Prognostic fields:
 !               -----------------
@@ -619,14 +619,14 @@ END DO ! end of loop on patches
 !*       7.     Canopy air fields:
 !               ------------------
 !
-CALL READ_TEB_CANOPY_n(HPROGRAM)
+ CALL READ_TEB_CANOPY_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*      11.     Diagnostics:
 !               -----------
 !
-CALL DIAG_TEB_INIT_n(HPROGRAM,ILU,ISWB)
+ CALL DIAG_TEB_INIT_n(HPROGRAM,ILU,ISWB)
 DO JPATCH=1,NTEB_PATCH
   CALL GOTO_TEB(JPATCH)
   CALL DIAG_MISC_TEB_INIT_n(HPROGRAM,ILU,ISWB)
@@ -636,7 +636,7 @@ END DO ! end of loop on patches
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',1,ZHOOK_HANDLE)
 !
 !

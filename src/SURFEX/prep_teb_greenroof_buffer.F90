@@ -47,15 +47,15 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF       ! type of field
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF       ! type of field
 INTEGER,            INTENT(IN)  :: KLUOUT      ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD      ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_BUF  ! current date and time
-CHARACTER(LEN=6)                :: YINMODEL    ! model from which buffer originates
+ CHARACTER(LEN=6)                :: YINMODEL    ! model from which buffer originates
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD      ! field read
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D    ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD          ! depth of field in the soil
@@ -68,7 +68,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GREENROOF_BUFFER',0,ZHOOK_HANDLE)
-CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUF)
+ CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUF)
 
 !
 !*      2.     Reading of field

@@ -78,7 +78,7 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HFILENAME
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HFILENAME
 !
 LOGICAL, INTENT(IN)          :: ORW, OVERBOSE
 !
@@ -88,7 +88,7 @@ INTEGER, INTENT(OUT)         :: KNCID
 !
 !*      declarations of local variables
 !
-CHARACTER(LEN=nf_max_name) :: YFNAME
+ CHARACTER(LEN=nf_max_name) :: YFNAME
 !
 INTEGER :: IC
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -132,7 +132,7 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HFILENAME
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HFILENAME
 !
 LOGICAL, INTENT(IN)          :: OVERBOSE
 INTEGER, INTENT(IN)          :: KLUOUT
@@ -169,7 +169,7 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME
 !
 INTEGER, INTENT(IN)          :: KLUOUT
 INTEGER, INTENT(IN)          :: KNCID
@@ -180,7 +180,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PVECT
 !
 !*      declarations of local variables
 !
-CHARACTER(LEN=nf_max_name) :: YVNAME
+ CHARACTER(LEN=nf_max_name) :: YVNAME
 !
 INTEGER :: IC, ID
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -226,7 +226,7 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME
 !
 INTEGER, INTENT(IN)          :: KLUOUT
 INTEGER, INTENT(IN)          :: KNCID
@@ -237,7 +237,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PVECT
 !
 !*      declarations of local variables
 !
-CHARACTER(LEN=nf_max_name) :: YVNAME
+ CHARACTER(LEN=nf_max_name) :: YVNAME
 !
 INTEGER :: IC, ID
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -283,7 +283,7 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME
 !
 INTEGER, INTENT(IN)          :: KLUOUT
 INTEGER, INTENT(IN)          :: KNCID
@@ -294,7 +294,7 @@ REAL, DIMENSION(:,:,:), INTENT(OUT) :: PVECT
 !
 !*      declarations of local variables
 !
-CHARACTER(LEN=nf_max_name) :: YVNAME
+ CHARACTER(LEN=nf_max_name) :: YVNAME
 !
 INTEGER :: IC, ID
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -344,9 +344,9 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HFILENAME, HTITLE, HTIMEUNIT
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HFILENAME, HTITLE, HTIMEUNIT
 !
-CHARACTER(LEN=nf_max_name), DIMENSION(:), INTENT(IN) :: HVNAME, HVLNAME, HUNIT  
+ CHARACTER(LEN=nf_max_name), DIMENSION(:), INTENT(IN) :: HVNAME, HVLNAME, HUNIT  
 !
 REAL, DIMENSION(:), INTENT(IN) :: PLON
 REAL, DIMENSION(:), INTENT(IN) :: PLAT
@@ -366,7 +366,7 @@ LOGICAL, DIMENSION(:), INTENT(IN), OPTIONAL  :: OVARZDIM
 !
 !*      declarations of local variables
 !
-CHARACTER(LEN=nf_max_name) :: YWORK
+ CHARACTER(LEN=nf_max_name) :: YWORK
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZWORK
 !
@@ -497,7 +497,7 @@ include 'netcdf.inc'
 !
 !*      declarations of arguments
 !
-CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME  
+ CHARACTER(LEN=nf_max_name), INTENT(IN) :: HVNAME  
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PWRITE
 !
@@ -513,7 +513,7 @@ LOGICAL, INTENT(IN), OPTIONAL :: OVARZDIM
 !
 !*      declarations of local variables
 !
-CHARACTER(LEN=nf_max_name) :: YWORK
+ CHARACTER(LEN=nf_max_name) :: YWORK
 !
 INTEGER, DIMENSION(4) :: ISTART, ICOUNT
 !

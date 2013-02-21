@@ -105,15 +105,15 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HISBA   ! type of ISBA version:
+ CHARACTER(LEN=*),     INTENT(IN)   :: HISBA   ! type of ISBA version:
 !                                             ! '2-L' (default)
 !                                             ! '3-L'
 !                                             ! 'DIF'   ISBA-DF
-CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                               !         (Douville et al. 1995)
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2001)
-CHARACTER(LEN=*),     INTENT(IN)   :: HRUNOFF ! surface runoff formulation
+ CHARACTER(LEN=*),     INTENT(IN)   :: HRUNOFF ! surface runoff formulation
 !                                             ! 'WSAT'
 !                                             ! 'DT92'
 !                                             ! 'SGH ' Topmodel
@@ -234,20 +234,20 @@ LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
 LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
 REAL   ,DIMENSION(:),INTENT(OUT)   :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HKSAT   ! soil hydraulic profil option
+ CHARACTER(LEN=*),     INTENT(IN)   :: HKSAT   ! soil hydraulic profil option
 !                                             ! 'DEF'  = ISBA homogenous soil
 !                                             ! 'SGH'  = ksat exponential decay
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HSOC    ! soil organic carbon profil option
+ CHARACTER(LEN=*),     INTENT(IN)   :: HSOC    ! soil organic carbon profil option
 !                                             ! 'DEF'  = ISBA homogenous soil
 !                                             ! 'SGH'  = SOC profile
 !
-CHARACTER(LEN=*), INTENT(IN)       :: HRAIN   ! Rainfall spatial distribution
+ CHARACTER(LEN=*), INTENT(IN)       :: HRAIN   ! Rainfall spatial distribution
                                               ! 'DEF' = No rainfall spatial distribution
                                               ! 'SGH' = Rainfall exponential spatial distribution
                                               ! 
 !
-CHARACTER(LEN=*), INTENT(IN)       :: HHORT   ! Horton runoff
+ CHARACTER(LEN=*), INTENT(IN)       :: HHORT   ! Horton runoff
                                               ! 'DEF' = no Horton runoff
                                               ! 'SGH' = Horton runoff
 !                                        
@@ -390,7 +390,7 @@ ENDIF
 !*       1.     EVOLUTION OF THE EQUIVALENT WATER CONTENT Wr
 !               --------------------------------------------
 !
-CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                              &
+ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                              &
                  ZRR, ZLEV, ZLETR, PVEG, ZPSNV,                    &
                  PWR, PWRMAX, ZPG, PDRIP, PRRVEG                  ) 
 !
@@ -433,7 +433,7 @@ ENDIF
 ! - Horton runoff : Direct or exponential precipitation distribution
 ! - Floodplains interception and infiltration
 !
-CALL HYDRO_SGH(HISBA,HRUNOFF,HRAIN,HHORT,         &
+ CALL HYDRO_SGH(HISBA,HRUNOFF,HRAIN,HHORT,         &
                  PTSTEP,PD_G,PDZG,PWSAT,PWWILT,   &
                  PWG, PWGI, KWG_LAYER,            &
                  ZPG, ZPG_MELT, PMUF,             &

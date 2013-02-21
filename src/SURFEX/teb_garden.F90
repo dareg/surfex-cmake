@@ -150,18 +150,18 @@ IMPLICIT NONE
 !
 !*      0.1    Declarations of arguments
 !
-CHARACTER(LEN=6)    , INTENT(IN)    :: HZ0H               ! TEB option for z0h roof & road
+ CHARACTER(LEN=6)    , INTENT(IN)    :: HZ0H               ! TEB option for z0h roof & road
 !                                                         ! 'MASC95' : Mascart et al 1995
 !                                                         ! 'BRUT82' : Brustaert     1982
 !                                                         ! 'KAND07' : Kanda         2007
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND       ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND       ! wind implicitation option
 !                                                         ! 'OLD' = direct
 !                                                         ! 'NEW' = Taylor serie, order 1
-CHARACTER(LEN=4)    , INTENT(IN)    :: HROAD_DIR          ! TEB option for road direction
+ CHARACTER(LEN=4)    , INTENT(IN)    :: HROAD_DIR          ! TEB option for road direction
                                                           ! 'UNIF' : uniform roads
                                                           ! 'ORIE' : specified
                                                           !   road orientation 
-CHARACTER(LEN=4)    , INTENT(IN)    :: HWALL_OPT          ! TEB option for walls representation
+ CHARACTER(LEN=4)    , INTENT(IN)    :: HWALL_OPT          ! TEB option for walls representation
                                                           ! 'UNIF' : uniform walls
                                                           ! 'TWO ' : 2 opposite  walls
 TYPE(DATE_TIME)     , INTENT(IN)    :: TPTIME             ! current date and time from teb
@@ -182,8 +182,8 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL_A          ! wall layers temperat
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL_B          ! wall layers temperatures
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PWS_ROOF           ! roof water reservoir
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PWS_ROAD           ! road water reservoir
-CHARACTER(LEN=*)    , INTENT(IN)    :: HSNOW_ROOF         ! snow roof scheme 'NONE', 'D95 ', '1-L '
-CHARACTER(LEN=*)    , INTENT(IN)    :: HSNOW_ROAD         ! snow road scheme 'NONE', 'D95 ', '1-L '
+ CHARACTER(LEN=*)    , INTENT(IN)    :: HSNOW_ROOF         ! snow roof scheme 'NONE', 'D95 ', '1-L '
+ CHARACTER(LEN=*)    , INTENT(IN)    :: HSNOW_ROAD         ! snow road scheme 'NONE', 'D95 ', '1-L '
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PWSNOW_ROOF        ! snow layers reservoir
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PTSNOW_ROOF        ! snow layers temperature
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PRSNOW_ROOF        ! snow layers density
@@ -364,10 +364,10 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GREENROOF   ! greenroof total vert
 !
 ! new arguments created after BEM
 !
-CHARACTER(LEN=6)    , INTENT(IN)    :: HCOOL_COIL
-CHARACTER(LEN=6)    , INTENT(IN)    :: HHEAT_COIL
+ CHARACTER(LEN=6)    , INTENT(IN)    :: HCOOL_COIL
+ CHARACTER(LEN=6)    , INTENT(IN)    :: HHEAT_COIL
 REAL, DIMENSION(:)  , INTENT(IN)    :: PF_WATER_COND      ! fraction of evaporation for the condensers
-CHARACTER(LEN=4), DIMENSION(:), INTENT(IN) :: HNATVENT
+ CHARACTER(LEN=4), DIMENSION(:), INTENT(IN) :: HNATVENT
 INTEGER             , INTENT(IN)    :: KDAY               ! Simulation day
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PAUX_MAX           ! Auxiliar variable for autosize calcs
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_FLOOR           ! Floor layers temperatures [K]
@@ -450,7 +450,7 @@ REAL                , INTENT(IN)     :: PTIME             ! current time since m
 LOGICAL,DIMENSION(:), INTENT(IN)     :: OSHADE
 LOGICAL,DIMENSION(:), INTENT(INOUT)  :: OSHAD_DAY         ! has shading been necessary this day ?
 LOGICAL,DIMENSION(:), INTENT(INOUT)  :: ONATVENT_NIGHT    ! has natural ventilation been necessary/possible this night ?
-CHARACTER(LEN=3)    , INTENT(IN)     :: HBEM              ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=3)    , INTENT(IN)     :: HBEM              ! Building Energy model 'DEF' or 'BEM'
 !
 REAL, DIMENSION(:)  , INTENT(IN)     :: PN_FLOOR          ! Number of floors     
 REAL, DIMENSION(:)  , INTENT(IN)     :: PWALL_O_BLD       ! Wall area [m2_wall/m2_bld]
@@ -471,7 +471,7 @@ REAL, DIMENSION(:)  , INTENT(IN)     :: PF_MASS_FLOOR     ! View factor mass-flo
 REAL, DIMENSION(:)  , INTENT(IN)     :: PF_MASS_WALL      ! View factor mass-wall
 REAL, DIMENSION(:)  , INTENT(IN)     :: PF_MASS_WIN       ! View factor mass-window
 LOGICAL             , INTENT(IN)     :: OCANOPY           ! is canopy active ?
-CHARACTER(LEN=5)    , INTENT(IN)     :: HCH_BEM         ! TEB option for building outside conv. coef
+ CHARACTER(LEN=5)    , INTENT(IN)     :: HCH_BEM         ! TEB option for building outside conv. coef
 REAL, DIMENSION(:)  , INTENT(IN)     :: PROUGH_ROOF     ! roof roughness coef.
 REAL, DIMENSION(:)  , INTENT(IN)     :: PROUGH_WALL     ! wall roughness coef.
 REAL, DIMENSION(:)  , INTENT(IN)     :: PF_WIN_WIN      ! indoor win to win view factor
@@ -677,8 +677,8 @@ ENDDO
 !
 !*      2.1    Snow-covered surfaces relative fractions (at previous time-step)
 !              ----------------------------------------
-CALL SNOW_FRAC_ROAD(PWSNOW_ROAD(:,1),PSR(:)>0.,ZDN_ROAD,ZDF_ROAD)
-CALL SNOW_FRAC_ROOF(PWSNOW_ROOF(:,1),PSR(:)>0.,ZDN_ROOF,ZDF_ROOF)
+ CALL SNOW_FRAC_ROAD(PWSNOW_ROAD(:,1),PSR(:)>0.,ZDN_ROAD,ZDF_ROAD)
+ CALL SNOW_FRAC_ROOF(PWSNOW_ROOF(:,1),PSR(:)>0.,ZDN_ROOF,ZDF_ROOF)
 !
 !* new snow albedo
 !
@@ -750,11 +750,11 @@ ENDIF
 !  
 GSHADE(:) = .FALSE.
 IF (HBEM=="BEM") &
-CALL WINDOW_SHADING_AVAILABILITY(OSHADE, PTI_BLD, PTCOOL_TARGET,GSHADE)
+ CALL WINDOW_SHADING_AVAILABILITY(OSHADE, PTI_BLD, PTCOOL_TARGET,GSHADE)
 !
 !* computes solar radiation exchanges
 !
-CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                   &
+ CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                   &
                      ZDIR_SW, ZSCA_SW, PZENITH, PAZIM,             &
                      PBLD, PGARDEN, PROAD_DIR, PROAD, PFRAC_GR,    &
                      PWALL_O_HOR, PCAN_HW_RATIO,                   &
@@ -804,8 +804,8 @@ CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                   &
 !-------------------------------------------------------------------------------
 !
 ! The subroutine is splitted in 2 because of compilation optimization issues
-CALL TEB_GARDEN2
-CALL TEB_GARDEN3
+ CALL TEB_GARDEN2
+ CALL TEB_GARDEN3
 !
 IF (LHOOK) CALL DR_HOOK('TEB_GARDEN',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
@@ -1038,7 +1038,7 @@ SUBROUTINE TEB_GARDEN3
 !*     10.     Aggregation
 !              -----------
 !
-CALL AVG_URBAN_FLUXES(PTS_TOWN, PEMIS_TOWN,                                    &
+ CALL AVG_URBAN_FLUXES(PTS_TOWN, PEMIS_TOWN,                                    &
                      PT_CANYON, PQ_CANYON,                                     &
                      PT_LOWCAN, PQ_LOWCAN,                                     &
                      PT_ROOF(:,1),PT_ROAD(:,1),PT_WALL_A(:,1), PT_WALL_B(:,1), &

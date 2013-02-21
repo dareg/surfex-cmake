@@ -51,9 +51,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER, INTENT(IN) :: KSIZE
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -62,9 +62,9 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 !              -------------------------------
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDATA_SST
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=1)  :: YDIR
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=1)  :: YDIR
 INTEGER           :: ILUOUT
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER           :: JTIME          ! loop index
@@ -74,16 +74,16 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_SEAFLUX_PAR_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF (IVERSION<4 .OR. IVERSION==4 .AND. IBUGFIX<=4 .OR. &
     IVERSION>5 .OR. IVERSION==5 .AND. IBUGFIX>=1) THEN
@@ -91,7 +91,7 @@ IF (IVERSION<4 .OR. IVERSION==4 .AND. IBUGFIX<=4 .OR. &
 ELSE
   YRECFM='NDATA_SEA_TIME'
 ENDIF
-CALL READ_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
 !
 ALLOCATE(ZDATA_SST (KSIZE,NTIME))
 DO JTIME=1,NTIME

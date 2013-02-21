@@ -267,9 +267,9 @@ TYPE TEB_GARDEN_PGD_t
 !-------------------------------------------------------------------------------
 !
 ! Type of vegetation (simplification of vegetation charaterization)
-CHARACTER(LEN=4)             :: CTYPE_HVEG   ! type of high vegetation
-CHARACTER(LEN=4)             :: CTYPE_LVEG   ! type of low vegetation
-CHARACTER(LEN=4)             :: CTYPE_NVEG   ! type of bare soil (no vegetation)
+ CHARACTER(LEN=4)             :: CTYPE_HVEG   ! type of high vegetation
+ CHARACTER(LEN=4)             :: CTYPE_LVEG   ! type of low vegetation
+ CHARACTER(LEN=4)             :: CTYPE_NVEG   ! type of bare soil (no vegetation)
 !-------------------------------------------------------------------------------
 !
 END TYPE TEB_GARDEN_PGD_t
@@ -623,11 +623,11 @@ REAL, POINTER, DIMENSION(:)  :: XKSAT_ICE=>NULL()
 !$OMP THREADPRIVATE(XKSAT_ICE)
 !
 ! Type of vegetation (simplification of veg characterization)
-CHARACTER(LEN=4), POINTER :: CTYPE_HVEG=>NULL()
+ CHARACTER(LEN=4), POINTER :: CTYPE_HVEG=>NULL()
 !$OMP THREADPRIVATE(CTYPE_HVEG)
-CHARACTER(LEN=4), POINTER :: CTYPE_LVEG=>NULL()
+ CHARACTER(LEN=4), POINTER :: CTYPE_LVEG=>NULL()
 !$OMP THREADPRIVATE(CTYPE_LVEG)
-CHARACTER(LEN=4), POINTER :: CTYPE_NVEG=>NULL()
+ CHARACTER(LEN=4), POINTER :: CTYPE_NVEG=>NULL()
 !$OMP THREADPRIVATE(CTYPE_NVEG)
 !
 CONTAINS

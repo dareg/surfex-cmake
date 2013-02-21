@@ -44,7 +44,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(OUT) :: HCH_DRY_DEP  ! deposition scheme
+ CHARACTER(LEN=6),  INTENT(OUT) :: HCH_DRY_DEP  ! deposition scheme
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !

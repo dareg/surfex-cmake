@@ -45,15 +45,15 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_BUF    ! current date and time
-CHARACTER(LEN=6)                :: YINMODEL ! model from which BUFFER originates
+ CHARACTER(LEN=6)                :: YINMODEL ! model from which BUFFER originates
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D ! 1D field read
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD   ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD             ! depth of field in the soil
@@ -66,7 +66,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_BUFFER',0,ZHOOK_HANDLE)
-CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUF)
+ CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUF)
 !
 IF (HSURF=='T_FLOOR' .OR. HSURF=='T_WALL' .OR. HSURF=='T_ROOF' .OR.  HSURF=='T_WIN2' .OR. HSURF=='TI_BLD') THEN
    ZTI_BLD = XTI_BLD_DEF
@@ -235,7 +235,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* interpolation on fine vertical grid
 IF (LHOOK) CALL DR_HOOK('TEB_PROFILE_BUFFER',0,ZHOOK_HANDLE)
 ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(PGRID)))
-CALL INTERP_GRID(ZD,ZFIELD,PGRID,PFIELD)
+ CALL INTERP_GRID(ZD,ZFIELD,PGRID,PFIELD)
 !
 !* end
 DEALLOCATE(ZFIELD)

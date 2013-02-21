@@ -707,9 +707,9 @@ N=SIZE(X,2)
 M=SIZE(C)-N
 
 ! Calcul de la matrice Kxe
-CALL SPLK(NORD,XE,X,G,WE1)
+ CALL SPLK(NORD,XE,X,G,WE1)
 ! Calcul de Kxe.c
-CALL MXMSPL(WE1,C(1:N),ZOUT1)
+ CALL MXMSPL(WE1,C(1:N),ZOUT1)
 
 IF (M.NE.0) THEN
   ! Generation des exposants des monomes
@@ -1107,8 +1107,8 @@ INTEGER, INTENT(OUT) :: IERR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:EISRS1',0,ZHOOK_HANDLE)
-CALL TRED2(AR,WR,WORK,ZR)
-CALL TQL2_2(WR,WORK,ZR,IERR)
+ CALL TRED2(AR,WR,WORK,ZR)
+ CALL TQL2_2(WR,WORK,ZR,IERR)
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:EISRS1',1,ZHOOK_HANDLE)
 
 END SUBROUTINE EISRS1
@@ -1209,7 +1209,7 @@ REAL, INTENT(OUT) :: RES
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLS2V',0,ZHOOK_HANDLE)
-CALL SPLBVM(BI,WI,N,P,RES)
+ CALL SPLBVM(BI,WI,N,P,RES)
 RES=N*P*RES
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLS2V',1,ZHOOK_HANDLE)
 
@@ -1271,7 +1271,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 ! Calcul de la valeur du s2 de Wahba pour p=infini
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLPS2V',0,ZHOOK_HANDLE)
-CALL SPLS2VI(W,RINF)
+ CALL SPLS2VI(W,RINF)
 IF (RINF.LE.S2) THEN
   IREP=-6
   P0=0.
@@ -1440,7 +1440,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Calcul de la valeur de la fonction de Reinsch pour p=infini
 
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLPR',0,ZHOOK_HANDLE)
-CALL SPLRI(W,N,RINF)
+ CALL SPLRI(W,N,RINF)
 IF (RINF.LE.S2) THEN
   IREP=-6
   P0=0.
@@ -1589,7 +1589,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 ! Calcul de Vm'(0) . Si Vm'(0) > 0 alors popt = 0.
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLPV',0,ZHOOK_HANDLE)
-CALL SPLDV(B,W,N,0.,DVM)
+ CALL SPLDV(B,W,N,0.,DVM)
 
 IF (DVM.GT.0.) THEN
   IREP=0.
@@ -1767,13 +1767,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 ! Calcul de la matrice T des monomes
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLTT',0,ZHOOK_HANDLE)
-CALL SPLT(X,IW,TM)
+ CALL SPLT(X,IW,TM)
 ! Calcul de Tm=(Ds-1)*T
-CALL MXIDML(DS,TM,TM)
+ CALL MXIDML(DS,TM,TM)
 ! Calcul de Tm'*Tm
-CALL MXMSPL(TRANSPOSE(TM),TM,TT)
+ CALL MXMSPL(TRANSPOSE(TM),TM,TT)
 ! Calcul de (Tm'*Tm)-1
-CALL SMXINV(TT,IREP)
+ CALL SMXINV(TT,IREP)
 ! Test du compte-rendu de smxinv
 IF (IREP.NE.0) WRITE(*,FMT='(A27)') "SPLTT: MATRICE TT NON INVERSIBLE"
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLTT',1,ZHOOK_HANDLE)
@@ -1813,7 +1813,7 @@ ENDDO
 IREP=0
 
 !  Calcul de (Ds-1)*R
-CALL MXIDML(DS,R,R)
+ CALL MXIDML(DS,R,R)
 
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLR_1',1,ZHOOK_HANDLE)
 
@@ -1847,23 +1847,23 @@ N=SIZE(X,2)
 M=SIZE(IW,2)
 
 !     Recherche des monomes de degre inferieur ou egal a nord-1
-CALL SPLIE(NORD-1,IW)
+ CALL SPLIE(NORD-1,IW)
 !----------------------------------------------------------
 !     Calcul de la matrice (Tm'*Tm)-1
-CALL SPLTT(X,DS,IW,TM,TT,IREP)
+ CALL SPLTT(X,DS,IW,TM,TT,IREP)
 !     Calcul de (T'm*Tm)-1 Tm'
-CALL MXMSPL(TT,TRANSPOSE(TM),TTT)
+ CALL MXMSPL(TT,TRANSPOSE(TM),TTT)
 !R1(:,1:M)=TRANSPOSE(TTT)
 !------------------------------------------------------------
 !     Calcul de Tm ((Tm'*Tm)-1) Tm'
-CALL MTXAXM(TRANSPOSE(TM),TT,C)
+ CALL MTXAXM(TRANSPOSE(TM),TT,C)
 DO J=1,N
   C(J,J)=C(J,J)-1.
 ENDDO
 C(:,:)=-C(:,:)
 !-----------------------------------------------------------
 !     Calcul des vecteurs propres de I - Tm c ((Tm'*Tm)-1) c Tm'
-CALL EISRS1(C,VP,R1,WORK,IREP)
+ CALL EISRS1(C,VP,R1,WORK,IREP)
 
 !     Test du signe des valeurs propres de C
 IMIN=MINLOC(VP(M+1:N))
@@ -1877,7 +1877,7 @@ ENDIF
 IREP=0
 !  Calcul de (Ds-1)*R
 R=R1(:,M+1:N)
-CALL MXIDML(DS,R,R)
+ CALL MXIDML(DS,R,R)
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLR_2',1,ZHOOK_HANDLE)
 
 END SUBROUTINE SPLR_2
@@ -1909,11 +1909,11 @@ N=SIZE(X,2)
 M=SIZE(X,2)-SIZE(R,2)
 
 ! Calcul de la matrice K des noyaux
-CALL SPLK(NORD,X,X,G,RK)
+ CALL SPLK(NORD,X,X,G,RK)
 ! Calcul de R'*K*R
-CALL MTXAXM(R,RK,RKR)
+ CALL MTXAXM(R,RK,RKR)
 ! Calcul de la matrice U des vecteurs propres de R'*K*R
-CALL EISRS1(RKR,DB,U,WORK,IREP)
+ CALL EISRS1(RKR,DB,U,WORK,IREP)
 ! Test du signe des valeurs propres de R'KR
 IMIN=MINLOC(DB)
 IF (DB(IMIN(1)).LE.0)  &
@@ -1943,9 +1943,9 @@ N=SIZE(Z)
 M=SIZE(Z)-SIZE(R,2)
 
 ! Calcul de R'*Z
-CALL MXMSPL(TRANSPOSE(R),Z,RZ)
+ CALL MXMSPL(TRANSPOSE(R),Z,RZ)
 ! Calcul de U'R'Z
-CALL MXMSPL(TRANSPOSE(U),RZ,W)
+ CALL MXMSPL(TRANSPOSE(U),RZ,W)
 IF (LHOOK) CALL DR_HOOK('MODE_SPLINES:SPLW',1,ZHOOK_HANDLE)
 
 END SUBROUTINE SPLW
@@ -1980,11 +1980,11 @@ DO J=1,SIZE(DB)
 ENDDO
 
 ! Calcul de U((DB+n*p*I)-1)U'
-CALL MTXAXM(TRANSPOSE(U),QW1,QW2)
+ CALL MTXAXM(TRANSPOSE(U),QW1,QW2)
 ! Calcul de RU((DB+n*p*I)-1))UR'
-CALL MTXAXM(TRANSPOSE(R),QW2,Q)
+ CALL MTXAXM(TRANSPOSE(R),QW2,Q)
 ! Calcul de QK
-CALL MXMSPL(Q,RK,Q1)
+ CALL MXMSPL(Q,RK,Q1)
 
 ! Calcul de I - QK
 Q1(:,:)=-Q1(:,:)
@@ -2020,7 +2020,7 @@ M=SIZE(TTT,1)
 !     Calcul de c
 !     -----------
 !     Calcul de c = Qz = R((R'KR+n*p*I)-1)R'z
-CALL MXMSPL(Q,Z,C(1:N))
+ CALL MXMSPL(Q,Z,C(1:N))
 
 !     Calcul de d
 !     -----------
@@ -2415,7 +2415,7 @@ DS(:)=1.
 ! Generation des sous-domaines: matrice AI de MODD_SPLINES
 NSD(1)=NSDI
 NSD(2)=NSDJ
-CALL SPLBSD(NSD,INTER,XD,AI)
+ CALL SPLBSD(NSD,INTER,XD,AI)
 
 LORDRE=0
 

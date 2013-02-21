@@ -48,10 +48,10 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-CHARACTER(LEN=4),  INTENT(OUT) :: HRUNOFF_GR    ! surface runoff formulation ('WSAT','DT92','SGH ')    
-CHARACTER(LEN=4),  INTENT(OUT) :: HSCOND_GR     ! thermal conductivity ('DEF ','PL98')
-CHARACTER(LEN=3),  INTENT(OUT) :: HKSAT_GR      ! soil hydraulic profile option ('DEF','SGH')
-CHARACTER(LEN=3),  INTENT(OUT) :: HHORT_GR      ! Horton runoff ('DEF','SGH')
+ CHARACTER(LEN=4),  INTENT(OUT) :: HRUNOFF_GR    ! surface runoff formulation ('WSAT','DT92','SGH ')    
+ CHARACTER(LEN=4),  INTENT(OUT) :: HSCOND_GR     ! thermal conductivity ('DEF ','PL98')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HKSAT_GR      ! soil hydraulic profile option ('DEF','SGH')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HHORT_GR      ! Horton runoff ('DEF','SGH')
 !                                           
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

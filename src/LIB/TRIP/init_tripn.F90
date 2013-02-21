@@ -68,7 +68,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
 INTEGER,          INTENT(IN) :: KYEAR
 INTEGER,          INTENT(IN) :: KMONTH 
 LOGICAL,          INTENT(IN) :: ORESTART
@@ -77,15 +77,15 @@ LOGICAL,          INTENT(IN) :: ORESTART
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=13), PARAMETER         :: YFILE_PARAM  ='TRIP_PARAM.nc'
-CHARACTER(LEN=12), PARAMETER         :: YFILE_INIT   ='TRIP_PREP.nc'
-CHARACTER(LEN=15), PARAMETER         :: YFILE_RESTART='TRIP_RESTART.nc'
-CHARACTER(LEN=10), PARAMETER         :: YDIAG        ='TRIP_DIAG_'
+ CHARACTER(LEN=13), PARAMETER         :: YFILE_PARAM  ='TRIP_PARAM.nc'
+ CHARACTER(LEN=12), PARAMETER         :: YFILE_INIT   ='TRIP_PREP.nc'
+ CHARACTER(LEN=15), PARAMETER         :: YFILE_RESTART='TRIP_RESTART.nc'
+ CHARACTER(LEN=10), PARAMETER         :: YDIAG        ='TRIP_DIAG_'
 !
-CHARACTER(LEN=6)                     :: YTIME
+ CHARACTER(LEN=6)                     :: YTIME
 !
-CHARACTER(LEN=50)                    :: YFILE
-CHARACTER(LEN=20)                    :: YVAR 
+ CHARACTER(LEN=50)                    :: YFILE
+ CHARACTER(LEN=20)                    :: YVAR 
 !
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZREAD, ZHSTREAM
 !
@@ -105,7 +105,7 @@ INTEGER :: IWORK, IFLOOD, I, J, INI
 !Output attribut for netcdf diag file
 !-------------------------------------------------------------------------------
 !
-CHARACTER(LEN=50) :: YTITLE,YTIMEUNIT
+ CHARACTER(LEN=50) :: YTITLE,YTIMEUNIT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                    YTITLE    = Title of each output file
 !                    YTIMEUNIT = Time unit in each output file if present
@@ -115,9 +115,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP_N',0,ZHOOK_HANDLE)
-CALL INIT_TRIP_PAR
+ CALL INIT_TRIP_PAR
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 WRITE(ILUOUT,*)''
 WRITE(ILUOUT,*)''
@@ -147,11 +147,11 @@ ENDIF
 !
 ! * Read TRIP grid configuration
 !
-CALL READ_NAM_GRID_TRIP(HPROGRAM)
+ CALL READ_NAM_GRID_TRIP(HPROGRAM)
 !
 ! * Store TRIP grid configuration
 !
-CALL GET_GRID_TRIP(XGRID_TRIP,ZLONMIN,ZLONMAX,ZLATMIN,ZLATMAX,ZGRID_RES,ILON,ILAT)
+ CALL GET_GRID_TRIP(XGRID_TRIP,ZLONMIN,ZLONMAX,ZLATMIN,ZLATMAX,ZGRID_RES,ILON,ILAT)
 !
 !-------------------------------------------------------------------------------
 ! * Check options
@@ -264,7 +264,7 @@ ALLOCATE(ZREAD(ILON,ILAT))
 ! * Flow direction 
 !
 YVAR ='FLOWDIR'
-CALL READ_TRIP(ILUOUT,YFILE_PARAM,YVAR,ZREAD)
+ CALL READ_TRIP(ILUOUT,YFILE_PARAM,YVAR,ZREAD)
 WHERE(ZREAD==XTRIP_UNDEF)ZREAD=0.0
 IGRCN(:,:)=INT(ZREAD(:,:))
 !
@@ -277,7 +277,7 @@ ENDIF
 ! * Rriver sequence
 !
 YVAR ='RIVSEQ'
-CALL READ_TRIP(ILUOUT,YFILE_PARAM,YVAR,ZREAD)
+ CALL READ_TRIP(ILUOUT,YFILE_PARAM,YVAR,ZREAD)
 WHERE(ZREAD==XTRIP_UNDEF)ZREAD=0.0
 ISEQ(:,:)=INT(ZREAD(:,:))
 !
@@ -289,16 +289,16 @@ DEALLOCATE(ZREAD)
 !
 ! * Set down stream
 !
-CALL SETNEXT(ILON,ILAT,IGRCN,INEXTX,INEXTY)
+ CALL SETNEXT(ILON,ILAT,IGRCN,INEXTX,INEXTY)
 !
 ! * Set area size
 !
-CALL SETAREA(ILAT,ZLATMIN,ZGRID_RES,XAREA)
+ CALL SETAREA(ILAT,ZLATMIN,ZGRID_RES,XAREA)
 !
 ! * Distance between grids with the meandering ratio
 !
 YVAR ='RIVLEN'
-CALL READ_TRIP(ILUOUT,YFILE_PARAM,YVAR,XLEN)
+ CALL READ_TRIP(ILUOUT,YFILE_PARAM,YVAR,XLEN)
 WHERE(.NOT.GMASK(:,:))XLEN(:,:)=0.0
 !
 ! * Variable velocity schemes variables
@@ -383,7 +383,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 YVAR ='SURF_STO'
-CALL READ_TRIP(ILUOUT,YFILE_INIT,YVAR,XSURF_STO)
+ CALL READ_TRIP(ILUOUT,YFILE_INIT,YVAR,XSURF_STO)
 !
 IF(CGROUNDW/='DEF')THEN
   YVAR ='GROUND_STO'
@@ -536,7 +536,7 @@ NRUN=0
 YFILE     = YDIAG//'RUN_'//YTIME(1:LEN_TRIM(YTIME))//'.nc'
 YTITLE    = 'TRIP run outputs'
 YTIMEUNIT = '-'
-CALL INIT_DIAG_TRIP_n(ILUOUT,YFILE,ILON,ILAT,YTITLE,YTIMEUNIT,.FALSE.)
+ CALL INIT_DIAG_TRIP_n(ILUOUT,YFILE,ILON,ILAT,YTITLE,YTIMEUNIT,.FALSE.)
 !
 !-------------------------------------------------------------------------------
 ! * Create restart file

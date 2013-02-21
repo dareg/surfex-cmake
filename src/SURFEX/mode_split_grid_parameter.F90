@@ -24,9 +24,9 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),       INTENT(IN) :: HPROGRAM    ! calling program
-CHARACTER(LEN=10),      INTENT(IN) :: HGRID       ! grid type
-CHARACTER(LEN=6),       INTENT(IN) :: HREC        ! name of the parameter
+ CHARACTER(LEN=6),       INTENT(IN) :: HPROGRAM    ! calling program
+ CHARACTER(LEN=10),      INTENT(IN) :: HGRID       ! grid type
+ CHARACTER(LEN=6),       INTENT(IN) :: HREC        ! name of the parameter
 INTEGER,                INTENT(IN) :: KDIM        ! size of PFIELD
 INTEGER,                INTENT(IN) :: KSIZE       ! size of PFIELD_SPLIT
 REAL, DIMENSION(KDIM ), INTENT(IN) :: PFIELD      ! real field for complete grid
@@ -77,9 +77,9 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM     ! calling program
-CHARACTER(LEN=10), INTENT(IN) :: HGRID        ! grid type
-CHARACTER(LEN=6),  INTENT(IN) :: HREC         ! name of the parameter
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM     ! calling program
+ CHARACTER(LEN=10), INTENT(IN) :: HGRID        ! grid type
+ CHARACTER(LEN=6),  INTENT(IN) :: HREC         ! name of the parameter
 INTEGER,           INTENT(IN) :: KFIELD       ! integer scalar for complete grid
 INTEGER,           INTENT(OUT):: KFIELD_SPLIT ! integer scalar for splitted grid
 !*      0.2   Declarations of local variables

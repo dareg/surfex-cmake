@@ -50,7 +50,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
+ CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PSNG    ! snow fraction over ground
@@ -69,7 +69,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_VAR_NATURE_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF (LSURF_VARS) THEN 

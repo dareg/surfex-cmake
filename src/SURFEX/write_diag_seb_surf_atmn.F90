@@ -65,16 +65,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 !
 INTEGER           :: JSW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -84,7 +84,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SURF_ATM_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 !
 !*       1.     Richardson number :
@@ -360,7 +360,7 @@ END IF
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !

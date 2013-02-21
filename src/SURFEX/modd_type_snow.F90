@@ -35,7 +35,7 @@
 IMPLICIT NONE
 !
 TYPE SURF_SNOW
-CHARACTER(LEN=3)                :: SCHEME    ! snow scheme used
+ CHARACTER(LEN=3)                :: SCHEME    ! snow scheme used
 INTEGER                         :: NLAYER    ! number of layers
 REAL, DIMENSION(:,:,:), POINTER :: WSNOW     ! snow (& liq. water) content (kg/m2)
 REAL, DIMENSION(:,:,:), POINTER :: HEAT      ! heat content                (J/m2)

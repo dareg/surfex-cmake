@@ -126,15 +126,15 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 !
 INTEGER           :: JSV, JSW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -144,7 +144,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -1161,7 +1161,7 @@ ENDIF
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',1,ZHOOK_HANDLE)
 !
 CONTAINS
@@ -1184,8 +1184,8 @@ REAL, DIMENSION(SIZE(XDG,1),NNSOILCARB)  :: ZSOILCARB
 REAL, DIMENSION(SIZE(XDG,1),NNLITTLEVS)  :: ZLIGNIN_STRUC
 REAL, DIMENSION(SIZE(XDG,1),NNLITTER,NNLITTLEVS)  :: ZLITTER
 !
-CHARACTER(LEN=8 ) :: YUNIT
-CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=8 ) :: YUNIT
+ CHARACTER(LEN=4 ) :: YLVL
 INTEGER :: JLAYER, JPATCH, JJ, INI, IWORK, IDEPTH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1336,7 +1336,7 @@ ENDDO
 !
 YRECFM='WR_ISBA'
 YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
 !
 ! * Glacier ice storage (semi-prognostic) (kg/m2)
 !
@@ -1372,7 +1372,7 @@ ENDWHERE
 !
 YRECFM='ASNOW_ISBA'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
 !  
 IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
   !

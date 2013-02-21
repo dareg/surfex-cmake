@@ -61,14 +61,14 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! file type
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! file type
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
-CHARACTER(LEN=10)               :: HSNSURF   ! type of field
+ CHARACTER(LEN=10)               :: HSNSURF   ! type of field
 INTEGER,            INTENT(IN)  :: KPATCH    ! patch number for output scheme
 INTEGER,            INTENT(IN)  :: KL        ! number of points
 TYPE(SURF_SNOW)                 :: TPSNOW    ! snow fields

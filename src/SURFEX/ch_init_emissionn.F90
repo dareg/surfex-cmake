@@ -43,7 +43,7 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
 INTEGER,           INTENT(IN)  :: KLU      ! number of points
 INTEGER,           INTENT(IN)  :: KCH      ! logical unit of input chemistry file
 REAL, DIMENSION(:),INTENT(IN)  :: PRHOA    ! air density
@@ -52,31 +52,31 @@ REAL, DIMENSION(:),INTENT(IN)  :: PRHOA    ! air density
 !
 INTEGER             :: IRESP                 !   File 
 INTEGER             :: ILUOUT                ! output listing logical unit
-CHARACTER (LEN=16)  :: YRECFM                ! management
-CHARACTER (LEN=100) :: YCOMMENT              ! variables
+ CHARACTER (LEN=16)  :: YRECFM                ! management
+ CHARACTER (LEN=100) :: YCOMMENT              ! variables
 INTEGER             :: JSPEC                 ! Loop index for cover data
 INTEGER             :: IIND1,IIND2           ! Indices counter
 !
-CHARACTER(LEN=40)                 :: YSPEC_NAME ! species name
-CHARACTER(LEN=6), DIMENSION(:),ALLOCATABLE :: YEMIS_NAME ! species name
+ CHARACTER(LEN=40)                 :: YSPEC_NAME ! species name
+ CHARACTER(LEN=6), DIMENSION(:),ALLOCATABLE :: YEMIS_NAME ! species name
 INTEGER,DIMENSION(:),ALLOCATABLE  :: INBTIMES! number of emission times array
 INTEGER,DIMENSION(:),ALLOCATABLE  :: ITIMES  ! emission times for a species
 INTEGER,DIMENSION(:),ALLOCATABLE  :: IOFFNDX ! index array of offline emission species
 INTEGER                           :: INBTS   ! number of emission times for a species
 INTEGER                           :: INBOFF  ! Number of offline emissions
 INTEGER                           :: IVERB   ! verbose level
-CHARACTER(LEN=3)                  :: YSURF   ! surface type
+ CHARACTER(LEN=3)                  :: YSURF   ! surface type
 !
 INTEGER           :: IVERSION       ! version of surfex file being read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CH_INIT_EMISSION_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 WRITE(ILUOUT,*) '------ Beginning of CH_INIT_EMISSION ------'
 !
 !* ascendant compatibility
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 !*      2.     Chemical Emission fields
 !              ------------------------

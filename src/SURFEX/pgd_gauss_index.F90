@@ -51,15 +51,15 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM
 LOGICAL,           INTENT(IN)  :: OZS      ! .true. if orography is imposed by atm. model
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=5)            :: YRES_COMP    ! Resolution in file 
-CHARACTER(LEN=6)            :: YFLAG
+ CHARACTER(LEN=5)            :: YRES_COMP    ! Resolution in file 
+ CHARACTER(LEN=6)            :: YFLAG
 INTEGER                     :: ILUOUT       ! output listing logical unit
 LOGICAL                     :: LNOPERFORM
 !
@@ -67,17 +67,17 @@ LOGICAL                     :: LNOPERFORM
 !            -----------------------
 !
 LOGICAL                  :: LINDEX_STORE      ! Store index in a binary file
-CHARACTER(LEN=28)        :: YINDEX_1KM        ! file name for gauss index at 1km
-CHARACTER(LEN=28)        :: YINDEX_10KM       ! file name for gauss index at 10km
-CHARACTER(LEN=28)        :: YINDEX_100KM      ! file name for gauss index at 100km
-CHARACTER(LEN=28)        :: YCOVER            ! file name for cover types
-CHARACTER(LEN=28)        :: YZS               ! file name for orography
-CHARACTER(LEN=28)        :: YSAND             ! file name for sand fraction
-CHARACTER(LEN=28)        :: YCLAY             ! file name for clay fraction
-CHARACTER(LEN=28)        :: YCTI              ! file name for topographic index
-CHARACTER(LEN=28)        :: YPERM             ! file name for permafrost map
-CHARACTER(LEN=28)        :: YSOC_TOP          ! file name for organic carbon
-CHARACTER(LEN=28)        :: YSOC_SUB          ! file name for organic carbon
+ CHARACTER(LEN=28)        :: YINDEX_1KM        ! file name for gauss index at 1km
+ CHARACTER(LEN=28)        :: YINDEX_10KM       ! file name for gauss index at 10km
+ CHARACTER(LEN=28)        :: YINDEX_100KM      ! file name for gauss index at 100km
+ CHARACTER(LEN=28)        :: YCOVER            ! file name for cover types
+ CHARACTER(LEN=28)        :: YZS               ! file name for orography
+ CHARACTER(LEN=28)        :: YSAND             ! file name for sand fraction
+ CHARACTER(LEN=28)        :: YCLAY             ! file name for clay fraction
+ CHARACTER(LEN=28)        :: YCTI              ! file name for topographic index
+ CHARACTER(LEN=28)        :: YPERM             ! file name for permafrost map
+ CHARACTER(LEN=28)        :: YSOC_TOP          ! file name for organic carbon
+ CHARACTER(LEN=28)        :: YSOC_SUB          ! file name for organic carbon
 !
 LOGICAL                  :: LIMP_COVER        ! Imposed values for Cover from another PGD file
 LOGICAL                  :: LIMP_ZS           ! Imposed orography from another PGD file
@@ -104,13 +104,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_GAUSS_INDEX',0,ZHOOK_HANDLE)
 YRES_COMP='     '
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !*    2.      Read all namelists
 !-------------------------------------------------------------------------------
 !
-CALL READ_NAM_PGD_GAUSS_INDEX(HPROGRAM,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,  &
+ CALL READ_NAM_PGD_GAUSS_INDEX(HPROGRAM,LINDEX_STORE,YINDEX_1KM,YINDEX_10KM,  &
                               YINDEX_100KM,YCOVER,YZS,YCLAY,YSAND,YCTI,      &
                               YPERM,YSOC_TOP,YSOC_SUB,                       &
                               LIMP_COVER,LIMP_ZS,LIMP_CLAY,LIMP_SAND,        &

@@ -62,21 +62,21 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
-CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
 LOGICAL, OPTIONAL, INTENT(OUT) :: ONOVALUE  ! flag for the not given value
 !
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=6)              :: YFILETYPE ! type of input file
-CHARACTER(LEN=28)             :: YFILE     ! name of file
-CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
-CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
+ CHARACTER(LEN=6)              :: YFILETYPE ! type of input file
+ CHARACTER(LEN=28)             :: YFILE     ! name of file
+ CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
+ CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN  ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:) :: ZFIELDOUT ! field interpolated   horizontally
 INTEGER                       :: ILUOUT    ! output listing logical unit
@@ -90,9 +90,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.     Reading of input file name and type
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_FLAKE_FIELD',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL READ_PREP_FLAKE_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+ CALL READ_PREP_FLAKE_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                           HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
 !
 CMASK = 'WATER'

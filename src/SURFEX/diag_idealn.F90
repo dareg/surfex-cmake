@@ -37,7 +37,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PQS
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0      ! rough. length wind  (m)

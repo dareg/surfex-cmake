@@ -53,8 +53,8 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 INTEGER           :: JCAT,JSTP ! loop control
 INTEGER           :: IUNIT     ! file unit numbers
-CHARACTER(LEN=28) :: YFILE     ! file name
-CHARACTER(LEN=40) :: YFORM     ! Writing format
+ CHARACTER(LEN=28) :: YFILE     ! file name
+ CHARACTER(LEN=40) :: YFORM     ! Writing format
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_BUDGET_COUPL_ROUT',0,ZHOOK_HANDLE)
@@ -118,7 +118,7 @@ ENDDO !JCAT
 YFORM='(i6,10f15.1)'
 YFILE=TRIM('bilan_tot.txt')
 !
-CALL OPEN_FILE('ASCII ',IUNIT,HFILE=YFILE,HFORM='FORMATTED',HACTION='WRITE')
+ CALL OPEN_FILE('ASCII ',IUNIT,HFILE=YFILE,HFORM='FORMATTED',HACTION='WRITE')
 !   
 WRITE(IUNIT,*) '     T','         ',YB_VAR(1),'         ',YB_VAR(2),'         ',&
                                     YB_VAR(3),'         ',YB_VAR(4),'         ',&
@@ -130,7 +130,7 @@ DO JSTP=1,NNB_TOPD_STEP
   WRITE(IUNIT,YFORM) JSTP,XB_VAR_TOT(JSTP,1:10)
 ENDDO
 !
-CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL CLOSE_FILE('ASCII ',IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_BUDGET_COUPL_ROUT',1,ZHOOK_HANDLE)
 !

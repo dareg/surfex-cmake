@@ -38,9 +38,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
@@ -49,7 +49,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
 !CHARACTER(LEN=6)              :: YINMODEL ! model from which GRIB file originates
 REAL, DIMENSION(:),       POINTER :: ZFIELD   ! field read
-CHARACTER(LEN=28) :: YNCVAR
+ CHARACTER(LEN=28) :: YNCVAR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------

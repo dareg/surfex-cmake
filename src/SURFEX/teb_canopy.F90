@@ -133,7 +133,7 @@ DO JLAYER=1,KLVL
   ZDENSITY(:,JLAYER) = PWALL_O_HOR(:)
 ENDDO  
 !
-CALL CANOPY(KI, KLVL, PZF, PDZ, PBLD_HEIGHT, ZDENSITY, ZCDRAG, PU, ZAIRVOL, &
+ CALL CANOPY(KI, KLVL, PZF, PDZ, PBLD_HEIGHT, ZDENSITY, ZCDRAG, PU, ZAIRVOL, &
             ZSV, ZFORC, PFORC_U, PDFORC_UDU, PFORC_E, PDFORC_EDE      )
 !
 !-------------------------------------------------------------------------------------

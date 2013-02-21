@@ -36,12 +36,12 @@ TYPE TRIP_t
 !
 ! TRIP Options:
 !
-CHARACTER(LEN=3)               :: CGROUNDW    !Use groundwater scheme
+ CHARACTER(LEN=3)               :: CGROUNDW    !Use groundwater scheme
                                               !'DEF' = No groundwater scheme
                                               !'CST' = Constant transfert time
                                               !'VAR' = Textural dependence of transfert time 
 !
-CHARACTER(LEN=3)               :: CVIT        !Type of stream flow velocity
+ CHARACTER(LEN=3)               :: CVIT        !Type of stream flow velocity
                                               !'DEF' = Constant velocit = 0.5m/s
                                               !'VAR' = variable velocity
 !
@@ -112,9 +112,9 @@ END TYPE TRIP_t
 !
 TYPE(TRIP_t), ALLOCATABLE, TARGET, SAVE :: TRIP_MODEL(:)
 !
-CHARACTER(LEN=3), POINTER        :: CGROUNDW=>NULL()
+ CHARACTER(LEN=3), POINTER        :: CGROUNDW=>NULL()
 !$OMP THREADPRIVATE(CGROUNDW)
-CHARACTER(LEN=3), POINTER        :: CVIT=>NULL()
+ CHARACTER(LEN=3), POINTER        :: CVIT=>NULL()
 !$OMP THREADPRIVATE(CVIT)
 !
 LOGICAL, POINTER                 :: LFLOODT=>NULL()

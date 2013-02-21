@@ -58,15 +58,15 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YLVLV, YPAS
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YLVLV, YPAS
 !
 INTEGER           :: JL, JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -75,7 +75,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_PGD_GRDN_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !* Leaf Area Index
 !
@@ -95,14 +95,14 @@ ENDIF
 YRECFM='GD_VEG'
 YCOMMENT='vegetation fraction (-)'
 !
-CALL WRITE_SURF(HPROGRAM,YRECFM,XVEG(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XVEG(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Surface roughness length (without snow)
 !
 YRECFM='GD_Z0VEG'
 YCOMMENT='surface roughness length (without snow) (M)'
 !
-CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -149,27 +149,27 @@ END DO
 !
 YRECFM='GD_RSMIN'
 YCOMMENT='minimum stomatal resistance (SM-1)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XRSMIN(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XRSMIN(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GD_GAMMA'
 YCOMMENT='coefficient for RSMIN calculation (-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XGAMMA(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XGAMMA(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GD_CV'
 YCOMMENT='vegetation thermal inertia coefficient (-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XCV(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XCV(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GD_RGL'
 YCOMMENT='maximum solar radiation usable in photosynthesis (-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XRGL(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XRGL(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GD_EMIS_ISBA'
 YCOMMENT='surface emissivity (-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XEMIS(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XEMIS(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GD_WRMAX_CF'
 YCOMMENT='coefficient for maximum water interception (-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XWRMAX_CF(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XWRMAX_CF(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -220,7 +220,7 @@ END IF
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_PGD_GRDN_N',1,ZHOOK_HANDLE)
 !
 !

@@ -67,7 +67,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: OCH_EMIS     ! emission flag
 !
 !
@@ -79,23 +79,23 @@ INTEGER                           :: ILUNAM    ! namelist file logical unit
 LOGICAL                           :: GFOUND    ! flag when namelist is present
 INTEGER                           :: JSPEC     ! loop counter on emission species
 INTEGER                           :: JSNAP     ! loop counter on SNAP categories
-CHARACTER(LEN=5)                  :: YSNAP_TIME_REF ! to check if all snaps use
+ CHARACTER(LEN=5)                  :: YSNAP_TIME_REF ! to check if all snaps use
 !                                                   ! the same time  reference
 !
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-CHARACTER(LEN=6),  DIMENSION(JPEMISMAX):: CEMIS_NAME
-CHARACTER(LEN=40), DIMENSION(JPEMISMAX):: CEMIS_COMMENT
-CHARACTER(LEN=28), DIMENSION(JPEMISMAX):: CSNAP_MONTHLY_FILE
-CHARACTER(LEN=28), DIMENSION(JPEMISMAX):: CSNAP_DAILY_FILE
-CHARACTER(LEN=28), DIMENSION(JPEMISMAX):: CSNAP_HOURLY_FILE
-CHARACTER(LEN=50), DIMENSION(JPEMISMAX,JPSNAPMAX):: CSNAP_POTENTIAL_FILE
-CHARACTER(LEN=6),  DIMENSION(JPEMISMAX)          :: CSNAP_POTENTIAL_FILETYPE
+ CHARACTER(LEN=6),  DIMENSION(JPEMISMAX):: CEMIS_NAME
+ CHARACTER(LEN=40), DIMENSION(JPEMISMAX):: CEMIS_COMMENT
+ CHARACTER(LEN=28), DIMENSION(JPEMISMAX):: CSNAP_MONTHLY_FILE
+ CHARACTER(LEN=28), DIMENSION(JPEMISMAX):: CSNAP_DAILY_FILE
+ CHARACTER(LEN=28), DIMENSION(JPEMISMAX):: CSNAP_HOURLY_FILE
+ CHARACTER(LEN=50), DIMENSION(JPEMISMAX,JPSNAPMAX):: CSNAP_POTENTIAL_FILE
+ CHARACTER(LEN=6),  DIMENSION(JPEMISMAX)          :: CSNAP_POTENTIAL_FILETYPE
 REAL,              DIMENSION(JPEMISMAX,JPSNAPMAX):: XUNIF_SNAP
-CHARACTER(LEN=50)                                :: CDELTA_LEGAL_TIME_FILE
-CHARACTER(LEN=6)                                 :: CDELTA_LEGAL_TIME_FILETYPE
+ CHARACTER(LEN=50)                                :: CDELTA_LEGAL_TIME_FILE
+ CHARACTER(LEN=6)                                 :: CDELTA_LEGAL_TIME_FILETYPE
 REAL                                             :: XUNIF_DELTA_LEGAL_TIME
 INTEGER :: NEMIS_NBR
 INTEGER :: NEMIS_SNAP
@@ -137,7 +137,7 @@ CSNAP_POTENTIAL_FILE(:,:)  = '                           '
 CDELTA_LEGAL_TIME_FILETYPE = '      '
 CDELTA_LEGAL_TIME_FILE     = '                           '
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -145,12 +145,12 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !             -------------------
 !
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_CH_SNAP_EMIS_PGD',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_CH_SNAP_EMIS_PGD',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CH_SNAP_EMIS_PGD)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

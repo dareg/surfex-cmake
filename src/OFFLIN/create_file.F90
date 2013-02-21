@@ -13,16 +13,16 @@ INCLUDE "netcdf.inc"
 !
 ! dummy arguments
 !
-CHARACTER(LEN=*),             INTENT(IN)          :: HFILE
+ CHARACTER(LEN=*),             INTENT(IN)          :: HFILE
 INTEGER, DIMENSION(:),        INTENT(IN)          :: KDIMS
-CHARACTER(LEN=*),DIMENSION(:),INTENT(IN)          :: HNAME_DIM
+ CHARACTER(LEN=*),DIMENSION(:),INTENT(IN)          :: HNAME_DIM
 INTEGER,                      INTENT(INOUT)       :: KFILE_ID
 INTEGER, DIMENSION(:),        INTENT(INOUT)       :: KDIM_ID
 !
 !* local variables
 !
 INTEGER :: IRET,ILEN,JNBDIM,INBDIM
-CHARACTER(LEN=50) :: YFILE
+ CHARACTER(LEN=50) :: YFILE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------
 !

@@ -47,7 +47,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
 LOGICAL,          INTENT(IN)  :: OECOCLIMAP ! T if parameters are computed with ecoclimap
 !                                           ! F if all parameters must be specified
 LOGICAL,          INTENT(IN)  :: OGARDEN    ! T if urban green areas

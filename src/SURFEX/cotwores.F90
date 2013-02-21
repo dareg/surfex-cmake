@@ -91,7 +91,7 @@ IMPLICIT NONE
 !
 !
 REAL,                INTENT(IN)  :: PTSTEP      ! time step
-CHARACTER(LEN=*),    INTENT(IN)  :: HPHOTO      ! Kind of photosynthesis
+ CHARACTER(LEN=*),    INTENT(IN)  :: HPHOTO      ! Kind of photosynthesis
 !                                               ! 'NON'
 !                                               ! 'AGS'
 !                                               ! 'LAI'

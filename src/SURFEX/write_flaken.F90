@@ -51,8 +51,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
 !                                             ! 'ALL' : all fields are written
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -62,13 +62,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_FLAKE_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','FLAKE ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','FLAKE ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
-CALL WRITESURF_FLAKE_CONF_n(HPROGRAM)
-CALL WRITESURF_FLAKE_n(HPROGRAM)
+ CALL WRITESURF_FLAKE_CONF_n(HPROGRAM)
+ CALL WRITESURF_FLAKE_n(HPROGRAM)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.LSELECT) CALL WRITESURF_FLAKE_SBL_n(HPROGRAM,HWRITE)
 !
@@ -77,7 +77,7 @@ IF ((.NOT.LNOWRITE_CANOPY).OR.LSELECT) CALL WRITESURF_FLAKE_SBL_n(HPROGRAM,HWRIT
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_FLAKE_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_FLAKE_n

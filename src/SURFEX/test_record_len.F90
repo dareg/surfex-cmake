@@ -11,11 +11,11 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL,            INTENT(OUT) :: ONOWRITE ! flag for article to be written
 !
-CHARACTER(LEN=12) :: YREC
+ CHARACTER(LEN=12) :: YREC
 INTEGER :: IFIELD,JFIELD
 INTEGER :: ILUOUT  ! listing logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

@@ -93,15 +93,15 @@ REAL, INTENT(IN)                    :: PTSTEP
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PVEGTYPE ! fraction of each vegetation
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HISBA
+ CHARACTER(LEN=*),     INTENT(IN)    :: HISBA
 !                                      HISBA     = FLAG to use Force-Restore or DIFfusion
 !                                      soil heat and mass transfer method
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ISBA
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ISBA
 !                                      HSNOW_ISBA = FLAG to use SNOW3L or not 
 !                                      (or default FR method)
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
 !                                      HSNOWRES  = ISBA-SNOW3L turbulant exchange option
 !                                      'DEF' = Default: Louis (ISBA: Noilhan and Mahfouf 1996)
 !                                      'RIL' = Limit Richarson number under very stable 
@@ -111,7 +111,7 @@ LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow a
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !

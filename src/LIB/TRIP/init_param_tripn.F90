@@ -42,17 +42,17 @@ include 'netcdf.inc'
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*), INTENT(IN) :: HFILE, HTITLE, HTIMEUNIT
+ CHARACTER(LEN=*), INTENT(IN) :: HFILE, HTITLE, HTIMEUNIT
 !
 INTEGER, INTENT(IN)          :: KLUOUT, KLON, KLAT
 !
 !*      0.2    declarations of output variables
 !
-CHARACTER(LEN=nf_max_name), DIMENSION(:), ALLOCATABLE :: YVNAME  !Name of each output variable
-CHARACTER(LEN=nf_max_name), DIMENSION(:), ALLOCATABLE :: YVLNAME !Long name of each output variables
-CHARACTER(LEN=nf_max_name), DIMENSION(:), ALLOCATABLE :: YUNIT   !Unit of each output variable
+ CHARACTER(LEN=nf_max_name), DIMENSION(:), ALLOCATABLE :: YVNAME  !Name of each output variable
+ CHARACTER(LEN=nf_max_name), DIMENSION(:), ALLOCATABLE :: YVLNAME !Long name of each output variables
+ CHARACTER(LEN=nf_max_name), DIMENSION(:), ALLOCATABLE :: YUNIT   !Unit of each output variable
 !
-CHARACTER(LEN=nf_max_name) :: YFILE,YTITLE,YTIMEUNIT
+ CHARACTER(LEN=nf_max_name) :: YFILE,YTITLE,YTIMEUNIT
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE ::  LZLEN
 !
@@ -190,7 +190,7 @@ YFILE     = HFILE(1:LEN_TRIM(HFILE))
 YTITLE    = HTITLE(1:LEN_TRIM(HTITLE))
 YTIMEUNIT = HTIMEUNIT(1:LEN_TRIM(HTIMEUNIT))
 !
-CALL GET_LONLAT_TRIP(KLON,KLAT,ZLON,ZLAT)
+ CALL GET_LONLAT_TRIP(KLON,KLAT,ZLON,ZLAT)
 !
 IF(ALL(.NOT.LZLEN(:)))THEN
    CALL NCCREATE(KLUOUT,YFILE,YTITLE,YTIMEUNIT,YVNAME,YVLNAME,YUNIT,   &
@@ -200,7 +200,7 @@ ELSE
                    ZLON,ZLAT,XTRIP_UNDEF,LNCPRINT,INCID,.FALSE.,NTRIPTAB,LZLEN)  
 ENDIF
 !
-CALL NCCLOSE(KLUOUT,LNCPRINT,YFILE,INCID)
+ CALL NCCLOSE(KLUOUT,LNCPRINT,YFILE,INCID)
 !
 ! * Deallocate netcdf file attributs
 !

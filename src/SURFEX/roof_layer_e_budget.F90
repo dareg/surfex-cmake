@@ -111,7 +111,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PTI_BLD        ! inside building temp.
 REAL, DIMENSION(:), INTENT(IN)    :: PAC_BLD        ! aerodynamical resistance
                                                     ! inside building itself
 REAL,               INTENT(IN)    :: PTSTEP         ! time step
-CHARACTER(LEN=3), INTENT(IN)      :: HBLD           ! Building Energy model 'DEF' or 'BEM'  
+ CHARACTER(LEN=3), INTENT(IN)      :: HBLD           ! Building Energy model 'DEF' or 'BEM'  
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHC_ROOF       ! heat capacity for roof layers
 REAL, DIMENSION(:,:), INTENT(IN)  :: PTC_ROOF       ! thermal conductivity for roof layers
 REAL, DIMENSION(:,:), INTENT(IN)  :: PD_ROOF        ! depth of roof layers
@@ -204,7 +204,7 @@ DO JJ=1,SIZE(ZCHTC_IN_ROOF)
    ZCHTC_IN_ROOF(JJ) = MAX(1., ZCHTC_IN_ROOF(JJ))
 ENDDO
 !
-CALL LAYER_E_BUDGET_GET_COEF( PT_ROOF, PTSTEP, ZIMPL, PHC_ROOF, PTC_ROOF, PD_ROOF, &
+ CALL LAYER_E_BUDGET_GET_COEF( PT_ROOF, PTSTEP, ZIMPL, PHC_ROOF, PTC_ROOF, PD_ROOF, &
                               ZA, ZB, ZC, ZY )
 !
 !
@@ -283,7 +283,7 @@ DO JJ=1,SIZE(PT_ROOF,1)
 ENDDO
 !
 !
-CALL LAYER_E_BUDGET( PT_ROOF, PTSTEP, ZIMPL, PHC_ROOF, PTC_ROOF, PD_ROOF, &
+ CALL LAYER_E_BUDGET( PT_ROOF, PTSTEP, ZIMPL, PHC_ROOF, PTC_ROOF, PD_ROOF, &
                      ZA, ZB, ZC, ZY, PDQS_ROOF )
 !
 !-------------------------------------------------------------------------------

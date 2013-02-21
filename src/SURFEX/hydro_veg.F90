@@ -73,7 +73,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HRAIN   ! Rainfall spatial distribution
+ CHARACTER(LEN=*),     INTENT(IN)   :: HRAIN   ! Rainfall spatial distribution
                                               ! 'DEF' = No rainfall spatial distribution
                                               ! 'SGH' = Rainfall exponential spatial distribution
                                               ! 

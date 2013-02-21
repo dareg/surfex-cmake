@@ -52,11 +52,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !                                   
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM    ! Type of program
-CHARACTER(LEN=28),   INTENT(OUT)   :: HZS         ! file name for orography
-CHARACTER(LEN=6),    INTENT(OUT)   :: HFILETYPE   ! data file type
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM    ! Type of program
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HZS         ! file name for orography
+ CHARACTER(LEN=6),    INTENT(OUT)   :: HFILETYPE   ! data file type
 REAL,                INTENT(OUT)   :: PUNIF_ZS    ! uniform orography
-CHARACTER(LEN=3),    INTENT(OUT)   :: HOROGTYPE   ! orogpraphy type 
+ CHARACTER(LEN=3),    INTENT(OUT)   :: HOROGTYPE   ! orogpraphy type 
 REAL,                INTENT(OUT)   :: PENV        ! parameter for enveloppe orography:
 LOGICAL,             INTENT(OUT)   :: OIMP_ZS     ! Imposed orography from another PGD file
 !                                  
@@ -71,10 +71,10 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=28)        :: YZS         ! file name for orography
-CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
+ CHARACTER(LEN=28)        :: YZS         ! file name for orography
+ CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
-CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
+ CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
 !                                       ! 'SIL' : silhouette orography
 !                                       ! 'ENV' : enveloppe orography
@@ -99,19 +99,19 @@ COROGTYPE      = 'ENV'
 XENV           = 0.
 LIMP_ZS        = .FALSE.
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_ZS',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_ZS',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_ZS)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

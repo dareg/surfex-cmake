@@ -59,7 +59,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 
 !
 !*       0.2   Declarations of local variables
@@ -78,7 +78,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('READ_FLAKE_CONF_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IMI=GET_CURRENT_MODEL_INDEX_SURFEX()
 !

@@ -50,10 +50,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM  ! host model
+ CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM  ! host model
 INTEGER,                      INTENT(IN   ) :: KLUOUT
 INTEGER,                      INTENT(IN   ) :: KPTS
-CHARACTER(LEN=*),             INTENT(IN   ) :: HNAME
+ CHARACTER(LEN=*),             INTENT(IN   ) :: HNAME
 REAL, DIMENSION(:,:),         INTENT(INOUT) :: PFIELD
 !
 REAL, DIMENSION(:  ), OPTIONAL, INTENT(IN) :: PDEF 

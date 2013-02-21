@@ -49,14 +49,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
 INTEGER,                INTENT(IN)    :: KLU        ! number of points
 LOGICAL,                INTENT(IN)    :: OREAD      ! flag to read the grid
 INTEGER,                INTENT(IN)    :: KSIZE      ! estimated size of PGRID_PAR
 REAL, DIMENSION(KSIZE), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                INTENT(OUT)   :: KRESP      ! error return code
-CHARACTER(LEN=1),       INTENT(IN)    :: HDIR       ! reading directive
+ CHARACTER(LEN=1),       INTENT(IN)    :: HDIR       ! reading directive
 !                                                   ! 'A' : all field
 !                                                   ! 'H' : field on this processor only
 !
@@ -79,18 +79,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_LONLATVAL',0,ZHOOK_HANDLE)
-CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
-CALL READ_SURF(HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
 !
-CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
-CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !
 !*       4.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_LONLATVAL(ZGRID_PAR,ZX,ZY,ZDX,ZDY)
+ CALL PUT_GRIDTYPE_LONLATVAL(ZGRID_PAR,ZX,ZY,ZDX,ZDY)
 !
 !---------------------------------------------------------------------------
 IF (OREAD) THEN

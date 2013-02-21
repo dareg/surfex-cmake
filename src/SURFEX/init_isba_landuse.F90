@@ -61,7 +61,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 !
 !
 !*       0.2   Declarations of local variables
@@ -80,7 +80,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_LANDUSE',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -93,16 +93,16 @@ ENDIF
 ! Conserve mass in the cell
 !-------------------------------------------------------------------------------
 !
-CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'WR      ', XWR     (:,:),0)
+ CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'WR      ', XWR     (:,:),0)
 
-CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'ICE_STO ', XICE_STO(:,:),0)
+ CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'ICE_STO ', XICE_STO(:,:),0)
 !
 DO JLAYER=1,SIZE(XTG,2)
    CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'TEMP GRO', XTG(:,JLAYER,:),0)
 END DO
 !
 !
-CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'ALBSNOW ', TSNOW%ALB(:,:),0)
+ CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'ALBSNOW ', TSNOW%ALB(:,:),0)
 !
 IF (TSNOW%SCHEME=='1-L'  .OR. TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
    CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'EMISSNOW', TSNOW%EMIS(:,:),0)    
@@ -162,14 +162,14 @@ ENDIF
 WHERE(ZZDG(:,:,:)    >1.E+10)ZZDG    (:,:,:)=0.
 WHERE(ZZDG_OLD(:,:,:)>1.E+10)ZZDG_OLD(:,:,:)=0.
 !
-CALL CONSERV_GLOBAL_MASS(ILUOUT,ZZDG,ZZDG_OLD,XWG, ZWG_OLD )
-CALL CONSERV_GLOBAL_MASS(ILUOUT,ZZDG,ZZDG_OLD,XWGI,ZWGI_OLD)
+ CALL CONSERV_GLOBAL_MASS(ILUOUT,ZZDG,ZZDG_OLD,XWG, ZWG_OLD )
+ CALL CONSERV_GLOBAL_MASS(ILUOUT,ZZDG,ZZDG_OLD,XWGI,ZWGI_OLD)
 !
 !-------------------------------------------------------------------------------
 ! Extrapolation with 3 pts 
 !-------------------------------------------------------------------------------
 !
-CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'RESA    ', XRESA(:,:),3)
+ CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'RESA    ', XRESA(:,:),3)
 !
 DO JLAYER=1,TSNOW%NLAYER
    CALL INI_VAR_FROM_PATCH(HPROGRAM,ILUOUT,'RHOSNOW ', TSNOW%RHO  (:,JLAYER,:),3)

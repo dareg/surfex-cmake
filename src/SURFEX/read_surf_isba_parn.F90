@@ -15,8 +15,8 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*),        INTENT(IN) :: HREC   ! name of the article to be read
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),        INTENT(IN) :: HREC   ! name of the article to be read
 !
 INTEGER,                 INTENT(IN) :: KLUOUT
 INTEGER,                 INTENT(IN) :: KSIZE
@@ -24,8 +24,8 @@ REAL, DIMENSION(:,:),    INTENT(OUT):: PFIELD ! array containing the data field
 
 INTEGER                  ,INTENT(OUT) :: KRESP      ! KRESP  : return-code if a problem appears
 INTEGER, INTENT(IN) :: KVERSION
-CHARACTER(LEN=*),OPTIONAL,INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
+ CHARACTER(LEN=*),OPTIONAL,INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -36,7 +36,7 @@ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 REAL, DIMENSION(KSIZE, NVEGTYPE)  :: ZFIELD
 REAL, DIMENSION(SIZE(PFIELD,1),1,NPATCH) :: ZFIELD_PATCH
 REAL, DIMENSION(SIZE(PFIELD,1),1,NVEGTYPE) :: ZFIELD_VEGTYPE
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER :: INI, JPATCH, IPATCH, JVEGTYPE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

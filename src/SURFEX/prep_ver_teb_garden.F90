@@ -196,7 +196,7 @@ IF (CISBA=='DIF') THEN
 ELSE
   IDEEP_SOIL = 2
 END IF
-CALL PREP_VER_SNOW(TSNOW,XZS_LS,XZS,SPREAD(ZTG_LS,3,1),SPREAD(XTG,3,1),IDEEP_SOIL)
+ CALL PREP_VER_SNOW(TSNOW,XZS_LS,XZS,SPREAD(ZTG_LS,3,1),SPREAD(XTG,3,1),IDEEP_SOIL)
 !
 !-------------------------------------------------------------------------------------
 !

@@ -61,7 +61,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),      INTENT(IN)     :: HPROGRAM ! host program
+ CHARACTER(LEN=6),      INTENT(IN)     :: HPROGRAM ! host program
 INTEGER,               INTENT(IN)     :: KLUOUT   ! output listing
 INTEGER,               INTENT(IN)     :: KNPTS    ! number of points to interpolate with
 INTEGER,DIMENSION(:),  INTENT(INOUT)  :: KCODE    ! code for each point
@@ -101,7 +101,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',0,ZHOOK_HANDLE)
 IL = SIZE(PFIELD,1)
 !
-CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
+ CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
 !
 INEAR_NBR = (2*IHALO+1)**2
 !

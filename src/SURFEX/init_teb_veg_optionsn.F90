@@ -71,7 +71,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 !
 !
 !
@@ -81,11 +81,11 @@ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling s
 INTEGER           :: IVERSION, IBUGFIX  ! surface version
 INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IRESP    ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM   ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM   ! Name of the article to be read
 !
 !
 REAL                              :: ZOUT_TSTEP
-CHARACTER(LEN=3)                  :: YRAIN 
+ CHARACTER(LEN=3)                  :: YRAIN 
 LOGICAL                           :: GCANOPY_DRAG
 LOGICAL                           :: GGLACIER
 LOGICAL                           :: GTRIP
@@ -100,7 +100,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TEB_VEG_OPTIONS_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !               Other little things
 !
@@ -132,9 +132,9 @@ IF (LNAM_READ) THEN
 ENDIF
 !        1.2. Defaults from file header
 !    
-CALL READ_DEFAULT_TEB_VEG_n(HPROGRAM)
+ CALL READ_DEFAULT_TEB_VEG_n(HPROGRAM)
 !
-CALL READ_TEB_VEG_CONF_n(HPROGRAM)
+ CALL READ_TEB_VEG_CONF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 CRESPSL = 'DEF'
@@ -146,10 +146,10 @@ CRESPSL = 'DEF'
 !               ---------------------
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 !*       2.     Initialisation of ISBA options
 !               ------------------------------
@@ -157,7 +157,7 @@ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 YRECFM='TWN_ISBA'
 IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_ISBA'
-CALL READ_SURF(HPROGRAM,YRECFM,CISBA,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,CISBA,IRESP)
 !
 IF (IVERSION>=7) THEN
   !
@@ -171,11 +171,11 @@ ENDIF
 !
 YRECFM='TWN_PHOTO'
 IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_PHOTO'
-CALL READ_SURF(HPROGRAM,YRECFM,CPHOTO,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,CPHOTO,IRESP)
 !
 YRECFM='TWN_LAYER'
 IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_LAYER'
-CALL READ_SURF(HPROGRAM,YRECFM,NGROUND_LAYER,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,NGROUND_LAYER,IRESP)
 !
 !* new radiative transfert
 !

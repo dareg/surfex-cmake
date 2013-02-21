@@ -67,19 +67,19 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     
 LOGICAL,             INTENT(OUT)   :: OINDEX_STORE
-CHARACTER(LEN=28),   INTENT(OUT)   :: HINDEX_1KM
-CHARACTER(LEN=28),   INTENT(OUT)   :: HINDEX_10KM
-CHARACTER(LEN=28),   INTENT(OUT)   :: HINDEX_100KM
-CHARACTER(LEN=28),   INTENT(OUT)   :: HCOVER
-CHARACTER(LEN=28),   INTENT(OUT)   :: HZS
-CHARACTER(LEN=28),   INTENT(OUT)   :: HCLAY
-CHARACTER(LEN=28),   INTENT(OUT)   :: HSAND
-CHARACTER(LEN=28),   INTENT(OUT)   :: HCTI
-CHARACTER(LEN=28),   INTENT(OUT)   :: HPERM
-CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_TOP
-CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_SUB
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HINDEX_1KM
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HINDEX_10KM
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HINDEX_100KM
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HCOVER
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HZS
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HCLAY
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HSAND
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HCTI
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HPERM
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_TOP
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_SUB
 LOGICAL,             INTENT(OUT)   :: OIMP_COVER
 LOGICAL,             INTENT(OUT)   :: OIMP_ZS
 LOGICAL,             INTENT(OUT)   :: OIMP_CLAY
@@ -109,8 +109,8 @@ LOGICAL                         :: GFOUND    ! flag when namelist is present
 !
 REAL, DIMENSION(JPCOVER) :: XUNIF_COVER    ! value of each cover (cover will be
 !                                                   uniform on the horizontal)
-CHARACTER(LEN=28)        :: YCOVER         ! file name for cover types
-CHARACTER(LEN=6)         :: YCOVERFILETYPE ! data file type
+ CHARACTER(LEN=28)        :: YCOVER         ! file name for cover types
+ CHARACTER(LEN=6)         :: YCOVERFILETYPE ! data file type
 REAL                     :: XRM_COVER      ! limit of coverage under which the
                                            ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST      ! limit of coast coverage under which
@@ -128,10 +128,10 @@ LOGICAL                  :: LIMP_COVER     ! Imposed values for Cover from anoth
 !*    0.4    Declaration of orography namelist
 !            ---------------------------------
 !
-CHARACTER(LEN=28)        :: YZS         ! file name for orography
-CHARACTER(LEN=6)         :: YZSFILETYPE ! data file type
+ CHARACTER(LEN=28)        :: YZS         ! file name for orography
+ CHARACTER(LEN=6)         :: YZSFILETYPE ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
-CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
+ CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 REAL                     :: XENV        ! parameter for enveloppe orography:
 LOGICAL                  :: LIMP_ZS     ! Imposed orography from another PGD file
 !
@@ -140,26 +140,26 @@ LOGICAL                  :: LIMP_ZS     ! Imposed orography from another PGD fil
 !
 INTEGER                  :: NPATCH           ! number of patches
 INTEGER                  :: NGROUND_LAYER    ! number of soil layers
-CHARACTER(LEN=3)         :: CISBA            ! ISBA option
-CHARACTER(LEN=4)         :: CPEDOTF          !
-CHARACTER(LEN=3)         :: CPHOTO           ! photosynthesis option
+ CHARACTER(LEN=3)         :: CISBA            ! ISBA option
+ CHARACTER(LEN=4)         :: CPEDOTF          !
+ CHARACTER(LEN=3)         :: CPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
 REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
-CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
-CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
-CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
-CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
-CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
-CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
-CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon
-CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon
-CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
-CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
-CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
-CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
-CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
-CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
-CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
+ CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
+ CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
+ CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
+ CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
+ CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
+ CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+ CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon
+ CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon
+ CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
+ CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
+ CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
+ CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
+ CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
+ CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
+ CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand from another PGD file
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay from another PGD file
 LOGICAL                  :: LIMP_CTI         ! Imposed values for topographic index statistics from another PGD file
@@ -176,10 +176,10 @@ REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil layer thickness for DIF
 !
 ! NO flux
 !
-CHARACTER(LEN=28)        :: YPH           ! file name for pH
-CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
-CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
-CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+ CHARACTER(LEN=28)        :: YPH           ! file name for pH
+ CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+ CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+ CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
 REAL                     :: XUNIF_PH      ! uniform value of pH
 REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
@@ -189,9 +189,9 @@ REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 LOGICAL                  :: LINDEX_STORE
 LOGICAL                  :: LSTOP_PGD
 !
-CHARACTER(LEN=28)        :: YINDEX_1KM        ! file name for gauss index at 1km
-CHARACTER(LEN=28)        :: YINDEX_10KM       ! file name for gauss index at 10km
-CHARACTER(LEN=28)        :: YINDEX_100KM      ! file name for gauss index at 100km
+ CHARACTER(LEN=28)        :: YINDEX_1KM        ! file name for gauss index at 1km
+ CHARACTER(LEN=28)        :: YINDEX_10KM       ! file name for gauss index at 10km
+ CHARACTER(LEN=28)        :: YINDEX_100KM      ! file name for gauss index at 100km
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_GAUSS_INDEX/ LINDEX_STORE, LSTOP_PGD, YINDEX_1KM, YINDEX_10KM, YINDEX_100KM
@@ -211,19 +211,19 @@ YINDEX_100KM    = '                          '
 !
 XUNIF_COVER(:) = XUNDEF
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Read gauss index namelists
 !             --------------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_GAUSS_INDEX',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_GAUSS_INDEX',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_GAUSS_INDEX)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -232,13 +232,13 @@ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 ! Cover
 !
-CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YCOVERFILETYPE, XUNIF_COVER,  &
+ CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YCOVERFILETYPE, XUNIF_COVER,  &
                           XRM_COVER, XRM_COAST, XRM_LAKE, XRM_SEA,        &
                           LORCA_GRID, XLAT_ANT, LIMP_COVER                )  
 !
 ! Orography
 !
-CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YZSFILETYPE, XUNIF_ZS, &
+ CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YZSFILETYPE, XUNIF_ZS, &
                               COROGTYPE, XENV, LIMP_ZS   )  
 !
 ! Nature field

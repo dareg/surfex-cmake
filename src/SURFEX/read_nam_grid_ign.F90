@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -74,7 +74,7 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZDY      ! Y grid mesh size
 !*       0.3   Declarations of namelist
 !              ------------------------
 !
-CHARACTER(LEN=3) :: CLAMBERT  ! Lambert type
+ CHARACTER(LEN=3) :: CLAMBERT  ! Lambert type
 INTEGER :: NPOINTS  ! number of points
 REAL, DIMENSION(100000) :: XX  ! X coordinate of grid mesh center (in meters)
 REAL, DIMENSION(100000) :: XY  ! Y coordinate of grid mesh center (in meters)
@@ -107,9 +107,9 @@ NAMELIST/NAM_IGN/CLAMBERT,NPOINTS,XX,XY,XDX,XDY,      &
 !*       1.    opening of namelist
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_IGN',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 XX_LLCORNER = XUNDEF
 XY_LLCORNER = XUNDEF
@@ -122,11 +122,11 @@ NROWS = 0
 !*       2.    Reading of projection parameters
 !              --------------------------------
 !
-CALL POSNAM(ILUNAM,'NAM_IGN',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_IGN',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_IGN)
 !
 !---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !---------------------------------------------------------------------------
 !
 !*       3.    Initialisation for a regular grid
@@ -191,7 +191,7 @@ ZDY(:) = XDY(:KL)
 !*       5.    Lambert type
 !              ------------
 !
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CLAMBERT',CLAMBERT,'L1 ','L2 ','L3 ',&
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CLAMBERT',CLAMBERT,'L1 ','L2 ','L3 ',&
                          'L4 ','L2E','L93' )  
 !
 SELECT CASE (CLAMBERT)
@@ -216,14 +216,14 @@ END SELECT
 !
 ALLOCATE(ZXALL(KL*3))
 ALLOCATE(ZYALL(KL*3))
-CALL GET_XYALL_IGN(ZX,ZY,ZDX,ZDY,ZXALL,ZYALL,IDIMX,IDIMY)
+ CALL GET_XYALL_IGN(ZX,ZY,ZDX,ZDY,ZXALL,ZYALL,IDIMX,IDIMY)
 !
 !---------------------------------------------------------------------------
 !
 !*       8.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_IGN(ZGRID_PAR,ILAMBERT,ZX,ZY,ZDX,ZDY,        &
+ CALL PUT_GRIDTYPE_IGN(ZGRID_PAR,ILAMBERT,ZX,ZY,ZDX,ZDY,        &
                       IDIMX,IDIMY,ZXALL(1:IDIMX),ZYALL(1:IDIMY))
 !
 !---------------------------------------------------------------------------

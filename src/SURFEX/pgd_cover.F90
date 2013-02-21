@@ -89,7 +89,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -115,10 +115,10 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
 REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER
 REAL, DIMENSION(JPCOVER)         :: ZDEF
-CHARACTER(LEN=10)                :: YFIELD
+ CHARACTER(LEN=10)                :: YFIELD
 !
-CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
-CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
+ CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
+ CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
 REAL                     :: XRM_COVER   ! limit of coverage under which the
                                         ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST   ! limit of coast coverage under which
@@ -146,7 +146,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_COVER',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ALLOCATE(XCOVER  (NL,JPCOVER))
 ALLOCATE(XUNIF_COVER(JPCOVER))
@@ -158,7 +158,7 @@ XUNIF_COVER = XUNDEF
 !*    2.      Input file for cover types
 !             --------------------------
 !
-CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YFILETYPE, XUNIF_COVER,  &
+ CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YFILETYPE, XUNIF_COVER,  &
                           XRM_COVER, XRM_COAST, XRM_LAKE, XRM_SEA,   &
                           LORCA_GRID, XLAT_ANT, LIMP_COVER           )  
 !

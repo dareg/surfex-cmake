@@ -47,7 +47,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
 LOGICAL,          INTENT(IN)  :: OECOCLIMAP ! T if parameters are computed with ecoclimap
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                           ! F if all parameters must be specified

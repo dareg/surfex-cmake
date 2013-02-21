@@ -63,7 +63,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
 !
@@ -79,7 +79,7 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_N',0,ZHOOK_HANDLE)
 !*       1. Full surface
 !           ------------
 !
-CALL PUT_ZS_SURF_ATM_n(HPROGRAM,KI,PZS)
+ CALL PUT_ZS_SURF_ATM_n(HPROGRAM,KI,PZS)
 !
 !*       2. inland water
 !           ------------
@@ -109,7 +109,7 @@ SUBROUTINE PACK_ZS(KSIZE,KMASK,YTYPE)
 !
 INTEGER, INTENT(IN)               :: KSIZE
 INTEGER, POINTER, DIMENSION(:)    :: KMASK
-CHARACTER(LEN=1), INTENT(IN)      :: YTYPE
+ CHARACTER(LEN=1), INTENT(IN)      :: YTYPE
 !
 REAL, DIMENSION(KSIZE) :: ZP_ZS
 INTEGER :: JJ

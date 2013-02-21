@@ -48,15 +48,15 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
-CHARACTER(LEN=5),  INTENT(IN)  :: HACTION    
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
+ CHARACTER(LEN=5),  INTENT(IN)  :: HACTION    
 !
 INTEGER                        :: ILU,IRET, IL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT('ASCII ',NLUOUT)
+ CALL GET_LUOUT('ASCII ',NLUOUT)
 !
 !$OMP BARRIER
 !
@@ -106,12 +106,12 @@ ENDIF
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
-CALL GET_SIZE_FULL_n('ASCII ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n('ASCII ',NFULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU
-CALL GET_TYPE_DIM_n(HMASK,IL)
-CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
+ CALL GET_TYPE_DIM_n(HMASK,IL)
+ CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

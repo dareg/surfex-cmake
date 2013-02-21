@@ -56,7 +56,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -64,15 +64,15 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 
 !
 INTEGER           :: IRESP          ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PRECIP_N',0,ZHOOK_HANDLE)
 YCOMMENT='flag to store precip fields in restart file'
-CALL WRITE_SURF(HPROGRAM,'RW_PRECIP',LRW_PRECIP,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'RW_PRECIP',LRW_PRECIP,IRESP,HCOMMENT=YCOMMENT)
 !
 IF(LRW_PRECIP.AND.LSAVE_PRECIP)THEN
 !

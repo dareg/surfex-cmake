@@ -42,12 +42,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN)         :: HISBA   ! type of ISBA version:
+ CHARACTER(LEN=*), INTENT(IN)         :: HISBA   ! type of ISBA version:
 !                                               ! '2-L' (default)
 !                                               ! '3-L'
 !                                               ! 'DIF'
 !
-CHARACTER(LEN=*), INTENT(IN)         :: HTOPREG ! Wolock and McCabe (2000) linear regression for Topmodel
+ CHARACTER(LEN=*), INTENT(IN)         :: HTOPREG ! Wolock and McCabe (2000) linear regression for Topmodel
                                                 ! 'DEF' = Reg
                                                 ! 'NON'
 !

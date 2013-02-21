@@ -50,7 +50,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: XTNG
 INTEGER, DIMENSION(:), ALLOCATABLE:: NSIZE
 !                          ! Number of points inside each mesh of the domain
 !
-CHARACTER(LEN=3)                  :: CATYPE = 'ARI'
+ CHARACTER(LEN=3)                  :: CATYPE = 'ARI'
 !                          ! Type of averaging:
 !                          ! 'ARI' : arithmetic
 !                          ! 'INV' : inverse

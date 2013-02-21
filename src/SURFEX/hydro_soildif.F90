@@ -135,13 +135,13 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PDRAIN, PHORTON
 !                                      PDRAIN   = drainage (flux out of model base) (kg m-2 s-1)
 !                                      PHORTON  = runoff (due to saturation (lateral) (kg m-2 s-1)
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HHORT    ! Hortonian runoff
+ CHARACTER(LEN=*),     INTENT(IN)    :: HHORT    ! Hortonian runoff
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HKSAT    ! soil hydraulic profil option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HKSAT    ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSOC     ! soil organic carbon profil option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSOC     ! soil organic carbon profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = SOC profile
 !
@@ -461,7 +461,7 @@ ENDDO
 ! Solve Matrix Equation: tridiagonal system: solve for soil
 ! water (volumetric water content) tendencies:
 !
-CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,KWG_LAYER,INL,ZSOL)
+ CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,KWG_LAYER,INL,ZSOL)
 !
 ! 9. Final calculations and diagnostics:
 !    -----------------------------------

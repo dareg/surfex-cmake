@@ -35,10 +35,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 REAL,               INTENT(IN) :: PFIELD   ! the real scalar to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -56,7 +56,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX0_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX0_BIN',1,ZHOOK_HANDLE)
 !
@@ -77,10 +77,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -98,7 +98,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN0_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN0_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFN0_BIN
@@ -118,10 +118,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -139,7 +139,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL0_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL0_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFL0_BIN
@@ -159,10 +159,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
-CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
+ CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -180,7 +180,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFC0_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFC0_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFC0_BIN
@@ -210,11 +210,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
@@ -229,7 +229,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+ CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
 !
 IF (NRANK==NPIO) THEN
   !
@@ -284,11 +284,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
@@ -303,7 +303,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+ CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
 !
 IF (NRANK==NPIO) THEN
   !
@@ -348,11 +348,11 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
@@ -383,7 +383,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN1_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFN1_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFN1_BIN
@@ -403,11 +403,11 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:),  INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
@@ -427,7 +427,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL1_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFL1_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFL1_BIN
@@ -447,13 +447,13 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
 INTEGER,            INTENT(IN)  :: KMONTH   ! month
 INTEGER,            INTENT(IN)  :: KDAY     ! day
 REAL,               INTENT(IN)  :: PTIME    ! time
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
@@ -483,7 +483,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT0_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT0_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFT0_BIN
@@ -503,13 +503,13 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),       INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),       INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KYEAR    ! year
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KMONTH   ! month
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KDAY     ! day
 REAL,    DIMENSION(:,:), INTENT(IN)  :: PTIME    ! time
 INTEGER,                 INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),      INTENT(IN)  :: HCOMMENT ! comment string
+ CHARACTER(LEN=100),      INTENT(IN)  :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -539,7 +539,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT2_BIN',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFT2_BIN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFT2_BIN

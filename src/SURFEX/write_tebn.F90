@@ -53,8 +53,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
 !                                             ! 'ALL' : all fields are written
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -67,26 +67,26 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_TEB_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
-CALL WRITESURF_TEB_CONF_n(HPROGRAM)
+ CALL WRITESURF_TEB_CONF_n(HPROGRAM)
 !
 DO JPATCH=1,NTEB_PATCH
   CALL GOTO_TEB(JPATCH)
   CALL WRITESURF_TEB_n(HPROGRAM,JPATCH,HWRITE)
 END DO
 !     
-CALL GOTO_TEB(1)
+ CALL GOTO_TEB(1)
 IF ((.NOT.LNOWRITE_CANOPY).OR.LSELECT) CALL WRITESURF_TEB_CANOPY_n(HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_TEB_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_TEB_n

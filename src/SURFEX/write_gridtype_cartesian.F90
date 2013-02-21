@@ -46,12 +46,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(IN)  :: KLU        ! number of points
 INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                    INTENT(OUT) :: KRESP      ! error return code
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR       ! type of field :
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR       ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! 'A' : (complete) field with
@@ -70,7 +70,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZY       ! Y conformal coordinate of grid m
 REAL, DIMENSION(:), ALLOCATABLE   :: ZDX      ! X grid mesh size (dim IIMAX)
 REAL, DIMENSION(:), ALLOCATABLE   :: ZDY      ! Y grid mesh size (dim IJMAX)
 !
-CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
+ CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
@@ -83,7 +83,7 @@ ALLOCATE(ZY (KLU))
 ALLOCATE(ZDX(KLU))
 ALLOCATE(ZDY(KLU))
 !
-CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0,           &
+ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0,           &
                               IIMAX,IJMAX,ZX,ZY,ZDX,ZDY        )  
 !
 !---------------------------------------------------------------------------
@@ -92,10 +92,10 @@ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0,           &
 !              -----------------------------------------
 !
 YCOMMENT=' '
-CALL WRITE_SURF(HPROGRAM,'LAT0',ZLAT0,KRESP,YCOMMENT)
-CALL WRITE_SURF(HPROGRAM,'LON0',ZLON0,KRESP,YCOMMENT)
-CALL WRITE_SURF(HPROGRAM,'IMAX ',IIMAX, KRESP,YCOMMENT)
-CALL WRITE_SURF(HPROGRAM,'JMAX ',IJMAX, KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LAT0',ZLAT0,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LON0',ZLON0,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'IMAX ',IIMAX, KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'JMAX ',IJMAX, KRESP,YCOMMENT)
 IF (PRESENT(HDIR)) THEN
   CALL WRITE_SURF(HPROGRAM,'XX',ZX,KRESP,YCOMMENT,HDIR)
   CALL WRITE_SURF(HPROGRAM,'YY',ZY,KRESP,YCOMMENT,HDIR)

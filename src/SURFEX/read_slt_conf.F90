@@ -51,7 +51,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! program calling SLT
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! program calling SLT
 
 !
 !*       0.2   Declarations of local variables
@@ -67,21 +67,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* get output listing file logical unit
 !
 IF (LHOOK) CALL DR_HOOK('READ_SLT_CONF',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !* open namelist file
 !
-CALL OPEN_NAMELIST(HPROGRAM,INAM)
+ CALL OPEN_NAMELIST(HPROGRAM,INAM)
 !
 !* reading of namelist
 !  -------------------
 !
-CALL POSNAM(INAM,'NAM_SURF_SLT',GFOUND,ILUOUT)
+ CALL POSNAM(INAM,'NAM_SURF_SLT',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=INAM,NML=NAM_SURF_SLT)
 !
 !* close namelist file
 !
-CALL CLOSE_NAMELIST(HPROGRAM,INAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,INAM)
 IF (LHOOK) CALL DR_HOOK('READ_SLT_CONF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

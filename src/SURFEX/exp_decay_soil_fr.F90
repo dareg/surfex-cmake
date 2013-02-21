@@ -53,7 +53,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*)                  :: HISBA   ! hydrology/soil:
+ CHARACTER(LEN=*)                  :: HISBA   ! hydrology/soil:
 !                                            ! '2-L'  = single column
 !                                            ! '3-L'  = root zone/baseflow layer
 !                                            ! 'DIF'  = N-layer diffusion: Richard's Eq.

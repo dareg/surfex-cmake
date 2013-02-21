@@ -70,7 +70,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
+ CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 ! Albedo dependance with surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
 !   "DRY " = constant albedo value for dry soil
@@ -118,7 +118,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             -----------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVG_ALBEDO_EMIS_GARDEN',0,ZHOOK_HANDLE)
-CALL ALBEDO(HALBEDO,                                    &
+ CALL ALBEDO(HALBEDO,                                    &
               PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,    &
               PALBVIS_SOIL,PALBNIR_SOIL,PALBUV_SOIL,      &
               PALBVIS_ECO,PALBNIR_ECO,PALBUV_ECO          )  

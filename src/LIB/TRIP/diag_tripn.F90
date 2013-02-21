@@ -71,10 +71,10 @@ REAL,DIMENSION(:,:), INTENT(IN) :: PSOURCE_OLD
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=10), PARAMETER         :: YDIAG ='TRIP_DIAG_'
-CHARACTER(LEN=6)                     :: YTIME
-CHARACTER(LEN=50)                    :: YFILE
-CHARACTER(LEN=10)                    :: YVNAME
+ CHARACTER(LEN=10), PARAMETER         :: YDIAG ='TRIP_DIAG_'
+ CHARACTER(LEN=6)                     :: YTIME
+ CHARACTER(LEN=50)                    :: YFILE
+ CHARACTER(LEN=10)                    :: YVNAME
 !
 REAL,DIMENSION(SIZE(XLEN,1),SIZE(XLEN,2))      :: ZWRITE
 !

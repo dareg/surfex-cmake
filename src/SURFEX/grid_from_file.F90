@@ -51,11 +51,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
-CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! file name
-CHARACTER(LEN=6),  INTENT(IN)   :: HFILETYPE  ! file type
+ CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
+ CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! file name
+ CHARACTER(LEN=6),  INTENT(IN)   :: HFILETYPE  ! file type
 LOGICAL,           INTENT(IN)   :: OGRID      ! .true. if grid is imposed by atm. model
-CHARACTER(LEN=10), INTENT(OUT)  :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=10), INTENT(OUT)  :: HGRID      ! type of horizontal grid
 INTEGER,           INTENT(OUT)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 INTEGER,           INTENT(OUT)  :: KL         ! number of points on processor
@@ -78,52 +78,52 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------
 !
 IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Opening of the file
 !              -------------------
 !
-CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
 !
 !---------------------------------------------------------------------------
 !
 !*       3.    Number of points in this file
 !              -----------------------------
 !
-CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP)
+ CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       4.    Grid type
 !              ---------
 !
-CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRID,IRESP)
+ CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRID,IRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       5.    Reading parameters of the grid
 !              ------------------------------
 !
-CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
+ CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
 !
 ALLOCATE(PGRID_PAR(KGRID_PAR))
-CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
+ CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
 !
 !---------------------------------------------------------------------------
 !
 !*       6.    Closes the file
 !              ---------------
 !
-CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
 !------------------------------------------------------------------------------
 !
 !*       7.    Open namelist
 !              -------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !------------------------------------------------------------------------------
 !
@@ -137,7 +137,7 @@ IF (.NOT. OGRID) CALL GRID_MODIF(ILUOUT,ILUNAM,HGRID,KGRID_PAR,PGRID_PAR,KL)
 !*       9.    Close namelist
 !              --------------
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

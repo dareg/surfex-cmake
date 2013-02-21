@@ -59,7 +59,7 @@ INTEGER, INTENT(IN) :: KI    ! Grid dimensions
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=30)  :: YVAR        ! name of results file
+ CHARACTER(LEN=30)  :: YVAR        ! name of results file
 INTEGER            :: JCAT, JJ, JI, IDX     ! loop control  
 INTEGER            :: II,ILINE ! work integer variables
 INTEGER            :: IDXM     ! indexes of Isba grid meshes and nodes
@@ -72,7 +72,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT('OFFLIN',ILUOUT)
+ CALL GET_LUOUT('OFFLIN',ILUOUT)
 !  
 !WRITE(*,*) 'Y0=', XY0(1), XY0(2)
 !WRITE(*,*) 'X0=', XX0(1), XX0(2)
@@ -130,7 +130,7 @@ WHERE (NMASKT(:,:)/=NUNDEF)
 ELSEWHERE
   ZWRK(:,:)=XUNDEF
 ENDWHERE
-CALL WRITE_FILE_MAP(ZWRK,YVAR)
+ CALL WRITE_FILE_MAP(ZWRK,YVAR)
 !CALL WRITE_FILE_MAP(REAL(NMASKT),YVAR)
 !
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA',1,ZHOOK_HANDLE)

@@ -56,7 +56,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_LONLAT_TRIP',0,ZHOOK_HANDLE)
-CALL GET_GRID_TRIP(XGRID_TRIP,PLON=PLON,PLAT=PLAT)
+ CALL GET_GRID_TRIP(XGRID_TRIP,PLON=PLON,PLAT=PLAT)
 IF (LHOOK) CALL DR_HOOK('GET_LONLAT_TRIP',1,ZHOOK_HANDLE)
 !    
 !---------------------------------------------------------------------------

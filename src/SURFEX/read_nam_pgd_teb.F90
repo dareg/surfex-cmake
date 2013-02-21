@@ -62,11 +62,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM         ! Type of program
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM         ! Type of program
 INTEGER,          INTENT(OUT) :: KTEB_PATCH       ! number of patches
-CHARACTER(LEN=3), INTENT(OUT) :: HBEM             ! to use BEM
-CHARACTER(LEN=6), INTENT(OUT) :: HCOOL_COIL       ! type of cooling coil
-CHARACTER(LEN=6), INTENT(OUT) :: HHEAT_COIL       ! type of heating coil
+ CHARACTER(LEN=3), INTENT(OUT) :: HBEM             ! to use BEM
+ CHARACTER(LEN=6), INTENT(OUT) :: HCOOL_COIL       ! type of cooling coil
+ CHARACTER(LEN=6), INTENT(OUT) :: HHEAT_COIL       ! type of heating coil
 LOGICAL,          INTENT(OUT) :: OAUTOSIZE        ! Flag to activate autosize calculations
 INTEGER,          INTENT(OUT) :: KROAD_LAYER      ! number of road layers
 INTEGER,          INTENT(OUT) :: KROOF_LAYER      ! number of roof layers
@@ -87,9 +87,9 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !            ------------------------
 !
 INTEGER                  :: NTEB_PATCH       ! number of patches
-CHARACTER(LEN=3)         :: CBEM             ! to use BEM
-CHARACTER(LEN=6)         :: CCOOL_COIL       ! type of cooling coil
-CHARACTER(LEN=6)         :: CHEAT_COIL       ! type of heating coil
+ CHARACTER(LEN=3)         :: CBEM             ! to use BEM
+ CHARACTER(LEN=6)         :: CCOOL_COIL       ! type of cooling coil
+ CHARACTER(LEN=6)         :: CHEAT_COIL       ! type of heating coil
 LOGICAL                  :: LAUTOSIZE        ! Flag to activate autosize calculations
 INTEGER                  :: NROAD_LAYER      ! number of road layers
 INTEGER                  :: NROOF_LAYER      ! number of roof layers
@@ -122,19 +122,19 @@ NFLOOR_LAYER       = 5
 LGREENROOF         = .FALSE.
 LHYDRO             = .FALSE.
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_TEB',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_TEB',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_TEB)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

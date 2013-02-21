@@ -51,7 +51,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 !
@@ -74,7 +74,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_WATFLUX_N',0,ZHOOK_HANDLE)
-CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
+ CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
                          XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_WATFLUX_N',1,ZHOOK_HANDLE)
 !

@@ -72,7 +72,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 
 !
 !
@@ -87,18 +87,18 @@ INTEGER,DIMENSION(:),ALLOCATABLE  :: IWATER_STATUS
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=28)        :: YWATER_DEPTH  ! file name for water depth
-CHARACTER(LEN=28)        :: YWATER_DEPTH_STATUS  ! file name for water depth status
-CHARACTER(LEN=28)        :: YWATER_FETCH
-CHARACTER(LEN=28)        :: YT_BS
-CHARACTER(LEN=28)        :: YDEPTH_BS
-CHARACTER(LEN=28)        :: YEXTCOEF_WATER
+ CHARACTER(LEN=28)        :: YWATER_DEPTH  ! file name for water depth
+ CHARACTER(LEN=28)        :: YWATER_DEPTH_STATUS  ! file name for water depth status
+ CHARACTER(LEN=28)        :: YWATER_FETCH
+ CHARACTER(LEN=28)        :: YT_BS
+ CHARACTER(LEN=28)        :: YDEPTH_BS
+ CHARACTER(LEN=28)        :: YEXTCOEF_WATER
 
-CHARACTER(LEN=6)         :: YWATER_DEPTHFILETYPE ! water depth file type
-CHARACTER(LEN=6)         :: YWATER_FETCHFILETYPE
-CHARACTER(LEN=6)         :: YT_BSFILETYPE
-CHARACTER(LEN=6)         :: YDEPTH_BSFILETYPE
-CHARACTER(LEN=6)         :: YEXTCOEF_WATERFILETYPE
+ CHARACTER(LEN=6)         :: YWATER_DEPTHFILETYPE ! water depth file type
+ CHARACTER(LEN=6)         :: YWATER_FETCHFILETYPE
+ CHARACTER(LEN=6)         :: YT_BSFILETYPE
+ CHARACTER(LEN=6)         :: YDEPTH_BSFILETYPE
+ CHARACTER(LEN=6)         :: YEXTCOEF_WATERFILETYPE
 
 REAL                     :: XUNIF_WATER_DEPTH   ! uniform value of water depth
 REAL                     :: XUNIF_WATER_FETCH
@@ -115,7 +115,7 @@ NAMELIST/NAM_DATA_FLAKE/ YWATER_DEPTH, YWATER_DEPTH_STATUS, YWATER_DEPTHFILETYPE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -147,12 +147,12 @@ YEXTCOEF_WATERFILETYPE = '      '
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_DATA_FLAKE',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_DATA_FLAKE',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_FLAKE)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -164,7 +164,7 @@ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !*    4.      Number of points and packing
 !             ----------------------------
 !
-CALL GET_SURF_SIZE_n('WATER ',NDIM)
+ CALL GET_SURF_SIZE_n('WATER ',NDIM)
 !
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XCOVER     (NDIM,JPCOVER))
@@ -173,7 +173,7 @@ ALLOCATE(XLAT       (NDIM))
 ALLOCATE(XLON       (NDIM))
 ALLOCATE(XMESH_SIZE (NDIM))
 !
-CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
+ CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
                 CGRID,  XGRID_PAR,                     &
                 LCOVER, XCOVER, XZS,                   &
                 XLAT, XLON, XMESH_SIZE                 )  
@@ -212,7 +212,7 @@ ENDIF
 !
 ALLOCATE(XWATER_FETCH  (NDIM)) 
 !
-CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,XWATER_FETCH(:))
+ CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,XWATER_FETCH(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -221,7 +221,7 @@ CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUN
 !
 ALLOCATE(XT_BS         (NDIM)) 
 !
-CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,XT_BS(:))
+ CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,XT_BS(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -230,7 +230,7 @@ CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYP
 !
 ALLOCATE(XDEPTH_BS     (NDIM)) 
 !
-CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,XDEPTH_BS(:))
+ CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,XDEPTH_BS(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -239,7 +239,7 @@ CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILE
 
 ALLOCATE(XEXTCOEF_WATER(NDIM)) 
 !
-CALL PGD_FIELD(HPROGRAM,'water extinction coefficient','WAT', &
+ CALL PGD_FIELD(HPROGRAM,'water extinction coefficient','WAT', &
                  YEXTCOEF_WATER,YEXTCOEF_WATERFILETYPE,XUNIF_EXTCOEF_WATER, &
                  XEXTCOEF_WATER(:))  
 !
@@ -248,7 +248,7 @@ CALL PGD_FIELD(HPROGRAM,'water extinction coefficient','WAT', &
 !*   10.     Prints of flake parameters in a tex file
 !            ----------------------------------------
 !
-CALL WRITE_COVER_TEX_WATER
+ CALL WRITE_COVER_TEX_WATER
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

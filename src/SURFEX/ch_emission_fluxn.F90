@@ -58,7 +58,7 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
 REAL,               INTENT(IN)  :: PSIMTIME    ! time of simulation in sec UTC
                                                ! (counting from midnight of
                                                ! the current day)
@@ -79,12 +79,12 @@ INTEGER :: INBTS       ! Number of emission times for a species
 INTEGER :: ITIM1,ITIM2 ! first/last time for interpolation
 INTEGER :: INDX1,INDX2 ! first/next index for data interpolation
 INTEGER :: ISIMTIME, ITPERIOD
-CHARACTER (LEN=16)  :: YRECFM          ! LFI article name
+ CHARACTER (LEN=16)  :: YRECFM          ! LFI article name
 TYPE(PRONOSVAR_T),POINTER :: CURPRONOS !Current pronostic variable
 !
 !*       0.3  declaration of saved local variables
 !
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: CNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: CNAMES
 REAL,DIMENSION(SIZE(PSFSV,1),KNBTS_MAX)     :: ZWORK ! temporary array for reading data
 REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZEMIS ! interpolated in time emission flux
 REAL,DIMENSION(SIZE(PSFSV,1))               :: ZFCO  ! CO flux
@@ -105,7 +105,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !     ---------------------
 !
 IF (LHOOK) CALL DR_HOOK('CH_EMISSION_FLUX_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 LIOINIT = .FALSE.
 IVERB   = 5
 KSIZE1D = SIZE(PSFSV,1)

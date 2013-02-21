@@ -39,25 +39,25 @@ IMPLICIT NONE
 !*    Types of files
 !     --------------
 !
-CHARACTER(LEN=6) :: CSURF_FILETYPE       = 'ASCII ' ! type of SURFEX surface files
+ CHARACTER(LEN=6) :: CSURF_FILETYPE       = 'ASCII ' ! type of SURFEX surface files
 !                                                   ! 'NETDF '
 !                                                   ! 'FA    '
 !                                                   ! 'ASCII '
 !                                                   ! 'LFI   '
-CHARACTER(LEN=6) :: CTIMESERIES_FILETYPE = 'NONE  ' ! type of the files contining the
+ CHARACTER(LEN=6) :: CTIMESERIES_FILETYPE = 'NONE  ' ! type of the files contining the
 !                                                   ! output diagnostic time series
 !                                                   ! 'NETCDF ', 'TEXTE '
-CHARACTER(LEN=6) :: CFORCING_FILETYPE    = 'NETCDF' ! type of atmospheric FORCING files
+ CHARACTER(LEN=6) :: CFORCING_FILETYPE    = 'NETCDF' ! type of atmospheric FORCING files
 !                                                   ! 'NETDF', 'BINARY', or 'ASCII '
 !
 !
 !*    Names of files
 !     --------------
 !
-CHARACTER(LEN=28):: CPGDFILE  ='PGD'          ! name of the PGD file
-CHARACTER(LEN=28):: CPREPFILE ='PREP'         ! name of the INITIAL file
-CHARACTER(LEN=28):: CSURFFILE ='SURFOUT'      ! name of the final output CSURFEX file
-CHARACTER(LEN=28):: CNAMELIST ='OPTIONS.nam'  ! name of namelist file
+ CHARACTER(LEN=28):: CPGDFILE  ='PGD'          ! name of the PGD file
+ CHARACTER(LEN=28):: CPREPFILE ='PREP'         ! name of the INITIAL file
+ CHARACTER(LEN=28):: CSURFFILE ='SURFOUT'      ! name of the final output CSURFEX file
+ CHARACTER(LEN=28):: CNAMELIST ='OPTIONS.nam'  ! name of namelist file
 !
 !
 !*    General flags defining output options
@@ -104,7 +104,7 @@ INTEGER         :: NPROMA                 ! Size of openMP packets
 INTEGER         :: NI,NJ                  ! Domain size
 !
 REAL            :: XIO_FRAC = 1.            ! fraction of ISIZE deduced to I/O
-CHARACTER(LEN=4) :: YALG_MPI = "LIN "       ! type of distribution algorithm for MPI
+ CHARACTER(LEN=4) :: YALG_MPI = "LIN "       ! type of distribution algorithm for MPI
 !-------------------------------------------------------------------------------
 !
 !*       1.    NAMELISTS

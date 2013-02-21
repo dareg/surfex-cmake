@@ -66,7 +66,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_LONLAT_REG',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_LONLAT_REG(PGRID_PAR,ZLONMIN,ZLONMAX,                    &
+ CALL GET_GRIDTYPE_LONLAT_REG(PGRID_PAR,ZLONMIN,ZLONMAX,                    &
                                ZLATMIN,ZLATMAX,ILON,ILAT,PLON=ZLON,PLAT=ZLAT )  
 !
 !-----------------------------------------------------------------------------

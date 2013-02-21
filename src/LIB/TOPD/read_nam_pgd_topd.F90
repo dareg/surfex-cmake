@@ -56,16 +56,16 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)   :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),                   INTENT(IN)   :: HPROGRAM     ! Type of program
 LOGICAL, INTENT(OUT) :: OCOUPL_TOPD
-CHARACTER(LEN=15), DIMENSION(JPCAT),INTENT(OUT)  :: HCAT         ! Names of catchments         
+ CHARACTER(LEN=15), DIMENSION(JPCAT),INTENT(OUT)  :: HCAT         ! Names of catchments         
 REAL, DIMENSION(JPCAT),INTENT(OUT)               :: PF_PARAM_BV
 REAL, DIMENSION(JPCAT),INTENT(OUT)               :: PC_DEPTH_RATIO_BV 
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=15), DIMENSION(JPCAT) :: CCAT
+ CHARACTER(LEN=15), DIMENSION(JPCAT) :: CCAT
 LOGICAL                           :: LCOUPL_TOPD
 REAL, DIMENSION(JPCAT)            :: XF_PARAM_BV
 REAL, DIMENSION(JPCAT)            :: XC_DEPTH_RATIO_BV
@@ -90,20 +90,20 @@ CCAT(:) = '   '
 XF_PARAM_BV(:) = 2.5
 XC_DEPTH_RATIO_BV(:) = 1.
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !CALL OPEN_NAMELIST(HPROGRAM,'SURF  ',ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_PGD_TOPD',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_PGD_TOPD',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PGD_TOPD)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !         2.   Initialises number of catchments and time step variables
 !              -------------------------------------------------------

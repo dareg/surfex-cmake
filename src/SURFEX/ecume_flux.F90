@@ -445,7 +445,7 @@ ENDIF
 !
 !       7.1. Richardson number
 !
-CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQSATA, &
+ CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQSATA, &
                 PZREF,PUREF,ZDIRCOSZW,PVMOD,PRI    )  
 !
 !       7.2. Friction velocity which contains correction du to rain

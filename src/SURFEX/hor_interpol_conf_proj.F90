@@ -85,7 +85,7 @@ END IF
 !
 !*      2.    Transformation of latitudes/longitudes into metric coordinates of output grid
 !
-CALL XY_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATORI,XLONORI, &
+ CALL XY_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATORI,XLONORI, &
                     ZX,ZY,XLAT_OUT,XLON_OUT          )  
 !
 !*      3.    Put input field on its squared grid

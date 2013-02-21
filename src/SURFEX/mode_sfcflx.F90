@@ -693,11 +693,11 @@ ELSE                       ! Convection
 END IF
 
 !  Compute fetch-dependent Charnock parameter, use "u_star_min_sf"
-CALL sfcflx_roughness (fetch, U_a, u_star_min_sf, h_ice, c_z0u_fetch, u_star_thresh, z0u_sf, z0t_sf, z0q_sf)
+ CALL sfcflx_roughness (fetch, U_a, u_star_min_sf, h_ice, c_z0u_fetch, u_star_thresh, z0u_sf, z0t_sf, z0q_sf)
 
 !  Threshold value of wind speed 
 u_star_st = u_star_thresh
-CALL sfcflx_roughness (fetch, U_a, u_star_st, h_ice, c_z0u_fetch, u_star_thresh, z0u_sf, z0t_sf, z0q_sf)
+ CALL sfcflx_roughness (fetch, U_a, u_star_st, h_ice, c_z0u_fetch, u_star_thresh, z0u_sf, z0t_sf, z0q_sf)
 IF(ZoL.GT.0.) THEN   ! MO function in stable stratification 
   psi_u = c_MO_u_stab*ZoL*(1.-MIN(z0u_sf/height_u, 1.))
 ELSE                        ! MO function in convection
@@ -799,7 +799,7 @@ END IF
 Q_mom_tur = -u_star_st*u_star_st
 
 !  Temperature and specific humidity fluxes
-CALL sfcflx_roughness (fetch, U_a, u_star_st, h_ice, c_z0u_fetch, u_star_thresh, z0u_sf, z0t_sf, z0q_sf)
+ CALL sfcflx_roughness (fetch, U_a, u_star_st, h_ice, c_z0u_fetch, u_star_thresh, z0u_sf, z0t_sf, z0q_sf)
 IF(ZoL.GE.0.) THEN   ! Stable stratification 
   psi_t = c_MO_t_stab*R_z*ZoL*(1.-MIN(z0t_sf/height_tq, 1.))
   psi_q = c_MO_q_stab*R_z*ZoL*(1.-MIN(z0q_sf/height_tq, 1.))

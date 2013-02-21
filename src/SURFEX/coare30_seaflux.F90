@@ -139,7 +139,7 @@ CONTAINS
 SUBROUTINE TREAT_SURF(KMASK,YTYPE)
 !
 INTEGER, INTENT(IN), DIMENSION(:) :: KMASK
-CHARACTER(LEN=1), INTENT(IN) :: YTYPE
+ CHARACTER(LEN=1), INTENT(IN) :: YTYPE
 !
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_TA   ! air temperature at atm. level (K)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_QA   ! air humidity at atm. level (kg/kg)

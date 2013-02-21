@@ -30,6 +30,6 @@
 !
 IMPLICIT NONE
 
-CHARACTER(LEN=3)  :: CRESPSL        ! Soil respiration
+ CHARACTER(LEN=3)  :: CRESPSL        ! Soil respiration
 !
 END MODULE MODN_PREP_ISBA_CARBON

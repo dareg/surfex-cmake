@@ -71,7 +71,7 @@ IMPLICIT NONE
 !* general variables
 !  -----------------
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                               !         (Douville et al. 1995)
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)

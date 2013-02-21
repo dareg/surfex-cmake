@@ -68,8 +68,8 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 ! 
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 REAL,                INTENT(IN)  :: PTIMEC    ! cumulated time since beginning of simulation
@@ -91,7 +91,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -129,7 +129,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 
 !
 !
@@ -166,7 +166,7 @@ END IF
 !*       2.    COMPUTE TIME
 !              ------------
 !
-CALL TEMP_FORC_DISTS (PTIMEC,NFORCF,XTIMEF,IHOURF,ZALPHA)
+ CALL TEMP_FORC_DISTS (PTIMEC,NFORCF,XTIMEF,IHOURF,ZALPHA)
 !
 !----------------------------------------------------------------------------------
 !
@@ -267,7 +267,7 @@ PSFCO2(:) = XSFCO2(IHOURF) + ( XSFCO2(IHOURF+1)-XSFCO2(IHOURF) )*ZALPHA
 !*       8.    OTHER OUTPUTS (RADIATIVE QUANTITIES) SET TO A CONSTANT VALUE
 !              ------------------------------------
 !
-CALL TEMP_FORC_DISTS (PTIMEC,NFORCT,XTIMET,IHOURT,ZALPHA)
+ CALL TEMP_FORC_DISTS (PTIMEC,NFORCT,XTIMET,IHOURT,ZALPHA)
 !
 PTRAD(:) = XTSRAD(IHOURT) + ( XTSRAD(IHOURT+1)-XTSRAD(IHOURT) )*ZALPHA
 !

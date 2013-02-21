@@ -64,7 +64,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !
 !*       0.2   Declarations of local variables
@@ -73,7 +73,7 @@ INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_FLAKE_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_WATER'
-CALL GET_TYPE_DIM_n('WATER ',ILU)
+ CALL GET_TYPE_DIM_n('WATER ',ILU)
 !
 !*       3.     Prognostic fields:
 !               -----------------

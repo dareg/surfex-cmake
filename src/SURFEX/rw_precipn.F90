@@ -45,7 +45,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PRAIN     ! liquid precipitation   (kg/m2/s)
 REAL, DIMENSION(:), INTENT(INOUT) :: PSNOW     ! snow precipitation     (kg/m2/s)

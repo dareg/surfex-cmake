@@ -53,11 +53,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
-CHARACTER(LEN=6),  INTENT(OUT) :: HNATURE  ! scheme for natural surfaces
-CHARACTER(LEN=6),  INTENT(OUT) :: HSEA     ! scheme for sea
-CHARACTER(LEN=6),  INTENT(OUT) :: HTOWN    ! scheme for towns
-CHARACTER(LEN=6),  INTENT(OUT) :: HWATER   ! scheme for inland water
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
+ CHARACTER(LEN=6),  INTENT(OUT) :: HNATURE  ! scheme for natural surfaces
+ CHARACTER(LEN=6),  INTENT(OUT) :: HSEA     ! scheme for sea
+ CHARACTER(LEN=6),  INTENT(OUT) :: HTOWN    ! scheme for towns
+ CHARACTER(LEN=6),  INTENT(OUT) :: HWATER   ! scheme for inland water
 !
 !
 !*    0.2    Declaration of local variables
@@ -74,31 +74,31 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.    defaults
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_PGD_SCHEMES',0,ZHOOK_HANDLE)
-CALL DEFAULT_SCHEMES(HPROGRAM,CNATURE,CSEA,CTOWN,CWATER)
+ CALL DEFAULT_SCHEMES(HPROGRAM,CNATURE,CSEA,CTOWN,CWATER)
 !
 !------------------------------------------------------------------------------
 !
 !*       2.    opening of namelist
 ! 
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*       3.    reading of namelist
 ! 
-CALL POSNAM(ILUNAM,'NAM_PGD_SCHEMES',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_PGD_SCHEMES',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PGD_SCHEMES)
 !
 !-------------------------------------------------------------------------------
 !
 !*       4.    check of file type
 ! 
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CNATURE',CNATURE,'NONE  ','ISBA  ','TSZ0  ','FLUX  ')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CSEA   ',CSEA   ,'NONE  ','SEAFLX','FLUX  ')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CTOWN  ',CTOWN  ,'NONE  ','TEB   ','FLUX  ')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CWATER ',CWATER ,'NONE  ','WATFLX','FLUX  ','FLAKE ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CNATURE',CNATURE,'NONE  ','ISBA  ','TSZ0  ','FLUX  ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CSEA   ',CSEA   ,'NONE  ','SEAFLX','FLUX  ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CTOWN  ',CTOWN  ,'NONE  ','TEB   ','FLUX  ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CWATER ',CWATER ,'NONE  ','WATFLX','FLUX  ','FLAKE ')
 !
 HNATURE = CNATURE
 HSEA    = CSEA
@@ -108,7 +108,7 @@ HWATER  = CWATER
 !
 !*       5.    close namelist file
 ! 
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 IF (LHOOK) CALL DR_HOOK('READ_PGD_SCHEMES',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

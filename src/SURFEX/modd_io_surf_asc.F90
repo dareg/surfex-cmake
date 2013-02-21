@@ -27,15 +27,15 @@
 !*       0.   DECLARATIONS
 !
 IMPLICIT NONE
-CHARACTER(LEN=28),SAVE :: CFILEIN ='SURFIN.txt' ! Name of the input
-CHARACTER(LEN=28),SAVE :: CFILEIN_SAVE ='SURFIN.txt' ! Name of the input
-CHARACTER(LEN=28),SAVE :: CFILEOUT='SURFOUT.txt'! Name of the output
-CHARACTER(LEN=28),SAVE :: CFILEPGD     ='PGD.txt'    ! Name of the pgd file
+ CHARACTER(LEN=28),SAVE :: CFILEIN ='SURFIN.txt' ! Name of the input
+ CHARACTER(LEN=28),SAVE :: CFILEIN_SAVE ='SURFIN.txt' ! Name of the input
+ CHARACTER(LEN=28),SAVE :: CFILEOUT='SURFOUT.txt'! Name of the output
+ CHARACTER(LEN=28),SAVE :: CFILEPGD     ='PGD.txt'    ! Name of the pgd file
 INTEGER                :: NUNIT       ! logical unit of surface file
 INTEGER                :: NLUOUT      ! logical unit of output file
 INTEGER, DIMENSION(:), POINTER :: NMASK ! 1D mask to read only interesting
 !$OMP THREADPRIVATE(NMASK)
-CHARACTER(LEN=6)               :: CMASK ! surface mask type
+ CHARACTER(LEN=6)               :: CMASK ! surface mask type
 !$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL ! total number fo points of surface
 !$OMP THREADPRIVATE(NFULL)

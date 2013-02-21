@@ -74,7 +74,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -91,13 +91,13 @@ INTEGER               :: JVEGTYPE    ! loop counter on patch
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28)          :: CFNAM_VEGTYPE    ! fractions of each vegtypes
+ CHARACTER(LEN=28)          :: CFNAM_VEGTYPE    ! fractions of each vegtypes
 !
 ! types of file containing data
 !
-CHARACTER(LEN=6)           :: CFTYP_VEGTYPE    ! fractions of each vegtypes
+ CHARACTER(LEN=6)           :: CFTYP_VEGTYPE    ! fractions of each vegtypes
 !
-CHARACTER(LEN=28)     :: HFILEIN
+ CHARACTER(LEN=28)     :: HFILEIN
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -117,13 +117,13 @@ CFTYP_VEGTYPE     = '      '
 !*    2.      Input file for cover types
 !             --------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_LAND_USE',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_LAND_USE',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LAND_USE)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

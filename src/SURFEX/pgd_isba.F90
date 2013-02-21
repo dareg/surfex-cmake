@@ -95,7 +95,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
 LOGICAL,          INTENT(IN)  :: OECOCLIMAP ! T if parameters are computed with ecoclimap
 !                                           ! F if all parameters must be specified
 !
@@ -123,26 +123,26 @@ INTEGER                           :: IRESP     ! error code
 !
 INTEGER                  :: IPATCH           ! number of patches
 INTEGER                  :: IGROUND_LAYER    ! number of soil layers
-CHARACTER(LEN=3)         :: YISBA            ! ISBA option
-CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo transfert function for DIF
-CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
+ CHARACTER(LEN=3)         :: YISBA            ! ISBA option
+ CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo transfert function for DIF
+ CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
 REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
-CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
-CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
-CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon top soil
-CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon sub soil
-CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
-CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
-CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
-CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
-CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
-CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
-CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
-CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
-CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
-CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
-CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
+ CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
+ CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
+ CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon top soil
+ CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon sub soil
+ CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
+ CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
+ CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+ CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
+ CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
+ CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
+ CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
+ CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
+ CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
+ CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
+ CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction  (-)
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction  (-)
 REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon top soil (kg/m2)
@@ -156,10 +156,10 @@ LOGICAL                  :: LIMP_SOC         ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_CTI         ! Imposed maps of topographic index statistics
 LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil grid reference for DIF
-CHARACTER(LEN=28)        :: YPH           ! file name for pH
-CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
-CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
-CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+ CHARACTER(LEN=28)        :: YPH           ! file name for pH
+ CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+ CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+ CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
 REAL                     :: XUNIF_PH      ! uniform value of pH
 REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
@@ -168,14 +168,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
+ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
                        YISBA,  YPEDOTF, YPHOTO, GTR_ML, ZRM_PATCH,               &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,              &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
@@ -200,9 +200,9 @@ XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
 !*    3.      Coherence of options
 !             --------------------
 !
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CISBA',CISBA,'2-L','3-L','DIF')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CPEDOTF',CPEDOTF,'CH78','CO84')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CPHOTO',CPHOTO,'NON','AGS','LAI','AST','LST','NIT','NCB')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CISBA',CISBA,'2-L','3-L','DIF')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CPEDOTF',CPEDOTF,'CH78','CO84')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CPHOTO',CPHOTO,'NON','AGS','LAI','AST','LST','NIT','NCB')
 !
 SELECT CASE (CISBA)
 !
@@ -308,7 +308,7 @@ END IF
 !*    4.      Number of points and packing of general fields
 !             ----------------------------------------------
 !
-CALL GET_SURF_SIZE_n('NATURE',ILU)
+ CALL GET_SURF_SIZE_n('NATURE',ILU)
 !
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XCOVER     (ILU,JPCOVER))
@@ -318,7 +318,7 @@ ALLOCATE(XLON       (ILU))
 ALLOCATE(XMESH_SIZE (ILU))
 ALLOCATE(XZ0EFFJPDIR(ILU))
 !
-CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
+ CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
                 CGRID,  XGRID_PAR,                     &
                 LCOVER, XCOVER, XZS,                   &
                 XLAT, XLON, XMESH_SIZE, XZ0EFFJPDIR    )  
@@ -328,10 +328,10 @@ CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
 !*    5.      Packing of ISBA specific fields
 !             -------------------------------
 !
-CALL GET_AOS_n(HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
-CALL GET_SSO_n(HPROGRAM,NL,ZSSO_SLOPE)
+ CALL GET_AOS_n(HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
+ CALL GET_SSO_n(HPROGRAM,NL,ZSSO_SLOPE)
 !
-CALL PACK_PGD_ISBA(HPROGRAM,                                    &
+ CALL PACK_PGD_ISBA(HPROGRAM,                                    &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
                      ZSSO_SLOPE                                   )  
@@ -341,7 +341,7 @@ CALL PACK_PGD_ISBA(HPROGRAM,                                    &
 !*    6.      Topographic index for TOPMODEL
 !             ------------------------------
 !
-CALL PGD_TOPO_INDEX(HPROGRAM,ILU,YCTI,YCTIFILETYPE,LIMP_CTI)
+ CALL PGD_TOPO_INDEX(HPROGRAM,ILU,YCTI,YCTIFILETYPE,LIMP_CTI)
 !
 !-------------------------------------------------------------------------------
 !
@@ -560,7 +560,7 @@ ENDIF
 !             --------------
 !
 ALLOCATE(XRUNOFFB(ILU))
-CALL PGD_FIELD                                                                              &
+ CALL PGD_FIELD                                                                              &
        (HPROGRAM,'subgrid runoff','NAT',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,XRUNOFFB(:))  
 !
 !-------------------------------------------------------------------------------
@@ -569,7 +569,7 @@ CALL PGD_FIELD                                                                  
 !             --------------------
 !
 ALLOCATE(XWDRAIN(ILU))
-CALL PGD_FIELD                                                                              &
+ CALL PGD_FIELD                                                                              &
        (HPROGRAM,'subgrid drainage','NAT',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,XWDRAIN(:))  
 !
 !-------------------------------------------------------------------------------
@@ -579,11 +579,11 @@ CALL PGD_FIELD                                                                  
 !
 LECOCLIMAP = OECOCLIMAP
 !
-CALL PGD_ISBA_PAR(HPROGRAM)
+ CALL PGD_ISBA_PAR(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
-CALL PGD_TOPD(HPROGRAM)
+ CALL PGD_TOPD(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

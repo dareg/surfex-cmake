@@ -38,7 +38,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=10),           INTENT(IN)  :: HGRID       ! type of grid
+ CHARACTER(LEN=10),           INTENT(IN)  :: HGRID       ! type of grid
 INTEGER                                  :: KGRID_PAR   ! size of PGRID_PAR
 REAL,    DIMENSION(:),       POINTER     :: PGRID_PAR   ! parameters defining this grid
 LOGICAL, DIMENSION(720,360), INTENT(OUT) :: OLATLONMASK ! mask where domain is

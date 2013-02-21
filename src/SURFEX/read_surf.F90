@@ -40,23 +40,23 @@ MODULE MODI_READ_SURF
 !
      SUBROUTINE READ_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 REAL, INTENT(INOUT) :: PFIELD            ! real scalar to be read  
 INTEGER,INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears 
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT  ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT  ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFX0
 !
      SUBROUTINE READ_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT) ::PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR       ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR       ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -64,12 +64,12 @@ END SUBROUTINE READ_SURFX1
 !
      SUBROUTINE READ_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -77,13 +77,13 @@ END SUBROUTINE READ_SURFX2
 !
       SUBROUTINE READ_SURFX2COV(HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD ! array containing the data field
 LOGICAL,DIMENSION(:), INTENT(IN)  ::OFLAG   ! mask for array filling
 INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -91,12 +91,12 @@ END SUBROUTINE READ_SURFX2COV
 !
      SUBROUTINE READ_SURFX3(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM      ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC          ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM      ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC          ! name of the article to be read
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP                 ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -104,23 +104,23 @@ END SUBROUTINE READ_SURFX3
 !
      SUBROUTINE READ_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, INTENT(OUT) :: KFIELD           ! integer to be read  
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFN0
 !
      SUBROUTINE READ_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD ! integer to be read  
 INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -128,34 +128,34 @@ END SUBROUTINE READ_SURFN1
 !
      SUBROUTINE READ_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM   ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC       ! name of the article to be read
-CHARACTER(LEN=*), INTENT(OUT) :: HFIELD    ! caracter to be read  
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM   ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC       ! name of the article to be read
+ CHARACTER(LEN=*), INTENT(OUT) :: HFIELD    ! caracter to be read  
 INTEGER, INTENT(OUT) :: KRESP              ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFC0
 !
       SUBROUTINE READ_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, INTENT(OUT)         :: OFIELD   ! array containing the data field
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFL0
 !
       SUBROUTINE READ_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -165,12 +165,12 @@ END SUBROUTINE READ_SURFL1
 !
 USE MODD_TYPE_DATE_SURF
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC      ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC      ! name of the article to be read
 TYPE(DATE_TIME), INTENT(INOUT) ::TFIELD   ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFT0
 !
@@ -178,12 +178,12 @@ END SUBROUTINE READ_SURFT0
 !
 USE MODD_TYPE_DATE_SURF
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 TYPE (DATE_TIME), DIMENSION(:), INTENT(INOUT) :: TFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFT1
 !
@@ -191,12 +191,12 @@ END SUBROUTINE READ_SURFT1
 !
 USE MODD_TYPE_DATE_SURF
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) ::HREC      ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) ::HREC      ! name of the article to be read
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(INOUT)::TFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 END SUBROUTINE READ_SURFT2
 !
@@ -237,18 +237,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, INTENT(OUT) :: PFIELD               ! the real scalar to be read  
 INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 DOUBLE PRECISION   :: XTIME0
 INTEGER            :: INFOMPI
 REAL               :: ZWORK
@@ -359,20 +359,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC      ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC      ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: IL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -452,20 +452,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: IL1, IL2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -546,21 +546,21 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD ! array containing the data field
 LOGICAL,DIMENSION(:), INTENT(IN) :: OFLAG   ! mask for array filling
 INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: JCOVER
 INTEGER            :: IL1, IL2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -642,20 +642,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM      ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC          ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM      ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC          ! name of the article to be read
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP                 ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: IL1, IL2, IL3
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -731,18 +731,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, INTENT(OUT) :: KFIELD           ! the integer to be read  
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 DOUBLE PRECISION   :: XTIME0
 INTEGER            :: IWORK
 INTEGER            :: INFOMPI
@@ -861,20 +861,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD ! the integer to be read  
 INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: IL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -960,19 +960,19 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
-CHARACTER(LEN=*), INTENT(OUT) :: HFIELD   ! the integer to be read  
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*), INTENT(OUT) :: HFIELD   ! the integer to be read  
 INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL,INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL,INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL,INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL,INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=40)  :: YFIELD
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=40)  :: YFIELD
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 DOUBLE PRECISION   :: XTIME0
 INTEGER            :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1084,18 +1084,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, INTENT(OUT) :: OFIELD           ! array containing the data field
 INTEGER, INTENT(OUT) :: KRESP           ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT  ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT  ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 DOUBLE PRECISION   :: XTIME0
 LOGICAL            :: GWORK
 INTEGER            :: INFOMPI
@@ -1202,20 +1202,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR     ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: IL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1295,18 +1295,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 TYPE(DATE_TIME), INTENT(OUT) :: TFIELD   ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 !
 DOUBLE PRECISION   :: XTIME0
 REAL    :: ZTIME
@@ -1440,18 +1440,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM   ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC       ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM   ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC       ! name of the article to be read
 TYPE(DATE_TIME), DIMENSION(:), INTENT(INOUT)::TFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP              ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: ILUOUT
 INTEGER            :: INFOMPI
 !
@@ -1577,18 +1577,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 TYPE(DATE_TIME), DIMENSION(:,:), INTENT(INOUT) :: TFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
-CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
+ CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
+ CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100) :: YCOMMENT
-CHARACTER(LEN=16)  :: YREC
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=16)  :: YREC
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: ILUOUT
 INTEGER            :: INFOMPI
 !

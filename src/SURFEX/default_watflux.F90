@@ -47,8 +47,8 @@ IMPLICIT NONE
 !
 REAL,              INTENT(OUT) :: PTSTEP     ! time step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time step for writing
-CHARACTER(LEN=4),  INTENT(OUT) :: HWAT_ALB   ! type of sea albedo
-CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_TS ! Quadratic interpolation of monthly TS
+ CHARACTER(LEN=4),  INTENT(OUT) :: HWAT_ALB   ! type of sea albedo
+ CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_TS ! Quadratic interpolation of monthly TS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables

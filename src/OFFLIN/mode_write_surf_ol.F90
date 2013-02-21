@@ -38,10 +38,10 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,               INTENT(IN)  :: PFIELD   ! the real scalar to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
@@ -55,7 +55,7 @@ KRESP=0
 !
 ! 0. find filename
 ! -----------------
-CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
+ CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
 ! 
 IF (IFILE_ID /= 0) THEN        
   ! 1. Find id of the variable
@@ -93,10 +93,10 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KFIELD   ! the integer scalar to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
@@ -110,7 +110,7 @@ KRESP=0
 !
 ! 0. find filename
 ! -----------------
-CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
+ CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
 !
 IF (IFILE_ID /= 0) THEN    
   ! 1. Find id of the variable
@@ -148,14 +148,14 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
-CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD   ! the integer scalar to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD   ! the integer scalar to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100)   :: YFIELD
+ CHARACTER(LEN=100)   :: YFIELD
 INTEGER              :: IFILE_ID, IVAR_ID, JRET
 INTEGER,DIMENSION(2) :: IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -166,7 +166,7 @@ KRESP=0
 !
 ! 0. find filename
 ! -----------------
-CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
+ CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
 !
 IF (IFILE_ID /= 0) THEN 
   ! 1. Find id of the variable
@@ -206,14 +206,14 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,             INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=1)     :: YFIELD   ! work array read in the file
+ CHARACTER(LEN=1)     :: YFIELD   ! work array read in the file
 INTEGER              :: IFILE_ID, IVAR_ID, JRET
 INTEGER,DIMENSION(2) :: IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -224,7 +224,7 @@ KRESP=0
 !
 ! 0. find filename
 ! -----------------
-CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
+ CALL OL_FIND_FILE_WRITE(HREC,IFILE_ID)
 ! 
 IF (IFILE_ID /= 0) THEN        
   ! 1. Find id of the variable
@@ -272,7 +272,7 @@ INCLUDE "netcdf.inc"
 !
 REAL,                INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
@@ -366,17 +366,17 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
-CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100)    :: YNAME
+ CHARACTER(LEN=100)    :: YNAME
 LOGICAL               :: GKNOWN
 INTEGER               :: IFILE_ID, IVAR_ID, JDIM, INDIMS
 INTEGER               :: JRET
@@ -400,7 +400,7 @@ KRESP=0
 !
 !$OMP SINGLE
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 !
 !$OMP END SINGLE COPYPRIVATE(GKNOWN)
 !
@@ -583,17 +583,17 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),    INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),    INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,              INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),   INTENT(IN) :: HCOMMENT
-CHARACTER(LEN=1),     INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),   INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=1),     INTENT(IN) :: HDIR     ! type of field :
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100)    :: YNAME
+ CHARACTER(LEN=100)    :: YNAME
 INTEGER               :: IFILE_ID, IVAR_ID, JDIM, INDIMS
 INTEGER               :: JRET
 INTEGER               :: INFOMPI
@@ -773,11 +773,11 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(IN)  :: HCOMMENT
-CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(IN)  :: HCOMMENT
+ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
@@ -789,7 +789,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFN1_OL',0,ZHOOK_HANDLE)
 !
 ZFIELD=FLOAT(KFIELD)
-CALL WRITE_SURFX1_OL(HREC,ZFIELD,KRESP,HCOMMENT,HDIR)
+ CALL WRITE_SURFX1_OL(HREC,ZFIELD,KRESP,HCOMMENT,HDIR)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFN1_OL',1,ZHOOK_HANDLE)
 !
@@ -819,11 +819,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,               INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),    INTENT(IN) :: HCOMMENT
-CHARACTER(LEN=1),      INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),    INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=1),      INTENT(IN) :: HDIR     ! type of field :
                                               ! 'H' : field with
                                               !       horizontal spatial dim.
                                               ! '-' : no horizontal dim.
@@ -891,7 +891,7 @@ SUBROUTINE WRITE_DATAL1_OL(KDIM)
 !
 INTEGER, INTENT(IN) :: KDIM
 !
-CHARACTER(LEN=1), DIMENSION(KDIM) :: YTAB1D  ! work array read in the file
+ CHARACTER(LEN=1), DIMENSION(KDIM) :: YTAB1D  ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFL1_OL:WRITE_DATAL1_OL',0,ZHOOK_HANDLE)
@@ -908,7 +908,7 @@ ENDDO
 !-----------------
 IRET(4)=NF_PUT_VAR_TEXT(IFILE_ID,IVAR_ID,YTAB1D)
 !
-CALL HANDLE_ERR(IRET(4),HREC)
+ CALL HANDLE_ERR(IRET(4),HREC)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFL1_OL:WRITE_DATAL1_OL',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_DATAL1_OL
@@ -935,17 +935,17 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
 INTEGER,            INTENT(IN)  :: KMONTH   ! month
 INTEGER,            INTENT(IN)  :: KDAY     ! day
 REAL,               INTENT(IN)  :: PTIME    ! time
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be written
+ CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be written
 INTEGER :: IFILE_ID, IVAR_ID, JRET, JWRK
 INTEGER :: JLEN
 INTEGER,DIMENSION(3) :: ITDATE  ! work array read in the file

@@ -76,7 +76,7 @@ INTEGER            :: JP_AER_SOA8 = 14
 INTEGER            :: JP_AER_SOA9 = 15 
 INTEGER            :: JP_AER_SOA10 = 16
 
-CHARACTER(LEN=32),DIMENSION(:), ALLOCATABLE :: CAERONAMES
+ CHARACTER(LEN=32),DIMENSION(:), ALLOCATABLE :: CAERONAMES
 
 INTEGER            :: JP_CH_SO4I = 1  
 INTEGER            :: JP_CH_SO4J = 2  
@@ -173,7 +173,7 @@ REAL         :: XEMISSIGI     = 1.86   ! dispersion of primary aerosol
                                        ! emission for I mode
 REAL         :: XEMISSIGJ     = 1.29   ! dispersion of primary aerosol
                                        ! emission for J mode
-CHARACTER*4  :: CRGUNIT   = 'NUMB'    ! type of log-normal geometric mean radius given
+ CHARACTER*4  :: CRGUNIT   = 'NUMB'    ! type of log-normal geometric mean radius given
 !                                     ! in nameliste (mass on number)
 
 

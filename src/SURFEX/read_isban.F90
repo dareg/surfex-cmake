@@ -72,7 +72,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -80,9 +80,9 @@ INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=4)  :: YLVL
 !
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 !
@@ -102,7 +102,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_ISBA_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_NATURE'
-CALL GET_TYPE_DIM_n('NATURE',ILU)
+ CALL GET_TYPE_DIM_n('NATURE',ILU)
 !
 !
 !*       2.     Prognostic fields:
@@ -154,7 +154,7 @@ END DO
 ALLOCATE(XWR(ILU,NPATCH))
 !
 YRECFM = 'WR'
-CALL READ_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP)
 !
 !* roughness length of Flood water
 !
@@ -173,13 +173,13 @@ END IF
 !
 !* snow mantel
 !
-CALL READ_GR_SNOW(HPROGRAM,'VEG','     ',ILU,NPATCH,TSNOW  )
+ CALL READ_GR_SNOW(HPROGRAM,'VEG','     ',ILU,NPATCH,TSNOW  )
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF(LGLACIER)THEN
   ALLOCATE(XICE_STO(ILU,NPATCH))
@@ -214,7 +214,7 @@ END IF
 !
 YRECFM = 'RESA'
 XRESA(:,:) = 100.
-CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:,:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:,:),IRESP)
 !
 !* patch averaged radiative temperature (K)
 !

@@ -110,13 +110,13 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,                          INTENT(IN)  :: OLAND_USE !
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -132,9 +132,9 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 !
-CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !
 !*       0.2   Declarations of local variables
@@ -154,7 +154,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('INIT_ISBAN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -195,9 +195,9 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
-CALL READ_DEFAULT_ISBA_n(HPROGRAM)
+ CALL READ_DEFAULT_ISBA_n(HPROGRAM)
 !
-CALL READ_ISBA_CONF_n(HPROGRAM)
+ CALL READ_ISBA_CONF_n(HPROGRAM)
 !
 !
 !*       1.     Reading of configuration:
@@ -281,14 +281,14 @@ END SELECT
 !
 ! initialization for I/O
 !
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
-CALL READ_PGD_ISBA_n(HPROGRAM,OLAND_USE)
+ CALL READ_PGD_ISBA_n(HPROGRAM,OLAND_USE)
 IF ( CPHOTO/='NON' .AND. NPATCH/=12) THEN
   CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND NPATCH')
 ENDIF
@@ -308,8 +308,8 @@ IF(CRESPSL/='CNT'.AND.LSPINUPCARBS)THEN
   CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CRESPSL AND LSPINUPCARBS (if not CNT must be false)')
 ENDIF
 !
-CALL END_IO_SURF_n(HPROGRAM)
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !
 !-----------------------------------------------------------------------------------------------------
 ! END READ PGD FILE
@@ -320,7 +320,7 @@ IF (OLAND_USE .OR. HINIT=='PGD') THEN
   RETURN
 END IF
 !
-CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
+ CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &

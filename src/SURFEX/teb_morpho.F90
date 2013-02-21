@@ -49,7 +49,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
 REAL, DIMENSION(:),   INTENT(INOUT)  :: PBLD         ! Urban horizontal building density
 REAL, DIMENSION(:),   INTENT(INOUT)  :: PWALL_O_HOR  ! Wall to horizontal surface ratio
 REAL, DIMENSION(:),   INTENT(INOUT)  :: PGARDEN      ! Urban horizontal garden density
@@ -75,7 +75,7 @@ INTEGER :: ILUOUT
 !
 !*       1.   Get listing file for warnings
 !
-CALL GET_LUOUT(HPROGRAM, ILUOUT)
+ CALL GET_LUOUT(HPROGRAM, ILUOUT)
 !
 
 

@@ -57,7 +57,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -120,16 +120,16 @@ NRGRI(:) = 0
 !
 !*       2.    opening of namelist
 ! 
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !---------------------------------------------------------------------------
 !
 !*       3.    Reading of projection parameters
 !              --------------------------------
 !
-CALL POSNAM(ILUNAM,'NAMGEM',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAMGEM',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAMGEM)
 !
 IF (RSTRET<1.) THEN
@@ -152,9 +152,9 @@ ZCODIL = RSTRET
 !*       4.    Reading parameters of the grid
 !              ------------------------------
 !
-CALL POSNAM(ILUNAM,'NAMDIM',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAMDIM',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAMDIM)
-CALL POSNAM(ILUNAM,'NAMRGRI',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAMRGRI',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAMRGRI)
 !
 INLATI = NDGLG
@@ -181,7 +181,7 @@ ENDIF
 ALLOCATE(ZLAT_XY(KL))
 ALLOCATE(ZLON_XY(KL))
 
-CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
+ CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
 
 !
 !---------------------------------------------------------------------------
@@ -192,7 +192,7 @@ CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
 !* all points are used
 ALLOCATE(ZLAT(KL))
 ALLOCATE(ZLON(KL))
-CALL LATLON_GAUSS(ZLON_XY,ZLAT_XY,KL,ZLOPO,ZLAPO,ZCODIL,ZLON,ZLAT)
+ CALL LATLON_GAUSS(ZLON_XY,ZLAT_XY,KL,ZLOPO,ZLAPO,ZCODIL,ZLON,ZLAT)
 !
 !---------------------------------------------------------------------------
 !
@@ -201,17 +201,17 @@ CALL LATLON_GAUSS(ZLON_XY,ZLAT_XY,KL,ZLOPO,ZLAPO,ZCODIL,ZLON,ZLAT)
 !
 ALLOCATE(ZMESH_SIZE(KL))
 !
-CALL MESH_SIZE_GAUSS(KL,INLATI,INLOPA,ZLAPO,ZLOPO,ZCODIL,&
+ CALL MESH_SIZE_GAUSS(KL,INLATI,INLOPA,ZLAPO,ZLOPO,ZCODIL,&
                                ZLAT_XY,ZLON,ZLAT,ZMESH_SIZE)  
 !
 !---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !---------------------------------------------------------------------------
 !
 !*       8.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_GAUSS(ZGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA, &
+ CALL PUT_GRIDTYPE_GAUSS(ZGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA, &
                           KL,ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE     )  
 !
 DEALLOCATE(ZLAT)

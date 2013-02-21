@@ -50,7 +50,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -90,20 +90,20 @@ NAMELIST/NAM_CARTESIAN/XLAT0, XLON0, NIMAX, NJMAX, XDX, XDY
 !*       1.    opening of namelist
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_CARTESIAN',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading of projection parameters
 !              --------------------------------
 !
-CALL POSNAM(ILUNAM,'NAM_CARTESIAN',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_CARTESIAN',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CARTESIAN)
 !
 !---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !---------------------------------------------------------------------------
 !
 !*       3.    Number of points
@@ -142,7 +142,7 @@ ZDY(:) = XDY
 !*       8.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_CARTESIAN(ZGRID_PAR,XLAT0,XLON0,               &
+ CALL PUT_GRIDTYPE_CARTESIAN(ZGRID_PAR,XLAT0,XLON0,               &
                               NIMAX,NJMAX,                         &
                               ZX,ZY,ZDX,ZDY                        )  
 !

@@ -49,8 +49,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM ! program calling SURFEX
-CHARACTER(LEN=10),     INTENT(IN) :: HGRID    ! grid type
+ CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM ! program calling SURFEX
+ CHARACTER(LEN=10),     INTENT(IN) :: HGRID    ! grid type
 INTEGER,               INTENT(OUT):: KHALO
 !
 !*       0.2   Declarations of local variables

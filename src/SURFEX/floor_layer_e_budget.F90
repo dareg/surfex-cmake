@@ -140,7 +140,7 @@ ENDDO
 
 
 !
-CALL LAYER_E_BUDGET_GET_COEF( PT_FLOOR, PTSTEP, ZIMPL, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
+ CALL LAYER_E_BUDGET_GET_COEF( PT_FLOOR, PTSTEP, ZIMPL, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
                               ZA, ZB, ZC, ZY )
 !
 ZTS_FLOOR(:) = PT_FLOOR(:,1) 
@@ -157,7 +157,7 @@ ZY(:,1) = ZY(:,1)  &
    + PRADHT_IN(:) * PF_FLOOR_MASS (:) * (PTS_MASS(:) - ZEXPL * PT_FLOOR(:,1))  &
    + PLOAD_FLOOR(:)
 !
-CALL LAYER_E_BUDGET( PT_FLOOR, PTSTEP, ZIMPL, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
+ CALL LAYER_E_BUDGET( PT_FLOOR, PTSTEP, ZIMPL, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
                      ZA, ZB, ZC, ZY, PDQS_FLOOR )
 !
 !*      floor surface temperature used in the implicit formulation

@@ -182,7 +182,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROAD_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !
-CALL LAYER_E_BUDGET_GET_COEF( PT_ROAD, PTSTEP, ZIMPL, PHC_ROAD, PTC_ROAD, PD_ROAD, &
+ CALL LAYER_E_BUDGET_GET_COEF( PT_ROAD, PTSTEP, ZIMPL, PHC_ROAD, PTC_ROAD, PD_ROAD, &
                               ZA, ZB, ZC, ZY )
 !
 !*      1.     Layer thermal properties
@@ -250,7 +250,7 @@ DO JJ=1,SIZE(PT_ROAD,1)
 ENDDO
 !
 !
-CALL LAYER_E_BUDGET( PT_ROAD, PTSTEP, ZIMPL, PHC_ROAD, PTC_ROAD, PD_ROAD, &
+ CALL LAYER_E_BUDGET( PT_ROAD, PTSTEP, ZIMPL, PHC_ROAD, PTC_ROAD, PD_ROAD, &
                      ZA, ZB, ZC, ZY, PDQS_ROAD )
 !
 !-------------------------------------------------------------------------------

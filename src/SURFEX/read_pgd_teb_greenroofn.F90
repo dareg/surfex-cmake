@@ -57,7 +57,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KVERSION ! version of SURFEX of the file being read
 !
 !*       0.2   Declarations of local variables
@@ -65,7 +65,7 @@ INTEGER,           INTENT(IN)  :: KVERSION ! version of SURFEX of the file being
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
 !
 INTEGER           :: JLAYER         ! loop counter on layers ! not used
@@ -77,7 +77,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_TOWN'
-CALL GET_TYPE_DIM_n('TOWN  ',NDIM)
+ CALL GET_TYPE_DIM_n('TOWN  ',NDIM)
 !
 !
 !*       2.     Initialisation of ISBA options for greenroofs
@@ -85,10 +85,10 @@ CALL GET_TYPE_DIM_n('TOWN  ',NDIM)
 !
 !
 YRECFM='GR_ISBA'
-CALL READ_SURF(HPROGRAM,YRECFM,CISBA_GR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,CISBA_GR,IRESP)
 !
 YRECFM='GR_SCOND'
-CALL READ_SURF(HPROGRAM,YRECFM,CSCOND_GR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,CSCOND_GR,IRESP)
 !
 !*       3.     Physiographic data fields:
 !               -------------------------
@@ -97,7 +97,7 @@ CALL READ_SURF(HPROGRAM,YRECFM,CSCOND_GR,IRESP)
 !
 ALLOCATE(XRUNOFFB_GR(NDIM))
 YRECFM='GR_RUNOFFB' 
-CALL READ_SURF(HPROGRAM,YRECFM,XRUNOFFB_GR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XRUNOFFB_GR,IRESP)
 !
 !* subgrid drainage coefficient
 !
@@ -139,7 +139,7 @@ END IF
 !
 !IF (LPAR_GREENROOF) CALL READ_PGD_TEB_GREENROOF_PAR_n(HPROGRAM)
 !
-CALL READ_PGD_TEB_GREENROOF_PAR_n(HPROGRAM)
+ CALL READ_PGD_TEB_GREENROOF_PAR_n(HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_N',1,ZHOOK_HANDLE)
 !

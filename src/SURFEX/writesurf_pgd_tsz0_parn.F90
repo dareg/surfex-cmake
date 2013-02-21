@@ -47,14 +47,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -64,15 +64,15 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TSZ0_PAR_N',0,ZHOOK_HANDLE)
 NTIME = SIZE(XDATA_DTS)
 YRECFM   = 'ND_TSZ0_TIME'
 YCOMMENT = '(-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM   = 'D_DTS'
 YCOMMENT = 'X_Y_DATA_DTS'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XDATA_DTS(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XDATA_DTS(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 YRECFM   = 'D_DHUGRD'
 YCOMMENT = 'X_Y_DATA_DHUGRD'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XDATA_DHUGRD(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XDATA_DHUGRD(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TSZ0_PAR_N',1,ZHOOK_HANDLE)
 !

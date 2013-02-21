@@ -54,7 +54,7 @@ LOGICAL    :: LQVNPLUS         ! An option for the resolution of the surface tem
 !
 LOGICAL    :: LCPL_ESM         ! Earth System Model Coupling key
 !
-CHARACTER(LEN=3) :: CIMPLICIT_WIND ! wind implicitation option
+ CHARACTER(LEN=3) :: CIMPLICIT_WIND ! wind implicitation option
 !                                  ! 'OLD' = direct
 !                                  ! 'NEW' = Taylor serie, order 1
 !

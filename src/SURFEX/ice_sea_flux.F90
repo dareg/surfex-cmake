@@ -151,7 +151,7 @@ PQSAT(:) = QSAT(PTICE(:),PPS(:))
 !              -----------------
 !
 
-CALL SURFACE_RI(PTICE,PQSAT,PEXNS,PEXNA,PTA,PQA, &
+ CALL SURFACE_RI(PTICE,PQSAT,PEXNS,PEXNA,PTA,PQA, &
                   PZREF, PUREF, ZDIRCOSZW,PVMOD,PRI)
 !                  
 !

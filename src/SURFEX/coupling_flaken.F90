@@ -90,8 +90,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
@@ -112,7 +112,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -151,7 +151,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
@@ -240,7 +240,7 @@ ZHU = 1.
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 TTIME%TIME = TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+ CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 !----------------------------------------
 ZMASK(:) = XTS(:) - XTTS
@@ -327,9 +327,9 @@ END DO
 !
 ZEMIS  = XEMIS
 !
-CALL FLAKE_ALBEDO(PDIR_SW,PSCA_SW,KSW,ZDIR_ALB,ZSCA_ALB,ZGLOBAL_SW,ZALB)
+ CALL FLAKE_ALBEDO(PDIR_SW,PSCA_SW,KSW,ZDIR_ALB,ZSCA_ALB,ZGLOBAL_SW,ZALB)
 !
-CALL FLAKE_INTERFACE( KI, &
+ CALL FLAKE_INTERFACE( KI, &
 ! Atmospheric forcing:
                        PSNOW, ZGLOBAL_SW, PLW, PUREF, PZREF, ZWIND, PTA, ZQA, PPS, &
 ! Constant parameters
@@ -480,16 +480,16 @@ IF (CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake code
   ZQSAT(:) = QSAT(XTS(:),PPS(:))
 ENDIF
 !
-CALL DIAG_INLINE_FLAKE_n(PTA, XTS, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF, PUREF,  &
+ CALL DIAG_INLINE_FLAKE_n(PTA, XTS, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF, PUREF,  &
                          ZCD, ZCDN, ZCH, ZRI, ZHU, XZ0, ZZ0H, ZQSAT,            &
                          PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,       &
                          ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD                       )  
 !
 !-------------------------------------------------------------------------------------
 !
-CALL DIAG_MISC_FLAKE_n(XT_WML,XT_BOT,XH_ML,XCT,XWATER_DEPTH)
+ CALL DIAG_MISC_FLAKE_n(XT_WML,XT_BOT,XH_ML,XCT,XWATER_DEPTH)
 !
-CALL UPDATE_RAD_SEAWAT(CFLK_ALB,XTS,PZENITH2,XTT,XEMIS,XDIR_ALB, &
+ CALL UPDATE_RAD_SEAWAT(CFLK_ALB,XTS,PZENITH2,XTT,XEMIS,XDIR_ALB, &
                        XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTRAD    )
 !                         
 IF (LHOOK) CALL DR_HOOK('COUPLING_FLAKE_N',1,ZHOOK_HANDLE)

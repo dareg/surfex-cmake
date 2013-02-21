@@ -73,11 +73,11 @@ IMPLICIT NONE
 !
 INTEGER :: I,IP
 !
-CHARACTER(LEN=6), DIMENSION(8) :: YDATA_TOWN    ! town parameters
-CHARACTER(LEN=6), DIMENSION(9) :: YDATA_MATE    ! materials parameters
-CHARACTER(LEN=6)               :: YSTRING6
+ CHARACTER(LEN=6), DIMENSION(8) :: YDATA_TOWN    ! town parameters
+ CHARACTER(LEN=6), DIMENSION(9) :: YDATA_MATE    ! materials parameters
+ CHARACTER(LEN=6)               :: YSTRING6
 !
-CHARACTER(LEN=200):: YFMT  ! fortran format
+ CHARACTER(LEN=200):: YFMT  ! fortran format
 LOGICAL           :: GLINE ! flag to write an additional horizontal line
 !
 REAL, DIMENSION(JPCOVER) :: ZDATA_SVF_ROAD,ZDATA_SVF_WALL

@@ -63,15 +63,15 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
-CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
-CHARACTER(LEN=6),  INTENT(IN) :: HFILETYPE     ! Type of the data file
-CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME    ! Name of the variable in netcdf file
-CHARACTER(LEN=20), INTENT(IN) :: HFIELD        ! Name of the field.
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
+ CHARACTER(LEN=6),  INTENT(IN) :: HFILETYPE     ! Type of the data file
+ CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME    ! Name of the variable in netcdf file
+ CHARACTER(LEN=20), INTENT(IN) :: HFIELD        ! Name of the field.
 REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PPGDARRAY ! field on MESONH grid
-CHARACTER(LEN=3),   INTENT(IN),    OPTIONAL :: HSFTYPE
+ CHARACTER(LEN=3),   INTENT(IN),    OPTIONAL :: HSFTYPE
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -81,7 +81,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TREAT_BATHYFIELD',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.     Selection of type of reading (and point by point treatment)
 !            -----------------------------------------------------------

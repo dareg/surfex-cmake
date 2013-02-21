@@ -46,8 +46,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 LOGICAL,           INTENT(OUT) :: OASSIM        ! assimilation or not
-CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM        ! type of corrections PLUS/2DVAR
-CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_ISBA
+ CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM        ! type of corrections PLUS/2DVAR
+ CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_ISBA
 LOGICAL,           INTENT(OUT) :: OPRINT
 LOGICAL,           INTENT(OUT) :: OAROME
 LOGICAL,           INTENT(OUT) :: OECSST

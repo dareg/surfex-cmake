@@ -45,7 +45,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=5),     INTENT(IN)  :: HTYPE     ! type of surface
+ CHARACTER(LEN=5),     INTENT(IN)  :: HTYPE     ! type of surface
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHC       ! input Heat Capacity
 REAL, DIMENSION(:,:), INTENT(IN)  :: PTC       ! input Thermal conductivity
 REAL, DIMENSION(:,:), INTENT(IN)  :: PD        ! input Layer Thickness
@@ -147,7 +147,7 @@ END DO
 !* Averaging of the Heat Capacity and the Thermal conductivity
 !
 ZW=1./PTC(:,:)
-CALL AV_THERMAL_DATA(PHC,ZW,PHC_OUT,ZW_OUT)
+ CALL AV_THERMAL_DATA(PHC,ZW,PHC_OUT,ZW_OUT)
 PTC_OUT=XUNDEF
 WHERE (ZW_OUT/=XUNDEF) PTC_OUT=1./ZW_OUT
 !

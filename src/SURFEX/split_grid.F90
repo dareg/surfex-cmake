@@ -50,14 +50,14 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=100) :: YCOMMENT
 INTEGER :: IRESP ! error return code
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('SPLIT_GRID',0,ZHOOK_HANDLE)

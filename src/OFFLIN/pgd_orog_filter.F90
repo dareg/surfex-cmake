@@ -50,7 +50,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !
 !
 !*    0.2    Declaration of local variables
@@ -74,14 +74,14 @@ IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL READ_NAM_PGD_OROG_FILTER(HPROGRAM, NZSFILTER )  
+ CALL READ_NAM_PGD_OROG_FILTER(HPROGRAM, NZSFILTER )  
 !
 !-------------------------------------------------------------------------------
 !
 !*   11.      Filtering of orography
 !             ----------------------
 !
-CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, XSEA, NZSFILTER, XZS)
+ CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, XSEA, NZSFILTER, XZS)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_OROG_FILTER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

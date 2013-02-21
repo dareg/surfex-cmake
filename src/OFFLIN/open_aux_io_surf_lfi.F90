@@ -51,9 +51,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
-CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -65,13 +65,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('LFI   ',NLUOUT)
+ CALL GET_LUOUT('LFI   ',NLUOUT)
 !
-CALL FMOPEN(HFILE,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
+ CALL FMOPEN(HFILE,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
 !
 CMASK = HMASK
 CFILE_LFI=HFILE
-CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET)
+ CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ IL = NFULL
 ALLOCATE(ZFULL(IL))
 ALLOCATE(NMASK(IL))
 ZFULL=1.
-CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
+ CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

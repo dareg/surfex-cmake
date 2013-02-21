@@ -103,7 +103,7 @@ IF (LFLOODT) THEN
   ENDIF
 ENDIF
 !
-CALL TRIP_INTERFACE_DIM(ISIZE)
+ CALL TRIP_INTERFACE_DIM(ISIZE)
 !
 !-------------------------------------------------------------------------------
 !Write restart
@@ -307,7 +307,7 @@ ENDIF
 !
 IF(LPRINT_TRIP)WRITE(KLUOUT,*)''
 !
-CALL DIAG_TRIP_n(KLUOUT,KYEAR,KMONTH,KTRIP,PDURATION,      &
+ CALL DIAG_TRIP_n(KLUOUT,KYEAR,KMONTH,KTRIP,PDURATION,      &
                   ZSURF_STO_OLD,ZQDIS_OLD,ZGROUND_STO_OLD, &
                   ZQGF_OLD,ZVEL_OLD,ZHS_OLD,ZFLOOD_STO_OLD,&
                   ZFF_OLD,ZHF_OLD,ZQFR_OLD,ZQRF_OLD,       &

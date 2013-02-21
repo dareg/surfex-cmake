@@ -65,7 +65,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -85,7 +85,7 @@ INTEGER, DIMENSION(:), ALLOCATABLE   :: IVALUE   ! value of a record of data poi
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=28)        :: YIRRIG   ! file name for irrigation
+ CHARACTER(LEN=28)        :: YIRRIG   ! file name for irrigation
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                        
 NAMELIST/NAM_ECOCLIMAP2/  YIRRIG, LCLIM_LAI
@@ -107,13 +107,13 @@ NYEAR          = NUNDEF
 !
 !* Reading
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_ECOCLIMAP2',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_ECOCLIMAP2',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_ECOCLIMAP2)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -137,7 +137,7 @@ IERR=0
 IF (LEN_TRIM(YIRRIG)>0) THEN
 ALLOCATE(IVALUE(7))    
 
-CALL OPEN_FILE(HPROGRAM,IGLB,YIRRIG,'FORMATTED',HACTION='READ') 
+ CALL OPEN_FILE(HPROGRAM,IGLB,YIRRIG,'FORMATTED',HACTION='READ') 
                
 DO JCOVER=301,JPCOVER
   READ(IGLB,FMT='(7I4)') IVALUE
@@ -170,7 +170,7 @@ DO JCOVER=301,JPCOVER
    ENDIF
 ENDDO
                 
-CALL CLOSE_FILE(HPROGRAM,IGLB)
+ CALL CLOSE_FILE(HPROGRAM,IGLB)
 
 IF (IERR.EQ.1) CALL ABOR1_SFX('PGD_ECOCLIMAP2_DATA (3)')
 
@@ -182,7 +182,7 @@ END IF
 !    4.    Computes LAI evolution for the chosen year
 !          ------------------------------------------
 !
-CALL ECOCLIMAP2_LAI
+ CALL ECOCLIMAP2_LAI
 IF (LHOOK) CALL DR_HOOK('PGD_ECOCLIMAP2_DATA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

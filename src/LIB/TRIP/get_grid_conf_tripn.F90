@@ -59,7 +59,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_CONF_TRIP_N',0,ZHOOK_HANDLE)
-CALL GET_GRID_TRIP(XGRID_TRIP,PLONMIN,PLONMAX,PLATMIN,PLATMAX,PRES,KLON,KLAT)
+ CALL GET_GRID_TRIP(XGRID_TRIP,PLONMIN,PLONMAX,PLATMIN,PLATMAX,PRES,KLON,KLAT)
 IF (LHOOK) CALL DR_HOOK('GET_GRID_CONF_TRIP_N',1,ZHOOK_HANDLE)
 !    
 !---------------------------------------------------------------------------

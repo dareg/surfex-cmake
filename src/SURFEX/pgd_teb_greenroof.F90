@@ -56,7 +56,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
 !                                           ! F if all parameters must be specified
 !
 !
@@ -92,7 +92,7 @@ XRUNOFFB_GR(:) = 0.5
 XWDRAIN_GR (:) = 0.0
 !
 NTIME_GR = 12
-CALL PGD_TEB_GREENROOF_PAR(HPROGRAM)
+ CALL PGD_TEB_GREENROOF_PAR(HPROGRAM)
 !
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GREENROOF',1,ZHOOK_HANDLE)

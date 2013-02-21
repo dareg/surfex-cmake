@@ -175,8 +175,8 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZTC, ZHC, ZD
 INTEGER               :: JLAYER    ! loop counter on layers
 INTEGER               :: IL        ! number of points
 !
-CHARACTER(LEN=3)      :: YAVG      ! Type of averaging for buildings
-CHARACTER(LEN=4)      :: YAREA     ! Area where parameter is averaged
+ CHARACTER(LEN=3)      :: YAVG      ! Type of averaging for buildings
+ CHARACTER(LEN=4)      :: YAREA     ! Area where parameter is averaged
 !
 !*    0.3    Declaration of namelists
 !            ------------------------

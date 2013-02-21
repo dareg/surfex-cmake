@@ -9,7 +9,7 @@ INTEGER :: KT
 INTEGER :: IT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SECOND_SFX',0,ZHOOK_HANDLE)
-CALL system('date +%s > tempo')
+ CALL system('date +%s > tempo')
 OPEN(UNIT=99,FILE='tempo')
 READ(99,*)IT
 CLOSE(99)

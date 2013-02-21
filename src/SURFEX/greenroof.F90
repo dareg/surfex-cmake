@@ -106,7 +106,7 @@ IMPLICIT NONE
 !
 !*      0.1    Declarations of arguments
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 TYPE(DATE_TIME)     , INTENT(IN)    :: TPTIME             ! current date and time from teb
@@ -153,7 +153,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GREENROOF      ! greenroof total (
 !
 !*      0.2    Declarations of local variables
 !
-CHARACTER(LEN=3)                     :: HRAIN               ! Rainfall spatial distribution ('DEF','SGH')
+ CHARACTER(LEN=3)                     :: HRAIN               ! Rainfall spatial distribution ('DEF','SGH')
 LOGICAL                              :: OFLOOD              ! Activation of the flooding scheme
 LOGICAL                              :: OTEMP_ARP           ! True  = time-varying force-restore soil temperature (as in ARPEGE)
                                                             ! False = No time-varying force-restore soil temperature (Default)
@@ -355,7 +355,7 @@ GIRRIDAY      = .FALSE.
 !* deep soil implicitation with roof
 !
 ZGAMMAT = XUNDEF
-CALL ROOF_IMPL_COEF(PTSTEP,ZTDEEP_A,ZTDEEP_B)
+ CALL ROOF_IMPL_COEF(PTSTEP,ZTDEEP_A,ZTDEEP_B)
 !
 !-------------------------------------------------------------------------------
 !
@@ -368,7 +368,7 @@ CALL ROOF_IMPL_COEF(PTSTEP,ZTDEEP_A,ZTDEEP_B)
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
 !
-CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR, CSOC_GR, &
+ CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR, CSOC_GR, &
           HRAIN, CHORT_GR, CC1DRY, CSCOND_GR, TSNOW%SCHEME, &
           CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TPTIME, OFLOOD, &
           OTEMP_ARP, OGLACIER, PTSTEP, HIMPLICIT_WIND, &

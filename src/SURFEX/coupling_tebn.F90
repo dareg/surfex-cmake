@@ -119,8 +119,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
@@ -141,7 +141,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -179,7 +179,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !
 !*      0.2    declarations of local variables
@@ -514,7 +514,7 @@ END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 TTIME%TIME = TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+ CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !  Anthropogenic fluxes (except building heating)
@@ -647,7 +647,7 @@ ZQ_CANYON(:) = ZQA(:)
 !
 !
 !* computes tendencies on wind and Tke due to canopy
-CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
+ CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
                 PPA,PRHOA,XU,                                                         &
                 ZAVG_DUWDU_GRND, ZAVG_UW_ROOF, ZAVG_DUWDU_ROOF,                       &
                 ZAVG_H_WALL,ZAVG_H_ROOF,ZAVG_E_ROOF,ZAVG_AC_GRND,ZAVG_AC_GRND_WAT,    &
@@ -716,7 +716,7 @@ ZEXNA     (:) = (ZPA(:)/XP00)**(XRD/XCPD)
 !--------------------------------------------------------------------------------------
 !
 DO JTEB_PATCH=1,NTEB_PATCH
-CALL GOTO_TEB(JTEB_PATCH)
+ CALL GOTO_TEB(JTEB_PATCH)
 !
 ZT_CAN=ZT_CANYON
 ZQ_CAN=ZQ_CANYON
@@ -738,7 +738,7 @@ IF (CBEM=='BEM') &
 WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
 !
 !
-CALL TEB_GARDEN      (CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,                      &
+ CALL TEB_GARDEN      (CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,                      &
                       TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &
                       XTI_BLD,                                                         &
@@ -848,9 +848,9 @@ ENDIF
 !
 ! Grid box average fluxes/properties: Arguments and standard diagnostics
 !
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,PSFTH,ZH)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,PSFTQ,ZEVAP)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,PSFCO2,ZSFCO2)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,PSFTH,ZH)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,PSFTQ,ZEVAP)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,PSFCO2,ZSFCO2)
 !
 !
 ! Albedo for each wavelength and patch
@@ -869,24 +869,24 @@ ZTRAD_PATCH(:,JTEB_PATCH) = ZTRAD
 !
 ! computes some aggregated diagnostics
 !
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CD ,ZCD )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CDN,ZCDN)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RI ,ZRI )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CH ,ZCH )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RN ,ZRN )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H  ,ZH  )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_LE ,ZLE )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_GFLUX ,ZGFLUX )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CD ,ZCD )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CDN,ZCDN)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RI ,ZRI )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CH ,ZCH )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RN ,ZRN )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H  ,ZH  )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_LE ,ZLE )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_GFLUX ,ZGFLUX )
 !
 !* warning: aerodynamical resistance does not yet take into account gardens
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RESA_TOWN,1./ZRESA_TOWN)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RESA_TOWN,1./ZRESA_TOWN)
 IF (JTEB_PATCH==NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
 !
 !-------------------------------------------------------------------------------------
 ! Diagnostics on each patch
 !-------------------------------------------------------------------------------------
 !
-CALL DIAG_MISC_TEB_n(PTSTEP, ZDQS_TOWN, ZQF_BLD, ZQF_TOWN, ZFLX_BLD,           &
+ CALL DIAG_MISC_TEB_n(PTSTEP, ZDQS_TOWN, ZQF_BLD, ZQF_TOWN, ZFLX_BLD,           &
                      ZRN_ROAD, ZH_ROAD, ZLE_ROAD, ZGFLUX_ROAD,                 &
                      ZRN_WALL_A, ZH_WALL_A, ZGFLUX_WALL_A,                     &
                      ZRN_WALL_B, ZH_WALL_B, ZGFLUX_WALL_B,                     &
@@ -938,12 +938,12 @@ IF (LCANOPY) THEN
 ! Town averaged quantities to force canopy atmospheric layers
 !-------------------------------------------------------------------------------------
 
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_GRND ,ZDUWDU_GRND )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_UW_ROOF ,ZUW_ROOF)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_ROOF ,ZDUWDU_ROOF)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WALL ,0.5*(ZH_WALL_A+ZH_WALL_B))
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+XH_INDUSTRY))
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+XLE_INDUSTRY)/XLVTT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_GRND ,ZDUWDU_GRND )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_UW_ROOF ,ZUW_ROOF)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_ROOF ,ZDUWDU_ROOF)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WALL ,0.5*(ZH_WALL_A+ZH_WALL_B))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+XH_INDUSTRY))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+XLE_INDUSTRY)/XLVTT)
 !
 !-------------------------------------------------------------------------------------
 ! Computes the impact of canopy and surfaces on air
@@ -952,11 +952,11 @@ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+XLE_INDUSTRY)/XLVTT)
 ZAC_GRND    (:) = (XROAD(:)*ZAC_ROAD    (:) + XGARDEN(:)*ZAC_GARDEN    (:)) / (XROAD(:)+XGARDEN(:))
 ZAC_GRND_WAT(:) = (XROAD(:)*ZAC_ROAD_WAT(:) + XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (XROAD(:)+XGARDEN(:))
 !
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND     ,ZAC_GRND    )
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND_WAT ,ZAC_GRND_WAT)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_U ,ZUW_GRND * (1.-XBLD))
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_T ,ZH_GRND  * (1.-XBLD)/XCPD/PRHOA)
-CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_Q ,ZLE_GRND * (1.-XBLD)/XLVTT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND     ,ZAC_GRND    )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND_WAT ,ZAC_GRND_WAT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_U ,ZUW_GRND * (1.-XBLD))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_T ,ZH_GRND  * (1.-XBLD)/XCPD/PRHOA)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_Q ,ZLE_GRND * (1.-XBLD)/XLVTT)
 !
 
 END IF
@@ -976,7 +976,7 @@ IF (LCANOPY) THEN
 !* Impact of TEB fluxes on the air
 !-------------------------------------------------------------------------------------
 !
-CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
+ CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
                 PPA,PRHOA,XU,                                                         &
                 ZAVG_DUWDU_GRND, ZAVG_UW_ROOF, ZAVG_DUWDU_ROOF,                       &
                 ZAVG_H_WALL,ZAVG_H_ROOF,ZAVG_E_ROOF,ZAVG_AC_GRND,ZAVG_AC_GRND_WAT,    &
@@ -986,7 +986,7 @@ CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR
 !* Evolution of canopy air due to these impacts
 !-------------------------------------------------------------------------------------
 !
-CALL CANOPY_EVOL(KI,NLVL,PTSTEP,2,                                            &
+ CALL CANOPY_EVOL(KI,NLVL,PTSTEP,2,                                            &
                  ZL,ZWIND,PTA,PQA,PPA,PRHOA,                                  &
                  ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,                                  &
                  ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                       &
@@ -1028,7 +1028,7 @@ END IF
 !
 ! Albedo, Emissivity and fraction at time t+1
 !
-CALL AVERAGE_RAD(XTEB_PATCH,                                              &
+ CALL AVERAGE_RAD(XTEB_PATCH,                                              &
                  ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH,&
                  PDIR_ALB,       PSCA_ALB,       PEMIS,       PTRAD       )
 
@@ -1113,7 +1113,7 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_INLINE_TEB_n(LCANOPY, PTA, PTRAD, ZQA, PPA, PPS, PRHOA,              &
+ CALL DIAG_INLINE_TEB_n(LCANOPY, PTA, PTRAD, ZQA, PPA, PPS, PRHOA,              &
                        PU, PV, ZWIND, PZREF, PUREF,                            &
                        ZAVG_CD, ZAVG_CDN, ZAVG_RI, ZAVG_CH, ZAVG_Z0_TOWN,      &
                        PTRAD, PEMIS, PDIR_ALB, PSCA_ALB,                       &

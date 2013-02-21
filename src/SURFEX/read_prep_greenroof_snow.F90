@@ -61,11 +61,11 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
-CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+ CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
 INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
-CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
-CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+ CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
+ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

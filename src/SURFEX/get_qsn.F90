@@ -47,7 +47,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
+ CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! roughness length for momentum (m)
 !
@@ -60,7 +60,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_QS_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF (LSURF_VARS)      THEN 

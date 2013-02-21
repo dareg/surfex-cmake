@@ -51,15 +51,15 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=3)  :: YREAD
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=3)  :: YREAD
 INTEGER :: JLAYER  ! loop counter on layers
 INTEGER :: ILU     ! 1D physical dimension
 INTEGER :: IRESP   ! Error code after redding
@@ -71,15 +71,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_TEB_CANOPY_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_TOWN'
-CALL GET_TYPE_DIM_n('TOWN  ',ILU)
+ CALL GET_TYPE_DIM_n('TOWN  ',ILU)
 !
 !* flag to use or not canopy levels
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF (IVERSION<3) THEN
   LCANOPY = .FALSE.
@@ -108,7 +108,7 @@ ENDIF
 !* number of vertical levels
 !
 YRECFM='TEB_CAN_LVL'
-CALL READ_SURF(HPROGRAM,YRECFM,NLVL,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,NLVL,IRESP)
 !
 !*       2.     Prognostic fields:
 !               -----------------
@@ -219,7 +219,7 @@ ALLOCATE(XLEPS(ILU,NLVL))
 ALLOCATE(XDZ (ILU,NLVL))
 ALLOCATE(XZF (ILU,NLVL))
 ALLOCATE(XDZF(ILU,NLVL))
-CALL CANOPY_GRID(ILU,NLVL,XZ,XZF,XDZ,XDZF)
+ CALL CANOPY_GRID(ILU,NLVL,XZ,XZF,XDZ,XDZF)
 !
 IF (LHOOK) CALL DR_HOOK('READ_TEB_CANOPY_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

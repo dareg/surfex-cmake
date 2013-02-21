@@ -48,9 +48,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM  ! host model
+ CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM  ! host model
 INTEGER,                      INTENT(IN   ) :: ILUOUT
-CHARACTER(LEN=*),             INTENT(IN   ) :: HNAME
+ CHARACTER(LEN=*),             INTENT(IN   ) :: HNAME
 REAL, DIMENSION(:,:),         INTENT(INOUT) :: PFIELD
 REAL, DIMENSION(:), OPTIONAL, INTENT(IN   ) :: PDEF 
 !
@@ -80,7 +80,7 @@ ALLOCATE(NSIZE(INI))
 ALLOCATE(NSIZE_TOT(NSIZE_FULL))
 ALLOCATE(ZFIELD_TOT(NSIZE_FULL))
 !
-CALL GET_SURF_MASK_n('NATURE',INI,IMASK,NSIZE_FULL,ILUOUT)
+ CALL GET_SURF_MASK_n('NATURE',INI,IMASK,NSIZE_FULL,ILUOUT)
 !
 DO JVEGTYPE=1,IVEGTYPE
   NSIZE(:)=0

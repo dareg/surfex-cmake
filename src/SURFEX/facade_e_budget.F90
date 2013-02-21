@@ -80,10 +80,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=4), INTENT(IN)      :: HWALL_OPT     ! TEB option for walls
+ CHARACTER(LEN=4), INTENT(IN)      :: HWALL_OPT     ! TEB option for walls
                                                    ! 'UNIF' : uniform walls
                                                    ! 'TWO ' : two different opposite walls
-CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL_A  ! wall A layers temperatures
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL_B  ! wall B layers temperatures
 REAL,               INTENT(IN)    :: PTSTEP       ! time step
@@ -213,7 +213,7 @@ ZTI_WALL_B(:) = PT_WALL_B(:,IWALL)
 ! *opaque balance of the facade for wall A
 !  ---------------------------------------
 !
-CALL WALL_LAYER_E_BUDGET(HBEM, PT_WALL_A, ZTS_WALL_B, ZTI_WALL_B, PTSTEP,                     &
+ CALL WALL_LAYER_E_BUDGET(HBEM, PT_WALL_A, ZTS_WALL_B, ZTI_WALL_B, PTSTEP,                     &
                          PHC_WALL, PTC_WALL, PD_WALL, PDN_ROAD, PRHOA, PAC_WALL,  &
                          PAC_BLD, PTI_BLD, PLW_RAD, PPS, PEXNS, PABS_SW_WALL_A, PT_CANYON,    &
                          PTS_ROAD, PTSNOW_ROAD, PTS_GARDEN, PTS_MASS, PTS_FLOOR, PEMIS_WALL,  &
@@ -235,7 +235,7 @@ ZRAD_WALL_WIN   = 0.5 * ZRAD_WALL_A_WIN
 !  ---------------------------------------
 !
 IF (HWALL_OPT/='UNIF') THEN
-CALL WALL_LAYER_E_BUDGET(HBEM, PT_WALL_B, ZTS_WALL_A, ZTI_WALL_A, PTSTEP,                     &
+ CALL WALL_LAYER_E_BUDGET(HBEM, PT_WALL_B, ZTS_WALL_A, ZTI_WALL_A, PTSTEP,                     &
                          PHC_WALL, PTC_WALL, PD_WALL, PDN_ROAD, PRHOA, PAC_WALL,              &
                          PAC_BLD, PTI_BLD, PLW_RAD, PPS, PEXNS, PABS_SW_WALL_B, PT_CANYON,    &
                          PTS_ROAD, PTSNOW_ROAD, PTS_GARDEN, PTS_MASS, PTS_FLOOR, PEMIS_WALL,  &

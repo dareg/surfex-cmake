@@ -43,7 +43,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
 REAL, POINTER, DIMENSION(:,:)   :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
@@ -157,7 +157,7 @@ SUBROUTINE PUT_UNIF_ON_REF_GRID(HSURFTYPE,PGRID)
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_INTERP_GRID
 !
-CHARACTER(LEN=4),   INTENT(IN) :: HSURFTYPE ! surface type
+ CHARACTER(LEN=4),   INTENT(IN) :: HSURFTYPE ! surface type
 REAL, DIMENSION(:), INTENT(IN) :: PGRID     ! reference grid
 !
 REAL               :: ZTS! surface temperature
@@ -210,7 +210,7 @@ ZD(1,2) = 1.
 
 !* interpolate this field on the required grid
 !
-CALL INTERP_GRID(ZD,ZT,PGRID,PFIELD)
+ CALL INTERP_GRID(ZD,ZT,PGRID,PFIELD)
 IF (LHOOK) CALL DR_HOOK('PUT_UNIF_ON_REF_GRID',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

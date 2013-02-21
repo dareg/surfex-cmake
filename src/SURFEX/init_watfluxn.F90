@@ -94,12 +94,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -115,9 +115,9 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 !
-CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 
 !
 !
@@ -134,7 +134,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_WATFLUX_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('INIT_WATFLUXN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -160,13 +160,13 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
-CALL READ_DEFAULT_WATFLUX_n(HPROGRAM)
+ CALL READ_DEFAULT_WATFLUX_n(HPROGRAM)
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
 !
-CALL READ_WATFLUX_CONF_n(HPROGRAM)
+ CALL READ_WATFLUX_CONF_n(HPROGRAM)
 !
 LINTERPOL_TS=.FALSE.
 IF(LCPL_ESM)THEN       
@@ -210,23 +210,23 @@ END SELECT
 !
 !         Initialisation for IO
 !
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','WATFLX','READ ')
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !         Reading of the fields
 !
-CALL READ_PGD_WATFLUX_n(HPROGRAM)
+ CALL READ_PGD_WATFLUX_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !* if only physiographic fields are to be initialized, stop here.
 !
-CALL WRITE_COVER_TEX_WATER
+ CALL WRITE_COVER_TEX_WATER
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !
 !-----------------------------------------------------------------------------------------------------
 ! END READ PGD FILE
@@ -241,13 +241,13 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','WATFLX','READ ')
+ CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !
 !*       2.     Prognostic and cover fields:
 !               ---------------------------
 !
-CALL READ_WATFLUX_n(HPROGRAM)
+ CALL READ_WATFLUX_n(HPROGRAM)
 !
 ILU = SIZE(XCOVER,1)
 !
@@ -275,7 +275,7 @@ XDIR_ALB = 0.0
 XSCA_ALB = 0.0
 XEMIS    = 0.0
 !
-CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
+ CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
                          XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
 !
 !-------------------------------------------------------------------------------
@@ -283,14 +283,14 @@ CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
 !*       5.     SBL air fields:
 !               --------------
 !
-CALL READ_WATFLUX_SBL_n(HPROGRAM)
+ CALL READ_WATFLUX_SBL_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*       6.     Chemistry / dust
 !               ----------------
 !
-CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
                      NSV_CHSBEG, NSV_CHSEND, NSV_AERBEG, NSV_AEREND, &
                      CCH_NAMES, CAER_NAMES, NDSTEQ, NSV_DSTBEG,      &
                      NSV_DSTEND, NSLTEQ, NSV_SLTBEG, NSV_SLTEND,     &
@@ -310,13 +310,13 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
-CALL DIAG_WATFLUX_INIT_n(HPROGRAM,ILU,KSW)
+ CALL DIAG_WATFLUX_INIT_n(HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('INIT_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE INIT_WATFLUX_n

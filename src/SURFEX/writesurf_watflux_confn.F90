@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling WATFLUX
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling WATFLUX
 
 !
 !*       0.2   Declarations of local variables
@@ -58,15 +58,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_WATFLUX_CONF_N',0,ZHOOK_HANDLE)
-CALL GET_DEFAULT_NAM_n(HPROGRAM,'WRITE',ILUDES)
+ CALL GET_DEFAULT_NAM_n(HPROGRAM,'WRITE',ILUDES)
 !
 IF (ILUDES==0 .AND. LHOOK) CALL DR_HOOK('WRITESURF_WATFLUX_CONF_N',1,ZHOOK_HANDLE)
 IF (ILUDES==0) RETURN
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_NAM_WATFLUXn
-CALL INIT_NAM_CH_WATFLUXn
+ CALL INIT_NAM_WATFLUXn
+ CALL INIT_NAM_CH_WATFLUXn
 !
 WRITE(UNIT=ILUDES,NML=NAM_WATFLUXn)
 WRITE(UNIT=ILUDES,NML=NAM_CH_WATFLUXn)

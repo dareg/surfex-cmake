@@ -54,9 +54,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
 LOGICAL,              INTENT(IN)  :: OGRID    ! .true. if grid is imposed by atm. model
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -64,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=100) :: YCOMMENT
 INTEGER :: IRESP ! error return code
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_GRID_SURF_ATM',0,ZHOOK_HANDLE)
@@ -73,16 +73,16 @@ CPROGNAME=HPROGRAM
 !*    1.      Set default constant values 
 !             ---------------------------
 !
-CALL SURF_VERSION
+ CALL SURF_VERSION
 !
-CALL INI_CSTS
+ CALL INI_CSTS
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Initialisation of output grid
 !             -----------------------------
 !
-CALL PGD_GRID        (HPROGRAM,HFILE,HFILETYPE,OGRID,CGRID,NGRID_PAR,XGRID_PAR)
+ CALL PGD_GRID        (HPROGRAM,HFILE,HFILETYPE,OGRID,CGRID,NGRID_PAR,XGRID_PAR)
 ! 
 !
 !-------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ CALL PGD_GRID        (HPROGRAM,HFILE,HFILETYPE,OGRID,CGRID,NGRID_PAR,XGRID_PAR)
 !
 !*    3.      Additional actions for I/O
 !
-CALL PGD_GRID_IO_INIT(HPROGRAM)
+ CALL PGD_GRID_IO_INIT(HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_GRID_SURF_ATM',1,ZHOOK_HANDLE)
 !_______________________________________________________________________________

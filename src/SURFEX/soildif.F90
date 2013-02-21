@@ -69,14 +69,14 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
+ CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
 !                                             ! 'NP89' :  Noilhan and Planton 
 !                                             !  (1989: McCumber-Pielke (1981) and
 !                                             !  Clapp and Hornberger (1978))
 !                                             ! 'PL98' Method of Johansen (1975) as
 !                                             ! presented by Peters-Lidard (JAS: 1998)
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
+ CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
 !                                               ! MLCH' = include the insulating effect of leaf
 !                                               !         litter/mulch on the surface thermal cond.
 !                                               ! 'DEF' = no mulch effect

@@ -73,13 +73,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),     INTENT(IN) :: HPHOTO           ! Kind of photosynthesis
+ CHARACTER(LEN=*),     INTENT(IN) :: HPHOTO           ! Kind of photosynthesis
 !                                                    ! 'NON'
 !                                                    ! 'AGS'
 !                                                    ! 'LAI'
 !                                                    ! 'AST'
 !                                                    ! 'LST'
-CHARACTER(LEN=3),     INTENT(IN) :: HRESPSL          ! Soil Respiration
+ CHARACTER(LEN=3),     INTENT(IN) :: HRESPSL          ! Soil Respiration
 !                                                    ! 'DEF' = Norman 1992
 !                                                    ! 'PRM' = Rivalland PhD Thesis (2003)
 !                                                    ! 'CNT' = CENTURY model (Gibelin 2008)

@@ -106,12 +106,12 @@ IMPLICIT NONE
 !
 !
 !
-CHARACTER(LEN=*),   INTENT(IN)   :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*),   INTENT(IN)   :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 !                                           ! '2-L'
 !                                           ! '3-L'
 !                                           ! 'DIF'   ISBA-DF
 !
-CHARACTER(LEN=*),    INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+ CHARACTER(LEN=*),    INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                              !         (Douville et al. 1995)
 !                                              ! '3-L' = 3-L snow scheme (option)
 !                                              !         (Boone and Etchevers 2000)
@@ -119,7 +119,7 @@ LOGICAL, INTENT(IN)               :: OFLOOD    ! Activation of the flooding sche
 LOGICAL, INTENT(IN)               :: OTEMP_ARP ! True  = time-varying force-restore soil temperature (as in ARPEGE)
                                                ! False = No time-varying force-restore soil temperature (Default)
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !                                               

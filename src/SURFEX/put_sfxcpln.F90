@@ -63,7 +63,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),        INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),        INTENT(IN)  :: HPROGRAM
 INTEGER,                 INTENT(IN)  :: KI      ! number of points
 INTEGER,                 INTENT(IN)  :: KSW     ! number of bands
 !
@@ -96,12 +96,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PUT_SFXCPL_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 ! Global argument
 !
-CALL GET_FRAC_n(HPROGRAM, KI, ZSEA, ZWATER, ZNATURE, ZTOWN)
+ CALL GET_FRAC_n(HPROGRAM, KI, ZSEA, ZWATER, ZNATURE, ZTOWN)
 !
 !-------------------------------------------------------------------------------
 ! Put variable over sea tile
@@ -129,7 +129,7 @@ ENDIF
 ! Update radiative properties at time t+1 for radiative scheme
 !-------------------------------------------------------------------------------
 !
-CALL UPDATE_ESM_SURF_ATM_n(HPROGRAM,KI,KSW,PZENITH,PSW_BANDS,PTSRAD,PDIR_ALB,PSCA_ALB,PEMIS)
+ CALL UPDATE_ESM_SURF_ATM_n(HPROGRAM,KI,KSW,PZENITH,PSW_BANDS,PTSRAD,PDIR_ALB,PSCA_ALB,PEMIS)
 !
 !-------------------------------------------------------------------------------
 !
@@ -142,7 +142,7 @@ SUBROUTINE TREAT_SURF(KLU,YTYPE)
 IMPLICIT NONE
 !
 INTEGER, INTENT(IN) :: KLU
-CHARACTER(LEN=1), INTENT(IN) :: YTYPE
+ CHARACTER(LEN=1), INTENT(IN) :: YTYPE
 !
 INTEGER, DIMENSION(KLU) :: IMASK   ! Working mask
 REAL,    DIMENSION(KLU) :: ZICE     ! ice fraction from GELATO
@@ -153,7 +153,7 @@ REAL,    DIMENSION(KLU) :: ZSCA_ALB ! Initialization of total direct albedo
 REAL,    DIMENSION(KLU) :: ZICE_ALB ! Sea-ice albedo (from GELATO)
 !
 REAL    :: ZMIN, ZMAX
-CHARACTER(LEN=3)     :: HT
+ CHARACTER(LEN=3)     :: HT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PUT_SFXCPL_N:TREAT_SURF',0,ZHOOK_HANDLE)
@@ -164,12 +164,12 @@ ELSEIF (YTYPE=='W') THEN
   CALL GET_1D_MASK(KLU,KI,ZWATER,IMASK)
 ENDIF
 !
-CALL PACK_SAME_RANK(IMASK,PICE       (:),ZICE    (:))
-CALL PACK_SAME_RANK(IMASK,PSST       (:),ZTS     (:))
-CALL PACK_SAME_RANK(IMASK,PTICE      (:),ZTICE   (:))
-CALL PACK_SAME_RANK(IMASK,PALB_SEAICE(:),ZDIR_ALB(:))
-CALL PACK_SAME_RANK(IMASK,PALB_SEAICE(:),ZSCA_ALB(:))
-CALL PACK_SAME_RANK(IMASK,PALB_SEAICE(:),ZICE_ALB(:))
+ CALL PACK_SAME_RANK(IMASK,PICE       (:),ZICE    (:))
+ CALL PACK_SAME_RANK(IMASK,PSST       (:),ZTS     (:))
+ CALL PACK_SAME_RANK(IMASK,PTICE      (:),ZTICE   (:))
+ CALL PACK_SAME_RANK(IMASK,PALB_SEAICE(:),ZDIR_ALB(:))
+ CALL PACK_SAME_RANK(IMASK,PALB_SEAICE(:),ZSCA_ALB(:))
+ CALL PACK_SAME_RANK(IMASK,PALB_SEAICE(:),ZICE_ALB(:))
 !
 ZMIN=MINVAL(ZTS(:))
 ZMAX=MAXVAL(ZTS(:))

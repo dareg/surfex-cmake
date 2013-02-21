@@ -51,8 +51,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !                                   
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM      ! Type of program
-CHARACTER(LEN=4),    INTENT(OUT)   :: HCH_EMIS      ! Option for emissions computations
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=4),    INTENT(OUT)   :: HCH_EMIS      ! Option for emissions computations
 !                                  
 !
 !*    0.2    Declaration of local variables
@@ -65,7 +65,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=4)         :: CCH_EMIS
+ CHARACTER(LEN=4)         :: CCH_EMIS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_CH_EMISSIONS/ CCH_EMIS
@@ -78,21 +78,21 @@ NAMELIST/NAM_CH_EMISSIONS/ CCH_EMIS
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_CHEMISTRY',0,ZHOOK_HANDLE)
 CCH_EMIS        = 'NONE'
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_CH_EMISSIONS',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_CH_EMISSIONS',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CH_EMISSIONS)
 !
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CCH_EMIS',CCH_EMIS,'NONE','AGGR','SNAP')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CCH_EMIS',CCH_EMIS,'NONE','AGGR','SNAP')
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

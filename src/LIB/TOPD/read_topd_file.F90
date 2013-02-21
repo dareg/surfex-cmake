@@ -56,9 +56,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM    !
-CHARACTER(LEN=*),  INTENT(IN)  :: HFILE       ! File to be read
-CHARACTER(LEN=*),  INTENT(IN)  :: HFORM       ! Format of the file to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM    !
+ CHARACTER(LEN=*),  INTENT(IN)  :: HFILE       ! File to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HFORM       ! Format of the file to be read
 INTEGER,           INTENT(IN)  :: KNPT        ! Number of points in the catchment
 REAL, DIMENSION(:), INTENT(OUT) :: PTOPD_READ ! Topographic parameter read on file
 !
@@ -74,9 +74,9 @@ IF (LHOOK) CALL DR_HOOK('READ_TOPD_FILE',0,ZHOOK_HANDLE)
 !*       0.2    preparing file openning
 !               ----------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
 !PTOPD_READ(:)=XUNDEF
 !
 DO JJ=1,13

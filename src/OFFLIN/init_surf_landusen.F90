@@ -60,13 +60,13 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,                          INTENT(IN)  :: OLAND_USE ! choice of doing land use or not 
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -82,9 +82,9 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                            !  midnight (UTC, s)
 !
-CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !
 !*       0.2   Declarations of local variables
@@ -93,8 +93,8 @@ REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 INTEGER           :: JLAYER
 INTEGER           :: ILU          ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=4)  :: YLVL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -118,18 +118,18 @@ ENDIF
 !
 !* initialization for I/O
 !
-CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !* 1D physical dimension
 !
-CALL GET_TYPE_DIM_n('NATURE',ILU)
+ CALL GET_TYPE_DIM_n('NATURE',ILU)
 ALLOCATE(ZWORK(ILU,NPATCH))
 !
 !* read old patch fraction
 !       
 ALLOCATE(XPATCH_OLD(ILU,NPATCH))       
 YRECFM = 'OLD_PATCH'
-CALL READ_SURF(HPROGRAM,YRECFM,XPATCH_OLD(:,:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XPATCH_OLD(:,:),IRESP)
 !
 !* read old soil layer thicknesses (m)
 !
@@ -145,18 +145,18 @@ DEALLOCATE(ZWORK)
 !
 !* End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
-CALL SET_VEGTYPES_FRACTIONS(HPROGRAM)
+ CALL SET_VEGTYPES_FRACTIONS(HPROGRAM)
 !
 !* re-initialize ISBA with new parameters
 !       
-CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
+ CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &

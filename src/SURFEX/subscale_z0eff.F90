@@ -179,7 +179,7 @@ END IF
 !
 ZZ0VEG(:) = PZ0VEG
 !
-CALL SUBSCALE_Z0EFF_1D(PAOSIP,PAOSIM,PAOSJP,PAOSJM,             &
+ CALL SUBSCALE_Z0EFF_1D(PAOSIP,PAOSIM,PAOSJP,PAOSJM,             &
                        PHO2IP,PHO2IM,PHO2JP,PHO2JM,ZZ0VEG,      &
                        PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,     &
                        GMASK                                    )
@@ -289,7 +289,7 @@ ELSE
   PZ0EFFJM = XUNDEF
 END IF
 !
-CALL SUBSCALE_Z0EFF_1D(PAOSIP,PAOSIM,PAOSJP,PAOSJM,             &
+ CALL SUBSCALE_Z0EFF_1D(PAOSIP,PAOSIM,PAOSJP,PAOSJM,             &
                        PHO2IP,PHO2IM,PHO2JP,PHO2JM,PZ0VEG,      &
                        PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,     &
                        GMASK                                    )

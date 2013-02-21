@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 !
@@ -94,7 +94,7 @@ ZTRAD_PATCH    = 0.0
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
-CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,&
+ CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,&
                          XZ0,XALBNIR,XALBVIS,XALBUV,XEMIS,             &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH     )  
 !
@@ -126,7 +126,7 @@ END DO
 !*       4.     averaged fields
 !               ---------------
 !
-CALL AVERAGE_RAD(XPATCH,                                                   &
+ CALL AVERAGE_RAD(XPATCH,                                                   &
                    ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH, &
                    PDIR_ALB,       PSCA_ALB,       XEMIS_NAT,   XTSRAD_NAT   )  
 !

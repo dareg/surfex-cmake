@@ -47,8 +47,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HWATER ! name of the scheme for inland water
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),    INTENT(IN)  :: HWATER ! name of the scheme for inland water
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
 !
@@ -81,7 +81,7 @@ USE MODD_WATFLUX_n,     ONLY : XZS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_WATFLX_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
@@ -108,7 +108,7 @@ USE MODD_FLAKE_n,     ONLY : XZS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_FLAKE_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF ( SIZE(PZS) /= SIZE(XZS) ) THEN

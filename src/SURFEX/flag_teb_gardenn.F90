@@ -139,7 +139,7 @@ ENDIF
 !
 !* Flag snow characteristics
 !
-CALL FLAG_GR_SNOW(KFLAG,XGARDEN(:)==0.,TSNOW)
+ CALL FLAG_GR_SNOW(KFLAG,XGARDEN(:)==0.,TSNOW)
 !
 !
 !* snow-free characteristics

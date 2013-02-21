@@ -70,7 +70,7 @@ INTEGER, DIMENSION(KI)           :: INSAT       ! number of saturated pixels in 
 INTEGER, DIMENSION(KI)           :: INDRY       ! Number of non-saturated pixels in an ISBA mesh
 REAL, DIMENSION(NNCAT,NMESHT)    :: ZROSAT      ! 
 REAL, DIMENSION(NNCAT,NMESHT)    :: ZRODRY      ! 
-CHARACTER(LEN=30)                :: YVAR        ! name of results file
+ CHARACTER(LEN=30)                :: YVAR        ! name of results file
 !
 REAL::ZSMALL,ZTMP,ZTMP2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

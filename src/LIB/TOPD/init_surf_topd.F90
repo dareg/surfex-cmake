@@ -63,7 +63,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM      !
+ CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM      !
 INTEGER,           INTENT(IN)     :: KI            ! grid dimension
 !
 INTEGER :: ILUOUT
@@ -78,7 +78,7 @@ IF (LCOUPL_TOPD) THEN
         CALL ABOR1_SFX("INIT_SURF_TOPD: coupling with topmodel only runs with TSNOW%SCHEME=3-L")
 ENDIF
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !            
 !         1.   Reads the namelists
 !              --------------------

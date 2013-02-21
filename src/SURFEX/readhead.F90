@@ -83,15 +83,15 @@ INTEGER                    :: IEINDEX    ! index of character 'E' in YSTRING1
 INTEGER                    :: IWINDEX    ! index of character 'W' in YSTRING1
 REAL, DIMENSION(7)         :: ZVAL       ! values of the head data
 INTEGER                    :: IHEAD      ! index of the data in the array ZVAL
-CHARACTER(LEN=100)         :: YSTRING    ! total string in the head
-CHARACTER(LEN=100)         :: YSTRING1   ! string less the begining line descriptor
-CHARACTER(LEN=100)         :: YVAL       ! absolute value of the data of the line
+ CHARACTER(LEN=100)         :: YSTRING    ! total string in the head
+ CHARACTER(LEN=100)         :: YSTRING1   ! string less the begining line descriptor
+ CHARACTER(LEN=100)         :: YVAL       ! absolute value of the data of the line
 INTEGER                    :: IPOINT     ! index of '.' in the string YVAL
 INTEGER                    :: ILENGTH    ! length of the string YVAL
 INTEGER                    :: IFRACLENGTH! length of the fractional part in string YVAL
-CHARACTER(LEN=2)           :: YLENGTH    ! length of the string YVAL
-CHARACTER(LEN=2)           :: YFRACLENGTH! length of the fractional part in string YVAL
-CHARACTER(LEN=10)          :: YINTERNALFORMAT ! format to read YVAL in real ZVAL
+ CHARACTER(LEN=2)           :: YLENGTH    ! length of the string YVAL
+ CHARACTER(LEN=2)           :: YFRACLENGTH! length of the fractional part in string YVAL
+ CHARACTER(LEN=10)          :: YINTERNALFORMAT ! format to read YVAL in real ZVAL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !

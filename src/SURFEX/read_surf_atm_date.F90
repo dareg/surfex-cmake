@@ -53,12 +53,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling ISBA
-CHARACTER(LEN=3),  INTENT(IN)  :: HINIT       ! fields to initialize 'ALL', 'PRE', 'PGD'
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling ISBA
+ CHARACTER(LEN=3),  INTENT(IN)  :: HINIT       ! fields to initialize 'ALL', 'PRE', 'PGD'
 TYPE (DATE_TIME),  INTENT(OUT) :: TPTIME      ! time and date
 INTEGER,           INTENT(IN)  :: KLUOUT      ! logical unit of output listing
-CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
 INTEGER,           INTENT(IN)  :: KYEAR       ! current year (UTC)
 INTEGER,           INTENT(IN)  :: KMONTH      ! current month (UTC)
 INTEGER,           INTENT(IN)  :: KDAY        ! current day (UTC)
@@ -68,12 +68,12 @@ REAL,              INTENT(IN)  :: PTIME       ! current time since midnight (UTC
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28)              :: YFILE       ! file name
-CHARACTER(LEN=6)               :: YFILETYPE   ! file type
-CHARACTER(LEN=28)              :: YFILEPGD       ! file name
-CHARACTER(LEN=6)               :: YFILEPGDTYPE   ! file type
-CHARACTER(LEN=28)              :: YFILEPGDIN       ! file name
-CHARACTER(LEN=6)               :: YFILEPGDINTYPE   ! file type
+ CHARACTER(LEN=28)              :: YFILE       ! file name
+ CHARACTER(LEN=6)               :: YFILETYPE   ! file type
+ CHARACTER(LEN=28)              :: YFILEPGD       ! file name
+ CHARACTER(LEN=6)               :: YFILEPGDTYPE   ! file type
+ CHARACTER(LEN=28)              :: YFILEPGDIN       ! file name
+ CHARACTER(LEN=6)               :: YFILEPGDINTYPE   ! file type
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ YFILEPGDINTYPE = '      '
 !* look for a date in the namelist NAM_SURF_ATM
 !----------------------------------------------
 !
-CALL READ_PRE_SURFA_DAT_CONF(HPROGRAM,KLUOUT,TPTIME)
+ CALL READ_PRE_SURFA_DAT_CONF(HPROGRAM,KLUOUT,TPTIME)
 !
 !* If no date in the namelist, look for a file
 !  ---------------

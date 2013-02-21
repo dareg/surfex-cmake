@@ -156,56 +156,56 @@ IMPLICIT NONE
 !* general variables
 !  -----------------
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HISBA      ! type of ISBA version:
+ CHARACTER(LEN=*),     INTENT(IN)  :: HISBA      ! type of ISBA version:
 !                                               ! '2-L' (default)
 !                                               ! '3-L'
 !                                               ! 'DIF'
-CHARACTER(LEN=*),     INTENT(IN)  :: HPHOTO     ! Kind of photosynthesis
+ CHARACTER(LEN=*),     INTENT(IN)  :: HPHOTO     ! Kind of photosynthesis
 !                                               ! 'NON'
 !                                               ! 'AGS'
 !                                               ! 'LAI'
 !                                               ! 'AST'
 !                                               ! 'LST'
 LOGICAL,              INTENT(IN)  :: OTR_ML     ! new TR
-CHARACTER(LEN=*),     INTENT(IN)  :: HRUNOFF    ! surface runoff formulation
+ CHARACTER(LEN=*),     INTENT(IN)  :: HRUNOFF    ! surface runoff formulation
 !                                               ! 'WSAT'
 !                                               ! 'DT92'
 !                                               ! 'SGH ' Topmodel
-CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
-CHARACTER(LEN=*),     INTENT(IN)  :: HSOC       ! soil organic carbon profil option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSOC       ! soil organic carbon profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = SOC profile
-CHARACTER(LEN=*),     INTENT(IN)  :: HRAIN      ! Rainfall spatial distribution
+ CHARACTER(LEN=*),     INTENT(IN)  :: HRAIN      ! Rainfall spatial distribution
                                                 ! 'DEF' = No rainfall spatial distribution
                                                 ! 'SGH' = Rainfall exponential spatial distribution
-CHARACTER(LEN=*),     INTENT(IN)  :: HHORT      ! Horton runoff
+ CHARACTER(LEN=*),     INTENT(IN)  :: HHORT      ! Horton runoff
                                                 ! 'DEF' = no Horton runoff
                                                 ! 'SGH' = Horton runoff
-CHARACTER(LEN=*),     INTENT(IN)  :: HC1DRY     ! C1 for dry soil formulation
+ CHARACTER(LEN=*),     INTENT(IN)  :: HC1DRY     ! C1 for dry soil formulation
 !                                               ! 'DEF' Default: Giard and Bazile
 !                                               ! 'GB93' Giordani 1993, Braud 1993
 !                                               ! (discontinuous at WILT)
-CHARACTER(LEN=*),     INTENT(IN)  :: HSCOND     ! Thermal conductivity
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSCOND     ! Thermal conductivity
 !                                               ! 'NP89' = NP89 implicit method
 !                                               ! 'PL98' = Peters-Lidard et al. 1998 used
 !                                               ! for explicit computation of CG
-CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                               !         (Douville et al. 1995)
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)
-CHARACTER(LEN=*),     INTENT(IN)  :: HSNOWRES   ! 'DEF' = Default: Louis (ISBA)
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSNOWRES   ! 'DEF' = Default: Louis (ISBA)
 !                                               ! 'RIL' = CROCUS (Martin) method
 !                                               !  ISBA-SNOW3L turbulant exchange option
-CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! Specific heat
+ CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! Specific heat
 !                                               ! 'DRY' = dry Cp
 !                                               ! 'HUM' = humid Cp fct of qs
-CHARACTER(LEN=*),     INTENT(IN)  :: HSOILFRZ   ! soil freezing-physics option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSOILFRZ   ! soil freezing-physics option
 !                                               ! 'DEF'   Default (Boone et al. 2000; Giard and Bazile 2000)
 !                                               ! 'LWT'   phase changes as above, but relation between unfrozen 
 !                                                     water and temperature considered
-CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
+ CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
 !                                               ! MLCH' = include the insulating effect of leaf
 !                                               !         litter/mulch on the surface thermal cond.
 !                                               ! 'DEF' = no mulch effect
@@ -220,7 +220,7 @@ LOGICAL, INTENT(IN)               :: OGLACIER   ! True = Over permanent snow and
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                 ! False = No specific treatment
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -785,7 +785,7 @@ ENDIF
 !*      3.0    Explicit snow scheme
 !              --------------------
 !
-CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,         &
+ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,         &
            TPTIME, PTSTEP,                                                      &
            PVEGTYPE, PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                   &
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                          &
@@ -806,14 +806,14 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,         
 !*      4.0    Fraction of leaves occupied by intercepted water
 !              ------------------------------------------------
 !
-CALL WET_LEAVES_FRAC(PWR, PVEG, PWRMAX_CF, PZ0_WITH_SNOW, PLAI, ZWRMAX, ZDELTA)
+ CALL WET_LEAVES_FRAC(PWR, PVEG, PWRMAX_CF, PZ0_WITH_SNOW, PLAI, ZWRMAX, ZDELTA)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      5.0    Plant stress due to soil water deficit
 !              --------------------------------------
 !
-CALL SOILSTRESS(HISBA, ZF2,                 &
+ CALL SOILSTRESS(HISBA, ZF2,                 &
          PROOTFRAC, PWSAT, PWFC, PWWILT,    &
          PWG, PWGI, KWG_LAYER, ZF2WGHT, ZF5 )  
 !
@@ -859,7 +859,7 @@ ENDIF
 !*      8.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !
-CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF,                                           &
+ CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF,                                           &
     PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
     PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
     PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
@@ -872,7 +872,7 @@ CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF,                                           
 !*      9.0    Resolution of the surface and soil energy budget
 !              ------------------------------------------------
 !
-CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             &
+ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             &
         PSODELX, PUREF,                                                         &
         PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,        &
         PPEQ_B_COEF, PVMOD, PCD, PTG, PTSTEP, PSNOWALB, PSW_RAD, PLW_RAD,       &
@@ -898,7 +898,7 @@ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             
 !  '3-L' : they represent                    flood + snow-flood-free  albedo and emissivity
 !*******************************************************************************
 !
-CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP, PTSTEP, PSODELX,       &
+ CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP, PTSTEP, PSODELX,       &
            PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC, ZUSTAR2_IC,                        &
            PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                             &
            PLAI, PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,&
@@ -941,7 +941,7 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
 !*     11.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
-CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, OGLACIER, OFLOOD, PTSTEP, PVEGTYPE,      &
+ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, OGLACIER, OFLOOD, PTSTEP, PVEGTYPE,      &
      PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
      PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, PVEG, ZWRMAX, PMELT,         &
      ZDWGI1, ZDWGI2, PLEGI, PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,       &     
@@ -965,7 +965,7 @@ PDRAIN(:)=PDRAIN(:)+ZWGI_EXCESS(:)
 !  of 3-L snow scheme
 !
 !
-CALL ISBA_SNOW_AGR( HSNOW_ISBA,                                   &
+ CALL ISBA_SNOW_AGR( HSNOW_ISBA,                                   &
           ZEMIST, ZALBT,                                          &
           PPSN, PPSNG, PPSNV,                                     &
           PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &

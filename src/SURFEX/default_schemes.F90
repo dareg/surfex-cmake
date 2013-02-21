@@ -48,11 +48,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
-CHARACTER(LEN=6),  INTENT(OUT) :: HNATURE  ! scheme for natural surfaces
-CHARACTER(LEN=6),  INTENT(OUT) :: HSEA     ! scheme for sea
-CHARACTER(LEN=6),  INTENT(OUT) :: HTOWN    ! scheme for towns
-CHARACTER(LEN=6),  INTENT(OUT) :: HWATER   ! scheme for inland water
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
+ CHARACTER(LEN=6),  INTENT(OUT) :: HNATURE  ! scheme for natural surfaces
+ CHARACTER(LEN=6),  INTENT(OUT) :: HSEA     ! scheme for sea
+ CHARACTER(LEN=6),  INTENT(OUT) :: HTOWN    ! scheme for towns
+ CHARACTER(LEN=6),  INTENT(OUT) :: HWATER   ! scheme for inland water
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !

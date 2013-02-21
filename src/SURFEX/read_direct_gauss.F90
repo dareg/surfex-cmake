@@ -63,11 +63,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
-CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
-CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
-CHARACTER(LEN=20), INTENT(IN) :: HFIELD        ! Name of the field.
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
+ CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
+ CHARACTER(LEN=20), INTENT(IN) :: HFIELD        ! Name of the field.
 !
 !*    0.2    Declaration of local variables read in the data file head
 !            ---------------------------------------------------------
@@ -87,16 +87,16 @@ INTEGER :: IGLB, IGLBHDR              ! logical units
 INTEGER :: ILUOUT                     ! output listing logical unit
 INTEGER :: IERR                       ! return codes
 !
-CHARACTER(LEN=28) :: YFILENAME        ! Name of the field file without header
-CHARACTER(LEN=28) :: YFILEHDR         ! Name of the field file header
+ CHARACTER(LEN=28) :: YFILENAME        ! Name of the field file without header
+ CHARACTER(LEN=28) :: YFILEHDR         ! Name of the field file header
 !
-CHARACTER(LEN=7)  :: YTYPE            ! type of numerical field stored in the
+ CHARACTER(LEN=7)  :: YTYPE            ! type of numerical field stored in the
 !                                     ! direct access file ('INTEGER','REAL   ')
 INTEGER           :: IBITS            ! number of bits of a record in the
 !                                     ! direct access file (16,32,64)
 INTEGER :: JLOOP                      ! loop index
-CHARACTER(LEN=100):: YSTRING          ! string
-CHARACTER(LEN=88 ):: YSTRING1         ! part of string STRING
+ CHARACTER(LEN=100):: YSTRING          ! string
+ CHARACTER(LEN=88 ):: YSTRING1         ! part of string STRING
 INTEGER           :: IINDEX           ! index of a character in string STRING1
 !
 REAL    :: ZDLAT                      ! latitude mesh in the data file
@@ -118,13 +118,13 @@ REAL    :: ZLATMAX                    ! maximum latitude of mask mesh
 REAL    :: ZSHIFT                     ! shift on longitudes
 REAL    :: ZFACT                      ! Factor integer to real
 !
-CHARACTER,        DIMENSION(:), ALLOCATABLE :: IVALUE8 ! value of a data point
-CHARACTER(LEN=2), DIMENSION(:), ALLOCATABLE :: IVALUE16 ! value of a data point
-CHARACTER(LEN=4), DIMENSION(:), ALLOCATABLE :: IVALUE32R ! value of a data point
+ CHARACTER,        DIMENSION(:), ALLOCATABLE :: IVALUE8 ! value of a data point
+ CHARACTER(LEN=2), DIMENSION(:), ALLOCATABLE :: IVALUE16 ! value of a data point
+ CHARACTER(LEN=4), DIMENSION(:), ALLOCATABLE :: IVALUE32R ! value of a data point
 INTEGER (KIND=4), DIMENSION(:), ALLOCATABLE :: IVALUE32 ! value of a data point
 INTEGER (KIND=8), DIMENSION(:), ALLOCATABLE :: IVALUE64 ! value of a data point
 REAL    (KIND=4), DIMENSION(:), ALLOCATABLE :: ZVALUE32 ! value of a data point
-CHARACTER(LEN=8), DIMENSION(:), ALLOCATABLE :: ZVALUE64 ! value of a data point
+ CHARACTER(LEN=8), DIMENSION(:), ALLOCATABLE :: ZVALUE64 ! value of a data point
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: ZVALUE             ! value of a record of data points
 !
@@ -141,7 +141,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_DIRECT_GAUSS',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.     Openning of global field
 !            ------------------------
@@ -155,7 +155,7 @@ YFILEHDR =ADJUSTL(ADJUSTR(HFILENAME)//'.hdr')
 !*    1.2    Openning of header
 !            ------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,IGLBHDR,YFILEHDR)
+ CALL OPEN_NAMELIST(HPROGRAM,IGLBHDR,YFILEHDR)
 !
 !*    1.3    Reading in header of direct access characteristics
 !            --------------------------------------------------
@@ -207,14 +207,14 @@ ENDIF
 !*    2.1    Head of data file
 !            -----------------
 !
-CALL READHEAD(IGLBHDR,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
+ CALL READHEAD(IGLBHDR,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
                 INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR)  
 IF (IERR/=0) CALL ABOR1_SFX('READ_DIRECT_GAUSS: PB IN FILE HEADER')
 !
 !*    2.2    Closing of header
 !            -----------------
 !
-CALL CLOSE_NAMELIST(HPROGRAM,IGLBHDR)
+ CALL CLOSE_NAMELIST(HPROGRAM,IGLBHDR)
 !
 !*    2.3    Dimension of work arrays
 !            ------------------------
@@ -252,7 +252,7 @@ ALLOCATE (ZVALUE64(INBCOL))
 !*    7.2    Openning of direct access file
 !            ------------------------------
 !
-CALL OPEN_FILE(HPROGRAM,IGLB,YFILENAME,'UNFORMATTED',           &
+ CALL OPEN_FILE(HPROGRAM,IGLB,YFILENAME,'UNFORMATTED',           &
                  HACTION='READ',HACCESS='DIRECT',KRECL=IRECLENGTH )  
 !
 !----------------------------------------------------------------------------
@@ -487,7 +487,7 @@ DEALLOCATE (IVALUE64)
 DEALLOCATE (ZVALUE32)
 DEALLOCATE (ZVALUE64)
 !
-CALL CLOSE_FILE(HPROGRAM,IGLB)
+ CALL CLOSE_FILE(HPROGRAM,IGLB)
 !
 !-------------------------------------------------------------------------------
 !

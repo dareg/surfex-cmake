@@ -40,9 +40,9 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
 INTEGER,           INTENT(IN)  :: KLU      ! number of points
-CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! Flag to know if one initializes:
+ CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! Flag to know if one initializes:
 !                                          ! 'ALL' : all variables for a run
 !                                          ! 'PRE' : only variables to build 
 !                                          !         an initial file
@@ -53,25 +53,25 @@ REAL, DIMENSION(:),INTENT(IN)  :: PRHOA    ! air density
 !
 INTEGER             :: IRESP                 !   File 
 INTEGER             :: ILUOUT                ! output listing logical unit
-CHARACTER (LEN=16)  :: YRECFM                ! management
-CHARACTER (LEN=100) :: YCOMMENT              ! variables
+ CHARACTER (LEN=16)  :: YRECFM                ! management
+ CHARACTER (LEN=100) :: YCOMMENT              ! variables
 INTEGER             :: JSPEC                 ! Loop index for chemical species
 INTEGER             :: JSNAP                 ! Loop index for SNAP categories
 !
-CHARACTER(LEN=40)   :: YSPEC_NAME            ! species name
+ CHARACTER(LEN=40)   :: YSPEC_NAME            ! species name
 !
 INTEGER             :: IVERSION       ! version of surfex file being read
 INTEGER             :: IBUG           ! version of SURFEX bugfix
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CH_INIT_SNAP_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !* ascendant compatibility
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUG,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUG,IRESP)
 !
 !*      1.     Chemical Emission snap configuration
 !              ------------------------------------

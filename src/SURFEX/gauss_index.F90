@@ -52,20 +52,20 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE
-CHARACTER(LEN=6),  INTENT(IN)  :: HFLAG
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFLAG
 LOGICAL,           INTENT(IN)  :: OINDEX_STORE      ! Store index in a binary file
-CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_1KM
-CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_10KM
-CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_100KM
-CHARACTER(LEN=5), INTENT(INOUT):: HRES_COMP
+ CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_1KM
+ CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_10KM
+ CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_100KM
+ CHARACTER(LEN=5), INTENT(INOUT):: HRES_COMP
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=5)            :: YRES         ! Resolution in file 
+ CHARACTER(LEN=5)            :: YRES         ! Resolution in file 
 REAL, DIMENSION(:), POINTER :: ZLAT         ! latitude of data points
 REAL, DIMENSION(:), POINTER :: ZLON         ! longitude of data points
 REAL                        :: ZDLAT        ! latitude mesh in the data file
@@ -74,7 +74,7 @@ INTEGER                     :: INDIM        ! number of grid point in file
 INTEGER                     :: INLON        ! number of longitude rows in file
 INTEGER                     :: INLAT        ! number of latitude  rows in file
 INTEGER                     :: ILUOUT       ! output listing logical unit
-CHARACTER(LEN=28)           :: YINDEX       ! file name for gauss index           
+ CHARACTER(LEN=28)           :: YINDEX       ! file name for gauss index           
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: IINDEX ! mesh index of all input points
                                              ! 0 indicates the point is out of the domain
@@ -88,14 +88,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GAUSS_INDEX',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !*    2.      Read configuration
 !-------------------------------------------------------------------------------
 !
 !
-CALL READ_GAUSS_CONF(HPROGRAM,HFILE,HINDEX_1KM,HINDEX_10KM,HINDEX_100KM,  &
+ CALL READ_GAUSS_CONF(HPROGRAM,HFILE,HINDEX_1KM,HINDEX_10KM,HINDEX_100KM,  &
                        YINDEX,YRES,INDIM,INLON,INLAT,ZDLON,ZDLAT,ZLON,ZLAT)  
 !
 IF(HRES_COMP==YRES .AND. LHOOK) CALL DR_HOOK('GAUSS_INDEX',1,ZHOOK_HANDLE)

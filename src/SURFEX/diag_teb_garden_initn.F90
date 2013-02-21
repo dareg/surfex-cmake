@@ -66,13 +66,13 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN)         :: KLU       ! size of arrays
 INTEGER, INTENT(IN)         :: KSW       ! spectral bands
-CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
+ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
+ CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

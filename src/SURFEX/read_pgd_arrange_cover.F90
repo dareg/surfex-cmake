@@ -49,7 +49,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
 LOGICAL,           INTENT(OUT) :: OWATER_TO_NATURE ! T: Change Wetland treated as inland water into nature
 LOGICAL,           INTENT(OUT) :: OTOWN_TO_ROCK    ! T: Change Town into Rock 
 !
@@ -84,15 +84,15 @@ LTOWN_TO_ROCK    = .FALSE.
 !
 !*       2.    opening of namelist
 ! 
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*       3.    reading of namelist
 ! 
-CALL POSNAM(ILUNAM,'NAM_PGD_ARRANGE_COVER',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_PGD_ARRANGE_COVER',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PGD_ARRANGE_COVER)
 !
 !-------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ OTOWN_TO_ROCK    = LTOWN_TO_ROCK
 !
 !*       5.    close namelist file
 ! 
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 IF (LHOOK) CALL DR_HOOK('READ_PGD_ARRANGE_COVER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

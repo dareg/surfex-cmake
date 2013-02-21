@@ -69,7 +69,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*),   INTENT(IN)  :: HROUGH         ! type of roughness length
+ CHARACTER(LEN=*),   INTENT(IN)  :: HROUGH         ! type of roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PALFA          ! wind direction from J axis (clockwise)
 REAL, DIMENSION(:), INTENT(IN)  :: PZREF          ! height of atmospheric level
 REAL, DIMENSION(:), INTENT(IN)  :: PUREF          ! reference height for wind

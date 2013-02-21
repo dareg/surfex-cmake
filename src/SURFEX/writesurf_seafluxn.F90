@@ -47,25 +47,25 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: JMTH, INMTH
-CHARACTER(LEN=2 ) :: YMTH
+ CHARACTER(LEN=2 ) :: YMTH
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',0,ZHOOK_HANDLE)
-CALL WRITESURF_OCEAN_n(HPROGRAM)
+ CALL WRITESURF_OCEAN_n(HPROGRAM)
 !
 !*       3.     Prognostic fields:
 !               -----------------
@@ -87,7 +87,7 @@ ENDIF
 !
 YRECFM='SST'
 YCOMMENT='SST'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XSST(:),IRESP,HCOMMENT=YCOMMENT)  
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XSST(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !-------------------------------------------------------------------------------
 !
@@ -98,7 +98,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XSST(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='Z0SEA'
 YCOMMENT='Z0SEA (m)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -107,7 +107,7 @@ CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='DTCUR'
 YCOMMENT='s'
-CALL WRITE_SURF(HPROGRAM,YRECFM,TTIME,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,TTIME,IRESP,HCOMMENT=YCOMMENT)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',1,ZHOOK_HANDLE)
 !
 !

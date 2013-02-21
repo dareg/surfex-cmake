@@ -219,7 +219,7 @@ END SELECT
 !*       7.    Masking where there is no snow
 !              ------------------------------
 !
-CALL MKFLAG_SNOW(TPSNOW)
+ CALL MKFLAG_SNOW(TPSNOW)
 !
 !-------------------------------------------------------------------------------------
 DEALLOCATE(ZWSNOW_LS)

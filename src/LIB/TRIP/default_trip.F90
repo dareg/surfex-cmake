@@ -45,12 +45,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=3),  INTENT(OUT) :: HGROUNDW      !Use groundwater scheme
+ CHARACTER(LEN=3),  INTENT(OUT) :: HGROUNDW      !Use groundwater scheme
                                                 !'DEF' = No groundwater scheme
                                                 !'CST' = Constant transfert time
                                                 !'VAR' = Textural dependence of transfert time
 !                                                
-CHARACTER(LEN=3),  INTENT(OUT) :: HVIT          !Type of stream flow velocity
+ CHARACTER(LEN=3),  INTENT(OUT) :: HVIT          !Type of stream flow velocity
                                                 !'DEF' = constant and uniforme v=0.5m/s
                                                 !'VAR' = variable velocity
 !                                                

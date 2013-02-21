@@ -298,13 +298,13 @@ ZQSAT(:) = QSATI(ZTS_SNOW(:), PPS(:) )
 !* snow is present on all the considered surface.
 !* computation occurs where snow is and/or falls.
 !
-CALL SURFACE_RI(ZTS_SNOW, ZQSAT, ZEXNS, ZEXNA, PTA, PQA, &
+ CALL SURFACE_RI(ZTS_SNOW, ZQSAT, ZEXNS, ZEXNA, PTA, PQA, &
                   PZREF, PUREF, ZDIRCOSZW, PVMOD, ZRI      )  
 !
 !*      1.2.4  Aerodynamical conductance
 !              -------------------------
 !
-CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, ZZ0, ZZ0H, ZAC, ZRA, ZCH)
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, ZZ0, ZZ0H, ZAC, ZRA, ZCH)
 !
 !-------------------------------------------------------------------------------
 !

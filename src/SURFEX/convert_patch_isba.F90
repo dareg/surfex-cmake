@@ -118,13 +118,13 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 INTEGER,                INTENT(IN)    :: KDECADE
 INTEGER,                INTENT(IN)    :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
-CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,                INTENT(IN)    :: OAGRIP
-CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(IN)   :: PWG1
 !
@@ -179,7 +179,7 @@ REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PIRRIG
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=3)  :: YTREE, YNAT, YLAI, YVEG, YBAR, YDIF
+ CHARACTER(LEN=3)  :: YTREE, YNAT, YLAI, YVEG, YBAR, YDIF
 !
 INTEGER               :: JLAYER    ! loop counter on layers
 INTEGER               :: JVEGTYPE  ! loop counter on vegtypes

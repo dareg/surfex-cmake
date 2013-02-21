@@ -74,14 +74,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER                               :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
 INTEGER                               :: JI             ! loop index
 INTEGER                               :: JTIME          ! loop index
 INTEGER                               :: JLAYER         ! loop index
@@ -98,14 +98,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_PAR_N',0,ZHOOK_HANDLE)
 !
 YRECFM='GR_NTIME'
-CALL READ_SURF(HPROGRAM,YRECFM,NTIME_GR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,NTIME_GR,IRESP)
 !
 YRECFM='GR_LAYER'
-CALL READ_SURF(HPROGRAM,YRECFM,NLAYER_GR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,NLAYER_GR,IRESP)
 !
 ! Read type of green roof
 YRECFM='D_TYPE_GR'
-CALL READ_SURF(HPROGRAM,YRECFM,CTYP_GR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,CTYP_GR,IRESP)
 !
 ! Read green roof OM fraction
 ALLOCATE(XPAR_OM_GR     (NDIM,NLAYER_GR))
@@ -243,7 +243,7 @@ IF (CTYP_GR == 'SEDUM') XPAR_VEGTYPE(:, NVT_TROG) = 1.
 !
 ! Dry/Wet soil albedos: (* Will need to account for XOM_GR eventually *)
 !CALL DRY_WET_SOIL_ALBEDOS_1D(XSAND_GR(:,1),XCLAY_GR(:,1),                         &
-CALL DRY_WET_SOIL_ALBEDOS_1D(XPAR_SAND_GR(:,1),XPAR_CLAY_GR(:,1),              &
+ CALL DRY_WET_SOIL_ALBEDOS_1D(XPAR_SAND_GR(:,1),XPAR_CLAY_GR(:,1),              &
                                XPAR_VEGTYPE,                                   &
                                XPAR_ALBNIR_DRY,XPAR_ALBVIS_DRY,XPAR_ALBUV_DRY, &
                                XPAR_ALBNIR_WET,XPAR_ALBVIS_WET,XPAR_ALBUV_WET  ) 

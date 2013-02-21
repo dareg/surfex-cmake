@@ -71,9 +71,9 @@ IMPLICIT NONE
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:), INTENT(IN)  :: PVEGTYPE  ! fraction of each cover class
 REAL, DIMENSION(:,:), INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,              INTENT(IN), OPTIONAL :: KDECADE ! current month
 !

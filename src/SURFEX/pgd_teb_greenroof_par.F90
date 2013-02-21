@@ -61,7 +61,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)             :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)             :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -84,7 +84,7 @@ INTEGER, PARAMETER                          :: JPVEGTYPE_MAX  = 12
 ! declaration of namelist variables
 INTEGER                                     :: ILAYER_GR      ! number of green roof physical layers
 INTEGER                                     :: ITIME_GR       ! ntime for green roof parameters
-CHARACTER(LEN=5)                            :: YTYP_GR        ! type of green roof
+ CHARACTER(LEN=5)                            :: YTYP_GR        ! type of green roof
 !
 ! uniform value
 !
@@ -95,17 +95,17 @@ REAL,DIMENSION(NTIME_GR_MAX)               :: ZUNIF_LAI_GR     ! LAI of green ro
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_OM_GR      ! fraction of organic matter (OM) in green roof layer
-CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
-CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
-CHARACTER(LEN=28),DIMENSION(NTIME_GR_MAX)  :: YFNAM_LAI_GR     ! LAI  of green roof
+ CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_OM_GR      ! fraction of organic matter (OM) in green roof layer
+ CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
+ CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: YFNAM_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
+ CHARACTER(LEN=28),DIMENSION(NTIME_GR_MAX)  :: YFNAM_LAI_GR     ! LAI  of green roof
 !
 ! type of files containing data
 !
-CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_OM_GR      ! fraction of organic matter (OM) in green roof layer
-CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
-CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
-CHARACTER(LEN=6 ),DIMENSION(NTIME_GR_MAX)  :: YFTYP_LAI_GR     ! LAI  of green roof
+ CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_OM_GR      ! fraction of organic matter (OM) in green roof layer
+ CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
+ CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: YFTYP_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
+ CHARACTER(LEN=6 ),DIMENSION(NTIME_GR_MAX)  :: YFTYP_LAI_GR     ! LAI  of green roof
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ YFTYP_LAI_GR     = '      '
 !*    2.      Input files for green roof characteristics
 !             -------------------------------------------
 !
-CALL READ_NAM_PGD_TEB_GREENROOF(HPROGRAM, ITIME_GR,ILAYER_GR,YTYP_GR,                     &
+ CALL READ_NAM_PGD_TEB_GREENROOF(HPROGRAM, ITIME_GR,ILAYER_GR,YTYP_GR,                     &
                                 ZUNIF_OM_GR, ZUNIF_CLAY_GR, ZUNIF_SAND_GR, ZUNIF_LAI_GR,  &
                                 YFNAM_OM_GR, YFNAM_CLAY_GR, YFNAM_SAND_GR, YFNAM_LAI_GR,  &
                                 YFTYP_OM_GR, YFTYP_CLAY_GR, YFTYP_SAND_GR, YFTYP_LAI_GR)
@@ -151,7 +151,7 @@ CTYP_GR            = YTYP_GR
 !*           Coherence of options for the green roof type
 !             -------------------------------------------
 !
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CTYP_GR',CTYP_GR,'GRASS','SEDUM')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CTYP_GR',CTYP_GR,'GRASS','SEDUM')
 !
 !
 ALLOCATE(XPAR_OM_GR       (NDIM,NLAYER_GR))

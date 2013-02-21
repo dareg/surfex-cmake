@@ -53,12 +53,12 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PVAR   ! variable to write in the file
-CHARACTER(LEN=30),    INTENT(IN) :: HVAR   ! end name of the file
+ CHARACTER(LEN=30),    INTENT(IN) :: HVAR   ! end name of the file
 !
 !*      0.2    declarations of local variables
-CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
-CHARACTER(LEN=40)                  :: CFMT
-CHARACTER(*),PARAMETER     :: YPFMT1="('(',I4,'(F10.3,')"
+ CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
+ CHARACTER(LEN=40)                  :: CFMT
+ CHARACTER(*),PARAMETER     :: YPFMT1="('(',I4,'(F10.3,')"
 INTEGER                    :: JWRK1,JJ,JI,JCAT
 INTEGER                    :: IINDEX ! reference number of the pixel
 INTEGER                    :: IUNIT,ILUOUT
@@ -72,7 +72,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_FILE_MAP',0,ZHOOK_HANDLE)
 !*       0.     Initialization:
 !               ---------------
 !
-CALL GET_LUOUT('OFFLIN',ILUOUT)
+ CALL GET_LUOUT('OFFLIN',ILUOUT)
 
 ZOUT = XUNDEF
 !

@@ -52,14 +52,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! choice of fields to initialize
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! choice of fields to initialize
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=12) :: YRECFM       ! Name of the article to be read
-CHARACTER(LEN=3)  :: YREAD
+ CHARACTER(LEN=12) :: YRECFM       ! Name of the article to be read
+ CHARACTER(LEN=3)  :: YREAD
 INTEGER :: ILU     ! 1D physical dimension
 INTEGER :: IRESP   ! Error code after redding
 INTEGER :: JLAYER  ! loop counter on layers
@@ -71,15 +71,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* 1D physical dimension
 !
 IF (LHOOK) CALL DR_HOOK('READ_SSO_CANOPY_N',0,ZHOOK_HANDLE)
-CALL GET_TYPE_DIM_n('FULL  ',ILU)
+ CALL GET_TYPE_DIM_n('FULL  ',ILU)
 !
 !* flag to use or not canopy levels
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF (IVERSION<6.OR.HINIT=='PGD'.OR. HINIT=='PRE') THEN
   GCANOPY = .FALSE.
@@ -163,7 +163,7 @@ ENDIF
 ALLOCATE(XDZ (ILU,NLVL))
 ALLOCATE(XZF (ILU,NLVL))
 ALLOCATE(XDZF(ILU,NLVL))
-CALL CANOPY_GRID(ILU,NLVL,XZ,XZF,XDZ,XDZF)
+ CALL CANOPY_GRID(ILU,NLVL,XZ,XZF,XDZ,XDZF)
 IF (LHOOK) CALL DR_HOOK('READ_SSO_CANOPY_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

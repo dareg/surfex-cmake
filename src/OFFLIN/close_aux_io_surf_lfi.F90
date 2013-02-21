@@ -43,8 +43,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -54,7 +54,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
-CALL FMCLOS(HFILE,'KEEP',CLUOUT_LFI,IRET)
+ CALL FMCLOS(HFILE,'KEEP',CLUOUT_LFI,IRET)
 !
 CMASK='      '
 DEALLOCATE(NMASK)

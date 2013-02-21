@@ -52,18 +52,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally (on final soil grid)
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: INI            ! total 1D dimension
 INTEGER           :: IPATCH         ! number of patch
@@ -79,8 +79,8 @@ INTEGER                             :: ICURRENT_PATCH ! current TEB patch to be 
 INTEGER                             :: IVERSION       ! SURFEX version
 INTEGER                             :: IBUGFIX        ! SURFEX bug version
 LOGICAL                             :: GOLD_NAME      ! old name flag for temperatures
-CHARACTER(LEN=12)                   :: YSURF     ! type of field
-CHARACTER(LEN=3)                    :: YPATCH    ! indentificator for TEB patch
+ CHARACTER(LEN=12)                   :: YSURF     ! type of field
+ CHARACTER(LEN=3)                    :: YPATCH    ! indentificator for TEB patch
 LOGICAL                         :: GTEB      ! flag if TEB fields are present
 LOGICAL                         :: GGARDEN   ! T if gardens are present in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -101,17 +101,17 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
 !
 !* reading of version of the file being read
-CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !* reads if TEB fields exist in the input file
-CALL TOWN_PRESENCE(HFILEPGDTYPE,GTEB)
+ CALL TOWN_PRESENCE(HFILEPGDTYPE,GTEB)
 !
 IF (GTEB) THEN
   CALL READ_TEB_PATCH(HFILEPGDTYPE,ITEB_PATCH)

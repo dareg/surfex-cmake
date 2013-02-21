@@ -18,7 +18,7 @@ USE MODD_GRID_BUFFER, ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! originating model
 REAL, DIMENSION(:), POINTER       :: PMASK     ! Land mask
 !
 INTEGER                           :: IRET      ! return code
@@ -59,7 +59,7 @@ USE MODD_GRID_BUFFER,  ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
@@ -98,7 +98,7 @@ USE MODD_GRID_BUFFER,  ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Buffer originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Buffer originating model
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
@@ -138,7 +138,7 @@ USE MODD_GRID_BUFFER,  ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
@@ -175,7 +175,7 @@ USE MODD_GRID_BUFFER,  ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
@@ -210,7 +210,7 @@ USE MODD_GRID_BUFFER,  ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
@@ -247,7 +247,7 @@ USE MODD_GRID_BUFFER,  ONLY : NNI
 USE MODI_READ_BUFFER
 !
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
@@ -312,7 +312,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 !
@@ -339,7 +339,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_WG',0,ZHOOK_HANDLE)
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('CLAY  ',ZFIELD,IRET)
+ CALL READ_BUFFER('CLAY  ',ZFIELD,IRET)
 !
 ! if not available, the model is not ISBA
 IF (IRET /= 0) THEN
@@ -358,7 +358,7 @@ END IF
 !     ------------------------------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('SAND  ',ZFIELD,IRET)
+ CALL READ_BUFFER('SAND  ',ZFIELD,IRET)
 !
 ! if not available, the model is not ISBA (IWMODE=1)
 IF (GISBA) THEN
@@ -377,7 +377,7 @@ END IF
 !     ---------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('WG1   ',ZFIELD,IRET)
+ CALL READ_BUFFER('WG1   ',ZFIELD,IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('MODE_READ_BUFFER: SOIL MOISTURE LEVEL 1 MISSING')
 END IF
@@ -392,7 +392,7 @@ DEALLOCATE(ZFIELD)
 !     ---------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('WG2   ',ZFIELD,IRET)
+ CALL READ_BUFFER('WG2   ',ZFIELD,IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('MODE_READ_BUFFER: SOIL MOISTURE LEVEL 2 MISSING')
 END IF
@@ -514,7 +514,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 !
@@ -540,7 +540,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_WGI',0,ZHOOK_HANDLE)
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('CLAY  ',ZFIELD,IRET)
+ CALL READ_BUFFER('CLAY  ',ZFIELD,IRET)
 !
 ! if not available, the model is not ISBA (IWMODE=1)
 IF (IRET /= 0) THEN
@@ -559,7 +559,7 @@ END IF
 !     ------------------------------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('SAND  ',ZFIELD,IRET)
+ CALL READ_BUFFER('SAND  ',ZFIELD,IRET)
 !
 ! if not available, the model is not ISBA (IWMODE=1)
 IF (GISBA) THEN
@@ -585,7 +585,7 @@ ALLOCATE(ZWGI(NNI,2))
 !     ---------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('WGI1  ',ZFIELD,IRET)
+ CALL READ_BUFFER('WGI1  ',ZFIELD,IRET)
 IF (IRET == 0) THEN
   WRITE (KLUOUT,'(A)') ' -> Soil ice level 1 is present'
   ZWGI(:,1) = ZFIELD(:)
@@ -601,7 +601,7 @@ END IF
 !     ---------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER('WGI2  ',ZFIELD,IRET)
+ CALL READ_BUFFER('WGI2  ',ZFIELD,IRET)
 IF (IRET == 0) THEN
   WRITE (KLUOUT,'(A)') ' -> Soil ice level 2 is present'
   ZWGI(:,2) = ZFIELD(:)
@@ -702,7 +702,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 !
@@ -732,7 +732,7 @@ ALLOCATE(PD    (NNI,3))
 !     -----------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER_TS(KLUOUT,HINMODEL,ZFIELD)
+ CALL READ_BUFFER_TS(KLUOUT,HINMODEL,ZFIELD)
 !
 PFIELD(:,1) = ZFIELD(:)
 PD    (:,1) = 0.
@@ -744,7 +744,7 @@ DEALLOCATE(ZFIELD)
 !     ---------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER_T2(KLUOUT,HINMODEL,ZFIELD)
+ CALL READ_BUFFER_T2(KLUOUT,HINMODEL,ZFIELD)
 !
 PFIELD(:,2) = ZFIELD(:)
 PD    (:,2) = 0.2         ! deep temperature depth assumed equal to 0.2m
@@ -783,7 +783,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   POINTER       :: PFIELD    ! field to initialize
 !
 !
@@ -811,7 +811,7 @@ ALLOCATE(PFIELD(NNI))
 ! 2.  Search and read level 1 (kg/m2)
 !     -----------------------
 !
-CALL READ_BUFFER('SNOW  ',PFIELD,IRET)
+ CALL READ_BUFFER('SNOW  ',PFIELD,IRET)
 !
 ! conversion to snow depth (meters)
 !
@@ -842,7 +842,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:),   POINTER       :: PFIELD    ! field to initialize
 !
 !
@@ -870,7 +870,7 @@ ALLOCATE(PFIELD(NNI))
 ! 2.  Search and read level 1 (and its depth)
 !     -----------------------
 !
-CALL READ_BUFFER('SNOW  ',PFIELD,IRET)
+ CALL READ_BUFFER('SNOW  ',PFIELD,IRET)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_SNOW_VEG',1,ZHOOK_HANDLE)
 !
 !
@@ -895,7 +895,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL,                 INTENT(IN)    :: PTI       ! internal temperature
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! normalized grid
@@ -926,7 +926,7 @@ ALLOCATE(PD    (NNI,3))
 !     -----------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER_TS(KLUOUT,HINMODEL,ZFIELD)
+ CALL READ_BUFFER_TS(KLUOUT,HINMODEL,ZFIELD)
 !
 PFIELD(:,1) = ZFIELD(:)
 PD    (:,1) = 0.
@@ -971,7 +971,7 @@ IMPLICIT NONE
 !  ---------------
 !
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL,                 INTENT(IN)    :: PTI       ! internal temperature
 REAL, DIMENSION(:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
@@ -1013,7 +1013,7 @@ DEALLOCATE(ZFIELD)
 !     ---------------------
 !
 ALLOCATE (ZFIELD(NNI))
-CALL READ_BUFFER_T2(KLUOUT,HINMODEL,ZFIELD)
+ CALL READ_BUFFER_T2(KLUOUT,HINMODEL,ZFIELD)
 !
 PFIELD(:,2) = ZFIELD(:)
 PD    (:,2) = 0.5         ! deep temperature depth assumed at half of the floor

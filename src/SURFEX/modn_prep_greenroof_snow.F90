@@ -30,7 +30,7 @@
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=3)  :: CSNOW          ! snow scheme
+ CHARACTER(LEN=3)  :: CSNOW          ! snow scheme
 INTEGER           :: NSNOW_LAYER    ! number of snow layers
 !
 END MODULE MODN_PREP_GREENROOF_SNOW

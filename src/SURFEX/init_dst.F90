@@ -19,7 +19,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !PASSED VARIABLES
-CHARACTER(LEN=6), INTENT(IN)      :: HPROGRAM              !Passing unit
+ CHARACTER(LEN=6), INTENT(IN)      :: HPROGRAM              !Passing unit
 !
 INTEGER, DIMENSION(:), POINTER :: KSIZE_NATURE_P
 INTEGER, DIMENSION(:,:), POINTER :: KR_NATURE_P
@@ -27,7 +27,7 @@ INTEGER, INTENT(IN)  :: KPATCH
 REAL, DIMENSION(:,:,:), POINTER :: PVEGTYPE_PATCH
 !
 !LOCAL VARIABLES
-CHARACTER(LEN=4)    :: CRGUNIT               ! type of log-normal geometric mean radius
+ CHARACTER(LEN=4)    :: CRGUNIT               ! type of log-normal geometric mean radius
 INTEGER             :: JVEG                  ! Counter for vegetation classes
 INTEGER             :: JVEG_IN               ! Vegetation index
 INTEGER             :: JPATCH                ! Counter for patches
@@ -39,7 +39,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !get output listing unit
 IF (LHOOK) CALL DR_HOOK('INIT_DST',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !Allocate memory for the real values which will be used by the model
 ALLOCATE(XEMISRADIUS_DST(NDSTMDE))

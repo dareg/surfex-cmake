@@ -77,7 +77,7 @@ INTEGER                            :: JCAT, JJ, JI ! Loop variables
 INTEGER                            :: JSTEP ! current or future integration steps
 REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZRUN_TOROUT ! stock d'eau dans rivière pas dans debit ! Kg/m2
 REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZDR_TOROUT ! stock d'eau dans rivière pas dans debit ! Kg/m2
-CHARACTER(LEN=3)                   :: YSTEP
+ CHARACTER(LEN=3)                   :: YSTEP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROUTING',0,ZHOOK_HANDLE)

@@ -50,7 +50,7 @@ IMPLICIT NONE
 !
 INTEGER,           INTENT(IN)   :: KLUOUT     ! output listing logical unit
 INTEGER,           INTENT(IN)   :: KLUNAM     ! namelist file logical unit
-CHARACTER(LEN=10), INTENT(IN)   :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=10), INTENT(IN)   :: HGRID      ! type of horizontal grid
 INTEGER,           INTENT(INOUT):: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 INTEGER,           INTENT(INOUT):: KL         ! number of points
@@ -68,11 +68,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('GRID_MODIF',0,ZHOOK_HANDLE)
 IGRID_PAR = 0
 ALLOCATE(ZGRID_PAR(0))
-CALL GRID_MODIFICATION(KLUOUT,KLUNAM,HGRID,KGRID_PAR,KL,PGRID_PAR,IGRID_PAR,IL,.FALSE.,ZGRID_PAR)
+ CALL GRID_MODIFICATION(KLUOUT,KLUNAM,HGRID,KGRID_PAR,KL,PGRID_PAR,IGRID_PAR,IL,.FALSE.,ZGRID_PAR)
 DEALLOCATE(ZGRID_PAR)
 !
 ALLOCATE(ZGRID_PAR(IGRID_PAR))
-CALL GRID_MODIFICATION(KLUOUT,KLUNAM,HGRID,KGRID_PAR,KL,PGRID_PAR,IGRID_PAR,IL,.TRUE.,ZGRID_PAR)
+ CALL GRID_MODIFICATION(KLUOUT,KLUNAM,HGRID,KGRID_PAR,KL,PGRID_PAR,IGRID_PAR,IL,.TRUE.,ZGRID_PAR)
 !
 DEALLOCATE(PGRID_PAR)
 !
@@ -134,7 +134,7 @@ IMPLICIT NONE
 !
 INTEGER,                      INTENT(IN)    :: KLUOUT     ! output listing logical unit
 INTEGER,                      INTENT(IN)    :: KLUNAM     ! namelist file logical unit
-CHARACTER(LEN=10),            INTENT(IN)    :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=10),            INTENT(IN)    :: HGRID      ! type of horizontal grid
 INTEGER,                      INTENT(IN)    :: KL         ! number of points
 INTEGER,                      INTENT(IN)    :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:),           INTENT(IN)    :: PGRID_PAR  ! parameters defining the grid

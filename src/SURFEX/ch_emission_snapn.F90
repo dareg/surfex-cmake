@@ -49,7 +49,7 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
-CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM! program calling surf. schemes
+ CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM! program calling surf. schemes
 INTEGER,                INTENT(IN)  :: KSIZE   ! number of points
 REAL,                   INTENT(IN)  :: PSIMTIME! time of simulation in sec UTC
                                                ! (counting from midnight of
@@ -89,7 +89,7 @@ IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N',0,ZHOOK_HANDLE)
 !*  1.  Updates Conversion Factor (may depends on air density)
 !       ------------------------------------------------------
 !
-CALL CH_CONVERSION_FACTOR(CCONVERSION,PRHOA(:))
+ CALL CH_CONVERSION_FACTOR(CCONVERSION,PRHOA(:))
 !
 !------------------------------------------------------------------------------
 !
@@ -133,7 +133,7 @@ SELECT CASE (CSNAP_TIME_REF)
 
 END SELECT
 !
-CALL DAY_OF_WEEK(IDAY(:,1), IMONTH(:,1), IYEAR(:,1), IDOW(:,1))
+ CALL DAY_OF_WEEK(IDAY(:,1), IMONTH(:,1), IYEAR(:,1), IDOW(:,1))
 !
 IHOUR(:,1) = INT((ZTIME0(:)+1.E-10)/3600.)! 1.E-10 and the where condition after are
 WHERE (IHOUR(:,1)==24) IHOUR(:,1)=23      ! set to avoid computer precision problems
@@ -151,7 +151,7 @@ DO JI=1,KSIZE
   CALL ADD_FORECAST_TO_DATE_SURF(IYEAR(JI,2),IMONTH(JI,2),IDAY(JI,2),ZTIME(JI,2))
 ENDDO
 !
-CALL DAY_OF_WEEK(IDAY(:,2), IMONTH(:,2), IYEAR(:,2), IDOW(:,2))
+ CALL DAY_OF_WEEK(IDAY(:,2), IMONTH(:,2), IYEAR(:,2), IDOW(:,2))
 !
 IHOUR(:,2)=NINT(ZTIME(:,2))/3600
 !

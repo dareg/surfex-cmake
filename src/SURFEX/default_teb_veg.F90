@@ -48,19 +48,19 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-CHARACTER(LEN=4),  INTENT(OUT) :: HROUGH     ! type of roughness length
-CHARACTER(LEN=4),  INTENT(OUT) :: HALBEDO    ! albedo type ('DRY','EVOL4,'WET','USER')
-CHARACTER(LEN=4),  INTENT(OUT) :: HSCOND     ! Thermal conductivity ('DEF','PL98')
-CHARACTER(LEN=4),  INTENT(OUT) :: HC1DRY     ! C1 formulation for dry soils ('DEF','GB93')
-CHARACTER(LEN=3),  INTENT(OUT) :: HSOILFRZ   ! soil freezing-physics option ('DEF','LWT')
-CHARACTER(LEN=4),  INTENT(OUT) :: HDIFSFCOND ! Mulch effects ('MLCH','DEF ')
-CHARACTER(LEN=3),  INTENT(OUT) :: HSNOWRES   ! Turbulent exchanges over snow ('DEF','RIL')
-CHARACTER(LEN=3),  INTENT(OUT) :: HCPSURF    ! specific heat ('DRY','HUM')
-CHARACTER(LEN=4),  INTENT(OUT) :: HRUNOFF    ! surface runoff formulation ('WSAT','DT92','SGH ')
-CHARACTER(LEN=3),  INTENT(OUT) :: HTOPREG    ! linear regression for Topmodel ('DEF','NON')
-CHARACTER(LEN=3),  INTENT(OUT) :: HKSAT      ! soil hydraulic profile option ('DEF','SGH')
-CHARACTER(LEN=3),  INTENT(OUT) :: HRAIN      ! Rainfall spatial distribution ('DEF','SGH')
-CHARACTER(LEN=3),  INTENT(OUT) :: HHORT      ! Horton runoff ('DEF','SGH')
+ CHARACTER(LEN=4),  INTENT(OUT) :: HROUGH     ! type of roughness length
+ CHARACTER(LEN=4),  INTENT(OUT) :: HALBEDO    ! albedo type ('DRY','EVOL4,'WET','USER')
+ CHARACTER(LEN=4),  INTENT(OUT) :: HSCOND     ! Thermal conductivity ('DEF','PL98')
+ CHARACTER(LEN=4),  INTENT(OUT) :: HC1DRY     ! C1 formulation for dry soils ('DEF','GB93')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HSOILFRZ   ! soil freezing-physics option ('DEF','LWT')
+ CHARACTER(LEN=4),  INTENT(OUT) :: HDIFSFCOND ! Mulch effects ('MLCH','DEF ')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HSNOWRES   ! Turbulent exchanges over snow ('DEF','RIL')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HCPSURF    ! specific heat ('DRY','HUM')
+ CHARACTER(LEN=4),  INTENT(OUT) :: HRUNOFF    ! surface runoff formulation ('WSAT','DT92','SGH ')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HTOPREG    ! linear regression for Topmodel ('DEF','NON')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HKSAT      ! soil hydraulic profile option ('DEF','SGH')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HRAIN      ! Rainfall spatial distribution ('DEF','SGH')
+ CHARACTER(LEN=3),  INTENT(OUT) :: HHORT      ! Horton runoff ('DEF','SGH')
 
 LOGICAL, INTENT(OUT)           :: OTRIP      ! T= ISBA-TRIP coupling, F= No ISBA-TRIP coupling
 LOGICAL, INTENT(OUT)           :: OFLOOD     ! T= Flooding scheme, F= No flooding scheme

@@ -37,7 +37,7 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 ! Variables specific to Topodyn
 !
-CHARACTER(LEN=15), DIMENSION(JPCAT) :: CCAT     ! base name for topographic files
+ CHARACTER(LEN=15), DIMENSION(JPCAT) :: CCAT     ! base name for topographic files
 INTEGER                             :: NNCAT    ! catchments number
 !
 INTEGER                             :: NNB_TOPD_STEP   ! number of TOPODYN time steps

@@ -67,13 +67,13 @@ IMPLICIT NONE
 !
 INTEGER :: I,IP
 !
-CHARACTER(LEN=6)  :: YSTRING6
+ CHARACTER(LEN=6)  :: YSTRING6
 !
-CHARACTER(LEN=200):: YFMT  ! fortran format
+ CHARACTER(LEN=200):: YFMT  ! fortran format
 !
 LOGICAL           :: GLINE ! flag to write an additional horizontal line
 !
-CHARACTER(LEN=6), DIMENSION(6) :: YDATA_WATER   ! water parameters
+ CHARACTER(LEN=6), DIMENSION(6) :: YDATA_WATER   ! water parameters
 REAL,             DIMENSION(1) :: ZZENITH       ! zenithal angle
 REAL,             DIMENSION(1) :: ZALBEDO       ! direct albedo
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

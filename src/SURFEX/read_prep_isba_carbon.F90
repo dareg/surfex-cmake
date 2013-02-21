@@ -52,8 +52,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
-CHARACTER(LEN=3),  INTENT(OUT) :: HRESPSL  ! Soil respiration
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+ CHARACTER(LEN=3),  INTENT(OUT) :: HRESPSL  ! Soil respiration
 
 !
 !*       0.2   Declarations of local variables

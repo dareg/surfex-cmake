@@ -49,14 +49,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
 INTEGER,                INTENT(IN)    :: KLU        ! number of points
 LOGICAL,                INTENT(IN)    :: OREAD      ! flag to read the grid
 INTEGER,                INTENT(IN)    :: KSIZE      ! estimated size of PGRID_PAR
 REAL, DIMENSION(KSIZE), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                INTENT(OUT)   :: KRESP      ! error return code
-CHARACTER(LEN=1),       INTENT(OUT)   :: HDIR       ! reading directive ('A','H')
+ CHARACTER(LEN=1),       INTENT(OUT)   :: HDIR       ! reading directive ('A','H')
 !
 !
 !*       0.2   Declarations of local variables
@@ -78,24 +78,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CARTESIAN',0,ZHOOK_HANDLE)
-CALL READ_SURF(HPROGRAM,'LAT0',ZLAT0,KRESP,HDIR=HDIR)
-CALL READ_SURF(HPROGRAM,'LON0',ZLON0,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'LAT0',ZLAT0,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'LON0',ZLON0,KRESP,HDIR=HDIR)
 !
-CALL READ_SURF(HPROGRAM,'IMAX ',IIMAX, KRESP,HDIR=HDIR)
-CALL READ_SURF(HPROGRAM,'JMAX ',IJMAX, KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'IMAX ',IIMAX, KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'JMAX ',IJMAX, KRESP,HDIR=HDIR)
 !
-CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
-CALL READ_SURF(HPROGRAM,'YY',ZY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'YY',ZY,KRESP,HDIR=HDIR)
 !
-CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
-CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !
 !*       4.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_CARTESIAN(ZGRID_PAR,ZLAT0,ZLON0,           &
+ CALL PUT_GRIDTYPE_CARTESIAN(ZGRID_PAR,ZLAT0,ZLON0,           &
                               IIMAX,IJMAX,                     &
                               ZX,ZY,ZDX,ZDY                    )  
 !

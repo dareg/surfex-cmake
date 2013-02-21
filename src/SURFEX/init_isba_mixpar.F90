@@ -83,12 +83,12 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=*), INTENT(IN)          :: HISBA 
+ CHARACTER(LEN=*), INTENT(IN)          :: HISBA 
 INTEGER,                INTENT(IN)    :: KDECADE
 INTEGER,                INTENT(OUT)   :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
-CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
-CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 !
 !*    0.2    Declaration of local variables
@@ -96,7 +96,7 @@ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 REAL, DIMENSION(12)   :: XSTRESS   ! 1. if defensive /0. if offensive
 !
-CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG
+ CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG
 !
 INTEGER               :: JVEGTYPE
 !

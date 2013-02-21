@@ -40,7 +40,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PCON_RAIN
 REAL, DIMENSION(KI), INTENT(IN) :: PSTRAT_RAIN
@@ -56,7 +56,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PTS
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !

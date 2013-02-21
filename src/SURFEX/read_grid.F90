@@ -47,8 +47,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
-CHARACTER(LEN=10),  INTENT(OUT) :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
+ CHARACTER(LEN=10),  INTENT(OUT) :: HGRID      ! type of horizontal grid
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 REAL, DIMENSION(:), INTENT(OUT) :: PLAT       ! latitude  (degrees)
 REAL, DIMENSION(:), INTENT(OUT) :: PLON       ! longitude (degrees)
@@ -68,24 +68,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -----------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRID',0,ZHOOK_HANDLE)
-CALL READ_SURF(HPROGRAM,'GRID_TYPE',HGRID,KRESP)
+ CALL READ_SURF(HPROGRAM,'GRID_TYPE',HGRID,KRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
-CALL READ_GRIDTYPE(HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.FALSE.)
+ CALL READ_GRIDTYPE(HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.FALSE.)
 !
 ALLOCATE(PGRID_PAR(IGRID_PAR))
-CALL READ_GRIDTYPE(HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.TRUE.,PGRID_PAR,KRESP)
+ CALL READ_GRIDTYPE(HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.TRUE.,PGRID_PAR,KRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       3.    Latitude, longitude, mesh size
 !              ------------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 SELECT CASE (HGRID)
   CASE("NONE      ")

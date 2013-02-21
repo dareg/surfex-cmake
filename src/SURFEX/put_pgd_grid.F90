@@ -45,7 +45,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=10), INTENT(IN)   :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=10), INTENT(IN)   :: HGRID      ! type of horizontal grid
 INTEGER,           INTENT(IN)   :: KSIZE_FULL ! number of points
 INTEGER,           INTENT(IN)   :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid

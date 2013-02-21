@@ -38,10 +38,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
-CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME    ! Name of the variable in netcdf file
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME    ! Name of the variable in netcdf file
 !
 !
 !*    0.2    Declaration of local variables
@@ -64,19 +64,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_NETCDF',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !
 !*    1.      Read the netcdf file and lat/lon/val arrays dimensions
 !             ------------------------------------------------------
-CALL READ_DIM_CDF(HFILENAME,HNCVARNAME,JDIMENSION)
+ CALL READ_DIM_CDF(HFILENAME,HNCVARNAME,JDIMENSION)
 ALLOCATE(ZVALU(JDIMENSION))
 ALLOCATE(ZLATI(JDIMENSION))
 ALLOCATE(ZLONG(JDIMENSION))
 
 !*    1.      Read the netcdf file and extract lat/lon/val
 !             --------------------------------------------
-CALL READ_LATLONVAL_CDF(HFILENAME,HNCVARNAME,ZLONG(:),ZLATI(:),ZVALU(:))
+ CALL READ_LATLONVAL_CDF(HFILENAME,HNCVARNAME,ZLONG(:),ZLATI(:),ZVALU(:))
 !
 !----------------------------------------------------------------------------
 !

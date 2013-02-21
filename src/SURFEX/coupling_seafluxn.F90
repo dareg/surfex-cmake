@@ -90,8 +90,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
@@ -112,7 +112,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -151,7 +151,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !     
@@ -262,7 +262,7 @@ IF (LSST_DATA .AND. (.NOT. LMERCATOR)) CALL SST_UPDATE(XSST, TTIME)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 TTIME%TIME = TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+ CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 !--------------------------------------------------------------------------------------
 ! Fluxes over water according to Charnock formulae
@@ -472,7 +472,7 @@ ENDIF
 ! Inline diagnostics at time t
 !-------------------------------------------------------------------------------
 !
-CALL DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, XSST, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,&
+ CALL DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, XSST, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,&
                              PUREF,ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU, XZ0, ZZ0H, ZQSAT, &
                              PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,       &
                              ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD, PRAIN, PSNOW,        &
@@ -487,7 +487,7 @@ IF (LINTERPOL_SST.AND.MOD(TTIME%TIME,XDAY) == 0.) THEN
    CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,XSST)
 ENDIF
 !
-CALL UPDATE_RAD_SEAWAT(CSEA_ALB,XSST,PZENITH2,XTTS,XEMIS,XDIR_ALB, &
+ CALL UPDATE_RAD_SEAWAT(CSEA_ALB,XSST,PZENITH2,XTTS,XEMIS,XDIR_ALB, &
                          XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTRAD      )  
 !
 !=======================================================================================

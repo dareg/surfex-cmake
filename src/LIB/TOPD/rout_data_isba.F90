@@ -66,7 +66,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! program calling surf. schemes
 INTEGER, INTENT(IN)          :: KI     ! Grid dimensions
 INTEGER, INTENT(IN)          :: KSTEP  ! current time step 
 !
@@ -75,7 +75,7 @@ INTEGER, INTENT(IN)          :: KSTEP  ! current time step
 INTEGER                       :: JJ,JI  ! loop control 
 INTEGER                       :: IUNIT       ! unit number of results files
 INTEGER                       :: ILUOUT      ! unit number of listing file
-CHARACTER(LEN=30)             :: YVAR
+ CHARACTER(LEN=30)             :: YVAR
 REAL, DIMENSION(KI)           :: ZRUNOFFC_FULL  ! Cumulated runoff from isba on the full domain (kg/m2)
 REAL, DIMENSION(KI)           :: ZRUNOFFC_FULLM ! Cumulated runoff from isba on the full domain (kg/m2) at t-dt
 REAL, DIMENSION(KI)           :: ZRUNOFF_ISBA   ! Runoff from Isba (kg/m2)
@@ -88,7 +88,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROUT_DATA_ISBA',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ZRUNOFFC_FULL (:) = 0.
 ZRUNOFFC_FULLM(:) = 0.
@@ -102,15 +102,15 @@ ZDRAIN_TOPD (:,:) = 0.
 !    Runoff on TOPODYN grid
 !   ---------------------------------------
 !
-CALL UNPACK_SAME_RANK(NR_NATURE,XRUNOFF_TOP,ZRUNOFFC_FULL)
-CALL UNPACK_SAME_RANK(NR_NATURE,XAVG_RUNOFFCM,ZRUNOFFC_FULLM)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XRUNOFF_TOP,ZRUNOFFC_FULL)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XAVG_RUNOFFCM,ZRUNOFFC_FULLM)
 !
-CALL DIAG_ISBA_TO_ROUT(ZRUNOFFC_FULL,ZRUNOFFC_FULLM,ZRUNOFF_ISBA)
+ CALL DIAG_ISBA_TO_ROUT(ZRUNOFFC_FULL,ZRUNOFFC_FULLM,ZRUNOFF_ISBA)
 !
 XAVG_RUNOFFCM(:) = XRUNOFF_TOP(:)
 ZRUNOFF_TOPD(:,:) = 0.0
 !
-CALL ISBA_TO_TOPD(ZRUNOFF_ISBA,ZRUNOFF_TOPD)
+ CALL ISBA_TO_TOPD(ZRUNOFF_ISBA,ZRUNOFF_TOPD)
 !
 DO JJ=1,NNCAT
   DO JI=1,NNMC(JJ)
@@ -121,15 +121,15 @@ ENDDO
 !    Drainage treatment
 !    ----------------------------------------
 !
-CALL UNPACK_SAME_RANK(NR_NATURE,XAVG_DRAINC*XATOP,ZDRAINC_FULL)
-CALL UNPACK_SAME_RANK(NR_NATURE,XAVG_DRAINCM*XATOP,ZDRAINC_FULLM)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XAVG_DRAINC*XATOP,ZDRAINC_FULL)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XAVG_DRAINCM*XATOP,ZDRAINC_FULLM)
 !
-CALL DIAG_ISBA_TO_ROUT(ZDRAINC_FULL,ZDRAINC_FULLM,ZDRAIN_ISBA)
+ CALL DIAG_ISBA_TO_ROUT(ZDRAINC_FULL,ZDRAINC_FULLM,ZDRAIN_ISBA)
 !
 XAVG_DRAINCM(:)  = XAVG_DRAINC(:)
 ZDRAIN_TOPD(:,:) = 0.0
 !
-CALL ISBA_TO_TOPD(ZDRAIN_ISBA,ZDRAIN_TOPD)
+ CALL ISBA_TO_TOPD(ZDRAIN_ISBA,ZDRAIN_TOPD)
 !
 DO JJ=1,NNCAT
   DO JI=1,NNMC(JJ)
@@ -139,7 +139,7 @@ ENDDO
 !*     Routing (runoff + drainage)
 !     ----------------------------------------
 !
-CALL ROUTING(ZRUNOFF_TOPD,ZDRAIN_TOPD,KSTEP)
+ CALL ROUTING(ZRUNOFF_TOPD,ZDRAIN_TOPD,KSTEP)
 !
 IF (LHOOK) CALL DR_HOOK('ROUT_DATA_ISBA',1,ZHOOK_HANDLE)
 !

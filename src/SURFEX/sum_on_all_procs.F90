@@ -50,10 +50,10 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM ! program calling SURFEX
-CHARACTER(LEN=10),     INTENT(IN) :: HGRID    ! grid type
+ CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM ! program calling SURFEX
+ CHARACTER(LEN=10),     INTENT(IN) :: HGRID    ! grid type
 LOGICAL, DIMENSION(:), INTENT(IN) :: OIN
-CHARACTER(LEN=3),      INTENT(IN), OPTIONAL :: HNAME ! pour la maquette offline
+ CHARACTER(LEN=3),      INTENT(IN), OPTIONAL :: HNAME ! pour la maquette offline
 INTEGER                           :: KOUT
 !
 !*       0.2   Declarations of local variables
@@ -64,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 INTEGER                       :: ISIZE
 INTEGER, DIMENSION(SIZE(OIN)) :: IIN ! 1 if OIN true, 0 otherwise
 !
-CHARACTER(LEN=3) :: YNAME
+ CHARACTER(LEN=3) :: YNAME
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SUM_ON_ALL_PROCS',0,ZHOOK_HANDLE)

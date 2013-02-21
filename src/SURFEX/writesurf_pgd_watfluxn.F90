@@ -51,14 +51,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 INTEGER           :: JCOVER         ! loop index
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -73,20 +73,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='COVER_LIST'
 YCOMMENT='(LOGICAL LIST)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(HPROGRAM,YRECFM,LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 YCOMMENT='COVER FIELDS'
-CALL WRITE_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP,HCOMMENT=YCOMMENT)
 !
 !* orography
 !
 YRECFM='ZS'
 YCOMMENT='ZS'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XZS(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XZS(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* latitude, longitude
 !
-CALL WRITE_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP)
+ CALL WRITE_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -171,13 +171,13 @@ INCLUDE "mpif.h"
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,                          INTENT(IN)  :: OLAND_USE !
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -187,7 +187,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo fo
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 !
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !
 !*       0.2   Declarations of local variables
@@ -220,7 +220,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('COMPUTE_ISBA_PARAMETERS',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('COMPUTE_ISBA_PARAMETERS: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -230,7 +230,7 @@ END IF
 !*       2.3    Physiographic data fields from land cover:
 !               -----------------------------------------
 !
-CALL ALLOCATE_PHYSIO(CPHOTO, CISBA, KI, NVEGTYPE, NGROUND_LAYER, NPATCH, &
+ CALL ALLOCATE_PHYSIO(CPHOTO, CISBA, KI, NVEGTYPE, NGROUND_LAYER, NPATCH, &
                      XVEGTYPE, XLAI, XVEG, XZ0, XEMIS, XDG, XD_ICE,      &
                      XRSMIN, XGAMMA, XWRMAX_CF, XRGL, XCV,               &
                      XZ0_O_Z0H, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
@@ -248,9 +248,9 @@ END IF
 !
 IDECADE2 = IDECADE
 !
-CALL INIT_ISBA_MIXPAR(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,'NAT')
+ CALL INIT_ISBA_MIXPAR(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,'NAT')
 !
-CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,           &
+ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,           &
                         'NAT',PVEG=XVEG,PLAI=XLAI,                             &
                         PRSMIN=XRSMIN,PGAMMA=XGAMMA,PWRMAX_CF=XWRMAX_CF,       &
                         PRGL=XRGL,PCV=XCV,PSOILGRID=XSOILGRID,                 &
@@ -298,7 +298,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_VEG_PGD_n(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
+ CALL INIT_VEG_PGD_n(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
                   XVEGTYPE, XPATCH, XVEGTYPE_PATCH, NSIZE_NATURE_P, NR_NATURE_P,    &
                   XRM_PATCH, &
                   LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, XTDEEP, XGAMMAT,   &
@@ -589,15 +589,15 @@ ENDIF
 !*      7.     ISBA time-varying deep force-restore temperature initialization
 !              ---------------------------------------------------------------
 !
-CALL SOILTEMP_ARP_PAR(HPROGRAM,LTEMP_ARP,NTEMPLAYER_ARP)
+ CALL SOILTEMP_ARP_PAR(HPROGRAM,LTEMP_ARP,NTEMPLAYER_ARP)
 !
 !-------------------------------------------------------------------------------
 !
 !*       9.     Prints of cover parameters in a tex file
 !               ----------------------------------------
 !
-CALL WRITE_COVER_TEX_ISBA    (NPATCH,NGROUND_LAYER,CISBA)
-CALL WRITE_COVER_TEX_ISBA_PAR(NPATCH,NGROUND_LAYER,CISBA,CPHOTO,XSOILGRID)
+ CALL WRITE_COVER_TEX_ISBA    (NPATCH,NGROUND_LAYER,CISBA)
+ CALL WRITE_COVER_TEX_ISBA_PAR(NPATCH,NGROUND_LAYER,CISBA,CPHOTO,XSOILGRID)
 !
 !* if only physiographic fields are to be initialized, stop here.
 !
@@ -608,12 +608,12 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !*      10.     Prognostic and semi-prognostic fields
 !               -------------------------------------
 !
-CALL READ_ISBA_n(HPROGRAM)
+ CALL READ_ISBA_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -630,7 +630,7 @@ END IF
 !*      12.     Canopy air fields:
 !               -----------------
 !
-CALL READ_ISBA_CANOPY_n(HPROGRAM)
+ CALL READ_ISBA_CANOPY_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -641,7 +641,7 @@ XSCA_ALB_WITH_SNOW = 0.0
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_VEG_n(NPATCH, KI, LCANOPY, CROUGH, TSNOW, &
+ CALL INIT_VEG_n(NPATCH, KI, LCANOPY, CROUGH, TSNOW, &
                    CPHOTO, XLAIMIN, XH_TREE, XVEGTYPE_PATCH, XLAI, XZ0, XVEG, XEMIS, &
                    LTR_ML, XFAPARC, XFAPIRC, XLAI_EFFC, XMUS, &
                    XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, XALBNIR, XALBVIS, XALBUV, &
@@ -656,7 +656,7 @@ DO JPATCH=1,NPATCH
   ZTG1(:,JPATCH) = XTG(:,1,JPATCH)
 END DO
 !
-CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,'NAT',&
+ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,'NAT',&
                           PWG1 = ZWG1, &
                           PALBNIR_SOIL=XALBNIR_SOIL, &
                           PALBVIS_SOIL=XALBVIS_SOIL, &
@@ -667,7 +667,7 @@ DEALLOCATE(ZWG1)
 ALLOCATE(XEMIS_NAT   (KI))
 XEMIS_NAT (:) = XUNDEF
 !
-CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                 &
+ CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                 &
                                  XVEG,XZ0,XLAI,ZTG1,                     &
                                  XPATCH,                                 &
                                  PSW_BANDS,                              &
@@ -690,17 +690,17 @@ DEALLOCATE(ZTG1)
 !
 IF(NPATCH<=1) LPATCH_BUDGET=.FALSE.
 !
-CALL DIAG_ISBA_INIT_n(HPROGRAM,KI,KSW)
+ CALL DIAG_ISBA_INIT_n(HPROGRAM,KI,KSW)
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_SURF_TOPD(HPROGRAM,NDIM_FULL)
+ CALL INIT_SURF_TOPD(HPROGRAM,NDIM_FULL)
 !
 !-------------------------------------------------------------------------------
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('COMPUTE_ISBA_PARAMETERS',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE COMPUTE_ISBA_PARAMETERS

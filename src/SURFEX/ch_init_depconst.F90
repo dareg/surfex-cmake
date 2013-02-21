@@ -55,27 +55,27 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)  :: KCH      ! chemistry input namelist logical unit
 INTEGER,                  INTENT(IN)  :: KLUOUT   ! output listing channel
-CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
+ CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=40) :: YFORMAT    
+ CHARACTER(LEN=40) :: YFORMAT    
                           ! format for input
-CHARACTER(LEN=40) :: YOUTFORMAT = '(A32,2E15.5)'
+ CHARACTER(LEN=40) :: YOUTFORMAT = '(A32,2E15.5)'
                           ! format for output
 !
 INTEGER :: IMASS          ! number of molecular diffusivity to be read
-CHARACTER(LEN=40), DIMENSION(:), ALLOCATABLE :: YMASSMOLNAME !species names
+ CHARACTER(LEN=40), DIMENSION(:), ALLOCATABLE :: YMASSMOLNAME !species names
 REAL             , DIMENSION(:), ALLOCATABLE :: ZMASSMOLVAL
                           ! molecular diffusivity value
 !
 INTEGER :: IREACT         ! number of chemical reactivity factor to be read
-CHARACTER(LEN=40), DIMENSION(:), ALLOCATABLE :: YREACTNAME !species names
+ CHARACTER(LEN=40), DIMENSION(:), ALLOCATABLE :: YREACTNAME !species names
 REAL             , DIMENSION(:), ALLOCATABLE :: ZREACTVAL 
                           ! chemical reactivity factor value
 !
 INTEGER :: IHENRY         ! number of chemical Henry constant to be read
-CHARACTER(LEN=40), DIMENSION(:), ALLOCATABLE :: YHENRYNAME !species names
+ CHARACTER(LEN=40), DIMENSION(:), ALLOCATABLE :: YHENRYNAME !species names
 REAL             , DIMENSION(:,:), ALLOCATABLE :: ZHENRYVAL
                           !chemical Henry constant value
 !

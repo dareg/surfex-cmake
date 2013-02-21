@@ -62,14 +62,14 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM  ! host program
+ CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM  ! host program
 INTEGER,                INTENT(IN)    :: KLUOUT
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG, YDIF
+ CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG, YDIF
 REAL, DIMENSION(NDIM,36,NVEGTYPE) :: ZWORK
 INTEGER :: JTIME
 !

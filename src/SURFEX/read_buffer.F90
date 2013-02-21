@@ -4,36 +4,36 @@
 INTERFACE READ_BUFFER
 !
       SUBROUTINE READ_BUFX1(HNAME,PFIELD,KRET)
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 REAL, DIMENSION(:),           INTENT(OUT)  :: PFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
 END SUBROUTINE READ_BUFX1
 !
       SUBROUTINE READ_BUFX0(HNAME,PFIELD,KRET)
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 REAL,                         INTENT(OUT)  :: PFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
 END SUBROUTINE READ_BUFX0
 !
       SUBROUTINE READ_BUFN0(HNAME,KFIELD,KRET)
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 INTEGER,                      INTENT(OUT)  :: KFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
 END SUBROUTINE READ_BUFN0
 !
       SUBROUTINE READ_BUFN1(HNAME,KFIELD,KRET)
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 INTEGER, DIMENSION(:),        INTENT(OUT)  :: KFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
 END SUBROUTINE READ_BUFN1
 !
       SUBROUTINE READ_BUFC0(HNAME,HFIELD,KRET)
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME     ! name of field
-CHARACTER(LEN=*),             INTENT(OUT)  :: HFIELD    ! array containing the data field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME     ! name of field
+ CHARACTER(LEN=*),             INTENT(OUT)  :: HFIELD    ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
 END SUBROUTINE READ_BUFC0
@@ -87,8 +87,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME     ! name of field
-CHARACTER(LEN=*),             INTENT(OUT)  :: HFIELD    ! array containing the data field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME     ! name of field
+ CHARACTER(LEN=*),             INTENT(OUT)  :: HFIELD    ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
 !
@@ -101,10 +101,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFC0',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('AROME ',ILUOUT)
+ CALL GET_LUOUT('AROME ',ILUOUT)
 !
 #ifdef ARO
-CALL GET_BUFC0(HNAME,HFIELD,LEN(HFIELD),KRET)
+ CALL GET_BUFC0(HNAME,HFIELD,LEN(HFIELD),KRET)
 #endif
 !
 IF (KRET /=0) THEN
@@ -165,7 +165,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 INTEGER,                      INTENT(OUT)  :: KFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
@@ -179,10 +179,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFN0',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('AROME ',ILUOUT)
+ CALL GET_LUOUT('AROME ',ILUOUT)
 !
 #ifdef ARO
-CALL GET_BUFN0(HNAME,KFIELD,KRET)
+ CALL GET_BUFN0(HNAME,KFIELD,KRET)
 #endif
 !
 IF (KRET /=0) THEN
@@ -243,7 +243,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 INTEGER, DIMENSION(:),        INTENT(OUT)  :: KFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
@@ -257,10 +257,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFN1',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('AROME ',ILUOUT)
+ CALL GET_LUOUT('AROME ',ILUOUT)
 !
 #ifdef ARO
-CALL GET_BUFN1(HNAME,SIZE(KFIELD),KFIELD,KRET)
+ CALL GET_BUFN1(HNAME,SIZE(KFIELD),KFIELD,KRET)
 #endif
 !
 IF (KRET /=0) THEN
@@ -321,7 +321,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 REAL,                         INTENT(OUT)  :: PFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
@@ -335,10 +335,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX0',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('AROME ',ILUOUT)
+ CALL GET_LUOUT('AROME ',ILUOUT)
 !
 #ifdef ARO
-CALL GET_BUFX0(HNAME,PFIELD,KRET)
+ CALL GET_BUFX0(HNAME,PFIELD,KRET)
 #endif
 !
 IF (KRET /=0) THEN
@@ -399,7 +399,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+ CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
 REAL, DIMENSION(:),           INTENT(OUT)  :: PFIELD ! array containing the data field
 INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !
@@ -413,10 +413,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX1',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('AROME ',ILUOUT)
+ CALL GET_LUOUT('AROME ',ILUOUT)
 !
 #ifdef ARO
-CALL GET_BUFX1(HNAME,SIZE(PFIELD),PFIELD,KRET)
+ CALL GET_BUFX1(HNAME,SIZE(PFIELD),PFIELD,KRET)
 #endif
 !
 IF (KRET /=0) THEN

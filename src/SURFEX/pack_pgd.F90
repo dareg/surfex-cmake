@@ -64,10 +64,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
-CHARACTER(LEN=6),        INTENT(IN) :: HSURF     ! surface type
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
+ CHARACTER(LEN=6),        INTENT(IN) :: HSURF     ! surface type
 !
-CHARACTER(LEN=10),       INTENT(OUT):: HGRID     ! grid used
+ CHARACTER(LEN=10),       INTENT(OUT):: HGRID     ! grid used
 REAL,    DIMENSION(:),   POINTER    :: PGRID_PAR ! grid definition
 LOGICAL, DIMENSION(:),   INTENT(OUT):: OCOVER    ! list of present cover
 REAL,    DIMENSION(:,:), INTENT(OUT):: PCOVER    ! cover fraction
@@ -94,29 +94,29 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PACK_PGD',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.      Number of points and packing
 !             ----------------------------
 !
-CALL GET_TYPE_DIM_n(HSURF,IL)
+ CALL GET_TYPE_DIM_n(HSURF,IL)
 ALLOCATE(IMASK(IL))
 ILU=0
-CALL GET_SURF_MASK_n(HSURF,IL,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n(HSURF,IL,IMASK,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Packing of grid
 !             ---------------
 !
-CALL PACK_GRID(IMASK,CGRID,HGRID,XGRID_PAR,PGRID_PAR)
+ CALL PACK_GRID(IMASK,CGRID,HGRID,XGRID_PAR,PGRID_PAR)
 !
 !-------------------------------------------------------------------------------
 !
 !*    3.      Computes geographical quantities
 !             --------------------------------
 !
-CALL LATLON_GRID(HGRID,SIZE(PGRID_PAR),IL,ILUOUT,PGRID_PAR,PLAT,PLON,PMESH_SIZE,ZDIR)
+ CALL LATLON_GRID(HGRID,SIZE(PGRID_PAR),IL,ILUOUT,PGRID_PAR,PLAT,PLON,PMESH_SIZE,ZDIR)
 !
 IF (PRESENT(PDIR)) PDIR = ZDIR
 !
@@ -125,19 +125,19 @@ IF (PRESENT(PDIR)) PDIR = ZDIR
 !*    4.      Packing of fields
 !             -----------------
 !
-CALL GET_COVER_n(HPROGRAM,NL,JPCOVER,ZCOVER)
-CALL GET_LCOVER_n(HPROGRAM,JPCOVER,GCOVER)
-CALL GET_ZS_n(HPROGRAM,NL,ZZS)
+ CALL GET_COVER_n(HPROGRAM,NL,JPCOVER,ZCOVER)
+ CALL GET_LCOVER_n(HPROGRAM,JPCOVER,GCOVER)
+ CALL GET_ZS_n(HPROGRAM,NL,ZZS)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL PACK_SAME_RANK(IMASK,ZCOVER(:,:),PCOVER(:,:))
+ CALL PACK_SAME_RANK(IMASK,ZCOVER(:,:),PCOVER(:,:))
 !
 OCOVER=GCOVER
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL PACK_SAME_RANK(IMASK,ZZS(:),PZS(:))
+ CALL PACK_SAME_RANK(IMASK,ZZS(:),PZS(:))
 !
 !-------------------------------------------------------------------------------
 !

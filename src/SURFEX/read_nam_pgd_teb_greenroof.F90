@@ -56,22 +56,22 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),                INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),                INTENT(IN)    :: HPROGRAM     ! Type of program
 INTEGER,                         INTENT(OUT)   :: KTIME_GR
 INTEGER,                         INTENT(OUT)   :: KLAYER_GR
-CHARACTER(LEN=5),                INTENT(OUT)   :: HTYP_GR
+ CHARACTER(LEN=5),                INTENT(OUT)   :: HTYP_GR
 REAL,DIMENSION(:),               INTENT(OUT)   :: PUNIF_OM_GR
 REAL,DIMENSION(:),               INTENT(OUT)   :: PUNIF_CLAY_GR
 REAL,DIMENSION(:),               INTENT(OUT)   :: PUNIF_SAND_GR
 REAL,DIMENSION(:),               INTENT(OUT)   :: PUNIF_LAI_GR
-CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_OM_GR
-CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_CLAY_GR
-CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_SAND_GR
-CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_LAI_GR
-CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_OM_GR
-CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_CLAY_GR
-CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_SAND_GR
-CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_LAI_GR
+ CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_OM_GR
+ CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_CLAY_GR
+ CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_SAND_GR
+ CHARACTER(LEN=28),DIMENSION(:),  INTENT(OUT)   :: HFNAM_LAI_GR
+ CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_OM_GR
+ CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_CLAY_GR
+ CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_SAND_GR
+ CHARACTER(LEN=6),DIMENSION(:),   INTENT(OUT)   :: HFTYP_LAI_GR
 
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -85,7 +85,7 @@ LOGICAL               :: GFOUND    ! true if namelist is found
 !
 INTEGER                                    :: NLAYER_GR      ! 
 INTEGER                                    :: NTIME_GR       ! 
-CHARACTER(LEN=5)                           :: CTYP_GR        ! type of green roof
+ CHARACTER(LEN=5)                           :: CTYP_GR        ! type of green roof
 !
 ! uniform value
 !
@@ -96,17 +96,17 @@ REAL,DIMENSION(NTIME_GR_MAX)               :: XUNIF_LAI_GR     ! LAI of green ro
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: CFNAM_OM_GR      ! fraction of organic matter (OM) in green roof layer
-CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: CFNAM_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
-CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: CFNAM_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
-CHARACTER(LEN=28),DIMENSION(NTIME_GR_MAX)  :: CFNAM_LAI_GR     ! LAI  of green roof
+ CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: CFNAM_OM_GR      ! fraction of organic matter (OM) in green roof layer
+ CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: CFNAM_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
+ CHARACTER(LEN=28),DIMENSION(NLAYER_GR_MAX) :: CFNAM_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
+ CHARACTER(LEN=28),DIMENSION(NTIME_GR_MAX)  :: CFNAM_LAI_GR     ! LAI  of green roof
 !
 ! type of files containing data
 !
-CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_OM_GR      ! fraction of organic matter (OM) in green roof layer
-CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
-CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
-CHARACTER(LEN=6 ),DIMENSION(NTIME_GR_MAX)  :: CFTYP_LAI_GR     ! LAI  of green roof
+ CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_OM_GR      ! fraction of organic matter (OM) in green roof layer
+ CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_CLAY_GR    ! fraction of clay for the non-OM part of the green roof layer
+ CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
+ CHARACTER(LEN=6 ),DIMENSION(NTIME_GR_MAX)  :: CFTYP_LAI_GR     ! LAI  of green roof
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -147,12 +147,12 @@ CFTYP_LAI_GR     = '      '
 !*    2.      Reading of green roof namelist
 !             ------------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-CALL POSNAM(ILUNAM,'NAM_DATA_TEB_GREENROOF',GFOUND,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL POSNAM(ILUNAM,'NAM_DATA_TEB_GREENROOF',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_TEB_GREENROOF)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !--------------------------------------------------
 !

@@ -45,12 +45,12 @@ IMPLICIT NONE
 !
 
 INTEGER,                         INTENT(IN)  :: KLUOUT ! output listing channel
-CHARACTER(LEN=6), DIMENSION(:),  INTENT(IN)  :: HSV    ! name of chemical species
+ CHARACTER(LEN=6), DIMENSION(:),  INTENT(IN)  :: HSV    ! name of chemical species
                                                        ! with character # (gas chemistry )
                                                        ! and  character @ (aerosols)
 INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KBAER    ! number of aerosol variables
-CHARACTER(LEN=6), DIMENSION(:),  POINTER :: HSVO ! name of scalar species without # and @
+ CHARACTER(LEN=6), DIMENSION(:),  POINTER :: HSVO ! name of scalar species without # and @
 INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
@@ -59,8 +59,8 @@ LOGICAL,                         INTENT(OUT) :: OVARSIGI, OVARSIGJ ! type of sta
 !
 !*      0.2    declarations of local variables
 INTEGER :: JSV  !! loop  NBEQ
-CHARACTER        :: YRC1
-CHARACTER(LEN=5) :: YRC2
+ CHARACTER        :: YRC1
+ CHARACTER(LEN=5) :: YRC2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

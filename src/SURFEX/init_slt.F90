@@ -10,10 +10,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 
 !PASSED VARIABLES
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM              !Passing unit
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM              !Passing unit
 !
 !LOCAL VARIABLES
-CHARACTER(LEN=4)    :: CRGUNITS              ! type of log-normal geometric mean radius
+ CHARACTER(LEN=4)    :: CRGUNITS              ! type of log-normal geometric mean radius
 INTEGER             :: JMODE                 ! Counter for sea salt modes
 INTEGER             :: JMODE_IDX             ! Index for sea salt modes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

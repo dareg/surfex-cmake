@@ -16,7 +16,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),        INTENT(IN)   :: HPROGRAM ! host program
+ CHARACTER(LEN=6),        INTENT(IN)   :: HPROGRAM ! host program
 INTEGER,                 INTENT(IN)   :: KLUOUT   ! output listing logical unit
 INTEGER,DIMENSION(:),    INTENT(INOUT):: KCODE    ! code for each point
                                                   ! >0 point used for interpolation
@@ -26,7 +26,7 @@ INTEGER,DIMENSION(:),    INTENT(INOUT):: KCODE    ! code for each point
 !                                                 ! -3 if spline is no computed
 !                                                 ! for this point
 REAL,   DIMENSION(:),    INTENT(INOUT):: PFIELD   ! pgd field on grid mesh
-CHARACTER(LEN=*),        INTENT(IN)   :: HFIELD   ! name of the field for prints
+ CHARACTER(LEN=*),        INTENT(IN)   :: HFIELD   ! name of the field for prints
 REAL,           OPTIONAL,INTENT(IN)   :: PDEF     ! default value if not enough data
 INTEGER, OPTIONAL,       INTENT(IN)   :: KNPTS    ! number of points to interpolate with
 !

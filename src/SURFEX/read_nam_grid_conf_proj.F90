@@ -51,7 +51,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -105,16 +105,16 @@ NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY
 !*       1.    opening of namelist
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_CONF_PROJ',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading of projection parameters
 !              --------------------------------
 !
-CALL POSNAM(ILUNAM,'NAM_CONF_PROJ',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_CONF_PROJ',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ)
 !
 !---------------------------------------------------------------------------
@@ -122,11 +122,11 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ)
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
-CALL POSNAM(ILUNAM,'NAM_CONF_PROJ_GRID',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_CONF_PROJ_GRID',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ_GRID)
 !
 !---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !---------------------------------------------------------------------------
 !
 !*       3.    Number of points
@@ -172,7 +172,7 @@ ZDY(:) = XDY
 ZXOR = - FLOAT(NIMAX+1)/2.*XDX
 ZYOR = - FLOAT(NJMAX+1)/2.*XDY
 !
-CALL LATLON_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATCEN,XLONCEN, &
+ CALL LATLON_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATCEN,XLONCEN, &
                         ZXOR,ZYOR,ZLATOR,ZLONOR                 )  
 !
 XLATC=XLATCEN
@@ -182,7 +182,7 @@ XLONC=XLONCEN
 !*       8.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,XLAT0,XLON0,XRPK,XBETA,    &
+ CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,XLAT0,XLON0,XRPK,XBETA,    &
                               ZLATOR(1),ZLONOR(1),NIMAX,NJMAX,     &
                               ZX,ZY,ZDX,ZDY                        )  
 !

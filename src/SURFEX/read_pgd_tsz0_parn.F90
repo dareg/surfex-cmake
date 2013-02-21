@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -54,16 +54,16 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER :: IVERSION  ! surface version
 INTEGER :: IBUGFIX   ! bugfix  of the old file
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TSZ0_PAR_N',0,ZHOOK_HANDLE)
 !
-CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HPROGRAM,'BUG', IBUGFIX ,IRESP)
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,'BUG', IBUGFIX ,IRESP)
 !
 IF (IVERSION.GT.7 .OR. (IVERSION==7 .AND. IBUGFIX.GT.1)) THEN
   YRECFM='ND_TSZ0_TIME'

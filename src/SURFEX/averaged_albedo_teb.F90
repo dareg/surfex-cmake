@@ -62,13 +62,13 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=3),   INTENT(IN) :: HBEM          ! Building Energy model 'DEF' or 'BEM'
-CHARACTER(LEN=4),   INTENT(IN) :: HROAD_DIR     ! road direction options
+ CHARACTER(LEN=3),   INTENT(IN) :: HBEM          ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=4),   INTENT(IN) :: HROAD_DIR     ! road direction options
               ! 'UNIF' : classical TEB version, all roads uniformely present
               ! 'ORIE' : specified road ORIEntation 
               !          (in fact many roads  direction
               !          possible because there can be many TEB patches)
-CHARACTER(LEN=4),   INTENT(IN) :: HWALL_OPT     ! wall options
+ CHARACTER(LEN=4),   INTENT(IN) :: HWALL_OPT     ! wall options
               ! 'UNIF' : classical TEB version, all walls are uniform
               ! 'TWO ' : the two opposite walls receive different solar energy
 REAL, DIMENSION(:), INTENT(IN) :: PZENITH       ! zenithal solar angle
@@ -152,8 +152,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_TEB',0,ZHOOK_HANDLE)
 GMASK(:) = .FALSE.
-CALL SNOW_FRAC_ROAD(TSNOW_ROAD%WSNOW(:,1,1),GMASK,ZDN_ROAD,ZDF_ROAD)
-CALL SNOW_FRAC_ROOF(TSNOW_ROOF%WSNOW(:,1,1),GMASK,ZDN_ROOF,ZDF_ROOF)
+ CALL SNOW_FRAC_ROAD(TSNOW_ROAD%WSNOW(:,1,1),GMASK,ZDN_ROAD,ZDF_ROAD)
+ CALL SNOW_FRAC_ROOF(TSNOW_ROOF%WSNOW(:,1,1),GMASK,ZDN_ROOF,ZDF_ROOF)
 !
 !
 !* town  direct and diffuse albedo
@@ -164,7 +164,7 @@ ZSCA_SW=1.
 GSHAD_DAY=.FALSE.
 IF (SIZE(OSHAD_DAY)>0) GSHAD_DAY=OSHAD_DAY
 !
-CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                   &
+ CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                   &
                      ZDIR_SW, ZSCA_SW, PZENITH, PAZIM,             &
                      PBLD, PGARDEN, PROAD_DIR, PROAD, PFRAC_GR,    &
                      PWALL_O_HOR, PCAN_HW_RATIO,                   &

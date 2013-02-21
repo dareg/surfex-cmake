@@ -256,17 +256,17 @@ IMPLICIT NONE
 !*      0.1    Declarations of arguments
 !
 !
-CHARACTER(LEN=6), INTENT(IN)      :: HZ0H          ! TEB option for z0h roof & road
+ CHARACTER(LEN=6), INTENT(IN)      :: HZ0H          ! TEB option for z0h roof & road
 !                                                  ! 'MASC95' : Mascart et al 1995
 !                                                  ! 'BRUT82' : Brustaert     1982
 !                                                  ! 'KAND07' : Kanda         2007
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
-CHARACTER(LEN=4), INTENT(IN)      :: HWALL_OPT     ! TEB option for walls
+ CHARACTER(LEN=4), INTENT(IN)      :: HWALL_OPT     ! TEB option for walls
                                                    ! 'UNIF' : uniform walls
                                                    ! 'TWO ' : two different opposite walls
-CHARACTER(LEN=3), INTENT(IN)      :: HBEM          ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=3), INTENT(IN)      :: HBEM          ! Building Energy model 'DEF' or 'BEM'
 REAL, DIMENSION(:), INTENT(INOUT) :: PT_CANYON     ! canyon air temperature
 REAL, DIMENSION(:), INTENT(INOUT) :: PQ_CANYON     ! canyon air specific humidity
 REAL, DIMENSION(:), INTENT(IN)    :: PU_CANYON     ! canyon hor. wind
@@ -281,11 +281,11 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL_A   ! wall A layers temperatures
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL_B   ! wall B layers temperatures
 REAL, DIMENSION(:), INTENT(INOUT) :: PWS_ROOF      ! roof water reservoir
 REAL, DIMENSION(:), INTENT(INOUT) :: PWS_ROAD      ! road water reservoir
-CHARACTER(LEN=*),   INTENT(IN)    :: HSNOW_ROOF    ! snow roof scheme
+ CHARACTER(LEN=*),   INTENT(IN)    :: HSNOW_ROOF    ! snow roof scheme
 !                                                  ! 'NONE'
 !                                                  ! 'D95 '
 !                                                  ! '1-L '
-CHARACTER(LEN=*),   INTENT(IN)    :: HSNOW_ROAD    ! snow road scheme
+ CHARACTER(LEN=*),   INTENT(IN)    :: HSNOW_ROAD    ! snow road scheme
 !                                                  ! 'NONE'
 !                                                  ! 'D95 '
 !                                                  ! '1-L '
@@ -471,10 +471,10 @@ REAL, DIMENSION(:), INTENT(IN)    :: PLW_S_TO_NR         ! LW contrib. sky      
 !
 ! new arguments after BEM
 !
-CHARACTER(LEN=4), DIMENSION(:), INTENT(IN) :: HNATVENT
-CHARACTER(LEN=6), INTENT(IN)       :: HCOOL_COIL
+ CHARACTER(LEN=4), DIMENSION(:), INTENT(IN) :: HNATVENT
+ CHARACTER(LEN=6), INTENT(IN)       :: HCOOL_COIL
 REAL, DIMENSION(:), INTENT(IN)     :: PF_WATER_COND!fraction of evaporation for the condensers
-CHARACTER(LEN=6), INTENT(IN)       :: HHEAT_COIL
+ CHARACTER(LEN=6), INTENT(IN)       :: HHEAT_COIL
 LOGICAL,            INTENT(IN)     :: OAUTOSIZE    ! Flag to activate autosize calculations
 INTEGER,            INTENT(IN)     :: KDAY         ! Simulation day
 REAL, DIMENSION(:), INTENT(INOUT)  :: PAUX_MAX     ! Auxiliar variable for autosize calcs
@@ -588,7 +588,7 @@ REAL, DIMENSION(:)  , INTENT(IN)  :: PF_MASS_FLOOR   ! View factor mass-floor
 REAL, DIMENSION(:)  , INTENT(IN)  :: PF_MASS_WALL    ! View factor mass-wall
 REAL, DIMENSION(:)  , INTENT(IN)  :: PF_MASS_WIN     ! View factor mass-window
 LOGICAL,              INTENT(IN)  :: OCANOPY         ! is canopy active ?
-CHARACTER(LEN=5), INTENT(IN)      :: HCH_BEM         ! TEB option for outside building coef
+ CHARACTER(LEN=5), INTENT(IN)      :: HCH_BEM         ! TEB option for outside building coef
                                                      ! "DOE-2"
 REAL, DIMENSION(:)  , INTENT(IN)  :: PROUGH_ROOF     ! roof roughness coef
 REAL, DIMENSION(:)  , INTENT(IN)  :: PROUGH_WALL     ! wall roughness coef
@@ -743,7 +743,7 @@ ZWS_ROAD_MAX(:) = ZWS_ROAD_MAX(:) * PDF_ROAD(:)
 !*      3.     Surface drag
 !              ------------
 !
-CALL URBAN_DRAG(HZ0H, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON,  &
+ CALL URBAN_DRAG(HZ0H, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON,  &
                 PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,          &
                 PZ_LOWCAN, ZTS_ROOF, ZTS_ROAD, ZTS_WALL,             &
                 PTS_GARDEN, PDN_ROOF, PDN_ROAD,                      &
@@ -789,7 +789,7 @@ ZQA(:) = PQA(:) * QSAT(PTA(:),PPS(:)) / QSAT(ZTA(:),PPA(:))
 !*      5.     Snow mantel model
 !              -----------------
 !
-CALL URBAN_SNOW_EVOL(PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,                         &
+ CALL URBAN_SNOW_EVOL(PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,                         &
                      ZTS_ROOF,ZTS_ROAD,ZTS_WALL_A, ZTS_WALL_B,                &
                      HSNOW_ROOF,                                              &
                      PWSNOW_ROOF, PTSNOW_ROOF, PRSNOW_ROOF, PASNOW_ROOF,      &
@@ -849,7 +849,7 @@ END SELECT
 !* ts_roof and qsat_roof are updated
 !
 
-CALL ROOF_LAYER_E_BUDGET(PT_ROOF, PQSAT_ROOF, PTI_BLD, ZAC_BLD, PTSTEP, &
+ CALL ROOF_LAYER_E_BUDGET(PT_ROOF, PQSAT_ROOF, PTI_BLD, ZAC_BLD, PTSTEP, &
                          HBEM, PHC_ROOF, PTC_ROOF, PD_ROOF, PDN_ROOF,   &
                          PRHOA, PAC_ROOF, PAC_ROOF_WAT, PLW_RAD, PPS,   &
                          PDELT_ROOF, ZTA, ZQA, PEXNA, PEXNS,            &
@@ -873,7 +873,7 @@ CALL ROOF_LAYER_E_BUDGET(PT_ROOF, PQSAT_ROOF, PTI_BLD, ZAC_BLD, PTSTEP, &
 !
 !* ts_road, ts_wall, qsat_road, t_canyon and q_canyon are updated
 !
-CALL ROAD_LAYER_E_BUDGET(PT_ROAD, PTSTEP, PHC_ROAD, PTC_ROAD, PD_ROAD,       &
+ CALL ROAD_LAYER_E_BUDGET(PT_ROAD, PTSTEP, PHC_ROAD, PTC_ROAD, PD_ROAD,       &
                          PDN_ROAD, PRHOA, PAC_ROAD, PAC_ROAD_WAT,            &
                          PLW_RAD, PPS, PQSAT_ROAD, PDELT_ROAD, PEXNS,        &
                          PABS_SW_ROAD, PGSNOW_ROAD, PQ_LOWCAN, PT_LOWCAN,    &
@@ -883,7 +883,7 @@ CALL ROAD_LAYER_E_BUDGET(PT_ROAD, PTSTEP, PHC_ROAD, PTC_ROAD, PD_ROAD,       &
                          PEMIS_ROAD, PEMIT_LW_ROAD, ZDQS_ROAD, PABS_LW_ROAD, &
                          PH_ROAD, PLEW_ROAD, ZIMB_ROAD, PRR                  )
 !
-CALL FACADE_E_BUDGET(HWALL_OPT, HBEM,                                    &
+ CALL FACADE_E_BUDGET(HWALL_OPT, HBEM,                                    &
                      PT_WALL_A, PT_WALL_B, PTSTEP,                       &
                      PHC_WALL, PTC_WALL, PD_WALL,                        &
                      PDN_ROAD, PRHOA, PAC_WALL,                          &
@@ -979,7 +979,7 @@ END SELECT
 !*      10.    Fluxes over built surfaces
 !              --------------------------
 !
-CALL URBAN_FLUXES   (HIMPLICIT_WIND, OCANOPY, PT_CANYON,                      &
+ CALL URBAN_FLUXES   (HIMPLICIT_WIND, OCANOPY, PT_CANYON,                      &
                      PPEW_A_COEF, PPEW_B_COEF,                                &
                      PEXNS, PRHOA, PVMOD,                                     &
                      PH_TRAFFIC, PLE_TRAFFIC, PH_INDUSTRY, PLE_INDUSTRY,      &
@@ -1029,7 +1029,7 @@ ENDWHERE
 !*      11.    Roof ans road reservoirs evolution
 !              ----------------------------------
 !
-CALL URBAN_HYDRO(ZWS_ROOF_MAX,ZWS_ROAD_MAX, PWS_ROOF, PWS_ROAD,        &
+ CALL URBAN_HYDRO(ZWS_ROOF_MAX,ZWS_ROAD_MAX, PWS_ROOF, PWS_ROAD,        &
                  PRR, PTSTEP, PBLD, PLE_ROOF, PLE_ROAD,                &
                  PRUNOFF_ROOF,                                         &
                  PRUNOFF_ROAD,                                         &

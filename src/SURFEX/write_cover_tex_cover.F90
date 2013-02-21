@@ -62,10 +62,10 @@ IMPLICIT NONE
 !
 INTEGER :: I,IP
 !
-CHARACTER(LEN=5), DIMENSION(4       ) :: YDATA_SURFTYPE! main surface type
-CHARACTER(LEN=6)                      :: YSTRING6
+ CHARACTER(LEN=5), DIMENSION(4       ) :: YDATA_SURFTYPE! main surface type
+ CHARACTER(LEN=6)                      :: YSTRING6
 !
-CHARACTER(LEN=200):: YFMT  ! fortran format
+ CHARACTER(LEN=200):: YFMT  ! fortran format
 !
 LOGICAL           :: GLINE ! flag to write an additional horizontal line
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

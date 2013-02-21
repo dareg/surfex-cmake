@@ -39,7 +39,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)      :: HTYPE    ! Type of surface
+ CHARACTER(LEN=6),  INTENT(IN)      :: HTYPE    ! Type of surface
 INTEGER,           INTENT(INOUT)   :: KDIM     ! size of the mask
 !
 !*       0.2   Declarations of local variables

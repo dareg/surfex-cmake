@@ -67,12 +67,12 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 ! 
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -83,7 +83,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo fo
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
 !
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !*       0.2   declarations of local variables
 !
@@ -96,7 +96,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_IDEAL_FLUX',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !----------------------------------------------------------------------------------
 IF (HTEST/='OK') THEN
@@ -118,8 +118,8 @@ ENDIF
 !*       0.2    configuration
 !               -------------
 !
-CALL READ_DEFAULT_IDEAL_n(HPROGRAM)
-CALL READ_IDEAL_CONF_n(HPROGRAM)
+ CALL READ_DEFAULT_IDEAL_n(HPROGRAM)
+ CALL READ_IDEAL_CONF_n(HPROGRAM)
 !
 ALLOCATE(XTIMEF_f (NFORCF+1))
 ALLOCATE(XSFTH_f  (NFORCF+1))
@@ -187,7 +187,7 @@ PEMIS    = XEMIS
 !*       9.    Fluxes as diagnostics
 !              ---------------------
 !
-CALL DIAG_IDEAL_INIT_n(KI,KSW)
+ CALL DIAG_IDEAL_INIT_n(KI,KSW)
 IF (LHOOK) CALL DR_HOOK('INIT_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

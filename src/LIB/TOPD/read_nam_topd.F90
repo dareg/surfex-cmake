@@ -62,7 +62,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)   :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),                   INTENT(IN)   :: HPROGRAM     ! Type of program
 LOGICAL,                            INTENT(OUT)  :: OBUDGET_TOPD ! budget computation
 INTEGER,                            INTENT(OUT)  :: KNB_TOPD     ! Ratio between Topmodel time step and ISBA time step
 LOGICAL,                            INTENT(OUT)  :: OSTOCK_TOPD  ! T if use of stock from previous simulation
@@ -117,19 +117,19 @@ XSPEEDG(:) = 0.3 ! default value of hillspeed
 XQINIT(:) = 0.
 XRTOP_D2(:) = 1.
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_TOPD',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_TOPD',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_TOPD)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*       0.1  declaration of arguments
 !
 INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
-CHARACTER(LEN=6), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
+ CHARACTER(LEN=6), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
 TYPE(PRONOSVAR_T),             POINTER     :: TPPRONOS
 INTEGER,                       INTENT(IN)  :: KCH     ! logical unit of input chemistry file
 INTEGER,                       INTENT(IN)  :: KLUOUT  ! output listing channel
@@ -54,15 +54,15 @@ INTEGER,                       INTENT(IN)  :: KVERB   ! verbose level
 !
 !*       0.2  declaration of local variables
 !
-CHARACTER(LEN=256) :: YINPLINE ! input agregation line read from Namelist
+ CHARACTER(LEN=256) :: YINPLINE ! input agregation line read from Namelist
 INTEGER :: INDX     ! 
 INTEGER :: INBCOEFF ! Numer of agregations coeff for one species
 INTEGER :: JI       ! loop index
 INTEGER :: INDX_PRO ! index of the pronostic variable in CNAMES array
 INTEGER :: IERR
-CHARACTER(LEN=32) :: YPRO_NAME, YEMIS_NAME ! Name of the pronostic & emission species
+ CHARACTER(LEN=32) :: YPRO_NAME, YEMIS_NAME ! Name of the pronostic & emission species
 LOGICAL :: GFOUND
-CHARACTER(LEN=6), DIMENSION(:),POINTER :: CNAMES
+ CHARACTER(LEN=6), DIMENSION(:),POINTER :: CNAMES
 TYPE(PRONOSVAR_T),             POINTER :: HEAD,CURRENT
 INTEGER :: IEQ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -81,7 +81,7 @@ IEQ = SIZE(CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !
-CALL CH_OPEN_INPUTB("AGREGATION", KCH , KLUOUT)
+ CALL CH_OPEN_INPUTB("AGREGATION", KCH , KLUOUT)
 !
 ! Parse each eq. line and build the TPPRONOS list
 !
@@ -232,11 +232,11 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
-CHARACTER(len=*),INTENT(INOUT) :: HTEXT
+ CHARACTER(len=*),INTENT(INOUT) :: HTEXT
 !
 !*       0.2  declaration of local variables
 !
-CHARACTER, PARAMETER :: YPTAB = CHAR(9) ! TAB character is ASCII : 9
+ CHARACTER, PARAMETER :: YPTAB = CHAR(9) ! TAB character is ASCII : 9
 INTEGER              :: JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

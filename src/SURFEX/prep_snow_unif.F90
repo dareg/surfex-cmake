@@ -48,7 +48,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
-CHARACTER(LEN=10),  INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=10),  INTENT(IN)  :: HSURF     ! type of field
 REAL, POINTER, DIMENSION(:,:,:) :: PFIELD    ! field to interpolate horizontally
 TYPE(DATE_TIME),    INTENT(IN)  :: TPTIME    ! date and time
 LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL

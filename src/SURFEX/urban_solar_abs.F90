@@ -203,12 +203,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=3)  , INTENT(IN)    :: HBEM              ! Building Energy model 'DEF' or 'BEM'
-CHARACTER(LEN=4),   INTENT(IN)    :: HROAD_DIR         ! road direction option
+ CHARACTER(LEN=3)  , INTENT(IN)    :: HBEM              ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=4),   INTENT(IN)    :: HROAD_DIR         ! road direction option
               ! 'UNIF' : classical TEB version, all roads uniformely present
               ! 'ORIE' : specified road ORIENTATION (in fact many roads  direction
               !          possible because there can be many TEB patches)
-CHARACTER(LEN=4),   INTENT(IN)    :: HWALL_OPT         ! walls option
+ CHARACTER(LEN=4),   INTENT(IN)    :: HWALL_OPT         ! walls option
               ! 'UNIF' : classical TEB version, all walls are identical
               ! 'TWO ' : the two opposite walls are different & receive different solar energy
 REAL, DIMENSION(:), INTENT(IN)    :: PDIR_SW           ! incoming direct solar radiation
@@ -531,7 +531,7 @@ ZAALB_WALL(:) =  PGR(:) * PALB_WIN(:) + (1.-PGR(:)) * PALB_WALL(:)
 !              ---------------------------------------------
 !
 !
-CALL SOLAR_REFLECTIONS(ZDIR_SW_ROAD,ZDIR_SW_WALL,                                 &
+ CALL SOLAR_REFLECTIONS(ZDIR_SW_ROAD,ZDIR_SW_WALL,                                 &
                          ZDIR_SW_GARDEN,                                          &
                          ZABS_DIR_SW_ROAD, ZABS_DIR_SW_SNOW_ROAD,                 &
                          ZABS_DIR_SW_WALL, ZABS_DIR_SW_GARDEN, ZABS_DIR_SW_WIN    )  
@@ -555,7 +555,7 @@ END IF
 !*      2.9    absorption of diffuse incoming solar radiation
 !              ----------------------------------------------
 !
-CALL SOLAR_REFLECTIONS(ZSCA_SW_ROAD,ZSCA_SW_WALL, ZSCA_SW_GARDEN,                 &
+ CALL SOLAR_REFLECTIONS(ZSCA_SW_ROAD,ZSCA_SW_WALL, ZSCA_SW_GARDEN,                 &
                          ZABS_SCA_SW_ROAD, ZABS_SCA_SW_SNOW_ROAD,                 &
                          ZABS_SCA_SW_WALL, ZABS_SCA_SW_GARDEN, ZABS_SCA_SW_WIN    )  
 !
@@ -579,7 +579,7 @@ PREF_SW_FAC = (1 - PGR) * PALB_WALL  / (1. - PALB_WALL)                     * &
 !*      3.1    direct albedo
 !              -------------
 !
-CALL TOWN_ALBEDO(ZDIR_SW,ZABS_DIR_SW_ROOF,ZABS_DIR_SW_SNOW_ROOF,              &
+ CALL TOWN_ALBEDO(ZDIR_SW,ZABS_DIR_SW_ROOF,ZABS_DIR_SW_SNOW_ROOF,              &
                    ZABS_DIR_SW_ROAD, ZABS_DIR_SW_SNOW_ROAD,ZABS_DIR_SW_WALL,  &
                    ZABS_DIR_SW_GARDEN, ZABS_DIR_SW_GREENROOF, ZABS_DIR_SW_WIN,&
                    PDIR_ALB_TOWN                                              )  
@@ -587,7 +587,7 @@ CALL TOWN_ALBEDO(ZDIR_SW,ZABS_DIR_SW_ROOF,ZABS_DIR_SW_SNOW_ROOF,              &
 !*      3.2    direct albedo
 !              -------------
 !
-CALL TOWN_ALBEDO(ZSCA_SW,ZABS_SCA_SW_ROOF,ZABS_SCA_SW_SNOW_ROOF,              &
+ CALL TOWN_ALBEDO(ZSCA_SW,ZABS_SCA_SW_ROOF,ZABS_SCA_SW_SNOW_ROOF,              &
                    ZABS_SCA_SW_ROAD, ZABS_SCA_SW_SNOW_ROAD,ZABS_SCA_SW_WALL,  &
                    ZABS_SCA_SW_GARDEN, ZABS_SCA_SW_GREENROOF, ZABS_SCA_SW_WIN,&
                    PSCA_ALB_TOWN                                              )  

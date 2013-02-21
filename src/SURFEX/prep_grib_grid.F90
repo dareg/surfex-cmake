@@ -57,10 +57,10 @@ IMPLICIT NONE
 !* 0.1. Declaration of arguments
 !       ------------------------
 !
-CHARACTER(LEN=*),  INTENT(IN)   :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),  INTENT(IN)   :: HGRIB     ! Grib file name
 INTEGER,          INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6), INTENT(OUT)   :: HINMODEL  ! Grib originating model
-CHARACTER(LEN=10), INTENT(OUT)  :: HGRIDTYPE ! Grid type
+ CHARACTER(LEN=6), INTENT(OUT)   :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=10), INTENT(OUT)  :: HGRIDTYPE ! Grid type
 TYPE (DATE_TIME)                :: TPTIME_GRIB    ! current date and time
 
 !
@@ -74,7 +74,7 @@ INTEGER(KIND=kindOfInt)                            :: IMISSING
 INTEGER(KIND=kindOfInt)                            :: IUNIT
 INTEGER(KIND=kindOfInt)                            :: IGRIB
 INTEGER                            :: ICENTER       ! number of center
-CHARACTER(LEN=20)                  :: HGRID         ! type of grid
+ CHARACTER(LEN=20)                  :: HGRID         ! type of grid
 INTEGER                            :: ISCAN, JSCAN
 INTEGER                            :: ILENX ! nb points in X
 INTEGER                            :: ILENY ! nb points in Y
@@ -94,29 +94,29 @@ IF (LHOOK) CALL DR_HOOK('PREP_GRIB_GRID',0,ZHOOK_HANDLE)
 WRITE (KLUOUT,'(A)') ' -- Grib reader started'
 !
 ! open grib file
-CALL GRIB_OPEN_FILE(IUNIT,HGRIB,'R',IRET)
+ CALL GRIB_OPEN_FILE(IUNIT,HGRIB,'R',IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('PREP_GRIB_GRID: Error opening the grib file '//HGRIB)
 END IF
 !
-CALL GRIB_NEW_FROM_FILE(IUNIT,IGRIB,IRET)
+ CALL GRIB_NEW_FROM_FILE(IUNIT,IGRIB,IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('PREP_GRIB_GRID: Error in reading the grib file')
 END IF
 !
 ! close the grib file
-CALL GRIB_CLOSE_FILE(IUNIT)
+ CALL GRIB_CLOSE_FILE(IUNIT)
 !
 !---------------------------------------------------------------------------------------
 !* 2.  Fix originating center
 !---------------------------------------------------------------------------------------
 !
-CALL GRIB_GET(IGRIB,'centre',ICENTER,IRET)
+ CALL GRIB_GET(IGRIB,'centre',ICENTER,IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('PREP_GRIB_GRID: Error in reading center')
 END IF
 !
-CALL GRIB_GET(IGRIB,'typeOfGrid',HGRID,IRET)
+ CALL GRIB_GET(IGRIB,'typeOfGrid',HGRID,IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('PREP_GRIB_GRID: Error in reading type of grid')
 END IF
@@ -363,13 +363,13 @@ END SELECT
 !
 WRITE (KLUOUT,'(A)') ' | Reading date'
 !
-CALL GRIB_GET(IGRIB,'year',TPTIME_GRIB%TDATE%YEAR,IRET)
-CALL GRIB_GET(IGRIB,'month',TPTIME_GRIB%TDATE%MONTH,IRET)
-CALL GRIB_GET(IGRIB,'day',TPTIME_GRIB%TDATE%DAY,IRET)
-CALL GRIB_GET(IGRIB,'time',ITIME,IRET)
+ CALL GRIB_GET(IGRIB,'year',TPTIME_GRIB%TDATE%YEAR,IRET)
+ CALL GRIB_GET(IGRIB,'month',TPTIME_GRIB%TDATE%MONTH,IRET)
+ CALL GRIB_GET(IGRIB,'day',TPTIME_GRIB%TDATE%DAY,IRET)
+ CALL GRIB_GET(IGRIB,'time',ITIME,IRET)
 TPTIME_GRIB%TIME=INT(ITIME/100)*3600+(ITIME-INT(ITIME/100)*100)*60
 !  
-CALL GRIB_GET(IGRIB,'P1',IP1,IRET)
+ CALL GRIB_GET(IGRIB,'P1',IP1,IRET)
 IF ( IP1>0 ) THEN
   CALL GRIB_GET(IGRIB,'unitOfTimeRange',IUNITTIME,IRET)      
   SELECT CASE (IUNITTIME)       ! Time unit indicator
@@ -382,7 +382,7 @@ ENDIF
 !
 !---------------------------------------------------------------------------------------
 !
-CALL GRIB_RELEASE(IGRIB,IRET)
+ CALL GRIB_RELEASE(IGRIB,IRET)
 IF (IRET /= 0) THEN
   CALL ABOR1_SFX('PREP_GRIB_GRID: Error in releasing the grib message memory')
 END IF

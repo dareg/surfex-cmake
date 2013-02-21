@@ -40,7 +40,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),  INTENT(IN)    :: HTYPE    ! Type of surface
+ CHARACTER(LEN=*),  INTENT(IN)    :: HTYPE    ! Type of surface
 INTEGER,           INTENT(OUT)   :: KL       ! number of points of this surface type
 !
 !*       0.2   Declarations of local variables

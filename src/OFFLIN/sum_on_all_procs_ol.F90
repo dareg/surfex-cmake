@@ -50,11 +50,11 @@ INCLUDE "mpif.h"
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=10),         INTENT(IN)    :: HGRID ! grid type
+ CHARACTER(LEN=10),         INTENT(IN)    :: HGRID ! grid type
 INTEGER,                   INTENT(IN)    :: KSIZE ! size of integer array
 INTEGER, DIMENSION(KSIZE), INTENT(IN)    :: KIN   ! integer array to sum
 INTEGER,                   INTENT(INOUT) :: KOUT  ! sum of all integers
-CHARACTER(LEN=3),          INTENT(IN)    :: HNAME ! name of type of field
+ CHARACTER(LEN=3),          INTENT(IN)    :: HNAME ! name of type of field
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -68,7 +68,7 @@ IF (LHOOK) CALL DR_HOOK('SUM_ON_ALL_PROCS_OL',0,ZHOOK_HANDLE)
 !
 !* sum of field
 !
-CALL GATHER_AND_WRITE_MPI(KIN,IIN)
+ CALL GATHER_AND_WRITE_MPI(KIN,IIN)
 IF (NRANK==NPIO) KOUT = SUM(IIN)
 !
 IF (NPROC>1) THEN

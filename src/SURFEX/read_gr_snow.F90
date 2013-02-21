@@ -56,32 +56,32 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)           :: HPROGRAM  ! calling program
-CHARACTER (LEN=*),  INTENT(IN)           :: HSURFTYPE ! generic name used for
+ CHARACTER(LEN=6),   INTENT(IN)           :: HPROGRAM  ! calling program
+ CHARACTER (LEN=*),  INTENT(IN)           :: HSURFTYPE ! generic name used for
                                                       ! snow characteristics
                                                       ! storage in file
-CHARACTER (LEN=3),  INTENT(IN)           :: HPREFIX   ! generic name for patch
+ CHARACTER (LEN=3),  INTENT(IN)           :: HPREFIX   ! generic name for patch
 !                                                     ! identification                      
 INTEGER,            INTENT(IN)           :: KLU       ! horizontal size of snow var.
 INTEGER,            INTENT(IN)           :: KPATCH    ! number of tiles
 TYPE(SURF_SNOW)                          :: TPSNOW    ! snow characteristics
-CHARACTER (LEN=1),  INTENT(IN), OPTIONAL :: HDIR      ! type of reading
+ CHARACTER (LEN=1),  INTENT(IN), OPTIONAL :: HDIR      ! type of reading
 !                                                     ! HDIR = 'A' : entire field on All processors
 !                                                     ! HDIR = 'H' : distribution on each processor
 !
 !*       0.2   declarations of local variables
 !
 INTEGER             :: IRESP               ! Error code after redding
-CHARACTER(LEN=12)   :: YRECFM              ! Name of the article to be read
-CHARACTER(LEN=16)   :: YRECFM2 
+ CHARACTER(LEN=12)   :: YRECFM              ! Name of the article to be read
+ CHARACTER(LEN=16)   :: YRECFM2 
 !
-CHARACTER (LEN=100) :: YFMT                ! format for writing
+ CHARACTER (LEN=100) :: YFMT                ! format for writing
 INTEGER             :: ISURFTYPE_LEN       ! 
 LOGICAL             :: GSNOW               ! snow written in the file
 INTEGER             :: JLAYER              ! loop counter
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK ! 2D array to write data in file
-CHARACTER(LEN=1)    :: YDIR                ! type of reading
-CHARACTER(LEN=4)    :: YNLAYER     !Format depending on the number of layers
+ CHARACTER(LEN=1)    :: YDIR                ! type of reading
+ CHARACTER(LEN=4)    :: YNLAYER     !Format depending on the number of layers
 INTEGER             :: IVERSION, IBUGFIX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -91,8 +91,8 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
 !-------------------------------------------------------------------------------
-CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
 !-------------------------------------------------------------------------------
 !
 !*       1.    Type of snow scheme
@@ -113,7 +113,7 @@ ELSE
   ENDIF
 END IF
 !
-CALL READ_SURF(HPROGRAM,YRECFM2,TPSNOW%SCHEME,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM2,TPSNOW%SCHEME,IRESP)
 !
 !*       2.    Snow levels
 !              -----------
@@ -128,7 +128,7 @@ ELSE
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2=ADJUSTL(HPREFIX//YRECFM2)
 END IF
 !
-CALL READ_SURF(HPROGRAM,YRECFM2,TPSNOW%NLAYER,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM2,TPSNOW%NLAYER,IRESP)
 !
 !*       2.    Presence of snow fields in the file
 !              -----------------------------------
@@ -153,7 +153,7 @@ END IF
 !*       3.    Allocations
 !              -----------
 !
-CALL ALLOCATE_GR_SNOW(TPSNOW,KLU,KPATCH)
+ CALL ALLOCATE_GR_SNOW(TPSNOW,KLU,KPATCH)
 !
 IF (.NOT. GSNOW) THEN
   IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',1,ZHOOK_HANDLE)

@@ -60,7 +60,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 
 !INPUT
-CHARACTER(LEN=*), INTENT(IN)       :: HPROGRAM       !I Name of program
+ CHARACTER(LEN=*), INTENT(IN)       :: HPROGRAM       !I Name of program
 INTEGER, INTENT(IN)                :: KI             !I Number of points in patch
 INTEGER, INTENT(IN)                :: KDST           !I Number of dust emission variables
 INTEGER, INTENT(IN)                :: KPATCH         !I Number of patch we are working on 
@@ -115,7 +115,7 @@ ENDDO  !Loop on dust emitter vegetation
 !Make sure you do this correctly so that area is OK.
 !Need to have this as kg/m2/sec from PATCH because
 !afterwards this is weighted by fraction of patch
-CALL AVG_FLUX_DST(NVEGNO_DST)
+ CALL AVG_FLUX_DST(NVEGNO_DST)
   
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 IF (LHOOK) CALL DR_HOOK('COUPLING_DST_N',1,ZHOOK_HANDLE)
@@ -227,7 +227,7 @@ ZP_SFMER(:) = - SQRT(ZP_CD_DST(:))*ZP_V(:)
 !
 !Get the 10m wind speed (needed for one operation in dust model)
 !And get the density at 2m to feed into erosion model
-CALL PARAM_CLS(                       &
+ CALL PARAM_CLS(                       &
        ZP_TA,                         &!I [K] atmospheric temperature
        ZP_TG,                         &!I [K] ground temperature 
        ZP_QA,                         &!I [kg_{H2O}/kg_{air} 

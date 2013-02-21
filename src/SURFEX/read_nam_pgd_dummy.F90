@@ -51,12 +51,12 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)   :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),                   INTENT(IN)   :: HPROGRAM     ! Type of program
 INTEGER,                            INTENT(OUT)  :: KDUMMY_NBR
 !                          ! number of dummy pgd fields chosen by user
-CHARACTER(LEN=20), DIMENSION(1000), INTENT(OUT)  :: HDUMMY_NAME
+ CHARACTER(LEN=20), DIMENSION(1000), INTENT(OUT)  :: HDUMMY_NAME
 !                          ! name of the dummy pgd fields (for information)
-CHARACTER(LEN=3),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_AREA
+ CHARACTER(LEN=3),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_AREA
 !                          ! areas where dummy pgd fields are defined
 !                          ! 'ALL' : everywhere
 !                          ! 'SEA' : where sea exists
@@ -66,10 +66,10 @@ CHARACTER(LEN=3),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_AREA
 !                          ! 'TWN' : where town areas exist
 !                          ! 'STR' : where streets are present
 !                          ! 'BLD' : where buildings are present
-CHARACTER(LEN=3),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_ATYPE    ! avg type for dummy pgd fields
+ CHARACTER(LEN=3),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_ATYPE    ! avg type for dummy pgd fields
 !                                                                   ! 'ARI' , 'INV'
-CHARACTER(LEN=28), DIMENSION(1000), INTENT(OUT)  :: HDUMMY_FILE     ! data files
-CHARACTER(LEN=6),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_FILETYPE ! type of these files
+ CHARACTER(LEN=28), DIMENSION(1000), INTENT(OUT)  :: HDUMMY_FILE     ! data files
+ CHARACTER(LEN=6),  DIMENSION(1000), INTENT(OUT)  :: HDUMMY_FILETYPE ! type of these files
 !
 !
 !*    0.2    Declaration of local variables
@@ -84,9 +84,9 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !
 INTEGER                             :: NDUMMY_NBR
 !                          ! number of dummy pgd fields chosen by user
-CHARACTER(LEN=20), DIMENSION(1000)  :: CDUMMY_NAME
+ CHARACTER(LEN=20), DIMENSION(1000)  :: CDUMMY_NAME
 !                          ! name of the dummy pgd fields (for information)
-CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_AREA
+ CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_AREA
 !                          ! areas where dummy pgd fields are defined
 !                          ! 'ALL' : everywhere
 !                          ! 'SEA' : where sea exists
@@ -96,10 +96,10 @@ CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_AREA
 !                          ! 'TWN' : where town areas exist
 !                          ! 'STR' : where streets are present
 !                          ! 'BLD' : where buildings are present
-CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_ATYPE    ! avg type for dummy pgd fields
+ CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_ATYPE    ! avg type for dummy pgd fields
 !                                                      ! 'ARI' , 'INV'
-CHARACTER(LEN=28), DIMENSION(1000)  :: CDUMMY_FILE     ! data files
-CHARACTER(LEN=6),  DIMENSION(1000)  :: CDUMMY_FILETYPE ! type of these files
+ CHARACTER(LEN=28), DIMENSION(1000)  :: CDUMMY_FILE     ! data files
+ CHARACTER(LEN=6),  DIMENSION(1000)  :: CDUMMY_FILETYPE ! type of these files
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DUMMY_PGD/ NDUMMY_NBR, CDUMMY_NAME, CDUMMY_AREA,       &
@@ -118,19 +118,19 @@ CDUMMY_FILETYPE = "      "
 CDUMMY_AREA     = "ALL"
 CDUMMY_ATYPE    = "ARI"
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_DUMMY_PGD',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_DUMMY_PGD',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DUMMY_PGD)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

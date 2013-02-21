@@ -30,8 +30,8 @@
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=3)  :: CSNOW_ROOF     ! snow scheme for roof
-CHARACTER(LEN=3)  :: CSNOW_ROAD     ! snow scheme for road
+ CHARACTER(LEN=3)  :: CSNOW_ROOF     ! snow scheme for roof
+ CHARACTER(LEN=3)  :: CSNOW_ROAD     ! snow scheme for road
 INTEGER :: NSNOW_ROOF ! snow scheme layers for roofs
 INTEGER :: NSNOW_ROAD ! snow scheme layers for roads
 !

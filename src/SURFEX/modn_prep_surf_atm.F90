@@ -30,10 +30,10 @@
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28) :: CFILE        ! file name
-CHARACTER(LEN=6)  :: CFILETYPE    ! file type
-CHARACTER(LEN=28) :: CFILEPGD        ! file name
-CHARACTER(LEN=6)  :: CFILEPGDTYPE    ! file type
+ CHARACTER(LEN=28) :: CFILE        ! file name
+ CHARACTER(LEN=6)  :: CFILETYPE    ! file type
+ CHARACTER(LEN=28) :: CFILEPGD        ! file name
+ CHARACTER(LEN=6)  :: CFILEPGDTYPE    ! file type
 INTEGER           :: NYEAR        ! YEAR for surface
 INTEGER           :: NMONTH       ! MONTH for surface
 INTEGER           :: NDAY         ! DAY for surface

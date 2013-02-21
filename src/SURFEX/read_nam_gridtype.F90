@@ -56,8 +56,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
-CHARACTER(LEN=10), INTENT(IN)   :: HGRID      ! grid type
+ CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
+ CHARACTER(LEN=10), INTENT(IN)   :: HGRID      ! grid type
 INTEGER,           INTENT(OUT)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 INTEGER,           INTENT(OUT)  :: KL         ! number of points

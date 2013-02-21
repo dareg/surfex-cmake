@@ -94,7 +94,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER, INTENT(IN)  :: KLUOUT
 !
 INTEGER, INTENT(IN)  :: KI
@@ -124,8 +124,8 @@ LOGICAL, DIMENSION(:,:), POINTER :: OIRRIDAY
 LOGICAL, DIMENSION(:,:), POINTER :: OIRRIGATE
 REAL, DIMENSION(:,:), POINTER :: PTHRESHOLDSPT
 !
-CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
-CHARACTER(LEN=3), INTENT(IN) :: HINIT
+ CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
+ CHARACTER(LEN=3), INTENT(IN) :: HINIT
 LOGICAL, INTENT(IN) :: OTR_ML
 INTEGER, INTENT(IN) :: KNBIOMASS
 REAL, DIMENSION(:), INTENT(IN) :: PCO2
@@ -154,26 +154,26 @@ REAL, DIMENSION(:,:,:), POINTER :: PINCREASE
 REAL, DIMENSION(:,:,:), POINTER :: PTURNOVER
 !
 INTEGER,                          INTENT(IN) :: KSV      ! number of scalars
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
 INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
 INTEGER,                         INTENT(OUT) :: KAEREQ  ! number of aerosol variables
 INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
 INTEGER,                         INTENT(OUT) :: KSV_AEREND  ! last  aerosol var.
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
 INTEGER,                         INTENT(OUT) :: KDSTEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KSV_DSTBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_DSTEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSLTEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KSV_SLTBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_SLTEND  ! last  chemical var.
-CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
-CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
 !
-CHARACTER(LEN=28), INTENT(OUT) :: HCHEM_SURF_FILE
+ CHARACTER(LEN=28), INTENT(OUT) :: HCHEM_SURF_FILE
 !
 REAL, DIMENSION(:,:,:), POINTER :: PSFDST
 REAL, DIMENSION(:,:,:), POINTER :: PSFDSTM
@@ -196,7 +196,7 @@ REAL, DIMENSION(:), POINTER :: PZ0REL
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PCLAY
 REAL, DIMENSION(:,:), INTENT(IN) :: PSAND
-CHARACTER(LEN=4), INTENT(IN) :: HPEDOTF
+ CHARACTER(LEN=4), INTENT(IN) :: HPEDOTF
 REAL, DIMENSION(:,:,:), POINTER :: PCONDSAT
 REAL, DIMENSION(:,:), POINTER :: PMPOTSAT
 REAL, DIMENSION(:,:), POINTER :: PBCOEF
@@ -217,12 +217,12 @@ REAL, DIMENSION(:,:), POINTER :: PPCPS
 REAL, DIMENSION(:,:), POINTER :: PPLVTT
 REAL, DIMENSION(:,:), POINTER :: PPLSTT
 !
-CHARACTER(LEN=4), INTENT(IN) :: HSCOND
-CHARACTER(LEN=3), INTENT(IN) :: HISBA
+ CHARACTER(LEN=4), INTENT(IN) :: HSCOND
+ CHARACTER(LEN=3), INTENT(IN) :: HISBA
 REAL, DIMENSION(:,:), POINTER :: PHCAPSOIL
 REAL, DIMENSION(:,:), POINTER :: PCONDDRY
 REAL, DIMENSION(:,:), POINTER :: PCONDSLD
-CHARACTER(LEN=3), INTENT(IN) :: HCPSURF
+ CHARACTER(LEN=3), INTENT(IN) :: HCPSURF
 !
 REAL, DIMENSION(:,:,:), INTENT(IN) :: PDG
 REAL, DIMENSION(:,:), INTENT(IN) :: PDROOT
@@ -279,7 +279,7 @@ ALLOCATE(PVEGTYPE_PATCH (KI,NVEGTYPE,KPATCH))
 ALLOCATE(KSIZE_NATURE_P (KPATCH))
 ALLOCATE(KR_NATURE_P    (KI,KPATCH))
 !
-CALL SURF_PATCH(KPATCH,PVEGTYPE,PPATCH,PVEGTYPE_PATCH)
+ CALL SURF_PATCH(KPATCH,PVEGTYPE,PPATCH,PVEGTYPE_PATCH)
 !
 !*       2.5    Masks for tiles
 !               ---------------
@@ -428,7 +428,7 @@ END IF
 !        3.1 Chemical gazes
 !            --------------
 !
-CALL INIT_CHEMICAL_n(KLUOUT, KSV, HSV, KBEQ, HSVO, KAEREQ,           &
+ CALL INIT_CHEMICAL_n(KLUOUT, KSV, HSV, KBEQ, HSVO, KAEREQ,           &
                      KSV_CHSBEG, KSV_CHSEND, KSV_AERBEG, KSV_AEREND, &
                      HCH_NAMES, HAER_NAMES, KDSTEQ, KSV_DSTBEG,      &
                      KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
@@ -475,7 +475,7 @@ ALLOCATE(PZ0EFFJM(KI,KPATCH))
 ALLOCATE(PZ0REL  (KI))
 !
 IF (SIZE(PAOSIP)>0)                                      &
-CALL SUBSCALE_Z0EFF(PAOSIP,PAOSIM,PAOSJP,PAOSJM,         &
+ CALL SUBSCALE_Z0EFF(PAOSIP,PAOSIM,PAOSJP,PAOSJM,         &
                     PHO2IP,PHO2IM,PHO2JP,PHO2JM,PZ0,     &
                     PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM, &
                     PZ0REL                               ) 
@@ -655,7 +655,7 @@ ALLOCATE(PALBNIR_WET  (KI))
 ALLOCATE(PALBVIS_WET  (KI))
 ALLOCATE(PALBUV_WET   (KI))
 !
-CALL DRY_WET_SOIL_ALBEDOS(PSAND(:,1),PCLAY(:,1),                 &
+ CALL DRY_WET_SOIL_ALBEDOS(PSAND(:,1),PCLAY(:,1),                 &
                           PVEGTYPE,                              &
                           PALBNIR_DRY,PALBVIS_DRY,PALBUV_DRY,    &
                           PALBNIR_WET,PALBVIS_WET,PALBUV_WET     )  

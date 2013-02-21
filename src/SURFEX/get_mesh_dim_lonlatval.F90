@@ -61,14 +61,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_LONLATVAL',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR,PX=ZX,PY=ZY,PDX=PDX,PDY=PDY      )
+ CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR,PX=ZX,PY=ZY,PDX=PDX,PDY=PDY      )
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_LONLATVAL(ZX,ZY,ZLAT,ZLON)
+ CALL LATLON_LONLATVAL(ZX,ZY,ZLAT,ZLON)
 !
 !-----------------------------------------------------------------------------
 !

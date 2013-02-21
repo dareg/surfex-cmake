@@ -53,7 +53,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
 LOGICAL,           INTENT(OUT) :: OGARDEN          ! T: Urban green areas
 !
 !
@@ -82,15 +82,15 @@ LGARDEN = .FALSE.
 !
 !*       2.    opening of namelist
 ! 
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*       3.    reading of namelist
 ! 
-CALL POSNAM(ILUNAM,'NAM_PGD_SCHEMES',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_PGD_SCHEMES',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PGD_SCHEMES)
 !
 !-------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ OGARDEN = LGARDEN
 !
 !*       5.    close namelist file
 ! 
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 IF (LHOOK) CALL DR_HOOK('READ_PGD_COVER_GARDEN',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

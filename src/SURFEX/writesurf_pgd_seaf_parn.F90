@@ -48,14 +48,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 INTEGER           :: JTIME          ! loop index
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -66,7 +66,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_SEAF_PAR_N',0,ZHOOK_HANDLE)
 NTIME = SIZE(XDATA_SST,2)
 YRECFM='ND_SEA_TIME'
 YCOMMENT='(-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
 !
 DO JTIME=1,NTIME
   WRITE(YRECFM,FMT='(A7,I3.3)') 'D_SST_T',JTIME
@@ -76,7 +76,7 @@ END DO
 !
 YRECFM='TDATA_SST'
 YCOMMENT='(-)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,TDATA_SST,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,TDATA_SST,IRESP,HCOMMENT=YCOMMENT)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_SEAF_PAR_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

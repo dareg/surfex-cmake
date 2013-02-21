@@ -53,7 +53,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
 INTEGER         ,  INTENT(IN)  :: KDIM_FULL  ! total number of points
 INTEGER         ,  INTENT(OUT) :: KSIZE_FULL ! total number of points on this proc
 !

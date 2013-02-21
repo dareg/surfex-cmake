@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                             ! 'ALL' : all fields are written
 !
@@ -59,19 +59,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_TEB_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
-CALL GOTO_TEB(1)
-CALL WRITESURF_PGD_TEB_n(HPROGRAM)
+ CALL GOTO_TEB(1)
+ CALL WRITESURF_PGD_TEB_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_TEB_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_PGD_TEB_n

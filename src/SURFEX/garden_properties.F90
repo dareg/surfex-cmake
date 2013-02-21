@@ -84,13 +84,13 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
-CALL FLAG_TEB_GARDEN_n(1)
+ CALL FLAG_TEB_GARDEN_n(1)
 !
 !
 !*      2.     Computes several properties of gardens
 !              --------------------------------------
 !
-CALL ISBA_PROPERTIES(CISBA, LTR_ML, TSNOW, 1,                            &
+ CALL ISBA_PROPERTIES(CISBA, LTR_ML, TSNOW, 1,                            &
                      PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                   &
                      XALBNIR(:), XALBVIS(:), XALBUV(:),                  &
                      XALBNIR_VEG(:), XALBVIS_VEG(:), XALBUV_VEG(:),      &

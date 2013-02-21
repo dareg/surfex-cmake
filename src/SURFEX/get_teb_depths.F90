@@ -53,7 +53,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 !
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PD_ROOF
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PD_ROAD
@@ -71,12 +71,12 @@ REAL,    DIMENSION(:,:), ALLOCATABLE :: ZPAR_HC, ZPAR_TC, ZHC, ZTC ! work arrays
 !
 INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX        ! surface bugfix version
-CHARACTER(LEN=5)  :: YSURF          ! Type of surface
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=12) :: YRECFM0        ! Name of the article to be read
-CHARACTER(LEN=12) :: YRECFM1        ! Name of the article to be read
-CHARACTER(LEN=12) :: YRECFM2        ! Name of the article to be read
-CHARACTER(LEN=3)  :: YAREA          ! Area where field is to be averaged
+ CHARACTER(LEN=5)  :: YSURF          ! Type of surface
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM0        ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM1        ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM2        ! Name of the article to be read
+ CHARACTER(LEN=3)  :: YAREA          ! Area where field is to be averaged
 INTEGER           :: IRESP          ! reading return code
 LOGICAL           :: GDATA          ! T if depth is to be read in the file
 REAL, DIMENSION(SIZE(XDATA_D_ROOF,1),SIZE(XDATA_D_ROOF,2)) :: ZDATA
@@ -97,9 +97,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('GET_TEB_DEPTHS',0,ZHOOK_HANDLE)
 !
 YRECFM='VERSION'
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
 YRECFM='BUG'
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP)
 !
 IF (PRESENT(PD_ROOF)) THEN
   YSURF='ROOF '

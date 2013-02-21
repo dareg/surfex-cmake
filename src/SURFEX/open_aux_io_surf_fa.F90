@@ -49,9 +49,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
-CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -62,22 +62,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_FA',0,ZHOOK_HANDLE)
-CALL GET_LUOUT('ASCII ',NLUOUT)
+ CALL GET_LUOUT('ASCII ',NLUOUT)
 !
 NUNIT=9
 !
 OPEN(UNIT=NUNIT,FILE=HFILE,FORM='FORMATTED')
 !
 CMASK = HMASK
-CALL READ_SURF('ASCII ','DIM_FULL',ILU,IRET)
+ CALL READ_SURF('ASCII ','DIM_FULL',ILU,IRET)
 NFULL = ILU
 !
 !------------------------------------------------------------------------------
 !
 IL = NFULL
-CALL GET_TYPE_DIM_n(HMASK,IL)
+ CALL GET_TYPE_DIM_n(HMASK,IL)
 ALLOCATE(IMASK(IL))
-CALL GET_SURF_MASK_n(HMASK,IL,IMASK,NFULL,NLUOUT)
+ CALL GET_SURF_MASK_n(HMASK,IL,IMASK,NFULL,NLUOUT)
 !
 ALLOCATE(NMASK(SIZE(IMASK)))
 NMASK(:)=IMASK(:)

@@ -70,11 +70,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output atmospheric file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output atmospheric file type
 !
 !
 !*    0.2    Declaration of local variables
@@ -88,42 +88,42 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
-CALL SURF_VERSION
+ CALL SURF_VERSION
 !
-CALL INI_CSTS
+ CALL INI_CSTS
 !
-CALL READ_NAM_WRITE_COVER_TEX(HPROGRAM)
+ CALL READ_NAM_WRITE_COVER_TEX(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Initialisation of output grid and schemes
 !             -----------------------------------------
 !
-CALL PGD_GRID(HPROGRAM,HFILE,HFILETYPE,.TRUE.,CGRID,NGRID_PAR,XGRID_PAR)
+ CALL PGD_GRID(HPROGRAM,HFILE,HFILETYPE,.TRUE.,CGRID,NGRID_PAR,XGRID_PAR)
 !
-CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
-CALL READ_SURF(HINIFILETYPE,'SEA',   CSEA,   IRESP)
-CALL READ_SURF(HINIFILETYPE,'NATURE',CNATURE,IRESP)
-CALL READ_SURF(HINIFILETYPE,'WATER', CWATER, IRESP)
-CALL READ_SURF(HINIFILETYPE,'TOWN',  CTOWN,  IRESP)
-CALL READ_COVER_GARDEN(HINIFILETYPE,LGARDEN)
-CALL INIT_READ_DATA_COVER(HPROGRAM)
-CALL INI_DATA_COVER
-CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
+ CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL READ_SURF(HINIFILETYPE,'SEA',   CSEA,   IRESP)
+ CALL READ_SURF(HINIFILETYPE,'NATURE',CNATURE,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'WATER', CWATER, IRESP)
+ CALL READ_SURF(HINIFILETYPE,'TOWN',  CTOWN,  IRESP)
+ CALL READ_COVER_GARDEN(HINIFILETYPE,LGARDEN)
+ CALL INIT_READ_DATA_COVER(HPROGRAM)
+ CALL INI_DATA_COVER
+ CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
 !
 !-------------------------------------------------------------------------------
 !
 !*    3.      surface cover
 !             -------------
 !
-CALL ZOOM_PGD_COVER(HPROGRAM,HINIFILE,HINIFILETYPE,LECOCLIMAP)
+ CALL ZOOM_PGD_COVER(HPROGRAM,HINIFILE,HINIFILETYPE,LECOCLIMAP)
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Orography
 !             ---------
 !
-CALL ZOOM_PGD_OROGRAPHY(HPROGRAM,XSEA,XWATER,HINIFILE,HINIFILETYPE)
+ CALL ZOOM_PGD_OROGRAPHY(HPROGRAM,XSEA,XWATER,HINIFILE,HINIFILETYPE)
 !
 !_______________________________________________________________________________
 !

@@ -63,13 +63,13 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling TEB
-CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW_ROOF ! snow scheme for roofs
-CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW_ROAD ! snow scheme for roads
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling TEB
+ CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW_ROOF ! snow scheme for roofs
+ CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW_ROAD ! snow scheme for roads
 INTEGER,           INTENT(OUT) :: KSNOW_ROOF ! snow scheme layers for roofs
 INTEGER,           INTENT(OUT) :: KSNOW_ROAD ! snow scheme layers for roads
-CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
-CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+ CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
+ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

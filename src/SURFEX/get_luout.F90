@@ -50,7 +50,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling GROUND
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling GROUND
 INTEGER,           INTENT(OUT) :: KLUOUT   ! Logical unit of output listing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

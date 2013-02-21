@@ -51,11 +51,11 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
-CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program
-CHARACTER (LEN=*),  INTENT(IN) :: HSURFTYPE  ! generic name used for
+ CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program
+ CHARACTER (LEN=*),  INTENT(IN) :: HSURFTYPE  ! generic name used for
                                              ! snow characteristics
                                              ! storage in file
-CHARACTER (LEN=3),  INTENT(IN) :: HPREFIX    ! generic name of prefix for
+ CHARACTER (LEN=3),  INTENT(IN) :: HPREFIX    ! generic name of prefix for
                                              ! patch identification
 TYPE(SURF_SNOW),    INTENT(IN) :: TPSNOW     ! snow characteristics
 !
@@ -63,15 +63,15 @@ TYPE(SURF_SNOW),    INTENT(IN) :: TPSNOW     ! snow characteristics
 !
 INTEGER             :: ISURFTYPE_LEN
 !
-CHARACTER (LEN=100) :: YFMT           ! format for writing
-CHARACTER(LEN=12)   :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100)  :: YCOMMENT       ! Comment string
+ CHARACTER (LEN=100) :: YFMT           ! format for writing
+ CHARACTER(LEN=12)   :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100)  :: YCOMMENT       ! Comment string
 INTEGER             :: IRESP          ! IRESP  : return-code if a problem appears
 !
 LOGICAL             :: GSNOW          ! T --> snow exists somewhere
 !
 INTEGER             :: JLAYER         ! loop counter
-CHARACTER(LEN=4)    :: YNLAYER        ! String depending on the number of layer : less
+ CHARACTER(LEN=4)    :: YNLAYER        ! String depending on the number of layer : less
                                       !than 10 or more                              
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -91,7 +91,7 @@ WRITE(YFMT,'(A5,I1,A4)') '(A3,A',ISURFTYPE_LEN,',A4)'
 WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE,'_TYP'
 YRECFM=ADJUSTL(HPREFIX//YRECFM)
 YCOMMENT=' '
-CALL WRITE_SURF(HPROGRAM,YRECFM,TPSNOW%SCHEME,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,TPSNOW%SCHEME,IRESP,HCOMMENT=YCOMMENT)
 !
 !
 !*       3.    Number of layers
@@ -101,7 +101,7 @@ WRITE(YFMT,'(A5,I1,A4)') '(A3,A',ISURFTYPE_LEN,',A2)'
 WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE,'_N'
 YRECFM=ADJUSTL(HPREFIX//YRECFM)
 YCOMMENT    = '(INTEGER)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,TPSNOW%NLAYER,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,TPSNOW%NLAYER,IRESP,HCOMMENT=YCOMMENT)
 !
 !
 !*       4.    Tests to find if there is snow
@@ -117,7 +117,7 @@ WRITE(YFMT,'(A5,I1,A1)') '(A3,A',ISURFTYPE_LEN,')'
 WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE
 YRECFM=ADJUSTL(HPREFIX//YRECFM)
 YCOMMENT    = '(LOGICAL)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,GSNOW,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,GSNOW,IRESP,HCOMMENT=YCOMMENT)
 !
 !
 IF (.NOT. GSNOW) THEN
@@ -130,7 +130,7 @@ END IF
 !              ---------------
 !
 YCOMMENT    = '(LOGICAL)'
-CALL WRITE_SURF(HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP,HCOMMENT=YCOMMENT)
 !
 !
 DO JLAYER = 1,TPSNOW%NLAYER

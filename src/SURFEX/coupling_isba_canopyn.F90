@@ -67,8 +67,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
@@ -89,7 +89,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -128,7 +128,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
@@ -184,7 +184,7 @@ REAL, DIMENSION(KI)   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
 REAL, DIMENSION(KI)   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 REAL, DIMENSION(KI)   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 !
-CHARACTER(LEN=1) :: GCOUPLING
+ CHARACTER(LEN=1) :: GCOUPLING
 !
 REAL, DIMENSION(KI)   ::ZCANOPY_DENSITY
 REAL, DIMENSION(KI)   ::ZUW_GROUND
@@ -339,7 +339,7 @@ END IF
 !*      2.     Call of ISBA
 !              ------------
 !
-CALL COUPLING_ISBA_n(HPROGRAM, GCOUPLING,                                                  &
+ CALL COUPLING_ISBA_n(HPROGRAM, GCOUPLING,                                                  &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2,                                                     &
@@ -364,7 +364,7 @@ IF (.NOT. LCANOPY) RETURN
 !*      4.     Computes the impact of surface on air
 !              -------------------------------------
 !
-CALL INIT_FORC( ZFORC_U, ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, &
+ CALL INIT_FORC( ZFORC_U, ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, &
                ZFORC_T, ZDFORC_TDT, ZFORC_Q, ZDFORC_QDQ )
 !
 ZSFLUX_U = - SQRT(PSFU(:)**2+PSFV(:)**2) / PRHOA(:)
@@ -405,7 +405,7 @@ ENDIF
 !             --------------------------------------------
 !
 ZWIND = SQRT(PU**2+PV**2)
-CALL CANOPY_EVOL(KI,NLVL,PTSTEP,2,ZZ,ZWIND,PTA,PQA,PPA,PRHOA,                 &
+ CALL CANOPY_EVOL(KI,NLVL,PTSTEP,2,ZZ,ZWIND,PTA,PQA,PPA,PRHOA,                 &
                  ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,                                  &
                  ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                       &
                  ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                       &

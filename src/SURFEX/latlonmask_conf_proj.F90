@@ -100,7 +100,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_CONF_PROJ',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,KIMAX=IIMAX,KJMAX=IJMAX)
+ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,KIMAX=IIMAX,KJMAX=IJMAX)
 !
 !
 ALLOCATE(ZX  (IIMAX*IJMAX))
@@ -121,7 +121,7 @@ OLATLONMASK(:,:) = .FALSE.
 !*      1.   Limits of the domain conformal plane coordinates
 !            ------------------------------------------------
 !
-CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY)
+ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY)
 !
 ZXMIN =      MINVAL(ZX) - 3.* MAXVAL(ZDX)/2.
 ZXMAX =      MAXVAL(ZX) + 3.* MAXVAL(ZDX)/2.
@@ -159,7 +159,7 @@ ZLON_MASK(:)= (/ (  JLON     /2. - 0.25 , JLON=1,720 ) /)
 !*      3.   Longitude correction / LON0
 !            ---------------------------
 !
-CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,                   &
+ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,                   &
                               PLAT0=ZLAT0,PLON0=ZLON0,PRPK=ZRPK,        &
                               PBETA=ZBETA,PLATOR=ZLATOR,PLONOR=ZLONOR   )  
 !
@@ -188,7 +188,7 @@ END WHERE
 !*      6.   Latitude and longitude of the points of the domain
 !            --------------------------------------------------
 !
-CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR, &
+ CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR, &
                       ZXCORNER,ZYCORNER,ZLAT,ZLON           )  
 !
 !*      7.   Longitudes between 0. and 360.

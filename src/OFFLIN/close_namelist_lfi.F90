@@ -45,7 +45,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
 INTEGER,           INTENT(IN)  :: KLUNAM   ! logical unit of namelist
 !
 !*       0.2   Declarations of local variables
@@ -59,7 +59,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !  -------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST_LFI',0,ZHOOK_HANDLE)
-CALL FMFREE(CNAMFI(KLUNAM),CLUOUT_LFI,IRESP)
+ CALL FMFREE(CNAMFI(KLUNAM),CLUOUT_LFI,IRESP)
 CLOSE(KLUNAM)
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST_LFI',1,ZHOOK_HANDLE)
 !

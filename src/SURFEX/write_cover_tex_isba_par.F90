@@ -61,8 +61,8 @@ IMPLICIT NONE
 !
 INTEGER,          INTENT(IN) :: KPATCH! number of patch
 INTEGER,          INTENT(IN) :: KLAYER! number of soil layers
-CHARACTER(LEN=*), INTENT(IN) :: HISBA ! type of soil (Force-Restore OR Diffusion)
-CHARACTER(LEN=*), INTENT(IN) :: HPHOTO! type of photosynthesis
+ CHARACTER(LEN=*), INTENT(IN) :: HISBA ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*), INTENT(IN) :: HPHOTO! type of photosynthesis
 REAL, DIMENSION(:),INTENT(IN) :: PSOILGRID ! reference grid for DIF
 !
 !*    0.2    Declaration of local variables
@@ -71,15 +71,15 @@ REAL, DIMENSION(:),INTENT(IN) :: PSOILGRID ! reference grid for DIF
 !
 INTEGER :: I,J,IP
 !
-CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_VEGPARAM! vegetation parameters
-CHARACTER(LEN=6)                      :: YSTRING6
-CHARACTER(LEN=24)                     :: YDATA_CV      ! Cv
-CHARACTER(LEN=24)                     :: YDATA_RE25    ! Re25
-CHARACTER(LEN=4)                      :: YDATA_STRESS  ! Stress def.
-CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_MONTH   ! monthly veg. parameters
-CHARACTER(LEN=6), DIMENSION(10      ) :: YDATA_LAYER   ! soil layer parameters
+ CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_VEGPARAM! vegetation parameters
+ CHARACTER(LEN=6)                      :: YSTRING6
+ CHARACTER(LEN=24)                     :: YDATA_CV      ! Cv
+ CHARACTER(LEN=24)                     :: YDATA_RE25    ! Re25
+ CHARACTER(LEN=4)                      :: YDATA_STRESS  ! Stress def.
+ CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_MONTH   ! monthly veg. parameters
+ CHARACTER(LEN=6), DIMENSION(10      ) :: YDATA_LAYER   ! soil layer parameters
 !
-CHARACTER(LEN=20) :: YFMT  ! fortran format
+ CHARACTER(LEN=20) :: YFMT  ! fortran format
 !
 INTEGER           :: JPAGE ! current page when the number of classes
                            ! is too long to stand on one page only
@@ -117,7 +117,7 @@ END DO
 !
 !ocl scalar
 !
-CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,HPHOTO, 'NAT',                    &
+ CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,HPHOTO, 'NAT',                    &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
                         PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &

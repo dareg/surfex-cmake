@@ -45,13 +45,13 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM     ! Type of program
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE        ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_1KM   ! index file at 1km
-CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_10KM  ! index file at 10km
-CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_100KM ! index file at 100km
-CHARACTER(LEN=28), INTENT(OUT) :: HINDEX       ! index file
-CHARACTER(LEN=5),  INTENT(OUT) :: HRES         ! resolution
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE        ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_1KM   ! index file at 1km
+ CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_10KM  ! index file at 10km
+ CHARACTER(LEN=28), INTENT(IN)  :: HINDEX_100KM ! index file at 100km
+ CHARACTER(LEN=28), INTENT(OUT) :: HINDEX       ! index file
+ CHARACTER(LEN=5),  INTENT(OUT) :: HRES         ! resolution
 INTEGER,           INTENT(OUT) :: KDIM         ! number of grid point in file
 INTEGER,           INTENT(OUT) :: KNLON        ! number of longitude rows in file
 INTEGER,           INTENT(OUT) :: KNLAT        ! number of latitude  rows in file
@@ -64,7 +64,7 @@ REAL,           INTENT(OUT)    :: PDLAT        ! latitude mesh in the data file
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28) :: YFILEHDR         ! Name of the field file header
+ CHARACTER(LEN=28) :: YFILEHDR         ! Name of the field file header
 INTEGER :: IERR, IGLBHDR              ! logical units
 !
 REAL    :: ZGLBLATMIN                 ! minimum latitude of data box in the file
@@ -80,13 +80,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GAUSS_INDEX:READ_GAUSS_CONF',0,ZHOOK_HANDLE)
 YFILEHDR =ADJUSTL(ADJUSTR(HFILE)//'.hdr')
-CALL OPEN_NAMELIST(HPROGRAM,IGLBHDR,YFILEHDR)
+ CALL OPEN_NAMELIST(HPROGRAM,IGLBHDR,YFILEHDR)
 !
-CALL READHEAD(IGLBHDR,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
+ CALL READHEAD(IGLBHDR,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
                 INBLINE,INBCOL,ZNODATA,PDLAT,PDLON,PLAT,PLON,IERR)  
 IF (IERR/=0) CALL ABOR1_SFX('READ_GAUSS_CONF: PB IN FILE HEADER')
 !
-CALL CLOSE_NAMELIST(HPROGRAM,IGLBHDR)
+ CALL CLOSE_NAMELIST(HPROGRAM,IGLBHDR)
 !
 !-------------------------------------------------------------------------------
 !
@@ -573,8 +573,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM
-CHARACTER(LEN=28),     INTENT(IN)  :: HINDEX       ! Index file 
+ CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=28),     INTENT(IN)  :: HINDEX       ! Index file 
 INTEGER,               INTENT(IN)  :: KNLON        ! number of longitude rows in file
 INTEGER,               INTENT(IN)  :: KNLAT        ! number of longitude rows in file
 INTEGER, DIMENSION(:), INTENT(OUT) :: KINDEX       ! mesh index of all input points
@@ -585,7 +585,7 @@ INTEGER, DIMENSION(:), OPTIONAL, INTENT(OUT) :: KSSOY ! Y submesh index in their
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-CHARACTER(LEN=28) :: YFILE
+ CHARACTER(LEN=28) :: YFILE
 !
 INTEGER (KIND=4), DIMENSION(:), ALLOCATABLE :: IVALUE ! value of a data point
 !
@@ -613,7 +613,7 @@ ALLOCATE (IVALUE(KNLON))
 !
 !-------------------------------------------------------------------------------
 
-CALL OPEN_FILE(HPROGRAM,IGLB,YFILE,'UNFORMATTED',           &
+ CALL OPEN_FILE(HPROGRAM,IGLB,YFILE,'UNFORMATTED',           &
                  HACTION='READ',HACCESS='DIRECT',KRECL=IRECLENGTH )  
 !
 !-------------------------------------------------------------------------------
@@ -717,7 +717,7 @@ DEALLOCATE (IVALUE)
 !
 !-------------------------------------------------------------------------------
 !
-CALL CLOSE_FILE(HPROGRAM,IGLB)
+ CALL CLOSE_FILE(HPROGRAM,IGLB)
 IF (LHOOK) CALL DR_HOOK('MODE_GAUSS_INDEX:READ_INDEX_GAUSS',1,ZHOOK_HANDLE)
 !
 !######################################################################################
@@ -760,8 +760,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM
-CHARACTER(LEN=5),      INTENT(IN) :: HRES         ! Resolution 
+ CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM
+ CHARACTER(LEN=5),      INTENT(IN) :: HRES         ! Resolution 
 INTEGER,               INTENT(IN) :: KNLON        ! number of longitude rows in file
 INTEGER,               INTENT(IN) :: KNLAT        ! number of longitude rows in file
 INTEGER, DIMENSION(:), INTENT(IN) :: KINDEX       ! mesh index of all input points
@@ -774,7 +774,7 @@ INTEGER, DIMENSION(:), OPTIONAL, INTENT(IN) :: KSSOY ! Y submesh index in their 
 !
 INTEGER (KIND=4), DIMENSION(:), ALLOCATABLE :: IVALUE ! value of a data point
 !
-CHARACTER(LEN=28) :: YFILENAME, YNLATI
+ CHARACTER(LEN=28) :: YFILENAME, YNLATI
 !
 INTEGER           :: INLATI 
 !
@@ -796,7 +796,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GAUSS_INDEX:STORE_INDEX_GAUSS',0,ZHOOK_HANDLE)
 IBITS      = 32
 IRECLENGTH = IBITS/8 * KNLON
 !
-CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,KNLATI=INLATI)
+ CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,KNLATI=INLATI)
 !
 WRITE(YNLATI,'(I28)')(INLATI-1)
 YFILENAME='index_'//ADJUSTL(HRES(:LEN_TRIM(HRES)))//'_to_t'//ADJUSTL(YNLATI(:LEN_TRIM(YNLATI))//'.bin')
@@ -805,7 +805,7 @@ ALLOCATE (IVALUE(KNLON))
 !
 !-------------------------------------------------------------------------------
 
-CALL OPEN_FILE(HPROGRAM,IGLB,YFILENAME,'UNFORMATTED',           &
+ CALL OPEN_FILE(HPROGRAM,IGLB,YFILENAME,'UNFORMATTED',           &
                  HACTION='WRITE',HACCESS='DIRECT',KRECL=IRECLENGTH )  
 !
 !-------------------------------------------------------------------------------
@@ -868,7 +868,7 @@ DEALLOCATE (IVALUE)
 !
 !-------------------------------------------------------------------------------
 !
-CALL CLOSE_FILE(HPROGRAM,IGLB)
+ CALL CLOSE_FILE(HPROGRAM,IGLB)
 IF (LHOOK) CALL DR_HOOK('MODE_GAUSS_INDEX:STORE_INDEX_GAUSS',1,ZHOOK_HANDLE)
 !
 !######################################################################################

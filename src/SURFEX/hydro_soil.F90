@@ -81,7 +81,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*),     INTENT(IN)   :: HISBA   ! type of ISBA version:
+ CHARACTER(LEN=*),     INTENT(IN)   :: HISBA   ! type of ISBA version:
 !                                             ! '2-L' (default)
 !                                             ! '3-L'
 !
@@ -142,7 +142,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PDRAIN
 !                                      PWGI2  = bulk deep-soil ice at 't+dt' (m3 m-3)
 !                                      PDRAIN = drainage (kg m-2 s-1)
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
 !

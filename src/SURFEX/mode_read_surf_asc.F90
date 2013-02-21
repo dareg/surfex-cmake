@@ -70,15 +70,15 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
 INTEGER,           INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50):: YCOMMENT
-CHARACTER(LEN=6) :: YMASK
+ CHARACTER(LEN=50):: YCOMMENT
+ CHARACTER(LEN=6) :: YMASK
 LOGICAL          :: GFOUND
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -88,10 +88,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
 !
 READ(NUNIT,FMT=*,END=100)
@@ -103,7 +103,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFX0_ASC
@@ -135,18 +135,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT)  :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER           :: I, INFOMPI
@@ -262,18 +262,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER           :: I, INFOMPI
@@ -382,15 +382,15 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -400,10 +400,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
 !
 READ(NUNIT,FMT=*,END=100)
@@ -415,7 +415,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE READ_SURFN0_ASC
@@ -447,18 +447,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER           :: I, INFOMPI
@@ -567,15 +567,15 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
-CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
+ CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50):: YCOMMENT
-CHARACTER(LEN=6) :: YMASK
+ CHARACTER(LEN=50):: YCOMMENT
+ CHARACTER(LEN=6) :: YMASK
 LOGICAL          :: GFOUND
 LOGICAL          :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -585,10 +585,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
 !
 READ(NUNIT,FMT=*,END=100)
@@ -601,7 +601,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFC0_ASC
@@ -626,15 +626,15 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -643,10 +643,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//HREC,GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
 !
 READ(NUNIT,FMT=*,END=100)
@@ -658,7 +658,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFL0_ASC
@@ -689,18 +689,18 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:),  INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50):: YCOMMENT
-CHARACTER(LEN=6) :: YMASK
+ CHARACTER(LEN=50):: YCOMMENT
+ CHARACTER(LEN=6) :: YMASK
 LOGICAL          :: GFOUND
 LOGICAL          :: GKNOWN
 INTEGER          :: INFOMPI
@@ -777,18 +777,18 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
 INTEGER,            INTENT(OUT) :: KMONTH   ! month
 INTEGER,            INTENT(OUT) :: KDAY     ! day
 REAL,               INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3) :: ITDATE
@@ -798,10 +798,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
 !IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
 !
 READ(NUNIT,FMT=*,END=100)
@@ -812,7 +812,7 @@ KYEAR  = ITDATE(1)
 KMONTH = ITDATE(2)
 KDAY   = ITDATE(3)
 !
-CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
 IF (.NOT. GFOUND) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,GFOUND,NLUOUT) ! used for auxilliary files
 !
 READ(NUNIT,FMT=*,END=100)
@@ -825,7 +825,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT0_ASC
@@ -850,18 +850,18 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(OUT) :: KDAY     ! day
 REAL,    DIMENSION(:), INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
@@ -871,10 +871,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
 !
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
@@ -884,7 +884,7 @@ KYEAR  (:) = ITDATE(1,:)
 KMONTH (:) = ITDATE(2,:)
 KDAY   (:) = ITDATE(3,:)
 !
-CALL POSNAM(NUNIT,CMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,CMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
 !
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
@@ -895,7 +895,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT1_ASC
@@ -920,18 +920,18 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KDAY     ! day
 REAL,    DIMENSION(:,:), INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
@@ -942,10 +942,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
-CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TDATE',GFOUND,NLUOUT)
 !
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
@@ -955,7 +955,7 @@ KYEAR  (:,:) = ITDATE(1,:,:)
 KMONTH (:,:) = ITDATE(2,:,:)
 KDAY   (:,:) = ITDATE(3,:,:)
 !
-CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
+ CALL POSNAM(NUNIT,YMASK//' '//TRIM(HREC)//'%TIME',GFOUND,NLUOUT)
 
 READ(NUNIT,FMT=*,END=100)
 READ(NUNIT,FMT='(A50)') YCOMMENT
@@ -967,7 +967,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',1,ZHOOK_HANDLE)
 RETURN
 !
 100 CONTINUE
-CALL ERROR_READ_SURF_ASC(HREC,KRESP)
+ CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT2_ASC

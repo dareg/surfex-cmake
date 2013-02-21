@@ -49,7 +49,7 @@ IMPLICIT NONE
 !
 LOGICAL,           INTENT(IN)     :: OCANOPY    ! True  = SBL scheme
                                                 ! False = no SBL scheme
-CHARACTER(LEN=4),  INTENT(INOUT)  :: HROUGH     ! type of roughness length
+ CHARACTER(LEN=4),  INTENT(INOUT)  :: HROUGH     ! type of roughness length
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !

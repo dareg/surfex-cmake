@@ -44,8 +44,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables

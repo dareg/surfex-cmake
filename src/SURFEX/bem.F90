@@ -178,12 +178,12 @@ IMPLICIT NONE
 !
 REAL,                INTENT(IN)   :: PTSTEP        ! Time step
 REAL,                INTENT(IN)   :: PTIME         ! current time since midnight (UTC, s)
-CHARACTER(LEN=6),    INTENT(IN)   :: HCOOL_COIL    ! type of cooling system IDEAL/DX_COOL
-CHARACTER(LEN=6),    INTENT(IN)   :: HHEAT_COIL    ! type of heating system IDEAL/FIN_CAP
+ CHARACTER(LEN=6),    INTENT(IN)   :: HCOOL_COIL    ! type of cooling system IDEAL/DX_COOL
+ CHARACTER(LEN=6),    INTENT(IN)   :: HHEAT_COIL    ! type of heating system IDEAL/FIN_CAP
 LOGICAL,             INTENT(IN)   :: OAUTOSIZE     ! Flag to activate autosize calculations
 INTEGER,             INTENT(IN)   :: KDAY          ! Simulation day
 !
-CHARACTER(LEN=4), DIMENSION(:), INTENT(IN) :: HNATVENT
+ CHARACTER(LEN=4), DIMENSION(:), INTENT(IN) :: HNATVENT
 !
 REAL, DIMENSION(:),   INTENT(IN)  :: PPS          ! Canyon air pressure [Pa]
 REAL, DIMENSION(:),   INTENT(IN)  :: PRHOA        ! Air density at the lowest level [kg m-3]
@@ -418,7 +418,7 @@ ENDWHERE
 !
 !*      2.2 FLOOR HEAT BALANCE
 !
-CALL FLOOR_LAYER_E_BUDGET(PT_FLOOR, PTSTEP,               &
+ CALL FLOOR_LAYER_E_BUDGET(PT_FLOOR, PTSTEP,               &
                           PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
                           PFLX_BLD_FLOOR, ZDQS_FLOOR, ZIMB_FLOOR,&
                           PF_FLOOR_MASS, PF_FLOOR_WALL, PF_FLOOR_WIN,&
@@ -428,7 +428,7 @@ CALL FLOOR_LAYER_E_BUDGET(PT_FLOOR, PTSTEP,               &
 !
 !*      2.3 MASS HEAT BALANCE
 !
-CALL MASS_LAYER_E_BUDGET(PT_MASS, PTSTEP,                &
+ CALL MASS_LAYER_E_BUDGET(PT_MASS, PTSTEP,                &
                           PHC_FLOOR, PTC_FLOOR, PD_FLOOR/2., &
                           PFLX_BLD_MASS, ZDQS_MASS, ZIMB_MASS,&
                           PF_MASS_WALL, PF_MASS_WIN,&

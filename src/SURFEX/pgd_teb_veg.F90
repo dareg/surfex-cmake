@@ -67,7 +67,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
 !                                           ! F if all parameters must be specified
 !
 !
@@ -82,21 +82,21 @@ INTEGER                  :: JLAYER    ! loop counter
 !
 INTEGER                  :: IPATCH           ! number of patches
 INTEGER                  :: IGROUND_LAYER    ! number of soil layers
-CHARACTER(LEN=3)         :: YISBA            ! ISBA option
-CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo-transfert function for DIF
-CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
+ CHARACTER(LEN=3)         :: YISBA            ! ISBA option
+ CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo-transfert function for DIF
+ CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
 REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
-CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
-CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
-CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
-CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
-CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
-CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
-CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
-CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
-CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
-CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
+ CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
+ CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
+ CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
+ CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
+ CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+ CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
+ CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
+ CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
+ CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
+ CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction
 REAL                     :: XUNIF_RUNOFFB    ! uniform value of subgrid runoff coefficient
@@ -108,20 +108,20 @@ REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil layer thickness for DIF
 !
 ! Not used in TEB garden
 !
-CHARACTER(LEN=28)        :: YSOC_TOP      ! file name for organic carbon
-CHARACTER(LEN=28)        :: YSOC_SUB      ! file name for organic carbon
-CHARACTER(LEN=28)        :: YPERM         ! file name for permafrost distribution
-CHARACTER(LEN=6)         :: YSOCFILETYPE  ! organic carbon data file type
-CHARACTER(LEN=6)         :: YPERMFILETYPE ! permafrost distribution data file type
+ CHARACTER(LEN=28)        :: YSOC_TOP      ! file name for organic carbon
+ CHARACTER(LEN=28)        :: YSOC_SUB      ! file name for organic carbon
+ CHARACTER(LEN=28)        :: YPERM         ! file name for permafrost distribution
+ CHARACTER(LEN=6)         :: YSOCFILETYPE  ! organic carbon data file type
+ CHARACTER(LEN=6)         :: YPERMFILETYPE ! permafrost distribution data file type
 REAL                     :: XUNIF_SOC_TOP ! uniform value of organic carbon top soil (kg/m2)
 REAL                     :: XUNIF_SOC_SUB ! uniform value of organic carbon sub soil (kg/m2)
 REAL                     :: XUNIF_PERM    ! uniform permafrost distribution
 LOGICAL                  :: LIMP_SOC      ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_PERM     ! Imposed maps of permafrost distribution
-CHARACTER(LEN=28)        :: YPH           ! file name for pH
-CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
-CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
-CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+ CHARACTER(LEN=28)        :: YPH           ! file name for pH
+ CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+ CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+ CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
 REAL                     :: XUNIF_PH      ! uniform value of pH
 REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
@@ -129,7 +129,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_VEG',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -141,7 +141,7 @@ CISBA         = '   '
 CPEDOTF       = '   '
 CPHOTO        = '   '
 !
-CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
+ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
                        YISBA, YPEDOTF, YPHOTO,  GTR_ML, ZRM_PATCH,              &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,             &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,             &
@@ -253,7 +253,7 @@ IF(LIMP_SAND)THEN
 !
 ELSE
 !
-CALL PGD_FIELD(HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,XSAND(:,1))
+ CALL PGD_FIELD(HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,XSAND(:,1))
 ENDIF
 !
 DO JLAYER=1,NGROUND_LAYER
@@ -271,7 +271,7 @@ IF(LIMP_CLAY)THEN
   CALL ABOR1_SFX('PGD_TEB_VEG: LIMP_SAND IS NOT CONSISTENT WITH TEB_GARDEN')
 !
 ELSE
-CALL PGD_FIELD(HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,XCLAY(:,1))
+ CALL PGD_FIELD(HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,XCLAY(:,1))
 ENDIF
 !
 DO JLAYER=1,NGROUND_LAYER
@@ -283,7 +283,7 @@ END DO
 !             --------------
 !
 ALLOCATE(XRUNOFFB(NDIM))
-CALL PGD_FIELD                                                                              &
+ CALL PGD_FIELD                                                                              &
        (HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,XRUNOFFB(:))  
 !
 !-------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ CALL PGD_FIELD                                                                  
 !             --------------------
 !
 ALLOCATE(XWDRAIN(NDIM))
-CALL PGD_FIELD                                                                              &
+ CALL PGD_FIELD                                                                              &
        (HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,XWDRAIN(:))  
 !
 !-------------------------------------------------------------------------------
@@ -301,7 +301,7 @@ CALL PGD_FIELD                                                                  
 !             --------------------------------------------
 !
 NTIME = 12
-CALL PGD_TEB_GARDEN_PAR(HPROGRAM)
+ CALL PGD_TEB_GARDEN_PAR(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

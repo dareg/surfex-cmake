@@ -57,15 +57,15 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
 INTEGER,           INTENT(OUT) :: KLUNAM   ! logical unit of namelist
-CHARACTER(LEN=28), INTENT(IN), OPTIONAL :: HFILE ! ASCII file to open
+ CHARACTER(LEN=28), INTENT(IN), OPTIONAL :: HFILE ! ASCII file to open
 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28) :: YFILE
+ CHARACTER(LEN=28) :: YFILE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

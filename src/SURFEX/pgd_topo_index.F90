@@ -81,10 +81,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM     ! program calling
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM     ! program calling
 INTEGER,              INTENT(IN)  :: KLU          ! number of nature points
-CHARACTER(LEN=28),    INTENT(IN)  :: HCTI         ! topographic index file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HCTIFILETYPE ! topographic index file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HCTI         ! topographic index file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HCTIFILETYPE ! topographic index file type
 LOGICAL,              INTENT(IN)  :: OIMP_CTI     ! .true. if topographic index statistics is imposed
 !
 !
@@ -100,8 +100,8 @@ INTEGER :: I_DIM
 INTEGER :: IRET      ! error code
 INTEGER :: ILUOUT    ! output listing logical unit
 !
-CHARACTER(LEN=6  ) :: YFILETYPE, YSCHEME, YSUBROUTINE
-CHARACTER(LEN=20)  :: YFIELD        ! Name of the field.
+ CHARACTER(LEN=6  ) :: YFILETYPE, YSCHEME, YSUBROUTINE
+ CHARACTER(LEN=20)  :: YFIELD        ! Name of the field.
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

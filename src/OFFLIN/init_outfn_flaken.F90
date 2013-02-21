@@ -53,7 +53,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 include 'netcdf.inc'
 
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM
 INTEGER, INTENT(IN)           :: KLUOUT
 !
 !*       0.2   Declarations of local variables
@@ -61,16 +61,16 @@ INTEGER, INTENT(IN)           :: KLUOUT
 !
 INTEGER                          :: INI, ICANLVL
 INTEGER                          :: IDIM1
-CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
+ CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
 REAL,DIMENSION(:), POINTER       :: ZX, ZY
 INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
-CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
+ CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
 !
-CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
+ CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
 INTEGER                          :: IFILE_ID, IVAR_ID
-CHARACTER(LEN=50)                :: YFILE
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
-CHARACTER(LEN=2)                 :: YLVLV
+ CHARACTER(LEN=50)                :: YFILE
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=2)                 :: YLVLV
 INTEGER                          :: JLAYER
 INTEGER                          :: JRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -80,11 +80,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! 1. Compute output lenght dimension
 !-----------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_FLAKE_N',0,ZHOOK_HANDLE)
-CALL GET_DIM_FULL_n(INI)
+ CALL GET_DIM_FULL_n(INI)
 !
-CALL OL_DEFINE_DIM(HPROGRAM, KLUOUT, INI, IDIM1, YUNIT1, YUNIT2, &
+ CALL OL_DEFINE_DIM(HPROGRAM, KLUOUT, INI, IDIM1, YUNIT1, YUNIT2, &
                   ZX, ZY, IDIMS, IDDIM, YNAME_DIM)
-CALL GET_DATE_OL(TTIME,XTSTEP_OUTPUT,YDATE(1))
+ CALL GET_DATE_OL(TTIME,XTSTEP_OUTPUT,YDATE(1))
 !
 ! 4. Create output file for fluxes values
 !----------------------------------------------------------
@@ -98,7 +98,7 @@ XOUT=0
 YATT_TITLE(1)='units'
 !
 YFILE='WATFLUX_DIAGNOSTICS.OUT.nc'
-CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+ CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
 YATT='dimensionless'
 !
 IF (LCOEF) THEN
@@ -151,7 +151,7 @@ IF(LSURF_BUDGET) THEN
   CALL DEF_VAR_NETCDF(IFILE_ID,'FMV_WAT'     ,'Averaged_Merid_Wind_Stress '               ,IDDIM,YATT_TITLE,YATT)
 ENDIF
 !
-CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
+ CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !
 !YFILE='WATFLUX_DIAG_CUMUL.OUT.nc'
 !CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
@@ -164,26 +164,26 @@ CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM
 !
 !
 YFILE='WATFLUX_PROGNOSTIC.OUT.nc'
-CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+ CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
 YATT='dimensionless'
 !
 YATT='K'
-CALL DEF_VAR_NETCDF(IFILE_ID,'TS_WATER'   , 'Averaged_Water_S_Temperature'                 ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'T_MNW'      , 'Averaged_Water_Temperature  '                 ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'T_WML'      , 'Mixed_layer_wat_temperature '                 ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'T_BOT'      , 'Bottom_Water_Temperature    '                 ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'TS_WATER'   , 'Averaged_Water_S_Temperature'                 ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'T_MNW'      , 'Averaged_Water_Temperature  '                 ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'T_WML'      , 'Mixed_layer_wat_temperature '                 ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'T_BOT'      , 'Bottom_Water_Temperature    '                 ,IDDIM,YATT_TITLE,YATT)
 YATT='m' 
-CALL DEF_VAR_NETCDF(IFILE_ID,'H_ML'       , 'Mixed_Layer_Depth           '                 ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'H_ML'       , 'Mixed_Layer_Depth           '                 ,IDDIM,YATT_TITLE,YATT)
 YATT=' '
-CALL DEF_VAR_NETCDF(IFILE_ID,'CT'         , 'Termocline_Shape_Factor        '              ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'CT'         , 'Termocline_Shape_Factor        '              ,IDDIM,YATT_TITLE,YATT)
 YATT='K'
-CALL DEF_VAR_NETCDF(IFILE_ID,'T_SNOW'     , 'Temperature at the air-snow interface'        ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'T_ICE'      , 'Ice_surface_Temperature  '                    ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'T_B1'       , 'Temperature of the upper layer of sediments ' ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'T_SNOW'     , 'Temperature at the air-snow interface'        ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'T_ICE'      , 'Ice_surface_Temperature  '                    ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'T_B1'       , 'Temperature of the upper layer of sediments ' ,IDDIM,YATT_TITLE,YATT)
 YATT='m'
-CALL DEF_VAR_NETCDF(IFILE_ID,'H_SNOW'     , 'Snow thickness'              ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'H_ICE'      , 'Ice thickness'               ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(IFILE_ID,'H_B1'       , 'Thickness of the upper layer of sediments'     ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'H_SNOW'     , 'Snow thickness'              ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'H_ICE'      , 'Ice thickness'               ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(IFILE_ID,'H_B1'       , 'Thickness of the upper layer of sediments'     ,IDDIM,YATT_TITLE,YATT)
 !
 IF (LSBL) THEN
   DO JLAYER=1,ICANLVL
@@ -196,7 +196,7 @@ IF (LSBL) THEN
   END DO
 ENDIF
 !
-CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
+ CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_FLAKE_N',1,ZHOOK_HANDLE)
 !

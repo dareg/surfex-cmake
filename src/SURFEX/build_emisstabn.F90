@@ -47,9 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
-CHARACTER(LEN=6),                INTENT(IN) :: HPROGRAM   ! Program name
+ CHARACTER(LEN=6),                INTENT(IN) :: HPROGRAM   ! Program name
 INTEGER,                         INTENT(IN) :: KCH
-CHARACTER(LEN=*),DIMENSION(:),   INTENT(IN) :: HEMIS_GR_NAME ! Offline species name
+ CHARACTER(LEN=*),DIMENSION(:),   INTENT(IN) :: HEMIS_GR_NAME ! Offline species name
 INTEGER, DIMENSION(:),           INTENT(IN) :: KNBTIMES ! nb of emis times array
 INTEGER, DIMENSION(:),           INTENT(IN) :: KEMIS_GR_TIME
 INTEGER, DIMENSION(:),           INTENT(IN) :: KOFFNDX ! index of offline species
@@ -62,14 +62,14 @@ REAL, DIMENSION(:),              INTENT(IN) :: PRHODREF ! dry density for ref. s
 !
 !*       0.2  declaration of local variables
 !
-CHARACTER(LEN=3):: YUNIT       ! unit of the flux
+ CHARACTER(LEN=3):: YUNIT       ! unit of the flux
 INTEGER         :: INBTS       ! Number of emis times for a species
 INTEGER         :: IRESP       ! I/O return value
 INTEGER         :: IIND1, IIND2
 INTEGER         :: JSPEC       ! loop index
 INTEGER         :: ITIME       ! loop index
 INTEGER         :: IWS_DEFAULT ! Default Memory window size for emission reading
-CHARACTER (LEN=16):: YRECFM    ! LFI article name
+ CHARACTER (LEN=16):: YRECFM    ! LFI article name
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !
@@ -87,7 +87,7 @@ END IF
 !*       1.   READ DATA 
 !        --------------
 !
-CALL CH_OPEN_INPUTB("EMISUNIT", KCH, KLUOUT)
+ CALL CH_OPEN_INPUTB("EMISUNIT", KCH, KLUOUT)
 !
 ! read unit identifier
 READ(KCH,'(A3)') YUNIT

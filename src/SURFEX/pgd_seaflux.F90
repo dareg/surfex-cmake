@@ -59,7 +59,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -70,9 +70,9 @@ REAL, DIMENSION(NL)               :: ZSEABATHY ! bathymetry on all surface point
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=28)        :: YSEABATHY         ! file name for bathymetrie
-CHARACTER(LEN=6)         :: YSEABATHYFILETYPE ! bathymetry data file type
-CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
+ CHARACTER(LEN=28)        :: YSEABATHY         ! file name for bathymetrie
+ CHARACTER(LEN=6)         :: YSEABATHYFILETYPE ! bathymetry data file type
+ CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
                                               ! file
 REAL                     :: XUNIF_SEABATHY    ! uniform value of bathymetry
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -89,7 +89,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             -------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',0,ZHOOK_HANDLE)
-CALL READ_NAM_PGD_SEABATHY(HPROGRAM,YSEABATHY,YSEABATHYFILETYPE,YNCVARNAME,&
+ CALL READ_NAM_PGD_SEABATHY(HPROGRAM,YSEABATHY,YSEABATHYFILETYPE,YNCVARNAME,&
        XUNIF_SEABATHY)  
 !
 !-------------------------------------------------------------------------------
@@ -102,14 +102,14 @@ CALL READ_NAM_PGD_SEABATHY(HPROGRAM,YSEABATHY,YSEABATHYFILETYPE,YNCVARNAME,&
 !*    4.      Bathymetry
 !             ----------
 !
-CALL PGD_BATHYFIELD(HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
+ CALL PGD_BATHYFIELD(HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
        YNCVARNAME,XUNIF_SEABATHY,ZSEABATHY(:))  
 !-------------------------------------------------------------------------------
 !
 !*    5.      Number of points and packing
 !             ----------------------------
 !
-CALL GET_SURF_SIZE_n('SEA   ',NDIM)
+ CALL GET_SURF_SIZE_n('SEA   ',NDIM)
 !
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XCOVER     (NDIM,JPCOVER))
@@ -118,14 +118,14 @@ ALLOCATE(XLAT       (NDIM))
 ALLOCATE(XLON       (NDIM))
 ALLOCATE(XMESH_SIZE (NDIM))
 !
-CALL PACK_PGD(HPROGRAM, 'SEA   ',                    &
+ CALL PACK_PGD(HPROGRAM, 'SEA   ',                    &
                 CGRID,  XGRID_PAR,                     &
                 LCOVER, XCOVER, XZS,                   &
                 XLAT, XLON, XMESH_SIZE                 )  
 !
-CALL PACK_PGD_SEAFLUX(HPROGRAM, ZSEABATHY)
+ CALL PACK_PGD_SEAFLUX(HPROGRAM, ZSEABATHY)
 !
-CALL PGD_SEAFLUX_PAR(HPROGRAM,LSST_DATA)
+ CALL PGD_SEAFLUX_PAR(HPROGRAM,LSST_DATA)
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

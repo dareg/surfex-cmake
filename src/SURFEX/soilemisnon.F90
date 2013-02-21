@@ -96,7 +96,7 @@ REAL, DIMENSION(SIZE(PUA,1))   :: ZN_Y            ! Normalized NO flux
 !
 REAL, DIMENSION(SIZE(PUA,1),3)   :: ZS            ! normalized sum
 !
-CHARACTER(LEN=2)               :: TEST_CRF ! 'OK' if VEG<60% (i.e. soils with sparse vegetation)
+ CHARACTER(LEN=2)               :: TEST_CRF ! 'OK' if VEG<60% (i.e. soils with sparse vegetation)
 !
 INTEGER :: J
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

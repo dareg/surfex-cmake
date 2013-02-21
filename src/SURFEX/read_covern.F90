@@ -60,7 +60,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -70,7 +70,7 @@ INTEGER           :: IRESP          ! Error code after redding
 ! 
 INTEGER           :: IVERSION       ! surface version
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -85,14 +85,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_COVER_N',0,ZHOOK_HANDLE)
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 ALLOCATE(LCOVER(JPCOVER))
-CALL READ_LCOVER(HPROGRAM,LCOVER)
+ CALL READ_LCOVER(HPROGRAM,LCOVER)
 !
 !
 ALLOCATE(XCOVER(NSIZE_FULL,JPCOVER))
-CALL READ_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP)
+ CALL READ_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP)
 !
 !*       2.1    Fractions :
 !               ---------
@@ -119,7 +119,7 @@ ENDIF
 !
 ALLOCATE(XZS(NSIZE_FULL))
 YRECFM='ZS'
-CALL READ_SURF(HPROGRAM,YRECFM,XZS(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XZS(:),IRESP)
 IF (LHOOK) CALL DR_HOOK('READ_COVER_N',1,ZHOOK_HANDLE)
 !
 !

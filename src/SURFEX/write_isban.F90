@@ -52,8 +52,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
 !                                             ! 'ALL' : all fields are written
 LOGICAL,             INTENT(IN)  :: OLAND_USE !
 !
@@ -66,13 +66,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !        
-CALL WRITESURF_ISBA_CONF_n(HPROGRAM)
-CALL WRITESURF_ISBA_n(HPROGRAM,OLAND_USE)
+ CALL WRITESURF_ISBA_CONF_n(HPROGRAM)
+ CALL WRITESURF_ISBA_n(HPROGRAM,OLAND_USE)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.LSELECT) CALL WRITESURF_ISBA_CANOPY_n(HPROGRAM,HWRITE)
 !
@@ -80,7 +80,7 @@ IF ((.NOT.LNOWRITE_CANOPY).OR.LSELECT) CALL WRITESURF_ISBA_CANOPY_n(HPROGRAM,HWR
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_ISBA_n

@@ -43,18 +43,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
 !
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=8)                    :: YSURF   ! type of field
-CHARACTER(LEN=28)                   :: YNCVARNAME   ! variable to read
+ CHARACTER(LEN=8)                    :: YSURF   ! type of field
+ CHARACTER(LEN=28)                   :: YNCVARNAME   ! variable to read
 !
 INTEGER                             :: IL        ! number of points
 INTEGER                             :: IK1
@@ -70,22 +70,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_OCEAN_FIELDS',0,ZHOOK_HANDLE)
 YSURF='TEMP_OC'
 YNCVARNAME='temperature'
-CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
+ CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 !*      4.     Treatment of oceanic salinity
 YSURF='SALT_OC'
 YNCVARNAME='salinity'
-CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
+ CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 !*      5.     Treatment of oceanic current
 YSURF='UCUR_OC'
 YNCVARNAME='u'
-CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
+ CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 YSURF='VCUR_OC'
 YNCVARNAME='v'
-CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
+ CALL PREP_HOR_OCEAN_FIELD(HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 IK1=NOCKMIN+1

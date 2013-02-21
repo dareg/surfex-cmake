@@ -66,11 +66,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
-CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! atmospheric file name
-CHARACTER(LEN=6),  INTENT(IN)   :: HFILETYPE  ! atmospheric file type
+ CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
+ CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! atmospheric file name
+ CHARACTER(LEN=6),  INTENT(IN)   :: HFILETYPE  ! atmospheric file type
 LOGICAL,           INTENT(IN)   :: OGRID      ! .true. if grid is imposed by atm. model
-CHARACTER(LEN=10), INTENT(OUT)  :: HGRID      ! grid type
+ CHARACTER(LEN=10), INTENT(OUT)  :: HGRID      ! grid type
 INTEGER,           INTENT(OUT)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 !
@@ -92,7 +92,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             --------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_GRID',0,ZHOOK_HANDLE)
-CALL DEFAULT_GRID(HPROGRAM,CGRID)
+ CALL DEFAULT_GRID(HPROGRAM,CGRID)
 !
 YINIFILE  = '                         '
 YFILETYPE = '      '
@@ -102,7 +102,7 @@ IF (OGRID) THEN
   YFILETYPE = HFILETYPE
 END IF
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !------------------------------------------------------------------------------
 !
 !*    2.      Open namelist
@@ -132,9 +132,9 @@ END IF
 !*       4.    check of grid and input file types
 !              ----------------------------------
 ! 
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CGRID',CGRID,'CONF PROJ ','NONE      ','LONLAT REG','CARTESIAN ','GAUSS     ',&
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CGRID',CGRID,'CONF PROJ ','NONE      ','LONLAT REG','CARTESIAN ','GAUSS     ',&
           'IGN       ','LONLATVAL ')  
-CALL TEST_NAM_VAR_SURF(ILUOUT,'YFILETYPE',YFILETYPE,'      ','MESONH','LFI   ','ASCII ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'YFILETYPE',YFILETYPE,'      ','MESONH','LFI   ','ASCII ')
 !
 !
 !------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ ALLOCATE(XLAT       (NL))
 ALLOCATE(XLON       (NL))
 ALLOCATE(XMESH_SIZE (NL))
 ALLOCATE(XJPDIR     (NL))
-CALL LATLON_GRID(CGRID,NGRID_PAR,NL,ILUOUT,XGRID_PAR,XLAT,XLON,XMESH_SIZE,XJPDIR)
+ CALL LATLON_GRID(CGRID,NGRID_PAR,NL,ILUOUT,XGRID_PAR,XLAT,XLON,XMESH_SIZE,XJPDIR)
 !
 !------------------------------------------------------------------------------
 !

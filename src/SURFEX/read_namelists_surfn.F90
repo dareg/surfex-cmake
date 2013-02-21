@@ -28,25 +28,25 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
-CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_SURF_N',0,ZHOOK_HANDLE)
-CALL DEFAULT_SSO(CROUGH,XFRACZ0,XCOEFBE)
+ CALL DEFAULT_SSO(CROUGH,XFRACZ0,XCOEFBE)
 !
-CALL DEFAULT_CH_SURF_ATM(CCHEM_SURF_FILE,LCH_SURF_EMIS)
+ CALL DEFAULT_CH_SURF_ATM(CCHEM_SURF_FILE,LCH_SURF_EMIS)
 !
-CALL DEFAULT_DIAG_SURF_ATM(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,  &
+ CALL DEFAULT_DIAG_SURF_ATM(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,  &
                             LCOEF,LSURF_VARS,LSURF_BUDGETC,          &
                             LRESET_BUDGETC,LSELECT, LPROVAR_TO_DIAG, &
                             LDIAG_GRID,LFRAC, XDIAG_TSTEP, CSELECT   )   
 !      
-CALL READ_DEFAULT_SURF_ATM_n(HPROGRAM) 
+ CALL READ_DEFAULT_SURF_ATM_n(HPROGRAM) 
 !
-CALL READ_SURF_ATM_CONF_n(HPROGRAM)    
+ CALL READ_SURF_ATM_CONF_n(HPROGRAM)    
 !       
 !---------------------------------------------------------------------------
 !PREP

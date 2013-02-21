@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(IN)  :: KLU        ! number of points
 INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
@@ -60,7 +60,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZY       ! Y conformal coordinate of grid m
 REAL, DIMENSION(:), ALLOCATABLE   :: ZDX      ! X grid mesh size (dim IIMAX)
 REAL, DIMENSION(:), ALLOCATABLE   :: ZDY      ! Y grid mesh size (dim IJMAX)
 !
-CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
+ CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
@@ -73,7 +73,7 @@ ALLOCATE(ZY (KLU))
 ALLOCATE(ZDX(KLU))
 ALLOCATE(ZDY(KLU))
 !
-CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR, &
+ CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR, &
                         PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY  )  
 !
 !---------------------------------------------------------------------------
@@ -82,16 +82,16 @@ CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR, &
 !              -----------------------------------------
 !
 YCOMMENT='XX'
-CALL WRITE_SURF(HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
 !
 YCOMMENT='XY'
-CALL WRITE_SURF(HPROGRAM,'XY',ZY,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'XY',ZY,KRESP,YCOMMENT)
 !
 YCOMMENT='XDX'
-CALL WRITE_SURF(HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
 !
 YCOMMENT='XDY'
-CALL WRITE_SURF(HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

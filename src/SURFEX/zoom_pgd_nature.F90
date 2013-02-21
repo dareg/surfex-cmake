@@ -49,11 +49,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
 LOGICAL,              INTENT(IN)  :: OECOCLIMAP  ! flag to use ecoclimap
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

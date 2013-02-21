@@ -74,7 +74,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_LONLAT_REG',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_LONLAT_REG(PGRID_PAR,ZLONMIN,ZLONMAX,                    &
+ CALL GET_GRIDTYPE_LONLAT_REG(PGRID_PAR,ZLONMIN,ZLONMAX,                    &
                                ZLATMIN,ZLATMAX,ILON,ILAT,PLON=PLON,PLAT=PLAT )  
 !
 !-----------------------------------------------------------------------------

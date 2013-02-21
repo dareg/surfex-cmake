@@ -58,16 +58,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
-CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
-CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
-CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
-CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
-CHARACTER(LEN=6),  INTENT(OUT) :: HFILEPGDTYPE! file type
-CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=28), INTENT(IN)  :: HPGDFILE    ! atmospheric file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HPGDFILETYPE! atmospheric file type
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+ CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
+ CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
+ CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
+ CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
+ CHARACTER(LEN=6),  INTENT(OUT) :: HFILEPGDTYPE! file type
+ CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=28), INTENT(IN)  :: HPGDFILE    ! atmospheric file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPGDFILETYPE! atmospheric file type
 INTEGER,           INTENT(IN)  :: KLUOUT   ! logical unit of output listing
 LOGICAL,           INTENT(OUT) :: OUNIF    ! flag for prescribed uniform field
 
@@ -79,7 +79,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
                                     ! at the open of the file in LFI  routines 
 INTEGER           :: ILUNAM         ! Logical unit of namelist file
 !
-CHARACTER(LEN=28) :: YNAMELIST      ! namelist file
+ CHARACTER(LEN=28) :: YNAMELIST      ! namelist file
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -115,7 +115,7 @@ END IF
 !
 IF (LEN_TRIM(HFILE)==0) THEN
 !
-CALL READ_PREP_SURF_ATM_CONF(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
+ CALL READ_PREP_SURF_ATM_CONF(HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                              HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KLUOUT)
 !
 END IF

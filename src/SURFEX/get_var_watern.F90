@@ -45,8 +45,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
-CHARACTER(LEN=6),     INTENT(IN)     :: HWATER
+ CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
+ CHARACTER(LEN=6),     INTENT(IN)     :: HWATER
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
@@ -81,7 +81,7 @@ USE MODD_DIAG_WATFLUX_n, ONLY   : XZ0, XZ0H, XQS, LSURF_VARS, LCOEF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('GET_VAR_WATFLX_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF (LSURF_VARS) THEN 
@@ -111,7 +111,7 @@ USE MODD_DIAG_FLAKE_n, ONLY   : XZ0, XZ0H, XQS, LSURF_VARS, LCOEF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('GET_VAR_FLAKE_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF (LSURF_VARS) THEN 

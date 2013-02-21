@@ -40,10 +40,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 REAL,               INTENT(IN) :: PFIELD   ! the real scalar to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -54,13 +54,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX0_LFI',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
-CALL FMWRITX0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,PFIELD,4,100,HCOMMENT,KRESP)
+ CALL FMWRITX0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,PFIELD,4,100,HCOMMENT,KRESP)
 !
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX0_LFI',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFX0_LFI
@@ -85,10 +85,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -110,13 +110,13 @@ IF (LMNH_COMPATIBLE .AND. HREC=='JMAX') THEN
   NJE = KFIELD+1
 END IF
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFN0_LFI',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
-CALL FMWRITN0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,KFIELD,4,100,HCOMMENT,KRESP)
+ CALL FMWRITN0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,KFIELD,4,100,HCOMMENT,KRESP)
 !
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFN0_LFI',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFN0_LFI
@@ -140,10 +140,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -154,13 +154,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFL0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFL0_LFI',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
-CALL FMWRITL0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,OFIELD,4,100,HCOMMENT,KRESP)
+ CALL FMWRITL0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,OFIELD,4,100,HCOMMENT,KRESP)
 !
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFL0_LFI',1,ZHOOK_HANDLE)
 !
@@ -185,10 +185,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
-CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
+ CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT  ! comment string
 !
 !*      0.2   Declarations of local variables
 !
@@ -199,16 +199,16 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFC0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFC0_LFI',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
-CALL FMWRITC0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,HFIELD,4,100,HCOMMENT,KRESP)
+ CALL FMWRITC0(CFILEOUT_LFI,HREC,CLUOUT_LFI,1,HFIELD,4,100,HCOMMENT,KRESP)
 !
 IF (HREC=="GRID_TYPE") LMNH_COMPATIBLE = (HFIELD=="CARTESIAN " .OR. HFIELD=="CONF PROJ ")
 IF (HREC=="GRID_TYPE" .AND. LMNH_COMPATIBLE) LCARTESIAN=(HFIELD=="CARTESIAN ")
 !
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFC0_LFI',1,ZHOOK_HANDLE)
 !
@@ -242,17 +242,17 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=20)        :: YREC
+ CHARACTER(LEN=20)        :: YREC
 LOGICAL                  :: GKNOWN
 INTEGER                  :: JI, JJ
 DOUBLE PRECISION         :: XTIME0
@@ -267,7 +267,7 @@ KRESP=0
 !
 !$OMP SINGLE
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 !
 !$OMP END SINGLE COPYPRIVATE(GKNOWN)
 !
@@ -346,11 +346,11 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
-CHARACTER(LEN=20),        INTENT(IN) :: HREC2    ! name of the article to be read
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=20),        INTENT(IN) :: HREC2    ! name of the article to be read
 REAL, DIMENSION(:),       INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
 INTEGER,                  INTENT(IN) :: KU
 INTEGER,                  INTENT(IN) :: KB
 INTEGER,                  INTENT(IN) :: KE
@@ -389,8 +389,8 @@ SELECT CASE(HREC)
   !  
 END SELECT
 !
-CALL FMWRITX1(CFILEOUT_LFI,HREC2,CLUOUT_LFI,KU,ZWORK,4,100,HCOMMENT,KRESP)
-CALL ERROR_WRITE_SURF_LFI(HREC2,KRESP)
+ CALL FMWRITX1(CFILEOUT_LFI,HREC2,CLUOUT_LFI,KU,ZWORK,4,100,HCOMMENT,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC2,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX1_LFI:WRITE_IN_LFI_X1_FOR_MNH',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_IN_LFI_X1_FOR_MNH
@@ -425,11 +425,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
@@ -447,7 +447,7 @@ KRESP=0
 !
 !$OMP SINGLE
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 !
 !$OMP END SINGLE COPYPRIVATE(GKNOWN)
 !
@@ -505,10 +505,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
 !
 !*      0.2   Declarations of local variables
 ! 
@@ -519,7 +519,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX2_LFI:WRITE_IN_LFI_X2_FOR_MNH',0,ZHOOK_HANDLE)
 !
-CALL GET_SURF_UNDEF(ZUNDEF)
+ CALL GET_SURF_UNDEF(ZUNDEF)
 !
 ZWORK3D=ZUNDEF
 DO JJ=1,NJE-NJB+1
@@ -536,7 +536,7 @@ ELSE
   CALL FMWRITX3(CFILEOUT_LFI,HREC,CLUOUT_LFI,SIZE(ZWORK3D),ZWORK3D,4,100,HCOMMENT,KRESP)
 ENDIF
 !  
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX2_LFI:WRITE_IN_LFI_X2_FOR_MNH',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_IN_LFI_X2_FOR_MNH
@@ -569,11 +569,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
@@ -590,7 +590,7 @@ KRESP=0
 !
 !$OMP SINGLE
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 !
 !$OMP END SINGLE COPYPRIVATE(GKNOWN)
 !
@@ -654,11 +654,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:),  INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
-CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
@@ -734,17 +734,17 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
 INTEGER,            INTENT(IN)  :: KMONTH   ! month
 INTEGER,            INTENT(IN)  :: KDAY     ! day
 REAL,               INTENT(IN)  :: PTIME    ! time
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)     :: YREC     ! Name of the article to be written
+ CHARACTER(LEN=12)     :: YREC     ! Name of the article to be written
 LOGICAL               :: GKNOWN
 INTEGER, DIMENSION(3) :: ITDATE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -753,7 +753,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFT0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL IO_BUFF_n(HREC,'W',GKNOWN)
+ CALL IO_BUFF_n(HREC,'W',GKNOWN)
 IF (GKNOWN .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFT0_LFI',1,ZHOOK_HANDLE)
 IF (GKNOWN) RETURN
 !
@@ -762,12 +762,12 @@ ITDATE(2) = KMONTH
 ITDATE(3) = KDAY
 !
 YREC=TRIM(HREC)//'%TDATE'
-CALL FMWRITN1(CFILEOUT_LFI,YREC,CLUOUT_LFI,3,ITDATE,4,100,HCOMMENT,KRESP)
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL FMWRITN1(CFILEOUT_LFI,YREC,CLUOUT_LFI,3,ITDATE,4,100,HCOMMENT,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 !
 YREC=TRIM(HREC)//'%TIME'
-CALL FMWRITX0(CFILEOUT_LFI,YREC,CLUOUT_LFI,1,PTIME,4,100,HCOMMENT,KRESP)
-CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+ CALL FMWRITX0(CFILEOUT_LFI,YREC,CLUOUT_LFI,1,PTIME,4,100,HCOMMENT,KRESP)
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFT0_LFI',1,ZHOOK_HANDLE)
 !
@@ -799,17 +799,17 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=12),    INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=12),    INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(IN) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(IN) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(IN) :: KDAY     ! day
 REAL,    DIMENSION(:), INTENT(IN) :: PTIME    ! time
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12) :: YREC     ! Name of the article to be written
+ CHARACTER(LEN=12) :: YREC     ! Name of the article to be written
 LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
 DOUBLE PRECISION   :: XTIME0

@@ -115,7 +115,7 @@ NAMELIST/NAM_INIFILE_CONF_PROJ/IXOR,IYOR,IXSIZE,IYSIZE,IDXRATIO,IDYRATIO
 !              --------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GRID_MODIF_CONF_PROJ',0,ZHOOK_HANDLE)
-CALL POSNAM(KLUNAM,'NAM_INIFILE_CONF_PROJ',GFOUND,KLUOUT)
+ CALL POSNAM(KLUNAM,'NAM_INIFILE_CONF_PROJ',GFOUND,KLUOUT)
 IF (GFOUND) READ(UNIT=KLUNAM,NML=NAM_INIFILE_CONF_PROJ)
 !
 !---------------------------------------------------------------------------
@@ -128,7 +128,7 @@ ALLOCATE(ZY1 (KL))
 ALLOCATE(ZDX1(KL))
 ALLOCATE(ZDY1(KL))
 !
-CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,    &
+ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,    &
                               ZLATOR,ZLONOR,                       &
                               IIMAX1,IJMAX1,                       &
                               ZX1,ZY1,ZDX1,ZDY1                    )  
@@ -158,7 +158,7 @@ ALLOCATE(ZY2 (IIMAX2*IJMAX2))
 ALLOCATE(ZDX2(IIMAX2*IJMAX2))
 ALLOCATE(ZDY2(IIMAX2*IJMAX2))
 !
-CALL REGULAR_GRID_SPAWN(KLUOUT,                               &
+ CALL REGULAR_GRID_SPAWN(KLUOUT,                               &
                           KL, IIMAX1,IJMAX1,ZX1,ZY1,ZDX1,ZDY1,  &
                           IXOR, IYOR, IDXRATIO, IDYRATIO,       &
                           IXSIZE, IYSIZE,                       &
@@ -173,7 +173,7 @@ DEALLOCATE(ZDY1)
 !*       5.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,    &
+ CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,    &
                               ZLATOR,ZLONOR,                       &
                               IIMAX2,IJMAX2,                       &
                               ZX2,ZY2,ZDX2,ZDY2                    )  

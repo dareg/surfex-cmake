@@ -55,14 +55,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! Error code after redding
 ! 
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_WATER'
-CALL GET_TYPE_DIM_n('WATER ',NDIM)
+ CALL GET_TYPE_DIM_n('WATER ',NDIM)
 !
 !
 !
@@ -81,23 +81,23 @@ CALL GET_TYPE_DIM_n('WATER ',NDIM)
 !* cover classes
 !
 ALLOCATE(LCOVER(JPCOVER))
-CALL READ_LCOVER(HPROGRAM,LCOVER)
+ CALL READ_LCOVER(HPROGRAM,LCOVER)
 !
 ALLOCATE(XCOVER(NDIM,JPCOVER))
-CALL READ_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP)
+ CALL READ_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP)
 !
 !* orography
 !
 ALLOCATE(XZS(NDIM))
 YRECFM='ZS'
-CALL READ_SURF(HPROGRAM,YRECFM,XZS(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XZS(:),IRESP)
 !
 !* latitude, longitude 
 !
 ALLOCATE(XLAT      (NDIM))
 ALLOCATE(XLON      (NDIM))
 ALLOCATE(XMESH_SIZE(NDIM))
-CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP)
+ CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP)
 IF (LHOOK) CALL DR_HOOK('READ_PGD_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

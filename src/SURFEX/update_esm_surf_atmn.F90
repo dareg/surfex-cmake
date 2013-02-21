@@ -55,7 +55,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                INTENT(IN)  :: KI        ! number of points
 INTEGER,                INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 REAL, DIMENSION(KI),     INTENT(IN) :: PZENITH   ! zenithal angle       (radian from the vertical)
@@ -175,7 +175,7 @@ ENDIF
 ! Grid box average radiative properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
+ CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
                    ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                    PDIR_ALB,      PSCA_ALB,      PEMIS,      PTRAD       )  
 !

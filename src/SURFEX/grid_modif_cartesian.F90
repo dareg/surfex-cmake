@@ -106,7 +106,7 @@ NAMELIST/NAM_INIFILE_CARTESIAN/IXOR,IYOR,IXSIZE,IYSIZE,IDXRATIO,IDYRATIO
 !              --------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GRID_MODIF_CARTESIAN',0,ZHOOK_HANDLE)
-CALL POSNAM(KLUNAM,'NAM_INIFILE_CARTESIAN',GFOUND,KLUOUT)
+ CALL POSNAM(KLUNAM,'NAM_INIFILE_CARTESIAN',GFOUND,KLUOUT)
 IF (GFOUND) READ(UNIT=KLUNAM,NML=NAM_INIFILE_CARTESIAN)
 !
 !---------------------------------------------------------------------------
@@ -119,7 +119,7 @@ ALLOCATE(ZY1 (KL))
 ALLOCATE(ZDX1(KL))
 ALLOCATE(ZDY1(KL))
 !
-CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0,               &
+ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0,               &
                               IIMAX1,IJMAX1,                       &
                               ZX1,ZY1,ZDX1,ZDY1                    )  
 !
@@ -148,7 +148,7 @@ ALLOCATE(ZY2 (IIMAX2*IJMAX2))
 ALLOCATE(ZDX2(IIMAX2*IJMAX2))
 ALLOCATE(ZDY2(IIMAX2*IJMAX2))
 !
-CALL REGULAR_GRID_SPAWN(KLUOUT,                               &
+ CALL REGULAR_GRID_SPAWN(KLUOUT,                               &
                           KL, IIMAX1,IJMAX1,ZX1,ZY1,ZDX1,ZDY1,  &
                           IXOR, IYOR, IDXRATIO, IDYRATIO,       &
                           IXSIZE, IYSIZE,                       &
@@ -162,7 +162,7 @@ DEALLOCATE(ZDY1)
 !*       5.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-CALL PUT_GRIDTYPE_CARTESIAN(ZGRID_PAR,ZLAT0,ZLON0,               &
+ CALL PUT_GRIDTYPE_CARTESIAN(ZGRID_PAR,ZLAT0,ZLON0,               &
                               IIMAX2,IJMAX2,                       &
                               ZX2,ZY2,ZDX2,ZDY2                    )  
 !

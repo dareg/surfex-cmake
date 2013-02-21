@@ -38,12 +38,12 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN) :: HPROGRAM      ! Type of program
-CHARACTER(LEN=28),    INTENT(IN) :: HFILENAME     ! Name of the field file.
+ CHARACTER(LEN=6),     INTENT(IN) :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=28),    INTENT(IN) :: HFILENAME     ! Name of the field file.
 REAL, DIMENSION(:,:), INTENT(OUT):: PSNAP_COEF    ! Snap coefficient
 INTEGER,              INTENT(IN) :: KTPS          ! Number of time step
 INTEGER,              INTENT(IN) :: KSNAP         ! Number of snaps
-CHARACTER(LEN=5), OPTIONAL, INTENT(OUT):: HSNAP_TIME_REF ! Reference time
+ CHARACTER(LEN=5), OPTIONAL, INTENT(OUT):: HSNAP_TIME_REF ! Reference time
 !                                                        ! 'UTC  ' : UTC   time
 !                                                        ! 'SOLAR' : SOLAR time
 !                                                        ! 'LEGAL' : LEGAL time
@@ -53,7 +53,7 @@ CHARACTER(LEN=5), OPTIONAL, INTENT(OUT):: HSNAP_TIME_REF ! Reference time
 !
 INTEGER                           :: IUNIT      ! logical unit
 INTEGER                           :: JSNAP      ! loop counter on snaps
-CHARACTER(LEN=200) :: YCOMMENT
+ CHARACTER(LEN=200) :: YCOMMENT
 REAL,    DIMENSION(KTPS)          :: ZSNAP_COEF ! snap temporal coefficient
 INTEGER                           :: ISNAP      ! snap number
 INTEGER                           :: ILUOUT     ! output listing
@@ -65,9 +65,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SNAP_TEMP_PROFILE',0,ZHOOK_HANDLE)
 !
-CALL OPEN_FILE(HPROGRAM,IUNIT,HFILENAME,'FORMATTED',HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,IUNIT,HFILENAME,'FORMATTED',HACTION='READ')
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !----------------------------------------------------------------------------
 READ(IUNIT,'(A)') YCOMMENT

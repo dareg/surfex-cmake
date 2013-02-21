@@ -62,7 +62,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER, INTENT(IN)  :: KLUOUT
 !
 INTEGER, INTENT(IN)  :: KI
@@ -75,8 +75,8 @@ REAL, DIMENSION(:), POINTER :: PTDEEP
 REAL, DIMENSION(:), POINTER :: PGAMMAT
 !
 !
-CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
-CHARACTER(LEN=3), INTENT(IN) :: HINIT
+ CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
+ CHARACTER(LEN=3), INTENT(IN) :: HINIT
 LOGICAL, INTENT(IN) :: OTR_ML
 INTEGER, INTENT(IN) :: KNBIOMASS
 REAL, DIMENSION(:), INTENT(IN) :: PCO2
@@ -102,30 +102,30 @@ REAL, DIMENSION(:), POINTER :: PAH
 REAL, DIMENSION(:), POINTER :: PBH
 !
 INTEGER,                          INTENT(IN) :: KSV      ! number of scalars
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
 INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
 INTEGER,                         INTENT(OUT) :: KAEREQ  ! number of aerosol variables
 INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
 INTEGER,                         INTENT(OUT) :: KSV_AEREND  ! last  aerosol var.
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
 INTEGER,                         INTENT(OUT) :: KDSTEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KSV_DSTBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_DSTEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSLTEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KSV_SLTBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_SLTEND  ! last  chemical var.
-CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
-CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
 !
-CHARACTER(LEN=28), INTENT(OUT) :: HCHEM_SURF_FILE
+ CHARACTER(LEN=28), INTENT(OUT) :: HCHEM_SURF_FILE
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PCLAY
 REAL, DIMENSION(:,:), INTENT(IN) :: PSAND
-CHARACTER(LEN=4), INTENT(IN) :: HPEDOTF
+ CHARACTER(LEN=4), INTENT(IN) :: HPEDOTF
 REAL, DIMENSION(:,:), POINTER :: PCONDSAT
 REAL, DIMENSION(:,:), POINTER :: PMPOTSAT
 REAL, DIMENSION(:,:), POINTER :: PBCOEF
@@ -146,12 +146,12 @@ REAL, DIMENSION(:), POINTER :: PPCPS
 REAL, DIMENSION(:), POINTER :: PPLVTT
 REAL, DIMENSION(:), POINTER :: PPLSTT
 !
-CHARACTER(LEN=4), INTENT(IN) :: HSCOND
-CHARACTER(LEN=3), INTENT(IN) :: HISBA
+ CHARACTER(LEN=4), INTENT(IN) :: HSCOND
+ CHARACTER(LEN=3), INTENT(IN) :: HISBA
 REAL, DIMENSION(:,:), POINTER :: PHCAPSOIL
 REAL, DIMENSION(:,:), POINTER :: PCONDDRY
 REAL, DIMENSION(:,:), POINTER :: PCONDSLD
-CHARACTER(LEN=3), INTENT(IN) :: HCPSURF
+ CHARACTER(LEN=3), INTENT(IN) :: HCPSURF
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PDG
 REAL, DIMENSION(:), INTENT(IN) :: PDROOT
@@ -324,7 +324,7 @@ ZGMES(:,1) = PGMES(:)
 ZGC(:,1) = PGC(:)
 ZDMAX(:,1) = PDMAX(:)
 !
-CALL INIT_VEG_PGD_n(HPROGRAM, KLUOUT, KI, 1, KGROUND_LAYER, KMONTH,   &
+ CALL INIT_VEG_PGD_n(HPROGRAM, KLUOUT, KI, 1, KGROUND_LAYER, KMONTH,   &
                   PVEGTYPE, ZPATCH, ZVEGTYPE_PATCH, ISIZE_NATURE_P, IR_NATURE_P,    &
                   0.0, &
                   .FALSE., .FALSE., ZTDEEP_CLI, ZGAMMAT_CLI, PTDEEP, PGAMMAT,   &

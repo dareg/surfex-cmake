@@ -50,10 +50,10 @@ IMPLICIT NONE
 !* 0.1. Declaration of arguments
 !       ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
+ CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
 INTEGER,           INTENT(IN)    :: KLUOUT       ! logical unit of output listing
-CHARACTER(LEN=10),  INTENT(OUT)  :: HGRIDTYPE    ! Grid type
-CHARACTER(LEN=6),  INTENT(OUT)   :: HINTERP_TYPE ! Grid type
+ CHARACTER(LEN=10),  INTENT(OUT)  :: HGRIDTYPE    ! Grid type
+ CHARACTER(LEN=6),  INTENT(OUT)   :: HINTERP_TYPE ! Grid type
 INTEGER,           INTENT(OUT)   :: KNI          ! number of points
 !
 !* 0.2 Declaration of local variables
@@ -68,7 +68,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      ------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_EXTERN',0,ZHOOK_HANDLE)
-CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRIDTYPE,IRESP)
+ CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRIDTYPE,IRESP)
 !
 !-----------------------------------------------------------------------
 !

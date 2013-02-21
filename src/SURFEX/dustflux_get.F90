@@ -112,12 +112,12 @@ DO I = 1,SIZE(PZ0)
 ENDDO
 !
 ! Convert volumetric water content to gravimetric water content
-CALL VWC2GWC(GFLG_MBL, PWSAT, PWG, ZGWC_SFC)
+ CALL VWC2GWC(GFLG_MBL, PWSAT, PWG, ZGWC_SFC)
 ! Factor by which soil moisture increases threshold friction velocity
-CALL FRC_THR_NCR_WTR_GET (GFLG_MBL, ZGWC_THR, ZGWC_SFC, ZFRC_THR_NCR_WTR)
+ CALL FRC_THR_NCR_WTR_GET (GFLG_MBL, ZGWC_THR, ZGWC_SFC, ZFRC_THR_NCR_WTR)
 !
 ! fxm: Use surface density not midlayer density
-CALL WND_FRC_THR_SLT_GET(PRHOA, XDMT_SLT_OPT, ZWND_FRC_THR_SLT)
+ CALL WND_FRC_THR_SLT_GET(PRHOA, XDMT_SLT_OPT, ZWND_FRC_THR_SLT)
 !
 DO I = 1, KSIZE
   ZWND_FRC_THR_SLT(I) =   & ! [m s-1] Threshold friction velocity for saltation
@@ -152,7 +152,7 @@ ZWND_FRC_SLT(:) = PUSTAR(:) / ZFRC_THR_NCR_DRG(:)
 ! 
 ! Horizontal streamwise mass flux for old "bulk" formulation
 ZCOEF(:) = XCST_SLT
-CALL FLX_MSS_HRZ_SLT_TTL_WHI79_GET(ZCOEF, GFLG_MBL, PRHOA, ZWND_FRC_SLT, &
+ CALL FLX_MSS_HRZ_SLT_TTL_WHI79_GET(ZCOEF, GFLG_MBL, PRHOA, ZWND_FRC_SLT, &
         ZWND_FRC_THR_SLT, ZFLX_MSS_HRZ_SLT_TTL_WBN)
 !
 ! Apply land surface and vegetation limitations and global tuning factor
@@ -164,7 +164,7 @@ DO I = 1, KSIZE
 ENDDO
 !    
 ! Vertical dust mass flux
-CALL FLX_MSS_VRT_DST_TTL_MAB95_GET(GFLG_MBL, ZCLAY, ZFLX_MSS_HRZ_SLT_TTL_WBN, & 
+ CALL FLX_MSS_VRT_DST_TTL_MAB95_GET(GFLG_MBL, ZCLAY, ZFLX_MSS_HRZ_SLT_TTL_WBN, & 
         ZDST_SLT_FLX_RAT_TTL, ZFLX_MSS_VRT_DST_TTL_WBN)
 !
 !Assign the output vertical dust flux to the value calculated

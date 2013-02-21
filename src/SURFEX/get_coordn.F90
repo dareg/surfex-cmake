@@ -48,7 +48,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI         ! horizontal dim. of cover
 REAL, DIMENSION(KI), INTENT(OUT) :: PLON, PLAT
 !
@@ -61,7 +61,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_COORD_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF ( SIZE(PLON) /= SIZE(XLON) .OR. SIZE(PLAT) /= SIZE(XLAT) ) THEN

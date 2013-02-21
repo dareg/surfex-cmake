@@ -76,14 +76,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER                               :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
 INTEGER                               :: JI, JLAYER     ! loop index
 INTEGER                               :: JTIME          ! loop index
 !
@@ -128,31 +128,31 @@ ALLOCATE(XDATA_H_HVEG    (NDIM))
 !
 ! Read type of high vegetation
 YRECFM='D_TYPE_HVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,CTYPE_HVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,CTYPE_HVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read type of low vegetation
 YRECFM='D_TYPE_LVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,CTYPE_LVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,CTYPE_LVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read type of bare soil (no vegetation)
 YRECFM='D_TYPE_NVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,CTYPE_NVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,CTYPE_NVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read fraction of high vegetation
 YRECFM='D_FRAC_HVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,XDATA_FRAC_HVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,XDATA_FRAC_HVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read fraction of low vegetation
 YRECFM='D_FRAC_LVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,XDATA_FRAC_LVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,XDATA_FRAC_LVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read fraction of bare soil (no vegetation)
 YRECFM='D_FRAC_NVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,XDATA_FRAC_NVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,XDATA_FRAC_NVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read height of trees( for high vegetation)
 YRECFM='D_H_HVEG'
-CALL READ_SURF(HPROGRAM,YRECFM,XDATA_H_HVEG,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,XDATA_H_HVEG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Read LAI of high vegetation
 DO JTIME=1,NTIME
@@ -268,7 +268,7 @@ IF (CTYPE_LVEG == 'PARK') XDATA_VEGTYPE(:, NVT_PARK) = XDATA_FRAC_LVEG(:)
 
 !
 ! Dry/Wet soil albedo
-CALL DRY_WET_SOIL_ALBEDOS(XSAND(:,1),XCLAY(:,1),                             &
+ CALL DRY_WET_SOIL_ALBEDOS(XSAND(:,1),XCLAY(:,1),                             &
                           XDATA_VEGTYPE,                                     &
                           XDATA_ALBNIR_DRY,XDATA_ALBVIS_DRY,XDATA_ALBUV_DRY, &
                           XDATA_ALBNIR_WET,XDATA_ALBVIS_WET,XDATA_ALBUV_WET  )  

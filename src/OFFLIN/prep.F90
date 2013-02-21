@@ -86,11 +86,11 @@ REAL               :: ZTIME
 LOGICAL            :: GFOUND
 
 REAL, DIMENSION(0) :: ZZS
-CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
-CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
-CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
-CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
-CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
+ CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
+ CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+ CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
+ CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
+ CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
 !
 INTEGER, DIMENSION(11)  :: IDATEF
 !
@@ -104,7 +104,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             --------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP',0,ZHOOK_HANDLE)
-CALL ALLOC_SURFEX(1)
+ CALL ALLOC_SURFEX(1)
 CSOFTWARE='PREP'
 !
 !     1.1     initializations
@@ -120,14 +120,14 @@ LCPL_ESM = .FALSE.
 !     1.2     output listing
 !             --------------
 CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
-CALL GET_LUOUT('ASCII ',ILUOUT)
+ CALL GET_LUOUT('ASCII ',ILUOUT)
 OPEN (UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 !
 !     1.3     output file name read in namelist
 !             ---------------------------------
-CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
+ CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
 !
-CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
+ CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
 !
 CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
@@ -146,26 +146,26 @@ CFILEOUT    = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
 CFILEOUT_FA = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
 CFILEOUT_LFI= CPREPFILE
 !
-CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+ CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !
-CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'PRE',.FALSE.)
+ CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'PRE',.FALSE.)
 !
-CALL GOTO_SURFEX(1,.TRUE.)
-CALL GOTO_TRIP(1,.TRUE.)
+ CALL GOTO_SURFEX(1,.TRUE.)
+ CALL GOTO_TRIP(1,.TRUE.)
 !
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
 !
-CALL IO_BUFF_CLEAN_n
-CALL INIT_PGD_SURF_ATM(CSURF_FILETYPE,'PRE',YATMFILE,YATMFILETYPE, &
+ CALL IO_BUFF_CLEAN_n
+ CALL INIT_PGD_SURF_ATM(CSURF_FILETYPE,'PRE',YATMFILE,YATMFILETYPE, &
                          IYEAR, IMONTH, IDAY, ZTIME            )  
 !
-CALL IO_BUFF_CLEAN_n
-CALL PREP_SURF_ATM(CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+ CALL IO_BUFF_CLEAN_n
+ CALL PREP_SURF_ATM(CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
-CALL PREP_SURF_TRIP(CSURF_FILETYPE)
+ CALL PREP_SURF_TRIP(CSURF_FILETYPE)
 !
-CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+ CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 IF (LWRITE_COORD) CALL GET_LONLAT_n(CSURF_FILETYPE)
 !
@@ -184,9 +184,9 @@ IF (CSURF_FILETYPE=='FA    ') THEN
 END IF
 !
 !* writes into the file
-CALL IO_BUFF_CLEAN_n
-CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
-CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
+ CALL IO_BUFF_CLEAN_n
+ CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
+ CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
 !
 !* closes the file
 IF (CSURF_FILETYPE=='FA    ') THEN
@@ -212,7 +212,7 @@ WRITE(*,*) '    -----------------------'
 !
 CLOSE(ILUOUT)
 !
-CALL DEALLOC_SURFEX
+ CALL DEALLOC_SURFEX
 IF (LHOOK) CALL DR_HOOK('PREP',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -181,7 +181,7 @@ END WHERE
 !-------------------------------------------------------------------------------------
 !
 IDEEP_SOIL = NLAYER_GR
-CALL PREP_VER_SNOW(TSNOW,XZS_LS,XZS,SPREAD(ZTG_LS,3,1),SPREAD(XTG,3,1),IDEEP_SOIL)
+ CALL PREP_VER_SNOW(TSNOW,XZS_LS,XZS,SPREAD(ZTG_LS,3,1),SPREAD(XTG,3,1),IDEEP_SOIL)
 !
 !-------------------------------------------------------------------------------------
 !

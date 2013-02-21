@@ -48,8 +48,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
@@ -70,7 +70,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -109,7 +109,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 
 !
 !*      0.2    declarations of local variables
@@ -140,7 +140,7 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',0,ZHOOK_HANDLE)
 !*      1.     Specified evolution of ISBA prognostic variables
 !              ------------------------------------------------
 !
-CALL TSZ0(PTIME, PTSTEP, XWFC, XTG, XWG)
+ CALL TSZ0(PTIME, PTSTEP, XWFC, XTG, XWG)
 !
 !
 !*      2.     Saves the prognostic variables
@@ -174,7 +174,7 @@ ZPEW_B_COEF =  XUNDEF
 !*      4.     Call to surface scheme
 !              ----------------------
 !
-CALL COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, 'E',                                              &
+ CALL COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, 'E',                                              &
                  0.001, KYEAR, KMONTH, KDAY, PTIME,                                          &
                  KI, KSV, KSW,                                                               &
                  PTSUN, PZENITH, PZENITH2, PAZIM,                                            &

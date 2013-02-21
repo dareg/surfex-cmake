@@ -47,15 +47,15 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=10),   INTENT(IN) :: HSURF     ! type of field
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=10),   INTENT(IN) :: HSURF     ! type of field
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_BUFFER    ! current date and time
-CHARACTER(LEN=6)                :: YINMODEL       ! model from which GRIB file originates
+ CHARACTER(LEN=6)                :: YINMODEL       ! model from which GRIB file originates
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D       ! field read
 REAL, DIMENSION(:),   POINTER   :: ZHEAT          ! heat in snow
 REAL, DIMENSION(:),   POINTER   :: ZRHO           ! density of snow
@@ -69,7 +69,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SNOW_BUFFER',0,ZHOOK_HANDLE)
-CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
+ CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
 !
 !-------------------------------------------------------------------------------------
 !

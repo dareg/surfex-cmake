@@ -60,7 +60,7 @@ INTEGER, INTENT(IN)             :: KI    ! Grid dimensions
 INTEGER                    :: JCAT,JMESH,JPIX
 INTEGER                    :: INUMPIX
 INTEGER :: IIMAX,IJMAX,IUNIT
-CHARACTER(LEN=50) :: YNAME
+ CHARACTER(LEN=50) :: YNAME
 REAL, DIMENSION(:),ALLOCATABLE    :: ZTOPD_READ !Topgraphic variable read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------

@@ -51,18 +51,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL,DIMENSION(KI), INTENT(IN) :: PTS_O
 REAL,DIMENSION(KI), INTENT(IN) :: PITM
-CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-CHARACTER(LEN=10)                :: YVAR    ! Name of the prognostic variable (in LFI file)
-CHARACTER(LEN=100)               :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
+ CHARACTER(LEN=10)                :: YVAR    ! Name of the prognostic variable (in LFI file)
+ CHARACTER(LEN=100)               :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                          :: IRESP,I
 REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 REAL, DIMENSION(KI)              :: ZLSTINC
@@ -125,16 +125,16 @@ CFILE_LFI=CFILEIN_LFI
 !
 !   Read grid dimension for allocation
 !
-CALL INIT_IO_SURF_n(YPROGRAM,'WATER ','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(YPROGRAM,'WATER ','SURF  ','READ ')
 !
 !  Read prognostic variables
 !
-CALL READ_SURF(YPROGRAM,'TS_WATER',  ZLST,  IRESP)
+ CALL READ_SURF(YPROGRAM,'TS_WATER',  ZLST,  IRESP)
 IF (LWATERTG2) THEN
   CALL READ_SURF(YPROGRAM,'TG2',       ZTP,   IRESP)
 ENDIF
-CALL END_IO_SURF_n(YPROGRAM)
-CALL IO_BUFF_CLEAN_n
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL IO_BUFF_CLEAN_n
 
 ZLSTINC(:) = 0.0
 ZLSTINC(:) = ZLST(:)
@@ -210,15 +210,15 @@ WRITE(*,*) 'WRITING UPDATED LST'
 CFILEOUT_LFI=CPREPFILE
 #endif
 !
-CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
-CALL INIT_IO_SURF_n(YPROGRAM,'WATER ','SURF  ','WRITE')
+ CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+ CALL INIT_IO_SURF_n(YPROGRAM,'WATER ','SURF  ','WRITE')
 
 YVAR='TS_WATER'
 YPREFIX='X_Y_TS_WATER (K)                                  '
-CALL WRITE_SURF(YPROGRAM,YVAR,ZLST,IRESP,HCOMMENT=YPREFIX)
+ CALL WRITE_SURF(YPROGRAM,YVAR,ZLST,IRESP,HCOMMENT=YPREFIX)
 
-CALL END_IO_SURF_n(YPROGRAM)
-CALL IO_BUFF_CLEAN_n
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL IO_BUFF_CLEAN_n
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',1,ZHOOK_HANDLE)
 !

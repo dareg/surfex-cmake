@@ -45,8 +45,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM
-CHARACTER(LEN=5), INTENT(IN)  :: HACTION ! 'READ ', 'WRITE'
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=5), INTENT(IN)  :: HACTION ! 'READ ', 'WRITE'
 INTEGER, INTENT(OUT) :: KLUDES ! logical unit of .des file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

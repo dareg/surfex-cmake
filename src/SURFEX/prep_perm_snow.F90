@@ -317,7 +317,7 @@ DEALLOCATE(ZPSN)
 !*       6.    Masking where there is no snow
 !              ------------------------------
 !
-CALL MKFLAG_SNOW(TPSNOW)
+ CALL MKFLAG_SNOW(TPSNOW)
 IF (LHOOK) CALL DR_HOOK('PREP_PERM_SNOW',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

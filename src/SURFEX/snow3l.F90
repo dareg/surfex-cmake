@@ -97,7 +97,7 @@ REAL, INTENT(IN)                    :: PTSTEP
 !                                      PTSTEP    = time step of the integration
 TYPE(DATE_TIME), INTENT(IN)         :: TPTIME      ! current date and time
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
 !                                      HSNOWRES  = ISBA-SNOW3L turbulant exchange option
 !                                      'DEF' = Default: Louis (ISBA: Noilhan and Mahfouf 1996)
 !                                      'RIL' = Limit Richarson number under very stable
@@ -107,7 +107,7 @@ LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow a
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                   ! False = No specific treatment
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -315,7 +315,7 @@ END DO
 ! Caluclate uppermost density and thickness changes due to snowfall,
 ! and add heat content of falling snow
 !
-CALL SNOW3LFALL(PTSTEP,OGLACIER,PSR,PTA,PVMOD,ZSNOW,PSNOWRHO,PSNOWDZ,    &
+ CALL SNOW3LFALL(PTSTEP,OGLACIER,PSR,PTA,PVMOD,ZSNOW,PSNOWRHO,PSNOWDZ,    &
                   PSNOWHEAT,PSNOWHMASS,PSNOWALB,PPERMSNOWFRAC)  
 !
 !
@@ -323,11 +323,11 @@ CALL SNOW3LFALL(PTSTEP,OGLACIER,PSR,PTA,PVMOD,ZSNOW,PSNOWRHO,PSNOWDZ,    &
 !               --------------------------
 ! Reset grid to conform to model specifications:
 !
-CALL SNOW3LGRID(ZSNOWDZN,ZSNOW)
+ CALL SNOW3LGRID(ZSNOWDZN,ZSNOW)
 !
 ! Mass/Heat redistribution:
 !
-CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,PSNOWHEAT)
+ CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,PSNOWHEAT)
 !
 !
 !*       4.     Liquid water content and snow temperature
@@ -351,7 +351,7 @@ ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
 !               ---------------
 ! Calculate snow density: compaction/aging: density increases
 !
-CALL SNOW3LCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW)
+ CALL SNOW3LCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW)
 !
 ! Update snow heat content (J/m2):
 !
@@ -366,7 +366,7 @@ PSNOWHEAT(:,:) = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
 ! Heat source (-sink) term due to shortwave
 ! radiation transmission within the snowpack:
 !
-CALL SNOW3LRAD(ZSNOWDZMIN,PSW_RAD,PSNOWALB,PSNOWDZ,PSNOWRHO,  &
+ CALL SNOW3LRAD(ZSNOWDZMIN,PSW_RAD,PSNOWALB,PSNOWDZ,PSNOWRHO,  &
                  PALB,ZRADSINK,ZRADXS)  
 !
 !
@@ -374,7 +374,7 @@ CALL SNOW3LRAD(ZSNOWDZMIN,PSW_RAD,PSNOWALB,PSNOWDZ,PSNOWRHO,  &
 !               ---------------------------------------
 ! Snow thermal conductivity:
 !
-CALL SNOW3LTHRM(PSNOWRHO,ZSCOND,ZSNOWTEMP,PPS)
+ CALL SNOW3LTHRM(PSNOWRHO,ZSCOND,ZSNOWTEMP,PPS)
 !
 ! Precipitation heating term:
 ! Rainfall renders it's heat to the snow when it enters
@@ -389,7 +389,7 @@ PHPSNOW(:) = 0.0
 ! Surface Energy Budget calculations using ISBA linearized form
 ! and standard ISBA turbulent transfer formulation
 !
-CALL SNOW3LEBUD(HSNOWRES, HIMPLICIT_WIND,                                      &
+ CALL SNOW3LEBUD(HSNOWRES, HIMPLICIT_WIND,                                      &
                   PPEW_A_COEF, PPEW_B_COEF,                                    &
                   PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,          &
                   ZSNOWDZMIN,                                                  &
@@ -408,7 +408,7 @@ CALL SNOW3LEBUD(HSNOWRES, HIMPLICIT_WIND,                                      &
 !
 ZSNOWTEMPO1(:) = ZSNOWTEMP(:,1) ! save surface snow temperature before update
 !
-CALL SNOW3LSOLVT(PTSTEP,ZSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,                 &
+ CALL SNOW3LSOLVT(PTSTEP,ZSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,                 &
                    PSOILCOND,PD_G,ZRADSINK,ZCT,ZTSTERM1,ZTSTERM2,              &
                    ZPET_A_COEF_T,ZPEQ_A_COEF_T,ZPET_B_COEF_T,ZPEQ_B_COEF_T,    &
                    ZTA_IC,ZQA_IC,PGRNDFLUX,ZGRNDFLUXO,ZSNOWTEMP,ZSNOWFLUX      )  
@@ -417,7 +417,7 @@ CALL SNOW3LSOLVT(PTSTEP,ZSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,                 &
 !*       8.     Surface fluxes
 !               --------------
 ! 
-CALL SNOW3LFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,              &
+ CALL SNOW3LFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,              &
                   ZUSTAR2_IC,                                         &
                   PTSTEP,PSNOWALB,PSW_RAD,PEMISNOW,ZLWUPSNOW,PLW_RAD, &
                   ZTA_IC,ZSFCFRZ,ZQA_IC,PHPSNOW,                      &
@@ -432,7 +432,7 @@ CALL SNOW3LFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,              &
 !
 ! First Test to see if snow pack vanishes during this time step:
 !
-CALL SNOW3LGONE(PTSTEP,PPSN3L,PLEL3L,PLES3L,PSNOWRHO,                     &
+ CALL SNOW3LGONE(PTSTEP,PPSN3L,PLEL3L,PLES3L,PSNOWRHO,                     &
                   PSNOWHEAT,ZRADSINK(:,INLVLS),PEVAPCOR,PTHRUFAL,PGRNDFLUX, &
                   PGFLUXSNOW,ZGRNDFLUXO,PSNOWDZ,PSNOWLIQ,ZSNOWTEMP,ZRADXS)  
 !
@@ -443,7 +443,7 @@ PGRNDFLUX(:) = PGRNDFLUX(:) + ZRADXS(:)
 !
 ! For "normal" melt: transform excess heat content into snow liquid:
 !
-CALL SNOW3LMELT(PTSTEP,ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,  &
+ CALL SNOW3LMELT(PTSTEP,ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,  &
                   PSNOWLIQ,ZMELTXS)  
 !
 ! Add any excess heat for melting to underlying surface
@@ -457,26 +457,26 @@ PGRNDFLUX(:) = PGRNDFLUX(:) + ZMELTXS(:)
 ! Liquid water vertical transfer and possible snowpack runoff
 ! And refreezing/freezing of meltwater/rainfall (ripening of the snow)
 !
-CALL SNOW3LREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL)
+ CALL SNOW3LREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL)
 !
 !
 !*      11.     Snow Evaporation/Sublimation mass updates:
 !               ------------------------------------------
 !
-CALL SNOW3LEVAPN(PPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
+ CALL SNOW3LEVAPN(PPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
                    PSNOWDZ(:,1),PSNOWLIQ(:,1),PEVAPCOR)  
 !
 ! If all snow in uppermost layer evaporates/sublimates, re-distribute
 ! grid (below could be evoked for vanishingly thin snowpacks):
 !
-CALL SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ)
+ CALL SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ)
 !
 !
 !*      12.     Update surface albedo:
 !               ----------------------
 ! Snow clear sky albedo:
 !
-CALL SNOW3LALB(PSNOWALB,PTSTEP,PSNOWLIQ(:,1),PSNOWDZ(:,1),PSNOWRHO(:,1),   &
+ CALL SNOW3LALB(PSNOWALB,PTSTEP,PSNOWLIQ(:,1),PSNOWDZ(:,1),PSNOWRHO(:,1),   &
                  GSFCMELT,PSR,PPERMSNOWFRAC)  
 !
 !
@@ -1376,12 +1376,12 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                    :: PTSTEP, PSNOWDZMIN
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES ! type of sfc resistance
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES ! type of sfc resistance
 !                                      DEFAULT=Louis (1979), standard ISBA
 !                                      method. Option to limit Ri number
 !                                      for very srtable conditions
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -1448,7 +1448,7 @@ PEMIST(:) = XEMISSN
 ! 2. Computation of resistance and drag coefficient
 ! -------------------------------------------------
 !
-CALL SURFACE_RI(PTS, PQSAT, PEXNS, PEXNA, PTA, PQA,                  &
+ CALL SURFACE_RI(PTS, PQSAT, PEXNS, PEXNA, PTA, PQA,                  &
                 PZREF, PUREF, PDIRCOSZW, PVMOD, ZRI                  )  
 !
 ! Simple adaptation of method by Martin and Lejeune (1998)
@@ -1462,11 +1462,11 @@ PRI(:)=ZRI(:)
 !
 ! Surface aerodynamic resistance for heat transfers
 !
-CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW)
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW)
 !
 ! For atmospheric model coupling:
 !
-CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0EFF, PZ0H, PCDSNOW, ZCDN)
+ CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0EFF, PZ0H, PCDSNOW, ZCDN)
 !
 PRSRA(:) = PRHOA(:) / PRA(:)
 !
@@ -1720,7 +1720,7 @@ ZFRCV(:,INLVLS)  =  ZCTERM(:,INLVLS)*PSNOWTEMP(:,INLVLS) +                    &
 ! 4. Compute solution vector
 ! --------------------------
 !
-CALL TRIDIAG_GROUND(ZAMTRX,ZBMTRX,ZCMTRX,ZFRCV,ZSNOWTEMP)
+ CALL TRIDIAG_GROUND(ZAMTRX,ZBMTRX,ZCMTRX,ZFRCV,ZSNOWTEMP)
 !
 ! Heat flux between surface and 2nd snow layers: (W/m2)
 !
@@ -1752,7 +1752,7 @@ DO JJ=2,INLVLS-1
    ENDDO
 ENDDO
 !
-CALL TRIDIAG_GROUND(ZAMTRX_M,ZBMTRX_M,ZCMTRX_M,ZFRCV_M,ZSNOWTEMP_M)
+ CALL TRIDIAG_GROUND(ZAMTRX_M,ZBMTRX_M,ZCMTRX_M,ZFRCV_M,ZSNOWTEMP_M)
 !
 ! If melting for 2 consecuative time steps, then replace current T-profile
 ! with one assuming T=Tf in surface layer:

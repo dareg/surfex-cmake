@@ -87,7 +87,7 @@ ALLOCATE(ZY (SIZE(PLAT)))
 ALLOCATE(ZDX(SIZE(PLAT)))
 ALLOCATE(ZDY(SIZE(PLAT)))
 !
-CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
+ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATOR,ZLONOR,                   &
                               PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )  
 !
@@ -96,7 +96,7 @@ CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR,ZX,ZY,PLAT,PLON)
+ CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR,ZX,ZY,PLAT,PLON)
 !
 !-----------------------------------------------------------------------------
 !
@@ -108,7 +108,7 @@ CALL LATLON_CONF_PROJ(ZLAT0,ZLON0,ZRPK,ZBETA,ZLATOR,ZLONOR,ZX,ZY,PLAT,PLON)
 !
 ALLOCATE(ZMAP(SIZE(PLAT)))
 !
-CALL MAP_FACTOR_CONF_PROJ(ZLAT0,ZRPK,PLAT,ZMAP)
+ CALL MAP_FACTOR_CONF_PROJ(ZLAT0,ZRPK,PLAT,ZMAP)
 !
 !        3.2   Grid size
 !              ---------

@@ -931,7 +931,7 @@ ELSE
 !
 ENDIF
 !
-CALL COVER301_573
+ CALL COVER301_573
 !
 !-------------------------------------------------------------------------------
 !
@@ -2109,21 +2109,21 @@ END IF
 !*    8.     Arrange cover (optional nam_pgd_arrange_cover)
 !            ----------------------------------------------
 !
-CALL ARRANGE_COVER
+ CALL ARRANGE_COVER
 !
 !-------------------------------------------------------------------------------
 !
 !*    9.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
-CALL ECOCLIMAP2_LAI
+ CALL ECOCLIMAP2_LAI
 !
 !-------------------------------------------------------------------------------
 !
 !*    10.    Secondary variables on natural covers
 !            -------------------------------------
 !
-CALL INI_DATA_PARAM(XDATA_VEGTYPE, PSURF=XDATA_NATURE, PSURF2=XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+ CALL INI_DATA_PARAM(XDATA_VEGTYPE, PSURF=XDATA_NATURE, PSURF2=XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                                   PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                                   PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
@@ -2147,7 +2147,7 @@ IDC = 1
 !*   10.     Takes into account gardens or not in parameters
 !            -----------------------------------------------
 !
-CALL UPDATE_DATA_FRAC_n(XDATA_NATURE,XDATA_TOWN,XDATA_GARDEN,LGARDEN,  &
+ CALL UPDATE_DATA_FRAC_n(XDATA_NATURE,XDATA_TOWN,XDATA_GARDEN,LGARDEN,  &
                         XDATA_BLD, XDATA_WALL_O_HOR                    )
 !
 IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',1,ZHOOK_HANDLE)

@@ -59,7 +59,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_COORD_LONLATVAL',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR,PX=PX,PY=PY)
+ CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR,PX=PX,PY=PY)
 IF (LHOOK) CALL DR_HOOK('GET_GRID_COORD_LONLATVAL',1,ZHOOK_HANDLE)
 !
 !---------------------------------------------------------------------------

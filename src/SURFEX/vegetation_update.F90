@@ -78,10 +78,10 @@ IMPLICIT NONE
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
 REAL,   DIMENSION(:,:), INTENT(IN)  :: PCOVER  ! cover types
-CHARACTER(LEN=*),     INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
-CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),     INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,              INTENT(IN)    :: OAGRIP
-CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
 LOGICAL,              INTENT(IN)    :: OECOCLIMAP ! T if ecoclimap is used
 !
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PLAI    ! leaf area index (LAI) 
@@ -109,7 +109,7 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PF2I
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PDMAX
 LOGICAL,DIMENSION(:,:), INTENT(INOUT) :: OSTRESS
 !
-CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
+ CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
 !                                              ! 'DRY ' 
 !                                              ! 'EVOL' 
 !                                              ! 'WET ' 

@@ -45,12 +45,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
 !
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=10) :: YGRID
+ CHARACTER(LEN=10) :: YGRID
 !
 LOGICAL :: LTRIP,LFLOOD
 !
@@ -59,15 +59,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_SURF_TRIP',0,ZHOOK_HANDLE)
-CALL SURF_VERSION
+ CALL SURF_VERSION
 !-------------------------------------------------------------------------------------
 !
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! * 1. Get ISBA configuration
 !      
-CALL GET_CONF_ISBA_n(LTRIP,LFLOOD,YGRID)
+ CALL GET_CONF_ISBA_n(LTRIP,LFLOOD,YGRID)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! TRIP parameters configuration:

@@ -53,7 +53,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*)    , INTENT(IN)   :: HISBA      ! ISBA scheme
+ CHARACTER(LEN=*)    , INTENT(IN)   :: HISBA      ! ISBA scheme
 LOGICAL             , INTENT(IN)   :: OTR_ML     ! new radiative transfert
 TYPE(SURF_SNOW),      INTENT(IN)   :: TPSNOW     ! ISBA snow scheme
 INTEGER,              INTENT(IN)   :: KPATCH     ! patch being treated
@@ -107,7 +107,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_PROPERTIES',0,ZHOOK_HANDLE)
-CALL ISBA_SNOW_FRAC(TPSNOW%SCHEME,                                        &
+ CALL ISBA_SNOW_FRAC(TPSNOW%SCHEME,                                        &
                     TPSNOW%WSNOW(:,:,KPATCH), TPSNOW%RHO(:,:,KPATCH),     &
                     TPSNOW%ALB  (:,KPATCH), PVEG, PLAI, PZ0,              &
                     PPSN, PPSNV_A, PPSNG, PPSNV                           )  
@@ -122,7 +122,7 @@ ZALBF         = 0.
 ZFFV          = 0.
 ZFFG          = 0.
 !
-CALL ISBA_ALBEDO(TPSNOW%SCHEME, OTR_ML,                                    &
+ CALL ISBA_ALBEDO(TPSNOW%SCHEME, OTR_ML,                                    &
                    PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                       &
                    PALBNIR, PALBVIS, PALBUV,                               &
                    PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG,                   &

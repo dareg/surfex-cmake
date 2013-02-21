@@ -79,14 +79,14 @@ ALLOCATE(ZDLON(SIZE(PLAT)))
 ALLOCATE(ZDLAT(SIZE(PLAT)))
 
 !
-CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
+ CALL GET_GRIDTYPE_LONLATVAL(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_LONLATVAL(ZX,ZY,PLAT,PLON)
+ CALL LATLON_LONLATVAL(ZX,ZY,PLAT,PLON)
 !
 !-----------------------------------------------------------------------------
 !

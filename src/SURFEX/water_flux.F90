@@ -153,7 +153,7 @@ PQSAT(:) = QSAT(PSST(:),PPS(:))
 !       2.1    Richardson number
 !              -----------------
 !
-CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,PQA,  &
+ CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,PQA,  &
                   PZREF, PUREF, ZDIRCOSZW,PVMOD,PRI)
 !
 !       2.2    Detection of sea ice

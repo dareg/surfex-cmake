@@ -50,7 +50,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 REAL,    DIMENSION(:), INTENT(OUT) :: PPGDARRAY
-CHARACTER(LEN=1), INTENT(IN) :: HTYPE
+ CHARACTER(LEN=1), INTENT(IN) :: HTYPE
 INTEGER, INTENT(IN)          :: KSTAT
 !
 !*    0.2    Declaration of other local variables

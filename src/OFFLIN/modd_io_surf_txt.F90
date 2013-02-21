@@ -29,7 +29,7 @@
 IMPLICIT NONE
 INTEGER, DIMENSION(:), POINTER :: NMASK ! 1D mask to read only interesting
 !$OMP THREADPRIVATE(NMASK)
-CHARACTER(LEN=6)               :: CMASK ! surface mask type
+ CHARACTER(LEN=6)               :: CMASK ! surface mask type
 !$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL ! total number for points of surface
 !$OMP THREADPRIVATE(NFULL)

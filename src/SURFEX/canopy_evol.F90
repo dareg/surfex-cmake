@@ -160,7 +160,7 @@ END DO
 !*    5. mixing and dissipative lengths (at full levels)
 !        ------------------------------
 !
-CALL RMC01_SURF(PZZ,PLMO,PLM,PLEPS,GNEUTRAL)
+ CALL RMC01_SURF(PZZ,PLMO,PLM,PLEPS,GNEUTRAL)
 !
 !-------------------------------------------------------------------------------
 !
@@ -187,7 +187,7 @@ ZDKDDVDZ = 0.
 !*    6.3  time evolution of wind in canopy
 !          --------------------------------
 !
-CALL CANOPY_EVOL_WIND(KI,KLVL,PTSTEP,KIMPL,PWIND,ZK,ZDKDDVDZ,PSFLUX_U,PFORC_U,PDFORC_UDU,PDZ,PDZF,PU,ZUW,PALFAU,PBETAU)
+ CALL CANOPY_EVOL_WIND(KI,KLVL,PTSTEP,KIMPL,PWIND,ZK,ZDKDDVDZ,PSFLUX_U,PFORC_U,PDFORC_UDU,PDZ,PDZF,PU,ZUW,PALFAU,PBETAU)
 !
 !*    6.4  Friction velocity at top of SBL layers
 !          --------------------------------------
@@ -270,7 +270,7 @@ ENDIF
 !*    9. time evolution of TKE in canopy
 !        -------------------------------
 !
-CALL CANOPY_EVOL_TKE(KI,KLVL,PTSTEP,PRHOA,PZ,PZF,PDZ,PDZF,PFORC_E,PDFORC_EDE, &
+ CALL CANOPY_EVOL_TKE(KI,KLVL,PTSTEP,PRHOA,PZ,PZF,PDZ,PDZF,PFORC_E,PDFORC_EDE, &
                       PU,ZTH,ZUW,ZWTH,ZWQ,PLEPS,PTKE                          ) 
 !
 !-------------------------------------------------------------------------------

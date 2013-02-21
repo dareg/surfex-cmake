@@ -48,11 +48,11 @@ IMPLICIT NONE
 !              -------------------------
 !
 INTEGER,           INTENT(OUT):: KUNIT    ! logical unit
-CHARACTER(LEN=28), INTENT(IN) :: HFILE    ! file to open
-CHARACTER(LEN=11), INTENT(IN) :: HFORM    ! type of file
-CHARACTER(LEN=9),  INTENT(IN) :: HACTION  ! action
-CHARACTER(LEN=6),  INTENT(IN) :: HACCESS  ! access type
-CHARACTER(LEN=6),  INTENT(IN) :: HPOSITION! position type
+ CHARACTER(LEN=28), INTENT(IN) :: HFILE    ! file to open
+ CHARACTER(LEN=11), INTENT(IN) :: HFORM    ! type of file
+ CHARACTER(LEN=9),  INTENT(IN) :: HACTION  ! action
+ CHARACTER(LEN=6),  INTENT(IN) :: HACCESS  ! access type
+ CHARACTER(LEN=6),  INTENT(IN) :: HPOSITION! position type
 INTEGER,           INTENT(IN) :: KRECL    ! record length
 !
 !*       0.2   Declarations of local variables
@@ -64,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_FILE_LFI',0,ZHOOK_HANDLE)
-CALL FMATTR(HFILE,CLUOUT_LFI,KUNIT,IRESP)
+ CALL FMATTR(HFILE,CLUOUT_LFI,KUNIT,IRESP)
 !
 IF (HFORM=='FORMATTED') THEN
   OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION,   &
@@ -82,9 +82,9 @@ END IF
 IF (LHOOK) CALL DR_HOOK('OPEN_FILE_LFI',1,ZHOOK_HANDLE)
 RETURN
 100 CONTINUE
-CALL GET_LUOUT('LFI   ',ILUOUT)
+ CALL GET_LUOUT('LFI   ',ILUOUT)
 WRITE(ILUOUT,*) 'Error when opening file ',HFILE
-CALL ABOR1_SFX('OPEN_FILE_LFI: ERROR WHEN OPENING FILE '//HFILE)
+ CALL ABOR1_SFX('OPEN_FILE_LFI: ERROR WHEN OPENING FILE '//HFILE)
 IF (LHOOK) CALL DR_HOOK('OPEN_FILE_LFI',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

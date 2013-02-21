@@ -49,18 +49,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally (on final soil grid)
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: INI            ! total 1D dimension
 INTEGER           :: IPATCH         ! number of patch
@@ -89,9 +89,9 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'NATURE')
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'NATURE')
 !
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !---------------------------------------------------------------------------------------
 !

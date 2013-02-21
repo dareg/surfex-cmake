@@ -53,10 +53,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM          ! Type of program
-CHARACTER(LEN=28),   INTENT(OUT)   :: HSEABATHY         ! file name for bathymetry
-CHARACTER(LEN=6),    INTENT(OUT)   :: HSEABATHYFILETYPE ! bathymetry data file type
-CHARACTER(LEN=28),   INTENT(OUT)   :: HNCVARNAME        ! variable to read in netcdf
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM          ! Type of program
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HSEABATHY         ! file name for bathymetry
+ CHARACTER(LEN=6),    INTENT(OUT)   :: HSEABATHYFILETYPE ! bathymetry data file type
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HNCVARNAME        ! variable to read in netcdf
                                                         ! file
 REAL,                INTENT(OUT)   :: PUNIF_SEABATHY    ! uniform value of bathymetry
 !
@@ -71,9 +71,9 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=28)        :: YSEABATHY         ! file name for bathymetry
-CHARACTER(LEN=6)         :: YSEABATHYFILETYPE ! bathymetry data file type
-CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
+ CHARACTER(LEN=28)        :: YSEABATHY         ! file name for bathymetry
+ CHARACTER(LEN=6)         :: YSEABATHYFILETYPE ! bathymetry data file type
+ CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
                                               ! file
 REAL                     :: XUNIF_SEABATHY    ! uniform value of bathymetry
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -91,19 +91,19 @@ YSEABATHY          = '                          '
 YSEABATHYFILETYPE  = '      '
 YNCVARNAME='rose                      '
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_SEABATHY',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_SEABATHY',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SEABATHY)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

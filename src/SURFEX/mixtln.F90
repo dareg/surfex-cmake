@@ -79,10 +79,10 @@ REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFV    ! meridian stress (Pa)
 REAL, DIMENSION(:)  ,INTENT(OUT)    :: PSEATEMP! sea surface temperature (K)
 !*      0.2    declarations of local variables
 !
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX,2) :: ZUC           ! vecteur vent en ecriture complexe
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAI, ZBI, ZCI     !matrices pour resolution numérique
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAU, ZBU, ZCU, ZYU !matrices pour resolution numérique
-COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZOMU,ZWU
+ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX,2) :: ZUC           ! vecteur vent en ecriture complexe
+ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAI, ZBI, ZCI     !matrices pour resolution numérique
+ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAU, ZBU, ZCU, ZYU !matrices pour resolution numérique
+ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZOMU,ZWU
 !
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT, ZSEAS, ZSEAE, ZSEAV, ZSEAU
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT_REL, ZSEAS_REL, ZSEAV_REL, ZSEAU_REL

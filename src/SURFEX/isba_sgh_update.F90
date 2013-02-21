@@ -67,18 +67,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN)     :: HISBA  ! type of ISBA version:
+ CHARACTER(LEN=*), INTENT(IN)     :: HISBA  ! type of ISBA version:
 !                                          ! '2-L' (default)
 !                                          ! '3-L'
 !                                          ! 'DIF'
 !
-CHARACTER(LEN=*), INTENT(IN)     :: HRUNOFF! surface runoff formulation
+ CHARACTER(LEN=*), INTENT(IN)     :: HRUNOFF! surface runoff formulation
 !                                          ! 'WSAT'
 !                                          ! 'DT92'
 !                                          ! 'SGH ' Topmodel
 !                                                     
 !
-CHARACTER(LEN=*), INTENT(IN)     :: HRAIN  ! Rainfall spatial distribution
+ CHARACTER(LEN=*), INTENT(IN)     :: HRAIN  ! Rainfall spatial distribution
                                            ! 'DEF' = No rainfall spatial distribution
                                            ! 'SGH' = Rainfall exponential spatial distribution
 !

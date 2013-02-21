@@ -59,24 +59,24 @@ IMPLICIT NONE
 !
 INTEGER,                          INTENT(IN) :: KLUOUT
 INTEGER,                          INTENT(IN) :: KSV      ! number of scalars
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
 INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
 INTEGER,                         INTENT(OUT) :: KBAER    ! number of aerosol variables
 INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
 INTEGER,                         INTENT(OUT) :: KSV_AEREND  ! last  aerosol var.
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
-CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
 INTEGER,                         INTENT(OUT) :: KDSTEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KSV_DSTBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_DSTEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSLTEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KSV_SLTBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_SLTEND  ! last  chemical var.
-CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
-CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
+ CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

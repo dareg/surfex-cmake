@@ -68,15 +68,15 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=3),INTENT(IN)  :: HISBA                  ! type of ISBA version:
+ CHARACTER(LEN=3),INTENT(IN)  :: HISBA                  ! type of ISBA version:
 !                                                      ! '2-L' (default)
 !                                                      ! '3-L'
 !                                                      ! 'DIF'
-CHARACTER(LEN=3), INTENT(IN) :: HRESPSL                ! Soil Respiration
+ CHARACTER(LEN=3), INTENT(IN) :: HRESPSL                ! Soil Respiration
 !                                                      ! 'DEF' = Norman 1992
 !                                                      ! 'PRM' = Rivalland PhD Thesis (2003)
 !                                                      ! 'CNT' = CENTURY model (Gibelin 2008)
-CHARACTER(LEN=3), INTENT(IN) :: HPHOTO                 ! type of photosynthesis
+ CHARACTER(LEN=3), INTENT(IN) :: HPHOTO                 ! type of photosynthesis
 !
 REAL, INTENT(IN)             :: PTSTEP                 ! time step
 INTEGER, INTENT(IN)          :: KSPINS                 ! (spinup) number of times CARBON_SOIL subroutine

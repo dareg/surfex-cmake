@@ -66,7 +66,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! number of points
 !
 REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRUI
@@ -99,11 +99,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_SFXCPL_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 ! Global argument
 !
-CALL GET_FRAC_n(HPROGRAM, KI, ZSEA, ZWATER, ZNATURE, ZTOWN)
+ CALL GET_FRAC_n(HPROGRAM, KI, ZSEA, ZWATER, ZNATURE, ZTOWN)
 !
 !-------------------------------------------------------------------------------
 ! Get variable over nature tile
@@ -149,7 +149,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_SFXCPL_N:TREAT_NATURE',0,ZHOOK_HANDLE)
 !
-CALL GET_1D_MASK(KLU,KI,ZNATURE,IMASK)
+ CALL GET_1D_MASK(KLU,KI,ZNATURE,IMASK)
 !
 IF (OPRESENT1) THEN
   !
@@ -187,7 +187,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_SFXCPL_N:TREAT_SEA',0,ZHOOK_HANDLE)
 !
-CALL GET_1D_MASK(KLU,KI,ZSEA,IMASK)
+ CALL GET_1D_MASK(KLU,KI,ZSEA,IMASK)
 !
 IF (OPRESENT1) THEN
   !
@@ -257,7 +257,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_SFXCPL_N:TREAT_WATER',0,ZHOOK_HANDLE)
 !
-CALL GET_1D_MASK(KLU,KI,ZWATER,IMASK)
+ CALL GET_1D_MASK(KLU,KI,ZWATER,IMASK)
 !
 IF (OPRESENT1) THEN
   !

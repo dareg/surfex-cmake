@@ -48,7 +48,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM
 INTEGER,                    INTENT(IN)  :: KI      ! horizontal dim. of cover
 INTEGER,                    INTENT(IN)  :: KCOVER  ! number of covers
 REAL, DIMENSION(KI,KCOVER), INTENT(OUT) :: PCOVER  ! cover types
@@ -62,7 +62,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_COVER_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 IF ( SIZE(PCOVER) /= SIZE(XCOVER) ) THEN

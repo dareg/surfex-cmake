@@ -90,7 +90,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 LOGICAL,            INTENT(IN)    :: OCANOPY      ! is canopy active ?
@@ -157,7 +157,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PFLX_BLD_MASS! heat flx from bld to mass
 REAL, DIMENSION(:), INTENT(IN)    :: PE_SHADING   ! energy not ref., nor absorbed, nor
                                                   !trans. by glazing [W
                                                   !m-2(win)]
-CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PGR          ! glazing ratio
 REAL, DIMENSION(:), INTENT(IN)    :: PT_WIN1      ! Outdoor window temperature [K]

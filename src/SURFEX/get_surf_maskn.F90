@@ -45,7 +45,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),  INTENT(IN)    :: HTYPE    ! Type of surface
+ CHARACTER(LEN=*),  INTENT(IN)    :: HTYPE    ! Type of surface
 INTEGER, INTENT(IN)              :: KDIM     ! dimension of mask
 INTEGER, DIMENSION(KDIM), INTENT(OUT) :: KMASK    ! mask for reading of the files
 INTEGER, INTENT(INOUT)           :: KLU      ! expected physical size of full surface array
@@ -84,7 +84,7 @@ IF (ILU/=KLU) THEN
   CALL ABOR1_SFX('GET_SURF_MASK: ERROR IN INITIALIZATION OF MASK FOR READING OR WRITING')
 END IF
 !
-CALL GET_MASK(ILU,HTYPE,KMASK)
+ CALL GET_MASK(ILU,HTYPE,KMASK)
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_MASK_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ SUBROUTINE GET_MASK(KLU,YTYPE,IMASK)
 IMPLICIT NONE
 !
 INTEGER, INTENT(IN) :: KLU
-CHARACTER(LEN=*),  INTENT(IN)  :: YTYPE    ! Type of surface
+ CHARACTER(LEN=*),  INTENT(IN)  :: YTYPE    ! Type of surface
 INTEGER, DIMENSION(:), INTENT(OUT) :: IMASK
 !
 REAL, DIMENSION(KLU) :: ZSEA   ! sea cover
@@ -143,7 +143,7 @@ ELSE
   !
 ENDIF
 !
-CALL GET_1D_MASK(ILU2,KLU,ZSURF,IMASK)
+ CALL GET_1D_MASK(ILU2,KLU,ZSURF,IMASK)
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_MASK_N:GET_MASK',1,ZHOOK_HANDLE)
 !

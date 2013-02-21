@@ -56,7 +56,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=10),  INTENT(IN)  :: HGRID      ! grid type
+ CHARACTER(LEN=10),  INTENT(IN)  :: HGRID      ! grid type
 INTEGER,            INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,            INTENT(IN)  :: KL         ! number of points
 INTEGER,            INTENT(IN)  :: KLUOUT     ! output listing logical unit

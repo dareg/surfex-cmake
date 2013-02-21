@@ -2,9 +2,9 @@
         MODULE MODD_DATA_LAKE
 !     #####################
 !
-CHARACTER(LEN=80), PARAMETER :: CLAKELTA = 'LAKE_LTA_NEW.nc'            ! The dataset file name
-CHARACTER(LEN=80), PARAMETER :: CLAKELDB = 'GlobalLakeDepth'    ! The file name of the map for global lake depth
-CHARACTER(LEN=80), PARAMETER :: CSTATUSLDB = 'GlobalLakeStatus' ! The file name of the map for global lake depth
+ CHARACTER(LEN=80), PARAMETER :: CLAKELTA = 'LAKE_LTA_NEW.nc'            ! The dataset file name
+ CHARACTER(LEN=80), PARAMETER :: CLAKELDB = 'GlobalLakeDepth'    ! The file name of the map for global lake depth
+ CHARACTER(LEN=80), PARAMETER :: CSTATUSLDB = 'GlobalLakeStatus' ! The file name of the map for global lake depth
 !
 INTEGER, PARAMETER :: NLONG=360, & ! Number of grid boxes of the "lake grid" in longitude
                       NLATG=150    ! Number of grid boxes of the "lake grid" in latitude

@@ -58,14 +58,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                 INTENT(IN) :: KSW       ! number of short-wave spectral bands
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
+ CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

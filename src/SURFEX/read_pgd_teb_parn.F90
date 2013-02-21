@@ -100,16 +100,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER,           INTENT(IN)  :: KNI      ! size of the new domain
-CHARACTER(LEN=1),  INTENT(IN)  :: HDIRIN
+ CHARACTER(LEN=1),  INTENT(IN)  :: HDIRIN
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: ILUOUT         ! output listing logical unit
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: JLAYER         ! loop index
 !
 INTEGER           :: IVERSION       ! surface version
@@ -120,12 +120,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_PAR_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF (IVERSION<7 .AND. .NOT.LECOCLIMAP) THEN
   !
@@ -739,9 +739,9 @@ USE MODI_HOR_INTERPOL
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HRECFM ! name of record in the file
+ CHARACTER(LEN=*),     INTENT(IN)  :: HRECFM ! name of record in the file
 REAL, DIMENSION(NDIM), INTENT(OUT) :: PFIELD
-CHARACTER(LEN=1),     INTENT(IN)  :: YDIR
+ CHARACTER(LEN=1),     INTENT(IN)  :: YDIR
 !
 REAL, DIMENSION(KNI)              :: ZF
 REAL, DIMENSION(:,:), POINTER     :: ZIN

@@ -62,7 +62,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL         ,    INTENT(OUT)   :: OSST_DATA
 !
 !
@@ -91,8 +91,8 @@ LOGICAL                        :: LSST_DATA
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28), DIMENSION(NTIME_MAX)   :: CFNAM_SST        ! sea surface temperature
-CHARACTER(LEN=6),  DIMENSION(NTIME_MAX)   :: CFTYP_SST        ! sea surface temperature
+ CHARACTER(LEN=28), DIMENSION(NTIME_MAX)   :: CFNAM_SST        ! sea surface temperature
+ CHARACTER(LEN=6),  DIMENSION(NTIME_MAX)   :: CFTYP_SST        ! sea surface temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_SEAFLUX/NTIME, LSST_DATA, XUNIF_SST, CFNAM_SST, CFTYP_SST, &
@@ -121,13 +121,13 @@ LSST_DATA         = .FALSE.
 !*    2.      Input file for cover types
 !             --------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_DATA_SEAFLUX',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_DATA_SEAFLUX',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_SEAFLUX)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 OSST_DATA         = LSST_DATA
 IF (.NOT. LSST_DATA .AND. LHOOK) CALL DR_HOOK('PGD_SEAFLUX_PAR',1,ZHOOK_HANDLE)

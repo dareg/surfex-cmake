@@ -60,7 +60,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
 REAL                ,INTENT(IN)       :: PTIME   ! current time since midnight in second
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PEMIS    ! emissivity
 REAL, DIMENSION(:,:),INTENT(IN)       :: PDIR_ALB ! direct albedo
@@ -98,7 +98,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MOD1D_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ITIME=INT(PTIME)
 NOCEAN_STEP=INT(XOCEAN_TSTEP)

@@ -57,9 +57,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM   !
-CHARACTER(LEN=*),  INTENT(IN)  :: HFILE      ! File to be read
-CHARACTER(LEN=*),  INTENT(IN)  :: HFORM      ! Format of the file to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM   !
+ CHARACTER(LEN=*),  INTENT(IN)  :: HFILE      ! File to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HFORM      ! Format of the file to be read
 REAL,              INTENT(OUT) :: PX0        ! abcissa of bottom-left pixel   
 REAL,              INTENT(OUT) :: PY0        ! ordinate of bottom-left pixel   
 INTEGER,           INTENT(OUT) :: KNXC       ! number of topographixc grid points along abcissa axis   
@@ -78,11 +78,11 @@ IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_DTM',0,ZHOOK_HANDLE)
 !
 !*       0.2    preparing file openning
 !               ----------------------
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 WRITE(ILUOUT,*) 'Open ',HFILE,'header'
 !
-CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
 !
 DO JJ=1,5
   READ(IUNIT,*) 
@@ -97,7 +97,7 @@ READ(IUNIT,*) PDXT
 READ(IUNIT,*)
 READ(IUNIT,*)
 !
-CALL CLOSE_FILE(HPROGRAM,IUNIT)
+ CALL CLOSE_FILE(HPROGRAM,IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_DTM',1,ZHOOK_HANDLE)
 !

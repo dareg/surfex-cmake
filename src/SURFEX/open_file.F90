@@ -57,22 +57,22 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)           :: HPROGRAM ! main program
+ CHARACTER(LEN=6),  INTENT(IN)           :: HPROGRAM ! main program
 INTEGER,           INTENT(OUT)          :: KUNIT    ! logical unit
-CHARACTER(LEN=*),  INTENT(IN)           :: HFILE    ! file to open
-CHARACTER(LEN=*),  INTENT(IN)           :: HFORM    ! type of file
-CHARACTER(LEN=*),  INTENT(IN), OPTIONAL :: HACTION  ! action
-CHARACTER(LEN=*),  INTENT(IN), OPTIONAL :: HACCESS  ! access type
+ CHARACTER(LEN=*),  INTENT(IN)           :: HFILE    ! file to open
+ CHARACTER(LEN=*),  INTENT(IN)           :: HFORM    ! type of file
+ CHARACTER(LEN=*),  INTENT(IN), OPTIONAL :: HACTION  ! action
+ CHARACTER(LEN=*),  INTENT(IN), OPTIONAL :: HACCESS  ! access type
 INTEGER,           INTENT(IN), OPTIONAL :: KRECL    ! record length
 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28) :: YFILE
-CHARACTER(LEN=11) :: YFORM
-CHARACTER(LEN=9)  :: YACTION
-CHARACTER(LEN=6)  :: YACCESS
+ CHARACTER(LEN=28) :: YFILE
+ CHARACTER(LEN=11) :: YFORM
+ CHARACTER(LEN=9)  :: YACTION
+ CHARACTER(LEN=6)  :: YACCESS
 INTEGER           :: IRECL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

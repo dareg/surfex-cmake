@@ -40,9 +40,9 @@ INCLUDE 'netcdf.inc'
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
@@ -79,18 +79,18 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_NETCDF',0,ZHOOK_HANDLE)
 
 !*      1.    get nature dimension
 !
-CALL GET_TYPE_DIM_n('NATURE',IL)
+ CALL GET_TYPE_DIM_n('NATURE',IL)
 !
 !*      2.     Reading of field
 !              ----------------
 
 ! Open netcdf file
 IERROR=NF_OPEN(HFILE,NF_NOWRITE,ID_FILE)
-CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILE))
+ CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILE))
 
 ! Look for variable ID
 IERROR=NF_INQ_VARID(ID_FILE,TRIM(HSURF),ID_VAR)
-CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HSURF))
+ CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HSURF))
 
 ! Number of dimensions
 IERROR=NF_INQ_VARNDIMS(ID_FILE,ID_VAR,INVARDIMS)
@@ -126,7 +126,7 @@ IF(ILENDIM/=IL) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '//
 !
 ! Read 1D variable
 IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
-CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+ CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
 !
 ! Close netcdf file
 IERROR=NF_CLOSE(ID_FILE)

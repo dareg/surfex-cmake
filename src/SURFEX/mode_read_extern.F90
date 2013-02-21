@@ -37,11 +37,11 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
-CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! type of input file
+ CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! type of input file
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=3),     INTENT(IN)    :: HISBA     ! type of ISBA soil scheme
-CHARACTER(LEN=3),     INTENT(IN)    :: HNAT      ! type of surface (nature, gardens)
-CHARACTER(LEN=7),     INTENT(IN)    :: HFIELD    ! field name
+ CHARACTER(LEN=3),     INTENT(IN)    :: HISBA     ! type of ISBA soil scheme
+ CHARACTER(LEN=3),     INTENT(IN)    :: HNAT      ! type of surface (nature, gardens)
+ CHARACTER(LEN=7),     INTENT(IN)    :: HFIELD    ! field name
 INTEGER,              INTENT(IN)    :: KNI       ! number of points
 INTEGER,           INTENT(INOUT)    :: KLAYER    ! number of layers
 INTEGER,              INTENT(IN)    :: KPATCH    ! number of patch
@@ -52,9 +52,9 @@ REAL, DIMENSION(:,:,:), POINTER     :: PDEPTH    ! middle depth of each layer
 !* local variables
 !  ---------------
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=16) :: YRECFM2
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=16) :: YRECFM2
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILAYER         ! number of soil layers
 INTEGER           :: JLAYER         ! loop counter
@@ -74,9 +74,9 @@ REAL,  DIMENSION(:,:),   ALLOCATABLE :: ZWORK  ! work array
 REAL,  DIMENSION(KNI)                :: ZHVEG  ! high vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZLVEG  ! low  vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZNVEG  ! no   vegetation fraction
-CHARACTER(LEN=4)                     :: YHVEG  ! type of high vegetation
-CHARACTER(LEN=4)                     :: YLVEG  ! type of low  vegetation
-CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
+ CHARACTER(LEN=4)                     :: YHVEG  ! type of high vegetation
+ CHARACTER(LEN=4)                     :: YLVEG  ! type of low  vegetation
+ CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
 LOGICAL                              :: GECOCLIMAP ! T if ecoclimap is used
 LOGICAL                              :: GPAR_GARDEN! T if garden data are used
 LOGICAL                              :: GDATA_DG
@@ -124,10 +124,10 @@ IF (GECOCLIMAP) THEN
 ENDIF
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 !-------------------------------------------------------------------
 IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
@@ -259,7 +259,7 @@ DEALLOCATE(ZD)
 !-------------------------------------------------------------------
 !
 ALLOCATE(PDEPTH    (KNI,ILAYER,NVEGTYPE))
-CALL PUT_ON_ALL_VEGTYPES(KNI,ILAYER,KPATCH,NVEGTYPE,ZDEPTH,PDEPTH)
+ CALL PUT_ON_ALL_VEGTYPES(KNI,ILAYER,KPATCH,NVEGTYPE,ZDEPTH,PDEPTH)
 DEALLOCATE(ZDEPTH)
 
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_DEPTH',1,ZHOOK_HANDLE)
@@ -290,14 +290,14 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 INTEGER,              INTENT(IN)    :: KNI       ! number of points
-CHARACTER(LEN=7),     INTENT(IN)    :: HFIELD    ! field name
-CHARACTER(LEN=*),     INTENT(IN)    :: HNAME     ! field name in the file
+ CHARACTER(LEN=7),     INTENT(IN)    :: HFIELD    ! field name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HNAME     ! field name in the file
 REAL, DIMENSION(:,:,:), POINTER       :: PFIELD    ! field to initialize
 REAL, DIMENSION(:,:,:), POINTER       :: PDEPTH    ! middle depth of each layer
 !
@@ -305,11 +305,11 @@ REAL, DIMENSION(:,:,:), POINTER       :: PDEPTH    ! middle depth of each layer
 !* local variables
 !  ---------------
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=4)  :: YLVL
-CHARACTER(LEN=3)  :: YISBA          ! type of ISBA soil scheme
-CHARACTER(LEN=3)  :: YNAT           ! type of surface (nature, garden)
-CHARACTER(LEN=4)  :: YPEDOTF        ! type of pedo-transfert function
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=3)  :: YISBA          ! type of ISBA soil scheme
+ CHARACTER(LEN=3)  :: YNAT           ! type of surface (nature, garden)
+ CHARACTER(LEN=4)  :: YPEDOTF        ! type of pedo-transfert function
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILAYER         ! number of layers
 INTEGER           :: JLAYER         ! loop counter
@@ -349,10 +349,10 @@ ELSE
 ENDIF
 !
 YRECFM='VERSION'
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP)
 !
 !* Read number of soil layers
 !
@@ -361,7 +361,7 @@ IF (GTEB) THEN
   YRECFM='TWN_LAYER'
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_LAYER'
 ENDIF
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,ILAYER,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ILAYER,IRESP)
 !
 !* number of tiles
 !
@@ -378,7 +378,7 @@ IF (GTEB) THEN
   YRECFM='TWN_ISBA'
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_ISBA'
 ENDIF
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,YISBA,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,YISBA,IRESP)
 !
 IF (IVERSION>=7) THEN
   !
@@ -411,7 +411,7 @@ IF (GTEB) THEN
   YRECFM='TWN_CLAY'
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_CLAY'
 ENDIF
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZCLAY(:),IRESP,HDIR='A')
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZCLAY(:),IRESP,HDIR='A')
 !
 !-------------------------------------------------------------------------------
 !
@@ -424,7 +424,7 @@ IF (GTEB) THEN
   YRECFM='TWN_SAND'
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_SAND'
 ENDIF
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZSAND(:),IRESP,HDIR='A')
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZSAND(:),IRESP,HDIR='A')
 !
 !-------------------------------------------------------------------------------
 !
@@ -466,7 +466,7 @@ END IF
 !
 DEALLOCATE(ZSOILGRID)
 !
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 !* Allocate soil variable profile
 !  ------------------------------
@@ -494,7 +494,7 @@ DO JLAYER=1,ILAYER
   END DO
 END DO
 !
-CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
 DEALLOCATE(ZWORK)
 !
@@ -576,7 +576,7 @@ DEALLOCATE(ZVAR)
 !     -----------------------------
 !
 ALLOCATE(PFIELD(KNI,ILAYER,NVEGTYPE))
-CALL PUT_ON_ALL_VEGTYPES(KNI,ILAYER,IPATCH,NVEGTYPE,ZFIELD,PFIELD)
+ CALL PUT_ON_ALL_VEGTYPES(KNI,ILAYER,IPATCH,NVEGTYPE,ZFIELD,PFIELD)
 DEALLOCATE(ZFIELD)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_ISBA',1,ZHOOK_HANDLE)
 !

@@ -62,7 +62,7 @@ USE MODI_INIT_SURFCONSPHY
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6)                  :: HZ0H     ! TEB option for z0h roof & road
+ CHARACTER(LEN=6)                  :: HZ0H     ! TEB option for z0h roof & road
 REAL,               INTENT(IN)    :: PZ0_O_Z0H! z0/z0h ratio used in Mascart (1995)
 REAL, DIMENSION(:), INTENT(IN)    :: PTG      ! surface temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PQS      ! surface specific humidity

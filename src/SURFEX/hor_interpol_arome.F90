@@ -74,7 +74,7 @@ IX=NX
 !
 !*      2.    Transformation of latitudes/longitudes into metric coordinates of input grid
 !
-CALL XY_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATOR,XLONOR,ZX,ZY,XLAT_OUT,XLON_OUT)
+ CALL XY_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATOR,XLONOR,ZX,ZY,XLAT_OUT,XLON_OUT)
 !
 !
 !*      3.    Input mask

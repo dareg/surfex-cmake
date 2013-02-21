@@ -56,7 +56,7 @@ INTEGER,            INTENT(OUT) :: KL
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=100) :: YCOMMENT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !

@@ -48,7 +48,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),       INTENT(IN)     :: HPROGRAM
+ CHARACTER(LEN=6),       INTENT(IN)     :: HPROGRAM
 INTEGER,                INTENT(IN)     :: KI        ! Number of points
 INTEGER,                INTENT(IN)     :: KS        ! Number of points
 REAL, DIMENSION(KI,KS), INTENT(OUT)    :: PFIELD    ! output field
@@ -66,7 +66,7 @@ REAL, DIMENSION(SIZE(XTS))    :: ZAUX
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_SERIES_N',0,ZHOOK_HANDLE)
 !

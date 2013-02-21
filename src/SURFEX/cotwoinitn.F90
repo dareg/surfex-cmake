@@ -78,7 +78,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=3),   INTENT(IN)   :: HPHOTO      ! type of photosynthesis
+ CHARACTER(LEN=3),   INTENT(IN)   :: HPHOTO      ! type of photosynthesis
 REAL,DIMENSION(:,:),INTENT(IN)   :: PVEGTYPE
 !                                     PVEGTYPE = fraction of each
 !                                     vegetation classification index;
@@ -195,7 +195,7 @@ ZCO2INIT5(:) = 0.
 ! DETERMINE GAUSSIAN WEIGHTS NEEDED FOR CO2 MODEL 
 ! -----------------------------------------------
 !
-CALL GAULEG(0.0,1.0,PABC,PPOI,SIZE(PABC))
+ CALL GAULEG(0.0,1.0,PABC,PPOI,SIZE(PABC))
 !
 !
 ! INITIALIZE VARIOUS PARAMETERS FOR CO2 MODEL:
@@ -296,7 +296,7 @@ ZANMAX(:)=ZANMAX(:)/1.2
 ZEPSO(:)=PEPSO(:)/1.2
 ZGAMMT(:)=ZGAMMT(:)*XMCO2/XMD*1e-6
 !
-CALL COTWO(PCO2, ZCO2INIT5, ZCO2INIT4, ZCO2INIT3, ZGAMMT, &
+ CALL COTWO(PCO2, ZCO2INIT5, ZCO2INIT4, ZCO2INIT3, ZGAMMT, &
            PFZERO, ZEPSO, ZANMAX, ZGMEST, PGC, ZDMAX,     &
            PANMAX, ZGS, ZRDK                              )                     
 ! change by sebastien PEPSO change into ZEPSO for units consistency

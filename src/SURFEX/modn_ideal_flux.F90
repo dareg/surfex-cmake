@@ -33,7 +33,7 @@ USE MODD_IDEAL_FLUX, ONLY : NFORC_MAX, NFORCF, NFORCT, XSFTH_f=>XSFTH, XSFTQ_f=>
 IMPLICIT NONE
 !
 REAL, DIMENSION(NFORC_MAX) :: XSFTH
-CHARACTER(LEN=7) :: CSFTQ ! Unit for the evaporation flux :
+ CHARACTER(LEN=7) :: CSFTQ ! Unit for the evaporation flux :
                           !'kg/m2/s'
                           !'W/m2   '
 REAL, DIMENSION(NFORC_MAX) :: XSFTQ

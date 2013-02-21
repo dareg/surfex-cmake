@@ -43,18 +43,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
 TYPE (DATE_TIME),   INTENT(OUT) :: TPTIME    ! grib date and time
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=12), DIMENSION(3000) :: HREC   ! list of records already read/written
+ CHARACTER(LEN=12), DIMENSION(3000) :: HREC   ! list of records already read/written
 INTEGER                            :: IREC
-CHARACTER(LEN=6)              :: YINMODEL  ! model from which GRIB file originates
-CHARACTER(LEN=10)             :: YGRIDTYPE ! Grid type
+ CHARACTER(LEN=6)              :: YINMODEL  ! model from which GRIB file originates
+ CHARACTER(LEN=10)             :: YGRIDTYPE ! Grid type
 INTEGER                       :: IRESP     ! Error code after redding
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -80,10 +80,10 @@ ELSE IF(HFILETYPE=='MESONH' .OR. HFILETYPE=='LFI   ' .OR. HFILETYPE=='ASCII ') T
 !
 ELSE IF(HFILETYPE=='BUFFER') THEN
 !
-CALL READ_BUFFER('YEAR  ',TPTIME%TDATE%YEAR,IRESP)
-CALL READ_BUFFER('MONTH ',TPTIME%TDATE%MONTH,IRESP)
-CALL READ_BUFFER('DAY   ',TPTIME%TDATE%DAY,IRESP)
-CALL READ_BUFFER('TIME  ',TPTIME%TIME,IRESP)
+ CALL READ_BUFFER('YEAR  ',TPTIME%TDATE%YEAR,IRESP)
+ CALL READ_BUFFER('MONTH ',TPTIME%TDATE%MONTH,IRESP)
+ CALL READ_BUFFER('DAY   ',TPTIME%TDATE%DAY,IRESP)
+ CALL READ_BUFFER('TIME  ',TPTIME%TIME,IRESP)
 !
 ELSE
 !

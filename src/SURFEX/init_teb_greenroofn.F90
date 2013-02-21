@@ -76,8 +76,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 REAL,             DIMENSION(KSW),   INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
@@ -90,7 +90,7 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IDECADE  ! decade of simulation
 !
 INTEGER :: JTEB_PATCH  ! loop counter on TEB patches
-CHARACTER(LEN=3) :: YPATCH ! patch identificator
+ CHARACTER(LEN=3) :: YPATCH ! patch identificator
 !
 REAL, DIMENSION(KI)               :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(KI)               :: ZTG1 ! work array for surface temperature
@@ -106,7 +106,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TEB_GREENROOF_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -126,7 +126,7 @@ IF (HINIT=='PRE') THEN
 ENDIF
 !-------------------------------------------------------------------------------
 !
-CALL ALLOCATE_TEB_GREENROOF(KI, NLAYER_GR)  
+ CALL ALLOCATE_TEB_GREENROOF(KI, NLAYER_GR)  
 !
 !-------------------------------------------------------------------------------
 !
@@ -156,7 +156,7 @@ ENDIF
   CALL READ_TEB_GREENROOF_n(HPROGRAM,YPATCH)
 !
 !
-CALL INIT_VEG_GARDEN_n(KI, LCANOPY, CROUGH, TSNOW, &
+ CALL INIT_VEG_GARDEN_n(KI, LCANOPY, CROUGH, TSNOW, &
                    CPHOTO, XLAIMIN, XH_TREE, XVEGTYPE, XLAI, XZ0, XVEG, XEMIS, &
                    LTR_ML_GR, XFAPARC, XFAPIRC, XLAI_EFFC, XMUS, &
                    XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, XALBNIR, XALBVIS, XALBUV, &
@@ -185,7 +185,7 @@ ELSE
 END IF
 !
 ! 
-CALL AVG_ALBEDO_EMIS_GREENROOF(CALBEDO,                                &
+ CALL AVG_ALBEDO_EMIS_GREENROOF(CALBEDO,                                &
                                XVEG,XZ0,XLAI,ZTG1,                     &
                                PSW_BANDS,                              &
                                XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &

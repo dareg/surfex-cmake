@@ -41,8 +41,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
-CHARACTER(LEN=3),   INTENT(IN)  :: HWRITE   ! 'PGD' : only physiographic fields are written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=3),   INTENT(IN)  :: HWRITE   ! 'PGD' : only physiographic fields are written
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                           ! 'ALL' : all fields are written
 !

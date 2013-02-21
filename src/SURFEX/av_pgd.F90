@@ -9,9 +9,9 @@ INTERFACE AV_PGD
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -23,9 +23,9 @@ END SUBROUTINE AV_PGD
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct for each patch
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PDATA   ! secondary field value for each class in each vegtype
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -37,9 +37,9 @@ END SUBROUTINE AV_PATCH_PGD
 REAL, DIMENSION(:),     INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:),     INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -51,9 +51,9 @@ END SUBROUTINE AV_PGD_1D
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct for each patch
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PDATA   ! secondary field value for each class in each vegtype
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:),     INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -66,9 +66,9 @@ USE MODD_TYPE_DATE_SURF
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(OUT) :: TFIELD  ! secondary field to construct for each patch
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN) :: TDATA  ! secondary field to construct for each patch
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE MAJOR_PATCH_PGD_1D
@@ -151,9 +151,9 @@ IMPLICIT NONE
 REAL, DIMENSION(:),     INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:),     INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -463,9 +463,9 @@ IMPLICIT NONE
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:,:), INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,              INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -856,9 +856,9 @@ IMPLICIT NONE
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -1139,9 +1139,9 @@ IMPLICIT NONE
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
 REAL, DIMENSION(:,:),     INTENT(IN)  :: PDATA   ! secondary field value for each class
-CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
@@ -1485,9 +1485,9 @@ IMPLICIT NONE
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(OUT) :: TFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN)  :: TDATA   ! secondary field value for each class
-CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+ CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
-CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
+ CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
 INTEGER,     INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 !*    0.2    Declaration of local variables
@@ -1527,7 +1527,7 @@ TFIELD(:,:)%TDATE%MONTH = NUNDEF
 TFIELD(:,:)%TDATE%DAY   = NUNDEF
 TFIELD(:,:)%TIME        = 0.
 !
-CALL DATE2DOY(TDATA,IDATA_DOY)
+ CALL DATE2DOY(TDATA,IDATA_DOY)
 !-------------------------------------------------------------------------------
 DO JP = 1, SIZE(PCOVER,1)
 

@@ -91,7 +91,7 @@ IF (LHOOK) CALL DR_HOOK('ROOF_IMPL_COEF',0,ZHOOK_HANDLE)
 !*      1.0    Coefficients of the tridioagonal matrix for heat conduction eq.
 !              ---------------------------------------------------------------
 !
-CALL LAYER_E_BUDGET_GET_COEF( XT_ROOF, PTSTEP, ZIMPL, XHC_ROOF, XTC_ROOF, XD_ROOF, &
+ CALL LAYER_E_BUDGET_GET_COEF( XT_ROOF, PTSTEP, ZIMPL, XHC_ROOF, XTC_ROOF, XD_ROOF, &
                               ZA, ZB, ZC, ZY )
 !
 !-------------------------------------------------------------------------------

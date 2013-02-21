@@ -47,8 +47,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*)  , INTENT(IN)  :: HISBA     ! type of ISBA version
-CHARACTER(LEN=*)  , INTENT(IN)  :: HCPSURF   ! specific heat at surface
+ CHARACTER(LEN=*)  , INTENT(IN)  :: HISBA     ! type of ISBA version
+ CHARACTER(LEN=*)  , INTENT(IN)  :: HCPSURF   ! specific heat at surface
 INTEGER           , INTENT(IN)  :: KLVL      ! number      of levels in canopy
 REAL, DIMENSION(:), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
@@ -241,7 +241,7 @@ ZQA  (:) = PQA(:) / PRHOA(:)
 ZWIND(:) = SQRT(PU**2+PV**2)
 !
 !We compute the snow fractions
-CALL ISBA_SNOW_FRAC(PTSNOW%SCHEME,                      &
+ CALL ISBA_SNOW_FRAC(PTSNOW%SCHEME,                      &
                     ZSNOWSWE, ZSNOWRHO, ZSNOWALB,       &
                     ZVEG, ZLAI, ZZ0,                    &
                     ZPSN, ZPSNV_A, ZPSNG, ZPSNV         )  
@@ -254,9 +254,9 @@ END DO
 !
 !We choose the case HPHOTO=='NON' and a humid soil (ZF2=1) to compute ZRS
 ZF2(:)=1.0
-CALL VEG(ZP_GLOBAL_SW, PTA, ZQA, PPS, ZRGL, ZLAI, ZRSMIN, ZGAMMA, ZF2, ZRS)
+ CALL VEG(ZP_GLOBAL_SW, PTA, ZQA, PPS, ZRGL, ZLAI, ZRSMIN, ZGAMMA, ZF2, ZRS)
 !Calculation of ZDELTA
-CALL WET_LEAVES_FRAC(ZWR, ZVEG, ZWRMAX_CF, ZZ0_WITH_SNOW, ZLAI, ZWRMAX, ZDELTA)
+ CALL WET_LEAVES_FRAC(ZWR, ZVEG, ZWRMAX_CF, ZZ0_WITH_SNOW, ZLAI, ZWRMAX, ZDELTA)
 !
 !We choose the case LFLOOD=false
 ZFFG   (:) = 0.0
@@ -267,7 +267,7 @@ ZFF    (:) = 0.0
 !
 ZF5    (:) = 1.0
 !We compute ZCD, ZCH and ZRI
-CALL DRAG(HISBA, PTSNOW%SCHEME, HCPSURF, ZTS, ZWG, ZWGI, ZEXNS, ZEXNA, PTA,   &
+ CALL DRAG(HISBA, PTSNOW%SCHEME, HCPSURF, ZTS, ZWG, ZWGI, ZEXNS, ZEXNA, PTA,   &
           ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS,                                 &
           ZVEG, ZZ0, ZZ0EFF, ZZ0H, PWFC(:,1), PWSAT(:,1),                     &
           ZPSNG, ZPSNV, PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5,              &

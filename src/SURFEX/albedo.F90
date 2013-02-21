@@ -15,7 +15,7 @@ INTERFACE ALBEDO
 !*      0.1    declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
+ CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
 ! Albedo dependance wxith surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
 !   "DRY " = constant albedo value for dry soil
@@ -50,7 +50,7 @@ END SUBROUTINE ALBEDO_1D
 !              -------------------------
 !
 !
-CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
+ CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
 ! Albedo dependance wxith surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
 !   "DRY " = constant albedo value for dry soil
@@ -133,7 +133,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
+ CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
 ! Albedo dependance wxith surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
 !   "DRY " = constant albedo value for dry soil
@@ -255,7 +255,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
+ CHARACTER(LEN=*),       INTENT(IN)   :: HALBEDO
 ! Albedo dependance wxith surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
 !   "DRY " = constant albedo value for dry soil

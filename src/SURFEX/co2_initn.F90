@@ -60,7 +60,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
+ CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
 INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_NATURE_P
 INTEGER, DIMENSION(:,:), INTENT(IN) :: KR_NATURE_P
 REAL, DIMENSION(:,:,:), INTENT(IN) :: PVEGTYPE_PATCH

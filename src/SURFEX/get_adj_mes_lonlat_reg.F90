@@ -62,7 +62,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_ADJ_MES_LONLAT_REG',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_LONLAT_REG(PGRID_PAR,ZLONMIN,ZLONMAX, &
+ CALL GET_GRIDTYPE_LONLAT_REG(PGRID_PAR,ZLONMIN,ZLONMAX, &
                                ZLATMIN,ZLATMAX,ILON,ILAT  )  
 !
 KLEFT  (:) = 0

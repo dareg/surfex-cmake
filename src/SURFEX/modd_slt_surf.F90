@@ -11,7 +11,7 @@ INTEGER, DIMENSION(NEMISMODES_MAX), PARAMETER :: JORDER_SLT=(/3,2,1/) !Dust mode
 REAL,DIMENSION(NEMISMODES_MAX)   :: XEMISRADIUS_INI_SLT          ! number madian radius initialization for sea salt mode (um)
 REAL,DIMENSION(NEMISMODES_MAX)   :: XEMISSIG_INI_SLT             ! dispersion initialization for sea salt mode
 !
-CHARACTER(LEN=5)   :: CEMISPARAM_SLT    ! Reference to paper where emission parameterization is proposed
+ CHARACTER(LEN=5)   :: CEMISPARAM_SLT    ! Reference to paper where emission parameterization is proposed
 INTEGER            :: JPMODE_SLT        ! number of sea salt modes (max 3; default = 1)
 LOGICAL            :: LVARSIG_SLT       ! switch to active pronostic dispersion for all modes
 LOGICAL            :: LRGFIX_SLT        ! switch to active pronostic mean radius for all modes

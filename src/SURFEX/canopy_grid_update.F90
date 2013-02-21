@@ -108,7 +108,7 @@ END DO
 !*    3.  New grid characteristics
 !         ------------------------
 !
-CALL CANOPY_GRID(KI,KLVL,PZ,PZF,PDZ,PDZF)
+ CALL CANOPY_GRID(KI,KLVL,PZ,PZF,PDZ,PDZF)
 !
 !
 !*    5.  at least one canopy level in addition to forcing level must be above canopy top
@@ -133,7 +133,7 @@ END DO
 !*    6.  Final grid characteristics
 !         --------------------------
 !
-CALL CANOPY_GRID(KI,KLVL,PZ,PZF,PDZ,PDZF)
+ CALL CANOPY_GRID(KI,KLVL,PZ,PZF,PDZ,PDZF)
 !
 IF (LHOOK) CALL DR_HOOK('CANOPY_GRID_UPDATE',1,ZHOOK_HANDLE)
 !

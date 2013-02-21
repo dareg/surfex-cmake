@@ -59,14 +59,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
 INTEGER           :: IVERSION   ! surface version
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -77,7 +77,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_SEAFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_SEA'
-CALL GET_TYPE_DIM_n('SEA   ',NDIM)
+ CALL GET_TYPE_DIM_n('SEA   ',NDIM)
 !
 !
 !*       2.     Physiographic data fields:
@@ -86,10 +86,10 @@ CALL GET_TYPE_DIM_n('SEA   ',NDIM)
 !* cover classes
 !
 ALLOCATE(LCOVER(JPCOVER))
-CALL READ_LCOVER(HPROGRAM,LCOVER)
+ CALL READ_LCOVER(HPROGRAM,LCOVER)
 !
 ALLOCATE(XCOVER(NDIM,JPCOVER))
-CALL READ_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP)
+ CALL READ_SURF(HPROGRAM,'COVER',XCOVER(:,:),LCOVER,IRESP)
 !
 !* orography
 !
@@ -97,7 +97,7 @@ ALLOCATE(XZS(NDIM))
 XZS(:) = 0.
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 !* bathymetry
 !
@@ -114,7 +114,7 @@ END IF
 ALLOCATE(XLAT      (NDIM))
 ALLOCATE(XLON      (NDIM))
 ALLOCATE(XMESH_SIZE(NDIM))
-CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP)
+ CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP)
 !
 !
 !* sst

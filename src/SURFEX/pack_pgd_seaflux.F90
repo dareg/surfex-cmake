@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
 REAL,    DIMENSION(:),   INTENT(IN) :: PSEABATHY ! bathymetry
 !
 !*    0.2    Declaration of local variables
@@ -68,15 +68,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PACK_PGD_SEAFLUX',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.      Number of points and packing
 !             ----------------------------
 !
-CALL GET_TYPE_DIM_n('SEA   ',NDIM)
+ CALL GET_TYPE_DIM_n('SEA   ',NDIM)
 ALLOCATE(IMASK(NDIM))
 ILU=0
-CALL GET_SURF_MASK_n('SEA   ',NDIM,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n('SEA   ',NDIM,IMASK,ILU,ILUOUT)
 !
 !
 !-------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ CALL GET_SURF_MASK_n('SEA   ',NDIM,IMASK,ILU,ILUOUT)
 !             -----------------
 !
 ALLOCATE(XSEABATHY(NDIM))
-CALL PACK_SAME_RANK(IMASK,PSEABATHY(:),XSEABATHY(:))
+ CALL PACK_SAME_RANK(IMASK,PSEABATHY(:),XSEABATHY(:))
 IF (LHOOK) CALL DR_HOOK('PACK_PGD_SEAFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

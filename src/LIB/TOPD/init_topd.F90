@@ -79,16 +79,16 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN) :: HPROGRAM    !
+ CHARACTER(LEN=*), INTENT(IN) :: HPROGRAM    !
 !
 !*      0.2    declarations of local variables
 !
 !
-CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILETOP ! topographic file names
-CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILECON ! topographic file names
-CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILESLO ! topographic file names
-CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILEDH  ! topographic file names
-CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILEDR  ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILETOP ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILECON ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILESLO ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILEDH  ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILEDR  ! topographic file names
 INTEGER                   :: JJ,JCAT ! loop control 
 INTEGER                   :: IUNIT                  ! Unit of the files
 INTEGER                   :: ILUOUT                 ! Unit of the files
@@ -102,7 +102,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_TOPD',0,ZHOOK_HANDLE)
 !*       1    Initialization:
 !               ---------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 WRITE(ILUOUT,*) 'INITIALISATION INIT_TOPD'
 !

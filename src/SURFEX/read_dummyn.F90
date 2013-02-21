@@ -34,19 +34,19 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! 
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: JDUMMY         ! loop counter
 !
-CHARACTER(LEN=20 ):: YSTRING20      ! string
-CHARACTER(LEN=3  ):: YSTRING03      ! string
+ CHARACTER(LEN=20 ):: YSTRING20      ! string
+ CHARACTER(LEN=3  ):: YSTRING03      ! string
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ IF (LHOOK) CALL DR_HOOK('READ_DUMMY_N',0,ZHOOK_HANDLE)
 YRECFM='DUMMY_GR_NBR'
 YCOMMENT=' '
 !
-CALL READ_SURF(HPROGRAM,YRECFM,NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
 CDUMMY_NAME(:) = '                    '
 CDUMMY_AREA(:) = '   '

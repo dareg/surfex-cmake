@@ -62,7 +62,7 @@ IMPLICIT NONE
 !
 INTEGER,          INTENT(IN) :: KPATCH! number of patch
 INTEGER,          INTENT(IN) :: KLAYER! number of soil layers
-CHARACTER(LEN=*), INTENT(IN) :: HISBA ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*), INTENT(IN) :: HISBA ! type of soil (Force-Restore OR Diffusion)
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -70,14 +70,14 @@ CHARACTER(LEN=*), INTENT(IN) :: HISBA ! type of soil (Force-Restore OR Diffusion
 !
 INTEGER :: I,J
 !
-CHARACTER(LEN=5), DIMENSION(NVEGTYPE) :: YDATA_VEGTYPE ! vegetation type
-CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_VEGPARAM! vegetation parameters
-CHARACTER(LEN=6)                      :: YSTRING6
-CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_MONTH   ! monthly veg. parameters
+ CHARACTER(LEN=5), DIMENSION(NVEGTYPE) :: YDATA_VEGTYPE ! vegetation type
+ CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_VEGPARAM! vegetation parameters
+ CHARACTER(LEN=6)                      :: YSTRING6
+ CHARACTER(LEN=6), DIMENSION(12      ) :: YDATA_MONTH   ! monthly veg. parameters
 !
-CHARACTER(LEN=40),DIMENSION(2)        :: YPATCH        ! titles for each vegtype
+ CHARACTER(LEN=40),DIMENSION(2)        :: YPATCH        ! titles for each vegtype
 !
-CHARACTER(LEN=20) :: YFMT  ! fortran format
+ CHARACTER(LEN=20) :: YFMT  ! fortran format
 !
 INTEGER           :: JPAGE ! current page when the number of classes
                            ! is too long to stand on one page only

@@ -56,7 +56,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -70,8 +70,8 @@ INTEGER               :: JCOVER,JDEC,JK ! loop counters on covers, decades and v
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=8), DIMENSION(12) :: CNVT
-CHARACTER(LEN=2) :: CF
+ CHARACTER(LEN=8), DIMENSION(12) :: CNVT
+ CHARACTER(LEN=2) :: CF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_DATA',0,ZHOOK_HANDLE)

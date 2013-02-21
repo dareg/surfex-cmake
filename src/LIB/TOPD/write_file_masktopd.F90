@@ -57,7 +57,7 @@ INTEGER, INTENT(IN)             :: KI    ! Grid dimensions
 !*      0.2    declarations of local variables
 INTEGER           :: JCAT,JMESH,JPIX
 INTEGER           :: IUNIT
-CHARACTER(LEN=50) :: YNAME
+ CHARACTER(LEN=50) :: YNAME
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_FILE_MASKTOPD',0,ZHOOK_HANDLE)

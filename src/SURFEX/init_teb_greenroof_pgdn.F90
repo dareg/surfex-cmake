@@ -92,12 +92,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,                            INTENT(IN)  :: OREAD_PGD ! flag to read PGD fields in the file
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSV       ! number of scalars
-CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV),   INTENT(IN)  :: HSV       ! name of all scalar variables
 INTEGER,                            INTENT(IN)  :: KVERSION  ! version number of the file being read
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),    INTENT(IN)  :: PRHOA       ! air density
@@ -140,7 +140,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TEB_GREENROOF_PGD_n',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -152,12 +152,12 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !               ---------------------------------
 !
 IF (OREAD_PGD) &
-CALL READ_PGD_TEB_GREENROOF_n(HPROGRAM,KVERSION)
+ CALL READ_PGD_TEB_GREENROOF_n(HPROGRAM,KVERSION)
 !
 !
 !* allocation of green roofs variables
 !
-CALL ALLOCATE_TEB_GREENROOF_PGD(OREAD_PGD, KI, NVEGTYPE, NLAYER_GR, NDIMTAB)
+ CALL ALLOCATE_TEB_GREENROOF_PGD(OREAD_PGD, KI, NVEGTYPE, NLAYER_GR, NDIMTAB)
 !
 !*       2.2    Physiographic data fields from land cover:
 !               -----------------------------------------
@@ -281,7 +281,7 @@ DO JVEGTYPE=1,NVEGTYPE
   END WHERE
 ENDDO
 !
-CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NLAYER_GR, TTIME%TDATE%MONTH,    &
+ CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NLAYER_GR, TTIME%TDATE%MONTH,    &
                         XVEGTYPE, XTDEEP, XGAMMAT, CPHOTO, HINIT, LTR_ML_GR,        &
                         NNBIOMASS, PCO2, PRHOA, XABC, XPOI,                         &
                         XGMES, XGC, XDMAX, XANMAX, XFZERO, XEPSO, XGAMM, XQDGAMM,   &

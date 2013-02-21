@@ -43,14 +43,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
 INTEGER,           INTENT(OUT) :: KLUNAM   ! logical unit of namelist
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE ! FAII file to open
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE ! FAII file to open
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28) :: YNAM
+ CHARACTER(LEN=28) :: YNAM
 !
 INTEGER           :: IRESP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -66,7 +66,7 @@ ELSE
   YNAM='OPTIONS.nam'
 END IF
 !
-CALL OPEN_FILE_LFI(KLUNAM,YNAM,"FORMATTED  ","READ     ","      ","REWIND",IRESP)
+ CALL OPEN_FILE_LFI(KLUNAM,YNAM,"FORMATTED  ","READ     ","      ","REWIND",IRESP)
 IF (LHOOK) CALL DR_HOOK('OPEN_NAMELIST_LFI',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

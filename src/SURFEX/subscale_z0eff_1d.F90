@@ -92,10 +92,10 @@ END IF
 !*    1.     Computations from A/S and h/2
 !            -----------------------------
 !      
-CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2JP(:),PAOSJP(:),PZ0EFFJP(:))
-CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2JM(:),PAOSJM(:),PZ0EFFJM(:))
-CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2IM(:),PAOSIM(:),PZ0EFFIM(:))
-CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2IP(:),PAOSIP(:),PZ0EFFIP(:))
+ CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2JP(:),PAOSJP(:),PZ0EFFJP(:))
+ CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2JM(:),PAOSJM(:),PZ0EFFJM(:))
+ CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2IM(:),PAOSIM(:),PZ0EFFIM(:))
+ CALL GET_Z0EFF(GMASK(:),PZ0VEG(:),PHO2IP(:),PAOSIP(:),PZ0EFFIP(:))
 !
 IF (LHOOK) CALL DR_HOOK('SUBSCALE_Z0EFF_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

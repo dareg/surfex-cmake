@@ -56,10 +56,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
-CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
-CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
+ CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
 !
 !*    0.2    Declaration of local variables read in the data file head
 !            ---------------------------------------------------------
@@ -80,7 +80,7 @@ INTEGER :: ILUOUT                     ! output listing logical unit
 INTEGER :: IERR                       ! return codes
 !
 INTEGER :: JLOOP                      ! loop index
-CHARACTER(LEN=100):: YSTRING          ! string
+ CHARACTER(LEN=100):: YSTRING          ! string
 !
 REAL    :: ZDLAT                      ! latitude mesh in the data file
 REAL    :: ZDLON                      ! longitude mesh in the data file
@@ -96,12 +96,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_LATLON',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.     Openning of header
 !            ------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,IFILE,HFILENAME)
+ CALL OPEN_NAMELIST(HPROGRAM,IFILE,HFILENAME)
 !
 !----------------------------------------------------------------------------
 !
@@ -111,7 +111,7 @@ CALL OPEN_NAMELIST(HPROGRAM,IFILE,HFILENAME)
 !*    2.1    Head of data file
 !            -----------------
 !
-CALL READHEAD(IFILE,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
+ CALL READHEAD(IFILE,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
                 INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR)  
 IF (IERR/=0) THEN
   CALL ABOR1_SFX('READ_LATLON: PROBLEM IN FILE HEADER')
@@ -120,7 +120,7 @@ END IF
 !*    2.2    Closing of header
 !            -----------------
 !
-CALL CLOSE_NAMELIST(HPROGRAM,IFILE)
+ CALL CLOSE_NAMELIST(HPROGRAM,IFILE)
 !
 !----------------------------------------------------------------------------
 !
@@ -134,7 +134,7 @@ IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK(XMESHLENGTH,ZDLAT,ZDLON)
 !*    4.     Openning of file
 !            ----------------
 !
-CALL OPEN_FILE(HPROGRAM,IFILE,HFILENAME,'FORMATTED',HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,IFILE,HFILENAME,'FORMATTED',HACTION='READ')
 DO JLOOP=1,8
   READ(IFILE,FMT='(A100)') YSTRING
 END DO
@@ -201,7 +201,7 @@ DEALLOCATE(ZVALUE)
 !*   12.     closes the file
 !            ---------------
 !
-CALL CLOSE_FILE(HPROGRAM,IFILE)
+ CALL CLOSE_FILE(HPROGRAM,IFILE)
 IF (LHOOK) CALL DR_HOOK('READ_LATLON',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

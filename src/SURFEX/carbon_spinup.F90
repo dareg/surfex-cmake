@@ -47,11 +47,11 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=3), INTENT(IN) :: HRESPSL                ! Soil Respiration
+ CHARACTER(LEN=3), INTENT(IN) :: HRESPSL                ! Soil Respiration
 !                                                      ! 'DEF' = Norman 1992
 !                                                      ! 'PRM' = Rivalland PhD Thesis (2003)
 !                                                      ! 'CNT' = CENTURY model (Gibelin 2008)
-CHARACTER(LEN=3), INTENT(IN) :: HPHOTO                 ! type of photosynthesis
+ CHARACTER(LEN=3), INTENT(IN) :: HPHOTO                 ! type of photosynthesis
 !
 INTEGER,          INTENT(IN)  :: KMONTH                ! Current month
 INTEGER,          INTENT(IN)  :: KDAY                  ! Current day

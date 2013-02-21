@@ -54,8 +54,8 @@ INTEGER, INTENT(IN)                  :: KTRIP
 INTEGER, INTENT(IN)                  :: KTSEPT
 INTEGER, INTENT(IN)                  :: KTSTEP_END
 !
-CHARACTER(LEN=3), INTENT(IN)         :: HGROUNDW !Groundwater scheme key
-CHARACTER(LEN=3), INTENT(IN)         :: HVIT     !Variable velocity scheme key
+ CHARACTER(LEN=3), INTENT(IN)         :: HGROUNDW !Groundwater scheme key
+ CHARACTER(LEN=3), INTENT(IN)         :: HVIT     !Variable velocity scheme key
 !
 LOGICAL, INTENT(IN)                  :: OFLOOD   !Flood scheme key
 LOGICAL, INTENT(IN)                  :: OPRINT   !Printable budget key 

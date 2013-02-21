@@ -51,7 +51,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),   INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),   INTENT(IN)    :: HPROGRAM   ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -85,19 +85,19 @@ NAMELIST/NAM_GRID_TRIP/TLONMIN, TLONMAX, TLATMIN, TLATMAX, TRES
 !*       1.    opening of namelist
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_TRIP',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading of projection parameters
 !              --------------------------------
 !
-CALL POSNAM(ILUNAM,'NAM_GRID_TRIP',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_GRID_TRIP',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_GRID_TRIP)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 IF(TRES/=0.5.AND.TRES/=1.0.AND.TRES/=0.1)THEN
   WRITE(ILUOUT,*)'Error : The resolution of the TRIP grid must be 1° or 0.5°'
@@ -140,7 +140,7 @@ ENDDO
 ALLOCATE(XGRID_TRIP(7+ILON+ILAT))
 XGRID_TRIP(:) = 0.0
 !
-CALL PUT_GRID_TRIP(XGRID_TRIP,TLONMIN,TLONMAX,TLATMIN,TLATMAX,TRES,ILON,ILAT,ZLON,ZLAT)
+ CALL PUT_GRID_TRIP(XGRID_TRIP,TLONMIN,TLONMAX,TLATMIN,TLATMAX,TRES,ILON,ILAT,ZLON,ZLAT)
 !
 DEALLOCATE(ZLON)
 DEALLOCATE(ZLAT)

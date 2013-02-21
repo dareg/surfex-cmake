@@ -50,14 +50,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 LOGICAL, DIMENSION(JPCOVER)    :: OCOVER   ! list of covers
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IVERSION       ! version of surfex file being read
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GCOVER ! cover list in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -67,14 +67,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* ascendant compatibility
 IF (LHOOK) CALL DR_HOOK('READ_LCOVER',0,ZHOOK_HANDLE)
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 IF (IVERSION<=3) THEN
   ALLOCATE(GCOVER(255))
 ELSE
   ALLOCATE(GCOVER(JPCOVER))
 END IF
-CALL OLD_NAME(HPROGRAM,'COVER_LIST      ',YRECFM)
-CALL READ_SURF(HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
+ CALL OLD_NAME(HPROGRAM,'COVER_LIST      ',YRECFM)
+ CALL READ_SURF(HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
 !
 OCOVER=.FALSE.
 OCOVER(:SIZE(GCOVER))=GCOVER(:)

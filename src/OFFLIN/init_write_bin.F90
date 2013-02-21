@@ -42,7 +42,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
+ CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 INTEGER,             INTENT(IN)     :: KPATCH    
 LOGICAL,             INTENT(INOUT)  :: OWFL
 INTEGER                             :: IP, IVAR, IFIELD, JFIELD

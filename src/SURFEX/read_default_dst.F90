@@ -49,7 +49,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! program calling DST
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM ! program calling DST
 
 
 !
@@ -64,9 +64,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_DEFAULT_DST',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL GET_DEFAULT_NAM_n(HPROGRAM,'READ ',ILUDES)
+ CALL GET_DEFAULT_NAM_n(HPROGRAM,'READ ',ILUDES)
 !
 IF (ILUDES==0 .AND. LHOOK) CALL DR_HOOK('READ_DEFAULT_DST',1,ZHOOK_HANDLE)
 IF (ILUDES==0) RETURN
@@ -74,7 +74,7 @@ IF (ILUDES==0) RETURN
 !* reading of new defaults in file
 !  -------------------------------
 !
-CALL POSNAM(ILUDES,'NAM_SURF_DST',GFOUND,ILUOUT)
+ CALL POSNAM(ILUDES,'NAM_SURF_DST',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUDES,NML=NAM_SURF_DST)
 IF (LHOOK) CALL DR_HOOK('READ_DEFAULT_DST',1,ZHOOK_HANDLE)
 !

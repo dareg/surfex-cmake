@@ -46,8 +46,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-CHARACTER(LEN=6),  INTENT(OUT) :: HZ0H       ! TEB option for z0h roof & road
-CHARACTER(LEN=5),  INTENT(OUT) :: HCH_BEM    ! TEB option building conv. coef.
+ CHARACTER(LEN=6),  INTENT(OUT) :: HZ0H       ! TEB option for z0h roof & road
+ CHARACTER(LEN=5),  INTENT(OUT) :: HCH_BEM    ! TEB option building conv. coef.
 REAL,              INTENT(OUT) :: PTSTEP     ! time step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time step for writing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

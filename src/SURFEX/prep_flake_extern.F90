@@ -21,24 +21,24 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILUOUT
 !
 INTEGER           :: INI            ! total 1D dimension
-CHARACTER(LEN=6)  :: YWATER         ! lake scheme
+ CHARACTER(LEN=6)  :: YWATER         ! lake scheme
 INTEGER           :: IDIM_WATER     ! number of water points
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -53,18 +53,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_EXTERN',0,ZHOOK_HANDLE)
 !
-CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'WATER ')
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'WATER ')
 !
-CALL READ_SURF(HFILEPGDTYPE,'WATER',YWATER,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,'WATER',YWATER,IRESP)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
-CALL READ_SURF(HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP)
+ CALL READ_SURF(HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP)
 !
 IF (IDIM_WATER==0) THEN
   CALL GET_LUOUT(HPROGRAM,ILUOUT)

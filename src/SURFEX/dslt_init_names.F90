@@ -40,8 +40,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,                         INTENT(IN)  :: KLUOUT   ! output listing channel
-CHARACTER(LEN=4),                INTENT(IN)  :: HRC1
-CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
+ CHARACTER(LEN=4),                INTENT(IN)  :: HRC1
+ CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
                                                          ! with character # for chemistry
 INTEGER,                         INTENT(OUT) :: KPMODE
 INTEGER,                         INTENT(OUT) :: KEQ         ! number of dust related variables
@@ -52,7 +52,7 @@ LOGICAL,                         INTENT(INOUT) :: ORGFIX    ! type of mean radiu
 !
 !*      0.2    declarations of local variables
 INTEGER :: JSV  !! loop on scalar variables
-CHARACTER(LEN=4) :: YRC1
+ CHARACTER(LEN=4) :: YRC1
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

@@ -49,10 +49,10 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=5),  INTENT(IN)  :: HACTION  ! action to do
-CHARACTER(LEN=6),  INTENT(IN)  :: HFORCING ! forcing file type
-CHARACTER(LEN=1),  INTENT(IN)  :: HACTION2 ! 'R': read, 'W': write
-CHARACTER(LEN=7)               :: YSTATUS  ! file status (OLD/NEW)
+ CHARACTER(LEN=5),  INTENT(IN)  :: HACTION  ! action to do
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFORCING ! forcing file type
+ CHARACTER(LEN=1),  INTENT(IN)  :: HACTION2 ! 'R': read, 'W': write
+ CHARACTER(LEN=7)               :: YSTATUS  ! file status (OLD/NEW)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

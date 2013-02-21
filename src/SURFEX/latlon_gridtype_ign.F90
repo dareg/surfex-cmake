@@ -81,14 +81,14 @@ ALLOCATE(ZY (SIZE(PLAT)))
 ALLOCATE(ZDX(SIZE(PLAT)))
 ALLOCATE(ZDY(SIZE(PLAT)))
 !
-CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
+ CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_IGN(ILAMBERT,ZX,ZY,PLAT,PLON)
+ CALL LATLON_IGN(ILAMBERT,ZX,ZY,PLAT,PLON)
 !
 !-----------------------------------------------------------------------------
 !
@@ -100,7 +100,7 @@ CALL LATLON_IGN(ILAMBERT,ZX,ZY,PLAT,PLON)
 !
 ALLOCATE(ZMAP(SIZE(PLAT)))
 !
-CALL MAP_FACTOR_IGN(ILAMBERT,ZX,ZY,ZMAP)
+ CALL MAP_FACTOR_IGN(ILAMBERT,ZX,ZY,ZMAP)
 !
 !        3.2   Grid size
 !              ---------
@@ -117,7 +117,7 @@ ALLOCATE(ZYDELTY(SIZE(PLAT)))
 ALLOCATE(ZLATDY (SIZE(PLAT)))
 ALLOCATE(ZLONDY (SIZE(PLAT)))
 ZYDELTY=ZY+XDELTY
-CALL LATLON_IGN(ILAMBERT,ZX,ZYDELTY,ZLATDY,ZLONDY)
+ CALL LATLON_IGN(ILAMBERT,ZX,ZYDELTY,ZLATDY,ZLONDY)
 
 PDIR(:)= ATAN( (XA*(ZLONDY(:)-PLON(:))*XPI/180.) / XDELTY) * XPI/180.
 !

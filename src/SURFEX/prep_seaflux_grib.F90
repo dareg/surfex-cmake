@@ -42,16 +42,16 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
-CHARACTER(LEN=6)              :: YINMODEL ! model from which GRIB file originates
+ CHARACTER(LEN=6)              :: YINMODEL ! model from which GRIB file originates
 REAL, DIMENSION(:)  ,     POINTER :: ZMASK => NULL()          ! Land mask
 REAL, DIMENSION(:),       POINTER :: ZFIELD => NULL()   ! field read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -65,9 +65,9 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_GRIB',0,ZHOOK_HANDLE)
 !
 IF (TRIM(HFILE).NE.CGRIB_FILE) CGRIB_FILE=""
 !
-CALL PREP_GRIB_GRID(HFILE,KLUOUT,YINMODEL,CINGRID_TYPE,TZTIME_GRIB)
+ CALL PREP_GRIB_GRID(HFILE,KLUOUT,YINMODEL,CINGRID_TYPE,TZTIME_GRIB)
 !
-CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,YINMODEL,ZMASK)
+ CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,YINMODEL,ZMASK)
 !
 !*      2.     Reading of field
 !              ----------------

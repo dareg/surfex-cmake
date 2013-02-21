@@ -73,7 +73,7 @@ IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_CARTESIAN',0,ZHOOK_HANDLE)
 ALLOCATE(ZDX(SIZE(PLAT)))
 ALLOCATE(ZDY(SIZE(PLAT)))
 !
-CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0, &
+ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0, &
                               PDX=ZDX,PDY=ZDY        )  
 !
 !---------------------------------------------------------------------------
@@ -81,7 +81,7 @@ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0, &
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_CARTESIAN(ZLAT0,ZLON0,PLAT,PLON)
+ CALL LATLON_CARTESIAN(ZLAT0,ZLON0,PLAT,PLON)
 !
 !-----------------------------------------------------------------------------
 !

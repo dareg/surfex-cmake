@@ -47,8 +47,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
-CHARACTER(LEN=10), INTENT(OUT) :: HGRID    ! type of grid
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
+ CHARACTER(LEN=10), INTENT(OUT) :: HGRID    ! type of grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !

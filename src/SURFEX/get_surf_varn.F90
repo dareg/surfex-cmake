@@ -73,7 +73,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),   INTENT(IN)            :: HPROGRAM    
+ CHARACTER(LEN=6),   INTENT(IN)            :: HPROGRAM    
 INTEGER,            INTENT(IN)            :: KI         ! number of points
 INTEGER,            INTENT(IN)            :: KS         ! number of points
 !
@@ -140,7 +140,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*   0. Logical unit for writing out
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_VAR_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*   1. Fraction of each tile
 !

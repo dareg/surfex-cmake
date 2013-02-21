@@ -45,7 +45,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*)    , INTENT(IN)   :: HSNOW      ! ISBA snow scheme
+ CHARACTER(LEN=*)    , INTENT(IN)   :: HSNOW      ! ISBA snow scheme
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PWSNOW     ! snow reservoir
 REAL, DIMENSION(:,:), INTENT(IN)   :: PRSNOW     ! snow density

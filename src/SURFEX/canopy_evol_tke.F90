@@ -191,7 +191,7 @@ ZDEXTDV = ZDEXTDV + PDFORC_EDE(:,:)
 !
 !* note that dissipation is implicited
 !
-CALL TRIDIAG_SURF(PTKE,ZF,ZDFDDVDZ,ZEXT,ZDEXTDV,PTSTEP, &
+ CALL TRIDIAG_SURF(PTKE,ZF,ZDFDDVDZ,ZEXT,ZDEXTDV,PTSTEP, &
                     PDZF,PDZ,ZTKE                         )  
 !
 !-------------------------------------------------------------------------------

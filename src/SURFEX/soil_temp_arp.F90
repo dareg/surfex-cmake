@@ -165,7 +165,7 @@ END WHERE
 ! used for systems of equations involving tridiagonal 
 ! matricies.
 !
-CALL TRIDIAG_GROUND(ZAMTRX,ZBMTRX,ZCMTRX,ZFRCV,ZTGM)
+ CALL TRIDIAG_GROUND(ZAMTRX,ZBMTRX,ZCMTRX,ZFRCV,ZTGM)
 !
 ! Update values in time:
 !

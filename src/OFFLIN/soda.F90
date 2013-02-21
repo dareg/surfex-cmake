@@ -108,16 +108,16 @@ IMPLICIT NONE
 !*    0.     Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=3), PARAMETER      :: YINIT        = 'ALL'
-CHARACTER(LEN=2), PARAMETER      :: YTEST        = 'OK'          ! must be equal to 'OK'
+ CHARACTER(LEN=3), PARAMETER      :: YINIT        = 'ALL'
+ CHARACTER(LEN=2), PARAMETER      :: YTEST        = 'OK'          ! must be equal to 'OK'
 INTEGER                          :: ILUOUT
 INTEGER                          :: ILUNAM
 INTEGER                          :: IYEAR, IMONTH, IDAY,IHOUR,NSSSSS,ndaysec
 REAL                             :: ZTIME
 LOGICAL                          :: GFOUND
-CHARACTER(LEN=28)                :: YATMFILE  ='                            '  ! name of the Atmospheric file
-CHARACTER(LEN=6)                 :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
-CHARACTER(LEN=28)                :: YLUOUT    ='LISTING_SODA                '  ! name of listing
+ CHARACTER(LEN=28)                :: YATMFILE  ='                            '  ! name of the Atmospheric file
+ CHARACTER(LEN=6)                 :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+ CHARACTER(LEN=28)                :: YLUOUT    ='LISTING_SODA                '  ! name of listing
 INTEGER                          :: IRET, INB
 REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 REAL                             :: ZTIMEC              ! current duration since start of the run (s)
@@ -137,7 +137,7 @@ REAL,ALLOCATABLE, DIMENSION(:)   :: PT2M                ! Screen level temperatu
 REAL,ALLOCATABLE, DIMENSION(:)   :: PHU2M               ! Screen level relative humidity
 REAL,ALLOCATABLE, DIMENSION(:)   :: PSWE                ! Snow water equvivalent (amount of snow on the ground)
 TYPE (DATE_TIME)                 :: TTIME               ! Current date and time  
-CHARACTER(LEN=6)                 :: YPROGRAM2 = 'FA    '
+ CHARACTER(LEN=6)                 :: YPROGRAM2 = 'FA    '
 INTEGER                          :: INI                 ! grid dimension
 INTEGER                          :: KSV                 ! Number of scalar species
 INTEGER                          :: KSW                 ! Number of radiative bands 
@@ -157,20 +157,20 @@ WRITE(*,*) '   ------------------------------------'
 WRITE(*,*)
 
 ! Allocate SURFEX
-CALL ALLOC_SURFEX(1)
+ CALL ALLOC_SURFEX(1)
 
 ! Open ascii outputfile for writing
 #ifdef LFI
 CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
 #endif
-CALL GET_LUOUT('LFI   ',ILUOUT)
+ CALL GET_LUOUT('LFI   ',ILUOUT)
 OPEN(UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 
 ! Read offline specific things
-CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
-CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
+ CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
+ CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
-CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+ CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 
 ! Setting input files read from namelist
 if ( CSURF_FILETYPE == "LFI   " ) then
@@ -198,21 +198,21 @@ endif
 
 
 ! Reading all namelist (also assimilation)
-CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
+ CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
 
 ! Go to SURFEX
-CALL GOTO_SURFEX(1,.TRUE.)
-CALL GOTO_TRIP(1,.TRUE.)
+ CALL GOTO_SURFEX(1,.TRUE.)
+ CALL GOTO_TRIP(1,.TRUE.)
 
 ! Initialize time information
 IYEAR    = NUNDEF
 IMONTH   = NUNDEF
 IDAY     = NUNDEF
 ZTIME    = XUNDEF
-CALL INIT_IO_SURF_n(CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
-CALL READ_SURF(CSURF_FILETYPE,'DIM_FULL  ',INI,  IRESP)
-CALL READ_SURF(CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
-CALL END_IO_SURF_n(CSURF_FILETYPE)
+ CALL INIT_IO_SURF_n(CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
+ CALL READ_SURF(CSURF_FILETYPE,'DIM_FULL  ',INI,  IRESP)
+ CALL READ_SURF(CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
+ CALL END_IO_SURF_n(CSURF_FILETYPE)
 
 NINDX2 = INI
 ALLOCATE(NWORK(INI))
@@ -240,7 +240,7 @@ ALLOCATE(XTSRAD(INI))
 
 WRITE(*,*) "INITIALIZING SURFEX..."
 ! Initialize the SURFEX interface
-CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE,             &
+ CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE,             &
                        INI, kSV, KSW,                             &
                        CSV,XCO2,XRHOA,                            &
                        XZENITH,XAZIM,XSW_BANDS,XDIR_ALB,XSCA_ALB, &
@@ -249,7 +249,7 @@ CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE,             &
                        YATMFILE, YATMFILETYPE, YTEST              )
 
 ! Initialyse the SURFACE-TRIP interface
-CALL INIT_SURF_TRIP_n(CSURF_FILETYPE,INI,KSW,LRESTART,IYEAR,IMONTH,&
+ CALL INIT_SURF_TRIP_n(CSURF_FILETYPE,INI,KSW,LRESTART,IYEAR,IMONTH,&
                        ZDURATION,ITRIP_MONTH,ITRIP_COUNT,XZENITH,  &
                        XSW_BANDS,XEMIS,XTSRAD,XDIR_ALB,XSCA_ALB    )
 
@@ -400,7 +400,7 @@ DEALLOCATE(NWORK)
 DEALLOCATE(XWORK)
 DEALLOCATE(XWORK2)
 !
-CALL DEALLOC_SURFEX
+ CALL DEALLOC_SURFEX
 IF (LHOOK) CALL DR_HOOK('SODA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

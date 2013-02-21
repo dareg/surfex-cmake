@@ -56,7 +56,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -65,10 +65,10 @@ INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=4)  :: YLVL
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=14) :: YFORM          ! Writing format
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=14) :: YFORM          ! Writing format
 REAL, DIMENSION(:),ALLOCATABLE  :: ZWORK      ! 1D array to write data in file
 !
 INTEGER :: JLEVEL ! loop counter on oceanic levels
@@ -82,7 +82,7 @@ IF (LHOOK) CALL DR_HOOK('READ_OCEAN_N',0,ZHOOK_HANDLE)
 NOCTCOUNT=0
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 !* flag to use or not Ocean model
 !
@@ -117,29 +117,29 @@ IF (.NOT. LMERCATOR) THEN
 ENDIF
 !
 !-------------------------------------------------------------------------------
-CALL OCEAN_MERCATORVERGRID
+ CALL OCEAN_MERCATORVERGRID
 ! Relaxation time and logical
 YRECFM='TAU_REL_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,XTAU_REL,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XTAU_REL,IRESP)
 !
 YRECFM='LREL_CUR_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,LREL_CUR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,LREL_CUR,IRESP)
 
 YRECFM='LREL_TS_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,LREL_TS,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,LREL_TS,IRESP)
 YRECFM='LFLX_NULL_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,LFLUX_NULL,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,LFLUX_NULL,IRESP)
 YRECFM='LFLX_CORR_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,LFLX_CORR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,LFLX_CORR,IRESP)
 YRECFM='CORR_FLX_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,XQCORR,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XQCORR,IRESP)
 YRECFM='LDIAPYC_OC'
-CALL READ_SURF(HPROGRAM,YRECFM,LDIAPYCNAL,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,LDIAPYCNAL,IRESP)
 !
 !* 1D physical dimension
 !
 YRECFM='SIZE_SEA'
-CALL GET_TYPE_DIM_n('SEA   ',ILU)
+ CALL GET_TYPE_DIM_n('SEA   ',ILU)
 !
 !*       2.     Prognostic fields:
 !               -----------------
@@ -285,7 +285,7 @@ DEALLOCATE(ZWORK)
 !-------------------------------------------------------------------------------
 ALLOCATE(XSEAHMO(ILU))
 YRECFM='SEA_HMO'
-CALL READ_SURF(HPROGRAM,YRECFM,XSEAHMO(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XSEAHMO(:),IRESP)
 !
 !-------------------------------------------------------------------------------
 ALLOCATE(XLE        (SIZE(XSEAT,1),NOCKMIN:NOCKMAX))

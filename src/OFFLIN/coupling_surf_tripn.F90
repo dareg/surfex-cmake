@@ -46,7 +46,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
 INTEGER,          INTENT(IN)         :: KSW      ! Number of spectral bands
 !
@@ -83,16 +83,16 @@ INTEGER :: ILUOUT
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_TRIP_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! * 1. Get ISBA and TRIP  configuration
 !      
-CALL GET_CONF_ISBA_n(LTRIP,LFLOOD)
+ CALL GET_CONF_ISBA_n(LTRIP,LFLOOD)
 !
 IF (.NOT.LTRIP .AND. LHOOK) CALL DR_HOOK('COUPLING_SURF_TRIP_N',1,ZHOOK_HANDLE)
 IF (.NOT.LTRIP) RETURN
 !
-CALL GET_CONF_TRIP_n(PTSTEP_COUPLING=ZTSTEP_COUPLING)
+ CALL GET_CONF_TRIP_n(PTSTEP_COUPLING=ZTSTEP_COUPLING)
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ ZSFX_SRC_FLOOD(:) = 0.0
 !
 ! * 2. Get SURFEX variables for TRIP in kg
 !
-CALL GET_COUPLING_VAR_SFX_n(LFLOOD,ZSFX_DRAIN(:),ZSFX_RUNOFF(:),ZSFX_SRC_FLOOD(:))
+ CALL GET_COUPLING_VAR_SFX_n(LFLOOD,ZSFX_DRAIN(:),ZSFX_RUNOFF(:),ZSFX_SRC_FLOOD(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -224,7 +224,7 @@ ENDIF
 !
 ! * 5. Call Trip coupling
 !
-CALL TRIP_INTERFACE(ILUOUT,ILON,ILAT,ORESTART,KYEAR,KMONTH,KTRIP,PDURATION,&
+ CALL TRIP_INTERFACE(ILUOUT,ILON,ILAT,ORESTART,KYEAR,KMONTH,KTRIP,PDURATION,&
                       Z2D_RUNOFF(:,:),Z2D_DRAIN(:,:),Z2D_SRC_FLOOD(:,:)      )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_TRIP_N:COUPLING_SURF_TRIP_DIM',1,ZHOOK_HANDLE)
@@ -253,7 +253,7 @@ ZSFX_FFLOOD   (:) = 0.0
 ZSFX_PIFLOOD  (:) = 0.0
 !   
 !   TRIP dimension INI in kg
-CALL GET_COUPLING_VAR_TRIP_n(ZTRIP_FFLOOD(:),ZTRIP_PIFLOOD(:))
+ CALL GET_COUPLING_VAR_TRIP_n(ZTRIP_FFLOOD(:),ZTRIP_PIFLOOD(:))
 !
 !   Interpolation from TRIP grid to SFX grid in kg
 IF(KI==KNI)THEN
@@ -273,13 +273,13 @@ WHERE(ZSFX_FFLOOD (:)<0.01)
   ZSFX_PIFLOOD(:)=0.0
 ENDWHERE
 !
-CALL PUT_COUPLING_VAR_SFX_n(ZSFX_FFLOOD,ZSFX_PIFLOOD)
+ CALL PUT_COUPLING_VAR_SFX_n(ZSFX_FFLOOD,ZSFX_PIFLOOD)
 !
 !-------------------------------------------------------------------------------
 !
 ! * 8. Update radiative properties with flooding
 !
-CALL UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,   &
+ CALL UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,   &
                            PTSRAD, PDIR_ALB, PSCA_ALB, PEMIS        )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_TRIP_N:COUPLING_SURF_TRIP_FLOOD',1,ZHOOK_HANDLE)

@@ -55,9 +55,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM    !
-CHARACTER(LEN=*),  INTENT(IN)  :: HFILE       ! File to be read
-CHARACTER(LEN=*),  INTENT(IN)  :: HFORM       ! Format of the file to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HPROGRAM    !
+ CHARACTER(LEN=*),  INTENT(IN)  :: HFILE       ! File to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HFORM       ! Format of the file to be read
 INTEGER,           INTENT(OUT) :: KNMC     ! number of pixels in a catchment 
 !
 !*      0.2    declarations of local variables
@@ -73,11 +73,11 @@ IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_CONNEX',0,ZHOOK_HANDLE)
 !*       0.2    preparing file openning
 !               ----------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 WRITE(ILUOUT,*) 'Open ',HFILE,'header'
 !
-CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
 !
 READ(IUNIT,*)
 READ(IUNIT,*) KNMC
@@ -86,7 +86,7 @@ DO JJ=1,5
   READ(IUNIT,*) 
 ENDDO
 !
-CALL CLOSE_FILE(HPROGRAM,IUNIT)
+ CALL CLOSE_FILE(HPROGRAM,IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_CONNEX',1,ZHOOK_HANDLE)
 !

@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling WATFLUX
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling WATFLUX
 INTEGER,           INTENT(IN)  :: KLUOUT      ! logical unit of output listing
 TYPE (DATE_TIME),  INTENT(OUT) :: TPTIME      ! current date and time
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

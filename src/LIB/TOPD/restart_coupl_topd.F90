@@ -52,7 +52,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
 !
 !
@@ -63,7 +63,7 @@ INTEGER                                     :: IUNIT    ! unit of restart files
 INTEGER                                     :: JSTP,JCAT,JPIX! loop control indexes
 REAL, DIMENSION(:),ALLOCATABLE              :: ZAS      ! Saturated area fraction for each Isba meshes
 REAL, DIMENSION(:),ALLOCATABLE              :: ZWTOPT   ! Initial water content in case of restart
-CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILETOP ! File names
+ CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILETOP ! File names
 LOGICAL                                     :: LSTOCK, LWG, LASAT
 REAL                                        :: ZCORR_STOCK ! used to avoid to lose stock
 REAL                                        :: ZCNT_UNDEF,ZSUM1,ZSUM2 ! used to correct budget
@@ -71,7 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! * 1. Read stock files
 !          

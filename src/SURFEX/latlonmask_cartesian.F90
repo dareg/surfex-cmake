@@ -68,7 +68,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_CARTESIAN',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0)
+ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0)
 !
 !-------------------------------------------------------------------------------
 !

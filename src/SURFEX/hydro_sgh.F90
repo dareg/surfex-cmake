@@ -50,24 +50,24 @@ IMPLICIT NONE
 !
 !
 !
-CHARACTER(LEN=*),INTENT(IN)      :: HISBA   ! hydrology/soil:
+ CHARACTER(LEN=*),INTENT(IN)      :: HISBA   ! hydrology/soil:
 !                                           ! '2-L'  = single column
 !                                           ! '3-L'  = root zone/baseflow layer
 !                                           ! 'DIF'  = N-layer diffusion: Richard's Eq.
 !                                           !         (Boone and Etchevers 2001)
 !
-CHARACTER(LEN=*),     INTENT(IN) :: HRUNOFF ! surface runoff formulation
+ CHARACTER(LEN=*),     INTENT(IN) :: HRUNOFF ! surface runoff formulation
 !                                           ! 'WSAT'
 !                                           ! 'DT92'
 !                                           ! 'SGH ' Topmodel
 !
 !
-CHARACTER(LEN=*), INTENT(IN)     :: HRAIN   ! Rainfall spatial distribution
+ CHARACTER(LEN=*), INTENT(IN)     :: HRAIN   ! Rainfall spatial distribution
                                             ! 'DEF' = No rainfall spatial distribution
                                             ! 'SGH' = Rainfall exponential spatial distribution
                                             ! 
 !
-CHARACTER(LEN=*), INTENT(IN)     :: HHORT   ! Horton runoff
+ CHARACTER(LEN=*), INTENT(IN)     :: HHORT   ! Horton runoff
                                             ! 'DEF' = no Horton runoff
                                             ! 'SGH' = Horton runoff
 !

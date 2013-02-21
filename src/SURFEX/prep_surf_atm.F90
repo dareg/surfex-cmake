@@ -44,23 +44,23 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
-CHARACTER(LEN=28), INTENT(IN) :: HATMFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),  INTENT(IN) :: HATMFILETYPE! type of the Atmospheric file
-CHARACTER(LEN=28), INTENT(IN) :: HPGDFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),  INTENT(IN) :: HPGDFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=28), INTENT(IN) :: HATMFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),  INTENT(IN) :: HATMFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=28), INTENT(IN) :: HPGDFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),  INTENT(IN) :: HPGDFILETYPE! type of the Atmospheric file
 !
 !*      0.2    declarations of local variables
-CHARACTER(LEN=28)               :: YATMFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6)                :: YATMFILETYPE! type of the Atmospheric file
-CHARACTER(LEN=28)               :: YPGDFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6)                :: YPGDFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=28)               :: YATMFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6)                :: YATMFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=28)               :: YPGDFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6)                :: YPGDFILETYPE! type of the Atmospheric file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_SURF_ATM',0,ZHOOK_HANDLE)
-CALL SURF_VERSION
+ CALL SURF_VERSION
 !-------------------------------------------------------------------------------------
 !
 IF ( LEN_TRIM(HATMFILE)>0 ) THEN
@@ -111,7 +111,7 @@ IF(NDIM_NATURE>0) CALL PREP_NATURE(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDF
 !
 IF(NDIM_TOWN>0) CALL PREP_TOWN(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
-CALL CLEAR_GRIB_INDEX
+ CALL CLEAR_GRIB_INDEX
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SURF_ATM',1,ZHOOK_HANDLE)
 !

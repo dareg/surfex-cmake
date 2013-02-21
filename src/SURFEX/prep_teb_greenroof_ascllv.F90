@@ -48,8 +48,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL, POINTER, DIMENSION(:,:,:) :: PFIELD    ! field to interpolate horizontally
 !
@@ -69,17 +69,17 @@ CATYPE = 'ARI'
 !
 !*      1.    get full dimension of grid
 !
-CALL GET_TYPE_DIM_n('FULL  ',NL)
+ CALL GET_TYPE_DIM_n('FULL  ',NL)
 !
 !*      2.    get nature dimension
 !
-CALL GET_TYPE_DIM_n('TOWN  ',IL)
+ CALL GET_TYPE_DIM_n('TOWN  ',IL)
 !
 ALLOCATE(ZFIELD(IL,2))
 !
 !*      3.    get grid informations known over full grid
 !
-CALL GET_LATLONMASK_n(LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
+ CALL GET_LATLONMASK_n(LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
 !
 !
 SELECT CASE(HSURF)

@@ -59,7 +59,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_IGN',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT, &
+ CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT, &
                               PX=ZX,PY=ZY,PDX=PDX,PDY=PDY      )  
 !
 !---------------------------------------------------------------------------
@@ -67,14 +67,14 @@ CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT, &
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
-CALL LATLON_IGN(ILAMBERT,ZX,ZY,ZLAT,ZLON)
+ CALL LATLON_IGN(ILAMBERT,ZX,ZY,ZLAT,ZLON)
 !
 !-----------------------------------------------------------------------------
 !
 !*       3.    Compute grif size
 !              -----------------
 !
-CALL MAP_FACTOR_IGN(ILAMBERT,ZX,ZY,ZMAP)
+ CALL MAP_FACTOR_IGN(ILAMBERT,ZX,ZY,ZMAP)
 !
 PDX(:) = PDX(:) / ZMAP(:)
 PDY(:) = PDY(:) / ZMAP(:)

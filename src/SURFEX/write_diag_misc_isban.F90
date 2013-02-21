@@ -86,16 +86,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YLVL
-CHARACTER(LEN=20) :: YFORM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YLVL
+ CHARACTER(LEN=20) :: YFORM
 !
 INTEGER           :: JLAYER, IWORK, JJ, IDEPTH
 !
@@ -106,7 +106,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -532,7 +532,7 @@ IF (LSURF_MISC_BUDGET) THEN
 ENDIF
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_DIAG_MISC_ISBA_n

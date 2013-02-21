@@ -71,18 +71,18 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
 INTEGER,           INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFX0_FA',0,ZHOOK_HANDLE)
@@ -90,11 +90,11 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFX0_FA',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
 YNAME=TRIM(YMASK)//TRIM(HREC)
-CALL FALIT_R(KRESP,NUNIT_FA,YNAME,PFIELD)
+ CALL FALIT_R(KRESP,NUNIT_FA,YNAME,PFIELD)
 IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
 !
 YCOMMENT = TRIM(YNAME)
@@ -132,20 +132,20 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN)  :: KL       ! number of points
 REAL, DIMENSION(KL), INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50)          :: YCOMMENT
-CHARACTER(LEN=3)           :: YPREF
-CHARACTER(LEN=13)          :: YSUFF
+ CHARACTER(LEN=50)          :: YCOMMENT
+ CHARACTER(LEN=3)           :: YPREF
+ CHARACTER(LEN=13)          :: YSUFF
 LOGICAL                    :: GFOUND
 !
 INTEGER ::  I, J, INFOMPI
@@ -255,21 +255,21 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN)  :: KL1      ! number of points
 INTEGER,                  INTENT(IN)  :: KL2      ! 2nd dimension
 REAL, DIMENSION(KL1,KL2), INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=50)                     :: YCOMMENT
-CHARACTER(LEN=4)                      :: YSUFFIX
-CHARACTER(LEN=2)                      :: YPATCH
+ CHARACTER(LEN=50)                     :: YCOMMENT
+ CHARACTER(LEN=4)                      :: YSUFFIX
+ CHARACTER(LEN=2)                      :: YPATCH
 LOGICAL                               :: GFOUND
 !
 INTEGER :: JL, I, INFOMPI ! loop counter
@@ -362,18 +362,18 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 REAL(KIND=JPRB)  :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFN0_FA',0,ZHOOK_HANDLE)
@@ -381,11 +381,11 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFN0_FA',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
 YNAME=TRIM(YMASK)//TRIM(HREC)
-CALL FALIT_I(KRESP,NUNIT_FA,YNAME,KFIELD)
+ CALL FALIT_I(KRESP,NUNIT_FA,YNAME,KFIELD)
 IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
 !
 YCOMMENT = YNAME
@@ -422,20 +422,20 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
 INTEGER, DIMENSION(KL), INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 !
@@ -533,17 +533,17 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
-CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
+ CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=18) :: YNAME ! Field Name
-CHARACTER,DIMENSION(40) :: YFIELD
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER,DIMENSION(40) :: YFIELD
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -554,11 +554,11 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFC0_FA',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
 YNAME=TRIM(YMASK)//TRIM(HREC)
-CALL FALIT_C(KRESP,NUNIT_FA,YNAME,40,YFIELD)
+ CALL FALIT_C(KRESP,NUNIT_FA,YNAME,40,YFIELD)
 IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
 WRITE(HFIELD,'(40A1)') YFIELD(:)
 !
@@ -588,16 +588,16 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -607,11 +607,11 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFL0_FA',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
 YNAME=TRIM(YMASK)//TRIM(HREC)
-CALL FALIT_L(KRESP,NUNIT_FA,YNAME,OFIELD)
+ CALL FALIT_L(KRESP,NUNIT_FA,YNAME,OFIELD)
 IF (KRESP/=0)CALL ERROR_READ_SURF_FA(HREC,KRESP)
 !
 YCOMMENT = YNAME
@@ -648,20 +648,20 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
 LOGICAL, DIMENSION(KL), INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER           :: INFOMPI
@@ -733,19 +733,19 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
 INTEGER,            INTENT(OUT) :: KMONTH   ! month
 INTEGER,            INTENT(OUT) :: KDAY     ! day
 REAL,               INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL          :: GKNOWN
 INTEGER, DIMENSION(3) :: ITDATE
@@ -756,11 +756,11 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFT0_FA',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
 YNAME=TRIM(YMASK)//TRIM(HREC)//'%TDATE'
-CALL FALIT_I_D(KRESP,NUNIT_FA,YNAME,3,ITDATE)
+ CALL FALIT_I_D(KRESP,NUNIT_FA,YNAME,3,ITDATE)
 IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
 !
 KYEAR  = ITDATE(1)
@@ -768,7 +768,7 @@ KMONTH = ITDATE(2)
 KDAY   = ITDATE(3)
 !
 YNAME=TRIM(YMASK)//TRIM(HREC)//'%TIME'
-CALL FALIT_R(KRESP,NUNIT_FA,YNAME,PTIME)
+ CALL FALIT_R(KRESP,NUNIT_FA,YNAME,PTIME)
 IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
 !
 YCOMMENT = TRIM(HREC)
@@ -799,20 +799,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER                                  :: KL1, KL2
 INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KDAY     ! day
 REAL,    DIMENSION(KL1,KL2), INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=50) :: YCOMMENT
-CHARACTER(LEN=6)  :: YMASK
-CHARACTER(LEN=18) :: YNAME ! Field Name
+ CHARACTER(LEN=50) :: YCOMMENT
+ CHARACTER(LEN=6)  :: YMASK
+ CHARACTER(LEN=18) :: YNAME ! Field Name
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
@@ -823,12 +823,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFT2_FA',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
-CALL IO_BUFF_n(HREC,'R',GKNOWN)
+ CALL IO_BUFF_n(HREC,'R',GKNOWN)
 IF (GKNOWN) YMASK='FULL  '
 !
 YNAME=TRIM(CMASK)//TRIM(HREC)
 WRITE(NLUOUT,*) ' READ_SURFT2_FA : time in 2 dimensions not yet implemented : YNAME=',YNAME
-CALL ABOR1_SFX('MODE_READ_SURF_FA:READ_SURFT2_FA: time in 2 dimensions not yet implemented')
+ CALL ABOR1_SFX('MODE_READ_SURF_FA:READ_SURFT2_FA: time in 2 dimensions not yet implemented')
 !
 HCOMMENT = YCOMMENT
 !

@@ -19,18 +19,18 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------
 !                  
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA',0,ZHOOK_HANDLE)
 !                   
-CALL DEFAULT_AGRI(LAGRIP)
+ CALL DEFAULT_AGRI(LAGRIP)
 !
-CALL DEFAULT_DEEPSOIL(LDEEPSOIL,LPHYSDOMC)
+ CALL DEFAULT_DEEPSOIL(LDEEPSOIL,LPHYSDOMC)
 !
-CALL READ_ISBA_CONF(HPROGRAM)
+ CALL READ_ISBA_CONF(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA',1,ZHOOK_HANDLE)
 !
 !---------------------------------------------------------

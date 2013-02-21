@@ -39,7 +39,7 @@ TYPE SURF_ATM_SSO_t
 !
 ! Type of roughness
 !
-CHARACTER(LEN=4) :: CROUGH     ! type of orographic roughness
+ CHARACTER(LEN=4) :: CROUGH     ! type of orographic roughness
 !                              ! 'NONE'
                                ! 'Z01D'
                                ! 'Z04D'
@@ -89,7 +89,7 @@ END TYPE SURF_ATM_SSO_t
 
 TYPE(SURF_ATM_SSO_t), ALLOCATABLE, TARGET, SAVE :: SURF_ATM_SSO_MODEL(:)
 
-CHARACTER(LEN=4),   POINTER :: CROUGH=>NULL()
+ CHARACTER(LEN=4),   POINTER :: CROUGH=>NULL()
 !$OMP THREADPRIVATE(CROUGH)
 REAL, DIMENSION(:), POINTER :: XAOSIP=>NULL(),XAOSIM=>NULL(),XAOSJP=>NULL(),XAOSJM=>NULL()
 !$OMP THREADPRIVATE(XAOSIP,XAOSIM,XAOSJP,XAOSJM)

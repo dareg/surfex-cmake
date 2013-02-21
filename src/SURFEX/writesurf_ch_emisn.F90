@@ -34,7 +34,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -42,14 +42,14 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears 
                                     ! at the open of the file in LFI  routines 
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be written
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=80) :: YNAME          ! emitted species name
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be written
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=80) :: YNAME          ! emitted species name
 !
 INTEGER           :: JI,JT          ! loop indices
 INTEGER           :: JSPEC          ! loop index
 LOGICAL           :: GFOUND,LOK
-CHARACTER(LEN=40),DIMENSION(NEMIS_NBR) :: YEMISPEC_NAMES
+ CHARACTER(LEN=40),DIMENSION(NEMIS_NBR) :: YEMISPEC_NAMES
 INTEGER,          DIMENSION(NEMIS_NBR) :: INBTIMES
 INTEGER,          DIMENSION(NEMIS_NBR) :: IFIRST,ILAST,INEXT
 INTEGER :: INTIMESMAX,ITMP
@@ -64,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITESURF_CH_EMIS_N',0,ZHOOK_HANDLE)
 YRECFM='EMISFILE_NBR'
 YCOMMENT='Total number of 2D emission files.'
-CALL WRITE_SURF(HPROGRAM,YRECFM,NEMIS_NBR,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,NEMIS_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
 ! count emitted species 
 IEMISPEC_NBR = 0
@@ -94,7 +94,7 @@ END DO
 !
 YRECFM='EMISPEC_NBR '
 YCOMMENT='Number of emitted chemical species.'
-CALL WRITE_SURF(HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
 IF (IEMISPEC_NBR > 0) THEN
   !
@@ -156,17 +156,17 @@ ZWORK2D(:,:) = XEMIS_FIELDS(:,IINDEX(:))
 ! stored in the commentary
 WRITE(YRECFM,'("EMISNAME",I3.3)') JSPEC
 WRITE(YCOMMENT,'(A3,", emission times number:",I5)') CEMIS_AREA(IINDEX(1)),KSIZE
-CALL WRITE_SURF(HPROGRAM,YRECFM,YEMISPEC_NAMES(JSPEC),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,YEMISPEC_NAMES(JSPEC),IRESP,HCOMMENT=YCOMMENT)
 ! 
 ! Write emission times (ITIME) for species JSPEC
 WRITE(YRECFM,'("EMISTIMES",I3.3)') JSPEC  
 YCOMMENT = "Emission times in second"
-CALL WRITE_SURF(HPROGRAM,YRECFM,ITIME(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(HPROGRAM,YRECFM,ITIME(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 ! Finally write emission data for species JSPEC
 YRECFM = "EMIS_"//TRIM(YEMISPEC_NAMES(JSPEC))
 YCOMMENT = "Emission data (x,y,t),"//TRIM(CEMIS_COMMENT(IINDEX(1)))
-CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK2D(:,:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK2D(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_CH_EMIS_N:WRITE_EMIS_SPEC',1,ZHOOK_HANDLE)
 !

@@ -67,10 +67,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
 INTEGER,           INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100),INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
@@ -82,9 +82,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL FMREADX0(CFILE_LFI,HREC,CLUOUT_LFI,1,PFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL FMREADX0(CFILE_LFI,HREC,CLUOUT_LFI,1,PFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX0_LFI',1,ZHOOK_HANDLE)
 !
@@ -117,17 +117,17 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=18) :: YREC
+ CHARACTER(LEN=18) :: YREC
 REAL              :: ZUNDEF  ! default value
 INTEGER           :: IGRID   ! position of data on grid
 INTEGER           :: ILENCH  ! length of comment string
@@ -245,18 +245,18 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),        INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),     INTENT(OUT):: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(OUT):: HCOMMENT ! comment string
-CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(OUT):: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
 !
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=4)   :: YREC1D
+ CHARACTER(LEN=4)   :: YREC1D
 INTEGER :: JI, JJ
 INTEGER :: ILEN
 INTEGER :: IGRID, ILENCH
@@ -343,7 +343,7 @@ END DO
 !
 DEALLOCATE(ZWORK2D) 
 !  
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX1_LFI:READ_IN_LFI_X1_FOR_MNH',1,ZHOOK_HANDLE)
 !
@@ -378,17 +378,17 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=16) :: YREC
+ CHARACTER(LEN=16) :: YREC
 REAL              :: ZUNDEF  ! default value
 INTEGER           :: IGRID   ! position of data on grid
 INTEGER           :: ILENCH  ! length of comment string
@@ -512,11 +512,11 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),        INTENT(IN) :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT):: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),       INTENT(OUT):: HCOMMENT ! comment string
-CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+ CHARACTER(LEN=100),       INTENT(OUT):: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
@@ -572,7 +572,7 @@ DO JJ=1,NJE-NJB+1
 END DO
 DEALLOCATE(ZWORK3D)
 !  
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFX2_LFI:READ_IN_LFI_X2_FOR_MNH',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_IN_LFI_X2_FOR_MNH
@@ -601,14 +601,14 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=40) :: YGRID
+ CHARACTER(LEN=40) :: YGRID
 INTEGER           :: IGRID   ! position of data on grid
 INTEGER           :: ILENCH  ! length of comment string
 INTEGER           :: IIMAX, IJMAX
@@ -620,9 +620,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFN0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL FMREADN0(CFILE_LFI,HREC,CLUOUT_LFI,1,KFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL FMREADN0(CFILE_LFI,HREC,CLUOUT_LFI,1,KFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 !* tests compatibility with MesoNH files
 !
@@ -637,8 +637,8 @@ IF (CFILE_LFI/=CFILEPGD_LFI) THEN
   CALL FMOPEN(CFILEPGD_LFI,'OLD',CLUOUT_LFI,0,1,1,INB,IRESP)
 ENDIF
 !
-CALL FMREADC0(CFILEPGD_LFI,'GRID_TYPE ',CLUOUT_LFI,1,YGRID,IGRID,ILENCH,HCOMMENT,KRESP)
-CALL ERROR_READ_SURF_LFI('GRID_TYPE ',KRESP)
+ CALL FMREADC0(CFILEPGD_LFI,'GRID_TYPE ',CLUOUT_LFI,1,YGRID,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI('GRID_TYPE ',KRESP)
 LMNH_COMPATIBLE = (YGRID=="CARTESIAN " .OR. YGRID=="CONF PROJ ")
 !
 IF (LMNH_COMPATIBLE) THEN
@@ -691,11 +691,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
@@ -797,10 +797,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
-CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
+ CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
 INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT  ! comment
 !
 !*      0.2   Declarations of local variables
 !
@@ -812,9 +812,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFC0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL FMREADC0(CFILE_LFI,HREC,CLUOUT_LFI,1,HFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL FMREADC0(CFILE_LFI,HREC,CLUOUT_LFI,1,HFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFC0_LFI',1,ZHOOK_HANDLE)
 !
@@ -838,10 +838,10 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 !
 !*      0.2   Declarations of local variables
 !
@@ -853,9 +853,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL0_LFI',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
-CALL FMREADL0(CFILE_LFI,HREC,CLUOUT_LFI,1,OFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL FMREADL0(CFILE_LFI,HREC,CLUOUT_LFI,1,OFIELD,IGRID,ILENCH,HCOMMENT,KRESP)
 !
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFL0_LFI',1,ZHOOK_HANDLE)
 !
@@ -887,11 +887,11 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
-CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
+ CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
                                                 ! 'H' : field with
                                                 !       horizontal spatial dim.
                                                 ! '-' : no horizontal dim.
@@ -967,17 +967,17 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
 INTEGER,            INTENT(OUT) :: KMONTH   ! month
 INTEGER,            INTENT(OUT) :: KDAY     ! day
 REAL,               INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
 INTEGER, DIMENSION(3) :: ITDATE
 !
 INTEGER          :: IGRID   ! position of data on grid
@@ -989,12 +989,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT0_LFI',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YREC=TRIM(HREC)//'%TDATE'
-CALL FMREADN1(CFILE_LFI,YREC,CLUOUT_LFI,3,ITDATE,IGRID,ILENCH,HCOMMENT,KRESP)
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL FMREADN1(CFILE_LFI,YREC,CLUOUT_LFI,3,ITDATE,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 YREC=TRIM(HREC)//'%TIME'
-CALL FMREADX0(CFILE_LFI,YREC,CLUOUT_LFI,1,PTIME,IGRID,ILENCH,HCOMMENT,KRESP)
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL FMREADX0(CFILE_LFI,YREC,CLUOUT_LFI,1,PTIME,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 KYEAR  = ITDATE(1)
 KMONTH = ITDATE(2)
@@ -1022,17 +1022,17 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
 INTEGER, DIMENSION(:), INTENT(OUT) :: KMONTH   ! month
 INTEGER, DIMENSION(:), INTENT(OUT) :: KDAY     ! day
 REAL,    DIMENSION(:), INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
 INTEGER          :: ILUOUT
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
@@ -1044,12 +1044,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT1_LFI',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YREC=TRIM(HREC)//'%TDATE'
-CALL FMREADN2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(ITDATE),ITDATE,IGRID,ILENCH,HCOMMENT,KRESP)
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL FMREADN2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(ITDATE),ITDATE,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 YREC=TRIM(HREC)//'%TIME'
-CALL FMREADX1(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(PTIME),PTIME,IGRID,ILENCH,HCOMMENT,KRESP)
-CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+ CALL FMREADX1(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(PTIME),PTIME,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
 !
 KYEAR (:) = ITDATE(1,:)
 KMONTH(:) = ITDATE(2,:)

@@ -37,7 +37,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
 REAL, POINTER, DIMENSION(:,:)   :: PFIELD    ! field to interpolate horizontally
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

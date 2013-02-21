@@ -41,7 +41,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=4),       INTENT(IN)   :: HALB
+ CHARACTER(LEN=4),       INTENT(IN)   :: HALB
 !
 REAL, DIMENSION(:),     INTENT(IN)   :: PSST      ! Sea surface temperature
 REAL, DIMENSION(:),     INTENT(IN)   :: PZENITH   ! Zenithal angle at t+1

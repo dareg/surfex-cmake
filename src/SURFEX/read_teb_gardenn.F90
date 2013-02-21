@@ -69,8 +69,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=3),  INTENT(IN)  :: HPATCH   ! current TEB patch identificator
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=3),  INTENT(IN)  :: HPATCH   ! current TEB patch identificator
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -79,8 +79,8 @@ LOGICAL           :: GTOWN          ! town variables written in the file
 INTEGER           :: IVERSION, IBUGFIX
 INTEGER           :: ILU            ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=4)  :: YLVL
 REAL, DIMENSION(:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 !
 INTEGER :: IWORK   ! Work integer
@@ -95,13 +95,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_TEB_GARDEN_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_TOWN'
-CALL GET_TYPE_DIM_n('TOWN  ',ILU)
+ CALL GET_TYPE_DIM_n('TOWN  ',ILU)
 !
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 !*       2.     Prognostic fields:
 !               -----------------
@@ -165,7 +165,7 @@ ELSE
   YRECFM='TWN_WR'
 ENDIF
 YRECFM=ADJUSTL(YRECFM)
-CALL READ_SURF(HPROGRAM,YRECFM,XWR(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XWR(:),IRESP)
 !
 !* Leaf Area Index (if prognostic)
 !
@@ -181,15 +181,15 @@ END IF
 !
 !* snow mantel
 !
-CALL END_IO_SURF_n(HPROGRAM)
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
-CALL TOWN_PRESENCE(HPROGRAM,GTOWN)
+ CALL TOWN_PRESENCE(HPROGRAM,GTOWN)
 !
-CALL END_IO_SURF_n(HPROGRAM)
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP')
-CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP')
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
 IF (.NOT. GTOWN) THEN
   TSNOW%SCHEME='1-L'
@@ -217,7 +217,7 @@ ELSE
 ENDIF
 YRECFM=ADJUSTL(YRECFM)
 XRESA(:) = 100.
-CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:),IRESP)
 !
 ALLOCATE(XLE(ILU))
 XLE(:) = XUNDEF

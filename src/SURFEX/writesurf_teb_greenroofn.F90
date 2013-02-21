@@ -60,17 +60,17 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)     :: HPROGRAM ! program calling
-CHARACTER(LEN=3),  INTENT(IN)     :: HPATCH   ! current teb patch
+ CHARACTER(LEN=6),  INTENT(IN)     :: HPROGRAM ! program calling
+ CHARACTER(LEN=3),  INTENT(IN)     :: HPATCH   ! current teb patch
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER                           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=30)                 :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100)                :: YCOMMENT       ! Comment string
-CHARACTER(LEN=14)                 :: YFORM          ! Writing format
-CHARACTER(LEN=4 )                 :: YLVL
+ CHARACTER(LEN=30)                 :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100)                :: YCOMMENT       ! Comment string
+ CHARACTER(LEN=14)                 :: YFORM          ! Writing format
+ CHARACTER(LEN=4 )                 :: YLVL
 !
 INTEGER                           :: JLAYER         ! loop counter on soil layers
 !
@@ -140,7 +140,7 @@ DEALLOCATE(ZWORK)
 YRECFM=HPATCH//'GR_WR'
 YRECFM=ADJUSTL(YRECFM)
 YCOMMENT='X_Y_TWN_WR_GR (kg/m2)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XWR(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XWR(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Leaf Area Index
 !
@@ -148,7 +148,7 @@ IF (CPHOTO/='NON' .AND. CPHOTO/='AGS' .AND. CPHOTO/='AST') THEN
   YRECFM=HPATCH//'GR_LAI'
   YRECFM=ADJUSTL(YRECFM)
   YCOMMENT='X_Y_GR_LAI (m2/m2)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XLAI(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XLAI(:),IRESP,HCOMMENT=YCOMMENT)
 END IF
 !
 !
@@ -179,12 +179,12 @@ END IF
 YRECFM=HPATCH//'GR_RESA'
 YRECFM=ADJUSTL(YRECFM)
 YCOMMENT='X_Y_GR_RESA (s/m)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XRESA(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XRESA(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* snow mantel
 !
 YRECFM='GR'
-CALL WRITESURF_GR_SNOW(HPROGRAM,YRECFM,HPATCH,TSNOW)
+ CALL WRITESURF_GR_SNOW(HPROGRAM,YRECFM,HPATCH,TSNOW)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_GREENROOF_N',1,ZHOOK_HANDLE)
 !

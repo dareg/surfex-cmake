@@ -44,7 +44,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-CHARACTER(LEN=28),        INTENT(OUT) :: HCHEM_SURF_FILE
+ CHARACTER(LEN=28),        INTENT(OUT) :: HCHEM_SURF_FILE
 LOGICAL,                  INTENT(OUT) :: OSURF_EMIS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

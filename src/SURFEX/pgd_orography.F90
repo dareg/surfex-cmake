@@ -80,11 +80,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 REAL, DIMENSION(:),   INTENT(IN)  :: PSEA     ! sea  fraction
 REAL, DIMENSION(:),   INTENT(IN)  :: PWATER   ! lake fraction
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
 LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed by atm. model
 !
 !
@@ -106,10 +106,10 @@ INTEGER                  :: IZS         ! size of orographic array in atmospheri
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-CHARACTER(LEN=28)        :: YZS         ! file name for orography
-CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
+ CHARACTER(LEN=28)        :: YZS         ! file name for orography
+ CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
-CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
+ CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
 !                                       ! 'SIL' : silhouette orography
 !                                       ! 'ENV' : enveloppe orography
@@ -124,14 +124,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YFILETYPE, XUNIF_ZS, &
+ CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YFILETYPE, XUNIF_ZS, &
                               COROGTYPE, XENV, LIMP_ZS )  
 !
 !-------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ NSIZE    (:) = 0.
 XSUMVAL  (:) = 0.
 XSUMVAL2 (:) = 0.
 !
-CALL INI_SSOWORK
+ CALL INI_SSOWORK
 !
 !-------------------------------------------------------------------------------
 !
@@ -326,7 +326,7 @@ END IF
 !*    6.      Averages the field
 !             ------------------
 !
-CALL TREAT_FIELD(HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS,  &
+ CALL TREAT_FIELD(HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS,  &
                    'ZS                  '                     )  
 !
 DEALLOCATE(XSUMVAL  )
@@ -347,14 +347,14 @@ WHERE (PSEA(:)==1. .AND. NSIZE(:)==0) NSIZE(:) = -1
 ! note that if no orography data exists near points that need to be defined,
 ! these points are probably small isolated islands, and a default value of 1m is assumed.
 !
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XAVG_ZS,   'average orography',PDEF=1.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XSIL_ZS,   'silhouette orography',PDEF=1.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XMIN_ZS,   'minimum orography',PDEF=1.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XMAX_ZS,   'maximum orography',PDEF=1.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XAVG_ZS,   'average orography',PDEF=1.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XSIL_ZS,   'silhouette orography',PDEF=1.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XMIN_ZS,   'minimum orography',PDEF=1.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,XMAX_ZS,   'maximum orography',PDEF=1.)
 !
 IFLAG(:) = NSIZE(:)
 WHERE (NSIZE(:)==1) IFLAG(:) = 0 ! only 1 data point was not enough for standard deviation
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_STDEV,'standard deviation of orography',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_STDEV,'standard deviation of orography',PDEF=0.)
 !
 !-------------------------------------------------------------------------------
 !
@@ -412,20 +412,20 @@ END SELECT
 !*   12.      Subgrid scale orography characteristics
 !             ---------------------------------------
 !
-CALL SSO(GSSO,GSSO_ANIS,PSEA)
+ CALL SSO(GSSO,GSSO_ANIS,PSEA)
 !
 IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GSSO(:))                 IFLAG(:) = 0
 WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_DIR,  'subgrid orography direction',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_SLOPE,'subgrid orography slope',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_DIR,  'subgrid orography direction',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_SLOPE,'subgrid orography slope',PDEF=0.)
 !
 IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GSSO_ANIS(:))            IFLAG(:) = 0
 WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_ANIS, 'subgrid orography anisotropy',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_ANIS, 'subgrid orography anisotropy',PDEF=0.)
 !
 WHERE (PSEA(:)==1.)
   XSSO_ANIS (:) = XUNDEF
@@ -444,23 +444,23 @@ END WHERE
 !*   13.      Subgrid scale orography roughness
 !             ---------------------------------
 !
-CALL SUBSCALE_AOS(GZ0EFFI,GZ0EFFJ,PSEA)
+ CALL SUBSCALE_AOS(GZ0EFFI,GZ0EFFJ,PSEA)
 !
 IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GZ0EFFI(:))              IFLAG(:) = 0
 WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSIP, 'subgrid orography A/S, direction i+',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSIM, 'subgrid orography A/S, direction i-',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2IP, 'subgrid orography h/2, direction i+',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2IM, 'subgrid orography h/2, direction i-',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSIP, 'subgrid orography A/S, direction i+',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSIM, 'subgrid orography A/S, direction i-',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2IP, 'subgrid orography h/2, direction i+',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2IM, 'subgrid orography h/2, direction i-',PDEF=0.)
 !
 IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GZ0EFFJ(:))              IFLAG(:) = 0
 WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSJP, 'subgrid orography A/S, direction j+',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSJM, 'subgrid orography A/S, direction j-',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2JP, 'subgrid orography h/2, direction j+',PDEF=0.)
-CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2JM, 'subgrid orography h/2, direction j-',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSJP, 'subgrid orography A/S, direction j+',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XAOSJM, 'subgrid orography A/S, direction j-',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2JP, 'subgrid orography h/2, direction j+',PDEF=0.)
+ CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XHO2JM, 'subgrid orography h/2, direction j-',PDEF=0.)
 !
 WHERE (PSEA(:)==1.)
   XHO2IP(:) = XUNDEF

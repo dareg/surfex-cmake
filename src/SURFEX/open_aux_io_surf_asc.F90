@@ -47,9 +47,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
-CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -62,19 +62,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_ASC',0,ZHOOK_HANDLE)
-CALL IO_BUFF_CLEAN_n
-CALL GET_LUOUT('ASCII ',NLUOUT)
+ CALL IO_BUFF_CLEAN_n
+ CALL GET_LUOUT('ASCII ',NLUOUT)
 !
 NUNIT=9
 !
 OPEN(UNIT=NUNIT,FILE=TRIM(HFILE)//'.txt',FORM='FORMATTED')
 !
 CMASK = HMASK
-CALL READ_SURF('ASCII ','DIM_FULL',NFULL,IRET)
+ CALL READ_SURF('ASCII ','DIM_FULL',NFULL,IRET)
 ALLOCATE(NMASK(NFULL))
 ALLOCATE(ZFULL(NFULL))
 ZFULL=1.
-CALL GET_1D_MASK(NFULL,NFULL,ZFULL,NMASK)
+ CALL GET_1D_MASK(NFULL,NFULL,ZFULL,NMASK)
 DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------

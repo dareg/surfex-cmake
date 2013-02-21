@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
 REAL,    DIMENSION(:,:), INTENT(IN) :: PSAND     ! sand   on all surface points
 REAL,    DIMENSION(:,:), INTENT(IN) :: PCLAY     ! clay   on all surface points
 REAL,    DIMENSION(:),   INTENT(IN) :: PRUNOFFB  ! runoff coef. on all surface points
@@ -72,15 +72,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PACK_PGD_SOIL',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.      Number of points and packing
 !             ----------------------------
 !
-CALL GET_TYPE_DIM_n('NATURE',NDIM)
+ CALL GET_TYPE_DIM_n('NATURE',NDIM)
 ALLOCATE(IMASK(NDIM))
 ILU=0
-CALL GET_SURF_MASK_n('NATURE',NDIM,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n('NATURE',NDIM,IMASK,ILU,ILUOUT)
 !
 !
 !-------------------------------------------------------------------------------
@@ -89,18 +89,18 @@ CALL GET_SURF_MASK_n('NATURE',NDIM,IMASK,ILU,ILUOUT)
 !             -----------------
 !
 ALLOCATE(XSAND(NDIM,NGROUND_LAYER))
-CALL PACK_SAME_RANK(IMASK,PSAND(:,:),XSAND(:,:))
+ CALL PACK_SAME_RANK(IMASK,PSAND(:,:),XSAND(:,:))
 !
 ALLOCATE(XCLAY(NDIM,NGROUND_LAYER))
-CALL PACK_SAME_RANK(IMASK,PCLAY(:,:),XCLAY(:,:))
+ CALL PACK_SAME_RANK(IMASK,PCLAY(:,:),XCLAY(:,:))
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 ALLOCATE(XRUNOFFB(NDIM))
-CALL PACK_SAME_RANK(IMASK,PRUNOFFB(:),XRUNOFFB(:))
+ CALL PACK_SAME_RANK(IMASK,PRUNOFFB(:),XRUNOFFB(:))
 !
 ALLOCATE(XWDRAIN(NDIM))
-CALL PACK_SAME_RANK(IMASK,PWDRAIN(:),XWDRAIN(:))
+ CALL PACK_SAME_RANK(IMASK,PWDRAIN(:),XWDRAIN(:))
 IF (LHOOK) CALL DR_HOOK('PACK_PGD_SOIL',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

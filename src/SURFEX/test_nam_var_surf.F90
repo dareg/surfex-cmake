@@ -10,25 +10,25 @@ INTERFACE TEST_NAM_VAR_SURF
                                        HVALUE7,HVALUE8,HVALUE9  )  
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
-CHARACTER(LEN=*) ,INTENT(IN)           ::HVAR     ! variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HVAR     ! variable to test
 
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE1  ! first possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE2  ! second possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE3  ! third possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE4  ! fourth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE5  ! fiveth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE6  ! sixth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE7  ! seventh possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE8  ! eightth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE9  ! nineth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE1  ! first possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE2  ! second possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE3  ! third possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE4  ! fourth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE5  ! fiveth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE6  ! sixth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE7  ! seventh possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE8  ! eightth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE9  ! nineth possible value
 !
 END SUBROUTINE TEST_NAM_VARC0_SURF
 !
       SUBROUTINE TEST_NAM_VARL0_SURF(KLUOUT,HNAME,OVAR,OVALUE)
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
 LOGICAL          ,INTENT(IN)           ::OVAR     ! variable to test
 
 LOGICAL          ,INTENT(IN), OPTIONAL ::OVALUE   ! possible value
@@ -41,7 +41,7 @@ END SUBROUTINE TEST_NAM_VARL0_SURF
                                        KVALUE7,KVALUE8,KVALUE9  )  
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
 INTEGER          ,INTENT(IN)           ::KVAR     ! variable to test
 
 INTEGER          ,INTENT(IN), OPTIONAL ::KVALUE1  ! first possible value
@@ -115,18 +115,18 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
-CHARACTER(LEN=*) ,INTENT(IN)           ::HVAR     ! variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HVAR     ! variable to test
 
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE1  ! first possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE2  ! second possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE3  ! third possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE4  ! fourth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE5  ! fiveth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE6  ! sixth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE7  ! seventh possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE8  ! eightth possible value
-CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE9  ! nineth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE1  ! first possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE2  ! second possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE3  ! third possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE4  ! fourth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE5  ! fiveth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE6  ! sixth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE7  ! seventh possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE8  ! eightth possible value
+ CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE9  ! nineth possible value
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
@@ -208,7 +208,7 @@ IF ( PRESENT (HVALUE7) ) WRITE (KLUOUT,*) '"',HVALUE7,'"'
 IF ( PRESENT (HVALUE8) ) WRITE (KLUOUT,*) '"',HVALUE8,'"'
 IF ( PRESENT (HVALUE9) ) WRITE (KLUOUT,*) '"',HVALUE9,'"'
 !
-CALL ABOR1_SFX('TEST_NAM_VAR_SURF: (1) CHARACTER VALUE NOT ALLOWED')
+ CALL ABOR1_SFX('TEST_NAM_VAR_SURF: (1) CHARACTER VALUE NOT ALLOWED')
 IF (LHOOK) CALL DR_HOOK('MODI_TEST_NAM_VAR_SURF:TEST_NAM_VARC0_SURF',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE TEST_NAM_VARC0_SURF
@@ -263,7 +263,7 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
 LOGICAL          ,INTENT(IN)           ::OVAR     ! variable to test
 
 LOGICAL          ,INTENT(IN), OPTIONAL ::OVALUE   ! possible value
@@ -293,7 +293,7 @@ WRITE (KLUOUT,*) ' '
 WRITE (KLUOUT,*) 'Possible values are:'
 IF ( PRESENT (OVALUE) ) WRITE (KLUOUT,*) '"',OVALUE,'"'
 !
-CALL ABOR1_SFX('TEST_NAM_VAR_SURF: (2) LOGICAL VALUE NOT ALLOWED')
+ CALL ABOR1_SFX('TEST_NAM_VAR_SURF: (2) LOGICAL VALUE NOT ALLOWED')
 IF (LHOOK) CALL DR_HOOK('MODI_TEST_NAM_VAR_SURF:TEST_NAM_VARL0_SURF',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE TEST_NAM_VARL0_SURF
@@ -351,7 +351,7 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
 INTEGER          ,INTENT(IN)           ::KVAR     ! variable to test
 
 INTEGER          ,INTENT(IN), OPTIONAL ::KVALUE1  ! first possible value
@@ -444,7 +444,7 @@ IF ( PRESENT (KVALUE7) ) WRITE (KLUOUT,*) '"',KVALUE7,'"'
 IF ( PRESENT (KVALUE8) ) WRITE (KLUOUT,*) '"',KVALUE8,'"'
 IF ( PRESENT (KVALUE9) ) WRITE (KLUOUT,*) '"',KVALUE9,'"'
 !
-CALL ABOR1_SFX('TEST_NAM_VAR_SURF: (3) INTEGER VALUE NOT ALLOWED')
+ CALL ABOR1_SFX('TEST_NAM_VAR_SURF: (3) INTEGER VALUE NOT ALLOWED')
 IF (LHOOK) CALL DR_HOOK('MODI_TEST_NAM_VAR_SURF:TEST_NAM_VARN0_SURF',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE TEST_NAM_VARN0_SURF

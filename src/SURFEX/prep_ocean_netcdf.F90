@@ -37,12 +37,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
-CHARACTER(LEN=28),  INTENT(IN), OPTIONAL   :: HNCVARNAME!var to read 
+ CHARACTER(LEN=28),  INTENT(IN), OPTIONAL   :: HNCVARNAME!var to read 
 REAL, POINTER, DIMENSION(:,:,:)   :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
@@ -70,7 +70,7 @@ ALLOCATE(ZFIELD(NILENGTH,NINDEPTH,1))
 !
 !*      2.     Reading of field
 !              ----------------
-CALL READ_LATLONDEPVAL_CDF(HFILE,HNCVARNAME,ZLONG,ZLATI,ZDEPTH,ZFIELD(:,:,1))
+ CALL READ_LATLONDEPVAL_CDF(HFILE,HNCVARNAME,ZLONG,ZLATI,ZDEPTH,ZFIELD(:,:,1))
 ALLOCATE(PFIELD(1:SIZE(ZFIELD,1),1:SIZE(ZFIELD,2),1:SIZE(ZFIELD,3)))
 PFIELD=ZFIELD
 !

@@ -30,10 +30,10 @@
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6) :: CNATURE  ! type of scheme for natural covers: NONE, ISBA
-CHARACTER(LEN=6) :: CSEA     ! type of scheme for oceans        : NONE, CSEAFLX
-CHARACTER(LEN=6) :: CTOWN    ! type of scheme for towns         : NONE, CTEB
-CHARACTER(LEN=6) :: CWATER   ! type of scheme for inland waters : NONE, WATFLX, FLAKE
+ CHARACTER(LEN=6) :: CNATURE  ! type of scheme for natural covers: NONE, ISBA
+ CHARACTER(LEN=6) :: CSEA     ! type of scheme for oceans        : NONE, CSEAFLX
+ CHARACTER(LEN=6) :: CTOWN    ! type of scheme for towns         : NONE, CTEB
+ CHARACTER(LEN=6) :: CWATER   ! type of scheme for inland waters : NONE, WATFLX, FLAKE
 LOGICAL          :: LGARDEN  ! T : urban green areas treated inside TOWN by CTOWN scheme
 !                            ! F : urban  greenareas treated inside NATURE aggregated
 !                            !     with other vegetated surfaces

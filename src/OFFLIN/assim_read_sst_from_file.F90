@@ -44,17 +44,17 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)    :: YPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN)    :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN)    :: KI
 REAL,DIMENSION(KI),  INTENT(OUT)   :: PSST
 REAL,DIMENSION(KI),  INTENT(IN)    :: PITM
-CHARACTER(LEN=2),   INTENT(IN)    :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN)    :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
+ CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
 INTEGER              :: IRESP
 REAL                 :: ZFMAX,ZFMIN,ZFMEAN
 REAL, DIMENSION (KI) :: PTS
@@ -79,7 +79,7 @@ WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
 !
 !  Open FA file
 !
-CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
 !
 !  Read SST_SIC 
 !
@@ -93,8 +93,8 @@ ENDIF
 !
 !  Close SST_SIC file
 !
-CALL END_IO_SURF_n(YPROGRAM2)
-CALL IO_BUFF_CLEAN_n
+ CALL END_IO_SURF_n(YPROGRAM2)
+ CALL IO_BUFF_CLEAN_n
 WRITE(*,*) 'READ SST_SIC OK'
 
 ZFMIN = MINVAL(PSST)

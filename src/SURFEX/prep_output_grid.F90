@@ -48,7 +48,7 @@ IMPLICIT NONE
 !            ------------------------------
 !
 INTEGER,           INTENT(IN)  :: KLUOUT     ! output listing logical unit
-CHARACTER(LEN=10), INTENT(IN)  :: HGRID      ! grid type
+ CHARACTER(LEN=10), INTENT(IN)  :: HGRID      ! grid type
 REAL, DIMENSION(:), POINTER    :: PGRID_PAR  ! parameters defining this grid
 REAL, DIMENSION(:),INTENT(IN)  :: PLAT       ! latitudes
 REAL, DIMENSION(:),INTENT(IN)  :: PLON       ! longitudes
@@ -73,7 +73,7 @@ XLAT_OUT = PLAT
 XLON_OUT = PLON
 LINTERP  = .TRUE.
 !
-CALL GET_GRID_COORD(KLUOUT,XX_OUT,XY_OUT,SIZE(PLAT),HGRID,PGRID_PAR)
+ CALL GET_GRID_COORD(KLUOUT,XX_OUT,XY_OUT,SIZE(PLAT),HGRID,PGRID_PAR)
 IF (LHOOK) CALL DR_HOOK('PREP_OUTPUT_GRID',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

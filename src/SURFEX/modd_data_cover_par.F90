@@ -97,7 +97,7 @@ INTEGER                                :: NDATA_FLOOR_LAYER
 !---------------------------------------------------------------------------------
 !* names of all ecosystems
 !
-CHARACTER(LEN=60), DIMENSION(JPCOVER,2) :: CNAMES
+ CHARACTER(LEN=60), DIMENSION(JPCOVER,2) :: CNAMES
 !---------------------------------------------------------------------------------
 !
 ! reference height for CDN averaging

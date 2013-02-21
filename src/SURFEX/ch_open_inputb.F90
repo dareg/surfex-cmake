@@ -56,13 +56,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN) :: HKEYWORD         ! keyword for positioning
+ CHARACTER(LEN=*), INTENT(IN) :: HKEYWORD         ! keyword for positioning
 INTEGER         , INTENT(IN) :: KCHANNEL         ! I/O channel to choose
 INTEGER,          INTENT(IN) :: KLUOUT           ! output listing logical unit
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=79) :: YIN ! character string for line-by-line read
+ CHARACTER(LEN=79) :: YIN ! character string for line-by-line read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ RETURN
 !
 100 CONTINUE
 WRITE(KLUOUT,*) "CH_OPEN_INPUTB-Error: Keyword ", HKEYWORD(1:8), " not found."
-CALL ABOR1_SFX('CH_OPEN_INPUTB: KEYWORD '//HKEYWORD(1:8)//' NOT FOUND')
+ CALL ABOR1_SFX('CH_OPEN_INPUTB: KEYWORD '//HKEYWORD(1:8)//' NOT FOUND')
 IF (LHOOK) CALL DR_HOOK('CH_OPEN_INPUTB',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE CH_OPEN_INPUTB

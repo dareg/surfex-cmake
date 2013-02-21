@@ -53,7 +53,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -84,7 +84,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',0,ZHOOK_HANDLE)
-CALL GET_SURF_SIZE_n('WATER ',NDIM)
+ CALL GET_SURF_SIZE_n('WATER ',NDIM)
 !
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XCOVER     (NDIM,JPCOVER))
@@ -93,13 +93,13 @@ ALLOCATE(XLAT       (NDIM))
 ALLOCATE(XLON       (NDIM))
 ALLOCATE(XMESH_SIZE (NDIM))
 !
-CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
+ CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
                 CGRID,  XGRID_PAR,                     &
                 LCOVER, XCOVER, XZS,                   &
                 XLAT, XLON, XMESH_SIZE                 )  
 !
 !-------------------------------------------------------------------------------
-CALL WRITE_COVER_TEX_WATER
+ CALL WRITE_COVER_TEX_WATER
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

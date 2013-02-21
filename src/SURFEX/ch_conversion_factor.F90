@@ -35,7 +35,7 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
-CHARACTER(LEN=3),  INTENT(IN)  :: HCONVERSION ! Unit conversion code
+ CHARACTER(LEN=3),  INTENT(IN)  :: HCONVERSION ! Unit conversion code
 REAL, DIMENSION(:),INTENT(IN)  :: PRHOA       ! air density
 !
 !*       0.2   declarations of local variables

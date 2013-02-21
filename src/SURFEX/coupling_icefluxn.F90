@@ -86,7 +86,7 @@ IF(ISIZE==0)THEN
   RETURN
 ENDIF
 !
-CALL TREAT_ICE(ISIZE,IMASK)
+ CALL TREAT_ICE(ISIZE,IMASK)
 !
 !=======================================================================================
 !
@@ -165,7 +165,7 @@ ZSFTQ (:) = XUNDEF
 ! Fluxes over ice according to Charnock formulae
 !--------------------------------------------------------------------------------------
 !
-CALL ICE_SEA_FLUX(ZZ0, ZTA, ZEXNA, ZRHOA, ZTICE, ZEXNS,       &
+ CALL ICE_SEA_FLUX(ZZ0, ZTA, ZEXNA, ZRHOA, ZTICE, ZEXNS,       &
                     ZQA, ZRR, ZRS, ZWIND, ZZREF, ZUREF, ZPS,  &
                     ZQSAT, ZSFTH, ZSFTQ, ZUSTAR, ZCD, ZCDN,   &
                     ZCH, ZRI, ZRESA, ZZ0H                     )  

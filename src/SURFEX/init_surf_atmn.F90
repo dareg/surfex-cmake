@@ -160,13 +160,13 @@ INCLUDE 'mpif.h'
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,                          INTENT(IN)  :: OLAND_USE ! 
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -182,9 +182,9 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 !
-CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -227,11 +227,11 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
-CALL SURF_VERSION
+ CALL SURF_VERSION
 !
 !-------------------------------------------------------------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (LNAM_READ) THEN
  !
@@ -251,17 +251,17 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
-CALL READ_DEFAULT_SURF_ATM_n(HPROGRAM)
+ CALL READ_DEFAULT_SURF_ATM_n(HPROGRAM)
 !
 !*       1.     Reading of configuration
 !               ------------------------
 !
 !        1.1. general options (diagnostics, etc...)
 !
-CALL READ_SURF_ATM_CONF_n(HPROGRAM)
+ CALL READ_SURF_ATM_CONF_n(HPROGRAM)
 !
-CALL WRITE_COVER_TEX_START(HPROGRAM)
-CALL WRITE_COVER_TEX_COVER
+ CALL WRITE_COVER_TEX_START(HPROGRAM)
+ CALL WRITE_COVER_TEX_COVER
 !
 !        1.2. Date
 !
@@ -296,40 +296,40 @@ END SELECT
 !
 !         Initialisation for IO
 !
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
 !
-CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
 !
 !         reading
 !
-CALL READ_SURF(HPROGRAM,'SEA   ',CSEA   ,IRESP)
-CALL READ_SURF(HPROGRAM,'WATER ',CWATER ,IRESP)
-CALL READ_SURF(HPROGRAM,'NATURE',CNATURE,IRESP)
-CALL READ_SURF(HPROGRAM,'TOWN  ',CTOWN  ,IRESP)
+ CALL READ_SURF(HPROGRAM,'SEA   ',CSEA   ,IRESP)
+ CALL READ_SURF(HPROGRAM,'WATER ',CWATER ,IRESP)
+ CALL READ_SURF(HPROGRAM,'NATURE',CNATURE,IRESP)
+ CALL READ_SURF(HPROGRAM,'TOWN  ',CTOWN  ,IRESP)
 !
-CALL READ_SURF(HPROGRAM,'DIM_FULL  ',NDIM_FULL,  IRESP)
+ CALL READ_SURF(HPROGRAM,'DIM_FULL  ',NDIM_FULL,  IRESP)
 IF (HINIT=='PRE') THEN
   NINDX2 = NDIM_FULL
   ALLOCATE(NWORK(NDIM_FULL))
   ALLOCATE(XWORK(NDIM_FULL))
   ALLOCATE(XWORK2(NDIM_FULL,2))
 ENDIF  
-CALL READ_SURF(HPROGRAM,'DIM_SEA   ',NDIM_SEA,   IRESP)
-CALL READ_SURF(HPROGRAM,'DIM_NATURE',NDIM_NATURE,IRESP)
-CALL READ_SURF(HPROGRAM,'DIM_WATER ',NDIM_WATER, IRESP)
-CALL READ_SURF(HPROGRAM,'DIM_TOWN  ',NDIM_TOWN,  IRESP)
-CALL READ_LECOCLIMAP(HPROGRAM,LECOCLIMAP)
-CALL READ_ARRANGE_COVER(HPROGRAM,LWATER_TO_NATURE,LTOWN_TO_ROCK)
-CALL READ_COVER_GARDEN(HPROGRAM,LGARDEN)
+ CALL READ_SURF(HPROGRAM,'DIM_SEA   ',NDIM_SEA,   IRESP)
+ CALL READ_SURF(HPROGRAM,'DIM_NATURE',NDIM_NATURE,IRESP)
+ CALL READ_SURF(HPROGRAM,'DIM_WATER ',NDIM_WATER, IRESP)
+ CALL READ_SURF(HPROGRAM,'DIM_TOWN  ',NDIM_TOWN,  IRESP)
+ CALL READ_LECOCLIMAP(HPROGRAM,LECOCLIMAP)
+ CALL READ_ARRANGE_COVER(HPROGRAM,LWATER_TO_NATURE,LTOWN_TO_ROCK)
+ CALL READ_COVER_GARDEN(HPROGRAM,LGARDEN)
 !
 !* reads if climatological LAI is used or not for ecoclimap2. If not, looks for year to be used.
-CALL READ_LCLIM_LAI(HPROGRAM,LCLIM_LAI)
+ CALL READ_LCLIM_LAI(HPROGRAM,LCLIM_LAI)
 IF (.NOT. LCLIM_LAI .AND. TTIME%TDATE%YEAR >= NECO2_START_YEAR &
                      .AND. TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) NYEAR=TTIME%TDATE%YEAR
-CALL INI_DATA_COVER
-CALL READ_ECO2_IRRIG(HPROGRAM)
+ CALL INI_DATA_COVER
+ CALL READ_ECO2_IRRIG(HPROGRAM)
 !
 !
 !*       2.     Cover fields and grid:
@@ -337,11 +337,11 @@ CALL READ_ECO2_IRRIG(HPROGRAM)
 !
 !        2.0. Get number of points on this proc
 !
-CALL GET_SIZE_FULL_n(HPROGRAM,NDIM_FULL,NSIZE_FULL)
+ CALL GET_SIZE_FULL_n(HPROGRAM,NDIM_FULL,NSIZE_FULL)
 !
 !        2.1. Read cover
 !
-CALL READ_COVER_n(HPROGRAM)
+ CALL READ_COVER_n(HPROGRAM)
 !
 !        2.2. Read grid
 !
@@ -349,7 +349,7 @@ ALLOCATE(XLAT       (NSIZE_FULL))
 ALLOCATE(XLON       (NSIZE_FULL))
 ALLOCATE(XMESH_SIZE (NSIZE_FULL))
 ALLOCATE(XZ0EFFJPDIR(NSIZE_FULL))
-CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP,XZ0EFFJPDIR)
+ CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP,XZ0EFFJPDIR)
 NGRID_PAR=SIZE(XGRID_PAR)
 !
 IF (NRANK==NPIO) THEN
@@ -365,14 +365,14 @@ ENDIF
 !
 !*       2.4     Allocation of chemical species name, chemical index of HSV array 
 !
-CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
                      NSV_CHSBEG, NSV_CHSEND, NSV_AERBEG, NSV_AEREND, &
                      CCH_NAMES, CAER_NAMES, NDSTEQ, NSV_DSTBEG,      &
                      NSV_DSTEND, NSLTEQ, NSV_SLTBEG, NSV_SLTEND      )
 !
 !        2.4 Initialize Chemical Emissions
 !
-CALL READ_SURF(HPROGRAM,'CH_EMIS',LCH_EMIS,IRESP)
+ CALL READ_SURF(HPROGRAM,'CH_EMIS',LCH_EMIS,IRESP)
 !
 IF (LCH_EMIS) THEN
   !
@@ -408,7 +408,7 @@ END IF
 !
 !*       2.5 Subgrid orography
 !
-CALL READ_SSO_n(HPROGRAM)
+ CALL READ_SSO_n(HPROGRAM)
 !
 !*       2.6 Orographic roughness length
 !
@@ -418,19 +418,19 @@ ALLOCATE(XZ0EFFJP(NSIZE_FULL))
 ALLOCATE(XZ0EFFJM(NSIZE_FULL))
 ALLOCATE(XZ0REL  (NSIZE_FULL))
 !
-CALL SUBSCALE_Z0EFF(XAOSIP,XAOSIM,XAOSJP,XAOSJM,         &
+ CALL SUBSCALE_Z0EFF(XAOSIP,XAOSIM,XAOSJP,XAOSJM,         &
                     XHO2IP,XHO2IM,XHO2JP,XHO2JM,0.,      &
                     XZ0EFFIP,XZ0EFFIM,XZ0EFFJP,XZ0EFFJM, &
                     XZ0REL                               )
 !
 !*       2.7 Dummy fields
 !
-CALL READ_DUMMY_n(HPROGRAM)
+ CALL READ_DUMMY_n(HPROGRAM)
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
-CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !
 !-----------------------------------------------------------------------------------------------------
 ! END READ PGD FILE
@@ -439,7 +439,7 @@ CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
 !
 !*       2.8 Allocations and Initialization of diagnostics
 !
@@ -452,11 +452,11 @@ IF (CROUGH=='BE04') CALL READ_SSO_CANOPY_n(HPROGRAM,HINIT)
 !
 !*       Precip fields (for ARPEGE/ALADIN run)
 !
-CALL READ_PRECIP_n(HPROGRAM,HINIT)
+ CALL READ_PRECIP_n(HPROGRAM,HINIT)
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 !
 !-----------------------------------------------------------------------------------------------------
 !
@@ -506,7 +506,7 @@ JTILE               = JTILE + 1
 ZFRAC_TILE(:,JTILE) = XSEA(:)
 !
 ! pack variables which are arguments to this routine
-CALL PACK_SURF_INIT_ARG(NSIZE_SEA,NR_SEA)
+ CALL PACK_SURF_INIT_ARG(NSIZE_SEA,NR_SEA)
 !
 ! initialization
 IF (NDIM_SEA>0) &
@@ -518,7 +518,7 @@ IF (NDIM_SEA>0) &
                   'OK'                                               )  
 !
 !
-CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_SEA,NR_SEA)  
+ CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_SEA,NR_SEA)  
 !
 #ifndef NOMPI
 XTIME_INIT_SEA = XTIME_INIT_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
@@ -533,7 +533,7 @@ JTILE               = JTILE + 1
 ZFRAC_TILE(:,JTILE) = XWATER(:)
 !
 ! pack variables which are arguments to this routine
-CALL PACK_SURF_INIT_ARG(NSIZE_WATER,NR_WATER)
+ CALL PACK_SURF_INIT_ARG(NSIZE_WATER,NR_WATER)
 !
 ! initialization
 IF (NDIM_WATER>0) &
@@ -544,7 +544,7 @@ IF (NDIM_WATER>0) &
                            KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                            'OK'                                               )
 !
-CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_WATER,NR_WATER)
+ CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_WATER,NR_WATER)
 !
 #ifndef NOMPI
 XTIME_INIT_WATER = XTIME_INIT_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
@@ -559,7 +559,7 @@ JTILE               = JTILE + 1
 ZFRAC_TILE(:,JTILE) = XNATURE(:)
 !
 ! pack variables which are arguments to this routine
-CALL PACK_SURF_INIT_ARG(NSIZE_NATURE,NR_NATURE)
+ CALL PACK_SURF_INIT_ARG(NSIZE_NATURE,NR_NATURE)
 !
 !$OMP SINGLE
 ALLOCATE(NWG_LAYER_TOT(NDIM_FULL,1))
@@ -575,7 +575,7 @@ IF (NDIM_NATURE>0) &
                      'OK'                                               )
 !
 !
-CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_NATURE,NR_NATURE)  
+ CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_NATURE,NR_NATURE)  
 !
 #ifndef NOMPI
 XTIME_INIT_NATURE = XTIME_INIT_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
@@ -590,7 +590,7 @@ JTILE               = JTILE + 1
 ZFRAC_TILE(:,JTILE) = XTOWN(:)
 !
 ! pack variables which are arguments to this routine
-CALL PACK_SURF_INIT_ARG(NSIZE_TOWN,NR_TOWN)
+ CALL PACK_SURF_INIT_ARG(NSIZE_TOWN,NR_TOWN)
 !
 ! initialization
 IF (NDIM_TOWN>0) &
@@ -602,7 +602,7 @@ IF (NDIM_TOWN>0) &
                    'OK'                                               )  
 !
 !
-CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_TOWN,NR_TOWN)  
+ CALL UNPACK_SURF_INIT_ARG(JTILE,NSIZE_TOWN,NR_TOWN)  
 !
 #ifndef NOMPI
 XTIME_INIT_TOWN = XTIME_INIT_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
@@ -634,7 +634,7 @@ IF(LPROVAR_TO_DIAG)THEN
 ENDIF 
 !
 !-------------------------------------------------------------------------------
-CALL WRITE_COVER_TEX_END(HPROGRAM)
+ CALL WRITE_COVER_TEX_END(HPROGRAM)
 !-------------------------------------------------------------------------------
 !==============================================================================
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',1,ZHOOK_HANDLE)

@@ -127,7 +127,7 @@ ZLON_MASK(:,:)=ZLON_MASK(:,:)+NINT((-ZLON_MASK(:,:))/360.)*360.
 !*      4.   X and Y of the points of the mask
 !            ---------------------------------
 !
-CALL GET_GRIDTYPE_IGN (PGRID_PAR, KLAMBERT=ILAMBERT)
+ CALL GET_GRIDTYPE_IGN (PGRID_PAR, KLAMBERT=ILAMBERT)
 DO JLAT=1,SIZE(ZLAT_MASK,2)
   CALL XY_IGN(ILAMBERT,ZX_MASK(:,JLAT),ZY_MASK(:,JLAT),          &
                 ZLAT_MASK(:,JLAT),ZLON_MASK(:,JLAT)   )  

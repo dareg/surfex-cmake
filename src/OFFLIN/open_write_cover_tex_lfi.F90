@@ -51,11 +51,11 @@ INTEGER, INTENT(OUT) :: KTEX ! logical unit of Tex file
 !              -------------------------------
 !
 INTEGER           :: IRESP
-CHARACTER(LEN=28) :: YTEX           ! name of tex file
-CHARACTER(LEN=11) :: YFORM
-CHARACTER(LEN=9)  :: YACTION
-CHARACTER(LEN=6)  :: YACCESS
-CHARACTER(LEN=6)  :: YPOSITION
+ CHARACTER(LEN=28) :: YTEX           ! name of tex file
+ CHARACTER(LEN=11) :: YFORM
+ CHARACTER(LEN=9)  :: YACTION
+ CHARACTER(LEN=6)  :: YACCESS
+ CHARACTER(LEN=6)  :: YPOSITION
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -68,7 +68,7 @@ YFORM = 'FORMATTED'
 YACTION = 'READWRITE'
 YACCESS  = '   '
 YPOSITION  = 'ASIS'
-CALL OPEN_FILE_LFI(KTEX,YTEX,YFORM,YACTION,YACCESS,YPOSITION,IRESP)
+ CALL OPEN_FILE_LFI(KTEX,YTEX,YFORM,YACTION,YACCESS,YPOSITION,IRESP)
 IF (LHOOK) CALL DR_HOOK('OPEN_WRITE_COVER_TEX_LFI',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

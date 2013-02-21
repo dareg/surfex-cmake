@@ -82,19 +82,19 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=3),     INTENT(IN)    :: HISBA   ! type of ISBA version:
+ CHARACTER(LEN=3),     INTENT(IN)    :: HISBA   ! type of ISBA version:
 !                                              ! '2-L' (default)
 !                                              ! '3-L'
 !                                              ! 'DIF'
-CHARACTER(LEN=3),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=3),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 !                                              ! 'NON'
 !                                              ! 'AGS'
 !                                              ! 'LAI'
-CHARACTER(LEN=3),     INTENT(IN)    :: HRESPSL ! Soil Respiration
+ CHARACTER(LEN=3),     INTENT(IN)    :: HRESPSL ! Soil Respiration
 !                                              ! 'DEF' = Norman 1992
 !                                              ! 'PRM' = Rivalland PhD Thesis (2003)
 !                                              ! 'CNT' = CENTURY model (Gibelin 2008)
-CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
+ CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
 !                                              ! 'DRY ' 
 !                                              ! 'EVOL' 
 !                                              ! 'WET ' 

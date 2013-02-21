@@ -76,7 +76,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
+ CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
 REAL,    INTENT(IN)               :: PTSTEP        ! time step
 INTEGER, INTENT(IN)               :: KSIZE, KPATCH   
 !

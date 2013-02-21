@@ -128,7 +128,7 @@ END DO
 !*     2.     Tri-diagonal system resolution
 !              ------------------------------
 !
-CALL TRIDIAG_GROUND(PA,PB,PC,PY,ZX)
+ CALL TRIDIAG_GROUND(PA,PB,PC,PY,ZX)
 !
 DO JLAYER=1,ILAYER
   PT(:,JLAYER) = ZX(:,JLAYER)

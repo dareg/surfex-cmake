@@ -55,7 +55,7 @@ INTEGER,                 INTENT(IN)    :: KLUOUT
 REAL, DIMENSION(:),      INTENT(IN)    :: PLAT    ! latitude of the point to add
 REAL, DIMENSION(:),      INTENT(IN)    :: PLON    ! longitude of the point to add
 REAL, DIMENSION(:),      INTENT(IN)    :: PVALUE  ! value of the point to add
-CHARACTER(LEN=1),        INTENT(IN)    :: HTYPE
+ CHARACTER(LEN=1),        INTENT(IN)    :: HTYPE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------

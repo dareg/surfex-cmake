@@ -45,9 +45,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
-CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
 !
 !
 !*    0.2    Declaration of local variables
@@ -72,9 +72,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             --------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_BINLLVFAST',0,ZHOOK_HANDLE)
-CALL OPEN_FILE(HPROGRAM,IGLB,HFILENAME,'UNFORMATTED',HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,IGLB,HFILENAME,'UNFORMATTED',HACTION='READ')
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !----------------------------------------------------------------------------
 !
@@ -119,7 +119,7 @@ END IF
 !*    6.    Closing of the data file
 !           ------------------------
 !
-CALL CLOSE_FILE (HPROGRAM,IGLB)
+ CALL CLOSE_FILE (HPROGRAM,IGLB)
 !
 !-------------------------------------------------------------------------------
 !

@@ -49,7 +49,7 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
-CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program
+ CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program
 !
 REAL, DIMENSION(:,:), INTENT(IN)::PFIELD ! array containing the data field
 !

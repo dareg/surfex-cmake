@@ -42,9 +42,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=3)                   :: HNVEG  ! type of no   vegetation
-CHARACTER(LEN=3)                   :: HLVEG  ! type of low  vegetation
-CHARACTER(LEN=3)                   :: HHVEG  ! type of high vegetation
+ CHARACTER(LEN=3)                   :: HNVEG  ! type of no   vegetation
+ CHARACTER(LEN=3)                   :: HLVEG  ! type of low  vegetation
+ CHARACTER(LEN=3)                   :: HHVEG  ! type of high vegetation
 REAL, DIMENSION(:),     INTENT(IN) :: PNVEG  ! fraction of no   vegetation
 REAL, DIMENSION(:),     INTENT(IN) :: PLVEG  ! fraction of low  vegetation
 REAL, DIMENSION(:),     INTENT(IN) :: PHVEG  ! fraction of high vegetation

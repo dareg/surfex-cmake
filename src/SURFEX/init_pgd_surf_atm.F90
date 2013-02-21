@@ -36,10 +36,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
-CHARACTER(LEN=28), INTENT(IN)   :: HATMFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),  INTENT(IN)   :: HATMFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
+ CHARACTER(LEN=28), INTENT(IN)   :: HATMFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),  INTENT(IN)   :: HATMFILETYPE! type of the Atmospheric file
 INTEGER,           INTENT(IN)   :: KYEAR       ! year
 INTEGER,           INTENT(IN)   :: KMONTH      ! month
 INTEGER,           INTENT(IN)   :: KDAY        ! day
@@ -48,7 +48,7 @@ REAL,              INTENT(IN)   :: PTIME       ! time
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=6), DIMENSION(0)  :: YSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(0)  :: YSV       ! name of all scalar variables
 REAL,             DIMENSION(0)  :: ZCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(0)  :: ZRHOA     ! air density (kg/m3)
 REAL,             DIMENSION(0)  :: ZZENITH   ! solar zenithal angle
@@ -64,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* initialization of PGD fields of output domain
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',0,ZHOOK_HANDLE)
-CALL INIT_SURF_ATM_n(HPROGRAM,HINIT,.FALSE.,                     &
+ CALL INIT_SURF_ATM_n(HPROGRAM,HINIT,.FALSE.,                     &
                       0,0,1,                                     &
                       YSV,ZCO2,ZRHOA,                            &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &

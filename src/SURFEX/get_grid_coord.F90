@@ -64,7 +64,7 @@ INTEGER,                      INTENT(IN)  :: KLUOUT ! output listing logical uni
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PX     ! X natural coordinate in the projection
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PY     ! X natural coordinate in the projection
 INTEGER,            OPTIONAL, INTENT(IN)  :: KL         ! number of points
-CHARACTER(LEN=10),  OPTIONAL, INTENT(IN)  :: HGRID      ! grid type
+ CHARACTER(LEN=10),  OPTIONAL, INTENT(IN)  :: HGRID      ! grid type
 REAL, DIMENSION(:), OPTIONAL, POINTER     :: PGRID_PAR  ! parameters defining this grid
 !
 !
@@ -74,7 +74,7 @@ REAL, DIMENSION(:), OPTIONAL, POINTER     :: PGRID_PAR  ! parameters defining th
 REAL, DIMENSION(:), ALLOCATABLE :: ZX
 REAL, DIMENSION(:), ALLOCATABLE :: ZY
 !
-CHARACTER(LEN=10)           :: YGRID
+ CHARACTER(LEN=10)           :: YGRID
 REAL, DIMENSION(:), POINTER :: ZGRID_PAR
 INTEGER                     :: IGRID_PAR
 INTEGER                     :: IL

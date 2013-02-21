@@ -82,7 +82,7 @@ REAL,              INTENT(OUT) :: PUTILGUST
 LOGICAL,           INTENT(OUT) :: OCPL_ARP
 LOGICAL,           INTENT(OUT) :: OQVNPLUS
 LOGICAL,           INTENT(OUT) :: ORW_PRECIP       ! flag used to Read/Write precipitation forcing 
-CHARACTER(LEN=*),  INTENT(OUT) :: HIMPLICIT_WIND   ! wind implicitation option : OLD or NEW
+ CHARACTER(LEN=*),  INTENT(OUT) :: HIMPLICIT_WIND   ! wind implicitation option : OLD or NEW
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                                    from/into the restart file for ARPEGE/ALADIN run  

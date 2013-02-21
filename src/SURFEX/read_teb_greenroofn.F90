@@ -62,8 +62,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=3),  INTENT(IN)  :: HPATCH   ! current TEB patch identificator
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=3),  INTENT(IN)  :: HPATCH   ! current TEB patch identificator
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -71,8 +71,8 @@ INTEGER           :: ILU                             ! 1D physical dimension
 INTEGER           :: IRESP                           ! Error code after redding
 INTEGER           :: IWORK                           ! Work integer
 INTEGER           :: JLAYER, JNBIOMASS               ! loop counter on layers
-CHARACTER(LEN=30) :: YRECFM                          ! Name of the article to be read
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=30) :: YRECFM                          ! Name of the article to be read
+ CHARACTER(LEN=4)  :: YLVL
 REAL, DIMENSION(:),ALLOCATABLE  :: ZWORK             ! 2D array to write data in file
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -84,7 +84,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_TEB_GREENROOF_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_TOWN'
-CALL GET_TYPE_DIM_n('TOWN  ',ILU)
+ CALL GET_TYPE_DIM_n('TOWN  ',ILU)
 !
 !
 !*       2.     Prognostic fields:
@@ -129,7 +129,7 @@ END DO
 !
 YRECFM=HPATCH//'GR_WR'
 YRECFM=ADJUSTL(YRECFM)
-CALL READ_SURF(HPROGRAM,YRECFM,XWR(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XWR(:),IRESP)
 !
 !* Leaf Area Index
 !
@@ -141,7 +141,7 @@ END IF
 !
 !* snow mantel
 !
-CALL READ_GR_SNOW(HPROGRAM,'GR',HPATCH,ILU,1,TSNOW  )! GROO:GreenROOf 
+ CALL READ_GR_SNOW(HPROGRAM,'GR',HPATCH,ILU,1,TSNOW  )! GROO:GreenROOf 
 !
 !-------------------------------------------------------------------------------
 !
@@ -153,7 +153,7 @@ CALL READ_GR_SNOW(HPROGRAM,'GR',HPATCH,ILU,1,TSNOW  )! GROO:GreenROOf
 YRECFM = HPATCH//'GR_RESA'
 YRECFM=ADJUSTL(YRECFM)
 XRESA(:) = 100.
-CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:),IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:),IRESP)
 !
 XLE(:) = XUNDEF
 !

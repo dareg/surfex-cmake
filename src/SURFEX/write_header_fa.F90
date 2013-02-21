@@ -61,8 +61,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE       ! 'PGD' : only physiographic fields are written
-CHARACTER(LEN=6),    INTENT(IN)  :: CFILETYPE    ! 'FA' could also be 'LFI' in future developments
+ CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE       ! 'PGD' : only physiographic fields are written
+ CHARACTER(LEN=6),    INTENT(IN)  :: CFILETYPE    ! 'FA' could also be 'LFI' in future developments
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -116,7 +116,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_HEADER_FA',0,ZHOOK_HANDLE)
-CALL IO_BUFF_CLEAN_n
+ CALL IO_BUFF_CLEAN_n
 !
 ZRAD=XPI/180.0
 !
@@ -280,11 +280,11 @@ ZAHYBR(0:1)=ZNIVA(0:1)
 ZBHYBR(0:1)=ZNIVB(0:1)
 !
 ! Reduce verbosity (in case it is not already done)
-CALL FANMSG(0,NLUOUT)
-CALL FACADE(CDNOMC,ITYPTR,ZSLAPO,ZCLOPO,ZSLOPO,ZCODIL,ITRONC,INLATI,INXLON, &
+ CALL FANMSG(0,NLUOUT)
+ CALL FACADE(CDNOMC,ITYPTR,ZSLAPO,ZCLOPO,ZSLOPO,ZCODIL,ITRONC,INLATI,INXLON, &
               INLOPA,INOZPA,ZSINLA,1,ZREFER,ZAHYBR,ZBHYBR,.TRUE.)  
 !
-CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN', &
+ CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN', &
               .TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)  
 !
 IDATE(:)=0
@@ -292,7 +292,7 @@ IDATE(1)=1992
 IDATE(2)=1
 IDATE(3)=1
 IDATE(6)=1
-CALL FANDAR(IRET,NUNIT_FA,IDATE)
+ CALL FANDAR(IRET,NUNIT_FA,IDATE)
 !
 DEALLOCATE(ZSINLA)
 DEALLOCATE(INLOPA)

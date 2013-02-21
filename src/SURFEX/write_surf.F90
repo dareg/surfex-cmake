@@ -5,97 +5,97 @@ MODULE MODI_WRITE_SURF
   INTERFACE WRITE_SURF
 !
      SUBROUTINE WRITE_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT)
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*),  INTENT(IN) :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),  INTENT(IN) :: HREC     ! name of the article to be written
 REAL,              INTENT(IN) :: PFIELD   ! real scalar to be written
 INTEGER,           INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears 
-CHARACTER(LEN=100),INTENT(IN) :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100),INTENT(IN) :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFX0
 !
      SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:), INTENT(IN)  :: PFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 END SUBROUTINE WRITE_SURFX1
 !
      SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
 INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 END SUBROUTINE WRITE_SURFX2
 !
       SUBROUTINE WRITE_SURFX2COV(HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
 LOGICAL,DIMENSION(:), INTENT(IN)  :: OFLAG  ! mask for array filling
 INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 END SUBROUTINE WRITE_SURFX2COV
 !
      SUBROUTINE WRITE_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER,            INTENT(IN)  :: KFIELD   ! integer to be written
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFN0
 !
      SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
-CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER, DIMENSION(:), INTENT(IN)  :: KFIELD   ! integer to be written
 INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 END SUBROUTINE WRITE_SURFN1
 !
      SUBROUTINE WRITE_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),    INTENT(IN)  :: HREC     ! name of the article to be written
-CHARACTER(LEN=*),    INTENT(IN)  :: HFIELD   ! caracter to be written
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),    INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=*),    INTENT(IN)  :: HFIELD   ! caracter to be written
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100),  INTENT(IN)  :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFC0
 !
       SUBROUTINE WRITE_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT)
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL,            INTENT(IN)  :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFL0
 !
       SUBROUTINE WRITE_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
-CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OFIELD   ! array containing the data field
 INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
@@ -105,11 +105,11 @@ END SUBROUTINE WRITE_SURFL1
 !
 USE MODD_TYPE_DATE_SURF
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME),   INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFT0
 !
@@ -117,11 +117,11 @@ END SUBROUTINE WRITE_SURFT0
 !
 USE MODD_TYPE_DATE_SURF
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME), DIMENSION(:), INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFT1
 !
@@ -129,11 +129,11 @@ END SUBROUTINE WRITE_SURFT1
 !
 USE MODD_TYPE_DATE_SURF
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 END SUBROUTINE WRITE_SURFT2
 !
@@ -184,15 +184,15 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! calling program
-CHARACTER(LEN=*),  INTENT(IN) :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),  INTENT(IN) :: HREC     ! name of the article to be written
 REAL,              INTENT(IN) :: PFIELD   ! real scalar to be written
 INTEGER,           INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears 
-CHARACTER(LEN=100),INTENT(IN) :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100),INTENT(IN) :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -201,7 +201,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX0',0,ZHOOK_HANDLE)
 !
 YREC = HREC
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX0',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -315,20 +315,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:), INTENT(IN)  :: PFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -339,7 +339,7 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 IL = SIZE(PFIELD)
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX1',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -433,21 +433,21 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
 INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL1
 INTEGER            :: IL2
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -459,7 +459,7 @@ IF (PRESENT(HDIR)) YDIR = HDIR
 IL1  = SIZE(PFIELD,1)
 IL2  = SIZE(PFIELD,2)
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -551,23 +551,23 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
 LOGICAL,DIMENSION(:), INTENT(IN)  :: OFLAG  ! mask for array filling
 INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
-CHARACTER(LEN=100) :: YCOMMENT
+ CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=100) :: YCOMMENT
 INTEGER            :: IL1
 INTEGER            :: IL2
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=1)   :: YDIR
 INTEGER            :: JCOVER
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -690,15 +690,15 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER,            INTENT(IN)  :: KFIELD   ! integer to be written
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -707,7 +707,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN0',0,ZHOOK_HANDLE)
 !
 YREC = HREC
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN0',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 
@@ -818,20 +818,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER, DIMENSION(:), INTENT(IN)  :: KFIELD   ! integer to be written
 INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -842,7 +842,7 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 IL = SIZE(KFIELD)
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN1',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -941,16 +941,16 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),    INTENT(IN)  :: HREC     ! name of the article to be written
-CHARACTER(LEN=*),    INTENT(IN)  :: HFIELD   ! caracter to be written
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),    INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=*),    INTENT(IN)  :: HFIELD   ! caracter to be written
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),  INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100),  INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
-CHARACTER(LEN=40)  :: YFIELD
+ CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=40)  :: YFIELD
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -961,7 +961,7 @@ YREC = HREC
 YFIELD = "                                        "
 YFIELD(1:LEN(HFIELD)) = HFIELD
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFC0',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -1075,15 +1075,15 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL,            INTENT(IN)  :: OFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
 DOUBLE PRECISION   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1092,7 +1092,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFL0',0,ZHOOK_HANDLE)
 !
 YREC = HREC
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFL0',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -1202,20 +1202,20 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OFIELD   ! array containing the data field
 INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+ CHARACTER(LEN=100),    INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 INTEGER            :: IL
-CHARACTER(LEN=1)   :: YDIR
+ CHARACTER(LEN=1)   :: YDIR
 LOGICAL :: LNOWRITE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1226,7 +1226,7 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 IL   = SIZE(OFIELD)
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFL1',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -1327,15 +1327,15 @@ INCLUDE "mpif.h"
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME),   INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 REAL    :: ZTIME
 DOUBLE PRECISION   :: XTIME0
 INTEGER :: IDAY
@@ -1353,7 +1353,7 @@ IMONTH = TFIELD%TDATE%MONTH
 IDAY   = TFIELD%TDATE%DAY
 ZTIME  = TFIELD%TIME
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFT0',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -1454,15 +1454,15 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME), DIMENSION(:), INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 INTEGER :: IL1
 REAL ,   DIMENSION(SIZE(TFIELD,1)) :: ZTIME
 INTEGER, DIMENSION(SIZE(TFIELD,1)) :: IDAY
@@ -1481,7 +1481,7 @@ IMONTH(:) = TFIELD(:)%TDATE%MONTH
 IDAY  (:) = TFIELD(:)%TDATE%DAY
 ZTIME (:) = TFIELD(:)%TIME
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFT1',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !
@@ -1559,15 +1559,15 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
-CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
-CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! Comment string
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=12)  :: YREC
+ CHARACTER(LEN=12)  :: YREC
 INTEGER :: IL1, IL2
 REAL ,   DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: ZTIME
 INTEGER, DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: IDAY
@@ -1587,7 +1587,7 @@ IMONTH(:,:) = TFIELD(:,:)%TDATE%MONTH
 IDAY  (:,:) = TFIELD(:,:)%TDATE%DAY
 ZTIME (:,:) = TFIELD(:,:)%TIME
 !
-CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,LNOWRITE)
 IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFT2',1,ZHOOK_HANDLE)
 IF(LNOWRITE)RETURN
 !

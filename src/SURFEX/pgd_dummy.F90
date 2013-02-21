@@ -53,7 +53,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -66,12 +66,12 @@ INTEGER                           :: JNBR      ! loop counter on dummy fields
 !            ------------------------
 !
 INTEGER                             :: IDUMMY_NBR
-CHARACTER(LEN=20), DIMENSION(1000)  :: YDUMMY_NAME
-CHARACTER(LEN=3),  DIMENSION(1000)  :: YDUMMY_AREA
-CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_ATYPE    ! avg type for dummy pgd fields
+ CHARACTER(LEN=20), DIMENSION(1000)  :: YDUMMY_NAME
+ CHARACTER(LEN=3),  DIMENSION(1000)  :: YDUMMY_AREA
+ CHARACTER(LEN=3),  DIMENSION(1000)  :: CDUMMY_ATYPE    ! avg type for dummy pgd fields
 !                                                      ! 'ARI' , 'INV'
-CHARACTER(LEN=28), DIMENSION(1000)  :: CDUMMY_FILE     ! data files
-CHARACTER(LEN=6),  DIMENSION(1000)  :: CDUMMY_FILETYPE ! type of these files
+ CHARACTER(LEN=28), DIMENSION(1000)  :: CDUMMY_FILE     ! data files
+ CHARACTER(LEN=6),  DIMENSION(1000)  :: CDUMMY_FILETYPE ! type of these files
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -80,14 +80,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_DUMMY',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL READ_NAM_PGD_DUMMY(HPROGRAM, IDUMMY_NBR, YDUMMY_NAME, YDUMMY_AREA, &
+ CALL READ_NAM_PGD_DUMMY(HPROGRAM, IDUMMY_NBR, YDUMMY_NAME, YDUMMY_AREA, &
                           CDUMMY_ATYPE, CDUMMY_FILE, CDUMMY_FILETYPE      )  
 !
 NDUMMY_NBR     = IDUMMY_NBR

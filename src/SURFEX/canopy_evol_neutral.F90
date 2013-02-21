@@ -155,7 +155,7 @@ ZDKDDVDZ = 0.
 !*    3.3  time evolution of wind in canopy
 !          --------------------------------
 !
-CALL CANOPY_EVOL_WIND(KI,KLVL,PTSTEP,KIMPL,PWIND,ZK,ZDKDDVDZ,PSFLUX_U,PFORC_U,PDFORC_UDU,PDZ,PDZF,PU,ZUW,PALFAU,PBETAU)
+ CALL CANOPY_EVOL_WIND(KI,KLVL,PTSTEP,KIMPL,PWIND,ZK,ZDKDDVDZ,PSFLUX_U,PFORC_U,PDFORC_UDU,PDZ,PDZF,PU,ZUW,PALFAU,PBETAU)
 !
 !*    3.4  Friction velocity at top of SBL layers
 !          --------------------------------------
@@ -172,7 +172,7 @@ ZWTH = 0.
 ZWQ  = 0.
 ZTH  = 300.
 !
-CALL CANOPY_EVOL_TKE(KI,KLVL,PTSTEP,PRHOA,PZ,PZF,PDZ,PDZF,PFORC_E,PDFORC_EDE, &
+ CALL CANOPY_EVOL_TKE(KI,KLVL,PTSTEP,PRHOA,PZ,PZF,PDZ,PDZF,PFORC_E,PDFORC_EDE, &
                      PU,ZTH,ZUW,ZWTH,ZWQ,ZLEPS,PTKE                           )
 !
 !-------------------------------------------------------------------------------

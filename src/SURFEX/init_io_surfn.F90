@@ -66,10 +66,10 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
-CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
-CHARACTER(LEN=6),  INTENT(IN)  :: HSCHEME  ! scheme used
-CHARACTER(LEN=5),  INTENT(IN)  :: HACTION  ! action performed ('READ ','WRITE')
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=6),  INTENT(IN)  :: HSCHEME  ! scheme used
+ CHARACTER(LEN=5),  INTENT(IN)  :: HACTION  ! action performed ('READ ','WRITE')
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables

@@ -57,7 +57,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
 REAL, DIMENSION(:),INTENT(OUT):: PDEPTH    ! physiographic field
 INTEGER, DIMENSION(:),INTENT(OUT):: KSTATUS   ! physiographic field
 !
@@ -71,7 +71,7 @@ INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field 
 INTEGER                        :: IDIM   !
 INTEGER                        :: JI
 !
-CHARACTER(LEN=6)    :: YMASK
+ CHARACTER(LEN=6)    :: YMASK
 INTEGER, DIMENSION(NL) :: ISTATUS
 REAL, DIMENSION(NL) :: ZDEPTH, ZSTATUS    ! physiographic field on full grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -88,7 +88,7 @@ ZSTATUS(:) = XUNDEF
 !*    2.      Output listing logical unit
 !             ---------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -101,7 +101,7 @@ ALLOCATE(XTNG      (NL,NGRADDEPTH_LDB))
 NSIZE  (:) = 0.
 XTNG   (:,:) = 0.
 !
-CALL TREAT_FIELD(HPROGRAM,'SURF  ','DIRECT','A_LDBD', CLAKELDB,   &
+ CALL TREAT_FIELD(HPROGRAM,'SURF  ','DIRECT','A_LDBD', CLAKELDB,   &
                  'water depth         ',ZDEPTH,'WAT'              ) 
 !
 DEALLOCATE(XTNG)
@@ -110,7 +110,7 @@ ALLOCATE(XTNG      (NL,NGRADSTATUS_LDB))
 NSIZE  (:) = 0.
 XTNG   (:,:) = 0.
 !
-CALL TREAT_FIELD(HPROGRAM,'SURF  ','DIRECT','A_LDBS', CSTATUSLDB,  &
+ CALL TREAT_FIELD(HPROGRAM,'SURF  ','DIRECT','A_LDBS', CSTATUSLDB,  &
                  'water status        ',ZSTATUS,'WAT'              )
 !
 ISTATUS = NINT(ZSTATUS)
@@ -136,7 +136,7 @@ ENDDO
 !             ------------------
 !
 YMASK='WATER '
-CALL GET_TYPE_DIM_n(YMASK,IDIM)
+ CALL GET_TYPE_DIM_n(YMASK,IDIM)
 IF (IDIM/=SIZE(PDEPTH) .OR. IDIM/=SIZE(KSTATUS)) THEN
    WRITE(ILUOUT,*)'Wrong dimension of MASK: ',IDIM,SIZE(PDEPTH),SIZE(KSTATUS)
    CALL ABOR1_SFX('TREAT_GLOBAL_LAKE_DEPTH: WRONG DIMENSION OF MASK')
@@ -144,9 +144,9 @@ ENDIF
 
 ALLOCATE(IMASK(IDIM))
 ILU=0
-CALL GET_SURF_MASK_n(YMASK,IDIM,IMASK,ILU,ILUOUT)
-CALL PACK_SAME_RANK(IMASK,ZDEPTH(:),PDEPTH(:))
-CALL PACK_SAME_RANK(IMASK,ISTATUS(:),KSTATUS(:))
+ CALL GET_SURF_MASK_n(YMASK,IDIM,IMASK,ILU,ILUOUT)
+ CALL PACK_SAME_RANK(IMASK,ZDEPTH(:),PDEPTH(:))
+ CALL PACK_SAME_RANK(IMASK,ISTATUS(:),KSTATUS(:))
 DEALLOCATE(IMASK)
 !
 IF (LHOOK) CALL DR_HOOK('TREAT_GLOBAL_LAKE_DEPTH',1,ZHOOK_HANDLE)

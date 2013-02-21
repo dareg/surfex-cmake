@@ -73,7 +73,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 INTEGER,                INTENT(IN)    :: KDECADE
-CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 !
 REAL, DIMENSION(:),   OPTIONAL, INTENT(OUT)   :: PVEG
 REAL, DIMENSION(:),   OPTIONAL, INTENT(OUT)   :: PLAI

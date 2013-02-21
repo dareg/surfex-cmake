@@ -65,7 +65,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
 !
 !*    0.2    Declaration of local variables
@@ -87,9 +87,9 @@ INTEGER, PARAMETER                     :: NTIME_MAX    = 12
 !
 ! type of vegetation
 !
-CHARACTER(LEN=4)                       :: CTYP_GARDEN_HVEG ! type of high vegetation
-CHARACTER(LEN=4)                       :: CTYP_GARDEN_LVEG ! type of low  vegetation
-CHARACTER(LEN=4)                       :: CTYP_GARDEN_NVEG ! type of bare soil
+ CHARACTER(LEN=4)                       :: CTYP_GARDEN_HVEG ! type of high vegetation
+ CHARACTER(LEN=4)                       :: CTYP_GARDEN_LVEG ! type of low  vegetation
+ CHARACTER(LEN=4)                       :: CTYP_GARDEN_NVEG ! type of bare soil
 !
 ! uniform value
 !
@@ -102,21 +102,21 @@ REAL                                   :: XUNIF_H_HVEG     ! height of trees
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28)                      :: CFNAM_FRAC_HVEG  ! fractions of high vegetation
-CHARACTER(LEN=28)                      :: CFNAM_FRAC_LVEG  ! fractions of low  vegetation
-CHARACTER(LEN=28)                      :: CFNAM_FRAC_NVEG  ! fractions of bare soil
-CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFNAM_LAI_HVEG   ! LAI       of high vegetation
-CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFNAM_LAI_LVEG   ! LAI       of low  vegetation
-CHARACTER(LEN=28)                      :: CFNAM_H_HVEG     ! height of trees
+ CHARACTER(LEN=28)                      :: CFNAM_FRAC_HVEG  ! fractions of high vegetation
+ CHARACTER(LEN=28)                      :: CFNAM_FRAC_LVEG  ! fractions of low  vegetation
+ CHARACTER(LEN=28)                      :: CFNAM_FRAC_NVEG  ! fractions of bare soil
+ CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFNAM_LAI_HVEG   ! LAI       of high vegetation
+ CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFNAM_LAI_LVEG   ! LAI       of low  vegetation
+ CHARACTER(LEN=28)                      :: CFNAM_H_HVEG     ! height of trees
 !
 ! type of files containing data
 !
-CHARACTER(LEN=28)                      :: CFTYP_FRAC_HVEG  ! fractions of high vegetation
-CHARACTER(LEN=28)                      :: CFTYP_FRAC_LVEG  ! fractions of low  vegetation
-CHARACTER(LEN=28)                      :: CFTYP_FRAC_NVEG  ! fractions of bare soil
-CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFTYP_LAI_HVEG   ! LAI       of high vegetation
-CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFTYP_LAI_LVEG   ! LAI       of low  vegetation
-CHARACTER(LEN=28)                      :: CFTYP_H_HVEG     ! height of trees
+ CHARACTER(LEN=28)                      :: CFTYP_FRAC_HVEG  ! fractions of high vegetation
+ CHARACTER(LEN=28)                      :: CFTYP_FRAC_LVEG  ! fractions of low  vegetation
+ CHARACTER(LEN=28)                      :: CFTYP_FRAC_NVEG  ! fractions of bare soil
+ CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFTYP_LAI_HVEG   ! LAI       of high vegetation
+ CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFTYP_LAI_LVEG   ! LAI       of low  vegetation
+ CHARACTER(LEN=28)                      :: CFTYP_H_HVEG     ! height of trees
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -174,13 +174,13 @@ NTIME_n = 12
 !*    2.      Input file for cover types
 !             --------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_DATA_TEB_GARDEN',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_DATA_TEB_GARDEN',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_TEB_GARDEN)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 IF (NTIME==1) THEN
   XUNIF_LAI_HVEG(2:) = XUNIF_LAI_HVEG(1)
@@ -232,13 +232,13 @@ CTYPE_NVEG = CTYP_GARDEN_NVEG
 !
 CATYPE = 'ARI'
 !
-CALL PGD_FIELD(HPROGRAM,'FRAC_HVEG: fraction of high vegetation','TWN',CFNAM_FRAC_HVEG,   &
+ CALL PGD_FIELD(HPROGRAM,'FRAC_HVEG: fraction of high vegetation','TWN',CFNAM_FRAC_HVEG,   &
                  CFTYP_FRAC_HVEG,XUNIF_FRAC_HVEG,XDATA_FRAC_HVEG(:))  
 !
-CALL PGD_FIELD(HPROGRAM,'FRAC_LVEG: fraction of low vegetation' ,'TWN',CFNAM_FRAC_LVEG,   &
+ CALL PGD_FIELD(HPROGRAM,'FRAC_LVEG: fraction of low vegetation' ,'TWN',CFNAM_FRAC_LVEG,   &
                  CFTYP_FRAC_LVEG,XUNIF_FRAC_LVEG,XDATA_FRAC_LVEG(:))  
 !
-CALL PGD_FIELD(HPROGRAM,'FRAC_NVEG: fraction of bare soil'      ,'TWN',CFNAM_FRAC_NVEG,   &
+ CALL PGD_FIELD(HPROGRAM,'FRAC_NVEG: fraction of bare soil'      ,'TWN',CFNAM_FRAC_NVEG,   &
                  CFTYP_FRAC_NVEG,XUNIF_FRAC_NVEG,XDATA_FRAC_NVEG(:))  
 !
 !
@@ -254,7 +254,7 @@ DO JTIME=1,NTIME_n
 ENDDO
 !
 !
-CALL PGD_FIELD(HPROGRAM,'H_HVEG: height of trees','TWN',CFNAM_H_HVEG,                     &
+ CALL PGD_FIELD(HPROGRAM,'H_HVEG: height of trees','TWN',CFNAM_H_HVEG,                     &
                  CFTYP_H_HVEG,XUNIF_H_HVEG,XDATA_H_HVEG(:))  
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN_PAR',1,ZHOOK_HANDLE)
 !

@@ -58,21 +58,21 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !
 INTEGER,          INTENT(IN) :: KULNAM
-CHARACTER(LEN=*), INTENT(IN) :: HDNAML
+ CHARACTER(LEN=*), INTENT(IN) :: HDNAML
 LOGICAL,          INTENT(OUT):: OFOUND
 INTEGER, OPTIONAL,INTENT(IN) :: KLUOUT
 !
 !*       0.2   Declarations of local variables
 !
-CHARACTER(LEN=120) :: YLINE
-CHARACTER(LEN=1)   :: YLTEST
+ CHARACTER(LEN=120) :: YLINE
+ CHARACTER(LEN=1)   :: YLTEST
 INTEGER            :: ILEN,ILEY,INDL,IND1,IRET
 INTEGER            :: J,JA, JFILE
 LOGICAL            :: LLOPENED
 !
-CHARACTER(LEN=1),DIMENSION(26) :: YLO=(/'a','b','c','d','e','f','g','h', &
+ CHARACTER(LEN=1),DIMENSION(26) :: YLO=(/'a','b','c','d','e','f','g','h', &
      'i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'/)
-CHARACTER(LEN=1),DIMENSION(26) :: YUP=(/'A','B','C','D','E','F','G','H', &
+ CHARACTER(LEN=1),DIMENSION(26) :: YUP=(/'A','B','C','D','E','F','G','H', &
      'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'/)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -180,12 +180,12 @@ IMPLICIT NONE
 !
 INTEGER,                    INTENT(IN) :: KULNAM
 INTEGER,                    INTENT(IN) :: KLUOUT
-CHARACTER(LEN=*),           INTENT(IN) :: HKEYWD1
-CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: HKEYWD2
+ CHARACTER(LEN=*),           INTENT(IN) :: HKEYWD1
+ CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: HKEYWD2
 !
 !*       0.2   Declarations of local variables
 !
-CHARACTER(LEN=120) :: YLINE
+ CHARACTER(LEN=120) :: YLINE
 INTEGER            :: ILEN1,ILEN2,IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -239,7 +239,7 @@ ELSE
 END IF
 ! end of file: scd keyword not found
 101  CONTINUE
-CALL ABOR1_SFX('MODE_POS_SURF: KEYWORD NOT FOUND: '//HKEYWD2)
+ CALL ABOR1_SFX('MODE_POS_SURF: KEYWORD NOT FOUND: '//HKEYWD2)
 IF (LHOOK) CALL DR_HOOK('MODE_POS_SURF:POSKEY',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------
 END SUBROUTINE POSKEY

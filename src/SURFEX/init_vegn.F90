@@ -58,10 +58,10 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: KPATCH
 INTEGER, INTENT(IN) :: KI
 LOGICAL, INTENT(IN) :: OCANOPY
-CHARACTER(LEN=4), INTENT(INOUT) :: HROUGH
+ CHARACTER(LEN=4), INTENT(INOUT) :: HROUGH
 TYPE(SURF_SNOW),      INTENT(INOUT) :: TPSNOW  ! snow characteristics
 !
-CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
+ CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
 REAL, DIMENSION(:,:), INTENT(IN) :: PLAIMIN
 REAL, DIMENSION(:,:), INTENT(IN) :: PH_TREE
 REAL, DIMENSION(:,:,:), INTENT(IN) :: PVEGTYPE_PATCH
@@ -114,7 +114,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_VEG_n',0,ZHOOK_HANDLE)
 !*      13.     Roughness length option
 !               -----------------------
 !
-CALL SET_ROUGH(OCANOPY,HROUGH)
+ CALL SET_ROUGH(OCANOPY,HROUGH)
 !
 !-------------------------------------------------------------------------------
 !
@@ -123,7 +123,7 @@ CALL SET_ROUGH(OCANOPY,HROUGH)
 !
 !* snow long-wave properties (not initialized in read_gr_snow)
 !
-CALL INIT_SNOW_LW(XEMISSN,TPSNOW)
+ CALL INIT_SNOW_LW(XEMISSN,TPSNOW)
 !
 !-------------------------------------------------------------------------------
 !

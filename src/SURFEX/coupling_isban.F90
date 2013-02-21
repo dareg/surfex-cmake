@@ -223,8 +223,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
@@ -282,7 +282,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !
 !*      0.2    declarations of local variables
@@ -425,7 +425,7 @@ ENDIF
 !
 !* Actualization of the SGH variable (Fmu, Fsat)
 !
-CALL ISBA_SGH_UPDATE(CISBA,CRUNOFF,CRAIN,PRAIN,XMUF,XFSAT)
+ CALL ISBA_SGH_UPDATE(CISBA,CRUNOFF,CRAIN,PRAIN,XMUF,XFSAT)
 !
 !
 !* Actualization of deep soil characteristics
@@ -448,15 +448,15 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 TTIME%TIME = TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+ CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 ! --------------------------------------------------------------------------------------
 !
 !*      2.     Physical evolution
 !
-CALL PACK_ISBA_PATCH_GET_SIZE_n
+ CALL PACK_ISBA_PATCH_GET_SIZE_n
 !
-CALL PACK_DIAG_PATCH_GET_SIZE_n
+ CALL PACK_DIAG_PATCH_GET_SIZE_n
 !
 ! --------------------------------------------------------------------------------------
 ! Patch Dependent Calculations
@@ -508,7 +508,7 @@ END IF
 ! --------------------------------------------------------------------------------------
 ! Grid box average fluxes/properties: Arguments and standard diagnostics
 !
-CALL AVERAGE_FLUX(XPATCH,                                             &
+ CALL AVERAGE_FLUX(XPATCH,                                             &
                   ZSFTH_TILE, ZSFTQ_TILE, ZSFTS_TILE, ZSFCO2_TILE,    &
                   ZSFU_TILE, ZSFV_TILE,                               &
                   PSFTH, PSFTQ, PSFTS, PSFCO2,                        &
@@ -516,11 +516,11 @@ CALL AVERAGE_FLUX(XPATCH,                                             &
 !
 ! Albedo, Emissivity and fraction at time t+1
 !
-CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,       &
+ CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,       &
                        XVEG, XLAI, XZ0, XALBNIR, XALBVIS, XALBUV, XEMIS,&
                        ZDIR_ALB_TILE,ZSCA_ALB_TILE,ZEMIS_TILE           )  
 !
-CALL AVERAGE_RAD(XPATCH,                                               &
+ CALL AVERAGE_RAD(XPATCH,                                               &
                  ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                  PDIR_ALB,      PSCA_ALB,      XEMIS_NAT,  XTSRAD_NAT  )  
 !
@@ -529,19 +529,19 @@ PTRAD = XTSRAD_NAT
 !
 ! Any additional diagnostics (stored in MODD_DIAG_ISBA_n)
 !
-CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2)
+ CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2)
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
-CALL AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
+ CALL AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
 !
 ! Miscellaneous diagnostics (stored in MODD_DIAG_MISC_ISBA_n)
 !
-CALL AVERAGE_DIAG_MISC_ISBA_n
+ CALL AVERAGE_DIAG_MISC_ISBA_n
 !
 !--------------------------------------------------------------------------------------
 !
-CALL COUPLING_SURF_TOPD(HPROGRAM,NDIM_FULL)
+ CALL COUPLING_SURF_TOPD(HPROGRAM,NDIM_FULL)
 !
 ! --------------------------------------------------------------------------------------
 ! Snow/Flood fractions, albedo and emissivity update :
@@ -744,7 +744,7 @@ ENDIF
 !
 ! Pack ISBA input and prognostic variables (modd_isban) for each patch:
 !
-CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
+ CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
 !
 
 ! Pack chemistry input and prognostic variables (modd_ch_isban) for each patch:
@@ -757,7 +757,7 @@ END IF
 !
 ! Allocate ISBA diagnostics for each patch:
 !
-CALL PACK_DIAG_PATCH_n(KSIZE,ISWB)     
+ CALL PACK_DIAG_PATCH_n(KSIZE,ISWB)     
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Cosine of the slope typically encoutered in the grid mesh (including subgrid orography)
@@ -807,7 +807,7 @@ ENDIF
 !
 !* effective roughness
 !
-CALL Z0EFF(CROUGH, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
+ CALL Z0EFF(CROUGH, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
      XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM, XP_FF, XP_Z0FLOOD,     &
      XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                                &
      XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,                                &
@@ -831,7 +831,7 @@ CALL Z0EFF(CROUGH, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
 !
 !* Snow-free surface albedo for each wavelength
 !
-CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML,                                   &
+ CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML,                                   &
                    ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS,ISWB,                 &
                    XP_ALBNIR, XP_ALBVIS, XP_ALBUV,                       &
                    XP_ALBNIR_VEG, XP_ALBVIS_VEG, XP_ALBUV_VEG,           &
@@ -845,7 +845,7 @@ CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML,                                   &
 ! Intialize computation of ISBA water and energy budget
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL ISBA_BUDGET_INIT(CISBA,TSNOW%SCHEME,            &
+ CALL ISBA_BUDGET_INIT(CISBA,TSNOW%SCHEME,            &
                       XP_WG,XP_WGI,XP_WR,XP_SNOWSWE, &
                       XP_DG, XP_DZG, ZP_WG_INI,      &
                       ZP_WGI_INI, ZP_WR_INI,         &
@@ -855,7 +855,7 @@ CALL ISBA_BUDGET_INIT(CISBA,TSNOW%SCHEME,            &
 ! Over Natural Land Surfaces:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSCOND,      &
+ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSCOND,      &
           TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TTIME, LFLOOD, LTEMP_ARP,&
           LGLACIER, PTSTEP, CIMPLICIT_WIND,                                               &
           XCGMAX, ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA,                  &
@@ -908,7 +908,7 @@ ENDIF
 ! Calculation of ISBA water and energy budget (and time tendencies of each reservoir)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL ISBA_BUDGET(CISBA,TSNOW%SCHEME,LGLACIER,PTSTEP,          &
+ CALL ISBA_BUDGET(CISBA,TSNOW%SCHEME,LGLACIER,PTSTEP,          &
                  XP_WG,XP_WGI,XP_WR,XP_SNOWSWE,XP_DG,XP_DZG,  & 
                  ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,ZP_SWE_INI,   &
                  ZP_RAIN,ZP_SNOW,XP_EVAP,XP_DRAIN,XP_RUNOFF,  &
@@ -978,7 +978,7 @@ END IF
 ! Reset effecitve roughness lentgh to its nominal value when snow has just disappeared
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL SUBSCALE_Z0EFF(XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,            &
+ CALL SUBSCALE_Z0EFF(XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,            &
                     XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,XP_Z0,      &
                     XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM,    &
                     OMASK=(XP_SNOWSWE(:,1)==0. .AND. XP_PSN(:)>0.)  )   
@@ -1116,7 +1116,7 @@ ENDIF !Check on CSLTYN
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_INLINE_ISBA_n(ZP_TA, ZP_TRAD, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,      &
+ CALL DIAG_INLINE_ISBA_n(ZP_TA, ZP_TRAD, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,      &
                           ZP_ZREF, ZP_UREF,                                            &
                           XP_CD, XP_CDN, XP_CH, XP_RI, XP_HU, XP_Z0_WITH_SNOW,         &
                           XP_Z0H_WITH_SNOW, XP_Z0EFF,                                  &
@@ -1128,13 +1128,13 @@ CALL DIAG_INLINE_ISBA_n(ZP_TA, ZP_TRAD, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V
 ! Isba offline diagnostics for each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_EVAP_ISBA_n(CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA)
+ CALL DIAG_EVAP_ISBA_n(CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Isba offline diagnostics for miscellaneous terms over each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL DIAG_MISC_ISBA_n(PTSTEP, CISBA, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML,    &
+ CALL DIAG_MISC_ISBA_n(PTSTEP, CISBA, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML,    &
                       PTIME, KSIZE, JPATCH, KMASK, XP_THRESHOLD,              &
                       XP_PSN, XP_PSNG, XP_PSNV, XP_FF, XP_FFG, XP_FFV,        &
                       XP_WG, XP_WGI, XP_WFC, XP_WWILT, XP_SNOWSWE, XP_SNOWRHO,&
@@ -1145,7 +1145,7 @@ CALL DIAG_MISC_ISBA_n(PTSTEP, CISBA, CPHOTO, TSNOW%SCHEME, LAGRIP, LTR_ML,    &
 
 !  (MUST be done BEFORE UNPACK_ISBA_PATCH, because of XP_LE)
 !
-CALL UNPACK_DIAG_PATCH_n(KMASK,KSIZE,NPATCH,JPATCH, &
+ CALL UNPACK_DIAG_PATCH_n(KMASK,KSIZE,NPATCH,JPATCH, &
                            ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD,ZCPL_PFLOOD,           &
                            ZCPL_IFLOOD, ZCPL_ICEFLUX)  
 !
@@ -1159,7 +1159,7 @@ END IF
 !
 ! Unpack ISBA variables (modd_isban) for each patch:
 !
-CALL UNPACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)
+ CALL UNPACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)
 !
 !----------------------------------------------------------------------
 !

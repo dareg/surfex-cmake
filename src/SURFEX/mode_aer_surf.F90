@@ -209,7 +209,7 @@ DO JJ=1, SIZE(PSVT,2)
   ZSV(:,JJ) = MAX(ZSV(:,JJ),1E-40 * ZDEN2MOL * PRHODREF(:))
 ENDDO
 !
-CALL INIT_VAR(ZSV,ZFAC,ZCTOTA)
+ CALL INIT_VAR(ZSV,ZFAC,ZCTOTA)
 !
 !*       2    calculate moment 3 from total aerosol mass
 !
@@ -381,7 +381,7 @@ DO JJ=1, SIZE(PSVT, 2)
   PSVT(:,JJ) =  PSVT(:,JJ) * ZDEN2MOL * PRHODREF(:)
 ENDDO
 !
-CALL INIT_VAR(PSVT,ZFAC,ZCTOTA)
+ CALL INIT_VAR(PSVT,ZFAC,ZCTOTA)
 !
 !*       3    calculate moment 3 from total aerosol mass
 !

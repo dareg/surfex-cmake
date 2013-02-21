@@ -69,7 +69,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 LOGICAL,                INTENT(IN)   :: OFLOOD
-CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
+ CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 ! Albedo dependance with surface soil water content
 !   "EVOL" = albedo evolves with soil wetness
 !   "DRY " = constant albedo value for dry soil
@@ -124,7 +124,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             -----------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',0,ZHOOK_HANDLE)
-CALL ALBEDO(HALBEDO,                                    &
+ CALL ALBEDO(HALBEDO,                                    &
               PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,    &
               PALBVIS_SOIL,PALBNIR_SOIL,PALBUV_SOIL,      &
               PALBVIS_ECO,PALBNIR_ECO,PALBUV_ECO          )  
@@ -145,7 +145,7 @@ PTSRAD  (:)  =0.
 !    
 !* Initialization of albedo for each wavelength, emissivity and snow/flood fractions
 !
-CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI, &
+ CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI, &
                          PZ0,PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,&
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH        )  
 !
@@ -174,7 +174,7 @@ END DO
 !
 !* averaged fields
 !
-CALL AVERAGE_RAD(PPATCH,                                                   &
+ CALL AVERAGE_RAD(PPATCH,                                                   &
                    ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH, &
                    PDIR_ALB,       PSCA_ALB,       PEMIS,       PTSRAD       )  
 IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',1,ZHOOK_HANDLE)

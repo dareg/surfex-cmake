@@ -44,7 +44,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 INTEGER,          INTENT(IN) :: KLUDES     ! logical unit
-CHARACTER(LEN=5), INTENT(IN) :: HEMISPARAM ! Reference to paper where emission parameterization is proposed
+ CHARACTER(LEN=5), INTENT(IN) :: HEMISPARAM ! Reference to paper where emission parameterization is proposed
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !

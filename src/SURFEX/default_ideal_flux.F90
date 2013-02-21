@@ -53,7 +53,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PTIMET
 REAL, DIMENSION(:), INTENT(OUT)   :: PSFTH      ! hourly data of heat surface flux        (W/m2)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSFTQ      ! hourly data of water vapor surface flux (kg/m2/s) or (W/m2)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSFCO2     ! hourly data of CO2 surface flux         (kg/m2/s)
-CHARACTER(LEN=5), INTENT(OUT)     :: HUSTARTYPE ! type of computation for friction
+ CHARACTER(LEN=5), INTENT(OUT)     :: HUSTARTYPE ! type of computation for friction
                                                 ! 'USTAR'
                                                 ! 'Z0   '
 REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR     ! hourly data of friction                 (m2/s2)

@@ -52,7 +52,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM         ! program calling READ_PGD
 !
 !
 !*    0.2    Declaration of local variables
@@ -86,22 +86,22 @@ IF (HPROGRAM=='MESONH') LREAD_DATA_COVER = .FALSE.
 !
 !*       2.    opening of namelist
 ! 
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*       3.    reading of namelist
 ! 
-CALL POSNAM(ILUNAM,'NAM_READ_DATA_COVER',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_READ_DATA_COVER',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_READ_DATA_COVER)
 !
 !-------------------------------------------------------------------------------
 !
 !*       5.    close namelist file
 ! 
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 IF (LHOOK) CALL DR_HOOK('INIT_READ_DATA_COVER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

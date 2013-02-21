@@ -54,14 +54,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM   ! calling program
-CHARACTER(LEN=10),            INTENT(IN)    :: HGRID      ! type of horizontal grid
+ CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=10),            INTENT(IN)    :: HGRID      ! type of horizontal grid
 INTEGER,                      INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                      INTENT(IN)    :: KLU        ! number of points
 LOGICAL,                      INTENT(IN)    :: OREAD      ! flag to read the grid
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,            OPTIONAL, INTENT(OUT)   :: KRESP      ! error return code
-CHARACTER(LEN=1),   OPTIONAL, INTENT(IN)    :: HDIR       ! reading directive ('A': all field;'H': this proc)
+ CHARACTER(LEN=1),   OPTIONAL, INTENT(IN)    :: HDIR       ! reading directive ('A': all field;'H': this proc)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -69,7 +69,7 @@ CHARACTER(LEN=1),   OPTIONAL, INTENT(IN)    :: HDIR       ! reading directive ('
 REAL, DIMENSION(:), ALLOCATABLE :: ZGRID_PAR
 INTEGER                         :: IGRID_PAR
 INTEGER                         :: IRESP
-CHARACTER(LEN=1)                :: YDIR
+ CHARACTER(LEN=1)                :: YDIR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------

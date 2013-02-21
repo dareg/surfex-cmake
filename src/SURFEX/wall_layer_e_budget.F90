@@ -115,7 +115,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_WALL    ! wall layers temperatures
 REAL, DIMENSION(:),   INTENT(IN)  :: PTS_WALL_B ! opposite wall surface temperature
 REAL, DIMENSION(:),   INTENT(IN)  :: PTI_WALL_B ! opposite wall internal temperature
 REAL,               INTENT(IN)    :: PTSTEP       ! time step
-CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
+ CHARACTER(LEN=3), INTENT(IN)      :: HBEM         ! Building Energy model 'DEF' or 'BEM'
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHC_WALL     ! heat capacity for wall layers
 REAL, DIMENSION(:,:), INTENT(IN)  :: PTC_WALL     ! thermal conductivity for wall layers
 REAL, DIMENSION(:,:), INTENT(IN)  :: PD_WALL      ! depth of wall layers
@@ -205,7 +205,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WALL_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !
-CALL LAYER_E_BUDGET_GET_COEF( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
+ CALL LAYER_E_BUDGET_GET_COEF( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
                               ZA, ZB, ZC, ZY )
 !
 IWALL_LAYER = SIZE(PT_WALL,2)
@@ -319,7 +319,7 @@ END DO
 !*      5.    heat conduction calculation
 !             ---------------------------
 !
-CALL LAYER_E_BUDGET( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
+ CALL LAYER_E_BUDGET( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
                      ZA, ZB, ZC, ZY, PDQS_WALL )
 !
 !-------------------------------------------------------------------------------

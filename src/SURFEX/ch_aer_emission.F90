@@ -41,7 +41,7 @@ IMPLICIT NONE
 REAL,   DIMENSION(:,:),      INTENT(INOUT) :: PFLUX
 REAL,   DIMENSION(:),        INTENT(IN) :: PRHODREF
 INTEGER,                     INTENT(IN) :: KSV_CHSBEG
-CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
+ CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
 REAL,   DIMENSION(:),OPTIONAL, INTENT(IN)  :: PFCO   ! CO flux 
 
 !

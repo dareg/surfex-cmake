@@ -61,14 +61,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
-CHARACTER(LEN=4),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
+ CHARACTER(LEN=4),  INTENT(IN)  :: HMASK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28)              :: YFILE
+ CHARACTER(LEN=28)              :: YFILE
 !
 !-------------------------------------------------------------------------------
 !

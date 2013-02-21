@@ -51,7 +51,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !                                   
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM    ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM    ! Type of program
 INTEGER,             INTENT(OUT)   :: KZSFILTER   ! number of orographic spatial filter iterations                     
 !
 !*    0.2    Declaration of local variables
@@ -77,19 +77,19 @@ NAMELIST/NAM_ZS_FILTER/NZSFILTER
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_OROG_FILTER',0,ZHOOK_HANDLE)
 NZSFILTER      = 1
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_ZS_FILTER',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_ZS_FILTER',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_ZS_FILTER)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

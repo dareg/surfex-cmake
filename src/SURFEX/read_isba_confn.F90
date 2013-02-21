@@ -62,7 +62,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 
 !
 !*       0.2   Declarations of local variables
@@ -72,7 +72,7 @@ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! logical unit of output file
 INTEGER           :: INAM           ! logical unit of namelist file
-CHARACTER(LEN=4)  :: YROUGH         ! CROUGH from surf_atm
+ CHARACTER(LEN=4)  :: YROUGH         ! CROUGH from surf_atm
 INTEGER           :: IMI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* get output listing file logical unit
 !
 IF (LHOOK) CALL DR_HOOK('READ_ISBA_CONF_N',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IMI=GET_CURRENT_MODEL_INDEX_SURFEX()
 !
@@ -166,7 +166,7 @@ ENDIF
 !
 !* coherence check : orographic drag must be done only once
 !
-CALL GET_SURF_ATM_SSO_ROUGH(YROUGH)
+ CALL GET_SURF_ATM_SSO_ROUGH(YROUGH)
 !
 IF (YROUGH/="NONE") THEN
   IF (LNAM_READ) THEN

@@ -145,7 +145,7 @@ REAL, INTENT(IN)                    :: PTSTEP
 !                                      PTSTEP    = time step of the integration
 TYPE(DATE_TIME), INTENT(IN)         :: TPTIME      ! current date and time
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
 !                                      HSNOWRES  = ISBA-SNOW3L turbulant exchange option
 !                                      'DEF' = Default: Louis (ISBA: Noilhan and Mahfouf 1996)
 !                                      'RIL' = Limit Richarson number under very stable
@@ -155,7 +155,7 @@ LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow a
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                   ! False = No specific treatment
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -566,7 +566,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after liquid water/&
 !        4.BIS   Snow metamorphism
 !                ----------------- 
 !        
-CALL SNOWCROMETAMO(PSNOWDZ,PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,ZSNOWTEMP,         &
+ CALL SNOWCROMETAMO(PSNOWDZ,PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,ZSNOWTEMP,         &
                        PSNOWLIQ,PTSTEP,PSNOWSWE,INLVLS_USE) 
 !
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROMETAMO",INLVLS_USE(IDEBUG),LPRINTGRAN,&
@@ -577,7 +577,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROMETAMO",INLVLS
 !               ---------------
 ! Calculate snow density: compaction/aging: density increases
 !
-CALL SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,     &
+ CALL SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,     &
             PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, PSNOWLIQ,INLVLS_USE,&
              PDIRCOSZW)
 
@@ -623,7 +623,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after update snow heat cont
 ! Heat source (-sink) term due to shortwave
 ! radiation transmission within the snowpack:
 !
-CALL SNOWCRORAD(TPTIME,OGLACIER,&
+ CALL SNOWCRORAD(TPTIME,OGLACIER,&
                 PSW_RAD,PSNOWALB,PSNOWDZ,PSNOWRHO,  &
                 PALB,ZRADSINK,ZRADXS,                          &
                 PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE,PPS,          &
@@ -637,7 +637,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCRORAD",INLVLS_US
 !               ---------------------------------------
 ! Snow thermal conductivity:
 !
-CALL SNOWCROTHRM(PSNOWRHO,ZSCOND,ZSNOWTEMP,PPS,PSNOWLIQ,OCOND_GRAIN,OCOND_YEN)
+ CALL SNOWCROTHRM(PSNOWRHO,ZSCOND,ZSNOWTEMP,PPS,PSNOWLIQ,OCOND_GRAIN,OCOND_YEN)
 !
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROTHRM",INLVLS_USE(IDEBUG),LPRINTGRAN,&
   PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),&
@@ -675,7 +675,7 @@ ELSE
   ZZ0EFF_SNOWICE = PZ0EFF
 END IF
 
-CALL SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                    &
+ CALL SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                    &
                  PPEW_A_COEF, PPEW_B_COEF,                                    &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,          &
                  ZSNOWDZMIN,                                                  &
@@ -698,7 +698,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEBUD",INLVLS_U
 !
 ZSNOWTEMPO1(:) = ZSNOWTEMP(:,1) ! save surface snow temperature before update
 !
-CALL SNOWCROSOLVT(PTSTEP,ZSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,                &
+ CALL SNOWCROSOLVT(PTSTEP,ZSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,                &
                   PSOILCOND,PD_G,ZRADSINK,ZCT,ZTSTERM1,ZTSTERM2,              &
                   ZPET_A_COEF_T,ZPEQ_A_COEF_T,ZPET_B_COEF_T,ZPEQ_B_COEF_T,    &
                   ZTA_IC,ZQA_IC,PGRNDFLUX, ZSNOWTEMP ,ZSNOWFLUX,              &
@@ -711,7 +711,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROSOLVT",INLVLS_
 !*       8.     Surface fluxes
 !               --------------
 !
-CALL SNOWCROFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,            &
+ CALL SNOWCROFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,            &
                  ZUSTAR2_IC,                                           &
                  PTSTEP,PSNOWALB,PSW_RAD,PEMISNOW,ZLWUPSNOW,PLW_RAD, &
                  ZTA_IC,ZSFCFRZ,ZQA_IC,PHPSNOW,                      &
@@ -728,7 +728,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROFLUX",INLVLS_U
 !
 ! First Test to see if snow pack vanishes during this time step:
 !
-CALL SNOWCROGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,                     &
+ CALL SNOWCROGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,                     &
                  PSNOWHEAT,ZRADSINK,PEVAPCOR,PTHRUFAL,PGRNDFLUX, &
                  PGFLUXSNOW,PSNOWDZ,PSNOWLIQ,ZSNOWTEMP,ZRADXS,    &
                  PRR,INLVLS_USE) 
@@ -756,7 +756,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROLAYER_GONE",IN
 !
 ! For partial melt: transform excess heat content into snow liquid:
 !
-CALL SNOWCROMELT(ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,PSNOWLIQ,INLVLS_USE)
+ CALL SNOWCROMELT(ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,PSNOWLIQ,INLVLS_USE)
 !                
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROMELT",INLVLS_USE(IDEBUG),LPRINTGRAN,&
   PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),&
@@ -767,7 +767,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROMELT",INLVLS_U
 ! Liquid water vertical transfer and possible snowpack runoff
 ! And refreezing/freezing of meltwater/rainfall (ripening of the snow)
 !
-CALL SNOWCROREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL, &
+ CALL SNOWCROREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL, &
                   ZSCAP,PLEL3L,INLVLS_USE) 
 !
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROREFRZ",INLVLS_USE(IDEBUG),LPRINTGRAN,&
@@ -777,7 +777,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROREFRZ",INLVLS_
 !*      11.     Snow Evaporation/Sublimation mass updates:
 !               ------------------------------------------
 !
-CALL SNOWCROEVAPN(PLES3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
+ CALL SNOWCROEVAPN(PLES3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
                   PSNOWDZ(:,1),PEVAPCOR,PSNOWHMASS) 
 !
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPN",INLVLS_USE(IDEBUG),LPRINTGRAN,&
@@ -787,7 +787,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPN",INLVLS_
 ! If all snow in uppermost layer evaporates/sublimates, re-distribute
 ! grid (below could be evoked for vanishingly thin snowpacks):
 !
-CALL SNOWCROEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ,PSNOWGRAN1,&
+ CALL SNOWCROEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ,PSNOWGRAN1,&
                      PSNOWGRAN2,PSNOWHIST,PSNOWAGE,INLVLS_USE) 
 !
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPGONE",INLVLS_USE(IDEBUG),LPRINTGRAN,&
@@ -798,7 +798,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPGONE",INLV
 !               ----------------------
 ! Snow clear sky albedo:
 !
-CALL SNOWCROALB(TPTIME,OGLACIER,&
+ CALL SNOWCROALB(TPTIME,OGLACIER,&
                 PSNOWALB,ZSPECTRALALBEDO,PSNOWDZ(:,1),PSNOWRHO(:,1:2),   &
                 PPERMSNOWFRAC,PSNOWGRAN1(:,1),PSNOWGRAN2(:,1), &
                 PSNOWAGE(:,1),PSNOWGRAN1(:,2),PSNOWGRAN2(:,2),PSNOWAGE(:,2),&
@@ -1809,7 +1809,7 @@ ENDIF
 ! -----------------------------------
 !
 !  
-CALL SNOWCROALB(TPTIME,OGLACIER,&
+ CALL SNOWCROALB(TPTIME,OGLACIER,&
                 ZALB_NEW,ZALB,PSNOWDZ(:,1),PSNOWRHO(:,1:2),   &
                 PPERMSNOWFRAC,PSNOWGRAN1(:,1),PSNOWGRAN2(:,1), &
                 PSNOWAGE(:,1),PSNOWGRAN1(:,2),PSNOWGRAN2(:,2),PSNOWAGE(:,2),&
@@ -2001,12 +2001,12 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                    :: PTSTEP, PSNOWDZMIN
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES ! type of sfc resistance
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES ! type of sfc resistance
 !                                      DEFAULT=Louis (1979), standard ISBA
 !                                      method. Option to limit Ri number
 !                                      for very stable conditions
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -2076,7 +2076,7 @@ PEMIST(:) = XEMISSN
 ! 2. Computation of resistance and drag coefficient
 ! -------------------------------------------------
 !
-CALL SURFACE_RI(PTS, PQSAT, PEXNS, PEXNA, PTA, PQA,                  &
+ CALL SURFACE_RI(PTS, PQSAT, PEXNS, PEXNA, PTA, PQA,                  &
                  PZREF, PUREF, PDIRCOSZW, PVMOD, ZRI                  ) 
 !
 ! Simple adaptation of method by Martin and Lejeune (1998)
@@ -2090,13 +2090,13 @@ PRI(:)=ZRI(:)
 !
 ! Surface aerodynamic resistance for heat transfers
 !
-CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW)
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW)
 !
 PRSRA(:) = PRHOA(:) / PRA(:)
 !
 ! For atmospheric model coupling:
 !
-CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0EFF, PZ0H, PCDSNOW, ZCDN)
+ CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0EFF, PZ0H, PCDSNOW, ZCDN)
 !
 !
 ! Modify flux-form implicit coupling coefficients:
@@ -2354,7 +2354,7 @@ ENDDO
 ! 4. Compute solution vector
 ! --------------------------
 !
-CALL TRIDIAG_GROUND_SNOWCRO(ZAMTRX,ZBMTRX,ZCMTRX,ZFRCV,ZSNOWTEMP,   &
+ CALL TRIDIAG_GROUND_SNOWCRO(ZAMTRX,ZBMTRX,ZCMTRX,ZFRCV,ZSNOWTEMP,   &
             INLVLS_USE,0) 
 !
 ! Heat flux between surface and 2nd snow layers: (W/m2)
@@ -2385,7 +2385,7 @@ DO JJ=1,SIZE(PTG)
    ZSNOWTEMP_M(JJ,2:INLVLS_USE(JJ)-1) = PSNOWTEMP(JJ,3:INLVLS_USE(JJ))
 ENDDO
 !
-CALL TRIDIAG_GROUND_SNOWCRO(ZAMTRX_M,ZBMTRX_M,ZCMTRX_M,ZFRCV_M,ZSNOWTEMP_M,   &
+ CALL TRIDIAG_GROUND_SNOWCRO(ZAMTRX_M,ZBMTRX_M,ZCMTRX_M,ZFRCV_M,ZSNOWTEMP_M,   &
                     INLVLS_USE,1) 
 !
 ! If melting for 2 consecuative time steps, then replace current T-profile
@@ -3199,7 +3199,7 @@ ZSNOWRHO_1D (:) = MAX(XRHOSMIN_ES,MIN(XRHOSMAX_ES,ZSNOWRHO_1D(:)))
 ! Where uppermost snow layer has vanished, redistribute vertical
 ! snow mass and heat profiles (and associated quantities):
 !
-CALL SNOW3LAVGRAIN(PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, &
+ CALL SNOW3LAVGRAIN(PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, &
                  ZSNOWGRAN1N, ZSNOWGRAN2N, ZSNOWHISTN,ZNDENT, ZNVIEU)         
 !
 DO JJ=1,SIZE(PSNOWRHO,1)
@@ -3970,7 +3970,7 @@ DO JJ=1,SIZE(PSNOW(:))
                PSNOW(JJ),INLVLS_USE(JJ) 
 write( *,*) 'PSNOWDZ:',     PSNOWDZ
 write( *,*) 'PSNOWDZN:',     PSNOWDZN
-CALL ABOR1_SFX("SNOWCRO: error in grid resizing")
+ CALL ABOR1_SFX("SNOWCRO: error in grid resizing")
    ENDIF       
 ENDDO
 IF (LHOOK) CALL DR_HOOK('SNOWNLFALL_UPGRID',1,ZHOOK_HANDLE)
@@ -4802,7 +4802,7 @@ SUBROUTINE SNOWCROPRINTPROFILE(CINFO,NLAYERS,LPRINTGRAN,PSNOWDZ,PSNOWRHO,PSNOWTE
 
 IMPLICIT NONE
 
-CHARACTER(*),INTENT(IN)::CINFO
+ CHARACTER(*),INTENT(IN)::CINFO
 LOGICAL,INTENT(IN)::LPRINTGRAN
 INTEGER,INTENT(IN)::NLAYERS
 REAL,DIMENSION(:),INTENT(IN)::PSNOWDZ,PSNOWRHO,PSNOWTEMP,PSNOWLIQ,&
@@ -4865,14 +4865,14 @@ PTG, PSOILCOND, PD_G, PPSN3L)
 
 IMPLICIT NONE
 
-CHARACTER(*),INTENT(IN)::CINFO
+ CHARACTER(*),INTENT(IN)::CINFO
 REAL,INTENT(IN)::PTA,PQA,PVMOD,PRR,PSR,PSW_RAD,PLW_RAD
 REAL,INTENT(IN)::PTG, PSOILCOND, PD_G, PPSN3L
 
 
 INTEGER::JST
 
-CALL SNOWCROPRINTDATE()
+ CALL SNOWCROPRINTDATE()
 WRITE(*,*)
 WRITE(*,*)TRIM(CINFO)
 WRITE(*,'(4(A12,"|"))')"------------","------------","------------",&
@@ -4965,7 +4965,7 @@ REAL :: ZMASSBALANCE,ZENERGYBALANCE
 
 write(*,*) ' '
 write(*,FMT='(A1,67("+"),A1)')"+","+"
-CALL SNOWCROPRINTDATE()
+ CALL SNOWCROPRINTDATE()
 write(*,*) ' '
 
 ! print des residus de bilan et des differents termes pour le point

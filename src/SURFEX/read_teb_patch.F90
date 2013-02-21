@@ -13,14 +13,14 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
-CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
 INTEGER,              INTENT(OUT)   :: KTEB_PATCH! number of TEB patches
 !
 !
 !* local variables
 !  ---------------
 !
-CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
 INTEGER           :: IRESP      ! reading return code
 !
 INTEGER           :: IVERSION   ! surface version
@@ -32,9 +32,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_TEB_PATCH',0,ZHOOK_HANDLE)
 YRECFM='VERSION'
-CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF (IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<=2)) THEN
   KTEB_PATCH = 1

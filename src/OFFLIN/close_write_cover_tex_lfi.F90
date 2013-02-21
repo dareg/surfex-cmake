@@ -50,7 +50,7 @@ INTEGER, INTENT(IN) :: KTEX  ! logical unit to close
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=20) :: YTEX           ! name of tex file
+ CHARACTER(LEN=20) :: YTEX           ! name of tex file
 INTEGER :: IRESP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_WRITE_COVER_TEX_LFI',0,ZHOOK_HANDLE)
 YTEX = 'class_cover_data.tex'
-CALL FMFREE(YTEX,CLUOUT_LFI,IRESP)
+ CALL FMFREE(YTEX,CLUOUT_LFI,IRESP)
 CLOSE(KTEX)
 IF (LHOOK) CALL DR_HOOK('CLOSE_WRITE_COVER_TEX_LFI',1,ZHOOK_HANDLE)
 !

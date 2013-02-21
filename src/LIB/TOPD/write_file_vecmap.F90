@@ -50,13 +50,13 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 REAL, DIMENSION(:),INTENT(IN) :: PVAR   ! variable to write in the file
-CHARACTER(LEN=30), INTENT(IN) :: HVAR   ! end name of the file
+ CHARACTER(LEN=30), INTENT(IN) :: HVAR   ! end name of the file
 INTEGER,           INTENT(IN) :: KCAT   ! catchment number
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=50)          :: CNAME
-CHARACTER(LEN=40)          :: CFMT
+ CHARACTER(LEN=50)          :: CNAME
+ CHARACTER(LEN=40)          :: CFMT
 INTEGER                    :: JJ,JI,JK
 INTEGER                    :: IINDEX ! reference number of the pixel
 INTEGER                    :: IUNIT
@@ -75,7 +75,7 @@ ZMAX = MAXVAL(PVAR)
 !
 CNAME = TRIM(CCAT(KCAT))//TRIM(HVAR)
 !
-CALL OPEN_FILE('ASCII ',IUNIT,HFILE=CNAME,HFORM='FORMATTED')
+ CALL OPEN_FILE('ASCII ',IUNIT,HFILE=CNAME,HFORM='FORMATTED')
 !
 DO JI=1,5
   WRITE(IUNIT,*)
@@ -101,7 +101,7 @@ DO JI=1,NNYC(KCAT)
   ENDDO
 ENDDO
 ! 
-CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL CLOSE_FILE('ASCII ',IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_FILE_VECMAP',1,ZHOOK_HANDLE)
 !

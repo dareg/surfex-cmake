@@ -46,13 +46,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
                                                  ! in a forcing iteration
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=3)              :: YSTEP    ! time stepsurf_tmp/off
+ CHARACTER(LEN=3)              :: YSTEP    ! time stepsurf_tmp/off
 INTEGER                       :: ILUOUT   ! unit of output listing file
 INTEGER                       :: JJ       ! loop control
 !
@@ -62,7 +62,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_TOPD',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF ( .NOT.LCOUPL_TOPD ) THEN
   IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_TOPD',1,ZHOOK_HANDLE)

@@ -66,11 +66,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
 LOGICAL,              INTENT(IN)  :: OECOCLIMAP  ! flag to use ecoclimap
 !
 !
@@ -94,7 +94,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZSSO_SLOPE! subgrid slope on all surface po
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*      1.     Preparation of IO for reading in the file
 !              -----------------------------------------
@@ -103,20 +103,20 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !  These points will not be used during the horizontal interpolation step.
 !  Their value must be defined as XUNDEF.
 !
-CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
 !
-CALL READ_SURF(HINIFILETYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(HINIFILETYPE,'PATCH_NUMBER',NPATCH,IRESP)
-CALL READ_SURF(HINIFILETYPE,'GROUND_LAYER',NGROUND_LAYER,IRESP)
-CALL READ_SURF(HINIFILETYPE,'ISBA',CISBA,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'PATCH_NUMBER',NPATCH,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'GROUND_LAYER',NGROUND_LAYER,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'ISBA',CISBA,IRESP)
 IF (IVERSION >= 7) THEN
   CALL READ_SURF(HINIFILETYPE,'PEDOTF',CPEDOTF,IRESP)
 ELSE
   CPEDOTF = 'CH78'
 ENDIF
-CALL READ_SURF(HINIFILETYPE,'PHOTO',CPHOTO,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'PHOTO',CPHOTO,IRESP)
 !
-CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
+ CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
 !
 !------------------------------------------------------------------------------
 LECOCLIMAP = OECOCLIMAP
@@ -127,7 +127,7 @@ LECOCLIMAP = OECOCLIMAP
 !             ----------------------------------------------
 !
 !
-CALL GET_SURF_SIZE_n('NATURE',ILU)
+ CALL GET_SURF_SIZE_n('NATURE',ILU)
 !
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XCOVER     (ILU,JPCOVER))
@@ -137,7 +137,7 @@ ALLOCATE(XLON       (ILU))
 ALLOCATE(XMESH_SIZE (ILU))
 ALLOCATE(XZ0EFFJPDIR(ILU))
 !
-CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
+ CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
                 CGRID,  XGRID_PAR,                     &
                 LCOVER, XCOVER, XZS,                   &
                 XLAT, XLON, XMESH_SIZE, XZ0EFFJPDIR    )  
@@ -151,14 +151,14 @@ ALLOCATE(XSAND(ILU,NGROUND_LAYER))
 ALLOCATE(XCLAY(ILU,NGROUND_LAYER))
 ALLOCATE(XRUNOFFB(ILU))
 ALLOCATE(XWDRAIN (ILU))
-CALL ZOOM_PGD_ISBA_FULL(HPROGRAM,HINIFILE,HINIFILETYPE)
+ CALL ZOOM_PGD_ISBA_FULL(HPROGRAM,HINIFILE,HINIFILETYPE)
 !
 !-------------------------------------------------------------------------------
 !
 !*    8.      Packing of ISBA specific fields
 !             -------------------------------
 !
-CALL GET_SURF_SIZE_n('FULL  ',IL)
+ CALL GET_SURF_SIZE_n('FULL  ',IL)
 !
 ALLOCATE(ZAOSIP(IL))
 ALLOCATE(ZAOSIM(IL))
@@ -170,10 +170,10 @@ ALLOCATE(ZHO2JP(IL))
 ALLOCATE(ZHO2JM(IL))
 ALLOCATE(ZSSO_SLOPE(IL))
 
-CALL GET_AOS_n(HPROGRAM,IL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
-CALL GET_SSO_n(HPROGRAM,IL,ZSSO_SLOPE)
+ CALL GET_AOS_n(HPROGRAM,IL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
+ CALL GET_SSO_n(HPROGRAM,IL,ZSSO_SLOPE)
 
-CALL PACK_PGD_ISBA(HPROGRAM,                                    &
+ CALL PACK_PGD_ISBA(HPROGRAM,                                    &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
                      ZSSO_SLOPE                                   )  

@@ -46,7 +46,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: XSFTH     ! hourly data of heat surface flu
 REAL, DIMENSION(:), ALLOCATABLE   :: XSFTQ     ! hourly data of water vapor surface flux (kg/m2/s) or (W/m2)
 REAL, DIMENSION(:,:), ALLOCATABLE :: XSFTS      ! hourly data of scalar surface flux      (kg/m2/s)
 REAL, DIMENSION(:), ALLOCATABLE   :: XSFCO2    ! hourly data of CO2 surface flux         (kg/m2/s)
-CHARACTER(LEN=5)                  :: CUSTARTYPE ! type of computation for friction
+ CHARACTER(LEN=5)                  :: CUSTARTYPE ! type of computation for friction
                                                 ! 'USTAR'
                                                 ! 'Z0   '
 REAL, DIMENSION(:), ALLOCATABLE   :: XUSTAR    ! hourly data of friction                 (m2/s2)

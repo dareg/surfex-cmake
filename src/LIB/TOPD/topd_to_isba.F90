@@ -85,7 +85,7 @@ REAL, DIMENSION(KI)    :: ZWSAT_FULL      ! Water content at saturation on the l
                                           ! on the full grid
 REAL, DIMENSION(KI)    :: ZWG_OLD
 REAL, DIMENSION(KI)    :: ZDG_FULL
-CHARACTER(LEN=3)       :: YSTEP
+ CHARACTER(LEN=3)       :: YSTEP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA',0,ZHOOK_HANDLE)
@@ -135,7 +135,7 @@ XWG_FULL(:) = MAX(XWG_FULL(:),XWGMIN)
 !
 10 CONTINUE 
 !
-CALL UNPACK_SAME_RANK(NR_NATURE,XWSAT(:,2),ZWSAT_FULL)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XWSAT(:,2),ZWSAT_FULL)
 !
 IF (.NOT.ALLOCATED(XWSUPSAT)) ALLOCATE(XWSUPSAT(KI))
 XWSUPSAT=0.

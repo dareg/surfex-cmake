@@ -52,7 +52,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_CARTESIAN',0,ZHOOK_HANDLE)
-CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,PDX=PDX,PDY=PDY)
+ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,PDX=PDX,PDY=PDY)
 IF (LHOOK) CALL DR_HOOK('GET_MESH_DIM_CARTESIAN',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

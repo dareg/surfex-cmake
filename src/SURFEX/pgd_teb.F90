@@ -66,7 +66,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
+ CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
 LOGICAL,          INTENT(IN)  :: OECOCLIMAP ! T if parameters are computed with ecoclimap
 !                                           ! F if all parameters must be specified
 LOGICAL,          INTENT(IN)  :: OGARDEN    ! T if urban green areas
@@ -84,7 +84,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 
 NROOF_LAYER  = 5
 NROAD_LAYER  = 5
@@ -96,7 +96,7 @@ NFLOOR_LAYER = 5
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL READ_NAM_PGD_TEB(HPROGRAM,NTEB_PATCH,CBEM,CCOOL_COIL,CHEAT_COIL,LAUTOSIZE,&
+ CALL READ_NAM_PGD_TEB(HPROGRAM,NTEB_PATCH,CBEM,CCOOL_COIL,CHEAT_COIL,LAUTOSIZE,&
                       NROAD_LAYER,NROOF_LAYER,NWALL_LAYER,NFLOOR_LAYER,        &
                       LGREENROOF,LHYDRO                                        )
 !
@@ -105,9 +105,9 @@ CALL READ_NAM_PGD_TEB(HPROGRAM,NTEB_PATCH,CBEM,CCOOL_COIL,CHEAT_COIL,LAUTOSIZE,&
 !*    3.      Coherence of options
 !             --------------------
 !
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CBLD',CBEM,'DEF','BEM ')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CCOOL_COIL',CCOOL_COIL,'IDEAL ','DXCOIL')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CHEAT_COIL',CHEAT_COIL,'IDEAL ','FINCAP')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CBLD',CBEM,'DEF','BEM ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CCOOL_COIL',CCOOL_COIL,'IDEAL ','DXCOIL')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CHEAT_COIL',CHEAT_COIL,'IDEAL ','FINCAP')
 !
 IF (.NOT. OGARDEN) THEN
   IF (LGREENROOF) CALL ABOR1_SFX('ERROR: You cannot activate LGREENROOF if LGARDEN is FALSE')
@@ -119,7 +119,7 @@ ENDIF
 !*    4.      Number of points and packing
 !             ----------------------------
 !
-CALL GET_SURF_SIZE_n('TOWN  ',NDIM)
+ CALL GET_SURF_SIZE_n('TOWN  ',NDIM)
 !
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XCOVER     (NDIM,JPCOVER))
@@ -128,7 +128,7 @@ ALLOCATE(XLAT       (NDIM))
 ALLOCATE(XLON       (NDIM))
 ALLOCATE(XMESH_SIZE (NDIM))
 !
-CALL PACK_PGD(HPROGRAM, 'TOWN  ',                    &
+ CALL PACK_PGD(HPROGRAM, 'TOWN  ',                    &
                 CGRID,  XGRID_PAR,                   &
                 LCOVER, XCOVER, XZS,                 &
                 XLAT, XLON, XMESH_SIZE               )  
@@ -139,7 +139,7 @@ CALL PACK_PGD(HPROGRAM, 'TOWN  ',                    &
 !             -------------------
 !
 LECOCLIMAP = OECOCLIMAP
-CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,LGREENROOF,CBLD_ATYPE)
+ CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,LGREENROOF,CBLD_ATYPE)
 !
 !-------------------------------------------------------------------------------
 !

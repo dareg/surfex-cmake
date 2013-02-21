@@ -82,9 +82,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
 LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed by atm. model
 !
 !*    0.2    Declaration of local variables
@@ -96,27 +96,27 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',0,ZHOOK_HANDLE)
 CPROGNAME=HPROGRAM
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*    1.      Set default constant values 
 !             ---------------------------
 !
-CALL READ_PGD_ARRANGE_COVER(HPROGRAM,LWATER_TO_NATURE,LTOWN_TO_ROCK)
+ CALL READ_PGD_ARRANGE_COVER(HPROGRAM,LWATER_TO_NATURE,LTOWN_TO_ROCK)
 !
-CALL READ_PGD_COVER_GARDEN(HPROGRAM,LGARDEN)
+ CALL READ_PGD_COVER_GARDEN(HPROGRAM,LGARDEN)
 !
-CALL INIT_READ_DATA_COVER(HPROGRAM)
+ CALL INIT_READ_DATA_COVER(HPROGRAM)
 !
-CALL INI_DATA_COVER
+ CALL INI_DATA_COVER
 !
 !*    1.2     surface schemes
-CALL READ_PGD_SCHEMES(HPROGRAM,CNATURE,CSEA,CTOWN,CWATER)
+ CALL READ_PGD_SCHEMES(HPROGRAM,CNATURE,CSEA,CTOWN,CWATER)
 !
 !*    1.3     prints all parameters in a Latex file
-CALL READ_NAM_WRITE_COVER_TEX(HPROGRAM)
+ CALL READ_NAM_WRITE_COVER_TEX(HPROGRAM)
 !
-CALL WRITE_COVER_TEX_START(HPROGRAM)
-CALL WRITE_COVER_TEX_COVER
+ CALL WRITE_COVER_TEX_START(HPROGRAM)
+ CALL WRITE_COVER_TEX_COVER
 !-------------------------------------------------------------------------------
 !
 !*    2.      Grid
@@ -126,15 +126,15 @@ ALLOCATE(XLAT(NSIZE_FULL))
 ALLOCATE(XLON(NSIZE_FULL))
 ALLOCATE(XMESH_SIZE(NSIZE_FULL))
 ALLOCATE(XJPDIR(NSIZE_FULL))
-CALL LATLON_GRID(CGRID,NGRID_PAR,NSIZE_FULL,ILUOUT,XGRID_PAR,XLAT,XLON,XMESH_SIZE,XJPDIR)
+ CALL LATLON_GRID(CGRID,NGRID_PAR,NSIZE_FULL,ILUOUT,XGRID_PAR,XLAT,XLON,XMESH_SIZE,XJPDIR)
 !
 !
 !*    2.3     Stores the grid in the module MODD_PGD_GRID
 !
-CALL PUT_PGD_GRID(CGRID,NSIZE_FULL,NGRID_PAR,XGRID_PAR)
+ CALL PUT_PGD_GRID(CGRID,NSIZE_FULL,NGRID_PAR,XGRID_PAR)
 !
 !*    2.4     mask to limit the number of input data to read
-CALL LATLONMASK      (CGRID,NGRID_PAR,XGRID_PAR,LLATLONMASK)
+ CALL LATLONMASK      (CGRID,NGRID_PAR,XGRID_PAR,LLATLONMASK)
 !
 !*    2.5     gaussien grid mesh index
 !
@@ -145,7 +145,7 @@ IF(CGRID=='GAUSS') CALL PGD_GAUSS_INDEX(HPROGRAM,OZS)
 !*    3.      surface cover
 !             -------------
 !
-CALL PGD_FRAC(HPROGRAM,LECOCLIMAP)
+ CALL PGD_FRAC(HPROGRAM,LECOCLIMAP)
 IF (LECOCLIMAP) CALL PGD_COVER(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ IF (LECOCLIMAP) CALL PGD_COVER(HPROGRAM)
 !*    4.      Orography
 !             ---------
 !
-CALL PGD_OROGRAPHY(HPROGRAM,XSEA,XWATER,HFILE,HFILETYPE,OZS)
+ CALL PGD_OROGRAPHY(HPROGRAM,XSEA,XWATER,HFILE,HFILETYPE,OZS)
 !
 !_______________________________________________________________________________
 !
@@ -185,13 +185,13 @@ IF (NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)
 !*    9.      Dummy fields
 !             ------------
 !
-CALL PGD_DUMMY(HPROGRAM)
+ CALL PGD_DUMMY(HPROGRAM)
 !_______________________________________________________________________________
 !
 !*   10.      Chemical Emission fields
 !             ------------------------
 !
-CALL READ_NAM_PGD_CHEMISTRY(HPROGRAM,CCH_EMIS)
+ CALL READ_NAM_PGD_CHEMISTRY(HPROGRAM,CCH_EMIS)
 IF (CCH_EMIS=='SNAP') THEN
   CALL PGD_CHEMISTRY_SNAP(HPROGRAM,LCH_EMIS)
 ELSE IF (CCH_EMIS=='AGGR') THEN
@@ -203,7 +203,7 @@ ENDIF
 !*   11.     Writing in cover latex file
 !            ---------------------------
 !
-CALL WRITE_COVER_TEX_END(HPROGRAM)
+ CALL WRITE_COVER_TEX_END(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',1,ZHOOK_HANDLE)
 !_______________________________________________________________________________
 !

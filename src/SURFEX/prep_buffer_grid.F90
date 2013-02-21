@@ -53,7 +53,7 @@ IMPLICIT NONE
 !       ------------------------
 !
 INTEGER,          INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6), INTENT(OUT)   :: HINMODEL  ! originating model
+ CHARACTER(LEN=6), INTENT(OUT)   :: HINMODEL  ! originating model
 TYPE (DATE_TIME)                :: TPTIME_BUF    ! current date and time
 
 !
@@ -72,7 +72,7 @@ WRITE (KLUOUT,'(A)') ' -- Buffer reader started'
 !* 1.  Read HINMODEL
 !---------------------------------------------------------------------------------------
 !
-CALL READ_BUFFER('INMODE',HINMODEL,IRET)
+ CALL READ_BUFFER('INMODE',HINMODEL,IRET)
 
     IF (HINMODEL =='ALADIN' ) THEN
       WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Aladin model'
@@ -84,7 +84,7 @@ CALL READ_BUFFER('INMODE',HINMODEL,IRET)
 !* 3. Number of points
 !---------------------------------------------------------------------------------------
 !
-CALL READ_BUFFER('NNI   ',NNI,IRET)
+ CALL READ_BUFFER('NNI   ',NNI,IRET)
 WRITE (KLUOUT,*)'apres READ BUFFER NNI=',NNI
 !---------------------------------------------------------------------------------------
 !* 2.4 Read date
@@ -92,10 +92,10 @@ WRITE (KLUOUT,*)'apres READ BUFFER NNI=',NNI
 !
 WRITE (KLUOUT,'(A)') ' | Reading date'
 !
-CALL READ_BUFFER('YEAR  ',TPTIME_BUF%TDATE%YEAR,IRET )
-CALL READ_BUFFER('MONTH ',TPTIME_BUF%TDATE%MONTH,IRET )
-CALL READ_BUFFER('DAY   ',TPTIME_BUF%TDATE%DAY,IRET )
-CALL READ_BUFFER('TIME  ', TPTIME_BUF%TIME,IRET)
+ CALL READ_BUFFER('YEAR  ',TPTIME_BUF%TDATE%YEAR,IRET )
+ CALL READ_BUFFER('MONTH ',TPTIME_BUF%TDATE%MONTH,IRET )
+ CALL READ_BUFFER('DAY   ',TPTIME_BUF%TDATE%DAY,IRET )
+ CALL READ_BUFFER('TIME  ', TPTIME_BUF%TIME,IRET)
 IF (LHOOK) CALL DR_HOOK('PREP_BUFFER_GRID',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE PREP_BUFFER_GRID

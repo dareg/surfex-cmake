@@ -91,11 +91,11 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PTS_ROOF   ! roof surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_ROAD   ! road surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL_A ! wall surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL_B ! wall surface temperature
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ROOF ! snow roof scheme
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ROOF ! snow roof scheme
 !                                                 ! 'NONE'
 !                                                 ! 'D95 '
 !                                                 ! '1-L '
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ROAD ! snow road scheme
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ROAD ! snow road scheme
 !                                                 ! 'NONE'
 !                                                 ! 'D95 '
 !                                                 ! '1-L '

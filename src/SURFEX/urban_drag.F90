@@ -91,9 +91,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=6),   INTENT(IN)    :: HZ0H           ! TEB option for z0h roof & road
+ CHARACTER(LEN=6),   INTENT(IN)    :: HZ0H           ! TEB option for z0h roof & road
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -175,7 +175,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR_TOWN    ! Fraction velocity for town
 LOGICAL, INTENT(IN)               :: OCANOPY        ! is canopy active
 REAL, DIMENSION(:), INTENT(OUT)   :: PAC_WIN        ! aerodynamical conductance for window
 REAL, DIMENSION(:), INTENT(IN)    :: PTS_WIN        ! window outdoor surface temp
-CHARACTER(LEN=5), INTENT(IN)      :: HCH_BEM        ! BEM option for convective heat transfer coef.
+ CHARACTER(LEN=5), INTENT(IN)      :: HCH_BEM        ! BEM option for convective heat transfer coef.
 REAL, DIMENSION(:), INTENT(IN)    :: PROUGH_ROOF    ! roughness coef for the roof
 REAL, DIMENSION(:), INTENT(IN)    :: PROUGH_WALL    ! roughness coef for the wall
 !

@@ -39,19 +39,19 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL,DIMENSION(kI), INTENT(IN) :: PT2M_O
-CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-CHARACTER(LEN=6)                   :: YPROGRAM  = 'LFI   '
+ CHARACTER(LEN=6)                   :: YPROGRAM  = 'LFI   '
 REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
-CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
-CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
+ CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
+ CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                            :: IRESP
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_TOWN_N',0,ZHOOK_HANDLE)

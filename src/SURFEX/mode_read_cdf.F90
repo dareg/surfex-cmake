@@ -15,7 +15,7 @@ CONTAINS
 !     ####################
 IMPLICIT NONE
 INTEGER, INTENT(IN)           :: status
-CHARACTER(*), INTENT(IN) :: line
+ CHARACTER(*), INTENT(IN) :: line
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 include 'netcdf.inc'
@@ -126,7 +126,7 @@ IMPLICIT NONE
 INTEGER,INTENT(IN) :: KCDF_ID !netcdf file identifiant
 INTEGER,INTENT(IN) :: IDVAR   !variable to read identifiant
 REAL,DIMENSION(:),INTENT(OUT) :: PDIM1,PDIM2 !dimensions for PVALU2D array
-CHARACTER(len=80),INTENT(OUT) :: HDIM1NAME,HDIM2NAME     !dimensions names
+ CHARACTER(len=80),INTENT(OUT) :: HDIM1NAME,HDIM2NAME     !dimensions names
 REAL, INTENT(OUT) :: PMISSVALUE
 REAL,DIMENSION(:,:),INTENT(OUT) :: PVALU2D !value array
 !
@@ -203,8 +203,8 @@ IF (KVARTYPE>=5) then
 ENDIF
 PVALU2D(:,:)=ZVALU2D(:,:)
 !
-CALL GET1DCDF(KCDF_ID,NVARDIMID(1),ZMISS1,PDIM1)
-CALL GET1DCDF(KCDF_ID,NVARDIMID(2),ZMISS2,PDIM2)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(1),ZMISS1,PDIM1)
+ CALL GET1DCDF(KCDF_ID,NVARDIMID(2),ZMISS2,PDIM2)
 HDIM1NAME=NVARDIMNAM(1)
 HDIM2NAME=NVARDIMNAM(2)
 IF (ALLOCATED(ZVALU2D  ))  DEALLOCATE(ZVALU2D)
@@ -219,8 +219,8 @@ END SUBROUTINE GET2DCDF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 REAL, DIMENSION(:), INTENT(OUT) :: PLON,PLAT ! Longitudes/latitudes innetcdf file 
 REAL, DIMENSION(:), INTENT(OUT) :: PVAL      ! value to get
 !
@@ -413,8 +413,8 @@ END SUBROUTINE READ_LATLONVAL_CDF
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
-CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
+ CHARACTER(LEN=28), INTENT(IN) :: HFILENAME   ! Name of the field file.
+ CHARACTER(LEN=28), INTENT(IN) :: HNCVARNAME  ! Name of variable to read in netcdf file
 INTEGER,           INTENT(OUT):: KDIM        ! value of dimension to get
 !
 integer :: status

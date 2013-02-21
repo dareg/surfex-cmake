@@ -67,7 +67,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: OECOCLIMAP   ! F if fractions prescribed by user
 !                                                  ! T if fractions will be computed from ecoclimap
 !
@@ -93,17 +93,17 @@ REAL     :: XUNIF_TOWN  ! value of town   fraction
 !
 ! name of files containing data
 !
-CHARACTER(LEN=28)     :: CFNAM_SEA    ! name of sea    file
-CHARACTER(LEN=28)     :: CFNAM_WATER  ! name of water  file
-CHARACTER(LEN=28)     :: CFNAM_NATURE ! name of nature file
-CHARACTER(LEN=28)     :: CFNAM_TOWN   ! name of town   file
+ CHARACTER(LEN=28)     :: CFNAM_SEA    ! name of sea    file
+ CHARACTER(LEN=28)     :: CFNAM_WATER  ! name of water  file
+ CHARACTER(LEN=28)     :: CFNAM_NATURE ! name of nature file
+ CHARACTER(LEN=28)     :: CFNAM_TOWN   ! name of town   file
 !
 ! type of files containing data
 !
-CHARACTER(LEN=6)      :: CFTYP_SEA    ! type of sea    file
-CHARACTER(LEN=6)      :: CFTYP_WATER  ! type of water  file
-CHARACTER(LEN=6)      :: CFTYP_NATURE ! type of nature file
-CHARACTER(LEN=6)      :: CFTYP_TOWN   ! type of town   file
+ CHARACTER(LEN=6)      :: CFTYP_SEA    ! type of sea    file
+ CHARACTER(LEN=6)      :: CFTYP_WATER  ! type of water  file
+ CHARACTER(LEN=6)      :: CFTYP_NATURE ! type of nature file
+ CHARACTER(LEN=6)      :: CFTYP_TOWN   ! type of town   file
 !
 INTEGER               :: ICOVER       ! 0 if cover is not present, >1 if present somewhere
 !                                     ! (even on another processor)
@@ -142,13 +142,13 @@ OECOCLIMAP = .TRUE.
 !*    2.      Input file for cover types
 !             --------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_FRAC',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_FRAC',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_FRAC)
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

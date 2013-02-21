@@ -48,7 +48,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
 !
 !*      0.2    declarations of local variables
@@ -57,40 +57,40 @@ INTEGER                        :: ILUOUT      ! unit of output listing file
 INTEGER                        :: IUNIT       ! unit of restart files
 INTEGER                        :: JSTP, JJ    ! loop control indexes
 REAL, DIMENSION(:),ALLOCATABLE :: ZAS         ! Saturated area fraction for each Isba meshes
-CHARACTER(LEN=30)              :: YVAR        ! name of results file
+ CHARACTER(LEN=30)              :: YVAR        ! name of results file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! * 1. Write stock files
 !          
 WRITE(ILUOUT,*) 'Write STOCK file'
 !
-CALL OPEN_FILE('ASCII ',IUNIT,HFILE='stocks_sav.txt',HFORM='FORMATTED',HACTION='WRITE')
+ CALL OPEN_FILE('ASCII ',IUNIT,HFILE='stocks_sav.txt',HFORM='FORMATTED',HACTION='WRITE')
 DO JSTP = 1,NNB_STP_RESTART
   WRITE(IUNIT,*)  XRUN_TOROUT(1:NNCAT,JSTP+NNB_TOPD_STEP), XDR_TOROUT(1:NNCAT,JSTP+NNB_TOPD_STEP)
 ENDDO
-CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL CLOSE_FILE('ASCII ',IUNIT)
 !  
 ! * 2. Write pixels water content
 !
 WRITE(ILUOUT,*) 'Write pixels water content files'
 !
 YVAR = '_xwtop_sav.map'
-CALL WRITE_FILE_MAP(XWTOPT,YVAR)
+ CALL WRITE_FILE_MAP(XWTOPT,YVAR)
 ! 
 ! * 3. Write Asat files
 ! 
 WRITE(ILUOUT,*) 'Write Asat files'
 !
 ALLOCATE(ZAS(KI))
-CALL UNPACK_SAME_RANK(NR_NATURE,XAS_NATURE,ZAS)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XAS_NATURE,ZAS)
 !
-CALL OPEN_FILE('ASCII ',IUNIT,HFILE='surfcont_sav.map',HFORM='FORMATTED',HACTION='WRITE')
-CALL WRITE_FILE_ISBAMAP(IUNIT,ZAS,KI)
-CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL OPEN_FILE('ASCII ',IUNIT,HFILE='surfcont_sav.map',HFORM='FORMATTED',HACTION='WRITE')
+ CALL WRITE_FILE_ISBAMAP(IUNIT,ZAS,KI)
+ CALL CLOSE_FILE('ASCII ',IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('PREP_RESTART_COUPL_TOPD',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

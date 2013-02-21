@@ -57,9 +57,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HPROGRAM   !
-CHARACTER(LEN=*),      INTENT(IN)  :: HFILE      ! File to be read
-CHARACTER(LEN=*),      INTENT(IN)  :: HFORM      ! Format of the file to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HPROGRAM   !
+ CHARACTER(LEN=*),      INTENT(IN)  :: HFILE      ! File to be read
+ CHARACTER(LEN=*),      INTENT(IN)  :: HFORM      ! Format of the file to be read
 INTEGER, DIMENSION(:), INTENT(IN)  :: KYEAR      ! Year of the beginning of the simulation.
 INTEGER, DIMENSION(:), INTENT(IN)  :: KMONTH     ! Month of the beginning of the simulation.
 INTEGER, DIMENSION(:), INTENT(IN)  :: KDAY       ! Day of the beginning of the simulation.
@@ -74,8 +74,8 @@ INTEGER                   :: JJ,JCAT ! loop control
 INTEGER                   :: IUNIT       ! Unit of the files
 INTEGER                   :: ILUOUT      ! Unit of the files
 !
-CHARACTER(LEN=28) :: YFILE
-CHARACTER(LEN=40) :: YFORM          ! Writing format
+ CHARACTER(LEN=28) :: YFILE
+ CHARACTER(LEN=40) :: YFORM          ! Writing format
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_DISCHARGE_FILE',0,ZHOOK_HANDLE)
@@ -83,7 +83,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DISCHARGE_FILE',0,ZHOOK_HANDLE)
 !*       0.3    preparing file openning
 !               ----------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 YFORM='(I4,A1,I2,A1,I2,A1,I2,A1,I2,A1,F7.2)'
 !
 DO JCAT=1,NNCAT
