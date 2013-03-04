@@ -39,8 +39,8 @@ USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XGRID_FLOOR, &
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+!USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
+!USE PARKIND1 ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
@@ -61,14 +61,14 @@ REAL, DIMENSION(:),   POINTER   :: ZFIELD1D => NULL() ! 1D field read
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD => NULL()   ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD => NULL()             ! depth of field in the soil
 REAL                            :: ZTI_BLD !indoor air temperature
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.     Reading of grid
 !              ---------------
 !
-IF (LHOOK) CALL DR_HOOK('PREP_TEB_GRIB',0,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('PREP_TEB_GRIB',0,ZHOOK_HANDLE)
 !
 IF (TRIM(HFILE).NE.CGRIB_FILE) CGRIB_FILE=""
 !
@@ -76,7 +76,8 @@ IF (TRIM(HFILE).NE.CGRIB_FILE) CGRIB_FILE=""
 !
  CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,YINMODEL,ZMASK)
 !
-IF (HSURF=='T_FLOOR' .OR. HSURF=='T_WALL' .OR. HSURF=='T_ROOF' .OR.  HSURF=='T_WIN2' .OR. HSURF=='TI_BLD' .OR. HSURF=='T_MASS') THEN
+IF (HSURF=='T_FLOOR' .OR. HSURF(1:6)=='T_WALL' .OR. HSURF=='T_ROOF' .OR.  &
+    HSURF=='T_WIN2' .OR. HSURF=='TI_BLD' .OR. HSURF=='T_MASS') THEN
   ZTI_BLD = XTI_BLD_DEF
   IF (XTI_BLD/=XUNDEF) ZTI_BLD=XTI_BLD
 ENDIF
@@ -231,7 +232,7 @@ CINTERP_TYPE='HORIBL'
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('PREP_TEB_GRIB',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('PREP_TEB_GRIB',1,ZHOOK_HANDLE)
 CONTAINS
 !
 !-------------------------------------------------------------------------------------
@@ -240,20 +241,20 @@ SUBROUTINE TEB_PROFILE_GRIB(PGRID)
 !-------------------------------------------------------------------------------------
 !
 REAL, DIMENSION(:),   INTENT(IN)  :: PGRID  ! destination grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 !-------------------------------------------------------------------------------------
 !
 !* interpolation on fine vertical grid
-IF (LHOOK) CALL DR_HOOK('TEB_PROFILE_GRIB',0,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('TEB_PROFILE_GRIB',0,ZHOOK_HANDLE)
 ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(PGRID)))
  CALL INTERP_GRID(ZD,ZFIELD,PGRID,PFIELD)
 !
 !* end
 DEALLOCATE(ZFIELD)
 DEALLOCATE(ZD)
-IF (LHOOK) CALL DR_HOOK('TEB_PROFILE_GRIB',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('TEB_PROFILE_GRIB',1,ZHOOK_HANDLE)
 
 END SUBROUTINE TEB_PROFILE_GRIB
 !
