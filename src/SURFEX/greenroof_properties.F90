@@ -47,6 +47,7 @@ USE MODD_TEB_GREENROOF_n,     ONLY :  CISBA_GR, TSNOW, XALBNIR, XALBVIS, XALBUV,
                                       XSNOWFREE_ALB                                                    
 !
 USE MODI_ISBA_PROPERTIES
+USE MODI_FLAG_TEB_GREENROOF_n
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -83,8 +84,20 @@ REAL, DIMENSION(SIZE(PALB))    :: ZESNOW    ! snow emissivity
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
-!* only one patch for gardens
+!* only one patch for green roofs
 IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
+!
+!*      1.     Set physical values for points where there is no green roof
+!              -----------------------------------------------------------
+!
+! This way, ISBA can run without problem for these points
+!
+ CALL FLAG_TEB_GREENROOF_n(1)
+!
+!
+!*      2.     Computes several properties of green roofs
+!              ------------------------------------------
+!
 !
  CALL ISBA_PROPERTIES(CISBA_GR, LTR_ML_GR, TSNOW, 1,             &
                       PDIR_SW, PSCA_SW, PSW_BANDS, KSW,          &

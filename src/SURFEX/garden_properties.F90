@@ -41,6 +41,7 @@ USE MODD_TEB_GARDEN_n,      ONLY : TSNOW, XALBNIR, XALBVIS, XALBUV,    &
                                    XSNOWFREE_ALB  
 !
 USE MODI_ISBA_PROPERTIES
+USE MODI_FLAG_TEB_GARDEN_n
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -115,3 +116,4 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE GARDEN_PROPERTIES
+
