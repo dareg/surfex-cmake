@@ -87,7 +87,9 @@ USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
+#ifdef TOPD
 USE MODD_COUPLING_TOPD, ONLY : LCOUPL_TOPD, XAS_NATURE, XATOP, XRUNOFF_TOP
+#endif
 !
 USE MODI_HYDRO_VEG
 USE MODI_HYDRO_SNOW
@@ -561,6 +563,7 @@ ELSE
     END IF
   ENDIF
   !
+#ifdef TOPD
   IF (LCOUPL_TOPD) THEN
     !runoff topo cumule (kg/m²)
     WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + (PRUNOFF(:)+ PHORTON(:))*XATOP(:)*PTSTEP
@@ -572,6 +575,7 @@ ELSE
       ! ZDUNNE concerns all the mesh so not only catchment =>*XATOP
     ENDIF
   ENDIF
+#endif
   !
 ENDIF
 !

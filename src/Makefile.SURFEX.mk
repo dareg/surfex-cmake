@@ -94,7 +94,7 @@ endif
 ##########################################################
 #
 DIR_TOPD += LIB/TOPD
-#CPPFLAGS_TOPD=
+CPPFLAGS_TOPD= -DTOPD
 #
 ifdef DIR_TOPD
 DIR_MASTER += $(DIR_TOPD)
