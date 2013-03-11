@@ -123,89 +123,89 @@ IMPLICIT NONE
 !  FLake variables of type REAL
 
 !  Temperatures at the previous time step ("p") and the updated temperatures ("n") 
-REAL :: T_mnw_p_flk, T_mnw_n_flk      ! Mean temperature of the water column [K] 
+REAL, POINTER :: T_mnw_p_flk=>NULL(), T_mnw_n_flk=>NULL()      ! Mean temperature of the water column [K] 
 !$OMP THREADPRIVATE(T_mnw_p_flk, T_mnw_n_flk)
-REAL :: T_snow_p_flk, T_snow_n_flk    ! Temperature at the air-snow interface [K] 
+REAL, POINTER :: T_snow_p_flk=>NULL(), T_snow_n_flk=>NULL()    ! Temperature at the air-snow interface [K] 
 !$OMP THREADPRIVATE(T_snow_p_flk, T_snow_n_flk)
-REAL :: T_ice_p_flk, T_ice_n_flk      ! Temperature at the snow-ice or air-ice interface [K] 
+REAL, POINTER :: T_ice_p_flk=>NULL(), T_ice_n_flk=>NULL()      ! Temperature at the snow-ice or air-ice interface [K] 
 !$OMP THREADPRIVATE(T_ice_p_flk, T_ice_n_flk) 
-REAL :: T_wML_p_flk, T_wML_n_flk      ! Mixed-layer temperature [K] 
+REAL, POINTER :: T_wML_p_flk=>NULL(), T_wML_n_flk=>NULL()      ! Mixed-layer temperature [K] 
 !$OMP THREADPRIVATE(T_wML_p_flk, T_wML_n_flk)
-REAL :: T_bot_p_flk, T_bot_n_flk      ! Temperature at the water-bottom sediment interface [K] 
+REAL, POINTER :: T_bot_p_flk=>NULL(), T_bot_n_flk=>NULL()      ! Temperature at the water-bottom sediment interface [K] 
 !$OMP THREADPRIVATE(T_bot_p_flk, T_bot_n_flk)
-REAL :: T_B1_p_flk, T_B1_n_flk        ! Temperature at the bottom of the upper layer of the sediments [K]   
+REAL, POINTER :: T_B1_p_flk=>NULL(), T_B1_n_flk=>NULL()        ! Temperature at the bottom of the upper layer of the sediments [K]   
 !$OMP THREADPRIVATE(T_B1_p_flk, T_B1_n_flk) 
 
 !  Thickness of various layers at the previous time step ("p") and the updated values ("n") 
-REAL :: h_snow_p_flk, h_snow_n_flk    ! Snow thickness [m]*
+REAL, POINTER :: h_snow_p_flk=>NULL(), h_snow_n_flk=>NULL()    ! Snow thickness [m]*
 !$OMP THREADPRIVATE(h_snow_p_flk, h_snow_n_flk)
-REAL :: h_ice_p_flk, h_ice_n_flk      ! Ice thickness [m]
+REAL, POINTER :: h_ice_p_flk=>NULL(), h_ice_n_flk=>NULL()      ! Ice thickness [m]
 !$OMP THREADPRIVATE(h_ice_p_flk, h_ice_n_flk)
-REAL :: h_ML_p_flk, h_ML_n_flk        ! Thickness of the mixed-layer [m] 
+REAL, POINTER :: h_ML_p_flk=>NULL(), h_ML_n_flk=>NULL()        ! Thickness of the mixed-layer [m] 
 !$OMP THREADPRIVATE(h_ML_p_flk, h_ML_n_flk)  
-REAL :: H_B1_p_flk, H_B1_n_flk        ! Thickness of the upper layer of bottom sediments [m]   
+REAL, POINTER :: H_B1_p_flk=>NULL(), H_B1_n_flk=>NULL()        ! Thickness of the upper layer of bottom sediments [m]   
 !$OMP THREADPRIVATE(H_B1_p_flk, H_B1_n_flk)
 
 !  The shape factor(s) at the previous time step ("p") and the updated value(s) ("n") 
-REAL :: C_T_p_flk, C_T_n_flk          ! Shape factor (thermocline)
+REAL, POINTER :: C_T_p_flk=>NULL(), C_T_n_flk=>NULL()          ! Shape factor (thermocline)
 !$OMP THREADPRIVATE(C_T_p_flk, C_T_n_flk)  
-REAL :: C_TT_flk                      ! Dimensionless parameter (thermocline)
+REAL, POINTER :: C_TT_flk=>NULL()                      ! Dimensionless parameter (thermocline)
 !$OMP THREADPRIVATE(C_TT_flk)
-REAL :: C_Q_flk                       ! Shape factor with respect to the heat flux (thermocline)
+REAL, POINTER :: C_Q_flk=>NULL()                       ! Shape factor with respect to the heat flux (thermocline)
 !$OMP THREADPRIVATE(C_Q_flk)
-REAL :: C_I_flk                       ! Shape factor (ice)
+REAL, POINTER :: C_I_flk=>NULL()                       ! Shape factor (ice)
 !$OMP THREADPRIVATE(C_I_flk)
-REAL :: C_S_flk                       ! Shape factor (snow) 
+REAL, POINTER :: C_S_flk=>NULL()                       ! Shape factor (snow) 
 !$OMP THREADPRIVATE(C_S_flk) 
 
 !  Derivatives of the shape functions
-REAL :: Phi_T_pr0_flk                 ! d\Phi_T(0)/d\zeta   (thermocline)
+REAL, POINTER :: Phi_T_pr0_flk=>NULL()                 ! d\Phi_T(0)/d\zeta   (thermocline)
 !$OMP THREADPRIVATE(Phi_T_pr0_flk) 
-REAL :: Phi_I_pr0_flk                 ! d\Phi_I(0)/d\zeta_I (ice)
+REAL, POINTER :: Phi_I_pr0_flk=>NULL()                 ! d\Phi_I(0)/d\zeta_I (ice)
 !$OMP THREADPRIVATE(Phi_I_pr0_flk)
-REAL :: Phi_I_pr1_flk                 ! d\Phi_I(1)/d\zeta_I (ice)
+REAL, POINTER :: Phi_I_pr1_flk=>NULL()                 ! d\Phi_I(1)/d\zeta_I (ice)
 !$OMP THREADPRIVATE(Phi_I_pr1_flk)
-REAL :: Phi_S_pr0_flk                 ! d\Phi_S(0)/d\zeta_S (snow)  
+REAL, POINTER :: Phi_S_pr0_flk=>NULL()                 ! d\Phi_S(0)/d\zeta_S (snow)  
 !$OMP THREADPRIVATE(Phi_S_pr0_flk)  
 
 !  Heat and radiation fluxes
-REAL :: Q_snow_flk                    ! Heat flux through the air-snow interface [W m^{-2}]
+REAL, POINTER :: Q_snow_flk=>NULL()                    ! Heat flux through the air-snow interface [W m^{-2}]
 !$OMP THREADPRIVATE(Q_snow_flk)  
-REAL :: Q_ice_flk                     ! Heat flux through the snow-ice or air-ice interface [W m^{-2}]
+REAL, POINTER :: Q_ice_flk=>NULL()                     ! Heat flux through the snow-ice or air-ice interface [W m^{-2}]
 !$OMP THREADPRIVATE(Q_ice_flk)  
-REAL :: Q_w_flk                       ! Heat flux through the ice-water or air-water interface [W m^{-2}]
+REAL, POINTER :: Q_w_flk=>NULL()                       ! Heat flux through the ice-water or air-water interface [W m^{-2}]
 !$OMP THREADPRIVATE(Q_w_flk) 
-REAL :: Q_bot_flk                     ! Heat flux through the water-bottom sediment interface [W m^{-2}]
+REAL, POINTER :: Q_bot_flk=>NULL()                     ! Heat flux through the water-bottom sediment interface [W m^{-2}]
 !$OMP THREADPRIVATE(Q_bot_flk)   
-REAL :: I_atm_flk                     ! Radiation flux at the lower boundary of the atmosphere [W m^{-2}],
+REAL, POINTER :: I_atm_flk=>NULL()                     ! Radiation flux at the lower boundary of the atmosphere [W m^{-2}],
                                     ! i.e. the incident radiation flux with no regard for the surface albedo.
 !$OMP THREADPRIVATE(I_atm_flk)                                  
-REAL :: I_snow_flk                    ! Radiation flux through the air-snow interface [W m^{-2}]
+REAL, POINTER :: I_snow_flk=>NULL()                    ! Radiation flux through the air-snow interface [W m^{-2}]
 !$OMP THREADPRIVATE(I_snow_flk)  
-REAL :: I_ice_flk                     ! Radiation flux through the snow-ice or air-ice interface [W m^{-2}]
+REAL, POINTER :: I_ice_flk=>NULL()                     ! Radiation flux through the snow-ice or air-ice interface [W m^{-2}]
 !$OMP THREADPRIVATE(I_ice_flk)  
-REAL :: I_w_flk                       ! Radiation flux through the ice-water or air-water interface [W m^{-2}]
+REAL, POINTER :: I_w_flk=>NULL()                       ! Radiation flux through the ice-water or air-water interface [W m^{-2}]
 !$OMP THREADPRIVATE(I_w_flk)  
-REAL :: I_h_flk                       ! Radiation flux through the mixed-layer-thermocline interface [W m^{-2}]
+REAL, POINTER :: I_h_flk=>NULL()                       ! Radiation flux through the mixed-layer-thermocline interface [W m^{-2}]
 !$OMP THREADPRIVATE(I_h_flk)
-REAL :: I_bot_flk                     ! Radiation flux through the water-bottom sediment interface [W m^{-2}]
+REAL, POINTER :: I_bot_flk=>NULL()                     ! Radiation flux through the water-bottom sediment interface [W m^{-2}]
 !$OMP THREADPRIVATE(I_bot_flk)
-REAL :: I_intm_0_h_flk                ! Mean radiation flux over the mixed layer [W m^{-1}]
+REAL, POINTER :: I_intm_0_h_flk=>NULL()                ! Mean radiation flux over the mixed layer [W m^{-1}]
 !$OMP THREADPRIVATE(I_intm_0_h_flk)   
-REAL :: I_intm_h_D_flk                ! Mean radiation flux over the thermocline [W m^{-1}]
+REAL, POINTER :: I_intm_h_D_flk=>NULL()                ! Mean radiation flux over the thermocline [W m^{-1}]
 !$OMP THREADPRIVATE(I_intm_h_D_flk)   
-REAL :: Q_star_flk                        ! A generalized heat flux scale [W m^{-2}]  
+REAL, POINTER :: Q_star_flk=>NULL()                        ! A generalized heat flux scale [W m^{-2}]  
 !$OMP THREADPRIVATE(Q_star_flk)  
 
 !  Velocity scales
-REAL :: u_star_w_flk                  ! Friction velocity in the surface layer of lake water [m s^{-1}]
+REAL, POINTER :: u_star_w_flk=>NULL()                  ! Friction velocity in the surface layer of lake water [m s^{-1}]
 !$OMP THREADPRIVATE(u_star_w_flk)   
-REAL :: w_star_sfc_flk                 ! Convective velocity scale,   
+REAL, POINTER :: w_star_sfc_flk=>NULL()                 ! Convective velocity scale,   
                                     ! using a generalized heat flux scale [m s^{-1}]
 !$OMP THREADPRIVATE(w_star_sfc_flk)                                  
 
 !  The rate of snow accumulation
-REAL :: dMsnowdt_flk                      ! The rate of snow accumulation [kg m^{-2} s^{-1}]  
+REAL, POINTER :: dMsnowdt_flk=>NULL()                      ! The rate of snow accumulation [kg m^{-2} s^{-1}]  
 !$OMP THREADPRIVATE(dMsnowdt_flk)
 
 !==============================================================================
