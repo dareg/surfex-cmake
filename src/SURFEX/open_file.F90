@@ -33,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ASC
+#if defined(ASC) || defined(ARO) || defined(MNH)
 USE MODI_OPEN_FILE_ASC
 #endif
 #ifdef FA
@@ -49,8 +49,8 @@ USE MODI_OPEN_FILE_OL
 USE MODI_OPEN_FILE_MNH
 #endif
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
+USE PARKIND1 ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
@@ -79,6 +79,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_FILE',0,ZHOOK_HANDLE)
+!
 YFILE = HFILE
 YFORM = HFORM
 IF (PRESENT(HACTION)) THEN
@@ -106,7 +107,7 @@ ELSE IF (HPROGRAM=='OFFLIN') THEN
   CALL OPEN_FILE_OL(KUNIT,YFILE,YFORM,YACTION,YACCESS,IRECL)
 #endif
 ELSE IF (HPROGRAM=='ASCII ' .OR. HPROGRAM=='AROME ') THEN
-#ifdef ASC || ARO
+#if defined(ASC) || defined(ARO) || defined(MNH)
   CALL OPEN_FILE_ASC(KUNIT,YFILE,YFORM,YACTION,YACCESS,IRECL)
 #endif
 ELSE IF (HPROGRAM=='FA    ') THEN
@@ -118,6 +119,7 @@ ELSE IF (HPROGRAM=='LFI   ') THEN
   CALL OPEN_FILE_LFI(KUNIT,YFILE,YFORM,YACTION,YACCESS,'ASIS  ',IRECL)
 #endif
 END IF
+!
 IF (LHOOK) CALL DR_HOOK('OPEN_FILE',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
