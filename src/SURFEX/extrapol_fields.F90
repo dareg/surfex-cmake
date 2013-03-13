@@ -49,7 +49,7 @@ USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_LAI, XPAR_H_TREE, XPAR_ROOT_DEPTH,  
                                 LDATA_IRRIG, LDATA_WATSUP, LDATA_ROOTFRAC,        &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH, LDATA_Z0
 !                                
-USE MODD_ISBA_n,         ONLY : CISBA, NGROUND_LAYER
+USE MODD_ISBA_n,         ONLY : CISBA, NGROUND_LAYER, CPHOTO
 !
 USE MODI_AV_PGD
 USE MODI_INI_VAR_FROM_VEGTYPE_DATA
@@ -138,36 +138,40 @@ IF (.NOT.LDATA_DG .AND. CISBA/='2-L' .AND. .NOT.LDATA_GROUND_DEPTH) THEN
 ENDIF
 !
 !
-!  IRRIG
-!  -----
-IF (.NOT.LDATA_IRRIG) THEN
-  DO JTIME=1,36
-!   ECOCLIMAP spatial distribution field       
-    CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_IRRIG,YVEG,'ARI',KDECADE=JTIME)
-!   Extrapolation toward new vegtype distribution field from updated land-use map or user  
-    CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'IRRIG  ', XPAR_IRRIG(:,JTIME,:))
-  ENDDO
+IF (CPHOTO/='NON') THEN
+  !
+  !  IRRIG
+  !  -----
+  IF (.NOT.LDATA_IRRIG) THEN
+    DO JTIME=1,36
+  !   ECOCLIMAP spatial distribution field       
+      CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_IRRIG,YVEG,'ARI',KDECADE=JTIME)
+  !   Extrapolation toward new vegtype distribution field from updated land-use map or user  
+      CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'IRRIG  ', XPAR_IRRIG(:,JTIME,:))
+    ENDDO
+  !
+    CALL GOTO_NTIME(NTIME,ZWORK,XPAR_IRRIG)
+  !
+    LDATA_IRRIG=.TRUE.
+  !
+  ENDIF
+  !
+  !   WATSUP
+  !   ------
+  IF (.NOT.LDATA_WATSUP) THEN
+    DO JTIME=1,36
+  !   ECOCLIMAP spatial distribution field       
+      CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_WATSUP,YVEG,'ARI',KDECADE=JTIME)  
+  !   Extrapolation toward new vegtype distribution field from updated land-use map or user  
+      CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'WATSUP  ', XPAR_WATSUP(:,JTIME,:))
+    ENDDO
+    !
+    CALL GOTO_NTIME(NTIME,ZWORK,XPAR_WATSUP)
+    !  
+    LDATA_WATSUP=.TRUE.
+  ENDIF
 !
-  CALL GOTO_NTIME(NTIME,ZWORK,XPAR_IRRIG)
-!
-  LDATA_IRRIG=.TRUE.
-!
-ENDIF
-!
-!   WATSUP
-!   ------
-IF (.NOT.LDATA_WATSUP) THEN
-  DO JTIME=1,36
-!   ECOCLIMAP spatial distribution field       
-    CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_WATSUP,YVEG,'ARI',KDECADE=JTIME)  
-!   Extrapolation toward new vegtype distribution field from updated land-use map or user  
-    CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'WATSUP  ', XPAR_WATSUP(:,JTIME,:))
-  ENDDO
-!
-  CALL GOTO_NTIME(NTIME,ZWORK,XPAR_WATSUP)
-!  
-  LDATA_WATSUP=.TRUE.
-ENDIF
+ENDIF 
 !
 IF (LHOOK) CALL DR_HOOK('EXTRAPOL_FIELDS',1,ZHOOK_HANDLE)
 !
