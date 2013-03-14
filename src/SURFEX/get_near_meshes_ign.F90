@@ -30,6 +30,7 @@
 !
 USE MODE_GRIDTYPE_IGN
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -48,13 +49,13 @@ INTEGER, DIMENSION(:,:),POINTER :: KNEAR    ! near mesh indices
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL, DIMENSION(KL,KL) :: ZDIS
-REAL,DIMENSION(KL)    :: ZX
-REAL,DIMENSION(KL)    :: ZY
-REAL,DIMENSION(KL)    :: ZDX
-REAL,DIMENSION(KL)    :: ZDY
-REAL, DIMENSION(KL) :: ZDMAX
-INTEGER, DIMENSION(KL) :: ID0
+REAL, DIMENSION(KL) :: ZDIS
+REAL,DIMENSION(KL)  :: ZX
+REAL,DIMENSION(KL)  :: ZY
+REAL,DIMENSION(KL)  :: ZDX
+REAL,DIMENSION(KL)  :: ZDY
+REAL :: ZDMAX
+INTEGER :: ID0
 INTEGER :: JP1, JP2, JN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -68,36 +69,28 @@ KNEAR  (:,:) = 0
 !
 ! calcul de la distance de tous les points 2 à 2
 !
-ZDIS = 1.E20
+ZDIS = XUNDEF
 !
 DO JP1=1,KL
+
   DO JP2=1,KL
-    ZDIS(JP1,JP2) = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
+    ZDIS(JP2) = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
   ENDDO
-  ZDMAX(JP1) = MAXVAL(ZDIS(JP1,:)) + 1.
-  ZDIS(JP1,JP1) = ZDMAX(JP1)
-ENDDO
-!
-! on prend les knear_nbr premiers, pour chaque
-!
-DO JN=1,KNEAR_NBR
+  ZDMAX = MAXVAL(ZDIS(:)) + 1.
+  ZDIS(JP1) = ZDMAX
   !
-  ID0(:) = 0
+  ! on prend les knear_nbr premiers, pour chaque
   !
-  IF (JN<KL) THEN
+  DO JN=1,MIN(KL-1,KNEAR_NBR)
     !
-    DO JP1=1,KL
-      ID0(JP1) = MAXVAL(MINLOC(ZDIS(JP1,:)))
-    ENDDO         
+    ID0 = 0
     !
-    DO JP1=1,KL
-      !
-      KNEAR(JP1,JN) = ID0(JP1)
-      ZDIS(JP1,ID0(JP1)) = ZDMAX(JP1)
-      !
-    ENDDO
+    ID0 = MAXVAL(MINLOC(ZDIS(:)))        
     !
-  ENDIF
+    KNEAR(JP1,JN) = ID0
+    ZDIS(ID0) = ZDMAX
+    !
+  ENDDO
   !
 ENDDO
 !

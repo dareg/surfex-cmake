@@ -31,7 +31,6 @@ INTEGER             :: IRESP  ! I/O error code
  CHARACTER (LEN=100) :: YCOMMENT ! comment
 INTEGER             :: ILUOUT   ! Unit number for prints
 INTEGER             :: JSPEC    ! Loop index for emission species
-INTEGER             :: IEMIS_NBR
 INTEGER             :: IEMISPEC_NBR    ! number of emitted chemical species
  CHARACTER(LEN=40)   :: YEMISPEC_NAME   ! species name
 INTEGER             :: IEMISPEC_NTIMES ! number of emission times
@@ -55,7 +54,7 @@ YRECFM='VERSION'
 !
 YRECFM='EMISFILE_NBR'
 IF (IVERSION<4) YRECFM='EMISFILE_GR_NBR'
- CALL READ_SURF(HPROGRAM,YRECFM,IEMIS_NBR,IRESP,YCOMMENT)
+ CALL READ_SURF(HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
  CALL END_IO_SURF_n(HPROGRAM)
 !
 IF (IRESP/=0) THEN
@@ -63,7 +62,7 @@ IF (IRESP/=0) THEN
 END IF
 !
  CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
- CALL WRITE_SURF(HPROGRAM,YRECFM,IEMIS_NBR,IRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
  CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------

@@ -124,6 +124,7 @@ REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface oro
 !
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
+REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV
 REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
@@ -197,8 +198,10 @@ ENDIF
 !
 IF(LNOSOF)THEN
    Z3D_TOT_SURF(:) = 1.
+   Z3D_TOT_SURF_INV(:) = 1.
 ELSE
    Z3D_TOT_SURF(:) = SQRT(1.+XSSO_SLOPE(:)**2)
+   Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
 ENDIF
 !
 !
@@ -214,11 +217,11 @@ ISWB = SIZE(PSW_BANDS)
 DO JSWB=1,ISWB
 ! correcting for the slope angle (scaterred SW flux)
 !
-  ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) / Z3D_TOT_SURF(:)
+  ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
 
 ! correcting for the slope angle (scaterred SW flux)
 !
-  ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) / Z3D_TOT_SURF(:)
+  ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
 END DO
 !
 ! part of LW flux is received from the surface itself, so the outgoing flux
@@ -226,8 +229,8 @@ END DO
 !
 ! correction for LW flux.
 !
-ZLW(:) =  PLW(:)                                *     1./Z3D_TOT_SURF(:)&
-          + XSTEFAN*XEMIS_NAT(:)*XTSRAD_NAT(:)**4 * (1.-1./Z3D_TOT_SURF(:))  
+ZLW(:) =  PLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
+          + XSTEFAN*XEMIS_NAT(:)*XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !-------------------------------------------------------------------------------------
 !
@@ -236,11 +239,11 @@ ZLW(:) =  PLW(:)                                *     1./Z3D_TOT_SURF(:)&
 !
 ! correction for RAIN flux.
 !
-ZRAIN(:) = PRAIN(:) / Z3D_TOT_SURF(:)
+ZRAIN(:) = PRAIN(:) * Z3D_TOT_SURF_INV(:)
 !
 ! correction for SNOW flux.
 !
-ZSNOW(:) = PSNOW(:) / Z3D_TOT_SURF(:)
+ZSNOW(:) = PSNOW(:) * Z3D_TOT_SURF_INV(:)
 !
 !-------------------------------------------------------------------------------------
 !

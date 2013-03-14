@@ -51,7 +51,7 @@ IMPLICIT NONE
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM
 INTEGER,                    INTENT(IN)  :: KI      ! horizontal dim. of cover
 INTEGER,                    INTENT(IN)  :: KCOVER  ! number of covers
-REAL, DIMENSION(KI,KCOVER), INTENT(OUT) :: PCOVER  ! cover types
+REAL, DIMENSION(KI), INTENT(OUT) :: PCOVER  ! cover types
 !
 !
 !*       0.2   Declarations of local variables
@@ -65,13 +65,13 @@ IF (LHOOK) CALL DR_HOOK('GET_COVER_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PCOVER) /= SIZE(XCOVER) ) THEN
+IF ( SIZE(PCOVER) /= SIZE(XCOVER,1) ) THEN
   WRITE(ILUOUT,*) 'try to get COVER field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PCOVER) :', SIZE(PCOVER)
   WRITE(ILUOUT,*) 'size of field inthe surface                     (XCOVER) :', SIZE(XCOVER)
   CALL ABOR1_SFX('GET_COVERN: (1) COVER SIZE NOT CORRECT')
 ELSE
-  PCOVER=XCOVER
+  PCOVER=XCOVER(:,KCOVER)
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_COVER_N',1,ZHOOK_HANDLE)
 !

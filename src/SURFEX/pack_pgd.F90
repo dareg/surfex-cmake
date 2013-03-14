@@ -84,10 +84,11 @@ REAL,    DIMENSION(:),   INTENT(OUT), OPTIONAL :: PDIR ! angle of grid axis with
 INTEGER                        :: ILUOUT ! output listing logical unit
 INTEGER                        :: IL     ! number of points
 INTEGER                        :: ILU    ! expected physical size of full surface array
+INTEGER                        :: JCOVER
 INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field to nature field
 REAL,    DIMENSION(SIZE(PLAT)) :: ZDIR
 !
-REAL, DIMENSION(NL,JPCOVER)    :: ZCOVER ! cover  on all surface points
+REAL, DIMENSION(NL)    :: ZCOVER ! cover  on all surface points
 LOGICAL, DIMENSION(JPCOVER)    :: GCOVER ! list of existing cover
 REAL, DIMENSION(NL)            :: ZZS    ! zs     on all surface points
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -125,13 +126,15 @@ IF (PRESENT(PDIR)) PDIR = ZDIR
 !*    4.      Packing of fields
 !             -----------------
 !
- CALL GET_COVER_n(HPROGRAM,NL,JPCOVER,ZCOVER)
+DO JCOVER=1,JPCOVER
+  CALL GET_COVER_n(HPROGRAM,NL,JCOVER,ZCOVER)
+  CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
+ENDDO
+
  CALL GET_LCOVER_n(HPROGRAM,JPCOVER,GCOVER)
  CALL GET_ZS_n(HPROGRAM,NL,ZZS)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!
- CALL PACK_SAME_RANK(IMASK,ZCOVER(:,:),PCOVER(:,:))
 !
 OCOVER=GCOVER
 !
