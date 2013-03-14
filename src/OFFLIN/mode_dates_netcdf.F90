@@ -79,26 +79,26 @@ SELECT CASE (HUNITS(1:4))
 END SELECT
 
 SELECT CASE (HUNITS(1:4))
-  CASE ("days")
-    !Read reference date
-    boucles_days:DO ICARACDAY=1,2 !Day written by 1 or 2 char
-      DO ICARACMONTH=1,2 !Month written by 1 or 2 char
-        DO ICARACYEAR=1,4 !Year written by 1 to 4 char
-          WRITE(YFMT,FMT='("(A",I2,",",2("I",I1,",A1,"),"I",I1,")")')&
-            ICARACUNITS,ICARACYEAR,ICARACMONTH,ICARACDAY
-          READ(HUNITS,FMT=YFMT,IOSTAT=IERROR)YHEADER,IYEARUNITS,YC1,IMONTHUNITS,YC2,IDAYUNITS
-          IHOURUNITS=0
-          IF (IERROR==0) THEN
-            IF ((TRIM(YHEADER)=='days since').AND.(YC1=='-').AND.(YC2=='-')) THEN
-              ! PRINT*,"DATE DE REFERENCE LUE :"
-              ! PRINT*,itv_oldref
-              EXIT boucles_days
-            END IF
-          END IF
-        END DO
-      END DO
-    END DO boucles_days
-  CASE ("hour","minu","seco")
+  !CASE ("days")
+  !  !Read reference date
+  !  boucles_days:DO ICARACDAY=1,2 !Day written by 1 or 2 char
+  !    DO ICARACMONTH=1,2 !Month written by 1 or 2 char
+  !      DO ICARACYEAR=1,4 !Year written by 1 to 4 char
+  !        WRITE(YFMT,FMT='("(A",I2,",",2("I",I1,",A1,"),"I",I1,",X,I",I1,",A1)")')&
+  !          ICARACUNITS,ICARACYEAR,ICARACMONTH,ICARACDAY,ICARACHOUR
+  !        READ(HUNITS,FMT=YFMT,IOSTAT=IERROR)YHEADER,IYEARUNITS,YC1,IMONTHUNITS,YC2,IDAYUNITS,IHOURUNITS,YC3
+  !        IHOURUNITS=0
+  !        IF (IERROR==0) THEN
+  !          IF ((TRIM(YHEADER)=='days since').AND.(YC1=='-').AND.(YC2=='-').AND.(YC3==':')) THEN
+  !            ! PRINT*,"DATE DE REFERENCE LUE :"
+  !            ! PRINT*,itv_oldref
+  !            EXIT boucles_days
+  !          END IF
+  !        END IF
+  !      END DO
+  !    END DO
+  !  END DO boucles_days
+  CASE ("days","hour","minu","seco")
     !Read reference date
     boucles_hours:DO ICARACHOUR=1,2 !Hour written by 1 or 2 char
       DO ICARACDAY=1,2 !Day written by 1 or 2 char
@@ -110,7 +110,7 @@ SELECT CASE (HUNITS(1:4))
               YC1,IMONTHUNITS,YC2,IDAYUNITS,IHOURUNITS,YC3
             IF (IERROR==0) THEN
               GHEADER=(TRIM(YHEADER)=='hours since') .OR. (TRIM(YHEADER)=='minutes since') .OR. &
-                      (TRIM(YHEADER)=='seconds since')
+                      (TRIM(YHEADER)=='seconds since') .OR. (TRIM(YHEADER)=='days since')
               IF (GHEADER.AND.(YC1=='-').AND.(YC2=='-').AND.(YC3==':')) THEN
                 ! PRINT*,"DATE DE REFERENCE LUE :"
                 ! PRINT*,itv_oldref
