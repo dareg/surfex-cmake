@@ -336,12 +336,15 @@ endif
 ##########################################################
 ifeq "$(F90)" "gfortran"
 ARCHOOK="linuxgfortran"
+#ARCHOOK="linuxgfortran_ubuntu"
 else 
 ifeq "$(F90)" "mpif90"
 ARCHOOK="linuxmpif90"
+#ARCHOOK="linuxmpif90_ubuntu"
 else
 ifeq "$(F90)" "ifort"
 ARCHOOK="ifort32"
+#ARCHOOK="linuxifort32_ubuntu"
 else
 ifeq "$(F90)" "LXpgi"
 ARCHOOK="linux"

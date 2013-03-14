@@ -45,6 +45,8 @@ else
 F90 = mpif90
 endif
 #
+FC = $(F90)
+#
 F90FLAGS      =  $(OPT) 
 F77 = $(F90)
 F77FLAGS      =  $(OPT) 
