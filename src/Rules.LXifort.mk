@@ -65,7 +65,7 @@ FX90FLAGS =  $(OPT)
 # -132 
 #
 #LDFLAGS    =  -Wl,-noinhibit-exec  -Wl,-warn-once $(PAR)
-LDFLAGS    =   -Wl,-warn-once $(PAR) -openmp
+LDFLAGS    =   -Wl,-warn-once $(PAR) -openmp -openmp-threadprivate=compat
 #
 CC = icc
 #
