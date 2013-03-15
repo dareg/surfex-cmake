@@ -627,6 +627,10 @@ END IF
 !
  CALL READ_ISBA_n(HPROGRAM)
 !
+IF (HINIT=='PRE' .AND. TSNOW%SCHEME.NE.'3-L' .AND. TSNOW%SCHEME.NE.'CRO' .AND. CISBA=='DIF') THEN
+    CALL ABOR1_SFX("INIT_ISBAN: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !*      11.  Extrapolation of the prognostic and semi-prognostic fields
