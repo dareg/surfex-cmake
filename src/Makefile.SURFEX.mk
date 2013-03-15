@@ -94,7 +94,7 @@ endif
 ##########################################################
 #
 DIR_TOPD += LIB/TOPD
-CPPFLAGS_TOPD= -DTOPD
+#CPPFLAGS_TOPD=
 #
 ifdef DIR_TOPD
 DIR_MASTER += $(DIR_TOPD)
@@ -447,7 +447,7 @@ NSOURCE=8
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST
+PROG_LIST += PGD PREP OFFLINE
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST
 endif
 #

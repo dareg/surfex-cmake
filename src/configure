@@ -132,6 +132,16 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 		export NEED_NCARG=${NEED_NCARG:-NO}
 		export NEED_TOOLS=NO
               ;;
+'Linux login0') #PREFIX
+
+                export     ARCH=${ARCH:-LXifort}
+                export  VER_MPI=${VER_MPI:-MPIAUTO}
+                export OPTLEVEL=${OPTLEVEL:-O2}
+                export MVWORK=${MVWORK:-NO}
+                export VER_CDF=${VER_CDF:-CDFAUTO}
+		export NEED_NCARG=${NEED_NCARG:-NO}
+		export NEED_TOOLS=NO
+              ;;
 'Linux nuwa'*)      
                 export     ARCH=${ARCH:-LXifort} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO} 
