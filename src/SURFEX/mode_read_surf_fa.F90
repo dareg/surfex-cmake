@@ -109,6 +109,7 @@ END SUBROUTINE READ_SURFX0_FA
 !
 !!****  *READX1* - routine to fill a real 1D array for the externalised surface 
 !
+USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ, &
                             WLOG_MPI
 !
@@ -134,7 +135,7 @@ INCLUDE "mpif.h"
 !
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN)  :: KL       ! number of points
-REAL, DIMENSION(KL), INTENT(OUT) :: PFIELD   ! array containing the data field
+REAL, DIMENSION(:), INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
  CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
  CHARACTER(LEN=1),    INTENT(IN)  :: HDIR     ! type of field :
@@ -166,9 +167,10 @@ KRESP=0
 XTIME0 = MPI_WTIME()
 #endif
 !
+!
 IF (NRANK==NPIO) THEN
   !
-!$OMP SINGLE        
+!$OMP SINGLE
   !
   YPREF=HREC(1:3)
   YSUFF=HREC(4:16) 
@@ -190,9 +192,10 @@ IF (NRANK==NPIO) THEN
   !
   HCOMMENT = YCOMMENT
   !
-!$OMP END SINGLE COPYPRIVATE(ZWORK,HCOMMENT,KRESP)  
+!$OMP END SINGLE COPYPRIVATE(ZWORK,HCOMMENT,KRESP)
   !
 ENDIF
+!
 !
 #ifndef NOMPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
@@ -258,7 +261,7 @@ INCLUDE "mpif.h"
  CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN)  :: KL1      ! number of points
 INTEGER,                  INTENT(IN)  :: KL2      ! 2nd dimension
-REAL, DIMENSION(KL1,KL2), INTENT(OUT) :: PFIELD   ! array containing the data field
+REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
  CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
  CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
@@ -424,7 +427,7 @@ INCLUDE "mpif.h"
 !
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
-INTEGER, DIMENSION(KL), INTENT(OUT) :: KFIELD   ! the integer to be read
+INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD   ! the integer to be read
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
  CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
  CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
@@ -650,7 +653,7 @@ INCLUDE "mpif.h"
 !
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
-LOGICAL, DIMENSION(KL), INTENT(OUT) :: OFIELD   ! array containing the data field
+LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
  CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
  CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
@@ -662,6 +665,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
  CHARACTER(LEN=50) :: YCOMMENT
  CHARACTER(LEN=6)  :: YMASK
  CHARACTER(LEN=18) :: YNAME ! Field Name
+!LOGICAL, DIMENSION(KL) :: GCOVER
 LOGICAL           :: GFOUND
 LOGICAL           :: GKNOWN
 INTEGER           :: INFOMPI
@@ -692,6 +696,8 @@ IF (NRANK==NPIO) THEN
   HCOMMENT = YCOMMENT
   !
 !$OMP END SINGLE COPYPRIVATE(OFIELD,HCOMMENT,KRESP)  
+  !
+  !OFIELD(:) = GCOVER(:)
   !
 ENDIF
 !
@@ -801,10 +807,10 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER                                  :: KL1, KL2
-INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KYEAR    ! year
-INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KMONTH   ! month
-INTEGER, DIMENSION(KL1,KL2), INTENT(OUT) :: KDAY     ! day
-REAL,    DIMENSION(KL1,KL2), INTENT(OUT) :: PTIME    ! year
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: KYEAR    ! year
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: KMONTH   ! month
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: KDAY     ! day
+REAL,    DIMENSION(:,:), INTENT(OUT) :: PTIME    ! year
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
  CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
 
