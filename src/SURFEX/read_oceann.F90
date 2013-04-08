@@ -117,7 +117,10 @@ IF (.NOT. LMERCATOR) THEN
 ENDIF
 !
 !-------------------------------------------------------------------------------
+!$OMP SINGLE
  CALL OCEAN_MERCATORVERGRID
+!$OMP END SINGLE
+!
 ! Relaxation time and logical
 YRECFM='TAU_REL_OC'
  CALL READ_SURF(HPROGRAM,YRECFM,XTAU_REL,IRESP)

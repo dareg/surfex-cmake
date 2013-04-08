@@ -86,14 +86,16 @@ IF (HACTION == 'READ ') THEN
   ! updated in init_io_surf_maskn.
   CMASK = 'FULL ' 
   CALL READ_SURF('ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
+  CMASK = HMASK
 ELSE
   IF (NRANK==NPIO) THEN
 !$OMP SINGLE          
     OPEN(UNIT=NUNIT,FILE=CFILEOUT,FORM='FORMATTED')
-!$OMP END SINGLE     
+!$OMP END SINGLE  
   ENDIF
   ! NFULL must be known in every case. 
   CALL GET_DIM_FULL_n(NFULL)
+  CMASK = HMASK
 ENDIF
 !
 ! nindex is needed for call to get_size_full_n. In init_index_mpi, 
@@ -113,8 +115,9 @@ IL = ILU
  CALL GET_TYPE_DIM_n(HMASK,IL)
  CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
 !
+!$OMP BARRIER
+!
 !------------------------------------------------------------------------------
-CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
 END SUBROUTINE INIT_IO_SURF_ASC_n

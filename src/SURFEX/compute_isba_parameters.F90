@@ -66,7 +66,7 @@ USE MODD_IO_SURF_LFI,  ONLY : NMASK_lfi => NMASK
 USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           CSCOND, CRESPSL, LTR_ML, NNBIOMASS, NNLITTER,       &
                           NNLITTLEVS, NNSOILCARB, XCLAY, XSAND, XSOC,         &
-                          XWWILT, XWFC, XWSAT, XRM_PATCH,                     &
+                          XWWILT, XWFC, XWSAT, XRM_PATCH, LPERM,              &
                           XCOVER, XVEG, XLAI, XRSMIN, XGAMMA, XRGL, XCV,      &
                           XDG, NWG_LAYER, XDROOT, XDG2, XDZG, XDZDIF,         &
                           XZ0, XZ0_O_Z0H, XABC, XPOI, XANMAX, XFZERO, XEPSO,  &
@@ -256,7 +256,7 @@ IDECADE2 = IDECADE
 !
  CALL INIT_ISBA_MIXPAR(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,'NAT')
 !
- CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,           &
+ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,LPERM,    &
                         'NAT',PVEG=XVEG,PLAI=XLAI,                             &
                         PRSMIN=XRSMIN,PGAMMA=XGAMMA,PWRMAX_CF=XWRMAX_CF,       &
                         PRGL=XRGL,PCV=XCV,PSOILGRID=XSOILGRID,                 &
@@ -627,6 +627,10 @@ END IF
 !
  CALL READ_ISBA_n(HPROGRAM)
 !
+IF (HINIT=='PRE' .AND. TSNOW%SCHEME.NE.'3-L' .AND. TSNOW%SCHEME.NE.'CRO' .AND. CISBA=='DIF') THEN
+    CALL ABOR1_SFX("INIT_ISBAN: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !*      11.  Extrapolation of the prognostic and semi-prognostic fields
@@ -668,7 +672,7 @@ DO JPATCH=1,NPATCH
   ZTG1(:,JPATCH) = XTG(:,1,JPATCH)
 END DO
 !
- CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,'NAT',&
+ CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,CPHOTO,LAGRIP,LPERM,'NAT',&
                           PWG1 = ZWG1, &
                           PALBNIR_SOIL=XALBNIR_SOIL, &
                           PALBVIS_SOIL=XALBVIS_SOIL, &

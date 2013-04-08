@@ -113,7 +113,7 @@ IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_GARDEN',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 !
-  CALL CONVERT_PATCH_ISBA(CISBA,KDECADE,KDECADE,XCOVER,CPHOTO,.FALSE.,         &
+  CALL CONVERT_PATCH_ISBA(CISBA,KDECADE,KDECADE,XCOVER,CPHOTO,.FALSE.,.FALSE., &
                         'GRD',PVEG=ZVEG,PLAI=ZLAI,                             &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF,       &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=XSOILGRID,                 &

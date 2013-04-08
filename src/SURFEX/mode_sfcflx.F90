@@ -174,7 +174,7 @@ REAL  ::    &
     z0u_sf                 ,  &! Roughness length with respect to wind velocity [m]
     z0t_sf                 ,  &! Roughness length with respect to potential temperature [m]
     z0q_sf                     ! Roughness length with respect to specific humidity [m]  
-
+!$OMP THREADPRIVATE(z0u_sf,z0t_sf,z0q_sf)
 !  Fluxes in the surface air layer
 REAL  ::    &
     u_star_a_sf            ,  &! Friction velocity [m s^{-1}]
@@ -182,7 +182,7 @@ REAL  ::    &
     Q_sens_a_sf            ,  &! Sensible heat flux [W m^{-2}]
     Q_lat_a_sf             ,  &! Laten heat flux [W m^{-2}]
     Q_watvap_a_sf              ! Flux of water vapout [kg m^{-2} s^{-1}]  
-
+!$OMP THREADPRIVATE(u_star_a_sf,Q_mom_a_sf,Q_sens_a_sf,Q_lat_a_sf,Q_watvap_a_sf)
 !  Security constants
 REAL , PARAMETER ::   &
     u_wind_min_sf  = 1.0E-02  ,  &! Minimum wind speed [m s^{-1}]
@@ -816,7 +816,8 @@ ELSE                        ! Convection
 !_dbg
 !  WRITE(*,*) 'CONV: psi_t = ', psi_t, '   psi_q = ', psi_q
 !_dbg
-END IF 
+END IF
+
 Q_sen_tur = -(T_a-T_s)*u_star_st*c_Karman/Pr_neutral  &
             / MAX(c_small_sf, LOG(height_tq/z0t_sf)+psi_t)  
 Q_lat_tur = -(q_a-q_s)*u_star_st*c_Karman/Sc_neutral  &

@@ -167,8 +167,8 @@ IDECADE2 = IDECADE
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
       CALL UPDATE_DATA_COVER(TTIME%TDATE%YEAR)  
       IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(HISBA,IDECADE,IDECADE2,PCOVER,HPHOTO,HSFTYPE)
-      CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,HPHOTO,     &
-                           OAGRIP,HSFTYPE, PVEG=PVEG,                   &
+      CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,HPHOTO,  &
+                           OAGRIP,.FALSE.,HSFTYPE, PVEG=PVEG,    &
                            PLAI=PLAI,PRSMIN=PRSMIN,PGAMMA=PGAMMA,&
                            PWRMAX_CF=PWRMAX_CF,                  &
                            PRGL=PRGL,PCV=PCV,PZ0=PZ0,            &

@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE CONVERT_PATCH_ISBA(HISBA,KDECADE,KDECADE2,PCOVER,HPHOTO,&
-                                  OAGRIP,HSFTYPE,PVEG,PLAI,PRSMIN,PGAMMA,&
-                                  PWRMAX_CF,PRGL,PCV,                    &
+                                  OAGRIP,OPERM,HSFTYPE,PVEG,PLAI,        &
+                                  PRSMIN,PGAMMA,PWRMAX_CF,PRGL,PCV,      &
                                   PSOILGRID,PDG,KWG_LAYER,PDROOT,PDG2,   &
                                   PZ0,PZ0_O_Z0H,                         &
                                   PALBNIR_VEG,PALBVIS_VEG,PALBUV_VEG,    &
@@ -57,7 +57,7 @@ USE MODD_SURF_ATM_n,     ONLY : LGARDEN
 USE MODD_ISBA_n,         ONLY : CALBEDO,                                  &
                                 XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,     &
                                 XALBNIR_WET, XALBVIS_WET, XALBUV_WET,     &
-                                XWSAT, LPERM, XPERM
+                                XWSAT, XPERM
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEGTYPE, &
                                 XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
@@ -124,6 +124,7 @@ INTEGER,                INTENT(IN)    :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
  CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,                INTENT(IN)    :: OAGRIP
+LOGICAL,                INTENT(IN)    :: OPERM
  CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(IN)   :: PWG1
@@ -289,7 +290,6 @@ IF (PRESENT(PD_ICE).AND.HISBA/='DIF') THEN
     CALL AV_PGD (PD_ICE,PCOVER,XDATA_DICE(:,:),YNAT,'ARI')
   ENDIF
 ENDIF
-
 !
 !        Other parameters
 !        ----------------
@@ -715,7 +715,7 @@ IF (HISBA/='2-L') THEN
 ENDIF
 !
 !CALCULATION OF GROUND_DEPTH : Permafrost depth put to 12m
-IF(HISBA=='DIF'.AND.LPERM)THEN
+IF(HISBA=='DIF'.AND.OPERM)THEN
   CALL PERMAFROST_DEPTH(KNI,KPATCH,XPERM,ZDTOT)
 ENDIF
 !
@@ -846,7 +846,7 @@ IF (HISBA=='DIF') THEN
     ENDIF
     !--------------waiting for new vegtypes-----------------------------------!
     !Jackson parameter for tundra
-    IF(LPERM)THEN
+    IF(OPERM)THEN
       IF (LDATA_ROOT_EXTINCTION) THEN
         ZPAR_ROOT_EXTINCTION(:,:)       =XPAR_ROOT_EXTINCTION(:,:)
         ZPAR_ROOT_EXTINCTION(:,NVT_GRAS)=0.914
