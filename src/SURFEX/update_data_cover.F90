@@ -63,15 +63,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('UPDATE_DATA_COVER',0,ZHOOK_HANDLE)
-!$OMP SINGLE
 IF (KYEAR /= NYEAR) THEN        
   NYEAR = KYEAR
   CALL ECOCLIMAP2_LAI
   CALL INI_DATA_PARAM(XDATA_VEGTYPE, PSURF=XDATA_NATURE, PSURF2=XDATA_GARDEN, &
              PLAI=XDATA_LAI, PH_TREE=XDATA_H_TREE, PVEG_OUT=XDATA_VEG, &
-             PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PEMIS_ECO=XDATA_EMIS_ECO)            
+             PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PEMIS_ECO=XDATA_EMIS_ECO)
 END IF
-!$OMP END SINGLE
 IF (LHOOK) CALL DR_HOOK('UPDATE_DATA_COVER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 
