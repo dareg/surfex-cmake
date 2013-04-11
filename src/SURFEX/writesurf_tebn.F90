@@ -61,6 +61,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
@@ -72,7 +76,7 @@ INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
+INTEGER           :: IRESP, INFOMPI, JPROC  ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=3)  :: YPATCH         ! Patch identificator
@@ -127,14 +131,16 @@ DO JLAYER=1,NROAD_LAYER
   WRITE(YRECFM,'(A3,A5,I1.1,A1)') YPATCH,'TROAD',JLAYER,' '
   YRECFM=ADJUSTL(YRECFM)
   IF (CROAD_DIR=='UNIF' .OR. LDATA_ROAD_DIR) THEN
-    WRITE(YCOMMENT,'(A9,I1.1,A4)') 'X_Y_TROAD',JLAYER,' (K)'
-  ELSE
+    YSTRING = 'X_Y_TROAD'
+  ELSEIF (SIZE(XROAD_DIR)>0) THEN
     !* road direction is uniform spatially, one can then indicate it in the comment
     CALL ROAD_DIR(XROAD_DIR(1),YDIR)
     YSTRING=TRIM(YDIR)//' ROAD TEMP. LAYER '
-    WRITE(YCOMMENT,'(A,I1.1,A4)') TRIM(YSTRING), JLAYER,' (K)'
-  END IF
- CALL WRITE_SURF(HPROGRAM,YRECFM,XT_ROAD(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
+  ELSE
+    YSTRING='? ROAD TEMP. LAYER '
+  ENDIF
+  WRITE(YCOMMENT,'(A,I1.1,A4)') TRIM(YSTRING), JLAYER,' (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XT_ROAD(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
 END DO
 !
 !* road water content
@@ -159,26 +165,30 @@ DO JLAYER=1,NWALL_LAYER
   WRITE(YRECFM,'(A3,A6,I1.1)') YPATCH,'TWALLA',JLAYER
   YRECFM=ADJUSTL(YRECFM)
   IF (LDATA_ROAD_DIR) THEN
-    WRITE(YCOMMENT,'(A11,I1.1,A4)') 'X_Y_TWALL_A',JLAYER,' (K)'
-  ELSE
+    YSTRING = 'X_Y_TWALL_A'
+  ELSEIF (SIZE(XROAD_DIR)>0) THEN
     !* wall direction is uniform spatially, one can then indicate it in the comment
     CALL WALLA_DIR(XROAD_DIR(1),YDIR)
     YSTRING=TRIM(YDIR)//'-FACING WALL TEMP. LAYER '
-    WRITE(YCOMMENT,'(A,I1.1,A4)') TRIM(YSTRING), JLAYER,' (K)'
-  END IF
+  ELSE
+    YSTRING='?-FACING WALL TEMP. LAYER '
+  ENDIF
+  WRITE(YCOMMENT,'(A,I1.1,A4)') TRIM(YSTRING), JLAYER,' (K)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XT_WALL_A(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
   !
   !* Wall B
   WRITE(YRECFM,'(A3,A6,I1.1)') YPATCH,'TWALLB',JLAYER
   YRECFM=ADJUSTL(YRECFM)
   IF (LDATA_ROAD_DIR) THEN
-    WRITE(YCOMMENT,'(A11,I1.1,A4)') 'X_Y_TWALL_B',JLAYER,' (K)'
-  ELSE
+    YSTRING = 'X_Y_TWALL_B'
+  ELSEIF (SIZE(XROAD_DIR)>0) THEN
     !* wall direction is uniform spatially, one can then indicate it in the comment
     CALL WALLB_DIR(XROAD_DIR(1),YDIR)
     YSTRING=TRIM(YDIR)//'-FACING WALL TEMP. LAYER '
-    WRITE(YCOMMENT,'(A,I1.1,A4)') TRIM(YSTRING), JLAYER,' (K)'
-  END IF
+  ELSE
+    YSTRING='?-FACING WALL TEMP. LAYER '
+  ENDIF
+  WRITE(YCOMMENT,'(A,I1.1,A4)') TRIM(YSTRING), JLAYER,' (K)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XT_WALL_B(:,JLAYER),IRESP,HCOMMENT=YCOMMENT)
  END IF
 END DO
