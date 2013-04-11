@@ -76,7 +76,7 @@ INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: IRESP, INFOMPI, JPROC  ! IRESP  : return-code if a problem appears
+INTEGER           :: IRESP           ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=3)  :: YPATCH         ! Patch identificator
