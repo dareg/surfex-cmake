@@ -213,22 +213,22 @@ REAL, PARAMETER, DIMENSION(12) :: XTAU_WOOD = &
 !
 ! Soil carbon (YPHOTO='NCB' and YRESPSL='CNT') parameters:
 !
-REAL, ALLOCATABLE, DIMENSION(:)      :: XCN
+REAL, DIMENSION(6)      :: XCN
 !                                       Biomass Carbon/Nitrogen ratio
 !
-REAL, ALLOCATABLE, DIMENSION(:)      :: XLC
+REAL, DIMENSION(6)      :: XLC
 !                                       Biomass Lignin/Carbon ratio
 !
-REAL, ALLOCATABLE, DIMENSION(:,:)    :: XFRAC_LITTER
+REAL, DIMENSION(6,2)    :: XFRAC_LITTER
 !                                       Fraction of biomass pools going into litter pools
 !
-REAL, ALLOCATABLE, DIMENSION(:)      :: XTAU_LITTER
+REAL, DIMENSION(2)      :: XTAU_LITTER
 !                                       Residence times in litter pools (s)
 !
-REAL, ALLOCATABLE, DIMENSION(:,:,:)  :: XFRAC_SOILCARB
+REAL, DIMENSION(2,3,6)  :: XFRAC_SOILCARB
 !                                       Fraction of litter decomposition flux that goes into soil
 !
-REAL, ALLOCATABLE, DIMENSION(:)      :: XTAU_SOILCARB
+REAL, DIMENSION(3)      :: XTAU_SOILCARB
 !                                       Residence times in carbon pools (s)
 !
 ! Radiative transfer parameters

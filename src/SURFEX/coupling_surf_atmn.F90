@@ -38,7 +38,8 @@ USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XP00, XCPD, XRD, XAVOGADRO
 USE MODD_SURF_ATM_GRID_n,ONLY : XLON
-USE MODD_SURF_ATM_n,     ONLY : NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
+USE MODD_SURF_ATM_n,     ONLY : NDIM_SEA, NDIM_WATER, NDIM_TOWN, NDIM_NATURE, &
+                                NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
                                 NR_SEA,    NR_WATER,    NR_TOWN,    NR_NATURE,    &
                                 XSEA,      XWATER,      XTOWN,      XNATURE,      &
                                 TTIME, NSIZE_FULL
@@ -205,10 +206,11 @@ TTIME%TIME = TTIME%TIME + PTSTEP
 !-------------------------------------------------------------------------------------
 ! FLAGS for the various surfaces:
 !
-GSEA      = NSIZE_SEA    >0
-GWATER    = NSIZE_WATER  >0
-GTOWN     = NSIZE_TOWN   >0
-GNATURE   = NSIZE_NATURE >0
+GSEA      = NDIM_SEA    >0
+GWATER    = NDIM_WATER  >0
+GTOWN     = NDIM_TOWN   >0
+GNATURE   = NDIM_NATURE >0
+
 !
 ! Tile counter:
 !

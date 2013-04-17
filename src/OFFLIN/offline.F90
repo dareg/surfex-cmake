@@ -1144,7 +1144,8 @@ IF ( LRESTART ) THEN
   IF(CSURF_FILETYPE/='FA    ')THEN
      CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
                            .FALSE.,0,0,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                           .FALSE.,.FALSE.,.FALSE.,.FALSE.)
+                           .FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                           .FALSE.,.FALSE.)
      CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
   ENDIF
   !
