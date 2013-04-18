@@ -347,7 +347,7 @@ END SUBROUTINE WRITE_SURFX0_TIME_OL
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_NPIO_WRITE, &
                             XTIME_COMM_WRITE, WLOG_MPI
 USE MODD_SURFEX_OMP, ONLY : CWORK0, NWORK0, NWORKVAR, NWORKB, NWORKDIMS, &
-                            NWORKIDS, NWORKLEN
+                            NWORKIDS, NWORKLEN, LWORK0
 !
 USE MODD_IO_SURF_OL, ONLY: LMASK, NMASK, NMASK_IGN, XSTART, &
                            XSTRIDE, LPARTW, XSTARTW, XCOUNTW
@@ -378,7 +378,6 @@ INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem 
                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-LOGICAL :: GKNOWN
  CHARACTER(LEN=100)    :: YNAME
 INTEGER               :: IFILE_ID, IVAR_ID, JDIM, INDIMS
 INTEGER               :: JRET
@@ -404,12 +403,12 @@ NWORKLEN(:) = 0
 CWORK0 = ""
 NWORKB=0
 !
+ CALL IO_BUFF_n(HREC,'W',LWORK0)
+!
 !$OMP END SINGLE
 !
- CALL IO_BUFF_n(HREC,'W',GKNOWN)
-!
-IF (GKNOWN .AND. LHOOK) CALL DR_HOOK("WRITE_SURF_OL:WRITE_SURFX1_OL",1,ZHOOK_HANDLE)
-IF (GKNOWN) RETURN
+IF (LWORK0 .AND. LHOOK) CALL DR_HOOK("WRITE_SURF_OL:WRITE_SURFX1_OL",1,ZHOOK_HANDLE)
+IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN 
   !
@@ -614,7 +613,6 @@ INTEGER,              INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem
                                              ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-LOGICAL :: GKNOWN
  CHARACTER(LEN=100)    :: YNAME
 INTEGER               :: IFILE_ID, IVAR_ID, JDIM, INDIMS
 INTEGER               :: JRET
