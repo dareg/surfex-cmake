@@ -147,8 +147,7 @@ REAL, PARAMETER                      :: XSNOWCRITD = 0.03  ! (m)
 !                                       
 ! ISBA-ES Minimum total snow depth for model 
 !
-! REAL, PARAMETER                      :: XSNOWDMIN = 0.000001  ! (m)
-REAL, PARAMETER                      :: XSNOWDMIN = 4E-5  ! (m)
+ REAL, PARAMETER                      :: XSNOWDMIN = 0.000001  ! (m)
 !                                       
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
