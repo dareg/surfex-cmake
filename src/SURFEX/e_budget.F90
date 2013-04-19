@@ -16,8 +16,7 @@
                             PFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,               &
                             PTA_IC, PQA_IC, PUSTAR2_IC,                          &
                             PSNOWFREE_ALB_VEG, PPSNV_A,PSNOWFREE_ALB_SOIL,       &
-                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDELTAT,   &
-                            PDEEP_FLUX                                           )  
+                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDEEP_FLUX )  
 !     ##########################################################################
 !
 !!****  *E_BUDGET*  
@@ -249,10 +248,6 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFF, PFFG, PFALB, PFEMIS, PFFROZEN
 !
 REAL, DIMENSION(:), INTENT(INOUT)  :: PLSTT, PLVTT
 !
-REAL, DIMENSION(:,:), INTENT(OUT) :: PDELTAT
-!                                    PDELTAT = change in temperature over the time
-!                                              step before adjustment owing to phase 
-!                                              changes (K)
 REAL, DIMENSION(:), INTENT(OUT)   :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
 !
 !*      0.2    declarations of local variables
@@ -301,7 +296,6 @@ ZCONDAVG(:)  = 0.0
 ZTERM2(:)    = 0.0
 ZTERM1(:)    = 0.0
 ZPTG_OLD(:)  = PTG(:,1)
-PDELTAT(:,:) = 0.0
 ZHUMSD(:)    = 0.0
 ZHUMAD(:)    = 0.0
 !
@@ -596,21 +590,10 @@ IF(HISBA == 'DIF')THEN
    ZTERM2(:)   = 2.*ZCONDAVG(:)*PCT(:)/(ZA(:)*PD_G(:,2))
    ZTERM1(:)   = (PTG(:,1)*ZB(:) + (ZC(:) - (2. * XPI * PTG(:,2) / XDAY)) )/ZA(:)  
 !
-! Save initial temperature profile (K):
-!
-   PDELTAT(:,:) = PTG(:,:)
-!
 ! Determine the soil temperatures:
 !
    CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
                      PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
-!
-! Compute the change in temperature over the time
-! step before adjustment owing to phase changes (K)
-! (Used in the diffusion soil phase change computations)
-!                                              
-   PDELTAT(:,:) = PTG(:,:) - PDELTAT(:,:) ! K
-!
 !
 ELSE
 !

@@ -142,8 +142,6 @@ USE MODI_ISBA_FLUXES
 !
 USE MODE_THERMOS
 !
-!
-!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -666,9 +664,6 @@ REAL, DIMENSION(SIZE(PWR)) :: ZF2       ! water stress coefficient
 REAL, DIMENSION(SIZE(PWR)) :: ZF5       ! water stress coefficient (based on F2)
 !                                       ! to enforce Etv=>0 as F2=>0
 !
-REAL, DIMENSION(SIZE(PWR)) :: ZDWGI1, ZDWGI2 ! Liquid equivalent volumetric soil
-!                                              ice content time tendencies (m3/m3)
-!
 REAL, DIMENSION(SIZE(PWR)) :: ZHUGI    ! humidity over frozen bare ground
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZEVAPCOR ! evaporation correction as last traces of snow
@@ -686,11 +681,6 @@ REAL, DIMENSION(SIZE(PWR)) :: ZTSM     ! surface temperature before time integra
 REAL, DIMENSION(SIZE(PWR)) :: ZLEG_DELTA  ! soil evaporation delta fn
 REAL, DIMENSION(SIZE(PWR)) :: ZLEGI_DELTA ! soil sublimation delta fn
 !
-REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZDELTAT
-!                                      ! change in temperature over the time
-!                                      ! step before adjustment owing to phase 
-!                                      ! changes (K)
-!
 REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
 !                                      ! absorbed PAR of each level within the
 !                                      ! canopy - Split into shaded and SUNLIT
@@ -705,13 +695,11 @@ REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivi
 !
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZF2WGHT    ! water stress factor
 !
-REAL, DIMENSION(SIZE(PWG,1))             :: ZWGI_EXCESS! Soil ice excess water content
 !
 ! Other :
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
 !                                                      ! if implicit coupling with atmosphere used.
-REAL, DIMENSION(SIZE(PWR)) :: ZTDIURN ! Ice maximum penetration depth for restore (m)
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
 !
@@ -736,9 +724,6 @@ ZCS(:)          = XUNDEF
 ZTA_IC(:)       = XUNDEF
 ZQA_IC(:)       = XUNDEF
 ZUSTAR2_IC(:)   = 0.0
-!
-ZTDIURN     (:) = 0.0
-ZWGI_EXCESS (:) = 0.0
 !
 ZEMIST      (:) = XUNDEF
 ZALBT       (:) = XUNDEF
@@ -883,7 +868,7 @@ ENDIF
         ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
         ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
         PSNOWFREE_ALB_VEG, PPSNV_A, PSNOWFREE_ALB_SOIL,                         &
-        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDELTAT, PDEEP_FLUX           )
+        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDEEP_FLUX                    )
 !
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -898,18 +883,19 @@ ENDIF
 !  '3-L' : they represent                    flood + snow-flood-free  albedo and emissivity
 !*******************************************************************************
 !
- CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, HSOILFRZ, OTEMP_ARP, PTSTEP, PSODELX,       &
+ CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, OTEMP_ARP, PTSTEP, PSODELX,                &
            PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC, ZUSTAR2_IC,                        &
            PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                             &
-           PLAI, PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,&
+           PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,      &
            ZF5, PRS, ZCS, PCG, PCT, PSNOWSWE(:,1), ZT2M, ZTSM,                  &
-           PPSN, PPSNV, PPSNG, ZFROZEN1, PTAUICE, ZWGI_EXCESS,                  &
+           PPSN, PPSNV, PPSNG, ZFROZEN1,                                        &
            ZALBT, ZEMIST, ZQSAT, ZDQSAT, ZSNOW_THRUFAL,                         &
            PRN, PH, PLE, PLEG, PLEGI, PLEV, PLES, PLER, PLETR, PEVAP, PGFLUX,   &
-           PMELTADV, PMELT, PRESTORE, PUSTAR, ZTS_RAD, ZDWGI1, ZDWGI2, ZDELTAT, &
-           ZSOILCONDZ, ZSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF, PD_G, PDZG, PTG,    &
-           PWGI, PWG, KWG_LAYER, PSRSFC, PPSNV_A, PFFG, PFFV, PFF, PFFROZEN,    &
-           PLE_FLOOD, PLEI_FLOOD, PSNOWTEMP(:,1), ZTDIURN                       )  
+           PMELTADV, PMELT, PRESTORE, PUSTAR, ZTS_RAD,                          &
+           ZSOILCONDZ,  PD_G, PDZG, PTG,                                        &
+           PSRSFC, PPSNV_A, PFFG, PFFV, PFF, PFFROZEN,                          &
+           PLE_FLOOD, PLEI_FLOOD, PSNOWTEMP(:,1)                                ) 
+!
 !
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEV+LEG+LEGI+LES) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
@@ -924,7 +910,8 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
      * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
        + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))*PHUG(:)  &
        + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:) *ZHUGI(:) &
-       + XLSTT*                 PPSN (:)                            )  
+       + XLSTT*                 PPSN (:)                            )
+!
 !
 !*******************************************************************************
 ! WARNING: at this stage, all fluxes have two different meanings according
@@ -936,25 +923,20 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
 !                                      PLER, PLETR, PEVAP, PUSTAR, PGFLUX
 !*******************************************************************************
 !
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!
 !*     11.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
- CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, OGLACIER, OFLOOD, PTSTEP, PVEGTYPE,      &
-     PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
-     PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, PVEG, ZWRMAX, PMELT,         &
-     ZDWGI1, ZDWGI2, PLEGI, PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,       &     
-     PPSNV, PPSNG, ZSNOW_THRUFAL, ZEVAPCOR, PWR,                                &
+ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OGLACIER, OFLOOD, PTSTEP,     &
+     PVEGTYPE, PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,      &
+     PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, PVEG, PLAI, ZWRMAX, PMELT,   &
+     PTAUICE, PLEGI, PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,              &     
+     PPSNV, PPSNG, ZSNOW_THRUFAL, ZEVAPCOR, PWR, ZSOILHCAPZ,                    &
      PSNOWSWE(:,1), PSNOWALB, PSNOWRHO(:,1), PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, &
      PWFC, PWWILT, ZF2WGHT, ZF2, PD_G, PDZG, PDZDIF, PPS,                       &
      PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF,                                &
      PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,                          &
      HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
-     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, ZTDIURN,          &
-     PIRRIG_FLUX                                                                )
-!
-PDRAIN(:)=PDRAIN(:)+ZWGI_EXCESS(:)
+     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX       )
 !
 !-------------------------------------------------------------------------------
 !

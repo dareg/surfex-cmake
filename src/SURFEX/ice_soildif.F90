@@ -2,7 +2,7 @@
       SUBROUTINE ICE_SOILDIF(PTSTEP, PTAUICE, PKSFC_IVEG, PLEGI,                 &
                             PSOILHCAPZ, PWSATZ, PMPOTSATZ, PBCOEFZ,              &
                             PTG, PWGI, PWG, KWG_LAYER,                           &
-                            PDELTAT, PDZG, PWGI_EXCESS                           )  
+                            PDZG, PWGI_EXCESS                                    )  
 !     ##########################################################################
 !
 !!****  *ICE_SOILDIF*  
@@ -70,7 +70,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,     ONLY : XLMTT, XTT, XG, XCI, XRHOLI, XRHOLW, XLSTT 
+USE MODD_CSTS,     ONLY : XLMTT, XTT, XG, XCI, XRHOLI, XRHOLW
 USE MODD_ISBA_PAR, ONLY : XWGMIN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -86,14 +86,11 @@ REAL, DIMENSION(:), INTENT(IN)      :: PTAUICE, PKSFC_IVEG, PLEGI
 !                                      PKSFC_IVEG = effect of surface layer insolation on phase changes
 !                                                    Giard and Bazile (2000): non-dimensional
 !                                      PTAUICE    = soil phase change characteristic time scale (s)
-!                                      PLEGI      = ice sublimation
+!                                      PLEGI      = ice sublimation (m s-1)
 !
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILHCAPZ, PWSATZ, PDELTAT
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILHCAPZ, PWSATZ
 !                                      PSOILHCAPZ = soil heat capacity [J/(m3 K)]
 !                                      PWSATZ     = soil porosity (m3/m3)
-!                                      PDELTAT    = change in temperature over the time
-!                                                   step before adjustment owing to phase 
-!                                                   changes (K)
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDZG
 !                                      PDZG   = Layer thickness (DIF option)
@@ -223,7 +220,7 @@ ENDDO
 ! 3. Adjust surface soil ice content for sublimation
 !    -----------------------------------------------
 !
-PWGI(:,1) = PWGI(:,1) - PLEGI(:)*PTSTEP/(XLSTT*XRHOLW*PDZG(:,1))
+PWGI(:,1) = PWGI(:,1) - PLEGI(:)*PTSTEP/PDZG(:,1)
 !
 ! The remaining code in this block are merely constraints to ensure a highly
 ! accurate water budget: most of the time this code will not have any

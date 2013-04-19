@@ -1,14 +1,14 @@
 !     #########
-      SUBROUTINE HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, OGLACIER,                &
+      SUBROUTINE HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OGLACIER,      &
                          OFLOOD, PTSTEP, PVEGTYPE,                          &
                          PRR, PSR, PLEV, PLETR, PLEG, PLES,                 &
                          PRUNOFFB, PWDRAIN,                                 &
                          PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT,      &
-                         PVEG, PWRMAX, PMELT, PDWGI1, PDWGI2, PLEGI,        &
+                         PVEG, PLAI, PWRMAX, PMELT, PTAUICE, PLEGI,         &
                          PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,      &
                          PPSNV, PPSNG,                                      &
                          PSNOW_THRUFAL, PEVAPCOR,                           &
-                         PWR,                                               &
+                         PWR, PSOILHCAPZ,                                   &
                          PSNOWSWE, PSNOWALB, PSNOWRHO,                      &
                          PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,           &
                          PWWILT, PF2WGHT, PF2, PD_G, PDZG, PDZDIF, PPS,     &
@@ -17,8 +17,7 @@
                          PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,  &
                          HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, &
                          PD_ICE, PHORTON, PDRIP, PFFG, PFFV , PFFLOOD,      &
-                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PTDIURN,       & 
-                         PIRRIG_FLUX        )  
+                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX    )  
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -78,6 +77,7 @@
 !!                     09/12 (B. Decharme) Bug in wg2 ice energy budget
 !!                     10/12 (B. Decharme) EVAPCOR snow correction in DIF
 !!                                         Add diag IRRIG_FLUX
+!!                     04/13 (B. Decharme) Pass soil phase changes routines here
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -96,6 +96,8 @@ USE MODI_HYDRO_SNOW
 USE MODI_HYDRO_SOIL
 USE MODI_HYDRO_SOILDIF                                          
 USE MODI_HYDRO_SGH
+USE MODI_ICE_SOILDIF              
+USE MODI_ICE_SOILFR              
 !
 USE MODE_THERMOS
 !
@@ -119,6 +121,10 @@ IMPLICIT NONE
 !                                             ! 'WSAT'
 !                                             ! 'DT92'
 !                                             ! 'SGH ' Topmodel
+CHARACTER(LEN=*),   INTENT(IN)      :: HSOILFRZ   ! soil freezing-physics option
+!                                                 ! 'DEF'   Default (Boone et al. 2000; Giard and Bazile 2000)
+!                                                 ! 'LWT'   phase changes as above, but relation between unfrozen 
+!                                                         water and temperature considered
 LOGICAL, INTENT(IN)                :: OGLACIER ! True = Over permanent snow and ice, 
 !                                                initialise WGI=WSAT,
 !                                                Hsnow>=10m and allow 0.8<SNOALB<0.85
@@ -151,8 +157,9 @@ REAL, DIMENSION(:,:), INTENT(IN)  :: PC3
 !                                      PCG = soil heat capacity
 !                                      PCT = grid-averaged heat capacity
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PRUNOFFD, PWRMAX
+REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PLAI, PRUNOFFD, PWRMAX
 !                                      PVEG = fraction of vegetation 
+!                                      PLAI = Leaf Area Index 
 !                                      PRUNOFFD = depth over which sub-grid runoff calculated (m)
 !                                      PWRMAX = maximum equivalent water content
 !                                               in the vegetation canopy
@@ -164,12 +171,10 @@ REAL, DIMENSION(:), INTENT(IN)    :: PPSNV, PPSNG
 !                                      PPSNV = vegetation covered by snow
 !                                      PPSNG = baresoil covered by snow
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PDWGI1, PDWGI2, PLEGI
-!                                      PDWGI1 = surface layer liquid water equivalent 
-!                                               volumetric ice content time tendency
-!                                      PDWGI2 = deep-soil layer liquid water equivalent 
-!                                               volumetric ice content time tendency 
-!                                      PLEGI  = surface soil ice sublimation 
+REAL, DIMENSION(:), INTENT(IN)    :: PTAUICE, PLEGI
+!                                    PTAUICE = characteristic time scale for soil water
+!                                                phase changes (s) 
+!                                    PLEGI   = surface soil ice sublimation 
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PSNOW_THRUFAL, PEVAPCOR
 !                                    PSNOW_THRUFAL = rate that liquid water leaves snow pack: 
@@ -192,6 +197,9 @@ REAL, DIMENSION(:,:), INTENT(IN)  :: PWSAT, PCONDSAT, PWFC, PD_G, PF2WGHT, PWWIL
 REAL, DIMENSION(:,:), INTENT(IN)  :: PDZDIF, PDZG
 !                                    PDZDIF = distance between consecuative layer mid-points
 !                                    PDZG   = soil layers thicknesses
+!
+REAL, DIMENSION(:,:), INTENT(IN) :: PSOILHCAPZ
+!                                   PSOILHCAPZ = ISBA-DF Soil heat capacity profile [J/(m3 K)]
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PSOILWGHT  ! ISBA-DIF: weights for vertical
 !                                               ! integration of soil water and properties
@@ -272,9 +280,6 @@ REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltratio
 REAL, DIMENSION(:), INTENT(INOUT)  :: PIFLOOD  !Floodplain real infiltration      [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT)  :: PPFLOOD  !Floodplain interception           [kg/m²/s]
 !
-REAL, DIMENSION(:), INTENT(IN)     :: PTDIURN
-!                                     PTDIURN      = penetration depth for restore (m)
-!
 !*      0.2    declarations of local variables
 !
 !
@@ -305,13 +310,28 @@ REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                       
 !                                 ZEVAPCOR = correction if evaporation from snow exceeds
 !                                               actual amount on the surface [m/s]
 !
+REAL, DIMENSION(SIZE(PVEG))     :: ZDWGI1, ZDWGI2, ZKSFC_IVEG
+!                                      ZDWGI1 = surface layer liquid water equivalent 
+!                                               volumetric ice content time tendency
+!                                      ZDWGI2 = deep-soil layer liquid water equivalent 
+!                                               volumetric ice content time tendency
+!                                      ZKSFC_IVEG = non-dimensional vegetation insolation coefficient
+!
+REAL, DIMENSION(SIZE(PVEG))    :: ZWGI_EXCESS
+!                                      ZWGI_EXCESS = Soil ice excess water content
+!
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZQSAT, ZQSATI, ZTI, ZPS
 !                                           For specific humidity at saturation computation (ISBA-DIF)
 !
-REAL, PARAMETER :: ZRICHARDSDTMAX = 900.  ! s  Maximum timescale for Richard's Eq. If the model
+!*      0.3    declarations of local parameters
+!
+REAL, PARAMETER             :: ZINSOLFRZ_VEG = 0.20  ! (-)       Vegetation insolation coefficient
+!
+REAL, PARAMETER             :: ZINSOLFRZ_LAI = 30.0  ! (m2 m-2)  Vegetation insolation coefficient
+
+REAL, PARAMETER             :: ZTIMEMAX      = 900.  ! s  Maximum timescale without time spliting
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-                                          !    timestep exceeds this (rather large) value,
-                                          !    then time split used for Richard's Eq. (DIF option only)
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -332,6 +352,10 @@ ZWWILT_AVG(:)    = 0.0
 ZWFC_AVG(:)      = 0.0
 !
 ZRR(:)           = PRR(:)
+!
+ZDRAIN(:)        = 0.
+ZHORTON(:)       = 0.
+ZWGI_EXCESS(:)   = 0.
 !
 PDRAIN(:)        = 0.
 PRUNOFF(:)       = 0.
@@ -443,7 +467,7 @@ ENDIF
                  PMPOTSAT, PKSAT_ICE, PD_ICE,     &
                  PFSAT, PHORTON, ZDUNNE, PFFLOOD, &
                  PPIFLOOD, PIFLOOD, PPFLOOD,      &
-                 PRUNOFFB, PRUNOFFD, PTDIURN,     &
+                 PRUNOFFB, PRUNOFFD, PCG,         &
                  PSOILWGHT, OFLOOD, KLAYER_HORT,  &
                  KLAYER_DUN                       )         
 !
@@ -462,6 +486,35 @@ ENDIF
 !               -------
 !                                     when the soil water exceeds saturation, 
 !                                     there is fast-time-response runoff
+!
+!
+! -----------------------------------------------------------------
+! Time splitting parameter for *very large time steps* since Richard
+! and/or soil freezing equations are very non-linear 
+! NOTE for NWP/GCM type applications, the time step is generally not split
+! (usually just for offline applications with a time step on order of 
+! 15 minutes to an hour for example)
+! ------------------------------------------------------------------
+!
+INDT = 1
+IF(PTSTEP>=ZTIMEMAX)THEN
+  INDT = MAX(2,NINT(PTSTEP/ZTIMEMAX))
+ENDIF
+!
+ZTSTEP  = PTSTEP/REAL(INDT)
+!
+! ------------------------------------------------------------------
+! The values for the two coefficients (multiplied by VEG and LAI) 
+! in the expression below are from 
+! Giard and Bazile (2000), Mon. Wea. Rev.: they model the effect of insolation due to
+! vegetation cover. This used by both 'DEF' (code blocks 3.-4.) and 'DIF' options.
+! ------------------------------------------------------------------
+!
+WHERE(PLAI(:)/=XUNDEF .AND. PVEG(:)/=0.)
+    ZKSFC_IVEG(:) = (1.0-ZINSOLFRZ_VEG*PVEG(:)) * (1.0-(PLAI(:)/ZINSOLFRZ_LAI))
+ELSEWHERE
+    ZKSFC_IVEG(:) = 1.0 ! No vegetation
+ENDWHERE
 !
 IF (HISBA=='DIF') THEN                
 !
@@ -496,24 +549,10 @@ IF (HISBA=='DIF') THEN
   ZEVAPCOR(:) = PEVAPCOR(:)        / XRHOLW
   ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*XLVTT)
   ZLETR   (:) = (ZLETR  (:)/PF2(:))/(XRHOLW*XLVTT)
+  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*XLSTT)
 !
-! -----------------------------------------------------------------
-! Time splitting for *very large time steps* since Richard's Eq is very
-! non-linear and for large throughfall (snowmelt, rainfall) with a thin
-! upper soil layer.
-! NOTE for NWP/GCM type applications, the time step is generally not split
-! (usually just for offline applications with a time step on order of 
-! 15 minutes to an hour for example)
-! ------------------------------------------------------------------
-!
-  INDT = 1
-  IF(PTSTEP>=ZRICHARDSDTMAX)THEN
-    INDT = MAX(2,NINT(PTSTEP/ZRICHARDSDTMAX))
-  ENDIF
-!
-  ZTSTEP  = PTSTEP/REAL(INDT)
-!
-  DO JDT     = 1,INDT
+  DO JDT = 1,INDT
+!                      
     CALL HYDRO_SOILDIF(ZTSTEP,                                      &
                 PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,            &
                 PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG, ZEVAPCOR,     &
@@ -521,24 +560,39 @@ IF (HISBA=='DIF') THEN
                 PWDRAIN, ZDRAIN, ZHORTON, HKSAT, HSOC, PWWILT,      &
                 HHORT, PFSAT, KWG_LAYER, INL, KLAYER_HORT           )  
 !
-    PDRAIN (:)  = PDRAIN (:) + ZDRAIN (:)/REAL(INDT)
+    CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,     &
+                     PSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF,    &
+                     PTG, PWGI, PWG, KWG_LAYER,              &
+                     PDZG,  ZWGI_EXCESS                      )
+!
+    PDRAIN (:)  = PDRAIN (:) + (ZDRAIN(:)+ZWGI_EXCESS(:))/REAL(INDT)
     PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(INDT)
   ENDDO
 !
 ELSE
-  !
-  CALL HYDRO_SOIL(HISBA,                                           &
-                  PTSTEP,                                          &
-                  ZLETR, ZLEG, ZPG, PEVAPCOR,                      &
-                  PWDRAIN,                                         &
-                  PC1, PC2, PC3, PC4B, PC4REF, PWGEQ,              &
-                  PD_G(:,2), ZDG, ZWSAT_AVG, ZWFC_AVG,             &
-                  PDWGI1, PDWGI2, ZLEGI, PD_G(:,1), PCG, PCT,      &
-                  PTG(:,1), PTG(:,2),                              &
-                  PWG(:,1), PWG(:,2), ZWG,                         &
-                  PWGI(:,1), PWGI(:,2),                            &
-                  PDRAIN,HKSAT,ZWWILT_AVG                          )
-  !
+!
+  DO JDT = 1,INDT
+!
+    CALL ICE_SOILFR(HSNOW_ISBA, HSOILFRZ, ZTSTEP, ZKSFC_IVEG, PCG, PCT,  &
+                    PPSNG, PFFG, PTAUICE, ZDWGI1, ZDWGI2, PWSAT,         &
+                    PMPOTSAT, PBCOEF, PD_G, PTG, PWGI, PWG               )
+!
+    CALL HYDRO_SOIL(HISBA,                                           &
+                    ZTSTEP,                                          &
+                    ZLETR, ZLEG, ZPG, PEVAPCOR,                      &
+                    PWDRAIN,                                         &
+                    PC1, PC2, PC3, PC4B, PC4REF, PWGEQ,              &
+                    PD_G(:,2), ZDG, ZWSAT_AVG, ZWFC_AVG,             &
+                    ZDWGI1, ZDWGI2, ZLEGI, PD_G(:,1), PCG, PCT,      &
+                    PTG(:,1), PTG(:,2),                              &
+                    PWG(:,1), PWG(:,2), ZWG,                         &
+                    PWGI(:,1), PWGI(:,2),                            &
+                    ZDRAIN,HKSAT,ZWWILT_AVG                          )
+!
+    PDRAIN (:)  = PDRAIN (:) + ZDRAIN (:)/REAL(INDT)
+!
+  ENDDO
+!
   IF (HISBA=='2-L' .OR. HISBA=='3-L') THEN
     !
     ! runoff of second layer

@@ -1,0 +1,1002 @@
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PWIND     ! wind speed                            (m/s)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PTA       ! Air temperature                       (K)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PQA       ! Air humidity                          (kg/m3)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PPA       ! Pressure at forcing level             (Pa)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! Air density at forcing level          (kg/m3)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_U  ! surface flux u'w'                     (m2/s2)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_T  ! surface flux w'T'                     (Km/s)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_Q  ! surface flux w'q'                     (kg/m2/s)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PUSTAR    ! friction velocity at forcing level    (m/s)
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFAU   ! V+(1) = alfa u'w'(1) + beta
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETAU   ! V+(1) = alfa u'w'(1) + beta
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFATH  ! Th+(1) = alfa w'th'(1) + beta
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETATH  ! Th+(1) = alfa w'th'(1) + beta
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFAQ   ! Q+(1) = alfa w'q'(1) + beta
+canopy_evol.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETAQ   ! Q+(1) = alfa w'q'(1) + beta
+canopy_evol.F90:REAL, DIMENSION(KI)      :: ZTHA               ! potential temperature at forcing level
+canopy_evol.F90:REAL, DIMENSION(KI)      :: ZSFLUX_TH          ! Surface flux w'Th'                    (mK/s)
+canopy_evol_field.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_F  ! surface flux w'Th'                    (mK/s)
+canopy_evol_field.F90:REAL, DIMENSION(KI), OPTIONAL, INTENT(OUT)   :: PALFA     !  V+(1) = alfa F(1) + beta
+canopy_evol_field.F90:REAL, DIMENSION(KI), OPTIONAL, INTENT(OUT)   :: PBETA     !  V+(1) = alfa F(1) + beta
+canopy_evol_field.F90:REAL, DIMENSION(KI)         :: ZDFADT  ! dTHa/dt   at forcing level
+canopy_evol_field.F90:REAL, DIMENSION(KI)         :: ZDWFDZ  ! dw'Th'/dz at forcing level
+canopy_evol_field.F90:REAL, DIMENSION(KI)         :: ZALFA, ZBETA
+canopy_evol_neutral.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PWIND     ! wind speed                            (m/s)
+canopy_evol_neutral.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! Air density at forcing level          (kg/m3)
+canopy_evol_neutral.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_U  ! surface flux u'w'                     (m2/s2)
+canopy_evol_neutral.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PUSTAR    ! friction velocity at forcing level    (m/s)
+canopy_evol_neutral.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFAU   ! V+(1) = alfa u'w'(1) + beta
+canopy_evol_neutral.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETAU   ! V+(1) = alfa u'w'(1) + beta
+canopy_evol_neutral.F90:REAL, DIMENSION(KI)      :: ZUSTAR   ! friction velocity (estimated from
+canopy_evol_temp.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PTHA      ! potential temp.  at forcing level     (K)
+canopy_evol_temp.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_T  ! surface flux w'Th'                    (mK/s)
+canopy_evol_temp.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFA     !  V+(1) = alfa F(1) + beta
+canopy_evol_temp.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETA     !  V+(1) = alfa F(1) + beta
+canopy_evol_temp.F90:REAL, DIMENSION(KI)         :: ZDTHADT  ! dTHa/dt   at forcing level
+canopy_evol_temp.F90:REAL, DIMENSION(KI)         :: ZDWTHDZ  ! dw'Th'/dz at forcing level
+canopy_evol_tke.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! Air density                           (kg/m3)
+canopy_evol_wind.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PWIND     ! wind at forcing level                 (m/s)
+canopy_evol_wind.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSFLUX_U  ! Surface flux u'w'                     (m2/s2)
+canopy_evol_wind.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PALFA     !  V+(1) = alfa u'w' + beta
+canopy_evol_wind.F90:REAL, DIMENSION(KI),      INTENT(OUT)   :: PBETA     !  V+(1) = alfa u'w' + beta
+canopy_evol_wind.F90:REAL, DIMENSION(KI)         :: ZDUADT   ! dUa/dt   at forcing level
+canopy.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PHEIGHT   ! canopy height                       (m)
+canopy_grid_update.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PH        ! maximum canopy height                 (m)
+canopy_grid_update.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PZFORC    ! height of wind forcing                (m)
+compute_isba_parameters.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+compute_isba_parameters.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+compute_isba_parameters.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+compute_isba_parameters.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+compute_isba_parameters.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PCLAY          !I [frc] mass fraction clay
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PPS            !I [Pa] surface pressure
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PQA            !I [kg/kg] atmospheric specific humidity
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PRA            !I [s/m] surface resistance
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PRHOA          !I [kg/m3] atmospheric density
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PSAND          !I [frc] mass fraction sand
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PSFTH          !I [W/m2] surface sensible heat flux
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PSFTQ          !I [kg/m2/sec] water vapor flux
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PTA            !I [K] Atmospheric temperature
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PTG            !I [K] Ground temperature
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PU             !I [m/s] zonal wind at atmospheric height 
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PUREF          !I [m] reference height of wind
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PV             !I [m/s] meridional wind at atmospheric height
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PWG            !I [m3/m3] ground volumetric water content
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PWSAT          !I [m3/m3] saturation volumetric water content
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PZREF          !I [m] reference height of wind
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PCD            !I [] Drag coefficient
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PRI            !I [] Richardson number from isba
+coupling_dstn.F90:REAL, DIMENSION(KI), INTENT(IN)    :: PZ0H_WITH_SNOW !I [frc] Z0 heat with snow
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t         (radian from the vertical)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1       (radian from the vertical)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_flaken.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_flaken.F90:REAL, DIMENSION(KI)     :: ZEMIS      ! Emissivity at time t
+coupling_flaken.F90:REAL, DIMENSION(KI)     :: ZTRAD      ! Radiative temperature at time t
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_flake_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PEXNA     ! Exner function at atm. level
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTICE     ! Ice Surface Temperature
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PEXNS     ! Exner function at sea surface
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PWIND     ! module of wind at atm. wind level
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! atm. level for temp. and humidity
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! atm. level for wind
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTWAT     ! Water Surface Temperature
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_icefluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_icefluxn.F90:INTEGER, DIMENSION(KI)           :: IMASK
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_ideal_flux.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1      (radian from the vertical)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t       (radian from the vertical)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1     (radian from the vertical)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model CANOPY           (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_isba_canopyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/kg)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2 positive toward the atmosphere (m/s*kg/kg)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_isban.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_isba_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_isba_svatn.F90~:REAL, DIMENSION(KI)    :: ZSFTH   ! surface temperature flux 
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1      (radian from the vertical)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_naturen.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_seafluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZEXNA      ! Exner function at forcing level
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZEXNS      ! Exner function at surface level
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZU         ! zonal wind
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZV         ! meridian wind
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZWIND      ! Wind
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZCD        ! Drag coefficient
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZCDN       ! Neutral Drag coefficient
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZCH        ! Heat transfer coefficient
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZCE        ! Vaporization heat transfer coefficient
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZRI        ! Richardson number
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZHU        ! Near surface relative humidity
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZRESA_SEA  ! aerodynamical resistance
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZUSTAR     ! friction velocity (m/s)
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZUSTAR2    ! square of friction velocity (m2/s2)
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZZ0H       ! heat roughness length over sea
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZQSAT      ! humidity at saturation
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZQA        ! specific humidity (kg/kg)
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZEMIS      ! Emissivity at time t
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZTRAD      ! Radiative temperature at time t
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZSFTH_ICE  ! Sea ice flux of heat
+coupling_seafluxn.F90:REAL, DIMENSION(KI) :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
+coupling_seafluxn.F90:REAL, DIMENSION(KI)              :: ZMASK
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_seaflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_sean.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model CANOPY           (m)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_seawat_sbln.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_sltn.F90:REAL, DIMENSION(KI),      INTENT(IN)  :: PWIND       !I wind velocity
+coupling_sltn.F90:REAL, DIMENSION(KI)   :: DZSPEED 
+coupling_sltn.F90:INTEGER, DIMENSION(KI):: WCL
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(INOUT) :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(INOUT) :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(INOUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(INOUT) :: PEMIS     ! emissivity                            (-)
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_tebn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_teb_orographyn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_townn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_watfluxn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZEXNA      ! Exner function at forcing level
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZEXNS      ! Exner function at surface level
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZWIND      ! Wind
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZCD        ! Drag coefficient
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZCDN       ! Neutral Drag coefficient
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZCH        ! Heat transfer coefficient
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZRI        ! Richardson number
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZHU        ! Near surface relative humidity
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZRESA_WATER! aerodynamical resistance
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZUSTAR     ! friction velocity (m/s)
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZUSTAR2    ! square of friction velocity (m2/s2)
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZZ0H       ! heat roughness length over sea
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZQSAT      ! humidity at saturation
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZQA        ! specific humidity (kg/kg)
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZEMIS      ! Emissivity at time t
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZTRAD      ! Radiative temperature at time t
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZSFTH_ICE  ! Sea ice flux of heat
+coupling_watfluxn.F90:REAL, DIMENSION(KI)  :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t      (radian from the vertical)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1    (radian from the vertical)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+coupling_watflux_orogn.F90:REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI), INTENT(IN) ::   &
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI), INTENT(IN) ::   &
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  :: &
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT) ::  &
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  :: &
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI), INTENT(INOUT)  ::    &
+flake_interface.F90:REAL (KIND = ireals), DIMENSION(KI) ::    &
+flake_interface.F90:TYPE (opticpar_medium), DIMENSION(KI) ::  &
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PAOSIP  ! subgrid orographic A/S, dir i+
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PAOSIM  ! subgrid orographic A/S, dir i-
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PAOSJP  ! subgrid orographic A/S, dir j+
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PAOSJM  ! subgrid orographic A/S, dir j-
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PHO2IP  ! subgrid orographic h/2, dir i+
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PHO2IM  ! subgrid orographic h/2, dir i-
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PHO2JP  ! subgrid orographic h/2, dir j+
+get_aosn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PHO2JM  ! subgrid orographic h/2, dir j-
+get_coordn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PLON, PLAT
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PRN       ! Net radiation at surface    (W/m2)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PH        ! Sensible heat flux          (W/m2)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PLE       ! Total Latent heat flux      (W/m2)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PLEI      ! Solid Latent heat flux      (W/m2)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PGFLUX    ! Net soil-vegetation flux    (W/m2)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PT2M      ! Air temperature at 2 meters (K)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PQ2M      ! Air humidity at 2 meters    (kg/kg)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PHU2M     ! Air relative humidity at 2 meters (-)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZON10M   ! zonal Wind at 10 meters     (m/s)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PMER10M   ! meridian Wind at 10 meters  (m/s)
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFLWNET   ! LW net at the surface
+get_fluxn.F90:REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFSWNET   ! SW net at the surface
+get_fracn.F90:REAL, DIMENSION(KI),  INTENT(OUT)           :: PSEA    ! sea    fraction
+get_fracn.F90:REAL, DIMENSION(KI),  INTENT(OUT)           :: PWATER  ! water  fraction
+get_fracn.F90:REAL, DIMENSION(KI),  INTENT(OUT)           :: PNATURE ! nature fraction
+get_fracn.F90:REAL, DIMENSION(KI),  INTENT(OUT)           :: PTOWN   ! town   fraction
+get_qsn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! roughness length for momentum (m)
+get_seriesn.F90:INTEGER, DIMENSION(KI)        :: IMASK
+get_seriesn.F90:REAL, DIMENSION(KI)           :: ZOUT
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRUI
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PWIND
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PFWSU
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PFWSV
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PSNET
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PHEAT
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PEVAP
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRAIN
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PSNOW
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PICEFLUX
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PFWSM
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PHEAT_ICE
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PEVAP_ICE
+get_sfxcpln.F90:REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PSNET_ICE
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZSEA    ! fraction of sea
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZWATER  ! fraction of water
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZNATURE ! fraction of nature
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZTOWN   ! fraction of town
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZWIND
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZFWSU
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZFWSV
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZSNET
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZHEAT
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZEVAP
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZRAIN
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZSNOW
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZFWSM
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZSNET_ICE
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZHEAT_ICE
+get_sfxcpln.F90:REAL, DIMENSION(KI)  :: ZEVAP_ICE
+get_sson.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSSO_SLOPE  ! subgrid slope
+get_sso_stdevn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PSSO_STDEV     ! S.S.O. standard deviation (m)
+get_surf_varn.F90:REAL, DIMENSION(KI)    :: ZFIELD1, ZFIELD2, ZFIELD3, ZFIELD4, ZFIELD5, ZFIELD6
+get_surf_varn.F90:REAL, DIMENSION(KI)    :: ZFIELD7
+get_surf_varn.F90:INTEGER, DIMENSION(KI) :: IMASK
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PSNG    ! snow fraction over ground
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PSNV    ! snow fraction over vegetation
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0EFF  ! effective roughness length (z0v+z0rel)
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+get_var_naturen.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PTWSNOW ! Snow total reservoir
+get_var_sean.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
+get_var_sean.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
+get_var_sean.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+get_var_townn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
+get_var_townn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
+get_var_townn.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+get_var_watern.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
+get_var_watern.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
+get_var_watern.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+get_z0n.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! roughness length for momentum (m)
+get_z0n.F90:REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! roughness length for heat     (m)
+get_zsn.F90:REAL, DIMENSION(KI), INTENT(OUT) :: PZS     ! orography
+init_flaken.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_flaken.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_flaken.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_flaken.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_flaken.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_flaken.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_ideal_flux.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_ideal_flux.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_ideal_flux.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_ideal_flux.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_ideal_flux.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_ideal_flux.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_inland_watern.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_inland_watern.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_inland_watern.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_inland_watern.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_inland_watern.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_inland_watern.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_isban.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_isban.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_isban.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_isban.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_isban.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_isban.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_naturen.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_naturen.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_naturen.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_naturen.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_naturen.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_naturen.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_seafluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_seafluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_seafluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_seafluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_seafluxn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_seafluxn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_sean.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_sean.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_sean.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_sean.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_sean.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_sean.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_surf_atmn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_surf_atmn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_surf_atmn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_surf_atmn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_surf_atmn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_surf_atmn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_teb_gardenn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_teb_gardenn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PRHOA     ! air density
+init_teb_gardenn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+init_teb_gardenn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_tebn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PCO2        ! CO2 concentration (kg/m3)
+init_tebn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PRHOA       ! air density
+init_tebn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH     ! solar zenithal angle
+init_tebn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PAZIM       ! solar azimuthal angle (rad from N, clock)
+init_tebn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS       ! emissivity
+init_tebn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD      ! radiative temperature
+init_tebn.F90:REAL, DIMENSION(KI)             :: ZEMIS_GARDEN     ! emissivity
+init_tebn.F90:REAL, DIMENSION(KI)             :: ZALB_GARDEN      ! albedo
+init_tebn.F90:REAL, DIMENSION(KI)             :: ZTS_GARDEN       ! radiative temperature
+init_townn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_townn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_townn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_townn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_townn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_townn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+init_watfluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+init_watfluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+init_watfluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+init_watfluxn.F90:REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+init_watfluxn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
+init_watfluxn.F90:REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+isba_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PHEIGHT     ! canopy height                       (m)
+isba_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PCANOPY_DENSITY ! canopy density                  (-)
+isba_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PUW_GROUND  ! friction flux for ground surface       (m2/s2)
+isba_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_GROUND  ! derivative of ground friction flux   (m/s)
+put_rad_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSST     
+put_rad_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTICE     
+put_rad_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PDIR_ALB
+put_rad_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSCA_ALB
+put_rad_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PICE_ALB
+put_rad_watn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTS     
+put_rad_watn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PTICE     
+put_rad_watn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PDIR_ALB
+put_rad_watn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PSCA_ALB
+put_rad_watn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PICE_ALB
+put_sfxcpln.F90:REAL, DIMENSION(KI),      INTENT(IN) :: PZENITH
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(OUT) :: PTSRAD   ! Total radiative temperature see by the atmosphere
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(OUT) :: PEMIS    ! Total emissivity see by the atmosphere
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PICE        ! Sea/Ice fraction
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(INOUT), OPTIONAL :: PSST        ! SST
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(INOUT), OPTIONAL :: PALB_SEAICE ! Sea_ice albedo
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PUMER       ! U sea current
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PVMER       ! V sea current
+put_sfxcpln.F90:REAL, DIMENSION(KI),     INTENT(IN   ), OPTIONAL :: PTICE       ! Sea ice temperature
+put_sfxcpln.F90:REAL, DIMENSION(KI) :: ZSEA    ! fraction of sea
+put_sfxcpln.F90:REAL, DIMENSION(KI) :: ZWATER  ! fraction of water
+put_sfxcpln.F90:REAL, DIMENSION(KI) :: ZNATURE ! fraction of nature
+put_sfxcpln.F90:REAL, DIMENSION(KI) :: ZTOWN   ! fraction of town
+put_zs_inland_watern.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+put_zs_naturen.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+put_zsn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+put_zs_sean.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+put_zs_surf_atmn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+put_zs_townn.F90:REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
+sso_beljaars04.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PSSO_STDEV! Subgrid scale orography standard dev. (m)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PBLD        ! building density                    (-)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PBLD_HEIGHT ! building height                     (m)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PWALL_O_HOR ! wall surf. / hor. surf.             (-)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PPA       ! air pressure                          (Pa)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PRHOA     ! air density                           (kg/m3)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_ROAD  ! derivative of road friction flux   (m/s)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PUW_ROOF  ! friction flux for roof surfaces       (m2/s2)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_ROOF  ! derivative of roof friction flux   (m/s)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PH_WALL   ! flux of heat for wall surfaces        (W/m2)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PH_ROOF   ! flux of heat for roof surfaces        (W/m2)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PE_ROOF   ! flux of vapor for roof surfaces       (kg/m2/s)
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PAC_ROAD  ! road aerodynamical conductance        ()
+teb_canopy.F90:REAL, DIMENSION(KI),      INTENT(IN)    :: PAC_ROAD_WAT ! road water aerodynamical conductance        ()
+update_esm_flaken.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
+update_esm_flaken.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+update_esm_flaken.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
+update_esm_isban.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
+update_esm_isban.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+update_esm_isban.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
+update_esm_isban.F90:REAL, DIMENSION(KI)            :: ZEMIS     ! emissivity
+update_esm_seafluxn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
+update_esm_seafluxn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+update_esm_seafluxn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
+update_esm_surf_atmn.F90:REAL, DIMENSION(KI),     INTENT(IN) :: PZENITH   ! zenithal angle       (radian from the vertical)
+update_esm_surf_atmn.F90:REAL, DIMENSION(KI),    INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+update_esm_surf_atmn.F90:REAL, DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+update_esm_watfluxn.F90:REAL,             DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! solar zenithal angle
+update_esm_watfluxn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
+update_esm_watfluxn.F90:REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature

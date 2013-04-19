@@ -1,0 +1,1817 @@
+albedo.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZSNOW
+albedo.F90:LOGICAL, DIMENSION(SIZE(PVEG)) :: GMASK
+albedo.F90:LOGICAL, DIMENSION(SIZE(PVEG,1)) :: GMASK
+albedo.F90:REAL, DIMENSION(SIZE(PVEG,1),SIZE(PVEG,2))  ::ZPATCH, ZSNOWPATCH 
+albedo_mk10.F90:REAL, DIMENSION(SIZE(PZENITH))  :: PDIR_ALB    ! direct albedo on water
+albedo_mk10.F90:REAL, DIMENSION(SIZE(PZENITH))  :: ZCOSZRS     ! Cosine of solar zenith angle
+albedo_ta96.F90:REAL, DIMENSION(SIZE(PZENITH))  :: PDIR_ALB    ! direct albedo on water
+average1_cover.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
+average1_cti.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
+average1_ldb.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
+average1_mesh.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
+average1_orography.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
+average1_orography.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: ISSOX  ! X submesh index in their mesh of all input points
+average1_orography.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: ISSOY  ! Y submesh index in their mesh of all input points
+average1_orography.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: INUM ! numbers of index
+average2_cti.F90:REAL, DIMENSION(SIZE(NSIZE)) :: ZSIZE
+averaged_albedo_emis_isba.F90:REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZDIR_ALB_PATCH 
+averaged_albedo_emis_isba.F90:REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA_ALB_PATCH 
+averaged_albedo_emis_isba.F90:REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
+averaged_albedo_emis_isba.F90:REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTRAD_PATCH   ! Tsrad
+averaged_albedo_emis_isba.F90:REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZDN_ROOF       ! snow fraction 
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZDN_ROAD       ! on the surface
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZDF_ROOF       ! free-snow fraction 
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZDF_ROAD       ! on the surface
+averaged_albedo_teb.F90:LOGICAL, DIMENSION(SIZE(PBLD)) :: GMASK       ! .false. (= no snow precip.)
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZDIR_SW        ! direct and diffuse shortwave radiation
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZSCA_SW        ! to mimic radiation behaviour of town
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_WALL       ! shortwave absorbed by walls
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_ROAD       ! shortwave absorbed by roads
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_ROOF       ! shortwave absorbed by roofs
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_GARDEN     ! shortwave absorbed by green areas
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_SNOW_ROAD  ! shortwave absorbed by snow
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_SNOW_ROOF  ! on roads, roofs,
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_ROAD       ! shortwave received by roads
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_WALL       ! shortwave received by walls
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_GARDEN     ! shortwave received by green areas
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_SNOW_ROAD  ! shortwave received by snow on roads
+averaged_albedo_teb.F90:REAL, DIMENSION(SIZE(PBLD)) :: ZSW_RAD_GARDEN ! total solar radiation reaching green areas
+average_diag_evap_isban.F90:REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMPATCH
+average_diag.F90:LOGICAL, DIMENSION(SIZE(PFIELD_IN,1)) :: GMASK
+average_diag.F90:LOGICAL, DIMENSION(SIZE(PFIELD_IN,1)) :: GMASK
+average_diag.F90:LOGICAL, DIMENSION(SIZE(PFIELD_IN,1)) :: GMASK
+average_diag_isban.F90:REAL, DIMENSION(SIZE(XPATCH,1))      :: ZSUMPATCH
+average_diag_misc_isban.F90:REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMPATCH
+average_diag_misc_isban.F90:REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMDG, ZSNOW, ZSUMSURF, ZSUMROOT, ZSUMDEEP
+average_diag_misc_isban.F90:REAL, DIMENSION(SIZE(XPATCH,1)) :: ZPOND
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZDN_ROOF       ! snow fraction 
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZDN_ROAD       ! on the surface
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZDF_ROOF       ! free-snow fraction 
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZDF_ROAD       ! on the surface
+averaged_tsrad_teb.F90:LOGICAL, DIMENSION(SIZE(PEMIS_ROOF)) :: GMASK       ! .false. (= no snow precip.)
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_W_TO_W     ! longwave exchange coefficients
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_W_TO_R     
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_W_TO_G     
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_W_TO_NR
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_NR_TO_W
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_NR_TO_R
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_NR_TO_G
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_NR_TO_NR
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_S_TO_W
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_S_TO_R
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_S_TO_G
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_S_TO_NR
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_R_TO_W
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_R_TO_R
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_R_TO_G
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_R_TO_NR
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_G_TO_W
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_G_TO_R
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_G_TO_G
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_G_TO_NR
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_RAD     ! incoming LW to mimic
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZABS_LW_WALL! longwave absorbed by walls
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZABS_LW_ROAD! longwave absorbed by roads
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZABS_LW_ROOF! longwave absorbed by roofs
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZABS_LW_SNOW_ROAD! longwave absorbed by snow
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZABS_LW_SNOW_ROOF! on roads and roofs
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZABS_LW_GARDEN   ! longwave absorbed by gardens
+averaged_tsrad_teb.F90:REAL, DIMENSION(SIZE(PEMIS_ROOF)) :: ZLW_UP      ! outgoing longwave
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PALBNIR_VEG,1)) :: ZALBNIR_PATCH ! near-infra-red albedo with snow
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PALBVIS_VEG,1)) :: ZALBVIS_PATCH ! visible albedo with snow
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PALBUV_VEG, 1)) :: ZALBUV_PATCH  ! UV albedo with snow
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZDIR_ALB_PATCH 
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA_ALB_PATCH 
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTRAD_PATCH   ! Tsrad
+avg_albedo_emis_garden.F90:REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
+avg_urban_fluxes.F90:REAL, DIMENSION(SIZE(PLW_RAD))    :: ZLW_UP            ! upwards radiations
+avg_urban_fluxes.F90:REAL, DIMENSION(SIZE(PROAD)) :: ZROAD, ZGARDEN
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1)) :: ZWORK, ZDZ
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1)) :: ZCOVER_WEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1)) :: ZSUM_COVER_WEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,2),NVEGTYPE)         :: ZWEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),NVEGTYPE)         :: ZCOVER_WEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZCOVER_WEIGHT_PATCH
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZSUM_COVER_WEIGHT_PATCH
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZWORK
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZDZ
+av_pgd.F90:INTEGER, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))  :: NMASK
+av_pgd.F90:INTEGER, DIMENSION(SIZE(PFIELD,2)) :: JCOUNT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2)) :: ZWORK, ZDZ
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2)) :: ZCOVER_WEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2)) :: ZSUM_COVER_WEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),NVEGTYPE)      :: ZCOVER_WEIGHT
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),SIZE(PFIELD,3)):: ZCOVER_WEIGHT_PATCH
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),SIZE(PFIELD,3)):: ZSUM_COVER_WEIGHT_PATCH
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),SIZE(PFIELD,3)):: ZWORK
+av_pgd.F90:REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),SIZE(PFIELD,3)):: ZDZ
+av_pgd.F90:INTEGER, DIMENSION(SIZE(PCOVER,2),NVEGTYPE)      :: IDATA_DOY
+av_pgd.F90:INTEGER, DIMENSION(SIZE(PCOVER,1))               :: IDOY
+av_pgd.F90:TYPE (DATE_TIME), DIMENSION(SIZE(PCOVER,2),NVEGTYPE) :: TPDATA
+av_pgd.F90:INTEGER, DIMENSION(SIZE(PCOVER,2),NVEGTYPE) :: KDOY
+av_pgd.F90:INTEGER, DIMENSION(SIZE(PCOVER,2),NVEGTYPE) :: IMONTH, IDAY
+av_pgd_param.F90:REAL, DIMENSION(SIZE(PFIELD,1),NVEGTYPE)  :: ZWEIGHT
+av_pgd_param.F90:REAL, DIMENSION(SIZE(PFIELD,1),SIZE(PFIELD,2))   :: ZSUM_WEIGHT_PATCH
+av_pgd_param.F90:REAL, DIMENSION(SIZE(PFIELD,1),SIZE(PFIELD,2))   :: ZWORK
+av_pgd_param.F90:REAL, DIMENSION(SIZE(PFIELD,1),SIZE(PFIELD,2))   :: ZDZ
+av_pgd_param.F90:INTEGER, DIMENSION(SIZE(PFIELD,1),SIZE(PFIELD,2))  :: NMASK
+av_pgd_param.F90:INTEGER, DIMENSION(SIZE(PFIELD,2)) :: JCOUNT
+bld_e_budget.F90:REAL, DIMENSION(SIZE(PTI_BLD)) :: ZT_FLOOR     ! floor temperature
+canopy_grid_update.F90:INTEGER, DIMENSION(SIZE(PZ,1))            :: IL     ! latest level below forcing height
+canopy_grid_update.F90:INTEGER, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ILEVEL ! to test if level is high enough
+carbon_evol.F90:REAL,  DIMENSION(SIZE(PTG,1))    :: ZT2                ! soil temperature (C) 
+carbon_evol.F90:REAL, DIMENSION(SIZE(PTG,1))     :: ZRESP_SOIL_TOT     ! total soil respiration (kgCO2/kgair m/s)
+carbon_evol.F90:REAL, DIMENSION(SIZE(PTG,1))     :: ZRESP_AUTO_ABOVE   ! total above ground biomass respiration (kgCO2/kgair m/s)
+carbon_evol.F90:REAL, DIMENSION(SIZE(PTG,1))     :: ZRESP_HETERO       ! total heterotrophic respiration (kgCO2/kgair m/s)
+carbon_evol.F90:REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2)) :: ZSOILCARBON_INPUT
+carbon_evol.F90:REAL, DIMENSION(SIZE(PSOILCARB,1)) :: ZRESP_HETERO_DAY_LITTER 
+carbon_evol.F90:REAL, DIMENSION(SIZE(PSOILCARB,1)) :: ZRESP_HETERO_DAY_SOIL   
+carbon_evol.F90:REAL, DIMENSION(SIZE(PLIGNIN_STRUC,1),SIZE(PLIGNIN_STRUC,2)) :: ZCONTROL_MOIST, &
+carbon_litter.F90:REAL, DIMENSION(SIZE(PLITTER,1))                                 :: ZFD
+carbon_litter.F90:REAL, DIMENSION(SIZE(PLITTER,1))                                 :: ZQD
+carbon_litter.F90:REAL, DIMENSION(SIZE(PLITTER,1),SIZE(PLITTER,3))                 :: ZOLD_STRUC
+carbon_litter.F90:REAL, DIMENSION(SIZE(PLITTER,1),SIZE(PLITTER,2),SIZE(PLITTER,3)) :: ZLITTER_INC
+carbon_litter.F90:REAL, DIMENSION(SIZE(PLITTER,1),SIZE(PLITTER,3))                 :: ZLIGNIN_STRUC_INC
+carbon_soil.F90:REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2),SIZE(PSOILCARB,2)) :: ZFRAC_CARB
+carbon_soil.F90:REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2))                   :: ZFRAC_RESP
+carbon_soil.F90:REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2))                   :: ZFLUXTOT
+carbon_soil.F90:REAL, DIMENSION(SIZE(PSOILCARB,1),SIZE(PSOILCARB,2),SIZE(PSOILCARB,2)) :: ZFLUX
+ccetr.F90:REAL, DIMENSION(SIZE(PIA,1))   :: ZXFD,ZXSLAI,ZXIDF,ZXIDR
+ccetr_pair.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZSLAI_TRU, ZFD_VEG, ZTDF, ZIDR, ZIDF
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1), JPIN) :: ZRD ! surface  resistance
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1), JPIN) :: ZVD  
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1), JPIN) :: Stn ! Stockes number
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1), JPIN) :: Sc
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1))      :: WCn
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1))      :: ZUSTAR, ZRESA
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1), JPIN):: ZWORK
+ch_aer_dep.F90:  REAL , DIMENSION(SIZE(PSVT,1),NSP+NCARB+NSOA,JPMODE):: ZCTOTA, ZCCTOT
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1),JPMODE):: ZRHOP
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1)) :: ZNU
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1),JPIN)     :: Dg,zvs,zvsg, zdsg
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1))        :: ZMU
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1),JPIN)   :: ZVGK, ZDPK
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1),JPMODE) :: ZSIG, ZRG, ZN
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1),JPMODE) :: ZVG, ZDG
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1), SIZE(PSVT,2)) :: ZSVT
+ch_aer_dep.F90:  REAL, DIMENSION(SIZE(PSVT,1))        :: ZSUM
+ch_aer_emission.F90:REAL,DIMENSION(SIZE(PFLUX,1),NSP+NCARB+NSOA,JPMODE) :: ZFCTOTA
+ch_aer_emission.F90:REAL,DIMENSION(SIZE(PFLUX,1),JPIN) :: ZFM
+ch_aer_emission.F90:REAL,DIMENSION(SIZE(PFLUX,1)) :: ZFCO
+ch_aer_emission.F90:REAL,DIMENSION(SIZE(PFLUX,1)) :: ZCONVERSION
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZRAD_PAR,  ZLCOR_RAD
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZFISO_FOR  , ZFMONO_FOR,   &
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1), NVEGTYPE) :: ZTCOR ,ZTCORM
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1),SIZE(XABC),NVEGTYPE) :: ZBVOCPAR 
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZISOPOT, ZMONOPOT
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZBVOCSG
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(PSW_FORBIO,1),SIZE(XABC)) :: ZBVOCPAR 
+ch_bvocemn.F90:REAL, DIMENSION(SIZE(ZX))   :: ZLCOR_FUNC
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1))             :: ZLANDEXT
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZSCMDT 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZDIFFMOLVAL
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZNATRB 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZMESORC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZSTOMRC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZEXTRC   
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZSOILRC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1)) :: ZINCRC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZSNOWRC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZCLAYRC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZSANDRC 
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZNATRC
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZBARERC
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZROCKRC
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZRES_VEGTYPE
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZRES_SNOWTYPE
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZHENRYVALCOR
+ch_dep_isba.F90:  REAL             , DIMENSION(SIZE(PTRAD,1)) :: ZDIFFMOLH2O
+ch_dep_isba.F90:  REAL, DIMENSION(SIZE(PTRAD,1))      :: ZTCOR
+ch_dep_isba.F90:  REAL, DIMENSION(SIZE(PTRAD,1))      :: ZTYPE1 ! Type soil 1
+ch_dep_isba.F90:  REAL,DIMENSION(SIZE(PUSTAR,1))      ::ZUSTAR
+ch_dep_town.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZSCMDT 
+ch_dep_town.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZDIFFMOLVAL
+ch_dep_town.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZTOWNRB 
+ch_dep_town.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZTOWNRC 
+ch_dep_town.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZRESTOWN 
+ch_dep_town.F90:  REAL, DIMENSION(SIZE(PTRAD,1))      :: ZTOWN_MAX
+ch_dep_town.F90:  REAL, DIMENSION(SIZE(PTRAD,1))      :: ZTCOR
+ch_dep_town.F90:  REAL,DIMENSION(SIZE(PUSTAR_TOWN,1))      ::ZUSTAR_TOWN
+ch_dep_water.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZSCMDT 
+ch_dep_water.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZDIFFMOLVAL
+ch_dep_water.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZWATRB  
+ch_dep_water.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZWATRC 
+ch_dep_water.F90:  REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZRESWAT  
+ch_dep_water.F90:  REAL, DIMENSION(SIZE(PTRAD,1))      :: ZTCOR
+ch_dep_water.F90:  REAL,DIMENSION(SIZE(PUSTAR,1))      ::ZUSTAR
+ch_emission_fluxn.F90:REAL,DIMENSION(SIZE(PSFSV,1),KNBTS_MAX)     :: ZWORK ! temporary array for reading data
+ch_emission_fluxn.F90:REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZEMIS ! interpolated in time emission flux
+ch_emission_fluxn.F90:REAL,DIMENSION(SIZE(PSFSV,1))               :: ZFCO  ! CO flux
+ch_init_names.F90:CHARACTER(LEN=*), DIMENSION(SIZE(HSV)),  INTENT(OUT) :: HSVO ! name of scalar species without # and @
+cls_tq.F90:REAL, DIMENSION(SIZE(PTA)) :: ZBNH,ZBH,ZRS
+cls_tq.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLOGS,ZCORS,ZIV
+cls_tq.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSATA, ZHUA
+cls_tq.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSATNM, ZPNM, ZQS, ZQSATS
+cls_wind.F90:REAL, DIMENSION(SIZE(PHW)) :: ZBN,ZBD,ZRU
+cls_wind.F90:REAL, DIMENSION(SIZE(PHW)) :: ZLOGU,ZCORU,ZIV
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZVMOD    ! wind intensity
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZPA      ! Pressure at atm. level
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZQASAT   ! specific humidity at saturation  at atm. level (kg/kg)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZO       ! rougness length ref 
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZWG      ! gustiness factor (m/s)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZDU,ZDT,ZDQ,ZDUWG !differences
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZUSR        !velocity scaling parameter "ustar" (m/s) = friction velocity
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZTSR        !temperature sacling parameter "tstar" (degC)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZQSR        !humidity scaling parameter "qstar" (kg/kg)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZU10,ZT10   !vertical profils (10-m height) 
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZVISA       !kinematic viscosity of dry air
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZO10,ZOT10  !roughness length at 10m
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZCD,ZCT,ZCC
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZCD10,ZCT10 !transfer coef. at 10m
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZRIBU,ZRIBCU
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZETU,ZL10
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZCHARN                      !Charnock number depends on wind module
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZTWAVE,ZHWAVE,ZCWAVE,ZLWAVE !to compute gravity waves' impact
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZZL,ZZTL!,ZZQL    !Obukhovs stability 
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZRR
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZOT,ZOQ           !rougness length ref
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZPUZ,ZPTZ,ZPQZ    !PHI funct. for u,T,q 
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZBF               !constants to compute gustiness factor
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZTAU       !momentum flux (W/m2)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZHF        !sensible heat flux (W/m2)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZEF        !latent heat flux (W/m2)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZWBAR      !diag for webb correction but not used here after
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZTAUR      !momentum flux due to rain (W/m2)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZRF        !sensible heat flux due to rain (W/m2)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZCHN,ZCEN  !neutral coef. for heat and vapor
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZLV      !latent heat constant
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZTAC,ZDQSDT,ZDTMP,ZDWAT,ZALFAC ! for precipitation impact
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZXLR                           ! vaporisation  heat  at a given temperature
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZCPLW                          ! specific heat for water at a given temperature 
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZUSTAR2  ! square of friction velocity
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZDIRCOSZW! orography slope cosine (=1 on water!)
+coare30_flux.F90:REAL, DIMENSION(SIZE(PTA))      :: ZAC      ! Aerodynamical conductance
+coare30_flux.F90:INTEGER, DIMENSION(SIZE(PTA))   :: ITERMAX             ! maximum number of iterations
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_TA   ! air temperature at atm. level (K)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_QA   ! air humidity at atm. level (kg/kg)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_EXNA ! Exner function at atm. level
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RHOA ! air density at atm. level
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_VMOD ! module of wind at atm. wind level (m/s)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_ZREF ! atm. level for temp. and humidity (m)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_UREF ! atm. level for wind (m)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SST  ! Sea Surface Temperature (K)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_EXNS ! Exner function at sea surface
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_PS   ! air pressure at sea surface (Pa)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RAIN !precipitation rate (kg/s/m2)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SNOW !snow rate (kg/s/m2)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_Z0SEA! roughness length over the ocean
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SFTH ! heat flux (W/m2)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SFTQ ! water flux (kg/m2/s)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_USTAR! friction velocity (m/s)
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_QSAT ! humidity at saturation
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CD   ! heat drag coefficient
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CDN  ! momentum drag coefficient
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CH   ! neutral momentum drag coefficient
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CE   !transfer coef. for latent heat flux
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RI   ! Richardson number
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RESA ! aerodynamical resistance
+coare30_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_Z0HSEA ! heat roughness length
+coef_ver_interp_lin_surf.F90:LOGICAL,DIMENSION(SIZE(PZ1,1),SIZE(PZ1,2))            :: GLEVEL
+coef_ver_interp_lin_surf.F90:INTEGER,DIMENSION(SIZE(PZ1,1))                        :: ILEVEL
+coef_ver_interp_lin_surf.F90:INTEGER,DIMENSION(SIZE(PZ1,1))                        :: IUNDER
+common_parts.F90:REAL, DIMENSION(SIZE(PCO2))       :: ZCO2  ! CO2 concentration  (kg/kg)
+compute_isba_parameters.F90:REAL, DIMENSION(SIZE(PTSRAD))     :: ZTSRAD_NAT !radiative temperature
+conserv_global_mass.F90:REAL,    DIMENSION(SIZE(PFIELD,1)) :: ZFIELD,ZFIELD_OLD, ZFRAC_NAT
+conserv_global_mass.F90:INTEGER, DIMENSION(SIZE(XNATURE))  :: IMASK  ! mask for packing from complete field to nature field
+control_moist_func.F90:REAL, DIMENSION(SIZE(PMOIST_IN))                        :: PMOISTFUNC_RESULT
+control_moist_func.F90:REAL, DIMENSION(SIZE(PMOIST_IN))                        :: ZMOIST_REL
+control_temp_func.F90:REAL, DIMENSION(SIZE(PTEMP_IN))                          :: PTEMPFUNC_RESULT
+cotwo.F90:REAL, DIMENSION(SIZE(PAN)) :: ZFMIN, ZDRAP, ZF
+cotwo.F90:REAL, DIMENSION(SIZE(PAN)) :: ZCSP, ZCI, ZCMIN, ZAMIN  
+cotwo.F90:REAL, DIMENSION(SIZE(PAN)) :: ZAM, ZEPS, ZLEF, ZAGR, ZAG
+cotwo.F90:REAL, DIMENSION(SIZE(PAN)) :: ZGSC, ZGS
+cotwoinitn.F90:REAL, DIMENSION(SIZE(PANMAX))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZGPP, ZRDK, ZEPSO
+cotwoinitn.F90:REAL, DIMENSION(SIZE(PANMAX))     :: ZCO2INIT3, ZCO2INIT4, ZCO2INIT5
+cotwoinitn.F90:REAL, DIMENSION(SIZE(PDMAX))      :: ZDMAX
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZCONVE1, ZTSPC, ZIA
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZLAI, ZGMEST, ZFZERO, ZDMAX
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZGAMMT, ZDSP, ZANMAX
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZXMUS, ZTAN, ZTGS, ZXIA, ZAN0, ZGS0, ZXTGS, ZRDK  
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZAN0_,ZGS0_,ZRDK_ ! parameters for shaded leaves
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZEPSO
+cotwores.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZDMAXSTAR, ZFZEROSTAR, ZFZERON, ZGMESTN  
+coupling_dstn.F90:REAL, DIMENSION(SIZE(PTA),NVEGNO_DST,NDSTMDE) :: ZSFDST_TILE  ![kg/m2] flux of dust for each vegetation types and each mode
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZEXNA  ! Exner function at forcing level
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZEXNS  ! Exner function at surface level
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND  ! Wind
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGLOBAL_SW    ! Solar radiation flux at the surface (W/m2) 
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Air specific humidity (kg/kg)
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR ! friction velocity (m/s)
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR2! square of friction velocity (m2/s2)
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZSFM   ! flux of momentum (Pa)
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRESA_WATER ! aerodynamical resistance
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZCD    ! Drag coefficient
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZCDN   ! Neutral Drag coefficient
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZCH    ! Heat transfer coefficient
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRI    ! Richardson number
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHU    ! Near surface relative humidity
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZZ0    ! roughness length
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZZ0H   ! heat roughness length
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQSAT  ! humidity at saturation
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTSTEP ! time-step
+coupling_flaken.F90:REAL, DIMENSION(SIZE(PTA))  :: ZALB   ! surface albedo
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M_MAX
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MIN
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MAX
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MIN
+coupling_flake_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MAX
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZZ0     ! roughness length
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLMO    ! Monin-Obuhkov length
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTHA    ! air potential temperature
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRVA    ! water vapor mixing ratio
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR  ! friction velocity
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND   ! wind
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQ0     ! surface temperature flux (mK/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZE0     ! surface vapor flux (mkg/kg/s)
+coupling_ideal_flux.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA     ! specific humidity (kg/kg)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZTA      ! temperature                                   (K)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPA      ! pressure                                      (Pa)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZZREF    ! temperature forcing level                     (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZUREF    ! wind        forcing level                     (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZU       ! zonal wind                                    (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZV       ! meridian wind                                 (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZQA      ! specific humidity                             (kg/m3)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF ! specific humidity implicit
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZCANOPY   ! height of canopy   (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_UDU! formal derivative of
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_EDE! formal derivative of
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_TDT! formal derivative of
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_QDQ! formal derivative of
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZLMO      ! MO length
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZLM       ! mixing length
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZLEPS     ! dissipative length
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZH           ! canopy height (m)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZUSTAR       ! friction velocity including drag effect (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZUSTAR_GROUND! friction velocity at ground only (ISBA) (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPET_A_COEF ! temperature implicit
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPET_B_COEF ! coefficients (K)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEW_A_COEF ! wind implicit
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEW_B_COEF ! coefficients (m/s)
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   :: ZALFAU   ! V+(1) = - alfa rho u'w'(1) + beta
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   :: ZBETAU   ! V+(1) = - alfa rho u'w'(1) + beta
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   :: ZALFATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCANOPY_DENSITY
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   ::ZUW_GROUND
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA))   ::ZDUWDU_GROUND
+coupling_isba_canopyn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZZ        ! height above displacement height
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZDIR     ! wind direction                        (rad from N clockwise)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZEXNA    ! Exner function at lowest atmospheric level    (-)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZEXNS    ! Exner function at surface                     (-)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZALFA    ! Wind direction                                (-)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZQA      ! specific humidity                             (kg/kg)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZCO2     ! CO2 concentration                             (kg/kg)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF ! specific humidity implicit
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFTH_TILE     ! surface heat flux (W/m2)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFTQ_TILE     ! surface vapor flux (kg/m2/s)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFCO2_TILE    ! surface CO2 flux positive toward the atmosphere (m/s*kg/kg)
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFU_TILE      ! zonal momentum flux
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZSFV_TILE      ! meridian momentum flux
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZTRAD_TILE     ! radiative surface temperature
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZEMIS_TILE     ! emissivity
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NPATCH) :: ZDIR_ALB_TILE  ! direct albedo
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NPATCH) :: ZSCA_ALB_TILE  ! diffuse albedo
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PSV,2),NPATCH) :: ZSFTS_TILE     ! scalar surface flux
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_DRAIN     ! For the coupling with TRIP
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_RUNOFF    ! For the coupling with TRIP
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_EFLOOD    ! For the coupling with TRIP
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_PFLOOD    ! For the coupling with TRIP
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_IFLOOD    ! For the coupling with TRIP
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZCPL_ICEFLUX
+coupling_isban.F90:REAL, DIMENSION(SIZE(PTA), NPATCH) :: ZSW_FORBIO
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: Z3D_TOT_SURF ! ratio between actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZSFTH   ! surface temperature flux per m2 of actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSFTQ))    :: ZSFTQ   ! surface water vapor flux per m2 of actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) &
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSFCO2))   :: ZSFCO2  ! surface CO2 flux per m2 of actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PDIR_SW,1),SIZE(PSW_BANDS))::ZDIR_SW ! incoming direct SW radiation
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSCA_SW,1),SIZE(PSW_BANDS))::ZSCA_SW ! incoming diffuse SW radiation
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PLW))      :: ZLW     ! incoming LW radiation per m2 of actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PRAIN))    :: ZRAIN   ! liquid precipitation per m2 of actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PSNOW))    :: ZSNOW   ! solid  precipitation per m2 of actual surface
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+coupling_isba_orographyn.F90:REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZSFTH   ! surface temperature flux 
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTQ))    :: ZSFTQ   ! surface water vapor flux 
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFCO2))   :: ZSFCO2  ! surface CO2 flux 
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTS,1),SIZE(PSFTS,2)) &
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFU))     :: ZSFU    ! zonal momentum flux
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFU))     :: ZSFV    ! meridian momentum flux
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PTRAD))    :: ZTRAD   ! surface radiative temperature
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PTRAD))    :: ZEMIS   ! surface emissivity
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PDIR_ALB,1),SIZE(PDIR_ALB,2)) :: ZDIR_ALB! direct surface albedo
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSCA_ALB,1),SIZE(PSCA_ALB,2)) :: ZSCA_ALB! diffuse surface albedo
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZPEW_A_COEF ! implicit coefficients
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZPEW_B_COEF ! needed if HCOUPLING='I'
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZPET_A_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZPEQ_A_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZPET_B_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PSFTH))    :: ZPEQ_B_COEF
+coupling_isba_svatn.F90:REAL, DIMENSION(SIZE(PTRAD))    :: ZWORK_LW  ! work array for mean upward longwave surface flux
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
+coupling_seaflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZTA      ! temperature                                   (K)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPA      ! pressure                                      (Pa)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZZREF    ! temperature forcing level                     (m)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZUREF    ! wind        forcing level                     (m)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZU       ! zonal wind                                    (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZV       ! meridian wind                                 (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZQA      ! specific humidity                             (kg/m3)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF ! specific humidity implicit
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_UDU! formal derivative of
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_EDE! formal derivative of
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_TDT! formal derivative of
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZDFORC_QDQ! formal derivative of
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZLMO      ! MO length
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZLM       ! mixing length
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA),KLVL)   :: ZLEPS     ! dissipative length
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZH           ! canopy height (m)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZUSTAR       ! friction velocity (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPET_A_COEF ! temperature implicit
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPET_B_COEF ! coefficients (K)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEW_A_COEF ! wind implicit
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEW_B_COEF ! coefficients (m/s)
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))   :: ZALFAU   ! V+(1) = - alfa rho u'w'(1) + beta
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))   :: ZBETAU   ! V+(1) = - alfa rho u'w'(1) + beta
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))   :: ZALFATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+coupling_seawat_sbln.F90:REAL, DIMENSION(SIZE(PTA))   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEW_A_COEF ! implicit coefficients
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEW_B_COEF ! needed if HCOUPLING='I'
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPET_A_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_A_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPET_B_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_B_COEF
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFTH_TILE     ! surface heat flux (Km/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFTQ_TILE     ! surface vapor flux (kgm/kg/s)
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PSV,2),NTILESFC) :: ZSFTS_TILE ! scalar surface flux
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFCO2_TILE    ! surface CO2 flux
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFU_TILE      ! zonal momentum flux
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZSFV_TILE      ! meridian momentum flux
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZTRAD_TILE     ! radiative surface temperature
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZEMIS_TILE     ! emissivity
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
+coupling_surf_atmn.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA         ! specific humidity                 (kg/kg)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZEXNA       ! Exner function at forcing level
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZEXNS       ! Exner function at surface level
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND       ! wind
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZU_CANYON   ! wind in canyon
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZT_CANYON   ! temperature in canyon
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQ_CANYON   ! specific humidity in canyon
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_ROOF    ! net radiation on roof
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_ROOF     ! sensible heat flux on roof
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_ROOF    ! latent heat flux on roof
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLEW_ROOF   ! latent heat flux on snowfree roof
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_ROOF ! storage flux in roof
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRUNOFF_ROOF! water runoff from roof
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_ROAD    ! net radiation on road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_ROAD     ! sensible heat flux on road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_ROAD    ! latent heat flux on road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLEW_ROAD   ! latent heat flux on snowfree road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_ROAD ! storage flux in road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRUNOFF_ROAD! water runoff from road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_WALL    ! net radiation on walls
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_WALL     ! sensible heat flux on walls
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_WALL    ! latent heat flux on walls
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_WALL ! storage flux in walls
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_GARDEN  ! net radiation on green areas
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_GARDEN   ! sensible heat flux on green areas
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_GARDEN  ! latent heat flux on green areas
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_GARDEN!storage flux in green areas
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_BLT     ! net radiation on built surf 
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_BLT      ! sensible heat flux on built surf 
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_BLT     ! latent heat flux on built surf 
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_BLT  ! storage flux in built surf 
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_GRND    ! net radiation on ground built surf
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_GRND     ! sensible heat flux on ground built surf
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_GRND    ! latent heat flux on ground built surf
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX_GRND ! storage flux in ground built surf
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRNSNOW_ROOF  ! net radiation over snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHSNOW_ROOF   ! sensible heat flux over snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLESNOW_ROOF  ! latent heat flux over snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGSNOW_ROOF   ! flux under the snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZMELT_ROOF    ! snow melt
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRNSNOW_ROAD  ! net radiation over snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHSNOW_ROAD   ! sensible heat flux over snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLESNOW_ROAD  ! latent heat flux over snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGSNOW_ROAD   ! flux under the snow
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZMELT_ROAD    ! snow melt
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN           ! net radiation over town
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH            ! sensible heat flux over town
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE           ! latent heat flux over town
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZGFLUX        ! flux through the ground
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQF_BLD       ! domestic heating
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQF_BLDWFR    ! domestic heating
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZFLX_BLD      ! flux from bld
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTI_BLD_EQ    ! internal temperature witout heating
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTI_BLDWFR    ! internal temperature witout F/R
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZDQS_TOWN     ! storage inside town materials
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQF_TOWN      ! total anthropogenic heat
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZEVAP         ! evaporation (km/m2/s)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRUNOFF       ! runoff over the ground
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZCD           ! drag coefficient
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZCDN          ! neutral drag coefficient
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZCH           ! heat drag
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRI           ! Richardson number
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUW_GRND      ! momentum flux for ground built surf
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUW_ROOF      ! momentum flux for roofs
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_GRND   !
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_ROOF   !
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR        ! friction velocity
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZDIR_ALB      ! direct albedo of town
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZSCA_ALB      ! diffuse albedo of town
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_TRAFFIC    ! anthropogenic sensible
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZLE_TRAFFIC   ! anthropogenic latent
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRESA_TOWN    ! aerodynamical resistance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_ROAD      ! road aerodynamical conductance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_GARDEN    ! green area aerodynamical conductance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_GRND      ! ground built surf aerodynamical conductance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_ROAD_WAT  ! road water aerodynamical conductance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_GARDEN_WAT! green area water aerodynamical conductance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_GRND_WAT  ! ground built surf water aerodynamical conductance
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZDIR_SW       ! total direct SW
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZSCA_SW       ! total diffuse SW
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEW_A_COEF   ! implicit coefficients
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEW_B_COEF   ! needed if HCOUPLING='I'
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_UDU! formal derivative of
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_EDE! formal derivative of
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_TDT! formal derivative of
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZDFORC_QDQ! formal derivative of
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZE_ROOF
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZE_GRND
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZT_LOWCAN  ! temperature at lowest canyon level (K)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZQ_LOWCAN  ! humidity    at lowest canyon level (kg/kg)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZU_LOWCAN  ! wind        at lowest canyon level (m/s)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZZ_LOWCAN  ! height      of lowest canyon level (m)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZPEW_A_COEF_LOWCAN   ! implicit coefficients for wind coupling
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZPEW_B_COEF_LOWCAN   ! between first canopy level and road
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZTA        ! temperature at canyon level just above roof (K)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZPA        ! pressure    at canyon level just above roof (K)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZUA        ! wind        at canyon level just above roof (m/s)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZUREF      ! height      of canyon level just above roof (m)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZZREF      ! height      of canyon level just above roof (m)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZLAMBDA_F  ! frontal density (-)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZLMO       ! Monin-Obukhov length at canopy height (m)
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA),NLVL)   :: ZL         ! Mixing length generic profile at mid levels
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZCOEF
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZALFAU   ! V+(1) = alfa u'w'(1) + beta
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZBETAU   ! V+(1) = alfa u'w'(1) + beta
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZALFAT   ! Th+(1) = alfa w'th'(1) + beta
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZBETAT   ! Th+(1) = alfa w'th'(1) + beta
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZALFAQ   ! Q+(1) = alfa w'q'(1) + beta
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZBETAQ   ! Q+(1) = alfa w'q'(1) + beta
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))        :: ZWAKE      ! reduction of average wind speed
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_ROAD
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_WALL
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_ROOF
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_GARDEN
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_SNOW_ROAD
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_SW_SNOW_ROOF
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_SNOW_ROAD
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_SNOW_ROOF
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_ROAD
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_WALL
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_ROOF
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZABS_LW_GARDEN
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M_MAX
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MIN
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MAX
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MIN
+coupling_tebn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MAX
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
+coupling_teb_orographyn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NGROUND_LAYER,NPATCH) :: ZTG   ! soil temperature
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NGROUND_LAYER,NPATCH) :: ZWG   ! soil water content
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NGROUND_LAYER,NPATCH) :: ZWGI  ! soil ice content
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZWR   ! interception reservoir
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZRESA ! aerodynamical resistance
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),TSNOW%NLAYER,NPATCH) :: ZWSNOW! snow reservoir
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),TSNOW%NLAYER,NPATCH) :: ZRHOSN! snow density
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),TSNOW%NLAYER,NPATCH) :: ZHEASN! snow heat content
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZALBSN! snow albedo
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA),NPATCH) :: ZEMISN! snow emissivity
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEW_A_COEF ! implicit coefficients
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEW_B_COEF ! needed if HCOUPLING='I'
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPET_A_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_A_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPET_B_COEF
+coupling_tsz0n.F90:REAL, DIMENSION(SIZE(PTA))     :: ZPEQ_B_COEF
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PPEQ_B_COEF))  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PPET_B_COEF))  ::  ZPET_B_COEF   ! 2nd explicit coefficient
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTA    ! Temperature at forcing height above surface orography
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPA    ! Pressure    at forcing height above surface orography
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPS    ! Pressure    at surface orography
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZQA    ! Humidity    at forcing height above surface orography
+coupling_watflux_orogn.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRHOA  ! Density     at forcing height above surface orography
+diag_cpl_esm_isba.F90:REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMPATCH
+diag_cpl_esm_isba.F90:REAL, DIMENSION(SIZE(XPATCH,1)) :: ZBUDGET
+diag_cpl_esm_sea.F90:REAL, DIMENSION(SIZE(XICE_ALB)) :: ZSWU
+diag_cpl_esm_water.F90:REAL, DIMENSION(SIZE(XICE_ALB)) :: ZSWU
+diag_inline_flaken.F90:REAL, DIMENSION(SIZE(PTA)) :: ZH
+diag_inline_isban.F90:REAL, DIMENSION(SIZE(PTA)) :: ZH
+diag_inline_oceann.F90:REAL, DIMENSION(SIZE(XSEAT(:,1)),NOCKMIN:NOCKMAX) :: ZSEADENS
+diag_inline_oceann.F90:REAL, DIMENSION(SIZE(XSEAT(:,1))) :: ZRHO0,ZRHOCMO,ZDRHOX,ZTCMO
+diag_inline_oceann.F90:REAL, DIMENSION(SIZE(XSEAT(:,1))) :: ZTMOY,ZSMOY,ZUMOY,ZVMOY,ZDMOY
+diag_inline_oceann.F90:INTEGER, DIMENSION(SIZE(XSEAT(:,1))) :: IHMOLEVEL
+diag_inline_seafluxn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZH
+diag_inline_tebn.F90:REAL, DIMENSION(SIZE(PTA))           :: ZH
+diag_inline_watfluxn.F90:REAL, DIMENSION(SIZE(PTA)) :: ZH
+diag_misc_flaken.F90:       REAL, DIMENSION(SIZE(XZW_PROFILE),SIZE(PT_WML)) :: ZCSI      ! Vertical normalized coordinate
+diag_misc_flaken.F90:       REAL, DIMENSION(SIZE(XZW_PROFILE),SIZE(PT_WML)) :: ZSHAPE    ! Shape function 
+diag_misc_isban.F90:REAL, DIMENSION(SIZE(PPSN))    :: ZSNOWTEMP
+diag_misc_isban.F90:REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORK
+diag_surf_atmn.F90:REAL, DIMENSION(SIZE(XSEA),NTILESFC) :: ZFRAC_TILE! fraction of each tile
+diag_surf_atmn.F90:REAL, DIMENSION(SIZE(XSEA)) :: ZPS         ! surface air pressure
+diag_surf_atmn.F90:REAL, DIMENSION(SIZE(XSEA)) :: ZRHOA       ! surface air density
+diag_townn.F90:REAL, DIMENSION(SIZE(PRN)) :: ZDELTA
+drag.F90:REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), KPMODE) :: ZSIG, ZRG, ZVG, ZDG
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), KPMODE) :: ZSTN ! Stockes number
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), KPMODE) :: ZSC  ! Schmidt number
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), KPMODE) :: ZRD  ! surface  resistance
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), KPMODE*3) :: ZVGK, ZDPK
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), KPMODE*3) :: ZVD  ! [m/s] dry deposition velocity 
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1), SIZE(PSVT,2)) :: ZSVT
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1)) :: ZUSTAR, ZRESA
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1)) :: ZNU
+dslt_dep.F90:REAL , DIMENSION(SIZE(PSVT,1)) :: ZMU
+dslt_velgrav1d.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLAMBDA
+dslt_velgrav1d.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRG, ZLN2S
+dslt_velgrav1d.F90:REAL, DIMENSION(SIZE(PTA)) :: ZKNG
+e_budget.F90:REAL, DIMENSION(SIZE(PALB)) ::   ZRORA,                        &
+e_budget.F90:REAL, DIMENSION(SIZE(PALB)) ::  ZCONDAVG, ZTERM2, ZTERM1
+e_budget.F90:REAL, DIMENSION(SIZE(PALB)) :: ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF,      &
+e_budget.F90:REAL, DIMENSION(SIZE(PALB)) :: ZUSTAR2, ZVMOD
+e_budget.F90:REAL, DIMENSION(SIZE(PALB)) :: ZXCPV_XCL_AVG, ZPTG_OLD
+e_budget.F90:REAL, DIMENSION(SIZE(PALB)) :: ZCNHUMA, ZPEQA2, ZDPQB, ZCDQSAT, ZINCR, ZTRAD, &
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZTAU      ! momentum flux (N/m2)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZHF       ! sensible heat flux (W/m2)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZEF       ! latent heat flux (W/m2)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZTAUR     ! momentum flx due to rain (N/m2)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZRF       ! sensible flx due to rain (W/m2)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZEFWEBB   ! Webb corr. on latent flx (W/m2)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZVMOD     ! wind intensity at atm.lev (m/s)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZQSATA    ! sat.spec.hum., atm.lev (kg/kg)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZPA       ! air pressure at atm. level (Pa)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZUSR      ! velocity scaling param. (m/s)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZTSR      ! temperature scaling param. (K)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZQSR      ! humidity scaling param. (kg/kg)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZWG       ! gustiness factor (m/s)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZUSTAR2   ! square of friction velocity
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZAC       ! aerodynamical conductance
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZDIRCOSZW ! orography slope cosine
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZLV,ZLR   ! vap.heat, sea/atm level (J/kg)
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZDU,ZDTH,ZDQ,ZDUWG
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZDELTAU10N,ZDELTAT10N,ZDELTAQ10N
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZCHN,ZCEN ! neutral coef. for T,Q
+ecume_flux.F90:REAL, DIMENSION(SIZE(PTA))        :: ZD0
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_TA   ! air temperature at atm. level (K)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_QA   ! air humidity at atm. level (kg/kg)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_EXNA ! Exner function at atm. level
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RHOA ! air density at atm. level
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_VMOD ! module of wind at atm. wind level (m/s)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_ZREF ! atm. level for temp. and humidity (m)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_UREF ! atm. level for wind (m)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SST  ! Sea Surface Temperature (K)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_EXNS ! Exner function at sea surface
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_PS   ! air pressure at sea surface (Pa)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RAIN !precipitation rate (kg/s/m2)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SNOW !snow rate (kg/s/m2)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_Z0SEA! roughness length over the ocean
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SFTH ! heat flux (W/m2)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_SFTQ ! water flux (kg/m2/s)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_USTAR! friction velocity (m/s)
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_QSAT ! humidity at saturation
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CD   ! heat drag coefficient
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CDN  ! momentum drag coefficient
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CH   ! neutral momentum drag coefficient
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_CE   !transfer coef. for latent heat flux
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RI   ! Richardson number
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_RESA ! aerodynamical resistance
+ecume_seaflux.F90:REAL, DIMENSION(SIZE(KMASK))      :: ZW_Z0HSEA ! heat roughness length
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG))      :: PEMIS        ! emissivity
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG,1),SIZE(PVEG,2)) :: PEMIS! emissivity
+emis_from_veg.F90:REAL, DIMENSION(SIZE(PVEG))         :: PEMIS
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG))      :: PEMIS        ! emissivity
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG))      :: ZEMISSOIL    ! soil emissivity
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG,1),SIZE(PVEG,2)) :: PEMIS! emissivity
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG,1),SIZE(PVEG,2)) :: ZEMISSOIL ! soil emissivity
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG))      :: PEMIS        ! emissivity
+emis_from_veg.F90:REAL,   DIMENSION(SIZE(PVEG))      :: ZEMISSOIL    ! soil emissivity
+exp_decay_soil_dif.F90:REAL, DIMENSION(SIZE(PD_G(:,:),1))                   :: ZC_DEPTH
+exp_decay_soil_dif.F90:REAL, DIMENSION(SIZE(PD_G(:,:),1),SIZE(PD_G(:,:),2)) :: ZD_MID
+exp_decay_soil_fr.F90:REAL, DIMENSION(SIZE(PF))         :: ZD_G_TOT, ZC_DEPTH, ZKSAT_NOEXP
+fapair.F90:REAL, DIMENSION(SIZE(PLAI))   :: ZXIA, ZXIA_SUP, ZKMUSP_SUP, ZKMUSP_INF
+fapair.F90:REAL, DIMENSION(SIZE(PLAI))   :: ZB_DR_SUP, ZB_DR_INF, ZOMEGA_DR_SUP, ZOMEGA_DR_INF, &
+fapair.F90:REAL, DIMENSION(SIZE(PLAI))   :: ZTR, ZFD_SKY, ZFD_VEG, ZFD_SUP, ZLAI_EFF0, ZLAI_EFF
+fapair.F90:!REAL, DIMENSION(SIZE(PLAI))    :: ZXIA_SUNLIT, ZXIA_SHADE, ZLAI_SUNLIT, ZLAI_SHADE
+fapair.F90:!REAL, DIMENSION(SIZE(PLAI))    :: ZRN_SUNLIT, ZRN_SHADE
+fapair.F90:REAL, DIMENSION(SIZE(PLAI),SIZE(PABC)) :: ZIACAN, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN
+flake_albedo.F90:REAL, DIMENSION(SIZE(PDIR_SW))      :: ZSW_UP
+forcing_vert_shift.F90:REAL, DIMENSION(SIZE(PQA_ATM  )) :: ZQA_ATM    ! air humidity (kg/kg)
+forcing_vert_shift.F90:REAL, DIMENSION(SIZE(PQA_ATM  )) :: ZQA_SURF   ! air humidity (kg/kg)
+forcing_vert_shift.F90:REAL, DIMENSION(SIZE(PRHOA_ATM)) :: ZRHOA_ATM  ! approximated density
+forcing_vert_shift.F90:REAL, DIMENSION(SIZE(PRHOA_ATM)) :: ZRHOA_SURF ! approximated density
+garden.F90:REAL, DIMENSION(SIZE(PPS))  :: PMUF  ! fraction of the grid cell reached by the rainfall
+garden.F90:REAL, DIMENSION(SIZE(PPS))  :: PFSAT ! Topmodel saturated fraction
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
+garden.F90:REAL, DIMENSION(SIZE(PPS),NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZRN_ISBA      ! net radiative flux from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZH_ISBA       ! sensible heat flux from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLEI_ISBA     ! baresoil evaporation from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLEG_ISBA     ! baresoil evaporation from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLEGI_ISBA    ! baresoil sublimation from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLEV_ISBA     ! total evapotranspiration from vegetation over 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLETR_ISBA    ! transpiration from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR_ISBA   ! friction velocity from snow-free 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLER_ISBA     ! evaporation from canopy water interception 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLE_ISBA      ! latent heat flux from snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZGFLUX_ISBA   ! net energy flux into the snow-free surface 
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZRNSNOW       ! net radiative flux from snow (ISBA-ES:3-L)    (W/m2)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZHSNOW        ! sensible heat flux from snow (ISBA-ES:3-L)    (W/m2)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZHPSNOW       ! heat release from rainfall (ISBA-ES:3-L)      (W/m2)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZSMELTFLUX    ! energy removed from soil/vegetation surface
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZGFLUXSNOW    ! net surface energy flux into snowpack (ISBA-ES:3-L)(W/m2)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZUSTARSNOW    ! friction velocity  over snow (ISBA-ES:3-L)    (m/s)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZGRNDFLUX     ! soil/snow interface heat flux (ISBA-ES:3-L)   (W/m2)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZSRSFC        ! snowfall over snowpack (ISBA-ES:3-L)          (kg/m2/s)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZRRSFC        ! rainfall over snowpack (ISBA-ES:3-L)          (kg/m2/s)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLESL         ! snowpack evaporation (ISBA-ES:3-L)            (W/m2)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZCDSNOW       ! snow drag coefficient (ISBA-ES:3-L)           (-)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZCHSNOW       ! heat turbulent transfer coefficient           (-)
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFFG
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFFV
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFF
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZALBF
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZEMISF
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFFROZEN
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFFLOOD
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZPIFLOOD
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZIFLOOD
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZPFLOOD
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLEFLOOD
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZLEIFLOOD
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFFG_NOSNOW
+garden.F90:REAL, DIMENSION(SIZE(PPS)) :: ZFFV_NOSNOW
+garden_properties.F90:REAL, DIMENSION(SIZE(PALB))    :: ZTSNOSNOW ! surf. temp. on snow free part
+garden_properties.F90:REAL, DIMENSION(SIZE(PALB))    :: ZTSSNOW   ! surf. temp. on snow covered part
+garden_properties.F90:REAL, DIMENSION(SIZE(PALB))    :: ZANOSNOW  ! snow-free surface albedo
+garden_properties.F90:REAL, DIMENSION(SIZE(PALB))    :: ZASNOW    ! snow albedo
+garden_properties.F90:REAL, DIMENSION(SIZE(PALB))    :: ZENOSNOW  ! snow-free surface emissivity
+garden_properties.F90:REAL, DIMENSION(SIZE(PALB))    :: ZESNOW    ! snow emissivity
+garden_soil_depth.F90:REAL, DIMENSION(SIZE(PDG,1),3,3) :: ZDATA_DG
+get_mesh_index_conf_proj.F90:REAL, DIMENSION(SIZE(PLON))       :: ZLON     ! longitude
+get_mesh_index.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IISSOX
+get_mesh_index.F90:INTEGER, DIMENSION(SIZE(PLAT)) :: IISSOY
+get_mesh_index_lonlat_reg.F90:REAL, DIMENSION(SIZE(PLON)) :: ZLON
+get_mesh_index_lonlatval.F90:REAL, DIMENSION(SIZE(PLON)) :: ZLON
+get_seriesn.F90:REAL, DIMENSION(SIZE(XTS),KS) :: ZINF
+get_seriesn.F90:REAL, DIMENSION(SIZE(XTS))    :: ZAUX
+get_xyall_ign.F90:REAL, DIMENSION(SIZE(POUT)) :: ZDOUT
+get_xyall_ign.F90:REAL, DIMENSION(SIZE(PIN)) :: ZOUT
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PGREEN       ! greeness fraction
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))::PGREEN ! greeness fraction
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: PGREEN ! greeness fraction
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PGREEN       ! greeness fraction
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: ZLAI
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))::PGREEN ! greeness fraction
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: ZLAI
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: PGREEN ! greeness fraction
+green_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: ZLAI
+heatcapz.F90:REAL,    DIMENSION(SIZE(PSANDZ,1),SIZE(PSANDZ,2)) :: ZGAMMAD
+hydro_dt92.F90:REAL, DIMENSION(SIZE(PRUNOFFD))    :: ZPAS, ZPG_INI, ZWG2
+hydro.F90:REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                          &
+hydro.F90:REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZQSAT, ZQSATI, ZTI, ZPS
+hydro_glacier.F90:REAL, DIMENSION(SIZE(PSR)) :: ZGLASTO,ZSTOMAX,ZFLUX,ZSR,ZSWE
+hydro_glacier.F90:REAL, DIMENSION(SIZE(PSR)) :: ZSNOWD
+hydro_sgh.F90:REAL, DIMENSION(SIZE(PPG))                 :: ZPG_INI, ZFROZEN, ZIMAX_ICE, ZIMAX, &
+hydro_sgh.F90:REAL, DIMENSION(SIZE(PPG))                 :: ZWG2_AVG, ZWGI2_AVG, ZWSAT_AVG, ZWWILT_AVG
+hydro_sgh.F90:REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)) :: ZNOFRZ, ZWSAT
+hydro_sgh.F90:REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPTH
+hydro_snow.F90:REAL, DIMENSION(SIZE(PSR)) :: ZSNOWSWEM, ZWSX,  ZANSMIN, ZANSMAX
+hydro_soildif.F90:REAL, DIMENSION(SIZE(PDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS
+hydro_soildif.F90:REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2)) :: ZWFLUX, ZDFLUXDT1, ZDFLUXDT2, ZWFLUXN
+hydro_soildif.F90:REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2)) :: ZPSI, ZK, ZNU, ZWSAT, ZHEAD, &
+hydro_soildif.F90:REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2)) :: ZAMTRX, ZBMTRX, ZCMTRX, ZFRC, ZSOL, &
+hydro_soildif.F90:REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2))  ::ZWWILT, ZINFLAYER
+hydro_soil.F90:REAL, DIMENSION(SIZE(PTG))   :: ZWGI1M, ZWG2M, ZWG3M, ZWGI2M
+hydro_soil.F90:REAL, DIMENSION(SIZE(PTG))   :: ZETR, ZEG
+hydro_soil.F90:REAL, DIMENSION(SIZE(PTG))   :: ZWSAT, ZWFC
+hydro_soil.F90:REAL, DIMENSION(SIZE(PWG3))  :: ZC4
+hydro_soil.F90:REAL, DIMENSION(SIZE(PWG3))  :: ZWAVG, ZSINK2,                                    &
+hydro_soil.F90:REAL, DIMENSION(SIZE(PWG3))  :: ZEXCESSF, ZA2, ZB2, ZC2, ZA3, ZB3, ZC3, ZWDRAIN, ZEXCESSFC
+hydro_soil.F90:REAL, DIMENSION(SIZE(PWG3))  :: ZWLIM2, ZWLIM3, ZWWILT
+hydro_veg.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZER
+hydro_veg.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZWR ! for time stability scheme
+hydro_veg.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZRUIR, ZRUIR2 ! dripping from the vegetation
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZVMOD     ! wind modulus
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR2   ! square of friction velocity
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC       ! Aerodynamical conductance
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRA       ! Aerodynamical resistance
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDIRCOSZW ! orography slope cosine (=1 on water!)
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZFP       ! working variable
+ice_sea_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRRCOR    ! correction od CD, CH, CDN due to moist-gustiness
+ice_soildif.F90:REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZK, ZEXCESSFC
+ice_soildif.F90:REAL, DIMENSION(SIZE(PTG,1))             :: ZEXCESS
+ini_data_param.F90:REAL, DIMENSION(SIZE(PTYPE,1)) :: ZGARDEN
+ini_data_soil.F90:LOGICAL,DIMENSION(SIZE(PDG_OUT,1)) :: LSURF
+init_isba_landuse.F90:REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZZDG     ! Actual layer thicknesses
+init_isba_landuse.F90:REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZZDG_OLD ! Old layer thicknesses
+init_isba_landuse.F90:REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZWG_OLD  ! Old XWG
+init_isba_landuse.F90:REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZWGI_OLD ! Old XWGI
+init_isba_landuse.F90:REAL, DIMENSION(SIZE(XDG,1),1,SIZE(XDG,3)) :: ZTEST
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZQA      ! specific humidity                             (kg/m3)
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZRI
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCD
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCDN
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCH
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZTNM
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZQNM
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZHUNM
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZP_SLOPE_COS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZZ0
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZZ0H
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZEXNS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZTS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZHU
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZQS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZZ0EFF
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZWG
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZWGI
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZVEG
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZRESA
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZHUG
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZHUGI
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZHV
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCPS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZWRMAX_CF
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZWR
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZZ0_WITH_SNOW
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZPSNG
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZPSNV
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZPSNV_A
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZPSN
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZSNOWALB
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PTSNOW%WSNOW,2)) ::ZSNOWSWE
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PTSNOW%WSNOW,2)) ::ZSNOWRHO
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZFFG
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZFFGNOS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZFFV
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZFFVNOS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZFF
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZRS
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZP_GLOBAL_SW
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZF2
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZF5
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZLAI
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZGAMMA
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZRGL
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZRSMIN
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZDELTA
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZWRMAX
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_ZON
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_MER
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PTSNOW%WSNOW,2))   ::ZSUM_LAYER
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   ::ZSUM
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZLEG_DELTA  ! soil evaporation delta fn
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZLEGI_DELTA ! soil sublimation delta fn
+init_isba_sbl.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PPATCH,2)) ::ZWSNOW
+init_surf_atmn.F90:REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
+init_surf_atmn.F90:REAL, DIMENSION(SIZE(PZENITH),SIZE(PSW_BANDS),NTILESFC) :: ZSCA_ALB_TILE  ! diffuse albedo
+init_surf_atmn.F90:REAL, DIMENSION(SIZE(PZENITH),NTILESFC)                 :: ZEMIS_TILE     ! emissivity
+init_surf_atmn.F90:REAL, DIMENSION(SIZE(PZENITH),NTILESFC)                 :: ZTSRAD_TILE    ! radiative temperature
+init_top.F90:REAL, DIMENSION(SIZE(PM)) :: ZD_TOP, ZWSAT_AVG, ZWWILT_AVG
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZWIND    ! lowest atmospheric level wind speed           (m/s)
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZEXNA    ! Exner function at lowest SBL scheme level     (-)
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZQA      ! specific humidity                             (kg/m3)
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZUSTAR       ! friction velocity (m/s)
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZEXNS
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZQSAT
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZCD
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZCDN
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZCH
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZRI
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZRESA_SEA
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZZ0H
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZCLS_WIND_ZON
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZCLS_WIND_MER
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZTNM
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZQNM
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZHUNM
+init_water_sbl.F90:REAL, DIMENSION(SIZE(PTA))   :: ZHU
+ini_var_from_data.F90:LOGICAL, DIMENSION(SIZE(PFIELD,2)) :: LPRESENT 
+ini_var_from_data.F90:LOGICAL, DIMENSION(SIZE(PFIELD_TIME,3)) :: LPRESENT
+ini_var_from_data.F90:LOGICAL, DIMENSION(SIZE(PFIELD_TIME,2)) :: LPRESENT_TIME
+ini_var_from_patch.F90:LOGICAL, DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: GVEG
+ini_var_from_patch.F90:REAL,    DIMENSION(SIZE(PFIELD,1)) :: ZFIELD1_TOT, ZFIELD2_TOT
+ini_var_from_patch.F90:INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IMASK  ! mask for packing from complete field to nature field
+ini_var_from_patch.F90:INTEGER, DIMENSION(SIZE(PFIELD,1)) :: NSIZE
+interp_grid.F90:REAL,    DIMENSION(SIZE(PZ1,1),SIZE(PZ2)) :: ZZ2      ! output grid
+interp_grid.F90:REAL,    DIMENSION(SIZE(PZ1,1),SIZE(PZ2)) :: ZCOEFLIN ! interpolation coefficients
+interp_grid.F90:INTEGER, DIMENSION(SIZE(PZ1,1),SIZE(PZ2)) :: IKLIN    ! lower interpolating level of
+interp_grid.F90:REAL,    DIMENSION(SIZE(PZ1,1),SIZE(PZ2,2)) :: ZCOEFLIN ! interpolation coefficients
+interp_grid.F90:INTEGER, DIMENSION(SIZE(PZ1,1),SIZE(PZ2,2)) :: IKLIN    ! lower interpolating level of
+interpol_field.F90:REAL, DIMENSION(SIZE(PFIELD),1) :: ZFIELD
+interpol_field.F90:REAL, DIMENSION(SIZE(KCODE))   :: ZX             ! coordinate used for
+interpol_field.F90:REAL, DIMENSION(SIZE(KCODE))   :: ZY             ! splines interpolation
+interpol_npts.F90:INTEGER, DIMENSION(SIZE(KCODE))             :: ISIZE
+interpol_npts.F90:REAL, DIMENSION(SIZE(PFIELD,2))         :: ZSUM
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR))      :: ZSW_UP
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR),KSW)  :: ZDIR_ALB_WITHOUT_SNOW
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR),KSW)  :: ZSCA_ALB_WITHOUT_SNOW
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR),KSW)  :: ZDIR_ALB_VEG_WITHOUT_SNOW
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR),KSW)  :: ZSCA_ALB_VEG_WITHOUT_SNOW
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR),KSW)  :: ZDIR_ALB_SOIL_WITHOUT_SNOW
+isba_albedo.F90:REAL, DIMENSION(SIZE(PALBNIR),KSW)  :: ZSCA_ALB_SOIL_WITHOUT_SNOW
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZCS       ! heat capacity of the snow
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZFROZEN1  ! ice fraction in superficial soil
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZDELTA    ! fraction of the foliage
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZQSAT     ! expression for the saturation 
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZDQSAT    ! expression for the saturation
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZTS_RAD   ! effective radiative temperature 
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZWRMAX    ! maximum canopy water interception
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZF2       ! water stress coefficient
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZF5       ! water stress coefficient (based on F2)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZDWGI1, ZDWGI2 ! Liquid equivalent volumetric soil
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZHUGI    ! humidity over frozen bare ground
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZEVAPCOR ! evaporation correction as last traces of snow
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZLES3L   ! sublimation from ISBA-ES(3L)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZLEL3L   ! evaporation heat flux of water in the snow (W/m2)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZEVAP3L  ! evaporation flux over snow from ISBA-ES (kg/m2/s)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow pack: 
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZT2M     ! restore temperature before time integration (K)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZTSM     ! surface temperature before time integration (K)
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZLEG_DELTA  ! soil evaporation delta fn
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZLEGI_DELTA ! soil sublimation delta fn
+isba.F90:REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZDELTAT
+isba.F90:REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
+isba.F90:REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZFRAC_SUN  ! fraction of sunlit leaves
+isba.F90:REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILHCAPZ ! ISBA-DF Soil heat capacity 
+isba.F90:REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
+isba.F90:REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZF2WGHT    ! water stress factor
+isba.F90:REAL, DIMENSION(SIZE(PWG,1))             :: ZWGI_EXCESS! Soil ice excess water content
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
+isba.F90:REAL, DIMENSION(SIZE(PWR)) :: ZTDIURN ! Ice maximum penetration depth for restore (m)
+isba.F90:REAL, DIMENSION(SIZE(PWR))   :: ZEMIST
+isba.F90:REAL, DIMENSION(SIZE(PWR))   :: ZALBT
+isba.F90:LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
+isba_fluxes.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZZHV,                  &
+isba_fluxes.F90:REAL, DIMENSION(SIZE(PLAI)) ::   ZKSFC_FRZ, ZFREEZING, ZICE_MELT, ZWIM,       &
+isba_fluxes.F90:REAL, DIMENSION(SIZE(PLAI)) ::  ZPSN, ZPSNV, ZPSNG, ZFRAC
+isba_fluxes.F90:REAL, DIMENSION(SIZE(PLAI)) ::  ZNEXTSNOW
+isba_fluxes.F90:REAL, DIMENSION(SIZE(PLAI)) ::  ZCONDAVG, ZWSAT_AVGZ
+isba_fluxes.F90:REAL, DIMENSION(SIZE(PLAI))          :: ZWORK1, ZWORK2, ZWORK3, ZWGI_EXCESS
+isba_properties.F90:REAL, DIMENSION(SIZE(PDIR_SW,1)) :: ZGLOBAL_SW                 ! global incoming SW rad.
+isba_properties.F90:REAL, DIMENSION(SIZE(PALBNIR))   :: ZALBF
+isba_properties.F90:REAL, DIMENSION(SIZE(PALBNIR))   :: ZFFV
+isba_properties.F90:REAL, DIMENSION(SIZE(PALBNIR))   :: ZFFG
+isba_sgh_update.F90:REAL, DIMENSION(SIZE(PRAIN))          :: ZDIST, ZBETA    ! HRAIN = SGH
+isba_sgh_update.F90:REAL, DIMENSION(SIZE(PRAIN))          :: ZD_TOP, ZW_TOP  ! HRUNOFF = SGH
+isba_sgh_update.F90:INTEGER, DIMENSION(SIZE(PRAIN))       :: IUP,IDOWN  ! HRUNOFF = SGH
+isba_sgh_update.F90:INTEGER, DIMENSION(SIZE(PRAIN))       :: NMASK      ! indices correspondance between arrays
+isba_sgh_update.F90:REAL, DIMENSION(SIZE(PRAIN))          :: ZWSAT_AVG, ZWWILT_AVG
+isba_snow_frac.F90:REAL, DIMENSION(SIZE(PVEG))      :: ZSNOWSWE
+isba_snow_frac.F90:REAL, DIMENSION(SIZE(PVEG))      :: ZSNOWD
+isba_snow_frac.F90:REAL, DIMENSION(SIZE(PVEG))      :: ZSNOWRHO
+lailoss.F90:REAL,    DIMENSION(SIZE(PSEFOLD))  :: ZXSEFOLD, ZXM
+mod1dn.F90:REAL, DIMENSION(SIZE(PSFTH)) :: ZFSOL,ZFNSOL !total solar and non-solar fluxes (W/m2)
+mod1dn.F90:REAL, DIMENSION(SIZE(PSFTH)) :: ZSFTEAU      !fresh water flux(kg/m2/s)
+mod1dn.F90:REAL, DIMENSION(SIZE(PSFTH)) :: ZLV          !latent heat
+mod1dn.F90:REAL, DIMENSION(SIZE(PSFTH)) :: ZSEATEMP     !surface temperature (K)
+mode_aer_surf.F90:REAL,DIMENSION(SIZE(PSVT,1), SIZE(PSVT,2))         :: ZSV      ! [aerosol concentration]
+mode_aer_surf.F90:REAL,DIMENSION(SIZE(PSVT,1))                       :: ZSIGMA   ! [-] standard deviation
+mode_aer_surf.F90:REAL,DIMENSION(SIZE(PSVT,1),NSP+NCARB+NSOA,JPMODE) :: ZCTOTA
+mode_aer_surf.F90:REAL,DIMENSION(SIZE(PSVT,1),JPMODE*3)              :: ZM
+mode_aer_surf.F90:REAL,DIMENSION(SIZE(PSVT,1),NSP+NCARB+NSOA,JPMODE):: ZCTOTA
+mode_aer_surf.F90:REAL,DIMENSION(SIZE(PSVT,1), JPMODE*3) :: ZM                  ! [aerosol units] local array which goes to output later
+mode_char2real.F90:REAL,DIMENSION(SIZE(HSTR)),   INTENT(OUT) :: KOUT
+mode_coare30_psi.F90:REAL, DIMENSION(SIZE(PZL))        :: PSIFCTU !function psi value
+mode_coare30_psi.F90:REAL, DIMENSION(SIZE(PZL)) :: ZY,ZX,ZC,ZPSIC,ZPSIK,ZF
+mode_coare30_psi.F90:REAL, DIMENSION(SIZE(PZL))        :: PSIFCTT !function psi value
+mode_coare30_psi.F90:REAL, DIMENSION(SIZE(PZL)) :: ZX,ZY,ZC,ZPSIC,ZPSIK,ZF
+mode_coupling_canopy.F90:REAL, DIMENSION(SIZE(PT))   :: ZU10
+mode_dslt_surf.F90:REAL,DIMENSION(SIZE(PFLUX,1),3) :: ZFM               !Intermediate variable to get moments
+mode_dslt_surf.F90:REAL,DIMENSION(SIZE(PSVT,1), SIZE(PSVT,2)) :: ZSV    ! [dusts moment concentration]
+mode_dslt_surf.F90:REAL,DIMENSION(SIZE(PSVT,1), SIZE(KM0)*3)  :: ZM     ! [moments] local array for moments  
+mode_dslt_surf.F90:REAL,DIMENSION(SIZE(PSVT,1))               :: ZSIGMA ! [-] standard deviation
+mode_dslt_surf.F90:REAL,DIMENSION(SIZE(PSVT,1))               :: ZRG    ! [um] number median diameter
+mode_dstmblutl.F90:REAL, DIMENSION(SIZE(PVWC_SAT)) :: ZDNS_BLK_DRY ! [kg m-3] Bulk density of dry surface soil
+mode_dstmblutl.F90:REAL, DIMENSION(SIZE(PDNS_MDP)) :: ZROP_ROA  ! [frc] ratio of particle densite to Midlayer density
+mode_dstmblutl.F90:REAL, DIMENSION(SIZE(PDSRLV,1),SIZE(PDSRLV,2)) :: ZDS
+mode_dstmblutl.F90:REAL, DIMENSION(SIZE(PDSRLV,2)) :: ZDPLN, ZSP, ZDMLN
+mode_geo_gauss.F90:    TYPE (LOLA), DIMENSION(SIZE(PT_REEL))       :: PT_G
+mode_geo_gauss.F90:    TYPE (LOLA), DIMENSION(SIZE(PT_G))     :: PT_REEL
+mode_geo_gauss.F90:    TYPE (LOLA), DIMENSION(SIZE(PT_TR))            :: PT_REEL
+mode_geo_gauss.F90:    REAL, DIMENSION(SIZE(PT_TR))                   :: ZSIN, ZCOS
+mode_geo_gauss.F90:    TYPE (LOLA), DIMENSION(SIZE(PT_REEL))          :: PT_TR  
+mode_geo_gauss.F90:    REAL, DIMENSION(SIZE(PT_REEL)) :: ZSIN, ZCOS
+mode_geo_gauss.F90:    TYPE (LOLA), DIMENSION(SIZE(PT_COORD))  :: PT_ET
+mode_geo_gauss.F90:    REAL, DIMENSION(SIZE(PT_COORD))         :: ZPC2, ZSIN, ZCOS
+mode_geo_gauss.F90:    TYPE (LOLA), DIMENSION(SIZE(PT_COORD))  :: PT_RE
+mode_geo_gauss.F90:    REAL, DIMENSION(SIZE(PT_COORD))         :: ZPC2, ZSIN, ZCOS
+mode_geo_gauss.F90:    REAL, DIMENSION(SIZE(PT_COORD))         :: PMF
+mode_geo_gauss.F90:    REAL, DIMENSION(SIZE(PT_COORD))         :: ZPC2
+mode_gridtype_conf_proj.F90:REAL, DIMENSION(SIZE(PX)) :: ZY
+mode_gridtype_conf_proj.F90:REAL, DIMENSION(SIZE(PX)) :: ZATA,ZRO2,ZT2,ZXMI0,ZYMI0
+mode_gridtype_conf_proj.F90:REAL,DIMENSION(SIZE(PLAT)) :: ZLAT,ZLON
+mode_gridtype_conf_proj.F90:REAL,DIMENSION(SIZE(PLAT)) :: ZCLAT,ZSLAT,ZRO,ZGA,ZXPR,ZYPR
+mode_gridtype_conf_proj.F90:REAL, DIMENSION(SIZE(PLAT))       :: ZLAT     ! latitude
+mode_gridtype_gauss.F90:    REAL, DIMENSION(SIZE(PLAT)),   INTENT(OUT):: PMAP   ! map factor
+mode_gridtype_gauss.F90:    TYPE(LOLA), DIMENSION(SIZE(PLAT))   :: TZPTCI
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX)) :: ZGAMMA
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX)) :: ZR               ! length of arc meridian line projection
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX)) :: ZLATISO          ! Isometric latitude
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX)) :: ZLAT0            ! For iteration
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PLAT)) :: ZWRK1, ZWRK2     ! working arrays
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PLAT)) :: ZLATRAD, ZLONRAD ! longitude and latitude in radians
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PLAT)) :: ZGAMMA
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PLAT)) :: ZLATFI           ! Isometric latitude
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PLAT)) :: ZR               ! length of arc meridian line projection
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX))       :: ZLAT0    ! latitude for iteration
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX))       :: ZLAT     ! latitude
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX))       :: ZLATISO  ! isometric latitude
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX))       :: ZR       ! R in the IGN formula
+mode_gridtype_ign.F90:REAL, DIMENSION(SIZE(PX))       :: ZGRANDN  ! N in the IGN formula
+mode_hydro_dif.F90:REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: PVAPCOND
+mode_hydro_dif.F90:REAL, DIMENSION(SIZE(PWG,1)) :: ZGREEN_AMPT, ZDEPTH
+mode_hydro_dif.F90:REAL, DIMENSION(SIZE(PWG,1)) :: INFMAX_FUNC
+mode_hydro_dif.F90:REAL, DIMENSION(SIZE(PFRC,1),SIZE(PFRC,2)) :: ZWORK! work array
+mode_hydro_dif.F90:REAL, DIMENSION(SIZE(PFRC,1))              :: ZDET ! work array
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: BUSINGER_PHIM_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO)) :: BUSINGER_PHIM_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: BUSINGER_PHIH_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO)) :: BUSINGER_PHIH_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: BUSINGER_PHIE_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1)) :: BUSINGER_PHIE_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: PAULSON_PSIM_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: ZX
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1)) :: PAULSON_PSIM_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1)) :: ZX
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1), &
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: PAULSON_PSIH_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1),SIZE(PZ_O_LMO,2)) :: ZY
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1)) :: PAULSON_PSIH_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ_O_LMO,1)) :: ZY
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PUSTAR,1),SIZE(PUSTAR,2)) :: LMO_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PUSTAR,1),SIZE(PUSTAR,2)) :: ZTHETAV
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PUSTAR,1),SIZE(PUSTAR,2)) :: ZQ0
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PUSTAR))   :: LMO_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PUSTAR))   :: ZTHETAV
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2))         :: USTAR_2D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2))         :: ZZ_O_LMO
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2))         :: ZZ0_O_LMO
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ))                    :: USTAR_1D
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ))                    :: ZZ_O_LMO
+mode_sbls.F90:  REAL, DIMENSION(SIZE(PZ))                    :: ZZ0_O_LMO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PWLIQMAX ! (kg/m3)
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: ZHOLDMAXR, ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PWLIQMAX ! (kg/m3)
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZHOLDMAXR, ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO)) :: PWLIQMAX ! (kg/m3)
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZHOLDMAXR, ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PWLIQMAX ! (kg/m3)
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PWLIQMAX ! (kg/m3)
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO)) :: PWLIQMAX ! (kg/m3)
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PWHOLDMAX
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: ZHOLDMAXR, ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PWHOLDMAX
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZHOLDMAXR, ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO))                    :: PWHOLDMAX
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO))                    :: ZHOLDMAXR, ZSNOWRHO
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PWHOLDMAX
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PWHOLDMAX
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO))                    :: PWHOLDMAX
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PSCAP
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PSCAP
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PSCAP
+mode_snow3l.F90:REAL, DIMENSION(SIZE(PSNOW))      :: ZWORK
+mode_snow3l.F90:        REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHO
+mode_snow3l.F90:        REAL, DIMENSION(SIZE(PSNOWRHO,1))   :: ZDIAMD,&
+mode_snow3l.F90:         REAL, DIMENSION(SIZE(PSNOWGRAN1,1)) ::KGRAN1, KGRAN2, KHIST    
+mode_soil.F90:   REAL, DIMENSION(SIZE(PSAND,1),SIZE(PSAND,2)) :: WSAT_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: WWILT_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: WFC_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: W33_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: BCOEF_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PSAND,1),SIZE(PSAND,2)) :: MATPOTSAT_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: HYDCONDSAT_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: CGSAT_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: C1SAT_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: C2REF_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: C3_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: C4B_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: C4REF_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: ACOEF_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY,1),SIZE(PCLAY,2)) :: PCOEF_FUNC_2D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PSAND))       :: WSAT_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: WWILT_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: WFC_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: W33_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: BCOEF_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PSAND))       :: MATPOTSAT_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: HYDCONDSAT_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: CGSAT_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: C1SAT_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: C2REF_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: C3_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: C4B_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: C4REF_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: ACOEF_FUNC_1D
+mode_soil.F90:   REAL, DIMENSION(SIZE(PCLAY))       :: PCOEF_FUNC_1D
+mode_splines.F90:REAL,DIMENSION(SIZE(A,1)*SIZE(A,2)) :: A1
+mode_splines.F90:REAL,DIMENSION(SIZE(B,1)*SIZE(B,2)) :: B1
+mode_splines.F90:REAL, DIMENSION(SIZE(A,1)*SIZE(A,2)) :: A2
+mode_splines.F90:INTEGER, DIMENSION(SIZE(A,1)) :: INDEX
+mode_splines.F90:REAL, DIMENSION(SIZE(A,1)) :: RI
+mode_splines.F90:INTEGER, DIMENSION(SIZE(IE,1)) :: NV
+mode_splines.F90:INTEGER, DIMENSION(SIZE(X,1),SIZE(C)-SIZE(X,2)) :: IW !ND,M
+mode_splines.F90:REAL, DIMENSION(SIZE(X,2)) :: WE1
+mode_splines.F90:REAL, DIMENSION(SIZE(IW,2)) :: WE2
+mode_splines.F90:REAL,DIMENSION(SIZE(X,2),SIZE(X,2)) :: C !N,N
+mode_splines.F90:REAL,DIMENSION(SIZE(X,2),SIZE(IW,2))  :: TM !N,M
+mode_splines.F90:REAL,DIMENSION(SIZE(IW,2),SIZE(IW,2)) :: TT !M,M
+mode_splines.F90:REAL, DIMENSION(SIZE(X,2),SIZE(X,2)) :: R1
+mode_splines.F90:REAL,DIMENSION(SIZE(X,2)) :: VP !N
+mode_splines.F90:REAL,DIMENSION(SIZE(X,2)) :: WORK !N
+mode_splines.F90:REAL,DIMENSION(SIZE(R,2),SIZE(R,2)) :: RKR !N-M,N-M
+mode_splines.F90:REAL,DIMENSION(SIZE(R,2)) :: WORK !N-M
+mode_splines.F90:REAL, DIMENSION(SIZE(R,1),SIZE(R,1)):: Q1 !N,N
+mode_splines.F90:REAL, DIMENSION(SIZE(U,1),SIZE(U,2))::QW1,QW2 !N-M,N-M
+mode_splines.F90:INTEGER, DIMENSION(SIZE(X,1),SIZE(C)-SIZE(X,2)) :: IW
+mode_splines.F90:REAL, DIMENSION(SIZE(C)-SIZE(X,2),SIZE(X,2)) :: TTT ! M,N
+mode_splines.F90:REAL, DIMENSION(SIZE(X,2),2*SIZE(X,2)-SIZE(C)) :: R ! N,N-M
+mode_splines.F90:REAL,DIMENSION(SIZE(X,2),SIZE(X,2)) :: RK !N,N
+mode_splines.F90:REAL,DIMENSION(SIZE(R,2)) :: RZ !N-M
+mode_splines.F90:REAL, DIMENSION(SIZE(X,2),SIZE(X,2)) :: Q ! N,N
+mode_splines.F90:REAL, DIMENSION(SIZE(X,2)) :: RKC !RKC(N)
+mode_splines.F90:REAL, DIMENSION(SIZE(NSD)) :: DXI, DXR
+mode_surf_flood_frac.F90:REAL, DIMENSION(SIZE(PPSNG))    :: PFFG    ! Floodplain fraction over the ground
+mode_surf_flood_frac.F90:REAL, DIMENSION(SIZE(PPSNV))    :: PFFV    ! Floodplain fraction over vegetation
+mode_surf_flood_frac.F90:REAL, DIMENSION(SIZE(PVEG))     :: PFF     ! Floodplain fraction at the surface
+mode_surf_snow_frac.F90:REAL, DIMENSION(SIZE(PWSNOW))   :: PPSNG  ! snow fraction over bare ground
+mode_surf_snow_frac.F90:REAL, DIMENSION(SIZE(PPSNG))    :: PWSNOW ! snow amount over natural areas (kg/m2)
+mode_surf_snow_frac.F90:REAL, DIMENSION(SIZE(PWSNOW))   :: PPSNV  ! snow fraction over vegetation
+mode_surf_snow_frac.F90:REAL, DIMENSION(SIZE(P_LAI))    :: PPSNV  ! snow fraction over vegetation
+mode_surf_snow_frac.F90:REAL, DIMENSION(SIZE(P_LAI))   :: FLAI  ! snow fraction over vegetation
+mode_surf_snow_frac.F90:REAL, DIMENSION(SIZE(PWSNOW))   :: PPSN   ! snow fraction over natural areas
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: PQSAT  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: PQSAT  ! saturation vapor 
+mode_thermos.F90:INTEGER, DIMENSION(SIZE(PT,1)) :: IMASK
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: PQSAT  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: PDQSAT ! derivative according
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))  :: ZFOES  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))  :: ZWORK2   ! loop index
+mode_thermos.F90:REAL,    DIMENSION(SIZE(PT))                    :: PDQSAT ! derivative according
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                       :: ZFOES  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: PQSAT  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor 
+mode_thermos.F90:REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))      :: PQSAT  ! saturation vapor 
+mode_thermos.F90:INTEGER, DIMENSION(SIZE(PT,1)) :: IMASK
+mode_write_surf_fa.F90:REAL, DIMENSION(SIZE(PFIELD,2))       :: ZMEAN, ZCOUNT
+mr98.F90:REAL, DIMENSION(SIZE(PTA)) :: ZZ0SEAH,        &!roughness length heat
+mr98.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSA, ZTHA, ZDU, ZDT, ZDQ, ZNU, ZWG
+mr98.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTSTAR, ZQSTAR, ZTVSTAR,          &
+mr98.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLMON, ZZETA, ZPSIM, ZPSIH, ZPSIQ,  &
+nitro_decline.F90:REAL,    DIMENSION(SIZE(PLAI))  :: ZXSEFOLD        ! e-folding time for senescence corrected (days)
+nitro_decline.F90:REAL,    DIMENSION(SIZE(PLAI))  :: ZLAIB_NITRO     ! LAI correction parameter used in sefold calculation
+nitro_decline.F90:REAL,    DIMENSION(SIZE(PLAI))  :: ZASSIM          ! assimilation
+nitro_decline.F90:REAL,    DIMENSION(SIZE(PLAI))  :: ZBIOMASST       ! leaf + active structural biomass
+nitro_decline.F90:REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZINCREASE
+nitro_decline.F90:REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZBIOMASS      ! temporary biomass reservoirs
+nitro_decline.F90:REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZDECLINE      ! biomass decline (storage+mortality)
+nitro_decline.F90:REAL, DIMENSION(SIZE(PLAI),SIZE(PBIOMASS,2))  :: ZSTORAGE      ! storage (part of decline)
+nitro_decline.F90:REAL, DIMENSION(SIZE(PLAI))                   :: ZMORT_LEAF    ! leaf mortality
+pack_pgd.F90:REAL,    DIMENSION(SIZE(PLAT)) :: ZDIR
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR     ! friction
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTH        ! potential temperature
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRV        ! H2O mixing ratio
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLMO       ! Monin Obhukov length
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZH_O_LMO   ! h/LMO
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: Z10M_O_LMO ! 10m/LMO
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: Z2M_O_LMO  ! 2m/LMO
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTSTAR     ! Scale of Temperature
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSTAR     ! Scale of humidity
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTH2M      ! Potential temperature at 2m
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZP2M       ! Pressure at 2m
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSAT2M    ! saturation specific humidity at 2m
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWT        ! potential temperature flux (Km/s)
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWQ        ! water vapor flux           (kg/kg*m/s)
+param_cls.F90:REAL, DIMENSION(SIZE(PTA)) :: ZEXN       ! Exner function
+prep_hor_isba_field.F90:INTEGER, DIMENSION(SIZE(XDG,1),SIZE(XDG,3)) :: IWORK
+prep_hor_isba_field.F90:REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
+prep_hor_isba_field.F90:REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
+prep_hor_snow_field.F90:REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
+prep_hor_snow_field.F90:REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
+prep_hor_snow_field.F90:REAL, DIMENSION(SIZE(PD2,1))             :: ZDT  ! output total thickness
+prep_hor_teb_field.F90:REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
+prep_hor_teb_field.F90:REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
+prep_hor_teb_field.F90:REAL, DIMENSION(SIZE(PD2,1))             :: ZD  ! output total thickness
+prep_hor_teb_garden_field.F90:REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
+prep_hor_teb_garden_field.F90:REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZDIR_ALB  ! direct albedo for each band
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZSCA_ALB  ! diffuse albedo for each band
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1))   :: ZEMIS     ! emissivity
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1))   :: ZZENITH   ! solar zenithal angle
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBNIR  ! near-infra-red albedo   (-)
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBVIS  ! visible albedo          (-)
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV   ! UV albedo               (-)
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBNIR_SOIL  ! soil near-infra-red albedo   (-)
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBVIS_SOIL  ! soil visible albedo          (-)
+prep_isba.F90:REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV_SOIL   ! soil UV albedo               (-)
+prep_sst_init.F90:REAL, DIMENSION(SIZE(PSST))              :: ZSST
+put_in_time.F90:REAL, DIMENSION(SIZE(PDATA,1),NTIME1,SIZE(PDATA,3)) :: ZDATA
+radiative_transfert.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZIA, ZLAI, ZLAI_EFF, ZXMUS 
+radiative_transfert.F90:REAL,    DIMENSION(SIZE(PLAI)) :: ZB_INF, ZB_SUP
+read_surf_isba_parn.F90:REAL, DIMENSION(SIZE(PFIELD,1),1,NPATCH) :: ZFIELD_PATCH
+read_surf_isba_parn.F90:REAL, DIMENSION(SIZE(PFIELD,1),1,NVEGTYPE) :: ZFIELD_VEGTYPE
+rmc01_surf.F90:REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZZ_O_LMO ! height / LMO
+rmc01_surf.F90:REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZPHIM    ! MO function
+rmc01_surf.F90:REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZPHIE    ! MO function
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROAD,2)) ::  ZA,& ! lower diag.
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDN_ROAD    ! snow-covered surface fraction on road
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDF_ROAD    ! snow-free surface fraction on road
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQSAT_ROAD ! dq_sat/dTs
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRHO_ACF_R  ! rho * conductance
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRHO_ACF_R_WAT ! rho * conductance for water
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROAD,2)) :: ZMTC_O_D_ROAD
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROAD,2)) :: ZHC_D_ROAD
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_ROAD    ! road surface temperature
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_ROAD,1)) :: ZEI_ROAD  ! internal energy of roads
+road_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_ROAD,1)) :: ZPEI_ROAD ! internal energy of roads at the
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDELTFREE_ROOF ! snow-free fraction
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZA ! lower diag.
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZB ! main  diag.
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZC ! upper diag.
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZY ! r.h.s.
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZX ! solution
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRHO_AC_ROOF ! conductance * rho
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRHO_AC_ROOF_WAT ! ! conductance * rho (for water)
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQSAT_ROOF  ! dq_sat/dTs
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZMTC_O_D
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_ROOF,2)) :: ZHC_D_ROOF
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_ROOF         ! roof surface temperature
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_ROOF,1)) :: ZEI_ROOF   ! internal energy of roofs
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_ROOF,1)) :: ZPEI_ROOF  ! internal energy of roofs at t+
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTI_ROOF         ! temperature of internal roof layer at t
+roof_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZFLX_BLD_ROOF_EQ ! heat flux between inside of the
+sm10.F90:REAL, DIMENSION(SIZE(PZ,1))           :: ZZ_CAN             ! mixing length generic profile in canopy
+sm10.F90:REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)):: ZZ_SURF            ! Mixing length generic profile at mid levels (near the surface)
+sm10.F90:REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)):: ZZ_ISBL            ! Mixing length generic profile at mid levels (in the inertial SBL)
+sm10.F90:REAL, DIMENSION(SIZE(PZ,1))           :: ZZ_BASE_ISBL       ! Mixing length generic at the base of the ISBL
+sm10.F90:REAL, DIMENSION(SIZE(PZ,1))           :: ZDISP_H            ! displacement height
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND,    &
+snow3l.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOW, ZSFCFRZ, ZTSTERM1, ZTSTERM2,                   &
+snow3l.F90:LOGICAL, DIMENSION(SIZE(PTA))       :: GSFCMELT
+snow3l.F90:REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZMELTXS, ZLIQHEATXS, &
+snow3l.F90:REAL, DIMENSION(SIZE(PTA))          :: ZUSTAR2_IC, ZTA_IC, ZQA_IC,                                 &
+snow3l.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOWFALL, ZRHOSNEW,        &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2, ZSETTLE, &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOW))         :: ZSMASSC
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHON
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEATN
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZTOP_NEW
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZBOT_NEW                                       
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHOO
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEATO
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWDZO
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZTOP_OLD
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZBOT_OLD  
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEAN, ZSNOWHEAO
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZMASTOTN, ZMASTOTO
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOW)) :: ZPSNOW_OLD, ZPSNOW_NEW
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOW)) :: ZSUMHEAT, ZSUMSWE, ZSNOWMIX_DELTA
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO))   :: ZPCPALB, ZALBDRY, ZANSMIN, ZANSMAX,  &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1))    :: ZRADTOT
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOW,            &
+snow3l.F90:REAL, DIMENSION(SIZE(PTS))        :: ZAC, ZRI,                          &
+snow3l.F90:REAL, DIMENSION(SIZE(PTG))                     :: ZSNOWTEMP_DELTA
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWTEMP, ZDTERM, ZCTERM, &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZWORK1, ZWORK2, ZDZDIF,    &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)-1) :: ZSNOWTEMP_M,             &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE, ZCMPRSFACT,   &
+snow3l.F90:REAL, DIMENSION(SIZE(PRR))            :: ZPCPXS, ZTOTWCAP, ZRAINFALL
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE, ZFLOWLIQ,    &
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)) :: ZFLOWLIQT
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ))      :: ZEVAPC, ZLE, ZSNOWTEMP, ZSMSNOW, ZGFLUX,  &
+snow3l.F90:REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWEVAPS, ZSNOWEVAP, ZSNOWEVAPX,          &
+snow3l.F90:REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWHEATC, ZSNOWGONE_DELTA
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSNOWHEAT_1D ! total heat content                (J/m2)
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSNOW        ! total snow depth                  (m)
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZMASS        ! total mass
+snow3l.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSCAP  ! Snow layer heat capacity          (J/K/m3)
+snow3L_isba.F90:REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL, &
+snow3L_isba.F90:INTEGER, DIMENSION(SIZE(PTA))      :: NMASK      ! indices correspondance between arrays
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZEXNS, ZEXNA, ZDIRCOSZW
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZZ0      ! roughness length for momentum
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZZ0H     ! roughness length forheat
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZRI      ! Richardson number
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZAC      ! aerodynamical conductance
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZRA      ! aerodynamical resistance
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZCH      ! drag coefficient for heat
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZB, ZY   ! coefficients in Ts eq.
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZWSNOW   ! snow before evolution
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZSNOW_HC ! snow heat capacity
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZSNOW_TC ! snow thermal conductivity
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZSNOW_D  ! snow depth
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZMELT    ! snow melting rate (kg/m3/s)
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZTS_SNOW ! snow surface temperature
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZQSAT    ! specific humidity
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZDQSAT   ! d(specific humidity)/dT
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZSR1, ZSR2   ! norm. snow precip.
+snow_cover_1layer.F90:LOGICAL, DIMENSION(SIZE(PWSNOW)) :: GSNOWMASK ! where snow is
+snow_cover_1layer.F90:LOGICAL, DIMENSION(SIZE(PWSNOW)) :: GFLUXMASK ! where fluxes can
+snow_cover_1layer.F90:INTEGER, DIMENSION(SIZE(PWSNOW)) :: JSNOWMASK1, JSNOWMASK2, JSNOWMASK3 ! where snow is or not
+snow_cover_1layer.F90:INTEGER, DIMENSION(SIZE(PWSNOW)) :: JFLUXMASK ! where fluxes can
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZEI_SNOW  ! internal energy of snow
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZPEI_SNOW ! internal energy of snow at t+
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZWORK1
+snow_cover_1layer.F90:REAL, DIMENSION(SIZE(PWSNOW)) :: ZDQSATI, ZQSATI
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND,    &
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOWBIS
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOW, ZSFCFRZ, ZTSTERM1, ZTSTERM2,                   &
+snowcro.F90:LOGICAL, DIMENSION(SIZE(PTA))       :: GSNOWFALL,GMODIF_MAILLAGE
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZLIQHEATXS, &
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZUSTAR2_IC, ZTA_IC, ZQA_IC,                                   &
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOWRHOF, ZSNOWDZF,ZSNOWGRAN1F,&
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOWAGEF
+snowcro.F90:INTEGER, DIMENSION(SIZE(PTA)) :: INLVLS_USE ! varying number of effective layers 
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2))  :: ZWHOLDMAX 
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2,    &! work snow density UNIT : kg m-3
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO))   ::  ZANSMIN,ZANSMAX  
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO))   :: ZDIAM_TOP,ZDIAM_BOT
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO),3)   :: ZALB,ZALB_TOP,ZALB_BOT
+snowcro.F90:REAL, DIMENSION(SIZE(PALBEDOSC))         :: NVAGE1                   
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1))    :: ZRADTOT, ZANSMIN, ZANSMAX
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,2))   :: ZDIAM
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,2),3)   :: ZBETA
+snowcro.F90:REAL, DIMENSION(SIZE(PALB))         :: NVAGE1                  
+snowcro.F90:REAL, DIMENSION(SIZE(PTS))        :: ZAC, ZRI,                        &
+snowcro.F90:REAL, DIMENSION(SIZE(PTS))       ::  ZSNOWEVAPX                                 !   
+snowcro.F90:REAL, DIMENSION(SIZE(PTG))                     :: ZGBAS, ZSNOWTEMP_DELTA
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWTEMP, ZDTERM, ZCTERM, &
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZWORK1, ZWORK2, ZDZDIF,    &
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)-1) :: ZSNOWTEMP_M,             &
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE, ZCMPRSFACT,   &
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE,     &
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)) :: ZFLOWLIQ
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ))      :: ZEVAPC, ZLE, ZSNOWTEMP, ZSMSNOW, ZGFLUX,  &
+snowcro.F90:REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWEVAPS, ZSNOWEVAP, ZSNOWEVAPX,          &
+snowcro.F90:REAL, DIMENSION(SIZE(PLES3L))       :: PRADSINK
+snowcro.F90:REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWHEATC
+snowcro.F90:INTEGER, DIMENSION(SIZE(PLES3L))    :: ISNOWGONE_DELTA
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSNOWHEAT_1D ! total heat content                (J/m2)
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSNOWRHO_1D  ! total snowpack average density    (kg/m3)
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSNOW        ! total snow depth                  (m)
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSCAP        ! Snow layer heat capacity          (J/K/m3)
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZNDENT       ! Number of dendritic layers        (-)
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZNVIEU       ! Number of non dendritic layers    (-)
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZSNOWAGE_1D  ! total snowpack average 
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::ZSNOWGRAN1N,   &
+snowcro.F90:LOGICAL, DIMENSION(SIZE(PTA))       :: OAGREG_SURF,OMODIF_GRID 
+snowcro.F90:REAL, DIMENSION(SIZE(PTA))          :: ZSNOWFALL,ZSNOWTEMP,ZSCAP,ZANSMAX
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::ZDZOPT 
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHON,ZSNOWGRAN1N,ZSNOWGRAN2N,     &
+snowcro.F90:REAL,DIMENSION(SIZE(PSNOWRHO,1)) ::ZSNOWAGEN          
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1)+1) :: ZSNOWRHOO,ZSNOWGRAN1O,ZSNOWGRAN2O,     &
+snowcro.F90:REAL,DIMENSION(SIZE(PSNOWRHO,1)+1) ::ZSNOWAGEO          
+snowcro.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2
+snowcro.F90:REAL, DIMENSION(SIZE(PA,1)           ) :: ZDET ! work array
+snowcro.F90:REAL, DIMENSION(SIZE(PA,1),SIZE(PA,2)) :: ZW   ! work array
+snowcroupgrid.F90:        REAL, DIMENSION(SIZE(PSNOW))           :: ZSUMHEAT, ZSUMSWE,    &
+snowcroupgrid.F90:        REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::ZSNOWHEATN, &
+snowcroupgrid.F90:        REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::ZSNOWGRAN1N,   &
+snowcroupgrid.F90:        REAL, DIMENSION(SIZE(PSNOW))           :: ZNDENT, ZNVIEU
+snowcroupgrid.F90:        REAL, DIMENSION(SIZE(PSNOW))           :: PSNOWMIN
+snowcroupgrid.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHON,ZSNOWGRAN1,ZSNOWGRAN2,     &
+snowcroupgrid.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1)-1) :: ZSNOWZO, ZSNOWZN, ZSNOWDDZ, ZDELTA  
+snowcroupgrid.F90:REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHON,ZSNOWGRAN1N,ZSNOWGRAN2N,     &
+soil_albedo.F90:REAL, DIMENSION(SIZE(PWSAT)) :: ZX
+soil_albedo.F90:REAL,    DIMENSION(SIZE(PWSAT)) :: ZX
+soildif.F90:REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZMATPOT
+soildif.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZFF, ZCF !heat capacity of the flood
+soildif.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZWTD ! Water table depth (m)  
+soil.F90:REAL, DIMENSION(SIZE(PVEG))   :: ZLAMS,                         &
+soil.F90:REAL, DIMENSION(SIZE(PVEG)) ::  ZFROZEN2, ZUNFROZEN2, ZCONDSAT, ZSATDEG, ZKERSTEN, &
+soil.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZWG2
+soil.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZCF !heat capacity of the flood
+soil.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZFF !Fraction of floodplain at the surface without snow
+soilgrid.F90:REAL,DIMENSION(SIZE(PDG,1),SIZE(PDG,3)) :: ZREF
+soilgrid.F90:REAL,DIMENSION(SIZE(PDG,1),SIZE(PDG,3)) :: ZDG_WATER
+soil_heatdif.F90:REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZTGM, ZDTERM, ZCTERM,   &
+soilstress.F90:REAL, DIMENSION(SIZE(PWFC,1)) ::  ZWFC_AVGZ, ZWSAT_AVGZ, ZWWILT_AVGZ
+soilstress.F90:REAL, DIMENSION(SIZE(PWG,1)) :: ZWSAT, ZWFC, ZWWILT
+soil_temp_arp.F90:REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))  :: ZTGM, ZFRCV, ZAMTRX, ZBMTRX,     &
+spinup_wood_biomass.F90:REAL,    DIMENSION(SIZE(PBIOMASS,1),SIZE(PBIOMASS,2))  :: ZBIOMASS   
+spinup_wood_biomass.F90:REAL,    DIMENSION(SIZE(PBIOMASS,1),SIZE(PBIOMASS,2))  :: ZDECLINE   
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZWIND   ! wind strength (m/s)
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZSSO_STDEV! SSO standard deviation (m)
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZUSTAR  ! friction velocity
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))     :: ZTA      ! temperature                                   (K)
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))     :: ZQA      ! specific humidity                             (kg/m3)
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))     :: ZPA      ! pressure                                      (Pa)
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZT
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZQ
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZLMO
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZLM
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZLEPS
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZP
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))     :: ZSFLUX_T
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU))     :: ZSFLUX_Q
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZFORC_T
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZDFORC_TDT
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZFORC_Q
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU),NLVL) :: ZDFORC_QDQ
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU)) :: ZALFATH
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU)) :: ZBETATH
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU)) :: ZALFAQ
+sso_be04_frictionn.F90:REAL, DIMENSION(SIZE(PU)) :: ZBETAQ
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU), NLVL) :: ZFORC_U      ! tendency due to drag force for wind
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU), NLVL) :: ZDFORC_UDU   ! formal derivative of
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU), NLVL) :: ZFORC_E      ! tendency due to drag force for TKE
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU), NLVL) :: ZDFORC_EDE   ! formal derivative of
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU))       :: ZH        ! Canopy height     (m)
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU))       :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU))       :: ZALFAU   ! V+(1) = alfa u'w'(1) + beta ! not used
+sso_be04_frictionn.F90:REAL,    DIMENSION(SIZE(PU))       :: ZBETAU   ! V+(1) = alfa u'w'(1) + beta ! not used
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZWIND   ! wind strength (m/s)
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZDIR    ! wind direction (rad., clockwise)
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZALFA   ! angle between z0eff J axis and wind direction (rad., clockwise) 
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZCOS2, ZSIN2
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZZ0EFF  ! Momentum Roughness length
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZCD     ! drag coefficient
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZUSTAR2 ! square of friction velocity
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZSSO_SFU! zonal orographic momentum flux
+sso_z0_frictionn.F90:REAL, DIMENSION(SIZE(PU))    :: ZSSO_SFV! meridian orographic momentum flux
+sso_z0_frictionn.F90:LOGICAL, DIMENSION(SIZE(PU)) :: GMASK   ! mask where SSO exists
+sst_update.F90:REAL, DIMENSION(SIZE(PSST))              :: ZSST, ZSST0
+subscale_z0eff_1d.F90:LOGICAL, DIMENSION(SIZE(PZ0EFFIM)) :: GMASK
+subscale_z0eff_1d.F90:LOGICAL, DIMENSION(SIZE(PZ0)) :: LWORK1
+subscale_z0eff.F90:REAL,    DIMENSION(SIZE(PZ0EFFIM)) :: ZZ0VEG
+subscale_z0eff.F90:LOGICAL, DIMENSION(SIZE(PZ0EFFIM)) :: GMASK
+subscale_z0eff.F90:LOGICAL, DIMENSION(SIZE(PZ0EFFIM)) :: GMASK
+subscale_z0eff.F90:LOGICAL, DIMENSION(SIZE(PZ0EFFIM,1)) :: GMASK
+sum_on_all_procs.F90:INTEGER, DIMENSION(SIZE(OIN)) :: IIN ! 1 if OIN true, 0 otherwise
+sunpos.F90:REAL, DIMENSION(SIZE(PLON))                :: ZTUT    ,&! True (absolute) Universal Time
+surface_aero_cond.F90:REAL, DIMENSION(SIZE(PRI)) :: ZZ0, ZZ0H, ZMU,          &
+surface_aero_cond.F90:REAL, DIMENSION(SIZE(PRI)) :: ZVMOD
+surface_cdch_1darp.F90:REAL, DIMENSION(SIZE(PTA))     :: ZSTAB
+surface_cdch_1darp.F90:REAL, DIMENSION(SIZE(PTA))     :: ZCDNH, ZRTI, ZU
+surface_ri.F90:REAL, DIMENSION(SIZE(PTG))   :: ZTHVA, ZTHVS
+surface_ri.F90:REAL, DIMENSION(SIZE(PVMOD)) :: ZVMOD
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZVMOD          ! wind
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWS_ROOF_MAX   ! maximum deepness of roof
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWS_ROAD_MAX   ! and road water reservoirs
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC_BLD        ! surface conductance inside
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTA            ! air temperature extrapolated at roof level
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQA            ! air humidity extrapolated at roof level
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZROOF_FRAC     ! roof, wall and
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWALL_FRAC     ! road fractions
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZROAD_FRAC     ! of exchange surf.
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZGARDEN_FRAC   !                  
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTOTS_O_HORS   ! total canyon+roof surface
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWALL_O_ROAD   ! wall surface over road surface
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWALL_O_GRND   ! wall surface over (road+GARDEN area) surface
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQS_ROAD      ! heat storage inside road
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQS_ROOF      ! heat storage inside roof
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQS_WALL      ! heat storage inside wall
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQF_WALL       ! 
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQF_ROOF       !heating through the roof 
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZFLX_BLD_ROOF  !heat flux from inside through roof
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZFLX_BLD_WALL  !heat flux from inside through wall
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQS_SNOW_ROOF ! heat storage inside roof snowpack
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDQS_SNOW_ROAD ! heat storage inside road snowpack
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZMELT_BLT      ! Snow melt for built & impervious part
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTSSNOW_ROAD ! road snow temperature
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_ROAD     ! road surface temperature 
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_WALL     ! wall surface temperature 
+teb.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_ROOF     ! roof surface temperature 
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTA            ! air temperature extrapolated at roof level
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQA            ! air humidity extrapolated at roof level
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDN_ROOF       ! snow fraction on roofs
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDN_ROAD       ! snow fraction on roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDF_ROOF       ! free-snow fraction on roofs
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDF_ROAD       ! free-snow fraction on roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDELT_ROAD     ! fraction of water on roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDELT_ROOF     ! fraction of water on roofs
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC_ROOF       ! roof conductance
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC_ROOF_WAT   ! roof water conductance
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC_WALL       ! wall conductance
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC_TOP        ! top conductance
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_ROAD     ! hum of saturation for roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_GARDEN   ! hum of saturation for green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_ROOF     ! hum of saturation for roofs
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTSSNOW_ROOF   ! roof snow temp at previous time-step
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTSSNOW_ROAD   ! road snow temp at previous time-step
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZESNOW_ROOF    ! snow emissivity at previous time-step
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZESNOW_ROAD    ! snow emissivity at previous time-step
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDIR_SW             ! direct  solar rad
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZSCA_SW             ! diffuse solar rad
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZALB_GARDEN    ! albedo     for green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZEMIS_GARDEN   ! emissivity for green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_ROAD        ! solar rad received by roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WALL        ! solar rad received by walls
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_GARDEN      ! solar rad received by gardens
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_SNOW_ROAD   ! solar rad received by snow on roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_GARDEN      ! IR rad received by gardens
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZSW_RAD_GARDEN      ! solar radiation reaching urban green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_W_TO_W          ! LW contrib. wall       -> wall
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_W_TO_R          ! LW contrib. wall       -> road
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_W_TO_G          ! LW contrib. wall       -> green
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_W_TO_NR         ! LW contrib. wall       -> road(snow)
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_R_TO_W          ! LW contrib. road       -> wall
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_R_TO_R          ! LW contrib. road       -> road
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_R_TO_G          ! LW contrib. road       -> green
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_R_TO_NR         ! LW contrib. road       -> road(snow)
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_G_TO_W          ! LW contrib. green      -> wall
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_G_TO_R          ! LW contrib. green      -> road
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_G_TO_G          ! LW contrib. green      -> green
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_G_TO_NR         ! LW contrib. green      -> road(snow)
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_NR_TO_W         ! LW contrib. road(snow) -> wall
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_NR_TO_R         ! LW contrib. road(snow) -> road
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_NR_TO_G         ! LW contrib. road(snow) -> green
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_NR_TO_NR        ! LW contrib. road(snow) -> road(snow)
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_S_TO_W          ! LW contrib. sky        -> wall
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_S_TO_R          ! LW contrib. sky        -> road
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_S_TO_G          ! LW contrib. sky        -> green
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW_S_TO_NR         ! LW contrib. sky        -> road(snow)
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPET_A_COEF          
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPET_B_COEF          
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_A_COEF          
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZPEQ_B_COEF          
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUW_ROAD           ! momentum flux for roads
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUW_GARDEN         ! momentum flux for green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZDUWDU_ROAD        !
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZAC_AGG_GARDEN     ! aggreg. aeodynamic resistance for green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA))  :: ZHU_AGG_GARDEN     ! aggreg. relative humidity for green areas
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZROOF_FRAC          ! roof, wall and
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWALL_FRAC          ! road fractions
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZROAD_FRAC          ! of exchange surf.
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZGARDEN_FRAC        !                  
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTOTS_O_HORS        ! total canyon+roof surface
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWALL_O_ROAD        ! wall surface over road surface
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZWALL_O_GRND        ! wall surface over (road+green area) surface
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_GARDEN          ! surface temperature of urban green areas at t
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GARDEN        ! evaporation (kg/m2/s)
+teb_garden.F90:REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GARDEN       ! CO2 fluxes (kg/m2/s)
+thrmcondz.F90:REAL,    DIMENSION(SIZE(PSANDZ,1),SIZE(PSANDZ,2)) :: ZQUARTZ, ZGAMMAD
+tridiag_ground.F90:REAL, DIMENSION(SIZE(PA,1)           ) :: ZDET ! work array
+tridiag_ground.F90:REAL, DIMENSION(SIZE(PA,1),SIZE(PA,2)) :: ZW   ! work array
+tridiag_surf.F90:REAL, DIMENSION(SIZE(PVARM,1),SIZE(PVARM,2))  :: ZVARP
+tridiag_surf.F90:REAL, DIMENSION(SIZE(PVARM,1),SIZE(PVARM,2))  :: ZDZ_DFDDTDZ_O_DZ2
+tridiag_surf.F90:REAL, DIMENSION(SIZE(PVARM,1),SIZE(PVARM,2))  :: ZA, ZB, ZC
+tridiag_surf.F90:REAL, DIMENSION(SIZE(PVARM,1),SIZE(PVARM,2))  :: ZY ,ZGAM 
+tridiag_surf.F90:REAL, DIMENSION(SIZE(PVARM,1))                :: ZBET
+update_rad_seawat.F90:REAL, DIMENSION(SIZE(PSST)) :: ZALBEDO
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_TOWN     ! town averaged temp.
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQ_TOWN      ! town averaged hum.
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAVDELT_ROOF ! averaged water frac.
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQ_ROOF      ! roof spec. hum.
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZZ0_ROOF     ! roof roughness length
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAVDELT_ROAD ! averaged water frac.
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQ_ROAD      ! road spec. hum.
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZZ0_ROAD     ! road roughness length
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZW_CAN       ! ver. wind in canyon
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRI          ! Richardson number
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLE_MAX      ! maximum latent heat flux available
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLE          ! actual latent heat flux
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRA_ROOF     ! aerodynamical resistance
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZCH_ROOF     ! drag coefficient for heat
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRA_TOP      ! aerodynamical resistance
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZCH_TOP      ! drag coefficient for heat
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRA_ROAD     ! aerodynamical resistance
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZCH_ROAD     ! drag coefficient for heat
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC          ! town aerodynamical conductance (not used)
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRA          ! town aerodynamical resistance  (not used)
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZCH          ! town drag coefficient for heat (not used)
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZCD          ! any surf. exchange coefficient (not used)
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZCDN         ! any surf. neutral exch. coef.  (not used)
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZU_STAR, ZW_STAR !! 
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZQ0              !! 
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR2      ! square of friction velocity (m2/s2
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZVMOD        ! module of the horizontal wind at t+1
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLMO         ! Monin-Obukhov length
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_ROAD  ! friction velocity for roads
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_ROOF  ! friction velocity for roofs
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR_TOWN  !
+urban_drag.F90:REAL, DIMENSION(SIZE(PTA)) :: ZZ0_TOP      ! roughness length for zac_top calculation
+urban_exch_coef.F90:REAL, DIMENSION(SIZE(PZ0))         :: ZZ0H     ! roughness length for heat
+urban_exch_coef.F90:REAL,DIMENSION(SIZE(PTA)) :: cmu, ctu, rib,ftemp,fvap,ilmo  ! temporary var for
+urban_exch_coef.F90:REAL,DIMENSION(SIZE(PTA)) :: ue,fcor, hBL,lzz0,lzz0t,fm, fh ! flxsurf3
+urban_exch_coef.F90:REAL,DIMENSION(SIZE(PTA)) :: z0h_roof,z0h_town,z0h_road     ! local thermal roughness
+urban_exch_coef.F90:REAL,DIMENSION(SIZE(PTA)) :: zustar
+urban_exch_coef.F90:REAL,DIMENSION(SIZE(PTA)) :: ZVMOD                          ! wind
+urban_exch_coef.F90:REAL,DIMENSION(SIZE(PTA)) :: ZDIRCOSZW     ! orography slope cosine
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZTOTS_O_BLT
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZROOF_BLT
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZROAD_BLT
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZWALL_BLT
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZH_ROOF_SNOWFREE
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZRN_ROOF_SNOWFREE
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZUSTAR2 ! square of friction velocity (m2/s2)
+urban_fluxes.F90:REAL, DIMENSION(SIZE(PTA))  :: ZVMOD   ! Wind
+urban_lw_coef.F90:REAL, DIMENSION(SIZE(PDN_ROAD))  :: ZAVEMIS_R   ! averaged road emissivity
+urban_lw_coef.F90:REAL, DIMENSION(SIZE(PDN_ROAD))  :: ZROAD       !
+urban_lw_coef.F90:REAL, DIMENSION(SIZE(PDN_ROAD))  :: ZGARDEN     !
+urban_snow_evol.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW1_ROAD   ! independant from
+urban_snow_evol.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW1_ROOF   ! surface temperature
+urban_snow_evol.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW2_ROAD   ! to be multiplied by
+urban_snow_evol.F90:REAL, DIMENSION(SIZE(PTA)) :: ZLW2_ROOF   ! 4th power of
+urban_snow_evol.F90:REAL, DIMENSION(SIZE(PTA)) :: ZSR_ROOF    ! snow fall on roof snow (kg/s/m2 of snow)
+urban_snow_evol.F90:REAL, DIMENSION(SIZE(PTA)) :: ZSR_ROAD    ! snow fall on road snow (kg/s/m2 of snow)
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZDIR_SW       ! direct and diffuse incoming radiation
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZSCA_SW       ! with a minimum to compute albedo
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZTANZEN       ! tangente of solar zenithal angle
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZTHETA0       ! canyon angle for
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZAALB_ROAD    ! averaged albedo
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZDIR_SW_ROAD  ! direct radiation reaching
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZDIR_SW_WALL  ! road, wall,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZDIR_SW_GARDEN! and GARDEN areas
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZSCA_SW_ROAD  ! diffuse radiation reaching
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZSCA_SW_WALL  ! road, wall,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZSCA_SW_GARDEN! and GARDEN areas
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_ROOF      ! solar radiation
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_ROAD      ! absorbed by roofs,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_WALL      ! road, wall, 
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_GARDEN    ! GARDEN areas, and snow
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_SNOW_ROOF ! over roof, wall,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_SNOW_ROAD ! and GARDEN areas
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_ROOF      ! solar radiation
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_ROAD      ! absorbed by roofs,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_WALL      ! road, wall,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_GARDEN    ! GARDEN areas, and snow
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_SNOW_ROOF ! over roof and wall,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_SNOW_ROAD ! coming from diffuse rad.
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZROAD                 !
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(PDIR_SW)) :: ZGARDEN               !
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZREF0_SW_ROAD    ! first solar reflection
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZREF0_SW_WALL    ! against road, wall
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZREF0_SW_GARDEN  ! and GARDEN areas
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZSREF_SW_ROAD    ! sum of all reflections
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZSREF_SW_WALL    ! against road, wall,
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZSREF_SW_GARDEN  ! and GARDEN areas
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW_ROAD)) :: ZWORK1, ZWORK2, ZDENOM
+urban_solar_abs.F90:REAL, DIMENSION(SIZE(ZSW))     :: ZSW_UP            ! outgoing solar radiation
+vegetation_evol.F90:REAL, DIMENSION(SIZE(PRESP_BIOMASS,1),SIZE(PRESP_BIOMASS,2)) :: ZRESP_BIOMASS_LAST ! biomass at t-1 (kg/m2/s)
+vegetation_evol.F90:REAL,    DIMENSION(SIZE(PLAI))    :: ZBIOMASS_LEAF   ! temporary leaf biomass 
+vegetation_evol.F90:REAL,    DIMENSION(SIZE(PLAI))    :: ZBSLAI_NITRO    ! (Calvet et al. 2008) ratio of biomass to LAI
+vegetation_evol.F90:REAL,    DIMENSION(SIZE(PLAI)) :: ZCO2, ZCNA_NITRO   ! fct of CO2        
+vegetation_evol.F90:REAL,    DIMENSION(SIZE(PLAI)) ::  ZCNAREF, ZPARAM
+vegetation_evol.F90:LOGICAL, DIMENSION(SIZE(PLAI))    :: GMASK_AGRI
+veg.F90:REAL, DIMENSION(SIZE(PSW_RAD)) :: ZF, ZF1, ZF3, ZF4
+veg.F90:REAL, DIMENSION(SIZE(PSW_RAD)) :: ZQSAT
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PVEG         ! vegetation fraction
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PVEG ! vegetation fraction
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: PVEG ! vegetation fraction
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PVEG         ! vegetation fraction
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: ZLAI
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PVEG ! vegetation fraction
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: ZLAI
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: PVEG ! vegetation fraction
+veg_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: ZLAI
+ver_interp_lin3d_surf.F90:REAL,   DIMENSION(SIZE(KKLIN,1),SIZE(KKLIN,2),SIZE(KKLIN,3))                   &
+ver_interp_lin_surf.F90:REAL,   DIMENSION(SIZE(KKLIN,1),SIZE(KKLIN,2),SIZE(KKLIN,3)) &
+ver_interp_lin_surf.F90:REAL,   DIMENSION(SIZE(KKLIN,1),SIZE(KKLIN,2))                               &
+ver_interp_lin_surf.F90:REAL,   DIMENSION(SIZE(KKLIN)) :: PVAR2 ! variable values on target
+ver_interp_lin_surf.F90:REAL,   DIMENSION(SIZE(KKLIN,1),SIZE(KKLIN,2),SIZE(KKLIN,3))                   &
+ver_interp_lin_surf.F90:REAL,   DIMENSION(SIZE(KKLIN,1),SIZE(KKLIN,2)) :: PVAR2 ! variable values on
+ver_interp_lin_surf.F90:REAL,   DIMENSION(SIZE(KKLIN)) :: PVAR2 ! variable values on target
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_WALL,2)) ::  ZA,& ! lower diag.
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRHO_AC_W   ! rho * conductance (for walls)
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_WALL,2)) :: ZMTC_O_D_WALL
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA),SIZE(PT_WALL,2)) :: ZHC_D_WALL
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PTA)) :: ZTS_WALL    ! wall surface temperature
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZEI_WALL  ! internal energy of walls
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZPEI_WALL ! internal energy of walls at time t+
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZTI_WALL    !temperature of internal wall layer at time t
+wall_layer_e_budget.F90:REAL, DIMENSION(SIZE(PT_WALL,1)) :: ZFLX_BLD_WALL_EQ !heat flux between inside of
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZVMOD     ! wind modulus
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZUSTAR2   ! square of friction velocity
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZAC       ! Aerodynamical conductance
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRA       ! Aerodynamical resistance
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZDIRCOSZW ! orography slope cosine (=1 on water!)
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZFP       ! working variable
+water_flux.F90:REAL, DIMENSION(SIZE(PTA)) :: ZRRCOR    ! correction of CD, CH, CDN due to moist-gustiness
+wet_leaves_frac.F90:REAL, DIMENSION(SIZE(PVEG)) :: ZCOEF,          &
+wind_threshold.F90:REAL, DIMENSION(SIZE(PWIND))     :: PWIND_NEW  ! modified wind
+write_cover_tex_teb.F90:REAL, DIMENSION(SIZE(XDATA_HC_ROOF,1),SIZE(XDATA_HC_ROOF,2)) :: ZDATA_HC_ROOF,ZDATA_HC_ROAD,ZDATA_HC_WALL
+write_diag_pgd_isban.F90:REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,3)) :: ZWORK ! Work array
+write_diag_seb_isban.F90:REAL, DIMENSION(SIZE(XTG,1))             :: ZPATCH, ZWORK
+write_diag_seb_isban.F90:REAL, DIMENSION(SIZE(XTG,1),SIZE(XTG,2)) :: ZTG
+write_diag_seb_isban.F90:REAL, DIMENSION(SIZE(XWG,1),SIZE(XWG,2)) :: ZWG
+write_diag_seb_isban.F90:REAL, DIMENSION(SIZE(XWG,1),SIZE(XWG,2)) :: ZWGI
+write_diag_seb_isban.F90:REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZDG
+writesurf_ch_emisn.F90:REAL,DIMENSION(SIZE(XEMIS_FIELDS,1),KSIZE) :: ZWORK2D
+write_surf.F90:REAL ,   DIMENSION(SIZE(TFIELD,1)) :: ZTIME
+write_surf.F90:INTEGER, DIMENSION(SIZE(TFIELD,1)) :: IDAY
+write_surf.F90:INTEGER, DIMENSION(SIZE(TFIELD,1)) :: IMONTH
+write_surf.F90:INTEGER, DIMENSION(SIZE(TFIELD,1)) :: IYEAR
+write_surf.F90:REAL ,   DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: ZTIME
+write_surf.F90:INTEGER, DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: IDAY
+write_surf.F90:INTEGER, DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: IMONTH
+write_surf.F90:INTEGER, DIMENSION(SIZE(TFIELD,1),SIZE(TFIELD,2)) :: IYEAR
+z0eff.F90:REAL, DIMENSION(SIZE(PZ0EFF)) :: ZWORK, ZALFA,       &
+z0rel_1d.F90:REAL,    DIMENSION(SIZE(PAOSIP)) :: ZLOC
+z0v_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
+z0v_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PZ0  ! vegetation roughness
+z0v_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI)) :: PZ0  ! vegetation roughness
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PVEGTYPE)) :: ZH          ! height for each type
+z0v_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI))                  :: ZALLEN_H    ! Allen formula for height
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI))                  :: ZLAI        ! LAI for vegetated areas
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI),SIZE(PVEGTYPE,2)) :: ZH          ! height for each type
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI))                  :: ZAVG_H      ! averaged height
+z0v_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PZ0  ! vegetation roughness
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))                  :: ZALLEN_H ! Allen formula for height
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))                  :: ZLAI     ! LAI for vegetated areas
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2),SIZE(PVEGTYPE,3)) :: ZH       ! height for each type
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))                  :: ZAVG_H   ! averaged height
+z0v_from_lai.F90:REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZALLEN_H    ! Allen formula for height
+z0v_from_lai.F90:REAL, DIMENSION(SIZE(PLAI)) :: ZH          ! height for each type

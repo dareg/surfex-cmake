@@ -5,7 +5,7 @@
                                PCONDSAT,PBCOEF,PMPOTSAT,                 &
                                PKSAT_ICE,PD_ICE,PFSAT,PHORTON,PDUNNE,    &
                                PFFLOOD,PPIFLOOD,PIFLOOD,PPFLOOD,         &
-                               PRUNOFFB,PRUNOFFD,PTDIURN,PSOILWGHT,      &
+                               PRUNOFFB,PRUNOFFD,PCG,PSOILWGHT,          &
                                OFLOOD,KLAYER_HORT,KLAYER_DUN             )  
 !
 !     #####################################################################
@@ -15,7 +15,7 @@
 !!    PURPOSE
 !!    =======
 !
-!     1. Determine the Horton runoff that take account of a spatial subgrid 
+!     1. Determine the Horton runoff that take account of a spatial subgri
 !        exponential distribution of the precipitation and of the surface ksat.
 !     1. Determine the surface saturated fraction (dt92 or Topmodel).
 !     3. Determine the Dunne runoff (dt92 or Topmodel).
@@ -28,8 +28,8 @@
 !        ===================
 !
 !
-USE MODD_CSTS,      ONLY : XRHOLW, XDAY
-USE MODD_ISBA_PAR,  ONLY : XWGMIN
+USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XCL, XCI, XRHOLI
+USE MODD_ISBA_PAR,  ONLY : XWGMIN, XSPHSOIL, XDRYWGHT
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_SGH_PAR,   ONLY : XHORT_DEPTH
 !
@@ -130,15 +130,15 @@ REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFB ! slope of the runoff curve
 REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFD
 !                                    PRUNOFFD = depth over which sub-grid runoff calculated (m)
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PTDIURN
-!                                    PTDIURN      = penetration depth for restore (m)
+REAL, DIMENSION(:), INTENT(IN)    :: PCG
+!                                   PCG = soil heat capacity to compute thermal penetration depth
 !
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER                            :: ZEICE = 6.0  ! Ice vertical diffusion impedence factor 
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_INI, ZFROZEN, ZIMAX_ICE, ZIMAX, &
-                                              ZHORT_R, ZHORT_M, ZSOILMAX, ZIF_MAX                   
+                                              ZHORT_R, ZHORT_M, ZSOILMAX, ZIF_MAX
 !                                             ZFROZEN  = frozen soil fraction for runoff
 !                                             ZIMAX_ICE    = maximum infiltration rate for frozen soil
 !                                             ZIMAX     = maximum infiltration rate for unfrozen soil
@@ -153,6 +153,10 @@ REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPT
 REAL, DIMENSION(SIZE(PPG))                 :: ZRUNOFF_TOPD
 !
 REAL                                       :: ZEFFICE, ZLOG10, ZLOG, ZS, ZD_H, ZFRZ
+!
+REAL                                       :: ZTDIURN, ZSOILHEATCAP
+!                                             ZTDIURN      = thermal penetration depth for restore (m)
+!                                             ZSOILHEATCAP = Total soil volumetric heat capacity [J/(m3 K)]
 !
 INTEGER                                    :: INI, INL, JJ, JL, IDEPTH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -308,6 +312,17 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !
     DO JJ=1,INI
 !
+!    Total soil volumetric heat capacity [J/(m3 K)]:
+!
+      ZSOILHEATCAP = XCL*XRHOLW*PWG (JJ,2) +                           &
+                     XCI*XRHOLI*PWGI(JJ,2) +                           &
+                     XSPHSOIL*XDRYWGHT*(1.0-PWSAT(JJ,1))*(1.0-PWSAT(JJ,1))
+!                     
+!     Soil thickness which corresponds to the diurnal surface temperature
+!     wave penetration depth as T2 is the average temperature for this layer:
+!
+      ZTDIURN   = MIN(PD_G(JJ,2), 4./(ZSOILHEATCAP*PCG(JJ)))
+!    
 !     Effective frozen depth penetration 
 !
       ZEFFICE=PD_G(JJ,2)*PWGI(JJ,2)/(PWGI(JJ,2)+PWG(JJ,2))
@@ -319,11 +334,11 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !
 !     calculate the subgrid frozen soil fraction of the grid cells
 !
-      ZFROZEN (JJ) = MIN(1.,ZEFFICE/MAX(PD_ICE(JJ),PTDIURN(JJ)))
+      ZFROZEN (JJ) = MIN(1.,ZEFFICE/MAX(PD_ICE(JJ),ZTDIURN))
 !
 !     Impedance Factor from (Johnsson and Lundin 1991).
 !
-      ZFRZ = EXP(ZLOG10*(-ZEICE*MIN(1.,ZEFFICE/PTDIURN(JJ))))
+      ZFRZ = EXP(ZLOG10*(-ZEICE*MIN(1.,ZEFFICE/ZTDIURN)))
 !
 !     Calculate infiltration MAX on frozen soil as Johnsson and Lundin (1991).
 !     The max infiltration is equal to the unsaturated conductivity function at a
