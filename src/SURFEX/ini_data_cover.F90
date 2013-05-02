@@ -175,12 +175,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
                                 
 IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',0,ZHOOK_HANDLE)
 !
-IF (IDC/=0) THEN
-  CALL UPDATE_DATA_FRAC_n(XDATA_NATURE,XDATA_TOWN,XDATA_GARDEN,LGARDEN,  &
-                          XDATA_BLD, XDATA_WALL_O_HOR                    )
-  IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',1,ZHOOK_HANDLE)
-  RETURN
-END IF
+IF (IDC==0) THEN
 !
 !$OMP SINGLE
 !
@@ -2104,6 +2099,13 @@ ELSE
   ENDDO
 END IF
 !
+!
+IDC = 1
+!
+!$OMP END SINGLE
+!
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !*    8.     Arrange cover (optional nam_pgd_arrange_cover)
@@ -2137,10 +2139,6 @@ END IF
                                   PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
                                   PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
                                   PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST)
-!
-IDC = 1
-!
-!$OMP END SINGLE
 !
 !-------------------------------------------------------------------------------
 !
