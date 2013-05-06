@@ -7170,7 +7170,7 @@ COVER 123
  
 COVER 124 
  FRACTION   Town Nature  Water    Sea
-      124   0.00   1.00   0.00   0.00
+      124   0.00   0.80   0.20   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       124   0.00   0.00   0.00   0.00   0.00   0.50   0.00   0.00   0.00   0.00   0.00   0.50
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -7240,7 +7240,7 @@ COVER 124
  
 COVER 125 
  FRACTION   Town Nature  Water    Sea
-      125   0.00   1.00   0.00   0.00
+      125   0.00   0.80   0.20   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       125   0.00   0.00   0.00   0.00   0.20   0.00   0.00   0.00   0.00   0.00   0.00   0.80
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -8720,7 +8720,7 @@ COVER 175
  
 COVER 176 
  FRACTION   Town Nature  Water    Sea
-      176   0.00   1.00   0.00   0.00
+      176   0.00   0.80   0.20   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       176   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12146,7 +12146,7 @@ COVER 237
  
 COVER 238 
  FRACTION   Town Nature  Water    Sea
-      238   0.00   1.00   0.00   0.00
+      238   0.00   0.80   0.20   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       238   0.00   0.00   0.00   0.50   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.50
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12216,7 +12216,7 @@ COVER 238
  
 COVER 239 
  FRACTION   Town Nature  Water    Sea
-      239   0.00   1.00   0.00   0.00
+      239   0.00   0.80   0.20   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       239   0.00   0.00   0.00   0.00   0.20   0.00   0.00   0.00   0.00   0.00   0.00   0.80
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12286,7 +12286,7 @@ COVER 239
  
 COVER 240 
  FRACTION   Town Nature  Water    Sea
-      240   0.00   1.00   0.00   0.00
+      240   0.00   0.80   0.20   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       240   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12330,7 +12330,7 @@ COVER 240
  
 COVER 241 
  FRACTION   Town Nature  Water    Sea
-      241   0.00   1.00   0.00   0.00
+      241   0.00   0.50   0.50   0.00
  FRACTION     No   Rock   Snow   Tree   Coni   Ever     C3     C4    Irr   Gras   Trog   Park
       241   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
