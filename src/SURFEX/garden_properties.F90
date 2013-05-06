@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,      &
-                                   PTS, PEMIS, PALB                       )  
+      SUBROUTINE GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
+                                   PTS, PEMIS, PALB, PTA             )  
 !     ##########################################################################
 !
 !!****  *GARDEN_PROPERTIES*  
@@ -60,6 +60,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)  :: PTS                ! radiative surface tem
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PEMIS              ! green areas emissivity
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PALB               ! green areas albedo
 !
+REAL, DIMENSION(:)  , INTENT(IN), OPTIONAL :: PTA        ! Air temperature (K)
 !-------------------------------------------------------------------------------
 !
 !*      0.2    Local variables

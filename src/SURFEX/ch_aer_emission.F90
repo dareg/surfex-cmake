@@ -24,6 +24,7 @@
 !!    None
 !!
 USE MODD_CHS_AEROSOL
+USE MODD_DST_SURF, ONLY : XDENSITY_DST
 USE MODI_ABOR1_SFX
 !!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -63,7 +64,7 @@ REAL   :: ZEMISRADIUSI, ZEMISRADIUSJ
 REAL   :: ZVALBC, ZVALOC
 INTEGER :: I_CH_M0i, I_CH_M0j, I_CH_M6i, I_CH_M6j, I_CH_H2Oi, I_CH_H2Oj,&
                   I_CH_SO4i,I_CH_SO4j, I_CH_NO3i, I_CH_NO3j, I_CH_NH3i, I_CH_NH3j,&
-                  I_CH_OCi, I_CH_OCj, I_CH_BCi, I_CH_BCj    
+                  I_CH_OCi, I_CH_OCj, I_CH_BCi, I_CH_BCj  , I_CH_DSTi, I_CH_DSTj   
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !
@@ -73,7 +74,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ------------------------------------
 !        1.1    initialisation 
 !
-
 IF (LHOOK) CALL DR_HOOK('CH_AER_EMISSION',0,ZHOOK_HANDLE)
 
 I_CH_M0i=-999
@@ -92,6 +92,8 @@ I_CH_OCi=-999
 I_CH_OCj=-999
 I_CH_BCi=-999
 I_CH_BCj=-999
+I_CH_DSTi=-999
+I_CH_DSTj=-999
 
 DO JSV=1, size(HSV)
    IF (TRIM(HSV(JSV)) == "M0I") I_CH_M0i=JSV-KSV_CHSBEG+1
@@ -110,6 +112,8 @@ DO JSV=1, size(HSV)
    IF (TRIM(HSV(JSV)) == "OCJ") I_CH_OCj=JSV-KSV_CHSBEG+1
    IF (TRIM(HSV(JSV)) == "BCI") I_CH_BCi=JSV-KSV_CHSBEG+1
    IF (TRIM(HSV(JSV)) == "BCJ") I_CH_BCj=JSV-KSV_CHSBEG+1
+   IF (TRIM(HSV(JSV)) == "DSTI") I_CH_DSTi=JSV-KSV_CHSBEG+1
+   IF (TRIM(HSV(JSV)) == "DSTJ") I_CH_DSTj=JSV-KSV_CHSBEG+1
 END DO
 
 IF (I_CH_M0i ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_M0i ')
@@ -128,19 +132,21 @@ IF (I_CH_OCi ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_OCi ')
 IF (I_CH_OCj ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_OCj ')
 IF (I_CH_BCi ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_BCi ')
 IF (I_CH_BCj ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_BCj ')
-
+IF (I_CH_DSTi ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_DSTi ')
+IF (I_CH_DSTj ==-999) CALL ABOR1_SFX ('WRONG VALUE FOR I_CH_DSTj ')
 
 ZMI(:) = 250.
 ZMI(JP_AER_SO4)  = 98.
 ZMI(JP_AER_NO3)  = 63.
 ZMI(JP_AER_NH3)  = 17.
 ZMI(JP_AER_H2O)  = 18.
+ZMI(JP_AER_DST)  = 100.
 
 ! Aerosol Density
 ! Cf Ackermann (all to black carbon except water)
 ZRHOI(:) = 1.8e3
 ZRHOI(JP_AER_H2O) = 1.0e3   ! water
-
+ZRHOI(JP_AER_DST) = XDENSITY_DST
 
 ZDEN2MOL = 1E-6 * XAVOGADRO / XMD
 
@@ -191,7 +197,8 @@ ZCONVERSION(:) =  XAVOGADRO * PRHODREF(:)
   PFLUX(:,I_CH_OCj)  = (PFLUX(:,I_CH_OCj) + ZFCO(:) * ZVALOC ) / ZCONVERSION(:) * ZMI(JP_AER_OC)*1E-3
   PFLUX(:,I_CH_BCi)  = (PFLUX(:,I_CH_BCi) + ZFCO(:) * ZVALBC / 2.) / ZCONVERSION(:) * ZMI(JP_AER_BC)*1E-3
   PFLUX(:,I_CH_BCj)  = (PFLUX(:,I_CH_BCj) + ZFCO(:) * ZVALBC ) / ZCONVERSION(:) * ZMI(JP_AER_BC)*1E-3
-
+  PFLUX(:,I_CH_DSTi) = PFLUX(:,I_CH_DSTi) / ZCONVERSION(:) * ZMI(JP_AER_DST)*1E-3 
+  PFLUX(:,I_CH_DSTj) = PFLUX(:,I_CH_DSTj) / ZCONVERSION(:) * ZMI(JP_AER_DST)*1E-3 
 !*       1.0    transfer aerosol mass from gas to aerosol variables
 !               (and conversion of kg.kg-1.m.s-1 --> microgram.m-2.s-1)
 
@@ -213,7 +220,8 @@ ZFCTOTA(:,JP_AER_OC,2)  = PFLUX(:,I_CH_OCj)  *1E+9 * PRHODREF(:)
 ZFCTOTA(:,JP_AER_BC,1)  = PFLUX(:,I_CH_BCi)  *1E+9 * PRHODREF(:)
 ZFCTOTA(:,JP_AER_BC,2)  = PFLUX(:,I_CH_BCj)  *1E+9 * PRHODREF(:)
 
-
+ZFCTOTA(:,JP_AER_DST,1)  = PFLUX(:,I_CH_DSTi)  *1E+9 * PRHODREF(:)
+ZFCTOTA(:,JP_AER_DST,2)  = PFLUX(:,I_CH_DSTj)  *1E+9 * PRHODREF(:)
 !*       1.1    calculate moment 3 flux from total aerosol mass
 
 !
@@ -261,6 +269,8 @@ ZFM(:,5) = 0.
   PFLUX(:,I_CH_OCj) = PFLUX(:,I_CH_OCj) * XMD / (ZMI(JP_AER_OC)*1E-3)
   PFLUX(:,I_CH_BCi) = PFLUX(:,I_CH_BCi) * XMD / (ZMI(JP_AER_BC)*1E-3)
   PFLUX(:,I_CH_BCj) = PFLUX(:,I_CH_BCj) * XMD / (ZMI(JP_AER_BC)*1E-3)
+  PFLUX(:,I_CH_DSTi) = PFLUX(:,I_CH_DSTi) * XMD / (ZMI(JP_AER_DST)*1E-3)
+  PFLUX(:,I_CH_DSTj) = PFLUX(:,I_CH_DSTj) * XMD / (ZMI(JP_AER_DST)*1E-3)
 !
  ! then conversion in  molecules.m-2.s-1
   PFLUX(:,I_CH_M0i) = PFLUX(:,I_CH_M0i) * ZCONVERSION(:)
@@ -281,6 +291,8 @@ ZFM(:,5) = 0.
   PFLUX(:,I_CH_OCj) = PFLUX(:,I_CH_OCj)   * ZCONVERSION(:) / (ZMI(JP_AER_OC)*1E-3)
   PFLUX(:,I_CH_BCi) = PFLUX(:,I_CH_BCi)   * ZCONVERSION(:) / (ZMI(JP_AER_BC)*1E-3)
   PFLUX(:,I_CH_BCj) = PFLUX(:,I_CH_BCj)   * ZCONVERSION(:) / (ZMI(JP_AER_BC)*1E-3)
+  PFLUX(:,I_CH_DSTi) = PFLUX(:,I_CH_DSTi) * ZCONVERSION(:) / (ZMI(JP_AER_DST)*1E-3)
+  PFLUX(:,I_CH_DSTj) = PFLUX(:,I_CH_DSTj) * ZCONVERSION(:) / (ZMI(JP_AER_DST)*1E-3)
   IF (LHOOK) CALL DR_HOOK('CH_AER_EMISSION',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE CH_AER_EMISSION

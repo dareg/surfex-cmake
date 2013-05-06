@@ -240,6 +240,8 @@ ZZ0_ROAD(:)    = MIN(0.05,0.1*PZ_LOWCAN(:))! z0 for roads
 !
 ZZ0_TOP(:) = PZ0_TOWN(:)
 !
+PCD (:) = XUNDEF
+PCDN(:) = XUNDEF
 !-------------------------------------------------------------------------------
 !
 !*      1.     roof and road saturation specific humidity

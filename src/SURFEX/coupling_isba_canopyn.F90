@@ -339,11 +339,11 @@ END IF
 !*      2.     Call of ISBA
 !              ------------
 !
- CALL COUPLING_ISBA_n(HPROGRAM, GCOUPLING,                                                  &
+ CALL COUPLING_ISBA_n(HPROGRAM, GCOUPLING,                                                 &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2,                                                     &
-             ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2,                        &
+             ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2, HSV,                   &
              PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,                     &
              PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
              PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &

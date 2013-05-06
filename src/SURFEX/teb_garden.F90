@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE TEB_GARDEN (HZ0H, HIMPLICIT_WIND, HROAD_DIR, HWALL_OPT, TPTIME,&
+    SUBROUTINE TEB_GARDEN (OGARDEN, OGREENROOF,                               &
+                     HZ0H, HIMPLICIT_WIND, HROAD_DIR, HWALL_OPT, TPTIME,      &
                      PTSUN, PT_CANYON, PQ_CANYON, PU_CANYON,                  &
                      PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN, PTI_BLD,     &
                      PT_ROOF, PT_ROAD, PT_WALL_A, PT_WALL_B,                  &
@@ -126,9 +127,6 @@ USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_CSTS,              ONLY: XTT, XSTEFAN
 USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_SNOW_PAR,          ONLY: XEMISSN, XANSMAX
-USE MODD_ISBA_PAR,          ONLY: XWGMIN
-USE MODD_TEB_n,             ONLY: LGARDEN, LGREENROOF
-USE MODD_TEB_GREENROOF_n,   ONLY: NLAYER_GR, XDG, XTG, XPLVTT
 !
 USE MODE_THERMOS
 USE MODE_SURF_SNOW_FRAC
@@ -150,6 +148,8 @@ IMPLICIT NONE
 !
 !*      0.1    Declarations of arguments
 !
+ LOGICAL,              INTENT(IN)    :: OGARDEN           ! Flag to use a garden    model inside the canyon
+ LOGICAL,              INTENT(IN)    :: OGREENROOF        ! Flag to use a greenroof model on roofs
  CHARACTER(LEN=6)    , INTENT(IN)    :: HZ0H               ! TEB option for z0h roof & road
 !                                                         ! 'MASC95' : Mascart et al 1995
 !                                                         ! 'BRUT82' : Brustaert     1982
@@ -400,7 +400,7 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PINF               ! Infiltration flow ra
 REAL, DIMENSION(:)  , INTENT(IN)    :: PTCOOL_TARGET      ! Cooling setpoint of HVAC system [K]
 REAL, DIMENSION(:)  , INTENT(IN)    :: PTHEAT_TARGET      ! Heating setpoint of HVAC system [K]
 REAL, DIMENSION(:)  , INTENT(IN)    :: PHR_TARGET         ! Relative humidity setpoint
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PT_WIN2            ! Indoor window temperature [K]
+REAL, DIMENSION(:)  , INTENT(INOUT) :: PT_WIN2            ! Indoor window temperature [K]
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PQI_BLD            ! Indoor air specific humidity [kg kg-1]
 REAL, DIMENSION(:)  , INTENT(IN)    :: PV_VENT            ! Ventilation flow rate [AC/H]
 REAL, DIMENSION(:)  , INTENT(IN)    :: PCAP_SYS_HEAT      ! Capacity of the heating system 
@@ -680,6 +680,7 @@ ENDDO
  CALL SNOW_FRAC_ROAD(PWSNOW_ROAD(:,1),PSR(:)>0.,ZDN_ROAD,ZDF_ROAD)
  CALL SNOW_FRAC_ROOF(PWSNOW_ROOF(:,1),PSR(:)>0.,ZDN_ROOF,ZDF_ROOF)
 !
+!
 !* new snow albedo
 !
 WHERE (PWSNOW_ROAD(:,1)==0. .AND. PSR(:)>0.) PASNOW_ROAD(:) = XANSMAX
@@ -724,9 +725,9 @@ ZALB_GARDEN   = XUNDEF
 ZEMIS_GARDEN  = XUNDEF
 ZTS_GARDEN    = XUNDEF
 !
-IF (LGARDEN) THEN
- CALL GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,     &
-                        ZTS_GARDEN, ZEMIS_GARDEN, ZALB_GARDEN )
+IF (OGARDEN) THEN
+ CALL GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                    &
+                        ZTS_GARDEN, ZEMIS_GARDEN, ZALB_GARDEN, PTA=PT_LOWCAN )
 ENDIF
 !
 ! for greenroofs :
@@ -735,9 +736,9 @@ ZALB_GREENROOF   = XUNDEF
 ZEMIS_GREENROOF  = XUNDEF
 ZTS_GREENROOF    = XUNDEF
 !
-IF (LGREENROOF) THEN
- CALL GREENROOF_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,     &
-                           ZTS_GREENROOF, ZEMIS_GREENROOF, ZALB_GREENROOF )
+IF (OGREENROOF) THEN
+ CALL GREENROOF_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                       &
+                           ZTS_GREENROOF, ZEMIS_GREENROOF, ZALB_GREENROOF, PTA=PTA )
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -819,7 +820,7 @@ SUBROUTINE TEB_GARDEN2
 !*      7.1    IR rad received by gardens (snow free and snow covered separately)
 !              --------------------------
 !
-IF (LGARDEN) THEN
+IF (OGARDEN) THEN
   ZT_SKY  (:) = (PLW_RAD(:)/XSTEFAN)**0.25
   ZREC_LW_GARDEN(:) = (ZLW_S_TO_G  (:) * (ZT_SKY(:)     - ZTS_GARDEN(:))   &
                      + ZLW_WA_TO_G (:) * (PT_WALL_A(:,1)- ZTS_GARDEN(:))   &
@@ -849,7 +850,7 @@ ZPEQ_B_COEF(:) = PQ_LOWCAN(:)
 !*      8.2    Call ISBA for green areas
 !              -------------------------
 !
-IF (LGARDEN) THEN
+IF (OGARDEN) THEN
 !
   CALL GARDEN(HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, &
               ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                  &
@@ -892,7 +893,7 @@ ENDIF
 !*      8.3    Call ISBA for greenroofs
 !              -------------------------
 !
-IF (LGREENROOF) THEN
+IF (OGREENROOF) THEN
 !
   CALL GREENROOF(HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,            &
                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                  &

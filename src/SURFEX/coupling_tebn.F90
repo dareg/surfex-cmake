@@ -44,7 +44,8 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
 USE MODD_SURF_ATM,     ONLY : CIMPLICIT_WIND
 !
-USE MODD_TEB_n,        ONLY : CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,            &
+USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF,                                     &
+                              CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,            &
                               XT_CANYON, XQ_CANYON,                                    &
                               XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B,                  &
                               XWS_ROOF, XWS_ROAD,                                      &
@@ -95,6 +96,7 @@ USE MODE_DSLT_SURF
 USE MODE_THERMOS
 USE MODE_SBLS
 !
+USE MODI_GOTO_TEB
 USE MODI_AVERAGE_RAD
 USE MODI_SM10
 USE MODI_ADD_FORECAST_TO_DATE_SURF
@@ -738,7 +740,7 @@ IF (CBEM=='BEM') &
 WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
 !
 !
- CALL TEB_GARDEN      (CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,                      &
+ CALL TEB_GARDEN      (LGARDEN, LGREENROOF, CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,&
                       TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &
                       XTI_BLD,                                                         &
@@ -869,9 +871,11 @@ ZTRAD_PATCH(:,JTEB_PATCH) = ZTRAD
 !
 ! computes some aggregated diagnostics
 !
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CD ,ZCD )
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CDN,ZCDN)
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RI ,ZRI )
+ IF (.NOT. LCANOPY) THEN
+   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CD ,ZCD )
+   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CDN,ZCDN)
+   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RI ,ZRI )
+ ENDIF
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CH ,ZCH )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RN ,ZRN )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H  ,ZH  )

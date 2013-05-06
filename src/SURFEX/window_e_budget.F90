@@ -95,7 +95,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROAD     ! road surface temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PTSNOW_ROAD  ! road snow temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PTS_GARDEN   ! green area surface temperature
 REAL, DIMENSION(:), INTENT(OUT)   :: PT_WIN1      ! outdoor window temperature [K]
-REAL, DIMENSION(:), INTENT(OUT)   :: PT_WIN2      ! indoor window temperature [K]
+REAL, DIMENSION(:), INTENT(INOUT) :: PT_WIN2      ! indoor window temperature [K]
 REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WIN_FLOOR ! rad. fluxes from window to floor [W m-2(window)]
 REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WIN_MASS  ! rad. fluxes from window to mass [W m-2(window)]
 REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_WIN_BLD  ! conv. fluxes from window to bld [W m-2(window)]

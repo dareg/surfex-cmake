@@ -257,10 +257,10 @@ IF ( GSNOW_ROAD ) THEN
   !
   ZT_SKY(:) = (PLW_RAD(:)/XSTEFAN)**0.25
 !
-  ZLW1_ROAD(:) = PLW_S_TO_NR  (:) * (ZT_SKY    (:) - PTSNOW_ROAD(:,1)) &
-               + PLW_WA_TO_NR (:) * (PTS_WALL_A(:) - PTSNOW_ROAD(:,1)) &
-               + PLW_WB_TO_NR (:) * (PTS_WALL_B(:) - PTSNOW_ROAD(:,1)) &
-               + PLW_WIN_TO_NR(:) * (PT_WIN1   (:) - PTSNOW_ROAD(:,1))
+  ZLW1_ROAD(:) = PLW_S_TO_NR  (:) * (ZT_SKY    (:) - PTSSNOW_ROAD(:)) &
+               + PLW_WA_TO_NR (:) * (PTS_WALL_A(:) - PTSSNOW_ROAD(:)) &
+               + PLW_WB_TO_NR (:) * (PTS_WALL_B(:) - PTSSNOW_ROAD(:)) &
+               + PLW_WIN_TO_NR(:) * (PT_WIN1   (:) - PTSSNOW_ROAD(:))
   ZLW2_ROAD(:) =  0.0
   !
   !* The global amount of snow on roads is supposed located on a

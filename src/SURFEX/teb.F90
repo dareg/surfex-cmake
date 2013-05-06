@@ -508,7 +508,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PINF          ! Infiltration flow rate [AC/H
 REAL, DIMENSION(:), INTENT(IN)   :: PTCOOL_TARGET ! Cooling setpoint of HVAC system [K]
 REAL, DIMENSION(:), INTENT(IN)   :: PTHEAT_TARGET ! Heating setpoint of HVAC system [K]
 REAL, DIMENSION(:), INTENT(IN)   :: PHR_TARGET    ! Relative humidity setpoint
-REAL, DIMENSION(:), INTENT(OUT)  :: PT_WIN2       ! Indoor window temperature [K]
+REAL, DIMENSION(:), INTENT(INOUT):: PT_WIN2       ! Indoor window temperature [K]
 REAL, DIMENSION(:), INTENT(INOUT):: PQI_BLD       ! Indoor air specific humidity [kg kg-1]
 REAL, DIMENSION(:), INTENT(IN)   :: PV_VENT       ! Ventilation flow rate [AC/H]
 REAL, DIMENSION(:), INTENT(IN)   :: PCAP_SYS_HEAT ! Capacity of the heating system 
@@ -848,7 +848,6 @@ END SELECT
 !
 !* ts_roof and qsat_roof are updated
 !
-
  CALL ROOF_LAYER_E_BUDGET(PT_ROOF, PQSAT_ROOF, PTI_BLD, ZAC_BLD, PTSTEP, &
                          HBEM, PHC_ROOF, PTC_ROOF, PD_ROOF, PDN_ROOF,   &
                          PRHOA, PAC_ROOF, PAC_ROOF_WAT, PLW_RAD, PPS,   &

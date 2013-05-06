@@ -87,6 +87,7 @@ TYPE(PRONOSVAR_T),POINTER :: CURPRONOS !Current pronostic variable
  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CNAMES
 REAL,DIMENSION(SIZE(PSFSV,1),KNBTS_MAX)     :: ZWORK ! temporary array for reading data
 REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZEMIS ! interpolated in time emission flux
+REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZDEPOT! interpolated in time deposition flux
 REAL,DIMENSION(SIZE(PSFSV,1))               :: ZFCO  ! CO flux
 INTEGER                          :: INEQ  ! number of chemical var
                                           !(=NEQ (chimie gaz) + NSV_AER (chimie aerosol)
@@ -415,6 +416,13 @@ DO WHILE(ASSOCIATED(CURPRONOS))
   CURPRONOS=>CURPRONOS%NEXT
 !
 END DO
+!
+ZDEPOT(:,:) = 0.
+WHERE (PSFSV(:,:) >= 0.) 
+  ZEMIS(:,:) = ZEMIS(:,:) + PSFSV(:,:)
+ELSE WHERE
+  ZDEPOT(:,:) = PSFSV(:,:)
+END WHERE
 !
 IF ((LCH_AERO_FLUX).AND.(NSV_AERBEG > 0)) THEN
   IF (GCO) THEN

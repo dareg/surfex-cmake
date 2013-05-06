@@ -289,6 +289,7 @@ ENDIF
 DEALLOCATE(ZD      )
 DEALLOCATE(ZW      )
 DEALLOCATE(ZDEPTH  )
+DEALLOCATE(ZVEGTYPE_PATCH)
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_SNOW_FIELDS',1,ZHOOK_HANDLE)
 !
 !----------------------------------------------------------------------------

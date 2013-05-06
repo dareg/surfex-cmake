@@ -49,7 +49,8 @@ USE MODI_CLOSE_NAMELIST
 USE MODI_ABOR1_SFX
 !
 USE MODD_PREP_TEB_GREENROOF,   ONLY : CFILE_SNOW, CTYPE_SNOW, LSNOW_IDEAL, &
-                                      XWSNOW, XTSNOW, XRSNOW, XASNOW 
+                                      XWSNOW_p=>XWSNOW, XTSNOW_p=>XTSNOW, &
+                                      XRSNOW_p=>XRSNOW, XASNOW 
 !
 USE MODD_PREP_SNOW,            ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX
 !
@@ -70,20 +71,21 @@ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: ZWSNOW, ZRSNOW, ZTSNOW, &
-                                    ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, &
+                                    XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,      &
-                            LSNOW_IDEAL, LSNOW_FRAC_TOT,                     &
-                            ZWSNOW, ZTSNOW, ZRSNOW, XASNOW,                  &
-                            ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
+NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
+                            LSNOW_IDEAL, LSNOW_FRAC_TOT,                 &
+                            XWSNOW, XTSNOW, XRSNOW, XASNOW,              &
+                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+
 NAMELIST/NAM_PREP_GREENROOF_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
-                            LSNOW_IDEAL, ZWSNOW, ZTSNOW, ZRSNOW, XASNOW
+                            LSNOW_IDEAL, XWSNOW, XTSNOW, XRSNOW, XASNOW
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_PREP_GREENROOF_SNOW',0,ZHOOK_HANDLE)
 !
@@ -103,14 +105,14 @@ IF (LNAM_READ) THEN
   LSNOW_IDEAL    = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.
   !
-  ZWSNOW(:)      = 0.
-  ZRSNOW(:)      = XRHOSMAX
-  ZTSNOW(:)      = XTT
+  XWSNOW(:)      = 0.
+  XRSNOW(:)      = XRHOSMAX
+  XTSNOW(:)      = XTT
   XASNOW         = XANSMIN  
-  ZSG1SNOW(:)    = XUNDEF
-  ZSG2SNOW(:)    = XUNDEF
-  ZHISTSNOW(:)   = XUNDEF
-  ZAGESNOW(:)    = XUNDEF  
+  XSG1SNOW(:)    = XUNDEF
+  XSG2SNOW(:)    = XUNDEF
+  XHISTSNOW(:)   = XUNDEF
+  XAGESNOW(:)    = XUNDEF  
   !
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
   CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
@@ -155,13 +157,13 @@ IF (LNAM_READ) THEN
     CALL ABOR1_SFX('READ_PREP_GREENROOF_SNOW: NUMBER OF SNOW LAYERS MUST BE INCREASED IN NAMELIST DECLARATION')
   ENDIF
   !
-  ALLOCATE(XWSNOW(NSNOW_LAYER))
-  ALLOCATE(XRSNOW(NSNOW_LAYER))
-  ALLOCATE(XTSNOW(NSNOW_LAYER))
+  ALLOCATE(XWSNOW_p(NSNOW_LAYER))
+  ALLOCATE(XRSNOW_p(NSNOW_LAYER))
+  ALLOCATE(XTSNOW_p(NSNOW_LAYER))
   !
-  XWSNOW=ZWSNOW(1:NSNOW_LAYER)
-  XRSNOW=ZRSNOW(1:NSNOW_LAYER)
-  XTSNOW=ZTSNOW(1:NSNOW_LAYER)
+  XWSNOW_p=XWSNOW(1:NSNOW_LAYER)
+  XRSNOW_p=XRSNOW(1:NSNOW_LAYER)
+  XTSNOW_p=XTSNOW(1:NSNOW_LAYER)
   !
   CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
   !

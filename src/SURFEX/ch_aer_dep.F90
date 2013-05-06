@@ -94,7 +94,7 @@ ZRESA(:) = MIN(MAX(PRESA(:),   1.E-20), 9999.)
 DO JSV=1,SIZE(PSVT,2)
 ZSVT(:,JSV) = PSVT(:,JSV) * XMD / (XAVOGADRO * PRHODREF(:))
 ENDDO
-ZSVT(:,:) = MAX(ZSVT(:,:),1E-40)
+ZSVT(:,:) = MAX(ZSVT(:,:),1E-80)
 
  CALL PPP2AERO_SURF(ZSVT, PRHODREF, PSIG1D=ZSIG, PRG1D=ZRG, PN1D=ZN, PCTOTA=ZCTOTA)
 
@@ -188,10 +188,10 @@ ENDDO
   M6J=0
   IF (LVARSIGI) M6I=1
   IF (LVARSIGJ) M6J=1
-  DO JSV=1,SIZE(PSVT,2)-1-(2*JPMODE+M6I+M6J),2 ! mass deposition for I mode
+  DO JSV=1,SIZE(PSVT,2)-1-(JPMODE+M6I+M6J),2 ! mass deposition for I mode
   PFSVT(:,JSV) =  PFSVT(:,JSV) - PSVT(:,JSV)  * ZVD(:,2)
   ENDDO
-  DO JSV=2,SIZE(PSVT,2)-(2*JPMODE+M6I+M6J),2   ! mass deposition for J mode
+  DO JSV=2,SIZE(PSVT,2)-(JPMODE+M6I+M6J),2   ! mass deposition for J mode
   PFSVT(:,JSV) =  PFSVT(:,JSV) - PSVT(:,JSV)  * ZVD(:,5)
   ENDDO
   ! number particles deposition I

@@ -45,12 +45,12 @@ IMPLICIT NONE
 !
 
 INTEGER,                         INTENT(IN)  :: KLUOUT ! output listing channel
- CHARACTER(LEN=6), DIMENSION(:),  INTENT(IN)  :: HSV    ! name of chemical species
+ CHARACTER(LEN=*), DIMENSION(:),  INTENT(IN)  :: HSV    ! name of chemical species
                                                        ! with character # (gas chemistry )
                                                        ! and  character @ (aerosols)
 INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
 INTEGER,                         INTENT(OUT) :: KBAER    ! number of aerosol variables
- CHARACTER(LEN=6), DIMENSION(:),  POINTER :: HSVO ! name of scalar species without # and @
+ CHARACTER(LEN=*), DIMENSION(SIZE(HSV)),  INTENT(OUT) :: HSVO ! name of scalar species without # and @
 INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
 INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
@@ -119,6 +119,8 @@ DO JSV=1, size(HSVO)
    IF (TRIM(HSVO(JSV)) == "OCJ") JP_CH_OCj=JSV-KSV_CHSEND
    IF (TRIM(HSVO(JSV)) == "BCI") JP_CH_BCi=JSV-KSV_CHSEND
    IF (TRIM(HSVO(JSV)) == "BCJ") JP_CH_BCj=JSV-KSV_CHSEND
+   IF (TRIM(HSVO(JSV)) == "DSTI") JP_CH_DSTi=JSV-KSV_CHSEND
+   IF (TRIM(HSVO(JSV)) == "DSTJ") JP_CH_DSTj=JSV-KSV_CHSEND
 END DO
 
 END IF

@@ -73,7 +73,7 @@ ELSEIF (CEMISPARAM_DST.EQ."alf98".OR.CEMISPARAM_DST.eq."EXPLI") THEN  !  Alfaro 
   XEMISSIG_INI_DST   (:) = (/1.70, 1.60, 1.50/)          ! [frc] Geometric standard deviation BSM96 p. 73 Table 2
   XMSS_FRC_SRC_INI   (:) = (/0.01, 0.19, 0.8 /)          ! [frc] Mass fraction BSM96 p. 73 Table 2  
 ELSEIF (CEMISPARAM_DST.EQ."AMMA ") THEN ! Default: New distribution from AMMA
-  XFLX_MSS_FDG_FCT = 60.e-4
+  XFLX_MSS_FDG_FCT = 105.e-4
   CRGUNIT   = 'NUMB' 
   XEMISRADIUS_INI_DST(:) = 0.5*(/ 0.078, 0.641, 5.00 /)  ! [um] Number median radius 
   XEMISSIG_INI_DST   (:) = (/ 1.75,  1.76, 1.70/)        ! [frc] Geometric standard deviation 

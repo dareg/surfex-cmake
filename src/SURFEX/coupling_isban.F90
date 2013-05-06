@@ -1,7 +1,7 @@
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,                      &
+                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
@@ -59,7 +59,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                             Isba budget
 !!-------------------------------------------------------------------
 !
-USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI
+USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI,XAVOGADRO
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_SNOW_PAR,     ONLY : XZ0SN
 USE MODD_TYPE_DATE_SURF
@@ -244,7 +244,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing            
 REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
-!                                             !
+!   
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables!
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -332,7 +333,8 @@ INTEGER :: INI_FLOOD
 INTEGER :: ISWB   ! number of spectral shortwave bands
 INTEGER :: JSWB   ! loop on number of spectral shortwave bands
 INTEGER :: JPATCH ! loop on patches
-INTEGER :: JSV, IDST, IMOMENT
+INTEGER :: JSV, IDST, IMOMENT, II
+INTEGER :: JLAYER, JMODE, JSV_IDX
 !
 ! logical units
 !
@@ -1067,7 +1069,32 @@ IF(NDSTEQ>0)THEN
             XP_Z0H_WITH_SNOW,            &!I [frc] Z0 (heat) with snow
             ZP_SFTS(:,NSV_DSTBEG:NSV_DSTEND)  &!O [kg/m2/sec] flux of dust            
             )  
+!
+   IF (NSV_AEREND > 0)  THEN ! case of dust/ anthropogenic aerosols coupling
+     DO JMODE=1,NDSTMDE
 
+      !Make index which is 0 for first mode, 3 for second, 6 for third etc
+       IF (LVARSIG_DST) THEN
+         JSV_IDX = (JMODE-1)*3
+       ELSE IF (LRGFIX_DST) THEN
+         JSV_IDX = JMODE-2
+       ELSE
+         JSV_IDX = (JMODE-1)*2
+       END IF
+
+       DO JSV=1, size(HSV)
+         IF ((TRIM(HSV(JSV)) == "@DSTI").AND.(JMODE==3)) THEN 
+           ! add dust flux and conversion kg/m2/s into molec.m2/s
+           ZP_SFTS(:,JSV) = ZP_SFTS(:,JSV) + ZP_SFTS(:,NSV_DSTBEG-1+JSV_IDX+2)*XAVOGADRO/XMOLARWEIGHT_DST
+         END IF
+         IF ( (TRIM(HSV(JSV)) == "@DSTJ").AND.(JMODE==2)) THEN 
+           ! add dust flux and conversion kg/m2/sec into molec.m2/s
+           ZP_SFTS(:,JSV) = ZP_SFTS(:,JSV) + ZP_SFTS(:,NSV_DSTBEG-1+JSV_IDX+2)*XAVOGADRO/XMOLARWEIGHT_DST
+         END IF
+       END DO
+     END DO
+
+    END IF
 !Modify fluxes due to dry deposition, we introduce a negative flux where dust is lost
   CALL DSLT_DEP(ZP_SV(:,NSV_DSTBEG:NSV_DSTEND), ZP_SFTS(:,NSV_DSTBEG:NSV_DSTEND), &
                 ZP_USTAR, XP_RESA, ZP_TA, ZP_RHOA, XEMISSIG_DST, XEMISRADIUS_DST, &

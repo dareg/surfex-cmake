@@ -154,6 +154,8 @@ END SELECT
 !              --------------------
 !
 CINTERP_TYPE='UNIF  '
+DEALLOCATE(ZTSNOW)
+DEALLOCATE(ZRSNOW)
 IF (LHOOK) CALL DR_HOOK('PREP_SNOW_UNIF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

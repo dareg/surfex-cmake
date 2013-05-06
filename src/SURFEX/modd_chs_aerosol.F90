@@ -56,25 +56,26 @@ INTEGER, PARAMETER :: JP_AER_SO4g = JP_AER_SO4
 INTEGER, PARAMETER :: JP_AER_NO3g = JP_AER_NO3
 INTEGER, PARAMETER :: JP_AER_NH3g = JP_AER_NH3
 !
-INTEGER, PARAMETER :: NCARB=2     ! number of chemically inert species
+INTEGER, PARAMETER :: NCARB=3     ! number of chemically inert species
                                   ! (like black carbon)
 INTEGER, PARAMETER :: JP_AER_OC = 5
 INTEGER, PARAMETER :: JP_AER_BC = 6
+INTEGER, PARAMETER :: JP_AER_DST = 7
 
 INTEGER            :: NSOA = 10    ! number of condensable species that may form
                                    ! secondary aerosols
 INTEGER            :: NM6_AER = 2  ! number of condensable species that may form
                                    ! secondary aerosols
-INTEGER            :: JP_AER_SOA1 = 7 
-INTEGER            :: JP_AER_SOA2 = 8
-INTEGER            :: JP_AER_SOA3 = 9
-INTEGER            :: JP_AER_SOA4 = 10
-INTEGER            :: JP_AER_SOA5 = 11
-INTEGER            :: JP_AER_SOA6 = 12
-INTEGER            :: JP_AER_SOA7 = 13
-INTEGER            :: JP_AER_SOA8 = 14
-INTEGER            :: JP_AER_SOA9 = 15 
-INTEGER            :: JP_AER_SOA10 = 16
+INTEGER            :: JP_AER_SOA1 = 8 
+INTEGER            :: JP_AER_SOA2 = 9
+INTEGER            :: JP_AER_SOA3 = 10
+INTEGER            :: JP_AER_SOA4 = 11
+INTEGER            :: JP_AER_SOA5 = 12
+INTEGER            :: JP_AER_SOA6 = 13
+INTEGER            :: JP_AER_SOA7 = 14
+INTEGER            :: JP_AER_SOA8 = 15
+INTEGER            :: JP_AER_SOA9 = 16 
+INTEGER            :: JP_AER_SOA10 = 17
 
  CHARACTER(LEN=32),DIMENSION(:), ALLOCATABLE :: CAERONAMES
 
@@ -90,30 +91,32 @@ INTEGER            :: JP_CH_OCI  = 9
 INTEGER            :: JP_CH_OCJ  = 10  
 INTEGER            :: JP_CH_BCI  = 11  
 INTEGER            :: JP_CH_BCJ  = 12 
-INTEGER            :: JP_CH_SOA1I  = 13  
-INTEGER            :: JP_CH_SOA1J  = 14
-INTEGER            :: JP_CH_SOA2I  = 15
-INTEGER            :: JP_CH_SOA2J  = 16
-INTEGER            :: JP_CH_SOA3I  = 17
-INTEGER            :: JP_CH_SOA3J  = 18  
-INTEGER            :: JP_CH_SOA4I  = 19  
-INTEGER            :: JP_CH_SOA4J  = 20 
-INTEGER            :: JP_CH_SOA5I  = 21  
-INTEGER            :: JP_CH_SOA5J  = 22  
-INTEGER            :: JP_CH_SOA6I  = 23  
-INTEGER            :: JP_CH_SOA6J  = 24  
-INTEGER            :: JP_CH_SOA7I  = 25  
-INTEGER            :: JP_CH_SOA7J  = 26  
-INTEGER            :: JP_CH_SOA8I  = 27  
-INTEGER            :: JP_CH_SOA8J  = 28  
-INTEGER            :: JP_CH_SOA9I  = 29  
-INTEGER            :: JP_CH_SOA9J  = 30  
-INTEGER            :: JP_CH_SOA10I = 31  
-INTEGER            :: JP_CH_SOA10J = 32  
-INTEGER            :: JP_CH_M0I = 33  
-INTEGER            :: JP_CH_M0J = 34  
-INTEGER            :: JP_CH_M6I = 35  
-INTEGER            :: JP_CH_M6J = 36  
+INTEGER            :: JP_CH_DSTI  = 13 
+INTEGER            :: JP_CH_DSTJ  = 14 
+INTEGER            :: JP_CH_SOA1I  = 15  
+INTEGER            :: JP_CH_SOA1J  = 16
+INTEGER            :: JP_CH_SOA2I  = 17
+INTEGER            :: JP_CH_SOA2J  = 18
+INTEGER            :: JP_CH_SOA3I  = 19
+INTEGER            :: JP_CH_SOA3J  = 20  
+INTEGER            :: JP_CH_SOA4I  = 21  
+INTEGER            :: JP_CH_SOA4J  = 22 
+INTEGER            :: JP_CH_SOA5I  = 23  
+INTEGER            :: JP_CH_SOA5J  = 24  
+INTEGER            :: JP_CH_SOA6I  = 25  
+INTEGER            :: JP_CH_SOA6J  = 26  
+INTEGER            :: JP_CH_SOA7I  = 27  
+INTEGER            :: JP_CH_SOA7J  = 28  
+INTEGER            :: JP_CH_SOA8I  = 29  
+INTEGER            :: JP_CH_SOA8J  = 30  
+INTEGER            :: JP_CH_SOA9I  = 31  
+INTEGER            :: JP_CH_SOA9J  = 32  
+INTEGER            :: JP_CH_SOA10I = 33  
+INTEGER            :: JP_CH_SOA10J = 34  
+INTEGER            :: JP_CH_M0I = 35  
+INTEGER            :: JP_CH_M0J = 36  
+INTEGER            :: JP_CH_M6I = 37  
+INTEGER            :: JP_CH_M6J = 38  
 
 !INTEGER, PARAMETER :: JPNN=NSP+NSOA+NCARB
                                    

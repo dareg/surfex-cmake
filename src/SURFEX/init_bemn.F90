@@ -186,7 +186,7 @@ CASE("BEM")
    ! *.     Window optical and thermal data
    !        -------------------------------
    !
-   CALL WINDOW_DATA(ILU)
+   CALL WINDOW_DATA(ILU, XSHGC, XU_WIN, XALB_WIN, XABS_WIN, XUGG_WIN, XTRAN_WIN)
    DO JJ=1,SIZE(XSHADE)
       IF (XSHADE(JJ) >= 0.0 .AND. XSHADE(JJ) < 0.5) THEN
          LSHADE(JJ) = .FALSE.

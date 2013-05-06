@@ -31,6 +31,7 @@
 !!    Original    10/12/97
 !!
 !!       Modified 08/12/05, P. Le Moigne: user defined fields
+!!       Modified 04/2013   V. Masson   : set a cover containing garden for TOWN default
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -260,7 +261,10 @@ IF (.NOT.LECOCLIMAP) THEN
   XCOVER(:,1) = XSEA(:)
   XCOVER(:,2) = XWATER(:)
   XCOVER(:,4) = XNATURE(:)
-  XCOVER(:,254) = XTOWN(:)
+  XCOVER(:,151) = XTOWN(:)
+  ! comment V. Masson: to use this cover type for town by default avoids crashes
+  ! when garden fraction is specified but no garden vegetation parameters.
+  ! In this cas, the properties for garden come from the cover 151
 !
  ALLOCATE(LCOVER(JPCOVER))
   LCOVER = .FALSE.

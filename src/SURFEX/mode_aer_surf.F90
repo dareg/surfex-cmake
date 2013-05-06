@@ -7,7 +7,7 @@ MODULE MODE_AER_SURF
 !! to understandable aerosol variables, e.g. #/m3, kg/m3, sigma, R_{n}
 
   USE MODD_CHS_AEROSOL
-
+  USE MODD_DST_SURF, ONLY : XDENSITY_DST
 !
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
   USE PARKIND1  ,ONLY : JPRB
@@ -35,6 +35,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_AER_SURF:INIT_VAR',0,ZHOOK_HANDLE)
 !
 ZRHOI(:) = 1.8e3
 ZRHOI(JP_AER_H2O) = 1.0e3   ! water
+ZRHOI(JP_AER_DST) = XDENSITY_DST
 !
 ! Moments index
 NM0(1) = 1 
@@ -54,6 +55,7 @@ ZMI(JP_AER_SO4)  = 98.
 ZMI(JP_AER_NO3)  = 63.
 ZMI(JP_AER_NH3)  = 17.
 ZMI(JP_AER_H2O)  = 18.
+ZMI(JP_AER_DST)  = 100.
 IF (NSOA .EQ. 10) THEN
   ZMI(JP_AER_SOA1) = 88. 
   ZMI(JP_AER_SOA2) = 180.
@@ -97,6 +99,10 @@ PCTOTA(:,JP_AER_OC,2) = PSV(:,JP_CH_OCj)*ZMI(JP_AER_OC)/ZMOL
 ! primary black carbon
 PCTOTA(:,JP_AER_BC,1) = PSV(:,JP_CH_BCi)*ZMI(JP_AER_BC)/ZMOL
 PCTOTA(:,JP_AER_BC,2) = PSV(:,JP_CH_BCj)*ZMI(JP_AER_BC)/ZMOL
+!
+!dust
+PCTOTA(:,JP_AER_DST,1) = PSV(:,JP_CH_DSTi)*ZMI(JP_AER_DST)/6.0221367E+11
+PCTOTA(:,JP_AER_DST,2) = PSV(:,JP_CH_DSTj)*ZMI(JP_AER_DST)/6.0221367E+11
 !
 IF (NSOA .EQ. 10) THEN
   PCTOTA(:,JP_AER_SOA1,1) = PSV(:,JP_CH_SOA1i)*ZMI(JP_AER_SOA1)/ZMOL
@@ -223,31 +229,31 @@ ENDDO
 !
 !*       3    set  moment 0 
 !
-ZM(:,1)=   MAX(ZSV(:,JP_CH_M0i) * 1E+6, 1.E-10) ! molec_{aer}/m3_{air}
-ZM(:,4)=   MAX(ZSV(:,JP_CH_M0j) * 1E+6, 1.E-10) ! molec_{aer}/m3_{air}
-WHERE ((ZM(:,1) .LT. ZMMIN(1)).OR.(ZM(:,2) .LT. ZMMIN(2)))
-  ZM(:,1)= ZMMIN(1)
-  ZM(:,2)= ZMMIN(2)
-
-  ZCTOTA(:,JP_AER_H2O,1) = 0.
-  ZCTOTA(:,JP_AER_NH3,1) = 0.
-  ZCTOTA(:,JP_AER_SO4,1) = 0.
-  ZCTOTA(:,JP_AER_NO3,1) = 0.
-  ZCTOTA(:,JP_AER_BC,1) = 0.5 * ZM(:,2) * ZFAC(JP_AER_BC)
-  ZCTOTA(:,JP_AER_OC,1) = 0.5 * ZM(:,2) * ZFAC(JP_AER_OC)
-END WHERE
+!ZM(:,1)=   MAX(ZSV(:,JP_CH_M0i) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
+!ZM(:,4)=   MAX(ZSV(:,JP_CH_M0j) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
+!WHERE ((ZM(:,1) .LT. ZMMIN(1)).OR.(ZM(:,2) .LT. ZMMIN(2)))
+!  ZM(:,1)= ZMMIN(1)
+!  ZM(:,2)= ZMMIN(2)
 !
-WHERE ((ZM(:,4) .LT. ZMMIN(4)).OR.(ZM(:,5) .LT. ZMMIN(5)))  
-  ZM(:,4)= ZMMIN(4)
-  ZM(:,5)= ZMMIN(5)
-
-  ZCTOTA(:,JP_AER_H2O,2) = 0.
-  ZCTOTA(:,JP_AER_NH3,2) = 0.
-  ZCTOTA(:,JP_AER_SO4,2) = 0.
-  ZCTOTA(:,JP_AER_NO3,2) = 0.
-  ZCTOTA(:,JP_AER_BC,2) = 0.5 * ZM(:,5) * ZFAC(JP_AER_BC)
-  ZCTOTA(:,JP_AER_OC,2) = 0.5 * ZM(:,5) * ZFAC(JP_AER_OC)
-END WHERE
+!  ZCTOTA(:,JP_AER_H2O,1) = 0.
+!  ZCTOTA(:,JP_AER_NH3,1) = 0.
+!  ZCTOTA(:,JP_AER_SO4,1) = 0.
+!  ZCTOTA(:,JP_AER_NO3,1) = 0.
+!  ZCTOTA(:,JP_AER_BC,1) = 0.5 * ZM(:,2) * ZFAC(JP_AER_BC)
+!  ZCTOTA(:,JP_AER_OC,1) = 0.5 * ZM(:,2) * ZFAC(JP_AER_OC)
+!END WHERE
+!!
+!WHERE ((ZM(:,4) .LT. ZMMIN(4)).OR.(ZM(:,5) .LT. ZMMIN(5)))  
+!  ZM(:,4)= ZMMIN(4)
+!  ZM(:,5)= ZMMIN(5)
+!
+!  ZCTOTA(:,JP_AER_H2O,2) = 0.
+!  ZCTOTA(:,JP_AER_NH3,2) = 0.
+!  ZCTOTA(:,JP_AER_SO4,2) = 0.
+!  ZCTOTA(:,JP_AER_NO3,2) = 0.
+!  ZCTOTA(:,JP_AER_BC,2) = 0.5 * ZM(:,5) * ZFAC(JP_AER_BC)
+!  ZCTOTA(:,JP_AER_OC,2) = 0.5 * ZM(:,5) * ZFAC(JP_AER_OC)
+!END WHERE
 !
 !*       4    set moment 6  ==> um6_{aer}/m3_{air}
 !
