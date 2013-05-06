@@ -152,7 +152,6 @@ INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem
 INTEGER           :: IL1, INFOMPI
 !
 DOUBLE PRECISION   :: XTIME0
-REAL, DIMENSION(:),   ALLOCATABLE   :: ZWORK   ! work array read in the file
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
@@ -296,7 +295,6 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
 INTEGER           :: IL1, IL2, INFOMPI
 !
 DOUBLE PRECISION   :: XTIME0
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK   ! work array read in the file
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
@@ -367,7 +365,7 @@ IF (HDIR=='A') THEN
 #ifndef NOMPI
     XTIME0 = MPI_WTIME()
 #endif
-    PFIELD(:,:) = ZWORK(1:IL1,:)
+    PFIELD(:,:) = XWORKD2(1:IL1,:)
 #ifndef NOMPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
 #endif
