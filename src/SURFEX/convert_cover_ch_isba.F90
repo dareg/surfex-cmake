@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CONVERT_COVER_CH_ISBA   (PCOVER,PSOILRC_SO2,PSOILRC_O3)
+      SUBROUTINE CONVERT_COVER_CH_ISBA   (PCOVER,OCOVER,PSOILRC_SO2,PSOILRC_O3)
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* convert surface cover classes into secondary 
@@ -52,6 +52,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PCOVER
+LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER
 
 REAL, DIMENSION(:,:),   INTENT(OUT)   :: PSOILRC_SO2
 REAL, DIMENSION(:,:),   INTENT(OUT)   :: PSOILRC_O3
@@ -64,8 +65,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CONVERT_COVER_CH_ISBA',0,ZHOOK_HANDLE)
- CALL AV_PGD (PSOILRC_SO2 ,PCOVER ,XDATA_SOILRC_SO2 (:,:) ,'NAT','ARI')
- CALL AV_PGD (PSOILRC_O3  ,PCOVER ,XDATA_SOILRC_O3  (:,:) ,'NAT','ARI')
+ CALL AV_PGD (PSOILRC_SO2 ,PCOVER ,XDATA_SOILRC_SO2 (:,:) ,'NAT','ARI',OCOVER)
+ CALL AV_PGD (PSOILRC_O3  ,PCOVER ,XDATA_SOILRC_O3  (:,:) ,'NAT','ARI',OCOVER)
 IF (LHOOK) CALL DR_HOOK('CONVERT_COVER_CH_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

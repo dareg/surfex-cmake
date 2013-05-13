@@ -33,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_n,           ONLY: XCOVER, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XWALL_O_BLD, CBEM 
+USE MODD_TEB_n,           ONLY: XCOVER, LCOVER, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XWALL_O_BLD, CBEM 
 USE MODD_BEM_n,           ONLY: NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,            &
                                 XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT,   &
                                 XQIN, XQIN_FRAD, XSHGC, XSHGC_SH, XU_WIN, XGR,           &
@@ -158,7 +158,7 @@ CASE("BEM")
 !----------
 
   XAUX_MAX(:) = 5.
-  CALL CONVERT_PATCH_TEB(XCOVER,0.,                                                   &
+  CALL CONVERT_PATCH_TEB(XCOVER,LCOVER,0.,                                            &
                       PHC_FLOOR=XHC_FLOOR, PTC_FLOOR=XTC_FLOOR, PD_FLOOR=XD_FLOOR,    &
                       PTCOOL_TARGET=XTCOOL_TARGET, PTHEAT_TARGET=XTHEAT_TARGET,       &
                       PF_WASTE_CAN=XF_WASTE_CAN, PEFF_HEAT=XEFF_HEAT, PQIN=XQIN,      &

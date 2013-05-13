@@ -564,6 +564,7 @@ INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem 
  CHARACTER(LEN=100) :: YCOMMENT
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
+INTEGER            :: JJ
 INTEGER            :: JCOVER
 INTEGER            :: IL1, IL2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -584,12 +585,16 @@ IF (HPROGRAM=='MESONH') THEN
 #endif
 ELSE
   !
-  DO JCOVER=1,IL2
+  JCOVER = 0
+  DO JJ=1,SIZE(OFLAG)
     !
-    WRITE(YREC,'(A5,I3.3)') 'COVER',JCOVER
+    IF (.NOT. OFLAG(JJ)) CYCLE
+    !
+    JCOVER = JCOVER + 1
+    !
+    WRITE(YREC,'(A5,I3.3)') 'COVER',JJ
     YCOMMENT='X_Y_'//YREC
     PFIELD(:,JCOVER)=0.
-    IF (.NOT. OFLAG(JCOVER)) CYCLE
     !
     IF (HPROGRAM=='AROME ') THEN
 #ifdef ARO

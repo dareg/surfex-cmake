@@ -28,8 +28,6 @@ SUBROUTINE PREP_HOR_ISBA_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPG
 !!      B. Decharme  07/2012, Bug init uniform snow
 !!------------------------------------------------------------------
 !
-!
-!
 USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, &
                           XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT, &
                           LINTERP, CMASK
@@ -57,6 +55,7 @@ USE MODI_PREP_ISBA_UNIF
 USE MODI_PREP_ISBA_BUFFER
 USE MODI_ABOR1_SFX
 USE MODI_HOR_INTERPOL
+USE MODI_PUT_ON_ALL_VEGTYPES
 USE MODI_VEGTYPE_GRID_TO_PATCH_GRID
 USE MODI_PREP_HOR_SNOW_FIELDS
 USE MODI_GET_LUOUT
@@ -87,7 +86,8 @@ IMPLICIT NONE
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizontally
 REAL, POINTER, DIMENSION(:,:)       :: ZFIELD ! field to interpolate horizontally
-REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUT ! field interpolated   horizontally
+REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
+REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   soil grid, npatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZF        ! work array (x, output soil grid, npatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZDG       ! out T grid (x, output soil grid, npatch)
@@ -96,8 +96,7 @@ INTEGER                       :: ILUOUT    ! output listing logical unit
 LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
 LOGICAL                       :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                       :: JPATCH    ! loop on patches
-INTEGER                       :: JVEGTYPE  ! loop on vegtypes
-INTEGER                       :: INI, INL, JJ, JL! Work integer
+INTEGER                       :: INI, INL, INP, JJ, JL! Work integer
 INTEGER, DIMENSION(SIZE(XDG,1),SIZE(XDG,3)) :: IWORK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -174,28 +173,35 @@ END IF
 !
 !*      5.     Horizontal interpolation
 !
-ALLOCATE(ZFIELDOUT(INI,SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)))
-ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,2)))
+INL = SIZE(ZFIELDIN,2)
+INP = SIZE(ZFIELDIN,3)
 !
-DO JVEGTYPE = 1, SIZE(ZFIELDIN,3)
-  ZFIELD=ZFIELDIN(:,:,JVEGTYPE)
-  IF (SIZE(ZFIELDIN,3)==NVEGTYPE) LINTERP = (XVEGTYPE(:,JVEGTYPE) > 0.)
-  CALL HOR_INTERPOL(ILUOUT,ZFIELD,ZFIELDOUT(:,:,JVEGTYPE))
+ALLOCATE(ZFIELDOUTP(INI,INL,INP))
+ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
+!
+DO JPATCH = 1, INP
+  ZFIELD=ZFIELDIN(:,:,JPATCH)
+  IF (INP==NVEGTYPE) LINTERP = (XVEGTYPE(:,JPATCH) > 0.)
+  CALL HOR_INTERPOL(ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
   LINTERP = .TRUE.
 END DO
 !
 DEALLOCATE(ZFIELD)
-
+!
+ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
+!
+CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+!
+DEALLOCATE(ZFIELDOUTP)
+!
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Transformation from vegtype grid to patch grid
 !
-ALLOCATE(ZW (INI,SIZE(ZFIELDOUT,2),NPATCH))
+ALLOCATE(ZW (INI,SIZE(ZFIELDOUTV,2),NPATCH))
 !
 ZW = 0.
-IF (SIZE(ZFIELDOUT,3)==NVEGTYPE) THEN
-  CALL VEGTYPE_GRID_TO_PATCH_GRID(NPATCH,XVEGTYPE_PATCH,XPATCH,ZFIELDOUT,ZW)
-END IF
+CALL VEGTYPE_GRID_TO_PATCH_GRID(NPATCH,XVEGTYPE_PATCH,XPATCH,ZFIELDOUTV,ZW)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -208,7 +214,7 @@ SELECT CASE (HSURF)
   !
  CASE('ZS     ') 
   ALLOCATE(XZS_LS(INI))
-  XZS_LS(:) = ZFIELDOUT(:,1,1)
+  XZS_LS(:) = ZFIELDOUTV(:,1,1)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
@@ -329,7 +335,7 @@ DEALLOCATE(ZW)
 !*      8.     Deallocations
 !
 DEALLOCATE(ZFIELDIN )
-DEALLOCATE(ZFIELDOUT)
+DEALLOCATE(ZFIELDOUTV)
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

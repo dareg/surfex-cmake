@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CONVERT_COVER_FRAC   (PCOVER,                     &
+      SUBROUTINE CONVERT_COVER_FRAC   (PCOVER, OCOVER,           &
                                          PSEA,PNATURE,PTOWN,PWATER   )  
 !     ##############################################################
 !
@@ -52,6 +52,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PCOVER
+LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSEA
 REAL, DIMENSION(:),   INTENT(OUT)   :: PNATURE
 REAL, DIMENSION(:),   INTENT(OUT)   :: PTOWN
@@ -65,10 +66,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             -------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CONVERT_COVER_FRAC',0,ZHOOK_HANDLE)
- CALL AV_PGD (PSEA    ,PCOVER(:,:),XDATA_SEA    (:),'ALL','ARI')
- CALL AV_PGD (PTOWN   ,PCOVER(:,:),XDATA_TOWN   (:),'ALL','ARI')
- CALL AV_PGD (PNATURE ,PCOVER(:,:),XDATA_NATURE (:),'ALL','ARI')
- CALL AV_PGD (PWATER  ,PCOVER(:,:),XDATA_WATER  (:),'ALL','ARI')
+ CALL AV_PGD (PSEA    ,PCOVER(:,:),XDATA_SEA    (:),'ALL','ARI',OCOVER(:))
+ CALL AV_PGD (PTOWN   ,PCOVER(:,:),XDATA_TOWN   (:),'ALL','ARI',OCOVER(:))
+ CALL AV_PGD (PNATURE ,PCOVER(:,:),XDATA_NATURE (:),'ALL','ARI',OCOVER(:))
+ CALL AV_PGD (PWATER  ,PCOVER(:,:),XDATA_WATER  (:),'ALL','ARI',OCOVER(:))
 
 !
 WHERE (PSEA   (:) == XUNDEF) PSEA   (:) = 0.

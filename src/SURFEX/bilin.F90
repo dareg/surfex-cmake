@@ -72,6 +72,8 @@
 !!    -------------
 !!
 !!      Original     01/2004
+! TD&DD: added OpenMP directives
+
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -114,6 +116,7 @@ REAL, DIMENSION (:),   ALLOCATABLE   :: ZX1      ! input X coordinate of all poi
 REAL, DIMENSION (:),   ALLOCATABLE   :: ZY1      ! input Y coordinate of all points
 REAL, DIMENSION (:),   ALLOCATABLE   :: ZFIELD1  ! input field of all points
 !
+INTEGER, DIMENSION(SIZE(PFIELD2))    :: ICI, ICJ
 REAL                                 :: ZC1_X    ! coefficient for left   points
 REAL                                 :: ZC2_X    ! coefficient for middle points
 REAL                                 :: ZC3_X    ! coefficient for right  points
@@ -134,7 +137,7 @@ REAL                                 :: ZEPS=1.E-3
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('BILIN',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BILIN_1',0,ZHOOK_HANDLE)
 IIU=SIZE(PFIELD1,1)
 IJU=SIZE(PFIELD1,2)
 !
@@ -309,11 +312,36 @@ PFIELD2(:) = XUNDEF
 !
 !* loop on all output grid points
 !
+IF (LHOOK) CALL DR_HOOK('BILIN_1',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BILIN_2',0,ZHOOK_HANDLE)
+!
+ICI(:) = 0
+ICJ(:) = 0
+!$OMP PARALLEL DO PRIVATE(JL,JJ)
+DO JL=1,SIZE(PFIELD2)
+  DO JJ=SIZE(ZX),1,-1
+    IF (ZX(JJ)<=PX2(JL)) THEN
+      ICI(JL) = JJ
+      EXIT
+    ENDIF
+  ENDDO
+  DO JJ=SIZE(ZY),1,-1
+    IF (ZY(JJ)<=PY2(JL)) THEN
+      ICJ(JL) = JJ
+      EXIT
+    ENDIF
+  ENDDO
+ENDDO
+!$OMP END PARALLEL DO
+
+IF (LHOOK) CALL DR_HOOK('BILIN_2',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BILIN_3',0,ZHOOK_HANDLE)
+
 DO JL=1,SIZE(PFIELD2,1)
 !
 !* interpolation weights in X direction
 !
-  JI=COUNT(ZX(:)<=PX2(JL))
+  JI=ICI(JL)
   JI=MAX(MIN(JI,IIU),0)
   IF (PX1(JI)<=PX2(JL)) THEN
     ZC2_X = (PX2(JL)-ZX(JI+1))/(PX1(JI)-ZX(JI+1))
@@ -327,9 +355,9 @@ DO JL=1,SIZE(PFIELD2,1)
     ZC3_X = 0.
   END IF
 !
-!* interpolation weights in Y direction
+!  interpolation weights in Y direction
 !
-  JJ=COUNT(ZY(:)<=PY2(JL))
+  JJ=ICJ(JL)
   JJ=MAX(MIN(JJ,IJU),0)
   IF (PY1(JJ)<=PY2(JL)) THEN
     ZC2_Y = (PY2(JL)-ZY(JJ+1))/(PY1(JJ)-ZY(JJ+1))
@@ -358,6 +386,9 @@ DO JL=1,SIZE(PFIELD2,1)
                       + ZC3_X * ZFIELD_XY(JI+1,JJ+1) )  
 
 END DO
+!
+IF (LHOOK) CALL DR_HOOK('BILIN_3',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BILIN_4',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -403,12 +434,12 @@ DO JJ=1,IJU
   END DO
 END DO
 !
- CALL HOR_EXTRAPOL_SURF(KLUOUT,'XY  ',ZY1,ZX1,ZFIELD1,PY2,PX2,PFIELD2,OINTERP)
+CALL HOR_EXTRAPOL_SURF(KLUOUT,'XY  ',ZY1,ZX1,ZFIELD1,PY2,PX2,PFIELD2,OINTERP)
 !
 DEALLOCATE(ZX1)
 DEALLOCATE(ZY1)
 DEALLOCATE(ZFIELD1)
-IF (LHOOK) CALL DR_HOOK('BILIN',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BILIN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE BILIN

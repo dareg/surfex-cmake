@@ -25,7 +25,6 @@ SUBROUTINE PREP_ISBA_NETCDF(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !
 
 USE MODD_PREP,           ONLY : CINTERP_TYPE
-USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 
 USE MODI_ABOR1_SFX
 
@@ -131,13 +130,11 @@ IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
 ! Close netcdf file
 IERROR=NF_CLOSE(ID_FILE)
 !
-ALLOCATE(PFIELD(IL,INLAYERS,NVEGTYPE)) !will be deallocated later by prep_hor_isba_field
+ALLOCATE(PFIELD(IL,INLAYERS,1)) !will be deallocated later by prep_hor_isba_field
 !
 ! For now initial values are identical for all tiles / soil layers.
 DO JJ=1,INLAYERS
-  DO JK=1,NVEGTYPE
-    PFIELD(:,JJ,JK)=ZFIELD
-  END DO
+  PFIELD(:,JJ,1)=ZFIELD
 END DO
 !
 DEALLOCATE(ZFIELD)

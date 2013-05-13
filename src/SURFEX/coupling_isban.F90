@@ -66,7 +66,7 @@ USE MODD_TYPE_DATE_SURF
 USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLACIER,     &
                                 NNBIOMASS, XABC, XPOI, CSNOWRES, CDIFSFCOND, CSOILFRZ,   &
                                 CSCOND, CC1DRY, CRUNOFF, CPHOTO, LTR_ML, CISBA, XPATCH,  &
-                                TTIME, CALBEDO, XCOVER, XLAI, XVEG, XZ0, XEMIS,          &
+                                TTIME, CALBEDO, XCOVER, LCOVER, XLAI, XVEG, XZ0, XEMIS,  &
                                 XALBNIR, XALBVIS, XALBUV, XEMIS_NAT,  XTSRAD_NAT,        &
                                 XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG, NGROUND_LAYER,     &
                                 XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,                    &
@@ -488,7 +488,7 @@ ENDIF
 ! --------------------------------------------------------------------------------------
 !
 IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
-     CALL VEGETATION_UPDATE(PTSTEP,TTIME,XCOVER,                       &
+     CALL VEGETATION_UPDATE(PTSTEP,TTIME,XCOVER, LCOVER,                 &
                          CISBA,LECOCLIMAP, CPHOTO, LAGRIP, 'NAT',        &
                          XLAI,XVEG,XZ0,                                  &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                   &

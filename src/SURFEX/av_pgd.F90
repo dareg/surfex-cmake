@@ -3,7 +3,7 @@
 !     ##################
 INTERFACE AV_PGD
 !
-      SUBROUTINE AV_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
 !
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct
@@ -12,12 +12,13 @@ REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each 
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PGD
 !
-      SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
 !
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct for each patch
@@ -26,12 +27,13 @@ REAL, DIMENSION(:,:),   INTENT(IN)  :: PDATA   ! secondary field value for each 
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PATCH_PGD
 !
-      SUBROUTINE AV_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
 !
 REAL, DIMENSION(:),     INTENT(OUT) :: PFIELD  ! secondary field to construct
@@ -40,12 +42,13 @@ REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each 
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+  LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:),     INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PGD_1D
 !
-      SUBROUTINE AV_PATCH_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
 !
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct for each patch
@@ -54,12 +57,13 @@ REAL, DIMENSION(:,:),   INTENT(IN)  :: PDATA   ! secondary field value for each 
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:),     INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PATCH_PGD_1D
 !
-      SUBROUTINE MAJOR_PATCH_PGD_1D(TFIELD,PCOVER,TDATA,HSFTYPE,HATYPE,KDECADE)
+      SUBROUTINE MAJOR_PATCH_PGD_1D(TFIELD,PCOVER,TDATA,HSFTYPE,HATYPE,OCOVER,KDECADE)
       
 !
 USE MODD_TYPE_DATE_SURF
@@ -69,6 +73,7 @@ TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN) :: TDATA  ! secondary field to cons
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE MAJOR_PATCH_PGD_1D
@@ -80,7 +85,7 @@ END MODULE MODI_AV_PGD
 !
 !
 !     ################################################################
-      SUBROUTINE AV_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PGD* average a secondary physiographic variable from the
@@ -154,13 +159,14 @@ REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each 
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:),  INTENT(IN) :: OCOVER
 REAL, DIMENSION(:),     INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-!
+INTEGER :: JJ
 INTEGER :: ICOVER  ! number of cover classes
 INTEGER :: JCOVER  ! loop on cover classes
 !
@@ -185,7 +191,7 @@ IF (SIZE(PFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(PCOVER,2)
+ICOVER=SIZE(OCOVER)
 !
 IF (PRESENT(PDZ)) THEN
   ZDZ(:)=PDZ(:)
@@ -199,7 +205,13 @@ ZWORK(:)=0.
 ZWEIGHT_MAX(:)=0.
 ZSUM_COVER_WEIGHT(:)=0.
 !-------------------------------------------------------------------------------
-DO JCOVER=1,ICOVER
+JCOVER = 0
+DO JJ=1,ICOVER
+  !
+  IF (.NOT.OCOVER(JJ)) CYCLE
+  !
+  JCOVER = JCOVER + 1
+  !
 !-------------------------------------------------------------------------------
 !
 !*    2.     Selection of the weighting function
@@ -210,42 +222,42 @@ DO JCOVER=1,ICOVER
          ZWEIGHT=1.
 
        CASE('NAT')
-         ZWEIGHT=XDATA_NATURE(JCOVER)
+         ZWEIGHT=XDATA_NATURE(JJ)
 
        CASE('GRD')
-         ZWEIGHT=XDATA_TOWN (JCOVER) * XDATA_GARDEN(JCOVER)
+         ZWEIGHT=XDATA_TOWN (JJ) * XDATA_GARDEN(JJ)
 
        CASE('TWN')
-         ZWEIGHT=XDATA_TOWN  (JCOVER)
+         ZWEIGHT=XDATA_TOWN  (JJ)
 
        CASE('WAT')
-         ZWEIGHT=XDATA_WATER (JCOVER)
+         ZWEIGHT=XDATA_WATER (JJ)
 
        CASE('SEA')
-         ZWEIGHT=XDATA_SEA   (JCOVER)
+         ZWEIGHT=XDATA_SEA   (JJ)
 
        CASE('BLD')
-         ZWEIGHT=XDATA_TOWN  (JCOVER) *        XDATA_BLD(JCOVER)
+         ZWEIGHT=XDATA_TOWN  (JJ) *        XDATA_BLD(JJ)
 
        CASE('BLV')  !* building Volume
-         ZWEIGHT=XDATA_TOWN  (JCOVER) *        XDATA_BLD(JCOVER) &
-                                      * XDATA_BLD_HEIGHT(JCOVER)
+         ZWEIGHT=XDATA_TOWN  (JJ) *        XDATA_BLD(JJ) &
+                                      * XDATA_BLD_HEIGHT(JJ)
 
        CASE('STR')
-         ZWEIGHT=XDATA_TOWN  (JCOVER) * ( 1. - XDATA_BLD(JCOVER) )
+         ZWEIGHT=XDATA_TOWN  (JJ) * ( 1. - XDATA_BLD(JJ) )
 
        CASE('TRE')
          PFIELD(:)=0.
-         ZWEIGHT=XDATA_NATURE(JCOVER) * (  XDATA_VEGTYPE(JCOVER,NVT_TREE) &
-                                           + XDATA_VEGTYPE(JCOVER,NVT_EVER) &
-                                           + XDATA_VEGTYPE(JCOVER,NVT_CONI) )  
+         ZWEIGHT=XDATA_NATURE(JJ) * (  XDATA_VEGTYPE(JJ,NVT_TREE) &
+                                           + XDATA_VEGTYPE(JJ,NVT_EVER) &
+                                           + XDATA_VEGTYPE(JJ,NVT_CONI) )  
 
        CASE('GRT')
          PFIELD(:)=0.
-         ZWEIGHT=XDATA_TOWN(JCOVER) * XDATA_GARDEN(JCOVER) &
-                         * (  XDATA_VEGTYPE(JCOVER,NVT_TREE) &
-                            + XDATA_VEGTYPE(JCOVER,NVT_EVER) &
-                            + XDATA_VEGTYPE(JCOVER,NVT_CONI) )  
+         ZWEIGHT=XDATA_TOWN(JJ) * XDATA_GARDEN(JJ) &
+                         * (  XDATA_VEGTYPE(JJ,NVT_TREE) &
+                            + XDATA_VEGTYPE(JJ,NVT_EVER) &
+                            + XDATA_VEGTYPE(JJ,NVT_CONI) )  
 
        CASE DEFAULT
          CALL ABOR1_SFX('AV_PGD_1D: WEIGHTING FUNCTION NOT ALLOWED '//HSFTYPE)
@@ -263,7 +275,7 @@ DO JCOVER=1,ICOVER
 !
   ZSUM_COVER_WEIGHT(:) = ZSUM_COVER_WEIGHT(:) + ZCOVER_WEIGHT(:)
 !
-  ZDATA = PDATA(JCOVER)
+  ZDATA = PDATA(JJ)
 !
 !*    3.2    Selection of averaging type
 !            ---------------------------
@@ -390,7 +402,7 @@ END SUBROUTINE AV_PGD_1D
 !
 !
 !     ################################################################
-      SUBROUTINE AV_PATCH_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PATCH_PGD* average for each surface patch a secondary physiographic 
@@ -432,6 +444,7 @@ END SUBROUTINE AV_PGD_1D
 !!
 !!    MODIFICATION
 !!    ------------
+
 !!
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
@@ -442,7 +455,8 @@ END SUBROUTINE AV_PGD_1D
 !            -----------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER,     ONLY : XDATA_SEA, XDATA_WATER, XDATA_VEGTYPE, XDATA_VEG, XDATA_LAI  
+USE MODD_DATA_COVER,     ONLY : XDATA_SEA, XDATA_WATER, XDATA_VEGTYPE, XDATA_VEG, XDATA_LAI, &
+                                XDATA_WEIGHT
 USE MODD_DATA_COVER_n,   ONLY : XDATA_NATURE, XDATA_TOWN, XDATA_BLD, XDATA_GARDEN
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TREE, NVT_CONI, NVT_EVER, NVEGTYPE, XCDREF
 !
@@ -466,12 +480,12 @@ REAL, DIMENSION(:,:), INTENT(IN)  :: PDATA   ! secondary field value for each cl
  CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:), INTENT(IN)  :: OCOVER
 REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,              INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
-!
 !
 INTEGER :: ICOVER  ! number of cover classes
 INTEGER :: JCOVER  ! loop on cover classes
@@ -481,20 +495,20 @@ INTEGER :: JCOVER  ! loop on cover classes
 INTEGER :: JVEGTYPE! loop on vegtype
 INTEGER :: IPATCH  ! number of patches
 INTEGER :: JPATCH  ! PATCH index
-INTEGER :: JJ, JI
+INTEGER :: JJ, JI, JK
 !
-
+REAL         :: ZCOVER_WEIGHT
+!
+REAL, DIMENSION(SIZE(PCOVER,1)) :: ZVAL
 !
 REAL, DIMENSION(SIZE(PCOVER,2),NVEGTYPE)         :: ZWEIGHT
-REAL, DIMENSION(SIZE(PCOVER,1),NVEGTYPE)         :: ZCOVER_WEIGHT
 !
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZSUM_COVER_WEIGHT_PATCH
-REAL, DIMENSION(NVEGTYPE)                        :: ZDATA
 !
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZWORK
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZDZ
 !
-INTEGER, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))  :: NMASK
+INTEGER, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))  :: IMASK
 INTEGER, DIMENSION(SIZE(PFIELD,2)) :: JCOUNT
 INTEGER ::  PATCH_LIST(NVEGTYPE)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -504,7 +518,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.1    field does not exist
 !            --------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D',0,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_1',0,ZHOOK_HANDLE)
 IF (SIZE(PFIELD)==0 .AND. LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D',1,ZHOOK_HANDLE)
 IF (SIZE(PFIELD)==0) RETURN
 !
@@ -513,10 +528,8 @@ IF (SIZE(PFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(PCOVER,2)
+ICOVER=SIZE(OCOVER)
 IPATCH=SIZE(PFIELD,2)
-!
-!
 !
 IF (PRESENT(PDZ)) THEN
   DO JPATCH=1,IPATCH
@@ -535,198 +548,173 @@ ZSUM_COVER_WEIGHT_PATCH(:,:) = 0.
 DO JVEGTYPE=1,NVEGTYPE
   PATCH_LIST(JVEGTYPE) = VEGTYPE_TO_PATCH (JVEGTYPE, IPATCH)
 ENDDO
-
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
 !
-!*    2.     Selection of the weighting function for vegtype
-!            -----------------------------------
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_1',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_2',0,ZHOOK_HANDLE)
+!
+IF (.NOT.ALLOCATED(XDATA_WEIGHT)) THEN
+  !
+  ALLOCATE(XDATA_WEIGHT(SIZE(PCOVER,2),NVEGTYPE,12))
+  XDATA_WEIGHT(:,:,:) = 0.
+  !
+  JCOVER=0
+  DO JJ=1,ICOVER
+    !
+    IF (.NOT.OCOVER(JJ)) CYCLE
+    !
+    JCOVER = JCOVER+1
+    !
+    DO JVEGTYPE=1,NVEGTYPE
+      !  CASE('NAT')
+      IF (XDATA_VEGTYPE(JJ,JVEGTYPE)==0.) CYCLE
+      !  
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,1)= XDATA_NATURE(JJ) * XDATA_VEGTYPE(JJ,JVEGTYPE)
+      !CASE('GRD')
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,2)= XDATA_TOWN(JJ)*XDATA_GARDEN(JJ) * XDATA_VEGTYPE(JJ,JVEGTYPE)           
+      !CASE('VEG')     
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,3)= XDATA_WEIGHT(JCOVER,JVEGTYPE,1) * XDATA_VEG(JJ,KDECADE,JVEGTYPE)  
+      !CASE('BAR')               
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,4)= XDATA_WEIGHT(JCOVER,JVEGTYPE,1) * (1.-XDATA_VEG(JJ,KDECADE,JVEGTYPE))                           
+      !CASE('GRV')              
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,5)= XDATA_WEIGHT(JCOVER,JVEGTYPE,2) * XDATA_VEG(JJ,KDECADE,JVEGTYPE)                              
+      !CASE('GRB')            
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,6)= XDATA_WEIGHT(JCOVER,JVEGTYPE,2) * (1.-XDATA_VEG(JJ,KDECADE,JVEGTYPE))
+      IF ( SUM(XDATA_LAI(JJ,:,JVEGTYPE)) .GT. 0.0) THEN
+        !CASE('DVG') ! for diffusion scheme only 
+        XDATA_WEIGHT(JCOVER,JVEGTYPE,7)= XDATA_WEIGHT(JCOVER,JVEGTYPE,1)
+        !CASE('GDV') ! for diffusion scheme only            
+        XDATA_WEIGHT(JCOVER,JVEGTYPE,8)= XDATA_WEIGHT(JCOVER,JVEGTYPE,2)   
+      ENDIF       
+      !CASE('LAI')           
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,9)= XDATA_WEIGHT(JCOVER,JVEGTYPE,1) * XDATA_LAI(JJ,KDECADE,JVEGTYPE)                            
+      !CASE('GRL')           
+      XDATA_WEIGHT(JCOVER,JVEGTYPE,10)= XDATA_WEIGHT(JCOVER,JVEGTYPE,2) * XDATA_LAI(JJ,KDECADE,JVEGTYPE)  
+      !CASE('TRE')  
+      !CASE('GRT')
+      IF (JVEGTYPE==NVT_TREE) THEN
+        XDATA_WEIGHT(JCOVER,NVT_TREE,11)= XDATA_WEIGHT(JCOVER,NVT_TREE,1)
+        XDATA_WEIGHT(JCOVER,NVT_TREE,12)= XDATA_WEIGHT(JCOVER,NVT_TREE,2)
+      ENDIF
+      IF (JVEGTYPE==NVT_CONI) THEN
+        XDATA_WEIGHT(JCOVER,NVT_CONI,11)= XDATA_WEIGHT(JCOVER,NVT_CONI,1)
+        XDATA_WEIGHT(JCOVER,NVT_CONI,12)= XDATA_WEIGHT(JCOVER,NVT_CONI,2)
+      ENDIF
+      IF (JVEGTYPE==NVT_EVER) THEN
+        XDATA_WEIGHT(JCOVER,NVT_EVER,11)= XDATA_WEIGHT(JCOVER,NVT_EVER,1)
+        XDATA_WEIGHT(JCOVER,NVT_EVER,12)= XDATA_WEIGHT(JCOVER,NVT_EVER,2)
+      ENDIF   
+      !
+    ENDDO      
+    !
+  ENDDO
+  !
+ENDIF
 !
 SELECT CASE (HSFTYPE)
-
-   CASE('NAT')
-     DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=XDATA_NATURE(:)*XDATA_VEGTYPE(:,JVEGTYPE)
-     END DO
-
-   CASE('GRD')
-     DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=XDATA_TOWN(:)*XDATA_GARDEN(:)*XDATA_VEGTYPE(:,JVEGTYPE)
-     END DO
-
-   CASE('VEG')
-     DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=XDATA_NATURE(:)*XDATA_VEGTYPE(:,JVEGTYPE)*&
-                           XDATA_VEG(:,KDECADE,JVEGTYPE)  
-     END DO
-
-   CASE('BAR')
-     DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=XDATA_NATURE(:)*XDATA_VEGTYPE(:,JVEGTYPE)*&
-                           (1.-XDATA_VEG(:,KDECADE,JVEGTYPE))  
-     END DO
-     
-   CASE('GRV')
-     DO JVEGTYPE=1,NVEGTYPE  
-       ZWEIGHT(:,JVEGTYPE)=XDATA_TOWN(:)*XDATA_GARDEN(:)*XDATA_VEGTYPE(:,JVEGTYPE)* &
-                             XDATA_VEG(:,KDECADE,JVEGTYPE)  
-     END DO
-
-   CASE('GRB')
-     DO JVEGTYPE=1,NVEGTYPE  
-       ZWEIGHT(:,JVEGTYPE)=XDATA_TOWN(:)*XDATA_GARDEN(:)*XDATA_VEGTYPE(:,JVEGTYPE)* &
-                             (1.-XDATA_VEG(:,KDECADE,JVEGTYPE))  
-     END DO
-     
-   CASE('DVG') ! for diffusion scheme only
-     DO JVEGTYPE=1,NVEGTYPE
-       WHERE ( SUM(XDATA_LAI(:,:,JVEGTYPE),2) .GT. 0.0) &
-         ZWEIGHT(:,JVEGTYPE)=XDATA_NATURE(:)*XDATA_VEGTYPE(:,JVEGTYPE)
-     END DO     
-
-   CASE('GDV') ! for diffusion scheme only
-     DO JVEGTYPE=1,NVEGTYPE
-       WHERE ( SUM(XDATA_LAI(:,:,JVEGTYPE),2) .GT. 0.0) &
-         ZWEIGHT(:,JVEGTYPE)=XDATA_TOWN(:)*XDATA_GARDEN(:)*XDATA_VEGTYPE(:,JVEGTYPE)
-     END DO     
-
-   CASE('LAI')
-     DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=XDATA_NATURE(:)*XDATA_VEGTYPE(:,JVEGTYPE)*&
-                           XDATA_LAI(:,KDECADE,JVEGTYPE)  
-     END DO
-     
-   CASE('GRL')
-     DO JVEGTYPE=1,NVEGTYPE  
-       ZWEIGHT(:,JVEGTYPE)=XDATA_TOWN(:)*XDATA_GARDEN(:)*XDATA_VEGTYPE(:,JVEGTYPE)* &
-                             XDATA_LAI(:,KDECADE,JVEGTYPE)  
-     END DO
-
-    CASE('TRE')
-      ZWEIGHT(:,:)=0.
-      WHERE (XDATA_VEGTYPE(:,NVT_TREE)>0.)
-        ZWEIGHT(:,NVT_TREE)=XDATA_NATURE(:) * XDATA_VEGTYPE(:,NVT_TREE)
-      ENDWHERE
-      WHERE (XDATA_VEGTYPE(:,NVT_CONI)>0.)
-        ZWEIGHT(:,NVT_CONI)=XDATA_NATURE(:) * XDATA_VEGTYPE(:,NVT_CONI)
-      ENDWHERE
-      WHERE (XDATA_VEGTYPE(:,NVT_EVER)>0.)
-        ZWEIGHT(:,NVT_EVER)=XDATA_NATURE(:) * XDATA_VEGTYPE(:,NVT_EVER)
-      ENDWHERE
-
-    CASE('GRT')
-      ZWEIGHT(:,:)=0.
-      WHERE (XDATA_VEGTYPE(:,NVT_TREE)>0.)
-        ZWEIGHT(:,NVT_TREE)=XDATA_TOWN(:)*XDATA_GARDEN(:) * XDATA_VEGTYPE(:,NVT_TREE)
-      ENDWHERE
-      WHERE (XDATA_VEGTYPE(:,NVT_CONI)>0.)
-        ZWEIGHT(:,NVT_CONI)=XDATA_TOWN(:)*XDATA_GARDEN(:) * XDATA_VEGTYPE(:,NVT_CONI)
-      ENDWHERE
-      WHERE (XDATA_VEGTYPE(:,NVT_EVER)>0.)
-        ZWEIGHT(:,NVT_EVER)=XDATA_TOWN(:)*XDATA_GARDEN(:) * XDATA_VEGTYPE(:,NVT_EVER)
-      ENDWHERE
-
-    CASE DEFAULT
-       CALL ABOR1_SFX('AV_PATCH_PGD_1D: WEIGHTING FUNCTION FOR VEGTYPE NOT ALLOWED')
+  CASE('NAT')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,1)
+  CASE('GRD')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,2)
+  CASE('VEG')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,3)
+  CASE('BAR')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,4)
+  CASE('GRV')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,5)
+  CASE('GRB')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,6)
+  CASE('DVG')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,7)   
+  CASE('GDV')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,8)   
+  CASE('LAI')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,9)
+  CASE('GRL')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,10)  
+  CASE('TRE')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,11) 
+  CASE('GRT')
+    ZWEIGHT(:,:) = XDATA_WEIGHT(:,:,12)    
+  CASE DEFAULT
+     CALL ABOR1_SFX('AV_PATCH_PGD_1D: WEIGHTING FUNCTION FOR VEGTYPE NOT ALLOWED')
 END SELECT
 !
-!-------------------------------------------------------------------------------
-DO JCOVER=1,ICOVER
-!-------------------------------------------------------------------------------
-!
-!*    3.     Averaging
-!            ---------
-!
-!*    3.1    Work arrays given for each patch
-!            -----------
-! 
-
-  ZDATA(:) = PDATA(JCOVER,:)
-
-!
-!*    3.2    Selection of averaging type
-!            ---------------------------
-!
-  SELECT CASE (HATYPE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_2',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
+  !
+  !
+  !*    2.     Selection of the weighting function for vegtype
+  !            -----------------------------------
+  !
+JCOVER=0
 !
-!*    3.3    Arithmetic averaging
-!            --------------------
-!
-    CASE ('ARI')
-!
-      DO JVEGTYPE=1,NVEGTYPE
-        JPATCH= PATCH_LIST(JVEGTYPE)
-        DO JJ=1,SIZE(PCOVER,1) 
-          ZCOVER_WEIGHT(JJ,JVEGTYPE) =  PCOVER(JJ,JCOVER) * ZWEIGHT(JCOVER,JVEGTYPE)      
-          ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH) = ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH) + ZCOVER_WEIGHT(JJ,JVEGTYPE)
-          ZWORK(JJ,JPATCH) =  ZWORK(JJ,JPATCH) + ZDATA(JVEGTYPE)  * ZCOVER_WEIGHT(JJ,JVEGTYPE)
+DO JJ=1,ICOVER
+  !
+  IF (OCOVER(JJ)) THEN
+    !
+    JCOVER = JCOVER+1
+    !
+    DO JVEGTYPE=1,NVEGTYPE
+      !
+      JPATCH= PATCH_LIST(JVEGTYPE)  
+      !
+      IF (ZWEIGHT(JCOVER,JVEGTYPE)/=0.) THEN
+        !
+        IF (HATYPE=='ARI') THEN
+          ZVAL(:) = PDATA(JJ,JVEGTYPE)
+        ELSEIF (HATYPE=='INV') THEN
+          ZVAL(:) = 1. / PDATA(JJ,JVEGTYPE)
+        ELSEIF (HATYPE=='CDN') THEN
+          DO JI=1,SIZE(PCOVER,1)
+            ZVAL(JI) = 1./(LOG(ZDZ(JI,JPATCH)/PDATA(JJ,JVEGTYPE)))**2 
+          ENDDO
+        ELSE
+          CALL ABOR1_SFX('AV_PATCH_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED')
+        ENDIF
+        !
+        DO JI=1,SIZE(PCOVER,1)
+          IF (PCOVER(JI,JCOVER)/=0.) THEN
+            ZCOVER_WEIGHT =  PCOVER(JI,JCOVER) * ZWEIGHT(JCOVER,JVEGTYPE)      
+            ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) = ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) + ZCOVER_WEIGHT
+            ZWORK(JI,JPATCH) = ZWORK(JI,JPATCH) + ZVAL(JI) * ZCOVER_WEIGHT
+          ENDIF
         ENDDO
-      END DO
+        !
+      ENDIF
+      !   
+    ENDDO 
+    !
+  ENDIF
+  !
+ENDDO
 !
-!-------------------------------------------------------------------------------
-!
-!*    3.4    Inverse averaging
-!            -----------------
-!
-    CASE('INV' )
-!
-     DO JVEGTYPE=1,NVEGTYPE 
-       JPATCH=PATCH_LIST(JVEGTYPE)
-       DO JJ=1,SIZE(PCOVER,1) 
-         ZCOVER_WEIGHT(JJ,JVEGTYPE) =  PCOVER(JJ,JCOVER) * ZWEIGHT(JCOVER,JVEGTYPE)      
-         ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH) =  ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH)+ ZCOVER_WEIGHT(JJ,JVEGTYPE)
-         ZWORK(JJ,JPATCH)= ZWORK(JJ,JPATCH) + 1./ ZDATA(JVEGTYPE) * ZCOVER_WEIGHT(JJ,JVEGTYPE)
-       ENDDO
-     END DO    
-!
-!-------------------------------------------------------------------------------!
-!
-!*    3.5    Roughness length averaging
-!            --------------------------
-
-!
-    CASE('CDN')
-!
-      DO JVEGTYPE=1,NVEGTYPE
-        JPATCH=PATCH_LIST(JVEGTYPE) 
-        DO JJ=1,SIZE(PCOVER,1) 
-          ZCOVER_WEIGHT(JJ,JVEGTYPE) =  PCOVER(JJ,JCOVER) * ZWEIGHT(JCOVER,JVEGTYPE)      
-          ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH) =  ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH)+ ZCOVER_WEIGHT(JJ,JVEGTYPE)
-          ZWORK(JJ,JPATCH)= ZWORK(JJ,JPATCH) + 1./(LOG(ZDZ(JJ,JPATCH)/ ZDATA(JVEGTYPE)))**2    &
-                              * ZCOVER_WEIGHT(JJ,JVEGTYPE)  
-        ENDDO
-      END DO   
-!
-!-------------------------------------------------------------------------------
-!
-  CASE DEFAULT
-    CALL ABOR1_SFX('AV_PATCH_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED')
-!
-  END SELECT
-!
-END DO
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_4',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 !*    4.     End of Averaging
 !            ----------------
 !
-NMASK(:,:)=0
+IMASK(:,:)=0
 JCOUNT(:)=0
 DO JPATCH=1,IPATCH
-  DO JJ=1,SIZE(PCOVER,1)
-    IF ( ZSUM_COVER_WEIGHT_PATCH(JJ,JPATCH) >0.) THEN
+  DO JI=1,SIZE(PCOVER,1)
+    IF ( ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) >0.) THEN
       JCOUNT(JPATCH)=JCOUNT(JPATCH)+1
-      NMASK(JCOUNT(JPATCH),JPATCH)=JJ
+      IMASK(JCOUNT(JPATCH),JPATCH)=JI
     ENDIF
   ENDDO
 ENDDO
 !
+!-------------------------------------------------------------------------------
+  
+!
 !*    4.1    Selection of averaging type
 !            ---------------------------
 !
-SELECT CASE (HATYPE)
+  SELECT CASE (HATYPE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -738,7 +726,7 @@ SELECT CASE (HATYPE)
     DO JPATCH=1,IPATCH
 !cdir nodep
       DO JJ=1,JCOUNT(JPATCH)
-          JI = NMASK(JJ,JPATCH)
+          JI = IMASK(JJ,JPATCH)
           PFIELD(JI,JPATCH) =  ZWORK(JI,JPATCH) / ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH)
       ENDDO
     ENDDO
@@ -753,7 +741,7 @@ SELECT CASE (HATYPE)
     DO JPATCH=1,IPATCH
 !cdir nodep
       DO JJ=1,JCOUNT(JPATCH)
-        JI = NMASK(JJ,JPATCH)
+        JI = IMASK(JJ,JPATCH)
         PFIELD(JI,JPATCH) = ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) / ZWORK(JI,JPATCH)
       ENDDO
     ENDDO
@@ -768,7 +756,7 @@ SELECT CASE (HATYPE)
     DO JPATCH=1,IPATCH
 !cdir nodep
       DO JJ=1,JCOUNT(JPATCH)
-        JI=NMASK(JJ,JPATCH)
+        JI = IMASK(JJ,JPATCH)
         PFIELD(JI,JPATCH) = ZDZ(JI,JPATCH) * EXP( - SQRT(ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH)/ZWORK(JI,JPATCH)) )
       ENDDO
     ENDDO
@@ -779,13 +767,16 @@ SELECT CASE (HATYPE)
     CALL ABOR1_SFX('AV_PATCH_PGD_1D: (2) AVERAGING TYPE NOT ALLOWED')
 !
 END SELECT
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D',1,ZHOOK_HANDLE)
+!
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_4',1,ZHOOK_HANDLE)
+!
+!IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !   
 END SUBROUTINE AV_PATCH_PGD_1D
 !
 !     ################################################################
-      SUBROUTINE AV_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PGD* average a secondary physiographic variable from the
@@ -859,13 +850,14 @@ REAL, DIMENSION(:),     INTENT(IN)  :: PDATA   ! secondary field value for each 
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-!
+INTEGER :: JJ
 INTEGER :: ICOVER  ! number of cover classes
 INTEGER :: JCOVER  ! loop on cover classes
 !
@@ -889,7 +881,7 @@ IF (SIZE(PFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(PCOVER,3)
+ICOVER=SIZE(OCOVER)
 !
 IF (PRESENT(PDZ)) THEN
   ZDZ(:,:)=PDZ(:,:)
@@ -902,7 +894,13 @@ PFIELD(:,:)=XUNDEF
 ZWORK(:,:)=0.
 ZSUM_COVER_WEIGHT(:,:)=0.
 !-------------------------------------------------------------------------------
-DO JCOVER=1,ICOVER
+JCOVER = 0
+DO JJ=1,ICOVER
+  !
+  IF (.NOT.OCOVER(JJ)) CYCLE
+  !
+  JCOVER = JCOVER + 1
+  !
 !-------------------------------------------------------------------------------
 !
 !*    2.     Selection of the weighting function
@@ -913,38 +911,38 @@ DO JCOVER=1,ICOVER
          ZWEIGHT=1.
 
        CASE('NAT')
-         ZWEIGHT=XDATA_NATURE(JCOVER)
+         ZWEIGHT=XDATA_NATURE(JJ)
 
        CASE('GRD')
-         ZWEIGHT=XDATA_TOWN (JCOVER) * XDATA_GARDEN(JCOVER)
+         ZWEIGHT=XDATA_TOWN (JJ) * XDATA_GARDEN(JJ)
 
        CASE('TWN')
-         ZWEIGHT=XDATA_TOWN  (JCOVER)
+         ZWEIGHT=XDATA_TOWN  (JJ)
 
        CASE('WAT')
-         ZWEIGHT=XDATA_WATER (JCOVER)
+         ZWEIGHT=XDATA_WATER (JJ)
 
        CASE('SEA')
-         ZWEIGHT=XDATA_SEA   (JCOVER)
+         ZWEIGHT=XDATA_SEA   (JJ)
 
        CASE('BLD')
-         ZWEIGHT=XDATA_TOWN  (JCOVER) *        XDATA_BLD(JCOVER)
+         ZWEIGHT=XDATA_TOWN  (JJ) *        XDATA_BLD(JJ)
 
        CASE('STR')
-         ZWEIGHT=XDATA_TOWN  (JCOVER) * ( 1. - XDATA_BLD(JCOVER) )
+         ZWEIGHT=XDATA_TOWN  (JJ) * ( 1. - XDATA_BLD(JJ) )
 
        CASE('TRE')
          PFIELD(:,:)=0.
-         ZWEIGHT=XDATA_NATURE(JCOVER) * (  XDATA_VEGTYPE(JCOVER,NVT_TREE) &
-                                           + XDATA_VEGTYPE(JCOVER,NVT_EVER) &
-                                           + XDATA_VEGTYPE(JCOVER,NVT_CONI) )  
+         ZWEIGHT=XDATA_NATURE(JJ) * (  XDATA_VEGTYPE(JJ,NVT_TREE) &
+                                           + XDATA_VEGTYPE(JJ,NVT_EVER) &
+                                           + XDATA_VEGTYPE(JJ,NVT_CONI) )  
 
        CASE('GRT')
          PFIELD(:,:)=0.
-         ZWEIGHT=XDATA_TOWN (JCOVER) * XDATA_GARDEN(JCOVER)  &
-                          * (  XDATA_VEGTYPE(JCOVER,NVT_TREE)  &
-                             + XDATA_VEGTYPE(JCOVER,NVT_EVER)  &
-                             + XDATA_VEGTYPE(JCOVER,NVT_CONI) )  
+         ZWEIGHT=XDATA_TOWN (JJ) * XDATA_GARDEN(JJ)  &
+                          * (  XDATA_VEGTYPE(JJ,NVT_TREE)  &
+                             + XDATA_VEGTYPE(JJ,NVT_EVER)  &
+                             + XDATA_VEGTYPE(JJ,NVT_CONI) )  
 
        CASE DEFAULT
          CALL ABOR1_SFX('AV_PGD: WEIGHTING FUNCTION NOT ALLOWED')
@@ -962,7 +960,7 @@ DO JCOVER=1,ICOVER
 !
   ZSUM_COVER_WEIGHT(:,:) = ZSUM_COVER_WEIGHT(:,:) + ZCOVER_WEIGHT(:,:)
 !
-  ZDATA = PDATA(JCOVER)
+  ZDATA = PDATA(JJ)
 !
 !*    3.2    Selection of averaging type
 !            ---------------------------
@@ -1066,7 +1064,7 @@ END SUBROUTINE AV_PGD
 !
 !
 !     ################################################################
-      SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PATCH_PGD* average for each surface patch a secondary physiographic 
@@ -1142,13 +1140,14 @@ REAL, DIMENSION(:,:),     INTENT(IN)  :: PDATA   ! secondary field value for eac
  CHARACTER(LEN=3),       INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),       INTENT(IN)  :: HATYPE  ! Type of averaging
+ LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-!
+INTEGER :: JJ
 INTEGER :: ICOVER  ! number of cover classes
 INTEGER :: JCOVER  ! loop on cover classes
 !
@@ -1182,7 +1181,7 @@ IF (SIZE(PFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(PCOVER,3)
+ICOVER=SIZE(OCOVER)
 IPATCH=SIZE(PFIELD,3)
 !
 !
@@ -1201,7 +1200,13 @@ ZWORK(:,:,:)=0.
 ZSUM_COVER_WEIGHT_PATCH(:,:,:)=0.
 !
 !-------------------------------------------------------------------------------
-DO JCOVER=1,ICOVER
+JCOVER = 0
+DO JJ=1,ICOVER
+  !
+  IF (.NOT.OCOVER(JJ)) CYCLE
+  !
+  JCOVER = JCOVER + 1
+  !
 !-------------------------------------------------------------------------------
 !
 !*    2.     Selection of the weighting function for vegtype
@@ -1211,86 +1216,86 @@ DO JCOVER=1,ICOVER
 
      CASE('NAT')
        DO JVEGTYPE=1,NVEGTYPE
-         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)
+         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)
        END DO
 
      CASE('GRD')
        DO JVEGTYPE=1,NVEGTYPE
-         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)
+         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)
        END DO
 
      CASE('VEG')
        DO JVEGTYPE=1,NVEGTYPE  
-         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)*&
-                             XDATA_VEG(JCOVER,KDECADE,JVEGTYPE)  
+         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)*&
+                             XDATA_VEG(JJ,KDECADE,JVEGTYPE)  
        END DO
 
      CASE('BAR')
        DO JVEGTYPE=1,NVEGTYPE  
-         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)*&
-                             (1.-XDATA_VEG(JCOVER,KDECADE,JVEGTYPE)) 
+         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)*&
+                             (1.-XDATA_VEG(JJ,KDECADE,JVEGTYPE)) 
        END DO
 
      CASE('GRV')
        DO JVEGTYPE=1,NVEGTYPE  
-         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)*&
-                             XDATA_VEG(JCOVER,KDECADE,JVEGTYPE)  
+         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)*&
+                             XDATA_VEG(JJ,KDECADE,JVEGTYPE)  
        END DO
 
      CASE('GRB')
        DO JVEGTYPE=1,NVEGTYPE  
-         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)*&
-                             (1.-XDATA_VEG(JCOVER,KDECADE,JVEGTYPE))
+         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)*&
+                             (1.-XDATA_VEG(JJ,KDECADE,JVEGTYPE))
        ENDDO 
        
      CASE('DVG') ! average only on vegetated area
        ZWEIGHT(:) = 0.0
        DO JVEGTYPE=1,NVEGTYPE
-         IF ( SUM(XDATA_LAI(JCOVER,:,JVEGTYPE)).GT.0.) &
-           ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)
+         IF ( SUM(XDATA_LAI(JJ,:,JVEGTYPE)).GT.0.) &
+           ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)
        END DO     
 
      CASE('GDV') ! average only on vegetated area
        ZWEIGHT(:) = 0.0             
        DO JVEGTYPE=1,NVEGTYPE
-         IF ( SUM(XDATA_LAI(JCOVER,:,JVEGTYPE)).GT.0.) &
-           ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)       
+         IF ( SUM(XDATA_LAI(JJ,:,JVEGTYPE)).GT.0.) &
+           ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)       
        END DO     
 
      CASE('LAI')
        DO JVEGTYPE=1,NVEGTYPE  
-         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)*&
-                             XDATA_LAI(JCOVER,KDECADE,JVEGTYPE)  
+         ZWEIGHT(JVEGTYPE)=XDATA_NATURE(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)*&
+                             XDATA_LAI(JJ,KDECADE,JVEGTYPE)  
        END DO
 
      CASE('GRL')
        DO JVEGTYPE=1,NVEGTYPE  
-         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER)*XDATA_VEGTYPE(JCOVER,JVEGTYPE)*&
-                             XDATA_LAI(JCOVER,KDECADE,JVEGTYPE)  
+         ZWEIGHT(JVEGTYPE)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ)*XDATA_VEGTYPE(JJ,JVEGTYPE)*&
+                             XDATA_LAI(JJ,KDECADE,JVEGTYPE)  
        END DO
 
       CASE('TRE')
         ZWEIGHT(:)=0.
-        IF (XDATA_VEGTYPE(JCOVER,NVT_TREE)>0.) THEN
-          ZWEIGHT(NVT_TREE)=XDATA_NATURE(JCOVER) * XDATA_VEGTYPE(JCOVER,NVT_TREE)
+        IF (XDATA_VEGTYPE(JJ,NVT_TREE)>0.) THEN
+          ZWEIGHT(NVT_TREE)=XDATA_NATURE(JJ) * XDATA_VEGTYPE(JJ,NVT_TREE)
         END IF
-        IF (XDATA_VEGTYPE(JCOVER,NVT_CONI)>0.) THEN
-          ZWEIGHT(NVT_CONI)=XDATA_NATURE(JCOVER) * XDATA_VEGTYPE(JCOVER,NVT_CONI)
+        IF (XDATA_VEGTYPE(JJ,NVT_CONI)>0.) THEN
+          ZWEIGHT(NVT_CONI)=XDATA_NATURE(JJ) * XDATA_VEGTYPE(JJ,NVT_CONI)
         END IF
-        IF (XDATA_VEGTYPE(JCOVER,NVT_EVER)>0.) THEN
-          ZWEIGHT(NVT_EVER)=XDATA_NATURE(JCOVER) * XDATA_VEGTYPE(JCOVER,NVT_EVER)
+        IF (XDATA_VEGTYPE(JJ,NVT_EVER)>0.) THEN
+          ZWEIGHT(NVT_EVER)=XDATA_NATURE(JJ) * XDATA_VEGTYPE(JJ,NVT_EVER)
         END IF
 
       CASE('GRT')
         ZWEIGHT(:)=0.
-        IF (XDATA_VEGTYPE(JCOVER,NVT_TREE)>0.) THEN
-          ZWEIGHT(NVT_TREE)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER) * XDATA_VEGTYPE(JCOVER,NVT_TREE)
+        IF (XDATA_VEGTYPE(JJ,NVT_TREE)>0.) THEN
+          ZWEIGHT(NVT_TREE)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ) * XDATA_VEGTYPE(JJ,NVT_TREE)
         END IF
-        IF (XDATA_VEGTYPE(JCOVER,NVT_CONI)>0.) THEN
-          ZWEIGHT(NVT_CONI)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER) * XDATA_VEGTYPE(JCOVER,NVT_CONI)
+        IF (XDATA_VEGTYPE(JJ,NVT_CONI)>0.) THEN
+          ZWEIGHT(NVT_CONI)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ) * XDATA_VEGTYPE(JJ,NVT_CONI)
         END IF
-        IF (XDATA_VEGTYPE(JCOVER,NVT_EVER)>0.) THEN
-          ZWEIGHT(NVT_EVER)=XDATA_TOWN(JCOVER)*XDATA_GARDEN(JCOVER) * XDATA_VEGTYPE(JCOVER,NVT_EVER)
+        IF (XDATA_VEGTYPE(JJ,NVT_EVER)>0.) THEN
+          ZWEIGHT(NVT_EVER)=XDATA_TOWN(JJ)*XDATA_GARDEN(JJ) * XDATA_VEGTYPE(JJ,NVT_EVER)
         END IF
 
       CASE DEFAULT
@@ -1322,7 +1327,7 @@ DO JCOVER=1,ICOVER
   ZSUM_COVER_WEIGHT_PATCH(:,:,:) = ZSUM_COVER_WEIGHT_PATCH(:,:,:) + ZCOVER_WEIGHT_PATCH(:,:,:)
 
 
-  ZDATA(:) = PDATA(JCOVER,:)
+  ZDATA(:) = PDATA(JJ,:)
 
 !
 !*    3.2    Selection of averaging type
@@ -1339,8 +1344,7 @@ DO JCOVER=1,ICOVER
 !
       DO JVEGTYPE=1,NVEGTYPE
         JPATCH= VEGTYPE_TO_PATCH (JVEGTYPE,IPATCH)
-        ZWORK(:,:,JPATCH) =  ZWORK(:,:,JPATCH) + ZDATA(JVEGTYPE)          &
-                                   * ZCOVER_WEIGHT(:,:,JVEGTYPE)  
+        ZWORK(:,:,JPATCH) =  ZWORK(:,:,JPATCH) + ZDATA(JVEGTYPE) * ZCOVER_WEIGHT(:,:,JVEGTYPE)  
       END DO
 !
 !-------------------------------------------------------------------------------
@@ -1352,8 +1356,7 @@ DO JCOVER=1,ICOVER
 !
      DO JVEGTYPE=1,NVEGTYPE 
        JPATCH=VEGTYPE_TO_PATCH (JVEGTYPE,IPATCH)
-       ZWORK(:,:,JPATCH)= ZWORK(:,:,JPATCH) + 1./ ZDATA(JVEGTYPE)     &
-                                 * ZCOVER_WEIGHT(:,:,JVEGTYPE)  
+       ZWORK(:,:,JPATCH)= ZWORK(:,:,JPATCH) + 1./ ZDATA(JVEGTYPE)* ZCOVER_WEIGHT(:,:,JVEGTYPE)  
      END DO    
 !
 !-------------------------------------------------------------------------------!
@@ -1433,7 +1436,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD',1,ZHOOK_HANDLE)
 END SUBROUTINE AV_PATCH_PGD
 !
 !     ################################################################
-      SUBROUTINE MAJOR_PATCH_PGD_1D(TFIELD,PCOVER,TDATA,HSFTYPE,HATYPE,KDECADE)
+      SUBROUTINE MAJOR_PATCH_PGD_1D(TFIELD,PCOVER,TDATA,HSFTYPE,HATYPE,OCOVER,KDECADE)
 !     ################################################################
 !
 !!**** *MAJOR_PATCH_PGD* find the dominant date for each vegetation type
@@ -1488,12 +1491,13 @@ TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN)  :: TDATA   ! secondary field value
  CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
                                                ! is defined
  CHARACTER(LEN=3),     INTENT(IN)  :: HATYPE  ! Type of averaging
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 INTEGER,     INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-!
+INTEGER :: JJ
 INTEGER :: ICOVER  ! number of cover classes
 INTEGER :: JCOVER  ! loop on cover classes
 !
@@ -1519,7 +1523,7 @@ IF (SIZE(TFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(PCOVER,2)
+ICOVER=SIZE(OCOVER)
 IPATCH=SIZE(TFIELD,2)
 !
 TFIELD(:,:)%TDATE%YEAR  = NUNDEF
@@ -1539,11 +1543,16 @@ DO JP = 1, SIZE(PCOVER,1)
       ! 
       IF(JPATCH==VEGTYPE_TO_PATCH(JVEGTYPE,IPATCH)) THEN
         !
-        DO JCOVER=1,ICOVER
+        JCOVER = 0
+        DO JJ=1,ICOVER
           !
-          IF (IDATA_DOY(JCOVER,JVEGTYPE) /= NUNDEF) THEN
+          IF (.NOT.OCOVER(JJ)) CYCLE
+          !
+          JCOVER = JCOVER + 1
+          !
+          IF (IDATA_DOY(JJ,JVEGTYPE) /= NUNDEF) THEN
             !
-            ZCOUNT(IDATA_DOY(JCOVER,JVEGTYPE)) = ZCOUNT(IDATA_DOY(JCOVER,JVEGTYPE)) + PCOVER(JP,JCOVER)
+            ZCOUNT(IDATA_DOY(JJ,JVEGTYPE)) = ZCOUNT(IDATA_DOY(JJ,JVEGTYPE)) + PCOVER(JP,JCOVER)
             !
           END IF
           !

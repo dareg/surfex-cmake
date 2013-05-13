@@ -54,7 +54,7 @@ USE MODN_IO_OFFLINE, ONLY : CSURF_FILETYPE
 USE MODD_SURF_ATM_n, ONLY : CSEA,        CWATER,      CTOWN,      CNATURE,      &
                             XSEA,        XWATER,      XTOWN,      XNATURE,      &
                             NSIZE_SEA,   NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
-                            NR_SEA,      NR_WATER,    NR_TOWN,                  &
+                            NR_SEA,      NR_WATER,    NR_TOWN, LCOVER,          &
                             NR_NATURE,   XCOVER,      NDIM_FULL,  NSIZE_FULL,   &
                             NDIM_NATURE, NDIM_SEA,    NDIM_WATER, NDIM_TOWN 
 
@@ -295,7 +295,7 @@ ALLOCATE(XNATURE(ISIZE))
 ALLOCATE(XWATER (ISIZE))
 ALLOCATE(XTOWN  (ISIZE))
 
- CALL CONVERT_COVER_FRAC(XCOVER,XSEA,XNATURE,XTOWN,XWATER)
+ CALL CONVERT_COVER_FRAC(XCOVER,LCOVER,XSEA,XNATURE,XTOWN,XWATER)
 
 NSIZE_NATURE = COUNT(XNATURE(:) > 0.0)
 NSIZE_TOWN   = COUNT(XTOWN(:)   > 0.0)

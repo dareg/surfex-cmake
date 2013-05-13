@@ -58,7 +58,6 @@ TYPE (DATE_TIME)                :: TZTIME_BUF    ! current date and time
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD         ! field read
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D       ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD             ! depth of field in the soil
-INTEGER                         :: JVEGTYPE       ! loop counter on vegtypes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -111,11 +110,11 @@ SELECT CASE(HSURF)
 !*      3.4    Water content intercepted on leaves, LAI
 !
   CASE('WR     ')
-     ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
+     ALLOCATE(PFIELD(NNI,1,1))
      PFIELD(:,:,:) = XWR_DEF
 !
   CASE('LAI    ')
-     ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
+     ALLOCATE(PFIELD(NNI,1,1))
      PFIELD(:,:,:) = XUNDEF
 !
 !
@@ -160,10 +159,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
      CALL INTERP_GRID(ZD,ZFIELD,XGRID_SOIL,ZOUT)
      !
      !* extends definition to all vegtypes.
-     ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),NVEGTYPE))
-     DO JVEGTYPE=1,NVEGTYPE
-       PFIELD(:,:,JVEGTYPE)=ZOUT(:,:)
-     END DO
+     ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),1))
+     PFIELD(:,:,1)=ZOUT(:,:)
      !* end
      DEALLOCATE(ZOUT)
      DEALLOCATE(ZFIELD)

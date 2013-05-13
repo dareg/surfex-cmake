@@ -43,8 +43,6 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_PUT_ON_ALL_VEGTYPES
-!
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
@@ -70,7 +68,7 @@ REAL, DIMENSION(:,:),   POINTER     :: ZFIELD1        ! field read on initial MN
 REAL, DIMENSION(:,:,:), POINTER     :: ZD             ! depth of field in the soil
 REAL, DIMENSION(:,:), POINTER     :: ZD1            ! depth of field in the soil, one patch
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT         !
-INTEGER                             :: JPATCH, JVEGTYPE        ! loop counter for patch
+INTEGER                             :: JPATCH       ! loop counter for patch
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -125,11 +123,11 @@ SELECT CASE(HSURF)
      ALLOCATE(ZOUT(SIZE(ZFIELD,1),SIZE(XGRID_SOIL)))
      ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),SIZE(ZFIELD,3)))
 !
-     DO JVEGTYPE=1,SIZE(ZFIELD,3)
-        ZFIELD1(:,:)=ZFIELD(:,:,JVEGTYPE)
-        ZD1(:,:)=ZD(:,:,JVEGTYPE)
+     DO JPATCH=1,SIZE(ZFIELD,3)
+        ZFIELD1(:,:)=ZFIELD(:,:,JPATCH)
+        ZD1(:,:)=ZD(:,:,JPATCH)
         CALL INTERP_GRID(ZD1,ZFIELD1,XGRID_SOIL,ZOUT)
-        PFIELD(:,:,JVEGTYPE)=ZOUT(:,:)
+        PFIELD(:,:,JPATCH)=ZOUT(:,:)
      END DO
    
 !
@@ -143,22 +141,19 @@ SELECT CASE(HSURF)
 !*      3.4    Water content intercepted on leaves, LAI
 !
   CASE('WR     ')
-     ALLOCATE(PFIELD(INI,1,NVEGTYPE))
      !* number of tiles
      YRECFM='PATCH_NUMBER'
      CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-     ALLOCATE(ZFIELD(INI,1,IPATCH))
+     ALLOCATE(PFIELD(INI,1,IPATCH))
      YRECFM = 'WR'
      CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')
-     CALL READ_SURF(HFILETYPE,YRECFM,ZFIELD(:,1,:),IRESP,HDIR='A')
+     CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
-     CALL PUT_ON_ALL_VEGTYPES(INI,1,IPATCH,NVEGTYPE,ZFIELD,PFIELD)
-     DEALLOCATE(ZFIELD)
 !
   CASE('LAI    ')
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-     ALLOCATE(PFIELD(INI,1,NVEGTYPE))
+     ALLOCATE(PFIELD(INI,1,1))
      PFIELD(:,:,:) = XUNDEF
 !
 END SELECT

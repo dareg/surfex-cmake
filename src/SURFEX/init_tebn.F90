@@ -47,7 +47,7 @@ USE MODD_SNOW_PAR, ONLY : XEMISSN
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 
 USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF,                                     &
-                                XTSTEP, XOUT_TSTEP, TTIME, XCOVER,                       &
+                                XTSTEP, XOUT_TSTEP, TTIME, XCOVER, LCOVER,               &
                                 XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
                                 XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XGREENROOF,          &
                                 XROAD, XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,          &
@@ -392,7 +392,7 @@ DO JPATCH=1,NTEB_PATCH
     ZDEF_ROAD_DIR = 180. * FLOAT(JPATCH-1) / FLOAT(NTEB_PATCH)
   END IF
   !
-  CALL CONVERT_PATCH_TEB(XCOVER, ZDEF_ROAD_DIR,                                  &
+  CALL CONVERT_PATCH_TEB(XCOVER, LCOVER, ZDEF_ROAD_DIR,                          &
                       PZ0_TOWN=XZ0_TOWN,                                         &
                       PALB_ROOF=XALB_ROOF,                                       &
                       PEMIS_ROOF=XEMIS_ROOF,PHC_ROOF=XHC_ROOF,PTC_ROOF=XTC_ROOF, &

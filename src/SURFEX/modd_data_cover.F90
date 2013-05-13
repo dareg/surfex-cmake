@@ -50,6 +50,10 @@ INTEGER :: NECO2_START_YEAR   =2002     ! first year of data for ecoclimap2
 INTEGER :: NECO2_END_YEAR     =2006     ! last  year of data for ecoclimap2
 !-------------------------------------------------------------------------------
 !
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_WEIGHT
+!
+!-------------------------------------------------------------------------------
+!
 ! Mask and number of grid elements containing patches/tiles:
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_VEGTYPE   ! fractions of veg. types

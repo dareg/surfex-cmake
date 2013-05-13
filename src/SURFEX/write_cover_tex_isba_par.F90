@@ -89,6 +89,7 @@ INTEGER           :: JPATCH   ! loop counter
 LOGICAL           :: GLINE ! flag to write an additional horizontal line
 !
 REAL, DIMENSION(JPCOVER,JPCOVER     ) :: ZCOVER
+LOGICAL, DIMENSION(JPCOVER          ) :: GCOVER
 REAL, DIMENSION(JPCOVER,KPATCH, 12  ) :: ZVEG, ZLAI, ZZ0VEG, ZEMIS_ECO, ZF2I
 REAL, DIMENSION(JPCOVER,KPATCH      ) :: ZRSMIN,ZGAMMA,ZRGL,ZCV,             &
                                            ZALBNIR_VEG,ZALBVIS_VEG,ZALBUV_VEG, &
@@ -115,9 +116,11 @@ DO I=1,JPCOVER
   ZCOVER(I,I) = 1.
 END DO
 !
+GCOVER(:) = .TRUE.
+!
 !ocl scalar
 !
- CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,HPHOTO, 'NAT',                    &
+ CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
                         PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &
@@ -130,7 +133,7 @@ END DO
                         PH_TREE=ZH_TREE,PRE25=ZRE25                       )  
 !
 DO J=1,12
-  CALL CONVERT_COVER_ISBA(HISBA,3*J-1,ZCOVER,HPHOTO, 'NAT',                &
+  CALL CONVERT_COVER_ISBA(HISBA,3*J-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
                             PVEG=ZVEG(:,:,J), PLAI=ZLAI(:,:,J),            &
                             PZ0=ZZ0VEG(:,:,J), PEMIS_ECO=ZEMIS_ECO(:,:,J), &
                             PF2I=ZF2I(:,:,J),OSTRESS=GSTRESS(:,:,J)        )  
