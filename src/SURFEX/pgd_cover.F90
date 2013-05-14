@@ -365,6 +365,16 @@ IF(.NOT.LIMP_COVER)THEN
 !-------------------------------------------------------------------------------
 ENDIF
 !-------------------------------------------------------------------------------
+!*    8.      List of cover present
+!             ---------------------
+!
+ALLOCATE(LCOVER(JPCOVER))
+LCOVER = .FALSE.
+DO JCOVER=1,JPCOVER
+  ICOVER = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0., 'COV')
+  IF (ICOVER>0) LCOVER(JCOVER)=.TRUE. 
+END DO
+!-------------------------------------------------------------------------------
 !
 !*    9.      Land - sea fractions
 !             --------------------
@@ -501,16 +511,6 @@ NDIM_NATURE    = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XNATURE(:) > 0., 'DIM')
 NDIM_WATER     = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XWATER (:) > 0., 'DIM')
 NDIM_SEA       = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XSEA   (:) > 0., 'DIM')
 NDIM_TOWN      = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XTOWN  (:) > 0., 'DIM')
-!
-!*    8.      List of cover present
-!             ---------------------
-!
-ALLOCATE(LCOVER(JPCOVER))
-LCOVER = .FALSE.
-DO JCOVER=1,JPCOVER
-  ICOVER = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0., 'COV')
-  IF (ICOVER>0) LCOVER(JCOVER)=.TRUE. 
-END DO
 !
 IF (LHOOK) CALL DR_HOOK('PGD_COVER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
