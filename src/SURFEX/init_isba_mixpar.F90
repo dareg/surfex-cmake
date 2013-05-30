@@ -131,7 +131,7 @@ ENDIF
 KDECADE2 = KDECADE
 IF (NTIME==2) KDECADE2 = KDECADE2 + 10 
 KDECADE2 = (KDECADE2-1) * NTIME / 36 + 1
-IF (NTIME==2) KDECADE2 = MOD(KDECADE2,2)
+IF (NTIME==2 .AND. KDECADE2==3) KDECADE2 = 1
 !
 !          1. Arrays needed further
 !          ------------------------
