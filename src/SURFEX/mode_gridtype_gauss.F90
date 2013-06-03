@@ -355,6 +355,7 @@ INTEGER :: JX ! longitude loop counter
 INTEGER :: JY ! latitude loop counter
 REAL                      :: ZPI, ZRD, ZI
 REAL, DIMENSION(KNLATI)   :: ZNLOPA, ZSINLA, ZWG
+REAL, DIMENSION(KNLATI)   :: ZDSINLA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -367,7 +368,7 @@ IF (KTYP==1) ZI=180.
 ZNLOPA=FLOAT(KNLOPA)
 !
 ! gaussian latitudes calculation
- CALL LATITUDES_GAUSS(KNLATI,ZSINLA,ZWG)
+ CALL LATITUDES_GAUSS(KNLATI,ZSINLA,ZDSINLA,ZWG)
 !
 JL=KNLATI/2
 DO JY=1,JL
@@ -443,6 +444,7 @@ INTEGER :: JX ! longitude loop counter
 INTEGER :: JY ! latitude loop counter
 REAL                    :: ZNLATI, ZPI, ZRD
 REAL, DIMENSION(KNLATI) :: ZNLOPA, ZSINLA, ZWG
+REAL, DIMENSION(KNLATI)   :: ZDSINLA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -454,7 +456,7 @@ ZNLATI=FLOAT(KNLATI)
 ZNLOPA=FLOAT(KNLOPA)
 !
 ! gaussian latitudes calculation
- CALL LATITUDES_GAUSS(KNLATI,ZSINLA,ZWG)
+ CALL LATITUDES_GAUSS(KNLATI,ZSINLA,ZDSINLA,ZWG)
 !
 JL=KNLATI/2
 DO JY=1,JL
@@ -490,100 +492,132 @@ END SUBROUTINE GAUSS_GRID_LIMITS
 !############################################################################
   !############################################################################
   !        ####################################################################
-  SUBROUTINE XY_GAUSS(PLAPO,PLOPO,PCODIL, &
-                              PLAT,PLON,PLAT_XY,PLON_XY)  
-    !      ####################################################################
+SUBROUTINE XY_GAUSS(PCODIL,KSIZE,PNODATA,PVALUE,PLAT_XY,PLON_XY)  
+  !      ####################################################################
+  !
+  !!****  *LATLON_GAUSS * - Routine to compute coordinates on a transform sphere
+  !!                        from geographical coordinates            
+  !!
+  !!     PURPOSE
+  !!     -------
+  !        This routine computes the latitude and longitude a real coordinates 
+  !        given array to an arpege model coordinates (rotated stretched)
+  !
+  !
+  !
+  !!**   METHOD
+  !!     ------
+  !!       use of rotations routines (eggmrt) and streching conformal formulae 
+  !!       to pass from real sphere (PLAT,PLON) transform sphere (PLAT_XY, PLON_XY)
+  !!
+  !!     EXTERNAL
+  !!     --------
+  !!       None
+  !!
+  !!     REFERENCE
+  !!     ---------
+  !!         Arpege DOC "Sphere Transphormee" Chapitre 7 version du 4/6/1991
+  !!         J-D Gril for GEO_GAUSS 2005
+  !!         J-D Gril Doc for EGGANGLES routines (new EGGX) 2005        
+  !!       
+  !!     AUTHOR
+  !!     ------
+  !!      J-D Gril
+  !!
+  !!     MODIFICATION
+  !!     ------------
+  !!       Original  10/2005
+  !
+  !-------------------------------------------------------------------------------
+  !
+  !*     0.     DECLARATIONS
+  !             ------------
+  !
+  USE MODD_GET_MESH_INDEX_GAUSS, ONLY : XLON, XLAT, XCOST, XSINTC, XSINTS, XCOSN, XSINN, &
+                                        XLONP, XLATP, XCOSP, XSINP, XPI, X1, X2, XDR  
+  !
+  IMPLICIT NONE
+  !
+  !*     0.1    Declarations of arguments and results
+  !
+  REAL,                 INTENT(IN) :: PCODIL
+  INTEGER,              INTENT(IN) :: KSIZE
+  REAL,                 INTENT(IN) :: PNODATA
+  REAL, DIMENSION(:),   INTENT(IN) :: PVALUE  ! value of the point to add
+  REAL, DIMENSION(:),   INTENT(OUT):: PLAT_XY,PLON_XY 
+  !
+  !*     0.2    Declarations of local variables
+  ! 
+  REAL :: ZCOS1, ZV1, ZINVS, ZLAT1, ZCOS2, ZLON1, ZINVC, ZSINN
+  REAL :: ZV2,  ZSINT, ZCOST, ZV3, ZLAT2, ZM, ZLON2
+  !
+  INTEGER :: JJ, IDN, IDT
+  !
+  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  !--------------------------------------------------------------------------------
+  !
+  !*     1.     Preliminary calculations
+  !             ------------------------
+  !
+  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE)
+  !
+!
+!$OMP PARALLEL DO PRIVATE(IDN,IDT,ZCOS1, ZV1, ZLAT1, ZCOS2, ZLON1, ZINVC, &
+!$OMP ZSINN, ZV2, ZINVS, ZSINT, ZCOST, ZV3, ZLAT2, ZM, ZLON2)
+  DO JJ=1,SIZE(PVALUE)
     !
-    !!****  *LATLON_GAUSS * - Routine to compute coordinates on a transform sphere
-    !!                        from geographical coordinates            
-    !!
-    !!     PURPOSE
-    !!     -------
-    !        This routine computes the latitude and longitude a real coordinates 
-    !        given array to an arpege model coordinates (rotated stretched)
+    IF (PVALUE(JJ)==PNODATA) CYCLE
     !
+    IDN = MOD(JJ,KSIZE) 
+    IF (IDN==0) IDN=KSIZE
+    IDT = CEILING(1.*JJ/KSIZE)
     !
+    ZCOS1 = XCOSN(IDN)*XCOST(IDT)
+    !ZCOS1 = COS(XLAT(IDT))*COS(XLON(IDN)-XLONP)
+    ZV1 = MIN(1.,MAX(-1.,XSINTS(IDT)+XCOSP*ZCOS1))
+    !ZV1 = MIN(1.,MAX(-1.,SIN(XLATP)*SIN(XLAT(IDT))+COS(XLATP)*ZCOS1))
+    ZLAT1 = ASIN(ZV1)
     !
-    !!**   METHOD
-    !!     ------
-    !!       use of rotations routines (eggmrt) and streching conformal formulae 
-    !!       to pass from real sphere (PLAT,PLON) transform sphere (PLAT_XY, PLON_XY)
-    !!
-    !!     EXTERNAL
-    !!     --------
-    !!       None
-    !!
-    !!     REFERENCE
-    !!     ---------
-    !!         Arpege DOC "Sphere Transphormee" Chapitre 7 version du 4/6/1991
-    !!         J-D Gril for GEO_GAUSS 2005
-    !!         J-D Gril Doc for EGGANGLES routines (new EGGX) 2005        
-    !!       
-    !!     AUTHOR
-    !!     ------
-    !!      J-D Gril
-    !!
-    !!     MODIFICATION
-    !!     ------------
-    !!       Original  10/2005
+    ZCOS2 = COS(ZLAT1)
     !
-    !-------------------------------------------------------------------------------
+    ZLON1 = 0.0 
+    IF (ZCOS2 /= 0.0) THEN
+      !ZINVC = 1./ZCOS2
+      !ZSINN = - XCOST(IDT)*XSINN(IDN)*ZINVC
+      !ZV2 = MIN(1.,MAX(-1.,(XSINTC(IDT)-XSINP*ZCOS1)*ZINVC))
+      ZSINN = - XCOST(IDT)*XSINN(IDN)/ZCOS2
+      !ZSINN = - COS(XLAT(IDT))*SIN(XLON(IDN)-XLONP)/ZCOS2
+      ZV2 = MIN(1.,MAX(-1.,(XSINTC(IDT)-XSINP*ZCOS1)/ZCOS2))     
+      !ZV2 = MIN(1.,MAX(-1.,(COS(XLATP)*SIN(XLAT(IDT))-SIN(XLATP)*ZCOS1)/ZCOS2))
+      ZLON1 = ACOS(ZV2) * SIGN(1.,ZSINN)
+    ENDIF
     !
-    !*     0.     DECLARATIONS
-    !             ------------
+    !-----------------------
+    !ZINVS = 1./(X2+X1*ZV1)
+    !ZSINT = ZINVS*(X1+X2*ZV1)
+    !ZCOST = ZINVS*ZCOS2*PCODIL*2.0
+    ZSINT = (X1+X2*ZV1)/(X2+X1*ZV1)
+    ZCOST = 2.0*PCODIL*ZCOS2/(X2+X1*ZV1)
     !
-    USE MODE_GEO_GAUSS,ONLY : GAUSS_TR, GAUSS_RT
-    USE EGGANGLES,ONLY : LOLA, ANGLE_DOMAIN
+    ZV3 = MIN(1.,MAX(-1.,ZCOST))
+    ZLAT2 = ACOS(ZV3)*SIGN(1.,ZSINT)
     !
-    IMPLICIT NONE
+    ZM = MOD(ZLON1,XPI)
+    ZLON2 = (ZM-XPI*MOD(REAL(INT(ZLON1/XPI)),2.0))*SIGN(1.0,ZLON1)*SIGN(1.0,ZM)
     !
-    !*     0.1    Declarations of arguments and results
-    !
-    REAL,                 INTENT(IN) :: PLOPO
-    REAL,                 INTENT(IN) :: PLAPO
-    REAL,                 INTENT(IN) :: PCODIL
-    REAL,                 INTENT(IN) :: PLAT,PLON
-
-    REAL,                 INTENT(OUT):: PLAT_XY,PLON_XY    
-    !
-    !*     0.2    Declarations of local variables
-    ! 
-    TYPE(LOLA)                          :: TZPOLE
-    TYPE(LOLA)                          :: TZPTCI,TZPTCO
-    !
-    REAL :: ZPI
-    REAL :: ZDR
-    REAL(KIND=JPRB) :: ZHOOK_HANDLE
-    !--------------------------------------------------------------------------------
-    !
-    !*     1.     Preliminary calculations
-    !             ------------------------
-    !
-    IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE)
-    ZPI = 4.*ATAN(1.)
-    ZDR = ZPI / 180.
-    !
-    TZPTCI%LON = ANGLE_DOMAIN(PLON,DOM='0+',UNIT='D') * ZDR
-    TZPTCI%LAT = PLAT * ZDR
-    TZPOLE%LON = ANGLE_DOMAIN(PLOPO,DOM='0+',UNIT='D') * ZDR
-    TZPOLE%LAT = PLAPO * ZDR
-    !
-    !-------------------------------------------------------------------------------
-    !
-    !*     2.    Calcul
-    !            ------
-    !
-    TZPTCO = ANGLE_DOMAIN(GAUSS_TR(TZPTCI,TZPOLE,PCODIL),DOM='-+',UNIT='R')
-    !     
     !---------------------------------------------------------------------------------
     !
     !*     3.      EXIT
     !              ----
     !
-    PLAT_XY = TZPTCO%LAT / ZDR
-    PLON_XY = TZPTCO%LON / ZDR
+    PLAT_XY(JJ) = ZLAT2 / XDR
+    PLON_XY(JJ) = ZLON2 / XDR
     !
-    IF (ABS(PLON_XY-360.)<1.E-4) PLON_XY = 0.
+    IF (ABS(PLON_XY(JJ)-360.)<1.E-4) PLON_XY(JJ) = 0.
+    !
+  ENDDO
+!$OMP END PARALLEL DO    
+!
   IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE)
     !---------------------------------------------------------------------------------
   END SUBROUTINE XY_GAUSS
@@ -671,153 +705,267 @@ END SUBROUTINE GAUSS_GRID_LIMITS
   !-------------------------------------------------------------------------------
   !############################################################################
   !##################################
-  SUBROUTINE LATITUDES_GAUSS(N,XMU,W)
+  SUBROUTINE LATITUDES_GAUSS(KN,PL,PDL,PW)
   !##################################
+
+  !**** *SUGAW36 * - Routine to initialize the Gaussian
+  !                  abcissa and the associated weights
+  !                  Frozen CY36 version.
+
+  !     Purpose.
+  !     --------
+  !           Initialize arrays PL,PDL and PW (quadrature abscissas and weights)
+  !**   Interface.
+  !     ----------
+  !        *CALL* *SUGAW36(...) *
+
+  !        Explicit arguments :
+  !        --------------------
+  !           INPUT:
+  !              KN       : Number of Gauss abscissas
+
+  !           OUTPUT:
+  !              PL (KN)  : Abscissas of Gauss
+  !              PDL(KN)  : Idem in quadruple precision (OPTIONNAL)
+  !              PW (KN)  : Weights of the Gaussian integration
+
+  !     PL (i) is the abscissa i starting from the northern pole, it is
+  !     the cosine of the colatitude of the corresponding row of the collocation grid.
+
+  !     KOUTENV  : Contains printings environment variables.
+  !                KOUTENV(1): output logical unit.
+  !                KOUTENV(2): option for level of printings.
   !
-  !!****  *LATITUDES_GAUSS* - routine to compute the gaussian latitudes
-  !!
-  !!    PURPOSE
-  !!    -------
-  !!       Compute the sinus of the latitudes of the gaussian grid associated
-  !!     to a given N number of latitudes
-  !!
-  !!**  METHOD
-  !!    ------
-  !!
-  !!    AUTHOR
-  !!    ------
-  !!              *Meteo France*
-  !!
-  !!    MODIFICATIONS
-  !!    -------------
-  !!      Original    08/2007
-  !-------------------------------------------------------------------------------
+  !        Implicit arguments :
+  !        --------------------
+  !       None
+
+  !     Method.
+  !     -------
+  !        See documentation
+
+  !     Externals.
+  !     ----------
+
+  !     Reference.
+  !     ----------
+
+  !     S.L. Belousov, Tables of normalized associated Legendre Polynomials, Pergamon Press (1962)
+  !     P.N. Swarztrauber, On computing the points and weights for Gauss-Legendre quadrature,
+  !     SIAM J. Sci. Comput. Vol. 24 (3) pp. 945-954 (2002)
+
+  !     Author.
+  !     -------
+  !      Mats Hamrud and Philippe Courtier  *ECMWF*
+  !      Original          : 87-10-15
+
+  !     Modifications.
+  !     --------------
+  !      Philippe Courtier : 92-12-19 Multitasking
+  !      Ryad El Khatib    : 94-04-20 Remove unused comdecks pardim and yomdim
+  !      Mats Hamrud       : 94-08-12 Printing level
+  !      K. Yessad (Sep 2008): cleaning, improve comments.
+  !      K. YESSAD (NOV 2008): make consistent arp/SUGAW36 and tfl/SUGAW.
+  !      Nils Wedi + Mats Hamrud, 2009-02-05 revised following Swarztrauber, 2002
+  !      K. Yessad (June 2009): externalisation + in-lining.
+  !      GCO + K. Yessad (Dec 2012): restore quadruple precision features.
+  !      K. Yessad (Dec 2012): simplify use of SUGAW36.
+  !     ------------------------------------------------------------------
+
+
+  !     ------------------------------------------------------------------
 
   IMPLICIT NONE
 
-  INTEGER,                       INTENT(IN)  :: N    ! number of latitudes (without pole)
-  REAL, DIMENSION (N/2), INTENT(OUT) :: XMU  ! Gauss abscissas
-  REAL, DIMENSION (N/2), INTENT(OUT) :: W    ! gaussian weights
+  INTEGER,INTENT(IN) :: KN
+  REAL,INTENT(OUT)   :: PL(KN)
+  REAL,INTENT(OUT)   :: PDL(KN)
+  REAL,INTENT(OUT)   :: PW(KN)
 
-  INTEGER                  :: JP1
-  PARAMETER (JP1=20001)
-  INTEGER                  :: JP2
-  PARAMETER (JP2=1000)
-  INTEGER                  :: NP, NN, J, ITER
-  REAL(KIND=8), DIMENSION (JP1) :: X
-  REAL(KIND=8), DIMENSION (JP2) :: XS
-  REAL(KIND=8), DIMENSION (JP2) :: XI
-  REAL(KIND=8), DIMENSION (JP2) :: AS
-  REAL(KIND=8), DIMENSION (JP2) :: AI
-  REAL(KIND=8)                  :: G, H, XA, XB, DX, DG
+  !     ------------------------------------------------------------------
+
+  REAL, DIMENSION(0:KN,0:KN) :: ZFN
+  REAL, DIMENSION(0:KN/2) :: ZFNLAT
+  REAL, DIMENSION(KN) :: ZREG, ZLI, ZT, ZMOD, ZM, ZR
+
+  REAL :: ZFNN, ZACOS
+  REAL ::  ZPI, Z, ZRA, ZEPS, ZW, ZX, ZXN
+  REAL :: ZDLX, ZDLXN, ZDLK, ZDLLDN, ZZDLXN, ZDLMOD
+
+  INTEGER, DIMENSION(KN) :: ITER
+
+  INTEGER :: JN, JGL, IODD, IK
+  INTEGER :: INS2, IALLOW, ISYM, IFLAG, ITEMAX, JTER
+
   REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
-  !-------------------------------------------------------------------------------
+  !     ------------------------------------------------------------------
 
+  !     ------------------------------------------------------------------
   IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:LATITUDES_GAUSS',0,ZHOOK_HANDLE)
-  NP=20001
-  DX=1.D0/(NP-1.D0)
-  X(1)=0.
-  DO J=2,NP
-    X(J)=X(J-1)+DX
-  ENDDO
-  CALL PDN(X(1),H,DG,N)
-  NN=0
-  DO J=2,NP
-    CALL PDN(X(J),G,DG,N)
-    IF(G*H > 0.D0) GO TO 12
-    NN=NN+1
-    XS(NN)=X(J)
-    XI(NN)=X(J-1)
-    AS(NN)=G
-    AI(NN)=H
- 12 CONTINUE
-    H=G
-  ENDDO
-
-  IF(NN == N/2) GO TO 13
-  CALL ABOR1_SFX('MODE_GRIDTYPE_GAUSS: LATITUDES_GAUSS')
- 13 CONTINUE
-  DO J=1,NN
-   19 CONTINUE
-    IF(DABS(AS(J)*1.D0) > DABS(AI(J)*1.D0)) GO TO 21
-    XA=XS(J)
-    GOTO 22
- 21 CONTINUE
-    XA=XI(J)
- 22 CONTINUE
-    ITER=0
-    DX=0.
- 23 CONTINUE
-    ITER=ITER+1
-    XA=XA-DX
-    IF((XA-XI(J))*(XA-XS(J)) > 0.) GO TO 25
-    CALL PDN(XA,G,DG,N)
-    DX=G/DG
-    IF(DABS(DX*1.D0) > 1.D-15) GO TO 24
-    XB=XA-DX
-    CALL PDN(XB,G,DG,N)
-    XMU(NN+1-J)=XB
-    W(NN+1-J)=2.D0/((1.D0-XB*XB)*DG*DG)
-    CYCLE
- 25 CONTINUE
-    XB=(XI(J)+XS(J))*0.5D0
-    CALL PDN(XB,G,DG,N)
-    IF(G*AS(J) < 0.) GO TO 26
-    XS(J)=XB
-    AS(J)=G
-    GO TO 19
- 26 CONTINUE
-    XI(J)=XB
-    AI(J)=G
-    GO TO 19
- 24 CONTINUE
-    IF(ITER < 30) GO TO 23
-  ENDDO
-  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:LATITUDES_GAUSS',1,ZHOOK_HANDLE)
-
-  !-------------------------------------------------------------------------------
-  END SUBROUTINE LATITUDES_GAUSS
-
-  !############################################################################
-  !#######################
-  SUBROUTINE PDN(X,P,DP,N)
-  !#######################
+  !     ------------------------------------------------------------------
+  !*       1. Initialization.
+  !           ---------------
   !
-  !-------------------------------------------------------------------------------
-
-  IMPLICIT NONE
-
-  INTEGER             :: JP1
-  PARAMETER (JP1=1000)
-
-  INTEGER,INTENT(IN)  :: N
-  REAL(KIND=8),INTENT(IN)  :: X
-  REAL(KIND=8),INTENT(OUT) :: P, DP
-
-  REAL(KIND=8)                 :: AI
-  REAL(KIND=8), DIMENSION(JP1) :: PN
-
-  INTEGER :: J
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
-  !-------------------------------------------------------------------------------
-  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:PDN',0,ZHOOK_HANDLE)
-  PN(1)=X
-  PN(2)=(3.D0*X*X-1.D0)*0.5D0
-
-  DO J=3,N
-    AI=J
-    PN(J)=((2.D0*AI-1.D0)*X*PN(J-1)-(AI-1.D0)*PN(J-2))/AI
+  !*       1.1 Calculation of ZFNLAT.
+  !            (Fourier coefficients of series expansion for
+  !            the ordinary Legendre polynomials).
+  ! Belousov, Swarztrauber use ZFN(0,0)=SQRT(2._JPRB)
+  ! IFS normalisation chosen to be 0.5*Integral(Pnm**2) = 1
+  ZFN(0,0) = 2.
+  DO JN=1,KN
+    ZFNN=ZFN(0,0)
+    DO JGL=1,JN
+      ZFNN = ZFNN*SQRT(1.-0.25/(JGL**2))
+    ENDDO
+    IODD=MOD(JN,2) 
+    ZFN(JN,JN)=ZFNN
+    DO JGL=2,JN-IODD,2
+      ZFN(JN,JN-JGL)=ZFN(JN,JN-JGL+2)*FLOAT((JGL-1)*(2*JN-JGL+2))/FLOAT(JGL*(2*JN-JGL+1))
+    ENDDO
   ENDDO
 
-  P=PN(N)
-  DP=AI*(X*P-PN(N-1))/(X*X-1.D0)
-  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:PDN',1,ZHOOK_HANDLE)
+  IODD=MOD(KN,2)
+  IK=IODD   
+  DO JGL=IODD,KN,2
+    ZFNLAT(IK)=ZFN(KN,JGL)
+    IK=IK+1
+  ENDDO 
 
-  !-------------------------------------------------------------------------------
-  END SUBROUTINE PDN
+  !*       1.2 Find first approximation of the roots of the
+  !            Legendre polynomial of degree KN.
+  ZPI=2.0*ASIN(1.0) ! Constant Pi
+  INS2 = KN/2+MOD(KN,2)
+  DO JGL=1,INS2
+    Z = (4*JGL-1)*ZPI/(4*KN+2)
+    PL(JGL) = Z+1.0/(TAN(Z)*8*(KN**2))
+    ZREG(JGL) = COS(Z)
+    ZLI (JGL) = COS(PL(JGL))
+  ENDDO
 
+  !     ------------------------------------------------------------------
+
+  !*      2. Computes roots and weights for transformed theta 
+  !          ------------------------------------------------
+
+  ZEPS = EPSILON(Z)
+  ITEMAX = 20
+  IODD=MOD(KN,2)
+
+  DO JGL=INS2,1,-1
+
+    ! * Initialization.
+
+    ZX = PL(JGL)
+    ZDLX = ZX
+    IFLAG = 0
+
+    ! * Newton iteration.
+
+    DO JTER=1,ITEMAX+1
+
+      ITER(JGL) = JTER
+
+      ! - Newton iteration step.
+
+      ZDLK = 0.0
+      IF( IODD==0 ) ZDLK=0.5*ZFNLAT(0)
+      ZZDLXN = 0.0
+      ZDLLDN = 0.0
+      IK=1
+
+      IF(IFLAG == 0)THEN
+        DO JN=2-IODD,KN,2
+          ! normalised ordinary Legendre polynomial == \overbar{P_n}^0
+          ZDLK = ZDLK + ZFNLAT(IK)*COS(JN*ZDLX)
+          ! normalised derivative == d/d\theta(\overbar{P_n}^0)
+          ZDLLDN = ZDLLDN - ZFNLAT(IK)*JN*SIN(JN*ZDLX)
+          IK=IK+1
+        ENDDO
+        ! Newton method
+        ZDLMOD = -ZDLK/ZDLLDN
+        ZZDLXN = ZDLX+ZDLMOD
+        ZXN = ZZDLXN
+        ZDLXN = ZZDLXN
+        ZMOD(JGL) = ZDLMOD
+      ENDIF
+
+      ! - Computes weight.
+  
+      IF(IFLAG == 1)THEN
+        DO JN=2-IODD,KN,2
+          ! normalised derivative
+          ZDLLDN = ZDLLDN - ZFNLAT(IK)*JN*SIN(JN*ZDLX)
+          IK=IK+1
+        ENDDO
+        ZW = (2*KN+1)/ZDLLDN**2
+      ENDIF
+
+      ZX = ZXN
+      ZDLX = ZDLXN
+
+      IF(IFLAG == 1) EXIT
+      IF(ABS(ZMOD(JGL)) <= ZEPS*1000.) IFLAG = 1
+    ENDDO
+
+    PL(JGL) = ZXN
+    PDL(JGL) = ZDLXN
+    PW(JGL) = ZW
+
+  ENDDO
+
+  ! convert to physical latitude space PMU
+  DO JGL=1,INS2
+    PL(JGL) = COS(PL(JGL))
+    PDL(JGL) = COS(PDL(JGL))
+  ENDDO
+
+  DO JGL=1,KN/2
+    ISYM = KN-JGL+1
+    PL (ISYM) = -PL (JGL)
+    PDL(ISYM) = -PDL(JGL)
+    PW (ISYM) =  PW (JGL)
+  ENDDO
+
+  !     ------------------------------------------------------------------
+
+  !*      3. Diagnostics.
+  !          ------------
+
+    ZRA=6371229.         ! Earth radius
+    DO JGL=1,INS2
+      ZACOS = ACOS(PL(JGL))
+      ZM(JGL) = (ZACOS-ACOS(ZLI (JGL)))*ZRA
+      ZR(JGL) = (ZACOS-ACOS(ZREG(JGL)))*ZRA
+      ZT(JGL) =  ZACOS*180./ZPI
+    ENDDO
+
+  IALLOW = 10
+  DO JGL=1,INS2
+    IF(ITER(JGL) > IALLOW)THEN
+      WRITE(*,FMT='('' CONVERGENCE FAILED IN MODE_GRIDTYPE_GAUSS:LATITUDES_GAUSS '')')
+      WRITE(*,FMT='('' ALLOWED : '',I4,''&
+       &NECESSARY : '',&
+       &I4)')IALLOW,ITER(JGL)
+      CALL ABOR1_SFX(' FAILURE IN MODE_GRIDTYPE_GAUSS:LATITUDES_GAUSS ')
+    ENDIF
+
+      !WRITE(*,FMT=&
+      ! &'('' ROW ='',I4,'' ITERATIONS='',I4,'' ROOT='',F30.20,&
+      ! &'' WEIGHT='',F30.20,'' MODIF :'',E8.2)')JGL,ITER(JGL),PL(JGL)&
+      ! &,PW(JGL),PL(JGL)-ZLI(JGL)
+      !WRITE(*,FMT=&
+      ! &'(10X,'' LAST INC. : '',E8.2,'' MODIF IN M : '',F10.3,&
+      ! &'' FROM THE REGULAR GRID : '',F10.3,'' COLAT '',F10.3)')&
+      ! &ZMOD(JGL),ZM(JGL),ZR(JGL),ZT(JGL)
+  ENDDO
+
+  !     ------------------------------------------------------------------
+
+  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:LATITUDES_GAUSS',1,ZHOOK_HANDLE)
+  END SUBROUTINE LATITUDES_GAUSS
+  !##################################
+  !############################################################################
   !############################################################################
   !##################################
   SUBROUTINE MESH_SIZE_GAUSS(KL,KNLATI,KNLOPA,PLAPO,PLOPO,PCODIL,&

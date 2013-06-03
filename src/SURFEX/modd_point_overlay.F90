@@ -25,7 +25,7 @@
 !
 IMPLICIT NONE 
 !
-INTEGER, DIMENSION(:),ALLOCATABLE  :: XNUM ! number of indexes for overlain points
+INTEGER :: NOVMX = 1
 !
 END MODULE MODD_POINT_OVERLAY
 

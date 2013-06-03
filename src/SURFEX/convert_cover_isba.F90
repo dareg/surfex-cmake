@@ -174,6 +174,12 @@ ENDIF
 !             -------------------------------
 !
 !
+! Leaf Aera Index
+! ---------------
+!
+IF (PRESENT(PLAI)) &
+  CALL AV_PGD (PLAI ,PCOVER ,XDATA_LAI (:,KDECADE,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE)  
+!
 IF (PRESENT(PH_TREE)) &
   CALL AV_PGD (PH_TREE ,PCOVER ,XDATA_H_TREE (:,:) ,YTREE,'ARI',OCOVER)  
 !
@@ -182,17 +188,13 @@ DO JVEG=1,NVEGTYPE
     CALL AV_PGD (PVEGTYPE(:,JVEG),PCOVER ,XDATA_VEGTYPE(:,JVEG),YNAT,'ARI',OCOVER)  
 END DO
 !
+!
 ! vegetation fraction
 ! -------------------
 !
 IF (PRESENT(PVEG)) &
   CALL AV_PGD (PVEG ,PCOVER ,XDATA_VEG (:,KDECADE,:),YNAT,'ARI',OCOVER)  
 !
-! Leaf Aera Index
-! ---------------
-!
-IF (PRESENT(PLAI)) &
-  CALL AV_PGD (PLAI ,PCOVER ,XDATA_LAI (:,KDECADE,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE)  
 !
 ! roughness length
 ! ----------------

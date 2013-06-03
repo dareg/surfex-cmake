@@ -1,3 +1,4 @@
+
 !     #########
       SUBROUTINE PGD_COVER(HPROGRAM)
 !     ##############################################################
@@ -43,7 +44,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR, NGRID_PAR
 USE MODD_PGDWORK,        ONLY : XSUMCOVER, NSIZE
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW
-USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA
+USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA, XDATA_NATURE, XDATA_WATER
 USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CTOWN, CWATER,            &
                                   XNATURE, XSEA, XTOWN, XWATER,           &
                                   XCOVER, LCOVER,                         &
@@ -67,6 +68,11 @@ USE MODI_READ_NAM_PGD_COVER
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
+!
+USE MODI_ABOR1_SFX
+!
+USE MODI_PGD_ECOCLIMAP2_DATA
+!
 #ifdef ASC
 USE MODD_IO_SURF_ASC, ONLY : CFILEIN
 #endif
@@ -80,10 +86,6 @@ USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_ABOR1_SFX
-!
-USE MODI_PGD_ECOCLIMAP2_DATA
-!
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
@@ -95,49 +97,46 @@ IMPLICIT NONE
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-INTEGER               :: ILUOUT    ! output listing logical unit
+ CHARACTER(LEN=10)       :: YFIELD
+ CHARACTER(LEN=28)       :: YCOVER      ! file name for cover types
+ CHARACTER(LEN=6)        :: YFILETYPE   ! data file type
 !
-INTEGER               :: JCOVER    ! loop counter on covers
-INTEGER               :: JL        ! loop counter on horizontal points
-INTEGER, DIMENSION(1) :: IMAXCOVER ! index of maximum cover for the given point
-INTEGER               :: IRESP     ! Error code after redding
-!
-REAL, DIMENSION(:), ALLOCATABLE :: ZLAT
-!
-!*    0.3    Declaration of namelists
-!            ------------------------
-!
-REAL, DIMENSION(:), ALLOCATABLE :: XUNIF_COVER ! value of each cover (cover will be
-!                                                uniform on the horizontal)
-REAL, DIMENSION(:), ALLOCATABLE :: ZSEA !to check compatibility between 
-REAL, DIMENSION(:), ALLOCATABLE :: ZWATER !prescribed fractions and ECOCLIMAP
-REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
-REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER
-REAL, DIMENSION(JPCOVER)         :: ZDEF
- CHARACTER(LEN=10)                :: YFIELD
-!
- CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
- CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
 REAL                     :: XRM_COVER   ! limit of coverage under which the
                                         ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST   ! limit of coast coverage under which
                                         ! the coast is replaced by sea or
                                         ! inland water. Default is 1.
-!
 REAL                     :: XRM_LAKE    ! limit of inland lake coverage under which
-                                        ! the water is removed. Default is 0.0
-!                                        
+                                        ! the water is removed. Default is 0.0                     
 REAL                     :: XRM_SEA     ! limit of sea coverage under which
                                         ! the sea is removed. Default is 0.0
+REAL                     :: XLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
+!
+REAL, DIMENSION(:), ALLOCATABLE :: ZDEF
+REAL, DIMENSION(:), ALLOCATABLE :: ZLAT
+REAL, DIMENSION(:), ALLOCATABLE :: XUNIF_COVER ! value of each cover (cover will be
+!                                                uniform on the horizontal)
+REAL, DIMENSION(:), ALLOCATABLE :: ZSEA   !to check compatibility between 
+REAL, DIMENSION(:), ALLOCATABLE :: ZWATER !prescribed fractions and ECOCLIMAP
+REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
+REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER
+!
+!
+INTEGER               :: ILUOUT    ! output listing logical unit
+INTEGER               :: IRESP     ! Error code after redding
+INTEGER               :: JCOVER    ! loop counter on covers
+INTEGER               :: JL        ! loop counter on horizontal points
+INTEGER               :: ICOVER, ICPT  ! 0 if cover is not present, >1 if present somewhere
+INTEGER               :: IPERMSNOW, IECO2 
+!
+INTEGER, DIMENSION(1) :: IMAXCOVER ! index of maximum cover for the given point
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_COVER, IMASK_SEA, IMASK_WATER
 !
 LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
                                         ! (Earth Model over Antarctic)
-REAL                     :: XLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
-!
 LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
-INTEGER                  :: ICOVER      ! 0 if cover is not present, >1 if present somewhere
-!                                       ! (even on another processor)
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------
@@ -146,12 +145,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_COVER',0,ZHOOK_HANDLE)
+!
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-ALLOCATE(XCOVER  (NL,JPCOVER))
+ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XUNIF_COVER(JPCOVER))
 !
-XCOVER      = XUNDEF
+LCOVER = .FALSE.
 XUNIF_COVER = XUNDEF
 !-------------------------------------------------------------------------------
 !
@@ -187,11 +187,17 @@ IF (ANY(XUNIF_COVER/=0.)) THEN
 !             ------------------------------------
 !
   ELSE
-    XCOVER(:,:) =0.
+    ICOVER = COUNT(XUNIF_COVER(:)/=0.)
+    ALLOCATE(XCOVER(NL,ICOVER))
+    ICPT = 0
     DO JCOVER=1,JPCOVER
-       XCOVER(:,JCOVER) = XUNIF_COVER(JCOVER)
+      IF (XUNIF_COVER(JCOVER)/=0.) THEN
+        LCOVER(JCOVER) = .TRUE.
+        ICPT = ICPT + 1
+        XCOVER(:,ICPT) = XUNIF_COVER(JCOVER)
+      ENDIF
     END DO
-    XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,JPCOVER)
+    XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,ICOVER)
   END IF
 !
 !*    3.3     No data
@@ -243,7 +249,7 @@ ELSE
   NSIZE    (:)   = 0.
   XSUMCOVER(:,:) = 0.
   CALL TREAT_FIELD(HPROGRAM,'SURF  ',YFILETYPE,'A_COVR',YCOVER,  &
-                     'COVER               '                        )  
+                     'COVER               '                      ) 
 
 !
 !*    4.      Interpolation if some points are not initialized (no data for these points) (same time)
@@ -257,10 +263,51 @@ ELSE
 !*    5.      Coherence check
 !             ---------------
 !
-  XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,JPCOVER)
+  ICOVER = SIZE(XCOVER,2)
+!
+  XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,ICOVER)
 !
   DEALLOCATE(NSIZE    )
   DEALLOCATE(XSUMCOVER)
+!
+!
+  ALLOCATE(IMASK_COVER(ICOVER))
+  ICPT = 0
+  DO JCOVER=1,JPCOVER
+    IF (LCOVER(JCOVER)) THEN
+      ICPT = ICPT + 1
+      IMASK_COVER(ICPT) = JCOVER
+    ENDIF
+  ENDDO
+!
+  ALLOCATE(IMASK_SEA(SIZE(NSEA)))
+  IMASK_SEA(:) = 0
+  DO JL=1,SIZE(NSEA)
+    DO JCOVER=1,ICOVER
+      IF (IMASK_COVER(JCOVER)==NSEA(JL)) IMASK_SEA(JL) = JCOVER
+    ENDDO
+  ENDDO
+  !
+  ALLOCATE(IMASK_WATER(SIZE(NWATER)))
+  IMASK_WATER(:) = 0
+  DO JL=1,SIZE(NWATER)
+    DO JCOVER=1,ICOVER
+      IF (IMASK_COVER(JCOVER)==NWATER(JL)) IMASK_WATER(JL) = JCOVER
+    ENDDO
+  ENDDO
+  !
+  IPERMSNOW=0
+  DO JCOVER=1,ICOVER
+    IF (IMASK_COVER(JCOVER)==NPERMSNOW) IPERMSNOW = JCOVER
+  ENDDO
+  !
+  IECO2 = 0
+  DO JCOVER=1,ICOVER
+    IF (IMASK_COVER(JCOVER)>300) THEN
+      IECO2 = JCOVER
+      EXIT
+    ENDIF
+  ENDDO
 !
 !-------------------------------------------------------------------------------
 !
@@ -270,46 +317,59 @@ ELSE
 ! * removes cover with very small coverage
   DO JL=1,SIZE(XCOVER,1)
     IMAXCOVER(:) = MAXLOC(XCOVER(JL,:))
-    DO JCOVER=1,JPCOVER
+    DO JCOVER=1,ICOVER
       IF (XCOVER(JL,JCOVER)<=XRM_COVER .AND. JCOVER /= IMAXCOVER(1)) THEN
         XCOVER(JL,JCOVER) = 0.
       END IF
     END DO
   END DO
-!
-! * removes cover; replace by sea or inland water if sea or inland water > XRM_COAST
-  DO JCOVER=1,JPCOVER
-     DO JL=1,SIZE(NSEA)
-        WHERE(XCOVER(:,NSEA(JL))>=XRM_COAST)
-              XCOVER(:,JCOVER) = 0.
-              XCOVER(:,NSEA(JL)) = 1.
-        END WHERE 
-     ENDDO
-     DO JL=1,SIZE(NWATER)
-        WHERE(XCOVER(:,NWATER(JL))>=XRM_COAST)
-              XCOVER(:,JCOVER) = 0.
-              XCOVER(:,NWATER(JL)) = 1.
-        END WHERE
-     ENDDO
-  ENDDO
-!
-! * removes lake as the user want
+  !
+  ! * removes lake as the user want
   IF(XRM_LAKE>0.0)THEN
      DO JL=1,SIZE(NWATER)
-        WHERE(XCOVER(:,NWATER(JL))<=XRM_LAKE)
-              XCOVER(:,NWATER(JL)) = 0.
-        ENDWHERE
-     ENDDO
+       IF (IMASK_WATER(JL)/=0) THEN
+         WHERE(XCOVER(:,IMASK_WATER(JL))<=XRM_LAKE)
+           XCOVER(:,IMASK_WATER(JL)) = 0.
+         ENDWHERE
+       ENDIF
+     ENDDO          
   ENDIF
-!
-! * removes sea as the user want
+  !
+  ! * removes sea as the user want
   IF(XRM_SEA>0.0)THEN
      DO JL=1,SIZE(NSEA)
-        WHERE(XCOVER(:,NSEA(JL))<=XRM_SEA)
-              XCOVER(:,NSEA(JL)) = 0.
-        ENDWHERE
-     ENDDO
+       IF (IMASK_SEA(JL)/=0) THEN
+         WHERE(XCOVER(:,IMASK_SEA(JL))<=XRM_SEA)
+           XCOVER(:,IMASK_SEA(JL)) = 0.
+         ENDWHERE
+       ENDIF
+     ENDDO          
   ENDIF
+  !
+  !
+  ! * removes cover; replace by sea or inland water if sea or inland water > XRM_COAST
+  DO JCOVER=1,ICOVER
+    !
+    DO JL=1,SIZE(NSEA)
+      IF (IMASK_SEA(JL)/=0) THEN
+        WHERE(XCOVER(:,IMASK_SEA(JL))>=XRM_COAST)
+          XCOVER(:,JCOVER) = 0.
+          XCOVER(:,IMASK_SEA(JL)) = 1.
+        END WHERE 
+      ENDIF
+    ENDDO
+    !
+    DO JL=1,SIZE(NWATER)
+      IF (IMASK_WATER(JL)/=0) THEN
+        WHERE(XCOVER(:,IMASK_WATER(JL))>=XRM_COAST)
+          XCOVER(:,JCOVER) = 0.
+          XCOVER(:,IMASK_WATER(JL)) = 1.
+        END WHERE
+      ENDIF
+    ENDDO 
+    !    
+  ENDDO
+!
 !
 ! * Compatibility between Surfex and Orca grid 
 !   (Earth Model over water bodies and Antarctic)
@@ -317,24 +377,29 @@ ELSE
   IF(LORCA_GRID.AND.CGRID=='GAUSS     ')THEN
 !
 !     No river or inland water bodies
-    XCOVER(:,NWATER(2)) = 0.
-    XCOVER(:,NWATER(3)) = 0.
+    XCOVER(:,IMASK_WATER(2)) = 0.
+    XCOVER(:,IMASK_WATER(3)) = 0.
 !
     ALLOCATE(ZLAT(NL))
     CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,PLAT=ZLAT)
 !
-    DO JL=1,SIZE(NSEA)
-       WHERE(ZLAT(:)<XLAT_ANT.AND.XCOVER(:,NSEA(JL))>0.0)
-             XCOVER(:,NPERMSNOW) = 1.0
-             XCOVER(:,NSEA(JL))  = 0.0
-       ENDWHERE 
-    ENDDO
-    DO JL=1,SIZE(NWATER)
-       WHERE(ZLAT(:)<XLAT_ANT.AND.XCOVER(:,NWATER(JL))>0.0)
-             XCOVER(:,NPERMSNOW)  = 1.0
-             XCOVER(:,NWATER(JL)) = 0.0
-       ENDWHERE
-    ENDDO
+      DO JL=1,SIZE(NSEA)
+        IF (IMASK_SEA(JL)/=0) THEN
+          WHERE(ZLAT(:)<XLAT_ANT.AND.XCOVER(:,IMASK_SEA(JL))>0.0)
+            XCOVER(:,IPERMSNOW) = 1.0
+            XCOVER(:,IMASK_SEA(JL))  = 0.0
+          ENDWHERE 
+        ENDIF
+      ENDDO
+
+      DO JL=1,SIZE(NWATER)
+        IF (IMASK_WATER(JL)/=0) THEN
+          WHERE(ZLAT(:)<XLAT_ANT.AND.XCOVER(:,IMASK_WATER(JL))>0.0)
+            XCOVER(:,IPERMSNOW)  = 1.0
+            XCOVER(:,IMASK_WATER(JL)) = 0.0
+          ENDWHERE
+        ENDIF
+      ENDDO
 !  
     DEALLOCATE(ZLAT)
 !
@@ -345,35 +410,42 @@ ELSE
 !*    7.      Coherence check
 !             ---------------
 !
-    XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,JPCOVER)
+  XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,ICOVER)
+!
+  DEALLOCATE(IMASK_SEA)
+  DEALLOCATE(IMASK_WATER)
+!
+!*    8.      List of cover present
+!             ---------------------
+!
+  LCOVER(:) = .FALSE.
+  DO JCOVER=1,ICOVER
+    ICOVER = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0., 'COV')
+    IF (ICOVER>0) LCOVER(IMASK_COVER(JCOVER))=.TRUE. 
+  END DO
+!
+  DEALLOCATE(IMASK_COVER)
 !
 !-------------------------------------------------------------------------------
 END IF
 !
 DEALLOCATE(XUNIF_COVER)
-!
 !-------------------------------------------------------------------------------
+!
 !
 IF(.NOT.LIMP_COVER)THEN
         
 !*    8.      List of cover present
 !             ---------------------
 !
-  IF ( SUM_ON_ALL_PROCS(HPROGRAM,CGRID,ANY(XCOVER(:,300:)>0.,DIM=2),'COV' ) >0 ) &
-  CALL PGD_ECOCLIMAP2_DATA(HPROGRAM)
+  IF (IECO2/=0) THEN
+    IF ( SUM_ON_ALL_PROCS(HPROGRAM,CGRID,ANY(XCOVER(:,IECO2:)>0.,DIM=2),'COV' ) >0 ) &
+      CALL PGD_ECOCLIMAP2_DATA(HPROGRAM)
+  ENDIF
 !
 !-------------------------------------------------------------------------------
 ENDIF
 !-------------------------------------------------------------------------------
-!*    8.      List of cover present
-!             ---------------------
-!
-ALLOCATE(LCOVER(JPCOVER))
-LCOVER = .FALSE.
-DO JCOVER=1,JPCOVER
-  ICOVER = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0., 'COV')
-  IF (ICOVER>0) LCOVER(JCOVER)=.TRUE. 
-END DO
 !-------------------------------------------------------------------------------
 !
 !*    9.      Land - sea fractions
@@ -388,6 +460,18 @@ IF (.NOT.ASSOCIATED(XSEA)) THEN
   CALL CONVERT_COVER_FRAC(XCOVER,LCOVER,XSEA,XNATURE,XTOWN,XWATER)
 
 ELSE
+  !
+  ICOVER = SIZE(XCOVER,2)
+  !
+  ALLOCATE(IMASK_COVER(ICOVER))
+  ICPT = 0
+  DO JCOVER=1,JPCOVER
+    IF (LCOVER(JCOVER)) THEN
+      ICPT = ICPT + 1
+      IMASK_COVER(ICPT) = JCOVER
+    ENDIF
+  ENDDO
+
 !if fractions are prescribed, it has to be verified that the locations of
 !ECOCLIMAP covers are compatible with the fractions of surface types
   ALLOCATE(ZSEA   (NL))
@@ -396,10 +480,10 @@ ELSE
   ALLOCATE(ZTOWN  (NL))
   CALL CONVERT_COVER_FRAC(XCOVER,LCOVER,ZSEA,ZNATURE,ZTOWN,ZWATER)
   !
-  ALLOCATE(ZCOVER_NATURE(NL,JPCOVER))
-  ALLOCATE(ZCOVER_TOWN  (NL,JPCOVER))
-  ALLOCATE(ZCOVER_SEA   (NL,JPCOVER))
-  ALLOCATE(ZCOVER_WATER (NL,JPCOVER))
+  ALLOCATE(ZCOVER_NATURE(NL,ICOVER))
+  ALLOCATE(ZCOVER_TOWN  (NL,ICOVER))
+  ALLOCATE(ZCOVER_SEA   (NL,ICOVER))
+  ALLOCATE(ZCOVER_WATER (NL,ICOVER))
   !
   ZCOVER_NATURE(:,:) = XCOVER(:,:)
   ZCOVER_TOWN  (:,:) = XCOVER(:,:)
@@ -407,6 +491,8 @@ ELSE
   ZCOVER_WATER (:,:) = XCOVER(:,:)
   !
   ALLOCATE(NSIZE(NL))
+  !
+  ALLOCATE(ZDEF(ICOVER))
   !
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -420,9 +506,14 @@ ELSE
     IF (XNATURE(JL).EQ.0.) NSIZE(JL)=-1
   ENDDO
   ZDEF(:)=0.
-  ZDEF(4)=1.  ! if not enough covers are present, cover 4 assumed
+  DO JCOVER=1,ICOVER
+    IF (XDATA_NATURE(IMASK_COVER(JCOVER))/=0.) THEN
+      ZDEF(JCOVER) = 1.
+      EXIT
+    ENDIF
+  ENDDO
   CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_NATURE(:,:),YFIELD,ZDEF)  
-
+!
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
   WRITE(ILUOUT,FMT=*) &
@@ -435,8 +526,13 @@ ELSE
     IF (XTOWN(JL).EQ.0.) NSIZE(JL)=-1
   ENDDO
   ZDEF(:)=0.
-  ZDEF(7)=1.  ! if not enough covers are present, cover 7 assumed
-  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN (:,:),YFIELD,ZDEF)  
+  DO JCOVER=1,ICOVER
+    IF (XDATA_TOWN(IMASK_COVER(JCOVER))/=0.) THEN
+      ZDEF(JCOVER) = 1.
+      EXIT
+    ENDIF
+  ENDDO  
+  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN (:,:),YFIELD,ZDEF) 
 
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -451,16 +547,20 @@ ELSE
      IF(XWATER(JL)==1.0)THEN
         ZCOVER_WATER(JL,1)=0.0
         ZCOVER_WATER(JL,2)=1.0
-        ZCOVER_WATER(JL,3:JPCOVER)=0.0
+        ZCOVER_WATER(JL,3:ICOVER)=0.0
         NSIZE(JL)=1
      ELSEIF(XWATER(JL)==0.0)THEN
         NSIZE(JL)=-1
      ENDIF
   ENDDO
   ZDEF(:)=0.
-  ZDEF(2)=1.  ! if not enough covers are present, cover 002 assumed
+  DO JCOVER=1,ICOVER
+    IF (XDATA_WATER(IMASK_COVER(JCOVER))/=0.) THEN
+      ZDEF(JCOVER) = 1.
+      EXIT
+    ENDIF
+  ENDDO    
   CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_WATER (:,:),YFIELD,PDEF=ZDEF)
-
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
   WRITE(ILUOUT,FMT=*) &
@@ -473,20 +573,25 @@ ELSE
   DO JL=1,SIZE(XCOVER,1)
      IF(XSEA(JL)==1.0)THEN
         ZCOVER_SEA(JL,1)=1.0
-        ZCOVER_SEA(JL,2:JPCOVER)=0.0
+        ZCOVER_SEA(JL,2:ICOVER)=0.0
         NSIZE(JL)=1
      ELSEIF(XSEA(JL)==0.0)THEN
         NSIZE(JL)=-1
      ENDIF
   ENDDO
   ZDEF(:)=0.
-  ZDEF(1)=1.  ! if not enough covers are present, cover 001 assumed
+  DO JCOVER=1,ICOVER
+    IF (XDATA_SEA(IMASK_COVER(JCOVER))/=0.) THEN
+      ZDEF(JCOVER) = 1.
+      EXIT
+    ENDIF
+  ENDDO    
   CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_SEA (:,:),YFIELD,PDEF=ZDEF)
   !
   XCOVER(:,:) = XCOVER(:,:) + 0.001 * ( ZCOVER_NATURE(:,:) + ZCOVER_TOWN(:,:) + &
                                         ZCOVER_WATER (:,:) + ZCOVER_SEA (:,:) )
   !
-  XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,JPCOVER)
+  XCOVER(:,:)=XCOVER(:,:)/SPREAD(SUM(XCOVER(:,:),2),2,ICOVER)
   !
   DEALLOCATE(ZCOVER_NATURE)
   DEALLOCATE(ZCOVER_TOWN  )
@@ -498,6 +603,9 @@ ELSE
   DEALLOCATE(ZWATER   )
   DEALLOCATE(ZNATURE  )
   DEALLOCATE(ZTOWN    )
+  !
+  DEALLOCATE(ZDEF)
+  DEALLOCATE(IMASK_COVER)
   !
 ENDIF
 !

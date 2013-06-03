@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_MESH_INDEX(KLUOUT,PLAT,PLON,KINDEX,KSSO,KISSOX,KISSOY)
+      SUBROUTINE GET_MESH_INDEX(KLUOUT,KNBLINES,PLAT,PLON,KINDEX,PVALUE,PNODATA,KSSO,KISSOX,KISSOY)
 !     ##############################################################
 !
 !!**** *GET_MESH_INDEX* get the grid mesh where point (lat,lon) is located
@@ -52,19 +52,24 @@ IMPLICIT NONE
 !            ------------------------
 !
 INTEGER,                         INTENT(IN)    :: KLUOUT  ! output listing
+INTEGER,                         INTENT(IN)    :: KNBLINES
 REAL,    DIMENSION(:),           INTENT(IN)    :: PLAT    ! latitude of the point
 REAL,    DIMENSION(:),           INTENT(IN)    :: PLON    ! longitude of the point
-INTEGER, DIMENSION(:),           INTENT(OUT)   :: KINDEX  ! index of the grid mesh where the point is
+INTEGER, DIMENSION(:,:),         INTENT(OUT)   :: KINDEX  ! index of the grid mesh where the point is
+!
+REAL, DIMENSION(:), OPTIONAL,     INTENT(IN)   :: PVALUE  ! value of the point to add
+REAL, OPTIONAL,                   INTENT(IN)   :: PNODATA
+!
 INTEGER,               OPTIONAL, INTENT(IN)    :: KSSO    ! number of subgrid mesh in each direction
-INTEGER, DIMENSION(:), OPTIONAL, INTENT(OUT)   :: KISSOX  ! X index of the subgrid mesh where the point is
-INTEGER, DIMENSION(:), OPTIONAL, INTENT(OUT)   :: KISSOY  ! Y index of the subgrid mesh where the point is
+INTEGER, DIMENSION(:,:), OPTIONAL, INTENT(OUT) :: KISSOX  ! X index of the subgrid mesh where the point is
+INTEGER, DIMENSION(:,:), OPTIONAL, INTENT(OUT) :: KISSOY  ! Y index of the subgrid mesh where the point is
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
 INTEGER                        :: ISSO
-INTEGER, DIMENSION(SIZE(PLAT)) :: IISSOX
-INTEGER, DIMENSION(SIZE(PLAT)) :: IISSOY
+INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: IISSOX
+INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: IISSOY
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -82,21 +87,23 @@ SELECT CASE (CGRID)
     ENDIF
     !
     IF (CGRID=="CONF PROJ ") THEN
-      CALL GET_MESH_INDEX_CONF_PROJ(NGRID_PAR,SIZE(PLAT),XGRID_PAR,PLAT,PLON,KINDEX,ISSO,IISSOX,IISSOY)  
-      XNUM(:)=0
+      CALL GET_MESH_INDEX_CONF_PROJ(NGRID_PAR,ISSO,XGRID_PAR,PLAT,PLON,KINDEX,IISSOX,IISSOY)  
     ENDIF
     IF (CGRID=="LONLAT REG") THEN
-      CALL GET_MESH_INDEX_LONLAT_REG(NGRID_PAR,SIZE(PLAT),XGRID_PAR,PLAT,PLON,KINDEX,ISSO,IISSOX,IISSOY)  
-      XNUM(:)=0     
+      CALL GET_MESH_INDEX_LONLAT_REG(NGRID_PAR,ISSO,XGRID_PAR,PLAT,PLON,KINDEX,IISSOX,IISSOY)  
     ENDIF
     IF (CGRID=="GAUSS     ") THEN
-      CALL GET_MESH_INDEX_GAUSS(NGRID_PAR,SIZE(PLAT),XGRID_PAR,PLAT,PLON,KINDEX,ISSO,IISSOX,IISSOY)  
-      XNUM(:)=0
+      IF (PRESENT(PVALUE) .AND. PRESENT(PNODATA)) THEN
+        CALL GET_MESH_INDEX_GAUSS(KNBLINES,NGRID_PAR,ISSO,XGRID_PAR,PLAT,PLON,KINDEX,IISSOX,IISSOY, &
+                                     PVALUE,PNODATA)
+      ELSE
+        CALL GET_MESH_INDEX_GAUSS(KNBLINES,NGRID_PAR,ISSO,XGRID_PAR,PLAT,PLON,KINDEX,IISSOX,IISSOY)
+      ENDIF              
     ENDIF
     IF (CGRID=="IGN       ") &
-      CALL GET_MESH_INDEX_IGN(NGRID_PAR,SIZE(PLAT),XGRID_PAR,PLAT,PLON,KINDEX,ISSO,IISSOX,IISSOY)  
+      CALL GET_MESH_INDEX_IGN(NGRID_PAR,ISSO,XGRID_PAR,PLAT,PLON,KINDEX,IISSOX,IISSOY)  
     IF (CGRID=="LONLATVAL ") &
-      CALL GET_MESH_INDEX_LONLATVAL(NGRID_PAR,SIZE(PLAT),XGRID_PAR,PLAT,PLON,KINDEX,ISSO,IISSOX,IISSOY)  
+      CALL GET_MESH_INDEX_LONLATVAL(NGRID_PAR,ISSO,XGRID_PAR,PLAT,PLON,KINDEX,IISSOX,IISSOY)  
     !
     IF (PRESENT(KSSO) .AND. PRESENT(KISSOX) .AND. PRESENT(KISSOY)) THEN
       KISSOX = IISSOX

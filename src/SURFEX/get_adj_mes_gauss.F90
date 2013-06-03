@@ -58,8 +58,12 @@ INTEGER, DIMENSION(:),ALLOCATABLE :: INLOPA ! number of pseudo-longitudes
 !                                           ! on each pseudo-latitude circle
 !                                           ! on pseudo-northern hemisphere
 !                                           ! (starting from the rotated pole)
+REAL, DIMENSION(:),ALLOCATABLE :: ZXCEN
 !
-INTEGER :: JLAT, JLON, IL, JL
+INTEGER :: JLAT, JLON, IL, JL, ILGRID, JLON2, ID, JL0
+!
+REAL :: ZDIS, ZINTER
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
@@ -67,9 +71,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('GET_ADJ_MES_GAUSS',0,ZHOOK_HANDLE)
  CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL)
 !
-ALLOCATE(INLOPA(INLATI))
+ALLOCATE(INLOPA(0:INLATI))
+ALLOCATE(ZXCEN(KL))
 !
- CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA)
+ CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA(1:INLATI), &
+                         PLON_XY=ZXCEN        )
+!
+INLOPA(0) = 0
 !
 KLEFT  (:) = 0
 KRIGHT (:) = 0
@@ -86,19 +94,52 @@ ENDDO
 JL = 0.0
 IF (IL==KL) THEN
   DO JLAT=1,INLATI
+    !
+    JL0 = JL
+    !
     DO JLON=1,INLOPA(JLAT)
+      !
       JL = JL + 1
+      !
       IF (JLON>1            ) KLEFT  (JL) = JL-1
       IF (JLON<INLOPA(JLAT) ) KRIGHT (JL) = JL+1
-      IF (JLAT>1            ) KBOTTOM(JL) = JL-INLOPA(JLAT-1)
-      IF (JLAT<INLATI       ) KTOP   (JL) = JL+INLOPA(JLAT)
+      !
       IF (JLON==1           ) KLEFT  (JL) = JL+INLOPA(JLAT)-1
       IF (JLON==INLOPA(JLAT)) KRIGHT (JL) = JL-INLOPA(JLAT)+1
+      !
+      IF (JLAT>1            ) THEN
+        ZDIS = ABS(ZXCEN(JL) - ZXCEN(JL0 - INLOPA(JLAT-1) + 1))
+        ID = 1
+        DO JLON2 = 1,INLOPA(JLAT-1)
+          ZINTER = ABS(ZXCEN(JL) - ZXCEN(JL0 - INLOPA(JLAT-1) + JLON2))
+          IF (ZINTER<ZDIS) THEN
+            ZDIS = ZINTER
+            ID = JLON2
+          ENDIF
+        ENDDO
+        KTOP(JL) = JL0 - INLOPA(JLAT-1) + ID
+      ENDIF
+      !
+      IF (JLAT<INLATI       ) THEN
+        ZDIS = ABS(ZXCEN(JL) - ZXCEN(JL0 + INLOPA(JLAT) + 1))
+        ID = 1
+        DO JLON2 = 1,INLOPA(JLAT+1)
+          ZINTER = ABS(ZXCEN(JL) - ZXCEN(JL0 + INLOPA(JLAT) + JLON2))
+          IF (ZINTER<ZDIS) THEN
+            ZDIS = ZINTER
+            ID = JLON2
+          ENDIF
+        ENDDO
+        KBOTTOM(JL) = JL0 + INLOPA(JLAT) + ID
+      ENDIF
+      !
     END DO
   END DO
 END IF
 !
 DEALLOCATE(INLOPA)
+DEALLOCATE(ZXCEN)
+!
 IF (LHOOK) CALL DR_HOOK('GET_ADJ_MES_GAUSS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

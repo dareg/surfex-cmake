@@ -36,7 +36,19 @@ REAL                              :: XLAPO    ! latitude  of the rotated pole (d
 REAL                              :: XLOPO    ! longitude of the rotated pole (deg)
 REAL                              :: XCODIL   ! stretching factor
 !
+REAL  :: XDY_MAX
+!
 LOGICAL                           :: LROTSTRETCH ! If true, rotated pole and/or stretching
+!
+INTEGER, DIMENSION(:,:), ALLOCATABLE :: NFRACDY
+INTEGER, DIMENSION(:), ALLOCATABLE :: NFACTY
+INTEGER, DIMENSION(:), ALLOCATABLE :: NFRACDX
+INTEGER, DIMENSION(:), ALLOCATABLE :: NFRACGX
+!
+REAL, DIMENSION(:), ALLOCATABLE  :: XLON, XLAT, XCOST, XSINTC, XSINTS, XCOSN, XSINN
+REAL, DIMENSION(:), ALLOCATABLE  :: XSIN
+REAL :: XLONP, XLATP, XCOSP, XSINP 
+REAL :: XPI, X1, X2, XDR
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: XXCEN    ! pseudo-longitude of center of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XYCEN    ! pseudo-latitude  of center of grid mesh
@@ -45,6 +57,8 @@ REAL, DIMENSION(:), ALLOCATABLE   :: XXSUP    ! pseudo-longitude eastern   limit
 REAL, DIMENSION(:), ALLOCATABLE   :: XXMAX    ! pseudo-longitude eastern   limit of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XYINF    ! pseudo-latitude  southern  limit of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XYSUP    ! pseudo-latitude  northern  limit of grid mesh
+REAL, DIMENSION(:), ALLOCATABLE   :: XXDIF
+REAL, DIMENSION(:), ALLOCATABLE   :: XYDIF
 !
 INTEGER, DIMENSION(:), ALLOCATABLE::IINDEX_1KM
 INTEGER, DIMENSION(:), ALLOCATABLE::IINDEX_10KM

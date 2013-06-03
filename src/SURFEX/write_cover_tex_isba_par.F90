@@ -120,6 +120,13 @@ GCOVER(:) = .TRUE.
 !
 !ocl scalar
 !
+DO J=1,12
+  CALL CONVERT_COVER_ISBA(HISBA,3*J-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
+                            PVEG=ZVEG(:,:,J), PLAI=ZLAI(:,:,J),            &
+                            PZ0=ZZ0VEG(:,:,J), PEMIS_ECO=ZEMIS_ECO(:,:,J), &
+                            PF2I=ZF2I(:,:,J),OSTRESS=GSTRESS(:,:,J)        )  
+END DO
+
  CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
@@ -132,12 +139,6 @@ GCOVER(:) = .TRUE.
                         PSEFOLD=ZSEFOLD,PGC=ZGC,PDMAX=ZDMAX,             &
                         PH_TREE=ZH_TREE,PRE25=ZRE25                       )  
 !
-DO J=1,12
-  CALL CONVERT_COVER_ISBA(HISBA,3*J-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
-                            PVEG=ZVEG(:,:,J), PLAI=ZLAI(:,:,J),            &
-                            PZ0=ZZ0VEG(:,:,J), PEMIS_ECO=ZEMIS_ECO(:,:,J), &
-                            PF2I=ZF2I(:,:,J),OSTRESS=GSTRESS(:,:,J)        )  
-END DO
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

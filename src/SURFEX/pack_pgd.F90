@@ -70,7 +70,7 @@ IMPLICIT NONE
  CHARACTER(LEN=10),       INTENT(OUT):: HGRID     ! grid used
 REAL,    DIMENSION(:),   POINTER    :: PGRID_PAR ! grid definition
 LOGICAL, DIMENSION(:),   INTENT(OUT):: OCOVER    ! list of present cover
-REAL,    DIMENSION(:,:), INTENT(OUT):: PCOVER    ! cover fraction
+REAL,    DIMENSION(:,:), POINTER :: PCOVER    ! cover fraction
 REAL,    DIMENSION(:),   INTENT(OUT):: PZS       ! zs
 REAL,    DIMENSION(:),   INTENT(OUT):: PLAT      ! latitude
 REAL,    DIMENSION(:),   INTENT(OUT):: PLON      ! longitude
@@ -126,12 +126,15 @@ IF (PRESENT(PDIR)) PDIR = ZDIR
 !*    4.      Packing of fields
 !             -----------------
 !
-DO JCOVER=1,JPCOVER
-  CALL GET_COVER_n(HPROGRAM,NL,JCOVER,ZCOVER)
+ CALL GET_LCOVER_n(HPROGRAM,JPCOVER,GCOVER)
+!
+ALLOCATE(PCOVER(SIZE(PLAT),COUNT(GCOVER)))
+!
+DO JCOVER=1,COUNT(GCOVER)
+  CALL GET_COVER_n(HPROGRAM,JCOVER,ZCOVER)
   CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
 ENDDO
 
- CALL GET_LCOVER_n(HPROGRAM,JPCOVER,GCOVER)
  CALL GET_ZS_n(HPROGRAM,NL,ZZS)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

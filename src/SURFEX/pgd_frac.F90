@@ -108,6 +108,7 @@ REAL     :: XUNIF_TOWN  ! value of town   fraction
 !
 INTEGER               :: ICOVER       ! 0 if cover is not present, >1 if present somewhere
 !                                     ! (even on another processor)
+INTEGER               :: ICPT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -255,23 +256,53 @@ OECOCLIMAP = LECOCLIMAP
 !
 IF (.NOT.LECOCLIMAP) THEN
 
-  ALLOCATE(XCOVER (NL,JPCOVER))
+  ALLOCATE(LCOVER(JPCOVER))
+  LCOVER(:) = .FALSE.
+  ICOVER = 0
+  ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XSEA(:)/=0. ,'COV')
+  IF (ICPT/=0) THEN
+    LCOVER(1) = .TRUE.
+    ICOVER=ICOVER+1
+  ENDIF
+  ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XWATER(:)/=0. ,'COV')
+  IF (ICPT/=0) THEN  
+    LCOVER(2) = .TRUE.
+    ICOVER=ICOVER+1
+  ENDIF
+  ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XNATURE(:)/=0. ,'COV')
+  IF (ICPT/=0) THEN  
+    LCOVER(4) = .TRUE.
+    ICOVER=ICOVER+1
+  ENDIF
+  ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XTOWN(:)/=0. ,'COV')
+  IF (ICPT/=0) THEN  
+    LCOVER(151) = .TRUE.
+    ICOVER=ICOVER+1
+  ENDIF
 
-  XCOVER(:,:) =0.
-  XCOVER(:,1) = XSEA(:)
-  XCOVER(:,2) = XWATER(:)
-  XCOVER(:,4) = XNATURE(:)
-  XCOVER(:,151) = XTOWN(:)
+  ALLOCATE(XCOVER (NL,ICOVER))
+
+  ICPT = 0
+  IF (LCOVER(1)) THEN
+    ICPT = ICPT + 1
+    XCOVER(:,ICPT) = XSEA(:)
+  ENDIF
+  IF (LCOVER(2)) THEN
+    ICPT = ICPT + 1
+    XCOVER(:,ICPT) = XWATER(:)
+  ENDIF
+  IF (LCOVER(4)) THEN
+    ICPT = ICPT + 1
+    XCOVER(:,ICPT) = XNATURE(:)
+  ENDIF
+  IF (LCOVER(151)) THEN
+    ICPT = ICPT + 1
+    XCOVER(:,ICPT) = XTOWN(:)
+  ENDIF
+  
   ! comment V. Masson: to use this cover type for town by default avoids crashes
   ! when garden fraction is specified but no garden vegetation parameters.
   ! In this cas, the properties for garden come from the cover 151
-!
- ALLOCATE(LCOVER(JPCOVER))
-  LCOVER = .FALSE.
- DO JCOVER=1,JPCOVER
-    ICOVER = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0. ,'COV')
-    IF (ICOVER>0) LCOVER(JCOVER)=.TRUE. 
- END DO  
 !
 !
 !-------------------------------------------------------------------------------

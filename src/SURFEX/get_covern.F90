@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_COVER_n(HPROGRAM,KI,KCOVER,PCOVER)
+      SUBROUTINE GET_COVER_n(HPROGRAM,KCOVER,PCOVER)
 !     ########################################
 !
 !!****  *GET_COVER_n* - routine to get some surface fields
@@ -49,9 +49,8 @@ IMPLICIT NONE
 !              -------------------------
 !
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM
-INTEGER,                    INTENT(IN)  :: KI      ! horizontal dim. of cover
 INTEGER,                    INTENT(IN)  :: KCOVER  ! number of covers
-REAL, DIMENSION(KI), INTENT(OUT) :: PCOVER  ! cover types
+REAL, DIMENSION(:), INTENT(OUT) :: PCOVER  ! cover types
 !
 !
 !*       0.2   Declarations of local variables

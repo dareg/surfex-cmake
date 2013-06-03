@@ -149,20 +149,18 @@ endif
 ##########################################################
 #           Source XRD                                   #
 ##########################################################
-DIR_XRD += LIB/XRD38/FA
-DIR_XRD += LIB/XRD38/FA/mt
-DIR_XRD += LIB/XRD38/LFI
-DIR_XRD += LIB/XRD38/LFI/mt
-DIR_XRD += LIB/XRD38/grib_mf
-DIR_XRD += LIB/XRD38/module
-DIR_XRD += LIB/XRD38/support
-DIR_XRD += LIB/XRD38/utilities
-INC_XRD = -I$(B)LIB/XRD38/include -I$(B)LIB/XRD38/FA -I$(B)LIB/XRD38/LFI
-#CPPFLAGS_XRD = -fdefault-real-8
+DIR_XRD += LIB/XRD39/FA
+DIR_XRD += LIB/XRD39/LFI
+DIR_XRD += LIB/XRD39/grib_mf
+DIR_XRD += LIB/XRD39/module
+DIR_XRD += LIB/XRD39/support
+DIR_XRD += LIB/XRD39/utilities
+INC_XRD = -I$(B)LIB/XRD39/include -I$(B)LIB/XRD39/FA -I$(B)LIB/XRD39/LFI
+CPPFLAGS_XRD = -DHIGHRES
 #
 ifdef DIR_XRD
 DIR_MASTER += $(DIR_XRD)
-#CPPFLAGS   += $(CPPFLAGS_XRD)
+CPPFLAGS   += $(CPPFLAGS_XRD)
 INC        += $(INC_XRD)
 endif
 ##########################################################
@@ -447,7 +445,7 @@ NSOURCE=8
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST
+PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST
 endif
 #
