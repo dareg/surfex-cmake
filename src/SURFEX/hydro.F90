@@ -78,6 +78,7 @@
 !!                     10/12 (B. Decharme) EVAPCOR snow correction in DIF
 !!                                         Add diag IRRIG_FLUX
 !!                     04/13 (B. Decharme) Pass soil phase changes routines here
+!!                                         Apply physical limits on wg in hydro_soil.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -217,8 +218,8 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PWGI, PWG
 !                                      PWGI  = soil frozen volumetric water content (m3/m3)
 !                                      PWG  = soil liquid volumetric water content (m3/m3)
 !                                      Prognostic variables of ISBA at 't-dt'
-!                                      ZWGI(:,1) = surface-soil volumetric ice content
-!                                      ZWGI(:,2) = deep-soil volumetric ice content
+!                                      PWGI(:,1) = surface-soil volumetric ice content
+!                                      PWGI(:,2) = deep-soil volumetric ice content
 !
 INTEGER, DIMENSION(:), INTENT(IN) :: KWG_LAYER  
 !                                    KWG_LAYER = Number of soil moisture layers (DIF option)
@@ -290,10 +291,10 @@ INTEGER                         :: INI, INL, IDEPTH ! (ISBA-DF option)
 REAL                            :: ZTSTEP      ! maximum time split time step (<= PTSTEP)
 !                                              ! ONLY used for DIF option.
 !
-REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                          &
-                                   ZLEV, ZLEG, ZLEGI, ZLETR, ZPSNV,                &
-                                   ZRR, ZDG, ZWG, ZWSAT_AVG, ZWWILT_AVG, ZWFC_AVG, &
-                                   ZDRAIN, ZHORTON, ZEVAPCOR 
+REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                            &
+                                   ZLEV, ZLEG, ZLEGI, ZLETR, ZPSNV,                  &
+                                   ZRR, ZDG3, ZWG3, ZWSAT_AVG, ZWWILT_AVG, ZWFC_AVG, &
+                                   ZRUNOFF, ZDRAIN, ZHORTON, ZEVAPCOR, ZQSB 
 !                                      Prognostic variables of ISBA at 't-dt'
 !                                      ZPG = total water reaching the ground
 !                                      ZPG_MELT = snowmelt reaching the ground 
@@ -306,7 +307,7 @@ REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                       
 !                                      so set this to zero here for this option.
 !                                 ZWSAT_AVG, ZWWILT_AVG, ZWFC_AVG = Average water and ice content
 !                                      values over the soil depth D2 (for calculating surface runoff)
-!                                 ZDRAIN and ZHORTON are working variables only used for DIF option
+!                                 ZDG3, ZWG3, ZRUNOFF, ZDRAIN and ZHORTON are working variables only used for DIF option
 !                                 ZEVAPCOR = correction if evaporation from snow exceeds
 !                                               actual amount on the surface [m/s]
 !
@@ -355,7 +356,9 @@ ZRR(:)           = PRR(:)
 !
 ZDRAIN(:)        = 0.
 ZHORTON(:)       = 0.
+ZRUNOFF(:)       = 0.
 ZWGI_EXCESS(:)   = 0.
+ZEVAPCOR(:)      = 0.
 !
 PDRAIN(:)        = 0.
 PRUNOFF(:)       = 0.
@@ -392,11 +395,11 @@ IF(HISBA == '2-L' .OR. HISBA == '3-L')THEN
 ENDIF
 !
 IF (HISBA == '3-L') THEN                                   
-   ZDG(:) = PD_G(:,3)
-   ZWG(:) = PWG (:,3)
+   ZDG3(:) = PD_G(:,3)
+   ZWG3(:) = PWG (:,3)
 ELSE
-   ZDG(:) = XUNDEF
-   ZWG(:) = XUNDEF
+   ZDG3(:) = XUNDEF
+   ZWG3(:) = XUNDEF
 END IF
 !
 !* irrigation
@@ -417,7 +420,7 @@ ENDIF
 !               --------------------------------------------
 !
  CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                              &
-                 ZRR, ZLEV, ZLETR, PVEG, ZPSNV,                    &
+                 ZRR, ZLEV, ZLETR, PVEG, ZPSNV,                   &
                  PWR, PWRMAX, ZPG, PDRIP, PRRVEG                  ) 
 !
 !-------------------------------------------------------------------------------
@@ -558,7 +561,7 @@ IF (HISBA=='DIF') THEN
                 PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG, ZEVAPCOR,     &
                 PF2WGHT, PWG, PWGI, PTG, PPS, ZQSAT, ZQSATI,        &
                 PWDRAIN, ZDRAIN, ZHORTON, HKSAT, HSOC, PWWILT,      &
-                HHORT, PFSAT, KWG_LAYER, INL, KLAYER_HORT           )  
+                HHORT, PFSAT, KWG_LAYER, INL, KLAYER_HORT           )
 !
     CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,     &
                      PSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF,    &
@@ -573,6 +576,7 @@ ELSE
 !
   DO JDT = 1,INDT
 !
+!   Only layer 1 and 2 are used for soil freezing (ZWG3 not used)
     CALL ICE_SOILFR(HSNOW_ISBA, HSOILFRZ, ZTSTEP, ZKSFC_IVEG, PCG, PCT,  &
                     PPSNG, PFFG, PTAUICE, ZDWGI1, ZDWGI2, PWSAT,         &
                     PMPOTSAT, PBCOEF, PD_G, PTG, PWGI, PWG               )
@@ -582,41 +586,20 @@ ELSE
                     ZLETR, ZLEG, ZPG, PEVAPCOR,                      &
                     PWDRAIN,                                         &
                     PC1, PC2, PC3, PC4B, PC4REF, PWGEQ,              &
-                    PD_G(:,2), ZDG, ZWSAT_AVG, ZWFC_AVG,             &
+                    PD_G(:,2), ZDG3, ZWSAT_AVG, ZWFC_AVG,            &
                     ZDWGI1, ZDWGI2, ZLEGI, PD_G(:,1), PCG, PCT,      &
                     PTG(:,1), PTG(:,2),                              &
-                    PWG(:,1), PWG(:,2), ZWG,                         &
+                    PWG(:,1), PWG(:,2), ZWG3(:),                     &
                     PWGI(:,1), PWGI(:,2),                            &
-                    ZDRAIN,HKSAT,ZWWILT_AVG                          )
+                    ZRUNOFF,ZDRAIN,HKSAT,ZWWILT_AVG                  )
 !
     PDRAIN (:)  = PDRAIN (:) + ZDRAIN (:)/REAL(INDT)
-!
+    PRUNOFF(:)  = PRUNOFF(:) + ZRUNOFF(:)/REAL(INDT)
+!    
   ENDDO
 !
-  IF (HISBA=='2-L' .OR. HISBA=='3-L') THEN
-    !
-    ! runoff of second layer
-    PRUNOFF(:) = MAX( 0., PWG(:,2)+PWGI(:,2)-ZWSAT_AVG(:) )*      &
-                 PD_G(:,2) * XRHOLW / PTSTEP  
-    !
-    ! now apply limits:
-    !
-    PWG(:,1) = MIN( PWG(:,1), ZWSAT_AVG(:) - PWGI(:,1) )
-    PWG(:,1) = MAX( PWG(:,1), XWGMIN                   )
-    !
-    PWG(:,2) = MIN( PWG(:,2), ZWSAT_AVG(:) - PWGI(:,2) )
-    PWG(:,2) = MAX( PWG(:,2), XWGMIN                   )
-    !
-    IF (HISBA=='3-L') THEN
-
-      !    runoff of third layer added to drainage
-      PDRAIN(:) = PDRAIN(:) + MAX( 0., ZWG(:)-ZWSAT_AVG(:) )*   &
-                  (PD_G(:,3)-PD_G(:,2)) * XRHOLW / PTSTEP  
-      PWG(:,3) = MIN( ZWG(:)  , ZWSAT_AVG(:)           )
-      PWG(:,3) = MAX( PWG(:,3), XWGMIN                 )
-    END IF
-  ENDIF
-  !
+  IF (HISBA == '3-L') PWG(:,3) = ZWG3(:)
+!
 #ifdef TOPD
   IF (LCOUPL_TOPD) THEN
     !runoff topo cumule (kg/m²)
