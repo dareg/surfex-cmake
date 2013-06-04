@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE ARRANGE_COVER
+      SUBROUTINE ARRANGE_COVER(PDATA_NATURE,PDATA_TOWN,PDATA_SEA,PDATA_WATER,PDATA_VEGTYPE, &
+                               PDATA_GARDEN, OGARDEN, PDATA_BLD, PDATA_WALL_O_HOR           )
 !     #########################
 !
 !!**** *ARRANGE_COVER*
@@ -31,6 +32,8 @@
 !!    ------------
 !!
 !!    Original    03/2009
+!!                04/2013 (V. Masson) Fusion of Arrange_cover & update_data_frac
+!!                        to allow distinct cover change options between submodels (_n)
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -40,11 +43,13 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_SURF_ATM_n,     ONLY : LWATER_TO_NATURE, LTOWN_TO_ROCK
 !
-USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_WATER, XDATA_SEA, &
-                                XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH, XDATA_DICE, &
-                                XDATA_VEGTYPE, XDATA_LAI, XDATA_LAI_ALL_YEARS,    &
-                                XDATA_GARDEN, XDATA_ALB_VEG_NIR, XDATA_ALB_VEG_VIS, &
-                                XDATA_ALB_SOIL_NIR, XDATA_ALB_SOIL_VIS   
+USE MODD_DATA_COVER_n,   ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_GARDEN,           &
+                                XDATA_SEA, XDATA_WATER, XDATA_VEGTYPE, LGARDEN,   &
+                                XDATA_BLD, XDATA_WALL_O_HOR
+USE MODD_DATA_COVER,     ONLY : XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH, XDATA_DICE, &
+                                XDATA_LAI, XDATA_LAI_ALL_YEARS,                   &
+                                XDATA_ALB_VEG_NIR, XDATA_ALB_VEG_VIS,             &
+                                XDATA_ALB_SOIL_NIR, XDATA_ALB_SOIL_VIS
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER, NROCK, NWATER, NVT_ROCK
 !
@@ -57,6 +62,17 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_NATURE
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_TOWN
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_SEA
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_WATER
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_GARDEN
+REAL, DIMENSION(:,:),INTENT(IN) :: PDATA_VEGTYPE
+LOGICAL,            INTENT(IN)  :: OGARDEN
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_BLD
+REAL, DIMENSION(:), INTENT(IN)  :: PDATA_WALL_O_HOR
+!
+!
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
@@ -66,19 +82,50 @@ INTEGER  :: JCOVER, JVEGTYPE, JL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('ARRANGE_COVER',0,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+! Allocate fields from submodel module
+!-------------------------------------------------------------------------------
+!
+IF (.NOT.ASSOCIATED(XDATA_NATURE)) THEN
+  ALLOCATE(XDATA_NATURE    (JPCOVER))
+  ALLOCATE(XDATA_TOWN      (JPCOVER))
+  ALLOCATE(XDATA_SEA       (JPCOVER))
+  ALLOCATE(XDATA_WATER     (JPCOVER))
+  ALLOCATE(XDATA_VEGTYPE   (JPCOVER,NVEGTYPE))
+  ALLOCATE(XDATA_GARDEN    (JPCOVER))
+  ALLOCATE(XDATA_BLD       (JPCOVER))
+  ALLOCATE(XDATA_WALL_O_HOR(JPCOVER))
+ENDIF
+!
+!-------------------------------------------------------------------------------
+! Default values
+!-------------------------------------------------------------------------------
+!
+LGARDEN = OGARDEN
+!
+XDATA_NATURE     = PDATA_NATURE
+XDATA_TOWN       = PDATA_TOWN
+XDATA_SEA        = PDATA_SEA
+XDATA_WATER      = PDATA_WATER
+XDATA_VEGTYPE    = PDATA_VEGTYPE
+XDATA_GARDEN     = PDATA_GARDEN
+XDATA_BLD        = PDATA_BLD
+XDATA_WALL_O_HOR = PDATA_WALL_O_HOR
+!
+!-------------------------------------------------------------------------------
 ! Change water (not lake) to nature
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('ARRANGE_COVER',0,ZHOOK_HANDLE)
 IF(LWATER_TO_NATURE)THEN
   DO JCOVER=1,JPCOVER
-     IF(JCOVER/=NWATER(1).AND.JCOVER/=NWATER(2).AND.JCOVER/=NWATER(3).AND.XDATA_WATER(JCOVER)>0.0)THEN
-       XDATA_NATURE(JCOVER)=XDATA_NATURE(JCOVER)+XDATA_WATER(JCOVER)
+     IF(JCOVER/=NWATER(1).AND.JCOVER/=NWATER(2).AND.JCOVER/=NWATER(3).AND.PDATA_WATER(JCOVER)>0.0)THEN
+       XDATA_NATURE(JCOVER)=PDATA_NATURE(JCOVER)+PDATA_WATER(JCOVER)
        XDATA_WATER (JCOVER)=0.0
      ENDIF
      !Only cover 242
-     IF(XDATA_SEA(JCOVER)>0.0.AND.XDATA_SEA(JCOVER)<1.0)THEN
-           XDATA_NATURE(JCOVER)=XDATA_NATURE(JCOVER)+XDATA_SEA(JCOVER)
+     IF(PDATA_SEA(JCOVER)>0.0.AND.PDATA_SEA(JCOVER)<1.0)THEN
+           XDATA_NATURE(JCOVER)=PDATA_NATURE(JCOVER)+PDATA_SEA(JCOVER)
            XDATA_SEA(JCOVER)=0.0
      ENDIF
   ENDDO
@@ -91,10 +138,10 @@ ENDIF
 IF(LTOWN_TO_ROCK)THEN
 !        
   DO JCOVER=1,JPCOVER
-     IF(XDATA_TOWN(JCOVER)>0.0.OR.XDATA_GARDEN(JCOVER)>0.0)THEN
+     IF(PDATA_TOWN(JCOVER)>0.0.OR.PDATA_GARDEN(JCOVER)>0.0)THEN
 !
-       XDATA_NATURE(JCOVER) = XDATA_NATURE(JCOVER) + XDATA_GARDEN(JCOVER) * XDATA_TOWN(JCOVER)
-       XDATA_TOWN  (JCOVER) = XDATA_TOWN  (JCOVER) * ( 1. - XDATA_GARDEN(JCOVER))
+       XDATA_NATURE(JCOVER) = PDATA_NATURE(JCOVER) + PDATA_GARDEN(JCOVER) * PDATA_TOWN(JCOVER)
+       XDATA_TOWN  (JCOVER) = PDATA_TOWN  (JCOVER) * ( 1. - PDATA_GARDEN(JCOVER))
        XDATA_GARDEN(JCOVER) = 0.0
 !
        ZWORK=XDATA_NATURE(JCOVER)+XDATA_TOWN(JCOVER)
@@ -123,7 +170,25 @@ IF(LTOWN_TO_ROCK)THEN
      ENDIF
   ENDDO
 !
+ELSE
+!-------------------------------------------------------------------------------
+! Town is kept, but if gardens are not treated specifically, 
+! they are included into nature fraction.
+!-------------------------------------------------------------------------------
+!
+  IF (.NOT. OGARDEN) THEN
+    XDATA_NATURE     = PDATA_NATURE + PDATA_GARDEN * PDATA_TOWN
+    XDATA_TOWN       = PDATA_TOWN   * ( 1. - PDATA_GARDEN)
+    XDATA_GARDEN     = 0.
+    XDATA_BLD        = PDATA_BLD / (1. - PDATA_GARDEN)
+    XDATA_WALL_O_HOR = PDATA_WALL_O_HOR / (1. - PDATA_GARDEN)
+  END IF
+
 ENDIF        
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('ARRANGE_COVER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

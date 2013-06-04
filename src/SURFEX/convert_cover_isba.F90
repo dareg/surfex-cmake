@@ -48,7 +48,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEGTYPE,   &
+USE MODD_DATA_COVER_n,   ONLY : XDATA_VEGTYPE
+USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
                                   XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
                                   XDATA_EMIS_ECO, XDATA_GAMMA, XDATA_CV,  &
                                   XDATA_RGL, XDATA_RSMIN,                 &
