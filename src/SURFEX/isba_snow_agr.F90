@@ -14,8 +14,8 @@
                          PSNOWTEMP, PTS_RAD, PTS, PRI, PSNOWHMASS,               &
                          PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
                          PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
-                         PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTS_RAD_SNOWFREE,     &
-                         PTG, PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD, PFFG,        &
+                         PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &
+                         PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD, PFFG,             &
                          PFFV, PFF                                               )  
 !     ##########################################################################
 !
@@ -51,6 +51,7 @@
 !!      B. Decharme 01/2009  Floodplains 
 !!      B. Decharme 01/2010  Effective surface temperature (for diag)
 !!      B. Decharme 09/2012  Bug total sublimation flux: no PLESL
+!!      B. Decharme 04/2013  Bug wrong radiative temperature
 
 !-------------------------------------------------------------------------------
 !
@@ -128,9 +129,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PLVTT, PLSTT
 !
 ! Prognostic variables:
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PTS_RAD_SNOWFREE    ! soil layer average temperatures        (K)
 REAL, DIMENSION(:,:), INTENT(IN) :: PTG                 ! soil layer average temperatures        (K)
-
 !
 !
 !* diagnostic variables
@@ -184,9 +183,9 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PLE_FLOOD, PLEI_FLOOD ! Flood evaporation
 !
 REAL, DIMENSION(:),   INTENT(OUT) :: PRI       ! Total Ridcharson number
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
 !*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -215,12 +214,11 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 !
 ! Effective surface radiating temperature:
 !
-  PALBT(:)     = PALB(:)*(1.-PPSN(:)) + PPSN(:)*PALB3L(:)
+  PALBT (:)    = PALB (:)*(1.-PPSN(:)) + PPSN(:)*PALB3L  (:)
   PEMIST(:)    = PEMIS(:)*(1.-PPSN(:)) + PPSN(:)*PEMISNOW(:)
-  PTS_RAD(:)   = ( ((1.-PPSN(:))*PEMIS(:)   *PTS_RAD_SNOWFREE(:)**4 +             &
-                          PPSN(:) *PEMISNOW(:)*PSNOWTEMP(:,1)**4  )/     &
-                     PEMIST(:) )**(0.25)  
-!
+!  
+  PTS_RAD(:)   = ( ((1.-PPSN(:))*PEMIS   (:)*PTG      (:,1)**4 +       &
+                        PPSN(:) *PEMISNOW(:)*PSNOWTEMP(:,1)**4  )/PEMIST(:) )**(0.25)  
 !
 ! Calculate actual fluxes from snow-free natural
 ! portion of surface: NET flux from surface is the sum of
@@ -240,7 +238,7 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 ! Total evapotranspiration flux (kg/m2/s):
 !
   PEVAP(:)     = (PLEV(:) + PLEG(:))/PLVTT(:) + PLEGI(:)/PLSTT(:) + PLE_FLOOD(:)/PLVTT(:) + &
-                    PLEI_FLOOD(:)/PLSTT(:) + PPSN(:) * PEVAP3L(:)  
+                    PLEI_FLOOD(:)/PLSTT(:) + PPSN(:) * PEVAP3L(:)
 !
 ! Momentum fluxes:
 !
@@ -261,11 +259,11 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
   PGRNDFLUX(:) =                            PPSN(:) * PGRNDFLUX(:) 
   PMELTADV(:)  =                            PPSN(:) * PMELTADV(:)
 !
-! Total evaporative flux:
+! Total evaporative flux (W/m2) :
 !
   PLE(:)       = PLEG(:) + PLEV(:) + PLES(:) + PLESL(:) + PLEGI(:) + PLE_FLOOD(:) + PLEI_FLOOD(:)
 !
-! Total sublimation flux:
+! Total sublimation flux (W/m2) :
 !
   PLEI(:)      = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
@@ -280,11 +278,11 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 ELSE
 !
   PTS    (:)  = PTG  (:,1)
-  PTS_RAD(:)  = PTS_RAD_SNOWFREE(:)
+  PTS_RAD(:)  = PTG  (:,1)
   PALBT  (:)  = PALB (:)
   PEMIST (:)  = PEMIS(:)
 !  
-! Total sublimation flux:
+! Total sublimation flux (W/m2) :
   PLEI   (:)  = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
 ENDIF

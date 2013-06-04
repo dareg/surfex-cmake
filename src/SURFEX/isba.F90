@@ -114,6 +114,7 @@
 !!                            Bug : flood fraction in COTWORES
 !!                            new wind implicitation
 !!                            Irrigation rate diag
+!!      (B. Decharme) 04/2013 Bug : Wrong radiative temperature
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -653,9 +654,6 @@ REAL, DIMENSION(SIZE(PWR)) :: ZQSAT     ! expression for the saturation
 !                                       ! specific humidity 
 REAL, DIMENSION(SIZE(PWR)) :: ZDQSAT    ! expression for the saturation
 !                                       ! specific humidity derivative
-REAL, DIMENSION(SIZE(PWR)) :: ZTS_RAD   ! effective radiative temperature 
-!                                         of the natural surface (K)
-!                                         (snow free part in case of 3-L snow scheme)
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZWRMAX    ! maximum canopy water interception
 !
@@ -891,7 +889,7 @@ ENDIF
            PPSN, PPSNV, PPSNG, ZFROZEN1,                                        &
            ZALBT, ZEMIST, ZQSAT, ZDQSAT, ZSNOW_THRUFAL,                         &
            PRN, PH, PLE, PLEG, PLEGI, PLEV, PLES, PLER, PLETR, PEVAP, PGFLUX,   &
-           PMELTADV, PMELT, PRESTORE, PUSTAR, ZTS_RAD,                          &
+           PMELTADV, PMELT, PRESTORE, PUSTAR,                                   &
            ZSOILCONDZ,  PD_G, PDZG, PTG,                                        &
            PSRSFC, PPSNV_A, PFFG, PFFV, PFF, PFFROZEN,                          &
            PLE_FLOOD, PLEI_FLOOD, PSNOWTEMP(:,1)                                ) 
@@ -962,8 +960,7 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
           PSNOWTEMP, PTS_RAD, PTS, PRI, PSNOWHMASS,               &
           PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
           PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
-          PLEI_ISBA, PGFLUX_ISBA, PMELTADV,                       &
-          ZTS_RAD, PTG,                                           &
+          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &
           PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD, PFFG, PFFV, PFF   )  
 !
 !***************************************************************************
