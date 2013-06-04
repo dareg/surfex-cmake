@@ -132,6 +132,10 @@ OSSO_ANIS(:)=.FALSE.
 !*    2.     Loop on MESONH grid points
 !            --------------------------
 !
+ZHYY(:) = 0.
+ZHXX(:) = 0.
+ZHXY(:) = 0.
+!
 DO JL=1,NL
 !
 !
@@ -319,8 +323,8 @@ DO JL=1,NL
         IMAXJ = MIN(JJSS+JNEXT-1,NSSO)
 !
         ZDZSDY(JISS,JJSS:IMAXJ) = ( XSSQO(JISS,INEXT,IL) - XSSQO(JISS,JJSS,JL)) &
-                                    / FLOAT(JNEXT) / ZDYEFF  
-!
+                                    / FLOAT(JNEXT) / ZDYEFF 
+       !
         GDZSDY(JISS,JJSS:IMAXJ) = .TRUE.
 !
 !
@@ -344,7 +348,7 @@ DO JL=1,NL
 
           IF (.NOT. (JPREV>=NSSO+1 .OR. IL==0)) THEN
             ZDZSDY(JISS,1:JJSS) = ( XSSQO(JISS,JJSS,JL) - XSSQO(JISS,IPREV,IL)) &
-                                    / FLOAT(JPREV) / ZDYEFF  
+                                    / FLOAT(JPREV) / ZDYEFF 
 !
             GDZSDY(JISS,1:JJSS) = .TRUE.
           END IF
@@ -395,7 +399,7 @@ DO JL=1,NL
 !            --------
 !
     ZHYY(JL) = SUM(ZDZSDY(:,:)*ZDZSDY(:,:),MASK=GDZSDX(:,:).AND.GDZSDY(:,:))&
-                /COUNT(GDZSDX(:,:).AND.GDZSDY(:,:))  
+                /COUNT(GDZSDX(:,:).AND.GDZSDY(:,:)) 
 !
 !*    5.5    term Hxy
 !            --------
