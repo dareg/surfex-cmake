@@ -158,11 +158,11 @@ DIR_XRD += LIB/XRD38/module
 DIR_XRD += LIB/XRD38/support
 DIR_XRD += LIB/XRD38/utilities
 INC_XRD = -I$(B)LIB/XRD38/include -I$(B)LIB/XRD38/FA -I$(B)LIB/XRD38/LFI
-#CPPFLAGS_XRD = -fdefault-real-8
+CPPFLAGS_XRD = -DHIGHRES
 #
 ifdef DIR_XRD
 DIR_MASTER += $(DIR_XRD)
-#CPPFLAGS   += $(CPPFLAGS_XRD)
+CPPFLAGS   += $(CPPFLAGS_XRD)
 INC        += $(INC_XRD)
 endif
 ##########################################################
