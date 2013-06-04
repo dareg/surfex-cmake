@@ -34,7 +34,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER,     ONLY : NYEAR, XDATA_NATURE, XDATA_GARDEN,                  &
+USE MODD_DATA_COVER_n,   ONLY : NYEAR
+USE MODD_DATA_COVER,     ONLY : XDATA_NATURE, XDATA_GARDEN,                  &
                                   XDATA_LAI, XDATA_VEGTYPE, XDATA_H_TREE,           &
                                   XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_EMIS_ECO
 !

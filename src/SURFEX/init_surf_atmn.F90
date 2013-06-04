@@ -43,6 +43,7 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!     (A. Lemonsu)    2009   New key read for urban green areas
 !!     (B.Decharme)  07/2011  Read pgd+prep
 !!     (S. Queguiner)  2011   Modif chemistry (2.4)
+!!     (B. Decharme)   2013   Read grid only once in AROME case
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -90,7 +91,8 @@ USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET,     &
                                 LSURF_BUDGETC, LRESET_BUDGETC,     &
                                 LPROVAR_TO_DIAG, LSELECT, CSELECT  
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
-USE MODD_DATA_COVER,     ONLY : LCLIM_LAI, NYEAR, XDATA_LAI_ALL_YEARS, XDATA_LAI, &
+USE MODD_DATA_COVER_n,   ONLY : NYEAR
+USE MODD_DATA_COVER,     ONLY : LCLIM_LAI, XDATA_LAI_ALL_YEARS, XDATA_LAI, &
                                 NECO2_START_YEAR, NECO2_END_YEAR  
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
@@ -367,7 +369,7 @@ ALLOCATE(XZ0EFFJPDIR(NSIZE_FULL))
  CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP,XZ0EFFJPDIR)
 NGRID_PAR=SIZE(XGRID_PAR)
 !
-IF (NRANK==NPIO) THEN
+IF (HPROGRAM/='AROME '.AND.NRANK==NPIO) THEN
   !
   IF (.NOT.ASSOCIATED(XGRID_FULL_PAR)) THEN
     CALL READ_GRIDTYPE(HPROGRAM,CGRID,NGRID_PAR,NDIM_FULL,.FALSE.,HDIR='A')

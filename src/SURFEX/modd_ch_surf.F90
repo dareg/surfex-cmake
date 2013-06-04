@@ -27,6 +27,10 @@
 !
 IMPLICIT NONE
 !
+INTEGER,PARAMETER :: JPEMISMAX_F = 10000
+INTEGER,PARAMETER :: JPEMISMAX_S = 1000
+INTEGER,PARAMETER :: JPSNAPMAX = 50
+!
 REAL, SAVE, DIMENSION(:),   ALLOCATABLE :: XSREALMASSMOLVAL ! final molecular
                                                             ! diffusivity value
 REAL, SAVE, DIMENSION(:),   ALLOCATABLE :: XSREALREACTVAL   ! final chemical

@@ -32,9 +32,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-INTEGER, PARAMETER                :: NOCKMIN=0  !first ocean level indice
-INTEGER, PARAMETER                :: NOCKMAX=40 ! last ocean level indice
-!
 !------------------------------------------------------------------------------
 !
 TYPE OCEAN_GRID_t
