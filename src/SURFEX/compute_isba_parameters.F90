@@ -310,7 +310,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_VEG_PGD_n(HPROGRAM, ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
+ CALL INIT_VEG_PGD_n(HPROGRAM, 'NATURE',ILUOUT, KI, NPATCH, NGROUND_LAYER, TTIME%TDATE%MONTH,   &
                   XVEGTYPE, XPATCH, XVEGTYPE_PATCH, NSIZE_NATURE_P, NR_NATURE_P,    &
                   XRM_PATCH, &
                   LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, XTDEEP, XGAMMAT,   &
