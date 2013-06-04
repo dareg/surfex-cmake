@@ -34,7 +34,7 @@ SUBROUTINE PREP_ISBA(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!                                          grib reading (no longer here)
 !!      B. Decharme  (10/2012): coherence between soil temp and liquid/solid water with DIF
 !!                              bug in biomass prognostic fields calculation
-!!
+!!      B. Decharme  (06/2013): XPSNV_A for EBA snow scheme not allocated
 !!------------------------------------------------------------------
 !
 !
@@ -59,7 +59,7 @@ USE MODD_ISBA_n,      ONLY : TSNOW, XRESA, XTSRAD_NAT, XEMIS, XLAI, XVEG,  &
                               XVEGTYPE_PATCH, LGLACIER, XICE_STO,            &
                               XPSN, XPSNG, XPSNV, XDIR_ALB_WITH_SNOW,        &
                               XSCA_ALB_WITH_SNOW, NGROUND_LAYER, XMPOTSAT,   &
-                              XBCOEF
+                              XBCOEF, XPSNV_A
 !                           
 USE MODD_DEEPSOIL,    ONLY : LPHYSDOMC
 USE MODD_CSTS,        ONLY : XTT, XG, XLMTT
@@ -266,12 +266,14 @@ ZALBVIS_SOIL(:,:)=0.
 ZALBUV_SOIL(:,:)=0.
 ZZENITH(:)=0.
 ZSW_BANDS(:)=0.
-ALLOCATE(XPSN (SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XPSNG(SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XPSNV(SIZE(XLAI,1),SIZE(XLAI,2)))
-XPSN  = 0.0
-XPSNG = 0.0
-XPSNV = 0.0
+ALLOCATE(XPSN   (SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XPSNG  (SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XPSNV  (SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XPSNV_A(SIZE(XLAI,1),SIZE(XLAI,2)))
+XPSN    = 0.0
+XPSNG   = 0.0
+XPSNV   = 0.0
+XPSNV_A = 0.0
 ALLOCATE(XDIR_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 ALLOCATE(XSCA_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 XDIR_ALB_WITH_SNOW = 0.0
@@ -289,6 +291,7 @@ XSCA_ALB_WITH_SNOW = 0.0
 DEALLOCATE(XPSN)
 DEALLOCATE(XPSNG)
 DEALLOCATE(XPSNV)
+DEALLOCATE(XPSNV_A)
 DEALLOCATE(XDIR_ALB_WITH_SNOW)
 DEALLOCATE(XSCA_ALB_WITH_SNOW)
 !
