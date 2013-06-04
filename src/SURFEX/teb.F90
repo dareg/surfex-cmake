@@ -940,6 +940,7 @@ CASE("DEF")
    PHVAC_COOL(:)  = XUNDEF
    PHVAC_HEAT(:)  = XUNDEF
    PCAP_SYS(:)    = XUNDEF
+   PT_SYS(:)      = XUNDEF
    PM_SYS(:)      = XUNDEF
    PCOP(:)        = XUNDEF
    PQ_SYS(:)      = XUNDEF

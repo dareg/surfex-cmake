@@ -90,6 +90,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_CSTS,ONLY : XCPD, XLVTT, XSTEFAN, XCL
 !
 USE MODE_THERMOS
@@ -194,6 +195,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ROOF_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
+!
+PRAD_ROOF_WALL(:) = XUNDEF
+PRAD_ROOF_WIN(:)  = XUNDEF
+PRAD_ROOF_FLOOR(:)= XUNDEF
+PRAD_ROOF_MASS(:) = XUNDEF
+PCONV_ROOF_BLD(:) = XUNDEF
 !
 ! *Convection heat transfer coefficients [W m-2 K-1] from EP Engineering Reference
 !

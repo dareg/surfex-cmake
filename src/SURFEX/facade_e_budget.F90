@@ -196,6 +196,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FACADE_E_BUDGET',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
+PRAD_WALL_FLOOR= XUNDEF
+PRAD_WALL_MASS = XUNDEF
+PRAD_WIN_FLOOR = XUNDEF
+PRAD_WIN_MASS  = XUNDEF
+PCONV_WALL_BLD = XUNDEF
+PCONV_WIN_BLD  = XUNDEF
 !
 !* surface temperature of the opposite wall
 !  ----------------------------------------
@@ -266,7 +272,11 @@ ZRAD_WALL_WIN   = ZRAD_WALL_WIN   + 0.5 * ZRAD_WALL_A_WIN
 ! *Energy Balance for windows (averaged on both walls)
 !  ---------------------------------------------------
 !
-IF (HBEM == 'DEF') ZEMIT_LW_WIN(:) = 0.
+IF (HBEM == 'DEF') THEN
+  ZEMIT_LW_WIN(:) = 0.
+  PABS_LW_WIN (:) = XUNDEF
+END IF
+!
 IF (HBEM == 'BEM') THEN
         ZEMIS_WIN(:) = 0.84 ! From Engineering Reference documentation p219 
                             ! (see http://apps1.eere.energy.gov/buildings/energyplus/
