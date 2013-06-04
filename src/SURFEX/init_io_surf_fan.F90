@@ -28,11 +28,14 @@
 !!                            to read dimensions only.
 !!      B. Decharme   2008  : Change to switch between offline and online run
 !!                            In online run, the mask must be always global
+!!      B. Decharme   2013  : Allocate work variables to write in FA in AROME case
 !
 !*       0.   DECLARATIONS
 !             ------------
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NPIO, NSIZE
+!
+USE MODD_SURFEX_OMP, ONLY : NINDX2, NWORK, XWORK, XWORK2, XWORK3, NWORK_FULL, XWORK_FULL, XWORK2_FULL
 !
 USE MODD_CSTS, ONLY : XPI
 !
@@ -161,9 +164,24 @@ CMASK=HMASK
 !------------------------------------------------------------------------------
 !
 IF (HPROGRAM=='AROME ') THEN
-  NFULL = NDIM_FULL
-  ILU = NFULL
-  IL  = NFULL
+  NFULL  = NDIM_FULL
+  ILU    = NFULL
+  IL     = NFULL
+  NSIZE  = NFULL
+  NINDX2 = NFULL
+  IF(.NOT.ASSOCIATED(NWORK )) ALLOCATE(NWORK(NFULL))
+  IF(.NOT.ASSOCIATED(XWORK )) ALLOCATE(XWORK(NFULL))
+  IF(.NOT.ASSOCIATED(XWORK2)) ALLOCATE(XWORK2(NFULL,2))
+  IF(.NOT.ASSOCIATED(XWORK3)) ALLOCATE(XWORK3(NFULL,10,10))
+  IF (NRANK==NPIO) THEN
+    IF(.NOT.ASSOCIATED(NWORK_FULL )) ALLOCATE(NWORK_FULL(NFULL))
+    IF(.NOT.ASSOCIATED(XWORK_FULL )) ALLOCATE(XWORK_FULL(NFULL))
+    IF(.NOT.ASSOCIATED(XWORK2_FULL)) ALLOCATE(XWORK2_FULL(NFULL,10))
+  ELSE
+    IF(.NOT.ASSOCIATED(NWORK_FULL )) ALLOCATE(NWORK_FULL(0))
+    IF(.NOT.ASSOCIATED(XWORK_FULL )) ALLOCATE(XWORK_FULL(0))
+    IF(.NOT.ASSOCIATED(XWORK2_FULL)) ALLOCATE(XWORK2_FULL(0,0))
+  ENDIF
 ELSE
   CALL GET_SIZE_FULL_n(HPROGRAM,NFULL,ILU)
   IF (ILU>NSIZE) NSIZE = ILU
