@@ -35,9 +35,11 @@ SUBROUTINE DIAG_MISC_ISBA_n(PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
 !!        S. Lafont  01/2011 : accumulate carbon variable between 2 outputs
 !!       B. Decharme 05/2012 : Carbon fluxes in diag_evap
 !!       B. Decharme 05/2012 : Active and frozen layers thickness for dif
+!!       B. Decharme 06/2013 : Snow temp for EBA scheme (XP_SNOWTEMP not allocated)
 !!
 !!------------------------------------------------------------------
 !
+USE MODD_CSTS,       ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODD_PACK_DIAG_ISBA,      ONLY : XP_HV, XP_SWI, XP_ALBT, XP_TSWI,     &
@@ -104,6 +106,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PFSAT
 !
 REAL, DIMENSION(SIZE(PPSN))    :: ZSNOWTEMP
 REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORK
+REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORKTEMP
 !
 LOGICAL :: GMASK
 INTEGER :: JJ, JI, JK
@@ -147,12 +150,18 @@ IF (LSURF_MISC_BUDGET) THEN
   XP_TDSNOW=0.
   ZSNOWTEMP=0.  
   !
+  IF (HSNOW/='EBA')THEN
+     ZWORKTEMP(:,:) = XP_SNOWTEMP(:,:)
+  ELSE
+     ZWORKTEMP(:,1) = MIN(PTG(:,1),XTT)
+  ENDIF
+  !
   DO JI = 1,SIZE(PWSNOW,2)
 !cdir nodep 
     DO JJ = 1,SIZE(PWSNOW,1)
       XP_TWSNOW(JJ) = XP_TWSNOW(JJ) + PWSNOW(JJ,JI)      
       XP_TDSNOW(JJ) = XP_TDSNOW(JJ) + ZWORK (JJ,JI)
-      ZSNOWTEMP(JJ) = ZSNOWTEMP(JJ) + XP_SNOWTEMP(JJ,JI) * ZWORK(JJ,JI)
+      ZSNOWTEMP(JJ) = ZSNOWTEMP(JJ) + ZWORKTEMP(JJ,JI) * ZWORK(JJ,JI)
     ENDDO
   ENDDO
   !
@@ -266,7 +275,6 @@ SUBROUTINE COMPUT_COLD_LAYERS_THICK
 !       ALT = depth to zero centigrade isotherm in permafrost
 !       FLT = depth to zero centigrade isotherm in non-permafrost
 !
-USE MODD_CSTS, ONLY : XTT
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
 IMPLICIT NONE
