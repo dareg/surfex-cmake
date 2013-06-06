@@ -98,6 +98,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,ONLY : XCPD, XSTEFAN
 !
 USE MODI_LAYER_E_BUDGET_GET_COEF
@@ -204,6 +205,14 @@ INTEGER :: JJ                    ! loop counter
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WALL_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
+!
+PFLX_BLD_WALL  = XUNDEF
+PIMB_WALL      = XUNDEF
+PRAD_WALL_WIN  = XUNDEF
+PRAD_WALL_FLOOR= XUNDEF
+PRAD_WALL_MASS = XUNDEF
+PCONV_WALL_BLD = XUNDEF
+
 !
  CALL LAYER_E_BUDGET_GET_COEF( PT_WALL, PTSTEP, ZIMPL, PHC_WALL, PTC_WALL, PD_WALL, &
                               ZA, ZB, ZC, ZY )

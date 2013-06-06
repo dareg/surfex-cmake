@@ -10,7 +10,7 @@
                           PALBT, PEMIST, PQSAT, PDQSAT, PSNOW_THRUFAL,         &
                           PRN, PH, PLE, PLEG, PLEGI, PLEV,                     &
                           PLES, PLER, PLETR, PEVAP,                            &
-                          PGFLUX, PMELTADV, PMELT, PRESTORE, PUSTAR, PTS_RAD,  &
+                          PGFLUX, PMELTADV, PMELT, PRESTORE, PUSTAR,           &
                           PSOILCONDZ, PD_G, PDZG, PTG,                         &
                           PSR, PPSNV_A,                                        &
                           PFFG, PFFV, PFF, PFFROZEN,                           &
@@ -79,6 +79,7 @@
 !!      (B. Decharme)10/2012  Melt rate with D95 computed using max(XTAU,PTSTEP)
 !!      (A.Boone)    02/2013  Split soil phase changes into seperate routine
 !!      (B. Decharme)04/2013  Pass soil phase changes routines in hydro.F90
+!!      (B. Decharme)04/2013  Delete PTS_RAD because wrong diagnostic
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -219,12 +220,10 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PLER, PLETR, PEVAP, PGFLUX, PMELTADV, PME
 !                                     PMELT = melting rate of snow (kg m-2 s-1)
 !                                     PRESTORE = surface restore flux (W m-2)
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PLEGI, PUSTAR, PTS_RAD
+REAL, DIMENSION(:), INTENT(OUT)     :: PLEGI, PUSTAR
 !                                      PLEGI   = sublimation component of the 
 !                                                latent heat flux from the soil surface
 !                                      PUSTAR  = friction velocity
-!                                      PTS_RAD = effective radiative temperature 
-!                                                of the natural surface (K)
 !
 !*      0.2    declarations of local variables
 !
@@ -311,7 +310,6 @@ DO JJ=1,SIZE(PTG,1)
   PRN(JJ)      = (1. - PALBT(JJ)) * PSW_RAD(JJ) + PEMIST(JJ) *      &
               (PLW_RAD(JJ) - XSTEFAN * (PTSM(JJ)** 3)*(4.*PTG(JJ,1) - 3.*PTSM(JJ)))
 !
-  PTS_RAD(JJ)=((PTSM(JJ)** 3)*(4.*PTG(JJ,1) - 3.*PTSM(JJ)))**0.25
 !                                            sensible heat flux
 !
   PH(JJ)       = PRHOA(JJ) * PCPS(JJ) * (PTG(JJ,1) - PTA(JJ)*PEXNS(JJ)/PEXNA(JJ)) &

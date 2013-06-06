@@ -14,6 +14,7 @@ PROGRAM OFFLINE
 ! modifications 
 ! 09/2012 G. Pigeon: coherence between radiation and zenith angle because of
 !                    trouble with radiation received by wall in TEB
+! 05/2013 B. Decharme goto_trip
 ! -------------------------------------------------
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
@@ -134,11 +135,11 @@ USE MODI_CLOSE_FILEIN_OL
 USE MODI_CLOSE_FILEOUT_OL
 USE MODI_DEALLOC_SURFEX
 !
+USE MODI_FANDAR
+!
 USE MODI_WRITE_DISCHARGE_FILE
 USE MODI_WRITE_BUDGET_COUPL_ROUT
 USE MODI_PREP_RESTART_COUPL_TOPD
-!
-USE MODI_FANDAR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -558,6 +559,7 @@ XTIME = (MPI_WTIME() - XTIME0)
 !
  CALL DEALLOC_SURFEX
  CALL ALLOC_SURFEX(NBLOCKTOT)
+ CALL GOTO_TRIP(1,.TRUE.)
 !
 ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
  CALL GET_SIZES_PARALLEL(NBLOCKTOT,INI,NPIO,ISIZE_OMP)
@@ -1107,12 +1109,12 @@ IF ( LRESTART ) THEN
     !* opens the file
     IF (CSURF_FILETYPE=='FA    ') THEN
       LFANOCOMPACT = .TRUE.
-      IDATEF(1)= IYEAR_OUT
-      IDATEF(2)= IMONTH_OUT
-      IDATEF(3)= IDAY_OUT
-      IDATEF(4)= FLOOR(ZTIME_OUT/3600.)
-      IDATEF(5)= FLOOR(ZTIME_OUT/60.) - IDATEF(4) * 60 
-      IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
+      IDATEF(1)= IYEAR
+      IDATEF(2)= IMONTH
+      IDATEF(3)= IDAY
+      IDATEF(4)= FLOOR(ZTIME/3600.)
+      IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
+      IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
       IDATEF(7:11) = 0    
       CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
       CALL FANDAR(IRET,NUNIT_FA,IDATEF)

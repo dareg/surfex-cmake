@@ -425,6 +425,7 @@ IF (HBEM == "DEF") THEN
              + ( PDQS_ROOF(:) - PGSNOW_ROOF      (:)  ) * PDN_ROOF(:) &
              + 0.5*PWALL_O_HOR(:)/PBLD(:) * ( PH_WALL_A(:) + PLE_WALL_A(:) + PDQS_WALL_A(:) - PRN_WALL_A(:) ) &
              + 0.5*PWALL_O_HOR(:)/PBLD(:) * ( PH_WALL_B(:) + PLE_WALL_B(:) + PDQS_WALL_B(:) - PRN_WALL_B(:) )
+  PFLX_BLD(:)= XUNDEF
 ELSEIF (HBEM == "BEM") THEN
   PQF_BLD(:) = PQIN(:)*PN_FLOOR(:) + PHVAC_COOL(:) + PHVAC_HEAT(:)
   PFLX_BLD(:)=  PFLX_BLD_ROOF(:) + 0.5*PWALL_O_HOR(:)/PBLD(:)*PFLX_BLD_WALL_A(:) &

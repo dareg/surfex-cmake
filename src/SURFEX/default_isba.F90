@@ -5,7 +5,9 @@
                               HCPSURF, PCGMAX, PCDRAG, HKSAT, HSOC,   &
                               HTOPREG, HRAIN, HHORT, OFLOOD, OTRIP,   &
                               OGLACIER, OCANOPY_DRAG, OVEGUPD,        &
-                              OSPINUPCARBS, OSPINUPCARBW              )  
+                              OSPINUPCARBS, OSPINUPCARBW,             &
+                              PSPINMAXS, PSPINMAXW,                   &
+                              KNBYEARSPINS, KNBYEARSPINW              )
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA
@@ -140,6 +142,10 @@ LOGICAL, INTENT(OUT)          :: OVEGUPD   ! T: update vegetation parameters
 !
 LOGICAL, INTENT(OUT)          :: OSPINUPCARBS ! T: carbon spinup soil
 LOGICAL, INTENT(OUT)          :: OSPINUPCARBW ! T: carbon spinup wood
+REAL,    INTENT(OUT)          :: PSPINMAXS    ! max number of times CARBON_SOIL subroutine is called
+REAL,    INTENT(OUT)          :: PSPINMAXW    ! max number of times the wood is accelerated 
+INTEGER, INTENT(OUT)          :: KNBYEARSPINS ! nbr years needed to reaches soil equilibrium
+INTEGER, INTENT(OUT)          :: KNBYEARSPINW ! nbr years needed to reaches wood equilibrium
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -184,6 +190,11 @@ OVEGUPD = .TRUE.
 !
 OSPINUPCARBS = .FALSE.
 OSPINUPCARBW = .FALSE.
+!
+PSPINMAXS = 0.
+PSPINMAXW = 0.
+KNBYEARSPINS = 0
+KNBYEARSPINW = 0
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',1,ZHOOK_HANDLE)
 !

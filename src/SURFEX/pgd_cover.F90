@@ -120,14 +120,14 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZSEA   !to check compatibility between
 REAL, DIMENSION(:), ALLOCATABLE :: ZWATER !prescribed fractions and ECOCLIMAP
 REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
 REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER, ZCOVER
 !
 !
 INTEGER               :: ILUOUT    ! output listing logical unit
 INTEGER               :: IRESP     ! Error code after redding
 INTEGER               :: JCOVER    ! loop counter on covers
 INTEGER               :: JL        ! loop counter on horizontal points
-INTEGER               :: ICOVER, ICPT  ! 0 if cover is not present, >1 if present somewhere
+INTEGER               :: ICOVER, ICOVERSUM, ICOVER_OLD, ICPT  ! 0 if cover is not present, >1 if present somewhere
 INTEGER               :: IPERMSNOW, IECO2 
 !
 INTEGER, DIMENSION(1) :: IMAXCOVER ! index of maximum cover for the given point
@@ -418,12 +418,27 @@ ELSE
 !*    8.      List of cover present
 !             ---------------------
 !
+  ALLOCATE(ZCOVER(NL,ICOVER))
+  ZCOVER(:,:) = 0.
+!
+  ICOVER_OLD = ICOVER
+  ICOVER = 0
+!
   LCOVER(:) = .FALSE.
-  DO JCOVER=1,ICOVER
-    ICOVER = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0., 'COV')
-    IF (ICOVER>0) LCOVER(IMASK_COVER(JCOVER))=.TRUE. 
+  DO JCOVER=1,ICOVER_OLD
+    ICOVERSUM = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XCOVER(:,JCOVER)/=0., 'COV')
+    IF (ICOVERSUM>0) THEN
+      LCOVER(IMASK_COVER(JCOVER))=.TRUE.
+      ICOVER = ICOVER+1
+      ZCOVER(:,ICOVER) = XCOVER(:,JCOVER)
+    ENDIF
   END DO
 !
+  DEALLOCATE(XCOVER)
+  ALLOCATE(XCOVER(NL,ICOVER))
+  XCOVER(:,:) = ZCOVER(:,1:ICOVER)
+!
+  DEALLOCATE(ZCOVER)
   DEALLOCATE(IMASK_COVER)
 !
 !-------------------------------------------------------------------------------

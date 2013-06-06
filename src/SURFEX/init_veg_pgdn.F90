@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_VEG_PGD_n(HPROGRAM, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH,        &
+SUBROUTINE INIT_VEG_PGD_n(HPROGRAM, HSURF, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH,        &
                         PVEGTYPE, PPATCH, PVEGTYPE_PATCH, KSIZE_NATURE_P, KR_NATURE_P,  &
                         PRM_PATCH, &
                         ODEEPSOIL, OPHYSDOMC, PTDEEP_CLI, PGAMMAT_CLI, PTDEEP, PGAMMAT, &
@@ -95,6 +95,7 @@ IMPLICIT NONE
 !              -------------------------
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6), INTENT(IN)  :: HSURF     ! Type of surface
 INTEGER, INTENT(IN)  :: KLUOUT
 !
 INTEGER, INTENT(IN)  :: KI
@@ -428,15 +429,25 @@ END IF
 !        3.1 Chemical gazes
 !            --------------
 !
+    !* for the time being, chemistry on vegetation works only for
+    ! ISBA on nature tile (not for gardens), because subroutine INIT_CHEMICAL_n
+    ! contains explicitely modules from ISBAn. It should be cleaned in a future
+    ! version.
+IF (HSURF=='NATURE') THEN
  CALL INIT_CHEMICAL_n(KLUOUT, KSV, HSV, KBEQ, HSVO, KAEREQ,           &
                      KSV_CHSBEG, KSV_CHSEND, KSV_AERBEG, KSV_AEREND, &
                      HCH_NAMES, HAER_NAMES, KDSTEQ, KSV_DSTBEG,      &
                      KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
                      HDSTNAMES=HDSTNAMES, HSLTNAMES=HSLTNAMES        )
+END IF
 !
 IF (KSV /= 0) THEN
   !
-  IF (KBEQ > 0) THEN
+  IF (HSURF=='NATURE' .AND. KBEQ > 0) THEN
+    !* for the time being, chemistry deposition on vegetation works only for
+    ! ISBA on nature tile (not for gardens), because subroutine CH_INIT_DEP_ISBA_n
+    ! contains explicitely modules from ISBAn. It should be cleaned in a future
+    ! version.
     CALL OPEN_NAMELIST(HPROGRAM, ICH, HFILE=HCHEM_SURF_FILE)
     CALL CH_INIT_DEP_ISBA_n(ICH, KLUOUT, HSVO, KI)
     CALL CLOSE_NAMELIST(HPROGRAM, ICH)

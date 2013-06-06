@@ -45,7 +45,7 @@ USE MODD_TEB_VEG_n,       ONLY: CROUGH,CISBA,CPEDOTF,LTR_ML,CPHOTO,CRUNOFF,CALBE
 !
 USE MODD_TEB_GARDEN_n,    ONLY: NGROUND_LAYER, XSOILGRID
 
-USE MODD_CH_TEB_n,        ONLY: CCH_DRY_DEP, LCH_BIO_FLUX  
+USE MODD_CH_TEB_n,        ONLY: LCH_BIO_FLUX  
 
 USE MODD_DATA_COVER_PAR,  ONLY: NVEGTYPE
 USE MODD_SURF_PAR,        ONLY: XUNDEF, NUNDEF
@@ -93,6 +93,10 @@ LOGICAL                           :: GFLOOD
 LOGICAL                           :: GVEGUPD
 LOGICAL                           :: GSPINUPCARBS
 LOGICAL                           :: GSPINUPCARBW
+REAL                              :: ZSPINMAXS
+REAL                              :: ZSPINMAXW
+INTEGER                           :: INBYEARSPINS
+INTEGER                           :: INBYEARSPINW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -124,9 +128,10 @@ IF (LNAM_READ) THEN
                    CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
                    CTOPREG, YRAIN, CHORT, GFLOOD, GTRIP,       &
                    GGLACIER, GCANOPY_DRAG, GVEGUPD,            &
-                   GSPINUPCARBS, GSPINUPCARBW                  )  
+                   GSPINUPCARBS, GSPINUPCARBW,                 & 
+                   ZSPINMAXS, ZSPINMAXW,                       &
+                   INBYEARSPINS, INBYEARSPINW                  )
  !
- CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)
  !
 ENDIF

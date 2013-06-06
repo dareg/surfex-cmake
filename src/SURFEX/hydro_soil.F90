@@ -8,7 +8,7 @@
                          PDWGI1, PDWGI2, PLEGI, PD_G1, PCG, PCT,            &
                          PTG, PTG2,                                         &
                          PWG1, PWG2, PWG3, PWGI1, PWGI2,                    &
-                         PDRAIN, HKSAT, PWWILT                              )  
+                         PRUNOFF, PDRAIN, HKSAT, PWWILT                     )  
 !     #####################################################################
 !
 !!****  *HYDRO_SOIL*  
@@ -64,6 +64,7 @@
 !!                                      cases when HISBA=2-L or d2>=d3 (HISBA=3-L)
 !!                                      for tighter water budget closure 
 !!                  07/08/12 B. Decharme : Soil ice energy conservation
+!!                     04/13 B. Decharme : Apply physical limits on wg here instead of in hydro.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -134,13 +135,15 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PTG, PTG2
 !                                    PTG2 = soil temperature at 't' (K)
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PWG1, PWG2, PWG3, PWGI1, PWGI2
-REAL, DIMENSION(:), INTENT(OUT)   :: PDRAIN
 !                                      PWG1   = near-surface soil moisture at 't+dt' (m3 m-3)
 !                                      PWG2   = bulk root-soil moisture at 't+dt' (m3 m-3)
 !                                      PWG3   = bulk deep-soil moisture at 't+dt' (m3 m-3)
 !                                      PWGI1  = bulk surface-soil ice at 't+dt' (m3 m-3)
 !                                      PWGI2  = bulk deep-soil ice at 't+dt' (m3 m-3)
-!                                      PDRAIN = drainage (kg m-2 s-1)
+!
+REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF, PDRAIN
+!                                      PRUNOFF = runoff (kg m-2 s-1)
+!                                      PDRAIN  = drainage (kg m-2 s-1)
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
@@ -192,7 +195,8 @@ ZWSAT(:)     = 0.
 ZWFC(:)      = 0.
 ZWWILT(:)    = 0.
 !
-PDRAIN(:)    = 0.
+PDRAIN (:)   = 0.
+PRUNOFF(:)   = 0.
 !
 ZDRAIN2(:)   = 0.
 ZDRAINCF2(:) = 0.
@@ -532,6 +536,31 @@ DO JJ=1,SIZE(PTG)
 !
 !
 ENDDO
+!
+!-------------------------------------------------------------------------------
+!
+!*       8.     PHYSICAL LIMITS AND RUNOFF
+!               --------------------------
+!
+! runoff of second layer
+!
+PRUNOFF(:) = MAX( 0., PWG2(:)+PWGI2(:)-PWSAT(:) )*PD_G2(:) * XRHOLW / PTSTEP
+!
+! now apply limits:
+!
+PWG1(:) = MIN( PWG1(:), PWSAT(:) - PWGI1(:) )
+PWG1(:) = MAX( PWG1(:), XWGMIN              )
+!
+PWG2(:) = MIN( PWG2(:), PWSAT(:) - PWGI2(:) )
+PWG2(:) = MAX( PWG2(:), XWGMIN              )
+!
+!runoff of third layer added to drainage
+!
+IF (HISBA=='3-L') THEN
+   PDRAIN(:) = PDRAIN(:) + MAX( 0., PWG3(:)-PWSAT(:) )* (PD_G3(:)-PD_G2(:)) * XRHOLW / PTSTEP  
+   PWG3(:) = MIN( PWG3(:), PWSAT(:)         )
+   PWG3(:) = MAX( PWG3(:), XWGMIN           )
+END IF
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO_SOIL',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

@@ -61,7 +61,8 @@ USE MODD_ISBA_n,   ONLY : CROUGH ,CISBA, CPHOTO, CRUNOFF, CALBEDO, CSCOND,    &
                           LTRIP, LFLOOD, LGLACIER, LVEGUPD, LCANOPY_DRAG,     &
                           CCPSURF, CHORT, XCGMAX, XCDRAG, CKSAT,              &
                           CSOC, CTOPREG, CRAIN, LSPINUPCARBS,                 &
-                          LSPINUPCARBW, NNBYEARSOLD, NSPINS, NSPINW
+                          LSPINUPCARBW, NNBYEARSOLD, NSPINS, NSPINW,          &
+                          XSPINMAXS, XSPINMAXW, NNBYEARSPINS, NNBYEARSPINW
 !
 USE MODD_CH_ISBA_n,      ONLY : LCH_BIO_FLUX, CCH_DRY_DEP  
 
@@ -177,7 +178,9 @@ IF (LNAM_READ) THEN
                      CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
                      CTOPREG, CRAIN, CHORT, LFLOOD, LTRIP,       &
                      LGLACIER, LCANOPY_DRAG, LVEGUPD,            &
-                     LSPINUPCARBS, LSPINUPCARBW                  )
+                     LSPINUPCARBS, LSPINUPCARBW,                 &
+                     XSPINMAXS, XSPINMAXW,                       &
+                     NNBYEARSPINS, NNBYEARSPINW                  )
  !                  
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)                  

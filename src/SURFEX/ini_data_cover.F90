@@ -35,6 +35,7 @@
 !!    F.solmon    01/06/00 adaptation for patch approach
 !!    B.Decharme  01/03/09 Arrange cover by user
 !!    G.Pigeon      08/12 add ROUGH_WALL/ROUGH_ROOF
+!!    V. Masson     04/13 merges Arrange cover & garden use option in arrange_cover routine
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -47,6 +48,10 @@ USE MODD_SURFEX_MPI,     ONLY : WLOG_MPI
 USE MODD_SURFEX_OMP,     ONLY : IDC
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
+!
+USE MODD_DATA_COVER_n,   ONLY : XDATA_NATURE_n => XDATA_NATURE, &
+                                XDATA_GARDEN_n => XDATA_GARDEN, &
+                                XDATA_VEGTYPE_n=> XDATA_VEGTYPE
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER, &
                                   XDATA_LAI, XDATA_VEGTYPE, XDATA_H_TREE,           &
@@ -151,7 +156,6 @@ USE MODI_ARRANGE_COVER
 USE MODI_COVER301_573
 USE MODI_ECOCLIMAP2_LAI
 USE MODI_INI_DATA_PARAM
-USE MODI_UPDATE_DATA_FRAC_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -166,6 +170,8 @@ IMPLICIT NONE
 !
 INTEGER         :: JCOVER, JVEGTYPE       ! loop counters on covers and decades
 INTEGER         :: ICPT_SEA, ICPT_WATER
+!
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.3    Declaration of namelists
@@ -175,7 +181,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
                                 
 IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',0,ZHOOK_HANDLE)
 !
-IF (IDC==0) THEN
+IF (IDC/=0) THEN
+  CALL ARRANGE_COVER(XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
+                     XDATA_GARDEN,LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
+  IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',1,ZHOOK_HANDLE)
+  RETURN
+END IF
 !
 !$OMP SINGLE
 !
@@ -2099,33 +2110,29 @@ ELSE
   ENDDO
 END IF
 !
-!
-IDC = 1
-!
 !$OMP END SINGLE
 !
-ENDIF
+!-------------------------------------------------------------------------------
+!
+!*    9.     Arrange cover (optional nam_pgd_arrange_cover & option to use !gardens or not)
+!            ------------------------------------------------------------------------------
+!
+ CALL ARRANGE_COVER(XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
+                    XDATA_GARDEN,LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
 !-------------------------------------------------------------------------------
 !
-!*    8.     Arrange cover (optional nam_pgd_arrange_cover)
-!            ----------------------------------------------
-!
- CALL ARRANGE_COVER
-!
-!-------------------------------------------------------------------------------
-!
-!*    9.     LAI for ecoclimap2: climatological or not
+!*   10.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
  CALL ECOCLIMAP2_LAI
 !
 !-------------------------------------------------------------------------------
 !
-!*    10.    Secondary variables on natural covers
+!*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
- CALL INI_DATA_PARAM(XDATA_VEGTYPE, PSURF=XDATA_NATURE, PSURF2=XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+ CALL INI_DATA_PARAM(XDATA_VEGTYPE_n, PSURF=XDATA_NATURE_n, PSURF2=XDATA_GARDEN_n, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                                   PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                                   PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
@@ -2140,13 +2147,9 @@ ENDIF
                                   PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
                                   PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST)
 !
-!-------------------------------------------------------------------------------
+IDC = 1
 !
-!*   10.     Takes into account gardens or not in parameters
-!            -----------------------------------------------
 !
- CALL UPDATE_DATA_FRAC_n(XDATA_NATURE,XDATA_TOWN,XDATA_GARDEN,LGARDEN,  &
-                        XDATA_BLD, XDATA_WALL_O_HOR                    )
 !
 IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',1,ZHOOK_HANDLE)
 !
