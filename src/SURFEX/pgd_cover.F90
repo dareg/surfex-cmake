@@ -129,13 +129,17 @@ INTEGER               :: JCOVER    ! loop counter on covers
 INTEGER               :: JL        ! loop counter on horizontal points
 INTEGER               :: ICOVER, ICOVERSUM, ICOVER_OLD, ICPT  ! 0 if cover is not present, >1 if present somewhere
 INTEGER               :: IPERMSNOW, IECO2 
+INTEGER               :: IC_NAT, IC_TWN, IC_WAT, IC_SEA
 !
 INTEGER, DIMENSION(1) :: IMAXCOVER ! index of maximum cover for the given point
-INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_COVER, IMASK_SEA, IMASK_WATER
+INTEGER, DIMENSION(:), POINTER :: IMASK_COVER
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_SEA, IMASK_WATER
 !
 LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
                                         ! (Earth Model over Antarctic)
 LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
+!
+LOGICAL                  :: GPRESENT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -270,15 +274,7 @@ ELSE
   DEALLOCATE(NSIZE    )
   DEALLOCATE(XSUMCOVER)
 !
-!
-  ALLOCATE(IMASK_COVER(ICOVER))
-  ICPT = 0
-  DO JCOVER=1,JPCOVER
-    IF (LCOVER(JCOVER)) THEN
-      ICPT = ICPT + 1
-      IMASK_COVER(ICPT) = JCOVER
-    ENDIF
-  ENDDO
+  CALL MAKE_MASK_COVER(IMASK_COVER,ICOVER)
 !
   ALLOCATE(IMASK_SEA(SIZE(NSEA)))
   IMASK_SEA(:) = 0
@@ -377,8 +373,8 @@ ELSE
   IF(LORCA_GRID.AND.CGRID=='GAUSS     ')THEN
 !
 !     No river or inland water bodies
-    XCOVER(:,IMASK_WATER(2)) = 0.
-    XCOVER(:,IMASK_WATER(3)) = 0.
+    IF (IMASK_WATER(2)/=0) XCOVER(:,IMASK_WATER(2)) = 0.
+    IF (IMASK_WATER(3)/=0) XCOVER(:,IMASK_WATER(3)) = 0.
 !
     ALLOCATE(ZLAT(NL))
     CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,PLAT=ZLAT)
@@ -478,15 +474,8 @@ ELSE
   !
   ICOVER = SIZE(XCOVER,2)
   !
-  ALLOCATE(IMASK_COVER(ICOVER))
-  ICPT = 0
-  DO JCOVER=1,JPCOVER
-    IF (LCOVER(JCOVER)) THEN
-      ICPT = ICPT + 1
-      IMASK_COVER(ICPT) = JCOVER
-    ENDIF
-  ENDDO
-
+  CALL MAKE_MASK_COVER(IMASK_COVER,ICOVER)
+  !
 !if fractions are prescribed, it has to be verified that the locations of
 !ECOCLIMAP covers are compatible with the fractions of surface types
   ALLOCATE(ZSEA   (NL))
@@ -494,6 +483,11 @@ ELSE
   ALLOCATE(ZNATURE(NL))
   ALLOCATE(ZTOWN  (NL))
   CALL CONVERT_COVER_FRAC(XCOVER,LCOVER,ZSEA,ZNATURE,ZTOWN,ZWATER)
+  !
+  CALL FIT_COVERS(XDATA_NATURE,XNATURE,4,ICOVER,IC_NAT)
+  CALL FIT_COVERS(XDATA_TOWN,XTOWN,7,ICOVER,IC_TWN)
+  CALL FIT_COVERS(XDATA_WATER,XWATER,2,ICOVER,IC_WAT)
+  CALL FIT_COVERS(XDATA_SEA,XSEA,1,ICOVER,IC_SEA)
   !
   ALLOCATE(ZCOVER_NATURE(NL,ICOVER))
   ALLOCATE(ZCOVER_TOWN  (NL,ICOVER))
@@ -517,6 +511,7 @@ ELSE
   '*********************************************************************'
   NSIZE(:) = 1
   WHERE (XNATURE(:).NE.0. .AND. ZNATURE(:).EQ.0.) NSIZE(:)=0
+          
   DO JL=1,SIZE(XCOVER,1)
     IF (XNATURE(JL).EQ.0.) NSIZE(JL)=-1
   ENDDO
@@ -557,12 +552,11 @@ ELSE
   '*********************************************************************'
   NSIZE(:) = 1
   WHERE (XWATER(:).NE.0. .AND. ZWATER(:).EQ.0.) NSIZE(:)=0
-! if water imposed to 1 in a grid cell: no extrapolation          
+! if water imposed to 1 in a grid cell: no extrapolation
   DO JL=1,SIZE(XCOVER,1)
      IF(XWATER(JL)==1.0)THEN
-        ZCOVER_WATER(JL,1)=0.0
-        ZCOVER_WATER(JL,2)=1.0
-        ZCOVER_WATER(JL,3:ICOVER)=0.0
+        ZCOVER_WATER(JL,:)=0.0             
+        ZCOVER_WATER(JL,IC_WAT)=1.0
         NSIZE(JL)=1
      ELSEIF(XWATER(JL)==0.0)THEN
         NSIZE(JL)=-1
@@ -587,8 +581,8 @@ ELSE
 ! if sea imposed to 1 in a grid cell: no extrapolation          
   DO JL=1,SIZE(XCOVER,1)
      IF(XSEA(JL)==1.0)THEN
-        ZCOVER_SEA(JL,1)=1.0
-        ZCOVER_SEA(JL,2:ICOVER)=0.0
+        ZCOVER_SEA(JL,:)=0.0             
+        ZCOVER_SEA(JL,IC_SEA)=1.0
         NSIZE(JL)=1
      ELSEIF(XSEA(JL)==0.0)THEN
         NSIZE(JL)=-1
@@ -637,5 +631,71 @@ NDIM_TOWN      = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,XTOWN  (:) > 0., 'DIM')
 !
 IF (LHOOK) CALL DR_HOOK('PGD_COVER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
+CONTAINS
+!
+SUBROUTINE FIT_COVERS(PDATA_SURF,PSURF,KSURF,KCOVER,KC_SURF)
+!
+REAL, DIMENSION(:), INTENT(IN) :: PDATA_SURF
+REAL, DIMENSION(:), INTENT(IN) :: PSURF
+INTEGER, INTENT(IN) :: KSURF
+INTEGER, INTENT(INOUT) :: KCOVER
+INTEGER, INTENT(OUT) :: KC_SURF
+!
+LOGICAL :: GPRESENT
+!
+GPRESENT = .FALSE.
+DO JCOVER=1,KCOVER
+  IF (PDATA_SURF(IMASK_COVER(JCOVER))/=0.) THEN
+    GPRESENT = .TRUE.
+    EXIT
+  ENDIF
+ENDDO
+!
+IF (.NOT.GPRESENT .AND. ANY(PSURF(:)/=0.)) THEN
+  !
+  LCOVER(KSURF) = .TRUE.
+  KCOVER = KCOVER + 1
+  ALLOCATE(ZCOVER(NL,KCOVER))
+  DO JCOVER = 1,KCOVER
+    IF (JCOVER<KCOVER) THEN
+      IF (IMASK_COVER(JCOVER)<KSURF) CYCLE
+    ENDIF
+    KC_SURF = JCOVER
+    IF (JCOVER>1) ZCOVER(:,1:JCOVER-1) = XCOVER(:,1:JCOVER-1)
+    ZCOVER(:,JCOVER) = 0.
+    IF (JCOVER<KCOVER) ZCOVER(:,JCOVER+1:KCOVER) = XCOVER(:,JCOVER:KCOVER-1)
+    EXIT
+  ENDDO
+  DEALLOCATE(XCOVER)
+  ALLOCATE(XCOVER(NL,KCOVER))
+  XCOVER(:,:) = ZCOVER(:,:)
+  DEALLOCATE(ZCOVER)
+  !
+  CALL MAKE_MASK_COVER(IMASK_COVER,KCOVER)
+  !
+ENDIF
+!
+END SUBROUTINE FIT_COVERS
+!
+!------------------------------------------------------
+!
+SUBROUTINE MAKE_MASK_COVER(KMASK_COVER,KCOVER)
+!
+INTEGER, DIMENSION(:), POINTER :: KMASK_COVER
+INTEGER, INTENT(IN) :: KCOVER
+!
+INTEGER :: ICPT
+!
+IF (ASSOCIATED(KMASK_COVER)) DEALLOCATE(KMASK_COVER)
+ALLOCATE(KMASK_COVER(KCOVER))
+ICPT = 0
+DO JCOVER=1,JPCOVER
+  IF (LCOVER(JCOVER)) THEN
+    ICPT = ICPT + 1
+    KMASK_COVER(ICPT) = JCOVER
+  ENDIF
+ENDDO
+!
+END SUBROUTINE MAKE_MASK_COVER
 !
 END SUBROUTINE PGD_COVER
