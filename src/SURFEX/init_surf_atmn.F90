@@ -51,15 +51,6 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
-USE MODD_SURF_ATM,       ONLY : XCISMIN, XVMODMIN, LALDTHRES,            &
-                                LDRAG_COEF_ARP, LALDZ0H, LNOSOF,         &
-                                LRW_PRECIP, XEDB, XEDC, XEDD, XEDK,      &
-                                XUSURIC, XUSURID, XUSURICL,              &
-                                XVCHRNK, XVZ0CM, XDELTA_MAX, XRIMAX,     &
-                                XWINDMIN, LVZIUSTAR0_ARP,                &
-                                XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
-                                XRRSCALE, XRRGAMMA, XUTILGUST, LCPL_ARP, &
-                                LQVNPLUS, LVERTSHIFT  
 USE MODD_SURF_ATM_n,     ONLY : CSEA,      CWATER,      CTOWN,      CNATURE,      &
                                 XSEA,      XWATER,      XTOWN,      XNATURE,      &
                                 NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
@@ -102,6 +93,8 @@ USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE
 USE MODD_SURFEX_MPI, ONLY : XTIME_INIT_SEA, XTIME_INIT_WATER, XTIME_INIT_NATURE, XTIME_INIT_TOWN, &
                             NRANK, NPIO, NWG_LAYER_TOT
 USE MODD_SURFEX_OMP, ONLY : NINDX2, NWORK, XWORK, XWORK2, XWORK3, NWORK_FULL, XWORK_FULL, XWORK2_FULL
+!
+USE MODD_MASK, ONLY: NMASK_FULL
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_DEFAULT_SSO
@@ -318,7 +311,13 @@ ENDIF
 !
  CALL READ_SURF(HPROGRAM,'DIM_FULL  ',NDIM_FULL,  IRESP)
 IF (HINIT=='PRE') THEN
+  !Initialize full dimension
   NINDX2 = NDIM_FULL
+  CALL END_IO_SURF_n(HPROGRAM)
+  !Initialize full mask with good dimension
+  DEALLOCATE(NMASK_FULL)
+  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
+  CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
   ALLOCATE(NWORK(NDIM_FULL))
   ALLOCATE(XWORK(NDIM_FULL))
   ALLOCATE(XWORK2(NDIM_FULL,2))
