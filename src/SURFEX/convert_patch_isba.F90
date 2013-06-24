@@ -60,7 +60,7 @@ USE MODD_ISBA_n,         ONLY : CALBEDO,                                  &
                                 XWSAT, XPERM
 !
 USE MODD_DATA_COVER_n,   ONLY : XDATA_VEGTYPE
-USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,  &
+USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_WEIGHT,  &
                                 XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
                                 XDATA_EMIS_ECO, XDATA_GAMMA, XDATA_CV,  &
                                 XDATA_RGL, XDATA_RSMIN,                 &
@@ -197,6 +197,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_ISBA',0,ZHOOK_HANDLE)
+!
+IF (ALLOCATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)
 !
 IF (HSFTYPE=='NAT') THEN
   YNAT='NAT'
@@ -606,6 +608,8 @@ IF (PRESENT(OSTRESS)) THEN
   ENDIF
 ENDIF
 !
+IF (ALLOCATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)
+!
 IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
@@ -886,7 +890,7 @@ IF (HISBA=='DIF') THEN
   IF (LWG_LAYER) KWG_LAYER(:,:) = IWG_LAYER(:,:)
   !
 ENDIF
-!     
+!
 IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_ISBA:SET_GRID_PARAM',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SET_GRID_PARAM

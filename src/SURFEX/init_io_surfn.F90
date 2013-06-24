@@ -48,6 +48,9 @@ USE MODI_INIT_IO_SURF_FA_n
 #ifdef LFI
 USE MODI_INIT_IO_SURF_LFI_n
 #endif
+#ifdef NC
+USE MODI_INIT_IO_SURF_NC_n
+#endif
 #ifdef OL
 USE MODI_INIT_IO_SURF_OL_n
 #endif
@@ -125,6 +128,13 @@ IF (HPROGRAM=='LFI   ' ) THEN
   CALL INIT_IO_SURF_LFI_n(HMASK,HACTION)
 #endif
 ENDIF
+!
+IF (HPROGRAM=='NC    ' ) THEN
+#ifdef NC
+  CALL INIT_IO_SURF_NC_n(HMASK,HACTION)
+#endif
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

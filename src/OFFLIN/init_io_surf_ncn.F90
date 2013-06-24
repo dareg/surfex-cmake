@@ -1,0 +1,119 @@
+!     #########
+      SUBROUTINE INIT_IO_SURF_NC_n(HMASK,HACTION)
+!     ######################
+!
+!!****  *INIT_IO_SURF_NC* Keep in memory the netcdf ID of the output files
+!!
+!!    PURPOSE
+!!    -------
+!
+!!
+!!**  IMPLICIT ARGUMENTS
+!!    ------------------
+!!      None 
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!    AUTHOR
+!!    ------
+!!	F. Habets   *Meteo France*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      modified 05/04 by P. LeMoigne *Meteo France*
+!!      modified 06/10 by S. Faroux *Meteo France*
+!!=================================================================
+!
+!*       0.   DECLARATIONS
+!             ------------
+!
+USE MODD_SURF_CONF,      ONLY : CSOFTWARE
+!
+USE MODD_SURFEX_MPI, ONLY : NINDEX
+!
+USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
+!
+USE MODD_IO_SURF_NC, ONLY : NMASK, CFILEIN_NC, CFILEOUT_NC, LMASK, NID_NC, &
+                            CMASK
+!
+USE MODI_GET_ISBA_CONF_n
+USE MODI_OL_DEFINE_DIM
+USE MODI_CREATE_FILE
+USE MODI_READ_SURF
+USE MODI_INIT_IO_SURF_MASK_n
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+INCLUDE "netcdf.inc"
+!
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
+ CHARACTER(LEN=5),  INTENT(IN)  :: HACTION 
+!
+INTEGER                          :: IDIM1, INDIMS
+ CHARACTER(LEN=13),DIMENSION(1)  :: YUNIT1, YUNIT2
+REAL,DIMENSION(:), POINTER       :: ZX, ZY
+INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
+ CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
+INTEGER           :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS, &
+                     INLITTER, INLITTLEVS, INSOILCARB
+INTEGER           :: ILU,IRET, IL, IFULL
+INTEGER           :: ILUOUT, IDIMID
+LOGICAL           :: GEXIST, GOPENED
+REAL(KIND=JPRB)  :: ZHOOK_HANDLE
+!------------------------------------------------------------------------------ 
+IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_NC_N',0,ZHOOK_HANDLE)
+!
+LMASK = .TRUE.
+!
+!$OMP BARRIER
+!
+IF (HACTION=='READ') THEN
+  INQUIRE(FILE=CFILEIN_NC,EXIST=GEXIST)
+  IF (GEXIST) THEN 
+    IRET = NF_OPEN(CFILEIN_NC,NF_NOWRITE,NID_NC)
+    CALL READ_SURF('NC    ','DIM_FULL',IFULL,IRET)
+  ENDIF
+ELSE 
+  CALL GET_DIM_FULL_n(IFULL)
+  INQUIRE(FILE=CFILEOUT_NC,EXIST=GEXIST)
+  INQUIRE(FILE=CFILEOUT_NC,OPENED=GOPENED)
+  IF (.NOT.GOPENED) IRET = NF_OPEN(CFILEOUT_NC,NF_WRITE,NID_NC)
+  IF (.NOT.GEXIST) THEN
+    IF (CSOFTWARE=='PREP' .OR. CSOFTWARE=='OFFLINE') THEN
+      CALL GET_ISBA_CONF_n(INPATCH, INLVLD, INLVLS, INBIOMASS, &
+                           INLITTER, INLITTLEVS, INSOILCARB)
+    ELSEIF (CSOFTWARE=='PGD') THEN
+      INPATCH = NVEGTYPE
+    ENDIF
+    CALL OL_DEFINE_DIM('NOTIME ', ILUOUT, IFULL, IDIM1, YUNIT1, YUNIT2, &
+                   ZX, ZY, IDIMS, IDDIM, YNAME_DIM, KNPATCH=INPATCH)
+    CALL CREATE_FILE(CFILEOUT_NC,IDIMS,YNAME_DIM,NID_NC,IDDIM)
+    IF (CSOFTWARE=='PGD') IRET = NF_DEF_DIM(NID_NC,"Number_of_covers",JPCOVER,IDIMID)
+  ENDIF
+ENDIF
+!
+! nindex is needed for call to get_size_full_n. In init_index_mpi, 
+! it's not initialized for first readings.  
+IF (.NOT.ALLOCATED(NINDEX)) THEN
+  ALLOCATE(NINDEX(IFULL))
+  NINDEX(:) = 0
+ENDIF
+!
+! size by MPI task. NINDEX is supposed to be initialized at this step.  
+ CALL GET_SIZE_FULL_n('OFFLIN',IFULL,ILU)
+!
+IL = ILU
+ CALL GET_TYPE_DIM_n(HMASK,IL)
+!
+ CALL INIT_IO_SURF_MASK_n(HMASK, IL, ILUOUT, ILU, NMASK)
+!
+CMASK = HMASK
+!------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_NC_N',1,ZHOOK_HANDLE)
+!------------------------------------------------------------------------------
+!
+END SUBROUTINE INIT_IO_SURF_NC_n

@@ -1,0 +1,56 @@
+!     ######################
+      MODULE MODD_IO_SURF_NC
+!     ######################
+!
+!!****  *MODD_IO_SURF_NC* Keep in memory the netcdf ID of the output files
+!!
+!!    PURPOSE
+!!    -------
+!
+!!
+!!**  IMPLICIT ARGUMENTS
+!!    ------------------
+!!      None 
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!    AUTHOR
+!!    ------
+!!	S. Faroux   *Meteo France*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!
+!*       0.   DECLARATIONS
+!             ------------
+!
+!
+IMPLICIT NONE
+!------------------------------------------------------------------------------
+!
+!* variables for each patch
+!
+ CHARACTER(LEN=28),SAVE :: CFILEIN_NC 
+ CHARACTER(LEN=28),SAVE :: CFILEIN_NC_SAVE            ! Name of the input
+ CHARACTER(LEN=28),SAVE :: CFILEOUT_NC                ! Name of the output
+ CHARACTER(LEN=28),SAVE :: CFILEPGD_NC                ! Name of the pgd file
+ CHARACTER(LEN=28),SAVE :: CLUOUT_NC
+!
+INTEGER :: NID_NC
+!
+INTEGER, DIMENSION(:),POINTER :: NMASK
+!$OMP THREADPRIVATE(NMASK)
+ CHARACTER(LEN=6)               :: CMASK ! surface mask type
+!$OMP THREADPRIVATE(CMASK)
+INTEGER :: NFULL
+!$OMP THREADPRIVATE(NFULL)
+!
+LOGICAL                       :: LMASK = .FALSE.
+!
+INTEGER, DIMENSION(:),ALLOCATABLE :: NMASK_IGN
+!
+!------------------------------------------------------------------------------
+!
+END MODULE MODD_IO_SURF_NC
+
