@@ -1281,9 +1281,11 @@ IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
 !
 !*    5.     Close parallelized I/O
 !            ----------------------
-CLOSE(ILUOUT)
 !
 IF (NRANK==NPIO) THEN
+!$OMP SINGLE
+  CLOSE(ILUOUT)
+!$OMP END SINGLE  
   WRITE(*,*) ' '
   WRITE(*,*) '    --------------------------'
   WRITE(*,*) '    | OFFLINE ENDS CORRECTLY |'
