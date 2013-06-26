@@ -44,7 +44,7 @@
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_TEB_VEG_n,      ONLY : CPHOTO
-USE MODD_TEB_GREENROOF_PGD_n,ONLY : XVEGTYPE,                             &
+USE MODD_TEB_GREENROOF_n,ONLY : XVEGTYPE,                             &
                                 XGMES, XGC, XDMAX, XABC, XPOI, XANMAX,&
                                 XFZERO, XEPSO, XGAMM, XQDGAMM,        &
                                 XQDGMES, XT1GMES, XT2GMES, XAMAX,     &
