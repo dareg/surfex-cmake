@@ -34,7 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_OPTION_n,        ONLY : LGARDEN, LGREENROOF, CBEM
+USE MODD_TEB_n,               ONLY : LGARDEN, LGREENROOF, CBEM
 USE MODD_DATA_TEB_n,          ONLY : NPAR_ROAD_LAYER, NPAR_WALL_LAYER,               &
                                      NPAR_ROOF_LAYER,                                &
                                      NPAR_BLDTYPE, NPAR_BLD_AGE, NPAR_USETYPE,       &
@@ -85,14 +85,13 @@ USE MODD_DATA_BEM_n,          ONLY : NPAR_FLOOR_LAYER,                          
                                      LDATA_F_WATER_COND, LDATA_SHADE, LDATA_HC_FLOOR,&
                                      LDATA_TC_FLOOR, LDATA_D_FLOOR
 
-USE MODD_TEB_GARDEN_PGD_n,    ONLY : CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : LPAR_GARDEN
+USE MODD_TEB_GARDEN_n,        ONLY : CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG, LPAR_GARDEN
 USE MODD_DATA_TEB_GARDEN_n,   ONLY : NTIME,                                          &
                                      XDATA_FRAC_HVEG, XDATA_FRAC_LVEG,               &
                                      XDATA_FRAC_NVEG,                                &
                                      XDATA_LAI_HVEG , XDATA_LAI_LVEG ,               &
                                      XDATA_H_HVEG  
-USE MODD_TEB_GREENROOF_OPTION_n,  ONLY : NTIME_GR,NLAYER_GR,CTYP_GR, LPAR_GREENROOF
+USE MODD_TEB_GREENROOF_n,     ONLY : NTIME_GR,NLAYER_GR,CTYP_GR, LPAR_GREENROOF
 USE MODD_DATA_TEB_GREENROOF_n,ONLY : XPAR_OM_GR, XPAR_CLAY_GR,                       &
                                      XPAR_SAND_GR, XPAR_LAI_GR
 !
