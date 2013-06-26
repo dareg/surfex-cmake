@@ -38,12 +38,10 @@ USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CRESPSL,                              &
                                 NNBIOMASS,                                    &
                                 CISBA
-USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY: XLAI
-USE MODD_TEB_GARDEN_PGD_n,     ONLY: XVEGTYPE, XWSAT, XBSLAI, XBSLAI_NITRO
-USE MODD_TEB_GARDEN_n,   ONLY : XRESA,                                        &
+USE MODD_TEB_GARDEN_n,   ONLY : XRESA, XLAI,                                  &
                                 XAN, XANFM, XANDAY, XLE,                      &
-                                XBIOMASS, XRESP_BIOMASS,                      &
-                                XWG, XWGI, XTG
+                                XBSLAI, XBSLAI_NITRO, XBIOMASS, XRESP_BIOMASS,&
+                                XWSAT, XWG, XWGI, XTG, XVEGTYPE
                                 ! A FAIRE :
                                 ! IL FAUT RAJOUTER TSNOW
                                 ! ----------------------
