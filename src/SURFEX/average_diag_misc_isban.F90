@@ -276,9 +276,8 @@ IF(CISBA=='DIF')THEN ! DIF case
                !Total soil wetness index, total water and ice contents
                XSOIL_TSWI(JJ) = XSOIL_TSWI(JJ) + ZWORK * XPATCH(JJ,JPATCH) * XTSWI(JJ,JLAYER,JPATCH)
                ZSUMDG    (JJ) = ZSUMDG    (JJ) + ZWORK * XPATCH(JJ,JPATCH)
-               XSOIL_TWG (JJ) = XSOIL_TWG (JJ) + ZWORK * XPATCH(JJ,JPATCH) * (XWG(JJ,JLAYER,JPATCH) &
-                                               + XWGI(JJ,JLAYER,JPATCH))
-               XSOIL_TWGI(JJ) = XSOIL_TWGI(JJ) + ZWORK * XPATCH(JJ,JPATCH) * XWGI(JJ,JLAYER,JPATCH)
+               XSOIL_TWG (JJ) = XSOIL_TWG (JJ) + ZWORK * XPATCH(JJ,JPATCH) * (XWG(JJ,JLAYER,JPATCH)+XWGI(JJ,JLAYER,JPATCH))
+               XSOIL_TWGI(JJ) = XSOIL_TWGI(JJ) + ZWORK * XPATCH(JJ,JPATCH) * XWGI(JJ,JLAYER,JPATCH)                     
              ENDIF
           ENDDO
        ENDDO
@@ -337,8 +336,7 @@ IF(CISBA=='DIF')THEN ! DIF case
               XROOT_TSWI (JJ) = XROOT_TSWI (JJ) + ZWORK * XPATCH(JJ,JPATCH) * XTSWI(JJ,JLAYER,JPATCH)
               ZSUMROOT   (JJ) = ZSUMROOT   (JJ) + ZWORK * XPATCH(JJ,JPATCH)
             ENDIF
-            XROOT_TWG  (JJ) = XROOT_TWG  (JJ) + ZWORK * XPATCH(JJ,JPATCH) * (XWG (JJ,JLAYER,JPATCH) &
-                                              + XWGI(JJ,JLAYER,JPATCH))
+            XROOT_TWG  (JJ) = XROOT_TWG  (JJ) + ZWORK * XPATCH(JJ,JPATCH) * (XWG (JJ,JLAYER,JPATCH)+XWGI(JJ,JLAYER,JPATCH))
             XROOT_TWGI (JJ) = XROOT_TWGI (JJ) + ZWORK * XPATCH(JJ,JPATCH) *  XWGI(JJ,JLAYER,JPATCH)
             !
             ! ISBA-FR-DG2 comparable soil wetness index, liquid water and ice contents
@@ -418,8 +416,7 @@ ELSE ! Force-restore case
           XAVG_TSWI(JJ,2) = XAVG_TSWI(JJ,2) + XPATCH(JJ,JPATCH) * XTSWI(JJ,2,JPATCH)
 !
           XSOIL_TSWI(JJ) = XSOIL_TSWI(JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * XTSWI(JJ,2,JPATCH)
-          XSOIL_TWG (JJ) = XSOIL_TWG (JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * (XWG(JJ,2,JPATCH) &
-                                          + XWGI(JJ,2,JPATCH))
+          XSOIL_TWG (JJ) = XSOIL_TWG (JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * (XWG(JJ,2,JPATCH)+XWGI(JJ,2,JPATCH))
           XSOIL_TWGI(JJ) = XSOIL_TWGI(JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * XWGI(JJ,2,JPATCH) 
 ! 
           ZSUMDG    (JJ) = ZSUMDG    (JJ) + XPATCH(JJ,JPATCH) * XDG(JJ,NGROUND_LAYER,JPATCH)        
