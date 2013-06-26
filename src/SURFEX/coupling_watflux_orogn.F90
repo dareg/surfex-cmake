@@ -163,8 +163,8 @@ ENDIF
                PTSUN, PZENITH, PZENITH2,PAZIM,                                             &
                PZREF, PUREF, XZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                 &
                PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,                   &
-               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, LSBL, XTS, XZ0, &
-               XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP, &
+               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, LSBL, XTS, XZ0,                    &
+               XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP,                       &
                N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M, XWIND10M, XWIND10M_MAX,           &
                XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX,                                   &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
