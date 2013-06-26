@@ -32,12 +32,11 @@ USE MODD_PREP,               ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,         
                                     LINTERP, CMASK
 USE MODD_PREP_TEB_GREENROOF, ONLY : XGRID_SOIL, NGRID_LEVEL,                     &
                                     XWSNOW, XRSNOW, XTSNOW, XASNOW, LSNOW_IDEAL
-USE MODD_TEB_OPTION_n,       ONLY : TTIME
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : NLAYER_GR, CISBA_GR
-USE MODD_TEB_GREENROOF_PGD_n,ONLY : XVEGTYPE, XDG, XWWILT, XWFC,                 &
-                                    XROOTFRAC, XWSAT
-USE MODD_TEB_GREENROOF_PGD_EVOL_n,ONLY : XLAI
-USE MODD_TEB_GREENROOF_n,    ONLY : XWG, XWGI, XTG, XWR, TSNOW
+USE MODD_TEB_n,              ONLY : TTIME
+USE MODD_TEB_GREENROOF_n,    ONLY : XWG, XWGI, XTG, XWR, XLAI,                   &
+                                    NLAYER_GR,                                   &
+                                    XVEGTYPE, XDG, XWWILT, XWFC,                 &
+                                    CISBA_GR, XROOTFRAC, XWSAT, TSNOW
 USE MODD_TEB_GRID_n,         ONLY : XLAT, XLON
 USE MODD_ISBA_PAR,           ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR,     ONLY : NVEGTYPE
