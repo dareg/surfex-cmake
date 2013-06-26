@@ -35,7 +35,7 @@ SUBROUTINE COUPLING_TEB_OROGRAPHY_n(HPROGRAM, HCOUPLING,                        
 !!-------------------------------------------------------------
 !
 USE MODD_CSTS,   ONLY : XCPD, XRD, XP00
-USE MODD_TEB_OPTION_n,  ONLY : XZS
+USE MODD_TEB_n,  ONLY : XZS
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
