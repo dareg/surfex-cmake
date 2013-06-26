@@ -37,12 +37,11 @@
 !              ------------
 !
 USE MODD_TEB_VEG_n,       ONLY : CPHOTO,CRESPSL, NNBIOMASS
-USE MODD_TEB_GREENROOF_OPTION_n,   ONLY : NLAYER_GR
-USE MODD_TEB_GREENROOF_PGD_n,      ONLY : XTDEEP
-USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : XLAI
-USE MODD_TEB_GREENROOF_n,          ONLY : XTG, XWG, XWGI, XWR, TSNOW,     &
-                                          XRESA, XAN, XANFM, XLE, XANDAY, &
-                                          XRESP_BIOMASS, XBIOMASS
+USE MODD_TEB_GREENROOF_n, ONLY : NLAYER_GR,                                    &
+                                 XTG, XWG, XWGI, XWR, XTDEEP, XLAI,            &
+                                 TSNOW,                                        &
+                                 XRESA, XAN, XANFM, XLE, XANDAY,               &
+                                 XRESP_BIOMASS, XBIOMASS
 !
 USE MODD_DIAG_TEB_GREENROOF_n, ONLY : XDRAIN,XRUNOFF
 !
