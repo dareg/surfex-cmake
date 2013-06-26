@@ -35,13 +35,11 @@
 !              ------------
 !
 USE MODD_OL_FILEID,       ONLY : XVAR_TO_FILEOUT, XID, XOUT
-USE MODD_TEB_OPTION_n,    ONLY: NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
-                                TTIME
-USE MODD_TEB_n,           ONLY: XZ0_TOWN
+USE MODD_TEB_n,           ONLY: NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
+                                XZ0_TOWN, TTIME
 USE MODD_TEB_CANOPY_n,    ONLY: NLVL
 USE MODD_DIAG_TEB_n
-USE MODD_DIAG_MISC_TEB_OPTION_n ,ONLY : LSURF_MISC_BUDGET
-USE MODD_DIAG_MISC_TEB_n ,ONLY : XQF_BLD,                         &
+USE MODD_DIAG_MISC_TEB_n ,ONLY : LSURF_MISC_BUDGET, XQF_BLD,      &
                                  XFLX_BLD, XQF_TOWN, XDQS_TOWN,   &
                                  XH_WALL_A, XH_WALL_B,XH_ROOF,XH_ROAD
 !
