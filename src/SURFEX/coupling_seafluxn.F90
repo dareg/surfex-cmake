@@ -46,7 +46,7 @@ USE MODD_SURF_ATM,   ONLY : LCPL_ESM, CIMPLICIT_WIND
 USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
 USE MODD_SEAFLUX_n,  ONLY : XSST, XTICE, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
                               CSEA_ALB, CSEA_FLUX, XUMER, XVMER, LINTERPOL_SST, &
-                              XICHCE, LPRECIP, LPWEBB , LPWG, CSEA_CO2
+                              XICHCE, LPRECIP, LPWEBB , LPWG
 
 USE MODD_OCEAN_n, ONLY : LMERCATOR                            
 USE MODD_CH_SEAFLUX_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
@@ -342,21 +342,13 @@ END WHERE
 !
 ! CO2 flux
 !
-IF (CSEA_CO2=='NONE') THEN
-  PSFCO2(:) = 0.
-ELSE IF (CSEA_CO2=='TF97') THEN
-! Takahashi, T., Feely, R., Weiss, R. W., Wanninkhof, R., Chipman, D., 
-! Sutherland, S., and Takahashi, T.: Global air-sea flux of CO2 : An estimate 
-! based on measurements of sea-air pCO2 difference, P. Natl. Acad., 94, 8292–8299, 1997.
-!
 ! PSFCO2 = E * deltapCO2 
 ! According to Wanninkhof (medium hypothesis) : 
 ! E = 1.13.10^-3 * WIND^2 CO2mol.m-2.yr-1.µatm-1 
 !   = 1.13.10^-3 * WIND^2 * Mco2.10^-3 * (1/365*24*3600)
 ! deltapCO2 = -8.7 µatm (Table 1 half hypothesis)
 
-  PSFCO2(:) = - ZWIND(:)**2 * 1.13E-3 * 8.7 * 44.E-3 / ( 365*24*3600 )
-END IF
+PSFCO2(:) = - ZWIND(:)**2 * 1.13E-3 * 8.7 * 44.E-3 / ( 365*24*3600 )
 !
 !
 !-------------------------------------------------------------------------------------
