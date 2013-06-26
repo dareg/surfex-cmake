@@ -1,8 +1,8 @@
 !     #########
-      SUBROUTINE DEFAULT_SEAFLUX(PTSTEP,POUT_TSTEP,HSEA_ALB,HSEA_FLUX,HSEA_CO2, &
-                                   OPWG, OPRECIP, OPWEBB, KGRVWAVES,            &
-                                   OPROGSST, KTIME_COUPLING,                    &
-                                   PICHCE, HINTERPOL_SST                        )  
+      SUBROUTINE DEFAULT_SEAFLUX(PTSTEP,POUT_TSTEP,HSEA_ALB,HSEA_FLUX, &
+                                   OPWG, OPRECIP, OPWEBB, KGRVWAVES,     &
+                                   OPROGSST, KTIME_COUPLING,             &
+                                   PICHCE, HINTERPOL_SST       )  
 !     ########################################################################
 !
 !!****  *DEFAULT_SEAFLUX* - routine to set default values for the configuration for SEAFLUX scheme
@@ -54,7 +54,6 @@ REAL,              INTENT(OUT) :: PTSTEP        ! time step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP    ! time step for writing
  CHARACTER(LEN=6),  INTENT(OUT) :: HSEA_FLUX     ! type of sea scheme
  CHARACTER(LEN=4),  INTENT(OUT) :: HSEA_ALB      ! type of sea albedo
- CHARACTER(LEN=4),  INTENT(OUT) :: HSEA_CO2      ! type of sea CO2 flux computation
 LOGICAL,           INTENT(OUT) :: OPWG          ! gustiness impact
 LOGICAL,           INTENT(OUT) :: OPRECIP       ! precipitation correction
 LOGICAL,           INTENT(OUT) :: OPWEBB        ! Webb correction
@@ -76,7 +75,6 @@ POUT_TSTEP = XUNDEF
 !
 HSEA_FLUX = "ECUME "
 HSEA_ALB  = "TA96"
-HSEA_CO2  = "NONE"
 !
 OPWG    = .FALSE.
 OPRECIP = .FALSE. 
