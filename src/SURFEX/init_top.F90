@@ -131,7 +131,7 @@ REAL                  :: ZFUP, ZFDOWN, ZWUP, ZWDOWN, ZSLOPEW
 !
 INTEGER, DIMENSION (1):: ID
 !
-INTEGER               :: INI, JI, IND, JSI_MIN, JSI_MAX, IPAS, &
+INTEGER               :: INI, I, IND, JSI_MIN, JSI_MAX, IPAS, &
                          JL, INL, JPATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -165,10 +165,10 @@ IF (HISBA == 'DIF') THEN
   DO JPATCH=1,NPATCH
     IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
     DO JL=1,INL
-       DO JI=1,INI
-          ZD_TOP    (JI) = ZD_TOP    (JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)
-          ZWSAT_AVG (JI) = ZWSAT_AVG (JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)*PWSAT (JI,JL)
-          ZWWILT_AVG(JI) = ZWWILT_AVG(JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)*PWWILT(JI,JL)
+       DO I=1,INI
+          ZD_TOP    (I) = ZD_TOP    (I) + PPATCH(I,JPATCH)*PSOILWGHT(I,JL,JPATCH)
+          ZWSAT_AVG (I) = ZWSAT_AVG (I) + PPATCH(I,JPATCH)*PSOILWGHT(I,JL,JPATCH)*PWSAT (I,JL)
+          ZWWILT_AVG(I) = ZWWILT_AVG(I) + PPATCH(I,JPATCH)*PSOILWGHT(I,JL,JPATCH)*PWWILT(I,JL)
        ENDDO
     ENDDO
   ENDDO
@@ -182,8 +182,8 @@ ELSE
 !     
   DO JPATCH=1,NPATCH
      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-     DO JI=1,INI
-        ZD_TOP(JI)=ZD_TOP(JI)+PRUNOFFD(JI,JPATCH)*PPATCH(JI,JPATCH)
+     DO I=1,INI
+        ZD_TOP(I)=ZD_TOP(I)+PRUNOFFD(I,JPATCH)*PPATCH(I,JPATCH)
      ENDDO
   ENDDO
 !     
@@ -202,17 +202,17 @@ ZAR = 0.0
 ZTOT= 0.0
 ZNO = 0.0
 !
-DO JI=1,INI
+DO I=1,INI
 !   
-   IF(PTI_MEAN(JI)==XUNDEF)THEN
+   IF(PTI_MEAN(I)==XUNDEF)THEN
 !
 !    *Case where the Topographics index are not defined.
 !    --------------------------------------------------------         
      ZNO=ZNO+1.0
-     PTAB_FSAT(JI,:)=0.0     
-     PTAB_WTOP(JI,:)=XUNDEF
+     PTAB_FSAT(I,:)=0.0     
+     PTAB_WTOP(I,:)=XUNDEF
 !     
-     PM(JI) =XUNDEF
+     PM(I) =XUNDEF
 !
    ELSE 
 !
@@ -229,32 +229,32 @@ DO JI=1,INI
 !    topographic index computed with a 1000 meter DEM and a 100 meter DEM.
 !
      IF(HTOPREG=="DEF")THEN
-       ZTI_MEAN=XREGP*PTI_MEAN(JI)-XREGA
-       IF (HISBA=='DIF'.OR.(PTI_MAX(JI)-PTI_MIN(JI))<0.2) THEN                                   
-          ZTI_MIN =XREGP*PTI_MIN (JI)-XREGA
-          ZTI_MAX =XREGP*PTI_MAX (JI)-XREGA
-          ZTI_STD =SQRT((XREGP**2)*(PTI_STD(JI)**2))
+       ZTI_MEAN=XREGP*PTI_MEAN(I)-XREGA
+       IF (HISBA=='DIF'.OR.(PTI_MAX(I)-PTI_MIN(I))<0.2) THEN                                   
+          ZTI_MIN =XREGP*PTI_MIN (I)-XREGA
+          ZTI_MAX =XREGP*PTI_MAX (I)-XREGA
+          ZTI_STD =SQRT((XREGP**2)*(PTI_STD(I)**2))
        ELSE
-          ZTI_MIN =PTI_MIN (JI)
-          ZTI_MAX =PTI_MAX (JI)
-          ZTI_STD =PTI_STD (JI)
+          ZTI_MIN =PTI_MIN (I)
+          ZTI_MAX =PTI_MAX (I)
+          ZTI_STD =PTI_STD (I)
        ENDIF
      ELSE
-       ZTI_MEAN=PTI_MEAN(JI)
-       ZTI_MIN =PTI_MIN (JI)
-       ZTI_MAX =PTI_MAX (JI)
-       ZTI_STD =PTI_STD (JI)
+       ZTI_MEAN=PTI_MEAN(I)
+       ZTI_MIN =PTI_MIN (I)
+       ZTI_MAX =PTI_MAX (I)
+       ZTI_STD =PTI_STD (I)
      ENDIF
 !
 !    Calculate topographic index pdf parameters 
 !
 !    Numerical problem especialy over Greenland
-     IF(PTI_SKEW(JI)<=0.2)THEN
+     IF(PTI_SKEW(I)<=0.2)THEN
 !     
        ZTI_SKEW=0.2
 !       
-       WRITE(KLUOUT,*)'TI_SKEW is too low or negatif (=',PTI_SKEW(JI),'),' 
-       WRITE(KLUOUT,*)'then PHI is too big for the grid-cell',JI,'So,GAMMA(PHI) -> +inf.'
+       WRITE(KLUOUT,*)'TI_SKEW is too low or negatif (=',PTI_SKEW(I),'),' 
+       WRITE(KLUOUT,*)'then PHI is too big for the grid-cell',I,'So,GAMMA(PHI) -> +inf.'
        WRITE(KLUOUT,*)'The applied solution is to put TI_SKEW = 0.2'
        IF(ZTI_STD<1.0)THEN
          WRITE(KLUOUT,*)'In addition TI_STD is too low (=',ZTI_STD,'),' 
@@ -269,7 +269,7 @@ DO JI=1,INI
 !
      ELSE
 !
-       ZXI  = PTI_SKEW(JI)*ZTI_STD/X2 
+       ZXI  = PTI_SKEW(I)*ZTI_STD/X2 
        ZPHI = (ZTI_STD/ZXI)**X2
 !
      ENDIF
@@ -278,14 +278,14 @@ DO JI=1,INI
 !
 !    Exponential decay factor of the local deficit
 !
-     PM(JI) =(ZWSAT_AVG(JI)-ZWWILT_AVG(JI))*ZD_TOP(JI)/X4 
+     PM(I) =(ZWSAT_AVG(I)-ZWWILT_AVG(I))*ZD_TOP(I)/X4 
 !
 !    1.2.1 Calculate grid cell pdf total density FTOT = F(ymin --> ymax)
 !    -------------------------------------------------------------------
 !
 !    Normalized TOPMODEL maximum deficit D0/M coefficient
 !
-     ZD0 = (ZWSAT_AVG(JI)-ZWWILT_AVG(JI))*ZD_TOP(JI)/PM(JI)
+     ZD0 = (ZWSAT_AVG(I)-ZWWILT_AVG(I))*ZD_TOP(I)/PM(I)
 !
 !    Initialise
 !
@@ -320,7 +320,7 @@ DO JI=1,INI
 !    if the incomplete gamma function don't work, print why
 !
      IF (IFLGST/=0)THEN
-        WRITE(KLUOUT,*)'GRID-CELL =',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMIN= ',ZYMIN 
+        WRITE(KLUOUT,*)'GRID-CELL =',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMIN= ',ZYMIN 
         CALL ABOR1_SFX('INIT_TOP: (1) PROBLEM WITH DGAM FUNCTION')
      ENDIF      
 !
@@ -331,7 +331,7 @@ DO JI=1,INI
 !    if the incomplete gamma function don't work, print why
 !
      IF (IFLGST/=0)THEN
-        WRITE(KLUOUT,*)'GRID-CELL =',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMAX= ',ZYMAX
+        WRITE(KLUOUT,*)'GRID-CELL =',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMAX= ',ZYMAX
         CALL ABOR1_SFX('INIT_TOP: (2) PROBLEM WITH DGAM FUNCTION')
      ENDIF      
 !
@@ -341,11 +341,11 @@ DO JI=1,INI
 !
 !    initialization water content and fraction
 !
-     PTAB_WTOP(JI,1) = ZWSAT_AVG(JI)
-     PTAB_FSAT(JI,1) = 1.0
+     PTAB_WTOP(I,1) = ZWSAT_AVG(I)
+     PTAB_FSAT(I,1) = 1.0
 !     
-     PTAB_WTOP(JI,IPAS) = ZWWILT_AVG(JI)
-     PTAB_FSAT(JI,IPAS) = 0.0
+     PTAB_WTOP(I,IPAS) = ZWWILT_AVG(I)
+     PTAB_FSAT(I,IPAS) = 0.0
 !
 !    Define the new limits for the satured index loop
 !
@@ -397,7 +397,7 @@ DO JI=1,INI
 !       if the incomplete gamma function don't works, print why
 !
         IF (IFLGST/=0)THEN
-           WRITE(KLUOUT,*)'GRID-CELL= ',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YSAT= ',ZYSAT
+           WRITE(KLUOUT,*)'GRID-CELL= ',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YSAT= ',ZYSAT
            CALL ABOR1_SFX('INIT_TOP: (3) PROBLEM WITH DGAM FUNCTION')
         ENDIF 
 !
@@ -408,13 +408,13 @@ DO JI=1,INI
 !       if the incomplete gamma function don't works, print why
 !
         IF (IFLGST/=0)THEN
-           WRITE(KLUOUT,*)'GRID-CELL= ',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'Y0= ',ZY0
+           WRITE(KLUOUT,*)'GRID-CELL= ',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'Y0= ',ZY0
            CALL ABOR1_SFX('INIT_TOP: (4) PROBLEM WITH DGAM FUNCTION')
         ENDIF 
 !
 !       compute satured fraction as FSAT = F(0 --> ymax) - F(0 --> ysat)
 !       
-        PTAB_FSAT(JI,IND)=MAX(0.0,(ZGYMAX-ZGYSAT)/ZFTOT)
+        PTAB_FSAT(I,IND)=MAX(0.0,(ZGYMAX-ZGYSAT)/ZFTOT)
 !
 !       Compute driest fraction
 !
@@ -422,7 +422,7 @@ DO JI=1,INI
 !
 !       Calculate FMED
 !        
-        ZFMED=(1.0-PTAB_FSAT(JI,IND)-ZF0)
+        ZFMED=(1.0-PTAB_FSAT(I,IND)-ZF0)
 !
         IF (ZFMED/=0.0) THEN
 !
@@ -447,7 +447,7 @@ DO JI=1,INI
 !
 !       Solves Dbar = (Wsat-WT)*d_top with Dbar/M (=ZDMOY) = (Wsat-WT)*d_top/M
 !
-        PTAB_WTOP(JI,IND) = ZWSAT_AVG(JI)-(PM(JI)*ZDMOY/ZD_TOP(JI))
+        PTAB_WTOP(I,IND) = ZWSAT_AVG(I)-(PM(I)*ZDMOY/ZD_TOP(I))
 !        
       ENDDO
 !
@@ -457,35 +457,35 @@ ENDDO
 !
 ! supress numerical artifacs for boundaries conditions
 !
-DO JI=1,INI
+DO I=1,INI
 !
 !  Upper boundary
 !
-   IF(PTAB_WTOP(JI,2)==ZWSAT_AVG(JI))THEN
+   IF(PTAB_WTOP(I,2)==ZWSAT_AVG(I))THEN
 !
-     ZFUP=PTAB_FSAT(JI,1)
-     ZWUP=PTAB_WTOP(JI,1)
+     ZFUP=PTAB_FSAT(I,1)
+     ZWUP=PTAB_WTOP(I,1)
 !   
-     ID(:)=MAXLOC(PTAB_WTOP(JI,:),PTAB_WTOP(JI,:)<ZWSAT_AVG(JI))
+     ID(:)=MAXLOC(PTAB_WTOP(I,:),PTAB_WTOP(I,:)<ZWSAT_AVG(I))
 !   
-     ZFDOWN=PTAB_FSAT(JI,ID(1))
-     ZWDOWN=PTAB_WTOP(JI,ID(1))
+     ZFDOWN=PTAB_FSAT(I,ID(1))
+     ZWDOWN=PTAB_WTOP(I,ID(1))
 !     
      ZSLOPEW=(ZWUP-ZWDOWN)/(ZFUP-ZFDOWN)   
 !
      DO IND=2,ID(1)-1
-        PTAB_WTOP(JI,IND)=ZWDOWN+(PTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEW
+        PTAB_WTOP(I,IND)=ZWDOWN+(PTAB_FSAT(I,IND)-ZFDOWN)*ZSLOPEW
      ENDDO
 !   
    ENDIF
 !
 !  Lower boundary
 !
-   WHERE(PTAB_FSAT(JI,:)<=0.0      )
-         PTAB_WTOP(JI,:)=ZWWILT_AVG(JI)
+   WHERE(PTAB_FSAT(I,:)<=0.0      )
+         PTAB_WTOP(I,:)=ZWWILT_AVG(I)
    ENDWHERE
-   WHERE(PTAB_WTOP(JI,:)<=ZWWILT_AVG(JI))
-         PTAB_FSAT(JI,:)=0.0
+   WHERE(PTAB_WTOP(I,:)<=ZWWILT_AVG(I))
+         PTAB_FSAT(I,:)=0.0
    ENDWHERE
 !   
 ENDDO
