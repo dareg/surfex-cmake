@@ -51,8 +51,8 @@
 !
 !
 !
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : LSURF_MISC_BUDGET
 USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,       &
+                                    LSURF_MISC_BUDGET,                            &
                                     XRN_ROAD, XH_ROAD, XLE_ROAD,                  &
                                     XGFLUX_ROAD,                                  &
                                     XRN_WALL_A, XH_WALL_A, XGFLUX_WALL_A,         &
@@ -82,7 +82,7 @@ USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,     
                                     XQ_SYS, XT_SYS, XTR_SW_WIN, XFAN_POWER,       &
                                     XABS_SW_WIN, XABS_LW_WIN
 !
-USE MODD_TEB_OPTION_n,       ONLY : CBEM 
+USE MODD_TEB_n,              ONLY : CBEM 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
