@@ -35,7 +35,7 @@
 !              ------------
 !
 USE MODD_TEB_GRID_n, ONLY :   NDIM
-USE MODD_TEB_OPTION_n,ONLY:   LECOCLIMAP, LGARDEN, CBEM
+USE MODD_TEB_n,      ONLY :   LECOCLIMAP, LGARDEN, CBEM
 USE MODD_DATA_TEB_n, ONLY :   NPAR_ROOF_LAYER, NPAR_WALL_LAYER, NPAR_ROAD_LAYER, &
                               NPAR_BLDTYPE, NPAR_USETYPE,                        &
                               NPAR_BLDCODE, NPAR_BLD_AGE,                        &
