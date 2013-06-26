@@ -46,7 +46,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_TEB_GREENROOF_OPTION_n,ONLY:NTIME_GR
+USE MODD_TEB_GREENROOF_n,      ONLY :NTIME_GR
 USE MODD_DATA_TEB_GREENROOF_n, ONLY :XPAR_OM_GR,                          &
                                      XPAR_SAND_GR, XPAR_CLAY_GR,          &
                                      XPAR_LAI, XPAR_H_TREE, XPAR_VEGTYPE, &
