@@ -46,7 +46,7 @@ USE MODD_DIAG_FLAKE_n, ONLY: &
 USE MODD_CH_WATFLUX_n, ONLY: &
            CCH_DRY_DEP_n => CCH_DRY_DEP  
 
-Use MODD_FLAKE_n, ONLY: &
+USE MODD_FLAKE_n, ONLY: &
            XTSTEP_n => XTSTEP, &
            XOUT_TSTEP_n => XOUT_TSTEP, &
            LSEDIMENTS_n => LSEDIMENTS, &

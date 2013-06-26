@@ -38,12 +38,12 @@
 !
 USE MODD_PGD_GRID,          ONLY : NL
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
-USE MODD_TEB_n,             ONLY : XCOVER, LCOVER, XZS,                     &
+USE MODD_TEB_OPTION_n,      ONLY : XCOVER, LCOVER, XZS,                     &
                                    LECOCLIMAP, LGREENROOF, LHYDRO
 USE MODD_TEB_VEG_n,         ONLY : NNBIOMASS,                               &
                                    CISBA, CPHOTO, CPEDOTF, LTR_ML
-USE MODD_TEB_GARDEN_n,      ONLY : NGROUND_LAYER, XSOILGRID,                &
-                                   XCLAY, XSAND, XRUNOFFB, XWDRAIN
+USE MODD_TEB_GARDEN_OPTION_n,ONLY: NGROUND_LAYER, XSOILGRID
+USE MODD_TEB_GARDEN_PGD_n,   ONLY: XCLAY, XSAND, XRUNOFFB, XWDRAIN
 USE MODD_TEB_GRID_n,        ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
 USE MODD_DATA_TEB_GARDEN_n, ONLY : NTIME
 !

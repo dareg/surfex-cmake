@@ -32,7 +32,7 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_DIAG_MISC_TEB_n, ONLY:                 &
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY:          &
            LSURF_MISC_BUDGET_n => LSURF_MISC_BUDGET
 USE MODD_DIAG_TEB_n, ONLY:                      &
            XDIAG_TSTEP_n => XDIAG_TSTEP,        &
@@ -46,7 +46,7 @@ USE MODD_DIAG_TEB_n, ONLY:                      &
            LSURF_VARS_n => LSURF_VARS
 USE MODD_DIAG_UTCI_TEB_n, ONLY :                &
            LUTCI_n => LUTCI  
-USE MODD_TEB_n, ONLY:                           &
+USE MODD_TEB_OPTION_n, ONLY:                    &
            XTSTEP_n => XTSTEP,                  &
            XOUT_TSTEP_n => XOUT_TSTEP,          &
            CZ0H_n => CZ0H,                      &

@@ -38,12 +38,12 @@ USE MODD_TYPE_DATE_SURF
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
-USE MODD_TEB_n,          ONLY : XCOVER, XZS, CBEM,                     &
+USE MODD_TEB_OPTION_n,   ONLY : XCOVER, XZS, CBEM,                     &
                                 NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
                                 TTIME, LCOVER, LECOCLIMAP, NTEB_PATCH, &
                                 CBLD_ATYPE, LGARDEN,                   &
                                 LGREENROOF
-USE MODD_BEM_n,          ONLY : NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
+USE MODD_BEM_OPTION_n,   ONLY : NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
 USE MODD_TEB_GRID_n,     ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 !
 !

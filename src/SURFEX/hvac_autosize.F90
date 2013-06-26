@@ -2,11 +2,12 @@
 SUBROUTINE HVAC_AUTOSIZE(KI,KLUOUT)
 !     #############################################################
 !
-USE MODD_BEM_n, ONLY : NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,       &
+USE MODD_BEM_OPTION_n, ONLY : NFLOOR_LAYER, LAUTOSIZE
+USE MODD_BEM_n, ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR,                     &
                        XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN,         &
                        XEFF_HEAT, XQIN, XQIN_FRAD, XQIN_FLAT, XSHGC,       &
                        XSHGC_SH,XU_WIN, XGR, XFLOOR_HEIGHT, XINF,          &
-                       LAUTOSIZE, XHR_TARGET, XV_VENT, XCAP_SYS_HEAT,      &
+                       XHR_TARGET, XV_VENT, XCAP_SYS_HEAT,                 &
                        XCAP_SYS_RAT, XT_ADP, XM_SYS_RAT, XCOP_RAT,         &
                        XALB_WIN, XABS_WIN, XT_SIZE_MAX, XT_SIZE_MIN,       &
                        XUGG_WIN, XN_FLOOR, XGLAZ_O_BLD, XMASS_O_BLD,       &
@@ -16,11 +17,13 @@ USE MODD_BEM_n, ONLY : NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,       &
                        XF_WIN_MASS, XF_WIN_WALL, XF_MASS_FLOOR,            &
                        XF_MASS_WALL, XF_MASS_WIN, XTRAN_WIN, XF_WIN_WIN
 
-USE MODD_TEB_n, ONLY : NROOF_LAYER, NWALL_LAYER, NROAD_LAYER, XGARDEN,     &
+USE MODD_TEB_OPTION_n, ONLY : NROOF_LAYER, NWALL_LAYER, NROAD_LAYER,       &
+                       CROAD_DIR, CWALL_OPT
+USE MODD_TEB_n,        ONLY : XGARDEN,                                     &
                        XBLD, XROAD, XCAN_HW_RATIO, XBLD_HEIGHT,            &
                        XWALL_O_HOR, XWALL_O_GRND, XWALL_O_BLD, XZ0_TOWN,   &
                        XSVF_ROAD, XSVF_GARDEN, XSVF_WALL,                  &
-                       CROAD_DIR, XROAD_DIR, CWALL_OPT,                    &
+                       XROAD_DIR,                                          &
                        XALB_ROOF, XEMIS_ROOF, XHC_ROOF, XTC_ROOF, XD_ROOF, &
                        XALB_ROAD, XEMIS_ROAD, XHC_ROAD, XTC_ROAD, XD_ROAD, &
                        XALB_WALL, XEMIS_WALL, XHC_WALL, XTC_WALL, XD_WALL, &

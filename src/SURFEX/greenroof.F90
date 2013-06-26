@@ -50,46 +50,56 @@
 USE MODD_SURF_PAR,             ONLY: XUNDEF
 USE MODD_TYPE_DATE_SURF,       ONLY: DATE_TIME
 USE MODD_CSTS,                 ONLY: XCPD
-USE MODD_TEB_n,                ONLY: LECOCLIMAP, XCOVER, XT_ROOF
+USE MODD_TEB_OPTION_n,         ONLY: LECOCLIMAP, XCOVER
+USE MODD_TEB_n,                ONLY: XT_ROOF
 USE MODD_TEB_GRID_n,        ONLY: XLAT, XLON
 USE MODD_TEB_VEG_n,            ONLY: CPHOTO, CC1DRY, NNBIOMASS, CRESPSL, &
                                      CALBEDO, CSOILFRZ, CDIFSFCOND, CCPSURF,  &
                                      CSNOWRES, XCGMAX, CISBA
-USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY: CSOC_GR, LTR_ML_GR,                    &
                                      CISBA_GR, CRUNOFF_GR, CSCOND_GR,         &
                                      CKSAT_GR, CHORT_GR,                      &
-                                     NLAYER_GR, NLAYER_HORT_GR, NLAYER_DUN_GR,&
-                                     TSNOW, XSOILWGHT,                        &
-                                     XVEGTYPE, NWG_LAYER, XDZG, XDZDIF,       &
-                                     XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
+                                     NLAYER_GR, NLAYER_HORT_GR, NLAYER_DUN_GR
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY: XEMIS, XVEG, XLAI,XZ0,               &
+                                         XALBVIS, XALBNIR, XALBUV
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : LSTRESS,                                 &
+                                     XSOILWGHT,                               &
+                                     XVEGTYPE, XDZG, XDZDIF, NWG_LAYER,       &
+                                     XWRMAX_CF, XRSMIN,                       &
                                      XGAMMA, XCV, XRGL, XRUNOFFD,             &
-                                     XZ0, XZ0_O_Z0H, XRUNOFFB_GR, XWDRAIN_GR, &
+                                     XZ0_O_Z0H, XRUNOFFB_GR, XWDRAIN_GR,      &
                                      XCGSAT, XC1SAT, XC2REF, XC3, XC4B,       &
                                      XC4REF, XACOEF, XPCOEF, XTAUICE,         &
-                                     XWR, XRESA, XAN,                         &
-                                     XANFM, XANDAY, XABC, XPOI,               &
+                                     XABC, XPOI,                              &
                                      XFZERO, XEPSO, XGAMM, XQDGAMM,           &
                                      XGMES, XQDGMES, XT1GMES, XT2GMES,        &
-                                     XRESP_BIOMASS, XBSLAI, XLAIMIN, XSEFOLD, &
+                                     XBSLAI, XLAIMIN, XSEFOLD,                &
                                      XAMAX, XQDAMAX, XT1AMAX, XT2AMAX,        &
                                      XF2I, XGC, XAH, XBH, XDMAX,              &
-                                     XDG, XROOTFRAC, XTG, XWG, XWGI, XPCPS,   &
+                                     XDG, XROOTFRAC, XPCPS,                   &
                                      XPLVTT, XPLSTT, XWFC, XWWILT, XWSAT,     &
                                      XBCOEF, XCONDSAT, XMPOTSAT, XHCAPSOIL,   &
                                      XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
                                      XCONDDRY, XCONDSLD, XRE25,               &
                                      XKSAT_ICE, XD_ICE,                       &
-                                     XALBNIR, XALBVIS, XALBUV,                &
                                      XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                      XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                     XALBNIR_TVEG, XALBVIS_TVEG,    &
-                                     XALBNIR_TSOIL, XALBVIS_TSOIL,  &
-                                     XLE, XANF, XSAND_GR,                     &
+                                     XALBNIR_TVEG, XALBVIS_TVEG,              &
+                                     XALBNIR_TSOIL, XALBVIS_TSOIL,            &
+                                     XANF, XSAND_GR,                          &
+                                     XANMAX,                                  &
+                                     XBSLAI_NITRO, XH_TREE
+
+USE MODD_TEB_GREENROOF_n,      ONLY: TSNOW,                                   &
+                                     XWR, XRESA, XAN,                         &
+                                     XANFM, XANDAY,                           &
+                                     XTG, XWG, XWGI,                          &
+                                     XRESP_BIOMASS, XLE,                      &
                                      XPSN, XPSNV, XPSNG, XPSNV_A,             &
                                      XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,   &
                                      XSNOWFREE_ALB,                           &
-                                     XANMAX, XBIOMASS,                        &
-                                     XBSLAI_NITRO, XH_TREE
+                                     XBIOMASS
+
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE_GREENROOF
@@ -118,7 +128,7 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PPEQ_B_COEF        ! for humidity
 REAL, DIMENSION(:)  , INTENT(IN)    :: PPET_A_COEF        ! implicit coefficients
 REAL, DIMENSION(:)  , INTENT(IN)    :: PPET_B_COEF        ! for temperature
 REAL                , INTENT(IN)    :: PTSTEP             ! time step
-REAL, DIMENSION(:)  , INTENT(IN)    :: PZREF              ! height of the first atmospheric level                                                !
+REAL, DIMENSION(:)  , INTENT(IN)    :: PZREF              ! height of the first atmospheric level
 REAL, DIMENSION(:)  , INTENT(IN)    :: PUREF              ! reference height for the wind
 REAL, DIMENSION(:)  , INTENT(IN)    :: PTA                ! temperature at first atm. level 
 REAL, DIMENSION(:)  , INTENT(IN)    :: PQA                ! specific humidity at first atm. level

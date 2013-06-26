@@ -44,9 +44,10 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
 USE MODD_SURF_ATM,     ONLY : CIMPLICIT_WIND
 !
-USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF,                                     &
+USE MODD_TEB_OPTION_n, ONLY : LGARDEN, LGREENROOF,                                     &
                               CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,            &
-                              XT_CANYON, XQ_CANYON,                                    &
+                              NTEB_PATCH, XTEB_PATCH, CCH_BEM
+USE MODD_TEB_n,        ONLY : XT_CANYON, XQ_CANYON,                                    &
                               XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B,                  &
                               XWS_ROOF, XWS_ROAD,                                      &
                               TSNOW_ROOF, TSNOW_ROAD,                                  &
@@ -60,12 +61,13 @@ USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF,                              
                               XSVF_ROAD, XSVF_WALL,                                    &
                               XSVF_GARDEN, XWALL_O_BLD,                                &
                               XQSAT_ROOF, XQSAT_ROAD, XDELT_ROOF, XDELT_ROAD,          &
-                              NTEB_PATCH, XTEB_PATCH, CCH_BEM, XROUGH_ROOF, XROUGH_WALL                       
+                              XROUGH_ROOF, XROUGH_WALL
 !
+USE MODD_BEM_OPTION_n, ONLY : CCOOL_COIL, CHEAT_COIL
 USE MODD_BEM_n,        ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR, XTCOOL_TARGET,           &
                               XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT, XTI_BLD,         &
                               XT_FLOOR, XT_MASS, XQIN, XQIN_FRAD, XSHGC, XSHGC_SH,     &
-                              XU_WIN, XGR, XINF, CCOOL_COIL, CHEAT_COIL,               &
+                              XU_WIN, XGR, XINF,                                       &
                               XF_WATER_COND, XAUX_MAX, XQIN_FLAT,                      &
                               XHR_TARGET, XT_WIN2, XQI_BLD, XV_VENT, XCAP_SYS_HEAT,    &
                               XCAP_SYS_RAT, XT_ADP, XM_SYS_RAT, XCOP_RAT, XT_WIN1,     &
@@ -75,7 +77,7 @@ USE MODD_BEM_n,        ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR, XTCOOL_TARGET,    
                               XF_FLOOR_MASS, XF_FLOOR_WALL, XF_FLOOR_WIN,              &
                               XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS,              &
                               XF_WALL_WIN, XF_WIN_FLOOR, XF_WIN_MASS, XF_WIN_WALL,     &
-                              XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN, &
+                              XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN,                &
                               XTRAN_WIN, XF_WIN_WIN
                                
 USE MODD_CH_TEB_n,     ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,    &

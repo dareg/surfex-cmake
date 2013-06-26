@@ -35,7 +35,7 @@
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF
-USE MODD_TEB_n,      ONLY : CBEM
+USE MODD_TEB_OPTION_n, ONLY : CBEM
 USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
                               XRN, XH, XLE, XGFLUX, XRI,            &
                               XCD, XCH, XCE, XZ0, XZ0H,             &

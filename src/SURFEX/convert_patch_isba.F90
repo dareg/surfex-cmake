@@ -60,7 +60,7 @@ USE MODD_ISBA_n,         ONLY : CALBEDO,                                  &
                                 XWSAT, XPERM
 !
 USE MODD_DATA_COVER_n,   ONLY : XDATA_VEGTYPE
-USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,  &
+USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                &
                                 XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
                                 XDATA_EMIS_ECO, XDATA_GAMMA, XDATA_CV,  &
                                 XDATA_RGL, XDATA_RSMIN,                 &
@@ -78,7 +78,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,  &
                                 XDATA_SEFOLD_ST, XDATA_GC_ST,           &
                                 XDATA_DMAX_ST, XDATA_WATSUP,            &
                                 TDATA_SEED, TDATA_REAP,XDATA_IRRIG,     &
-                                XDATA_GARDEN, XDATA_NATURE,             &
+                                XDATA_GARDEN,                           &
                                 XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,   &
                                 XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN
 !   

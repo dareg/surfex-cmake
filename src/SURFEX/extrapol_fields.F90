@@ -35,7 +35,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_ISBA_GRID_n,    ONLY : NDIM
-USE MODD_ISBA_n,         ONLY : XCOVER, CISBA, CPHOTO 
+USE MODD_ISBA_n,         ONLY : XCOVER, CISBA, CPHOTO, NGROUND_LAYER 
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                                &
                                 XDATA_IRRIG, XDATA_WATSUP,                              &
@@ -49,8 +49,6 @@ USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_LAI, XPAR_H_TREE, XPAR_ROOT_DEPTH,  
                                 LDATA_IRRIG, LDATA_WATSUP, LDATA_ROOTFRAC,        &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH, LDATA_Z0
 !                                
-USE MODD_ISBA_n,         ONLY : CISBA, NGROUND_LAYER, CPHOTO
-!
 USE MODI_AV_PGD
 USE MODI_INI_VAR_FROM_VEGTYPE_DATA
 !

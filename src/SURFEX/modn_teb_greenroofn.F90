@@ -28,7 +28,7 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_TEB_GREENROOF_n, ONLY:                 &
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY:          &
            CRUNOFF_GR_n => CRUNOFF_GR,          &
            CSCOND_GR_n  => CSCOND_GR,           & 
            CKSAT_GR_n   => CKSAT_GR,            &

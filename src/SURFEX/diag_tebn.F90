@@ -28,7 +28,7 @@ SUBROUTINE DIAG_TEB_n(HPROGRAM,                                               &
 !
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_TEB_n,      ONLY : TTIME
+USE MODD_TEB_OPTION_n,ONLY: TTIME
 USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,              &
                               XRN, XH, XLE, XGFLUX, XRI, XCD, XCH, XCE, XQS,   &
                               XZ0, XZ0H, XT2M, XQ2M, XHU2M, XZON10M, XMER10M,  &

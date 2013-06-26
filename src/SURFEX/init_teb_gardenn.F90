@@ -36,20 +36,23 @@ SUBROUTINE INIT_TEB_GARDEN_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
-USE MODD_TEB_n,           ONLY: TTIME, NTEB_PATCH, LCANOPY
+USE MODD_TEB_OPTION_n,    ONLY: TTIME, NTEB_PATCH, LCANOPY
 USE MODD_TEB_VEG_n,       ONLY: CALBEDO, CCPSURF, CROUGH, CPHOTO, CISBA, LTR_ML
-USE MODD_TEB_GARDEN_n,    ONLY: TSNOW, XLAI,      &
-                                XLAIMIN, XZ0, XVEG, XEMIS,               &
+USE MODD_TEB_GARDEN_OPTION_n,  ONLY:LPAR_GARDEN, NGROUND_LAYER
+USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY:XLAI, XZ0, XVEG, XEMIS,              &
+                                    XALBNIR, XALBVIS, XALBUV
+USE MODD_TEB_GARDEN_PGD_n,ONLY: XLAIMIN,                                 &
                                 XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                XALBNIR, XALBVIS, XALBUV, XWG, XTG,      &
-                                XWSAT, XFAPARC, XFAPIRC, XLAI_EFFC, XMUS,&
-                                LPAR_GARDEN, XVEGTYPE, XH_TREE,          &
-                                NGROUND_LAYER,                           &
+                                XWSAT,                                   &
+                                XVEGTYPE, XH_TREE,                       &
                                 XALBVIS_DRY, XALBNIR_DRY, XALBUV_DRY,    &
                                 XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
-                                XALBVIS_WET, XALBNIR_WET, XALBUV_WET,    &
+                                XALBVIS_WET, XALBNIR_WET, XALBUV_WET
+USE MODD_TEB_GARDEN_n,    ONLY: TSNOW,                                   &
+                                XWG, XTG,                                &
+                                XFAPARC, XFAPIRC, XLAI_EFFC, XMUS,       &
                                 XPSN, XPSNG, XPSNV, XPSNV_A
-USE MODD_DIAG_MISC_TEB_n, ONLY: LSURF_DIAG_ALBEDO
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY: LSURF_DIAG_ALBEDO
 
 USE MODD_DATA_COVER_PAR,  ONLY: NVEGTYPE
 USE MODD_SURF_PAR,        ONLY: XUNDEF, NUNDEF

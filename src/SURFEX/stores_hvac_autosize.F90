@@ -34,8 +34,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_BEM_n,      ONLY:      LAUTOSIZE,                            &
-                                XM_SYS_RAT, XCAP_SYS_RAT, XCAP_SYS_HEAT
+USE MODD_BEM_OPTION_n, ONLY:    LAUTOSIZE
+USE MODD_BEM_n,      ONLY:      XM_SYS_RAT, XCAP_SYS_RAT, XCAP_SYS_HEAT
 USE MODD_DATA_BEM_n, ONLY :     XPAR_M_SYS_RAT,    LDATA_M_SYS_RAT,   &
                                 XPAR_CAP_SYS_RAT,  LDATA_CAP_SYS_RAT, &
                                 XPAR_CAP_SYS_HEAT, LDATA_CAP_SYS_HEAT,&

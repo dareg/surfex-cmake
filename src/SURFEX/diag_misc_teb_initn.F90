@@ -36,9 +36,9 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF
 !
-USE MODD_TEB_n,             ONLY : CBEM
-USE MODD_DIAG_MISC_TEB_n,   ONLY : LSURF_MISC_BUDGET,                         &
-                                     XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,  &
+USE MODD_TEB_OPTION_n,             ONLY : CBEM
+USE MODD_DIAG_MISC_TEB_OPTION_n,   ONLY : LSURF_MISC_BUDGET
+USE MODD_DIAG_MISC_TEB_n,   ONLY :   XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,  &
                                      XRN_ROAD, XH_ROAD, XLE_ROAD, XGFLUX_ROAD,&
                                      XRN_WALL_A, XH_WALL_A, XGFLUX_WALL_A,    &
                                      XRN_WALL_B, XH_WALL_B, XGFLUX_WALL_B,    &
