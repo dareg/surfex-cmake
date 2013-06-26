@@ -62,8 +62,6 @@ INTEGER, INTENT(IN) :: KFROM, KTO
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! Save current state for allocated arrays
-IF (LKFROM) THEN
-ENDIF
 !
 ! Current model is set to model KTO
 IF (LHOOK) CALL DR_HOOK('MODD_IDEAL_N:IDEAL_GOTO_MODEL',0,ZHOOK_HANDLE)
