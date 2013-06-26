@@ -31,10 +31,10 @@ USE MODI_PREP_VER_TEB_GREENROOF
 USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CRESPSL,                                &
                                 NNBIOMASS
 USE MODD_TEB_n,          ONLY : XT_ROOF
-USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : XLAI
-USE MODD_TEB_GREENROOF_PGD_n,      ONLY : XBSLAI, XBSLAI_NITRO, XWSAT, XTDEEP
-USE MODD_TEB_GREENROOF_n,ONLY : XRESA, XAN, XANFM, XANDAY, XLE,            &
-                                XBIOMASS, XRESP_BIOMASS, XWG, XWGI, XTG
+USE MODD_TEB_GREENROOF_n,ONLY : XRESA, XLAI,                                    &
+                                XAN, XANFM, XANDAY, XLE,                        &
+                                XBSLAI, XBSLAI_NITRO, XBIOMASS, XRESP_BIOMASS,  &
+                                XWSAT, XWG, XWGI, XTG, XTDEEP
                                 ! A FAIRE :
                                 ! IL FAUT RAJOUTER TSNOW
                                 ! ----------------------
