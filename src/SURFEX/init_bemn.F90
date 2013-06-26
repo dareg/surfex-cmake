@@ -33,18 +33,16 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_OPTION_n,    ONLY: XCOVER, CBEM 
-USE MODD_TEB_n,           ONLY: XBLD, XBLD_HEIGHT, XWALL_O_HOR, XWALL_O_BLD
-USE MODD_BEM_OPTION_n,    ONLY: NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
-USE MODD_BEM_n,           ONLY: XHC_FLOOR, XTC_FLOOR, XD_FLOOR,                          &
+USE MODD_TEB_n,           ONLY: XCOVER, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XWALL_O_BLD, CBEM 
+USE MODD_BEM_n,           ONLY: NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,            &
                                 XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT,   &
                                 XQIN, XQIN_FRAD, XSHGC, XSHGC_SH, XU_WIN, XGR,           &
                                 XFLOOR_HEIGHT, XINF, XQIN_FLAT, XHR_TARGET, XV_VENT,     &
                                 XCAP_SYS_HEAT, XAUX_MAX, XCAP_SYS_RAT, XT_ADP,           &
                                 XM_SYS_RAT, XCOP_RAT, XT_SIZE_MAX, XT_SIZE_MIN,          &
-                                XF_WATER_COND, LSHAD_DAY,                                &
+                                CCOOL_COIL, CHEAT_COIL, XF_WATER_COND, LSHAD_DAY,        &
                                 LNATVENT_NIGHT, LSHADE, XSHADE, CNATVENT, XNATVENT,      &
-                                XT_WIN1, XALB_WIN, XABS_WIN, XUGG_WIN,                   &
+                                LAUTOSIZE, XT_WIN1, XALB_WIN, XABS_WIN, XUGG_WIN,        &
                                 XN_FLOOR, XGLAZ_O_BLD, XMASS_O_BLD, XFLOOR_HW_RATIO,     &
                                 XF_FLOOR_MASS, XF_FLOOR_WALL, XF_FLOOR_WIN,              &
                                 XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS,              &
