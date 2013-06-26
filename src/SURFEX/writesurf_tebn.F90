@@ -34,19 +34,17 @@
 !              ------------
 !
 !
-USE MODD_TEB_OPTION_n,   ONLY : LGARDEN, LGREENROOF, CBEM,      &
-                                TTIME, NROOF_LAYER, NROAD_LAYER,&
-                                NWALL_LAYER, NTEB_PATCH,        &
-                                CROAD_DIR, CWALL_OPT
-USE MODD_TEB_n,          ONLY : XT_ROOF, XWS_ROOF,              &
-                                XT_ROAD, XWS_ROAD,              &
-                                XT_WALL_A,XT_WALL_B,            &
+USE MODD_TEB_n,          ONLY : LGARDEN, LGREENROOF, CBEM,      &
+                                NROOF_LAYER, XT_ROOF, XWS_ROOF, &
+                                NROAD_LAYER, XT_ROAD, XWS_ROAD, &
+                                NWALL_LAYER,XT_WALL_A,XT_WALL_B,&
                                 XTI_ROAD,                       &
                                 TSNOW_ROOF, TSNOW_ROAD,         &
                                 XT_CANYON, XQ_CANYON,           &
-                                XROAD_DIR
-USE MODD_BEM_OPTION_n,   ONLY : NFLOOR_LAYER
-USE MODD_BEM_n,          ONLY : XT_FLOOR,                       &
+                                TTIME, NTEB_PATCH, CROAD_DIR,   &
+                                XROAD_DIR,                      &
+                                CWALL_OPT, XROAD_DIR
+USE MODD_BEM_n,          ONLY : NFLOOR_LAYER, XT_FLOOR,         &
                                 XT_MASS, XT_WIN1, XT_WIN2,      &
                                 XQI_BLD, XTI_BLD                                 
 !
