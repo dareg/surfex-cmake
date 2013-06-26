@@ -34,9 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_GREENROOF_OPTION_n,   ONLY : CISBA_GR, CSCOND_GR,      &
-                                          NLAYER_GR, NTIME_GR
-USE MODD_TEB_GREENROOF_PGD_n,      ONLY : XRUNOFFB_GR, XWDRAIN_GR 
+USE MODD_TEB_GREENROOF_n,   ONLY : CISBA_GR, CSCOND_GR,      &
+                                   NLAYER_GR, NTIME_GR,      &
+                                   XRUNOFFB_GR, XWDRAIN_GR 
 USE MODI_WRITE_SURF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
