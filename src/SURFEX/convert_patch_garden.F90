@@ -34,21 +34,19 @@ SUBROUTINE CONVERT_PATCH_GARDEN(KLU,KDECADE)
 !              ------------
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
-USE MODD_TEB_OPTION_n,      ONLY: XCOVER
+USE MODD_TEB_n,             ONLY: XCOVER
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO
-USE MODD_TEB_GARDEN_OPTION_n,   ONLY : LPAR_GARDEN, NGROUND_LAYER, XSOILGRID
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY: XZ0, XVEG, XLAI, XEMIS, &
-                                      XALBNIR, XALBVIS, XALBUV
-USE MODD_TEB_GARDEN_PGD_n,      ONLY: XWRMAX_CF, XRSMIN, LSTRESS,          &
+USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS, NGROUND_LAYER,     &
+                                  XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
                                   XGAMMA, XCV, XRGL,                       &
-                                  XDG2, XDROOT, NWG_LAYER,                 &
-                                  XGMES,                                   &
+                                  XZ0, XDG2, XDROOT, NWG_LAYER,            &
+                                  XGMES, XSOILGRID,                        &
                                   XBSLAI, XLAIMIN, XSEFOLD,                &
                                   XF2I, XGC,                               &
                                   XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XDMAX,                                   &
+                                  XDMAX, XALBNIR, XALBVIS, XALBUV,         &
                                   XVEGTYPE,                                &
                                   XD_ICE, XDG, XH_TREE, XRE25, XROOTFRAC,  &
                                   XZ0_O_Z0H
