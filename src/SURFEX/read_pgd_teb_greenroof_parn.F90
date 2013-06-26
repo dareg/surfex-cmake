@@ -40,8 +40,8 @@ USE MODD_CSTS,                 ONLY : XDAY
 USE MODD_SURF_PAR,             ONLY : XUNDEF
 USE MODD_TEB_GRID_n,           ONLY : NDIM
 USE MODD_DATA_COVER_PAR,       ONLY : NVEGTYPE, NVT_GRAS, NVT_TROG
-USE MODD_TEB_GREENROOF_OPTION_n,ONLY: NLAYER_GR, CTYP_GR, NTIME_GR
-USE MODD_TEB_GREENROOF_PGD_n,  ONLY : XSAND_GR, XCLAY_GR
+USE MODD_TEB_GREENROOF_n,      ONLY : NLAYER_GR, CTYP_GR, NTIME_GR,                             &
+                                      XSAND_GR, XCLAY_GR
 USE MODD_DATA_TEB_GREENROOF_n, ONLY : XPAR_LAI_GR,                                              &
                                       XPAR_OM_GR, XPAR_SAND_GR, XPAR_CLAY_GR,                   & 
                                       XPAR_VEG, XPAR_LAI,XPAR_RSMIN,XPAR_GAMMA,XPAR_WRMAX_CF,   &
