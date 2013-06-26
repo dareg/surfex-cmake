@@ -71,8 +71,8 @@ LOGICAL, INTENT(IN) :: LKFROM
 INTEGER, INTENT(IN) :: KFROM, KTO
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-! Save current state for allocated arrays
 IF (LKFROM) THEN
+! Save current state for allocated arrays
 SSO_CANOPY_MODEL(KFROM)%XZ=>XZ
 SSO_CANOPY_MODEL(KFROM)%XU=>XU
 SSO_CANOPY_MODEL(KFROM)%XTKE=>XTKE
