@@ -56,8 +56,7 @@ USE MODD_SEAFLUX_n,      ONLY : XCOVER, XDIR_ALB, XSCA_ALB,    &
                                   NGRVWAVES, XSST_INI, LSBL,     &
                                   XZ0, XZ0H, XUMER, XVMER,       &
                                   XICHCE, CINTERPOL_SST,         &
-                                  LINTERPOL_SST, XICE_ALB  ,     &
-                                  CSEA_CO2
+                                  LINTERPOL_SST, XICE_ALB  
 USE MODD_OCEAN_n,        ONLY : LPROGSST,NTIME_COUPLING,LMERCATOR,LCURRENT
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET, XDIAG_TSTEP, L2M_MIN_ZS, &
                                   LCOEF, LSURF_VARS, LSURF_BUDGETC, LRESET_BUDGETC  
@@ -168,7 +167,7 @@ IF (LNAM_READ) THEN
  !        0.1. Hard defaults
  !      
  
- CALL DEFAULT_SEAFLUX(XTSTEP,XOUT_TSTEP,CSEA_ALB,CSEA_FLUX,CSEA_CO2,LPWG,&
+ CALL DEFAULT_SEAFLUX(XTSTEP,XOUT_TSTEP,CSEA_ALB,CSEA_FLUX,LPWG,       &
                         LPRECIP,LPWEBB,NGRVWAVES,LPROGSST,NTIME_COUPLING,&
                         XICHCE,CINTERPOL_SST          )  
  !                     
