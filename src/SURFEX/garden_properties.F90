@@ -30,13 +30,13 @@
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODD_TEB_VEG_n,         ONLY : CISBA, LTR_ML
-USE MODD_TEB_GARDEN_PGD_n,  ONLY : XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,      &
+USE MODD_TEB_GARDEN_n,      ONLY : TSNOW, XALBNIR, XALBVIS, XALBUV,    &
+                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,      &
                                    XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,   &
-                                   XALBNIR_TVEG, XALBVIS_TVEG,                &
-                                   XALBNIR_TSOIL, XALBVIS_TSOIL
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : XVEG, XLAI, XZ0, XEMIS,                &
-                                       XALBNIR, XALBVIS, XALBUV
-USE MODD_TEB_GARDEN_n,      ONLY : TSNOW, XTG, XPSN, XPSNV, XPSNG, XPSNV_A,   &
+                                   XALBNIR_TVEG, XALBVIS_TVEG,       &
+                                   XALBNIR_TSOIL, XALBVIS_TSOIL,   &                                   
+                                   XVEG, XLAI, XZ0, XEMIS, XTG,       &
+                                   XPSN, XPSNV, XPSNG, XPSNV_A,  &
                                    XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,     &
                                    XSNOWFREE_ALB  
 !
