@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE READ_BLD_DESCRIPTION(HPROGRAM)
+      SUBROUTINE READ_BLD_DESCRIPTION_n(HPROGRAM)
 !     #########################
 !
 !!
@@ -34,7 +34,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_BLD_DESCRIPTION
+USE MODD_BLD_DESCRIPTION_n
 !
 USE MODI_READ_SURF
 USE MODI_ABOR1_SFX
@@ -64,7 +64,7 @@ INTEGER                         :: ITOT
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION_n',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -219,7 +219,7 @@ END DO
 !
 DEALLOCATE(ZWORK)
 !
-IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION_n',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 CONTAINS
 SUBROUTINE UP_DESC_IND(K)
@@ -229,4 +229,4 @@ I2=I2+K
 END SUBROUTINE UP_DESC_IND
 !-------------------------------------------------------------------------------
 !
-END SUBROUTINE READ_BLD_DESCRIPTION
+END SUBROUTINE READ_BLD_DESCRIPTION_n

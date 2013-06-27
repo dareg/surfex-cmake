@@ -49,7 +49,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_BLD_DESCRIPTION
+USE MODD_BLD_DESCRIPTION_n
 !
 USE MODI_ABOR1_SFX
 !

@@ -13,7 +13,7 @@ INTEGER,           INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem ap
 !
 END SUBROUTINE WRITE_SURFX0
 !
-     SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:), INTENT(IN)  :: PFIELD   ! array containing the data field
@@ -23,6 +23,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX1
 !
      SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
@@ -287,7 +288,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
@@ -336,6 +337,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=12)  :: YREC
@@ -393,7 +395,11 @@ ENDIF
 !
 IF (HPROGRAM=='NC    ') THEN
 #ifdef NC
-  CALL WRITE_SURFN_NC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  IF (PRESENT(HNAM_DIM)) THEN
+    CALL WRITE_SURFN_NC(YREC,PFIELD,KRESP,HCOMMENT,YDIR,HNAM_DIM)
+  ELSE
+    CALL WRITE_SURFN_NC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  ENDIF
 #endif
 ENDIF
 !

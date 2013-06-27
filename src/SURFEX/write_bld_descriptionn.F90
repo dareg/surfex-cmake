@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE WRITE_BLD_DESCRIPTION(HPROGRAM)
+      SUBROUTINE WRITE_BLD_DESCRIPTION_n(HPROGRAM)
 !     #########################
 !
 !!
@@ -34,7 +34,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_BLD_DESCRIPTION
+USE MODD_BLD_DESCRIPTION_n
 !
 USE MODI_WRITE_SURF
 USE MODI_ABOR1_SFX
@@ -65,7 +65,7 @@ INTEGER                         :: ITOT
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('WRITE_BLD_DESCRIPTION',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('WRITE_BLD_DESCRIPTION_n',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -83,7 +83,7 @@ ZWORK(6) = FLOAT(NDESC_ROAD_LAYER)
 ZWORK(7) = FLOAT(NDESC_FLOOR_LAYER)
 !
 YCOMMENT='Configuration numbers for descriptive building data'
- CALL WRITE_SURF(HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,'-','Bld_parameters  ')
 DEALLOCATE(ZWORK)
 !
 !-------------------------------------------------------------------------------
@@ -167,10 +167,10 @@ END DO
  CALL UP_DESC_IND_W(NDESC_AGE) ; ZWORK(I1:I2) = FLOAT(NDESC_AGE_DATE(:))
 !
 YCOMMENT='Descriptive building data'
- CALL WRITE_SURF(HPROGRAM,'BLD_DESC_DAT',ZWORK,IRESP,YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(HPROGRAM,'BLD_DESC_DAT',ZWORK,IRESP,YCOMMENT,'-','Bld_parameters  ')
 DEALLOCATE(ZWORK)
 !
-IF (LHOOK) CALL DR_HOOK('WRITE_BLD_DESCRIPTION',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('WRITE_BLD_DESCRIPTION_n',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 CONTAINS
 SUBROUTINE UP_DESC_IND_W(K)
@@ -180,4 +180,4 @@ I2=I2+K
 END SUBROUTINE UP_DESC_IND_W
 !-------------------------------------------------------------------------------
 !
-END SUBROUTINE WRITE_BLD_DESCRIPTION
+END SUBROUTINE WRITE_BLD_DESCRIPTION_n
