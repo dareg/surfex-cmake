@@ -212,7 +212,7 @@
            ! Search now in PGD file
            CALL END_IO_SURF_n('ASCII ')
            CFILEIN = 'PGD.txt'
-           CALL INIT_IO_SURF_n('ASCII ',CMASK,'SURF  ','READ ')
+           CALL INIT_IO_SURF_n('ASCII ',CMASK_SAVE,'SURF  ','READ ')
            CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
          ENDIF
          IF (.NOT.GFOUND) CALL ERR_STOP(HREC,CFILEIN,NLUOUT)
