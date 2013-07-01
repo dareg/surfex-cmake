@@ -83,7 +83,7 @@ WHERE (OMASK(:))
   WHERE ( ZLOC(:) > 0. )
     PZ0REL(:) = 0.25 * (PHO2IP(:)+PHO2IM(:)+PHO2JP(:)+PHO2JM(:)) &
                      * EXP(-SQRT(1./ZLOC(:)))
-    PZ0REL(:) = MAX(PZ0REL(:),0.)
+    PZ0REL(:) = MAX(PZ0REL(:),1E-10)                     
   ELSEWHERE
     PZ0REL(:) = 0.
   END WHERE
