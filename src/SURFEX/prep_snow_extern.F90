@@ -279,7 +279,11 @@ SELECT CASE (HSURF(1:3))
           !* input snow layer thickness
           ALLOCATE(ZDEPTH(INI,TZSNOW%NLAYER,IPATCH))
           DO JPATCH=1,IPATCH
-            CALL SNOW3LGRID(ZDEPTH(:,:,JPATCH),ZD(:,JPATCH))
+            IF (KLAYER>=3) THEN
+              CALL SNOW3LGRID(ZDEPTH(:,:,JPATCH),ZD(:,JPATCH))
+            ELSEIF (KLAYER==1) THEN
+              ZDEPTH(:,1,JPATCH) = ZD(:,JPATCH)
+            ENDIF
           END DO
           !* input normalized grid
           ALLOCATE(ZGRID(INI,TZSNOW%NLAYER,IPATCH))
