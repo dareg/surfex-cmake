@@ -78,7 +78,8 @@ IMPLICIT NONE
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, POINTER,     DIMENSION(:,:,:) :: ZFIELDIN       ! field to interpolate horizontally
 REAL, POINTER,     DIMENSION(:,:)   :: ZFIELD         ! field to interpolate horizontally
-REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUT      ! field interpolated   horizontally
+REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
+REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZVEGTYPE_PATCH ! vegtype for each patch
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZW             ! work array (x, fine   soil grid, npatch)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZF             ! work array (x, output soil grid, npatch)
@@ -88,8 +89,9 @@ REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
 INTEGER                             :: ILUOUT         ! output listing logical unit
 !
 LOGICAL                             :: GUNIF          ! flag for prescribed uniform field
-INTEGER                             :: JVEGTYPE       ! loop on vegtypes
+INTEGER                             :: JVEGTYPE, JPATCH    ! loop on vegtypes
 INTEGER                             :: JLAYER         ! loop on layers
+INTEGER                             :: INI, INL, INP
 INTEGER                             :: IWORK          ! Work integer
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -106,6 +108,8 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GREENROOF_FIELD',0,ZHOOK_HANDLE)
                                   HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
 !
 CMASK = 'TOWN  '
+!
+INI=SIZE(XLAT)
 !
 !-------------------------------------------------------------------------------------
 !*      2.     Snow variables case
@@ -163,29 +167,44 @@ END IF
 !
 !*      5.     Horizontal interpolation for vegtype grid
 !
-ALLOCATE(ZFIELDOUT(SIZE(XLAT),SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)))
-ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,2)))
+INL = SIZE(ZFIELDIN,2)
+INP = SIZE(ZFIELDIN,3)
 !
-DO JVEGTYPE = 1, SIZE(ZFIELDIN,3)
-  ZFIELD=ZFIELDIN(:,:,JVEGTYPE)
-  IF (SIZE(ZFIELDIN,3)==NVEGTYPE) LINTERP = (XVEGTYPE(:,JVEGTYPE) > 0.)
-  CALL HOR_INTERPOL(ILUOUT,ZFIELD,ZFIELDOUT(:,:,JVEGTYPE))
+ALLOCATE(ZFIELDOUTP(INI,INL,INP))
+ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
+!
+DO JPATCH = 1, INP
+  ZFIELD=ZFIELDIN(:,:,JPATCH)
+  IF (INP==NVEGTYPE) LINTERP = (XVEGTYPE(:,JPATCH) > 0.)
+  CALL HOR_INTERPOL(ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
   LINTERP = .TRUE.
 END DO
 !
 DEALLOCATE(ZFIELD)
 !
+ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
+!
+CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+!
+DEALLOCATE(ZFIELDOUTP)
+!
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Transformation from vegtype grid to patch grid
 !
-ALLOCATE(ZW (SIZE(ZFIELDOUT,1),SIZE(ZFIELDOUT,2)))
+ALLOCATE(ZW (INI,INL))
 ZW = 0.
 DO JVEGTYPE=1,NVEGTYPE
   DO JLAYER=1,SIZE(ZW,2)
-    ZW(:,JLAYER) = ZW(:,JLAYER) + XVEGTYPE(:,JVEGTYPE) * ZFIELDOUT(:,JLAYER,JVEGTYPE)
+    ZW(:,JLAYER) = ZW(:,JLAYER) + XVEGTYPE(:,JVEGTYPE) * ZFIELDOUTV(:,JLAYER,JVEGTYPE)
   END DO
 END DO
+!
+!
+!*      8.     Deallocations
+!
+DEALLOCATE(ZFIELDIN )
+DEALLOCATE(ZFIELDOUTV) 
 !
 !-------------------------------------------------------------------------------------
 !
@@ -197,13 +216,13 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WG     ') 
-  ALLOCATE(ZF (SIZE(ZFIELDOUT,1),NLAYER_GR))
+  ALLOCATE(ZF (INI,NLAYER_GR))
   !
   !* interpolates on output levels
   CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,XDG,ZF)
   !
   !* retrieves soil water content from soil relative humidity
-  ALLOCATE(XWG(SIZE(ZFIELDOUT,1),NLAYER_GR))
+  ALLOCATE(XWG(INI,NLAYER_GR))
   XWG(:,:) = XWWILT + ZF(:,:) * (XWFC-XWWILT)
   XWG(:,:) = MAX(MIN(XWG(:,:),XWSAT),XWGMIN)
   !
@@ -214,13 +233,13 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WGI    ')
-  ALLOCATE(ZF (SIZE(ZFIELDOUT,1),NLAYER_GR))
+  ALLOCATE(ZF (INI,NLAYER_GR))
   !
   !* interpolates on output levels
   CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,XDG,ZF)
   !
   !* retrieves soil ice content from soil relative humidity
-  ALLOCATE(XWGI(SIZE(ZFIELDOUT,1),NLAYER_GR))
+  ALLOCATE(XWGI(INI,NLAYER_GR))
   XWGI(:,:) = ZF(:,:) * XWSAT
   XWGI(:,:) = MAX(MIN(XWGI(:,:),XWSAT),0.)
   !
@@ -232,7 +251,7 @@ SELECT CASE (HSURF)
   !
  CASE('TG     ') 
   IWORK=NLAYER_GR
-  ALLOCATE(XTG(SIZE(ZFIELDOUT,1),IWORK))
+  ALLOCATE(XTG(INI,IWORK))
   ALLOCATE(ZDG(SIZE(XDG,1),IWORK))
   !* diffusion method, the soil grid is the same as for humidity
   ZDG(:,:) = XDG(:,:)
@@ -242,7 +261,7 @@ SELECT CASE (HSURF)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WR     ') 
-  ALLOCATE(XWR(SIZE(ZFIELDOUT,1)))
+  ALLOCATE(XWR(INI))
   XWR(:) = ZW(:,1)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -255,11 +274,6 @@ END SELECT
 !
 DEALLOCATE(ZW)
 !-------------------------------------------------------------------------------------
-!
-!*      8.     Deallocations
-!
-DEALLOCATE(ZFIELDIN )
-DEALLOCATE(ZFIELDOUT) 
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GREENROOF_FIELD',1,ZHOOK_HANDLE)
 !
