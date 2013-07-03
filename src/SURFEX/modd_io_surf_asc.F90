@@ -39,7 +39,8 @@ INTEGER, DIMENSION(:), POINTER :: NMASK ! 1D mask to read only interesting
 !$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL ! total number fo points of surface
 !$OMP THREADPRIVATE(NFULL)
-LOGICAL                 :: LOPEN_READ   ! flag to know if the file has been openned during the surface call and is to be read
+LOGICAL, SAVE          :: LCREATED=.FALSE.   ! flag to know if the output file was created
+LOGICAL                :: LOPEN        ! flag to know if the file has been openned during the surface call and is to be read
 INTEGER                :: NNI_FORC      ! number of points in forcing files.
 !
 END MODULE MODD_IO_SURF_ASC
