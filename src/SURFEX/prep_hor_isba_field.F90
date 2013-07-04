@@ -82,6 +82,8 @@ IMPLICIT NONE
  CHARACTER(LEN=28)             :: YFILE     ! name of file
  CHARACTER(LEN=6)              :: YFILETYPE_SNOW ! type of input file
  CHARACTER(LEN=28)             :: YFILE_SNOW     ! name of file
+ CHARACTER(LEN=6)              :: YFILEPGDTYPE_SNOW ! type of input file
+ CHARACTER(LEN=28)             :: YFILEPGD_SNOW     ! name of file 
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizontally
@@ -119,11 +121,14 @@ INI=SIZE(XLAT)
 !*      2.     Snow variables case?
 !
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_ISBA_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE_SNOW,YFILETYPE_SNOW,GUNIF_SNOW)
+  CALL READ_PREP_ISBA_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE_SNOW,YFILETYPE_SNOW,&
+                                YFILEPGD_SNOW,YFILEPGDTYPE_SNOW,GUNIF_SNOW)
   IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE_SNOW)==0.AND.LEN_TRIM(YFILETYPE_SNOW)==0)THEN
     IF(LEN_TRIM(YFILE)/=0.AND.LEN_TRIM(YFILETYPE)/=0)THEN
        YFILE_SNOW    =YFILE
        YFILETYPE_SNOW=YFILETYPE
+       YFILEPGD_SNOW    =YFILEPGD
+       YFILEPGDTYPE_SNOW=YFILEPGDTYPE       
     ELSE
        GUNIF_SNOW=.TRUE.
        IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0
@@ -131,7 +136,7 @@ IF (HSURF=='SN_VEG ') THEN
   ENDIF
   CALL PREP_HOR_SNOW_FIELDS(HPROGRAM, HSURF,                     &
                             YFILE_SNOW, YFILETYPE_SNOW,          &
-                            YFILEPGD, YFILEPGDTYPE,              &
+                            YFILEPGD_SNOW, YFILEPGDTYPE_SNOW,    &
                             ILUOUT, GUNIF_SNOW, NPATCH,          &
                             INI,TSNOW, TTIME,                    &
                             XWSNOW, XRSNOW, XTSNOW, XASNOW,      &

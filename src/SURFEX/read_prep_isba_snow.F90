@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_PREP_ISBA_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,OUNIF)
+      SUBROUTINE READ_PREP_ISBA_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,OUNIF)
 !     #######################################################
 !
 !!****  *READ_PREP_ISBA_SNOW* - routine to read the configuration for snow
@@ -53,7 +53,8 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_ABOR1_SFX
 !
-USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, LSNOW_IDEAL, &
+USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
+                           CTYPEPGD_SNOW, LSNOW_IDEAL, &
                            XWSNOW_p=>XWSNOW, XTSNOW_p=>XTSNOW,  &
                            XRSNOW_p=>XRSNOW, XASNOW,            &
                            XSG1SNOW_p=>XSG1SNOW, XSG2SNOW_p=>XSG2SNOW, &
@@ -75,6 +76,8 @@ IMPLICIT NONE
 INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+ CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
+ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILEPGDTYPE    ! file type
 LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
 !
 !*       0.2   Declarations of local variables
@@ -92,6 +95,7 @@ INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
+                            CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,                 &
                             XWSNOW, XTSNOW, XRSNOW, XASNOW,              &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
@@ -107,6 +111,8 @@ IF (LNAM_READ) THEN
   !
   CFILE_SNOW    = '                         '
   CTYPE_SNOW    = '      '
+  CFILEPGD_SNOW    = '                         '
+  CTYPEPGD_SNOW    = '      '  
   !
   LSNOW_IDEAL = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.
@@ -222,7 +228,8 @@ ELSEIF(PRESENT(OUNIF))THEN
     OUNIF=.TRUE.
 ENDIF
 !
-LFILE=(LEN_TRIM(CFILE_SNOW)>0.AND.LEN_TRIM(CTYPE_SNOW)>0)
+LFILE=(LEN_TRIM(CFILE_SNOW)>0.AND.LEN_TRIM(CTYPE_SNOW)>0 &
+        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0)
 !
 IF(PRESENT(HFILE))THEN 
   IF(LFILE)THEN
@@ -236,6 +243,20 @@ IF(PRESENT(HFILETYPE))THEN
      HFILETYPE = CTYPE_SNOW
   ELSE
      HFILETYPE = '      '
+  ENDIF
+ENDIF
+IF(PRESENT(HFILEPGDTYPE))THEN 
+  IF(LFILE)THEN
+     HFILEPGDTYPE = CTYPEPGD_SNOW
+  ELSE
+     HFILEPGDTYPE = '      '
+  ENDIF
+ENDIF
+IF(PRESENT(HFILEPGD))THEN 
+  IF(LFILE)THEN
+     HFILEPGD = CFILEPGD_SNOW
+  ELSE
+     HFILEPGD = '                         '
   ENDIF
 ENDIF
 IF (LFILE.AND.PRESENT(OUNIF)) OUNIF=.FALSE.

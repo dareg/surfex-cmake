@@ -38,6 +38,8 @@ SAVE
  CHARACTER(LEN=6)  :: CTYPEPGD       ! input file type
  CHARACTER(LEN=28) :: CFILE_SNOW     ! input file name for Snow
  CHARACTER(LEN=6)  :: CTYPE_SNOW     ! input file type for Snow
+ CHARACTER(LEN=28) :: CFILEPGD_SNOW     ! input file name for Snow
+ CHARACTER(LEN=6)  :: CTYPEPGD_SNOW     ! input file type for Snow
  CHARACTER(LEN=28) :: CFILE_WS       ! input file name for Ws
  CHARACTER(LEN=6)  :: CTYPE_WS       ! input file type for Ws
  CHARACTER(LEN=28) :: CFILE_TS       ! input file name for Ts

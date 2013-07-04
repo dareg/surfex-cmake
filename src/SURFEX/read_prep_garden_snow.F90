@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_PREP_GARDEN_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE)
+      SUBROUTINE READ_PREP_GARDEN_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE)
 !     #######################################################
 !
 !!****  *READ_PREP_GARDEN_SNOW* - routine to read the configuration for snow
@@ -52,7 +52,8 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_ABOR1_SFX
 !
-USE MODD_PREP_TEB_GARDEN, ONLY : CFILE_SNOW, CTYPE_SNOW, LSNOW_IDEAL, &
+USE MODD_PREP_TEB_GARDEN, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
+                                 CTYPEPGD_SNOW, LSNOW_IDEAL, &
                                  XWSNOW_p=>XWSNOW, XTSNOW_p=>XTSNOW, &
                                  XRSNOW_p=>XRSNOW, XASNOW 
 !
@@ -71,6 +72,8 @@ IMPLICIT NONE
 INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+ CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
+ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILEPGDTYPE    ! file type 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -84,10 +87,12 @@ INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
+                            CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,                &
                             XWSNOW, XTSNOW, XRSNOW, XASNOW,             &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
 NAMELIST/NAM_PREP_GARDEN_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
+                              CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
                               LSNOW_IDEAL, XWSNOW, XTSNOW, XRSNOW, XASNOW
 !-------------------------------------------------------------------------------
 !* default
@@ -102,6 +107,8 @@ IF (LNAM_READ) THEN
   !
   CFILE_SNOW    = '                         '
   CTYPE_SNOW    = '      '  
+  CFILEPGD_SNOW    = '                         '
+  CTYPEPGD_SNOW    = '      '    
   !
   LSNOW_IDEAL = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.
@@ -176,9 +183,13 @@ HSNOW = CSNOW
 !
 KSNOW_LAYER = NSNOW_LAYER
 !
-IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 ) THEN
+IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0  &
+        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0) THEN
   IF (PRESENT(HFILE)) HFILE = CFILE_SNOW
   IF (PRESENT(HFILETYPE)) HFILETYPE = CTYPE_SNOW
+  IF (PRESENT(HFILEPGD)) HFILEPGD = CFILEPGD_SNOW
+  IF (PRESENT(HFILEPGDTYPE)) HFILEPGDTYPE = CTYPEPGD_SNOW  
+  
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('READ_PREP_GARDEN_SNOW',1,ZHOOK_HANDLE)

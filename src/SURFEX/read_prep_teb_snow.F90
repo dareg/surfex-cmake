@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_PREP_TEB_SNOW(HPROGRAM,HSNOW_ROOF,KSNOW_ROOF,HSNOW_ROAD,KSNOW_ROAD,HFILE,HFILETYPE)
+      SUBROUTINE READ_PREP_TEB_SNOW(HPROGRAM,HSNOW_ROOF,KSNOW_ROOF,HSNOW_ROAD,KSNOW_ROAD,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE)
 !     #######################################################
 !
 !!****  *READ_PREP_TEB_SNOW* - routine to read the configuration for snow
@@ -51,7 +51,8 @@ USE MODD_PREP_TEB, ONLY : XWSNOW_ROOF_p=>XWSNOW_ROOF, XTSNOW_ROOF_p=>XTSNOW_ROOF
                           XRSNOW_ROOF_p=>XRSNOW_ROOF, XASNOW_ROOF, &
                           XWSNOW_ROAD_p=>XWSNOW_ROAD, XTSNOW_ROAD_p=>XTSNOW_ROAD, &
                           XRSNOW_ROAD_p=>XRSNOW_ROAD, XASNOW_ROAD, &
-                          CFILE_SNOW, CTYPE_SNOW, LSNOW_IDEAL 
+                          CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
+                           CTYPEPGD_SNOW, LSNOW_IDEAL 
 !
 USE MODD_PREP_SNOW, ONLY : NSNOW_LAYER_MAX
 !
@@ -70,6 +71,9 @@ INTEGER,           INTENT(OUT) :: KSNOW_ROOF ! snow scheme layers for roofs
 INTEGER,           INTENT(OUT) :: KSNOW_ROAD ! snow scheme layers for roads
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+ CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
+ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILEPGDTYPE    ! file type
+ 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -83,6 +87,7 @@ INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_TEB_SNOW/CSNOW_ROOF, CSNOW_ROAD, CFILE_SNOW, CTYPE_SNOW, LSNOW_IDEAL, &
+                           CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
                            XWSNOW_ROOF, XTSNOW_ROOF, XRSNOW_ROOF, XASNOW_ROOF,          &
                            XWSNOW_ROAD, XTSNOW_ROAD, XRSNOW_ROAD, XASNOW_ROAD
 !-------------------------------------------------------------------------------
@@ -98,7 +103,9 @@ IF (LNAM_READ) THEN
   CSNOW_ROAD = '1-L'
   !
   CFILE_SNOW    = '                         '
-  CTYPE_SNOW    = '      '  
+  CTYPE_SNOW    = '      ' 
+  CFILEPGD_SNOW    = '                         '
+  CTYPEPGD_SNOW    = '      '    
   !
   XWSNOW_ROOF(:) = 0.
   XTSNOW_ROOF(:) = XTT
@@ -148,9 +155,12 @@ HSNOW_ROAD = CSNOW_ROAD
 KSNOW_ROOF = 1
 KSNOW_ROAD = 1
 !
-IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 ) THEN
+IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 & 
+        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0) THEN
   IF (PRESENT(HFILE)) HFILE = CFILE_SNOW
   IF (PRESENT(HFILETYPE)) HFILETYPE = CTYPE_SNOW
+  IF (PRESENT(HFILEPGD)) HFILEPGD = CFILEPGD_SNOW
+  IF (PRESENT(HFILEPGDTYPE)) HFILEPGDTYPE = CTYPEPGD_SNOW  
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('READ_PREP_TEB_SNOW',1,ZHOOK_HANDLE)

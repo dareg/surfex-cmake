@@ -37,6 +37,8 @@ IMPLICIT NONE
  CHARACTER(LEN=6)  :: CTYPEPGD       ! input file type
  CHARACTER(LEN=28) :: CFILE_SNOW     ! input file name for Snow
  CHARACTER(LEN=6)  :: CTYPE_SNOW     ! input file type for Snow
+ CHARACTER(LEN=28) :: CFILEPGD_SNOW     ! input file name for Snow
+ CHARACTER(LEN=6)  :: CTYPEPGD_SNOW     ! input file type for Snow
  CHARACTER(LEN=28) :: CFILE_HUG      ! input file name for Wg, Wgi
  CHARACTER(LEN=6)  :: CTYPE_HUG      ! input file type for Wg, Wgi
  CHARACTER(LEN=28) :: CFILE_TG       ! input file name for Tg
