@@ -1054,10 +1054,10 @@ ELSE
       PSNOWDZ(:,4) = MIN(0.03*PSNOW(:),PSNOW(:)/INLVLS)
       PSNOWDZ(:,5) = MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS)
       PSNOWDZ(:,INLVLS)=MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
-      ZWORK(:) = SUM(PSNOWDZ(:,1:5))    
+      ZWORK(:) = SUM(PSNOWDZ(:,1:5),2)
       DO JJ=6,INLVLS-1,1
          DO JI=1,INI
-            PSNOWDZ(JI,JJ) = (PSNOW(JI) - ZWORK(JI) -PSNOWDZ(JI,INLVLS)) &
+            PSNOWDZ(JI,JJ) = (PSNOW(JI) - ZWORK(JI) - PSNOWDZ(JI,INLVLS)) &
                  /(INLVLS-6) 
          ENDDO
       ENDDO
