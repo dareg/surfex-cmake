@@ -78,6 +78,8 @@ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, &
                                     XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
 !
+LOGICAL           :: LFILE
+!
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
@@ -113,7 +115,7 @@ IF (LNAM_READ) THEN
   LSNOW_IDEAL    = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.
   !
-  XWSNOW(:)      = 0.
+  XWSNOW(:)      = XUNDEF
   XRSNOW(:)      = XRHOSMAX
   XTSNOW(:)      = XTT
   XASNOW         = XANSMIN  
@@ -186,12 +188,40 @@ ELSEIF(PRESENT(OUNIF))THEN
     OUNIF=.TRUE.
 ENDIF
 !
-! A FAIRE :
-!mod03/08: pbme with 3rd line to solve / not sure needed for greenroofs anyway
-!IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 ) THEN
-!  IF (PRESENT(HFILE)) HFILE = CFILE_SNOW
-!  IF (PRESENT(HFILETYPE)) HFILETYPE = CTYPE_SNOW
-!END IF
+LFILE=(LEN_TRIM(CFILE_SNOW)>0.AND.LEN_TRIM(CTYPE_SNOW)>0 &
+        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0)
+!
+IF (PRESENT(OUNIF)) LFILE=(LFILE .AND. .NOT.OUNIF)
+!
+IF(PRESENT(HFILE))THEN 
+  IF(LFILE)THEN
+     HFILE = CFILE_SNOW
+  ELSE
+     HFILE = '                         '
+  ENDIF
+ENDIF
+IF(PRESENT(HFILETYPE))THEN 
+  IF(LFILE)THEN
+     HFILETYPE = CTYPE_SNOW
+  ELSE
+     HFILETYPE = '      '
+  ENDIF
+ENDIF
+IF(PRESENT(HFILEPGDTYPE))THEN 
+  IF(LFILE)THEN
+     HFILEPGDTYPE = CTYPEPGD_SNOW
+  ELSE
+     HFILEPGDTYPE = '      '
+  ENDIF
+ENDIF
+IF(PRESENT(HFILEPGD))THEN 
+  IF(LFILE)THEN
+     HFILEPGD = CFILEPGD_SNOW
+  ELSE
+     HFILEPGD = '                         '
+  ENDIF
+ENDIF
+IF (LFILE.AND.PRESENT(OUNIF)) OUNIF=.FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('READ_PREP_GREENROOF_SNOW',1,ZHOOK_HANDLE)
 !
