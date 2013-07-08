@@ -25,10 +25,9 @@ SUBROUTINE CLI_LAKE
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODN_PREP_FLAKE,   ONLY : NMONTH, NDAY
 USE MODD_FLAKE_GRID_n, ONLY : XLAT, XLON
 USE MODD_FLAKE_n,      ONLY : XTS, XT_SNOW, XT_ICE, XT_MNW, XT_WML, &
-                              XT_BOT, XT_B1, &  
+                              XT_BOT, XT_B1, TTIME, &  
                               XCT, XH_SNOW, XH_ICE, XH_ML, XH_B1, &  
                               XWATER_DEPTH
 !
@@ -51,8 +50,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('CLI_LAKE',0,ZHOOK_HANDLE)
 
 DO JI=1,SIZE(XLAT)
-  CALL START_LAKE_OF(NDAY,NMONTH,XLON(JI),XLAT(JI),XWATER_DEPTH(JI), &
-        XT_SNOW(JI),XT_ICE(JI),XT_MNW(JI),XT_WML(JI), &
+  CALL START_LAKE_OF(TTIME%TDATE%DAY,TTIME%TDATE%MONTH,XLON(JI),XLAT(JI),&
+        XWATER_DEPTH(JI), XT_SNOW(JI),XT_ICE(JI),XT_MNW(JI),XT_WML(JI), &
         XT_BOT(JI),XT_B1(JI),XCT(JI), &
         XH_SNOW(JI),XH_ICE(JI),XH_ML(JI),XH_B1(JI),XTS(JI))
  
