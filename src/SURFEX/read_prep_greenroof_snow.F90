@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_PREP_GREENROOF_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE)
+      SUBROUTINE READ_PREP_GREENROOF_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,OUNIF)
 !     #######################################################
 !
 !!****  *READ_PREP_GREENROOF_SNOW* - routine to read the configuration for snow
@@ -70,6 +70,7 @@ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILEPGDTYPE    ! file type  
+ LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -178,6 +179,12 @@ ENDIF
 !
 HSNOW       = CSNOW
 KSNOW_LAYER = NSNOW_LAYER
+!
+IF(ALL(XWSNOW_p(:)==XUNDEF).AND.PRESENT(OUNIF))THEN
+    OUNIF=.FALSE.
+ELSEIF(PRESENT(OUNIF))THEN
+    OUNIF=.TRUE.
+ENDIF
 !
 ! A FAIRE :
 !mod03/08: pbme with 3rd line to solve / not sure needed for greenroofs anyway

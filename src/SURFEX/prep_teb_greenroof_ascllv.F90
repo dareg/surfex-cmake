@@ -75,7 +75,7 @@ CATYPE = 'ARI'
 !
  CALL GET_TYPE_DIM_n('TOWN  ',IL)
 !
-ALLOCATE(ZFIELD(IL,2))
+ALLOCATE(ZFIELD(IL,3))
 !
 !*      3.    get grid informations known over full grid
 !

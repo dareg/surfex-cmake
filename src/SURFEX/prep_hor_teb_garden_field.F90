@@ -93,6 +93,7 @@ REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
 INTEGER                             :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                             :: GUNIF     ! flag for prescribed uniform field
+LOGICAL                             :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                             :: JVEGTYPE, JPATCH  ! loop on vegtypes
 INTEGER                             :: JLAYER    ! loop on layers
 INTEGER                             :: JI, INP, INL, INI
@@ -117,8 +118,12 @@ INI=SIZE(XLAT)
 !*      2.     Snow variables case?
 !
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE)
-  IF (LEN_TRIM(YFILE)>0 .AND. LEN_TRIM(YFILETYPE)>0) GUNIF = .FALSE.  
+  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE,YFILETYPE,YFILEPGD,&
+        YFILEPGDTYPE,GUNIF_SNOW)
+  IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE)==0.AND.LEN_TRIM(YFILETYPE)==0)THEN
+    GUNIF_SNOW=.TRUE.
+    IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0  
+  ENDIF    
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW)))
@@ -131,7 +136,7 @@ IF (HSURF=='SN_VEG ') THEN
   CALL PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &
-                            ILUOUT,GUNIF,1,                 &
+                            ILUOUT,GUNIF_SNOW,1,            &
                             INI,TSNOW, TTIME,               &
                             XWSNOW, XRSNOW, XTSNOW, XASNOW, &
                             LSNOW_IDEAL, ZSG1SNOW,          &
