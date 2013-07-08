@@ -154,6 +154,7 @@
 !!                          the internal mass depth is 1/2 of the floor depth
 !!                          add the option of no atmospheric heat releases by HVAC system (PF_WATER_COND < 0)
 !!    G. Pigeon oct. 2012:  use indoor air density + new solar heat gain distribution
+!!    V. Masson May  2013   implicitation of internal building temperature evolution
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -766,14 +767,17 @@ ENDDO
 ! EVOLUTION OF THE INTERNAL TEMPERATURE AND HUMIDITY
 !###################################################
 !
-ZTI_BLD(:) = ZTI_BLD(:) + PTSTEP/PBLD_HEIGHT(:) *                   & 
-            ((ZINF(:) + ZNAT_VENT(:)) * (PT_CANYON(:) - PTI_BLD(:)) &
-            + PM_SYS(:) / ZRHOI(:)    * (PT_SYS   (:) - PTI_BLD(:)) )
-!
-ZQI_BLD(:) = PQI_BLD(:) +  PTSTEP/PBLD_HEIGHT(:) *                     & 
-             ( ZQIN(:) * PQIN_FLAT(:) / ( ZRHOI(:) * XLVTT)            &
-              + (ZINF(:) + ZNAT_VENT(:)) * (PQ_CANYON(:) - PQI_BLD(:)) &
-              + PM_SYS(:) / ZRHOI(:)     * (PQ_SYS   (:) - PQI_BLD(:)) )
+ZTI_BLD(:) = ( ZTI_BLD(:) + PTSTEP/PBLD_HEIGHT(:) *                   & 
+            ((ZINF(:) + ZNAT_VENT(:)) * (PT_CANYON(:)             )   &
+            + PM_SYS(:) / ZRHOI(:)    * (PT_SYS   (:)             ) ))&
+          / (1. + PTSTEP/PBLD_HEIGHT(:)*                              &
+                (ZINF(:) + ZNAT_VENT(:) + PM_SYS(:) / ZRHOI(:))      )
+ZQI_BLD(:) = ( PQI_BLD(:) +  PTSTEP/PBLD_HEIGHT(:) *                    & 
+             ( ZQIN(:) * PQIN_FLAT(:) / ( ZRHOI(:) * XLVTT)             &
+              + (ZINF(:) + ZNAT_VENT(:)) * (PQ_CANYON(:)            )   &
+              + PM_SYS(:) / ZRHOI(:)     * (PQ_SYS   (:)            ) ))&
+          / (1. + PTSTEP/PBLD_HEIGHT(:)*                              &
+                (ZINF(:) + ZNAT_VENT(:) + PM_SYS(:) / ZRHOI(:))      )
 !
 !
 ! Update variables
