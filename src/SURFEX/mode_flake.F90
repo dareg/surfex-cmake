@@ -868,7 +868,7 @@ ELSE HTC_Water                                      ! Open water
   END IF
 
 ! Mean buoyancy frequency in the thermocline
-  N_T_mean = flake_buoypar(0.5*(T_wML_p_flk+T_bot_p_flk))*(T_wML_p_flk-T_bot_p_flk)
+  N_T_mean = flake_buoypar(0.5*(T_wML_p_flk+T_bot_p_flk))*MAX(0.,(T_wML_p_flk-T_bot_p_flk))
   IF(h_ML_p_flk.LE.depth_w-h_ML_min_flk) THEN
     N_T_mean = SQRT(N_T_mean/(depth_w-h_ML_p_flk))  ! Compute N                   
   ELSE 
