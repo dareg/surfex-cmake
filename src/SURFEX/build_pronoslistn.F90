@@ -115,7 +115,7 @@ DO
   IF (.NOT. GFOUND) THEN
     WRITE(KLUOUT,*) 'BUILD_PRONOSLIST ERROR : ',TRIM(YPRO_NAME),&
             ' not found in pronostic variables list !'  
-    CALL ABOR1_SFX('BUILD_PRONOSLISTN: VARIABLE NOT FOUND')
+    CALL ABOR1_SFX('CH_BUILDPRONOSN: VARIABLE NOT FOUND')
   END IF
 !
 ! If YPRO_NAME variable already encountered : append the new equation (coeffs)
@@ -150,7 +150,7 @@ DO
       WRITE(KLUOUT,*) 'FATAL ERROR : Number of aggregation coefficients for ',&
              TRIM(YPRO_NAME),' exceeds constant JPNBCOEFFMAX = ',JPNBCOEFFMAX  
       WRITE(KLUOUT,*) '=> You should increase the JPNBCOEFFMAX value in modd_type_efutil.f90'
-      CALL ABOR1_SFX('BUILD_PRONOSLISTN: NUMBER OF AGGREGATION COEFFICIENTS TOO BIG')
+      CALL ABOR1_SFX('CH_BUILDPRONOSN: NUMBER OF AGGREGATION COEFFICIENTS TOO BIG')
     END IF
     READ(YINPLINE(1:INDX-1),*) CURRENT%XCOEFF(INBCOEFF)
 !
@@ -162,7 +162,7 @@ DO
 ! check EMIS species name
     GFOUND = .FALSE.
     DO JI=1,KEMIS_NBR
-      IF (TRIM(HEMIS_NAME(JI)) == TRIM(YEMIS_NAME)) THEN
+      IF (HEMIS_NAME(JI) == YEMIS_NAME) THEN
         GFOUND = .TRUE.
         CURRENT%NEFINDEX(INBCOEFF) = JI
         EXIT
@@ -171,7 +171,7 @@ DO
     IF (.NOT. GFOUND) THEN
       WRITE(KLUOUT,*) 'ERROR : ',TRIM(YEMIS_NAME),&
               ' not found in emission variables list !'  
-      CALL ABOR1_SFX('BUILD_PRONOSLISTN: UNKNOWN EMISSION VARIABLE')
+      CALL ABOR1_SFX('CH_BUILDPRONOSN: UNKNOWN EMISSION VARIABLE')
     END IF
   END DO
   CURRENT%NBCOEFF = INBCOEFF
