@@ -276,7 +276,6 @@ JLAT = 0
 DO 
   !
   JLAT = JLAT + 1
-  print*,'JLAT',JLAT
   IF (JLAT==361) EXIT
   !
   IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) CYCLE
