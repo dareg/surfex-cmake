@@ -189,6 +189,8 @@ IF(LGLACIER)THEN
   ELSE
     XICE_STO(:,:) = 0.0
   ENDIF
+ELSE
+  ALLOCATE(XICE_STO(0,0))
 ENDIF
 !
 !-------------------------------------------------------------------------------
