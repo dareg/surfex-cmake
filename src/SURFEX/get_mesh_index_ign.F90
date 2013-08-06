@@ -1,5 +1,6 @@
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_IGN(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
+      SUBROUTINE GET_MESH_INDEX_IGN(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,&
+                                KINDEX,KISSOX,KISSOY,PVALUE,PNODATA)
 !     ###############################################################
 !
 !!**** *GET_MESH_INDEX_IGN* get the grid mesh where point (lat,lon) is located
@@ -47,6 +48,9 @@ INTEGER, DIMENSION(:,:),      INTENT(OUT)   :: KINDEX    ! index of the grid mes
 INTEGER, DIMENSION(:,:),      INTENT(OUT)   :: KISSOX    ! X index of the subgrid mesh
 INTEGER, DIMENSION(:,:),      INTENT(OUT)   :: KISSOY    ! Y index of the subgrid mesh
 !
+REAL, DIMENSION(:), OPTIONAL, INTENT(IN)    :: PVALUE  ! value of the point to add
+REAL, OPTIONAL, INTENT(IN) :: PNODATA
+!
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
@@ -57,9 +61,13 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZY       ! Y Lambert   coordinate
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: ZXLIM       ! X Lambert   coordinate
 !
+REAL, DIMENSION(SIZE(PLAT))       :: ZVALUE
+!
 LOGICAL, DIMENSION(SIZE(PLAT)) :: GMASK
 !
 REAL  :: ZVALX
+!
+REAL :: ZNODATA
 !
 INTEGER :: ISIZE, IFACT
 INTEGER                           :: IL, ICPT       ! Grid dimension
@@ -71,6 +79,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_1',0,ZHOOK_HANDLE)
+!
+IF (PRESENT(PVALUE) .AND. PRESENT(PNODATA)) THEN
+  ZVALUE(:) = PVALUE(:)
+  ZNODATA = PNODATA
+ELSE
+  ZVALUE(:) = 1
+  ZNODATA = 0
+ENDIF
+!
 IF (.NOT. ALLOCATED(XXLIM)) THEN
 !
 !*    1.     Uncode parameters of the grid
@@ -168,6 +185,7 @@ ICI(:,:) = 0
 !$OMP PARALLEL DO PRIVATE(JL,JI,JJ)
 DO JL=1,SIZE(PLAT)
   !
+  IF (ZVALUE(JL)==ZNODATA) CYCLE  
   IF (GMASK(JL)) CYCLE
   !
   frac: &
@@ -203,6 +221,7 @@ IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',0,ZHOOK_HANDLE)
 !
 DO JL=1,SIZE(PLAT)
   !
+  IF (ZVALUE(JL)==ZNODATA) CYCLE  
   IF (GMASK(JL)) CYCLE
   !
   ICPT = 0

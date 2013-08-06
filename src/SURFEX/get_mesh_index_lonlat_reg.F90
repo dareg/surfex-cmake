@@ -1,5 +1,6 @@
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_LONLAT_REG(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
+      SUBROUTINE GET_MESH_INDEX_LONLAT_REG(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,&
+                        KINDEX,KISSOX,KISSOY,PVALUE,PNODATA)
 !     ###############################################################
 !
 !!**** *GET_MESH_INDEX_LONLAT_REG* get the grid mesh where point (lat,lon) is located
@@ -43,6 +44,9 @@ INTEGER, DIMENSION(:,:),       INTENT(OUT)   :: KINDEX    ! index of the grid me
 INTEGER, DIMENSION(:,:),       INTENT(OUT)   :: KISSOX    ! X index of the subgrid mesh
 INTEGER, DIMENSION(:,:),       INTENT(OUT)   :: KISSOY    ! Y index of the subgrid mesh
 !
+REAL, DIMENSION(:), OPTIONAL, INTENT(IN)    :: PVALUE  ! value of the point to add
+REAL, OPTIONAL, INTENT(IN) :: PNODATA
+!
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
@@ -57,6 +61,10 @@ REAL    :: ZLATMAX ! maximum latitude  (degrees)
 REAL    :: ZDLON   ! longitude grid size
 REAL    :: ZDLAT   ! latitude  grid size
 !
+REAL :: ZNODATA
+!
+REAL, DIMENSION(SIZE(PLAT))       :: ZVALUE
+!
 REAL, DIMENSION(SIZE(PLON)) :: ZLON
 !
 INTEGER, DIMENSION(SIZE(PLAT))    :: ICI, ICJ
@@ -66,6 +74,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_LONLAT_REG_1',0,ZHOOK_HANDLE)
+!
+IF (PRESENT(PVALUE) .AND. PRESENT(PNODATA)) THEN
+  ZVALUE(:) = PVALUE(:)
+  ZNODATA = PNODATA
+ELSE
+  ZVALUE(:) = 1
+  ZNODATA = 0
+ENDIF
+!
 IF (.NOT. ALLOCATED(XLATLIM)) THEN
 !
 !*    1.     Uncode parameters of the grid
@@ -123,6 +140,9 @@ ICI(:) = 0
 ICJ(:) = 0
 !$OMP PARALLEL DO PRIVATE(JL,JJ)
 DO JL=1,SIZE(PLAT)
+  !
+  IF (ZVALUE(JL)==ZNODATA) CYCLE
+  ! 
   DO JJ=SIZE(XLONLIM),1,-1
     IF (XLONLIM(JJ)<=ZLON(JL)) THEN
       ICI(JL) = JJ
@@ -135,6 +155,7 @@ DO JL=1,SIZE(PLAT)
       EXIT
     ENDIF
   ENDDO
+  !
 ENDDO
 !$OMP END PARALLEL DO
 !
@@ -144,6 +165,9 @@ IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_LONLAT_REG_4',0,ZHOOK_HANDLE)
 KINDEX(:,:) = 0
 
 DO JL=1,SIZE(PLAT)
+  !
+  IF (ZVALUE(JL)==ZNODATA) CYCLE
+  ! 
   IF (     ZLON(JL)<XLONLIM(1) .OR. ZLON(JL)>=XLONLIM(NLON+1) &
         .OR. PLAT(JL)<XLATLIM(1) .OR. PLAT(JL)>=XLATLIM(NLAT+1) ) THEN
 
