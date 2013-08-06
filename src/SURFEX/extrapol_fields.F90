@@ -43,9 +43,9 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                        
                                 XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,                   &
                                 XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN
 !                                
-USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_LAI, XPAR_H_TREE, XPAR_ROOT_DEPTH,    &
-                                XPAR_GROUND_DEPTH, XPAR_IRRIG, XPAR_WATSUP,       &
-                                LDATA_VEGTYPE, LDATA_LAI, LDATA_H_TREE, LDATA_DG, &
+USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_VEGTYPE, XPAR_LAI, XPAR_H_TREE,       &
+                                XPAR_ROOT_DEPTH, XPAR_GROUND_DEPTH, XPAR_IRRIG,   &
+                                XPAR_WATSUP, LDATA_LAI, LDATA_H_TREE, LDATA_DG,   &
                                 LDATA_IRRIG, LDATA_WATSUP, LDATA_ROOTFRAC,        &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH, LDATA_Z0
 !                                
@@ -72,7 +72,7 @@ INTEGER,                INTENT(IN)    :: KLUOUT
  CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG, YDIF
 REAL, DIMENSION(NDIM,36,NVEGTYPE) :: ZWORK
 REAL, DIMENSION(SIZE(XPAR_LAI,3)) :: ZDEF
-INTEGER :: JTIME
+INTEGER :: JTIME, JVEGTYPE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -95,6 +95,9 @@ IF (.NOT.LDATA_LAI) THEN
 !    
 !   ECOCLIMAP spatial distribution field
     CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_LAI(:,JTIME,:),YVEG,'ARI',LCOVER,KDECADE=JTIME)
+    DO JVEGTYPE=1,3
+      WHERE (XPAR_VEGTYPE(:,JVEGTYPE)/=0.) ZWORK(:,JTIME,JVEGTYPE) = 0.
+    ENDDO
 !
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user 
     CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'LAI: leaf area index',ZWORK(:,JTIME,:))
@@ -112,7 +115,7 @@ ENDIF
 IF (.NOT.LDATA_H_TREE .AND. (CPHOTO/='NON' .OR. .NOT.LDATA_Z0)) THEN
 !  
   ZDEF(:)=10.
-! ECOCLIMAP spatial distribution field       
+! ECOCLIMAP spatial distribution field   
   CALL AV_PGD(XPAR_H_TREE,XCOVER,XDATA_H_TREE,YTREE,'ARI',LCOVER,KDECADE=1)
 !
 ! Extrapolation toward new vegtype distribution field from updated land-use map or user  
