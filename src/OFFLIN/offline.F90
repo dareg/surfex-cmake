@@ -139,6 +139,7 @@ USE MODI_DEALLOC_SURFEX
 !
 USE MODI_WRITE_HEADER_FA
 USE MODI_FANDAR
+USE MODI_ABOR1_SFX
 !
 USE MODI_WRITE_DISCHARGE_FILE
 USE MODI_WRITE_BUDGET_COUPL_ROUT
@@ -194,7 +195,6 @@ REAL                              :: ZTSTEP              ! atmospheric time-step
 !
 INTEGER                           :: INI                 ! grid dimension
 INTEGER                           :: JLOOP               ! loop counter
-INTEGER                           :: ISCAL               ! Number of scalar species
 INTEGER                           :: IBANDS              ! Number of radiative bands 
 INTEGER                           :: INB_STEP_ATM        ! Number of atmospheric time-steps
 INTEGER                           :: INB_ATM             ! Number of Isba time-steps 
@@ -319,6 +319,8 @@ ENDIF
                                                                             'ASCII ','LFI   ','FA    ',&
                                                                             'NONE  ','OFFLIN')  
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CFORCING_FILETYPE',CFORCING_FILETYPE,'NETCDF','ASCII ','BINARY')
+!
+IF (NSCAL>41) CALL ABOR1_SFX("OFFLINE: NSCAL MUST BE LOWER THAN OR EQUAL TO 41")
 !
 !
 IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
@@ -466,9 +468,8 @@ ENDIF
 !       allocation of variables
 !
 IBANDS = 1
-ISCAL  = 1
 !
- CALL OL_ALLOC_ATM(INI,IBANDS,ISCAL)
+ CALL OL_ALLOC_ATM(INI,IBANDS,NSCAL)
 !
 XZS   = ZZS_FORC
 XZREF = ZZREF
@@ -476,7 +477,7 @@ XUREF = ZUREF
 !
 !       compare orography
 !
- CALL COMPARE_OROGRAPHY (CSURF_FILETYPE, LSET_FORC_ZS, 200.)
+ CALL COMPARE_OROGRAPHY (CSURF_FILETYPE, LSET_FORC_ZS, XDELTA_OROG)
 !
 !       miscellaneous initialization
 !
@@ -595,7 +596,7 @@ ELSE
 ENDIF
 !
  CALL INIT_SURF_ATM_n(CSURF_FILETYPE, YINIT, LLAND_USE,                      &
-                     INKPROMA, ISCAL, IBANDS,                               &
+                     INKPROMA, NSCAL, IBANDS,                               &
                      CSV,XCO2(NINDX1:NINDX2),XRHOA(NINDX1:NINDX2),          &
                      XZENITH(NINDX1:NINDX2),XAZIM(NINDX1:NINDX2),XSW_BANDS, &
                      XDIR_ALB(NINDX1:NINDX2,:), XSCA_ALB(NINDX1:NINDX2,:),  &
@@ -624,7 +625,7 @@ XTIME_COMM_READ = 0.
 !   Land use or/and vegetation dynamic
 !                  
  CALL INIT_SURF_LANDUSE_n(CSURF_FILETYPE,YINIT,LLAND_USE,             &
-                       INI, ISCAL, IBANDS,                           &
+                       INI, NSCAL, IBANDS,                           &
                        CSV,XCO2(NINDX1:NINDX2),XRHOA(NINDX1:NINDX2), &
                        XZENITH(NINDX1:NINDX2),XAZIM(NINDX1:NINDX2),  &
                        XSW_BANDS,XDIR_ALB(NINDX1:NINDX2,:),          &
@@ -785,7 +786,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     ENDIF
     !
     CALL COUPLING_SURF_ATM_n(CSURF_FILETYPE, 'E', ZTIMEC,                    &
-           XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, ISCAL, IBANDS, &
+           XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, NSCAL, IBANDS, &
            XTSUN(NINDX1:NINDX2), XZENITH(NINDX1:NINDX2),                     &
            XZENITH2(NINDX1:NINDX2), XAZIM(NINDX1:NINDX2),                    &
            XZREF(NINDX1:NINDX2), XUREF(NINDX1:NINDX2), XZS(NINDX1:NINDX2),   &

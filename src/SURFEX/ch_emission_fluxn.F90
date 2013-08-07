@@ -197,7 +197,7 @@ DO JI=1,SIZE(TSEMISS)
           IF (IVERB >= 6) WRITE(ILUOUT,*) 'INIT des I/O DONE.'
           LIOINIT=.TRUE.
         END IF
-        YRECFM='EMIS_'//TRIM(TSEMISS(JI)%CNAME)
+        YRECFM='E_'//TRIM(TSEMISS(JI)%CNAME)
         IF (IVERB >= 6)&
                WRITE (ILUOUT,*) 'READ emission :',TRIM(YRECFM),&
                ', SIZE(ZWORK)=',SIZE(ZWORK,1),INBTS 

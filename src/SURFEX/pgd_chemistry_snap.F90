@@ -45,8 +45,8 @@ USE MODD_CH_SNAP_n,          ONLY : NEMIS_SNAP_n=>NEMIS_SNAP,                &
                                     CEMIS_COMMENT_n=>CEMIS_COMMENT,          &
                                     XSNAP_MONTHLY,XSNAP_DAILY, XSNAP_HOURLY, &
                                     NSNAP_M, NSNAP_D, NSNAP_H,               &
-                                    XEMIS_FIELDS_SNAP, LEMIS_FIELDS,         &
-                                    CSNAP_TIME_REF, XDELTA_LEGAL_TIME
+                                    XEMIS_FIELDS_SNAP, CSNAP_TIME_REF,       &
+                                    XDELTA_LEGAL_TIME
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -171,8 +171,6 @@ CEMIS_NAME_n         (:) = CEMIS_NAME   (1:NEMIS_NBR)
 CEMIS_COMMENT_n      (:) = CEMIS_COMMENT(1:NEMIS_NBR)
 !
 ALLOCATE(XEMIS_FIELDS_SNAP(NL,NEMIS_SNAP,NEMIS_NBR))
-!
-LEMIS_FIELDS = .FALSE.
 !
 !-------------------------------------------------------------------------------
 OCH_EMIS = NEMIS_NBR > 0

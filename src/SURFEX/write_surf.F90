@@ -26,7 +26,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
  CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX1
 !
-     SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
@@ -36,6 +36,7 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX2
 !
       SUBROUTINE WRITE_SURFX2COV(HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
@@ -60,7 +61,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 END SUBROUTINE WRITE_SURFN0
 !
-     SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
  CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER, DIMENSION(:), INTENT(IN)  :: KFIELD   ! integer to be written
@@ -70,6 +71,7 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFN1
 !
      SUBROUTINE WRITE_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
@@ -420,7 +422,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX1',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
@@ -469,6 +471,7 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=12)  :: YREC
@@ -528,7 +531,11 @@ ENDIF
 !
 IF (HPROGRAM=='NC    ') THEN
 #ifdef NC
-  CALL WRITE_SURFN_NC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  IF (PRESENT(HNAM_DIM)) THEN
+    CALL WRITE_SURFN_NC(YREC,PFIELD,KRESP,HCOMMENT,YDIR,HNAM_DIM)
+  ELSE
+    CALL WRITE_SURFN_NC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  ENDIF
 #endif
 ENDIF
 !
@@ -834,7 +841,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to write an integer
@@ -883,6 +890,7 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=12)  :: YREC
@@ -940,7 +948,11 @@ ENDIF
 !
 IF (HPROGRAM=='NC    ') THEN
 #ifdef NC
-  CALL WRITE_SURFN_NC(YREC,KFIELD,KRESP,HCOMMENT,YDIR)
+  IF (PRESENT(HNAM_DIM)) THEN
+    CALL WRITE_SURFN_NC(YREC,KFIELD,KRESP,HCOMMENT,YDIR,HNAM_DIM)
+  ELSE
+    CALL WRITE_SURFN_NC(YREC,KFIELD,KRESP,HCOMMENT,YDIR)
+  ENDIF
 #endif
 ENDIF
 !

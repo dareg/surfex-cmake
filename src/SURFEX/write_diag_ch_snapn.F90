@@ -29,7 +29,7 @@
 !              ------------
 !
 USE MODD_CSTS,        ONLY : XAVOGADRO
-USE MODD_CH_SNAP_n,   ONLY : NEMIS_NBR,XEMIS_FIELDS,CEMIS_NAME,LEMIS_FIELDS
+USE MODD_CH_SNAP_n,   ONLY : NEMIS_NBR,XEMIS_FIELDS,CEMIS_NAME
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -67,15 +67,12 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_CH_SNAP_n',0,ZHOOK_HANDLE)
 !
 !         Writes Emissions of all species
 !
-IF (LEMIS_FIELDS) THEN
-!
 DO JSPEC=1,NEMIS_NBR
   YRECFM = "EMIS_"//TRIM(CEMIS_NAME(JSPEC))
   YCOMMENT = "Emission data at time t (ppm*m/s)"
   CALL WRITE_SURF(HPROGRAM,YRECFM,XEMIS_FIELDS(:,JSPEC),IRESP,HCOMMENT=YCOMMENT)
 END DO
 !
-END IF
 !-------------------------------------------------------------------------------
 !
 !         End of IO

@@ -494,7 +494,7 @@ IF (HDIR=='A') THEN  ! no distribution on other tasks
 #ifndef NOMPI          
     XTIME0 = MPI_WTIME()
 #endif   
-    PFIELD(:,:) = XWORKD2(:,:)
+    PFIELD(:,:) = XWORKD2(:,1:SIZE(PFIELD,2))
 #ifndef NOMPI    
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
 #endif    
@@ -509,12 +509,12 @@ ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
   ENDIF
 #endif    
 !$OMP END SINGLE
-  PFIELD(:,:) = XWORKD2(:,:)
+  PFIELD(:,:) = XWORKD2(:,1:SIZE(PFIELD,2))
 ELSE
   IF (LMASK) THEN
-    CALL READ_AND_SEND_MPI(XWORKD2,PFIELD,NMASK)
+    CALL READ_AND_SEND_MPI(XWORKD2(:,1:SIZE(PFIELD,2)),PFIELD,NMASK)
   ELSE 
-    CALL READ_AND_SEND_MPI(XWORKD2,PFIELD)
+    CALL READ_AND_SEND_MPI(XWORKD2(:,1:SIZE(PFIELD,2)),PFIELD)
   END IF
 ENDIF
 !

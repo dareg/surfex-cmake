@@ -142,7 +142,7 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
     TPEMISS(JSPEC)%LREAD = .FALSE. ! to prevent future reading
     ALLOCATE(TPEMISS(JSPEC)%XEMISDATA(KSIZE,INBTS))
 ! Read file for emission data
-    YRECFM='EMIS_'//TRIM(TPEMISS(JSPEC)%CNAME)
+    YRECFM='E_'//TRIM(TPEMISS(JSPEC)%CNAME)
     CALL READ_SURF(HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX

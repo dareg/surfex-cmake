@@ -73,9 +73,8 @@ USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH, XAOSIP, XAOSIM, XAOSJP, XAOSJM, &
                                 XHO2IP, XHO2IM, XHO2JP, XHO2JM,         &
                                 XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, &
                                 XZ0REL, XZ0EFFJPDIR, XFRACZ0, XCOEFBE
-USE MODD_CH_SURF_n,      ONLY : CCH_NAMES, LCH_EMIS, LRW_CH_EMIS, &
-                                LCH_SURF_EMIS, CCHEM_SURF_FILE, CAER_NAMES,&
-                                CCH_EMIS
+USE MODD_CH_SURF_n,      ONLY : CCH_NAMES, LCH_EMIS, LCH_SURF_EMIS, &
+                                CCHEM_SURF_FILE, CAER_NAMES, CCH_EMIS
 USE MODD_SV_n,           ONLY : NBEQ, CSV, NSV_CHSBEG, NSV_CHSEND, &
                                 NSV_DSTBEG, NSV_DSTEND, NDSTEQ,    &
                                 NSV_SLTBEG, NSV_SLTEND, NSLTEQ,    &
@@ -410,8 +409,6 @@ IF (LCH_EMIS) THEN
   ELSE
     CALL READ_SURF(HPROGRAM,'CH_EMIS_OPT',CCH_EMIS,IRESP)
   END IF
-  !
-  IF (CCH_EMIS=='AGGR') LRW_CH_EMIS = .TRUE.
   !
   IF (NBEQ > 0) THEN
     !

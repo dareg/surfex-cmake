@@ -74,6 +74,13 @@ LOGICAL          :: LOUT_TIMENAME = .FALSE.! change the name of output file at t
 !
 LOGICAL          :: LDIAG_FA_NOCOMPACT = .FALSE. ! fa compaction for diagnostic files
 !
+!*    Variables
+!     ---------
+!
+INTEGER          :: NSCAL = 0                 ! Number of scalar species
+INTEGER          :: NHALO = 2
+REAL             :: XDELTA_OROG = 200.
+!
 !*    Time steps
 !     ----------
 !
@@ -112,7 +119,7 @@ REAL            :: XIO_FRAC = 1.            ! fraction of ISIZE deduced to I/O
 !
 NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE, &
                         CPGDFILE, CPREPFILE, CSURFFILE,                          &
-                        LPRINT, LRESTART, LINQUIRE,                              &
+                        LPRINT, LRESTART, LINQUIRE, NSCAL, NHALO, XDELTA_OROG,   &
                         XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC, YALG_MPI
