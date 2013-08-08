@@ -43,6 +43,8 @@ USE MODD_OCEAN_n
 USE MODD_OCEAN_CSTS, ONLY: NOCKMIN, NOCKMAX
 USE MODD_DIAG_OCEAN_n, ONLY: LDIAG_OCEAN, XTOCMOY, XSOCMOY, XUOCMOY, XVOCMOY, XDOCMOY
 !
+USE MODD_CH_SEAFLUX_n,  ONLY : CCH_DRY_DEP, CCH_NAMES, NBEQ
+!
 USE MODN_IO_OFFLINE,    ONLY: XTSTEP_OUTPUT
 !
 USE MODI_GET_DIM_FULL_n
@@ -64,19 +66,23 @@ INTEGER, INTENT(IN)           :: KLUOUT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER                          :: INI
-INTEGER                          :: IDIM1, INDIMS
- CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
-REAL,DIMENSION(:), POINTER       :: ZX, ZY
-INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
  CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
-!
- CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
-INTEGER                          :: IFILE_ID
- CHARACTER(LEN=50)                :: YFILE
  CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
+ CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
+ CHARACTER(LEN=100)               :: YCOMMENT 
+ CHARACTER(LEN=50)                :: YFILE
+ CHARACTER(LEN=12)                :: YRECFM 
  CHARACTER(LEN=3)                 :: YPAS, YLVL
+!
+INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM, IDDIM1
+INTEGER                          :: INI
 INTEGER                          :: JLAYER
+INTEGER                          :: IDIM1
+INTEGER                          :: IFILE_ID, JSV
+!
+REAL,DIMENSION(:), POINTER       :: ZX, ZY
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -88,8 +94,6 @@ IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_SEA_N',0,ZHOOK_HANDLE)
  CALL OL_DEFINE_DIM(HPROGRAM, KLUOUT, INI, IDIM1, YUNIT1, YUNIT2, &
                    ZX, ZY, IDIMS, IDDIM, YNAME_DIM)
  CALL GET_DATE_OL(TTIME,XTSTEP_OUTPUT,YDATE(1))
-!
-INDIMS = SIZE(IDDIM)
 !
 ! 4. Create output file for fluxes values
 !----------------------------------------------------------
@@ -187,6 +191,20 @@ IF (LDIAG_OCEAN) THEN
      CALL DEF_VAR_NETCDF(IFILE_ID,'DOML','Mean cmo Densi ',IDDIM,YATT_TITLE,YATT)
 
 ENDIF
+!
+IF (NBEQ>0 .AND. CCH_DRY_DEP=="WES89 ") THEN
+  !
+  YATT="(m/s)"
+  !
+  DO JSV = 1,SIZE(CCH_NAMES,1)
+    !
+    YRECFM = 'DV_SEA_'//TRIM(CCH_NAMES(JSV))
+    WRITE(YCOMMENT,'(A7,I3.3)')'DV_SEA_',JSV    
+    CALL DEF_VAR_NETCDF(IFILE_ID,YRECFM,YCOMMENT,IDDIM,YATT_TITLE,YATT)      
+    !
+  ENDDO
+  !
+END IF
 !
  CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !

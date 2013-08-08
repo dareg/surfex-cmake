@@ -66,6 +66,10 @@ USE MODD_ASSIM ,           ONLY : LASSIM, CASSIM
 USE MODD_AGRI  ,           ONLY : LAGRIP
 USE MODD_DIAG_ISBA_n,      ONLY : LPGD
 !
+USE MODD_CH_ISBA_n,    ONLY : CCH_DRY_DEP, LCH_BIO_FLUX, CCH_NAMES, NBEQ, &
+                              LCH_NO_FLUX
+USE MODD_GR_BIOG_n,    ONLY : XFISO, XFMONO, XNOFLUX                              
+!
 USE MODN_IO_OFFLINE,       ONLY : XTSTEP_OUTPUT
 !
 USE MODI_GET_DIM_FULL_n
@@ -88,23 +92,26 @@ INTEGER,          INTENT(IN) :: KLUOUT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER                          :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS, &
-                                    INLITTER, INLITTLEVS, INSOILCARB
-INTEGER                          :: IDIM1, INDIMS
- CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
-REAL,DIMENSION(:), POINTER       :: ZX, ZY
-INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM  
  CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
-!
-INTEGER, DIMENSION(:), ALLOCATABLE :: JDIM 
- CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
-INTEGER                          :: IFILE_ID
- CHARACTER(LEN=50)                :: YFILE
  CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
-INTEGER                          :: IL
+ CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
+ CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
+ CHARACTER(LEN=100)               :: YCOMMENT  
+ CHARACTER(LEN=50)                :: YFILE 
+ CHARACTER(LEN=12)                :: YRECFM
  CHARACTER(LEN=3)                 :: YPAS, YLVL
  CHARACTER(LEN=2)                 :: YLVLV
-INTEGER                          :: JLAYER, JVEG, JNBIOMASS, JNLITTER, JNLITTLEVS, JNSOILCARB  
+! 
+REAL,DIMENSION(:), POINTER       :: ZX, ZY
+!
+INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
+INTEGER, DIMENSION(:), ALLOCATABLE :: JDIM 
+INTEGER                          :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS, &
+                                    INLITTER, INLITTLEVS, INSOILCARB
+INTEGER                          :: JLAYER, JVEG, JNBIOMASS, JNLITTER, JNLITTLEVS, JNSOILCARB
+INTEGER                          :: IDIM1, INDIMS
+INTEGER                          :: IFILE_ID, IDIMID, JSV
+INTEGER                          :: IL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -622,6 +629,46 @@ IF (LSURF_MISC_BUDGET) THEN
   ENDIF
   !  
 ENDIF
+!
+IF (NBEQ>0 .AND. CCH_DRY_DEP=="WES89 ") THEN
+  !
+  YATT="(m/s)"
+  !
+  DO JSV = 1,SIZE(CCH_NAMES,1)
+    !
+    YRECFM = 'DV_NAT_'//TRIM(CCH_NAMES(JSV))
+    WRITE(YCOMMENT,'(A7,I3.3)')'DV_NAT_',JSV
+    CALL DEF_VAR_NETCDF(IFILE_ID,YRECFM,YCOMMENT,IDDIM,YATT_TITLE,YATT)      
+    !
+  ENDDO
+  !
+END IF
+!
+IF (NBEQ>0 .AND. LCH_BIO_FLUX) THEN
+  !
+  IF (ASSOCIATED(XFISO)) THEN
+    YRECFM='FISO'
+    WRITE(YCOMMENT,'(A21)')'FISO (molecules/m2/s)'
+    CALL DEF_VAR_NETCDF(IFILE_ID,YRECFM,YCOMMENT,JDIM,YATT_TITLE,YATT)  
+  END IF
+  !
+  IF (ASSOCIATED(XFISO)) THEN
+    YRECFM='FMONO'
+    WRITE(YCOMMENT,'(A22)')'FMONO (molecules/m2/s)'
+    CALL DEF_VAR_NETCDF(IFILE_ID,YRECFM,YCOMMENT,JDIM,YATT_TITLE,YATT)  
+  END IF
+  !
+ENDIF
+!
+IF (LCH_NO_FLUX) THEN
+  !
+  IF (ASSOCIATED(XNOFLUX)) THEN
+    YRECFM='NOFLUX'
+    WRITE(YCOMMENT,'(A21)')'NOFLUX (molecules/m2/s)'
+    CALL DEF_VAR_NETCDF(IFILE_ID,YRECFM,YCOMMENT,JDIM,YATT_TITLE,YATT)     
+  END IF
+  !
+END IF
 !
 IF(LPROVAR_TO_DIAG)THEN
   !

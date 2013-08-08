@@ -43,6 +43,8 @@ USE MODD_DIAG_MISC_TEB_n ,ONLY : LSURF_MISC_BUDGET, XQF_BLD,      &
                                  XFLX_BLD, XQF_TOWN, XDQS_TOWN,   &
                                  XH_WALL_A, XH_WALL_B,XH_ROOF,XH_ROAD
 !
+USE MODD_CH_TEB_n,  ONLY : CCH_DRY_DEP, CCH_NAMES, NBEQ
+!
 USE MODN_IO_OFFLINE,      ONLY : XTSTEP_OUTPUT
 !
 USE MODI_GET_DIM_FULL_n
@@ -64,19 +66,23 @@ INTEGER,           INTENT(IN) :: KLUOUT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+ CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
+ CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
+ CHARACTER(LEN=100)               :: YCOMMENT   
+ CHARACTER(LEN=50)                :: YFILE
+ CHARACTER(LEN=12)                :: YRECFM 
+ CHARACTER(LEN=3)                 :: YPAS, YLVL 
+!
+INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
 INTEGER                          :: INI
 INTEGER                          :: IDIM1
- CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
-REAL,DIMENSION(:), POINTER       :: ZX, ZY
-INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
- CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
-!
- CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
-INTEGER                          :: IFILE_ID
- CHARACTER(LEN=50)                :: YFILE
- CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
- CHARACTER(LEN=3)                 :: YPAS, YLVL
+INTEGER                          :: IFILE_ID, IDIMID, JSV
 INTEGER                          :: JLAYER
+!
+REAL,DIMENSION(:), POINTER       :: ZX, ZY
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -164,6 +170,20 @@ YATT='W/m2'
  CALL DEF_VAR_NETCDF(IFILE_ID,'LWU_TEB'  ,'Averaged_Upward_LW         '               ,IDDIM,YATT_TITLE,YATT)
  CALL DEF_VAR_NETCDF(IFILE_ID,'FMU_TEB'  ,'Averaged_Zonal_Wind_Stress '               ,IDDIM,YATT_TITLE,YATT)
  CALL DEF_VAR_NETCDF(IFILE_ID,'FMV_TEB'  ,'Averaged_Merid_Wind_Stress '               ,IDDIM,YATT_TITLE,YATT)
+!
+IF (NBEQ>0 .AND. CCH_DRY_DEP=="WES89 ") THEN
+  !
+  YATT="(m/s)"
+  !
+  DO JSV = 1,SIZE(CCH_NAMES,1)
+    !
+    YRECFM = 'DV_TWN_'//TRIM(CCH_NAMES(JSV))
+    WRITE(YCOMMENT,'(A7,I3.3)')'DV_TWN_',JSV
+    CALL DEF_VAR_NETCDF(IFILE_ID,YRECFM,YCOMMENT,IDDIM,YATT_TITLE,YATT)      
+    !
+  ENDDO
+  !
+END IF
 !
  CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !
