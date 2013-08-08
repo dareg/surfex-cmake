@@ -613,7 +613,11 @@ IF (NRANK==NPIO) THEN
 !$OMP SINGLE
     !
     IRET(1) = NF_INQ_NDIMS(NID_NC,NWORKDIMS)
-    IRET(2) = NF_INQ_DIMID(NID_NC,"Number_of_points",NWORKIDS(1))
+    IF ( TRIM(YNAM_DIM) == "Nemis_snap" ) THEN
+      IRET(2) = NF_INQ_DIMID(NID_NC,"Nsnap_temp",NWORKIDS(1))
+    ELSE
+      IRET(2) = NF_INQ_DIMID(NID_NC,"Number_of_points",NWORKIDS(1))
+    ENDIF
     IF (IRET(2)==0) THEN
       IRET(3) = NF_INQ_DIMID(NID_NC,TRIM(YNAM_DIM),NWORKIDS(2))
     ELSE
