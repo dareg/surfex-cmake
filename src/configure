@@ -132,6 +132,16 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 		export NEED_NCARG=${NEED_NCARG:-NO}
 		export NEED_TOOLS=NO
               ;;
+'Linux beaufixlogin'*) #PREFIX
+
+                export     ARCH=${ARCH:-LXifort}
+                export  VER_MPI=${VER_MPI:-MPIAUTO}
+                export OPTLEVEL=${OPTLEVEL:-O2}
+                export MVWORK=${MVWORK:-NO}
+                export VER_CDF=${VER_CDF:-CDFAUTO}
+		export NEED_NCARG=${NEED_NCARG:-NO}
+		export NEED_TOOLS=NO
+              ;;
 'Linux login0') #PREFIX
 
                 export     ARCH=${ARCH:-LXifort}
@@ -158,13 +168,13 @@ export MANPATH=\$MPI_ROOT/share/man:\$MANPATH
 "}
               ;;
 Linux*)      
-                export     ARCH=${ARCH:-LXgfortran} 
-                export  VER_MPI=${VER_MPI:-MPIVIDE} 
-                export OPTLEVEL=${OPTLEVEL:-DEBUG}  
+	        export     ARCH=${ARCH:-LXgfortan}
+                export  VER_MPI=${VER_MPI:-MPIAUTO}
+                export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
-		#export VER_CDF=${VER_CDF:-CDFGFOR}
-		export VER_CDF=${VER_CDF:-CDFAUTO}
-		export NEED_NCARG=${NEED_NCARG:-YES}
+                export VER_CDF=${VER_CDF:-CDFAUTO}
+		export NEED_NCARG=${NEED_NCARG:-NO}
+		export NEED_TOOLS=NO
               ;;
 *) 
                 echo "WARNING ; system not yet tested " 
