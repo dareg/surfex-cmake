@@ -5,7 +5,7 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE   =  -openmp -openmp-threadprivate=compat -r8 -g -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise 
+OPT_BASE   =  -openmp -openmp-threadprivate=compat -convert big_endian -r8 -g -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise 
 #-switch fe_inline_all_arg_copy_inout
 OPT_PERF0  =  -O0 
 OPT_PERF2  =  -O2 -fpe0 -ftz
