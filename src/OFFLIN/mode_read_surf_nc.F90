@@ -1027,10 +1027,10 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
 !
 !*      0.2   Declarations of local variables
 !
-INTEGER   :: IFIELD   ! work array read in the file
+ CHARACTER(LEN=1)  :: YFIELD   ! work array read in the file
  CHARACTER(LEN=100) :: YFILE    ! Filename
 INTEGER :: IVAR_ID,JRET
-INTEGER,DIMENSION(2) :: IRET
+INTEGER,DIMENSION(3) :: IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_NC:READ_SURFL0_NC',0,ZHOOK_HANDLE)
@@ -1046,14 +1046,14 @@ IF (NID_NC.NE.0) THEN
   !  
   ! 2. Get variable
   !----------------------------
-  IRET(2)=NF_GET_VAR_INT(NID_NC,IVAR_ID,IFIELD)
-  !  
-  IF (IFIELD ==1) OFIELD=.TRUE.
-  IF (IFIELD ==0) OFIELD=.FALSE.
+  IRET(2)=NF_GET_VAR_TEXT(NID_NC,IVAR_ID,YFIELD)
   !
   IRET(3) = NF_GET_ATT_TEXT(NID_NC,IVAR_ID,"comment",HCOMMENT)
   !  
 ENDIF
+!  
+IF (YFIELD =="T") OFIELD=.TRUE.
+IF (YFIELD =="F") OFIELD=.FALSE.
 !
 ! 3. Check for errors
 !--------------------
@@ -1107,7 +1107,7 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=100) :: YFILE          ! Filename
-INTEGER, DIMENSION(:), ALLOCATABLE :: ITAB_1D  ! work array read in the file
+ CHARACTER(LEN=1), DIMENSION(:), ALLOCATABLE :: YTAB_1D  ! work array read in the file
 !
 INTEGER :: IVAR_ID,JRET,JDIM,INDIMS
 INTEGER :: INFOMPI
@@ -1150,15 +1150,15 @@ IF (NRANK==NPIO) THEN
     DO JDIM=1,INDIMS
       JRET=NF_INQ_DIMLEN(NID_NC,IDIMIDS(JDIM),IDIMLEN(JDIM))
     ENDDO
-    ALLOCATE(ITAB_1D(IDIMLEN(1)))
+    ALLOCATE(YTAB_1D(IDIMLEN(1)))
     !  
     ! 2. Get variable
     !----------------------------
-    IRET(1)=NF_GET_VAR_INT(NID_NC,IVAR_ID,ITAB_1D)
+    IRET(1)=NF_GET_VAR_TEXT(NID_NC,IVAR_ID,YTAB_1D)
     !
     DO JRET=1,SIZE(LWORKD)
-      IF (ITAB_1D(JRET) ==1) LWORKD(JRET)=.TRUE.
-      IF (ITAB_1D(JRET) ==0) LWORKD(JRET)=.FALSE.
+      IF (YTAB_1D(JRET) =="T") LWORKD(JRET)=.TRUE.
+      IF (YTAB_1D(JRET) =="F") LWORKD(JRET)=.FALSE.
     ENDDO
     !
     IRET(2) = NF_GET_ATT_TEXT(NID_NC,IVAR_ID,"comment",CWORK0)
@@ -1173,7 +1173,7 @@ IF (NRANK==NPIO) THEN
     ENDIF
   ENDDO
   !
-  DEALLOCATE(ITAB_1D)
+  DEALLOCATE(YTAB_1D)
   !
 !$OMP END SINGLE
   !  
