@@ -26,17 +26,20 @@
 !!
 !!    Original    01/2004
 !!    Modification
+!!      A. Alias        07/2013 add MODI_ABOR1_SFX
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : NDIM_FULL, NSIZE_FULL
 USE MODD_SURF_ATM_GRID_n, ONLY : CGRID
+!
 USE MODI_GET_GRID_COORD
 USE MODI_INTERPOL_NPTS
 USE MODI_SUM_ON_ALL_PROCS
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

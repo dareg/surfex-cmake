@@ -1,5 +1,12 @@
 !     #########
       SUBROUTINE DEF_VAR_NETCDF(KFILE_ID,HNAME,HLONG_NAME,KDIM_ID,HATT_TITLE,HATT_TEXT)
+!     #################################################
+!
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      B. Decharme 07/2013 special case for time in netcdf output files
+!-------------------------------------------------------------------------------
 !
 USE MODD_OL_FILEID,      ONLY : XVAR_TO_FILEOUT, XOUT
 USE MODD_DIAG_SURF_ATM_n,ONLY : LSELECT, CSELECT
@@ -43,8 +50,8 @@ XVAR_TO_FILEOUT=XTEMP
 DEALLOCATE(XTEMP)
 !
 ! if output fields selection is active, test if this field is to be written
-IF ( HNAME/='xx'  .AND. HNAME/='yy' .AND. HNAME/='lon' .AND. &
-     HNAME/='lat' .AND. LSELECT )  THEN
+IF ( HNAME/='xx'  .AND. HNAME/='yy'   .AND. HNAME/='lon' .AND. &
+     HNAME/='lat' .AND. HNAME/='time' .AND. LSELECT )  THEN
   IFIELD=COUNT(CSELECT /= '            ')
   NOWRITE=.TRUE.
   DO JFIELD=1,IFIELD

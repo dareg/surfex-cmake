@@ -20,12 +20,14 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original        11/2011
+!!      A. Alias        07/2013 add MODI_ABOR1_SFX
 !!-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !
 USE MODD_CSTS,       ONLY : XAVOGADRO, XMD
 USE MODD_CH_SNAP_n,  ONLY : XCONVERSION
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

@@ -96,7 +96,7 @@ DO IL=1,SIZE(PIRRIG,1)
       !
       ! Stop irrigation after reaping date
       !
-      IF (KMONTH == TREAPMONTH(IL,JL) .AND. KDAY .GE. TSEEDDAY(IL,JL)) THEN
+      IF (KMONTH == TREAPMONTH(IL,JL) .AND. KDAY .GT. TREAPDAY(IL,JL)) THEN
          LIRRIGATE(IL,JL) = .FALSE.
       END IF
       IF (KMONTH > TREAPMONTH(IL,JL)) THEN
