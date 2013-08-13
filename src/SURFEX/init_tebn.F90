@@ -144,7 +144,6 @@ USE MODI_INIT_TEB_GREENROOF_PGD_n
 USE MODI_GREENROOF_PROPERTIES
 !
 USE MODI_READ_COVER_GARDEN
-USE MODI_WRITE_COVER_TEX_TEB
 USE MODI_ABOR1_SFX
 USE MODI_READ_TEB_CANOPY_n
 USE MODI_SET_SURFEX_FILEIN
@@ -464,8 +463,6 @@ END DO ! end of loop on TEB patches
 !-------------------------------------------------------------------------------
 !
 !* if only physiographic fields are to be initialized, stop here.
-!
- CALL WRITE_COVER_TEX_TEB
 !
 IF (HINIT/='ALL') THEN
   IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',1,ZHOOK_HANDLE)

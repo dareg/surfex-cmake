@@ -87,8 +87,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 !
-USE MODI_WRITE_COVER_TEX_WATER
-!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -220,8 +218,6 @@ END SELECT
 !-------------------------------------------------------------------------------
 !
 !* if only physiographic fields are to be initialized, stop here.
-!
- CALL WRITE_COVER_TEX_WATER
 !
 !         End of IO
 !

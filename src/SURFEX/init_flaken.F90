@@ -106,8 +106,6 @@ USE MODI_ABOR1_SFX
 !
 USE MODI_GET_TYPE_DIM_n
 !
-USE MODI_WRITE_COVER_TEX_WATER
-!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -244,8 +242,6 @@ END SELECT
 !         Reading of the fields
 !
  CALL READ_PGD_FLAKE_n(HPROGRAM)
-!
- CALL WRITE_COVER_TEX_WATER
 !
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
