@@ -115,7 +115,8 @@ IF (.NOT.LDATA_H_TREE .AND. (CPHOTO/='NON' .OR. .NOT.LDATA_Z0)) THEN
   CALL AV_PGD(XPAR_H_TREE,XCOVER,XDATA_H_TREE,YTREE,'ARI')
 !
 ! Extrapolation toward new vegtype distribution field from updated land-use map or user  
-  CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'H_TREE: height of trees',XPAR_H_TREE)
+  ZDEF(:)=10.
+  CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'H_TREE: height of trees',XPAR_H_TREE,PDEF=ZDEF)
 !  
   LDATA_H_TREE=.TRUE.
 !  
