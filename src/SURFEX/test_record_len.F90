@@ -1,4 +1,12 @@
+!#################################################
 SUBROUTINE TEST_RECORD_LEN(HPROGRAM,HREC,ONOWRITE)
+!#################################################
+!
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      B. Decharme 07/2013 write 'time' in netcdf output files
+!-------------------------------------------------------------------------------
 !
 USE MODI_GET_LUOUT
 USE MODD_DIAG_SURF_ATM_n,  ONLY : LSELECT, CSELECT
@@ -47,6 +55,8 @@ IF (LSELECT)  THEN
          ONOWRITE=.FALSE.
       ENDIF
    ENDDO
+   !special case for netcdf output
+   IF(TRIM(YREC)=='time')ONOWRITE=.FALSE.
 ELSE
    ONOWRITE=.FALSE.
 ENDIF

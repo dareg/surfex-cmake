@@ -181,12 +181,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
                                 
 IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',0,ZHOOK_HANDLE)
 !
-IF (IDC/=0) THEN
-  CALL ARRANGE_COVER(XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
-                     XDATA_GARDEN,LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
-  IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',1,ZHOOK_HANDLE)
-  RETURN
-END IF
+IF (IDC==0) THEN
 !
 !$OMP SINGLE
 !
@@ -2112,6 +2107,7 @@ END IF
 !
 !$OMP END SINGLE
 !
+ENDIF
 !-------------------------------------------------------------------------------
 !
 !*    9.     Arrange cover (optional nam_pgd_arrange_cover & option to use !gardens or not)

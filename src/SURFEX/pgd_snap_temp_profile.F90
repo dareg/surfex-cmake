@@ -17,6 +17,7 @@
 !!    ------------
 !!
 !!    Original    09/2011 
+!!    A. Alias    07/2013 CONTINUE procedure for compilation on beaufix
 !!
 !----------------------------------------------------------------------------
 !
@@ -100,7 +101,8 @@ ENDDO
 !*    8.    Closing of the data file
 !           ------------------------
 !
-2000 CALL CLOSE_FILE (HPROGRAM,IUNIT)
+2000 CONTINUE
+CALL CLOSE_FILE (HPROGRAM,IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SNAP_TEMP_PROFILE',1,ZHOOK_HANDLE)
 !

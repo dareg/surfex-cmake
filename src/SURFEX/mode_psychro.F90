@@ -271,6 +271,7 @@ end function TWB_FROM_TPQ_1D
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    12/04/11 
+!!      A. Alias    01/2013   compi. on Bull : must be 1.0E-5 instead of 1.0D-5
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -294,7 +295,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
       IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:ENTH_FN_T_Q',0,ZHOOK_HANDLE)
 ! calculate enthalpy
       ZT = PT - 273.15
-      ZRV=MAX(PQ/(1-PQ),1.0d-5)
+      ZRV=MAX(PQ/(1-PQ),1.0E-5)
       PENTH=1.00484d3*ZT+ZRV*(2.50094d6+1.85895d3*ZT)
 !
       IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:ENTH_FN_T_Q',1,ZHOOK_HANDLE)
