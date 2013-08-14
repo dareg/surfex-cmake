@@ -280,7 +280,7 @@ DO JL=1,KL
 !*    6.     Localisation of the data points on in the subgrid of this mesh
 !            --------------------------------------------------------------
 !
-          IF (KSSO/=0) THEN
+          IF (ISSO/=0) THEN
             KISSOX(JL) = 1 + INT( FLOAT(KSSO) * (ZXX-XXINF(JGRID))/(XXSUP(JGRID)-XXINF(JGRID)) )
             KISSOY(JL) = 1 + INT( FLOAT(KSSO) * (ZY -XYINF(JGRID))/(XYSUP(JGRID)-XYINF(JGRID)) )
           END IF
