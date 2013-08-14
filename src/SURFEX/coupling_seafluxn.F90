@@ -457,10 +457,12 @@ ENDIF
   IF (LMERCATOR) THEN
 
     ! Update SST reference profile for relaxation purpose
-    IF (LSST_DATA) CALL SST_UPDATE(XSEAT_REL(:,NOCKMIN+1), TTIME)
-    !
-    ! Convert to degree C for ocean model
-    XSEAT_REL(:,NOCKMIN+1) = XSEAT_REL(:,NOCKMIN+1) - XTT
+    IF (LSST_DATA) THEN
+      CALL SST_UPDATE(XSEAT_REL(:,NOCKMIN+1), TTIME)
+      !
+      ! Convert to degree C for ocean model
+      XSEAT_REL(:,NOCKMIN+1) = XSEAT_REL(:,NOCKMIN+1) - XTT
+    ENDIF
     !
     CALL MOD1D_n(HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
                  PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
