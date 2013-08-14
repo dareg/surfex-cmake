@@ -157,6 +157,9 @@ ALLOCATE(XUNIF_COVER(JPCOVER))
 !
 LCOVER = .FALSE.
 XUNIF_COVER = XUNDEF
+!
+IECO2 = 0
+!
 !-------------------------------------------------------------------------------
 !
 !*    2.      Input file for cover types
