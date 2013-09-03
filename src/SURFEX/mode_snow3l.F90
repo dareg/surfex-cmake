@@ -978,7 +978,7 @@ ELSE IF(INLVLS==10) THEN
       PSNOWDZ(:,7) = MIN(0.01, PSNOW(:)/INLVLS)
       PSNOWDZ(:,8) = MIN(0.01, PSNOW(:)/INLVLS)
       PSNOWDZ(:,9) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9))
+      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
      END WHERE
 
      WHERE(PSNOW > XSNOWCRITD+0.07 .AND. PSNOW<=0.19)
@@ -991,7 +991,7 @@ ELSE IF(INLVLS==10) THEN
       PSNOWDZ(:,7) = 0.01+(PSNOW(:)-0.1)/9
       PSNOWDZ(:,8) = 0.01+(PSNOW(:)-0.1)/9
       PSNOWDZ(:,9) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9))
+      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
      END WHERE
 
      WHERE(PSNOW > 0.19 .AND. PSNOW<=0.27)
@@ -1004,7 +1004,7 @@ ELSE IF(INLVLS==10) THEN
       PSNOWDZ(:,7) = 0.02+(PSNOW(:)-0.19)/8
       PSNOWDZ(:,8) = 0.02+(PSNOW(:)-0.19)/8
       PSNOWDZ(:,9) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9))
+      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
      END WHERE
 
       WHERE(PSNOW > 0.27 .AND. PSNOW<=0.41)
@@ -1017,7 +1017,7 @@ ELSE IF(INLVLS==10) THEN
       PSNOWDZ(:,7) = 0.03+(PSNOW(:)-0.27)/7
       PSNOWDZ(:,8) = 0.03+(PSNOW(:)-0.27)/7
       PSNOWDZ(:,9) = 0.03+(PSNOW(:)-0.27)/7
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9))
+      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
      END WHERE
 
       WHERE(PSNOW > 0.41 .AND. PSNOW<=0.71)
@@ -1030,7 +1030,7 @@ ELSE IF(INLVLS==10) THEN
       PSNOWDZ(:,7) = 0.05+(PSNOW(:)-0.41)/6
       PSNOWDZ(:,8) = 0.05+(PSNOW(:)-0.41)/6
       PSNOWDZ(:,9) = 0.05+(PSNOW(:)-0.41)/6
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9))
+      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
      END WHERE
   
       WHERE(PSNOW > 0.71)
@@ -1043,7 +1043,7 @@ ELSE IF(INLVLS==10) THEN
       PSNOWDZ(:,7) = 0.1+(PSNOW(:)-0.71)/5
       PSNOWDZ(:,8) = 0.1+(PSNOW(:)-0.71)/5
       PSNOWDZ(:,9) = 0.1+(PSNOW(:)-0.71)/5
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9))
+      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
      END WHERE
        
 ! ajout EB pour permettre cas INLVLS > 10
