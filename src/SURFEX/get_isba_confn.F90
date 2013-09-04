@@ -1,5 +1,5 @@
 !     ########################################
-      SUBROUTINE GET_ISBA_CONF_n(KPATCH,KGROUND_LAYER,KSNOW_LAYER,KNBIOMASS,  &
+      SUBROUTINE GET_ISBA_CONF_n(HISBA, KPATCH,KGROUND_LAYER,KSNOW_LAYER,KNBIOMASS,  &
                                    KNLITTER, KNLITTLEVS, KNSOILCARB)  
 !     ########################################
 !
@@ -36,7 +36,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n,     ONLY : NPATCH, NGROUND_LAYER, TSNOW, NNBIOMASS, &
+USE MODD_ISBA_n,     ONLY : CISBA, NPATCH, NGROUND_LAYER, TSNOW, NNBIOMASS, &
                               NNLITTER, NNLITTLEVS, NNSOILCARB  
 !
 !
@@ -48,6 +48,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+CHARACTER(LEN=3), INTENT(OUT) :: HISBA
 INTEGER, INTENT(OUT) :: KPATCH        ! number of patchs
 INTEGER, INTENT(OUT) :: KGROUND_LAYER ! number of ground layers
 INTEGER, INTENT(OUT) :: KSNOW_LAYER   ! number of snow layers
@@ -64,6 +65,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_ISBA_CONF_N',0,ZHOOK_HANDLE)
+HISBA = CISBA
 KPATCH = NPATCH
 KGROUND_LAYER = NGROUND_LAYER
 KSNOW_LAYER = TSNOW%NLAYER
