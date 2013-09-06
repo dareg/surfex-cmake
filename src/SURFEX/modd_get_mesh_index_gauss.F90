@@ -54,7 +54,6 @@ REAL, DIMENSION(:), ALLOCATABLE   :: XXCEN    ! pseudo-longitude of center of gr
 REAL, DIMENSION(:), ALLOCATABLE   :: XYCEN    ! pseudo-latitude  of center of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XXINF    ! pseudo-longitude western   limit of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XXSUP    ! pseudo-longitude eastern   limit of grid mesh
-REAL, DIMENSION(:), ALLOCATABLE   :: XXMAX    ! pseudo-longitude eastern   limit of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XYINF    ! pseudo-latitude  southern  limit of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XYSUP    ! pseudo-latitude  northern  limit of grid mesh
 REAL, DIMENSION(:), ALLOCATABLE   :: XXDIF

@@ -129,7 +129,6 @@ IF (.NOT. ALLOCATED(NNLOPA)) THEN
     XYDIF(JJ) = 1. / (XYSUP(JJ) - XYINF(JJ))
   ENDDO
   !
-  !
   IFACTX = FLOOR(SQRT(FLOAT(NNLATI))) + 1
   ISIZEX = FLOOR(FLOAT(NNLATI) / IFACTX)
   !
@@ -281,7 +280,7 @@ DO JL=1,SIZE(PLAT)
       DO JI=NFRACDY(ICJ(JL),JJ-1)+1,NFRACDY(ICJ(JL),JJ)
         !
         JGRID = JGRID + 1
-        IF (ZX(JL)<=XXCEN(JGRID)-180.) ZX(JL) = ZX(JL) + 360.
+        IF (ZX(JL)<=XXCEN(JGRID)-180. .AND. ZX(JL)<XXSUP(JGRID)-360.) ZX(JL) = ZX(JL) + 360.
     !* imput point is in this grid mesh
         IF (ZX(JL)>=XXINF(JGRID) .AND. ZX(JL)<XXSUP(JGRID)) THEN
           !
