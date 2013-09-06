@@ -1316,6 +1316,11 @@ IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
 !            ----------------------
 !
 IF (NRANK==NPIO) THEN
+  WRITE(ILUOUT,*) ' '
+  WRITE(ILUOUT,*) '    --------------------------'
+  WRITE(ILUOUT,*) '    | OFFLINE ENDS CORRECTLY |'
+  WRITE(ILUOUT,*) '    --------------------------'
+  WRITE(ILUOUT,*) ' '        
 !$OMP SINGLE
   CLOSE(ILUOUT)
 !$OMP END SINGLE  
