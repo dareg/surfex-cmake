@@ -148,8 +148,6 @@ USE MODI_EXP_DECAY_SOIL_DIF
 USE MODI_EXP_DECAY_SOIL_FR
 USE MODI_CARBON_INIT
 USE MODI_SOILTEMP_ARP_PAR
-USE MODI_WRITE_COVER_TEX_ISBA
-USE MODI_WRITE_COVER_TEX_ISBA_PAR
 USE MODI_END_IO_SURF_n
 !
 USE MODI_READ_ISBA_n
@@ -614,9 +612,6 @@ ENDIF
 !
 !*       9.     Prints of cover parameters in a tex file
 !               ----------------------------------------
-!
- CALL WRITE_COVER_TEX_ISBA    (NPATCH,NGROUND_LAYER,CISBA)
- CALL WRITE_COVER_TEX_ISBA_PAR(NPATCH,NGROUND_LAYER,CISBA,CPHOTO,XSOILGRID)
 !
 !* if only physiographic fields are to be initialized, stop here.
 !
