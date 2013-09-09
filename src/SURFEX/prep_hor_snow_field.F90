@@ -99,7 +99,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   snow gr
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZHEAT     ! work array (x, output snow grid, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZGRID     ! grid array (x, output snow grid, kpatch)
 !
-LOGICAL                       :: GSNOW_IDEAL, GUNIF
+LOGICAL                       :: GSNOW_IDEAL
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: JLAYER    ! loop on layers
@@ -119,11 +119,7 @@ GSNOW_IDEAL = .FALSE.
 !
 !*      2.     Reading of input  configuration (Grid and interpolation type)
 !
-GUNIF = OUNIF
-!for garden especially:
-IF (HFILETYPE=='GRIB ') GUNIF = .FALSE.
-!
-IF (GUNIF) THEN
+IF (OUNIF) THEN
   GSNOW_IDEAL = OSNOW_IDEAL
   CALL PREP_SNOW_UNIF(KLUOUT,HSNSURF,ZFIELDIN, TPTIME, GSNOW_IDEAL,       &
                       PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW,              &
