@@ -37,6 +37,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_ISBA_GRID_n,    ONLY : NDIM
 USE MODD_ISBA_n,         ONLY : XCOVER, LCOVER, CISBA, CPHOTO 
 !
+USE MODD_DATA_COVER_n,   ONLY : XDATA_WEIGHT
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                                &
                                 XDATA_IRRIG, XDATA_WATSUP,                              &
                                 XDATA_GARDEN, XDATA_NATURE,                             &
@@ -91,14 +92,14 @@ YDIF ='DVG'
 !   ---
 IF (.NOT.LDATA_LAI) THEN
 !
-  DO JTIME=1,36 
+  DO JTIME=1,36
 !    
 !   ECOCLIMAP spatial distribution field
+    IF (ASSOCIATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)
     CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_LAI(:,JTIME,:),YVEG,'ARI',LCOVER,KDECADE=JTIME)
     DO JVEGTYPE=1,3
       WHERE (XPAR_VEGTYPE(:,JVEGTYPE)/=0.) ZWORK(:,JTIME,JVEGTYPE) = 0.
     ENDDO
-!
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user 
     CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'LAI: leaf area index',ZWORK(:,JTIME,:))
 !    
@@ -115,7 +116,8 @@ ENDIF
 IF (.NOT.LDATA_H_TREE .AND. (CPHOTO/='NON' .OR. .NOT.LDATA_Z0)) THEN
 !  
   ZDEF(:)=10.
-! ECOCLIMAP spatial distribution field   
+! ECOCLIMAP spatial distribution field  
+  IF (ASSOCIATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)
   CALL AV_PGD(XPAR_H_TREE,XCOVER,XDATA_H_TREE,YTREE,'ARI',LCOVER,KDECADE=1)
 !
 ! Extrapolation toward new vegtype distribution field from updated land-use map or user  
@@ -130,6 +132,7 @@ ENDIF
 !
 !ROOT_DEPTH is needed for DIF, 2-L, 3-L 
 IF (.NOT.LDATA_DG .AND. (CISBA/='DIF' .OR. LDATA_ROOTFRAC) .AND. .NOT.LDATA_ROOT_DEPTH) THEN
+  IF (ASSOCIATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)        
   CALL AV_PGD (XPAR_ROOT_DEPTH(:,:),XCOVER,XDATA_ROOT_DEPTH(:,:),YNAT,'ARI',LCOVER,KDECADE=1)
   CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'ROOTDEPTH', XPAR_ROOT_DEPTH(:,:))
   LDATA_ROOT_DEPTH = .TRUE.
@@ -137,6 +140,7 @@ ENDIF
 !
 !GROUND_DEPTH is needed for DIF and 3-L
 IF (.NOT.LDATA_DG .AND. CISBA/='2-L' .AND. .NOT.LDATA_GROUND_DEPTH) THEN
+  IF (ASSOCIATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)      
   CALL AV_PGD (XPAR_GROUND_DEPTH(:,:),XCOVER,XDATA_GROUND_DEPTH(:,:),YNAT,'ARI',LCOVER,KDECADE=1)
   CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'GROUNDDEPTH', XPAR_GROUND_DEPTH(:,:))
   LDATA_GROUND_DEPTH = .TRUE.
@@ -147,7 +151,8 @@ ENDIF
 IF (.NOT.LDATA_IRRIG) THEN
    ZDEF(:)=0.
   DO JTIME=1,36
-!   ECOCLIMAP spatial distribution field       
+!   ECOCLIMAP spatial distribution field      
+    IF (ASSOCIATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)
     CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_IRRIG,YVEG,'ARI',LCOVER,KDECADE=JTIME)
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user  
     CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'IRRIG  ', ZWORK(:,JTIME,:), PDEF=ZDEF)
@@ -164,7 +169,8 @@ ENDIF
 IF (.NOT.LDATA_WATSUP) THEN
   ZDEF(:)=0.
   DO JTIME=1,36
-!   ECOCLIMAP spatial distribution field       
+!   ECOCLIMAP spatial distribution field    
+    IF (ASSOCIATED(XDATA_WEIGHT)) DEALLOCATE(XDATA_WEIGHT)
     CALL AV_PGD(ZWORK(:,JTIME,:),XCOVER,XDATA_WATSUP,YVEG,'ARI',LCOVER,KDECADE=JTIME)  
 !   Extrapolation toward new vegtype distribution field from updated land-use map or user  
     CALL INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,KLUOUT,'WATSUP  ', ZWORK(:,JTIME,:), PDEF=ZDEF)
