@@ -8,7 +8,7 @@ SUBROUTINE PREP_HOR_SNOW_FIELD( HPROGRAM,                       &
                                 PUNIF_TSNOW, PUNIF_ASNOW,       &
                                 OSNOW_IDEAL,                    &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
-                                PUNIF_HISTSNOW,PUNIF_AGESNOW,   &                                
+                                PUNIF_HISTSNOW,PUNIF_AGESNOW,   &  
                                 PF,PDEPTH,PVEGTYPE_PATCH,PPATCH   )
 !     #######################################################
 !
@@ -99,7 +99,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   snow gr
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZHEAT     ! work array (x, output snow grid, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZGRID     ! grid array (x, output snow grid, kpatch)
 !
-LOGICAL                       :: GSNOW_IDEAL
+LOGICAL                       :: GSNOW_IDEAL, GUNIF
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: JLAYER    ! loop on layers
@@ -119,7 +119,11 @@ GSNOW_IDEAL = .FALSE.
 !
 !*      2.     Reading of input  configuration (Grid and interpolation type)
 !
-IF (OUNIF) THEN
+GUNIF = OUNIF
+!for garden especially:
+IF (HFILETYPE=='GRIB ') GUNIF = .FALSE.
+!
+IF (GUNIF) THEN
   GSNOW_IDEAL = OSNOW_IDEAL
   CALL PREP_SNOW_UNIF(KLUOUT,HSNSURF,ZFIELDIN, TPTIME, GSNOW_IDEAL,       &
                       PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW,              &
