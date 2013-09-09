@@ -78,6 +78,7 @@ INTEGER,           INTENT(IN) :: KLUOUT
 !              -------------------------------
 !
  CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
+ CHARACTER(LEN=100), DIMENSION(:), ALLOCATABLE :: YNAME_DIM1 
  CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT 
  CHARACTER(LEN=40), DIMENSION(1)  :: YDATE
  CHARACTER(LEN=13), DIMENSION(1)  :: YUNIT1, YUNIT2
@@ -89,6 +90,7 @@ INTEGER,           INTENT(IN) :: KLUOUT
  CHARACTER(LEN=2)                 :: YNUM
 !
 INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
+INTEGER, DIMENSION(:), ALLOCATABLE :: IDDIM1, IDIMS1
 INTEGER                          :: INI, JNBIOMASS
 INTEGER                          :: IDIM1, INDIMS
 INTEGER                          :: IFILE_ID, IDIMID, JSV, JSW
@@ -109,6 +111,16 @@ IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_TEB_N',0,ZHOOK_HANDLE)
  CALL GET_DATE_OL(TTIME,XTSTEP_OUTPUT,YDATE(1))
 !
 INDIMS = SIZE(IDDIM)
+!
+ALLOCATE(IDIMS1(INDIMS+1))
+IDIMS1(INDIMS+1) = IDIMS(INDIMS)
+IDIMS1(1:INDIMS-1) = IDIMS(1:INDIMS-1)
+IDIMS1(INDIMS) = 1
+ALLOCATE(YNAME_DIM1(INDIMS+1))
+YNAME_DIM1(INDIMS+1) = YNAME_DIM(INDIMS)
+YNAME_DIM1(1:INDIMS-1) = YNAME_DIM(1:INDIMS-1)
+YNAME_DIM1(INDIMS) = "Snow_patches"
+ALLOCATE(IDDIM1(INDIMS+1))
 !
 ! 4. Create output file for fluxes values
 !----------------------------------------------------------
@@ -447,7 +459,9 @@ ENDIF
 !------------------------------------------------------------------------
 
 YFILE='TEB_PROGNOSTIC.OUT.nc'
-CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+CALL CREATE_FILE(YFILE,IDIMS1,YNAME_DIM1,IFILE_ID,IDDIM1)
+IDDIM(1:INDIMS-1) = IDDIM1(1:INDIMS-1)
+IDDIM(INDIMS) = IDDIM1(INDIMS+1)
 !
 ! 5.1 Temperatures
 YATT='K'
@@ -513,21 +527,25 @@ DO JPATCH=1,NTEB_PATCH
     END DO
   ENDIF
   !
-  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'WSN_RF1'), 'Snow_Water_Equivalent_layer', IDDIM, YATT_TITLE, (/'Kg/m2'/))
-  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'RSN_RF1'), 'Snow_density_layer',         IDDIM, YATT_TITLE, (/'Kg/m3'/))
-  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'ASNOW_RF1'), 'Snow_albedo', IDDIM, YATT_TITLE, (/'-'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'WSN_RF1'), 'Rf_Snow_Water_Eq_layer_1', IDDIM1, YATT_TITLE, (/'Kg/m2'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'RSN_RF1'), 'Rf_snow_density_layer_1', IDDIM1, YATT_TITLE, (/'Kg/m3'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'TSN_RF1'), 'Rf_snow_temperature_1', IDDIM1, YATT_TITLE, (/'K'/))
   !
-  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'WSN_RD1'), 'Snow_Water_Equivalent_layer', IDDIM, YATT_TITLE, (/'Kg/m2'/))
-  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'RSN_RD1'), 'Snow_density_layer',         IDDIM, YATT_TITLE, (/'Kg/m3'/))
-  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'ASNOW_RD1'), 'Snow_albedo', IDDIM, YATT_TITLE, (/'-'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'ASNOW_RF'), 'Rf_snow_albedo_1', IDDIM1, YATT_TITLE, (/'-'/))
+  !
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'WSN_RD1'), 'Rd_snow_Water_Eq_layer_1', IDDIM1, YATT_TITLE, (/'Kg/m2'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'RSN_RD1'), 'Rd_snow_density_layer_1', IDDIM1, YATT_TITLE, (/'Kg/m3'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'TSN_RD1'), 'Rd_snow_temperature_1', IDDIM1, YATT_TITLE, (/'K'/))
+  !  
+  CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'ASNOW_RD'), 'Rd_snow_albedo_1', IDDIM, YATT_TITLE, (/'-'/))
   !
   IF (LGARDEN) THEN
     !
     DO JLAYER=1,NGROUND_LAYER
       WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_TG'//YLVL),'GD_TG',IDDIM(1:INDIMS-1),YATT_TITLE,(/'K'/))
-      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_WG'//YLVL),'GD_WG',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/))
-      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_WGI'//YLVL),'GD_WG',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_TG'//YLVL),'GD_TG',IDDIM,YATT_TITLE,(/'K'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_WG'//YLVL),'GD_WG',IDDIM,YATT_TITLE,(/'m3/m3'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_WGI'//YLVL),'GD_WG',IDDIM,YATT_TITLE,(/'m3/m3'/))
     ENDDO
     !
     CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GD_WR'), 'GD_WR', IDDIM, YATT_TITLE, (/'(kg/m2)'/))
@@ -551,22 +569,22 @@ DO JPATCH=1,NTEB_PATCH
     !
     DO JLAYER=1,TSNOW_gd%NLAYER
       WRITE(YPAS,'(I3)') JLAYER; YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-      CALL DEF_VAR_NETCDF(IFILE_ID, 'WSN_GD'//YLVL, 'Snow_Water_Equivalent_layer_'//YLVL, IDDIM, YATT_TITLE, (/'Kg/m2'/))
-      CALL DEF_VAR_NETCDF(IFILE_ID, 'RSN_GD'//YLVL, 'Snow_density_layer_'//YLVL ,         IDDIM, YATT_TITLE, (/'Kg/m3'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID, 'WSN_GD'//YLVL, 'Gd_Snow_Water_Eq_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'Kg/m2'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID, 'RSN_GD'//YLVL, 'Gd_snow_density_layer_'//YLVL ,         IDDIM1, YATT_TITLE, (/'Kg/m3'/))
       IF (TSNOW_gd%SCHEME=='3-L' .OR. TSNOW_gd%SCHEME=='CRO') THEN   
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'HSN_GD'//YLVL,  'Snow_heat_layer'//YLVL,              IDDIM, YATT_TITLE, (/'J/m2'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'HSN_GD'//YLVL,  'Gd_snow_heat_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'J/m2'/))
       ELSE
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'TSN_GD'//YLVL,  'Snow_temp_layer'//YLVL,              IDDIM, YATT_TITLE, (/'K'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'TSN_GD'//YLVL,  'Gd_snow_temp_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'K'/))
       ENDIF
       IF (TSNOW_gd%SCHEME=='CRO') THEN   
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG1_GD'//YLVL, 'Snow_grain_parameter1_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG2_GD'//YLVL, 'Snow_grain_parameter2_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SHI_GD'//YLVL,  'Snow_historical_param_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SAG_GD'//YLVL,   'Snow_age_param_layer_'//YLVL       , IDDIM, YATT_TITLE,&
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG1_GD'//YLVL, 'Gd_snow_grain_par1_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG2_GD'//YLVL, 'Gd_snow_grain_par2_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SHI_GD'//YLVL,  'Gd_snow_hist_par_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SAG_GD'//YLVL,   'Gd_snow_age_par_layer_'//YLVL, IDDIM1, YATT_TITLE,&
              (/'days since snowfall'/))
       ENDIF
     ENDDO
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'ASNOW_GD', 'Snow_albedo', IDDIM, YATT_TITLE, (/'-'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'ASNOW_GD', 'Gd_snow_albedo', IDDIM1, YATT_TITLE, (/'-'/))    
     !
   ENDIF      
   !
@@ -574,9 +592,9 @@ DO JPATCH=1,NTEB_PATCH
     !
     DO JLAYER=1,NLAYER_GR
       WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_TG'//YLVL),'GR_TG',IDDIM(1:INDIMS-1),YATT_TITLE,(/'K'/))
-      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_WG'//YLVL),'GR_WG',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/))
-      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_WGI'//YLVL),'GR_WG',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_TG'//YLVL),'GR_TG',IDDIM,YATT_TITLE,(/'K'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_WG'//YLVL),'GR_WG',IDDIM,YATT_TITLE,(/'m3/m3'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_WGI'//YLVL),'GR_WG',IDDIM,YATT_TITLE,(/'m3/m3'/))
     ENDDO
     !
     CALL DEF_VAR_NETCDF(IFILE_ID,ADJUSTL(YPATCH//'GR_WR'), 'GR_WR', IDDIM, YATT_TITLE, (/'(kg/m2)'/))
@@ -600,22 +618,22 @@ DO JPATCH=1,NTEB_PATCH
     !
     DO JLAYER=1,TSNOW_gr%NLAYER
       WRITE(YPAS,'(I3)') JLAYER; YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-      CALL DEF_VAR_NETCDF(IFILE_ID, 'WSN_GR'//YLVL, 'Snow_Water_Equivalent_layer_'//YLVL, IDDIM, YATT_TITLE, (/'Kg/m2'/))
-      CALL DEF_VAR_NETCDF(IFILE_ID, 'RSN_GR'//YLVL, 'Snow_density_layer_'//YLVL ,         IDDIM, YATT_TITLE, (/'Kg/m3'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID, 'WSN_GR'//YLVL, 'Gr_Snow_Water_Eq_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'Kg/m2'/))
+      CALL DEF_VAR_NETCDF(IFILE_ID, 'RSN_GR'//YLVL, 'Gr_snow_density_layer_'//YLVL ,         IDDIM1, YATT_TITLE, (/'Kg/m3'/))
       IF (TSNOW_gr%SCHEME=='3-L' .OR. TSNOW_gr%SCHEME=='CRO') THEN   
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'HSN_GR'//YLVL,  'Snow_heat_layer'//YLVL,              IDDIM, YATT_TITLE, (/'J/m2'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'HSN_GR'//YLVL,  'Gr_snow_heat_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'J/m2'/))
       ELSE
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'TSN_GR'//YLVL,  'Snow_temp_layer'//YLVL,              IDDIM, YATT_TITLE, (/'K'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'TSN_GR'//YLVL,  'Gr_snow_temp_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'K'/))
       ENDIF
       IF (TSNOW_gr%SCHEME=='CRO') THEN   
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG1_GR'//YLVL, 'Snow_grain_parameter1_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG2_GR'//YLVL, 'Snow_grain_parameter2_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SHI_GR'//YLVL,  'Snow_historical_param_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-        CALL DEF_VAR_NETCDF(IFILE_ID, 'SAG_GR'//YLVL,   'Snow_age_param_layer_'//YLVL       , IDDIM, YATT_TITLE,&
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG1_GR'//YLVL, 'Gr_snow_grain_par1_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SG2_GR'//YLVL, 'Gr_snow_grain_par_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SHI_GR'//YLVL,  'Gr_snow_hist_par_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
+        CALL DEF_VAR_NETCDF(IFILE_ID, 'SAG_GR'//YLVL,   'Gr_snow_age_param_layer_'//YLVL       , IDDIM1, YATT_TITLE,&
              (/'days since snowfall'/))
       ENDIF
     ENDDO
-    CALL DEF_VAR_NETCDF(IFILE_ID, 'ASNOW_GR', 'Snow_albedo', IDDIM, YATT_TITLE, (/'-'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID, 'ASNOW_GR', 'Gr_snow_albedo', IDDIM1, YATT_TITLE, (/'-'/))    
     !    
   ENDIF
   !
