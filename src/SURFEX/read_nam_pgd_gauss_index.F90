@@ -259,7 +259,6 @@ IF(CNATURE=='ISBA')THEN
 !
 ENDIF
 !
-print*,XUNIF_CLAY
 !-------------------------------------------------------------------------------
 !
 OINDEX_STORE = LINDEX_STORE
