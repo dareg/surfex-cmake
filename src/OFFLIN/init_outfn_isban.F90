@@ -956,7 +956,7 @@ ELSEIF(LPGD)THEN
   CALL DEF_VAR_NETCDF(IFILE_ID,'Z0VEG'       ,'Roughness_Length_Vegetation'        ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'PATCH'       ,'Fraction_Of_Patch'                  ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
   !
-  CALL DEF_VAR_NETCDF(IFILE_ID,'Z0REL'       ,'orography_roughness_length',IDDIM(1:2),YATT_TITLE,(/'m'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,'Z0REL'       ,'orography_roughness_length',IDDIM(1:1),YATT_TITLE,(/'m'/))
   !
   DO JLAYER=1,INLVLD
     WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
