@@ -36,7 +36,7 @@ PROGRAM PREP
 !
 USE MODE_POS_SURF
 !
-USE MODD_SURFEX_OMP, ONLY : NWORK, NWORK2, XWORK, XWORK2, XWORK3, &
+USE MODD_SURFEX_OMP, ONLY : NWORK, NWORK2, XWORK, XWORK2, XWORK3, NBLOCKTOT, &
                              NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
 !
 USE MODN_IO_OFFLINE, ONLY : LLAND_USE
@@ -81,6 +81,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef AIX64
+INCLUDE 'omp_lib.h'
+#endif
 !
 !*    0.     Declaration of local variables
 !            ------------------------------
@@ -165,6 +169,10 @@ CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
 !
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
+!
+!$OMP PARALLEL
+!$ NBLOCKTOT = OMP_GET_NUM_THREADS()
+!$OMP END PARALLEL
 !
  CALL IO_BUFF_CLEAN_n
  CALL INIT_PGD_SURF_ATM(CSURF_FILETYPE,'PRE',YATMFILE,YATMFILETYPE, &
