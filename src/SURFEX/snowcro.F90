@@ -513,9 +513,11 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWFALL_UPGRID",INLV
            PSNOWHIST(JJ,:),PSNOWAGE(JJ,:),GSNOWFALL(JJ), &
            ZSNOWRHOF(JJ),ZSNOWDZF(JJ),PSNOWHMASS(JJ),ZSNOWGRAN1F(JJ),&
            ZSNOWGRAN2F(JJ), ZSNOWHISTF(JJ),ZSNOWAGEF(JJ),   &
-           INLVLS_USE(JJ))                                
+           INLVLS_USE(JJ)) 
+
     ENDIF
-  ENDDO                                       
+  ENDDO      
+
 !
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWNLGRIDFRESH_1D",INLVLS_USE(IDEBUG),LPRINTGRAN,&
   PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),&
@@ -790,6 +792,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPN",INLVLS_
  CALL SNOWCROEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ,PSNOWGRAN1,&
                      PSNOWGRAN2,PSNOWHIST,PSNOWAGE,INLVLS_USE) 
 !
+
 IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPGONE",INLVLS_USE(IDEBUG),LPRINTGRAN,&
   PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),&
  PSNOWGRAN1(IDEBUG,:),PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:))
@@ -804,6 +807,7 @@ IF (GCRODEBUGDETAILSPRINT) CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPGONE",INLV
                 PSNOWAGE(:,1),PSNOWGRAN1(:,2),PSNOWGRAN2(:,2),PSNOWAGE(:,2),&
                 PPS, PZENITH, INLVLS_USE) 
 !
+
 !*      13.     Update snow heat content:
 !               -------------------------
 ! Update the heat content (variable stored each time step)
@@ -3383,6 +3387,7 @@ PSNOWDZN(:,:)  = PSNOWDZ(:,:)
 OAGREG_SURF(:)=.FALSE.
 OMODIF_GRID(:)=.FALSE.
 !
+ZDZOPT(:,:) = 0.
 ! 
 !                     
 !*      1.1   Calculation of the optimal vertical grid size 
@@ -3442,7 +3447,6 @@ DO JJ=1, SIZE(PSNOW(:))
       ! last layer of' upper layers' : normal case : thin layer
       ZDZOPT(JJ,NB_UPPER_LAYER)=   &
         MIN(DZ_base,PSNOW_UPPER/MAX(INLVLSMIN,NB_UPPER_LAYER))
-
       !remaining snow for remaining layers
       THICKNESS_INTERMEDIATE=PSNOW_UPPER - SUM(ZDZOPT(JJ,1:5))-ZDZOPT(JJ,NB_UPPER_LAYER)
 
@@ -3487,6 +3491,7 @@ DO JJ=1, SIZE(PSNOW(:))
                                     0.66*ZDZOPT(JJ,NB_UPPER_LAYER-3)
       ZDZOPT(JJ,NB_UPPER_LAYER-1) = 0.66*ZDZOPT(JJ,NB_UPPER_LAYER)+&
                                     0.34*ZDZOPT(JJ,NB_UPPER_LAYER-3)
+
     ENDIF
   END IF
 END DO
@@ -3534,6 +3539,7 @@ END DO
 !!
 DO JJ=1, SIZE(PSNOW(:))
 IF (PSR(JJ) > UEPSI ) THEN  
+        
 ! newly fallen snow characteristics:
   IF (INLVLS_USE(JJ)>0) THEN !Case of new snowfall on a previously snow-free surface 
     ZSCAP(JJ)      = XCI*PSNOWRHO(JJ,1)
@@ -3563,6 +3569,7 @@ IF (PSR(JJ) > UEPSI ) THEN
   PSNOWAGEF(JJ)  = 0.
   GSNOWFALL(JJ)  =.TRUE. 
   OMODIF_GRID(JJ)=.TRUE.
+
 !      
 ENDIF
 ENDDO
@@ -3593,10 +3600,13 @@ ELSEIF(PSNOW(JJ)<XSNOWCRITD.OR.PSNOW(JJ)==ZSNOWFALL(JJ).OR. &
                               INLVLS_USE(JJ)<INLVLSMIN  ) THEN 
 ! too shallow snowpack or only fresh snow or too few layers
 ! ==> uniform grid and identical snow layers / number depends on snow depth 
+
   OMODIF_GRID(JJ)=.TRUE.
   INLVLS_USE(JJ)= MAX(INLVLSMIN,MIN(INLVLSMAX,INT(PSNOW(JJ)*scale_cm)))
   PSNOWDZN(JJ,1:INLVLS_USE(JJ))=PSNOW(JJ)/INLVLS_USE(JJ)
 ELSE
+        
+        
 ! fresh snow over snow covered ground + enough snow layers 
   OMODIF_GRID(JJ)=.TRUE.
   ZDIFTYPE_SUP= SNOW3LDIFTYP(PSNOWGRAN1(JJ,1),PSNOWGRAN1F(JJ),&
@@ -3707,6 +3717,8 @@ IF(INLVLSMIN==INLVLSMAX) THEN ! specific case with INLSVSMIN = INLVLSMAX  (INLVL
  DO JJ=1,SIZE(PSNOW(:)) ! loop grid points
   IF(.NOT.OMODIF_GRID(JJ)) THEN 
    IF(PSNOWDZ(JJ,1)< DZMIN_TOP) THEN
+           
+
      OMODIF_GRID(JJ)=.TRUE.
      OAGREG_SURF(JJ)=.TRUE.
      ZPENALTY=PSNOWDZ(JJ,2)/ZDZOPT(JJ,2)
@@ -3741,6 +3753,7 @@ IF(INLVLSMIN==INLVLSMAX) THEN ! specific case with INLSVSMIN = INLVLSMAX  (INLVL
  DO JJ=1,SIZE(PSNOW(:)) ! loop grid points
   IF(.NOT.OMODIF_GRID(JJ)) THEN 
    IF(PSNOWDZ(JJ,INLVLS)< DZMIN_TOP) THEN
+           
       OMODIF_GRID(JJ)=.TRUE.
       ZPENALTY=PSNOWDZ(JJ,INLVLS-2)/ZDZOPT(JJ,INLVLS-2)
       JJ_A_DEDOUB=INLVLS-2
@@ -3779,6 +3792,7 @@ DO JJ=1,SIZE(PSNOW(:))
 IF((.NOT.GSNOWFALL(JJ)).AND.PSNOW(JJ)> XSNOWCRITD.AND. &
   (.NOT.OMODIF_GRID(JJ))) THEN  
   IF(PSNOWDZ(JJ,1)< DZMIN_TOP_BIS) THEN ! case shallow surface layer 
+          
     OMODIF_GRID(JJ)=.TRUE.
     OAGREG_SURF(JJ)=.TRUE.
     IF(INLVLS_USE(JJ)>INLVLSMIN) THEN ! case minimum not reached 
@@ -3896,6 +3910,7 @@ ENDDO
 ! according to its depth and to the optimal grid size
 
 !NB : allow these changes for 5 layers and more [NEW] (before : 6 layers)
+
 
 DO JJ=1,SIZE(PSNOW(:))
 IF (.NOT.OMODIF_GRID(JJ))THEN
@@ -4065,6 +4080,13 @@ INLVLS_OLD = -1
 ZPSNOW_NEW=0.
 ZPSNOW_OLD=0.
 !
+ZSNOWRHON(:) = PSNOWRHO(:)
+ZSNOWHEATN(:) = PSNOWHEAT(:)
+ZSNOWGRAN2N(:) = PSNOWGRAN2(:)
+ZSNOWGRAN1N(:) = PSNOWGRAN1(:)
+ZSNOWHISTN(:) = PSNOWHIST(:)
+ZSNOWAGEN(:) = PSNOWAGE(:)
+!
 DO JST_NEW=1,INLVLS_NEW
 ZPSNOW_NEW=ZPSNOW_NEW+PSNOWDZN(JST_NEW)
 ENDDO
@@ -4212,7 +4234,7 @@ DO JST_NEW=1,INLVLS_NEW
          ! dendricity is preserved if possible and sphericity is adjusted
          ZSNOWGRAN1N(JST_NEW)=-XX*ZDENTMOYN
                IF(ABS(ZSNOWGRAN1N(JST_NEW)+XX)< 0.01) THEN
-                 ZSNOWGRAN2N(JST_NEW)=XX*ZSPHERMOYN                  
+                 ZSNOWGRAN2N(JST_NEW)=XX*ZSPHERMOYN      
                ELSEIF  (ABS(ZSNOWGRAN1N(JST_NEW))< 0.0001) THEN
                ! dendritic snow               
                 ZSNOWGRAN1N(JST_NEW)=XX*ZSPHERMOYN
@@ -4234,6 +4256,7 @@ DO JST_NEW=1,INLVLS_NEW
                ! size between D2 and D3 and dendricity == 0         
                ZSNOWGRAN1N(JST_NEW)=XX*ZSPHERMOYN
                ZSNOWGRAN2N(JST_NEW)=ZDIAM
+ 
      ELSE
                ! size between D2 and D3 and dendricity < 0         
                ! sphericity is firts preserved, if possible. If not,
@@ -4279,6 +4302,7 @@ ENDIF
 ! 5. Update mass (density and thickness) and heat:
 ! ------------------------------------------------
 !
+
 PSNOWDZ(:)    = PSNOWDZN(:)
 PSNOWRHO(:)   = ZSNOWRHON(:)
 PSNOWHEAT(:)  = ZSNOWHEATN(:)

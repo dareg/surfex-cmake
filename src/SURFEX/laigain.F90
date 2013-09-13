@@ -79,7 +79,7 @@ ZBMCOEF     = XMC/(XMCO2*XPCCO2)
 ! Once a day (at midnight), adjust biomass:
 ! ----------------------------------------
 !
-WHERE( (PVEG(:)>0) )
+WHERE( (PVEG(:)>0.) )
 !
 ! change biomass in time due to assimilation of CO2:
 ! 2011 :this computation have been move to lailoss and nitro_decline
