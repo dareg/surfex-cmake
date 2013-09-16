@@ -643,14 +643,14 @@ DEALLOCATE(ZFRAC_TILE)
 !*      11.     check diagnostics flag
 !               -----------------------
 !
-IF(LPROVAR_TO_DIAG)THEN
-   IF (NDIM_WATER>0.AND.CWATER=='FLAKE ') THEN
-       CALL ABOR1_SFX('For the moment LPROVAR_TO_DIAG can not be activated with CWATER=FLAKE')
-   ENDIF
-   IF (NDIM_TOWN>0.AND.CTOWN=='TEB') THEN
-       CALL ABOR1_SFX('For the moment LPROVAR_TO_DIAG can not be activated with CTOWN=TEB')
-   ENDIF
-ENDIF 
+!IF(LPROVAR_TO_DIAG)THEN
+!   IF (NDIM_WATER>0.AND.CWATER=='FLAKE ') THEN
+!       CALL ABOR1_SFX('For the moment LPROVAR_TO_DIAG can not be activated with CWATER=FLAKE')
+!   ENDIF
+!   IF (NDIM_TOWN>0.AND.CTOWN=='TEB') THEN
+!       CALL ABOR1_SFX('For the moment LPROVAR_TO_DIAG can not be activated with CTOWN=TEB')
+!   ENDIF
+!ENDIF 
 !
 !-------------------------------------------------------------------------------
 !==============================================================================
