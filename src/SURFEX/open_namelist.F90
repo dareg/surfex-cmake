@@ -80,6 +80,7 @@ ELSE
   YFILE = '                           '
 END IF
 
+!$OMP SINGLE
 IF (HPROGRAM=='MESONH') THEN
 #ifdef MNH
   CALL MNHOPEN_NAMELIST(HPROGRAM,KLUNAM,YFILE)
@@ -109,6 +110,8 @@ ELSE IF (HPROGRAM=='NC    ') THEN
   CALL OPEN_NAMELIST_NC(HPROGRAM,KLUNAM,YFILE)
 #endif
 END IF
+!$OMP END SINGLE COPYPRIVATE(KLUNAM)
+!
 IF (LHOOK) CALL DR_HOOK('OPEN_NAMELIST',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

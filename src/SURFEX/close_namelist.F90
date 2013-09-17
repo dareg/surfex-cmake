@@ -45,6 +45,9 @@ USE MODI_CLOSE_NAMELIST_LFI
 #ifdef OL
 USE MODI_CLOSE_NAMELIST_OL
 #endif
+#ifdef NC
+USE MODI_CLOSE_NAMELIST_NC
+#endif
 #ifdef MNH
 USE MODI_MNHCLOSE_NAMELIST
 #endif
@@ -67,6 +70,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST',0,ZHOOK_HANDLE)
+!$OMP SINGLE
 IF (HPROGRAM=='MESONH') THEN
 #ifdef MNH
   CALL MNHCLOSE_NAMELIST(HPROGRAM,KLUNAM)
@@ -91,7 +95,12 @@ ELSE IF (HPROGRAM=='LFI   ') THEN
 #ifdef LFI
   CALL CLOSE_NAMELIST_LFI(HPROGRAM,KLUNAM)
 #endif
+ELSE IF (HPROGRAM=='NC    ') THEN
+#ifdef NC
+  CALL CLOSE_NAMELIST_NC(HPROGRAM,KLUNAM)
+#endif
 END IF
+!$OMP END SINGLE
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

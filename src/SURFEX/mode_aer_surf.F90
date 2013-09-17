@@ -229,10 +229,10 @@ ENDDO
 !
 !*       3    set  moment 0 
 !
-!ZM(:,1)=   MAX(ZSV(:,JP_CH_M0i) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
-!ZM(:,4)=   MAX(ZSV(:,JP_CH_M0j) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
-!WHERE ((ZM(:,1) .LT. ZMMIN(1)).OR.(ZM(:,2) .LT. ZMMIN(2)))
-!  ZM(:,1)= ZMMIN(1)
+ZM(:,1)=   MAX(ZSV(:,JP_CH_M0i) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
+ZM(:,4)=   MAX(ZSV(:,JP_CH_M0j) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
+WHERE ((ZM(:,1) .LT. ZMMIN(1))) !.OR.(ZM(:,2) .LT. ZMMIN(2)))
+  ZM(:,1)= ZMMIN(1)
 !  ZM(:,2)= ZMMIN(2)
 !
 !  ZCTOTA(:,JP_AER_H2O,1) = 0.
@@ -241,10 +241,10 @@ ENDDO
 !  ZCTOTA(:,JP_AER_NO3,1) = 0.
 !  ZCTOTA(:,JP_AER_BC,1) = 0.5 * ZM(:,2) * ZFAC(JP_AER_BC)
 !  ZCTOTA(:,JP_AER_OC,1) = 0.5 * ZM(:,2) * ZFAC(JP_AER_OC)
-!END WHERE
+END WHERE
 !!
-!WHERE ((ZM(:,4) .LT. ZMMIN(4)).OR.(ZM(:,5) .LT. ZMMIN(5)))  
-!  ZM(:,4)= ZMMIN(4)
+WHERE ((ZM(:,4) .LT. ZMMIN(4))) !.OR.(ZM(:,5) .LT. ZMMIN(5)))  
+  ZM(:,4)= ZMMIN(4)
 !  ZM(:,5)= ZMMIN(5)
 !
 !  ZCTOTA(:,JP_AER_H2O,2) = 0.
@@ -253,7 +253,7 @@ ENDDO
 !  ZCTOTA(:,JP_AER_NO3,2) = 0.
 !  ZCTOTA(:,JP_AER_BC,2) = 0.5 * ZM(:,5) * ZFAC(JP_AER_BC)
 !  ZCTOTA(:,JP_AER_OC,2) = 0.5 * ZM(:,5) * ZFAC(JP_AER_OC)
-!END WHERE
+END WHERE
 !
 !*       4    set moment 6  ==> um6_{aer}/m3_{air}
 !
@@ -276,7 +276,7 @@ ELSE ! fixed standard deviation
   ZM(:,3) = ZM(:,1) &
             * ( (ZM(:,2)/ZM(:,1))**(1./3.)  &
             * exp(-(3./2.)*log(XEMISSIGI)**2))**6 &
-            * exp(18.*log(XEMISSIGI)**2)  
+            * exp(18.*log(XEMISSIGI)**2) 
 
   IF(PRESENT(PSIG1D)) PSIG1D(:,1) = XEMISSIGI
 END IF

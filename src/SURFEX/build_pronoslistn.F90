@@ -29,6 +29,7 @@ USE MODI_CH_OPEN_INPUTB
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
+USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_TYPE_EFUTIL
 USE MODD_SV_n,  ONLY: CSV
 !------------------------------------------------------------------------------
@@ -74,14 +75,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
 !
-!
 ! CNAMES points on chemical variables name
 CNAMES => CSV
 IEQ = SIZE(CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !
+!$OMP SINGLE
  CALL CH_OPEN_INPUTB("AGREGATION", KCH , KLUOUT)
+!$OMP END SINGLE
 !
 ! Parse each eq. line and build the TPPRONOS list
 !
@@ -91,7 +93,9 @@ DO
 !
 ! Read a line and convert 'tab' to 'space' characters
 ! until the keyword 'END_AGREGATION' is reached
+!$OMP SINGLE
   READ(KCH,'(A)',IOSTAT=IERR) YINPLINE
+!$OMP END SINGLE COPYPRIVATE(YINPLINE,IERR)
   IF (IERR /= 0) EXIT
   YINPLINE = TRIM(ADJUSTL(YINPLINE))
   IF (LEN_TRIM(YINPLINE) == 0) CYCLE ! skip blank line
@@ -176,7 +180,6 @@ DO
   END DO
   CURRENT%NBCOEFF = INBCOEFF
 END DO
-
 !
 ! Update TPPRONOS pointer with head of list
 TPPRONOS => HEAD
@@ -194,8 +197,9 @@ IF (KVERB >= 6) THEN
     CURRENT=>CURRENT%NEXT
   END DO
 END IF
-
+!
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',1,ZHOOK_HANDLE)
+!
 CONTAINS 
 !!
 !!    ###########################

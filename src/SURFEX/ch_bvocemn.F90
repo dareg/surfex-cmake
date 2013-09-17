@@ -128,6 +128,7 @@ ELSEWHERE
   ZISOPOT (:) = 0.
   ZMONOPOT(:) = 0.
 END WHERE
+
  CALL BY_VEG(NVT_TREE, NVT_CONI, NVT_EVER, ZISOPOT, ZMONOPOT, ZFISO_FOR, ZFMONO_FOR)
 !
 ZISOPOT (:) = XISOPOT_GRASS
@@ -144,7 +145,7 @@ ZMONOPOT(:) = XMONOPOT_CROP
 !------------------------------------------------
 !
 !isoprene in ppp.m.s-1
-XFISO (:)=(3.0012E-10/3600.) * ( ZFISO_FOR (:) + ZFISO_GRASS (:)+ ZFISO_CROP (:) ) + 1E-17
+XFISO (:)=(3.0012E-10/3600.) * ( ZFISO_FOR(:) + ZFISO_GRASS(:) + ZFISO_CROP(:) ) + 1E-17
 !monoterpenes
 XFMONO(:)=(1.5006E-10/3600.) * ( ZFMONO_FOR(:) + ZFMONO_GRASS(:)+ ZFMONO_CROP(:) ) + 1E-17
 !
@@ -248,7 +249,12 @@ WHERE ( XVEGTYPE(:,NVT_V1) + XVEGTYPE(:,NVT_V2) + XVEGTYPE(:,NVT_V3) > 0. )
       +ZTCORM(:,NVT_V3) * XVEGTYPE(:,NVT_V3) )
              
   !
-ENDWHERE
+ELSEWHERE
+  !
+  PFISO(:) = 0.
+  PFMONO(:) = 0.
+  !
+END WHERE
 !
 IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG',1,ZHOOK_HANDLE)
 !
