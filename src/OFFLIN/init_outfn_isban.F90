@@ -908,7 +908,7 @@ ELSEIF(LPGD)THEN
   CALL DEF_VAR_NETCDF(IFILE_ID,'Z0VEG'       ,'Roughness_Length_Vegetation'        ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'PATCH'       ,'Fraction_Of_Patch'                  ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
   !
-  CALL DEF_VAR_NETCDF(IFILE_ID,'Z0REL'       ,'orography_roughness_length',IDDIM(1:2),YATT_TITLE,(/'m'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID,'Z0REL'       ,'orography_roughness_length',IDDIM(1:1),YATT_TITLE,(/'m'/))
   !
   DO JLAYER=1,INLVLD
     WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
@@ -917,9 +917,9 @@ ELSEIF(LPGD)THEN
   !
   DO JLAYER=1,INLVLD
     WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-    CALL DEF_VAR_NETCDF(IFILE_ID,'WSAT'//YLVL ,'soil_porosity_layer_'//YLVL,IDDIM(1:2),YATT_TITLE,(/'m3/m3'/))
-    CALL DEF_VAR_NETCDF(IFILE_ID,'WFC'//YLVL  ,'field_capacity_layer_'//YLVL,IDDIM(1:2),YATT_TITLE,(/'m3/m3'/)) 
-    CALL DEF_VAR_NETCDF(IFILE_ID,'WWILT'//YLVL,'wilting_point_layer_'//YLVL,IDDIM(1:2),YATT_TITLE,(/'m3/m3'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID,'WSAT'//YLVL ,'soil_porosity_layer_'//YLVL,IDDIM(1:1),YATT_TITLE,(/'m3/m3'/))
+    CALL DEF_VAR_NETCDF(IFILE_ID,'WFC'//YLVL  ,'field_capacity_layer_'//YLVL,IDDIM(1:1),YATT_TITLE,(/'m3/m3'/)) 
+    CALL DEF_VAR_NETCDF(IFILE_ID,'WWILT'//YLVL,'wilting_point_layer_'//YLVL,IDDIM(1:1),YATT_TITLE,(/'m3/m3'/))
   ENDDO
   !
   IF(CISBA=='DIF')THEN
