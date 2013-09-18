@@ -47,6 +47,7 @@ END INTERFACE
 INTERFACE READ_SURFT_LFI
         MODULE PROCEDURE READ_SURFT0_LFI
         MODULE PROCEDURE READ_SURFT1_LFI
+        MODULE PROCEDURE READ_SURFT2_LFI
 END INTERFACE
 !
 CONTAINS
@@ -1048,7 +1049,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 
 !*      0.2   Declarations of local variables
 !
- CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
 INTEGER, DIMENSION(3) :: ITDATE
 !
 INTEGER          :: IGRID   ! position of data on grid
@@ -1103,7 +1104,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 
 !*      0.2   Declarations of local variables
 !
- CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
 INTEGER          :: ILUOUT
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
@@ -1129,5 +1130,63 @@ KDAY  (:) = ITDATE(3,:)
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT1_LFI',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT1_LFI
+!
+!     #############################################################
+      SUBROUTINE READ_SURFT2_LFI(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+!     #############################################################
+!
+!!****  *READT0* - routine to read a date
+!
+USE MODD_IO_SURF_LFI,        ONLY : CFILE_LFI, CLUOUT_LFI  
+!
+USE MODI_FMREAD
+USE MODI_ERROR_READ_SURF_LFI
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1   Declarations of arguments
+!
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: KYEAR    ! year
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: KMONTH   ! month
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: KDAY     ! day
+REAL,    DIMENSION(:,:), INTENT(OUT) :: PTIME    ! year
+INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
+
+!*      0.2   Declarations of local variables
+!
+ CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
+INTEGER          :: ILUOUT
+INTEGER          :: IGRID   ! position of data on grid
+INTEGER          :: ILENCH  ! length of comment string
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT2_LFI',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+YREC=TRIM(HREC)//'%YEAR'
+ CALL FMREADN2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(KYEAR),KYEAR,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
+YREC=TRIM(HREC)//'%MONTH'
+ CALL FMREADN2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(KMONTH),KMONTH,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
+YREC=TRIM(HREC)//'%DAY'
+ CALL FMREADN2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(KDAY),KDAY,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
+YREC=TRIM(HREC)//'%TIME'
+ CALL FMREADX2(CFILE_LFI,YREC,CLUOUT_LFI,SIZE(PTIME),PTIME,IGRID,ILENCH,HCOMMENT,KRESP)
+ CALL ERROR_READ_SURF_LFI(HREC,KRESP)
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT2_LFI',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE READ_SURFT2_LFI
 !
 END MODULE MODE_READ_SURF_LFI
