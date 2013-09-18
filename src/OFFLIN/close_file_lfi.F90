@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_FMDECLAR,    ONLY : CNAMFI
+USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -49,12 +51,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER :: IRESP
 !-------------------------------------------------------------------------------
 !
 !* closes the file
 !  -------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_FILE_LFI',0,ZHOOK_HANDLE)
+ CALL FMFREE(CNAMFI(KUNIT),CLUOUT_LFI,IRESP)
 CLOSE(KUNIT)
 IF (LHOOK) CALL DR_HOOK('CLOSE_FILE_LFI',1,ZHOOK_HANDLE)
 !
