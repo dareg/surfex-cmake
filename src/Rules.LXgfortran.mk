@@ -38,6 +38,10 @@ OPT0      = $(OPT_BASE) $(OPT_PERF0) $(OPT_CHECK)
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF0)
 endif
 #
+ifneq "$(OPTLEVEL)" "DEBUG"
+OBJSD += spll_teb_garden.o
+$(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF0)
+endif
 #  
 ifeq "$(VER_MPI)" "NOMPI"
 F90 = gfortran
