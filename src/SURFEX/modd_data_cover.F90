@@ -42,7 +42,7 @@ IMPLICIT NONE
 !
 LOGICAL :: LREAD_DATA_COVER    ! true if ecoclimap(2) parameters are read in binary files
 LOGICAL :: LDATA_IRRIG    ! true if ecoclimap2 irrigation parameters have been modified by user
-LOGICAL :: LCLIM_LAI =.FALSE.  ! F: uses current year LAI (if between 2002 and 2006). 
+LOGICAL :: LCLIM_LAI =.TRUE.  ! F: uses current year LAI (if between 2002 and 2006). 
 !                              ! T: uses average of LAI  (average is done using the 5 years) 
 INTEGER :: NECO2_START_YEAR   =2002     ! first year of data for ecoclimap2
 INTEGER :: NECO2_END_YEAR     =2006     ! last  year of data for ecoclimap2
