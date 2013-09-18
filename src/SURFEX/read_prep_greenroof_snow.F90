@@ -131,7 +131,7 @@ IF (LNAM_READ) THEN
   IF (GFOUND) THEN 
     READ(UNIT=ILUNAM,NML=NAM_PREP_GREENROOF_SNOW)
   !crocus can't be used in garden if not used in isba scheme
-    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW,'D95','3-L','EBA','NON')
+    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW,'D95','3-L','EBA','CRO','NON')
   ENDIF
   !
   IF ( CSNOW=='NON')                                         NSNOW_LAYER = 0
