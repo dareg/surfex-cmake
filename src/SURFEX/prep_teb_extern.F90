@@ -168,12 +168,10 @@ ELSE
       !
       !* reading of the profile
       ALLOCATE(ZFIELD(INI,ILAYER))
-      print*,HSURF,GOLD_NAME
       DO JLAYER=1,ILAYER
         IF (GOLD_NAME) THEN
           WRITE(YRECFM,'(A6,I1.1)') HSURF(1:6),JLAYER
         ELSE
-          print*,HSURF(1:1),HSURF(3:6),JLAYER
           WRITE(YRECFM,'(A1,A4,I1.1)') HSURF(1:1),HSURF(3:6),JLAYER
           IF (YSURF =='T_WALL' .AND. YWALL_OPT/='UNIF') &
             WRITE(YRECFM,'(A1,A5,I1.1)') HSURF(1:1),HSURF(3:7),JLAYER
