@@ -1049,7 +1049,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 
 !*      0.2   Declarations of local variables
 !
- CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
 INTEGER, DIMENSION(3) :: ITDATE
 !
 INTEGER          :: IGRID   ! position of data on grid
@@ -1104,7 +1104,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 
 !*      0.2   Declarations of local variables
 !
- CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
 INTEGER          :: ILUOUT
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
@@ -1159,7 +1159,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 
 !*      0.2   Declarations of local variables
 !
- CHARACTER(LEN=18)     :: YREC     ! Name of the article to be read
+ CHARACTER(LEN=12)     :: YREC     ! Name of the article to be read
 INTEGER          :: ILUOUT
 INTEGER          :: IGRID   ! position of data on grid
 INTEGER          :: ILENCH  ! length of comment string
