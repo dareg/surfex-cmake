@@ -53,6 +53,7 @@ REAL, DIMENSION(:),INTENT(IN)  :: PRHOA    ! air density
 !
 INTEGER             :: IRESP                 !   File 
 INTEGER             :: ILUOUT                ! output listing logical unit
+ CHARACTER (LEN=3)   :: YCONVERSION
  CHARACTER (LEN=16)  :: YRECFM                ! management
  CHARACTER (LEN=100) :: YCOMMENT              ! variables
 INTEGER             :: JSPEC                 ! Loop index for chemical species
@@ -142,10 +143,14 @@ END DO
 !              -----------------
 !
 IF (HINIT=='ALL') THEN
+!$OMP SINGLE        
   CALL CH_OPEN_INPUTB("EMISUNIT", KCH, ILUOUT)
 !
 ! read unit identifier
-  READ(KCH,'(A3)') CCONVERSION
+  READ(KCH,'(A3)') YCONVERSION
+!$OMP END SINGLE COPYPRIVATE(YCONVERSION)
+!
+CCONVERSION = YCONVERSION
 !
   ALLOCATE (XCONVERSION(KLU))
 ! determine the conversion factor
