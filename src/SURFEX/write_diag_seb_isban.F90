@@ -529,7 +529,7 @@ IF (LSURF_BUDGETC) THEN
     !
   ENDIF
   !  
-  IF(LWATER_BUDGET)THEN 
+  IF(LWATER_BUDGET .OR. (LSURF_BUDGETC .AND. .NOT.LRESET_BUDGETC))THEN 
     !
     YRECFM='RAINFC_ISBA'
     YCOMMENT='cumulated input rainfall rate (Kg/m2)'
@@ -1080,7 +1080,7 @@ IF(LPATCH_BUDGET.AND.(NPATCH >1))THEN
         !
       ENDIF
       !  
-      IF(LWATER_BUDGET)THEN 
+      IF(LWATER_BUDGET .OR. (LSURF_BUDGETC .AND. .NOT.LRESET_BUDGETC))THEN 
         !
         YRECFM='DWGC_P'
         YCOMMENT='cumulated change in liquid soil moisture per patch (Kg/m2)'
