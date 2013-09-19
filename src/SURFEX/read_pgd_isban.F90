@@ -43,7 +43,7 @@ USE MODD_TYPE_DATE_SURF
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : CNATURE
+USE MODD_SURF_ATM_n, ONLY : CNATURE, NSIZE_FULL
 USE MODD_ISBA_n, ONLY : NPATCH, TTIME, XCOVER, XZS, CISBA, CPEDOTF,  &
                           CPHOTO, LTR_ML, CRUNOFF, XCLAY, XSAND,     &
                           XSOC, LSOCP, LNOF, XRM_PATCH,              &                          
@@ -76,6 +76,11 @@ USE MODI_GET_TYPE_DIM_n
 USE MODI_READ_LECOCLIMAP
 !
 USE MODI_ABOR1_SFX
+!
+USE MODI_GET_LUOUT
+USE MODI_PACK_SAME_RANK
+USE MODI_GET_SURF_MASK_n
+!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -87,10 +92,14 @@ LOGICAL,           INTENT(IN)  :: OLAND_USE !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field to nature field
+!
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK
 !
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
+INTEGER :: ILU    ! expected physical size of full surface array
+INTEGER :: ILUOUT ! output listing logical unit
 INTEGER :: IRESP          ! Error code after redding
 INTEGER :: JLAYER  ! loop counter on layers
 INTEGER :: IVERSION, IBUGFIX   ! surface version
@@ -434,19 +443,30 @@ ENDIF
 !* biogenic chemical emissions
 !
 IF (LCH_BIO_FLUX) THEN
-  ALLOCATE(ZWORK(NDIM,1))
+  ALLOCATE(ZWORK(NSIZE_FULL,1))
+  !
+  CALL END_IO_SURF_n(HPROGRAM)
+  CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
+  !
+  CALL GET_LUOUT(HPROGRAM,ILUOUT)
+  ALLOCATE(IMASK(NDIM))
+  ILU=0
+  CALL GET_SURF_MASK_n('NATURE',NDIM,IMASK,ILU,ILUOUT)
+  ALLOCATE(XISOPOT(NDIM))
+  ALLOCATE(XMONOPOT(NDIM))
   !
   ZWORK(:,:) = 0.  
-  ALLOCATE(XISOPOT(NDIM))
   YRECFM='E_ISOPOT'
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK,IRESP)
-  XISOPOT(:) = ZWORK(:,1)
+  CALL PACK_SAME_RANK(IMASK,ZWORK(:,1),XISOPOT(:))
   !
   ZWORK(:,:) = 0.  
-  ALLOCATE(XMONOPOT(NDIM))
   YRECFM='E_MONOPOT'
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK,IRESP)
-  XMONOPOT(:) = ZWORK(:,1)
+  CALL PACK_SAME_RANK(IMASK,ZWORK(:,1),XMONOPOT(:))
+  !
+  CALL END_IO_SURF_n(HPROGRAM)
+  CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
   !
   DEALLOCATE(ZWORK)
 ELSE
