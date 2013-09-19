@@ -25,7 +25,7 @@
 !!
 !!    REFERENCE
 !!    ---------
-!!    Carrer et al. ??
+!!    Carrer et al. 2013
 !!      
 !!    AUTHOR
 !!    ------
@@ -34,7 +34,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/04/11 
-!!
+!!      LAI_EFF corrected 07/2013 
 !-------------------------------------------------------------------------------
 !
 USE MODD_CSTS,       ONLY : XI0
@@ -96,20 +96,6 @@ ELSE
 ENDIF
 !
 !
-DO I=1,SIZE(PIA)
-  IF (PIA(I)>0.) THEN
-    ZSLAI_TRU(I) = (PABC_SUP-PABC)*PLAI(I)
-    PLAI_EFF(I) = POMEGA_DR(I)*ZSLAI_TRU(I)
-    ! transmittance of direct beam
-    ZIDR(I) = EXP(-ZGT*PB_DR(I)*POMEGA_DR(I)*ZSLAI_TRU(I)/PXMUS(I))
-    ! transmittance of diffuse beam
-    ZIDF(I) = EXP(-PB_DF*POMEGA_DF(I)*ZSLAI_TRU(I))
-    !
-    PTR(I) = ((1.-PFD_VEG(I))*ZIDR(I) + PFD_VEG(I)*ZIDF(I))*PTR(I)
-  ENDIF
-ENDDO
-!
-!
 IF (PABC.GT.0.8) THEN
   DO I=1,SIZE(PIA)
     IF (PIA(I)>0.) THEN
@@ -120,6 +106,21 @@ IF (PABC.GT.0.8) THEN
     ENDIF
   ENDDO
 ENDIF
+!
+DO I=1,SIZE(PIA)
+  IF (PIA(I)>0.) THEN
+    ZSLAI_TRU(I) = (PABC_SUP-PABC)*PLAI(I)
+    !PLAI_EFF(I) = POMEGA_DR(I)*ZSLAI_TRU(I)
+    ! transmittance of direct beam
+    ZIDR(I) = EXP(-ZGT*PB_DR(I)*POMEGA_DR(I)*ZSLAI_TRU(I)/PXMUS(I))
+    ! transmittance of diffuse beam
+    ZIDF(I) = EXP(-PB_DF*POMEGA_DF(I)*ZSLAI_TRU(I))
+    PLAI_EFF(I) = ((1.-PFD_VEG(I))*POMEGA_DR(I)+PFD_VEG(I)*POMEGA_DF(I))*ZSLAI_TRU(I)
+    !
+    PTR(I) = ((1.-PFD_VEG(I))*ZIDR(I) + PFD_VEG(I)*ZIDF(I))*PTR(I)
+  ENDIF
+ENDDO
+!
 !
 ! transmissivity of upper layers
 !
