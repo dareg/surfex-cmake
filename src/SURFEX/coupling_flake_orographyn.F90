@@ -34,6 +34,7 @@ SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n(HPROGRAM, HCOUPLING,                      
 !!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!-------------------------------------------------------------
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,   ONLY : XCPD, XRD, XP00
 USE MODD_FLAKE_n,          ONLY : LSBL, XTS, XZ0, XZS
 USE MODD_FLAKE_SBL_n,      ONLY : XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP
@@ -162,6 +163,13 @@ ELSE
   ZRHOA   = PRHOA
 !
 ENDIF
+!
+ZWIND10M(:) = XUNDEF
+ZWIND10M_MAX(:) = 0.
+ZT2M_MIN(:) = XUNDEF
+ZT2M_MAX(:) = 0.
+ZHU2M_MIN(:) = XUNDEF
+ZHU2M_MAX(:) = 0.
 !
  CALL COUPLING_SEAWAT_SBL_n(HPROGRAM, HCOUPLING, 'F',                                       &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
