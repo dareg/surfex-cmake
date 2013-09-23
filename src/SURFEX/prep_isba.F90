@@ -72,6 +72,7 @@ USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_PREP,        ONLY : XZS_LS
 !
 USE MODN_PREP_ISBA
+USE MODN_PREP_ISBA_SNOW, ONLY : LSWEMAX, XSWEMAX 
 !
 USE MODI_VEGTYPE_TO_PATCH
 USE MODI_PREP_PERM_SNOW
@@ -114,6 +115,7 @@ REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBVIS_SOIL  ! soil v
 REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV_SOIL   ! soil UV albedo               (-)
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL    :: SMAX
 !
 !-------------------------------------------------------------------------------------
 !
@@ -209,6 +211,17 @@ ISNOW = VEGTYPE_TO_PATCH(NVT_SNOW,NPATCH)
 !
 IF (LPHYSDOMC) THEN
    TSNOW%WSNOW(:,:,:)=0.
+ENDIF 
+!------------------------------------------------------------------------------------- 
+! 
+!*      4.b     Possibility for setting an upper limit on the initial snow water equivalent field 
+IF (LSWEMAX) THEN 
+  SMAX = MAXVAL(TSNOW%WSNOW(:,:,:)) 
+  WRITE(*,*) ' MAX(Snow content (kg/m2)): ', SMAX 
+  WRITE(*,*) ' Set MAX to', XSWEMAX, '(kg/m2)' 
+  TSNOW%WSNOW(:,:,:) = MIN(TSNOW%WSNOW(:,:,:),XSWEMAX) 
+  SMAX = MAXVAL(TSNOW%WSNOW(:,:,:)) 
+  WRITE(*,*) ' MAX(Snow content (kg/m2)): ', SMAX 
 ENDIF
 !
 !-------------------------------------------------------------------------------------

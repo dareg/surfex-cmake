@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_ISBA,OPRINT,        &
+      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_ISBA,NPRINTLEV,     &
                                OAROME,OECSST,OAESST,OAESNM,             &
                                OALADSURF,OREAD_SST_FROM_FILE,           &
                                OEXTRAP_SEA,OEXTRAP_WATER,OEXTRAP_NATURE,&
@@ -46,9 +46,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 LOGICAL,           INTENT(OUT) :: OASSIM        ! assimilation or not
- CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM        ! type of corrections PLUS/2DVAR
- CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_ISBA
-LOGICAL,           INTENT(OUT) :: OPRINT
+CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM        ! type of corrections PLUS/2DVAR
+CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_ISBA
+INTEGER,           INTENT(OUT) :: NPRINTLEV
 LOGICAL,           INTENT(OUT) :: OAROME
 LOGICAL,           INTENT(OUT) :: OECSST
 LOGICAL,           INTENT(OUT) :: OAESST
@@ -66,7 +66,7 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_ASSIM',0,ZHOOK_HANDLE)
 OASSIM    = .FALSE.
 HASSIM    = "PLUS "
 HASSIM_ISBA = "OI" 
-OPRINT    = .FALSE.
+NPRINTLEV = 0
 OAROME    = .TRUE.
 OECSST    = .FALSE.
 OAESST    = .FALSE.

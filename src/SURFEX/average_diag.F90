@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG(K2M, OSURF_BUDGET, OSURF_BUDGETC, OCOEF, OSURF_VARS,&
+      SUBROUTINE AVERAGE_DIAG(K2M, OT2MMW, OSURF_BUDGET, OSURF_BUDGETC, OCOEF, OSURF_VARS,&
                                 PFRAC_TILE,                                       &
                                 PRN_TILE, PH_TILE, PLE_TILE, PLEI_TILE ,          &
                                 PGFLUX_TILE, PRI_TILE, PCD_TILE, PCH_TILE,        &
@@ -66,6 +66,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,              INTENT(IN) :: K2M          ! Flag for 2m and 10m diagnostics
+LOGICAL,              INTENT(IN) :: OT2MMW       ! Flag to perform modified weighting of 2m temperature
 LOGICAL,              INTENT(IN) :: OSURF_BUDGET ! Flag for surface energy budget
 LOGICAL,              INTENT(IN) :: OSURF_BUDGETC! Flag for surface cumulated energy budget
 LOGICAL,              INTENT(IN) :: OCOEF        ! Flag for transfer coefficients
@@ -301,9 +302,16 @@ IF (K2M>=1) THEN
 !
 ! Temperature at 2 meters
 !
-  CALL MAKE_AVERAGE(PFRAC_TILE,PT2M_TILE,PT2M)
-  CALL MAKE_AVERAGE(PFRAC_TILE,PT2M_MIN_TILE,PT2M_MIN)
-  CALL MAKE_AVERAGE(PFRAC_TILE,PT2M_MAX_TILE,PT2M_MAX)
+  IF (OT2MMW) THEN
+! Modified weighting giving increased weight to LAND temperature
+    CALL MAKE_AVERAGE_MW(PFRAC_TILE,PT2M_TILE,PT2M)
+    CALL MAKE_AVERAGE_MW(PFRAC_TILE,PT2M_MIN_TILE,PT2M_MIN)
+    CALL MAKE_AVERAGE_MW(PFRAC_TILE,PT2M_MAX_TILE,PT2M_MAX)
+  ELSE
+    CALL MAKE_AVERAGE(PFRAC_TILE,PT2M_TILE,PT2M)
+    CALL MAKE_AVERAGE(PFRAC_TILE,PT2M_MIN_TILE,PT2M_MIN)
+    CALL MAKE_AVERAGE(PFRAC_TILE,PT2M_MAX_TILE,PT2M_MAX)
+  ENDIF
 !
 ! Relative humidity at 2 meters
 !
@@ -450,7 +458,56 @@ WHERE(.NOT. GMASK(:)) PFIELD_OUT(:) = XUNDEF
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG:MAKE_AVERAGE_Z0',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE MAKE_AVERAGE_Z0
+!
+SUBROUTINE MAKE_AVERAGE_MW(PFRAC,PFIELD_IN,PFIELD_OUT)
+!
+USE MODD_SURF_PAR, ONLY : XUNDEF
+!
+IMPLICIT NONE
+!
+REAL, DIMENSION(:,:),INTENT(IN)   :: PFRAC
+REAL, DIMENSION(:,:),INTENT(IN)   :: PFIELD_IN
+REAL, DIMENSION(:),  INTENT(OUT)  :: PFIELD_OUT
+LOGICAL, DIMENSION(SIZE(PFIELD_IN,1)) :: GMASK
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+INTEGER :: JT
+REAL, DIMENSION(SIZE(PFIELD_IN,1))    :: ZT2M_LAND, ZT2M_SEA, ZFRL, ZALFA
+!
+IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG:MAKE_AVERAGE_MW',0,ZHOOK_HANDLE)
+!
+GMASK(:) = .TRUE.
+DO JT=1,SIZE(PFIELD_IN,2)
+  WHERE (PFIELD_IN(:,JT)==XUNDEF .AND. PFRAC(:,JT)/=0.) GMASK(:) = .FALSE.
+END DO
+!
+ZT2M_SEA     (:)= 0.
+ZT2M_LAND    (:)= 0.
+ZFRL         (:)= 0.
+DO JT=1,2
+  ZT2M_SEA     (:) = ZT2M_SEA(:)  + PFRAC(:,JT) * PT2M_TILE(:,JT)
+END DO
+!
+DO JT=3,4
+  ZT2M_LAND    (:) = ZT2M_LAND(:) + PFRAC(:,JT) * PT2M_TILE(:,JT)
+  ZFRL         (:) = ZFRL     (:) + PFRAC(:,JT)
+END DO
+! 
+WHERE(ZFRL(:)>0.)
+  ZT2M_LAND    (:) = ZT2M_LAND(:)/ZFRL(:)
+ENDWHERE
+WHERE(ZFRL(:)<1.)
+  ZT2M_SEA     (:) = ZT2M_SEA (:)/(1.-ZFRL(:))
+ENDWHERE
+!
+ZALFA     (:) = 1. - EXP(-10.*ZFRL(:))
+PFIELD_OUT(:) = ZALFA(:) * ZT2M_LAND(:) + (1. - ZALFA(:)) * ZT2M_SEA(:)
 
+WHERE(.NOT. GMASK(:)) PFIELD_OUT(:) = XUNDEF
+!
+IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG:MAKE_AVERAGE_MW',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE MAKE_AVERAGE_MW
+!
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE AVERAGE_DIAG

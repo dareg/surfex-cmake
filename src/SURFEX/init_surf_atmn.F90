@@ -84,7 +84,7 @@ USE MODD_SLT_SURF,       ONLY : NSLTMDE, NSLT_MDEBEG, LVARSIG_SLT, LRGFIX_SLT
 USE MODD_SURF_ATM_GRID_n,ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, &
                                 NGRID_PAR, XGRID_FULL_PAR
 
-USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET,     &
+USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, LT2MMW, L2M_MIN_ZS, LSURF_BUDGET, &
                                 LRAD_BUDGET, LCOEF, XDIAG_TSTEP,   &
                                 LFRAC, LSURF_VARS, LDIAG_GRID,     &
                                 LSURF_BUDGETC, LRESET_BUDGETC,     &
@@ -114,6 +114,7 @@ USE MODI_READ_SURF_ATM_CONF_n
 USE MODI_READ_SURF_ATM_DATE
 USE MODI_READ_NAM_PREP_SURF_n
 USE MODI_READ_SURF
+USE MODI_SUNPOS
 USE MODI_GET_SIZE_FULL_n
 USE MODI_READ_COVER_n
 USE MODI_READ_SSO_n
@@ -199,11 +200,16 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: ICH      ! unit of input chemical file
 INTEGER           :: IVERSION, IBUGFIX       ! surface version
 !
-REAL, DIMENSION(:,:), ALLOCATABLE                       :: ZFRAC_TILE     ! fraction of each surface type
-REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE  ! direct albedo
-REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE  ! diffuse albedo
-REAL, DIMENSION(KI,NTILESFC)                 :: ZEMIS_TILE     ! emissivity
-REAL, DIMENSION(KI,NTILESFC)                 :: ZTSRAD_TILE    ! radiative temperature
+LOGICAL           :: LZENITH  ! is the PZENITH field initialized ?
+!
+REAL, DIMENSION(:,:), ALLOCATABLE   :: ZFRAC_TILE     ! fraction of each surface type
+REAL, DIMENSION(KI,KSW,NTILESFC)    :: ZDIR_ALB_TILE  ! direct albedo
+REAL, DIMENSION(KI,KSW,NTILESFC)    :: ZSCA_ALB_TILE  ! diffuse albedo
+REAL, DIMENSION(KI,NTILESFC)        :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,NTILESFC)        :: ZTSRAD_TILE    ! radiative temperature
+REAL, DIMENSION(KI)                 :: ZZENITH        ! zenith angle
+REAL, DIMENSION(KI)                 :: ZAZIM          ! azimuth angle
+REAL, DIMENSION(KI)                 :: ZTSUN          ! solar time since midnight
 !
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_ZENITH   ! zenithal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_AZIM     ! azimuthal angle
@@ -245,7 +251,7 @@ IF (LNAM_READ) THEN
  !      
  CALL DEFAULT_SSO(CROUGH,XFRACZ0,XCOEFBE)
  CALL DEFAULT_CH_SURF_ATM(CCHEM_SURF_FILE,LCH_SURF_EMIS)
- CALL DEFAULT_DIAG_SURF_ATM(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET, &
+ CALL DEFAULT_DIAG_SURF_ATM(N2M,LT2MMW,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET, &
                             LCOEF,LSURF_VARS,LSURF_BUDGETC,          &
                             LRESET_BUDGETC,LSELECT, LPROVAR_TO_DIAG, &
                             LDIAG_GRID, LFRAC, XDIAG_TSTEP )                       
@@ -372,6 +378,13 @@ ALLOCATE(XMESH_SIZE (NSIZE_FULL))
 ALLOCATE(XZ0EFFJPDIR(NSIZE_FULL))
  CALL READ_GRID(HPROGRAM,CGRID,XGRID_PAR,XLAT,XLON,XMESH_SIZE,IRESP,XZ0EFFJPDIR)
 NGRID_PAR=SIZE(XGRID_PAR)
+!
+!        2.3. Initialize zenith and azimuth angles if not done yet
+!
+LZENITH = ALL(PZENITH /= XUNDEF)
+IF (.NOT. LZENITH) &
+  CALL SUNPOS(KYEAR, KMONTH, KDAY, PTIME, XLON, XLAT, ZTSUN, ZZENITH, ZAZIM)
+
 !
 IF (HPROGRAM/='AROME '.AND.NRANK==NPIO) THEN
   !
@@ -696,10 +709,20 @@ IF (SIZE(PCO2)>0) &
      ZP_CO2   (JJ)     = PCO2        (KMASK(JJ))  
 IF (SIZE(PRHOA)>0) &
      ZP_RHOA  (JJ)     = PRHOA       (KMASK(JJ))  
-IF (SIZE(PZENITH)>0) &
-     ZP_ZENITH(JJ)     = PZENITH     (KMASK(JJ))  
-IF (SIZE(PAZIM  )>0) &
-     ZP_AZIM  (JJ)     = PAZIM       (KMASK(JJ))  
+IF (SIZE(PZENITH)>0) THEN
+    IF (LZENITH) THEN
+       ZP_ZENITH(JJ)     = PZENITH     (KMASK(JJ)) 
+    ELSE
+       ZP_ZENITH(JJ)     = ZZENITH     (KMASK(JJ)) 
+    ENDIF
+ENDIF
+IF (SIZE(PAZIM  )>0) THEN
+    IF (LZENITH) THEN
+       ZP_AZIM  (JJ)     = PAZIM       (KMASK(JJ)) 
+    ELSE
+       ZP_AZIM  (JJ)     = ZAZIM       (KMASK(JJ)) 
+    ENDIF
+ENDIF
 ENDDO
 IF (LHOOK) CALL DR_HOOK('PACK_SURF_INIT_ARG',1,ZHOOK_HANDLE)
 !

@@ -32,11 +32,18 @@ USE MODD_TYPE_DATE_SURF
 USE MODI_PREP_BUFFER_GRID
 USE MODI_INTERP_GRID
 !
+USE MODD_SURF_ATM_n,     ONLY : NR_NATURE,NSIZE_NATURE
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_GRID_BUFFER,      ONLY : NNI
+USE MODD_GRID_BUFFER,    ONLY : NNI
+USE MODN_PREP_ISBA,      ONLY : LEXTRAP_TG,LEXTRAP_WG,LEXTRAP_WGI
+USE MODD_ISBA_GRID_n,    ONLY : XLAT, XLON
+USE MODI_OI_HOR_EXTRAPOL_SURF
+USE MODI_PACK_SAME_RANK
+USE MODI_UNPACK_SAME_RANK
+USE MODI_ABOR1_SFX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -54,10 +61,18 @@ REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontal
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_BUF    ! current date and time
- CHARACTER(LEN=6)                :: YINMODEL       ! model from which buffer originates
+CHARACTER(LEN=6)                 :: YINMODEL       ! model from which buffer originates
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD         ! field read
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D       ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD             ! depth of field in the soil
+REAL,DIMENSION(:),POINTER        :: ZLSM
+REAL,DIMENSION(:),POINTER        :: ZALT
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZFIELD_EP
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZFIELD_EP_IN
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZLSM_NATURE
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZALT_NATURE
+LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP
+INTEGER                          :: ILAYER,II
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -84,6 +99,53 @@ SELECT CASE(HSURF)
      SELECT CASE(YINMODEL)
      CASE('ALADIN')
         CALL READ_BUFFER_TG(KLUOUT,YINMODEL,ZFIELD,ZD)
+        IF ( LEXTRAP_TG ) THEN
+          IF ( SIZE(NR_NATURE) /= NSIZE_NATURE ) THEN
+            CALL ABOR1_SFX('ABORT: PREP_ISBA_BUFFER - DIFFERENT SIZES')
+          ELSE
+            ! Allocate working arrays
+            ALLOCATE(ZFIELD_EP(NSIZE_NATURE))
+            ALLOCATE(ZFIELD_EP_IN(NSIZE_NATURE))
+            ALLOCATE(OINTERP(NSIZE_NATURE))
+            ALLOCATE(ZLSM_NATURE(NSIZE_NATURE))
+            ALLOCATE(ZALT_NATURE(NSIZE_NATURE))
+
+            ! Read LSM and ZS
+            CALL READ_BUFFER_LAND_MASK(KLUOUT,YINMODEL,ZLSM)
+            CALL READ_BUFFER_ZS(KLUOUT,YINMODEL,ZALT)
+
+            ! Pack nature points to reduce dimension to nsize_nature
+            CALL PACK_SAME_RANK(NR_NATURE,ZLSM,ZLSM_NATURE)
+            CALL PACK_SAME_RANK(NR_NATURE,ZALT,ZALT_NATURE)
+
+            ! Do extrapolations in all layers
+            DO ILAYER=1,SIZE(ZFIELD,2)
+              WRITE(KLUOUT,*) 'Extrapolating TG from nearest land point in points where LSM < 0.5. LAYER:',ILAYER
+
+              ! Pack nature points to reduce dimension
+              CALL PACK_SAME_RANK(NR_NATURE,ZFIELD(:,ILAYER),ZFIELD_EP(:))
+              ! Set values to be extrapolated
+              OINTERP=.FALSE.
+              DO II=1,NSIZE_NATURE
+                IF ( ZLSM_NATURE(II) < 0.5 ) THEN
+                  OINTERP(II)   = .TRUE.
+                  ZFIELD_EP(II) = XUNDEF
+                ENDIF
+              ENDDO
+
+              ZFIELD_EP_IN(:) = ZFIELD_EP(:)
+              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
+
+              ! Unpack to full rank
+              CALL UNPACK_SAME_RANK(NR_NATURE,ZFIELD_EP(:),ZFIELD(:,ILAYER))
+            ENDDO
+            DEALLOCATE(ZFIELD_EP)
+            DEALLOCATE(ZFIELD_EP_IN)
+            DEALLOCATE(ZLSM_NATURE)
+            DEALLOCATE(ZALT_NATURE)
+            DEALLOCATE(OINTERP)
+          ENDIF
+        ENDIF 
      END SELECT
      
      CALL SOIL_PROFILE_BUFFER
@@ -93,6 +155,51 @@ SELECT CASE(HSURF)
      SELECT CASE(YINMODEL)
      CASE('ARPEGE','ALADIN','MOCAGE')
         CALL READ_BUFFER_WG(KLUOUT,YINMODEL,ZFIELD,ZD)
+        IF ( LEXTRAP_WG ) THEN
+          IF ( SIZE(NR_NATURE) /= NSIZE_NATURE ) THEN
+            CALL ABOR1_SFX('ABORT: PREP_ISBA_BUFFER - DIFFERENT SIZES')
+          ELSE
+            ! Allocate working arrays
+            ALLOCATE(ZFIELD_EP(NSIZE_NATURE))
+            ALLOCATE(ZFIELD_EP_IN(NSIZE_NATURE))
+            ALLOCATE(OINTERP(NSIZE_NATURE))
+            ALLOCATE(ZLSM_NATURE(NSIZE_NATURE))
+
+            ! Read LSM
+            CALL READ_BUFFER_LAND_MASK(KLUOUT,YINMODEL,ZLSM)
+
+            ! Pack nature points to reduce dimension to nsize_nature
+            CALL PACK_SAME_RANK(NR_NATURE,ZLSM,ZLSM_NATURE)
+   
+            ! Do extrapolations in all layers
+            DO ILAYER=1,SIZE(ZFIELD,2)
+              WRITE(KLUOUT,*) 'Extrapolating WG from nearest land point in points where LSM < 0.5. LAYER:',ILAYER
+
+              ! Pack nature points to reduce dimension
+              CALL PACK_SAME_RANK(NR_NATURE,ZFIELD(:,ILAYER),ZFIELD_EP(:))
+              ! Set values to be extrapolated
+              OINTERP=.FALSE.
+              
+              DO II=1,NSIZE_NATURE
+                IF ( ZLSM_NATURE(II) < 0.5 ) THEN
+                  OINTERP(II)   = .TRUE.
+                  ZFIELD_EP(II) = XUNDEF
+                ENDIF
+              ENDDO
+
+              ZFIELD_EP_IN(:) = ZFIELD_EP
+              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+
+              ! Unpack to full rank
+              CALL UNPACK_SAME_RANK(NR_NATURE,ZFIELD_EP(:),ZFIELD(:,ILAYER))
+            ENDDO
+            DEALLOCATE(ZFIELD_EP)
+            DEALLOCATE(ZFIELD_EP_IN)
+            DEALLOCATE(ZLSM_NATURE)
+            DEALLOCATE(OINTERP)
+          ENDIF
+        ENDIF
+
      END SELECT
      CALL SOIL_PROFILE_BUFFER
 
@@ -104,6 +211,52 @@ SELECT CASE(HSURF)
      SELECT CASE(YINMODEL)
        CASE('ALADIN')
          CALL READ_BUFFER_WGI(KLUOUT,YINMODEL,ZFIELD,ZD)
+         IF ( LEXTRAP_WGI ) THEN
+
+          IF ( SIZE(NR_NATURE) /= NSIZE_NATURE ) THEN
+            CALL ABOR1_SFX('ABORT: PREP_ISBA_BUFFER - DIFFERENT SIZES')
+          ELSE
+
+            ! Allocate working arrays
+            ALLOCATE(ZFIELD_EP(NSIZE_NATURE))
+            ALLOCATE(ZFIELD_EP_IN(NSIZE_NATURE))
+            ALLOCATE(OINTERP(NSIZE_NATURE))
+            ALLOCATE(ZLSM_NATURE(NSIZE_NATURE))
+
+            ! Read LSM
+            CALL READ_BUFFER_LAND_MASK(KLUOUT,YINMODEL,ZLSM)
+
+            ! Pack nature points to reduce dimension to nsize_nature
+            CALL PACK_SAME_RANK(NR_NATURE,ZLSM,ZLSM_NATURE)
+
+            ! Do extrapolations in all layers
+            DO ILAYER=1,SIZE(ZFIELD,2)
+              WRITE(KLUOUT,*) 'Extrapolating WGI from nearest land point in points where LSM < 0.5. LAYER:',ILAYER
+        
+              ! Pack nature points to reduce dimension
+              CALL PACK_SAME_RANK(NR_NATURE,ZFIELD(:,ILAYER),ZFIELD_EP(:))
+              ! Set values to be extrapolated
+              OINTERP=.FALSE.
+              DO II=1,NSIZE_NATURE
+                IF ( ZLSM_NATURE(II) < 0.5 ) THEN
+                  OINTERP(II)  = .TRUE.
+                  ZFIELD_EP(II) = XUNDEF
+                ENDIF
+              ENDDO
+          
+              ZFIELD_EP_IN(:) = ZFIELD_EP
+              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+
+              ! Unpack to full rank
+              CALL UNPACK_SAME_RANK(NR_NATURE,ZFIELD_EP(:),ZFIELD(:,ILAYER))
+            ENDDO
+            DEALLOCATE(ZFIELD_EP)
+            DEALLOCATE(ZFIELD_EP_IN)
+            DEALLOCATE(ZLSM_NATURE)
+            DEALLOCATE(OINTERP)
+          ENDIF
+        ENDIF
+
      END SELECT
      CALL SOIL_PROFILE_BUFFER
 !

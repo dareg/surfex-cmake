@@ -12,6 +12,7 @@
 !****      Mod : F. Taillefer 09/02 : mise a jour constantes surface selon SST
 !****      Mod : F. Bouyssel 02/04 : Seuil utilisant l'angle zenithal solaire
 !****      Mod : E. Bazile 01/2007 : Parametre pour la correction PSNS et WPI
+!        M.Hamrud      01-Jul-2006  Revised surface fields
 !        A.Trojakova   27-Jun-2007 bugfixing ZV10M (surface pointers)
 !        F. Bouyssel    27-Mar-2011  Use of REPS2 instead of REPS3 for ZNEIG
 !****---------------------------------------------------------------------------

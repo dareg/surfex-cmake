@@ -86,6 +86,11 @@ REAL                  :: XASNOW         ! snow albedo
 !
 !--------------------------------------------------------------------------
 !
+LOGICAL           :: LEXTRAP_TG     ! extrapolate TG points where LSM < 0.5 (buffer only)         
+LOGICAL           :: LEXTRAP_WG     ! extrapolate WG points where LSM < 0.5 (buffer only)  
+LOGICAL           :: LEXTRAP_WGI    ! extrapolate WGI points where LSM < 0.5 (buffer only) 
+LOGICAL           :: LEXTRAP_SN     ! extrapolate SNOW (SWE/depth) points where LSM < 0.5 (buffer only) 
+
 END MODULE MODD_PREP_ISBA
 
 

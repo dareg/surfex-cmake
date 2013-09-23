@@ -38,7 +38,7 @@ IMPLICIT NONE
  LOGICAL                               :: LASSIM               ! Assimilation or not
                                                                !'.TRUE.'
                                                                !'.FALSE.'
- LOGICAL                               :: LPRINT               ! Verbose
+ INTEGER                               :: NPRINTLEV            ! Verbosity
  LOGICAL                               :: LAROME               ! If reading AROME fields
  LOGICAL                               :: LECSST               ! Use ECMWF SST
  LOGICAL                               :: LAESST               ! SST analysis performed
@@ -68,10 +68,26 @@ IMPLICIT NONE
  REAL,DIMENSION(NVARMAX)               :: TPRT_M               ! The perturbation amplitude (max dim)
  REAL,DIMENSION(NVARMAX)               :: XSIGMA_M             ! covariance of background errors if B is fixed (max dim)
 !                                                              ! covariance of model errors if B evolving (max dim)
- CHARACTER(LEN=3),DIMENSION(NVARMAX)   :: XVAR_M ! X is ctrl   ! Name of control variables (syntax of surfex in PREP.txt file ) (max dim)
+ CHARACTER(LEN=3),DIMENSION(NVARMAX)   :: XVAR_M               ! X is ctrl
  CHARACTER(LEN=100),DIMENSION(NVARMAX) :: PREFIX_M             ! The prefix of the control variables (in PREP.txt file) (max dim)
  INTEGER,DIMENSION(NVARMAX)            :: INCV                 ! Select the control variables to be used
  REAL                                  :: SCALE_Q              ! scaling factor of Q matrix w.r.t. the initial B
+ REAL,DIMENSION(:,:),ALLOCATABLE       :: XAT2M_ISBA
+ REAL,DIMENSION(:,:),ALLOCATABLE       :: XAHU2M_ISBA
+ REAL,DIMENSION(:,:),ALLOCATABLE       :: XAZON10M_ISBA
+ REAL,DIMENSION(:,:),ALLOCATABLE       :: XAMER10M_ISBA
+ REAL,DIMENSION(:),ALLOCATABLE         :: XAT2M_TEB
+ REAL                                  :: PTSTEP_OUTPUT
+ INTEGER                               :: NBOUTPUT
+ REAL,DIMENSION(:,:,:),ALLOCATABLE     :: SIMOBS               ! vector of model observations (for each pacth)
+ REAL,DIMENSION(:,:,:),ALLOCATABLE     :: SIMMOD               ! Vector of forecast control variables
+ REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: YF_PATCH             ! vector of model observations (for each pacth)
+ REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF                   ! Vector of forecast control variables
+ CHARACTER(LEN=10),DIMENSION(:),ALLOCATABLE :: XOBS            ! Identifier for simulated observations
+ CHARACTER(LEN=3),DIMENSION(:),ALLOCATABLE  :: XVAR            ! Identifier for control variable
+ REAL,DIMENSION(:),ALLOCATABLE              :: TPRT            ! The perturbation amplitude
+ REAL,DIMENSION(:),ALLOCATABLE              :: XSIGMA          ! covariance of background errors if B is fixed
+                                                               ! covariance of model errors if B evolving 
 !
 ! Constants and options of the soil OI analysis
 !

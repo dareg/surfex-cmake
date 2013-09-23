@@ -52,7 +52,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! NECHGU : ECHEANCE DU GUESS EN HEURES (0 A 30).
 !
  IF (LHOOK) CALL DR_HOOK('INI_ASSIM',0,ZHOOK_HANDLE)
+
+ LASSIM=.FALSE.
+
  NECHGU = 6
+
 !
 !
 !LFGEL   : CLE D'APPEL DU GEL DE L'EAU DU SOL AVEC ISBA (LSOLV)
@@ -211,8 +215,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
  LISSEW   = .FALSE.
  LOBSWG   = .TRUE.   ! assimilation of WG
  LOBS2M   = .FALSE.  ! assimilation of T2M + RH2M (with WG)
- LAROME   = .TRUE. !  if AROME model 
- LPRINT   = .TRUE. !  for additional prints
+ LAROME   = .TRUE.   !  if AROME model 
+ NPRINTLEV= 0        !  for additional prints
  NLISSEW  = 0
  MINDJ    = 6
  NNEBUL   = 1
@@ -285,6 +289,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
  IDJ     = 12.0                    ! day duration
  RCDTR   = 24./360.
  ! ITRAD (half assimilation window in sec) --> dependant from NECHGU --> set in OI_MAIN
+
+
+ ! Initialization of EKF
+ LPRT          = .FALSE.
+ LBEV          = .TRUE.
+ NOBSTYPE      = 2
+ NVAR          = 4
+ NBOUTPUT      = 1
+ PTSTEP_OUTPUT = NECHGU
+
+ XVAR_M   = (/"WG2","WG1","TG2","TG1"/)
+ XSIGMA_M = (/0.15,0.1,2.0,2.0/)
+ TPRT_M   = (/0.0001,0.0001,0.00001,0.00001/)
+ INCV     = (/1,1,1,1/)
+ SCALE_Q  = 0.125
+ INCV     = (/1,1,1,1/)
+
 IF (LHOOK) CALL DR_HOOK('INI_ASSIM',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -35,7 +35,8 @@ USE MODD_PREP_ISBA,  ONLY : CFILE_ISBA, CTYPE, CFILEPGD_ISBA, CTYPEPGD,       &
                               XHUGI_SURF, XHUGI_ROOT, XHUGI_DEEP,              &
                               CFILE_TG, CTYPE_TG,                             &
                               CFILE_TG_SURF, CFILE_TG_ROOT, CFILE_TG_DEEP,    &
-                              XTG_SURF, XTG_ROOT, XTG_DEEP  
+                              XTG_SURF, XTG_ROOT, XTG_DEEP,LEXTRAP_TG,LEXTRAP_WG,&
+                              LEXTRAP_WGI,LEXTRAP_SN 
 
 !
 IMPLICIT NONE
@@ -53,6 +54,7 @@ NAMELIST/NAM_PREP_ISBA/CFILE_ISBA, CTYPE, CFILEPGD_ISBA, CTYPEPGD,       &
                          CFILE_TG, CTYPE_TG,                              &
                          CFILE_TG_SURF, CFILE_TG_ROOT, CFILE_TG_DEEP,    &
                          XTG_SURF, XTG_ROOT, XTG_DEEP,                   &
-                         NYEAR, NMONTH, NDAY, XTIME, LISBA_CANOPY  
+                         NYEAR, NMONTH, NDAY, XTIME, LISBA_CANOPY,LEXTRAP_TG,&
+                         LEXTRAP_WG,LEXTRAP_WGI,LEXTRAP_SN  
 !
 END MODULE MODN_PREP_ISBA

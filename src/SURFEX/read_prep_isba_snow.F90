@@ -98,7 +98,8 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,                 &
                             XWSNOW, XTSNOW, XRSNOW, XASNOW,              &
-                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
+                            LSWEMAX,XSWEMAX
 !-------------------------------------------------------------------------------
 !* default
 !  -------
@@ -125,6 +126,9 @@ IF (LNAM_READ) THEN
   XSG2SNOW(:) = XUNDEF
   XHISTSNOW(:) = XUNDEF
   XAGESNOW(:) = XUNDEF  
+  !
+  LSWEMAX=.FALSE. 
+  XSWEMAX=500. 
   !
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
   CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)

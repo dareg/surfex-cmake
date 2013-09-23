@@ -35,7 +35,7 @@ USE MODD_SURF_ATM_n,     ONLY : XSEA, XTOWN, XNATURE, XWATER, TTIME,            
 USE MODD_SURF_ATM_n,     ONLY : XZS
 USE MODD_SURF_ATM_SSO_n, ONLY : XMIN_ZS
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
-USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET, LCOEF, LSURF_VARS,&
+USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, LT2MMW, L2M_MIN_ZS, LSURF_BUDGET, LCOEF, LSURF_VARS,&
                                   XRN_TILE, XH_TILE, XLE_TILE, XGFLUX_TILE,      &
                                   XRI_TILE, XCD_TILE, XCH_TILE, XCE_TILE,        &
                                   XT2M_TILE, XTS_TILE, XQ2M_TILE, XHU2M_TILE,    &
@@ -81,7 +81,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 !
 !
 !*      0.2    declarations of local variables
@@ -119,7 +119,7 @@ ZFRAC_TILE(:,:)    = 0.0
 JSW = SIZE(XSWBD_TILE,3)
 !
 !
- CALL GET_DIMS(IFACT)
+CALL GET_DIMS(IFACT)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
@@ -182,7 +182,7 @@ ENDIF
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
- CALL AVERAGE_DIAG(N2M, LSURF_BUDGET, LSURF_BUDGETC, LCOEF, LSURF_VARS,   &
+CALL AVERAGE_DIAG(N2M, LT2MMW, LSURF_BUDGET, LSURF_BUDGETC, LCOEF, LSURF_VARS,   &
                     ZFRAC_TILE, XRN_TILE, XH_TILE, XLE_TILE, XLEI_TILE , &
                     XGFLUX_TILE,XRI_TILE, XCD_TILE, XCH_TILE, XCE_TILE,  &
                     XT2M_TILE, XTS_TILE, XQ2M_TILE, XHU2M_TILE,          &
@@ -227,7 +227,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',0,ZHOOK_HANDLE)
 !
- CALL FORCING_VERT_SHIFT(XZS,XMIN_ZS,XAVG_T2M,XAVG_Q2M,XPS,XRHOA, &
+CALL FORCING_VERT_SHIFT(XZS,XMIN_ZS,XAVG_T2M,XAVG_Q2M,XPS,XRHOA, &
                             XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,ZPS,ZRHOA)  
 XAVG_HU2M_MIN_ZS = XAVG_HU2M
 !

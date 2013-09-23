@@ -37,6 +37,7 @@
 !!      A.L. Gibelin    04/2009 : BIOMASS and RESP_BIOMASS arrays 
 !!      A.L. Gibelin    06/2009 : Soil carbon variables for CNT option
 !!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
+!!      T. Aspelien  08/2013 : Read diagnostics for assimilation
 !!
 !-------------------------------------------------------------------------------
 !
@@ -54,6 +55,9 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                   XLITTER, XSOILCARB, XLIGNIN_STRUC,  &
                                   LFLOOD, XZ0_FLOOD, LTEMP_ARP,       &
                                   NTEMPLAYER_ARP, LGLACIER, XICE_STO  
+USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
+                              & XAZON10M_ISBA,XAMER10M_ISBA,              &
+                              & NVAR,NOBSTYPE,XVAR,XOBS,IVAR,LPRT,TPRT
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XZ0SN
@@ -92,6 +96,8 @@ INTEGER :: JP, JL, JNBIOMASS, JNLITTER, JNSOILCARB, JNLITTLEVS  ! loop counter o
 !
 INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX
+INTEGER           :: IIVAR
+INTEGER           :: IOBS
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -124,6 +130,17 @@ DO JL=1,IWORK
   YRECFM='TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
   XTG(:,JL,:)=ZWORK
+
+  ! Perturb value if requested
+  IF ( LPRT ) THEN
+    ! read in control variable
+    IF (( TRIM(XVAR(IVAR)) == "TG1" ) .AND. ( JL == 1 ) ) THEN
+      XTG(:,JL,:) = XTG(:,JL,:) + TPRT(IVAR)*XTG(:,JL,:)
+    ENDIF
+    IF (( TRIM(XVAR(IVAR)) == "TG2" ) .AND. ( JL == 2 ) ) THEN
+      XTG(:,JL,:) = XTG(:,JL,:) + TPRT(IVAR)*XTG(:,JL,:)
+    ENDIF
+  ENDIF
 END DO
 !
 !
@@ -140,6 +157,17 @@ DO JL=1,NGROUND_LAYER
   YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
    XWG(:,JL,:)=ZWORK
+   
+   ! Perturb value if requested
+  IF ( LPRT ) THEN
+    ! read in control variable
+    IF (( TRIM(XVAR(IVAR)) == "WG1" ) .AND. ( JL == 1 ) ) THEN
+      XWG(:,JL,:) = XWG(:,JL,:) + TPRT(IVAR)*XWG(:,JL,:)
+    ENDIF
+    IF (( TRIM(XVAR(IVAR)) == "WG2" ) .AND. ( JL == 2 ) ) THEN
+      XWG(:,JL,:) = XWG(:,JL,:) + TPRT(IVAR)*XWG(:,JL,:)
+    ENDIF
+  ENDIF
 END DO
 !
 DO JL=1,NGROUND_LAYER
@@ -356,6 +384,54 @@ IF (CRESPSL=='CNT') THEN
   END DO
 !
 ENDIF
+
+IF ( LASSIM ) THEN
+  IF ( NPATCH /= 1 ) CALL ABOR1_SFX ('Reading of diagnostical values for'&
+                     & //'assimilation at the moment only works for one patch')
+  IF ( TRIM(CASSIM_ISBA) == "OI" ) THEN
+    ! Diagnostic fields for assimilation
+    IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
+    XAT2M_ISBA=XUNDEF
+    YRECFM='T2M'
+    CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
+
+    IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,1))
+    XAHU2M_ISBA=XUNDEF
+    YRECFM='HU2M'
+    CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
+
+    IF ( .NOT. ALLOCATED(XAZON10M_ISBA)) ALLOCATE(XAZON10M_ISBA(ILU,1))
+    XAZON10M_ISBA=XUNDEF
+    YRECFM='ZON10M'
+    CALL READ_SURF(HPROGRAM,YRECFM,XAZON10M_ISBA(:,1),IRESP)
+
+    IF ( .NOT. ALLOCATED(XAMER10M_ISBA)) ALLOCATE(XAMER10M_ISBA(ILU,1))
+    XAMER10M_ISBA=XUNDEF
+    YRECFM='MER10M'
+    CALL READ_SURF(HPROGRAM,YRECFM,XAMER10M_ISBA(:,1),IRESP)
+  ELSE
+    ! Diagnostic fields for EKF assimilation ("observations")
+    DO IOBS = 1,NOBSTYPE
+     SELECT CASE (TRIM(XOBS(IOBS)))
+       CASE("T2M")
+         IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
+         XAT2M_ISBA=XUNDEF
+         YRECFM='T2M_ISBA'
+         CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
+       CASE("HU2M")
+         IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,1))
+         XAHU2M_ISBA=XUNDEF
+         YRECFM='HU2M_ISBA'
+         CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
+       CASE("WG1")
+         ! This is already read above
+       CASE DEFAULT
+         CALL ABOR1_SFX("Mapping of "//XOBS(IOBS)//" is not defined in READ_ISBA_n!")
+     END SELECT
+    ENDDO
+  ENDIF
+ENDIF
+
 !
 !
 DEALLOCATE(ZWORK)

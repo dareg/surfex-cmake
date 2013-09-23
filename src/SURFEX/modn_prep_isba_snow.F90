@@ -30,7 +30,9 @@
 !
 IMPLICIT NONE
 !
- CHARACTER(LEN=3)  :: CSNOW          ! snow scheme
+CHARACTER(LEN=3)  :: CSNOW          ! snow scheme
 INTEGER           :: NSNOW_LAYER    ! number of snow layers
+LOGICAL           :: LSWEMAX        ! logical switch to set an upper limit on initial snow water equivalent
+REAL              :: XSWEMAX        ! upper limit of initial snow water equivalent
 !
 END MODULE MODN_PREP_ISBA_SNOW

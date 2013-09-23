@@ -39,6 +39,7 @@
 !              ------------
 !
 USE MODN_PREP_GARDEN_SNOW
+USE MODN_PREP_ISBA_SNOW, ONLY : LSWEMAX, XSWEMAX
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -67,14 +68,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
- CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
+CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
 INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
- CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
- CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
- CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
- CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILEPGDTYPE    ! file type 
- LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
+CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
+CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
+ CHARACTER(LEN=28),OPTIONAL, INTENT(OUT) :: HFILEPGD     ! file name
+ CHARACTER(LEN=6), OPTIONAL, INTENT(OUT) :: HFILEPGDTYPE ! file type 
+ LOGICAL,          OPTIONAL, INTENT(OUT) :: OUNIF        ! uniform snow
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -93,7 +94,8 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
                             CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,                &
                             XWSNOW, XTSNOW, XRSNOW, XASNOW,             &
-                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,    &
+                            LSWEMAX,XSWEMAX
 NAMELIST/NAM_PREP_GARDEN_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
                               CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
                               LSNOW_IDEAL, XWSNOW, XTSNOW, XRSNOW, XASNOW
@@ -124,6 +126,9 @@ IF (LNAM_READ) THEN
   XSG2SNOW(:) = XUNDEF
   XHISTSNOW(:) = XUNDEF
   XAGESNOW(:) = XUNDEF  
+  !
+  LSWEMAX=.FALSE.
+  XSWEMAX=500.
   !
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
   CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)

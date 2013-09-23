@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_READ_SST_FROM_FILE(YPROGRAM,KI,PSST,PITM,HTEST)
+SUBROUTINE ASSIM_READ_SST_FROM_FILE(YPROGRAM,KI,PITM,PSST,PSIC,HTEST)
 
 !     ###############################################################################
 !
@@ -44,17 +44,18 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)    :: YPROGRAM  ! program calling surf. schemes
-INTEGER,            INTENT(IN)    :: KI
-REAL,DIMENSION(KI),  INTENT(OUT)   :: PSST
-REAL,DIMENSION(KI),  INTENT(IN)    :: PITM
- CHARACTER(LEN=2),   INTENT(IN)    :: HTEST ! must be equal to 'OK'
+CHARACTER(LEN=6),   INTENT(IN)  :: YPROGRAM  ! program calling surf. schemes
+INTEGER,            INTENT(IN)  :: KI
+REAL,DIMENSION(KI), INTENT(IN)  :: PITM
+REAL,DIMENSION(KI), INTENT(OUT) :: PSST
+REAL,DIMENSION(KI), INTENT(OUT) :: PSIC  ! Not used at the moment
+CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
- CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
+CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
 INTEGER              :: IRESP
 REAL                 :: ZFMAX,ZFMIN,ZFMEAN
 REAL, DIMENSION (KI) :: PTS
@@ -75,11 +76,14 @@ CFILEIN_FA = 'SST_SIC'        ! input SST and SIC analysis
 CDNOMC     = 'CADRE SST'      ! new frame name 
 WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
 #endif
+
+PSIC=0.
+
 !
 !
 !  Open FA file
 !
- CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
 !
 !  Read SST_SIC 
 !
@@ -93,8 +97,8 @@ ENDIF
 !
 !  Close SST_SIC file
 !
- CALL END_IO_SURF_n(YPROGRAM2)
- CALL IO_BUFF_CLEAN_n
+CALL END_IO_SURF_n(YPROGRAM2)
+CALL IO_BUFF_CLEAN_n
 WRITE(*,*) 'READ SST_SIC OK'
 
 ZFMIN = MINVAL(PSST)

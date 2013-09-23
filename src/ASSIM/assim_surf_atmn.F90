@@ -4,6 +4,7 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM,KI,                                        
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
                             PSWEC,     PTSC,                                            &
                             PTS,       PT2M,        PHU2M,     PSWE,                    &
+                            PSST,      PSIC,                                            &
                             HTEST )
 !     #################################################################################
 !
@@ -34,14 +35,11 @@ USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_ATM_n,     ONLY : NDIM_FULL,                             &
                                 NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
                                 NR_SEA,    NR_WATER,    NR_TOWN,    NR_NATURE
-!
-USE MODD_ASSIM,          ONLY : LREAD_SST_FROM_FILE
-!
+USE MODD_ASSIM,          ONLY : XAT2M_ISBA,XAHU2M_ISBA,XAZON10M_ISBA,XAMER10M_ISBA,XAT2M_TEB
 USE YOMHOOK,             ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,            ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
-USE MODI_ASSIM_READ_SST_FROM_FILE
 USE MODI_ASSIM_SEA_n
 USE MODI_ASSIM_INLAND_WATER_n
 USE MODI_ASSIM_NATURE_n
@@ -51,7 +49,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
+CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PCON_RAIN
 REAL, DIMENSION(KI), INTENT(IN) :: PSTRAT_RAIN
@@ -63,11 +61,13 @@ REAL, DIMENSION(KI), INTENT(IN) :: PEVAPTR
 REAL, DIMENSION(KI), INTENT(IN) :: PEVAP
 REAL, DIMENSION(KI), INTENT(IN) :: PSWEC
 REAL, DIMENSION(KI), INTENT(IN) :: PTSC
-REAL, DIMENSION(KI), INTENT(INOUT) :: PTS
+REAL, DIMENSION(KI), INTENT(IN) :: PTS
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
- CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
+REAL, DIMENSION(KI), INTENT(IN) :: PSST
+REAL, DIMENSION(KI), INTENT(IN) :: PSIC
+CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
 
 !
 !*      0.2    declarations of local variables
@@ -114,7 +114,6 @@ JTILE = JTILE + 1
 !
 IF(GSEA)THEN
 !
-  IF ( LREAD_SST_FROM_FILE ) CALL ASSIM_READ_SST_FROM_FILE(HPROGRAM,NDIM_FULL,PTS,PLSM,HTEST)
   CALL ASSIM_TREAT_SURF(JTILE,NSIZE_SEA,NR_SEA)
 !
 ENDIF
@@ -139,6 +138,12 @@ JTILE = JTILE + 1
 IF(GNATURE)THEN
 !
   CALL ASSIM_TREAT_SURF(JTILE,NSIZE_NATURE,NR_NATURE)
+
+  IF ( ALLOCATED(XAT2M_ISBA))    DEALLOCATE(XAT2M_ISBA)
+  IF ( ALLOCATED(XAHU2M_ISBA))   DEALLOCATE(XAHU2M_ISBA)
+  IF ( ALLOCATED(XAZON10M_ISBA)) DEALLOCATE(XAZON10M_ISBA)
+  IF ( ALLOCATED(XAMER10M_ISBA)) DEALLOCATE(XAMER10M_ISBA)
+
 !
 ENDIF 
 !
@@ -151,6 +156,9 @@ JTILE = JTILE + 1
 IF(GTOWN)THEN
 !
   CALL ASSIM_TREAT_SURF(JTILE,NSIZE_TOWN,NR_TOWN)
+
+  IF ( ALLOCATED(XAT2M_TEB))    DEALLOCATE(XAT2M_TEB)
+
 !
 ENDIF
 
@@ -181,6 +189,8 @@ REAL,DIMENSION(KSIZE)                 :: ZP_PTS
 REAL,DIMENSION(KSIZE)                 :: ZP_PT2M
 REAL,DIMENSION(KSIZE)                 :: ZP_PHU2M
 REAL,DIMENSION(KSIZE)                 :: ZP_PSWE
+REAL,DIMENSION(KSIZE)                 :: ZP_PSST
+REAL,DIMENSION(KSIZE)                 :: ZP_PSIC
 
 DO JJ=1,KSIZE
   JI=KMASK(JJ)
@@ -198,6 +208,8 @@ DO JJ=1,KSIZE
   ZP_PT2M(JJ)        = PT2M(JI)
   ZP_PHU2M(JJ)       = PHU2M(JI)
   ZP_PSWE(JJ)        = PSWE(JI)
+  ZP_PSST(JJ)        = PSST(JI)
+  ZP_PSIC(JJ)        = PSIC(JI)
 ENDDO
 
 IF (KTILE==1) THEN
@@ -206,7 +218,7 @@ IF (KTILE==1) THEN
   WRITE(*,*) '*      ASSIMILATIONS FOR SEA POINTS         *'
   WRITE(*,*) '*********************************************'
  
-  CALL ASSIM_SEA_n(HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST)
+  CALL ASSIM_SEA_n(HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST)
 
 ELSEIF (KTILE==2) THEN
   

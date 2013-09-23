@@ -68,6 +68,29 @@ VER_SURFEX=SURFEX-7-2-0
 $(OBJS0): OPT = $(OPT0) 
 
 endif
+
+##########################################################
+#           Source ASSIM                                 #
+##########################################################
+# PRE_BUG TEST !!!
+#DIR_SURFEX += ARCH_SRC/bug_surfex
+# PRE_BUG TEST !!!
+#
+DIR_ASSIM += ASSIM
+#CPPFLAGS_ASSIM=
+#
+ifdef DIR_ASSIM
+DIR_MASTER += $(DIR_ASSIM)
+CPPFLAGS   += $(CPPFLAGS_ASSIM)
+#VER_SURFEX=SURFEX-7-2-0
+#ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MYSRC)
+
+#OBJS_NOCB +=  spll_mode_cover_301_573.o 
+
+$(OBJS0): OPT = $(OPT0)
+
+endif
+
 ##########################################################
 #           Source TRIP                                  #
 ##########################################################

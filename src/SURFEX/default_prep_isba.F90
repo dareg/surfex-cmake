@@ -42,7 +42,8 @@ USE MODD_PREP_ISBA,  ONLY : CFILE_ISBA, CTYPE, CFILEPGD_ISBA, CTYPEPGD,       &
                               CFILE_TG, CTYPE_TG,                             &
                               CFILE_TG_SURF, CFILE_TG_ROOT, CFILE_TG_DEEP,    &
                               XTG_SURF, XTG_ROOT, XTG_DEEP,                   &
-                              XWR_DEF  
+                              XWR_DEF, LEXTRAP_TG, LEXTRAP_WG, LEXTRAP_WGI,   &
+                              LEXTRAP_SN 
 !
 USE MODN_PREP_ISBA,  ONLY : LISBA_CANOPY
 !
@@ -98,7 +99,12 @@ XTG_DEEP  = XUNDEF
 !
 XWR_DEF   = 0.
 !
-LISBA_CANOPY = .FALSE. 
+LISBA_CANOPY = .FALSE.
+LEXTRAP_TG   = .FALSE.
+LEXTRAP_WG   = .FALSE.
+LEXTRAP_WGI  = .FALSE.
+LEXTRAP_SN   = .FALSE.
+ 
 IF (LHOOK) CALL DR_HOOK('DEFAULT_PREP_ISBA',1,ZHOOK_HANDLE)
 
 !-------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 
 !     ###################################################################
       SUBROUTINE OI_HOR_EXTRAPOL_SURF(NDIM,PLAT_IN,PLON_IN,PFIELD_IN, &
-                                         PLAT,PLON,PFIELD,OINTERP,PZS)  
+                                         PLAT,PLON,PFIELD,OINTERP,PZS,NDIM2)  
 !     ###################################################################
 !
 !!**** *OI_HOR_EXTRAPOL_SURF* extrapolate a surface field
@@ -45,6 +45,7 @@ USE MODD_CSTS,       ONLY : XPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -60,6 +61,7 @@ REAL,   DIMENSION(NDIM),  INTENT(IN)     :: PLON     ! longitude of each grid me
 REAL,   DIMENSION(NDIM),  INTENT(INOUT)  :: PFIELD   ! field on grid mesh
 LOGICAL,DIMENSION(NDIM),  INTENT(IN)     :: OINTERP  ! .true. where physical value is needed
 REAL,   DIMENSION(NDIM), OPTIONAL, INTENT(IN) :: PZS      ! surface height
+INTEGER,                 OPTIONAL, INTENT(IN) :: NDIM2 ! Optional subdomain to search in
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -71,12 +73,16 @@ REAL     :: ZFIELD  ! current found field value
 REAL     :: ZNDIST  ! smallest distance to valid point
 REAL     :: ZCOSLA  ! cosine of latitude
 REAL     :: ZZS_OUT ! altitude of nearest grid point
+REAL,PARAMETER :: ZLIMMAX = 1.  ! Maximum distance allowed (in degrees)
 !
 INTEGER  :: JI    ! loop index on points
 INTEGER  :: JISC  ! loop index on valid points
+INTEGER  :: JISC1,JISC2,JZLIMCNT
 !
 REAL     :: ZLONSC, ZDLAT, ZDLON, ZCONV, ZR_EARTH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+LOGICAL :: LNDIM2
 !
 ! Earth radius
 !
@@ -99,6 +105,7 @@ IF (COUNT(PFIELD_IN(:)/=XUNDEF)==0) RETURN
 !*      4.   Loop on points to define
 !            ------------------------
 !
+JZLIMCNT = 0
 !
 DO JI=1,NDIM
   IF (PFIELD(JI)/=XUNDEF) CYCLE
@@ -107,17 +114,26 @@ DO JI=1,NDIM
 !*      4.1  initialisation
 !            --------------
 !
-  ZNDIST=1.E20
+  ZNDIST=XUNDEF
   ZLAT=PLAT(JI)
   ZLON=PLON(JI)
   ZFIELD=PFIELD(JI)
   ZCOSLA=COS(ZLAT*ZCONV)
-  IF (PRESENT(PZS)) ZZS_OUT=PZS(JI) 
+  IF (PRESENT(PZS)) ZZS_OUT=PZS(JI)
+  IF ( PRESENT (NDIM2)) THEN
+    JISC1=MAX((JI-NDIM2),1)
+    JISC2=MIN((JI+NDIM2),NDIM)
+    LNDIM2=.TRUE.
+  ELSE
+    JISC1=1
+    JISC2=NDIM
+    LNDIM2=.FALSE.
+  ENDIF
 !
 !*      4.2  extrapolation with nearest valid point
 !            --------------------------------------
 !
-  DO JISC=1,NDIM
+  DO JISC=JISC1,JISC2
     IF (PFIELD_IN(JISC)/=XUNDEF) THEN
       ZLONSC = PLON_IN(JISC)
       IF (ZLONSC-ZLON> 180.) ZLONSC = ZLONSC - 360.0
@@ -127,19 +143,32 @@ DO JI=1,NDIM
       ZDIST = ZDLAT*ZDLAT + ZDLON*ZDLON*ZCOSLA*ZCOSLA
       IF (ZDIST<=ZNDIST) THEN
         ZFIELD=PFIELD_IN(JISC)
-        IF (PRESENT(PZS)) ZZS_OUT=PZS(JISC)        
+        IF (PRESENT(PZS)) ZZS_OUT=PZS(JISC)
         ZNDIST=ZDIST
       END IF
     END IF
   END DO
+
+  ! Check if we got values
+  IF ( ZNDIST  == XUNDEF ) THEN
+    CALL ABOR1_SFX("Extrapolated point is undefined! No nearby point found.")      
+  ELSEIF ( ZNDIST > (ZLIMMAX*ZCONV) ) THEN
+    IF ( LNDIM2 ) &
+    & CALL ABOR1_SFX("Distance to extrapolated point is to large. Increase ZLIMMAX or NDIM2")     
+    JZLIMCNT = JZLIMCNT + 1
+  ENDIF
   IF (PRESENT(PZS)) THEN
     PFIELD(JI) = ZFIELD + (ZZS_OUT - PZS(JI))*0.0065
   ELSE
-    PFIELD(JI) = ZFIELD    
+    PFIELD(JI) = ZFIELD
   ENDIF  
 
-
 END DO
+
+IF ( JZLIMCNT > 0 ) THEN
+  PRINT *,'Points with extrapolation distance > ',ZLIMMAX,' degrees are ',JZLIMCNT
+ENDIF
+
 IF (LHOOK) CALL DR_HOOK('OI_HOR_EXTRAPOL_SURF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

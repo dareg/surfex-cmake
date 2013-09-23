@@ -45,6 +45,7 @@ USE MODD_TEB_n,          ONLY : NROOF_LAYER, XT_ROOF, XWS_ROOF, &
                                   NTEB_PATCH, CROAD_DIR, CWALL_OPT
 USE MODD_BEM_n, ONLY : NFLOOR_LAYER, XT_FLOOR, XT_MASS,           &
                        XT_WIN1, XT_WIN2, XQI_BLD, XTI_BLD                                   
+USE MODD_ASSIM, ONLY : LASSIM,XAT2M_TEB
 !
 USE MODI_READ_SURF
 !
@@ -301,6 +302,15 @@ YRECFM=ADJUSTL(YRECFM)
 IF (GOLD_NAME) YRECFM='Q_CANYON'
  CALL READ_SURF(HPROGRAM,YRECFM,XQ_CANYON(:),IRESP)
 IF (LHOOK) CALL DR_HOOK('READ_TEB_N',1,ZHOOK_HANDLE)
+
+IF ( LASSIM ) THEN
+  ! Diagnostic fields for assimilation
+  IF ( .NOT. ALLOCATED(XAT2M_TEB)) ALLOCATE(XAT2M_TEB(ILU))
+  XAT2M_TEB=XUNDEF
+  YRECFM='T2M'
+  CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_TEB(:),IRESP)
+ENDIF
+
 !
 !-------------------------------------------------------------------------------
 !

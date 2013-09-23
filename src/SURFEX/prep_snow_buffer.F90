@@ -30,14 +30,21 @@ USE MODD_TYPE_DATE_SURF
 !
 USE MODI_PREP_BUFFER_GRID
 USE MODI_SNOW_T_WLIQ_TO_HEAT
+USE MODI_OI_HOR_EXTRAPOL_SURF
+USE MODI_PACK_SAME_RANK
+USE MODI_UNPACK_SAME_RANK
+USE MODI_ABOR1_SFX
 !
+USE MODD_SURF_ATM_n,     ONLY : NR_NATURE,NSIZE_NATURE
 USE MODD_PREP,           ONLY : CINTERP_TYPE
+USE MODD_PREP_ISBA,      ONLY : LEXTRAP_SN
 USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_GRID_BUFFER,    ONLY : NNI
 USE MODD_SNOW_PAR,       ONLY : XANSMIN, XANSMAX, XRHOSMAX
 USE MODD_CSTS,           ONLY : XTT
+USE MODD_ISBA_GRID_n,    ONLY : XLAT, XLON
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,20 +54,27 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=10),   INTENT(IN) :: HSURF     ! type of field
-INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
-REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
+CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=10),  INTENT(IN)   :: HSURF     ! type of field
+INTEGER,            INTENT(IN)   :: KLUOUT    ! logical unit of output listing
+REAL,DIMENSION(:,:,:), POINTER   :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
-TYPE (DATE_TIME)                :: TZTIME_BUFFER    ! current date and time
- CHARACTER(LEN=6)                :: YINMODEL       ! model from which GRIB file originates
-REAL, DIMENSION(:),   POINTER   :: ZFIELD1D       ! field read
-REAL, DIMENSION(:),   POINTER   :: ZHEAT          ! heat in snow
-REAL, DIMENSION(:),   POINTER   :: ZRHO           ! density of snow
-INTEGER                         :: JVEGTYPE       ! loop counter on vegtypes
-INTEGER                         :: JLAYER         ! loop on snow fine grid
+TYPE (DATE_TIME)                 :: TZTIME_BUFFER    ! current date and time
+CHARACTER(LEN=6)                 :: YINMODEL       ! model from which GRIB file originates
+REAL, DIMENSION(:),   POINTER    :: ZFIELD1D       ! field read
+REAL, DIMENSION(:),   POINTER    :: ZHEAT          ! heat in snow
+REAL, DIMENSION(:),   POINTER    :: ZRHO           ! density of snow
+REAL,DIMENSION(:),POINTER        :: ZLSM           ! Land/sea mask
+INTEGER                          :: JVEGTYPE       ! loop counter on vegtypes
+INTEGER                          :: JLAYER         ! loop on snow fine grid
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZFIELD_EP
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZFIELD_EP_IN
+REAL,ALLOCATABLE,DIMENSION(:)    :: ZLSM_NATURE
+LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP
+INTEGER                          :: II
+INTEGER,PARAMETER                :: IDIM2=10
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -69,7 +83,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SNOW_BUFFER',0,ZHOOK_HANDLE)
- CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
+CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -100,6 +114,49 @@ ELSE
 !
   CASE('WWW')
      CALL READ_BUFFER_SNOW_VEG(KLUOUT,YINMODEL,ZFIELD1D)
+     IF ( LEXTRAP_SN ) THEN
+       IF ( SIZE(NR_NATURE) /= NSIZE_NATURE ) THEN
+         CALL ABOR1_SFX('ABORT: PREP_ISBA_BUFFER - DIFFERENT SIZES')
+       ELSE
+         ! Allocate working arrays
+         ALLOCATE(ZFIELD_EP(NSIZE_NATURE))
+         ALLOCATE(ZFIELD_EP_IN(NSIZE_NATURE))
+         ALLOCATE(OINTERP(NSIZE_NATURE))
+         ALLOCATE(ZLSM_NATURE(NSIZE_NATURE))
+
+         ! Read LSM
+         CALL READ_BUFFER_LAND_MASK(KLUOUT,YINMODEL,ZLSM)
+
+         ! Pack nature points to reduce dimension to nsize_nature
+         CALL PACK_SAME_RANK(NR_NATURE,ZLSM,ZLSM_NATURE)
+
+         ! Do extrapolation
+         WRITE(KLUOUT,*) 'Extrapolating WWW from nearest land point in points where LSM < 0.5.'
+
+         ! Pack nature points to reduce dimension
+         CALL PACK_SAME_RANK(NR_NATURE,ZFIELD1D(:),ZFIELD_EP(:))
+
+         ! Set values to be extrapolated
+         OINTERP=.FALSE.
+         DO II=1,NSIZE_NATURE
+           IF ( ZLSM_NATURE(II) < 0.5 ) THEN
+             OINTERP(II)  = .TRUE.
+             ZFIELD_EP(II) = XUNDEF
+           ENDIF
+         ENDDO
+
+         ZFIELD_EP_IN(:) = ZFIELD_EP
+         CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=IDIM2)
+
+         ! Unpack to full rank
+         CALL UNPACK_SAME_RANK(NR_NATURE,ZFIELD_EP(:),ZFIELD1D(:))
+         DEALLOCATE(ZFIELD_EP)
+         DEALLOCATE(ZFIELD_EP_IN)
+         DEALLOCATE(ZLSM_NATURE)
+         DEALLOCATE(OINTERP)
+       ENDIF
+     ENDIF
+
      !
      ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
      DO JVEGTYPE=1,NVEGTYPE
@@ -112,6 +169,48 @@ ELSE
 !
   CASE('DEP')
      CALL READ_BUFFER_SNOW_VEG_DEPTH(KLUOUT,YINMODEL,ZFIELD1D)
+     IF ( LEXTRAP_SN ) THEN
+       IF ( SIZE(NR_NATURE) /= NSIZE_NATURE ) THEN
+         CALL ABOR1_SFX('ABORT: PREP_ISBA_BUFFER - DIFFERENT SIZES')
+       ELSE
+         ! Allocate working arrays
+         ALLOCATE(ZFIELD_EP(NSIZE_NATURE))
+         ALLOCATE(ZFIELD_EP_IN(NSIZE_NATURE))
+         ALLOCATE(OINTERP(NSIZE_NATURE))
+         ALLOCATE(ZLSM_NATURE(NSIZE_NATURE))
+
+         ! Read LSM
+         CALL READ_BUFFER_LAND_MASK(KLUOUT,YINMODEL,ZLSM)
+
+         ! Pack nature points to reduce dimension to nsize_nature
+         CALL PACK_SAME_RANK(NR_NATURE,ZLSM,ZLSM_NATURE)
+
+         ! Do extrapolation
+         WRITE(KLUOUT,*) 'Extrapolating DEP from nearest land point in points where LSM < 0.5.'
+
+         ! Pack nature points to reduce dimension
+         CALL PACK_SAME_RANK(NR_NATURE,ZFIELD1D(:),ZFIELD_EP(:))
+         ! Set values to be extrapolated
+         OINTERP=.FALSE.
+         DO II=1,NSIZE_NATURE
+           IF ( ZLSM_NATURE(II) < 0.5 ) THEN
+             OINTERP(II)  = .TRUE.
+             ZFIELD_EP(II) = XUNDEF
+           ENDIF
+         ENDDO
+
+         ZFIELD_EP_IN(:) = ZFIELD_EP
+         CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=IDIM2)
+       
+         ! Unpack to full rank
+         CALL UNPACK_SAME_RANK(NR_NATURE,ZFIELD_EP(:),ZFIELD1D(:))
+         DEALLOCATE(ZFIELD_EP)
+         DEALLOCATE(ZFIELD_EP_IN)
+         DEALLOCATE(ZLSM_NATURE)
+         DEALLOCATE(OINTERP)
+       ENDIF
+     ENDIF
+
      !
      ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
      DO JVEGTYPE=1,NVEGTYPE

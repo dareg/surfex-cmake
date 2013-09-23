@@ -162,7 +162,7 @@ IDECADE2 = IDECADE
 !              --------------
 !
 !* new decade?
-  IF ( MOD(TTIME%TDATE%DAY,10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
+  IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
