@@ -53,7 +53,7 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_ABOR1_SFX
 !
-USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
+USE MODD_PREP_ISBA, ONLY : CFILE_SNOW_ISBA, CTYPE_SNOW, CFILEPGD_SNOW_ISBA, &
                            CTYPEPGD_SNOW, LSNOW_IDEAL, &
                            XWSNOW_p=>XWSNOW, XTSNOW_p=>XTSNOW,  &
                            XRSNOW_p=>XRSNOW, XASNOW,            &
@@ -94,8 +94,8 @@ INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
-                            CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
+NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW_ISBA, CTYPE_SNOW,  &
+                            CFILEPGD_SNOW_ISBA, CTYPEPGD_SNOW,                & 
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,                 &
                             XWSNOW, XTSNOW, XRSNOW, XASNOW,              &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
@@ -109,10 +109,10 @@ IF (LNAM_READ) THEN
   CSNOW = 'D95'
   NSNOW_LAYER = 1
   !
-  CFILE_SNOW    = '                         '
-  CTYPE_SNOW    = '      '
-  CFILEPGD_SNOW    = '                         '
-  CTYPEPGD_SNOW    = '      '  
+  CFILE_SNOW_ISBA = '                         '
+  CTYPE_SNOW      = '      '
+  CFILEPGD_SNOW_ISBA = '                         '
+  CTYPEPGD_SNOW      = '      '  
   !
   LSNOW_IDEAL = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.
@@ -228,12 +228,12 @@ ELSEIF(PRESENT(OUNIF))THEN
     OUNIF=.TRUE.
 ENDIF
 !
-LFILE=(LEN_TRIM(CFILE_SNOW)>0.AND.LEN_TRIM(CTYPE_SNOW)>0 &
-        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0)
+LFILE=(LEN_TRIM(CFILE_SNOW_ISBA)>0.AND.LEN_TRIM(CTYPE_SNOW)>0 &
+        .AND.LEN_TRIM(CFILEPGD_SNOW_ISBA)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0)
 !
 IF(PRESENT(HFILE))THEN 
   IF(LFILE)THEN
-     HFILE = CFILE_SNOW
+     HFILE = CFILE_SNOW_ISBA
   ELSE
      HFILE = '                         '
   ENDIF
@@ -254,7 +254,7 @@ IF(PRESENT(HFILEPGDTYPE))THEN
 ENDIF
 IF(PRESENT(HFILEPGD))THEN 
   IF(LFILE)THEN
-     HFILEPGD = CFILEPGD_SNOW
+     HFILEPGD = CFILEPGD_SNOW_ISBA
   ELSE
      HFILEPGD = '                         '
   ENDIF

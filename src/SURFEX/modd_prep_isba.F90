@@ -36,9 +36,9 @@ SAVE
  CHARACTER(LEN=6)  :: CTYPE          ! input file type
  CHARACTER(LEN=28) :: CFILEPGD_ISBA  ! input file name
  CHARACTER(LEN=6)  :: CTYPEPGD       ! input file type
- CHARACTER(LEN=28) :: CFILE_SNOW     ! input file name for Snow
+ CHARACTER(LEN=28) :: CFILE_SNOW_ISBA  ! input file name for Snow
  CHARACTER(LEN=6)  :: CTYPE_SNOW     ! input file type for Snow
- CHARACTER(LEN=28) :: CFILEPGD_SNOW     ! input file name for Snow
+ CHARACTER(LEN=28) :: CFILEPGD_SNOW_ISBA ! input file name for Snow
  CHARACTER(LEN=6)  :: CTYPEPGD_SNOW     ! input file type for Snow
  CHARACTER(LEN=28) :: CFILE_HUG      ! input file name for Wg, Wgi
  CHARACTER(LEN=6)  :: CTYPE_HUG      ! input file type for Wg, Wgi

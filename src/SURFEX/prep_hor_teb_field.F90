@@ -28,7 +28,7 @@ SUBROUTINE PREP_HOR_TEB_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGD
 !
 USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, XLAT_OUT, XLON_OUT, &
                           XX_OUT, XY_OUT, CMASK
-USE MODD_PREP_TEB, ONLY : XGRID_ROOF, XGRID_ROAD, XGRID_WALL, XGRID_FLOOR, LSNOW_IDEAL, &
+USE MODD_PREP_TEB, ONLY : XGRID_ROOF, XGRID_ROAD, XGRID_WALL, XGRID_FLOOR, LSNOW_IDEAL_TEB, &
                           XWSNOW_ROOF, XRSNOW_ROOF, XTSNOW_ROOF, XASNOW_ROOF,           &
                           XWSNOW_ROAD, XRSNOW_ROAD, XTSNOW_ROAD, XASNOW_ROAD,           &
                           XHUI_BLD, XHUI_BLD_DEF
@@ -119,7 +119,7 @@ IF (HSURF=='SN_ROOF') THEN
                             SIZE(XLAT),TSNOW_ROOF, TTIME,&
                             XWSNOW_ROOF, XRSNOW_ROOF,    &
                             XTSNOW_ROOF, XASNOW_ROOF,    &
-                            LSNOW_IDEAL, ZSG1SNOW,       &
+                            LSNOW_IDEAL_TEB, ZSG1SNOW,   &
                             ZSG2SNOW, ZHISTSNOW, ZAGESNOW )
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
@@ -143,7 +143,7 @@ ELSE IF (HSURF=='SN_ROAD') THEN
                             SIZE(XLAT),TSNOW_ROAD, TTIME,&
                             XWSNOW_ROAD, XRSNOW_ROAD,    &
                             XTSNOW_ROAD, XASNOW_ROAD,    &
-                            LSNOW_IDEAL, ZSG1SNOW,       &
+                            LSNOW_IDEAL_TEB, ZSG1SNOW,       &
                             ZSG2SNOW, ZHISTSNOW, ZAGESNOW )
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)

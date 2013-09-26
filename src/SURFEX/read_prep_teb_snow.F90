@@ -51,8 +51,8 @@ USE MODD_PREP_TEB, ONLY : XWSNOW_ROOF_p=>XWSNOW_ROOF, XTSNOW_ROOF_p=>XTSNOW_ROOF
                           XRSNOW_ROOF_p=>XRSNOW_ROOF, XASNOW_ROOF, &
                           XWSNOW_ROAD_p=>XWSNOW_ROAD, XTSNOW_ROAD_p=>XTSNOW_ROAD, &
                           XRSNOW_ROAD_p=>XRSNOW_ROAD, XASNOW_ROAD, &
-                          CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
-                           CTYPEPGD_SNOW, LSNOW_IDEAL 
+                          CFILE_SNOW_TEB, CTYPE_SNOW, CFILEPGD_SNOW_TEB, &
+                           CTYPEPGD_SNOW, LSNOW_IDEAL_TEB
 !
 USE MODD_PREP_SNOW, ONLY : NSNOW_LAYER_MAX
 !
@@ -86,9 +86,9 @@ INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-NAMELIST/NAM_PREP_TEB_SNOW/CSNOW_ROOF, CSNOW_ROAD, CFILE_SNOW, CTYPE_SNOW, LSNOW_IDEAL, &
-                           CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
-                           XWSNOW_ROOF, XTSNOW_ROOF, XRSNOW_ROOF, XASNOW_ROOF,          &
+NAMELIST/NAM_PREP_TEB_SNOW/CSNOW_ROOF, CSNOW_ROAD, CFILE_SNOW_TEB, CTYPE_SNOW, &
+                           LSNOW_IDEAL_TEB, CFILEPGD_SNOW_TEB, CTYPEPGD_SNOW,      & 
+                           XWSNOW_ROOF, XTSNOW_ROOF, XRSNOW_ROOF, XASNOW_ROOF, &
                            XWSNOW_ROAD, XTSNOW_ROAD, XRSNOW_ROAD, XASNOW_ROAD
 !-------------------------------------------------------------------------------
 !
@@ -102,10 +102,10 @@ IF (LNAM_READ) THEN
   CSNOW_ROOF = '1-L'
   CSNOW_ROAD = '1-L'
   !
-  CFILE_SNOW    = '                         '
-  CTYPE_SNOW    = '      ' 
-  CFILEPGD_SNOW    = '                         '
-  CTYPEPGD_SNOW    = '      '    
+  CFILE_SNOW_TEB = '                         '
+  CTYPE_SNOW     = '      ' 
+  CFILEPGD_SNOW_TEB = '                         '
+  CTYPEPGD_SNOW     = '      '    
   !
   XWSNOW_ROOF(:) = 0.
   XTSNOW_ROOF(:) = XTT
@@ -155,11 +155,11 @@ HSNOW_ROAD = CSNOW_ROAD
 KSNOW_ROOF = 1
 KSNOW_ROAD = 1
 !
-IF (LEN_TRIM(CFILE_SNOW)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 & 
-        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0) THEN
-  IF (PRESENT(HFILE)) HFILE = CFILE_SNOW
+IF (LEN_TRIM(CFILE_SNOW_TEB)>0 .AND. LEN_TRIM(CTYPE_SNOW)>0 & 
+        .AND.LEN_TRIM(CFILEPGD_SNOW_TEB)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0) THEN
+  IF (PRESENT(HFILE)) HFILE = CFILE_SNOW_TEB
   IF (PRESENT(HFILETYPE)) HFILETYPE = CTYPE_SNOW
-  IF (PRESENT(HFILEPGD)) HFILEPGD = CFILEPGD_SNOW
+  IF (PRESENT(HFILEPGD)) HFILEPGD = CFILEPGD_SNOW_TEB
   IF (PRESENT(HFILEPGDTYPE)) HFILEPGDTYPE = CTYPEPGD_SNOW  
 END IF
 !

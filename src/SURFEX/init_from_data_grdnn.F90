@@ -60,7 +60,7 @@ USE MODD_DATA_TEB_GARDEN_n, ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEGTYPE, &
                                    XDATA_ROOTFRAC, LDATA_STRESS,           &
                                    XDATA_DMAX, XDATA_F2I, XDATA_RE25,      &
                                    XDATA_CE_NITRO, XDATA_CF_NITRO,         &
-                                   XDATA_CNA_NITRO  
+                                   XDATA_CNA_NITRO, NTIME  
 
 !
 !
@@ -126,7 +126,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! data every month
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_DATA_GRDN_N',0,ZHOOK_HANDLE)
-ITIME = (KDECADE+2)/3      
+IF (NTIME==12) THEN
+  ITIME = (KDECADE+2)/3    
+ELSEIF (NTIME==1) THEN
+  ITIME = 1
+ENDIF
 !
 !*    2.      SECONDARY VARIABLES
 !             -------------------

@@ -36,9 +36,9 @@ SAVE
  CHARACTER(LEN=6)  :: CTYPE          ! input file type
  CHARACTER(LEN=28) :: CFILEPGD_TEB   ! input file name
  CHARACTER(LEN=6)  :: CTYPEPGD       ! input file type
- CHARACTER(LEN=28) :: CFILE_SNOW     ! input file name for Snow
+ CHARACTER(LEN=28) :: CFILE_SNOW_TEB ! input file name for Snow
  CHARACTER(LEN=6)  :: CTYPE_SNOW     ! input file type for Snow
- CHARACTER(LEN=28) :: CFILEPGD_SNOW     ! input file name for Snow
+ CHARACTER(LEN=28) :: CFILEPGD_SNOW_TEB ! input file name for Snow
  CHARACTER(LEN=6)  :: CTYPEPGD_SNOW     ! input file type for Snow
  CHARACTER(LEN=28) :: CFILE_WS       ! input file name for Ws
  CHARACTER(LEN=6)  :: CTYPE_WS       ! input file type for Ws
@@ -65,7 +65,7 @@ REAL              :: XHUI_BLD_DEF   ! default uniform building interior relative
 !
 ! Snow variables
 !
-LOGICAL :: LSNOW_IDEAL 
+LOGICAL :: LSNOW_IDEAL_TEB 
 !
 REAL, DIMENSION(:), POINTER :: XWSNOW_ROOF      ! snow reservoir   for roofs
 REAL, DIMENSION(:), POINTER :: XTSNOW_ROOF      ! snow density     for roofs

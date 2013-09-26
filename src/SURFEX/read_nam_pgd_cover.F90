@@ -80,7 +80,7 @@ REAL, DIMENSION(JPCOVER) :: XUNIF_COVER ! value of each cover (cover will be
 !                                                   uniform on the horizontal)
 !
  CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
- CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
+ CHARACTER(LEN=6)         :: YCOVERFILETYPE   ! data file type
 REAL                     :: XRM_COVER   ! limit of coverage under which the
                                         ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST   ! limit of coast coverage under which
@@ -100,7 +100,7 @@ REAL                     :: XLAT_ANT    ! Lattitude limit from Orca grid (Antart
 LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_COVER/ YCOVER, YFILETYPE, XUNIF_COVER, XRM_COVER, XRM_COAST, &
+NAMELIST/NAM_COVER/ YCOVER, YCOVERFILETYPE, XUNIF_COVER, XRM_COVER, XRM_COAST, &
                       XRM_LAKE, XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER  
 !
 !-------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ NAMELIST/NAM_COVER/ YCOVER, YFILETYPE, XUNIF_COVER, XRM_COVER, XRM_COAST, &
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_COVER',0,ZHOOK_HANDLE)
 XUNIF_COVER(:) = 0.
 YCOVER         = '                          '
-YFILETYPE      = '      '
+YCOVERFILETYPE      = '      '
 XRM_COVER      = 1.E-6
 XRM_COAST      = 1.0
 XRM_LAKE       = 0.0
@@ -139,7 +139,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_COVER)
 !-------------------------------------------------------------------------------
 !
 HCOVER      = YCOVER      ! file name for cover types
-HFILETYPE   = YFILETYPE   ! data file type
+HFILETYPE   = YCOVERFILETYPE   ! data file type
 PUNIF_COVER = XUNIF_COVER ! value of each cover (cover will be uniform on the horizontal)
 PRM_COVER   = XRM_COVER   ! limit of coverage under which the cover is removed. Default is 1.E-6
 PRM_COAST   = XRM_COAST   ! limit of coast coverage
