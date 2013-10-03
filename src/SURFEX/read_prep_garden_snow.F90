@@ -178,9 +178,11 @@ IF (LNAM_READ) THEN
   !
   !* It is erased by GARDEN namelist if specified
   CALL POSNAM(ILUNAM,'NAM_PREP_GARDEN_SNOW',GFOUND,ILUOUT)
-  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PREP_GARDEN_SNOW)
-  !crocus can't be used in garden if not used in isba scheme
-  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW_GD,'D95','3-L','EBA','NON')
+  IF (GFOUND) THEN
+    READ(UNIT=ILUNAM,NML=NAM_PREP_GARDEN_SNOW)
+    !crocus can't be used in garden if not used in isba scheme
+    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW_GD,'D95','3-L','EBA','NON')
+  ENDIF
   !
   IF (CSNOW_GD=='NON') NSNOW_LAYER_GD = 0
   !
