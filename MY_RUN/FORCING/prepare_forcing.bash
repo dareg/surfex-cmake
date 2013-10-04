@@ -131,7 +131,7 @@ fi
 		echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		echo " "
 		echo " You must set CFORCING_FILETYPE to $option2 in namelist  "
-		echo " ${SRC_SURFEX}/MY_RUN/$1/OPTIONS.nam "
+		echo " ${SRC_SURFEX}/MY_RUN/KTEST/$1/OPTIONS.nam "
 		echo " "
 		echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		echo " "
