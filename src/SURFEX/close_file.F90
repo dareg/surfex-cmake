@@ -33,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ASC
+#if defined(ASC) || defined(ARO) || defined(MNH)
 USE MODI_CLOSE_FILE_ASC
 #endif
 #ifdef FA
@@ -77,7 +77,7 @@ ELSE IF (HPROGRAM=='OFFLIN') THEN
   CALL CLOSE_FILE_OL(HPROGRAM,KUNIT)
 #endif
 ELSE IF (HPROGRAM=='ASCII ') THEN
-#ifdef ASC
+#if defined(ASC) || defined(ARO) || defined(MNH)
   CALL CLOSE_FILE_ASC(HPROGRAM,KUNIT)
 #endif
 ELSE IF (HPROGRAM=='FA    ') THEN

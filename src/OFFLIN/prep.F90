@@ -119,6 +119,7 @@ IDAY     = NUNDEF
 ZTIME    = XUNDEF
 !
 LCPL_ESM = .FALSE.
+LPREP    = .TRUE.
 !
 !     1.2     output listing
 !             --------------
