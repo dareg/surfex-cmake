@@ -1,6 +1,7 @@
 !     #########
-      SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,PZ0ICEZ0SNOW,PRHOTHRESHOLD_ICE,&
-                 PALBICE1,PALBICE2,PALBICE3,PVAGING_NOGLACIER,PVAGING_GLACIER)  
+      SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,PZ0ICEZ0SNOW,PRHOTHRESHOLD_ICE,  &
+                 PALBICE1,PALBICE2,PALBICE3,PVAGING_NOGLACIER,PVAGING_GLACIER,PPERCENTAGEPORE,&
+                 HSNOWMETAMO,HSNOWRAD)  
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for Crocus
@@ -62,6 +63,13 @@ REAL, INTENT(OUT) :: PZ0ICEZ0SNOW
 ! Parameters for ageing effect on albedo
 REAL, INTENT(OUT) :: PVAGING_NOGLACIER,PVAGING_GLACIER
 !
+! percentage of the total pore volume to compute the max liquid water holding capacity      
+REAL, INTENT(OUT) :: PPERCENTAGEPORE
+!
+! Snow metamorphism scheme
+ CHARACTER(*), INTENT(OUT) :: HSNOWMETAMO,HSNOWRAD
+!
+!
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !                                          
@@ -69,34 +77,38 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',0,ZHOOK_HANDLE)
-
-OSNOWDRIFT=.TRUE.
-OSNOWDRIFT_SUBLIM=.FALSE.
-
+!
+OSNOWDRIFT        = .TRUE.
+OSNOWDRIFT_SUBLIM = .FALSE.
+!
 ! Roughness length ratio between ice and snow
-PZ0ICEZ0SNOW=10.
-
+PZ0ICEZ0SNOW = 10.
+!
 ! 3 bands spectral albedo for glacier ice (CROCUS)
 ! Default values from Lejeune et al 2009 (Zongo, Bolivia)
-PALBICE1=0.38
-PALBICE2=0.23
-PALBICE3=0.08
-
+PALBICE1 = 0.38
+PALBICE2 = 0.23
+PALBICE3 = 0.08
+!
 ! Gerbaux et al 2005 (Saint Sorlin)
 ! PALBICE1=0.23
 ! PALBICE2=0.16
 ! PALBICE3=0.05
 !
 ! Density threshold for ice detection kg.m-3
-PRHOTHRESHOLD_ICE=850.
-
-! Parameters for ageing effect on albedo
-PVAGING_NOGLACIER=60.
-PVAGING_GLACIER=900.
-
-
-IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',1,ZHOOK_HANDLE)
+PRHOTHRESHOLD_ICE = 850.
 !
+! Parameters for ageing effect on albedo
+PVAGING_NOGLACIER = 60.
+PVAGING_GLACIER   = 900.
+!
+HSNOWMETAMO = 'B92'
+HSNOWRAD    = 'B92'
+!
+! percentage of the total pore volume to compute the max liquid water holding capacity   !Pahaut 1976
+PPERCENTAGEPORE = 0.05
+!
+IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE DEFAULT_CROCUS

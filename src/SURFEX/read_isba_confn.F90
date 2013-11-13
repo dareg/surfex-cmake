@@ -33,6 +33,7 @@
 !!      Modified by P. Le Moigne (06/2006): seeding and irrigation
 !!      Modified by P. Le Moigne (05/2008): deep soil characteristics
 !!      Modified by R. El Khatib 05-Apr-2012 Fix message handling
+!!      Modified by C. Carmagnola (01/2013): CSNOWMETAMO = 'B92','C13','F06','T07'
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -139,6 +140,9 @@ IF (LNAM_READ) THEN
  !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CCH_DRY_DEP',CCH_DRY_DEP,'      ','WES89 ','NONE  ')
  !
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWMETAMO',CSNOWMETAMO,'B92','C13','F06','T07')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWRAD',CSNOWRAD,'B92','TAR','TA1','TA2')
+ ! 
  !* close namelist file
  !
  CALL CLOSE_NAMELIST(HPROGRAM,INAM)

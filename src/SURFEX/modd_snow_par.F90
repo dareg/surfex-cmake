@@ -61,6 +61,9 @@ REAL, SAVE       :: XRHOTHRESHOLD_ICE
 !for ageing effects
 REAL, SAVE      :: XVAGING_NOGLACIER, XVAGING_GLACIER
 
+! percentage of the total pore volume to compute the max liquid water holding capacity
+REAL, SAVE      :: XPERCENTAGEPORE
+
 ! Height (m) of aged snow in glacier case (allows Pn=1)
 !
 REAL, SAVE       :: XHGLA
@@ -82,6 +85,12 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 !
 ! Logicals for snowdrift and sublimation
 LOGICAL,SAVE    :: LSNOWDRIFT, LSNOWDRIFT_SUBLIM
+
+! Scheme of snow metamorphism
+CHARACTER(3),SAVE :: CSNOWMETAMO
+
+! radiative transfer scheme in snow
+CHARACTER(3),SAVE :: CSNOWRAD
 
 ! Snow Melt timescale with D95 (s): needed to prevent time step 
 ! dependence of melt when snow fraction < unity.
@@ -143,23 +152,22 @@ REAL, PARAMETER       :: XRHOSMAX_ES = 750.  ! (kg m-3)
 !
 ! ISBA-ES Critical snow depth at which snow grid thicknesses constant
 !
-REAL, PARAMETER                      :: XSNOWCRITD = 0.03  ! (m)
+REAL, PARAMETER       :: XSNOWCRITD = 0.03  ! (m)
 !                                       
 ! ISBA-ES Minimum total snow depth for model 
 !
- REAL, PARAMETER                      :: XSNOWDMIN = 0.000001  ! (m)
-!                                       
+ REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
+!                                      
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
-REAL, PARAMETER                      :: X_RI_MAX = 0.20
+REAL, PARAMETER       :: X_RI_MAX = 0.20
 !                                       
 ! ISBA-ES Maximum snow liquid water holding capacity (fraction by mass) parameters:
 !
-REAL, PARAMETER                      :: XWSNOWHOLDMAX2   = 0.10  ! (-) 
-REAL, PARAMETER                      :: XWSNOWHOLDMAX1   = 0.03  ! (-)
-REAL, PARAMETER                      :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
+REAL, PARAMETER       :: XWSNOWHOLDMAX2   = 0.10  ! (-) 
+REAL, PARAMETER       :: XWSNOWHOLDMAX1   = 0.03  ! (-)
+REAL, PARAMETER       :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
 !
-
 !--------------------------------------------------------------------------------
 ! Calibration coefficients for CROCUS albedo computation
 !--------------------------------------------------------------------------------
@@ -172,25 +180,151 @@ REAL, PARAMETER                      :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
 ! REAL, PARAMETER :: XVAGING_SOIL=90. , XVAGING_GLACIER=900. , XVPRES1=87000.
 
 ! modifs SM 20110805 tests SIberie - albedo
-REAL, PARAMETER :: XD1=1., XD2=3., XD3=4., XX=99.,XVALB2=.96, XVALB3=1.58,&
-                   XVALB4=.92,XVALB5=.90,XVALB6=15.4,XVALB7=346.3, XVALB8=32.31,&  
-                   XVALB9=.88,XVALB10=.200,XVALB11=.6,XVDIOP1=2.3E-3, &
-                   XVRPRE1=.5,XVRPRE2=1.5
+REAL, PARAMETER :: XD1 = 1., XD2 = 3., XD3 = 4., XX = 99., &
+                   XVALB2 = .96, XVALB3 = 1.58, XVALB4 = .92, XVALB5 = .90, &
+                   XVALB6 = 15.4, XVALB7 = 346.3, XVALB8 = 32.31, XVALB9 = .88, &
+                   XVALB10 = .200, XVALB11 = .6, XVDIOP1 = 2.3E-3, XVRPRE1 = .5, &
+                   XVRPRE2=1.5
+!
 ! for ageing effects:
-REAL, PARAMETER :: XVPRES1=87000.
+REAL, PARAMETER :: XVPRES1 = 87000.
 ! REAL, PARAMETER :: XZ_SWE_ALB=5.
 ! end modifs SM 20110805 tests SIberie - albedo
-
-
+!
 ! for spectral distribution and thickness effects
-REAL, PARAMETER :: XVSPEC1=.71, XVSPEC2=.21 , XVSPEC3=.08
+REAL, PARAMETER :: XVSPEC1 = .71, XVSPEC2 = .21, XVSPEC3 = .08
 ! modif SM 20110519
 !REAL, PARAMETER :: XVSPEC1=.68, XVSPEC2=.25 , XVSPEC3=.07
 ! end modif SM 20110519
 ! for thickness effects
-REAL, PARAMETER :: XVW1=.80, XVW2=.20 , XVD1=.02, XVD2=.01
+REAL, PARAMETER :: XVW1 = .80, XVW2 = .20 , XVD1 = .02, XVD2 = .01
+!
 !--------------------------------------------------------------------------------
+! calibration coefficients for exctinction computation
+REAL, PARAMETER :: XVBETA1 = 1.92E-3, XVBETA2 = 40., XVBETA3 = 1.098E-2, &
+                   XVBETA4 = 100.,  XVBETA5 = 2000.
+!
+!--------------------------------------------------------------------------------
+! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER :: XSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
+REAL, PARAMETER :: XSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
+!
+! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
+! (sig only for new snow OR high altitudes)
+! from Sun et al. (1999): based on data from Jordan (1991)
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER :: XSNOWTHRMCOND_AVAP = -0.06023 ! [W/(m K)]
+REAL, PARAMETER :: XSNOWTHRMCOND_BVAP = -2.5425  ! (W/m)
+REAL, PARAMETER :: XSNOWTHRMCOND_CVAP = -289.99  ! (K)
+!
+! Crocus thermal conducitivity coefficient from Yen (1981)
+REAL, PARAMETER :: XVRKZ6 = 1.88
+!
+!--------------------------------------------------------------------------------
+! ISBA-ES CROCUS (Pahaut 1976): snowfall density coefficients:
+!
+REAL, PARAMETER :: XSNOWFALL_A_SN = 109.0  ! kg/m3
+REAL, PARAMETER :: XSNOWFALL_B_SN =   6.0  ! kg/(m3 K)
+REAL, PARAMETER :: XSNOWFALL_C_SN =  26.0  ! kg/(m7/2 s1/2)
+!
+! Coefficients for the optimal vertical grid calculation
+REAL, PARAMETER :: XDZ1 = 0.01
+REAL, PARAMETER :: XDZ2 = 0.0125
+REAL, PARAMETER :: XDZ3 = 0.015
+REAL, PARAMETER :: XDZ3_BIS = 0.03
+REAL, PARAMETER :: XDZ4 = 0.04
+REAL, PARAMETER :: XDZ5 = 0.05
+REAL, PARAMETER :: XDZ_BASE = 0.02
+REAL, PARAMETER :: XDZ_INTERNAL = 0.07
+REAL, PARAMETER :: XSCALE_CM = 100.
+REAL,DIMENSION(5), PARAMETER :: XDZMAX_INTERNAL = (/0.5,1.,2.,4.,10./)
+REAL, PARAMETER :: XDZMIN_TOP_EXTREM = 0.0001
+!
+! Below this threshold of snowfall, new snowfall are aggregated with surface layer to avoid numerical problems
+! (0.03 mm/h)
+REAL,PARAMETER :: XSNOWFALL_THRESHOLD = 0.0333/3600.
 
+! The ratio between a new surface layer thickness and the second layer surface thickness is limited to 1/10
+REAL,PARAMETER :: XRATIO_NEWLAYER = 0.1
+
+! Coefficients for cases with very thick snowpacks
+REAL, PARAMETER :: XDEPTH_THRESHOLD1 = 3.
+REAL, PARAMETER :: XDEPTH_THRESHOLD2 = 20.
+REAL, PARAMETER :: XDEPTH_SURFACE = 3.
+!
+! Coefficients for computing the difference in 2 snow layer characteristics
+REAL, PARAMETER :: XDIFF_1 = 20.
+REAL, PARAMETER :: XDIFF_MAX = 200.
+REAL, PARAMETER :: XSCALE_DIFF = 25.
+!
+! Coeefficients for snow layer splitting
+REAL, PARAMETER :: XDZMIN_TOP = 0.01
+REAL, PARAMETER :: XDZMIN_TOP_BIS = 0.005
+REAL, PARAMETER :: XDZMIN_BOT = 0.02
+REAL, PARAMETER :: XSPLIT_COEF = 8.
+!
+! Coeefficients for snow layer agregation 
+REAL, PARAMETER :: XAGREG_COEF_1 = 5.
+REAL, PARAMETER :: XAGREG_COEF_2 = 4.5
+!
+!--------------------------------------------------------------------------------
+!
+! Calibration coefficients
+REAL, PARAMETER :: XVTIME = 48*3600. ! characteristic time for
+!compaction and metamorphism by wind drift
+!
+REAL, PARAMETER :: XVROMAX = 350. !  maximum density for
+! drift compaction     UNIT : kg m-3
+REAL, PARAMETER :: XVROMIN = 50.  !  minimum density for
+! mobility computation UNIT : kg m-3
+REAL, PARAMETER :: XVMOB1 = 0.295  !  coefficient for computing
+! the mobility index
+REAL, PARAMETER :: XVMOB2 = 0.833  !  coefficient for computing
+! the mobility index
+REAL, PARAMETER :: XVMOB3 = 0.583  !  coefficient for computing
+! the mobility index
+REAL, PARAMETER :: XVMOB4 = -0.0583 !  coefficient for computing
+! the mobility index
+REAL, PARAMETER :: XVDRIFT1 = 2.868 !  coefficient for computing
+! the drift index
+REAL, PARAMETER :: XVDRIFT2 = 0.085 !  coefficient for computing
+! the drift index
+REAL, PARAMETER :: XVDRIFT3 = 3.25  !  coefficient for computing
+! the drift index
+REAL, PARAMETER :: XVSIZEMIN = 3.E-4 !  minimum size decrease 
+! by drift  UNIT = m
+!
+! modif_EB pour sublim 
+! a pour but de tenir compte du fait que le vent moyen est > rafales
+! on en tient compte egalement pour diminuer la duree de l'effet
+REAL, PARAMETER :: XCOEF_FF = 1.25 ! coefficient for gust diagnosis from average wind 
+REAL, PARAMETER :: XCOEF_EFFECT = 1.0 ! coefficient for impact on density du drift
+REAL, PARAMETER :: XQS_REF = 2.E-5 ! valeur de reference de ZQS pour effet neige
+!
+!--------------------------------------------------------------------------------
+!
+! ISBA-ES snow grid parameters
+!
+REAL, PARAMETER, DIMENSION(3)     :: XSGCOEF1  = (/0.25, 0.50, 0.25/) 
+REAL, PARAMETER, DIMENSION(2)     :: XSGCOEF2  = (/0.05, 0.34/)       
+REAL, PARAMETER, DIMENSION(10)    :: XSGCOEF3  = (/0.025, 0.033, 0.043, &
+                                     0.055, 0.071, 0.091, 0.117, 0.150, &
+                                     0.193, 0.247/) 
+!
+! Minimum total snow depth at which surface layer thickness is constant:
+!
+REAL, PARAMETER                   :: XSNOWTRANS = 0.20                ! (m)
+REAL, PARAMETER                   :: XSNOWTRANS1 = 0.40                ! (m)
+REAL, PARAMETER                   :: XSNOWTRANS2 = 0.6061                ! (m)
+REAL, PARAMETER                   :: XSNOWTRANS3 = 0.7143               ! (m)
+REAL, PARAMETER                   :: XSNOWTRANS4 = 0.9259                ! (m)
+REAL, PARAMETER                   :: XSNOWTRANS5 = 1.4493                ! (m)
+!
+!------------------------------------------------------------------------------
+!
 END MODULE MODD_SNOW_PAR
 
 
