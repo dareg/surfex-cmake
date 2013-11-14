@@ -1423,7 +1423,7 @@ REAL :: ZGRADT, ZTELM, ZVDENT, ZDENT, ZSPHE, ZVAP, ZDANGL, &
         ZSIZE, ZSSA, ZSSA0, ZSSA_T, ZSSA_T_DT, ZA, ZB, ZC, &
         ZA2, ZB2, ZC2, ZOPTD, ZOPTR, ZOPTR0, ZDRDT
 REAL :: ZVDENT1, ZVDENT2, ZVSPHE, ZCOEF_SPH
-REAL :: ZDENOM1, ZDENOM2, ZFACT                          
+REAL :: ZDENOM1, ZDENOM2, ZFACT1, ZFACT2                          
 INTEGER :: INLVLS
 INTEGER :: JST,JJ                                !Loop controls 
 INTEGER :: IDRHO, IDGRAD, IDTEMP           !Indices for values from Flanner 2006
@@ -1470,7 +1470,6 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       ! X COEF
       ZVSPHE = XVSPHE1
       ! FOR C13
-      GCOND_SPH = ( ZSPHE < 1.-XUEPSI )
       ZCOEF_SPH = 2.      
       !
     ELSEIF ( ZGRADT<XVGRAT1 ) THEN
@@ -1487,7 +1486,6 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       ! X COEF
       ZVSPHE = XVSPHE1
       ! FOR C13
-      GCOND_SPH = ( ZSPHE < 1.-XUEPSI )
       ZCOEF_SPH = 2.
       !
     ELSE
@@ -1505,7 +1503,6 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       ! X COEF
       ZVSPHE = XUNDEF 
       ! FOR C13
-      GCOND_SPH = ( ZSPHE > XUEPSI )
       ZCOEF_SPH = 3.
       !
     ENDIF       
@@ -1580,7 +1577,13 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       !
       ! SPHERICITY
       ZSPHE = PSNOWGRAN2(JJ,JST) + ZVDENT2 * PTSTEP
-      CALL SET_THRESH(ZGRADT,PSNOWLIQ(JJ,JST),ZSPHE)
+      CALL SET_THRESH(ZGRADT,PSNOWLIQ(JJ,JST),ZSPHE)      
+      IF ( PSNOWLIQ(JJ,JST)>XUEPSI .OR. ZGRADT<XVGRAT1 ) THEN
+        GCOND_SPH = ( ZSPHE < 1.-XUEPSI )
+      ELSE 
+        GCOND_SPH = ( ZSPHE > XUEPSI )
+      ENDIF
+      !      
       IF ( GCOND_C13 .AND. PSNOWGRAN1(JJ,JST)<XVDIAM6*(4.-ZSPHE)-XUEPSI ) THEN
         ! 1.1.1 CAS DENDRITIQUE/DENDRITIC CASE.
         !
@@ -1623,7 +1626,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       !
       IF ( PSNOWLIQ(JJ,JST)<=XUEPSI .AND. CSNOWMETAMO=='T07' ) THEN   
         !    
-        WRITE(*,*) CSNOWMETAMO,': you are using T07 formulation!!'
+     !   WRITE(*,*) CSNOWMETAMO,': you are using T07 formulation!!'
         !
         ! Coefficients from Taillander et al. 2007
         ZSSA0 = 6./( XRHOLI*XVDIAM6 ) * 10.
@@ -1652,11 +1655,15 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
         ! Compute SSA (rate equation with Taylor series)
         ZSSA = 6./( XRHOLI*PSNOWGRAN1(JJ,JST) ) * 10.
         !
-       ZDENOM1 = (PSNOWAGE(JJ,JST)*24.) + EXP(ZC/ZB)
-         ZDENOM2 = (PSNOWAGE(JJ,JST)*24.) + EXP(ZC2/ZB2)
-        ZFACT = 0.5 + 0.5*TANH( 0.5*(ZGRADT-10.) )
-        ZSSA = ZSSA + (PTSTEP/3600.) * ZFACT * ( (-ZB/ZDENOM1) + (-ZB2/ZDENOM2) + &
-                                                 (PTSTEP/3600.) * ( (ZB/ZDENOM1**2.) + (ZB2/ZDENOM2**2.) ) * 1./2. )
+        ZDENOM1 = (PSNOWAGE(JJ,JST)*24.) + EXP(ZC/ZB)
+        ZDENOM2 = (PSNOWAGE(JJ,JST)*24.) + EXP(ZC2/ZB2)
+        ZFACT1 = 0.5 + 0.5*TANH( 0.5*(ZGRADT-10.) )
+        ZFACT2 = 0.5 - 0.5*TANH( 0.5*(ZGRADT-10.) )
+        ZSSA = ZSSA + (PTSTEP/3600.) * (                   ZFACT1 * (-ZB/ZDENOM1)    + ZFACT2 * (-ZB2/ZDENOM2)   + &
+                                        (PTSTEP/3600.) * ( ZFACT1 * (ZB/ZDENOM1**2.) + ZFACT2 * (ZB2/ZDENOM2**2.) ) * 1./2. )
+        !ZSSA = ZSSA + (PTSTEP/3600.) * (  ZFACT1 * ZB /ZDENOM1 * ( 1./ZDENOM1 * (PTSTEP/3600.) * 1./2. - 1. ) + &
+        !                                  ZFACT2 * ZB2/ZDENOM2 * ( 1./ZDENOM2 * (PTSTEP/3600.) * 1./2. - 1. ) )
+         !                                      
         ZSSA = MAX( ZSSA, 8.*10. )
         !
         PSNOWGRAN1(JJ,JST) = 6./( XRHOLI*ZSSA ) * 10.
@@ -1669,7 +1676,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       !---------------------------------
       ELSEIF ( PSNOWLIQ(JJ,JST)<=XUEPSI .AND. CSNOWMETAMO=='F06' )THEN   
         !
-        WRITE(*,*) CSNOWMETAMO,': you are using F06 formulation!!'
+      !  WRITE(*,*) CSNOWMETAMO,': you are using F06 formulation!!'
         !
         ! XDRDT0(dens,gradT,T), XTAU(dens,gradT,T), XKAPPA(dens,gradT,T)
         ! dens: [1-8 <-> 50.-400. kg/m3]
@@ -1913,15 +1920,15 @@ DO JJ=1, SIZE(PALBEDOSC)
     PALBEDOSC(JJ) = ZANSMIN(JJ)
   ELSE
     !
-    CALL GET_ALB(PSNOWRHO(JJ,1),PPS(JJ),ZVAGE1(JJ),PSNOWGRAN1_TOP(JJ),&
+    CALL GET_ALB(JJ,PSNOWRHO(JJ,1),PPS(JJ),ZVAGE1(JJ),PSNOWGRAN1_TOP(JJ),&
                  PSNOWGRAN2_TOP(JJ),PSNOWAGE_TOP(JJ),ZALB_TOP(JJ,:))
     !                  
 !      IF (KNLVLS_USE(JJ)>=1) THEN
     IF ( KNLVLS_USE(JJ)>=2 ) THEN !modif ML
       ! second surface layer when it exists 
       !
-      CALL GET_ALB(PSNOWRHO(JJ,2),PPS(JJ),ZVAGE1(JJ),PSNOWGRAN1_BOT(JJ),&
-                   PSNOWGRAN2_BOT(JJ),MIN(115.,PSNOWAGE_BOT(JJ)),ZALB_BOT(JJ,:))
+      CALL GET_ALB(JJ,PSNOWRHO(JJ,2),PPS(JJ),ZVAGE1(JJ),PSNOWGRAN1_BOT(JJ),&
+                   PSNOWGRAN2_BOT(JJ),MIN(365.,PSNOWAGE_BOT(JJ)),ZALB_BOT(JJ,:))
       !
     ELSE
       ! when it does not exist, the second surface layer gets top layer albedo   
@@ -1955,7 +1962,7 @@ IF (LHOOK) CALL DR_HOOK('SNOWCROALB',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOWCROALB
 !####################################################################
-SUBROUTINE GET_ALB(PSNOWRHO_IN,PPS_IN,PVAGE1,PSNOWGRAN1,PSNOWGRAN2,PSNOWAGE,PALB)
+SUBROUTINE GET_ALB(KJ,PSNOWRHO_IN,PPS_IN,PVAGE1,PSNOWGRAN1,PSNOWGRAN2,PSNOWAGE,PALB)
 !
 USE MODD_SNOW_PAR, ONLY : XALBICE1, XALBICE2, XALBICE3,   &
                           XRHOTHRESHOLD_ICE,              &
@@ -1968,6 +1975,7 @@ USE MODE_SNOW3L, ONLY : GET_DIAM
 !
 IMPLICIT NONE
 !
+INTEGER, INTENT(IN) :: KJ
 REAL, INTENT(IN) :: PSNOWRHO_IN, PPS_IN
 REAL, INTENT(IN) :: PVAGE1
 REAL, INTENT(IN) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE
@@ -1991,7 +1999,7 @@ IF ( PSNOWRHO_IN<XRHOTHRESHOLD_ICE ) THEN
  ! AGE CORRECTION ONLY FOR VISIBLE BAND
  
 ! ! ! ! ! 		PALB(1)=MAX(XVALB11,PALB(1)-MIN(MAX(PPS_IN/XVPRES1,XVRPRE1), &
-! ! ! ! ! 			XVRPRE2)*XVALB10*MIN(115.,ZAGE_NOW-PSNOWAGE)/PVAGE1)
+! ! ! ! ! 			XVRPRE2)*XVALB10*MIN(365.,ZAGE_NOW-PSNOWAGE)/PVAGE1)
 
   PALB(1) = MAX( XVALB11, PALB(1) - MIN( MAX(PPS_IN/XVPRES1,XVRPRE1), XVRPRE2 ) * &
                    XVALB10 * PSNOWAGE / PVAGE1 )

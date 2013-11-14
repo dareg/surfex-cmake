@@ -399,7 +399,7 @@ REAL, DIMENSION(:,:,:), INTENT(OUT) :: PCOSSALB !co single scattering albedo of 
 REAL,DIMENSION(SIZE(PSNOWSSA,1),SIZE(PSNOWSSA,2)) :: ZABS_IMP
 !
 INTEGER :: JIMP !loop counter
-INTEGER :: JB, JL !loop counter
+INTEGER :: JB, JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -410,16 +410,22 @@ PCOSSALB = 0.
 DO JB = 1,NPNBANDS
   DO JIMP = 1,NPNIMP
     DO JL = 1,KMAX_USE
-      WHERE ( KNLVLS_USE>=JL )
-        ZABS_IMP(:,JL)       = -XREFIMP_I(JB,JIMP)
-        PCOSSALB(:,JL,JB) = PCOSSALB(:,JL,JB) + &
-                                    12. * XPI / ( XPWAVELENGTHS_M(JB)*PSNOWSSA(:,JL) ) * &
-                                    PSNOWIMP_CONTENT(:,JL,JIMP) / PSNOWIMP_DENSITY(:,JL,JIMP) * &
-                                    ZABS_IMP(:,JL) !doc equation 79
-      ENDWHERE
-    END DO
-  END DO
-END DO
+      DO JJ = 1,SIZE(KNLVLS_USE)
+        !
+        IF ( KNLVLS_USE(JJ)>=JL ) THEN
+          !
+          ZABS_IMP(JJ,JL)       = -XREFIMP_I(JB,JIMP)
+          PCOSSALB(JJ,JL,JB) = PCOSSALB(JJ,JL,JB) + &
+                                      12. * XPI / ( XPWAVELENGTHS_M(JB)*PSNOWSSA(JJ,JL) ) * &
+                                      PSNOWIMP_CONTENT(JJ,JL,JIMP) / PSNOWIMP_DENSITY(JJ,JL,JIMP) * &
+                                      ZABS_IMP(JJ,JL) !doc equation 79
+          !
+        ENDIF
+        !
+      ENDDO
+    ENDDO
+  ENDDO
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO',1,ZHOOK_HANDLE)
 !
@@ -455,7 +461,7 @@ REAL, DIMENSION(SIZE(PSNOWSSA,1),SIZE(PSNOWSSA,2),NPNBANDS) :: ZIMPCOSSALB ! co-
 !
 REAL, DIMENSION(SIZE(PSNOWSSA,1),SIZE(PSNOWSSA,2)) :: ZC,ZPHI
 !
-INTEGER :: JB,JL !loop counter
+INTEGER :: JB,JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -463,28 +469,30 @@ IF (LHOOK) CALL DR_HOOK('SINGLE_SCATTERING_OPTICAL_PARAMETERS',0,ZHOOK_HANDLE)
 !
 CALL SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,ZSNOWG00,ZSNOWY,ZSNOWW,ZSNOWB)
 !
-DO JB = 1,NPNBANDS
+DO JL = 1,KMAX_USE
   !
-  DO JL = 1,KMAX_USE
+  DO JJ =1,SIZE(PSNOWSSA,1)
     !
-    WHERE( KNLVLS_USE>=JL )
+    IF ( KNLVLS_USE(JJ)>=JL ) THEN
       !
-      ! calculation of the spectral asymmetry parameter of snow
-      ZC(:,JL) = XCONST_C(JB) / PSNOWSSA(:,JL)
-      !    
-      PSNOWG(:,JL,JB) = XGINF(JB) - ( XGINF(JB) - ZSNOWG00(:,JL,JB) ) * &
-                                     EXP( -ZSNOWY(:,JL,JB)*ZC(:,JL) )
+      DO JB = 1,NPNBANDS
+        !
+        ! calculation of the spectral asymmetry parameter of snow
+        ZC(JJ,JL) = XCONST_C(JB) / PSNOWSSA(JJ,JL)
+        !    
+        PSNOWG(JJ,JL,JB) = XGINF(JB) - ( XGINF(JB)-ZSNOWG00(JJ,JL,JB) ) * EXP( -ZSNOWY(JJ,JL,JB)*ZC(JJ,JL) )
+       !
+        ! co- single scattering albedo of pure snow
+        ZPHI        (JJ,JL)       = 2./3. * ZSNOWB(JJ,JL,JB) / ( 1.-ZSNOWW(JJ,JL,JB) )
+        ZSNOWCOSSALB(JJ,JL,JB) = 0.5 * ( 1.-ZSNOWW(JJ,JL,JB) ) * ( 1.-EXP( -ZPHI(JJ,JL)*ZC(JJ,JL) ) ) !doc equation 76
+        !    
+      ENDDO
       !
-      ! co- single scattering albedo of pure snow
-      ZPHI        (:,JL)       = 2./3. * ZSNOWB(:,JL,JB) / ( 1.-ZSNOWW(:,JL,JB) )
-      ZSNOWCOSSALB(:,JL,JB) = 0.5 * ( 1.-ZSNOWW(:,JL,JB) ) * &
-                                    ( 1.-EXP( -ZPHI(:,JL)*ZC(:,JL) ) ) !doc equation 76
-      !    
-    ENDWHERE
+    ENDIF
     !
-  END DO
+  ENDDO
   !
-END DO
+ENDDO
 !
 !adding co- single scattering albedo for impureties
 CALL IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO(PSNOWSSA,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,&
@@ -519,7 +527,7 @@ REAL, DIMENSION(:,:,:), INTENT(OUT) :: PSNOWALBEDO ! Albedo (npoints,nlayer,nban
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PKESTAR !Asymptotic Flux Extinction Coefficent (npoints,nlayer,nbands) 
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PG_STAR,PSSALB_STAR,PGAMMA1,PGAMMA2 !(npoints,nlayer,nbands) 
 !
-INTEGER :: JB,JL !loop counter
+INTEGER :: JB,JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -529,30 +537,34 @@ DO JB = 1,NPNBANDS
   !
   DO JL = 1,KMAX_USE
     !
-    WHERE ( KNLVLS_USE>=JL )
+    DO JJ =1,SIZE(PSNOWG,1)
       !
-      PG_STAR    (:,JL,JB) = PSNOWG    (:,JL,JB) / ( 1. + PSNOWG(:,JL,JB) ) !doc equation 12
-      PSSALB_STAR(:,JL,JB) = PSNOWSSALB(:,JL,JB) * ( 1. - PSNOWG(:,JL,JB)**2 ) / &
-                                    ( 1. - PSNOWG(:,JL,JB)**2 * PSNOWSSALB(:,JL,JB) ) !doc equation 16
+      IF ( KNLVLS_USE(JJ)>=JL ) THEN
+        !
+        PG_STAR    (JJ,JL,JB) = PSNOWG    (JJ,JL,JB) / ( 1. + PSNOWG(JJ,JL,JB) ) !doc equation 12
+        PSSALB_STAR(JJ,JL,JB) = PSNOWSSALB(JJ,JL,JB) * ( 1. - PSNOWG(JJ,JL,JB)**2 ) / &
+                                      ( 1. - PSNOWG(JJ,JL,JB)**2 * PSNOWSSALB(JJ,JL,JB) ) !doc equation 16
+        !
+        ! Jimenez-Aquino, J. and Varela, J. R., (2005)
+        PGAMMA1(JJ,JL,JB) =  0.25 * ( 7. - PSSALB_STAR(JJ,JL,JB)*(4.+3.*PG_STAR(JJ,JL,JB)) )      !doc equation 38
+        PGAMMA2(JJ,JL,JB) = -0.25 * ( 1. - PSSALB_STAR(JJ,JL,JB)*(4.-3.*PG_STAR(JJ,JL,JB)) )      !doc equation 39
+        !
+        PKESTAR    (JJ,JL,JB) = SQRT( PGAMMA1(JJ,JL,JB)**2 - PGAMMA2(JJ,JL,JB)**2 )                     !doc equation 42
+        PSNOWALBEDO(JJ,JL,JB) = ( PGAMMA1(JJ,JL,JB)-PKESTAR(JJ,JL,JB) ) / PGAMMA2(JJ,JL,JB)  !doc equation 43
+        !
+        ! Modif M Lafaysse to avoid division by 0
+        !NB JJ note that this variable can be negative in infra-red wavelengths (it represents the albedo only in smallest wavelengths
+        IF ( ABS(PSNOWALBEDO(JJ,JL,JB))<XUEPSI ) THEN
+          PSNOWALBEDO(JJ,JL,JB) = SIGN( XUEPSI, PSNOWALBEDO(JJ,JL,JB) )
+        ENDIF
+        !
+      ENDIF
       !
-      ! Jimenez-Aquino, J. and Varela, J. R., (2005)
-      PGAMMA1(:,JL,JB) =  0.25 * ( 7. - PSSALB_STAR(:,JL,JB)*(4.+3.*PG_STAR(:,JL,JB)) )      !doc equation 38
-      PGAMMA2(:,JL,JB) = -0.25 * ( 1. - PSSALB_STAR(:,JL,JB)*(4.-3.*PG_STAR(:,JL,JB)) )      !doc equation 39
-      !
-      PKESTAR    (:,JL,JB) = SQRT( PGAMMA1(:,JL,JB)**2 - PGAMMA2(:,JL,JB)**2 )                     !doc equation 42
-      PSNOWALBEDO(:,JL,JB) = ( PGAMMA1(:,JL,JB)-PKESTAR(:,JL,JB) ) / PGAMMA2(:,JL,JB)  !doc equation 43
-      !
-      ! Modif M Lafaysse to avoid division by 0
-      !NB : note that this variable can be negative in infra-red wavelengths (it represents the albedo only in smallest wavelengths
-      WHERE ( ABS(PSNOWALBEDO(:,JL,JB))<XUEPSI )
-        PSNOWALBEDO(:,JL,JB) = SIGN( XUEPSI, PSNOWALBEDO(:,JL,JB) )
-      ENDWHERE
-      !
-    END WHERE
+    ENDDO
     !
-  END DO
+  ENDDO
   !
-END DO
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('INFINITE_MEDIUM_OPTICAL_PARAMETERS',1,ZHOOK_HANDLE)
 !
@@ -693,9 +705,9 @@ INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective lay
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PGP !GP vector (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PGM !GM vector (npoints,nlayer,nbands)
 !
-REAL,DIMENSION(SIZE(PKESTAR,1)) :: ZGAMMA3,ZGAMMA4,ZG ! intermediate terms
+REAL :: ZGAMMA3,ZGAMMA4,ZG ! intermediate terms
 !
-INTEGER :: JB,JL !loop counter
+INTEGER :: JB,JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -709,13 +721,19 @@ DO JB = 1,NPNBANDS
   !
   DO JL = 1,KMAX_EFF(JB)
     !
-    WHERE ( PSW_RAD(:,JB)>0. .AND. KNLVLS_EFF(:,JB)>=JL )
-      ZGAMMA3 = 0.25 * ( 2. - 3.*PG_STAR(:,JL,JB)*PCOSZEN ) !doc equation 28
-      ZGAMMA4 = 0.25 * ( 2. + 3.*PG_STAR(:,JL,JB)*PCOSZEN ) !doc equation 27
-      ZG = PCOSZEN**2 * PSSALB_STAR(:,JL,JB) / ( (PKESTAR(:,JL,JB)*PCOSZEN)**2 - 1. ) !factor eq 44-45
-      PGP(:,JL,JB) = ZG * ( (PGAMMA1(:,JL,JB)-1./PCOSZEN)*ZGAMMA3 + PGAMMA2(:,JL,JB)*ZGAMMA4 ) !doc equation 45
-      PGM(:,JL,JB) = ZG * ( (PGAMMA1(:,JL,JB)+1./PCOSZEN)*ZGAMMA4 + PGAMMA2(:,JL,JB)*ZGAMMA3 ) !doc equation 44
-    ENDWHERE
+    DO JJ =1,SIZE(PSW_RAD,1)
+      !
+      IF ( PSW_RAD(JJ,JB)>0. .AND. KNLVLS_EFF(JJ,JB)>=JL ) THEN
+        !
+        ZGAMMA3 = 0.25 * ( 2. - 3.*PG_STAR(JJ,JL,JB)*PCOSZEN(JJ) ) !doc equation 28
+        ZGAMMA4 = 0.25 * ( 2. + 3.*PG_STAR(JJ,JL,JB)*PCOSZEN(JJ) ) !doc equation 27
+        ZG = PCOSZEN(JJ)**2 * PSSALB_STAR(JJ,JL,JB) / ( (PKESTAR(JJ,JL,JB)*PCOSZEN(JJ))**2 - 1. ) !factor eq 44-45
+        PGP(JJ,JL,JB) = ZG * ( (PGAMMA1(JJ,JL,JB)-1./PCOSZEN(JJ))*ZGAMMA3 + PGAMMA2(JJ,JL,JB)*ZGAMMA4 ) !doc equation 45
+        PGM(JJ,JL,JB) = ZG * ( (PGAMMA1(JJ,JL,JB)+1./PCOSZEN(JJ))*ZGAMMA4 + PGAMMA2(JJ,JL,JB)*ZGAMMA3 ) !doc equation 44
+        !
+      ENDIF
+      !
+      ENDDO
     !
   END DO
   !
@@ -770,25 +788,29 @@ DO JB = 1,NPNBANDS
 !           PRINT*,"WARNING ZFDIAG ",JL," BAND ",JB," : ",EXP(-PKESTAR(1,JL,JB)*PDTAUSTAR(1,JL,JB))     
 !       END IF
 !
-    WHERE ( JL<=KNLVLS_EFF(:,JB)-1 )
+    DO JI =1,SIZE(KNLVLS_EFF,1)
       !
-      !See matrix documentation page 8 and formal expressions page 9
-      ZFDIAG(:) = EXP( -PKESTAR(:,JL,JB)*PDTAUSTAR(:,JL,JB) )
-      !    
-      !Décalage d'un indice vers la droite par rapport au code python
-      PDM(:,JL*2,JB)   = ( 1. - PSNOWALBEDO(:,JL,JB)*PSNOWALBEDO(:,JL+1,JB) ) * ZFDIAG
-      PDM(:,JL*2+1,JB) = ( 1./PSNOWALBEDO(:,JL,JB) - PSNOWALBEDO(:,JL,JB) )   * 1./ZFDIAG
-      !  
-      PD(:,JL*2,JB)    = ( 1. - PSNOWALBEDO(:,JL+1,JB)/PSNOWALBEDO(:,JL,JB) ) * 1./ZFDIAG
-      PD(:,JL*2+1,JB)  = PSNOWALBEDO(:,JL,JB) - PSNOWALBEDO(:,JL+1,JB)
-      !    
-      !Décalage d'un indice vers la gauche par rapport au code python
-      PDP(:,JL*2,JB)   = PSNOWALBEDO(:,JL+1,JB) * PSNOWALBEDO(:,JL+1,JB) - 1.
-      PDP(:,JL*2+1,JB) = PSNOWALBEDO(:,JL,JB) - 1./PSNOWALBEDO(:,JL+1,JB)
+      IF ( JL<=KNLVLS_EFF(JI,JB)-1 ) THEN
+        !
+        !See matrix documentation page 8 and formal expressions page 9
+        ZFDIAG(JI) = EXP( -PKESTAR(JI,JL,JB)*PDTAUSTAR(JI,JL,JB) )
+        !    
+        !Décalage d'un indice vers la droite par rapport au code python
+        PDM(JI,JL*2,JB)   = ( 1. - PSNOWALBEDO(JI,JL,JB)*PSNOWALBEDO(JI,JL+1,JB) ) * ZFDIAG(JI)
+        PDM(JI,JL*2+1,JB) = ( 1./PSNOWALBEDO(JI,JL,JB) - PSNOWALBEDO(JI,JL,JB) )   * 1./ZFDIAG(JI)
+        !  
+        PD(JI,JL*2,JB)    = ( 1. - PSNOWALBEDO(JI,JL+1,JB)/PSNOWALBEDO(JI,JL,JB) ) * 1./ZFDIAG(JI)
+        PD(JI,JL*2+1,JB)  = PSNOWALBEDO(JI,JL,JB) - PSNOWALBEDO(JI,JL+1,JB)
+        !    
+        !Décalage d'un indice vers la gauche par rapport au code python
+        PDP(JI,JL*2,JB)   = PSNOWALBEDO(JI,JL+1,JB) * PSNOWALBEDO(JI,JL+1,JB) - 1.
+        PDP(JI,JL*2+1,JB) = PSNOWALBEDO(JI,JL,JB) - 1./PSNOWALBEDO(JI,JL+1,JB)
+        !
+      ENDIF
       !
-    ENDWHERE
+    ENDDO
     !
-  END DO
+  ENDDO
   !  
   PDP(:,1,JB) = 1. !Décalage d'un indice vers la gauche par rapport au code python
   PD (:,1,JB) = 1.
@@ -831,7 +853,7 @@ INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (n
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PVECTOR !output vector V
 !
-REAL :: ZDGP,ZDGM
+REAL :: ZDGP,ZDGM,ZEXP
 !
 INTEGER :: JB,JL,JI !loop counter
 !
@@ -843,28 +865,23 @@ PVECTOR(:,1,:) = -PGM(:,1,:)
 !
 DO JB = 1,NPNBANDS
   !
-  DO JL = 1,KMAX_EFF(JB)
+  DO JI = 1,SIZE(PSNOWALBEDO,1)
     !
-    DO JI = 1,SIZE(PSNOWALBEDO,1)
+    DO JL = 1,KMAX_EFF(JB)
       !
       IF ( JL<=KNLVLS_EFF(JI,JB)-1 ) THEN
         !
         ZDGP = PGP(JI,JL+1,JB) - PGP(JI,JL,JB) !doc equation 58
         ZDGM = PGM(JI,JL+1,JB) - PGM(JI,JL,JB) !doc equation 58
         !
+        ZEXP = EXP( -PTAUSTAR(JI,JL,JB)/PCOSZEN(JI) )
         !see expression doc page 9
-        PVECTOR(JI,2*JL,JB)   = ( ZDGM - PSNOWALBEDO(JI,JL+1,JB) * ZDGP ) &
-                                       * EXP( -PTAUSTAR(JI,JL,JB)/PCOSZEN(JI) )
-        PVECTOR(JI,2*JL+1,JB) = ( ZDGP - PSNOWALBEDO(JI,JL,JB)   * ZDGM ) &
-                                       * EXP( -PTAUSTAR(JI,JL,JB)/PCOSZEN(JI) )
+        PVECTOR(JI,2*JL,JB)   = ( ZDGM - PSNOWALBEDO(JI,JL+1,JB) * ZDGP ) * ZEXP 
+        PVECTOR(JI,2*JL+1,JB) = ( ZDGP - PSNOWALBEDO(JI,JL,JB)   * ZDGM ) * ZEXP 
         !
       END IF
       !
     END DO
-    !
-  END DO
-  !  
-  DO JI = 1,SIZE(PSNOWALBEDO,1)
     !
     PVECTOR(JI,2*KNLVLS_EFF(JI,JB),JB) = ( PSOILALBEDO(JI,JB) * &
                                             ( PGM(JI,KNLVLS_EFF(JI,JB),JB) + PCOSZEN(JI) ) - &
@@ -905,22 +922,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SOLVES_TWO_STREAM2',0,ZHOOK_HANDLE)
 !
+! for now we inverse the matrix twice :
+! to be improved by adding a dimension in tridiag_ground_snowcro
+CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
+                            PVECT_DIR(:,:,:),ZX0_DIR(:,:,:),  &
+                            2*KNLVLS_EFF(:,:),0)
+!
+CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
+                            PVECT_DIF(:,:,:),ZX0_DIF(:,:,:),  &
+                            2*KNLVLS_EFF(:,:),0)
+!
 !for now we always compute everything
 DO JB = 1,NPNBANDS
-  !
-  ! for now we inverse the matrix twice :
-  ! to be improved by adding a dimension in tridiag_ground_snowcro
-  !
-  CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,JB),PD(:,:,JB),PDP(:,:,JB), &
-                              PVECT_DIR(:,:,JB),ZX0_DIR(:,:,JB),  &
-                              2*KNLVLS_EFF(:,JB),0)
-  !                
-  CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,JB),PD(:,:,JB),PDP(:,:,JB), &
-                              PVECT_DIF(:,:,JB),ZX0_DIF(:,:,JB),  &
-                              2*KNLVLS_EFF(:,JB),0)
-  !
+  !  
   DO JL=1,KMAX_EFF(JB)
+    !
     DO JI=1,SIZE(PDM,1)
+      !
       IF ( JL<=KNLVLS_EFF(JI,JB) ) THEN
         PXA_DIR(JI,JL,JB) = ZX0_DIR(JI,JL*2-1,JB)
         PXA_DIF(JI,JL,JB) = ZX0_DIF(JI,JL*2-1,JB)
@@ -932,7 +950,9 @@ DO JB = 1,NPNBANDS
         PXD_DIR(JI,JL,JB) = PXB_DIR(JI,JL,JB) / PSNOWALBEDO(JI,JL,JB)
         PXD_DIF(JI,JL,JB) = PXB_DIF(JI,JL,JB) / PSNOWALBEDO(JI,JL,JB)
       END IF
+      !
     END DO
+    !
   END DO
   !
 END DO
@@ -1003,9 +1023,9 @@ INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (n
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PEPROFILE ! energy absorbed by each layer (W/m^2) npoints,nlayer,nbands)
 !
-REAL,DIMENSION(SIZE(KNLVLS_EFF,1)):: ZDEXP, ZFDU, ZFDD, ZSTAR
+REAL :: ZDEXP, ZFDU, ZFDD, ZSTAR
 !
-INTEGER::JB,JL !loop counter
+INTEGER::JB,JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1013,46 +1033,50 @@ IF (LHOOK) CALL DR_HOOK('ENERGY_PROFILE',0,ZHOOK_HANDLE)
 
 DO JB = 1,NPNBANDS
   !
-  ZSTAR(:) = PKESTAR(:,1,JB) * PDTAUSTAR(:,1,JB)
-  !
-  !surface layer doc equation 64
-  PEPROFILE(:,1,JB) = ( PCOSZEN - ( PXC(:,1,JB)+PXD(:,1,JB)+PGP(:,1,JB) ) ) + &
-                          ( PXC(:,1,JB) * EXP(   -ZSTAR(:) ) + PXD(:,1,JB) * EXP(    ZSTAR(:) ) + &
-                            PGP(:,1,JB) * EXP( -PDTAUSTAR(:,1,JB)/PCOSZEN) ) - &
-                          ( PXA(:,1,JB) * EXP(   -ZSTAR(:) ) + PXB(:,1,JB) * EXP(    ZSTAR(:) ) + &
-                            PGM(:,1,JB) * EXP( -PDTAUSTAR(:,1,JB)/PCOSZEN) + &
-                                PCOSZEN * EXP( -PTAUSTAR (:,1,JB)/PCOSZEN) ) 
-  !
-  !internal layers
-  ! 
-  DO JL = 2,KMAX_EFF(JB)
-    !  
-    ZSTAR(:) = PKESTAR(:,JL,JB) * PDTAUSTAR(:,JL,JB)
+  DO JJ =1,SIZE(PEPROFILE,1)
     !
-    WHERE ( JL<=KNLVLS_EFF(:,JB) )
-      !
-      !last factor in equations 62 and 63
-      ZDEXP = EXP( -PTAUSTAR(:,JL  ,JB)/PCOSZEN ) - EXP( -PTAUSTAR(:,JL-1,JB)/PCOSZEN )
-      !
-      !doc equation 62
-      ZFDU = PXC(:,JL,JB) * ( EXP(-ZSTAR(:)) -1. ) + &
-             PXD(:,JL,JB) * ( EXP( ZSTAR(:)) -1. ) + PGP(:,JL,JB) * ZDEXP
-      !
-      !doc equation 63
-      ZFDD = PXA(:,JL,JB) * ( EXP(-ZSTAR(:)) -1. ) + &
-             PXB(:,JL,JB) * ( EXP( ZSTAR(:)) -1. ) + ( PGM(:,JL,JB) + PCOSZEN ) * ZDEXP
-      !      
-      PEPROFILE(:,JL,JB) = ZFDU - ZFDD !doc equation 61
-      !
-    ELSEWHERE
-      !
-      PEPROFILE(:,JL,JB) = 0.
-      !
-    ENDWHERE
+    ZSTAR = PKESTAR(JJ,1,JB) * PDTAUSTAR(JJ,1,JB)
     !
-  END DO
+    !surface layer doc equation 64
+    PEPROFILE(JJ,1,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
+                            ( PXC(JJ,1,JB) * EXP(-ZSTAR) + PXD(JJ,1,JB) * EXP(ZSTAR) + &
+                              PGP(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSZEN(JJ)) ) - &
+                            ( PXA(JJ,1,JB) * EXP(-ZSTAR) + PXB(JJ,1,JB) * EXP(ZSTAR) + &
+                              PGM(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSZEN(JJ)) + &
+                               PCOSZEN(JJ) * EXP( -PTAUSTAR (JJ,1,JB)/PCOSZEN(JJ)) ) 
+    !
+    !internal layers
+    ! 
+    DO JL = 2,KMAX_EFF(JB)
+      !  
+      ZSTAR = PKESTAR(JJ,JL,JB) * PDTAUSTAR(JJ,JL,JB)
+      !
+      IF ( JL<=KNLVLS_EFF(JJ,JB) ) THEN
+        !
+        !last factor in equations 62 and 63
+        ZDEXP = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSZEN(JJ) ) - EXP( -PTAUSTAR(JJ,JL-1,JB)/PCOSZEN(JJ) )
+        !
+        !doc equation 62
+        ZFDU = PXC(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
+               PXD(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + PGP(JJ,JL,JB) * ZDEXP
+        !
+        !doc equation 63
+        ZFDD = PXA(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
+               PXB(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + ( PGM(JJ,JL,JB) + PCOSZEN(JJ) ) * ZDEXP
+        !      
+        PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
+        !
+      ELSE
+        !
+        PEPROFILE(JJ,JL,JB) = 0.
+        !
+      ENDIF
+      !
+    ENDDO
+    !
+  ENDDO
   !
-END DO
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('ENERGY_PROFILE',1,ZHOOK_HANDLE)
 !
@@ -1398,12 +1422,11 @@ DO JL = 1,SIZE(PSNOWRHO,2)
   DO JJ = 1,SIZE(PSNOWRHO,1)
     !
     IF ( JL<=KNLVLS_USE(JJ) ) THEN
+      !
       CALL GET_DIAM(PSNOWGRAN1(JJ,JL),PSNOWGRAN2(JJ,JL),ZDIAM)
-    ELSE
-      ZDIAM = PSNOWGRAN1(JJ,JL)
+      ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)
+      !
     ENDIF
-    !
-    ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)
     !
   ENDDO
   !
