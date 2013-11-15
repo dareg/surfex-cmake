@@ -48,6 +48,7 @@ SUBROUTINE INIT_ISBA_n    (HPROGRAM,HINIT,OLAND_USE,                    &
 !!      A.L. Gibelin   06/09 : soil carbon initialisation
 !!      B. Decharme    07/11 : read pgd+prep
 !!      R. Alkama      05/12 : new carbon spinup
+!!      J.Escobar      11/13 : add USE MODI_DEFAULT_CROCUS
 !!
 !-------------------------------------------------------------------------------
 !
@@ -102,6 +103,7 @@ USE MODI_READ_NAM_PREP_ISBA_n
 USE MODI_SET_SURFEX_FILEIN
 !
 USE MODI_END_IO_SURF_n
+USE MODI_DEFAULT_CROCUS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

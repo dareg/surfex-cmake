@@ -20,6 +20,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original        11/2011
+!!      J.Escobar       11/2013 : ajout use MODI_CH_OPEN_INPUTB
 !!-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -31,6 +32,7 @@ USE MODI_READ_SURF
 USE MODI_ABOR1_SFX
 USE MODI_CH_CONVERSION_FACTOR
 USE MODI_BUILD_PRONOSLIST_n
+USE MODI_CH_OPEN_INPUTB
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

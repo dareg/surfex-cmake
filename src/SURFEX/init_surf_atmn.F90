@@ -44,6 +44,7 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!     (B.Decharme)  07/2011  Read pgd+prep
 !!     (S. Queguiner)  2011   Modif chemistry (2.4)
 !!     (B. Decharme)   2013   Read grid only once in AROME case
+!!     (G. Tanguy)     2013   Add IF(ALLOCATED(NMASK_FULL))  before deallocate
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -315,7 +316,7 @@ IF (HINIT=='PRE') THEN
   NSIZE = NDIM_FULL
   CALL END_IO_SURF_n(HPROGRAM)
   !Initialize full mask with good dimension
-  DEALLOCATE(NMASK_FULL)
+  IF ( ALLOCATED(NMASK_FULL) ) DEALLOCATE(NMASK_FULL)
   CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
   CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
   ALLOCATE(NWORK(NDIM_FULL))

@@ -30,6 +30,7 @@
 !!    ------------
 !!
 !!    Original    03/2010
+!!    J.Escobar   11/2013   Add USE MODI_PGD_TEB_GREENROOF
 !!
 !----------------------------------------------------------------------------
 !
@@ -61,6 +62,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
+USE MODI_PGD_TEB_GREENROOF
 !
 IMPLICIT NONE
 !
