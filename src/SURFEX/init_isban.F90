@@ -48,7 +48,7 @@ SUBROUTINE INIT_ISBA_n    (HPROGRAM,HINIT,OLAND_USE,                    &
 !!      A.L. Gibelin   06/09 : soil carbon initialisation
 !!      B. Decharme    07/11 : read pgd+prep
 !!      R. Alkama      05/12 : new carbon spinup
-!!
+!!      J.Escobar      11/13 : add USE MODI_DEFAULT_CROCUS
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -92,6 +92,7 @@ USE MODI_DEFAULT_ISBA
 USE MODI_DEFAULT_CH_DEP
 USE MODI_DEFAULT_CH_BIO_FLUX
 USE MODI_DEFAULT_DIAG_ISBA
+USE MODI_DEFAULT_CROCUS
 USE MODI_READ_DEFAULT_ISBA_n
 USE MODI_READ_ISBA_CONF_n
 USE MODI_READ_PREP_ISBA_SNOW

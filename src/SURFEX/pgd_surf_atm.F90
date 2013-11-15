@@ -30,6 +30,7 @@
 !!
 !!    Original     13/10/03
 !!      A. Lemonsu      05/2009         Ajout de la clef LGARDEN pour TEB
+!!      J. Escobar      11/2013         Add USE MODI_READ_NAM_PGD_CHEMISTRY
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -53,6 +54,7 @@ USE MODI_READ_PGD_ARRANGE_COVER
 USE MODI_READ_PGD_COVER_GARDEN
 USE MODI_INI_DATA_COVER
 USE MODI_READ_PGD_SCHEMES
+USE MODI_READ_NAM_PGD_CHEMISTRY
 USE MODI_READ_NAM_WRITE_COVER_TEX
 USE MODI_WRITE_COVER_TEX_START
 USE MODI_WRITE_COVER_TEX_COVER

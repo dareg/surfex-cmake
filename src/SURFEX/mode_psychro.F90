@@ -23,7 +23,8 @@ MODULE MODE_PSYCHRO
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    12/04/11 
+!!      Original    12/04/11
+!!      J.Escobar   11/13 :  remove space in ELSEWHERE statement
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -123,9 +124,9 @@ ALPHA(:) = LOG(ZPE(:)/1000.)
 WHERE (PT .GE. XTT .AND. PT .GE. 93.+XTT)
         PTD = XTT+6.54+14.526*ALPHA+0.7389*ALPHA*ALPHA+0.09486*ALPHA**3 &
               +0.4569*(ZPE/1000.)**0.1984
-      ELSE WHERE (PT .LT. XTT)
+      ELSEWHERE (PT .LT. XTT)
         PTD = XTT+6.09+12.608*ALPHA+0.4959*ALPHA*ALPHA
-ELSE WHERE
+ELSEWHERE
         PTD = XUNDEF
 END WHERE
 PTD(:) = MIN(PTD(:), PT(:))
