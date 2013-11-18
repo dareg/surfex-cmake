@@ -154,7 +154,7 @@ F77FLAGS  =    -f0 $(OPT)
 FX90 = $(F90)        
 FX90FLAGS =    -f0 $(OPT)
 # 
-LDFLAGS += $(OPT) -Wl,-Z,1G 
+LDFLAGS += $(OPT) -Wl,-Z,80G 
 #
 #
 # preprocessing flags 
