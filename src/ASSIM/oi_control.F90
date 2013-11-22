@@ -138,6 +138,7 @@ TYPE (DATE_TIME)            :: TTIME                ! Current date and time
 INTEGER                     :: ISIZE
 INTEGER                     :: ISIZE1
 LOGICAL                     :: LLKEEPEXTZONE
+LOGICAL                     :: LPRINT=.FALSE.
 
 ! Arrays for soil OI analysis
 REAL, DIMENSION (:,:), ALLOCATABLE :: PWS, PWP, PTS, PTP, PTL, PSNS, PRSMIN, PD2, PLAI, PVEG

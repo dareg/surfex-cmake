@@ -200,6 +200,8 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: ICH      ! unit of input chemical file
 INTEGER           :: IVERSION, IBUGFIX       ! surface version
 !
+INTEGER           :: ISIZE_OMP(0:0)
+!
 LOGICAL           :: LZENITH  ! is the PZENITH field initialized ?
 !
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZFRAC_TILE     ! fraction of each surface type
@@ -382,8 +384,10 @@ NGRID_PAR=SIZE(XGRID_PAR)
 !        2.3. Initialize zenith and azimuth angles if not done yet
 !
 LZENITH = ALL(PZENITH /= XUNDEF)
-IF (.NOT. LZENITH) &
-  CALL SUNPOS(KYEAR, KMONTH, KDAY, PTIME, XLON, XLAT, ZTSUN, ZZENITH, ZAZIM)
+IF (.NOT. LZENITH) THEN
+  CALL GET_SIZES_PARALLEL(1,KI,0,ISIZE_OMP)
+  CALL SUNPOS(ISIZE_OMP,KYEAR, KMONTH, KDAY, PTIME, XLON, XLAT, ZTSUN, ZZENITH, ZAZIM)
+ENDIF
 
 !
 IF (HPROGRAM/='AROME '.AND.NRANK==NPIO) THEN
