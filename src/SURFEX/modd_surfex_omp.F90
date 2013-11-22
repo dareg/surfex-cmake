@@ -22,6 +22,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       26/06/12
+!!      Modified    11/2013 by J.Escobar :add !$ to inhibit completly omp dependency  
+!!-------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -30,13 +32,13 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 #ifdef AIX64 
-USE OMP_LIB
+!$ USE OMP_LIB
 #endif
 !
 IMPLICIT NONE
 !
 #ifndef AIX64
-INCLUDE 'omp_lib.h'
+!$ INCLUDE 'omp_lib.h'
 #endif
 !
 INTEGER :: NBLOCKTOT = 1

@@ -44,6 +44,7 @@
 !!      (J.Stein)            01:04/96  bug correction for ZZEANG     
 !!      (K. Suhre)           14/02/97  bug correction for ZLON0     
 !!      (V. Masson)          01/03/03  add zenithal angle output
+!!      (J.Escobar)           11/2013  add !$ to inhibit completly omp dependency  
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -56,13 +57,13 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 #ifdef AIX64
-USE OMP_LIB
+!$ USE OMP_LIB
 #endif
 !
 IMPLICIT NONE
 !
 #ifndef AIX64
-INCLUDE 'omp_lib.h'
+!$ INCLUDE 'omp_lib.h'
 #endif
 !
 !*       0.1   Declarations of dummy arguments :

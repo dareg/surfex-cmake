@@ -62,7 +62,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 #ifdef AIX64
-USE OMP_LIB
+!$ USE OMP_LIB
 #endif
 !
 IMPLICIT NONE
@@ -70,7 +70,7 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 #ifndef AIX64
-INCLUDE 'omp_lib.h'
+!$ INCLUDE 'omp_lib.h'
 #endif
 !
 ! global variables
