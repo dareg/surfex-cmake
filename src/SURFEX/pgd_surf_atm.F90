@@ -61,7 +61,6 @@ USE MODI_WRITE_COVER_TEX_COVER
 USE MODI_LATLON_GRID
 USE MODI_PUT_PGD_GRID
 USE MODI_LATLONMASK
-USE MODI_PGD_GAUSS_INDEX
 USE MODI_PGD_FRAC
 USE MODI_PGD_COVER
 USE MODI_PGD_OROGRAPHY
@@ -137,10 +136,6 @@ ALLOCATE(XJPDIR(NSIZE_FULL))
 !
 !*    2.4     mask to limit the number of input data to read
  CALL LATLONMASK      (CGRID,NGRID_PAR,XGRID_PAR,LLATLONMASK)
-!
-!*    2.5     gaussien grid mesh index
-!
-IF(CGRID=='GAUSS') CALL PGD_GAUSS_INDEX(HPROGRAM,OZS)
 !
 !-------------------------------------------------------------------------------
 !
