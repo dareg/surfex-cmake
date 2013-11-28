@@ -29,7 +29,8 @@ USE MODD_GET_MESH_INDEX_GAUSS, ONLY : XXCEN, XYCEN, XYINF, XYSUP, XXINF, XXSUP, 
                                       NNLATI, NNLOPA, XLAPO, XLOPO, XCODIL, XSINTS,   &
                                       XLON, XLAT, XCOST, XSINTC, XCOSN, XSINN, XLONP, &
                                       XLATP, XCOSP, XSINP, XPI, X1, X2, XDR,          &
-                                      NFRACDX, NFRACGX, NFRACDY, NFACTY, XXDIF, XYDIF
+                                      NFRACDX, NFRACGX, NFRACDY, NFACTY, XXDIF, XYDIF,&
+                                      LROTSTRETCH
 !
 USE MODE_GRIDTYPE_GAUSS
 !
@@ -162,6 +163,12 @@ IF (.NOT. ALLOCATED(NNLOPA)) THEN
     ENDDO
   ENDDO
   !
+  !*    3.     Find if rotated pole and/or stretching to improve CPU time
+  !            ----------------------------------------------------------
+  !
+  LROTSTRETCH = .TRUE.
+  IF (XCODIL==1.0.AND.XLAPO==90.0.AND.XLOPO==0.0) LROTSTRETCH = .FALSE.
+  !
 ENDIF
 !
 ISIZE = SIZE(PLAT)/KNBLINES
@@ -209,7 +216,12 @@ DO JJ=1,KNBLINES
   XCOST (JJ) = COS(XLAT(JJ))
 ENDDO
 !
-CALL XY_GAUSS(XCODIL,ISIZE,ZNODATA,ZVALUE,ZY,ZX)
+IF (LROTSTRETCH) THEN
+  CALL XY_GAUSS(XCODIL,ISIZE,ZNODATA,ZVALUE,ZY,ZX)
+ELSE
+  ZX(:) = PLON(:)
+  ZY(:) = PLAT(:) 
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',0,ZHOOK_HANDLE)

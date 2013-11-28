@@ -97,7 +97,8 @@ IF (NRANK==NPIO) THEN
   !
   !*      1.    Define configuration parameters
   !
-  IF (HFORCING_FILETYPE == 'BINARY') READ(261,*) YSWAP
+  YSWAP='N'
+  IF (HFORCING_FILETYPE == 'BINARY') READ(21,*) YSWAP
   IF (YSWAP.EQ.'Y') THEN 
     LITTLE_ENDIAN_ARCH=.NOT.LITTLE_ENDIAN_ARCH
     WRITE(ILUOUT,*) '*******************************************************************'
@@ -106,17 +107,17 @@ IF (NRANK==NPIO) THEN
     WRITE(ILUOUT,*) '*******************************************************************'
   ENDIF
   !
-  READ(261,*) INI
+  READ(21,*) INI
   NNI_FORC = INI
   !
-  READ(261,*) INB_FORC
-  READ(261,*) PTSTEP_FORC
+  READ(21,*) INB_FORC
+  READ(21,*) PTSTEP_FORC
   PDURATION = ( INB_FORC - 1 ) * PTSTEP_FORC
   !
-  READ(261,*) IYEAR
-  READ(261,*) IMONTH
-  READ(261,*) IDAY
-  READ(261,*) ZTIME
+  READ(21,*) IYEAR
+  READ(21,*) IMONTH
+  READ(21,*) IDAY
+  READ(21,*) ZTIME
   !
 #ifndef NOMPI  
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
@@ -171,10 +172,10 @@ IF (NRANK==NPIO) THEN
 #endif  
   !
   IF (INI==1) THEN
-    READ(UNIT=261,FMT='(F15.8)') ZWORK0
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
     ZWORK(:) = ZWORK0
   ELSE
-    READ(UNIT=261,FMT='(50(F15.8))') ZWORK
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
 #ifndef NOMPI  
@@ -190,10 +191,10 @@ IF (NRANK==NPIO) THEN
 #endif
   !
   IF (INI==1) THEN
-    READ(UNIT=261,FMT='(F15.8)') ZWORK0
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
     ZWORK(:) = ZWORK0
   ELSE
-    READ(UNIT=261,FMT='(50(F15.8))') ZWORK
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
 #ifndef NOMPI  
@@ -209,10 +210,10 @@ IF (NRANK==NPIO) THEN
 #endif
   !
   IF (INI==1) THEN
-    READ(UNIT=261,FMT='(F15.8)') ZWORK0
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
     ZWORK(:) = ZWORK0
   ELSE
-    READ(UNIT=261,FMT='(50(F15.8))') ZWORK
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
 #ifndef NOMPI  
@@ -228,10 +229,10 @@ IF (NRANK==NPIO) THEN
 #endif
   !
   IF (INI==1) THEN
-    READ(UNIT=261,FMT='(F15.8)') ZWORK0
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
     ZWORK(:) = ZWORK0
   ELSE
-    READ(UNIT=261,FMT='(50(F15.8))') ZWORK
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
 #ifndef NOMPI  
@@ -247,10 +248,10 @@ IF (NRANK==NPIO) THEN
 #endif 
   !
   IF (INI==1) THEN
-    READ(UNIT=261,FMT='(F15.8)') ZWORK0
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
     ZWORK(:) = ZWORK0
   ELSE
-    READ(UNIT=261,FMT='(50(F15.8))') ZWORK
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
 #ifndef NOMPI  

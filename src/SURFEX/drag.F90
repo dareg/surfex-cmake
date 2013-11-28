@@ -71,6 +71,7 @@
 !!                            when hug(i)Qsat < Qa and Qsat > Qa
 !!      (A.Boone)    21/11/11 Add Rs_max limit for dry conditions with Etv
 !!      (B. Decharme)   09/12 limitation of Ri in surface_ri.F90
+!!      (C. Ardilouze)  09/13 Halstead coef set to 0 for very low values
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -183,7 +184,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFF, PFFG, PFFG_NOSNOW, PFFV_NOSNOW
 !
 !*      0.2    declarations of local variables
 !
-!
+REAL, PARAMETER            :: ZHVLIM = 1.E-12 ! set halstead coef to 0 at this limit
 !
 REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
 !                                              ZQSAT = specific humidity at saturation
@@ -285,6 +286,10 @@ ZZHV(:)       = MAX(0.,SIGN(1.,ZQSAT(:)-PQA(:))) ! condensation on foilage if = 
 PHV(:)        = PDELTA(:) + (1.- PDELTA(:))*                                    &
                 ( PRA(:) + PRS(:)*(1.0 - ZZHV(:)) )*                            &
                 ( (1/(PRA(:)+PRS(:))) - (ZZHV(:)*(1.-PF5(:))/(PRA(:)+XRS_MAX)) )
+!
+WHERE(PHV(:)<ZHVLIM)
+      PHV(:)=0.0
+ENDWHERE
 !
 !-------------------------------------------------------------------------------
 !
@@ -396,6 +401,10 @@ ENDIF
 PHV(:)        = PDELTA(:) + (1.- PDELTA(:))*                                       &
                 ( PRA(:) + PRS(:)*(1.0 - ZZHV(:)) )*                               &
                 ( (1/(PRA(:)+PRS(:))) - (ZZHV(:)*(1.-PF5(:))/(PRA(:)+XRS_MAX)) )
+!
+WHERE(PHV(:)<ZHVLIM)
+      PHV(:)=0.0
+ENDWHERE
 !                
 IF (LHOOK) CALL DR_HOOK('DRAG',1,ZHOOK_HANDLE)
 !

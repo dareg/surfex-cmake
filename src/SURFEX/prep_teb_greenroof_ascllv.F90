@@ -32,9 +32,9 @@ USE MODD_PGDWORK,           ONLY : CATYPE
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
 USE MODD_SURF_PAR,          ONLY : XUNDEF
 USE MODD_PREP_TEB_GREENROOF,ONLY : CTYPE_HUG     , CTYPE_TG     , &
-                                   CFILE_HUG_SURF, CFILE_TG_SURF, &
-                                   CFILE_HUG_ROOT, CFILE_TG_ROOT, &
-                                   CFILE_HUG_DEEP, CFILE_TG_DEEP  
+                                   CFILE_HUG_SURF_GR, CFILE_TG_SURF_GR, &
+                                   CFILE_HUG_ROOT_GR, CFILE_TG_ROOT_GR, &
+                                   CFILE_HUG_DEEP_GR, CFILE_TG_DEEP_GR  
 USE MODI_PGD_FIELD
 USE MODI_GET_LATLONMASK_n
 !
@@ -89,11 +89,11 @@ SELECT CASE(HSURF)
 !
   CASE('WG     ')
 
-    CALL PGD_FIELD(HPROGRAM,'HUG_SURF: relative humidity','TWN',CFILE_HUG_SURF,   &
+    CALL PGD_FIELD(HPROGRAM,'HUG_SURF: relative humidity','TWN',CFILE_HUG_SURF_GR,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,1))  
-    CALL PGD_FIELD(HPROGRAM,'HUG_ROOT: relative humidity','TWN',CFILE_HUG_ROOT,   &
+    CALL PGD_FIELD(HPROGRAM,'HUG_ROOT: relative humidity','TWN',CFILE_HUG_ROOT_GR,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,2))  
-    CALL PGD_FIELD(HPROGRAM,'HUG_DEEP: relative humidity','TWN',CFILE_HUG_DEEP,   &
+    CALL PGD_FIELD(HPROGRAM,'HUG_DEEP: relative humidity','TWN',CFILE_HUG_DEEP_GR,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,3))  
 
     ALLOCATE(PFIELD(IL,3,NVEGTYPE))
@@ -107,11 +107,11 @@ SELECT CASE(HSURF)
 
   CASE('TG     ')
 
-    CALL PGD_FIELD(HPROGRAM,'TG_SURF: temperature','TWN',CFILE_TG_SURF,   &
+    CALL PGD_FIELD(HPROGRAM,'TG_SURF: temperature','TWN',CFILE_TG_SURF_GR,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,1))  
-    CALL PGD_FIELD(HPROGRAM,'TG_ROOT: temperature','TWN',CFILE_TG_ROOT,   &
+    CALL PGD_FIELD(HPROGRAM,'TG_ROOT: temperature','TWN',CFILE_TG_ROOT_GR,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,2))  
-    CALL PGD_FIELD(HPROGRAM,'TG_DEEP: temperature','TWN',CFILE_TG_DEEP,   &
+    CALL PGD_FIELD(HPROGRAM,'TG_DEEP: temperature','TWN',CFILE_TG_DEEP_GR,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,3))  
 
     ALLOCATE(PFIELD(IL,3,NVEGTYPE))

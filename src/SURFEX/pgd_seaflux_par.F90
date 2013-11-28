@@ -78,7 +78,7 @@ INTEGER               :: JTIME     ! loop counter on time
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-INTEGER            :: NTIME
+INTEGER            :: NTIME_SST
 INTEGER, PARAMETER :: NTIME_MAX    = 365
 !
 REAL, DIMENSION(NTIME_MAX)     :: XUNIF_SST        ! sea surface temperature
@@ -95,7 +95,7 @@ LOGICAL                        :: LSST_DATA
  CHARACTER(LEN=6),  DIMENSION(NTIME_MAX)   :: CFTYP_SST        ! sea surface temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_DATA_SEAFLUX/NTIME, LSST_DATA, XUNIF_SST, CFNAM_SST, CFTYP_SST, &
+NAMELIST/NAM_DATA_SEAFLUX/NTIME_SST, LSST_DATA, XUNIF_SST, CFNAM_SST, CFTYP_SST, &
                             NYEAR_SST, NMONTH_SST, NDAY_SST, XTIME_SST  
 !-------------------------------------------------------------------------------
 !
@@ -103,7 +103,7 @@ NAMELIST/NAM_DATA_SEAFLUX/NTIME, LSST_DATA, XUNIF_SST, CFNAM_SST, CFTYP_SST, &
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX_PAR',0,ZHOOK_HANDLE)
-NTIME             = 12
+NTIME_SST         = 12
 XUNIF_SST (:)     = XUNDEF ! sea surface temperature
 !
 CFNAM_SST (:)     = '                            '
@@ -133,12 +133,12 @@ OSST_DATA         = LSST_DATA
 IF (.NOT. LSST_DATA .AND. LHOOK) CALL DR_HOOK('PGD_SEAFLUX_PAR',1,ZHOOK_HANDLE)
 IF (.NOT. LSST_DATA) RETURN
 !
-IF (NTIME > NTIME_MAX) THEN
-   WRITE(ILUOUT,*)'NTIME SHOULD NOT EXCEED',NTIME_MAX
+IF (NTIME_SST > NTIME_MAX) THEN
+   WRITE(ILUOUT,*)'NTIME_SST SHOULD NOT EXCEED',NTIME_MAX
    CALL ABOR1_SFX('PGD_SEAFLUX_PAR: NTIME TOO BIG')
 ENDIF
-ALLOCATE(XDATA_SST     (NDIM,NTIME))
-ALLOCATE(TDATA_SST     (NTIME))
+ALLOCATE(XDATA_SST     (NDIM,NTIME_SST))
+ALLOCATE(TDATA_SST     (NTIME_SST))
 !
 !-------------------------------------------------------------------------------
 !
@@ -147,7 +147,7 @@ ALLOCATE(TDATA_SST     (NTIME))
 !
 CATYPE = 'ARI'
 !
-DO JTIME=1,NTIME
+DO JTIME=1,NTIME_SST
   CALL PGD_FIELD(HPROGRAM,'SST: sea surface temperature','SEA',CFNAM_SST(JTIME),   &
                    CFTYP_SST(JTIME),XUNIF_SST(JTIME),XDATA_SST(:,JTIME))  
 !                 

@@ -48,12 +48,12 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_ABOR1_SFX
 !
-USE MODD_PREP_TEB_GREENROOF,   ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
-                                      CTYPEPGD_SNOW, LSNOW_IDEAL, &
-                                      XWSNOW_p=>XWSNOW, XTSNOW_p=>XTSNOW, &
-                                      XRSNOW_p=>XRSNOW, XASNOW 
+USE MODD_PREP_TEB_GREENROOF,   ONLY : CFILE_SNOW_GR, CTYPE_SNOW, CFILEPGD_SNOW_GR, &
+                                      CTYPEPGD_SNOW, LSNOW_IDEAL_GR, &
+                                      XWSNOW_p=>XWSNOW_GR, XTSNOW_p=>XTSNOW_GR, &
+                                      XRSNOW_p=>XRSNOW_GR, XASNOW_GR
 !
-USE MODD_PREP_SNOW,            ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX
+USE MODD_PREP_SNOW,            ONLY : NSNOW_LAYER_MAX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -75,8 +75,16 @@ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, &
-                                    XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+CHARACTER(LEN=3) :: CSNOW
+INTEGER :: NSNOW_LAYER
+CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
+LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT
+REAL :: XASNOW
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, XSG1SNOW, XSG2SNOW,&
+                                    XHISTSNOW, XAGESNOW
+!
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, &
+                                    XSG1SNOW_GR, XSG2SNOW_GR, XHISTSNOW_GR, XAGESNOW_GR
 !
 LOGICAL           :: LFILE
 !
@@ -91,38 +99,37 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             XWSNOW, XTSNOW, XRSNOW, XASNOW,              &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
 
-NAMELIST/NAM_PREP_GREENROOF_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
-                            CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
-                            LSNOW_IDEAL, XWSNOW, XTSNOW, XRSNOW, XASNOW
+NAMELIST/NAM_PREP_GREENROOF_SNOW/CSNOW_GR, NSNOW_LAYER_GR, CFILE_SNOW_GR, CTYPE_SNOW, &
+                            CFILEPGD_SNOW_GR, CTYPEPGD_SNOW,                & 
+                            LSNOW_IDEAL_GR, XWSNOW_GR, XTSNOW_GR, XRSNOW_GR, XASNOW_GR
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_PREP_GREENROOF_SNOW',0,ZHOOK_HANDLE)
 !
 !* default for greenroofs
 !  ----------------------
-CSNOW       = '3-L'
-NSNOW_LAYER = 3
+CSNOW_GR       = '3-L'
+NSNOW_LAYER_GR = 3
 !
 IF (LNAM_READ) THEN
   !
-  CSNOW          = '3-L'
-  NSNOW_LAYER    = 3
+  CSNOW_GR          = '3-L'
+  NSNOW_LAYER_GR    = 3
   !
-  CFILE_SNOW     = '                         '
+  CFILE_SNOW_GR     = '                         '
   CTYPE_SNOW     = '      '  
-  CFILEPGD_SNOW    = '                         '
+  CFILEPGD_SNOW_GR    = '                         '
   CTYPEPGD_SNOW    = '      '      
   !
-  LSNOW_IDEAL    = .FALSE.
-  LSNOW_FRAC_TOT = .FALSE.
+  LSNOW_IDEAL_GR    = .FALSE.
   !
-  XWSNOW(:)      = XUNDEF
-  XRSNOW(:)      = XRHOSMAX
-  XTSNOW(:)      = XTT
-  XASNOW         = XANSMIN  
-  XSG1SNOW(:)    = XUNDEF
-  XSG2SNOW(:)    = XUNDEF
-  XHISTSNOW(:)   = XUNDEF
-  XAGESNOW(:)    = XUNDEF  
+  XWSNOW_GR(:)      = XUNDEF
+  XRSNOW_GR(:)      = XRHOSMAX
+  XTSNOW_GR(:)      = XTT
+  XASNOW_GR         = XANSMIN  
+  XSG1SNOW_GR(:)    = XUNDEF
+  XSG2SNOW_GR(:)    = XUNDEF
+  XHISTSNOW_GR(:)   = XUNDEF
+  XAGESNOW_GR(:)    = XUNDEF  
   !
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
   CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
@@ -132,24 +139,56 @@ IF (LNAM_READ) THEN
   !
   !* default can be provided by ISBA scheme variables
   CALL POSNAM(ILUNAM,'NAM_PREP_ISBA_SNOW',GFOUND,ILUOUT)
-  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PREP_ISBA_SNOW)
-  !
-  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW,'D95','3-L','EBA','CRO','NON')
+  IF (GFOUND) THEN
+    !
+    CSNOW = '3-L'
+    NSNOW_LAYER = 3
+    CFILE_SNOW = '                         '
+    CFILEPGD_SNOW = '                         '
+    LSNOW_IDEAL = .FALSE.
+    LSNOW_FRAC_TOT = .FALSE.
+    XWSNOW(:) = XUNDEF
+    XRSNOW(:) = XRHOSMAX
+    XTSNOW(:) = XTT
+    XASNOW = XANSMIN  
+    XSG1SNOW(:) = XUNDEF
+    XSG2SNOW(:) = XUNDEF
+    XHISTSNOW(:) = XUNDEF
+    XAGESNOW(:) = XUNDEF  
+    !         
+    READ(UNIT=ILUNAM,NML=NAM_PREP_ISBA_SNOW)
+    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW,'D95','3-L','EBA','NON','CRO')
+    !
+    CSNOW_GR = CSNOW
+    NSNOW_LAYER_GR = NSNOW_LAYER
+    CFILE_SNOW_GR = CFILE_SNOW
+    CFILEPGD_SNOW_GR = CFILEPGD_SNOW
+    LSNOW_IDEAL_GR = LSNOW_IDEAL
+    XWSNOW_GR(:) = XWSNOW(:)
+    XRSNOW_GR(:) = XRSNOW(:)
+    XTSNOW_GR(:) = XTSNOW(:)
+    XASNOW_GR = XASNOW
+    XSG1SNOW_GR(:) = XSG1SNOW(:)
+    XSG2SNOW_GR(:) = XSG2SNOW(:)
+    XHISTSNOW_GR(:) = XHISTSNOW(:)
+    XAGESNOW_GR(:) = XAGESNOW(:)
+    !
+  ENDIF
   !
   !* It is erased by GREENROOF namelist if specified
   CALL POSNAM(ILUNAM,'NAM_PREP_GREENROOF_SNOW',GFOUND,ILUOUT)
-  IF (GFOUND) THEN 
+  IF (GFOUND) THEN
     READ(UNIT=ILUNAM,NML=NAM_PREP_GREENROOF_SNOW)
-  !crocus can't be used in garden if not used in isba scheme
-    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW,'D95','3-L','EBA','CRO','NON')
+    !crocus can't be used in garden if not used in isba scheme
+    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW_GR,'D95','3-L','EBA','NON')
   ENDIF
   !
-  IF ( CSNOW=='NON')                                         NSNOW_LAYER = 0
-  IF ( CSNOW=='D95' .OR. CSNOW=='EBA')                       NSNOW_LAYER = 1
-  IF ((CSNOW=='3-L' .OR. CSNOW=='CRO') .AND. NSNOW_LAYER<=2) NSNOW_LAYER = 3
+  IF ( CSNOW_GR=='NON')                                         NSNOW_LAYER_GR = 0
+  IF ( CSNOW_GR=='D95' .OR. CSNOW_GR=='EBA')                       NSNOW_LAYER_GR = 1
+  IF (CSNOW_GR=='3-L' .AND. NSNOW_LAYER_GR<=2) NSNOW_LAYER_GR = 3
   !
-  IF (CSNOW=='3-L' .AND. NSNOW_LAYER>3) THEN
-    NSNOW_LAYER = 3
+  IF (CSNOW_GR=='3-L' .AND. NSNOW_LAYER_GR>3) THEN
+    NSNOW_LAYER_GR = 3
     WRITE(ILUOUT,*) '------------------------------------'
     WRITE(ILUOUT,*) 'With ISBA-ES, number of snow layers '
     WRITE(ILUOUT,*) 'cannot be more than 3.              '
@@ -157,7 +196,7 @@ IF (LNAM_READ) THEN
     WRITE(ILUOUT,*) '------------------------------------'
   ENDIF
   !  
-  IF (NSNOW_LAYER > NSNOW_LAYER_MAX) THEN
+  IF (NSNOW_LAYER_GR > NSNOW_LAYER_MAX) THEN
     WRITE(ILUOUT,*) '------------------------------------'
     WRITE(ILUOUT,*) 'Please update modd_prep_snow.f90 routine : '
     WRITE(ILUOUT,*) 'The maximum number of snow layers  '
@@ -167,20 +206,20 @@ IF (LNAM_READ) THEN
     CALL ABOR1_SFX('READ_PREP_GREENROOF_SNOW: NUMBER OF SNOW LAYERS MUST BE INCREASED IN NAMELIST DECLARATION')
   ENDIF
   !
-  ALLOCATE(XWSNOW_p(NSNOW_LAYER))
-  ALLOCATE(XRSNOW_p(NSNOW_LAYER))
-  ALLOCATE(XTSNOW_p(NSNOW_LAYER))
+  ALLOCATE(XWSNOW_p(NSNOW_LAYER_GR))
+  ALLOCATE(XRSNOW_p(NSNOW_LAYER_GR))
+  ALLOCATE(XTSNOW_p(NSNOW_LAYER_GR))
   !
-  XWSNOW_p=XWSNOW(1:NSNOW_LAYER)
-  XRSNOW_p=XRSNOW(1:NSNOW_LAYER)
-  XTSNOW_p=XTSNOW(1:NSNOW_LAYER)
+  XWSNOW_p=XWSNOW_GR(1:NSNOW_LAYER_GR)
+  XRSNOW_p=XRSNOW_GR(1:NSNOW_LAYER_GR)
+  XTSNOW_p=XTSNOW_GR(1:NSNOW_LAYER_GR)
   !
   CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
   !
 ENDIF
 !
-HSNOW       = CSNOW
-KSNOW_LAYER = NSNOW_LAYER
+HSNOW       = CSNOW_GR
+KSNOW_LAYER = NSNOW_LAYER_GR
 !
 IF(ALL(XWSNOW_p(:)==XUNDEF).AND.PRESENT(OUNIF))THEN
     OUNIF=.FALSE.
@@ -188,14 +227,14 @@ ELSEIF(PRESENT(OUNIF))THEN
     OUNIF=.TRUE.
 ENDIF
 !
-LFILE=(LEN_TRIM(CFILE_SNOW)>0.AND.LEN_TRIM(CTYPE_SNOW)>0 &
-        .AND.LEN_TRIM(CFILEPGD_SNOW)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0)
+LFILE=(LEN_TRIM(CFILE_SNOW_GR)>0.AND.LEN_TRIM(CTYPE_SNOW)>0 &
+        .AND.LEN_TRIM(CFILEPGD_SNOW_GR)>0.AND.LEN_TRIM(CTYPEPGD_SNOW)>0)
 !
 IF (PRESENT(OUNIF)) LFILE=(LFILE .AND. .NOT.OUNIF)
 !
 IF(PRESENT(HFILE))THEN 
   IF(LFILE)THEN
-     HFILE = CFILE_SNOW
+     HFILE = CFILE_SNOW_GR
   ELSE
      HFILE = '                         '
   ENDIF
@@ -216,7 +255,7 @@ IF(PRESENT(HFILEPGDTYPE))THEN
 ENDIF
 IF(PRESENT(HFILEPGD))THEN 
   IF(LFILE)THEN
-     HFILEPGD = CFILEPGD_SNOW
+     HFILEPGD = CFILEPGD_SNOW_GR
   ELSE
      HFILEPGD = '                         '
   ENDIF

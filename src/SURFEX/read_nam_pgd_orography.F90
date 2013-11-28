@@ -72,7 +72,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !            ------------------------
 !
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
- CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
+ CHARACTER(LEN=6)         :: YZSFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
@@ -83,7 +83,7 @@ REAL                     :: XENV        ! parameter for enveloppe orography:
 LOGICAL                  :: LIMP_ZS     ! Imposed orography from another PGD file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_ZS/YZS, YFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS  
+NAMELIST/NAM_ZS/YZS, YZSFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS  
 !
 !-------------------------------------------------------------------------------
 !
@@ -93,7 +93,7 @@ NAMELIST/NAM_ZS/YZS, YFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 XUNIF_ZS       = XUNDEF
 YZS            = '                          '
-YFILETYPE      = '      '
+YZSFILETYPE    = '      '
 !
 COROGTYPE      = 'ENV'
 XENV           = 0.
@@ -116,7 +116,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_ZS)
 !-------------------------------------------------------------------------------
 !
 HZS       = YZS       ! file name for orography
-HFILETYPE = YFILETYPE ! data file type
+HFILETYPE = YZSFILETYPE ! data file type
 PUNIF_ZS  = XUNIF_ZS  ! uniform orography
 HOROGTYPE = COROGTYPE ! orogpraphy type 
 PENV      = XENV      ! parameter for enveloppe orography:

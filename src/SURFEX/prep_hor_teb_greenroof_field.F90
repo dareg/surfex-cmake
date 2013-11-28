@@ -31,7 +31,7 @@ USE MODD_PREP,               ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,         
                                     XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT,          &
                                     LINTERP, CMASK
 USE MODD_PREP_TEB_GREENROOF, ONLY : XGRID_SOIL, NGRID_LEVEL,                     &
-                                    XWSNOW, XRSNOW, XTSNOW, XASNOW, LSNOW_IDEAL
+                                    XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, XASNOW_GR, LSNOW_IDEAL_GR
 USE MODD_TEB_n,              ONLY : TTIME
 USE MODD_TEB_GREENROOF_n,    ONLY : XWG, XWGI, XTG, XWR, XLAI,                   &
                                     NLAYER_GR,                                   &
@@ -131,13 +131,13 @@ IF (HSURF=='SN_VEG ') THEN
       YFILEPGDTYPE_SNOW=YFILEPGDTYPE       
     ELSE            
       GUNIF_SNOW=.TRUE.
-      IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0  
+      IF(ALL(XWSNOW_GR==XUNDEF))XWSNOW_GR=0.0  
     ENDIF
   ENDIF          
-  ALLOCATE(ZSG1SNOW(SIZE(XWSNOW)))
-  ALLOCATE(ZSG2SNOW(SIZE(XWSNOW)))
-  ALLOCATE(ZHISTSNOW(SIZE(XWSNOW)))
-  ALLOCATE(ZAGESNOW(SIZE(XWSNOW)))
+  ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_GR)))
+  ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_GR)))
+  ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_GR)))
+  ALLOCATE(ZAGESNOW(SIZE(XWSNOW_GR)))
   ALLOCATE(ZPATCH(SIZE(XVEGTYPE,1),1))
   ALLOCATE(ZVEGTYPE_PATCH (SIZE(XVEGTYPE,1),SIZE(XVEGTYPE,2),1))
   !
@@ -148,8 +148,8 @@ IF (HSURF=='SN_VEG ') THEN
                             YFILEPGD, YFILEPGDTYPE,         &
                             ILUOUT,GUNIF_SNOW, 1,           &
                             SIZE(XLAT),TSNOW, TTIME,        &
-                            XWSNOW, XRSNOW, XTSNOW, XASNOW, &
-                            LSNOW_IDEAL, ZSG1SNOW,          &
+                            XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, XASNOW_GR, &
+                            LSNOW_IDEAL_GR, ZSG1SNOW,          &
                             ZSG2SNOW, ZHISTSNOW, ZAGESNOW,  &
                             ZVEGTYPE_PATCH, ZPATCH          )
   DEALLOCATE(ZSG1SNOW)

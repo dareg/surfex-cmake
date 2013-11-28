@@ -42,7 +42,10 @@
 !                       type when snow depth< 3 cm. 
 !     S. Morin          02/2011 - Add routines for Crocus
 !     A. Boone          02/2012 - Add optimization of do-loops.
+!     C. Carmagnola     12/2012 - Add the case CSNOWMETAMO!='B92' in subroutine SNOW3LAVGRAIN and in function SNOW3LDIFTYP
 !     M. Lafaysse       01/2013 - Remove SNOWCROWLIQMAX routines (not used)
+!     M. Lafaysse       08/2013 - simplification of routine SNOW3LAVGRAIN (logical GDENDRITIC)
+!
 !----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -92,6 +95,14 @@ END INTERFACE
 !
 INTERFACE SNOW3LDIFTYP
   MODULE PROCEDURE SNOW3LDIFTYP
+END INTERFACE
+!
+INTERFACE GET_MASS_HEAT
+  MODULE PROCEDURE GET_MASS_HEAT
+END INTERFACE
+!
+INTERFACE GET_DIAM
+  MODULE PROCEDURE GET_DIAM
 END INTERFACE
 !
 !-------------------------------------------------------------------------------
@@ -394,8 +405,8 @@ ZSNOWRHO = MIN(XRHOSMAX_ES, PSNOWRHO)
 !
 ! Maximum ratio of liquid to SWE:
 !
-ZHOLDMAXR = XWSNOWHOLDMAX1 + (XWSNOWHOLDMAX2-XWSNOWHOLDMAX1)*     &
-                  MAX(0.,XSNOWRHOHOLD-ZSNOWRHO)/XSNOWRHOHOLD 
+ZHOLDMAXR = XWSNOWHOLDMAX1 + (XWSNOWHOLDMAX2-XWSNOWHOLDMAX1) *     &
+                             MAX(0.,XSNOWRHOHOLD-ZSNOWRHO)/XSNOWRHOHOLD 
 !
 ! Maximum liquid water holding capacity of the snow (m):
 !
@@ -412,6 +423,7 @@ END FUNCTION SNOW3LHOLD_0D
 !     snow layer(s).
 !
 USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
+USE MODD_SNOW_PAR, ONLY : XPERCENTAGEPORE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -442,7 +454,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! porosity.
 
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_3D',0,ZHOOK_HANDLE)
-PWHOLDMAX(:,:,:) = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)    
+PWHOLDMAX(:,:,:) = XPERCENTAGEPORE/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_3D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOWCROHOLD_3D
@@ -455,6 +467,7 @@ END FUNCTION SNOWCROHOLD_3D
 !     snow layer(s).
 !
 USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
+USE MODD_SNOW_PAR, ONLY : XPERCENTAGEPORE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -485,7 +498,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! porosity.
 
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_2D',0,ZHOOK_HANDLE)
-PWHOLDMAX(:,:) = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)    
+PWHOLDMAX(:,:) = XPERCENTAGEPORE/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_2D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOWCROHOLD_2D
@@ -500,6 +513,7 @@ END FUNCTION SNOWCROHOLD_2D
 !     snow layer(s).
 !
 USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
+USE MODD_SNOW_PAR, ONLY : XPERCENTAGEPORE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -530,7 +544,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! porosity.
 
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_1D',0,ZHOOK_HANDLE)
-PWHOLDMAX(:) = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)  
+PWHOLDMAX(:) = XPERCENTAGEPORE/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_1D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOWCROHOLD_1D
@@ -543,6 +557,7 @@ END FUNCTION SNOWCROHOLD_1D
 !     snow layer(s).
 !
 USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
+USE MODD_SNOW_PAR, ONLY : XPERCENTAGEPORE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -573,7 +588,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! porosity.
 
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',0,ZHOOK_HANDLE)
-PWHOLDMAX = 0.05/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW) 
+PWHOLDMAX = XPERCENTAGEPORE/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOWCROHOLD_0D
@@ -739,65 +754,77 @@ END FUNCTION SNOW3LSCAP_0D
 
 USE MODD_CSTS, ONLY : XTT
 USE MODD_SNOW_METAMO  
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
-
-
+!
 !     DECLARATIONS.
 !     -------------
-REAL ,INTENT(IN) :: PSNOWTEMP,PSNOWRHO,PGRADT
+!
+REAL ,INTENT(IN) :: PSNOWTEMP, PSNOWRHO, PGRADT
+!
 REAL             :: PDANGL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
-
+!
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3L_MARBOUTY',0,ZHOOK_HANDLE)
-PDANGL=0.0
+!
+PDANGL = 0.0
+!
 ! INFLUENCE DE LA TEMPERATURE /TEMPERATURE INFLUENCE.
-
-IF(PSNOWTEMP >= XTT-VTANG1)THEN
-  IF(PSNOWTEMP >= XTT-VTANG2)THEN
-    PDANGL=VTANG4+VTANG5*(XTT-PSNOWTEMP)/VTANG6
-  ELSEIF(PSNOWTEMP >= XTT-VTANG3)THEN
-    PDANGL=VTANG7-VTANG8*(XTT-VTANG2-PSNOWTEMP)/VTANG9
+IF( PSNOWTEMP>=XTT-XVTANG1 ) THEN
+  !
+  IF ( PSNOWTEMP>=XTT-XVTANG2 ) THEN
+    PDANGL = XVTANG4 + XVTANG5 * (XTT-PSNOWTEMP) / XVTANG6
+  ELSEIF( PSNOWTEMP>=XTT-XVTANG3 ) THEN
+    PDANGL = XVTANG7 - XVTANG8 * (XTT-XVTANG2-PSNOWTEMP) / XVTANG9
   ELSE
-    PDANGL=VTANGA-VTANGB*(XTT-VTANG3-PSNOWTEMP)/VTANGC
+    PDANGL = XVTANGA - XVTANGB * (XTT-XVTANG3-PSNOWTEMP) / XVTANGC
   ENDIF
-
-! INFLUENCE DE LA MASSE VOLUMIQUE / DENSITY INFLUENCE.
-
-  IF (PSNOWRHO <= VRANG1) THEN
-    IF(PSNOWRHO > VRANG2) THEN
-      PDANGL=PDANGL*(1.-(PSNOWRHO-VRANG2)/(VRANG1-VRANG2))
+  !
+  ! INFLUENCE DE LA MASSE VOLUMIQUE / DENSITY INFLUENCE.
+  IF ( PSNOWRHO<=XVRANG1 ) THEN
+    !
+    IF ( PSNOWRHO>XVRANG2 ) THEN
+      PDANGL = PDANGL * ( 1. - (PSNOWRHO-XVRANG2)/(XVRANG1-XVRANG2) )
     ENDIF
-!   INFLUENCE DU GRADIENT DE TEMPERATURE / TEMPERATURE GRADIENT INFLUENCE.
-
-    IF(PGRADT <= VGANG1)THEN
-      IF(PGRADT <= VGANG2)THEN
-        PDANGL=PDANGL*VGANG5*(PGRADT-VGANG6)/(VGANG2-VGANG6)
-      ELSEIF(PGRADT <= VGANG3)THEN
-        PDANGL = PDANGL*(VGANG7 + VGANG8*(PGRADT-VGANG2)/(VGANG3-VGANG2))
-      ELSEIF(PGRADT <= VGANG4)THEN
-        PDANGL = PDANGL*(VGANG9 + VGANGA*(PGRADT-VGANG3)/(VGANG4-VGANG3))
+    !
+    ! INFLUENCE DU GRADIENT DE TEMPERATURE / TEMPERATURE GRADIENT INFLUENCE.
+    IF ( PGRADT<=XVGANG1 ) THEN
+      !
+      IF ( PGRADT<=XVGANG2 ) THEN
+        PDANGL = PDANGL * XVGANG5 * (PGRADT-XVGANG6)/(XVGANG2-XVGANG6)
+      ELSEIF( PGRADT<=XVGANG3 ) THEN
+        PDANGL = PDANGL * ( XVGANG7 + XVGANG8 * (PGRADT-XVGANG2)/(XVGANG3-XVGANG2) )
+      ELSEIF( PGRADT<=XVGANG4 )THEN
+        PDANGL = PDANGL * ( XVGANG9 + XVGANGA * (PGRADT-XVGANG3)/(XVGANG4-XVGANG3) )
       ELSE
-        PDANGL = PDANGL*(VGANGB + VGANGC*(PGRADT-VGANG4)/(VGANG1-VGANG4))
+        PDANGL = PDANGL * ( XVGANGB + XVGANGC * (PGRADT-XVGANG4)/(XVGANG1-XVGANG4) )
       ENDIF
+      !
     ENDIF
+    !
   ELSE
-    PDANGL=0.
+    !
+    PDANGL = 0.
+    !
   ENDIF
+  !
 ELSE
-  PDANGL=0.
-ENDIF                   
+  !
+  PDANGL = 0.
+  !
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3L_MARBOUTY',1,ZHOOK_HANDLE)
+!
 END FUNCTION SNOW3L_MARBOUTY     
-        
+!       
 !####################################################################
 !####################################################################
 !####################################################################
-
-      SUBROUTINE SNOW3LGRID_2D(PSNOWDZ,PSNOW)
+SUBROUTINE SNOW3LGRID_2D(PSNOWDZ,PSNOW)
 !
 !!    PURPOSE
 !!    -------
@@ -813,10 +840,6 @@ END FUNCTION SNOW3L_MARBOUTY
 !        interface (set to a constant value) and increases with snow depth.
 !        Second layer can't be more than an order of magnitude thicker
 !        than surface layer.
-!
-!
-USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SNOW_PAR,   ONLY : XSNOWCRITD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -831,39 +854,18 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDZ
 !
 !*      0.1    declarations of local variables
 !
-INTEGER                           :: JJ, JI
+INTEGER                           :: JI
+INTEGER                           :: INI
 !
-INTEGER                           :: INLVLS, INI
-!   
-REAL, DIMENSION(SIZE(PSNOW))      :: ZWORK
-!
-! ISBA-ES snow grid parameters
-!
-REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF1  = (/0.25, 0.50, 0.25/) 
-REAL, PARAMETER, DIMENSION(2)     :: ZSGCOEF2  = (/0.05, 0.34/)       
-REAL, PARAMETER, DIMENSION(10)    :: ZSGCOEF3  = (/0.025, 0.033, 0.043,&
-  0.055, 0.071, 0.091, 0.117, 0.150, 0.193, 0.247/) 
-      
-! Minimum total snow depth at which surface layer thickness is constant:
-!
-REAL, PARAMETER                   :: ZSNOWTRANS = 0.20                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS1 = 0.40                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS2 = 0.6061                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS3 = 0.7143               ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS4 = 0.9259                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS5 = 1.4493                ! (m)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialization:
 ! ------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',0,ZHOOK_HANDLE)
-INLVLS = SIZE(PSNOWDZ(:,:),2)
-INI    = SIZE(PSNOWDZ(:,:),1)
 !
-ZWORK(:)  = 0.0
+INI    = SIZE(PSNOWDZ(:,:),1)
 !
 ! 1. Calculate current grid for 3-layer (default) configuration):
 ! ---------------------------------------------------------------
@@ -872,204 +874,8 @@ ZWORK(:)  = 0.0
 ! i) smooth transition here at ZSNOWTRANS
 ! ii) constant ratio for very thin snow:
 ! iii) ratio of layer 2 to surface layer <= 10
-!
-IF(INLVLS == 3)THEN
-!
-   WHERE(PSNOW <= XSNOWCRITD+0.01)
-      PSNOWDZ(:,1) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,3) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,2) = PSNOW(:) - PSNOWDZ(:,1) - PSNOWDZ(:,3)
-   END WHERE
-!
-   WHERE(PSNOW <= ZSNOWTRANS .AND. PSNOW > XSNOWCRITD+0.01)
-      PSNOWDZ(:,1) = PSNOW(:)*ZSGCOEF1(1)
-      PSNOWDZ(:,2) = PSNOW(:)*ZSGCOEF1(2)
-      PSNOWDZ(:,3) = PSNOW(:)*ZSGCOEF1(3)
-   END WHERE
-!
-   WHERE(PSNOW > ZSNOWTRANS)
-      PSNOWDZ(:,1) = ZSGCOEF2(1)
-      PSNOWDZ(:,2) = (PSNOW(:)-ZSGCOEF2(1))*ZSGCOEF2(2) + ZSGCOEF2(1)
-!
-! When using simple finite differences, limit the thickness
-! factor between the top and 2nd layers to at most 10
-! 
-      PSNOWDZ(:,2) = MIN(10*ZSGCOEF2(1),  PSNOWDZ(:,2))
-      PSNOWDZ(:,3) = PSNOW(:) - PSNOWDZ(:,2) - PSNOWDZ(:,1)
-   END WHERE
-!
-! 2. For more than 3-layers:
-! --------------------------
-! For the case when more than 3 layers are to be used, specifiy how
-! grid should be defined here. For now, a very simple arbitrary method
-! herein. WARNING: Detailed testing using more than 3-layers has not been done
-! to date, only minor tests.
-!
-ELSE IF(INLVLS>3 .AND. INLVLS<10) THEN
-      DO JJ=1,INLVLS
-         DO JI=1,INI
-            PSNOWDZ(JI,JJ)  = PSNOW(JI)/INLVLS
-         ENDDO
-      ENDDO
-!
-     PSNOWDZ(:,INLVLS) = PSNOWDZ(:,INLVLS) + (PSNOWDZ(:,1) - MIN(0.05, PSNOWDZ(:,1)))
-     PSNOWDZ(:,1)      = MIN(0.05, PSNOWDZ(:,1))
-! ajout EB pour permettre > 10
-ELSE IF(INLVLS==10) THEN 
-!
-!   
-!    DO JJ=1,INLVLS
-!        WHERE(PSNOW <=XSNOWCRITD+0.07 )
-!        PSNOWDZ(:,JJ) = PSNOW(:)/INLVLS
-!        ENDWHERE
-!        WHERE(PSNOW >XSNOWCRITD+0.07)
-!        PSNOWDZ(:,JJ) = (PSNOW(:)-1)*ZSGCOEF3(JJ)
-!        ENDWHERE
-!    END DO
-!        
-!     
-!   WHERE(PSNOW <= ZSNOWTRANS2 .AND. PSNOW > ZSNOWTRANS1)
-!        PSNOWDZ(:,INLVLS)=PSNOWDZ(:,INLVLS)-0.01+PSNOWDZ(:,1)
-!        PSNOWDZ(:,1)=0.01
-!   END WHERE
-!
-!    WHERE(PSNOW <= ZSNOWTRANS3 .AND. PSNOW > ZSNOWTRANS2)
-!        PSNOWDZ(:,INLVLS)=PSNOWDZ(:,INLVLS)+(PSNOWDZ(:,1)-0.01)+(PSNOWDZ(:,2)-0.02)
-!        PSNOWDZ(:,1)=0.01
-!        PSNOWDZ(:,2)=0.02
-!   END WHERE
-!
-!    WHERE(PSNOW <= ZSNOWTRANS4 .AND. PSNOW > ZSNOWTRANS3)
-!        PSNOWDZ(:,INLVLS)=PSNOWDZ(:,INLVLS)+(PSNOWDZ(:,1)-0.01)+(PSNOWDZ(:,2)-0.02)+(PSNOWDZ(:,3)-0.03)
-!        PSNOWDZ(:,1)=0.01
-!        PSNOWDZ(:,2)=0.02
-!        PSNOWDZ(:,3)=0.03
-!   END WHERE
-!
-!    WHERE(PSNOW <= ZSNOWTRANS5 .AND. PSNOW > ZSNOWTRANS4)
-!        PSNOWDZ(:,INLVLS)=PSNOWDZ(:,INLVLS)+(PSNOWDZ(:,1)-0.01)+(PSNOWDZ(:,2)-0.02)+(PSNOWDZ(:,3)-0.03)&
-!        &+(PSNOWDZ(:,4)-0.05) 
-!        PSNOWDZ(:,1)=0.01
-!        PSNOWDZ(:,2)=0.02
-!        PSNOWDZ(:,3)=0.03
-!        PSNOWDZ(:,4)=0.05
-!   END WHERE
-!        
-!    WHERE(PSNOW > ZSNOWTRANS5)
-!
-!         PSNOWDZ(:,INLVLS) = PSNOWDZ(:,INLVLS)+(PSNOWDZ(:,1)-0.01)+(PSNOWDZ(:,2)-0.02)+(PSNOWDZ(:,3)-0.03)+&
-!&(PSNOWDZ(:,4)-0.05)+(PSNOWDZ(:,5)-0.1)
-!
-!        PSNOWDZ(:,1)=0.01
-!        PSNOWDZ(:,2)=0.02
-!        PSNOWDZ(:,3)=0.03
-!        PSNOWDZ(:,4)=0.05
-!        PSNOWDZ(:,5)=0.1
-!                
-!     END WHERE
-        
-     WHERE(PSNOW <= XSNOWCRITD+0.07)
-      PSNOWDZ(:,1) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,2) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,3) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,4) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,5) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,6) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,7) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,8) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,9) = MIN(0.01, PSNOW(:)/INLVLS)
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
-     END WHERE
-
-     WHERE(PSNOW > XSNOWCRITD+0.07 .AND. PSNOW<=0.19)
-      PSNOWDZ(:,1) = 0.01 
-      PSNOWDZ(:,2) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,3) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,4) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,5) = 0.01+(PSNOW(:)-0.1)/9 
-      PSNOWDZ(:,6) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,7) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,8) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,9) = 0.01+(PSNOW(:)-0.1)/9
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
-     END WHERE
-
-     WHERE(PSNOW > 0.19 .AND. PSNOW<=0.27)
-      PSNOWDZ(:,1) = 0.01 
-      PSNOWDZ(:,2) = 0.02
-      PSNOWDZ(:,3) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,4) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,5) = 0.02+(PSNOW(:)-0.19)/8 
-      PSNOWDZ(:,6) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,7) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,8) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,9) = 0.02+(PSNOW(:)-0.19)/8
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
-     END WHERE
-
-      WHERE(PSNOW > 0.27 .AND. PSNOW<=0.41)
-      PSNOWDZ(:,1) = 0.01 
-      PSNOWDZ(:,2) = 0.02
-      PSNOWDZ(:,3) = 0.03
-      PSNOWDZ(:,4) = 0.03+(PSNOW(:)-0.27)/7
-      PSNOWDZ(:,5) = 0.03+(PSNOW(:)-0.27)/7 
-      PSNOWDZ(:,6) = 0.03+(PSNOW(:)-0.27)/7
-      PSNOWDZ(:,7) = 0.03+(PSNOW(:)-0.27)/7
-      PSNOWDZ(:,8) = 0.03+(PSNOW(:)-0.27)/7
-      PSNOWDZ(:,9) = 0.03+(PSNOW(:)-0.27)/7
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
-     END WHERE
-
-      WHERE(PSNOW > 0.41 .AND. PSNOW<=0.71)
-      PSNOWDZ(:,1) = 0.01 
-      PSNOWDZ(:,2) = 0.02
-      PSNOWDZ(:,3) = 0.03
-      PSNOWDZ(:,4) = 0.05
-      PSNOWDZ(:,5) = 0.05+(PSNOW(:)-0.41)/6 
-      PSNOWDZ(:,6) = 0.05+(PSNOW(:)-0.41)/6
-      PSNOWDZ(:,7) = 0.05+(PSNOW(:)-0.41)/6
-      PSNOWDZ(:,8) = 0.05+(PSNOW(:)-0.41)/6
-      PSNOWDZ(:,9) = 0.05+(PSNOW(:)-0.41)/6
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
-     END WHERE
-  
-      WHERE(PSNOW > 0.71)
-      PSNOWDZ(:,1) = 0.01 
-      PSNOWDZ(:,2) = 0.02
-      PSNOWDZ(:,3) = 0.03
-      PSNOWDZ(:,4) = 0.05
-      PSNOWDZ(:,5) = 0.1
-      PSNOWDZ(:,6) = 0.1+(PSNOW(:)-0.71)/5
-      PSNOWDZ(:,7) = 0.1+(PSNOW(:)-0.71)/5
-      PSNOWDZ(:,8) = 0.1+(PSNOW(:)-0.71)/5
-      PSNOWDZ(:,9) = 0.1+(PSNOW(:)-0.71)/5
-      PSNOWDZ(:,INLVLS) = PSNOW(:) - SUM(PSNOWDZ(:,1:9),2)
-     END WHERE
-       
-! ajout EB pour permettre cas INLVLS > 10
-ELSE   
-      PSNOWDZ(:,1) = MIN(0.02,PSNOW(:)/INLVLS) 
-      PSNOWDZ(:,2) = MIN(0.01*PSNOW(:),PSNOW(:)/INLVLS)
-      PSNOWDZ(:,3) = MIN(0.02*PSNOW(:),PSNOW(:)/INLVLS)
-      PSNOWDZ(:,4) = MIN(0.03*PSNOW(:),PSNOW(:)/INLVLS)
-      PSNOWDZ(:,5) = MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS)
-      PSNOWDZ(:,INLVLS)=MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
-      ZWORK(:) = SUM(PSNOWDZ(:,1:5),2)
-      DO JJ=6,INLVLS-1,1
-         DO JI=1,INI
-            PSNOWDZ(JI,JJ) = (PSNOW(JI) - ZWORK(JI) - PSNOWDZ(JI,INLVLS)) &
-                 /(INLVLS-6) 
-         ENDDO
-      ENDDO
-!
-ENDIF
-!
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      IF(PSNOW(JI)==XUNDEF)THEN
-         PSNOWDZ(JI,JJ) = XUNDEF
-      ENDIF
-   ENDDO
+DO JI = 1,INI
+  CALL SNOW3LGRID_1D(PSNOWDZ(JI,:),PSNOW(JI))
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',1,ZHOOK_HANDLE)
@@ -1078,8 +884,7 @@ END SUBROUTINE SNOW3LGRID_2D
 !####################################################################
 !####################################################################
 !####################################################################
-
-      SUBROUTINE SNOW3LGRID_1D(PSNOWDZ,PSNOW)
+SUBROUTINE SNOW3LGRID_1D(PSNOWDZ,PSNOW)
 !
 !!    PURPOSE
 !!    -------
@@ -1098,7 +903,9 @@ END SUBROUTINE SNOW3LGRID_2D
 !
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SNOW_PAR,   ONLY : XSNOWCRITD
+USE MODD_SNOW_PAR,   ONLY : XSNOWCRITD, XSGCOEF1, XSGCOEF2, XSGCOEF3, XSNOWTRANS, &
+                            XSNOWTRANS1, XSNOWTRANS2, XSNOWTRANS3, XSNOWTRANS4,   &
+                            XSNOWTRANS5
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1113,35 +920,19 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWDZ
 !
 !*      0.1    declarations of local variables
 !
-INTEGER JJ
+REAL :: ZWORK
 !
-INTEGER                           :: INLVLS
+INTEGER :: JJ
+INTEGER :: INLVLS
 !
-REAL                              :: ZWORK
-!
-! ISBA-ES snow grid parameters
-!
-REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF1  = (/0.25, 0.50, 0.25/) 
-REAL, PARAMETER, DIMENSION(2)     :: ZSGCOEF2  = (/0.05, 0.34/)       
-REAL, PARAMETER, DIMENSION(10)    :: ZSGCOEF3  = (/0.025, 0.033, 0.043,&
-  0.055, 0.071, 0.091, 0.117, 0.150, 0.193, 0.247/) 
-      
-! Minimum total snow depth at which surface layer thickness is constant:
-!
-REAL, PARAMETER                   :: ZSNOWTRANS  = 0.20                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS1 = 0.40                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS2 = 0.6061                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS3 = 0.7143               ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS4 = 0.9259                ! (m)
-REAL, PARAMETER                   :: ZSNOWTRANS5 = 1.4493                ! (m)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialization:
 ! ------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_1D',0,ZHOOK_HANDLE)
+!
 INLVLS = SIZE(PSNOWDZ(:),1)
 !
 ! 1. Calculate current grid for 3-layer (default) configuration):
@@ -1152,464 +943,429 @@ INLVLS = SIZE(PSNOWDZ(:),1)
 ! ii) constant ratio for very thin snow:
 ! iii) ratio of layer 2 to surface layer <= 10
 !
-IF(INLVLS == 3)THEN
-!
-   IF(PSNOW <= XSNOWCRITD+0.01)THEN
-      PSNOWDZ(1) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(3) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(2) = PSNOW - PSNOWDZ(1) - PSNOWDZ(3)
-   ENDIF
-!
-   IF(PSNOW <= ZSNOWTRANS .AND. PSNOW > XSNOWCRITD+0.01)THEN
-      PSNOWDZ(1) = PSNOW*ZSGCOEF1(1)
-      PSNOWDZ(2) = PSNOW*ZSGCOEF1(2)
-      PSNOWDZ(3) = PSNOW*ZSGCOEF1(3)
-   ENDIF
-!
-   IF(PSNOW > ZSNOWTRANS)THEN
-      PSNOWDZ(1) = ZSGCOEF2(1)
-      PSNOWDZ(2) = (PSNOW-ZSGCOEF2(1))*ZSGCOEF2(2) + ZSGCOEF2(1)
-!
-! When using simple finite differences, limit the thickness
-! factor between the top and 2nd layers to at most 10
-! 
-      PSNOWDZ(2) = MIN(10*ZSGCOEF2(1),  PSNOWDZ(2))
-      PSNOWDZ(3) = PSNOW - PSNOWDZ(2) - PSNOWDZ(1)
-   END IF
-!
-!
-!plm
-ELSE IF(INLVLS>3 .AND. INLVLS<10) THEN
-      DO JJ=1,INLVLS
-         PSNOWDZ(JJ)  = PSNOW/INLVLS
+IF ( INLVLS==3 )THEN
+  !
+  IF ( PSNOW <= XSNOWCRITD + 0.01 )THEN
+    PSNOWDZ(1) = MIN( 0.01, PSNOW/INLVLS )
+    PSNOWDZ(3) = MIN( 0.01, PSNOW/INLVLS )
+    PSNOWDZ(2) = PSNOW - PSNOWDZ(1) - PSNOWDZ(3)
+  ELSEIF ( PSNOW <= XSNOWTRANS )THEN
+    PSNOWDZ(1) = PSNOW * XSGCOEF1(1)
+    PSNOWDZ(2) = PSNOW * XSGCOEF1(2)
+    PSNOWDZ(3) = PSNOW * XSGCOEF1(3)
+  ELSE
+    PSNOWDZ(1) = XSGCOEF2(1)
+    PSNOWDZ(2) = ( PSNOW - XSGCOEF2(1) ) * XSGCOEF2(2) + XSGCOEF2(1)
+    ! When using simple finite differences, limit the thickness
+    ! factor between the top and 2nd layers to at most 10
+     PSNOWDZ(2) = MIN( 10.*XSGCOEF2(1),  PSNOWDZ(2) )
+     PSNOWDZ(3) = PSNOW - PSNOWDZ(2) - PSNOWDZ(1)
+  END IF
+  !
+  !plm
+ELSEIF ( INLVLS>3 .AND. INLVLS<10 ) THEN
+  !
+  DO JJ = 1,INLVLS
+    PSNOWDZ(JJ) = PSNOW / INLVLS
+  ENDDO
+  !
+  PSNOWDZ(INLVLS) = PSNOWDZ(INLVLS) + ( PSNOWDZ(1) - MIN(0.05, PSNOWDZ(1)) )
+  PSNOWDZ(1)      = MIN( 0.05, PSNOWDZ(1) )
+  !
+  ! ajout EB pour permettre > 10
+ELSEIF ( INLVLS==10 ) THEN
+  !
+  ! plm
+  ! ELSE 
+  !
+  ! 2. For more than 3-layers:
+  ! --------------------------
+  ! For the case when more than 3 layers are to be used, specifiy how
+  ! grid should be defined here. For now, a very simple arbitrary method
+  ! herein. WARNING: Detailed testing using more than 3-layers has not been done
+  ! to date, only minor tests. 
+  IF ( PSNOW<=XSNOWCRITD+0.07 ) THEN
+    DO JJ = 1,9
+      PSNOWDZ(JJ) = MIN( 0.01, PSNOW / INLVLS )
+    ENDDO
+    !
+  ELSE
+    !
+    PSNOWDZ(1) = 0.01 
+    IF ( PSNOW<=0.19 ) THEN
+      DO JJ = 2,9
+        PSNOWDZ(JJ) = PSNOWDZ(1) + ( PSNOW - 0.1 ) / 9.
       ENDDO
-!
-     PSNOWDZ(INLVLS) = PSNOWDZ(INLVLS) + (PSNOWDZ(1) - MIN(0.05, PSNOWDZ(1)))
-     PSNOWDZ(1)      = MIN(0.05, PSNOWDZ(1))
-! ajout EB pour permettre > 10
-ELSE IF(INLVLS==10) THEN 
-! plm
-! ELSE 
-!
-! 2. For more than 3-layers:
-! --------------------------
-! For the case when more than 3 layers are to be used, specifiy how
-! grid should be defined here. For now, a very simple arbitrary method
-! herein. WARNING: Detailed testing using more than 3-layers has not been done
-! to date, only minor tests.
-!           
-     IF(PSNOW <= XSNOWCRITD+0.07)THEN
-      PSNOWDZ(1) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(2) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(3) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(4) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(5) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(6) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(7) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(8) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(9) = MIN(0.01, PSNOW/INLVLS)
-      PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-!  
-     ELSEIF(PSNOW > XSNOWCRITD+0.07 .AND. PSNOW<=0.19)THEN
-      PSNOWDZ(1) = 0.01 
-      PSNOWDZ(2) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(3) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(4) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(5) = 0.01+(PSNOW-0.1)/9 
-      PSNOWDZ(6) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(7) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(8) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(9) = 0.01+(PSNOW-0.1)/9
-      PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-!
-     ELSEIF(PSNOW > 0.19 .AND. PSNOW<=0.27)THEN
-      PSNOWDZ(1) = 0.01 
+    ELSE
+      !
       PSNOWDZ(2) = 0.02
-      PSNOWDZ(3) = 0.02+(PSNOW-0.19)/8
-      PSNOWDZ(4) = 0.02+(PSNOW-0.19)/8
-      PSNOWDZ(5) = 0.02+(PSNOW-0.19)/8 
-      PSNOWDZ(6) = 0.02+(PSNOW-0.19)/8
-      PSNOWDZ(7) = 0.02+(PSNOW-0.19)/8
-      PSNOWDZ(8) = 0.02+(PSNOW-0.19)/8
-      PSNOWDZ(9) = 0.02+(PSNOW-0.19)/8
-      PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-!
-      ELSEIF(PSNOW > 0.27 .AND. PSNOW<=0.41)THEN
-      PSNOWDZ(1) = 0.01 
-      PSNOWDZ(2) = 0.02
-      PSNOWDZ(3) = 0.03
-      PSNOWDZ(4) = 0.03+(PSNOW-0.27)/7
-      PSNOWDZ(5) = 0.03+(PSNOW-0.27)/7 
-      PSNOWDZ(6) = 0.03+(PSNOW-0.27)/7
-      PSNOWDZ(7) = 0.03+(PSNOW-0.27)/7
-      PSNOWDZ(8) = 0.03+(PSNOW-0.27)/7
-      PSNOWDZ(9) = 0.03+(PSNOW-0.27)/7
-      PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-!
-      ELSEIF(PSNOW > 0.41 .AND. PSNOW<=0.71)THEN
-      PSNOWDZ(1) = 0.01 
-      PSNOWDZ(2) = 0.02
-      PSNOWDZ(3) = 0.03
-      PSNOWDZ(4) = 0.05
-      PSNOWDZ(5) = 0.05+(PSNOW-0.41)/6 
-      PSNOWDZ(6) = 0.05+(PSNOW-0.41)/6
-      PSNOWDZ(7) = 0.05+(PSNOW-0.41)/6
-      PSNOWDZ(8) = 0.05+(PSNOW-0.41)/6
-      PSNOWDZ(9) = 0.05+(PSNOW-0.41)/6
-      PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-!     
+      IF ( PSNOW<=0.27 ) THEN
+        DO JJ = 3,9
+          PSNOWDZ(JJ) = PSNOWDZ(2) + ( PSNOW - 0.19 ) / 8.
+        ENDDO
       ELSE
-      PSNOWDZ(1) = 0.01 
-      PSNOWDZ(2) = 0.02
-      PSNOWDZ(3) = 0.03
-      PSNOWDZ(4) = 0.05
-      PSNOWDZ(5) = 0.1
-      PSNOWDZ(6) = 0.1+(PSNOW-0.71)/5
-      PSNOWDZ(7) = 0.1+(PSNOW-0.71)/5
-      PSNOWDZ(8) = 0.1+(PSNOW-0.71)/5
-      PSNOWDZ(9) = 0.1+(PSNOW-0.71)/5
-      PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-     ENDIF
-       
-! ajout EB pour permettre cas INLVLS > 10
-ELSE   
-      PSNOWDZ(1) = MIN(0.02,PSNOW/INLVLS) 
-      PSNOWDZ(2) = MIN(0.01*PSNOW,PSNOW/INLVLS)
-      PSNOWDZ(3) = MIN(0.02*PSNOW,PSNOW/INLVLS)
-      PSNOWDZ(4) = MIN(0.03*PSNOW,PSNOW/INLVLS)
-      PSNOWDZ(5) = MIN(0.05*PSNOW,PSNOW/INLVLS)
-      PSNOWDZ(INLVLS)=MIN(0.05*PSNOW,PSNOW/INLVLS) 
-      ZWORK = SUM(PSNOWDZ(1:5))          
-      DO JJ=6,INLVLS-1,1
-         PSNOWDZ(JJ) = (PSNOW - ZWORK -PSNOWDZ(INLVLS)) &
-          /(INLVLS-6) 
-      END DO
-!
+        !
+        PSNOWDZ(3) = 0.03
+        IF ( PSNOW<=0.41 ) THEN
+          DO JJ = 4,9
+            PSNOWDZ(JJ) = PSNOWDZ(3) + ( PSNOW - 0.27 ) / 7.
+          ENDDO
+        ELSE
+          !
+          PSNOWDZ(4) = 0.05
+          IF ( PSNOW<=0.71 ) THEN
+            DO JJ = 5,9
+              PSNOWDZ(JJ) = PSNOWDZ(4) + ( PSNOW - 0.41 ) / 6.
+            ENDDO
+          ELSE
+            !
+            PSNOWDZ(5) = 0.1
+            DO JJ = 6,9
+              PSNOWDZ(JJ) = PSNOWDZ(5) + ( PSNOW - 0.71 ) / 5.
+            ENDDO
+            !
+          ENDIF
+        ENDIF
+      ENDIF
+    ENDIF
+  ENDIF
+  PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
+  !
+  ! ajout EB pour permettre cas INLVLS > 10
+ELSE
+  !
+  PSNOWDZ(1) = MIN( 0.02, PSNOW/INLVLS ) 
+  PSNOWDZ(2) = MIN( 0.01*PSNOW, PSNOW/INLVLS )
+  PSNOWDZ(3) = MIN( 0.02*PSNOW, PSNOW/INLVLS )
+  PSNOWDZ(4) = MIN( 0.03*PSNOW, PSNOW/INLVLS )
+  PSNOWDZ(5) = MIN( 0.05*PSNOW, PSNOW/INLVLS )
+  PSNOWDZ(INLVLS) = MIN( 0.05*PSNOW, PSNOW/INLVLS ) 
+  ZWORK = SUM(PSNOWDZ(1:5))          
+  DO JJ = 6,INLVLS-1,1
+    PSNOWDZ(JJ) = ( PSNOW - ZWORK - PSNOWDZ(INLVLS) ) / ( INLVLS-6 ) 
+  END DO
+  !
 ENDIF
 !
-DO JJ=1,INLVLS
-  IF(PSNOW==XUNDEF)THEN
+DO JJ = 1,INLVLS
+  IF ( PSNOW==XUNDEF ) THEN
     PSNOWDZ(JJ) = XUNDEF
   ENDIF
 END DO
+!
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_1D',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOW3LGRID_1D
 !
 !###################################################################################
 !###################################################################################
-!
-!       
-        SUBROUTINE SNOW3LAGREG(PSNOWDZN,PSNOWDZ,PSNOWRHO,PSNOWGRAN1, PSNOWGRAN2,&
-                                 PSNOWHIST,PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN,   &
-                                 KILAYER1,KILAYER2,PSNOWDDZ) 
+SUBROUTINE SNOW3LAGREG(PSNOWDZN,PSNOWDZ,PSNOWRHO,PSNOWGRAN1, PSNOWGRAN2, &
+                       PSNOWHIST,PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN,     &
+                       KL1,KL2,PSNOWDDZ                        ) 
 !
 USE MODD_SNOW_METAMO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-        IMPLICIT NONE
+IMPLICIT NONE
 !
 !       0.1 declarations of arguments        
 !        
-        REAL, DIMENSION(:), INTENT(IN)         :: PSNOWDZN,PSNOWDZ,PSNOWRHO,&
-                                                     PSNOWDDZ  
+REAL, DIMENSION(:), INTENT(IN)  :: PSNOWDZN,PSNOWDZ,PSNOWRHO,PSNOWDDZ  
 !                                                    
-        REAL, DIMENSION(:), INTENT(IN)      :: PSNOWGRAN1, PSNOWGRAN2,&
-                                                     PSNOWHIST 
-                                                    
-        REAL, DIMENSION(:), INTENT(OUT)      :: PSNOWGRAN1N, PSNOWGRAN2N,&
-                                                     PSNOWHISTN                                                    
-
-        INTEGER, INTENT(IN)                      :: KILAYER1 ! Indice
-!                                                couche de référence (i)
-        INTEGER, INTENT(IN)                      :: KILAYER2 ! Indice de
-!        la couche (i-1 ou i+1) dont une partie est aggrégée à la couche (i)
+REAL, DIMENSION(:), INTENT(IN)  :: PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST 
+REAL, DIMENSION(:), INTENT(OUT) :: PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN                                              
+!
+INTEGER, INTENT(IN) :: KL1  ! Indice couche de référence (i)
+INTEGER, INTENT(IN) :: KL2 ! Indice de la couche (i-1 ou i+1) dont une 
+                                ! partie est aggrégée à la couche (i)
 !
 !       0.2 declaration of local variables
 !        
-        REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHO
-                                      
+REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHO
+REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZDIAMD,ZDIAMV,ZSPHERD,ZSPHERV,&
+                                     ZDIAMN,ZSPHERN,ZDENT 
 !
-        INTEGER                         :: IDENT, IVIEU, ILAYER
+REAL :: ZDELTA, ZCOMP
 !
-        REAL                            :: ZDELTA
-        REAL, DIMENSION(SIZE(PSNOWRHO,1))   :: ZDIAMD,&
-                                                 ZDIAMV,ZSPHERD,ZSPHERV,&
-                                                 ZDIAMN,ZSPHERN,ZDENT 
-        REAL(KIND=JPRB) :: ZHOOK_HANDLE
-     
+INTEGER :: IDENT, IVIEU, IL
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAGREG',0,ZHOOK_HANDLE)
-IF(KILAYER1<KILAYER2)THEN
-        ZDELTA=0.0
-        ILAYER = KILAYER1
+!
+IF( KL1<KL2 ) THEN
+  ZDELTA = 0.0
+  IL = KL1
 ELSE
-        ZDELTA=1.0
-        ILAYER = KILAYER2
-ENDIF        
+  ZDELTA = 1.0
+  IL = KL2
+ENDIF
+!
 ! Mean Properties
 !
 !       1. History
 !
-        IF(PSNOWHIST(KILAYER1)/=PSNOWHIST(KILAYER2)) THEN
-        PSNOWHISTN(KILAYER1)=0.0
-        ENDIF
+IF ( PSNOWHIST(KL1)/=PSNOWHIST(KL2) ) THEN
+  PSNOWHISTN(KL1) = 0.0
+ENDIF
 !
 !       2. New grain types
 !
 !       2.1 Same grain type
 !
-!
-          
-        IF((PSNOWGRAN1(KILAYER1)*PSNOWGRAN1(KILAYER2)>0.0).OR.            &
-         (PSNOWGRAN1(KILAYER1)==0.AND.PSNOWGRAN1(KILAYER2)>=0.0).OR.       &
-         (PSNOWGRAN1(KILAYER2)==0.AND.PSNOWGRAN1(KILAYER1)>=0.0)) THEN 
-!
-!code original vincent          PSNOWGRAN1N(KILAYER1)=(PSNOWGRAN1(KILAYER1)*PSNOWRHO(KILAYER1)&
-!code original vincent        *(PSNOWDZN(KILAYER1)-(1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))-ZDELTA*&
-!code original vincent        abs(PSNOWDDZ(KILAYER2)))+PSNOWGRAN1(KILAYER2)*                   &
-!code original vincent        PSNOWRHO(KILAYER2)*((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+        &   
-!code original vincent        ZDELTA*abs(PSNOWDDZ(KILAYER2))))/((PSNOWDZN(KILAYER1)-(1.0-ZDELTA)&
-!code original vincent        *abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2)))*        &
-!code original vincent        PSNOWRHO(KILAYER1)+((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+        &   
-!code original vincent        ZDELTA*abs(PSNOWDDZ(KILAYER2)))*PSNOWRHO(KILAYER2))
-!code original vincent !
-!code original vincent          PSNOWGRAN2N(KILAYER1)=(PSNOWGRAN2(KILAYER1)*PSNOWRHO(KILAYER1) &
-!code original vincent        *(PSNOWDZN(KILAYER1)-(1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))-ZDELTA* &
-!code original vincent        abs(PSNOWDDZ(KILAYER2)))+PSNOWGRAN2(KILAYER2)*                   &
-!code original vincent        PSNOWRHO(KILAYER2)*((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))        &
-!code original vincent        +ZDELTA*abs(PSNOWDDZ(KILAYER2))))/((PSNOWDZN(KILAYER1)-(1.0-ZDELTA)&
-!code original vincent        *abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2)))*        &
-!code original vincent        PSNOWRHO(KILAYER1)+((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+        &   
-!code original vincent        ZDELTA*abs(PSNOWDDZ(KILAYER2)))*PSNOWRHO(KILAYER2))
-!     
-!plm
-         PSNOWGRAN1N(KILAYER1) = (   PSNOWGRAN1(KILAYER1) * PSNOWRHO(KILAYER1)         &
-                                    * (PSNOWDZN(KILAYER1) - abs(PSNOWDDZ(ILAYER)))      &
-                                    + PSNOWGRAN1(KILAYER2) * PSNOWRHO(KILAYER2)         &
-                                    * abs(PSNOWDDZ(ILAYER))                        )  / &
-                                  (   (PSNOWDZN(KILAYER1)-abs(PSNOWDDZ(ILAYER)))          &
-                                    * PSNOWRHO(KILAYER1)                                &
-                                    + abs(PSNOWDDZ(ILAYER))*PSNOWRHO(KILAYER2)     ) 
-!
-         PSNOWGRAN2N(KILAYER1) = (   PSNOWGRAN2(KILAYER1) * PSNOWRHO(KILAYER1)         &
-                                    * (PSNOWDZN(KILAYER1) - abs(PSNOWDDZ(ILAYER)))      &
-                                    + PSNOWGRAN2(KILAYER2) * PSNOWRHO(KILAYER2)         &
-                                    * abs(PSNOWDDZ(ILAYER))                        )  / &
-                                  (   (PSNOWDZN(KILAYER1)-abs(PSNOWDDZ(ILAYER)))          &
-                                    * PSNOWRHO(KILAYER1)                                &
-                                    + abs(PSNOWDDZ(ILAYER))*PSNOWRHO(KILAYER2)     ) 
-!plm
-!     
-        ELSE
-!
-!       2.2 Different types
-!        
-        IF(PSNOWGRAN1(KILAYER1)<0.0) THEN
-          IDENT = KILAYER1
-          IVIEU = KILAYER2
-        ELSE
-          IDENT = KILAYER2
-          IVIEU = KILAYER1
-        ENDIF  
-!                        
-        ZDIAMD(KILAYER1)=-PSNOWGRAN1(IDENT)*XDIAET/XGRAN+              &
-                         (1.0+PSNOWGRAN1(IDENT)/XGRAN)*(PSNOWGRAN2(IDENT) &
-                         *XDIAGF/XGRAN+(1.0-PSNOWGRAN2(IDENT)/XGRAN)&
-                         *XDIAFP)                  
-        ZSPHERD(KILAYER1)=PSNOWGRAN2(IDENT)/XGRAN                
-        ZDIAMV(KILAYER1)=PSNOWGRAN2(IVIEU)
-        ZSPHERV(KILAYER1)=PSNOWGRAN1(IVIEU)/XGRAN
-        !IF(KILAYER1==1)THEN
-        !write(*,*) 'ZDD1',ZDIAMD(1),'ZSD1',ZSPHERD(1)
-        !write(*,*) 'ZDV1',ZDIAMV(1),'ZSV1',ZSPHERV(1)
-        !ENDIF
-!
-!        
-!
-        IF(IDENT==KILAYER1) THEN
-!code original vincent        ZDIAMN(KILAYER1)= (ZDIAMD(KILAYER1)*PSNOWRHO(IDENT)*&
-!code original vincent            (PSNOWDZN(IDENT)-(1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))-ZDELTA*      &
-!code original vincent            abs(PSNOWDDZ(KILAYER2)))+ZDIAMV(KILAYER1)*PSNOWRHO(IVIEU)*(       &
-!code original vincent            (1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2))))/&
-!code original vincent            ((PSNOWDZN(KILAYER1)-(1.0-ZDELTA)*                                    &
-!code original vincent            abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2)))*            &
-!code original vincent            PSNOWRHO(KILAYER1)+((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+          &   
-!code original vincent            ZDELTA*abs(PSNOWDDZ(KILAYER2)))*PSNOWRHO(KILAYER2))
-!
-!plm
-        ZDIAMN(KILAYER1)= (ZDIAMD(KILAYER1)*PSNOWRHO(IDENT)*&
-             (PSNOWDZN(IDENT)-abs(PSNOWDDZ(ILAYER)))+        &
-             ZDIAMV(KILAYER1)*PSNOWRHO(IVIEU)*abs(PSNOWDDZ(ILAYER)))/&
-             ((PSNOWDZN(KILAYER1)-abs(PSNOWDDZ(ILAYER)))*            &
-             PSNOWRHO(KILAYER1)+abs(PSNOWDDZ(ILAYER))*PSNOWRHO(KILAYER2)) 
-!plm
+IF (  PSNOWGRAN1(KL1)*PSNOWGRAN1(KL2)>0.0 .OR. &
+    ( PSNOWGRAN1(KL1)==0.0 .AND. PSNOWGRAN1(KL2)>=0.0 ) .OR. &
+    ( PSNOWGRAN1(KL2)==0.0 .AND. PSNOWGRAN1(KL1)>=0.0 ) ) THEN 
+  !
+  !code original vincent          PSNOWGRAN1N(KL1)=(PSNOWGRAN1(KL1)*PSNOWRHO(KL1)&
+  !code original vincent        *(PSNOWDZN(KL1)-(1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))-ZDELTA*&
+  !code original vincent        ABS(PSNOWDDZ(KL2)))+PSNOWGRAN1(KL2)*                   &
+  !code original vincent        PSNOWRHO(KL2)*((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+        &   
+  !code original vincent        ZDELTA*ABS(PSNOWDDZ(KL2))))/((PSNOWDZN(KL1)-(1.0-ZDELTA)&
+  !code original vincent        *ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2)))*        &
+  !code original vincent        PSNOWRHO(KL1)+((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+        &   
+  !code original vincent        ZDELTA*ABS(PSNOWDDZ(KL2)))*PSNOWRHO(KL2))
+  !code original vincent !
+  !code original vincent          PSNOWGRAN2N(KL1)=(PSNOWGRAN2(KL1)*PSNOWRHO(KL1) &
+  !code original vincent        *(PSNOWDZN(KL1)-(1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))-ZDELTA* &
+  !code original vincent        ABS(PSNOWDDZ(KL2)))+PSNOWGRAN2(KL2)*                   &
+  !code original vincent        PSNOWRHO(KL2)*((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))        &
+  !code original vincent        +ZDELTA*ABS(PSNOWDDZ(KL2))))/((PSNOWDZN(KL1)-(1.0-ZDELTA)&
+  !code original vincent        *ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2)))*        &
+  !code original vincent        PSNOWRHO(KL1)+((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+        &   
+  !code original vincent        ZDELTA*ABS(PSNOWDDZ(KL2)))*PSNOWRHO(KL2))
+  !     
+  !plm
+  CALL GET_AGREG(KL1,KL2,PSNOWGRAN1(KL1),PSNOWGRAN1(KL2),PSNOWGRAN1N(KL1))
+  !
+  CALL GET_AGREG(KL1,KL2,PSNOWGRAN2(KL1),PSNOWGRAN2(KL2),PSNOWGRAN2N(KL1))
+  !
+  !plm
+  !     
+ELSE
+  !
+  !       2.2 Different types
+  !        
+  IF ( PSNOWGRAN1(KL1)<0.0 ) THEN
+    IDENT = KL1
+    IVIEU = KL2
+  ELSE
+    IDENT = KL2
+    IVIEU = KL1
+  ENDIF  
+  !                        
+  ZDIAMD (KL1) = - PSNOWGRAN1(IDENT)/XGRAN * XDIAET + ( 1.0 + PSNOWGRAN1(IDENT)/XGRAN ) * &
+                 ( PSNOWGRAN2(IDENT)/XGRAN * XDIAGF + ( 1.0 - PSNOWGRAN2(IDENT)/XGRAN ) * XDIAFP )
+  !
+  ZSPHERD(KL1) = PSNOWGRAN2(IDENT)/XGRAN                
+  ZDIAMV (KL1) = PSNOWGRAN2(IVIEU)
+  ZSPHERV(KL1) = PSNOWGRAN1(IVIEU)/XGRAN
+  !IF(KL1==1)THEN
+  !write(*,*) 'ZDD1',ZDIAMD(1),'ZSD1',ZSPHERD(1)
+  !write(*,*) 'ZDV1',ZDIAMV(1),'ZSV1',ZSPHERV(1)
+  !ENDIF       
+  !
+  IF ( IDENT==KL1 ) THEN
+    !code original vincent        ZDIAMN(KL1)= (ZDIAMD(KL1)*PSNOWRHO(IDENT)*&
+    !code original vincent            (PSNOWDZN(IDENT)-(1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))-ZDELTA*      &
+    !code original vincent            ABS(PSNOWDDZ(KL2)))+ZDIAMV(KL1)*PSNOWRHO(IVIEU)*(       &
+    !code original vincent            (1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2))))/&
+    !code original vincent            ((PSNOWDZN(KL1)-(1.0-ZDELTA)*                                    &
+    !code original vincent            ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2)))*            &
+    !code original vincent            PSNOWRHO(KL1)+((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+          &   
+    !code original vincent            ZDELTA*ABS(PSNOWDDZ(KL2)))*PSNOWRHO(KL2))
+    !
+    !plm
+    CALL GET_AGREG(IDENT,IVIEU,ZDIAMD(KL1),ZDIAMV(KL1),ZDIAMN(KL1))
+    !
+    !plm
+    !         
+    !code original vincent        ZSPHERN(KL1)= (ZSPHERD(KL1)*PSNOWRHO(IDENT)*&
+    !code original vincent            (PSNOWDZN(IDENT)-(1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))-ZDELTA*      &
+    !code original vincent            ABS(PSNOWDDZ(KL2)))+ZSPHERV(KL1)*PSNOWRHO(IVIEU)*(       &
+    !code original vincent            (1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2))))/&
+    !code original vincent            ((PSNOWDZN(KL1)-(1.0-ZDELTA)*                                    &
+    !code original vincent            ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2)))*            &
+    !code original vincent            PSNOWRHO(KL1)+((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+          &   
+    !code original vincent            ZDELTA*ABS(PSNOWDDZ(KL2)))*PSNOWRHO(KL2))
 
+    !plm
+    CALL GET_AGREG(IDENT,IVIEU,ZSPHERD(KL1),ZSPHERV(KL1),ZSPHERN(KL1))   
+    !plm
+    !
+  ELSE
+    !code original vincent        ZDIAMN(KL1)= (ZDIAMD(KL1)*PSNOWRHO(IDENT)*&
+    !code original vincent            ((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+ZDELTA*ABS(PSNOWDDZ(KL2)))&
+    !code original vincent            +ZDIAMV(KL1)*PSNOWRHO(IVIEU)*(PSNOWDZN(IVIEU)-(1.0-ZDELTA)*  & 
+    !code original vincent            ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2))))/&
+    !code original vincent            ((PSNOWDZN(KL1)-(1.0-ZDELTA)*                          &
+    !code original vincent            ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2)))*    &
+    !code original vincent            PSNOWRHO(KL1)+((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+   &
+    !code original vincent            ZDELTA*ABS(PSNOWDDZ(KL2)))*PSNOWRHO(KL2))
+    !code original vincent!            
+    !code original vincent         ZSPHERN(KL1)= (ZSPHERD(KL1)*PSNOWRHO(IDENT)*&
+    !code original vincent            ((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+ZDELTA*ABS(PSNOWDDZ(KL2)))&
+    !code original vincent            +ZSPHERV(KL1)*PSNOWRHO(IVIEU)*(PSNOWDZN(IVIEU)-(1.0-ZDELTA)* & 
+    !code original vincent            ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2))))/&
+    !code original vincent            ((PSNOWDZN(KL1)-(1.0-ZDELTA)*                                    &
+    !code original vincent            ABS(PSNOWDDZ(KL1))-ZDELTA*ABS(PSNOWDDZ(KL2)))*            &
+    !code original vincent            PSNOWRHO(KL1)+((1.0-ZDELTA)*ABS(PSNOWDDZ(KL1))+          &   
+    !code original vincent            ZDELTA*ABS(PSNOWDDZ(KL2)))*PSNOWRHO(KL2))
+    !plm
+    !
+    CALL GET_AGREG(IVIEU,IDENT,ZDIAMV(KL1),ZDIAMD(KL1),ZDIAMN(KL1))
+    !           
+    CALL GET_AGREG(IVIEU,IDENT,ZSPHERV(KL1),ZSPHERD(KL1),ZSPHERN(KL1))
+    !plm
+    !
+  ENDIF
+  !       
+  ZCOMP = ZSPHERN(KL1) * XDIAGF + ( 1.-ZSPHERN(KL1) ) * XDIAFP
+  IF( ZDIAMN(KL1) < ZCOMP ) THEN
+    !
+    ZDENT(KL1) = ( ZDIAMN(KL1) - ZCOMP ) / ( XDIAET - ZCOMP ) 
+    !IF(KL1==1) write(*,*) 'ZDENT',ZDENT(1)   
+    PSNOWGRAN1N(KL1) = - XGRAN * ZDENT  (KL1)
+    PSNOWGRAN2N(KL1) =   XGRAN * ZSPHERN(KL1)
+    !
+  ELSE
+    !
+    PSNOWGRAN1N(KL1) = XGRAN * ZSPHERN(KL1)
+    PSNOWGRAN2N(KL1) = ZDIAMN(KL1)
+    !
+  ENDIF
+  !  
+ENDIF
 !
-!         
-!code original vincent        ZSPHERN(KILAYER1)= (ZSPHERD(KILAYER1)*PSNOWRHO(IDENT)*&
-!code original vincent            (PSNOWDZN(IDENT)-(1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))-ZDELTA*      &
-!code original vincent            abs(PSNOWDDZ(KILAYER2)))+ZSPHERV(KILAYER1)*PSNOWRHO(IVIEU)*(       &
-!code original vincent            (1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2))))/&
-!code original vincent            ((PSNOWDZN(KILAYER1)-(1.0-ZDELTA)*                                    &
-!code original vincent            abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2)))*            &
-!code original vincent            PSNOWRHO(KILAYER1)+((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+          &   
-!code original vincent            ZDELTA*abs(PSNOWDDZ(KILAYER2)))*PSNOWRHO(KILAYER2))
-
-!plm
-        ZSPHERN(KILAYER1)= (ZSPHERD(KILAYER1)*PSNOWRHO(IDENT)*&
-             (PSNOWDZN(IDENT)-abs(PSNOWDDZ(ILAYER)))+          &
-             ZSPHERV(KILAYER1)*PSNOWRHO(IVIEU)* abs(PSNOWDDZ(ILAYER)))/&
-             ((PSNOWDZN(KILAYER1)-abs(PSNOWDDZ(ILAYER)))*            &
-             PSNOWRHO(KILAYER1)+abs(PSNOWDDZ(ILAYER))*PSNOWRHO(KILAYER2)) 
-!plm
-!
-!
-!
-        ELSE
-!code original vincent        ZDIAMN(KILAYER1)= (ZDIAMD(KILAYER1)*PSNOWRHO(IDENT)*&
-!code original vincent            ((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+ZDELTA*abs(PSNOWDDZ(KILAYER2)))&
-!code original vincent            +ZDIAMV(KILAYER1)*PSNOWRHO(IVIEU)*(PSNOWDZN(IVIEU)-(1.0-ZDELTA)*  & 
-!code original vincent            abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2))))/&
-!code original vincent            ((PSNOWDZN(KILAYER1)-(1.0-ZDELTA)*                          &
-!code original vincent            abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2)))*    &
-!code original vincent            PSNOWRHO(KILAYER1)+((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+   &
-!code original vincent            ZDELTA*abs(PSNOWDDZ(KILAYER2)))*PSNOWRHO(KILAYER2))
-!code original vincent!            
-!code original vincent         ZSPHERN(KILAYER1)= (ZSPHERD(KILAYER1)*PSNOWRHO(IDENT)*&
-!code original vincent            ((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+ZDELTA*abs(PSNOWDDZ(KILAYER2)))&
-!code original vincent            +ZSPHERV(KILAYER1)*PSNOWRHO(IVIEU)*(PSNOWDZN(IVIEU)-(1.0-ZDELTA)* & 
-!code original vincent            abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2))))/&
-!code original vincent            ((PSNOWDZN(KILAYER1)-(1.0-ZDELTA)*                                    &
-!code original vincent            abs(PSNOWDDZ(KILAYER1))-ZDELTA*abs(PSNOWDDZ(KILAYER2)))*            &
-!code original vincent            PSNOWRHO(KILAYER1)+((1.0-ZDELTA)*abs(PSNOWDDZ(KILAYER1))+          &   
-!code original vincent            ZDELTA*abs(PSNOWDDZ(KILAYER2)))*PSNOWRHO(KILAYER2))
-
-!plm
-        ZDIAMN(KILAYER1)= (ZDIAMD(KILAYER1)*PSNOWRHO(IDENT)*&
-             abs(PSNOWDDZ(ILAYER))&
-             +ZDIAMV(KILAYER1)*PSNOWRHO(IVIEU)*(PSNOWDZN(IVIEU)-abs(PSNOWDDZ(ILAYER))))/&
-             ((PSNOWDZN(KILAYER1)-abs(PSNOWDDZ(ILAYER)))*    &
-             PSNOWRHO(KILAYER1)+abs(PSNOWDDZ(ILAYER))*PSNOWRHO(KILAYER2)) 
-!            
-         ZSPHERN(KILAYER1)= (ZSPHERD(KILAYER1)*PSNOWRHO(IDENT)*&
-             abs(PSNOWDDZ(ILAYER))&
-             +ZSPHERV(KILAYER1)*PSNOWRHO(IVIEU)*(PSNOWDZN(IVIEU)-abs(PSNOWDDZ(ILAYER))))/&
-             ((PSNOWDZN(KILAYER1)-abs(PSNOWDDZ(ILAYER)))*            &
-             PSNOWRHO(KILAYER1)+abs(PSNOWDDZ(ILAYER))*PSNOWRHO(KILAYER2)) 
-!plm
-        ENDIF
-!
-!
-!        
-        IF(ZDIAMN(KILAYER1)<ZSPHERN(KILAYER1)*XDIAGF+&
-                    (1-ZSPHERN(KILAYER1))*XDIAFP) THEN 
-         ZDENT(KILAYER1)=(ZDIAMN(KILAYER1)-(ZSPHERN(KILAYER1)*&
-             XDIAGF+(1-ZSPHERN(KILAYER1))*XDIAFP))/(XDIAET-&
-             (ZSPHERN(KILAYER1)*XDIAGF+(1-ZSPHERN(KILAYER1))*XDIAFP)) 
-         !IF(KILAYER1==1) write(*,*) 'ZDENT',ZDENT(1)   
-         PSNOWGRAN1N(KILAYER1)=-XGRAN*ZDENT(KILAYER1)
-         PSNOWGRAN2N(KILAYER1)= XGRAN*ZSPHERN(KILAYER1)
-        ELSE
-        PSNOWGRAN1N(KILAYER1)= XGRAN*ZSPHERN(KILAYER1)
-        PSNOWGRAN2N(KILAYER1)= ZDIAMN(KILAYER1)
-        ENDIF                       
-        ENDIF
-       IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAGREG',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAGREG',1,ZHOOK_HANDLE)
 !
 !       3. Update snow grains parameters : GRAN1, GRAN2        
-!        PSNOWGRAN1(KILAYER1)=ZSNOWGRAN1(KILAYER1)
-!        PSNOWGRAN2(KILAYER1)=ZSNOWGRAN2(KILAYER1)
-              
-       
-       END SUBROUTINE SNOW3LAGREG    
+!        PSNOWGRAN1(KL1)=ZSNOWGRAN1(KL1)
+!        PSNOWGRAN2(KL1)=ZSNOWGRAN2(KL1)
 !
-!###############################################################################                 
+CONTAINS
+!
+SUBROUTINE GET_AGREG(KID1,KID2,PFIELD1,PFIELD2,PFIELD)
+!
+INTEGER, INTENT(IN) :: KID1, KID2
+REAL, INTENT(IN) :: PFIELD1, PFIELD2
+REAL, INTENT(OUT) :: PFIELD
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAGREG:GET_AGREG',0,ZHOOK_HANDLE)
+!
+PFIELD = ( PFIELD1 * PSNOWRHO(KID1) * ( PSNOWDZN(KID1) - ABS(PSNOWDDZ(IL)) ) &
+         + PFIELD2 * PSNOWRHO(KID2) * ABS(PSNOWDDZ(IL))                        ) / &
+         (           PSNOWRHO (KL1) * ( PSNOWDZN (KL1) - ABS(PSNOWDDZ(IL)) ) + &
+                     PSNOWRHO (KL2) * ABS(PSNOWDDZ(IL))                        ) 
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAGREG:GET_AGREG',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE GET_AGREG
+!
+END SUBROUTINE SNOW3LAGREG    
+!###############################################################################    
 !###############################################################################
 !
 !       
 !ajout EB : ajout des arguments "N" pour faire idem variables d'origine
-
-        SUBROUTINE SNOW3LAVGRAIN(PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,   &
-                       ZSNOWGRAN1N, ZSNOWGRAN2N, ZSNOWHISTN,PNDENT, PNVIEU) 
+SUBROUTINE SNOW3LAVGRAIN(PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,                &
+                         PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN,PNDENT,PNVIEU) 
+!
+USE MODD_SNOW_PAR, ONLY : CSNOWMETAMO
+USE MODD_SNOW_METAMO, ONLY : XVDIAM6, XUEPSI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-!
-        IMPLICIT NONE
+IMPLICIT NONE
 !
 !       0.1 declarations of arguments        
 !        
-        REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1,PSNOWGRAN2,  &
-                                                 PSNOWHIST 
-!
+REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST 
 ! ajout EB
-        REAL, DIMENSION(:,:), INTENT(INOUT)  :: ZSNOWGRAN1N,ZSNOWGRAN2N,  &
-                                                 ZSNOWHISTN 
-
-        REAL, DIMENSION(:), INTENT(IN)    :: PNDENT, PNVIEU          
+REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN 
 !
+REAL, DIMENSION(:), INTENT(IN)    :: PNDENT, PNVIEU          
 !
 !       0.2 declaration of local variables
 !
-         INTEGER                              :: JI, JJ
-         INTEGER                              :: INLVLS, INI
+REAL, DIMENSION(SIZE(PSNOWGRAN1,1)) :: ZGRAN1, ZGRAN2, ZHIST 
 !
-         REAL, DIMENSION(SIZE(PSNOWGRAN1,1)) ::KGRAN1, KGRAN2, KHIST    
-         REAL(KIND=JPRB) :: ZHOOK_HANDLE
+LOGICAL, DIMENSION(SIZE(PSNOWGRAN1,1),SIZE(PSNOWGRAN1,2)) :: GDENDRITIC
+!
+INTEGER :: JI, JL
+INTEGER :: INLVLS, INI
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         
 !       0.3 initialization         
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAVGRAIN',0,ZHOOK_HANDLE)
+!
 INLVLS    = SIZE(PSNOWGRAN1,2) 
-INI       = SIZE(PSNOWGRAN1,1) 
-KGRAN1(:) = 0.0
-KGRAN2(:) = 0.0
-KHIST(:)  = 0.0
+INI       = SIZE(PSNOWGRAN1,1)
 !
-!      
-!         
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      IF(PNDENT(JI)==0.0 .AND. PNVIEU(JI)==0.0)THEN
-         KGRAN1(JI)    = 1.0
-         KGRAN2(JI)    = 1.0 
-         KHIST(JI)     = 1.0
-      ELSEIF(PNDENT(JI)>=PNVIEU(JI))THEN      ! more dendritic than non dendritic snow layer
-         IF(PSNOWGRAN1(JI,JJ)<0.0)THEN
-            KGRAN1(JI) = KGRAN1(JI)+PSNOWGRAN1(JI,JJ)
-            KGRAN2(JI) = KGRAN2(JI)+PSNOWGRAN2(JI,JJ)
-         ENDIF
-      ELSE                              ! more non dendritic than dendritic snow layers  
-         IF(PSNOWGRAN1(JI,JJ)>=0)THEN
-            KGRAN1(JI) = KGRAN1(JI)+PSNOWGRAN1(JI,JJ)
-            KGRAN2(JI) = KGRAN2(JI)+PSNOWGRAN2(JI,JJ)
-            KHIST(JI)  = KHIST(JI)+PSNOWHIST(JI,JJ) 
-         ENDIF
-      ENDIF
-   ENDDO
-ENDDO
-!
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      IF(PNDENT(JI)==0.0 .AND. PNVIEU(JI)==0.0)THEN
-         KGRAN1(JI)        =1.0
-      ELSEIF(PNDENT(JI)>=PNVIEU(JI))THEN
-         ZSNOWGRAN1N(JI,JJ)= KGRAN1(JI)/PNDENT(JI)   
-         ZSNOWGRAN2N(JI,JJ)= KGRAN2(JI)/PNDENT(JI)
-         ZSNOWHISTN(JI,JJ) = 0.0
+ZGRAN1(:) = 0.0
+ZGRAN2(:) = 0.0
+ZHIST (:) = 0.0
+!     
+DO JI = 1,INI
+  !
+  IF ( PNDENT(JI)==0.0 .AND. PNVIEU(JI)==0.0 ) THEN
+    !
+    ZGRAN1(JI) = 1.0
+    ZGRAN2(JI) = 1.0 
+    ZHIST (JI) = 1.0
+    !
+  ELSE
+    !
+    DO JL = 1,INLVLS
+      IF ( CSNOWMETAMO=='B92' ) THEN
+        GDENDRITIC(JI,JL) = ( PSNOWGRAN1(JI,JL) < 0.0 )
       ELSE
-         ZSNOWGRAN1N(JI,JJ)= KGRAN1(JI)/PNVIEU(JI)
-         ZSNOWGRAN2N(JI,JJ)= KGRAN2(JI)/PNVIEU(JI)
-         ZSNOWHISTN(JI,JJ) = KHIST(JI) /PNVIEU(JI)
+        GDENDRITIC(JI,JL) = ( PSNOWGRAN1(JI,JL) < XVDIAM6*(4.-PSNOWGRAN2(JI,JL)) - XUEPSI )
       ENDIF
-   ENDDO
+    ENDDO
+    !
+    IF ( PNDENT(JI)>=PNVIEU(JI) ) THEN      ! more dendritic than non dendritic snow layer
+      !
+      DO JL = 1,INLVLS
+        IF ( GDENDRITIC(JI,JL) ) THEN
+          ZGRAN1(JI) = ZGRAN1(JI) + PSNOWGRAN1(JI,JL)
+          ZGRAN2(JI) = ZGRAN2(JI) + PSNOWGRAN2(JI,JL)
+        ENDIF
+      ENDDO
+      !
+      PSNOWGRAN1N(JI,:) = ZGRAN1(JI) / PNDENT(JI)   
+      PSNOWGRAN2N(JI,:) = ZGRAN2(JI) / PNDENT(JI)
+      PSNOWHISTN (JI,:) = 0.0
+      !
+    ELSE                              ! more non dendritic than dendritic snow layers  
+      !
+      DO JL = 1,INLVLS
+        IF ( .NOT.GDENDRITIC(JI,JL) ) THEN
+          ZGRAN1(JI) = ZGRAN1(JI) + PSNOWGRAN1(JI,JL)
+          ZGRAN2(JI) = ZGRAN2(JI) + PSNOWGRAN2(JI,JL)
+          ZHIST (JI) = ZHIST (JI) + PSNOWHIST (JI,JL) 
+        ENDIF
+      ENDDO
+      !
+      PSNOWGRAN1N(JI,:) = ZGRAN1(JI) / PNVIEU(JI)
+      PSNOWGRAN2N(JI,:) = ZGRAN2(JI) / PNVIEU(JI)
+      PSNOWHISTN (JI,:) = ZHIST (JI) / PNVIEU(JI)
+      !    
+    ENDIF
+    !
+  ENDIF
+  !
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAVGRAIN',1,ZHOOK_HANDLE)
+!
 END SUBROUTINE SNOW3LAVGRAIN         
 !        
 !####################################################################
@@ -1621,34 +1377,265 @@ FUNCTION SNOW3LDIFTYP(PGRAIN1,PGRAIN2,PGRAIN3,PGRAIN4) RESULT(ZDIFTYPE)
 !*    CALCUL DE LA DIFFERENCE ENTRE DEUX TYPES DE GRAINS
 !     VALEUR ENTRE 200 ET 0
 !
+USE MODD_SNOW_PAR, ONLY : CSNOWMETAMO
+USE MODD_SNOW_METAMO, ONLY : XGRAN, XVDIAM6, XUEPSI
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !*      0.1    declarations of arguments
-REAL  :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4, ZDIFTYPE
+REAL, INTENT(IN) :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4
+REAL :: ZDIFTYPE, ZCOEF3, ZCOEF4
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !*      0.2    calcul de la difference entre type de grains
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDIFTYP',0,ZHOOK_HANDLE)
-if (pgrain1==0.and.pgrain2>=0) then
-ZDIFTYPE=ABS(PGRAIN1-PGRAIN2)+ABS(PGRAIN3-PGRAIN4)*5.*10000.
-elseIF(PGRAIN1>=0.and.PGRAIN2==0) then
-ZDIFTYPE=ABS(PGRAIN1-PGRAIN2)+ABS(PGRAIN3-PGRAIN4)*5.*10000.
-else if(PGRAIN1<0.and.PGRAIN2==0) then
-       zdiftype=200.
-else if(PGRAIN1==0.and.PGRAIN2<0) then
-       zdiftype=200.
-ELSEIF(PGRAIN1*PGRAIN2.LT.0.) THEN
-ZDIFTYPE=200.
-ELSEIF(PGRAIN1.LT.0.) THEN
-ZDIFTYPE=ABS(PGRAIN1-PGRAIN2)*.5+ABS(PGRAIN3-PGRAIN4)*.5
+!
+IF ( CSNOWMETAMO=='B92' ) THEN 
+  !
+  IF ( ( PGRAIN1<0.  .AND. PGRAIN2>=0.) .OR. ( PGRAIN1>=0. .AND. PGRAIN2<0. ) ) THEN
+    ZDIFTYPE = 200.
+  ELSEIF ( PGRAIN1<0. ) THEN
+    ZDIFTYPE = ABS( PGRAIN1-PGRAIN2 ) * .5 + ABS( PGRAIN3-PGRAIN4 ) * .5
+  ELSE
+    ZDIFTYPE = ABS( PGRAIN1-PGRAIN2 )      + ABS( PGRAIN3-PGRAIN4 ) * 5. * 10000.
+  ENDIF
+  !
 ELSE
-ZDIFTYPE=ABS(PGRAIN1-PGRAIN2)+ABS(PGRAIN3-PGRAIN4)*5.*10000.
+  !
+  ZCOEF3 = XVDIAM6 * (4.-PGRAIN3) - XUEPSI
+  ZCOEF4 = XVDIAM6 * (4.-PGRAIN4) - XUEPSI 
+  IF ( ( PGRAIN1<ZCOEF3 .AND. PGRAIN2>=ZCOEF4 ) .OR. ( PGRAIN1>=ZCOEF3 .AND. PGRAIN2<ZCOEF4 ) ) THEN
+    ZDIFTYPE = 200.
+  ELSEIF ( PGRAIN1<ZCOEF3 ) THEN
+    ZDIFTYPE = ABS( (PGRAIN3-PGRAIN4)*XGRAN ) * .5 + &
+               ABS( ( (PGRAIN1/XVDIAM6 - 4. + PGRAIN3) / (PGRAIN3 - 3.) - &
+                      (PGRAIN2/XVDIAM6 - 4. + PGRAIN4) / (PGRAIN4 - 3.) ) * XGRAN ) * .5
+             
+  ELSE
+    ZDIFTYPE = ABS( (PGRAIN3-PGRAIN4)*XGRAN )      + ABS( ZCOEF3-ZCOEF4 ) * 5. * 10000.
+  ENDIF  
+  !
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDIFTYP',1,ZHOOK_HANDLE)
+!
 END FUNCTION SNOW3LDIFTYP
 !####################################################################
+SUBROUTINE GET_MASS_HEAT(KJ,KNLVLS_NEW,KNLVLS_OLD,                                &
+                         PSNOWZTOP_OLD,PSNOWZTOP_NEW,PSNOWZBOT_OLD,PSNOWZBOT_NEW, &
+                         PSNOWRHOO,PSNOWDZO,PSNOWGRAN1O,PSNOWGRAN2O,PSNOWHISTO,   &
+                         PSNOWAGEO,PSNOWHEATO,                                    &
+                         PSNOWRHON,PSNOWDZN,PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN,   &
+                         PSNOWAGEN, PSNOWHEATN                                    )
+!
+USE MODD_SNOW_PAR, ONLY : XSNOWCRITD, XD1, XD2, XD3, XX, XVALB5, XVALB6, &
+                          CSNOWMETAMO
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+INTEGER, INTENt(IN) :: KJ
+INTEGER, INTENT(IN) :: KNLVLS_NEW, KNLVLS_OLD
+REAL, DIMENSION(:), INTENT(IN) :: PSNOWZTOP_OLD, PSNOWZBOT_OLD
+REAL, DIMENSION(:), INTENT(IN) :: PSNOWZTOP_NEW, PSNOWZBOT_NEW
+REAL, DIMENSION(:), INTENT(IN) :: PSNOWRHOO, PSNOWDZO, PSNOWGRAN1O, PSNOWGRAN2O, &
+                                  PSNOWHISTO, PSNOWAGEO, PSNOWHEATO
+REAL, DIMENSION(:), INTENT(IN) :: PSNOWDZN
+REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRHON, PSNOWGRAN1N, PSNOWGRAN2N, &
+                                   PSNOWHISTN, PSNOWAGEN, PSNOWHEATN
+!
+REAL :: ZPROPOR, ZMASDZ_OLD, ZDIAM, ZMASTOT_T07
+REAL :: ZSNOWHEAN, ZMASTOTN, ZDENTMOYN, ZSPHERMOYN, ZALBMOYN, ZHISTMOYN
+REAL :: ZAGEMOYN
+!
+INTEGER :: JST_NEW, JST_OLD
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('GET_MASS_HEAT',0,ZHOOK_HANDLE)
+!
+PSNOWRHON  (:) = 0.
+PSNOWGRAN1N(:) = 0.
+PSNOWGRAN2N(:) = 0.
+PSNOWHISTN (:) = 0.
+PSNOWAGEN  (:) = 0.
+PSNOWHEATN (:) = 0.
+!
+DO JST_NEW = 1,KNLVLS_NEW
+  !
+  ZSNOWHEAN   = 0.
+  ZMASTOTN    = 0.
+  ZMASTOT_T07 = 0.
+  ZDENTMOYN   = 0.
+  ZSPHERMOYN  = 0.
+  ZALBMOYN    = 0.
+  ZDIAM       = 0.
+  ZHISTMOYN   = 0.
+  ZAGEMOYN    = 0.
+  !
+  ! lopp over the ols snow layers 
+  DO JST_OLD = 1,KNLVLS_OLD
+    !
+    IF( PSNOWZTOP_OLD(JST_OLD)<=PSNOWZBOT_NEW(JST_NEW) ) THEN
+      ! JST_OLD lower than JJ_NEW ==> no contribution
+    ELSEIF ( PSNOWZBOT_OLD(JST_OLD)>=PSNOWZTOP_NEW(JST_NEW) ) THEN
+      ! JST_OLD higher than JJ_NEW ==> no contribution
+    ELSE
+      ! old layer contributes to the new one
+      ! computation of its contributing ratio and mass/heat 
+      ZPROPOR = ( MIN( PSNOWZTOP_OLD(JST_OLD), PSNOWZTOP_NEW(JST_NEW) )   &
+                - MAX( PSNOWZBOT_OLD(JST_OLD), PSNOWZBOT_NEW(JST_NEW) ) ) &
+                 / PSNOWDZO(JST_OLD) 
+      ZMASDZ_OLD = ZPROPOR * PSNOWRHOO(JST_OLD) * PSNOWDZO(JST_OLD)
+      !
+      ZMASTOTN    = ZMASTOTN + ZMASDZ_OLD
+      ZMASTOT_T07 = ZMASTOT_T07 + 1.
+      !
+      ZSNOWHEAN = ZSNOWHEAN + ZPROPOR * PSNOWHEATO(JST_OLD)
+      !
+      IF ( CSNOWMETAMO=='B92' ) THEN
+        !
+        ! contribution to the grain optical size and then to the albedo
+        IF ( PSNOWGRAN1O(JST_OLD)<0. ) THEN
+          ZDIAM = -PSNOWGRAN1O(JST_OLD)*XD1/XX + (1.+PSNOWGRAN1O(JST_OLD)/XX) * &
+                 ( PSNOWGRAN2O(JST_OLD)*XD2/XX + (1.-PSNOWGRAN2O(JST_OLD)/XX)*XD3 ) 
+          ZDIAM = ZDIAM/10000.      
+          ZDENTMOYN  = ZDENTMOYN  - ZMASDZ_OLD * PSNOWGRAN1O(JST_OLD) / XX
+          ZSPHERMOYN = ZSPHERMOYN + ZMASDZ_OLD * PSNOWGRAN2O(JST_OLD) / XX
+        ELSE
+          ZDIAM = PSNOWGRAN2O(JST_OLD)
+          ZDENTMOYN  = ZDENTMOYN  + ZMASDZ_OLD * 0.
+          ZSPHERMOYN = ZSPHERMOYN + ZMASDZ_OLD * PSNOWGRAN1O(JST_OLD) / XX
+        ENDIF
+        !
+      ELSE
+        !
+        ZDIAM = PSNOWGRAN1O(JST_OLD)
+        ZSPHERMOYN = ZSPHERMOYN + ZMASDZ_OLD * PSNOWGRAN2O(JST_OLD)
+        !
+      ENDIF
+      !
+      ZALBMOYN  = ZALBMOYN  + MAX( 0., ZMASDZ_OLD * (XVALB5-XVALB6*SQRT(ZDIAM)) )
+      ZHISTMOYN = ZHISTMOYN + ZMASDZ_OLD * PSNOWHISTO(JST_OLD)
+      ZAGEMOYN  = ZAGEMOYN  + ZMASDZ_OLD * PSNOWAGEO (JST_OLD)
+      !
+    ENDIF
+    !
+  ENDDO
+  ! 
+  ! the new layer inherits from the weihted average properties of the old ones
+  ! heat and mass
+  PSNOWHEATN(JST_NEW) = ZSNOWHEAN
+  PSNOWRHON (JST_NEW) = ZMASTOTN / PSNOWDZN(JST_NEW)
+  ! grain type and size decuced from the average albedo
+  ZALBMOYN   = ZALBMOYN / ZMASTOTN
+  ZSPHERMOYN = MAX( 0., ZSPHERMOYN/ZMASTOTN )
+  ZDENTMOYN  = MAX( 0., ZDENTMOYN /ZMASTOTN )
+  ZDIAM = ( (XVALB5-ZALBMOYN)/XVALB6 )**2
+  !
+  IF ( CSNOWMETAMO=='B92' ) THEN
+    !
+    ! size between D2 and D3 and dendricity < 0         
+    ! sphericity is firts preserved, if possible. If not,
+    ! denditricity =0
+    PSNOWGRAN1N(JST_NEW) = -XX * ZDENTMOYN
+    !
+    IF ( ZDENTMOYN/=1.) THEN
+      PSNOWGRAN2N(JST_NEW) = XX * ( ( ZDIAM*10000. + PSNOWGRAN1N(JST_NEW)*XD1/XX ) &
+                                 / ( 1. + PSNOWGRAN1N(JST_NEW)/XX ) - XD3 )        &
+                             / ( XD2-XD3 )
+    ENDIF
+    !
+    ! dendricity is preserved if possible and sphericity is adjusted
+    IF ( ZDIAM < XD2/10000. - 0.0000001 ) THEN
+      !
+      IF ( ABS( PSNOWGRAN1N(JST_NEW)+XX ) < 0.01 ) THEN
+        !
+        PSNOWGRAN2N(JST_NEW) = XX * ZSPHERMOYN
+        !
+      ELSEIF ( ABS( PSNOWGRAN1N(JST_NEW) ) < 0.0001 ) THEN ! dendritic snow
+        !
+        PSNOWGRAN1N(JST_NEW) = XX * ZSPHERMOYN
+        PSNOWGRAN2N(JST_NEW) = ZDIAM
+        !
+      ELSEIF ( PSNOWGRAN2N(JST_NEW) < 0. ) THEN ! non dendritic
+        !
+        PSNOWGRAN2N(JST_NEW) = 0.
+        !
+      ELSEIF ( PSNOWGRAN2N(JST_NEW) > XX + 0.0000001 ) THEN ! non dendritic
+        !
+        PSNOWGRAN2N(JST_NEW) = XX
+        !
+      ENDIF
+      !
+    ELSEIF ( ZDIAM > XD3/10000. .OR. ZDENTMOYN <= 0. + 0.0000001 .OR. &
+             PSNOWGRAN2N(JST_NEW) < 0. .OR. PSNOWGRAN2N(JST_NEW) > XX ) THEN
+      !
+      ! dendritic snow
+      ! inconsistency with ZDIAM ==>  dendricity = 0
+      ! size between D2 and D3 and dendricity == 0          
+      PSNOWGRAN1N(JST_NEW) = XX * ZSPHERMOYN
+      PSNOWGRAN2N(JST_NEW) = ZDIAM
+      !
+    ENDIF
+    !
+  ELSE
+    !
+    PSNOWGRAN1N(JST_NEW) = ZDIAM
+    PSNOWGRAN2N(JST_NEW) = MIN( 1., ZSPHERMOYN )
+    !
+  ENDIF
+  !
+  PSNOWHISTN(JST_NEW) = NINT( ZHISTMOYN/ZMASTOTN )
+  PSNOWAGEN (JST_NEW) = ZAGEMOYN / ZMASTOTN
+  !
+ENDDO     
+!
+IF (LHOOK) CALL DR_HOOK('GET_MASS_HEAT',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE GET_MASS_HEAT
+!####################################################################
+SUBROUTINE GET_DIAM(PSNOWGRAN1,PSNOWGRAN2,PDIAM)
+!
+USE MODD_SNOW_PAR, ONLY : XD1, XD2, XD3, XX, CSNOWMETAMO
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+REAL, INTENT(IN) :: PSNOWGRAN1
+REAL, INTENT(IN) :: PSNOWGRAN2
+REAL, INTENT(OUT) :: PDIAM
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('GET_DIAM',0,ZHOOK_HANDLE)
+!
+IF ( CSNOWMETAMO=='B92' ) THEN
+  !
+  IF( PSNOWGRAN1<0. ) THEN
+    PDIAM = -PSNOWGRAN1*XD1/XX + (1.+PSNOWGRAN1/XX) * &
+           ( PSNOWGRAN2*XD2/XX + (1.-PSNOWGRAN2/XX) * XD3 ) 
+    PDIAM = PDIAM/10000.      
+  ELSE 
+    PDIAM = PSNOWGRAN2*PSNOWGRAN1/XX + &
+            MAX( 0.0004, 0.5*PSNOWGRAN2 ) * ( 1.-PSNOWGRAN1/XX )      
+  ENDIF
+  !
+ELSE
+  !
+  PDIAM = PSNOWGRAN1
+  !
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('GET_DIAM',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE GET_DIAM
 !####################################################################
 !####################################################################
 

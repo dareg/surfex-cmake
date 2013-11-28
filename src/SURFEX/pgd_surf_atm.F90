@@ -30,6 +30,7 @@
 !!
 !!    Original     13/10/03
 !!      A. Lemonsu      05/2009         Ajout de la clef LGARDEN pour TEB
+!!      J. Escobar      11/2013         Add USE MODI_READ_NAM_PGD_CHEMISTRY
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -53,13 +54,13 @@ USE MODI_READ_PGD_ARRANGE_COVER
 USE MODI_READ_PGD_COVER_GARDEN
 USE MODI_INI_DATA_COVER
 USE MODI_READ_PGD_SCHEMES
+USE MODI_READ_NAM_PGD_CHEMISTRY
 USE MODI_READ_NAM_WRITE_COVER_TEX
 USE MODI_WRITE_COVER_TEX_START
 USE MODI_WRITE_COVER_TEX_COVER
 USE MODI_LATLON_GRID
 USE MODI_PUT_PGD_GRID
 USE MODI_LATLONMASK
-USE MODI_PGD_GAUSS_INDEX
 USE MODI_PGD_FRAC
 USE MODI_PGD_COVER
 USE MODI_PGD_OROGRAPHY
@@ -135,10 +136,6 @@ ALLOCATE(XJPDIR(NSIZE_FULL))
 !
 !*    2.4     mask to limit the number of input data to read
  CALL LATLONMASK      (CGRID,NGRID_PAR,XGRID_PAR,LLATLONMASK)
-!
-!*    2.5     gaussien grid mesh index
-!
-IF(CGRID=='GAUSS') CALL PGD_GAUSS_INDEX(HPROGRAM,OZS)
 !
 !-------------------------------------------------------------------------------
 !

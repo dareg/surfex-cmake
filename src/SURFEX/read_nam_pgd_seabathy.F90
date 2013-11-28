@@ -86,7 +86,7 @@ NAMELIST/NAM_SEABATHY/ YSEABATHY, YSEABATHYFILETYPE, YNCVARNAME, XUNIF_SEABATHY
 !             ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_SEABATHY',0,ZHOOK_HANDLE)
-XUNIF_SEABATHY     = 300.
+XUNIF_SEABATHY     = -300.
 YSEABATHY          = '                          '
 YSEABATHYFILETYPE  = '      '
 YNCVARNAME='rose                      '

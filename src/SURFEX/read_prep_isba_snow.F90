@@ -110,10 +110,10 @@ IF (LNAM_READ) THEN
   CSNOW = 'D95'
   NSNOW_LAYER = 1
   !
-  CFILE_SNOW    = '                         '
-  CTYPE_SNOW    = '      '
-  CFILEPGD_SNOW    = '                         '
-  CTYPEPGD_SNOW    = '      '  
+  CFILE_SNOW = '                         '
+  CTYPE_SNOW = '      '
+  CFILEPGD_SNOW = '                         '
+  CTYPEPGD_SNOW = '      '  
   !
   LSNOW_IDEAL = .FALSE.
   LSNOW_FRAC_TOT = .FALSE.

@@ -30,7 +30,7 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF
+USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF
 !
 IMPLICIT NONE
 !
@@ -51,7 +51,7 @@ LOGICAL           :: LCORR_FLUX       ! If T, fluxes correction is made
 REAL              :: XCORFLX          ! correction coefficient ( W.m-2.K-1)
 LOGICAL           :: LDIAPYC          ! If T, fluxes correction is made                                      
 !
-NAMELIST/NAM_PREP_SEAFLUX/CFILE_SEAFLX, CTYPE, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF,  &
+NAMELIST/NAM_PREP_SEAFLUX/CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF,  &
                           NYEAR, NMONTH, NDAY, XTIME, LSEA_SBL, &
                           LOCEAN_MERCATOR, LOCEAN_CURRENT,      & 
                           XTIME_REL,LCUR_REL,LTS_REL,  &

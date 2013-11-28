@@ -80,7 +80,7 @@ INTEGER               :: JTIME     ! loop counter on time
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-INTEGER                                :: NTIME
+INTEGER                                :: NTIME_GD
 INTEGER, PARAMETER                     :: NGROUND_MAX  = 20
 INTEGER, PARAMETER                     :: NVEGTYPE_MAX = 12
 INTEGER, PARAMETER                     :: NTIME_MAX    = 12
@@ -120,7 +120,7 @@ REAL                                   :: XUNIF_H_HVEG     ! height of trees
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_DATA_TEB_GARDEN/   NTIME,                                             &
+NAMELIST/NAM_DATA_TEB_GARDEN/   NTIME_GD,                                          &
                                 CTYP_GARDEN_HVEG, CTYP_GARDEN_LVEG,                &
                                 CTYP_GARDEN_NVEG,                                  &
                                 XUNIF_FRAC_HVEG, XUNIF_FRAC_LVEG, XUNIF_FRAC_NVEG, &
@@ -140,7 +140,7 @@ NAMELIST/NAM_DATA_TEB_GARDEN/   NTIME,                                          
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN_PAR',0,ZHOOK_HANDLE)
 
-NTIME = 12
+NTIME_GD = 12
 !
 CTYP_GARDEN_HVEG   = 'TREE'           ! Forest and trees
 CTYP_GARDEN_LVEG   = 'PARK'           ! Grassland
@@ -182,11 +182,11 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_TEB_GARDEN)
 !
  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
-IF (NTIME==1) THEN
+IF (NTIME_GD==1) THEN
   XUNIF_LAI_HVEG(2:) = XUNIF_LAI_HVEG(1)
   XUNIF_LAI_LVEG(2:) = XUNIF_LAI_LVEG(1)
-ELSE IF (NTIME/=12) THEN
-  CALL ABOR1_SFX( 'Namelist NAM_DATA_TEB_GARDEN: NTIME must be equal to 1 or 12')
+ELSE IF (NTIME_GD/=12) THEN
+  CALL ABOR1_SFX( 'Namelist NAM_DATA_TEB_GARDEN: NTIME_GD must be equal to 1 or 12')
 END IF
 !-------------------------------------------------------------------------------
 !
@@ -213,6 +213,8 @@ IF (GNO_PAR_GARDEN) THEN
 END IF
 !
 !-------------------------------------------------------------------------------
+!
+NTIME_n = NTIME_GD
 !
 ALLOCATE(XDATA_FRAC_HVEG   (NDIM        ))
 ALLOCATE(XDATA_FRAC_LVEG   (NDIM        ))
