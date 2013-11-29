@@ -299,8 +299,8 @@ DO J=1,SIZE(PTA)
   !                3.  ITERATIVE LOOP TO COMPUTE USR, TSR, QSR 
   !                -------------------------------------------
   !
-  ZHWAVE(J) = 0.018*PVMOD(J)*PVMOD(J)*(1.+0.015*PVMOD(J))
-  ZTWAVE(J) = 0.729*PVMOD(J)
+  ZHWAVE(J) = 0.018*ZVMOD(J)*ZVMOD(J)*(1.+0.015*ZVMOD(J))
+  ZTWAVE(J) = 0.729*ZVMOD(J)
   ZCWAVE(J) = XG*ZTWAVE(J)/(2.*XPI)
   ZLWAVE(J) = ZTWAVE(J)*ZCWAVE(J)
   !
