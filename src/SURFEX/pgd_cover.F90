@@ -132,7 +132,7 @@ INTEGER               :: IPERMSNOW, IECO2
 INTEGER               :: IC_NAT, IC_TWN, IC_WAT, IC_SEA
 !
 INTEGER, DIMENSION(1) :: IMAXCOVER ! index of maximum cover for the given point
-INTEGER, DIMENSION(:), POINTER :: IMASK_COVER
+INTEGER, DIMENSION(:), POINTER :: IMASK_COVER=>NULL()
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_SEA, IMASK_WATER
 !
 LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
