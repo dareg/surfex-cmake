@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE GET_FLUX_n(HPROGRAM,KI,PRN,PH,PLE,PLEI,PGFLUX,PT2M,PQ2M,   &
-                            PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET     )  
+                            PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET,PCD )  
 !     ########################################
 !
 !!****  *GET_FLUX_n* - routine to get some surface fields
@@ -37,11 +37,11 @@
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX,   &
-                                     XAVG_T2M, XAVG_Q2M, XAVG_HU2M,        &
-                                     XAVG_ZON10M, XAVG_MER10M,             &
-                                     LSURF_BUDGET, N2M, XAVG_LEI,          &
-                                     XAVG_LWD, XAVG_LWU, XAVG_SWD, XAVG_SWU  
+USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX, &
+                                   XAVG_T2M, XAVG_Q2M, XAVG_HU2M,        &
+                                   XAVG_ZON10M, XAVG_MER10M, XAVG_CD,    &
+                                   LSURF_BUDGET, N2M, XAVG_LEI, LCOEF,   &
+                                   XAVG_LWD, XAVG_LWU, XAVG_SWD, XAVG_SWU  
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -67,6 +67,8 @@ REAL, DIMENSION(KI),  INTENT(OUT)    :: PMER10M   ! meridian Wind at 10 meters  
 !
 REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFLWNET   ! LW net at the surface
 REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFSWNET   ! SW net at the surface
+!
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PCD       ! exchange coeficient at the surface
 !
 !
 !*       0.2   Declarations of local variables
@@ -110,7 +112,14 @@ IF (N2M>0)      THEN
         PHU2M    = XUNDEF
         PZON10M  = XUNDEF
         PMER10M  = XUNDEF
-ENDIF           
+ENDIF   
+!
+IF (LCOEF) THEN
+  PCD      = XAVG_CD
+ELSE
+  PCD      = XUNDEF
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('GET_FLUX_N',1,ZHOOK_HANDLE)
 !==============================================================================
 !
