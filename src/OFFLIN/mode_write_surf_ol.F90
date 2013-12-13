@@ -685,7 +685,7 @@ ELSE
   IVAR_ID = 0
   INDIMS = 0
   IDIMIDS(:) = 0
-  IDIMLEN(:) = 0
+  IDIMLEN(:) = SIZE(PFIELD,2)
   YNAME = "" 
 ENDIF
 !

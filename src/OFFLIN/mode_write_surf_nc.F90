@@ -650,14 +650,14 @@ IF (NRANK==NPIO) THEN
   ELSE
     INDIMS = 0
     IDIMIDS(:) = 0
-    IDIMLEN(:) = 0
+    IDIMLEN(:) = SIZE(PFIELD,2)
     YNAME = ""
   ENDIF
   !
 ELSE
   INDIMS = 0
   IDIMIDS(:) = 0
-  IDIMLEN(:) = 0
+  IDIMLEN(:) = SIZE(PFIELD,2)
   YNAME = ""        
 ENDIF
 !

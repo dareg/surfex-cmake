@@ -7,7 +7,8 @@
 ################################
 ### USER DEPENDENT VARIABLE ####
 ################################
-CLIMDATA=/disk1/climate/PGD/
+CLIMDATA=/disk1/climdata/PGD/
+CSURF_FILETYPE=ASCII
 ################################
 ################################
 ################################
@@ -53,6 +54,19 @@ else
     echo "You need to source the config file before calling this script!"
     exit 1
   fi
+  suffix=""
+  case $CSURF_FILETYPE in
+    "ASCII")
+       suffix="txt"
+    ;;
+    "LFI")
+       suffix="lfi"
+    ;;
+    *)
+      echo "Filetype is not defined: $CSURF_FILETYPE"
+      exit 1
+    ;; 
+  esac
 fi
 
 
@@ -67,11 +81,7 @@ case $mode in
     cd $work || exit 1
 
     # Copy namelists
-    cp $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_pgd OPTIONS.nam
-
-    # Ecoclimap
-    ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.bin .
-    ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.dat .
+    cp $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_pgd_$suffix OPTIONS.nam
 
     #  Databases (SYSTEM DEPENDENT)
     if [ ! -d $CLIMDATA ]; then
@@ -80,15 +90,20 @@ case $mode in
     else
       ln -sf $CLIMDATA/* .
     fi
+    # Ecoclimap
+    ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.bin .
+    ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.dat .
+
 
     # Make PGD
     [ ! -f $SRC_SURFEX/exe/PGD$XYZ ] && echo "$SRC_SURFEX/exe/PGD$XYZ not found" && exit 1
     $SRC_SURFEX/exe/PGD$XYZ
  
-    if [ -f PGD_SODA.lfi ]; then
-      mv PGD_SODA.lfi $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.lfi
+    if [ -f PGD_SODA.$suffix ]; then
+      [ -d $SRC_SURFEX/MY_RUN/SODA/OUTPUT ] || mkdir $SRC_SURFEX/MY_RUN/SODA/OUTPUT
+      mv PGD_SODA.$suffix $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.$suffix
     else
-      echo "File PGD_SODA.lfi does not exist!"
+      echo "File PGD_SODA.$suffix does not exist!"
       exit 1
     fi
 esac
@@ -104,14 +119,15 @@ case $mode in
     cd $work || exit 1
 
     # Copy namelists
-    cp $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_prep OPTIONS.nam
+    cp $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_prep_$suffix OPTIONS.nam
 
     # Ecoclimap
     ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.bin .
     ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.dat .
 
     # Copy PGD file
-    cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.lfi .
+    [ -d $SRC_SURFEX/MY_RUN/SODA/OUTPUT ] || mkdir $SRC_SURFEX/MY_RUN/SODA/OUTPUT
+    cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.$suffix .
 
     # Copy input grib file
     cp $SRC_SURFEX/MY_RUN/SODA/INPUT/ECMWF_GRIB_FILE .
@@ -120,17 +136,17 @@ case $mode in
     [ ! -f $SRC_SURFEX/exe/PREP$XYZ ] && echo "$SRC_SURFEX/exe/PREP$XYZ not found" && exit 1
     $SRC_SURFEX/exe/PREP$XYZ
 
-    if [ -f PREP_SODA.lfi ]; then
-      mv PREP_SODA.lfi $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA.lfi
+    if [ -f PREP_SODA.$suffix ]; then
+      mv PREP_SODA.$suffix $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA.$suffix
     else
-      echo "File PREP_SODA.lfi does not exist!"
+      echo "File PREP_SODA.$suffix does not exist!"
       exit 1
     fi
 esac
 
 # Run SODA test (With single or multiple offline runs)
 if [ -f $script ]; then
-  $script || exit 1
+  $script $suffix || exit 1
 else
   echo "Script $script for test $exp not found"
   exit 1

@@ -11,11 +11,11 @@ fi
 
 LPRT=".FALSE."
 IVAR="1"
-if [ $# -ne 0 -a $# -ne 1 ]; then
-  echo "Usage: $0 [pert]"
+if [ $# -ne 0 -a $# -ne 2 ]; then
+  echo "Usage: $0 pert suffix"
 else
   mbr=""
-  if [ $# -eq 1 ]; then
+  if [ $1 -ge 0 ]; then
     pert=$1
     mbr="_PERT_"$(printf "%.2d" "$pert")
     echo "Running offline for perturbation $pert"
@@ -26,6 +26,7 @@ else
   else
     echo "Running offline"
   fi
+  suffix=$2
 fi
 
 work=$SRC_SURFEX/MY_RUN/SODA/RUN/RUN_OFFLINE$mbr
@@ -35,7 +36,7 @@ cd $work || exit 1
 # Copy namelists
 sed -e "s/LPRT=LPRT/LPRT=$LPRT/" \
     -e "s/IVAR=IVAR/IVAR=$IVAR/" \
-    $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_offline > OPTIONS.nam
+    $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_offline_$suffix > OPTIONS.nam
 
 # Ecoclimap
 ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.bin .
@@ -45,17 +46,17 @@ ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.dat .
 cp $SRC_SURFEX/MY_RUN/SODA/INPUT/*.txt .
 
 # Copy PGD file
-cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.lfi .
+cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.$suffix .
 
 # Copy OFFLINE PREP file
-cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA$mbr.lfi PREP_SODA.lfi
+cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA$mbr.$suffix PREP_SODA.$suffix
 
 # Run SODA
 [ ! -f $SRC_SURFEX/exe/OFFLINE$XYZ ] && echo "$SRC_SURFEX/exe/OFFLINE$XYZ not found" && exit 1
 $SRC_SURFEX/exe/OFFLINE$XYZ
 
-if [ -f SURFOUT.20081001_00h00.lfi ]; then
-  mv SURFOUT.20081001_00h00.lfi $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_OFFLINE$mbr.lfi
+if [ -f SURFOUT.20081001_00h00.$suffix ]; then
+  mv SURFOUT.20081001_00h00.$suffix $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_OFFLINE$mbr.$suffix
 else
   echo "Output file from SURFEX not found"
   exit 1

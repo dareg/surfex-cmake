@@ -5,6 +5,7 @@ if [ "$SRC_SURFEX" == "" -o "$XYZ" == "" ]; then
   echo "You need to source the config file before calling this script!"
   exit 1
 else
+  suffix=$1
   [ ! -d $SRC_SURFEX/MY_RUN/SODA ] && echo "The directory $SRC_SURFEX/MY_RUN/SODA was not found" && exit 1
   [ ! -f $SRC_SURFEX/exe/SODA$XYZ ] && echo "The needed binary $SRC_SURFEX/exe/SODA$XYZ was not found" && exit 1
 fi
@@ -24,14 +25,14 @@ mkdir $work
 cd $work || exit 1
 
 # Copy namelists
-cp $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_soda_EKF OPTIONS.nam
+cp $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_soda_EKF_$suffix OPTIONS.nam
 
 # Ecoclimap
 ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.bin .
 ln -sf $SRC_SURFEX/MY_RUN/ECOCLIMAP/*.dat .
 
 # Copy PGD file
-cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.lfi .
+cp  $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PGD_SODA.$suffix .
 
 # Copy input grib files
 cp $SRC_SURFEX/MY_RUN/SODA/INPUT/FG_OI_MAIN .
@@ -46,25 +47,25 @@ while [ $pert -le $npert ]; do
 
   # Perturb initial state
   # Copy the initial PREP file that should be perturbed
-  cp $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA.lfi $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA$mbr.lfi
+  cp $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA.$suffix $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA$mbr.$suffix
 
   # Run (pertubed ) offline
   offline="$SRC_SURFEX/MY_RUN/SODA/TESTS/OFFLINE.sh"
   if [ -f $offline ]; then
-    $offline $pert || exit 1
+    $offline $pert $suffix || exit 1
   else
     echo "No script $offline found"
     exit 1
   fi
 
   # Copy stored simulation results
-  cp $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_OFFLINE$mbr.lfi PREP_EKF_PERT$pert.lfi
+  cp $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_OFFLINE$mbr.$suffix PREP_EKF_PERT$pert.$suffix
  
   pert=$(( $pert + 1 ))
 done
 
 # Copy first guess. In this case OFFLINE PREP file (control run)
-cp $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_OFFLINE_PERT_00.lfi PREP_SODA_EKF.lfi
+cp $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_OFFLINE_PERT_00.$suffix PREP_SODA_EKF.$suffix
 
 ###################
 ## Do EKF steps
@@ -86,7 +87,7 @@ sed -e "s/LBEV=LBEV/LBEV=.TRUE./" \
     -e "s/LPRT=LPRT/LPRT=.FALSE./" \
     -e "s/LSIM=LSIM/LSIM=.FALSE./" \
     -e "s/IVAR=IVAR/IVAR=1/" \
-    $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_soda_EKF > OPTIONS.nam
+    $SRC_SURFEX/MY_RUN/SODA/NAMELISTS/OPTIONS.nam_soda_EKF_$suffix > OPTIONS.nam
 
 # Run SODA for EKF
 [ ! -f $SRC_SURFEX/exe/SODA$XYZ ] && echo "$SRC_SURFEX/exe/SODA$XYZ not found" && exit 1
@@ -100,5 +101,5 @@ for f in `ls -1 LTM_del*_del*`; do
 done
 
 # Save output
-mv PREP_SODA_EKF.lfi $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA_EKF.lfi
+mv PREP_SODA_EKF.$suffix $SRC_SURFEX/MY_RUN/SODA/OUTPUT/PREP_SODA_EKF.$suffix
 
