@@ -13,6 +13,8 @@ SUBROUTINE OI_CONTROL (      &
  & P__SURFACCGRAUPEL,        &
  & P__CLSTEMPERATURE,        &
  & P__CLSHUMI_RELATIVE,      &
+ & P__CLSVENT_ZONAL,         &
+ & P__CLSVENT_MERIDIEN,      &
  & P__SURFIND_TERREMER,      &
  & P__SURFRESERV_NEIGE,      &
  & P__LON,                   &
@@ -36,6 +38,7 @@ SUBROUTINE OI_CONTROL (      &
 !   (06/2009)  : Modifications to allow the assimilation of ASCAT superficial soil moisture
 !   (09/2010)  : More parameters to goto_surfex
 !   (03/2011)  : Initialization of ZEVAPTR (F.Bouyssel)
+!   (03/2013)  : Use 10m wind from upperair instead surfex one (F.Taillefer)
 !
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
@@ -54,7 +57,7 @@ USE MODN_IO_OFFLINE, ONLY : CSURF_FILETYPE
 USE MODD_SURF_ATM_n, ONLY : CSEA,        CWATER,      CTOWN,      CNATURE,      &
                             XSEA,        XWATER,      XTOWN,      XNATURE,      &
                             NSIZE_SEA,   NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
-                            NR_SEA,      NR_WATER,    NR_TOWN, LCOVER,          &
+                            NR_SEA,      NR_WATER,    NR_TOWN,    LCOVER,       &
                             NR_NATURE,   XCOVER,      NDIM_FULL,  NSIZE_FULL,   &
                             NDIM_NATURE, NDIM_SEA,    NDIM_WATER, NDIM_TOWN 
 
@@ -113,6 +116,8 @@ REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFACCNEIGE
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFACCGRAUPEL
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__CLSTEMPERATURE
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__CLSHUMI_RELATIVE
+REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__CLSVENT_ZONAL
+REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__CLSVENT_MERIDIEN
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFIND_TERREMER
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFRESERV_NEIGE
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__LON
@@ -122,13 +127,13 @@ LOGICAL,         OPTIONAL, DIMENSION (:) ::  LD_MASKEXT
 INTEGER :: IGPCOMP
 INTEGER :: IDAT
 
- CHARACTER(LEN=28) :: YNAMELIST = 'OPTIONS.nam                 '
+CHARACTER(LEN=28) :: YNAMELIST = 'OPTIONS.nam                 '
 
 !    Declarations of local variables
 
- CHARACTER(LEN=6)            :: YPROGRAM
- CHARACTER(LEN=6), PARAMETER :: YPROGRAM2 = 'FA    '
- CHARACTER(LEN=2)            :: CMONTH
+CHARACTER(LEN=6)            :: YPROGRAM
+CHARACTER(LEN=6), PARAMETER :: YPROGRAM2 = 'FA    '
+CHARACTER(LEN=2)            :: CMONTH
 INTEGER                     :: IYEAR                ! current year (UTC)
 INTEGER                     :: IMONTH               ! current month (UTC)
 INTEGER                     :: IDAY                 ! current day (UTC)
@@ -138,7 +143,6 @@ TYPE (DATE_TIME)            :: TTIME                ! Current date and time
 INTEGER                     :: ISIZE
 INTEGER                     :: ISIZE1
 LOGICAL                     :: LLKEEPEXTZONE
-LOGICAL                     :: LPRINT=.FALSE.
 
 ! Arrays for soil OI analysis
 REAL, DIMENSION (:,:), ALLOCATABLE :: PWS, PWP, PTS, PTP, PTL, PSNS, PRSMIN, PD2, PLAI, PVEG
@@ -155,12 +159,13 @@ REAL, DIMENSION (:),   ALLOCATABLE :: ZSST1, ZLST1, PSST1, PLST1, PLAT1, PLON1, 
 
 INTEGER                            :: IVERSION, IBUGFIX
 INTEGER                            :: J,J1
- CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
- CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
+CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
+CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                            :: ILUOUT  ! ascii output unit number
 INTEGER                            :: INOBS   ! number of observations
 
 REAL                               :: PLAT0,PLON0,PRPK,PLATOR,PLONOR,DELX,DELY,PBETA,ZTHRES
+REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180
 
 LOGICAL, DIMENSION(:), ALLOCATABLE :: OINTERP_LST, OINTERP_SST
 LOGICAL, DIMENSION(:), ALLOCATABLE :: OINTERP_LST1, OINTERP_SST1
@@ -175,7 +180,7 @@ PRINT *,'|                             ENTER OI_ASSIM                           
 PRINT *,'|                                                                        |'
 PRINT *,'--------------------------------------------------------------------------'
 
- CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
+CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
 
 IF (LDINLINE) THEN
 
@@ -201,14 +206,17 @@ ENDIF
 ILUOUT = 111
 LLKEEPEXTZONE = .FALSE.
 
+Z1S2PI=1.0_JPRB/(2.0_JPRB*XPI)
+ZPIS180=XPI/180.0_JPRB
+
 !   Update some constants dependant from NACVEG
 
 !  scaling of soil moisture increments when assimilation window is different from 6 hours
-RSCALDW = REAL(NECHGU)/6.0
+RSCALDW = REAL(NECHGU)/6.0_JPRB
 !  half assimilation window in sec
 ITRAD   = NECHGU*1800
 
- CALL INI_DATA_COVER
+CALL INI_DATA_COVER
 
 !   File handling definition
 
@@ -222,11 +230,11 @@ ENDIF
 
 !   Read grid dimension for allocation
 
- CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
 
 !   Find current time
 
- CALL READ_SURF(YPROGRAM,'DTCUR',TTIME,IRESP)
+CALL READ_SURF(YPROGRAM,'DTCUR',TTIME,IRESP)
 
 !   Time initializations
 
@@ -235,24 +243,24 @@ IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 NSSSSS = TTIME%TIME
 IF (NSSSSS > NDAYSEC) NSSSSS = NSSSSS - NDAYSEC
- CALL TRANS_CHAINE(CMONTH,IMONTH,2)
+CALL TRANS_CHAINE(CMONTH,IMONTH,2)
 
 !   Reading grid characteristics to perform nature mask
 
- CALL END_IO_SURF_n(YPROGRAM)
- CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL END_IO_SURF_n(YPROGRAM)
+CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
+CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
 
- CALL READ_SURF(YPROGRAM,'SEA   ',CSEA   ,IRESP)
- CALL READ_SURF(YPROGRAM,'WATER ',CWATER ,IRESP)
- CALL READ_SURF(YPROGRAM,'NATURE',CNATURE,IRESP)
- CALL READ_SURF(YPROGRAM,'TOWN  ',CTOWN  ,IRESP)
+CALL READ_SURF(YPROGRAM,'SEA   ',CSEA   ,IRESP)
+CALL READ_SURF(YPROGRAM,'WATER ',CWATER ,IRESP)
+CALL READ_SURF(YPROGRAM,'NATURE',CNATURE,IRESP)
+CALL READ_SURF(YPROGRAM,'TOWN  ',CTOWN  ,IRESP)
 
- CALL READ_SURF(YPROGRAM,'DIM_FULL  ',NDIM_FULL,  IRESP)
- CALL READ_SURF(YPROGRAM,'DIM_SEA   ',NDIM_SEA,   IRESP)
- CALL READ_SURF(YPROGRAM,'DIM_NATURE',NDIM_NATURE,IRESP)
- CALL READ_SURF(YPROGRAM,'DIM_WATER ',NDIM_WATER, IRESP)
- CALL READ_SURF(YPROGRAM,'DIM_TOWN  ',NDIM_TOWN,  IRESP)
+CALL READ_SURF(YPROGRAM,'DIM_FULL  ',NDIM_FULL,  IRESP)
+CALL READ_SURF(YPROGRAM,'DIM_SEA   ',NDIM_SEA,   IRESP)
+CALL READ_SURF(YPROGRAM,'DIM_NATURE',NDIM_NATURE,IRESP)
+CALL READ_SURF(YPROGRAM,'DIM_WATER ',NDIM_WATER, IRESP)
+CALL READ_SURF(YPROGRAM,'DIM_TOWN  ',NDIM_TOWN,  IRESP)
 
 NINDX2_s = NDIM_FULL
 ALLOCATE(NWORK(NDIM_FULL))
@@ -274,7 +282,7 @@ ENDIF
 !
 !   Get total dimension of domain (excluding extension zone)
 
- CALL GET_SIZE_FULL_n(YPROGRAM,NDIM_FULL,NSIZE_FULL)
+CALL GET_SIZE_FULL_n(YPROGRAM,NDIM_FULL,NSIZE_FULL)
 
 IF (LDINLINE) THEN
   ISIZE = NSIZE_FULL
@@ -286,11 +294,11 @@ ALLOCATE (PSAB(ISIZE))
 ALLOCATE (PARG(ISIZE))
 ALLOCATE (ZALT(ISIZE))
 
- CALL READ_SURF(YPROGRAM,'SAND',      PSAB,  IRESP)
- CALL READ_SURF(YPROGRAM,'CLAY',      PARG,  IRESP)
- CALL READ_SURF(YPROGRAM,'ZS',        ZALT,  IRESP)
+CALL READ_SURF(YPROGRAM,'SAND',      PSAB,  IRESP)
+CALL READ_SURF(YPROGRAM,'CLAY',      PARG,  IRESP)
+CALL READ_SURF(YPROGRAM,'ZS',        ZALT,  IRESP)
 
- CALL READ_COVER_n(YPROGRAM)
+CALL READ_COVER_n(YPROGRAM)
 
 !   Perform masks (only nature used)
 
@@ -299,7 +307,7 @@ ALLOCATE(XNATURE(ISIZE))
 ALLOCATE(XWATER (ISIZE))
 ALLOCATE(XTOWN  (ISIZE))
 
- CALL CONVERT_COVER_FRAC(XCOVER,LCOVER,XSEA,XNATURE,XTOWN,XWATER)
+CALL CONVERT_COVER_FRAC(XCOVER,LCOVER,XSEA,XNATURE,XTOWN,XWATER)
 
 NSIZE_NATURE = COUNT(XNATURE(:) > 0.0)
 NSIZE_TOWN   = COUNT(XTOWN(:)   > 0.0)
@@ -311,10 +319,10 @@ ALLOCATE(NR_TOWN   (NSIZE_TOWN  ))
 ALLOCATE(NR_WATER  (NSIZE_WATER ))
 ALLOCATE(NR_SEA    (NSIZE_SEA   ))
 
- CALL GET_1D_MASK( NSIZE_SEA,    ISIZE, XSEA   , NR_SEA   )
- CALL GET_1D_MASK( NSIZE_WATER,  ISIZE, XWATER , NR_WATER )
- CALL GET_1D_MASK( NSIZE_TOWN,   ISIZE, XTOWN  , NR_TOWN  )
- CALL GET_1D_MASK( NSIZE_NATURE, ISIZE, XNATURE, NR_NATURE)
+CALL GET_1D_MASK( NSIZE_SEA,    ISIZE, XSEA   , NR_SEA   )
+CALL GET_1D_MASK( NSIZE_WATER,  ISIZE, XWATER , NR_WATER )
+CALL GET_1D_MASK( NSIZE_TOWN,   ISIZE, XTOWN  , NR_TOWN  )
+CALL GET_1D_MASK( NSIZE_NATURE, ISIZE, XNATURE, NR_NATURE)
 
 ! Allocate arrays
 
@@ -344,9 +352,9 @@ ALLOCATE (ZSST(ISIZE))
 
 !  Read prognostic variables
 
- CALL END_IO_SURF_n(YPROGRAM)
- CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL END_IO_SURF_n(YPROGRAM)
+CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
+CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
 
 IF (NSIZE_NATURE>0 .AND. CNATURE/='NONE') THEN
   CALL READ_SURF(YPROGRAM,'WG1',       PWS,   IRESP)
@@ -384,19 +392,17 @@ ELSE
   PTRD3(:) = XUNDEF
 ENDIF
 
- CALL READ_SURF(YPROGRAM,'T2M',       PTCLS, IRESP)
- CALL READ_SURF(YPROGRAM,'HU2M',      PHCLS, IRESP)
- CALL READ_SURF(YPROGRAM,'ZON10M',    PUCLS, IRESP)
- CALL READ_SURF(YPROGRAM,'MER10M',    PVCLS, IRESP)
+CALL READ_SURF(YPROGRAM,'T2M',       PTCLS, IRESP)
+CALL READ_SURF(YPROGRAM,'HU2M',      PHCLS, IRESP)
 
 ! Read constant surface fields
 
- CALL READ_SURF(YPROGRAM,'RSMIN',     PRSMIN,IRESP)
- CALL READ_SURF(YPROGRAM,'DG2',       PD2,   IRESP)
- CALL READ_SURF(YPROGRAM,'LAI',       PLAI,  IRESP)
- CALL READ_SURF(YPROGRAM,'VEG',       PVEG,  IRESP)
+CALL READ_SURF(YPROGRAM,'RSMIN',     PRSMIN,IRESP)
+CALL READ_SURF(YPROGRAM,'DG2',       PD2,   IRESP)
+CALL READ_SURF(YPROGRAM,'LAI',       PLAI,  IRESP)
+CALL READ_SURF(YPROGRAM,'VEG',       PVEG,  IRESP)
 
-IF (LPRINT) THEN
+IF (NPRINTLEV>0) THEN
   J = NR_NATURE(1)
   PRINT *,'value in PREP file => WG1       ',PWS(J,1)
   PRINT *,'value in PREP file => WG2       ',PWP(J,1)
@@ -414,8 +420,8 @@ IF (LPRINT) THEN
   PRINT *,'value in PREP file => ZS        ',ZALT(J)
 ENDIF
 
- CALL END_IO_SURF_n(YPROGRAM)
- CALL IO_BUFF_CLEAN_n
+CALL END_IO_SURF_n(YPROGRAM)
+CALL IO_BUFF_CLEAN_n
 
 !  Interface (allocate arrays)
 
@@ -550,11 +556,15 @@ IF (LDINLINE) THEN
   PT2M_O(:)  = P__CLSTEMPERATURE   (1:ISIZE)
   PHU2M_O(:) = P__CLSHUMI_RELATIVE (1:ISIZE)
   PTS_O(:)   = P__SURFTEMPERATURE  (1:ISIZE)
+  PUCLS(:)   = P__CLSVENT_ZONAL    (1:ISIZE)
+  PVCLS(:)   = P__CLSVENT_MERIDIEN (1:ISIZE)
 ELSE
 !  Read CANARI analysis
   CALL READ_SURF(YPROGRAM2,'CLSTEMPERATURE  ',PT2M_O ,IRESP)
   CALL READ_SURF(YPROGRAM2,'CLSHUMI.RELATIVE',PHU2M_O,IRESP)
   CALL READ_SURF(YPROGRAM2,'SURFTEMPERATURE ',PTS_O  ,IRESP)
+  CALL READ_SURF(YPROGRAM2,'CLSVENT.ZONAL   ',PUCLS  ,IRESP)
+  CALL READ_SURF(YPROGRAM2,'CLSVENT.MERIDIEN',PVCLS  ,IRESP)
 ENDIF
 
 IF (.NOT. LDINLINE) THEN
@@ -588,7 +598,7 @@ INOBS = 0
 
 ! Perform bias correction of SM observations
 
- CALL OI_BC_SOIL_MOISTURE(ISIZE,PSM_O,PSAB,PWS_O)
+CALL OI_BC_SOIL_MOISTURE(ISIZE,PSM_O,PSAB,PWS_O)
 
 IF (.NOT. LDINLINE) THEN
 !  Define FA file name for surface climatology
@@ -676,11 +686,6 @@ DO J = 1, ISIZE
 ENDDO
 PRINT *,' NUMBER OF ASCAT OBSERVATIONS AFTER BACKGROUND CHECK  :: ',INOBS
 
-PRINT *,'           '
-PRINT *,'Mean T2m increments  ',SUM(ZT2INC)/SIZE(ZT2INC)
-PRINT *,'Mean HU2m increments ',SUM(ZH2INC)/SIZE(ZH2INC)
-PRINT *,'           '
-
 ! Interface (define arrays and perform unit conversions)
 
 PARG(:) = PARG(:)*100.0
@@ -716,16 +721,16 @@ PZ0H(:)     = XUNDEF
 
 ! Climatological arrays set to missing values
 
-PSNC(:)     =  PSNS(:,1) ! need to read the snow climatology 
+PSNC(:)     =  PSNS(:,1) ! need to read the snow climatology
 PWSC(:)     =  XUNDEF
 PWPC(:)     =  XUNDEF
 PTSC(:)     =  XUNDEF
 PTPC(:)     =  XUNDEF
 
 DO J = 1, ISIZE
-  PGELAT(J)   = PLAT(J) 
-  PGELAM(J)   = PLON(J) 
-  PGEMU(J)    = SIN(PLAT(J)*XPI/180.)
+  PGELAT(J)   = PLAT(J)
+  PGELAM(J)   = PLON(J)
+  PGEMU(J)    = SIN(PLAT(J)*ZPIS180)
 ENDDO
 
 ZEVAP(:)   =  (PEVAP(:)/XLVTT*XDAY)/(NECHGU*3600.) ! conversion W/m2 -> mm/day
@@ -743,13 +748,20 @@ IF (LDINLINE) THEN
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone
   WHERE (LD_MASKEXT (1:ISIZE))
-    PD2(:,1) = 1.
+    PD2(:,1) = 1.0
+    ZT2INC(:) = 0.0_JPRB
+    ZH2INC(:) = 0.0_JPRB
   END WHERE
 ENDIF
 
+PRINT *,'           '
+PRINT *,'Mean T2m increments  ',SUM(ZT2INC)/NDIM_FULL
+PRINT *,'Mean HU2m increments ',SUM(ZH2INC)/NDIM_FULL
+PRINT *,'           '
+
 !  Soil analysis based on optimal interpolation
 
- CALL OI_CACSTS(ISIZE,ZT2INC,ZH2INC,ZWGINC,PWS_O,                       &
+ CALL OI_CACSTS(ISIZE,ZT2INC,ZH2INC,ZWGINC,PWS_O,                      &
                 IDAT,NSSSSS,                                           &
                 ZTP,ZWP,ZTL,ZSNS,ZTS,ZWS,                              &
                 ZTCLS,ZHCLS,ZUCLS,ZVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
@@ -762,10 +774,10 @@ ENDIF
 
 !  Store increments
 
-ZWSINC(:) = 0.0
-ZWPINC(:) = 0.0
-ZTLINC(:) = 0.0
-ZSNINC(:) = 0.0
+ZWSINC(:) = 0.0_JPRB
+ZWPINC(:) = 0.0_JPRB
+ZTLINC(:) = 0.0_JPRB
+ZSNINC(:) = 0.0_JPRB
 
 WHERE (PWS(:,1)/=XUNDEF)
   ZWSINC(:) = ZWS(:) - PWS(:,1)*(RD1*XRHOLW)    
@@ -778,7 +790,7 @@ IF (LDINLINE) THEN
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone
   WHERE (LD_MASKEXT (1:ISIZE))
-    PD2(:,1) = 1.
+    PD2(:,1) = 1.0
   END WHERE
 ENDIF
 
@@ -796,8 +808,8 @@ END WHERE
 OINTERP_LST(:) = .FALSE.
 OINTERP_SST(:) = .FALSE.
 
-ZTSINC(:) = 0.0
-ZTPINC(:) = 0.0
+ZTSINC(:) = 0.0_JPRB
+ZTPINC(:) = 0.0_JPRB
 
 ! a) Temperature analysis of NATURE points
 
@@ -811,7 +823,7 @@ END WHERE
 ! b) Temperature analysis of SEA and LAKE points
 
 DO J = 1, ISIZE
-  IF (PITM(J) < 0.5) THEN
+  IF (PITM(J) < 0.5_JPRB) THEN
     IF (PSST(J)/=XUNDEF) THEN
       ZTSINC(J) = PTS_O(J) - PSST(J)
       PSST(J) = PTS_O(J)   ! canari
@@ -834,7 +846,7 @@ ENDDO
 ! c) Temperature analysis of TOWN points
 
 WHERE (PTRD3(:)/=XUNDEF)
-  PTRD3(:) = PTRD3(:) + ZT2INC(:)/(2.0*XPI)
+  PTRD3(:) = PTRD3(:) + ZT2INC(:)*Z1S2PI
 END WHERE
 
 ! Search for the nearest grid point values for lake and sea points
@@ -921,7 +933,7 @@ ENDIF
 
 ! PRINT values produced by OI_HO_EXTRAPOL_SURF
 
-IF (LPRINT) THEN
+IF (NPRINTLEV>1) THEN
   DO J = 1, ISIZE
     IF (OINTERP_LST(J)) THEN
       PRINT *,'Lake surface temperature set to ',PLST(J),'from nearest neighbour at J=',J
@@ -996,13 +1008,12 @@ IF (LDINLINE) THEN
 #endif
 ENDIF
 
- CALL END_IO_SURF_n(YPROGRAM)
- CALL IO_BUFF_CLEAN_n
+CALL END_IO_SURF_n(YPROGRAM)
+CALL IO_BUFF_CLEAN_n
 
 DEALLOCATE(NWORK)
 DEALLOCATE(XWORK)
 DEALLOCATE(NWORK2)
-DEALLOCATE(XWORK2)
 DEALLOCATE(XWORK2)
 DEALLOCATE(XWORK3)
 DEALLOCATE(NWORK_FULL)
@@ -1025,47 +1036,47 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 0, ZHOOK_HANDLE)
 
- CALL DD ('WG1', PWS (:,1))
+CALL DD ('WG1', PWS (:,1))
 
 YVAR='WG1'
 YPREFIX='X_Y_WG1 (m3/m3)                                   '
- CALL WRITE_SURF(YPROGRAM,YVAR,PWS,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PWS,IRESP,HCOMMENT=YPREFIX)
 
- CALL DD ('WG2', PWP (:,1))
+CALL DD ('WG2', PWP (:,1))
 
 YVAR='WG2'
 YPREFIX='X_Y_WG2 (m3/m3)                                   '
- CALL WRITE_SURF(YPROGRAM,YVAR,PWP,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PWP,IRESP,HCOMMENT=YPREFIX)
 
- CALL DD ('WGI2', PTL (:,1))
+CALL DD ('WGI2', PTL (:,1))
 
 YVAR='WGI2'
 YPREFIX='X_Y_WGI2 (m3/m3)                                  '
- CALL WRITE_SURF(YPROGRAM,YVAR,PTL,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PTL,IRESP,HCOMMENT=YPREFIX)
 
- CALL DD ('TG1', PTS (:,1))
+CALL DD ('TG1', PTS (:,1))
 
 YVAR='TG1'
 YPREFIX='X_Y_TG1 (K)                                       '
- CALL WRITE_SURF(YPROGRAM,YVAR,PTS,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PTS,IRESP,HCOMMENT=YPREFIX)
 
- CALL DD ('TG2', PTP (:,1))
+CALL DD ('TG2', PTP (:,1))
 
 YVAR='TG2'
 YPREFIX='X_Y_TG2 (K)                                       '
- CALL WRITE_SURF(YPROGRAM,YVAR,PTP,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PTP,IRESP,HCOMMENT=YPREFIX)
 
- CALL DD ('SST', PSST)
+CALL DD ('SST', PSST)
 
 YVAR='SST'
 YPREFIX='X_Y_SST (K)                                       '
- CALL WRITE_SURF(YPROGRAM,YVAR,PSST,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PSST,IRESP,HCOMMENT=YPREFIX)
 
- CALL DD ('TS_WATER', PLST)
+CALL DD ('TS_WATER', PLST)
 
 YVAR='TS_WATER'
 YPREFIX='X_Y_TS_WATER (K)                                  '
- CALL WRITE_SURF(YPROGRAM,YVAR,PLST,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PLST,IRESP,HCOMMENT=YPREFIX)
 
 IF (NSIZE_TOWN > 0 .AND. LAROME) THEN
   CALL DD ('T_ROAD3', PTRD3)
@@ -1075,18 +1086,18 @@ IF (NSIZE_TOWN > 0 .AND. LAROME) THEN
   CALL WRITE_SURF(YPROGRAM,YVAR,PTRD3,IRESP,HCOMMENT=YPREFIX)
 ENDIF
 
- CALL DD ('WSNOW_VEG1', PSNS (:,1))
+CALL DD ('WSNOW_VEG1', PSNS (:,1))
 
 YVAR='WSN_VEG1'
 YPREFIX='X_Y_WSNOW_VEG1 (kg/m2)                            '
- CALL WRITE_SURF(YPROGRAM,YVAR,PSNS,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YPROGRAM,YVAR,PSNS,IRESP,HCOMMENT=YPREFIX)
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 1, ZHOOK_HANDLE)
 
 END SUBROUTINE WRITE
 
 SUBROUTINE DD (CDN, PX)
- CHARACTER(LEN=*), INTENT (IN) :: CDN
+CHARACTER(LEN=*), INTENT (IN) :: CDN
 REAL, INTENT (IN) :: PX (:)
 
 REAL :: ZX (SIZE (PX))

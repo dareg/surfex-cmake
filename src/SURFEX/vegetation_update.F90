@@ -13,7 +13,7 @@
                        HALBEDO, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
                        PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,       &
                        PCE_NITRO, PCF_NITRO, PCNA_NITRO,              &
-                       TPSEED, TPREAP, PWATSUP, PIRRIG       )  
+                       TPSEED, TPREAP, PWATSUP, PIRRIG , LDUPDATED     )  
 !   ###############################################################
 !!****  *VEGETATION EVOL*
 !!
@@ -142,6 +142,8 @@ TYPE(DATE_TIME), DIMENSION(:,:), INTENT(INOUT) :: TPREAP   ! seeding date
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PWATSUP  ! water supply during irrigation
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PIRRIG   ! irrigated fraction
 !
+LOGICAL,              INTENT(OUT)   :: LDUPDATED  ! T if parameters are being reset
+!
 !*      0.2    declarations of local variables
 !
 INTEGER                                  :: IDECADE, IDECADE2  ! decade of simulation
@@ -157,12 +159,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE',0,ZHOOK_HANDLE)
 IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
 IDECADE2 = IDECADE
+LDUPDATED=.FALSE.
 !
 !*      2.2    From ecoclimap
 !              --------------
 !
 !* new decade?
   IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
+    LDUPDATED=.TRUE.
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)

@@ -57,6 +57,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                             New wind implicitation
 !!                             New soil carbon spinup and diag
 !!                             Isba budget
+!!      F. Bouttier  01/2013 : Apply random perturbations for ensembles
 !!-------------------------------------------------------------------
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI,XAVOGADRO
@@ -84,7 +85,8 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 LFLOOD, XFFLOOD, XPIFLOOD, LTEMP_ARP, XSODELX,           &
                                 LVEGUPD, NLAYER_HORT, NLAYER_DUN,                        &
                                 LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,        &
-                                NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, NSPINS, NSPINW  
+                                NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, NSPINS, NSPINW, &
+                                LPERTSURF, XPERTVEG, XPERTLAI, XPERTCV, XPERTALB, XPERTZ0
 !
 USE MODD_SURF_ATM,    ONLY : LNOSOF, CIMPLICIT_WIND
 USE MODD_SURF_ATM_n,  ONLY : NDIM_FULL
@@ -339,6 +341,7 @@ INTEGER :: JLAYER, JMODE, JSV_IDX
 ! logical units
 !
 INTEGER :: JJ
+LOGICAL :: LUPDATED              ! T if VEGETATION_UPDATE has reset fields
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
@@ -487,6 +490,7 @@ ENDIF
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
+LUPDATED=.FALSE.
 IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
      CALL VEGETATION_UPDATE(PTSTEP,TTIME,XCOVER, LCOVER,                 &
                          CISBA,LECOCLIMAP, CPHOTO, LAGRIP, 'NAT',        &
@@ -502,8 +506,26 @@ IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
                          CALBEDO, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,  &
                          XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,        &
                          XCE_NITRO, XCF_NITRO, XCNA_NITRO,               &
-                         TSEED, TREAP, XWATSUP, XIRRIG                   )  
+                         TSEED, TREAP, XWATSUP, XIRRIG, LUPDATED         )  
 END IF
+
+IF(LPERTSURF.AND.LUPDATED) THEN
+  ! random perturbation for ensembles:
+  ! reset these fields to their original values, as in compute_isba_parameters
+  XVEG(:,1) = XPERTVEG(:)
+  XLAI(:,1) = XPERTLAI(:)
+  XCV(:,1)  = XPERTCV(:)
+  ! reapply original perturbation patterns
+  WHERE(XALBNIR(:,1)/=XUNDEF)  XALBNIR(:,1) =XALBNIR(:,1) *( 1.+ XPERTALB(:) )
+  WHERE(XALBVIS(:,1)/=XUNDEF)  XALBVIS(:,1) =XALBVIS(:,1) *( 1.+ XPERTALB(:) )
+  WHERE(XALBUV(:,1)/=XUNDEF)   XALBUV(:,1)  =XALBUV(:,1)  *( 1.+ XPERTALB(:) )
+  WHERE(XZ0(:,1)/=XUNDEF)      XZ0(:,1)     =XZ0(:,1)     *( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFIP(:,1)/=XUNDEF) XZ0EFFIP(:,1)=XZ0EFFIP(:,1)*( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFIM(:,1)/=XUNDEF) XZ0EFFIM(:,1)=XZ0EFFIM(:,1)*( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFJP(:,1)/=XUNDEF) XZ0EFFJP(:,1)=XZ0EFFJP(:,1)*( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFJM(:,1)/=XUNDEF) XZ0EFFJM(:,1)=XZ0EFFJM(:,1)*( 1.+ XPERTZ0(:) )
+
+ENDIF
 !
 ! --------------------------------------------------------------------------------------
 ! Outputs for the atmospheric model or update the snow/flood fraction 

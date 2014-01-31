@@ -45,6 +45,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !!      A.L. Gibelin   04/09 : modifications for CENTURY model 
 !!      A.L. Gibelin   06/09 : soil carbon initialisation
 !!      Modified by B. Decharme  (09/2012): Bug in exponential profile calculation with DIF
+!!      F. Bouttier    08/13 : apply random perturbation patterns for ensembles
 !!
 !-------------------------------------------------------------------------------
 !
@@ -107,7 +108,8 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           XPSNV_A, XFF, XFFG, XFFV, XPCPS, XPLVTT, XPLSTT,    &
                           LCANOPY, LCANOPY_DRAG, XDIR_ALB_WITH_SNOW,          &
                           XSCA_ALB_WITH_SNOW, XALBF, XEMISF, XCPL_ICEFLUX,    &
-                          NLAYER_HORT, NLAYER_DUN, XF_PARAM, XC_DEPTH_RATIO
+                          NLAYER_HORT, NLAYER_DUN, XF_PARAM, XC_DEPTH_RATIO,  &
+                          LPERTSURF,XPERTVEG,XPERTLAI,XPERTCV,XPERTALB,XPERTZ0
 !
 USE MODD_CH_ISBA_n, ONLY : CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,         &
                            CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,      &
@@ -151,6 +153,7 @@ USE MODI_CARBON_INIT
 USE MODI_SOILTEMP_ARP_PAR
 USE MODI_END_IO_SURF_n
 !
+USE MODI_READ_SURF
 USE MODI_READ_ISBA_n
 USE MODI_INIT_ISBA_LANDUSE
 USE MODI_READ_ISBA_CANOPY_n
@@ -209,11 +212,12 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZWG1 ! work array for surface water content
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG1 ! work array for surface temperature
 !
 REAL, DIMENSION(:),   ALLOCATABLE :: ZM, ZWORK
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZF
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZF, ZPERTBUF
 !
 INTEGER :: IDIM_FULL, JL
 INTEGER           :: JILU     ! loop increment
 INTEGER           :: ILUOUT   ! unit of output listing file
+INTEGER           :: IRESP   ! return code
 INTEGER           :: IDECADE, IDECADE2  ! decade of simulation
 INTEGER :: JPATCH  ! loop counter on tiles
 INTEGER           :: IUNIT       ! unit of f/dc map file
@@ -688,6 +692,46 @@ END DO
                           PALBUV_SOIL=XALBUV_SOIL )
 !
 DEALLOCATE(ZWG1)
+!
+! Load randomly perturbed fields. Perturbation ratios are saved in case fields are reset later.
+IF(LPERTSURF) THEN
+
+  CALL READ_SURF(HPROGRAM,'VEG',XVEG(:,:),IRESP)
+  ALLOCATE(XPERTVEG(KI))
+  XPERTVEG(:)=XVEG(:,1)
+
+  CALL READ_SURF(HPROGRAM,'LAI',XLAI(:,:),IRESP)
+  ALLOCATE(XPERTLAI(KI))
+  XPERTLAI(:)=XLAI(:,1)
+
+  CALL READ_SURF(HPROGRAM,'CV',XCV(:,:),IRESP)
+  ALLOCATE(XPERTCV(KI))
+  XPERTCV(:)=XCV(:,1)
+
+  ALLOCATE(ZPERTBUF(KI,NPATCH))
+
+  CALL READ_SURF(HPROGRAM,'PERTALB',ZPERTBUF(:,:),IRESP)
+  ALLOCATE(XPERTALB(KI))
+  XPERTALB(:)=ZPERTBUF(:,1)
+  WHERE(XALBNIR_VEG(:,1)/=XUNDEF)  XALBNIR_VEG(:,1) = XALBNIR_VEG(:,1) *( 1.+ XPERTALB(:) )
+  WHERE(XALBVIS_VEG(:,1)/=XUNDEF)  XALBVIS_VEG(:,1) = XALBVIS_VEG(:,1) *( 1.+ XPERTALB(:) )
+  WHERE(XALBUV_VEG(:,1)/=XUNDEF)   XALBUV_VEG(:,1)  = XALBUV_VEG(:,1)  *( 1.+ XPERTALB(:) )
+  WHERE(XALBNIR_SOIL(:,1)/=XUNDEF) XALBNIR_SOIL(:,1)= XALBNIR_SOIL(:,1)*( 1.+ XPERTALB(:) )
+  WHERE(XALBVIS_SOIL(:,1)/=XUNDEF) XALBVIS_SOIL(:,1)= XALBVIS_SOIL(:,1)*( 1.+ XPERTALB(:) )
+  WHERE(XALBUV_SOIL(:,1)/=XUNDEF)  XALBUV_SOIL(:,1) = XALBUV_SOIL(:,1) *( 1.+ XPERTALB(:) )
+
+  CALL READ_SURF(HPROGRAM,'PERTZ0LAND',ZPERTBUF(:,:),IRESP)
+  ALLOCATE(XPERTZ0(KI))
+  XPERTZ0(:)=ZPERTBUF(:,1)
+  WHERE(XZ0(:,1)/=XUNDEF)      XZ0(:,1)     =XZ0(:,1)     *( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFIP(:,1)/=XUNDEF) XZ0EFFIP(:,1)=XZ0EFFIP(:,1)*( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFIM(:,1)/=XUNDEF) XZ0EFFIM(:,1)=XZ0EFFIM(:,1)*( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFJP(:,1)/=XUNDEF) XZ0EFFJP(:,1)=XZ0EFFJP(:,1)*( 1.+ XPERTZ0(:) )
+  WHERE(XZ0EFFJM(:,1)/=XUNDEF) XZ0EFFJM(:,1)=XZ0EFFJM(:,1)*( 1.+ XPERTZ0(:) )
+
+  DEALLOCATE(ZPERTBUF)
+
+ENDIF
 !
 ALLOCATE(XEMIS_NAT   (KI))
 XEMIS_NAT (:) = XUNDEF

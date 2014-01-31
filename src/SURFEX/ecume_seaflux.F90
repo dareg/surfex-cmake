@@ -4,7 +4,7 @@
                               PRAIN,PSNOW,PVMOD,PZREF,PUREF,PPS,      &
                               PICHCE,OPRECIP,OPWEBB, OPWG, PQSAT,     &
                               PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,        &
-                              PCE,PRI,PRESA,PZ0HSEA) 
+                              PCE,PRI,PRESA,PZ0HSEA,PPERTFLUX ) 
 !     #######################################################################
 !
 !
@@ -73,6 +73,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PEXNS ! Exner function at sea surface
 REAL, DIMENSION(:), INTENT(IN)    :: PPS   ! air pressure at sea surface (Pa)
 REAL, DIMENSION(:), INTENT(IN)    :: PRAIN ! precipitation rate (kg/s/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PSNOW ! snow rate (kg/s/m2)
+REAL, DIMENSION(:), INTENT(IN)    :: PPERTFLUX   ! stochastic flux perturbation pattern
 !
 REAL,               INTENT(IN)    :: PICHCE ! 
 LOGICAL,            INTENT(IN)    :: OPRECIP! 
@@ -162,6 +163,7 @@ REAL, DIMENSION(SIZE(KMASK))      :: ZW_EXNS ! Exner function at sea surface
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_PS   ! air pressure at sea surface (Pa)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_RAIN !precipitation rate (kg/s/m2)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_SNOW !snow rate (kg/s/m2)
+REAL, DIMENSION(SIZE(KMASK))      :: ZW_PERTFLUX !stochastic flux perturbation pattern
 !
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_Z0SEA! roughness length over the ocean
 !                                                                                 
@@ -207,6 +209,7 @@ DO JJ=1, SIZE(KMASK)
   ZW_RI(JJ) = PRI(KMASK(JJ))
   ZW_RESA(JJ) = PRESA(KMASK(JJ))
   ZW_Z0HSEA(JJ) = PZ0HSEA(KMASK(JJ))
+  ZW_PERTFLUX(JJ) = PPERTFLUX(KMASK(JJ))
 END DO
 !
 IF (YTYPE=='W') THEN
@@ -214,7 +217,7 @@ IF (YTYPE=='W') THEN
   CALL ECUME_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,        &
          ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,PICHCE,OPRECIP,OPWEBB,OPWG,&
          ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,ZW_CD,ZW_CDN,ZW_CH,ZW_CE,     &
-         ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA)   
+         ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA,ZW_PERTFLUX)   
   !
 ELSEIF (YTYPE=='I') THEN
   !

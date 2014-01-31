@@ -29,6 +29,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original   06/2003
+!!      M. Jidane    Nov 2013 : correct allocation of NINLO and reading of INLOPA
+!!      F. Taillefer Dec 2013 : debug estimation of XILO2
 !-------------------------------------------------------------------------------
 !
 !*      0. DECLARATIONS
@@ -37,7 +39,6 @@
 USE MODI_READ_SURF
 !
 USE MODD_GRID_GAUSS, ONLY : XILA1, XILO1, XILA2, XILO2, NINLA, NINLO, NILEN, LROTPOLE, XCOEF, XLAP, XLOP
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -62,19 +63,21 @@ INTEGER           :: JL        ! loop counter
 REAL, DIMENSION(:), ALLOCATABLE :: ZW ! work array
 !
 INTEGER :: INLATI  ! number of pseudo-latitudes
+INTEGER :: INLATI2 ! number of half pseudo-latitudes
 REAL    :: ZLAPO   ! latitude of the rotated pole  (deg)
 REAL    :: ZLOPO   ! longitude of the rotated pole (deg)
 REAL    :: ZCODIL  ! stretching factor (must be greater than or equal to 1)
 INTEGER, DIMENSION(:), ALLOCATABLE :: INLOPA ! number of pseudo-longitudes on each
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
                                              ! pseudo-latitude circle
-
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-----------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('PREP_GRID_GAUSS',0,ZHOOK_HANDLE)
 !-----------------------------------------------------------------------
 !
 !*   1 Projection
 !      ----------
 !
-IF (LHOOK) CALL DR_HOOK('PREP_GRID_GAUSS',0,ZHOOK_HANDLE)
 YRECFM = 'LAPO'
  CALL READ_SURF(HFILETYPE,YRECFM,ZLAPO,IRESP)
 YRECFM = 'LOPO'
@@ -92,8 +95,10 @@ YRECFM = 'NLATI'
 !
 IF (ALLOCATED(INLOPA)) DEALLOCATE(INLOPA)
 ALLOCATE(INLOPA(INLATI))
+IF (ALLOCATED(NINLO)) DEALLOCATE(NINLO)
+ALLOCATE(NINLO(INLATI))
 YRECFM = 'NLOPA'
- CALL READ_SURF(HFILETYPE,YRECFM,INLOPA,IRESP)
+ CALL READ_SURF(HFILETYPE,YRECFM,INLOPA,IRESP,HDIR='A')
 !
 KNI = SUM(INLOPA)
 !
@@ -102,6 +107,7 @@ KNI = SUM(INLOPA)
 !*   3 Computes additional quantities used in interpolation
 !      ----------------------------------------------------
 !
+INLATI2=NINT(REAL(INLATI)/2.0_JPRB)
 NINLA = INLATI
 NINLO = INLOPA
 NILEN = KNI
@@ -110,13 +116,13 @@ XLOP = ZLOPO
 XLAP = ZLAPO
 XCOEF=ZCODIL
 !
-XILA1=90.*(1.-0.5/INLATI)
-XILO1=0.
-XILA2=-90.*(1.-0.5/INLATI)
-XILO2=360.*(INLOPA(1)-1.)/INLOPA(1)
+XILA1=90.0*(1.0-0.5/REAL(INLATI,JPRB))
+XILO1=0.0
+XILA2=-90.0*(1.0-0.5/REAL(INLATI,JPRB))
+XILO2=360.0*(REAL(INLOPA(INLATI2),JPRB)-1.0)/REAL(INLOPA(INLATI2),JPRB)
 !
-!-----------------------------------------------------------------------
 HINTERP_TYPE = 'HORIBL'
+!-----------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_GAUSS',1,ZHOOK_HANDLE)
 !-----------------------------------------------------------------------
 !

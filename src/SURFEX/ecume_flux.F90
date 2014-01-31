@@ -2,7 +2,7 @@
     SUBROUTINE ECUME_FLUX(PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,PVMOD, &
                             PZREF,PUREF,PPS,PICHCE,OPRECIP,OPWEBB,OPWG,&
                             PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE, &
-                            PRI,PRESA,PRAIN,PZ0HSEA    )  
+                            PRI,PRESA,PRAIN,PZ0HSEA,PPERTFLUX    )  
 !###############################################################################
 !!
 !!****  *ECUME_FLUX*
@@ -86,6 +86,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PPS       ! air pressure at sea surf. (Pa)
 REAL, DIMENSION(:), INTENT(IN)    :: PRAIN     ! precipitation rate (kg/s/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PEXNA     ! Exner function at atm. level
 REAL, DIMENSION(:), INTENT(IN)    :: PEXNS     ! Exner function at sea surface
+REAL, DIMENSION(:), INTENT(IN)    :: PPERTFLUX ! stochastic flux perturbation pattern
 
 REAL,               INTENT(IN)    :: PICHCE    !
 LOGICAL,            INTENT(IN)    :: OPRECIP   !
@@ -384,6 +385,14 @@ DO JLON=1,SIZE(PTA)
   ZTAU(JLON) = -PRHOA(JLON)*PCD(JLON)*ZDUWG(JLON)**2
   ZHF (JLON) = -PRHOA(JLON)*XCPD*PCH(JLON)*ZDUWG(JLON)*ZDTH(JLON)
   ZEF (JLON) = -PRHOA(JLON)*ZLV(JLON)*PCE(JLON)*ZDUWG(JLON)*ZDQ(JLON)
+!
+!       4.3. Stochastic perturbation of turbulent fluxes
+
+  IF( LPERTFLUX )THEN
+    ZTAU(JLON) = ZTAU(JLON)* ( 1. + PPERTFLUX(JLON) / 2. )
+    ZHF (JLON) = ZHF(JLON)*  ( 1. + PPERTFLUX(JLON) / 2. )
+    ZEF (JLON) = ZEF(JLON)*  ( 1. + PPERTFLUX(JLON) / 2. )
+  ENDIF
 !
 ENDDO
 !

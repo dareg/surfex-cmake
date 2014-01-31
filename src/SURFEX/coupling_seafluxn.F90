@@ -44,7 +44,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM,   ONLY : LCPL_ESM, CIMPLICIT_WIND
 !
 USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
-USE MODD_SEAFLUX_n,  ONLY : XSST, XTICE, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
+USE MODD_SEAFLUX_n,  ONLY : XSST, XPERTFLUX, XTICE, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
                               CSEA_ALB, CSEA_FLUX, XUMER, XVMER, LINTERPOL_SST, &
                               XICHCE, LPRECIP, LPWEBB , LPWG
 
@@ -297,7 +297,8 @@ SELECT CASE (CSEA_FLUX)
                       ZWIND, PZREF, PUREF,                            &
                       PPS, XICHCE, LPRECIP, LPWEBB, LPWG, ZQSAT,      &
                       PSFTH, PSFTQ, ZUSTAR,                           &
-                      ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H       )  
+                      ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H,      &
+                      XPERTFLUX                                       )  
 
   CASE ('COARE3')
     CALL COARE30_SEAFLUX(XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,            &

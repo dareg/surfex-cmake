@@ -36,6 +36,7 @@
 !              ------------
 !
 USE MODD_SEAFLUX_n,      ONLY : XSST, XZ0, LINTERPOL_SST, &
+                                  XPERTFLUX, LPERTFLUX, &
                                   CINTERPOL_SST, XSST_MTH, TTIME  
 USE MODD_OCEAN_n,        ONLY : LMERCATOR
 !
@@ -107,6 +108,11 @@ ELSE
   CALL READ_SURF(HPROGRAM,YRECFM,XSST(:),IRESP)
 !
 ENDIF
+!
+!* stochastic flux perturbation pattern
+!
+ALLOCATE(XPERTFLUX(ILU))
+IF( LPERTFLUX ) CALL READ_SURF(HPROGRAM,'PERTSEAFLUX',XPERTFLUX(:),IRESP)
 !
 !-------------------------------------------------------------------------------
 !
