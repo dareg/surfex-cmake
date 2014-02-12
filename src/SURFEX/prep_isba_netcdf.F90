@@ -21,14 +21,14 @@ SUBROUTINE PREP_ISBA_NETCDF(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    04/2012
-!!      J.Escobar   11/2013  Add USE MODI_GET_TYPE_DIM_n
 !!------------------------------------------------------------------
 !
+
 USE MODD_PREP,           ONLY : CINTERP_TYPE
-!
+
 USE MODI_ABOR1_SFX
-USE MODI_GET_TYPE_DIM_n
-!
+USE MODI_GET_TYPE_DIM_N
+
 USE MODE_READ_CDF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK

@@ -152,7 +152,8 @@ DO
   END IF
 END DO
 !
-98 REWIND(ILUNAM)
+98 CONTINUE
+REWIND(ILUNAM)
 !
 !
 !
@@ -208,7 +209,8 @@ DO
   END IF
 END DO
 !
-99 REWIND(ILUNAM)
+99 CONTINUE
+REWIND(ILUNAM)
 !
 !------------------------------------------------------------------------------
 !
@@ -480,7 +482,8 @@ DO
   END IF
 END DO
 !
-101 YERROR=TRIM(HCODE1)//' not found in file : '//TRIM(HFILE)
+101 CONTINUE
+ YERROR=TRIM(HCODE1)//' not found in file : '//TRIM(HFILE)
  CALL ABOR1_SFX(YERROR)
 !
 END SUBROUTINE READ_CONF_IN_CSVFILE
@@ -513,7 +516,8 @@ DO
   END IF
 END DO
 !
-101 YERROR=TRIM(HCODE1)//' '//TRIM(HCODE2)//' not found in file : '//TRIM(HFILE)
+101 CONTINUE
+ YERROR=TRIM(HCODE1)//' '//TRIM(HCODE2)//' not found in file : '//TRIM(HFILE)
  CALL ABOR1_SFX(YERROR)
 !
 END SUBROUTINE READ_HYP_IN_CSVFILE
@@ -610,7 +614,8 @@ DO
   IF (ALL(GINITIALIZED)) EXIT
 END DO
 !
-100 REWIND(ILUNAM)
+100 CONTINUE
+REWIND(ILUNAM)
 DEALLOCATE(ZDATA)
 !
 !* one checks if the data is available for all building's types

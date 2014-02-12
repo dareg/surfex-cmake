@@ -20,19 +20,17 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original        11/2011
-!!      J.Escobar       11/2013 : ajout use MODI_CH_OPEN_INPUTB
 !!-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !
 USE MODD_CSTS,       ONLY : XAVOGADRO, XMD
 USE MODD_CH_SNAP_n
-!
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
 USE MODI_ABOR1_SFX
-USE MODI_CH_OPEN_INPUTB
 USE MODI_CH_CONVERSION_FACTOR
+USE MODI_CH_OPEN_INPUTB
 USE MODI_BUILD_PRONOSLIST_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
