@@ -2,6 +2,38 @@
 SUBROUTINE PREP_SNOW_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                             KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER)
 !     #################################################################################
+ !!     ##########################################################################
+ !
+ !
+!!****  *PREP_SNOW_EXTERN*
+!!
+!!    PURPOSE
+!!    -------
+!!       Read and prepare initial snow fields from external files
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!         * Meteo-France *
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    ?
+!!       02/2014 E. Martin : cor. for passing from from multilayer to a single layer
+!-------------------------------------------------------------------------------
 !
 !
 USE MODD_TYPE_SNOW
@@ -157,9 +189,7 @@ ELSE
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 ENDIF
 !
-IF (TZSNOW%NLAYER.GT.KLAYER) THEN
-  TZSNOW%NLAYER=KLAYER
-ELSEIF (TZSNOW%NLAYER.LT.KLAYER) THEN
+IF (TZSNOW%NLAYER.LT.KLAYER) THEN
   CALL ABOR1_SFX("PREP_SNOW_EXTERN: SNOW NLAYER IN EXTERN FILE MUST BE GROWER THAN CURRENT NLAYER")
 ENDIF
 !
