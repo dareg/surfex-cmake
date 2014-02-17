@@ -157,11 +157,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 #ifndef NOMPI
-!$ INCLUDE 'mpif.h'
+ INCLUDE 'mpif.h'
 #endif
 !
 #ifndef AIX64
-INCLUDE 'omp_lib.h'
+!$ INCLUDE 'omp_lib.h'
 #endif
 !
 !*      0.    declarations of local variables
