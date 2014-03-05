@@ -31,6 +31,7 @@
 !!
 !!    Original    03/2010
 !!
+!!    J.Escobar   11/2013   Add USE MODI_PGD_TEB_GREENROOF
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -55,8 +56,8 @@ USE MODI_READ_NAM_PGD_ISBA
 USE MODI_PGD_FIELD
 USE MODI_TEST_NAM_VAR_SURF
 !
-USE MODI_PGD_TEB_GARDEN_PAR
 USE MODI_PGD_TEB_GREENROOF
+USE MODI_PGD_TEB_GARDEN_PAR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

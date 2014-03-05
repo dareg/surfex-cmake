@@ -44,6 +44,7 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!     (B.Decharme)  07/2011  Read pgd+prep
 !!     (S. Queguiner)  2011   Modif chemistry (2.4)
 !!     (B. Decharme)   2013   Read grid only once in AROME case
+!!     (G. Tanguy)     2013   Add IF(ALLOCATED(NMASK_FULL))  before deallocate
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS

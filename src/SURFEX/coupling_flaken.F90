@@ -55,6 +55,7 @@ USE MODD_FLAKE_n,  ONLY :   TTIME         , XEMIS         , XWATER_DEPTH  , &
                             XUSTAR        , LSEDIMENTS    , CFLK_FLUX     , &
                             CFLK_ALB      , XICHCE        , LPRECIP       , &
                             LPWEBB
+USE MODD_SEAFLUX_n,  ONLY : XPERTFLUX
 !                          
 !salgado - keep the same ch_ routines and modules used in watflux_n
 USE MODD_CH_WATFLUX_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
@@ -267,8 +268,8 @@ SELECT CASE (CFLK_FLUX)
                       ZWIND, PZREF, PUREF,                         &
                       PPS, XICHCE, LPRECIP,LPWEBB, GPWG, ZQSAT,    &
                       PSFTH, PSFTQ, ZUSTAR,                        &
-                      ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_WATER, ZZ0H  )
-
+                      ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_WATER, ZZ0H, & 
+                      XPERTFLUX                                    )
 END SELECT
 !
 IF (CFLK_FLUX=='DEF  ' .OR. CFLK_FLUX=='ECUME') THEN

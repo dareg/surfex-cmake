@@ -118,6 +118,7 @@ TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZSEED
 TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZREAP
 REAL, DIMENSION(KLU,1) :: ZWATSUP
 REAL, DIMENSION(KLU,1) :: ZIRRIG
+LOGICAL :: LUPDATED              ! T if VEGETATION_UPDATE has reset fields
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -173,6 +174,7 @@ ZCNA_NITRO(:,1)   = XCNA_NITRO
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
+LUPDATED=.FALSE.
 IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,LCOVER,                 &
                          CISBA,(.NOT. LPAR_GREENROOF), CPHOTO, .FALSE., 'GR ',  &
@@ -188,7 +190,7 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          CALBEDO, ZALBNIR_VEG, ZALBVIS_VEG, ZALBUV_VEG,  &
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
-                         TZSEED, TZREAP, ZWATSUP, ZIRRIG                 )  
+                         TZSEED, TZREAP, ZWATSUP, ZIRRIG, LUPDATED      )  
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
