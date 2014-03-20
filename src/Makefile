@@ -364,7 +364,6 @@ cleandrhook :
 # EXTRA LIB : ECOCLIMAP                                  #
 #                                                        #
 ##########################################################
-SRC_SURFEX=/home/seity/SVN/V8_GMAP
 ecoclimap:${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin
 
 
