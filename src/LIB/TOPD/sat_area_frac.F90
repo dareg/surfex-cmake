@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !     ########################
-      SUBROUTINE SAT_AREA_FRAC(PDEF,PAS)
+      SUBROUTINE SAT_AREA_FRAC(PDEF,PAS,GTOPD)
 !     ########################
 !
 !!*****    * SAT_AREA_FRAC *
@@ -40,13 +40,14 @@
 !!    -------------
 !!
 !!      Original   27/11/2006
+!!                 03/2014 (B. Vincendon) computation based of pixels counts instead of areas 
 !
 !----------------------------------------------------------------------
 !*       0.      DECLARATIONS
 !                ------------
 !
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XDXT
-USE MODD_COUPLING_TOPD, ONLY : NMASKT
+USE MODD_COUPLING_TOPD, ONLY : NMASKT, NNPIX
 USE MODD_SURF_ATM_GRID_n, ONLY : XMESH_SIZE
 USE MODD_SURF_PAR,        ONLY : XUNDEF, NUNDEF
 !
@@ -59,9 +60,11 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:,:),INTENT(IN)     :: PDEF    ! deficit
 REAL, DIMENSION(:), INTENT(OUT)     :: PAS     !contributive area fraction in Isba meshes
+LOGICAL, DIMENSION(:), INTENT(INOUT)   :: GTOPD     ! 
 !
 !*      0.2    declarations of local variables
 INTEGER               :: JJ, JI
+REAL, DIMENSION(SIZE(PAS,1)) :: ZCOUNT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('SAT_AREA_FRAC',0,ZHOOK_HANDLE)
@@ -71,16 +74,20 @@ IF (LHOOK) CALL DR_HOOK('SAT_AREA_FRAC',0,ZHOOK_HANDLE)
 PAS(:)=0.0
 !
 DO JJ=1,NNCAT
+ IF (GTOPD(JJ)) THEN
   DO JI=1,NNMC(JJ)
-    IF (PDEF(JJ,JI)==0.0 .AND. NMASKT(JJ,JI)/=NUNDEF) THEN 
-      PAS(NMASKT(JJ,JI)) = PAS(NMASKT(JJ,JI)) + XDXT(JJ)**2
+    IF (PDEF(JJ,JI)==0.0 .AND. NMASKT(JJ,JI)/=NUNDEF.AND. NMASKT(JJ,JI)/=0) THEN 
+      PAS(NMASKT(JJ,JI)) = PAS(NMASKT(JJ,JI)) +1. 
     ENDIF
   ENDDO
+ !ELSE
+ ! PAS(NMASKT(JJ,:)) = 0.
+ ENDIF
 ENDDO
 !
 ! Calculation of the saturated area ratio in each Isba mesh
-WHERE ((XMESH_SIZE/=0.).AND.(PAS/=XUNDEF))
-  PAS(:) = PAS(:) / XMESH_SIZE(:) 
+WHERE ((NNPIX/=0.).AND.(PAS/=XUNDEF))
+  PAS(:) = PAS(:) / NNPIX(:)
 ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('SAT_AREA_FRAC',1,ZHOOK_HANDLE)
