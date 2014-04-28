@@ -42,7 +42,10 @@ USE MODD_TEB_n,          ONLY : NROOF_LAYER, XT_ROOF, XWS_ROOF, &
                                   XTI_ROAD, CBEM,                 &
                                   TSNOW_ROOF, TSNOW_ROAD,         &
                                   XT_CANYON, XQ_CANYON,           &
-                                  NTEB_PATCH, CROAD_DIR, CWALL_OPT
+                                  NTEB_PATCH, CROAD_DIR, CWALL_OPT,&
+                                  LSOLAR_PANEL
+USE MODD_TEB_PANEL_n,    ONLY : XTHER_PRODC_DAY
+
 USE MODD_BEM_n, ONLY : NFLOOR_LAYER, XT_FLOOR, XT_MASS,           &
                        XT_WIN1, XT_WIN2, XQI_BLD, XTI_BLD                                   
 USE MODD_ASSIM, ONLY : LASSIM,XAT2M_TEB
@@ -301,7 +304,17 @@ YRECFM=YPATCH//'QCANYON'
 YRECFM=ADJUSTL(YRECFM)
 IF (GOLD_NAME) YRECFM='Q_CANYON'
  CALL READ_SURF(HPROGRAM,YRECFM,XQ_CANYON(:),IRESP)
-IF (LHOOK) CALL DR_HOOK('READ_TEB_N',1,ZHOOK_HANDLE)
+!
+!* Thermal solar panels present day production
+!
+IF (LSOLAR_PANEL) THEN
+  ALLOCATE(XTHER_PRODC_DAY(ILU))
+  XTHER_PRODC_DAY(:) = 0.
+
+  YRECFM=YPATCH//'THER_PDAY'
+  YRECFM=ADJUSTL(YRECFM)
+  CALL READ_SURF(HPROGRAM,YRECFM,XTHER_PRODC_DAY(:),IRESP)
+END IF
 
 IF ( LASSIM ) THEN
   ! Diagnostic fields for assimilation
@@ -312,6 +325,8 @@ IF ( LASSIM ) THEN
 ENDIF
 
 !
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('READ_TEB_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE READ_TEB_n

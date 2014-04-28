@@ -74,6 +74,7 @@ INTEGER, INTENT(IN) :: KLUOUT ! logical unit of output listing
 !
 INTEGER                         :: JJ               ! counter
 INTEGER                         :: ILU              ! sizes of TEB arrays
+LOGICAL                         :: GPRINT           ! flag for warning prints in output file
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -187,30 +188,39 @@ CASE("BEM")
    !        -------------------------------
    !
    CALL WINDOW_DATA(ILU, XSHGC, XU_WIN, XALB_WIN, XABS_WIN, XUGG_WIN, XTRAN_WIN)
+   GPRINT = .FALSE.
    DO JJ=1,SIZE(XSHADE)
       IF (XSHADE(JJ) >= 0.0 .AND. XSHADE(JJ) < 0.5) THEN
          LSHADE(JJ) = .FALSE.
       ELSEIF (XSHADE(JJ) >= 0.5 .AND. XSHADE(JJ) <= 1.0) THEN
          LSHADE(JJ) = .TRUE.
       ELSE
-       PRINT*,'ERROR INTRODUCING SHADE'
+       GPRINT = .TRUE.
+       LSHADE(JJ) = .FALSE.
       ENDIF
    ENDDO
+   IF (GPRINT) WRITE(KLUOUT,*) &
+   'TEB-BEM : Error in specifying shading devices for at least one point, no shading device for these points'
    LSHAD_DAY(:) = .FALSE.
    !
    ! *.     Nocturnal surventilation
    !        ------------------------
+   GPRINT = .FALSE.
    DO JJ=1,SIZE(XNATVENT)
       IF (XNATVENT(JJ) >= 0.0 .AND. XNATVENT(JJ) < 0.5) THEN
         CNATVENT(JJ) = 'NONE'
       ELSEIF (XNATVENT(JJ) >= 0.5 .AND. XNATVENT(JJ) < 1.5) THEN
         CNATVENT(JJ) = 'MANU'
-      ELSEIF (XNATVENT(JJ) >= 1.5 .AND. XNATVENT(JJ) <= 2.) THEN
+      ELSEIF (XNATVENT(JJ) >= 1.5 .AND. XNATVENT(JJ) <= 2.5) THEN
         CNATVENT(JJ) = 'AUTO'        
+      ELSEIF (XNATVENT(JJ) >= 2.5 .AND. XNATVENT(JJ) <= 3.5) THEN
+        CNATVENT(JJ) = 'MECH'        
       ELSE
-        PRINT*,'ERROR INTRODUCING NATVENT'
+        GPRINT = .TRUE.
+        CNATVENT(JJ) = 'NONE'        
       ENDIF
     ENDDO
+    IF (GPRINT) WRITE(KLUOUT,*) 'TEB-BEM : Chosen option for surventilation is not yet implemented; None venting is kept instead'
 
    LNATVENT_NIGHT(:) = .FALSE.
    !

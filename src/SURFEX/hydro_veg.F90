@@ -1,7 +1,7 @@
 !     #########
-      SUBROUTINE HYDRO_VEG(HRAIN, PTSTEP, PMUF, PRR, PLEV, PLETR,    &
+      SUBROUTINE HYDRO_VEG(HRAIN, PTSTEP, PMUF, PRR, PLEV, PLETR,      &
                               PVEG, PPSNV, PWR, PWRMAX, PPG, PDRIP,    &
-                              PRRVEG  )    
+                              PRRVEG, PIRRIG_GR                        )    
 !     #####################################################################
 !
 !!****  *HYDRO_VEG*  
@@ -56,6 +56,7 @@
 !!                  07/2011  (B. Decharme) delete SGH for very fine precipitation
 !!                  09/2012  (B. Decharme) Computation efficiency for HRAIN=='SGH'
 !!                  10/2012  (B. Decharme) PPG intent(out)
+!!                  02/2013  (C. de Munck) specified irrigation rate of ground added
 !
 !-------------------------------------------------------------------------------
 !
@@ -94,6 +95,10 @@ REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PWRMAX
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PPSNV
 !                                      PPSNV = vegetation covered by snow
+!
+REAL, DIMENSION(:), INTENT(IN)    :: PIRRIG_GR
+!                                      PIRRIG_GR = ground irrigation rate (kg/m2/s)
+!
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PWR
 !                                      PWR = liquid water retained on the foliage
@@ -231,7 +236,8 @@ PWR(:)   = MIN(PWR(:), PWRMAX(:))
 !precipitation plus the vegetation runoff (we also consider the
 !negative runoff).
 !
-PPG(:) = (1.-PVEG(:)*(1-PPSNV(:))) * PRR(:) + ZRUIR(:) + ZRUIR2(:)
+PPG(:) = (1.-PVEG(:)*(1-PPSNV(:))) * PRR(:) + ZRUIR(:) + ZRUIR2(:) &
+         +                             PIRRIG_GR(:) 
 !
 PDRIP(:) = ZRUIR(:) + ZRUIR2(:)
 IF (LHOOK) CALL DR_HOOK('HYDRO_VEG',1,ZHOOK_HANDLE)

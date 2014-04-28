@@ -28,6 +28,7 @@ SUBROUTINE DIAG_INLAND_WATER_n(HPROGRAM,                                        
 !!    -------------
 !!      Original    01/2004
 !!      Modified    08/2009 : cumulated diag & t2m min/max
+!!       V.Masson   10/2013 Adds min and max 2m parameters
 !!------------------------------------------------------------------
 !
 
@@ -113,7 +114,9 @@ ELSE IF (CWATER=='FLAKE ') THEN
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE,   &
                         PQS, PZ0, PZ0H,                                   &
                         PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,         &
-                        PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV  )  
+                        PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV, &
+                        PT2M_MIN, PT2M_MAX,                               &
+                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX      )  
 !
 ! new diag not yet inplemeted in flake
 !
@@ -128,12 +131,6 @@ ELSE IF (CWATER=='FLAKE ') THEN
   PLWUC    = XUNDEF
   PFMUC    = XUNDEF
   PFMVC    = XUNDEF
-  PT2M_MIN = XUNDEF
-  PT2M_MAX = XUNDEF 
-  PHU2M_MIN= XUNDEF
-  PHU2M_MAX= XUNDEF  
-  PWIND10M = XUNDEF
-  PWIND10M_MAX = XUNDEF  
 !
 ELSE IF (CWATER=='FLUX  ') THEN
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)

@@ -2,6 +2,7 @@
     SUBROUTINE URBAN_SNOW_EVOL(                                                 &
                        PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,                         &
                        PTS_ROOF,PTS_ROAD,PTS_WALL_A, PTS_WALL_B,                &
+                       PT_ROOF, PD_ROOF, PTC_ROOF, PHC_ROOF,                    &
                        HSNOW_ROOF,                                              &
                        PWSNOW_ROOF, PTSNOW_ROOF, PRSNOW_ROOF, PASNOW_ROOF,      &
                        PTSSNOW_ROOF, PESNOW_ROOF,                               &
@@ -72,6 +73,7 @@ USE MODD_CSTS,     ONLY : XSTEFAN
 !
 USE MODE_SURF_SNOW_FRAC
 !
+USE MODI_ROOF_IMPL_COEF
 USE MODI_SNOW_COVER_1LAYER
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -91,6 +93,10 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PTS_ROOF   ! roof surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_ROAD   ! road surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL_A ! wall surface temperature
 REAL, DIMENSION(:),   INTENT(IN)    :: PTS_WALL_B ! wall surface temperature
+REAL, DIMENSION(:,:), INTENT(IN)    :: PT_ROOF    ! roof temperature profile
+REAL, DIMENSION(:,:), INTENT(IN)    :: PD_ROOF    ! roof layer thickness
+REAL, DIMENSION(:,:), INTENT(IN)    :: PTC_ROOF   ! roof layer thermal conductivity
+REAL, DIMENSION(:,:), INTENT(IN)    :: PHC_ROOF   ! roof layer heat capacity
  CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ROOF ! snow roof scheme
 !                                                 ! 'NONE'
 !                                                 ! 'D95 '
@@ -168,6 +174,10 @@ REAL, DIMENSION(SIZE(PTA)) :: ZSR_ROOF    ! snow fall on roof snow (kg/s/m2 of s
 REAL, DIMENSION(SIZE(PTA)) :: ZSR_ROAD    ! snow fall on road snow (kg/s/m2 of snow)
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZT_SKY      ! sky temperature
+REAL, DIMENSION(SIZE(PTA)) :: ZTS_COEFA   ! Coefficient A for implicit coupling
+!                                         ! of snow with the underlying surface
+REAL, DIMENSION(SIZE(PTA)) :: ZTS_COEFB   ! Coefficient B for implicit coupling
+!                                         ! of snow with the underlying surface
 !
 ! flags to call to snow routines
 !
@@ -224,6 +234,11 @@ IF ( GSNOW_ROOF ) THEN
   ZSR_ROOF=0.
   WHERE (PDN_ROOF(:)>0.) ZSR_ROOF   (:) = PSR   (:) / PDN_ROOF(:)
 !
+!* Estimates implicit coupling between snow and roof
+! (strictly equal to an implicit formulation for 100% snow coverage)
+!
+  CALL ROOF_IMPL_COEF(PTSTEP, SIZE(PT_ROOF,2), PD_ROOF, PTC_ROOF, PHC_ROOF, PT_ROOF, ZTS_COEFA,ZTS_COEFB)
+!
 !* call to snow mantel scheme
 !
   IF (HSNOW_ROOF=='1-L')  &
@@ -234,7 +249,7 @@ IF ( GSNOW_ROOF ) THEN
                            PTSNOW_ROOF(:,1), PASNOW_ROOF,                       &
                            PRSNOW_ROOF(:,1), PWSNOW_ROOF(:,1), PTSSNOW_ROOF,    &
                            PESNOW_ROOF,                                         &
-                           PTS_ROOF, PABS_SW_SNOW_ROOF,                         &
+                           PTS_ROOF,  ZTS_COEFA, ZTS_COEFB, PABS_SW_SNOW_ROOF,  &
                            ZLW1_ROOF, ZLW2_ROOF,                                &
                            PTA, PQA, PVMOD, PPS, PRHOA, ZSR_ROOF, PZREF, PUREF, &
                            PRNSNOW_ROOF, PHSNOW_ROOF, PLESNOW_ROOF, PGSNOW_ROOF,&
@@ -273,6 +288,11 @@ IF ( GSNOW_ROAD ) THEN
   ZSR_ROAD=0.
   WHERE (PDN_ROAD(:)>0.) ZSR_ROAD   (:) = PSR   (:) / PDN_ROAD(:)
   !
+  !* no implicit coupling necessary with road
+  !
+  ZTS_COEFA = 0.
+  ZTS_COEFB = PTS_ROAD
+  !
   !* call to snow mantel scheme
   !
   IF (HSNOW_ROAD=='1-L')                                                        &
@@ -283,7 +303,8 @@ IF ( GSNOW_ROAD ) THEN
                            PTSNOW_ROAD(:,1), PASNOW_ROAD,                       &
                            PRSNOW_ROAD(:,1), PWSNOW_ROAD(:,1), PTSSNOW_ROAD,    &
                            PESNOW_ROAD,                                         &
-                           PTS_ROAD, PABS_SW_SNOW_ROAD, ZLW1_ROAD, ZLW2_ROAD,   &
+                           PTS_ROAD, ZTS_COEFA, ZTS_COEFB,                      &
+                           PABS_SW_SNOW_ROAD, ZLW1_ROAD, ZLW2_ROAD,             &
                            PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PPS, PRHOA,         &
                            ZSR_ROAD, PZ_LOWCAN, PZ_LOWCAN,                      &
                            PRNSNOW_ROAD, PHSNOW_ROAD, PLESNOW_ROAD, PGSNOW_ROAD,&

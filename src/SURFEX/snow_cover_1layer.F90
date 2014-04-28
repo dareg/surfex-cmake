@@ -4,7 +4,8 @@
                                    PDRAIN_TIME, PWCRN, PZ0SN, PZ0HSN,        &
                                    PTSNOW, PASNOW, PRSNOW, PWSNOW, PTS_SNOW, &
                                    PESNOW,                                   &
-                                   PTG,PABS_SW, PLW1, PLW2,                  &
+                                   PTG, PTG_COEFA, PTG_COEFB,                &
+                                   PABS_SW, PLW1, PLW2,                      &
                                    PTA, PQA, PVMOD, PPS, PRHOA, PSR,         &
                                    PZREF, PUREF,                             &
                                    PRNSNOW, PHSNOW, PLESNOW, PGSNOW, PMELT,  &
@@ -51,6 +52,7 @@
 !!    -------------
 !!      Original    08/09/98 
 !!      J. Escobar 24/10/2012 : BUF PGI10.X , rewrite some 1 line WHERE statement
+!!      V. Masson  13/09/2013 : implicitation of coupling with roof below
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -96,6 +98,8 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PRSNOW   ! snow density
 REAL, DIMENSION(:), INTENT(INOUT) :: PTS_SNOW ! snow surface temperature
 REAL, DIMENSION(:), INTENT(INOUT) :: PESNOW   ! snow emissivity
 REAL, DIMENSION(:), INTENT(IN)    :: PTG      ! underlying ground temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PTG_COEFA! underlying ground temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PTG_COEFB! implicit terms
 REAL, DIMENSION(:), INTENT(IN)    :: PABS_SW  ! absorbed SW energy (Wm-2)
 REAL, DIMENSION(:), INTENT(IN)    :: PLW1     ! LW coef independant of TSNOW
                                               ! (Wm-2)     usually equal to:
@@ -407,9 +411,10 @@ DO JJ=1,JCOMPT_SNOW3
 !
   ZWORK1(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI))
 !
-  ZB(JI) = ZB(JI) + ZWORK1(JI) *  ZIMPL
+  ZB(JI) = ZB(JI) + ZWORK1(JI) *  ZIMPL / ( 1. + ZWORK1(JI)*PTG_COEFA(JI) )
 !
-  ZY(JI) = ZY(JI) - ZWORK1(JI) * (ZEXPL * PTSNOW(JI) - PTG(JI))
+  ZY(JI) = ZY(JI) - ZWORK1(JI) * (ZEXPL * PTSNOW(JI) - PTG_COEFB(JI)) &
+                   / ( 1. + ZWORK1(JI)*PTG_COEFA(JI) )
 !
 !*      3.8    guess of snow temperature before accumulation and melting
 !              ---------------------------------------------------------
@@ -496,7 +501,9 @@ DO JJ = 1, JCOMPT_FLUX
 !*      5.5    Conduction heat flux
 !              --------------------
 !
-  PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( PTSNOW(JI) - PTG(JI) )
+  !PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( PTSNOW(JI) - PTG(JI) )
+  PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( PTSNOW(JI) - PTG_COEFB(JI) ) &
+             / ( 1. + ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI))*PTG_COEFA(JI) )
 !
 !
 !*      5.6    If ground T>0 C, Melting is estimated from conduction heat flux

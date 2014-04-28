@@ -37,6 +37,7 @@
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_TEB_n
+USE MODD_TEB_PANEL_n
 USE MODD_BEM_n, ONLY : XN_FLOOR, NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR
 
 !
@@ -104,6 +105,10 @@ YCOMMENT='Garden fraction (-)'
 YRECFM='GREENROOF_FRAC'
 YCOMMENT='Greenroof fraction (-)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XGREENROOF(:),IRESP,HCOMMENT=YCOMMENT)
+ !
+YRECFM='PANEL_FRAC'
+YCOMMENT='Solar Panel fraction (-)'
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XFRAC_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -169,6 +174,10 @@ YRECFM='ROUGH_WALL'
 YCOMMENT='Wall roughness'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XROUGH_WALL(:),IRESP,HCOMMENT=YCOMMENT)
 !
+!
+YRECFM='RESIDENTIAL'
+YCOMMENT='Residential use fraction'
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XRESIDENTIAL(:),IRESP,HCOMMENT=YCOMMENT)
 !-------------------------------------------------------------------------------
 !
 !         Road parameters

@@ -61,11 +61,20 @@ INTEGER                         :: IRESP
 INTEGER                         :: I1, I2
 INTEGER                         :: JL
 INTEGER                         :: ITOT
+INTEGER           :: IVERSION       ! surface version
+INTEGER           :: IBUGFIX        ! surface bugfix version
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION_n',0,ZHOOK_HANDLE)
 !
+!-------------------------------------------------------------------------------
+!
+!*    1.   Read file version
+!          -----------------
+!
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
 !-------------------------------------------------------------------------------
 !
 !*    1.   Read configuration variables of the descriptive data
@@ -123,6 +132,10 @@ ALLOCATE(XDESC_INF(NDESC_CODE))
 ALLOCATE(XDESC_V_VENT(NDESC_CODE))
 ALLOCATE(XDESC_GREENROOF(NDESC_CODE))
 !
+ALLOCATE(XDESC_EMIS_PANEL(NDESC_CODE))
+ALLOCATE(XDESC_ALB_PANEL (NDESC_CODE))
+ALLOCATE(XDESC_EFF_PANEL (NDESC_CODE))
+ALLOCATE(XDESC_FRAC_PANEL(NDESC_CODE))
 !
 ALLOCATE(NDESC_USE_LIST(NDESC_USE))
 ALLOCATE(XDESC_TCOOL_TARGET(NDESC_USE))
@@ -132,16 +145,23 @@ ALLOCATE(XDESC_QIN_FLAT(NDESC_USE))
 ALLOCATE(XDESC_SHGC_SH(NDESC_USE))
 ALLOCATE(XDESC_SHADE(NDESC_USE))
 ALLOCATE(XDESC_NATVENT(NDESC_USE))
+ALLOCATE(XDESC_RESIDENTIAL(NDESC_USE))
 !
 ALLOCATE(NDESC_AGE_LIST(NDESC_AGE))
 ALLOCATE(NDESC_AGE_DATE(NDESC_AGE))
+!
+!* default data for old files
+XDESC_EMIS_PANEL = 0.9
+XDESC_ALB_PANEL  = 0.1
+XDESC_EFF_PANEL  = 0.14
+XDESC_FRAC_PANEL = 0.   ! no solar panels for old versions of SURFEX
 !-------------------------------------------------------------------------------
 !
 !*    3.   Read descriptive data
 !          ---------------------
 !
-ITOT=(17+3*NDESC_ROOF_LAYER+3*NDESC_ROAD_LAYER+3*NDESC_WALL_LAYER+3*NDESC_FLOOR_LAYER)*NDESC_CODE &
-      + 8*NDESC_USE + 2*NDESC_AGE + NDESC_BLD
+ITOT=(21+3*NDESC_ROOF_LAYER+3*NDESC_ROAD_LAYER+3*NDESC_WALL_LAYER+3*NDESC_FLOOR_LAYER)*NDESC_CODE &
+      + 9*NDESC_USE + 2*NDESC_AGE + NDESC_BLD
 ALLOCATE(ZWORK(ITOT))
 !
  CALL READ_SURF(HPROGRAM,'BLD_DESC_DAT',ZWORK,IRESP,HDIR='-')
@@ -204,6 +224,12 @@ END DO
  CALL UP_DESC_IND(NDESC_CODE) ; XDESC_INF(:)          = ZWORK(I1:I2)
  CALL UP_DESC_IND(NDESC_CODE) ; XDESC_V_VENT(:)       = ZWORK(I1:I2)
  CALL UP_DESC_IND(NDESC_CODE) ; XDESC_GREENROOF(:)    = ZWORK(I1:I2)
+ IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=4)) THEN
+   CALL UP_DESC_IND(NDESC_CODE) ; XDESC_EMIS_PANEL(:)   = ZWORK(I1:I2)
+   CALL UP_DESC_IND(NDESC_CODE) ; XDESC_ALB_PANEL(:)    = ZWORK(I1:I2)
+   CALL UP_DESC_IND(NDESC_CODE) ; XDESC_EFF_PANEL(:)    = ZWORK(I1:I2)
+   CALL UP_DESC_IND(NDESC_CODE) ; XDESC_FRAC_PANEL(:)   = ZWORK(I1:I2)
+ END IF
 !
  CALL UP_DESC_IND(NDESC_USE) ; NDESC_USE_LIST(:)     = NINT(ZWORK(I1:I2))
  CALL UP_DESC_IND(NDESC_USE) ; XDESC_TCOOL_TARGET(:) = ZWORK(I1:I2)
@@ -213,6 +239,7 @@ END DO
  CALL UP_DESC_IND(NDESC_USE) ; XDESC_SHGC_SH(:)      = ZWORK(I1:I2)
  CALL UP_DESC_IND(NDESC_USE) ; XDESC_SHADE(:)        = ZWORK(I1:I2)
  CALL UP_DESC_IND(NDESC_USE) ; XDESC_NATVENT(:)      = ZWORK(I1:I2)
+ CALL UP_DESC_IND(NDESC_USE) ; XDESC_RESIDENTIAL(:)  = ZWORK(I1:I2)
 !
  CALL UP_DESC_IND(NDESC_AGE) ; NDESC_AGE_LIST(:)     = NINT(ZWORK(I1:I2))
  CALL UP_DESC_IND(NDESC_AGE) ; NDESC_AGE_DATE(:)     = NINT(ZWORK(I1:I2))

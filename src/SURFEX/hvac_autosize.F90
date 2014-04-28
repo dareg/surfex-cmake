@@ -1,6 +1,26 @@
 !     #############################################################
 SUBROUTINE HVAC_AUTOSIZE(KI,KLUOUT)
 !     #############################################################
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!    Calibrates HVAC systems for TEB-BEM
+!!      
+!!    AUTHOR
+!!    ------
+!!
+!!	G. Pigeon           * Meteo-France *
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!    Original    05/2011
+!!    modified    08/2013 add solar panels (V. Masson)
+!-------------------------------------------------------------------------------
+!
+!*       0.     DECLARATIONS
+!               ------------
+!
 !
 USE MODD_BEM_n, ONLY : NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,       &
                        XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN,         &
@@ -25,7 +45,7 @@ USE MODD_TEB_n, ONLY : NROOF_LAYER, NWALL_LAYER, NROAD_LAYER, XGARDEN,     &
                        XALB_ROAD, XEMIS_ROAD, XHC_ROAD, XTC_ROAD, XD_ROAD, &
                        XALB_WALL, XEMIS_WALL, XHC_WALL, XTC_WALL, XD_WALL, &
                        XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY, &
-                       XROUGH_ROOF, XROUGH_WALL, XGREENROOF
+                       XROUGH_ROOF, XROUGH_WALL, XGREENROOF, TTIME
 
 
 USE MODD_CSTS,            ONLY : XCPD, XPI, XP00, XRD, XSTEFAN
@@ -77,6 +97,8 @@ INTEGER             :: JJ
 INTEGER             :: JFORC_STEP
 INTEGER             :: INB_STEP_ATM
 !
+REAL, DIMENSION(KI) :: ZFRAC_PANEL
+REAL, DIMENSION(KI) :: ZALB_PANEL
 !! GREGOIRE 13/03
 REAL, DIMENSION(KI) :: ZROAD
 REAL, DIMENSION(KI) :: ZGARDEN
@@ -124,6 +146,7 @@ REAL, DIMENSION(KI) :: ZABS_SW_WALL_A
 REAL, DIMENSION(KI) :: ZABS_SW_WALL_B
 REAL, DIMENSION(KI) :: ZABS_SW_GARDEN
 REAL, DIMENSION(KI) :: ZABS_SW_GREENROOF
+REAL, DIMENSION(KI) :: ZABS_SW_PANEL
 REAL, DIMENSION(KI) :: ZABS_SW_SNOW_ROOF
 REAL, DIMENSION(KI) :: ZABS_SW_SNOW_ROAD
 REAL, DIMENSION(KI) :: ZREC_SW_ROAD
@@ -131,6 +154,7 @@ REAL, DIMENSION(KI) :: ZREC_SW_SNOW_ROAD
 REAL, DIMENSION(KI) :: ZREC_SW_WALL_A
 REAL, DIMENSION(KI) :: ZREC_SW_WALL_B
 REAL, DIMENSION(KI) :: ZREC_SW_GARDEN
+REAL, DIMENSION(KI) :: ZREC_SW_ROOF
 REAL, DIMENSION(KI) :: ZABS_LW_ROOF      ! absorbed IR rad by roof
 REAL, DIMENSION(KI) :: ZABS_LW_SNOW_ROOF ! absorbed IR rad by snow on roof
 REAL, DIMENSION(KI) :: ZABS_LW_ROAD      ! absorbed IR rad by road
@@ -218,7 +242,6 @@ REAL, DIMENSION(KI) :: ZHSNOW_ROAD   ! sensible heat flux over snow
 REAL, DIMENSION(KI) :: ZLESNOW_ROAD  ! latent heat flux over snow
 REAL, DIMENSION(KI) :: ZGSNOW_ROAD   ! flux under the snow
 REAL, DIMENSION(KI) :: ZMELT_ROAD    ! snow melt
-REAL, DIMENSION(KI) :: ZRUNOFF_TOWN  ! runoff over the ground
 REAL, DIMENSION(KI) :: ZUW_ROAD      ! Momentum flux for roads
 REAL, DIMENSION(KI) :: ZUW_ROOF      ! Momentum flux for roofs
 REAL, DIMENSION(KI) :: ZDUWDU_ROAD   !
@@ -291,12 +314,24 @@ REAL, DIMENSION(KI) :: ZRN_GREENROOF
 REAL, DIMENSION(KI) :: ZH_GREENROOF
 REAL, DIMENSION(KI) :: ZLE_GREENROOF
 REAL, DIMENSION(KI) :: ZGFLUX_GREENROOF
+REAL, DIMENSION(KI) :: ZRUNOFF_GREENROOF 
+REAL, DIMENSION(KI) :: ZDRAIN_GREENROOF 
 REAL, DIMENSION(KI) :: ZUW_GREENROOF
 REAL, DIMENSION(KI) :: ZG_GREENROOF_ROOF
 REAL, DIMENSION(KI) :: ZRN_STRLROOF
 REAL, DIMENSION(KI) :: ZH_STRLROOF
 REAL, DIMENSION(KI) :: ZLE_STRLROOF
 REAL, DIMENSION(KI) :: ZGFLUX_STRLROOF
+REAL, DIMENSION(KI) :: ZRUNOFF_STRLROOF 
+!
+! Road irrigation (not used here)
+LOGICAL             :: GPAR_RD_IRRIG = .FALSE.
+REAL, DIMENSION(KI) :: ZRD_START_MONTH
+REAL, DIMENSION(KI) :: ZRD_END_MONTH
+REAL, DIMENSION(KI) :: ZRD_START_HOUR
+REAL, DIMENSION(KI) :: ZRD_END_HOUR
+REAL, DIMENSION(KI) :: ZRD_24H_IRRIG
+REAL, DIMENSION(KI) :: ZIRRIG_ROAD
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 !
@@ -373,15 +408,27 @@ ZE_SHADING(:) = 0.
 GNATVENT_NIGHT(:) = .FALSE.
 GSHADE        (:) = .FALSE.
 GSHAD_DAY     (:) = .FALSE.
+! solar panels are not taken into account in the building's HVAC equipment sizing process
+ZFRAC_PANEL  = 0.
+ZALB_PANEL   = 0.1
 !
-! Case greenroofs
+! greenroofs   are not taken into account in the building's HVAC equipment sizing process
 ZRN_GREENROOF    (:) = 0.
 ZH_GREENROOF     (:) = 0.
 ZLE_GREENROOF    (:) = 0.
 ZGFLUX_GREENROOF (:) = 0.
 ZUW_GREENROOF    (:) = 0.
+ZRUNOFF_GREENROOF (:) = 0.
+ZDRAIN_GREENROOF (:) = 0.
 !* one supposes zero conduction heat flux between the greenroof and the roof.
 ZG_GREENROOF_ROOF(:) = 0.
+!
+!* road watering (not used)
+ZRD_START_MONTH= 1.
+ZRD_END_MONTH  = 1.
+ZRD_START_HOUR = 0.
+ZRD_END_HOUR   = 24.
+ZRD_24H_IRRIG  = 0.
 !
 !*      A.     Autosize of the heating system
 !              ---------------------------------
@@ -472,7 +519,7 @@ ZALB_GARDEN   (:) = 0.
 ZALB_GREENROOF(:) = 0.
 ZAC_GARDEN    (:) = 0.
 ZSVF_GARDEN   (:) = 0.
-!! GREGOIRE 13/03
+!
 !
 ALLOCATE(ISIZE_OMP(0:0))
  CALL GET_SIZES_PARALLEL(1,KI,0,ISIZE_OMP)
@@ -508,6 +555,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
                      XWALL_O_HOR, XCAN_HW_RATIO,                   &
                      XALB_ROOF,                                    &
                      XALB_ROAD, XSVF_ROAD, XALB_WALL, XSVF_WALL,   &
+                     ZFRAC_PANEL, ZALB_PANEL,                      &
                      ZALB_GARDEN, ZSVF_GARDEN,                     &
                      ZALB_GREENROOF,                               &
                      ZASNOW_ROOF, ZASNOW_ROAD,                     &
@@ -517,9 +565,10 @@ DO JFORC_STEP= 1,INB_STEP_ATM
                      ZABS_SW_WALL_A, ZABS_SW_WALL_B,               &
                      ZABS_SW_GARDEN, ZABS_SW_GREENROOF,            &
                      ZABS_SW_SNOW_ROOF, ZABS_SW_SNOW_ROAD,         &
+                     ZABS_SW_PANEL,                                &
                      ZREC_SW_ROAD,  ZREC_SW_SNOW_ROAD,             &
                      ZREC_SW_WALL_A, ZREC_SW_WALL_B,               &
-                     ZREC_SW_GARDEN,                               &
+                     ZREC_SW_GARDEN, ZREC_SW_ROOF,                 &
                      ZDIR_ALB_TOWN,ZSCA_ALB_TOWN,                  &
                      ZSW_RAD_GARDEN, ZABS_SW_WIN, ZREC_SW_WIN,     &
                      XTRAN_WIN,                                    &
@@ -552,6 +601,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !               -------------
 !
     CALL TEB  (HZ0H, HIMPLICIT_WIND, CWALL_OPT, YBEM,                 &
+             TTIME, ZTSUN,                                            &
              ZT_CANYON, ZQ_CANYON, ZU_CANYON,                         &
              ZT_CANYON, ZQ_CANYON, ZU_CANYON, ZZ_LOWCAN, ZTI_BLD,     &
              ZT_ROOF, ZT_ROAD, ZT_WALL_A, ZT_WALL_B,                  &
@@ -576,7 +626,9 @@ DO JFORC_STEP= 1,INB_STEP_ATM
              ZLEW_ROOF, ZGFLUX_ROOF, ZRUNOFF_ROOF,                    &
              ZRN_GREENROOF, ZH_GREENROOF, ZLE_GREENROOF,              &
              ZGFLUX_GREENROOF, ZUW_GREENROOF,                         &
+             ZRUNOFF_GREENROOF,ZDRAIN_GREENROOF,                      &
              ZRN_STRLROOF, ZH_STRLROOF, ZLE_STRLROOF, ZGFLUX_STRLROOF,&
+             ZRUNOFF_STRLROOF,                                        &
              ZRN_ROAD, ZH_ROAD,                                       &
              ZLE_ROAD, ZLEW_ROAD, ZGFLUX_ROAD, ZRUNOFF_ROAD,          &
              ZRN_WALL_A, ZH_WALL_A, ZLE_WALL_A, ZGFLUX_WALL_A,        &
@@ -587,7 +639,6 @@ DO JFORC_STEP= 1,INB_STEP_ATM
              ZRNSNOW_ROAD, ZHSNOW_ROAD, ZLESNOW_ROAD, ZGSNOW_ROAD,    &
              ZMELT_ROAD,                                              &
              ZG_GREENROOF_ROOF,                                       &
-             ZRUNOFF_TOWN,                                            &
              ZUW_ROAD, ZUW_ROOF, ZDUWDU_ROAD, ZDUWDU_ROOF,            &
              ZUSTAR_TOWN, ZCD, ZCDN, ZCH_TOWN, ZRI_TOWN,              &
              ZRESA_TOWN, ZDQS_TOWN, ZQF_TOWN, ZQF_BLD, ZFLX_BLD,      &
@@ -626,8 +677,9 @@ DO JFORC_STEP= 1,INB_STEP_ATM
              XF_FLOOR_WIN, XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS, &
              XF_WALL_WIN, XF_WIN_FLOOR, XF_WIN_MASS, XF_WIN_WALL,      &
              XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN, GCANOPY, YCH_BEM, &
-             XROUGH_ROOF, XROUGH_WALL, XF_WIN_WIN)
-!! GREGOIRE 15/03 : commente appel à TEB
+             XROUGH_ROOF, XROUGH_WALL, XF_WIN_WIN,                     &
+             GPAR_RD_IRRIG, ZRD_START_MONTH, ZRD_END_MONTH,            &
+             ZRD_START_HOUR, ZRD_END_HOUR, ZRD_24H_IRRIG, ZIRRIG_ROAD  )
 ! 
 !
 !   Time update

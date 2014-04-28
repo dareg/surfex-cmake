@@ -38,7 +38,7 @@
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
                       PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
-                      PIRRIG_FLUX, PDEEP_FLUX                                    )                     
+                      PIRRIG_FLUX, PDEEP_FLUX ,PIRRIG_GR                         )                     
 !     ##########################################################################
 !
 !
@@ -115,6 +115,7 @@
 !!                            new wind implicitation
 !!                            Irrigation rate diag
 !!      (B. Decharme) 04/2013 Bug : Wrong radiative temperature
+!!     (C. de Munck) 03/2013  Specified irrigation for ground
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -378,6 +379,9 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PWATSUP
 REAL   ,DIMENSION(:),INTENT(IN)    :: PTHRESHOLD
 LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
 LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
+REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/s)
+!
+!
 !
 !* ISBA-Ags parameters
 !  -------------------
@@ -934,7 +938,8 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
      PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF,                                &
      PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,                          &
      HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
-     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX       )
+     PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,      &
+     PIRRIG_GR                                                                  )
 !
 !-------------------------------------------------------------------------------
 !

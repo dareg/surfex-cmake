@@ -3,7 +3,7 @@
                                   HCOOL_COIL, HHEAT_COIL, OAUTOSIZE,&
                                   KROAD_LAYER, KROOF_LAYER,         &
                                   KWALL_LAYER, KFLOOR_LAYER,        &
-                                  OGREENROOF, OHYDRO                )
+                                  OGREENROOF, OHYDRO, OSOLAR_PANEL  )
 !     ##############################################################
 !
 !!**** *READ_NAM_PGD_TEB* reads namelist for TEB
@@ -74,6 +74,7 @@ INTEGER,          INTENT(OUT) :: KWALL_LAYER      ! number of wall layers
 INTEGER,          INTENT(OUT) :: KFLOOR_LAYER     ! number of floor layers
 LOGICAL,          INTENT(OUT) :: OGREENROOF       ! key for greenroof activation
 LOGICAL,          INTENT(OUT) :: OHYDRO           ! key for urban hydrology activation
+LOGICAL,          INTENT(OUT) :: OSOLAR_PANEL     ! key for solar panel activation
 !
 !
 !*    0.2    Declaration of local variables
@@ -97,12 +98,13 @@ INTEGER                  :: NWALL_LAYER      ! number of wall layers
 INTEGER                  :: NFLOOR_LAYER     ! number of floor layers
 LOGICAL                  :: LGREENROOF       ! key for greenroof activation
 LOGICAL                  :: LHYDRO           ! key for urban hydrology activation
+LOGICAL                  :: LSOLAR_PANEL     ! key for solar panel activation
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_TEB/ NTEB_PATCH, CBEM, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE, &
                   NROAD_LAYER, NFLOOR_LAYER, NROOF_LAYER, NWALL_LAYER, &
-                  LGREENROOF, LHYDRO
+                  LGREENROOF, LHYDRO, LSOLAR_PANEL
 !
 !-------------------------------------------------------------------------------
 !
@@ -121,6 +123,7 @@ NWALL_LAYER        = 5
 NFLOOR_LAYER       = 5
 LGREENROOF         = .FALSE.
 LHYDRO             = .FALSE.
+LSOLAR_PANEL       = .FALSE.
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
@@ -150,6 +153,7 @@ KFLOOR_LAYER = NFLOOR_LAYER
 !
 OGREENROOF   = LGREENROOF
 OHYDRO       = LHYDRO
+OSOLAR_PANEL = LSOLAR_PANEL
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_TEB',1,ZHOOK_HANDLE)
 !

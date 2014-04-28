@@ -13,7 +13,8 @@
                        HALBEDO, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
                        PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,       &
                        PCE_NITRO, PCF_NITRO, PCNA_NITRO,              &
-                       TPSEED, TPREAP, PWATSUP, PIRRIG , LDUPDATED     )  
+                       TPSEED, TPREAP, PWATSUP, PIRRIG,               &
+                       ODUPDATED, OABSENT                             )
 !   ###############################################################
 !!****  *VEGETATION EVOL*
 !!
@@ -55,8 +56,6 @@
 !               ------------
 !
 USE MODD_TYPE_DATE_SURF
-!
-USE MODD_TEB_n,   ONLY : XGARDEN
 !
 USE MODI_INIT_ISBA_MIXPAR
 USE MODI_CONVERT_PATCH_ISBA
@@ -142,7 +141,8 @@ TYPE(DATE_TIME), DIMENSION(:,:), INTENT(INOUT) :: TPREAP   ! seeding date
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PWATSUP  ! water supply during irrigation
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PIRRIG   ! irrigated fraction
 !
-LOGICAL,              INTENT(OUT)   :: LDUPDATED  ! T if parameters are being reset
+LOGICAL,              INTENT(OUT)   :: ODUPDATED  ! T if parameters are being reset
+LOGICAL,DIMENSION(:), INTENT(IN), OPTIONAL :: OABSENT ! T where field is not defined
 !
 !*      0.2    declarations of local variables
 !
@@ -159,14 +159,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE',0,ZHOOK_HANDLE)
 IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
 IDECADE2 = IDECADE
-LDUPDATED=.FALSE.
+ODUPDATED=.FALSE.
 !
 !*      2.2    From ecoclimap
 !              --------------
 !
 !* new decade?
   IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
-    LDUPDATED=.TRUE.
+    ODUPDATED=.TRUE.
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
@@ -189,8 +189,20 @@ LDUPDATED=.FALSE.
                            PCNA_NITRO=PCNA_NITRO,                &
                            TPSEED=TPSEED, TPREAP=TPREAP,         &
                            PWATSUP=PWATSUP,PIRRIG=PIRRIG     ) 
-      IF (HSFTYPE=='GRD'.OR.HSFTYPE=='GNR') THEN
-        WHERE (XGARDEN(:)==0.)
+    ELSEIF (HSFTYPE=='GRD') THEN
+      CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,                                      &
+                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
+     
+    ELSEIF (HSFTYPE=='GNR') THEN
+      CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,HPHOTO,                                 &
+                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
+
+    ENDIF
+!
+!* default values to avoid problems in physical routines
+!  for points where there is no vegetation or soil to be simulated by ISBA.
+    IF (PRESENT(OABSENT)) THEN
+        WHERE (OABSENT(:))
           PVEG       (:,1) = 0.
           PLAI       (:,1) = 0.
           PRSMIN     (:,1) = 40.
@@ -205,7 +217,7 @@ LDUPDATED=.FALSE.
           PEMIS      (:,1) = 0.94                
         END WHERE
         IF (HPHOTO/='NON') THEN
-          WHERE (XGARDEN(:)==0.)
+          WHERE (OABSENT(:))
             PGMES      (:,1) = 0.020
             PBSLAI     (:,1) = 0.36
             PLAIMIN    (:,1) = 0.3
@@ -213,9 +225,9 @@ LDUPDATED=.FALSE.
             PGC        (:,1) = 0.00025                  
           END WHERE
           IF (HPHOTO/='AGS' .AND. HPHOTO/='LAI') THEN
-            WHERE (XGARDEN(:)==0.) PF2I       (:,1) = 0.3
+            WHERE (OABSENT(:)) PF2I       (:,1) = 0.3
             IF (HPHOTO=='NIT' .OR. HPHOTO=='NCB') THEN
-              WHERE (XGARDEN(:)==0.)
+              WHERE (OABSENT(:))
                 PCE_NITRO  (:,1) = 7.68
                 PCF_NITRO  (:,1) = -4.33
                 PCNA_NITRO (:,1) = 1.3                      
@@ -223,17 +235,8 @@ LDUPDATED=.FALSE.
             ENDIF
           ENDIF
         ENDIF
-      ENDIF
-  
-    ELSEIF (HSFTYPE=='GRD') THEN
-      CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,                                      &
-                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
-     
-    ELSEIF (HSFTYPE=='GNR') THEN
-      CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,HPHOTO,                                 &
-                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
-
     ENDIF
+
     IF (HSFTYPE=='NAT') THEN
 !* albedo
       CALL ALBEDO(HALBEDO,                                 &

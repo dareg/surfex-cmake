@@ -43,10 +43,12 @@ USE MODD_TEB_n,          ONLY : LGARDEN, LGREENROOF, CBEM,      &
                                 XT_CANYON, XQ_CANYON,           &
                                 TTIME, NTEB_PATCH, CROAD_DIR,   &
                                 XROAD_DIR,                      &
-                                CWALL_OPT, XROAD_DIR
+                                CWALL_OPT, XROAD_DIR,           &
+                                LSOLAR_PANEL
 USE MODD_BEM_n,          ONLY : NFLOOR_LAYER, XT_FLOOR,         &
                                 XT_MASS, XT_WIN1, XT_WIN2,      &
                                 XQI_BLD, XTI_BLD                                 
+USE MODD_TEB_PANEL_n,    ONLY : XTHER_PRODC_DAY
 !
 USE MODD_DATA_TEB_n,     ONLY : LDATA_ROAD_DIR
 !
@@ -278,6 +280,20 @@ YRECFM=ADJUSTL(YRECFM)
 YCOMMENT='Q_CANYON (kg/kg)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XQ_CANYON(:),IRESP,HCOMMENT=YCOMMENT)
 !
+!
+!* Thermal solar panels present day production
+!
+IF (LSOLAR_PANEL) THEN
+  YRECFM=YPATCH//'THER_PDAY'
+  YRECFM=ADJUSTL(YRECFM)
+  YCOMMENT='Thermal Solar Panels present day production (J/m2)'
+  IF (.NOT. ASSOCIATED(XTHER_PRODC_DAY)) THEN
+    ! for PREP cases
+    ALLOCATE(XTHER_PRODC_DAY(SIZE(XTI_BLD)))
+    XTHER_PRODC_DAY=0.
+  END IF
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XTHER_PRODC_DAY(:),IRESP,HCOMMENT=YCOMMENT)
+END IF
 !-------------------------------------------------------------------------------
 !
 !*       5.  Time

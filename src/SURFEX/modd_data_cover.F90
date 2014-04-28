@@ -32,6 +32,7 @@
 !!      P Le Moigne 09/2005 AGS modifs of L. Jarlan
 !!      P Le Moigne 06/2006 seeding and irrigation
 !!      G Pigeon    08/2012 ROUGH_ROOF, ROUGH_WALL
+!!      V. Masson   08/2013  Adds solar panel variables
 !!----------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -248,6 +249,12 @@ REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_SHADE
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_NATVENT
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_ROUGH_ROOF
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_ROUGH_WALL
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_RESIDENTIAL ! residential use fraction
+
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_EMIS_PANEL  ! emissivity of solar panels
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_ALB_PANEL   ! albedo     of solar panels
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_EFF_PANEL   ! efficiency of solar panels
+REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_FRAC_PANEL  ! fraction   of solar panels on roofs
 !
 ! urban vegetation parameters
 !

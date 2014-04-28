@@ -132,8 +132,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! data every month
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_DATA_GREENROOF_N',0,ZHOOK_HANDLE)
-!ITIME = (KDECADE+2)/3      
-ITIME = NTIME_GR
+IF (NTIME_GR==12) THEN
+  ITIME = (KDECADE+2)/3      
+ELSE
+  ITIME = 1
+END IF
 !
 !*    2.      SECONDARY VARIABLES
 !             -------------------

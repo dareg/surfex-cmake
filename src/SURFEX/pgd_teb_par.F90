@@ -32,6 +32,8 @@
 !!
 !!       Modified 08/12/05, P. Le Moigne: user defined fields
 !!    G. Pigeon      09/2012: add ROUGH_WALL/ROUGH_ROOF for outdoor convection
+!!    V. Masson      08/2013: adds solar panels
+!!    V. Masson      10/2013: adds residential fraction
 !!
 !----------------------------------------------------------------------------
 !
@@ -68,7 +70,12 @@ USE MODD_DATA_TEB_n, ONLY : NPAR_ROAD_LAYER_n => NPAR_ROAD_LAYER,          &
                             LDATA_ROAD_DIR, LDATA_USETYPE, LDATA_BLD_AGE,  &
                             LDATA_ROUGH_ROOF, LDATA_ROUGH_WALL,            &
                             XPAR_ROUGH_ROOF, XPAR_ROUGH_WALL,              &
-                            LDATA_GREENROOF, XPAR_GREENROOF
+                            LDATA_RESIDENTIAL, XPAR_RESIDENTIAL,           &
+                            LDATA_GREENROOF, XPAR_GREENROOF,               &
+                            LDATA_EMIS_PANEL, XPAR_EMIS_PANEL,             &
+                            LDATA_ALB_PANEL,  XPAR_ALB_PANEL,              &
+                            LDATA_EFF_PANEL,  XPAR_EFF_PANEL,              &
+                            LDATA_FRAC_PANEL, XPAR_FRAC_PANEL
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -215,6 +222,9 @@ REAL, DIMENSION(NWALL_MAX)              :: XUNIF_D_WALL       ! depth of wall la
 REAL                                    :: XUNIF_ROUGH_WALL  ! wall roughness coef
  CHARACTER(LEN=28)                       :: CFNAM_ROUGH_WALL  ! file name for ROUGH_WALL
  CHARACTER(LEN=6)                        :: CFTYP_ROUGH_WALL  ! file type for ROUGH_WALL
+REAL                                    :: XUNIF_RESIDENTIAL ! residential fraction
+ CHARACTER(LEN=28)                       :: CFNAM_RESIDENTIAL ! file name for RESIDENTIAL
+ CHARACTER(LEN=6)                        :: CFTYP_RESIDENTIAL ! file type for RESIDENTIAL
 !
 ! anthropogenic fluxes
 !
@@ -234,6 +244,22 @@ REAL                                    :: XUNIF_LE_INDUSTRY  ! anthropogenic la
  CHARACTER(LEN=6)                        :: CFTYP_LE_TRAFFIC   ! file type for LE_TRAFFIC
  CHARACTER(LEN=6)                        :: CFTYP_H_INDUSTRY   ! file type for H_INDUSTRY
  CHARACTER(LEN=6)                        :: CFTYP_LE_INDUSTRY  ! file type for LE_INDUSTRY
+!
+! Solar panels parameters
+!
+REAL                                    :: XUNIF_EMIS_PANEL    ! emissivity of solar panel       (-)
+REAL                                    :: XUNIF_ALB_PANEL     ! albedo     of solar panel       (-)
+REAL                                    :: XUNIF_EFF_PANEL     ! efficiency of solar panel       (-)
+REAL                                    :: XUNIF_FRAC_PANEL    ! fraction   of solar panel       (-)
+ CHARACTER(LEN=28)                       :: CFNAM_EMIS_PANEL   ! file name for EMIS_PANEL
+ CHARACTER(LEN=28)                       :: CFNAM_ALB_PANEL    ! file name for ALB_PANEL
+ CHARACTER(LEN=28)                       :: CFNAM_EFF_PANEL    ! file name for EFF_PANEL
+ CHARACTER(LEN=28)                       :: CFNAM_FRAC_PANEL   ! file name for FRAC_PANEL
+ CHARACTER(LEN=6)                        :: CFTYP_EMIS_PANEL   ! file type for EMIS_PANEL
+ CHARACTER(LEN=6)                        :: CFTYP_ALB_PANEL    ! file type for ALB_PANEL
+ CHARACTER(LEN=6)                        :: CFTYP_EFF_PANEL    ! file type for EFF_PANEL
+ CHARACTER(LEN=6)                        :: CFTYP_FRAC_PANEL   ! file type for FRAC_PANEL
+
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 
@@ -278,7 +304,12 @@ NAMELIST/NAM_DATA_TEB/      NPAR_ROOF_LAYER, NPAR_ROAD_LAYER, NPAR_WALL_LAYER,&
                               CFTYP_H_INDUSTRY, CFTYP_LE_INDUSTRY,            &
                               CFTYP_GARDEN, CFTYP_ROAD_DIR, CFTYP_GREENROOF,  &
                               XUNIF_ROUGH_ROOF, CFNAM_ROUGH_ROOF, CFTYP_ROUGH_ROOF, &
-                              XUNIF_ROUGH_WALL, CFNAM_ROUGH_WALL, CFTYP_ROUGH_WALL
+                              XUNIF_ROUGH_WALL, CFNAM_ROUGH_WALL, CFTYP_ROUGH_WALL, &
+                              XUNIF_RESIDENTIAL,CFNAM_RESIDENTIAL,CFTYP_RESIDENTIAL,&
+                              XUNIF_EMIS_PANEL, CFNAM_EMIS_PANEL, CFTYP_EMIS_PANEL, &
+                              XUNIF_ALB_PANEL,  CFNAM_ALB_PANEL,  CFTYP_ALB_PANEL,  &
+                              XUNIF_EFF_PANEL,  CFNAM_EFF_PANEL,  CFTYP_EFF_PANEL,  &
+                              XUNIF_FRAC_PANEL, CFNAM_FRAC_PANEL, CFTYP_FRAC_PANEL
 
 !
 !-------------------------------------------------------------------------------
@@ -322,6 +353,11 @@ XUNIF_GREENROOF    = XUNDEF
 XUNIF_ROAD_DIR     = XUNDEF
 XUNIF_ROUGH_ROOF   = XUNDEF
 XUNIF_ROUGH_WALL   = XUNDEF
+XUNIF_RESIDENTIAL  = XUNDEF
+XUNIF_EMIS_PANEL   = XUNDEF
+XUNIF_ALB_PANEL    = XUNDEF
+XUNIF_EFF_PANEL    = XUNDEF
+XUNIF_FRAC_PANEL   = XUNDEF
 
 CFNAM_BLDTYPE      = '                            '
 CFNAM_BLD_AGE      = '                            '
@@ -339,6 +375,7 @@ CFNAM_TC_ROOF  (:) = '                            '
 CFNAM_D_ROOF   (:) = '                            '
 CFNAM_ROUGH_ROOF(:) = '                            '
 CFNAM_ROUGH_WALL(:) = '                            '
+CFNAM_RESIDENTIAL(:)= '                            '
 CFNAM_ALB_ROAD (:) = '                            '
 CFNAM_EMIS_ROAD(:) = '                            '
 CFNAM_HC_ROAD  (:) = '                            '
@@ -359,6 +396,11 @@ CFNAM_GARDEN       = '                            '
 CFNAM_GREENROOF    = '                            '
 CFNAM_ROAD_DIR     = '                            '
 
+CFNAM_EMIS_PANEL   = '                            '
+CFNAM_ALB_PANEL    = '                            '
+CFNAM_EFF_PANEL    = '                            '
+CFNAM_FRAC_PANEL   = '                            '
+
 CFTYP_BLDTYPE      = '      '
 CFTYP_BLD_AGE      = '      '
 CFTYP_USETYPE      = '      '
@@ -373,6 +415,7 @@ CFTYP_TC_ROOF(:)   = '      '
 CFTYP_D_ROOF(:)    = '      '
 CFTYP_ROUGH_ROOF(:)    = '      '
 CFTYP_ROUGH_WALL(:)    = '      '
+CFTYP_RESIDENTIAL(:)   = '      '
 CFTYP_ALB_ROAD(:)  = '      '
 CFTYP_EMIS_ROAD(:) = '      '
 CFTYP_HC_ROAD(:)   = '      '
@@ -391,7 +434,10 @@ CFTYP_GARDEN       = '      '
 CFTYP_GREENROOF    = '      '
 CFTYP_ROAD_DIR     = '      '
 !
-
+CFTYP_EMIS_PANEL   = '      '
+CFTYP_ALB_PANEL    = '      '
+CFTYP_EFF_PANEL    = '      '
+CFTYP_FRAC_PANEL   = '      '
 !
 !-------------------------------------------------------------------------------
 !
@@ -471,6 +517,12 @@ ALLOCATE(XPAR_TC_WALL     (NDIM,NPAR_WALL_LAYER))
 ALLOCATE(XPAR_D_WALL      (NDIM,NPAR_WALL_LAYER))
 ALLOCATE(XPAR_ROUGH_ROOF    (NDIM))
 ALLOCATE(XPAR_ROUGH_WALL    (NDIM))
+ALLOCATE(XPAR_RESIDENTIAL   (NDIM))
+!
+ALLOCATE(XPAR_EMIS_PANEL  (NDIM))
+ALLOCATE(XPAR_ALB_PANEL   (NDIM))
+ALLOCATE(XPAR_EFF_PANEL   (NDIM))
+ALLOCATE(XPAR_FRAC_PANEL  (NDIM))
 !
 !-------------------------------------------------------------------------------
 IF (NROOF_MAX < NPAR_ROOF_LAYER) THEN
@@ -666,7 +718,10 @@ IF (.NOT.LDATA_ROUGH_ROOF) DEALLOCATE(XPAR_ROUGH_ROOF)
  CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'ROUGH_WALL','TWN',CFNAM_ROUGH_WALL,CFTYP_ROUGH_WALL,XUNIF_ROUGH_WALL ,&
         XPAR_ROUGH_WALL,LDATA_ROUGH_WALL)
 IF (.NOT.LDATA_ROUGH_WALL) DEALLOCATE(XPAR_ROUGH_WALL)
-
+!
+ CALL INI_VAR_FROM_DATA_0D(HPROGRAM,CBLD_ATYPE,'RESIDENTIAL','TWN',CFNAM_RESIDENTIAL,CFTYP_RESIDENTIAL,XUNIF_RESIDENTIAL ,&
+        XPAR_RESIDENTIAL,LDATA_RESIDENTIAL)
+IF (.NOT.LDATA_RESIDENTIAL) DEALLOCATE(XPAR_RESIDENTIAL)
 !-------------------------------------------------------------------------------
 !
 !* coherence checks
@@ -682,6 +737,23 @@ IF (.NOT.LDATA_ROUGH_WALL) DEALLOCATE(XPAR_ROUGH_WALL)
  CALL INI_VAR_FROM_DATA_0D(HPROGRAM,'ARI','ROAD_DIR   ','TWN',CFNAM_ROAD_DIR  ,CFTYP_ROAD_DIR    ,XUNIF_ROAD_DIR   ,&
         XPAR_ROAD_DIR, LDATA_ROAD_DIR    )
 IF (.NOT.LDATA_ROAD_DIR) DEALLOCATE(XPAR_ROAD_DIR)
+!
+!-------------------------------------------------------------------------------
+!
+!* solar panels
+!
+ CALL INI_VAR_FROM_DATA_0D(HPROGRAM,'ARI','EMIS_PANEL ','BLD',CFNAM_EMIS_PANEL,CFTYP_EMIS_PANEL,XUNIF_EMIS_PANEL,&
+       XPAR_EMIS_PANEL, LDATA_EMIS_PANEL    )
+IF (.NOT.LDATA_EMIS_PANEL) DEALLOCATE(XPAR_EMIS_PANEL)
+ CALL INI_VAR_FROM_DATA_0D(HPROGRAM,'ARI','ALB_PANEL  ','BLD',CFNAM_ALB_PANEL ,CFTYP_ALB_PANEL ,XUNIF_ALB_PANEL ,&
+       XPAR_ALB_PANEL , LDATA_ALB_PANEL     )
+IF (.NOT.LDATA_ALB_PANEL ) DEALLOCATE(XPAR_ALB_PANEL )
+ CALL INI_VAR_FROM_DATA_0D(HPROGRAM,'ARI','EFF_PANEL  ','BLD',CFNAM_EFF_PANEL ,CFTYP_EFF_PANEL ,XUNIF_EFF_PANEL ,&
+       XPAR_EFF_PANEL , LDATA_EFF_PANEL     )
+IF (.NOT.LDATA_EFF_PANEL ) DEALLOCATE(XPAR_EFF_PANEL )
+ CALL INI_VAR_FROM_DATA_0D(HPROGRAM,'ARI','FRAC_PANEL ','BLD',CFNAM_FRAC_PANEL,CFTYP_FRAC_PANEL,XUNIF_FRAC_PANEL,&
+       XPAR_FRAC_PANEL, LDATA_FRAC_PANEL    )
+IF (.NOT.LDATA_FRAC_PANEL) DEALLOCATE(XPAR_FRAC_PANEL)
 !
 !-------------------------------------------------------------------------------
 !

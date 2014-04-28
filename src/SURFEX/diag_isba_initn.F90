@@ -45,6 +45,8 @@
 !!                             swi, wg and wgi comparable to ISBA-FR-DG2 and DG3 layers
 !!                             active layer thickness over permafrost
 !!                             frozen layer thickness over non-permafrost
+!!      B. Vincendon 02/2014 : condition added for RAD_BUDGET variables (needed for
+!!                             restart mode)
 !-------------------------------------------------------------------------------
 !
 !*       0.0    DECLARATIONS
@@ -58,7 +60,7 @@ USE MODD_TYPE_DATE_SURF
 USE MODD_AGRI,           ONLY : LAGRIP
 USE MODD_DIAG_SURF_ATM_n,ONLY : LREAD_BUDGETC
 USE MODD_DIAG_ISBA_n,    ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,            &
-                                LPATCH_BUDGET,                                   &
+                                LPATCH_BUDGET, LRAD_BUDGET,                      &
                                 XRN, XH, XGFLUX, XLEI, XRI, XCD, XCH, XCE,       &
                                 XTS, XTSRAD, XT2M, XQ2M, XHU2M,                  &
                                 XZON10M, XMER10M,                                &
@@ -774,8 +776,8 @@ IF (LSURF_BUDGETC) THEN
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LEVC   ,IRESP)
     YREC='LESC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LESC   ,IRESP)
-    IF((TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') .AND. &
-       (IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3))THEN  
+    IF( (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') .AND. &
+        (IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3) ) THEN  
       YREC='LESLC_ISBA'
       CALL READ_SURF(HPROGRAM,YREC,XAVG_LESLC  ,IRESP)      
     ELSE
@@ -840,14 +842,16 @@ IF (LSURF_BUDGETC) THEN
       XAVG_LEI_FLOODC = 0.0
     ENDIF
 !      
-    YREC='SWDC_ISBA'
-    CALL READ_SURF(HPROGRAM,YREC,XAVG_SWDC,IRESP)
-    YREC='SWUC_ISBA'
-    CALL READ_SURF(HPROGRAM,YREC,XAVG_SWUC,IRESP)
-    YREC='LWDC_ISBA'
-    CALL READ_SURF(HPROGRAM,YREC,XAVG_LWDC,IRESP)
-    YREC='LWUC_ISBA'
-    CALL READ_SURF(HPROGRAM,YREC,XAVG_LWUC,IRESP)
+    IF (LRAD_BUDGET) THEN
+      YREC='SWDC_ISBA'
+      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWDC,IRESP)
+      YREC='SWUC_ISBA'
+      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWUC,IRESP)
+      YREC='LWDC_ISBA'
+      CALL READ_SURF(HPROGRAM,YREC,XAVG_LWDC,IRESP)
+      YREC='LWUC_ISBA'
+      CALL READ_SURF(HPROGRAM,YREC,XAVG_LWUC,IRESP)
+    ENDIF
     YREC='FMUC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_FMUC,IRESP)
     YREC='FMVC_ISBA'
@@ -885,6 +889,8 @@ IF (LSURF_BUDGETC) THEN
     !
     IF(LPATCH_BUDGET .AND. NPATCH>1)THEN
       !
+      CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+      CALL READ_SURF(HPROGRAM,'BUG ',IBUG,IRESP)
       YREC2=''
       IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUG<3) YREC2='ATCH'
       YREC='RNC_P'
@@ -906,7 +912,7 @@ IF (LSURF_BUDGETC) THEN
       YREC='LESC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESC   ,IRESP)
       IF((TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') .AND. &
-         (IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3))THEN  
+          (IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3))THEN  
         YREC='LESLC_P'
         CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESLC,IRESP)        
       ELSE
@@ -948,14 +954,16 @@ IF (LSURF_BUDGETC) THEN
         XRESPC_ECO =0.0
       ENDIF
       !
-      YREC='SWDC_P'
-      CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XSWDC,IRESP)
-      YREC='SWUC_P'
-      CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XSWUC,IRESP)
-      YREC='LWDC_P'
-      CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLWDC,IRESP)
-      YREC='LWUC_P'
-      CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLWUC,IRESP)
+      IF (LRAD_BUDGET) THEN
+        YREC='SWDC_P'
+        CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XSWDC,IRESP)
+        YREC='SWUC_P'
+        CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XSWUC,IRESP)
+        YREC='LWDC_P'
+        CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLWDC,IRESP)
+        YREC='LWUC_P'
+        CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLWUC,IRESP)
+      ENDIF
       YREC='FMUC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XFMUC,IRESP)
       YREC='FMVC_P'
@@ -1182,7 +1190,7 @@ IF (N2M>=1) THEN
   XAVG_RI      = XUNDEF
   XAVG_T2M     = XUNDEF
   XAVG_T2M_MIN = XUNDEF
-  XAVG_T2M_MAX = 0.0
+  XAVG_T2M_MAX = -XUNDEF
   XAVG_Q2M     = XUNDEF
   XAVG_HU2M    = XUNDEF
   XAVG_HU2M_MIN= XUNDEF

@@ -17,7 +17,8 @@
                          PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,  &
                          HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, &
                          PD_ICE, PHORTON, PDRIP, PFFG, PFFV , PFFLOOD,      &
-                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX    )  
+                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,   &  
+                         PIRRIG_GR                                          )
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -244,6 +245,9 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PTHRESHOLD
 LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
 LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
 REAL   ,DIMENSION(:),INTENT(OUT)   :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
+REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/s)
+!
+!
 !
  CHARACTER(LEN=*),     INTENT(IN)   :: HKSAT   ! soil hydraulic profil option
 !                                             ! 'DEF'  = ISBA homogenous soil
@@ -421,7 +425,7 @@ ENDIF
 !
  CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                              &
                  ZRR, ZLEV, ZLETR, PVEG, ZPSNV,                   &
-                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG                  ) 
+                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG,PIRRIG_GR        ) 
 !
 !-------------------------------------------------------------------------------
 !

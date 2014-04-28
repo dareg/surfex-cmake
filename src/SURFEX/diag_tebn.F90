@@ -2,7 +2,9 @@
 SUBROUTINE DIAG_TEB_n(HPROGRAM,                                               &
                         PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,          &
                         PZ0, PZ0H, PT2M, PQ2M, PHU2M, PZON10M, PMER10M,         &
-                        PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV        )  
+                        PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
+                        PT2M_MIN, PT2M_MAX, PHU2M_MIN, PHU2M_MAX,               &
+                        PWIND10M, PWIND10M_MAX                                  )
 !     ###############################################################################
 !
 !!****  *DIAG_TEB_n * - diagnostics for TEB
@@ -32,7 +34,9 @@ USE MODD_TEB_n,      ONLY : TTIME
 USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,              &
                               XRN, XH, XLE, XGFLUX, XRI, XCD, XCH, XCE, XQS,   &
                               XZ0, XZ0H, XT2M, XQ2M, XHU2M, XZON10M, XMER10M,  &
-                              XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV  
+                              XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV,&
+                              XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX,        &
+                              XWIND10M, XWIND10M_MAX
 ! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -68,6 +72,12 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSWBD  ! incoming short-wave radiation by s
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSWBU  ! upward short-wave radiation by spectral band (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PFMU     ! zonal momentum flux (m2/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PFMV     ! meridian momentum flux (m2/s2)
+REAL, DIMENSION(:), INTENT(OUT) :: PT2M_MIN ! Minimum temperature at 2m   (K)
+REAL, DIMENSION(:), INTENT(OUT) :: PT2M_MAX ! Maximum temperature at 2m   (K)
+REAL, DIMENSION(:), INTENT(OUT) :: PHU2M_MIN! Minimum relative humidity at 2m (-)
+REAL, DIMENSION(:), INTENT(OUT) :: PHU2M_MAX! Maximum relative humidity at 2m (-)
+REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M ! wind at 10m (m/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M_MAX! Maximum wind at 10m (m/s)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -94,10 +104,16 @@ END IF
 IF (N2M>=1) THEN
   PRI      = XRI
   PT2M     = XT2M
+  PT2M_MIN = XT2M_MIN
+  PT2M_MAX = XT2M_MAX
   PQ2M     = XQ2M
   PHU2M    = XHU2M
+  PHU2M_MIN= XHU2M_MIN
+  PHU2M_MAX= XHU2M_MAX
   PZON10M  = XZON10M
   PMER10M  = XMER10M
+  PWIND10M = XWIND10M
+  PWIND10M_MAX = XWIND10M_MAX
 END IF
 !
 IF (LCOEF) THEN

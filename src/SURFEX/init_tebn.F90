@@ -46,7 +46,7 @@ USE MODD_SNOW_PAR, ONLY : XEMISSN
 !
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 
-USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF,                                     &
+USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF, LSOLAR_PANEL,                       &
                                 XTSTEP, XOUT_TSTEP, TTIME, XCOVER, LCOVER,               &
                                 XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
                                 XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XGREENROOF,          &
@@ -65,7 +65,9 @@ USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF,                            
                                 XAC_ROOF_WAT, XAC_ROAD_WAT,                              &
                                 XQSAT_ROOF, XQSAT_ROAD, XDELT_ROOF, XDELT_ROAD,          &
                                 NTEB_PATCH, XTEB_PATCH, CBEM, CCH_BEM,                   &
-                                XROUGH_ROOF, XROUGH_WALL
+                                XROUGH_ROOF, XROUGH_WALL, XRESIDENTIAL, XDT_RES, XDT_OFF
+
+USE MODD_TEB_PANEL_n,     ONLY: XEMIS_PANEL, XALB_PANEL, XEFF_PANEL, XFRAC_PANEL
 
 USE MODD_BEM_n,           ONLY: NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,            &
                                 XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT,   &
@@ -142,6 +144,7 @@ USE MODI_INIT_BEM_n
 USE MODI_INIT_TEB_GREENROOF_n
 USE MODI_INIT_TEB_GREENROOF_PGD_n
 USE MODI_GREENROOF_PROPERTIES
+USE MODI_READ_PGD_TEB_IRRIG_n
 !
 USE MODI_READ_COVER_GARDEN
 USE MODI_ABOR1_SFX
@@ -239,7 +242,7 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_TEB(CZ0H,XTSTEP,XOUT_TSTEP, CCH_BEM)
+ CALL DEFAULT_TEB(CZ0H,XTSTEP,XOUT_TSTEP, CCH_BEM, XDT_RES, XDT_OFF)
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_DIAG_TEB(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
                        LSURF_MISC_BUDGET,LUTCI,LPGD,LPGD_FIX,XDIAG_TSTEP)  
@@ -377,8 +380,13 @@ DO JPATCH=1,NTEB_PATCH
   ALLOCATE(XD_WALL      (ILU,NWALL_LAYER))
   ALLOCATE(XROUGH_ROOF      (ILU))
   ALLOCATE(XROUGH_WALL      (ILU))
+  ALLOCATE(XRESIDENTIAL     (ILU))
   ALLOCATE(XGREENROOF       (ILU))
   ALLOCATE(XGARDEN          (ILU))
+  ALLOCATE(XEMIS_PANEL      (ILU))
+  ALLOCATE(XALB_PANEL       (ILU))
+  ALLOCATE(XEFF_PANEL       (ILU))
+  ALLOCATE(XFRAC_PANEL      (ILU))
   !
   XROAD_DIR(:) = 0.
   XROAD    (:) = 0.
@@ -408,7 +416,10 @@ DO JPATCH=1,NTEB_PATCH
                       PH_TRAFFIC=XH_TRAFFIC, PLE_TRAFFIC=XLE_TRAFFIC,            &
                       PH_INDUSTRY=XH_INDUSTRY, PLE_INDUSTRY=XLE_INDUSTRY,        &
                       PROUGH_ROOF = XROUGH_ROOF, PROUGH_WALL = XROUGH_WALL,      &
-                      PGREENROOF = XGREENROOF                                    )
+                      PRESIDENTIAL = XRESIDENTIAL,                               &
+                      PGREENROOF = XGREENROOF,                                   &
+                      PEMIS_PANEL=XEMIS_PANEL, PALB_PANEL=XALB_PANEL,            &
+                      PEFF_PANEL=XEFF_PANEL, PFRAC_PANEL=XFRAC_PANEL             )
   !
   IF (.NOT. LGREENROOF .AND. MAXVAL(XGREENROOF)>0. ) THEN !<== A paralleliser pour un stop propre
     WRITE(ILUOUT,*) 'You choose NOT to have greenroofs, BUT your greenroof fraction is not zero'
@@ -416,6 +427,14 @@ DO JPATCH=1,NTEB_PATCH
     WRITE(ILUOUT,*) 'Or be sure NOT to have any greenroofs in your area'
     CALL ABOR1_SFX('INIT_TEBN: GREENROOF OPTION NOT ACTIVATED WHILE GREENROOFS ARE PRESENT')
   ENDIF
+  !
+  IF (.NOT. LSOLAR_PANEL .AND. MAXVAL(XFRAC_PANEL)>0. ) THEN !<== A paralleliser pour un stop propre
+    WRITE(ILUOUT,*) 'You choose NOT to have solar panels, BUT your solar panel fraction is not zero'
+    WRITE(ILUOUT,*) 'Please activate the solar panel option (and rerun the SURFEX suite from the PGD step)'
+    WRITE(ILUOUT,*) 'Or be sure NOT to have any solar panel in your area'
+    CALL ABOR1_SFX('INIT_TEBN: SOLAR_PANEL OPTION NOT ACTIVATED WHILE SOLAR PANELS ARE PRESENT')
+  ENDIF
+  !
   !-------------------------------------------------------------------------------
   !
   !*       5.     Sky-view-factors:
@@ -460,6 +479,15 @@ DO JPATCH=1,NTEB_PATCH
   ENDIF
 !-------------------------------------------------------------------------------
 END DO ! end of loop on TEB patches
+!-------------------------------------------------------------------------------
+!
+!* Read irrigation parameters for TEB
+!
+ CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
+ CALL READ_PGD_TEB_IRRIG_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
+!
 !-------------------------------------------------------------------------------
 !
 !* if only physiographic fields are to be initialized, stop here.
@@ -570,6 +598,7 @@ DO JPATCH=1,NTEB_PATCH
 !
   CALL AVERAGED_ALBEDO_TEB(CBEM,CROAD_DIR,CWALL_OPT,PZENITH,PAZIM, &
                        XBLD, XGARDEN, XROAD_DIR, XROAD, XGREENROOF,&
+                       XFRAC_PANEL, XALB_PANEL,                    &
                        XWALL_O_HOR, XCAN_HW_RATIO,                 &
                        XALB_ROOF,                                  &
                        XALB_ROAD, XSVF_ROAD,                       &

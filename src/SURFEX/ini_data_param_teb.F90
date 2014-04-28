@@ -13,7 +13,9 @@
                                 PF_WATER_COND, PQIN_FLAT, PHR_TARGET, PV_VENT,      &
                                 PCAP_SYS_HEAT, PCAP_SYS_RAT, PT_ADP, PM_SYS_RAT,    &
                                 PCOP_RAT, PT_SIZE_MAX, PT_SIZE_MIN, PSHADE,         &
-                                PNATVENT, PROUGH_ROOF, PROUGH_WALL, PGREENROOF      )
+                                PNATVENT, PROUGH_ROOF, PROUGH_WALL, PGREENROOF,     &
+                                PRESIDENTIAL,                                       &
+                                PEMIS_PANEL, PALB_PANEL, PEFF_PANEL, PFRAC_PANEL    )
 
 !     #########################
 !
@@ -44,6 +46,8 @@
 !!
 !!    Original    05/2012 from INI_DATA_PARAM_TEB, separates urban parameters
 !!    modified    08/2012 add PROUGH_ROOF, PROUGH_WALL
+!!     V. Masson  08/2013 add solar panels
+!!     V. Masson  10/2013 add residential use fraction
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -124,7 +128,12 @@ REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PSHADE
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PNATVENT
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_ROOF
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PROUGH_WALL
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PRESIDENTIAL
 REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PGREENROOF
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PEMIS_PANEL
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PALB_PANEL
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PEFF_PANEL
+REAL, DIMENSION(:),   INTENT(OUT), OPTIONAL   :: PFRAC_PANEL
 !
 !*    0.2    Declaration of local variables
 !      ------------------------------
@@ -324,6 +333,22 @@ DO JLOOP=1,SIZE(KTYPE)
     IF (PRESENT(PGREENROOF)) THEN
       PGREENROOF(JLOOP) = XDESC_GREENROOF(IINDEX)
     ENDIF
+    !
+    IF (PRESENT(PEMIS_PANEL)) THEN
+      PEMIS_PANEL(JLOOP) = XDESC_EMIS_PANEL(IINDEX)
+    ENDIF
+    !
+    IF (PRESENT(PALB_PANEL)) THEN
+      PALB_PANEL(JLOOP) = XDESC_ALB_PANEL(IINDEX)
+    ENDIF
+    !
+    IF (PRESENT(PEFF_PANEL)) THEN
+      PEFF_PANEL(JLOOP) = XDESC_EFF_PANEL(IINDEX)
+    ENDIF
+    !
+    IF (PRESENT(PFRAC_PANEL)) THEN
+      PFRAC_PANEL(JLOOP) = XDESC_FRAC_PANEL(IINDEX)
+    ENDIF
 !
 !
 !-------------------------------------------------------------------------------
@@ -360,6 +385,10 @@ DO JLOOP=1,SIZE(KTYPE)
 !
     IF (PRESENT(PNATVENT)) THEN
       PNATVENT(JLOOP) = XDESC_NATVENT(IINDEX)
+    ENDIF
+!
+    IF (PRESENT(PRESIDENTIAL)) THEN
+      PRESIDENTIAL(JLOOP) = XDESC_RESIDENTIAL(IINDEX)
     ENDIF
 
 !

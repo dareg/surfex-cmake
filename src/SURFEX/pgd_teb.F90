@@ -41,7 +41,8 @@ USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_TEB_n,          ONLY : XCOVER, LCOVER, XZS,                   &
                                 NROAD_LAYER, NWALL_LAYER, NROOF_LAYER, &
                                 LECOCLIMAP, LGARDEN, NTEB_PATCH,       &
-                                CBLD_ATYPE, CBEM, LGREENROOF, LHYDRO 
+                                CBLD_ATYPE, CBEM, LGREENROOF, LHYDRO,  &
+                                LSOLAR_PANEL
 USE MODD_BEM_n,          ONLY : NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
 USE MODD_TEB_GRID_n,     ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
 !
@@ -98,7 +99,7 @@ NFLOOR_LAYER = 5
 !
  CALL READ_NAM_PGD_TEB(HPROGRAM,NTEB_PATCH,CBEM,CCOOL_COIL,CHEAT_COIL,LAUTOSIZE,&
                       NROAD_LAYER,NROOF_LAYER,NWALL_LAYER,NFLOOR_LAYER,        &
-                      LGREENROOF,LHYDRO                                        )
+                      LGREENROOF,LHYDRO,LSOLAR_PANEL                           )
 !
 !-------------------------------------------------------------------------------
 !
@@ -122,6 +123,7 @@ ENDIF
  CALL GET_SURF_SIZE_n('TOWN  ',NDIM)
 !
 ALLOCATE(LCOVER     (JPCOVER))
+ALLOCATE(XCOVER     (NDIM,JPCOVER))
 ALLOCATE(XZS        (NDIM))
 ALLOCATE(XLAT       (NDIM))
 ALLOCATE(XLON       (NDIM))

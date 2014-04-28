@@ -36,7 +36,7 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF
 !
-USE MODD_TEB_n,             ONLY : CBEM
+USE MODD_TEB_n,             ONLY : CBEM, LSOLAR_PANEL
 USE MODD_DIAG_MISC_TEB_n,   ONLY : LSURF_MISC_BUDGET,                         &
                                      XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,  &
                                      XRN_ROAD, XH_ROAD, XLE_ROAD, XGFLUX_ROAD,&
@@ -49,7 +49,11 @@ USE MODD_DIAG_MISC_TEB_n,   ONLY : LSURF_MISC_BUDGET,                         &
                                      XLE_STRLROOF, XGFLUX_STRLROOF,           &
                                      XRN_GREENROOF, XH_GREENROOF,             &
                                      XLE_GREENROOF, XGFLUX_GREENROOF,         &
+                                     XRUNOFF_TOWN, XRUNOFF_GARDEN,                 &
+                                     XRUNOFF_ROAD, XRUNOFF_ROOF,XRUNOFF_STRLROOF,  &
                                      XRUNOFF_GREENROOF, XDRAIN_GREENROOF,     &
+                                     XDRAIN_GARDEN, XIRRIG_ROAD,              &
+                                     XIRRIG_GREENROOF, XIRRIG_GARDEN,         &
                                      XRN_BLT,XH_BLT,XLE_BLT,XGFLUX_BLT,       &
                                      XABS_SW_ROOF ,XABS_SW_SNOW_ROOF,         &
                                      XABS_LW_ROOF ,XABS_LW_SNOW_ROOF,         &
@@ -67,7 +71,15 @@ USE MODD_DIAG_MISC_TEB_n,   ONLY : LSURF_MISC_BUDGET,                         &
                                      XQ_SYS, XT_SYS, XTR_SW_WIN, XFAN_POWER,  &
                                      XABS_SW_WIN, XABS_LW_WIN, XEMIT_LW_GRND, &
                                      XEMIT_LW_FAC, XT_RAD_IND,                &
-                                     XREF_SW_GRND, XREF_SW_FAC, XHU_BLD
+                                     XREF_SW_GRND, XREF_SW_FAC, XHU_BLD,      &
+                                     XTCOOL_CUR_TARGET, XTHEAT_CUR_TARGET,    &
+                                     XCUR_QIN,                                &
+                                     XABS_SW_PANEL, XABS_LW_PANEL, XRN_PANEL, &
+                                     XH_PANEL, XTHER_PROD_PANEL,              &
+                                     XPHOT_PROD_PANEL, XPROD_PANEL,           &
+                                     XPHOT_PROD_BLD, XTHER_PROD_BLD
+
+USE MODD_DIAG_CUMUL_TEB_n
 
 !
 USE MODI_READ_SURF
@@ -136,8 +148,17 @@ IF (LSURF_MISC_BUDGET) THEN
   ALLOCATE(XLE_GREENROOF     (KLU))
   ALLOCATE(XGFLUX_GREENROOF  (KLU))
   ALLOCATE(XG_GREENROOF_ROOF (KLU))
+  ALLOCATE(XRUNOFF_TOWN      (KLU))
+  ALLOCATE(XRUNOFF_GARDEN    (KLU))
+  ALLOCATE(XRUNOFF_ROAD      (KLU))
+  ALLOCATE(XRUNOFF_STRLROOF  (KLU))
+  ALLOCATE(XRUNOFF_ROOF      (KLU))
   ALLOCATE(XRUNOFF_GREENROOF (KLU))
   ALLOCATE(XDRAIN_GREENROOF  (KLU))
+  ALLOCATE(XDRAIN_GARDEN     (KLU))
+  ALLOCATE(XIRRIG_GREENROOF  (KLU))
+  ALLOCATE(XIRRIG_GARDEN     (KLU))
+  ALLOCATE(XIRRIG_ROAD       (KLU))
   !
   ALLOCATE(XABS_SW_ROOF      (KLU))
   ALLOCATE(XABS_SW_SNOW_ROOF (KLU))
@@ -162,6 +183,10 @@ IF (LSURF_MISC_BUDGET) THEN
   ALLOCATE(XEMIT_LW_FAC      (KLU))
   ALLOCATE(XEMIT_LW_GRND     (KLU))
   !
+  ALLOCATE(XTCOOL_CUR_TARGET (KLU))
+  ALLOCATE(XTHEAT_CUR_TARGET (KLU))
+  ALLOCATE(XCUR_QIN          (KLU))
+  !
   IF (CBEM=='BEM') THEN
     ALLOCATE(XH_BLD_COOL    (KLU))
     ALLOCATE(XT_BLD_COOL    (KLU))
@@ -185,6 +210,37 @@ IF (LSURF_MISC_BUDGET) THEN
     ALLOCATE(XABS_LW_WIN    (KLU))    
   ENDIF
   !
+  IF (LSOLAR_PANEL) THEN
+    ALLOCATE(XABS_SW_PANEL   (KLU))
+    ALLOCATE(XABS_LW_PANEL   (KLU))
+    ALLOCATE(XRN_PANEL       (KLU))
+    ALLOCATE(XH_PANEL        (KLU))
+    ALLOCATE(XTHER_PROD_PANEL(KLU))
+    ALLOCATE(XPHOT_PROD_PANEL(KLU))
+    ALLOCATE(XPROD_PANEL     (KLU))
+    ALLOCATE(XTHER_PROD_BLD  (KLU))
+    ALLOCATE(XPHOT_PROD_BLD  (KLU))
+  END IF
+  !
+    ALLOCATE(XRUNOFFC_TOWN      (KLU))
+    ALLOCATE(XRUNOFFC_GARDEN    (KLU))
+    ALLOCATE(XDRAINC_GARDEN     (KLU))
+    ALLOCATE(XIRRIGC_GARDEN     (KLU))
+    ALLOCATE(XRUNOFFC_ROAD      (KLU))
+    ALLOCATE(XIRRIGC_ROAD       (KLU))
+    ALLOCATE(XRUNOFFC_STRLROOF  (KLU))
+    ALLOCATE(XRUNOFFC_ROOF      (KLU))
+    ALLOCATE(XRUNOFFC_GREENROOF (KLU))
+    ALLOCATE(XDRAINC_GREENROOF  (KLU))
+    ALLOCATE(XIRRIGC_GREENROOF  (KLU))
+    IF (CBEM=='BEM') THEN
+      ALLOCATE(XHVACC_COOL       (KLU))
+      ALLOCATE(XHVACC_HEAT       (KLU))
+    END IF
+  IF (LSOLAR_PANEL) THEN
+    ALLOCATE(XTHER_PROD_BLDC(KLU))
+    ALLOCATE(XPHOT_PROD_BLDC(KLU))
+  END IF
   XQF_BLD            = XUNDEF
   XFLX_BLD           = XUNDEF
   XQF_TOWN           = XUNDEF
@@ -220,8 +276,17 @@ IF (LSURF_MISC_BUDGET) THEN
   XLE_GREENROOF      = XUNDEF
   XGFLUX_GREENROOF   = XUNDEF  
   XG_GREENROOF_ROOF  = XUNDEF  
+  XRUNOFF_TOWN       = XUNDEF  
+  XRUNOFF_GARDEN     = XUNDEF  
+  XRUNOFF_ROAD       = XUNDEF  
+  XRUNOFF_ROOF       = XUNDEF  
+  XRUNOFF_STRLROOF   = XUNDEF
   XRUNOFF_GREENROOF  = XUNDEF  
   XDRAIN_GREENROOF   = XUNDEF  
+  XDRAIN_GARDEN      = XUNDEF  
+  XIRRIG_GREENROOF   = XUNDEF  
+  XIRRIG_GARDEN      = XUNDEF  
+  XIRRIG_ROAD        = XUNDEF  
 !
   XABS_SW_ROOF       = XUNDEF  
   XABS_SW_SNOW_ROOF  = XUNDEF  
@@ -246,6 +311,10 @@ IF (LSURF_MISC_BUDGET) THEN
   XEMIT_LW_FAC       = XUNDEF
   XEMIT_LW_GRND      = XUNDEF
   !
+  XTCOOL_CUR_TARGET  = XUNDEF
+  XTHEAT_CUR_TARGET  = XUNDEF
+  XCUR_QIN           = XUNDEF
+  !
   IF (CBEM=='BEM') THEN
     XH_BLD_COOL     = XUNDEF
     XT_BLD_COOL     = XUNDEF
@@ -268,7 +337,38 @@ IF (LSURF_MISC_BUDGET) THEN
     XABS_SW_WIN     = XUNDEF 
     XABS_LW_WIN     = XUNDEF    
   ENDIF
+
+  IF (LSOLAR_PANEL) THEN
+    XABS_SW_PANEL   = XUNDEF
+    XABS_LW_PANEL   = XUNDEF
+    XRN_PANEL       = XUNDEF
+    XH_PANEL        = XUNDEF
+    XTHER_PROD_PANEL= XUNDEF
+    XPHOT_PROD_PANEL= XUNDEF
+    XPROD_PANEL     = XUNDEF
+    XTHER_PROD_BLD  = XUNDEF
+    XPHOT_PROD_BLD  = XUNDEF
+  END IF
 !  
+    XRUNOFFC_TOWN       = 0.0  
+    XRUNOFFC_GARDEN     = 0.0  
+    XRUNOFFC_ROAD       = 0.0  
+    XRUNOFFC_ROOF       = 0.0  
+    XRUNOFFC_STRLROOF   = 0.0  
+    XRUNOFFC_GREENROOF  = 0.0  
+    XDRAINC_GREENROOF   = 0.0  
+    XDRAINC_GARDEN      = 0.0  
+    XIRRIGC_GREENROOF   = 0.0  
+    XIRRIGC_GARDEN      = 0.0  
+    XIRRIGC_ROAD        = 0.0  
+    IF (CBEM=='BEM') THEN
+      XHVACC_COOL       = 0.0
+      XHVACC_HEAT       = 0.0
+    END IF
+  IF (LSOLAR_PANEL) THEN
+    XTHER_PROD_BLDC = 0.
+    XPHOT_PROD_BLDC = 0.
+  END IF
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_MISC_TEB_INIT_N',1,ZHOOK_HANDLE)

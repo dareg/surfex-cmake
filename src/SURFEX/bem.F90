@@ -1,5 +1,5 @@
 !   ##########################################################################
-        SUBROUTINE BEM(PTSTEP, PTIME, HCOOL_COIL, HHEAT_COIL,                 &
+        SUBROUTINE BEM(PTSTEP, PSUNTIME, HCOOL_COIL, HHEAT_COIL,              &
                 OAUTOSIZE, KDAY,  HNATVENT,                                   &
                 PPS, PRHOA, PT_CANYON, PQ_CANYON, PU_CANYON,                  &
                 PT_ROOF, PT_WALL_A, PT_WALL_B, PBLD, PBLD_HEIGHT, PWALL_O_HOR,&
@@ -178,7 +178,7 @@ IMPLICIT NONE
 !
 !
 REAL,                INTENT(IN)   :: PTSTEP        ! Time step
-REAL,                INTENT(IN)   :: PTIME         ! current time since midnight (UTC, s)
+REAL, DIMENSION(:),  INTENT(IN)   :: PSUNTIME       ! current solar time since midnight (solar time, s)
  CHARACTER(LEN=6),    INTENT(IN)   :: HCOOL_COIL    ! type of cooling system IDEAL/DX_COOL
  CHARACTER(LEN=6),    INTENT(IN)   :: HHEAT_COIL    ! type of heating system IDEAL/FIN_CAP
 LOGICAL,             INTENT(IN)   :: OAUTOSIZE     ! Flag to activate autosize calculations
@@ -396,11 +396,11 @@ END WHERE
 ! *Int.gains schedule
 !
 ZQIN = PQIN * PN_FLOOR
-IF (PTIME > 0. .AND. PTIME < 25200.) THEN ! night between 0000 and 0700
+WHERE (PSUNTIME(:) > 0. .AND. PSUNTIME(:) < 25200.) ! night between 0000 and 0700
   ZQIN(:) = ZQIN(:) * ZF_NIGHT(:)
-ELSE
+ELSEWHERE
   ZQIN(:) = ZQIN(:) * ZF_DAY(:)
-END IF
+END WHERE
 
 ! *Change of units AC/H -> [m3 s-1 m-2(bld)]
 ZV_VENT(:) = PV_VENT(:) * PBLD_HEIGHT(:) / 3600.
@@ -495,14 +495,19 @@ DO JJ=1,SIZE(PT_CANYON)
     GNAT_VENT(JJ) = .FALSE.
     !
   !    *automatic management of surventilation
-  ELSEIF (HNATVENT(JJ)=='AUTO') THEN
+  ELSEIF (HNATVENT(JJ)=='AUTO' .OR. HNATVENT(JJ)=='MECH') THEN
     !
-    IF (MOD(PTIME, 3600.) .LT. 1.E-6) THEN
+    IF (MOD(PSUNTIME(JJ), 3600.) .LT. PTSTEP) THEN
       !
       IF ( PTI_BLD(JJ).GT. PT_CANYON(JJ) + 1 ) THEN ! condition to enable the
-        ! surventilation rate calculation whereas risk of floating point exception
-        CALL GET_NAT_VENT(PTI_BLD(JJ), PT_CANYON(JJ), PU_CANYON(JJ), PGR(JJ), &
-                          PFLOOR_HW_RATIO(JJ), PBLD_HEIGHT(JJ), ZNAT_VENT(JJ))
+        IF (HNATVENT(JJ)=='AUTO') THEN
+        ! natural surventilation rate calculation (window opening)
+          CALL GET_NAT_VENT(PTI_BLD(JJ), PT_CANYON(JJ), PU_CANYON(JJ), PGR(JJ), &
+                            PFLOOR_HW_RATIO(JJ), PBLD_HEIGHT(JJ), ZNAT_VENT(JJ))
+        ELSE IF (HNATVENT(JJ)=='MECH') THEN
+        ! mechanical surventilation rate calculation : 5 volumes/hour
+          ZNAT_VENT(JJ) =  5.0*PBLD_HEIGHT(JJ)/3600.
+        END IF
         !
         ZTI_BLD_OPEN  (JJ) = ZTI_BLD(JJ) &
                 + ZNAT_VENT(JJ)            * PTSTEP/PBLD_HEIGHT(JJ) * (PT_CANYON(JJ) - PTI_BLD(JJ)) 
@@ -525,9 +530,9 @@ DO JJ=1,SIZE(PT_CANYON)
   ELSEIF (HNATVENT(JJ)=='MANU') THEN
     !
     ONATVENT_NIGHT(JJ) = ONATVENT_NIGHT(JJ) .AND. &
-                         .NOT. ( PTIME > 5.*3600 .AND. PTIME < 18.*3600 )
+                         .NOT. ( PSUNTIME(JJ) > 5.*3600 .AND. PSUNTIME(JJ) < 18.*3600 )
     !
-    GNAT_VENT(JJ) = ( PTIME > 18.*3600. .AND. PTIME < 21.*3600.  &
+    GNAT_VENT(JJ) = ( PSUNTIME(JJ) > 18.*3600. .AND. PSUNTIME(JJ) < 21.*3600.  &
                       .AND. PT_CANYON(JJ) < PTI_BLD(JJ)+2.       &
                       .AND. PT_CANYON(JJ) > PTHEAT_TARGET(JJ)    & 
                       .AND. ( PTI_BLD(JJ) > PTHEAT_TARGET(JJ)+5. &

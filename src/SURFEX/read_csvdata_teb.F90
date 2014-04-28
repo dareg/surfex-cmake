@@ -75,11 +75,13 @@ INTEGER            :: I1
 INTEGER            :: I2
 INTEGER            :: JBLD                ! loop counter on buildings
 INTEGER            :: JAGE                ! loop counter on building's ages
+INTEGER            :: JUSE                ! loop counter on building's uses
 INTEGER            :: JLAYER              ! loop counter on layers
 INTEGER            :: IINDEX              ! index in descriptive data arrays
 !
 INTEGER            :: IALL_HYP            ! number of hypotheses for equipment
 INTEGER            :: IHYP                ! kept hypothese for equipment
+INTEGER            :: IRES                ! index for residential use
  CHARACTER(LEN=10)  :: YTYPE_OF_DATA       ! 'STRUCTURE', 'EQUIPMENT'
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -340,7 +342,7 @@ XDESC_F_WASTE_CAN = XDESC_F_WASTE_CAN / 100. ! % => fraction
  CALL READ_HYP_IN_CSVFILE("Climatisation","Taux de rejets secs",IHYP)
 ALLOCATE(XDESC_F_WATER_COND(NDESC_CODE))
  CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Climatisation",'Taux de rejets secs',XDESC_F_WATER_COND)
-XDESC_F_WATER_COND = XDESC_F_WATER_COND / 100. ! % => fraction
+XDESC_F_WATER_COND = 1. - XDESC_F_WATER_COND / 100. ! % => fraction    and dry waste => humid waste
 !
  CALL READ_HYP_IN_CSVFILE("Climatisation","Performance (COP)",IHYP)
 ALLOCATE(XDESC_COP_RAT(NDESC_CODE))
@@ -368,6 +370,27 @@ ALLOCATE(XDESC_V_VENT(NDESC_CODE))
  CALL READ_HYP_IN_CSVFILE("Toits vegetalises","Implantation",IHYP)
 ALLOCATE(XDESC_GREENROOF(NDESC_CODE))
  CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Toits vegetalises","Implantation",XDESC_GREENROOF)
+!
+!* solar panels
+ CALL READ_HYP_IN_CSVFILE("Panneau solaire","Emissivite",IHYP)
+ALLOCATE(XDESC_EMIS_PANEL(NDESC_CODE))
+ CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Panneau solaire","Emissivite",XDESC_EMIS_PANEL)
+!
+ CALL READ_HYP_IN_CSVFILE("Panneau solaire","Coefficient d_absorption",IHYP)
+ALLOCATE(XDESC_ALB_PANEL(NDESC_CODE))
+ CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Panneau solaire","Coefficient d_absorption",XDESC_ALB_PANEL)
+XDESC_ALB_PANEL = 1. - XDESC_ALB_PANEL  ! absorption ==> albedo
+!
+ CALL READ_HYP_IN_CSVFILE("Panneau solaire","Rendement",IHYP)
+ALLOCATE(XDESC_EFF_PANEL(NDESC_CODE))
+ CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Panneau solaire","Rendement",XDESC_EFF_PANEL)
+XDESC_EFF_PANEL = XDESC_EFF_PANEL /100.  ! % ==> fraction
+!
+ CALL READ_HYP_IN_CSVFILE("Panneau solaire","Surface des panneaux / surface du toit",IHYP)
+ALLOCATE(XDESC_FRAC_PANEL(NDESC_CODE))
+ CALL READ_IN_CSVFILE('EQUIPEMENT',YBLD_NAME,"Panneau solaire","Surface des panneaux / surface du toit",XDESC_FRAC_PANEL)
+XDESC_FRAC_PANEL = XDESC_FRAC_PANEL/100. ! % ==> fraction
+
 !-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -415,6 +438,14 @@ ALLOCATE(XDESC_SHADE(NDESC_USE))
 ALLOCATE(XDESC_NATVENT(NDESC_USE))
  CALL READ_IN_CSVFILE('USAGE',YUSE_NAME,"Sur-ventilation","Type d_ouverture",XDESC_NATVENT)
 !
+!* fraction of residential use for the buildings
+ALLOCATE(XDESC_RESIDENTIAL(NDESC_USE))
+CALL READ_CONF_IN_CSVFILE("Residentiel",IRES)
+XDESC_RESIDENTIAL(:) = 0.
+DO JUSE=1,NDESC_USE
+  IF (JUSE==IRES) XDESC_RESIDENTIAL(JUSE) = 1.
+END DO
+
 !------------------------------------------------------------------------------
 !
 !*    8.     town parameters depending on urban structure

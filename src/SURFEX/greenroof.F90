@@ -8,7 +8,7 @@
                 PSFCO2,PEVAP_GREENROOF, PUW_GREENROOF,                               &
                 PAC_GREENROOF,PQSAT_GREENROOF,PTS_GREENROOF,                         &
                 PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,PDEEP_FLUX,                     &
-                PRUNOFF_GREENROOF, PDRAIN_GREENROOF                                  )  
+                PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PIRRIG_GREENROOF                )  
 !   ##################################################################################
 !
 !!****  *GREENROOF*  
@@ -42,6 +42,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !     Original    09/2011 
+!     C. de Munck   02/2013  irrigation (drip irrigation)
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -50,8 +52,9 @@
 USE MODD_SURF_PAR,             ONLY: XUNDEF
 USE MODD_TYPE_DATE_SURF,       ONLY: DATE_TIME
 USE MODD_CSTS,                 ONLY: XCPD
-USE MODD_TEB_n,                ONLY: LECOCLIMAP, XCOVER, XT_ROOF
-USE MODD_TEB_GRID_n,        ONLY: XLAT, XLON
+USE MODD_TEB_n,                ONLY: LECOCLIMAP, XCOVER, XT_ROOF, XD_ROOF, &
+                                     XTC_ROOF, XHC_ROOF, NROOF_LAYER
+USE MODD_TEB_GRID_n,           ONLY: XLAT, XLON
 USE MODD_TEB_VEG_n,            ONLY: CPHOTO, CC1DRY, NNBIOMASS, CRESPSL, &
                                      CALBEDO, CSOILFRZ, CDIFSFCOND, CCPSURF,  &
                                      CSNOWRES, XCGMAX, CISBA
@@ -82,14 +85,17 @@ USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
                                      XALBNIR, XALBVIS, XALBUV,                &
                                      XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                      XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                     XALBNIR_TVEG, XALBVIS_TVEG,    &
-                                     XALBNIR_TSOIL, XALBVIS_TSOIL,  &
+                                     XALBNIR_TVEG, XALBVIS_TVEG,              &
+                                     XALBNIR_TSOIL, XALBVIS_TSOIL,            &
                                      XLE, XANF, XSAND_GR,                     &
                                      XPSN, XPSNV, XPSNG, XPSNV_A,             &
                                      XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,   &
                                      XSNOWFREE_ALB,                           &
                                      XANMAX, XBIOMASS,                        &
                                      XBSLAI_NITRO, XH_TREE
+USE MODD_TEB_IRRIG_n, ONLY : LPAR_GR_IRRIG,                                  &
+                             XGR_START_MONTH, XGR_END_MONTH, XGR_START_HOUR, &
+                             XGR_END_HOUR, XGR_24H_IRRIG
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE_GREENROOF
@@ -97,6 +103,7 @@ USE MODI_VEGETATION_EVOL
 USE MODI_CARBON_EVOL
 USE MODE_THERMOS
 USE MODI_ROOF_IMPL_COEF
+USE MODI_TEB_IRRIG
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -149,6 +156,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG_GREENROOF     ! aggreg. relative 
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GREENROOF     ! greenroof surface runoff
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GREENROOF      ! greenroof total (vertical) drainage
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GREENROOF      ! greenroof summer irrigation rate
 !
 !
 !*      0.2    Declarations of local variables
@@ -279,6 +287,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZTHRESHOLDSPT
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIGATE
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIDAY
 !
+!
 !  variables for deep soil
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZGAMMAT  ! not used
@@ -352,10 +361,14 @@ ZTHRESHOLDSPT = 0.
 GIRRIGATE     = .FALSE.
 GIRRIDAY      = .FALSE.
 !
+!* automatic summer irrigation 
+!
+PIRRIG_GREENROOF(:) = 0.
+!
 !* deep soil implicitation with roof
 !
 ZGAMMAT = XUNDEF
- CALL ROOF_IMPL_COEF(PTSTEP,ZTDEEP_A,ZTDEEP_B)
+ CALL ROOF_IMPL_COEF(PTSTEP,NROOF_LAYER, XD_ROOF, XTC_ROOF, XHC_ROOF, XT_ROOF, ZTDEEP_A,ZTDEEP_B)
 !
 !-------------------------------------------------------------------------------
 !
@@ -364,6 +377,15 @@ ZGAMMAT = XUNDEF
 !
 !radiative temperature diagnostic
 !-------------------------------
+!
+!*      9.1    Summer irrigation 
+!              ------------------
+!
+!* irrigation automatique de type goutte à goutte (arrosage du sol seulement)
+!
+CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
+               XGR_START_MONTH, XGR_END_MONTH, XGR_START_HOUR,   &
+               XGR_END_HOUR, XGR_24H_IRRIG, PIRRIG_GREENROOF     )
 !
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
@@ -398,7 +420,7 @@ ZGAMMAT = XUNDEF
           TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
           ZSMELTFLUX, ZRNSNOW, ZHSNOW,  ZGFLUXSNOW, ZUSTARSNOW,       &
           ZSRSFC, ZRRSFC, ZLESL, TSNOW%EMIS(:,1), ZCDSNOW, ZCHSNOW,   &
-          PTS_GREENROOF, ZTS, ZHV, ZQS, ZSNOWTEMP, ZSNOWLIQ, ZSNOWDZ,    &
+          PTS_GREENROOF, ZTS, ZHV, ZQS, ZSNOWTEMP, ZSNOWLIQ, ZSNOWDZ, &
           ZCG, ZC1, ZC2, ZWGEQ, ZCT, ZCH, ZCD, ZCDN, ZRI, ZHU, ZHUG,  &
           ZEMIST, ZALBT, ZRS, XLE,  ZRN, ZH, ZLEI, ZLEGI, ZLEG, ZLEV, &
           ZLES, ZLER, ZLETR, ZEVAP, ZGFLUX, ZRESTORE, ZUSTAR, ZDRAIN, &
@@ -408,7 +430,7 @@ ZGAMMAT = XUNDEF
           PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          PDEEP_FLUX                                                  )  
+          PDEEP_FLUX, PIRRIG_GREENROOF                                )  
 !
 PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
 PDRAIN_GREENROOF(:)  = ZDRAIN(:)

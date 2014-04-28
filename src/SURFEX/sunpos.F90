@@ -44,6 +44,7 @@
 !!      (J.Stein)            01:04/96  bug correction for ZZEANG     
 !!      (K. Suhre)           14/02/97  bug correction for ZLON0     
 !!      (V. Masson)          01/03/03  add zenithal angle output
+!!      (V. Masson)          14/03/14  avoid discontinuous declination at 00UTC each day
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -120,10 +121,12 @@ DO JI=2,11
   IBIS(JI) = INOBIS(JI)+1
 END DO
 IF( MOD(KYEAR,4).EQ.0 .AND. (MOD(KYEAR,100).NE.0 .OR. MOD(KYEAR,400).EQ.0)) THEN
-  ZDATE = FLOAT(KDAY +   IBIS(KMONTH-1)) - 1
+  ZDATE = FLOAT(KDAY +   IBIS(KMONTH-1)) - 1 + PTIME/XDAY
+  !ZDATE = FLOAT(KDAY +   IBIS(KMONTH-1)) - 1
   ZAD = 2.0*XPI*ZDATE/366.0
 ELSE
-  ZDATE = FLOAT(KDAY + INOBIS(KMONTH-1)) - 1
+  ZDATE = FLOAT(KDAY + INOBIS(KMONTH-1)) - 1 + PTIME/XDAY
+  !ZDATE = FLOAT(KDAY + INOBIS(KMONTH-1)) - 1
   ZAD = 2.0*XPI*ZDATE/365.0
 END IF
 

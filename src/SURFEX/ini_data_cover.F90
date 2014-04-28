@@ -93,7 +93,9 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_CAP_SYS_RAT, XDATA_T_ADP, XDATA_M_SYS_RAT,  &
                                   XDATA_COP_RAT, XDATA_T_SIZE_MAX, XDATA_T_SIZE_MIN,&
                                   XDATA_SHADE, XDATA_NATVENT, XDATA_ROUGH_ROOF,     &
-                                  XDATA_ROUGH_WALL, XDATA_FRAC_GR
+                                  XDATA_ROUGH_WALL, XDATA_FRAC_GR,XDATA_RESIDENTIAL,&
+                                  XDATA_EMIS_PANEL, XDATA_ALB_PANEL,                &
+                                  XDATA_EFF_PANEL, XDATA_FRAC_PANEL
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
                                   NVT_TREE, NVT_CONI, NVT_EVER, NVT_C3,   &
@@ -860,6 +862,9 @@ ALLOCATE(XDATA_ROUGH_WALL (JPCOVER))
 XDATA_ROUGH_ROOF(:) = XUNDEF 
 XDATA_ROUGH_WALL(:) = XUNDEF
 !
+ALLOCATE(XDATA_RESIDENTIAL (JPCOVER))
+XDATA_RESIDENTIAL(:) = XUNDEF
+!
 !-------------------------------------------------------------------------------
 !
 !*    3.13   For greenroof
@@ -868,6 +873,21 @@ XDATA_ROUGH_WALL(:) = XUNDEF
 ALLOCATE(XDATA_FRAC_GR (JPCOVER))
 !
 XDATA_FRAC_GR (:) = 0.
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.14   For solar panels
+!            ----------------
+!
+ALLOCATE(XDATA_EMIS_PANEL (JPCOVER))
+ALLOCATE(XDATA_ALB_PANEL  (JPCOVER))
+ALLOCATE(XDATA_EFF_PANEL  (JPCOVER))
+ALLOCATE(XDATA_FRAC_PANEL (JPCOVER))
+!
+XDATA_EMIS_PANEL (:) = XUNDEF
+XDATA_ALB_PANEL  (:) = XUNDEF
+XDATA_EFF_PANEL  (:) = XUNDEF
+XDATA_FRAC_PANEL (:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -961,6 +981,8 @@ DO JCOVER = 1, JPCOVER
   !
   XDATA_CAN_HW_RATIO(JCOVER) = 0.5 * XDATA_WALL_O_HOR(JCOVER) / (1.-XDATA_BLD (JCOVER))
   !
+  !* Building Energy Model variables 
+  !
   XDATA_HC_FLOOR(JCOVER,:) = 2016000.
   XDATA_TC_FLOOR(JCOVER,:) = 1.95
   XDATA_D_FLOOR(JCOVER,1) = 0.01
@@ -995,6 +1017,12 @@ DO JCOVER = 1, JPCOVER
   XDATA_NATVENT(JCOVER)      = 0.0  
   XDATA_ROUGH_ROOF(JCOVER)   = 1.52  
   XDATA_ROUGH_WALL(JCOVER)   = 1.52  
+  XDATA_RESIDENTIAL(JCOVER)  = 1.
+  !
+  XDATA_EMIS_PANEL (JCOVER) = 0.9
+  XDATA_ALB_PANEL  (JCOVER) = 0.1
+  XDATA_EFF_PANEL  (JCOVER) = 0.14
+  XDATA_FRAC_PANEL (JCOVER) = 0.
   !  
   IF (XDATA_GARDEN(JCOVER)/=0.) THEN
     DO JVEGTYPE=1,NVEGTYPE

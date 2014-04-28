@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE TEB_GARDEN (OGARDEN, OGREENROOF,                               &
+    SUBROUTINE TEB_GARDEN (OGARDEN, OGREENROOF, OSOLAR_PANEL,                 &
                      HZ0H, HIMPLICIT_WIND, HROAD_DIR, HWALL_OPT, TPTIME,      &
                      PTSUN, PT_CANYON, PQ_CANYON, PU_CANYON,                  &
                      PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN, PTI_BLD,     &
@@ -38,8 +38,10 @@
                      PRN_WALL_A, PH_WALL_A, PLE_WALL_A, PGFLUX_WALL_A,        &
                      PRN_WALL_B, PH_WALL_B, PLE_WALL_B, PGFLUX_WALL_B,        &
                      PRN_GARDEN,PH_GARDEN,PLE_GARDEN, PGFLUX_GARDEN,          &
+                     PRUNOFF_GARDEN, PDRAIN_GARDEN, PIRRIG_GARDEN,            &
                      PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF, PGFLUX_GREENROOF, &
                      PRN_STRLROOF,PH_STRLROOF,PLE_STRLROOF, PGFLUX_STRLROOF,  &
+                     PRUNOFF_STRLROOF,                                        &
                      PRN_BLT,PH_BLT,PLE_BLT, PGFLUX_BLT,                      &
                      PRNSNOW_ROOF, PHSNOW_ROOF, PLESNOW_ROOF, PGSNOW_ROOF,    &
                      PMELT_ROOF,                                              &
@@ -60,10 +62,11 @@
                      PABS_SW_SNOW_ROAD,PABS_LW_SNOW_ROAD,                     &
                      PABS_SW_WALL_A,PABS_LW_WALL_A,                           &
                      PABS_SW_WALL_B,PABS_LW_WALL_B,                           &
+                     PABS_SW_PANEL,PABS_LW_PANEL,                             &
                      PABS_SW_GARDEN,PABS_LW_GARDEN,                           &
                      PABS_SW_GREENROOF,PABS_LW_GREENROOF,                     &
                      PG_GREENROOF_ROOF,PRUNOFF_GREENROOF,PDRAIN_GREENROOF,    &
-                     HCOOL_COIL, PF_WATER_COND, HHEAT_COIL,                   &
+                     PIRRIG_GREENROOF, HCOOL_COIL, PF_WATER_COND, HHEAT_COIL, &
                      HNATVENT, KDAY, PAUX_MAX, PT_FLOOR,                      &
                      PT_MASS, PH_BLD_COOL, PT_BLD_COOL, PH_BLD_HEAT,          &
                      PLE_BLD_COOL, PLE_BLD_HEAT, PH_WASTE, PLE_WASTE,         &
@@ -82,7 +85,16 @@
                      PF_FLOOR_WIN, PF_FLOOR_ROOF, PF_WALL_FLOOR, PF_WALL_MASS,&
                      PF_WALL_WIN, PF_WIN_FLOOR, PF_WIN_MASS, PF_WIN_WALL,     &
                      PF_MASS_FLOOR, PF_MASS_WALL, PF_MASS_WIN, OCANOPY,       &
-                     PTRAN_WIN, HCH_BEM, PROUGH_ROOF, PROUGH_WALL, PF_WIN_WIN )
+                     PTRAN_WIN, HCH_BEM, PROUGH_ROOF, PROUGH_WALL, PF_WIN_WIN,&
+                     OPAR_RD_IRRIG, PRD_START_MONTH, PRD_END_MONTH,           &
+                     PRD_START_HOUR, PRD_END_HOUR, PRD_24H_IRRIG, PIRRIG_ROAD,&
+                     PEMIS_PANEL, PALB_PANEL, PEFF_PANEL, PFRAC_PANEL,        &
+                     PRESIDENTIAL,                                            &
+                     PTHER_PROD_PANEL, PPHOT_PROD_PANEL, PPROD_PANEL,         &
+                     PTHER_PROD_BLD  , PPHOT_PROD_BLD  , PPROD_BLD  ,         &
+                     PTHER_PRODC_DAY, PH_PANEL, PRN_PANEL,                    &
+                     PDT_RES, PDT_OFF,                                        &
+                     PCUR_TCOOL_TARGET, PCUR_THEAT_TARGET, PCUR_QIN           )
 !   ##########################################################################
 !
 !!****  *TEB_GARDEN*  
@@ -131,6 +143,7 @@ USE MODD_SNOW_PAR,          ONLY: XEMISSN, XANSMAX
 USE MODE_THERMOS
 USE MODE_SURF_SNOW_FRAC
 !
+USE MODI_SOLAR_PANEL
 USE MODI_GARDEN_PROPERTIES
 USE MODI_GREENROOF_PROPERTIES
 USE MODI_WINDOW_SHADING_AVAILABILITY
@@ -140,6 +153,7 @@ USE MODI_GARDEN
 USE MODI_GREENROOF
 USE MODI_TEB
 USE MODI_AVG_URBAN_FLUXES
+USE MODI_BLD_OCC_CALENDAR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -150,7 +164,8 @@ IMPLICIT NONE
 !
  LOGICAL,              INTENT(IN)    :: OGARDEN           ! Flag to use a garden    model inside the canyon
  LOGICAL,              INTENT(IN)    :: OGREENROOF        ! Flag to use a greenroof model on roofs
- CHARACTER(LEN=6)    , INTENT(IN)    :: HZ0H               ! TEB option for z0h roof & road
+ LOGICAL,              INTENT(IN)    :: OSOLAR_PANEL      ! Flag to use a Solar Panel model on roofs
+ CHARACTER(LEN=6)    , INTENT(IN)    :: HZ0H              ! TEB option for z0h roof & road
 !                                                         ! 'MASC95' : Mascart et al 1995
 !                                                         ! 'BRUT82' : Brustaert     1982
 !                                                         ! 'KAND07' : Kanda         2007
@@ -281,6 +296,9 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GARDEN         ! net radiation over g
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GARDEN          ! sensible heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GARDEN         ! latent heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_GARDEN      ! flux through the green areas
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GARDEN     ! runoff over garden
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GARDEN      ! drainage over garden
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GARDEN      ! water supply for irrigation over garden (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GREENROOF      ! net radiation over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GREENROOF       ! sensible heat flux over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GREENROOF      ! latent heat flux over greenroofs
@@ -289,6 +307,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_STRLROOF       ! net radiation over s
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_STRLROOF        ! sensible heat flux over structural roof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_STRLROOF       ! latent heat flux over structural roof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_STRLROOF    ! flux through the structural roof
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_STRLROOF   ! runoff aver structural roof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_BLT            ! net radiation over built surf 
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_BLT             ! sensible heat flux over built surf 
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_BLT            ! latent heat flux over built surf 
@@ -353,6 +372,8 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_SW_WALL_A     ! absorbed solar rad b
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_LW_WALL_A     ! absorbed IR rad by wall
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_SW_WALL_B     ! absorbed solar rad by wall
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_LW_WALL_B     ! absorbed IR rad by wall
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_SW_PANEL      ! absorbed solar rad by solar panels
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_LW_PANEL      ! absorbed IR rad by solar panels
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_SW_GARDEN     ! absorbed solar rad by green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_LW_GARDEN     ! absorbed IR rad by green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PABS_SW_GREENROOF  ! absorbed solar rad by green roofs
@@ -361,6 +382,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PG_GREENROOF_ROOF  ! heat flux between ba
 !                                                         !    and structural roof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GREENROOF  ! greenroof surface runoff
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GREENROOF   ! greenroof total vertical drainage
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GREENROOF   ! water supply for greenroof ground irrigation
 !
 ! new arguments created after BEM
 !
@@ -475,7 +497,43 @@ LOGICAL             , INTENT(IN)     :: OCANOPY           ! is canopy active ?
 REAL, DIMENSION(:)  , INTENT(IN)     :: PROUGH_ROOF     ! roof roughness coef.
 REAL, DIMENSION(:)  , INTENT(IN)     :: PROUGH_WALL     ! wall roughness coef.
 REAL, DIMENSION(:)  , INTENT(IN)     :: PF_WIN_WIN      ! indoor win to win view factor
-
+!
+!* arguments for road watering
+!
+LOGICAL,              INTENT(IN)      :: OPAR_RD_IRRIG  ! True if there is potentially irrigation
+REAL, DIMENSION(:),   INTENT(IN)      :: PRD_START_MONTH! First month of irrigation
+REAL, DIMENSION(:),   INTENT(IN)      :: PRD_END_MONTH  ! Last month of irrigation
+REAL, DIMENSION(:),   INTENT(IN)      :: PRD_START_HOUR ! First hour of irrigation (included)
+REAL, DIMENSION(:),   INTENT(IN)      :: PRD_END_HOUR   ! Last hour of irrigation  (excluded)
+REAL, DIMENSION(:),   INTENT(IN)      :: PRD_24H_IRRIG  ! diurnal averaged irrigation flux (kg/m2/s)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PIRRIG_ROAD    ! man-made watering of roads (kg/m2/s)
+!
+!* arguments for solar panels
+!
+REAL, DIMENSION(:),   INTENT(IN)      :: PEMIS_PANEL    ! Emissivity of solar panels (-)
+REAL, DIMENSION(:),   INTENT(IN)      :: PALB_PANEL     ! Albedo     of solar panels (-)
+REAL, DIMENSION(:),   INTENT(IN)      :: PEFF_PANEL     ! Efficiency of solar panel (-)
+REAL, DIMENSION(:),   INTENT(IN)      :: PFRAC_PANEL    ! Fraction of solar panel on roofs (-)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PTHER_PROD_PANEL ! Thermal      Energy production of solar panel on roofs (W/m2 panel)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PPHOT_PROD_PANEL ! Photovoltaic Energy production of solar panel on roofs (W/m2 panel)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PPROD_PANEL      ! Averaged     Energy production of solar panel on roofs (W/m2 panel)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PTHER_PROD_BLD   ! Thermal      Energy production of solar panel on roofs (W/m2 bld  )
+REAL, DIMENSION(:),   INTENT(OUT)     :: PPHOT_PROD_BLD   ! Photovoltaic Energy production of solar panel on roofs (W/m2 bld  )
+REAL, DIMENSION(:),   INTENT(OUT)     :: PPROD_BLD        ! Averaged     Energy production of solar panel on roofs (W/m2 bld  )
+REAL, DIMENSION(:),   INTENT(OUT)     :: PTHER_PRODC_DAY  ! Present day integrated thermal production of energy    (J/m2 panel)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PH_PANEL       ! Sensible heat flux from solar panels      (W/m2 panel)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PRN_PANEL      ! Net radiation        of solar panel       (W/m2 panel)
+!
+!* arguments for building's use description
+!
+REAL, DIMENSION(:),   INTENT(IN)      :: PRESIDENTIAL      ! Fraction of residential use (-)
+REAL,                 INTENT(IN)      :: PDT_RES           ! target temperature change when unoccupied (K) (residential buildings)
+REAL,                 INTENT(IN)      :: PDT_OFF           ! target temperature change when unoccupied (K) (office buildings)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PCUR_TCOOL_TARGET ! Cooling target temperature at current time (K)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PCUR_THEAT_TARGET ! Heating target temperature at current time (K)
+REAL, DIMENSION(:),   INTENT(OUT)     :: PCUR_QIN          ! Internal heat gains        at current time (W/m2 floor)
+!
+!
 !*      0.2    Declarations of local variables
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZTA            ! air temperature extrapolated at roof level
@@ -527,6 +585,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_SNOW_ROAD   ! solar rad received by snow o
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_GARDEN      ! IR rad received by gardens
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZSW_RAD_GARDEN      ! solar radiation reaching urban green areas
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_ROOF        ! solar rad received by roofs in presence of solar panels
 !
 ! coefficients for LW contributions
 !
@@ -571,6 +630,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZLW_NR_TO_WIN       ! L.W. interactions snow(road)
                                                   !
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WIN         ! solar received by windows [W m-2(win)]
 REAL, DIMENSION(SIZE(PTA)) :: ZT_SKY              ! sky temperature [K]
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_ROOF        ! Incoming LW on roofs in presence of solar panels
 !
 ! local variable at previous time-step
 !
@@ -618,12 +678,18 @@ REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GREENROOF    ! CO2 fluxes over greenroofs (
 ! fluxes from built surfaces
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROAD       ! LW flux emitted by the road (W/m² road)
 !
+! fluxes from/to solar panel
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWDN_PANEL    ! LW flux emitted DOWNWARDS by the solar panel (W/m² panel)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWUP_PANEL    ! LW flux emitted UPWARDS   by the solar panel (W/m² panel)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROOF       ! LW flux emitted UPWARDS   by the roof        (W/m² roof )
+!
 !new local variables for shading
 REAL, DIMENSION(SIZE(PTA)) :: ZE_SHADING          ! energy not ref., nor absorbed, nor
                                                   ! trans. by glazing [Wm-2(win)]
 LOGICAL, DIMENSION(SIZE(PTA)) :: GSHADE           ! describes if one encounters the
 !                                                 ! conditions to close windows
 !                                              
+!
 INTEGER :: JJ
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -679,7 +745,6 @@ ENDDO
 !              ----------------------------------------
  CALL SNOW_FRAC_ROAD(PWSNOW_ROAD(:,1),PSR(:)>0.,ZDN_ROAD,ZDF_ROAD)
  CALL SNOW_FRAC_ROOF(PWSNOW_ROOF(:,1),PSR(:)>0.,ZDN_ROOF,ZDF_ROOF)
-!
 !
 !* new snow albedo
 !
@@ -743,24 +808,47 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
+!*      5.     Occupation of buildings
+!              -----------------------
+!
+!* when building in unoccupied, target temperature is modified
+!
+CALL BLD_OCC_CALENDAR(TPTIME%TDATE%YEAR,TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY,PTSUN,      &
+                      PRESIDENTIAL,PTCOOL_TARGET, PTHEAT_TARGET, PQIN,                  &
+                      PDT_RES,PDT_OFF,1.,PCUR_TCOOL_TARGET, PCUR_THEAT_TARGET, PCUR_QIN )
+!
+!-------------------------------------------------------------------------------
+!
 !*      5.     Solar radiation
 !              ---------------
+!
+!
+!*       5.1   Windows management
+!              ------------------
 !
 !* checks if one encouters the conditions for closing the windows at day
 !  (needs to be equiped of solar protections and not to be confortable inside)
 !  
 GSHADE(:) = .FALSE.
-IF (HBEM=="BEM") &
- CALL WINDOW_SHADING_AVAILABILITY(OSHADE, PTI_BLD, PTCOOL_TARGET,GSHADE)
+IF (HBEM=="BEM") THEN
+ CALL WINDOW_SHADING_AVAILABILITY(OSHADE, PTI_BLD, PCUR_TCOOL_TARGET,GSHADE)
 !
-!* computes solar radiation exchanges
+!* Reinitialize shading of windows when changing day
 !
- CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                   &
+  WHERE (PTSUN .LT. PTSTEP + 1E-3) OSHAD_DAY(:) = .FALSE.
+END IF
+!
+!
+!*       5.2   computes solar radiation exchanges
+!              ----------------------------------
+!
+ CALL URBAN_SOLAR_ABS(HBEM, HROAD_DIR, HWALL_OPT,                  &
                      ZDIR_SW, ZSCA_SW, PZENITH, PAZIM,             &
                      PBLD, PGARDEN, PROAD_DIR, PROAD, PFRAC_GR,    &
                      PWALL_O_HOR, PCAN_HW_RATIO,                   &
                      PALB_ROOF,                                    &
                      PALB_ROAD, PSVF_ROAD, PALB_WALL, PSVF_WALL,   &
+                     PFRAC_PANEL, PALB_PANEL,                      &
                      ZALB_GARDEN, PSVF_GARDEN,                     &
                      ZALB_GREENROOF,                               &
                      PASNOW_ROOF, PASNOW_ROAD,                     &
@@ -770,9 +858,10 @@ IF (HBEM=="BEM") &
                      PABS_SW_WALL_A, PABS_SW_WALL_B,               &
                      PABS_SW_GARDEN, PABS_SW_GREENROOF,            &
                      PABS_SW_SNOW_ROOF, PABS_SW_SNOW_ROAD,         &
+                     PABS_SW_PANEL,                                &
                      ZREC_SW_ROAD,  ZREC_SW_SNOW_ROAD,             &
                      ZREC_SW_WALL_A, ZREC_SW_WALL_B,               &
-                     ZREC_SW_GARDEN,                               &
+                     ZREC_SW_GARDEN, ZREC_SW_ROOF,                 &
                      PDIR_ALB_TOWN,PSCA_ALB_TOWN,                  &
                      ZSW_RAD_GARDEN, PABS_SW_WIN, ZREC_SW_WIN,     &
                      PTRAN_WIN,                                    &
@@ -831,6 +920,25 @@ ELSE
   ZREC_LW_GARDEN      (:) = XUNDEF
 END IF
 !
+!*     7.2     Effect of solar panels on incoming LW on roofs
+!              ----------------------------------------------
+!
+IF (OSOLAR_PANEL) THEN
+  !
+  ! solar panels downwards surface is supposed to be at air temperature
+  ! and to be have an emissivity of 1.
+  !
+  ZEMIT_LWDN_PANEL = XSTEFAN * PTA**4
+  !
+  ! note that, for the time being, one considers that the solar panel 
+  ! intercept radiation both above roof and greenroofs (if any)
+  ZREC_LW_ROOF = (1.-PFRAC_PANEL(:)) * PLW_RAD            &
+                +    PFRAC_PANEL(:)  * ZEMIT_LWDN_PANEL
+ELSE
+  ZEMIT_LWDN_PANEL = XUNDEF
+  ZREC_LW_ROOF     = PLW_RAD
+END IF
+!
 !-------------------------------------------------------------------------------
 !
 !*      8.     Treatment of green areas
@@ -858,9 +966,10 @@ IF (OGARDEN) THEN
               PT_LOWCAN, PQ_LOWCAN, PEXNS, PRHOA, PCO2, PPS, PRR, PSR, PZENITH,    &
               ZREC_SW_GARDEN, ZREC_LW_GARDEN, PU_LOWCAN,                           &
               PRN_GARDEN,PH_GARDEN,PLE_GARDEN,PGFLUX_GARDEN, ZSFCO2_GARDEN,        &
-              ZEVAP_GARDEN, ZUW_GARDEN,                                            &
+              ZEVAP_GARDEN, ZUW_GARDEN,PRUNOFF_GARDEN,                             &
               PAC_GARDEN,ZQSAT_GARDEN,ZTS_GARDEN,                                  &
-              ZAC_AGG_GARDEN, ZHU_AGG_GARDEN                                       )
+              ZAC_AGG_GARDEN, ZHU_AGG_GARDEN,                                      &
+              PDRAIN_GARDEN, PIRRIG_GARDEN                                         )  
 
   PAC_GARDEN_WAT(:) = PAC_GARDEN(:)
   PABS_SW_GARDEN(:) = (1.-ZALB_GARDEN(:)) * ZREC_SW_GARDEN
@@ -887,7 +996,9 @@ ELSE
  PAC_GARDEN_WAT(:) = XUNDEF
  PABS_SW_GARDEN(:) = XUNDEF
  PABS_LW_GARDEN(:) = XUNDEF
- ZEMIT_LW_GARDEN(:)= XUNDEF
+ PRUNOFF_GARDEN(:) = 0.
+ PDRAIN_GARDEN (:) = 0.
+ PIRRIG_GARDEN (:) = 0.
 !
 ENDIF
 !
@@ -896,20 +1007,21 @@ ENDIF
 !
 IF (OGREENROOF) THEN
 !
+  !
   CALL GREENROOF(HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,            &
                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                  &
                 PTSTEP, PZREF, PUREF,                                                &
                 PTA, PQA, PEXNS, PEXNA,PRHOA, PCO2, PPS, PRR, PSR, PZENITH,          &
-                ZDIR_SW+ZSCA_SW, PLW_RAD, PVMOD,                                     &
+                ZREC_SW_ROOF, ZREC_LW_ROOF, PVMOD,                                   &
                 PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF,PGFLUX_GREENROOF,           &
                 ZSFCO2_GREENROOF,ZEVAP_GREENROOF, ZUW_GREENROOF,                     &
                 PAC_GREENROOF,ZQSAT_GREENROOF,ZTS_GREENROOF,                         &
                 ZAC_AGG_GREENROOF, ZHU_AGG_GREENROOF,PG_GREENROOF_ROOF,              &
-                PRUNOFF_GREENROOF, PDRAIN_GREENROOF                                  )  
+                PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PIRRIG_GREENROOF                )  
 !
   PAC_GREENROOF_WAT(:) = PAC_GREENROOF(:)
-  PABS_SW_GREENROOF(:) = (1.-ZALB_GREENROOF(:)) * (ZDIR_SW+ZSCA_SW)
-  PABS_LW_GREENROOF(:) = ZEMIS_GREENROOF * PLW_RAD - XSTEFAN * ZEMIS_GREENROOF * ZTS_GREENROOF**4
+  PABS_SW_GREENROOF(:) = (1.-ZALB_GREENROOF(:)) * ZREC_SW_ROOF
+  PABS_LW_GREENROOF(:) = ZEMIS_GREENROOF * ZREC_LW_ROOF - XSTEFAN * ZEMIS_GREENROOF * ZTS_GREENROOF**4
 
 ELSE
 !
@@ -923,6 +1035,7 @@ ELSE
  ZSFCO2_GREENROOF (:) = 0.
  PRUNOFF_GREENROOF(:) = 0.
  PDRAIN_GREENROOF (:) = 0.
+ PIRRIG_GREENROOF (:) = 0.
  ZQSAT_GREENROOF  (:) = XUNDEF
  ZTS_GREENROOF    (:) = XUNDEF
  ZAC_AGG_GREENROOF(:) = XUNDEF
@@ -941,7 +1054,7 @@ SUBROUTINE TEB_GARDEN3
 !*     9.      Treatment of built covers
 !              -------------------------
 !
-  CALL TEB  (HZ0H, HIMPLICIT_WIND, HWALL_OPT, HBEM,                   &
+  CALL TEB  (HZ0H, HIMPLICIT_WIND, HWALL_OPT, HBEM, TPTIME, PTSUN,    &
              PT_CANYON, PQ_CANYON, PU_CANYON,                         &
              PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,              &
              PTI_BLD,                                                 &
@@ -978,7 +1091,9 @@ SUBROUTINE TEB_GARDEN3
              PRUNOFF_ROOF,                                            &
              PRN_GREENROOF, PH_GREENROOF, PLE_GREENROOF,              &
              PGFLUX_GREENROOF, ZUW_GREENROOF,                         &
+             PRUNOFF_GREENROOF, PDRAIN_GREENROOF,                     &
              PRN_STRLROOF, PH_STRLROOF, PLE_STRLROOF, PGFLUX_STRLROOF,&
+             PRUNOFF_STRLROOF,                                        &
              PRN_ROAD, PH_ROAD, PLE_ROAD, PLEW_ROAD, PGFLUX_ROAD,     &
              PRUNOFF_ROAD,                                            &
              PRN_WALL_A, PH_WALL_A, PLE_WALL_A, PGFLUX_WALL_A,        &
@@ -989,7 +1104,6 @@ SUBROUTINE TEB_GARDEN3
              PRNSNOW_ROAD, PHSNOW_ROAD, PLESNOW_ROAD, PGSNOW_ROAD,    &
              PMELT_ROAD,                                              &
              PG_GREENROOF_ROOF,                                       &
-             PRUNOFF_TOWN,                                            &
              ZUW_ROAD, PUW_ROOF, ZDUWDU_ROAD, PDUWDU_ROOF,            &
              PUSTAR_TOWN, PCD, PCDN, PCH_TOWN, PRI_TOWN,              &
              PRESA_TOWN, PDQS_TOWN, PQF_TOWN, PQF_BLD, PFLX_BLD,      &
@@ -1018,9 +1132,9 @@ SUBROUTINE TEB_GARDEN3
              PT_MASS, PH_BLD_COOL, PT_BLD_COOL,                       &    
              PH_BLD_HEAT, PLE_BLD_COOL, PLE_BLD_HEAT,                 &
              PH_WASTE, PLE_WASTE, PF_WASTE_CAN, PHVAC_COOL,           &
-             PHVAC_HEAT, PQIN, PQIN_FRAD, PQIN_FLAT,                  &
-             PGR, PEFF_HEAT, PINF, PTCOOL_TARGET,                     &
-             PTHEAT_TARGET, PHR_TARGET, PT_WIN2, PQI_BLD,             &
+             PHVAC_HEAT, PCUR_QIN, PQIN_FRAD, PQIN_FLAT,              &
+             PGR, PEFF_HEAT, PINF, PCUR_TCOOL_TARGET,                 &
+             PCUR_THEAT_TARGET, PHR_TARGET, PT_WIN2, PQI_BLD,         &
              PV_VENT, PCAP_SYS_HEAT, PCAP_SYS_RAT, PT_ADP,            &
              PM_SYS_RAT, PCOP_RAT, PCAP_SYS, PM_SYS, PCOP,            &
              PQ_SYS, PT_SYS, PTR_SW_WIN, PFAN_POWER, PHC_FLOOR,       &
@@ -1033,11 +1147,49 @@ SUBROUTINE TEB_GARDEN3
              PF_FLOOR_ROOF, PF_WALL_FLOOR, PF_WALL_MASS, PF_WALL_WIN, &
              PF_WIN_FLOOR, PF_WIN_MASS, PF_WIN_WALL, PF_MASS_FLOOR,   &
              PF_MASS_WALL, PF_MASS_WIN, OCANOPY,                      &
-             HCH_BEM, PROUGH_ROOF, PROUGH_WALL, PF_WIN_WIN            )
+             HCH_BEM, PROUGH_ROOF, PROUGH_WALL, PF_WIN_WIN,           &
+             OPAR_RD_IRRIG, PRD_START_MONTH, PRD_END_MONTH,           &
+             PRD_START_HOUR, PRD_END_HOUR, PRD_24H_IRRIG, PIRRIG_ROAD )
 !
 !-------------------------------------------------------------------------------
 !
-!*     10.     Aggregation
+!*    10.      Treatment of solar panels
+!              -------------------------
+!
+IF (OSOLAR_PANEL) THEN
+  ! 
+  !* LW radiation coming upwards from roofs
+  !
+  ZEMIT_LW_ROOF =  ZREC_LW_ROOF                                  &
+     - (        PFRAC_GR(:)  *               PABS_LW_GREENROOF(:)&
+          + (1.-PFRAC_GR(:)) * ZDF_ROOF(:) * PABS_LW_ROOF(:)     &
+          + (1.-PFRAC_GR(:)) * ZDN_ROOF(:) * PABS_LW_SNOW_ROOF(:)&
+       )
+  !
+  ! note that, for the time being, one considers that the solar panel 
+  ! intercept radiation both above roof and greenroofs (if any)
+  CALL SOLAR_PANEL(PTSTEP, PTSUN, PRESIDENTIAL,                   &
+                   ZEMIT_LW_ROOF,ZEMIT_LWDN_PANEL, PLW_RAD,       &
+                   PABS_SW_PANEL, PTA, PN_FLOOR, PFRAC_PANEL,     &
+                   PEMIS_PANEL, PALB_PANEL, PEFF_PANEL,           &
+                   PABS_LW_PANEL, PH_PANEL, PRN_PANEL,            &
+                   PTHER_PRODC_DAY,                               &
+                   PTHER_PROD_PANEL, PPHOT_PROD_PANEL,PPROD_PANEL,&
+                   PTHER_PROD_BLD,   PPHOT_PROD_BLD,  PPROD_BLD   )
+ELSE
+  PABS_LW_PANEL    = XUNDEF
+  PTHER_PROD_PANEL = XUNDEF
+  PPHOT_PROD_PANEL = XUNDEF
+  PPROD_PANEL      = XUNDEF
+  PTHER_PROD_BLD   = XUNDEF
+  PPHOT_PROD_BLD   = XUNDEF
+  PPROD_BLD        = XUNDEF
+  PH_PANEL         = XUNDEF
+  PRN_PANEL        = XUNDEF
+END IF
+!-------------------------------------------------------------------------------
+!
+!*     11.     Aggregation
 !              -----------
 !
  CALL AVG_URBAN_FLUXES(PTS_TOWN, PEMIS_TOWN,                                    &
@@ -1073,6 +1225,10 @@ SUBROUTINE TEB_GARDEN3
                      ZEVAP_GARDEN, ZEVAP_GREENROOF,                            &
                      PRN_GRND, PH_GRND, PLE_GRND, PGFLUX_GRND,                 &
                      PRN_TOWN, PH_TOWN, PLE_TOWN, PGFLUX_TOWN, PEVAP_TOWN,     &
+                     PRUNOFF_GARDEN,PRUNOFF_ROAD,PRUNOFF_STRLROOF,             &
+                     PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PRUNOFF_TOWN,        &
+                     PABS_LW_PANEL, PEMIS_PANEL, PFRAC_PANEL, PRN_PANEL,       &
+                     PH_PANEL,                                                 &
                      PH_WASTE, PLE_WASTE, PF_WASTE_CAN,                        &
                      PABS_LW_WIN, PT_WIN1, PGR, ZEMIT_LW_ROAD, ZEMIT_LW_GARDEN,&
                      PEMIT_LW_GRND, HBEM, PSVF_ROAD, PSVF_GARDEN, PSVF_WALL,   &
@@ -1083,7 +1239,7 @@ PSFCO2(:) = PGARDEN(:) * ZSFCO2_GARDEN(:) + PBLD(:) * PFRAC_GR(:) * ZSFCO2_GREEN
 !
 !-------------------------------------------------------------------------------
 !
-!*     11.     Momentum flux for ground built surfaces
+!*     12.     Momentum flux for ground built surfaces
 !              ---------------------------------------
 !
 PUW_GRND (:)     = (PROAD(:)*ZUW_ROAD(:) + PGARDEN(:)*ZUW_GARDEN(:)) / (PROAD(:)+PGARDEN(:))

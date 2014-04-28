@@ -46,6 +46,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !!      A.L. Gibelin   06/09 : soil carbon initialisation
 !!      Modified by B. Decharme  (09/2012): Bug in exponential profile calculation with DIF
 !!      F. Bouttier    08/13 : apply random perturbation patterns for ensembles
+!!      B. Vincendon   03/14 : bug correction for CISBA=3L and CKSAT=EXP (TOPD coupling)
 !!
 !-------------------------------------------------------------------------------
 !
@@ -108,9 +109,11 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           XPSNV_A, XFF, XFFG, XFFV, XPCPS, XPLVTT, XPLSTT,    &
                           LCANOPY, LCANOPY_DRAG, XDIR_ALB_WITH_SNOW,          &
                           XSCA_ALB_WITH_SNOW, XALBF, XEMISF, XCPL_ICEFLUX,    &
-                          NLAYER_HORT, NLAYER_DUN, XF_PARAM, XC_DEPTH_RATIO,  &
+                          NLAYER_HORT, NLAYER_DUN, XF_PARAM,   &
                           LPERTSURF,XPERTVEG,XPERTLAI,XPERTCV,XPERTALB,XPERTZ0
-!
+#ifdef TOPD
+USE MODD_DUMMY_EXP_PROFILE,ONLY : XC_DEPTH_RATIO
+#endif
 USE MODD_CH_ISBA_n, ONLY : CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,         &
                            CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,      &
                            NSV_AERBEG, NSV_AEREND, NAEREQ, CDSTNAMES, CAER_NAMES,&
@@ -466,9 +469,11 @@ IF(HINIT/='PRE'.AND.CISBA/='DIF')THEN
     ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
     !
     ALLOCATE(XF_PARAM (KI))
-    ALLOCATE(XC_DEPTH_RATIO (KI))
     XF_PARAM(:) = ZF(:,1)
-    XC_DEPTH_RATIO(:) = 1.25
+#ifdef TOPD
+IF (.NOT.ALLOCATED(XC_DEPTH_RATIO))ALLOCATE(XC_DEPTH_RATIO (KI))
+    XC_DEPTH_RATIO(:) = 1.00
+#endif
     !
     DO JPATCH=1,NPATCH
       IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
@@ -480,9 +485,7 @@ IF(HINIT/='PRE'.AND.CISBA/='DIF')THEN
   ELSEIF ( CKSAT=='EXP' .AND. CISBA=='3-L' ) THEN
     !
     ALLOCATE(XF_PARAM (KI))
-    ALLOCATE(XC_DEPTH_RATIO (KI))
     XF_PARAM(:) = XUNDEF
-    XC_DEPTH_RATIO(:) = XUNDEF
     !
     IF (HPROGRAM/='AROME ' .AND. HPROGRAM/='MESONH ') THEN
       !
@@ -492,7 +495,11 @@ IF(HINIT/='PRE'.AND.CISBA/='DIF')THEN
       ENDDO
       CALL CLOSE_FILE('ASCII ',IUNIT)
       CALL READ_AND_SEND_MPI(ZF_PARAM,XF_PARAM,NR_NATURE)
+#ifdef TOPD
+IF (.NOT.ALLOCATED(XC_DEPTH_RATIO))    ALLOCATE(XC_DEPTH_RATIO (KI))
+    XC_DEPTH_RATIO(:) = XUNDEF
       CALL READ_AND_SEND_MPI(ZC_DEPTH_RATIO,XC_DEPTH_RATIO,NR_NATURE)
+#endif
       !
     ELSE
       WRITE(ILUOUT,*) "COMPUTE_ISBA_PARAMETERS: WITH CKSAT=EXP, IN NOT OFFLINE "//&
@@ -500,13 +507,13 @@ IF(HINIT/='PRE'.AND.CISBA/='DIF')THEN
     ENDIF
     !
     DO JPATCH=1,NPATCH
-      WHERE (XF_PARAM(:)/=XUNDEF)
-        ZF(:,JPATCH) = XF_PARAM(:)
-      ELSEWHERE
+      WHERE (XF_PARAM(:)==XUNDEF.AND.XDG(:,2,JPATCH)/=XUNDEF)
         ZF(:,JPATCH) = 4.0/XDG(:,2,JPATCH)
-        ZF(:,JPATCH) = MIN(ZF(:,JPATCH),XF_DECAY)
+      ELSEWHERE
+        ZF(:,JPATCH) = XF_PARAM(:)
       ENDWHERE
-    ENDDO
+     ENDDO
+     ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
     !
     DO JPATCH=1,NPATCH
       CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:,JPATCH),XC1SAT(:,JPATCH),XC2REF(:,JPATCH), &

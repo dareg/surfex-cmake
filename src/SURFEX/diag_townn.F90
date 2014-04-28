@@ -106,7 +106,9 @@ IF (CTOWN=='TEB   ') THEN
   CALL DIAG_TEB_n(HPROGRAM,                                          &
                     PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,     &
                     PZ0, PZ0H, PT2M, PQ2M, PHU2M, PZON10M, PMER10M,    &
-                    PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV   )  
+                    PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,  &
+                    PT2M_MIN, PT2M_MAX, PHU2M_MIN, PHU2M_MAX,          &
+                    PWIND10M, PWIND10M_MAX                             )
 !
 ! new diag not yet inplemeted for TEB (these diag are required for the climate model)
 !
@@ -131,17 +133,6 @@ IF (CTOWN=='TEB   ') THEN
   PLWUC    = XUNDEF
   PFMUC    = XUNDEF
   PFMVC    = XUNDEF
-  PT2M_MIN = XUNDEF
-  PT2M_MAX = 0.0
-  PHU2M_MIN= XUNDEF
-  PHU2M_MAX= -XUNDEF
-  PWIND10M_MAX = 0.0      
-  PT2M_MIN = MIN(PT2M(:),PT2M_MIN(:))
-  PT2M_MAX = MAX(PT2M(:),PT2M_MAX(:))
-  PHU2M_MIN= MIN(PHU2M(:),PHU2M_MIN(:))
-  PHU2M_MAX= MAX(PHU2M(:),PHU2M_MAX(:))
-  PWIND10M    (:) = SQRT(PZON10M(:)**2+PMER10M(:)**2)
-  PWIND10M_MAX(:) = MAX(PWIND10M_MAX(:),PWIND10M(:))
 !      
 ELSE IF (CTOWN=='FLUX  ') THEN
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)

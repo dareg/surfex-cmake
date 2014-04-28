@@ -36,6 +36,7 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!      G. Pigeon   10/2012 XF_WIN_WIN as arg. of TEB_GARDEN
 !!      B. Decharme 09/2012 New wind implicitation
 !!      J. Escobar  09/2012 KI not allowed without-interface , replace by KI
+!!      V. Masson   08/2013 adds solar panels & occupation calendar
 !!---------------------------------------------------------------
 !
 !
@@ -44,7 +45,7 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
 USE MODD_SURF_ATM,     ONLY : CIMPLICIT_WIND
 !
-USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF,                                     &
+USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF, LSOLAR_PANEL,                       &
                               CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,            &
                               XT_CANYON, XQ_CANYON,                                    &
                               XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B,                  &
@@ -60,7 +61,11 @@ USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF,                              
                               XSVF_ROAD, XSVF_WALL,                                    &
                               XSVF_GARDEN, XWALL_O_BLD,                                &
                               XQSAT_ROOF, XQSAT_ROAD, XDELT_ROOF, XDELT_ROAD,          &
-                              NTEB_PATCH, XTEB_PATCH, CCH_BEM, XROUGH_ROOF, XROUGH_WALL                       
+                              NTEB_PATCH, XTEB_PATCH, CCH_BEM, XROUGH_ROOF,XROUGH_WALL,&
+                              XRESIDENTIAL, XDT_RES, XDT_OFF
+!
+USE MODD_TEB_PANEL_n,  ONLY : XEMIS_PANEL, XALB_PANEL, XEFF_PANEL, XFRAC_PANEL,        &
+                              XTHER_PRODC_DAY
 !
 USE MODD_BEM_n,        ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR, XTCOOL_TARGET,           &
                               XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT, XTI_BLD,         &
@@ -85,7 +90,11 @@ USE MODD_TEB_CANOPY_n, ONLY : XZ, XU, NLVL, XTKE, XT, XQ,                       
                               XLMO, XLM, XLEPS,XZF, XDZ, XDZF, XP
 USE MODD_DIAG_TEB_n,   ONLY : N2M, XZON10M, XMER10M
 USE MODD_DIAG_UTCI_TEB_n, ONLY : LUTCI, XUTCI_IN, XUTCI_OUTSUN,          &
-                                 XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE
+                                 XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE, &
+                                 XUTCIC_IN, XUTCIC_OUTSUN, XUTCIC_OUTSHADE
+USE MODD_TEB_IRRIG_n,  ONLY : LPAR_RD_IRRIG,                                  &
+                              XRD_START_MONTH, XRD_END_MONTH, XRD_START_HOUR, &
+                              XRD_END_HOUR, XRD_24H_IRRIG
 USE MODD_DST_n,        ONLY : XEMISRADIUS_DST, XEMISSIG_DST
 USE MODD_SLT_n,        ONLY : XEMISRADIUS_SLT, XEMISSIG_SLT
 USE MODD_DST_SURF
@@ -115,6 +124,7 @@ USE MODI_ABOR1_SFX
 USE MODI_CANOPY_EVOL
 USE MODI_CANOPY_GRID_UPDATE
 USE MODI_UTCI_TEB
+USE MODI_UTCIC_STRESS
 USE MODI_CIRCUMSOLAR_RAD
 !
 IMPLICIT NONE
@@ -213,6 +223,7 @@ REAL, DIMENSION(KI)  :: ZLE_ROAD    ! latent heat flux on road
 REAL, DIMENSION(KI)  :: ZLEW_ROAD   ! latent heat flux on snowfree road
 REAL, DIMENSION(KI)  :: ZGFLUX_ROAD ! storage flux in road
 REAL, DIMENSION(KI)  :: ZRUNOFF_ROAD! water runoff from road
+REAL, DIMENSION(KI)  :: ZIRRIG_ROAD ! water supply from road summer watering
 REAL, DIMENSION(KI)  :: ZRN_WALL_A  ! net radiation on walls
 REAL, DIMENSION(KI)  :: ZH_WALL_A   ! sensible heat flux on walls
 REAL, DIMENSION(KI)  :: ZLE_WALL_A  ! latent heat flux on walls
@@ -225,6 +236,9 @@ REAL, DIMENSION(KI)  :: ZRN_GARDEN  ! net radiation on green areas
 REAL, DIMENSION(KI)  :: ZH_GARDEN   ! sensible heat flux on green areas
 REAL, DIMENSION(KI)  :: ZLE_GARDEN  ! latent heat flux on green areas
 REAL, DIMENSION(KI)  :: ZGFLUX_GARDEN!storage flux in green areas
+REAL, DIMENSION(KI)  :: ZRUNOFF_GARDEN!runoff over green areas
+REAL, DIMENSION(KI)  :: ZDRAIN_GARDEN !drainage over green areas
+REAL, DIMENSION(KI)  :: ZIRRIG_GARDEN !water supply from garden summer irrigation 
 REAL, DIMENSION(KI)  :: ZRN_GREENROOF! net radiation on green roofs
 REAL, DIMENSION(KI)  :: ZH_GREENROOF ! sensible heat flux on green roofs
 REAL, DIMENSION(KI)  :: ZLE_GREENROOF! latent heat flux on green roofs
@@ -232,10 +246,20 @@ REAL, DIMENSION(KI)  :: ZGFLUX_GREENROOF    ! storage flux in green roofs
 REAL, DIMENSION(KI)  :: ZG_GREENROOF_ROOF   ! heat flux between base of greenroof
 REAL, DIMENSION(KI)  :: ZRUNOFF_GREENROOF   ! water runoff from green roof
 REAL, DIMENSION(KI)  :: ZDRAIN_GREENROOF    ! water drainage from green roof
+REAL, DIMENSION(KI)  :: ZIRRIG_GREENROOF    ! water supply from green roof summer irrigation 
 REAL, DIMENSION(KI)  :: ZRN_STRLROOF        ! net radiation on structural roof
 REAL, DIMENSION(KI)  :: ZH_STRLROOF         ! sensible heat flux on structural roof
 REAL, DIMENSION(KI)  :: ZLE_STRLROOF        ! latent heat flux on structural roof
 REAL, DIMENSION(KI)  :: ZGFLUX_STRLROOF     ! storage flux in structural roof
+REAL, DIMENSION(KI)  :: ZRUNOFF_STRLROOF    ! runoff over structural roof
+REAL, DIMENSION(KI)  :: ZH_PANEL    ! sensible heat flux on solar panel
+REAL, DIMENSION(KI)  :: ZTHER_PROD_PANEL ! thermal      energy production from solar panel (W/m2 panel)
+REAL, DIMENSION(KI)  :: ZPHOT_PROD_PANEL ! photovoltaic energy production from solar panel (W/m2 panel)
+REAL, DIMENSION(KI)  :: ZPROD_PANEL      ! averaged     energy production from solar panel (W/m2 panel)
+REAL, DIMENSION(KI)  :: ZTHER_PROD_BLD   ! thermal      energy production from solar panel (W/m2 bld)
+REAL, DIMENSION(KI)  :: ZPHOT_PROD_BLD   ! photovoltaic energy production from solar panel (W/m2 bld)
+REAL, DIMENSION(KI)  :: ZPROD_BLD        ! averaged     energy production from solar panel (W/m2 bld)
+REAL, DIMENSION(KI)  :: ZRN_PANEL   ! net radiation of solar panel
 REAL, DIMENSION(KI)  :: ZRN_BLT     ! net radiation on built surf 
 REAL, DIMENSION(KI)  :: ZH_BLT      ! sensible heat flux on built surf 
 REAL, DIMENSION(KI)  :: ZLE_BLT     ! latent heat flux on built surf 
@@ -272,7 +296,7 @@ REAL, DIMENSION(KI)  :: ZFLX_BLD      ! flux from bld
 REAL, DIMENSION(KI)  :: ZDQS_TOWN     ! storage inside town materials
 REAL, DIMENSION(KI)  :: ZQF_TOWN      ! total anthropogenic heat
 REAL, DIMENSION(KI)  :: ZEVAP         ! evaporation (km/m2/s)
-REAL, DIMENSION(KI)  :: ZRUNOFF       ! runoff over the ground
+REAL, DIMENSION(KI)  :: ZRUNOFF_TOWN  ! runoff over the ground
 REAL, DIMENSION(KI)  :: ZCD           ! drag coefficient
 REAL, DIMENSION(KI)  :: ZCDN          ! neutral drag coefficient
 REAL, DIMENSION(KI)  :: ZCH           ! heat drag
@@ -388,6 +412,7 @@ REAL, DIMENSION(KI) :: ZABS_SW_WALL_B
 REAL, DIMENSION(KI) :: ZABS_SW_ROOF
 REAL, DIMENSION(KI) :: ZABS_SW_GARDEN
 REAL, DIMENSION(KI) :: ZABS_SW_GREENROOF
+REAL, DIMENSION(KI) :: ZABS_SW_PANEL
 REAL, DIMENSION(KI) :: ZABS_SW_SNOW_ROAD
 REAL, DIMENSION(KI) :: ZABS_SW_SNOW_ROOF
 REAL, DIMENSION(KI) :: ZABS_LW_SNOW_ROAD
@@ -398,6 +423,7 @@ REAL, DIMENSION(KI) :: ZABS_LW_WALL_B
 REAL, DIMENSION(KI) :: ZABS_LW_ROOF
 REAL, DIMENSION(KI) :: ZABS_LW_GARDEN 
 REAL, DIMENSION(KI) :: ZABS_LW_GREENROOF
+REAL, DIMENSION(KI) :: ZABS_LW_PANEL
 !
 REAL, DIMENSION(KI)        :: ZU_UTCI ! wind speed for the UTCI calculation (m/s) 
 
@@ -443,6 +469,11 @@ REAL, DIMENSION(KI) :: ZAVG_QI_BLD
 REAL, DIMENSION(KI) :: ZF1_o_B
 REAL, DIMENSION(KI,SIZE(PDIR_SW,2))  :: ZDIR_SWB ! total direct SW per band
 REAL, DIMENSION(KI,SIZE(PSCA_SW,2))  :: ZSCA_SWB ! total diffuse SW per band
+!
+! occupation of buildings
+REAL, DIMENSION(SIZE(PTA)) :: ZCUR_TCOOL_TARGET ! Cooling target temperature at current time
+REAL, DIMENSION(SIZE(PTA)) :: ZCUR_THEAT_TARGET ! Heating target temperature at current time
+REAL, DIMENSION(SIZE(PTA)) :: ZCUR_QIN          ! Internal heat gains        at current time
 !
 REAL, DIMENSION(KI)        :: ZCOEF
 !
@@ -733,14 +764,11 @@ ZLESNOW_ROAD(:) = 0.
 ZG_GREENROOF_ROOF(:) = 0.
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  Reinitialize shading of windows when changing day
+! Call the physical routines of TEB (including gardens & greenroofs)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (CBEM=='BEM') &
-WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
-!
-!
- CALL TEB_GARDEN      (LGARDEN, LGREENROOF, CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,&
+ CALL TEB_GARDEN      (LGARDEN, LGREENROOF, LSOLAR_PANEL,                              &
+                      CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,                      &
                       TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &
                       XTI_BLD,                                                         &
@@ -778,15 +806,17 @@ WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
                       ZRN_WALL_A, ZH_WALL_A, ZLE_WALL_A, ZGFLUX_WALL_A,                &
                       ZRN_WALL_B, ZH_WALL_B, ZLE_WALL_B, ZGFLUX_WALL_B,                &
                       ZRN_GARDEN,ZH_GARDEN,ZLE_GARDEN,ZGFLUX_GARDEN,                   &
+                      ZRUNOFF_GARDEN, ZDRAIN_GARDEN, ZIRRIG_GARDEN,                    &
                       ZRN_GREENROOF,ZH_GREENROOF,ZLE_GREENROOF,ZGFLUX_GREENROOF,       &
                       ZRN_STRLROOF,ZH_STRLROOF,ZLE_STRLROOF,ZGFLUX_STRLROOF,           &
+                      ZRUNOFF_STRLROOF,                                                &
                       ZRN_BLT,ZH_BLT,ZLE_BLT,ZGFLUX_BLT,                               &
                       ZRNSNOW_ROOF, ZHSNOW_ROOF, ZLESNOW_ROOF, ZGSNOW_ROOF,            &
                       ZMELT_ROOF,                                                      &
                       ZRNSNOW_ROAD, ZHSNOW_ROAD, ZLESNOW_ROAD, ZGSNOW_ROAD,            &
                       ZMELT_ROAD,                                                      &
                       ZRN_GRND, ZH_GRND, ZLE_GRND, ZGFLUX_GRND,                        &
-                      ZRN, ZH, ZLE, ZGFLUX, ZEVAP, ZRUNOFF, ZSFCO2,                    &
+                      ZRN, ZH, ZLE, ZGFLUX, ZEVAP, ZRUNOFF_TOWN, ZSFCO2,               &
                       ZUW_GRND, ZUW_ROOF, ZDUWDU_GRND, ZDUWDU_ROOF,                    &
                       ZUSTAR, ZCD, ZCDN, ZCH, ZRI,                                     &
                       ZTRAD, ZEMIS, ZDIR_ALB, ZSCA_ALB, ZRESA_TOWN, ZDQS_TOWN,         &
@@ -799,10 +829,11 @@ WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
                       ZABS_SW_SNOW_ROAD,ZABS_LW_SNOW_ROAD,                             &
                       ZABS_SW_WALL_A, ZABS_LW_WALL_A,                                  &
                       ZABS_SW_WALL_B, ZABS_LW_WALL_B,                                  &
+                      ZABS_SW_PANEL,ZABS_LW_PANEL,                                     &
                       ZABS_SW_GARDEN,ZABS_LW_GARDEN,                                   &
                       ZABS_SW_GREENROOF,ZABS_LW_GREENROOF, ZG_GREENROOF_ROOF,          &
                       ZRUNOFF_GREENROOF, ZDRAIN_GREENROOF,                             &
-                      CCOOL_COIL, XF_WATER_COND, CHEAT_COIL, CNATVENT,                 &
+                      ZIRRIG_GREENROOF, CCOOL_COIL, XF_WATER_COND, CHEAT_COIL,CNATVENT,&
                       KDAY, XAUX_MAX, XT_FLOOR, XT_MASS, ZH_BLD_COOL,                  &
                       ZT_BLD_COOL, ZH_BLD_HEAT, ZLE_BLD_COOL, ZLE_BLD_HEAT, ZH_WASTE,  &
                       ZLE_WASTE, XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT, XQIN, XQIN_FRAD,&
@@ -820,7 +851,15 @@ WHERE (PTSUN .LT. PTSTEP + 1E-3) LSHAD_DAY(:) = .FALSE.
                       XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS,                      &
                       XF_WALL_WIN, XF_WIN_FLOOR, XF_WIN_MASS, XF_WIN_WALL,             &
                       XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN, LCANOPY, XTRAN_WIN,    &
-                      CCH_BEM, XROUGH_ROOF, XROUGH_WALL, XF_WIN_WIN                    )
+                      CCH_BEM, XROUGH_ROOF, XROUGH_WALL, XF_WIN_WIN,                   &
+                      LPAR_RD_IRRIG, XRD_START_MONTH, XRD_END_MONTH,                   &
+                      XRD_START_HOUR, XRD_END_HOUR, XRD_24H_IRRIG, ZIRRIG_ROAD,        &
+                      XEMIS_PANEL, XALB_PANEL, XEFF_PANEL, XFRAC_PANEL, XRESIDENTIAL,  &
+                      ZTHER_PROD_PANEL, ZPHOT_PROD_PANEL, ZPROD_PANEL,                 &
+                      ZTHER_PROD_BLD  , ZPHOT_PROD_BLD  , ZPROD_BLD  ,                 &
+                      XTHER_PRODC_DAY, ZH_PANEL, ZRN_PANEL,                            &
+                      XDT_RES, XDT_OFF,                                                &
+                      ZCUR_TCOOL_TARGET, ZCUR_THEAT_TARGET, ZCUR_QIN                   )
 
 
 !
@@ -871,11 +910,9 @@ ZTRAD_PATCH(:,JTEB_PATCH) = ZTRAD
 !
 ! computes some aggregated diagnostics
 !
- IF (.NOT. LCANOPY) THEN
-   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CD ,ZCD )
-   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CDN,ZCDN)
-   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RI ,ZRI )
- ENDIF
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CD ,ZCD )
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CDN,ZCDN)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RI ,ZRI )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CH ,ZCH )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RN ,ZRN )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H  ,ZH  )
@@ -891,15 +928,19 @@ IF (JTEB_PATCH==NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
 !-------------------------------------------------------------------------------------
 !
  CALL DIAG_MISC_TEB_n(PTSTEP, ZDQS_TOWN, ZQF_BLD, ZQF_TOWN, ZFLX_BLD,           &
+                     ZRUNOFF_TOWN,                                             &
                      ZRN_ROAD, ZH_ROAD, ZLE_ROAD, ZGFLUX_ROAD,                 &
+                     ZRUNOFF_ROAD, ZIRRIG_ROAD,                                &
                      ZRN_WALL_A, ZH_WALL_A, ZGFLUX_WALL_A,                     &
                      ZRN_WALL_B, ZH_WALL_B, ZGFLUX_WALL_B,                     &
-                     ZRN_ROOF, ZH_ROOF, ZLE_ROOF, ZGFLUX_ROOF, ZRUNOFF,        &
+                     ZRN_ROOF, ZH_ROOF, ZLE_ROOF, ZGFLUX_ROOF, ZRUNOFF_ROOF,   &
                      ZRN_STRLROOF, ZH_STRLROOF, ZLE_STRLROOF, ZGFLUX_STRLROOF, &
+                     ZRUNOFF_STRLROOF,                                         &
                      ZRN_GREENROOF, ZH_GREENROOF,                              &
                      ZLE_GREENROOF, ZGFLUX_GREENROOF, ZG_GREENROOF_ROOF,       &
-                     ZRUNOFF_GREENROOF, ZDRAIN_GREENROOF,                      &
+                     ZRUNOFF_GREENROOF, ZDRAIN_GREENROOF,ZIRRIG_GREENROOF,     &
                      ZRN_GARDEN,ZH_GARDEN,ZLE_GARDEN,ZGFLUX_GARDEN,            &
+                     ZRUNOFF_GARDEN, ZDRAIN_GARDEN, ZIRRIG_GARDEN,             &
                      ZRN_BLT,ZH_BLT,ZLE_BLT,ZGFLUX_BLT,                        &
                      ZABS_SW_ROOF,ZABS_LW_ROOF,                                &
                      ZABS_SW_SNOW_ROOF,ZABS_LW_SNOW_ROOF,                      &
@@ -914,7 +955,11 @@ IF (JTEB_PATCH==NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
                      ZH_WASTE, ZLE_WASTE, ZHVAC_COOL,                          &
                      ZHVAC_HEAT, ZCAP_SYS, ZM_SYS, ZCOP,                       &
                      ZQ_SYS, ZT_SYS, ZTR_SW_WIN, ZFAN_POWER,                   &
-                     ZABS_SW_WIN, ZABS_LW_WIN                                  )
+                     ZABS_SW_WIN, ZABS_LW_WIN,                                 &
+                     ZCUR_TCOOL_TARGET, ZCUR_THEAT_TARGET, ZCUR_QIN,           &
+                     ZABS_SW_PANEL, ZABS_LW_PANEL, ZRN_PANEL,                  &
+                     ZH_PANEL, ZTHER_PROD_PANEL, ZPHOT_PROD_PANEL, ZPROD_PANEL,&
+                     ZTHER_PROD_BLD, ZPHOT_PROD_BLD                            )
 !
 !
 !-------------------------------------------------------------------------------------
@@ -1152,13 +1197,19 @@ IF (LUTCI .AND. N2M >0) THEN
  CALL UTCI_TEB(XT_CANYON, XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND,&
      ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC, ZAVG_EMIT_LW_GRND, PLW,   &
      ZAVG_T_RAD_IND, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XUTCI_IN, XUTCI_OUTSUN,         &
-     XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE                                      )       
+     XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE                                      )
+ CALL UTCIC_STRESS(PTSTEP,XUTCI_IN      ,XUTCIC_IN      )
+ CALL UTCIC_STRESS(PTSTEP,XUTCI_OUTSUN  ,XUTCIC_OUTSUN  )
+ CALL UTCIC_STRESS(PTSTEP,XUTCI_OUTSHADE,XUTCIC_OUTSHADE)
 ELSE IF (LUTCI) THEN
   XUTCI_IN(:) = XUNDEF
   XUTCI_OUTSUN(:) = XUNDEF
   XUTCI_OUTSHADE(:) = XUNDEF
   XTRAD_SUN(:) = XUNDEF
   XTRAD_SHADE(:) = XUNDEF
+  XUTCIC_IN(:,:) = XUNDEF
+  XUTCIC_OUTSUN(:,:) = XUNDEF
+  XUTCIC_OUTSHADE(:,:) = XUNDEF
 ENDIF
 
 !

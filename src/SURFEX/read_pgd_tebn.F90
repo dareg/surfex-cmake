@@ -42,7 +42,7 @@ USE MODD_TEB_n,          ONLY : XCOVER, XZS, CBEM,                     &
                                 NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
                                 TTIME, LCOVER, LECOCLIMAP, NTEB_PATCH, &
                                 CBLD_ATYPE, LGARDEN,                   &
-                                LGREENROOF
+                                LGREENROOF, LHYDRO, LSOLAR_PANEL
 USE MODD_BEM_n,          ONLY : NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
 USE MODD_TEB_GRID_n,     ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 !
@@ -145,7 +145,26 @@ IF (LGARDEN) THEN
     YRECFM='LGREENROOF'
     CALL READ_SURF(HPROGRAM,YRECFM,LGREENROOF,IRESP)
   END IF
+!
+!* Case of urban hydrology
+!
+  IF (IVERSION<7 .OR.( IVERSION==7 .AND. IBUGFIX<=3)) THEN
+    LHYDRO = .FALSE.
+  ELSE
+    YRECFM='LURBAN_HYDRO'
+    CALL READ_SURF(HPROGRAM,YRECFM,LHYDRO,IRESP)
+  END IF
 ENDIF
+!
+!* Solar panels
+!
+IF (IVERSION<7 .OR.( IVERSION==7 .AND. IBUGFIX<=3)) THEN
+  LSOLAR_PANEL = .FALSE.
+ELSE
+  YRECFM='SOLAR_PANEL'
+  CALL READ_SURF(HPROGRAM,YRECFM,LSOLAR_PANEL,IRESP)
+END IF
+!
 !
 !
 !*       3.     Physiographic data fields:

@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!!       V.Masson   10/2013 Adds min and max 2m parameters
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,7 +41,10 @@ USE MODD_DIAG_FLAKE_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,   &
                                   XT2M, XQ2M, XHU2M,                    &
                                   XZON10M, XMER10M, XQS,                &
                                   XSWD, XSWU, XLWD, XLWU,               &
-                                  XSWBD, XSWBU, XFMU, XFMV  
+                                  XSWBD, XSWBU, XFMU, XFMV,             &
+                                  XT2M_MIN,XT2M_MAX,XHU2M_MIN,XHU2M_MAX,&
+                                  XWIND10M, XWIND10M_MAX
+
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -112,24 +116,42 @@ ENDIF
 IF (N2M>=1) THEN
   ALLOCATE(XRI     (KLU))
   ALLOCATE(XT2M    (KLU))
+  ALLOCATE(XT2M_MIN(KLU))
+  ALLOCATE(XT2M_MAX(KLU))
   ALLOCATE(XQ2M    (KLU))
   ALLOCATE(XHU2M   (KLU))
+  ALLOCATE(XHU2M_MIN(KLU))
+  ALLOCATE(XHU2M_MAX(KLU))
   ALLOCATE(XZON10M (KLU))
   ALLOCATE(XMER10M (KLU))
+  ALLOCATE(XWIND10M (KLU))
+  ALLOCATE(XWIND10M_MAX(KLU))
   !
   XRI      = XUNDEF
   XT2M     = XUNDEF
+  XT2M_MIN = XUNDEF
+  XT2M_MAX = 0.0
   XQ2M     = XUNDEF
   XHU2M    = XUNDEF
+  XHU2M_MIN= XUNDEF
+  XHU2M_MAX=-XUNDEF
   XZON10M  = XUNDEF
   XMER10M  = XUNDEF
+  XWIND10M = XUNDEF
+  XWIND10M_MAX = 0.0
 ELSE
-  ALLOCATE(XRI     (0))
-  ALLOCATE(XT2M    (0))
-  ALLOCATE(XQ2M    (0))
-  ALLOCATE(XHU2M   (0))
-  ALLOCATE(XZON10M (0))
-  ALLOCATE(XMER10M (0))
+  ALLOCATE(XRI      (0))
+  ALLOCATE(XT2M     (0))
+  ALLOCATE(XT2M_MIN (0))
+  ALLOCATE(XT2M_MAX (0))
+  ALLOCATE(XQ2M     (0))
+  ALLOCATE(XHU2M    (0))
+  ALLOCATE(XHU2M_MIN(0))
+  ALLOCATE(XHU2M_MAX(0))
+  ALLOCATE(XZON10M  (0))
+  ALLOCATE(XMER10M  (0))
+  ALLOCATE(XWIND10M (0))
+  ALLOCATE(XWIND10M_MAX(0))
 END IF
 !
 !* transfer coefficients

@@ -34,6 +34,7 @@
 !!      (J.Stein)   27/03/96 use only H and LE in the soil scheme
 !!      A. Boone    27/11/02 revised to output ALMA variables, and general applications
 !!      B. Decharme 17/08/09 cumulative radiatif budget
+!!      V. Masson   10/2013  coherence between canopy and min/max T2M diagnostics
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -41,7 +42,7 @@
 !
 !
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_ISBA_n,      ONLY : XPATCH, NPATCH, XLE
+USE MODD_ISBA_n,      ONLY : XPATCH, NPATCH, XLE, LCANOPY
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_BUDGETC                            
 USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,            &
                                XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX, XAVG_RI, &
@@ -231,16 +232,13 @@ DO JPATCH=1,SIZE(XPATCH,2)
        XAVG_TSRAD(:)  = XAVG_TSRAD(:) + XPATCH(:,JPATCH) * XTSRAD(:,JPATCH)
     END WHERE
 END DO
-
 !
-IF (N2M>=1) THEN
+!
+IF (.NOT. LCANOPY .AND. N2M>=1) THEN
 
   XAVG_T2M(:)  = 0.
   XAVG_Q2M(:)  = 0.
   XAVG_HU2M(:)  = 0.
-  XAVG_RI(:)  = 0.
-  !
-  XAVG_SFCO2(:)  = PSFCO2(:)
   !
   DO JPATCH=1,SIZE(XPATCH,2)
     WHERE (ZSUMPATCH(:) > 0.)
@@ -256,10 +254,6 @@ IF (N2M>=1) THEN
 ! 2 meters relative humidity
 !
       XAVG_HU2M(:)  = XAVG_HU2M(:) + XPATCH(:,JPATCH) * XHU2M(:,JPATCH)
-!
-! Richardson number
-!
-      XAVG_RI(:)  = XAVG_RI(:) + XPATCH(:,JPATCH) * XRI(:,JPATCH)
 !
     END WHERE
   END DO
@@ -293,6 +287,21 @@ IF (N2M>=1) THEN
 !
 END IF
 !
+! Richardson number
+!
+IF (N2M>=1) THEN
+
+  XAVG_RI(:)  = 0.
+  !
+  XAVG_SFCO2(:)  = PSFCO2(:)
+  !
+  DO JPATCH=1,SIZE(XPATCH,2)
+    WHERE (ZSUMPATCH(:) > 0.)
+      XAVG_RI(:)  = XAVG_RI(:) + XPATCH(:,JPATCH) * XRI(:,JPATCH)
+    END WHERE
+  END DO
+!
+END IF
 !
 !       3.     Transfer coefficients
 !              ---------------------

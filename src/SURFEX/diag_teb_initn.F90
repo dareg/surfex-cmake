@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!!       V. Masson  10/2013 Adds integrated UTCI diagnostics
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -42,10 +43,14 @@ USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
                               XT2M, XQ2M, XHU2M,                    &
                               XZON10M, XMER10M, XSFCO2, XQS,        &
                               XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
-                              XFMU, XFMV  
+                              XFMU, XFMV , XT2M_MIN, XT2M_MAX,      &
+                              XHU2M_MIN, XHU2M_MAX, XWIND10M,       &
+                              XWIND10M_MAX 
 !
+USE MODD_UTCI,              ONLY : NUTCI_STRESS
 USE MODD_DIAG_UTCI_TEB_n,   ONLY : XUTCI_OUTSUN, XUTCI_OUTSHADE, XTRAD_SUN, &
-                                   XTRAD_SHADE, XUTCI_IN, LUTCI
+                                   XTRAD_SHADE, XUTCI_IN, LUTCI,            &
+                                   XUTCIC_IN, XUTCIC_OUTSUN, XUTCIC_OUTSHADE
 
 !
 USE MODI_READ_SURF
@@ -124,24 +129,42 @@ END IF
 IF (N2M>=1) THEN
   ALLOCATE(XRI     (KLU))
   ALLOCATE(XT2M    (KLU))
+  ALLOCATE(XT2M_MIN (KLU))
+  ALLOCATE(XT2M_MAX (KLU))
   ALLOCATE(XQ2M    (KLU))
   ALLOCATE(XHU2M   (KLU))
+  ALLOCATE(XHU2M_MIN(KLU))
+  ALLOCATE(XHU2M_MAX(KLU))
   ALLOCATE(XZON10M (KLU))
   ALLOCATE(XMER10M (KLU))
+  ALLOCATE(XWIND10M (KLU))
+  ALLOCATE(XWIND10M_MAX(KLU))
   !
   XRI      = XUNDEF
   XT2M     = XUNDEF
+  XT2M_MIN = XUNDEF
+  XT2M_MAX = -XUNDEF
   XQ2M     = XUNDEF
   XHU2M    = XUNDEF
+  XHU2M_MIN= XUNDEF
+  XHU2M_MAX=-XUNDEF
   XZON10M  = XUNDEF
   XMER10M  = XUNDEF
+  XWIND10M = XUNDEF
+  XWIND10M_MAX = -XUNDEF
 ELSE
   ALLOCATE(XRI      (0))
   ALLOCATE(XT2M     (0))
+  ALLOCATE(XT2M_MIN (0))
+  ALLOCATE(XT2M_MAX (0))
   ALLOCATE(XQ2M     (0))
   ALLOCATE(XHU2M    (0))
+  ALLOCATE(XHU2M_MIN(0))
+  ALLOCATE(XHU2M_MAX(0))
   ALLOCATE(XZON10M  (0))
   ALLOCATE(XMER10M  (0))  
+  ALLOCATE(XWIND10M (0))
+  ALLOCATE(XWIND10M_MAX(0))
 END IF
 !!
 !* miscellaneous fields
@@ -153,12 +176,18 @@ IF (N2M>0 .AND. LUTCI) THEN
   ALLOCATE(XUTCI_OUTSHADE (KLU))
   ALLOCATE(XTRAD_SUN      (KLU))
   ALLOCATE(XTRAD_SHADE    (KLU))
+  ALLOCATE(XUTCIC_IN      (KLU,NUTCI_STRESS))
+  ALLOCATE(XUTCIC_OUTSUN  (KLU,NUTCI_STRESS))
+  ALLOCATE(XUTCIC_OUTSHADE(KLU,NUTCI_STRESS))
   !
   XUTCI_IN        = XUNDEF
   XUTCI_OUTSUN    = XUNDEF
   XUTCI_OUTSHADE  = XUNDEF
   XTRAD_SUN       = XUNDEF
   XTRAD_SHADE     = XUNDEF
+  XUTCIC_IN       = 0.
+  XUTCIC_OUTSUN   = 0.
+  XUTCIC_OUTSHADE = 0.
   !  
 ELSE
   ALLOCATE(XUTCI_IN       (0))
@@ -166,6 +195,9 @@ ELSE
   ALLOCATE(XUTCI_OUTSHADE (0))
   ALLOCATE(XTRAD_SUN      (0))
   ALLOCATE(XTRAD_SHADE    (0))        
+  ALLOCATE(XUTCIC_IN      (0,0))
+  ALLOCATE(XUTCIC_OUTSUN  (0,0))
+  ALLOCATE(XUTCIC_OUTSHADE(0,0))
 ENDIF
 !
 !* transfer coefficients

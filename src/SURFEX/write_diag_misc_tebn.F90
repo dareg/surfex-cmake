@@ -28,8 +28,10 @@
 !              ------------
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
+USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_END_IO_SURF_n
-USE MODD_TEB_n,ONLY : XZ0_TOWN, NTEB_PATCH, CBEM, XROAD, LGREENROOF, LGARDEN, CWALL_OPT
+USE MODD_TEB_n,          ONLY : XZ0_TOWN, NTEB_PATCH, CBEM, XROAD, XGREENROOF,   &
+                                  LGREENROOF, LGARDEN, CWALL_OPT, LSOLAR_PANEL
 USE MODD_DIAG_MISC_TEB_n,ONLY : LSURF_MISC_BUDGET,                               &
                                   XQF_BLD,XFLX_BLD, XQF_TOWN, XDQS_TOWN,         &
                                   XRN_ROAD, XH_ROAD, XLE_ROAD, XGFLUX_ROAD,      &
@@ -59,7 +61,14 @@ USE MODD_DIAG_MISC_TEB_n,ONLY : LSURF_MISC_BUDGET,                              
                                   XGFLUX_GREENROOF,                              &
                                   XABS_SW_GREENROOF, XABS_LW_GREENROOF,          &  
                                   XG_GREENROOF_ROOF,                             &
-                                  XRUNOFF_GREENROOF, XDRAIN_GREENROOF
+                                  XRUNOFF_TOWN, XRUNOFF_GARDEN, XRUNOFF_ROAD,    &
+                                  XRUNOFF_ROOF, XRUNOFF_STRLROOF,                &
+                                  XRUNOFF_GREENROOF, XDRAIN_GREENROOF,           &
+                                  XTCOOL_CUR_TARGET, XTHEAT_CUR_TARGET, XCUR_QIN,&
+                                  XABS_SW_PANEL, XABS_LW_PANEL, XRN_PANEL,       &
+                                  XH_PANEL, XTHER_PROD_PANEL, XPHOT_PROD_PANEL,  &
+                                  XPROD_PANEL, XPHOT_PROD_BLD, XTHER_PROD_BLD
+USE MODD_DIAG_CUMUL_TEB_n                                  
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -84,7 +93,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
-!         Initialisation for IO
+!           Initialisation for IO
+!           ---------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_TEB_N',0,ZHOOK_HANDLE)
  CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','WRITE')
@@ -126,6 +136,12 @@ YCOMMENT='heat storage inside building'//' (W/m2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XDQS_TOWN(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='RUNOFF_TW'
+YRECFM=ADJUSTL(YPATCH//YRECFM)
+YCOMMENT='aggregated runoff for town'//' (kg/m2/s)'
+!
+CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFF_TOWN(:),IRESP,HCOMMENT=YCOMMENT)
+!
 YRECFM='RN_RD'
 YRECFM=ADJUSTL(YPATCH//YRECFM)
 YCOMMENT=' net radiation at road'//' (W/m2)'
@@ -149,6 +165,12 @@ YRECFM=ADJUSTL(YPATCH//YRECFM)
 YCOMMENT='net road conduction flux'//' (W/m2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX_ROAD(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='RUNOFF_RD'
+YRECFM=ADJUSTL(YPATCH//YRECFM)
+YCOMMENT='road surface runoff'//' (kg/m2/s)'
+!
+CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFF_ROAD(:),IRESP,HCOMMENT=YCOMMENT)
 !
 IF (CWALL_OPT=='UNIF') THEN
   !
@@ -234,6 +256,13 @@ YCOMMENT='net roof conduction flux'//YRECFM//' (W/m2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX_ROOF(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='RUNOFF_RF'
+YRECFM=ADJUSTL(YPATCH//YRECFM)
+YCOMMENT='aggregated roof runoff'//' (kg/m2/s)'
+!
+CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFF_ROOF(:),IRESP,HCOMMENT=YCOMMENT)
+!
+!
 IF (LGARDEN) THEN
   !
   YRECFM='RN_GD'
@@ -259,6 +288,14 @@ IF (LGARDEN) THEN
   YCOMMENT='net GARDEN area conduction flux'//YRECFM//' (W/m2)'
   !
   CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX_GARDEN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  !
+  YRECFM='RUNOFF_GD'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='garden surface runoff'//' (kg/m2/s)'
+  !
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFF_GARDEN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
   !
 ENDIF
 !
@@ -416,6 +453,21 @@ YCOMMENT='LW emitted by facade'//' (W/m2)'
 !
   IF (CBEM=='BEM') THEN
     !
+    YRECFM='CL_CURT'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Current Cooling system temperature set point'//' (K)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTCOOL_CUR_TARGET(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='HT_CURT'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Current Heating system temperature set point'//' (K)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTHEAT_CUR_TARGET(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='QIN_CUR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Current Building internal heat loads'//' (W m-2(floor))'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XCUR_QIN(:),IRESP,HCOMMENT=YCOMMENT)
+    !
     YRECFM='XFLX_BLD'
     YRECFM=ADJUSTL(YPATCH//YRECFM)
     YCOMMENT='heat flux from bld'//' (W/m2)'
@@ -525,6 +577,18 @@ YCOMMENT='LW emitted by facade'//' (W/m2)'
   !
   IF (LGREENROOF) THEN
   !
+    WHERE (XGREENROOF(:) == 0.)
+      XRN_GREENROOF    (:) = XUNDEF   
+      XH_GREENROOF     (:) = XUNDEF 
+      XLE_GREENROOF    (:) = XUNDEF 
+      XGFLUX_GREENROOF (:) = XUNDEF 
+      XABS_SW_GREENROOF(:) = XUNDEF 
+      XABS_LW_GREENROOF(:) = XUNDEF 
+      XG_GREENROOF_ROOF(:) = XUNDEF 
+      XRUNOFF_GREENROOF(:) = XUNDEF 
+      XDRAIN_GREENROOF (:) = XUNDEF 
+    END WHERE
+    !
     YRECFM='RN_GR'
     YRECFM=ADJUSTL(YPATCH//YRECFM)
     YCOMMENT='net radiation for GREENROOFs'//' (W/m2)'
@@ -570,11 +634,215 @@ YCOMMENT='LW emitted by facade'//' (W/m2)'
     YCOMMENT='GREENROOF total vertical drainage'//' (kg/m2/s)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDRAIN_GREENROOF(:),IRESP,HCOMMENT=YCOMMENT)
   !
+    WHERE (XGREENROOF(:) == 1.)
+      XRN_STRLROOF(:)     = XUNDEF   
+      XH_STRLROOF(:)      = XUNDEF   
+      XLE_STRLROOF(:)     = XUNDEF   
+      XGFLUX_STRLROOF(:)  = XUNDEF   
+      XRUNOFF_STRLROOF(:) = XUNDEF   
+    END WHERE
+    !
+    YRECFM='RN_SR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='structural roof net radiation'//YRECFM//' (W/m2)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XRN_STRLROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='H_SR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='structural roof sensible heat flux'//YRECFM//' (W/m2)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XH_STRLROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LE_SR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='structural roof latent heat flux'//YRECFM//' (W/m2)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_STRLROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='GFLUX_SR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='structural roof conduction flux'//YRECFM//' (W/m2)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX_STRLROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='RUNOFF_SR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='structural roof surface runoff'//' (kg/m2/s)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFF_STRLROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
   ENDIF
   !
-END IF
+  !* solar panels
+  IF (LSOLAR_PANEL) THEN
+    YRECFM='SWA_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Shortwave absorbed by solar panels on roofs'//' (W/m2 panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XABS_SW_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWA_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Longwave  absorbed by solar panels on roofs'//' (W/m2 panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XABS_LW_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='RN_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Net radiation of solar panels on roofs'//' (W/m2 panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XRN_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='H_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Sensible Heat flux  from solar panels on roofs'//' (W/m2 panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XH_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='PHOT_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Photovolatic production '//' (W/m2 photovoltaic panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XPHOT_PROD_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='THER_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Hot Water production '//' (W/m2 thermal panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTHER_PROD_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='PROD_SP'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Production by solar panels on roofs'//' (W/m2 panel)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XPROD_PANEL(:),IRESP,HCOMMENT=YCOMMENT)
+        !
+    YRECFM='PHOT_BLD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Photovolatic production '//' (W/m2 bld)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XPHOT_PROD_BLD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='THER_BLD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Hot Water production '//' (W/m2 bld)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTHER_PROD_BLD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END IF
 !
-!*       5.    Cumulated Energy fluxes 
+!*
+!*       3. Cumulated fields
+!           ----------------
+!
+!
+  IF  (CBEM=='BEM') THEN
+  !
+  YRECFM='HVACC_CL'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='cumulated cooling energy consumption'//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XHVACC_COOL(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='HVACC_HT'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='cumulated heating energy consumption'//' (J/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XHVACC_HEAT(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  END IF
+  !
+  YRECFM='RUNOFFC_TW'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='cumulated aggregated runoff for town'//' (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC_TOWN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='RUNOFFC_RD'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='cumulated road surface runoff'//' (kg/m2 road)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC_ROAD(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='RUNOFFC_RF'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='cumulated aggregated roof runoff'//' (kg/m2 roof)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC_ROOF(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='IRRIGC_RD'
+  YRECFM=ADJUSTL(YPATCH//YRECFM)
+  YCOMMENT='cumulated road irrigation'//' (kg/m2 road)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XIRRIGC_ROAD(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  IF (LGARDEN) THEN
+    !
+    YRECFM='RUNOFFC_GD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='cumulated garden surface runoff'//' (kg/m2 garden)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC_GARDEN(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='DRAINC_GD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='cumulated garden surface drainage'//' (kg/m2 garden)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XDRAINC_GARDEN(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='IRRIGC_GD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='cumulated garden irrigation'//' (kg/m2 garden)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XIRRIGC_GARDEN(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END IF
+  !
+  IF (LGREENROOF) THEN
+    !
+    WHERE (XGREENROOF(:) == 0.)
+      XRUNOFFC_GREENROOF (:) = XUNDEF   
+      XDRAINC_GREENROOF  (:) = XUNDEF 
+      XIRRIGC_GREENROOF  (:) = XUNDEF 
+    END WHERE
+    !  
+    YRECFM='RUNOFFC_GR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='GREENROOF cumulated soil surface runoff'//' (kg/m2 greenroof)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC_GREENROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='DRAINC_GR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='GREENROOF cumulated total vertical drainage'//' (kg/m2 greenroof)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XDRAINC_GREENROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    !
+    YRECFM='IRRIGC_GR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='GREENROOF cumulated irrigation'//' (kg/m2 greenroof)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XIRRIGC_GREENROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    WHERE (XGREENROOF(:) == 1.)
+      XRUNOFFC_STRLROOF  (:) = XUNDEF   
+    END WHERE 
+    !
+    YRECFM='RUNOFFC_SR'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='cumulated structural roof surface runoff'//' (kg/m2)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFC_STRLROOF(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END IF
+  !  
+  !* solar panels
+  IF (LSOLAR_PANEL) THEN
+    !
+    YRECFM='PHOTC_BLD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Cumulated Photovolatic production '//' (J/m2 bld)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XPHOT_PROD_BLDC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='THERC_BLD'
+    YRECFM=ADJUSTL(YPATCH//YRECFM)
+    YCOMMENT='Cumulated Hot water production '//' (J/m2 bld)'
+    !
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTHER_PROD_BLDC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  END IF
+!
+END IF
 !
 !
 !-------------------------------------------------------------------------------

@@ -172,6 +172,10 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK
 USE MODD_AGRI,           ONLY : LAGRIP
 USE MODD_DEEPSOIL,       ONLY : LDEEPSOIL
 !
+#ifdef TOPD
+USE MODD_COUPLING_TOPD,  ONLY : NMASKT_PATCH
+#endif
+!
 USE MODI_IRRIGATION_UPDATE
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_Z0EFF
@@ -246,7 +250,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing            
 REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
-!   
+!
  CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables!
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
@@ -335,8 +339,8 @@ INTEGER :: INI_FLOOD
 INTEGER :: ISWB   ! number of spectral shortwave bands
 INTEGER :: JSWB   ! loop on number of spectral shortwave bands
 INTEGER :: JPATCH ! loop on patches
-INTEGER :: JSV, IDST, IMOMENT, II
-INTEGER :: JLAYER, JMODE, JSV_IDX
+INTEGER :: JSV, IDST, IMOMENT
+INTEGER :: JMODE, JSV_IDX
 !
 ! logical units
 !
@@ -473,6 +477,9 @@ PATCH_LOOP: DO JPATCH=1,NPATCH
 !
 ! Pack dummy arguments for each patch:
 !
+#ifdef TOPD
+  IF (CRUNOFF=='TOPD')NMASKT_PATCH(:)=NR_NATURE_P(:,JPATCH)
+#endif
   CALL TREAT_PATCH(NSIZE_NATURE_P(JPATCH),NR_NATURE_P(:,JPATCH))
 !
 ENDDO PATCH_LOOP
@@ -644,7 +651,7 @@ REAL, DIMENSION(KSIZE)      :: ZP_ALBNIR_TVEG         ! total vegetation albedo 
 REAL, DIMENSION(KSIZE)      :: ZP_ALBNIR_TSOIL        ! total soil albedo in ir
 REAL, DIMENSION(KSIZE)      :: ZP_ALBVIS_TVEG         ! total vegetation albedo in vis
 REAL, DIMENSION(KSIZE)      :: ZP_ALBVIS_TSOIL        ! total soil albedo in vis
-REAL, DIMENSION(KSIZE) :: ZP_EMIS                      ! emissiviity
+REAL, DIMENSION(KSIZE) :: ZP_EMIS                      ! emissivity
 REAL, DIMENSION(KSIZE) :: ZP_GLOBAL_SW                 ! global incoming SW rad.
 REAL, DIMENSION(KSIZE) :: ZP_SLOPE_COS                 ! typical slope in the grid cosine
 !
@@ -669,6 +676,7 @@ REAL, DIMENSION(KSIZE) :: ZP_SWE_INI
 !
 REAL, DIMENSION(KSIZE)               :: ZP_DEEP_FLUX ! Flux at the bottom of the soil
 REAL, DIMENSION(KSIZE)               :: ZP_TDEEP_A   ! coefficient for implicitation of Tdeep
+REAL, DIMENSION(KSIZE)               :: ZIRRIG_GR    ! green roof ground irrigation rate 
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -878,6 +886,7 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Over Natural Land Surfaces:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ZIRRIG_GR(:)= 0.
 !
  CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSCOND,      &
           TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TTIME, LFLOOD, LTEMP_ARP,&
@@ -914,7 +923,7 @@ ENDIF
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX                           )  
+          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX,ZIRRIG_GR                 )  
 !
 ZP_TRAD=XP_TSRAD
 !

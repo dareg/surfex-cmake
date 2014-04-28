@@ -33,13 +33,14 @@ SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n(HPROGRAM, HCOUPLING,                      
 !!      Original    01/2004
 !!      B. Decharme   2008   reset the subgrid topographic effect on the forcing
 !!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
+!!       V.Masson   10/2013 Adds min and max 2m parameters
 !!-------------------------------------------------------------
 !
-USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,   ONLY : XCPD, XRD, XP00
 USE MODD_FLAKE_n,          ONLY : LSBL, XTS, XZ0, XZS
 USE MODD_FLAKE_SBL_n,      ONLY : XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP
-USE MODD_DIAG_FLAKE_n,     ONLY : N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M
+USE MODD_DIAG_FLAKE_n,     ONLY : N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M, XWIND10M, &
+                                  XWIND10M_MAX, XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -128,12 +129,6 @@ REAL, DIMENSION(KI)  :: ZPS    ! Pressure    at surface orography
 REAL, DIMENSION(KI)  :: ZQA    ! Humidity    at forcing height above surface orography
 REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface orography
 !
-REAL, DIMENSION(KI)  :: ZWIND10M
-REAL, DIMENSION(KI)  :: ZWIND10M_MAX
-REAL, DIMENSION(KI)  :: ZT2M_MIN
-REAL, DIMENSION(KI)  :: ZT2M_MAX
-REAL, DIMENSION(KI)  :: ZHU2M_MIN
-REAL, DIMENSION(KI)  :: ZHU2M_MAX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
@@ -165,13 +160,6 @@ ELSE
 !
 ENDIF
 !
-ZWIND10M(:) = XUNDEF
-ZWIND10M_MAX(:) = 0.
-ZT2M_MIN(:) = XUNDEF
-ZT2M_MAX(:) = 0.
-ZHU2M_MIN(:) = XUNDEF
-ZHU2M_MAX(:) = 0.
-!
  CALL COUPLING_SEAWAT_SBL_n(HPROGRAM, HCOUPLING, 'F',                                       &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                KI, KSV, KSW,                                                               &
@@ -180,8 +168,8 @@ ZHU2M_MAX(:) = 0.
                PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,                   &
                PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, LSBL, XTS, XZ0,                    &
                XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP,                       &
-               N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M, ZWIND10M, ZWIND10M_MAX,           &
-               ZT2M_MIN, ZT2M_MAX, ZHU2M_MIN, ZHU2M_MAX,                                   &
+               N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M, XWIND10M, XWIND10M_MAX,           &
+               XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX,                                   &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
                PPEW_A_COEF, PPEW_B_COEF,                                                   &
                PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                         &

@@ -30,6 +30,7 @@
 !!      Original    01/2004
 !!      S. Riette   06/2009 CLS_2M becomes CLS_TQ, CLS_TQ and CLS_WIND have one
 !!                          more argument (height of diagnostic)
+!!       V.Masson   10/2013 Adds min and max 2m parameters
 !!------------------------------------------------------------------
 !
 
@@ -43,7 +44,10 @@ USE MODD_DIAG_FLAKE_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,   &
                                   XRN, XH, XLE, XLEI, XGFLUX,            &
                                   XRI, XCD, XCH, XCE, XZ0, XZ0H,        &
                                   XQS, XSWD, XSWU, XLWD,                &
-                                  XLWU, XSWBD, XSWBU, XFMU, XFMV  
+                                  XLWU, XSWBD, XSWBU, XFMU, XFMV,&
+                                  XT2M_MIN, XT2M_MAX,    &
+                                  XHU2M_MIN, XHU2M_MAX,       &
+                                  XWIND10M, XWIND10M_MAX  
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -121,6 +125,20 @@ IF (.NOT. LSBL) THEN
                     XZON10M, XMER10M               )  
     XRI = PRI
   END IF
+
+  IF (N2M>=1) THEN
+    !
+    XT2M_MIN(:) = MIN(XT2M_MIN(:),XT2M(:))
+    XT2M_MAX(:) = MAX(XT2M_MAX(:),XT2M(:))
+    !
+    XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
+    XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
+    !
+    XWIND10M    (:) = SQRT(XZON10M**2+XMER10M**2)
+    XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
+    !
+  ENDIF
+
   !
 ELSE
   !

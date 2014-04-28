@@ -23,18 +23,21 @@
 !!    -------------
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
+!!       V.Masson   10/2013 Adds min and max 2m parameters
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_PAR,      ONLY : XUNDEF
 USE MODD_DIAG_FLAKE_n,  ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET,  LCOEF,   &
                                  LSURF_VARS, XRN, XH, XLE, XLEI, XGFLUX,   &
                                  XRI, XCD, XCH, XCE, XZ0, XZ0H,            &
                                  XT2M, XQ2M, XHU2M,                        &
                                  XZON10M, XMER10M, XQS,                    &
                                  XSWD, XSWU, XLWD, XLWU, XSWBD, XSWBU,     &
-                                 XFMU, XFMV  
+                                 XFMU, XFMV, XT2M_MIN, XT2M_MAX,           &
+                                 XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX
 
 USE MODD_CH_WATFLUX_n,  ONLY : XDEP, CCH_DRY_DEP, CCH_NAMES, NBEQ
 !
@@ -221,6 +224,18 @@ YCOMMENT='2 meters temperature'//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='T2MMIN_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (K)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
+XT2M_MIN(:)=XUNDEF
+!
+YRECFM='T2MMAX_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (K)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+XT2M_MAX(:)=0.0
+
 YRECFM='Q2M_WAT'
 YCOMMENT='2 meters specific humidity'//' (KG/KG)'
 !
@@ -231,6 +246,18 @@ YCOMMENT='2 meters relative humidity'//' (KG/KG)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='HU2MMIN_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (-)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
+XHU2M_MIN(:)=XUNDEF
+!
+YRECFM='HU2MMAX_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (-)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+XHU2M_MAX(:)=-XUNDEF
+!
 YRECFM='ZON10M_WAT'
 YCOMMENT='10 meters zonal wind'//' (M/S)'
 !
@@ -240,6 +267,17 @@ YRECFM='MER10M_WAT'
 YCOMMENT='10 meters meridian wind'//' (M/S)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XMER10M(:),IRESP,HCOMMENT=YCOMMENT)
+ !
+YRECFM='W10M_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='W10MMAX_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+XWIND10M_MAX(:)=0.0
 !
 END IF
 !

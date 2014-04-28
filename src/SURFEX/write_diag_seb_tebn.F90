@@ -24,11 +24,13 @@
 !!    -------------
 !!      Original    01/2004
 !!      Modified    01/2006 : TEB flux parameterization.
+!!       V. Masson  10/2013 : Adds heat/cold stress ranges diagnostics
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_DIAG_TEB_n,ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET,          &
                              LCOEF, LSURF_VARS,                       &
                              XRN, XH, XLE, XGFLUX,                    &
@@ -36,9 +38,13 @@ USE MODD_DIAG_TEB_n,ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET,          &
                              XT2M, XQ2M, XHU2M,                       &
                              XZON10M, XMER10M, XSFCO2, XQS,           &
                              XSWD, XSWU, XSWBD, XSWBU,                &
-                             XLWD, XLWU, XFMU, XFMV  
+                             XLWD, XLWU, XFMU, XFMV ,                 &
+                             XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX,&
+                             XWIND10M, XWIND10M_MAX
+USE MODD_UTCI
 USE MODD_DIAG_UTCI_TEB_n, ONLY : LUTCI, XUTCI_IN, XUTCI_OUTSUN,       &
-                                 XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE
+                                 XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE,&
+                                 XUTCIC_IN, XUTCIC_OUTSUN,XUTCIC_OUTSHADE
                            
 USE MODD_CH_TEB_n,  ONLY : XDEP, CCH_DRY_DEP, CCH_NAMES, NBEQ 
 !
@@ -66,6 +72,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=2)  :: YNUM
 !
 INTEGER           :: JSV, JSW
+INTEGER           :: JSTRESS         ! loop on heat stress ranges
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -222,6 +229,18 @@ YCOMMENT='X_Y_'//YRECFM//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='T2MMIN_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (K)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
+XT2M_MIN(:)=XUNDEF
+!
+YRECFM='T2MMAX_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (K)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+XT2M_MAX(:)=-XUNDEF
+!
 YRECFM='Q2M_TEB'
 YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
 !
@@ -231,6 +250,18 @@ YRECFM='HU2M_TEB'
 YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M(:),IRESP,HCOMMENT=YCOMMENT)
+ !
+YRECFM='HU2MMIN_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (-)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
+XHU2M_MIN(:)=XUNDEF
+!
+YRECFM='HU2MMAX_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (-)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+XHU2M_MAX(:)=-XUNDEF
 !
 YRECFM='ZON10M_TEB'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'
@@ -241,6 +272,17 @@ YRECFM='MER10M_TEB'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XMER10M(:),IRESP,HCOMMENT=YCOMMENT)
+ !
+YRECFM='W10M_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='W10MMAX_TEB'
+YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
+XWIND10M_MAX(:)=0.0
 !
 YRECFM='SFCO2_TEB'
 YCOMMENT='X_Y_'//YRECFM//' (KG/M2/S)'
@@ -269,6 +311,24 @@ IF (LUTCI .AND. N2M >0) THEN
   YRECFM='TRAD_SHADE'
   YCOMMENT='Mean radiant temperature seen by person in shade'//' (K)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XTRAD_SHADE(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  DO JSTRESS=1,NUTCI_STRESS
+    YRECFM='UTCIC_IN_'//CUTCI_STRESS_NAMES(JSTRESS)
+    YCOMMENT='Cumulated time spent in '//CUTCI_STRESS_NAMES(JSTRESS)//' stress range for person indoor'//' (s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCIC_IN(:,JSTRESS),IRESP,HCOMMENT=YCOMMENT)
+  END DO
+  !
+  DO JSTRESS=1,NUTCI_STRESS
+    YRECFM='UTCIC_SU_'//CUTCI_STRESS_NAMES(JSTRESS)
+    YCOMMENT='Cumulated time spent in '//CUTCI_STRESS_NAMES(JSTRESS)//' stress range for person at sun'//' (s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCIC_OUTSUN(:,JSTRESS),IRESP,HCOMMENT=YCOMMENT)
+  END DO
+  !
+  DO JSTRESS=1,NUTCI_STRESS
+    YRECFM='UTCIC_SH_'//CUTCI_STRESS_NAMES(JSTRESS)
+    YCOMMENT='Cumulated time spent in '//CUTCI_STRESS_NAMES(JSTRESS)//' stress range for person in shade'//' (s)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCIC_OUTSHADE(:,JSTRESS),IRESP,HCOMMENT=YCOMMENT)
+  END DO
 END IF
 !
 !

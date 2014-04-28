@@ -38,7 +38,7 @@
 !               ------------
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
-USE MODD_TEB_n,             ONLY: XCOVER, LCOVER
+USE MODD_TEB_n,             ONLY: XCOVER, LCOVER, XGARDEN
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO
 USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
@@ -118,7 +118,7 @@ TYPE (DATE_TIME),  DIMENSION(KLU,1) :: TZSEED
 TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZREAP
 REAL, DIMENSION(KLU,1) :: ZWATSUP
 REAL, DIMENSION(KLU,1) :: ZIRRIG
-LOGICAL :: LUPDATED              ! T if VEGETATION_UPDATE has reset fields
+LOGICAL :: GUPDATED              ! T if VEGETATION_UPDATE has reset fields
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -174,7 +174,7 @@ ZCNA_NITRO(:,1) = XCNA_NITRO
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
-LUPDATED=.FALSE.
+GUPDATED=.FALSE.
 IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,LCOVER,                 &
                          CISBA,(.NOT. LPAR_GARDEN), CPHOTO, .FALSE.,'GRD',  &
@@ -190,7 +190,8 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          CALBEDO, ZALBNIR_VEG, ZALBVIS_VEG, ZALBUV_VEG,  &
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
-                         TZSEED, TZREAP, ZWATSUP, ZIRRIG, LUPDATED      )  
+                         TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
+                         GUPDATED, OABSENT=(XGARDEN==0.)                 )
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

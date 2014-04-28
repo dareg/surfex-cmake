@@ -5,9 +5,9 @@
                 PT_LOWCAN, PQ_LOWCAN, PEXNS, PRHOA, PCO2, PPS, PRR, PSR, PZENITH,    &
                 PSW, PLW, PU_LOWCAN,                                                 &
                 PRN_GARDEN,PH_GARDEN,PLE_GARDEN,PGFLUX_GARDEN,PSFCO2,                &
-                PEVAP_GARDEN, PUW_GARDEN,                                            &
+                PEVAP_GARDEN, PUW_GARDEN,PRUNOFF_GARDEN,                             &
                 PAC_GARDEN,PQSAT_GARDEN,PTS_GARDEN,                                  &
-                PAC_AGG_GARDEN, PHU_AGG_GARDEN                                       )  
+                PAC_AGG_GARDEN, PHU_AGG_GARDEN, PDRAIN_GARDEN, PIRRIG_GARDEN         )  
 !   ##########################################################################
 !
 !!****  *GARDEN*  
@@ -90,6 +90,9 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XSNOWFREE_ALB, XVEGTYPE,                 &
                                   XANMAX, XBIOMASS,                        &
                                   XBSLAI_NITRO, XH_TREE 
+USE MODD_TEB_IRRIG_n, ONLY : LPAR_GD_IRRIG,                                  &
+                             XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR, &
+                             XGD_END_HOUR, XGD_24H_IRRIG
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE_GARDEN
@@ -98,6 +101,7 @@ USE MODE_THERMOS
 USE MODI_FLAG_TEB_GARDEN_n
 USE MODI_CARBON_EVOL
 USE MODI_VEGETATION_EVOL
+USE MODI_TEB_IRRIG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -139,11 +143,14 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_GARDEN      ! flux through the gre
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP_GARDEN       ! total evaporation over gardens (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GARDEN         ! friction flux (m2/s2)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GARDEN     ! runoff over garden (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GARDEN         ! aerodynamical conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT_GARDEN       ! saturation humidity
 REAL, DIMENSION(:)  , INTENT(INOUT) :: PTS_GARDEN         ! radiative surface temp. (snow free)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG_GARDEN     ! aggreg. aeodynamic resistance for green areas for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG_GARDEN     ! aggreg. relative humidity for green areas for latent heat flux
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GARDEN      ! garden total (vertical) drainage
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GARDEN      ! garden summer irrigation rate
 !
 !
 !*      0.2    Declarations of local variables
@@ -221,8 +228,6 @@ REAL, DIMENSION(SIZE(PPS)) :: ZEVAP
 REAL, DIMENSION(SIZE(PPS)) :: ZGFLUX
 REAL, DIMENSION(SIZE(PPS)) :: ZRESTORE
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
-REAL, DIMENSION(SIZE(PPS)) :: ZDRAIN
-REAL, DIMENSION(SIZE(PPS)) :: ZRUNOFF
 REAL, DIMENSION(SIZE(PPS)) :: ZMELT
 REAL, DIMENSION(SIZE(PPS),TSNOW%NLAYER) :: ZSNOWTEMP
 REAL, DIMENSION(SIZE(PPS),TSNOW%NLAYER) :: ZSNOWLIQ
@@ -279,6 +284,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZWATSUP
 REAL, DIMENSION(SIZE(PPS)) :: ZTHRESHOLDSPT
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIGATE
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIDAY
+!
 !
 !  variables for deep soil temperature
 REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
@@ -345,7 +351,7 @@ ZLEIFLOOD     = 0.
 ZFFG_NOSNOW   = 0.
 ZFFV_NOSNOW   = 0.
 !
-!* irrigation (not implemented)
+!* ISBA like irrigation (not implemented)
 !
 ZIRRIG        = 0.
 ZWATSUP       = 0.
@@ -362,9 +368,14 @@ ZGAMMAT  = XUNDEF
 !*      2.     Treatment of green areas
 !              ------------------------
 !
-!radiative temperature diagnostic
-!-------------------------------
 !
+!
+!*      2.1    Automatic irrigation
+!              --------------------
+!
+CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
+               XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR,   &
+               XGD_END_HOUR, XGD_24H_IRRIG, PIRRIG_GARDEN        ) 
 !
 !*      2.2    Call ISBA for green areas
 !              -------------------------
@@ -403,14 +414,15 @@ ZGAMMAT  = XUNDEF
           PTS_GARDEN, ZTS, ZHV, ZQS, ZSNOWTEMP, ZSNOWLIQ, ZSNOWDZ,    &
           ZCG, ZC1, ZC2, ZWGEQ, ZCT, ZCH, ZCD, ZCDN, ZRI, ZHU, ZHUG,  &
           ZEMIST, ZALBT, ZRS, XLE,  ZRN, ZH, ZLEI, ZLEGI, ZLEG, ZLEV, &
-          ZLES, ZLER, ZLETR, ZEVAP, ZGFLUX, ZRESTORE, ZUSTAR, ZDRAIN, &
-          ZRUNOFF, ZMELT, ZMELTADV, ZRN_ISBA, ZH_ISBA, ZLEG_ISBA,     &
+          ZLES, ZLER, ZLETR, ZEVAP, ZGFLUX, ZRESTORE, ZUSTAR,         &
+          PDRAIN_GARDEN, PRUNOFF_GARDEN,                              &
+          ZMELT, ZMELTADV, ZRN_ISBA, ZH_ISBA, ZLEG_ISBA,              &
           ZLEGI_ISBA, ZLEV_ISBA, ZLETR_ISBA, ZUSTAR_ISBA, ZLER_ISBA,  &
           ZLE_ISBA, ZLEI_ISBA, ZGFLUX_ISBA, ZHORT, ZDRIP, ZRRVEG,     &
           PAC_AGG_GARDEN, PHU_AGG_GARDEN, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          ZDEEP_FLUX                                                  )                                                           
+          ZDEEP_FLUX,PIRRIG_GARDEN                                    )                                                           
 !
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=ZSNOWTEMP(:,1)

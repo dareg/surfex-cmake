@@ -32,6 +32,7 @@
 !!    Original    03/2010
 !!
 !!    J.Escobar   11/2013   Add USE MODI_PGD_TEB_GREENROOF
+!!    V. Masson   04/2014   Adds Irrigation
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -58,6 +59,7 @@ USE MODI_TEST_NAM_VAR_SURF
 !
 USE MODI_PGD_TEB_GREENROOF
 USE MODI_PGD_TEB_GARDEN_PAR
+USE MODI_PGD_TEB_IRRIG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -311,6 +313,13 @@ NTIME = 12
 !             ------------------
 !
 IF (LGREENROOF) CALL PGD_TEB_GREENROOF(HPROGRAM)
+!
+!-------------------------------------------------------------------------------
+!
+!*    9.      Irrigation of gardens and greenroofs
+!             ------------------------------------
+!
+CALL PGD_TEB_IRRIG(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

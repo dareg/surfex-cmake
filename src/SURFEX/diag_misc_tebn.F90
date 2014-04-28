@@ -1,16 +1,20 @@
 !     #########
        SUBROUTINE DIAG_MISC_TEB_n(PTSTEP, PDQS_TOWN,PQF_BLD,PQF_TOWN, PFLX_BLD,             &
+                                    PRUNOFF_TOWN,                                           &
                                     PRN_ROAD, PH_ROAD, PLE_ROAD, PGFLUX_ROAD,               &
+                                    PRUNOFF_ROAD, PIRRIG_ROAD,                              &
                                     PRN_WALL_A, PH_WALL_A, PGFLUX_WALL_A,                   &
                                     PRN_WALL_B, PH_WALL_B, PGFLUX_WALL_B,                   &
                                     PRN_ROOF, PH_ROOF, PLE_ROOF, PGFLUX_ROOF,               &
-                                    PRUNOFF,                                                &
+                                    PRUNOFF_ROOF,                                           &
                                     PRN_STRLROOF, PH_STRLROOF,                              &
                                     PLE_STRLROOF, PGFLUX_STRLROOF,                          &
+                                    PRUNOFF_STRLROOF,                                       &
                                     PRN_GREENROOF, PH_GREENROOF,                            &
                                     PLE_GREENROOF, PGFLUX_GREENROOF, PG_GREENROOF_ROOF,     &
-                                    PRUNOFF_GREENROOF, PDRAIN_GREENROOF,                    &
+                                    PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PIRRIG_GREENROOF,  &
                                     PRN_GARDEN,PH_GARDEN,PLE_GARDEN,PGFLUX_GARDEN,          &
+                                    PRUNOFF_GARDEN, PDRAIN_GARDEN, PIRRIG_GARDEN,           &
                                     PRN_BLT,PH_BLT,PLE_BLT,PGFLUX_BLT,                      &
                                     PABS_SW_ROOF,PABS_LW_ROOF,                              &
                                     PABS_SW_SNOW_ROOF,PABS_LW_SNOW_ROOF,                    &
@@ -25,7 +29,11 @@
                                     PH_WASTE, PLE_WASTE, PHVAC_COOL,                        &
                                     PHVAC_HEAT, PCAP_SYS, PM_SYS, PCOP,                     &
                                     PQ_SYS, PT_SYS, PTR_SW_WIN, PFAN_POWER,                 &
-                                    PABS_SW_WIN, PABS_LW_WIN                                )  
+                                    PABS_SW_WIN, PABS_LW_WIN,                               &
+                                    PTCOOL_TARGET, PTHEAT_TARGET, PQIN,                     &
+                                    PABS_SW_PANEL, PABS_LW_PANEL, PRN_PANEL,                &
+                                    PH_PANEL, PTHER_PROD_PANEL, PPHOT_PROD_PANEL,           &
+                                    PPROD_PANEL, PTHER_PROD_BLD, PPHOT_PROD_BLD             )  
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-TEB_n * - additional diagnostics for TEB
@@ -66,7 +74,11 @@ USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,     
                                     XG_GREENROOF_ROOF,                            &
                                     XRN_GARDEN,XH_GARDEN,XLE_GARDEN,XGFLUX_GARDEN,&
                                     XRN_BLT,XH_BLT,XLE_BLT,XGFLUX_BLT,            &
+                                    XRUNOFF_TOWN, XRUNOFF_GARDEN,                 &
+                                    XRUNOFF_ROAD, XRUNOFF_ROOF,XRUNOFF_STRLROOF,  &
                                     XRUNOFF_GREENROOF, XDRAIN_GREENROOF,          &
+                                    XIRRIG_GREENROOF, XIRRIG_GARDEN,              &
+                                    XIRRIG_ROAD, XDRAIN_GARDEN,                   &
                                     XABS_SW_ROOF,XABS_LW_ROOF,                    &
                                     XABS_SW_SNOW_ROOF,XABS_LW_SNOW_ROOF,          &
                                     XABS_SW_ROAD,XABS_LW_ROAD,                    &
@@ -80,9 +92,14 @@ USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,     
                                     XH_WASTE, XLE_WASTE, XHVAC_COOL,              &
                                     XHVAC_HEAT, XCAP_SYS, XM_SYS, XCOP,           &
                                     XQ_SYS, XT_SYS, XTR_SW_WIN, XFAN_POWER,       &
-                                    XABS_SW_WIN, XABS_LW_WIN
+                                    XABS_SW_WIN, XABS_LW_WIN,                     &
+                                    XTCOOL_CUR_TARGET, XTHEAT_CUR_TARGET,XCUR_QIN,&
+                                    XABS_SW_PANEL, XABS_LW_PANEL, XRN_PANEL,      &
+                                    XH_PANEL, XTHER_PROD_PANEL, XPHOT_PROD_PANEL, &
+                                    XPROD_PANEL, XTHER_PROD_BLD, XPHOT_PROD_BLD
 !
-USE MODD_TEB_n,              ONLY : CBEM 
+USE MODD_TEB_n,              ONLY : CBEM, LSOLAR_PANEL 
+USE MODI_CUMUL_DIAG_TEB_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -100,6 +117,8 @@ IMPLICIT NONE
        REAL, DIMENSION(:), INTENT(IN) :: PH_ROAD           ! sensible heat flux for roads
        REAL, DIMENSION(:), INTENT(IN) :: PLE_ROAD          ! latent heat flux for roads
        REAL, DIMENSION(:), INTENT(IN) :: PGFLUX_ROAD       ! storage flux for roads
+       REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF_ROAD      ! runoff for roads       
+       REAL, DIMENSION(:), INTENT(IN) :: PIRRIG_ROAD       ! water supply for watering of roads       
        REAL, DIMENSION(:), INTENT(IN) :: PRN_WALL_A        ! net radiation for wall
        REAL, DIMENSION(:), INTENT(IN) :: PH_WALL_A         ! sensible heat flux for walls
        REAL, DIMENSION(:), INTENT(IN) :: PGFLUX_WALL_A     ! storage flux for walls
@@ -110,11 +129,13 @@ IMPLICIT NONE
        REAL, DIMENSION(:), INTENT(IN) :: PH_ROOF           ! sensible heat flux for roofs
        REAL, DIMENSION(:), INTENT(IN) :: PLE_ROOF          ! latent heat flux for roofs
        REAL, DIMENSION(:), INTENT(IN) :: PGFLUX_ROOF       ! storage flux for roofs       
-       REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF           ! runoff for town    
+       REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF_ROOF      ! aggregated runoff for roof
+       REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF_TOWN      ! aggregated runoff for town
        REAL, DIMENSION(:), INTENT(IN) :: PRN_STRLROOF      ! net radiation for structural roofs
        REAL, DIMENSION(:), INTENT(IN) :: PH_STRLROOF       ! sensible heat flux for structural roofs
        REAL, DIMENSION(:), INTENT(IN) :: PLE_STRLROOF      ! latent heat flux for structural roofs
        REAL, DIMENSION(:), INTENT(IN) :: PGFLUX_STRLROOF   ! storage flux for structural roofs       
+       REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF_STRLROOF  ! runoff for structural roofs       
        REAL, DIMENSION(:), INTENT(IN) :: PRN_GREENROOF     ! net radiation for green roofs
        REAL, DIMENSION(:), INTENT(IN) :: PH_GREENROOF      ! sensible heat flux for green roofs
        REAL, DIMENSION(:), INTENT(IN) :: PLE_GREENROOF     ! latent heat flux for green roofs
@@ -122,10 +143,14 @@ IMPLICIT NONE
        REAL, DIMENSION(:), INTENT(IN) :: PG_GREENROOF_ROOF ! heat flux between green/structural roofs
        REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF_GREENROOF ! runoff for green roofs       
        REAL, DIMENSION(:), INTENT(IN) :: PDRAIN_GREENROOF  ! total vertical drainage for green roofs       
+       REAL, DIMENSION(:), INTENT(IN) :: PIRRIG_GREENROOF  ! water supply from green roof ground irrigation
        REAL, DIMENSION(:), INTENT(IN) :: PRN_GARDEN        ! net radiation for GARDEN areas
        REAL, DIMENSION(:), INTENT(IN) :: PH_GARDEN         ! sensible heat flux for GARDEN areas
        REAL, DIMENSION(:), INTENT(IN) :: PLE_GARDEN        ! latent heat flux for GARDEN areas
        REAL, DIMENSION(:), INTENT(IN) :: PGFLUX_GARDEN     ! storage flux for GARDEN areas
+       REAL, DIMENSION(:), INTENT(IN) :: PRUNOFF_GARDEN    ! runoff for green areas
+       REAL, DIMENSION(:), INTENT(IN) :: PDRAIN_GARDEN     ! drainage for green areas
+       REAL, DIMENSION(:), INTENT(IN) :: PIRRIG_GARDEN     ! water supply for irrigation for green areas
        REAL, DIMENSION(:), INTENT(IN) :: PRN_BLT           ! net radiation for built surf
        REAL, DIMENSION(:), INTENT(IN) :: PH_BLT            ! sensible heat flux for built surf
        REAL, DIMENSION(:), INTENT(IN) :: PLE_BLT           ! latent heat flux for built surf
@@ -179,7 +204,19 @@ IMPLICIT NONE
        REAL, DIMENSION(:), INTENT(IN) :: PABS_SW_WIN       ! window absorbed shortwave radiation [W m-2] 
        REAL, DIMENSION(:), INTENT(IN) :: PABS_LW_WIN       ! absorbed infrared rad. [W m-2]
        !
+       REAL, DIMENSION(:), INTENT(IN) :: PTCOOL_TARGET     ! Cooling system set point modulated by bld_occ_calendar [K]
+       REAL, DIMENSION(:), INTENT(IN) :: PTHEAT_TARGET     ! Heating system set point modulated by bld_occ_calendar [K] 
+       REAL, DIMENSION(:), INTENT(IN) :: PQIN              ! Building interal heat load modulated by bld_occ_calendar [W m-2(floor)]
 !
+       REAL, DIMENSION(:), INTENT(IN) :: PABS_SW_PANEL     ! absorbed solar    energy by solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PABS_LW_PANEL     ! absorbed longwave energy by solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PRN_PANEL         ! net radiation            of solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PH_PANEL          ! sensible heat flux       of solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PTHER_PROD_PANEL  ! thermal      production  of solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PPHOT_PROD_PANEL  ! photovoltaic production  of solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PPROD_PANEL       ! averaged     production  of solar panels [W m-2(panel)]
+       REAL, DIMENSION(:), INTENT(IN) :: PTHER_PROD_BLD    ! thermal      production  of solar panels [W m-2(bld)]
+       REAL, DIMENSION(:), INTENT(IN) :: PPHOT_PROD_BLD    ! photovoltaic production  of solar panels [W m-2(bld)]
 !
 !*      0.2    declarations of local variables
 !
@@ -215,8 +252,17 @@ IF (LSURF_MISC_BUDGET) THEN
    XLE_GREENROOF      = PLE_GREENROOF
    XGFLUX_GREENROOF   = PGFLUX_GREENROOF
    XG_GREENROOF_ROOF  = PG_GREENROOF_ROOF
+   XRUNOFF_TOWN       = PRUNOFF_TOWN
+   XRUNOFF_GARDEN     = PRUNOFF_GARDEN
+   XRUNOFF_ROAD       = PRUNOFF_ROAD
+   XRUNOFF_ROOF       = PRUNOFF_ROOF
+   XRUNOFF_STRLROOF   = PRUNOFF_STRLROOF
    XRUNOFF_GREENROOF  = PRUNOFF_GREENROOF
+   XDRAIN_GARDEN      = PDRAIN_GARDEN
    XDRAIN_GREENROOF   = PDRAIN_GREENROOF
+   XIRRIG_ROAD        = PIRRIG_ROAD
+   XIRRIG_GARDEN      = PIRRIG_GARDEN
+   XIRRIG_GREENROOF   = PIRRIG_GREENROOF
    XRN_GARDEN         = PRN_GARDEN
    XH_GARDEN          = PH_GARDEN
    XLE_GARDEN         = PLE_GARDEN
@@ -263,7 +309,28 @@ IF (LSURF_MISC_BUDGET) THEN
      !
      XABS_SW_WIN = PABS_SW_WIN 
      XABS_LW_WIN = PABS_LW_WIN
+     !
+     XTCOOL_CUR_TARGET  = PTCOOL_TARGET    
+     XTHEAT_CUR_TARGET  = PTHEAT_TARGET    
+     XCUR_QIN           = PQIN    
    ENDIF
+   !
+   IF (LSOLAR_PANEL) THEN
+     XABS_SW_PANEL    = PABS_SW_PANEL
+     XABS_LW_PANEL    = PABS_LW_PANEL
+     XRN_PANEL        = PRN_PANEL
+     XH_PANEL         = PH_PANEL
+     XTHER_PROD_PANEL = PTHER_PROD_PANEL
+     XPHOT_PROD_PANEL = PPHOT_PROD_PANEL
+     XPROD_PANEL      = PPROD_PANEL
+     XTHER_PROD_BLD   = PTHER_PROD_BLD
+     XPHOT_PROD_BLD   = PPHOT_PROD_BLD
+   END IF
+   !
+   ! cumulated diagnostics 
+   ! ---------------------
+   !
+   CALL CUMUL_DIAG_TEB_n(PTSTEP)
    !
 END IF
 !
