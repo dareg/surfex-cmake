@@ -81,7 +81,7 @@ IF ( LTOPD_STEP ) THEN
     WRITE(YSTEP,'(I3)') NTOPD_STEP
   ENDIF
   !
-  write(*,*) 'pas de temps coupl ',YSTEP
+  write(ILUOUT,*) 'pas de temps coupl ',YSTEP
   !
   IF (CRUNOFF=='TOPD') THEN
     CALL COUPL_TOPD(HPROGRAM,YSTEP,KI,NTOPD_STEP)

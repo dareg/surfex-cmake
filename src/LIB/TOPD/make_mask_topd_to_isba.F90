@@ -34,6 +34,7 @@
 !!    -------------
 !!
 !!      Original   16/03/2005
+!!                 03/2014 (E. Artinian) manages the option CGRID='IGN'
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -140,29 +141,46 @@ CONTAINS
 SUBROUTINE INIT_4POINTS(KDXM,PX1,PX2,PX3,PX4,PY1,PY2,PY3,PY4)
 !
 USE MODD_COUPLING_TOPD, ONLY: NIMAX, XXI, XYI
+USE MODD_SURF_ATM_GRID_N,   ONLY :  CGRID, XGRID_PAR    
+USE MODE_GRIDTYPE_IGN
 !
 INTEGER, INTENT(IN) :: KDXM
 REAL, INTENT(OUT) :: PX1, PX2, PX3, PX4
 REAL, INTENT(OUT) :: PY1, PY2, PY3, PY4
+REAL, DIMENSION(KI)    :: ZDX, ZDY
 !
 INTEGER :: ILINE, II, IDXN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA:INIT_4POINTS',0,ZHOOK_HANDLE)
 !
-ILINE = INT(KDXM/(NIMAX))+1      ! number of the current line
-II    = KDXM-((ILINE-1)*NIMAX)   ! index of point in the line
-IDXN  = (ILINE-1)*(NIMAX+1)+II   ! indice du point dans la grille isba
+IF (CGRID=='IGN') THEN 
+CALL GET_GRIDTYPE_IGN(XGRID_PAR,PDX=ZDX,PDY=ZDY)
+ IDXN=KDXM
+ PX1 = XXI(IDXN)              ! coordonnée X du point courant
+ PX2 = XXI(IDXN+1)            ! coordonnée X du point suivant
+ PX3 = XXI(IDXN)    ! coordonnée X du point aligné sur la ligne suivante 
+ PX4 = XXI(IDXN+1)  ! coordonnée X du point suivant sur la ligne suivante
 !
-PX1 = XXI(IDXN)              ! coordonnée X du point courant
-PX2 = XXI(IDXN+1)            ! coordonnée X du point suivant
-PX3 = XXI(IDXN+(NIMAX+1))    ! coordonnée X du point aligné sur la ligne suivante 
-PX4 = XXI(IDXN+1+(NIMAX+1))  ! coordonnée X du point suivant sur la ligne suivante
+ PY1 = XYI(IDXN)              ! coordonnée Y du point courant
+ PY2 = XYI(IDXN+1)            ! coordonnée Y du point suivant
+ PY3 = XYI(IDXN)+ZDY(IDXN)    ! coordonnée Y du point aligné sur la ligne suivante
+ PY4 = XYI(IDXN+1)+ZDY(IDXN+1)  ! coordonnée Y du point suivant sur la ligne suivante
+ELSE
+ ILINE = INT(KDXM/(NIMAX))+1      ! number of the current line
+ II    = KDXM-((ILINE-1)*NIMAX)   ! index of point in the line
+ IDXN  = (ILINE-1)*(NIMAX+1)+II   ! indice du point dans la grille isba
 !
-PY1 = XYI(IDXN)              ! coordonnée Y du point courant
-PY2 = XYI(IDXN+1)            ! coordonnée Y du point suivant
-PY3 = XYI(IDXN+(NIMAX+1))    ! coordonnée Y du point aligné sur la ligne suivante
-PY4 = XYI(IDXN+1+(NIMAX+1))  ! coordonnée Y du point suivant sur la ligne suivante
+ PX1 = XXI(IDXN)              ! coordonnée X du point courant
+ PX2 = XXI(IDXN+1)            ! coordonnée X du point suivant
+ PX3 = XXI(IDXN+(NIMAX+1))    ! coordonnée X du point aligné sur la ligne suivante 
+ PX4 = XXI(IDXN+1+(NIMAX+1))  ! coordonnée X du point suivant sur la ligne suivante
+!
+ PY1 = XYI(IDXN)              ! coordonnée Y du point courant
+ PY2 = XYI(IDXN+1)            ! coordonnée Y du point suivant
+ PY3 = XYI(IDXN+(NIMAX+1))    ! coordonnée Y du point aligné sur la ligne suivante
+ PY4 = XYI(IDXN+1+(NIMAX+1))  ! coordonnée Y du point suivant sur la ligne suivante
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA:INIT_4POINTS',1,ZHOOK_HANDLE)
 !

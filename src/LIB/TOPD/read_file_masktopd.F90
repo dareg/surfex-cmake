@@ -31,6 +31,7 @@
 !!    -------------
 !!
 !!      Original   11/2011
+!!                 03/2014 (B. Vincendon) modification of mask_surf files format
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -58,7 +59,8 @@ INTEGER, INTENT(IN)             :: KI    ! Grid dimensions
 !
 !*      0.2    declarations of local variables
 INTEGER                    :: JCAT,JMESH,JPIX
-INTEGER                    :: INUMPIX
+INTEGER,DIMENSION(KI)      :: JP_IN_M
+INTEGER                    :: INUMPIX,IEOF,ITMP
 INTEGER :: IIMAX,IJMAX,IUNIT
  CHARACTER(LEN=50) :: YNAME
 REAL, DIMENSION(:),ALLOCATABLE    :: ZTOPD_READ !Topgraphic variable read
@@ -100,16 +102,17 @@ INUMPIX=MAXVAL(NNPIX)
 !
 ALLOCATE(NMASKI(KI,NNCAT,INUMPIX))
 NMASKI(:,:,:) = NUNDEF
-
 DO JCAT=1,NNCAT
+JP_IN_M(:)=1
   !
   YNAME=TRIM(CCAT(JCAT))//TRIM('.mask_surf')
   CALL OPEN_FILE('ASCII ',IUNIT,YNAME,'FORMATTED','READ')
   ! 
-  DO JMESH=1,KI
-    DO JPIX=1,NNPIX(JMESH)
-      READ(IUNIT,*) NMASKI(JMESH,JCAT,JPIX)
-    ENDDO
+  IEOF=0
+  DO WHILE(IEOF==0)
+      READ(IUNIT,*,IOSTAT=IEOF) JMESH,ITMP 
+      NMASKI(JMESH,JCAT,JP_IN_M(JMESH))=ITMP
+      JP_IN_M(JMESH)=JP_IN_M(JMESH)+1
   ENDDO
   !
   CALL CLOSE_FILE('ASCII ',IUNIT)

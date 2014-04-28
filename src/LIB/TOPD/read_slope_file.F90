@@ -37,6 +37,8 @@
 !!    -------------
 !!
 !!      Original   11/2006
+!!                 03/2014 (B. Vincendon) add the possibility of reading topographic
+!!                         files produced by a new chain (based of java+GRASS)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -76,6 +78,8 @@ INTEGER                   :: ILUOUT      ! Unit of the files
 REAL                      :: ZWRK        ! work variable
 REAL, DIMENSION(KNMC)     :: ZDAREA      ! drainage area (aire drainee)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+CHARACTER(LEN=100)    :: YHEADER    ! Header File to be read
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_SLOPE_FILE',0,ZHOOK_HANDLE)
 !
@@ -85,15 +89,22 @@ IF (LHOOK) CALL DR_HOOK('READ_SLOPE_FILE',0,ZHOOK_HANDLE)
 !
  CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
 !
-READ(IUNIT,*) 
+READ(IUNIT,*) YHEADER
 !
-DO JJ=1,KNMC
-  !
+IF (INDEX(YHEADER,'pixel_REF')/=0) THEN !Slope file from new java+GRASS chain
+ write(ILUOUT,*) 'Slope file from new java + GRASS chain'
+ DO JJ=1,KNMC
+  READ(IUNIT,*,END=110) IWRK, PTANB(JJ),PLAMBDA(JJ) 
+ ENDDO
+ PSLOP(:)=PLAMBDA(:) !not used
+ PDAREA(:)=PLAMBDA(:) !not used
+ELSE !Slope file from old f77  chain
+ write(*,*) 'Slope file from old f77 chain'
+ DO JJ=1,KNMC
    READ(IUNIT,*,END=110) IWRK, PTANB(JJ), PSLOP(JJ), ZWRK, PDAREA(JJ)
   PLAMBDA(JJ) = LOG(PDAREA(JJ)/PSLOP(JJ))
-  !
-ENDDO
-!
+ ENDDO
+ENDIF
 110 CALL CLOSE_FILE(HPROGRAM,IUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_SLOPE_FILE',1,ZHOOK_HANDLE)

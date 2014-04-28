@@ -31,6 +31,7 @@
 !!    -------------
 !!
 !!      Original  03/2008 
+!!                03/2014 (B. Vincendon) add new control variables
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -53,6 +54,7 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 INTEGER           :: JCAT,JSTP ! loop control
 INTEGER           :: IUNIT     ! file unit numbers
+INTEGER           :: INB_VAR   ! number of variable to write
  CHARACTER(LEN=28) :: YFILE     ! file name
  CHARACTER(LEN=40) :: YFORM     ! Writing format
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -61,10 +63,11 @@ IF (LHOOK) CALL DR_HOOK('WRITE_BUDGET_COUPL_ROUT',0,ZHOOK_HANDLE)
 !
 !*       1.     WRITING BUDGET FILES
 !               ------------
+INB_VAR=12
 !
 DO JCAT=1,NNCAT
   !
-  YFORM='(i6,10f15.1)'
+  YFORM='(i6,12f15.1)'
   YFILE=TRIM('bilan_bv_')//TRIM(CCAT(JCAT))//TRIM('.txt')
   !
   CALL OPEN_FILE('ASCII ',IUNIT,HFILE=YFILE,HFORM='FORMATTED',HACTION='WRITE')
@@ -73,10 +76,11 @@ DO JCAT=1,NNCAT
                                       YB_VAR(3),'         ',YB_VAR(4),'         ',&
                                       YB_VAR(5),'         ',YB_VAR(6),'         ',&
                                       YB_VAR(7),'         ',YB_VAR(8),'         ',&
-                                      YB_VAR(9),'         ',YB_VAR(10)
+                                      YB_VAR(9),'         ',YB_VAR(10),'         ',&
+                                      YB_VAR(11),'         ',YB_VAR(12)
   !
   DO JSTP=1,NNB_TOPD_STEP
-    WRITE(IUNIT,YFORM) JSTP,XB_VAR_BV(JSTP,JCAT,1:10)
+    WRITE(IUNIT,YFORM) JSTP,XB_VAR_BV(JSTP,JCAT,1:INB_VAR)
   ENDDO
   !
   CALL CLOSE_FILE('ASCII ',IUNIT)
@@ -89,10 +93,12 @@ DO JCAT=1,NNCAT
                                       YB_VAR(3),'         ',YB_VAR(4),'         ',&
                                       YB_VAR(5),'         ',YB_VAR(6),'         ',&
                                       YB_VAR(7),'         ',YB_VAR(8),'         ',&
-                                      YB_VAR(9),'         ',YB_VAR(10)
+                                      YB_VAR(9),'         ',YB_VAR(10),'         ',&
+                                      YB_VAR(11),'         ',YB_VAR(12)
+
   !
   DO JSTP=1,NNB_TOPD_STEP
-    WRITE(IUNIT,YFORM) JSTP,XB_VAR_NOBV(JSTP,JCAT,1:10)
+    WRITE(IUNIT,YFORM) JSTP,XB_VAR_NOBV(JSTP,JCAT,1:INB_VAR)
   ENDDO
   !
   CALL CLOSE_FILE('ASCII ',IUNIT)
@@ -115,7 +121,7 @@ DO JCAT=1,NNCAT
   !
 ENDDO !JCAT
 
-YFORM='(i6,10f15.1)'
+YFORM='(i6,12f15.1)'
 YFILE=TRIM('bilan_tot.txt')
 !
  CALL OPEN_FILE('ASCII ',IUNIT,HFILE=YFILE,HFORM='FORMATTED',HACTION='WRITE')
@@ -124,10 +130,12 @@ WRITE(IUNIT,*) '     T','         ',YB_VAR(1),'         ',YB_VAR(2),'         ',
                                     YB_VAR(3),'         ',YB_VAR(4),'         ',&
                                     YB_VAR(5),'         ',YB_VAR(6),'         ',&
                                     YB_VAR(7),'         ',YB_VAR(8),'         ',&
-                                    YB_VAR(9),'         ',YB_VAR(10)
+                                    YB_VAR(9),'         ',YB_VAR(10),'         ',&
+                                      YB_VAR(11),'         ',YB_VAR(12)
+
 !
 DO JSTP=1,NNB_TOPD_STEP
-  WRITE(IUNIT,YFORM) JSTP,XB_VAR_TOT(JSTP,1:10)
+  WRITE(IUNIT,YFORM) JSTP,XB_VAR_TOT(JSTP,1:INB_VAR)
 ENDDO
 !
  CALL CLOSE_FILE('ASCII ',IUNIT)

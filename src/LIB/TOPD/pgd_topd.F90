@@ -29,6 +29,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    11/2011
+!!                 03/2014 (E. Artinian) manages the option CGRID='IGN'
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -59,7 +60,7 @@ USE MODI_MAKE_MASK_ISBA_TO_TOPD
 USE MODI_WRITE_FILE_MASKTOPD
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
-USE MODI_TOPD_TO_ISBA_SLOPE
+!USE MODI_TOPD_TO_ISBA_SLOPE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -69,15 +70,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
+CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
 !
- CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
+CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
 INTEGER                   :: IL                     ! number of points
 INTEGER                   :: JJ,JI,JK,JWRK ! loop control 
 INTEGER                   :: JCAT,JMESH,JPIX ! loop control 
 INTEGER                           :: ILUOUT       ! Logical unit for output filr
 INTEGER                           :: IUNIT       ! Logical unit for carte_asat file
 INTEGER                           :: IMESHL       !  number of ISBA grid nodes
+INTEGER                           :: ILAMBERT     ! Lambert projection type
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: ZXI, ZYI     ! natural coordinates of ISBA grid (conformal projection or latlon)
 REAL, DIMENSION(:), ALLOCATABLE   :: ZDXI, ZDYI   ! Isba grid resolution in the conformal projection
@@ -102,12 +104,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_TOPD',0,ZHOOK_HANDLE)
 !
- CALL GET_LUOUT(HPROGRAM,ILUOUT)
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !  
- CALL READ_NAM_PGD_TOPD(HPROGRAM,LCOUPL_TOPD,CCAT,XF_PARAM_BV,XC_DEPTH_RATIO_BV)
+CALL READ_NAM_PGD_TOPD(HPROGRAM,LCOUPL_TOPD,CCAT,XF_PARAM_BV,XC_DEPTH_RATIO_BV)
 !
-IF (LCOUPL_TOPD .AND. CISBA/='3-L') &
-  CALL ABOR1_SFX("PGD_TOPD: coupling with topmodel only runs with CISBA=3-L")
+IF (LCOUPL_TOPD .AND. (CISBA/='3-L'.AND. CISBA/='DIF')) &
+  CALL ABOR1_SFX("PGD_TOPD: coupling with topmodel only runs with CISBA=3-L or CISBA=DIF  ")
 !
 !         1.   Reads the namelists
 !              --------------------
@@ -119,7 +121,7 @@ IF (LCOUPL_TOPD) THEN
   !              -------------------------------------------
   WRITE(ILUOUT,*) 'NNCAT',NNCAT
   !
-  CALL INIT_TOPD(HPROGRAM)
+  CALL INIT_TOPD_PGD(HPROGRAM)
   !
   !         4.   Compute masks to couple ISBA and TOPODYN grids
   !              -------------------------------------------------------
@@ -263,7 +265,19 @@ IF (LCOUPL_TOPD) THEN
       ENDDO
     ENDDO
     !
-  ELSE
+  ! Modification by Eram Artinian to take into account IGN grid 1
+  ELSE IF (CGRID=='IGN') THEN 
+    WRITE(ILUOUT,*) 'GRILLE IGN (application Bulgarie)' 
+    ALLOCATE(ZXN(NDIM_FULL))
+    ALLOCATE(ZYN(NDIM_FULL))
+    CALL GET_GRIDTYPE_IGN(XGRID_PAR,KLAMBERT=ILAMBERT,&
+                          KL=IL,PX=ZXN,PY=ZYN,KDIMX=NIMAX)
+    IMESHL=IL
+    ALLOCATE(ZLAT(IMESHL))
+    ALLOCATE(ZLON(IMESHL))
+    CALL LATLON_IGN(ILAMBERT,ZXN,ZYN,ZLAT,ZLON)
+  !End modification by Eram Artinian to take into account IGN grid
+  ELSE 
     !       
     WRITE(ILUOUT,*) 'ERREUR: TYPE DE GRILLE NON GERE PAR LE CODE'
     CALL ABOR1_SFX("PGD_TOPD: TYPE DE GRILLE NON GERE PAR LE CODE")
@@ -275,7 +289,16 @@ IF (LCOUPL_TOPD) THEN
   !
   ALLOCATE(XXI(IMESHL))
   ALLOCATE(XYI(IMESHL))
-  CALL XY_IGN(5,XXI,XYI,ZLAT,ZLON)
+  ! Modification by Eram Artinian to take into account IGN grid 2
+  IF (CGRID/='IGN') THEN
+    CALL XY_IGN(5,XXI,XYI,ZLAT,ZLON)
+  ELSE
+    XXI=ZXN
+    XYI=ZYN
+    DEALLOCATE(ZXN)
+    DEALLOCATE(ZYN)
+  ENDIF
+  !End modification by Eram Artinian to take into account IGN grid 2
   DEALLOCATE(ZLAT)
   DEALLOCATE(ZLON)
   !
@@ -295,10 +318,10 @@ IF (LCOUPL_TOPD) THEN
   CALL WRITE_FILE_MASKTOPD(NDIM_FULL)
   !
   !*        3.0 Compute Mean slope over each ISBA_MESH
-  !            ----------------------------------------------------------------------
-  CALL TOPD_TO_ISBA_SLOPE(NDIM_FULL)
-  !
-  !*        4.0  Compute F and DC for each ISBA mesh
+!            ----------------------------------------------------------------------
+CALL TOPD_TO_ISBA_SLOPE(NDIM_FULL)
+!
+!*        4.0  Compute F and DC for each ISBA mesh
   !            ----------------------------------------------------------------------
   !
   ALLOCATE(NNBV_IN_MESH(NDIM_FULL,NNCAT))

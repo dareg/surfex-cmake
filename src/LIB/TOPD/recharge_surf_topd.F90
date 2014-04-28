@@ -35,16 +35,17 @@
 !!    -------------
 !!
 !!      Original   12/2003
+!!                 03/2014 (B. Vincendon) use of the number of pixels included in a mesh and a watershed
 !! 
 !!    WARNING
 !!    ----------------
-!!     on considère que le seuil pour les deficits reste le niveau Wfc
+!!     WFC is the threshold for deficits 
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 USE MODD_COUPLING_TOPD, ONLY: NMASKI, XWFCTOPT, XDMAXFC, XWTOPT,&
-                                XDTOPT, XWSTOPT, NNPIX
+                                XDTOPT, XWSTOPT, NNPIX, NNBV_IN_MESH
 USE MODD_TOPODYN,       ONLY: NNCAT, XDMAXT
 !
 USE MODD_SURF_PAR,        ONLY: XUNDEF,NUNDEF
@@ -93,8 +94,7 @@ DO J3 = 1,KI
       !
       J4 = 1
       J2 = NMASKI(J3,J1,J4)
-      !
-      DO WHILE (J2 /= NUNDEF .AND. J4<=SIZE(NMASKI,3) )
+      DO WHILE (J2 /= NUNDEF .AND. J4<=NNBV_IN_MESH(J3,J1) )
         !
         IF ( XWFCTOPT(J1,J2) /= XUNDEF ) THEN
           !
@@ -141,7 +141,7 @@ DO J3 = 1,KI
         J4=1
         J2=NMASKI(J3,J1,J4)
         !
-        DO WHILE ( J2/=NUNDEF .AND. J4<=SIZE(NMASKI,3) )
+        DO WHILE ( J2/=NUNDEF .AND. J4<=NNBV_IN_MESH(J3,J1) )
           !
           IF ( GTEST(J1,J4) .AND. XWFCTOPT(J1,J2)/=XUNDEF ) THEN
             !
@@ -207,7 +207,7 @@ DO J3 = 1,KI
           !
           IF (NNPIX(J3) > 400 ) THEN
             WRITE(*,*) 'MAILLE NUM=',J3, 'nb pix tot=',NNPIX(J3)
-            CALL ABOR1_SFX("RECHARGE_SURF_TOPD: TOO MANY PIXELS SATURATED ")
+           ! CALL ABOR1_SFX("RECHARGE_SURF_TOPD: TOO MANY PIXELS SATURATED ")
           ELSE
             ZREST=0.0
           ENDIF

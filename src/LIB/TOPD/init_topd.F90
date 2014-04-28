@@ -45,6 +45,8 @@
 !!                             that are now module arguments from MODD_TOPDDYN_n
 !!                             NNB_TOPD_STEP,XTOPD_STEP
 !!      Modification 11/2011 : Exfiltration option removed (B. Vincendon)
+!!      Modification 03/2014 : common init_topd routine  called in init_topd_pgd
+!!                             and init_topd_ol (B. Vincendon)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -84,11 +86,11 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 !
 !
- CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILETOP ! topographic file names
- CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILECON ! topographic file names
- CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILESLO ! topographic file names
- CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILEDH  ! topographic file names
- CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILEDR  ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(NNCAT) :: YFILETOP ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(NNCAT) :: YFILECON ! topographic file names
+ CHARACTER(LEN=50), DIMENSION(NNCAT) :: YFILESLO
+ CHARACTER(LEN=50), DIMENSION(NNCAT) :: YFILEDH
+ CHARACTER(LEN=50), DIMENSION(NNCAT) :: YFILEDR
 INTEGER                   :: JJ,JCAT ! loop control 
 INTEGER                   :: IUNIT                  ! Unit of the files
 INTEGER                   :: ILUOUT                 ! Unit of the files
@@ -106,11 +108,6 @@ IF (LHOOK) CALL DR_HOOK('INIT_TOPD',0,ZHOOK_HANDLE)
 !
 WRITE(ILUOUT,*) 'INITIALISATION INIT_TOPD'
 !
-ALLOCATE(YFILETOP(NNCAT))
-ALLOCATE(YFILECON(NNCAT))
-ALLOCATE(YFILESLO(NNCAT))
-ALLOCATE(YFILEDH (NNCAT))
-ALLOCATE(YFILEDR (NNCAT))
 !
 DO JCAT=1,NNCAT
   YFILETOP(JCAT)=TRIM(CCAT(JCAT))//'_FilledDTM.map'
@@ -135,10 +132,11 @@ NNPT(:)=0
 ALLOCATE(XNUL(NNCAT))
 ALLOCATE(XDXT(NNCAT))
 !
+!
 !*       2      Topographic files
 !               -----------------------------
 DO JCAT=1,NNCAT
-  CALL READ_TOPD_HEADER_DTM("ASCII ",YFILETOP(JCAT),'FORMATTED',&
+  CALL READ_TOPD_HEADER_DTM(HPROGRAM,YFILETOP(JCAT),'FORMATTED',&
                             XX0(JCAT),XY0(JCAT),NNXC(JCAT),NNYC(JCAT),&
                             XNUL(JCAT),XDXT(JCAT))
 ENDDO
@@ -150,21 +148,12 @@ NPMAX = MAXVAL(NNPT(:))
 !
 ALLOCATE(NLINE(NNCAT,NPMAX))
 NLINE(:,:)=0
-ALLOCATE(XDRIV(NNCAT,NPMAX))
-XDRIV(:,:)=0.0
-ALLOCATE(XDHIL(NNCAT,NPMAX))
-XDHIL(:,:)=0.0
-ALLOCATE(XDGRD(NNCAT,NPMAX))
-XDGRD(:,:)=0.0
-ALLOCATE(XQTOT(NNCAT,NNB_TOPD_STEP))
-XQTOT(:,:)=0.0
 ALLOCATE(XTOPD(NNCAT,NPMAX))
 XTOPD(:,:)=0.0
-
 ALLOCATE(ZTOPD_READ(NPMAX))
 DO JCAT = 1,NNCAT
   !
-  CALL READ_TOPD_FILE("ASCII ",YFILETOP(JCAT),'FORMATTED',NNPT(JCAT),ZTOPD_READ)
+  CALL READ_TOPD_FILE(HPROGRAM,YFILETOP(JCAT),'FORMATTED',NNPT(JCAT),ZTOPD_READ)
   DO JJ = 1,NNPT(JCAT)
     XTOPD(JCAT,JJ) = ZTOPD_READ(JJ) ! XTOPD can only be >=0
   ENDDO
@@ -173,43 +162,50 @@ ENDDO
 ! for XTOPD, we do not have to use NLINE, all the pixels of the rectancle around
 ! the catchment are read.
 !
-!*      4       Connection files
+
+!*      3       Connection files
 !               ----------------
 !
 DO JCAT=1,NNCAT
-  CALL READ_TOPD_HEADER_CONNEX("ASCII ",YFILECON(JCAT),'FORMATTED',NNMC(JCAT))
+  CALL READ_TOPD_HEADER_CONNEX(HPROGRAM,YFILECON(JCAT),'FORMATTED',NNMC(JCAT))
 ENDDO
 !
 NMESHT=MAXVAL(NNMC(:))
 !
-ALLOCATE(XDMAXT(NNCAT,NMESHT))
 ALLOCATE(XCONN(NNCAT,NMESHT,NDIM))
 XCONN(:,:,:)=0.0
-XDMAXT(:,:)=0.0
 !
 DO JCAT=1,NNCAT
   CALL READ_CONNEX_FILE(HPROGRAM,YFILECON(JCAT),'FORMATTED',NNMC(JCAT),XCONN(JCAT,:,:),NLINE(JCAT,:))
 ENDDO
+
 !
-!*     5        Slope files
+!*       4      Slope files
 !               -----------
-IF (HPROGRAM/='PGD') THEN
-  !
   ALLOCATE(XTANB(NNCAT,NMESHT))
   ALLOCATE(XSLOP(NNCAT,NMESHT))
   ALLOCATE(XDAREA(NNCAT,NMESHT))
   ALLOCATE(XLAMBDA(NNCAT,NMESHT))
   !
   DO JCAT=1,NNCAT
-    CALL READ_SLOPE_FILE("ASCII ",YFILESLO(JCAT),'FORMATTED',NNMC(JCAT),&
+    CALL READ_SLOPE_FILE(HPROGRAM,YFILESLO(JCAT),'FORMATTED',NNMC(JCAT),&
                        XTANB(JCAT,:),XSLOP(JCAT,:),XDAREA(JCAT,:),XLAMBDA(JCAT,:))
   ENDDO
   !
-  !*      6       River Distance file
+ALLOCATE(XDRIV(NNCAT,NPMAX))
+XDRIV(:,:)=0.0
+ALLOCATE(XDHIL(NNCAT,NPMAX))
+XDHIL(:,:)=0.0
+ALLOCATE(XDGRD(NNCAT,NPMAX))
+XDGRD(:,:)=0.0
+ALLOCATE(XQTOT(NNCAT,NNB_TOPD_STEP))
+XQTOT(:,:)=0.0
+!
+!*     5          River Distance file
   !               -------------------
   !
   DO JCAT=1,NNCAT
-    CALL  READ_TOPD_FILE("ASCII ",YFILEDR(JCAT),'FORMATTED',NNPT(JCAT),ZTOPD_READ)
+    CALL  READ_TOPD_FILE(HPROGRAM,YFILEDR(JCAT),'FORMATTED',NNPT(JCAT),ZTOPD_READ)
     DO JJ=1,NPMAX
       IF ( NLINE(JCAT,JJ)/=0. .AND. NLINE(JCAT,JJ)/=XUNDEF ) &
        XDRIV(JCAT,NLINE(JCAT,JJ)) = ZTOPD_READ(JJ)
@@ -217,11 +213,11 @@ IF (HPROGRAM/='PGD') THEN
   ENDDO
   ! for XDRIV, we must use NLINE, online pixels inside de the catchment are read.
   !
-  !*      7       Hillslope Distance file
+  !*      6       Hillslope Distance file
   !  -----------------------
   !
   DO JCAT=1,NNCAT
-    CALL  READ_TOPD_FILE("ASCII ",YFILEDH(JCAT),'FORMATTED',NNPT(JCAT),ZTOPD_READ)
+    CALL  READ_TOPD_FILE(HPROGRAM,YFILEDH(JCAT),'FORMATTED',NNPT(JCAT),ZTOPD_READ)
     DO JJ=1,NPMAX
       IF ( NLINE(JCAT,JJ)/=0. .AND. NLINE(JCAT,JJ)/=XUNDEF ) &
         XDHIL(JCAT,NLINE(JCAT,JJ)) = ZTOPD_READ(JJ)
@@ -230,47 +226,6 @@ IF (HPROGRAM/='PGD') THEN
   !
   ! for XDHIL, we must use NLINE, online pixels inside de the catchment are read.
   XDGRD(:,:) = XDHIL(:,:)
-  !
-  !*      8       Calculations for routing by geomorpho
-  !               -------------------------------------
-  !
-  ALLOCATE(NX_STEP_ROUT(NNCAT))
-  ALLOCATE(XTIME_TOPD(NNCAT,NMESHT))
-  ALLOCATE(XTIME_TOPD_DRAIN(NNCAT,NMESHT))
-  !
-  XTIME_TOPD(:,:) = 0.0
-  XTIME_TOPD_DRAIN(:,:) = 0.0
-  XSPEEDH(:) = XSPEEDR(:)/10.
-  !
-  !
-  DO JCAT=1,NNCAT
-    !
-    IF ( XSPEEDR(JCAT)/=0. .AND. XSPEEDG(JCAT)/=0. ) THEN
-      WHERE ( XDHIL(JCAT,1:NNMC(JCAT))/=XUNDEF .AND. XDRIV(JCAT,1:NNMC(JCAT))/=XUNDEF ) &
-        XTIME_TOPD(JCAT,1:NNMC(JCAT)) = XDHIL(JCAT,1:NNMC(JCAT)) / XSPEEDH(JCAT) + &
-                                        XDRIV(JCAT,1:NNMC(JCAT)) / XSPEEDR(JCAT)
-      WHERE ( XDGRD(JCAT,1:NNMC(JCAT))/=XUNDEF .AND. XDRIV(JCAT,1:NNMC(JCAT))/=XUNDEF ) &
-        XTIME_TOPD_DRAIN(JCAT,1:NNMC(JCAT)) = XDGRD(JCAT,1:NNMC(JCAT)) / XSPEEDG(JCAT) + &
-                                              XDRIV(JCAT,1:NNMC(JCAT)) / XSPEEDR(JCAT)
-    ELSE 
-      WRITE(ILUOUT,*) 'You have to choose some values for routing velocities'
-    ENDIF
-    !
-    IF (XTOPD_STEP/=0.) &
-      NX_STEP_ROUT(JCAT) = INT(MAXVAL(XTIME_TOPD(JCAT,1:NNMC(JCAT))) / XTOPD_STEP) + 1
-    !
-  ENDDO
-  !
-  IF ( NNB_STP_RESTART==0 ) NNB_STP_RESTART = MAX(NNB_TOPD_STEP,MAXVAL(NX_STEP_ROUT(:)))
-  !
-  !
-  ALLOCATE(XQB_DR(NNCAT,NNB_TOPD_STEP))
-  XQB_DR(:,:)=0.0
-  ALLOCATE(XQB_RUN(NNCAT,NNB_TOPD_STEP))
-  XQB_RUN(:,:)=0.0
-  !
-ENDIF
-!
-IF (LHOOK) CALL DR_HOOK('INIT_TOPD',1,ZHOOK_HANDLE)
+  !IF (LHOOK) CALL DR_HOOK('INIT_TOPD',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE INIT_TOPD

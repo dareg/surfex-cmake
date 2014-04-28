@@ -31,6 +31,7 @@
 !!    -------------
 !!
 !!      Original   11/2011
+!!                 03/2014 (B. Vincendon) modification of mask_surf files format
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -38,7 +39,7 @@
 !
 USE MODD_TOPODYN, ONLY : CCAT, NNCAT
 USE MODD_COUPLING_TOPD, ONLY : NMASKI, NNPIX
-USE MODD_SURF_PAR,        ONLY : XUNDEF
+USE MODD_SURF_PAR,        ONLY : NUNDEF
 !
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
@@ -73,7 +74,8 @@ DO JCAT=1,NNCAT
   !
   DO JMESH=1,KI
     DO JPIX=1,NNPIX(JMESH)
-      WRITE(IUNIT,*) NMASKI(JMESH,JCAT,JPIX)
+    IF (NMASKI(JMESH,JCAT,JPIX)/=NUNDEF)&
+      WRITE(IUNIT,*) JMESH,NMASKI(JMESH,JCAT,JPIX)
     ENDDO
   ENDDO
   !

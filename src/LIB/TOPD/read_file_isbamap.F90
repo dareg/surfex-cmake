@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !     ##########################
-      SUBROUTINE READ_FILE_ISBAMAP(KUNIT,PVAR,INI)
+      SUBROUTINE READ_FILE_ISBAMAP(KUNIT,PVAR,KI)
 !     ##########################
 !
 !!
@@ -31,6 +31,7 @@
 !!    -------------
 !!
 !!      Original   25/01/2005
+!!                 03/2014 (E. Artinian) manages the option CGRID='IGN'
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -38,11 +39,13 @@
 !
 !
 USE MODD_TOPODYN
-USE MODD_SURF_ATM_GRID_n, ONLY : XGRID_PAR
+USE MODD_SURF_ATM_GRID_n, ONLY : XGRID_PAR, CGRID
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODE_GRIDTYPE_CONF_PROJ
-!
+USE MODE_GRIDTYPE_LONLAT_REG
+USE MODE_GRIDTYPE_IGN
+!!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -52,17 +55,20 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN)             :: KUNIT  ! file unit
 REAL, DIMENSION(:), INTENT(OUT) :: PVAR   ! variable to write in the file
-INTEGER, INTENT(IN)             :: INI    ! Grid dimensions
+INTEGER, INTENT(IN)             :: KI    ! Grid dimensions
 !
 !
 !*      0.2    declarations of local variables
-INTEGER                    :: JJ,JI
+INTEGER                    :: JJ,JI,IL
+INTEGER                    :: INI,ILAMBERT
 INTEGER                    :: JINDEX ! reference number of the pixel
 REAL                       :: ZOUT
 REAL                       :: ZMAX,ZMIN
-REAL, DIMENSION(INI)       :: ZXI, ZYI   ! natural coordinates of ISBA grid (conformal projection)
-REAL, DIMENSION(INI)       :: ZDXI, ZDYI   ! Isba grid resolution in the conformal projection
+REAL, DIMENSION(KI)       :: ZXI, ZYI   ! natural coordinates of ISBA grid (conformal projection)
+REAL, DIMENSION(KI)       :: ZXN, ZYN     ! isba nodes coordinates in the Lambert II coordinates - Eram rajout
+REAL, DIMENSION(KI)       :: ZDXI, ZDYI   ! Isba grid resolution in the conformal projection
 INTEGER                    :: IIMAX,IJMAX
+REAL :: ZLONMIN,ZLONMAX,ZLATMIN,ZLATMAX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_FILE_ISBAMAP',0,ZHOOK_HANDLE)
@@ -70,7 +76,23 @@ IF (LHOOK) CALL DR_HOOK('READ_FILE_ISBAMAP',0,ZHOOK_HANDLE)
 !*       0.     Initialization:
 !               ---------------
 !
+IF(CGRID.EQ.'CONF PROJ') THEN
  CALL GET_GRIDTYPE_CONF_PROJ(XGRID_PAR,PX=ZXI,PY=ZYI,KIMAX=IIMAX,KJMAX=IJMAX,PDX=ZDXI)
+ELSE IF(CGRID.EQ.'LONLAT REG') THEN
+    CALL GET_GRIDTYPE_LONLAT_REG(XGRID_PAR,PLONMIN=ZLONMIN,PLONMAX=ZLONMAX,             &
+                                 PLATMIN=ZLATMIN,PLATMAX=ZLATMAX,KLON=IIMAX,KLAT=IJMAX, &
+                                 KL=IL,PLON=ZXI,PLAT=ZYI)
+    !
+    ZDXI(:)=(ZLONMAX-ZLONMIN)/(IIMAX-1)
+    ZDYI(:)=(ZLATMAX-ZLATMIN)/(IJMAX-1)
+ELSE IF (CGRID=='IGN') THEN 
+ CALL GET_GRIDTYPE_IGN(XGRID_PAR,KLAMBERT=ILAMBERT,KL=INI,PX=ZXN,PY=ZYN)
+  INI=KI
+  ZDXI(:)=8000
+  ZDYI(:)=8000
+ELSE
+    CALL ABOR1_SFX("READ_FILE_ISBAMAP: TYPE DE GRILLE NON GERE PAR LE CODE")
+ENDIF
 !
 ZMAX=MAXVAL(PVAR)
 ZMIN=MINVAL(PVAR)
@@ -80,21 +102,36 @@ DO JJ=1,5
   READ(KUNIT,*)
 ENDDO
 !
-READ(KUNIT,*) ZXI(1)
-READ(KUNIT,*) ZYI(1)
-READ(KUNIT,*) IIMAX
-READ(KUNIT,*) IJMAX
-READ(KUNIT,*) ZOUT
-READ(KUNIT,*) ZDXI(1)
-READ(KUNIT,*) ZMIN
-READ(KUNIT,*) ZMAX
+IF(CGRID.EQ.'IGN') THEN
+    !
+    READ(KUNIT,*) ZXN(1)
+    READ(KUNIT,*) ZYN(1)
+    READ(KUNIT,*) INI
+    READ(KUNIT,*) ZOUT
+    READ(KUNIT,*) ZDXI(1)
+    READ(KUNIT,*) ZMIN
+    READ(KUNIT,*) ZMAX
+    !
+    DO JJ=1,INI
+        READ(KUNIT,*) PVAR(JJ)
+    ENDDO
+ELSE
+    READ(KUNIT,*) ZXI(1)
+    READ(KUNIT,*) ZYI(1)
+    READ(KUNIT,*) IIMAX
+    READ(KUNIT,*) IJMAX
+    READ(KUNIT,*) ZOUT
+    READ(KUNIT,*) ZDXI(1)
+    READ(KUNIT,*) ZMIN
+    READ(KUNIT,*) ZMAX
 !
-DO JJ=1,IJMAX
-  DO JI=1,IIMAX
-    JINDEX=(JJ - 1) * IIMAX + JI
-    READ(KUNIT,*) PVAR(JINDEX)
-  ENDDO
-ENDDO
+    DO JJ=1,IJMAX
+      DO JI=1,IIMAX
+        JINDEX=(JJ - 1) * IIMAX + JI
+        READ(KUNIT,*) PVAR(JINDEX)
+      ENDDO
+    ENDDO
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('READ_FILE_ISBAMAP',1,ZHOOK_HANDLE)
 !

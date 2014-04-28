@@ -40,25 +40,27 @@
 !!    -------------
 !!
 !!      Original   09/10/2003
+!!                 03/2014 (B. Vincendon) correction for meshes covered by several watersheds
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-!*** SurfEx ***
+!
 USE MODI_UNPACK_SAME_RANK
-!*** Coupling ***
+!
 USE MODI_WRITE_FILE_ISBAMAP
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, NNB_TOPD_STEP
-USE MODD_COUPLING_TOPD, ONLY : XWG_FULL, XDTOPT, XWTOPT, XWSUPSAT,&
-                                 NMASKT, XTOTBV_IN_MESH, NNPIX, NFREQ_MAPS_WG
+USE MODD_TOPODYN,         ONLY : NNCAT, NNMC, NNB_TOPD_STEP
+USE MODD_COUPLING_TOPD,   ONLY : XWG_FULL, XDTOPT, XWTOPT, XWSUPSAT,&
+                                 NMASKT, XTOTBV_IN_MESH, NNPIX,&
+                                 NFREQ_MAPS_WG, XBV_IN_MESH,NNBV_IN_MESH
 !
 USE MODD_ISBA_n,          ONLY : XWSAT
 USE MODD_SURF_ATM_GRID_n, ONLY : XMESH_SIZE
-USE MODD_SURF_PAR,        ONLY : XUNDEF
+USE MODD_SURF_PAR,        ONLY : XUNDEF,NUNDEF
 USE MODD_SURF_ATM_n,      ONLY : NR_NATURE
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 !
@@ -72,20 +74,24 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 INTEGER, INTENT(IN)                 :: KSTEP   ! Topodyn current time step
-LOGICAL, DIMENSION(:), INTENT(IN) :: GTOPD     ! 
+LOGICAL, DIMENSION(:), INTENT(INOUT)   :: GTOPD     ! 
 !
 !*      0.2    declarations of local variables
 !
 !
-INTEGER                :: JJ, JI          ! loop control 
-INTEGER                :: IUNIT               
-REAL, DIMENSION(KI)    :: ZW              ! TOPODYN water content on ISBA grid (mm)
-REAL, DIMENSION(KI)    :: ZCOUNT          ! TOPO pixel number in an ISBA pixel
-REAL, DIMENSION(KI)    :: ZWSAT_FULL      ! Water content at saturation on the layer 2 
+INTEGER                   :: JJ, JI , JMESH, JCAT         ! loop control 
+INTEGER                   :: IUNIT               
+REAL, DIMENSION(KI)       :: ZW              ! TOPODYN water content on ISBA grid (mm)
+REAL, DIMENSION(KI)       :: ZWSAT_FULL      ! Water content at saturation on the layer 2 
                                           ! on the full grid
-REAL, DIMENSION(KI)    :: ZWG_OLD
-REAL, DIMENSION(KI)    :: ZDG_FULL
- CHARACTER(LEN=3)       :: YSTEP
+REAL, DIMENSION(KI)       :: ZWG_OLD
+REAL, DIMENSION(KI)       :: ZDG_FULL
+!
+REAL, DIMENSION(KI,NNCAT) :: ZCOUNT, ZW_CAT
+!
+CHARACTER(LEN=3)          :: YSTEP
+INTEGER                   :: JCAT_IN
+
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA',0,ZHOOK_HANDLE)
@@ -93,7 +99,9 @@ IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA',0,ZHOOK_HANDLE)
 !*       0.     Initialization:
 !               ---------------
 !
-ZW(: )= 0.0
+ZW(:)= 0.0
+ZW_CAT(:,:)= 0.0
+ZCOUNT(:,:)=0.0
 !
 ZWG_OLD(:) = XWG_FULL(:)
 !
@@ -104,40 +112,74 @@ ZWG_OLD(:) = XWG_FULL(:)
 !               -----------------
 !
 DO JJ=1,NNCAT
-  IF (GTOPD(JJ)) THEN
-    DO JI=1,NNMC(JJ)
-      IF (XDTOPT(JJ,JI) /= XUNDEF) THEN
-        ZW(NMASKT(JJ,JI)) = ZW(NMASKT(JJ,JI)) + XWTOPT(JJ,JI)
-      ENDIF
-    ENDDO
-  ELSE
-    GOTO 10 
-  ENDIF
+ IF (GTOPD(JJ)) THEN
+  DO JI=1,NNMC(JJ)
+   IF ( (XDTOPT(JJ,JI) /= XUNDEF).AND. (NMASKT(JJ,JI) /= NUNDEF) )THEN
+    ZW_CAT(NMASKT(JJ,JI),JJ) = ZW_CAT(NMASKT(JJ,JI),JJ) + XWTOPT(JJ,JI)
+    ZCOUNT(NMASKT(JJ,JI),JJ) = ZCOUNT(NMASKT(JJ,JI),JJ) + 1.0
+   ENDIF
+  ENDDO
+ ENDIF
 ENDDO
 !
-ZCOUNT(:)=REAL(NNPIX(:))
 !
-WHERE (ZCOUNT(:) /= 0.0.AND.XWG_FULL(:)/=XUNDEF)
-  ZW(:) = ZW(:) / ZCOUNT
-ENDWHERE
-!
-!
-! The soil water content is the balanced mean between the soil water content calculated by TOPODYN 
-! and the initial soil water content in each mesh, in function of the area of the mesh occupied by TOPODYN
-WHERE ( XMESH_SIZE(:) - XTOTBV_IN_MESH(:) <= 0.0) ! la maille isba est totalement couverte par des bassins versants
-  XWG_FULL(:) = ZW(:)
-ELSEWHERE (XTOTBV_IN_MESH(:) /= 0.0)
-  XWG_FULL = (XTOTBV_IN_MESH(:)/XMESH_SIZE(:))*ZW(:) + ((XMESH_SIZE(:)-XTOTBV_IN_MESH(:))/XMESH_SIZE(:))*XWG_FULL(:)
+JCAT_IN=1
+DO JMESH=1,KI
+ IF (XTOTBV_IN_MESH(JMESH)/=0.0 .AND. XTOTBV_IN_MESH(JMESH)/=XUNDEF ) THEN
+  ! at least 1 catchment over mesh
+  DO JCAT=1,NNCAT
+   IF (XTOTBV_IN_MESH(JMESH)==XBV_IN_MESH(JMESH,JCAT)) THEN ! only 1 catchment on mesh
+    JCAT_IN=JCAT
+    IF (GTOPD(JCAT).AND. NNBV_IN_MESH(JMESH,JCAT) /=0.) THEN
+     IF (XBV_IN_MESH(JMESH,JCAT)>=XMESH_SIZE(JMESH)*0.75) THEN ! catchment covers totaly mesh
+     ZW(JMESH) = ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT) 
+     ELSE
+      ZW(JMESH) = ZW_CAT(JMESH,JCAT) /  ZCOUNT(JMESH,JCAT) 
+     ENDIF
 
-ENDWHERE
+    ELSE
+     ZW(JMESH)=ZWG_OLD(JMESH)
+    ENDIF
+   ENDIF
+  ENDDO
+  !
+  IF(ZW(JMESH)==0.0) JCAT_IN=0 ! several catchments on the same mesh
+  !
+  IF (JCAT_IN==0) THEN  ! several catchments on the same mesh
+   IF (XTOTBV_IN_MESH(JMESH)>=XMESH_SIZE(JMESH)*0.75) THEN ! catchmentS cover totaly mesh
+    DO JCAT=1,NNCAT
+     IF (GTOPD(JCAT).AND. ZCOUNT(JMESH,JCAT)/=0.) THEN
+      ZW(JMESH) = ZW(JMESH) + ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT) *&
+                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/XMESH_SIZE(JMESH)))
+     ELSE
+      ZW(JMESH)=0.
+     ENDIF
+    ENDDO
+    IF (ZW(JMESH)==0.) ZW(JMESH)=ZWG_OLD(JMESH)
+   ELSE
+    DO JCAT=1,NNCAT
+     IF (GTOPD(JCAT).AND. ZCOUNT(JMESH,JCAT)/=0.) THEN
+      ZW(JMESH) = ZW(JMESH) + ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT)*&
+                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/XMESH_SIZE(JMESH)))
+     ELSE
+      ZW(JMESH)=0.
+     ENDIF
+    ENDDO
+    IF (ZW(JMESH)==0.) ZW(JMESH)=ZWG_OLD(JMESH)
+    !
+   ENDIF
+  ENDIF
+
+ ELSE
+  ZW(JMESH)=ZWG_OLD(JMESH)
+ ENDIF
+ENDDO
 !
-XWG_FULL(:) = MAX(XWG_FULL(:),XWGMIN)
+XWG_FULL(:) = MAX(ZW(:),XWGMIN)
 !
-10 CONTINUE 
 !
  CALL UNPACK_SAME_RANK(NR_NATURE,XWSAT(:,2),ZWSAT_FULL)
 !
-IF (.NOT.ALLOCATED(XWSUPSAT)) ALLOCATE(XWSUPSAT(KI))
 XWSUPSAT=0.
 !ludo glace Wsat varie
 WHERE ( XWG_FULL(:) > ZWSAT_FULL(:) .AND. XWG_FULL(:)/=XUNDEF )
@@ -146,11 +188,8 @@ WHERE ( XWG_FULL(:) > ZWSAT_FULL(:) .AND. XWG_FULL(:)/=XUNDEF )
   XWG_FULL(:) = ZWSAT_FULL(:)
 ENDWHERE
 !
-WHERE (XWG_FULL(:) < XWGMIN .AND. XWG_FULL(:)/=XUNDEF)
-  XWG_FULL(:) = XWGMIN
-ENDWHERE
-!
-IF ( NFREQ_MAPS_WG/=0 .AND. (MOD(KSTEP,NFREQ_MAPS_WG)==0 .OR. KSTEP==NNB_TOPD_STEP) ) THEN
+IF ( (NFREQ_MAPS_WG/=0 .AND. MOD(KSTEP,NFREQ_MAPS_WG)==0) .OR.&
+     ( KSTEP==NNB_TOPD_STEP)  ) THEN
   ! writing of YSTEP to be able to write maps
   IF (KSTEP<10) THEN
     WRITE(YSTEP,'(I1)') KSTEP
@@ -166,6 +205,7 @@ IF ( NFREQ_MAPS_WG/=0 .AND. (MOD(KSTEP,NFREQ_MAPS_WG)==0 .OR. KSTEP==NNB_TOPD_ST
   !
 ENDIF
 !
+
 IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE TOPD_TO_ISBA

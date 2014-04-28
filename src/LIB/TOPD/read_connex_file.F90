@@ -37,6 +37,7 @@
 !!    -------------
 !!
 !!      Original   11/2006
+!!                 03/2014 (B. Vincendon) format correction
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -88,7 +89,7 @@ ENDDO
 !
 DO JJ=1,KNMC
   !
-  READ(IUNIT,'(f9.0,1x,f8.3,1x,2(f1.0,1x),8(f8.0,1x,f8.6,1x))',END=120) PCONN(JJ,:)
+  READ(IUNIT,*,END=120) PCONN(JJ,:)
   IINDEX = INT(PCONN(JJ,1))
   KLINE(IINDEX) = JJ
   !

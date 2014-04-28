@@ -34,6 +34,8 @@
 !!      Original    11/2006
 !!      Modif 04/2007: Arguments PTOPD_STEP,KNB_TOPD_STEP become module
 !!                     variables from MODD_TOPDDYN
+!!      Modif 03/2014: New organisation of routines with init_topd_ol and
+!!                     displacement of init_budget
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -51,7 +53,7 @@ USE MODD_ISBA_n, ONLY : TSNOW
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 !
-USE MODI_INIT_TOPD
+USE MODI_INIT_TOPD_OL
 USE MODI_INIT_COUPL_TOPD
 USE MODI_INIT_BUDGET_COUPL_ROUT
 !
@@ -91,7 +93,7 @@ IF (LCOUPL_TOPD) THEN
   !              -------------------------------------------
   WRITE(ILUOUT,*) 'NNCAT',NNCAT
   !
-  CALL INIT_TOPD(HPROGRAM)
+  CALL INIT_TOPD_OL(HPROGRAM)
   !
   !         4.   Initialises variables nedded for coupling with Topmodel
   !              -------------------------------------------------------
@@ -100,7 +102,7 @@ IF (LCOUPL_TOPD) THEN
   !
   WRITE(ILUOUT,*) 'Couplage avec TOPMODEL active'
   !
-  IF (LBUDGET_TOPD) CALL INIT_BUDGET_COUPL_ROUT(KI)
+  !IF (LBUDGET_TOPD) CALL INIT_BUDGET_COUPL_ROUT(KI)
   !
 ELSE
   !

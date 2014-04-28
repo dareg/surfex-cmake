@@ -40,7 +40,9 @@
 !!      Original   23/11/2005
 !!      M. Le Lay     02/2008 Compatibility with the RESTART option (to update the
 !!                            discharge between two runs)
-!!      Modif B Vincendon 11/2011 : stock managed in thre distinct variables
+!!      Modif B Vincendon 11/2011 : stock managed in three distinct variables
+!!      Modif B Vincendon 03/2014 : correction of a bug on drainage still in the
+!                                   river
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -72,12 +74,13 @@ INTEGER, INTENT(IN)              :: KSTEP   ! current integration step
 !*      0.2    declarations of local variables
 !
 !
-INTEGER                            :: IUNIT ! unit of discharge files
+INTEGER                            :: IUNIT        ! unit of discharge files
 INTEGER                            :: JCAT, JJ, JI ! Loop variables
-INTEGER                            :: JSTEP ! current or future integration steps
-REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZRUN_TOROUT ! stock d'eau dans rivière pas dans debit ! Kg/m2
-REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZDR_TOROUT ! stock d'eau dans rivière pas dans debit ! Kg/m2
- CHARACTER(LEN=3)                   :: YSTEP
+INTEGER                            :: JSTEP        ! current or future integration steps
+REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZRUN_TOROUT,ZDR_TOROUT ! Kg/m2
+                                                   ! water of runoff and drainage resp. still in the river 
+                                                   ! and added to the discharge for the current simulation
+ CHARACTER(LEN=3)                  :: YSTEP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROUTING',0,ZHOOK_HANDLE)
@@ -111,11 +114,9 @@ DO JCAT=1,NNCAT
       !
     ENDIF
     !
-  ENDDO
   !
   !*       3.0    Drainage by geomorpho transfer function
   !               -------------------------------------
-  DO JJ=1,NNMC(JCAT)
     !
     IF ((PDR(JCAT,JJ) > 0.0).AND.(PDR(JCAT,JJ)<XUNDEF)) THEN
       !
@@ -128,7 +129,7 @@ DO JCAT=1,NNCAT
         !
       ELSEIF (JSTEP.LE.NNB_TOPD_STEP+NNB_STP_RESTART) THEN
         !
-        ZRUN_TOROUT(JCAT,JSTEP) = ZRUN_TOROUT(JCAT,JSTEP) + PDR(JCAT,JJ) !m3
+        ZDR_TOROUT(JCAT,JSTEP) = ZDR_TOROUT(JCAT,JSTEP) + PDR(JCAT,JJ) !m3
         !
       ENDIF
     ENDIF
