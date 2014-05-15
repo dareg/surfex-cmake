@@ -813,9 +813,11 @@ ENDIF
 !
 !* when building in unoccupied, target temperature is modified
 !
-CALL BLD_OCC_CALENDAR(TPTIME%TDATE%YEAR,TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY,PTSUN,      &
-                      PRESIDENTIAL,PTCOOL_TARGET, PTHEAT_TARGET, PQIN,                  &
-                      PDT_RES,PDT_OFF,1.,PCUR_TCOOL_TARGET, PCUR_THEAT_TARGET, PCUR_QIN )
+IF (HBEM=="BEM") THEN
+  CALL BLD_OCC_CALENDAR(TPTIME%TDATE%YEAR,TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY,PTSUN,      &
+                        PRESIDENTIAL,PTCOOL_TARGET, PTHEAT_TARGET, PQIN,                  &
+                        PDT_RES,PDT_OFF,1.,PCUR_TCOOL_TARGET, PCUR_THEAT_TARGET, PCUR_QIN )
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
