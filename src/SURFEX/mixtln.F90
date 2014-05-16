@@ -149,6 +149,74 @@ ZS2=0.77475
 !
 ZALG = XG / XRHOSW
 !
+ZUC(:,:) = (0.,0.)
+ZAI(:) = (0.,0.)
+ZBI(:) = (0.,0.)
+ZCI(:) = (0.,0.)
+ZAU(:) = (0.,0.)
+ZBU(:) = (0.,0.)
+ZCU(:) = (0.,0.)
+ZYU(:) = (0.,0.)
+ZOMU(:) = (0.,0.)
+ZWU(:) = (0.,0.)
+!
+ZSEAT(:) = 0.
+ZSEAS(:) = 0.
+ZSEAV(:) = 0.
+ZSEAE(:) = 0.
+ZSEAU(:) = 0.
+!
+ZSEAT_REL(:) = 0.
+ZSEAS_REL(:) = 0.
+ZSEAV_REL(:) = 0.
+ZSEAU_REL(:) = 0.
+!
+ZA(:) = 0.
+ZB(:) = 0.
+ZC(:) = 0.
+ZA2(:) = 0.
+ZB2(:) = 0.
+ZC2(:) = 0.
+ZYT(:) = 0.
+ZYS(:) = 0.
+ZYE(:) = 0.
+!
+ADVT(:) = 0.
+ADVS(:) = 0.
+ADVU(:) = 0.
+ADVV(:) = 0.
+ADVE(:) = 0.
+!
+ZTDTREL(:) = 0.
+ZSDTREL(:) = 0.
+ZUDTREL(:) = 0.
+ZVDTREL(:) = 0.
+!
+ZLE(:) = 0.
+ZKMEL(:) = 0.
+ZKMELM(:) = 0.
+ZKMES(:) = 0.
+ZKMED(:) = 0.
+ZKMEWM(:) = 0.
+ZKMEWS(:) = 0.
+ZPTH(:) = 0.
+ZPDY(:) = 0.
+ZTENDE(:) = 0.
+ZDIFFV(:) = 0.
+ZOMT(:) = 0.
+ZOMS(:) = 0.
+ZOME(:) = 0.
+ZWT(:) = 0.
+ZWS(:) = 0.
+ZWE(:) = 0.
+ZZDRHO(:) = 0.
+ZDTFSOL(:) = 0.
+ZT(:) = 0.
+ZS(:) = 0.    
+ZU(:) = 0.
+ZV(:) = 0.
+ZE(:) = 0.
+!
 !-------------------------------------------------------------------------------
 !
 !iterations on grid points
@@ -229,7 +297,7 @@ DO JPT=1,SIZE(PFSOL)
       ZTEST=1.
     ENDIF
   ENDDO
-  
+
   !! Modif PP - HG : flag diapycnal
   IF (LDIAPYCNAL) THEN
     !
