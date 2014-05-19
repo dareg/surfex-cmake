@@ -55,7 +55,6 @@ USE MODD_FLAKE_n,  ONLY :   TTIME         , XEMIS         , XWATER_DEPTH  , &
                             XUSTAR        , LSEDIMENTS    , CFLK_FLUX     , &
                             CFLK_ALB      , XICHCE        , LPRECIP       , &
                             LPWEBB
-USE MODD_SEAFLUX_n,  ONLY : XPERTFLUX
 !                          
 !salgado - keep the same ch_ routines and modules used in watflux_n
 USE MODD_CH_WATFLUX_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
@@ -174,6 +173,8 @@ REAL, DIMENSION(KI)  :: ZUSTAR ! friction velocity (m/s)
 REAL, DIMENSION(KI)  :: ZUSTAR2! square of friction velocity (m2/s2)
 REAL, DIMENSION(KI)  :: ZSFM   ! flux of momentum (Pa)
 !
+REAL, DIMENSION(KI)  :: ZPERTFLUX
+!
 REAL, DIMENSION(KI)  :: ZRESA_WATER ! aerodynamical resistance
 !
 !salgado only for inline diagnostics - not used for the moment
@@ -269,7 +270,7 @@ SELECT CASE (CFLK_FLUX)
                       PPS, XICHCE, LPRECIP,LPWEBB, GPWG, ZQSAT,    &
                       PSFTH, PSFTQ, ZUSTAR,                        &
                       ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_WATER, ZZ0H, & 
-                      XPERTFLUX                                    )
+                      ZPERTFLUX                                    )
 END SELECT
 !
 IF (CFLK_FLUX=='DEF  ' .OR. CFLK_FLUX=='ECUME') THEN
