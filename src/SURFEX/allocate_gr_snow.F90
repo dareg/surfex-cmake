@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*       0.1   Declaration of arguments
 !              ------------------------
 !
-TYPE(SURF_SNOW)                            :: TPSNOW
+TYPE(SURF_SNOW), INTENT(INOUT)             :: TPSNOW
 INTEGER, INTENT(IN)                        :: KLU
 INTEGER, INTENT(IN)                        :: KPATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -68,7 +68,7 @@ IF (LHOOK) CALL DR_HOOK('ALLOCATE_GR_SNOW',0,ZHOOK_HANDLE)
 !
 IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO' .OR. TPSNOW%SCHEME=='1-L' .OR.  &
     TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA') THEN
-  ! 
+  !
   ALLOCATE(TPSNOW%WSNOW(KLU,TPSNOW%NLAYER,KPATCH))
   ALLOCATE(TPSNOW%RHO  (KLU,TPSNOW%NLAYER,KPATCH))
   ALLOCATE(TPSNOW%ALB  (KLU,KPATCH))  

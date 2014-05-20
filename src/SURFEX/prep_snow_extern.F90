@@ -2,38 +2,6 @@
 SUBROUTINE PREP_SNOW_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                             KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER)
 !     #################################################################################
- !!     ##########################################################################
- !
- !
-!!****  *PREP_SNOW_EXTERN*
-!!
-!!    PURPOSE
-!!    -------
-!!       Read and prepare initial snow fields from external files
-!!
-!!**  METHOD
-!!    ------
-!!
-!!    EXTERNAL
-!!    --------
-!!
-!!    IMPLICIT ARGUMENTS
-!!    ------------------
-!!
-!!
-!!    REFERENCE
-!!    ---------
-!!
-!!
-!!    AUTHOR
-!!    ------
-!!         * Meteo-France *
-!!
-!!    MODIFICATIONS
-!!    -------------
-!!      Original    ?
-!!       02/2014 E. Martin : cor. for passing from from multilayer to a single layer
-!-------------------------------------------------------------------------------
 !
 !
 USE MODD_TYPE_SNOW
@@ -176,6 +144,7 @@ IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   IF (.NOT. GTOWN) THEN
     TZSNOW%SCHEME='1-L'
+    TZSNOW%NLAYER=1
     CALL ALLOCATE_GR_SNOW(TZSNOW,INI,IPATCH)
   ELSE
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
@@ -189,7 +158,9 @@ ELSE
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 ENDIF
 !
-IF (TZSNOW%NLAYER.LT.KLAYER) THEN
+IF (TZSNOW%NLAYER.GT.KLAYER) THEN
+  TZSNOW%NLAYER=KLAYER
+ELSEIF (TZSNOW%NLAYER.LT.KLAYER) THEN
   CALL ABOR1_SFX("PREP_SNOW_EXTERN: SNOW NLAYER IN EXTERN FILE MUST BE GROWER THAN CURRENT NLAYER")
 ENDIF
 !
