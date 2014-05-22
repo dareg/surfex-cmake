@@ -112,7 +112,11 @@ ENDIF
 !* stochastic flux perturbation pattern
 !
 ALLOCATE(XPERTFLUX(ILU))
-IF( LPERTFLUX ) CALL READ_SURF(HPROGRAM,'PERTSEAFLUX',XPERTFLUX(:),IRESP)
+IF( LPERTFLUX ) THEN
+   CALL READ_SURF(HPROGRAM,'PERTSEAFLUX',XPERTFLUX(:),IRESP)
+ELSE
+  XPERTFLUX(:) = 0.
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
