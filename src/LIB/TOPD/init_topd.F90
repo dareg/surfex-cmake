@@ -226,6 +226,7 @@ XQTOT(:,:)=0.0
   !
   ! for XDHIL, we must use NLINE, online pixels inside de the catchment are read.
   XDGRD(:,:) = XDHIL(:,:)
-  !IF (LHOOK) CALL DR_HOOK('INIT_TOPD',1,ZHOOK_HANDLE)
+
+IF (LHOOK) CALL DR_HOOK('INIT_TOPD',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE INIT_TOPD
