@@ -57,29 +57,32 @@ ELSE
 ENDIF
 
 IF ( LINITSNOW ) THEN
-  ZSWE(:)=TSNOW%WSNOW(:,NLAYER,NPATCH)
-  ZTS(:)=XTG(:,1,NPATCH)
-  PSWE_ORIG(:)=ZSWE(:)
 
-  ZSWE=PSWE
+  PSWE_ORIG(:) = TSNOW%WSNOW(:,NLAYER,NPATCH)
+
+  ZTS(:) = XTG(:,1,NPATCH)
+
+  ZSWE(:) = PSWE(:)
   ! Set snow=0 where 1. guess = 0 and Ts>0, to avoid that the snow analysis introduce snow where it is no snow.
   WHERE ( PSWE(:)/=XUNDEF .AND. PSWE(:)<1.0E-10 .AND. ZTS(:)>XTT )
      ZSWE(:)   = 0.0
   END WHERE
-  TSNOW%WSNOW(:,NLAYER,NPATCH)=ZSWE
+
+  TSNOW%WSNOW(:,NLAYER,NPATCH) = ZSWE(:)
+
 ENDIF
 
 
 ! Update snow
 IF ( LINC ) THEN
 
-  ZSWE(:)=TSNOW%WSNOW(:,NLAYER,NPATCH)  
-  ZSNA(:)=TSNOW%ALB(:,NPATCH)
-  ZSNR(:)=TSNOW%RHO(:,NLAYER,NPATCH)
+  ZSWE(:) = TSNOW%WSNOW(:,NLAYER,NPATCH)  
+  ZSNA(:) = TSNOW%ALB(:,NPATCH)
+  ZSNR(:) = TSNOW%RHO(:,NLAYER,NPATCH)
 
   ! If we only do second step, we must set working SWE as input SWE
   IF ( .NOT. LINITSNOW ) THEN
-    ZSWE(:)=PSWE(:)
+    ZSWE(:) = PSWE(:)
   ENDIF
  
   ! Calculate increments
@@ -93,9 +96,11 @@ IF ( LINC ) THEN
     ZSNA(:)    = 0.5 * ( XANSMIN + XANSMAX ) 
     ZSNR(:)    = 0.5 * ( XRHOSMIN + XRHOSMAX ) 
   END WHERE 
-  TSNOW%ALB(:,NPATCH)=ZSNA(:)
-  TSNOW%RHO(:,NLAYER,NPATCH)=ZSNR(:)
-  TSNOW%WSNOW(:,NLAYER,NPATCH)=ZSWE(:)
+
+  TSNOW%ALB(:,NPATCH) = ZSNA(:)
+  TSNOW%RHO(:,NLAYER,NPATCH) = ZSNR(:)
+  TSNOW%WSNOW(:,NLAYER,NPATCH) = ZSWE(:)
+
 ENDIF
 
 !

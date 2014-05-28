@@ -567,7 +567,7 @@ IF (KLTYPE==112) THEN
   PD = (KLEV2 - KLEV1) / 100.
 ELSE
   IF (KNLAYERDEEP == 4) THEN
-    PD = PV4            
+    PD = PV4
   ELSE
     PD = PV
   END IF

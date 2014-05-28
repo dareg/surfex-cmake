@@ -83,6 +83,7 @@ IF ( LEXTRAP_WATER ) THEN
   ALLOCATE(OINTERP_LST(KI))
   ALLOCATE(ZLON(KI))
   ALLOCATE(ZLAT(KI))
+
   ALLOCATE(ZLST_IN(KI))
 
   ! Set longitudes/latitudes for water point
@@ -103,6 +104,7 @@ ZLSTINC(:) = ZLST(:)
 IF ( LWATERTG2 ) ALLOCATE(ZTP(KI))
 
 DO I=1,KI
+  !
   IF ( LWATERTG2 ) THEN
 
     ! Set TG2 from global array
@@ -118,28 +120,28 @@ DO I=1,KI
     !
     IF (ZTP(I)/=XUNDEF .AND. PITM(I) > 0.5 ) THEN
       ZLST(I) = ZTP(I)
-    ELSE
+    ELSEIF ( LEXTRAP_WATER ) THEN
       ! Keep ZLST or do extrapolation from neighbour points
-      IF ( LEXTRAP_WATER ) THEN
-        OINTERP_LST(I) = .TRUE.
-        ZLST(I) = XUNDEF
-      ENDIF
+      OINTERP_LST(I) = .TRUE.
+      ZLST(I) = XUNDEF
     ENDIF
+    !
   ELSE
     !
     !*     ZLST updated from from CANARI analysis
     !
     IF ( PITM(I) < 0.5 ) THEN
       ZLST(I) = PTS_O(I)
-    ELSE
+    ELSEIF ( LEXTRAP_WATER ) THEN
       ! Keep ZLST or do extrapolation from neighbour points
-      IF ( LEXTRAP_WATER ) THEN
-        OINTERP_LST(I) = .TRUE.
-        ZLST(I) = XUNDEF
-      ENDIF
+      OINTERP_LST(I) = .TRUE.
+      ZLST(I) = XUNDEF
     ENDIF
+    !
   ENDIF
+  !
 ENDDO
+!
 IF ( LWATERTG2 ) DEALLOCATE(ZTP)
 
 

@@ -89,18 +89,19 @@ REAL,    DIMENSION(:), ALLOCATABLE :: ZALT
 REAL,    DIMENSION(KI)             :: ZSWE
 REAL,    DIMENSION(KI)             :: ZSWE_ORIG
 INTEGER                            :: I,NLAYER,NPATCH
-
+!
 IF (LHOOK) CALL DR_HOOK('ASSIM_ISBA_N',0,ZHOOK_HANDLE)
-
+!
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_ISBA_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
-
+!
 ! Set snow layers and patches
-NPATCH=1
-NLAYER=1
-
-ZSWE=PSWE
+NPATCH = 1
+NLAYER = 1
+!
+ZSWE = PSWE
+!
 ! Soil assimilation
 IF ( CASSIM_ISBA == 'EKF  ' ) THEN
 
@@ -113,9 +114,7 @@ IF ( CASSIM_ISBA == 'EKF  ' ) THEN
   ENDIF
 
   ! Run EKF for soil
-  CALL ASSIM_NATURE_ISBA_EKF(HPROGRAM,KI,   &
-                             PT2M,    PHU2M,&
-                             HTEST )
+  CALL ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI, PT2M, PHU2M, HTEST)
 
 ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
 
@@ -148,6 +147,7 @@ ENDIF
 
 ! Extrapolation if requested
 IF ( LEXTRAP_NATURE ) THEN
+  !
   ALLOCATE(OINTERP_NATURE(KI))
   ALLOCATE(OINTERP_SN(KI))
   ALLOCATE(PLON(KI))

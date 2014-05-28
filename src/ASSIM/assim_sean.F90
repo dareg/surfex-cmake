@@ -97,7 +97,7 @@ IF ( LEXTRAP_SEA ) THEN
 ENDIF
 
 ! Set SST from watfluxn
-PSST=XSST
+PSST = XSST
 
 ! Read SST from file or set it to input SST
 IF ( .NOT. LAESST ) THEN
@@ -109,8 +109,8 @@ ELSE
   ! SST analysed in CANARI 
   ZSST(:)    = XUNDEF
   DO I=1,KI
-    IF (PITM(I)< 0.5 .AND. XNATURE(NR_SEA(I)) == XUNDEF ) THEN
-     ZSST(:) = PTS_IN(:)   ! set SST analysis from CANARI
+    IF (PITM(I)< 0.5 .AND. XNATURE(NR_SEA(I)) == 0. ) THEN
+     ZSST(I) = PTS_IN(I)   ! set SST analysis from CANARI
     ENDIF
   END DO
   !
@@ -126,14 +126,14 @@ ZSSTINC(:) = PSST(:)
 !*     PSST updated at all sea points with ZSST where ZSST is available
 
 DO I=1,KI
+  !
   IF (ZSST(I)/=XUNDEF) THEN
     PSST(I) = ZSST(I)
-  ELSE
-    IF ( LEXTRAP_SEA ) THEN
-      OINTERP_SST(I) = .TRUE.
+  ELSEIF ( LEXTRAP_SEA ) THEN
+    OINTERP_SST(I) = .TRUE.
     PSST(I) = XUNDEF
   ENDIF
-  ENDIF
+  !
 ENDDO
 
 IF ( LEXTRAP_SEA ) THEN
@@ -161,7 +161,7 @@ IF ( LEXTRAP_SEA ) THEN
 ENDIF
 
 ! Sum the increments
-  ZSSTINC(:) = PSST(:) - ZSSTINC(:)
+ZSSTINC(:) = PSST(:) - ZSSTINC(:)
 
 WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
 

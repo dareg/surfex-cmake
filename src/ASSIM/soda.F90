@@ -40,6 +40,8 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_SURFEX_OMP, ONLY : NINDX2SFX, NWORK, XWORK, XWORK2, XWORK3, &
                             NWORK_FULL, XWORK_FULL, XWORK2_FULL
 !
+USE MODD_SURF_CONF, ONLY : CSOFTWARE
+!
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
 USE MODD_ASSIM,          ONLY : LASSIM,LAROME,LALADSURF,CASSIM_ISBA,LREAD_SST_FROM_FILE,&
@@ -69,13 +71,18 @@ USE MODD_FORC_ATM,       ONLY : CSV         ,&! name of all scalar variables
 !
 USE MODD_SURF_ATM_n,     ONLY : NSIZE_NATURE,NSIZE_FULL
 !
+#ifdef NC
+USE MODD_IO_SURF_NC,    ONLY : CFILEIN_NC,CFILEIN_NC_SAVE,&
+                                CFILEPGD_NC, CFILEOUT_NC, LDEF
+#endif
 #ifdef ASC
 USE MODD_IO_SURF_ASC,    ONLY : CFILEIN,CFILEIN_SAVE,&
-                                CFILEPGD
+                                CFILEPGD, CFILEOUT
 #endif
 #ifdef FA
 USE MODD_IO_SURF_FA,     ONLY : CFILEIN_FA,CFILEIN_FA_SAVE,&
-                                CFILEPGD_FA,CDNOMC  
+                                CFILEPGD_FA,CDNOMC, CFILEOUT_FA, &
+                                NUNIT_FA, IVERBFA, LFANOCOMPACT
 #endif
 #ifdef LFI
 USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI,CFILEIN_LFI_SAVE,&
@@ -83,7 +90,8 @@ USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI,CFILEIN_LFI_SAVE,&
 #endif
 !
 USE MODN_IO_OFFLINE,     ONLY : NAM_IO_OFFLINE,CNAMELIST,CPGDFILE,CPREPFILE,&
-                                CSURF_FILETYPE,LLAND_USE,LRESTART
+                                CSURF_FILETYPE,CTIMESERIES_FILETYPE,LLAND_USE,LRESTART,&
+                                LDIAG_FA_NOCOMPACT,LOUT_TIMENAME
 !
 USE MODE_POS_SURF,       ONLY : POSNAM
 !
@@ -110,8 +118,9 @@ USE MODI_DEALLOC_SURFEX
 USE MODI_WRITE_SURF_ATM_n
 USE MODI_WRITE_DIAG_SURF_ATM_n
 USE MODI_ASSIM_READ_SST_FROM_FILE
-
-
+#ifdef OFF
+USE MODI_FANDAR
+#endif
 !
 IMPLICIT NONE
 !
@@ -128,7 +137,6 @@ LOGICAL                          :: GFOUND
 CHARACTER(LEN=28)                :: YATMFILE  ='                            '  ! name of the Atmospheric file
 CHARACTER(LEN=6)                 :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
 CHARACTER(LEN=28)                :: YLUOUT    ='LISTING_SODA                '  ! name of listing
-CHARACTER(LEN=28)                :: CDSURFEX_FNAME_SAVE
 INTEGER                          :: IRET, INB
 REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 REAL                             :: ZTIMEC              ! current duration since start of the run (s)
@@ -163,7 +171,14 @@ INTEGER                          :: IIVAR,NTIMES
 CHARACTER                        :: CVAR
 INTEGER                          :: IVAR_COUNT
 INTEGER                          :: IOBS
+INTEGER                          :: INW, JNW
 
+INTEGER, DIMENSION(11)  :: IDATEF
+INTEGER  :: IYEAR_OUT           ! output year name
+INTEGER  :: IMONTH_OUT          ! output month name
+INTEGER  :: IDAY_OUT            ! output day name
+REAL     :: ZTIME_OUT           ! output time since start of the run (s)
+!
 IF (LHOOK) CALL DR_HOOK('SODA',0,ZHOOK_HANDLE)
 
 WRITE(*,*)
@@ -175,6 +190,7 @@ WRITE(*,*)
 
 ! Allocate SURFEX
 CALL ALLOC_SURFEX(1)
+CSOFTWARE='SODA'
 
 ! Open ascii outputfile for writing
 #ifdef LFI
@@ -190,7 +206,7 @@ IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
 CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 
 ! Setting input files read from namelist
-if ( CSURF_FILETYPE == "LFI   " ) then
+IF ( CSURF_FILETYPE == "LFI   " ) THEN
 #ifdef LFI
   CFILEIN_LFI      = CPREPFILE
   CFILE_LFI        = CPREPFILE
@@ -198,21 +214,30 @@ if ( CSURF_FILETYPE == "LFI   " ) then
   CFILEPGD_LFI     = CPGDFILE
   CFILEOUT_LFI     = CPREPFILE
 #endif
-elseif ( CSURF_FILETYPE == "FA    " ) then
+ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
 #ifdef FA
   CFILEIN_FA      = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
   CFILEIN_FA_SAVE = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
   CFILEPGD_FA     = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+  CFILEOUT_FA     = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
 #endif
-elseif ( CSURF_FILETYPE == "ASCII " ) then
+ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
 #ifdef ASC
   CFILEIN      = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
   CFILEIN_SAVE = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
   CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
+  CFILEOUT     = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
 #endif
-else
+ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+#ifdef ASC
+  CFILEIN_NC      = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+  CFILEIN_NC_SAVE = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+  CFILEPGD_NC     = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+  CFILEOUT_NC     = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+#endif
+ELSE
   CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
-endif
+  ENDIF
 
 
 ! Reading all namelist (also assimilation)
@@ -231,7 +256,7 @@ CALL INIT_IO_SURF_n(CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
 CALL READ_SURF(CSURF_FILETYPE,'DIM_FULL  ',INI,  IRESP)
 CALL READ_SURF(CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
 CALL END_IO_SURF_n(CSURF_FILETYPE)
-
+!
 NINDX2SFX = INI
 ALLOCATE(NWORK(INI))
 ALLOCATE(XWORK(INI))
@@ -246,13 +271,13 @@ ELSE
   ALLOCATE(XWORK_FULL(0))
   ALLOCATE(XWORK2_FULL(0,0))
 ENDIF
-
+!
 IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 ZTIME  = TTIME%TIME
 IF (ZTIME > NDAYSEC) ZTIME = ZTIME - NDAYSEC
-
+!
 KSW=0
 KSV=0
 ALLOCATE(CSV(KSV))
@@ -265,50 +290,75 @@ ALLOCATE(XDIR_ALB(INI,KSW))
 ALLOCATE(XSCA_ALB(INI,KSW))
 ALLOCATE(XEMIS(INI))
 ALLOCATE(XTSRAD(INI))
-
+!
 ! Indicate that zenith and azimuth angles are not initialized
-
+!
 XZENITH = XUNDEF
 XAZIM   = XUNDEF
-
+!
 IF ( CASSIM_ISBA == 'EKF  ' ) THEN
  ! Has to do initialization for all the perturbations + 
  ! control + the real run at last
- NTIMES=NVAR+2
+ NTIMES = NVAR + 2
 ELSE
- NTIMES=1
+ NTIMES = 1
 ENDIF
 
 WRITE(*,*) "INITIALIZING SURFEX..."
-
-CDSURFEX_FNAME_SAVE=CFILEIN_LFI
-DO IVAR_COUNT=1,NTIMES
+!
+DO IVAR_COUNT = 1,NTIMES
 
   ! If we have more than one initialization to do
-  IF ( NTIMES > 1 ) THEN
+  IF ( NTIMES > 1 .AND.  IVAR_COUNT /= NTIMES ) THEN
     ! For last initialization, we must re-do the first.
     ! Could be avoided by introducing knowlegde of LASSIM on this level
-    IF ( IVAR_COUNT /= NTIMES ) THEN
-      WRITE(CVAR,'(I1.1)') IVAR_COUNT-1
+    WRITE(CVAR,'(I1.1)') IVAR_COUNT-1
+    !
+    IF ( CSURF_FILETYPE == "LFI   " ) THEN
 #ifdef LFI
-      CFILEIN_LFI="PREP_EKF_PERT"//CVAR
+      CFILEIN_LFI = "PREP_EKF_PERT"//CVAR
+#endif
+    ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
+#ifdef FA
+      CFILEIN_FA = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.fa')
+#endif
+    ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
+#ifdef ASC
+      CFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.txt')
+#endif
+    ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+#ifdef NC
+      CFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.nc')
 #endif
     ELSE
-#ifdef LFI
-      CFILEIN_LFI=CDSURFEX_FNAME_SAVE
-#endif
+      CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
     ENDIF
-  ELSE
-#ifdef LFI
-    CFILEIN_LFI=CDSURFEX_FNAME_SAVE
-#endif
+    !  
   ENDIF
+  !
+  IF ( CSURF_FILETYPE == "LFI   " ) THEN
 #ifdef LFI
-  CFILE_LFI        = CFILEIN_LFI
-  CFILEIN_LFI_SAVE = CFILEIN_LFI
+    CFILE_LFI        = CFILEIN_LFI
+    CFILEIN_LFI_SAVE = CFILEIN_LFI
 #endif
-
+  ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
+#ifdef FA
+    CFILEIN_FA_SAVE = CFILEIN_FA
+#endif
+  ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
+#ifdef ASC
+    CFILEIN_SAVE = CFILEIN
+#endif
+  ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+#ifdef NC
+    CFILEIN_NC_SAVE = CFILEIN_NC
+#endif
+  ELSE
+    CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
+  ENDIF
+  !
   ! Initialize the SURFEX interface
+  CALL IO_BUFF_CLEAN_n
   CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE,             &
                          INI, kSV, KSW,                             &
                          CSV,XCO2,XRHOA,                            &
@@ -316,13 +366,16 @@ DO IVAR_COUNT=1,NTIMES
                          XEMIS,XTSRAD,                              &
                          IYEAR, IMONTH, IDAY, ZTIME,                &
                          YATMFILE, YATMFILETYPE, YTEST              )
-
+  !
   IF ( CASSIM_ISBA == 'EKF  ' ) THEN
+    !
     IF ( IVAR_COUNT == 1 ) THEN
       ALLOCATE(XF(NSIZE_NATURE,NPATCH,NVAR+1,NVAR))
       ALLOCATE(YF_PATCH(NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE))
     ENDIF
+    !
     IF (( IVAR_COUNT > 0 ) .AND. (IVAR_COUNT < NTIMES ))  THEN
+      !
       ! Set the global state values for this control value
       DO IOBS = 1,NOBSTYPE
         SELECT CASE (TRIM(XOBS(IOBS)))
@@ -336,7 +389,7 @@ DO IVAR_COUNT=1,NTIMES
             CALL ABOR1_SFX("Mapping of "//XOBS(IOBS)//" is not defined in AROINI_SURFC!")
         END SELECT
       ENDDO
-
+      !
       ! Prognostic fields for assimilation (Control vector)
       DO IIVAR = 1,NVAR
         SELECT CASE (TRIM(XVAR(IIVAR)))
@@ -383,6 +436,7 @@ ALLOCATE(PSIC(INI))
 !  Read atmospheric forecast fields from FA files 
 #ifdef FA
 CFILEIN_FA = 'FG_OI_MAIN'
+CDNOMC     = 'oimain'                  ! new frame name
 #endif
 !  Open FA file (LAM version with extension zone)
 CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
@@ -420,6 +474,7 @@ WRITE(*,*)'READ FG_OI_MAIN OK'
 !  Define FA file name for CANARI analysis
 #ifdef FA
 CFILEIN_FA = 'CANARI'        ! input CANARI analysis
+CDNOMC     = 'canari'                  ! new frame name
 #endif
 
 !  Open FA file 
@@ -485,11 +540,75 @@ DEALLOCATE(PHU2M)
 DEALLOCATE(PSWE)
 DEALLOCATE(PSST)
 DEALLOCATE(PSIC)
+!
+INW = 1
+IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
+!
+ZTIME_OUT  = ZTIME
+IDAY_OUT   = IDAY
+IMONTH_OUT = IMONTH
+IYEAR_OUT  = IYEAR
+!
+IF(LOUT_TIMENAME)THEN
+  ! if true, change the name of output file at the end of a day
+  ! (ex: 19860502_00h00 -> 19860501_24h00)                     
+  IF(ZTIME==0.0)THEN
+    ZTIME_OUT = 86400.
+    IDAY_OUT   = IDAY-1
+    IF(IDAY_OUT==0)THEN
+      IMONTH_OUT = IMONTH - 1
+      IF(IMONTH_OUT==0)THEN
+        IMONTH_OUT=12
+        IYEAR_OUT = IYEAR - 1
+      ENDIF
+      SELECT CASE (IMONTH_OUT)
+        CASE(4,6,9,11)
+          IDAY_OUT=30
+        CASE(1,3,5,7:8,10,12)
+          IDAY_OUT=31
+        CASE(2)
+          IF( ((MOD(IYEAR_OUT,4)==0).AND.(MOD(IYEAR_OUT,100)/=0)) .OR. (MOD(IYEAR_OUT,400)==0))THEN 
+            IDAY_OUT=29
+          ELSE
+            IDAY_OUT=28
+          ENDIF
+      END SELECT
+    ENDIF
+  ENDIF
+  !
+ENDIF
 
-! Store results from assimilation
-CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
-CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
-
+IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+  CDNOMC = 'header'
+  LFANOCOMPACT = LDIAG_FA_NOCOMPACT
+  IDATEF(1)= IYEAR_OUT
+  IDATEF(2)= IMONTH_OUT
+  IDATEF(3)= IDAY_OUT
+  IDATEF(4)= FLOOR(ZTIME_OUT/3600.)
+  IDATEF(5)= FLOOR(ZTIME_OUT/60.) - IDATEF(4) * 60 
+  IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
+  IDATEF(7:11) = 0
+  IF (CSURF_FILETYPE/='FA    ') THEN
+    CALL WRITE_HEADER_FA(CSURF_FILETYPE,'ALL')
+  ELSE
+    CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
+  ENDIF
+  CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+END IF
+!
+LDEF = .TRUE.
+DO JNW = 1,INW
+  ! Store results from assimilation
+  CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+  CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
+  LDEF = .FALSE.
+  CALL IO_BUFF_CLEAN_n
+  !
+ENDDO  
+!
+IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+  CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+END IF
 !
 !*    3.     Close parallelized I/O
 !            ----------------------

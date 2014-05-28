@@ -67,7 +67,7 @@ USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE,       &
 USE MODD_IO_SURF_LFI,ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, CLUOUT_LFI, CFILEOUT_LFI, &
                             LMNH_COMPATIBLE, CFILEPGD_LFI  
 USE MODD_IO_SURF_NC, ONLY : CFILEIN_NC, CFILEIN_NC_SAVE, CFILEOUT_NC, CLUOUT_NC, &
-                                CFILEPGD_NC
+                            CFILEPGD_NC, LDEF
 USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE,           &
                               LDEFINED_NATURE, LDEFINED_SEA,    &
                               LDEFINED_WATER,  LDEFINED_TOWN,   &
@@ -158,7 +158,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 #ifndef NOMPI
- INCLUDE 'mpif.h'
+!$ INCLUDE 'mpif.h'
 #endif
 !
 #ifndef AIX64
@@ -227,7 +227,8 @@ INTEGER                           :: ILUOUT              ! ascii output unit num
 INTEGER                           :: ILUNAM              ! namelist unit number
 INTEGER                           :: IRET                ! error return code
 INTEGER                           :: INB 
- CHARACTER(LEN=14)                 :: YTAG                
+INTEGER                           :: INW, JNW
+ CHARACTER(LEN=14)                :: YTAG                
 LOGICAL                           :: GFOUND              ! return logical when reading namelist
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
 REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
@@ -333,7 +334,7 @@ ENDIF
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSURF_FILETYPE',CSURF_FILETYPE,'ASCII ','LFI   ','FA    ','NC    ')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
                                                                             'ASCII ','LFI   ','FA    ',&
-                                                                            'NONE  ','OFFLIN')  
+                                                                            'NONE  ','OFFLIN','NC    ')  
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CFORCING_FILETYPE',CFORCING_FILETYPE,'NETCDF','ASCII ','BINARY')
 !
 IF (NSCAL>59) CALL ABOR1_SFX("OFFLINE: NSCAL MUST BE LOWER THAN OR EQUAL TO 59")
@@ -803,22 +804,25 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     CALL COUPLING_SURF_ATM_n(CSURF_FILETYPE, 'E', ZTIMEC,                    &
            XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, NSCAL, IBANDS, &
-           XTSUN(NINDX1SFX:NINDX2SFX), XZENITH(NINDX1SFX:NINDX2SFX),                     &
-           XZENITH2(NINDX1SFX:NINDX2SFX), XAZIM(NINDX1SFX:NINDX2SFX),                    &
-           XZREF(NINDX1SFX:NINDX2SFX), XUREF(NINDX1SFX:NINDX2SFX), XZS(NINDX1SFX:NINDX2SFX),   &
-           XU(NINDX1SFX:NINDX2SFX), XV(NINDX1SFX:NINDX2SFX), XQA(NINDX1SFX:NINDX2SFX),         &
-           XTA(NINDX1SFX:NINDX2SFX), XRHOA(NINDX1SFX:NINDX2SFX), XSV(NINDX1SFX:NINDX2SFX,:),   &
-           XCO2(NINDX1SFX:NINDX2SFX), CSV, XRAIN(NINDX1SFX:NINDX2SFX),                   &
-           XSNOW(NINDX1SFX:NINDX2SFX), XLW(NINDX1SFX:NINDX2SFX),                         &
-           XDIR_SW(NINDX1SFX:NINDX2SFX,:), XSCA_SW(NINDX1SFX:NINDX2SFX,:), XSW_BANDS,    &
-           XPS(NINDX1SFX:NINDX2SFX), XPA(NINDX1SFX:NINDX2SFX),                           &
-           XSFTQ(NINDX1SFX:NINDX2SFX), XSFTH(NINDX1SFX:NINDX2SFX), XSFTS(NINDX1SFX:NINDX2SFX,:), &
-           XSFCO2(NINDX1SFX:NINDX2SFX), XSFU(NINDX1SFX:NINDX2SFX), XSFV(NINDX1SFX:NINDX2SFX),  &
-           XTSRAD(NINDX1SFX:NINDX2SFX), XDIR_ALB(NINDX1SFX:NINDX2SFX,:),                 &
-           XSCA_ALB(NINDX1SFX:NINDX2SFX,:), XEMIS(NINDX1SFX:NINDX2SFX),                  &
-           XPEW_A_COEF(NINDX1SFX:NINDX2SFX), XPEW_B_COEF(NINDX1SFX:NINDX2SFX),           &
-           XPET_A_COEF(NINDX1SFX:NINDX2SFX), XPEQ_A_COEF(NINDX1SFX:NINDX2SFX),           &
-           XPET_B_COEF(NINDX1SFX:NINDX2SFX), XPEQ_B_COEF(NINDX1SFX:NINDX2SFX), YTEST     )
+           XTSUN(NINDX1SFX:NINDX2SFX), XZENITH(NINDX1SFX:NINDX2SFX),         &
+           XZENITH2(NINDX1SFX:NINDX2SFX), XAZIM(NINDX1SFX:NINDX2SFX),        &
+           XZREF(NINDX1SFX:NINDX2SFX), XUREF(NINDX1SFX:NINDX2SFX),           &
+           XZS(NINDX1SFX:NINDX2SFX), XU(NINDX1SFX:NINDX2SFX),                &
+           XV(NINDX1SFX:NINDX2SFX), XQA(NINDX1SFX:NINDX2SFX),                &
+           XTA(NINDX1SFX:NINDX2SFX), XRHOA(NINDX1SFX:NINDX2SFX),             &
+           XSV(NINDX1SFX:NINDX2SFX,:), XCO2(NINDX1SFX:NINDX2SFX), CSV,       &
+           XRAIN(NINDX1SFX:NINDX2SFX),  XSNOW(NINDX1SFX:NINDX2SFX),          &
+           XLW(NINDX1SFX:NINDX2SFX), XDIR_SW(NINDX1SFX:NINDX2SFX,:),          &
+           XSCA_SW(NINDX1SFX:NINDX2SFX,:), XSW_BANDS, XPS(NINDX1SFX:NINDX2SFX),&
+           XPA(NINDX1SFX:NINDX2SFX), XSFTQ(NINDX1SFX:NINDX2SFX),             &
+           XSFTH(NINDX1SFX:NINDX2SFX), XSFTS(NINDX1SFX:NINDX2SFX,:),         &
+           XSFCO2(NINDX1SFX:NINDX2SFX), XSFU(NINDX1SFX:NINDX2SFX),           &
+           XSFV(NINDX1SFX:NINDX2SFX), XTSRAD(NINDX1SFX:NINDX2SFX),           &
+           XDIR_ALB(NINDX1SFX:NINDX2SFX,:), XSCA_ALB(NINDX1SFX:NINDX2SFX,:), &
+           XEMIS(NINDX1SFX:NINDX2SFX), XPEW_A_COEF(NINDX1SFX:NINDX2SFX),     &
+           XPEW_B_COEF(NINDX1SFX:NINDX2SFX),XPET_A_COEF(NINDX1SFX:NINDX2SFX),&
+           XPEQ_A_COEF(NINDX1SFX:NINDX2SFX),XPET_B_COEF(NINDX1SFX:NINDX2SFX),&
+           XPEQ_B_COEF(NINDX1SFX:NINDX2SFX), YTEST     )
     !
     CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
     !
@@ -915,10 +919,14 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       IF (NRANK==NPIO) THEN
         !
+        INW = 1
         !* name of the file
         IF (CTIMESERIES_FILETYPE=="ASCII " .OR. &
             CTIMESERIES_FILETYPE=="LFI   " .OR. &
-            CTIMESERIES_FILETYPE=="FA    "      ) THEN  
+            CTIMESERIES_FILETYPE=="FA    " .OR. &
+            CTIMESERIES_FILETYPE=="NC    "    ) THEN  
+          !
+          IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
           !
           ZTIME_OUT  = ZTIME
           IDAY_OUT   = IDAY
@@ -959,6 +967,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
           CFILEOUT    = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.txt')
           CFILEOUT_LFI= ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG)
           CFILEOUT_FA = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.fa')
+          CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')
           !
           IF (CTIMESERIES_FILETYPE=='FA    ') THEN
             LFANOCOMPACT = LDIAG_FA_NOCOMPACT
@@ -1009,23 +1018,31 @@ DO JFORC_STEP=1,INB_STEP_ATM
         CALL GOTO_SURFEX(NBLOCK,.TRUE.)
       ENDIF
       !
+      LDEF = .TRUE.
+      DO JNW = 1,INW
+        !
 #ifndef NOMPI      
-      XTIME1 =  MPI_WTIME()
+        XTIME1 =  MPI_WTIME()
 #endif 
-      CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+        CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifndef NOMPI      
-      XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
-      XTIME1 =  MPI_WTIME()
+        XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
+        XTIME1 =  MPI_WTIME()
 #endif      
-      CALL DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE)
+        CALL DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE)
 #ifndef NOMPI      
-      XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
-      XTIME1 =  MPI_WTIME()
+        XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
+        XTIME1 =  MPI_WTIME()
 #endif    
-      CALL WRITE_DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL')
+        CALL WRITE_DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL')
 #ifndef NOMPI      
-      XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
-#endif      
+        XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
+#endif  
+        !
+        LDEF = .FALSE.
+        CALL IO_BUFF_CLEAN_n
+        !
+      ENDDO
       !
       CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
       !
@@ -1171,15 +1188,26 @@ IF ( LRESTART ) THEN
   !  
   CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
   !  
-  !* writes into the file
-  CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
-  IF(CSURF_FILETYPE/='FA    ')THEN
-     CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
-                           .FALSE.,0,0,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                           .FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                           .FALSE.,.FALSE.)
-     CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
-  ENDIF
+  INW = 1
+  IF (CSURF_FILETYPE=="NC    ") INW = 2
+  !
+  LDEF = .TRUE.
+  DO JNW = 1,INW
+    !
+    !* writes into the file
+    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+    IF(CSURF_FILETYPE/='FA    ')THEN
+       CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
+                             .FALSE.,0,0,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                             .FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                             .FALSE.,.FALSE.)
+       CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
+    ENDIF
+    !
+    LDEF = .FALSE.
+    CALL IO_BUFF_CLEAN_n
+    !
+  ENDDO
   !
   CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
   !
