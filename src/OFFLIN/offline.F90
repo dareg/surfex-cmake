@@ -665,6 +665,9 @@ XTIME0 = MPI_WTIME()
 !
 ! --------------------------------------------------------------------------------------
 !
+INW = 1
+IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
+!
 NWRITE = 0
 !
 #ifndef NOMPI
@@ -919,14 +922,12 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       IF (NRANK==NPIO) THEN
         !
-        INW = 1
         !* name of the file
         IF (CTIMESERIES_FILETYPE=="ASCII " .OR. &
             CTIMESERIES_FILETYPE=="LFI   " .OR. &
             CTIMESERIES_FILETYPE=="FA    " .OR. &
             CTIMESERIES_FILETYPE=="NC    "    ) THEN  
           !
-          IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
           !
           ZTIME_OUT  = ZTIME
           IDAY_OUT   = IDAY
@@ -1081,6 +1082,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
   END DO
   !
+  
   IF (NRANK==NPIO) THEN
     IF (LPRINT) THEN
       IF (MOD(ZTIMEC,XDAY) == 0.) THEN
