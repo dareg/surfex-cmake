@@ -161,10 +161,11 @@ ELSE
         CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,INLATI)
         IRET = NF_DEF_DIM(NID_NC,"Nlati",INLATI,IDIMID)
       ENDIF
+    ELSE
+      IF (LDEF) IRET = NF_REDEF(NID_NC)
     ENDIF
 !$OMP END SINGLE
   ENDIF
-  IF (LDEF) IRET = NF_REDEF(NID_NC)
 ENDIF
 !
 ! nindex is needed for call to get_size_full_n. In init_index_mpi, 
