@@ -55,7 +55,6 @@ IMPLICIT NONE
                                                                ! 'AVERA'            
                                                                ! '2DVAR'
  LOGICAL                               :: LPRT                 ! Running VARASSIM in a perturbation mode
- LOGICAL                               :: LSIM                 ! Running VARASSIM in a reading mode
  LOGICAL                               :: LBEV                 ! Running VARASSIM to evolve B
  LOGICAL                               :: LBFIXED
  INTEGER                               :: NOBSTYPE

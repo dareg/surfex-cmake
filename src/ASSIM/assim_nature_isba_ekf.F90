@@ -22,8 +22,8 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
 ! -----------------------------------------------------------------------------
 !
 USE MODD_TYPE_DATE_SURF,ONLY : DATE_TIME
-USE MODD_ASSIM,         ONLY : LPRT,LSIM,LBEV,LBFIXED,NOBSTYPE,YERROBS,LOBSWG,INCO,  &
-                             & IVAR,NVAR,NVARMAX,INCV,SCALE_Q,NPRINTLEV,             &
+USE MODD_ASSIM,         ONLY : LPRT,LBEV,LBFIXED,NOBSTYPE,YERROBS,LOBSWG,INCO,  &
+                             & NVAR,NVARMAX,INCV,SCALE_Q,NPRINTLEV,             &
                              & XAT2M_ISBA,XAHU2M_ISBA,                               &
                              & NBOUTPUT, PTSTEP_OUTPUT,YF_PATCH,XF,XOBS,XVAR,TPRT,   &
                              & XSIGMA,YERROBS
