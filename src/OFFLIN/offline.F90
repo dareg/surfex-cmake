@@ -1196,13 +1196,13 @@ IF ( LRESTART ) THEN
   LDEF = .TRUE.
   DO JNW = 1,INW
     !
+    CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,0,0,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.)    
     !* writes into the file
     CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
-    IF(CSURF_FILETYPE/='FA    ')THEN
-       CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
-                             .FALSE.,0,0,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                             .FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                             .FALSE.,.FALSE.)
+    IF(CSURF_FILETYPE/='FA    ') THEN
        CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
     ENDIF
     !

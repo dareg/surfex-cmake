@@ -39,6 +39,7 @@ IMPLICIT NONE
  CHARACTER(LEN=28),SAVE :: CLUOUT_NC
 !
 INTEGER :: NID_NC
+INTEGER :: NLUOUT         ! logical unit of output file
 LOGICAL, SAVE :: LCREATED = .FALSE.
 LOGICAL :: LDEF = .FALSE.
 !$OMP THREADPRIVATE(LDEF)
@@ -49,6 +50,7 @@ INTEGER, DIMENSION(:),POINTER :: NMASK
 !$OMP THREADPRIVATE(CMASK)
 INTEGER :: NFULL
 !$OMP THREADPRIVATE(NFULL)
+INTEGER :: NFULL_AUX ! total number fo points of surface (Auxilarry file for prep)
 !
 LOGICAL, SAVE                     :: LMASK = .FALSE.
 !
