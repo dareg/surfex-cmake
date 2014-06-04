@@ -1,4 +1,5 @@
 !     #########
+irint*,shape(XWORKD2)
       SUBROUTINE CH_INIT_SNAP_n(HPROGRAM,KLU,HINIT,KCH,PRHOA)
 !     #######################################
 !
@@ -53,6 +54,8 @@ REAL, DIMENSION(:),INTENT(IN)  :: PRHOA    ! air density
 !
 !*       0.2   declarations of local variables
 !
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZTEMP
+INTEGER :: ISNAP
 INTEGER             :: IRESP                 !   File 
 INTEGER             :: ILUOUT                ! output listing logical unit
  CHARACTER (LEN=3)   :: YCONVERSION
@@ -114,6 +117,9 @@ IF (CSNAP_TIME_REF=='LEGAL') THEN
   CALL READ_SURF(HPROGRAM,YRECFM,XDELTA_LEGAL_TIME(:),IRESP,YCOMMENT)
 END IF
 !
+ISNAP = MAX(NSNAP_M,NSNAP_D,NSNAP_H)
+ALLOCATE(ZTEMP(ISNAP,NEMIS_SNAP))
+!
 DO JSPEC = 1,NEMIS_NBR ! Loop on the number of species
 !
 ! Read the species name
@@ -134,12 +140,17 @@ DO JSPEC = 1,NEMIS_NBR ! Loop on the number of species
 !
 ! Read the temporal profiles of all snaps
   YRECFM = "E_"//TRIM(CEMIS_NAME(JSPEC))//"_M"
-  CALL READ_SURF(HPROGRAM,YRECFM,XSNAP_MONTHLY(:,:,JSPEC),IRESP,YCOMMENT,HDIR='-')
+  CALL READ_SURF(HPROGRAM,YRECFM,ZTEMP,IRESP,YCOMMENT,HDIR='-')
+  XSNAP_MONTHLY(:,:,JSPEC) = ZTEMP(1:NSNAP_M,:)
   YRECFM = "E_"//TRIM(CEMIS_NAME(JSPEC))//"_D"
-  CALL READ_SURF(HPROGRAM,YRECFM,XSNAP_DAILY(:,:,JSPEC),IRESP,YCOMMENT,HDIR='-')
+  CALL READ_SURF(HPROGRAM,YRECFM,ZTEMP,IRESP,YCOMMENT,HDIR='-')
+  XSNAP_DAILY(:,:,JSPEC) = ZTEMP(1:NSNAP_D,:)
   YRECFM = "E_"//TRIM(CEMIS_NAME(JSPEC))//"_H"
-  CALL READ_SURF(HPROGRAM,YRECFM,XSNAP_HOURLY(:,:,JSPEC),IRESP,YCOMMENT,HDIR='-')
+  CALL READ_SURF(HPROGRAM,YRECFM,ZTEMP,IRESP,YCOMMENT,HDIR='-')
+  XSNAP_HOURLY(:,:,JSPEC) = ZTEMP(1:NSNAP_H,:)
 END DO
+!
+DEALLOCATE(ZTEMP)
 !
 !*      3.     Conversion factor
 !              -----------------
