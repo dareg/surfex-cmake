@@ -73,7 +73,7 @@ INTEGER, INTENT(IN)           :: KLUOUT
  CHARACTER(LEN=2)                 :: YLVLV
 !
 INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
-INTEGER                          :: INI, ICANLVL
+INTEGER                          :: INI
 INTEGER                          :: IDIM1
 INTEGER                          :: IFILE_ID, IVAR_ID, JSV, JRET
 INTEGER                          :: JLAYER
@@ -214,7 +214,7 @@ YATT='m'
  CALL DEF_VAR_NETCDF(IFILE_ID,'H_B1'       , 'Thickness of the upper layer of sediments'     ,IDDIM,YATT_TITLE,YATT)
 !
 IF (LSBL) THEN
-  DO JLAYER=1,ICANLVL
+  DO JLAYER=1,NLVL
     WRITE(YLVLV,'(i2.2)') JLAYER
     CALL DEF_VAR_NETCDF(IFILE_ID,'WAT_SBL_Z'//YLVLV,'Canopy height',   IDDIM,YATT_TITLE,(/'m'/))
     CALL DEF_VAR_NETCDF(IFILE_ID,'WAT_SBL_U'//YLVLV,'Canopy wind',     IDDIM,YATT_TITLE,(/'m/s'/))
