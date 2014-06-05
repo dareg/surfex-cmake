@@ -58,6 +58,7 @@ INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
 !
 !*      0.2    declarations of local variables
 !
+INTEGER :: JJ
 INTEGER                                     :: ILUOUT   ! unit of output listing file
 INTEGER                                     :: IUNIT    ! unit of restart files
 INTEGER                                     :: JSTP,JCAT,JPIX! loop control indexes
@@ -66,7 +67,7 @@ REAL, DIMENSION(:),ALLOCATABLE              :: ZWTOPT   ! Initial water content 
  CHARACTER(LEN=50), DIMENSION(:),ALLOCATABLE :: YFILETOP ! File names
 LOGICAL                                     :: LSTOCK, LWG, LASAT
 REAL                                        :: ZCORR_STOCK ! used to avoid to lose stock
-REAL                                        :: ZCNT_UNDEF,ZSUM1,ZSUM2 ! used to correct budget
+REAL                                        :: ZCNT_UNDEF,ZSUM1,ZSUM2, ZDENOM ! used to correct budget
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
@@ -74,7 +75,7 @@ IF (LHOOK) CALL DR_HOOK('RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! * 1. Read stock files
-!          
+!       
 WRITE(*,*) 'Read STOCK file ',NNB_STP_STOCK
 NNB_STP_STOCK = MIN(NNB_STP_STOCK, NNB_TOPD_STEP + NNB_STP_RESTART)
 !
@@ -150,11 +151,22 @@ ELSE
       !
       IF ( ABS(ZSUM2-ZSUM1)>100. ) THEN
         !
-        ZCNT_UNDEF = COUNT(XWTOPT(JCAT,NLINE(JCAT,:))/=XUNDEF.AND. NLINE(JCAT,:)/=0)
+        ZCNT_UNDEF = 0.
+        DO JJ=1,SIZE(NLINE,2)
+          IF ( NLINE(JCAT,JJ)/=0 ) THEN
+            IF ( XWTOPT(JCAT,NLINE(JCAT,JJ))/=XUNDEF ) ZCNT_UNDEF = ZCNT_UNDEF + 1.
+          ENDIF
+        ENDDO
+        !
         IF (ZCNT_UNDEF/=0.) THEN
-          WHERE ( XWTOPT(JCAT,NLINE(JCAT,:))/=XUNDEF .AND. NLINE(JCAT,:)/=0 )
-            XWTOPT(JCAT,NLINE(JCAT,:)) = XWTOPT(JCAT,NLINE(JCAT,:)) - ((ZSUM2-ZSUM1)/ZCNT_UNDEF)
-          ENDWHERE
+          ZDENOM = (ZSUM2-ZSUM1)/ZCNT_UNDEF
+          DO JJ=1,SIZE(NLINE,2)
+            IF ( NLINE(JCAT,JJ)/=0 ) THEN
+              IF ( XWTOPT(JCAT,NLINE(JCAT,JJ))/=XUNDEF ) THEN
+                XWTOPT(JCAT,NLINE(JCAT,JJ)) = XWTOPT(JCAT,NLINE(JCAT,JJ)) - ZDENOM
+              ENDIF
+            ENDIF
+          ENDDO
         ENDIF
         ZSUM2=SUM(XWTOPT(JCAT,:),MASK=XWTOPT(JCAT,:)<XUNDEF)
         !

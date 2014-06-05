@@ -90,7 +90,7 @@ USE MODD_ISBA_PAR,  ONLY : XWGMIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
 #ifdef TOPD
-USE MODD_COUPLING_TOPD, ONLY : LCOUPL_TOPD, XAS_NATURE, XATOP, XRUNOFF_TOP
+USE MODD_COUPLING_TOPD, ONLY : LCOUPL_TOPD, XAS_NATURE, XATOP, XRUNOFF_TOP, NMASKT_PATCH
 #endif
 !
 USE MODI_HYDRO_VEG
@@ -607,14 +607,21 @@ ELSE
 #ifdef TOPD
   IF (LCOUPL_TOPD) THEN
     !runoff topo cumule (kg/m²)
-    WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + (PRUNOFF(:)+ PHORTON(:))*XATOP(:)*PTSTEP
-    IF (HRUNOFF=='TOPD') THEN     
-      WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + ZDUNNE(:)*PTSTEP
-      ! ZDUNNE contains only saturated pixels on mesh so only catchment
-    ELSE
-      WHERE ( XATOP(:)/=XUNDEF ) XRUNOFF_TOP(:) = XRUNOFF_TOP(:) + ZDUNNE(:)*XATOP(:)*PTSTEP  
+    DO JJ=1,SIZE(NMASKT_PATCH)
+      IF  (NMASKT_PATCH(JJ)/=0) THEN
+        IF ( XATOP(NMASKT_PATCH(JJ))/=XUNDEF) THEN
+          XRUNOFF_TOP(NMASKT_PATCH(JJ)) = XRUNOFF_TOP(NMASKT_PATCH(JJ)) + &
+                                          (PRUNOFF(JJ)+ PHORTON(JJ))*XATOP(NMASKT_PATCH(JJ))*PTSTEP
+          IF (HRUNOFF=='TOPD') THEN
+            XRUNOFF_TOP(NMASKT_PATCH(JJ)) = XRUNOFF_TOP(NMASKT_PATCH(JJ)) + ZDUNNE(JJ)*PTSTEP
+          ELSE
+            ! ZDUNNE contains only saturated pixels on mesh so only catchment
+            XRUNOFF_TOP(NMASKT_PATCH(JJ)) = XRUNOFF_TOP(NMASKT_PATCH(JJ)) + ZDUNNE(JJ)*XATOP(NMASKT_PATCH(JJ))*PTSTEP
+          ENDIF  
+        ENDIF
+      ENDIF
       ! ZDUNNE concerns all the mesh so not only catchment =>*XATOP
-    ENDIF
+    ENDDO
   ENDIF
 #endif
   !

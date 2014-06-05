@@ -63,6 +63,8 @@ INTEGER                           :: JI, JLAYER, JPATCH ! loop indexes
 REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('TOPD_TO_DF',0,ZHOOK_HANDLE)
+!
 DO JPATCH=1,NPATCH
 
  IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
