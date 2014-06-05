@@ -328,7 +328,7 @@ DO IVAR_COUNT = 1,NTIMES
 #endif
     ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
 #ifdef NC
-      CFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.nc')
+      CFILEIN_NC = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.nc')
 #endif
     ELSE
       CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
