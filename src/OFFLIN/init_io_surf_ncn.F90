@@ -190,6 +190,8 @@ IL = ILU
  CALL INIT_IO_SURF_MASK_n(HMASK, IL, ILUOUT, ILU, NMASK)
 !
 CMASK = HMASK
+!
+!$OMP BARRIER
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_NC_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
