@@ -52,6 +52,7 @@
 !*       0.0    DECLARATIONS
 !              ------------
 !
+USE MODN_IO_OFFLINE,     ONLY : LRESTART
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, LFLOOD, CHORT, LGLACIER,  &
                                 LTR_ML, TSNOW, CISBA, XABC, CPHOTO
@@ -457,7 +458,7 @@ END IF
 !
 !* surface cumulated energy budget
 !
-IF (LSURF_BUDGETC) THEN
+IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XAVG_RNC        (KLU))
   ALLOCATE(XAVG_HC         (KLU))
   ALLOCATE(XAVG_LEC        (KLU))
