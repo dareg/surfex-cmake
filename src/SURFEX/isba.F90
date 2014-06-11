@@ -2,7 +2,9 @@
       SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HSOC, HRAIN, HHORT, &
                       HC1DRY, HSCOND, HSNOW_ISBA, HSNOWRES, HCPSURF, HSOILFRZ,   &
                       HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
-                      HIMPLICIT_WIND, PCGMAX, PZREF, PUREF, PDIRCOSZW,           &
+                      HIMPLICIT_WIND,OSNOWDRIFT,OSNOWDRIFT_SUBLIM,               &
+                      OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,                     &
+                      PCGMAX, PZREF, PUREF, PDIRCOSZW,                           &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,         &
                       PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, PRSMIN,&
@@ -223,6 +225,22 @@ LOGICAL, INTENT(IN)               :: OGLACIER   ! True = Over permanent snow and
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
+!
+LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
+LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
+CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
+                                         !-----------------------
+                                         ! Crocus metamorphism scheme
+                                         ! HSNOWMETAMO=B92 Brun et al 1992
+                                         ! HSNOWMETAMO=C13 Carmagnola et al 2014
+                                         ! HSNOWMETAMO=T07 Taillandier et al 2007
+                                         ! HSNOWMETAMO=F06 Flanner et al 2006
+                                         !-----------------------
+                                         ! Crocus radiative transfer scheme
+                                         ! HSNOWMETAMO=B92 Brun et al 1992
+                                         ! HSNOWMETAMO=TAR TARTES (Libois et al 2013)
+                                         ! HSNOWMETAMO=TA1 TARTES with constant impurities
+                                         ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
 !
 REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
 !
@@ -786,7 +804,9 @@ ENDIF
            PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,       &
            PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSMELTFLUX,                        &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
-           PSNOWHMASS, ZRI3L, PZENITH, PLAT, PLON                               )  
+           PSNOWHMASS, ZRI3L, PZENITH, PLAT, PLON  ,                            &
+           OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
+           HSNOWMETAMO,HSNOWRAD                                                 )  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !

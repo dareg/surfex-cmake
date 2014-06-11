@@ -126,6 +126,17 @@ TYPE ISBA_t
   LOGICAL                        :: LPERTSURF ! True  = apply random perturbations for ensemble prediction
                                               ! False = no random perturbation (default)
 !-------------------------------------------------------------------------------
+! Snow options
+  LOGICAL                        :: LSNOWDRIFT, LSNOWDRIFT_SUBLIM ! Logicals for snowdrift and sublimation
+!
+  LOGICAL                        :: LSNOW_ABS_ZENITH ! if True modify solar absorption as a function of solar zenithal angle
+                                                     ! (physically wrong but better results in polar regions when CSNOWRAD=B92)
+! Scheme of snow metamorphism (Crocus)
+  CHARACTER(3)                   :: CSNOWMETAMO ! B92 (historical version, Brun et al 92), C13, T07, F06 (see Carmagnola et al 2014)
+!
+! radiative transfer scheme in snow (Crocus)
+  CHARACTER(3)                   :: CSNOWRAD ! B92 (historical version, Brun et al 92), TAR, TA1, TA2 (see Libois et al 2013)
+!-------------------------------------------------------------------------------
 !
   LOGICAL                        :: LCANOPY ! T: SBL scheme within the canopy
 !                                           ! F: no atmospheric layers below forcing level
@@ -660,6 +671,16 @@ LOGICAL, POINTER :: LCANOPY_DRAG=>NULL()
 !$OMP THREADPRIVATE(LCANOPY_DRAG)
 LOGICAL, POINTER :: LPERTSURF=>NULL()
 !$OMP THREADPRIVATE(LPERTSURF)
+LOGICAL, POINTER :: LSNOWDRIFT=>NULL()
+!$OMP THREADPRIVATE(LSNOWDRIFT)
+LOGICAL, POINTER :: LSNOWDRIFT_SUBLIM=>NULL()
+!$OMP THREADPRIVATE(LSNOWDRIFT_SUBLIM)
+LOGICAL, POINTER :: LSNOW_ABS_ZENITH=>NULL()
+!$OMP THREADPRIVATE(LSNOW_ABS_ZENITH)
+CHARACTER(LEN=3), POINTER :: CSNOWMETAMO=>NULL()
+!$OMP THREADPRIVATE(CSNOWMETAMO)
+CHARACTER(LEN=3), POINTER :: CSNOWRAD=>NULL()
+!$OMP THREADPRIVATE(CSNOWRAD)
 LOGICAL, POINTER :: LECOCLIMAP=>NULL()
 !$OMP THREADPRIVATE(LECOCLIMAP)
 LOGICAL, POINTER :: LCTI=>NULL()
@@ -1351,6 +1372,11 @@ LVEGUPD=>ISBA_MODEL(KTO)%LVEGUPD
 LCANOPY=>ISBA_MODEL(KTO)%LCANOPY
 LCANOPY_DRAG=>ISBA_MODEL(KTO)%LCANOPY_DRAG
 LPERTSURF=>ISBA_MODEL(KTO)%LPERTSURF
+LSNOWDRIFT=>ISBA_MODEL(KTO)%LSNOWDRIFT
+LSNOWDRIFT_SUBLIM=>ISBA_MODEL(KTO)%LSNOWDRIFT_SUBLIM
+LSNOW_ABS_ZENITH=>ISBA_MODEL(KTO)%LSNOW_ABS_ZENITH
+CSNOWMETAMO=>ISBA_MODEL(KTO)%CSNOWMETAMO
+CSNOWRAD=>ISBA_MODEL(KTO)%CSNOWRAD
 LECOCLIMAP=>ISBA_MODEL(KTO)%LECOCLIMAP
 LCTI=>ISBA_MODEL(KTO)%LCTI
 LSOCP=>ISBA_MODEL(KTO)%LSOCP
@@ -1811,6 +1837,11 @@ ISBA_MODEL(:)%LVEGUPD=.FALSE.
 ISBA_MODEL(:)%LCANOPY=.FALSE.
 ISBA_MODEL(:)%LCANOPY_DRAG=.FALSE.
 ISBA_MODEL(:)%LPERTSURF=.FALSE.
+ISBA_MODEL(:)%LSNOWDRIFT=.TRUE.
+ISBA_MODEL(:)%LSNOWDRIFT_SUBLIM=.FALSE.
+ISBA_MODEL(:)%LSNOW_ABS_ZENITH=.FALSE.
+ISBA_MODEL(:)%CSNOWMETAMO='B92'
+ISBA_MODEL(:)%CSNOWRAD='B92'
 ISBA_MODEL(:)%LECOCLIMAP=.FALSE.
 ISBA_MODEL(:)%LCTI=.FALSE.
 ISBA_MODEL(:)%LSOCP=.FALSE.

@@ -313,7 +313,10 @@ TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
 INTEGER                    :: ILU
 !
-
+!Snow options
+LOGICAL :: GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH
+CHARACTER(3) :: YSNOWMETAMO,YSNOWRAD
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -332,6 +335,13 @@ OTEMP_ARP = .FALSE.
 OGLACIER  = .FALSE.
 PMUF      = 0.
 PFSAT     = 0.
+!
+! Snow options
+GSNOWDRIFT=.TRUE.
+GSNOWDRIFT_SUBLIM=.FALSE.
+GSNOW_ABS_ZENITH=.FALSE.
+YSNOWMETAMO="B92"
+YSNOWRAD="B92"
 !
 ! Van genuchten parameter (not yet inplemented)
 !
@@ -394,6 +404,8 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           HRAIN, CHORT_GR, CC1DRY, CSCOND_GR, TSNOW%SCHEME, &
           CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TPTIME, OFLOOD, &
           OTEMP_ARP, OGLACIER, PTSTEP, HIMPLICIT_WIND, &
+          GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,           &
+          YSNOWMETAMO,YSNOWRAD,                                    &          
           XCGMAX, PZREF, PUREF, ZDIRCOSZW, PTA,         &
           PQA, PEXNA, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
           PSW, PLW, PVMOD, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &

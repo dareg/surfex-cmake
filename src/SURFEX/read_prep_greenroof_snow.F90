@@ -29,6 +29,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    08/2011 
+!!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,10 +51,10 @@ USE MODI_ABOR1_SFX
 !
 USE MODD_PREP_TEB_GREENROOF,   ONLY : CFILE_SNOW_GR, CTYPE_SNOW, CFILEPGD_SNOW_GR, &
                                       CTYPEPGD_SNOW, LSNOW_IDEAL_GR, &
-                                      XWSNOW_p=>XWSNOW_GR, XTSNOW_p=>XTSNOW_GR, &
+                                      XWSNOW_p=>XWSNOW_GR, XTSNOW_p=>XTSNOW_GR, XLWCSNOW_p=>XLWCSNOW_GR, &
                                       XRSNOW_p=>XRSNOW_GR, XASNOW_GR
 !
-USE MODD_PREP_SNOW,            ONLY : NSNOW_LAYER_MAX
+USE MODD_PREP_SNOW,            ONLY : NSNOW_LAYER_MAX, LSNOW_PREP_PERM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -80,10 +81,11 @@ INTEGER :: NSNOW_LAYER
 CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
 LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
 REAL :: XASNOW, XSWEMAX
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, XSG1SNOW, XSG2SNOW,&
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, XSG1SNOW, XSG2SNOW,&
                                     XHISTSNOW, XAGESNOW
+INTEGER           :: JLAYER                                    
 !
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, &
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GR, XZSNOW_GR, XRSNOW_GR, XTSNOW_GR, XLWCSNOW_GR, &
                                     XSG1SNOW_GR, XSG2SNOW_GR, XHISTSNOW_GR, XAGESNOW_GR
 !
 LOGICAL           :: LFILE
@@ -95,8 +97,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             CFILEPGD_SNOW, CTYPEPGD_SNOW,                & 
-                            LSNOW_IDEAL, LSNOW_FRAC_TOT,                 &
-                            XWSNOW, XTSNOW, XRSNOW, XASNOW,              &
+                            LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,&
+                            XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,              &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
                             LSWEMAX, XSWEMAX
 
@@ -122,10 +124,13 @@ IF (LNAM_READ) THEN
   CTYPEPGD_SNOW    = '      '      
   !
   LSNOW_IDEAL_GR    = .FALSE.
+  LSNOW_PREP_PERM = .TRUE.
   !
-  XWSNOW_GR(:)      = XUNDEF
+  XWSNOW_GR(:)      = 0.
+  XZSNOW_GR(:) = XUNDEF  
   XRSNOW_GR(:)      = XRHOSMAX
   XTSNOW_GR(:)      = XTT
+  XLWCSNOW_GR(:) = 0.
   XASNOW_GR         = XANSMIN  
   XSG1SNOW_GR(:)    = XUNDEF
   XSG2SNOW_GR(:)    = XUNDEF
@@ -145,29 +150,31 @@ IF (LNAM_READ) THEN
     CSNOW = '3-L'
     NSNOW_LAYER = 3
     CFILE_SNOW = '                         '
-    CFILEPGD_SNOW = '                         '
     LSNOW_IDEAL = .FALSE.
     LSNOW_FRAC_TOT = .FALSE.
     XWSNOW(:) = XUNDEF
+    XZSNOW(:) = XUNDEF
     XRSNOW(:) = XRHOSMAX
     XTSNOW(:) = XTT
+    XLWCSNOW(:) = 0.
     XASNOW = XANSMIN  
     XSG1SNOW(:) = XUNDEF
     XSG2SNOW(:) = XUNDEF
     XHISTSNOW(:) = XUNDEF
-    XAGESNOW(:) = XUNDEF  
-    !         
+    XAGESNOW(:) = XUNDEF    
+    !
     READ(UNIT=ILUNAM,NML=NAM_PREP_ISBA_SNOW)
     CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW,'D95','3-L','EBA','NON','CRO')
     !
     CSNOW_GR = CSNOW
     NSNOW_LAYER_GR = NSNOW_LAYER
     CFILE_SNOW_GR = CFILE_SNOW
-    CFILEPGD_SNOW_GR = CFILEPGD_SNOW
     LSNOW_IDEAL_GR = LSNOW_IDEAL
     XWSNOW_GR(:) = XWSNOW(:)
+    XZSNOW_GR(:) = XZSNOW(:)
     XRSNOW_GR(:) = XRSNOW(:)
     XTSNOW_GR(:) = XTSNOW(:)
+    XLWCSNOW_GR(:) = XLWCSNOW(:)
     XASNOW_GR = XASNOW
     XSG1SNOW_GR(:) = XSG1SNOW(:)
     XSG2SNOW_GR(:) = XSG2SNOW(:)
@@ -210,10 +217,26 @@ IF (LNAM_READ) THEN
   ALLOCATE(XWSNOW_p(NSNOW_LAYER_GR))
   ALLOCATE(XRSNOW_p(NSNOW_LAYER_GR))
   ALLOCATE(XTSNOW_p(NSNOW_LAYER_GR))
+  ALLOCATE(XLWCSNOW_p(NSNOW_LAYER_GR))
   !
-  XWSNOW_p=XWSNOW_GR(1:NSNOW_LAYER_GR)
+  DO JLAYER=1,NSNOW_LAYER_GR
+    IF ((XZSNOW_GR(JLAYER)>0) .AND.(XZSNOW_GR(JLAYER)/=XUNDEF )) THEN
+      IF ((XWSNOW_GR(JLAYER)>0)  .AND.(XWSNOW_GR(JLAYER)/=XUNDEF )) THEN
+        WRITE(ILUOUT,*) 'XWSNOW and XZSNOW are both defined.'
+        WRITE(ILUOUT,*) 'You must define only one of them.'
+        WRITE(ILUOUT,*) '    PLEASE CORRECT THAT     '
+        CALL ABOR1_SFX('READ_PREP_GREENROOF_SNOW: ERROR IN INITIALIZATION OF SNOW DEPTH')
+      ELSE
+        XWSNOW_p(JLAYER)=XZSNOW_GR(JLAYER)*XRSNOW_GR(JLAYER)
+      ENDIF
+    ELSE
+      XWSNOW_p(JLAYER)=XWSNOW_GR(JLAYER)
+    ENDIF
+  ENDDO
+
   XRSNOW_p=XRSNOW_GR(1:NSNOW_LAYER_GR)
   XTSNOW_p=XTSNOW_GR(1:NSNOW_LAYER_GR)
+  XLWCSNOW_p=XLWCSNOW_GR(1:NSNOW_LAYER_GR)
   !
   CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
   !

@@ -38,6 +38,7 @@
 !!    04/2009     (B. Decharme) Special treatement for gaussian grid
 !!    06/2009     (B. Decharme)  call Topographic index statistics calculation
 !!    09/2010     (E. Kourzeneva) call reading of the lake database
+!!    03/2012     (M. Lafaysse) NETCDF
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -50,6 +51,9 @@ USE MODI_READ_LATLON
 USE MODI_READ_BINLLV
 USE MODI_READ_BINLLVFAST
 USE MODI_READ_ASCLLV
+ 
+USE MODI_READ_PGD_NETCDF, ONLY : READ_PGD_NETCDF
+
 USE MODI_AVERAGE2_MESH
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : CGRID
@@ -114,6 +118,9 @@ SELECT CASE (HFILETYPE)
 
    CASE ('LATLON')
        CALL READ_LATLON(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME)
+
+   CASE ('NETCDF')
+       CALL READ_PGD_NETCDF(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
 
    CASE DEFAULT
      CALL ABOR1_SFX('TREAT_FIELD: FILE TYPE NOT SUPPORTED: '//HFILETYPE)

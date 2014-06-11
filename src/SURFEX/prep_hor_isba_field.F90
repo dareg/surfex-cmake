@@ -26,6 +26,7 @@ SUBROUTINE PREP_HOR_ISBA_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPG
 !!      B. Decharme  01/2009, Optional Arpege deep soil temperature initialization
 !!      M. Lafaysse  07/2012, allow netcdf input files
 !!      B. Decharme  07/2012, Bug init uniform snow
+!!      M. Lafaysse 11/2012, snow liquid water content
 !!------------------------------------------------------------------
 !
 USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, &
@@ -33,7 +34,7 @@ USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, &
                           LINTERP, CMASK
 
 USE MODD_PREP_ISBA, ONLY : XGRID_SOIL, NGRID_LEVEL, LSNOW_IDEAL,    &
-                           XWSNOW, XRSNOW, XTSNOW, XASNOW,          &
+                           XWSNOW, XRSNOW, XTSNOW, XLWCSNOW, XASNOW,          &
                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
 
 USE MODD_ISBA_n,    ONLY : TTIME, XWG, XWGI, XTG, XWR, XLAI,         &
@@ -139,13 +140,14 @@ IF (HSURF=='SN_VEG ') THEN
                             YFILEPGD_SNOW, YFILEPGDTYPE_SNOW,    &
                             ILUOUT, GUNIF_SNOW, NPATCH,          &
                             INI,TSNOW, TTIME,                    &
-                            XWSNOW, XRSNOW, XTSNOW, XASNOW,      &
+                            XWSNOW, XRSNOW, XTSNOW, XLWCSNOW, XASNOW,      &
                             LSNOW_IDEAL, XSG1SNOW,               &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
                             XVEGTYPE_PATCH, XPATCH               )
   DEALLOCATE(XWSNOW)
   DEALLOCATE(XRSNOW)
   DEALLOCATE(XTSNOW)
+  DEALLOCATE(XLWCSNOW)
   DEALLOCATE(XSG1SNOW)
   DEALLOCATE(XSG2SNOW)
   DEALLOCATE(XHISTSNOW)

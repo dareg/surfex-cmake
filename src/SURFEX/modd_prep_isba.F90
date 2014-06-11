@@ -78,6 +78,7 @@ LOGICAL :: LSNOW_IDEAL
 REAL, DIMENSION(:), POINTER :: XWSNOW         ! Snow reservoir
 REAL, DIMENSION(:), POINTER :: XRSNOW         ! snow density
 REAL, DIMENSION(:), POINTER :: XTSNOW         ! snow temperature
+REAL, DIMENSION(:), POINTER :: XLWCSNOW       ! snow liquid water content
 REAL, DIMENSION(:), POINTER :: XSG1SNOW
 REAL, DIMENSION(:), POINTER :: XSG2SNOW
 REAL, DIMENSION(:), POINTER :: XHISTSNOW

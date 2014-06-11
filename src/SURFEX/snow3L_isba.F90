@@ -14,7 +14,9 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,   
                          PUSTARSNOW,                                                         &
                          PPSN, PSRSFC, PRRSFC, PSMELTFLUX,                                   &
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
-                         PSNOWHMASS, PRI, PZENITH, PLAT, PLON                                )  
+                         PSNOWHMASS, PRI, PZENITH, PLAT, PLON  ,                             &
+                         OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
+                         HSNOWMETAMO,HSNOWRAD)                               
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -233,6 +235,22 @@ REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)      :: PLAT
 REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
+LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
+LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
+CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
+                                         !-----------------------
+                                         ! Crocus metamorphism scheme
+                                         ! HSNOWMETAMO=B92 Brun et al 1992
+                                         ! HSNOWMETAMO=C13 Carmagnola et al 2014
+                                         ! HSNOWMETAMO=T07 Taillandier et al 2007
+                                         ! HSNOWMETAMO=F06 Flanner et al 2006
+                                         !-----------------------
+                                         ! Crocus radiative transfer scheme
+                                         ! HSNOWMETAMO=B92 Brun et al 1992
+                                         ! HSNOWMETAMO=TAR TARTES (Libois et al 2013)
+                                         ! HSNOWMETAMO=TA1 TARTES with constant impurities
+                                         ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
+
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER                     :: ZCHECK_TEMP = 100.0 
@@ -605,7 +623,9 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX, ZP_EVAPCOR,  &
              ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,       &
              ZP_LEL3L, ZP_EVAP, ZP_RI, ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,&
-             ZP_CHSNOW, ZP_SNOWHMASS, ZP_VEGTYPE, ZP_ZENITH, ZP_LAT, ZP_LON)    
+             ZP_CHSNOW, ZP_SNOWHMASS, ZP_VEGTYPE, ZP_ZENITH, ZP_LAT,ZP_LON,&
+             OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                &
+             HSNOWMETAMO,HSNOWRAD)    
 
 ELSE 
 

@@ -69,11 +69,13 @@ LOGICAL :: LSNOW_IDEAL_TEB
 !
 REAL, DIMENSION(:), POINTER :: XWSNOW_ROOF      ! snow reservoir   for roofs
 REAL, DIMENSION(:), POINTER :: XTSNOW_ROOF      ! snow density     for roofs
+REAL, DIMENSION(:), POINTER :: XLWCSNOW_ROOF      ! snow liquid water content     for roofs
 REAL, DIMENSION(:), POINTER :: XRSNOW_ROOF      ! snow temperature for roofs
 REAL              :: XASNOW_ROOF      ! snow albedo      for roofs
 !
 REAL, DIMENSION(:), POINTER :: XWSNOW_ROAD      ! snow reservoir   for roads
 REAL, DIMENSION(:), POINTER :: XTSNOW_ROAD      ! snow temperature for roads
+REAL, DIMENSION(:), POINTER :: XLWCSNOW_ROAD      ! snow liquid water content     for roads
 REAL, DIMENSION(:), POINTER :: XRSNOW_ROAD      ! snow density     for roads
 REAL              :: XASNOW_ROAD      ! snow albedo      for roads
 !

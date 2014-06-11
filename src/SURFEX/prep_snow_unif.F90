@@ -2,7 +2,7 @@
 SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
                           OSNOW_IDEAL,                  &
                           PUNIF_WSNOW, PUNIF_RSNOW,     &
-                          PUNIF_TSNOW, PUNIF_ASNOW,     &
+                          PUNIF_TSNOW, PUNIF_LWCSNOW,PUNIF_ASNOW,     &
                           PUNIF_SG1SNOW, PUNIF_SG2SNOW, &
                           PUNIF_HISTSNOW,PUNIF_AGESNOW  )  
 !     #################################################################################
@@ -27,6 +27,7 @@ SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
 !!    -------------
 !!      Original    01/2004
 !!      M. Lafaysse adaptation with new snow age
+!!      2012-11-19 M. Lafaysse initialization of liquid water content
 !!------------------------------------------------------------------
 !
 !
@@ -55,6 +56,7 @@ LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_WSNOW ! prescribed snow content (kg/m2)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_RSNOW ! prescribed density (kg/m3)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_TSNOW ! prescribed temperature (K)
+REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_LWCSNOW ! prescribed snow liquid water content (kg/m3)
 REAL,               INTENT(IN)  :: PUNIF_ASNOW ! prescribed albedo (-)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
@@ -63,7 +65,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW !
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW, ZRSNOW
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW, ZRSNOW, ZLWCSNOW !(ZLWCSNOW in kg/m2)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -75,10 +77,12 @@ IF (OSNOW_IDEAL) THEN
   ALLOCATE(PFIELD(1,SIZE(PUNIF_WSNOW),1))
   ALLOCATE(ZTSNOW(1,SIZE(PUNIF_WSNOW),1))
   ALLOCATE(ZRSNOW(1,SIZE(PUNIF_WSNOW),1))
+  ALLOCATE(ZLWCSNOW(1,SIZE(PUNIF_WSNOW),1))
 ELSE
   ALLOCATE(PFIELD(1,NGRID_LEVEL,1))
   ALLOCATE(ZTSNOW(1,NGRID_LEVEL,1))
   ALLOCATE(ZRSNOW(1,NGRID_LEVEL,1))
+  ALLOCATE(ZLWCSNOW(1,NGRID_LEVEL,1))
 ENDIF
 !
 !*      1.     No snow
@@ -118,11 +122,13 @@ SELECT CASE(HSURF(1:3))
     IF (OSNOW_IDEAL) THEN
       ZRSNOW(1,:,1) = PUNIF_RSNOW(:)
       ZTSNOW(1,:,1) = PUNIF_TSNOW(:)
+      ZLWCSNOW(1,:,1) = PUNIF_LWCSNOW(:) ! kg/m3
     ELSE
       ZRSNOW(1,:,1) = PUNIF_RSNOW(1)
       ZTSNOW(1,:,1) = PUNIF_TSNOW(1)
+      ZLWCSNOW(1,:,1) = PUNIF_LWCSNOW(1) ! kg/m3
     ENDIF
-    CALL SNOW_T_WLIQ_TO_HEAT(PFIELD,ZRSNOW,ZTSNOW)
+    CALL SNOW_T_WLIQ_TO_HEAT(PFIELD,ZRSNOW,ZTSNOW,ZLWCSNOW) ! ZLWCSNOW in kg/m3
   CASE('SG1')
     IF (OSNOW_IDEAL) THEN
       PFIELD(1,:,1) = PUNIF_SG1SNOW(:)
@@ -156,6 +162,7 @@ END SELECT
 CINTERP_TYPE='UNIF  '
 DEALLOCATE(ZTSNOW)
 DEALLOCATE(ZRSNOW)
+DEALLOCATE(ZLWCSNOW)
 IF (LHOOK) CALL DR_HOOK('PREP_SNOW_UNIF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -195,7 +195,7 @@ DO JJ = IINDX1,IINDX2
 !              --------------------------------------------
 !
   IF (ZSINZEN(JJ)/=0.) THEN
-    !Azimuth is measured counter-opposite-clockwise from due south
+    !Azimuth is measured clockwise from north
     ZSINAZI(JJ)  = - ZCOSDEL * SIN(ZSOLANG(JJ)) / ZSINZEN(JJ)
     ZCOSAZI(JJ)  = (-SIN(ZLAT(JJ))*ZCOSDEL*COS(ZSOLANG(JJ))      &
                        +COS(ZLAT(JJ))*ZSINDEL                       &

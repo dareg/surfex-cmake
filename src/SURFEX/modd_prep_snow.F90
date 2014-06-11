@@ -23,6 +23,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       01/2004
+!!      Modif M Lafaysse 04/2014 : LSNOW_PREP_PERM
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -44,6 +45,7 @@ REAL, PARAMETER  :: XWSNOW_CLIM_GRAD = - 0.08 * 300.     * (-0.0065)
 !
 LOGICAL :: LSNOW_FRAC_TOT
 INTEGER, PARAMETER :: NSNOW_LAYER_MAX = 50
+LOGICAL :: LSNOW_PREP_PERM ! activate or disactivate initialization over permanent ice areas
 !
 !--------------------------------------------------------------------------
 !

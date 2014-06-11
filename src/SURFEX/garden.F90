@@ -312,6 +312,10 @@ INTEGER                    :: ILU
 !
 LOGICAL :: GMASK
 !
+!Snow options
+LOGICAL :: GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH
+CHARACTER(3) :: YSNOWMETAMO,YSNOWRAD
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -363,6 +367,12 @@ ZTDEEP_A = XUNDEF
 ZTDEEP_B = XUNDEF
 ZGAMMAT  = XUNDEF
 !
+! Snow options
+GSNOWDRIFT=.TRUE.
+GSNOWDRIFT_SUBLIM=.FALSE.
+GSNOW_ABS_ZENITH=.FALSE.
+YSNOWMETAMO="B92"
+YSNOWRAD="B92"
 !-------------------------------------------------------------------------------
 !
 !*      2.     Treatment of green areas
@@ -385,6 +395,8 @@ CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ,  &
           CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,    &
           HIMPLICIT_WIND,                                             &
+          GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,              &
+          YSNOWMETAMO,YSNOWRAD,                                       &
           XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,         &
           PQ_LOWCAN, PEXNS, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
           PSW, PLW, PU_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &

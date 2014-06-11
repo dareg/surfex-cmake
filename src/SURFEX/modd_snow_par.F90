@@ -83,15 +83,6 @@ REAL, SAVE       :: XZ0HSN
 ! Roughness length ratio between ice and snow
 REAL, SAVE       :: XZ0ICEZ0SNOW
 !
-! Logicals for snowdrift and sublimation
-LOGICAL,SAVE    :: LSNOWDRIFT, LSNOWDRIFT_SUBLIM
-
-! Scheme of snow metamorphism
-CHARACTER(3),SAVE :: CSNOWMETAMO
-
-! radiative transfer scheme in snow
-CHARACTER(3),SAVE :: CSNOWRAD
-
 ! Snow Melt timescale with D95 (s): needed to prevent time step 
 ! dependence of melt when snow fraction < unity.
 !

@@ -1167,7 +1167,7 @@ END SUBROUTINE SPECTRAL_REPARTITION
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
                           PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
-                          PSNOWALB,PRADSINK,PRADXS,ODEBUG)
+                          PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO)
 !
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
@@ -1200,6 +1200,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
 !
 LOGICAL, INTENT(IN) :: ODEBUG ! Print for debugging
+CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 !
 !packed variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_DENSITY_P !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
@@ -1312,7 +1313,7 @@ IF ( IPOINTDAY>=1 ) THEN
                            ZSNOWW0_P(1:IPOINTDAY,:),ZSNOWB0_P(1:IPOINTDAY,:),ZSNOWIMP_DENSITY_P(1:IPOINTDAY,:,:), &
                            ZSNOWIMP_CONTENT_P(1:IPOINTDAY,:,:),ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),        &
                            ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),              &
-                           ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG )
+                           ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO)
   !
   !Unpack 1d output variables
   !
@@ -1349,7 +1350,7 @@ END SUBROUTINE SNOWCRO_TARTES
 
 SUBROUTINE SNOWCRO_CALL_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
                                PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
-                               PSNOWALB,PRADSINK,PRADXS,ODEBUG)
+                               PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO)
 !
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
@@ -1384,6 +1385,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
 
 LOGICAL,INTENT(IN) :: ODEBUG ! Print for debugging
+CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 
 !Local variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNBANDS) :: ZSNOWENERGY !(npoints,nlayer,nbands)
@@ -1423,7 +1425,7 @@ DO JL = 1,SIZE(PSNOWRHO,2)
     !
     IF ( JL<=KNLVLS_USE(JJ) ) THEN
       !
-      CALL GET_DIAM(PSNOWGRAN1(JJ,JL),PSNOWGRAN2(JJ,JL),ZDIAM)
+      CALL GET_DIAM(PSNOWGRAN1(JJ,JL),PSNOWGRAN2(JJ,JL),ZDIAM,HSNOWMETAMO)
       ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)
       !
     ENDIF

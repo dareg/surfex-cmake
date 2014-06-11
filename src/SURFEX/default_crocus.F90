@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,PZ0ICEZ0SNOW,PRHOTHRESHOLD_ICE,  &
-                 PALBICE1,PALBICE2,PALBICE3,PVAGING_NOGLACIER,PVAGING_GLACIER,PPERCENTAGEPORE,&
+      SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
                  HSNOWMETAMO,HSNOWRAD)  
 !     ########################################################################
 !
@@ -49,24 +48,9 @@ IMPLICIT NONE
 ! Logicals to activate / disactivate snowdrift                                          
 LOGICAL, INTENT(OUT)          :: OSNOWDRIFT
 LOGICAL, INTENT(OUT)          :: OSNOWDRIFT_SUBLIM
-
-! Prescribed ice albedo in 3 spectral bands for glacier simulation with CROCUS scheme.
-REAL,  INTENT(OUT) :: PALBICE1,PALBICE2,PALBICE3
+LOGICAL, INTENT(OUT)          :: OSNOW_ABS_ZENITH
 !
-
-! Density threshold for ice detection in CROCUS scheme.
-REAL,  INTENT(OUT) :: PRHOTHRESHOLD_ICE
-
-! Roughness length ratio between ice and snow
-REAL, INTENT(OUT) :: PZ0ICEZ0SNOW
-
-! Parameters for ageing effect on albedo
-REAL, INTENT(OUT) :: PVAGING_NOGLACIER,PVAGING_GLACIER
-!
-! percentage of the total pore volume to compute the max liquid water holding capacity      
-REAL, INTENT(OUT) :: PPERCENTAGEPORE
-!
-! Snow metamorphism scheme
+! Snow metamorphism scheme and radiative transfer scheme
  CHARACTER(*), INTENT(OUT) :: HSNOWMETAMO,HSNOWRAD
 !
 !
@@ -80,33 +64,10 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',0,ZHOOK_HANDLE)
 !
 OSNOWDRIFT        = .TRUE.
 OSNOWDRIFT_SUBLIM = .FALSE.
-!
-! Roughness length ratio between ice and snow
-PZ0ICEZ0SNOW = 10.
-!
-! 3 bands spectral albedo for glacier ice (CROCUS)
-! Default values from Lejeune et al 2009 (Zongo, Bolivia)
-PALBICE1 = 0.38
-PALBICE2 = 0.23
-PALBICE3 = 0.08
-!
-! Gerbaux et al 2005 (Saint Sorlin)
-! PALBICE1=0.23
-! PALBICE2=0.16
-! PALBICE3=0.05
-!
-! Density threshold for ice detection kg.m-3
-PRHOTHRESHOLD_ICE = 850.
-!
-! Parameters for ageing effect on albedo
-PVAGING_NOGLACIER = 60.
-PVAGING_GLACIER   = 900.
+OSNOW_ABS_ZENITH = .FALSE.
 !
 HSNOWMETAMO = 'B92'
 HSNOWRAD    = 'B92'
-!
-! percentage of the total pore volume to compute the max liquid water holding capacity   !Pahaut 1976
-PPERCENTAGEPORE = 0.05
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

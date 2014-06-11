@@ -33,6 +33,7 @@
 !!     V. Vionnet   06/2008 - Flag for snow metamorphism
 !                           - Preparation of uniform snow fields : density, temperture,albedo,grain types
 !!                          - Flag to avtivate new maximal liquid water holding capacity : formulation used by Crocus
+!!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -54,10 +55,10 @@ USE MODI_ABOR1_SFX
 !
 USE MODD_PREP_TEB_GARDEN, ONLY : CFILE_SNOW_GD, CTYPE_SNOW, CFILEPGD_SNOW_GD, &
                                  CTYPEPGD_SNOW, LSNOW_IDEAL_GD, &
-                                 XWSNOW_p=>XWSNOW_GD, XTSNOW_p=>XTSNOW_GD, &
+                                 XWSNOW_p=>XWSNOW_GD, XTSNOW_p=>XTSNOW_GD, XLWCSNOW_p=>XLWCSNOW_GD, &
                                  XRSNOW_p=>XRSNOW_GD, XASNOW_GD
 !
-USE MODD_PREP_SNOW, ONLY : NSNOW_LAYER_MAX
+USE MODD_PREP_SNOW, ONLY : NSNOW_LAYER_MAX, LSNOW_PREP_PERM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -84,10 +85,11 @@ INTEGER :: NSNOW_LAYER
 CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
 LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
 REAL :: XASNOW, XSWEMAX
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XRSNOW, XTSNOW, XSG1SNOW, XSG2SNOW,&
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, XSG1SNOW, XSG2SNOW,&
                                     XHISTSNOW, XAGESNOW
+INTEGER           :: JLAYER
 !
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, &
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GD, XZSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, &
                                     XSG1SNOW_GD, XSG2SNOW_GD, XHISTSNOW_GD, XAGESNOW_GD
 !
 LOGICAL           :: LFILE
@@ -99,13 +101,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
                             CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
-                            LSNOW_IDEAL, LSNOW_FRAC_TOT,                &
-                            XWSNOW, XTSNOW, XRSNOW, XASNOW,             &
+                            LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,       &
+                            XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,    &
                             LSWEMAX,XSWEMAX
 NAMELIST/NAM_PREP_GARDEN_SNOW/CSNOW_GD, NSNOW_LAYER_GD, CFILE_SNOW_GD, CTYPE_SNOW, &
                               CFILEPGD_SNOW_GD, CTYPEPGD_SNOW,               & 
-                              LSNOW_IDEAL_GD, XWSNOW_GD, XTSNOW_GD, XRSNOW_GD, XASNOW_GD
+                              LSNOW_IDEAL_GD, XWSNOW_GD, XZSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, XRSNOW_GD, XASNOW_GD
 !-------------------------------------------------------------------------------
 !* default
 !  -------
@@ -123,15 +125,18 @@ IF (LNAM_READ) THEN
   CTYPEPGD_SNOW    = '      '    
   !
   LSNOW_IDEAL_GD = .FALSE.
+  LSNOW_PREP_PERM = .TRUE.
   !
-  XWSNOW_GD(:) = XUNDEF
+  XWSNOW_GD(:) = 0.
+  XZSNOW_GD(:) = XUNDEF
   XRSNOW_GD(:) = XRHOSMAX
   XTSNOW_GD(:) = XTT
+  XLWCSNOW_GD(:) = 0.
   XASNOW_GD = XANSMIN  
   XSG1SNOW_GD(:) = XUNDEF
-  XSG2SNOW_GD(:) = XUNDEF
+  XSG2SNOW(:) = XUNDEF
   XHISTSNOW_GD(:) = XUNDEF
-  XAGESNOW_GD(:) = XUNDEF  
+  XAGESNOW_GD(:) = XUNDEF
   !
   LSWEMAX=.FALSE.
   XSWEMAX=500.
@@ -170,8 +175,10 @@ IF (LNAM_READ) THEN
     CFILEPGD_SNOW_GD = CFILEPGD_SNOW
     LSNOW_IDEAL_GD = LSNOW_IDEAL
     XWSNOW_GD(:) = XWSNOW(:)
+    XZSNOW_GD(:) = XZSNOW(:)    
     XRSNOW_GD(:) = XRSNOW(:)
     XTSNOW_GD(:) = XTSNOW(:)
+    XLWCSNOW_GD(:) = XLWCSNOW(:)    
     XASNOW_GD = XASNOW
     XSG1SNOW_GD(:) = XSG1SNOW(:)
     XSG2SNOW_GD(:) = XSG2SNOW(:)
@@ -216,10 +223,27 @@ IF (LNAM_READ) THEN
   ALLOCATE(XWSNOW_p(NSNOW_LAYER_GD))
   ALLOCATE(XRSNOW_p(NSNOW_LAYER_GD))
   ALLOCATE(XTSNOW_p(NSNOW_LAYER_GD))
+  ALLOCATE(XLWCSNOW_p(NSNOW_LAYER_GD))
   !
-  XWSNOW_p=XWSNOW_GD(1:NSNOW_LAYER_GD)
+  DO JLAYER=1,NSNOW_LAYER_GD
+  
+    IF ((XZSNOW_GD(JLAYER)>0) .AND.(XZSNOW_GD(JLAYER)/=XUNDEF )) THEN
+      IF ((XWSNOW_GD(JLAYER)>0)  .AND.(XWSNOW_GD(JLAYER)/=XUNDEF )) THEN    
+        WRITE(ILUOUT,*) 'XWSNOW and XZSNOW are both defined.'
+        WRITE(ILUOUT,*) 'You must define only one of them.'
+        WRITE(ILUOUT,*) '    PLEASE CORRECT THAT     '
+        CALL ABOR1_SFX('READ_PREP_GARDEN_SNOW: ERROR IN INITIALIZATION OF SNOW DEPTH')
+      ELSE
+        XWSNOW_p(JLAYER)=XZSNOW_GD(JLAYER)*XRSNOW_GD(JLAYER)
+      ENDIF
+    ELSE
+      XWSNOW_p(JLAYER)=XWSNOW_GD(JLAYER)
+    ENDIF
+  ENDDO
+
   XRSNOW_p=XRSNOW_GD(1:NSNOW_LAYER_GD)
   XTSNOW_p=XTSNOW_GD(1:NSNOW_LAYER_GD)
+  XLWCSNOW_p=XLWCSNOW_GD(1:NSNOW_LAYER_GD)
   !
   CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
   !

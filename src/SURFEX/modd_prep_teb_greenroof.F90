@@ -65,6 +65,7 @@ LOGICAL :: LSNOW_IDEAL_GR
 REAL, DIMENSION(:), POINTER :: XWSNOW_GR         ! Snow reservoir
 REAL, DIMENSION(:), POINTER :: XRSNOW_GR         ! snow density
 REAL, DIMENSION(:), POINTER :: XTSNOW_GR         ! snow temperature
+REAL, DIMENSION(:), POINTER :: XLWCSNOW_GR         ! snow liquid water conten
 REAL                        :: XASNOW_GR         ! snow albedo
 !
 REAL                        :: XWR_DEF        ! default for leaves interception reservoir

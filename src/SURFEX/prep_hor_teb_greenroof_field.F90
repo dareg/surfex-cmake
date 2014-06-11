@@ -31,7 +31,7 @@ USE MODD_PREP,               ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,         
                                     XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT,          &
                                     LINTERP, CMASK
 USE MODD_PREP_TEB_GREENROOF, ONLY : XGRID_SOIL, NGRID_LEVEL,                     &
-                                    XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, XASNOW_GR, LSNOW_IDEAL_GR
+                                    XWSNOW_GR, XRSNOW_GR, XTSNOW_GR,XLWCSNOW_GR, XASNOW_GR, LSNOW_IDEAL_GR
 USE MODD_TEB_n,              ONLY : TTIME
 USE MODD_TEB_GREENROOF_n,    ONLY : XWG, XWGI, XTG, XWR, XLAI,                   &
                                     NLAYER_GR,                                   &
@@ -149,7 +149,7 @@ IF (HSURF=='SN_VEG ') THEN
                             YFILEPGD, YFILEPGDTYPE,         &
                             ILUOUT,GUNIF_SNOW, 1,           &
                             SIZE(XLAT),TSNOW, TTIME,        &
-                            XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, XASNOW_GR, &
+                            XWSNOW_GR, XRSNOW_GR, XTSNOW_GR,XLWCSNOW_GR, XASNOW_GR, &
                             LSNOW_IDEAL_GR, ZSG1SNOW,          &
                             ZSG2SNOW, ZHISTSNOW, ZAGESNOW,  &
                             ZVEGTYPE_PATCH, ZPATCH          )

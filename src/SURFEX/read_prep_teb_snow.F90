@@ -47,9 +47,9 @@ USE MODI_CLOSE_NAMELIST
 !
 USE MODD_CSTS,     ONLY : XTT
 USE MODD_SNOW_PAR, ONLY : XANSMIN, XRHOSMAX
-USE MODD_PREP_TEB, ONLY : XWSNOW_ROOF_p=>XWSNOW_ROOF, XTSNOW_ROOF_p=>XTSNOW_ROOF, &
+USE MODD_PREP_TEB, ONLY : XWSNOW_ROOF_p=>XWSNOW_ROOF, XTSNOW_ROOF_p=>XTSNOW_ROOF, XLWCSNOW_ROOF_p=>XLWCSNOW_ROOF, &
                           XRSNOW_ROOF_p=>XRSNOW_ROOF, XASNOW_ROOF, &
-                          XWSNOW_ROAD_p=>XWSNOW_ROAD, XTSNOW_ROAD_p=>XTSNOW_ROAD, &
+                          XWSNOW_ROAD_p=>XWSNOW_ROAD, XTSNOW_ROAD_p=>XTSNOW_ROAD, XLWCSNOW_ROAD_p=>XLWCSNOW_ROAD,&
                           XRSNOW_ROAD_p=>XRSNOW_ROAD, XASNOW_ROAD, &
                           CFILE_SNOW_TEB, CTYPE_SNOW, CFILEPGD_SNOW_TEB, &
                            CTYPEPGD_SNOW, LSNOW_IDEAL_TEB
@@ -78,8 +78,8 @@ INTEGER,           INTENT(OUT) :: KSNOW_ROAD ! snow scheme layers for roads
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_ROAD, XRSNOW_ROAD, XTSNOW_ROAD, &
-                                    XWSNOW_ROOF, XRSNOW_ROOF, XTSNOW_ROOF
+REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_ROAD, XRSNOW_ROAD, XTSNOW_ROAD, XLWCSNOW_ROAD, &
+                                    XWSNOW_ROOF, XRSNOW_ROOF, XTSNOW_ROOF, XLWCSNOW_ROOF
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
@@ -88,8 +88,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_TEB_SNOW/CSNOW_ROOF, CSNOW_ROAD, CFILE_SNOW_TEB, CTYPE_SNOW, &
                            LSNOW_IDEAL_TEB, CFILEPGD_SNOW_TEB, CTYPEPGD_SNOW,      & 
-                           XWSNOW_ROOF, XTSNOW_ROOF, XRSNOW_ROOF, XASNOW_ROOF, &
-                           XWSNOW_ROAD, XTSNOW_ROAD, XRSNOW_ROAD, XASNOW_ROAD
+                           XWSNOW_ROOF, XTSNOW_ROOF, XLWCSNOW_ROOF, XRSNOW_ROOF, XASNOW_ROOF, &
+                           XWSNOW_ROAD, XTSNOW_ROAD, XLWCSNOW_ROAD, XRSNOW_ROAD, XASNOW_ROAD
 !-------------------------------------------------------------------------------
 !
 !* default
@@ -109,11 +109,13 @@ IF (LNAM_READ) THEN
   !
   XWSNOW_ROOF(:) = 0.
   XTSNOW_ROOF(:) = XTT
+  XLWCSNOW_ROOF(:) = 0.
   XRSNOW_ROOF(:) = XRHOSMAX
   XASNOW_ROOF = XANSMIN
   !
   XWSNOW_ROAD(:) = 0.
   XTSNOW_ROAD(:) = XTT
+  XLWCSNOW_ROAD(:) = 0.
   XRSNOW_ROAD(:) = XRHOSMAX
   XASNOW_ROAD = XANSMIN
   !
@@ -133,18 +135,22 @@ IF (LNAM_READ) THEN
   ALLOCATE(XWSNOW_ROOF_p(1))
   ALLOCATE(XRSNOW_ROOF_p(1))
   ALLOCATE(XTSNOW_ROOF_p(1))
+  ALLOCATE(XLWCSNOW_ROOF_p(1))
   !
   XWSNOW_ROOF_p=XWSNOW_ROOF(1)
   XRSNOW_ROOF_p=XRSNOW_ROOF(1)
   XTSNOW_ROOF_p=XTSNOW_ROOF(1)
+  XLWCSNOW_ROOF_p=XLWCSNOW_ROOF(1)
   !
   ALLOCATE(XWSNOW_ROAD_p(1))
   ALLOCATE(XRSNOW_ROAD_p(1))
   ALLOCATE(XTSNOW_ROAD_p(1))
+  ALLOCATE(XLWCSNOW_ROAD_p(1))
   !
   XWSNOW_ROAD_p=XWSNOW_ROAD(1)
   XRSNOW_ROAD_p=XRSNOW_ROAD(1)
   XTSNOW_ROAD_p=XTSNOW_ROAD(1)
+  XLWCSNOW_ROAD_p=XLWCSNOW_ROAD(1)
   !
   CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
   !

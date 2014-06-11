@@ -30,6 +30,7 @@ SUBROUTINE INI_SURF_CSTS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    08/2009
+!!      M Lafaysse 05/2014 : snow parameters
 !!
 !-------------------------------------------------------------------------------
 !
@@ -43,7 +44,11 @@ USE MODD_FLOOD_PAR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX, &
                            XAGLAMIN, XAGLAMAX, XHGLA, &
                            XWSNV, XZ0SN, XZ0HSN, &
-                           XTAU_SMELT
+                           XTAU_SMELT,&
+                           XALBICE1, XALBICE2, XALBICE3,&
+                           XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW, &
+                           XVAGING_NOGLACIER, XVAGING_GLACIER, &
+                           XPERCENTAGEPORE
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -65,6 +70,10 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XALBWAT, XALBCOEF_TA96, XALBSCA_WAT, XEMISWAT, &
                         XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XCFFV,  &
                         XZ0SN, XZ0HSN, XTAU_SMELT  
+NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
+                             XALBICE1, XALBICE2, XALBICE3,             &
+                             XVAGING_NOGLACIER, XVAGING_GLACIER,       &
+                             XPERCENTAGEPORE
 !
 !-------------------------------------------------------------------------------
 !*	 1. Default values
@@ -134,6 +143,32 @@ XZ0HSN = 0.0001
 !
 XTAU_SMELT = 300.
 !
+! NAM_SURF_SNOW_CSTS
+!
+! Roughness length ratio between ice and snow
+XZ0ICEZ0SNOW = 10.
+!
+! 3 bands spectral albedo for glacier ice (CROCUS)
+! Default values from Lejeune et al 2009 (Zongo, Bolivia)
+XALBICE1 = 0.38
+XALBICE2 = 0.23
+XALBICE3 = 0.08
+!
+! Gerbaux et al 2005 (Saint Sorlin)
+! PALBICE1=0.23
+! PALBICE2=0.16
+! PALBICE3=0.05
+!
+! Density threshold for ice detection kg.m-3
+XRHOTHRESHOLD_ICE = 850.
+!
+! Parameters for ageing effect on albedo
+XVAGING_NOGLACIER = 60.
+XVAGING_GLACIER   = 900.
+
+! percentage of the total pore volume to compute the max liquid water holding capacity   !Pahaut 1976
+XPERCENTAGEPORE = 0.05
+
 !-------------------------------------------------------------------------------
 !*	 2. User values
 !-------------------------------------------------------------------------------
@@ -145,7 +180,11 @@ XTAU_SMELT = 300.
  CALL POSNAM(ILUNAM,'NAM_SURF_CSTS',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_CSTS)
 !
+ CALL POSNAM(ILUNAM,'NAM_SURF_SNOW_CSTS',GFOUND,ILUOUT)
+IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_SNOW_CSTS)
+!
  CALL CLOSE_NAMELIST(CPROGNAME,ILUNAM)
+
 IF (LHOOK) CALL DR_HOOK('INI_SURF_CSTS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

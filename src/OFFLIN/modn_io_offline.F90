@@ -106,6 +106,10 @@ LOGICAL          :: LSET_FORC_ZS =.FALSE.  ! .T. : the orography of the
 LOGICAL          :: LLIMIT_QAIR = .FALSE. ! .T. : Qair always <= Qsat(Tair)
                                           ! .F. : No limitation
 
+!     General flag to modify direct solar radiation due to slopes and shadows.
+LOGICAL          :: LSHADOWS_SLOPE = .FALSE.
+LOGICAL          :: LSHADOWS_OTHER = .FALSE.
+
 ! * For offline driver with openMP
 INTEGER         :: NPROMA                 ! Size of openMP packets
 INTEGER         :: NI,NJ                  ! Domain size
@@ -122,6 +126,7 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LPRINT, LRESTART, LINQUIRE, NSCAL, NHALO, XDELTA_OROG,   &
                         XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
+                        LSHADOWS_SLOPE,LSHADOWS_OTHER,                           &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC, YALG_MPI
 !
 !-------------------------------------------------------------------------------
