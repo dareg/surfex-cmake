@@ -83,7 +83,7 @@ ZWORK(6) = FLOAT(NDESC_ROAD_LAYER)
 ZWORK(7) = FLOAT(NDESC_FLOOR_LAYER)
 !
 YCOMMENT='Configuration numbers for descriptive building data'
- CALL WRITE_SURF(HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,'-','Bld_parameters  ')
+ CALL WRITE_SURF(HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,'-','Bld_dimensions  ')
 DEALLOCATE(ZWORK)
 !
 !-------------------------------------------------------------------------------
