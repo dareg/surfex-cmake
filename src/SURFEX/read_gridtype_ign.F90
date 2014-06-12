@@ -75,6 +75,7 @@ REAL, DIMENSION(KLU*3)            :: ZXALL    ! maximum domain X coordinate of g
 REAL, DIMENSION(KLU*3)            :: ZYALL    ! maximum domain Y coordinate of grid mesh
 INTEGER                           :: IDIMX    ! maximum domain length in X
 INTEGER                           :: IDIMY    ! maximum domain length in Y
+INTEGER                           :: IFLOX, IFLOY
 INTEGER                           :: ILUOUT
 !---------------------------------------------------------------------------
 REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR
@@ -110,8 +111,10 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
 !*       4.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
+IFLOX = MIN(1,IDIMX)
+IFLOY = MIN(1,IDIMY)
  CALL PUT_GRIDTYPE_IGN(ZGRID_PAR,ILAMBERT,ZX,ZY,ZDX,ZDY,        &
-                      IDIMX,IDIMY,ZXALL(1:IDIMX),ZYALL(1:IDIMY))
+                      IDIMX,IDIMY,ZXALL(IFLOX:IDIMX),ZYALL(IFLOY:IDIMY))
 !
 !---------------------------------------------------------------------------
 IF (OREAD) THEN
