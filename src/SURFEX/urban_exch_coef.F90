@@ -147,7 +147,7 @@ ELSEIF(HZ0H=='BRUT82' .OR. HZ0H=='KAND07')THEN
   ZTG = PTG/PEXNS
   CALL FLXSURF3BX( cmu, ctu, PRI,ftemp,fvap,ilmo,    &
                    ue, fcor, ZTA, PQA,           &
-                   PUREF, PZREF, ZVMOD, PTG, PQS,&
+                   PUREF, PZREF, ZVMOD, ZTG, PQS,&
                    hBL, PZ0,ZZ0H,                      &
                    lzz0, lzz0t, fm, fh,N               )  
 !
