@@ -367,7 +367,7 @@ ENDIF
 !*       8.     prognostic variable diagnostics:
 !               --------------------------------
 !
-IF(LPROVAR_TO_DIAG.OR.LINTERPOL_SST)THEN
+IF(LPROVAR_TO_DIAG)THEN
 !
   YRECFM='SST'
   YCOMMENT='SST'
