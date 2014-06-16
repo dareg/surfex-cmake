@@ -137,6 +137,7 @@ LOGICAL                          :: GFOUND
 CHARACTER(LEN=28)                :: YATMFILE  ='                            '  ! name of the Atmospheric file
 CHARACTER(LEN=6)                 :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
 CHARACTER(LEN=28)                :: YLUOUT    ='LISTING_SODA                '  ! name of listing
+CHARACTER(LEN=28)                :: YFILEIN
 INTEGER                          :: IRET, INB
 REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 REAL                             :: ZTIMEC              ! current duration since start of the run (s)
@@ -309,49 +310,59 @@ WRITE(*,*) "INITIALIZING SURFEX..."
 DO IVAR_COUNT = 1,NTIMES
 
   ! If we have more than one initialization to do
-  IF ( NTIMES > 1 .AND.  IVAR_COUNT /= NTIMES ) THEN
-    ! For last initialization, we must re-do the first.
-    ! Could be avoided by introducing knowlegde of LASSIM on this level
-    WRITE(CVAR,'(I1.1)') IVAR_COUNT-1
-    !
-    IF ( CSURF_FILETYPE == "LFI   " ) THEN
-#ifdef LFI
-      CFILEIN_LFI = "PREP_EKF_PERT"//CVAR
-#endif
-    ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
-#ifdef FA
-      CFILEIN_FA = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.fa')
-#endif
-    ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
-#ifdef ASC
-      CFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.txt')
-#endif
-    ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
-#ifdef NC
-      CFILEIN_NC = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.nc')
-#endif
+  IF ( NTIMES > 1) THEN
+    IF (IVAR_COUNT /= NTIMES ) THEN
+      ! For last initialization, we must re-do the first.
+      ! Could be avoided by introducing knowlegde of LASSIM on this level
+      WRITE(CVAR,'(I1.1)') IVAR_COUNT-1
+      !
+      IF ( CSURF_FILETYPE == "LFI   " ) THEN
+        YFILEIN = "PREP_EKF_PERT"//CVAR
+      ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
+        YFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.fa')
+      ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
+        YFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.txt')
+      ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+        YFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(CVAR)//'.nc')
+      ELSE
+        CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
+      ENDIF
     ELSE
-      CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
+      IF ( CSURF_FILETYPE == "LFI   " ) THEN
+        YFILEIN = CPREPFILE
+      ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
+        YFILEIN = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
+      ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
+        YFILEIN = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
+      ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+        YFILEIN = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+      ELSE
+        CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
+      ENDIF
     ENDIF
-    !  
+      !  
   ENDIF
   !
   IF ( CSURF_FILETYPE == "LFI   " ) THEN
 #ifdef LFI
-    CFILE_LFI        = CFILEIN_LFI
-    CFILEIN_LFI_SAVE = CFILEIN_LFI
+    CFILEIN_LFI      = YFILEIN 
+    CFILE_LFI        = YFILEIN
+    CFILEIN_LFI_SAVE = YFILEIN
 #endif
   ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
 #ifdef FA
-    CFILEIN_FA_SAVE = CFILEIN_FA
+    CFILEIN_FA      = YFILEIN
+    CFILEIN_FA_SAVE = YFILEIN
 #endif
   ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
 #ifdef ASC
-    CFILEIN_SAVE = CFILEIN
+    CFILEIN      = YFILEIN
+    CFILEIN_SAVE = YFILEIN
 #endif
   ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
 #ifdef NC
-    CFILEIN_NC_SAVE = CFILEIN_NC
+    CFILEIN_NC      = YFILEIN
+    CFILEIN_NC_SAVE = YFILEIN
 #endif
   ELSE
     CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
