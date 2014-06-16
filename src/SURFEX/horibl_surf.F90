@@ -109,9 +109,9 @@ IMPLICIT NONE
 !
 !*      0.1. Declaration of arguments
 !         
-REAL,                      INTENT(IN)  :: PILA1   ! Lat. (y) of first input point
-REAL,                      INTENT(IN)  :: PILO1   ! Lon. (x) of first input point
-REAL,                      INTENT(IN)  :: PILA2   ! Lat. (y) of last input point
+REAL,                      INTENT(IN)  :: PILA1   ! Lat. (y) of first input point KDGSA
+REAL,                      INTENT(IN)  :: PILO1   ! Lon. (x) of first input point 
+REAL,                      INTENT(IN)  :: PILA2   ! Lat. (y) of last input point KDGEN
 REAL,                      INTENT(IN)  :: PILO2   ! Lon. (x) of last input point
 INTEGER,                   INTENT(IN)  :: KINLA   ! Number of parallels
 INTEGER, DIMENSION(KINLA), INTENT(IN)  :: KINLO   ! Number of point along a parallel
