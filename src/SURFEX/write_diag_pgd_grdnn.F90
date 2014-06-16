@@ -109,7 +109,7 @@ YCOMMENT='surface roughness length (without snow) (M)'
 !* Soil depth for each patch
 !
 DO JL=1,SIZE(XDG,2)
-  WRITE(YRECFM,FMT='(A4,I1)') 'GD_DG',JL
+  WRITE(YRECFM,FMT='(A5,I1)') 'GD_DG',JL
   YCOMMENT='soil depth'//' (M)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDG(:,JL),IRESP,HCOMMENT=YCOMMENT)
 END DO
