@@ -1,9 +1,10 @@
-SUBROUTINE ASSIM_NATURE_ISBA_OI(YPROGRAM, KI,                     &
+SUBROUTINE ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                     &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,                   &
                                 PTS_O,    PT2M_O, PHU2M_O, PSWE,  &
-                                HTEST )
+                                HTEST, ODINLINE, OD_MASKEXT,      &
+                                PLON_IN, PLAT_IN )
 
 ! ------------------------------------------------------------------------------------------
 !  *****************************************************************************************
@@ -27,25 +28,26 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(YPROGRAM, KI,                     &
 !   (06/2013)  : Separating IO (T. Aspelien)
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
-USE MODD_TYPE_DATE_SURF,  ONLY : DATE_TIME
-USE MODD_CSTS,            ONLY : XDAY, XPI, XG, XRHOLW, XLVTT, NDAYSEC
+USE MODD_CSTS,            ONLY : XDAY, XPI, XRHOLW, XLVTT, NDAYSEC
 USE MODD_SURF_PAR,        ONLY : XUNDEF 
-USE MODD_ISBA_n,          ONLY : XTG,XWG,XWGI,XSAND,XCLAY,XZS,TSNOW,XRSMIN,XDG,XLAI,XVEG,TTIME
-USE MODD_ASSIM,           ONLY : LOBSWG,ITRAD,NPRINTLEV,NECHGU,RD1,RSCALDW,&
-                                 RTHR_QC,SIGWGB,SIGWGO,SIGWGO_MAX,XAT2M_ISBA,&
-                                 XAHU2M_ISBA,XAZON10M_ISBA,XAMER10M_ISBA
-USE MODD_SURF_ATM_n,      ONLY : NR_NATURE,XNATURE
-USE MODD_SURF_ATM_GRID_n, ONLY : XLAT, XLON
+!
+USE MODD_ASSIM,           ONLY : LOBSWG, NITRAD, NPRINTLEV, NECHGU, XRD1, XRSCALDW,   &
+                                 XRTHR_QC, XSIGWGB, XSIGWGO, XSIGWGO_MAX, XAT2M_ISBA, &
+                                 XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA
+!
+USE MODD_ISBA_GRID_n,     ONLY : XLAT, XLON
+USE MODD_ISBA_n,          ONLY : XTG, XWG, XWGI, XSAND, XCLAY, TSNOW, XRSMIN,    &
+                                 XDG, XLAI, XVEG, TTIME
+
 USE YOMHOOK,              ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,             ONLY : JPRB
-
+!
 USE MODI_ABOR1_SFX
-USE MODI_TRANS_CHAINE
 USE MODI_OI_BC_SOIL_MOISTURE
 USE MODI_OI_CACSTS
 !
 IMPLICIT NONE
-CHARACTER(LEN=6),    INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PRRCL
 REAL, DIMENSION(KI), INTENT(IN) :: PRRSL
@@ -62,34 +64,33 @@ REAL, DIMENSION(KI), INTENT(IN) :: PT2M_O
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M_O
 REAL, DIMENSION(KI), INTENT(OUT):: PSWE
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+LOGICAL, INTENT (IN) :: ODINLINE
+LOGICAL,  DIMENSION (KI) ::  OD_MASKEXT
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
 
 !    Declarations of local variables
-INTEGER                                  :: IDAT
-CHARACTER(LEN=2)                         :: CMONTH
-INTEGER                                  :: IYEAR                      ! current year (UTC)
-INTEGER                                  :: IMONTH                     ! current month (UTC)
-INTEGER                                  :: IDAY                       ! current day (UTC)
-INTEGER                                  :: NSSSSS                     ! current time since start of the run (s)
-
 !
 ! Arrays for soil OI analysis
 !
- 
-REAL, DIMENSION (KI) :: PWS, PWP, PTS, PTP, PTL, PLAI, PVEG, PRSMIN, PD2, PSAB, PARG,        &
-                        PTSUN, PZENITH, PAZIMSOL, PTCLS, PHCLS, PRAIN, PSNOW,                &
-                        PWIND, PSWD, PSWS, PUCLS, PVCLS, PSNS,                               &
-                        ZT2INC, ZH2INC, ZWS, ZWP, ZTL, ZTS, ZTP, ZTCLS, ZHCLS, ZUCLS,        &
-                        ZVCLS, PSSTC, PWPINC1, PWPINC2, PWPINC3, PT2MBIAS, PH2MBIAS,         &
-                        PALBF, PEMISF, PZ0F, PIVEG, PZ0H,                                    &
-                        PTPC, PWSC, PWPC, ZEVAP, ZEVAPTR, PGELAT, PGELAM, PGEMU,             &
-                        ZWSINC, ZWPINC, ZSNS, ZTSINC, ZTPINC, ZTLINC,                        &
-                        PSM_O,  PSIG_SMO, PLSM_O, PWS_O,  ZWGINC ,                           &
-                        ZALT  
- 
-REAL,DIMENSION(KI)   :: PLON,  PLAT
-INTEGER              :: I,J,NPATCH,NLAYER
-INTEGER              :: INOBS   ! number of observations
-REAL                 :: ZTHRES
+REAL, DIMENSION (KI) :: ZSAB, ZARG, ZWS, ZWP, ZTL, ZWS0, ZWP0, ZTL0,         &
+                        ZTS, ZTP, ZSNS, ZTCLS, ZHCLS, ZUCLS, ZVCLS, ZD2,     &
+                        ZRSMIN, ZLAI, ZVEG, ZSNS0, ZTS0, ZTP0,               &
+                        ZIVEG,  ZSM_O, ZSIG_SMO, ZLSM_O, ZWS_O, ZLON, ZLAT,  &           
+                        ZT2INC, ZH2INC, ZWGINC, ZWPINC1, ZWPINC2, ZWPINC3,   &
+                        ZT2MBIAS, ZH2MBIAS, ZALBF, ZEMISF, ZZ0F, ZZ0H,       &
+                        ZWSC, ZWPC, ZTPC, ZEVAP, ZEVAPTR, ZSSTC,             &
+                        ZGELAT, ZGELAM, ZGEMU,  ZWSINC, ZWPINC, ZTLINC,      &
+                        ZSNINC, ZTSINC, ZTPINC
+!                 
+REAL :: ZTHRES
+INTEGER  :: IDAT
+INTEGER  :: IYEAR                      ! current year (UTC)
+INTEGER  :: IMONTH                     ! current month (UTC)
+INTEGER  :: IDAY                       ! current day (UTC)
+INTEGER  :: ISSSSS                     ! current time since start of the run (s)
+INTEGER  :: I, J, IP, IL
+INTEGER  :: INOBS   ! number of observations
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 !
 ! ----------------------------------------------------------------------------------
@@ -107,119 +108,170 @@ IF ( NPRINTLEV > 0 ) THEN
   WRITE(*,*) '|                                                                        |'
   WRITE(*,*) '--------------------------------------------------------------------------'
 ENDIF
-
 !
 !   Update some constants dependant from NACVEG
 !
 !  scaling of soil moisture increments when assimilation window is different
 !  from 6 hours
-RSCALDW = REAL(NECHGU)/6.0
+XRSCALDW = REAL(NECHGU)/6.0
 !  half assimilation window in sec
-ITRAD   = NECHGU*1800
-
-NPATCH=1
-NLAYER=1
-PSAB(:)=XSAND(:,NPATCH)
-PARG(:)=XCLAY(:,NPATCH)
-ZALT(:)=XZS(:)
-
-PWS(:)=XWG(:,1,NPATCH)
-PWP(:)=XWG(:,2,NPATCH)
-PTS(:)=XTG(:,1,NPATCH)
-PTP(:)=XTG(:,2,NPATCH)
-PTL(:)=XWGI(:,2,NPATCH)
-PSNS(:)=TSNOW%WSNOW(:,NLAYER,NPATCH)
-PTCLS(:)=XAT2M_ISBA(:,NPATCH)
-PHCLS(:)=XAHU2M_ISBA(:,NPATCH)
-PUCLS(:)=XAZON10M_ISBA(:,NPATCH)
-PVCLS(:)=XAMER10M_ISBA(:,NPATCH)
-PRSMIN(:)=XRSMIN(:,NPATCH)
-PD2(:)=XDG(:,2,NPATCH)
-PLAI(:)=XLAI(:,NPATCH)
-PVEG(:)=XVEG(:,NPATCH)
-
-! Set PIVEG (SURFIND.VEG.DOMI) since it is not available
-PIVEG = 0.0
-
+NITRAD = NECHGU*1800
+!
 !   Time initializations 
 !
 IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
-NSSSSS = TTIME%TIME
-IF (NSSSSS > NDAYSEC) NSSSSS = NSSSSS - NDAYSEC
-CALL TRANS_CHAINE(CMONTH,IMONTH,2)
+ISSSSS = TTIME%TIME
+IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
-
+!
+!
+IF ( .NOT.ODINLINE ) THEN
+!Set longitudes/latitudes
+  DO I=1,KI
+    ZGELAM(I) = XLON(I)
+    ZGELAT(I) = XLAT(I)
+  ENDDO
+ELSE
+  DO I=1,KI     
+    ZGELAM(I) = PLON_IN(I)  
+    ZGELAT(I) = PLAT_IN(I)
+  ENDDO
+ENDIF
+DO I=1,KI
+  ZGEMU (I) = SIN(ZGELAT(I)*XPI/180.)
+ENDDO
+!
+!
+IP = 1
+IL = 1
+!
+!
+ZSAB  (:) = XSAND(:,IP)*100.
+ZARG  (:) = XCLAY(:,IP)*100.
+!
+ZTS   (:) = XTG  (:,1,IP)
+ZTP   (:) = XTG  (:,2,IP)
+!
+ZWS0  (:) = XWG  (:,1,IP)
+ZWP0  (:) = XWG  (:,2,IP)
+ZTL0  (:) = XWGI (:,2,IP)
+WHERE ( ZWS0(:)/=XUNDEF )
+  ZWS(:) = ZWS0(:) * XRD1   * XRHOLW  ! conversion of m3/m3 -> mm
+  ZWP(:) = ZWP0(:) * ZD2(:) * XRHOLW  ! conversion of m3/m3 -> mm
+  ZTL(:) = ZTL0(:) * ZD2(:) * XRHOLW  ! conversion of m3/m3 -> mm
+ENDWHERE
+!
+ZSNS0(:) = TSNOW%WSNOW(:,IL,IP)
+ZSNS (:) = ZSNS0(:)
+!
+ZTCLS (:) = XAT2M_ISBA   (:,IP)
+ZHCLS (:) = XAHU2M_ISBA  (:,IP)
+ZUCLS (:) = XAZON10M_ISBA(:,IP)
+ZVCLS (:) = XAMER10M_ISBA(:,IP)
+!
+ZD2   (:) = XDG   (:,2,IP)
+ZRSMIN(:) = XRSMIN(:,IP)
+ZLAI  (:) = XLAI  (:,IP)
+ZVEG  (:) = XVEG  (:,IP)
+!
+! SST not used in cacsts
+ZSSTC(:)    = 0.
+!
+ZWPINC1 (:) = XUNDEF
+ZWPINC2 (:) = XUNDEF
+ZWPINC3 (:) = XUNDEF
+ZT2MBIAS(:) = XUNDEF
+ZH2MBIAS(:) = XUNDEF
+!
+! Sea-ice surface properties
+ZALBF (:) = XUNDEF
+ZEMISF(:) = XUNDEF
+ZZ0F  (:) = XUNDEF
+ZZ0H  (:) = XUNDEF
+!
+! Climatological arrays set to missing values
+ZWSC(:) = XUNDEF
+ZWPC(:) = XUNDEF
+ZTPC(:) = XUNDEF
+!
+ZEVAP  (:) =  (PEVAP(:)/XLVTT*XDAY)/(NECHGU*3600.) ! conversion W/m2 -> mm/day
+ZEVAPTR(:) =  PEVAPTR(:)*XDAY 
+!
+! Set PIVEG (SURFIND.VEG.DOMI) since it is not available
+ZIVEG(:) = 0.0
 !
 ! PRINT 
 !
 IF ( NPRINTLEV > 1 ) THEN
-  WRITE(*,*) 'value in PREP file => WG1       ',SUM(PWS)/KI
-  WRITE(*,*) 'value in PREP file => WG2       ',SUM(PWP)/KI
-  WRITE(*,*) 'value in PREP file => TG1       ',SUM(PTS)/KI
-  WRITE(*,*) 'value in PREP file => TG2       ',SUM(PTP)/KI
-  WRITE(*,*) 'value in PREP file => WGI2      ',SUM(PTL)/KI
-  WRITE(*,*) 'value in PREP file => WSNOW_VEG1',SUM(PSNS)/KI
-  WRITE(*,*) 'value in PREP file => LAI       ',SUM(PLAI)/KI
-  WRITE(*,*) 'value in PREP file => VEG       ',SUM(PVEG)/KI
-  WRITE(*,*) 'value in PREP file => RSMIN     ',SUM(PRSMIN)/KI
-  WRITE(*,*) 'value in PREP file => DATA_DG2  ',SUM(PD2)/KI
-  WRITE(*,*) 'value in PREP file => SAND      ',SUM(PSAB)/KI
-  WRITE(*,*) 'value in PREP file => CLAY      ',SUM(PARG)/KI
-  WRITE(*,*) 'value in PREP file => ZS        ',SUM(ZALT)/KI
+  WRITE(*,*) 'value in PREP file => WG1       ',SUM(ZWS)/KI
+  WRITE(*,*) 'value in PREP file => WG2       ',SUM(ZWP)/KI
+  WRITE(*,*) 'value in PREP file => TG1       ',SUM(ZTS)/KI
+  WRITE(*,*) 'value in PREP file => TG2       ',SUM(ZTP)/KI
+  WRITE(*,*) 'value in PREP file => WGI2      ',SUM(ZTL)/KI
+  WRITE(*,*) 'value in PREP file => WSNOW_VEG1',SUM(ZSNS)/KI
+  WRITE(*,*) 'value in PREP file => LAI       ',SUM(ZLAI)/KI
+  WRITE(*,*) 'value in PREP file => VEG       ',SUM(ZVEG)/KI
+  WRITE(*,*) 'value in PREP file => RSMIN     ',SUM(ZRSMIN)/KI
+  WRITE(*,*) 'value in PREP file => DATA_DG2  ',SUM(ZD2)/KI
+  WRITE(*,*) 'value in PREP file => SAND      ',SUM(ZSAB)/KI
+  WRITE(*,*) 'value in PREP file => CLAY      ',SUM(ZARG)/KI
 ENDIF
-!
 !
 !  Read ASCAT SM observations (in percent)
 !
-
-
 INOBS = 0
-IF (LOBSWG) THEN
+IF ( LOBSWG ) THEN
   OPEN(UNIT=111,FILE='ASCAT_SM.DAT')
   DO I=1,KI
-    READ(111,*) PSM_O(I),PSIG_SMO(I),PLSM_O(I)
-    IF (PLSM_O(I) < 1.0)          PSM_O(I) = 999.0 ! data rejection if not on land
-    IF (PSIG_SMO(I) > SIGWGO_MAX) PSM_O(I) = 999.0 ! data rejection of error too large
-    IF (PSM_O(I) /= 999.0) INOBS = INOBS + 1
+    READ(111,*) ZSM_O(I),ZSIG_SMO(I),ZLSM_O(I)
+    ! data rejection if not on land
+    ! data rejection of error too large
+    IF ( ZLSM_O(I)<1.0 .OR. ZSIG_SMO(I)>XSIGWGO_MAX ) ZSM_O(I) = 999.0 
+    IF ( ZSM_O(I)/=999.0 ) INOBS = INOBS + 1
   ENDDO
   CLOSE(UNIT=111)
   IF ( NPRINTLEV > 0 ) WRITE(*,*) 'READ ASCAT SM OK'
 ELSE
-  PSM_O(:)    = 999.0
-  PSIG_SMO(:) = 999.0
-  PLSM_O(:)   = 0.0
+  ZSM_O   (:) = 999.0
+  ZSIG_SMO(:) = 999.0
+  ZLSM_O  (:) = 0.0
 ENDIF
 IF ( NPRINTLEV > 0 ) WRITE(*,*) ' NUMBER OF ASCAT OBSERVATIONS AFTER INITIAL CHECKS  :: ',INOBS
-INOBS = 0
-
+!
 ! Perform bias correction of SM observations
-
-CALL OI_BC_SOIL_MOISTURE(KI,PSM_O,PSAB,PWS_O)
-
-!Set longitudes/latitudes
-DO I=1,KI
-  PLON(I)=XLON(NR_NATURE(I))
-  PLAT(I)=XLAT(NR_NATURE(I))
-ENDDO
-
-
+CALL OI_BC_SOIL_MOISTURE(KI,ZSM_O,ZSAB,ZWS_O)
+!
+!
 ! Screen-level innovations
-
-ZT2INC(:) = PT2M_O(:) - PTCLS(:)
-ZH2INC(:) = PHU2M_O(:) - PHCLS(:)
-
+ZT2INC(:) = PT2M_O (:) - ZTCLS(:)
+ZH2INC(:) = PHU2M_O(:) - ZHCLS(:)
+!
+IF (ODINLINE) THEN
+! Avoid division by zero in next WHERE statement; 
+! this may occur in the extension zone
+  WHERE (OD_MASKEXT(1:KI))
+    ZD2   (:) = 1.0
+    ZT2INC(:) = 0.0
+    ZH2INC(:) = 0.0
+  END WHERE
+ENDIF
+!
+!  Soil analysis based on optimal interpolation
+write(*,*) '           '
+write(*,*) 'Mean T2m increments  ',SUM(ZT2INC)/KI
+write(*,*) 'Mean HU2m increments ',SUM(ZH2INC)/KI
+write(*,*) '           '
+!
 ! Threshold for background check
-
-ZTHRES=RTHR_QC*SQRT(SIGWGO**2 + SIGWGB**2)
-
+ZTHRES = XRTHR_QC*SQRT(XSIGWGO**2 + XSIGWGB**2)
 ! Superficial soil moisture innovations in (m3/m3)
-
+INOBS = 0
 DO I=1,KI
-  IF (PWS_O(I) /= 999.0) THEN
-    ZWGINC(I) = PWS_O(I) - PWS(I)
-    IF (ABS(ZWGINC(I)) > ZTHRES) THEN 
+  IF ( ZWS_O(I)/=999.0 ) THEN
+    ZWGINC(I) = ZWS_O(I) - ZWS(I)
+    IF ( ABS(ZWGINC(I))>ZTHRES ) THEN 
       ZWGINC(I) = 0.0 ! background check
     ELSE
       INOBS = INOBS + 1
@@ -228,109 +280,59 @@ DO I=1,KI
     ZWGINC(I) = 0.0
   ENDIF
 ENDDO
-IF ( NPRINTLEV > 0 ) WRITE(*,*) ' NUMBER OF ASCAT OBSERVATIONS AFTER BACKGROUND CHECK  :: ',INOBS
-
 IF ( NPRINTLEV > 0 ) THEN
+  WRITE(*,*) ' NUMBER OF ASCAT OBSERVATIONS AFTER BACKGROUND CHECK  :: ',INOBS
   WRITE(*,*) 'Mean T2m increments  ',SUM(ZT2INC)/KI
   WRITE(*,*) 'Mean HU2m increments ',SUM(ZH2INC)/KI
 ENDIF
-
-! Interface (define arrays and perform unit conversions)
-
-PARG(:)     = PARG(:)*100.0
-PSAB(:)     = PSAB(:)*100.0
-
-ZWS(:)      = PWS(:)*RD1*XRHOLW     ! conversion of m3/m3 -> mm
-ZWP(:)      = PWP(:)*PD2(:)*XRHOLW  ! conversion of m3/m3 -> mm
-ZTL(:)      = PTL(:)*PD2(:)*XRHOLW  ! conversion of m3/m3 -> mm
-ZTCLS(:)    = PTCLS(:)
-ZHCLS(:)    = PHCLS(:)
-ZUCLS(:)    = PUCLS(:)
-ZVCLS(:)    = PVCLS(:)
-
-! SST not used in cacsts
-PSSTC(:)    = 0.
-
-PWPINC1(:)  = XUNDEF
-PWPINC2(:)  = XUNDEF
-PWPINC3(:)  = XUNDEF
-PT2MBIAS(:) = XUNDEF
-PH2MBIAS(:) = XUNDEF
-
-
-! Sea-ice surface properties
-
-PALBF(:)    = XUNDEF
-PEMISF(:)   = XUNDEF
-PZ0F(:)     = XUNDEF
-PZ0H(:)     = XUNDEF
-
-! Climatological arrays set to missing values
-
-PWSC(:)     =  XUNDEF
-PWPC(:)     =  XUNDEF
-PTPC(:)     =  XUNDEF
- 
-DO I=1,KI
-  PGELAT(I)   = PLAT(I) 
-  PGELAM(I)   = PLON(I) 
-  PGEMU(I)    = SIN(PLAT(I)*XPI/180.)
-ENDDO
-
-ZEVAP(:)   =  (PEVAP(:)/XLVTT*XDAY)/(NECHGU*3600.) ! conversion W/m2 -> mm/day
-ZEVAPTR(:) =  PEVAPTR(:)*XDAY 
-ZSNS(:)    =  PSNS(:)
-
-DO I=1,KI
-  ZTS(I) = PTS(I)
-  ZTP(I) = PTP(I)
-ENDDO
-
-
-!  Soil analysis based on optimal interpolation
-
+!
 write(*,*) 'PERFORMING OI SOIL ANALYSIS'
-CALL OI_CACSTS(KI,ZT2INC,ZH2INC,ZWGINC,PWS_O,                         &
-               IDAT,NSSSSS,                                           &
-               ZTP,ZWP,ZTL,ZSNS,ZTS,ZWS,                              &
-               ZTCLS,ZHCLS,ZUCLS,ZVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
-               PT2MBIAS,PH2MBIAS,                                     &
-               PRRCL,PRRSL,PRRCN,PRRSN,PATMNEB,ZEVAP,ZEVAPTR,         &
-               PITM,PVEG,PALBF,PEMISF,PZ0F,                           &
-               PIVEG,PARG,PD2,PSAB,PLAI,PRSMIN,PZ0H,                  &
-               PTSC,PTPC,PWSC,PWPC,PSNC,                              &
-               PGELAT,PGELAM,PGEMU)  
-
-! Update snow
-PSWE=ZSNS
-
-
+CALL OI_CACSTS(KI, ZT2INC, ZH2INC, ZWGINC, ZWS_O,                   &
+               IDAT, ISSSSS,                                        &
+               ZTP, ZWP, ZTL, ZSNS, ZTS, ZWS,                       &
+               ZTCLS, ZHCLS, ZUCLS, ZVCLS, ZSSTC,                   &
+               ZWPINC1, ZWPINC2, ZWPINC3, ZT2MBIAS, ZH2MBIAS,       &
+               PRRCL, PRRSL, PRRCN, PRRSN, PATMNEB, ZEVAP, ZEVAPTR, &
+               PITM, ZVEG, ZALBF, ZEMISF, ZZ0F,                     &
+               ZIVEG, ZARG, ZD2, ZSAB, ZLAI, ZRSMIN, ZZ0H,          &
+               PTSC, ZTPC, ZWSC, ZWPC, PSNC, ZGELAT, ZGELAM, ZGEMU )  
+!
 !  Perform soil moiture analyses
-
+PSWE(:) = ZSNS(:)
+!
 ZWSINC(:) = 0.0
 ZWPINC(:) = 0.0
 ZTLINC(:) = 0.0
+ZSNINC(:) = 0.0
+WHERE ( ZWS(:)/=XUNDEF )
+  ZWSINC(:) = ZWS(:) - ZWS0(:) * XRD1 * XRHOLW
+  ZWPINC(:) = ZWP(:) - ZWP0(:) * ZD2(:) * XRHOLW
+  ZTLINC(:) = ZTL(:) - ZTL0(:) * ZD2(:) * XRHOLW
+  ZSNINC(:) = ZSNS(:) - ZSNS0(:)
+END WHERE
 
-ZWSINC(:) = ZWS(:) - PWS(:)*(RD1*XRHOLW)    
-ZWPINC(:) = ZWP(:) - PWP(:)*(PD2(:)*XRHOLW) 
-ZTLINC(:) = ZTL(:) - PTL(:)*(PD2(:)*XRHOLW) 
-
-PWS(:)  = ZWS(:)/(RD1*XRHOLW)
-PWP(:)  = ZWP(:)/(PD2(:)*XRHOLW)
-PTL(:)  = ZTL(:)/(PD2(:)*XRHOLW)
-
+IF (ODINLINE) THEN
+! Avoid division by zero in next WHERE statement; 
+! this may occur in the extension zone
+  WHERE (OD_MASKEXT(1:KI)) ZD2(:) = 1.0
+ENDIF
+!
+WHERE (ZWS0(:)/=XUNDEF)
+  ZWS0(:)  = ZWS(:)/ (XRD1*XRHOLW)
+  ZWP0(:)  = ZWP(:)/ (ZD2(:)*XRHOLW)
+  ZTL0(:)  = ZTL(:)/ (ZD2(:)*XRHOLW)
+  ZSNS0(:) = ZSNS(:)
+ENDWHERE
 !  Perform temperature analyses
-
-
+!
 ZTSINC(:) = 0.0
 ZTPINC(:) = 0.0
-
-ZTSINC(:) = ZTS(:) - PTS(:)
-ZTPINC(:) = ZTP(:) - PTP(:)
-
-PTS(:)    = ZTS(:)
-PTP(:)    = ZTP(:)
-
+WHERE (ZTS(:)/=XUNDEF)
+  ZTSINC(:) = ZTS(:) - ZTS0(:)
+  ZTPINC(:) = ZTP(:) - ZTP0(:)
+  ZTS0(:)   = ZTS(:)
+  ZTP0(:)   = ZTP(:)
+END WHERE
 
 
 ! PRINT statistics of the soil analysis
@@ -344,11 +346,11 @@ WRITE(*,*) 'Mean TL increments over NATURE ',SUM(ZTLINC)/KI
 WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
-XWG(:,1,NPATCH)=PWS(:)
-XWG(:,2,NPATCH)=PWP(:)
-XTG(:,1,NPATCH)=PTS(:)
-XTG(:,2,NPATCH)=PTP(:)
-XWGI(:,2,NPATCH)=PTL(:)
+XWG (:,1,IP) = ZWS0(:)
+XWG (:,2,IP) = ZWP0(:)
+XTG (:,1,IP) = ZTS0(:)
+XTG (:,2,IP) = ZTP0(:)
+XWGI(:,2,IP) = ZTL0(:)
 
 !
 ! -------------------------------------------------------------------------------------

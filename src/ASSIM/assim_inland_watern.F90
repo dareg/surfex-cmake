@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_INLAND_WATER_n(YPROGRAM,KI,PTS_O,PITM,HTEST)
+SUBROUTINE ASSIM_INLAND_WATER_n(HPROGRAM,KI,PTS_IN,PITM,HTEST, &
+                                ODINLINE,OLKEEPEXTZONE,OD_MASKEXT)
 
 !     ###############################################################################
 !
@@ -27,14 +28,14 @@ SUBROUTINE ASSIM_INLAND_WATER_n(YPROGRAM,KI,PTS_O,PITM,HTEST)
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : NPRINTLEV,LEXTRAP_WATER,LWATERTG2
-USE MODN_IO_OFFLINE,     ONLY : CPREPFILE,CPGDFILE
+!
+USE MODD_SURF_ATM_n,     ONLY : CWATER,NR_WATER,NR_NATURE,NSIZE_NATURE
 USE MODD_ISBA_n,         ONLY : XTG
 USE MODD_WATFLUX_n,      ONLY : XTS,XZS
-USE MODD_SURF_ATM_n,     ONLY : CWATER,NR_WATER,NSIZE_WATER,NR_NATURE,NSIZE_NATURE
-USE MODD_SURF_ATM_GRID_n,ONLY : XLAT, XLON
+USE MODD_WATFLUX_GRID_n, ONLY : XLAT, XLON
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
-
+!
 USE MODI_ABOR1_SFX
 USE MODI_OI_HOR_EXTRAPOL_SURF
 !
@@ -42,27 +43,29 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
-REAL,DIMENSION(KI), INTENT(IN) :: PTS_O
+REAL,DIMENSION(KI), INTENT(IN) :: PTS_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PITM
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
+LOGICAL, INTENT(IN) :: ODINLINE
+LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
+LOGICAL, DIMENSION(KI), INTENT(IN) :: OD_MASKEXT
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-INTEGER                          :: IRESP,I,J
-REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
-REAL, DIMENSION(KI)              :: ZLSTINC
 REAL, DIMENSION(KI)              :: ZLST
-REAL,ALLOCATABLE,DIMENSION(:)    :: ZTP
-REAL,ALLOCATABLE,DIMENSION(:)    :: ZLON
-REAL,ALLOCATABLE,DIMENSION(:)    :: ZLAT
-REAL,ALLOCATABLE,DIMENSION(:)    :: ZALT
-REAL,ALLOCATABLE,DIMENSION(:)    :: ZLST_IN
-LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP_LST
-INTEGER                          :: NPATCH=1
+REAL, DIMENSION(KI)              :: ZLST0
+REAL, DIMENSION(KI)              :: ZLSTINC
+REAL, DIMENSION(:), ALLOCATABLE  :: ZLST01, ZLST1, ZLON1, ZLAT1, ZALT1 
+REAL,DIMENSION(KI)    :: ZTP
+!
+LOGICAL,DIMENSION(KI) :: GINTERP_LST
+LOGICAL, DIMENSION(:), ALLOCATABLE :: GINTERP_LST1
+INTEGER  :: IRESP,I,J,IS1,J1
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',0,ZHOOK_HANDLE)
 
@@ -71,113 +74,116 @@ IF (HTEST/='OK') THEN
 END IF
 
 WRITE(*,*) 'UPDATING LST FOR INLAND_WATER: ',TRIM(CWATER)
-
-! Set local array from global
-ZLST=XTS
-
-IF ( LEXTRAP_WATER ) THEN
-  ALLOCATE(ZALT(KI))
-  ! Set local array from global
-  ZALT=XZS
-
-  ALLOCATE(OINTERP_LST(KI))
-  ALLOCATE(ZLON(KI))
-  ALLOCATE(ZLAT(KI))
-
-  ALLOCATE(ZLST_IN(KI))
-
-  ! Set longitudes/latitudes for water point
+!
+!*     ZLST updated!
+!
+ZLST(:) = XUNDEF
+IF (.NOT.LWATERTG2 ) THEN
+  !*     ZLST updated from from CANARI analysis
   DO I=1,KI
-    ZLON(I)=XLON(NR_WATER(I))
-    ZLAT(I)=XLAT(NR_WATER(I))
+    IF ( PITM(I)<0.5 ) ZLST(I) = PTS_IN(I)
   ENDDO
-  OINTERP_LST(:) = .FALSE.
+  !
+ELSE
+  ! Set TG2 from global array
+  DO I=1,KI
+    IF ( PITM(I)>0.5 ) THEN
+      !*     ZLST updated from LAND values of climatological TS
+      DO J=1,NSIZE_NATURE
+        IF ( NR_WATER(I)==NR_NATURE(J) ) THEN
+          ZLST(I) = XTG(J,2,1)
+          EXIT
+        ENDIF
+      ENDDO
+    ENDIF
+  ENDDO
+  !
 ENDIF
-
-ZLSTINC(:) = 0.0
-ZLSTINC(:) = ZLST(:)
-
 !
-!*     ZLST updated
-!
-
-IF ( LWATERTG2 ) ALLOCATE(ZTP(KI))
-
+! Set local array from global
+GINTERP_LST(:) = .FALSE.
 DO I=1,KI
-  !
-  IF ( LWATERTG2 ) THEN
-
-    ! Set TG2 from global array
-    ZTP(I)=XUNDEF
-    loop: DO J=1,NSIZE_NATURE
-      IF ( NR_WATER(I) == NR_NATURE(J) ) THEN
-        ZTP(I)=XTG(J,2,NPATCH)
-        CYCLE loop
-      ENDIF
-    ENDDO loop
-    !
-    !*     ZLST updated from LAND values of climatological TS
-    !
-    IF (ZTP(I)/=XUNDEF .AND. PITM(I) > 0.5 ) THEN
-      ZLST(I) = ZTP(I)
-    ELSEIF ( LEXTRAP_WATER ) THEN
-      ! Keep ZLST or do extrapolation from neighbour points
-      OINTERP_LST(I) = .TRUE.
-      ZLST(I) = XUNDEF
-    ENDIF
-    !
+  IF ( ZLST(I)/=XUNDEF ) THEN
+    ZLST0(I) = ZLST(I)
+  ELSEIF ( LEXTRAP_WATER ) THEN
+    ! Keep ZLST or do extrapolation from neighbour points
+    ZLST0(I) = XUNDEF
+    GINTERP_LST(I) = .TRUE.  
   ELSE
-    !
-    !*     ZLST updated from from CANARI analysis
-    !
-    IF ( PITM(I) < 0.5 ) THEN
-      ZLST(I) = PTS_O(I)
-    ELSEIF ( LEXTRAP_WATER ) THEN
-      ! Keep ZLST or do extrapolation from neighbour points
-      OINTERP_LST(I) = .TRUE.
-      ZLST(I) = XUNDEF
-    ENDIF
-    !
+    ZLST0(I) = XTS(I)
   ENDIF
-  !
 ENDDO
 !
-IF ( LWATERTG2 ) DEALLOCATE(ZTP)
-
-
 IF ( LEXTRAP_WATER ) THEN
   !
-  !*     Extrapolation
-  !
-  ZLST_IN = ZLST
-  CALL OI_HOR_EXTRAPOL_SURF(KI,ZLAT,ZLON,ZLST_IN,ZLAT,ZLON,ZLST,OINTERP_LST,ZALT)
-
-  !
-  !*     Print values produced by OI_HO_EXTRAPOL_SURF
-  !
-  IF ( NPRINTLEV > 2 ) THEN
-    DO I=1,KI
-      IF (OINTERP_LST(I)) THEN
-        PRINT *,'Lake surface temperature set to ',ZLST(I),'from nearest neighbour at I=',NR_WATER(I)
-      ENDIF
-    ENDDO
+  IF (ODINLINE) THEN
+    !
+    IF (OLKEEPEXTZONE) THEN
+      !     
+      ZLST(:) = ZLST0(:)
+      WHERE ( OD_MASKEXT(:) ) ZLST0(:) = XUNDEF
+      CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZLST0,XLAT,XLON,ZLST,GINTERP_LST,XZS)
+      !
+    ELSE
+      !
+      IS1 = COUNT (.NOT.OD_MASKEXT)
+      ALLOCATE (ZLST1(IS1), ZLST01(IS1), ZLAT1(IS1), ZLON1(IS1), ZALT1(IS1), GINTERP_LST1(IS1))
+      !
+      ! remove extension zone
+      J = 1
+      DO J1 = 1, KI
+        IF ( .NOT.OD_MASKEXT(J1) )  THEN
+          ZLST01(J) = ZLST0(J1)
+          ZLAT1 (J) = XLAT (J1)
+          ZLON1 (J) = XLON (J1)
+          ZALT1 (J) = XZS  (J1)
+          GINTERP_LST1(J) = GINTERP_LST(J1)
+          J = J + 1
+        ENDIF
+      ENDDO
+        
+      ZLST1(:) = ZLST01(:)
+      CALL OI_HOR_EXTRAPOL_SURF(IS1,ZLAT1,ZLON1,ZLST01,ZLAT1,ZLON1,ZLST1,GINTERP_LST1,ZALT1)
+      !
+      ! copy back
+      J = 1
+      DO J1 = 1, KI
+        IF ( .NOT.OD_MASKEXT(J1) ) THEN
+          ZLST(J1) = ZLST1(J)
+          J = J + 1
+        ENDIF
+      ENDDO
+      !
+      DEALLOCATE (ZLST01, ZLST1, ZLAT1, ZLON1, ZALT1, GINTERP_LST1)
+      !
+    ENDIF
+    !
+  ELSE     
+    !
+    !*     Extrapolation
+    ZLST = ZLST0
+    CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZLST0,XLAT,XLON,ZLST1,GINTERP_LST,XZS)
+    !
   ENDIF
-
-  DEALLOCATE(OINTERP_LST)
-  DEALLOCATE(ZLON)
-  DEALLOCATE(ZLAT)
-  DEALLOCATE(ZALT)
-  DEALLOCATE(ZLST_IN)
+  !
 ENDIF
-
+!
+!*     Print values produced by OI_HO_EXTRAPOL_SURF
+IF ( NPRINTLEV > 2 ) THEN
+  DO I=1,KI
+    IF (GINTERP_LST(I)) THEN
+      PRINT *,'Lake surface temperature set to ',ZLST(I),'from nearest neighbour at I=',NR_WATER(I)
+    ENDIF
+  ENDDO
+ENDIF
+!
 ! Sum the increments
-ZLSTINC(:) = ZLST(:) - ZLSTINC(:)
-
+ZLSTINC(:) = ZLST(:) - XTS(:)
 WRITE(*,*) 'Mean LST increments over inland water   ',SUM(ZLSTINC)/KI
-
+!
 ! Setting modified variables
-XTS=ZLST
-
+XTS(:) = ZLST(:)
+!
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

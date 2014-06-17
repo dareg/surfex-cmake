@@ -31,7 +31,7 @@ SUBROUTINE OI_JACOBIANS (KNBPT,&
 
 !-----------------------------------------------------------------------
 !
-USE MODD_ASSIM,      ONLY : NECHGU, RSCAL_JAC                                                                      
+USE MODD_ASSIM,      ONLY : NECHGU, XRSCAL_JAC                                                                      
 USE MODD_CSTS,       ONLY : XRHOLW, XDAY  
 !  
 !
@@ -40,9 +40,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !  
-INTEGER    :: KNBPT
-INTEGER    :: JROF
-!
+INTEGER, INTENT(IN)    :: KNBPT
 REAL    ,INTENT(IN)    :: PWS_O(KNBPT) 
 REAL    ,INTENT(IN)    :: PSAB(KNBPT)
 REAL    ,INTENT(IN)    :: PARG(KNBPT)
@@ -53,30 +51,38 @@ REAL    ,INTENT(OUT)   :: PDWG_DWG(KNBPT)
 REAL    ,INTENT(OUT)   :: PDWG_DW2(KNBPT) 
 !
 REAL    :: ZWSAT, ZWL, ZDT, ZW2, ZC2, ZC2REF, ZP, ZA, ZWGEQ_DW2
+INTEGER    :: JROF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('OI_JACOBIANS',0,ZHOOK_HANDLE)
+!
 ZWL = 1.E-5
-ZDT = REAL(NECHGU)*3600.0*RSCAL_JAC
+ZDT = REAL(NECHGU)*3600.0*XRSCAL_JAC
 !
 ! Compute analytical Jacobians for the ISBA 2L scheme
 !
 DO JROF = 1,KNBPT
+
   IF (PWS_O(JROF) /= 999.0) THEN
-    ZP = 0.134*PARG(JROF) + 3.4
-    ZA = 732.42E-3*PARG(JROF)**(-0.539)
-    ZC2REF = 13.815*PARG(JROF)**(-0.954)
+
+    ZP = 0.134     * PARG(JROF) + 3.4
+    ZA = 732.42E-3 * PARG(JROF)**(-0.539)
+    ZC2REF = 13.815 * PARG(JROF)**(-0.954)
     ZWSAT = (-1.08*PSAB(JROF) + 494.305)*0.001
     ZW2 = PWP(JROF)/(PD2(JROF)*XRHOLW)
     ZC2 = ZC2REF*ZW2/(ZWSAT -ZW2 + ZWL)
     ZWGEQ_DW2 = 1.0 - ZA*ZP*(ZW2/ZWSAT)**(ZP-1.0) +  &
-                   9.0*ZA*ZP*(ZW2/ZWSAT)**(9.0*ZP-1.0)   
+                  9.0*ZA*ZP*(ZW2/ZWSAT)**(9.0*ZP-1.0)   
     PDWG_DWG(JROF) = EXP(-ZC2/XDAY*ZDT)
-    PDWG_DW2(JROF) = ZWGEQ_DW2*(1.0 - EXP(-ZC2/XDAY*ZDT))
+    PDWG_DW2(JROF) = ZWGEQ_DW2 * (1.0 - EXP(-ZC2/XDAY*ZDT))
+
   ELSE
+
     PDWG_DWG(JROF) = 0.0
     PDWG_DW2(JROF) = 0.0
+
   ENDIF 
+
 ENDDO
 IF (LHOOK) CALL DR_HOOK('OI_JACOBIANS',1,ZHOOK_HANDLE)
 !

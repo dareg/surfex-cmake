@@ -1,8 +1,8 @@
-SUBROUTINE OI_CAVEGI(VGAT1,VGAT2,VGAT3,VGBT1,VGBT2,VGBT3,VGCT1,VGCT2,       &
-                      VGAH1,VGAH2,VGAH3,VGBH1,VGBH2,VGBH3,VGCH1,VGCH2,       &
-                      SIGT2MP,SIGHP2,LSGOBS)   
+SUBROUTINE OI_CAVEGI(PVGAT1,PVGAT2,PVGAT3,PVGBT1,PVGBT2,PVGBT3,PVGCT1,PVGCT2,       &
+                     PVGAH1,PVGAH2,PVGAH3,PVGBH1,PVGBH2,PVGBH3,PVGCH1,PVGCH2,       &
+                     PSIGT2MP,PSIGHP2,OSGOBS)   
 !****------------------------------------------------------------------------
-USE MODD_ASSIM, ONLY : SIGHP1, SIGT2MR, SIGH2MR, SIGT2MO, SIGH2MO, REPS3
+USE MODD_ASSIM, ONLY : XSIGHP1, XSIGT2MR, XSIGH2MR, XSIGT2MO, XSIGH2MO, XREPS3
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -12,15 +12,15 @@ IMPLICIT NONE
 !
 INTEGER :: J
 ! 
-REAL ,INTENT(OUT) :: VGAT1(24),VGAT2(24),VGAT3(24)
-REAL ,INTENT(OUT) :: VGBT1(24),VGBT2(24),VGBT3(24)
-REAL ,INTENT(OUT) :: VGCT1(24),VGCT2(24)
-REAL ,INTENT(OUT) :: VGAH1(24),VGAH2(24),VGAH3(24)
-REAL ,INTENT(OUT) :: VGBH1(24),VGBH2(24),VGBH3(24)
-REAL ,INTENT(OUT) :: VGCH1(24),VGCH2(24)
-REAL ,INTENT(OUT) :: SIGT2MP(24),SIGHP2(24)
+REAL ,INTENT(OUT) :: PVGAT1(24),PVGAT2(24),PVGAT3(24)
+REAL ,INTENT(OUT) :: PVGBT1(24),PVGBT2(24),PVGBT3(24)
+REAL ,INTENT(OUT) :: PVGCT1(24),PVGCT2(24)
+REAL ,INTENT(OUT) :: PVGAH1(24),PVGAH2(24),PVGAH3(24)
+REAL ,INTENT(OUT) :: PVGBH1(24),PVGBH2(24),PVGBH3(24)
+REAL ,INTENT(OUT) :: PVGCH1(24),PVGCH2(24)
+REAL ,INTENT(OUT) :: PSIGT2MP(24),PSIGHP2(24)
 !
-LOGICAL :: LSGOBS
+LOGICAL :: OSGOBS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !**---------------------------------------------------------------------
@@ -30,29 +30,37 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! lecture des coefficients polynomiaux
 !
 IF (LHOOK) CALL DR_HOOK('OI_CAVEGI',0,ZHOOK_HANDLE)
+!
 DO J=1,24
-  READ(61,'(6X,8F10.4)') VGAT1(J),VGAT2(J),VGAT3(J),&
-      VGBT1(J),VGBT2(J),VGBT3(J),&
-      VGCT1(J),VGCT2(J)    
+
+  READ(61,'(6X,8F10.4)') PVGAT1(J),PVGAT2(J),PVGAT3(J),&
+                         PVGBT1(J),PVGBT2(J),PVGBT3(J),&
+                         PVGCT1(J),PVGCT2(J)    
+
 ENDDO
 !
 DO J=1,24
-  READ(61,'(6X,8F10.4)') VGAH1(J),VGAH2(J),VGAH3(J),&
-      VGBH1(J),VGBH2(J),VGBH3(J),&
-      VGCH1(J),VGCH2(J)    
+
+  READ(61,'(6X,8F10.4)') PVGAH1(J),PVGAH2(J),PVGAH3(J),&
+                         PVGBH1(J),PVGBH2(J),PVGBH3(J),&
+                         PVGCH1(J),PVGCH2(J)    
+
 ENDDO
 !
-DO J = 1,24   
-  SIGT2MP(J)= MAX(.3 , 2.7*(1.0 - ((REAL(J)-15.)/9.)**2))   
-  SIGHP2(J)= (REAL(J)*2.0/3. - 15.)*1.E-2
+DO J = 1,24 
+
+  PSIGT2MP(J) = MAX(.3 , 2.7*(1.0 - ((REAL(J)-15.)/9.)**2))   
+  PSIGHP2 (J) = (REAL(J)*2.0/3. - 15.)*1.E-2
+
 ENDDO
 !
 !**---------------------------------------------------------------------
 !**  3. Initialisation des variables internes.
 !**     -------------------------------------
 !
-LSGOBS = SIGT2MO > 0.0 .AND. SIGH2MO > 0.0 .AND. &
-    (ABS(SIGH2MO-SIGH2MR) > REPS3 .OR. ABS(SIGT2MO-SIGT2MR) > REPS3)    
+OSGOBS = XSIGT2MO > 0.0 .AND. XSIGH2MO > 0.0 .AND. &
+         (ABS(XSIGH2MO-XSIGH2MR) > XREPS3 .OR. ABS(XSIGT2MO-XSIGT2MR) > XREPS3)  
+
 IF (LHOOK) CALL DR_HOOK('OI_CAVEGI',1,ZHOOK_HANDLE)
 !
 !**---------------------------------------------------------------------

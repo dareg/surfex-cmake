@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_TEB_n(YPROGRAM,KI,PT2M_O,HTEST)
+SUBROUTINE ASSIM_TEB_n(HPROGRAM,KI,PT2M_O,HTEST)
 
 !     ###############################################################################
 !
@@ -39,7 +39,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL,DIMENSION(KI), INTENT(IN) :: PT2M_O
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
@@ -48,10 +48,10 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !-------------------------------------------------------------------------------------
 !
-INTEGER              :: I
 REAL, DIMENSION (KI) :: ZTRD3
 REAL, DIMENSION (KI) :: ZT2INC
 REAL, DIMENSION (KI) :: ZTCLS
+INTEGER              :: I
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_TEB_N',0,ZHOOK_HANDLE)
@@ -64,8 +64,8 @@ WRITE(*,*) 'UPDATING TOWN FOR SCHEME: ',TRIM(CTOWN)
 
 IF ( NROAD_LAYER < 3 ) CALL ABOR1_SFX('ASSIM_TEB_n: Only imlemented with 3 or more layers')
 
-ZTRD3(:)=XT_ROAD(:,3)  ! T_ROAD3
-ZTCLS(:)=XAT2M_TEB(:)  ! T2M (TEB)
+ZTRD3(:) = XT_ROAD(:,3)  ! T_ROAD3
+ZTCLS(:) = XAT2M_TEB(:)  ! T2M (TEB)
 
 ! Screen-level innovations
 
@@ -84,7 +84,7 @@ END WHERE
 WRITE(*,*) 'Mean T_ROAD3 increments over TOWN ',SUM(ZT2INC)/KI
 
 ! Update modified variables
-XT_ROAD(:,3)=ZTRD3  ! T_ROAD3
+XT_ROAD(:,3) = ZTRD3  ! T_ROAD3
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_TEB_N',1,ZHOOK_HANDLE)
 !

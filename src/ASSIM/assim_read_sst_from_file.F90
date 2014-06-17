@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_READ_SST_FROM_FILE(YPROGRAM,KI,PITM,PSST,PSIC,HTEST)
+SUBROUTINE ASSIM_READ_SST_FROM_FILE(KI,PITM,PSST,PSIC,HTEST)
 
 !     ###############################################################################
 !
@@ -28,11 +28,8 @@ USE MODD_ASSIM,         ONLY : LECSST
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 #ifdef FA
-USE MODD_IO_SURF_FA,    ONLY : CFILEIN_FA,CDNOMC
+USE MODD_IO_SURF_FA,    ONLY : CFILEIN_FA, CDNOMC
 #endif
-!
-USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
-USE PARKIND1,           ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 USE MODI_INIT_IO_SURF_n
@@ -40,11 +37,13 @@ USE MODI_READ_SURF
 USE MODI_END_IO_SURF_n
 USE MODI_IO_BUFF_CLEAN_n
 !
+USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
+USE PARKIND1,           ONLY : JPRB
+!
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: YPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN)  :: KI
 REAL,DIMENSION(KI), INTENT(IN)  :: PITM
 REAL,DIMENSION(KI), INTENT(OUT) :: PSST
@@ -56,9 +55,9 @@ CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
 !-------------------------------------------------------------------------------------
 !
 CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
+REAL, DIMENSION (KI) :: ZTS
+REAL                 :: ZFMAX, ZFMIN, ZFMEAN
 INTEGER              :: IRESP
-REAL                 :: ZFMAX,ZFMIN,ZFMEAN
-REAL, DIMENSION (KI) :: PTS
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',0,ZHOOK_HANDLE)
@@ -76,10 +75,10 @@ CFILEIN_FA = 'SST_SIC'        ! input SST and SIC analysis
 CDNOMC     = 'CADRE SST'      ! new frame name 
 WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
 #endif
-
-PSIC=0.
-
 !
+ZTS(:) = XUNDEF
+!
+PSIC(:) = 0.
 !
 !  Open FA file
 !
@@ -111,21 +110,17 @@ IF ( LECSST ) THEN
   ! Replace -9999. with UNDEF
   WHERE ( PSST(:)< 0. )
     PSST(:) = XUNDEF
-  END WHERE
+  ENDWHERE
 ELSE
   WRITE(*,*) '  Boundary file'
   WRITE(*,'("  SURFTEMPERATURE - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
   ! To avoid surface temperatures influenced by land, NATURE points are replaced with UNDEF
-  WHERE ( PTS(:)/=XUNDEF .OR. PITM(:)>0.5 )
+  WHERE ( ZTS(:)/=XUNDEF .OR. PITM(:)>0.5 )
     PSST(:) = XUNDEF
-  END WHERE
+  ENDWHERE
 ENDIF
 
-ZFMIN = MINVAL(PSST)
-ZFMAX = MAXVAL(PSST)
-ZFMEAN = SUM(PSST)/FLOAT(KI)
 WRITE(*,*) '  Replaced land by UNDEF '
-WRITE(*,'("  SST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_READ_SST_FROM_FILE',1,ZHOOK_HANDLE)
 !

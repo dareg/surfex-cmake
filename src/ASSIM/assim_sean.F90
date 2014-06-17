@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SEA_n(YPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST)
+SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
+                       ODINLINE,OLKEEPEXTZONE,OD_MASKEXT)
 
 !     ###############################################################################
 !
@@ -25,15 +26,16 @@ SUBROUTINE ASSIM_SEA_n(YPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST)
 !!      Trygve Aspelien, Separating IO  06/2013 
 !!--------------------------------------------------------------------
 !
-USE MODD_ASSIM,          ONLY : NPRINTLEV,LAESST,LEXTRAP_SEA
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM_n,     ONLY : CSEA,NR_SEA,XZS,XNATURE
-USE MODD_SEAFLUX_n,      ONLY : XSST
-USE MODD_SURF_ATM_GRID_n,ONLY : XLAT, XLON
-USE MODN_IO_OFFLINE,     ONLY : CPGDFILE,CPREPFILE
+USE MODD_ASSIM,          ONLY : NPRINTLEV,LAESST,LEXTRAP_SEA
+!
+USE MODD_SURF_ATM_n,     ONLY : CSEA,NR_SEA,XNATURE
+USE MODD_SEAFLUX_n,      ONLY : XSST, XZS
+USE MODD_SEAFLUX_GRID_n, ONLY : XLAT, XLON
+!
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
-
+!
 USE MODI_ABOR1_SFX
 USE MODI_OI_HOR_EXTRAPOL_SURF
 !
@@ -41,75 +43,49 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN) :: YPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL,DIMENSION(KI), INTENT(IN) :: PTS_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PSST_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PSIC_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PITM
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
+LOGICAL, INTENT(IN) :: ODINLINE
+LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
+LOGICAL, DIMENSION(KI), INTENT(IN) :: OD_MASKEXT
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
-REAL(KIND=JPRB)             :: ZHOOK_HANDLE
-INTEGER                     :: IRESP,I
-REAL                        :: ZFMAX,ZFMIN,ZFMEAN
-REAL, DIMENSION (KI)        :: ZT2INC
-REAL, DIMENSION (KI)        :: ZTCLS
-REAL, DIMENSION (KI)        :: ZSST
-REAL, DIMENSION (KI)        :: PSST
-REAL, DIMENSION (KI)        :: PTS
-REAL, DIMENSION (KI)        :: ZSSTINC
-REAL,ALLOCATABLE,DIMENSION(:)    :: PLON
-REAL,ALLOCATABLE,DIMENSION(:)    :: PLAT
-REAL,ALLOCATABLE,DIMENSION(:)    :: ZALT
-LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP_SST
+REAL, DIMENSION(KI) :: ZSST
+REAL, DIMENSION(KI) :: ZSST0
+REAL, DIMENSION(KI) :: ZSSTINC
+REAL, DIMENSION(:), ALLOCATABLE :: ZSST01, ZSST1, ZLON1, ZLAT1, ZALT1 
+REAL :: ZFMAX, ZFMIN, ZFMEAN
+LOGICAL, DIMENSION(KI) :: GINTERP_SST
+LOGICAL, DIMENSION(:), ALLOCATABLE :: GINTERP_SST1
+INTEGER  :: IRESP, I, J, J1, IS1
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',0,ZHOOK_HANDLE)
-
+!
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SEA_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
-
+!
 WRITE(*,*) 'UPDATING SST FOR SCHEME: ',TRIM(CSEA)
-
-IF ( LEXTRAP_SEA ) THEN
-  ALLOCATE(ZALT(KI))
-
-  ! Set local array from global
-  DO I=1,KI
-    ZALT(I)=XZS(NR_SEA(I))
-  ENDDO
-
-  ALLOCATE(OINTERP_SST(KI))
-  ALLOCATE(PLON(KI))
-  ALLOCATE(PLAT(KI))
-
-  ! Set longitudes/latitudes for sea point
-  DO I=1,KI
-    PLON(I)=XLON(NR_SEA(I))
-    PLAT(I)=XLAT(NR_SEA(I))
-  ENDDO
-
-  OINTERP_SST(:) = .FALSE.
-ENDIF
-
-! Set SST from watfluxn
-PSST = XSST
-
+!
 ! Read SST from file or set it to input SST
-IF ( .NOT. LAESST ) THEN
-
+IF ( .NOT.LAESST ) THEN
   ! Set SST to input
   ZSST(:) = PSST_IN(:)
+  !
 ELSE
-
   ! SST analysed in CANARI 
-  ZSST(:)    = XUNDEF
+  ZSST(:) = XUNDEF
   DO I=1,KI
-    IF (PITM(I)< 0.5 .AND. XNATURE(NR_SEA(I)) == 0. ) THEN
+    IF (PITM(I)<0.5 .AND. XNATURE(NR_SEA(I))==0. ) THEN
      ZSST(I) = PTS_IN(I)   ! set SST analysis from CANARI
     ENDIF
   END DO
@@ -121,53 +97,92 @@ ELSE
   WRITE(*,'("  ZSST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
 ENDIF
 
-ZSSTINC(:) = PSST(:)
-
 !*     PSST updated at all sea points with ZSST where ZSST is available
-
+GINTERP_SST(:) = .FALSE.
+! Set SST from watfluxn
 DO I=1,KI
   !
-  IF (ZSST(I)/=XUNDEF) THEN
-    PSST(I) = ZSST(I)
+  IF ( ZSST(I)/=XUNDEF ) THEN
+    ZSST0(I) = ZSST(I)
   ELSEIF ( LEXTRAP_SEA ) THEN
-    OINTERP_SST(I) = .TRUE.
-    PSST(I) = XUNDEF
+    ZSST0(I) = XUNDEF          
+    GINTERP_SST(I) = .TRUE.
+  ELSE
+    ZSST0(I) = XSST(I)
   ENDIF
   !
 ENDDO
-
+!
 IF ( LEXTRAP_SEA ) THEN
   !
-  !*     Extrapolation
-  !
-  ZSST(:) = PSST(:)
-  CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT,PLON,ZSST,PLAT,PLON,PSST,OINTERP_SST,ZALT)
-
-  !
-  !*     Print values produced by OI_HO_EXTRAPOL_SURF
-  !
-  IF ( NPRINTLEV > 2 ) THEN
-    DO I=1,KI
-      IF (OINTERP_SST(I)) THEN
-        PRINT *,'Sea surface temperature set to ',PSST(I),'from nearest neighbour at I=',NR_SEA(I)
-      ENDIF
-    ENDDO
+  IF (ODINLINE) THEN
+    !
+    IF (OLKEEPEXTZONE) THEN
+      !     
+      ZSST(:) = ZSST0(:)
+      WHERE ( OD_MASKEXT(:) ) ZSST0(:) = XUNDEF
+      CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZSST0,XLAT,XLON,ZSST,GINTERP_SST,XZS)
+      !
+    ELSE
+      !
+      IS1 = COUNT (.NOT. OD_MASKEXT)
+      ALLOCATE (ZSST1(IS1), ZSST01(IS1), ZLAT1(IS1), ZLON1(IS1), ZALT1(IS1), GINTERP_SST1(IS1))
+      !
+      ! remove extension zone
+      J = 1
+      DO J1 = 1, KI
+        IF (.NOT. OD_MASKEXT (J1)) THEN
+          ZSST01(J) = ZSST0(J1)
+          ZLAT1 (J) = XLAT (J1)
+          ZLON1 (J) = XLON (J1)
+          ZALT1 (J) = XZS  (J1)
+          GINTERP_SST1(J) = GINTERP_SST(J1)
+          J = J + 1
+        ENDIF
+      ENDDO
+        
+      ZSST1(:) = ZSST01(:)
+      CALL OI_HOR_EXTRAPOL_SURF(IS1,ZLAT1,ZLON1,ZSST01,ZLAT1,ZLON1,ZSST1,GINTERP_SST1,ZALT1)
+   
+      ! copy back
+      J = 1
+      DO J1 = 1, KI
+        IF (.NOT. OD_MASKEXT(J1)) THEN
+          ZSST(J1) = ZSST1(J)
+          J = J + 1
+        ENDIF
+      ENDDO
+      !
+      DEALLOCATE (ZSST01, ZSST1, ZLAT1, ZLON1, ZALT1, GINTERP_SST1)
+      !
+    ENDIF
+    !
+  ELSE
+    !
+    !*     Extrapolation
+    ZSST(:) = ZSST0(:)
+    CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZSST0,XLAT,XLON,ZSST,GINTERP_SST,XZS)
+    !
   ENDIF
-
-  DEALLOCATE(OINTERP_SST)
-  DEALLOCATE(PLON)
-  DEALLOCATE(PLAT)
-  DEALLOCATE(ZALT)
+  !
 ENDIF
-
+!
+!*     Print values produced by OI_HO_EXTRAPOL_SURF
+IF ( NPRINTLEV > 2 ) THEN
+  DO I=1,KI
+    IF (GINTERP_SST(I)) THEN
+      PRINT *,'Sea surface temperature set to ',ZSST(I),'from nearest neighbour at I=',NR_SEA(I)
+    ENDIF
+  ENDDO
+ENDIF
+!
 ! Sum the increments
-ZSSTINC(:) = PSST(:) - ZSSTINC(:)
-
+ZSSTINC(:) = ZSST(:) - XSST(:)
 WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
-
+!
 ! Setting modified variables
-XSST=PSST
-
+XSST(:) = ZSST(:)
+!
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -57,7 +57,7 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                   NTEMPLAYER_ARP, LGLACIER, XICE_STO  
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
                               & XAZON10M_ISBA,XAMER10M_ISBA,              &
-                              & NVAR,NOBSTYPE,XVAR,XOBS,IVAR,LPRT,TPRT
+                              & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XZ0SN
@@ -135,11 +135,11 @@ DO JL=1,IWORK
   ! Perturb value if requested
   IF ( LPRT ) THEN
     ! read in control variable
-    IF (( TRIM(XVAR(IVAR)) == "TG1" ) .AND. ( JL == 1 ) ) THEN
-      XTG(:,JL,:) = XTG(:,JL,:) + TPRT(IVAR)*XTG(:,JL,:)
+    IF (( TRIM(CVAR(NIVAR)) == "TG1" ) .AND. ( JL == 1 ) ) THEN
+      XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
     ENDIF
-    IF (( TRIM(XVAR(IVAR)) == "TG2" ) .AND. ( JL == 2 ) ) THEN
-      XTG(:,JL,:) = XTG(:,JL,:) + TPRT(IVAR)*XTG(:,JL,:)
+    IF (( TRIM(CVAR(NIVAR)) == "TG2" ) .AND. ( JL == 2 ) ) THEN
+      XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
     ENDIF
   ENDIF
 END DO
@@ -162,11 +162,11 @@ DO JL=1,NGROUND_LAYER
    ! Perturb value if requested
   IF ( LPRT ) THEN
     ! read in control variable
-    IF (( TRIM(XVAR(IVAR)) == "WG1" ) .AND. ( JL == 1 ) ) THEN
-      XWG(:,JL,:) = XWG(:,JL,:) + TPRT(IVAR)*XWG(:,JL,:)
+    IF (( TRIM(CVAR(NIVAR)) == "WG1" ) .AND. ( JL == 1 ) ) THEN
+      XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
     ENDIF
-    IF (( TRIM(XVAR(IVAR)) == "WG2" ) .AND. ( JL == 2 ) ) THEN
-      XWG(:,JL,:) = XWG(:,JL,:) + TPRT(IVAR)*XWG(:,JL,:)
+    IF (( TRIM(CVAR(NIVAR)) == "WG2" ) .AND. ( JL == 2 ) ) THEN
+      XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
     ENDIF
   ENDIF
 END DO
@@ -413,7 +413,7 @@ IF ( LASSIM ) THEN
   ELSE
     ! Diagnostic fields for EKF assimilation ("observations")
     DO IOBS = 1,NOBSTYPE
-     SELECT CASE (TRIM(XOBS(IOBS)))
+     SELECT CASE (TRIM(COBS(IOBS)))
        CASE("T2M")
          IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
          XAT2M_ISBA=XUNDEF
@@ -427,7 +427,7 @@ IF ( LASSIM ) THEN
        CASE("WG1")
          ! This is already read above
        CASE DEFAULT
-         CALL ABOR1_SFX("Mapping of "//XOBS(IOBS)//" is not defined in READ_ISBA_n!")
+         CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in READ_ISBA_n!")
      END SELECT
     ENDDO
   ENDIF

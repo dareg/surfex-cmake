@@ -4,7 +4,7 @@ SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
                           PSWEC,     PTSC,                                &
                           PTS,       PT2M,        PHU2M,     PSWE,        &
-                          HTEST )
+                          HTEST, ODINLINE, OD_MASKEXT, PLON, PLAT)
 
 !     ###############################################################################
 !
@@ -57,31 +57,35 @@ REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+LOGICAL, INTENT (IN) :: ODINLINE
+LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
 !
 !*      0.2    declarations of local variables
 !
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
-REAL(KIND=JPRB)                :: ZHOOK_HANDLE
-
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_N',0,ZHOOK_HANDLE)
-
+!
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_NATURE_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
-
+!
 IF (CNATURE=='ISBA  ') THEN
-
+  !
   CALL ASSIM_ISBA_n(HPROGRAM,KI,                                    &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
                     PSWEC,     PTSC,                                &
                     PTS,       PT2M,        PHU2M,     PSWE,        &
-                    HTEST )
+                    HTEST, ODINLINE, OD_MASKEXT, PLON, PLAT )
 ELSE
   WRITE(*,*) 'No assimilation done for scheme: ',TRIM(CNATURE)
 END IF
-
+!
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

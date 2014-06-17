@@ -212,9 +212,9 @@ ZPIS180=XPI/180.0_JPRB
 !   Update some constants dependant from NACVEG
 
 !  scaling of soil moisture increments when assimilation window is different from 6 hours
-RSCALDW = REAL(NECHGU)/6.0_JPRB
+XRSCALDW = REAL(NECHGU)/6.0_JPRB
 !  half assimilation window in sec
-ITRAD   = NECHGU*1800
+NITRAD   = NECHGU*1800
 
 CALL INI_DATA_COVER
 
@@ -582,7 +582,7 @@ IF (LOBSWG) THEN
   DO J=1,NDIM_FULL
     READ(111,*,END=990) PSM_O(J),PSIG_SMO(J),PLSM_O(J)
     IF (PLSM_O(J) < 1.0)          PSM_O(J) = 999.0 ! data rejection if not on land
-    IF (PSIG_SMO(J) > SIGWGO_MAX) PSM_O(J) = 999.0 ! data rejection of error too large
+    IF (PSIG_SMO(J) > XSIGWGO_MAX) PSM_O(J) = 999.0 ! data rejection of error too large
     IF (PSM_O(J) /= 999.0) INOBS = INOBS + 1
   ENDDO
 990 CONTINUE
@@ -668,7 +668,7 @@ ZH2INC(:) = PHU2M_O(:) - PHCLS(:)
 
 ! Threshold for background check
 
-ZTHRES=RTHR_QC*SQRT(SIGWGO**2 + SIGWGB**2)
+ZTHRES=XRTHR_QC*SQRT(XSIGWGO**2 + XSIGWGB**2)
 
 ! Superficial soil moisture innovations in (m3/m3)
 
@@ -696,7 +696,7 @@ ZWP(:) = XUNDEF
 ZTL(:) = XUNDEF
 
 WHERE (PWS(:,1)/=XUNDEF) 
-  ZWS(:)      = PWS(:,1)*RD1*XRHOLW     ! conversion of m3/m3 -> mm
+  ZWS(:)      = PWS(:,1)*XRD1*XRHOLW     ! conversion of m3/m3 -> mm
   ZWP(:)      = PWP(:,1)*PD2(:,1)*XRHOLW  ! conversion of m3/m3 -> mm
   ZTL(:)      = PTL(:,1)*PD2(:,1)*XRHOLW  ! conversion of m3/m3 -> mm
 END WHERE
@@ -780,7 +780,7 @@ ZTLINC(:) = 0.0_JPRB
 ZSNINC(:) = 0.0_JPRB
 
 WHERE (PWS(:,1)/=XUNDEF)
-  ZWSINC(:) = ZWS(:) - PWS(:,1)*(RD1*XRHOLW)    
+  ZWSINC(:) = ZWS(:) - PWS(:,1)*(XRD1*XRHOLW)    
   ZWPINC(:) = ZWP(:) - PWP(:,1)*(PD2(:,1)*XRHOLW) 
   ZTLINC(:) = ZTL(:) - PTL(:,1)*(PD2(:,1)*XRHOLW) 
   ZSNINC(:) = ZSNS(:) - PSNS(:,1)
@@ -797,7 +797,7 @@ ENDIF
 !  Define soil moiture analyses over NATURE points
 
 WHERE (PWS(:,1)/=XUNDEF)
-  PWS(:,1)  = ZWS(:)/(RD1*XRHOLW)
+  PWS(:,1)  = ZWS(:)/(XRD1*XRHOLW)
   PWP(:,1)  = ZWP(:)/(PD2(:,1)*XRHOLW)
   PTL(:,1)  = ZTL(:)/(PD2(:,1)*XRHOLW)
   PSNS(:,1) = ZSNS(:)

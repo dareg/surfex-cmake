@@ -3,7 +3,7 @@ SUBROUTINE OI_KALMAN_GAIN(PDWG_DWG,PDWG_DW2,PD2,PK1,PK2)
 !****-------------------------------------------------------------------
 !
 USE MODD_CSTS,  ONLY : XRHOLW 
-USE MODD_ASSIM, ONLY : RD1, SIGWGO, SIGWGB, SIGW2B
+USE MODD_ASSIM, ONLY : XRD1, XSIGWGO, XSIGWGB, XSIGW2B
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -20,9 +20,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Standard deviation of background and observation errors
 !
 IF (LHOOK) CALL DR_HOOK('OI_KALMAN_GAIN',0,ZHOOK_HANDLE)
-ZSIG_WG = SIGWGB
-ZSIG_W2 = SIGW2B
-ZSIG_WO = SIGWGO
+ZSIG_WG = XSIGWGB
+ZSIG_W2 = XSIGW2B
+ZSIG_WO = XSIGWGO
 !
 ! Jacobians elements
 !
