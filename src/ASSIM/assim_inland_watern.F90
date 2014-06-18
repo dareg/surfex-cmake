@@ -1,6 +1,6 @@
 !     ###############################################################################
 SUBROUTINE ASSIM_INLAND_WATER_n(HPROGRAM,KI,PTS_IN,PITM,HTEST, &
-                                ODINLINE,OLKEEPEXTZONE,OD_MASKEXT)
+                                ODINLINE,OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
 !
@@ -51,6 +51,8 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 LOGICAL, INTENT(IN) :: ODINLINE
 LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 LOGICAL, DIMENSION(KI), INTENT(IN) :: OD_MASKEXT
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
 !
 !*      0.2    declarations of local variables
 !
@@ -122,7 +124,7 @@ IF ( LEXTRAP_WATER ) THEN
       !     
       ZLST(:) = ZLST0(:)
       WHERE ( OD_MASKEXT(:) ) ZLST0(:) = XUNDEF
-      CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZLST0,XLAT,XLON,ZLST,GINTERP_LST,XZS)
+      CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZLST0,PLAT_IN,PLON_IN,ZLST,GINTERP_LST,XZS)
       !
     ELSE
       !
@@ -134,8 +136,8 @@ IF ( LEXTRAP_WATER ) THEN
       DO J1 = 1, KI
         IF ( .NOT.OD_MASKEXT(J1) )  THEN
           ZLST01(J) = ZLST0(J1)
-          ZLAT1 (J) = XLAT (J1)
-          ZLON1 (J) = XLON (J1)
+          ZLAT1 (J) = PLAT_IN (J1)
+          ZLON1 (J) = PLON_IN (J1)
           ZALT1 (J) = XZS  (J1)
           GINTERP_LST1(J) = GINTERP_LST(J1)
           J = J + 1

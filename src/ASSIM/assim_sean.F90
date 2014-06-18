@@ -1,6 +1,6 @@
 !     ###############################################################################
 SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
-                       ODINLINE,OLKEEPEXTZONE,OD_MASKEXT)
+                       ODINLINE,OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
 !
@@ -29,14 +29,15 @@ SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : NPRINTLEV,LAESST,LEXTRAP_SEA
 !
-USE MODD_SURF_ATM_n,     ONLY : CSEA,NR_SEA,XNATURE
-USE MODD_SEAFLUX_n,      ONLY : XSST, XZS
+USE MODD_SURF_ATM_n,     ONLY : CSEA, NR_SEA, XSEA, XZS
+USE MODD_SEAFLUX_n,      ONLY : XSST
 USE MODD_SEAFLUX_GRID_n, ONLY : XLAT, XLON
 !
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
+USE MODI_PACK_SAME_RANK
 USE MODI_OI_HOR_EXTRAPOL_SURF
 !
 IMPLICIT NONE
@@ -53,11 +54,14 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 LOGICAL, INTENT(IN) :: ODINLINE
 LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 LOGICAL, DIMENSION(KI), INTENT(IN) :: OD_MASKEXT
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
+REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
 !
 !*      0.2    declarations of local variables
 !
 !-------------------------------------------------------------------------------------
 !
+REAL, DIMENSION(KI) :: ZALT
 REAL, DIMENSION(KI) :: ZSST
 REAL, DIMENSION(KI) :: ZSST0
 REAL, DIMENSION(KI) :: ZSSTINC
@@ -76,6 +80,8 @@ END IF
 !
 WRITE(*,*) 'UPDATING SST FOR SCHEME: ',TRIM(CSEA)
 !
+CALL PACK_SAME_RANK(NR_SEA,XZS,ZALT)
+!
 ! Read SST from file or set it to input SST
 IF ( .NOT.LAESST ) THEN
   ! Set SST to input
@@ -85,7 +91,7 @@ ELSE
   ! SST analysed in CANARI 
   ZSST(:) = XUNDEF
   DO I=1,KI
-    IF (PITM(I)<0.5 .AND. XNATURE(NR_SEA(I))==0. ) THEN
+    IF (PITM(I)<0.5 .AND. XSEA(NR_SEA(I))/=0. ) THEN
      ZSST(I) = PTS_IN(I)   ! set SST analysis from CANARI
     ENDIF
   END DO
@@ -96,7 +102,6 @@ ELSE
   WRITE(*,*) '  SST analysis from CANARI '
   WRITE(*,'("  ZSST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
 ENDIF
-
 !*     PSST updated at all sea points with ZSST where ZSST is available
 GINTERP_SST(:) = .FALSE.
 ! Set SST from watfluxn
@@ -105,7 +110,7 @@ DO I=1,KI
   IF ( ZSST(I)/=XUNDEF ) THEN
     ZSST0(I) = ZSST(I)
   ELSEIF ( LEXTRAP_SEA ) THEN
-    ZSST0(I) = XUNDEF          
+    ZSST0(I) = XUNDEF
     GINTERP_SST(I) = .TRUE.
   ELSE
     ZSST0(I) = XSST(I)
@@ -121,7 +126,7 @@ IF ( LEXTRAP_SEA ) THEN
       !     
       ZSST(:) = ZSST0(:)
       WHERE ( OD_MASKEXT(:) ) ZSST0(:) = XUNDEF
-      CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZSST0,XLAT,XLON,ZSST,GINTERP_SST,XZS)
+      CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZSST0,PLAT_IN,PLON_IN,ZSST,GINTERP_SST,ZALT)
       !
     ELSE
       !
@@ -133,8 +138,8 @@ IF ( LEXTRAP_SEA ) THEN
       DO J1 = 1, KI
         IF (.NOT. OD_MASKEXT (J1)) THEN
           ZSST01(J) = ZSST0(J1)
-          ZLAT1 (J) = XLAT (J1)
-          ZLON1 (J) = XLON (J1)
+          ZLAT1 (J) = PLAT_IN (J1)
+          ZLON1 (J) = PLON_IN (J1)
           ZALT1 (J) = XZS  (J1)
           GINTERP_SST1(J) = GINTERP_SST(J1)
           J = J + 1
@@ -161,7 +166,7 @@ IF ( LEXTRAP_SEA ) THEN
     !
     !*     Extrapolation
     ZSST(:) = ZSST0(:)
-    CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZSST0,XLAT,XLON,ZSST,GINTERP_SST,XZS)
+    CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZSST0,XLAT,XLON,ZSST,GINTERP_SST,ZALT)
     !
   ENDIF
   !

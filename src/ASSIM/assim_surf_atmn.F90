@@ -370,7 +370,7 @@ IF (KTILE==1) THEN
   WRITE(*,*) '*********************************************'
  
   CALL  ASSIM_SEA_n(HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST,&
-              ODINLINE,GLKEEPEXTZONE,GD_MASKEXT)
+              ODINLINE,GLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
 ELSEIF (KTILE==2) THEN
   
@@ -378,7 +378,7 @@ ELSEIF (KTILE==2) THEN
   WRITE(*,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
   WRITE(*,*) '*********************************************'
   CALL ASSIM_INLAND_WATER_n(HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
-                            ODINLINE,GLKEEPEXTZONE,GD_MASKEXT)
+                            ODINLINE,GLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
 ELSEIF (KTILE==3) THEN
   

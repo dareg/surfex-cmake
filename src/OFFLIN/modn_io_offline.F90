@@ -65,6 +65,7 @@ IMPLICIT NONE
 !
 LOGICAL          :: LPRINT   = .FALSE.  ! write some information on screen 
 LOGICAL          :: LRESTART = .FALSE.  ! write restart file
+LOGICAL          :: LRESTART_2M = .FALSE.  ! write restart file
 LOGICAL          :: LINQUIRE = .FALSE.  ! inquiry mode
 !      
 LOGICAL          :: LWRITE_COORD = .FALSE. ! write lat/lon of the target grid
@@ -122,7 +123,7 @@ REAL            :: XIO_FRAC = 1.            ! fraction of ISIZE deduced to I/O
 !              ---------
 !
 NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE, &
-                        CPGDFILE, CPREPFILE, CSURFFILE,                          &
+                        CPGDFILE, CPREPFILE, CSURFFILE, LRESTART_2M,             &
                         LPRINT, LRESTART, LINQUIRE, NSCAL, NHALO, XDELTA_OROG,   &
                         XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &

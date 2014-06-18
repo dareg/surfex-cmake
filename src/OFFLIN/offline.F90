@@ -233,8 +233,9 @@ INTEGER                           :: ILUOUT              ! ascii output unit num
 INTEGER                           :: ILUNAM              ! namelist unit number
 INTEGER                           :: IRET                ! error return code
 INTEGER                           :: INB 
-INTEGER                           :: INW, JNW
- CHARACTER(LEN=14)                :: YTAG                
+INTEGER                           :: INW, JNW, I2M
+ CHARACTER(LEN=14)                :: YTAG      
+LOGICAL                           :: GPGD 
 LOGICAL                           :: GFOUND              ! return logical when reading namelist
 LOGICAL                           :: GSHADOWS    
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
@@ -1220,11 +1221,19 @@ IF ( LRESTART ) THEN
     ENDIF
     !  
     CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
-    !  
-    CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
-                          .FALSE.,0,0,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                          .FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                          .FALSE.,.FALSE.)    
+    !
+    IF (LRESTART_2M) THEN
+      I2M = 1
+      GPGD = .TRUE.
+    ELSE
+      I2M = 0
+      GPGD = .FALSE.
+    ENDIF
+    CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,I2M,.FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,0,0,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                          GPGD,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.)
     !* writes into the file
     CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ') THEN
