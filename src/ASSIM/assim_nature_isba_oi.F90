@@ -151,17 +151,12 @@ IL = 1
 ZSAB  (:) = XSAND(:,IP)*100.
 ZARG  (:) = XCLAY(:,IP)*100.
 !
-ZTS   (:) = XTG  (:,1,IP)
-ZTP   (:) = XTG  (:,2,IP)
+ZTS0  (:) = XTG  (:,1,IP)
+ZTP0  (:) = XTG  (:,2,IP)
 !
 ZWS0  (:) = XWG  (:,1,IP)
 ZWP0  (:) = XWG  (:,2,IP)
 ZTL0  (:) = XWGI (:,2,IP)
-WHERE ( ZWS0(:)/=XUNDEF )
-  ZWS(:) = ZWS0(:) * XRD1   * XRHOLW  ! conversion of m3/m3 -> mm
-  ZWP(:) = ZWP0(:) * ZD2(:) * XRHOLW  ! conversion of m3/m3 -> mm
-  ZTL(:) = ZTL0(:) * ZD2(:) * XRHOLW  ! conversion of m3/m3 -> mm
-ENDWHERE
 !
 ZSNS0(:) = TSNOW%WSNOW(:,IL,IP)
 ZSNS (:) = ZSNS0(:)
@@ -175,9 +170,6 @@ ZD2   (:) = XDG   (:,2,IP)
 ZRSMIN(:) = XRSMIN(:,IP)
 ZLAI  (:) = XLAI  (:,IP)
 ZVEG  (:) = XVEG  (:,IP)
-!
-! SST not used in cacsts
-ZSSTC(:)    = 0.
 !
 ZWPINC1 (:) = XUNDEF
 ZWPINC2 (:) = XUNDEF
@@ -196,20 +188,14 @@ ZWSC(:) = XUNDEF
 ZWPC(:) = XUNDEF
 ZTPC(:) = XUNDEF
 !
-ZEVAP  (:) =  (PEVAP(:)/XLVTT*XDAY)/(NECHGU*3600.) ! conversion W/m2 -> mm/day
-ZEVAPTR(:) =  PEVAPTR(:)*XDAY 
-!
-! Set PIVEG (SURFIND.VEG.DOMI) since it is not available
-ZIVEG(:) = 0.0
-!
 ! PRINT 
 !
 IF ( NPRINTLEV > 1 ) THEN
-  WRITE(*,*) 'value in PREP file => WG1       ',SUM(ZWS)/KI
-  WRITE(*,*) 'value in PREP file => WG2       ',SUM(ZWP)/KI
-  WRITE(*,*) 'value in PREP file => TG1       ',SUM(ZTS)/KI
-  WRITE(*,*) 'value in PREP file => TG2       ',SUM(ZTP)/KI
-  WRITE(*,*) 'value in PREP file => WGI2      ',SUM(ZTL)/KI
+  WRITE(*,*) 'value in PREP file => WG1       ',SUM(ZWS0)/KI
+  WRITE(*,*) 'value in PREP file => WG2       ',SUM(ZWP0)/KI
+  WRITE(*,*) 'value in PREP file => TG1       ',SUM(ZTS0)/KI
+  WRITE(*,*) 'value in PREP file => TG2       ',SUM(ZTP0)/KI
+  WRITE(*,*) 'value in PREP file => WGI2      ',SUM(ZTL0)/KI
   WRITE(*,*) 'value in PREP file => WSNOW_VEG1',SUM(ZSNS)/KI
   WRITE(*,*) 'value in PREP file => LAI       ',SUM(ZLAI)/KI
   WRITE(*,*) 'value in PREP file => VEG       ',SUM(ZVEG)/KI
@@ -218,6 +204,22 @@ IF ( NPRINTLEV > 1 ) THEN
   WRITE(*,*) 'value in PREP file => SAND      ',SUM(ZSAB)/KI
   WRITE(*,*) 'value in PREP file => CLAY      ',SUM(ZARG)/KI
 ENDIF
+!
+! SST not used in cacsts
+ZSSTC(:)    = 0.
+!
+WHERE ( ZWS0(:)/=XUNDEF )
+  ZWS(:) = ZWS0(:) * XRD1   * XRHOLW  ! conversion of m3/m3 -> mm
+  ZWP(:) = ZWP0(:) * ZD2(:) * XRHOLW  ! conversion of m3/m3 -> mm
+  ZTL(:) = ZTL0(:) * ZD2(:) * XRHOLW  ! conversion of m3/m3 -> mm
+ENDWHERE
+!
+ZEVAP  (:) =  (PEVAP(:)/XLVTT*XDAY)/(NECHGU*3600.) ! conversion W/m2 -> mm/day
+ZEVAPTR(:) =  PEVAPTR(:)*XDAY 
+!
+! Set PIVEG (SURFIND.VEG.DOMI) since it is not available
+ZIVEG(:) = 0.0
+!
 !
 !  Read ASCAT SM observations (in percent)
 !
@@ -258,11 +260,6 @@ IF (ODINLINE) THEN
   END WHERE
 ENDIF
 !
-!  Soil analysis based on optimal interpolation
-write(*,*) '           '
-write(*,*) 'Mean T2m increments  ',SUM(ZT2INC)/KI
-write(*,*) 'Mean HU2m increments ',SUM(ZH2INC)/KI
-write(*,*) '           '
 !
 ! Threshold for background check
 ZTHRES = XRTHR_QC*SQRT(XSIGWGO**2 + XSIGWGB**2)
@@ -286,6 +283,8 @@ IF ( NPRINTLEV > 0 ) THEN
   WRITE(*,*) 'Mean HU2m increments ',SUM(ZH2INC)/KI
 ENDIF
 !
+ZTS(:) = ZTS0(:)
+ZTP(:) = ZTP0(:)
 write(*,*) 'PERFORMING OI SOIL ANALYSIS'
 CALL OI_CACSTS(KI, ZT2INC, ZH2INC, ZWGINC, ZWS_O,                   &
                IDAT, ISSSSS,                                        &

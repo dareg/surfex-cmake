@@ -356,8 +356,10 @@ DO JJ=1,KSIZE
   ZP_PHU2M(JJ)       = PHU2M(JI)
   ZP_PSST(JJ)        = PSST(JI)
   ZP_PSIC(JJ)        = PSIC(JI)
-  ZP_LON(JJ)         = PLON(JI)
-  ZP_LAT(JJ)         = PLAT(JI)
+  IF (ODINLINE) THEN
+    ZP_LON(JJ)         = PLON(JI)
+    ZP_LAT(JJ)         = PLAT(JI)
+  ENDIF
   GD_MASKEXT(JJ)     = OD_MASKEXT(JI)
 ENDDO
 

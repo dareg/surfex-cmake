@@ -213,7 +213,7 @@ IF ( LEXTRAP_NATURE ) THEN
   IF ( NPRINTLEV > 2 ) THEN
     DO I=1,KI
      IF (GINTERP_NATURE(I)) THEN
-       PRINT *,'Surface temperature set to ',ZTS_EP0(I),'from nearest neighbour at I=',NR_NATURE(I)
+       PRINT *,'Surface temperature set to ',ZTS_EP(I),'from nearest neighbour at I=',NR_NATURE(I)
      ENDIF
     ENDDO
   ENDIF
