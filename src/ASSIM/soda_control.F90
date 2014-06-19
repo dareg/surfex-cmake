@@ -155,7 +155,7 @@ LOGICAL,         OPTIONAL, DIMENSION (:) ::  OD_MASKEXT
 !*    0.     Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=3), PARAMETER  :: YINIT        = 'ALL'
+CHARACTER(LEN=3)  :: YINIT
 CHARACTER(LEN=2), PARAMETER  :: YTEST        = 'OK'          ! must be equal to 'OK'
 CHARACTER(LEN=28)            :: YATMFILE  ='   '  ! name of the Atmospheric file
 CHARACTER(LEN=6)             :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
@@ -349,6 +349,12 @@ ELSE
 ENDIF
 
 WRITE(*,*) "INITIALIZING SURFEX..."
+!
+IF (ODINLINE) THEN
+  YINIT = 'SOD'
+ELSE
+  YINIT = 'ALL'
+ENDIF
 !
 DO IVAR_COUNT = 1,ITIMES
 
@@ -668,74 +674,74 @@ DEALLOCATE(ZVCLS)
 DEALLOCATE(ZSST)
 DEALLOCATE(ZSIC)
 !
-INW = 1
-IF (CSURF_FILETYPE=="NC    ") INW = 2
-!
-ZTIME_OUT  = ZTIME
-IDAY_OUT   = IDAY
-IMONTH_OUT = IMONTH
-IYEAR_OUT  = IYEAR
-!
-IF(LOUT_TIMENAME)THEN
-  ! if true, change the name of output file at the end of a day
-  ! (ex: 19860502_00h00 -> 19860501_24h00)                     
-  IF(ZTIME==0.0)THEN
-    ZTIME_OUT = 86400.
-    IDAY_OUT   = IDAY-1
-    IF(IDAY_OUT==0)THEN
-      IMONTH_OUT = IMONTH - 1
-      IF(IMONTH_OUT==0)THEN
-        IMONTH_OUT=12
-        IYEAR_OUT = IYEAR - 1
+IF (.NOT.ODINLINE) THEN
+  !       
+  INW = 1
+  IF (CSURF_FILETYPE=="NC    ") INW = 2
+  !
+  ZTIME_OUT  = ZTIME
+  IDAY_OUT   = IDAY
+  IMONTH_OUT = IMONTH
+  IYEAR_OUT  = IYEAR
+  !
+  IF(LOUT_TIMENAME)THEN
+    ! if true, change the name of output file at the end of a day
+    ! (ex: 19860502_00h00 -> 19860501_24h00)                     
+    IF(ZTIME==0.0)THEN
+      ZTIME_OUT = 86400.
+      IDAY_OUT   = IDAY-1
+      IF(IDAY_OUT==0)THEN
+        IMONTH_OUT = IMONTH - 1
+        IF(IMONTH_OUT==0)THEN
+          IMONTH_OUT=12
+          IYEAR_OUT = IYEAR - 1
+        ENDIF
+        SELECT CASE (IMONTH_OUT)
+          CASE(4,6,9,11)
+            IDAY_OUT=30
+          CASE(1,3,5,7:8,10,12)
+            IDAY_OUT=31
+          CASE(2)
+            IF( ((MOD(IYEAR_OUT,4)==0).AND.(MOD(IYEAR_OUT,100)/=0)) .OR. (MOD(IYEAR_OUT,400)==0))THEN 
+              IDAY_OUT=29
+            ELSE
+             IDAY_OUT=28
+           ENDIF
+        END SELECT
       ENDIF
-      SELECT CASE (IMONTH_OUT)
-        CASE(4,6,9,11)
-          IDAY_OUT=30
-        CASE(1,3,5,7:8,10,12)
-          IDAY_OUT=31
-        CASE(2)
-          IF( ((MOD(IYEAR_OUT,4)==0).AND.(MOD(IYEAR_OUT,100)/=0)) .OR. (MOD(IYEAR_OUT,400)==0))THEN 
-            IDAY_OUT=29
-          ELSE
-            IDAY_OUT=28
-          ENDIF
-      END SELECT
     ENDIF
+    !
   ENDIF
+  !
+  IF (CSURF_FILETYPE=='FA    ') THEN
+    CDNOMC = 'header'
+    LFANOCOMPACT = LDIAG_FA_NOCOMPACT
+    IDATEF(1)= IYEAR_OUT
+    IDATEF(2)= IMONTH_OUT
+    IDATEF(3)= IDAY_OUT
+    IDATEF(4)= FLOOR(ZTIME_OUT/3600.)
+    IDATEF(5)= FLOOR(ZTIME_OUT/60.) - IDATEF(4) * 60 
+    IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
+    IDATEF(7:11) = 0
+    CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
+    CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+  END IF
+  !
+  LDEF = .TRUE.
+  DO JNW = 1,INW
+    ! Store results from assimilation
+    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+    CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
+    LDEF = .FALSE.
+    CALL IO_BUFF_CLEAN_n
+    !
+  ENDDO  
+  !
+  IF (CSURF_FILETYPE=='FA    ') THEN
+    CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+  END IF
   !
 ENDIF
-
-IF (CTIMESERIES_FILETYPE=='FA    ') THEN
-  CDNOMC = 'header'
-  LFANOCOMPACT = LDIAG_FA_NOCOMPACT
-  IDATEF(1)= IYEAR_OUT
-  IDATEF(2)= IMONTH_OUT
-  IDATEF(3)= IDAY_OUT
-  IDATEF(4)= FLOOR(ZTIME_OUT/3600.)
-  IDATEF(5)= FLOOR(ZTIME_OUT/60.) - IDATEF(4) * 60 
-  IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
-  IDATEF(7:11) = 0
-  IF (CSURF_FILETYPE/='FA    ') THEN
-    CALL WRITE_HEADER_FA(CSURF_FILETYPE,'ALL')
-  ELSE
-    CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
-  ENDIF
-  CALL FANDAR(IRET,NUNIT_FA,IDATEF)
-END IF
-!
-LDEF = .TRUE.
-DO JNW = 1,INW
-  ! Store results from assimilation
-  CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
-  CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
-  LDEF = .FALSE.
-  CALL IO_BUFF_CLEAN_n
-  !
-ENDDO  
-!
-IF (CTIMESERIES_FILETYPE=='FA    ') THEN
-  CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
-END IF
 !
 !*    3.     Close parallelized I/O
 !            ----------------------

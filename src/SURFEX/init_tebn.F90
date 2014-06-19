@@ -492,7 +492,7 @@ END DO ! end of loop on TEB patches
 !
 !* if only physiographic fields are to be initialized, stop here.
 !
-IF (HINIT/='ALL') THEN
+IF (HINIT/='ALL' .AND. HINIT/='SOD') THEN
   IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',1,ZHOOK_HANDLE)
   RETURN
 END IF
@@ -639,6 +639,12 @@ DO JPATCH=1,NTEB_PATCH
 !
 !-------------------------------------------------------------------------------
 END DO ! end of loop on patches
+!
+IF (HINIT/='ALL') THEN
+  CALL END_IO_SURF_n(HPROGRAM)
+  IF (LHOOK) CALL DR_HOOK('INIT_TEB_N',1,ZHOOK_HANDLE)
+  RETURN
+END IF
 !-------------------------------------------------------------------------------
 !
 !*       7.     Canopy air fields:

@@ -1236,7 +1236,7 @@ IF ( LRESTART ) THEN
                           .FALSE.,.FALSE.)
     !* writes into the file
     CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
-    IF(CSURF_FILETYPE/='FA    ') THEN
+    IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
        CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
     ENDIF
     !
