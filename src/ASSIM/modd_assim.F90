@@ -50,32 +50,34 @@ IMPLICIT NONE
  LOGICAL                               :: LEXTRAP_NATURE       ! Extrapolation of nature points
  LOGICAL                               :: LPRT                 ! Running VARASSIM in a perturbation mode
  LOGICAL                               :: LBEV                 ! Running VARASSIM to evolve B
- LOGICAL                               :: LBFIXED                                          
+ LOGICAL                               :: LBFIXED    
+ LOGICAL                               :: LOBSFILE 
 
- INTEGER, PARAMETER                    :: NOBSMAX = 3
- INTEGER, PARAMETER                    :: NVARMAX = 4
+ INTEGER, PARAMETER                    :: NOBSMAX = 4
+ INTEGER, PARAMETER                    :: NVARMAX = 5
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE
  INTEGER                               :: NIVAR                ! counter for ctnrl vars
  INTEGER                               :: NVAR                 ! number of cntrl vars
- INTEGER                               :: NBOUTPUT 
+ INTEGER                               :: NBOUTPUT  
  INTEGER                               :: NPRINTLEV            ! Verbosity 
 
+ CHARACTER(LEN=12)                     :: CBIO                 ! Name of Biomass variable
  CHARACTER(LEN=5)                      :: CASSIM_ISBA          ! OI/EKF
  CHARACTER(LEN=5)                      :: CASSIM               ! type of correction
  CHARACTER(LEN=3),DIMENSION(NVARMAX)   :: CVAR_M               ! X is ctrl
- CHARACTER(LEN=100),DIMENSION(NVARMAX) :: CPREFIX_M            ! The prefix of the control variables (in PREP.txt file) (max dim)
                                                                ! 'PLUS ' (default)
                                                                ! 'AVERA'            
                                                                ! '2DVAR'
- CHARACTER(LEN=10),DIMENSION(:),ALLOCATABLE :: COBS            ! Identifier for simulated observations
- CHARACTER(LEN=3),DIMENSION(:),ALLOCATABLE  :: CVAR            ! Identifier for control variable
+ CHARACTER(LEN=10),DIMENSION(:), ALLOCATABLE  :: COBS          ! Identifier for simulated observations
+ CHARACTER(LEN=3),DIMENSION(:), ALLOCATABLE   :: CVAR          ! Identifier for control variable
 
+REAL,DIMENSION(12)                     :: XALPH
  REAL,DIMENSION(NVARMAX)               :: XTPRT_M              ! The perturbation amplitude (max dim)
  REAL,DIMENSION(NVARMAX)               :: XSIGMA_M             ! covariance of background errors if B is fixed (max dim)
 !                                                              ! covariance of model errors if B evolving (max dim)
- REAL,DIMENSION(NOBSMAX)               :: XERROBS              ! Observational standard deviation
+ REAL,DIMENSION(NOBSMAX)               :: XERROBS_M            ! Observational standard deviation
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF_PATCH             ! vector of model observations (for each pacth)
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF                   ! Vector of forecast control variables  
  REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XSIMOBS              ! vector of model observations (for each pacth)
@@ -88,8 +90,9 @@ IMPLICIT NONE
  REAL,DIMENSION(:),ALLOCATABLE         :: XTPRT           ! The perturbation amplitude
  REAL,DIMENSION(:),ALLOCATABLE         :: XSIGMA          ! covariance of background errors if B is fixed
                                                           ! covariance of model errors if B evolving  
+ REAL,DIMENSION(:),ALLOCATABLE         :: XERROBS
  REAL                                  :: XSCALE_Q        ! scaling factor of Q matrix w.r.t. the initial B
- REAL                                  :: XTSTEP_OUTPUT
+ REAL                                  :: XSCALE_QLAI
 
 !
 ! Constants and options of the soil OI analysis

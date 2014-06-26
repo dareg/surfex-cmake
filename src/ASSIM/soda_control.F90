@@ -57,7 +57,8 @@ SUBROUTINE SODA_CONTROL(     &
 !! 03/2014 E. Martin change indices names in OMP module according to GMAP changes
 !----------------------------------------------------------------------------
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
+USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,   &
+                            NINDEX, NSIZE_TASK, END_LOG_MPI
 USE MODD_SURFEX_OMP, ONLY : NINDX2SFX, NWORK, XWORK, XWORK2, XWORK3, &
                             NWORK_FULL, XWORK_FULL, XWORK2_FULL
 !
@@ -67,10 +68,11 @@ USE MODD_SURF_CONF, ONLY : CSOFTWARE
 USE MODD_SURF_PAR,  ONLY : XUNDEF,NUNDEF
 !
 USE MODD_SURF_ATM_n, ONLY : NSIZE_NATURE, NSIZE_FULL
-USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG
+USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG, XLAI
 !
 USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
-                       NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS
+                       NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU,      &
+                       NBOUTPUT
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
@@ -92,8 +94,8 @@ USE MODD_IO_SURF_FA,   ONLY : CFILEIN_FA, CFILEIN_FA_SAVE, CFILEPGD_FA, CDNOMC, 
                               NUNIT_FA, IVERBFA, LFANOCOMPACT
 #endif
 #ifdef LFI
-USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI,CFILEIN_LFI_SAVE,&
-       CFILEPGD_LFI,CFILE_LFI,CLUOUT_LFI,CFILEOUT_LFI 
+USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, &
+                                CFILEPGD_LFI, CFILE_LFI, CLUOUT_LFI, CFILEOUT_LFI 
 #endif
 !
 USE MODN_IO_OFFLINE,     ONLY : NAM_IO_OFFLINE, CNAMELIST, CPGDFILE, CPREPFILE, CSURFFILE, &
@@ -120,6 +122,8 @@ USE MODI_ASSIM_SURF_ATM_n
 USE MODI_WRITE_SURF_ATM_n
 USE MODI_WRITE_DIAG_SURF_ATM_n
 USE MODI_ASSIM_READ_SST_FROM_FILE
+USE MODI_ADD_FORECAST_TO_DATE_SURF
+USE MODI_GET_FILE_NAME
 !
 #ifdef OFF
 USE MODI_FANDAR
@@ -129,6 +133,10 @@ USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE 'mpif.h'
+#endif
 !
 LOGICAL, INTENT (IN) :: ODINLINE
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFTEMPERATURE
@@ -155,14 +163,15 @@ LOGICAL,         OPTIONAL, DIMENSION (:) ::  OD_MASKEXT
 !*    0.     Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=3)  :: YINIT
-CHARACTER(LEN=2), PARAMETER  :: YTEST        = 'OK'          ! must be equal to 'OK'
-CHARACTER(LEN=28)            :: YATMFILE  ='   '  ! name of the Atmospheric file
-CHARACTER(LEN=6)             :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
-CHARACTER(LEN=28)            :: YLUOUT    ='LISTING_SODA                '  ! name of listing
-CHARACTER(LEN=6)             :: YPROGRAM2 = 'FA    '
-CHARACTER(LEN=28)            :: YFILEIN
-CHARACTER(LEN=1)             :: YVAR
+ CHARACTER(LEN=200) :: YMFILE     ! Name of the observation, perturbed or reference file!
+ CHARACTER(LEN=3)  :: YINIT
+ CHARACTER(LEN=2), PARAMETER  :: YTEST        = 'OK'          ! must be equal to 'OK'
+ CHARACTER(LEN=28)            :: YATMFILE  ='   '  ! name of the Atmospheric file
+ CHARACTER(LEN=6)             :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+ CHARACTER(LEN=28)            :: YLUOUT    ='LISTING_SODA                '  ! name of listing
+ CHARACTER(LEN=6)             :: YPROGRAM2 = 'FA    '
+ CHARACTER(LEN=28)            :: YFILEIN
+ CHARACTER(LEN=1)             :: YVAR
 !
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZLSM                ! Land-Sea mask
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZCON_RAIN           ! Amount of convective liquid precipitation
@@ -200,20 +209,35 @@ INTEGER, DIMENSION(11)  :: IDATEF
 INTEGER :: INI, ISIZE          ! grid dimension
 INTEGER :: ISV                 ! Number of scalar species
 INTEGER :: ISW                 ! Number of radiative bands 
-INTEGER :: IYEAR, IMONTH, IDAY
+INTEGER :: IYEAR, IMONTH, IDAY, IHOUR
 INTEGER :: IYEAR_OUT, IMONTH_OUT, IDAY_OUT
-INTEGER :: IIVAR,ITIMES
+INTEGER :: L,INBPERT
 INTEGER :: INW, JNW
-INTEGER :: IVAR_COUNT
-INTEGER :: IOBS
+INTEGER :: IVAR_COUNT, ISTEP
+INTEGER :: IOBS, IIOBS
 INTEGER :: IGPCOMP
 INTEGER :: ILUOUT
 INTEGER :: ILUNAM
 INTEGER :: IRET, INB
 INTEGER :: IRESP               ! Response value
+INTEGER :: ILEVEL, INFOMPI
+!
+#ifndef NOMPI
+ CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
+#endif
 !
 IF (LHOOK) CALL DR_HOOK('SODA',0,ZHOOK_HANDLE)
-
+!
+#ifndef NOMPI
+NCOMM = MPI_COMM_WORLD
+ CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
+ CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
+#endif
+!
+ CALL PREP_LOG_MPI
+!
+!--------------------------------------
+!
 WRITE(*,*)
 WRITE(*,*) '   ------------------------------------'
 WRITE(*,*) '   |               SODA               |'
@@ -258,6 +282,56 @@ ELSE
   CALL ALLOC_SURFEX(1)
   CALL GOTO_SURFEX(1,.TRUE.)
 ENDIF
+!
+NINDX2SFX = INI
+ALLOCATE(NWORK(INI))
+ALLOCATE(XWORK(INI))
+ALLOCATE(XWORK2(INI,10))
+ALLOCATE(XWORK3(INI,10,10))
+IF (NRANK==NPIO) THEN
+  ALLOCATE(NWORK_FULL(INI))
+  ALLOCATE(XWORK_FULL(INI))
+  ALLOCATE(XWORK2_FULL(INI,10))
+ELSE
+  ALLOCATE(NWORK_FULL(0))
+  ALLOCATE(XWORK_FULL(0))
+  ALLOCATE(XWORK2_FULL(0,0))
+ENDIF
+!
+ISW = 0
+ISV = 0
+ALLOCATE(CSV(ISV))
+ALLOCATE(XCO2(INI))
+ALLOCATE(XRHOA(INI))
+ALLOCATE(XZENITH(INI))
+ALLOCATE(XAZIM(INI))
+ALLOCATE(XSW_BANDS(ISW))
+ALLOCATE(XDIR_ALB(INI,ISW))
+ALLOCATE(XSCA_ALB(INI,ISW))
+ALLOCATE(XEMIS(INI))
+ALLOCATE(XTSRAD(INI))
+!
+! Indicate that zenith and azimuth angles are not initialized
+XZENITH = XUNDEF
+XAZIM   = XUNDEF
+!
+IF ( CASSIM_ISBA == 'EKF  ' ) THEN
+ ! Has to do initialization for all the perturbations + 
+ ! control + the real run at last
+ INBPERT = NVAR + 1
+ELSE
+ INBPERT = 1
+ENDIF
+
+WRITE(*,*) "INITIALIZING SURFEX..."
+!
+IF (ODINLINE) THEN
+  YINIT = 'SOD'
+ELSE
+  YINIT = 'ALL'
+ENDIF
+!
+!
 
 ! Setting input files read from namelist
 IF ( CSURF_FILETYPE == "LFI   " ) THEN
@@ -292,7 +366,7 @@ ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
 ELSE
   CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
 ENDIF
-
+!
 ! Initialize time information
 IYEAR    = NUNDEF
 IMONTH   = NUNDEF
@@ -303,169 +377,118 @@ CALL READ_SURF(CSURF_FILETYPE,'DIM_FULL  ',INI,  IRESP)
 CALL READ_SURF(CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
 CALL END_IO_SURF_n(CSURF_FILETYPE)
 !
-NINDX2SFX = INI
-ALLOCATE(NWORK(INI))
-ALLOCATE(XWORK(INI))
-ALLOCATE(XWORK2(INI,10))
-ALLOCATE(XWORK3(INI,10,10))
-IF (NRANK==NPIO) THEN
-  ALLOCATE(NWORK_FULL(INI))
-  ALLOCATE(XWORK_FULL(INI))
-  ALLOCATE(XWORK2_FULL(INI,10))
-ELSE
-  ALLOCATE(NWORK_FULL(0))
-  ALLOCATE(XWORK_FULL(0))
-  ALLOCATE(XWORK2_FULL(0,0))
-ENDIF
-!
 IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 ZTIME  = TTIME%TIME
 !
-ISW = 0
-ISV = 0
-ALLOCATE(CSV(ISV))
-ALLOCATE(XCO2(INI))
-ALLOCATE(XRHOA(INI))
-ALLOCATE(XZENITH(INI))
-ALLOCATE(XAZIM(INI))
-ALLOCATE(XSW_BANDS(ISW))
-ALLOCATE(XDIR_ALB(INI,ISW))
-ALLOCATE(XSCA_ALB(INI,ISW))
-ALLOCATE(XEMIS(INI))
-ALLOCATE(XTSRAD(INI))
-!
-! Indicate that zenith and azimuth angles are not initialized
-XZENITH = XUNDEF
-XAZIM   = XUNDEF
-!
-IF ( CASSIM_ISBA == 'EKF  ' ) THEN
- ! Has to do initialization for all the perturbations + 
- ! control + the real run at last
- ITIMES = NVAR + 2
-ELSE
- ITIMES = 1
-ENDIF
-
-WRITE(*,*) "INITIALIZING SURFEX..."
-!
-IF (ODINLINE) THEN
-  YINIT = 'SOD'
-ELSE
-  YINIT = 'ALL'
-ENDIF
-!
-DO IVAR_COUNT = 1,ITIMES
-
-  ! If we have more than one initialization to do
-  IF ( ITIMES > 1 ) THEN
-    IF (IVAR_COUNT /= ITIMES ) THEN
-      ! For last initialization, we must re-do the first.
-      ! Could be avoided by introducing knowlegde of LASSIM on this level
+IHOUR = 0
+ZTIME = FLOAT(NECHGU) * 3600.
+! BEGINNING OF TIME LOOP
+TIMELOOP : DO ISTEP = 1,NBOUTPUT
+  ! Update date
+  CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
+  ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
+  IHOUR = IHOUR + NECHGU
+  !
+  YMFILE = "PREP_"
+  CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
+  !
+  DO IVAR_COUNT = 1,INBPERT
+    !
+    ! If we have more than one initialization to do
+    ! For last initialization, we must re-do the first.
+    ! Could be avoided by introducing knowlegde of LASSIM on this level
+    IF ( CASSIM_ISBA == 'EKF  ' ) THEN
+      !
       WRITE(YVAR,'(I1.1)') IVAR_COUNT-1
       !
       IF ( CSURF_FILETYPE == "LFI   " ) THEN
-        YFILEIN = "PREP_EKF_PERT"//YVAR
-      ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
-        YFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.fa')
-      ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
-        YFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.txt')
-      ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
-        YFILEIN = "PREP_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.nc')
-      ELSE
-        CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
-      ENDIF
-    ELSE
-      IF ( CSURF_FILETYPE == "LFI   " ) THEN
-        YFILEIN = CPREPFILE
-      ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
-        YFILEIN = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
-      ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
-        YFILEIN = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
-      ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
-        YFILEIN = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
-      ELSE
-        CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
-      ENDIF
-    ENDIF            
-    !  
-    IF ( CSURF_FILETYPE == "LFI   " ) THEN
+        YFILEIN = YMFILE//"_EKF_PERT"//YVAR
 #ifdef LFI
-      CFILEIN_LFI      = YFILEIN 
-      CFILE_LFI        = YFILEIN
-      CFILEIN_LFI_SAVE = YFILEIN
-#endif
-    ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
+        CFILEIN_LFI      = YFILEIN 
+        CFILE_LFI        = YFILEIN
+        CFILEIN_LFI_SAVE = YFILEIN
+#endif    
+      ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
+        YFILEIN = YMFILE//"EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.fa')
 #ifdef FA
-      CFILEIN_FA      = YFILEIN
-      CFILEIN_FA_SAVE = YFILEIN
-#endif
-    ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
+        CFILEIN_FA      = YFILEIN
+        CFILEIN_FA_SAVE = YFILEIN
+#endif    
+      ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
+        YFILEIN = YMFILE//"EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.txt')
 #ifdef ASC
-      CFILEIN      = YFILEIN
-      CFILEIN_SAVE = YFILEIN
-#endif
-    ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+        CFILEIN      = YFILEIN
+        CFILEIN_SAVE = YFILEIN
+#endif    
+      ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
+        YFILEIN = YMFILE//"EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.nc')
 #ifdef NC
-      CFILEIN_NC      = YFILEIN
-      CFILEIN_NC_SAVE = YFILEIN
-#endif
-    ELSE
-      CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
-    ENDIF
+        CFILEIN_NC      = YFILEIN
+        CFILEIN_NC_SAVE = YFILEIN
+#endif    
+      ELSE
+        CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
+      ENDIF
+      !
+    ENDIF  
     !
-  ENDIF
-  !
-  ! Initialize the SURFEX interface
-  CALL IO_BUFF_CLEAN_n
-  CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE, INI, ISV, ISW,  &
-                       CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS,     &
-                       XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD,               &
-                       IYEAR, IMONTH, IDAY, ZTIME,                      &
-                        YATMFILE, YATMFILETYPE, YTEST              )
-  !
-  IF ( CASSIM_ISBA == 'EKF  ' ) THEN
+    ! Initialize the SURFEX interface
+    CALL IO_BUFF_CLEAN_n
+    CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE, INI, ISV, ISW,  &
+                         CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS,     &
+                         XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD,               &
+                         IYEAR, IMONTH, IDAY, ZTIME,                      &
+                          YATMFILE, YATMFILETYPE, YTEST              )
     !
-    IF ( IVAR_COUNT == 1 ) THEN
-      ALLOCATE(XF      (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
-      ALLOCATE(XF_PATCH(NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE))
-    ENDIF
-    !
-    IF ( IVAR_COUNT>0 .AND. IVAR_COUNT<ITIMES )  THEN
+    IF ( CASSIM_ISBA=='EKF  ' ) THEN
+      !
+      IF ( ISTEP==1 .AND. IVAR_COUNT==1 ) THEN
+        ALLOCATE(XF      (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
+        ALLOCATE(XF_PATCH(NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
+      ENDIF
       !
       ! Set the global state values for this control value
       DO IOBS = 1,NOBSTYPE
+        IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
         SELECT CASE (TRIM(COBS(IOBS)))
           CASE("T2M")
-            XF_PATCH(:,:,IVAR_COUNT,IOBS) = XAT2M_ISBA(:,:)
+            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XAT2M_ISBA(:,:)
           CASE("HU2M")
-            XF_PATCH(:,:,IVAR_COUNT,IOBS) = XAHU2M_ISBA(:,:)
+            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XAHU2M_ISBA(:,:)
           CASE("WG1")
-            XF_PATCH(:,:,IVAR_COUNT,IOBS) = XWG(:,1,:)
+            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XWG(:,1,:)
+          CASE("LAI")
+            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XLAI(:,:)
           CASE DEFAULT
             CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in AROINI_SURFC!")
         END SELECT
       ENDDO
       !
       ! Prognostic fields for assimilation (Control vector)
-      DO IIVAR = 1,NVAR
-        SELECT CASE (TRIM(CVAR(IIVAR)))
+      DO L = 1,NVAR
+        SELECT CASE (TRIM(CVAR(L)))
           CASE("TG1")
-            XF(:,:,IVAR_COUNT,IIVAR) = XTG(:,1,:)
+            XF(:,:,IVAR_COUNT,L) = XTG(:,1,:)
           CASE("TG2")
-            XF(:,:,IVAR_COUNT,IIVAR) = XTG(:,2,:)
+            XF(:,:,IVAR_COUNT,L) = XTG(:,2,:)
           CASE("WG1")
-            XF(:,:,IVAR_COUNT,IIVAR) = XWG(:,1,:)
+            XF(:,:,IVAR_COUNT,L) = XWG(:,1,:)
           CASE("WG2")
-            XF(:,:,IVAR_COUNT,IIVAR) = XWG(:,2,:)
+            XF(:,:,IVAR_COUNT,L) = XWG(:,2,:)
+          CASE("LAI")
+            XF(:,:,IVAR_COUNT,L) = XLAI(:,:)            
           CASE DEFAULT
-            CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(IIVAR))//" is not defined in AROINI_SURFC!")
+            CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in AROINI_SURFC!")
         END SELECT
       ENDDO
+      !
     ENDIF
-  ENDIF
-ENDDO
+    !
+  ENDDO
+  !
+ENDDO TIMELOOP
 !
 CALL GET_SIZE_FULL_n(CSURF_FILETYPE,INI,NSIZE_FULL)
 !

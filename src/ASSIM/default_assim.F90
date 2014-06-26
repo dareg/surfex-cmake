@@ -3,7 +3,7 @@
                                OAROME,OECSST,OAESST,OAESNM,             &
                                OALADSURF,OREAD_SST_FROM_FILE,           &
                                OEXTRAP_SEA,OEXTRAP_WATER,OEXTRAP_NATURE,&
-                               OWATERTG2,OBFIXED,PERROBS,KNCO)
+                               OWATERTG2,OBFIXED,PERROBS_M,KNCO,OOBSFILE)
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA assimilation scheme
@@ -62,9 +62,10 @@ LOGICAL,           INTENT(OUT) :: OEXTRAP_WATER
 LOGICAL,           INTENT(OUT) :: OEXTRAP_NATURE
 LOGICAL,           INTENT(OUT) :: OWATERTG2
 LOGICAL,           INTENT(OUT) :: OBFIXED
-REAL, DIMENSION(NOBSMAX), INTENT(OUT) :: PERROBS
+REAL, DIMENSION(NOBSMAX), INTENT(OUT) :: PERROBS_M
 INTEGER, DIMENSION(NOBSMAX), INTENT(OUT) :: KNCO
-
+LOGICAL, INTENT(OUT) :: OOBSFILE
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -85,8 +86,9 @@ OEXTRAP_WATER  = .TRUE.
 OEXTRAP_NATURE = .FALSE.
 OWATERTG2      = .FALSE.
 OBFIXED = .FALSE.
-PERROBS = (/1.0,0.1,0.4/)
-KNCO = (/1,1,0/)
+PERROBS_M = (/1.0,0.1,0.4,0.2/)
+KNCO = (/1,1,0,0/)
+OOBSFILE = .FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_ASSIM',1,ZHOOK_HANDLE)
 !

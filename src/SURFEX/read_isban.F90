@@ -198,6 +198,12 @@ ENDIF
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
   YRECFM = 'LAI'
   CALL READ_SURF(HPROGRAM,YRECFM,XLAI(:,:),IRESP)
+  IF ( LPRT ) THEN
+    ! read in control variable
+    IF ( TRIM(CVAR(NIVAR)) == "LAI" ) THEN
+      XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XLAI(:,:)
+    ENDIF
+  ENDIF  
 END IF
 !
 !* snow mantel

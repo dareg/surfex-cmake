@@ -22,13 +22,15 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
 ! -----------------------------------------------------------------------------
 !
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNCV, &
-                               XSCALE_Q, NPRINTLEV, CVAR, XTPRT, XSIGMA, NBOUTPUT, &
-                               XTSTEP_OUTPUT, XF_PATCH, XF, COBS
+                               XSCALE_Q, NPRINTLEV, CVAR, XTPRT, XSIGMA, CBIO,     &
+                               XF_PATCH, XF, COBS, XSCALE_QLAI,  LOBSFILE, XALPH,  &
+                               NECHGU, NBOUTPUT
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 USE MODD_SURF_ATM_n,    ONLY : NDIM_FULL
-USE MODD_ISBA_n,        ONLY : XTG, XWG, XSAND, XCLAY, TTIME, NPATCH, XPATCH
+USE MODD_ISBA_n,        ONLY : XTG, XWG, XWGI, XLAI, XSAND, XCLAY, TTIME, &
+                               NPATCH, XPATCH, XBIOMASS, XRESP_BIOMASS
 !
 #ifdef ARO   
 USE YOMMP,              ONLY : MYPROC 
@@ -39,6 +41,7 @@ USE PARKIND1,           ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 USE MODI_ADD_FORECAST_TO_DATE_SURF
+USE MODI_GET_FILE_NAME
 !
 ! -----------------------------------------------------------
 !
@@ -52,11 +55,12 @@ CHARACTER(LEN=2),    INTENT(IN)            :: HTEST        ! must be equal to 'O
 !
 !    Declarations of local variables
 !
-CHARACTER(LEN=30)  :: YBGFILE
-CHARACTER(LEN=17)  :: YLFNAME
-CHARACTER(LEN=9)   :: YFNAME
-CHARACTER(LEN=7)   :: YMYPROC
-CHARACTER(LEN=1)   :: YCHAR
+ CHARACTER(LEN=200) :: YMFILE     ! Name of the observation, perturbed or reference file!  
+ CHARACTER(LEN=30)  :: YBGFILE
+ CHARACTER(LEN=17)  :: YLFNAME
+ CHARACTER(LEN=9)   :: YFNAME
+ CHARACTER(LEN=7)   :: YMYPROC
+ CHARACTER(LEN=1)   :: YCHAR
 !
 ! Local Matrix for Analysis calculation
 !
@@ -68,28 +72,31 @@ CHARACTER(LEN=1)   :: YCHAR
 !
 ! Temporary vectors used by the EKF approach
 
-REAL,DIMENSION(KI,NOBSTYPE,NOBSTYPE) :: ZK1
-REAL,DIMENSION(KI,NOBSTYPE,NOBSTYPE) :: ZR                 ! covariance matrix of observation errors
+REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZK1
+REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZR                 ! covariance matrix of observation errors
 REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZKH, ZKRK
 REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZIDKH
 REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZB           ! background error covariance matrix
 REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZLTM         ! linear tangent matrix for the f'ward model
 REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZQ           ! model error matrix
-REAL,DIMENSION(KI,NOBSTYPE,NPATCH*NVAR) :: ZHO             ! Jacobian of observation operator
-REAL,DIMENSION(KI,NOBSTYPE,NPATCH*NVAR) :: ZHOWR           ! copy of HO for writing out
-REAL,DIMENSION(KI,NPATCH*NVAR,NOBSTYPE) :: ZHOT            ! Transpose of HO
-REAL,DIMENSION(KI,NPATCH*NVAR,NOBSTYPE) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
-REAL,DIMENSION(KI,NPATCH,NVAR) :: ZXI                      ! Vector of control variables (at beginning of timestep)
+REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT,NPATCH*NVAR) :: ZHO             ! Jacobian of observation operator
+REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT,NPATCH*NVAR) :: ZHOWR           ! copy of HO for writing out
+REAL,DIMENSION(KI,NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZHOT            ! Transpose of HO
+REAL,DIMENSION(KI,NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZEPS                     ! The perturbation amplitude
-REAL,DIMENSION(KI,NVAR+1,NOBSTYPE) :: ZYF                  ! Vector of model observations (averaged) 
+REAL,DIMENSION(KI,NVAR+1,NOBSTYPE*NBOUTPUT) :: ZYF                  ! Vector of model observations (averaged) 
 REAL,DIMENSION(NPATCH*NVAR,NPATCH*NVAR) :: ZIDENT          ! identitiy matrix, used for Ba
-REAL,DIMENSION(KI,NOBSTYPE) :: ZYO                         ! vector of observations
-REAL,DIMENSION(KI,NOBSTYPE) :: ZX,ZB2,ZP
+REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT) :: ZYO                         ! vector of observations
+REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT) :: ZX,ZB2,ZP
 REAL,DIMENSION(KI,NPATCH*NVAR) :: ZXINCR                   ! Analysis increment
 REAL,DIMENSION(KI,NPATCH) :: ZVECT                         ! The analysed variable
-REAL,DIMENSION(NDIM_FULL,NOBSTYPE) :: ZYOWR
+REAL,DIMENSION(KI,NPATCH) :: ZBIO_PASS
+REAL,DIMENSION(KI,NPATCH) :: ZBIO_OUT
 REAL,DIMENSION(KI) :: ZCOFSWI                              ! dynamic range (Wfc - Wwilt)
 REAL,DIMENSION(KI) :: ZSMSAT                               ! saturation  
+REAL,DIMENSION(KI) :: ZWILT
+!
+REAL,DIMENSION(NPATCH) :: ZVLAIMIN
 !
 REAL :: ZTIME                      ! current time since start of the run (s)
 
@@ -97,17 +104,19 @@ INTEGER :: IOBSCOUNT
 INTEGER :: IYEAR                      ! current year (UTC)
 INTEGER :: IMONTH                     ! current month (UTC)
 INTEGER :: IDAY                       ! current day (UTC)
+INTEGER :: IHOUR
 INTEGER :: IRESP                      ! return code
 INTEGER :: ISTEP                      ! 
 INTEGER :: IMYPROC
-INTEGER :: IOBS
+INTEGER :: INOBS, IOBS
 INTEGER :: ISTAT
 !
-INTEGER :: I,J,K,JJ,L
+INTEGER :: I,J,K,JJ,L,K1,L1
 !
 LOGICAL :: GBEXISTS
 !
 REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
+!
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',0,ZHOOK_HANDLE)
 !
@@ -135,39 +144,31 @@ IMYPROC = 1
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF (SUM(NNCV) /= NVAR) THEN
-  WRITE(*,*) 'INCONSISTENCY in set-up of CONTROL VARIABLES',SUM(NNCV),NVAR
-  CALL ABOR1_SFX('INCONSISTENCY in set-up of CONTROL VARIABLES')
-ENDIF
-!
 IF ( NPRINTLEV > 0 ) WRITE(*,*) 'number of patches =',NPATCH
-!
-IOBS = NOBSTYPE
 !
 ! Set control variables
 DO L = 1,NVAR
-  !
-  SELECT CASE (TRIM(CVAR(L)))
-    CASE("TG1")
-      ZXI(:,:,L) = XTG(:,1,:)
-    CASE("TG2")
-      ZXI(:,:,L) = XTG(:,2,:)
-    CASE("WG1")
-      ZXI(:,:,L) = XWG(:,1,:)
-    CASE("WG2")
-      ZXI(:,:,L) = XWG(:,2,:)
-    CASE DEFAULT
-      CALL ABOR1_SFX("Mapping of "//CVAR(L)//" is not defined in EKF!")
-  END SELECT
-  !
-  IF ( NPRINTLEV > 0 ) WRITE(*,*) CVAR(L),' - initial ',ZXI(1,1,L)
-  !
+  IF ( NPRINTLEV > 0 ) WRITE(*,*) CVAR(L),' - initial ',XF(1,1,1,L)
 ENDDO
 !
+SELECT CASE (TRIM(CBIO))
+  CASE("BIOMA1","BIOMASS1")
+    ZBIO_PASS(:,:) = XBIOMASS(:,1,:)
+  CASE("BIOMA2","BIOMASS2")
+    ZBIO_PASS(:,:) = XBIOMASS(:,2,:)
+  CASE("RESPI1","RESP_BIOM1")
+    ZBIO_PASS(:,:) = XRESP_BIOMASS(:,1,:)
+  CASE("RESPI2","RESP_BIOM2")
+    ZBIO_PASS(:,:) = XRESP_BIOMASS(:,2,:)
+  CASE("LAI")
+    ZBIO_PASS(:,:) = XLAI(:,:)
+  CASE DEFAULT
+    CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
+END SELECT
 !
 ! Calculate delta for control variables 
 DO L = 1,NVAR
-  ZEPS(:,:,L) = XTPRT(L) * ZXI(:,:,L)
+  ZEPS(:,:,L) = XTPRT(L) * XF(:,:,1,L)
 ENDDO
 !
 !   Read CLAY fraction to  compute the SWI range (Wfc - Wwilt)
@@ -177,10 +178,9 @@ ENDDO
 !
 DO I=1,KI
   ZCOFSWI(I) = 0.001 * (89.0467 * ((100.*XCLAY(I,1))**0.3496) - 37.1342*((100.*XCLAY(I,1))**0.5))
-  ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305) 
+  ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
+  ZWILT  (I) = 0.001 * 37.1342 * ((100.*XCLAY(I,1))**0.5) 
 ENDDO
-!
-IF ( NPRINTLEV > 0 ) WRITE(*,*) KI,'ki ', KI,'nsize '
 !
 ! ----------------------
 ! VARASSIM OPTION : LBEV
@@ -216,14 +216,13 @@ IF ( LBEV ) THEN
     DO L = 1,NVAR
       DO I = 1,KI
         DO J = 1,NPATCH
-          IF ( CVAR(L)=='WG2') &
-                  ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
-          IF ( CVAR(L)=='WG1') &
-                  ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
-          IF ( CVAR(L)=='TG2') &
-                  ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)
-          IF ( CVAR(L)=='TG1') &
-                  ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)       
+          L1 = J+NPATCH*(L-1)
+          IF ( TRIM(CVAR(L))=='WG2' .OR. TRIM(CVAR(L))=='WG1' ) &
+            ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
+          IF ( TRIM(CVAR(L))=='TG2' .OR. TRIM(CVAR(L))=='TG1' ) &
+            ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)
+          IF ( TRIM(CVAR(L))=='LAI' ) &
+            ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)*XLAI(I,J)*XLAI(I,J) 
         ENDDO
       ENDDO
     ENDDO
@@ -238,13 +237,15 @@ IF ( LBEV ) THEN
       DO I = 1,KI 
         DO J = 1,NPATCH 
           
-          IF ( XF(I,J,L+1,K).NE.XUNDEF .AND. XF(I,J,1,K).NE.XUNDEF ) THEN
+          IF ( XPATCH(I,J)>0.0 .AND. XF(I,J,L+1,K).NE.XUNDEF .AND. XF(I,J,1,K).NE.XUNDEF ) THEN
             !
+            L1 = J + NPATCH*(L-1)
+            K1 = J + NPATCH*(K-1)
             ! Jacobian of fwd model
-            ZLTM(I, J+NPATCH*(L-1), J+NPATCH*(K-1)) = (XF(I,J,L+1,K) - XF(I,J,1,K)) / ZEPS(I,J,L)
+            ZLTM(I,L1,K1) = ( XF(I,J,L+1,K) - XF(I,J,1,K) ) / ZEPS(I,J,L)
             ! impose upper/lower limits 
-            !LTM(I,J+NPATCH*(L-1),J+NPATCH*(K-1)) = max(-0.1, LTM(I,J+NPATCH*(L-1),J+NPATCH*(K-1)))
-            !LTM(I,J+NPATCH*(L-1),J+NPATCH*(K-1)) = min(1.0, LTM(I,J+NPATCH*(L-1),J+NPATCH*(K-1)))
+            ZLTM(I,L1,K1) = MAX(-0.1, ZLTM(I,L1,K1))
+            ZLTM(I,L1,K1) = MIN( 1.0, ZLTM(I,L1,K1))
             !
           ENDIF
 
@@ -262,8 +263,12 @@ IF ( LBEV ) THEN
   ENDDO
   !
   ! write out the LTM for the forward model
+  ! Write out current B
+  YBGFILE="BGROUNDout_LBEV."//YMYPROC
+  OPEN (unit=112,file=YBGFILE,status='unknown')
+  !
   DO L=1,NVAR
-    DO K=1,NVAR 
+    DO K=1,NVAR
       !
       WRITE(YCHAR,'(I1)') K
       YLFNAME='LTM_del'//TRIM(CVAR(K))//'_del'//TRIM(CVAR(L))//"."//YMYPROC
@@ -271,7 +276,13 @@ IF ( LBEV ) THEN
       OPEN(UNIT=111,FILE=YLFNAME,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='APPEND')
       DO I=1,KI
         DO J=1,NPATCH
-          WRITE (111,*) ZLTM(I, J+NPATCH*(L-1), J+NPATCH*(K-1))
+          !
+          WRITE (111,*) ZLTM(I,J+NPATCH*(L-1),J+NPATCH*(K-1))
+          !
+          DO JJ=1,NPATCH
+            WRITE (112,*)  ZB(I,J+NPATCH*(L-1),JJ+NPATCH*(K-1))
+          ENDDO
+          !     
         ENDDO
       ENDDO
       !
@@ -280,27 +291,12 @@ IF ( LBEV ) THEN
     ENDDO
   ENDDO
   !
-  ! Write out current B
+  CLOSE(112)
+  !
   IF ( NPRINTLEV > 0 ) THEN
     WRITE(*,*) 'store B matrix after TL evolution ==>',ZB(1,1,1)
     WRITE(*,*) 'writing out B'
   ENDIF
-  !
-  YBGFILE="BGROUNDout_LBEV."//YMYPROC
-  !
-  OPEN (unit=111,file=YBGFILE,status='unknown')
-  DO L=1,NVAR
-    DO K=1,NVAR
-      DO I=1,KI
-        DO J=1,NPATCH
-          DO JJ=1,NPATCH
-            WRITE (111,*)  ZB(I, J+NPATCH*(L-1), JJ+NPATCH*(K-1))
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-  ENDDO
-  CLOSE(111)
   !
   !--------------------------------------------------------------------
   !
@@ -313,14 +309,14 @@ IF ( LBEV ) THEN
     DO I=1,KI
       DO J=1,NPATCH
         !
-        IF (TRIM(CVAR(L)) == 'WG2') &
-          ZQ(I, J+NPATCH*(L-1), J+NPATCH*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
-        IF (TRIM(CVAR(L)) == 'WG1') &
-          ZQ(I, J+NPATCH*(L-1), J+NPATCH*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
-        IF (TRIM(CVAR(L)) == 'TG2') &
-          ZQ(I, J+NPATCH*(L-1), J+NPATCH*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)
-        IF (TRIM(CVAR(L)) == 'TG1') &
-          ZQ(I, J+NPATCH*(L-1), J+NPATCH*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)
+        L1 = J+NPATCH*(L-1)
+        !
+        IF (TRIM(CVAR(L)) == 'WG2' .OR. TRIM(CVAR(L)) == 'WG1') &
+          ZQ(I,L1,L1) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
+        IF (TRIM(CVAR(L)) == 'TG2' .OR. TRIM(CVAR(L)) == 'TG1') &
+          ZQ(I,L1,L1) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)
+        IF (TRIM(CVAR(L)) == 'LAI') &
+          ZQ(I,L1,L1) = XSCALE_QLAI*XSCALE_QLAI*XSIGMA(L)*XSIGMA(L)
         !
       ENDDO
     ENDDO
@@ -341,10 +337,13 @@ ELSEIF (LBFIXED) THEN
   DO L=1,NVAR
     DO I=1,KI
       DO J=1,NPATCH
-        IF (TRIM(CVAR(L)) == 'WG2') ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
-        IF (TRIM(CVAR(L)) == 'WG1') ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
-        IF (TRIM(CVAR(L)) == 'TG2') ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)
-        IF (TRIM(CVAR(L)) == 'TG1') ZB(I,J+NPATCH*(L-1),J+NPATCH*(L-1)) = XSIGMA(L)*XSIGMA(L)       
+        L1 = J+NPATCH*(L-1)
+        IF ( TRIM(CVAR(L)) == 'WG2' .OR. TRIM(CVAR(L)) == 'WG1' ) &
+          ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
+        IF ( TRIM(CVAR(L)) == 'TG2' .OR. TRIM(CVAR(L)) == 'TG1' ) &
+          ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)
+        IF (TRIM(CVAR(L)) == 'LAI') &
+          ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)*XLAI(I,J)*XLAI(I,J)      
       ENDDO
     ENDDO
   ENDDO
@@ -363,18 +362,16 @@ ENDIF
 IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
-ZTIME  = TTIME%TIME
 !
 ! Initialisations
-ZB2(:,:)      = 999.0     ! Innovation vector
+ZB2(:,:)      = XUNDEF    ! Innovation vector
 ZR(:,:,:)     = 0.0       ! Observation error matrix
-ZHO(:,:,:)    = 999.0     ! Linearized observation matrix
-ZHOWR(:,:,:)  = 999.0  
+ZHO(:,:,:)    = XUNDEF    ! Linearized observation matrix
+ZHOWR(:,:,:)  = XUNDEF 
 !
-ZYOWR(:,:)    = 999.0     ! Observation vector on the full grid to be written on file
+ZX(:,:) = 0.0
+!
 ZYF(:,:,:)    = 0.0       ! Tile averaged simulated observation vector
-!
-IOBSCOUNT     = 0
 !
 ZIDENT(:,:) = 0                    ! identity matrix
 DO L = 1,NVAR
@@ -382,81 +379,126 @@ DO L = 1,NVAR
     ZIDENT(J+NPATCH*(L-1),J+NPATCH*(L-1)) = 1.0
   ENDDO
 ENDDO
-! 
-ZTIME = XTSTEP_OUTPUT
+!
+!
+INOBS = 0
+IHOUR = 0
+ZTIME = FLOAT(NECHGU) * 3600.
 ! BEGINNING OF TIME LOOP
 TIMELOOP : DO ISTEP=1,NBOUTPUT
   ! Update date
   CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
-  ZTIME = ZTIME + XTSTEP_OUTPUT
+  ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
+  IHOUR = IHOUR + NECHGU
   !
-  ZYO(:,1) = PT2M (:)
-  ZYO(:,2) = PHU2M(:) 
-  !
-  IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(1,1), ZYO(1,2),IOBS
-  !
-  ! Mean simulated obs averaged over tiles
-  DO I=1,KI
-    DO J=1,NPATCH
-      IF (XPATCH(I,J) > 0.0) THEN
-        ZYF(I,:,:) = ZYF(I,:,:) + XPATCH(I,J)*XF_PATCH(I,J,:,:)
-      ENDIF
+  IF ( LOBSFILE ) THEN
+    !
+    INOBS = 0
+    YMFILE = 'CANARI_NATURE_'
+    CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
+    OPEN(UNIT=55,FILE=YMFILE,FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
+    IF ( ISTAT==0 ) THEN
+      !   If it exists, read observations
+      DO I = 1,KI
+        READ (55,*)  (ZYO(I,INOBS+J),J=1,NOBSTYPE)
+      ENDDO
+      INOBS = INOBS + NOBSTYPE      
+      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(I,:), INOBS
+      CLOSE(55)
+    ENDIF
+    !
+    IF ( INOBS == 0 ) THEN
+      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'No observations read for LAI in OBS file - stop'
+      CALL ABOR1_SFX("ASSIM_NATURE_ISBA_EKF: No observations read for LAI in OBS file - stop")
+    ENDIF
+    !
+  ELSE
+    !
+    INOBS = NOBSTYPE*NBOUTPUT
+    DO IOBS = 1,INOBS
+      ZYO(:,IOBS) = XF_PATCH(:,1,1,IOBS)
     ENDDO
-  ENDDO
+    !
+  ENDIF
   !
 ENDDO TIMELOOP
+!
+IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(1,:), IOBS
+!
+! Mean simulated obs averaged over tiles
+DO I=1,KI
+  DO J=1,NPATCH
+    IF (XPATCH(I,J) > 0.0) THEN
+      ZYF(I,:,:) = ZYF(I,:,:) + XPATCH(I,J)*XF_PATCH(I,J,:,:)
+    ENDIF
+  ENDDO
+ENDDO
+!
+IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in sim obs yf', ZYF(1,:,1)
+!
 !
 ! SET OBSERVATION ERROR 
 DO I=1,KI
   DO K=1,NOBSTYPE
-    IF (K .LT. 3) THEN
-      ZR(I,K,K) = XERROBS(K)*XERROBS(K)
-    ELSE
+    IF ( COBS(K) .EQ. "LAI" ) THEN
+      ZR(I,K,K) = XERROBS(K)*XERROBS(K) * ZYO(I,K)*ZYO(I,K)
+    ELSEIF (COBS(K) .EQ. "WG1") THEN
       ! convert R for wg1 from SWI  to abs value
-      ZR(I,K,K) = XERROBS(K)*XERROBS(K)*ZCOFSWI(I)*ZCOFSWI(I) 
+      ZR(I,K,K) = XERROBS(K)*XERROBS(K) * ZCOFSWI(I)*ZCOFSWI(I)
+    ELSE
+      ZR(I,K,K) = XERROBS(K)*XERROBS(K)
     ENDIF
   ENDDO
 ENDDO
 !
 ! WRITE OUT OBS AND YERROR FOR DIAGNOSTIC PURPOSES
-OPEN (unit=111,file='OBSERRORout.'//YMYPROC,status='unknown',IOSTAT=istat)
+OPEN (UNIT=111,FILE='OBSERRORout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
 WRITE (111,*) (ZR(I,:,:), I=1,KI)
 CLOSE(111)
 !
-OPEN (unit=111,file='OBSout.'//YMYPROC,status='unknown',IOSTAT=istat)
+OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
 WRITE (111,*) (ZYO(I,:), I=1,KI)
 CLOSE(111)
 !
-! Data type selection before assimilation (only if NOBS = NOBSTYPE)
-IF ( IOBS == NOBSTYPE ) THEN
-  DO I = 1,NOBSTYPE
-    IF (NNCO(I) == 0) THEN 
-      ZYO (:,I) = 999.0
-      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION TYPE ',COBS(I),' REMOVED'
-    ENDIF
-  ENDDO
-ENDIF
+!
+IOBS = NOBSTYPE
+! Data type selection before assimilation 
+DO I = 1,NOBSTYPE
+  IF ( NNCO(I)==0 ) THEN 
+    ZYO (:,I) = XUNDEF
+    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION TYPE ',COBS(I),' REMOVED'
+  ENDIF
+ENDDO
+!
+DO I = 1,KI
+  IF ( MINVAL(XWGI(I,1,:))>0. ) THEN
+    ZYO (I,:) = XUNDEF
+    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',I,' REMOVED'
+  ENDIF
+ENDDO
 !
 IF ( NPRINTLEV > 0 ) WRITE(*,*) 'calculating jacobians',IOBS
 !
+IOBSCOUNT = 0
 DO L=1,NVAR
   DO I=1,KI
-    DO J=1,NPATCH  
+    DO J=1,NPATCH
+      L1 = J + NPATCH*(L-1)
       DO K=1,IOBS
         !
-        ZHOWR(I,K,J+NPATCH*(L-1)) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L) 
-        IF(ZYO(I,K) .NE. 999.0) THEN         !if obs available
+        ZHOWR(I,K,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L) 
+        IF( ZYO(I,K).NE.XUNDEF ) THEN         !if obs available
           ! Jacobian of obs operator
-          ZHO(I,K,J+NPATCH*(L-1)) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L)
+          ZHO(I,K,L1) = ZHOWR(I,K,J+NPATCH*(L-1))
           ! impose limits  
-          !HO(I,K,J+NPATCH*(L-1)) = max(-0.1, HO(I,K,J+NPATCH*(L-1)))             
-          !HO(I,K,J+NPATCH*(L-1)) = min(1.0, HO(I,K,J+NPATCH*(L-1)))
+          ZHO(I,K,L1) = MAX(-0.1, ZHO(I,K,L1))             
+          ZHO(I,K,L1) = MIN( 1.0, ZHO(I,K,L1))
           ! innovation vector
-          ZB2(I,K) = ZYO(I,K) - ZYF(I,1,K)                 
+          ZB2(I,K) = ZYO(I,K) - ZYF(I,1,K)
           IOBSCOUNT = IOBSCOUNT + 1
         ELSE  !if no obs available
           ! set obs operator and innovation to zero if no obs available
-          ZHO(I,K,J+NPATCH*(L-1)) = 0.0
+          ZHO(I,K,L1) = 0.0
           ZB2(I,K) = 0.0 
         ENDIF
       ENDDO
@@ -464,20 +506,14 @@ DO L=1,NVAR
   ENDDO
 ENDDO
 !
-! *** Write innovations in ASCII file ***
-!
-OPEN (unit=111,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=istat)
-DO I=1,KI
-  WRITE(111,*) (ZB2(I,K),K=1,IOBS)
-ENDDO
-CLOSE(UNIT=111)
-!
 !-----------------------------------------------------
 !
 !            ******  SOIL ANALYSIS *******
 !
 !-----------------------------------------------------
 IF ( NPRINTLEV > 0 ) WRITE(*,*) 'PERFORMING ANALYSIS'
+!
+ZVLAIMIN=(/0.3,0.3,0.3,0.3,1.0,1.0,0.3,0.3,0.3,0.3,0.3,0.3/)
 !
 DO I=1,KI
   !
@@ -489,36 +525,22 @@ DO I=1,KI
   !
   DO L=1,NVAR
     DO J=1,NPATCH
+      L1 = J+NPATCH*(L-1)
       ! Update the modified values
-      ZXI(I,J,L) = ZXI(I,J,L) + ZXINCR(I,J+NPATCH*(L-1))
-      ! A possible sanity check
-      SELECT CASE (TRIM(CVAR(L)))
-        CASE("TG1")
-        CASE("TG2")
-        CASE("WG1")
-          ! Preserve positive values
-          !XI(I,J,L) = MAX(0.,(XI(I,J,L)))
-        CASE("WG2")
-          ! Preserve positive values
-          !XI(I,J,L) = MAX(0.,(XI(I,J,L)))
-        CASE DEFAULT
-          CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in EKF!")
-      END SELECT
+      IF ( TRIM(CVAR(L))=="LAI" ) THEN
+        ZXINCR(I,L1) = MAX( ZXINCR(I,L1), ZVLAIMIN(J)-XF(I,J,1,L) )
+        ZBIO_PASS(I,J) = ZBIO_PASS(I,J) + ZXINCR(I,L1)*XALPH(J)
+      ELSEIF ( XF(I,J,1,L)+ZXINCR(I,L1)<0. ) THEN
+        ZXINCR(I,L1) = 0.         
+      ENDIF
+      XF(I,J,1,L) = XF(I,J,1,L) + ZXINCR(I,L1)
       ! For no only warn if we have negative values.
-      IF ( ZXI(I,J,L) < 0. ) WRITE(*,*) "WARNING X<0. for ",I,J," for variable ",TRIM(CVAR(L))
+      IF ( XF(I,J,1,L) < 0. ) WRITE(*,*) "WARNING X<0. for ",I,J," for variable ",TRIM(CVAR(L))
     ENDDO
   ENDDO
   !
 ENDDO
 !
-! Write analysis results and increments in ASCII file
-OPEN (unit=111,file='ANAL_INCR.'//YMYPROC,status='unknown',IOSTAT=istat)
-DO I=1,KI
-  DO J=1,NPATCH
-    WRITE(111,*) (ZXI(I,J,L),L=1,NVAR), (ZXINCR(I,J+NPATCH*(L-1)),L=1,NVAR)
-  ENDDO
-ENDDO
-CLOSE(UNIT=111)
 !
 ! **********************************************
 DO L=1,NVAR
@@ -528,13 +550,29 @@ DO L=1,NVAR
   ! Update the modified values
   SELECT CASE (TRIM(CVAR(L)))
     CASE("TG1")
-      XTG(:,1,:) = ZXI(:,:,L)
+      XTG(:,1,:) = XF(:,:,1,L)
     CASE("TG2")
-      XTG(:,2,:) = ZXI(:,:,L)
+      XTG(:,2,:) = XF(:,:,1,L)
     CASE("WG1")
-      XWG(:,1,:) = ZXI(:,:,L)
+      XWG(:,1,:) = XF(:,:,1,L)
     CASE("WG2")
-      XWG(:,2,:) = ZXI(:,:,L)
+      XWG(:,2,:) = XF(:,:,1,L)
+    CASE("LAI") 
+      XLAI(:,:) = XF(:,:,1,L)
+      SELECT CASE (TRIM(CBIO))
+        CASE("BIOMA1","BIOMASS1")
+          XBIOMASS(:,1,:) = ZBIO_PASS(:,:)
+        CASE("BIOMA2","BIOMASS2")
+          XBIOMASS(:,2,:) = ZBIO_PASS(:,:)
+        CASE("RESPI1","RESP_BIOM1")
+          XRESP_BIOMASS(:,1,:) = ZBIO_PASS(:,:)
+        CASE("RESPI2","RESP_BIOM2")
+          XRESP_BIOMASS(:,2,:) = ZBIO_PASS(:,:)
+        CASE("LAI")
+          XLAI(:,:) = ZBIO_PASS(:,:)
+        CASE DEFAULT
+          CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
+      END SELECT
     CASE DEFAULT
       CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in EKF!")
   END SELECT
@@ -555,6 +593,24 @@ DO I=1,KI
   IF (.NOT.LBFIXED)  ZB(I,:,:) = MATMUL(ZIDKH(I,:,:),MATMUL(ZB(I,:,:),TRANSPOSE(ZIDKH(I,:,:))))+ZKRK(I,:,:)
   !
 ENDDO
+!
+!
+! *** Write innovations in ASCII file ***
+!
+OPEN (unit=111,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
+DO I=1,KI
+  WRITE(111,*) (ZB2(I,K),K=1,IOBS)
+ENDDO
+CLOSE(UNIT=111)
+!
+! Write analysis results and increments in ASCII file
+OPEN (unit=111,file='ANAL_INCR.'//YMYPROC,status='unknown',IOSTAT=istat)
+DO I=1,KI
+  DO J=1,NPATCH
+    WRITE(111,*) (XF(I,J,1,L),L=1,NVAR), (ZXINCR(I,J+NPATCH*(L-1)),L=1,NVAR)
+  ENDDO
+ENDDO
+CLOSE(UNIT=111)
 !
 ! Write out analysed B (for use in next cycle)
 YBGFILE = "BGROUNDout_ASSIM."//YMYPROC
@@ -603,40 +659,40 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  Subroutines of Linear Algebra  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-SUBROUTINE INVERSE_MATRIX(N,A,P)
+SUBROUTINE INVERSE_MATRIX(KN,PA,PP)
 !--------------------------------------------------------
 !
 ! Explicit inversed matrix after Cholesky decomposition
 !
 !--------------------------------------------------------
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: N
-REAL, DIMENSION (N,N),  INTENT(INOUT) :: A
-REAL, DIMENSION (N),  INTENT(IN)      :: P
-REAL ZSUM
+INTEGER, INTENT(IN) :: KN
+REAL, DIMENSION (KN,KN), INTENT(INOUT) :: PA
+REAL, DIMENSION (KN),    INTENT(IN)    :: PP
+REAL :: ZSUM
 INTEGER :: I, J, K
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF:INVERSE_MATRIX',0,ZHOOK_HANDLE)
 !
-DO I=1,N
-  A(I,I)=1./P(I)
-  DO J=I+1,N
+DO I = 1,KN
+  PA(I,I)=1./PP(I)
+  DO J = I+1,KN
     ZSUM = 0.
-    DO K=I,J-1
-      ZSUM = ZSUM - A(J,K)*A(K,I)
+    DO K = I,J-1
+      ZSUM = ZSUM - PA(J,K)*PA(K,I)
     ENDDO
-    A(J,I) = ZSUM/P(J)
+    PA(J,I) = ZSUM/PP(J)
   ENDDO
 ENDDO  
 !
-DO I=1,N
-  DO J=I+1,N
-    A(I,J) =0.0
+DO I = 1,KN
+  DO J = I+1,KN
+    PA(I,J) = 0.0
   ENDDO
 ENDDO
 !
-A = MATMUL(TRANSPOSE(A),A)
+PA = MATMUL(TRANSPOSE(PA),PA)
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF:INVERSE_MATRIX',1,ZHOOK_HANDLE)
 !
@@ -644,22 +700,22 @@ END SUBROUTINE INVERSE_MATRIX
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-SUBROUTINE CHOLDC(N,A,P)
+SUBROUTINE CHOLDC(KN,PA,PP)
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: N
-REAL, DIMENSION(N,N), INTENT(INOUT) :: A
-REAL, DIMENSION(N), INTENT(OUT) :: P
+INTEGER, INTENT(IN) :: KN
+REAL, DIMENSION(KN,KN), INTENT(INOUT) :: PA
+REAL, DIMENSION(KN), INTENT(OUT) :: PP
 INTEGER :: I
-REAL :: SUMM
+REAL :: ZSUM
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF:CHOLDC',0,ZHOOK_HANDLE)
 !
-DO I=1,N
-  SUMM = A(I,I)- DOT_PRODUCT(A(I,1:I-1),A(I,1:I-1))
-  IF (SUMM <= 0.0) CALL ABOR1_SFX('ASSIM_NATURE_ISBA_EKF: ERROR IN CHOLDC')
-  P(I) = SQRT(SUMM) 
-  A(I+1:N,I) = (A(I,I+1:N) - MATMUL(A(I+1:N,1:I-1),A(I,1:I-1)))/P(I)
+DO I = 1,KN
+  ZSUM = PA(I,I)- DOT_PRODUCT(PA(I,1:I-1),PA(I,1:I-1))
+  IF ( ZSUM<=0.0 ) CALL ABOR1_SFX('ASSIM_NATURE_ISBA_EKF: ERROR IN CHOLDC')
+  PP(I) = SQRT(ZSUM) 
+  PA(I+1:KN,I) = ( PA(I,I+1:KN) - MATMUL(PA(I+1:KN,1:I-1),PA(I,1:I-1)) )/PP(I)
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF:CHOLDC',1,ZHOOK_HANDLE)
@@ -668,27 +724,29 @@ END SUBROUTINE CHOLDC
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-SUBROUTINE CHOLSL(N,A,P,B,X)
+SUBROUTINE CHOLSL(KN,PA,PP,PB,PX)
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: N
-REAL, DIMENSION (N,N),  INTENT(IN) :: A
-REAL, DIMENSION (N),  INTENT(IN)   :: P,B
-REAL, DIMENSION (N), INTENT(INOUT) :: X
+INTEGER, INTENT(IN) :: KN
+REAL, DIMENSION (KN,KN), INTENT(IN) :: PA
+REAL, DIMENSION (KN), INTENT(IN)    :: PP,PB
+REAL, DIMENSION (KN), INTENT(INOUT) :: PX
 INTEGER :: I
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF:CHOLSL',0,ZHOOK_HANDLE)
 !
-DO I=1,N
-  X(I) = (B(I) - DOT_PRODUCT(A(I,1:I-1),X(1:I-1)))/P(I)
+DO I = 1,KN
+  PX(I) = (PB(I) - DOT_PRODUCT(PA(I,1:I-1),PX(1:I-1)))/PP(I)
 ENDDO
-DO I=N,1,-1
-  X(I) = (X(I) - DOT_PRODUCT(A(I+1:N,I),X(I+1:N)))/P(I)
+DO I = KN,1,-1
+  PX(I) = (PX(I) - DOT_PRODUCT(PA(I+1:KN,I),PX(I+1:KN)))/PP(I)
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF:CHOLSL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE CHOLSL
-
+!
+!
 END SUBROUTINE ASSIM_NATURE_ISBA_EKF
+!
 
