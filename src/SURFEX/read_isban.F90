@@ -136,10 +136,14 @@ DO JL=1,IWORK
   IF ( LPRT ) THEN
     ! read in control variable
     IF (( TRIM(CVAR(NIVAR)) == "TG1" ) .AND. ( JL == 1 ) ) THEN
-      XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
+      WHERE ( XTG(:,JL,:)/=XUNDEF )
+        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
+      ENDWHERE
     ENDIF
     IF (( TRIM(CVAR(NIVAR)) == "TG2" ) .AND. ( JL == 2 ) ) THEN
-      XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
+      WHERE ( XTG(:,JL,:)/=XUNDEF )
+        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
+      ENDWHERE
     ENDIF
   ENDIF
 END DO
@@ -163,10 +167,14 @@ DO JL=1,NGROUND_LAYER
   IF ( LPRT ) THEN
     ! read in control variable
     IF (( TRIM(CVAR(NIVAR)) == "WG1" ) .AND. ( JL == 1 ) ) THEN
-      XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
+      WHERE ( XWG(:,JL,:)/=XUNDEF )
+        XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
+      ENDWHERE
     ENDIF
     IF (( TRIM(CVAR(NIVAR)) == "WG2" ) .AND. ( JL == 2 ) ) THEN
-      XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
+      WHERE ( XWG(:,JL,:)/=XUNDEF )
+        XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
+      ENDWHERE
     ENDIF
   ENDIF
 END DO
@@ -201,7 +209,9 @@ IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
   IF ( LPRT ) THEN
     ! read in control variable
     IF ( TRIM(CVAR(NIVAR)) == "LAI" ) THEN
-      XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XLAI(:,:)
+      WHERE ( XLAI(:,:)/=XUNDEF ) 
+        XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XLAI(:,:)
+      ENDWHERE
     ENDIF
   ENDIF  
 END IF
@@ -393,9 +403,9 @@ IF (CRESPSL=='CNT') THEN
 ENDIF
 
 IF ( LASSIM ) THEN
-  IF ( NPATCH /= 1 ) CALL ABOR1_SFX ('Reading of diagnostical values for'&
-                     & //'assimilation at the moment only works for one patch')
   IF ( TRIM(CASSIM_ISBA) == "OI" ) THEN
+    IF ( NPATCH /= 1 ) CALL ABOR1_SFX ('Reading of diagnostical values for'&
+                       & //'assimilation at the moment only works for one patch')          
     ! Diagnostic fields for assimilation
     IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
     XAT2M_ISBA=XUNDEF
@@ -421,15 +431,23 @@ IF ( LASSIM ) THEN
     DO IOBS = 1,NOBSTYPE
      SELECT CASE (TRIM(COBS(IOBS)))
        CASE("T2M")
-         IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
+         IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,NPATCH))
          XAT2M_ISBA=XUNDEF
-         YRECFM='T2M_ISBA'
-         CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
+         IF (NPATCH>1) THEN
+           YRECFM='T2M_P'
+         ELSE
+           YRECFM='T2M_ISBA'
+         ENDIF
+         CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,:),IRESP)
        CASE("HU2M")
-         IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,1))
+         IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,NPATCH))
          XAHU2M_ISBA=XUNDEF
-         YRECFM='HU2M_ISBA'
-         CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
+         IF (NPATCH>1) THEN
+           YRECFM='HU2M_P'
+         ELSE
+           YRECFM='HU2M_ISBA'
+         ENDIF
+         CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,:),IRESP)
        CASE("WG1")
          ! This is already read above
        CASE DEFAULT

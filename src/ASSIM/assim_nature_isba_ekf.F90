@@ -47,11 +47,11 @@ USE MODI_GET_FILE_NAME
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),    INTENT(IN)            :: HPROGRAM     ! program calling surf. schemes
-INTEGER,             INTENT(IN)            :: KI
-REAL, DIMENSION(KI), INTENT(IN)            :: PT2M
-REAL, DIMENSION(KI), INTENT(IN)            :: PHU2M
-CHARACTER(LEN=2),    INTENT(IN)            :: HTEST        ! must be equal to 'OK'
+CHARACTER(LEN=6),    INTENT(IN)           :: HPROGRAM     ! program calling surf. schemes
+INTEGER,             INTENT(IN)           :: KI
+REAL, DIMENSION(:), INTENT(IN)            :: PT2M
+REAL, DIMENSION(:), INTENT(IN)            :: PHU2M
+CHARACTER(LEN=2),    INTENT(IN)           :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !
@@ -396,7 +396,7 @@ TIMELOOP : DO ISTEP=1,NBOUTPUT
     INOBS = 0
     YMFILE = 'CANARI_NATURE_'
     CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
-    OPEN(UNIT=55,FILE=YMFILE,FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
+    OPEN(UNIT=55,FILE=TRIM(YMFILE)//".DAT",FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
     IF ( ISTAT==0 ) THEN
       !   If it exists, read observations
       DO I = 1,KI
@@ -414,9 +414,16 @@ TIMELOOP : DO ISTEP=1,NBOUTPUT
     !
   ELSE
     !
-    INOBS = NOBSTYPE*NBOUTPUT
+    INOBS = NOBSTYPE
     DO IOBS = 1,INOBS
-      ZYO(:,IOBS) = XF_PATCH(:,1,1,IOBS)
+      SELECT CASE (TRIM(COBS(IOBS)))   
+        CASE("T2M") 
+          ZYO(:,IOBS) = PT2M(:)
+        CASE("HU2M")   
+          ZYO(:,IOBS) = PHU2M(:) 
+        CASE("WG1","LAI")  
+          CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
+      END SELECT                 
     ENDDO
     !
   ENDIF
