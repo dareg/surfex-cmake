@@ -56,8 +56,8 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                   LFLOOD, XZ0_FLOOD, LTEMP_ARP,       &
                                   NTEMPLAYER_ARP, LGLACIER, XICE_STO  
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
-                              & XAZON10M_ISBA,XAMER10M_ISBA,              &
-                              & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR
+                              & XAZON10M_ISBA,XAMER10M_ISBA,XTPRT_VAR,    &
+                              & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR,CBIO
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XZ0SN
@@ -99,6 +99,7 @@ INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX
 INTEGER           :: IIVAR
 INTEGER           :: IOBS
+INTEGER           :: IBSUP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -114,6 +115,16 @@ YRECFM='SIZE_NATURE'
 !
 !*       2.     Prognostic fields:
 !               -----------------
+!
+IF (.NOT.ALLOCATED(XTPRT_VAR)) THEN
+  ALLOCATE(XTPRT_VAR(ILU,NPATCH))
+ENDIF
+!
+IF (LASSIM) THEN
+  CALL READ_SURF(HPROGRAM,"TPRT_VAR",XTPRT_VAR(:,:),IRESP)
+ELSE
+  XTPRT_VAR(:,:) = 1.0
+ENDIF
 !
 ALLOCATE(ZWORK(ILU,NPATCH))
 !* soil temperatures
@@ -137,15 +148,18 @@ DO JL=1,IWORK
     ! read in control variable
     IF (( TRIM(CVAR(NIVAR)) == "TG1" ) .AND. ( JL == 1 ) ) THEN
       WHERE ( XTG(:,JL,:)/=XUNDEF )
-        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
+        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XTG(:,JL,:)
+        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT_VAR(:,:)
       ENDWHERE
     ENDIF
     IF (( TRIM(CVAR(NIVAR)) == "TG2" ) .AND. ( JL == 2 ) ) THEN
       WHERE ( XTG(:,JL,:)/=XUNDEF )
-        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
+        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XTG(:,JL,:)
+        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT_VAR(:,:)   
       ENDWHERE
     ENDIF
   ENDIF
+  !
 END DO
 !
 !
@@ -168,12 +182,14 @@ DO JL=1,NGROUND_LAYER
     ! read in control variable
     IF (( TRIM(CVAR(NIVAR)) == "WG1" ) .AND. ( JL == 1 ) ) THEN
       WHERE ( XWG(:,JL,:)/=XUNDEF )
+        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XWG(:,JL,:)
         XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
       ENDWHERE
     ENDIF
     IF (( TRIM(CVAR(NIVAR)) == "WG2" ) .AND. ( JL == 2 ) ) THEN
       WHERE ( XWG(:,JL,:)/=XUNDEF )
-        XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
+        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XWG(:,JL,:)
+        XWG(:,JL,:) = FLOAT(NINT((XWG(:,JL,:) +XTPRT(NIVAR)*XWG(:,JL,:))*100000000))/100000000.
       ENDWHERE
     ENDIF
   ENDIF
@@ -210,7 +226,9 @@ IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
     ! read in control variable
     IF ( TRIM(CVAR(NIVAR)) == "LAI" ) THEN
       WHERE ( XLAI(:,:)/=XUNDEF ) 
-        XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XLAI(:,:)
+        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XLAI(:,:)
+        !XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XTPRT_VAR(:,:)
+        XLAI(:,:) = FLOAT(NINT((XLAI(:,:) +XTPRT(NIVAR)*XLAI(:,:))*100000000))/100000000.
       ENDWHERE
     ENDIF
   ENDIF  
@@ -309,7 +327,7 @@ ELSEIF (CPHOTO=='LAI' .OR. CPHOTO=='LST') THEN
   XBIOMASS(:,1,:) = XBSLAI(:,:) * XLAI(:,:)
   XRESP_BIOMASS(:,:,:) = 0.
 
-ELSEIF (CPHOTO=='NIT') THEN
+ELSEIF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
   !
   XBIOMASS(:,:,:) = 0.
   DO JNBIOMASS=1,NNBIOMASS
@@ -320,11 +338,30 @@ ELSEIF (CPHOTO=='NIT') THEN
       YRECFM='BIOMASS'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     ENDIF
     CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
+    IF ( LPRT ) THEN
+      ! read in control variable
+      IF ( TRIM(CVAR(NIVAR)) == "LAI" .AND. TRIM(CBIO)==TRIM(YRECFM) ) THEN
+        WHERE ( ZWORK(:,:)/=XUNDEF ) 
+          !XTPRT_VAR(:,:) = XTPRT(NIVAR)*ZWORK(:,:)
+          !ZWORK(:,:) = ZWORK(:,:) + XTPRT(NIVAR)*ZWORK(:,:)
+          WHERE (ZWORK(:,:)>=0.1)
+            ZWORK(:,:) = FLOAT(NINT((ZWORK(:,:) +XTPRT(NIVAR)*ZWORK(:,:))*100000000))/100000000.
+          ELSEWHERE
+            ZWORK(:,:) = FLOAT(NINT((ZWORK(:,:) +XTPRT(NIVAR)*ZWORK(:,:))*1000000000))/1000000000.
+          ENDWHERE
+        ENDWHERE
+      ENDIF
+    ENDIF     
     XBIOMASS(:,JNBIOMASS,:)=ZWORK
   END DO
 
   XRESP_BIOMASS(:,:,:) = 0.
-  DO JNBIOMASS=2,NNBIOMASS
+  IF (CPHOTO=='NIT') THEN
+    IBSUP = NNBIOMASS
+  ELSEIF (CPHOTO=='NCB') THEN
+    IBSUP = NNBIOMASS-2
+  ENDIF
+  DO JNBIOMASS=2,IBSUP
     WRITE(YLVL,'(I1)') JNBIOMASS
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
       YRECFM='RESPI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
@@ -332,32 +369,16 @@ ELSEIF (CPHOTO=='NIT') THEN
       YRECFM='RESP_BIOM'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     ENDIF    
     CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-    XRESP_BIOMASS(:,JNBIOMASS,:)=ZWORK
-  END DO
-
-ELSEIF (CPHOTO=='NCB') THEN
-  !
-  XBIOMASS(:,:,:) = 0.
-  DO JNBIOMASS=1,NNBIOMASS
-    WRITE(YLVL,'(I1)') JNBIOMASS
-    IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
-      YRECFM='BIOMA'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-    ELSE
-      YRECFM='BIOMASS'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-    ENDIF    
-    CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-    XBIOMASS(:,JNBIOMASS,:)=ZWORK
-  END DO
-
-  XRESP_BIOMASS(:,:,:) = 0.
-  DO JNBIOMASS=2,NNBIOMASS-2
-    WRITE(YLVL,'(I1)') JNBIOMASS
-    IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
-      YRECFM='RESPI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-    ELSE
-      YRECFM='RESP_BIOM'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-    ENDIF    
-    CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
+    IF ( LPRT ) THEN
+      ! read in control variable
+      IF ( TRIM(CVAR(NIVAR)) == "LAI" .AND. TRIM(CBIO)==TRIM(YRECFM) ) THEN
+        WHERE ( ZWORK(:,:)/=XUNDEF ) 
+          !XTPRT_VAR(:,:) = XTPRT(NIVAR)*ZWORK(:,:)
+          !ZWORK(:,:) = ZWORK(:,:) + XTPRT_VAR(:,:)
+          ZWORK(:,:) = FLOAT(NINT((ZWORK(:,:) +XTPRT(NIVAR)*ZWORK(:,:))*100000000))/100000000.
+        ENDWHERE
+      ENDIF
+    ENDIF      
     XRESP_BIOMASS(:,JNBIOMASS,:)=ZWORK
   END DO
   !

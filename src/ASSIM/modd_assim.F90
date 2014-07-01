@@ -80,8 +80,8 @@ REAL,DIMENSION(12)                     :: XALPH
  REAL,DIMENSION(NOBSMAX)               :: XERROBS_M            ! Observational standard deviation
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF_PATCH             ! vector of model observations (for each pacth)
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF                   ! Vector of forecast control variables  
- REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XSIMOBS              ! vector of model observations (for each pacth)
- REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XSIMMOD              ! Vector of forecast control variables
+ REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XEPS 
+ REAL,DIMENSION(:,:),ALLOCATABLE       :: XTPRT_VAR            ! Vector of initial variables
  REAL,DIMENSION(:,:),ALLOCATABLE       :: XAT2M_ISBA
  REAL,DIMENSION(:,:),ALLOCATABLE       :: XAHU2M_ISBA
  REAL,DIMENSION(:,:),ALLOCATABLE       :: XAZON10M_ISBA

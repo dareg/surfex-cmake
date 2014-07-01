@@ -24,7 +24,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XTPRT, XSIGMA, CBIO,     &
                                XF_PATCH, XF, COBS, XSCALE_QLAI,  LOBSFILE, XALPH,  &
-                               NECHGU, NBOUTPUT
+                               NECHGU, NBOUTPUT, XEPS
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
@@ -166,10 +166,6 @@ SELECT CASE (TRIM(CBIO))
     CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
 END SELECT
 !
-! Calculate delta for control variables 
-DO L = 1,NVAR
-  ZEPS(:,:,L) = XTPRT(L) * XF(:,:,1,L)
-ENDDO
 !
 !   Read CLAY fraction to  compute the SWI range (Wfc - Wwilt)
 !   (XSIGMA is defined in terms of SWI), need to convert to equivalent v/v
@@ -231,7 +227,7 @@ IF ( LBEV ) THEN
   ENDIF
 
   ! calculate LTM
-
+  ZLTM(:,:,:) = 0.0
   DO L = 1,NVAR    ! control variable (x at previous time step)
     DO K = 1,NVAR
       DO I = 1,KI 
@@ -242,7 +238,7 @@ IF ( LBEV ) THEN
             L1 = J + NPATCH*(L-1)
             K1 = J + NPATCH*(K-1)
             ! Jacobian of fwd model
-            ZLTM(I,L1,K1) = ( XF(I,J,L+1,K) - XF(I,J,1,K) ) / ZEPS(I,J,L)
+            ZLTM(I,L1,K1) = ( XF(I,J,L+1,K) - XF(I,J,1,K) ) / XEPS(I,J,L)
             ! impose upper/lower limits 
             ZLTM(I,L1,K1) = MAX(-0.1, ZLTM(I,L1,K1))
             ZLTM(I,L1,K1) = MIN( 1.0, ZLTM(I,L1,K1))
@@ -403,7 +399,7 @@ TIMELOOP : DO ISTEP=1,NBOUTPUT
         READ (55,*)  (ZYO(I,INOBS+J),J=1,NOBSTYPE)
       ENDDO
       INOBS = INOBS + NOBSTYPE      
-      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(I,:), INOBS
+      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(1,:), INOBS
       CLOSE(55)
     ENDIF
     !
@@ -429,8 +425,6 @@ TIMELOOP : DO ISTEP=1,NBOUTPUT
   ENDIF
   !
 ENDDO TIMELOOP
-!
-IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(1,:), IOBS
 !
 ! Mean simulated obs averaged over tiles
 DO I=1,KI
@@ -493,7 +487,7 @@ DO L=1,NVAR
       L1 = J + NPATCH*(L-1)
       DO K=1,IOBS
         !
-        ZHOWR(I,K,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L) 
+        ZHOWR(I,K,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/XEPS(I,J,L) 
         IF( ZYO(I,K).NE.XUNDEF ) THEN         !if obs available
           ! Jacobian of obs operator
           ZHO(I,K,L1) = ZHOWR(I,K,J+NPATCH*(L-1))
@@ -640,7 +634,7 @@ DO L=1,NVAR
   DO K=1, NOBSTYPE
     WRITE(YCHAR,'(I1)') K
     YFNAME='HO_'//CVAR(L)//'_v'//YCHAR
-    OPEN(UNIT=111,FILE=YFNAME,FORM='FORMATTED',STATUS='NEW',IOSTAT=ISTAT)
+    OPEN(UNIT=111,FILE=YFNAME,FORM='FORMATTED',STATUS='UNKNOWN',IOSTAT=ISTAT)
     DO I=1,KI
       DO J=1,NPATCH
         WRITE(111,*) ZHOWR(I,K,J+NPATCH*(L-1)),ZGAIN(I,J+NPATCH*(L-1),K)
@@ -651,6 +645,7 @@ DO L=1,NVAR
 ENDDO
 !
 IF ( NPRINTLEV > 0 ) THEN
+  IOBSCOUNT = IOBSCOUNT / NPATCH / NVAR
   WRITE(*,*)
   WRITE(*,*) '   ---------------------------------------'
   WRITE(*,*) '   |   EXITING VARASSIM AFTER ANALYSIS   |'

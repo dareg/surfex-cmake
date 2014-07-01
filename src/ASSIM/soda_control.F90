@@ -75,7 +75,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG, XLAI
 !
 USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
                        NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU,      &
-                       NBOUTPUT
+                       NBOUTPUT, XTPRT_VAR, XEPS
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
@@ -212,7 +212,7 @@ INTEGER :: IYEAR, IMONTH, IDAY, IHOUR
 INTEGER :: IYEAR_OUT, IMONTH_OUT, IDAY_OUT
 INTEGER :: L,INBPERT
 INTEGER :: INW, JNW
-INTEGER :: IVAR_COUNT, ISTEP
+INTEGER :: IPERT, ISTEP
 INTEGER :: IOBS, IIOBS
 INTEGER :: IGPCOMP
 INTEGER :: ILUOUT
@@ -386,30 +386,30 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
   YMFILE = "PREP_"
   CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
   !
-  DO IVAR_COUNT = 1,INBPERT
+  DO IPERT = 1,INBPERT
     !
     ! If we have more than one initialization to do
     ! For last initialization, we must re-do the first.
     ! Could be avoided by introducing knowlegde of LASSIM on this level
     IF ( CASSIM_ISBA == 'EKF  ' ) THEN
       !
-      WRITE(YVAR,'(I1.1)') IVAR_COUNT-1
+      WRITE(YVAR,'(I1.1)') IPERT-1
       !
       IF ( CSURF_FILETYPE == "LFI   " ) THEN
-        YFILEIN = YMFILE//"_EKF_PERT"//YVAR
+        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//YVAR
 #ifdef LFI
         CFILEIN_LFI      = YFILEIN 
         CFILE_LFI        = YFILEIN
         CFILEIN_LFI_SAVE = YFILEIN
 #endif    
       ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
-        YFILEIN = YMFILE//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.fa')
+        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.fa')
 #ifdef FA
         CFILEIN_FA      = YFILEIN
         CFILEIN_FA_SAVE = YFILEIN
 #endif    
       ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
-        YFILEIN = YMFILE//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.txt')
+        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.txt')
 #ifdef ASC
         CFILEIN      = YFILEIN
         CFILEIN_SAVE = YFILEIN
@@ -436,9 +436,10 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
     !
     IF ( CASSIM_ISBA=='EKF  ' ) THEN
       !
-      IF ( ISTEP==1 .AND. IVAR_COUNT==1 ) THEN
+      IF ( ISTEP==1 .AND. IPERT==1 ) THEN
         ALLOCATE(XF      (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
         ALLOCATE(XF_PATCH(NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
+        ALLOCATE(XEPS    (NSIZE_NATURE,NPATCH,NVAR))
       ENDIF
       !
       ! Set the global state values for this control value
@@ -446,13 +447,13 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
         IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
         SELECT CASE (TRIM(COBS(IOBS)))
           CASE("T2M")
-            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XAT2M_ISBA(:,:)
+          XF_PATCH(:,:,IPERT,IIOBS) = XAT2M_ISBA(:,:)
           CASE("HU2M")
-            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XAHU2M_ISBA(:,:)
+            XF_PATCH(:,:,IPERT,IIOBS) = XAHU2M_ISBA(:,:)
           CASE("WG1")
-            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XWG(:,1,:)
+            XF_PATCH(:,:,IPERT,IIOBS) = XWG(:,1,:)
           CASE("LAI")
-            XF_PATCH(:,:,IVAR_COUNT,IIOBS) = XLAI(:,:)
+            XF_PATCH(:,:,IPERT,IIOBS) = XLAI(:,:)
           CASE DEFAULT
             CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA_CONTROL!")
         END SELECT
@@ -462,18 +463,19 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
       DO L = 1,NVAR
         SELECT CASE (TRIM(CVAR(L)))
           CASE("TG1")
-            XF(:,:,IVAR_COUNT,L) = XTG(:,1,:)
+            XF(:,:,IPERT,L) = XTG(:,1,:)
           CASE("TG2")
-            XF(:,:,IVAR_COUNT,L) = XTG(:,2,:)
+            XF(:,:,IPERT,L) = XTG(:,2,:)
           CASE("WG1")
-            XF(:,:,IVAR_COUNT,L) = XWG(:,1,:)
+            XF(:,:,IPERT,L) = XWG(:,1,:)
           CASE("WG2")
-            XF(:,:,IVAR_COUNT,L) = XWG(:,2,:)
+            XF(:,:,IPERT,L) = XWG(:,2,:)
           CASE("LAI")
-            XF(:,:,IVAR_COUNT,L) = XLAI(:,:)            
+            XF(:,:,IPERT,L) = XLAI(:,:)            
           CASE DEFAULT
             CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
         END SELECT
+        IF ( L==IPERT-1 ) XEPS(:,:,L) = XTPRT_VAR(:,:)
       ENDDO
       !
     ENDIF
