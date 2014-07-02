@@ -471,6 +471,8 @@ IF ( LASSIM ) THEN
          CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,:),IRESP)
        CASE("WG1")
          ! This is already read above
+       CASE("LAI")
+         ! This is already read above         
        CASE DEFAULT
          CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in READ_ISBA_n!")
      END SELECT

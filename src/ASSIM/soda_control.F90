@@ -386,7 +386,7 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
   YMFILE = "PREP_"
   CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
   !
-  DO IPERT = 1,INBPERT
+  DO IPERT = INBPERT,1,-1
     !
     ! If we have more than one initialization to do
     ! For last initialization, we must re-do the first.
@@ -436,7 +436,7 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
     !
     IF ( CASSIM_ISBA=='EKF  ' ) THEN
       !
-      IF ( ISTEP==1 .AND. IPERT==1 ) THEN
+      IF ( ISTEP==1 .AND. IPERT==INBPERT ) THEN
         ALLOCATE(XF      (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
         ALLOCATE(XF_PATCH(NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
         ALLOCATE(XEPS    (NSIZE_NATURE,NPATCH,NVAR))

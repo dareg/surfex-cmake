@@ -24,7 +24,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XTPRT, XSIGMA, CBIO,     &
                                XF_PATCH, XF, COBS, XSCALE_QLAI,  LOBSFILE, XALPH,  &
-                               NECHGU, NBOUTPUT, XEPS
+                               NECHGU, NBOUTPUT, XEPS, XTPRT
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
@@ -89,15 +89,18 @@ REAL,DIMENSION(NPATCH*NVAR,NPATCH*NVAR) :: ZIDENT          ! identitiy matrix, u
 REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT) :: ZYO                         ! vector of observations
 REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT) :: ZX,ZB2,ZP
 REAL,DIMENSION(KI,NPATCH*NVAR) :: ZXINCR                   ! Analysis increment
-REAL,DIMENSION(KI,NPATCH) :: ZVECT                         ! The analysed variable
+REAL,DIMENSION(KI,NPATCH*NVAR) :: ZB0
 REAL,DIMENSION(KI,NPATCH) :: ZBIO_PASS
-REAL,DIMENSION(KI,NPATCH) :: ZBIO_OUT
+REAL,DIMENSION(KI*NPATCH*NVAR*NPATCH*NVAR) :: ZBLONG
 REAL,DIMENSION(KI) :: ZCOFSWI                              ! dynamic range (Wfc - Wwilt)
 REAL,DIMENSION(KI) :: ZSMSAT                               ! saturation  
 REAL,DIMENSION(KI) :: ZWILT
+
 !
 REAL,DIMENSION(NPATCH) :: ZVLAIMIN
 !
+REAL :: ZBVAR
+REAL :: ZLAI_PASS
 REAL :: ZTIME                      ! current time since start of the run (s)
 
 INTEGER :: IOBSCOUNT
@@ -109,7 +112,7 @@ INTEGER :: IRESP                      ! return code
 INTEGER :: ISTEP                      ! 
 INTEGER :: IMYPROC
 INTEGER :: INOBS, IOBS
-INTEGER :: ISTAT
+INTEGER :: ISTAT, ICPT
 !
 INTEGER :: I,J,K,JJ,L,K1,L1
 !
@@ -192,14 +195,14 @@ IF ( LBEV ) THEN
   IF (GBEXISTS) THEN
     !
     OPEN (unit=111,file=YBGFILE,status='unknown',IOSTAT=ISTAT)
-    DO JJ = 1,NVAR   ! control variable (x at previous time step)
-      DO L = 1,NVAR
+    DO L = 1,NVAR   ! control variable (x at previous time step)
+      DO K = 1,NVAR
         DO I = 1,KI
           DO J = 1,NPATCH   
-            DO K = 1,NPATCH   
-              READ (111,*) ZB(I, J+NPATCH*(JJ-1), K+NPATCH*(L-1))
+            DO JJ = 1,NPATCH
+              READ (111,*) ZB(I,J+NPATCH*(L-1),JJ+NPATCH*(K-1))
             ENDDO
-          ENDDO                 
+          ENDDO
         ENDDO
       ENDDO
     ENDDO
@@ -209,21 +212,57 @@ IF ( LBEV ) THEN
   ELSE
     ! Initialization of B 
     ZB(:,:,:) = 0.0
-    DO L = 1,NVAR
-      DO I = 1,KI
+    DO I = 1,KI
+      DO L = 1,NVAR
         DO J = 1,NPATCH
-          L1 = J+NPATCH*(L-1)
           IF ( TRIM(CVAR(L))=='WG2' .OR. TRIM(CVAR(L))=='WG1' ) &
-            ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
+            ZB0(I,J+NPATCH *(L-1)) = XSIGMA(L)*XSIGMA(L)*ZCOFSWI(I)*ZCOFSWI(I)
           IF ( TRIM(CVAR(L))=='TG2' .OR. TRIM(CVAR(L))=='TG1' ) &
-            ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)
-          IF ( TRIM(CVAR(L))=='LAI' ) &
-            ZB(I,L1,L1) = XSIGMA(L)*XSIGMA(L)*XLAI(I,J)*XLAI(I,J) 
+            ZB0(I,J+NPATCH *(L-1)) = XSIGMA(L)*XSIGMA(L)
+          IF ( TRIM(CVAR(L))=='LAI' ) THEN
+            IF (XLAI(I,J)/=XUNDEF) THEN
+              ZLAI_PASS = XEPS(I,J,L) / XTPRT(L)
+              ZB0(I,J+NPATCH *(L-1)) = XSIGMA(L)*XSIGMA(L)*ZLAI_PASS*ZLAI_PASS
+            ELSE
+              ZB0(I,J+NPATCH *(L-1)) = XUNDEF
+            ENDIF
+            
+          ENDIF
         ENDDO
       ENDDO
     ENDDO
+
+     ICPT = 0
+     DO I = 1,KI
+       DO J = 1,NPATCH
+         DO JJ = 1,NPATCH
+           DO L = 1,NVAR
+             DO K = 1,NVAR
+               ICPT = ICPT + 1
+               ZBLONG(ICPT) = ZB0(I,J+NPATCH*(L-1))
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+     !
+     ICPT = 0
+     DO L = 1,NVAR  
+       DO K = 1,NVAR  
+         DO I = 1,KI
+           DO J = 1,NPATCH  
+             DO JJ = 1,NPATCH
+               ICPT = ICPT+1
+               ZB(I,J+NPATCH*(L-1),JJ+NPATCH*(K-1)) = ZBLONG(ICPT)
+             ENDDO
+           ENDDO    
+         ENDDO
+       ENDDO
+     ENDDO
+     !    
     IF ( NPRINTLEV > 0 ) WRITE(*,*) 'Initialized B'
     !
+    
   ENDIF
 
   ! calculate LTM
@@ -255,14 +294,14 @@ IF ( LBEV ) THEN
   ! evolve B 
   !
   DO I=1,KI
-    ZB(I,:,:) = MATMUL(ZLTM(I,:,:),MATMUL(ZB(I,:,:),TRANSPOSE(ZLTM(I,:,:))))     
+    ZB(I,:,:) = MATMUL(ZLTM(I,:,:),MATMUL(ZB(I,:,:),TRANSPOSE(ZLTM(I,:,:))))
   ENDDO
   !
   ! write out the LTM for the forward model
   ! Write out current B
   YBGFILE="BGROUNDout_LBEV."//YMYPROC
   OPEN (unit=112,file=YBGFILE,status='unknown')
-  !
+  !  
   DO L=1,NVAR
     DO K=1,NVAR
       !
@@ -421,7 +460,7 @@ TIMELOOP : DO ISTEP=1,NBOUTPUT
           CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
       END SELECT                 
     ENDDO
-    !
+    !  
   ENDIF
   !
 ENDDO TIMELOOP
@@ -430,7 +469,9 @@ ENDDO TIMELOOP
 DO I=1,KI
   DO J=1,NPATCH
     IF (XPATCH(I,J) > 0.0) THEN
-      ZYF(I,:,:) = ZYF(I,:,:) + XPATCH(I,J)*XF_PATCH(I,J,:,:)
+      WHERE ( XF_PATCH(I,J,:,:)/=XUNDEF ) 
+        ZYF(I,:,:) = ZYF(I,:,:) + XPATCH(I,J)*XF_PATCH(I,J,:,:)
+      ENDWHERE
     ENDIF
   ENDDO
 ENDDO
@@ -462,15 +503,6 @@ WRITE (111,*) (ZYO(I,:), I=1,KI)
 CLOSE(111)
 !
 !
-IOBS = NOBSTYPE
-! Data type selection before assimilation 
-DO I = 1,NOBSTYPE
-  IF ( NNCO(I)==0 ) THEN 
-    ZYO (:,I) = XUNDEF
-    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION TYPE ',COBS(I),' REMOVED'
-  ENDIF
-ENDDO
-!
 DO I = 1,KI
   IF ( MINVAL(XWGI(I,1,:))>0. ) THEN
     ZYO (I,:) = XUNDEF
@@ -478,17 +510,17 @@ DO I = 1,KI
   ENDIF
 ENDDO
 !
-IF ( NPRINTLEV > 0 ) WRITE(*,*) 'calculating jacobians',IOBS
+IF ( NPRINTLEV > 0 ) WRITE(*,*) 'calculating jacobians',INOBS
 !
 IOBSCOUNT = 0
 DO L=1,NVAR
   DO I=1,KI
     DO J=1,NPATCH
       L1 = J + NPATCH*(L-1)
-      DO K=1,IOBS
+      DO K=1,INOBS
         !
         ZHOWR(I,K,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/XEPS(I,J,L) 
-        IF( ZYO(I,K).NE.XUNDEF ) THEN         !if obs available
+        IF( ZYO(I,K).NE.XUNDEF .AND. ZYO(I,K).NE.999.0 ) THEN         !if obs available
           ! Jacobian of obs operator
           ZHO(I,K,L1) = ZHOWR(I,K,J+NPATCH*(L-1))
           ! impose limits  
@@ -586,7 +618,7 @@ ENDDO
 DO I=1,KI 
   !
   ! K1 = (R+H.B.HT) (calculate inverse -> output goes to K1)
-  CALL INVERSE_MATRIX(NOBSTYPE,ZK1(I,:,:),ZP(I,:))
+  CALL INVERSE_MATRIX(INOBS,ZK1(I,:,:),ZP(I,:))
   ZGAIN(I,:,:) = MATMUL(ZB(I,:,:),MATMUL(ZHOT(I,:,:),ZK1(I,:,:)))
   ZKH(I,:,:) = MATMUL(ZGAIN(I,:,:),ZHO(I,:,:))
   ZIDKH(I,:,:) = ZIDENT(:,:) - ZKH(I,:,:) 
@@ -600,7 +632,7 @@ ENDDO
 !
 OPEN (unit=111,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
 DO I=1,KI
-  WRITE(111,*) (ZB2(I,K),K=1,IOBS)
+  WRITE(111,*) (ZB2(I,K),K=1,INOBS)
 ENDDO
 CLOSE(UNIT=111)
 !
