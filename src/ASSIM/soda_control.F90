@@ -71,11 +71,11 @@ USE MODD_SURF_CONF, ONLY : CSOFTWARE
 USE MODD_SURF_PAR,  ONLY : XUNDEF,NUNDEF
 !
 USE MODD_SURF_ATM_n, ONLY : NSIZE_NATURE, NSIZE_FULL
-USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG, XLAI
+USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG, XLAI, XBIOMASS, XRESP_BIOMASS
 !
 USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
-                       NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU,      &
-                       NBOUTPUT, XTPRT_VAR, XEPS
+                       NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU, XI,  &
+                       NBOUTPUT, XLAI_PASS, XBIO_PASS, CBIO
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
@@ -127,6 +127,8 @@ USE MODI_WRITE_DIAG_SURF_ATM_n
 USE MODI_ASSIM_READ_SST_FROM_FILE
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_GET_FILE_NAME
+USE MODI_FLAG_UPDATE
+USE MODI_FLAG_DIAG_UPDATE
 !
 #ifdef OFF
 USE MODI_FANDAR
@@ -356,7 +358,7 @@ XAZIM   = XUNDEF
 IF ( CASSIM_ISBA == 'EKF  ' ) THEN
  ! Has to do initialization for all the perturbations + 
  ! control + the real run at last
- INBPERT = NVAR + 1
+ INBPERT = NVAR + 2
 ELSE
  INBPERT = 1
 ENDIF
@@ -392,30 +394,35 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
     ! For last initialization, we must re-do the first.
     ! Could be avoided by introducing knowlegde of LASSIM on this level
     IF ( CASSIM_ISBA == 'EKF  ' ) THEN
-      !
-      WRITE(YVAR,'(I1.1)') IPERT-1
+      !    
+      IF ( IPERT<INBPERT ) THEN
+       WRITE(YVAR,'(I1.1)') IPERT-1
+        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//YVAR
+      ELSE
+        YFILEIN = "PREP_INIT"
+      ENDIF
       !
       IF ( CSURF_FILETYPE == "LFI   " ) THEN
-        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//YVAR
+        YFILEIN = TRIM(YFILEIN)
 #ifdef LFI
         CFILEIN_LFI      = YFILEIN 
         CFILE_LFI        = YFILEIN
         CFILEIN_LFI_SAVE = YFILEIN
 #endif    
       ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
-        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.fa')
+        YFILEIN = TRIM(YFILEIN)//'.fa'
 #ifdef FA
         CFILEIN_FA      = YFILEIN
         CFILEIN_FA_SAVE = YFILEIN
 #endif    
       ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
-        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.txt')
+        YFILEIN = TRIM(YFILEIN)//'.txt'
 #ifdef ASC
         CFILEIN      = YFILEIN
         CFILEIN_SAVE = YFILEIN
 #endif    
       ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
-        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//ADJUSTL(ADJUSTR(YVAR)//'.nc')
+        YFILEIN = TRIM(YFILEIN)//'.nc'
 #ifdef NC
         CFILEIN_NC      = YFILEIN
         CFILEIN_NC_SAVE = YFILEIN
@@ -437,46 +444,91 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
     IF ( CASSIM_ISBA=='EKF  ' ) THEN
       !
       IF ( ISTEP==1 .AND. IPERT==INBPERT ) THEN
-        ALLOCATE(XF      (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
-        ALLOCATE(XF_PATCH(NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
-        ALLOCATE(XEPS    (NSIZE_NATURE,NPATCH,NVAR))
+        ALLOCATE(XLAI_PASS(NSIZE_NATURE,NPATCH)) 
+        ALLOCATE(XBIO_PASS(NSIZE_NATURE,NPATCH))     
+        ALLOCATE(XI       (NSIZE_NATURE,NPATCH,NVAR    ))
+        ALLOCATE(XF       (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
+        ALLOCATE(XF_PATCH (NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
       ENDIF
       !
-      ! Set the global state values for this control value
-      DO IOBS = 1,NOBSTYPE
-        IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
-        SELECT CASE (TRIM(COBS(IOBS)))
-          CASE("T2M")
-          XF_PATCH(:,:,IPERT,IIOBS) = XAT2M_ISBA(:,:)
-          CASE("HU2M")
-            XF_PATCH(:,:,IPERT,IIOBS) = XAHU2M_ISBA(:,:)
-          CASE("WG1")
-            XF_PATCH(:,:,IPERT,IIOBS) = XWG(:,1,:)
-          CASE("LAI")
-            XF_PATCH(:,:,IPERT,IIOBS) = XLAI(:,:)
-          CASE DEFAULT
-            CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA_CONTROL!")
-        END SELECT
-      ENDDO
-      !
-      ! Prognostic fields for assimilation (Control vector)
-      DO L = 1,NVAR
-        SELECT CASE (TRIM(CVAR(L)))
-          CASE("TG1")
-            XF(:,:,IPERT,L) = XTG(:,1,:)
-          CASE("TG2")
-            XF(:,:,IPERT,L) = XTG(:,2,:)
-          CASE("WG1")
-            XF(:,:,IPERT,L) = XWG(:,1,:)
-          CASE("WG2")
-            XF(:,:,IPERT,L) = XWG(:,2,:)
-          CASE("LAI")
-            XF(:,:,IPERT,L) = XLAI(:,:)            
-          CASE DEFAULT
-            CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
-        END SELECT
-        IF ( L==IPERT-1 ) XEPS(:,:,L) = XTPRT_VAR(:,:)
-      ENDDO
+      IF ( IPERT<INBPERT ) THEN
+        !
+        ! Set the global state values for this control value
+        DO IOBS = 1,NOBSTYPE
+          IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
+          SELECT CASE (TRIM(COBS(IOBS)))
+            CASE("T2M")
+              XF_PATCH(:,:,IPERT,IIOBS) = XAT2M_ISBA(:,:)
+            CASE("HU2M")
+              XF_PATCH(:,:,IPERT,IIOBS) = XAHU2M_ISBA(:,:)
+            CASE("WG1")
+              XF_PATCH(:,:,IPERT,IIOBS) = XWG(:,1,:)
+            CASE("LAI")
+              XF_PATCH(:,:,IPERT,IIOBS) = XLAI(:,:)
+            CASE DEFAULT
+              CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA_CONTROL!")
+          END SELECT
+        ENDDO
+        !
+        ! Prognostic fields for assimilation (Control vector)
+        DO L = 1,NVAR
+          SELECT CASE (TRIM(CVAR(L)))
+            CASE("TG1")
+              XF(:,:,IPERT,L) = XTG(:,1,:)
+            CASE("TG2")
+              XF(:,:,IPERT,L) = XTG(:,2,:)
+            CASE("WG1")
+              XF(:,:,IPERT,L) = XWG(:,1,:)
+            CASE("WG2")
+              XF(:,:,IPERT,L) = XWG(:,2,:)
+            CASE("LAI")
+              XF(:,:,IPERT,L) = XLAI(:,:)
+            CASE DEFAULT
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
+          END SELECT
+        ENDDO
+        !
+        IF ( IPERT==1 ) THEN
+          !
+          SELECT CASE (TRIM(CBIO))
+            CASE("BIOMA1","BIOMASS1")
+              XBIO_PASS(:,:) = XBIOMASS(:,1,:)
+            CASE("BIOMA2","BIOMASS2")
+              XBIO_PASS(:,:) = XBIOMASS(:,2,:)
+            CASE("RESPI1","RESP_BIOM1")
+              XBIO_PASS(:,:) = XRESP_BIOMASS(:,1,:)
+            CASE("RESPI2","RESP_BIOM2")
+              XBIO_PASS(:,:) = XRESP_BIOMASS(:,2,:)
+            CASE("LAI")
+              XBIO_PASS(:,:) = XLAI(:,:)
+            CASE DEFAULT
+              CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
+          END SELECT
+          print*,'BIO_PASS ',XBIO_PASS
+          !
+        ENDIF
+        !
+      ELSE
+        !
+        DO L = 1,NVAR
+          SELECT CASE (TRIM(CVAR(L)))
+            CASE("TG1")
+              XI(:,:,L) = XTG(:,1,:)
+            CASE("TG2")
+              XI(:,:,L) = XTG(:,2,:)
+            CASE("WG1")
+              XI(:,:,L) = XWG(:,1,:)
+            CASE("WG2")
+              XI(:,:,L) = XWG(:,2,:)
+            CASE("LAI")
+              XI(:,:,L) = XLAI(:,:)
+            CASE DEFAULT
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
+          END SELECT
+        ENDDO        
+        XLAI_PASS(:,:) = XLAI(:,:)
+        !
+      ENDIF
       !
     ENDIF
     !
@@ -746,6 +798,12 @@ IF (.NOT.ODINLINE) THEN
   !
   LDEF = .TRUE.
   DO JNW = 1,INW
+    CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+    CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,0,0,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.,.FALSE.,&
+                          .FALSE.,.FALSE.)  
     ! Store results from assimilation
     CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
     CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')

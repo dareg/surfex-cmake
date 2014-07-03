@@ -56,7 +56,7 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                   LFLOOD, XZ0_FLOOD, LTEMP_ARP,       &
                                   NTEMPLAYER_ARP, LGLACIER, XICE_STO  
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
-                              & XAZON10M_ISBA,XAMER10M_ISBA,XTPRT_VAR,    &
+                              & XAZON10M_ISBA,XAMER10M_ISBA,   &
                               & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR,CBIO
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
@@ -116,16 +116,6 @@ YRECFM='SIZE_NATURE'
 !*       2.     Prognostic fields:
 !               -----------------
 !
-IF (.NOT.ALLOCATED(XTPRT_VAR)) THEN
-  ALLOCATE(XTPRT_VAR(ILU,NPATCH))
-ENDIF
-!
-IF (LASSIM) THEN
-  CALL READ_SURF(HPROGRAM,"TPRT_VAR",XTPRT_VAR(:,:),IRESP)
-ELSE
-  XTPRT_VAR(:,:) = 1.0
-ENDIF
-!
 ALLOCATE(ZWORK(ILU,NPATCH))
 !* soil temperatures
 !
@@ -142,20 +132,13 @@ DO JL=1,IWORK
   YRECFM='TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
   XTG(:,JL,:)=ZWORK
-
   ! Perturb value if requested
   IF ( LPRT ) THEN
     ! read in control variable
-    IF (( TRIM(CVAR(NIVAR)) == "TG1" ) .AND. ( JL == 1 ) ) THEN
+    IF ( (TRIM(CVAR(NIVAR))=="TG1" .AND. JL==1) .OR. &
+         (TRIM(CVAR(NIVAR))=="TG2" .AND. JL==2) ) THEN
       WHERE ( XTG(:,JL,:)/=XUNDEF )
-        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XTG(:,JL,:)
-        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT_VAR(:,:)
-      ENDWHERE
-    ENDIF
-    IF (( TRIM(CVAR(NIVAR)) == "TG2" ) .AND. ( JL == 2 ) ) THEN
-      WHERE ( XTG(:,JL,:)/=XUNDEF )
-        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XTG(:,JL,:)
-        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT_VAR(:,:)   
+        XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
       ENDWHERE
     ENDIF
   ENDIF
@@ -175,21 +158,14 @@ DO JL=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JL
   YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-   XWG(:,JL,:)=ZWORK
-   
+   XWG(:,JL,:)=ZWORK   
    ! Perturb value if requested
   IF ( LPRT ) THEN
     ! read in control variable
-    IF (( TRIM(CVAR(NIVAR)) == "WG1" ) .AND. ( JL == 1 ) ) THEN
+    IF ( (TRIM(CVAR(NIVAR))=="WG1" .AND. JL==1) .OR. & 
+         (TRIM(CVAR(NIVAR))=="WG2" .AND. JL==2) ) THEN
       WHERE ( XWG(:,JL,:)/=XUNDEF )
-        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XWG(:,JL,:)
         XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
-      ENDWHERE
-    ENDIF
-    IF (( TRIM(CVAR(NIVAR)) == "WG2" ) .AND. ( JL == 2 ) ) THEN
-      WHERE ( XWG(:,JL,:)/=XUNDEF )
-        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XWG(:,JL,:)
-        XWG(:,JL,:) = FLOAT(NINT((XWG(:,JL,:) +XTPRT(NIVAR)*XWG(:,JL,:))*100000000))/100000000.
       ENDWHERE
     ENDIF
   ENDIF
@@ -224,11 +200,9 @@ IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
   CALL READ_SURF(HPROGRAM,YRECFM,XLAI(:,:),IRESP)
   IF ( LPRT ) THEN
     ! read in control variable
-    IF ( TRIM(CVAR(NIVAR)) == "LAI" ) THEN
+    IF ( TRIM(CVAR(NIVAR))=="LAI" ) THEN
       WHERE ( XLAI(:,:)/=XUNDEF ) 
-        XTPRT_VAR(:,:) = XTPRT(NIVAR)*XLAI(:,:)
-        !XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XTPRT_VAR(:,:)
-        XLAI(:,:) = FLOAT(NINT((XLAI(:,:) +XTPRT(NIVAR)*XLAI(:,:))*100000000))/100000000.
+        XLAI(:,:) = XLAI(:,:) + XTPRT(NIVAR)*XLAI(:,:)
       ENDWHERE
     ENDIF
   ENDIF  
@@ -342,13 +316,7 @@ ELSEIF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
       ! read in control variable
       IF ( TRIM(CVAR(NIVAR)) == "LAI" .AND. TRIM(CBIO)==TRIM(YRECFM) ) THEN
         WHERE ( ZWORK(:,:)/=XUNDEF ) 
-          !XTPRT_VAR(:,:) = XTPRT(NIVAR)*ZWORK(:,:)
-          !ZWORK(:,:) = ZWORK(:,:) + XTPRT(NIVAR)*ZWORK(:,:)
-          WHERE (ZWORK(:,:)>=0.1)
-            ZWORK(:,:) = FLOAT(NINT((ZWORK(:,:) +XTPRT(NIVAR)*ZWORK(:,:))*100000000))/100000000.
-          ELSEWHERE
-            ZWORK(:,:) = FLOAT(NINT((ZWORK(:,:) +XTPRT(NIVAR)*ZWORK(:,:))*1000000000))/1000000000.
-          ENDWHERE
+          ZWORK(:,:) = ZWORK(:,:) + XTPRT(NIVAR)*ZWORK(:,:)
         ENDWHERE
       ENDIF
     ENDIF     
@@ -373,9 +341,7 @@ ELSEIF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
       ! read in control variable
       IF ( TRIM(CVAR(NIVAR)) == "LAI" .AND. TRIM(CBIO)==TRIM(YRECFM) ) THEN
         WHERE ( ZWORK(:,:)/=XUNDEF ) 
-          !XTPRT_VAR(:,:) = XTPRT(NIVAR)*ZWORK(:,:)
-          !ZWORK(:,:) = ZWORK(:,:) + XTPRT_VAR(:,:)
-          ZWORK(:,:) = FLOAT(NINT((ZWORK(:,:) +XTPRT(NIVAR)*ZWORK(:,:))*100000000))/100000000.
+          ZWORK(:,:) = ZWORK(:,:) + XTPRT(NIVAR)*ZWORK(:,:)
         ENDWHERE
       ENDIF
     ENDIF      
