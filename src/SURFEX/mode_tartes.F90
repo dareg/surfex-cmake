@@ -666,6 +666,8 @@ DO JB = 1,NPNBANDS
     !
     WHERE ( (KNLVLS_USE>=JL) .AND. GEFF )
       ZTAU(:,JL,JB) = ZTAU(:,JL-1,JB) + PKESTAR(:,JL,JB) * PDTAUSTAR(:,JL,JB)
+    ELSEWHERE
+      ZTAU(:,JL,JB) = 0.      
     ENDWHERE
     WHERE ( ZTAU(:,JL,JB)>XPTAUMAX )
       KNLVLS_EFF(:,JB) = MAX(1,JL-1)
@@ -1535,6 +1537,7 @@ END DO
 ZSNOWENERGY_BB(:,1) = ZSNOWENERGY_BB(:,1) + ZNIR_ABS
 !
 ! Total energy absorbed by snowpack
+ZTOTSNOWENERGY(:)=0
 DO JL = 1,SIZE(PSNOWRHO,2)
   DO JJ = 1,SIZE(PSNOWRHO,1)
     IF ( JL<=KNLVLS_USE(JJ) ) THEN
