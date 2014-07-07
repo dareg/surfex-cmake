@@ -368,7 +368,7 @@ ENDIF
 !*       8.     prognostic variable diagnostics:
 !               --------------------------------
 !
-IF(LPROVAR_TO_DIAG.OR.LINTERPOL_TS)THEN
+IF(LPROVAR_TO_DIAG)THEN
 !
   YRECFM='TS_WATER'
   YCOMMENT='TS_WATER (K)'

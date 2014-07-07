@@ -62,7 +62,7 @@ REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the 
 !
 !*      0.2    declarations of local variables
 !
-INTEGER                  :: JLAYER    ! loop counter on canopy heights
+INTEGER                  :: JLAYER, JJ    ! loop counter on canopy heights
 !         
 REAL, DIMENSION(KI,KLVL) :: ZCDRAG    ! drag coefficient in canopy
 REAL, DIMENSION(KI,KLVL) :: ZDENSITY  ! vegetation density for each canopy level
@@ -83,9 +83,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_CANOPY',0,ZHOOK_HANDLE)
 ZDENSITY(:,:) = 0.
-DO JLAYER=1,KLVL
-  WHERE(PHEIGHT(:)>0.)  &
-    ZDENSITY(:,JLAYER) = 1.5 * MAX(PCANOPY_DENSITY(:) * 4. * PZ(:,JLAYER) * (PHEIGHT(:)-PZ(:,JLAYER)) / PHEIGHT(:)**2, 0.)  
+DO JLAYER = 1,KLVL
+  DO JJ = 1,KI
+    IF (PHEIGHT(JJ)>0.) THEN
+      ZDENSITY(JJ,JLAYER) = 1.5 * &
+        MAX( PCANOPY_DENSITY(JJ)*4.*PZ(JJ,JLAYER)*(PHEIGHT(JJ)-PZ(JJ,JLAYER))/PHEIGHT(JJ)**2, 0.)
+    ENDIF
+  ENDDO
 END DO
 !
 !*      2.1    Drag coefficient by vegetation (Patton et al 2001)

@@ -258,14 +258,17 @@ IF (LCANOPY) THEN
 !* mean canopy height
 !
 !* in ecoclimap, height is set retrieved from roughness length (z0/0.13)
-    ZH = SUM(XPATCH(:,:)*XZ0(:,:)/0.13,DIM=2)
-    ZH = MIN(ZH, XZF(:,NLVL))
-    WHERE (ZH<=XDZ(:,1)) ZH = 0.
+    DO JJ=1,KI
+      ZH(JJ) = SUM(XPATCH(JJ,:)*XZ0(JJ,:)/0.13)
+      ZH(JJ) = MIN(ZH(JJ), XZF(JJ,NLVL))
+      IF (ZH(JJ)<=XDZ(JJ,1)) ZH(JJ) = 0.
 !
 !* canopy for wind drag only
-    ZCANOPY_DENSITY = SUM(XPATCH(:,:)*XLAI(:,:),DIM=2)
-    ZUW_GROUND      = 0.
-    ZDUWDU_GROUND   = 0.
+      ZCANOPY_DENSITY(JJ) = SUM(XPATCH(JJ,:)*XLAI(JJ,:))
+      ZUW_GROUND(JJ)      = 0.
+      ZDUWDU_GROUND(JJ)   = 0.
+      !
+    ENDDO
 !
 !* computes tendencies on wind and Tke due to canopy
     CALL ISBA_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZH,ZCANOPY_DENSITY,XU,XTKE,    &
@@ -378,9 +381,11 @@ ZSFLUX_Q(:) = PSFTQ(:)
 !
 IF (LCANOPY_DRAG) THEN
 !
-  ZUW_GROUND    = -SQRT(PSFU**2+PSFV**2)/ PRHOA(:)
-  ZDUWDU_GROUND = 0.
-  WHERE (XU(:,1)   /=0.) ZDUWDU_GROUND = 2. * ZUW_GROUND / XU(:,1)
+  DO JJ=1,KI
+    ZUW_GROUND(JJ)    = -SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/ PRHOA(JJ)
+    ZDUWDU_GROUND(JJ) = 0.
+    IF (XU(JJ,1)   /=0.) ZDUWDU_GROUND(JJ) = 2. * ZUW_GROUND(JJ) / XU(JJ,1)
+  ENDDO
 
 !* computes tendencies on wind and Tke due to canopy and surface
   CALL ISBA_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZH,ZCANOPY_DENSITY,XU,XTKE,  &
@@ -418,11 +423,13 @@ XLMO(:) = ZLMO(:,NLVL)
 !
 !* Total friction due to surface averaged friction and averaged canopy drag
 IF (LCANOPY_DRAG .OR. CROUGH=='BE04') THEN
-  ZUSTAR_GROUND=SQRT(SQRT(PSFU**2+PSFV**2)/PRHOA)
-  WHERE (ZUSTAR_GROUND(:)>0.)
-    PSFU(:) = PSFU(:) * ZUSTAR**2/ZUSTAR_GROUND**2
-    PSFV(:) = PSFV(:) * ZUSTAR**2/ZUSTAR_GROUND**2
-  END WHERE
+  DO JJ=1,KI
+    ZUSTAR_GROUND(JJ) = SQRT(SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/PRHOA(JJ))
+    IF (ZUSTAR_GROUND(JJ)>0.) THEN
+      PSFU(JJ) = PSFU(JJ) * ZUSTAR(JJ)**2/ZUSTAR_GROUND(JJ)**2
+      PSFV(JJ) = PSFV(JJ) * ZUSTAR(JJ)**2/ZUSTAR_GROUND(JJ)**2
+    ENDIF
+  ENDDO
 !* Total friction due to surface averaged friction and averaged canopy drag
   IF (LSURF_BUDGET) THEN
     XAVG_FMU = PSFU
