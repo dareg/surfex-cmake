@@ -380,6 +380,7 @@ IHOUR = 0
 ZTIME = FLOAT(NECHGU) * 3600.
 ! BEGINNING OF TIME LOOP
 TIMELOOP : DO ISTEP = 1,NBOUTPUT
+  !
   ! Update date
   CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
   ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
@@ -504,7 +505,6 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
           END SELECT
-          print*,'BIO_PASS ',XBIO_PASS
           !
         ENDIF
         !

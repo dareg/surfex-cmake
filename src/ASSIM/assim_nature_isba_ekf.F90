@@ -1,6 +1,4 @@
-SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI,   &
-                                 PT2M,     PHU2M,&
-                                 HTEST )
+SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI, PT2M, PHU2M, HTEST)
 
 ! -----------------------------------------------------------------------------
 !
@@ -47,11 +45,11 @@ USE MODI_GET_FILE_NAME
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),    INTENT(IN)           :: HPROGRAM     ! program calling surf. schemes
-INTEGER,             INTENT(IN)           :: KI
-REAL, DIMENSION(:), INTENT(IN)            :: PT2M
-REAL, DIMENSION(:), INTENT(IN)            :: PHU2M
-CHARACTER(LEN=2),    INTENT(IN)           :: HTEST        ! must be equal to 'OK'
+CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
+INTEGER,            INTENT(IN) :: KI
+REAL, DIMENSION(:), INTENT(IN) :: PT2M
+REAL, DIMENSION(:), INTENT(IN) :: PHU2M
+CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !
@@ -73,6 +71,7 @@ CHARACTER(LEN=2),    INTENT(IN)           :: HTEST        ! must be equal to 'OK
 ! Temporary vectors used by the EKF approach
 REAL,DIMENSION(KI) :: ZCOFSWI                     ! dynamic range (Wfc - Wwilt)
 REAL,DIMENSION(KI) :: ZSMSAT                      ! saturation  
+!
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZCOEF
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZEPS            ! The perturbation amplitude
 !
@@ -166,7 +165,6 @@ DO I=1,KI
   !ZWILT  (I) = 0.001 * 37.1342 * ((100.*XCLAY(I,1))**0.5) 
 ENDDO
 !
-!
 ! Set control variables
 ZIDENT(:,:) = 0.                   ! identity matrix
 DO L = 1,NVAR
@@ -191,7 +189,11 @@ DO L = 1,NVAR
     !
     DO I = 1,KI
       DO J = 1,NPATCH
-        ZCOEF(I,J,L) = XLAI_PASS(I,J)*XLAI_PASS(I,J)
+        IF ( XLAI_PASS(I,J)/=XUNDEF ) THEN
+          ZCOEF(I,J,L) = XLAI_PASS(I,J)*XLAI_PASS(I,J)
+        ELSE 
+          ZCOEF(I,J,L) = 0.
+        ENDIF
       ENDDO
     ENDDO
     !
@@ -262,105 +264,109 @@ ELSEIF ( LBEV .OR. LBFIXED ) THEN
     CALL B_BIG_LOOP("BUIL","",ZB,ZBLONG)
     IF ( NPRINTLEV > 0 ) WRITE(*,*) 'Initialized B'
     !
-!//////////////////////TO WRITE LTM/////////////////////////////////////
-    IUNIT = 110
-    DO L=1,NVAR
-      DO K=1,NVAR
-        IUNIT = IUNIT + 1
-        WRITE(YCHAR,'(I1)') K
-        YLFNAME='LTM_del'//TRIM(CVAR(K))//'_del'//TRIM(CVAR(L))//"."//YMYPROC
-        OPEN(UNIT=IUNIT,FILE=YLFNAME,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='APPEND')
-      ENDDO
-    ENDDO
-!/////////////////////TO WRITE LTM////////////////////////////////////////
-    DO I = 1,KI
-      !
-      ! calculate LTM
-      ZLTM(:,:) = 0.0
-      IUNIT = 110
-      DO L = 1,NVAR    ! control variable (x at previous time step)
-        DO K = 1,NVAR 
-          IUNIT = IUNIT + 1
-          DO J = 1,NPATCH 
-            !
-            L1 = J + NPATCH*(L-1)
-            K1 = J + NPATCH*(K-1)
-            !
-            IF ( XPATCH(I,J)>0.0 .AND. XF(I,J,L+1,K).NE.XUNDEF .AND. XF(I,J,1,K).NE.XUNDEF ) THEN
-              !
-              ! Jacobian of fwd model
-              ZLTM(L1,K1) = ( XF(I,J,L+1,K) - XF(I,J,1,K) ) / ZEPS(I,J,L)
-              ! impose upper/lower limits 
-              ZLTM(L1,K1) = MAX(-0.1, ZLTM(L1,K1))
-              ZLTM(L1,K1) = MIN( 1.0, ZLTM(L1,K1))
-              !
-            ENDIF
-            !
-            WRITE (IUNIT,*) ZLTM(L1,K1)
-            !
-          ENDDO
-        ENDDO
-      ENDDO
-      !
-!//////////////////////TO WRITE LTM/////////////////////////////////////      
-      IUNIT = 110
-      DO L=1,NVAR
-        DO K=1,NVAR
-          IUNIT = IUNIT + 1
-          CLOSE(IUNIT)
-        ENDDO
-      ENDDO
-!//////////////////////TO WRITE LTM/////////////////////////////////////      
-      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'LTM d(wg2)/d(wg2)', ZLTM(1,1)
-      !
-      ! evolve B 
-      ZB(I,:,:) = MATMUL(ZLTM(:,:),MATMUL(ZB(I,:,:),TRANSPOSE(ZLTM(:,:))))
-      !
-      !
-      !   Adding model error to background error matrix 
-      ZQ(:,:) = 0.0
-      DO L=1,NVAR
-        DO J=1,NPATCH
-          !
-          L1 = J+NPATCH*(L-1)
-          !
-          ZQ(L1,L1) = XSIGMA(L)*XSIGMA(L)
-          !
-          IF (TRIM(CVAR(L)) == 'LAI') THEN
-            ZQ(L1,L1) = XSCALE_QLAI*XSCALE_QLAI * ZQ(L1,L1)
-          ELSE
-            ZQ(L1,L1) = XSCALE_Q*XSCALE_Q * ZQ(L1,L1) * ZCOEF(I,J,L)
-          ENDIF
-          !
-        ENDDO
-      ENDDO
-      !
-      ! B is the forecast matrix - need to add Q
-      IF ( NPRINTLEV > 0 ) THEN
-        WRITE(*,*) 'B before wg2 wg2 ==> ',sqrt(ZB(I,1,1))/ZCOFSWI(I),ZB(I,1,1)
-        WRITE(*,*) 'Q value wg2 wg2 ==> ',sqrt(ZQ(1,1))/ZCOFSWI(I),ZQ(1,1)
-      ENDIF
-      !
-      ZB(I,:,:) = ZB(I,:,:) + ZQ(:,:)
-      !
-      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'B after wg2 wg2 ==>',sqrt(ZB(I,1,1))/ZCOFSWI(1),ZB(I,1,1)
-      !
-    ENDDO
-    !
-    ! write out the LTM for the forward model
-    ! Write out current B
-    YBGFILE="BGROUNDout_LBEV."//YMYPROC
-    CALL B_BIG_LOOP("WRIT",YBGFILE,ZB)
-    IF ( NPRINTLEV > 0 ) THEN
-      WRITE(*,*) 'store B matrix after TL evolution ==>',ZB(1,1,1)
-      WRITE(*,*) 'writing out B'
-    ENDIF
-    !
   ENDIF
   !
 ELSE
   !
   CALL ABOR1_SFX("LBEV or LBFIXED should be .TRUE.!")
+  !
+ENDIF
+!
+IF ( LBEV ) THEN
+  !
+!//////////////////////TO WRITE LTM/////////////////////////////////////
+  IUNIT = 110
+  DO L=1,NVAR
+    DO K=1,NVAR
+      IUNIT = IUNIT + 1
+      WRITE(YCHAR,'(I1)') K
+      YLFNAME='LTM_del'//TRIM(CVAR(K))//'_del'//TRIM(CVAR(L))//"."//YMYPROC
+      OPEN(UNIT=IUNIT,FILE=YLFNAME,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='APPEND')
+    ENDDO
+  ENDDO
+!/////////////////////TO WRITE LTM////////////////////////////////////////
+  DO I = 1,KI
+    !
+    ! calculate LTM
+    ZLTM(:,:) = 0.0
+    IUNIT = 110
+    DO L = 1,NVAR    ! control variable (x at previous time step)
+      DO K = 1,NVAR 
+        IUNIT = IUNIT + 1
+        DO J = 1,NPATCH 
+          !
+          L1 = J + NPATCH*(L-1)
+          K1 = J + NPATCH*(K-1)
+          !
+          IF ( XPATCH(I,J)>0.0 .AND. XF(I,J,L+1,K).NE.XUNDEF .AND. XF(I,J,1,K).NE.XUNDEF ) THEN
+            !
+            ! Jacobian of fwd model
+            ZLTM(L1,K1) = ( XF(I,J,L+1,K) - XF(I,J,1,K) ) / ZEPS(I,J,L)
+            ! impose upper/lower limits 
+            ZLTM(L1,K1) = MAX(-0.1, ZLTM(L1,K1))
+            ZLTM(L1,K1) = MIN( 1.0, ZLTM(L1,K1))
+            !
+          ENDIF
+          !
+          WRITE (IUNIT,*) ZLTM(L1,K1)
+          !
+        ENDDO
+      ENDDO
+    ENDDO
+    !
+!//////////////////////TO WRITE LTM/////////////////////////////////////      
+    IUNIT = 110
+    DO L=1,NVAR
+      DO K=1,NVAR
+        IUNIT = IUNIT + 1
+        CLOSE(IUNIT)
+      ENDDO
+    ENDDO
+!//////////////////////TO WRITE LTM/////////////////////////////////////      
+    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'LTM d(wg2)/d(wg2)', ZLTM(1,1)
+    !
+    ! evolve B 
+    ZB(I,:,:) = MATMUL(ZLTM(:,:),MATMUL(ZB(I,:,:),TRANSPOSE(ZLTM(:,:))))
+    !
+    !
+    !   Adding model error to background error matrix 
+    ZQ(:,:) = 0.0
+    DO L=1,NVAR
+      DO J=1,NPATCH
+        !
+        L1 = J+NPATCH*(L-1)
+        !
+        ZQ(L1,L1) = XSIGMA(L)*XSIGMA(L)
+        !
+        IF (TRIM(CVAR(L)) == 'LAI') THEN
+          ZQ(L1,L1) = XSCALE_QLAI*XSCALE_QLAI * ZQ(L1,L1)
+        ELSE
+          ZQ(L1,L1) = XSCALE_Q*XSCALE_Q * ZQ(L1,L1) * ZCOEF(I,J,L)
+        ENDIF
+        !
+      ENDDO
+    ENDDO
+    !
+    ! B is the forecast matrix - need to add Q
+    IF ( NPRINTLEV > 0 ) THEN
+      WRITE(*,*) 'B before wg2 wg2 ==> ',sqrt(ZB(I,1,1))/ZCOFSWI(I),ZB(I,1,1)
+      WRITE(*,*) 'Q value wg2 wg2 ==> ',sqrt(ZQ(1,1))/ZCOFSWI(I),ZQ(1,1)
+    ENDIF
+    !
+    ZB(I,:,:) = ZB(I,:,:) + ZQ(:,:)
+    !
+    !IF ( NPRINTLEV > 0 ) WRITE(*,*) 'B after wg2 wg2 ==>',sqrt(ZB(I,1,1))/ZCOFSWI(1),ZB(I,1,1)
+    !
+  ENDDO
+  !
+  ! write out the LTM for the forward model
+  ! Write out current B
+  YBGFILE="BGROUNDout_LBEV."//YMYPROC
+  CALL B_BIG_LOOP("WRIT",YBGFILE,ZB)
+  IF ( NPRINTLEV > 0 ) THEN
+    WRITE(*,*) 'store B matrix after TL evolution ==>',ZB(1,1,1)
+    WRITE(*,*) 'writing out B'
+  ENDIF
   !
 ENDIF
 !
