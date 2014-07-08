@@ -184,17 +184,17 @@ DO L = 1,NVAR
       ZCOEF(I,:,L) = ZCOFSWI(I)*ZCOFSWI(I)
     ENDDO
     !
-  !ELSEIF ( TRIM(CVAR(L))=='LAI' ) THEN
-  !  !
-  !  DO I = 1,KI
-  !    DO J = 1,NPATCH
-  !      IF ( XLAI_PASS(I,J)/=XUNDEF ) THEN
-  !        ZCOEF(I,J,L) = XLAI_PASS(I,J)*XLAI_PASS(I,J)
-  !      ELSE 
-  !        ZCOEF(I,J,L) = 0.
-  !      ENDIF
-  !    ENDDO
-  !  ENDDO
+  ELSEIF ( TRIM(CVAR(L))=='LAI' .AND. LBFIXED ) THEN
+    !
+    DO I = 1,KI
+      DO J = 1,NPATCH
+        IF ( XLAI_PASS(I,J)/=XUNDEF ) THEN
+          ZCOEF(I,J,L) = XLAI_PASS(I,J)*XLAI_PASS(I,J)
+        ELSE 
+          ZCOEF(I,J,L) = 0.
+        ENDIF
+      ENDDO
+    ENDDO
     !
   ELSE
     !
@@ -335,12 +335,12 @@ IF ( LBEV ) THEN
         !
         L1 = J+NPATCH*(L-1)
         !
-        ZQ(L1,L1) = XSIGMA(L)*XSIGMA(L) * ZCOEF(I,J,L)
+        ZQ(L1,L1) = XSIGMA(L)*XSIGMA(L)
         !
         IF (TRIM(CVAR(L)) == 'LAI') THEN
           ZQ(L1,L1) = XSCALE_QLAI*XSCALE_QLAI * ZQ(L1,L1)
         ELSE
-          ZQ(L1,L1) = XSCALE_Q*XSCALE_Q * ZQ(L1,L1) !* ZCOEF(I,J,L)
+          ZQ(L1,L1) = XSCALE_Q*XSCALE_Q * ZQ(L1,L1) * ZCOEF(I,J,L)
         ENDIF
         !
       ENDDO
@@ -353,6 +353,8 @@ IF ( LBEV ) THEN
     ENDIF
     !
     ZB(I,:,:) = ZB(I,:,:) + ZQ(:,:)
+    !
+    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'B after wg2 wg2 ==>',ZB(I,1,1)/ZCOFSWI(1),ZB(I,1,1)
     !
   ENDDO
   !
