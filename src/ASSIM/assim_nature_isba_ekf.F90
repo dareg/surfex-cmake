@@ -87,7 +87,6 @@ REAL,DIMENSION(NPATCH*NVAR,NPATCH*NVAR) :: ZLTM         ! linear tangent matrix 
 REAL,DIMENSION(NPATCH*NVAR,NPATCH*NVAR) :: ZQ           ! model error matrix
 !
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NPATCH*NVAR) :: ZHO             ! Jacobian of observation operator
-REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NPATCH*NVAR) :: ZHOWR           ! copy of HO for writing out
 REAL,DIMENSION(NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZHOT            ! Transpose of HO
 REAL,DIMENSION(NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
 !
@@ -185,17 +184,17 @@ DO L = 1,NVAR
       ZCOEF(I,:,L) = ZCOFSWI(I)*ZCOFSWI(I)
     ENDDO
     !
-  ELSEIF ( TRIM(CVAR(L))=='LAI' ) THEN
-    !
-    DO I = 1,KI
-      DO J = 1,NPATCH
-        IF ( XLAI_PASS(I,J)/=XUNDEF ) THEN
-          ZCOEF(I,J,L) = XLAI_PASS(I,J)*XLAI_PASS(I,J)
-        ELSE 
-          ZCOEF(I,J,L) = 0.
-        ENDIF
-      ENDDO
-    ENDDO
+  !ELSEIF ( TRIM(CVAR(L))=='LAI' ) THEN
+  !  !
+  !  DO I = 1,KI
+  !    DO J = 1,NPATCH
+  !      IF ( XLAI_PASS(I,J)/=XUNDEF ) THEN
+  !        ZCOEF(I,J,L) = XLAI_PASS(I,J)*XLAI_PASS(I,J)
+  !      ELSE 
+  !        ZCOEF(I,J,L) = 0.
+  !      ENDIF
+  !    ENDDO
+  !  ENDDO
     !
   ELSE
     !
@@ -336,12 +335,12 @@ IF ( LBEV ) THEN
         !
         L1 = J+NPATCH*(L-1)
         !
-        ZQ(L1,L1) = XSIGMA(L)*XSIGMA(L)
+        ZQ(L1,L1) = XSIGMA(L)*XSIGMA(L) * ZCOEF(I,J,L)
         !
         IF (TRIM(CVAR(L)) == 'LAI') THEN
           ZQ(L1,L1) = XSCALE_QLAI*XSCALE_QLAI * ZQ(L1,L1)
         ELSE
-          ZQ(L1,L1) = XSCALE_Q*XSCALE_Q * ZQ(L1,L1) * ZCOEF(I,J,L)
+          ZQ(L1,L1) = XSCALE_Q*XSCALE_Q * ZQ(L1,L1) !* ZCOEF(I,J,L)
         ENDIF
         !
       ENDDO
@@ -349,13 +348,11 @@ IF ( LBEV ) THEN
     !
     ! B is the forecast matrix - need to add Q
     IF ( NPRINTLEV > 0 ) THEN
-      WRITE(*,*) 'B before wg2 wg2 ==> ',sqrt(ZB(I,1,1))/ZCOFSWI(I),ZB(I,1,1)
-      WRITE(*,*) 'Q value wg2 wg2 ==> ',sqrt(ZQ(1,1))/ZCOFSWI(I),ZQ(1,1)
+      WRITE(*,*) 'B before wg2 wg2 ==> ',ZB(I,1,1)/ZCOFSWI(I),ZB(I,1,1)
+      WRITE(*,*) 'Q value wg2 wg2 ==> ',ZQ(1,1)/ZCOFSWI(I),ZQ(1,1)
     ENDIF
     !
     ZB(I,:,:) = ZB(I,:,:) + ZQ(:,:)
-    !
-    !IF ( NPRINTLEV > 0 ) WRITE(*,*) 'B after wg2 wg2 ==>',sqrt(ZB(I,1,1))/ZCOFSWI(1),ZB(I,1,1)
     !
   ENDDO
   !
@@ -490,7 +487,6 @@ DO I=1,KI
   !
   ZR   (:,:) = 0. ! Observation error matrix
   !
-  ZHOWR(:,:) = XUNDEF
   ZHO  (:,:) = XUNDEF  ! Linearized observation matrix
   ZB2  (:)   = XUNDEF  ! Innovation vector
   !
@@ -515,10 +511,9 @@ DO I=1,KI
           !
           L1 = J + NPATCH*(L-1)
           !
-          ZHOWR(K1,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L) 
           IF( ZYO(I,K1).NE.XUNDEF .AND. ZYO(I,K1).NE.999.0 ) THEN         !if obs available
             ! Jacobian of obs operator
-            ZHO(K1,L1) = ZHOWR(K1,J+NPATCH*(L-1))
+            ZHO(K1,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L)
             ! impose limits  
             ZHO(K1,L1) = MAX(-0.1, ZHO(K1,L1))
             ZHO(K1,L1) = MIN( 1.0, ZHO(K1,L1))
@@ -552,7 +547,7 @@ DO I=1,KI
   ZK1 (:,:) = MATMUL(ZHO(:,:),MATMUL(ZB(I,:,:),ZHOT(:,:))) + ZR(:,:)
   CALL CHOLDC(NOBSTYPE,ZK1(:,:),ZP(:))                         ! Cholesky decomposition (1)
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
-  ZXINCR(:) = MATMUL(ZB(I,:,:),MATMUL(ZHOT(:,:),ZX(:))) 
+  ZXINCR(:) = MATMUL(ZB(I,:,:),MATMUL(ZHOT(:,:),ZX(:)))
   !
   DO L=1,NVAR
     DO J=1,NPATCH
@@ -603,7 +598,7 @@ DO I=1,KI
     DO K = 1,NOBSTYPE
       IUNIT = IUNIT + 1
       DO J=1,NPATCH
-        WRITE(IUNIT,*) ZHOWR(K,J+NPATCH*(L-1)),ZGAIN(J+NPATCH*(L-1),K)
+        WRITE(IUNIT,*) ZHO(K,J+NPATCH*(L-1)),ZGAIN(J+NPATCH*(L-1),K)
       ENDDO
     ENDDO
   ENDDO
