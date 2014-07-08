@@ -70,15 +70,14 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 ! Temporary vectors used by the EKF approach
 REAL,DIMENSION(KI) :: ZCOFSWI                     ! dynamic range (Wfc - Wwilt)
-REAL,DIMENSION(KI) :: ZSMSAT                      ! saturation  
+!REAL,DIMENSION(KI) :: ZSMSAT                      ! saturation  
+!REAL,DIMENSION(KI) :: ZWILT
 !
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZCOEF
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZEPS            ! The perturbation amplitude
 !
 REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT) :: ZYO       ! vector of observations
 REAL,DIMENSION(NVAR+1,NOBSTYPE) :: ZYF            ! Vector of model observations (averaged) 
-!
-!REAL,DIMENSION(KI) :: ZWILT
 !
 REAL,DIMENSION(KI*NPATCH*NVAR*NPATCH*NVAR) :: ZBLONG
 REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZB           ! background error covariance matrix
@@ -160,7 +159,7 @@ IF ( NPRINTLEV > 0 ) WRITE(*,*) 'number of patches =',NPATCH
 !
 DO I=1,KI
   ZCOFSWI(I) = 0.001 * (89.0467 * ((100.*XCLAY(I,1))**0.3496) - 37.1342*((100.*XCLAY(I,1))**0.5))
-  ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
+  !ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
   !ZWILT  (I) = 0.001 * 37.1342 * ((100.*XCLAY(I,1))**0.5) 
 ENDDO
 !
