@@ -1,4 +1,4 @@
-SUBROUTINE INIT_SLOPE_PARAM(PZS,KI,PLON)
+SUBROUTINE INIT_SLOPE_PARAM(PZS,KI,PLAT)
 
 !
 !!**** *INIT_SLOPE_PARAM
@@ -62,7 +62,7 @@ INCLUDE "mpif.h"
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)
-REAL,DIMENSION(:),INTENT(IN):: PLON ! longitudes
+REAL,DIMENSION(:),INTENT(IN):: PLAT ! latitudes
 !
 !
 !
@@ -181,8 +181,8 @@ ALLOCATE(XZSL (NNX,NNY))
 !
 ! PRINT*,SIZE(XZSL,1),SIZE(XZSL,2)
 
-! 2d grid should be decreasing in longitude
-LREVERTGRID=(PLON(1)<PLON(1+NIX))
+! 2d grid should be decreasing in latitude
+LREVERTGRID=(PLAT(1)<PLAT(1+NIX))
 
 IF (LREVERTGRID) THEN
   DO JY=1,NIY
@@ -298,7 +298,7 @@ DO JT=1,4
 !* slope angles
 !
       XSLOPANG(JI,JJ,JT) = ATAN(SQRT(ZDZSDX**2+ZDZSDY**2))
-      XSLOPAZI(JI,JJ,JT) = 0.5*XPI - ATAN2( ZDZSDY, ZDZSDX + SIGN(1.E-30,ZDZSDX) )
+      XSLOPAZI(JI,JJ,JT) = - 0.5*XPI + ATAN2( ZDZSDY, ZDZSDX + SIGN(1.E-30,ZDZSDX) )
 !
 
 ! surface of each triangle
