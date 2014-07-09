@@ -75,7 +75,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG, XLAI, XBIOMASS, XRESP_BIOMASS
 !
 USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
                        NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU, XI,  &
-                       NBOUTPUT, XLAI_PASS, XBIO_PASS, CBIO
+                       NBOUTPUT, XLAI_PASS, XBIO_PASS, CBIO, NIVAR, NIPERT
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
@@ -214,7 +214,7 @@ INTEGER :: IYEAR, IMONTH, IDAY, IHOUR
 INTEGER :: IYEAR_OUT, IMONTH_OUT, IDAY_OUT
 INTEGER :: L,INBPERT
 INTEGER :: INW, JNW
-INTEGER :: IPERT, ISTEP
+INTEGER :: ISTEP
 INTEGER :: IOBS, IIOBS
 INTEGER :: IGPCOMP
 INTEGER :: ILUOUT
@@ -389,15 +389,15 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
   YMFILE = "PREP_"
   CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
   !
-  DO IPERT = INBPERT,1,-1
+  DO NIPERT = INBPERT,1,-1
     !
     ! If we have more than one initialization to do
     ! For last initialization, we must re-do the first.
     ! Could be avoided by introducing knowlegde of LASSIM on this level
     IF ( CASSIM_ISBA == 'EKF  ' ) THEN
       !    
-      IF ( IPERT<INBPERT ) THEN
-       WRITE(YVAR,'(I1.1)') IPERT-1
+      IF ( NIPERT<INBPERT ) THEN
+       WRITE(YVAR,'(I1.1)') NIPERT-1
         YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//YVAR
       ELSE
         YFILEIN = "PREP_INIT"
@@ -432,7 +432,7 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
         CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
       ENDIF
       !
-    ENDIF  
+    ENDIF 
     !
     ! Initialize the SURFEX interface
     CALL IO_BUFF_CLEAN_n
@@ -444,7 +444,7 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
     !
     IF ( CASSIM_ISBA=='EKF  ' ) THEN
       !
-      IF ( ISTEP==1 .AND. IPERT==INBPERT ) THEN
+      IF ( ISTEP==1 .AND. NIPERT==INBPERT ) THEN
         ALLOCATE(XLAI_PASS(NSIZE_NATURE,NPATCH)) 
         ALLOCATE(XBIO_PASS(NSIZE_NATURE,NPATCH))     
         ALLOCATE(XI       (NSIZE_NATURE,NPATCH,NVAR    ))
@@ -452,20 +452,20 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
         ALLOCATE(XF_PATCH (NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
       ENDIF
       !
-      IF ( IPERT<INBPERT ) THEN
+      IF ( NIPERT<INBPERT ) THEN
         !
         ! Set the global state values for this control value
         DO IOBS = 1,NOBSTYPE
           IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
           SELECT CASE (TRIM(COBS(IOBS)))
             CASE("T2M")
-              XF_PATCH(:,:,IPERT,IIOBS) = XAT2M_ISBA(:,:)
+              XF_PATCH(:,:,NIPERT,IIOBS) = XAT2M_ISBA(:,:)
             CASE("HU2M")
-              XF_PATCH(:,:,IPERT,IIOBS) = XAHU2M_ISBA(:,:)
+              XF_PATCH(:,:,NIPERT,IIOBS) = XAHU2M_ISBA(:,:)
             CASE("WG1")
-              XF_PATCH(:,:,IPERT,IIOBS) = XWG(:,1,:)
+              XF_PATCH(:,:,NIPERT,IIOBS) = XWG(:,1,:)
             CASE("LAI")
-              XF_PATCH(:,:,IPERT,IIOBS) = XLAI(:,:)
+              XF_PATCH(:,:,NIPERT,IIOBS) = XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA_CONTROL!")
           END SELECT
@@ -475,22 +475,25 @@ TIMELOOP : DO ISTEP = 1,NBOUTPUT
         DO L = 1,NVAR
           SELECT CASE (TRIM(CVAR(L)))
             CASE("TG1")
-              XF(:,:,IPERT,L) = XTG(:,1,:)
+              XF(:,:,NIPERT,L) = XTG(:,1,:)
             CASE("TG2")
-              XF(:,:,IPERT,L) = XTG(:,2,:)
+              XF(:,:,NIPERT,L) = XTG(:,2,:)
             CASE("WG1")
-              XF(:,:,IPERT,L) = XWG(:,1,:)
+              XF(:,:,NIPERT,L) = XWG(:,1,:)
             CASE("WG2")
-              XF(:,:,IPERT,L) = XWG(:,2,:)
+              XF(:,:,NIPERT,L) = XWG(:,2,:)
             CASE("LAI")
-              XF(:,:,IPERT,L) = XLAI(:,:)
+              XF(:,:,NIPERT,L) = XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
           END SELECT
         ENDDO
         !
-        IF ( IPERT==1 ) THEN
+        IF ( NIPERT==1 ) THEN
           !
+          IF ( NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
+            CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF with NPATCH=1!")
+          ENDIF
           SELECT CASE (TRIM(CBIO))
             CASE("BIOMA1","BIOMASS1")
               XBIO_PASS(:,:) = XBIOMASS(:,1,:)

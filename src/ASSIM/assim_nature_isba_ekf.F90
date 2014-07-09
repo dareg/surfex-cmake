@@ -469,7 +469,11 @@ DO L = 1,NVAR
 ENDDO
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
 !
-ZVLAIMIN = (/0.3,0.3,0.3,0.3,1.0,1.0,0.3,0.3,0.3,0.3,0.3,0.3/)
+IF (NPATCH==12) THEN
+  ZVLAIMIN = (/0.3,0.3,0.3,0.3,1.0,1.0,0.3,0.3,0.3,0.3,0.3,0.3/)
+ELSE
+  ZVLAIMIN = (/0.3/)
+ENDIF
 !
 IOBSCOUNT = 0
 DO I=1,KI
@@ -490,7 +494,7 @@ DO I=1,KI
   !
   ZHO  (:,:) = XUNDEF  ! Linearized observation matrix
   ZB2  (:)   = XUNDEF  ! Innovation vector
-  !
+  
   DO ISTEP=1,NBOUTPUT
     !
     DO K = 1,NOBSTYPE
@@ -533,10 +537,10 @@ DO I=1,KI
     ENDDO
     !
   ENDDO
-  !
+  
   WRITE(111,*) ZR(:,:)
   WRITE(112,*) ZB2(:)
-  !
+  
 !---------------******  SOIL ANALYSIS *******--------------------------
   ZHOT(:,:) = 0.
   ZK1(:,:) = 0.
@@ -549,7 +553,7 @@ DO I=1,KI
   CALL CHOLDC(NOBSTYPE,ZK1(:,:),ZP(:))                         ! Cholesky decomposition (1)
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
   ZXINCR(:) = MATMUL(ZB(I,:,:),MATMUL(ZHOT(:,:),ZX(:)))
-  !
+  
   DO L=1,NVAR
     DO J=1,NPATCH
       !
@@ -572,17 +576,17 @@ DO I=1,KI
       !
     ENDDO
   ENDDO
-  !
+  
   DO J=1,NPATCH
     WRITE(113,*) (XF(I,J,1,L),L=1,NVAR), (ZXINCR(J+NPATCH*(L-1)),L=1,NVAR)
   ENDDO
-  !
-  !
+  
+  
 !--------------------ANALYSIS OF B (FOR USE IN NEXT CYCLE)-------------------
   ! Ba = (I-KH)Bf(I-KH)t+KRKt
   ! K = BfHt{K1}**-1
   ! K1 needs PATCH dim added
-  !
+  
   ZGAIN(:,:) = 0.
   ZIDKH(:,:) = 0.
   ZKRK(:,:) = 0.
@@ -593,7 +597,7 @@ DO I=1,KI
   ZIDKH(:,:) = ZIDENT(:,:) - MATMUL(ZGAIN(:,:),ZHO(:,:))
   ZKRK (:,:) = MATMUL(ZGAIN(:,:),MATMUL(ZR(:,:),TRANSPOSE(ZGAIN(:,:))))
   IF (.NOT.LBFIXED)  ZB(I,:,:) = MATMUL(ZIDKH(:,:),MATMUL(ZB(I,:,:),TRANSPOSE(ZIDKH(:,:)))) + ZKRK(:,:)
-  !
+  
   IUNIT = 113
   DO L = 1,NVAR
     DO K = 1,NOBSTYPE

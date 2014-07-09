@@ -56,7 +56,7 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                   LFLOOD, XZ0_FLOOD, LTEMP_ARP,       &
                                   NTEMPLAYER_ARP, LGLACIER, XICE_STO  
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
-                              & XAZON10M_ISBA,XAMER10M_ISBA,   &
+                              & XAZON10M_ISBA,XAMER10M_ISBA,NIPERT,NVAR, &
                               & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR,CBIO
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
@@ -413,7 +413,7 @@ IF ( LASSIM ) THEN
     XAMER10M_ISBA=XUNDEF
     YRECFM='MER10M'
     CALL READ_SURF(HPROGRAM,YRECFM,XAMER10M_ISBA(:,1),IRESP)
-  ELSE
+  ELSEIF ( NIPERT/=NVAR+2 ) THEN
     ! Diagnostic fields for EKF assimilation ("observations")
     DO IOBS = 1,NOBSTYPE
      SELECT CASE (TRIM(COBS(IOBS)))

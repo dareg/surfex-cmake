@@ -58,6 +58,7 @@ IMPLICIT NONE
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE
+ INTEGER                               :: NIPERT 
  INTEGER                               :: NIVAR                ! counter for ctnrl vars
  INTEGER                               :: NVAR                 ! number of cntrl vars
  INTEGER                               :: NBOUTPUT  
