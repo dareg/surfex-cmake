@@ -49,6 +49,7 @@ IMPLICIT NONE
  LOGICAL                               :: LEXTRAP_WATER        ! Extrapolation of inland water  points
  LOGICAL                               :: LEXTRAP_NATURE       ! Extrapolation of nature points
  LOGICAL                               :: LPRT                 ! Running VARASSIM in a perturbation mode
+ LOGICAL                               :: LSIM                 ! Running VARASSIM in a perturbation mode 
  LOGICAL                               :: LBEV                 ! Running VARASSIM to evolve B
  LOGICAL                               :: LBFIXED    
  LOGICAL                               :: LOBSFILE 
@@ -65,12 +66,14 @@ IMPLICIT NONE
  INTEGER                               :: NPRINTLEV            ! Verbosity 
 
  CHARACTER(LEN=12)                     :: CBIO                 ! Name of Biomass variable
+ CHARACTER(LEN=100)                    :: CPREFIX_BIO          ! The prefix of the Biomass variable 
  CHARACTER(LEN=5)                      :: CASSIM_ISBA          ! OI/EKF
  CHARACTER(LEN=5)                      :: CASSIM               ! type of correction
  CHARACTER(LEN=3),DIMENSION(NVARMAX)   :: CVAR_M               ! X is ctrl
                                                                ! 'PLUS ' (default)
                                                                ! 'AVERA'            
                                                                ! '2DVAR'
+ CHARACTER(LEN=100),DIMENSION(NVARMAX) :: CPREFIX_M            ! The prefix of the control variables (in PREP.txt file) (max dim)                          
  CHARACTER(LEN=10),DIMENSION(:), ALLOCATABLE  :: COBS          ! Identifier for simulated observations
  CHARACTER(LEN=3),DIMENSION(:), ALLOCATABLE   :: CVAR          ! Identifier for control variable
 

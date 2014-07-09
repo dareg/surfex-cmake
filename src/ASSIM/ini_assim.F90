@@ -301,6 +301,7 @@ XRCDTR   = 24./360.
 
 ! Initialization of EKF
 LPRT          = .FALSE.
+LSIM          = .FALSE.
 LBEV          = .TRUE.
 !
 NOBSTYPE      = 2
