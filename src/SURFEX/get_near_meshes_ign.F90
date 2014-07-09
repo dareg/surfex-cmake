@@ -62,7 +62,8 @@ IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN_1',0,ZHOOK_HANDLE)
 !
  CALL GET_GRIDTYPE_IGN(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY)
 !
-KNEAR  (:,:) = 0
+KNEAR(:,:) = 0
+ZNEAR(:,:) = 0.
 !
 ! calcul de la distance de tous les points 2 à 2
 !
@@ -79,13 +80,13 @@ DO JP1=1,KL-1
     !
     IF (JP1==1) THEN 
       !
-      ZNEAR(JP2,:) = ZDIS
-      KNEAR(JP2,:) = 1
+      ZNEAR(JP2,1) = ZDIS
+      KNEAR(JP2,1) = 1
       !
       IF (JP2==2) THEN
         !
-        ZNEAR(1,:) = ZDIS
-        KNEAR(1,:) = 2
+        ZNEAR(1,1) = ZDIS
+        KNEAR(1,1) = 2
         !
       ELSE
         !
@@ -119,7 +120,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 DO JN1 = 1,KNEAR_NBR
   !
-  IF (PDIS<ZNEAR(KP1,JN1)) THEN
+  IF (PDIS<ZNEAR(KP1,JN1) .OR. KNEAR(KP1,JN1)==0) THEN
     !
     IF (JN1<KNEAR_NBR) THEN
       !
