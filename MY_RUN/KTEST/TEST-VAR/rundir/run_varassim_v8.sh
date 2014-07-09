@@ -16,7 +16,7 @@
 # Initialisation forcing, observations, and execution directories
 #
 #set -e
-#set -evx
+#set -x
 echo 'Initialisation ...'
 #
 expid=test_varassim
@@ -68,8 +68,8 @@ cp -f $repinput/'PREP_'${exp_prep}.txt $reprun/PREP_REF.txt
 #---------------------------------------------------
 # Define the experiment identifier and beginning date
 #----------------------------------------------------
-AAAAMMJJRR_start=2007071206
-AAAAMMJJRR_end=2007071206
+AAAAMMJJRR_start=2007071006
+AAAAMMJJRR_end=2007071506
 
 AAAAMMJJRR=$AAAAMMJJRR_start
 
@@ -131,7 +131,7 @@ while [ $AAAAMMJJRR  -le $AAAAMMJJRR_end ] ; do
 	rm -f stderr
 
 	./VARASSIM 2>stderr
-
+cp -f SURFOUT.txt SURFOUT$vv.txt
     mv -f PERTURB                PERTURB_${vv}_$aaobs$mmobs${jjobs}'H'$RRobs.DAT
 
     if [ $vv -eq 1 ] ; then     
@@ -143,6 +143,7 @@ while [ $AAAAMMJJRR  -le $AAAAMMJJRR_end ] ; do
 
     cat PREP.txt >> SURFOUT.txt                   # changed for ASCII treatment of PREP
     mv -f SURFOUT.txt PREP.txt                    # changed for ASCII treatment of PREP
+    cp -f PREP.txt PREP$vv.txt
 	mv -f stderr stderr1$vv
 	rm -f fort.10
    
