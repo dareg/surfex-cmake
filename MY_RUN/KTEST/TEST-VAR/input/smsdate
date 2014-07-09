@@ -9,7 +9,7 @@ if [  $AJOUT -ge 24 ]
    then
    inc=$((AJOUT/24))
    HEURE=$((AJOUT-$((inc*24))))
-   DATE=`$HOME/SVN/surfex/branches/V8_BARBU/TEST-VAR/input/decdate $DATEIN +$inc`
+   DATE=`$HOME/SVN/surfex/branches/V8_FOR_UNIFIED_ASSIMILATION/MY_RUN/KTEST/TEST-VAR/input/decdate $DATEIN +$inc`
    DATEOUT=$DATE"0"$HEURE
 elif [ $AJOUT -lt 24 ]
    then
