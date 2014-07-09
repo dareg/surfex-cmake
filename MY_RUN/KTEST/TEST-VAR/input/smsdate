@@ -1,0 +1,20 @@
+# script emulant la commande smsdate de Meteo-France et se basant sur decdate
+#
+#Exemple d'utilisation:
+#AAAAMMJJRR=`$HOME/bin/smsdate $AAAAMMJJRR 6`
+DATEIN=`expr $1 |cut -c1-8`
+HEURE=10#`expr $1 | cut -c9-10`
+AJOUT=$((HEURE+$2))
+if [  $AJOUT -ge 24 ]
+   then
+   inc=$((AJOUT/24))
+   HEURE=$((AJOUT-$((inc*24))))
+   DATE=`$HOME/SVN/surfex/branches/V8_BARBU/TEST-VAR/input/decdate $DATEIN +$inc`
+   DATEOUT=$DATE"0"$HEURE
+elif [ $AJOUT -lt 24 ]
+   then
+   HEURE=$AJOUT
+   DATEOUT=$DATEIN$HEURE
+fi
+echo $DATEOUT
+
