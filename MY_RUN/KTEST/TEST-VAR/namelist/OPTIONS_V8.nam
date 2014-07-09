@@ -69,7 +69,7 @@
 /
 &NAM_PREP_SURF_ATM NYEAR  = 2007,
                    NMONTH = 7,
-                   NDAY   = 12,
+                   NDAY   = 10,
                    XTIME  = 21600. 
 /
 &NAM_SGH_ISBAn         CRUNOFF    = 'DT92'
