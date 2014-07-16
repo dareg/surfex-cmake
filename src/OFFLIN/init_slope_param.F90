@@ -298,7 +298,7 @@ DO JT=1,4
 !* slope angles
 !
       XSLOPANG(JI,JJ,JT) = ATAN(SQRT(ZDZSDX**2+ZDZSDY**2))
-      XSLOPAZI(JI,JJ,JT) = 1.5*XPI + ATAN2( ZDZSDY, ZDZSDX + SIGN(1.E-30,ZDZSDX) )
+      XSLOPAZI(JI,JJ,JT) = 1.5*XPI - ATAN2( ZDZSDY, ZDZSDX + SIGN(1.E-30,ZDZSDX) )
 !
 
 ! surface of each triangle
