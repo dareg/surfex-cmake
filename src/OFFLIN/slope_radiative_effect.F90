@@ -206,7 +206,7 @@ ZMAP(:,:) = 1.
 CALL  SURF_RAD_MODIF ( ZMAP, XXHAT_THREAD, XYHAT_THREAD,                    &
                        ZCOSZEN, ZSINZEN, ZAZIMSOL,PZS,PZS_XY,               &
                        PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,                    &
-                       XXHAT,XYHAT,1,1,XZSL,XZS_XY,                         &
+                       XXHAT,XYHAT,NINDX1_X,NINDX1_Y,XZSL,XZS_XY,           &
                        ZDIRFLASWD, ZDIRSRFSWD                    )
 !
 !

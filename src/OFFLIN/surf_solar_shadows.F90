@@ -193,7 +193,8 @@ IF (LSHADOWS_OTHER) THEN
 	ZAZIM=PAZIMSOL(JI,JJ)
 	!
 	!
-	ZAZIM = ZAZIM - XPI/2.
+	!ZAZIM = ZAZIM - XPI/2.
+        ZAZIM = XPI/2. - ZAZIM
 	!
 	!* cosine and sine of azimuthal solar angle
 	!
