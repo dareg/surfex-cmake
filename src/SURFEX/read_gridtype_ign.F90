@@ -105,15 +105,22 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
 !*       7.    maximum domain lengths
 !              ----------------------
 !
- CALL GET_XYALL_IGN(ZX,ZY,ZDX,ZDY,ZXALL,ZYALL,IDIMX,IDIMY)
+IF (HDIR=='A') THEN
+  CALL GET_XYALL_IGN(ZX,ZY,ZDX,ZDY,ZXALL,ZYALL,IDIMX,IDIMY)
+ CALL PUT_GRIDTYPE_IGN(ZGRID_PAR,ILAMBERT,ZX,ZY,ZDX,ZDY,        &
+                      IDIMX,IDIMY,ZXALL(1:IDIMX),ZYALL(1:IDIMY))
+ELSE
+  IDIMX = 0
+  IDIMY = 0
+  CALL PUT_GRIDTYPE_IGN(ZGRID_PAR,ILAMBERT,ZX,ZY,ZDX,ZDY,        &
+                      IDIMX,IDIMY,ZXALL,ZYALL)
+ENDIF
 !
 !--------------------------------------------------------------------------
 !
 !*       4.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
- CALL PUT_GRIDTYPE_IGN(ZGRID_PAR,ILAMBERT,ZX,ZY,ZDX,ZDY,        &
-                      IDIMX,IDIMY,ZXALL(1:IDIMX),ZYALL(1:IDIMY))
 !
 !---------------------------------------------------------------------------
 IF (OREAD) THEN
