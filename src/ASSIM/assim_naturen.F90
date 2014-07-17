@@ -4,7 +4,7 @@ SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
                           PSWEC,     PTSC,                                &
                           PTS,       PT2M,        PHU2M,     PSWE,        &
-                          HTEST, ODINLINE, OD_MASKEXT, PLON, PLAT)
+                          HTEST, OD_MASKEXT, PLON, PLAT)
 
 !     ###############################################################################
 !
@@ -57,7 +57,6 @@ REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
-LOGICAL, INTENT (IN) :: ODINLINE
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
@@ -81,7 +80,7 @@ IF (CNATURE=='ISBA  ') THEN
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
                     PSWEC,     PTSC,                                &
                     PTS,       PT2M,        PHU2M,     PSWE,        &
-                    HTEST, ODINLINE, OD_MASKEXT, PLON, PLAT )
+                    HTEST, OD_MASKEXT, PLON, PLAT )
 ELSE
   WRITE(*,*) 'No assimilation done for scheme: ',TRIM(CNATURE)
 END IF

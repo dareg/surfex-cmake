@@ -1,6 +1,6 @@
 !     ###############################################################################
 SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
-                       ODINLINE,OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
+                       OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
 !
@@ -51,7 +51,6 @@ REAL,DIMENSION(KI), INTENT(IN) :: PSST_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PSIC_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PITM
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
-LOGICAL, INTENT(IN) :: ODINLINE
 LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 LOGICAL, DIMENSION(KI), INTENT(IN) :: OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
@@ -120,53 +119,43 @@ ENDDO
 !
 IF ( LEXTRAP_SEA ) THEN
   !
-  IF (ODINLINE) THEN
-    !
-    IF (OLKEEPEXTZONE) THEN
-      !     
-      ZSST(:) = ZSST0(:)
-      WHERE ( OD_MASKEXT(:) ) ZSST0(:) = XUNDEF
-      CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZSST0,PLAT_IN,PLON_IN,ZSST,GINTERP_SST,ZALT)
-      !
-    ELSE
-      !
-      IS1 = COUNT (.NOT. OD_MASKEXT)
-      ALLOCATE (ZSST1(IS1), ZSST01(IS1), ZLAT1(IS1), ZLON1(IS1), ZALT1(IS1), GINTERP_SST1(IS1))
-      !
-      ! remove extension zone
-      J = 1
-      DO J1 = 1, KI
-        IF (.NOT. OD_MASKEXT (J1)) THEN
-          ZSST01(J) = ZSST0(J1)
-          ZLAT1 (J) = PLAT_IN (J1)
-          ZLON1 (J) = PLON_IN (J1)
-          ZALT1 (J) = XZS  (J1)
-          GINTERP_SST1(J) = GINTERP_SST(J1)
-          J = J + 1
-        ENDIF
-      ENDDO
-        
-      ZSST1(:) = ZSST01(:)
-      CALL OI_HOR_EXTRAPOL_SURF(IS1,ZLAT1,ZLON1,ZSST01,ZLAT1,ZLON1,ZSST1,GINTERP_SST1,ZALT1)
-   
-      ! copy back
-      J = 1
-      DO J1 = 1, KI
-        IF (.NOT. OD_MASKEXT(J1)) THEN
-          ZSST(J1) = ZSST1(J)
-          J = J + 1
-        ENDIF
-      ENDDO
-      !
-      DEALLOCATE (ZSST01, ZSST1, ZLAT1, ZLON1, ZALT1, GINTERP_SST1)
-      !
-    ENDIF
+  IF (OLKEEPEXTZONE) THEN
+    !     
+    ZSST(:) = ZSST0(:)
+    WHERE ( OD_MASKEXT(:) ) ZSST0(:) = XUNDEF
+    CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZSST0,PLAT_IN,PLON_IN,ZSST,GINTERP_SST,ZALT)
     !
   ELSE
     !
-    !*     Extrapolation
-    ZSST(:) = ZSST0(:)
-    CALL OI_HOR_EXTRAPOL_SURF(KI,XLAT,XLON,ZSST0,XLAT,XLON,ZSST,GINTERP_SST,ZALT)
+    IS1 = COUNT (.NOT. OD_MASKEXT)
+    ALLOCATE (ZSST1(IS1), ZSST01(IS1), ZLAT1(IS1), ZLON1(IS1), ZALT1(IS1), GINTERP_SST1(IS1))
+    !
+    ! remove extension zone
+    J = 1
+    DO J1 = 1, KI
+      IF (.NOT. OD_MASKEXT (J1)) THEN
+        ZSST01(J) = ZSST0(J1)
+        ZLAT1 (J) = PLAT_IN (J1)
+        ZLON1 (J) = PLON_IN (J1)
+        ZALT1 (J) = XZS  (J1)
+        GINTERP_SST1(J) = GINTERP_SST(J1)
+        J = J + 1
+      ENDIF
+    ENDDO
+      
+    ZSST1(:) = ZSST01(:)
+    CALL OI_HOR_EXTRAPOL_SURF(IS1,ZLAT1,ZLON1,ZSST01,ZLAT1,ZLON1,ZSST1,GINTERP_SST1,ZALT1)
+ 
+    ! copy back
+    J = 1
+    DO J1 = 1, KI
+      IF (.NOT. OD_MASKEXT(J1)) THEN
+        ZSST(J1) = ZSST1(J)
+        J = J + 1
+      ENDIF
+    ENDDO
+    !
+    DEALLOCATE (ZSST01, ZSST1, ZLAT1, ZLON1, ZALT1, GINTERP_SST1)
     !
   ENDIF
   !

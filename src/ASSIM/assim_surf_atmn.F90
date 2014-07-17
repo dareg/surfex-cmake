@@ -5,7 +5,7 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                       
                             PSWEC,     PTSC,                                            &
                             PTS,       PT2M,        PHU2M,     PSWE,                    &
                             PSST,      PSIC,                                            &
-                            HTEST , ODINLINE, OD_MASKEXT, PLON, PLAT)
+                            HTEST , OD_MASKEXT, PLON, PLAT, OLKEEPEXTZONE )
 !     #################################################################################
 !
 !
@@ -79,16 +79,15 @@ REAL, DIMENSION(KI), INTENT(IN) :: PSWE
 REAL, DIMENSION(KI), INTENT(IN) :: PSST
 REAL, DIMENSION(KI), INTENT(IN) :: PSIC
 CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
-LOGICAL, INTENT (IN) :: ODINLINE
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
+LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 !
 !*      0.2    declarations of local variables
 !
 INTEGER :: JTILE                        ! loop on type of surface
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
-LOGICAL :: GLKEEPEXTZONE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -99,8 +98,6 @@ CPROGNAME = HPROGRAM
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
-!
-GLKEEPEXTZONE = .FALSE.
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries: Tile related operations
@@ -175,138 +172,10 @@ IF(GTOWN)THEN
 !
 ENDIF
 !
-IF (ODINLINE) THEN
-#ifdef ARO
-! Count 2D fields in MSE
-  NCOUNTW_TOT = 0
-  LWRITE      = .FALSE.
-  LCOUNTW     = .TRUE.
-  NCOUNTW     = 0
-! NINDX1, NINDX2, NKPROMA already set 
-  IF (.NOT. LFMWRIT) CALL SURFEX_FIELD_BUF_SET_RECORD(YSURFEX_CACHE_OUT, .FALSE.)
-  !
-  CALL WRITE
-  !  
-  IF (LFMWRIT) THEN
-    ALLOCATE (XGPGW(IGPCOMP, NCOUNTW_TOT))
-    XGPGW = XUNDEF
-  ELSE
-    CALL SURFEX_FIELD_BUF_PREALLOC  (YSURFEX_CACHE_OUT)
-    CALL SURFEX_FIELD_BUF_SET_RECORD(YSURFEX_CACHE_OUT, .TRUE.)
-  ENDIF
-  !
-  LWRITE      = .TRUE.
-  LCOUNTW     = .FALSE.
-  NCOUNTW     = 0
-
-  IF (LFMWRIT) DEALLOCATE (XGPGW)
-#endif
-ENDIF
-
 IF (LHOOK) CALL DR_HOOK('ASSIM_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
 CONTAINS
-
-SUBROUTINE WRITE 
-
-USE MODI_WRITE_SURF
-
-CHARACTER(LEN=10)  :: YVAR
-CHARACTER(LEN=100) :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
-INTEGER :: IRESP
-
-IF (LHOOK) CALL DR_HOOK ('ASSIM_SURF_ATM_n:WRITE', 0, ZHOOK_HANDLE)
-
-CALL DD ('WG1', XWG(:,1,1))
-
-YVAR='WG1'
-YPREFIX='X_Y_WG1 (m3/m3)                                   '
-CALL WRITE_SURF(HPROGRAM,YVAR,XWG(:,1,1),IRESP,HCOMMENT=YPREFIX)
-
-CALL DD ('WG2', XWG(:,2,1))
-
-YVAR='WG2'
-YPREFIX='X_Y_WG2 (m3/m3)                                   '
-CALL WRITE_SURF(HPROGRAM,YVAR,XWG(:,2,1),IRESP,HCOMMENT=YPREFIX)
-
-CALL DD ('WGI2', XWGI(:,2,1))
-
-YVAR='WGI2'
-YPREFIX='X_Y_WGI2 (m3/m3)                                  '
-CALL WRITE_SURF(HPROGRAM,YVAR,XWGI(:,2,1),IRESP,HCOMMENT=YPREFIX)
-
-CALL DD ('TG1', XTG(:,1,1))
-
-YVAR='TG1'
-YPREFIX='X_Y_TG1 (K)                                       '
-CALL WRITE_SURF(HPROGRAM,YVAR,XTG(:,1,1),IRESP,HCOMMENT=YPREFIX)
-
-CALL DD ('TG2', XTG(:,2,1))
-
-YVAR='TG2'
-YPREFIX='X_Y_TG2 (K)                                       '
-CALL WRITE_SURF(HPROGRAM,YVAR,XTG(:,2,1),IRESP,HCOMMENT=YPREFIX)
-
-CALL DD ('SST', XSST(:))
-
-YVAR='SST'
-YPREFIX='X_Y_SST (K)                                       '
-CALL WRITE_SURF(HPROGRAM,YVAR,XSST(:),IRESP,HCOMMENT=YPREFIX)
-
-CALL DD ('TS_WATER', XTS(:))
-
-YVAR='TS_WATER'
-YPREFIX='X_Y_TS_WATER (K)                                  '
-CALL WRITE_SURF(HPROGRAM,YVAR,XTS(:),IRESP,HCOMMENT=YPREFIX)
-
-IF (NSIZE_TOWN > 0 .AND. LAROME) THEN
-  CALL DD ('T_ROAD3', XT_ROAD(:,3))
-
-  YVAR='TROAD3'
-  YPREFIX='X_Y_T_ROAD3 (K)                                   '
-  CALL WRITE_SURF(HPROGRAM,YVAR,XT_ROAD(:,3),IRESP,HCOMMENT=YPREFIX)
-ENDIF
-
-CALL DD ('WSNOW_VEG1', TSNOW%WSNOW(:,1,1))
-
-YVAR='WSN_VEG1'
-YPREFIX='X_Y_WSNOW_VEG1 (kg/m2)                            '
-CALL WRITE_SURF(HPROGRAM,YVAR,TSNOW%WSNOW(:,1,1),IRESP,HCOMMENT=YPREFIX)
-
-IF (LHOOK) CALL DR_HOOK ('ASSIM_SURF_ATM_n:WRITE', 1, ZHOOK_HANDLE)
-
-END SUBROUTINE WRITE
-
-SUBROUTINE DD (CDN, PX)
-CHARACTER(LEN=*), INTENT (IN) :: CDN
-REAL, INTENT (IN) :: PX (:)
-
-REAL :: ZX (SIZE (PX))
-INTEGER :: I, N
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
-IF (LHOOK) CALL DR_HOOK ('ASSIM_SURF_ATM_n:DD', 0, ZHOOK_HANDLE)
-
-IF (ODINLINE) THEN
-#ifdef ARO
-  IF (.NOT.LWRITE.AND.LHOOK) CALL DR_HOOK ('ASSIM_SURF_ATM_n:DD', 1, ZHOOK_HANDLE)
-  IF (.NOT.LWRITE) RETURN
-#endif
-  N = COUNT (.NOT. OD_MASKEXT)
-  ZX (1:N) = PACK (PX, .NOT. OD_MASKEXT)
-ELSE
-  ZX = PX
-  N = SIZE (PX)
-ENDIF
-
-WRITE (0, *) TRIM(CDN)//" = " 
-WRITE (0, *) N, MINVAL(ZX(1:N)), MAXVAL(ZX(1:N))
-!WRITE (0, '(10(E14.6,", "))') ZX (1:N)
-
-IF (LHOOK) CALL DR_HOOK ('ASSIM_SURF_ATM_n:DD', 1, ZHOOK_HANDLE)
-
-END SUBROUTINE DD
 !
 !=======================================================================================
 SUBROUTINE ASSIM_TREAT_SURF(KTILE,KSIZE,KMASK)
@@ -356,10 +225,8 @@ DO JJ=1,KSIZE
   ZP_PHU2M(JJ)       = PHU2M(JI)
   ZP_PSST(JJ)        = PSST(JI)
   ZP_PSIC(JJ)        = PSIC(JI)
-  IF (ODINLINE) THEN
-    ZP_LON(JJ)         = PLON(JI)
-    ZP_LAT(JJ)         = PLAT(JI)
-  ENDIF
+  ZP_LON(JJ)         = PLON(JI)
+  ZP_LAT(JJ)         = PLAT(JI)
   GD_MASKEXT(JJ)     = OD_MASKEXT(JI)
 ENDDO
 
@@ -370,7 +237,7 @@ IF (KTILE==1) THEN
   WRITE(*,*) '*********************************************'
  
   CALL  ASSIM_SEA_n(HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST,&
-              ODINLINE,GLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
+                    OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
 ELSEIF (KTILE==2) THEN
   
@@ -378,7 +245,7 @@ ELSEIF (KTILE==2) THEN
   WRITE(*,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
   WRITE(*,*) '*********************************************'
   CALL ASSIM_INLAND_WATER_n(HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
-                            ODINLINE,GLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
+                            OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
 ELSEIF (KTILE==3) THEN
   
@@ -390,7 +257,7 @@ ELSEIF (KTILE==3) THEN
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
                       ZP_PSWEC,     ZP_PTSC,                                      &
                       ZP_PTS,       ZP_PT2M,        ZP_PHU2M,     ZP_PSWE,        & 
-                      HTEST, ODINLINE, GD_MASKEXT, ZP_LON, ZP_LAT )
+                      HTEST, GD_MASKEXT, ZP_LON, ZP_LAT )
   
 ELSEIF (KTILE==4) THEN
   

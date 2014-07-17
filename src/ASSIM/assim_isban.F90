@@ -4,7 +4,7 @@ SUBROUTINE ASSIM_ISBA_n(HPROGRAM,KI,                                   &
                         PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
                         PSWEC,     PTSC,                               &
                         PTS,       PT2M,        PHU2M,     PSWE,       &
-                        HTEST, ODINLINE, OD_MASKEXT, PLON_IN, PLAT_IN )
+                        HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
 
 !     ###############################################################################
 !
@@ -67,7 +67,6 @@ REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
-LOGICAL, INTENT (IN) :: ODINLINE
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
@@ -134,7 +133,7 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
                             PSWEC,     PTSC,                               &
                             PTS,       PT2M,        PHU2M,     ZSWE,       &
-                            HTEST, ODINLINE, OD_MASKEXT, PLON_IN, PLAT_IN )
+                            HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
   !
   ! Snow analysis/update (changed in oi_cacsts). Get the full increment
   IF (LAESNM) THEN

@@ -3,7 +3,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                     &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,                   &
                                 PTS_O,    PT2M_O, PHU2M_O, PSWE,  &
-                                HTEST, ODINLINE, OD_MASKEXT,      &
+                                HTEST, OD_MASKEXT,      &
                                 PLON_IN, PLAT_IN )
 
 ! ------------------------------------------------------------------------------------------
@@ -35,7 +35,6 @@ USE MODD_ASSIM,           ONLY : LOBSWG, NITRAD, NPRINTLEV, NECHGU, XRD1, XRSCAL
                                  XRTHR_QC, XSIGWGB, XSIGWGO, XSIGWGO_MAX, XAT2M_ISBA, &
                                  XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA
 !
-USE MODD_ISBA_GRID_n,     ONLY : XLAT, XLON
 USE MODD_ISBA_n,          ONLY : XTG, XWG, XWGI, XSAND, XCLAY, TSNOW, XRSMIN,    &
                                  XDG, XLAI, XVEG, TTIME
 
@@ -64,7 +63,6 @@ REAL, DIMENSION(KI), INTENT(IN) :: PT2M_O
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M_O
 REAL, DIMENSION(KI), INTENT(OUT):: PSWE
 CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
-LOGICAL, INTENT (IN) :: ODINLINE
 LOGICAL,  DIMENSION (KI) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
@@ -127,18 +125,11 @@ IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 !
 !
-IF ( .NOT.ODINLINE ) THEN
-!Set longitudes/latitudes
-  DO I=1,KI
-    ZGELAM(I) = XLON(I)
-    ZGELAT(I) = XLAT(I)
-  ENDDO
-ELSE
-  DO I=1,KI     
-    ZGELAM(I) = PLON_IN(I)  
-    ZGELAT(I) = PLAT_IN(I)
-  ENDDO
-ENDIF
+DO I=1,KI     
+  ZGELAM(I) = PLON_IN(I)  
+  ZGELAT(I) = PLAT_IN(I)
+ENDDO
+!
 DO I=1,KI
   ZGEMU (I) = SIN(ZGELAT(I)*XPI/180.)
 ENDDO
@@ -250,16 +241,13 @@ CALL OI_BC_SOIL_MOISTURE(KI,ZSM_O,ZSAB,ZWS_O)
 ZT2INC(:) = PT2M_O (:) - ZTCLS(:)
 ZH2INC(:) = PHU2M_O(:) - ZHCLS(:)
 !
-IF (ODINLINE) THEN
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone
-  WHERE (OD_MASKEXT(1:KI))
-    ZD2   (:) = 1.0
-    ZT2INC(:) = 0.0
-    ZH2INC(:) = 0.0
-  END WHERE
-ENDIF
-!
+WHERE (OD_MASKEXT(1:KI))
+  ZD2   (:) = 1.0
+  ZT2INC(:) = 0.0
+  ZH2INC(:) = 0.0
+END WHERE
 !
 ! Threshold for background check
 ZTHRES = XRTHR_QC*SQRT(XSIGWGO**2 + XSIGWGB**2)
@@ -310,11 +298,9 @@ WHERE ( ZWS(:)/=XUNDEF )
   ZSNINC(:) = ZSNS(:) - ZSNS0(:)
 END WHERE
 
-IF (ODINLINE) THEN
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone
-  WHERE (OD_MASKEXT(1:KI)) ZD2(:) = 1.0
-ENDIF
+WHERE (OD_MASKEXT(1:KI)) ZD2(:) = 1.0
 !
 WHERE (ZWS0(:)/=XUNDEF)
   ZWS0(:)  = ZWS(:)/ (XRD1*XRHOLW)

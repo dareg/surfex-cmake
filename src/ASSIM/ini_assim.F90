@@ -32,8 +32,19 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ASSIM
-USE MODD_CSTS,       ONLY : XRHOLW, XPI 
+USE MODD_ASSIM, ONLY : LFGEL, LCLIM, XSODELX, NTVGLA, XRD1, XRTINER, XWCRIN, &
+                       XWPMX, XWSMX, XTMERGL, XRZHZ0G, NSEAICE, XRWPIA, &
+                       XRWPIB, XRSNSA, XRSNSB, XSALBM, XSALBB, XSEMIM, XSEMIB, &
+                       XSZZ0B, LHUMID, LLDHMT, LISSEW, NLISSEW, NMINDJ, NNEBUL, &
+                       NNEIGT, NNEIGW, XANEBUL, XRCLIMN, XRCLIMTP, XRCLIMTS, &
+                       XRCLIMV, XRCLIMWP, XRCLIMWS, XSCOEFH, XSCOEFT, XSEVAP, &
+                       XSICE, XSNEIGT, XSNEIGW, XSPRECIP, XSWFC, XV10MX, XSMU0, &
+                       L_SM_WP, NR_SM_WP, XRA_SM_WP, XSIGHP1, XSIGT2MR, XSIGH2MR, &
+                       XRSABR, XRARGR, XGWFC, XEWFC, XGWWILT, XEWWILT, XG1WSAT, &
+                       XG2WSAT, XADWR, XREPS1, XREPS2, XREPS3, NIDJ, XREPSM, &
+                       XRCDTR
+!
+USE MODD_CSTS,  ONLY : XPI 
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -52,11 +63,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! NECHGU : ECHEANCE DU GUESS EN HEURES (0 A 30).
 !
 IF (LHOOK) CALL DR_HOOK('INI_ASSIM',0,ZHOOK_HANDLE)
-!
-LASSIM=.FALSE.
-!
-NECHGU = 6
-!
 !
 !LFGEL   : CLE D'APPEL DU GEL DE L'EAU DU SOL AVEC ISBA (LSOLV)
 !        : KEY FOR SOIL FREEZING WITH ISBA (LSOLV)
@@ -99,20 +105,14 @@ XTMERGL = 271.23
 XRZHZ0G = 1.0 
 !
 !nactex, canali
-!  RCLIMCA : coef. de rappel vers la climatologie des champs de surface
-!  RCLISST : coef. de rappel vers la climatologie de SST
 !  NSEAICE : utilsation limite glace SSM/I (et nb de jours de retard possible)
 !  RSNSA   : Coefficient pour l'analyse de neige
 !  RSNSB   : Coefficient pour l'analyse de neige
 !  RWPIA   : Coefficient pour l'analyse de l'eau gelee
 !  RWPIB   : Coefficient pour l'analyse de l'eau gelee
 !
- NSEAICE = 0
+NSEAICE = 0
 !
-!XRCLIMCA=0.045
-XRCLIMCA = 0. ! no climatology relaxation
-!XRCLISST=0.05 ! as in the original cacsts
-XRCLISST = 0.05
 XRWPIA   = 0.025
 XRWPIB   = 2.  
 XRSNSA   = 0.025
@@ -141,7 +141,6 @@ XSZZ0B = 0.001
 !   V10MX , MINDJ , SPRECIP , SWFC  , SEVAP , SICE , SMU0
 !
 ! cles et coefficients de reglage
-!     LIMVEG : activation de la limitation a wp > veg*wwilt
 !     LHUMID : activation de la clef LIMVEG  ou du seuil SWFC limitee
 !     LISSEW : activation du lissage des increments de wp (si NLISSEW=3)
 !     NLISSEW: nombre de reseaux anterieurs utilisables pour le lissage
@@ -171,7 +170,6 @@ XSZZ0B = 0.001
 !
 !***
 !*** conditions d'analyse
-!***  LIMVEG  : si wp >= veg*wwilt
 !***  MINDJ   : duree du jour minimale (heure)
 !***  V10MX   : seuil sur le module du vent (analyse) a 10m
 !***  SPRECIP : seuil sur les precipitations (prevues) en mm
@@ -183,8 +181,6 @@ XSZZ0B = 0.001
 !***  LHUMID  : humidification seulement si wp < veg*wwilt
 !***          : assechement seulement si ws > SWFC*wfc (pour ws)
 !***  LISSEW  : lissage des increments de wp (moyenne glissante sur 24h)
-!***  SIGT2MO : ecart-type d'erreur "d'observation" sur T2m
-!***  SIGH2MO : ecart-type d'erreur "d'observation" sur Hu2m
 !***  ANEBUL  : reduction maximale par la nebulosite
 !***  NNEBUL  : puissance de la nebulosite prise en compte
 !***            nebulosite moyenne neb <--> poids 1-ANEBUL*neb**NNEBUL
@@ -211,14 +207,9 @@ XSZZ0B = 0.001
 !***---------------------------------------------------------------------
 !
 LHUMID   = .TRUE.
-LIMVEG   = .TRUE.
 LLDHMT   = .FALSE.
 LISSEW   = .FALSE.
-LOBSWG   = .TRUE.   ! assimilation of WG
-LOBS2M   = .FALSE.  ! assimilation of T2M + RH2M (with WG)
-LAROME   = .TRUE.   !  if AROME model 
 !
-NPRINTLEV= 0        !  for additional prints
 NLISSEW  = 0
 NMINDJ    = 6
 NNEBUL   = 1
@@ -236,21 +227,12 @@ XSCOEFH   = 0.
 XSCOEFT   = 0.
 XSEVAP    = 0.
 XSICE     = 5
-XSIGH2MO  = 0.1  ! observation error for HU2m
-XSIGT2MO  = 1.0  ! observation error for T2m
-XSIGWGO   = 0.06 ! observation error for WG
-XSIGWGB   = 0.06 ! background error for WG
-XSIGW2B   = 0.03 ! background error for W2
 XSNEIGT   = 1.
 XSNEIGW   = 0.
 XSPRECIP  = .3
-XSPRECIP2 = 4.0
 XSWFC     = 1.0
 XV10MX    = 10.
 XSMU0     = 7.
-XRTHR_QC  = 3.0
-XSIGWGO_MAX = 6.0 ! maximum acceptable WG obs error (%)
-XRSCAL_JAC  = 4.0  ! to modify the "effective" assimilation window
 !
 ! PARAMETERS TO SWITCH ON CASMSWI - SPATIAL SMOOTHING OF SWI (SOIL WETNESS INDEX)
 ! THEN CHANGING OF Wp ( TOTAL SOIL WATER CONTENT) IN CANARI OI. 
@@ -297,30 +279,6 @@ NIDJ     = 12                      ! day duration
 XREPSM   = 0.409093                ! obliquity
 XRCDTR   = 24./360.
 ! ITRAD (half assimilation window in sec) --> dependant from NECHGU --> set in OI_MAIN
-
-
-! Initialization of EKF
-LPRT          = .FALSE.
-LSIM          = .FALSE.
-LBEV          = .TRUE.
-!
-NOBSTYPE      = 2
-NVAR          = 4
-NBOUTPUT      = 1
-!
-!
-CBIO = "BIOMA1"
-!
-CVAR_M   = (/"WG2","WG1","TG2","TG1","LAI"/)
-XSIGMA_M = (/0.15,0.1,2.0,2.0,0.2/)
-XTPRT_M   = (/0.0001,0.0001,0.00001,0.00001,0.001/)
-NNCV     = (/1,1,1,1,1/)
-XSCALE_Q  = 0.125
-!
-XSCALE_QLAI = 0.5
-!
-XALPH = (/0., 0., 0., 0.08203445, 0.07496252, 0.06846970, 0.06771856, 0.09744689, &
-          0.09744689, 0.07164350, 0.17686594, 0.07164350/)
 !
 IF (LHOOK) CALL DR_HOOK('INI_ASSIM',1,ZHOOK_HANDLE)
 !

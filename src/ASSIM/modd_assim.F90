@@ -59,6 +59,7 @@ IMPLICIT NONE
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE
+ INTEGER                               :: NOBS
  INTEGER                               :: NIPERT 
  INTEGER                               :: NIVAR                ! counter for ctnrl vars
  INTEGER                               :: NVAR                 ! number of cntrl vars
@@ -85,6 +86,7 @@ REAL,DIMENSION(12)                     :: XALPH
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF_PATCH             ! vector of model observations (for each pacth)
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF                   ! Vector of forecast control variables 
  REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XI 
+ REAL,DIMENSION(:,:), ALLOCATABLE      :: XYO                  ! vector of observations
  REAL,DIMENSION(:,:),ALLOCATABLE       :: XLAI_PASS
  REAL,DIMENSION(:,:),ALLOCATABLE       :: XBIO_PASS
  REAL,DIMENSION(:,:),ALLOCATABLE       :: XAT2M_ISBA

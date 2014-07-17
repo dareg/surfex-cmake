@@ -4,14 +4,19 @@ SUBROUTINE READ_NAMELISTS_ASSIM(HPROGRAM)
 !
 !---------------------------    
 !
-USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,LAROME,LECSST,    &
-                                 LAESST,LAESNM,LALADSURF,LREAD_SST_FROM_FILE,       &
+USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,LAROME,LECSST,  &
+                                 LAESST,LAESNM,LALADSURF,LREAD_SST_FROM_FILE,        &
                                  LEXTRAP_SEA,LEXTRAP_WATER,LEXTRAP_NATURE,LWATERTG2, &
-                                 LBFIXED,XERROBS_M,NNCO,LOBSFILE
+                                 NBOUTPUT,NECHGU,XRCLIMCA,XRCLISST,XSIGH2MO,XSIGT2MO,&
+                                 XSIGWGO,XSIGWGB,XSIGW2B,LOBSWG,LOBS2M,LIMVEG,       &
+                                 XSPRECIP2,XRTHR_QC,XSIGWGO_MAX,XRSCAL_JAC,LPRT,LSIM,&
+                                 LBEV,LBFIXED,NOBSTYPE,LOBSFILE,XERROBS_M,NNCO,NIVAR,&
+                                 NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,XTPRT_M,NNCV,        &
+                                 XSCALE_Q,XSCALE_QLAI,CBIO,CPREFIX_BIO,XALPH
+!
 USE MODI_DEFAULT_ASSIM
 USE MODI_READ_ASSIM_CONF
 USE MODI_INI_ASSIM
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -29,11 +34,19 @@ CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,     &
                    LAROME,LECSST,LAESST,LAESNM,             &
                    LALADSURF,LREAD_SST_FROM_FILE,           &
                    LEXTRAP_SEA,LEXTRAP_WATER,LEXTRAP_NATURE,&
-                   LWATERTG2,LBFIXED,XERROBS_M,NNCO,LOBSFILE)
-
+                   LWATERTG2,NBOUTPUT,NECHGU,XRCLIMCA,      &
+                   XRCLISST,XSIGH2MO,XSIGT2MO,XSIGWGO,      &
+                   XSIGWGB,XSIGW2B,LOBSWG,LOBS2M,LIMVEG,    &
+                   XSPRECIP2,XRTHR_QC,XSIGWGO_MAX,          &
+                   XRSCAL_JAC,LPRT,LSIM,LBEV,LBFIXED,       &
+                   NOBSTYPE,LOBSFILE,XERROBS_M,NNCO,NIVAR,  &
+                   NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,XTPRT_M,  &
+                   NNCV,XSCALE_Q,XSCALE_QLAI,CBIO,          &
+                   CPREFIX_BIO,XALPH)
+!
 ! Set default assimilations values/constants
 CALL INI_ASSIM
-
+!
 ! Override with namelist values
 CALL READ_ASSIM_CONF(HPROGRAM)
 

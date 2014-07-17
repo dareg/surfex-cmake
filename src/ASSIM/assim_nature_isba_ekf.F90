@@ -22,7 +22,8 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI, PT2M, PHU2M, HTEST)
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XSIGMA, CBIO, XI,        &
                                XF_PATCH, XF, COBS, XSCALE_QLAI,  LOBSFILE, XALPH,  &
-                               NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS
+                               NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS,      &
+                               NOBS, XYO
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
@@ -39,7 +40,6 @@ USE PARKIND1,           ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 USE MODI_ADD_FORECAST_TO_DATE_SURF
-USE MODI_GET_FILE_NAME
 !
 USE MODE_EKF
 !
@@ -55,7 +55,6 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !
- CHARACTER(LEN=200) :: YMFILE     ! Name of the observation, perturbed or reference file!  
  CHARACTER(LEN=30)  :: YBGFILE
  CHARACTER(LEN=17)  :: YLFNAME
  CHARACTER(LEN=9)   :: YFNAME
@@ -78,7 +77,6 @@ REAL,DIMENSION(KI) :: ZCOFSWI                     ! dynamic range (Wfc - Wwilt)
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZCOEF
 REAL,DIMENSION(KI,NPATCH,NVAR) :: ZEPS            ! The perturbation amplitude
 !
-REAL,DIMENSION(KI,NOBSTYPE*NBOUTPUT) :: ZYO       ! vector of observations
 REAL,DIMENSION(NVAR+1,NOBSTYPE) :: ZYF            ! Vector of model observations (averaged) 
 !
 REAL,DIMENSION(KI*NPATCH*NVAR*NPATCH*NVAR) :: ZBLONG
@@ -112,7 +110,7 @@ INTEGER :: IHOUR
 INTEGER :: IRESP                      ! return code
 INTEGER :: ISTEP                      ! 
 INTEGER :: IMYPROC
-INTEGER :: INOBS, IOBS
+INTEGER :: IOBS
 INTEGER :: ISTAT, ICPT, IUNIT
 !
 INTEGER :: I,J,K,JJ,L,K1,L1
@@ -381,7 +379,6 @@ IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 !
-INOBS = 0
 IHOUR = 0
 ZTIME = FLOAT(NECHGU) * 3600.
 !
@@ -394,36 +391,14 @@ DO ISTEP=1,NBOUTPUT
   ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
   IHOUR = IHOUR + NECHGU
   !
-  IF ( LOBSFILE ) THEN
+  IF ( .NOT.LOBSFILE ) THEN
     !
-    INOBS = 0
-    YMFILE = 'CANARI_NATURE_'
-    CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
-    OPEN(UNIT=55,FILE=TRIM(YMFILE)//".DAT",FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
-    IF ( ISTAT==0 ) THEN
-      !   If it exists, read observations
-      DO I = 1,KI
-        READ (55,*)  (ZYO(I,INOBS+J),J=1,NOBSTYPE)
-      ENDDO
-      INOBS = INOBS + NOBSTYPE      
-      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', ZYO(1,:), INOBS
-      CLOSE(55)
-    ENDIF
-    !
-    IF ( INOBS == 0 ) THEN
-      IF ( NPRINTLEV > 0 ) WRITE(*,*) 'No observations read for LAI in OBS file - stop'
-      CALL ABOR1_SFX("ASSIM_NATURE_ISBA_EKF: No observations read for LAI in OBS file - stop")
-    ENDIF
-    !
-  ELSE
-    !
-    INOBS = NOBSTYPE
-    DO IOBS = 1,INOBS
+    DO IOBS = 1,NOBS
       SELECT CASE (TRIM(COBS(IOBS)))   
         CASE("T2M") 
-          ZYO(:,IOBS) = PT2M(:)
+          XYO(:,IOBS) = PT2M(:)
         CASE("HU2M")   
-          ZYO(:,IOBS) = PHU2M(:)
+          XYO(:,IOBS) = PHU2M(:)
         CASE("WG1","LAI")  
           CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
       END SELECT                 
@@ -437,10 +412,10 @@ ENDDO
 OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
 DO I = 1,KI
   IF ( MINVAL(XWGI(I,1,:))>0. ) THEN
-    ZYO (I,:) = XUNDEF
+    XYO (I,:) = XUNDEF
     IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',I,' REMOVED'
   ENDIF
-  WRITE (111,*) ZYO(I,:)
+  WRITE (111,*) XYO(I,:)
 ENDDO
 CLOSE(111)
 !//////////////////////TO WRITE OBS/////////////////////////////////////
@@ -448,7 +423,7 @@ CLOSE(111)
 !############################# ANALYSIS ###############################
 !
 IF ( NPRINTLEV > 0 ) THEN
-  WRITE(*,*) 'calculating jacobians',INOBS
+  WRITE(*,*) 'calculating jacobians',NOBS
   WRITE(*,*) ' and then PERFORMING ANALYSIS'
 ENDIF
 !
@@ -506,7 +481,7 @@ DO I=1,KI
 !--------------------- SET OBSERVATION ERROR ------------------      
       ZR(K1,K1) = XERROBS(K)*XERROBS(K)
       IF ( COBS(K) .EQ. "LAI" ) THEN
-        ZR(K1,K1) = ZR(K1,K1) * ZYO(I,K1)*ZYO(I,K1)
+        ZR(K1,K1) = ZR(K1,K1) * XYO(I,K1)*XYO(I,K1)
       ELSEIF (COBS(K) .EQ. "WG1") THEN
         ! convert R for wg1 from SWI  to abs value
         ZR(K1,K1) = ZR(K1,K1) * ZCOFSWI(I)*ZCOFSWI(I)
@@ -518,14 +493,14 @@ DO I=1,KI
           !
           L1 = J + NPATCH*(L-1)
           !
-          IF( ZYO(I,K1).NE.XUNDEF .AND. ZYO(I,K1).NE.999.0 ) THEN         !if obs available
+          IF( XYO(I,K1).NE.XUNDEF .AND. XYO(I,K1).NE.999.0 ) THEN         !if obs available
             ! Jacobian of obs operator
             ZHO(K1,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L)
             ! impose limits  
             ZHO(K1,L1) = MAX(-0.1, ZHO(K1,L1))
             ZHO(K1,L1) = MIN( 1.0, ZHO(K1,L1))
             ! innovation vector
-            ZB2(K1) = ZYO(I,K1) - ZYF(1,K)
+            ZB2(K1) = XYO(I,K1) - ZYF(1,K)
             IOBSCOUNT = IOBSCOUNT + 1
           ELSE  !if no obs available
             ! set obs operator and innovation to zero if no obs available
@@ -594,7 +569,7 @@ DO I=1,KI
   ZKRK(:,:) = 0.
   !
   ! K1 = (R+H.B.HT) (calculate inverse -> output goes to K1)
-  CALL INVERSE_MATRIX(INOBS,ZK1(:,:),ZP(:))
+  CALL INVERSE_MATRIX(NOBS,ZK1(:,:),ZP(:))
   ZGAIN(:,:) = MATMUL(ZB(I,:,:),MATMUL(ZHOT(:,:),ZK1(:,:)))
   ZIDKH(:,:) = ZIDENT(:,:) - MATMUL(ZGAIN(:,:),ZHO(:,:))
   ZKRK (:,:) = MATMUL(ZGAIN(:,:),MATMUL(ZR(:,:),TRANSPOSE(ZGAIN(:,:))))
