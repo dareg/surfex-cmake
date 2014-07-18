@@ -353,6 +353,13 @@ endif
 GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}${MNH_INT}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 endif
+
+ifeq "$(VER_GRIBAPI)" "SOPRANO"
+DIR_GRIBAPI=/usr/local/sopra/grib_api
+GRIBAPI_PATH=${DIR_GRIBAPI}
+GRIBAPI_INC=${GRIBAPI_PATH}/include/grib_api.mod
+endif
+
 #
 ifdef DIR_GRIBAPI
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
@@ -455,6 +462,14 @@ INC            +=  $(INC_NETCDF)
 LIBS           +=  $(LIB_NETCDF)
 endif
 
+ifeq "$(VER_CDF)" "CDFSOPRANO"
+CDF_PATH?=/usr
+INC_NETCDF     = -I${CDF_PATH}/include
+LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf
+INC            += $(INC_NETCDF)
+LIBS           += $(LIB_NETCDF)
+endif
+
 ##########################################################
 #           Number of NESTED MODEL                       #
 ##########################################################
@@ -468,8 +483,8 @@ NSOURCE=8
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST
-#PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST
+PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST VARASSIM
+#PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 endif
 #
 ifeq "$(VER_USER)" "FORC"
