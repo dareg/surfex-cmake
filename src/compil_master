@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+#SBATCH -n 1
+#
+#SBATCH -t 02:00:00
+#SBATCH -N 1
+#SBATCH -p login
+#
+export VERSION_BUG=0
+#
+export VER_MPI="MPIAUTO"
+#
+export VERSION_MASTER="SFX-V8-0"
+export VERSION_XYZ=${VERSION_MASTER}-${VERSION_BUG}
+#
+TARG=$(uname -s -n)
+case "$TARG" in
+'Linux lx'*|'Linux sx'*|'Linux px'*) #PC
+	export ARCH=${ARCH:-LXgfortran}
+        ;;
+'Linux beaufix'*) #BEAUFIX     
+        export ARCH=${ARCH:-LXifort} 	
+        ;;
+esac	
+#
+./configure
+#
+. ../conf/profile_surfex-$ARCH-$VERSION_XYZ-$VER_MPI-O2
+#
+iflag=0
+#
+make || { iflag=1 ; }
+if [ $iflag -eq 1 ] ; then
+    echo " "
+    echo "              ###########################"
+    echo "              Probleme compilation master"
+    echo "              ###########################"
+    echo " "
+    exit 1
+fi 
+#
+make installmaster
+#
+exit
