@@ -69,6 +69,11 @@ export VERSION_CDF=${VERSION_CDF}
 export VER_GRIBAPI=${VER_GRIBAPI}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI}
 #
+# Version of OASIS
+#
+export VER_OASIS=mct
+export VERSION_OASIS=3-mct
+#
 # Version of Def integer
 #
 export MNH_INT=${MNH_INT}

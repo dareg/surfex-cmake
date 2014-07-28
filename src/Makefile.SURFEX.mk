@@ -22,6 +22,7 @@ ARCH_XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}
 ##########################################################
 ifdef VER_USER
 DIR_USER += ${VER_USER}
+DIR_USER += ${VER_USER}_OFFLIN
 endif
 ##########################################################
 #           Source OFFLIN                                #
@@ -98,7 +99,7 @@ endif
 #DIR_SURFEX += ARCH_SRC/bug_surfex
 # PRE_BUG TEST !!!
 #
-DIR_TRIP += LIB/TRIP
+DIR_TRIP += LIB/TRIPv2
 #CPPFLAGS_TRIP=
 #
 ifdef DIR_TRIP
@@ -122,6 +123,21 @@ CPPFLAGS_TOPD= -DTOPD
 ifdef DIR_TOPD
 DIR_MASTER += $(DIR_TOPD)
 CPPFLAGS   += $(CPPFLAGS_TOPD)
+
+$(OBJS0): OPT = $(OPT0) 
+
+endif
+##########################################################
+#           Source GELATO                                #
+##########################################################
+DIR_GELATO += LIB/GELATO
+CPPFLAGS_GELATO= -Din_surfex
+#
+ifdef DIR_GELATO
+DIR_MASTER += $(DIR_GELATO)
+CPPFLAGS   += $(CPPFLAGS_GELATO)
+VER_GELATO=GELATO-6-0-34
+#ARCH_XYZ    := $(ARCH_XYZ)-$(VER_GELATO)
 
 $(OBJS0): OPT = $(OPT0) 
 
@@ -168,7 +184,7 @@ endif
 ifeq "$(VER_MPI)" "NOMPI"
 LIBS       += $(DIR_HOOK)/libmpi_serial.a
 endif
-
+#
 ##########################################################
 #           Source XRD                                   #
 ##########################################################
@@ -389,6 +405,7 @@ INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -L${CDF_PATH}/lib64 -lnetcdf_c++ -lnetcdf
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 #
 # NetCDF in SGI ICE
@@ -399,6 +416,7 @@ INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff  -lnetcdf -i_dynamic 
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 #
 # NetCDF in NEC SX
@@ -409,6 +427,7 @@ INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdf_c++ -lnetcdf
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 #
 ifeq "$(VER_CDF)" "CDFMFSX"
@@ -417,6 +436,7 @@ INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdf
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 #
 # NetCDF in AIX S
@@ -427,6 +447,7 @@ INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdf_c++ -lnetcdf
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -438,6 +459,7 @@ LIB_NETCDF     ?=  -lnetcdf -lnetcdff /usr/lib64/libgfortran.so.2
 #LIB_NETCDF     ?=  -lnetcdf -lnetcdff 
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -449,6 +471,7 @@ INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -456,20 +479,63 @@ endif
 #
 ifeq "$(VER_CDF)" "CDF3GFOR"
 CDF_PATH       ?=/opt/netcdf3
-INC_NETCDF     ?=  -I${CDF_PATH}/include
-LIB_NETCDF     ?=  -L${CDF_PATH}/lib64  -lnetcdf_c++ -lnetcdf
+INC_NETCDF     ?= -I${CDF_PATH}/include
+LIB_NETCDF     ?= -L${CDF_PATH}/lib64  -lnetcdf_c++ -lnetcdf
 INC            +=  $(INC_NETCDF)
 LIBS           +=  $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 
+#
+# Linux with SOPRANO
+#
 ifeq "$(VER_CDF)" "CDFSOPRANO"
 CDF_PATH?=/usr
 INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
 endif
 
+#
+# Linux with gfortran Beaufix
+#
+ifeq "$(VER_CDF)" "CDFBOFX"
+CDF_PATH       ?= /opt/softs/libraries/ICC13.1.4.183/netcdf-4.3.0
+INC_NETCDF     ?= -I${CDF_PATH}/include 
+#INC_NETCDF     += -I${CDF_PATH}/zlib-1.2.5/include
+#INC_NETCDF     += -I${CDF_PATH}/szip-2.1/include
+#INC_NETCDF     += -I${CDF_PATH}/hdf5-1.8.11/include
+LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf
+#LIB_NETCDF     += -L${CDF_PATH}/zlib-1.2.5/lib -lz
+#LIB_NETCDF     += -L${CDF_PATH}/szip-2.1/lib -lsz
+#LIB_NETCDF     += -L${CDF_PATH}/hdf5-1.8.11/lib -lhdf5_hl -lhdf5
+INC            += $(INC_NETCDF)
+LIBS           += $(LIB_NETCDF)
+VPATH          += ${CDF_PATH}/include
+endif
+
+
+##########################################################
+#           Librairie OASIS3-MCT                         #
+##########################################################
+#
+ifneq "$(VER_MPI)" "NOMPI"
+#
+ifeq "$(VER_OASIS)" "mct"
+DIR_OASIS?=${SRC_SURFEX}/src/LIB/oasis3-mct
+LIB_OASIS?=-L$(DIR_OASIS)/SFX/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
+INC_OASIS?=-I$(DIR_OASIS)/SFX/build/lib/psmile.MPI1
+OASIS_KEY?=${DIR_OASIS}/SFX/build/lib/psmile.MPI1/mod_oasis.mod
+#
+LIBS       += $(LIB_OASIS)
+INC        += $(INC_OASIS)
+VPATH      += $(DIR_OASIS)/SFX/build/lib/psmile.MPI1
+endif
+#
+endif
+#
 ##########################################################
 #           Number of NESTED MODEL                       #
 ##########################################################
@@ -480,10 +546,12 @@ NSOURCE=8
 #                                                        #
 ##########################################################
 #
+TRIP_LIST += TRIP_PREP TRIP_MASTER TRIP_CHANGE_DATE
+#
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST VARASSIM
+PROG_LIST += PGD PREP OFFLINE OI_MAIN SODA SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 endif
 #
@@ -509,8 +577,7 @@ LIB_OBJS_ROOT   := $(LIB_OBJS_ROOT)-$(ARCH_XYZ)
 #
 IGNORE_OBJS += 
 IGNORE_DEP_MASTER += 
-IGNORE_DEP_MASTER += 
-
+IGNORE_DEP_MASTER +=
 #
 #
 ##########################################################

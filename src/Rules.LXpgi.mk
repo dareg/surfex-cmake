@@ -54,8 +54,10 @@ endif
 FC = pgf90
 ifeq "$(VER_MPI)" "MPIAUTO"
 F90 = mpif90
+CC  = mpicc
 else
 F90 = pgf90
+CC  =
 endif
 #
 F77FLAGS  =  $(OPT)
@@ -92,10 +94,18 @@ CNAME_GRIBEX=_pgf77
 
 OBJS_NOCB +=  spll_isba.o
 #
-include Makefile.SURFEX.mk
+include ${SRC_SURFEX}/src/Makefile.SURFEX.mk
 #
 ifeq "$(VER_MPI)" "NOMPI"
 CPPFLAGS += -DNOMPI
+else
+ifeq "$(VER_OASIS)" "mct"
+CPPFLAGS += -DSFXOASIS -DTRIPOASIS
+endif
+endif
+#
+ifeq "$(VER_CDF)" "CDFBOFX"
+  LDFLAGS += -Wl,-rpath,$(CDF_PATH)/lib
 endif
 #
 ##########################################################

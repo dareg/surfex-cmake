@@ -50,8 +50,10 @@ endif
 #         
 ifeq "$(VER_MPI)" "NOMPI"
 F90 = xlf95_r
+CC  =
 else         
 F90 = mpxlf95_r
+CC  =
 endif
 
 F90FLAGS =       $(OPT) -qfree=f90 -qsuffix=f=f90 
@@ -95,7 +97,7 @@ CNAME_GRIBEX=""
 #DIR_SURFEX      += ARCH_SRC/surfex 
 #DIR_SURCOUCHE   += ARCH_SRC/bug_surcouche
 #
-include Makefile.SURFEX.mk
+include ${SRC_SURFEX}/src/Makefile.SURFEX.mk
 #
 INC += -I/usr/lpp/xlf/include
 VPATH += /usr/lpp/xlf/include
@@ -103,6 +105,10 @@ CPPFLAGS += -DAIX64
 #
 ifeq "$(VER_MPI)" "NOMPI"
 CPPFLAGS += -DNOMPI
+else
+ifeq "$(VER_OASIS)" "mct"
+CPPFLAGS += -DSFXOASIS -DTRIPOASIS
+endif
 endif
 #
 ##########################################################

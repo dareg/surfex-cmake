@@ -8,7 +8,7 @@
 #
 dependance_flist = $(notdir $(shell find $(1) -follow -type f \
                -name '*.f' -o -name '*.f90' -o -name '*.fx90' -o -name '*.F' -o -name '*.F90'\
-               | grep -v ',v' | sed -e 's/\.f.*/.D/g' -e 's/\.F.*/.D/g' ))
+               | grep -v ',v' | grep -v "\.\#" | sed -e 's/\.f.*/.D/g' -e 's/\.F.*/.D/g' ))
 obj_flist        = $(notdir $(shell find $(1) -follow -type f \
                -name 'spll_*.f*' | sed -e 's/\..*/.o/g' )) 
 #
@@ -169,9 +169,9 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 #                                                        #
 ##########################################################
 ifeq "$(VER_CDF)" "CDFAUTO"
-all : drhook ecoclimap gribapi cdf progmaster
+all : drhook ecoclimap gribapi cdf oasis progmaster
 else
-all : drhook ecoclimap gribapi progmaster
+all : drhook ecoclimap gribapi oasis progmaster
 endif
 
 objdirmaster :  $(OBJDIR_MASTER)/.dummy
@@ -328,6 +328,19 @@ $(CDF_INC) :
 cleanmaster : cleancdf
 cleancdf :
 	- [ -d ${CDF_PATH} ] && rm -fr  ${CDF_PATH}
+endif
+##########################################################
+#                                                        #
+# EXTRA LIB : OASIS3-MCT                                 #
+#                                                        #
+##########################################################
+ifeq "$(VER_OASIS)" "mct"
+oasis : $(OASIS_KEY)
+$(OASIS_KEY) : 
+	cd ${DIR_OASIS}/util/make_dir && cp -f make.inc_cnrm make.inc && make -f TopMakefileOasis3
+
+cleanoasis : 
+	cd ${DIR_OASIS}/util/make_dir && make realclean -f TopMakefileOasis3
 endif
 ##########################################################
 #                                                        #

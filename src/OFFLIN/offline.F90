@@ -14,8 +14,8 @@ PROGRAM OFFLINE
 ! modifications 
 ! 09/2012 G. Pigeon: coherence between radiation and zenith angle because of
 !                    trouble with radiation received by wall in TEB
-! 05/2013 B. Decharme goto_trip
 ! 03/2014 E. Martin change indices names in OMP module according to GMAP changes
+! 05/2014 B. Decharme delete trip
 ! -------------------------------------------------
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
@@ -110,7 +110,6 @@ USE MODI_TEST_NAM_VAR_SURF
 USE MODI_CLOSE_NAMELIST
 USE MODI_READ_ALL_NAMELISTS
 USE MODI_GOTO_SURFEX
-USE MODI_GOTO_TRIP
 USE MODI_OPEN_CLOSE_BIN_ASC_FORC
 USE MODI_OPEN_FILEIN_OL
 USE MODI_OL_READ_ATM_CONF
@@ -124,10 +123,8 @@ USE MODI_GET_SIZES_PARALLEL
 USE MODI_IO_BUFF_CLEAN_n
 USE MODI_INIT_SURF_ATM_n
 USE MODI_INIT_SURF_LANDUSE_n
-USE MODI_INIT_SURF_TRIP_n
 USE MODI_OL_TIME_INTERP_ATM
 USE MODI_COUPLING_SURF_ATM_n
-USE MODI_COUPLING_SURF_TRIP_n
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_WRITE_SURF_ATM_n
 USE MODI_WRITE_HEADER_MNH
@@ -214,8 +211,6 @@ INTEGER                           :: IDMAX               ! nb of lines to read i
 INTEGER                           :: JFORC_STEP          ! atmospheric loop index
 INTEGER                           :: JSURF_STEP          ! isba loop index
 INTEGER                           :: ICOUNT              ! day counter 
-INTEGER                           :: ITRIP_COUNT         ! day counter
-INTEGER                           :: ITRIP_MONTH
 REAL                              :: ZDURATION           ! duration of run                     (s)
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTA                 ! air temperature forcing               (K)
@@ -593,7 +588,6 @@ XTIME = (MPI_WTIME() - XTIME0)
 !
  CALL DEALLOC_SURFEX
  CALL ALLOC_SURFEX(NBLOCKTOT)
- CALL GOTO_TRIP(1,.TRUE.)
 !
 ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
  CALL GET_SIZES_PARALLEL(NBLOCKTOT,INI,NPIO,ISIZE_OMP, GSHADOWS)
@@ -672,12 +666,6 @@ XTIME_COMM_READ = 0.
 #ifndef NOMPI
 XTIME0 = MPI_WTIME()
 #endif
-!
-! Initialyse the SURFACE-TRIP interface
-!
- CALL INIT_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,IMONTH,&
-                        ZDURATION,ITRIP_MONTH,ITRIP_COUNT,XZENITH,      &
-                        XSW_BANDS,XEMIS,XTSRAD,XDIR_ALB,XSCA_ALB        )  
 !
  CALL INIT_CRODEBUG()
 !
@@ -863,10 +851,6 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifndef NOMPI    
     XTIME1 = MPI_WTIME()  
 #endif
-    CALL COUPLING_SURF_TRIP_n(CSURF_FILETYPE,INI,IBANDS,LRESTART,IYEAR,  &
-                              ITRIP_MONTH,ITRIP_COUNT,ZTIME+XTSTEP_SURF, &
-                              ZDURATION,XZENITH,XSW_BANDS,XEMIS,XTSRAD,  &
-                              XDIR_ALB,XSCA_ALB                          )
     !
     ZTIME = ZTIME + XTSTEP_SURF
     CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
