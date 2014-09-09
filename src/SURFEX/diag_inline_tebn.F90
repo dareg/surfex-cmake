@@ -28,6 +28,7 @@
 !!      Original    01/2004
 !!      S. Riette   06/2009 CLS_WIND has one more argument (height of diagnostic)
 !!      S. Riette   01/2010 Use of interpol_sbl to compute 10m wind diagnostic
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
@@ -42,7 +43,7 @@ USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
                               XCE, XZ0, XZ0H, XQS, XSWD, XSWU, XLWD,&
                               XLWU, XSWBD, XSWBU, XFMU, XFMV,XSFCO2,&
                               XT2M_MIN,XT2M_MAX,XHU2M_MIN,XHU2M_MAX,&
-                              XWIND10M,XWIND10M_MAX
+                              XWIND10M,XWIND10M_MAX,XDIAG_TS
 !
 USE MODI_CLS_WIND
 USE MODI_PARAM_CLS
@@ -75,9 +76,9 @@ REAL, DIMENSION(:), INTENT(IN)       :: PCD      ! drag coefficient for momentum
 REAL, DIMENSION(:), INTENT(IN)       :: PCDN     ! neutral drag coefficient
 REAL, DIMENSION(:), INTENT(IN)       :: PSFZON   ! zonal friction
 REAL, DIMENSION(:), INTENT(IN)       :: PSFMER   ! meridian friction
-REAL, DIMENSION(:), INTENT(IN)       :: PSFCO2   ! CO2 flux
+REAL, DIMENSION(:), INTENT(IN)       :: PSFCO2   ! CO2 flux   (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:), INTENT(IN)       :: PSFTH    ! heat flux  (W/m2)
-REAL, DIMENSION(:), INTENT(IN)       :: PSFTQ    ! water flux (kg/m2)
+REAL, DIMENSION(:), INTENT(IN)       :: PSFTQ    ! water flux (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN)       :: PRI      ! Richardson number
 REAL, DIMENSION(:), INTENT(IN)       :: PCH      ! drag coefficient for heat
 REAL, DIMENSION(:), INTENT(IN)       :: PZ0      ! roughness length for momentum
@@ -111,6 +112,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',0,ZHOOK_HANDLE)
+!
+! * Mean surface temperature need to couple with AGCM
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Here it is the radiative temperature that is wrong !
+!It should be the arithmetic mean of the surface temperature
+!of each independant energy budget, if there is. See ISBA for more detail.
+!
+XDIAG_TS(:) = PTS(:)
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
 ZZ0_O_Z0H = 200.
 !
 !* 2m and 10m variables interpolated from canopy if used

@@ -45,7 +45,8 @@
 !     C. Carmagnola     12/2012 - Add the case CSNOWMETAMO!='B92' in subroutine SNOW3LAVGRAIN and in function SNOW3LDIFTYP
 !     M. Lafaysse       01/2013 - Remove SNOWCROWLIQMAX routines (not used)
 !     M. Lafaysse       08/2013 - simplification of routine SNOW3LAVGRAIN (logical GDENDRITIC)
-!
+!     B. Decharme       07/2013 - SNOW3LGRID cleanning 
+!                                 New algorithm to compute snow grid for 6-L or 12-L
 !----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -828,67 +829,8 @@ END FUNCTION SNOW3L_MARBOUTY
 !####################################################################
 !####################################################################
 !####################################################################
-SUBROUTINE SNOW3LGRID_2D(PSNOWDZ,PSNOW)
 !
-!!    PURPOSE
-!!    -------
-!     Once during each time step, update grid to maintain
-!     grid proportions. Similar to approach of Lynch-Steiglitz,
-!     1994, J. Clim., 7, 1842-1855. Corresponding mass and
-!     heat adjustments made directly after the call to this
-!     routine. 3 grid configurations:
-!     1) for very thin snow, constant grid spacing
-!     2) for intermediate thicknesses, highest resolution at soil/snow
-!        interface and at the snow/atmosphere interface
-!     3) for deep snow, vertical resoution finest at snow/atmosphere
-!        interface (set to a constant value) and increases with snow depth.
-!        Second layer can't be more than an order of magnitude thicker
-!        than surface layer.
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:), INTENT(IN)    :: PSNOW
-!
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDZ
-!
-!*      0.1    declarations of local variables
-!
-INTEGER                           :: JI
-INTEGER                           :: INI
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------------------
-!
-! 0. Initialization:
-! ------------------
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',0,ZHOOK_HANDLE)
-!
-INI    = SIZE(PSNOWDZ(:,:),1)
-!
-! 1. Calculate current grid for 3-layer (default) configuration):
-! ---------------------------------------------------------------
-! Based on formulation of Lynch-Stieglitz (1994)
-! except for 3 modifications: 
-! i) smooth transition here at ZSNOWTRANS
-! ii) constant ratio for very thin snow:
-! iii) ratio of layer 2 to surface layer <= 10
-DO JI = 1,INI
-  CALL SNOW3LGRID_1D(PSNOWDZ(JI,:),PSNOW(JI))
-ENDDO
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',1,ZHOOK_HANDLE)
-!
-END SUBROUTINE SNOW3LGRID_2D
-!####################################################################
-!####################################################################
-!####################################################################
-SUBROUTINE SNOW3LGRID_1D(PSNOWDZ,PSNOW)
+      SUBROUTINE SNOW3LGRID_2D(PSNOWDZ,PSNOW,PSNOWDZ_OLD)
 !
 !!    PURPOSE
 !!    -------
@@ -907,9 +849,7 @@ SUBROUTINE SNOW3LGRID_1D(PSNOWDZ,PSNOW)
 !
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SNOW_PAR,   ONLY : XSNOWCRITD, XSGCOEF1, XSGCOEF2, XSGCOEF3, XSNOWTRANS, &
-                            XSNOWTRANS1, XSNOWTRANS2, XSNOWTRANS3, XSNOWTRANS4,   &
-                            XSNOWTRANS5
+USE MODD_SNOW_PAR,   ONLY : XSNOWCRITD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -918,26 +858,60 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-REAL, INTENT(IN)    :: PSNOW
-!
-REAL, DIMENSION(:), INTENT(OUT) :: PSNOWDZ
+REAL, DIMENSION(:  ), INTENT(IN )           :: PSNOW
+REAL, DIMENSION(:,:), INTENT(OUT)           :: PSNOWDZ
+REAL, DIMENSION(:,:), INTENT(IN ), OPTIONAL :: PSNOWDZ_OLD
 !
 !*      0.1    declarations of local variables
 !
-REAL :: ZWORK
+INTEGER                           :: JJ, JI
 !
-INTEGER :: JJ
-INTEGER :: INLVLS
+INTEGER                           :: INLVLS, INI
+!   
+REAL,     DIMENSION(SIZE(PSNOW))  :: ZWORK
+!
+LOGICAL , DIMENSION(SIZE(PSNOW))  :: GREGRID
+
+! ISBA-ES snow grid parameters
+!
+REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF1  = (/0.25, 0.50, 0.25/) 
+REAL, PARAMETER, DIMENSION(2)     :: ZSGCOEF2  = (/0.05, 0.34/)       
+!      
+! Minimum total snow depth at which surface layer thickness is constant:
+!
+REAL, PARAMETER                   :: ZSNOWTRANS = 0.20                ! (m)
+!      
+! Minimum snow depth by layer for 6-L or 12-L configuration :
+!
+REAL, PARAMETER                   ::  ZDZ1=0.01
+REAL, PARAMETER                   ::  ZDZ2=0.05
+REAL, PARAMETER                   ::  ZDZ3=0.15
+REAL, PARAMETER                   ::  ZDZ4=0.50
+REAL, PARAMETER                   ::  ZDZ5=1.00
+REAL, PARAMETER                   ::  ZDZN0=0.02
+REAL, PARAMETER                   ::  ZDZN1=0.1
+REAL, PARAMETER                   ::  ZDZN2=0.5
+REAL, PARAMETER                   ::  ZDZN3=1.0
+!
+REAL, PARAMETER                   ::  ZCOEF1 = 0.1
+REAL, PARAMETER                   ::  ZCOEF2 = 2.5
+REAL, PARAMETER                   ::  ZCOEF3 = 0.5
+REAL, PARAMETER                   ::  ZCOEF4 = 2.0
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialization:
 ! ------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_1D',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',0,ZHOOK_HANDLE)
 !
-INLVLS = SIZE(PSNOWDZ(:),1)
+INLVLS = SIZE(PSNOWDZ(:,:),2)
+INI    = SIZE(PSNOWDZ(:,:),1)
+!
+ZWORK  (:) = 0.0
+GREGRID(:) = .TRUE.
 !
 ! 1. Calculate current grid for 3-layer (default) configuration):
 ! ---------------------------------------------------------------
@@ -947,113 +921,412 @@ INLVLS = SIZE(PSNOWDZ(:),1)
 ! ii) constant ratio for very thin snow:
 ! iii) ratio of layer 2 to surface layer <= 10
 !
-IF ( INLVLS==3 )THEN
-  !
-  IF ( PSNOW <= XSNOWCRITD + 0.01 )THEN
-    PSNOWDZ(1) = MIN( 0.01, PSNOW/INLVLS )
-    PSNOWDZ(3) = MIN( 0.01, PSNOW/INLVLS )
-    PSNOWDZ(2) = PSNOW - PSNOWDZ(1) - PSNOWDZ(3)
-  ELSEIF ( PSNOW <= XSNOWTRANS )THEN
-    PSNOWDZ(1) = PSNOW * XSGCOEF1(1)
-    PSNOWDZ(2) = PSNOW * XSGCOEF1(2)
-    PSNOWDZ(3) = PSNOW * XSGCOEF1(3)
-  ELSE
-    PSNOWDZ(1) = XSGCOEF2(1)
-    PSNOWDZ(2) = ( PSNOW - XSGCOEF2(1) ) * XSGCOEF2(2) + XSGCOEF2(1)
-    ! When using simple finite differences, limit the thickness
-    ! factor between the top and 2nd layers to at most 10
-     PSNOWDZ(2) = MIN( 10.*XSGCOEF2(1),  PSNOWDZ(2) )
-     PSNOWDZ(3) = PSNOW - PSNOWDZ(2) - PSNOWDZ(1)
-  END IF
-  !
-  !plm
-ELSEIF ( INLVLS>3 .AND. INLVLS<10 ) THEN
-  !
-  DO JJ = 1,INLVLS
-    PSNOWDZ(JJ) = PSNOW / INLVLS
+IF(INLVLS == 1)THEN
+!
+  DO JI=1,INI
+     PSNOWDZ(JI,1)  = PSNOW(JI)
   ENDDO
-  !
-  PSNOWDZ(INLVLS) = PSNOWDZ(INLVLS) + ( PSNOWDZ(1) - MIN(0.05, PSNOWDZ(1)) )
-  PSNOWDZ(1)      = MIN( 0.05, PSNOWDZ(1) )
-  !
-  ! ajout EB pour permettre > 10
-ELSEIF ( INLVLS==10 ) THEN
-  !
-  ! plm
-  ! ELSE 
-  !
-  ! 2. For more than 3-layers:
-  ! --------------------------
-  ! For the case when more than 3 layers are to be used, specifiy how
-  ! grid should be defined here. For now, a very simple arbitrary method
-  ! herein. WARNING: Detailed testing using more than 3-layers has not been done
-  ! to date, only minor tests. 
-  IF ( PSNOW<=XSNOWCRITD+0.07 ) THEN
-    DO JJ = 1,9
-      PSNOWDZ(JJ) = MIN( 0.01, PSNOW / INLVLS )
-    ENDDO
-    !
-  ELSE
-    !
-    PSNOWDZ(1) = 0.01 
-    IF ( PSNOW<=0.19 ) THEN
-      DO JJ = 2,9
-        PSNOWDZ(JJ) = PSNOWDZ(1) + ( PSNOW - 0.1 ) / 9.
-      ENDDO
-    ELSE
-      !
-      PSNOWDZ(2) = 0.02
-      IF ( PSNOW<=0.27 ) THEN
-        DO JJ = 3,9
-          PSNOWDZ(JJ) = PSNOWDZ(2) + ( PSNOW - 0.19 ) / 8.
-        ENDDO
-      ELSE
-        !
-        PSNOWDZ(3) = 0.03
-        IF ( PSNOW<=0.41 ) THEN
-          DO JJ = 4,9
-            PSNOWDZ(JJ) = PSNOWDZ(3) + ( PSNOW - 0.27 ) / 7.
-          ENDDO
-        ELSE
-          !
-          PSNOWDZ(4) = 0.05
-          IF ( PSNOW<=0.71 ) THEN
-            DO JJ = 5,9
-              PSNOWDZ(JJ) = PSNOWDZ(4) + ( PSNOW - 0.41 ) / 6.
-            ENDDO
-          ELSE
-            !
-            PSNOWDZ(5) = 0.1
-            DO JJ = 6,9
-              PSNOWDZ(JJ) = PSNOWDZ(5) + ( PSNOW - 0.71 ) / 5.
-            ENDDO
-            !
-          ENDIF
-        ENDIF
-      ENDIF
-    ENDIF
+!
+ELSEIF(INLVLS == 3)THEN
+!
+   WHERE(PSNOW <= XSNOWCRITD+0.01)
+      PSNOWDZ(:,1) = MIN(0.01, PSNOW(:)/INLVLS)
+      PSNOWDZ(:,3) = MIN(0.01, PSNOW(:)/INLVLS)
+      PSNOWDZ(:,2) = PSNOW(:) - PSNOWDZ(:,1) - PSNOWDZ(:,3)
+   END WHERE
+!
+   WHERE(PSNOW <= ZSNOWTRANS .AND. PSNOW > XSNOWCRITD+0.01)
+      PSNOWDZ(:,1) = PSNOW(:)*ZSGCOEF1(1)
+      PSNOWDZ(:,2) = PSNOW(:)*ZSGCOEF1(2)
+      PSNOWDZ(:,3) = PSNOW(:)*ZSGCOEF1(3)
+   END WHERE
+!
+   WHERE(PSNOW > ZSNOWTRANS)
+      PSNOWDZ(:,1) = ZSGCOEF2(1)
+      PSNOWDZ(:,2) = (PSNOW(:)-ZSGCOEF2(1))*ZSGCOEF2(2) + ZSGCOEF2(1)
+!
+! When using simple finite differences, limit the thickness
+! factor between the top and 2nd layers to at most 10
+! 
+      PSNOWDZ(:,2) = MIN(10*ZSGCOEF2(1),  PSNOWDZ(:,2))
+      PSNOWDZ(:,3) = PSNOW(:) - PSNOWDZ(:,2) - PSNOWDZ(:,1)
+   END WHERE
+!
+!
+! 2. Calculate current grid for 6-layer :
+! ---------------------------------------------------------------
+!
+ELSEIF(INLVLS == 6)THEN
+!
+! critere a satisfaire pour remaillage
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID(:) = PSNOWDZ_OLD(:,1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,6) < ZCOEF3 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,6) > ZCOEF4 * MIN(ZDZN0,PSNOW(:)/INLVLS)
   ENDIF
-  PSNOWDZ(INLVLS) = PSNOW - SUM(PSNOWDZ(1:9))
-  !
-  ! ajout EB pour permettre cas INLVLS > 10
-ELSE
-  !
-  PSNOWDZ(1) = MIN( 0.02, PSNOW/INLVLS ) 
-  PSNOWDZ(2) = MIN( 0.01*PSNOW, PSNOW/INLVLS )
-  PSNOWDZ(3) = MIN( 0.02*PSNOW, PSNOW/INLVLS )
-  PSNOWDZ(4) = MIN( 0.03*PSNOW, PSNOW/INLVLS )
-  PSNOWDZ(5) = MIN( 0.05*PSNOW, PSNOW/INLVLS )
-  PSNOWDZ(INLVLS) = MIN( 0.05*PSNOW, PSNOW/INLVLS ) 
-  ZWORK = SUM(PSNOWDZ(1:5))          
-  DO JJ = 6,INLVLS-1,1
-    PSNOWDZ(JJ) = ( PSNOW - ZWORK - PSNOWDZ(INLVLS) ) / ( INLVLS-6 ) 
-  END DO
-  !
+!
+  WHERE(GREGRID(:))  
+!      top layers 
+       PSNOWDZ(:,1) = MIN(ZDZ1       ,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,2) = MIN(ZDZ2       ,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,3) = MIN(ZSGCOEF2(2),PSNOW(:)/INLVLS)
+!      last layers 
+       PSNOWDZ(:,6) = MIN(ZDZN0,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,5) = MIN(ZDZN2,PSNOW(:)/INLVLS)
+!      remaining snow for remaining layers
+       PSNOWDZ(:,4) = PSNOW(:) - PSNOWDZ(:,1) - PSNOWDZ(:,2) - PSNOWDZ(:,3) &
+                               - PSNOWDZ(:,5) - PSNOWDZ(:,6) 
+  ENDWHERE
+!
+! 3. Calculate current grid for 12-layer :
+! ---------------------------------------------------------------
+!
+ELSEIF(INLVLS == 12)THEN
+!
+! critere a satisfaire pour remaillage
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID(:) = PSNOWDZ_OLD(:, 1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:, 1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:, 2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:, 2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,12) < ZCOEF3 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,12) > ZCOEF4 * MIN(ZDZN0,PSNOW(:)/INLVLS) 
+  ENDIF
+!             
+  WHERE(GREGRID(:))  
+!      top layers 
+       PSNOWDZ(:,1) = MIN(ZDZ1,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,2) = MIN(ZDZ2,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,3) = MIN(ZDZ3,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,4) = MIN(ZDZ4,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,5) = MIN(ZDZ5,PSNOW(:)/INLVLS)
+!      last layers 
+       PSNOWDZ(:,12)= MIN(ZDZN0,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,11)= MIN(ZDZN1,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,10)= MIN(ZDZN2,PSNOW(:)/INLVLS)
+       PSNOWDZ(:, 9)= MIN(ZDZN3,PSNOW(:)/INLVLS)
+!      remaining snow for remaining layers
+       ZWORK(:) = PSNOW(:) - PSNOWDZ(:, 1) - PSNOWDZ(:, 2) - PSNOWDZ(:, 3) &
+                           - PSNOWDZ(:, 4) - PSNOWDZ(:, 5) - PSNOWDZ(:, 9) &
+                           - PSNOWDZ(:,10) - PSNOWDZ(:,11) - PSNOWDZ(:,12)
+       PSNOWDZ(:,6) = ZWORK(:)*ZSGCOEF1(1)
+       PSNOWDZ(:,7) = ZWORK(:)*ZSGCOEF1(2)
+       PSNOWDZ(:,8) = ZWORK(:)*ZSGCOEF1(3)
+!      layer 6 tickness >= layer 5 tickness
+       ZWORK(:)=MIN(0.0,PSNOWDZ(:,6)-PSNOWDZ(:,5))
+       PSNOWDZ(:,6)=PSNOWDZ(:,6)-ZWORK(:)
+       PSNOWDZ(:,7)=PSNOWDZ(:,7)+ZWORK(:) 
+!      layer 8 tickness >= layer 9 tickness  
+       ZWORK(:)=MIN(0.0,PSNOWDZ(:,8)-PSNOWDZ(:,9))
+       PSNOWDZ(:,8)=PSNOWDZ(:,8)-ZWORK(:)
+       PSNOWDZ(:,7)=PSNOWDZ(:,7)+ZWORK(:)
+  ENDWHERE
+!
+! 4. Calculate other non-optimized grid :
+! ---------------------------------------
+! 
+ELSEIF(INLVLS<10.AND.INLVLS/=3.AND.INLVLS/=6) THEN
+!
+  DO JJ=1,INLVLS
+     DO JI=1,INI
+        PSNOWDZ(JI,JJ)  = PSNOW(JI)/INLVLS
+     ENDDO
+  ENDDO
+!
+  PSNOWDZ(:,INLVLS) = PSNOWDZ(:,INLVLS) + (PSNOWDZ(:,1) - MIN(0.05, PSNOWDZ(:,1)))
+  PSNOWDZ(:,1)      = MIN(0.05, PSNOWDZ(:,1))
+!
+ELSE !(INLVLS>=10 and /=12)  
+!
+! critere a satisfaire pour remaillage
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID(:) = PSNOWDZ_OLD(:,     1) < ZCOEF1 * MIN(ZDZ1         ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,     1) > ZCOEF2 * MIN(ZDZ1         ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,     2) < ZCOEF3 * MIN(ZDZ2         ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,     2) > ZCOEF4 * MIN(ZDZ2         ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,INLVLS) < ZCOEF3 * MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,INLVLS) > ZCOEF4 * MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
+  ENDIF
+!
+  WHERE(GREGRID(:))  
+       PSNOWDZ(:,1     ) = MIN(ZDZ1         ,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,2     ) = MIN(ZDZ2         ,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,3     ) = MIN(ZDZ3         ,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,4     ) = MIN(ZDZ4         ,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,5     ) = MIN(ZDZ5         ,PSNOW(:)/INLVLS)          
+       PSNOWDZ(:,INLVLS) = MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
+  ENDWHERE
+!
+  DO JJ=6,INLVLS-1,1
+     DO JI=1,INI
+        IF(GREGRID(JI))THEN           
+          ZWORK(JI) = PSNOWDZ(JI,1)+PSNOWDZ(JI,2)+PSNOWDZ(JI,3)+PSNOWDZ(JI,4)+PSNOWDZ(JI,5)
+          PSNOWDZ(JI,JJ) = (PSNOW(JI)-ZWORK(JI)-PSNOWDZ(JI,INLVLS))/(INLVLS-6) 
+        ENDIF
+     ENDDO
+  ENDDO
+!
 ENDIF
 !
-DO JJ = 1,INLVLS
-  IF ( PSNOW==XUNDEF ) THEN
+DO JJ=1,INLVLS
+   DO JI=1,INI
+      IF(PSNOW(JI)==XUNDEF)THEN
+         PSNOWDZ(JI,JJ) = XUNDEF
+      ELSEIF(.NOT.GREGRID(JI))THEN           
+         PSNOWDZ(JI,JJ)=PSNOWDZ_OLD(JI,JJ)
+      ENDIF      
+   ENDDO
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_2D',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SNOW3LGRID_2D
+!####################################################################
+!####################################################################
+!####################################################################
+!
+      SUBROUTINE SNOW3LGRID_1D(PSNOWDZ,PSNOW,PSNOWDZ_OLD)
+!
+!!    PURPOSE
+!!    -------
+!     Once during each time step, update grid to maintain
+!     grid proportions. Similar to approach of Lynch-Steiglitz,
+!     1994, J. Clim., 7, 1842-1855. Corresponding mass and
+!     heat adjustments made directly after the call to this
+!     routine. 3 grid configurations:
+!     1) for very thin snow, constant grid spacing
+!     2) for intermediate thicknesses, highest resolution at soil/snow
+!        interface and at the snow/atmosphere interface
+!     3) for deep snow, vertical resoution finest at snow/atmosphere
+!        interface (set to a constant value) and increases with snow depth.
+!        Second layer can't be more than an order of magnitude thicker
+!        than surface layer.
+!
+!
+USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SNOW_PAR,   ONLY : XSNOWCRITD
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL,               INTENT(IN )           :: PSNOW
+REAL, DIMENSION(:), INTENT(OUT)           :: PSNOWDZ
+REAL, DIMENSION(:), INTENT(IN ), OPTIONAL :: PSNOWDZ_OLD
+!
+!*      0.1    declarations of local variables
+!
+INTEGER JJ
+!
+INTEGER                           :: INLVLS
+!
+REAL                              :: ZWORK
+!
+! modif_EB pour maillage
+LOGICAL                           :: GREGRID
+
+! ISBA-ES snow grid parameters
+!
+REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF1  = (/0.25, 0.50, 0.25/) 
+REAL, PARAMETER, DIMENSION(2)     :: ZSGCOEF2  = (/0.05, 0.34/)       
+!      
+! Minimum total snow depth at which surface layer thickness is constant:
+!
+REAL, PARAMETER                   :: ZSNOWTRANS  = 0.20                ! (m)
+!      
+! Minimum snow depth by layer for 6-L or 12-L configuration :
+!
+REAL, PARAMETER                   ::  ZDZ1=0.01
+REAL, PARAMETER                   ::  ZDZ2=0.05
+REAL, PARAMETER                   ::  ZDZ3=0.15
+REAL, PARAMETER                   ::  ZDZ4=0.50
+REAL, PARAMETER                   ::  ZDZ5=1.00
+REAL, PARAMETER                   ::  ZDZN0=0.02
+REAL, PARAMETER                   ::  ZDZN1=0.1
+REAL, PARAMETER                   ::  ZDZN2=0.5
+REAL, PARAMETER                   ::  ZDZN3=1.0
+!
+REAL, PARAMETER                   ::  ZCOEF1 = 0.1
+REAL, PARAMETER                   ::  ZCOEF2 = 2.5
+REAL, PARAMETER                   ::  ZCOEF3 = 0.5
+REAL, PARAMETER                   ::  ZCOEF4 = 2.0
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+! 0. Initialization:
+! ------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LGRID_1D',0,ZHOOK_HANDLE)
+!
+INLVLS = SIZE(PSNOWDZ(:),1)
+!
+GREGRID = .TRUE.
+!
+! 1. Calculate current grid for 3-layer (default) configuration):
+! ---------------------------------------------------------------
+! Based on formulation of Lynch-Stieglitz (1994)
+! except for 3 modifications: 
+! i) smooth transition here at ZSNOWTRANS
+! ii) constant ratio for very thin snow:
+! iii) ratio of layer 2 to surface layer <= 10
+!
+IF(INLVLS == 1)THEN
+!
+  PSNOWDZ(1) = PSNOW
+!
+ELSEIF(INLVLS == 3)THEN
+!
+   IF(PSNOW <= XSNOWCRITD+0.01)THEN
+      PSNOWDZ(1) = MIN(0.01, PSNOW/INLVLS)
+      PSNOWDZ(3) = MIN(0.01, PSNOW/INLVLS)
+      PSNOWDZ(2) = PSNOW - PSNOWDZ(1) - PSNOWDZ(3)
+   ENDIF
+!
+   IF(PSNOW <= ZSNOWTRANS .AND. PSNOW > XSNOWCRITD+0.01)THEN
+      PSNOWDZ(1) = PSNOW*ZSGCOEF1(1)
+      PSNOWDZ(2) = PSNOW*ZSGCOEF1(2)
+      PSNOWDZ(3) = PSNOW*ZSGCOEF1(3)
+   ENDIF
+!
+   IF(PSNOW > ZSNOWTRANS)THEN
+      PSNOWDZ(1) = ZSGCOEF2(1)
+      PSNOWDZ(2) = (PSNOW-ZSGCOEF2(1))*ZSGCOEF2(2) + ZSGCOEF2(1)
+!
+! When using simple finite differences, limit the thickness
+! factor between the top and 2nd layers to at most 10
+! 
+      PSNOWDZ(2) = MIN(10*ZSGCOEF2(1),  PSNOWDZ(2))
+      PSNOWDZ(3) = PSNOW - PSNOWDZ(2) - PSNOWDZ(1)
+   END IF
+!
+!
+! 2. Calculate current grid for 6-layer :
+! ---------------------------------------------------------------
+!
+ELSEIF(INLVLS == 6)THEN
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID    = PSNOWDZ_OLD(1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(6) < ZCOEF3 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(6) > ZCOEF4 * MIN(ZDZN0,PSNOW/INLVLS) 
+  ENDIF
+!
+  IF (GREGRID)THEN
+!    top layers 
+     PSNOWDZ(1) = MIN(ZDZ1,PSNOW/INLVLS) 
+     PSNOWDZ(2) = MIN(ZDZ2,PSNOW/INLVLS) 
+     PSNOWDZ(3) = MIN(ZSGCOEF2(2),PSNOW/INLVLS)
+!    last layers 
+     PSNOWDZ(6)= MIN(ZDZN0,PSNOW/INLVLS)
+     PSNOWDZ(5)= MIN(ZDZN2,PSNOW/INLVLS)
+!    remaining snow for remaining layers
+     PSNOWDZ(4) = PSNOW - PSNOWDZ(1) - PSNOWDZ(2) - PSNOWDZ(3) &
+                        - PSNOWDZ(5) - PSNOWDZ(6)
+  ENDIF
+!
+!
+! 3. Calculate current grid for 12-layer :
+! ---------------------------------------------------------------
+!
+ELSEIF(INLVLS == 12)THEN
+!
+! modif_EB pour maillage
+! critere a satisfaire pour remaillage
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID    = PSNOWDZ_OLD(1)  < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(1)  > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2)  < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2)  > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(12) < ZCOEF3 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(12) > ZCOEF4 * MIN(ZDZN0,PSNOW/INLVLS) 
+  ENDIF
+!
+  IF (GREGRID)THEN
+!    top layers 
+     PSNOWDZ(1) = MIN(ZDZ1,PSNOW/INLVLS) 
+     PSNOWDZ(2) = MIN(ZDZ2,PSNOW/INLVLS) 
+     PSNOWDZ(3) = MIN(ZDZ3,PSNOW/INLVLS)
+     PSNOWDZ(4) = MIN(ZDZ4,PSNOW/INLVLS)
+     PSNOWDZ(5) = MIN(ZDZ5,PSNOW/INLVLS)
+!    last layers 
+     PSNOWDZ(12)= MIN(ZDZN0,PSNOW/INLVLS)
+     PSNOWDZ(11)= MIN(ZDZN1,PSNOW/INLVLS)
+     PSNOWDZ(10)= MIN(ZDZN2,PSNOW/INLVLS)
+     PSNOWDZ( 9)= MIN(ZDZN3,PSNOW/INLVLS)
+!    remaining snow for remaining layers
+     ZWORK = PSNOW - PSNOWDZ( 1) - PSNOWDZ( 2) - PSNOWDZ( 3) &
+                   - PSNOWDZ( 4) - PSNOWDZ( 5) - PSNOWDZ( 9) &
+                   - PSNOWDZ(10) - PSNOWDZ(11) - PSNOWDZ(12)
+     PSNOWDZ(6) = ZWORK*ZSGCOEF1(1)
+     PSNOWDZ(7) = ZWORK*ZSGCOEF1(2)
+     PSNOWDZ(8) = ZWORK*ZSGCOEF1(3)
+!    layer 6 tickness >= layer 5 tickness
+     ZWORK=MIN(0.0,PSNOWDZ(6)-PSNOWDZ(5))
+     PSNOWDZ(6)=PSNOWDZ(6)-ZWORK
+     PSNOWDZ(7)=PSNOWDZ(7)+ZWORK 
+!    layer 8 tickness >= layer 9 tickness  
+     ZWORK=MIN(0.0,PSNOWDZ(8)-PSNOWDZ(9))
+     PSNOWDZ(8)=PSNOWDZ(8)-ZWORK
+     PSNOWDZ(7)=PSNOWDZ(7)+ZWORK
+  ENDIF
+!
+! 4. Calculate other non-optimized grid to allow CROCUS PREP :
+! ------------------------------------------------------------
+! 
+ELSE IF(INLVLS<10.AND.INLVLS/=3.AND.INLVLS/=6) THEN
+!        
+  DO JJ=1,INLVLS
+     PSNOWDZ(JJ)  = PSNOW/INLVLS
+  ENDDO
+!
+  PSNOWDZ(INLVLS) = PSNOWDZ(INLVLS) + (PSNOWDZ(1) - MIN(0.05, PSNOWDZ(1)))
+  PSNOWDZ(1)      = MIN(0.05, PSNOWDZ(1))
+!
+ELSE   
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID    = PSNOWDZ_OLD(     1) < ZCOEF1 * MIN(ZDZ1      ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(     1) > ZCOEF2 * MIN(ZDZ1      ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(     2) < ZCOEF3 * MIN(ZDZ2      ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(     2) > ZCOEF4 * MIN(ZDZ2      ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(INLVLS) < ZCOEF3 * MIN(0.05*PSNOW,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(INLVLS) > ZCOEF4 * MIN(0.05*PSNOW,PSNOW/INLVLS) 
+  ENDIF
+!
+  IF (GREGRID)THEN
+     PSNOWDZ(     1) = MIN(ZDZ1      ,PSNOW/INLVLS) 
+     PSNOWDZ(     2) = MIN(ZDZ2      ,PSNOW/INLVLS)
+     PSNOWDZ(     3) = MIN(ZDZ3      ,PSNOW/INLVLS)
+     PSNOWDZ(     4) = MIN(ZDZ4      ,PSNOW/INLVLS)
+     PSNOWDZ(     5) = MIN(ZDZ5      ,PSNOW/INLVLS)
+     PSNOWDZ(INLVLS) = MIN(0.05*PSNOW,PSNOW/INLVLS) 
+     ZWORK = SUM(PSNOWDZ(1:5))          
+     DO JJ=6,INLVLS-1,1
+        PSNOWDZ(JJ) = (PSNOW - ZWORK -PSNOWDZ(INLVLS))/(INLVLS-6) 
+     END DO
+  ENDIF
+!
+ENDIF
+!
+DO JJ=1,INLVLS
+  IF(PSNOW==XUNDEF)THEN
     PSNOWDZ(JJ) = XUNDEF
+  ELSEIF(.NOT.GREGRID)THEN
+    PSNOWDZ(JJ) = PSNOWDZ_OLD(JJ)
   ENDIF
 END DO
 !

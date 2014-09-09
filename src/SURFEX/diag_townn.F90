@@ -5,7 +5,8 @@ SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
                          PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, PFMU, PFMV,   &
                          PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,      &
                          PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
-                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX        )  
+                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
+                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 !     ######################################################################
 !
 !!****  *DIAG_TOWN_n * - Chooses the surface schemes for town diagnostics
@@ -30,13 +31,14 @@ SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : new diag
 !!      Modified    09/2012 : new PLEI diag required by atmospheric model
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : CTOWN
-USE MODD_CSTS,       ONLY : XTT
+USE MODD_CSTS,       ONLY : XTT, XLSTT, XLVTT
 !
 USE MODI_DIAG_TEB_n
 USE MODI_DIAG_IDEAL_n
@@ -55,6 +57,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient    (W/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! transf. coef heat   (W/s)
@@ -81,6 +85,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux       (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
@@ -103,29 +109,39 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
 IF (CTOWN=='TEB   ') THEN
-  CALL DIAG_TEB_n(HPROGRAM,                                          &
-                    PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,     &
-                    PZ0, PZ0H, PT2M, PQ2M, PHU2M, PZON10M, PMER10M,    &
+  CALL DIAG_TEB_n(HPROGRAM,                                           &
+                    PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,      &
+                    PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                     PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,  &
                     PT2M_MIN, PT2M_MAX, PHU2M_MIN, PHU2M_MAX,          &
                     PWIND10M, PWIND10M_MAX                             )
 !
-! new diag not yet inplemeted for TEB (these diag are required for the climate model)
+!!!!! important, diagd should be computed in teb !!!!!!
 !
-! Ok with atmospheric model but LEI (latent heat of sublimation) must by implemented in TEB
+! diag not yet inplemeted for TEB (these diag are required for the climate model)
+!
+! Ok with atmospheric model but LEI (latent heat of sublimation w/m2), EVAP (total evapotranspiration kg/m2/s),
+! and SUBL (sublimation kg/m2/s) must by implemented in TEB as well as theirs cumulative values
+! Not good if LCPL_ARP = TRUE in ISBA (ALARO)
+!
   IF (SIZE(PLEI)>0) THEN
-    PLEI(:) = XUNDEF
+    PLEI (:) = XUNDEF
+    PEVAP(:) = XUNDEF
+    PSUBL(:) = XUNDEF
     WHERE(PLE(:)/=XUNDEF)
-      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-PT2M(:)))
+      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-PTS(:)))
+      PEVAP (:) = (PLE(:) * ZDELTA(:))/XLSTT + (PLE(:) * (1.0-ZDELTA(:)))/XLVTT
       PLEI  (:) = PLE(:) * ZDELTA(:)
+      PSUBL (:) = PLEI(:)/XLSTT
     ENDWHERE
   ENDIF
 !
-  PTS      = XUNDEF
-  PRNC     = XUNDEF
-  PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
+  PRNC     = XUNDEF
+  PHC      = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF
@@ -133,10 +149,14 @@ IF (CTOWN=='TEB   ') THEN
   PLWUC    = XUNDEF
   PFMUC    = XUNDEF
   PFMVC    = XUNDEF
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
 ELSE IF (CTOWN=='FLUX  ') THEN
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
+  PEVAP    = XUNDEF
+  PSUBL    = XUNDEF
   PRI      = XUNDEF
   PCD      = XUNDEF
   PCH      = XUNDEF
@@ -159,6 +179,8 @@ ELSE IF (CTOWN=='FLUX  ') THEN
   PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF
@@ -177,6 +199,8 @@ ELSE IF (CTOWN=='NONE  ') THEN
   PH       = XUNDEF
   PLE      = XUNDEF
   PLEI     = XUNDEF
+  PEVAP    = XUNDEF
+  PSUBL    = XUNDEF  
   PGFLUX   = XUNDEF
   PRI      = XUNDEF
   PCD      = XUNDEF
@@ -203,6 +227,8 @@ ELSE IF (CTOWN=='NONE  ') THEN
   PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF

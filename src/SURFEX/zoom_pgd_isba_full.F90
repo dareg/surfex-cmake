@@ -41,7 +41,7 @@
 !
 USE MODD_ISBA_n,           ONLY : XCLAY, XSAND, XRUNOFFB, XWDRAIN, &
                                   NGROUND_LAYER, XSOC, LSOCP, LNOF, &
-                                  XPH, XFERT, LPERM, XPERM
+                                  XPH, XFERT, LPERM, XPERM, LGW, XGW
 USE MODD_CH_ISBA_n,   ONLY : LCH_NO_FLUX                                  
 USE MODD_ISBA_GRID_n,      ONLY : XLAT, XLON, CGRID, XGRID_PAR, NDIM
 USE MODD_PREP,             ONLY : CINGRID_TYPE, CINTERP_TYPE, LINTERP
@@ -172,6 +172,25 @@ IF(LPERM)THEN
 ELSE
 !  
   ALLOCATE(XPERM (0))
+!
+ENDIF
+!
+!* groundwater distribution
+!
+IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+   CALL READ_SURF(HPROGRAM,'GWKEY',LGW,IRESP)
+ELSE
+   LGW=.FALSE.
+ENDIF
+!
+IF(LGW)THEN
+!  
+  ALLOCATE(XGW (INI))
+  CALL READ_SURF(HPROGRAM,'GWFRAC',XGW(:),IRESP)
+!
+ELSE
+!  
+  ALLOCATE(XGW (0))
 !
 ENDIF
 !

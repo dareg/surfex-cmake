@@ -2,6 +2,12 @@
 SUBROUTINE OL_ALLOC_ATM(KNI,KBANDS,KSCAL)
 !     #################################################################################
 !
+!!
+!!    MODIFICATIONS
+!!    -------------
+!     05/2013  B. Decharme : New coupling variables (for AGCM)
+!-------------------------------------------------------------------------------
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 
 USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
@@ -42,8 +48,11 @@ USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
                             XPET_A_COEF ,&
                             XPEQ_A_COEF ,&
                             XPET_B_COEF ,&
-                            XPEQ_B_COEF  
-
+                            XPEQ_B_COEF ,&
+                            XTSURF    ,&
+                            XZ0       ,&
+                            XZ0H      ,&
+                            XQSURF
 !
 !
 !
@@ -103,6 +112,10 @@ IF (.NOT.ALLOCATED(XPET_A_COEF)) ALLOCATE(XPET_A_COEF (KNI)     )
 IF (.NOT.ALLOCATED(XPEQ_A_COEF)) ALLOCATE(XPEQ_A_COEF (KNI)     )
 IF (.NOT.ALLOCATED(XPET_B_COEF)) ALLOCATE(XPET_B_COEF (KNI)     )
 IF (.NOT.ALLOCATED(XPEQ_B_COEF)) ALLOCATE(XPEQ_B_COEF (KNI)     )
+IF (.NOT.ALLOCATED(XTSURF)) ALLOCATE(XTSURF(KNI)     )
+IF (.NOT.ALLOCATED(XZ0)   ) ALLOCATE(XZ0   (KNI)     )
+IF (.NOT.ALLOCATED(XZ0H)  ) ALLOCATE(XZ0H  (KNI)     )
+IF (.NOT.ALLOCATED(XQSURF)) ALLOCATE(XQSURF(KNI)     )
 !
 IF (SIZE(CSV)>=1) CSV(1) = '#CO   '
 IF (SIZE(CSV)>=2) CSV(2) = '#O3   '     
@@ -203,6 +216,11 @@ XPET_A_COEF (:)=XUNDEF
 XPEQ_A_COEF (:)=XUNDEF
 XPET_B_COEF (:)=XUNDEF
 XPEQ_B_COEF (:)=XUNDEF
+XTSURF    (:)=XUNDEF ! effective temperature                  (K)
+XZ0       (:)=XUNDEF ! surface roughness length for momentum  (m)
+XZ0H      (:)=XUNDEF ! surface roughness length for heat      (m)
+XQSURF    (:)=XUNDEF ! specific humidity at surface           (kg/kg)
+!
 IF (LHOOK) CALL DR_HOOK('OL_ALLOC_ATM',1,ZHOOK_HANDLE)
 
 END SUBROUTINE OL_ALLOC_ATM

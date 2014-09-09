@@ -73,8 +73,8 @@ REAL                        :: XWR_DEF        ! default for leaves interception 
 !
 !* normalized dimensions for interpolation grids for soil
 !
-INTEGER, PARAMETER           :: NGRID_LEVEL = 7 
-REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = (/ 0., 0.004, 0.036, 0.068, 0.100, 0.125, 0.150/)
+INTEGER, PARAMETER           :: NGRID_LEVEL = 6 
+REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = (/ 0.004, 0.036, 0.068, 0.100, 0.125, 0.150/)
 !--------------------------------------------------------------------------
 !
 END MODULE MODD_PREP_TEB_GREENROOF

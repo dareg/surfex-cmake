@@ -115,13 +115,17 @@ REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil layer thickness for DIF
  CHARACTER(LEN=28)        :: YSOC_TOP      ! file name for organic carbon
  CHARACTER(LEN=28)        :: YSOC_SUB      ! file name for organic carbon
  CHARACTER(LEN=28)        :: YPERM         ! file name for permafrost distribution
+ CHARACTER(LEN=28)        :: YGW               ! file name for groundwater map
  CHARACTER(LEN=6)         :: YSOCFILETYPE  ! organic carbon data file type
  CHARACTER(LEN=6)         :: YPERMFILETYPE ! permafrost distribution data file type
+ CHARACTER(LEN=6)         :: YGWFILETYPE      ! groundwater distribution data file type
 REAL                     :: XUNIF_SOC_TOP ! uniform value of organic carbon top soil (kg/m2)
 REAL                     :: XUNIF_SOC_SUB ! uniform value of organic carbon sub soil (kg/m2)
 REAL                     :: XUNIF_PERM    ! uniform permafrost distribution
+REAL                     :: XUNIF_GW         ! uniform groundwater distribution
 LOGICAL                  :: LIMP_SOC      ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_PERM     ! Imposed maps of permafrost distribution
+LOGICAL                  :: LIMP_GW          ! Imposed maps of groundwater distribution
  CHARACTER(LEN=28)        :: YPH           ! file name for pH
  CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
  CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
@@ -152,6 +156,7 @@ CPHOTO        = '   '
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,         &
                        XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,   &
                        YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,             &                     
+                       YGW, YGWFILETYPE, XUNIF_GW, LIMP_GW,                     &                     
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,               &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,     &
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,        &

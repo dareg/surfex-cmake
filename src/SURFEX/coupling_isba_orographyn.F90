@@ -4,7 +4,7 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, HCOUPLING,                       
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  HTEST                                                                       )  
@@ -33,10 +33,13 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, HCOUPLING,                       
 !!      modified    05/2004 by P. LeMoigne: vertical shift of implicit
 !!                          coefficients
 !!      B. Decharme   2008   reset the subgrid topographic effect on the forcing
+!!      B. Decharme  04/2013 new coupling variables and optimization
+!!                           improve forcing vertical shift
 !----------------------------------------------------------------
 !
-USE MODD_CSTS,   ONLY : XSTEFAN, XCPD, XRD, XP00
-USE MODD_ISBA_n, ONLY : XSSO_SLOPE, XEMIS_NAT, XTSRAD_NAT, XZS
+USE MODD_SURF_PAR,ONLY : XUNDEF
+USE MODD_CSTS,    ONLY : XSTEFAN, XCPD, XRD, XP00
+USE MODD_ISBA_n,  ONLY : XSSO_SLOPE, XEMIS_NAT, XTSRAD_NAT, XZS
 !
 USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
 !
@@ -97,13 +100,18 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                    
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
@@ -120,6 +128,9 @@ REAL, DIMENSION(KI)  :: ZPA    ! Pressure    at forcing height above surface oro
 REAL, DIMENSION(KI)  :: ZPS    ! Pressure    at surface orography
 REAL, DIMENSION(KI)  :: ZQA    ! Humidity    at forcing height above surface orography
 REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZLW    ! LW rad      at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZRAIN  ! Rainfall    at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface orography
 !
 !
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
@@ -129,10 +140,6 @@ REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
 !                                                         ! per m2 of actual surface
-REAL, DIMENSION(KI)      :: ZLW     ! incoming LW radiation per m2 of actual surface
-!
-REAL, DIMENSION(KI)    :: ZRAIN   ! liquid precipitation per m2 of actual surface
-REAL, DIMENSION(KI)    :: ZSNOW   ! solid  precipitation per m2 of actual surface
 !
 REAL, DIMENSION(KI)  ::  ZPEQ_B_COEF   ! 1st explicit coefficient
 REAL, DIMENSION(KI)  ::  ZPET_B_COEF   ! 2nd explicit coefficient
@@ -149,14 +156,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_OROGRAPHY_N',0,ZHOOK_HANDLE)
 !
-ZPEQ_B_COEF = PPEQ_B_COEF
-ZPET_B_COEF = PPET_B_COEF
+ZPEQ_B_COEF(:) = PPEQ_B_COEF(:)
+ZPET_B_COEF(:) = PPET_B_COEF(:)
 !
 IF(LVERTSHIFT)THEN
-!        
-  CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,ZTA,ZQA,ZPA,ZRHOA)
 !
-  ZPS = ZPA + (PPS - PPA)
+  ZTA  (:) = XUNDEF
+  ZQA  (:) = XUNDEF
+  ZPS  (:) = XUNDEF
+  ZPA  (:) = XUNDEF
+  ZRHOA(:) = XUNDEF
+  ZLW  (:) = XUNDEF
+  ZRAIN(:) = XUNDEF
+  ZSNOW(:) = XUNDEF
+!     
+   CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+                           ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
+!
+   ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
 !
   IF (HCOUPLING=='I') THEN
     ZPEQ_B_COEF = PPEQ_B_COEF + ZQA - PQA
@@ -165,11 +182,14 @@ IF(LVERTSHIFT)THEN
 !
 ELSE
 !
-  ZTA     = PTA
-  ZQA     = PQA
-  ZPS     = PPS
-  ZPA     = PPS
-  ZRHOA   = PRHOA
+  ZTA  (:) = PTA  (:)
+  ZQA  (:) = PQA  (:)
+  ZPS  (:) = PPS  (:)
+  ZPA  (:) = PPS  (:)
+  ZRHOA(:) = PRHOA(:)
+  ZLW  (:) = PLW  (:)
+  ZRAIN(:) = PRAIN(:)
+  ZSNOW(:) = PSNOW(:)
 !
 ENDIF
 !
@@ -178,76 +198,72 @@ ENDIF
 !*      2.     Presence of orography slopes
 !              ----------------------------
 !
+IF(LNOSOF)THEN
+!        
+!  No modifications to conserve mass and energy with atmosphere
+!
+   Z3D_TOT_SURF    (:) = 0.
+   Z3D_TOT_SURF_INV(:) = 0.
+!   
+   ZSCA_SW(:,:) = PSCA_SW(:,:)
+   ZDIR_SW(:,:) = PDIR_SW(:,:)
+!
+ELSE
+!
+! Note that this effect is not conservative and should not be use with
+! atmospheric model
+!
 !* Incoming and outgoing fluxes are supposed to be on a horizontal surface.
 !  When slopes are present, the actual surface is LARGER than the
-!  horizontal surface.
+!  horizontal surface (none conservative).
 !
 !* Therefore, this increase of surface will lead to modify the
-!  radiative and energy fluxes.
+!  radiative and energy fluxes (none conservative).
 !  
 !* Note that momentum fluxes are not modified, because the
-! effect of subgrid orography is already taken into account
-! in the effective roughness length.
+!  effect of subgrid orography is already taken into account
+!  in the effective roughness length (none conservative).
 !
+!  The subgrid slope comes from the XSSO_SLOPE field.
 !
-!
-!*      2.     Estimation of total surface
-!              ---------------------------
-!
-! The subgrid slope comes from the XSSO_SLOPE field.
-!
-IF(LNOSOF)THEN
-   Z3D_TOT_SURF(:) = 1.
-   Z3D_TOT_SURF_INV(:) = 1.
-ELSE
    Z3D_TOT_SURF(:) = SQRT(1.+XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
-ENDIF
 !
+!  number of spectral shortwave bands
 !
-!-------------------------------------------------------------------------------------
+   ISWB = SIZE(PSW_BANDS)
 !
-!*      3.     Modification of the incoming radiation
-!              --------------------------------------
+   DO JSWB=1,ISWB
+!     correcting for the slope angle (scaterred SW flux)
 !
-! number of spectral shortwave bands
-!
-ISWB = SIZE(PSW_BANDS)
-!
-DO JSWB=1,ISWB
-! correcting for the slope angle (scaterred SW flux)
-!
-  ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
+      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
 
-! correcting for the slope angle (scaterred SW flux)
+!     correcting for the slope angle (scaterred SW flux)
 !
-  ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
-END DO
+      ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
+   END DO
 !
-! part of LW flux is received from the surface itself, so the outgoing flux
-! is needed.
+!  part of LW flux is received from the surface itself, so the outgoing flux
+!  is needed.
 !
-! correction for LW flux.
+!  incoming LW radiation per m2 of actual surface
 !
-ZLW(:) =  PLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
+   ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
           + XSTEFAN*XEMIS_NAT(:)*XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
-!-------------------------------------------------------------------------------------
+!  liquid precipitation per m2 of actual surface
 !
-!*      4.     Modification of precipitation
-!              -----------------------------
+   ZRAIN(:) = ZRAIN(:) * Z3D_TOT_SURF_INV(:)
 !
-! correction for RAIN flux.
+!  solid  precipitation per m2 of actual surface
 !
-ZRAIN(:) = PRAIN(:) * Z3D_TOT_SURF_INV(:)
+   ZSNOW(:) = ZSNOW(:) * Z3D_TOT_SURF_INV(:)
 !
-! correction for SNOW flux.
-!
-ZSNOW(:) = PSNOW(:) * Z3D_TOT_SURF_INV(:)
+ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
-!*      5.     Call of ISBA
+!*      3.     Call of ISBA
 !              ------------
 !
  CALL COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                                           &
@@ -257,22 +273,25 @@ ZSNOW(:) = PSNOW(:) * Z3D_TOT_SURF_INV(:)
                PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                   &
                ZRAIN, ZSNOW, ZLW, ZDIR_SW, ZSCA_SW, PSW_BANDS, ZPS, ZPA,                     &
                PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
-               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &
+               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &
                PPEW_A_COEF, PPEW_B_COEF,                                                     &
                PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
                'OK'                                                                          )  
 !
 !-------------------------------------------------------------------------------------
 !
-!*      6.     Modification of turbulent energy and gaz fluxes
-!              -----------------------------------------------
+!*      4.     Optional modification of turbulent energy and gaz fluxes 
+!              --------------------------------------------------------
 !
-PSFTH (:)  = PSFTH (:) * Z3D_TOT_SURF(:)
-PSFTQ (:)  = PSFTQ (:) * Z3D_TOT_SURF(:)
-PSFCO2(:)  = PSFCO2(:) * Z3D_TOT_SURF(:)
-DO JSV=1,SIZE(PSFTS,2)
-  PSFTS(:,JSV)  = PSFTS(:,JSV) * Z3D_TOT_SURF(:)
-END DO
+IF(.NOT.LNOSOF)THEN
+  PSFTH (:)  = PSFTH (:) * Z3D_TOT_SURF(:)
+  PSFTQ (:)  = PSFTQ (:) * Z3D_TOT_SURF(:)
+  PSFCO2(:)  = PSFCO2(:) * Z3D_TOT_SURF(:)
+  DO JSV=1,SIZE(PSFTS,2)
+    PSFTS(:,JSV)  = PSFTS(:,JSV) * Z3D_TOT_SURF(:)
+  END DO
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_OROGRAPHY_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

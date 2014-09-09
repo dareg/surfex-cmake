@@ -29,6 +29,7 @@ SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSIO
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    09/2009
+!!                  11/2013 (B. Decharme) No exp profile with DIF
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -39,7 +40,7 @@ USE MODD_TYPE_SNOW
 !
 USE MODD_TEB_n,           ONLY: TTIME, XGARDEN
 USE MODD_TEB_VEG_n,       ONLY: CISBA, CPEDOTF, CPHOTO, CSCOND, LTR_ML, NNBIOMASS,  &
-                                CCPSURF, CKSAT, CSOC
+                                CCPSURF, CKSAT, LSOC, CRUNOFF
 USE MODD_TEB_GARDEN_n,    ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     &
                                 XCLAY, XSAND, XWWILT, XWFC, XWSAT,                  &
                                 XVEG, XRSMIN, XGAMMA, XRGL, XCV, XLAI,              &
@@ -80,7 +81,6 @@ USE MODI_READ_PGD_TEB_GARDEN_n
 USE MODI_CONVERT_PATCH_GARDEN
 USE MODI_INIT_FROM_DATA_GRDN_n
 USE MODI_INIT_VEG_PGD_GARDEN_n
-USE MODI_EXP_DECAY_SOIL_DIF
 USE MODI_EXP_DECAY_SOIL_FR
 USE MODI_ABOR1_SFX
 !
@@ -261,7 +261,7 @@ DO JVEGTYPE=1,NVEGTYPE
 ENDDO
 !
  CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NGROUND_LAYER, TTIME%TDATE%MONTH,    &
-                        XVEGTYPE, XTDEEP, XGAMMAT, CPHOTO, HINIT, LTR_ML,           &
+                        XVEGTYPE, XTDEEP, XGAMMAT, CPHOTO, HINIT, LTR_ML, CRUNOFF,  &
                         NNBIOMASS, PCO2, PRHOA, XABC, XPOI,                         &
                         XGMES, XGC, XDMAX, XANMAX, XFZERO, XEPSO, XGAMM, XQDGAMM,   &
                         XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX, XT2AMAX,&
@@ -283,38 +283,17 @@ ENDDO
 !
 !-------------------------------------------------------------------------------
 !
-IF(CISBA=='DIF'.AND.CSOC=='SGH')THEN
+IF(CISBA=='DIF'.AND.LSOC)THEN
   CALL ABOR1_SFX('INIT_TEB_GARDEN_PGDn: SUBGRID Soil organic matter'//&
-                 ' effect (CSOC) NOT YET IMPLEMENTED FOR GARDEN')
+                 ' effect (LSOC) NOT YET IMPLEMENTED FOR GARDEN')
 ELSEIF (CISBA=='3-L'.AND.CKSAT=='EXP') THEN 
   CALL ABOR1_SFX('INIT_TEB_GARDEN_PGDn: topmodel exponential decay not implemented for garden')
 ENDIF
 !
-IF(CKSAT=='SGH' .AND. HINIT/='PRE')THEN 
-  !
-  ZF (:) = XUNDEF
-  !  
-  !Soil organic carbon effect and/or Exponential decay for DIF option 
-  IF(CISBA=='DIF') THEN
-    ZWORK(:) = XUNDEF
-    ZF(:) = 4.0/MERGE(XDROOT(:),XDG2(:),XDROOT(:)>0.0) 
-  ELSE
-    WHERE (ZF(:)==XUNDEF) ZF(:) =  4.0/XDG(:,2)
-  ENDIF
-  ZF(:)=MIN(ZF(:),XF_DECAY)
-  !
-  IF(CISBA=='DIF') THEN
-    !   
-    ZWORK(:) = MERGE(XDROOT(:),XDG2(:),XDROOT(:)>0.0)      
-    CALL EXP_DECAY_SOIL_DIF(ZF(:),XDG(:,:),NWG_LAYER(:),ZWORK(:),XCONDSAT(:,:))   
-    !Exponential decay for ISBA-FR option
-  ELSE
-    !
-    CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:),XC1SAT(:),XC2REF(:),XDG(:,:),XD_ICE(:),&
-                           XC4REF(:),XC3(:,:),XCONDSAT(:,:),XKSAT_ICE(:))  
-    ! 
-  ENDIF
-  !
+IF(CKSAT=='SGH' .AND. CISBA/='DIF' .AND. HINIT/='PRE')THEN 
+  ZF(:)=MIN(4.0/XDG(:,2),XF_DECAY)
+  CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:),XC1SAT(:),XC2REF(:),XDG(:,:),XD_ICE(:),&
+                         XC4REF(:),XC3(:,:),XCONDSAT(:,:),XKSAT_ICE(:))
 ENDIF
 !
 !-------------------------------------------------------------------------------

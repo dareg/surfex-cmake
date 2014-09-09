@@ -39,7 +39,7 @@
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_TEB_n,             ONLY: XCOVER, LCOVER, XGARDEN
-USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO
+USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO, LTR_ML
 USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
                                   XGAMMA, XCV, XRGL,                       &
@@ -177,7 +177,8 @@ ZCNA_NITRO(:,1) = XCNA_NITRO
 GUPDATED=.FALSE.
 IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,LCOVER,                 &
-                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, .FALSE.,'GRD',  &
+                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, .FALSE.,     &
+                         LTR_ML, 'GRD',                                  &
                          ZLAI,ZVEG,ZZ0,                                  &
                          ZALBNIR,ZALBVIS,ZALBUV,ZEMIS,                   &
                          ZRSMIN,ZGAMMA,ZWRMAX_CF,                        &

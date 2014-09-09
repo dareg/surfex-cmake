@@ -12,7 +12,7 @@
                                  PALBNIR_ECO,PALBVIS_ECO,   &
                                  PALBUV_ECO,                &
                                  PDIR_ALB,PSCA_ALB,         &
-                                 PEMIS,PTSRAD               )  
+                                 PEMIS,PTSRAD,PTSURF        )  
 !     ###################################################
 !
 !!**** ** computes radiative fields used in ISBA
@@ -44,6 +44,7 @@
 !!     A. Bogatchev 09/2005 EBA snow option
 !!     B. Decharme  2008    The fraction of vegetation covered by snow must be
 !                            <= to ZSNG
+!!     B. Decharme  2013    new coupling variable and optimization    
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -101,6 +102,7 @@ REAL, DIMENSION(:,:),   INTENT(OUT)  :: PDIR_ALB    ! averaged direct albedo  (p
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PSCA_ALB    ! averaged diffuse albedo (per wavelength)
 REAL, DIMENSION(:),     INTENT(OUT)  :: PEMIS       ! averaged emissivity
 REAL, DIMENSION(:),     INTENT(OUT)  :: PTSRAD      ! averaged radiaitve temp.
+REAL, DIMENSION(:),     INTENT(OUT)  :: PTSURF      ! surface effective temperature         (K)
 !
 !
 !*    0.2    Declaration of local variables
@@ -112,18 +114,45 @@ REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZDIR
 REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA_ALB_PATCH 
 !                                                     ! diffuse albedo
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTRAD_PATCH   ! Tsrad
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSRAD_PATCH  ! Tsrad
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSURF_PATCH  ! Tsurf
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS         ! emissivity with flood
 !
-INTEGER :: JPATCH ! loop on patches
+LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
+!
+INTEGER :: INP, INI
+INTEGER :: JP, JI ! loop on patches
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
+!
+!*    0.      Init
+!             ----
+!
+IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',0,ZHOOK_HANDLE)
+!
+INI=SIZE(PPATCH,1)
+INP=SIZE(PPATCH,2)
+!
+PDIR_ALB(:,:)=0.
+PSCA_ALB(:,:)=0.
+PEMIS   (:)  =0.
+PTSRAD  (:)  =0.
+PTSURF  (:)  =0.
+!
+ZDIR_ALB_PATCH(:,:,:)=0.
+ZSCA_ALB_PATCH(:,:,:)=0.
+ZEMIS_PATCH   (:,:  )=0.
+!
+LEXPLICIT_SNOW = (TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO')
+!
+ZTSRAD_PATCH (:,:) = PTG1(:,:)
+ZTSURF_PATCH (:,:) = PTG1(:,:)
 !
 !
 !*    1.      averaged albedo on natural continental surfaces (except prognostic snow)
 !             -----------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',0,ZHOOK_HANDLE)
  CALL ALBEDO(HALBEDO,                                    &
               PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,    &
               PALBVIS_SOIL,PALBNIR_SOIL,PALBUV_SOIL,      &
@@ -132,17 +161,6 @@ IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',0,ZHOOK_HANDLE)
 !
 !*    2.      averaged albedo and emis. on natural continental surfaces (with prognostic snow)
 !             ---------------------------------------------------------
-!
-ZDIR_ALB_PATCH(:,:,:)=0.
-ZSCA_ALB_PATCH(:,:,:)=0.
-ZEMIS_PATCH   (:,:)=0.
-ZTRAD_PATCH   (:,:)=0.
-!
-PDIR_ALB(:,:)=0.
-PSCA_ALB(:,:)=0.
-PEMIS   (:)  =0.
-PTSRAD  (:)  =0.
-!    
 !* Initialization of albedo for each wavelength, emissivity and snow/flood fractions
 !
  CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI, &
@@ -151,32 +169,40 @@ PTSRAD  (:)  =0.
 !
 !* radiative surface temperature
 !
-DO JPATCH=1,SIZE(PALBVIS_VEG,2)
+ZEMIS(:,:)=PEMIS_ECO(:,:)
 !
-  ZEMIS(:) = PEMIS_ECO(:,JPATCH)
-!   
-  IF(OFLOOD.AND.(TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO'))THEN
-    WHERE(XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
-      ZEMIS(:) = ((1.-XFF(:,JPATCH)-XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + XFF(:,JPATCH)*XEMISF(:,JPATCH))/(1.-XPSN(:,JPATCH))
-    ENDWHERE   
-  ENDIF
+IF(LEXPLICIT_SNOW.AND.OFLOOD)THEN
+  WHERE(XPSN(:,:)<1.0.AND.PEMIS_ECO(:,:)/=XUNDEF)
+       ZEMIS(:,:) = ((1.-XFF(:,:)-XPSN(:,:))*PEMIS_ECO(:,:) + XFF(:,:)*XEMISF(:,:)) / (1.-XPSN(:,:))
+  ENDWHERE
+ENDIF
 !
-  IF (TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA') THEN
-    ZTRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
-  ELSE IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
-    WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF .AND. ZEMIS_PATCH(:,JPATCH)/=0.)
-      ZTRAD_PATCH(:,JPATCH) =( ( (1.-XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
-                                  +    XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
-                               / ZEMIS_PATCH(:,JPATCH)**0.25  
-    END WHERE
-  END IF
-END DO
+IF(LEXPLICIT_SNOW)THEN
+  WHERE(PEMIS_ECO(:,:)/=XUNDEF.AND.ZEMIS_PATCH(:,:)/=0.)
+       ZTSRAD_PATCH(:,:) = ( ( (1.-XPSN(:,:))*ZEMIS      (:,:)*PTG1     (:,:)**4            &
+                             +     XPSN(:,:) *TPSNOW%EMIS(:,:)*TPSNOW%TS(:,:)**4 )   &
+                           / ZEMIS_PATCH(:,:) )**0.25        
+  ENDWHERE
+ENDIF
 !
-!* averaged fields
+!* averaged radiative fields
 !
- CALL AVERAGE_RAD(PPATCH,                                                   &
-                   ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH, &
-                   PDIR_ALB,       PSCA_ALB,       PEMIS,       PTSRAD       )  
+ CALL AVERAGE_RAD(PPATCH,                                                     &
+                   ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTSRAD_PATCH, &
+                   PDIR_ALB,       PSCA_ALB,       PEMIS,       PTSRAD        )  
+!
+!* averaged effective temperature
+!
+IF(LEXPLICIT_SNOW)THEN
+  ZTSURF_PATCH(:,:) = PTG1(:,:)*(1.-XPSN(:,:)) + TPSNOW%TS(:,:)*XPSN(:,:)
+ENDIF
+!
+DO JP=1,INP
+  DO JI=1,INI
+     PTSURF(JI) = PTSURF(JI) + PPATCH(JI,JP) * ZTSURF_PATCH(JI,JP)
+  ENDDO
+ENDDO
+!
 IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 !#############################################################
 SUBROUTINE INIT_VEG_PGD_GARDEN_n(HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,        &
-                        PVEGTYPE, PTDEEP, PGAMMAT, HPHOTO, HINIT, OTR_ML,   &
+                        PVEGTYPE, PTDEEP, PGAMMAT, HPHOTO, HINIT, OTR_ML, HRUNOFF,  &
                         KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
                         PGMES, PGC, PDMAX, PANMAX, PFZERO, PEPSO, PGAMM, PQDGAMM,   &
                         PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,&
@@ -46,6 +46,7 @@ SUBROUTINE INIT_VEG_PGD_GARDEN_n(HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,   
 !!
 !!    MODIFICATIONS
 !!    -------------
+!     B. decharme 04/2013 : dummy for water table / surface coupling
 !!
 !-------------------------------------------------------------------------------
 !
@@ -148,6 +149,7 @@ REAL, DIMENSION(:), POINTER :: PPLSTT
 !
  CHARACTER(LEN=4), INTENT(IN) :: HSCOND
  CHARACTER(LEN=3), INTENT(IN) :: HISBA
+ CHARACTER(LEN=4), INTENT(IN) :: HRUNOFF
 REAL, DIMENSION(:,:), POINTER :: PHCAPSOIL
 REAL, DIMENSION(:,:), POINTER :: PCONDDRY
 REAL, DIMENSION(:,:), POINTER :: PCONDSLD
@@ -237,6 +239,11 @@ REAL, DIMENSION(:,:), POINTER :: ZT2AMAX
 REAL, DIMENSION(:,:), POINTER :: ZAH
 REAL, DIMENSION(:,:), POINTER :: ZBH
 REAL, DIMENSION(:,:), POINTER :: ZTAU_WOOD
+REAL, DIMENSION(:,:), POINTER :: ZKANISO
+REAL, DIMENSION(:,:), POINTER :: ZWD0
+!
+REAL, DIMENSION(:), POINTER   :: ZFWTD ! grid-cell fraction of water table to rise
+REAL, DIMENSION(:), POINTER   :: ZWTD  ! water table depth from Obs, TRIP or MODCOU
 !
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),1) :: ZDG
 REAL, DIMENSION(SIZE(PDROOT),1) :: ZDROOT
@@ -310,6 +317,10 @@ NULLIFY(ZT2AMAX)
 NULLIFY(ZAH)
 NULLIFY(ZBH)
 NULLIFY(ZTAU_WOOD)
+NULLIFY(ZFWTD)
+NULLIFY(ZWTD)
+NULLIFY(ZWD0)
+NULLIFY(ZKANISO)
 !
 ZDG(:,:,1) = PDG(:,:)
 ZROOTFRAC(:,:,1) = PROOTFRAC(:,:)
@@ -341,7 +352,8 @@ ZDMAX(:,1) = PDMAX(:)
                   ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM, ZHO2IP, ZHO2IM, ZHO2JP,     &
                   ZHO2JM, ZZ0, ZZ0EFFIP, ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, ZZ0REL,&
                   PCLAY, PSAND, HPEDOTF,                                      &
-                  ZCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT,            &
+                  ZCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT, ZWD0,      &
+                  ZKANISO, HRUNOFF,                                           &
                   PTAUICE, PCGSAT, ZC1SAT, ZC2REF, ZC3, PC4B, PACOEF, PPCOEF, &
                   ZC4REF, ZPCPS, ZPLVTT, ZPLSTT,                              &
                   HSCOND, HISBA, PHCAPSOIL, PCONDDRY, PCONDSLD, HCPSURF,      &
@@ -349,7 +361,7 @@ ZDMAX(:,1) = PDMAX(:)
                   ZSOILWGHT, IWG_LAYER, KLAYER_HORT, KLAYER_DUN, ZD_ICE,      &
                   ZKSAT_ICE, PALBNIR_DRY, PALBVIS_DRY, PALBUV_DRY,            &
                   PALBNIR_WET, PALBVIS_WET, PALBUV_WET, ZBSLAI_NITRO,         &
-                  ZCE_NITRO, ZCNA_NITRO, ZCF_NITRO                            )
+                  ZCE_NITRO, ZCNA_NITRO, ZCF_NITRO, ZFWTD, ZWTD               )
 !
 ALLOCATE(PPCPS(SIZE(ZPCPS,1)))
 IF (SIZE(ZPCPS)>0) &

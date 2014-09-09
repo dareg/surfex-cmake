@@ -41,6 +41,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original    05/2009
+!     B. decharme 04/2013 : variables for surf/atm coupling
+!                           dummy for water table / surface coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -52,10 +54,10 @@ USE MODD_CSTS,              ONLY: XCPD
 USE MODD_TEB_n,             ONLY: XCOVER, XGARDEN
 USE MODD_TEB_GRID_n,        ONLY: XLAT, XLON
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CRESPSL, LTR_ML, CRUNOFF, &
-                                  CC1DRY,  &
+                                  CC1DRY,  LNITRO_DILU,                    &
                                   CSCOND, NNBIOMASS, CRESPSL, CALBEDO,     &
                                   CSOILFRZ, CDIFSFCOND, CCPSURF,           &
-                                  CKSAT, CSOC, CHORT, CSNOWRES, XCGMAX
+                                  CKSAT, CHORT, CSNOWRES, XCGMAX
 USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   TSNOW,                                   &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
@@ -89,7 +91,8 @@ USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
                                   XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,   &
                                   XSNOWFREE_ALB, XVEGTYPE,                 &
                                   XANMAX, XBIOMASS,                        &
-                                  XBSLAI_NITRO, XH_TREE 
+                                  XBSLAI_NITRO, XH_TREE, NGROUND_LAYER
+!
 USE MODD_TEB_IRRIG_n, ONLY : LPAR_GD_IRRIG,                                  &
                              XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR, &
                              XGD_END_HOUR, XGD_24H_IRRIG
@@ -132,7 +135,7 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PCO2               ! CO2 concentration in
 REAL, DIMENSION(:)  , INTENT(IN)    :: PRR                ! rain rate
 REAL, DIMENSION(:)  , INTENT(IN)    :: PSR                ! snow rate
 REAL, DIMENSION(:)  , INTENT(IN)    :: PZENITH            ! solar zenithal angle
-REAL, DIMENSION(:),   INTENT(IN)    :: PSW                ! incoming total solar rad on an horizontal surface
+REAL, DIMENSION(:)  , INTENT(IN)    :: PSW                ! incoming total solar rad on an horizontal surface
 REAL, DIMENSION(:)  , INTENT(IN)    :: PLW                ! atmospheric infrared radiation
 REAL, DIMENSION(:)  , INTENT(IN)    :: PU_LOWCAN          ! wind near the road
 
@@ -140,7 +143,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GARDEN         ! net radiation over g
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GARDEN          ! sensible heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GARDEN         ! latent heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_GARDEN      ! flux through the green areas
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (kg/m2/s)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP_GARDEN       ! total evaporation over gardens (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GARDEN         ! friction flux (m2/s2)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GARDEN     ! runoff over garden (kg/m2/s)
@@ -165,9 +168,15 @@ LOGICAL              :: OGLACIER   ! True = Over permanent snow and ice,
 !                                      initialise WGI=WSAT,
 !                                      Hsnow>=10m and allow 0.8<SNOALB<0.85
                                    ! False = No specific treatment
-REAL, DIMENSION(0)   ::  PSODELX   ! Pulsation for each layer (Only used if LTEMP_ARP=True)                                    
-REAL, DIMENSION(SIZE(PPS))  :: PMUF  ! fraction of the grid cell reached by the rainfall
-REAL, DIMENSION(SIZE(PPS))  :: PFSAT ! Topmodel saturated fraction
+REAL, DIMENSION(0)   ::  ZSODELX   ! Pulsation for each layer (Only used if LTEMP_ARP=True)     
+!
+REAL, DIMENSION(SIZE(PPS))               :: ZMUF    ! fraction of the grid cell reached by the rainfall
+REAL, DIMENSION(SIZE(PPS))               :: ZFSAT   ! Topmodel (SGH not used in TEB) saturated fraction
+REAL, DIMENSION(SIZE(PPS),NGROUND_LAYER) :: ZTOPQS  ! Topmodel (SGH not used in TEB) lateral subsurface flow by layer
+REAL, DIMENSION(SIZE(PPS))               :: ZQSB    ! Topmodel (SGH not used in TEB) output lateral subsurface
+REAL, DIMENSION(SIZE(PPS))               :: ZFWTD   ! grid-cell fraction of water table to rise
+REAL, DIMENSION(SIZE(PPS))               :: ZWTD    ! water table depth from Obs, TRIP or MODCOU
+!
 REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
 REAL, DIMENSION(SIZE(PPS),NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 !
@@ -225,6 +234,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZLES
 REAL, DIMENSION(SIZE(PPS)) :: ZLER
 REAL, DIMENSION(SIZE(PPS)) :: ZLETR
 REAL, DIMENSION(SIZE(PPS)) :: ZEVAP
+REAL, DIMENSION(SIZE(PPS)) :: ZSUBL !Sublimation
 REAL, DIMENSION(SIZE(PPS)) :: ZGFLUX
 REAL, DIMENSION(SIZE(PPS)) :: ZRESTORE
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
@@ -260,6 +270,8 @@ REAL, DIMENSION(SIZE(PPS)) :: ZMUS
 REAL, DIMENSION(SIZE(PPS)) :: ZIRRIG_FLUX
 REAL, DIMENSION(0,0,0)     :: ZLITTER
 REAL, DIMENSION(0,0)       :: ZLIGNIN_STRUC , ZSOILCARB, ZTURNOVER
+!
+REAL, DIMENSION(SIZE(PPS)) :: ZSNDRIFT
 !
 !  surfaces relative fractions
 !  for flood
@@ -310,7 +322,7 @@ TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
 INTEGER                    :: ILU
 !
-LOGICAL :: GMASK
+LOGICAL :: GMASK, GAGRI_TO_GRASS
 !
 !Snow options
 LOGICAL :: GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH
@@ -332,10 +344,15 @@ HRAIN     = 'DEF'
 OFLOOD    = .FALSE.
 OTEMP_ARP = .FALSE.
 OGLACIER  = .FALSE.
-PMUF      = 0.
-PFSAT     = 0.
+ZMUF      = 0.
+ZFSAT     = 0.
+ZTOPQS    = 0.
+ZQSB      = 0.
+ZFWTD     = 0.
+ZWTD      = XUNDEF
+ZSNDRIFT  = 0.
 !
-! Van genuchten parameter (not yet inplemented)
+GAGRI_TO_GRASS = .FALSE.
 !
 !*      1.2    flood
 !              -----
@@ -367,6 +384,16 @@ ZTDEEP_A = XUNDEF
 ZTDEEP_B = XUNDEF
 ZGAMMAT  = XUNDEF
 !
+!-------------------------------------------------------------------------------
+!
+!* Variables required in TEB to allow coupling
+!  with AROME/ALADIN/ARPEGE as LE or EVAP
+!
+ZLEI  = 0.0 ! sublimation heat flux (W/m2)
+ZSUBL = 0.0 ! sublimation (kg/m2/s)
+ZTS   = 0.0 ! surface temperature (K) (non-radiative)
+!
+!-------------------------------------------------------------------------------
 ! Snow options
 GSNOWDRIFT=.TRUE.
 GSNOWDRIFT_SUBLIM=.FALSE.
@@ -391,10 +418,10 @@ CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
 !              -------------------------
 !
 !
- CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, HRAIN, CHORT,  &
+ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, HRAIN, CHORT,       &
           CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ,  &
           CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,    &
-          HIMPLICIT_WIND,                                             &
+          HIMPLICIT_WIND, GAGRI_TO_GRASS,                             &
           GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,              &
           YSNOWMETAMO,YSNOWRAD,                                       &
           XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,         &
@@ -413,11 +440,11 @@ CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX,&
           XT2AMAX, XABC, XDG, XDZG, XDZDIF, NWG_LAYER, XROOTFRAC,     &
           XWFC, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,           &
-          XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, PMUF, ZFF,&
+          XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, ZMUF, ZFF,&
           ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &
-          ZLEIFLOOD, PSODELX, XLAT, XLON, XTG, XWG, XWGI, XPCPS,      &
-          XPLVTT, XPLSTT, XWR, XRESA, XANFM, PFSAT, TSNOW%ALB(:,1),   &
+          ZLEIFLOOD, ZSODELX, XLAT, XLON, XTG, XWG, XWGI, XPCPS,      &
+          XPLVTT, XPLSTT, XWR, XRESA, XANFM, ZFSAT, TSNOW%ALB(:,1),   &
           TSNOW%WSNOW(:,:,1), TSNOW%HEAT(:,:,1), TSNOW%RHO(:,:,1),    &
           TSNOW%GRAN1(:,:,1), TSNOW%GRAN2(:,:,1), TSNOW%HIST(:,:,1),  &
           TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
@@ -434,7 +461,8 @@ CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           PAC_AGG_GARDEN, PHU_AGG_GARDEN, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          ZDEEP_FLUX,PIRRIG_GARDEN                                    )                                                           
+          ZDEEP_FLUX,PIRRIG_GARDEN,                                   &
+          ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT                  )                                                           
 !
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
@@ -461,6 +489,7 @@ END IF
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT') THEN
   CALL VEGETATION_EVOL(CISBA, CPHOTO, CRESPSL, CALBEDO, .FALSE., LTR_ML,   &
+                       LNITRO_DILU, GAGRI_TO_GRASS,                        &
                        PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, 1,    &
                        TPTIME%TIME, XLAT, PRHOA, XDG, XDZG, NWG_LAYER,     & 
                        XTG, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,          &

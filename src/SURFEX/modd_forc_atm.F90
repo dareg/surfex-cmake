@@ -68,7 +68,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: XSFTH     ! flux of heat                     
 REAL, DIMENSION(:), ALLOCATABLE :: XSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(:), ALLOCATABLE :: XSFU      ! zonal momentum flux                   (pa)
 REAL, DIMENSION(:), ALLOCATABLE :: XSFV      ! meridian momentum flux                (pa)
-REAL, DIMENSION(:), ALLOCATABLE :: XSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(:), ALLOCATABLE :: XSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:,:),ALLOCATABLE:: XSFTS     ! flux of scalar var.                   (kg/m2/s)
 !
 REAL, DIMENSION(:), ALLOCATABLE :: XPEW_A_COEF ! implicit coefficients
@@ -77,7 +77,12 @@ REAL, DIMENSION(:), ALLOCATABLE :: XPET_A_COEF
 REAL, DIMENSION(:), ALLOCATABLE :: XPEQ_A_COEF
 REAL, DIMENSION(:), ALLOCATABLE :: XPET_B_COEF
 REAL, DIMENSION(:), ALLOCATABLE :: XPEQ_B_COEF
-
+!
+REAL, DIMENSION(:), ALLOCATABLE :: XTSURF   ! effective temperature                  (K)
+REAL, DIMENSION(:), ALLOCATABLE :: XZ0      ! surface roughness length for momentum  (m)
+REAL, DIMENSION(:), ALLOCATABLE :: XZ0H     ! surface roughness length for heat      (m)
+REAL, DIMENSION(:), ALLOCATABLE :: XQSURF   ! specific humidity at surface           (kg/kg)
+!
 !------------------------------------------------------------------------------
 !
 END MODULE MODD_FORC_ATM

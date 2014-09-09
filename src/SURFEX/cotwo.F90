@@ -1,7 +1,7 @@
 !     #########
     SUBROUTINE COTWO(PCSP, PF2, PIA, PDS, PGAMMT,               &
                      PFZERO, PEPSO, PANMAX, PGMEST, PGC, PDMAX, &
-                     PAN, PGS, PRD                             )  
+                     PAN, PGS, PRD, PLAITOP, PLAI   )  
 !   #########################################################################
 !
 !!****  *COTWO*  
@@ -45,6 +45,8 @@
 !!      A.L. Gibelin 07/2009 : Suppress GPP and PPST as outputs
 !!                             GPP is calculated in cotwores.f90 and cotworestress.f90
 !!      B. Decharme   2012   : optimization
+!!      C. Delire     2014   : Assuming a nitrogen profile with an exctinction coefficient 
+!!      
 !!
 !-------------------------------------------------------------------------------
 !
@@ -74,7 +76,7 @@ REAL, DIMENSION(:),   INTENT(IN):: PCSP, PF2, PIA, PDS,PGAMMT
 !
 !                                      Time constants:
 !
-REAL, DIMENSION(:), INTENT(IN)  :: PFZERO, PEPSO, PANMAX, PGMEST, PGC, PDMAX
+REAL, DIMENSION(:), INTENT(IN)  :: PFZERO, PEPSO, PANMAX, PGMEST, PGC, PDMAX, PLAITOP, PLAI
 !                                      PFZERO    = ideal value of F, no photorespiration 
 !                                                  or saturation deficit
 !                                      PEPSO     = maximum initial quantum use efficiency 
@@ -86,6 +88,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PFZERO, PEPSO, PANMAX, PGMEST, PGC, PDMAX
 !                                      PGC       = cuticular conductance (m s-1)
 !                                      PDMAX     = maximum saturation deficit of 
 !                                                  atmosphere tolerate by vegetation       
+!                                      PLAITOP   = LAI (thickness of canopy) above considered layer 
+!                                      PLAI      = canopy LAI 
 !
 !                                      CO2 model outputs:
 REAL, DIMENSION(:),  INTENT(OUT) :: PAN, PGS, PRD
@@ -181,10 +185,15 @@ DO JJ = 1, SIZE(PAN)
   ZAM(JJ) = PGMEST(JJ)*(ZCI(JJ)-PGAMMT(JJ))
   !
   ZAM(JJ) = -ZAM(JJ)/PANMAX(JJ)
-  ZAM(JJ) = PANMAX(JJ)*(1.0d0 - EXP(ZAM(JJ)*1.0d0))
+  ZAM(JJ) = PANMAX(JJ)*(1.0 - EXP(ZAM(JJ)))
   ZAM(JJ) = MAX(ZAM(JJ),ZAMIN(JJ))
   !
-  PRD(JJ) = ZAM(JJ)*XRDCF
+  ! Assuming a nitrogen profile within the canopy with a Kn exctinction coefficient (Bonan et al, 2011) 
+  ! that applies to dark respiration. Here Kn=0.2 (Mercado et al, 2009).
+  ! Rd is divised by LAI to be consistent with the logic of assimilation (calculated per unit LAI)
+  ! if not tropical forest, PLAITOP=0, PRD=ZAM*XRDCF
+  !
+  PRD(JJ) = ZAM(JJ)*XRDCF/PLAI(JJ)*EXP(-0.2*PLAITOP(JJ))
   !
   ! Initial quantum use efficiency (kgCO2 J-1 PAR m3 kgAir-1):
   !

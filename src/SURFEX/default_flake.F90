@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE DEFAULT_FLAKE(PTSTEP,POUT_TSTEP,OSEDIMENTS,HSNOW_FLK, &
-        HFLK_FLUX,HFLK_ALB,PICHCE,OPRECIP,OPWEBB)  
+        HFLK_FLUX,HFLK_ALB,OSKINTEMP)  
 !     ########################################################################
 !
 !!****  *DEFAULT_FLAKE* - routine to set default values for the configuration for FLAKE scheme
@@ -50,14 +50,11 @@ REAL,             INTENT(OUT) :: PTSTEP     ! time step for run
 REAL,             INTENT(OUT) :: POUT_TSTEP ! time step for writing
 !
 LOGICAL,          INTENT(OUT) :: OSEDIMENTS 
- CHARACTER(LEN=3), INTENT(OUT) :: HSNOW_FLK
- CHARACTER(LEN=5), INTENT(OUT) :: HFLK_FLUX
- CHARACTER(LEN=4), INTENT(OUT) :: HFLK_ALB
+LOGICAL,          INTENT(OUT) :: OSKINTEMP 
+CHARACTER(LEN=3), INTENT(OUT) :: HSNOW_FLK
+CHARACTER(LEN=5), INTENT(OUT) :: HFLK_FLUX
+CHARACTER(LEN=4), INTENT(OUT) :: HFLK_ALB
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
-REAL,             INTENT(OUT) :: PICHCE     ! ECUME
-LOGICAL,          INTENT(OUT) :: OPRECIP    ! ECUME
-LOGICAL,          INTENT(OUT) :: OPWEBB     ! ECUME
 !
 !
 !*       0.2   Declarations of local variables
@@ -70,13 +67,10 @@ PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
 !
 OSEDIMENTS  = .FALSE.
+OSKINTEMP   = .FALSE.
 HSNOW_FLK   = 'DEF'
 HFLK_FLUX   = 'DEF  '
 HFLK_ALB    = 'UNIF'
-!
-PICHCE      = 0.
-OPRECIP     = .FALSE.
-OPWEBB      = .FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_FLAKE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

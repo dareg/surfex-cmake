@@ -47,7 +47,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PREP_SEAFLUX)
  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CTYPE_SEAFLX',   CTYPE_SEAFLX,   '      ','GRIB  ','MESONH',&
-                          'ASCII ','NETCDF','LFI   ')   
+                          'ASCII ','NETCDF','LFI   ','FA    ')   
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CTYPEPGD',   CTYPEPGD,   '      ','GRIB  ','MESONH','ASCII ','LFI   ')
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PREP_SEAFLUX_N',1,ZHOOK_HANDLE)
 !------------------------------------

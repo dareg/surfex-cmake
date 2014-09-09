@@ -146,13 +146,13 @@ REAL, DIMENSION(SIZE(PPG))                 :: ZWG2_AVG, ZWGI2_AVG, ZWSAT_AVG, ZW
 !                                             Average water and ice content
 !                                             values over the soil depth D2 (for calculating surface runoff)
 !
-REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)) :: ZNOFRZ, ZWSAT
+REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)) :: ZWSAT, ZFRZ
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPTH
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZRUNOFF_TOPD
 !
-REAL                                       :: ZEFFICE, ZLOG10, ZLOG, ZS, ZD_H, ZFRZ
+REAL                                       :: ZEFFICE, ZLOG10, ZLOG, ZS, ZD_H
 !
 REAL                                       :: ZTDIURN, ZSOILHEATCAP
 !                                             ZTDIURN      = thermal penetration depth for restore (m)
@@ -263,50 +263,24 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !
   IF(HISBA == 'DIF')THEN
 !
-    ZDEPTH(:) = 0.0
+!   no subgrid frozen soil fraction of the grid cells
+    ZFROZEN(:) = 0.0
 !    
     DO JL=1,KLAYER_HORT
       DO JJ=1,INI   
-!                     
-      IF(ZDEPTH(JJ)<XHORT_DEPTH)THEN
 !              
 !       Modify soil porosity as ice assumed to become part
 !       of solid soil matrix (with respect to liquid flow):                
         ZWSAT(JJ,JL) = MAX(XWGMIN, PWSAT(JJ,JL)-PWGI(JJ,JL)) 
-!         
-!       Subgrid frozen soil fraction of the grid cells
-        ZFROZEN(JJ)=ZFROZEN(JJ)+(PWGI(JJ,JL)/PWSAT(JJ,JL))*PDZG(JJ,JL)    
 !        
 !       Impedance Factor from (Johnsson and Lundin 1991).
-        ZFRZ = EXP(ZLOG10*(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL)))))       
-!  
-!       Calculate infiltration MAX on frozen soil as Johnsson and Lundin (1991).
-!       The max infiltration is equal to the unsaturated conductivity function at a
-!       water content corresponding to the total porosity less the ice-filled volume.
-!       The unsaturated conductivity function is computed using LOG/EXP transformation
-!
-        ZS           = MIN(1.,ZWSAT(JJ,JL)/PWSAT(JJ,JL))
-!       Matric potential psi=mpotsat*(w/wsat)**(-bcoef) (m)
-        ZLOG         = PBCOEF(JJ,JL)*LOG(ZS)
-!       Hydraulic conductivity k=frz*condsat*(psi/mpotsat)**(-2-3/bcoef) (m s-1)
-        ZLOG         = -(2.0+3.0/PBCOEF(JJ,JL))*ZLOG
-        ZIMAX_ICE(JJ)= ZIMAX_ICE(JJ)+PDZG(JJ,JL)*ZFRZ*PCONDSAT(JJ,JL)*EXP(-ZLOG)
-!       
-        ZDEPTH(JJ) = PD_G(JJ,JL)
-!
-      ENDIF
+        ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL)))))
 !
       ENDDO
     ENDDO    
 !
-    ZFROZEN  (:)=ZFROZEN  (:)/ZDEPTH(:)
-    ZIMAX_ICE(:)=ZIMAX_ICE(:)/ZDEPTH(:)
-!
 !   Calculate infiltration MAX using green-ampt approximation (derived form)
-!
-    ZNOFRZ(:,:)=1.0
-!  
-    ZIMAX(:) = INFMAX_FUNC(PWG,ZWSAT,ZNOFRZ,PCONDSAT,PMPOTSAT,PBCOEF,PDZG,PD_G,KLAYER_HORT)
+    ZIMAX(:) = INFMAX_FUNC(PWG,ZWSAT,ZFRZ,PCONDSAT,PMPOTSAT,PBCOEF,PDZG,PD_G,KLAYER_HORT)
 !  
   ELSE
 !
@@ -338,14 +312,14 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !
 !     Impedance Factor from (Johnsson and Lundin 1991).
 !
-      ZFRZ = EXP(ZLOG10*(-ZEICE*MIN(1.,ZEFFICE/ZTDIURN)))
+      ZFRZ(JJ,1) = EXP(ZLOG10*(-ZEICE*MIN(1.,ZEFFICE/ZTDIURN)))
 !
 !     Calculate infiltration MAX on frozen soil as Johnsson and Lundin (1991).
 !     The max infiltration is equal to the unsaturated conductivity function at a
 !     water content corresponding to the total porosity less the ice-filled volume.
 !
       ZS =MIN(1.,ZWSAT(JJ,1)/PWSAT(JJ,1))
-      ZIMAX_ICE(JJ)=ZFRZ*PKSAT_ICE(JJ)*(ZS**(2*PBCOEF(JJ,1)+3.))
+      ZIMAX_ICE(JJ)=ZFRZ(JJ,1)*PKSAT_ICE(JJ)*(ZS**(2*PBCOEF(JJ,1)+3.))
 !
 !     Calculate infiltration MAX on unfrozen soil using green-ampt approximation
 !    

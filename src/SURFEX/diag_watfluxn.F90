@@ -5,7 +5,8 @@ SUBROUTINE DIAG_WATFLUX_n(HPROGRAM,                                             
                             PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
                             PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,          &
                             PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,         &
-                            PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX            )  
+                            PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,           &
+                            PEVAP, PEVAPC, PSUBL, PSUBLC                            )
 !     ###############################################################################
 !
 !!****  *DIAG_WATFLUX_n * - diagnostics for lakes
@@ -28,6 +29,7 @@ SUBROUTINE DIAG_WATFLUX_n(HPROGRAM,                                             
 !!    -------------
 !!      Original    01/2004
 !!      Modified    08/2009 : cumulated diag & t2m min/max
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
@@ -40,7 +42,8 @@ USE MODD_DIAG_WATFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_BUDGETC, LSURF_V
                                   XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV,&
                                   XRNC, XHC, XLEC, XGFLUXC, XSWDC, XSWUC, XLWDC,   &
                                   XLWUC, XFMUC, XFMVC, XT2M_MIN, XT2M_MAX, XLEIC,  &
-                                  XDIAG_TS, XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX  
+                                  XDIAG_TS, XHU2M_MIN, XHU2M_MAX, XWIND10M,        &
+                                  XWIND10M_MAX, XEVAP, XEVAPC, XSUBL, XSUBLC
 !                                
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -57,6 +60,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient    (W/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! transf. coef heat   (W/s)
@@ -83,6 +88,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
@@ -109,6 +116,8 @@ IF (LSURF_BUDGET) THEN
   PLE      = XLE
   PLEI     = XLEI
   PGFLUX   = XGFLUX
+  PEVAP    = XEVAP
+  PSUBL    = XSUBL
   PSWD     = XSWD
   PSWU     = XSWU
   PLWD     = XLWD
@@ -125,6 +134,8 @@ IF (LSURF_BUDGETC) THEN
   PLEC      = XLEC
   PLEIC     = XLEIC
   PGFLUXC   = XGFLUXC
+  PEVAPC    = XEVAPC
+  PSUBLC    = XSUBLC  
   PSWDC     = XSWDC
   PSWUC     = XSWUC
   PLWDC     = XLWDC

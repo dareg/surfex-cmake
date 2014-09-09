@@ -93,6 +93,10 @@ SELECT CASE(HSURF)
     ALLOCATE(PFIELD(1,1,1))
     PFIELD = XUNDEF
 
+  CASE('ICE_STO')
+    ALLOCATE(PFIELD(1,1,1))
+    PFIELD = 0.0
+
 END SELECT
 !
 !*      4.     Interpolation method

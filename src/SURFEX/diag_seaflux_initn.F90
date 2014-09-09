@@ -30,6 +30,8 @@
 !!      Original    01/2004 
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : cumulative sea flux 
+!!      B. decharme 04/2013 : Add EVAP and SUBL diag
+!!      S.Senesi    01/2014 : introduce fractional seaice 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -37,21 +39,33 @@
 !
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM,       ONLY : LCPL_ESM
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA,LCPL_SEAICE
 USE MODD_DIAG_SURF_ATM_n,ONLY : LREAD_BUDGETC
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,     &
                                   LSURF_BUDGETC, LRESET_BUDGETC,            &
-                                  XRN, XH, XLE, XLEI, XGFLUX,               &
+                                  XRN, XH, XLE, XLEI, XGFLUX, XEVAP, XSUBL, &
                                   XRI, XCD, XCH, XCE, XZ0, XZ0H, XT2M,      &
                                   XQ2M, XHU2M, XZON10M, XMER10M, XQS, XSWD, &
                                   XSWU, XLWD, XLWU, XT2M_MIN, XT2M_MAX,     &
-                                  XSWBD, XSWBU, XFMU, XFMV, XDIAG_SST,      &
+                                  XSWBD, XSWBU, XFMU, XFMV, XTS, XTSRAD,    &
                                   XRNC, XHC, XLEC, XLEIC, XGFLUXC,          &
+                                  XEVAPC, XSUBLC,                           &
                                   XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC, &
-                                  XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX  
+                                  XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX,&
+                                  XT2M_ICE, XQ2M_ICE, XHU2M_ICE,            &
+                                  XZON10M_ICE, XMER10M_ICE, XWIND10M_ICE,   &
+                                  XRN_ICE, XH_ICE, XGFLUX_ICE, XRI_ICE,     &
+                                  XCD_ICE, XCH_ICE,                         &
+                                  XZ0_ICE, XZ0H_ICE, XQS_ICE, XSWU_ICE,     &
+                                  XLWU_ICE, XSWBU_ICE, XFMU_ICE, XFMV_ICE,  &
+                                  XRN_ICEC, XH_ICEC, XGFLUX_ICEC,           &
+                                  XSWU_ICEC, XLWU_ICEC, XFMU_ICEC, XFMV_ICEC 
+
 !                                
 USE MODD_DIAG_OCEAN_n,   ONLY : LDIAG_OCEAN, XTOCMOY, XSOCMOY, XUOCMOY,   &
                                   XVOCMOY, XDOCMOY  
+!
+USE MODD_DIAG_SEAICE_n,   ONLY : LDIAG_SEAICE, XSIT, XSND, XMLT
 !
 USE MODD_SEAFLUX_n,      ONLY : XCPL_SEA_WIND,                 &
                                   XCPL_SEA_EVAP,XCPL_SEA_HEAT,   &
@@ -60,7 +74,7 @@ USE MODD_SEAFLUX_n,      ONLY : XCPL_SEA_WIND,                 &
                                   XCPL_SEA_SNOW,XCPL_SEA_FWSM,   &
                                   XCPL_SEAICE_EVAP,              &
                                   XCPL_SEAICE_HEAT,              &
-                                  XCPL_SEAICE_SNET  
+                                  XCPL_SEAICE_SNET, LHANDLE_SIC  
 !
 USE MODI_READ_SURF
 !
@@ -80,61 +94,93 @@ INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
+!
+REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 !* surface energy budget
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SEAFLUX_INIT_N',0,ZHOOK_HANDLE)
-ALLOCATE(XDIAG_SST(KLU))
-XDIAG_SST = XUNDEF
+ALLOCATE(XTS   (KLU))
+ALLOCATE(XTSRAD(KLU))
+XTS    = XUNDEF
+XTSRAD = XUNDEF
 !
 IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   ALLOCATE(XRN     (KLU))
+  ALLOCATE(XRN_ICE (KLU))
   ALLOCATE(XH      (KLU))
+  ALLOCATE(XH_ICE  (KLU))
   ALLOCATE(XLE     (KLU))
   ALLOCATE(XLEI    (KLU))
   ALLOCATE(XGFLUX  (KLU))
+  ALLOCATE(XGFLUX_ICE(KLU))
+  ALLOCATE(XEVAP   (KLU))
+  ALLOCATE(XSUBL   (KLU))
   ALLOCATE(XSWD    (KLU))
   ALLOCATE(XSWU    (KLU))
+  ALLOCATE(XSWU_ICE(KLU))
   ALLOCATE(XLWD    (KLU))
   ALLOCATE(XLWU    (KLU))
+  ALLOCATE(XLWU_ICE(KLU))
   ALLOCATE(XSWBD   (KLU,KSW))
   ALLOCATE(XSWBU   (KLU,KSW))
+  ALLOCATE(XSWBU_ICE(KLU,KSW))
   ALLOCATE(XFMU    (KLU))
+  ALLOCATE(XFMU_ICE(KLU))
   ALLOCATE(XFMV    (KLU))
+  ALLOCATE(XFMV_ICE(KLU))
   !
   XRN      = XUNDEF
+  XRN_ICE  = XUNDEF
   XH       = XUNDEF
+  XH_ICE   = XUNDEF
   XLE      = XUNDEF
   XLEI     = XUNDEF
   XGFLUX   = XUNDEF
+  XGFLUX_ICE=XUNDEF
+  XEVAP    = XUNDEF
+  XSUBL    = XUNDEF  
   XSWD     = XUNDEF
   XSWU     = XUNDEF
+  XSWU_ICE = XUNDEF
   XLWD     = XUNDEF
   XLWU     = XUNDEF
+  XLWU_ICE = XUNDEF
   XSWBD    = XUNDEF
   XSWBU    = XUNDEF
-  XFMU     = XUNDEF
-  XFMV     = XUNDEF
+  XSWBU_ICE= XUNDEF
+  XFMU_ICE = XUNDEF
+  XFMV_ICE = XUNDEF
   !
 ELSE
   ALLOCATE(XRN     (0))
+  ALLOCATE(XRN_ICE (0))
   ALLOCATE(XH      (0))
+  ALLOCATE(XH_ICE  (0))
   ALLOCATE(XLE     (0))
   ALLOCATE(XLEI    (0))
   ALLOCATE(XGFLUX  (0))
+  ALLOCATE(XGFLUX_ICE(0))
+  ALLOCATE(XEVAP   (0))
+  ALLOCATE(XSUBL   (0))  
   ALLOCATE(XSWD    (0))
   ALLOCATE(XSWU    (0))
+  ALLOCATE(XSWU_ICE(0))
   ALLOCATE(XLWD    (0))
   ALLOCATE(XLWU    (0))
+  ALLOCATE(XLWU_ICE(0))
   ALLOCATE(XSWBD   (0,0))
   ALLOCATE(XSWBU   (0,0))
+  ALLOCATE(XSWBU_ICE(0,0))
   ALLOCATE(XFMU    (0))
+  ALLOCATE(XFMU_ICE(0))
   ALLOCATE(XFMV    (0))
+  ALLOCATE(XFMV_ICE(0))
 ENDIF
 !
 !* cumulative surface energy budget
@@ -142,41 +188,68 @@ ENDIF
 IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
 !        
   ALLOCATE(XRNC    (KLU))
+  ALLOCATE(XRN_ICEC(KLU))
   ALLOCATE(XHC     (KLU))
+  ALLOCATE(XH_ICEC (KLU))
   ALLOCATE(XLEC    (KLU))
   ALLOCATE(XLEIC   (KLU))
   ALLOCATE(XGFLUXC (KLU))
+  ALLOCATE(XGFLUX_ICEC(KLU))
+  ALLOCATE(XEVAPC  (KLU))
+  ALLOCATE(XSUBLC  (KLU))  
   ALLOCATE(XSWDC   (KLU))
   ALLOCATE(XSWUC   (KLU))
+  ALLOCATE(XSWU_ICEC(KLU))
   ALLOCATE(XLWDC   (KLU))
   ALLOCATE(XLWUC   (KLU))
+  ALLOCATE(XLWU_ICEC(KLU))
   ALLOCATE(XFMUC   (KLU))
+  ALLOCATE(XFMU_ICEC(KLU))
   ALLOCATE(XFMVC   (KLU))
+  ALLOCATE(XFMV_ICEC(KLU))
 !
   IF (.NOT. LREAD_BUDGETC) THEN        
      XRNC    = 0.0
+     XRN_ICEC =0.0
      XHC     = 0.0
+     XH_ICEC  =0.0
      XLEC    = 0.0
      XLEIC   = 0.0
      XGFLUXC = 0.0
+     XGFLUX_ICEC=0.0
+     XEVAPC  = 0.0
+     XSUBLC  = 0.0
      XSWDC   = 0.0
      XSWUC   = 0.0
+     XSWU_ICEC=0.0
      XLWDC   = 0.0
      XLWUC   = 0.0
+     XLWU_ICEC=0.0
      XFMUC   = 0.0
+     XFMU_ICEC=0.0
      XFMVC   = 0.0
+     XFMV_ICEC=0.0
   ELSEIF (LREAD_BUDGETC.AND.LRESET_BUDGETC) THEN
      XRNC    = 0.0
+     XRN_ICEC= 0.0
      XHC     = 0.0
+     XH_ICEC = 0.0
      XLEC    = 0.0
      XLEIC   = 0.0
      XGFLUXC = 0.0
+     XGFLUX_ICEC=0.0
+     XEVAPC  = 0.0
+     XSUBLC  = 0.0     
      XSWDC   = 0.0
      XSWUC   = 0.0
+     XSWU_ICEC=0.0
      XLWDC   = 0.0
      XLWUC   = 0.0
+     XLWU_ICEC=0.0
      XFMUC   = 0.0
+     XFMU_ICEC=0.0
      XFMVC   = 0.0
+     XFMV_ICEC=0.0
   ELSE
      YREC='RNC_SEA'
      CALL READ_SURF(HPROGRAM,YREC,XRNC,IRESP)
@@ -200,61 +273,124 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      CALL READ_SURF(HPROGRAM,YREC,XFMUC,IRESP)
      YREC='FMVC_SEA'
      CALL READ_SURF(HPROGRAM,YREC,XFMVC,IRESP)
+!
+     CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+      IF (IVERSION<8)THEN
+         XEVAPC      = 0.0
+         XSUBLC      = 0.0              
+         XRN_ICEC    = 0.0
+         XH_ICEC     = 0.0
+         XGFLUX_ICEC = 0.0
+         XSWU_ICEC   = 0.0
+         XLWU_ICEC   = 0.0
+         XFMU_ICEC   = 0.0
+         XFMV_ICEC   = 0.0
+      ELSE
+         YREC='EVAPC_SEA'
+         CALL READ_SURF(HPROGRAM,YREC,XEVAPC,IRESP)
+         YREC='SUBLC_SEA'
+         CALL READ_SURF(HPROGRAM,YREC,XSUBLC,IRESP)   
+         YREC='RNC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XRN_ICEC,IRESP)
+         YREC='HC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XH_ICEC ,IRESP)
+         YREC='GFLXC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XGFLUX_ICEC,IRESP)
+         YREC='SWUC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XSWU_ICEC,IRESP)
+         YREC='LWUC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XLWU_ICEC,IRESP)
+         YREC='FMUC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XFMU_ICEC,IRESP)
+         YREC='FMVC_SEAICE'
+         CALL READ_SURF(HPROGRAM,YREC,XFMV_ICEC,IRESP)         
+      ENDIF
+!
   ENDIF   
 ELSE
   ALLOCATE(XRNC    (0))
+  ALLOCATE(XRN_ICEC(0))
   ALLOCATE(XHC     (0))
+  ALLOCATE(XH_ICEC (0))
   ALLOCATE(XLEC    (0))
   ALLOCATE(XLEIC   (0))
   ALLOCATE(XGFLUXC (0))
+  ALLOCATE(XGFLUX_ICEC(0))
+  ALLOCATE(XEVAPC  (0))
+  ALLOCATE(XSUBLC  (0))  
   ALLOCATE(XSWDC   (0))
   ALLOCATE(XSWUC   (0))
+  ALLOCATE(XSWU_ICEC(0))
   ALLOCATE(XLWDC   (0))
   ALLOCATE(XLWUC   (0))
+  ALLOCATE(XLWU_ICEC(0))
   ALLOCATE(XFMUC   (0))
+  ALLOCATE(XFMU_ICEC(0))
   ALLOCATE(XFMVC   (0))
+  ALLOCATE(XFMV_ICEC(0))
 ENDIF
 !
 !* parameters at 2m
 !
 IF (N2M>=1) THEN
   ALLOCATE(XRI      (KLU))
+  ALLOCATE(XRI_ICE  (KLU))
   ALLOCATE(XT2M     (KLU))
+  ALLOCATE(XT2M_ICE (KLU))
   ALLOCATE(XT2M_MIN (KLU))
   ALLOCATE(XT2M_MAX (KLU))
   ALLOCATE(XQ2M     (KLU))
+  ALLOCATE(XQ2M_ICE (KLU))
   ALLOCATE(XHU2M    (KLU))
+  ALLOCATE(XHU2M_ICE(KLU))
   ALLOCATE(XHU2M_MIN(KLU))
   ALLOCATE(XHU2M_MAX(KLU))
   ALLOCATE(XZON10M  (KLU))
+  ALLOCATE(XZON10M_ICE(KLU))
   ALLOCATE(XMER10M  (KLU))
+  ALLOCATE(XMER10M_ICE(KLU))
   ALLOCATE(XWIND10M (KLU))
+  ALLOCATE(XWIND10M_ICE(KLU))
   ALLOCATE(XWIND10M_MAX(KLU))
   !
   XRI      = XUNDEF
+  XRI_ICE  = XUNDEF
   XT2M     = XUNDEF
+  XT2M_ICE = XUNDEF
   XT2M_MIN = XUNDEF
   XT2M_MAX = 0.0
   XQ2M     = XUNDEF
+  XQ2M_ICE = XUNDEF
   XHU2M    = XUNDEF
+  XHU2M_ICE= XUNDEF
   XHU2M_MIN= XUNDEF
   XHU2M_MAX=-XUNDEF
   XZON10M  = XUNDEF
+  XZON10M_ICE=XUNDEF
   XMER10M  = XUNDEF
+  XMER10M_ICE=XUNDEF
   XWIND10M = XUNDEF
+  XWIND10M_ICE=XUNDEF
   XWIND10M_MAX = 0.0
 ELSE
   ALLOCATE(XRI      (0))
+  ALLOCATE(XRI_ICE  (0))
   ALLOCATE(XT2M     (0))
+  ALLOCATE(XT2M_ICE (0))
   ALLOCATE(XT2M_MIN (0))
   ALLOCATE(XT2M_MAX (0))
   ALLOCATE(XQ2M     (0))
+  ALLOCATE(XQ2M_ICE (0))
   ALLOCATE(XHU2M    (0))
+  ALLOCATE(XHU2M_ICE(0))
   ALLOCATE(XHU2M_MIN(0))
   ALLOCATE(XHU2M_MAX(0))
   ALLOCATE(XZON10M  (0))
+  ALLOCATE(XZON10M_ICE(0))
   ALLOCATE(XMER10M  (0))
+  ALLOCATE(XMER10M_ICE(0))
   ALLOCATE(XWIND10M (0))
+  ALLOCATE(XWIND10M_ICE(0))
   ALLOCATE(XWIND10M_MAX(0))
 END IF
 !
@@ -262,22 +398,34 @@ END IF
 !
 IF (LCOEF) THEN
   ALLOCATE(XCD     (KLU))
+  ALLOCATE(XCD_ICE (KLU))
   ALLOCATE(XCH     (KLU))
+  ALLOCATE(XCH_ICE (KLU))
   ALLOCATE(XCE     (KLU))
   ALLOCATE(XZ0     (KLU))
+  ALLOCATE(XZ0_ICE (KLU))
   ALLOCATE(XZ0H    (KLU))
+  ALLOCATE(XZ0H_ICE(KLU))
   !
   XCD      = XUNDEF
+  XCD_ICE  = XUNDEF
   XCH      = XUNDEF
+  XCH_ICE  = XUNDEF
   XCE      = XUNDEF
   XZ0      = XUNDEF
+  XZ0_ICE  = XUNDEF
   XZ0H     = XUNDEF
+  XZ0H_ICE = XUNDEF
 ELSE
   ALLOCATE(XCD     (0))
+  ALLOCATE(XCD_ICE (0))
   ALLOCATE(XCH     (0))
+  ALLOCATE(XCH_ICE (0))
   ALLOCATE(XCE     (0))
   ALLOCATE(XZ0     (0))
+  ALLOCATE(XZ0_ICE (0))
   ALLOCATE(XZ0H    (0))
+  ALLOCATE(XZ0H_ICE(0))
 END IF
 !
 !
@@ -285,10 +433,13 @@ END IF
 !
 IF (LSURF_VARS) THEN
   ALLOCATE(XQS     (KLU))
+  ALLOCATE(XQS_ICE (KLU))
   !
   XQS      = XUNDEF
+  XQS_ICE  = XUNDEF
 ELSE
   ALLOCATE(XQS     (0))
+  ALLOCATE(XQS_ICE (0))
 END IF
 !
 !* ocean diag
@@ -313,9 +464,24 @@ ELSE
   ALLOCATE(XDOCMOY  (0))
 ENDIF
 !
+!* Seaice model diagnostics init 
+!
+IF (LDIAG_SEAICE) THEN
+  ALLOCATE(XSIT(KLU))
+  XSIT=XUNDEF
+  ALLOCATE(XSND(KLU))
+  XSND=XUNDEF
+  ALLOCATE(XMLT(KLU))
+  XMLT=XUNDEF
+ELSE
+  ALLOCATE(XSIT  (0))
+  ALLOCATE(XSND  (0))
+  ALLOCATE(XMLT  (0))
+ENDIF
+!
 !* Earth system model coupling variables
 !
-IF(LCPL_ESM)THEN
+IF(LCPL_SEA.OR.LHANDLE_SIC)THEN
 !        
   ALLOCATE(XCPL_SEA_WIND(KLU))
   ALLOCATE(XCPL_SEA_FWSU(KLU))

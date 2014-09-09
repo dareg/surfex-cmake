@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG(K2M, OT2MMW, OSURF_BUDGET, OSURF_BUDGETC, OCOEF, OSURF_VARS,&
-                                PFRAC_TILE,                                       &
+      SUBROUTINE AVERAGE_DIAG(K2M, OT2MMW, OSURF_BUDGET, OSURF_BUDGETC, OCOEF,    &
+                                OSURF_VARS, PFRAC_TILE,                           &
                                 PRN_TILE, PH_TILE, PLE_TILE, PLEI_TILE ,          &
                                 PGFLUX_TILE, PRI_TILE, PCD_TILE, PCH_TILE,        &
                                 PCE_TILE, PT2M_TILE, PTS_TILE, PQ2M_TILE,         &
@@ -20,7 +20,9 @@
                                 PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,   &
                                 PHU2M_MIN_TILE, PHU2M_MAX_TILE, PHU2M_MIN,        &
                                 PHU2M_MAX, PWIND10M_TILE, PWIND10M_MAX_TILE,      &
-                                PWIND10M, PWIND10M_MAX                            )  
+                                PWIND10M, PWIND10M_MAX,                           & 
+                                PEVAP_TILE, PEVAPC_TILE, PEVAP, PEVAPC,           &
+                                PSUBL_TILE, PSUBLC_TILE, PSUBL, PSUBLC            )                                
 !     ######################################################################
 !
 !
@@ -53,6 +55,7 @@
 !!      Original    06/2003
 !!      Modified    08/2009 (B. Decharme) : new diag
 !     02/2010 - S. Riette - Security for wind average in case of XUNDEF values
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -79,6 +82,8 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PH_TILE       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PLE_TILE      ! Total latent heat flux       (W/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PLEI_TILE     ! Sublimation latent heat flux (W/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PGFLUX_TILE   ! Storage flux        (W/m2)
+REAL, DIMENSION(:,:), INTENT(IN) :: PEVAP_TILE    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:,:), INTENT(IN) :: PSUBL_TILE    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:,:), INTENT(IN) :: PRI_TILE      ! Richardson number   (-)
 REAL, DIMENSION(:,:), INTENT(IN) :: PCD_TILE      ! drag coefficient for wind (W/s2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PCH_TILE      ! drag coefficient for heat (W/s)
@@ -111,6 +116,8 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PHC_TILE       ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PLEC_TILE      ! Total latent heat flux    (J/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PLEIC_TILE     ! Sublimation latent heat flux    (J/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PGFLUXC_TILE   ! Storage flux        (J/m2)
+REAL, DIMENSION(:,:), INTENT(IN) :: PEVAPC_TILE    ! Total evapotranspiration  (kg/m2)
+REAL, DIMENSION(:,:), INTENT(IN) :: PSUBLC_TILE    ! Sublimation (kg/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PSWDC_TILE     ! short wave incoming radiation (J/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PSWUC_TILE     ! short wave outgoing radiation (J/m2)
 REAL, DIMENSION(:,:), INTENT(IN) :: PLWDC_TILE     ! long wave incoming radiation (J/m2)
@@ -127,6 +134,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient for wind (W/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! drag coefficient for heat (W/s)
@@ -153,6 +162,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
@@ -194,6 +205,14 @@ IF (OSURF_BUDGET) THEN
 ! Sublimation latent heat flux
 !
   CALL MAKE_AVERAGE(PFRAC_TILE,PLEI_TILE,PLEI)
+!
+! Total evapotranspiration
+!
+  CALL MAKE_AVERAGE(PFRAC_TILE,PEVAP_TILE,PEVAP)
+!
+! Sublimation
+!
+  CALL MAKE_AVERAGE(PFRAC_TILE,PSUBL_TILE,PSUBL)
 !
 ! Storage flux
 !
@@ -254,6 +273,14 @@ IF (OSURF_BUDGETC) THEN
 ! Storage flux
 !
   CALL MAKE_AVERAGE(PFRAC_TILE,PGFLUXC_TILE,PGFLUXC)
+!
+! Total evapotranspiration
+!
+  CALL MAKE_AVERAGE(PFRAC_TILE,PEVAPC_TILE,PEVAPC)
+!
+! Sublimation
+!
+  CALL MAKE_AVERAGE(PFRAC_TILE,PSUBLC_TILE,PSUBLC)
 !
 ! Downwards short wave radiation
 !
@@ -343,8 +370,6 @@ IF (OCOEF) THEN
   CALL MAKE_AVERAGE(PFRAC_TILE,PCD_TILE,PCD)
 !
   CALL MAKE_AVERAGE(PFRAC_TILE,PCH_TILE,PCH)
-!
-  CALL MAKE_AVERAGE(PFRAC_TILE,PCE_TILE,PCE)
 !
   CALL MAKE_AVERAGE(PFRAC_TILE,PCE_TILE,PCE)
 !

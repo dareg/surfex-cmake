@@ -33,6 +33,8 @@
 !!      B. Decharme  06/2009 : add topographic index statistics
 !!      A.L. Gibelin 04/2009 : dimension NBIOMASS for ISBA-A-gs
 !!      B. Decharme  07/2011 : delete argument HWRITE
+!!      B. Decharme  07/2012 : files of data for permafrost area and for SOC top and sub soil
+!!                   11/2013 : same for groundwater distribution
 !!
 !-------------------------------------------------------------------------------
 !
@@ -51,7 +53,8 @@ USE MODD_ISBA_n, ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA,&
                         XTI_SKEW, XZS,XCOVER,                   &
                         XZ0EFFJPDIR,                            &
                         LCOVER, LECOCLIMAP, LCTI, LSOCP, LNOF,  &
-                        XSOILGRID, XPH, XFERT, LPERM, XPERM
+                        XSOILGRID, XPH, XFERT, LPERM, XPERM,    &
+                        LGW, XGW
 !
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR
 !
@@ -210,6 +213,18 @@ IF(LPERM)THEN
   YCOMMENT='X_Y_PERM'
   YRECFM='PERM'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XPERM(:),IRESP,HCOMMENT=YCOMMENT)
+ENDIF
+!
+!* groundwater distribution
+!
+YRECFM='GWKEY'
+YCOMMENT=''
+ CALL WRITE_SURF(HPROGRAM,YRECFM,LGW,IRESP,HCOMMENT=YCOMMENT)
+!
+IF(LGW)THEN
+  YCOMMENT='X_Y_GWFRAC'
+  YRECFM='GWFRAC'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XGW(:),IRESP,HCOMMENT=YCOMMENT)
 ENDIF
 !
 !SOILNOX

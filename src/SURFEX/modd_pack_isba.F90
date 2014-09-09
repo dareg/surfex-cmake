@@ -391,7 +391,6 @@ REAL, POINTER, DIMENSION(:)    :: XP_PCOEF       ! 'Force-Restore' surface verti
 REAL, POINTER, DIMENSION(:,:)  :: XP_WFC         ! field capacity volumetric water content
 !$OMP THREADPRIVATE(XP_WFC)
 !                                                    ! profile                                 (m3/m3)
-
 REAL, POINTER, DIMENSION(:,:)  :: XP_WWILT       ! wilting point volumetric water content 
 !$OMP THREADPRIVATE(XP_WWILT)
 !                                                    ! profile                                 (m3/m3)
@@ -460,6 +459,11 @@ REAL, POINTER, DIMENSION(:,:)   :: XP_WGI        ! soil liquid water equivalent 
 !                                                    ! ice content profile                     (m3/m3)
 REAL, POINTER, DIMENSION(:)     :: XP_RESA       ! aerodynamic resistance                  (s/m)
 !$OMP THREADPRIVATE(XP_RESA)
+!
+REAL, POINTER, DIMENSION(:)     :: XP_FWTD       ! grid-cell fraction of water table to rise
+!$OMP THREADPRIVATE(XP_FWTD)
+REAL, POINTER, DIMENSION(:)     :: XP_WTD        ! water table depth                  (m)
+!$OMP THREADPRIVATE(XP_WTD)
 !
 ! - Vegetation: Ags Prognostic (YPHOTO = 'LAI', 'LST', 'NIT', 'NCB') or prescribed (YPHOTO = 'NON', 'AGS', 'AST')
 !
@@ -539,7 +543,9 @@ REAL, POINTER, DIMENSION(:)        :: XP_FSAT      !Topmodel saturated fraction
 !$OMP THREADPRIVATE(XP_FSAT)
 REAL, POINTER, DIMENSION(:)        :: XP_MUF       !Rainfall surface fraction 
 !$OMP THREADPRIVATE(XP_MUF)
-!                                                         ! previous day                         (kg/m2)
+REAL, POINTER, DIMENSION(:,:)      :: XP_TOPQS     !Topmodel baseflow by layer (m s-1)
+!$OMP THREADPRIVATE(XP_TOPQS)
+!
 ! - Courant time step properties
 !
 REAL, POINTER, DIMENSION(:)        :: XP_PSN       ! fraction of the grid covered by snow          (-)
@@ -574,8 +580,6 @@ REAL, POINTER, DIMENSION(:)        :: XP_FFLOOD  ! Grdi-cell flood fraction     
 !$OMP THREADPRIVATE(XP_FFLOOD)
 REAL, POINTER, DIMENSION(:)        :: XP_PIFLOOD ! Floodplains potential infiltration (kg/m2/s)
 !$OMP THREADPRIVATE(XP_PIFLOOD)
-REAL, POINTER, DIMENSION(:)        :: XP_Z0FLOOD ! Floodplains roughness length
-!$OMP THREADPRIVATE(XP_Z0FLOOD)
 !
 REAL, POINTER, DIMENSION(:)        :: XP_CPS, XP_LVTT, XP_LSTT
 !$OMP THREADPRIVATE(XP_CPS, XP_LVTT, XP_LSTT)

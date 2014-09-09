@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_FLAKE(HPROGRAM)
+      SUBROUTINE PGD_FLAKE(HPROGRAM,OECOCLIMAP,ORM_RIVER)
 !     ##############################################################
 !
 !!**** *PGD_FLAKE* monitor for averaging and interpolations of FLAKE physiographic fields
@@ -29,6 +29,7 @@
 !!    ------------
 !!
 !!    Original    03/2004
+!!    04/2013, P. Le Moigne : allow limitation of lake depth
 !!
 !----------------------------------------------------------------------------
 !
@@ -44,8 +45,10 @@ USE MODD_FLAKE_n,        ONLY : XCOVER, LCOVER, XZS, &
                                   XT_BS         , &
                                   XDEPTH_BS     , &
                                   XEXTCOEF_WATER    
- 
-USE MODD_FLAKE_GRID_n,  ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
+!
+USE MODD_PGDWORK,        ONLY : CATYPE
+!
+USE MODD_FLAKE_GRID_n,   ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
 !
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
@@ -72,8 +75,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
- CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-
+CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+LOGICAL,             INTENT(IN)    :: OECOCLIMAP
+LOGICAL,             INTENT(IN)    :: ORM_RIVER    ! delete river coverage (default = false)
 !
 !
 !*    0.2    Declaration of local variables
@@ -105,13 +109,15 @@ REAL                     :: XUNIF_WATER_FETCH
 REAL                     :: XUNIF_T_BS
 REAL                     :: XUNIF_DEPTH_BS
 REAL                     :: XUNIF_EXTCOEF_WATER
+REAL                     :: XMAX_DEPTH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_FLAKE/ YWATER_DEPTH, YWATER_DEPTH_STATUS, YWATER_DEPTHFILETYPE,     &
                          XUNIF_WATER_DEPTH, YWATER_FETCH, YWATER_FETCHFILETYPE,       &
                          XUNIF_WATER_FETCH, YT_BS, YT_BSFILETYPE, XUNIF_T_BS,         &
                          YDEPTH_BS, YDEPTH_BSFILETYPE, XUNIF_DEPTH_BS,                &
-                         YEXTCOEF_WATER, YEXTCOEF_WATERFILETYPE, XUNIF_EXTCOEF_WATER  
+                         YEXTCOEF_WATER, YEXTCOEF_WATERFILETYPE, XUNIF_EXTCOEF_WATER, &
+                         XMAX_DEPTH  
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',0,ZHOOK_HANDLE)
@@ -122,7 +128,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',0,ZHOOK_HANDLE)
 !*    1.      Initializations of defaults
 !             ---------------------------
 !
-XUNIF_WATER_DEPTH  = 20.
+XUNIF_WATER_DEPTH  = 10.
 XUNIF_WATER_FETCH  = 1000.
 XUNIF_T_BS         = 286.
 XUNIF_DEPTH_BS     = 1.
@@ -140,7 +146,8 @@ YWATER_FETCHFILETYPE   = '      '
 YT_BSFILETYPE          = '      '
 YDEPTH_BSFILETYPE      = '      '
 YEXTCOEF_WATERFILETYPE = '      '
-
+!
+XMAX_DEPTH  = 1.E+20
 !
 !-------------------------------------------------------------------------------
 !
@@ -200,9 +207,25 @@ IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT
   !
 ELSE
   !
+  IF(OECOCLIMAP.AND.(.NOT.ORM_RIVER))THEN
+     WRITE(ILUOUT,*)'With this version of Flake, river must be removed'
+     WRITE(ILUOUT,*)'Indeed, river energy budget can not be computed  '
+     WRITE(ILUOUT,*)'using static lake scheme without 2D informations.'
+     WRITE(ILUOUT,*)'Please add LRM_RIVER = T in NAM_COVER            '
+     WRITE(ILUOUT,*)' '
+     WRITE(ILUOUT,*)'If you still want to use Flake to comput river   '
+     WRITE(ILUOUT,*)'energy budget, please use the two files for the  '
+     WRITE(ILUOUT,*)'Kourzeneva 2009 method: ',CLAKELDB,CSTATUSLDB
+     CALL ABOR1_SFX('PGD_FLAKE: WITH THIS VERSION OF FLAKE, LRM_RIVER MUST BE TRUE')         
+  ENDIF
+  !
+  CATYPE='INV'
   CALL PGD_FIELD(HPROGRAM,'water depth','WAT',YWATER_DEPTH,YWATER_DEPTHFILETYPE,XUNIF_WATER_DEPTH,XWATER_DEPTH(:))
   !
 ENDIF
+!
+XWATER_DEPTH(:) = MIN (XWATER_DEPTH(:),XMAX_DEPTH)
+WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
 !
 !-------------------------------------------------------------------------------
 !
@@ -211,7 +234,8 @@ ENDIF
 !
 ALLOCATE(XWATER_FETCH  (NDIM)) 
 !
- CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,XWATER_FETCH(:))
+CATYPE='ARI'
+CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,XWATER_FETCH(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -220,7 +244,8 @@ ALLOCATE(XWATER_FETCH  (NDIM))
 !
 ALLOCATE(XT_BS         (NDIM)) 
 !
- CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,XT_BS(:))
+CATYPE='ARI'
+CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,XT_BS(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -229,7 +254,8 @@ ALLOCATE(XT_BS         (NDIM))
 !
 ALLOCATE(XDEPTH_BS     (NDIM)) 
 !
- CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,XDEPTH_BS(:))
+CATYPE='INV'
+CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,XDEPTH_BS(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -238,7 +264,8 @@ ALLOCATE(XDEPTH_BS     (NDIM))
 
 ALLOCATE(XEXTCOEF_WATER(NDIM)) 
 !
- CALL PGD_FIELD(HPROGRAM,'water extinction coefficient','WAT', &
+CATYPE='ARI'
+CALL PGD_FIELD(HPROGRAM,'water extinction coefficient','WAT', &
                  YEXTCOEF_WATER,YEXTCOEF_WATERFILETYPE,XUNIF_EXTCOEF_WATER, &
                  XEXTCOEF_WATER(:))  
 !
@@ -247,7 +274,8 @@ ALLOCATE(XEXTCOEF_WATER(NDIM))
 !*   10.     Prints of flake parameters in a tex file
 !            ----------------------------------------
 !
- CALL WRITE_COVER_TEX_WATER
+CALL WRITE_COVER_TEX_WATER
+!
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

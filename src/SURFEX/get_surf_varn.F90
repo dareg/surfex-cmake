@@ -6,7 +6,7 @@
                                   PZ0H_SEA, PZ0H_WATER, PZ0H_NATURE, PZ0H_TOWN,&
                                   PQS_SEA, PQS_WATER, PQS_NATURE, PQS_TOWN,    &
                                   PPSNG, PPSNV, PZS, PSERIES, PTWSNOW,         &
-                                  PSSO_STDEV                     )  
+                                  PSSO_STDEV, PLON, PLAT                       )  
 !     #######################################################################
 !
 !!****  *GET_SURF_VAR_n* - gets some surface fields on atmospheric grid
@@ -42,6 +42,7 @@
 !!      Original    02/2006
 !       S. Riette   06/2010 PSSO_STDEV and PTWSNOW added
 !       B. Decharme 09/2012 Argument added in GET_FLUX_n
+!       B. Decharme 05/2013 Argument added in GET_FLUX_n for debug in ARP/AL/AR
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -67,6 +68,7 @@ USE PARKIND1  ,ONLY : JPRB
 USE MODI_ABOR1_SFX
 USE MODI_GET_SSO_STDEV_n
 USE MODI_GET_1D_MASK
+USE MODI_GET_COORD_n
 !
 IMPLICIT NONE
 !
@@ -110,10 +112,13 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PPSNV      ! snow fraction over veg
 !
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PZS        ! surface orography                   (m)    
 !
-REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PSERIES   ! any surface field for which 
-!                                                        ! mesoNH series are required
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PSERIES  ! any surface field for which 
+!                                                       ! mesoNH series are required
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PTWSNOW    ! Snow total reservoir
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PSSO_STDEV ! S.S.O. standard deviation           (m)
+!
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLON       ! longitude
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLAT       ! latitude
 !
 !-------------------------------------------------------------------------------
 !
@@ -162,7 +167,8 @@ END IF
 IF ( PRESENT(PT2M) .OR. PRESENT(PQ2M) ) THEN
    !
    CALL GET_FLUX_n(HPROGRAM, KI, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD2, &
-                                 ZFIELD3, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4 )
+                                 ZFIELD3, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, &
+                                 ZFIELD4, ZFIELD4, ZFIELD4                             )
    !
    IF (PRESENT(PT2M)   ) PT2M    = ZFIELD2
    IF (PRESENT(PQ2M)   ) PQ2M    = ZFIELD3
@@ -423,7 +429,7 @@ IF (PRESENT(PSERIES)) THEN
    !
 END IF
 !
-!*   6. SSO STDEV
+!*   7. Subgrid orography standard deviation
 !
 IF (PRESENT(PSSO_STDEV)) THEN
    !
@@ -433,9 +439,18 @@ IF (PRESENT(PSSO_STDEV)) THEN
    !
 END IF
 !
+!*   8. Longitude et Latitude
+!
+IF (PRESENT(PLON).OR.PRESENT(PLAT)) THEN
+   !
+   CALL GET_COORD_n(HPROGRAM, KI, ZFIELD1, ZFIELD2)
+   !
+   IF (PRESENT(PLON)   ) PLON    = ZFIELD1
+   IF (PRESENT(PLAT)   ) PLAT    = ZFIELD2
+   !
+END IF
+!
 IF (LHOOK) CALL DR_HOOK('GET_SURF_VAR_N',1,ZHOOK_HANDLE)
-!
-!
 !==============================================================================
 !
 END SUBROUTINE GET_SURF_VAR_n

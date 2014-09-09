@@ -107,9 +107,11 @@ INTEGER :: INI, INL, JJ, JL, IDEPTH
 !
 !*      0.3    declarations of local parameters:
 !
-REAL, PARAMETER                :: ZDENOM_MIN  = 1.E-6 ! minimum denominator: 
+REAL, PARAMETER             :: ZDENOM_MIN  = 1.E-12 ! minimum denominator
+!                                                   ! numerical factor to prevent division by 0
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!                                                     ! numerical factor to prevent division by 0
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization of variables:
@@ -157,8 +159,7 @@ IF(HISBA =='DIF')THEN
   ZWWILT(:) = PWWILT(:,1) * ZWSAT(:)/PWSAT(:,1)
 !
 ! Calculate the soil water stress factor for each layer:
-  PF2WGHT(:,1) = (PWG(:,1)-ZWWILT(:))/(ZWFC(:)-ZWWILT(:))
-  PF2WGHT(:,1) = MIN( 1.0, MAX( ZDENOM_MIN,PF2WGHT(:,1) ) ) 
+  PF2WGHT(:,1) = MIN(1.0,MAX(ZDENOM_MIN,((PWG(:,1)-ZWWILT(:))/(ZWFC(:)-ZWWILT(:)))))
 !
 ! Normalize the transpiration weights by root fraction:
   PF2WGHT(:,1) = PROOTFRAC(:,1)*PF2WGHT(:,1)
@@ -185,8 +186,7 @@ IF(HISBA =='DIF')THEN
         ZWWILT(JJ) = PWWILT(JJ,JL) * ZWSAT(JJ)/PWSAT(JJ,JL)
 !
 !       Calculate the soil water stress factor for each layer:
-        PF2WGHT(JJ,JL) = (PWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ))
-        PF2WGHT(JJ,JL) = MIN( 1.0, MAX( ZDENOM_MIN,PF2WGHT(JJ,JL) ) ) 
+        PF2WGHT(JJ,JL) = MIN(1.0,MAX(ZDENOM_MIN,((PWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ)))))
 !
 !       Calculate normalized root fraction weights:
         ZROOTFRACN = PROOTFRAC(JJ,JL) - PROOTFRAC(JJ,JL-1)

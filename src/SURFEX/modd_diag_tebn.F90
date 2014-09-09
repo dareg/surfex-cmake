@@ -75,7 +75,7 @@ TYPE DIAG_TEB_t
   REAL, POINTER, DIMENSION(:)   :: XMER10M  ! meridian wind at 10 meters       (m/s)
   REAL, POINTER, DIMENSION(:)   :: XWIND10M ! wind at 10 meters                (m/s)
   REAL, POINTER, DIMENSION(:)   :: XWIND10M_MAX! Maximum wind at 10 meters     (m/s)
-  REAL, POINTER, DIMENSION(:)   :: XSFCO2   ! CO2 flux                         (kg/m2/s)
+  REAL, POINTER, DIMENSION(:)   :: XSFCO2   ! CO2 flux                         (m/s*kg_CO2/kg_air)
   REAL, POINTER, DIMENSION(:)   :: XLWD     ! downward long wave radiation     (W/m2)
   REAL, POINTER, DIMENSION(:)   :: XLWU     ! upward long wave radiation       (W/m2)
   REAL, POINTER, DIMENSION(:)   :: XSWD     ! downward short wave radiation    (W/m2)
@@ -84,6 +84,7 @@ TYPE DIAG_TEB_t
   REAL, POINTER, DIMENSION(:,:) :: XSWBU    ! upward short wave radiation by spectral band (W/m2)
   REAL, POINTER, DIMENSION(:)   :: XFMU     ! horizontal momentum flux zonal   (m2/s2)
   REAL, POINTER, DIMENSION(:)   :: XFMV     ! horizontal momentum flux meridian (m2/s2)             
+  REAL, POINTER, DIMENSION(:)   :: XDIAG_TS ! arithmetic mean of surface temperature (K)
 !------------------------------------------------------------------------------
 !
 
@@ -171,6 +172,8 @@ REAL, POINTER, DIMENSION(:)   :: XFMU=>NULL()
 !$OMP THREADPRIVATE(XFMU)
 REAL, POINTER, DIMENSION(:)   :: XFMV=>NULL()
 !$OMP THREADPRIVATE(XFMV)
+REAL, POINTER, DIMENSION(:)   :: XDIAG_TS=>NULL()
+!$OMP THREADPRIVATE(XDIAG_TS)
 
 CONTAINS
 
@@ -212,6 +215,7 @@ DIAG_TEB_MODEL(KFROM)%XSWBD=>XSWBD
 DIAG_TEB_MODEL(KFROM)%XSWBU=>XSWBU
 DIAG_TEB_MODEL(KFROM)%XFMU=>XFMU
 DIAG_TEB_MODEL(KFROM)%XFMV=>XFMV
+DIAG_TEB_MODEL(KFROM)%XDIAG_TS=>XDIAG_TS
 ENDIF
 !
 ! Current model is set to model KTO
@@ -256,6 +260,7 @@ XSWBD=>DIAG_TEB_MODEL(KTO)%XSWBD
 XSWBU=>DIAG_TEB_MODEL(KTO)%XSWBU
 XFMU=>DIAG_TEB_MODEL(KTO)%XFMU
 XFMV=>DIAG_TEB_MODEL(KTO)%XFMV
+XDIAG_TS=>DIAG_TEB_MODEL(KTO)%XDIAG_TS
 IF (LHOOK) CALL DR_HOOK('MODD_DIAG_TEB_N:DIAG_TEB_GOTO_MODEL',1,ZHOOK_HANDLE)
 
 END SUBROUTINE DIAG_TEB_GOTO_MODEL
@@ -298,6 +303,7 @@ DO J=1,KMODEL
   NULLIFY(DIAG_TEB_MODEL(J)%XSWBU)
   NULLIFY(DIAG_TEB_MODEL(J)%XFMU)
   NULLIFY(DIAG_TEB_MODEL(J)%XFMV)
+  NULLIFY(DIAG_TEB_MODEL(J)%XDIAG_TS)
 ENDDO
 DIAG_TEB_MODEL(:)%XDIAG_TSTEP=0.
 DIAG_TEB_MODEL(:)%N2M=0

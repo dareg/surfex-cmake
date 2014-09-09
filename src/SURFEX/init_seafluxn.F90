@@ -3,7 +3,7 @@
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
                                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                  PEMIS,PTSRAD,                              &
+                                  PEMIS,PTSRAD,PTSURF,                       &
                                   KYEAR, KMONTH,KDAY, PTIME,                 &
                                   HATMFILE,HATMFILETYPE,                     &
                                   HTEST                                      )  
@@ -39,28 +39,38 @@
 !!                  01/2008 : coupling with 1D ocean
 !!      B. Decharme 08/2009 : specific treatment for sea/ice in the Earth System Model 
 !!      B. Decharme 07/2011 : read pgd+prep 
+!!      B. Decharme 04/2013 : new coupling variables
+!!      S. Senesi   01/2014 : introduce sea-ice model 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM,       ONLY : LCPL_ESM
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_CSTS,           ONLY : XTTS
 USE MODD_SNOW_PAR,       ONLY : XZ0HSN
-USE MODD_SEAFLUX_n,      ONLY : XCOVER, XDIR_ALB, XSCA_ALB,    &
+USE MODD_SEAFLUX_n,      ONLY : XCOVER, XDIR_ALB, XSCA_ALB,  &
                                   XEMIS, XSST, XTICE, CSEA_FLUX, &
                                   CSEA_ALB, LPWG,LPRECIP,LPWEBB, &
                                   XTSTEP, XOUT_TSTEP, TTIME,     &
                                   NGRVWAVES, XSST_INI, LSBL,     &
-                                  XZ0, XZ0H, XUMER, XVMER,       &
-                                  XICHCE, CINTERPOL_SST,         &
-                                  LINTERPOL_SST, XICE_ALB  
+                                  XZ0, XZ0H, XUMER, XVMER,XICHCE,&
+                                  CINTERPOL_SST, LINTERPOL_SST,  &
+                                  CINTERPOL_SSS, LINTERPOL_SSS,  &
+                                  CINTERPOL_SIC, LINTERPOL_SIC,  &
+                                  CINTERPOL_SIT, LINTERPOL_SIT,  &
+                                  LHANDLE_SIC, XICE_ALB,  XFREEZING_SST,&
+                                  XSIC_EFOLDING_TIME, XSIT_EFOLDING_TIME,&
+                                  XSEAICE_TSTEP, CSEAICE_SCHEME, &
+                                  XCD_ICE_CST, XSI_FLX_DRV, TGLT,&
+                                  XSIC
 USE MODD_OCEAN_n,        ONLY : LPROGSST,NTIME_COUPLING,LMERCATOR,LCURRENT
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET, XDIAG_TSTEP, L2M_MIN_ZS, &
                                   LCOEF, LSURF_VARS, LSURF_BUDGETC, LRESET_BUDGETC  
 USE MODD_DIAG_OCEAN_n,   ONLY : LDIAG_OCEAN
+USE MODD_DIAG_SEAICE_n,  ONLY : LDIAG_SEAICE
 USE MODD_CH_SEAFLUX_n,   ONLY : XDEP, CCH_DRY_DEP, CSV, CCH_NAMES, &
                                   NBEQ, NSV_CHSBEG, NSV_CHSEND,  &
                                   NAEREQ, NSV_AERBEG, NSV_AEREND, CAER_NAMES,&
@@ -73,12 +83,19 @@ USE MODD_SLT_SURF,       ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_DEFAULT_CH_DEP
+!
 USE MODI_DEFAULT_SEAFLUX
 USE MODI_DEFAULT_DIAG_SEAFLUX
 USE MODI_READ_DEFAULT_SEAFLUX_n
 USE MODI_READ_SEAFLUX_CONF_n
 USE MODI_READ_SEAFLUX_n
+!
 USE MODI_READ_OCEAN_n
+!
+USE MODI_DEFAULT_SEAICE
+USE MODI_READ_SEAICE_n
+USE MODI_GLTOOLS_READNAM
+!
 USE MODI_READ_PGD_SEAFLUX_n
 USE MODI_DIAG_SEAFLUX_INIT_n
 USE MODI_END_IO_SURF_n
@@ -88,8 +105,9 @@ USE MODI_READ_SEAFLUX_DATE
 USE MODI_READ_NAM_PREP_SEAFLUX_n
 USE MODI_INIT_CHEMICAL_n
 USE MODI_PREP_CTRL_SEAFLUX
-USE MODI_UPDATE_RAD_SEAWAT
+USE MODI_UPDATE_RAD_SEA
 USE MODI_READ_SEAFLUX_SBL_n
+USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 USE MODI_ABOR1_SFX
 !
 USE MODI_SET_SURFEX_FILEIN
@@ -118,6 +136,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -155,6 +174,7 @@ PDIR_ALB = XUNDEF
 PSCA_ALB = XUNDEF
 PEMIS    = XUNDEF
 PTSRAD   = XUNDEF
+PTSURF   = XUNDEF
 !
 LMERCATOR = .FALSE.
 LCURRENT  = .FALSE.
@@ -169,14 +189,19 @@ IF (LNAM_READ) THEN
  
  CALL DEFAULT_SEAFLUX(XTSTEP,XOUT_TSTEP,CSEA_ALB,CSEA_FLUX,LPWG,       &
                         LPRECIP,LPWEBB,NGRVWAVES,LPROGSST,NTIME_COUPLING,&
-                        XICHCE,CINTERPOL_SST          )  
+                        XICHCE,CINTERPOL_SST)
+ CALL DEFAULT_SEAICE(HPROGRAM, CSEAICE_SCHEME, CINTERPOL_SSS,             &
+                     CINTERPOL_SIC,CINTERPOL_SIT, XFREEZING_SST,          &
+                     XSEAICE_TSTEP, XSIC_EFOLDING_TIME,  &
+                     XSIT_EFOLDING_TIME, XCD_ICE_CST, XSI_FLX_DRV)     
  !                     
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP) 
  !            
  CALL DEFAULT_DIAG_SEAFLUX(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
-                           LDIAG_OCEAN,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP     )  
+                           LDIAG_OCEAN,LDIAG_SEAICE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP )  
 
 ENDIF
+!
 !
 !        0.2. Defaults from file header
 !    
@@ -188,12 +213,34 @@ ENDIF
  CALL READ_SEAFLUX_CONF_n(HPROGRAM)
 !
 LINTERPOL_SST=.FALSE.
-IF(LCPL_ESM)THEN       
-! No STT interpolation in Earth System Model
+LINTERPOL_SSS=.FALSE.
+LINTERPOL_SIC=.FALSE.
+LINTERPOL_SIT=.FALSE.
+IF(LCPL_SEA)THEN 
+  IF(N2M<1)THEN
+     CALL ABOR1_SFX('INIT_SEAFLUX_n: N2M must be set >0 in case of LCPL_SEA')
+  ENDIF
+! No STT / SSS interpolation in Earth System Model
   CINTERPOL_SST='NONE  '
-  LINTERPOL_SST=.FALSE.
-ELSEIF(CINTERPOL_SST/='NONE  ')THEN
-  LINTERPOL_SST=.TRUE.
+  CINTERPOL_SSS='NONE  '
+  CINTERPOL_SIC='NONE  '
+  CINTERPOL_SIT='NONE  '
+ELSE
+   IF(TRIM(CINTERPOL_SST)/='NONE')THEN
+      LINTERPOL_SST=.TRUE.
+   ENDIF
+   IF(TRIM(CINTERPOL_SSS)/='NONE')THEN
+      LINTERPOL_SSS=.TRUE.
+   ENDIF
+   IF(TRIM(CINTERPOL_SIC)/='NONE')THEN
+      LINTERPOL_SIC=.TRUE.
+   ENDIF
+   IF(TRIM(CINTERPOL_SIT)/='NONE')THEN
+      LINTERPOL_SIT=.TRUE.
+   ENDIF
+ENDIF
+IF (TRIM(CSEAICE_SCHEME) == 'GELATO' .AND. (NBLOCKTOT>1)) THEN 
+   CALL ABOR1_SFX("INIT_SEAFLUX_N: GELATO CANNOT YET RUN MULTI-THREAD")
 ENDIF
 !
 !*       1.     Cover fields and grid:
@@ -209,7 +256,7 @@ SELECT CASE (HINIT)
 
   CASE ('PRE')
     CALL PREP_CTRL_SEAFLUX(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
-                             LDIAG_OCEAN,ILUOUT,LSURF_BUDGETC ) 
+                             LDIAG_OCEAN,LDIAG_SEAICE,ILUOUT,LSURF_BUDGETC ) 
     IF (LNAM_READ) CALL READ_NAM_PREP_SEAFLUX_n(HPROGRAM)      
     CALL READ_SEAFLUX_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,TTIME)
 
@@ -280,21 +327,26 @@ ELSEWHERE
   XZ0H(:) = XZ0HSN
 ENDWHERE
 !
+!-------------------------------------------------------------------------------
 !
-!*       3.     Specific fields when using earth system model (Sea current and Sea-ice temperature)
-!               -----------------------------------------------------------------------------------
+!*       3.     Specific fields when using earth system model or sea-ice scheme
+!               (Sea current and Sea-ice temperature)
+!               -----------------------------------------------------------------
 !
-IF(LCPL_ESM)THEN       
+IF(LCPL_SEA.OR.LHANDLE_SIC)THEN       
 ! 
-  ALLOCATE(XTICE   (ILU))
-  ALLOCATE(XICE_ALB(ILU))
   ALLOCATE(XUMER   (ILU))
   ALLOCATE(XVMER   (ILU))
 !
-  XTICE   (:)=XUNDEF
-  XICE_ALB(:)=XUNDEF
   XUMER   (:)=XUNDEF
   XVMER   (:)=XUNDEF
+!
+  IF(LCPL_SEAICE.OR.LHANDLE_SIC)THEN       
+    ALLOCATE(XTICE   (ILU))
+    ALLOCATE(XICE_ALB(ILU))
+    XTICE   (:)=XUNDEF
+    XICE_ALB(:)=XUNDEF
+  ENDIF
 !
 ELSE
 ! 
@@ -305,8 +357,16 @@ ELSE
 !
 ENDIF
 !
-!*       4.     Albedo, emissivity and output radiative fields on open sea and sea ice
-!               ----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!
+!*       4.     Seaice prognostic variables and forcings :
+!
+CALL READ_SEAICE_n(HPROGRAM,ILU)
+!
+!-------------------------------------------------------------------------------
+!
+!*       5.     Albedo, emissivity and temperature fields on the mix (open sea + sea ice)
+!               -----------------------------------------------------------------
 !
 ALLOCATE(XDIR_ALB (ILU))
 ALLOCATE(XSCA_ALB (ILU))
@@ -315,19 +375,26 @@ XDIR_ALB = 0.0
 XSCA_ALB = 0.0
 XEMIS    = 0.0
 !
- CALL UPDATE_RAD_SEAWAT(CSEA_ALB,XSST,PZENITH,XTTS,XEMIS,XDIR_ALB,&
-                         XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD   )  
+CALL UPDATE_RAD_SEA(CSEA_ALB,XSST,PZENITH,XTTS,XEMIS,XDIR_ALB,&
+                    XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,  &
+                    LHANDLE_SIC,XTICE,XSIC,XICE_ALB           )  
+!
+IF (LHANDLE_SIC) THEN
+   PTSURF(:) = XSST(:) * ( 1 - XSIC(:)) + XTICE(:) * XSIC(:)
+ELSE
+   PTSURF(:) = XSST(:)
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!*       5.     SBL air fields:
+!*       6.     SBL air fields:
 !               --------------
 !
  CALL READ_SEAFLUX_SBL_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
-!*       6.     Chemistry /dust
+!*       7.     Chemistry /dust
 !               ---------
 !
  CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
@@ -346,7 +413,7 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
-!*       7.     diagnostics initialization
+!*       8.     diagnostics initialization
 !               --------------------------
 !
  CALL DIAG_SEAFLUX_INIT_n(HPROGRAM,ILU,KSW)

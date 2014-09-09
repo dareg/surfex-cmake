@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CARBON_SPINUP(KMONTH,KDAY,PTIME,                   &
+      SUBROUTINE CARBON_SPINUP(KMONTH,KDAY,PTIME,                      &
                    OSPINUPCARBS, OSPINUPCARBW, PSPINMAXS, PSPINMAXW,   &
                    KNBYEARSPINS, KNBYEARSPINW, KNBYEARSOLD, HPHOTO,    &
                    HRESPSL, KSPINS, KSPINW                             )
@@ -73,14 +73,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('CARBON_SPINUP',0,ZHOOK_HANDLE)
+!
 !       1.     Initializations
 !              ---------------
 !
-IF (LHOOK) CALL DR_HOOK('CARBON_SPINUP',0,ZHOOK_HANDLE)
-!
-IF (KMONTH == 1 .AND. KDAY==1 .AND. PTIME == 0.0 )THEN
-   KNBYEARSOLD = KNBYEARSOLD + 1
-ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! number of times CARBON_SOIL subroutine is called for each time step
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -94,6 +91,10 @@ ENDIF
 KSPINW=1
 IF ( OSPINUPCARBW .AND. HPHOTO=='NCB' ) THEN
    CALL SPINUP_MAX(PSPINMAXW,KNBYEARSPINW,KNBYEARSOLD,KSPINW)
+ENDIF
+!
+IF (KMONTH == 1 .AND. KDAY==1 .AND. PTIME == 0.0 )THEN
+   KNBYEARSOLD = KNBYEARSOLD + 1
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('CARBON_SPINUP',1,ZHOOK_HANDLE)

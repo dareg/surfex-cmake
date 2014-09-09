@@ -3,15 +3,15 @@
                          PEMIS, PALB,                                            &
                          PPSN, PPSNG, PPSNV,                                     &
                          PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &
-                         PLETR, PEVAP, PGFLUX, PLVTT, PLSTT,                     &
+                         PLETR, PEVAP, PSUBL, PGFLUX, PLVTT, PLSTT,              &
                          PUSTAR,                                                 &
                          PLES3L, PLEL3L, PEVAP3L,                                &
-                         PRI3L, PALB3L,                                          &
+                         PRI3L, PQS3L, PALB3L,                                   &
                          PRNSNOW, PHSNOW,  PHPSNOW,                              &
                          PGFLUXSNOW, PUSTARSNOW,                                 &
                          PGRNDFLUX, PLESL,                                       &
                          PEMISNOW,                                               &
-                         PSNOWTEMP, PTS_RAD, PTS, PRI, PSNOWHMASS,               &
+                         PSNOWTEMP, PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,          &
                          PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
                          PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
                          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &
@@ -52,7 +52,8 @@
 !!      B. Decharme 01/2010  Effective surface temperature (for diag)
 !!      B. Decharme 09/2012  Bug total sublimation flux: no PLESL
 !!      B. Decharme 04/2013  Bug wrong radiative temperature
-
+!!                           Sublimation diag flux
+!!                           Qs for 3l or crocus (needed for coupling with atm)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -104,6 +105,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PPSNV      ! fraction of the the veg.
 !
 REAL, DIMENSION(:),   INTENT(IN) :: PALB3L      ! Snow albedo
 REAL, DIMENSION(:),   INTENT(IN) :: PRI3L       ! Snow Ridcharson number
+REAL, DIMENSION(:),   INTENT(IN) :: PQS3L       ! Surface humidity
 ! 
 ! Diagnostics:
 !
@@ -158,6 +160,7 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PLER     ! latent heat of the fraction
 REAL, DIMENSION(:), INTENT(INOUT) :: PLETR    ! evapotranspiration of the rest
 !                                             ! of the vegetation
 REAL, DIMENSION(:), INTENT(INOUT) :: PEVAP    ! total evaporative flux (kg/m2/s)
+REAL, DIMENSION(:), INTENT(INOUT) :: PSUBL    ! sublimation flux (kg/m2/s)
 REAL, DIMENSION(:), INTENT(INOUT) :: PGFLUX   ! flux through the ground
 REAL, DIMENSION(:), INTENT(INOUT) :: PUSTAR   ! friction velocity
 REAL, DIMENSION(:), INTENT(INOUT) :: PMELTADV ! advection heat flux from snowmelt (W/m2)
@@ -182,6 +185,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PFFG,PFFV,PFF
 REAL, DIMENSION(:), INTENT(INOUT) :: PLE_FLOOD, PLEI_FLOOD ! Flood evaporation
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PRI       ! Total Ridcharson number
+REAL, DIMENSION(:), INTENT(INOUT) :: PQS       ! Surface humidity
 !
 !*      0.2    declarations of local variables
 !
@@ -267,6 +271,10 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 !
   PLEI(:)      = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
+! Total sublimation flux (kg/m2/s):
+!
+  PSUBL(:)     = PLEI(:)/PLSTT(:)
+!
 ! Total FLUX into snow/soil/vegetation surface:
 !
   PGFLUX(:)    = PRN(:) - PH(:) - PLE(:) + PHPSNOW(:) 
@@ -275,6 +283,10 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 !
   PRI(:)       = (1.-PPSN(:))  * PRI(:)   + PPSN(:) * PRI3L(:)  
 !
+! surface humidity:
+!
+  PQS(:)       = (1.-PPSN(:))  * PQS(:)   + PPSN(:) * PQS3L(:)
+!  
 ELSE
 !
   PTS    (:)  = PTG  (:,1)
@@ -284,6 +296,9 @@ ELSE
 !  
 ! Total sublimation flux (W/m2) :
   PLEI   (:)  = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
+!
+! Total sublimation flux (kg/m2/s):
+  PSUBL  (:)  = PLEI(:)/PLSTT(:)
 !
 ENDIF
 IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR',1,ZHOOK_HANDLE)

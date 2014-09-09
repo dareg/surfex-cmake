@@ -1,9 +1,9 @@
 !     #########
-      SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HSOC, HRAIN, HHORT, &
+      SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HRAIN, HHORT,       &
                       HC1DRY, HSCOND, HSNOW_ISBA, HSNOWRES, HCPSURF, HSOILFRZ,   &
                       HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
-                      HIMPLICIT_WIND,OSNOWDRIFT,OSNOWDRIFT_SUBLIM,               &
-                      OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,                     &
+                      HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,                &
+                      OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
                       PCGMAX, PZREF, PUREF, PDIRCOSZW,                           &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,         &
@@ -40,7 +40,8 @@
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
                       PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
-                      PIRRIG_FLUX, PDEEP_FLUX ,PIRRIG_GR                         )                     
+                      PIRRIG_FLUX, PDEEP_FLUX, PIRRIG_GR, PTOPQS, PQSB, PSUBL,   &
+                      PFWTD, PWTD, PSNDRIFT                                      )                     
 !     ##########################################################################
 !
 !
@@ -116,8 +117,12 @@
 !!                            Bug : flood fraction in COTWORES
 !!                            new wind implicitation
 !!                            Irrigation rate diag
-!!      (B. Decharme) 04/2013 Bug : Wrong radiative temperature
 !!     (C. de Munck) 03/2013  Specified irrigation for ground
+!!      (B. Decharme) 04/2013 Bug : Wrong radiative temperature
+!!                            DIF lateral subsurface drainage
+!!                            Sublimation diag flux
+!!                            Qs for 3l or crocus (needed for coupling with atm)
+!!                            water table / surface coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -176,9 +181,6 @@ LOGICAL,              INTENT(IN)  :: OTR_ML     ! new TR
  CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
- CHARACTER(LEN=*),     INTENT(IN)  :: HSOC       ! soil organic carbon profil option
-!                                               ! 'DEF'  = ISBA homogenous soil
-!                                               ! 'SGH'  = SOC profile
  CHARACTER(LEN=*),     INTENT(IN)  :: HRAIN      ! Rainfall spatial distribution
                                                 ! 'DEF' = No rainfall spatial distribution
                                                 ! 'SGH' = Rainfall exponential spatial distribution
@@ -222,25 +224,28 @@ LOGICAL, INTENT(IN)               :: OGLACIER   ! True = Over permanent snow and
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                 ! False = No specific treatment
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
-LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
-LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
+LOGICAL,              INTENT(IN)  :: OAGRI_TO_GRASS
+LOGICAL,              INTENT(IN)  :: OSNOWDRIFT          ! activate snowdrift
+LOGICAL,              INTENT(IN)  :: OSNOWDRIFT_SUBLIM   ! activate sublimation during drift
+LOGICAL,              INTENT(IN)  :: OSNOW_ABS_ZENITH    ! activate parametrization of solar absorption for polar regions
+CHARACTER(3),         INTENT(IN)  :: HSNOWMETAMO
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
                                          ! HSNOWMETAMO=C13 Carmagnola et al 2014
                                          ! HSNOWMETAMO=T07 Taillandier et al 2007
                                          ! HSNOWMETAMO=F06 Flanner et al 2006
+CHARACTER(3),         INTENT(IN)  :: HSNOWRAD
                                          !-----------------------
                                          ! Crocus radiative transfer scheme
-                                         ! HSNOWMETAMO=B92 Brun et al 1992
-                                         ! HSNOWMETAMO=TAR TARTES (Libois et al 2013)
-                                         ! HSNOWMETAMO=TA1 TARTES with constant impurities
-                                         ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
+                                         ! HSNOWRAD=B92 Brun et al 1992
+                                         ! HSNOWRAD=TAR TARTES (Libois et al 2013)
+                                         ! HSNOWRAD=TA1 TARTES with constant impurities
+                                         ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
 !
 REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
 !
@@ -255,6 +260,9 @@ REAL, DIMENSION(:),   INTENT(IN) :: PUREF       ! reference height of the wind
 !                                               ! NOT when coupled to a model (MesoNH)
 REAL, DIMENSION(:),   INTENT(IN) ::  PDIRCOSZW  ! Director Cosinus along z
 !                                               ! directions at surface w-point
+!
+REAL, DIMENSION(:), INTENT(IN)   ::  PLAT       ! Latitude
+REAL, DIMENSION(:), INTENT(IN)   ::  PLON       ! Longitude
 !
 !* atmospheric variables
 !  ---------------------
@@ -399,8 +407,6 @@ LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
 LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
 REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/s)
 !
-!
-!
 !* ISBA-Ags parameters
 !  -------------------
 !
@@ -490,10 +496,13 @@ REAL, DIMENSION(:), INTENT(INOUT):: PIFLOOD   !Floodplains infiltration         
 REAL, DIMENSION(:), INTENT(INOUT):: PPFLOOD   !Floodplains direct precipitation             [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT):: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux     [W/m²]
 !
-REAL, DIMENSION(:), INTENT(IN)   ::  PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
+REAL, DIMENSION(:), INTENT(IN)   :: PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
 !
-REAL, DIMENSION(:), INTENT(IN)   ::  PLAT
-REAL, DIMENSION(:), INTENT(IN)   ::  PLON
+REAL, DIMENSION(:,:), INTENT(IN) :: PTOPQS !Topmodel (HRUNOFF=SGH) subsurface flow by layer for DIF (m/s)
+REAL, DIMENSION(:), INTENT(OUT)  :: PQSB   !Topmodel (HRUNOFF=SGH) Lateral subsurface flow for DIF [kg/m²/s]
+!
+REAL, DIMENSION(:), INTENT(IN)   :: PFWTD    ! grid-cell fraction of water table rises
+REAL, DIMENSION(:), INTENT(IN)   :: PWTD     ! water table depth from hydrological model (m)
 !
 !* prognostic variables
 !  --------------------
@@ -608,6 +617,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PLER       ! latent heat of the fraction
 REAL, DIMENSION(:), INTENT(OUT) :: PLETR      ! evapotranspiration of the rest
 !                                             ! of the vegetation
 REAL, DIMENSION(:), INTENT(OUT) :: PEVAP      ! total evaporative flux (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL      ! sublimation flux (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX     ! flux through the ground
 REAL, DIMENSION(:), INTENT(OUT) :: PRESTORE   ! surface restore flux (W m-2)
 REAL, DIMENSION(:), INTENT(OUT) :: PUSTAR     ! friction velocity
@@ -616,6 +626,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PRUNOFF    ! runoff
 REAL, DIMENSION(:), INTENT(OUT) :: PMELT      ! melting rate of the snow (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PMELTADV   ! advection heat flux from snowmelt (W/m2)
 REAL ,DIMENSION(:), INTENT(OUT) :: PIRRIG_FLUX! irrigation rate (kg/m2/s)
+REAL ,DIMENSION(:), INTENT(OUT) :: PSNDRIFT   ! blowing snow sublimation (kg/m2/s)
 !
 ! The following surface fluxes are from snow-free portion of grid
 ! box when the ISBA-ES option is ON. Otherwise, they are equal
@@ -695,11 +706,13 @@ REAL, DIMENSION(SIZE(PWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow
 !                                           ! ISBA-ES [kg/(m2 s)]
 REAL, DIMENSION(SIZE(PWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
 REAL, DIMENSION(SIZE(PWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
+REAL, DIMENSION(SIZE(PWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
 REAL, DIMENSION(SIZE(PWR)) :: ZT2M     ! restore temperature before time integration (K)
 REAL, DIMENSION(SIZE(PWR)) :: ZTSM     ! surface temperature before time integration (K)
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZLEG_DELTA  ! soil evaporation delta fn
 REAL, DIMENSION(SIZE(PWR)) :: ZLEGI_DELTA ! soil sublimation delta fn
+REAL, DIMENSION(SIZE(PWR)) :: ZLER_DELTA
 !
 REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
 !                                      ! absorbed PAR of each level within the
@@ -723,8 +736,8 @@ REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction u
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
 !
-REAL, DIMENSION(SIZE(PWR))   :: ZEMIST
-REAL, DIMENSION(SIZE(PWR))   :: ZALBT
+REAL, DIMENSION(SIZE(PWR))   :: ZEMIST, ZZHV
+REAL, DIMENSION(SIZE(PWR))   :: ZALBT, ZEV, ZETR, ZER
 !
 LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -754,6 +767,8 @@ ZSOILCONDZ(:,:) = XUNDEF
 ZF2WGHT   (:,:) = XUNDEF
 !
 PRS         (:)   = 0.0
+PAC_AGG     (:)   = 0.0
+PHU_AGG     (:)   = 0.0
 !
 ! Save surface and sub-surface temperature values at beginning of time step for 
 ! budget and flux calculations:
@@ -782,7 +797,8 @@ ELSE
 !
    CALL SOILDIF (HSCOND, HDIFSFCOND, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
      PCG, PCGMAX, PCT, ZFROZEN1, PD_G, PTG, PWG, PWGI, KWG_LAYER, PHCAPSOIL,    &
-     PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ        )
+     PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ,       &
+     PFWTD, PWTD                                                                )
 !
 ENDIF
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -802,9 +818,9 @@ ENDIF
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
            ZSNOW_THRUFAL, PGRNDFLUX, ZEVAPCOR,                                  &
            PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,       &
-           PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSMELTFLUX,                        &
+           PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSMELTFLUX,              &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
-           PSNOWHMASS, ZRI3L, PZENITH, PLAT, PLON  ,                            &
+           PSNOWHMASS, ZRI3L, PZENITH, PLAT, PLON, ZQS3L,                       &
            OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
            HSNOWMETAMO,HSNOWRAD                                                 )  
 !
@@ -830,7 +846,7 @@ ENDIF
 !              -------------------
 !
 IF (OTR_ML) THEN
-  CALL RADIATIVE_TRANSFERT(PVEGTYPE,                                    &
+  CALL RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,                    &
               PALBVIS_TVEG, PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, &
               PSW_RAD, PLAI, PZENITH, PABC,                             &
               PFAPARC, PFAPIRC, PMUS, PLAI_EFFC, GSHADE, PIACAN,        &              
@@ -866,13 +882,13 @@ ENDIF
 !*      8.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !
- CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF,                                           &
+ CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF, PTSTEP,                                  &
     PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
     PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
     PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
     PDIRCOSZW, ZDELTA, ZF5, PRESA,  PCH, PCD, PCDN, PRI, PHUG, ZHUGI,           &
     PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF, PFFG_NOSNOW, PFFV_NOSNOW,             &
-    ZLEG_DELTA, ZLEGI_DELTA                                                     )  
+    ZLEG_DELTA, ZLEGI_DELTA, PWR, PRHOA, PLVTT                                  )  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -928,11 +944,13 @@ PAC_AGG(:) =   1. / PRESA(:) / XLVTT                              &
        + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:)           &
        + XLSTT*                 PPSN (:)                            )  
 !
-PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
-     * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
-       + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))*PHUG(:)  &
-       + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:) *ZHUGI(:) &
-       + XLSTT*                 PPSN (:)                            )
+WHERE(PAC_AGG(:)>0.0)
+      PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
+           * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
+             + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))*PHUG(:)  &
+             + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:) *ZHUGI(:) &
+             + XLSTT*                 PPSN (:)                            )  
+ENDWHERE
 !
 !
 !*******************************************************************************
@@ -955,11 +973,11 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
      PPSNV, PPSNG, ZSNOW_THRUFAL, ZEVAPCOR, PWR, ZSOILHCAPZ,                    &
      PSNOWSWE(:,1), PSNOWALB, PSNOWRHO(:,1), PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, &
      PWFC, PWWILT, ZF2WGHT, ZF2, PD_G, PDZG, PDZDIF, PPS,                       &
-     PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF,                                &
+     PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF, PTOPQS,                        &
      PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,                          &
-     HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,   &
+     HKSAT, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,         &
      PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,      &
-     PIRRIG_GR                                                                  )
+     PIRRIG_GR, PQSB, PFWTD, PWTD )
 !
 !-------------------------------------------------------------------------------
 !
@@ -970,19 +988,19 @@ PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
 !  of 3-L snow scheme
 !
 !
- CALL ISBA_SNOW_AGR( HSNOW_ISBA,                                   &
+ CALL ISBA_SNOW_AGR( HSNOW_ISBA,                                  &
           ZEMIST, ZALBT,                                          &
           PPSN, PPSNG, PPSNV,                                     &
           PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &
-          PLETR, PEVAP, PGFLUX, PLVTT, PLSTT,                     &
+          PLETR, PEVAP, PSUBL, PGFLUX, PLVTT, PLSTT,              &
           PUSTAR,                                                 &
           ZLES3L, ZLEL3L, ZEVAP3L,                                &
-          ZRI3L, ZALB3L,                                          &
+          ZRI3L, ZQS3L, ZALB3L,                                   &
           PRNSNOW, PHSNOW,  PHPSNOW,                              &
           PGFLUXSNOW, PUSTARSNOW,                                 &
           PGRNDFLUX, PLESL,                                       &
           PEMISNOW,                                               &
-          PSNOWTEMP, PTS_RAD, PTS, PRI, PSNOWHMASS,               &
+          PSNOWTEMP, PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,          &
           PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
           PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
           PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &

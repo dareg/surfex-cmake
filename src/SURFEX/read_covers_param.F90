@@ -29,6 +29,8 @@
 !!    ------------
 !!
 !!    Original    23/03/11
+!!
+!!    R. Alkama    05/2012 : read 19 vegtypes rather than 12
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -87,13 +89,13 @@ IF (LHOOK) CALL DR_HOOK('READ_COVERS_PARAM',0,ZHOOK_HANDLE)
 IF (KFILE==1) THEN
   !YFIL = TRIM(YDIR)//'ecoclimapI_covers_param.bin'
   !OPEN(41,FILE=TRIM(YFIL),FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
-  OPEN(41,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)  
+  OPEN(41,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)  
   INB_COVER = NCOVER_ECO1_END
   INB_AN = 1
 ELSEIF (KFILE==2) THEN
   !YFIL = TRIM(YDIR)//'ecoclimapII_eu_covers_param.bin'
   !OPEN(41,FILE=TRIM(YFIL),FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
-  OPEN(41,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(41,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
   INB_COVER = JPCOVER - NCOVER_ECO2_START + 1
   INB_AN = NECO2_END_YEAR - NECO2_START_YEAR + 1
 ENDIF
@@ -184,10 +186,6 @@ IF (KFILE<=2 .AND. XDATA_NATURE(ICOVER)/=0.) THEN
   IREC=IREC+1
   READ(41,REC=IREC) ZINTER(:) 
   XDATA_ALB_SOIL_VIS(ICOVER,25:36,1) = ZINTER(:)
-  DO JVEGTYPE=2,NVEGTYPE
-    XDATA_ALB_SOIL_NIR(ICOVER,:,JVEGTYPE) = XDATA_ALB_SOIL_NIR(ICOVER,:,1)
-    XDATA_ALB_SOIL_VIS(ICOVER,:,JVEGTYPE) = XDATA_ALB_SOIL_VIS(ICOVER,:,1)
-  ENDDO
 ENDIF
 !
 DO JVEGTYPE=1,NVEGTYPE
@@ -209,7 +207,7 @@ DO JVEGTYPE=1,NVEGTYPE
         ENDIF
       ENDDO
       !Heights of trees
-      IF (JVEGTYPE.LT.7) THEN
+      IF ((JVEGTYPE < 7) .OR. (JVEGTYPE > 12 .AND. JVEGTYPE /= 18)) THEN
         IREC=IREC+1
         READ(41,REC=IREC) XDATA_H_TREE(ICOVER,JVEGTYPE)
       ENDIF

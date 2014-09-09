@@ -36,6 +36,9 @@ SUBROUTINE PREP_ISBA(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!                              bug in biomass prognostic fields calculation
 !!      B. Decharme  (06/2013): XPSNV_A for EBA snow scheme not allocated
 !!      M. Lafaysse (04/2014) : LSNOW_PREP_PERM
+!!      B. Decharme  (04/2013): Good computation for coherence between soil temp and 
+!!                              liquid/solid water with DIF (results don't change)
+!!                              if lglacier in input file, do not initialize again
 !!------------------------------------------------------------------
 !
 !
@@ -53,22 +56,21 @@ USE MODD_ISBA_n,      ONLY : TSNOW, XRESA, XTSRAD_NAT, XEMIS, XLAI, XVEG,  &
                               XZ0, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,     &
                               CPHOTO, CRESPSL, XAN, XANFM, XANDAY, XLE,      &
                               NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB,   &
-                              XBSLAI, XBSLAI_NITRO, XBIOMASS, XRESP_BIOMASS, &
-                              XLITTER, XSOILCARB, XLIGNIN_STRUC,             &
+                              XBSLAI, XBIOMASS, XRESP_BIOMASS,               &
                               NPATCH, XWSAT, XWG, XWGI, CISBA, XTG, LCANOPY, &
-                              LFLOOD, XZ0_FLOOD, XPATCH, CALBEDO,            &
-                              XVEGTYPE_PATCH, LGLACIER, XICE_STO,            &
+                              XPATCH, CALBEDO,                               &
+                              XVEGTYPE_PATCH, LGLACIER,                      &
                               XPSN, XPSNG, XPSNV, XDIR_ALB_WITH_SNOW,        &
                               XSCA_ALB_WITH_SNOW, NGROUND_LAYER, XMPOTSAT,   &
                               XBCOEF, XPSNV_A
 !                           
 USE MODD_DEEPSOIL,    ONLY : LPHYSDOMC
 USE MODD_CSTS,        ONLY : XTT, XG, XLMTT
-USE MODD_SNOW_PAR,    ONLY : XZ0SN, XEMISSN
+USE MODD_SNOW_PAR,    ONLY : XEMISSN
 USE MODD_ISBA_PAR,    ONLY : XWGMIN
 !
 USE MODD_ISBA_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
-USE MODD_CO2V_PAR,    ONLY : XANFMINIT, XCA_NIT, XCC_NIT
+USE MODD_CO2V_PAR,    ONLY : XANFMINIT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_PREP,        ONLY : XZS_LS
 
@@ -81,6 +83,7 @@ USE MODI_VEGTYPE_TO_PATCH
 USE MODI_PREP_PERM_SNOW
 USE MODI_INIT_SNOW_LW
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
+USE MODI_PREP_HOR_ISBA_CC_FIELD
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -103,7 +106,7 @@ IMPLICIT NONE
 INTEGER :: ILUOUT, INI
 INTEGER :: JP, JL, JJ
 INTEGER :: ISNOW          ! patch number where permanent snow is
-REAL    :: ZWORK, ZLOG, ZWTOT, ZMATPOT
+REAL    :: ZWORK, ZLOG, ZWTOT, ZMATPOT, ZWL
 !
 REAL,             DIMENSION(1)   :: ZSW_BANDS ! middle wavelength of each band
 REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZDIR_ALB  ! direct albedo for each band
@@ -116,18 +119,31 @@ REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV   ! UV albedo  
 REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBNIR_SOIL  ! soil near-infra-red albedo   (-)
 REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBVIS_SOIL  ! soil visible albedo          (-)
 REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV_SOIL   ! soil UV albedo               (-)
+REAL,             DIMENSION(SIZE(XLAI,1))   :: ZTSURF     ! surface effective temperature
+!
+LOGICAL         :: GPERMSNOW
+LOGICAL         :: GTEMP2WGI
+LOGICAL         :: GWG
+LOGICAL         :: GWGI
+LOGICAL         :: GTG
+!
+REAL            :: SMAX
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-REAL    :: SMAX
 !
 !-------------------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('PREP_ISBA',0,ZHOOK_HANDLE)
+!
 !*      1.     Default of configuration
+!
+GPERMSNOW = .TRUE.
+GWG       = .TRUE.
+GWGI      = .TRUE.
+GTG       = .TRUE.
 !
 !*      1.1    Default
 !
-!
-IF (LHOOK) CALL DR_HOOK('PREP_ISBA',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
  CALL PREP_OUTPUT_GRID(ILUOUT,CGRID,XGRID_PAR,XLAT,XLON)
@@ -143,11 +159,11 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA',0,ZHOOK_HANDLE)
 !
 !*      2.1    Soil Water reservoirs
 !
- CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+ CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GWG)
 !
 !*      2.2    Soil ice reservoirs
 !
- CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+ CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GWGI)
 !
 !*      2.3    Leaves interception water reservoir
 !
@@ -155,18 +171,22 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA',0,ZHOOK_HANDLE)
 !
 !*      2.4    Temperature profile
 !
- CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+ CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GTG)
 !
 !*      2.5    Snow variables
 !
- CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+ CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GPERMSNOW)
 !
 !*      2.6    LAI
 !
  CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
-!-------------------------------------------------------------------------------------
- CALL CLEAN_PREP_OUTPUT_GRID
+!*      2.7    GLACIER
+!
+IF(LGLACIER)THEN
+  CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'ICE_STO',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+ENDIF
+!
 !-------------------------------------------------------------------------------------
 !
 !*      3.    Physical limitation: 
@@ -201,18 +221,11 @@ DEALLOCATE(XZS_LS)
 !
 !*      4.     Treatment of permanent snow
 !
-IF(LGLACIER)THEN
-  ALLOCATE(XICE_STO(SIZE(XLAI,1),SIZE(XLAI,2)))
-  XICE_STO(:,:) = 0.0
-ELSE
-  ALLOCATE(XICE_STO(0,0))
-ENDIF
-!
-IF (LSNOW_PREP_PERM) THEN
+IF (GPERMSNOW.AND.LSNOW_PREP_PERM) THEN
   ISNOW = VEGTYPE_TO_PATCH(NVT_SNOW,NPATCH)
   CALL PREP_PERM_SNOW(TSNOW,XTG(:,:,ISNOW),XVEGTYPE_PATCH(:,:,ISNOW),ISNOW)
 ENDIF
-
+!
 CALL INIT_SNOW_LW(XEMISSN,TSNOW)
 !
 IF (LPHYSDOMC) THEN
@@ -234,7 +247,9 @@ ENDIF
 !
 !*      5.     coherence between soil temperature and liquid/solid water
 !
-IF (CISBA == 'DIF') THEN
+GTEMP2WGI=(GWG.OR.GWGI.OR.GTG)
+!
+IF (CISBA == 'DIF'.AND.GTEMP2WGI) THEN
    INI=SIZE(XWSAT,1)
    DO JP=1,NPATCH
       DO JL=1,NGROUND_LAYER
@@ -253,11 +268,12 @@ IF (CISBA == 'DIF') THEN
 !
 !             soil liquid water content computation
 !             w=wsat*(psi/mpotsat)**(-1/bcoef)
-              ZMATPOT       = ZMATPOT + XLMTT*MIN(0.0,XTG(JJ,JL,JP)-XTT)/(XG*XTG(JJ,JL,JP))        
+              ZMATPOT       = MIN(XMPOTSAT(JJ,JL),XLMTT*(XTG(JJ,JL,JP)-XTT)/(XG*XTG(JJ,JL,JP)))
               ZWORK         = MAX(1.0,ZMATPOT/XMPOTSAT(JJ,JL))
               ZLOG          = LOG(ZWORK)
-              XWG(JJ,JL,JP) = XWSAT(JJ,JL)*EXP(-ZLOG/XBCOEF(JJ,JL))
-              XWG(JJ,JL,JP) = MAX(XWGMIN,XWG(JJ,JL,JP))
+              ZWL           = XWSAT(JJ,JL)*EXP(-ZLOG/XBCOEF(JJ,JL))
+              ZWL           = MAX(ZWL,XWGMIN)
+              XWG(JJ,JL,JP) = MIN(ZWL,ZWTOT )
 !        
 !             soil ice computation    
               XWGI(JJ,JL,JP) = MAX(0.0,ZWTOT-XWG(JJ,JL,JP))
@@ -299,7 +315,7 @@ ALLOCATE(XDIR_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 ALLOCATE(XSCA_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 XDIR_ALB_WITH_SNOW = 0.0
 XSCA_ALB_WITH_SNOW = 0.0
- CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
+CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
                                  XVEG,XZ0,XLAI,XTG(:,1,:),               &
                                  XPATCH, ZSW_BANDS,                      &
                                  XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &
@@ -308,7 +324,7 @@ XSCA_ALB_WITH_SNOW = 0.0
                                  TSNOW,                                  &
                                  ZALBNIR,ZALBVIS,ZALBUV,                 &
                                  ZDIR_ALB, ZSCA_ALB,                     &
-                                 ZEMIS,XTSRAD_NAT                        )  
+                                 ZEMIS,XTSRAD_NAT,ZTSURF                 )  
 DEALLOCATE(XPSN)
 DEALLOCATE(XPSNG)
 DEALLOCATE(XPSNV)
@@ -334,15 +350,15 @@ IF (CPHOTO /= 'NON') THEN
    ALLOCATE(XLE(SIZE(XLAI,1),SIZE(XLAI,2)))
    XLE = 0.
 !
+   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
+   XRESP_BIOMASS(:,:,:) = 0.
+!
 ENDIF
 !
 IF (CPHOTO == 'AGS' .OR. CPHOTO == 'AST') THEN
 !
    ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XBIOMASS(:,1,:) = 0.
-!
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
+   XBIOMASS(:,:,:) = 0.
 !
 ELSEIF (CPHOTO == 'LAI' .OR. CPHOTO == 'LST') THEN
 !
@@ -353,23 +369,9 @@ ELSEIF (CPHOTO == 'LAI' .OR. CPHOTO == 'LST') THEN
          XBIOMASS(:,1,:) = 0.0
    ENDWHERE
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
-!
 ELSEIF (CPHOTO == 'NIT' .OR. CPHOTO == 'NCB') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   WHERE(XLAI(:,:)/=XUNDEF)
-         XBIOMASS(:,1,:) = XLAI(:,:) * XBSLAI_NITRO(:,:)
-   ELSEWHERE
-         XBIOMASS(:,1,:) = 0.0
-   ENDWHERE
-   XBIOMASS(:,2,:) = MAX( 0., (XBIOMASS(:,1,:)/ (XCC_NIT/10.**XCA_NIT))  &
-                              **(1.0/(1.0-XCA_NIT)) - XBIOMASS(:,1,:) )  
-   XBIOMASS(:,3:NNBIOMASS,:) = 0.
-!
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
+   CALL PREP_HOR_ISBA_CC_FIELD(HPROGRAM,'BIOMASS ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)   
 !
 ENDIF
 !
@@ -379,26 +381,22 @@ ENDIF
 !
 IF (CRESPSL == 'CNT') THEN
 !
-   ALLOCATE(XLITTER(SIZE(XLAI,1),NNLITTER,NNLITTLEVS,SIZE(XLAI,2)))
-   XLITTER(:,:,:,:) = 0.
+!*      8.1    Litter
 !
-   ALLOCATE(XSOILCARB(SIZE(XLAI,1),NNSOILCARB,SIZE(XLAI,2)))
-   XSOILCARB(:,:,:) = 0.
+ CALL PREP_HOR_ISBA_CC_FIELD(HPROGRAM,'LITTER  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
-   ALLOCATE(XLIGNIN_STRUC(SIZE(XLAI,1),NNLITTLEVS,SIZE(XLAI,2)))
-   XLIGNIN_STRUC(:,:,:) = 0.
+!*      8.2    Soil carbon
+!
+ CALL PREP_HOR_ISBA_CC_FIELD(HPROGRAM,'SOILCARB',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+!
+!*      8.2    lignin
+!
+ CALL PREP_HOR_ISBA_CC_FIELD(HPROGRAM,'LIGNIN  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 ENDIF
 !
 !-------------------------------------------------------------------------------------
-!
-!*      9.     Floodplains scheme
-!
-IF(LFLOOD)THEN
-  ALLOCATE(XZ0_FLOOD(SIZE(XLAI,1),SIZE(XLAI,2)))
-  XZ0_FLOOD(:,:) = XZ0SN
-ENDIF
-!
+ CALL CLEAN_PREP_OUTPUT_GRID
 !-------------------------------------------------------------------------------------
 !
 !*      10.     Preparation of canopy air variables
@@ -406,6 +404,7 @@ ENDIF
 !
 LCANOPY = LISBA_CANOPY
 IF (LCANOPY) CALL PREP_ISBA_CANOPY()
+!
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

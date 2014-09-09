@@ -46,12 +46,11 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_ISBA(XTSTEP, XOUT_TSTEP,                            &
                      CROUGH,CRUNOFF,CALBEDO,CSCOND,              &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
-                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
-                     CTOPREG, CRAIN, CHORT, LFLOOD, LTRIP,       &
-                     LGLACIER, LCANOPY_DRAG, LVEGUPD,            &
-                     LSPINUPCARBS, LSPINUPCARBW,                 &
-                     XSPINMAXS, XSPINMAXW,                       &
-                     NNBYEARSPINS, NNBYEARSPINW                  )
+                     CCPSURF, XCGMAX, XCDRAG, CKSAT, LSOC,       &
+                     CRAIN, CHORT, LGLACIER, LCANOPY_DRAG,       &
+                     LVEGUPD, LSPINUPCARBS, LSPINUPCARBW,        &
+                     XSPINMAXS, XSPINMAXW, XCO2_START, XCO2_END, &
+                     NNBYEARSPINS, NNBYEARSPINW, LNITRO_DILU     )
 !
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX) 

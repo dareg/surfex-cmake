@@ -77,6 +77,10 @@ REAL, PARAMETER       :: XCONDQRTZ = 7.7    ! W/(m K)  Quartz thermal conductivi
 REAL, PARAMETER       :: XCONDOTH1 = 2.0    ! W/(m K)  Other thermal conductivity
 REAL, PARAMETER       :: XCONDOTH2 = 3.0    ! W/(m K)  Other thermal conductivity
 REAL, PARAMETER       :: XCONDWTR  = 0.57   ! W/(m K)  Water thermal conductivity
+!                        
+! Maximum depth of the water table for soil thermal computation
+!
+REAL, PARAMETER       :: XWTD_MAXDEPTH = 100. !m
 !
 !--------------------------------------------------------------------------------
 ! Vegetation radiative properties
@@ -89,7 +93,7 @@ REAL, PARAMETER       :: XRED_EDGE = 0.0000007  ! (m)   0.7 micro-m
 !                        
 ! Wavelength between visible and UV parts of the solar spectra
 !
-REAL, PARAMETER       :: XUV_EDGE  = 0.00000025 ! (m)   0.1 micro-m
+REAL, PARAMETER       :: XUV_EDGE  = 0.0000002  ! (m)   0.1 micro-m
 !
 !--------------------------------------------------------------------------------
 ! Soil geometry if DF option

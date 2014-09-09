@@ -25,6 +25,8 @@ SUBROUTINE DIAG_EVAP_ISBA_n(HPHOTO,PTSTEP,KMASK,KSIZE,KPATCH,PRHOA)
 !!      B. Decharme    2012      New snow diag LESL
 !!                               Add carbon fluxes diag
 !!                               Add isba water budget diag
+!!      B. Decharme  04/2013     add Subsurface runoff if SGH (DIF option only) 
+!!                               add sublimation
 !!------------------------------------------------------------------
 !
 USE MODD_ISBA_n,              ONLY : LGLACIER, CPHOTO, TSNOW
@@ -33,7 +35,8 @@ USE MODD_PACK_ISBA,           ONLY : XP_LE
 USE MODD_PACK_DIAG_ISBA,      ONLY : XP_RN, XP_H, XP_GFLUX, XP_LEI,  &
                                        XP_LEG, XP_LEGI, XP_LEV,      &
                                        XP_LES, XP_LER, XP_LETR,      &
-                                       XP_EVAP, XP_DRAIN, XP_RUNOFF, &
+                                       XP_EVAP, XP_SUBL, XP_SNDRIFT, &
+                                       XP_DRAIN, XP_RUNOFF,          &
                                        XP_HORT, XP_MELT, XP_DRIP,    &
                                        XP_IFLOOD, XP_PFLOOD,         &
                                        XP_LE_FLOOD, XP_SWD, XP_SWU,  &
@@ -43,19 +46,19 @@ USE MODD_PACK_DIAG_ISBA,      ONLY : XP_RN, XP_H, XP_GFLUX, XP_LEI,  &
                                        XP_IRRIG_FLUX, XP_GPP,        &
                                        XP_RESP_AUTO, XP_RESP_ECO,    &
                                        XP_DWG,XP_DWGI,XP_DWR,        &
-                                       XP_DSWE,XP_WATBUD                                       
+                                       XP_DSWE, XP_WATBUD, XP_QSB                                       
 
 USE MODD_DIAG_EVAP_ISBA_n,    ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC,    &
                                        LWATER_BUDGET,                     &
                                        XLEG, XLEGI, XLEV, XLES, XLESL,    &
-                                       XLER, XLETR, XEVAP, XDRAIN,        &
-                                       XRUNOFF, XHORT, XMELT, XDRIP,      &
+                                       XLER, XLETR, XEVAP, XSUBL, XDRAIN, &
+                                       XQSB, XRUNOFF, XHORT, XMELT, XDRIP,&
                                        XRRVEG, XRNC, XHC, XLEC, XGFLUXC,  &
                                        XLEGC, XLEGIC, XLEVC, XLESC,       &
                                        XLESLC, XLERC, XLETRC, XEVAPC,     &
-                                       XLEIC, XDRAINC, XRUNOFFC, XHORTC,  &
-                                       XMELTC, XDRIPC, XRRVEGC,           &
-                                       XIFLOOD, XIFLOODC,                 &
+                                       XSUBLC, XLEIC, XDRAINC, XRUNOFFC,  &
+                                       XHORTC, XMELTC, XDRIPC, XRRVEGC,   &
+                                       XIFLOOD, XIFLOODC, XQSBC,          &
                                        XPFLOOD, XPFLOODC,                 &
                                        XLE_FLOOD, XLE_FLOODC,             &
                                        XLEI_FLOOD, XLEI_FLOODC, XICEFLUXC,&
@@ -63,7 +66,8 @@ USE MODD_DIAG_EVAP_ISBA_n,    ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC,    &
                                        XGPP, XRESP_AUTO, XRESP_ECO,       &
                                        XGPPC, XRESPC_AUTO, XRESPC_ECO,    &
                                        XDWG,XDWGI,XDWR,XDSWE,XWATBUD,     &
-                                       XDWGC,XDWGIC,XDWRC,XDSWEC,XWATBUDC
+                                       XDWGC,XDWGIC,XDWRC,XDSWEC,XWATBUDC,&
+                                       XSNDRIFT, XSNDRIFTC
 
 !
 USE MODD_DIAG_ISBA_n,         ONLY : XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC
@@ -103,7 +107,9 @@ IF (LSURF_EVAP_BUDGET) THEN
      XLER       (KMASK(JJ), KPATCH)  =  XP_LER        (JJ)
      XLETR      (KMASK(JJ), KPATCH)  =  XP_LETR       (JJ)
      XEVAP      (KMASK(JJ), KPATCH)  =  XP_EVAP       (JJ)
+     XSUBL      (KMASK(JJ), KPATCH)  =  XP_SUBL       (JJ)
      XDRAIN     (KMASK(JJ), KPATCH)  =  XP_DRAIN      (JJ)
+     XQSB       (KMASK(JJ), KPATCH)  =  XP_QSB        (JJ)
      XRUNOFF    (KMASK(JJ), KPATCH)  =  XP_RUNOFF     (JJ)
      XHORT      (KMASK(JJ), KPATCH)  =  XP_HORT       (JJ)
      XDRIP      (KMASK(JJ), KPATCH)  =  XP_DRIP       (JJ)
@@ -121,6 +127,7 @@ IF (LSURF_EVAP_BUDGET) THEN
 !cdir nodep
      DO JJ=1,KSIZE
         XLESL    (KMASK(JJ), KPATCH)  =  XP_LESL       (JJ)
+        XSNDRIFT (KMASK(JJ), KPATCH)  =  XP_SNDRIFT    (JJ)
      END DO
   END IF
   !
@@ -168,7 +175,9 @@ IF (LSURF_BUDGETC) THEN
      XLERC       (KMASK(JJ), KPATCH)  =  XLERC       (KMASK(JJ), KPATCH) + XP_LER       (JJ) * PTSTEP
      XLETRC      (KMASK(JJ), KPATCH)  =  XLETRC      (KMASK(JJ), KPATCH) + XP_LETR      (JJ) * PTSTEP
      XEVAPC      (KMASK(JJ), KPATCH)  =  XEVAPC      (KMASK(JJ), KPATCH) + XP_EVAP      (JJ) * PTSTEP
+     XSUBLC      (KMASK(JJ), KPATCH)  =  XSUBLC      (KMASK(JJ), KPATCH) + XP_SUBL      (JJ) * PTSTEP
      XDRAINC     (KMASK(JJ), KPATCH)  =  XDRAINC     (KMASK(JJ), KPATCH) + XP_DRAIN     (JJ) * PTSTEP
+     XQSBC       (KMASK(JJ), KPATCH)  =  XQSBC       (KMASK(JJ), KPATCH) + XP_QSB       (JJ) * PTSTEP
      XRUNOFFC    (KMASK(JJ), KPATCH)  =  XRUNOFFC    (KMASK(JJ), KPATCH) + XP_RUNOFF    (JJ) * PTSTEP
      XHORTC      (KMASK(JJ), KPATCH)  =  XHORTC      (KMASK(JJ), KPATCH) + XP_HORT      (JJ) * PTSTEP
      XDRIPC      (KMASK(JJ), KPATCH)  =  XDRIPC      (KMASK(JJ), KPATCH) + XP_DRIP      (JJ) * PTSTEP
@@ -192,7 +201,8 @@ IF (LSURF_BUDGETC) THEN
   IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
 !cdir nodep
      DO JJ=1,KSIZE
-        XLESLC (KMASK(JJ), KPATCH) = XLESLC (KMASK(JJ), KPATCH) + XP_LESL (JJ) * PTSTEP
+        XLESLC    (KMASK(JJ), KPATCH) = XLESLC    (KMASK(JJ), KPATCH) + XP_LESL    (JJ) * PTSTEP
+        XSNDRIFTC (KMASK(JJ), KPATCH) = XSNDRIFTC (KMASK(JJ), KPATCH) + XP_SNDRIFT (JJ) * PTSTEP
      END DO
   END IF
   !

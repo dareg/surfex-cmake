@@ -33,6 +33,7 @@
 !!      B. Decharme   06/2009 : add topographic index statistics
 !!      A.L. Gibelin 04/2009 : dimension NBIOMASS for ISBA-A-gs
 !!      B. Decharme  07/2012  : files of data for permafrost area and for SOC top and sub soil
+!!                   11/2013  : same for groundwater distribution
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -54,7 +55,7 @@ USE MODD_ISBA_n, ONLY : NPATCH, TTIME, XCOVER, XZS, CISBA, CPEDOTF,  &
                           XZ0EFFJPDIR, LCOVER, LECOCLIMAP, LCTI,     &
                           XWDRAIN, XTI_MIN, XTI_MAX, XTI_MEAN,       &
                           XTI_STD, XTI_SKEW, XSOILGRID, XPH, XFERT,  &
-                          LPERM, XPERM  
+                          LPERM, XPERM, LGW, XGW  
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 USE MODD_GR_BIOG_n,   ONLY : XISOPOT, XMONOPOT
@@ -258,7 +259,7 @@ END DO
 !
 !* Soil organic carbon profile
 !
-IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
    YRECFM='SOCP'
    CALL READ_SURF(HPROGRAM,YRECFM,LSOCP,IRESP)
 ELSE
@@ -286,7 +287,7 @@ ENDIF
 !
 !* permafrost distribution
 !
-IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
    YRECFM='PERMAFROST'
    CALL READ_SURF(HPROGRAM,YRECFM,LPERM,IRESP)
 ELSE
@@ -303,6 +304,28 @@ IF(LPERM)THEN
 ELSE
 !  
   ALLOCATE(XPERM (0))
+!
+ENDIF
+!
+!* groundwater distribution
+!
+IF (IVERSION>=8) THEN
+   YRECFM='GWKEY'
+   CALL READ_SURF(HPROGRAM,YRECFM,LGW,IRESP)
+ELSE
+   LGW=.FALSE.
+ENDIF
+!
+IF(LGW)THEN
+!  
+  ALLOCATE(XGW (NDIM))
+!
+  YRECFM='GWFRAC'
+  CALL READ_SURF(HPROGRAM,YRECFM,XGW(:),IRESP)
+!
+ELSE
+!  
+  ALLOCATE(XGW (0))
 !
 ENDIF
 !

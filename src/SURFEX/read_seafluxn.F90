@@ -35,9 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n,      ONLY : XSST, XZ0, LINTERPOL_SST, &
-                                  XPERTFLUX, LPERTFLUX, &
-                                  CINTERPOL_SST, XSST_MTH, TTIME  
+USE MODD_SEAFLUX_n,      ONLY : XSST, XZ0, LINTERPOL_SST, CINTERPOL_SST, &
+                                XPERTFLUX, LPERTFLUX,                    &
+                                XSST_MTH, TTIME, LHANDLE_SIC
+!
 USE MODD_OCEAN_n,        ONLY : LMERCATOR
 !
 USE MODI_READ_SURF
@@ -59,23 +60,26 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER           :: JMTH, INMTH
- CHARACTER(LEN=2 ) :: YMTH
+CHARACTER(LEN=2 ) :: YMTH
 !
 INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
+INTEGER           :: IVERSION       ! surface version
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 !* 1D physical dimension
 !
 IF (LHOOK) CALL DR_HOOK('READ_SEAFLUX_N',0,ZHOOK_HANDLE)
+!
 YRECFM='SIZE_SEA'
- CALL GET_TYPE_DIM_n('SEA   ',ILU)
+CALL GET_TYPE_DIM_n('SEA   ',ILU)
 !
 !*       2.     Prognostic fields:
 !               -----------------
@@ -86,10 +90,9 @@ ALLOCATE(XSST(ILU))
 !
 IF(LINTERPOL_SST)THEN
 !
-! Precedent, Current and Next Monthly SST
+! Precedent, Current and Next Monthly/annual SST
   INMTH=3
-! Precedent, Current and Next Annual Monthly SST
-  IF(CINTERPOL_SST=='ANNUAL')INMTH=14
+  IF(TRIM(CINTERPOL_SST)=='ANNUAL')INMTH=14
 !
   ALLOCATE(XSST_MTH(SIZE(XSST),INMTH))
   DO JMTH=1,INMTH
@@ -98,7 +101,7 @@ IF(LINTERPOL_SST)THEN
      CALL READ_SURF(HPROGRAM,YRECFM,XSST_MTH(:,JMTH),IRESP)
   ENDDO
 !
-  CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,XSST)
+  CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'T',XSST)
 !
 ELSE
 ! 
@@ -128,8 +131,18 @@ ENDIF
 ALLOCATE(XZ0(ILU))
 YRECFM='Z0SEA'
 XZ0(:) = 0.001
- CALL READ_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP)
+CALL READ_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP)
+!
 IF (LHOOK) CALL DR_HOOK('READ_SEAFLUX_N',1,ZHOOK_HANDLE)
 !
+!* flag to use or not the SeaIce model 
+!
+CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+IF (IVERSION <8) THEN
+   LHANDLE_SIC=.FALSE.
+ELSE
+   CALL READ_SURF(HPROGRAM,'HANDLE_SIC',LHANDLE_SIC,IRESP)
+ENDIF
+
 !------------------------------------------------------------------------------
 END SUBROUTINE READ_SEAFLUX_n

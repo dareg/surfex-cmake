@@ -3,7 +3,7 @@
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
                                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                  PEMIS,PTSRAD,                              &
+                                  PEMIS,PTSRAD,PTSURF,                       &
                                   KYEAR, KMONTH,KDAY, PTIME,                 &
                                   HATMFILE,HATMFILETYPE,                     &
                                   HTEST                                      )  
@@ -37,13 +37,14 @@
 !!      Original    01/2003
 !!      B. Decharme 08/2009 : specific treatment for water/ice in the Earth System Model 
 !!      B. Decharme 07/2011 : read pgd+prep 
+!!       B.Decharme 04/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
-USE MODD_SURF_ATM,       ONLY : LCPL_ESM
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_WATFLUX_n,      ONLY : XCOVER, XDIR_ALB, XSCA_ALB, XEMIS, XTS, XTSTEP,   &
@@ -77,7 +78,7 @@ USE MODI_READ_WATFLUX_DATE
 USE MODI_READ_NAM_PREP_WATFLUX_n
 USE MODI_INIT_CHEMICAL_n
 USE MODI_PREP_CTRL_WATFLUX
-USE MODI_UPDATE_RAD_SEAWAT
+USE MODI_UPDATE_RAD_WATER
 !
 USE MODI_READ_WATFLUX_SBL_n
 USE MODI_SET_SURFEX_FILEIN
@@ -107,6 +108,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -140,6 +142,11 @@ END IF
 !
 !         Other little things
 !
+PDIR_ALB = XUNDEF
+PSCA_ALB = XUNDEF
+PEMIS    = XUNDEF
+PTSRAD   = XUNDEF
+PTSURF   = XUNDEF
 !
 IF (LNAM_READ) THEN
  !
@@ -167,7 +174,7 @@ ENDIF
  CALL READ_WATFLUX_CONF_n(HPROGRAM)
 !
 LINTERPOL_TS=.FALSE.
-IF(LCPL_ESM)THEN       
+IF(LCPL_SEA)THEN       
 ! No TS water interpolation in Earth System Model
   CINTERPOL_TS='NONE  '
   LINTERPOL_TS=.FALSE.
@@ -257,7 +264,7 @@ ILU = SIZE(XCOVER,1)
 !*       3.     Specific fields when using earth system model (Ice temperature)
 !               ---------------------------------------------------------------
 !
-IF(LCPL_ESM)THEN
+IF(LCPL_SEAICE)THEN
   ALLOCATE(XTICE   (ILU))
   ALLOCATE(XICE_ALB(ILU))
   XTICE   (:)=XUNDEF
@@ -267,8 +274,8 @@ ELSE
   ALLOCATE(XICE_ALB(0))
 ENDIF
 !
-!*       4.     Albedo, emissivity and output radiative fields on open water and ice
-!               --------------------------------------------------------------------
+!*       4.     Albedo, emissivity and temperature fields on open water and ice
+!               ---------------------------------------------------------------
 !
 ALLOCATE(XDIR_ALB (ILU))
 ALLOCATE(XSCA_ALB (ILU))
@@ -277,8 +284,10 @@ XDIR_ALB = 0.0
 XSCA_ALB = 0.0
 XEMIS    = 0.0
 !
- CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
-                         XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
+ CALL UPDATE_RAD_WATER(CWAT_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB,&
+                       XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
+!
+PTSURF(:) = XTS(:)
 !
 !-------------------------------------------------------------------------------
 !

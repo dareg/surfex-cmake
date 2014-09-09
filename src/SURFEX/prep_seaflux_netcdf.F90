@@ -21,6 +21,7 @@ SUBROUTINE PREP_SEAFLUX_NETCDF(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2008
+!!      Modified    09/2013 : S. Senesi : extends to SSS and SIC fields 
 !!------------------------------------------------------------------
 !
 USE MODE_READ_NETCDF_MERCATOR
@@ -80,8 +81,14 @@ SELECT CASE(HSURF)
 !* 2.2 Temperature profiles
 !      --------------------
 !
-  CASE('SST    ')
-    YNCVAR='temperature'
+  CASE('SST    ','SSS    ','SIC    ')
+    IF ( HSURF == 'SST    ') THEN
+       YNCVAR='temperature'
+    ELSE IF ( HSURF == 'SSS    ') THEN
+       YNCVAR='sss'
+    ELSE IF ( HSURF == 'SIC    ') THEN
+       YNCVAR='sic'
+    END IF
     CALL PREP_NETCDF_GRID(HFILE,YNCVAR)
     CALL READ_NETCDF_SST(HFILE,YNCVAR,ZFIELD)
     ALLOCATE(PFIELD(MAX(1,NILENGTH),1))

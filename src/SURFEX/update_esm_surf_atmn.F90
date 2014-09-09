@@ -1,6 +1,6 @@
 !     #################################################################################
-SUBROUTINE UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,   &
-                                   PTRAD, PDIR_ALB, PSCA_ALB, PEMIS         )  
+SUBROUTINE UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
+                                   PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )  
 !     #################################################################################
 !
 !!****  *UPDATE_ESM_SURF_ATM_n * - Routine to update radiative properties in Earth
@@ -25,6 +25,7 @@ SUBROUTINE UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,   &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    09/2009
+!!      B. Decharme 06/2013 new coupling variables
 !!-------------------------------------------------------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -39,6 +40,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 !
 USE MODI_AVERAGE_RAD
 !
+USE MODI_AVERAGE_TSURF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -46,10 +48,9 @@ USE PARKIND1  ,ONLY : JPRB
 USE MODI_ABOR1_SFX
 !
 USE MODI_UPDATE_ESM_ISBA_n
-!
 USE MODI_UPDATE_ESM_SEAFLUX_n
-!
 USE MODI_UPDATE_ESM_WATFLUX_n
+USE MODI_UPDATE_ESM_FLAKE_n
 !
 IMPLICIT NONE
 !
@@ -65,6 +66,7 @@ REAL, DIMENSION(KI),    INTENT(OUT) :: PTRAD     ! radiative temperature        
 REAL, DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+REAL, DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 !
 !*      0.2    declarations of local variables
 !
@@ -76,6 +78,7 @@ LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is re
 REAL, DIMENSION(KI,NTILESFC) :: ZTRAD_TILE     ! radiative surface temperature
 REAL, DIMENSION(KI,NTILESFC) :: ZEMIS_TILE     ! emissivity
 REAL, DIMENSION(KI,NTILESFC) :: ZFRAC_TILE     ! fraction of each surface type
+REAL, DIMENSION(KI,NTILESFC) :: ZTSURF_TILE    ! surface effective temperature
 !
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
@@ -106,6 +109,7 @@ ZTRAD_TILE(:,:)       = XUNDEF
 ZDIR_ALB_TILE(:,:,:)  = XUNDEF
 ZSCA_ALB_TILE(:,:,:)  = XUNDEF
 ZEMIS_TILE(:,:)       = XUNDEF
+ZTSURF_TILE(:,:)      = XUNDEF
 !
 ! Fractions for each tile:
 !
@@ -179,6 +183,8 @@ ENDIF
                    ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                    PDIR_ALB,      PSCA_ALB,      PEMIS,      PTRAD       )  
 !
+ CALL AVERAGE_TSURF(ZFRAC_TILE, ZTSURF_TILE, PTSURF)
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_SURF_ATM_N',1,ZHOOK_HANDLE)
@@ -196,6 +202,7 @@ REAL, DIMENSION(KSIZE)     :: ZP_TRAD     ! radiative temperature               
 REAL, DIMENSION(KSIZE,KSW) :: ZP_DIR_ALB  ! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KSIZE,KSW) :: ZP_SCA_ALB  ! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KSIZE)     :: ZP_EMIS     ! emissivity
+REAL, DIMENSION(KSIZE)     :: ZP_TSURF    ! effective temperature                 (K)
 !
 INTEGER :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -208,6 +215,7 @@ ZP_TRAD    = XUNDEF
 ZP_DIR_ALB = XUNDEF
 ZP_SCA_ALB = XUNDEF
 ZP_EMIS    = XUNDEF
+ZP_TSURF   = XUNDEF
 !
 DO JJ=1,KSIZE
   ZP_ZENITH(JJ)     = PZENITH     (KMASK(JJ))
@@ -217,7 +225,8 @@ ENDDO
 IF (KTILE==1) THEN
   !
   IF (CSEA=='SEAFLX') THEN
-    CALL UPDATE_ESM_SEAFLUX_n(HPROGRAM,NSIZE_SEA,KSW,ZP_ZENITH,ZP_DIR_ALB,ZP_SCA_ALB,ZP_EMIS,ZP_TRAD)
+    CALL UPDATE_ESM_SEAFLUX_n(NSIZE_SEA,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+                              ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: SEA SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
   ENDIF
@@ -225,17 +234,20 @@ IF (KTILE==1) THEN
 ELSEIF (KTILE==2) THEN
   !
   IF (CWATER=='WATFLX') THEN   
-    CALL UPDATE_ESM_WATFLUX_n(HPROGRAM,NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB,ZP_SCA_ALB,ZP_EMIS,ZP_TRAD)
+    CALL UPDATE_ESM_WATFLUX_n(NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+                              ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF   )
   ELSEIF (CWATER=='FLAKE ') THEN
-    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: FLAKE SCHEME NOT YET AVAILABLE FOR EARTH SYSTEM MODEL')
+    CALL UPDATE_ESM_FLAKE_n(NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+                            ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF   )
   ELSE
-    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: SEA SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
+    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: INLAND WATER SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
   ENDIF
   !
 ELSEIF (KTILE==3) THEN
   !          
   IF (CNATURE=='ISBA') THEN   
-    CALL UPDATE_ESM_ISBA_n(HPROGRAM,NSIZE_NATURE,KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB,ZP_EMIS,ZP_TRAD)
+    CALL UPDATE_ESM_ISBA_n(NSIZE_NATURE,KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB, &
+                           ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF              )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: NATURE SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
   ENDIF
@@ -243,7 +255,7 @@ ELSEIF (KTILE==3) THEN
 !ELSEIF (KTILE==4) THEN
 !  !
 !  IF (CTOWN=='TEB   ') THEN   
-!    CALL UPDATE_ESM_TEB_n(HPROGRAM,NSIZE_SEA,KSW,ZP_ZENITH,ZP_TRAD,ZP_DIR_ALB,ZP_SCA_ALB,ZP_EMIS)
+!    CALL UPDATE_ESM_TEB_n(NSIZE_SEA,KSW,ZP_ZENITH,ZP_TRAD,ZP_DIR_ALB,ZP_SCA_ALB,ZP_EMIS,ZP_TSURF)
 !  ELSE
 !    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: TEB SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
 !  ENDIF
@@ -255,6 +267,7 @@ DO JJ=1,KSIZE
    ZDIR_ALB_TILE   (KMASK(JJ),:,KTILE)= ZP_DIR_ALB   (JJ,:)
    ZSCA_ALB_TILE   (KMASK(JJ),:,KTILE)= ZP_SCA_ALB   (JJ,:)
    ZEMIS_TILE      (KMASK(JJ),KTILE)  = ZP_EMIS      (JJ)
+   ZTSURF_TILE     (KMASK(JJ),KTILE)  = ZP_TSURF     (JJ)
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_SURF_ATM_N:TREAT_SURF',1,ZHOOK_HANDLE)

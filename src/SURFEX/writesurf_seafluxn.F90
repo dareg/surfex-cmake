@@ -28,16 +28,20 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!!      Modified    01/2014 : S. Senesi : handle seaice scheme
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n,      ONLY : XSST, XZ0, TTIME,  &
-                                  LINTERPOL_SST, XSST_MTH  
+USE MODD_SEAFLUX_n, ONLY : XSST, XZ0, TTIME, &
+                           LINTERPOL_SST,    &
+                           XSST_MTH,         &
+                           LHANDLE_SIC
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITESURF_OCEAN_n
+USE MODI_WRITESURF_SEAICE_N
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -65,7 +69,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',0,ZHOOK_HANDLE)
- CALL WRITESURF_OCEAN_n(HPROGRAM)
+!
+CALL WRITESURF_OCEAN_n(HPROGRAM)
+!
+!*       2.     Sea-ice prognostic fields:
+!               --------------------------
+!
+!* flag to tell if Sea Ice model is used
+!
+YCOMMENT='flag to handle sea ice cover'
+CALL WRITE_SURF(HPROGRAM,'HANDLE_SIC',LHANDLE_SIC,IRESP,YCOMMENT)
+!
+IF (LHANDLE_SIC) CALL WRITESURF_SEAICE_n(HPROGRAM)
 !
 !*       3.     Prognostic fields:
 !               -----------------

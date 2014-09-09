@@ -52,7 +52,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'SEA   ')
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
  CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
@@ -76,6 +76,13 @@ SELECT CASE(HSURF)
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'SEA   ')
     CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+!
+!*      5.  Sea surface salinity and ice fraction
+!           -------------------------------------
+!
+  CASE('SSS    ','SIC    ')
+    ALLOCATE(PFIELD(INI,1))
+    PFIELD = 0.0
 !
 !---------------------------------------------------------------------------------------
 END SELECT

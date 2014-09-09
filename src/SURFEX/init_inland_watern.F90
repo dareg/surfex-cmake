@@ -3,7 +3,7 @@
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
                                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                   PEMIS,PTSRAD,                              &
+                                   PEMIS,PTSRAD,PTSURF,                       &
                                    KYEAR, KMONTH,KDAY, PTIME,                 &
                                    HATMFILE,HATMFILETYPE,                     &
                                    HTEST                                      )  
@@ -35,6 +35,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003
+!!      B. Decharme  04/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -75,6 +76,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -100,20 +102,21 @@ IF (CWATER=='NONE  ') THEN
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
+  PTSURF  =XTT
 ELSE IF (CWATER=='FLUX  ') THEN
   CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,   &
                          PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
-                         PEMIS,PTSRAD,'OK'                           )  
+                         PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (CWATER=='WATFLX') THEN
   CALL INIT_WATFLUX_n(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                        PEMIS,PTSRAD,                                 &
+                        PEMIS,PTSRAD,PTSURF,                          &
                         KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK'                                          )  
 ELSE IF (CWATER=='FLAKE ') THEN
   CALL INIT_FLAKE_n(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,       &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                        PEMIS,PTSRAD,                                 &
+                        PEMIS,PTSRAD,PTSURF,                          &
                         KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK')          
 END IF

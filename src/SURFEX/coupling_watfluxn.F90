@@ -1,10 +1,10 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING,                                         &
+SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                                   &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  HTEST                                                                       )  
@@ -35,12 +35,15 @@ SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING,                              
 !                           the energy budget between surfex and the atmosphere 
 !!      B. Decharme 01/2010 Add XTT
 !!      B. Decharme 09/2012 New wind implicitation
+!!      P. LeMoigne 04/2013 Wind implicitation displaced
+!!      B. Decharme  04/2013 new coupling variables
 !!----------------------------------------------------------------------------
 !
+USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XTT, XDAY, XTTS
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM,   ONLY : LCPL_ESM, CIMPLICIT_WIND
+USE MODD_SFX_OASIS,  ONLY : LCPL_SEAICE
 USE MODD_WATER_PAR
 !
 USE MODD_WATFLUX_n,    ONLY : CWAT_ALB,XTS, XZ0, XDIR_ALB, XSCA_ALB, XEMIS, TTIME, &
@@ -55,7 +58,7 @@ USE MODI_DIAG_INLINE_WATFLUX_n
 USE MODI_CH_AER_DEP
 USE MODI_CH_DEP_WATER
 USE MODI_DSLT_DEP
-USE MODI_UPDATE_RAD_SEAWAT
+USE MODI_UPDATE_RAD_WATER
 USE MODI_INTERPOL_TS_WATER_MTH
 !
 USE MODE_DSLT_SURF
@@ -79,6 +82,7 @@ IMPLICIT NONE
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
+REAL,                INTENT(IN)  :: PTIMEC    ! cumulated time since beginning of simulation
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,             INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,             INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -122,13 +126,18 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                    
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients   (m2s/kg)
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I' (m/s)
@@ -151,13 +160,14 @@ REAL, DIMENSION(KI)  :: ZHU        ! Near surface relative humidity
 REAL, DIMENSION(KI)  :: ZRESA_WATER! aerodynamical resistance
 REAL, DIMENSION(KI)  :: ZUSTAR     ! friction velocity (m/s)
 REAL, DIMENSION(KI)  :: ZUSTAR2    ! square of friction velocity (m2/s2)
-REAL, DIMENSION(KI)  :: ZZ0H       ! heat roughness length over sea
+REAL, DIMENSION(KI)  :: ZZ0H       ! heat roughness length over water
 REAL, DIMENSION(KI)  :: ZQSAT      ! humidity at saturation
 REAL, DIMENSION(KI)  :: ZQA        ! specific humidity (kg/kg)
 REAL, DIMENSION(KI)  :: ZEMIS      ! Emissivity at time t
 REAL, DIMENSION(KI)  :: ZTRAD      ! Radiative temperature at time t
 REAL, DIMENSION(KI)  :: ZSFTH_ICE  ! Sea ice flux of heat
 REAL, DIMENSION(KI)  :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
+REAL, DIMENSION(KI)  :: ZWORK      ! Work array
 !
 REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t
 REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
@@ -167,7 +177,10 @@ REAL                       :: ZCONVERTFACM3_SLT, ZCONVERTFACM3_DST
 REAL                       :: ZCONVERTFACM6_SLT, ZCONVERTFACM6_DST
 !
 INTEGER                          :: ISWB       ! number of shortwave spectral bands
-INTEGER                          :: JSWB       ! loop counter on shortwave spectral bands       
+INTEGER                          :: JSWB       ! loop counter on shortwave spectral bands      
+!
+LOGICAL                    :: GHANDLE_SIC = .FALSE. ! no sea-ice model
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -194,10 +207,11 @@ ZZ0H       (:) = XUNDEF
 ZQSAT      (:) = XUNDEF
 ZEMIS      (:) = XUNDEF
 ZTRAD      (:) = XUNDEF
+ZWORK      (:) = XUNDEF
 ZDIR_ALB   (:,:) = XUNDEF
 ZSCA_ALB   (:,:) = XUNDEF
 !
-IF(LCPL_ESM)THEN
+IF(LCPL_SEAICE)THEN
   ZSFTQ_ICE(:) = XUNDEF
   ZSFTH_ICE(:) = XUNDEF
 ENDIF
@@ -220,51 +234,17 @@ ZQA(:) = PQA(:) / PRHOA(:)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 TTIME%TIME = TTIME%TIME + PTSTEP
- CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
 !
 !--------------------------------------------------------------------------------------
 ! Fluxes over water according to Charnock formulae
 !--------------------------------------------------------------------------------------
 !
 !
- CALL WATER_FLUX(XZ0, PTA, ZEXNA, PRHOA, XTS, ZEXNS, ZQA, PRAIN,           &
-                  PSNOW, XTT, ZWIND, PZREF, PUREF, PPS, ZQSAT, PSFTH, PSFTQ,&
-                  ZUSTAR, ZCD, ZCDN, ZCH, ZRI, ZRESA_WATER, ZZ0H            )  
-!
-!-------------------------------------------------------------------------------------
-! Outputs:
-!-------------------------------------------------------------------------------------
-!
-! Momentum fluxes
-!
-IF(CIMPLICIT_WIND=='OLD')THEN
-! old implicitation
-  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:)) /          &
-               (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
-ELSE
-! new implicitation
-  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*(2.*PPEW_B_COEF(:)-ZWIND(:))) /&
-               (1.0-2.0*PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
-!                   
-  ZWIND(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
-  ZWIND(:) = MAX(ZWIND(:),0.)
-!
-  WHERE(PPEW_A_COEF(:)/= 0.)
-        ZUSTAR2(:) = MAX( ( ZWIND(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
-  ENDWHERE
-!              
-ENDIF
-!
-PSFU = 0.
-PSFV = 0.
-WHERE (ZWIND(:)>0.)
-  PSFU(:) = - PRHOA(:) * ZUSTAR2(:) * PU(:) / ZWIND(:)
-  PSFV(:) = - PRHOA(:) * ZUSTAR2(:) * PV(:) / ZWIND(:)
-END WHERE
-!
-! CO2 flux
-!
-PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
+CALL WATER_FLUX(XZ0, PTA, ZEXNA, PRHOA, XTS, ZEXNS, ZQA, PRAIN,    &
+                PSNOW, XTT, ZWIND, PZREF, PUREF, PPS, GHANDLE_SIC, &
+                ZQSAT, PSFTH, PSFTQ, ZUSTAR, ZCD, ZCDN, ZCH, ZRI,  &
+                ZRESA_WATER, ZZ0H                                  )  
 !
 !-------------------------------------------------------------------------------------
 !radiative properties at t
@@ -285,10 +265,10 @@ ZTRAD  = XTS
 !(intermediate step before explicit sea and ice fluxes comutation)
 !-------------------------------------------------------------------------------------
 !
-IF(LCPL_ESM)THEN   
+IF(LCPL_SEAICE)THEN   
   CALL COUPLING_ICEFLUX_n(KI, PTA, ZEXNA, PRHOA, XTICE, ZEXNS,      &
                             ZQA, PRAIN, PSNOW, ZWIND, PZREF, PUREF, &
-                            PPS, XTS, XTTS, ZSFTH_ICE, ZSFTQ_ICE      )  
+                            PPS, XTS, XTT, ZSFTH_ICE, ZSFTQ_ICE     )  
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -356,26 +336,76 @@ IF (NSLTEQ>0) THEN
 ENDIF
 !
 !-------------------------------------------------------------------------------------
-! Inline diagnostics
+! Outputs fluxes at time t+1
+!-------------------------------------------------------------------------------------
+!
+! Momentum fluxes
+!
+IF(CIMPLICIT_WIND=='OLD')THEN
+! old implicitation
+  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*PPEW_B_COEF(:)) /          &
+               (1.0-PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
+ELSE
+! new implicitation
+  ZUSTAR2(:) = (ZCD(:)*ZWIND(:)*(2.*PPEW_B_COEF(:)-ZWIND(:))) /&
+               (1.0-2.0*PRHOA(:)*ZCD(:)*ZWIND(:)*PPEW_A_COEF(:))
+!                   
+  ZWORK(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+  ZWORK(:) = MAX(ZWORK(:),0.)
+!
+  WHERE(PPEW_A_COEF(:)/= 0.)
+        ZUSTAR2(:) = MAX( ( ZWORK(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+  ENDWHERE
+!              
+ENDIF
+!
+PSFU = 0.
+PSFV = 0.
+WHERE (ZWIND(:)>0.)
+  PSFU(:) = - PRHOA(:) * ZUSTAR2(:) * PU(:) / ZWIND(:)
+  PSFV(:) = - PRHOA(:) * ZUSTAR2(:) * PV(:) / ZWIND(:)
+END WHERE
+!
+! CO2 flux
+!
+PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
+!
+!-------------------------------------------------------------------------------------
+! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
  CALL DIAG_INLINE_WATFLUX_n(PTSTEP,PTA, XTS, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
                              PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, XZ0, ZZ0H, ZQSAT,     &
                              PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,       &
                              ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD, PRAIN, PSNOW,        &
-                             XTICE, ZSFTH_ICE, ZSFTQ_ICE                            )  
+                             XTICE, ZSFTH_ICE, ZSFTQ_ICE                            )
+!
+!-------------------------------------------------------------------------------
+! IMPOSED MONTHLY TS AT TIME t+1
+!-------------------------------------------------------------------------------
 !  
+IF (LINTERPOL_TS.AND.MOD(TTIME%TIME,XDAY) == 0.) THEN
+   CALL INTERPOL_TS_WATER_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,XTS)
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!Physical properties see by the atmosphere in order to close the energy budget 
+!between surfex and the atmosphere. All variables should be at t+1 but very 
+!difficult to do. Maybe it will be done later. However, Ts can be at time t+1
+!-------------------------------------------------------------------------------
+!
+PTSURF (:) = XTS  (:)
+PZ0    (:) = XZ0  (:)
+PZ0H   (:) = ZZ0H (:)
+PQSURF (:) = ZQSAT(:)
+!
 !-------------------------------------------------------------------------------------
 !Radiative properties at time t+1 (see by the atmosphere) in order to close
 !the energy budget between surfex and the atmosphere
 !-------------------------------------------------------------------------------------
 !
-IF (LINTERPOL_TS.AND.MOD(TTIME%TIME,XDAY) == 0.) THEN
-   CALL INTERPOL_TS_WATER_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,XTS)
-ENDIF
-!
- CALL UPDATE_RAD_SEAWAT(CWAT_ALB,XTS,PZENITH2,XTT,XEMIS,XDIR_ALB, &
-                         XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTRAD    )  
+ CALL UPDATE_RAD_WATER(CWAT_ALB,XTS,PZENITH2,XTT,XEMIS,XDIR_ALB, &
+                       XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTRAD    )  
 !
 !=======================================================================================
 !

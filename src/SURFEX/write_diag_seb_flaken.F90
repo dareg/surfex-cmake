@@ -23,23 +23,32 @@
 !!    -------------
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
-!!       V.Masson   10/2013 Adds min and max 2m parameters
+!!      P.LeMoigne    04/2013 : Add accumulated diagnostics
+!!      Modified    04/2013, P. Le Moigne: FLake chemistry
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF
-USE MODD_DIAG_FLAKE_n,  ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET,  LCOEF,   &
-                                 LSURF_VARS, XRN, XH, XLE, XLEI, XGFLUX,   &
+!
+USE MODD_DIAG_SURF_ATM_n,ONLY : LPROVAR_TO_DIAG, LRESET_BUDGETC
+!
+USE MODD_DIAG_FLAKE_n,ONLY :   N2M, LRAD_BUDGET, LSURF_BUDGET, LCOEF,    &
+                                 LSURF_VARS,                               &
+                                 XRN, XH, XLE, XLEI, XGFLUX,               &
                                  XRI, XCD, XCH, XCE, XZ0, XZ0H,            &
-                                 XT2M, XQ2M, XHU2M,                        &
-                                 XZON10M, XMER10M, XQS,                    &
+                                 XT2M, XQ2M, XHU2M, XT2M_MIN, XT2M_MAX,    &
+                                 XZON10M, XMER10M, XQS, XDIAG_TS,          &
                                  XSWD, XSWU, XLWD, XLWU, XSWBD, XSWBU,     &
-                                 XFMU, XFMV, XT2M_MIN, XT2M_MAX,           &
-                                 XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX
-
-USE MODD_CH_WATFLUX_n,  ONLY : XDEP, CCH_DRY_DEP, CCH_NAMES, NBEQ
+                                 XFMU, XFMV, LSURF_BUDGETC,                &
+                                 XRNC, XHC, XLEC, XGFLUXC, XSWDC, XSWUC,   &
+                                 XLWDC, XLWUC, XFMUC, XFMVC, XLEIC,        &
+                                 XHU2M_MIN, XHU2M_MAX, XWIND10M,           &
+                                 XWIND10M_MAX, XEVAP, XEVAPC, XSUBL,       &
+                                 XSUBLC, XALBT, XSWE
+!
+USE MODD_CH_FLAKE_n,  ONLY : XDEP, CCH_DRY_DEP, CCH_NAMES, NBEQ
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -116,6 +125,16 @@ YCOMMENT='conduction flux for water'//' (W/m2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='EVAP_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XEVAP(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='SUBL_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XSUBL(:),IRESP,HCOMMENT=YCOMMENT)
+!
 IF (LRAD_BUDGET) THEN
 !
    YRECFM='SWD_WAT'
@@ -163,6 +182,91 @@ YRECFM='FMV_WAT'
 YCOMMENT='v-component of momentum flux for water'//' (kg/ms2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XFMV(:),IRESP,HCOMMENT=YCOMMENT)
+!
+END IF
+!
+IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
+!
+  YRECFM='TALB_WAT'
+  YCOMMENT='total albedo over tile water (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XALBT(:),IRESP,HCOMMENT=YCOMMENT)
+!
+  YRECFM='WSN_WAT'
+  YCOMMENT='snow water equivalent over tile water (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSWE(:),IRESP,HCOMMENT=YCOMMENT)
+!        
+ENDIF
+!
+IF (LSURF_BUDGETC) THEN
+!
+YRECFM='RNC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XRNC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='HC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XHC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='LEC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XLEC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='LEIC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XLEIC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='GFLUXC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUXC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='EVAPC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XEVAPC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='SUBLC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XSUBLC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+IF (LRAD_BUDGET .OR. (LSURF_BUDGETC .AND. .NOT.LRESET_BUDGETC)) THEN
+!
+   YRECFM='SWDC_WAT'
+   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+   !
+   CALL WRITE_SURF(HPROGRAM,YRECFM,XSWDC(:),IRESP,HCOMMENT=YCOMMENT)
+   !
+   YRECFM='SWUC_WAT'
+   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+   !
+   CALL WRITE_SURF(HPROGRAM,YRECFM,XSWUC(:),IRESP,HCOMMENT=YCOMMENT)
+   !
+   YRECFM='LWDC_WAT'
+   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+   !
+   CALL WRITE_SURF(HPROGRAM,YRECFM,XLWDC(:),IRESP,HCOMMENT=YCOMMENT)
+   !
+   YRECFM='LWUC_WAT'
+   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+   !
+   CALL WRITE_SURF(HPROGRAM,YRECFM,XLWUC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+ENDIF
+!
+YRECFM='FMUC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/ms)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XFMUC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='FMVC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/ms)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XFMVC(:),IRESP,HCOMMENT=YCOMMENT)
 !
 END IF
 !
@@ -218,7 +322,7 @@ ENDIF
 !               -----------------------------
 !
 IF (N2M>=1) THEN
-
+!
 YRECFM='T2M_WAT'
 YCOMMENT='2 meters temperature'//' (K)'
 !
@@ -235,7 +339,7 @@ YCOMMENT='X_Y_'//YRECFM//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
 XT2M_MAX(:)=0.0
-
+!
 YRECFM='Q2M_WAT'
 YCOMMENT='2 meters specific humidity'//' (KG/KG)'
 !
@@ -267,7 +371,7 @@ YRECFM='MER10M_WAT'
 YCOMMENT='10 meters meridian wind'//' (M/S)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XMER10M(:),IRESP,HCOMMENT=YCOMMENT)
- !
+!
 YRECFM='W10M_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'
 !
@@ -288,9 +392,21 @@ END IF
 IF (NBEQ>0 .AND. CCH_DRY_DEP=="WES89 ") THEN
   DO JSV = 1,SIZE(CCH_NAMES,1)
     YRECFM='DV_WAT_'//TRIM(CCH_NAMES(JSV))
-    WRITE(YCOMMENT,'(A26)')'final dry deposition (m/s)'
+    WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_WAT_',JSV
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDEP(:,JSV),IRESP,HCOMMENT=YCOMMENT)
   END DO
+ENDIF
+!
+!
+!*       8.     prognostic variable diagnostics:
+!               --------------------------------
+!
+IF(LPROVAR_TO_DIAG)THEN
+!
+  YRECFM='TS_WATER'
+  YCOMMENT='TS_WATER (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XDIAG_TS(:),IRESP,HCOMMENT=YCOMMENT)
+!
 ENDIF
 !
 !-------------------------------------------------------------------------------

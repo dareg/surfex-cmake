@@ -11,9 +11,9 @@
                PSOILCOND,PD_G,                                           &
                PSNOWLIQ,PSNOWTEMP,PSNOWDZ,                               &
                PTHRUFAL,PGRNDFLUX,PEVAPCOR,PRNSNOW,PHSNOW,PGFLUXSNOW,    &
-               PHPSNOW,PLES3L,PLEL3L,PEVAP,PRI,                          &
-               PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,               &
-               PPERMSNOWFRAC,PZENITH,  PXLAT, PXLON,                     &
+               PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
+               PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
+               PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,                        &
                OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
                HSNOWMETAMO,HSNOWRAD) 
 !     ##########################################################################
@@ -114,6 +114,11 @@
 !!       Modified by C. Carmagnola (3/2013): 
 !!                                          * Dendricity and size replaced by the optical diameter
 !!                                          * Test of different evolution laws for the optical diameter
+!!
+!!       Modified by B. Decharme  (08/2013): Qsat as argument (needed for coupling with atm)
+!!                                           add PSNDRIFT
+!!
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -244,7 +249,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PTHRUFAL, PGRNDFLUX, PEVAPCOR
 !                                                  sink. [kg/(m2 s)]
 !
 REAL, DIMENSION(:), INTENT(OUT)      :: PRNSNOW, PHSNOW, PGFLUXSNOW, PLES3L, PLEL3L, &
-                                        PHPSNOW, PCDSNOW, PUSTAR, PEVAP 
+                                        PHPSNOW, PCDSNOW, PUSTAR, PEVAP, PSNDRIFT
 !                                      PLES3L      = evaporation heat flux from snow (W/m2)
 !                                      PLEL3L      = sublimation (W/m2)
 !                                      PHPSNOW     = heat release from rainfall (W/m2)
@@ -254,6 +259,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PRNSNOW, PHSNOW, PGFLUXSNOW, PLES3L, PLE
 !                                      PCDSNOW     = drag coefficient for momentum over snow
 !                                      PUSTAR      = friction velocity over snow (m/s)
 !                                      PEVAP       = total evaporative flux (kg/m2/s)
+!                                      PSNDRIFT    = blowing snow sublimation (kg/m2/s)
 !
 REAL, DIMENSION(:), INTENT(OUT)      :: PCHSNOW, PEMISNOW, PSNOWHMASS
 !                                      PEMISNOW    = snow surface emissivity
@@ -262,8 +268,9 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PCHSNOW, PEMISNOW, PSNOWHMASS
 !                                                    changes in snowpack (J/m2): for budget
 !                                                    calculations only.
 !
-REAL, DIMENSION(:), INTENT(OUT)      :: PRI
+REAL, DIMENSION(:), INTENT(OUT)      :: PRI, PQS
 !                                      PRI = Ridcharson number
+!                                      PQS = surface humidity
 !
 REAL, DIMENSION(:), INTENT(IN)        :: PZENITH ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)        :: PXLAT,PXLON ! LAT/LON after packing
@@ -666,10 +673,11 @@ ENDIF
 !       
 !*       5.1    Snow Compaction and Metamorphism due to snow drift
 !               ---------------
+PSNDRIFT(:) = 0.0
 IF (OSNOWDRIFT) THEN
   CALL SNOWDRIFT(PTSTEP, PVMOD, PSNOWRHO,PSNOWDZ, ZSNOW,                      &
-                 PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,INLVLS_USE,PTA,PQA,PPS,PRHOA,PZ0EFF,PUREF,&
-                 OSNOWDRIFT_SUBLIM,HSNOWMETAMO)
+                 PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,INLVLS_USE,PTA,PQA,PPS,PRHOA,&
+                 PZ0EFF,PUREF,OSNOWDRIFT_SUBLIM,HSNOWMETAMO,PSNDRIFT)
 ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -1065,8 +1073,8 @@ ENDDO
 !Control and print energy balance
 IF (GCRODEBUGPRINTBALANCE) THEN
   !
-  ZSUMMASS_FIN(IDEBUG) = SUM( PSNOWSWE (IDEBUG,1:INLVLS_USE(JJ)) )
-  ZSUMHEAT_FIN(IDEBUG) = SUM( PSNOWHEAT(IDEBUG,1:INLVLS_USE(JJ)) )
+  ZSUMMASS_FIN(IDEBUG) = SUM( PSNOWSWE (IDEBUG,1:INLVLS_USE(IDEBUG)) )
+  ZSUMHEAT_FIN(IDEBUG) = SUM( PSNOWHEAT(IDEBUG,1:INLVLS_USE(IDEBUG)) )
   !
   CALL GET_BALANCE(ZSUMMASS_INI(IDEBUG),ZSUMHEAT_INI(IDEBUG),ZSUMMASS_FIN(IDEBUG), &
                    ZSUMHEAT_FIN(IDEBUG),PSR(IDEBUG),PRR(IDEBUG),PTHRUFAL(IDEBUG),  &
@@ -1105,6 +1113,8 @@ IF (LPSTOPBALANCE) THEN
   !
 END IF
 !***************************************DEBUG OUT********************************************
+!
+PQS(:) = ZQSAT(:)
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO',1,ZHOOK_HANDLE)
 !
@@ -3904,7 +3914,7 @@ END DO
 !!
 DO JJ = 1,SIZE(PSNOW(:))
   !
-  IF ( PSR(JJ)>XUEPSI ) THEN  
+  IF ( PSR(JJ)>0.0 ) THEN  
     !    
     ! newly fallen snow characteristics:
     IF ( KNLVLS_USE(JJ)>0 ) THEN !Case of new snowfall on a previously snow-free surface 
@@ -4673,7 +4683,7 @@ END SUBROUTINE SNOWNLGRIDFRESH_1D
 SUBROUTINE SNOWDRIFT(PTSTEP,PVMOD,PSNOWRHO,PSNOWDZ,PSNOW,        &
                      PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,KNLVLS_USE, &
                      PTA,PQA,PPS,PRHOA,PZ0EFF,PUREF,             &
-                     OSNOWDRIFT_SUBLIM,HSNOWMETAMO)
+                     OSNOWDRIFT_SUBLIM,HSNOWMETAMO,PSNDRIFT      )
 !
 !!    PURPOSE
 !!    -------
@@ -4723,15 +4733,17 @@ REAL, DIMENSION(:),INTENT(IN)       :: PZ0EFF,PUREF
 !
 LOGICAL,INTENT(IN)                  :: OSNOWDRIFT_SUBLIM
 !
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
+CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO ! metamorphism scheme
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO, PSNOWDZ,PSNOWGRAN1, &
                                        PSNOWGRAN2,PSNOWHIST
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNOW
+REAL, DIMENSION(:), INTENT(OUT)     :: PSNDRIFT !blowing snow sublimation (kg/m2/s)
 !
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2
+REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZSNOWDZ1
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1))   :: ZQSATI, ZFF ! QS wrt ice, gust speed
 !
@@ -4760,6 +4772,8 @@ IF (LHOOK) CALL DR_HOOK('SNOWDRIFT',0,ZHOOK_HANDLE)
 !
 ! 0. Initialization:
 ! ------------------
+!
+ZSNOWDZ1(:) = PSNOWDZ(:,1)
 !
 DO JJ = 1,SIZE(PSNOW)
   DO JST = 1,KNLVLS_USE(JJ)
@@ -4849,6 +4863,7 @@ DO JJ=1, SIZE(PSNOW)
       ! 2 lignes ci-dessous a valider pour avoir sublim drift
       PSNOWDZ(JJ,JST) = MAX( 0.5*PSNOWDZ(JJ,JST), &
                              PSNOWDZ(JJ,JST) - MAX(0.,ZQS) * PTSTEP/XCOEF_FF/PSNOWRHO(JJ,JST) )
+      PSNDRIFT(JJ) = (ZSNOWDZ1(JJ)-PSNOWDZ(JJ,JST))*PSNOWRHO(JJ,JST)/PTSTEP
     ELSE
       ZQS = 0.
     END IF

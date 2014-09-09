@@ -32,6 +32,7 @@
 !!      Original    01/2004 
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!      C. Lebeaupin 01/2008  Add oceanic variables initialization
+!!      Modified     09/2013  S. Senesi : introduce variables for sea-ice scheme 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -42,7 +43,8 @@ USE MODN_PREP_SEAFLUX
 USE MODI_READ_PREP_SURF_ATM_CONF
 USE MODI_OCEAN_MERCATORVERGRID
 !
-USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF
+USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, &
+                              XSST_UNIF, XSSS_UNIF, XSIC_UNIF
 USE MODD_OCEAN_n, ONLY : LMERCATOR
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -90,15 +92,15 @@ IF (LHOOK) CALL DR_HOOK('READ_PREP_SEAFLUX_CONF',0,ZHOOK_HANDLE)
 HFILE = '                         '
 HFILETYPE = '      '
 !
-HFILEPGD = '                         '
+HFILEPGD = '                            '
 HFILEPGDTYPE = '      '
 !
 OUNIF     = .FALSE.
 !
 !-------------------------------------------------------------------------------
 !
-!* choice of input file
-!  --------------------
+!* Select seaflux files if they are defined
+!  -----------------------------------------
 !
 IF (LEN_TRIM(HFILE)==0 .AND. LEN_TRIM(CFILE_SEAFLX)>0 .AND. LEN_TRIM(CTYPE_SEAFLX)>0) THEN
   HFILE     = CFILE_SEAFLX
@@ -124,7 +126,15 @@ END IF
 !* Is an uniform field prescribed?
 !  ------------------------------
 !
-    OUNIF = (XSST_UNIF/=XUNDEF) 
+SELECT CASE (HVAR)
+   CASE ('SST    ') 
+      OUNIF = (XSST_UNIF/=XUNDEF) 
+   CASE ('SSS    ') 
+      OUNIF = (XSSS_UNIF/=XUNDEF) 
+   CASE ('SIC    ') 
+      OUNIF = (XSIC_UNIF/=XUNDEF) 
+END SELECT
+
 !
 !-------------------------------------------------------------------------------
 !

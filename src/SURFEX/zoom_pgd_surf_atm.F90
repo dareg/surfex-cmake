@@ -145,7 +145,7 @@ IF (NDIM_TOWN>0)                                 &
 !             ------------------------------------------
 !
 IF (NDIM_WATER>0)                                 &
-  CALL ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)  
+  CALL ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme

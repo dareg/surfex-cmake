@@ -29,6 +29,7 @@
 !!    -------------
 !!      Original    09/2003 
 !!      Modified    04/2004 by P. LeMoigne: add HACTION if ASCII mode selected
+!!    B. Decharme (03/2014) read fa file in prep
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -41,6 +42,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 #ifdef ASC
 USE MODI_CLOSE_AUX_IO_SURF_ASC
+#endif
+!
+#ifdef FA
+USE MODI_CLOSE_AUX_IO_SURF_FA
 #endif
 !
 #ifdef LFI
@@ -101,6 +106,12 @@ ENDIF
 IF (HFILETYPE=='AROME ' ) THEN
 #ifdef ARO
   CALL AROCLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+#endif
+ENDIF
+!
+IF (HFILETYPE=='FA    ' ) THEN
+#ifdef FA
+  CALL CLOSE_AUX_IO_SURF_FA(HFILE,HFILETYPE)
 #endif
 ENDIF
 !

@@ -16,6 +16,10 @@ PROGRAM OFFLINE
 !                    trouble with radiation received by wall in TEB
 ! 03/2014 E. Martin change indices names in OMP module according to GMAP changes
 ! 05/2014 B. Decharme delete trip
+!                     I5 format to print DAY
+! 04/2013 P. Lemoigne Add XDELTA_OROG to fix the maximum difference allowed between
+!                     forcing and surface file orographies if LSET_FORC_ZS=.F
+! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
@@ -55,7 +59,11 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XPET_A_COEF ,&
                             XPEQ_A_COEF ,&
                             XPET_B_COEF ,&
-                            XPEQ_B_COEF  
+                            XPEQ_B_COEF ,&
+                            XTSURF      ,&! effective temperature                  (K)
+                            XZ0         ,&! surface roughness length for momentum  (m)
+                            XZ0H        ,&! surface roughness length for heat      (m)
+                            XQSURF        ! specific humidity at surface           (kg/kg)
 !
 USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
@@ -75,7 +83,6 @@ USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE,           &
                               XSTARTW, XCOUNTW, LTIME_WRITTEN,  &
                               NSTEP_OUTPUT  
 USE MODD_WRITE_BIN,  ONLY : NWRITE
-USE MODD_SURF_ATM,   ONLY : LCPL_ESM
 !
 USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,   &
                             NINDEX, NSIZE_TASK, XTIME_NPIO_READ, XTIME_NPIO_WRITE, &
@@ -96,6 +103,8 @@ USE MODD_TOPODYN, ONLY : XTOPD_STEP, NNB_TOPD_STEP, XQTOT, XQB_RUN, XQB_DR
 !
 USE MODD_SLOPE_EFFECT, ONLY: XZS_THREAD,XZS_XY_THREAD,XSLOPANG_THREAD,&
                              XSLOPAZI_THREAD,XSURF_TRIANGLE_THREAD
+!
+USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
 !
 USE MODE_POS_SURF
 !
@@ -150,6 +159,15 @@ USE MODI_PREP_RESTART_COUPL_TOPD
 !
 USE MODI_INIT_SLOPE_PARAM
 USE MODI_SLOPE_RADIATIVE_EFFECT
+!
+USE MODI_SFX_OASIS_INIT
+USE MODI_SFX_OASIS_READ_NAM
+USE MODI_SFX_OASIS_DEF_OL
+USE MODI_SFX_OASIS_RECV_OL
+USE MODI_SFX_OASIS_SEND_OL
+USE MODI_SFX_OASIS_END
+!
+USE MODE_GLT_DIA_LU
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -228,13 +246,22 @@ INTEGER                           :: ILUOUT              ! ascii output unit num
 INTEGER                           :: ILUNAM              ! namelist unit number
 INTEGER                           :: IRET                ! error return code
 INTEGER                           :: INB 
-INTEGER                           :: INW, JNW, I2M
+INTEGER                           :: INW, JNW
  CHARACTER(LEN=14)                :: YTAG      
-LOGICAL                           :: GPGD 
 LOGICAL                           :: GFOUND              ! return logical when reading namelist
 LOGICAL                           :: GSHADOWS    
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
 REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
+!
+! Flag diag :
+!
+INTEGER                           :: I2M, IBEQ, IDSTEQ
+LOGICAL                           :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
+                                     GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GINTERPOL_SST,   &
+                                     GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,            &
+                                     GWATER_PROFILE, GINTERPOL_TS,                           &
+                                     GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,&
+                                     GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB
 !
 ! Inquiry mode arrays:
 !
@@ -251,19 +278,39 @@ INTEGER :: ISERIES, ISIZE
 !
 ! MPI variables
 !
- CHARACTER(LEN=100) :: YNAME
+CHARACTER(LEN=100) :: YNAME
+CHARACTER(LEN=10)  :: YRANK
 INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
+!
+! SFX - OASIS coupling variables
+!
+INTEGER  :: ILOCAL_COMM  ! Local communicator
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
 !
-!*     0.1.   MPI and dr_hook initializations
+!*     0.1.   MPI, OASIS, and dr_hook initializations
+!
+INFOMPI=1
+!
+#ifdef SFXOASIS
+!Must be call before DRHOOK !
+CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM)
+#else
+LOASIS   = .FALSE.
+XRUNTIME = 0.0
+#endif
 !
 #ifndef NOMPI
+IF(.NOT.LOASIS)THEN
  CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
+ IF (INFOMPI /= MPI_SUCCESS) THEN 
+    CALL ABOR1_SFX('OFFLINE: ERROR WHEN INITIALIZING MPI')
+ ENDIF
+ENDIF
 #endif
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
@@ -271,10 +318,15 @@ IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
 CSOFTWARE='OFFLINE'
 !
 #ifndef NOMPI
-NCOMM = MPI_COMM_WORLD
+IF(LOASIS)THEN
+  NCOMM=ILOCAL_COMM
+ELSE
+  NCOMM=MPI_COMM_WORLD
+ENDIF
  CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
  CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
+!
 !
 !$OMP PARALLEL
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
@@ -293,11 +345,8 @@ XTIME0 = MPI_WTIME()
 !
 !*      0.3.   Open ascii file for writing
 !
-IF (NRANK>=10) THEN
-  WRITE(YNAME,FMT='(A15,I2)') TRIM(YLUOUT),NRANK
-ELSE
-  WRITE(YNAME,FMT='(A15,I1)') TRIM(YLUOUT),NRANK
-ENDIF
+WRITE(YRANK,FMT='(I10)') NRANK
+YNAME=TRIM(YLUOUT)//ADJUSTL(YRANK)
 !
 CLUOUT_LFI =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
 CLUOUT_NC  =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
@@ -366,6 +415,10 @@ ENDIF
 !
  CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
 !
+!*      0.5.   Reads SFX - OASIS coupling namelists
+!
+CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF)
+!
 !*      0.6   Assume FA filetype consistency 
 !
 CPROGNAME = CSURF_FILETYPE
@@ -373,8 +426,6 @@ CPROGNAME = CSURF_FILETYPE
 ! --------------------------------------------------------------------------------------
 !
 !*      1.    Initializations
-!
-LCPL_ESM = .FALSE.
 !
 !       netcdf file handling
 !
@@ -415,7 +466,7 @@ IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !       splitting of the grid
 !
 GSHADOWS = LSHADOWS_SLOPE .OR. LSHADOWS_OTHER
- CALL INIT_INDEX_MPI(CSURF_FILETYPE, YALG_MPI, XIO_FRAC, GSHADOWS)
+CALL INIT_INDEX_MPI(CSURF_FILETYPE, YALG_MPI, XIO_FRAC, GSHADOWS)
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ init_index ',PLOG=XTIME_NPIO_READ)
@@ -466,6 +517,12 @@ IF ( ZTIME /= 0. .AND. MOD(ZTIME,XTSTEP_SURF) /= 0  ) THEN
    WRITE(ILUOUT,*)' INITIAL AND SURFACE TIME STEP SHOULD BE MULTIPLE', &
    NINT(ZTIME),NINT(XTSTEP_SURF)  
    CALL ABOR1_SFX('OFFLINE: INITIAL AND SURFACE TIME STEP SHOULD BE MULTIPLE')
+ENDIF
+!
+IF(LOASIS.AND.ZDURATION/=XRUNTIME)THEN
+   WRITE(ILUOUT,*)'Total simulated time given by Forcing field and OASIS namcouple are different'
+   WRITE(ILUOUT,*)'From Forcing (s) : ',ZDURATION, 'From OASIS   (s) : ',XRUNTIME
+   CALL ABOR1_SFX('OFFLINE: TOTAL SIMULATED TIME DIFFERENT BETWEEN FORCING AND OASIS')
 ENDIF
 !
 INB_STEP_ATM  = INT(ZDURATION / ZTSTEP)
@@ -522,6 +579,13 @@ ENDIF
 IDMAX=INB_LINES+1
 !effective number of readings of the forcing files
 NB_READ_FORC=CEILING(1.*(INB_STEP_ATM+1)/INB_LINES)
+!
+!     open Gelato specific diagnostic files (if requested by 
+!     Gelato wizzard user)
+!
+#if ! defined in_arpege
+CALL OPNDIA()
+#endif
 !
 !       allocate local atmospheric variables
 !
@@ -621,6 +685,7 @@ ENDIF
                      XZENITH(NINDX1SFX:NINDX2SFX),XAZIM(NINDX1SFX:NINDX2SFX),XSW_BANDS, &
                      XDIR_ALB(NINDX1SFX:NINDX2SFX,:), XSCA_ALB(NINDX1SFX:NINDX2SFX,:),  &
                      XEMIS(NINDX1SFX:NINDX2SFX), XTSRAD(NINDX1SFX:NINDX2SFX),           &
+                     XTSURF(NINDX1SFX:NINDX2SFX),                           &
                      IYEAR, IMONTH, IDAY, ZTIME,                            &
                      YATMFILE, YATMFILETYPE, YTEST                          )
 !
@@ -660,6 +725,7 @@ XTIME_COMM_READ = 0.
                        XSW_BANDS,XDIR_ALB(NINDX1SFX:NINDX2SFX,:),          &
                        XSCA_ALB(NINDX1SFX:NINDX2SFX,:),                    &
                        XEMIS(NINDX1SFX:NINDX2SFX),XTSRAD(NINDX1SFX:NINDX2SFX),   &
+                       XTSURF(NINDX1SFX:NINDX2SFX),                           &
                        IYEAR, IMONTH, IDAY, ZTIME,                   &
                        YATMFILE, YATMFILETYPE, YTEST                 )
 !
@@ -668,6 +734,12 @@ XTIME0 = MPI_WTIME()
 #endif
 !
  CALL INIT_CRODEBUG()
+!
+! * SURFEX - OASIS  grid, partitions and local field definitions
+!
+IF(LOASIS)THEN
+  CALL SFX_OASIS_DEF_OL(CSURF_FILETYPE,YALG_MPI)
+ENDIF
 !
 ! --------------------------------------------------------------------------------------
 !
@@ -761,23 +833,23 @@ DO JFORC_STEP=1,INB_STEP_ATM
     XTIME1 = MPI_WTIME()    
 #endif
     !
-    ! coherence between solar zenithal angle and radiation
-    ! when solar beam close to horizontal -> reduction of direct radiation to
-    ! the benefit of scattered radiation
-    ! when pi/2 - 0.1 < ZENITH < pi/2 - 0.05 => weight of direct to scattered radiation decreases linearly with zenith 
-    ! when pi/2 - 0.05 < ZENITH => all the direct radiation is converted to scattered radiation
-    ! coherence between solar zenithal angle and radiation
-    !
-    ZCOEF(:) = (XPI/2. - XZENITH(:) - 0.05) / 0.05
-    ZCOEF(:) = MAX(MIN(ZCOEF,1.),0.)
-    DO JLOOP=1,SIZE(XDIR_SW,2)
-      XSCA_SW(:,JLOOP) = XSCA_SW(:,JLOOP) + XDIR_SW(:,JLOOP) * (1 - ZCOEF)
-      XDIR_SW(:,JLOOP) = XDIR_SW(:,JLOOP) * ZCOEF(:)
-    ENDDO   
-    !ZSW(:) = 0.
-    !DO JLOOP=1,SIZE(XDIR_SW,2)
-    !  ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
-    !END DO    
+    IF(LADAPT_SW)THEN
+      !
+      ! coherence between solar zenithal angle and radiation
+      ! when solar beam close to horizontal -> reduction of direct radiation to
+      ! the benefit of scattered radiation
+      ! when pi/2 - 0.1 < ZENITH < pi/2 - 0.05 => weight of direct to scattered radiation decreases linearly with zenith 
+      ! when pi/2 - 0.05 < ZENITH => all the direct radiation is converted to scattered radiation
+      ! coherence between solar zenithal angle and radiation
+      !
+      ZCOEF(:) = (XPI/2. - XZENITH(:) - 0.05) / 0.05
+      ZCOEF(:) = MAX(MIN(ZCOEF,1.),0.)
+      DO JLOOP=1,SIZE(XDIR_SW,2)
+        XSCA_SW(:,JLOOP) = XSCA_SW(:,JLOOP) + XDIR_SW(:,JLOOP) * (1 - ZCOEF)
+        XDIR_SW(:,JLOOP) = XDIR_SW(:,JLOOP) * ZCOEF(:)
+      ENDDO
+      !
+    ENDIF
     !
     ! updates time
     ZTIMEC= ZTIMEC+XTSTEP_SURF
@@ -790,6 +862,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #endif   
     !
     CALL IO_BUFF_CLEAN_n
+    !
+    IF(LOASIS)THEN
+     ! Receive fields to other models proc by proc
+     CALL SFX_OASIS_RECV_OL(CSURF_FILETYPE,INI,IBANDS,ZTIMEC,       &
+                            XTSTEP_SURF,ISIZE_OMP,XZENITH,XSW_BANDS,&
+                            XTSRAD,XDIR_ALB,XSCA_ALB,XEMIS,XTSURF   )
+    ENDIF
     !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
     !
@@ -835,10 +914,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
            XSFCO2(NINDX1SFX:NINDX2SFX), XSFU(NINDX1SFX:NINDX2SFX),           &
            XSFV(NINDX1SFX:NINDX2SFX), XTSRAD(NINDX1SFX:NINDX2SFX),           &
            XDIR_ALB(NINDX1SFX:NINDX2SFX,:), XSCA_ALB(NINDX1SFX:NINDX2SFX,:), &
-           XEMIS(NINDX1SFX:NINDX2SFX), XPEW_A_COEF(NINDX1SFX:NINDX2SFX),     &
-           XPEW_B_COEF(NINDX1SFX:NINDX2SFX),XPET_A_COEF(NINDX1SFX:NINDX2SFX),&
-           XPEQ_A_COEF(NINDX1SFX:NINDX2SFX),XPET_B_COEF(NINDX1SFX:NINDX2SFX),&
-           XPEQ_B_COEF(NINDX1SFX:NINDX2SFX), YTEST     )
+           XEMIS(NINDX1SFX:NINDX2SFX),                                       &
+           XTSURF(NINDX1SFX:NINDX2SFX), XZ0(NINDX1SFX:NINDX2SFX),            &
+           XZ0H(NINDX1SFX:NINDX2SFX), XQSURF(NINDX1SFX:NINDX2SFX),           &          
+           XPEW_A_COEF(NINDX1SFX:NINDX2SFX),XPEW_B_COEF(NINDX1SFX:NINDX2SFX),&
+           XPET_A_COEF(NINDX1SFX:NINDX2SFX),XPEQ_A_COEF(NINDX1SFX:NINDX2SFX),&
+           XPET_B_COEF(NINDX1SFX:NINDX2SFX),XPEQ_B_COEF(NINDX1SFX:NINDX2SFX),&
+           YTEST                                                             )
     !
     CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
     !
@@ -851,6 +933,11 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifndef NOMPI    
     XTIME1 = MPI_WTIME()  
 #endif
+    !
+    IF(LOASIS)THEN
+     ! Send fields to other models proc by proc
+     CALL SFX_OASIS_SEND_OL(CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF,ISIZE_OMP)
+    ENDIF
     !
     ZTIME = ZTIME + XTSTEP_SURF
     CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
@@ -1098,8 +1185,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
       IF (MOD(ZTIMEC,XDAY) == 0.) THEN
 !$OMP SINGLE              
         ICOUNT = ICOUNT + 1
-        CALL WLOG_MPI('  DAY :',KLOG=ICOUNT,KLOG2=INT(ZDURATION/XDAY))
-        WRITE(*,'(A7,I4,A2,I4)')'  DAY :',ICOUNT,' /',INT(ZDURATION/XDAY)
+        CALL WLOG_MPI('SFX DAY :',KLOG=ICOUNT,KLOG2=INT(ZDURATION/XDAY))
+        WRITE(*,'(A10,I5,A2,I5)')'SFX  DAY :',ICOUNT,' /',INT(ZDURATION/XDAY)
 !$OMP END SINGLE        
       ENDIF
     ENDIF
@@ -1204,22 +1291,54 @@ IF ( LRESTART ) THEN
       CALL GOTO_SURFEX(NBLOCK,.TRUE.)
     ENDIF
     !  
+    !--------------------------------------------------  
+    !* writes prognostic variables into the restar file
+    !--------------------------------------------------  
+    !  
     CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+    !
+    !--------------------------------------------------  
+    !* writes some diags into the restar file
+    !--------------------------------------------------  
     !
     IF (LRESTART_2M) THEN
-      I2M = 1
-      GPGD = .TRUE.
+      I2M       = 1
+      GPGD_ISBA = .TRUE.
     ELSE
-      I2M = 0
-      GPGD = .FALSE.
+      I2M       = 0
+      GPGD_ISBA = .FALSE.
     ENDIF
-    CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,I2M,.FALSE.,.FALSE.,.FALSE.,&
-                          .FALSE.,0,0,.FALSE.,.FALSE.,&
-                          .FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                          GPGD,.FALSE.,.FALSE.,&
-                          .FALSE.,.FALSE.)
-    !* writes into the file
-    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+    GFRAC                  = .FALSE.
+    GDIAG_GRID             = .TRUE.
+    GSURF_BUDGET           = .FALSE.
+    GRAD_BUDGET            = .FALSE.
+    GCOEF                  = .FALSE.
+    GSURF_VARS             = .FALSE.
+    IBEQ                   = 0
+    IDSTEQ                 = 0
+    GDIAG_OCEAN            = .FALSE.
+    GDIAG_SEAICE           = .FALSE.
+    GINTERPOL_SST          = .FALSE.
+    GINTERPOL_SSS          = .FALSE.
+    GINTERPOL_SIC          = .FALSE.
+    GINTERPOL_SIT          = .FALSE.
+    GWATER_PROFILE         = .FALSE.
+    GINTERPOL_TS           = .FALSE.
+    GSURF_EVAP_BUDGET      = .FALSE.
+    GFLOOD                 = .FALSE.
+    GCH_NO_FLUX_ISBA       = .FALSE.
+    GSURF_MISC_BUDGET_ISBA = .FALSE.
+    GPGD_TEB               = .FALSE.
+    GSURF_MISC_BUDGET_TEB  = .FALSE.  
+    !
+    CALL FLAG_DIAG_UPDATE(GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
+                          GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
+                          GINTERPOL_SST, GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,&
+                          GWATER_PROFILE, GINTERPOL_TS,                              &
+                          GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
+                          GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
+    !
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
        CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
     ENDIF
@@ -1374,6 +1493,11 @@ IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOS
 IF (CFORCING_FILETYPE=='NETCDF') CALL CLOSE_FILEIN_OL
 IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
 !
+!    4'    Close Gelato specific diagnostic 
+#if ! defined in_arpege
+CALL CLSDIA()
+#endif
+!
 !
 !*    5.     Close parallelized I/O
 !            ----------------------
@@ -1383,7 +1507,7 @@ IF (NRANK==NPIO) THEN
   WRITE(ILUOUT,*) '    --------------------------'
   WRITE(ILUOUT,*) '    | OFFLINE ENDS CORRECTLY |'
   WRITE(ILUOUT,*) '    --------------------------'
-  WRITE(ILUOUT,*) ' '        
+  WRITE(ILUOUT,*) ' '
 !$OMP SINGLE
   CLOSE(ILUOUT)
 !$OMP END SINGLE  
@@ -1413,9 +1537,15 @@ IF (ASSOCIATED(XWORK2_FULL)) DEALLOCATE(XWORK2_FULL)
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',1,ZHOOK_HANDLE)
 !
+! * MPI and OASIS must be finalized after the last DR_HOOK call
+!
+IF(LOASIS)THEN
+  CALL SFX_OASIS_END
+ELSE
 #ifndef NOMPI
  CALL MPI_FINALIZE(INFOMPI)
 #endif
+ENDIF
 !
 ! --------------------------------------------------------------------------------------
 !

@@ -1,30 +1,32 @@
 !#############################################################
-SUBROUTINE INIT_VEG_PGD_n(HPROGRAM, HSURF, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH,        &
-                        PVEGTYPE, PPATCH, PVEGTYPE_PATCH, KSIZE_NATURE_P, KR_NATURE_P,  &
-                        PRM_PATCH, &
-                        ODEEPSOIL, OPHYSDOMC, PTDEEP_CLI, PGAMMAT_CLI, PTDEEP, PGAMMAT, &
-                        OAGRIP, PTHRESHOLD, KIRRINUM, OIRRIDAY, OIRRIGATE, PTHRESHOLDSPT, &
-                        HPHOTO, HINIT, OTR_ML, KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
-                        PGMES, PGC, PDMAX, PANMAX, PFZERO, PEPSO, PGAMM, PQDGAMM,   &
-                        PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,&
-                        PAH, PBH, PTAU_WOOD, PINCREASE, PTURNOVER,                  &
-                        KSV, HSV, KBEQ, HSVO, KAEREQ, KSV_CHSBEG, KSV_CHSEND,       &
-                        KSV_AERBEG, KSV_AEREND, HCH_NAMES, HAER_NAMES, KDSTEQ,      &
-                        KSV_DSTBEG, KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
-                        HDSTNAMES, HSLTNAMES, HCHEM_SURF_FILE,                      &
-                        PSFDST, PSFDSTM, PSFSLT,                                    &
-                        PAOSIP, PAOSIM, PAOSJP, PAOSJM, PHO2IP, PHO2IM, PHO2JP,     &
-                        PHO2JM, PZ0, PZ0EFFIP, PZ0EFFIM, PZ0EFFJP, PZ0EFFJM, PZ0REL,&
-                        PCLAY, PSAND, HPEDOTF,                                      &
-                        PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT,            &
-                        PTAUICE, PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PACOEF, PPCOEF, &
-                        PC4REF, PPCPS, PPLVTT, PPLSTT,                              &
-                        HSCOND, HISBA, PHCAPSOIL, PCONDDRY, PCONDSLD, HCPSURF,      &
-                        PDG, PDROOT, PDG2, PROOTFRAC, PRUNOFFD, PDZG, PDZDIF,       &
-                        PSOILWGHT, KWG_LAYER, KLAYER_HORT, KLAYER_DUN, PD_ICE,      &
-                        PKSAT_ICE, PALBNIR_DRY, PALBVIS_DRY, PALBUV_DRY,            &
-                        PALBNIR_WET, PALBVIS_WET, PALBUV_WET, PBSLAI_NITRO,         &
-                        PCE_NITRO, PCNA_NITRO, PCF_NITRO                            )  
+SUBROUTINE INIT_VEG_PGD_n(HPROGRAM, HSURF, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH, &
+                          PVEGTYPE, PPATCH, PVEGTYPE_PATCH, KSIZE_NATURE_P,           &
+                          KR_NATURE_P, PRM_PATCH,                                     &
+                          ODEEPSOIL, OPHYSDOMC, PTDEEP_CLI, PGAMMAT_CLI, PTDEEP,      &
+                          PGAMMAT, OAGRIP, PTHRESHOLD, KIRRINUM, OIRRIDAY, OIRRIGATE, &
+                          PTHRESHOLDSPT,                                              &
+                          HPHOTO, HINIT, OTR_ML, KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
+                          PGMES, PGC, PDMAX, PANMAX, PFZERO, PEPSO, PGAMM, PQDGAMM,   &
+                          PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,&
+                          PAH, PBH, PTAU_WOOD, PINCREASE, PTURNOVER,                  &
+                          KSV, HSV, KBEQ, HSVO, KAEREQ, KSV_CHSBEG, KSV_CHSEND,       &
+                          KSV_AERBEG, KSV_AEREND, HCH_NAMES, HAER_NAMES, KDSTEQ,      &
+                          KSV_DSTBEG, KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
+                          HDSTNAMES, HSLTNAMES, HCHEM_SURF_FILE,                      &
+                          PSFDST, PSFDSTM, PSFSLT,                                    &
+                          PAOSIP, PAOSIM, PAOSJP, PAOSJM, PHO2IP, PHO2IM, PHO2JP,     &
+                          PHO2JM, PZ0, PZ0EFFIP, PZ0EFFIM, PZ0EFFJP, PZ0EFFJM, PZ0REL,&
+                          PCLAY, PSAND, HPEDOTF,                                      &
+                          PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT, PWD0,      &
+                          PKANISO, HRUNOFF,                                           &
+                          PTAUICE, PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PACOEF, PPCOEF, &
+                          PC4REF, PPCPS, PPLVTT, PPLSTT,                              &
+                          HSCOND, HISBA, PHCAPSOIL, PCONDDRY, PCONDSLD, HCPSURF,      &
+                          PDG, PDROOT, PDG2, PROOTFRAC, PRUNOFFD, PDZG, PDZDIF,       &
+                          PSOILWGHT, KWG_LAYER, KLAYER_HORT, KLAYER_DUN, PD_ICE,      &
+                          PKSAT_ICE, PALBNIR_DRY, PALBVIS_DRY, PALBUV_DRY,            &
+                          PALBNIR_WET, PALBVIS_WET, PALBUV_WET, PBSLAI_NITRO,         &
+                          PCE_NITRO, PCNA_NITRO, PCF_NITRO, PFWTD, PWTD               )  
 !#############################################################
 !
 !!****  *INIT_VEG_PGD_n_n* - routine to initialize ISBA
@@ -52,6 +54,7 @@ SUBROUTINE INIT_VEG_PGD_n(HPROGRAM, HSURF, KLUOUT, KI, KPATCH, KGROUND_LAYER, KM
 !!
 !!    MODIFICATIONS
 !!    -------------
+!!      23/07/13     (Decharme) Surface / Water table depth coupling
 !!
 !-------------------------------------------------------------------------------
 !
@@ -204,6 +207,9 @@ REAL, DIMENSION(:,:), POINTER :: PBCOEF
 REAL, DIMENSION(:,:), POINTER :: PWWILT
 REAL, DIMENSION(:,:), POINTER :: PWFC
 REAL, DIMENSION(:,:), POINTER :: PWSAT
+REAL, DIMENSION(:,:), POINTER :: PWD0
+REAL, DIMENSION(:,:), POINTER :: PKANISO
+!
 REAL, DIMENSION(:), POINTER :: PTAUICE
 REAL, DIMENSION(:), POINTER :: PCGSAT
 REAL, DIMENSION(:,:), POINTER :: PC1SAT
@@ -220,6 +226,7 @@ REAL, DIMENSION(:,:), POINTER :: PPLSTT
 !
  CHARACTER(LEN=4), INTENT(IN) :: HSCOND
  CHARACTER(LEN=3), INTENT(IN) :: HISBA
+ CHARACTER(LEN=4), INTENT(IN) :: HRUNOFF
 REAL, DIMENSION(:,:), POINTER :: PHCAPSOIL
 REAL, DIMENSION(:,:), POINTER :: PCONDDRY
 REAL, DIMENSION(:,:), POINTER :: PCONDSLD
@@ -252,6 +259,9 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PCE_NITRO
 REAL, DIMENSION(:,:), INTENT(IN) :: PCNA_NITRO
 REAL, DIMENSION(:,:), INTENT(IN) :: PCF_NITRO
 !
+REAL, DIMENSION(:), POINTER :: PFWTD
+REAL, DIMENSION(:), POINTER :: PWTD
+!
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
@@ -263,6 +273,7 @@ INTEGER :: ICH     ! unit of input chemistry file
 INTEGER :: ISIZE
 !
 REAL, DIMENSION(SIZE(PCO2))       :: ZCO2  ! CO2 concentration  (kg/kg)
+!
 INTEGER, DIMENSION(:), ALLOCATABLE :: IR_NATURE_P
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -520,10 +531,10 @@ END DO
 !
 IF (HISBA=='2-L' .OR. HISBA=='3-L') THEN
   !  field capacity at hydraulic conductivity = 0.1mm/day
-  PWFC  (:,:) = WFC_FUNC  (PCLAY(:,:),PSAND(:,:),HPEDOTF)
+  PWFC(:,:) = WFC_FUNC(PCLAY(:,:),PSAND(:,:),HPEDOTF)
 ELSE IF (HISBA=='DIF') THEN
   !  field capacity at water potential = 0.33bar        
-  PWFC  (:,:) = W33_FUNC  (PCLAY(:,:),PSAND(:,:),HPEDOTF)
+  PWFC(:,:) = W33_FUNC(PCLAY(:,:),PSAND(:,:),HPEDOTF)
 END IF
 !
 PTAUICE(:) = XTAU_ICE
@@ -566,6 +577,25 @@ ELSE IF (HISBA=='DIF') THEN
   ALLOCATE(PPCOEF (0))
   !
 END IF
+!
+IF(HRUNOFF=='SGH')THEN
+!
+  ALLOCATE(PWD0   (KI,KGROUND_LAYER))
+  ALLOCATE(PKANISO(KI,KGROUND_LAYER))
+!
+  IF(HISBA=='DIF')THEN
+     PWD0(:,:) = WD0_FUNC(PCLAY(:,:),PSAND(:,:),HPEDOTF)
+  ELSE
+     PWD0(:,:) = PWWILT(:,:)
+  ENDIF
+  PKANISO(:,:) = ANISO_FUNC(PCLAY(:,:))
+!
+ELSE
+!
+  ALLOCATE(PWD0   (0,0))
+  ALLOCATE(PKANISO(0,0))
+!
+ENDIF
 !
 !*       5.2     Soil thermal characteristics:
 !               --------------------------------
@@ -626,6 +656,11 @@ IF (HISBA == 'DIF') THEN
                  KWG_LAYER, PDZG, PDZDIF, PSOILWGHT,        &
                  PRUNOFFD, KLAYER_HORT, KLAYER_DUN  )
 !
+   ALLOCATE(PFWTD(KI))
+   ALLOCATE(PWTD (KI))
+   PFWTD(:) = 0.0
+   PWTD (:) = XUNDEF
+!
 ELSE
 !    
   ALLOCATE(PDZG       (0,0,0))
@@ -639,6 +674,9 @@ ELSE
 !  
   KLAYER_DUN=2
   KLAYER_HORT=2
+!
+  ALLOCATE(PFWTD(0))
+  ALLOCATE(PWTD (0))
 !   
 ENDIF
 !

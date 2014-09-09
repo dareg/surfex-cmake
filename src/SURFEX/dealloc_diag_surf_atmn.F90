@@ -10,6 +10,7 @@
 !!    -------------
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
+!!      B.Decharme  04/2013 : new diags
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -26,7 +27,7 @@ USE MODD_DIAG_SURF_ATM_n,ONLY : XRN_TILE, XH_TILE, XLE_TILE, XGFLUX_TILE,       
                                   XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,XAVG_HU2M_MIN_ZS, &
                                   XPS,XRHOA, XDIAG_TRAD, XDIAG_EMIS,                &
                                   XAVG_ZON10M, XAVG_MER10M, XAVG_SFCO2, XAVG_LEIC,  &
-                                  XAVG_Z0, XAVG_Z0H, XRW_RAIN, XRW_SNOW,  XAVG_RNC, &
+                                  XAVG_Z0, XAVG_Z0H, XAVG_RNC,                      &
                                   XAVG_HC, XAVG_LEC, XAVG_GFLUXC, XAVG_SWDC,        &
                                   XAVG_SWUC, XAVG_LWDC, XAVG_LWUC, XAVG_FMUC,       &
                                   XAVG_FMVC, XRNC_TILE, XHC_TILE, XLEC_TILE,        &
@@ -35,8 +36,9 @@ USE MODD_DIAG_SURF_ATM_n,ONLY : XRN_TILE, XH_TILE, XLE_TILE, XGFLUX_TILE,       
                                   XAVG_T2M_MAX, XLEIC_TILE, XHU2M_MIN_TILE,         &
                                   XAVG_HU2M_MIN, XHU2M_MAX_TILE, XAVG_HU2M_MAX,     &
                                   XWIND10M_TILE, XAVG_WIND10M, XWIND10M_MAX_TILE,   &
-                                  XAVG_WIND10M_MAX  
-!
+                                  XAVG_WIND10M_MAX,                                 &  
+                                  XEVAP_TILE, XEVAPC_TILE, XAVG_EVAP, XAVG_EVAPC,   &
+                                  XSUBL_TILE, XSUBLC_TILE, XAVG_SUBL, XAVG_SUBLC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -68,6 +70,8 @@ DEALLOCATE(XH_TILE      )
 DEALLOCATE(XLE_TILE     )
 DEALLOCATE(XLEI_TILE    )
 DEALLOCATE(XGFLUX_TILE  )
+DEALLOCATE(XEVAP_TILE   )
+DEALLOCATE(XSUBL_TILE   )
 DEALLOCATE(XT2M_TILE    )
 DEALLOCATE(XTS_TILE     )
 DEALLOCATE(XT2M_MIN_TILE)
@@ -90,6 +94,8 @@ DEALLOCATE(XAVG_H      )
 DEALLOCATE(XAVG_LE     )
 DEALLOCATE(XAVG_LEI    )
 DEALLOCATE(XAVG_GFLUX  )
+DEALLOCATE(XAVG_EVAP   )
+DEALLOCATE(XAVG_SUBL   )
 DEALLOCATE(XAVG_T2M    )
 DEALLOCATE(XAVG_TS     )
 DEALLOCATE(XAVG_T2M_MIN)
@@ -110,6 +116,8 @@ DEALLOCATE(XHC_TILE      )
 DEALLOCATE(XLEC_TILE     )
 DEALLOCATE(XLEIC_TILE    )
 DEALLOCATE(XGFLUXC_TILE  )
+DEALLOCATE(XEVAPC_TILE   )
+DEALLOCATE(XSUBLC_TILE   )
 DEALLOCATE(XSWDC_TILE    )
 DEALLOCATE(XSWUC_TILE    )
 DEALLOCATE(XLWDC_TILE    )
@@ -122,15 +130,14 @@ DEALLOCATE(XAVG_HC      )
 DEALLOCATE(XAVG_LEC     )
 DEALLOCATE(XAVG_LEIC    )
 DEALLOCATE(XAVG_GFLUXC  )
+DEALLOCATE(XAVG_EVAPC   )
+DEALLOCATE(XAVG_SUBLC   )
 DEALLOCATE(XAVG_SWDC    )
 DEALLOCATE(XAVG_SWUC    )
 DEALLOCATE(XAVG_LWDC    )
 DEALLOCATE(XAVG_LWUC    )
 DEALLOCATE(XAVG_FMUC    )
 DEALLOCATE(XAVG_FMVC    )
-!
-DEALLOCATE(XRW_RAIN   )
-DEALLOCATE(XRW_SNOW   )
 !
 DEALLOCATE(XHU2M_MIN_TILE    )
 DEALLOCATE(XAVG_HU2M_MIN     )

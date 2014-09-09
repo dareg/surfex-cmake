@@ -47,14 +47,15 @@
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
-                                  NNLITTER, NNLITTLEVS, NNSOILCARB,   &
-                                  CPHOTO, CRESPSL, XTSRAD_NAT,        &
-                                  XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
-                                  XRESA, XANFM, XAN, XLE, XANDAY,     &
-                                  XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
-                                  XLITTER, XSOILCARB, XLIGNIN_STRUC,  &
-                                  LFLOOD, XZ0_FLOOD, LTEMP_ARP,       &
-                                  NTEMPLAYER_ARP, LGLACIER, XICE_STO  
+                                NNLITTER, NNLITTLEVS, NNSOILCARB,   &
+                                CISBA, CPHOTO, CRESPSL, XTSRAD_NAT, &
+                                XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
+                                XRESA, XANFM, XAN, XLE, XANDAY,     &
+                                XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
+                                XLITTER, XSOILCARB, XLIGNIN_STRUC,  &
+                                LTEMP_ARP, NTEMPLAYER_ARP,          &
+                                LGLACIER, XICE_STO
+!                          
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
                               & XAZON10M_ISBA,XAMER10M_ISBA,NIPERT,NVAR, &
                               & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR,CBIO
@@ -85,9 +86,9 @@ INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
- CHARACTER(LEN=4)  :: YLVL
+CHARACTER(LEN=4)  :: YLVL
 !
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 !
@@ -121,29 +122,34 @@ ALLOCATE(ZWORK(ILU,NPATCH))
 !
 IF(LTEMP_ARP)THEN
   IWORK=NTEMPLAYER_ARP
-ELSE
+ELSEIF(CISBA=='DIF')THEN
   IWORK=NGROUND_LAYER
+ELSE
+  IWORK=2 !Only 2 temperature layer in ISBA-FR
 ENDIF
 !
 ALLOCATE(XTG(ILU,IWORK,NPATCH))
+XTG(:,:,:)=XUNDEF
 !
 DO JL=1,IWORK
   WRITE(YLVL,'(I4)') JL
   YRECFM='TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-  XTG(:,JL,:)=ZWORK
-  ! Perturb value if requested
-  IF ( LPRT ) THEN
-    ! read in control variable
+  XTG(:,JL,:)=ZWORK(:,:)
+END DO
+!
+! Perturb value if requested
+IF ( LPRT ) THEN
+  DO JL=1,IWORK
+  ! read in control variable
     IF ( (TRIM(CVAR(NIVAR))=="TG1" .AND. JL==1) .OR. &
          (TRIM(CVAR(NIVAR))=="TG2" .AND. JL==2) ) THEN
       WHERE ( XTG(:,JL,:)/=XUNDEF )
         XTG(:,JL,:) = XTG(:,JL,:) + XTPRT(NIVAR)*XTG(:,JL,:)
       ENDWHERE
     ENDIF
-  ENDIF
-  !
-END DO
+  END DO
+ENDIF
 !
 !
 !* soil liquid and ice water contents
@@ -158,9 +164,12 @@ DO JL=1,NGROUND_LAYER
   WRITE(YLVL,'(I4)') JL
   YRECFM='WG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-   XWG(:,JL,:)=ZWORK   
-   ! Perturb value if requested
-  IF ( LPRT ) THEN
+   XWG(:,JL,:)=ZWORK(:,:)
+END DO
+!
+! Perturb value if requested
+IF ( LPRT ) THEN
+   DO JL=1,NGROUND_LAYER
     ! read in control variable
     IF ( (TRIM(CVAR(NIVAR))=="WG1" .AND. JL==1) .OR. & 
          (TRIM(CVAR(NIVAR))=="WG2" .AND. JL==2) ) THEN
@@ -168,14 +177,20 @@ DO JL=1,NGROUND_LAYER
         XWG(:,JL,:) = XWG(:,JL,:) + XTPRT(NIVAR)*XWG(:,JL,:)
       ENDWHERE
     ENDIF
-  ENDIF
-END DO
+   END DO
+ENDIF
 !
-DO JL=1,NGROUND_LAYER
+IF(CISBA=='DIF')THEN
+  IWORK=NGROUND_LAYER
+ELSE
+  IWORK=2 !Only 2 soil ice layer in ISBA-FR
+ENDIF
+!
+DO JL=1,IWORK
   WRITE(YLVL,'(I4)') JL
   YRECFM='WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-  XWGI(:,JL,:)=ZWORK
+  XWGI(:,JL,:)=ZWORK(:,:)
 END DO
 !
 !* water intercepted on leaves
@@ -184,14 +199,6 @@ ALLOCATE(XWR(ILU,NPATCH))
 !
 YRECFM = 'WR'
  CALL READ_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP)
-!
-!* roughness length of Flood water
-!
-IF(LFLOOD)THEN
-  ALLOCATE(XZ0_FLOOD(ILU,NPATCH))
-  YRECFM = 'Z0_FLOOD'
-  CALL READ_SURF(HPROGRAM,YRECFM,XZ0_FLOOD(:,:),IRESP)
-ENDIF
 !
 !* Leaf Area Index
 !
@@ -301,7 +308,7 @@ ELSEIF (CPHOTO=='LAI' .OR. CPHOTO=='LST') THEN
   XBIOMASS(:,1,:) = XBSLAI(:,:) * XLAI(:,:)
   XRESP_BIOMASS(:,:,:) = 0.
 
-ELSEIF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
+ELSEIF (CPHOTO=='NIT'.OR.CPHOTO=='NCB') THEN
   !
   XBIOMASS(:,:,:) = 0.
   DO JNBIOMASS=1,NNBIOMASS
@@ -322,14 +329,12 @@ ELSEIF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
     ENDIF     
     XBIOMASS(:,JNBIOMASS,:)=ZWORK
   END DO
-
+!
+  IWORK=0
+  IF(CPHOTO=='NCB'.OR.IVERSION<7.OR.(IVERSION==7.AND.IBUGFIX<=3))IWORK=2
+!
   XRESP_BIOMASS(:,:,:) = 0.
-  IF (CPHOTO=='NIT') THEN
-    IBSUP = NNBIOMASS
-  ELSEIF (CPHOTO=='NCB') THEN
-    IBSUP = NNBIOMASS-2
-  ENDIF
-  DO JNBIOMASS=2,IBSUP
+  DO JNBIOMASS=2,NNBIOMASS-IWORK
     WRITE(YLVL,'(I1)') JNBIOMASS
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
       YRECFM='RESPI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
@@ -354,12 +359,10 @@ ENDIF
 !
 !
 IF (CRESPSL=='CNT') THEN
+  !
   ALLOCATE(XLITTER          (ILU,NNLITTER,NNLITTLEVS,NPATCH))
   ALLOCATE(XSOILCARB        (ILU,NNSOILCARB,NPATCH))
   ALLOCATE(XLIGNIN_STRUC    (ILU,NNLITTLEVS,NPATCH))
-END IF
-!
-IF (CRESPSL=='CNT') THEN
   !
   XLITTER(:,:,:,:) = 0.
   DO JNLITTER=1,NNLITTER

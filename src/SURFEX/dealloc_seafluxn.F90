@@ -21,16 +21,16 @@ SUBROUTINE DEALLOC_SEAFLUX_n
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      Modified    09/2013 : S. Senesi : introduce sea-ice-cover ans sea-surface salinity
 !!------------------------------------------------------------------
 !
-
 !
-USE MODD_SEAFLUX_n,      ONLY : LCOVER, XCOVER, XZS, XSST, XZ0, XZ0H, &
-                                  XSEABATHY, XEMIS, XDIR_ALB, XSCA_ALB  
+USE MODD_SEAFLUX_n,      ONLY : LCOVER, XCOVER, XZS, XSST, XSSS, XSIC, XZ0, XZ0H, &
+                       XSEABATHY, XEMIS, XDIR_ALB, XSCA_ALB, TGLT, XFSIC, XFSIT  
 USE MODD_SEAFLUX_GRID_n, ONLY : XGRID_PAR, XLAT, XLON, XMESH_SIZE
 USE MODD_CH_SEAFLUX_n,   ONLY : XDEP, CCH_NAMES, CSV
-
-
+!
+USE MODI_GLTOOLS_DEALLOC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -42,16 +42,20 @@ IMPLICIT NONE
 !
 !*      0.2    declarations of local variables
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !-------------------------------------------------------------------------------------
 !
-
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
 IF (LHOOK) CALL DR_HOOK('DEALLOC_SEAFLUX_N',0,ZHOOK_HANDLE)
+!
 IF (ASSOCIATED(LCOVER ))   DEALLOCATE(LCOVER )
 IF (ASSOCIATED(XCOVER ))   DEALLOCATE(XCOVER )
 IF (ASSOCIATED(XZS    ))   DEALLOCATE(XZS    )
 IF (ASSOCIATED(XSST   ))   DEALLOCATE(XSST   )
+IF (ASSOCIATED(XSSS   ))   DEALLOCATE(XSSS   )
+IF (ASSOCIATED(XSIC   ))   DEALLOCATE(XSIC   )
+IF (ASSOCIATED(XFSIC  ))   DEALLOCATE(XFSIC  )
+IF (ASSOCIATED(XFSIT  ))   DEALLOCATE(XFSIT  )
 IF (ASSOCIATED(XZ0    ))   DEALLOCATE(XZ0    )
 IF (ASSOCIATED(XZ0H   ))   DEALLOCATE(XZ0H   )
 IF (ASSOCIATED(XSEABATHY)) DEALLOCATE(XSEABATHY)
@@ -71,6 +75,11 @@ IF (ASSOCIATED(XMESH_SIZE)) DEALLOCATE(XMESH_SIZE)
 IF(ASSOCIATED(XDEP))      DEALLOCATE(XDEP)
 IF(ASSOCIATED(CCH_NAMES)) DEALLOCATE(CCH_NAMES)
 IF(ASSOCIATED(CSV))       DEALLOCATE(CSV)
+!
+!-------------------------------------------------------------------------------------
+!
+IF (ASSOCIATED(TGLT%bat)) CALL GLTOOLS_DEALLOC(TGLT)
+!
 IF (LHOOK) CALL DR_HOOK('DEALLOC_SEAFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

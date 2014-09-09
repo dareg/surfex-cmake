@@ -1,8 +1,8 @@
 !     #########
-      SUBROUTINE DEFAULT_SEAFLUX(PTSTEP,POUT_TSTEP,HSEA_ALB,HSEA_FLUX, &
+      SUBROUTINE DEFAULT_SEAFLUX(PTSTEP,POUT_TSTEP,HSEA_ALB,HSEA_FLUX,   &
                                    OPWG, OPRECIP, OPWEBB, KGRVWAVES,     &
                                    OPROGSST, KTIME_COUPLING,             &
-                                   PICHCE, HINTERPOL_SST       )  
+                                   PICHCE, HINTERPOL_SST)  
 !     ########################################################################
 !
 !!****  *DEFAULT_SEAFLUX* - routine to set default values for the configuration for SEAFLUX scheme
@@ -32,7 +32,6 @@
 !!    -------------
 !!      Original    01/2004 
 !!      Modified    01/2006 : sea flux parameterization.
-
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -61,7 +60,7 @@ INTEGER,           INTENT(OUT) :: KGRVWAVES     ! Wave gravity in roughness leng
 LOGICAL,           INTENT(OUT) :: OPROGSST      !two-way coupling
 INTEGER,           INTENT(OUT) :: KTIME_COUPLING!coupling frequency
 REAL,              INTENT(OUT) :: PICHCE        !CE coef calculation for ECUME
- CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_SST ! Quadratic interpolation of monthly SST
+CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_SST ! Quadratic interpolation of monthly SST
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables

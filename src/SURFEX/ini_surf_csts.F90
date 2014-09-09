@@ -31,6 +31,7 @@ SUBROUTINE INI_SURF_CSTS
 !!    -------------
 !!      Original    08/2009
 !!      M Lafaysse 05/2014 : snow parameters
+!!      B. Decharme    05/13 : Add NAM_SURF_REPROD_OPER for versions reproductibility
 !!
 !-------------------------------------------------------------------------------
 !
@@ -43,8 +44,8 @@ USE MODD_WATER_PAR
 USE MODD_FLOOD_PAR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX, &
                            XAGLAMIN, XAGLAMAX, XHGLA, &
-                           XWSNV, XZ0SN, XZ0HSN, &
-                           XTAU_SMELT,&
+                           XWSNV, XZ0SN, XZ0HSN,      &
+                           XTAU_SMELT,                &
                            XALBICE1, XALBICE2, XALBICE3,&
                            XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW, &
                            XVAGING_NOGLACIER, XVAGING_GLACIER, &
@@ -55,6 +56,10 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODE_POS_SURF
 !
+USE MODD_REPROD_OPER,  ONLY : XEVERG_RSMIN, XEVERG_VEG, &
+                                   CDGAVG, CIMPLICIT_WIND,   &
+                                   CQSAT, CCHARNOCK, CDGDIF
+USE MODI_TEST_NAM_VAR_SURF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -64,12 +69,21 @@ IMPLICIT NONE
 INTEGER               :: ILUOUT    ! unit of output listing file
 INTEGER               :: ILUNAM    ! namelist file  logical unit
 LOGICAL               :: GFOUND    ! true if namelist is found
+!
+LOGICAL               :: LREPROD_OPER
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XALBWAT, XALBCOEF_TA96, XALBSCA_WAT, XEMISWAT, &
                         XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XCFFV,  &
-                        XZ0SN, XZ0HSN, XTAU_SMELT  
+                        XZ0SN, XZ0HSN, XTAU_SMELT, XALBSEAICE,         &
+                        XZ0FLOOD, XALBWATSNOW
+!
+NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
+                          CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
+                          CCHARNOCK
+!
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
@@ -82,6 +96,7 @@ NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
 ! Snow emissivity:
 !
 IF (LHOOK) CALL DR_HOOK('INI_SURF_CSTS',0,ZHOOK_HANDLE)
+!
 XEMISSN = 1.0  ! (-)
 !
 ! Minimum and maximum values of the albedo of snow:
@@ -120,7 +135,13 @@ XEMISWAT =  0.98
 !
 ! Sea ice albedo
 !
-XALBWATICE = 0.85
+XALBSEAICE = 0.71
+!
+! water ice and snow albedo
+!
+XALBWATICE = 0.40
+!
+XALBWATSNOW = 0.60
 !
 ! Sea ice emissivity
 !
@@ -168,7 +189,52 @@ XVAGING_GLACIER   = 900.
 
 ! percentage of the total pore volume to compute the max liquid water holding capacity   !Pahaut 1976
 XPERCENTAGEPORE = 0.05
-
+!
+! Roughness length for flood (m)
+!
+XZ0FLOOD = 0.0002
+!-------------------------------------------------------------------------------
+!
+! * Reproductibility for SURFEX OPER
+!
+LREPROD_OPER = .FALSE. ! default
+!
+! * Vegetation parameters for tropical forest
+!
+!XEVERG_RSMIN : old = 250. (Manzi 1993) but observations range 
+!               from 140 to 180. According to Delire et al. (1997) and 
+!               new tests over 6 local sites, 175. is recommended
+!               Should be the default after check with AROME/ALADIN
+!
+XEVERG_RSMIN = 175.  !Rsmin
+!
+!XEVERG_VEG : old = 0.99 (Manzi 1993) but according to Delire et al. (1997) and 
+!             new tests over 6 local sites, 1.0 is recommended because 0.99
+!             induces unrealistic bare soil evaporation for Tropical forest
+!             Should be the default after check with AROME/ALADIN
+!
+XEVERG_VEG   = 1.0  !Veg fraction
+!
+! * Soil depth average
+!
+CDGAVG = 'INV'
+!
+! * Soil depth with ISBA-DF
+!
+CDGDIF = 'ROOT'
+!
+! * wind implicitation option
+!
+CIMPLICIT_WIND = 'NEW'
+!
+! * qsat computation
+!
+CQSAT = 'NEW'
+!
+! * Charnock parameter
+!
+CCHARNOCK = 'NEW'
+!
 !-------------------------------------------------------------------------------
 !*	 2. User values
 !-------------------------------------------------------------------------------
@@ -183,8 +249,35 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_CSTS)
  CALL POSNAM(ILUNAM,'NAM_SURF_SNOW_CSTS',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_SNOW_CSTS)
 !
+!-------------------------------------------------------------------------------
+!*	 3. For Reproductibility or not...
+!-------------------------------------------------------------------------------
+!
+ CALL POSNAM(ILUNAM,'NAM_REPROD_OPER',GFOUND,ILUOUT)
+IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_REPROD_OPER)
+!
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CDGAVG',CDGAVG,'ARI','INV')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CDGDIF',CDGDIF,'SOIL','ROOT')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CIMPLICIT_WIND',CIMPLICIT_WIND,'NEW','OLD')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CQSAT',CIMPLICIT_WIND,'NEW','OLD')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CCHARNOCK',CIMPLICIT_WIND,'NEW','OLD')
+!
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'XEVERG_RSMIN',XEVERG_RSMIN,175.0,250.0)
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'XEVERG_VEG',XEVERG_VEG,1.0,0.99) 
+!
+IF(LREPROD_OPER)THEN
+  XEVERG_RSMIN   = 250.
+  XEVERG_VEG     = 0.99
+  CDGAVG         = 'ARI'
+  CDGDIF         = 'SOIL'
+  CQSAT          = 'OLD'
+  CCHARNOCK      = 'OLD'
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
  CALL CLOSE_NAMELIST(CPROGNAME,ILUNAM)
-
+!
 IF (LHOOK) CALL DR_HOOK('INI_SURF_CSTS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

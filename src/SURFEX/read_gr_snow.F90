@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE READ_GR_SNOW(HPROGRAM,HSURFTYPE,HPREFIX,     &
-                              KLU,KPATCH,TPSNOW,HDIR)  
+                              KLU,KPATCH,TPSNOW,HDIR,KVERSION,KBUGFIX)  
 !     ##########################################################
 !
 !!****  *READ_GR_SNOW* - routine to read snow surface fields
@@ -69,6 +69,9 @@ TYPE(SURF_SNOW)                          :: TPSNOW    ! snow characteristics
 !                                                     ! HDIR = 'A' : entire field on All processors
 !                                                     ! HDIR = 'H' : distribution on each processor
 !
+INTEGER,            INTENT(IN), OPTIONAL :: KVERSION
+INTEGER,            INTENT(IN), OPTIONAL :: KBUGFIX
+!
 !*       0.2   declarations of local variables
 !
 INTEGER             :: IRESP               ! Error code after redding
@@ -91,8 +94,16 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
 !-------------------------------------------------------------------------------
- CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
- CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+IF(PRESENT(KVERSION))THEN
+  IVERSION=KVERSION
+ELSE
+  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ENDIF
+IF(PRESENT(KBUGFIX))THEN
+  IBUGFIX=KBUGFIX
+ELSE
+  CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
+ENDIF
 !-------------------------------------------------------------------------------
 !
 !*       1.    Type of snow scheme
@@ -299,7 +310,7 @@ DO JLAYER = 1,TPSNOW%NLAYER
 !*       12.    Age parameter
 !              -------------------
 !
-  IF (TPSNOW%SCHEME=='CRO') THEN
+  IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
     IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
       WRITE(YFMT,'(A5,I1,A6)')     '(A5,A',ISURFTYPE_LEN,','//YNLAYER//')'
       WRITE(YRECFM,YFMT) 'SAGE_',HSURFTYPE,JLAYER

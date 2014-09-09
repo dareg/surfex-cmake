@@ -30,6 +30,7 @@
 !!    -------------
 !!      Original    08/2011 
 !!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
+!      B. Decharme  07/2013 ES snow grid layer can be > to 3 (default 12)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -193,16 +194,7 @@ IF (LNAM_READ) THEN
   !
   IF ( CSNOW_GR=='NON')                                         NSNOW_LAYER_GR = 0
   IF ( CSNOW_GR=='D95' .OR. CSNOW_GR=='EBA')                       NSNOW_LAYER_GR = 1
-  IF (CSNOW_GR=='3-L' .AND. NSNOW_LAYER_GR<=2) NSNOW_LAYER_GR = 3
-  !
-  IF (CSNOW_GR=='3-L' .AND. NSNOW_LAYER_GR>3) THEN
-    NSNOW_LAYER_GR = 3
-    WRITE(ILUOUT,*) '------------------------------------'
-    WRITE(ILUOUT,*) 'With ISBA-ES, number of snow layers '
-    WRITE(ILUOUT,*) 'cannot be more than 3.              '
-    WRITE(ILUOUT,*) 'So it is forced to 3 here.          '
-    WRITE(ILUOUT,*) '------------------------------------'
-  ENDIF
+  IF (CSNOW_GR=='3-L' .AND. NSNOW_LAYER_GR<=2) NSNOW_LAYER_GR = 12
   !  
   IF (NSNOW_LAYER_GR > NSNOW_LAYER_MAX) THEN
     WRITE(ILUOUT,*) '------------------------------------'

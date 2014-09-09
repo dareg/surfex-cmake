@@ -58,6 +58,7 @@ USE MODD_DIAG_MISC_ISBA_n,    ONLY : LSURF_MISC_BUDGET,                       &
                                      XFLT
 USE MODD_TYPE_SNOW
 !
+USE MODI_COMPUT_COLD_LAYERS_THICK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -108,6 +109,8 @@ REAL, DIMENSION(SIZE(PPSN))    :: ZSNOWTEMP
 REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORK
 REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORKTEMP
 !
+REAL, DIMENSION(KSIZE) :: ZALT, ZFLT
+!
 LOGICAL :: GMASK
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -115,6 +118,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
+!
 IF (LSURF_MISC_BUDGET) THEN
   !
   XP_SWI (:,:)=XUNDEF
@@ -122,8 +126,11 @@ IF (LSURF_MISC_BUDGET) THEN
   DO JJ=1,SIZE(PWG,2)
     DO JI=1,SIZE(PWG,1)
       IF(PWG (JI,JJ)/=XUNDEF)THEN    
-        XP_SWI (JI,JJ) = (PWG (JI,JJ)               - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
-        XP_TSWI(JI,JJ) = (PWG (JI,JJ) + PWGI(JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+        XP_SWI (JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+        XP_TSWI(JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+      ENDIF
+      IF(PWGI (JI,JJ)/=XUNDEF)THEN    
+        XP_TSWI(JI,JJ) = XP_TSWI(JI,JJ) +  PWGI(JI,JJ) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
       ENDIF
     ENDDO
   ENDDO
@@ -247,7 +254,14 @@ IF (LSURF_MISC_BUDGET) THEN
   ENDIF
   !
   IF(HISBA=='DIF')THEN
-    CALL COMPUT_COLD_LAYERS_THICK
+    ZALT(:)=0.0
+    ZFLT(:)=0.0
+    CALL COMPUT_COLD_LAYERS_THICK(PDG,PTG,ZALT,ZFLT)
+    DO JJ=1,KSIZE
+       JI              =  KMASK(JJ)
+       XALT(JI,KPATCH) =  ZALT(JJ) 
+       XFLT(JI,KPATCH) =  ZFLT(JJ)  
+    ENDDO
   ENDIF
   !
 END IF
@@ -264,107 +278,6 @@ IF (OAGRIP) THEN
 !
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------------
-!
-CONTAINS
-!
-SUBROUTINE COMPUT_COLD_LAYERS_THICK
-!
-! Comput active layer (ALT) and frozen layer (FLT) theaknesses 
-! using linear interpolation between two nodes :
-!       ALT = depth to zero centigrade isotherm in permafrost
-!       FLT = depth to zero centigrade isotherm in non-permafrost
-!
-USE MODD_SURF_PAR, ONLY : NUNDEF
-!
-IMPLICIT NONE
-!
-REAL, DIMENSION(KSIZE,SIZE(PDG,2)) :: ZNODE
-INTEGER, DIMENSION(KSIZE)          :: IUP_ALT, IDOWN_ALT
-INTEGER, DIMENSION(KSIZE)          :: IUP_FLT, IDOWN_FLT
-!
-REAL    :: ZTG_UP, ZTG_DOWN
-REAL    :: ZUP, ZDOWN
-REAL    :: ZALT, ZFLT, ZSLOPE
-!
-INTEGER :: JJ, JI, JL, INL
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
-IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N:COMPUT_COLD_LAYERS_THICK',0,ZHOOK_HANDLE)
-!
-INL=SIZE(PDG,2)
-!
-IUP_ALT  (:)=0
-IDOWN_ALT(:)=0
-IUP_FLT  (:)=0
-IDOWN_FLT(:)=0
-!
-!Surface soil layer
-!
-ZNODE(:,1)=0.5*PDG(:,1)
-WHERE(PTG(:,1)>XTT.AND.PTG(:,2)<=XTT.AND.PTG(:,3)<=XTT)
-      IUP_ALT  (:)=1
-      IDOWN_ALT(:)=2
-ENDWHERE
-WHERE(PTG(:,1)<XTT.AND.PTG(:,2)>=XTT.AND.PTG(:,3)>=XTT)
-      IUP_FLT  (:)=1
-      IDOWN_FLT(:)=2
-ENDWHERE
-!
-!Middle soil layer
-!
-DO JL=2,INL-1
-   DO JJ=1,KSIZE 
-      ZNODE(JJ,JL)=0.5*(PDG(JJ,JL)+PDG(JJ,JL-1))
-      IF(PTG(JJ,JL-1)>XTT.AND.PTG(JJ,JL)>XTT.AND.PTG(JJ,JL+1)<=XTT)THEN
-        IUP_ALT  (JJ)=JL
-        IDOWN_ALT(JJ)=JL+1
-      ENDIF
-      IF(PTG(JJ,JL-1)<XTT.AND.PTG(JJ,JL)<XTT.AND.PTG(JJ,JL+1)>=XTT)THEN
-        IUP_FLT  (JJ)=JL
-        IDOWN_FLT(JJ)=JL+1
-      ENDIF      
-   ENDDO
-ENDDO
-!
-!Last soil layer
-!
-ZNODE(:,INL)=0.5*(PDG(:,INL)+PDG(:,INL-1))
-WHERE(PTG(:,INL)>XTT)IDOWN_ALT(:)=NUNDEF
-WHERE(PTG(:,INL)<XTT)IDOWN_FLT(:)=NUNDEF
-!
-DO JJ=1,KSIZE
-!
-   ZALT  =0.0
-   IF(IDOWN_ALT(JJ)>0.AND.IDOWN_ALT(JJ)<=INL)THEN
-     ZTG_UP    = PTG  (JJ,IUP_ALT  (JJ))
-     ZTG_DOWN  = PTG  (JJ,IDOWN_ALT(JJ))
-     ZUP       = ZNODE(JJ,IUP_ALT  (JJ))
-     ZDOWN     = ZNODE(JJ,IDOWN_ALT(JJ))
-     ZSLOPE    = (ZUP-ZDOWN)/(ZTG_UP-ZTG_DOWN)
-     ZALT      = ZDOWN+(XTT-ZTG_DOWN)*ZSLOPE
-   ENDIF
-!
-   ZFLT  =0.0
-   IF(IDOWN_FLT(JJ)>0.AND.IDOWN_FLT(JJ)<=INL)THEN
-     ZTG_UP    = PTG  (JJ,IUP_FLT  (JJ))
-     ZTG_DOWN  = PTG  (JJ,IDOWN_FLT(JJ))
-     ZUP       = ZNODE(JJ,IUP_FLT  (JJ))
-     ZDOWN     = ZNODE(JJ,IDOWN_FLT(JJ))
-     ZSLOPE    = (ZUP-ZDOWN)/(ZTG_UP-ZTG_DOWN)
-     ZFLT      = ZDOWN+(XTT-ZTG_DOWN)*ZSLOPE
-   ENDIF
-!
-   JI              =  KMASK(JJ)
-   XALT(JI,KPATCH) =  ZALT 
-   XFLT(JI,KPATCH) =  ZFLT 
-!
-ENDDO
-!
-IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N:COMPUT_COLD_LAYERS_THICK',1,ZHOOK_HANDLE)
-!
-END SUBROUTINE COMPUT_COLD_LAYERS_THICK
 !-------------------------------------------------------------------------------------
 !
 END SUBROUTINE DIAG_MISC_ISBA_n

@@ -38,6 +38,7 @@
 !       Modified    07/2011, B.Decharme: delete write pgd fields
 !       Modified    07/2011, B.Decharme: land_use key for writing semi-prognostic variables
 !       Modified    05/2012, B.Decharme: supress LPROVAR_TO_DIAG to write prognostic fields if user want
+!       Modified    05/2013, B.Decharme: WRITESURF_PRECIP becomes WRITESURF_CPL_GCM
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -62,7 +63,7 @@ USE MODI_WRITE_GRID
 !
 USE MODI_WRITESURF_ATM_CONF_n
 USE MODI_WRITESURF_SSO_CANOPY_n
-USE MODI_WRITESURF_PRECIP_n
+USE MODI_WRITESURF_CPL_GCM_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -117,7 +118,7 @@ LSELECT=LSAVE_SELECT
 !
 IF (HWRITE/='PRE') CALL WRITESURF_SSO_CANOPY_n(HPROGRAM,(CROUGH=='BE04' .AND. .NOT. LNOWRITE_CANOPY))
 !
- CALL WRITESURF_PRECIP_n(HPROGRAM)
+ CALL WRITESURF_CPL_GCM_n(HPROGRAM)
 !
 YCOMMENT='flag for accumulated variables'
  CALL WRITE_SURF(HPROGRAM,'BUDC',LSURF_BUDGETC,IRESP,HCOMMENT=YCOMMENT)

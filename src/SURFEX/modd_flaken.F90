@@ -30,26 +30,52 @@ MODULE MODD_FLAKE_n
 !
 USE MODD_TYPE_DATE_SURF
 !
-
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
 TYPE FLAKE_t 
 !
+!-------------------------------------------------------------------------------------
 ! General surface: 
+!-------------------------------------------------------------------------------------
 !
   REAL, POINTER, DIMENSION(:) :: XZS       ! orography                     (m)
   REAL, POINTER, DIMENSION(:) :: XZ0       ! roughness length              (m)
   REAL, POINTER, DIMENSION(:) :: XUSTAR    ! air friction velocity         (m/s)
+  REAL, POINTER, DIMENSION(:) :: XEMIS     ! water surface emissivity (NOT USED BY FLAKE)
+!
   REAL, POINTER, DIMENSION(:,:) :: XCOVER  ! fraction of each ecosystem    (-)
-  LOGICAL, POINTER, DIMENSION(:):: LCOVER  ! GCOVER(i)=T --> ith cover field is not 0.
-  LOGICAL                       :: LSBL    ! T: SBL scheme within the Surface Boundary Layer
 !                                          ! F: no atmospheric layers below forcing level  
 !
-! Inland water:
-  REAL, POINTER, DIMENSION(:) :: XEMIS  ! water surface emissivity (NOT USED BY FLAKE)
-! FLake parameters
+  LOGICAL, POINTER, DIMENSION(:) :: LCOVER ! GCOVER(i)=T --> ith cover field is not 0.
+  LOGICAL                        :: LSBL   ! T: SBL scheme within the Surface Boundary Layer
+!
+!-------------------------------------------------------------------------------------
+! Date and time:
+!-------------------------------------------------------------------------------------
+!
+  TYPE (DATE_TIME)                  :: TTIME         ! current date and time
+!
+  REAL                              :: XTSTEP        ! time step
+!
+  REAL                              :: XOUT_TSTEP    ! output writing time step
+!
+!-------------------------------------------------------------------------------------
+! FLake switches
+!-------------------------------------------------------------------------------------
+!
+  LOGICAL            :: LSEDIMENTS  ! flag to use or not the bottom sediments
+  LOGICAL            :: LSKINTEMP   ! flag to use or not the skin temperature computation
+  CHARACTER(LEN=3)   :: CSNOW_FLK   ! FLake snow scheme
+  CHARACTER(LEN=5)   :: CFLK_FLUX   ! Type of flux computation
+  CHARACTER(LEN=4)   :: CFLK_ALB    ! Type of albedo
+!
+!-------------------------------------------------------------------------------------
+! FLake parameters and variables
+!-------------------------------------------------------------------------------------
+!
   REAL, POINTER, DIMENSION(:) :: XWATER_DEPTH  ! Lake depth (m)
   REAL, POINTER, DIMENSION(:) :: XWATER_FETCH  ! Lake fetch (m)
   REAL, POINTER, DIMENSION(:) :: XT_BS         ! Temperature at the outer edge of the thermally 
@@ -64,7 +90,6 @@ TYPE FLAKE_t
   REAL, POINTER, DIMENSION(:) :: XEXTCOEF_WATER ! Extinction coefficient for the water [m^{-1}]
   REAL, POINTER, DIMENSION(:) :: XEXTCOEF_ICE   ! Extinction coefficient for the ice [m^{-1}]
   REAL, POINTER, DIMENSION(:) :: XEXTCOEF_SNOW  ! Extinction coefficient for the snow [m^{-1}] 
-! Flake variables
   REAL, POINTER, DIMENSION(:) :: XT_SNOW       ! Temperature at the air-snow interface [K]    
   REAL, POINTER, DIMENSION(:) :: XT_ICE        ! Temperature at the snow-ice or air-ice 
                                                !        interface [K]
@@ -82,33 +107,21 @@ TYPE FLAKE_t
 !
   REAL, POINTER, DIMENSION(:) :: XTS  ! surface temperature  (K)
                                       ! (water or ice or snow)
-
-! Date:
 !
-  TYPE (DATE_TIME)                  :: TTIME         ! current date and time
+!-------------------------------------------------------------------------------------
+! Coupling field for Earth system model
+!-------------------------------------------------------------------------------------
 !
-! Time-step:
-!
-  REAL                              :: XTSTEP        ! time step
-!
-  REAL                              :: XOUT_TSTEP    ! output writing time step
-!
-! FLake switches
-!
-  LOGICAL            :: LSEDIMENTS  ! flag to use or not the bottom sediments
-  CHARACTER(LEN=3)   :: CSNOW_FLK   ! FLake snow scheme
-  CHARACTER(LEN=5)   :: CFLK_FLUX   ! Type of flux computation
-  CHARACTER(LEN=4)   :: CFLK_ALB    ! Type of albedo
-!
-! ECUME switches for FLake
-  LOGICAL                           :: LPRECIP     ! flag for precip correction
-  LOGICAL                           :: LPWEBB      ! flag for heat flux correction
-  REAL                              :: XICHCE      ! CE coef calculation for ECUME
+  REAL, POINTER, DIMENSION(:) :: XCPL_FLAKE_EVAP ! Evaporation for ESM coupling
+  REAL, POINTER, DIMENSION(:) :: XCPL_FLAKE_RAIN ! Rainfall for ESM coupling
+  REAL, POINTER, DIMENSION(:) :: XCPL_FLAKE_SNOW ! Snowfall for ESM coupling
 !
 END TYPE FLAKE_t
-
+!
+!-------------------------------------------------------------------------------------
+!
 TYPE(FLAKE_t), ALLOCATABLE, TARGET, SAVE :: FLAKE_MODEL(:)
-
+!
 REAL, POINTER, DIMENSION(:) :: XZS=>NULL()
 !$OMP THREADPRIVATE(XZS)
 REAL, POINTER, DIMENSION(:) :: XZ0=>NULL()
@@ -180,6 +193,8 @@ REAL, POINTER :: XOUT_TSTEP=>NULL()
 !
 LOGICAL, POINTER            :: LSEDIMENTS=>NULL()  
 !$OMP THREADPRIVATE(LSEDIMENTS)
+LOGICAL, POINTER            :: LSKINTEMP=>NULL()  
+!$OMP THREADPRIVATE(LSKINTEMP)
  CHARACTER(LEN=3),POINTER    :: CSNOW_FLK=>NULL()
 !$OMP THREADPRIVATE(CSNOW_FLK)
  CHARACTER(LEN=4),POINTER    :: CFLK_ALB=>NULL()
@@ -187,56 +202,69 @@ LOGICAL, POINTER            :: LSEDIMENTS=>NULL()
  CHARACTER(LEN=5),POINTER    :: CFLK_FLUX=>NULL()
 !$OMP THREADPRIVATE(CFLK_FLUX)
 !
-REAL, POINTER :: XICHCE=>NULL()
-!$OMP THREADPRIVATE(XICHCE)
-LOGICAL, POINTER :: LPRECIP=>NULL()
-!$OMP THREADPRIVATE(LPRECIP)
-LOGICAL, POINTER :: LPWEBB=>NULL()
-!$OMP THREADPRIVATE(LPWEBB)
-
+REAL, POINTER, DIMENSION(:) :: XCPL_FLAKE_EVAP=>NULL()
+!$OMP THREADPRIVATE(XCPL_FLAKE_EVAP)
+REAL, POINTER, DIMENSION(:) :: XCPL_FLAKE_RAIN=>NULL()
+!$OMP THREADPRIVATE(XCPL_FLAKE_RAIN)
+REAL, POINTER, DIMENSION(:) :: XCPL_FLAKE_SNOW=>NULL()
+!$OMP THREADPRIVATE(XCPL_FLAKE_SNOW)
+!
+!-------------------------------------------------------------------------------------
+!
 CONTAINS
-
+!
+!-------------------------------------------------------------------------------------
+!
 SUBROUTINE FLAKE_GOTO_MODEL(KFROM, KTO, LKFROM)
 LOGICAL, INTENT(IN) :: LKFROM
 INTEGER, INTENT(IN) :: KFROM, KTO
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! Save current state for allocated arrays
+!
 IF (LKFROM) THEN
-FLAKE_MODEL(KFROM)%XZS=>XZS
-FLAKE_MODEL(KFROM)%XZ0=>XZ0
-FLAKE_MODEL(KFROM)%XUSTAR=>XUSTAR
-FLAKE_MODEL(KFROM)%XCOVER=>XCOVER
-FLAKE_MODEL(KFROM)%LCOVER=>LCOVER
-FLAKE_MODEL(KFROM)%XEMIS=>  XEMIS
-FLAKE_MODEL(KFROM)%XWATER_DEPTH=>  XWATER_DEPTH
-FLAKE_MODEL(KFROM)%XWATER_FETCH=>  XWATER_FETCH
-FLAKE_MODEL(KFROM)%XT_BS=>         XT_BS
-FLAKE_MODEL(KFROM)%XDEPTH_BS=>     XDEPTH_BS
-FLAKE_MODEL(KFROM)%XCORIO=>        XCORIO
-FLAKE_MODEL(KFROM)%XDIR_ALB=>      XDIR_ALB
-FLAKE_MODEL(KFROM)%XSCA_ALB=>      XSCA_ALB
-FLAKE_MODEL(KFROM)%XICE_ALB=>      XICE_ALB
-FLAKE_MODEL(KFROM)%XSNOW_ALB=>     XSNOW_ALB
-FLAKE_MODEL(KFROM)%XEXTCOEF_WATER=>XEXTCOEF_WATER
-FLAKE_MODEL(KFROM)%XEXTCOEF_ICE=>  XEXTCOEF_ICE
-FLAKE_MODEL(KFROM)%XEXTCOEF_SNOW=> XEXTCOEF_SNOW
-FLAKE_MODEL(KFROM)%XT_SNOW=>       XT_SNOW
-FLAKE_MODEL(KFROM)%XT_ICE=>        XT_ICE
-FLAKE_MODEL(KFROM)%XT_MNW=>        XT_MNW
-FLAKE_MODEL(KFROM)%XT_WML=>        XT_WML
-FLAKE_MODEL(KFROM)%XT_BOT=>        XT_BOT
-FLAKE_MODEL(KFROM)%XT_B1=>         XT_B1
-FLAKE_MODEL(KFROM)%XCT=>           XCT
-FLAKE_MODEL(KFROM)%XH_SNOW=>       XH_SNOW
-FLAKE_MODEL(KFROM)%XH_ICE=>        XH_ICE
-FLAKE_MODEL(KFROM)%XH_ML=>         XH_ML
-FLAKE_MODEL(KFROM)%XH_B1=>         XH_B1            
-FLAKE_MODEL(KFROM)%XTS=>XTS
+!
+  FLAKE_MODEL(KFROM)%XZS=>XZS
+  FLAKE_MODEL(KFROM)%XZ0=>XZ0
+  FLAKE_MODEL(KFROM)%XUSTAR=>XUSTAR
+  FLAKE_MODEL(KFROM)%XCOVER=>XCOVER
+  FLAKE_MODEL(KFROM)%LCOVER=>LCOVER
+  FLAKE_MODEL(KFROM)%XEMIS=>  XEMIS
+  FLAKE_MODEL(KFROM)%XWATER_DEPTH=>  XWATER_DEPTH
+  FLAKE_MODEL(KFROM)%XWATER_FETCH=>  XWATER_FETCH
+  FLAKE_MODEL(KFROM)%XT_BS=>         XT_BS
+  FLAKE_MODEL(KFROM)%XDEPTH_BS=>     XDEPTH_BS
+  FLAKE_MODEL(KFROM)%XCORIO=>        XCORIO
+  FLAKE_MODEL(KFROM)%XDIR_ALB=>      XDIR_ALB
+  FLAKE_MODEL(KFROM)%XSCA_ALB=>      XSCA_ALB
+  FLAKE_MODEL(KFROM)%XICE_ALB=>      XICE_ALB
+  FLAKE_MODEL(KFROM)%XSNOW_ALB=>     XSNOW_ALB
+  FLAKE_MODEL(KFROM)%XEXTCOEF_WATER=>XEXTCOEF_WATER
+  FLAKE_MODEL(KFROM)%XEXTCOEF_ICE=>  XEXTCOEF_ICE
+  FLAKE_MODEL(KFROM)%XEXTCOEF_SNOW=> XEXTCOEF_SNOW
+  FLAKE_MODEL(KFROM)%XT_SNOW=>       XT_SNOW
+  FLAKE_MODEL(KFROM)%XT_ICE=>        XT_ICE
+  FLAKE_MODEL(KFROM)%XT_MNW=>        XT_MNW
+  FLAKE_MODEL(KFROM)%XT_WML=>        XT_WML
+  FLAKE_MODEL(KFROM)%XT_BOT=>        XT_BOT
+  FLAKE_MODEL(KFROM)%XT_B1=>         XT_B1
+  FLAKE_MODEL(KFROM)%XCT=>           XCT
+  FLAKE_MODEL(KFROM)%XH_SNOW=>       XH_SNOW
+  FLAKE_MODEL(KFROM)%XH_ICE=>        XH_ICE
+  FLAKE_MODEL(KFROM)%XH_ML=>         XH_ML
+  FLAKE_MODEL(KFROM)%XH_B1=>         XH_B1            
+  FLAKE_MODEL(KFROM)%XTS=>XTS
+!
+  FLAKE_MODEL(KFROM)%XCPL_FLAKE_EVAP=>XCPL_FLAKE_EVAP
+  FLAKE_MODEL(KFROM)%XCPL_FLAKE_RAIN=>XCPL_FLAKE_RAIN
+  FLAKE_MODEL(KFROM)%XCPL_FLAKE_SNOW=>XCPL_FLAKE_SNOW
+!
 ENDIF
 !
 ! Current model is set to model KTO
+!
 IF (LHOOK) CALL DR_HOOK('MODD_FLAKE_N:FLAKE_GOTO_MODEL',0,ZHOOK_HANDLE)
+!
 XZS=>FLAKE_MODEL(KTO)%XZS
 XZ0=>FLAKE_MODEL(KTO)%XZ0
 XUSTAR=>FLAKE_MODEL(KTO)%XUSTAR
@@ -273,18 +301,21 @@ XTSTEP=>FLAKE_MODEL(KTO)%XTSTEP
 XOUT_TSTEP=>FLAKE_MODEL(KTO)%XOUT_TSTEP
 !
 LSEDIMENTS=>FLAKE_MODEL(KTO)%LSEDIMENTS  
+LSKINTEMP=>FLAKE_MODEL(KTO)%LSKINTEMP  
 CSNOW_FLK=>FLAKE_MODEL(KTO)%CSNOW_FLK
 CFLK_ALB=>FLAKE_MODEL(KTO)%CFLK_ALB
 CFLK_FLUX=>FLAKE_MODEL(KTO)%CFLK_FLUX
 !
-XICHCE=>FLAKE_MODEL(KTO)%XICHCE
-LPRECIP=>FLAKE_MODEL(KTO)%LPRECIP  
-LPWEBB=>FLAKE_MODEL(KTO)%LPWEBB  
+XCPL_FLAKE_EVAP=>FLAKE_MODEL(KTO)%XCPL_FLAKE_EVAP
+XCPL_FLAKE_RAIN=>FLAKE_MODEL(KTO)%XCPL_FLAKE_RAIN
+XCPL_FLAKE_SNOW=>FLAKE_MODEL(KTO)%XCPL_FLAKE_SNOW
 !
 IF (LHOOK) CALL DR_HOOK('MODD_FLAKE_N:FLAKE_GOTO_MODEL',1,ZHOOK_HANDLE)
-
+!
 END SUBROUTINE FLAKE_GOTO_MODEL
-
+!
+!-------------------------------------------------------------------------------------
+!
 SUBROUTINE FLAKE_ALLOC(KMODEL)
 INTEGER, INTENT(IN) :: KMODEL
 INTEGER :: J
@@ -322,25 +353,30 @@ DO J=1,KMODEL
   NULLIFY(FLAKE_MODEL(J)%XH_ML)
   NULLIFY(FLAKE_MODEL(J)%XH_B1)
   NULLIFY(FLAKE_MODEL(J)%XTS)
+  NULLIFY(FLAKE_MODEL(J)%XCPL_FLAKE_EVAP)
+  NULLIFY(FLAKE_MODEL(J)%XCPL_FLAKE_RAIN)
+  NULLIFY(FLAKE_MODEL(J)%XCPL_FLAKE_SNOW)
 ENDDO
 FLAKE_MODEL(:)%LSBL=.FALSE.
 FLAKE_MODEL(:)%XTSTEP=0.
 FLAKE_MODEL(:)%XOUT_TSTEP=0.
 FLAKE_MODEL(:)%LSEDIMENTS=.FALSE.
+FLAKE_MODEL(:)%LSKINTEMP=.FALSE.
 FLAKE_MODEL(:)%CSNOW_FLK='   '
 FLAKE_MODEL(:)%CFLK_ALB='    '
 FLAKE_MODEL(:)%CFLK_FLUX='     '
-FLAKE_MODEL(:)%XICHCE=0.
-FLAKE_MODEL(:)%LPRECIP=.FALSE.
-FLAKE_MODEL(:)%LPWEBB=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_FLAKE_N:FLAKE_ALLOC",1,ZHOOK_HANDLE)
 END SUBROUTINE FLAKE_ALLOC
-
+!
+!-------------------------------------------------------------------------------------
+!
 SUBROUTINE FLAKE_DEALLO
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK("MODD_FLAKE_N:FLAKE_DEALLO",0,ZHOOK_HANDLE)
 IF (ALLOCATED(FLAKE_MODEL)) DEALLOCATE(FLAKE_MODEL)
 IF (LHOOK) CALL DR_HOOK("MODD_FLAKE_N:FLAKE_DEALLO",1,ZHOOK_HANDLE)
 END SUBROUTINE FLAKE_DEALLO
-
+!
+!-------------------------------------------------------------------------------------
+!
 END MODULE MODD_FLAKE_n

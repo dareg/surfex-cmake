@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG_ISBA_n(PHW,PHT,PSFCO2)
+      SUBROUTINE AVERAGE_DIAG_ISBA_n(PHW,PHT,PSFCO2,PTRAD)
 !     #######################################
 !
 !
@@ -35,6 +35,8 @@
 !!      A. Boone    27/11/02 revised to output ALMA variables, and general applications
 !!      B. Decharme 17/08/09 cumulative radiatif budget
 !!      V. Masson   10/2013  coherence between canopy and min/max T2M diagnostics
+!!      B. Decharme    04/13 Averaged Trad already done in average_diag.F90
+!!                           Good dimension for CO2 flux
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -59,7 +61,6 @@ USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,            &
                                XFMU, XFMV, XSWDC, XSWUC, XLWDC, XLWUC,        &
                                XFMUC, XFMVC, XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, &
                                XAVG_LWUC, XAVG_FMUC, XAVG_FMVC, XTS, XAVG_TS, &
-                               XTSRAD, XAVG_TSRAD,                            &
                                XAVG_HU2M_MIN, XAVG_HU2M_MAX, XAVG_WIND10M,    &
                                XAVG_WIND10M_MAX, XWIND10M, XAVG_SFCO2  
 !
@@ -71,9 +72,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-REAL, DIMENSION(:), INTENT(IN)       :: PHW    ! atmospheric level height for wind
-REAL, DIMENSION(:), INTENT(IN)       :: PHT    ! atmospheric level height
-REAL, DIMENSION(:), INTENT(IN)       :: PSFCO2 ! CO2 flux
+REAL, DIMENSION(:), INTENT(IN)       :: PHW    ! atmospheric level height for wind (m)
+REAL, DIMENSION(:), INTENT(IN)       :: PHT    ! atmospheric level height (m)
+REAL, DIMENSION(:), INTENT(IN)       :: PSFCO2 ! CO2 flux (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:), INTENT(IN)       :: PTRAD  ! Radiative temperature (K)
 !
 !*      0.2    declarations of local variables
 !
@@ -226,13 +228,6 @@ DO JPATCH=1,SIZE(XPATCH,2)
        XAVG_TS(:)  = XAVG_TS(:) + XPATCH(:,JPATCH) * XTS(:,JPATCH)
     END WHERE
 END DO
-XAVG_TSRAD(:) = 0.0
-DO JPATCH=1,SIZE(XPATCH,2)
-    WHERE (ZSUMPATCH(:) > 0.)
-       XAVG_TSRAD(:)  = XAVG_TSRAD(:) + XPATCH(:,JPATCH) * XTSRAD(:,JPATCH)
-    END WHERE
-END DO
-!
 !
 IF (.NOT. LCANOPY .AND. N2M>=1) THEN
 

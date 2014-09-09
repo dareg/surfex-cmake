@@ -40,7 +40,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
 USE MODD_ISBA_n,         ONLY : CISBA,XWG,XWGI,XWSAT,   &
                                 NGROUND_LAYER,LGLACIER, &
-                                TTIME
+                                XWFC,TTIME
 !
 USE MODI_SNOW_HEAT_TO_T_WLIQ
 USE MODI_SNOW_T_WLIQ_TO_HEAT
@@ -60,7 +60,11 @@ REAL, DIMENSION(:,:),  INTENT(IN):: PTG             ! soil temperature for patch
 REAL, DIMENSION(:,:),  INTENT(IN):: PPERM_SNOW_FRAC ! fraction of permanent snow for patch KSNOW
 INTEGER,               INTENT(IN):: KSNOW           ! patch number where permanent snow is
 !
-!*      0.2    declarations of local variables
+!*      0.2    declarations of local parameter
+!
+REAL, PARAMETER :: ZRHOL1 = 150.
+!
+!*      0.3    declarations of local variables
 !
 INTEGER                             :: JLAYER      ! loop counter on snow layers
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZWSNOW_PERM ! snow total reservoir due to perm. snow
@@ -68,11 +72,11 @@ REAL, DIMENSION(:),   ALLOCATABLE   :: ZWSNOW      ! initial snow total reservoi
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZD          ! new snow total depth
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZDEPTH      ! depth of each layer
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZT          ! new snow temperature profile
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWLIQ       ! liquid water in the snow
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZPSN        ! permanent snow fraction
+REAL, DIMENSION(:,:), ALLOCATABLE   :: ZWAT        ! 
 !
-LOGICAL, DIMENSION(:),  ALLOCATABLE :: LWORK
-INTEGER                             :: IWORK
+LOGICAL, DIMENSION(:,:), ALLOCATABLE :: GWORK
+INTEGER                              :: IWORK
 !
 REAL              ::ZRHOSMAX
 REAL              ::ZAGE_NOW
@@ -135,61 +139,97 @@ ENDIF
 !
 !* rho must be defined for snow 3-L before temperature and heat computations
 !
-!* rho
-!
-ALLOCATE(LWORK(SIZE(PTG,1)))
+ALLOCATE(GWORK(SIZE(PTG,1),TPSNOW%NLAYER))
 !
 DO JLAYER=1,TPSNOW%NLAYER
 !
-  LWORK(:)=.FALSE.
+  GWORK(:,JLAYER)=.FALSE.
 !
   IF(LGLACIER)THEN
-      WHERE(ZWSNOW_PERM(:)>0.)LWORK(:)=.TRUE.
+      WHERE(ZWSNOW_PERM(:)>0.)GWORK(:,JLAYER)=.TRUE.
   ELSE
-      WHERE(ZWSNOW_PERM(:)>0..AND.TPSNOW%WSNOW(:,JLAYER,KSNOW)==0.)LWORK(:)=.TRUE.
+      WHERE(ZWSNOW_PERM(:)>0..AND.TPSNOW%WSNOW(:,JLAYER,KSNOW)==0.)GWORK(:,JLAYER)=.TRUE.
   ENDIF
 !
-  WHERE(LWORK(:))
+!* rho
+!
+  WHERE(GWORK(:,JLAYER))
     TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX
   END WHERE
 !
 !* albedo
 !
   IF(LGLACIER)THEN
-    WHERE(LWORK(:))
+    WHERE(GWORK(:,JLAYER))
          TPSNOW%ALB(:,KSNOW) = (XAGLAMAX+XAGLAMIN)/2.0
     END WHERE
   ELSE
-    WHERE(LWORK(:))
+    WHERE(GWORK(:,JLAYER))
          TPSNOW%ALB(:,KSNOW) = (XANSMAX+XANSMIN)/2.0
     END WHERE
   ENDIF
 !
 END DO
 !
+IF (TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO') THEN
+!
+! * optimized rho perm snow profile
+!
+  IF(LGLACIER.AND.TPSNOW%NLAYER>=6)THEN
+    WHERE(GWORK(:,1))
+      TPSNOW%RHO(:,1,KSNOW) = ZRHOL1
+    END WHERE 
+    IF(TPSNOW%NLAYER>=6.AND.TPSNOW%NLAYER<12)THEN
+      WHERE(GWORK(:,2))
+       TPSNOW%RHO(:,2,KSNOW) = ZRHOL1 + 100.
+      END WHERE 
+      WHERE(GWORK(:,3))
+       TPSNOW%RHO(:,3,KSNOW) = ZRHOL1 + 250.
+      END WHERE 
+    ELSE
+      DO JLAYER=2,TPSNOW%NLAYER
+         WHERE(GWORK(:,JLAYER))
+              TPSNOW%RHO(:,JLAYER,KSNOW) = MIN(ZRHOSMAX,TPSNOW%RHO(:,JLAYER-1,KSNOW)+100.)
+         END WHERE     
+      ENDDO
+    ENDIF
+  ENDIF
+!
+! * Snow age profile
+!
+  DO JLAYER=1,TPSNOW%NLAYER/4
+    WHERE(GWORK(:,JLAYER))
+             TPSNOW%AGE(:,JLAYER,KSNOW) = 365.0*FLOAT(JLAYER-1)/ &
+                                          FLOAT(TPSNOW%NLAYER)
+    END WHERE
+  END DO
+  DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
+    WHERE(GWORK(:,JLAYER))
+             TPSNOW%AGE(:,JLAYER,KSNOW) = 3650.*FLOAT(JLAYER-1)/ &
+                                          FLOAT(TPSNOW%NLAYER) 
+    END WHERE
+  END DO
+!
+  IF(LGLACIER)THEN
+    WHERE(GWORK(:,:))TPSNOW%AGE(:,:,KSNOW) = 0.0
+  ENDIF
+!
+END IF
+!
 IF (TPSNOW%SCHEME=='CRO') THEN
-
 DO JLAYER=1,TPSNOW%NLAYER/4
-  WHERE(LWORK(:))
-            !TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX*         &
-            !      (1.+ FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER)) 
+  WHERE(GWORK(:,JLAYER))
            TPSNOW%GRAN1(:,JLAYER,KSNOW) = MIN(-1.,-99.*     &
                   (1.-4*FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER))) 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 50. 
            TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
-           TPSNOW%AGE(:,JLAYER,KSNOW) = 365.*FLOAT(JLAYER-1)/ &
-                                        FLOAT(TPSNOW%NLAYER)
   END WHERE
 END DO
 DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
-  WHERE(LWORK(:))
-           !TPSNOW%RHO(:,JLAYER,KSNOW) = ZRHOSMAX*         &
-           !       (1.+ FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER)) 
+  WHERE(GWORK(:,JLAYER))
            TPSNOW%GRAN1(:,JLAYER,KSNOW) = 99. 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 0.0003 
            TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
-           TPSNOW%AGE(:,JLAYER,KSNOW) = 3650.*FLOAT(JLAYER-1)/ &
-                                        FLOAT(TPSNOW%NLAYER) 
   END WHERE
 END DO
 END IF
@@ -224,13 +264,13 @@ ZD(:) = ZD(:) + (ZWSNOW_PERM(:)-ZWSNOW(:))/ZRHOSMAX
 !
 SELECT CASE(TPSNOW%SCHEME)
   CASE('D95','1-L','EBA')
-    LWORK(:)=.FALSE.
+    GWORK(:,1)=.FALSE.
     IF(LGLACIER)THEN
-       WHERE(ZWSNOW(:)>=0..AND.TPSNOW%WSNOW(:,1,KSNOW)/=XUNDEF)LWORK(:)=.TRUE.
+       WHERE(ZWSNOW(:)>=0..AND.TPSNOW%WSNOW(:,1,KSNOW)/=XUNDEF)GWORK(:,1)=.TRUE.
     ELSE
-       WHERE(ZWSNOW(:)==0..AND.TPSNOW%WSNOW(:,1,KSNOW)/=XUNDEF)LWORK(:)=.TRUE.
+       WHERE(ZWSNOW(:)==0..AND.TPSNOW%WSNOW(:,1,KSNOW)/=XUNDEF)GWORK(:,1)=.TRUE.
     ENDIF
-    WHERE(LWORK(:))
+    WHERE(GWORK(:,1))
       TPSNOW%WSNOW(:,1,KSNOW) = ZWSNOW_PERM(:)
     END WHERE
   CASE('3-L','CRO')
@@ -238,11 +278,8 @@ SELECT CASE(TPSNOW%SCHEME)
     ALLOCATE(ZDEPTH(SIZE(PTG,1),TPSNOW%NLAYER))
     CALL SNOW3LGRID(ZDEPTH,ZD)
     DO JLAYER=1,TPSNOW%NLAYER
-      WHERE(ZWSNOW(:)> 0. .AND. TPSNOW%WSNOW(:,JLAYER,KSNOW)/=XUNDEF)
+      WHERE(ZWSNOW(:)>= 0. .AND. TPSNOW%WSNOW(:,JLAYER,KSNOW)/=XUNDEF)
         TPSNOW%WSNOW(:,JLAYER,KSNOW) = ZDEPTH(:,JLAYER) * TPSNOW%RHO(:,JLAYER,KSNOW)
-      END WHERE
-      WHERE(ZWSNOW(:)==0. .AND. TPSNOW%WSNOW(:,JLAYER,KSNOW)/=XUNDEF)
-        TPSNOW%WSNOW(:,JLAYER,KSNOW) = ZDEPTH(:,JLAYER) * ZRHOSMAX
       END WHERE
    END DO
    DEALLOCATE(ZDEPTH)
@@ -250,39 +287,48 @@ SELECT CASE(TPSNOW%SCHEME)
 END SELECT
 !
 DEALLOCATE(ZD)
-DEALLOCATE(LWORK)
 !-------------------------------------------------------------------------------------
 !
 !*       4.    Temperature of new snow
 !              -----------------------
 !
 ALLOCATE(ZT   (SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),SIZE(TPSNOW%WSNOW,3)))
-ALLOCATE(ZWLIQ(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),SIZE(TPSNOW%WSNOW,3)))
-!
+!       
 SELECT CASE(TPSNOW%SCHEME)
   CASE('1-L')
     ZT(:,:,:) = TPSNOW%T (:,:,:)
   CASE('3-L','CRO')
-    CALL SNOW_HEAT_TO_T_WLIQ(TPSNOW%HEAT,TPSNOW%RHO,ZT,ZWLIQ)
+    CALL SNOW_HEAT_TO_T_WLIQ(TPSNOW%HEAT,TPSNOW%RHO,ZT)
 END SELECT
 !
 !* new snow is set to deep ground temperature
 !
 DO JLAYER=1,TPSNOW%NLAYER
-  WHERE(ZWSNOW_PERM(:)>0. .AND. ZWSNOW(:)==0.)
-    ZT(:,JLAYER,KSNOW) = MIN(PTG(:,SIZE(PTG,2)), XTT)
+!
+  GWORK(:,JLAYER)=.FALSE.
+!
+  IF(LGLACIER)THEN
+      WHERE(ZWSNOW_PERM(:)>0.)GWORK(:,JLAYER)=.TRUE.
+  ELSE
+      WHERE(ZWSNOW_PERM(:)>0. .AND. ZWSNOW(:)==0)GWORK(:,JLAYER)=.TRUE.
+  ENDIF
+!  
+  WHERE(GWORK(:,JLAYER))
+      ZT(:,JLAYER,KSNOW) = MIN(PTG(:,SIZE(PTG,2)),XTT)
   END WHERE
+!
 END DO
+!
 !
 SELECT CASE(TPSNOW%SCHEME)
   CASE('1-L')
     TPSNOW%T (:,:,:) = ZT(:,:,:)
   CASE('3-L','CRO')
-    CALL SNOW_T_WLIQ_TO_HEAT(TPSNOW%HEAT,TPSNOW%RHO,ZT,ZWLIQ)
+    CALL SNOW_T_WLIQ_TO_HEAT(TPSNOW%HEAT,TPSNOW%RHO,ZT)
 END SELECT
 !
 DEALLOCATE(ZT   )
-DEALLOCATE(ZWLIQ)
+DEALLOCATE(GWORK)
 !
 !
 !-------------------------------------------------------------------------------------
@@ -290,17 +336,21 @@ DEALLOCATE(ZWLIQ)
 !*       5.    Soil ice initialization for LGLACIER
 !              -----------------------
 !
+ALLOCATE(ZWAT(SIZE(PTG,1),SIZE(PTG,2)))
+!
 IF(LGLACIER)THEN
 !
   IF (CISBA == 'DIF') THEN
       IWORK=NGROUND_LAYER
+      ZWAT(:,:)=XWFC(:,:)
   ELSE
       IWORK=2
+      ZWAT(:,:)=XWSAT(:,:)
   ENDIF
 !
   DO JLAYER=1,IWORK
      WHERE(PPERM_SNOW_FRAC(:,NVT_SNOW)>0.0)
-           XWGI(:,JLAYER,KSNOW) = MAX(XWGI(:,JLAYER,KSNOW),XWSAT(:,JLAYER)*ZPSN(:))
+           XWGI(:,JLAYER,KSNOW) = MAX(XWGI(:,JLAYER,KSNOW),ZWAT(:,JLAYER)*ZPSN(:))
            XWG (:,JLAYER,KSNOW) = MIN(XWG (:,JLAYER,KSNOW),MAX(XWSAT(:,JLAYER)-XWGI(:,JLAYER,KSNOW),XWGMIN))
      END WHERE
      WHERE(XWG(:,JLAYER,KSNOW) /= XUNDEF .AND. (XWG(:,JLAYER,KSNOW) + XWGI(:,JLAYER,KSNOW)) > XWSAT(:,JLAYER) )
@@ -310,6 +360,7 @@ IF(LGLACIER)THEN
 !
 ENDIF
 !
+DEALLOCATE(ZWAT)
 DEALLOCATE(ZPSN)
 !
 !-------------------------------------------------------------------------------------

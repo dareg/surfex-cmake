@@ -46,6 +46,8 @@ TYPE TEB_VEG_OPTIONS_t
                                                    ! F = keep vegetation parameters constant in time
 !
   LOGICAL                          :: LTR_ML
+!  
+  LOGICAL                          :: LNITRO_DILU  ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 !-------------------------------------------------------------------------------
 !
   CHARACTER(LEN=3)                 :: CISBA       ! type of ISBA version:
@@ -118,24 +120,20 @@ TYPE TEB_VEG_OPTIONS_t
   CHARACTER(LEN=3)                 :: CCPSURF     ! specific heat at surface
                                                   ! 'DRY' = default value (dry Cp)
                                                   ! 'HUM' = Cp as a fct of specific humidity
-! - SGH scheme
+! - SGH scheme and vertical hydrology
 !                                                     
   CHARACTER(LEN=4)                 :: CRUNOFF     ! surface runoff formulation
                                                   ! 'WSAT'
                                                   ! 'DT92'
                                                   ! 'SGH ' Topmodel
 !                                                     
-  CHARACTER(LEN=3)                 :: CTOPREG     ! Wolock and McCabe (2000) linear regression for Topmodel
-                                                  ! 'DEF' = Reg
-                                                  ! 'NON' = no Reg  
-!                                           
   CHARACTER(LEN=3)                 :: CKSAT       ! ksat
                                                   ! 'DEF' = default value 
                                                   ! 'SGH' = profil exponentiel
 !
-  CHARACTER(LEN=3)               :: CSOC          ! soil organic carbon effect
-!                                                 ! 'DEF' = default value 
-!                                                 ! 'SGH' = SOC profil
+  LOGICAL                          :: LSOC        ! soil organic carbon effect
+!                                                 ! FALSE = default value 
+!                                                 ! TRUE  = SOC profil
 !
   CHARACTER(LEN=3)                 :: CRAIN       ! Rainfall spatial distribution
                                                   ! 'DEF' = No rainfall spatial distribution
@@ -160,43 +158,43 @@ LOGICAL, POINTER                 :: LCANOPY_DRAG=>NULL()
 !$OMP THREADPRIVATE(LCANOPY_DRAG)
 LOGICAL, POINTER                 :: LVEGUPD=>NULL()
 !$OMP THREADPRIVATE(LVEGUPD)
+LOGICAL, POINTER                 :: LNITRO_DILU=>NULL()
+!$OMP THREADPRIVATE(LNITRO_DILU)
 LOGICAL,          POINTER        :: LTR_ML=>NULL()
 !$OMP THREADPRIVATE(LTR_ML)
- CHARACTER(LEN=3), POINTER        :: CISBA=>NULL()
+CHARACTER(LEN=3), POINTER        :: CISBA=>NULL()
 !$OMP THREADPRIVATE(CISBA)
- CHARACTER(LEN=4), POINTER        :: CROUGH=>NULL()
+CHARACTER(LEN=4), POINTER        :: CROUGH=>NULL()
 !$OMP THREADPRIVATE(CROUGH)
- CHARACTER(LEN=4), POINTER        :: CPEDOTF=>NULL()
+CHARACTER(LEN=4), POINTER        :: CPEDOTF=>NULL()
 !$OMP THREADPRIVATE(CPEDOTF)
- CHARACTER(LEN=3), POINTER        :: CPHOTO=>NULL()
+CHARACTER(LEN=3), POINTER        :: CPHOTO=>NULL()
 !$OMP THREADPRIVATE(CPHOTO)
- CHARACTER(LEN=4), POINTER        :: CALBEDO=>NULL()
+CHARACTER(LEN=4), POINTER        :: CALBEDO=>NULL()
 !$OMP THREADPRIVATE(CALBEDO)
- CHARACTER(LEN=4), POINTER        :: CSCOND=>NULL()
+CHARACTER(LEN=4), POINTER        :: CSCOND=>NULL()
 !$OMP THREADPRIVATE(CSCOND)
- CHARACTER(LEN=4), POINTER        :: CC1DRY=>NULL()
+CHARACTER(LEN=4), POINTER        :: CC1DRY=>NULL()
 !$OMP THREADPRIVATE(CC1DRY)
- CHARACTER(LEN=3), POINTER        :: CSOILFRZ=>NULL()
+CHARACTER(LEN=3), POINTER        :: CSOILFRZ=>NULL()
 !$OMP THREADPRIVATE(CSOILFRZ)
- CHARACTER(LEN=4), POINTER        :: CDIFSFCOND=>NULL()
+CHARACTER(LEN=4), POINTER        :: CDIFSFCOND=>NULL()
 !$OMP THREADPRIVATE(CDIFSFCOND)
- CHARACTER(LEN=3), POINTER        :: CSNOWRES=>NULL()
+CHARACTER(LEN=3), POINTER        :: CSNOWRES=>NULL()
 !$OMP THREADPRIVATE(CSNOWRES)
- CHARACTER(LEN=3), POINTER        :: CRESPSL=>NULL()
+CHARACTER(LEN=3), POINTER        :: CRESPSL=>NULL()
 !$OMP THREADPRIVATE(CRESPSL)
- CHARACTER(LEN=3), POINTER        :: CCPSURF=>NULL()
+CHARACTER(LEN=3), POINTER        :: CCPSURF=>NULL()
 !$OMP THREADPRIVATE(CCPSURF)
- CHARACTER(LEN=4), POINTER        :: CRUNOFF=>NULL()
+CHARACTER(LEN=4), POINTER        :: CRUNOFF=>NULL()
 !$OMP THREADPRIVATE(CRUNOFF)
- CHARACTER(LEN=3), POINTER        :: CTOPREG=>NULL()
-!$OMP THREADPRIVATE(CTOPREG)
- CHARACTER(LEN=3), POINTER        :: CKSAT=>NULL()
+CHARACTER(LEN=3), POINTER        :: CKSAT=>NULL()
 !$OMP THREADPRIVATE(CKSAT)
- CHARACTER(LEN=3), POINTER      :: CSOC=>NULL()
-!$OMP THREADPRIVATE(CSOC)
- CHARACTER(LEN=3), POINTER        :: CRAIN=>NULL()
+LOGICAL, POINTER                 :: LSOC=>NULL()
+!$OMP THREADPRIVATE(LSOC)
+CHARACTER(LEN=3), POINTER        :: CRAIN=>NULL()
 !$OMP THREADPRIVATE(CRAIN)
- CHARACTER(LEN=3), POINTER        :: CHORT=>NULL()
+CHARACTER(LEN=3), POINTER        :: CHORT=>NULL()
 !$OMP THREADPRIVATE(CHORT)
 INTEGER, POINTER                 :: NNBIOMASS=>NULL()
 !$OMP THREADPRIVATE(NNBIOMASS)
@@ -227,6 +225,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODD_TEB_VEG_N:TEB_VEG_OPTIONS_GOTO_MODEL',0,ZHOOK_HANDLE)
 LCANOPY_DRAG=>TEB_VEG_OPTIONS_MODEL(KTO)%LCANOPY_DRAG
 LVEGUPD=>TEB_VEG_OPTIONS_MODEL(KTO)%LVEGUPD
+LNITRO_DILU=>TEB_VEG_OPTIONS_MODEL(KTO)%LNITRO_DILU
 LTR_ML=>TEB_VEG_OPTIONS_MODEL(KTO)%LTR_ML
 CISBA=>TEB_VEG_OPTIONS_MODEL(KTO)%CISBA
 CROUGH=>TEB_VEG_OPTIONS_MODEL(KTO)%CROUGH
@@ -241,9 +240,8 @@ CSNOWRES=>TEB_VEG_OPTIONS_MODEL(KTO)%CSNOWRES
 CRESPSL=>TEB_VEG_OPTIONS_MODEL(KTO)%CRESPSL
 CCPSURF=>TEB_VEG_OPTIONS_MODEL(KTO)%CCPSURF
 CRUNOFF=>TEB_VEG_OPTIONS_MODEL(KTO)%CRUNOFF
-CTOPREG=>TEB_VEG_OPTIONS_MODEL(KTO)%CTOPREG
 CKSAT=>TEB_VEG_OPTIONS_MODEL(KTO)%CKSAT
-CSOC=>TEB_VEG_OPTIONS_MODEL(KTO)%CSOC
+LSOC=>TEB_VEG_OPTIONS_MODEL(KTO)%LSOC
 CRAIN=>TEB_VEG_OPTIONS_MODEL(KTO)%CRAIN
 CHORT=>TEB_VEG_OPTIONS_MODEL(KTO)%CHORT
 NNBIOMASS=>TEB_VEG_OPTIONS_MODEL(KTO)%NNBIOMASS
@@ -262,6 +260,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_OPTIONS_ALLOC",0,ZHOOK_HANDLE)
 ALLOCATE(TEB_VEG_OPTIONS_MODEL(KMODEL))
 TEB_VEG_OPTIONS_MODEL(:)%LCANOPY_DRAG=.FALSE.
 TEB_VEG_OPTIONS_MODEL(:)%LVEGUPD=.FALSE. 
+TEB_VEG_OPTIONS_MODEL(:)%LNITRO_DILU=.FALSE. 
 TEB_VEG_OPTIONS_MODEL(:)%LTR_ML=.FALSE.
 TEB_VEG_OPTIONS_MODEL(:)%CISBA=' '
 TEB_VEG_OPTIONS_MODEL(:)%CROUGH=' '
@@ -276,9 +275,8 @@ TEB_VEG_OPTIONS_MODEL(:)%CSNOWRES=' '
 TEB_VEG_OPTIONS_MODEL(:)%CRESPSL=' '
 TEB_VEG_OPTIONS_MODEL(:)%CCPSURF=' '
 TEB_VEG_OPTIONS_MODEL(:)%CRUNOFF=' '
-TEB_VEG_OPTIONS_MODEL(:)%CTOPREG=' '
 TEB_VEG_OPTIONS_MODEL(:)%CKSAT=' '
-TEB_VEG_OPTIONS_MODEL(:)%CSOC=' '
+TEB_VEG_OPTIONS_MODEL(:)%LSOC=.FALSE.
 TEB_VEG_OPTIONS_MODEL(:)%CRAIN=' '
 TEB_VEG_OPTIONS_MODEL(:)%CHORT=' '
 TEB_VEG_OPTIONS_MODEL(:)%NNBIOMASS=0

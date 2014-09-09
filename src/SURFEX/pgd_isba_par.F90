@@ -31,6 +31,7 @@
 !!    Original    10/12/97
 !!
 !!       Modified 08/12/05, P. Le Moigne: user defined fields
+!!                 05/2012  R. Alkama   : 19 vegtypes rather than 12    
 !!
 !----------------------------------------------------------------------------
 !
@@ -105,7 +106,7 @@ LOGICAL               :: GPAR_STRESS   ! type of stress
 INTEGER :: NTIME
 INTEGER, PARAMETER :: NTIME_MAX    = 36
 INTEGER, PARAMETER :: NGROUND_MAX  = 150
-INTEGER, PARAMETER :: NVEGTYPE_MAX = 12
+INTEGER, PARAMETER :: NVEGTYPE_MAX = 19
 !
 REAL, DIMENSION(NVEGTYPE_MAX)   :: XSTRESS   ! 1. if defensive /0. if offensive
 !
@@ -267,7 +268,7 @@ NAMELIST/NAM_DATA_ISBA/NTIME, XUNIF_VEGTYPE, XUNIF_DG, XUNIF_ROOTFRAC, XUNIF_DIC
                          CFTYP_DMAX,CFTYP_F2I, CFTYP_H_TREE,CFTYP_RE25,                             &
                          CFTYP_CE_NITRO,CFTYP_CF_NITRO,CFTYP_CNA_NITRO  
 
-DATA XSTRESS /1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0./
+DATA XSTRESS /1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./
 !-------------------------------------------------------------------------------
 !
 !*    1.      Initializations

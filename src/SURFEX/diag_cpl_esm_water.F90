@@ -64,11 +64,16 @@ REAL, DIMENSION(:,:),INTENT(IN):: PSCA_SW   ! diffuse solar radiation (on horizo
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(XICE_ALB)) :: ZSWU
+REAL, DIMENSION(SIZE(XICE_ALB)) :: ZSWU, ZTICE4
 !
 INTEGER                      :: ISWB ! number of SW bands
 INTEGER                      :: JSWB ! loop counter on number of SW bands
+INTEGER                      :: INI  ! number of points
+INTEGER                      :: JI   ! loop counter on number of points
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------
 ! Total or free-ice water flux
@@ -76,7 +81,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !* 10m wind speed (m)
 !
-IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',0,ZHOOK_HANDLE)
 XCPL_WATER_WIND(:) = XCPL_WATER_WIND(:) + PTSTEP * SQRT(PZON10M(:)**2+PMER10M(:)**2)
 ! 
 !* wind stress (Pa.s)
@@ -93,11 +97,11 @@ XCPL_WATER_SNET(:) = XCPL_WATER_SNET(:) + PTSTEP * (PSWD(:) - PSWU(:))
 !
 XCPL_WATER_HEAT(:) = XCPL_WATER_HEAT(:) + PTSTEP * (PGFLUX(:) + PSWU(:) - PSWD(:)) 
 !
-!* Evaporation (mm/day)
+!* Evaporation (kg/m2)
 !
 XCPL_WATER_EVAP(:) = XCPL_WATER_EVAP(:) + PTSTEP * PSFTQ(:)
 !
-!* Precip (mm/day)
+!* Precip (kg/m2)
 ! 
 XCPL_WATER_RAIN(:) = XCPL_WATER_RAIN(:) + PTSTEP * PRAIN(:) 
 XCPL_WATER_SNOW(:) = XCPL_WATER_SNOW(:) + PTSTEP * PSNOW(:)
@@ -106,25 +110,31 @@ XCPL_WATER_SNOW(:) = XCPL_WATER_SNOW(:) + PTSTEP * PSNOW(:)
 ! Ice flux
 !-------------------------------------------------------------------------------------
 !
+INI  = SIZE(PDIR_SW,1)
 ISWB = SIZE(PDIR_SW,2)
 !
 !* Solar net heat flux (J/m2)
 !
 ZSWU(:)=0.0
 DO JSWB=1,ISWB
-   ZSWU(:) = ZSWU(:) + (PDIR_SW(:,JSWB)+PSCA_SW(:,JSWB)) * XICE_ALB(:)
+   DO JI=1,INI
+      ZSWU(JI) = ZSWU(JI) + (PDIR_SW(JI,JSWB)+PSCA_SW(JI,JSWB)) * XICE_ALB(JI)
+   ENDDO
 ENDDO
 !
 XCPL_WATERICE_SNET(:) = XCPL_WATERICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-XCPL_WATERICE_HEAT(:) = XCPL_WATERICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*PTICE(:)**4) &
-                                                             - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)      )  
+ZTICE4(:)=PTICE(:)**4
 !
-!* Sublimation (mm/day)
+XCPL_WATERICE_HEAT(:) = XCPL_WATERICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &
+                                                             - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)  )  
+!
+!* Sublimation (kg/m2)
 !
 XCPL_WATERICE_EVAP(:) = XCPL_WATERICE_EVAP(:) + PTSTEP * PSFTQ_ICE(:)
+!
 IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

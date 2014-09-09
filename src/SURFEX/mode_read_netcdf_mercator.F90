@@ -1,3 +1,6 @@
+!!
+!!      Modified    09/2013 : S. Senesi : adapt READ_NETCDF_SST to read 2D fields other than SST
+!!
 MODULE MODE_READ_NETCDF_MERCATOR
 !!!=============================================================================
 !-------------------------------------------------------------------------------
@@ -1182,7 +1185,7 @@ if (NILENGTH<0) then
   ALLOCATE(PFIELD(1))
   PFIELD(:)=XUNDEF
   CINTERP_TYPE='UNIF  ' !!prescribed uniform field
-elseif (NINDEPTH<0) then
+elseif ((NINDEPTH<0).OR.(HNCVARNAME/='SST    ')) then
   ALLOCATE(ZLATI(NILENGTH) )
   ALLOCATE(ZLONG(NILENGTH) )
   ALLOCATE(ZVAL (NILENGTH) )
@@ -1190,7 +1193,9 @@ elseif (NINDEPTH<0) then
   ALLOCATE(PFIELD(NILENGTH))
   PFIELD(:)=XUNDEF
   PFIELD(:) = ZVAL(:)
-  WHERE (ZVAL(:)/=ZUNDEF .AND. ZVAL(:)<100.) PFIELD(:)=PFIELD(:)+XTT
+  IF (HNCVARNAME == 'SST    ') THEN 
+     WHERE (ZVAL(:)/=ZUNDEF .AND. ZVAL(:)<100.) PFIELD(:)=PFIELD(:)+XTT
+  ENDIF
   CINTERP_TYPE='HORIBL' !!interpolation from gaussian, legendre or regular grid
 !                       !!CINGRID_TYPE='GAUSS  ' ou ='AROME '
 !                       !!CINGRID_TYPE='LATLON '

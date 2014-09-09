@@ -4,7 +4,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  HTEST                                                                       )  
@@ -58,9 +58,16 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                             New soil carbon spinup and diag
 !!                             Isba budget
 !!      F. Bouttier  01/2013 : Apply random perturbations for ensembles
+!!      B. Decharme  04/2013 new coupling variables
+!!                           Subsurface runoff if SGH (DIF option only)
+!!                   07/2013 Surface / Water table depth coupling
 !!-------------------------------------------------------------------
 !
-USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI,XAVOGADRO
+USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
+!
+USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI, XAVOGADRO, XMD
+USE MODD_CO2V_PAR,     ONLY : XMCO2, XSPIN_CO2
+!
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_SNOW_PAR,     ONLY : XZ0SN
 USE MODD_TYPE_DATE_SURF
@@ -72,7 +79,6 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG, NGROUND_LAYER,     &
                                 XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,                    &
                                 XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,                 &
-                                XALBNIR_WET, XALBVIS_WET, XALBUV_WET, XWG, XWSAT,        &
                                 XRSMIN, XGAMMA, XWRMAX_CF, XRGL, XCV, XZ0_O_Z0H,         &
                                 XVEGTYPE, XROOTFRAC, XGMES, XBSLAI, XLAIMIN, XSEFOLD,    &
                                 XGC, XF2I, LSTRESS, XH_TREE, XDMAX, XRE25,               &
@@ -81,15 +87,17 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 XHO2IP, XHO2IM, XHO2JP, XHO2JM, TSNOW, CRESPSL,          &
                                 XCE_NITRO, XCF_NITRO, XCNA_NITRO, LECOCLIMAP, CCPSURF,   &
                                 TSEED, TREAP, XWATSUP, XIRRIG, XCGMAX,                   &
-                                CKSAT, CSOC, CHORT, CRAIN, XMUF, XFSAT, LTRIP,           &
+                                CKSAT, CHORT, CRAIN, XMUF, XFSAT,                        &
                                 LFLOOD, XFFLOOD, XPIFLOOD, LTEMP_ARP, XSODELX,           &
                                 LVEGUPD, NLAYER_HORT, NLAYER_DUN,                        &
                                 LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,        &
                                 NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, NSPINS, NSPINW, &
+                                XTOPQS, LCPL_RRM, LNITRO_DILU, LAGRI_TO_GRASS,           &
                                 LPERTSURF, XPERTVEG, XPERTLAI, XPERTCV, XPERTALB,XPERTZ0,&
-                                LSNOWDRIFT,LSNOWDRIFT_SUBLIM,LSNOW_ABS_ZENITH,           &
-                                CSNOWMETAMO,CSNOWRAD
-USE MODD_SURF_ATM,    ONLY : LNOSOF, CIMPLICIT_WIND
+                                LSNOWDRIFT, LSNOWDRIFT_SUBLIM, LSNOW_ABS_ZENITH,         &
+                                CSNOWMETAMO, CSNOWRAD, XCO2_START, XCO2_END
+!
+USE MODD_SURF_ATM,    ONLY : LNOSOF
 USE MODD_SURF_ATM_n,  ONLY : NDIM_FULL
 !
 USE MODD_DST_n,       ONLY : XSFDST, XSFDSTM, XEMISRADIUS_DST, XEMISSIG_DST
@@ -99,7 +107,7 @@ USE MODD_SLT_SURF
 USE MODE_DSLT_SURF
 !
 USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
-                             XP_Z0EFFIM, XP_Z0EFFJP, XP_Z0EFFJM, XP_Z0FLOOD,   &
+                             XP_Z0EFFIM, XP_Z0EFFJP, XP_Z0EFFJM,               &
                              XP_AOSIP, XP_AOSIM ,XP_AOSJP, XP_AOSJM, XP_HO2IP, &
                              XP_HO2IM, XP_HO2JP, XP_HO2JM, XP_Z0_O_Z0H,        &
                              XP_ALBNIR, XP_ALBVIS, XP_ALBUV, XP_ALBNIR_VEG,    &
@@ -136,7 +144,8 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_RESP_BIOMASS, XP_INCREASE, XP_TURNOVER,        &
                              XP_TAU_WOOD, TP_SEED, TP_REAP, XP_RE25, XP_LITTER,&
                              XP_LIGNIN_STRUC, XP_SOILCARB,  XP_CLAY, XP_SAND,  &
-                             XP_DIR_ALB_WITH_SNOW, XP_SCA_ALB_WITH_SNOW
+                             XP_DIR_ALB_WITH_SNOW, XP_SCA_ALB_WITH_SNOW,       &
+                             XP_TOPQS,XP_FWTD,XP_WTD
 !
 USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,          &
@@ -160,7 +169,8 @@ USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_GPP, XP_FAPAR, XP_FAPIR, XP_FAPAR_BS,       &
                                 XP_FAPIR_BS, XP_ICEFLUX, XP_IRRIG_FLUX,        &
                                 XP_RESP_AUTO, XP_RESP_ECO, XP_DWG, XP_DWGI,    &
-                                XP_DWR, XP_DSWE, XP_WATBUD  
+                                XP_DWR, XP_DSWE, XP_WATBUD, XP_QSB, XP_SUBL,   &
+                                XP_SNDRIFT
 !                         
 USE MODD_PACK_CH_ISBA,   ONLY : XP_SOILRC_SO2, XP_SOILRC_O3, XP_DEP
 
@@ -182,10 +192,12 @@ USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_Z0EFF
 USE MODI_ISBA
 USE MODI_AVERAGE_FLUX
+USE MODI_AVERAGE_PHY
 USE MODI_AVERAGE_RAD
 USE MODI_AVERAGE_DIAG_ISBA_n
 USE MODI_VEGETATION_EVOL
 USE MODI_VEGETATION_UPDATE
+USE MODI_ALBEDO_VEG_UPDATE
 USE MODI_CARBON_EVOL
 USE MODI_SUBSCALE_Z0EFF
 USE MODI_SOIL_ALBEDO
@@ -251,7 +263,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing            
 REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
-!
+!   
  CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables!
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
@@ -284,6 +296,11 @@ REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral 
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
 !
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
+!
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
@@ -304,8 +321,12 @@ REAL, DIMENSION(KI)     :: ZEXNS    ! Exner function at surface                 
 REAL, DIMENSION(KI)     :: ZALFA    ! Wind direction                                (-)
 REAL, DIMENSION(KI)     :: ZQA      ! specific humidity                             (kg/kg)
 REAL, DIMENSION(KI)     :: ZCO2     ! CO2 concentration                             (kg/kg)
+REAL                    :: ZSPINCO2 ! CO2 concentration                             (ppmv)
 REAL, DIMENSION(KI)     :: ZPEQ_A_COEF ! specific humidity implicit
 REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
+!
+INTEGER                 ::ISPINEND
+!
 ! Patch outputs:
 !
 REAL, DIMENSION(KI,NPATCH) :: ZSFTH_TILE     ! surface heat flux (W/m2)
@@ -315,6 +336,10 @@ REAL, DIMENSION(KI,NPATCH) :: ZSFU_TILE      ! zonal momentum flux
 REAL, DIMENSION(KI,NPATCH) :: ZSFV_TILE      ! meridian momentum flux
 REAL, DIMENSION(KI,NPATCH) :: ZTRAD_TILE     ! radiative surface temperature
 REAL, DIMENSION(KI,NPATCH) :: ZEMIS_TILE     ! emissivity
+REAL, DIMENSION(KI,NPATCH) :: ZTSURF_TILE    ! surface effective temperature
+REAL, DIMENSION(KI,NPATCH) :: ZZ0_TILE       ! roughness length for momentum
+REAL, DIMENSION(KI,NPATCH) :: ZZ0H_TILE      ! roughness length for heat
+REAL, DIMENSION(KI,NPATCH) :: ZQSURF_TILE    ! specific humidity at surface
 REAL, DIMENSION(KI,KSW,NPATCH) :: ZDIR_ALB_TILE  ! direct albedo
 REAL, DIMENSION(KI,KSW,NPATCH) :: ZSCA_ALB_TILE  ! diffuse albedo
 REAL, DIMENSION(KI,KSV,NPATCH) :: ZSFTS_TILE     ! scalar surface flux
@@ -336,17 +361,17 @@ REAL                       :: ZCONVERTFACM6_SLT, ZCONVERTFACM6_DST
 !
 ! dimensions and loop counters
 !
-INTEGER :: INI_FLOOD
 INTEGER :: ISWB   ! number of spectral shortwave bands
 INTEGER :: JSWB   ! loop on number of spectral shortwave bands
 INTEGER :: JPATCH ! loop on patches
-INTEGER :: JSV, IDST, IMOMENT
-INTEGER :: JMODE, JSV_IDX
+INTEGER :: JSV, IDST, IMOMENT, II
+INTEGER :: JLAYER, JMODE, JSV_IDX
 !
 ! logical units
 !
 INTEGER :: JJ
 LOGICAL :: LUPDATED              ! T if VEGETATION_UPDATE has reset fields
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
@@ -371,6 +396,10 @@ ZTRAD_TILE   (:,:)   = XUNDEF
 ZEMIS_TILE   (:,:)   = XUNDEF
 ZDIR_ALB_TILE(:,:,:) = XUNDEF
 ZSCA_ALB_TILE(:,:,:) = XUNDEF
+ZTSURF_TILE  (:,:)   = XUNDEF
+ZZ0_TILE     (:,:)   = XUNDEF
+ZZ0H_TILE    (:,:)   = XUNDEF
+ZQSURF_TILE  (:,:)   = XUNDEF
 !
 ZSFTS_TILE(:,:,:) = 0.
 !
@@ -397,7 +426,6 @@ DO JJ=1,SIZE(PQA)
   ZPEQ_B_COEF(JJ) = PPEQ_B_COEF(JJ) / PRHOA(JJ)
 !
   ZCO2(JJ) = PCO2(JJ) / PRHOA(JJ)
-!
 !
 ! Other forcing variables depending on incoming forcing (argument list)JJ
 !
@@ -435,7 +463,7 @@ ENDIF
 !
 !* Actualization of the SGH variable (Fmu, Fsat)
 !
- CALL ISBA_SGH_UPDATE(CISBA,CRUNOFF,CRAIN,PRAIN,XMUF,XFSAT)
+ CALL ISBA_SGH_UPDATE(CISBA,CRUNOFF,CRAIN,PRAIN,XMUF,XFSAT,XTOPQS)
 !
 !
 !* Actualization of deep soil characteristics
@@ -446,11 +474,35 @@ ENDIF
 !
 !* Actualization of soil and wood carbon spinup
 !
+! During soil carbon spinup with ISBA-CC: 
+!        (1) Atmospheric CO2 concentration fixed to Pre-industrial CO2 consentration XCO2_START
+!        (2) Atmospheric CO2 concentration rampin up from XCO2_START to XCO2_END
+!
 IF(LSPINUPCARBS.OR.LSPINUPCARBW)THEN
+!
+  ISPINEND=NNBYEARSPINS-NINT(NNBYEARSPINS*XSPIN_CO2)
+!  
+  LAGRI_TO_GRASS = .FALSE.
+!
+  IF ( LSPINUPCARBS .AND. (NNBYEARSOLD <= ISPINEND) ) THEN
+!
+   LAGRI_TO_GRASS = .TRUE.
+!
+   ZCO2(:) = XCO2_START * 1.E-6 * XMCO2 / XMD
+!
+  ELSEIF(LSPINUPCARBS .AND. (NNBYEARSOLD > ISPINEND) .AND. (NNBYEARSOLD <= NNBYEARSPINS) )THEN
+!
+   ZSPINCO2 = XCO2_START + (XCO2_END-XCO2_START) * REAL(NNBYEARSOLD - ISPINEND) / REAL(NNBYEARSPINS - ISPINEND)
+!
+   ZCO2 (:) = ZSPINCO2 * 1.E-6 * XMCO2 / XMD
+!
+  ENDIF
+!
   CALL CARBON_SPINUP(TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME,       &
                      LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,   &
                      NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, CPHOTO,    &
                      CRESPSL, NSPINS, NSPINW                             )
+!
 ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -486,22 +538,24 @@ PATCH_LOOP: DO JPATCH=1,NPATCH
 ENDDO PATCH_LOOP
 !
 ! --------------------------------------------------------------------------------------
-! TRIP coupling update if used :
+! SFX - RRM coupling update if used :
 ! --------------------------------------------------------------------------------------
 !
-IF(LTRIP)THEN
+IF(LCPL_RRM)THEN
   CALL DIAG_CPL_ESM_ISBA(PTSTEP,ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD, &
-                           ZCPL_PFLOOD,ZCPL_IFLOOD,ZCPL_ICEFLUX         )  
+                           ZCPL_PFLOOD,ZCPL_IFLOOD,ZCPL_ICEFLUX     )  
 ENDIF
 !
 ! --------------------------------------------------------------------------------------
 ! Vegetation update (in case of non-interactive vegetation):
+! Or
+! Vegetation albedo only update (in case of interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
 LUPDATED=.FALSE.
 IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
      CALL VEGETATION_UPDATE(PTSTEP,TTIME,XCOVER, LCOVER,                 &
-                         CISBA,LECOCLIMAP, CPHOTO, LAGRIP, 'NAT',        &
+                         CISBA,LECOCLIMAP,CPHOTO,LAGRIP,LTR_ML,'NAT',    &
                          XLAI,XVEG,XZ0,                                  &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                   &
                          XRSMIN,XGAMMA,XWRMAX_CF,                        &
@@ -515,8 +569,14 @@ IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
                          XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,        &
                          XCE_NITRO, XCF_NITRO, XCNA_NITRO,               &
                          TSEED, TREAP, XWATSUP, XIRRIG, LUPDATED         )  
+ELSEIF ((CPHOTO=='LAI'.OR.CPHOTO=='LST'.OR.CPHOTO=='NIT'.OR.CPHOTO=='NCB').AND.LVEGUPD) THEN
+  CALL ALBEDO_VEG_UPDATE(PTSTEP,TTIME,XCOVER, LCOVER,                    &
+                         CISBA,LECOCLIMAP,CPHOTO,LAGRIP,LTR_ML,'NAT',    &
+                         XVEG,XALBNIR,XALBVIS,XALBUV,                    &
+                         CALBEDO, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,  &
+                         XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL         )
 END IF
-
+!
 IF(LPERTSURF.AND.LUPDATED) THEN
   ! random perturbation for ensembles:
   ! reset these fields to their original values, as in compute_isba_parameters
@@ -536,17 +596,31 @@ IF(LPERTSURF.AND.LUPDATED) THEN
 ENDIF
 !
 ! --------------------------------------------------------------------------------------
-! Outputs for the atmospheric model or update the snow/flood fraction 
+! Outputs for the atmospheric model or update the snow/flood fraction at time t+1
 ! --------------------------------------------------------------------------------------
-! Grid box average fluxes/properties: Arguments and standard diagnostics
+! Grid box average fluxes/properties: Arguments and standard diagnostics at time t+1
 !
  CALL AVERAGE_FLUX(XPATCH,                                             &
                   ZSFTH_TILE, ZSFTQ_TILE, ZSFTS_TILE, ZSFCO2_TILE,    &
-                  ZSFU_TILE, ZSFV_TILE,                               &
+                  ZSFU_TILE, ZSFV_TILE,                               &                   
                   PSFTH, PSFTQ, PSFTS, PSFCO2,                        &
                   PSFU, PSFV                                          )  
 !
-! Albedo, Emissivity and fraction at time t+1
+!
+!-------------------------------------------------------------------------------
+!Physical properties see by the atmosphere in order to close the energy budget 
+!between surfex and the atmosphere. All variables should be at t+1 but very 
+!difficult to do. Maybe it will be done later. However, Ts is at time t+1
+!-------------------------------------------------------------------------------
+!   
+ CALL AVERAGE_PHY(XPATCH,                                         &
+                  ZTSURF_TILE, ZZ0_TILE, ZZ0H_TILE, ZQSURF_TILE,  &    
+                  PUREF, PZREF, PTSURF, PZ0, PZ0H, PQSURF         )
+!
+!-------------------------------------------------------------------------------------
+!Radiative properties at time t+1 (see by the atmosphere) in order to close
+!the energy budget between surfex and the atmosphere
+!-------------------------------------------------------------------------------------
 !
  CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,       &
                        XVEG, XLAI, XZ0, XALBNIR, XALBVIS, XALBUV, XEMIS,&
@@ -559,9 +633,11 @@ ENDIF
 PEMIS = XEMIS_NAT
 PTRAD = XTSRAD_NAT
 !
+!-------------------------------------------------------------------------------------
+!
 ! Any additional diagnostics (stored in MODD_DIAG_ISBA_n)
 !
- CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2)
+ CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2,PTRAD)
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
@@ -638,6 +714,10 @@ REAL, DIMENSION(KSIZE) :: ZP_USTAR   ! friction velocity                     (m/
 REAL, DIMENSION(KSIZE) :: ZP_SFU     ! zonal momentum flux                   (pa)
 REAL, DIMENSION(KSIZE) :: ZP_SFV     ! meridian momentum flux                (pa)
 REAL, DIMENSION(KSIZE) :: ZP_TRAD    ! radiative temperature                 (K)
+REAL, DIMENSION(KSIZE) :: ZP_TSURF   ! surface effective temperature (K)
+REAL, DIMENSION(KSIZE) :: ZP_Z0      ! roughness length for momentum (m)
+REAL, DIMENSION(KSIZE) :: ZP_Z0H     ! roughness length for heat     (m)
+REAL, DIMENSION(KSIZE) :: ZP_QSURF   ! specific humidity at surface  (kg/kg)
 !
 !*  other forcing variables (packed for each patch)
 !
@@ -656,6 +736,7 @@ REAL, DIMENSION(KSIZE) :: ZP_EMIS                      ! emissivity
 REAL, DIMENSION(KSIZE) :: ZP_GLOBAL_SW                 ! global incoming SW rad.
 REAL, DIMENSION(KSIZE) :: ZP_SLOPE_COS                 ! typical slope in the grid cosine
 !
+REAL, DIMENSION(KSIZE) :: ZP_Z0FLOOD  !Floodplain 
 REAL, DIMENSION(KSIZE) :: ZP_FFGNOS   !Floodplain fraction over the ground without snow
 REAL, DIMENSION(KSIZE) :: ZP_FFVNOS   !Floodplain fraction over vegetation without snow
 !
@@ -779,7 +860,6 @@ ENDIF
 !
  CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
 !
-
 ! Pack chemistry input and prognostic variables (modd_ch_isban) for each patch:
 !
 IF (NBEQ>0) THEN
@@ -816,19 +896,10 @@ ZP_TDEEP_A = 0.
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF(LFLOOD)THEN
-  WHERE(XP_FFLOOD(:)==0.0) 
-    XP_Z0FLOOD(:) = XZ0SN
-    ZP_FFGNOS (:) = 0.0
-    ZP_FFVNOS (:) = 0.0
-  ENDWHERE
-  INI_FLOOD =COUNT(XP_FFLOOD(:)>0.0)
-  IF (INI_FLOOD>0) &
-    CALL ISBA_FLOOD_PROPERTIES(INI_FLOOD,ZP_TA,ZP_EXNA,ZP_RHOA,XP_TG(:,1), &
-                               ZP_EXNS,ZP_QA,ZP_WIND,ZP_ZREF,ZP_UREF,ZP_PS,&
-                               ZP_SLOPE_COS,XP_VEG,XP_LAI,XP_FFLOOD,       &
-                               XP_FFROZEN,XP_Z0FLOOD,ZP_FFGNOS,ZP_FFVNOS   )  
+  CALL ISBA_FLOOD_PROPERTIES(XP_LAI,XP_FFLOOD,XP_FFROZEN,  &
+                             ZP_Z0FLOOD,ZP_FFGNOS,ZP_FFVNOS)  
 ELSE
-  XP_Z0FLOOD = XUNDEF
+  ZP_Z0FLOOD = XUNDEF
   ZP_FFGNOS  = 0.0
   ZP_FFVNOS  = 0.0
 ENDIF
@@ -841,7 +912,7 @@ ENDIF
 !* effective roughness
 !
  CALL Z0EFF(CROUGH, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
-     XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM, XP_FF, XP_Z0FLOOD,     &
+     XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM, XP_FF, ZP_Z0FLOOD,     &
      XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                                &
      XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,                                &
      XP_Z0_O_Z0H, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_Z0EFF            )  
@@ -889,10 +960,10 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ZIRRIG_GR(:)= 0.
 !
- CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CSOC, CRAIN, CHORT, CC1DRY, CSCOND,      &
+ CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CRAIN, CHORT, CC1DRY, CSCOND,           &
           TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TTIME, LFLOOD, LTEMP_ARP,&
-          LGLACIER, PTSTEP, CIMPLICIT_WIND,                                               &
-          LSNOWDRIFT,LSNOWDRIFT_SUBLIM,LSNOW_ABS_ZENITH,CSNOWMETAMO,CSNOWRAD,             &
+          LGLACIER, PTSTEP, CIMPLICIT_WIND, LAGRI_TO_GRASS,                               &
+          LSNOWDRIFT, LSNOWDRIFT_SUBLIM, LSNOW_ABS_ZENITH, CSNOWMETAMO, CSNOWRAD,         &
           XCGMAX, ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA,                  &
           ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, ZP_SNOW, ZP_ZENITH, ZP_GLOBAL_SW, ZP_LW,      &
           ZP_WIND, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,            &
@@ -925,7 +996,8 @@ ZIRRIG_GR(:)= 0.
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX,ZIRRIG_GR                 )  
+          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX, ZIRRIG_GR,               &
+          XP_TOPQS, XP_QSB, XP_SUBL, XP_FWTD, XP_WTD, XP_SNDRIFT                          )  
 !
 ZP_TRAD=XP_TSRAD
 !
@@ -943,11 +1015,12 @@ ENDIF
 ! Calculation of ISBA water and energy budget (and time tendencies of each reservoir)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL ISBA_BUDGET(CISBA,TSNOW%SCHEME,LGLACIER,PTSTEP,          &
+CALL ISBA_BUDGET(CISBA,TSNOW%SCHEME,LGLACIER,PTSTEP,          &
                  XP_WG,XP_WGI,XP_WR,XP_SNOWSWE,XP_DG,XP_DZG,  & 
                  ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,ZP_SWE_INI,   &
                  ZP_RAIN,ZP_SNOW,XP_EVAP,XP_DRAIN,XP_RUNOFF,  &
                  XP_IFLOOD,XP_PFLOOD,XP_ICEFLUX,XP_IRRIG_FLUX,&
+                 XP_SNDRIFT,                                  &
                  XP_DWG,XP_DWGI,XP_DWR,XP_DSWE,XP_WATBUD      )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -973,6 +1046,7 @@ END IF
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
   CALL VEGETATION_EVOL(CISBA, CPHOTO, CRESPSL, CALBEDO, LAGRIP, LTR_ML,           &
+                       LNITRO_DILU, LAGRI_TO_GRASS,                               &
                        PTSTEP, KMONTH, KDAY, NSPINW, PTIME, XP_LAT, ZP_RHOA,      &
                        XP_DG, XP_DZG, NK_WG_LAYER,                                &                       
                        XP_TG, XP_ALBNIR_VEG, XP_ALBVIS_VEG, XP_ALBUV_VEG,         &
@@ -1105,8 +1179,8 @@ IF(NDSTEQ>0)THEN
 !
    IF (NSV_AEREND > 0)  THEN ! case of dust/ anthropogenic aerosols coupling
      DO JMODE=1,NDSTMDE
-
-      !Make index which is 0 for first mode, 3 for second, 6 for third etc
+       !
+       !Make index which is 0 for first mode, 3 for second, 6 for third etc
        IF (LVARSIG_DST) THEN
          JSV_IDX = (JMODE-1)*3
        ELSE IF (LRGFIX_DST) THEN
@@ -1114,7 +1188,7 @@ IF(NDSTEQ>0)THEN
        ELSE
          JSV_IDX = (JMODE-1)*2
        END IF
-
+       !
        DO JSV=1, size(HSV)
          IF ((TRIM(HSV(JSV)) == "@DSTI").AND.(JMODE==3)) THEN 
            ! add dust flux and conversion kg/m2/s into molec.m2/s
@@ -1125,17 +1199,18 @@ IF(NDSTEQ>0)THEN
            ZP_SFTS(:,JSV) = ZP_SFTS(:,JSV) + ZP_SFTS(:,NSV_DSTBEG-1+JSV_IDX+2)*XAVOGADRO/XMOLARWEIGHT_DST
          END IF
        END DO
+       !
      END DO
-
     END IF
+!    
 !Modify fluxes due to dry deposition, we introduce a negative flux where dust is lost
   CALL DSLT_DEP(ZP_SV(:,NSV_DSTBEG:NSV_DSTEND), ZP_SFTS(:,NSV_DSTBEG:NSV_DSTEND), &
                 ZP_USTAR, XP_RESA, ZP_TA, ZP_RHOA, XEMISSIG_DST, XEMISRADIUS_DST, &
                 JPMODE_DST, XDENSITY_DST, XMOLARWEIGHT_DST, ZCONVERTFACM0_DST,    &
                 ZCONVERTFACM6_DST, ZCONVERTFACM3_DST, LVARSIG_DST, LRGFIX_DST,    &
                 CVERMOD  )
-
- !Transfer these fluxes to fluxes understandable by all moments
+!
+!Transfer these fluxes to fluxes understandable by all moments
   CALL MASSFLUX2MOMENTFLUX(           &
     ZP_SFTS(:,NSV_DSTBEG:NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     ZP_RHOA,                          & !I [kg/m3] air density
@@ -1146,7 +1221,7 @@ IF(NDSTEQ>0)THEN
     ZCONVERTFACM6_DST,                &
     ZCONVERTFACM3_DST,                &
     LVARSIG_DST, LRGFIX_DST           )   
-
+!
 ENDIF !Check on CDSTYN
 !
 ! --------------------------------------------------------------------------------------
@@ -1176,13 +1251,27 @@ ENDIF !Check on CSLTYN
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_ISBA_n(ZP_TA, ZP_TRAD, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,      &
+ CALL DIAG_INLINE_ISBA_n(ZP_TA, XP_TS, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,      &
                           ZP_ZREF, ZP_UREF,                                            &
                           XP_CD, XP_CDN, XP_CH, XP_RI, XP_HU, XP_Z0_WITH_SNOW,         &
                           XP_Z0H_WITH_SNOW, XP_Z0EFF,                                  &
                           ZP_SFTH, ZP_SFTQ, ZP_SFU, ZP_SFV, XP_QS,                     &
                           XP_DIR_ALB_WITH_SNOW, XP_SCA_ALB_WITH_SNOW,                  &
                           ZP_DIR_SW, ZP_SCA_SW, ZP_LW, XP_RN                           )  
+!
+!
+!-------------------------------------------------------------------------------
+!Physical properties see by the atmosphere in order to close the energy budget 
+!between surfex and the atmosphere. All variables should be at t+1 but very 
+!difficult to do. Maybe it will be done later. However, Ts can be at time t+1
+!-------------------------------------------------------------------------------
+!
+ZP_TSURF (:) = XP_TS (:)
+ZP_Z0    (:) = XP_Z0_WITH_SNOW (:)
+ZP_Z0H   (:) = XP_Z0H_WITH_SNOW(:)
+ZP_QSURF (:) = XP_QS (:)
+!
+!-------------------------------------------------------------------------------
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Isba offline diagnostics for each patch
@@ -1253,6 +1342,10 @@ IF (NPATCH==1) THEN
    ZSFU_TILE       (:,JPATCH)  = ZP_SFU       (:)
    ZSFV_TILE       (:,JPATCH)  = ZP_SFV       (:)
    ZTRAD_TILE      (:,JPATCH)  = ZP_TRAD      (:)
+   ZTSURF_TILE     (:,JPATCH)  = ZP_TSURF     (:)
+   ZZ0_TILE        (:,JPATCH)  = ZP_Z0        (:)
+   ZZ0H_TILE       (:,JPATCH)  = ZP_Z0H       (:)
+   ZQSURF_TILE     (:,JPATCH)  = ZP_QSURF     (:)   
 ELSE
 !cdir nodep
 !cdir unroll=8
@@ -1264,6 +1357,10 @@ ELSE
    ZSFU_TILE       (JI,JPATCH)  = ZP_SFU       (JJ)
    ZSFV_TILE       (JI,JPATCH)  = ZP_SFV       (JJ)
    ZTRAD_TILE      (JI,JPATCH)  = ZP_TRAD      (JJ)
+   ZTSURF_TILE     (JI,JPATCH)  = ZP_TSURF     (JJ)
+   ZZ0_TILE        (JI,JPATCH)  = ZP_Z0        (JJ)
+   ZZ0H_TILE       (JI,JPATCH)  = ZP_Z0H       (JJ)
+   ZQSURF_TILE     (JI,JPATCH)  = ZP_QSURF     (JJ)   
  ENDDO
 !
 !cdir nodep

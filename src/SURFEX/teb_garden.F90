@@ -334,7 +334,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_TOWN           ! latent heat flux ove
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_TOWN        ! flux through the ground
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP_TOWN         ! evaporation flux (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_TOWN       ! runoff over the ground
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2       (kg/m2/s)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2       (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GRND           ! momentum flux for ground built surf
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_ROOF           ! momentum flux for roofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDUWDU_GRND        !
@@ -670,10 +670,10 @@ REAL, DIMENSION(SIZE(PTA)) :: ZMTC_O_GR_R1        ! mean thermal conductivity ov
 ! fluxes from green surfaces
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GARDEN        ! evaporation (kg/m2/s)
-REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GARDEN       ! CO2 fluxes (kg/m2/s)
+REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GARDEN       ! CO2 fluxes (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_GARDEN     ! LW flux emitted by the garden (W/m² garden)
 REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GREENROOF     ! evaporation over greenroofs (kg/m2/s)
-REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GREENROOF    ! CO2 fluxes over greenroofs (kg/m2/s)
+REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GREENROOF    ! CO2 fluxes over greenroofs (m/s*kg_CO2/kg_air)
 !
 ! fluxes from built surfaces
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROAD       ! LW flux emitted by the road (W/m² road)

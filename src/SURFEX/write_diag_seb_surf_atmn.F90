@@ -26,6 +26,7 @@
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : cumulated diag
 !!      Juan        6/12/2011: parallel bug , remove local ANY(XAVG_ZON10M) test
+!!      B. Decharme  06/13   Add QS, evap and sublimation diags
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -33,8 +34,9 @@
 !
 USE MODD_DIAG_SURF_ATM_n,  ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET, LCOEF,          &
                                   LRAD_BUDGET, LRESET_BUDGETC, LSURF_BUDGETC,    &
+                                  LSURF_VARS,                                    &
                                   XAVG_RN, XAVG_H, XAVG_LE, XAVG_LEI, XAVG_GFLUX,&
-                                  XAVG_RI, XAVG_CD, XAVG_CH, XAVG_CE,            &
+                                  XAVG_RI, XAVG_CD, XAVG_CH, XAVG_CE, XAVG_QS,   &
                                   XAVG_T2M, XAVG_TS, XAVG_Q2M, XAVG_HU2M,        &
                                   XAVG_ZON10M, XAVG_MER10M, XAVG_Z0, XAVG_Z0H,   &
                                   XAVG_T2M_MIN_ZS, XAVG_Q2M_MIN_ZS,              &
@@ -47,7 +49,8 @@ USE MODD_DIAG_SURF_ATM_n,  ONLY : N2M, L2M_MIN_ZS, LSURF_BUDGET, LCOEF,         
                                   XAVG_FMUC, XAVG_FMVC, XAVG_T2M_MIN,            &
                                   XAVG_T2M_MAX, XAVG_LEIC, XDIAG_TRAD,           &
                                   XDIAG_EMIS, XAVG_HU2M_MIN, XAVG_HU2M_MAX,      &
-                                  XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2
+                                  XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2,    &
+                                  XAVG_EVAP, XAVG_EVAPC, XAVG_SUBL, XAVG_SUBLC
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : CGRID
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -117,7 +120,7 @@ IF (N2M>=1.OR.LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDIAG_EMIS(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='SFCO2'
-  YCOMMENT='X_Y_'//YRECFM//' (KG/M2/S)'
+  YCOMMENT='X_Y_'//YRECFM//' (M.kgCO2.S-1.kgAIR-1)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SFCO2(:),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
@@ -215,6 +218,16 @@ IF (LSURF_BUDGET) THEN
   YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_GFLUX(:),IRESP,HCOMMENT=YCOMMENT)
   !
+  YRECFM='EVAP'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+  !
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_EVAP(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='SUBL'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+  !
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SUBL(:),IRESP,HCOMMENT=YCOMMENT)
+  !
   IF (LRAD_BUDGET) THEN
     !         
     YRECFM='SWD'
@@ -290,6 +303,16 @@ IF (LSURF_BUDGETC) THEN
   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_GFLUXC(:),IRESP,HCOMMENT=YCOMMENT)
   !
+  YRECFM='EVAPC'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+  !
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_EVAPC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='SUBLC'
+  YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+  !
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SUBLC(:),IRESP,HCOMMENT=YCOMMENT)
+  !
   IF (LRAD_BUDGET .OR. (LSURF_BUDGETC .AND. .NOT.LRESET_BUDGETC)) THEN
     !        
     YRECFM='SWDC'
@@ -355,6 +378,19 @@ IF (LCOEF) THEN
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDIAG_ZREF(:),IRESP,HCOMMENT=YCOMMENT)
   !
 END IF
+!
+!
+!*       5.     Surface humidity
+!               ----------------
+!
+IF (LSURF_VARS) THEN
+!
+YRECFM='QS'
+YCOMMENT='X_Y_'//YRECFM//' (kg/kg)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_QS(:),IRESP,HCOMMENT=YCOMMENT)
+!
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

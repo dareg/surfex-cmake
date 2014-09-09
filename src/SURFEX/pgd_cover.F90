@@ -1,6 +1,6 @@
 
 !     #########
-      SUBROUTINE PGD_COVER(HPROGRAM)
+      SUBROUTINE PGD_COVER(HPROGRAM,ORM_RIVER)
 !     ##############################################################
 !
 !!**** *PGD_COVER* monitor for averaging and interpolations of cover fractions
@@ -34,6 +34,7 @@
 !!    B. Decharme  06/2009  remove lack and sea as the user want
 !!    B. Decharme  07/2009  compatibility between Surfex and Orca (Nemo) grid (Earth Model)
 !!    B. Decharme  07/2012  if sea or water imposed to 1 in a grid cell: no extrapolation
+!!    B. Decharme  02/2014  Add LRM_RIVER
 !!
 !----------------------------------------------------------------------------
 !
@@ -55,6 +56,7 @@ USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CTOWN, CWATER,            &
 !
 USE MODI_GET_LUOUT
 USE MODE_GRIDTYPE_GAUSS
+USE MODE_GRIDTYPE_LONLAT_REG
 
 USE MODI_TREAT_FIELD
 USE MODI_INTERPOL_FIELD2D
@@ -91,7 +93,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
- CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+LOGICAL,             INTENT(OUT)   :: ORM_RIVER    ! delete river coverage (default = false)
 !
 !
 !*    0.2    Declaration of local variables
@@ -104,8 +107,7 @@ IMPLICIT NONE
 REAL                     :: XRM_COVER   ! limit of coverage under which the
                                         ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST   ! limit of coast coverage under which
-                                        ! the coast is replaced by sea or
-                                        ! inland water. Default is 1.
+                                        ! the coast is replaced by sea. Default is 1.
 REAL                     :: XRM_LAKE    ! limit of inland lake coverage under which
                                         ! the water is removed. Default is 0.0                     
 REAL                     :: XRM_SEA     ! limit of sea coverage under which
@@ -141,6 +143,8 @@ LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another 
 !
 LOGICAL                  :: GPRESENT
 !
+LOGICAL                  :: LRM_RIVER   ! delete inland river coverage. Default is false
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------
@@ -155,7 +159,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_COVER',0,ZHOOK_HANDLE)
 ALLOCATE(LCOVER     (JPCOVER))
 ALLOCATE(XUNIF_COVER(JPCOVER))
 !
-LCOVER = .FALSE.
+LCOVER      = .FALSE.
 XUNIF_COVER = XUNDEF
 !
 IECO2 = 0
@@ -166,8 +170,8 @@ IECO2 = 0
 !             --------------------------
 !
  CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YFILETYPE, XUNIF_COVER,  &
-                          XRM_COVER, XRM_COAST, XRM_LAKE, XRM_SEA,   &
-                          LORCA_GRID, XLAT_ANT, LIMP_COVER           )  
+                         XRM_COVER, XRM_COAST, XRM_LAKE, LRM_RIVER, &
+                         XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER  )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -325,6 +329,14 @@ ELSE
     END DO
   END DO
   !
+  ! * removes River if the user want
+  ORM_RIVER=LRM_RIVER
+  IF(LRM_RIVER.AND.IMASK_WATER(2)/=0)THEN
+     WHERE(XCOVER(:,IMASK_WATER(2)) > 0.)
+           XCOVER(:,IMASK_WATER(2)) = 0.
+     ENDWHERE
+  ENDIF
+  !
   ! * removes lake as the user want
   IF(XRM_LAKE>0.0)THEN
      DO JL=1,SIZE(NWATER)
@@ -348,7 +360,7 @@ ELSE
   ENDIF
   !
   !
-  ! * removes cover; replace by sea or inland water if sea or inland water > XRM_COAST
+  ! * removes cover; replace by sea or inland water if sea > XRM_COAST
   DO JCOVER=1,ICOVER
     !
     DO JL=1,SIZE(NSEA)
@@ -359,15 +371,6 @@ ELSE
         END WHERE 
       ENDIF
     ENDDO
-    !
-    DO JL=1,SIZE(NWATER)
-      IF (IMASK_WATER(JL)/=0) THEN
-        WHERE(XCOVER(:,IMASK_WATER(JL))>=XRM_COAST)
-          XCOVER(:,JCOVER) = 0.
-          XCOVER(:,IMASK_WATER(JL)) = 1.
-        END WHERE
-      ENDIF
-    ENDDO 
     !    
   ENDDO
 !
@@ -375,14 +378,15 @@ ELSE
 ! * Compatibility between Surfex and Orca grid 
 !   (Earth Model over water bodies and Antarctic)
 !
-  IF(LORCA_GRID.AND.CGRID=='GAUSS     ')THEN
+  IF(LORCA_GRID.AND.(CGRID=='GAUSS     '.OR.CGRID=='LONLAT REG'))THEN
 !
 !     No river or inland water bodies
     IF (IMASK_WATER(2)/=0) XCOVER(:,IMASK_WATER(2)) = 0.
     IF (IMASK_WATER(3)/=0) XCOVER(:,IMASK_WATER(3)) = 0.
 !
     ALLOCATE(ZLAT(NL))
-    CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,PLAT=ZLAT)
+    IF (CGRID=='GAUSS     ') CALL GET_GRIDTYPE_GAUSS(XGRID_PAR,PLAT=ZLAT)
+    IF (CGRID=='LONLAT REG') CALL GET_GRIDTYPE_LONLAT_REG(XGRID_PAR,PLAT=ZLAT)
 !
       DO JL=1,SIZE(NSEA)
         IF (IMASK_SEA(JL)/=0) THEN

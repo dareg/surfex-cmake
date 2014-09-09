@@ -34,6 +34,7 @@ PROGRAM SODA
 !!    Original         04/2012
 !!
 !! 03/2014 E. Martin change indices names in OMP module according to GMAP changes
+!  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
 !----------------------------------------------------------------------------
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI, NPROC, NCOMM,   &
@@ -61,7 +62,7 @@ USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATC
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
-                                XZENITH, XAZIM, XCO2, XRHOA 
+                                XZENITH, XAZIM, XCO2, XRHOA, XTSURF
 !
 #ifdef ARO 
 USE MODD_IO_SURF_ARO,ONLY : NGPTOT, NGPTOT_CAP, NPROMA, NINDX1, NINDX2, NBLOCK, NKPROMA
@@ -188,6 +189,16 @@ INTEGER :: ILUNAM
 INTEGER :: IRET, INB
 INTEGER :: IRESP, ISTAT               ! Response value
 INTEGER :: INFOMPI, ILEVEL
+!
+! Flag diag :
+!
+INTEGER :: I2M, IBEQ, IDSTEQ
+LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
+           GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GINTERPOL_SST,   &
+           GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,            &
+           GWATER_PROFILE, GINTERPOL_TS,                           &
+           GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,&
+           GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB
 !
 ! ******************************************************************************************
 !
@@ -320,6 +331,7 @@ ALLOCATE(XDIR_ALB(INI,ISW))
 ALLOCATE(XSCA_ALB(INI,ISW))
 ALLOCATE(XEMIS(INI))
 ALLOCATE(XTSRAD(INI))
+ALLOCATE(XTSURF(INI))
 !
 ! Indicate that zenith and azimuth angles are not initialized
 XZENITH = XUNDEF
@@ -405,7 +417,7 @@ DO ISTEP = 1,NBOUTPUT
     CALL IO_BUFF_CLEAN_n
     CALL INIT_SURF_ATM_n(CSURF_FILETYPE,YINIT, LLAND_USE, INI, ISV, ISW,  &
                          CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS,     &
-                         XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD,               &
+                         XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSURF,       &
                          IYEAR, IMONTH, IDAY, ZTIME,                      &
                           YATMFILE, YATMFILETYPE, YTEST              )
     !
@@ -737,12 +749,41 @@ END IF
 !
 LDEF = .TRUE.
 DO JNW = 1,INW
+  !
   CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
-  CALL FLAG_DIAG_UPDATE(.FALSE.,.TRUE.,0,.FALSE.,.FALSE.,.FALSE.,&
-                        .FALSE.,0,0,.FALSE.,.FALSE.,&
-                        .FALSE.,.FALSE.,.FALSE.,.FALSE.,&
-                        .FALSE.,.FALSE.,.FALSE.,&
-                        .FALSE.,.FALSE.)  
+  !
+  GFRAC                  = .FALSE.
+  GDIAG_GRID             = .TRUE.
+  I2M                    = 0
+  GSURF_BUDGET           = .FALSE.
+  GRAD_BUDGET            = .FALSE.
+  GCOEF                  = .FALSE.
+  GSURF_VARS             = .FALSE.
+  IBEQ                   = 0
+  IDSTEQ                 = 0
+  GDIAG_OCEAN            = .FALSE.
+  GDIAG_SEAICE           = .FALSE.
+  GINTERPOL_SST          = .FALSE.
+  GINTERPOL_SSS          = .FALSE.
+  GINTERPOL_SIC          = .FALSE.
+  GINTERPOL_SIT          = .FALSE.
+  GWATER_PROFILE         = .FALSE.
+  GINTERPOL_TS           = .FALSE.
+  GSURF_EVAP_BUDGET      = .FALSE.
+  GFLOOD                 = .FALSE.
+  GPGD_ISBA              = .FALSE.  
+  GCH_NO_FLUX_ISBA       = .FALSE.
+  GSURF_MISC_BUDGET_ISBA = .FALSE.
+  GPGD_TEB               = .FALSE.
+  GSURF_MISC_BUDGET_TEB  = .FALSE.  
+  !
+  CALL FLAG_DIAG_UPDATE(GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
+                        GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
+                        GINTERPOL_SST, GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,&
+                        GWATER_PROFILE, GINTERPOL_TS,                              &
+                        GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
+                        GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
+  ! 
   ! Store results from assimilation
   CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
   CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')

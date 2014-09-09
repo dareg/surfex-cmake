@@ -23,6 +23,8 @@
 !!    ------
 !!
 !!	P. Le Moigne           * Meteo-France *
+!!
+!!      Modified by P. Le Moigne - 10/2013 : bug in ZSW_UP declaration
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -53,7 +55,8 @@ REAL, DIMENSION(:)  , INTENT(OUT)  :: PALB               ! albedo
 !              ---------------
 !
 INTEGER                          :: JSWB
-REAL, DIMENSION(SIZE(PDIR_SW))      :: ZSW_UP
+REAL, DIMENSION(SIZE(PDIR_SW,1)) :: ZSW_UP
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -70,7 +73,7 @@ IF (LHOOK) CALL DR_HOOK('FLAKE_ALBEDO',0,ZHOOK_HANDLE)
     PGLOBAL_SW(:) = PGLOBAL_SW(:) + (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB))
   END DO
 !
-!* global albedo
+!* total shortwave upcoming radiation
 !
   ZSW_UP(:) = 0. 
   DO JSWB=1,KSW
@@ -78,8 +81,9 @@ IF (LHOOK) CALL DR_HOOK('FLAKE_ALBEDO',0,ZHOOK_HANDLE)
                  + PDIR_ALB(:,JSWB) * PDIR_SW(:,JSWB) &
                  + PSCA_ALB(:,JSWB) * PSCA_SW(:,JSWB)  
   END DO
-
-  PALB(:) = XUNDEF
+!
+!* global albedo
+!
   WHERE(PGLOBAL_SW(:)>0.)  
        PALB(:) = ZSW_UP(:) / PGLOBAL_SW(:)
   ELSEWHERE

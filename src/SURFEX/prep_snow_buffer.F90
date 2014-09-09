@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_SNOW_BUFFER(HPROGRAM,HSURF,KLUOUT,PFIELD)
+SUBROUTINE PREP_SNOW_BUFFER(HPROGRAM,HSURF,KLUOUT,KLAYER,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_SNOW_BUFFER* - prepares snow field from operational BUFFER
@@ -23,6 +23,7 @@ SUBROUTINE PREP_SNOW_BUFFER(HPROGRAM,HSURF,KLUOUT,PFIELD)
 !!      Original    03/2005
 !!------------------------------------------------------------------
 !
+USE MODE_SNOW3L
 !
 USE MODE_READ_BUFFER
 !
@@ -57,6 +58,7 @@ IMPLICIT NONE
 CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=10),  INTENT(IN)   :: HSURF     ! type of field
 INTEGER,            INTENT(IN)   :: KLUOUT    ! logical unit of output listing
+INTEGER,            INTENT(IN)  :: KLAYER        ! Number of layer of output snow scheme
 REAL,DIMENSION(:,:,:), POINTER   :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
@@ -93,7 +95,9 @@ CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
 IF (HSURF(7:8)=='RO') THEN
   ! 
   SELECT CASE(HSURF(1:3))
-    CASE('DEP','ALB','WWW')
+    CASE('DEP')
+      ALLOCATE(PFIELD(NNI,KLAYER,1))
+    CASE('ALB','WWW')
       ALLOCATE(PFIELD(NNI,1,1))
     CASE('HEA','RHO')
       ALLOCATE(PFIELD(NNI,SIZE(XGRID_SNOW),1))
@@ -165,7 +169,7 @@ ELSE
      DEALLOCATE(ZFIELD1D)
 !
 !
-!*      3.2    Total snow depth (m)
+!*      3.2    Total snow depth (m) to snow layers ticknesses (m)
 !
   CASE('DEP')
      CALL READ_BUFFER_SNOW_VEG_DEPTH(KLUOUT,YINMODEL,ZFIELD1D)
@@ -212,9 +216,9 @@ ELSE
      ENDIF
 
      !
-     ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
+     ALLOCATE(PFIELD(NNI,KLAYER,NVEGTYPE))
      DO JVEGTYPE=1,NVEGTYPE
-       PFIELD(:,1,JVEGTYPE)=ZFIELD1D(:)
+        CALL SNOW3LGRID(PFIELD(:,:,JVEGTYPE),ZFIELD1D(:))
      END DO
      DEALLOCATE(ZFIELD1D)
 !

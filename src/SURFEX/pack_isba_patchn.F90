@@ -30,12 +30,14 @@ SUBROUTINE PACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
 !!      A.L. Gibelin 06/2009 : Soil carbon variables for CNT option
 !!      A.L. Gibelin 07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
+!!      B. Decharme  04/2013 : DIF lateral subsurface drainage
+!!                             water table / surface coupling
 !!
 !!------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 USE MODD_ISBA_n,      ONLY : NGROUND_LAYER,  NNBIOMASS, NNLITTER, NNSOILCARB,       &
-                               NNLITTLEVS, CISBA, CPHOTO, CSCOND, CRESPSL,          &
+                               NNLITTLEVS, CISBA, CPHOTO, CSCOND, CRESPSL, CRUNOFF, &
                                LGLACIER, XZ0_O_Z0H, XEMIS, XZ0, XWRMAX_CF, XGAMMA,  &
                                XCV, XRGL, XVEGTYPE_PATCH, XDG, XRUNOFFD, XRUNOFFB,  &
                                XWDRAIN, XTAUICE, XZ0REL, XGAMMAT, NWG_LAYER,        &
@@ -62,11 +64,12 @@ USE MODD_ISBA_n,      ONLY : NGROUND_LAYER,  NNBIOMASS, NNLITTER, NNSOILCARB,   
                                XCE_NITRO,XCF_NITRO,XCNA_NITRO,XBSLAI_NITRO,         &
                                XWATSUP,XIRRIG,TSEED,TREAP,                          &
                                CRAIN, XMUF, XFSAT, XKSAT_ICE,                       &
-                               XD_ICE, LFLOOD, XFFLOOD, XPIFLOOD, XZ0_FLOOD,        &
+                               XD_ICE, LFLOOD, XFFLOOD, XPIFLOOD,                   &
                                XPCPS, XPLVTT, XPLSTT, XINCREASE, XTURNOVER,         &
                                XPSN, XPSNG, XPSNV, XPSNV_A, XFF, XFFG, XFFV, XALBF, &
                                XEMISF, XDIR_ALB_WITH_SNOW, XSCA_ALB_WITH_SNOW,      &
-                               XICE_STO, XFFROZEN, XDZG, XDZDIF, XSOILWGHT
+                               XICE_STO, XFFROZEN, XDZG, XDZDIF, XSOILWGHT,         &
+                               XTOPQS, XFWTD, XWTD
                              
 USE MODD_AGRI,        ONLY : LAGRIP
 USE MODD_AGRI_n,      ONLY : LIRRIDAY, XTHRESHOLDSPT, LIRRIGATE
@@ -111,10 +114,11 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_CE_NITRO, XP_CF_NITRO, XP_CNA_NITRO, XP_BSLAI_NITRO,           &
                                TP_SEED,TP_REAP,XP_IRRIG,XP_WATSUP,XP_LIRRIDAY,XP_THRESHOLD,      &
                                XP_LIRRIGATE, XP_MUF, XP_FSAT, XP_KSAT_ICE, XP_D_ICE,             &
-                               XP_FFLOOD, XP_Z0FLOOD, XP_PIFLOOD, XP_INCREASE, XP_TURNOVER,      &
+                               XP_FFLOOD, XP_PIFLOOD, XP_INCREASE, XP_TURNOVER,                  &
                                XP_PSN, XP_PSNG, XP_PSNV, XP_PSNV_A, XP_FF, XP_FFG, XP_FFV,       &
                                XP_CPS, XP_LVTT, XP_LSTT, XP_ALBF, XP_EMISF, XP_DIR_ALB_WITH_SNOW,&
-                               XP_SCA_ALB_WITH_SNOW, XP_ICE_STO, XP_FFROZEN, XP_SOILWGHT  
+                               XP_SCA_ALB_WITH_SNOW, XP_ICE_STO, XP_FFROZEN, XP_SOILWGHT,        &
+                               XP_TOPQS, XP_FWTD, XP_WTD  
 !
 USE MODD_CSTS,       ONLY : XLVTT, XLSTT, XCPD
 !
@@ -341,8 +345,6 @@ XP_FFLOOD       => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_PIFLOOD      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-XP_Z0FLOOD      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_FF           => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_FFG          => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
@@ -370,11 +372,15 @@ IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
    XP_SNOWHEAT   => XBLOCK_SNOW(:,:,ISIZE_SNOW)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    XP_SNOWEMIS   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SNOW = ISIZE_SNOW + 1
+   XP_SNOWAGE    => XBLOCK_SNOW(:,:,ISIZE_SNOW)
 ELSE
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWHEAT   => XBLOCK_00(:,:,ISIZE_00) 
   ISIZE_0 = ISIZE_0 + 1
   XP_SNOWEMIS   => XBLOCK_0(:,ISIZE_0)
+  ISIZE_00 = ISIZE_00 + 1
+  XP_SNOWAGE    => XBLOCK_00(:,:,ISIZE_00)
 END IF
 !
 IF(TSNOW%SCHEME=='CRO') THEN
@@ -382,10 +388,8 @@ IF(TSNOW%SCHEME=='CRO') THEN
    XP_SNOWGRAN1  => XBLOCK_SNOW(:,:,ISIZE_SNOW)
   ISIZE_SNOW = ISIZE_SNOW + 1
    XP_SNOWGRAN2  => XBLOCK_SNOW(:,:,ISIZE_SNOW)
-ISIZE_SNOW = ISIZE_SNOW + 1
-   XP_SNOWHIST   => XBLOCK_SNOW(:,:,ISIZE_SNOW)
   ISIZE_SNOW = ISIZE_SNOW + 1
-   XP_SNOWAGE    => XBLOCK_SNOW(:,:,ISIZE_SNOW)
+   XP_SNOWHIST   => XBLOCK_SNOW(:,:,ISIZE_SNOW)
 ELSE      
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWGRAN1  => XBLOCK_00(:,:,ISIZE_00)  
@@ -393,8 +397,6 @@ ELSE
   XP_SNOWGRAN2  => XBLOCK_00(:,:,ISIZE_00) 
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWHIST   => XBLOCK_00(:,:,ISIZE_00) 
-  ISIZE_00 = ISIZE_00 + 1
-  XP_SNOWAGE    => XBLOCK_00(:,:,ISIZE_00) 
 END IF
 !
 IF(LGLACIER)THEN  
@@ -479,7 +481,12 @@ IF (CISBA=='DIF') THEN
 !
   ISIZE_NSIMPLE = ISIZE_NSIMPLE + 1
    NK_WG_LAYER   => NBLOCK_SIMPLE(:,ISIZE_NSIMPLE)
-!  
+! 
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1  
+   XP_FWTD=> XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1  
+   XP_WTD=> XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!
 ELSE
 !
   ISIZE_01 = ISIZE_01 + 1
@@ -493,6 +500,23 @@ ELSE
 !  
   ISIZE_N0 = ISIZE_N0 + 1
    NK_WG_LAYER   => NBLOCK_0(:,ISIZE_N0)
+!  
+  ISIZE_0 = ISIZE_0 + 1
+   XP_FWTD=> XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+   XP_WTD=> XBLOCK_0(:,ISIZE_0)
+!
+END IF
+!
+IF (CISBA=='DIF'.AND.CRUNOFF=='SGH') THEN
+!
+  ISIZE_GROUND = ISIZE_GROUND + 1
+  XP_TOPQS => XBLOCK_GROUND(:,:,ISIZE_GROUND)
+!  
+ELSE
+!
+  ISIZE_01 = ISIZE_01 + 1
+  XP_TOPQS   => XBLOCK_01(:,:,ISIZE_01)
 !   
 END IF
 !
@@ -887,7 +911,6 @@ IF (NPATCH==1) THEN
   IF(LFLOOD)THEN
     XP_FFLOOD  (:)=XFFLOOD  (:)
     XP_PIFLOOD (:)=XPIFLOOD (:)
-    XP_Z0FLOOD (:)=XZ0_FLOOD(:, 1)
     XP_FF      (:)=XFF      (:, 1)
     XP_FFG     (:)=XFFG     (:, 1)
     XP_FFV     (:)=XFFV     (:, 1)    
@@ -910,14 +933,14 @@ IF (NPATCH==1) THEN
   ENDIF
   !
   IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
-    XP_SNOWHEAT   (:, :) =    TSNOW%HEAT   (:, :, 1)
+    XP_SNOWHEAT   (:,:) =    TSNOW%HEAT  (:,:,1)
+    XP_SNOWAGE    (:,:) =    TSNOW%AGE   (:,:,1)  
   END IF
   !
   IF(TSNOW%SCHEME=='CRO') THEN
     XP_SNOWGRAN1  (:,:) =     TSNOW%GRAN1  (:,:,1)
     XP_SNOWGRAN2  (:,:) =     TSNOW%GRAN2  (:,:,1)
     XP_SNOWHIST   (:,:) =     TSNOW%HIST   (:,:,1)  
-    XP_SNOWAGE    (:,:) =     TSNOW%AGE    (:,:,1)  
   END IF
   !
   IF(LGLACIER)THEN
@@ -950,6 +973,12 @@ IF (NPATCH==1) THEN
     XP_DZDIF      (:, :) =    XDZDIF      (:, :, 1)
     XP_SOILWGHT   (:, :) =    XSOILWGHT   (:, :, 1)
     NK_WG_LAYER   (:   ) =    NWG_LAYER   (:,    1)
+    XP_FWTD       (:   ) =    XFWTD       (:)
+    XP_WTD        (:   ) =    XWTD        (:)
+  END IF
+  !
+  IF (CISBA=='DIF'.AND.CRUNOFF=='SGH') THEN
+    XP_TOPQS   (:, :) =    XTOPQS   (:, :, 1)
   END IF
   !
   IF (LTR_ML) THEN
@@ -1156,7 +1185,6 @@ ELSE
        JI             = KMASK(JJ)
        XP_FFLOOD  (JJ)=XFFLOOD  (JI)
        XP_PIFLOOD (JJ)=XPIFLOOD (JI)
-       XP_Z0FLOOD (JJ)=XZ0_FLOOD(JI,KPATCH)
        XP_FF      (JJ)=XFF      (JI,KPATCH)
        XP_FFG     (JJ)=XFFG     (JI,KPATCH)
        XP_FFV     (JJ)=XFFV     (JI,KPATCH)
@@ -1187,6 +1215,7 @@ ELSE
       DO JJ=1,KSIZE
         JI                     =    KMASK(JJ)
         XP_SNOWHEAT   (JJ, JK) =    TSNOW%HEAT   (JI, JK, KPATCH)
+        XP_SNOWAGE    (JJ, JK) =    TSNOW%AGE    (JI, JK, KPATCH)
       ENDDO
     END DO
   END IF
@@ -1198,7 +1227,6 @@ ELSE
         XP_SNOWGRAN1  (JJ, JK) =    TSNOW%GRAN1  (JI, JK, KPATCH)
         XP_SNOWGRAN2  (JJ, JK) =    TSNOW%GRAN2  (JI, JK, KPATCH)
         XP_SNOWHIST   (JJ, JK) =    TSNOW%HIST   (JI, JK, KPATCH)
-        XP_SNOWAGE    (JJ, JK) =    TSNOW%AGE    (JI, JK, KPATCH)
       ENDDO
     END DO
   END IF
@@ -1270,8 +1298,19 @@ ELSE
     DO JJ=1,KSIZE
       JI                =  KMASK(JJ)
       NK_WG_LAYER (JJ)  =  NWG_LAYER (JI,KPATCH)
+      XP_FWTD     (JJ)  =  XFWTD     (JI)
+      XP_WTD      (JJ)  =  XWTD      (JI)
     ENDDO
   ENDIF
+  !
+  IF (CISBA=='DIF'.AND.CRUNOFF=='SGH') THEN
+    DO JK=1,SIZE(XROOTFRAC,2)
+      DO JJ=1,KSIZE
+        JI                     =    KMASK(JJ)
+        XP_TOPQS   (JJ, JK)    =    XTOPQS   (JI, JK, KPATCH)  
+      ENDDO
+    ENDDO        
+  END IF
   !
   IF (LTR_ML) THEN
     DO JJ=1,KSIZE

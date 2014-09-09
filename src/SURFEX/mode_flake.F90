@@ -227,8 +227,7 @@ CONTAINS
 ! Version %I% from %G% extracted: %H%
 !------------------------------------------------------------------------------
 
-SUBROUTINE flake_radflux ( depth_w, albedo_water, albedo_ice, albedo_snow,  &
-                             opticpar_water, opticpar_ice, opticpar_snow )         
+SUBROUTINE flake_radflux(depth_w,albedo,opticpar_water,opticpar_ice,opticpar_snow)         
 
 !------------------------------------------------------------------------------
 !
@@ -288,9 +287,7 @@ IMPLICIT NONE
 
 REAL, INTENT(IN) ::   &
     depth_w                           ,  &! The lake depth [m]
-    albedo_water                      ,  &! Albedo of the water surface 
-    albedo_ice                        ,  &! Albedo of the ice surface
-    albedo_snow                           ! Albedo of the snow surface  
+    albedo                                ! Albedo of all surfaces
 
 TYPE (opticpar_medium), INTENT(IN) ::  &
     opticpar_water                    ,  &! Optical characteristics of water
@@ -310,7 +307,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
   IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_RADFLUX',0,ZHOOK_HANDLE)
   IF(h_ice_p_flk.GE.h_Ice_min_flk) THEN            ! Ice exists
     IF(h_snow_p_flk.GE.h_Snow_min_flk) THEN        ! There is snow above the ice
-      I_snow_flk = I_atm_flk*(1.-albedo_snow) 
+      I_snow_flk = I_atm_flk*(1.-albedo) 
       I_bot_flk = 0.
       DO i=1, opticpar_snow%nband_optic
         I_bot_flk = I_bot_flk +                     &
@@ -319,7 +316,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
       I_ice_flk  = I_snow_flk*I_bot_flk
     ELSE                                           ! No snow above the ice 
       I_snow_flk = I_atm_flk  
-      I_ice_flk  = I_atm_flk*(1.-albedo_ice)
+      I_ice_flk  = I_atm_flk*(1.-albedo)
     END IF 
     I_bot_flk = 0.
     DO i=1, opticpar_ice%nband_optic
@@ -330,7 +327,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
   ELSE                                             ! No ice-snow cover
     I_snow_flk   = I_atm_flk  
     I_ice_flk    = I_atm_flk
-    I_w_flk      = I_atm_flk*(1.-albedo_water)
+    I_w_flk      = I_atm_flk*(1.-albedo)
   END IF 
 
   IF(h_ML_p_flk.GE.h_ML_min_flk) THEN           ! Radiation flux at the bottom of the mixed layer
@@ -770,8 +767,11 @@ T_ice_n_flk =  MIN(T_ice_n_flk,  tpl_T_f)
 
 !_tmp
 ! Security, avoid too low values (these constraints are used for debugging purposes)
-  T_snow_n_flk = MAX(T_snow_n_flk, 73.15)  
-  T_ice_n_flk =  MAX(T_ice_n_flk,  73.15)    
+! not good must be deleteted !!!!!!! But the snow scheme is not robust !!!!!!!
+! not good must be deleteted !!!!!!! But the snow scheme is not robust !!!!!!!
+! not good must be deleteted !!!!!!! But the snow scheme is not robust !!!!!!!
+  T_snow_n_flk = MAX(T_snow_n_flk, 200.15)  
+  T_ice_n_flk =  MAX(T_ice_n_flk,  200.15)    
 !_tmp
 
 ! Remove too thin ice and/or snow
@@ -942,21 +942,6 @@ ELSE HTC_Water                                      ! Open water
 ! as a negative dh_ML/dt is encountered very rarely.
 !_dm
 
-!_dbg
-! IF(d_h_ML_dt.LT.0.) THEN 
-!   WRITE*, 'FLake: negative d_h_ML_dt during convection, = ', d_h_ML_dt
-!   WRITE*, '                d_h_ML_dt*del_time = ', MAX(d_h_ML_dt, c_small_flk)*del_time
-!   WRITE*, '         u_*       = ', u_star_w_flk   
-!   WRITE*, '         w_*       = ', w_star_sfc_flk
-!   WRITE*, '         h_CBL_eqi = ', conv_equil_h_scale
-!   WRITE*, '         ZM scale  = ', ZM_h_scale
-!   WRITE*, '        h_ML_p_flk = ', h_ML_p_flk
-! END IF
-!   WRITE*, 'FLake: Convection, = ', d_h_ML_dt
-!   WRITE*, '         Q_*       = ', Q_star_flk
-!   WRITE*, '         \beta*Q_* = ', flk_str_1
-!_dbg
-
       d_h_ML_dt = MAX(d_h_ML_dt, c_small_flk)    
       h_ML_n_flk = h_ML_p_flk + d_h_ML_dt*del_time                       ! Update h_ML 
       h_ML_n_flk = MAX(h_ML_min_flk, MIN(h_ML_n_flk, depth_w))           ! Security, limit h_ML
@@ -993,14 +978,6 @@ ELSE HTC_Water                                      ! Open water
     C_T_n_flk = MIN(C_T_max, MAX(C_T_n_flk, C_T_min))                    ! Limit C_T 
     d_C_T_dt = (C_T_n_flk-C_T_p_flk)/del_time                            ! Re-compute dC_T/dt
 
-!_dbg
-! WRITE*, 'FLake: wind mixing: d_h_ML_dt*del_time = ', d_h_ML_dt*del_time
-! WRITE*, '              h_CBL_eqi = ', conv_equil_h_scale
-! WRITE*, '              ZM scale  = ', ZM_h_scale
-! WRITE*, '              w_*       = ', w_star_sfc_flk
-! WRITE*, '              u_*       = ', u_star_w_flk
-! WRITE*, '             h_ML_p_flk = ', h_ML_p_flk
-!_dbg
 
   END IF Mixing_regime
 
@@ -1053,11 +1030,7 @@ ELSE HTC_Water                                      ! Open water
 
   END IF
 
-!    print '(6(F12.5,1x))',d_T_bot_dt*del_time,aux1*del_time,aux2*del_time,aux3 &
-!                         ,aux4,aux5
-
 END IF HTC_Water
-
 
 !------------------------------------------------------------------------------
 !  Compute the depth of the upper layer of bottom sediments
@@ -1090,28 +1063,11 @@ Sediment: IF(lflk_botsed_use) THEN   ! The bottom-sediment scheme is used
   d_T_B1_dt = flk_str_2*d_H_B1_dt
   T_B1_n_flk = T_B1_p_flk + d_T_B1_dt*del_time            ! Advance T_B1
 
-!_dbg
-! WRITE*, 'BS module: '
-! WRITE*, '  Q_bot   = ', Q_bot_flk
-! WRITE*, '  d_H_B1_dt = ', d_H_B1_dt
-! WRITE*, '  d_T_B1_dt = ', d_T_B1_dt
-! WRITE*, '  H_B1    = ', H_B1_n_flk
-! WRITE*, '    T_bot = ', T_bot_n_flk
-! WRITE*, '  T_B1    = ', T_B1_n_flk
-! WRITE*, '    T_bs  = ',  T_bs
-!_dbg
-
-!_nu  
 ! Use a very simplistic procedure, where only the upper layer profile is used, 
 ! H_B1 is always set to depth_bs, and T_B1 is always set to T_bs.
 ! Then, the time derivatives are zero, and the sign of the bottom heat flux depends on 
 ! whether T_bot is smaller or greater than T_bs.
 ! This is, of course, an oversimplified scheme.
-!_nu  d_H_B1_dt = 0.
-!_nu  d_T_B1_dt = 0.
-!_nu  H_B1_n_flk = H_B1_p_flk + d_H_B1_dt*del_time   ! Advance H_B1
-!_nu  T_B1_n_flk = T_B1_p_flk + d_T_B1_dt*del_time   ! Advance T_B1
-!_nu  
 
   l_snow_exists = H_B1_n_flk.GE.depth_bs-H_B1_min_flk                     &! H_B1 reached depth_bs, or
                .OR. H_B1_n_flk.LT.H_B1_min_flk                              &! H_B1 decreased to zero, or
@@ -1136,16 +1092,6 @@ END IF Sediment
 ! In case of unstable stratification, force mixing down to the bottom
 flk_str_2 = (T_wML_n_flk-T_bot_n_flk)*flake_buoypar(T_mnw_n_flk)
 IF(flk_str_2.LT.0.) THEN 
-
-!_dbg
-! WRITE*, 'FLake: inverse (unstable) stratification !!! '
-! WRITE*, '       Mixing down to the bottom is forced.'
-! WRITE*, '  T_wML_p, T_wML_n ', T_wML_p_flk-tpl_T_f, T_wML_n_flk-tpl_T_f
-! WRITE*, '  T_mnw_p, T_mnw_n ', T_mnw_p_flk-tpl_T_f, T_mnw_n_flk-tpl_T_f
-! WRITE*, '  T_bot_p, T_bot_n ', T_bot_p_flk-tpl_T_f, T_bot_n_flk-tpl_T_f
-! WRITE*, '  h_ML_p,  h_ML_n  ', h_ML_p_flk,          h_ML_n_flk
-! WRITE*, '  C_T_p,   C_T_n   ', C_T_p_flk,           C_T_n_flk
-!_dbg
 
   h_ML_n_flk = depth_w
   T_wML_n_flk = T_mnw_n_flk

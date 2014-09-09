@@ -7,9 +7,9 @@ SUBROUTINE READ_NAMELISTS_TEB_n(HPROGRAM, HINIT)
 USE MODN_TEB_n                          
 USE MODN_TEB_VEG_n,            ONLY: CROUGH,CRUNOFF,CALBEDO,CSCOND,                &
                                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,       &
-                                     CCPSURF, XCGMAX, CKSAT, CTOPREG,              &
-                                     CRAIN, CHORT, LFLOOD, LTRIP , LGLACIER,       &
-                                     LCANOPY_DRAG, LVEGUPD
+                                     CCPSURF, XCGMAX, CKSAT,                       &
+                                     CRAIN, CHORT, LGLACIER,                       &
+                                     LCANOPY_DRAG, LVEGUPD, LNITRO_DILU
 USE MODN_TEB_GREENROOF_n,      ONLY: CRUNOFF_GR,CSCOND_GR,CKSAT_GR,CHORT_GR
 !
 USE MODI_DEFAULT_TEB
@@ -43,9 +43,9 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_TEB_N',0,ZHOOK_HANDLE)
 !
  CALL DEFAULT_TEB_VEG(CROUGH,CRUNOFF,CALBEDO,CSCOND,            &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,   &
-                     CCPSURF, XCGMAX, CKSAT, CTOPREG,          &
-                     CRAIN, CHORT, LFLOOD, LTRIP , LGLACIER,   &
-                     LCANOPY_DRAG, LVEGUPD                     )
+                     CCPSURF, XCGMAX, CKSAT,                   &
+                     CRAIN, CHORT, LGLACIER,                   &
+                     LCANOPY_DRAG, LVEGUPD, LNITRO_DILU        )
 !
  CALL DEFAULT_GREENROOF(CRUNOFF_GR,CSCOND_GR,                   &
                        CKSAT_GR,CHORT_GR)

@@ -1,6 +1,6 @@
-!     ###############################################################
-      SUBROUTINE ISBA_SGH_UPDATE(HISBA,HRUNOFF,HRAIN,PRAIN,PMUF,PFSAT)
-!     ###############################################################
+!     #######################################################################
+      SUBROUTINE ISBA_SGH_UPDATE(HISBA,HRUNOFF,HRAIN,PRAIN,PMUF,PFSAT,PTOPQS)
+!     #######################################################################
 !
 !!****  *SGH_UPDATE*  
 !!
@@ -36,6 +36,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      07/2011 (B. Decharme) : Add fsat diag for dt92
+!!      (B. Decharme) 04/2013 : DIF lateral subsurface drainage
 !!
 !-------------------------------------------------------------------------------
 !
@@ -43,10 +44,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n,      ONLY : NGROUND_LAYER, NPATCH, XPATCH, XWG, XWWILT,  &
-                             XWSAT, XTAB_FSAT, XTAB_WTOP,                 &
+USE MODD_ISBA_n,      ONLY : NGROUND_LAYER, NPATCH, XPATCH, XWG, XWD0,   &
+                             XWSAT, XTAB_FSAT, XTAB_WTOP, XTAB_QTOP,      &
                              XTI_MEAN, XSOILWGHT, XRUNOFFD,               &
-                             NSIZE_NATURE_P, NLAYER_DUN, XWGI
+                             NSIZE_NATURE_P, NLAYER_DUN, XWGI,            &
+                             XKANISO, XCONDSAT
 !
 USE MODD_ISBA_GRID_n, ONLY : XMESH_SIZE
 !
@@ -57,11 +59,6 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!
-!------------------waiting for MEB-------------------------!
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
-USE MODD_SNOW_PAR , ONLY : XWSNV
-!------------------waiting for MEB-------------------------!
 !
 IMPLICIT NONE
 !
@@ -91,15 +88,19 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PMUF
 REAL, DIMENSION(:), INTENT(OUT)  :: PFSAT
 !                                   PFSAT   = Topmodel satured fraction
 !
+REAL, DIMENSION(:,:,:), INTENT(OUT):: PTOPQS
+!                                     PTOPQS   = Topmodel subsurface flow by layer (m/s)
+!
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PRAIN))          :: ZDIST, ZBETA    ! HRAIN = SGH
 !                                        ZDIST  = the cell scale (in km)
 !                                        ZBETA  = cell scale dependency parameter
 !
-REAL, DIMENSION(SIZE(PRAIN))          :: ZD_TOP, ZW_TOP  ! HRUNOFF = SGH
+REAL, DIMENSION(SIZE(PRAIN))          :: ZD_TOP, ZW_TOP, ZQTOP  ! HRUNOFF = SGH
 !                                        ZW_TOP = ative TOPMODEL-soil moisture at 't' (m3 m-3)
-!                                        ZD_TOP  = Topmodel active layer
+!                                        ZD_TOP = Topmodel active layer
+!                                        ZQTOP  = Topmodel lateral sub-surface flow (-)
 !
 INTEGER, DIMENSION(SIZE(PRAIN))       :: IUP,IDOWN  ! HRUNOFF = SGH
 !                                        change in xsat (or fsat) index
@@ -107,9 +108,11 @@ INTEGER, DIMENSION(SIZE(PRAIN))       :: IUP,IDOWN  ! HRUNOFF = SGH
 INTEGER, DIMENSION(SIZE(PRAIN))       :: NMASK      ! indices correspondance between arrays
 !
 REAL, DIMENSION(SIZE(PRAIN))          :: ZWSAT_AVG, ZWWILT_AVG
-!                                           Average soil properties content
+!                                        Average soil properties content
 !
-REAL                                  :: ZF_UP, ZF_DOWN, ZW_UP, ZW_DOWN, ZSLOPEF
+REAL                                  :: ZW_UP, ZW_DOWN
+REAL                                  :: ZF_UP, ZF_DOWN, ZSLOPEF
+REAL                                  :: ZQ_UP, ZQ_DOWN, ZSLOPEQ
 !
 INTEGER                               :: INI, JJ, JI, JPATCH, JTAB, ICOUNT, &
                                          JL
@@ -120,8 +123,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('ISBA_SGH_UPDATE',0,ZHOOK_HANDLE)
 !
 INI=SIZE(PRAIN,1)
-!
-PFSAT   (:) = 0.0
+PFSAT(:) = 0.0
 !
 !*   1.0 Spatial distribution of precipitation
 !    ---------------------------------------------
@@ -160,7 +162,8 @@ IF(HRUNOFF=='SGH')THEN
 !
 ! Calculation of the ative TOPMODEL-soil moisture at 't' (m)
 ! ---------------------------------------------------------------
-!  
+!
+  ZQTOP     (:) = 0.0
   ZW_TOP    (:) = 0.0
   ZD_TOP    (:) = 0.0
   ZWSAT_AVG (:) = 0.0
@@ -169,21 +172,16 @@ IF(HRUNOFF=='SGH')THEN
   IF(HISBA=='DIF')THEN        
 !
     DO JPATCH=1,NPATCH
-      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+      IF (NSIZE_NATURE_P(JPATCH)>0 )THEN
       DO JL=1,NLAYER_DUN
         DO JJ=1,INI
           ZD_TOP    (JJ) = ZD_TOP    (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)
-          ZWSAT_AVG (JJ) = ZWSAT_AVG (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWSAT (JJ,JL)
-          ZWWILT_AVG(JJ) = ZWWILT_AVG(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWWILT(JJ,JL)
-          !------------------waiting for MEB-------------------------!
-          IF(LSNOW_FRAC_TOT.OR.XWSNV<0.1)THEN
-            ZW_TOP(JJ) = ZW_TOP(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWG(JJ,JL,JPATCH)
-          ELSE
-            ZW_TOP(JJ) = ZW_TOP(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*(XWG(JJ,JL,JPATCH)+XWGI(JJ,JL,JPATCH))
-          ENDIF
-          !------------------waiting for MEB-------------------------!
+          ZWSAT_AVG (JJ) = ZWSAT_AVG (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWSAT(JJ,JL)
+          ZWWILT_AVG(JJ) = ZWWILT_AVG(JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWD0 (JJ,JL)
+          ZW_TOP    (JJ) = ZW_TOP    (JJ) + XPATCH(JJ,JPATCH)*XSOILWGHT(JJ,JL,JPATCH)*XWG(JJ,JL,JPATCH)
         ENDDO
       ENDDO
+      ENDIF
     ENDDO
 !
     WHERE(ZD_TOP(:)>0.0)
@@ -195,19 +193,20 @@ IF(HRUNOFF=='SGH')THEN
   ELSE
 !    
     DO JPATCH=1,NPATCH
-      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-      DO JJ=1,INI
-        ZD_TOP(JJ) = ZD_TOP(JJ)+XRUNOFFD(JJ,JPATCH)*XPATCH(JJ,JPATCH)
-        ZW_TOP(JJ) = ZW_TOP(JJ)+XRUNOFFD(JJ,JPATCH)*XPATCH(JJ,JPATCH)*XWG(JJ,2,JPATCH)
-      ENDDO
+      IF (NSIZE_NATURE_P(JPATCH)>0 )THEN
+        DO JJ=1,INI
+          ZD_TOP(JJ) = ZD_TOP(JJ)+XRUNOFFD(JJ,JPATCH)*XPATCH(JJ,JPATCH)
+          ZW_TOP(JJ) = ZW_TOP(JJ)+XRUNOFFD(JJ,JPATCH)*XPATCH(JJ,JPATCH)*XWG(JJ,2,JPATCH)
+        ENDDO
+      ENDIF
     ENDDO
 !  
     WHERE(ZD_TOP(:)>0.0)
           ZW_TOP(:) = ZW_TOP(:) / ZD_TOP(:)
     ENDWHERE
 !      
-    ZWSAT_AVG (:) = XWSAT (:,1)
-    ZWWILT_AVG(:) = XWWILT(:,1)
+    ZWSAT_AVG (:) = XWSAT(:,1)
+    ZWWILT_AVG(:) = XWD0 (:,1)
 !
   ENDIF
 !
@@ -252,18 +251,40 @@ IF(HRUNOFF=='SGH')THEN
 !    new range
      ZF_UP   = XTAB_FSAT(JI,IUP  (JJ))
      ZF_DOWN = XTAB_FSAT(JI,IDOWN(JJ))
+     ZQ_UP   = XTAB_QTOP(JI,IUP  (JJ))
+     ZQ_DOWN = XTAB_QTOP(JI,IDOWN(JJ))     
      ZW_UP   = XTAB_WTOP(JI,IUP  (JJ))
      ZW_DOWN = XTAB_WTOP(JI,IDOWN(JJ))
 !     
 !    Calculate new FSAT
      ZSLOPEF = 0.0
+     ZSLOPEQ = 0.0
      IF(IUP(JJ)/=IDOWN(JJ))THEN
        ZSLOPEF = (ZF_UP-ZF_DOWN)/(ZW_UP-ZW_DOWN)
+       ZSLOPEQ = (ZQ_UP-ZQ_DOWN)/(ZW_UP-ZW_DOWN)
      ENDIF
 !     
      PFSAT(JI) = ZF_DOWN+(ZW_TOP(JI)-ZW_DOWN)*ZSLOPEF
+     ZQTOP(JI) = ZQ_DOWN+(ZW_TOP(JI)-ZW_DOWN)*ZSLOPEQ
 !     
-  ENDDO 
+  ENDDO
+!
+! Subsurface flow by layer (m/s)
+! ------------------------------
+!
+  IF(HISBA=='DIF')THEN        
+!
+    DO JPATCH=1,NPATCH
+      IF(NSIZE_NATURE_P(JPATCH)>0)THEN
+        DO JL=1,NLAYER_DUN
+           DO JJ=1,INI
+            PTOPQS(JJ,JL,JPATCH)=XKANISO(JJ,JL)*XCONDSAT(JJ,1,JPATCH)*ZQTOP(JJ)*XSOILWGHT(JJ,JL,JPATCH)/XRUNOFFD(JJ,JPATCH)
+           ENDDO
+        ENDDO
+      ENDIF
+    ENDDO
+!
+  ENDIF
 !
 ENDIF
 !

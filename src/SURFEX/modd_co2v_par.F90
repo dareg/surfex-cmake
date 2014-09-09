@@ -36,6 +36,7 @@
 !!      A.L. Gibelin 04/2009 : add parameters for PHOTO='NCB'
 !!      A.L. Gibelin 06/2009 : add parameters for RESPSL='CNT'
 !!      B. Decahrme  05/2012 : Add XCC_NITRO and XBIOMASST_LIM (optimization)
+!!      R. Alkama    05/2012 : parameters for 19 vegtype rather than 12
 !!
 !-------------------------------------------------------------------------------
 !
@@ -47,9 +48,9 @@
 !
 IMPLICIT NONE
 !
-INTEGER                              :: NGROUND_CO2_GAUS_LAYERS
-!                                       number of Gaussian intervals for integration over canopy
-!
+REAL, PARAMETER                      :: XSPIN_CO2 = 0.1
+!                                       fraction of the total spinup period used
+!                                       to ramp up CO2 concentration from XCO2_START to XCO2_END
 !
 REAL, PARAMETER                      :: XMCO2 = 44.0E-3, XMC   = 12.0E-3
 !                                       molecular mass of CO2, 
@@ -122,8 +123,10 @@ REAL, PARAMETER, DIMENSION(2) :: XTOPT   = (/25.0, 35.0/)
 !
 REAL, PARAMETER, DIMENSION(2) :: XFZERO1  = (/0.85, 0.50/)   ! AGS LAI
 REAL, PARAMETER, DIMENSION(2) :: XFZERO2  = (/0.95, 0.60/)   ! AST, LST, NIT, NCB 
-!                                       ideal value of F, no photorespiration or 
-!                                       saturation deficit
+!                                       CO2_atm/CO2_int with no photorespiration or saturation deficit, 
+!                                       used only for crops & herbaceous plants       
+REAL, PARAMETER, DIMENSION(2) :: XFZEROTROP  = (/0.74, 0.74/) ! Tropical forests with and without 
+!                                       Carrer et al. radiative transfer                                                                   
 !
 REAL, PARAMETER, DIMENSION(2) :: XEPSO   = (/0.017E-6,0.014E-6/) 
 !                                       maximum initial quantum use efficiency 
@@ -147,10 +150,6 @@ REAL, PARAMETER, DIMENSION(2) :: XT2GMES = (/36.0, 36.0/)
 !                                       reference temperature for computing compensation
 !                                       concentration function for mesophyll conductance: 
 !                                       maximum temperature
-!
-
-REAL, PARAMETER, DIMENSION(2) :: XAMAX   = (/2.2E-6, 1.7E-6/)
-!                                       leaf photosynthetic capacity (kgCO2 m-2 s-1)
 !
 REAL, PARAMETER, DIMENSION(2) :: XQDAMAX = (/2.0, 2.0/)
 !                                       Q10 function for leaf photosynthetic capacity
@@ -205,9 +204,10 @@ REAL, PARAMETER               :: XCOEFF_MAINT_RESP_ZERO = 1.19E-4/86400.
 REAL, PARAMETER               :: XSLOPE_MAINT_RESP = 0.16
 !                                slope for maintenance respiration for temperature dependance (1/°C)
 !
-REAL, PARAMETER, DIMENSION(12) :: XTAU_WOOD = &
-           (/ 0., 0., 0., 40.*365.*86400., 50.*365.*86400., 30.*365.*86400., &
-              0., 0., 0., 0., 0., 0. /)
+REAL, PARAMETER, DIMENSION(19) :: XTAU_WOOD = &
+        (/ 0., 0., 0., 40.*365.*86400., 50.*365.*86400., 30.*365.*86400., 0., 0., 0., 0., &
+           0., 0., 40.*365.*86400., 40.*365.*86400., 50.*365.*86400., 40.*365.*86400.,    &
+           50.*365.*86400., 0., 40.*365.*86400. /)
 !                                 Residence time in woody pools (s) (YPHOTO='NCB')
 !
 !
@@ -246,23 +246,27 @@ REAL, PARAMETER                      :: XXSI_SUP = 2.  ! hight/diameter ratio of
 !
 ! lower layer (calibration should depend on vegetation type...)
 REAL, PARAMETER                      :: XK_INF   = 1.  ! k_sup = 2*tan(zc); where zc is the crown angle
-REAL, PARAMETER                      :: XXSI_INF = 7.  ! hight/diameter ratio of the crown
+REAL, PARAMETER                      :: XXSI_INF = 7.  ! height/diameter ratio of the crown
 !
-REAL, PARAMETER, DIMENSION(12) :: XLAI_SHADE = &       ! above this value sahding is activated
-           (/ 0., 0., 0., 2., 3., 6., 2., 2., 2., 2., 2., 2. /)
-REAL, PARAMETER, DIMENSION(12) :: XXB_SUP = &       ! b_sup = 1/omega_sup(zs=0) -1 calibration avec omega_sup(zs=0)=0.5
-           (/ 1., 1., 1., 1., 2., 3., 2., 2., 2., 2., 2., 2. /)
-REAL, PARAMETER, DIMENSION(12) :: XXB_INF = &       ! b_sup = 1/omega_sup(zs=0) -1 calibration avec omega_sup(zs=0)=0.5
-           (/ 1., 1., 1., 4., 2., 4., 1., 1.5, 1.5, 1., 1., 1. /)
+REAL, PARAMETER, DIMENSION(19) :: XLAI_SHADE = &       ! above this value shading is activated
+           (/ 0., 0., 0., 2., 3., 6., 2., 2., 2., 2., 2., 2., 2., 2., 3., 2., 3., 2., 2. /)
+REAL, PARAMETER, DIMENSION(19) :: XXB_SUP = &       ! b_sup = 1/omega_sup(zs=0) -1 calibration avec omega_sup(zs=0)=0.5
+           (/ 1., 1., 1., 1., 2., 3., 2., 2., 2., 2., 2., 2., 1., 1., 2., 1., 2., 2., 1. /)
+REAL, PARAMETER, DIMENSION(19) :: XXB_INF = &       ! b_sup = 1/omega_sup(zs=0) -1 calibration avec omega_sup(zs=0)=0.5
+           (/ 1., 1., 1., 4., 2., 4., 1., 1.5, 1.5, 1., 1., 1., 4., 4., 2., 4., 2., 1., 4. /)
 !
 ! (Calvet et al. 2008) coefs for ratio of biomass to LAI with representation of nitrogen dilution fct of CO2
-REAL, PARAMETER, DIMENSION(12) :: XCNAREF = &       
-(/ 0., 0., 0., 2.0, 2.8, 2.5, 1.3, 1.9, 1.9, 1.3, 1.3, 1.3 /)
-
-
-REAL, PARAMETER, DIMENSION(12) :: XPARAM = &       
-(/ 0., 0., 0., 2.56, 1.81, 1.81, 1.48, 1.48, 1.48, 1.81, 1.81, 1.81 /)
-
+REAL, PARAMETER, DIMENSION(19) :: XPARAM = &       
+(/ 0., 0., 0., 2.56, 1.81, 1.81, 1.48, 1.48, 1.48, 1.81, 1.81, 1.81, 2.56, 2.56, 1.81, 2.56, &
+  1.81, 1.81, 2.56 /)
+!
+! Leaf photosynthetic capacity (kgCO2 m-2 s-1)
+! Modified parameter for tropical forests. Only change: PFT=6 from Domingues et al, 2011.
+! Other values: 2.2E-6 for C3 PFTs, 1.7E-6 for C4 PFTs, 1. for soil, rock, ice (should be undef)
+REAL, PARAMETER, DIMENSION(19) :: XAMAX   = &
+(/ 1., 1., 1., 2.2E-6, 2.2E-6, 0.36E-6, 2.2E-6, 1.7E-6, 1.7E-6, 2.2E-6, 1.7E-6, 2.2E-6, &
+   2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6/)
+!                                       
 END MODULE MODD_CO2V_PAR
 
 

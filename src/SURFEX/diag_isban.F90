@@ -5,7 +5,8 @@ SUBROUTINE DIAG_ISBA_n(HPROGRAM,                                               &
                          PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
                          PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,          &
                          PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,         &
-                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX            )  
+                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,           &
+                            PEVAP, PEVAPC, PSUBL, PSUBLC                         )
 !     ###############################################################################
 !
 !!****  *DIAG_ISBA_n * - Stores ISBA diagnostics
@@ -29,6 +30,7 @@ SUBROUTINE DIAG_ISBA_n(HPROGRAM,                                               &
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : new diag
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 !
@@ -36,7 +38,8 @@ USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_ISBA_n,      ONLY : TTIME
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_BUDGETC, XAVG_RNC,       &
                                     XAVG_HC, XAVG_LEC, XAVG_LEIC,  &
-                                    XAVG_GFLUXC  
+                                    XAVG_GFLUXC, XAVG_EVAP,        &
+                                    XAVG_EVAPC, XAVG_SUBL, XAVG_SUBLC
 !                                  
 USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,       &
                                XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX,     &
@@ -67,6 +70,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient    (W/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! transf. coef heat   (W/s)
@@ -93,6 +98,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
@@ -119,6 +126,8 @@ IF (LSURF_BUDGET) THEN
   PLE      = XAVG_LE
   PLEI     = XAVG_LEI
   PGFLUX   = XAVG_GFLUX
+  PEVAP    = XAVG_EVAP
+  PSUBL    = XAVG_SUBL
   PSWD     = XAVG_SWD
   PSWU     = XAVG_SWU
   PLWD     = XAVG_LWD
@@ -135,6 +144,8 @@ IF (LSURF_BUDGETC) THEN
   PLEC      = XAVG_LEC
   PLEIC     = XAVG_LEIC
   PGFLUXC   = XAVG_GFLUXC
+  PEVAPC    = XAVG_EVAPC
+  PSUBLC    = XAVG_SUBLC
   PSWDC     = XAVG_SWDC
   PSWUC     = XAVG_SWUC
   PLWDC     = XAVG_LWDC

@@ -23,6 +23,7 @@ SUBROUTINE PREP_SEAFLUX(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!      Original    01/2004
 !!      S. Riette   06/2009 PREP_SEAFLUX_SBL has no more argument
 !!      Modified    07/2012, P. Le Moigne : CMO1D phasing
+!!      Modified    01/2014, S. Senesi : introduce sea-ice model 
 !!------------------------------------------------------------------
 !
 !
@@ -30,14 +31,14 @@ USE MODI_PREP_HOR_SEAFLUX_FIELD
 USE MODI_PREP_VER_SEAFLUX
 USE MODI_PREP_OUTPUT_GRID
 USE MODI_PREP_SEAFLUX_SBL
+USE MODI_PREP_SEAICE
 USE MODI_GET_LUOUT
 !
 USE MODN_PREP_SEAFLUX
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SEAFLUX_n,      ONLY : XZ0, XSST, LSBL, XZ0H, &
-                                  LINTERPOL_SST,         &
-                                  CINTERPOL_SST,         &
-                                  XSST_MTH  
+                                LINTERPOL_SST, CINTERPOL_SST, &
+                                XSST_MTH  
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 USE MODD_OCEAN_n,        ONLY : LMERCATOR, LCURRENT
@@ -105,9 +106,15 @@ LDIAPYCNAL = LDIAPYC
 !
  CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
-!*      2.1    Temperature
+!*      2.1.1    Temperature
 !
  CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+!
+!*      2.1.2   Sea-ice
+!
+IF (CSEAICE_SCHEME /= 'NONE  ') THEN 
+   CALL PREP_SEAICE(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+ENDIF
 !
 !
 !*      2.2    Roughness
@@ -135,7 +142,7 @@ DEALLOCATE(XZS_LS)
 !*      4.     Preparation of optional interpolation of monthly sst
 !
 LINTERPOL_SST=.FALSE.
-IF(CINTERPOL_SST/='NONE  ')THEN
+IF(TRIM(CINTERPOL_SST)/='NONE')THEN
   LINTERPOL_SST=.TRUE.
 ENDIF
 !
@@ -144,7 +151,7 @@ IF(LINTERPOL_SST)THEN
 ! Precedent, Current and Next Monthly SST
   INMTH=3
 ! Precedent, Current and Next Annual Monthly SST
-  IF(CINTERPOL_SST=='ANNUAL')INMTH=14
+  IF(TRIM(CINTERPOL_SST)=='ANNUAL')INMTH=14
 !
   ALLOCATE(XSST_MTH(SIZE(XSST),INMTH))
   DO JMTH=1,INMTH

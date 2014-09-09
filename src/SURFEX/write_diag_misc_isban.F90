@@ -36,37 +36,40 @@
 !!                           swi, wg and wgi comparable to ISBA-FR-DG2 and DG3 layers
 !!                           active layer thickness over permafrost
 !!                           frozen layer thickness over non-permafrost
+!!      B. Decharme  06/13   All snow outputs noted SN
+!!                           XTSRAD_NAT instead of XAVG_TSRAD
+!!                           delete NWG_SIZE
+!!                           water table depth
 !!
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURFEX_MPI, ONLY : NWG_SIZE
-!
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
-USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER,       &
+USE MODD_ISBA_n,          ONLY :   NGROUND_LAYER, XTSRAD_NAT,      &
                                    CRUNOFF, CRAIN, CISBA, LTR_ML,  &
-                                   XMUF, NWG_LAYER,                &
+                                   NPATCH, XMUF, NWG_LAYER,        &
                                    CPHOTO, CRESPSL, LFLOOD,        &
-                                   XFFLOOD, XPIFLOOD, TSNOW  
+                                   XFFLOOD, XPIFLOOD, TSNOW,       &
+                                   XFWTD, XWTD, LWTD
 !                                 
 USE MODD_DIAG_ISBA_n,     ONLY :   LPATCH_BUDGET, XTS, XAVG_TS,    &
-                                   XTSRAD, XAVG_TSRAD  
+                                   XTSRAD 
 !                                 
 USE MODD_AGRI,            ONLY :   LAGRIP
 USE MODD_DIAG_MISC_ISBA_n,ONLY :   LSURF_MISC_BUDGET, LSURF_MISC_DIF,   &
                                    XHV, XAVG_HV, XSWI, XAVG_SWI,        &
                                    XTSWI, XAVG_TSWI, XDPSNG, XAVG_PSNG, &
                                    XDPSNV, XAVG_PSNV, XDPSN, XAVG_PSN,  &
-                                   XSEUIL, XSOIL_TSWI, XALBT, XAVG_ALBT,&                                   
+                                   XSEUIL, XALBT, XAVG_ALBT,            &                                   
                                    XTWSNOW, XAVG_TWSNOW, XTDSNOW,       &
                                    XAVG_TDSNOW,XTTSNOW, XAVG_TTSNOW,    &
                                    XDFFG, XAVG_FFG, XDFFV, XAVG_FFV,    &
-                                   XDFF, XAVG_FF, XSOIL_TWG, XSOIL_TWGI,&
-                                   XDFSAT , XAVG_FSAT,                  &
-                                   XSURF_TSWI, XSURF_TWG, XSURF_TWGI,   &
-                                   XROOT_TSWI, XROOT_TWG, XROOT_TWGI,   &
+                                   XDFF, XAVG_FF,                       &
+                                   XSOIL_SWI, XSOIL_TSWI, XSOIL_TWG,    &
+                                   XSOIL_TWGI, XSOIL_WG, XSOIL_WGI,     &
+                                   XDFSAT, XAVG_FSAT,                   &
                                    XFRD2_TSWI, XFRD2_TWG, XFRD2_TWGI,   &
                                    XFRD3_TSWI, XFRD3_TWG, XFRD3_TWGI,   &                                   
                                    XSNOWLIQ, XSNOWTEMP, XDLAI_EFFC,     &
@@ -97,7 +100,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
-INTEGER           :: JLAYER, IWORK, JJ, IDEPTH
+INTEGER           :: JLAYER, JJ, IDEPTH
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -153,7 +156,7 @@ IF (LSURF_MISC_BUDGET) THEN
     !
     YRECFM='TSRAD_ISBA'
     YCOMMENT='total radiative surface temperature (isba+snow) over tile nature'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TSRAD(:),IRESP,HCOMMENT=YCOMMENT)
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XTSRAD_NAT(:),IRESP,HCOMMENT=YCOMMENT)
     !
   END IF
   !
@@ -161,9 +164,6 @@ IF (LSURF_MISC_BUDGET) THEN
   !               --------------------------------------------------------
   !  
   IF(CISBA=='DIF')THEN
-    !
-    IWORK = NWG_SIZE
-    !          
     DO JLAYER = 1,NGROUND_LAYER
      DO JJ=1,SIZE(NWG_LAYER,1)
         IDEPTH=MAXVAL(NWG_LAYER(JJ,:),NWG_LAYER(JJ,:)/=NUNDEF)
@@ -173,11 +173,9 @@ IF (LSURF_MISC_BUDGET) THEN
         ENDIF
       ENDDO 
     ENDDO
-  ELSE
-    IWORK = NGROUND_LAYER    
   ENDIF         
   !
-  DO JLAYER=1,IWORK
+  DO JLAYER=1,NGROUND_LAYER
     !
     WRITE(YLVL,'(I2)') JLAYER
     !
@@ -197,6 +195,10 @@ IF (LSURF_MISC_BUDGET) THEN
     !
   END DO
   !
+  YRECFM='SWI_T_ISBA'
+  YCOMMENT='soil wetness index over the soil column (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_SWI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
   YRECFM='TSWI_T_ISBA'
   YCOMMENT='total soil wetness index over the soil column (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
@@ -209,33 +211,17 @@ IF (LSURF_MISC_BUDGET) THEN
   YCOMMENT='total ice content (solid) over the soil column (kg/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_TWGI(:),IRESP,HCOMMENT=YCOMMENT)
   !
+  YRECFM='WGTOT_ISBA'
+  YCOMMENT='total volumetric water content (liquid+solid) over the soil column (m3/m3)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_WG(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='WGI_ISBA'
+  YCOMMENT='total volumetric ice content (solid) over the soil column (m3/m3)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOIL_WGI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
   IF(CISBA=='DIF') THEN
     !
     IF (LSURF_MISC_DIF)THEN
-      !
-      YRECFM='TSWI_R_ISBA'
-      YCOMMENT='total soil wetness index over the root zone (-)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
-      !
-      YRECFM='WGTOT_R_ISBA'
-      YCOMMENT='total water content (liquid+solid) over the root zone (kg/m2)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWG(:),IRESP,HCOMMENT=YCOMMENT)
-      !
-      YRECFM='WGI_R_ISBA'
-      YCOMMENT='total ice content (solid) over the root zone (kg/m2)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XROOT_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
-      !    
-      YRECFM='TSWI_S_ISBA'
-      YCOMMENT='total soil wetness index over the surface (-)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TSWI(:),IRESP,HCOMMENT=YCOMMENT)
-      !
-      YRECFM='WG_S_ISBA'
-      YCOMMENT='liquid water content over the surface (m3/m3)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWG(:),IRESP,HCOMMENT=YCOMMENT)
-      !
-      YRECFM='WGI_S_ISBA'
-      YCOMMENT='ice content over the surface (m3/m3)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XSURF_TWGI(:),IRESP,HCOMMENT=YCOMMENT)  
       !
       YRECFM='TSWI_D2_ISBA'
       YCOMMENT='total soil wetness index over comparable FR-DG2 reservoir (-)'
@@ -276,15 +262,15 @@ IF (LSURF_MISC_BUDGET) THEN
   !        2.5    Snow outputs
   !               -------------
   !
-  YRECFM='WSNOW_T_ISBA'
+  YRECFM='WSN_T_ISBA'
   YCOMMENT='Total_snow_reservoir (kg/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TWSNOW(:),IRESP,HCOMMENT=YCOMMENT)
   !
-  YRECFM='DSNOW_T_ISBA'
+  YRECFM='DSN_T_ISBA'
   YCOMMENT='Total_snow_depth (m)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TDSNOW(:),IRESP,HCOMMENT=YCOMMENT)
   !
-  YRECFM='TSNOW_T_ISBA'
+  YRECFM='TSN_T_ISBA'
   YCOMMENT='Total_snow_temperature (K)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_TTSNOW(:),IRESP,HCOMMENT=YCOMMENT)
   !
@@ -333,12 +319,26 @@ IF (LSURF_MISC_BUDGET) THEN
   !        2.8    Total LAI
   !               ---------
   !
-  IF(CPHOTO/='NON')THEN        
+  IF(CPHOTO/='NON'.OR.NPATCH>1)THEN        
     YRECFM='LAI_ISBA'
     YCOMMENT='leaf area index (m2/m2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LAI(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF
-  !  
+  !
+  !        2.9    Water table depth
+  !               -----------------
+  !
+  IF(LWTD)THEN
+    !
+    YRECFM='FWTD_ISBA'
+    YCOMMENT='grid-cell fraction of water table to rise'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XFWTD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='WTD_ISBA'
+    YCOMMENT='water table depth from RRM model or observation (m)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,XWTD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDIF
   !*       3.     Miscellaneous fields for each patch :
   !               -------------------------------------
   !
@@ -350,7 +350,7 @@ IF (LSURF_MISC_BUDGET) THEN
     !        3.1    Soil Wetness Index and active layer depth
     !               -----------------------------------------   
     !
-    DO JLAYER=1,IWORK
+    DO JLAYER=1,NGROUND_LAYER
       !
       WRITE(YLVL,'(I2)') JLAYER
       !
@@ -450,16 +450,16 @@ IF (LSURF_MISC_BUDGET) THEN
     !        3.6  Snow outputs 
     !        -----------------
     !
-    YRECFM='WSNOW_VEGT'
-    YCOMMENT='X_Y_WSNOW_VEG_TOT (kg/m2) per patch'
+    YRECFM='WSN_T_P'
+    YCOMMENT='X_Y_WSNOW_TOT (kg/m2) per patch'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XTWSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='DSNOW_VEGT'
-    YCOMMENT='X_Y_DSNOW_VEG_TOT (m) per patch'
+    YRECFM='DSN_T_P'
+    YCOMMENT='X_Y_DSNOW_TOT (m) per patch'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XTDSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='TSNOW_VEGT'
-    YCOMMENT='X_Y_TSNOW_VEG_TOT (k) per patch'
+    YRECFM='TSN_T_P'
+    YCOMMENT='X_Y_TSNOW_TOT (k) per patch'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XTTSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
     IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN

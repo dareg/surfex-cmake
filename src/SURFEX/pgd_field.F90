@@ -32,6 +32,8 @@
 !!    09/2010 (E. Kourzeneva):   interpolation of the lake depth 
 !!                               is not allowed and not necessary
 !!
+!!    02/2014 (B. Decharme):     interpolation of the lake depth 
+!!                               re-allowed but using the nearest point
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -126,6 +128,10 @@ IF (LEN_TRIM(HFILE)/=0) THEN
   XSUMVAL  (:) = 0.
   INPTS        = 3
 !
+  IF(HFIELD=="water depth") THEN
+    INPTS = 1
+  ENDIF  
+!
   IF (CATYPE=='MAJ') THEN
     ALLOCATE(NVALNBR  (NL))
     ALLOCATE(NVALCOUNT(NL,JPVALMAX))
@@ -167,13 +173,11 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    5.      Interpolation if some points are not initialized (no data for these points)
 !             ------------------------------------------------
 !
-  IF(HFIELD.NE."water depth") THEN
-    IF (PUNIF/=XUNDEF) THEN
-      CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD,PDEF=PUNIF,KNPTS=INPTS)
-    ELSE
-      CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD)
-    END IF          
-  END IF
+  IF (PUNIF/=XUNDEF) THEN
+    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD,PDEF=PUNIF,KNPTS=INPTS)
+  ELSE
+    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,ZFIELD(:),HFIELD)
+  END IF          
 !
   DEALLOCATE(NSIZE    )
   DEALLOCATE(XSUMVAL  )

@@ -114,7 +114,11 @@ END DO
 DEALLOCATE(ZW)
 !
 !-----------------------------------------------------------------------
-HINTERP_TYPE = 'BILIN '
+IF(KNI==1)THEN
+  HINTERP_TYPE = 'UNIF  '
+ELSE
+  HINTERP_TYPE = 'BILIN '
+ENDIF
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_CONF_PROJ',1,ZHOOK_HANDLE)
 !-----------------------------------------------------------------------
 !

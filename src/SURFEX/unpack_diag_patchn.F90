@@ -31,6 +31,8 @@ SUBROUTINE UNPACK_DIAG_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH,    &
 !!      Modified      04-09 by A.L. Gibelin : Add carbon diagnostics
 !!      Modified      05-09 by A.L. Gibelin : Add carbon spinup
 !!      Modified    08/2012 by B. Decharme : optimization
+!!      Modified    06/2013 by B. Decharme : add lateral drainage flux diag for DIF
+!!                                           add tiotale sublimation flux
 !!
 !!------------------------------------------------------------------
 !
@@ -42,7 +44,7 @@ USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW, XP_SMELTFLUX, 
                                   XP_SNOWLIQ, XP_SNOWDZ, XP_SNOWHMASS,          &
                                   XP_RN_ISBA, XP_H_ISBA, XP_LEG_ISBA,           &
                                   XP_LEGI_ISBA, XP_LEV_ISBA, XP_LETR_ISBA,      &
-                                  XP_USTAR_ISBA, XP_LER_ISBA,                   &
+                                  XP_USTAR_ISBA, XP_LER_ISBA, XP_SNDRIFT,       &
                                   XP_LE_ISBA, XP_GFLUX_ISBA, XP_MELTADV,        &
                                   XP_LEI_ISBA, XP_IACAN, XP_LEI,                &
                                   XP_CH, XP_CD, XP_CDN, XP_RI, XP_HU, XP_HUG,   &
@@ -64,7 +66,7 @@ USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW, XP_SMELTFLUX, 
                                   XP_RRVEG, XP_GPP, XP_RESP_AUTO, XP_RESP_ECO,  &
                                   XP_FAPAR, XP_FAPIR, XP_FAPAR_BS, XP_FAPIR_BS, &
                                   XP_IRRIG_FLUX,XP_DWG,XP_DWGI,XP_DSWE,         &
-                                  XP_WATBUD,                                    &                                  
+                                  XP_WATBUD, XP_SUBL, XP_QSB,                   &                                  
                                   XBLOCK_SIMPLE, XBLOCK_GROUND, XBLOCK_SNOW,    &
                                   XBLOCK_KSW, XBLOCK_ABC, XBLOCK_0, XBLOCK_00
 !
@@ -77,8 +79,7 @@ USE MODD_DIAG_ISBA_n,    ONLY :   N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,         
 !
 USE MODD_GR_BIOG_n,      ONLY : XIACAN
 !
-USE MODD_ISBA_n,         ONLY : CPHOTO, LTRIP, LFLOOD, TSNOW, LGLACIER
-!
+USE MODD_ISBA_n,         ONLY : CPHOTO, LFLOOD, TSNOW, LGLACIER, LCPL_RRM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -148,18 +149,19 @@ IF (KNPATCH==1) THEN
     XQS            (:, KPATCH)    = XP_QS             (:)
   END IF
   !
-  IF (LTRIP) THEN
+  IF (LCPL_RRM) THEN
     PCPL_DRAIN     (:, KPATCH)    = XP_DRAIN         (:)
     PCPL_RUNOFF    (:, KPATCH)    = XP_RUNOFF        (:)
   END IF
   !
   IF (LFLOOD) THEN
-    PCPL_EFLOOD    (:, KPATCH)    = XP_LE_FLOOD(:) / XP_LVTT(:) + XP_LEI_FLOOD(:) / XP_LSTT(:)
-    PCPL_PFLOOD    (:, KPATCH)    = XP_PFLOOD        (:)
-    PCPL_IFLOOD    (:, KPATCH)    = XP_IFLOOD        (:)
+    PCPL_EFLOOD    (:, KPATCH)    = XP_LE_FLOOD (:) / XP_LVTT(:) &
+                                  + XP_LEI_FLOOD(:) / XP_LSTT(:)
+    PCPL_PFLOOD    (:, KPATCH)    = XP_PFLOOD                (:)
+    PCPL_IFLOOD    (:, KPATCH)    = XP_IFLOOD                (:)
   END IF    
   !
-  IF(LGLACIER)THEN
+  IF(LCPL_RRM.AND.LGLACIER)THEN
     PCPL_ICEFLUX   (:, KPATCH)    = XP_ICEFLUX       (:)
   ENDIF
   !
@@ -235,7 +237,7 @@ ELSE
     END DO
   END IF
   !
-  IF (LTRIP) THEN
+  IF (LCPL_RRM) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
       PCPL_DRAIN       (JI, KPATCH)    = XP_DRAIN          (JJ)
@@ -245,10 +247,11 @@ ELSE
   !
   IF (LFLOOD) THEN
     DO JJ=1,KSIZE
-      JI                               = KMASK             (JJ)
-      PCPL_EFLOOD      (JI, KPATCH)    = XP_LE_FLOOD(JJ) / XP_LVTT(JJ) + XP_LEI_FLOOD(JJ) / XP_LSTT(JJ)
-      PCPL_PFLOOD      (JI, KPATCH)    = XP_PFLOOD         (JJ)
-      PCPL_IFLOOD      (JI, KPATCH)    = XP_IFLOOD         (JJ)
+      JI                               = KMASK                     (JJ)
+      PCPL_EFLOOD      (JI, KPATCH)    = XP_LE_FLOOD (JJ) / XP_LVTT(JJ) &
+                                       + XP_LEI_FLOOD(JJ) / XP_LSTT(JJ)
+      PCPL_PFLOOD      (JI, KPATCH)    = XP_PFLOOD                 (JJ)
+      PCPL_IFLOOD      (JI, KPATCH)    = XP_IFLOOD                 (JJ)
     END DO
   END IF
   !
@@ -301,8 +304,10 @@ XP_LER          => NULL()
 XP_LETR         => NULL()
 XP_GFLUX        => NULL()
 XP_EVAP         => NULL()
+XP_SUBL         => NULL()
 XP_RESTORE      => NULL()
 XP_DRAIN        => NULL()
+XP_QSB          => NULL()
 XP_RUNOFF       => NULL()
 XP_MELT         => NULL()
 XP_MELTADV      => NULL()
@@ -362,6 +367,7 @@ XP_GFLUXSNOW    => NULL()
 XP_USTARSNOW    => NULL()
 XP_GRNDFLUX     => NULL()
 XP_LESL         => NULL()
+XP_SNDRIFT      => NULL()
 XP_CDSNOW       => NULL()
 XP_CHSNOW       => NULL()
 XP_SNOWHMASS    => NULL()

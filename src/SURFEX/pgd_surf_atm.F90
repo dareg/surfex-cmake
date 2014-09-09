@@ -31,6 +31,7 @@
 !!    Original     13/10/03
 !!      A. Lemonsu      05/2009         Ajout de la clef LGARDEN pour TEB
 !!      J. Escobar      11/2013         Add USE MODI_READ_NAM_PGD_CHEMISTRY
+!!      B. Decharme     02/2014         Add LRM_RIVER
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -83,18 +84,25 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
- CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
- CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
- CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
+CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
+CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
 LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed by atm. model
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
+LOGICAL :: LRM_RIVER   !delete inland river coverage. Default is false
+!
 INTEGER :: ILUOUT ! logical unit of output listing file
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',0,ZHOOK_HANDLE)
+!
+LRM_RIVER = .FALSE.
+!
 CPROGNAME=HPROGRAM
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
@@ -143,7 +151,7 @@ ALLOCATE(XJPDIR(NSIZE_FULL))
 !             -------------
 !
  CALL PGD_FRAC(HPROGRAM,LECOCLIMAP)
-IF (LECOCLIMAP) CALL PGD_COVER(HPROGRAM)
+IF (LECOCLIMAP) CALL PGD_COVER(HPROGRAM,LRM_RIVER)
 !
 !-------------------------------------------------------------------------------
 !
@@ -169,7 +177,7 @@ IF (NDIM_TOWN>0) CALL PGD_TOWN(HPROGRAM,LECOCLIMAP,LGARDEN)
 !*    7.      Additionnal fields for inland water scheme
 !             ------------------------------------------
 !
-IF (NDIM_WATER>0) CALL PGD_INLAND_WATER(HPROGRAM)   
+IF (NDIM_WATER>0) CALL PGD_INLAND_WATER(HPROGRAM,LECOCLIMAP,LRM_RIVER)   
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme

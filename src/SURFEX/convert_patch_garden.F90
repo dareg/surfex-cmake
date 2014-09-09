@@ -35,7 +35,7 @@ SUBROUTINE CONVERT_PATCH_GARDEN(KLU,KDECADE)
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_TEB_n,             ONLY: XCOVER, LCOVER
-USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO
+USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, LTR_ML
 USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS, NGROUND_LAYER,     &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
                                   XGAMMA, XCV, XRGL,                       &
@@ -114,7 +114,7 @@ IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_GARDEN',0,ZHOOK_HANDLE)
 !
 !
   CALL CONVERT_PATCH_ISBA(CISBA,KDECADE,KDECADE,XCOVER,LCOVER,CPHOTO,.FALSE.,  &
-                        .FALSE.,'GRD',PVEG=ZVEG,PLAI=ZLAI,                     &
+                        .FALSE.,LTR_ML,'GRD',PVEG=ZVEG,PLAI=ZLAI,              &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF,       &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=XSOILGRID,                 &
                         PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,PDG2=ZDG2,   &

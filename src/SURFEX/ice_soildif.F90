@@ -65,6 +65,9 @@
 !
 !      Modified    08/2011     Decharme
 !                              Optimization
+!      Modified    10/2013     Boone
+!                              Slight edit to phase computation to improve enthalpy conservation
+!                              
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -207,7 +210,7 @@ DO JL=1,INL
       PTG(JJ,JL) = ZTGM + (ZPHASEF - ZPHASEM)/(PSOILHCAPZ(JJ,JL)+ZAPPHEATCAP)
 !
 !     Get estimate of actual total phase change (J/m3) for equivalent soil water changes:
-      ZPHASE = ZPHASEF - ZPHASEM - ZAPPHEATCAP*(PTG(JJ,JL)-ZTGM)
+      ZPHASE = (PSOILHCAPZ(JJ,JL)+ZAPPHEATCAP)*(PTG(JJ,JL)-ZTGM)
 !
 !     Adjust ice and liquid water conents (m3/m3) accordingly :
       PWGI(JJ,JL) = ZWGIM + ZPHASE/(XLMTT*XRHOLW)     

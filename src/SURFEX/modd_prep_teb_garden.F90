@@ -72,10 +72,10 @@ REAL              :: XASNOW_GD         ! snow albedo
 REAL              :: XWR_DEF        ! default for leaves interception reservoir
 !--------------------------------------------------------------------------
 !
-!* normalized dimensions for interpolation grids for soil
-INTEGER, PARAMETER           :: NGRID_LEVEL = 20
-REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = (/ 0., 0.01, 0.02, 0.05, 0.1, 0.2,&
-    0.4, 0.7, 1., 1.3, 1.6, 2., 2.5, 3., 3.5, 4., 5., 6., 8., 10.  /)  
+!* dimensions for interpolation grids for soil
+INTEGER, PARAMETER           :: NGRID_LEVEL = 22
+REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = &
+      (/0.01,0.04,0.10,0.20,0.40,0.60,0.80,1.0,1.25,1.5,1.75,2.0,2.5,3.0,4.0,5.0,8.00,12.0,17.,23.,30.,100./)
 !
 !--------------------------------------------------------------------------
 !

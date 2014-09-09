@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)
+      SUBROUTINE ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE, &
+                                       HFILE,HFILETYPE,OECOCLIMAP)
 !     ###########################################################
 
 !!
@@ -30,6 +31,7 @@
 !!    ------------
 !!
 !!    Original     13/10/03
+!!    B. Decharme  02/2014  Add LRM_RIVER
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -48,16 +50,19 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
- CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
- CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
- CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
- CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
- CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
+CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
+CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
+CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
+CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
+CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
+LOGICAL,              INTENT(IN)  :: OECOCLIMAP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
+!
+LOGICAL :: LRM_RIVER ! dummy keys
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_INLAND_WATER',0,ZHOOK_HANDLE)
@@ -70,7 +75,8 @@ ELSE IF (CWATER=='FLUX  ') THEN
 ELSE IF (CWATER=='WATFLX') THEN
   CALL PGD_WATFLUX(HPROGRAM)
 ELSE IF (CWATER=='FLAKE ') THEN
-  CALL PGD_FLAKE(HPROGRAM)
+  LRM_RIVER=.TRUE.
+  CALL PGD_FLAKE(HPROGRAM,OECOCLIMAP,LRM_RIVER)
 END IF
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_INLAND_WATER',1,ZHOOK_HANDLE)
 !

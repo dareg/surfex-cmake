@@ -24,6 +24,8 @@ SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFI
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!      P. Le Moigne 03/2007, Ajout initialisation par ascllv
 !!      B. Decharme  01/2009, Optional Arpege deep soil temperature initialization
+!!      B. Decharme  03/2014, external init with FA files
+!!                            new vertical interpol
 !!------------------------------------------------------------------
 !
 !
@@ -58,11 +60,11 @@ USE MODI_VEGTYPE_GRID_TO_PATCH_GRID
 USE MODI_PREP_HOR_SNOW_FIELDS
 USE MODI_GET_LUOUT
 USE MODI_PREP_TEB_GARDEN_EXTERN
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
@@ -175,7 +177,7 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
   CALL PREP_TEB_GARDEN_ASCLLV(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_TEB_GARDEN_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
-ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   ') THEN
+ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
    CALL PREP_TEB_GARDEN_EXTERN(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_TEB_GARDEN_BUFFER(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
@@ -278,7 +280,7 @@ SELECT CASE (HSURF)
   IF (CISBA=='2-L'.OR.CISBA=='3-L') THEN
     ZDG(:,1) = 0.
     ZDG(:,2) = 0.40   ! deep temperature for force-restore taken at 20cm
-    IF(CISBA=='3-L') ZDG(:,3) = 5.60   ! climatological temperature, usually not used
+    IF(CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used
   ELSE
     !* diffusion method, the soil grid is the same as for humidity
     ZDG(:,:) = XDG(:,:)
@@ -321,7 +323,7 @@ CONTAINS
 !
 SUBROUTINE INIT_FROM_REF_GRID(PGRID1,PT1,PD2,PT2)
 !
-USE MODI_INTERP_GRID
+USE MODI_INTERP_GRID_NAT
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PT1    ! variable profile
 REAL, DIMENSION(:),   INTENT(IN)  :: PGRID1 ! normalized grid
@@ -330,7 +332,6 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PT2    ! variable profile
 !
 INTEGER                                  :: JI, JL  ! loop counter
 REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
-REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
 !
 INTEGER :: ILAYER1, ILAYER2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -338,6 +339,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',0,ZHOOK_HANDLE)
+!
 IF (SIZE(PT1,2)==3) THEN
 !
 !* 1. case with only 3 input levels (typically coming from 'UNIF')
@@ -360,8 +362,6 @@ IF (SIZE(PT1,2)==3) THEN
          PT2(:,JL) = PT2(:,ILAYER1)
        ENDDO
     ENDIF
-    IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',1,ZHOOK_HANDLE)
-    RETURN
 !    
   ELSEIF(CISBA=='DIF')THEN
        !surface layer (generally 0.01m imposed)
@@ -379,29 +379,25 @@ IF (SIZE(PT1,2)==3) THEN
              ENDIF
           END DO
        END DO 
-       IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',1,ZHOOK_HANDLE)
-    RETURN
   END IF    
 !
-END IF
-!
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ELSE
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !* 2. case with fine grid as input (general case)
 !     ----------------------------
 !
-  ZD2(:,:) = 0.
-  !
-  ZD2(:,1) = PD2(:,1)/2.
-  DO JL=2,SIZE(ZD2,2)
-    ZD2(:,JL) = (PD2(:,JL-1)+PD2(:,JL)) /2.
-  END DO
-  !
   DO JL=1,SIZE(PT1,2)
     ZD1(:,JL) = PGRID1(JL)
   END DO
-  !
-  CALL INTERP_GRID(ZD1,PT1(:,:),ZD2,PT2(:,:))
+!
+  CALL INTERP_GRID_NAT(ZD1,PT1(:,:),PD2,PT2(:,:))
+!
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ENDIF
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',1,ZHOOK_HANDLE)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

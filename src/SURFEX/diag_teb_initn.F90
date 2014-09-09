@@ -29,6 +29,7 @@
 !!    -------------
 !!      Original    01/2004 
 !!       V. Masson  10/2013 Adds integrated UTCI diagnostics
+!       B. decharme 04/2013 : Add DIAG_TS
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -45,7 +46,7 @@ USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
                               XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
                               XFMU, XFMV , XT2M_MIN, XT2M_MAX,      &
                               XHU2M_MIN, XHU2M_MAX, XWIND10M,       &
-                              XWIND10M_MAX 
+                              XWIND10M_MAX, XDIAG_TS 
 !
 USE MODD_UTCI,              ONLY : NUTCI_STRESS
 USE MODD_DIAG_UTCI_TEB_n,   ONLY : XUTCI_OUTSUN, XUTCI_OUTSHADE, XTRAD_SUN, &
@@ -80,6 +81,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* surface energy budget
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TEB_INIT_N',0,ZHOOK_HANDLE)
+!
+ALLOCATE(XDIAG_TS(KLU))
+XDIAG_TS = XUNDEF
+!
 IF (LSURF_BUDGET) THEN
   ALLOCATE(XRN     (KLU))
   ALLOCATE(XH      (KLU))

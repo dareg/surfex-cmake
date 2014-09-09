@@ -50,8 +50,8 @@ LOGICAL :: LSNOW_PREP_PERM ! activate or disactivate initialization over permane
 !--------------------------------------------------------------------------
 !
 !* normalized dimensions for interpolation grids for soil
-INTEGER, PARAMETER           :: NGRID_LEVEL = 6
-REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SNOW = (/ 0., 0.05, 0.1, 0.5, 0.9, 1.  /)
+INTEGER, PARAMETER           :: NGRID_LEVEL = 100
+REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SNOW
 !
 !--------------------------------------------------------------------------
 !

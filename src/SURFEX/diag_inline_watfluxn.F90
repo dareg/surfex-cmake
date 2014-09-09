@@ -29,6 +29,7 @@
 !!      B. Decharme 08/2009 : Diag for Earth System Model Coupling
 !!      S. Riette   06/2009 CLS_2M becomes CLS_TQ, CLS_TQ and CLS_WIND have one
 !!                          more argument (height of diagnostic)
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
@@ -36,7 +37,7 @@
 !
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM,       ONLY : LCPL_ESM
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
 USE MODD_WATFLUX_n,      ONLY : LSBL
 USE MODD_DIAG_WATFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
                                   XT2M, XQ2M, XHU2M, XZON10M, XMER10M,  &
@@ -45,7 +46,7 @@ USE MODD_DIAG_WATFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
                                   XLWD, XLWU, XSWBD, XSWBU, XFMU, XFMV, &
                                   LSURF_BUDGETC, XT2M_MIN, XT2M_MAX,    &
                                   XDIAG_TS, XHU2M_MIN, XHU2M_MAX,       &
-                                  XWIND10M, XWIND10M_MAX  
+                                  XWIND10M, XWIND10M_MAX, XEVAP, XSUBL  
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -108,15 +109,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_WATFLUX_N',0,ZHOOK_HANDLE)
+!
+! * Mean surface temperature need to couple with AGCM
+!
 XDIAG_TS(:) = PTS(:)
 !
 IF (.NOT. LSBL) THEN
 !        
-  IF (N2M==1) THEN
-       
+  IF (N2M==1) THEN      
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
-                     PSFTH, PSFTQ, PSFZON, PSFMER,                       &
-                     XT2M, XQ2M, XHU2M, XZON10M, XMER10M                       )  
+                     PSFTH, PSFTQ, PSFZON, PSFMER,                    &
+                     XT2M, XQ2M, XHU2M, XZON10M, XMER10M              )  
   ELSE IF (N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
@@ -158,19 +161,20 @@ ENDIF
 !
 IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   !
-  CALL  DIAG_SURF_BUDGET_WATER (XTT, PRHOA, PSFTH, PSFTQ,             &
+  CALL  DIAG_SURF_BUDGET_WATER (XTT, PTS, PRHOA, PSFTH, PSFTQ,          &
                                   PDIR_SW, PSCA_SW, PLW,                &
                                   PDIR_ALB, PSCA_ALB, PEMIS, PTRAD,     &
                                   PSFZON, PSFMER,                       &
                                   XRN, XH, XLE, XLEI, XGFLUX,           &
                                   XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
-                                  XFMU, XFMV )  
+                                  XFMU, XFMV, XEVAP, XSUBL )  
   !
 END IF
 !
 IF(LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_WATER(PTSTEP, XRN, XH, XLE, XLEI, XGFLUX, &
-                                 XSWD, XSWU, XLWD, XLWU, XFMU, XFMV  )  
+  CALL DIAG_SURF_BUDGETC_WATER(PTSTEP, XRN, XH, XLE, XLEI, XGFLUX,  &
+                                 XSWD, XSWU, XLWD, XLWU, XFMU, XFMV,&
+                                 XEVAP, XSUBL                       )  
 ENDIF
 !
 IF (LCOEF) THEN
@@ -186,7 +190,7 @@ IF (LCOEF) THEN
   XZ0  = PZ0
   XZ0H = PZ0H
   !
-END IF
+ENDIF
 !
 IF (LSURF_VARS) THEN
   !
@@ -194,11 +198,11 @@ IF (LSURF_VARS) THEN
   !
   XQS = PQSAT
   !
-END IF
+ENDIF
 !
 ! Diag for Earth System Model coupling
 !
-IF (LCPL_ESM) THEN
+IF (LCPL_SEA) THEN
 !
   CALL DIAG_CPL_ESM_WATER(PTSTEP,XZON10M,XMER10M,XFMU,XFMV,  &
                             XSWD,XSWU,XGFLUX,PSFTQ,PRAIN,      &

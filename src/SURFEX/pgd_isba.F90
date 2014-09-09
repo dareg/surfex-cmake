@@ -36,6 +36,8 @@
 !!    E. Martin     12/2008 : files of data for runoffb and wdrain
 !!    B. Decharme   06/2009 : files of data for topographic index
 !!    A.L. Gibelin  04/2009 : dimension NBIOMASS for ISBA-A-gs
+!!    R. Alkama     05/2012 : npatch must be 12 or 19 if CPHOTO/='NON'
+!!    B. Decharme   11/2013 : groundwater distribution for water table/surface coupling
 !!
 !----------------------------------------------------------------------------
 !
@@ -51,7 +53,8 @@ USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 XZ0EFFJPDIR, CPHOTO, LTR_ML, XRM_PATCH,  &
                                 XCLAY, XSAND, XSOC, LSOCP, LNOF,         &
                                 XRUNOFFB, XWDRAIN, LECOCLIMAP,           &
-                                XSOILGRID, LPERM, XPERM, XPH, XFERT 
+                                XSOILGRID, LPERM, XPERM, XPH, XFERT,     &
+                                LGW, XGW
 USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE
 !
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
@@ -136,6 +139,7 @@ REAL                     :: ZRM_PATCH        ! threshold to remove little fracti
  CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
  CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
  CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
+ CHARACTER(LEN=28)        :: YGW               ! file name for groundwater map
  CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
  CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
  CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
@@ -143,6 +147,7 @@ REAL                     :: ZRM_PATCH        ! threshold to remove little fracti
  CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
  CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
  CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
+ CHARACTER(LEN=6)         :: YGWFILETYPE      ! groundwater distribution data file type
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction  (-)
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction  (-)
 REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon top soil (kg/m2)
@@ -150,11 +155,13 @@ REAL                     :: XUNIF_SOC_SUB    ! uniform value of organic carbon s
 REAL                     :: XUNIF_RUNOFFB    ! uniform value of subgrid runoff coefficient
 REAL                     :: XUNIF_WDRAIN     ! uniform subgrid drainage parameter
 REAL                     :: XUNIF_PERM       ! uniform permafrost distribution
+REAL                     :: XUNIF_GW         ! uniform groundwater distribution
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay
 LOGICAL                  :: LIMP_SOC         ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_CTI         ! Imposed maps of topographic index statistics
 LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
+LOGICAL                  :: LIMP_GW          ! Imposed maps of groundwater distribution
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil grid reference for DIF
  CHARACTER(LEN=28)        :: YPH           ! file name for pH
  CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
@@ -182,6 +189,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,          &
                        XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,    &
                        YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,              &                       
+                       YGW, YGWFILETYPE, XUNIF_GW, LIMP_GW,                      &                       
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,      &
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,         &
@@ -285,13 +293,13 @@ IF (NPATCH<1 .OR. NPATCH>NVEGTYPE) THEN
   CALL ABOR1_SFX('PGD_ISBA: NPATCH MUST BE BETWEEN 1 AND NVEGTYPE')
 END IF
 !
-IF ( CPHOTO/='NON' .AND. NPATCH/=12 ) THEN
+IF ( CPHOTO/='NON' .AND. NPATCH/=12 .AND. NPATCH/=19 ) THEN
   WRITE(ILUOUT,*) '*****************************************'
   WRITE(ILUOUT,*) '* With option CPHOTO = ', CPHOTO
-  WRITE(ILUOUT,*) '* Number of patch must be equal to 12 '
+  WRITE(ILUOUT,*) '* Number of patch must be equal to 12 or 19'
   WRITE(ILUOUT,*) '* But you have chosen NPATCH = ', NPATCH
   WRITE(ILUOUT,*) '*****************************************'
-  CALL ABOR1_SFX('PGD_ISBA: CPHOTO='//CPHOTO//' REQUIRES NPATCH=12')
+  CALL ABOR1_SFX('PGD_ISBA: CPHOTO='//CPHOTO//' REQUIRES NPATCH=12 or 19')
 END IF
 !
 IF ( CPHOTO=='NON' .AND. LTR_ML ) THEN
@@ -536,9 +544,49 @@ ELSE
 !
 ENDIF
 !
+!*    11.     Permafrost distribution
+!             -----------------------
+!
+IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
+!
+  ALLOCATE(XGW(ILU))
+!
+  LGW=.TRUE.
+!
+  IF(LIMP_GW)THEN
+!
+    IF(YGWFILETYPE=='NETCDF')THEN
+       CALL ABOR1_SFX('Use another format than netcdf for groundwater input file with LIMP_GW')
+    ELSE
+#ifdef ASC
+       CFILEIN     = ADJUSTL(ADJUSTR(YGW)//'.txt')
+#endif
+#ifdef FA
+       CFILEIN_FA  = ADJUSTL(ADJUSTR(YGW)//'.fa')
+#endif
+#ifdef LFI
+       CFILEIN_LFI = ADJUSTL(YGW)
+#endif
+       CALL INIT_IO_SURF_n(YGWFILETYPE,'NATURE','ISBA  ','READ ')
+    ENDIF     
+!   
+    CALL READ_SURF(YGWFILETYPE,'GW',XGW(:),IRESP) 
+!
+    CALL END_IO_SURF_n(YGWFILETYPE)
+  ELSE
+    CALL PGD_FIELD(HPROGRAM,'permafrost','NAT',YGW,YGWFILETYPE,XUNIF_GW,XGW(:))
+  ENDIF
+!
+ELSE
+!
+  LGW=.FALSE.  
+  ALLOCATE(XGW(0))
+!
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
-!*    11.  pH and fertlisation data
+!*    12.  pH and fertlisation data
 !             --------------------------
 !
 IF((LEN_TRIM(YPHFILETYPE)/=0.OR.XUNIF_PH/=XUNDEF) .AND. (LEN_TRIM(YFERTFILETYPE)/=0.OR.XUNIF_FERT/=XUNDEF)) THEN
@@ -555,7 +603,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!*    12.      Subgrid runoff 
+!*    13.      Subgrid runoff 
 !             --------------
 !
 ALLOCATE(XRUNOFFB(ILU))
@@ -564,7 +612,7 @@ ALLOCATE(XRUNOFFB(ILU))
 !
 !-------------------------------------------------------------------------------
 !
-!*    13.     Drainage coefficient
+!*    14.     Drainage coefficient
 !             --------------------
 !
 ALLOCATE(XWDRAIN(ILU))
@@ -573,7 +621,7 @@ ALLOCATE(XWDRAIN(ILU))
 !
 !-------------------------------------------------------------------------------
 !
-!*   14.      ISBA specific fields
+!*   15.      ISBA specific fields
 !             --------------------
 !
 LECOCLIMAP = OECOCLIMAP
@@ -586,7 +634,7 @@ LECOCLIMAP = OECOCLIMAP
 !
 !-------------------------------------------------------------------------------
 !
-!*   15.     Prints of cover parameters in a tex file
+!*   16.     Prints of cover parameters in a tex file
 !            ----------------------------------------
 !
 IF (OECOCLIMAP) THEN

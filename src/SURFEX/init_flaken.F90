@@ -3,7 +3,7 @@ SUBROUTINE INIT_FLAKE_n(HPROGRAM,HINIT,                            &
                           KI,KSV,KSW,                                &
                           HSV,PCO2,PRHOA,                            &
                           PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                          PEMIS,PTSRAD,                              &
+                          PEMIS,PTSRAD,PTSURF,                       &
                           KYEAR, KMONTH,KDAY, PTIME,                 &
                           HATMFILE,HATMFILETYPE,                     &
                           HTEST                                     )   
@@ -36,14 +36,18 @@ SUBROUTINE INIT_FLAKE_n(HPROGRAM,HINIT,                            &
 !!    -------------
 !!      Original    01/2003
 !!      B. Decharme    07/11 : read pgd+prep
+!!      Modified    04/2013, P. Le Moigne: FLake chemistry
+!!      Modified    04/2013, P. Le Moigne: Coupling with AGCM
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CSTS,           ONLY : XTT, XPI, XOMEGA 
-USE MODD_WATER_PAR,      ONLY : XALBWAT, XEMISWAT
-!?? USE MODD_SNOW_PAR,       ONLY : XANSMAX, XEMISSN
+USE MODD_CSTS,          ONLY : XTT, XPI, XOMEGA 
+!
+USE MODD_WATER_PAR,     ONLY : XALBWATICE, XALBWATSNOW
+USE MODD_SNOW_PAR,      ONLY : XANSMIN, XANSMAX
+!
 USE MODD_FLAKE_GRID_n,  ONLY : XLAT
 USE MODD_FLAKE_n,  ONLY : XCOVER          , TTIME         , XTSTEP        , &
                             XOUT_TSTEP    , XEMIS         , XWATER_DEPTH  , &
@@ -56,21 +60,19 @@ USE MODD_FLAKE_n,  ONLY : XCOVER          , TTIME         , XTSTEP        , &
                             XH_SNOW       , XH_ICE        , XH_ML         , &
                             XH_B1         , XTS           , LSEDIMENTS    , &
                             CSNOW_FLK     , CFLK_FLUX     , CFLK_ALB      , &
-                            LSBL          , XICHCE        , LPRECIP       , &
-                            LPWEBB
-
-
-
+                            LSBL          , LSKINTEMP
+!
 USE MODD_DIAG_FLAKE_n, ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET, XDIAG_TSTEP, &
                                 L2M_MIN_ZS, LCOEF, LSURF_VARS, LSURF_BUDGETC,&
                                 LRESET_BUDGETC  
-USE MODD_DIAG_MISC_FLAKE_n,    ONLY : LWATER_PROFILE , XZWAT_PROFILE,     &
-                                      XZW_PROFILE, XTW_PROFILE
-USE MODD_CH_WATFLUX_n,   ONLY : XDEP, CCH_DRY_DEP, CSV, CCH_NAMES, &
-                                  NBEQ, NSV_CHSBEG, NSV_CHSEND,  &
-                                  NAEREQ, NSV_AERBEG, NSV_AEREND, CAER_NAMES,&
-                                  NSV_DSTBEG, NSV_DSTEND, NDSTEQ, CDSTNAMES, &
-                                  NSV_SLTBEG, NSV_SLTEND, NSLTEQ, CSLTNAMES  
+!
+USE MODD_DIAG_MISC_FLAKE_n,    ONLY : LWATER_PROFILE, XZWAT_PROFILE
+!
+USE MODD_CH_FLAKE_n,   ONLY : XDEP, CCH_DRY_DEP, CSV, CCH_NAMES, &
+                                NBEQ, NSV_CHSBEG, NSV_CHSEND,  &
+                                NAEREQ, NSV_AERBEG, NSV_AEREND, CAER_NAMES,&
+                                NSV_DSTBEG, NSV_DSTEND, NDSTEQ, CDSTNAMES, &
+                                NSV_SLTBEG, NSV_SLTEND, NSLTEQ, CSLTNAMES  
 USE MODD_CHS_AEROSOL,    ONLY: LVARSIGI, LVARSIGJ
 USE MODD_DST_SURF,       ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST
 USE MODD_SLT_SURF,       ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
@@ -94,7 +96,7 @@ USE MODI_READ_FLAKE_DATE
 USE MODI_READ_NAM_PREP_FLAKE_n
 USE MODI_INIT_CHEMICAL_n
 USE MODI_PREP_CTRL_FLAKE
-USE MODI_UPDATE_RAD_SEAWAT
+USE MODI_UPDATE_RAD_FLAKE
 USE MODI_READ_FLAKE_SBL_n
 !
 USE MODI_SET_SURFEX_FILEIN
@@ -126,6 +128,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -168,6 +171,7 @@ PDIR_ALB = XUNDEF
 PSCA_ALB = XUNDEF
 PEMIS    = XUNDEF
 PTSRAD   = XUNDEF
+PTSURF   = XUNDEF
 !
 IF (LNAM_READ) THEN
  !
@@ -177,7 +181,7 @@ IF (LNAM_READ) THEN
  !        0.1. Hard defaults
  !      
  CALL DEFAULT_FLAKE(XTSTEP,XOUT_TSTEP,LSEDIMENTS,CSNOW_FLK,CFLK_FLUX,CFLK_ALB,&
-                    XICHCE,LPRECIP,LPWEBB)
+                    LSKINTEMP)
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_DIAG_FLAKE(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
                          LWATER_PROFILE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP,  &
@@ -195,16 +199,6 @@ ENDIF
 !
  CALL READ_FLAKE_CONF_n(HPROGRAM)
 !
-IF (LWATER_PROFILE) THEN
-   CALL GET_TYPE_DIM_n('WATER ',ILU)
-   ALLOCATE (XZW_PROFILE(count (XZWAT_PROFILE /= XUNDEF))) 
-   ALLOCATE (XTW_PROFILE(count (XZWAT_PROFILE /= XUNDEF),ILU)) 
-   XZW_PROFILE=XZWAT_PROFILE(:count (XZWAT_PROFILE /= XUNDEF))
- ELSE
-   ALLOCATE (XZW_PROFILE(1)) 
-   ALLOCATE (XTW_PROFILE(1,1)) 
- END IF
-
 !-------------------------------------------------------------------------------
 !
 !*       1.     Cover fields and grid:
@@ -281,10 +275,11 @@ ALLOCATE(XEXTCOEF_SNOW  (ILU))
 !
 XCORIO(:) = 2*XOMEGA*SIN(XLAT(:)*XPI/180.)
 !
-XICE_ALB      = XUNDEF
-XSNOW_ALB     = XUNDEF
-XEXTCOEF_ICE  = XUNDEF
-XEXTCOEF_SNOW = XUNDEF
+XICE_ALB  = XALBWATICE  ! constant, should be improved latter
+XSNOW_ALB = XALBWATSNOW ! constant, should be improved latter
+!
+XEXTCOEF_ICE  = XUNDEF !not used
+XEXTCOEF_SNOW = XUNDEF !not used
 !-------------------------------------------------------------------------------
 !
 !*       4.     Albedo, emissivity and radiative fields on lake
@@ -297,8 +292,10 @@ XDIR_ALB = 0.0
 XSCA_ALB = 0.0
 XEMIS    = 0.0
 !
- CALL UPDATE_RAD_SEAWAT(CFLK_ALB,XTS,PZENITH,XTT,XEMIS,XDIR_ALB   ,&
-                      XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD   )
+ CALL UPDATE_RAD_FLAKE(CFLK_ALB,XTS,PZENITH,XH_ICE,XH_SNOW,XICE_ALB,XSNOW_ALB, &
+                       XDIR_ALB,XSCA_ALB,XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )
+!
+PTSURF(:) = XTS(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -332,7 +329,7 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_FLAKE_INIT_n(ILU,KSW)
+ CALL DIAG_FLAKE_INIT_n(HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

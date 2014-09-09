@@ -4,7 +4,7 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
                PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                PPEW_A_COEF, PPEW_B_COEF,                                                   &
                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                HTEST                                                                       )
@@ -37,13 +37,13 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!      B. Decharme 09/2012 New wind implicitation
 !!      J. Escobar  09/2012 KI not allowed without-interface , replace by KI
 !!      V. Masson   08/2013 adds solar panels & occupation calendar
+!!      B. Decharme  04/2013 new coupling variables
 !!---------------------------------------------------------------
 !
+USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XLVTT, XPI, XKARMAN, XG
 USE MODD_SURF_PAR,     ONLY : XUNDEF
-!
-USE MODD_SURF_ATM,     ONLY : CIMPLICIT_WIND
 !
 USE MODD_TEB_n,        ONLY : LGARDEN, LGREENROOF, LSOLAR_PANEL,                       &
                               CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,            &
@@ -184,6 +184,11 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature           
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
@@ -1075,12 +1080,26 @@ END IF
 ! Outputs:
 !-------------------------------------------------------------------------------------
 !
-! Albedo, Emissivity and fraction at time t+1
+!-------------------------------------------------------------------------------------
+!Radiative properties should be at time t+1 (see by the atmosphere) in order to close
+!the energy budget between surfex and the atmosphere. It is not the case here
+!for ALB and EMIS
+!-------------------------------------------------------------------------------------
 !
  CALL AVERAGE_RAD(XTEB_PATCH,                                              &
                  ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH,&
                  PDIR_ALB,       PSCA_ALB,       PEMIS,       PTRAD       )
-
+!
+!-------------------------------------------------------------------------------
+!Physical properties see by the atmosphere in order to close the energy budget 
+!between surfex and the atmosphere. All variables should be at t+1 but very 
+!difficult to do. Maybe it will be done later. However, Ts can be at time t+1
+!-------------------------------------------------------------------------------
+!
+PTSURF (:) = PTRAD         (:) ! Should be the surface effective temperature; not radative
+PZ0    (:) = ZAVG_Z0_TOWN  (:) ! Should account for ISBA (greenroof and garden) Z0
+PZ0H   (:) = PZ0 (:) / 200.    ! Should account for ISBA (greenroof and garden) Z0
+PQSURF (:) = XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
 !
 !-------------------------------------------------------------------------------------
 ! Scalar fluxes:

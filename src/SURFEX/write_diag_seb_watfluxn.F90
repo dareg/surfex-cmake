@@ -24,6 +24,8 @@
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      S.Bielli    11/2012 : write HU2M_WAT mis placed
+!!      B. Decharme  06/13   Add evap and sublimation diag
+!!                           Delete LPROVAR_TO_DIAG here
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -31,21 +33,20 @@
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n,ONLY : LPROVAR_TO_DIAG, LRESET_BUDGETC
+USE MODD_DIAG_SURF_ATM_n,ONLY : LRESET_BUDGETC
 !
 USE MODD_DIAG_WATFLUX_n,ONLY : N2M, LRAD_BUDGET, LSURF_BUDGET, LCOEF,    &
                                  LSURF_VARS,                               &
                                  XRN, XH, XLE, XLEI, XGFLUX,               &
                                  XRI, XCD, XCH, XCE, XZ0, XZ0H,            &
                                  XT2M, XQ2M, XHU2M, XT2M_MIN, XT2M_MAX,    &
-                                 XZON10M, XMER10M, XQS, XDIAG_TS,          &
+                                 XZON10M, XMER10M, XQS,                    &
                                  XSWD, XSWU, XLWD, XLWU, XSWBD, XSWBU,     &
                                  XFMU, XFMV, LSURF_BUDGETC,                &
                                  XRNC, XHC, XLEC, XGFLUXC, XSWDC, XSWUC,   &
                                  XLWDC, XLWUC, XFMUC, XFMVC, XLEIC,        &
-                                 XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX  
-!
-USE MODD_WATFLUX_n,ONLY : LINTERPOL_TS
+                                 XHU2M_MIN, XHU2M_MAX, XWIND10M,           &
+                                 XWIND10M_MAX, XEVAP, XEVAPC, XSUBL, XSUBLC  
 !
 USE MODD_CH_WATFLUX_n,  ONLY : XDEP, CCH_DRY_DEP, CCH_NAMES, NBEQ
 !
@@ -124,6 +125,16 @@ YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUX(:),IRESP,HCOMMENT=YCOMMENT)
 !
+YRECFM='EVAP_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XEVAP(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='SUBL_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XSUBL(:),IRESP,HCOMMENT=YCOMMENT)
+!
 IF (LRAD_BUDGET) THEN
 !       
    YRECFM='SWD_WAT'
@@ -167,6 +178,7 @@ YRECFM='FMU_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (kg/ms2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XFMU(:),IRESP,HCOMMENT=YCOMMENT)
+!
 YRECFM='FMV_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (kg/ms2)'
 !
@@ -200,6 +212,16 @@ YRECFM='GFLUXC_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XGFLUXC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='EVAPC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XEVAPC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+YRECFM='SUBLC_WAT'
+YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+!
+ CALL WRITE_SURF(HPROGRAM,YRECFM,XSUBLC(:),IRESP,HCOMMENT=YCOMMENT)
 !
 IF (LRAD_BUDGET .OR. (LSURF_BUDGETC .AND. .NOT.LRESET_BUDGETC)) THEN
 !
@@ -283,7 +305,6 @@ YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
 !
 ENDIF
 !
-
 !
 !*       6.     parameters at 2 and 10 meters :
 !               -----------------------------
@@ -362,18 +383,6 @@ IF (NBEQ>0 .AND. CCH_DRY_DEP=="WES89 ") THEN
     WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_WAT_',JSV
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDEP(:,JSV),IRESP,HCOMMENT=YCOMMENT)
   END DO
-ENDIF
-!
-!
-!*       8.     prognostic variable diagnostics:
-!               --------------------------------
-!
-IF(LPROVAR_TO_DIAG)THEN
-!
-  YRECFM='TS_WATER'
-  YCOMMENT='TS_WATER (K)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XDIAG_TS(:),IRESP,HCOMMENT=YCOMMENT)
-!
 ENDIF
 !
 !-------------------------------------------------------------------------------

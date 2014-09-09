@@ -6,19 +6,22 @@ MODULE MODE_GRIDTYPE_GAUSS
 !############################################################################
 !############################################################################
 !
-      USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-      USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
 !
-      USE MODI_ABOR1_SFX
+USE MODI_ABOR1_SFX
 !
-      IMPLICIT NONE
+IMPLICIT NONE
+!
 CONTAINS
+!
 !############################################################################
 !############################################################################
 !############################################################################
 !     ####################################################################
       SUBROUTINE PUT_GRIDTYPE_GAUSS(PGRID_PAR,KNLATI, PLAPO,PLOPO,PCODIL,KNLOPA, &
-                                      KL,PLAT,PLON,PLAT_XY,PLON_XY,PMESH_SIZE      )  
+                                    KL,PLAT,PLON,PLAT_XY,PLON_XY,PMESH_SIZE    , &
+                                    PLONINF,PLATINF,PLONSUP,PLATSUP              )  
 !     ####################################################################
 !
 !!****  *PUT_GRIDTYPE_GAUSS* - routine to store in PGRID_PAR the horizontal grid
@@ -42,20 +45,25 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-INTEGER,                    INTENT(IN) :: KNLATI ! number of pseudo-latitudes
-REAL,                       INTENT(IN) :: PLAPO  ! latitude of the rotated pole (deg)
-REAL,                       INTENT(IN) :: PLOPO  ! logitude of the rotated pole (rad)
-REAL,                       INTENT(IN) :: PCODIL ! stretching factor
-INTEGER, DIMENSION(KNLATI), INTENT(IN) :: KNLOPA ! number of pseudo-longitudes
-!                                                ! on each pseudo-latitude circle
-!                                                ! on pseudo-northern hemisphere
-!                                                ! (starting from the rotated pole)
-INTEGER,                    INTENT(IN) :: KL     ! number of points used
-REAL,   DIMENSION(:),       INTENT(IN) :: PLAT   ! latitudes of points
-REAL,   DIMENSION(:),       INTENT(IN) :: PLON   ! longitudes of points
-REAL,   DIMENSION(:),       INTENT(IN) :: PLAT_XY! pseudo-latitudes of points
-REAL,   DIMENSION(:),       INTENT(IN) :: PLON_XY! pseudo-longitudes of points
+INTEGER,                    INTENT(IN) :: KNLATI     ! number of pseudo-latitudes
+REAL,                       INTENT(IN) :: PLAPO      ! latitude of the rotated pole (deg)
+REAL,                       INTENT(IN) :: PLOPO      ! logitude of the rotated pole (rad)
+REAL,                       INTENT(IN) :: PCODIL     ! stretching factor
+INTEGER, DIMENSION(KNLATI), INTENT(IN) :: KNLOPA     ! number of pseudo-longitudes
+!                                                    ! on each pseudo-latitude circle
+!                                                    ! on pseudo-northern hemisphere
+!                                                    ! (starting from the rotated pole)
+INTEGER,                    INTENT(IN) :: KL         ! number of points used
+REAL,   DIMENSION(:),       INTENT(IN) :: PLAT       ! latitudes of points
+REAL,   DIMENSION(:),       INTENT(IN) :: PLON       ! longitudes of points
+REAL,   DIMENSION(:),       INTENT(IN) :: PLAT_XY    ! pseudo-latitudes of points
+REAL,   DIMENSION(:),       INTENT(IN) :: PLON_XY    ! pseudo-longitudes of points
 REAL,   DIMENSION(:),       INTENT(IN) :: PMESH_SIZE ! Mesh size
+!                                                                               _____ Sup
+REAL,   DIMENSION(:),       INTENT(IN) :: PLATSUP    ! Grid corner Latitude    |     |
+REAL,   DIMENSION(:),       INTENT(IN) :: PLONSUP    ! Grid corner Longitude   |     |
+REAL,   DIMENSION(:),       INTENT(IN) :: PLATINF    ! Grid corner Latitude    |_____|
+REAL,   DIMENSION(:),       INTENT(IN) :: PLONINF    ! Grid corner Longitude  Inf
 !
 REAL, DIMENSION(:), POINTER :: PGRID_PAR         ! parameters defining this grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -68,7 +76,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:PUT_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
-ALLOCATE(PGRID_PAR(5+KNLATI+5*KL))
+ALLOCATE(PGRID_PAR(5+KNLATI+9*KL))
 PGRID_PAR(1) = KNLATI
 PGRID_PAR(2) = PLAPO
 PGRID_PAR(3) = PLOPO
@@ -80,6 +88,10 @@ PGRID_PAR(6+KNLATI+KL:5+KNLATI+2*KL) = PLON(:)
 PGRID_PAR(6+KNLATI+2*KL:5+KNLATI+3*KL) = PLAT_XY(:)
 PGRID_PAR(6+KNLATI+3*KL:5+KNLATI+4*KL) = PLON_XY(:)
 PGRID_PAR(6+KNLATI+4*KL:5+KNLATI+5*KL) = PMESH_SIZE(:)
+PGRID_PAR(6+KNLATI+5*KL:5+KNLATI+6*KL) = PLONINF(:)
+PGRID_PAR(6+KNLATI+6*KL:5+KNLATI+7*KL) = PLATINF(:)
+PGRID_PAR(6+KNLATI+7*KL:5+KNLATI+8*KL) = PLONSUP(:)
+PGRID_PAR(6+KNLATI+8*KL:5+KNLATI+9*KL) = PLATSUP(:)
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:PUT_GRIDTYPE_GAUSS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
@@ -88,9 +100,10 @@ END SUBROUTINE PUT_GRIDTYPE_GAUSS
 !############################################################################
 !############################################################################
 !     ####################################################################
-      SUBROUTINE GET_GRIDTYPE_GAUSS(PGRID_PAR,KNLATI,                  &
-                                      PLAPO,PLOPO,PCODIL,KNLOPA,KL,      &
-                                      PLAT,PLON,PLAT_XY,PLON_XY,PMESH_SIZE)  
+      SUBROUTINE GET_GRIDTYPE_GAUSS(PGRID_PAR,KNLATI,                      &
+                                      PLAPO,PLOPO,PCODIL,KNLOPA,KL,        &
+                                      PLAT,PLON,PLAT_XY,PLON_XY,PMESH_SIZE,&  
+                                      PLONINF,PLATINF,PLONSUP,PLATSUP      )  
 !     ####################################################################
 !
 !!****  *GET_GRIDTYPE_GAUSS* - routine to get from PGRID_PAR the horizontal grid
@@ -128,6 +141,11 @@ REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLON    ! longitude
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLAT_XY ! pseudo-latitude
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLON_XY ! pseudo-longitude
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PMESH_SIZE ! Mesh size
+!                                                                                  _____ Sup
+REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLATSUP    ! Grid corner Latitude    |     |
+REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLONSUP    ! Grid corner Longitude   |     |
+REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLATINF    ! Grid corner Latitude    |_____|
+REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLONINF    ! Grid corner Longitude  Inf
 !
 !
 !*       0.2   Declarations of local variables
@@ -189,6 +207,36 @@ IF (PRESENT(PMESH_SIZE)) THEN
   END IF
  PMESH_SIZE(:) = PGRID_PAR(6+INLATI+4*IL:5+INLATI+5*IL)
 END IF
+!
+IF (PRESENT(PLONINF)) THEN
+  IF (SIZE(PLONINF)/=IL) THEN
+    CALL ABOR1_SFX('MODE_GRIDTYPE_GAUSS: WRONG SIZE FOR PLONINF') 
+  END IF
+ PLONINF(:) = PGRID_PAR(6+INLATI+5*IL:5+INLATI+6*IL)
+END IF
+!
+IF (PRESENT(PLATINF)) THEN
+  IF (SIZE(PLATINF)/=IL) THEN
+    CALL ABOR1_SFX('MODE_GRIDTYPE_GAUSS: WRONG SIZE FOR PLATINF') 
+  END IF
+ PLATINF(:) = PGRID_PAR(6+INLATI+6*IL:5+INLATI+7*IL)
+END IF
+!
+IF (PRESENT(PLONSUP)) THEN
+  IF (SIZE(PLONSUP)/=IL) THEN
+    CALL ABOR1_SFX('MODE_GRIDTYPE_GAUSS: WRONG SIZE FOR PLONSUP') 
+  END IF
+ PLONSUP(:) = PGRID_PAR(6+INLATI+7*IL:5+INLATI+8*IL)
+END IF
+!
+IF (PRESENT(PLATSUP)) THEN
+  IF (SIZE(PLATSUP)/=IL) THEN
+    CALL ABOR1_SFX('MODE_GRIDTYPE_GAUSS: WRONG SIZE FOR PLATSUP') 
+  END IF
+ PLATSUP(:) = PGRID_PAR(6+INLATI+8*IL:5+INLATI+9*IL)
+END IF
+!
+!
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:GET_GRIDTYPE_GAUSS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
@@ -214,6 +262,8 @@ END SUBROUTINE GET_GRIDTYPE_GAUSS
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CSTS, ONLY : XPI
+!
 IMPLICIT NONE
 !
 !
@@ -238,17 +288,17 @@ REAL,  DIMENSION(KL),      INTENT(OUT):: PLON    ! longitudes of points (deg)
 
 INTEGER :: JP
 REAL :: ZCLO3,ZCONR,ZINTERM,ZLAT1,ZLAT2,ZLAT3,ZLON1,ZLON2,ZLON3
-REAL :: ZLATP,ZLONP,ZSLA3,ZSLO3,ZR,ZPI
+REAL :: ZLATP,ZLONP,ZSLA3,ZSLO3,ZR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:LATLON_GAUSS',0,ZHOOK_HANDLE)
-ZPI=4.*ATAN(1.)
-ZCONR=ZPI/180.
-
+!
+ZCONR=XPI/180.
+!
 ZLONP=ZCONR*PLOPO
 ZLATP=ZCONR*PLAPO
-
+!
 DO JP = 1,KL
   ZLON1=ZCONR*PLON_XY(JP)
   ZLAT1=ZCONR*PLAT_XY(JP)
@@ -280,18 +330,18 @@ DO JP = 1,KL
     IF (ZSLO3==0.) THEN
       ZLON3=0.
     ELSEIF (ZSLO3>0.) THEN
-      ZLON3=ZPI/2.
+      ZLON3=XPI/2.
     ELSE
-      ZLON3=-ZPI/2.
+      ZLON3=-XPI/2.
     ENDIF
   ELSE
     ZINTERM=ATAN(ZSLO3/ZCLO3)
     IF (ZCLO3>=0.) THEN
       ZLON3=ZINTERM
     ELSEIF (ZSLO3>=0.) THEN
-      ZLON3=ZINTERM+ZPI
+      ZLON3=ZINTERM+XPI
     ELSE
-      ZLON3=ZINTERM-ZPI
+      ZLON3=ZINTERM-XPI
     ENDIF
   ENDIF
 !
@@ -299,10 +349,10 @@ DO JP = 1,KL
   PLON(JP)=ZLON3/ZCONR
   IF (PLON(JP)<0.) PLON(JP)=PLON(JP)+360.
   PLAT(JP)=ZLAT3/ZCONR
-
+!
 END DO
+!
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:LATLON_GAUSS',1,ZHOOK_HANDLE)
-
 !
 !-------------------------------------------------------------------------------
 END SUBROUTINE LATLON_GAUSS
@@ -329,7 +379,8 @@ END SUBROUTINE LATLON_GAUSS
 !              ------------
 !
 USE EGGANGLES , ONLY : P_ASIN
-
+USE MODD_CSTS,  ONLY : XPI
+!
 IMPLICIT NONE
 !
 !
@@ -353,15 +404,15 @@ REAL,   DIMENSION(KL),   INTENT(INOUT) :: PLON_XY ! pseudo-longitudes of points 
 INTEGER :: JL ! point loop counter
 INTEGER :: JX ! longitude loop counter
 INTEGER :: JY ! latitude loop counter
-REAL                      :: ZPI, ZRD, ZI
+REAL                      :: ZRD, ZI
 REAL, DIMENSION(KNLATI)   :: ZNLOPA, ZSINLA, ZWG
 REAL, DIMENSION(KNLATI)   :: ZDSINLA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:COMP_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
-ZPI = 4.*ATAN(1.)
-ZRD = 180. / ZPI
+!
+ZRD = 180. / XPI
 ZI=0.
 IF (KTYP==1) ZI=180.
 !
@@ -419,7 +470,8 @@ END SUBROUTINE COMP_GRIDTYPE_GAUSS
 !              ------------
 !
 USE EGGANGLES , ONLY : P_ASIN
-
+USE MODD_CSTS,  ONLY : XPI
+!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -442,15 +494,15 @@ REAL,   DIMENSION(:),      INTENT(OUT):: PYSUP ! maximum pseudo latitude  of the
 INTEGER :: JL ! point loop counter
 INTEGER :: JX ! longitude loop counter
 INTEGER :: JY ! latitude loop counter
-REAL                    :: ZNLATI, ZPI, ZRD
+REAL                    :: ZNLATI, ZRD
 REAL, DIMENSION(KNLATI) :: ZNLOPA, ZSINLA, ZWG
-REAL, DIMENSION(KNLATI)   :: ZDSINLA
+REAL, DIMENSION(KNLATI) :: ZDSINLA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:GAUSS_GRID_LIMITS',0,ZHOOK_HANDLE)
-ZPI = 4.*ATAN(1.)
-ZRD = 180. / ZPI
+!
+ZRD = 180. / XPI
 !
 ZNLATI=FLOAT(KNLATI)
 ZNLOPA=FLOAT(KNLOPA)

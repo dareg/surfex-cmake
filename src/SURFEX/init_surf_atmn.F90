@@ -3,7 +3,7 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                             PEMIS,PTSRAD,                              &
+                             PEMIS,PTSRAD,PTSURF,                       &
                              KYEAR, KMONTH,KDAY, PTIME,                 &
                              HATMFILE,HATMFILETYPE,                     &
                              HTEST                                      )  
@@ -45,22 +45,19 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!     (S. Queguiner)  2011   Modif chemistry (2.4)
 !!     (B. Decharme)   2013   Read grid only once in AROME case
 !!     (G. Tanguy)     2013   Add IF(ALLOCATED(NMASK_FULL))  before deallocate
+!!      B. Decharme  04/2013  new coupling variables
+!!                            Delete LPROVAR_TO_DIAG check
+!!                            Delete NWG_LAYER_TOT
+!!      R. Séférian 03/2014   Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_ATM,       ONLY : XCO2UNCPL
+!
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
-USE MODD_SURF_ATM,       ONLY : XCISMIN, XVMODMIN, LALDTHRES,            &
-                                LDRAG_COEF_ARP, LALDZ0H, LNOSOF,         &
-                                LRW_PRECIP, XEDB, XEDC, XEDD, XEDK,      &
-                                XUSURIC, XUSURID, XUSURICL,              &
-                                XVCHRNK, XVZ0CM, XDELTA_MAX, XRIMAX,     &
-                                XWINDMIN, LVZIUSTAR0_ARP,                &
-                                XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
-                                XRRSCALE, XRRGAMMA, XUTILGUST, LCPL_ARP, &
-                                LQVNPLUS, LVERTSHIFT  
 USE MODD_SURF_ATM_n,     ONLY : CSEA,      CWATER,      CTOWN,      CNATURE,      &
                                 XSEA,      XWATER,      XTOWN,      XNATURE,      &
                                 NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
@@ -100,7 +97,7 @@ USE MODD_CHS_AEROSOL,    ONLY : LVARSIGI, LVARSIGJ
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE  
 !
 USE MODD_SURFEX_MPI, ONLY : XTIME_INIT_SEA, XTIME_INIT_WATER, XTIME_INIT_NATURE, XTIME_INIT_TOWN, &
-                            NRANK, NPIO, NWG_LAYER_TOT, NSIZE
+                            NRANK, NPIO, NSIZE
 USE MODD_SURFEX_OMP, ONLY : NINDX2SFX, NWORK, NWORK2, XWORK, XWORK2, XWORK3, &
                             NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL, &
                             NBLOCKTOT
@@ -129,13 +126,13 @@ USE MODI_READ_GRIDTYPE
 USE MODI_END_IO_SURF_n
 USE MODI_PREP_CTRL_SURF_ATM
 USE MODI_AVERAGE_RAD
+USE MODI_AVERAGE_TSURF
 USE MODI_INIT_CHEMICAL_n
 USE MODI_CH_INIT_DEPCONST
 USE MODI_CH_INIT_EMISSION_n
 USE MODI_CH_INIT_SNAP_n
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
-USE MODI_READ_PRECIP_n
 USE MODI_ABOR1_SFX
 USE MODI_ALLOC_DIAG_SURF_ATM_n
 USE MODI_GET_1D_MASK
@@ -152,6 +149,8 @@ USE MODI_READ_LECOCLIMAP
 USE MODI_SURF_VERSION
 USE MODI_GET_LUOUT
 USE MODI_SET_SURFEX_FILEIN
+!
+USE MODI_INIT_CPL_GCM_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -189,6 +188,8 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+!
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -220,6 +221,7 @@ REAL, DIMENSION(KI,KSW,NTILESFC)    :: ZDIR_ALB_TILE  ! direct albedo
 REAL, DIMENSION(KI,KSW,NTILESFC)    :: ZSCA_ALB_TILE  ! diffuse albedo
 REAL, DIMENSION(KI,NTILESFC)        :: ZEMIS_TILE     ! emissivity
 REAL, DIMENSION(KI,NTILESFC)        :: ZTSRAD_TILE    ! radiative temperature
+REAL, DIMENSION(KI,NTILESFC)        :: ZTSURF_TILE    ! effective temperature
 REAL, DIMENSION(KI)                 :: ZZENITH        ! zenith angle
 REAL, DIMENSION(KI)                 :: ZAZIM          ! azimuth angle
 REAL, DIMENSION(KI)                 :: ZTSUN          ! solar time since midnight
@@ -232,6 +234,7 @@ REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_DIR_ALB  ! direct albedo
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_SCA_ALB  ! diffuse albedo
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_EMIS     ! emissivity
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSRAD    ! radiative temperature
+REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSURF    ! surface effective temperature
 !
 DOUBLE PRECISION :: XTIME0
 !
@@ -281,6 +284,18 @@ ENDIF
 !        1.1. general options (diagnostics, etc...)
 !
  CALL READ_SURF_ATM_CONF_n(HPROGRAM)
+!
+IF(XCO2UNCPL/=XUNDEF)THEN
+  WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  WRITE(ILUOUT,*)'!!!                                           !!!'
+  WRITE(ILUOUT,*)'!!!          WARNING    WARNING               !!!'
+  WRITE(ILUOUT,*)'!!!                                           !!!'
+  WRITE(ILUOUT,*)'!!! Decoupling between CO2 for photosynthesis !!!' 
+  WRITE(ILUOUT,*)'!!! and atmospheric CO2 activated             !!!'
+  WRITE(ILUOUT,*)'!!! In NAM_SURF_ATM XCO2UNCPL =',XCO2UNCPL,'  !!!'
+  WRITE(ILUOUT,*)'!!!                                           !!!'
+  WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'        
+ENDIF
 !
 !        1.2. Date
 !
@@ -502,9 +517,9 @@ IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(HPROGRAM,KSW)
 !
 IF (CROUGH=='BE04') CALL READ_SSO_CANOPY_n(HPROGRAM,HINIT)
 !
-!*       Precip fields (for ARPEGE/ALADIN run)
+!*       Physical fields need for ARPEGE/ALADIN climate run
 !
- CALL READ_PRECIP_n(HPROGRAM,HINIT)
+ CALL INIT_CPL_GCM_n(HPROGRAM,HINIT)
 !
 !         End of IO
 !
@@ -546,6 +561,7 @@ ZDIR_ALB_TILE = XUNDEF
 ZSCA_ALB_TILE = XUNDEF
 ZEMIS_TILE    = XUNDEF
 ZTSRAD_TILE   = XUNDEF
+ZTSURF_TILE   = XUNDEF
 !
 #ifndef NOMPI
 XTIME0 = MPI_WTIME()
@@ -565,7 +581,7 @@ IF (NDIM_SEA>0) &
   CALL INIT_SEA_n(HPROGRAM,HINIT,NSIZE_SEA,KSV,KSW,                  &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
-                  ZP_EMIS,ZP_TSRAD,                                  &
+                  ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
                   KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                   'OK'                                               )  
 !
@@ -592,7 +608,7 @@ IF (NDIM_WATER>0) &
   CALL INIT_INLAND_WATER_n(HPROGRAM,HINIT,NSIZE_WATER,KSV,KSW,                &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
-                           ZP_EMIS,ZP_TSRAD,                                  &
+                           ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
                            KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                            'OK'                                               )
 !
@@ -613,17 +629,12 @@ ZFRAC_TILE(:,JTILE) = XNATURE(:)
 ! pack variables which are arguments to this routine
  CALL PACK_SURF_INIT_ARG(NSIZE_NATURE,NR_NATURE)
 !
-!$OMP SINGLE
-IF ( ALLOCATED(NWG_LAYER_TOT) ) DEALLOCATE(NWG_LAYER_TOT)
-ALLOCATE(NWG_LAYER_TOT(NDIM_FULL,1))
-!$OMP END SINGLE
-!
 ! initialization
 IF (NDIM_NATURE>0) &
   CALL INIT_NATURE_n(HPROGRAM,HINIT,OLAND_USE,NSIZE_NATURE,KSV,KSW,     &
                      HSV,ZP_CO2,ZP_RHOA,                                &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
-                     ZP_EMIS,ZP_TSRAD,                                  &
+                     ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
                      KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                      'OK'                                               )
 !
@@ -649,7 +660,7 @@ IF (NDIM_TOWN>0) &
   CALL INIT_TOWN_n(HPROGRAM,HINIT,NSIZE_TOWN,KSV,KSW,                 &
                    HSV,ZP_CO2,ZP_RHOA,                                &
                    ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
-                   ZP_EMIS,ZP_TSRAD,                                  &
+                   ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
                    KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
                    'OK'                                               )  
 !
@@ -661,29 +672,18 @@ XTIME_INIT_TOWN = XTIME_INIT_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN
 #endif
 !
 !
-!*      10.     Output radiative fields
-!               -----------------------
+!*      10.     Output radiative and physical fields
+!               ------------------------------------
 !
 IF (SIZE(PDIR_ALB)>0)                                                   &
   CALL AVERAGE_RAD(ZFRAC_TILE,                                            &
                    ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTSRAD_TILE, &
-                   PDIR_ALB,      PSCA_ALB,      PEMIS,      PTSRAD       )  
-
+                   PDIR_ALB,      PSCA_ALB,      PEMIS,      PTSRAD       ) 
+!
+IF (SIZE(PTSURF)>0) &
+  CALL AVERAGE_TSURF(ZFRAC_TILE, ZTSURF_TILE, PTSURF)
+!                  
 DEALLOCATE(ZFRAC_TILE)
-!
-!
-!
-!*      11.     check diagnostics flag
-!               -----------------------
-!
-!IF(LPROVAR_TO_DIAG)THEN
-!   IF (NDIM_WATER>0.AND.CWATER=='FLAKE ') THEN
-!       CALL ABOR1_SFX('For the moment LPROVAR_TO_DIAG can not be activated with CWATER=FLAKE')
-!   ENDIF
-!   IF (NDIM_TOWN>0.AND.CTOWN=='TEB') THEN
-!       CALL ABOR1_SFX('For the moment LPROVAR_TO_DIAG can not be activated with CTOWN=TEB')
-!   ENDIF
-!ENDIF 
 !
 !-------------------------------------------------------------------------------
 !==============================================================================
@@ -712,6 +712,7 @@ ALLOCATE(ZP_DIR_ALB(KSIZE,ISWB))
 ALLOCATE(ZP_SCA_ALB(KSIZE,ISWB))
 ALLOCATE(ZP_EMIS   (KSIZE))
 ALLOCATE(ZP_TSRAD  (KSIZE))
+ALLOCATE(ZP_TSURF  (KSIZE))
 !
 IF (KSIZE>0) THEN
   ZP_CO2    = 6.E-4
@@ -722,6 +723,7 @@ IF (KSIZE>0) THEN
   ZP_SCA_ALB = XUNDEF
   ZP_EMIS    = XUNDEF
   ZP_TSRAD   = XUNDEF
+  ZP_TSURF   = XUNDEF
 END IF
 !
 DO JJ=1,KSIZE
@@ -767,7 +769,9 @@ IF (SIZE(ZDIR_ALB_TILE)>0) &
 IF (SIZE(ZSCA_ALB_TILE)>0) &
      ZSCA_ALB_TILE(KMASK(JJ),:,KTILE)= ZP_SCA_ALB   (JJ,:)  
 IF (SIZE(ZEMIS_TILE)>0) &
-     ZEMIS_TILE   (KMASK(JJ),KTILE)  = ZP_EMIS      (JJ)  
+     ZEMIS_TILE   (KMASK(JJ),KTILE)  = ZP_EMIS      (JJ)
+IF (SIZE(ZTSURF_TILE)>0) &
+     ZTSURF_TILE  (KMASK(JJ),KTILE)  = ZP_TSURF     (JJ)
 ENDDO
 !
 DEALLOCATE(ZP_CO2    )
@@ -778,6 +782,7 @@ DEALLOCATE(ZP_DIR_ALB)
 DEALLOCATE(ZP_SCA_ALB)
 DEALLOCATE(ZP_EMIS   )
 DEALLOCATE(ZP_TSRAD  )
+DEALLOCATE(ZP_TSURF  )
 IF (LHOOK) CALL DR_HOOK('UNPACK_SURF_INIT_ARG',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE UNPACK_SURF_INIT_ARG

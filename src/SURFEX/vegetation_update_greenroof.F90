@@ -38,8 +38,8 @@
 !               ------------
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
-USE MODD_TEB_n,             ONLY: XCOVER,LCOVER, XGREENROOF
-USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO
+USE MODD_TEB_n,             ONLY: XCOVER, LCOVER, XGREENROOF
+USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO, LTR_ML
 USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS,                 &
                                   XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
                                   XGAMMA, XCV, XRGL,                       &
@@ -51,10 +51,7 @@ USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS,                 &
                                   XRE25,                                   &
                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XALBNIR, XALBVIS, XALBUV, XDMAX
-
-
-  
+                                  XALBNIR, XALBVIS, XALBUV, XDMAX  
 !
 USE MODI_VEGETATION_UPDATE
 !
@@ -177,7 +174,8 @@ ZCNA_NITRO(:,1)   = XCNA_NITRO
 GUPDATED=.FALSE.
 IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,LCOVER,                 &
-                         CISBA,(.NOT. LPAR_GREENROOF), CPHOTO, .FALSE., 'GR ',  &
+                         CISBA,(.NOT. LPAR_GREENROOF), CPHOTO, .FALSE.,  &
+                         LTR_ML, 'GR ',                                  &
                          ZLAI,ZVEG,ZZ0,                                  &
                          ZALBNIR,ZALBVIS,ZALBUV,ZEMIS,                   &
                          ZRSMIN,ZGAMMA,ZWRMAX_CF,                        &

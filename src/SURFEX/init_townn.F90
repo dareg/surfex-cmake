@@ -3,7 +3,7 @@
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
                                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                   PEMIS,PTSRAD,                              &
+                                   PEMIS,PTSRAD,PTSURF,                       &
                                    KYEAR, KMONTH,KDAY, PTIME,                 &
                                    HATMFILE,HATMFILETYPE,                     &
                                    HTEST                                      )  
@@ -38,6 +38,7 @@
 !!       V.Masson   18/08/97 call to fmread directly with dates and strings
 !!       V.Masson   15/03/99 new PGD treatment with COVER types
 !        F.Solmon  06/00   adaptation for patch approach
+!!       B.Decharme 04/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -76,6 +77,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -103,15 +105,16 @@ IF (CTOWN=='NONE  ') THEN
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
+  PTSURF  =XTT
 ELSE IF (CTOWN=='FLUX  ') THEN
   CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
-                           PEMIS,PTSRAD,'OK'                           )  
+                           PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (CTOWN=='TEB   ') THEN
   CALL INIT_TEB_n(HPROGRAM,HINIT,                               &
                     KI,KSV,KSW,HSV,PCO2,PRHOA,                    &
                     PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                    PEMIS,PTSRAD,                                 &
+                    PEMIS,PTSRAD,PTSURF,                          &
                     KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                     'OK'                                          )  
 END IF

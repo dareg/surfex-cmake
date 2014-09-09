@@ -30,12 +30,15 @@
 !!    -------------
 !!      Original    05-04
 !!      Modified 06-10 by S. Faroux
+!!      modified   06-13  B. Decharme  : Add some key
+!!                                       Add diag (Qs, Evap, Subl)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 
-USE MODD_DIAG_SURF_ATM_n, ONLY : LFRAC, LCOEF, N2M, LSURF_BUDGET, LSURF_BUDGETC, LSELECT
+USE MODD_DIAG_SURF_ATM_n, ONLY : LFRAC, LCOEF, N2M, LSURF_BUDGET, LSURF_BUDGETC, LSELECT, &
+                                 L2M_MIN_ZS, LRAD_BUDGET, LRESET_BUDGETC, LSURF_VARS
 USE MODD_OL_FILEID,       ONLY : XVAR_TO_FILEOUT, XID, XOUT
 USE MODD_SURF_ATM_n,      ONLY : TTIME
 !
@@ -154,12 +157,14 @@ IF (LCOEF) THEN
    CALL DEF_VAR_NETCDF(IFILE_ID,'CE'   ,'Drag_Coefficient_For_Evaporation'   ,IDDIM,YATT_TITLE,YATT)
    YATT='m'
    CALL DEF_VAR_NETCDF(IFILE_ID,'Z0'   ,'Roughness_Length_For_Momentum'   ,IDDIM,YATT_TITLE,YATT)
-   YATT='m'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'Z0H'  ,'Roughness_Length_For_Heat'   ,IDDIM,YATT_TITLE,YATT)
-   YATT='m'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'UREF'  ,'Reference_Height_For_Momentum'   ,IDDIM,YATT_TITLE,YATT)
-   YATT='m'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'ZREF'  ,'Reference_Height_For_Heat'   ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'Z0H'  ,'Roughness_Length_For_Heat'       ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'UREF' ,'Reference_Height_For_Momentum'   ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'ZREF' ,'Reference_Height_For_Heat'       ,IDDIM,YATT_TITLE,YATT)
+ENDIF
+!
+IF (LSURF_VARS) THEN
+   YATT='kg/kg'
+   CALL DEF_VAR_NETCDF(IFILE_ID,'QS'   ,'Surface_specific_humidity'   ,IDDIM,YATT_TITLE,YATT)
 ENDIF
 !
 IF (LSURF_BUDGET)  THEN
@@ -169,13 +174,22 @@ IF (LSURF_BUDGET)  THEN
    CALL DEF_VAR_NETCDF(IFILE_ID,'LE'   ,'Averaged_Total_Latent_Heat_Flux  ',IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'LEI'  ,'Averaged_Sublimation_Latent_Heat_Flux  ',IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUX','Averaged_Ground_Heat_Flux  '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'SWD'  ,'Averaged_Downward_SW       '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'SWU'  ,'Averaged_Upward_SW         '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'LWD'  ,'Averaged_Downward_LW       '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'LWU'  ,'Averaged_Upward_LW         '   ,IDDIM,YATT_TITLE,YATT)
+   !
+   IF (LRAD_BUDGET) THEN
+      !
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWD'  ,'Averaged_Downward_SW       '   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWU'  ,'Averaged_Upward_SW         '   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWD'  ,'Averaged_Downward_LW       '   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWU'  ,'Averaged_Upward_LW         '   ,IDDIM,YATT_TITLE,YATT)
+      !
+   ENDIF
+   !
    YATT='kg/ms2'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'FMU'  ,'Averaged_Zonal_Wind_Stress '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'FMV'  ,'Averaged_Merid_Wind_Stress '   ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'FMU'  ,'Averaged_Zonal_Wind_Stress '      ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'FMV'  ,'Averaged_Merid_Wind_Stress '      ,IDDIM,YATT_TITLE,YATT)
+   YATT='kg/m2/s'  
+   CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP' ,'Averaged_Total_Evapotranspiration',IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'SUBL' ,'Averaged_Sublimation_of_seaice'   ,IDDIM,YATT_TITLE,YATT)   
 ENDIF
 !
 IF (LSURF_BUDGETC) THEN
@@ -185,30 +199,45 @@ IF (LSURF_BUDGETC) THEN
    CALL DEF_VAR_NETCDF(IFILE_ID,'LEC'   ,'Cumulated_Averaged_Total_Latent_Heat_Flux  ',IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'LEIC'  ,'Cumulated_Averaged_Sublimation_Latent_Heat_Flux  ',IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUXC','Cumulated_Averaged_Ground_Heat_Flux  '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'SWDC'  ,'Cumulated_Averaged_Downward_SW       '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'SWUC'  ,'Cumulated_Averaged_Upward_SW         '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'LWDC'  ,'Cumulated_Averaged_Downward_LW       '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'LWUC'  ,'Cumulated_Averaged_Upward_LW         '   ,IDDIM,YATT_TITLE,YATT)
+   !
+   IF (LRAD_BUDGET .OR. (LSURF_BUDGETC .AND. .NOT.LRESET_BUDGETC)) THEN
+      !     
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWDC'  ,'Cumulated_Averaged_Downward_SW       '   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWUC'  ,'Cumulated_Averaged_Upward_SW         '   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWDC'  ,'Cumulated_Averaged_Downward_LW       '   ,IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWUC'  ,'Cumulated_Averaged_Upward_LW         '   ,IDDIM,YATT_TITLE,YATT)
+      !
+   ENDIF
+   !
    YATT='kg/ms'
    CALL DEF_VAR_NETCDF(IFILE_ID,'FMUC'  ,'Cumulated_Averaged_Zonal_Wind_Stress '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'FMVC'  ,'Cumulated_Averaged_Merid_Wind_Stress '   ,IDDIM,YATT_TITLE,YATT)
+   YATT='kg/m2'  
+   CALL DEF_VAR_NETCDF(IFILE_ID,'EVAPC' ,'Cumulated_Averaged_Total_Evaporation'    ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'SUBLC' ,'Cumulated_Averaged_Sublimation_of_seaice',IDDIM,YATT_TITLE,YATT)   
 ENDIF
 !
 IF (N2M>=1.OR.LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
    YATT='K'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'TS' ,'Surface_Temperature         '   ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'TSRAD' ,'Surface_Skin,Temperature '   ,IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'TS'    ,'Effective_Surface_Temperature      ',IDDIM,YATT_TITLE,YATT)
+   CALL DEF_VAR_NETCDF(IFILE_ID,'TSRAD' ,'Radiative_Surface_Skin_Temperature ',IDDIM,YATT_TITLE,YATT)
    YATT='-'
    CALL DEF_VAR_NETCDF(IFILE_ID,'EMIS' ,'Surface_emissivity '   ,IDDIM,YATT_TITLE,YATT)
 ENDIF
 !
 IF (N2M>0) THEN
-   YATT='K'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'T2M_MIN_ZS' ,'2m_Temperature         '   ,IDDIM,YATT_TITLE,YATT)
-   YATT='kg/kg'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'Q2M_MIN_ZS' ,'2m_Specific_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
-   YATT='(-)'
-   CALL DEF_VAR_NETCDF(IFILE_ID,'HU2M_MIN_ZS','2m_Relative_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
+   !
+   IF (L2M_MIN_ZS) THEN
+      !
+      YATT='K'
+      CALL DEF_VAR_NETCDF(IFILE_ID,'T2M_MIN_ZS' ,'2m_Temperature         '   ,IDDIM,YATT_TITLE,YATT)
+      YATT='kg/kg'
+      CALL DEF_VAR_NETCDF(IFILE_ID,'Q2M_MIN_ZS' ,'2m_Specific_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
+      YATT='(-)'
+      CALL DEF_VAR_NETCDF(IFILE_ID,'HU2M_MIN_ZS','2m_Relative_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
+      !
+   ENDIF
+   !
    YATT='K'
    CALL DEF_VAR_NETCDF(IFILE_ID,'T2M' ,'2m_Temperature         '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'T2MMIN' ,'Minimum_2m_Temperature         '   ,IDDIM,YATT_TITLE,YATT)
@@ -219,11 +248,13 @@ IF (N2M>0) THEN
    CALL DEF_VAR_NETCDF(IFILE_ID,'HU2M','2m_Relative_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'HU2MMIN','Minimum_2m_Relative_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'HU2MMAX','Maximum_2m_Relative_Humidity   '   ,IDDIM,YATT_TITLE,YATT)
+   !
    YATT='m/s'
    CALL DEF_VAR_NETCDF(IFILE_ID,'ZON10M','10m_Zonal_wind       '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'MER10M','10m_Meridian_Wind     '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'W10M','10m_Wind     '   ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'W10MMAX','Maximum_10m_Wind     ' ,IDDIM,YATT_TITLE,YATT)
+   !
 ENDIF
 !
 IF (LCH_EMIS .AND. NBEQ>0 .AND. LCH_SURF_EMIS) THEN

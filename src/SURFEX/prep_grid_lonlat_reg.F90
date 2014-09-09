@@ -108,7 +108,12 @@ DO JL = 2,NINLAT
 ENDDO
 !
 !-----------------------------------------------------------------------
-HINTERP_TYPE = 'HORIBL'
+IF(KNI==1)THEN
+  HINTERP_TYPE = 'UNIF'
+ELSE
+  HINTERP_TYPE = 'HORIBL'
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_LONLAT_REG',1,ZHOOK_HANDLE)
 !-----------------------------------------------------------------------
 !

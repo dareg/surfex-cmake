@@ -66,22 +66,30 @@ REAL,    DIMENSION(KLU) :: ZLON ! longitudes
 REAL,    DIMENSION(KLU) :: ZLAT_XY
 REAL,    DIMENSION(KLU) :: ZLON_XY
 REAL,    DIMENSION(KLU) :: ZMESH_SIZE
-
+!                                                                 _____ Sup
+REAL,    DIMENSION(KLU) :: ZLATSUP     ! Grid corner Latitude    |     |
+REAL,    DIMENSION(KLU) :: ZLONSUP     ! Grid corner Longitude   |     |
+REAL,    DIMENSION(KLU) :: ZLATINF     ! Grid corner Latitude    |_____|
+REAL,    DIMENSION(KLU) :: ZLONINF     ! Grid corner Longitude  Inf
+!
 INTEGER                            :: IL    ! total number of points
 !
  CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('WRITE_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
+!
 !*       1.    Projection and 2D grid parameters
 !              ---------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('WRITE_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
  CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI)
 !
 ALLOCATE(INLOPA(INLATI))
+!
  CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA(:),IL,&
-                          ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE)  
+                         ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE,            &
+                         ZLONINF,ZLATINF,ZLONSUP,ZLATSUP                  )  
 !
 !---------------------------------------------------------------------------
 !
@@ -99,9 +107,14 @@ YCOMMENT=' '
  CALL WRITE_SURF(HPROGRAM,'LAT_G_XY',ZLAT_XY(:),KRESP,YCOMMENT)
  CALL WRITE_SURF(HPROGRAM,'LON_G_XY',ZLON_XY(:),KRESP,YCOMMENT)
  CALL WRITE_SURF(HPROGRAM,'MESHGAUSS',ZMESH_SIZE(:),KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LONINF',ZLONINF(:),KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LATINF',ZLATINF(:),KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LONSUP',ZLONSUP(:),KRESP,YCOMMENT)
+ CALL WRITE_SURF(HPROGRAM,'LATSUP',ZLATSUP(:),KRESP,YCOMMENT)
+!
+DEALLOCATE(INLOPA)
 !
 !---------------------------------------------------------------------------
-DEALLOCATE(INLOPA)
 IF (LHOOK) CALL DR_HOOK('WRITE_GRIDTYPE_GAUSS',1,ZHOOK_HANDLE)
 !---------------------------------------------------------------------------
 !

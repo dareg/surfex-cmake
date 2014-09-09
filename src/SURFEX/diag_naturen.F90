@@ -5,7 +5,8 @@ SUBROUTINE DIAG_NATURE_n(HPROGRAM,                                              
                            PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, PFMU, PFMV,      &
                            PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,         &
                            PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,        &
-                           PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX           )  
+                           PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,          &
+                           PEVAP, PEVAPC, PSUBL, PSUBLC                           )
 !     ###############################################################################
 !
 !!****  *DIAG_NATURE_n * - Chooses the surface schemes for diagnostics over
@@ -30,6 +31,7 @@ SUBROUTINE DIAG_NATURE_n(HPROGRAM,                                              
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : new diag
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
@@ -55,6 +57,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux       (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient    (W/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! transf. coef heat   (W/s)
@@ -81,6 +85,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux       (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
@@ -109,12 +115,15 @@ IF (CNATURE=='ISBA  ' .OR. CNATURE=='TSZ0  ' ) THEN
                      PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,      &
                      PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,         &
                      PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,        &
-                     PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX           )  
+                     PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,          &
+                     PEVAP, PEVAPC, PSUBL, PSUBLC                           )
 !                   
 ELSE IF (CNATURE=='FLUX  ') THEN
 !   
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
+  PEVAP    = XUNDEF
+  PSUBL    = XUNDEF
   PRI      = XUNDEF
   PCD      = XUNDEF
   PCH      = XUNDEF
@@ -137,13 +146,15 @@ ELSE IF (CNATURE=='FLUX  ') THEN
   PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF
   PLWDC    = XUNDEF
   PLWUC    = XUNDEF
   PFMUC    = XUNDEF
-  PFMVC    = XUNDEF 
+  PFMVC    = XUNDEF
   PT2M_MIN = XUNDEF
   PT2M_MAX = XUNDEF
   PHU2M_MIN= XUNDEF
@@ -155,6 +166,8 @@ ELSE IF (CNATURE=='NONE  ') THEN
   PH       = XUNDEF
   PLE      = XUNDEF
   PLEI     = XUNDEF
+  PEVAP    = XUNDEF
+  PSUBL    = XUNDEF  
   PGFLUX   = XUNDEF
   PRI      = XUNDEF
   PCD      = XUNDEF
@@ -163,6 +176,7 @@ ELSE IF (CNATURE=='NONE  ') THEN
   PQS      = XUNDEF
   PZ0      = XUNDEF
   PZ0H     = XUNDEF
+  PTS      = XUNDEF
   PT2M     = XUNDEF
   PQ2M     = XUNDEF
   PHU2M    = XUNDEF
@@ -180,6 +194,8 @@ ELSE IF (CNATURE=='NONE  ') THEN
   PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF
@@ -188,7 +204,7 @@ ELSE IF (CNATURE=='NONE  ') THEN
   PFMUC    = XUNDEF
   PFMVC    = XUNDEF
   PT2M_MIN = XUNDEF
-  PT2M_MAX = XUNDEF 
+  PT2M_MAX = XUNDEF
   PHU2M_MIN= XUNDEF
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF

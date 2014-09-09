@@ -31,14 +31,16 @@
 !!      01/2008     C. Lebeaupin Brossier ! initialization of oceanic var. 
 !!                                        ! from MERCATOR analyses types
 !!      07/2012     P. Le Moigne          ! CMO1D phasing
+!!      01/2014     S. Senesi             ! introduce fractional seaice and sea-ice model 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_PREP_SEAFLUX,   ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF
+USE MODD_PREP_SEAFLUX,   ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF,&
+                                XSSS_UNIF, XSIC_UNIF
 !
-USE MODN_PREP_SEAFLUX,   ONLY : LSEA_SBL, LOCEAN_MERCATOR, LOCEAN_CURRENT, &
+USE MODN_PREP_SEAFLUX,   ONLY : LSEA_SBL, CSEAICE_SCHEME, LOCEAN_MERCATOR, LOCEAN_CURRENT, &
                                 XTIME_REL, LCUR_REL, LTS_REL,    &
                                 LZERO_FLUX, LCORR_FLUX, XCORFLX, LDIAPYC
 
@@ -71,8 +73,11 @@ CFILEPGD_SEAFLX = '                          '
 CTYPEPGD        = '      '
 !
 XSST_UNIF = XUNDEF
+XSSS_UNIF = XUNDEF
+XSIC_UNIF = XUNDEF
 !
 LSEA_SBL = .FALSE.
+CSEAICE_SCHEME='NONE  '
 LOCEAN_MERCATOR = .FALSE.
 LOCEAN_CURRENT = .FALSE.
 !

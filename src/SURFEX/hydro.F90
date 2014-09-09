@@ -13,12 +13,12 @@
                          PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,           &
                          PWWILT, PF2WGHT, PF2, PD_G, PDZG, PDZDIF, PPS,     &
                          PWG, PWGI, PTG, KWG_LAYER,                         &
-                         PDRAIN, PRUNOFF,                                   &
+                         PDRAIN, PRUNOFF, PTOPQS,                           &
                          PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,  &
-                         HKSAT, HSOC, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, &
+                         HKSAT, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE,       &
                          PD_ICE, PHORTON, PDRIP, PFFG, PFFV , PFFLOOD,      &
-                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,   &  
-                         PIRRIG_GR                                          )
+                         PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,   &
+                         PIRRIG_GR, PQSB, PFWTD, PWTD                       )
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -80,6 +80,9 @@
 !!                                         Add diag IRRIG_FLUX
 !!                     04/13 (B. Decharme) Pass soil phase changes routines here
 !!                                         Apply physical limits on wg in hydro_soil.F90
+!!                                         Subsurface runoff if SGH (DIF option only)
+!!                                         water table / surface coupling
+!!                  02/2013  (C. de Munck) specified irrigation rate of ground added
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -253,10 +256,6 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/
 !                                             ! 'DEF'  = ISBA homogenous soil
 !                                             ! 'SGH'  = ksat exponential decay
 !
- CHARACTER(LEN=*),     INTENT(IN)   :: HSOC    ! soil organic carbon profil option
-!                                             ! 'DEF'  = ISBA homogenous soil
-!                                             ! 'SGH'  = SOC profile
-!
  CHARACTER(LEN=*), INTENT(IN)       :: HRAIN   ! Rainfall spatial distribution
                                               ! 'DEF' = No rainfall spatial distribution
                                               ! 'SGH' = Rainfall exponential spatial distribution
@@ -273,7 +272,7 @@ REAL, DIMENSION(:),  INTENT(IN)   :: PKSAT_ICE!hydraulic conductivity at saturat
 REAL, DIMENSION(:),  INTENT(IN)   :: PMUF     !fraction of the grid cell reached by the rainfall
 REAL, DIMENSION(:),  INTENT(INOUT):: PFSAT    !Topmodel/dt92 saturated fraction
 !
-REAL, DIMENSION(:),  INTENT(OUT)  :: PHORTON    !Horton runoff (kg/m2/s)
+REAL, DIMENSION(:),  INTENT(OUT)  :: PHORTON   !Horton runoff (kg/m2/s)
 !
 REAL, DIMENSION(:),  INTENT(OUT)   :: PDRIP    !Dripping from the vegetation (kg/m2/s)
 REAL, DIMENSION(:),  INTENT(OUT)   :: PRRVEG   !Precip. intercepted by vegetation (kg/m2/s)
@@ -284,6 +283,12 @@ REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltratio
 !
 REAL, DIMENSION(:), INTENT(INOUT)  :: PIFLOOD  !Floodplain real infiltration      [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT)  :: PPFLOOD  !Floodplain interception           [kg/m²/s]
+!
+REAL, DIMENSION(:,:), INTENT(IN)   :: PTOPQS   !Topmodel (HRUNOFF=SGH) subsurface flow by layer (m/s)
+REAL, DIMENSION(:),   INTENT(OUT)  :: PQSB     !Topmodel (HRUNOFF=SGH) lateral subsurface flow [kg/m²/s]
+!
+REAL, DIMENSION(:), INTENT(IN)     :: PFWTD    !grid-cell fraction of water table to rise
+REAL, DIMENSION(:), INTENT(IN)     :: PWTD     !water table depth (m)
 !
 !*      0.2    declarations of local variables
 !
@@ -311,7 +316,7 @@ REAL, DIMENSION(SIZE(PVEG))     :: ZPG, ZPG_MELT, ZDUNNE,                       
 !                                      so set this to zero here for this option.
 !                                 ZWSAT_AVG, ZWWILT_AVG, ZWFC_AVG = Average water and ice content
 !                                      values over the soil depth D2 (for calculating surface runoff)
-!                                 ZDG3, ZWG3, ZRUNOFF, ZDRAIN and ZHORTON are working variables only used for DIF option
+!                                 ZDG3, ZWG3, ZRUNOFF, ZDRAIN, ZQSB and ZHORTON are working variables only used for DIF option
 !                                 ZEVAPCOR = correction if evaporation from snow exceeds
 !                                               actual amount on the surface [m/s]
 !
@@ -363,10 +368,12 @@ ZHORTON(:)       = 0.
 ZRUNOFF(:)       = 0.
 ZWGI_EXCESS(:)   = 0.
 ZEVAPCOR(:)      = 0.
+ZQSB    (:)      = 0.
 !
 PDRAIN(:)        = 0.
 PRUNOFF(:)       = 0.
 PHORTON(:)       = 0.
+PQSB   (:)       = 0.
 !
 ! Initialize evaporation components: variable definitions
 ! depend on snow scheme:
@@ -406,7 +413,12 @@ ELSE
    ZWG3(:) = XUNDEF
 END IF
 !
-!* irrigation
+!-------------------------------------------------------------------------------
+!
+!*       1.     EVOLUTION OF THE EQUIVALENT WATER CONTENT Wr
+!               --------------------------------------------
+!
+!* add irrigation over vegetation to liquid precipitation (rr)
 !
 PIRRIG_FLUX(:)=0.0
 !
@@ -418,14 +430,18 @@ IF (SIZE(LIRRIGATE)>0) THEN
    END WHERE
 ENDIF
 !
-!-------------------------------------------------------------------------------
+!* interception reservoir and dripping computation
 !
-!*       1.     EVOLUTION OF THE EQUIVALENT WATER CONTENT Wr
-!               --------------------------------------------
+ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
+                 ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
+                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
 !
- CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                              &
-                 ZRR, ZLEV, ZLETR, PVEG, ZPSNV,                   &
-                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG,PIRRIG_GR        ) 
+!
+!* add irrigation over ground to potential soil infiltration (pg)
+!
+PIRRIG_FLUX(:) = PIRRIG_FLUX(:) + PIRRIG_GR(:)
+!
+ZPG(:) = ZPG(:) + PIRRIG_GR(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -560,12 +576,12 @@ IF (HISBA=='DIF') THEN
 !
   DO JDT = 1,INDT
 !                      
-    CALL HYDRO_SOILDIF(ZTSTEP,                                      &
+    CALL HYDRO_SOILDIF(HRUNOFF, HHORT, ZTSTEP,                      &
                 PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,            &
                 PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG, ZEVAPCOR,     &
                 PF2WGHT, PWG, PWGI, PTG, PPS, ZQSAT, ZQSATI,        &
-                PWDRAIN, ZDRAIN, ZHORTON, HKSAT, HSOC, PWWILT,      &
-                HHORT, PFSAT, KWG_LAYER, INL, KLAYER_HORT           )
+                ZDRAIN, ZHORTON, PFSAT, KWG_LAYER, INL,             &
+                KLAYER_HORT, PTOPQS, ZQSB, PFWTD, PWTD              )
 !
     CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,     &
                      PSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF,    &
@@ -573,8 +589,10 @@ IF (HISBA=='DIF') THEN
                      PDZG,  ZWGI_EXCESS                      )
 !
     PDRAIN (:)  = PDRAIN (:) + (ZDRAIN(:)+ZWGI_EXCESS(:))/REAL(INDT)
+    PQSB   (:)  = PQSB   (:) + ZQSB   (:)/REAL(INDT)
     PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(INDT)
-  ENDDO
+!
+  ENDDO  
 !
 ELSE
 !
@@ -629,9 +647,9 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-! Add sub-grid surface runoff to saturation excess:
+! Add sub-grid surface and subsurface runoff to saturation excess:
 !
-PRUNOFF(:) = PRUNOFF(:) + ZDUNNE(:) + PHORTON(:)
+PRUNOFF(:) = PRUNOFF(:) + ZDUNNE(:) + PHORTON(:) + PQSB (:)
 !
 !-------------------------------------------------------------------------------
 !

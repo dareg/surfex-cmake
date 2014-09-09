@@ -34,6 +34,7 @@
 !                           - Preparation of uniform snow fields : density, temperture,albedo,grain types
 !!                          - Flag to avtivate new maximal liquid water holding capacity : formulation used by Crocus
 !!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
+!      B. Decharme  07/2013 Add ES snow grid case : 6-L or 12-L
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -201,17 +202,8 @@ IF (LNAM_READ) THEN
   !
   IF (CSNOW_GD=='D95' .OR. CSNOW_GD=='EBA') NSNOW_LAYER_GD = 1
   ! not more than 3 layers for snow in garden
-  IF (CSNOW_GD=='3-L' .AND. NSNOW_LAYER_GD<=2) NSNOW_LAYER_GD = 3
+  IF (CSNOW_GD=='3-L' .AND. NSNOW_LAYER_GD<=2) NSNOW_LAYER_GD = 12
   !
-  IF (CSNOW_GD=='3-L' .AND. NSNOW_LAYER_GD>3) THEN
-    NSNOW_LAYER_GD = 3
-    WRITE(ILUOUT,*) '------------------------------------'
-    WRITE(ILUOUT,*) 'With ISBA-ES, number of snow layers '
-    WRITE(ILUOUT,*) 'cannot be more than 3.              '
-    WRITE(ILUOUT,*) 'So it is forced to 3 here.          '
-    WRITE(ILUOUT,*) '------------------------------------'
-  ENDIF
-  !  
   IF (NSNOW_LAYER_GD > NSNOW_LAYER_MAX) THEN
     WRITE(ILUOUT,*) '------------------------------------'
     WRITE(ILUOUT,*) 'Please update modd_prep_snow.f90 routine : '

@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -35,17 +36,18 @@
 !
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM,       ONLY : LCPL_ESM
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 USE MODD_DIAG_SURF_ATM_n,ONLY : LREAD_BUDGETC
-USE MODD_DIAG_WATFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, &
+USE MODD_DIAG_WATFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,   &
                                   LSURF_BUDGETC, LRESET_BUDGETC,        &
-                                  XRN, XH, XLE, XLEI, XGFLUX, XRI,      &
-                                  XCD, XCH, XCE, XZ0, XZ0H,             &
+                                  XRN, XH, XLE, XLEI, XGFLUX, XEVAP,    &
+                                  XSUBL, XRI, XCD, XCH, XCE, XZ0, XZ0H, &
                                   XT2M, XQ2M, XHU2M, XT2M_MIN, XT2M_MAX,&
                                   XZON10M, XMER10M, XQS,                &
                                   XSWD, XSWU, XLWD, XLWU,               &
                                   XSWBD, XSWBU, XFMU, XFMV,             &
                                   XRNC, XHC, XLEC, XLEIC, XGFLUXC,      &
+                                  XEVAPC, XSUBLC,                       &
                                   XSWDC, XSWUC, XLWDC, XLWUC, XFMUC,    &
                                   XFMVC, XDIAG_TS, XHU2M_MIN, XHU2M_MAX,&
                                   XWIND10M, XWIND10M_MAX  
@@ -59,7 +61,6 @@ USE MODD_WATFLUX_n,      ONLY : XCPL_WATER_WIND,XCPL_WATER_EVAP,      &
                                   XCPL_WATERICE_SNET  
 !
 USE MODI_READ_SURF
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -76,6 +77,7 @@ INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER           :: IVERSION, IBUG
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -85,6 +87,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* surface energy budget
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_WATFLUX_INIT_N',0,ZHOOK_HANDLE)
+!
 ALLOCATE(XDIAG_TS(KLU))
 XDIAG_TS = XUNDEF
 !
@@ -94,6 +97,8 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   ALLOCATE(XLE     (KLU))
   ALLOCATE(XLEI    (KLU))
   ALLOCATE(XGFLUX  (KLU))
+  ALLOCATE(XEVAP   (KLU))
+  ALLOCATE(XSUBL   (KLU))
   ALLOCATE(XSWD    (KLU))
   ALLOCATE(XSWU    (KLU))
   ALLOCATE(XLWD    (KLU))
@@ -108,6 +113,8 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   XLE      = XUNDEF
   XLEI     = XUNDEF
   XGFLUX   = XUNDEF
+  XEVAP    = XUNDEF
+  XSUBL    = XUNDEF  
   XSWD     = XUNDEF
   XSWU     = XUNDEF
   XLWD     = XUNDEF
@@ -122,6 +129,8 @@ ELSE
   ALLOCATE(XLE     (0))
   ALLOCATE(XLEI    (0))
   ALLOCATE(XGFLUX  (0))
+  ALLOCATE(XEVAP   (0))
+  ALLOCATE(XSUBL   (0))  
   ALLOCATE(XSWD    (0))
   ALLOCATE(XSWU    (0))
   ALLOCATE(XLWD    (0))
@@ -141,6 +150,8 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XLEC    (KLU))
   ALLOCATE(XLEIC   (KLU))
   ALLOCATE(XGFLUXC (KLU))
+  ALLOCATE(XEVAPC  (KLU))
+  ALLOCATE(XSUBLC  (KLU))  
   ALLOCATE(XSWDC   (KLU))
   ALLOCATE(XSWUC   (KLU))
   ALLOCATE(XLWDC   (KLU))
@@ -154,6 +165,8 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      XLEC    = 0.0
      XLEIC   = 0.0
      XGFLUXC = 0.0
+     XEVAPC  = 0.0
+     XSUBLC  = 0.0
      XSWDC   = 0.0
      XSWUC   = 0.0
      XLWDC   = 0.0
@@ -166,6 +179,8 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      XLEC    = 0.0
      XLEIC   = 0.0
      XGFLUXC = 0.0
+     XEVAPC  = 0.0
+     XSUBLC  = 0.0     
      XSWDC   = 0.0
      XSWUC   = 0.0
      XLWDC   = 0.0
@@ -195,6 +210,19 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      CALL READ_SURF(HPROGRAM,YREC,XFMUC,IRESP)
      YREC='FMVC_WAT'
      CALL READ_SURF(HPROGRAM,YREC,XFMVC,IRESP)
+!
+     CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+     CALL READ_SURF(HPROGRAM,'BUG ',IBUG,IRESP)
+      IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUG<3)THEN
+         XEVAPC  = 0.0
+         XSUBLC  = 0.0              
+      ELSE
+         YREC='EVAPC_WAT'
+         CALL READ_SURF(HPROGRAM,YREC,XEVAPC,IRESP)
+         YREC='SUBLC_WAT'
+         CALL READ_SURF(HPROGRAM,YREC,XSUBLC,IRESP)              
+      ENDIF
+!
   ENDIF   
 ELSE
   ALLOCATE(XRNC    (0))
@@ -202,6 +230,8 @@ ELSE
   ALLOCATE(XLEC    (0))
   ALLOCATE(XLEIC   (0))
   ALLOCATE(XGFLUXC (0))
+  ALLOCATE(XEVAP   (0))
+  ALLOCATE(XSUBL   (0))  
   ALLOCATE(XSWDC   (0))
   ALLOCATE(XSWUC   (0))
   ALLOCATE(XLWDC   (0))
@@ -286,7 +316,7 @@ ELSE
   ALLOCATE(XQS     (0))
 END IF
 !
-IF(LCPL_ESM)THEN
+IF(LCPL_SEA)THEN
 !        
   ALLOCATE(XCPL_WATER_WIND(KLU))
   ALLOCATE(XCPL_WATER_FWSU(KLU))
@@ -307,12 +337,14 @@ IF(LCPL_ESM)THEN
   XCPL_WATER_SNOW(:) = 0.0        
   XCPL_WATER_FWSM(:) = 0.0
 !
-  ALLOCATE(XCPL_WATERICE_SNET(KLU))
-  ALLOCATE(XCPL_WATERICE_HEAT(KLU))
-  ALLOCATE(XCPL_WATERICE_EVAP(KLU))
-  XCPL_WATERICE_SNET(:) = 0.0
-  XCPL_WATERICE_HEAT(:) = 0.0
-  XCPL_WATERICE_EVAP(:) = 0.0
+  IF(LCPL_SEAICE)THEN
+    ALLOCATE(XCPL_WATERICE_SNET(KLU))
+    ALLOCATE(XCPL_WATERICE_HEAT(KLU))
+    ALLOCATE(XCPL_WATERICE_EVAP(KLU))
+    XCPL_WATERICE_SNET(:) = 0.0
+    XCPL_WATERICE_HEAT(:) = 0.0
+    XCPL_WATERICE_EVAP(:) = 0.0
+  ENDIF
 !
 ELSE
   ALLOCATE(XCPL_WATER_WIND(0))

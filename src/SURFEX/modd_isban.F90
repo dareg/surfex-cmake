@@ -122,7 +122,10 @@ TYPE ISBA_t
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                              ! False = No specific treatment
   LOGICAL                        :: LVEGUPD  ! True = update vegetation parameters every decade
-                                             ! False = keep vegetation parameters constant in time                                             
+                                             ! False = keep vegetation parameters constant in time
+!  
+  LOGICAL                        :: LNITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
+!
   LOGICAL                        :: LPERTSURF ! True  = apply random perturbations for ensemble prediction
                                               ! False = no random perturbation (default)
 !-------------------------------------------------------------------------------
@@ -152,6 +155,7 @@ TYPE ISBA_t
   LOGICAL                        :: LCTI       ! Topographic index data
   LOGICAL                        :: LSOCP      ! Soil organic carbon profile data
   LOGICAL                        :: LPERM      ! Permafrost distribution data
+  LOGICAL                        :: LGW        ! Groudwater distribution data
   LOGICAL                        :: LNOF  
 !-------------------------------------------------------------------------------
 !
@@ -159,16 +163,21 @@ TYPE ISBA_t
 !
   LOGICAL                        :: LSPINUPCARBS  ! T: do the soil carb spinup, F: no
   LOGICAL                        :: LSPINUPCARBW  ! T: do the wood carb spinup, F: no  
+  LOGICAL                        :: LAGRI_TO_GRASS! During soil carbon spinup with ISBA-CC, 
+                                                  ! grass parameters are attributed to all agricultural PFT
+!  
   REAL                           :: XSPINMAXS     ! max number of times CARBON_SOIL subroutine is
                                                   ! called for each timestep in simulation during
-                                                  ! acceleration procedure number
-  REAL                           :: XSPINMAXW     ! max number of times the wood is accelerated                                                  
-  INTEGER                        :: NNBYEARSPINS   ! nbr years needed to reaches soil equilibrium 
-  INTEGER                        :: NNBYEARSPINW   ! nbr years needed to reaches wood equilibrium
-  INTEGER                        :: NNBYEARSOLD    ! nbr years executed at curent time step
-  INTEGER                        :: NSPINS    ! number of times the soil is accelerated
-  INTEGER                        :: NSPINW    ! number of times the wood is accelerated
-
+                                                  ! acceleration procedure number                             
+  REAL                           :: XSPINMAXW     ! max number of times the wood is accelerated  
+  REAL                           :: XCO2_START    ! Pre-industrial CO2 concentration
+  REAL                           :: XCO2_END      ! Begin-transient CO2 concentration
+  INTEGER                        :: NNBYEARSPINS  ! nbr years needed to reaches soil equilibrium 
+  INTEGER                        :: NNBYEARSPINW  ! nbr years needed to reaches wood equilibrium
+  INTEGER                        :: NNBYEARSOLD   ! nbr years executed at curent time step
+  INTEGER                        :: NSPINS        ! number of times the soil is accelerated
+  INTEGER                        :: NSPINW        ! number of times the wood is accelerated
+!
 !-------------------------------------------------------------------------------
 !
 ! Mask and number of grid elements containing patches/tiles:
@@ -361,6 +370,7 @@ TYPE ISBA_t
   REAL, POINTER, DIMENSION(:,:)    :: XCLAY          ! clay fraction                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XSOC           ! soil organic carbon content             (kg/m2)
   REAL, POINTER, DIMENSION(:)      :: XPERM          ! permafrost distribution                 (-)
+  REAL, POINTER, DIMENSION(:)      :: XGW            ! groundwater distribution                 (-)
 
   REAL, POINTER, DIMENSION(:)      :: XWDRAIN        ! continuous drainage parameter           (-)
   REAL, POINTER, DIMENSION(:)      :: XTAUICE        ! soil freezing characteristic timescale  (s)
@@ -517,24 +527,20 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
   REAL                                  :: XCDRAG           ! drag coefficient in canopy
 !-------------------------------------------------------------------------------
 !
-! - Sub-grid hydrology
+! - Sub-grid hydrology and vertical hydrology
 !                                                     
   CHARACTER(LEN=4)               :: CRUNOFF! surface runoff formulation
 !                                          ! 'WSAT'
 !                                          ! 'DT92'
 !                                          ! 'SGH ' Topmodel
 !                                                     
-  CHARACTER(LEN=3)               :: CTOPREG! Wolock and McCabe (2000) linear regression for Topmodel
-                                           ! 'DEF' = Reg
-                                           ! 'NON' = no Reg  
-!                                           
   CHARACTER(LEN=3)               :: CKSAT  ! ksat
 !                                          ! 'DEF' = default value 
 !                                          ! 'SGH' = profil exponentiel
 !                                           
-  CHARACTER(LEN=3)               :: CSOC   ! soil organic carbon effect
-!                                          ! 'DEF' = default value 
-!                                          ! 'SGH' = soil SOC profil
+  LOGICAL                        :: LSOC   ! soil organic carbon effect
+!                                          ! False = default value 
+!                                          ! True  = soil SOC profil
 !
   CHARACTER(LEN=3)               :: CRAIN  ! Rainfall spatial distribution
                                            ! 'DEF' = No rainfall spatial distribution
@@ -560,6 +566,7 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !
   REAL, POINTER, DIMENSION(:,:)  :: XTAB_FSAT !Satured fraction array
   REAL, POINTER, DIMENSION(:,:)  :: XTAB_WTOP !Active TOPMODEL-layer array
+  REAL, POINTER, DIMENSION(:,:)  :: XTAB_QTOP !Subsurface flow TOPMODEL array
 !                                        
   REAL, POINTER, DIMENSION(:,:)  :: XD_ICE    !depth of the soil column for the calculation
 !                                              of the frozen soil fraction (m)
@@ -571,8 +578,13 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !                                            
   REAL, POINTER, DIMENSION(:)    :: XMUF  ! fraction of the grid cell reached by the rainfall
   REAL, POINTER, DIMENSION(:)    :: XFSAT ! Topmodel or dt92 saturated fraction
+  REAL, POINTER, DIMENSION(:,:,:):: XTOPQS! Topmodel subsurface flow by layer (m/s)
 !
   REAL, POINTER, DIMENSION(:,:)  :: XFRACSOC ! Fraction of organic carbon in each soil layer
+!
+  REAL, POINTER, DIMENSION(:,:)  :: XKANISO  ! Anisotropy coeficient for hydraulic conductivity 
+!                                            ! for lateral drainage ('DIF' option)
+  REAL, POINTER, DIMENSION(:,:)  :: XWD0     ! water content equivalent to TOPMODEL maximum deficit
 !
 !-------------------------------------------------------------------------------
 !
@@ -597,25 +609,37 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !
 !-------------------------------------------------------------------------------
 !
-! - ESM, TRIP and Flood scheme coupling
+! - Flood scheme
 !
-  LOGICAL                      :: LTRIP        ! Activation of the TRIP RRM
   LOGICAL                      :: LFLOOD       ! Activation of the flooding scheme
-! 
   REAL, POINTER, DIMENSION(:)  :: XFFLOOD      ! Grid-cell flood fraction
   REAL, POINTER, DIMENSION(:)  :: XPIFLOOD     ! flood potential infiltration
-  REAL, POINTER, DIMENSION(:)  :: XCPL_EFLOOD
-  REAL, POINTER, DIMENSION(:)  :: XCPL_PFLOOD
-  REAL, POINTER, DIMENSION(:)  :: XCPL_IFLOOD
-  REAL, POINTER, DIMENSION(:)  :: XCPL_DRAIN
-  REAL, POINTER, DIMENSION(:)  :: XCPL_RUNOFF  
-  REAL, POINTER, DIMENSION(:)  :: XCPL_ICEFLUX  
-  REAL, POINTER, DIMENSION(:,:):: XZ0_FLOOD        ! roughness length of Flood water
-  REAL                         :: XTSTEP_COUPLING  ! ISBA-TRIP coulpling time step
+!
+!-------------------------------------------------------------------------------
+!
+! - Water table depth coupling
+!  
+  LOGICAL                      :: LWTD          ! Activation of Water table depth coupling
+  REAL, POINTER, DIMENSION(:)  :: XFWTD         ! grid-cell fraction of water table rise
+  REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (m)
+!
+!-------------------------------------------------------------------------------
+!
+! - Coupling with river routing model
+!  
+  LOGICAL                      :: LCPL_RRM     ! Activation of the coupling
+  REAL, POINTER, DIMENSION(:)  :: XCPL_DRAIN   ! Surface runoff
+  REAL, POINTER, DIMENSION(:)  :: XCPL_RUNOFF  ! Deep drainage or gourdwater recharge
+  REAL, POINTER, DIMENSION(:)  :: XCPL_ICEFLUX ! Calving flux
+  REAL, POINTER, DIMENSION(:)  :: XCPL_RECHARGE! Groundwater recharge
+  REAL, POINTER, DIMENSION(:)  :: XCPL_EFLOOD  ! floodplains evaporation
+  REAL, POINTER, DIMENSION(:)  :: XCPL_PFLOOD  ! floodplains precipitation interception
+  REAL, POINTER, DIMENSION(:)  :: XCPL_IFLOOD  ! floodplains infiltration
 !
 !-------------------------------------------------------------------------------
 !
 !  - Random perturbations
+!
   REAL, POINTER, DIMENSION(:)     :: XPERTVEG
   REAL, POINTER, DIMENSION(:)     :: XPERTLAI
   REAL, POINTER, DIMENSION(:)     :: XPERTCV
@@ -665,6 +689,8 @@ LOGICAL, POINTER :: LGLACIER=>NULL()
 !$OMP THREADPRIVATE(LGLACIER)
 LOGICAL, POINTER :: LVEGUPD=>NULL()
 !$OMP THREADPRIVATE(LVEGUPD)
+LOGICAL, POINTER :: LNITRO_DILU=>NULL()
+!$OMP THREADPRIVATE(LNITRO_DILU)
 LOGICAL, POINTER :: LCANOPY=>NULL()
 !$OMP THREADPRIVATE(LCANOPY)
 LOGICAL, POINTER :: LCANOPY_DRAG=>NULL()
@@ -689,14 +715,22 @@ LOGICAL, POINTER :: LSOCP=>NULL()
 !$OMP THREADPRIVATE(LSOCP)
 LOGICAL, POINTER :: LPERM=>NULL()
 !$OMP THREADPRIVATE(LPERM)
+LOGICAL, POINTER :: LGW=>NULL()
+!$OMP THREADPRIVATE(LGW)
 LOGICAL, POINTER :: LSPINUPCARBS=>NULL()
 !$OMP THREADPRIVATE(LSPINUPCARBS)
 LOGICAL, POINTER :: LSPINUPCARBW=>NULL()
 !$OMP THREADPRIVATE(LSPINUPCARBW)
+LOGICAL, POINTER :: LAGRI_TO_GRASS=>NULL()
+!$OMP THREADPRIVATE(LAGRI_TO_GRASS)
 REAL, POINTER :: XSPINMAXS=>NULL()
 !$OMP THREADPRIVATE(XSPINMAXS)
 REAL, POINTER :: XSPINMAXW=>NULL()
 !$OMP THREADPRIVATE(XSPINMAXW)
+REAL, POINTER :: XCO2_START=>NULL()
+!$OMP THREADPRIVATE(XCO2_START)
+REAL, POINTER :: XCO2_END=>NULL()
+!$OMP THREADPRIVATE(XCO2_END)
 INTEGER, POINTER :: NNBYEARSPINS=>NULL()
 !$OMP THREADPRIVATE(NNBYEARSPINS)
 INTEGER, POINTER :: NNBYEARSPINW=>NULL()
@@ -885,6 +919,8 @@ REAL, POINTER, DIMENSION(:,:)    :: XSOC=>NULL()
 !$OMP THREADPRIVATE(XSOC)
 REAL, POINTER, DIMENSION(:)    :: XPERM=>NULL()
 !$OMP THREADPRIVATE(XPERM)
+REAL, POINTER, DIMENSION(:)    :: XGW=>NULL()
+!$OMP THREADPRIVATE(XGW)
 REAL, POINTER, DIMENSION(:)      :: XRUNOFFB=>NULL()
 !$OMP THREADPRIVATE(XRUNOFFB)
 REAL, POINTER, DIMENSION(:)      :: XWDRAIN=>NULL()
@@ -931,6 +967,8 @@ REAL, POINTER, DIMENSION(:)      :: XPCOEF=>NULL()
 !$OMP THREADPRIVATE(XPCOEF)
 REAL, POINTER, DIMENSION(:,:)    :: XWFC=>NULL()
 !$OMP THREADPRIVATE(XWFC)
+REAL, POINTER, DIMENSION(:,:)    :: XWD0=>NULL()
+!$OMP THREADPRIVATE(XWD0)
 REAL, POINTER, DIMENSION(:,:)    :: XWWILT=>NULL()
 !$OMP THREADPRIVATE(XWWILT)
 REAL, POINTER, DIMENSION(:,:)    :: XWSAT=>NULL()
@@ -1051,17 +1089,15 @@ REAL, POINTER, DIMENSION(:,:,:) :: XSCA_ALB_WITH_SNOW=>NULL()
 REAL, POINTER, DIMENSION(:,:) :: XICE_STO=>NULL()
 !$OMP THREADPRIVATE(XICE_STO)
 !
-!SGH scheme
+!SGH scheme and vertical hydrology
 !
- CHARACTER(LEN=3), POINTER      :: CTOPREG=>NULL()
-!$OMP THREADPRIVATE(CTOPREG)
- CHARACTER(LEN=3), POINTER      :: CKSAT=>NULL()
+CHARACTER(LEN=3), POINTER      :: CKSAT=>NULL()
 !$OMP THREADPRIVATE(CKSAT)
- CHARACTER(LEN=3), POINTER      :: CSOC=>NULL()
-!$OMP THREADPRIVATE(CSOC)
- CHARACTER(LEN=3), POINTER      :: CRAIN=>NULL()
+LOGICAL, POINTER               :: LSOC=>NULL()
+!$OMP THREADPRIVATE(LSOC)
+CHARACTER(LEN=3), POINTER      :: CRAIN=>NULL()
 !$OMP THREADPRIVATE(CRAIN)
- CHARACTER(LEN=3), POINTER      :: CHORT=>NULL()
+CHARACTER(LEN=3), POINTER      :: CHORT=>NULL()
 !$OMP THREADPRIVATE(CHORT)
 !
 REAL, POINTER, DIMENSION(:)    :: XTI_MIN=>NULL()
@@ -1078,11 +1114,15 @@ REAL, POINTER, DIMENSION(:)    :: XMUF=>NULL()
 !$OMP THREADPRIVATE(XMUF)
 REAL, POINTER, DIMENSION(:)    :: XFSAT=>NULL()
 !$OMP THREADPRIVATE(XFSAT)
+REAL, POINTER, DIMENSION(:,:,:):: XTOPQS=>NULL()
+!$OMP THREADPRIVATE(XTOPQS)
 !
 REAL, POINTER, DIMENSION(:,:)  :: XTAB_FSAT=>NULL()
 !$OMP THREADPRIVATE(XTAB_FSAT)
 REAL, POINTER, DIMENSION(:,:)  :: XTAB_WTOP=>NULL()
 !$OMP THREADPRIVATE(XTAB_WTOP)
+REAL, POINTER, DIMENSION(:,:)  :: XTAB_QTOP=>NULL()
+!$OMP THREADPRIVATE(XTAB_QTOP)
 !
 REAL, POINTER, DIMENSION(:,:)  :: XD_ICE=>NULL()
 !$OMP THREADPRIVATE(XD_ICE)
@@ -1090,38 +1130,53 @@ REAL, POINTER, DIMENSION(:,:)  :: XKSAT_ICE=>NULL()
 !$OMP THREADPRIVATE(XKSAT_ICE)
 REAL, POINTER, DIMENSION(:,:)  :: XFRACSOC=>NULL()
 !$OMP THREADPRIVATE(XFRACSOC)
+REAL, POINTER, DIMENSION(:,:)  :: XKANISO=>NULL()
+!$OMP THREADPRIVATE(XKANISO)
 !
 INTEGER, POINTER :: NLAYER_HORT=>NULL()
 !$OMP THREADPRIVATE(NLAYER_HORT)
 INTEGER, POINTER :: NLAYER_DUN=>NULL()
 !$OMP THREADPRIVATE(NLAYER_DUN)
 !
-!TRIP and Flood scheme
+!Flood scheme
 !
-LOGICAL, POINTER               :: LTRIP=>NULL()
-!$OMP THREADPRIVATE(LTRIP)
 LOGICAL, POINTER               :: LFLOOD=>NULL()
 !$OMP THREADPRIVATE(LFLOOD)
 REAL, POINTER, DIMENSION(:)    :: XFFLOOD=>NULL()      
 !$OMP THREADPRIVATE(XFFLOOD)
 REAL, POINTER, DIMENSION(:)    :: XPIFLOOD=>NULL()      
 !$OMP THREADPRIVATE(XPIFLOOD)
-REAL, POINTER, DIMENSION(:)    :: XCPL_EFLOOD=>NULL()
-!$OMP THREADPRIVATE(XCPL_EFLOOD)
-REAL, POINTER, DIMENSION(:)    :: XCPL_PFLOOD=>NULL()
-!$OMP THREADPRIVATE(XCPL_PFLOOD)
-REAL, POINTER, DIMENSION(:)    :: XCPL_IFLOOD=>NULL()
-!$OMP THREADPRIVATE(XCPL_IFLOOD)
+!
+!Coupling with water table depth
+!
+LOGICAL, POINTER                :: LWTD=>NULL()
+!$OMP THREADPRIVATE(LWTD)
+REAL, POINTER, DIMENSION(:)     :: XFWTD=>NULL()
+!$OMP THREADPRIVATE(XFWTD)
+REAL, POINTER, DIMENSION(:)     :: XWTD=>NULL()
+!$OMP THREADPRIVATE(XWTD)
+!
+!Coupling with river routing model
+!
+LOGICAL, POINTER               :: LCPL_RRM=>NULL()
+!$OMP THREADPRIVATE(LCPL_RRM)
 REAL, POINTER, DIMENSION(:)    :: XCPL_DRAIN=>NULL()
 !$OMP THREADPRIVATE(XCPL_DRAIN)
 REAL, POINTER, DIMENSION(:)    :: XCPL_RUNOFF=>NULL()
 !$OMP THREADPRIVATE(XCPL_RUNOFF)
 REAL, POINTER, DIMENSION(:)    :: XCPL_ICEFLUX=>NULL()
 !$OMP THREADPRIVATE(XCPL_ICEFLUX)
-REAL, POINTER, DIMENSION(:,:)  :: XZ0_FLOOD=>NULL()
-!$OMP THREADPRIVATE(XZ0_FLOOD)
-REAL, POINTER :: XTSTEP_COUPLING=>NULL()
-!$OMP THREADPRIVATE(XTSTEP_COUPLING)
+REAL, POINTER, DIMENSION(:)    :: XCPL_RECHARGE=>NULL()
+!$OMP THREADPRIVATE(XCPL_RECHARGE)
+REAL, POINTER, DIMENSION(:)    :: XCPL_EFLOOD=>NULL()
+!$OMP THREADPRIVATE(XCPL_EFLOOD)
+REAL, POINTER, DIMENSION(:)    :: XCPL_PFLOOD=>NULL()
+!$OMP THREADPRIVATE(XCPL_PFLOOD)
+REAL, POINTER, DIMENSION(:)    :: XCPL_IFLOOD=>NULL()
+!$OMP THREADPRIVATE(XCPL_IFLOOD)
+!
+!Random perturbations
+!
 REAL, POINTER, DIMENSION(:) :: XPERTVEG=>NULL()
 !$OMP THREADPRIVATE(XPERTVEG)
 REAL, POINTER, DIMENSION(:) :: XPERTLAI=>NULL()
@@ -1232,6 +1287,7 @@ ISBA_MODEL(KFROM)%XSAND=>XSAND
 ISBA_MODEL(KFROM)%XCLAY=>XCLAY
 ISBA_MODEL(KFROM)%XSOC=>XSOC
 ISBA_MODEL(KFROM)%XPERM=>XPERM
+ISBA_MODEL(KFROM)%XGW=>XGW
 ISBA_MODEL(KFROM)%XRUNOFFB=>XRUNOFFB
 ISBA_MODEL(KFROM)%XWDRAIN=>XWDRAIN
 ISBA_MODEL(KFROM)%XTAUICE=>XTAUICE
@@ -1255,6 +1311,7 @@ ISBA_MODEL(KFROM)%XC4REF=>XC4REF
 ISBA_MODEL(KFROM)%XACOEF=>XACOEF
 ISBA_MODEL(KFROM)%XPCOEF=>XPCOEF
 ISBA_MODEL(KFROM)%XWFC=>XWFC
+ISBA_MODEL(KFROM)%XWD0=>XWD0
 ISBA_MODEL(KFROM)%XWWILT=>XWWILT
 ISBA_MODEL(KFROM)%XWSAT=>XWSAT
 ISBA_MODEL(KFROM)%XBCOEF=>XBCOEF
@@ -1320,25 +1377,36 @@ ISBA_MODEL(KFROM)%XTI_STD=>XTI_STD
 ISBA_MODEL(KFROM)%XTI_SKEW=>XTI_SKEW
 ISBA_MODEL(KFROM)%XMUF=>XMUF
 ISBA_MODEL(KFROM)%XFSAT=>XFSAT
+ISBA_MODEL(KFROM)%XTOPQS=>XTOPQS
 !
 ISBA_MODEL(KFROM)%XTAB_FSAT=>XTAB_FSAT
 ISBA_MODEL(KFROM)%XTAB_WTOP=>XTAB_WTOP
+ISBA_MODEL(KFROM)%XTAB_QTOP=>XTAB_QTOP
 !                          
 ISBA_MODEL(KFROM)%XD_ICE=>XD_ICE
 ISBA_MODEL(KFROM)%XKSAT_ICE=>XKSAT_ICE
 ISBA_MODEL(KFROM)%XFRACSOC=>XFRACSOC
+ISBA_MODEL(KFROM)%XKANISO=>XKANISO
 !
 !Flood scheme
 !
-ISBA_MODEL(KFROM)%XZ0_FLOOD=>XZ0_FLOOD
 ISBA_MODEL(KFROM)%XFFLOOD=>XFFLOOD     
 ISBA_MODEL(KFROM)%XPIFLOOD=>XPIFLOOD     
-ISBA_MODEL(KFROM)%XCPL_EFLOOD=>XCPL_EFLOOD
-ISBA_MODEL(KFROM)%XCPL_PFLOOD=>XCPL_PFLOOD
-ISBA_MODEL(KFROM)%XCPL_IFLOOD=>XCPL_IFLOOD
+!
+!Coupling with water table depth
+!
+ISBA_MODEL(KFROM)%XFWTD=>XFWTD
+ISBA_MODEL(KFROM)%XWTD=>XWTD
+!
+!Coupling with river routing model
+!
 ISBA_MODEL(KFROM)%XCPL_DRAIN=>XCPL_DRAIN
 ISBA_MODEL(KFROM)%XCPL_RUNOFF=>XCPL_RUNOFF
 ISBA_MODEL(KFROM)%XCPL_ICEFLUX=>XCPL_ICEFLUX
+ISBA_MODEL(KFROM)%XCPL_RECHARGE=>XCPL_RECHARGE
+ISBA_MODEL(KFROM)%XCPL_EFLOOD=>XCPL_EFLOOD
+ISBA_MODEL(KFROM)%XCPL_PFLOOD=>XCPL_PFLOOD
+ISBA_MODEL(KFROM)%XCPL_IFLOOD=>XCPL_IFLOOD
 !
 !Random Perturbations
 !
@@ -1369,6 +1437,7 @@ CCPSURF=>ISBA_MODEL(KTO)%CCPSURF
 LTEMP_ARP=>ISBA_MODEL(KTO)%LTEMP_ARP
 LGLACIER=>ISBA_MODEL(KTO)%LGLACIER
 LVEGUPD=>ISBA_MODEL(KTO)%LVEGUPD
+LNITRO_DILU=>ISBA_MODEL(KTO)%LNITRO_DILU
 LCANOPY=>ISBA_MODEL(KTO)%LCANOPY
 LCANOPY_DRAG=>ISBA_MODEL(KTO)%LCANOPY_DRAG
 LPERTSURF=>ISBA_MODEL(KTO)%LPERTSURF
@@ -1381,10 +1450,14 @@ LECOCLIMAP=>ISBA_MODEL(KTO)%LECOCLIMAP
 LCTI=>ISBA_MODEL(KTO)%LCTI
 LSOCP=>ISBA_MODEL(KTO)%LSOCP
 LPERM=>ISBA_MODEL(KTO)%LPERM
+LGW=>ISBA_MODEL(KTO)%LGW
 LSPINUPCARBS=>ISBA_MODEL(KTO)%LSPINUPCARBS
 LSPINUPCARBW=>ISBA_MODEL(KTO)%LSPINUPCARBW
+LAGRI_TO_GRASS=>ISBA_MODEL(KTO)%LAGRI_TO_GRASS
 XSPINMAXS=>ISBA_MODEL(KTO)%XSPINMAXS
 XSPINMAXW=>ISBA_MODEL(KTO)%XSPINMAXW
+XCO2_START=>ISBA_MODEL(KTO)%XCO2_START
+XCO2_END=>ISBA_MODEL(KTO)%XCO2_END
 NNBYEARSPINS=>ISBA_MODEL(KTO)%NNBYEARSPINS
 NNBYEARSPINW=>ISBA_MODEL(KTO)%NNBYEARSPINW
 NNBYEARSOLD=>ISBA_MODEL(KTO)%NNBYEARSOLD
@@ -1488,6 +1561,7 @@ XSAND=>ISBA_MODEL(KTO)%XSAND
 XCLAY=>ISBA_MODEL(KTO)%XCLAY
 XSOC=>ISBA_MODEL(KTO)%XSOC
 XPERM=>ISBA_MODEL(KTO)%XPERM
+XGW=>ISBA_MODEL(KTO)%XGW
 XRUNOFFB=>ISBA_MODEL(KTO)%XRUNOFFB
 XWDRAIN=>ISBA_MODEL(KTO)%XWDRAIN
 XTAUICE=>ISBA_MODEL(KTO)%XTAUICE
@@ -1511,6 +1585,7 @@ XC4REF=>ISBA_MODEL(KTO)%XC4REF
 XACOEF=>ISBA_MODEL(KTO)%XACOEF
 XPCOEF=>ISBA_MODEL(KTO)%XPCOEF
 XWFC=>ISBA_MODEL(KTO)%XWFC
+XWD0=>ISBA_MODEL(KTO)%XWD0
 XWWILT=>ISBA_MODEL(KTO)%XWWILT
 XWSAT=>ISBA_MODEL(KTO)%XWSAT
 XBCOEF=>ISBA_MODEL(KTO)%XBCOEF
@@ -1575,9 +1650,8 @@ XICE_STO=>ISBA_MODEL(KTO)%XICE_STO
 !
 !SGH scheme
 !
-CTOPREG=>ISBA_MODEL(KTO)%CTOPREG
 CKSAT=>ISBA_MODEL(KTO)%CKSAT
-CSOC=>ISBA_MODEL(KTO)%CSOC
+LSOC=>ISBA_MODEL(KTO)%LSOC
 CRAIN=>ISBA_MODEL(KTO)%CRAIN
 CHORT=>ISBA_MODEL(KTO)%CHORT
 !
@@ -1588,36 +1662,51 @@ XTI_STD=>ISBA_MODEL(KTO)%XTI_STD
 XTI_SKEW=>ISBA_MODEL(KTO)%XTI_SKEW
 XMUF=>ISBA_MODEL(KTO)%XMUF
 XFSAT=>ISBA_MODEL(KTO)%XFSAT
+XTOPQS=>ISBA_MODEL(KTO)%XTOPQS
 !
 XTAB_FSAT=>ISBA_MODEL(KTO)%XTAB_FSAT
 XTAB_WTOP=>ISBA_MODEL(KTO)%XTAB_WTOP
+XTAB_QTOP=>ISBA_MODEL(KTO)%XTAB_QTOP
 !
 XD_ICE=>ISBA_MODEL(KTO)%XD_ICE
 XKSAT_ICE=>ISBA_MODEL(KTO)%XKSAT_ICE
 XFRACSOC=>ISBA_MODEL(KTO)%XFRACSOC
+XKANISO=>ISBA_MODEL(KTO)%XKANISO
 !
 NLAYER_HORT=>ISBA_MODEL(KTO)%NLAYER_HORT
 NLAYER_DUN=>ISBA_MODEL(KTO)%NLAYER_DUN
 !
-!TRIP and Flood scheme
+!Flood scheme
 !
-LTRIP=>ISBA_MODEL(KTO)%LTRIP
 LFLOOD=>ISBA_MODEL(KTO)%LFLOOD
-XZ0_FLOOD=>ISBA_MODEL(KTO)%XZ0_FLOOD
 XFFLOOD=>ISBA_MODEL(KTO)%XFFLOOD     
-XPIFLOOD=>ISBA_MODEL(KTO)%XPIFLOOD     
-XCPL_EFLOOD=>ISBA_MODEL(KTO)%XCPL_EFLOOD
-XCPL_PFLOOD=>ISBA_MODEL(KTO)%XCPL_PFLOOD
-XCPL_IFLOOD=>ISBA_MODEL(KTO)%XCPL_IFLOOD
+XPIFLOOD=>ISBA_MODEL(KTO)%XPIFLOOD 
+!
+!Coupling with water table depth
+!
+LWTD=>ISBA_MODEL(KTO)%LWTD
+XFWTD=>ISBA_MODEL(KTO)%XFWTD
+XWTD=>ISBA_MODEL(KTO)%XWTD
+!
+!Coupling with river routing model
+!
+LCPL_RRM=>ISBA_MODEL(KTO)%LCPL_RRM
 XCPL_DRAIN=>ISBA_MODEL(KTO)%XCPL_DRAIN
 XCPL_RUNOFF=>ISBA_MODEL(KTO)%XCPL_RUNOFF
 XCPL_ICEFLUX=>ISBA_MODEL(KTO)%XCPL_ICEFLUX
-XTSTEP_COUPLING=>ISBA_MODEL(KTO)%XTSTEP_COUPLING
+XCPL_RECHARGE=>ISBA_MODEL(KTO)%XCPL_RECHARGE
+XCPL_EFLOOD=>ISBA_MODEL(KTO)%XCPL_EFLOOD
+XCPL_PFLOOD=>ISBA_MODEL(KTO)%XCPL_PFLOOD
+XCPL_IFLOOD=>ISBA_MODEL(KTO)%XCPL_IFLOOD
+!
+!Random Perturbations
+!
 XPERTVEG=>ISBA_MODEL(KTO)%XPERTVEG
 XPERTLAI=>ISBA_MODEL(KTO)%XPERTLAI
 XPERTCV=>ISBA_MODEL(KTO)%XPERTCV
 XPERTALB=>ISBA_MODEL(KTO)%XPERTALB
 XPERTZ0=>ISBA_MODEL(KTO)%XPERTZ0
+!
 IF (LHOOK) CALL DR_HOOK('MODD_ISBA_N:ISBA_GOTO_MODEL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE ISBA_GOTO_MODEL
@@ -1740,6 +1829,7 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XACOEF)
   NULLIFY(ISBA_MODEL(J)%XPCOEF)
   NULLIFY(ISBA_MODEL(J)%XWFC)
+  NULLIFY(ISBA_MODEL(J)%XWD0)
   NULLIFY(ISBA_MODEL(J)%XWWILT)
   NULLIFY(ISBA_MODEL(J)%XWSAT)
   NULLIFY(ISBA_MODEL(J)%XBCOEF)
@@ -1780,8 +1870,11 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XIRRIG)
   NULLIFY(ISBA_MODEL(J)%XTAB_FSAT)
   NULLIFY(ISBA_MODEL(J)%XTAB_WTOP)
+  NULLIFY(ISBA_MODEL(J)%XTAB_QTOP)
   NULLIFY(ISBA_MODEL(J)%XD_ICE)
   NULLIFY(ISBA_MODEL(J)%XKSAT_ICE)
+  NULLIFY(ISBA_MODEL(J)%XFRACSOC)
+  NULLIFY(ISBA_MODEL(J)%XKANISO)
   NULLIFY(ISBA_MODEL(J)%XTI_MIN)
   NULLIFY(ISBA_MODEL(J)%XTI_MAX)
   NULLIFY(ISBA_MODEL(J)%XTI_MEAN)
@@ -1789,6 +1882,7 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XTI_SKEW)
   NULLIFY(ISBA_MODEL(J)%XMUF)
   NULLIFY(ISBA_MODEL(J)%XFSAT)
+  NULLIFY(ISBA_MODEL(J)%XTOPQS)
   NULLIFY(ISBA_MODEL(J)%XPSNG)
   NULLIFY(ISBA_MODEL(J)%XPSNV)
   NULLIFY(ISBA_MODEL(J)%XPSNV_A)
@@ -1804,13 +1898,15 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XICE_STO)
   NULLIFY(ISBA_MODEL(J)%XFFLOOD)
   NULLIFY(ISBA_MODEL(J)%XPIFLOOD)
-  NULLIFY(ISBA_MODEL(J)%XCPL_EFLOOD)
-  NULLIFY(ISBA_MODEL(J)%XCPL_PFLOOD)
-  NULLIFY(ISBA_MODEL(J)%XCPL_IFLOOD)
+  NULLIFY(ISBA_MODEL(J)%XFWTD)
+  NULLIFY(ISBA_MODEL(J)%XWTD)  
   NULLIFY(ISBA_MODEL(J)%XCPL_DRAIN)
   NULLIFY(ISBA_MODEL(J)%XCPL_RUNOFF)
   NULLIFY(ISBA_MODEL(J)%XCPL_ICEFLUX)
-  NULLIFY(ISBA_MODEL(J)%XZ0_FLOOD)
+  NULLIFY(ISBA_MODEL(J)%XCPL_RECHARGE)
+  NULLIFY(ISBA_MODEL(J)%XCPL_EFLOOD)
+  NULLIFY(ISBA_MODEL(J)%XCPL_PFLOOD)
+  NULLIFY(ISBA_MODEL(J)%XCPL_IFLOOD)
   NULLIFY(ISBA_MODEL(J)%XPERTVEG)
   NULLIFY(ISBA_MODEL(J)%XPERTLAI)
   NULLIFY(ISBA_MODEL(J)%XPERTCV)
@@ -1834,6 +1930,7 @@ ISBA_MODEL(:)%CCPSURF=' '
 ISBA_MODEL(:)%LTEMP_ARP=.FALSE.
 ISBA_MODEL(:)%LGLACIER=.FALSE.
 ISBA_MODEL(:)%LVEGUPD=.FALSE.
+ISBA_MODEL(:)%LNITRO_DILU=.FALSE.
 ISBA_MODEL(:)%LCANOPY=.FALSE.
 ISBA_MODEL(:)%LCANOPY_DRAG=.FALSE.
 ISBA_MODEL(:)%LPERTSURF=.FALSE.
@@ -1846,10 +1943,14 @@ ISBA_MODEL(:)%LECOCLIMAP=.FALSE.
 ISBA_MODEL(:)%LCTI=.FALSE.
 ISBA_MODEL(:)%LSOCP=.FALSE.
 ISBA_MODEL(:)%LPERM=.FALSE.
+ISBA_MODEL(:)%LGW=.FALSE.
 ISBA_MODEL(:)%LSPINUPCARBS=.FALSE.
 ISBA_MODEL(:)%LSPINUPCARBW=.FALSE.
+ISBA_MODEL(:)%LAGRI_TO_GRASS=.FALSE.
 ISBA_MODEL(:)%XSPINMAXS=0.
 ISBA_MODEL(:)%XSPINMAXW=0.
+ISBA_MODEL(:)%XCO2_START=0.
+ISBA_MODEL(:)%XCO2_END=0.
 ISBA_MODEL(:)%NNBYEARSPINS=0
 ISBA_MODEL(:)%NNBYEARSPINW=0
 ISBA_MODEL(:)%NNBYEARSOLD=0
@@ -1868,16 +1969,15 @@ ISBA_MODEL(:)%XOUT_TSTEP=0.
 ISBA_MODEL(:)%XCGMAX=0.
 ISBA_MODEL(:)%XCDRAG=0.
 ISBA_MODEL(:)%CRUNOFF=' '
-ISBA_MODEL(:)%CTOPREG=' '
 ISBA_MODEL(:)%CKSAT=' '
-ISBA_MODEL(:)%CSOC=' '
+ISBA_MODEL(:)%LSOC=.FALSE.
 ISBA_MODEL(:)%CRAIN=' '
 ISBA_MODEL(:)%CHORT=' '
 ISBA_MODEL(:)%NLAYER_HORT=0
 ISBA_MODEL(:)%NLAYER_DUN=0
-ISBA_MODEL(:)%LTRIP=.FALSE.
 ISBA_MODEL(:)%LFLOOD=.FALSE.
-ISBA_MODEL(:)%XTSTEP_COUPLING=0.
+ISBA_MODEL(:)%LWTD=.FALSE.
+ISBA_MODEL(:)%LCPL_RRM=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_ALLOC",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_ALLOC
 

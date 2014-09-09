@@ -30,12 +30,14 @@ SUBROUTINE READ_NAM_GRID_GAUSS(HPROGRAM,KGRID_PAR,KL,PGRID_PAR)
 !!      Original    01/2004
 !!      B. Decharme    2008  Comput and save the Mesh size
 !!                     2013  Bug lat and lon for non rotat-strech grid
+!!                           Grid corner (used with oasis)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CSTS, ONLY : XPI
+USE MODD_CSTS,     ONLY : XPI
+USE MODD_SURF_PAR, ONLY : XUNDEF
 ! 
 USE MODE_POS_SURF
 !
@@ -58,7 +60,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -68,11 +70,21 @@ REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining th
 !
 INTEGER :: ILUOUT ! output listing logical unit
 INTEGER :: ILUNAM ! namelist file  logical unit
-REAL,    DIMENSION(:), ALLOCATABLE :: ZLAT_XY ! pseudo-latitudes
-REAL,    DIMENSION(:), ALLOCATABLE :: ZLON_XY ! pseudo-longitudes
-REAL,    DIMENSION(:), ALLOCATABLE :: ZLAT    ! latitudes
-REAL,    DIMENSION(:), ALLOCATABLE :: ZLON    ! longitudes
-REAL,    DIMENSION(:), ALLOCATABLE :: ZMESH_SIZE ! Mesh size
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLAT_XY     ! pseudo-latitudes
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLON_XY     ! pseudo-longitudes
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLAT        ! latitudes
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLON        ! longitudes
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZMESH_SIZE  ! Mesh size
+!                                                                              _____ Sup
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLATSUP     ! Grid corner Latitude    |     |
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLONSUP     ! Grid corner Longitude   |     |
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLATINF     ! Grid corner Latitude    |_____|
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZLONINF     ! Grid corner Longitude  Inf
+!
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZXINF    ! pseudo-longitude western limit of grid mesh
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZXSUP    ! pseudo-longitude eastern limit of grid mesh
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZYINF    ! pseudo-latitude southern limit of grid mesh
+REAL,    DIMENSION(:),   ALLOCATABLE :: ZYSUP    ! pseudo-latitude northern limit of grid mesh
 !
 !*       0.3   Declarations of namelist
 !              ------------------------
@@ -164,6 +176,8 @@ INLOPA(1:INLATI/2) = NRGRI(1:INLATI/2)
 INLOPA(INLATI/2+1:INLATI) = NRGRI(INLATI/2:1:-1)
 !
 !---------------------------------------------------------------------------
+CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+!---------------------------------------------------------------------------
 !
 !*       5.    Computes pseudo-latitudes and pseudo-longitudes of all points
 !              -------------------------------------------------------------
@@ -181,8 +195,10 @@ ENDIF
 !
 ALLOCATE(ZLAT_XY(KL))
 ALLOCATE(ZLON_XY(KL))
+ZLAT_XY(:) = XUNDEF
+ZLON_XY(:) = XUNDEF
 !
- CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
+CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
 !
 !---------------------------------------------------------------------------
 !
@@ -193,7 +209,10 @@ ALLOCATE(ZLON_XY(KL))
 ALLOCATE(ZLAT(KL))
 ALLOCATE(ZLON(KL))
 !
-IF(ZCODIL==1.0.AND.ZLAPO==90.0.AND.ZLOPO==0.0)THEN
+ZLAT(:) = XUNDEF
+ZLON(:) = XUNDEF
+!
+IF(ZCODIL==1.0.AND.ITYP==0)THEN
   ZLON(:)=ZLON_XY(:)
   ZLAT(:)=ZLAT_XY(:)
 ELSE
@@ -202,23 +221,64 @@ ENDIF
 !
 !---------------------------------------------------------------------------
 !
-!*       7.    Computes mesh size
+!*       7.    Computes grid corner latitudes and longitudes
+!              ---------------------------------------------
+!
+ALLOCATE(ZXINF(KL))
+ALLOCATE(ZYINF(KL))
+ALLOCATE(ZXSUP(KL))
+ALLOCATE(ZYSUP(KL))
+!
+ALLOCATE(ZLONINF(KL))
+ALLOCATE(ZLATINF(KL))
+ALLOCATE(ZLONSUP(KL))
+ALLOCATE(ZLATSUP(KL))
+!
+ZXINF  (:) = XUNDEF
+ZYINF  (:) = XUNDEF
+ZXSUP  (:) = XUNDEF
+ZYSUP  (:) = XUNDEF
+ZLONINF(:) = XUNDEF
+ZLATINF(:) = XUNDEF
+ZLONSUP(:) = XUNDEF
+ZLATSUP(:) = XUNDEF
+!
+CALL GAUSS_GRID_LIMITS(INLATI,INLOPA,ZXINF,ZXSUP,ZYINF,ZYSUP)
+!
+IF(ZCODIL==1.0.AND.ZLAPO==90.0.AND.ZLOPO==0.0)THEN
+  ZLONINF(:) = ZXINF(:)
+  ZLATINF(:) = ZYINF(:)
+  ZLONSUP(:) = ZXSUP(:)
+  ZLATSUP(:) = ZYSUP(:)
+ELSE
+  CALL LATLON_GAUSS(ZXINF,ZYINF,KL,ZLOPO,ZLAPO,ZCODIL,ZLONINF,ZLATINF)
+  CALL LATLON_GAUSS(ZXSUP,ZYSUP,KL,ZLOPO,ZLAPO,ZCODIL,ZLONSUP,ZLATSUP)
+ENDIF
+!
+!---------------------------------------------------------------------------
+!
+!*       8.    Computes mesh size
 !              ---------------------------------
 !
 ALLOCATE(ZMESH_SIZE(KL))
+ZMESH_SIZE(:) = XUNDEF
 !
  CALL MESH_SIZE_GAUSS(KL,INLATI,INLOPA,ZLAPO,ZLOPO,ZCODIL,&
                                ZLAT_XY,ZLON,ZLAT,ZMESH_SIZE)  
 !
 !---------------------------------------------------------------------------
- CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-!---------------------------------------------------------------------------
 !
-!*       8.    All this information stored into pointer PGRID_PAR
+!*       9.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
  CALL PUT_GRIDTYPE_GAUSS(ZGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA, &
-                          KL,ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE     )  
+                          KL,ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE,   &
+                          ZLONINF,ZLATINF,ZLONSUP,ZLATSUP            )  
+!
+!---------------------------------------------------------------------------
+!
+!*       9.    All this information stored into pointer PGRID_PAR
+!              --------------------------------------------------
 !
 DEALLOCATE(ZLAT)
 DEALLOCATE(ZLON)
@@ -226,6 +286,15 @@ DEALLOCATE(ZLAT_XY)
 DEALLOCATE(ZLON_XY)
 DEALLOCATE(INLOPA)
 DEALLOCATE(ZMESH_SIZE)
+DEALLOCATE(ZLATINF)
+DEALLOCATE(ZLONINF)
+DEALLOCATE(ZLATSUP)
+DEALLOCATE(ZLONSUP)
+DEALLOCATE(ZXINF)
+DEALLOCATE(ZYINF)
+DEALLOCATE(ZXSUP)
+DEALLOCATE(ZYSUP)
+!
 !---------------------------------------------------------------------------
 !
 !* 1st call : initializes dimension

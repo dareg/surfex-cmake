@@ -1,7 +1,7 @@
 !     #########
     SUBROUTINE VEGETATION_UPDATE(PTSTEP,TTIME,PCOVER,OCOVER,          &
-                       HISBA,OECOCLIMAP, HPHOTO, OAGRIP, HSFTYPE,     &
-                       PLAI,PVEG,PZ0,                                 &
+                       HISBA,OECOCLIMAP, HPHOTO, OAGRIP, OTR_ML,      &
+                       HSFTYPE, PLAI,PVEG,PZ0,                        &
                        PALBNIR,PALBVIS,PALBUV,PEMIS,                  &
                        PRSMIN,PGAMMA,PWRMAX_CF,                       &
                        PRGL,PCV,                                      &
@@ -81,7 +81,8 @@ LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER
  CHARACTER(LEN=*),     INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
  CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,              INTENT(IN)    :: OAGRIP
- CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
+LOGICAL,              INTENT(IN)    :: OTR_ML
+CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
 LOGICAL,              INTENT(IN)    :: OECOCLIMAP ! T if ecoclimap is used
 !
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PLAI    ! leaf area index (LAI) 
@@ -173,9 +174,9 @@ ODUPDATED=.FALSE.
       CALL UPDATE_DATA_COVER(TTIME%TDATE%YEAR)  
       IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,HPHOTO,HSFTYPE)
       CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
-                           HPHOTO,OAGRIP,.FALSE.,HSFTYPE, PVEG=PVEG, &
-                           PLAI=PLAI,PRSMIN=PRSMIN,PGAMMA=PGAMMA,&
-                           PWRMAX_CF=PWRMAX_CF,                  &
+                           HPHOTO,OAGRIP,.FALSE.,OTR_ML,HSFTYPE, &
+                           PVEG=PVEG,PLAI=PLAI,PRSMIN=PRSMIN,    &
+                           PGAMMA=PGAMMA, PWRMAX_CF=PWRMAX_CF,   &
                            PRGL=PRGL,PCV=PCV,PZ0=PZ0,            &
                            PALBNIR_VEG=PALBNIR_VEG,              &
                            PALBVIS_VEG=PALBVIS_VEG,              &

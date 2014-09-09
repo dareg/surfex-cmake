@@ -30,6 +30,9 @@ IMPLICIT NONE
 REAL, SAVE       :: XCFFV
 !                   Coefficient for calculation of floodplain fraction over vegetation
 !
+REAL, SAVE       :: XZ0FLOOD
+!                   Roughness length for flood (m)
+!
 !-------------------------------------------------------------------------------
 !
 END MODULE MODD_FLOOD_PAR

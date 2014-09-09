@@ -1,9 +1,9 @@
 !     #########
       SUBROUTINE CONVERT_PATCH_ISBA(HISBA,KDECADE,KDECADE2,PCOVER,OCOVER,&
-                                  HPHOTO,OAGRIP,OPERM,HSFTYPE,PVEG,PLAI, &
-                                  PRSMIN,PGAMMA,PWRMAX_CF,PRGL,PCV,      &
-                                  PSOILGRID,PDG,KWG_LAYER,PDROOT,PDG2,   &
-                                  PZ0,PZ0_O_Z0H,                         &
+                                  HPHOTO,OAGRIP,OPERM,OTR_ML,HSFTYPE,    &
+                                  PVEG,PLAI,PRSMIN,PGAMMA,PWRMAX_CF,     &
+                                  PRGL,PCV,PSOILGRID,PDG,KWG_LAYER,      &
+                                  PDROOT,PDG2,PZ0,PZ0_O_Z0H,             &
                                   PALBNIR_VEG,PALBVIS_VEG,PALBUV_VEG,    &
                                   PEMIS_ECO,PVEGTYPE,PROOTFRAC,          &
                                   PGMES,PBSLAI,PLAIMIN,PSEFOLD,PGC,      &
@@ -44,13 +44,19 @@
 !!      V. Masson    04/14 Garden and Greenroofs can only be initialized by ecoclimap 
 !!                         in this routine (not from user specified parameters from
 !!                         the nature tile, as the number of points is not the same)
+!!    B. Decharme  04/2013  Add CDGAVG (method to average depth)
+!!                          Soil depth = Root depth with ISBA-DF
+!!                           except for bare soil pft (but limited to 1m)
+!!                          With TR_ML (new radiative transfert) and modis
+!!                           albedo, UV albedo not defined (conserv nrj when
+!!                           coupled to atmosphere)
 !!
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_GRAS
+USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW
 USE MODD_ISBA_GRID_n,    ONLY : NDIM
 !
 USE MODD_TYPE_DATE_SURF
@@ -121,15 +127,16 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
- CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 INTEGER,                INTENT(IN)    :: KDECADE
 INTEGER,                INTENT(IN)    :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
-LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
- CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+LOGICAL, DIMENSION(:),  INTENT(IN)    :: OCOVER
+CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,                INTENT(IN)    :: OAGRIP
 LOGICAL,                INTENT(IN)    :: OPERM
- CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
+LOGICAL,                INTENT(IN)    :: OTR_ML
+CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(IN)   :: PWG1
 !
@@ -380,10 +387,14 @@ IF (PRESENT(PALBVIS_VEG)) THEN
 ENDIF
 !
 IF (PRESENT(PALBUV_VEG)) THEN
-  IF (GDATA .AND. LDATA_ALBUV_VEG) THEN
-    CALL AV_PGD_PARAM(PALBUV_VEG,XPAR_VEGTYPE,XPAR_ALBUV_VEG,YVEG,'ARI',KDECADE=KDECADE2)
+  IF ((CALBEDO=='CM13'.OR.OTR_ML).AND.PRESENT(PALBVIS_VEG)) THEN
+    PALBUV_VEG(:,:)=PALBVIS_VEG(:,:)
   ELSE
-    CALL AV_PGD (PALBUV_VEG,PCOVER,XDATA_ALBUV_VEG,YVEG,'ARI',OCOVER,KDECADE=KDECADE)  
+    IF (GDATA .AND. LDATA_ALBUV_VEG) THEN
+      CALL AV_PGD_PARAM(PALBUV_VEG,XPAR_VEGTYPE,XPAR_ALBUV_VEG,YVEG,'ARI',KDECADE=KDECADE2)
+    ELSE
+      CALL AV_PGD (PALBUV_VEG,PCOVER,XDATA_ALBUV_VEG,YVEG,'ARI',OCOVER,KDECADE=KDECADE)  
+    ENDIF
   ENDIF
 ENDIF
 !
@@ -603,11 +614,15 @@ IF (PRESENT(PALBVIS_SOIL)) THEN
 ENDIF
 !
 IF (PRESENT(PALBUV_SOIL)) THEN
-  IF (GDATA .AND. LDATA_ALBUV_SOIL) THEN
-    CALL AV_PGD_PARAM(PALBUV_SOIL,XPAR_VEGTYPE,XPAR_ALBUV_SOIL,YNAT,'ARI',KDECADE=KDECADE2)
+  IF ((CALBEDO=='CM13'.OR.OTR_ML).AND.PRESENT(PALBVIS_SOIL)) THEN
+    PALBUV_SOIL(:,:)=PALBVIS_SOIL(:,:)
   ELSE
-    CALL SOIL_ALBEDO (CALBEDO, XWSAT(:,1),PWG1, XALBVIS_DRY,XALBUV_DRY,XALBUV_DRY,     &
-                      XALBVIS_WET,XALBNIR_WET,XALBUV_WET,PALBUV_SOIL=PALBUV_SOIL )
+    IF (GDATA .AND. LDATA_ALBUV_SOIL) THEN
+      CALL AV_PGD_PARAM(PALBUV_SOIL,XPAR_VEGTYPE,XPAR_ALBUV_SOIL,YNAT,'ARI',KDECADE=KDECADE2)
+    ELSE
+      CALL SOIL_ALBEDO (CALBEDO, XWSAT(:,1),PWG1, XALBVIS_DRY,XALBUV_DRY,XALBUV_DRY,     &
+                        XALBVIS_WET,XALBNIR_WET,XALBUV_WET,PALBUV_SOIL=PALBUV_SOIL )
+    ENDIF
   ENDIF
 ENDIF
 !
@@ -662,7 +677,9 @@ END SUBROUTINE SET_STRESS
 !-------------------------------------------------------------------------------
 SUBROUTINE SET_GRID_PARAM(KNI,KGROUND,KPATCH,LDG2,LDROOT,LWG_LAYER,LROOTFRAC)
 !
-USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
+USE MODD_SURF_PAR, ONLY : XUNDEF, NUNDEF
+!
+USE MODD_REPROD_OPER, ONLY : CDGAVG, CDGDIF
 !
 USE MODI_INI_DATA_ROOTFRAC
 USE MODI_INI_DATA_SOIL
@@ -681,15 +698,15 @@ LOGICAL, INTENT(IN) :: LDROOT
 LOGICAL, INTENT(IN) :: LWG_LAYER
 LOGICAL, INTENT(IN) :: LROOTFRAC
 !
-REAL, DIMENSION (KNI,KGROUND,KPATCH) :: ZROOTFRAC
-REAL, DIMENSION (KNI,KPATCH) :: ZDTOT, ZDG2, ZROOT_EXT, ZROOT_LIN, ZWORK_EXT
-!--------------waiting for new vegtypes-----------------------------------!
-REAL, DIMENSION (NDIM,NVEGTYPE)   :: ZPAR_ROOT_EXTINCTION
-REAL, DIMENSION (SIZE(XDATA_ROOT_EXTINCTION,1),NVEGTYPE) :: ZDATA_ROOT_EXTINCTION
-!--------------waiting for new vegtypes-----------------------------------!
-INTEGER, DIMENSION(KNI,KPATCH) :: IWG_LAYER
+REAL,    DIMENSION (SIZE(XDATA_GROUND_DEPTH,1),NVEGTYPE) :: ZDATA_GROUND_DEPTH
+!
+REAL,    DIMENSION (KNI,KGROUND,KPATCH) :: ZROOTFRAC
+REAL,    DIMENSION (KNI,KPATCH)         :: ZDTOT, ZDG2, ZROOT_EXT, ZROOT_LIN
+INTEGER, DIMENSION (KNI,KPATCH)         :: IWG_LAYER
+!
 INTEGER :: JJ, JL, JPATCH
-! flags taking general surfa etype flag into account
+!
+! flags taking general surface type flag into account
 LOGICAL :: GDATA_DG, GDATA_GROUND_DEPTH, GDATA_ROOT_DEPTH, GDATA_ROOTFRAC
 !-------------------------------------------------------------------------!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -698,7 +715,7 @@ IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_ISBA:SET_GRID_PARAM',0,ZHOOK_HANDLE)
 !
 IF(HISBA=='DIF')THEN
   IF(.NOT.LWG_LAYER) CALL ABOR1_SFX('CONVERT_PATCH_ISBA: SET_GRID_PARAM: KWG_LAYER must be present with DIF')
-  IF(.NOT.LDROOT   ) CALL ABOR1_SFX('CONVERT_PATCH_ISBA: SET_GRID_PARAM:  PDROOT must be present with DIF')
+  IF(.NOT.LDROOT   ) CALL ABOR1_SFX('CONVERT_PATCH_ISBA: SET_GRID_PARAM: PDROOT must be present with DIF')
   IF(.NOT.LDG2     ) CALL ABOR1_SFX('CONVERT_PATCH_ISBA: SET_GRID_PARAM: PDG2 must be present with DIF')   
 ENDIF
 !
@@ -707,18 +724,44 @@ ZDTOT    (:,:) = XUNDEF
 ZDG2     (:,:) = XUNDEF
 IWG_LAYER(:,:) = NUNDEF
 !
+ZDATA_GROUND_DEPTH(:,:) = XDATA_GROUND_DEPTH(:,:)
+!
 GDATA_DG           = GDATA .AND. LDATA_DG
 GDATA_GROUND_DEPTH = GDATA .AND. LDATA_GROUND_DEPTH
 GDATA_ROOT_DEPTH   = GDATA .AND. LDATA_ROOT_DEPTH
 GDATA_ROOTFRAC     = GDATA .AND. LDATA_ROOTFRAC
 !
+!####################################################################################
+!
+!CDGAVG : old for reprod = 'ARI' Arithmetic average for all depth 
+!         recommended    = 'INV' Harmonic average for all depth (default)
+!
+!CDGDIF : old for reprod = 'SOIL' d3 soil depth from ecoclimap for isba-df
+!         recommended    = 'ROOT' d2 soil depth from ecoclimap for isba-df (default)
+!
+!####################################################################################
+!
 !DG IN NAMELIST => GROUND_DEPTH KNOWN, ROOT_DEPTH UNKNOWN 
 IF (GDATA_DG) THEN
   !
   DO JLAYER=1,KGROUND
-    CALL AV_PGD_PARAM(PDG(:,JLAYER,:),XPAR_VEGTYPE,XPAR_DG(:,JLAYER,:),YNAT,'ARI')
+    CALL AV_PGD_PARAM(PDG(:,JLAYER,:),XPAR_VEGTYPE,XPAR_DG(:,JLAYER,:),YNAT,CDGAVG)
   ENDDO
   !
+ENDIF
+!
+IF(HISBA=='DIF'.AND.CDGDIF=='ROOT')THEN
+  DO JVEGTYPE=1,NVEGTYPE
+     IF(JVEGTYPE==NVT_NO)THEN
+        WHERE(XDATA_GROUND_DEPTH(:,JVEGTYPE)/=XUNDEF)
+             ZDATA_GROUND_DEPTH(:,JVEGTYPE) = MIN(1.0,XDATA_GROUND_DEPTH(:,JVEGTYPE))
+        ENDWHERE
+     ELSEIF(JVEGTYPE/=NVT_ROCK.AND.JVEGTYPE/=NVT_SNOW)THEN
+       ZDATA_GROUND_DEPTH(:,JVEGTYPE) = MAX(1.0,XDATA_ROOT_DEPTH(:,JVEGTYPE))
+     ELSE
+       ZDATA_GROUND_DEPTH(:,JVEGTYPE) = XDATA_ROOT_DEPTH(:,JVEGTYPE)
+     ENDIF
+   ENDDO
 ENDIF
 !
 !CALCULATION OF GROUND_DEPTH IN ZDTOT : ECOCLIMAP OR LDATA_GROUND_DEPTH
@@ -726,7 +769,7 @@ IF (HISBA/='2-L') THEN
   !
   IF (GDATA_GROUND_DEPTH .AND. (HISBA=='DIF' .OR. .NOT.GDATA_DG)) THEN
     !GROUND DEPTH IN NAMELIST
-    CALL AV_PGD_PARAM(ZDTOT(:,:),XPAR_VEGTYPE,XPAR_GROUND_DEPTH(:,:),YNAT,'ARI')
+    CALL AV_PGD_PARAM(ZDTOT(:,:),XPAR_VEGTYPE,XPAR_GROUND_DEPTH(:,:),YNAT,CDGAVG)
     !Error Due to machine precision
     WHERE(ZDTOT(:,:)/=XUNDEF)
           ZDTOT(:,:)=INT(ZDTOT(:,:)*ZPREC)/ZPREC
@@ -738,7 +781,7 @@ IF (HISBA/='2-L') THEN
     ZDTOT(:,:) = PDG(:,KGROUND,:)
   ELSE
     !GROUND DEPTH FROM ECOCLIMAP
-    CALL AV_PGD (ZDTOT(:,:),PCOVER,XDATA_GROUND_DEPTH(:,:),YNAT,'ARI',OCOVER,KDECADE=KDECADE)
+    CALL AV_PGD (ZDTOT(:,:),PCOVER,ZDATA_GROUND_DEPTH(:,:),YNAT,CDGAVG,OCOVER,KDECADE=KDECADE)
   ENDIF
   !
 ENDIF
@@ -753,7 +796,7 @@ IF (HISBA=='DIF' .OR. .NOT.GDATA_DG) THEN
   !
   IF (GDATA_ROOT_DEPTH .AND. .NOT.GDATA_ROOTFRAC ) THEN
     !ROOT_DEPTH IN NAMELIST
-    CALL AV_PGD_PARAM(ZDG2(:,:),XPAR_VEGTYPE,XPAR_ROOT_DEPTH(:,:),YNAT,'ARI')
+    CALL AV_PGD_PARAM(ZDG2(:,:),XPAR_VEGTYPE,XPAR_ROOT_DEPTH(:,:),YNAT,CDGAVG)
     !Error Due to machine precision
     WHERE(ZDG2(:,:)/=XUNDEF)
           ZDG2(:,:)=INT(ZDG2(:,:)*ZPREC)/ZPREC
@@ -762,7 +805,7 @@ IF (HISBA=='DIF' .OR. .NOT.GDATA_DG) THEN
     IF (LDATA_DG) ZDG2(:,:) = MIN(ZDG2(:,:),PDG(:,KGROUND,:))
     ZDTOT(:,:) = MAX(ZDG2(:,:),ZDTOT(:,:))
     IF (HISBA=='DIF') THEN
-      CALL AV_PGD_PARAM(PDROOT(:,:),XPAR_VEGTYPE,XPAR_ROOT_DEPTH(:,:),YDIF,'ARI')
+      CALL AV_PGD_PARAM(PDROOT(:,:),XPAR_VEGTYPE,XPAR_ROOT_DEPTH(:,:),YDIF,CDGAVG)
      !Error Due to machine precision
       WHERE(PDROOT(:,:)/=XUNDEF)
           PDROOT(:,:)=INT(PDROOT(:,:)*ZPREC)/ZPREC
@@ -772,8 +815,11 @@ IF (HISBA=='DIF' .OR. .NOT.GDATA_DG) THEN
     ENDIF
   ELSE 
     !ROOT_DEPTH FROM ECOCLIMAP
-    CALL AV_PGD (ZDG2(:,:),PCOVER,XDATA_ROOT_DEPTH(:,:),YNAT,'ARI',OCOVER,KDECADE=KDECADE)
-    IF (HISBA=='DIF') CALL AV_PGD (PDROOT(:,:),PCOVER,XDATA_ROOT_DEPTH(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
+    CALL AV_PGD (ZDG2(:,:),PCOVER,XDATA_ROOT_DEPTH(:,:),YNAT,CDGAVG,OCOVER,KDECADE=KDECADE)
+    IF (HISBA=='DIF')THEN
+       CALL AV_PGD (PDROOT(:,:),PCOVER,XDATA_ROOT_DEPTH(:,:),YDIF,CDGAVG,OCOVER,KDECADE=KDECADE)
+       IF(CDGDIF=='ROOT')WHERE(PDROOT(:,:).NE.XUNDEF) ZDTOT(:,:) = MAX(PDROOT(:,:),ZDTOT(:,:))
+    ENDIF
     IF ( GDATA_GROUND_DEPTH .OR. GDATA_DG ) THEN
       ZDG2  (:,:) = MIN(ZDG2  (:,:),ZDTOT(:,:))
       IF (HISBA=='DIF') WHERE (PDROOT(:,:).NE.XUNDEF) PDROOT(:,:) = MIN(PDROOT(:,:),ZDTOT(:,:))
@@ -873,27 +919,6 @@ IF (HISBA=='DIF') THEN
     ELSE
       CALL AV_PGD (ZROOT_EXT(:,:),PCOVER,XDATA_ROOT_EXTINCTION(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
     ENDIF
-    !--------------waiting for new vegtypes-----------------------------------!
-    !Jackson parameter for tundra
-    IF(OPERM)THEN
-      IF (GDATA .AND. LDATA_ROOT_EXTINCTION) THEN
-        ZPAR_ROOT_EXTINCTION(:,:)       =XPAR_ROOT_EXTINCTION(:,:)
-        ZPAR_ROOT_EXTINCTION(:,NVT_GRAS)=0.914
-        CALL AV_PGD_PARAM(ZWORK_EXT(:,:),XPAR_VEGTYPE,ZPAR_ROOT_EXTINCTION(:,:),YDIF,'ARI')
-      ELSE
-        ZDATA_ROOT_EXTINCTION(:,:)       =XDATA_ROOT_EXTINCTION(:,:)
-        ZDATA_ROOT_EXTINCTION(:,NVT_GRAS)=0.914
-        CALL AV_PGD (ZWORK_EXT(:,:),PCOVER,ZDATA_ROOT_EXTINCTION(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
-      ENDIF        
-      DO JPATCH=1,KPATCH
-        DO JJ=1,KNI
-           IF(XPERM(JJ)>=0.25.AND.ZROOT_EXT(JJ,JPATCH)/=XUNDEF)THEN
-              ZROOT_EXT(JJ,JPATCH)=ZWORK_EXT(JJ,JPATCH)
-           ENDIF
-        ENDDO
-      ENDDO
-    ENDIF
-    !--------------waiting for new vegtypes-----------------------------------!
     IF (GDATA .AND. LDATA_ROOT_LIN) THEN
       CALL AV_PGD_PARAM(ZROOT_LIN(:,:),XPAR_VEGTYPE,XPAR_ROOT_LIN(:,:),YDIF,'ARI')
     ELSE

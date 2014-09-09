@@ -33,6 +33,8 @@ SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
 !!      B. Decharme 2012     New diag for snow 
 !!                                        carbon
 !!                                        isab water budget
+!!                  2013                  Sublimation
+!!                                        Subsurface runoff if SGH (DIF option only)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -50,7 +52,9 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : XRNC, XAVG_RNC, XHC, XAVG_HC,                 
                                   XLER, XLERC, XAVG_LER, XAVG_LERC,              &
                                   XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,          &
                                   XEVAP, XEVAPC, XAVG_EVAP, XAVG_EVAPC,          &
+                                  XSUBL, XSUBLC, XAVG_SUBL, XAVG_SUBLC,          &
                                   XDRAIN, XDRAINC, XAVG_DRAIN, XAVG_DRAINC,      &
+                                  XQSB, XQSBC, XAVG_QSB, XAVG_QSBC,              &
                                   XRUNOFF, XRUNOFFC, XAVG_RUNOFF, XAVG_RUNOFFC,  &
                                   XMELT, XMELTC, XAVG_MELT, XAVG_MELTC,          &
                                   LSURF_EVAP_BUDGET, LSURF_BUDGETC,              &
@@ -74,7 +78,8 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : XRNC, XAVG_RNC, XHC, XAVG_HC,                 
                                   XDWR,XDWRC,XAVG_DWR,XAVG_DWRC,                 &
                                   XDSWE,XDSWEC,XAVG_DSWE,XAVG_DSWEC,             &
                                   XRAINFALL,XRAINFALLC,XSNOWFALL,XSNOWFALLC,     &
-                                  XWATBUD,XWATBUDC,XAVG_WATBUD,XAVG_WATBUDC 
+                                  XWATBUD,XWATBUDC,XAVG_WATBUD,XAVG_WATBUDC,     & 
+                                  XSNDRIFT,XSNDRIFTC,XAVG_SNDRIFT,XAVG_SNDRIFTC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -120,7 +125,10 @@ IF (LSURF_EVAP_BUDGET) THEN
    XAVG_LER        (:) = 0.
    XAVG_LETR       (:) = 0.
    XAVG_EVAP       (:) = 0.
+   XAVG_SUBL       (:) = 0.
+   XAVG_SNDRIFT    (:) = 0.
    XAVG_DRAIN      (:) = 0.
+   XAVG_QSB        (:) = 0.
    XAVG_RUNOFF     (:) = 0.
    XAVG_HORT       (:) = 0.
    XAVG_DRIP       (:) = 0.
@@ -172,9 +180,21 @@ IF (LSURF_EVAP_BUDGET) THEN
 !
         XAVG_EVAP(JJ)  = XAVG_EVAP(JJ) + XPATCH(JJ,JPATCH) * XEVAP(JJ,JPATCH)
 !
+! Sublimation
+!
+        XAVG_SUBL(JJ)  = XAVG_SUBL(JJ) + XPATCH(JJ,JPATCH) * XSUBL(JJ,JPATCH)
+!
+! Blowing snow sublimation (ES or Crocus)
+!
+        XAVG_SNDRIFT(JJ)  = XAVG_SNDRIFT(JJ) + XPATCH(JJ,JPATCH) * XSNDRIFT(JJ,JPATCH)
+!
 ! Soil drainage flux
 !
         XAVG_DRAIN(JJ)  = XAVG_DRAIN(JJ) + XPATCH(JJ,JPATCH) * XDRAIN(JJ,JPATCH)
+!
+! Soil lateral subsurface flux
+!
+        XAVG_QSB(JJ)  = XAVG_QSB(JJ) + XPATCH(JJ,JPATCH) * XQSB(JJ,JPATCH)        
 !
 ! Supersaturation runoff
 !
@@ -278,7 +298,10 @@ IF (LSURF_BUDGETC) THEN
    XAVG_LERC       (:) = 0.
    XAVG_LETRC      (:) = 0.
    XAVG_EVAPC      (:) = 0.
+   XAVG_SUBLC      (:) = 0.
+   XAVG_SNDRIFTC   (:) = 0.
    XAVG_DRAINC     (:) = 0.
+   XAVG_QSBC       (:) = 0.
    XAVG_RUNOFFC    (:) = 0.
    XAVG_HORTC      (:) = 0.
    XAVG_DRIPC      (:) = 0.
@@ -350,9 +373,21 @@ IF (LSURF_BUDGETC) THEN
 !
         XAVG_EVAPC(JJ)  = XAVG_EVAPC(JJ) + XPATCH(JJ,JPATCH) * XEVAPC(JJ,JPATCH)
 !
+! Sublimation
+!
+        XAVG_SUBLC(JJ)  = XAVG_SUBLC(JJ) + XPATCH(JJ,JPATCH) * XSUBLC(JJ,JPATCH)
+!
+! Blowing snow sublimation (ES or Crocus)
+!
+        XAVG_SNDRIFTC(JJ)  = XAVG_SNDRIFTC(JJ) + XPATCH(JJ,JPATCH) * XSNDRIFTC(JJ,JPATCH)
+!
 ! Soil drainage flux
 !
         XAVG_DRAINC(JJ)  = XAVG_DRAINC(JJ) + XPATCH(JJ,JPATCH) * XDRAINC(JJ,JPATCH)
+!
+! Soil lateral subsurface flux
+!
+        XAVG_QSBC(JJ)  = XAVG_QSBC(JJ) + XPATCH(JJ,JPATCH) * XQSBC(JJ,JPATCH)        
 !
 ! Supersaturation runoff
 !

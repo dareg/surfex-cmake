@@ -1,7 +1,7 @@
 !     #########
 SUBROUTINE DIAG_TEB_n(HPROGRAM,                                               &
                         PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,          &
-                        PZ0, PZ0H, PT2M, PQ2M, PHU2M, PZON10M, PMER10M,         &
+                        PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
                         PT2M_MIN, PT2M_MAX, PHU2M_MIN, PHU2M_MAX,               &
                         PWIND10M, PWIND10M_MAX                                  )
@@ -26,12 +26,13 @@ SUBROUTINE DIAG_TEB_n(HPROGRAM,                                               &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!       B. decharme 04/2013 : Add Ts diag
 !!------------------------------------------------------------------
 !
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TEB_n,      ONLY : TTIME
-USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,              &
+USE MODD_DIAG_TEB_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS, XDIAG_TS,    &
                               XRN, XH, XLE, XGFLUX, XRI, XCD, XCH, XCE, XQS,   &
                               XZ0, XZ0H, XT2M, XQ2M, XHU2M, XZON10M, XMER10M,  &
                               XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV,&
@@ -59,6 +60,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PCE      ! transf. coef vapor  (W/s/K)
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0      ! rough. length wind  (m)
 REAL, DIMENSION(:), INTENT(OUT) :: PQS
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0H     ! rough. length heat  (m)
+REAL, DIMENSION(:), INTENT(OUT) :: PTS      ! surface temperature (K)
 REAL, DIMENSION(:), INTENT(OUT) :: PT2M     ! temperature at 2m   (K)
 REAL, DIMENSION(:), INTENT(OUT) :: PQ2M     ! humidity at 2m      (kg/kg)
 REAL, DIMENSION(:), INTENT(OUT) :: PHU2M    ! relative humidity at 2m (-)
@@ -100,6 +102,8 @@ IF (LSURF_BUDGET) THEN
   PFMU     = XFMU
   PFMV     = XFMV
 END IF
+!
+IF (N2M>=1 .OR. LSURF_BUDGET) PTS = XDIAG_TS
 !
 IF (N2M>=1) THEN
   PRI      = XRI

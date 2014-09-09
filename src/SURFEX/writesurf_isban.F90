@@ -39,6 +39,7 @@
 !!      B. Decharme  07/2011 : land_use semi-prognostic variables
 !!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !!      B. Decharme  09/2012 : write some key for prep_read_external
+!!      B. Decharme  04/2013 : Only 2 temperature layer in ISBA-FR
 !!
 !-------------------------------------------------------------------------------
 !
@@ -47,13 +48,13 @@
 !
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
-USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL, CSOC, &
+USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL, LSOC, &
                           NNBIOMASS, NNLITTER, NNSOILCARB, NNLITTLEVS, &
                           XTG, XWG, XWGI, XWR, XLAI, TSNOW, XTSRAD_NAT,&
                           XRESA, XAN, XANFM, XLE, XANDAY, TTIME,       &
                           XRESP_BIOMASS, XBIOMASS, XPATCH, XDG,        &
-                          XLITTER, XSOILCARB, XLIGNIN_STRUC, LFLOOD,   &
-                          XZ0_FLOOD, LTEMP_ARP, NTEMPLAYER_ARP,        &
+                          XLITTER, XSOILCARB, XLIGNIN_STRUC,           &
+                          LTEMP_ARP, NTEMPLAYER_ARP,                   &
                           LGLACIER, XICE_STO, LSPINUPCARBS,            &
                           LSPINUPCARBW, NNBYEARSOLD
 !
@@ -102,8 +103,10 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_ISBA_N',0,ZHOOK_HANDLE)
 !
 IF(LTEMP_ARP)THEN
   IWORK=NTEMPLAYER_ARP
-ELSE
+ELSEIF(CISBA=='DIF')THEN
   IWORK=NGROUND_LAYER
+ELSE
+  IWORK=2 !Only 2 temperature layer in ISBA-FR
 ENDIF
 !
 DO JLAYER=1,IWORK
@@ -128,7 +131,13 @@ END DO
 !
 !* soil ice water contents
 !
-DO JLAYER=1,NGROUND_LAYER
+IF(CISBA=='DIF')THEN
+  IWORK=NGROUND_LAYER
+ELSE
+  IWORK=2 !Only 2 soil ice layer in ISBA-FR
+ENDIF
+!
+DO JLAYER=1,IWORK
    WRITE(YLVL,'(I4)') JLAYER     
    YRECFM='WGI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
    YFORM='(A7,I1.1,A8)'
@@ -143,15 +152,11 @@ YRECFM='WR'
 YCOMMENT='X_Y_WR (kg/m2)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
-!* roughness length of Flood water
-!
-IF(LFLOOD)THEN
-  YRECFM='Z0_FLOOD'
-  YCOMMENT='X_Y_Z0_FLOOD (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0_FLOOD(:,:),IRESP,HCOMMENT=YCOMMENT)
-ENDIF
-!
 !* Glacier ice storage
+!
+YRECFM = 'GLACIER'
+YCOMMENT='LGLACIER key for external prep'
+CALL WRITE_SURF(HPROGRAM,YRECFM,LGLACIER,IRESP,HCOMMENT=YCOMMENT)
 !
 IF(LGLACIER)THEN
   YRECFM='ICE_STO'
@@ -177,22 +182,11 @@ END IF
 !
 !* key and/or field usefull to make an external prep
 !
-YRECFM = 'GLACIER'
-YCOMMENT='LGLACIER key for external prep'
- CALL WRITE_SURF(HPROGRAM,YRECFM,LGLACIER,IRESP,HCOMMENT=YCOMMENT)
-!
 IF(CISBA=='DIF')THEN
 !
   YRECFM = 'SOC'
   YCOMMENT='SOC key for external prep'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,CSOC,IRESP,HCOMMENT=YCOMMENT)
-!
-  IF(CSOC=='SGH')THEN
-!   Fraction for each patch
-    YRECFM='PATCH'
-    YCOMMENT='X_Y_PATCH (-) for external prep with SOC'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)        
-  ENDIF
+  CALL WRITE_SURF(HPROGRAM,YRECFM,LSOC,IRESP,HCOMMENT=YCOMMENT)
 !
 ELSE
 !
@@ -214,6 +208,12 @@ ENDIF
 !            -------------------------
 !
 !
+!* Fraction for each patch
+!
+YRECFM='PATCH'
+YCOMMENT='fraction for each patch (-)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
 !* patch averaged radiative temperature (K)
 !
 YRECFM='TSRAD_NAT'
@@ -229,10 +229,6 @@ YCOMMENT='X_Y_RESA (s/m)'
 !* Land use variables
 !
 IF(OLAND_USE)THEN
-!     
-  YRECFM='OLD_PATCH'
-  YCOMMENT='X_Y_OLD_PATCH (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
   DO JLAYER=1,NGROUND_LAYER
     WRITE(YLVL,'(I4)') JLAYER
@@ -277,25 +273,13 @@ IF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
   END DO
   !
   !
-  DO JNBIOMASS=2,NNBIOMASS-2
+  DO JNBIOMASS=2,NNBIOMASS
     WRITE(YLVL,'(I1)') JNBIOMASS
     YRECFM='RESPI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     YFORM='(A16,I1.1,A10)'
     WRITE(YCOMMENT,FMT=YFORM) 'X_Y_RESP_BIOMASS',JNBIOMASS,' (kg/m2/s)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XRESP_BIOMASS(:,JNBIOMASS,:),IRESP,HCOMMENT=YCOMMENT)
   END DO
-  !
-  IF (CPHOTO=='NIT') THEN
-    !
-    DO JNBIOMASS=NNBIOMASS-1,NNBIOMASS
-      WRITE(YLVL,'(I1)') JNBIOMASS
-      YRECFM='RESPI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-      YFORM='(A16,I1.1,A10)'
-      WRITE(YCOMMENT,FMT=YFORM) 'X_Y_RESP_BIOMASS',JNBIOMASS,' (kg/m2/s)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XRESP_BIOMASS(:,JNBIOMASS,:),IRESP,HCOMMENT=YCOMMENT)
-    END DO
-    !
-  ENDIF
   !
 END IF
 !

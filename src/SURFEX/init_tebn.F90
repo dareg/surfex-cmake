@@ -3,7 +3,7 @@
                                  KI,KSV,KSW,                                &
                                  HSV,PCO2,PRHOA,                            &
                                  PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                 PEMIS,PTSRAD,                              &
+                                 PEMIS,PTSRAD,PTSURF,                       &
                                  KYEAR, KMONTH,KDAY, PTIME,                 &
                                  HATMFILE,HATMFILETYPE,                     &
                                  HTEST                                      )  
@@ -36,6 +36,8 @@
 !!    -------------
 !!      Original    01/2003
 !!      G. Pigeon   09/2012: add ROUGH_WALL/ROUGH_ROOF/CH_BEM for conv. coef.
+!!      B. Decharme  04/2013 new coupling variables
+!!                           delete CTOPREG option (never used)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -85,7 +87,7 @@ USE MODD_BEM_n,           ONLY: NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,   
                                 XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN, XTRAN_WIN
 
 USE MODD_TEB_VEG_n,       ONLY: CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,                  &
-                                CCPSURF, XCGMAX, CKSAT, CTOPREG,                         &
+                                CCPSURF, XCGMAX, CKSAT,                                  &
                                 CRAIN, CHORT,                                            &
                                 LCANOPY_DRAG, LVEGUPD
 
@@ -174,6 +176,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB    ! direct albedo f
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB    ! diffuse albedo for each band
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS       ! emissivity
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD      ! radiative temperature
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSURF      ! surface effective temperature         (K)
 INTEGER,                            INTENT(IN)  :: KYEAR       ! current year (UTC)
 INTEGER,                            INTENT(IN)  :: KMONTH      ! current month (UTC)
 INTEGER,                            INTENT(IN)  :: KDAY        ! current day (UTC)
@@ -231,6 +234,7 @@ PDIR_ALB = XUNDEF
 PSCA_ALB = XUNDEF
 PEMIS    = XUNDEF
 PTSRAD   = XUNDEF
+PTSURF   = XUNDEF
 !
 LSURF_DIAG_ALBEDO = .FALSE.
 LSURF_EVAP_BUDGET = .FALSE.

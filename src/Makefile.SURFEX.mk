@@ -23,6 +23,7 @@ ARCH_XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}
 ifdef VER_USER
 DIR_USER += ${VER_USER}
 DIR_USER += ${VER_USER}_OFFLIN
+DIR_USER += ${VER_USER}_ASSIM
 endif
 ##########################################################
 #           Source OFFLIN                                #

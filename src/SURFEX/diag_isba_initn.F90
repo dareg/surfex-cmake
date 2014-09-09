@@ -47,6 +47,8 @@
 !!                             frozen layer thickness over non-permafrost
 !!      B. Vincendon 02/2014 : condition added for RAD_BUDGET variables (needed for
 !!                             restart mode)
+!       B. decharme 04/2013 : Add new diag for coupling
+!                             Delete XAVG_TSRAD (because same than XTSRAD_NAT)
 !-------------------------------------------------------------------------------
 !
 !*       0.0    DECLARATIONS
@@ -55,7 +57,7 @@
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, LFLOOD, CHORT, LGLACIER,  &
-                                LTR_ML, TSNOW, CISBA, XABC, CPHOTO
+                                LTR_ML, TSNOW, CISBA, XABC, CPHOTO, CRUNOFF
 USE MODD_CH_ISBA_n,      ONLY : LCH_BIO_FLUX, NBEQ 
 USE MODD_TYPE_DATE_SURF
 USE MODD_AGRI,           ONLY : LAGRIP
@@ -76,7 +78,7 @@ USE MODD_DIAG_ISBA_n,    ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,           
                                 XAVG_LWD, XAVG_LWU, XAVG_FMU, XAVG_FMV,          &
                                 XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,        &
                                 XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,      &
-                                XAVG_FMUC, XAVG_FMVC, XAVG_TS, XAVG_TSRAD,       &
+                                XAVG_FMUC, XAVG_FMVC, XAVG_TS,                   &
                                 XAVG_HU2M_MIN, XAVG_HU2M_MAX, XWIND10M,          &
                                 XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2  
 !
@@ -93,7 +95,10 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGE
                                   XLER, XLERC, XAVG_LER, XAVG_LERC,                &
                                   XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,            &
                                   XEVAP, XEVAPC, XAVG_EVAP, XAVG_EVAPC,            &
+                                  XSUBL, XSUBLC, XAVG_SUBL, XAVG_SUBLC,            &
+                                  XSNDRIFT, XSNDRIFTC, XAVG_SNDRIFT, XAVG_SNDRIFTC,&
                                   XDRAIN, XDRAINC, XAVG_DRAIN, XAVG_DRAINC,        &
+                                  XQSB, XQSBC, XAVG_QSB, XAVG_QSBC,                &
                                   XRUNOFF, XRUNOFFC, XAVG_RUNOFF, XAVG_RUNOFFC,    &
                                   XHORT, XHORTC, XAVG_HORT, XAVG_HORTC,            &
                                   XDRIP, XDRIPC, XAVG_DRIP, XAVG_DRIPC,            &
@@ -125,11 +130,11 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET, LSURF_MISC_DIF,            
                                   XAVG_TWSNOW, XAVG_TDSNOW, XAVG_TTSNOW,          &
                                   XAVG_PSNG, XAVG_PSNV, XAVG_PSN, XSEUIL,         &
                                   XAVG_ALBT, XALBT,                               &
-                                  XSOIL_TSWI, XSOIL_TWG, XSOIL_TWGI,              &
+                                  XSOIL_SWI, XSOIL_TSWI, XSOIL_TWG, XSOIL_TWGI,   &
+                                  XSOIL_WG, XSOIL_WGI,                            &
                                   XDFFG, XDFFV, XDFF, XAVG_FFG, XAVG_FFV, XAVG_FF,&
                                   XSNOWLIQ, XSNOWTEMP, XDFSAT, XAVG_FSAT,         &
-                                  XSURF_TSWI, XSURF_TWG, XSURF_TWGI,  XROOT_TSWI, &
-                                  XROOT_TWG,  XROOT_TWGI, XFRD2_TSWI, XFRD2_TWG,  &
+                                  XFRD2_TSWI, XFRD2_TWG,                          &
                                   XFRD2_TWGI, XFRD3_TSWI, XFRD3_TWG, XFRD3_TWGI,  &
                                   XFAPAR, XFAPIR, XDFAPARC, XDFAPIRC,             &
                                   XFAPAR_BS, XFAPIR_BS, XDLAI_EFFC, XAVG_LAI                                  
@@ -261,7 +266,10 @@ IF (LSURF_EVAP_BUDGET) THEN
   ALLOCATE(XAVG_LER       (KLU))
   ALLOCATE(XAVG_LETR      (KLU))
   ALLOCATE(XAVG_EVAP      (KLU))
+  ALLOCATE(XAVG_SUBL      (KLU))
+  ALLOCATE(XAVG_SNDRIFT   (KLU))
   ALLOCATE(XAVG_DRAIN     (KLU))
+  ALLOCATE(XAVG_QSB       (KLU))
   ALLOCATE(XAVG_RUNOFF    (KLU))
   ALLOCATE(XAVG_HORT      (KLU))
   ALLOCATE(XAVG_DRIP      (KLU))
@@ -280,7 +288,10 @@ IF (LSURF_EVAP_BUDGET) THEN
   XAVG_LER        = XUNDEF
   XAVG_LETR       = XUNDEF
   XAVG_EVAP       = XUNDEF
+  XAVG_SUBL       = XUNDEF
+  XAVG_SNDRIFT    = XUNDEF
   XAVG_DRAIN      = XUNDEF
+  XAVG_QSB        = XUNDEF
   XAVG_RUNOFF     = XUNDEF
   XAVG_HORT       = XUNDEF
   XAVG_DRIP       = XUNDEF
@@ -308,7 +319,10 @@ IF (LSURF_EVAP_BUDGET) THEN
   ALLOCATE(XLER       (KLU,NPATCH))
   ALLOCATE(XLETR      (KLU,NPATCH))
   ALLOCATE(XEVAP      (KLU,NPATCH))
+  ALLOCATE(XSUBL      (KLU,NPATCH))
+  ALLOCATE(XSNDRIFT   (KLU,NPATCH))
   ALLOCATE(XDRAIN     (KLU,NPATCH))
+  ALLOCATE(XQSB       (KLU,NPATCH))
   ALLOCATE(XRUNOFF    (KLU,NPATCH))
   ALLOCATE(XHORT      (KLU,NPATCH))
   ALLOCATE(XDRIP      (KLU,NPATCH))
@@ -327,7 +341,10 @@ IF (LSURF_EVAP_BUDGET) THEN
   XLER           = XUNDEF
   XLETR          = XUNDEF
   XEVAP          = XUNDEF
+  XSUBL          = XUNDEF
+  XSNDRIFT       = XUNDEF
   XDRAIN         = XUNDEF
+  XQSB           = XUNDEF
   XRUNOFF        = XUNDEF
   XHORT          = XUNDEF
   XDRIP          = XUNDEF
@@ -402,7 +419,10 @@ ELSE
   ALLOCATE(XAVG_LER       (0))
   ALLOCATE(XAVG_LETR      (0))
   ALLOCATE(XAVG_EVAP      (0))
+  ALLOCATE(XAVG_SUBL      (0))
+  ALLOCATE(XAVG_SNDRIFT   (0))
   ALLOCATE(XAVG_DRAIN     (0))
+  ALLOCATE(XAVG_QSB       (0))
   ALLOCATE(XAVG_RUNOFF    (0))
   ALLOCATE(XAVG_HORT      (0))
   ALLOCATE(XAVG_DRIP      (0))
@@ -425,7 +445,10 @@ ELSE
   ALLOCATE(XLER       (0,0))
   ALLOCATE(XLETR      (0,0))
   ALLOCATE(XEVAP      (0,0))
+  ALLOCATE(XSUBL      (0,0))
+  ALLOCATE(XSNDRIFT   (0,0))
   ALLOCATE(XDRAIN     (0,0))
+  ALLOCATE(XQSB       (0,0))
   ALLOCATE(XRUNOFF    (0,0))
   ALLOCATE(XHORT      (0,0))
   ALLOCATE(XDRIP      (0,0))
@@ -472,7 +495,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XAVG_LERC       (KLU))
   ALLOCATE(XAVG_LETRC      (KLU))
   ALLOCATE(XAVG_EVAPC      (KLU))
+  ALLOCATE(XAVG_SUBLC      (KLU))
+  ALLOCATE(XAVG_SNDRIFTC   (KLU))
   ALLOCATE(XAVG_DRAINC     (KLU))
+  ALLOCATE(XAVG_QSBC       (KLU))
   ALLOCATE(XAVG_RUNOFFC    (KLU))
   ALLOCATE(XAVG_HORTC      (KLU))
   ALLOCATE(XAVG_DRIPC      (KLU))
@@ -500,7 +526,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XLERC       (KLU,NPATCH))
   ALLOCATE(XLETRC      (KLU,NPATCH))
   ALLOCATE(XEVAPC      (KLU,NPATCH))
+  ALLOCATE(XSUBLC      (KLU,NPATCH))
+  ALLOCATE(XSNDRIFTC   (KLU,NPATCH))
   ALLOCATE(XDRAINC     (KLU,NPATCH))
+  ALLOCATE(XQSBC       (KLU,NPATCH))
   ALLOCATE(XRUNOFFC    (KLU,NPATCH))
   ALLOCATE(XHORTC      (KLU,NPATCH))
   ALLOCATE(XDRIPC      (KLU,NPATCH))
@@ -581,7 +610,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XAVG_LERC        = 0.0
       XAVG_LETRC       = 0.0
       XAVG_EVAPC       = 0.0
+      XAVG_SUBLC       = 0.0
+      XAVG_SNDRIFTC    = 0.0
       XAVG_DRAINC      = 0.0
+      XAVG_QSBC        = 0.0
       XAVG_RUNOFFC     = 0.0
       XAVG_HORTC       = 0.0
       XAVG_DRIPC       = 0.0
@@ -609,7 +641,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XLERC        = 0.0
       XLETRC       = 0.0
       XEVAPC       = 0.0
+      XSUBLC       = 0.0
+      XSNDRIFTC    = 0.0
       XDRAINC      = 0.0
+      XQSBC        = 0.0
       XRUNOFFC     = 0.0
       XHORTC       = 0.0
       XDRIPC       = 0.0
@@ -675,7 +710,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XAVG_LERC        = 0.0
       XAVG_LETRC       = 0.0
       XAVG_EVAPC       = 0.0
+      XAVG_SUBLC       = 0.0
+      XAVG_SNDRIFTC    = 0.0
       XAVG_DRAINC      = 0.0
+      XAVG_QSBC        = 0.0
       XAVG_RUNOFFC     = 0.0
       XAVG_HORTC       = 0.0
       XAVG_DRIPC       = 0.0
@@ -703,7 +741,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XLERC        = 0.0
       XLETRC       = 0.0
       XEVAPC       = 0.0
+      XSUBLC       = 0.0
+      XSNDRIFTC    = 0.0
       XDRAINC      = 0.0
+      XQSBC        = 0.0
       XRUNOFFC     = 0.0
       XHORTC       = 0.0
       XDRIPC       = 0.0
@@ -777,12 +818,22 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LEVC   ,IRESP)
     YREC='LESC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LESC   ,IRESP)
-    IF( (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') .AND. &
-        (IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3) ) THEN  
-      YREC='LESLC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LESLC  ,IRESP)      
+    IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
+       IF(IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3)THEN
+         YREC='LESLC_ISBA'
+         CALL READ_SURF(HPROGRAM,YREC,XAVG_LESLC,IRESP)  
+       ELSE
+         XAVG_LESLC=0.0
+       ENDIF
+       IF(IVERSION>=8)THEN
+         YREC='SNDRIFC_ISBA'
+         CALL READ_SURF(HPROGRAM,YREC,XAVG_SNDRIFTC,IRESP)      
+       ELSE
+         XAVG_SNDRIFTC = 0.0
+       ENDIF
     ELSE
       XAVG_LESLC = 0.0
+      XAVG_SNDRIFTC = 0.0
     ENDIF
     YREC='LERC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LERC   ,IRESP)
@@ -790,6 +841,12 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LETRC  ,IRESP)
     YREC='EVAPC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_EVAPC  ,IRESP)
+    IF (IVERSION<8)THEN
+       XAVG_SUBLC = 0.0
+    ELSE
+       YREC='SUBLC_ISBA'
+       CALL READ_SURF(HPROGRAM,YREC,XAVG_SUBLC  ,IRESP) 
+    ENDIF    
     YREC='DRAINC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_DRAINC ,IRESP)
     YREC='RUNOFFC_ISBA'
@@ -818,6 +875,13 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XAVG_GPPC = 0.0
       XAVG_RESPC_AUTO = 0.0
       XAVG_RESPC_ECO = 0.0
+    ENDIF
+    !
+    IF((CRUNOFF=='SGH'.AND.CISBA=='DIF').AND.IVERSION>=8)THEN
+      YREC='QSBC_ISBA'
+      CALL READ_SURF(HPROGRAM,YREC,XAVG_QSBC,IRESP)              
+    ELSE
+      XAVG_QSBC = 0.0
     ENDIF
     !
     IF(CHORT=='SGH'.OR.CISBA=='DIF')THEN
@@ -912,12 +976,22 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLEVC   ,IRESP)
       YREC='LESC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESC   ,IRESP)
-      IF((TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') .AND. &
-          (IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3))THEN  
-        YREC='LESLC_P'
-        CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESLC,IRESP)        
+      IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
+         IF(IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3)THEN
+           YREC='LESLC_P'
+           CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESLC,IRESP)  
+         ELSE
+           XLESLC = 0.0
+         ENDIF
+         IF(IVERSION>=8)THEN
+           YREC='SNDRIFC_P'
+           CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XSNDRIFTC,IRESP)        
+         ELSE
+           XSNDRIFTC = 0.0
+         ENDIF        
       ELSE
         XLESLC = 0.0
+        XSNDRIFTC = 0.0
       ENDIF
       YREC='LERC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLERC   ,IRESP)
@@ -925,6 +999,12 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLETRC  ,IRESP)
       YREC='EVAPC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XEVAPC  ,IRESP)
+      IF (IVERSION<8)THEN
+         XSUBLC = 0.0
+      ELSE
+         YREC='SUBLC_P'
+         CALL READ_SURF(HPROGRAM,YREC,XSUBLC,IRESP)
+      ENDIF    
       YREC='DRAINC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XDRAINC ,IRESP)
       YREC='RUNOFFC_P'
@@ -935,6 +1015,14 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XRRVEGC,IRESP)
       YREC='SNOMLTC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XMELTC,IRESP)
+      !
+      IF((CRUNOFF=='SGH'.OR.CISBA=='DIF').AND.IVERSION>=8)THEN
+        YREC='QSBC_P'
+        CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XQSBC,IRESP)              
+      ELSE
+        XQSBC = 0.0
+      ENDIF
+      !      
       IF (LAGRIP) THEN
         YREC='IRRIGC_P'
         CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XIRRIG_FLUXC,IRESP)
@@ -1032,7 +1120,10 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XLERC        = 0.0
       XLETRC       = 0.0
       XEVAPC       = 0.0
+      XSUBLC       = 0.0
+      XSNDRIFTC    = 0.0
       XDRAINC      = 0.0
+      XQSBC        = 0.0
       XRUNOFFC     = 0.0
       XHORTC       = 0.0
       XDRIPC       = 0.0
@@ -1083,7 +1174,10 @@ ELSE
   ALLOCATE(XAVG_LERC       (0))
   ALLOCATE(XAVG_LETRC      (0))
   ALLOCATE(XAVG_EVAPC      (0))
+  ALLOCATE(XAVG_SUBLC      (0))
+  ALLOCATE(XAVG_SNDRIFTC   (0))
   ALLOCATE(XAVG_DRAINC     (0))
+  ALLOCATE(XAVG_QSBC       (0))
   ALLOCATE(XAVG_RUNOFFC    (0))
   ALLOCATE(XAVG_HORTC      (0))
   ALLOCATE(XAVG_DRIPC      (0))
@@ -1112,7 +1206,10 @@ ELSE
   ALLOCATE(XLERC       (0,0))
   ALLOCATE(XLETRC      (0,0))
   ALLOCATE(XEVAPC      (0,0))
+  ALLOCATE(XSUBLC      (0,0))
+  ALLOCATE(XSNDRIFTC   (0,0))
   ALLOCATE(XDRAINC     (0,0))
+  ALLOCATE(XQSBC       (0,0))
   ALLOCATE(XRUNOFFC    (0,0))
   ALLOCATE(XHORTC      (0,0))
   ALLOCATE(XDRIPC      (0,0))
@@ -1169,10 +1266,7 @@ ALLOCATE(XAVG_TS(KLU))
 XTS     = XUNDEF
 XAVG_TS = XUNDEF
 ALLOCATE(XTSRAD    (KLU,NPATCH))
-ALLOCATE(XAVG_TSRAD(KLU))
 XTSRAD     = XUNDEF
-XAVG_TSRAD = XUNDEF
-
 !
 IF (N2M>=1) THEN
   ALLOCATE(XAVG_RI           (KLU))
@@ -1256,8 +1350,11 @@ IF (LSURF_MISC_BUDGET) THEN
   ALLOCATE(XAVG_FF          (KLU))
   !
   ALLOCATE(XSOIL_TSWI        (KLU))
+  ALLOCATE(XSOIL_SWI         (KLU))
   ALLOCATE(XSOIL_TWG         (KLU))
   ALLOCATE(XSOIL_TWGI        (KLU))
+  ALLOCATE(XSOIL_WG          (KLU))
+  ALLOCATE(XSOIL_WGI         (KLU))  
   ALLOCATE(XAVG_SWI          (KLU,NGROUND_LAYER))
   ALLOCATE(XAVG_TSWI         (KLU,NGROUND_LAYER))
   !
@@ -1269,8 +1366,11 @@ IF (LSURF_MISC_BUDGET) THEN
   XAVG_SWI     = XUNDEF
   XAVG_TSWI    = XUNDEF
   XSOIL_TSWI   = XUNDEF
+  XSOIL_SWI    = XUNDEF
   XSOIL_TWG    = XUNDEF
   XSOIL_TWGI   = XUNDEF
+  XSOIL_WG     = XUNDEF
+  XSOIL_WGI    = XUNDEF  
   XAVG_PSNG    = XUNDEF
   XAVG_PSNV    = XUNDEF
   XAVG_PSN     = XUNDEF
@@ -1321,24 +1421,12 @@ IF (LSURF_MISC_BUDGET) THEN
   XSNOWTEMP= XUNDEF
   !
   IF(CISBA=='DIF'.AND.LSURF_MISC_DIF)THEN
-    ALLOCATE(XSURF_TSWI(KLU))
-    ALLOCATE(XSURF_TWG (KLU))
-    ALLOCATE(XSURF_TWGI(KLU))
-    ALLOCATE(XROOT_TSWI(KLU))
-    ALLOCATE(XROOT_TWG (KLU))
-    ALLOCATE(XROOT_TWGI(KLU))
     ALLOCATE(XFRD2_TSWI(KLU))
     ALLOCATE(XFRD2_TWG (KLU))
     ALLOCATE(XFRD2_TWGI(KLU))
     ALLOCATE(XFRD3_TSWI(KLU))
     ALLOCATE(XFRD3_TWG (KLU))
     ALLOCATE(XFRD3_TWGI(KLU))    
-    XSURF_TSWI = XUNDEF
-    XSURF_TWG  = XUNDEF
-    XSURF_TWGI = XUNDEF
-    XROOT_TSWI = XUNDEF
-    XROOT_TWG  = XUNDEF
-    XROOT_TWGI = XUNDEF
     XFRD2_TSWI = XUNDEF
     XFRD2_TWG  = XUNDEF
     XFRD2_TWGI = XUNDEF
@@ -1390,8 +1478,11 @@ ELSE
   ALLOCATE(XAVG_FF          (0))
 !
   ALLOCATE(XSOIL_TSWI        (0))
+  ALLOCATE(XSOIL_SWI         (0))
   ALLOCATE(XSOIL_TWG         (0))
   ALLOCATE(XSOIL_TWGI        (0))
+  ALLOCATE(XSOIL_WG          (0))
+  ALLOCATE(XSOIL_WGI         (0))
   ALLOCATE(XAVG_SWI          (0,0))
   ALLOCATE(XAVG_TSWI         (0,0))
 !
@@ -1420,12 +1511,6 @@ ELSE
 END IF
 !
 IF (CISBA/='DIF') THEN
-  ALLOCATE(XSURF_TSWI(0))
-  ALLOCATE(XSURF_TWG (0))
-  ALLOCATE(XSURF_TWGI(0))
-  ALLOCATE(XROOT_TSWI(0))
-  ALLOCATE(XROOT_TWG (0))
-  ALLOCATE(XROOT_TWGI(0))
   ALLOCATE(XFRD2_TSWI(0))
   ALLOCATE(XFRD2_TWG (0))
   ALLOCATE(XFRD2_TWGI(0))

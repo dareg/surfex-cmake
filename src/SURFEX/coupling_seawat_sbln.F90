@@ -1,13 +1,13 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEAWAT_SBL_n(HPROGRAM, HCOUPLING, HSURF,                               &
+SUBROUTINE COUPLING_SEAWAT_SBL_n(HPROGRAM, HCOUPLING,  PTIMEC, HSURF,                      &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, OSBL, PSST, PZ0,                   &
+               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, OSBL, PSST, PZ0SLB,                &
                PZ, PXU, KLVL, PTKE, PT, PQ, PLMO, PZF, PDZ, PDZF, PP,                      &
                K2M, PT2M, PQ2M, PHU2M, PZON10M, PMER10M, PWIND10M, PWIND10M_MAX,           &
                PT2M_MIN, PT2M_MAX, PHU2M_MIN, PHU2M_MAX,                                   &
-               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                PPEW_A_COEF, PPEW_B_COEF,                                                   &
                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                HTEST                                                                       )
@@ -36,6 +36,7 @@ SUBROUTINE COUPLING_SEAWAT_SBL_n(HPROGRAM, HCOUPLING, HSURF,                    
 !!      S. Riette   06/2009 Initialisation of XT, PQ, XU and XTKE on canopy levels
 !!      S. Riette   10/2009 Iterative computation of XZ0
 !!      S. Riette   01/2010 Use of interpol_sbl to compute 10m wind diagnostic
+!!      B. Decharme  04/2013 new coupling variables
 !----------------------------------------------------------------
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
@@ -63,6 +64,7 @@ IMPLICIT NONE
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
                                               ! 'I' : implicit
+ REAL,                INTENT(IN)  :: PTIMEC    ! cumulated time since beginning of simulation
  CHARACTER(LEN=1),    INTENT(IN)  :: HSURF     ! 
 INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,             INTENT(IN)  :: KMONTH    ! current month (UTC)
@@ -107,12 +109,12 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                    
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 LOGICAL, INTENT(IN) :: OSBL
 REAL, DIMENSION(KI), INTENT(IN) :: PSST
-REAL, DIMENSION(KI), INTENT(INOUT) :: PZ0
+REAL, DIMENSION(KI), INTENT(INOUT) :: PZ0SLB
 REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PZ
 REAL, DIMENSION(KI,KLVL), INTENT(INOUT) :: PXU
 INTEGER, INTENT(IN) :: KLVL
@@ -141,6 +143,11 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature           
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
@@ -228,7 +235,7 @@ IF (OSBL) THEN
 !
   IF(ANY(PT(:,:) == XUNDEF)) THEN
     CALL INIT_WATER_SBL(KLVL, PPA, PPS, PTA, PQA, PRHOA, PU, PV, PRAIN, PSNOW,     &
-                        PSFTH, PSFTQ, PZREF, PUREF, PSST, PZ0, PZ,                 &
+                        PSFTH, PSFTQ, PZREF, PUREF, PSST, PZ0SLB, PZ,              &
                         PT, PQ, PXU, PTKE, PP)
   ENDIF
 !
@@ -305,26 +312,26 @@ END IF
 !              ------------
 !
 IF (HSURF=='S') THEN
-  CALL COUPLING_SEAFLUX_n(HPROGRAM, GCOUPLING,                                             &
+  CALL COUPLING_SEAFLUX_n(HPROGRAM, GCOUPLING, PTIMEC,                                     &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
              ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2, HSV,                   &
              PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,                     &
              PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
-             PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &
+             PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &
              ZPEW_A_COEF, ZPEW_B_COEF,                                                     &
              ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
              'OK'                                                                          )
 ELSEIF (HSURF=='W') THEN
-  CALL COUPLING_WATFLUX_n(HPROGRAM, GCOUPLING,                                             &
+  CALL COUPLING_WATFLUX_n(HPROGRAM, GCOUPLING, PTIMEC,                                     &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
              ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2, HSV,                   &
              PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,                     &
              PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
-             PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &
+             PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &
              ZPEW_A_COEF, ZPEW_B_COEF,                                                     &
              ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
              'OK'                                                                          )
@@ -336,7 +343,7 @@ ELSEIF (HSURF=='F') THEN
               ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2, HSV,                   &
               PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,                     &
               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
-              PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                             &
+              PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &
               ZPEW_A_COEF, ZPEW_B_COEF,                                                     &
               ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
               'OK'                                                                          )

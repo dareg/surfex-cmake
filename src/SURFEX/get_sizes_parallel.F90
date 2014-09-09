@@ -1,6 +1,8 @@
 SUBROUTINE GET_SIZES_PARALLEL(KPROC,KSIZE,KPROCMIN,KSIZE_TASK,OSHADOWS)
 !
-
+!
+! Modified by B. Decharme  (08/2013): bug in KSIZE_TASK
+!
 ! Modif Matthieu Lafaysse 04/2014
 ! For shadows routines, we need strictly rectangular subdomains
 
@@ -100,7 +102,7 @@ ELSE
   KSIZE_TASK(:) = ISIZE
   IF (INRESTE>0) THEN
     DO J = KPROCMIN+KPROC-INRESTE,KPROCMIN+KPROC-1
-      KSIZE_TASK(MOD(J,KPROC)) = IRESTE     
+      KSIZE_TASK(MOD(J,KPROC-1)) = IRESTE     
     ENDDO
   ENDIF
 

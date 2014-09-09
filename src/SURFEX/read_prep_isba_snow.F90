@@ -37,6 +37,7 @@
 !!      M. Lafaysse 11/2012, snow liquid water content
 !!      M. Lafaysse 11/2012, possibility to prescribe snow depth instead of snow water equivalent
 !!      M Lafaysse 04/2014 : LSNOW_PREP_PERM
+!      B. Decharme  07/2013 ES snow grid layer can be > to 3 (default 12)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -152,16 +153,7 @@ IF (LNAM_READ) THEN
   !
   IF (CSNOW=='D95' .OR. CSNOW=='EBA') NSNOW_LAYER = 1
   !
-  IF ((CSNOW=='3-L' .OR. CSNOW=='CRO') .AND. NSNOW_LAYER<=2) NSNOW_LAYER = 3
-  !
-  IF (CSNOW=='3-L' .AND. NSNOW_LAYER>3) THEN
-    NSNOW_LAYER = 3
-    WRITE(ILUOUT,*) '------------------------------------'
-    WRITE(ILUOUT,*) 'With ISBA-ES, number of snow layers '
-    WRITE(ILUOUT,*) 'cannot be more than 3.              '
-    WRITE(ILUOUT,*) 'So it is forced to 3 here.          '
-    WRITE(ILUOUT,*) '------------------------------------'
-  ENDIF
+  IF ((CSNOW=='3-L' .OR. CSNOW=='CRO') .AND. NSNOW_LAYER<=2) NSNOW_LAYER = 12
   !
   IF (NSNOW_LAYER > NSNOW_LAYER_MAX) THEN
     WRITE(ILUOUT,*) '------------------------------------'
@@ -211,10 +203,12 @@ IF (LNAM_READ) THEN
   ALLOCATE(XRSNOW_p(NSNOW_LAYER))
   ALLOCATE(XTSNOW_p(NSNOW_LAYER))
   ALLOCATE(XLWCSNOW_p(NSNOW_LAYER))
+  ALLOCATE(XAGESNOW_p(NSNOW_LAYER))
   !
-  XWSNOW_p=XWSNOW(1:NSNOW_LAYER)
-  XRSNOW_p=XRSNOW(1:NSNOW_LAYER)
-  XTSNOW_p=XTSNOW(1:NSNOW_LAYER)
+  XWSNOW_p  =XWSNOW(1:NSNOW_LAYER)
+  XRSNOW_p  =XRSNOW(1:NSNOW_LAYER)
+  XTSNOW_p  =XTSNOW(1:NSNOW_LAYER)
+  XAGESNOW_p=XAGESNOW(1:NSNOW_LAYER)
   XLWCSNOW_p=XLWCSNOW(1:NSNOW_LAYER)
   !
 
@@ -237,12 +231,10 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (NSNOW_LAYER))
     ALLOCATE(XSG2SNOW_p (NSNOW_LAYER))
     ALLOCATE(XHISTSNOW_p(NSNOW_LAYER))
-    ALLOCATE(XAGESNOW_p (NSNOW_LAYER))
     !
     XSG1SNOW_p =XSG1SNOW (1:NSNOW_LAYER)
     XSG2SNOW_p =XSG2SNOW (1:NSNOW_LAYER)
     XHISTSNOW_p=XHISTSNOW(1:NSNOW_LAYER)
-    XAGESNOW_p =XAGESNOW (1:NSNOW_LAYER)
     !
     DO JLAYER=1,NSNOW_LAYER
       IF ((XSG1SNOW_p (JLAYER)==XUNDEF .OR. XSG2SNOW_p(JLAYER)==XUNDEF .OR. &
@@ -263,7 +255,6 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (0))
     ALLOCATE(XSG2SNOW_p (0))
     ALLOCATE(XHISTSNOW_p(0))
-    ALLOCATE(XAGESNOW_p (0))
     !
   ENDIF
   !

@@ -4,7 +4,8 @@
                          PCG, PCGMAX, PCT, PFROZEN1,                             &
                          PD_G, PTG, PWG, PWGI, KWG_LAYER,                        &
                          PHCAPSOILZ, PCONDDRYZ, PCONDSLDZ,                       &
-                         PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, PSOILHCAPZ         )  
+                         PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, PSOILHCAPZ,        &
+                         PFWTD, PWTD)
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -52,13 +53,15 @@
 !!                  08/25/02      (Boone)   DIF option code only
 !!                  25/05/08     (Decharme) Add Flood properties
 !!                  03/08/11     (Decharme) Optimization
+!!                     04/13     (Decharme) good soil moisture extrapolation computation
+!!                  23/07/13     (Decharme) Surface / Water table depth coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,       ONLY : XCL, XCI, XRHOLW, XRHOLI, XPI, XDAY, XCONDI, XTT, XLMTT, XG
-USE MODD_ISBA_PAR,   ONLY : XCONDWTR, XWGMIN
+USE MODD_ISBA_PAR,   ONLY : XCONDWTR, XWGMIN, XWTD_MAXDEPTH
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -69,22 +72,24 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
- CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
+CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
 !                                             ! 'NP89' :  Noilhan and Planton 
 !                                             !  (1989: McCumber-Pielke (1981) and
 !                                             !  Clapp and Hornberger (1978))
 !                                             ! 'PL98' Method of Johansen (1975) as
 !                                             ! presented by Peters-Lidard (JAS: 1998)
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
+CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
 !                                               ! MLCH' = include the insulating effect of leaf
 !                                               !         litter/mulch on the surface thermal cond.
 !                                               ! 'DEF' = no mulch effect
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PCV
+REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PCV, PFWTD, PWTD
 !                                      Soil and vegetation parameters
 !                                      PVEG = fraction of vegetation
 !                                      PCV  = the heat capacity of the vegetation
+!                                      PFWTD= grid-cell fraction of water table to rise
+!                                      PWTD = water table depth
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHCAPSOILZ, PCONDDRYZ, PCONDSLDZ, PD_G 
 !                                    PHCAPSOILZ = soil heat capacity [J/(K m3)]
@@ -132,7 +137,7 @@ REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZMATPOT
 !                                           ZMATPOT    = soil matric potential (m)
 !
 REAL                         :: ZFROZEN2DF, ZUNFROZEN2DF, ZCONDSATDF, ZLOG_CONDI, ZLOG_CONDWTR, &
-                                ZSATDEGDF, ZKERSTENDF, ZWORK1, ZWORK2, ZWORK3, ZLOG, ZWTOT
+                                ZSATDEGDF, ZKERSTENDF, ZWORK1, ZWORK2, ZWORK3, ZLOG, ZWTOT, ZWL
                                 
 !
 REAL, PARAMETER              :: ZVEGMULCH  = 0.10 ! reduction factor for the surface layer
@@ -142,7 +147,7 @@ REAL, PARAMETER              :: ZVEGMULCH  = 0.10 ! reduction factor for the sur
 !
 REAL, DIMENSION(SIZE(PVEG)) :: ZFF, ZCF !heat capacity of the flood
 !
-REAL, DIMENSION(SIZE(PVEG)) :: ZWTD ! Water table depth (m)  
+REAL, DIMENSION(SIZE(PVEG)) :: ZWTD ! Water table depth if no coupling (m)  
 !
 INTEGER :: INI, INL, JJ, JL, IDEPTH
 !
@@ -166,9 +171,14 @@ ZCF    (:)   = XUNDEF
 !               -------------------------------------------
 !
 !
-!Water Table Depth (m) 
-!WTD will be able to evolve according to observations or MODCOU/TRIP inputs 
-ZWTD(:)=100.
+!Water Table depth (m)
+!
+WHERE(PWTD(:)==XUNDEF)
+  ZWTD(:) = XWTD_MAXDEPTH !no water table / surface coupling over some regions
+ELSEWHERE
+  ZWTD(:) = PFWTD(:)/MAX(PWTD(:),0.1) + (1.0-PFWTD(:))/MAX(PWTD(:),XWTD_MAXDEPTH)
+  ZWTD(:) = 1.0/ZWTD(:)
+ENDWHERE
 !
 DO JL=1,INL
    DO JJ=1,INI
@@ -184,8 +194,8 @@ DO JL=1,INL
 !       extrapolation of total matric potential
         ZWORK1         = 0.5*(PD_G(JJ,IDEPTH)+PD_G(JJ,IDEPTH-1))
         ZWORK2         = 0.5*(PD_G(JJ,JL)+PD_G(JJ,JL-1))
-        ZWORK3         = (PMPOTSAT(JJ,JL)-ZMATPOT(JJ,IDEPTH))/MAX(1.E-6,ZWTD(JJ)-ZWORK1)
-        ZMATPOT(JJ,JL) = PMPOTSAT(JJ,JL)-ZWORK3*MAX(0.0,ZWTD(JJ)-ZWORK2)
+        ZWORK3         = MAX(0.0,(ZWTD(JJ)-ZWORK2)/(ZWORK2-ZWORK1))
+        ZMATPOT(JJ,JL) = (PMPOTSAT(JJ,JL)+ZWORK3*ZMATPOT(JJ,IDEPTH))/(1.0+ZWORK3)
 !
 !       total soil water content computation
         ZWORK1      = MAX(1.0,ZMATPOT(JJ,JL)/PMPOTSAT(JJ,JL))
@@ -194,12 +204,13 @@ DO JL=1,INL
         ZWTOT       = MAX(XWGMIN,ZWTOT)
 !
 !       soil liquid water content computation
-        ZMATPOT(JJ,JL) = ZMATPOT(JJ,JL) + XLMTT*MIN(0.0,PTG(JJ,JL)-XTT)/(XG*PTG(JJ,JL))
+        ZMATPOT(JJ,JL) = MIN(PMPOTSAT(JJ,JL),XLMTT*(PTG(JJ,JL)-XTT)/(XG*PTG(JJ,JL)))
 !        
         ZWORK1      = MAX(1.0,ZMATPOT(JJ,JL)/PMPOTSAT(JJ,JL))
         ZLOG        = LOG(ZWORK1)/PBCOEF(JJ,JL)
-        PWG (JJ,JL) = PWSAT(JJ,JL)*EXP(-ZLOG)
-        PWG (JJ,JL) = MAX(XWGMIN,PWG(JJ,JL))
+        ZWL         = PWSAT(JJ,JL)*EXP(-ZLOG)
+        ZWL         = MAX(ZWL,XWGMIN)
+        PWG (JJ,JL) = MIN(ZWL,ZWTOT )
 !        
 !       soil ice computation        
         PWGI(JJ,JL) = MAX(0.0,ZWTOT-PWG(JJ,JL))

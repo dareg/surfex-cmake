@@ -22,6 +22,7 @@ SUBROUTINE INIT_PGD_SURF_ATM(HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      B. Decharme  04/2013 new coupling variables
 !!------------------------------------------------------------------
 !
 !
@@ -58,6 +59,7 @@ REAL,             DIMENSION(0,1):: ZDIR_ALB  ! direct albedo for each band
 REAL,             DIMENSION(0,1):: ZSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(0)  :: ZEMIS     ! emissivity
 REAL,             DIMENSION(0)  :: ZTSRAD    ! radiative temperature
+REAL,             DIMENSION(0)  :: ZTSURF    ! radiative temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -68,7 +70,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',0,ZHOOK_HANDLE)
                       0,0,1,                                     &
                       YSV,ZCO2,ZRHOA,                            &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &
-                      ZEMIS,ZTSRAD,                              &
+                      ZEMIS,ZTSRAD,ZTSURF,                       &
                       KYEAR, KMONTH, KDAY, PTIME,                &
                       HATMFILE,HATMFILETYPE, 'OK'                )  
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',1,ZHOOK_HANDLE)

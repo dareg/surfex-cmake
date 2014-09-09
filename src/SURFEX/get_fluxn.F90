@@ -1,6 +1,7 @@
 !     #########
       SUBROUTINE GET_FLUX_n(HPROGRAM,KI,PRN,PH,PLE,PLEI,PGFLUX,PT2M,PQ2M,   &
-                            PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET,PCD )  
+                            PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET,PCD,&  
+                            PEVAP, PSUBL                                    )  
 !     ########################################
 !
 !!****  *GET_FLUX_n* - routine to get some surface fields
@@ -29,6 +30,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -41,8 +43,8 @@ USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX, &
                                    XAVG_T2M, XAVG_Q2M, XAVG_HU2M,        &
                                    XAVG_ZON10M, XAVG_MER10M, XAVG_CD,    &
                                    LSURF_BUDGET, N2M, XAVG_LEI, LCOEF,   &
-                                   XAVG_LWD, XAVG_LWU, XAVG_SWD, XAVG_SWU  
-!
+                                   XAVG_LWD, XAVG_LWU, XAVG_SWD,         &
+                                   XAVG_SWU, XAVG_EVAP, XAVG_SUBL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -52,8 +54,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),    INTENT(IN)     :: HPROGRAM
-INTEGER,             INTENT(IN)     :: KI        ! Number of points
+CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
+INTEGER,              INTENT(IN)     :: KI        ! Number of points
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PRN       ! Net radiation at surface    (W/m2)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PH        ! Sensible heat flux          (W/m2)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PLE       ! Total Latent heat flux      (W/m2)
@@ -64,11 +66,11 @@ REAL, DIMENSION(KI),  INTENT(OUT)    :: PQ2M      ! Air humidity at 2 meters    
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PHU2M     ! Air relative humidity at 2 meters (-)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZON10M   ! zonal Wind at 10 meters     (m/s)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PMER10M   ! meridian Wind at 10 meters  (m/s)
-!
-REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFLWNET   ! LW net at the surface
-REAL, DIMENSION(KI),  INTENT(OUT) :: PSURFSWNET   ! SW net at the surface
-!
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PSURFLWNET   ! LW net at the surface
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PSURFSWNET   ! SW net at the surface
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PCD       ! exchange coeficient at the surface
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PEVAP     ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PSUBL     ! Sublimation (kg/m2/s)
 !
 !
 !*       0.2   Declarations of local variables
@@ -88,16 +90,20 @@ IF (LSURF_BUDGET)      THEN
         PLE       = XAVG_LE 
         PLEI      = XAVG_LEI 
         PGFLUX    = XAVG_GFLUX 
-        PSURFLWNET=XAVG_LWD-XAVG_LWU
-        PSURFSWNET=XAVG_SWD-XAVG_SWU
+        PSURFLWNET= XAVG_LWD-XAVG_LWU
+        PSURFSWNET= XAVG_SWD-XAVG_SWU
+        PEVAP     = XAVG_EVAP
+        PSUBL     = XAVG_SUBL
    ELSE 
-        PRN      = XUNDEF
-        PH       = XUNDEF
-        PLE      = XUNDEF
-        PLEI     = XUNDEF
-        PGFLUX   = XUNDEF
-        PSURFLWNET=XUNDEF
-        PSURFSWNET=XUNDEF   
+        PRN       = XUNDEF
+        PH        = XUNDEF
+        PLE       = XUNDEF
+        PLEI      = XUNDEF
+        PGFLUX    = XUNDEF
+        PSURFLWNET= XUNDEF
+        PSURFSWNET= XUNDEF  
+        PEVAP     = XUNDEF
+        PSUBL     = XUNDEF        
 ENDIF           
 !
 IF (N2M>0)      THEN 

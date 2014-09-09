@@ -1,6 +1,7 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_WATER(PTSTEP, PRN, PH, PLE, PLEI, PGFLUX, &
-                                            PSWD, PSWU, PLWD, PLWU, PFMU, PFMV  )  
+       SUBROUTINE DIAG_SURF_BUDGETC_WATER(PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
+                                            PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,&
+                                            PEVAP, PSUBL                       )  
 !     #########################################################################
 !
 !!****  *DIAG_SURF_BUDGETC_WATER * - Computes cumulated diagnostics over water
@@ -25,8 +26,8 @@
 !!------------------------------------------------------------------
 ! 
 USE MODD_DIAG_WATFLUX_n, ONLY : XRNC, XHC, XLEC, XGFLUXC, XSWDC,  &
-                                  XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,&
-                                  XLEIC  
+                                XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,&
+                                XLEIC, XEVAPC, XSUBLC  
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -42,6 +43,8 @@ REAL, DIMENSION(:), INTENT(IN) :: PH       ! sensible heat flux                 
 REAL, DIMENSION(:), INTENT(IN) :: PLE      ! total latent heat flux                (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PLEI     ! sublimation latent heat flux          (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PGFLUX   ! storage flux                          (W/m2)
+REAL, DIMENSION(:), INTENT(IN) :: PEVAP    ! total evaporation                     (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN) :: PSUBL    ! sublimation                           (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSWD     ! total incoming short wave radiation (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSWU     ! total upward short wave radiation (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PLWD     ! Downward long wave radiation (W/m2)
@@ -73,10 +76,15 @@ XRNC(:) = XRNC(:) + PRN(:) * PTSTEP
 !
 XHC(:) = XHC(:) + PH(:) * PTSTEP 
 !
-!* latent heat flux
+!* latent heat flux (J/m2)
 !
 XLEC (:) = XLEC (:) + PLE (:) * PTSTEP 
 XLEIC(:) = XLEIC(:) + PLEI(:) * PTSTEP 
+!
+!* evaporation and sublimation (kg/m2)
+!
+XEVAPC(:) = XEVAPC(:) + PEVAP(:) * PTSTEP
+XSUBLC(:) = XSUBLC(:) + PSUBL(:) * PTSTEP
 !
 !* storage flux
 !
@@ -85,8 +93,8 @@ XGFLUXC(:) = XGFLUXC(:) + PGFLUX(:) * PTSTEP
 !* wind stress
 !
 XFMUC(:) = XFMUC(:) + PFMU(:) * PTSTEP 
-!
 XFMVC(:) = XFMVC(:) + PFMV(:) * PTSTEP
+!
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -28,6 +28,8 @@ SUBROUTINE UNPACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
 !!      A.L. Gibelin 06/2009 : Soil carbon variables for CNT option
 !!      A.L. Gibelin 07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
+!!      B. Decharme  06/2013 : add lateral drainage flux diag for DIF
+!!                             water table / surface coupling
 !!
 !!------------------------------------------------------------------
 !
@@ -60,15 +62,15 @@ USE MODD_PACK_ISBA, ONLY :   LBLOCK_SIMPLE, LBLOCK_0, TBLOCK_SIMPLE, TBLOCK_0, X
                              XP_ALBNIR_DRY, XP_ALBVIS_DRY, XP_ALBUV_DRY,                       &
                              XP_ALBNIR_WET, XP_ALBVIS_WET, XP_ALBUV_WET,                       &
                              XP_ALBNIR_SOIL, XP_ALBVIS_SOIL, XP_ALBUV_SOIL,                    &
-                             XP_CLAY, XP_SAND, XP_LAT, XP_LON,                                 &
+                             XP_CLAY, XP_SAND, XP_LAT, XP_LON, XP_FWTD, XP_WTD,                &
                              XP_BIOMASS, XP_RESP_BIOMASS,                                      &
                              XP_LITTER, XP_SOILCARB, XP_LIGNIN_STRUC,                          &
                              XP_CE_NITRO, XP_CF_NITRO, XP_CNA_NITRO, XP_BSLAI_NITRO,           &
                              TP_SEED,TP_REAP,XP_IRRIG,XP_WATSUP,XP_LIRRIDAY,XP_THRESHOLD,      &
                              XP_LIRRIGATE, XP_D_ICE,XP_KSAT_ICE,XP_MUF,XP_FSAT,                &
-                             XP_FFLOOD, XP_Z0FLOOD, XP_PIFLOOD,  XP_INCREASE, XP_TURNOVER,     &
+                             XP_FFLOOD, XP_PIFLOOD,  XP_INCREASE, XP_TURNOVER,                 &
                              XP_PSN, XP_PSNG, XP_PSNV, XP_PSNV_A, XP_FF, XP_FFG, XP_FFV,       &
-                             XP_CPS, XP_LVTT, XP_LSTT, XP_DIR_ALB_WITH_SNOW,                   &
+                             XP_CPS, XP_LVTT, XP_LSTT, XP_DIR_ALB_WITH_SNOW, XP_TOPQS,         &
                              XP_SCA_ALB_WITH_SNOW, XP_ALBF, XP_EMISF, XP_ICE_STO, XP_FFROZEN
 
 USE MODD_AGRI,     ONLY :  LAGRIP
@@ -83,7 +85,7 @@ USE MODD_ISBA_n,   ONLY : TSNOW, XWR, XTG, XWG, XWGI, XRESA, XLAI, XAN, XANFM,  
                             XBIOMASS, XRESP_BIOMASS, XINCREASE, XTURNOVER, XFAPARC,     &
                             CRESPSL, XLITTER, XSOILCARB, XLIGNIN_STRUC, XFAPIRC,        &
                             XCE_NITRO, XCF_NITRO, XCNA_NITRO, XBSLAI_NITRO,             &
-                            LFLOOD, XZ0_FLOOD, XPCPS, XPLVTT, XPLSTT, XICE_STO
+                            XPCPS, XPLVTT, XPLSTT, XICE_STO
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -171,17 +173,13 @@ IF (NPATCH==1) THEN
   IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
      TSNOW%HEAT      (:, :, 1) = XP_SNOWHEAT   (:, :)
      TSNOW%EMIS      (:, 1)    = XP_SNOWEMIS   (:)
+     TSNOW%AGE       (:, :, 1) = XP_SNOWAGE    (:, :)
   END IF
 
   IF (TSNOW%SCHEME=='CRO') THEN
      TSNOW%GRAN1     (:, :, 1) = XP_SNOWGRAN1   (:, :)
      TSNOW%GRAN2     (:, :, 1) = XP_SNOWGRAN2   (:, :)
      TSNOW%HIST      (:, :, 1) = XP_SNOWHIST    (:, :)
-     TSNOW%AGE       (:, :, 1) = XP_SNOWAGE     (:, :)
-  END IF
-!
-  IF(LFLOOD)THEN
-     XZ0_FLOOD       (:,1)     = XP_Z0FLOOD    (:)
   END IF
   !
   IF(LGLACIER)THEN
@@ -325,7 +323,8 @@ ELSE
     DO JK=1,SIZE(XP_SNOWHEAT,2)
       DO JJ=1,KSIZE
         JI                              = KMASK         (JJ)
-        TSNOW%HEAT      (JI, JK, KPATCH) = XP_SNOWHEAT   (JJ, JK)
+        TSNOW%HEAT      (JI, JK, KPATCH) = XP_SNOWHEAT  (JJ, JK)
+        TSNOW%AGE       (JI, JK, KPATCH) = XP_SNOWAGE   (JJ, JK)
       ENDDO
     ENDDO
     DO JJ=1,KSIZE
@@ -341,17 +340,9 @@ ELSE
         TSNOW%GRAN1     (JI, JK, KPATCH) = XP_SNOWGRAN1   (JJ, JK)
         TSNOW%GRAN2     (JI, JK, KPATCH) = XP_SNOWGRAN2   (JJ, JK)
         TSNOW%HIST      (JI, JK, KPATCH) = XP_SNOWHIST    (JJ, JK)
-        TSNOW%AGE       (JI, JK, KPATCH) = XP_SNOWAGE     (JJ, JK)
       ENDDO
     END DO
   END IF
-  !
-  IF(LFLOOD)THEN
-    DO JJ=1,KSIZE
-      JI                    = KMASK     (JJ)
-      XZ0_FLOOD(JI, KPATCH) = XP_Z0FLOOD(JJ)
-    END DO
-  END IF  
   !
   IF(LGLACIER)THEN
     DO JJ=1,KSIZE
@@ -444,7 +435,6 @@ XP_SCA_ALB_WITH_SNOW=> NULL()
 !
 XP_FFLOOD       => NULL()
 XP_PIFLOOD      => NULL()
-XP_Z0FLOOD      => NULL()
 XP_FF           => NULL()
 XP_FFG          => NULL()
 XP_FFV          => NULL()
@@ -463,6 +453,9 @@ XP_SNOWHIST     => NULL()
 XP_SNOWAGE      => NULL()
 !
 XP_ICE_STO      => NULL()
+!
+XP_FWTD         => NULL()
+XP_WTD          => NULL()
 !
 XP_HCAPSOIL     => NULL()
 !
@@ -550,6 +543,7 @@ XP_LIGNIN_STRUC => NULL()
 XP_TURNOVER     => NULL()
 !
 XP_FSAT=> NULL()
+XP_TOPQS=> NULL()
 !
 XP_MUF=> NULL()
 !

@@ -4,7 +4,7 @@ SUBROUTINE COUPLING_TEB_OROGRAPHY_n(HPROGRAM, HCOUPLING,                        
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  HTEST                                                                       )  
@@ -32,10 +32,13 @@ SUBROUTINE COUPLING_TEB_OROGRAPHY_n(HPROGRAM, HCOUPLING,                        
 !!      Original    01/2004
 !!      B. Decharme   2008   reset the subgrid topographic effect on the forcing
 !!      J. Escobar  09/2012 SIZE(PTA) not allowed without-interface , replace by KI
+!!      B. Decharme  04/2013 new coupling variables
+!!                           improve forcing vertical shift
 !!-------------------------------------------------------------
 !
-USE MODD_CSTS,   ONLY : XCPD, XRD, XP00
-USE MODD_TEB_n,  ONLY : XZS
+USE MODD_SURF_PAR,ONLY : XUNDEF
+USE MODD_CSTS,    ONLY : XCPD, XRD, XP00
+USE MODD_TEB_n,   ONLY : XZS
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -97,13 +100,18 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                    
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
@@ -123,6 +131,10 @@ REAL, DIMENSION(KI)  :: ZPA    ! Pressure    at forcing height above surface oro
 REAL, DIMENSION(KI)  :: ZPS    ! Pressure    at surface orography
 REAL, DIMENSION(KI)  :: ZQA    ! Humidity    at forcing height above surface orography
 REAL, DIMENSION(KI)  :: ZRHOA  ! Density     at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZLW    ! LW rad      at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZRAIN  ! Rainfall    at forcing height above surface orography
+REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface orography
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
@@ -130,14 +142,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_TEB_OROGRAPHY_N',0,ZHOOK_HANDLE)
 !
-ZPEQ_B_COEF = PPEQ_B_COEF
-ZPET_B_COEF = PPET_B_COEF
+ZPEQ_B_COEF(:) = PPEQ_B_COEF(:)
+ZPET_B_COEF(:) = PPET_B_COEF(:)
 !
 IF(LVERTSHIFT)THEN
-!        
-  CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,ZTA,ZQA,ZPA,ZRHOA)
 !
-  ZPS = ZPA + (PPS - PPA)
+  ZTA  (:) = XUNDEF
+  ZQA  (:) = XUNDEF
+  ZPS  (:) = XUNDEF
+  ZPA  (:) = XUNDEF
+  ZRHOA(:) = XUNDEF
+  ZLW  (:) = XUNDEF
+  ZRAIN(:) = XUNDEF
+  ZSNOW(:) = XUNDEF
+!     
+   CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+                           ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
+!
+   ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
 !
   IF (HCOUPLING=='I') THEN
     ZPEQ_B_COEF = PPEQ_B_COEF + ZQA - PQA
@@ -146,11 +168,14 @@ IF(LVERTSHIFT)THEN
 !
 ELSE
 !
-  ZTA     = PTA
-  ZQA     = PQA
-  ZPS     = PPS
-  ZPA     = PPS
-  ZRHOA   = PRHOA
+  ZTA  (:) = PTA  (:)
+  ZQA  (:) = PQA  (:)
+  ZPS  (:) = PPS  (:)
+  ZPA  (:) = PPS  (:)
+  ZRHOA(:) = PRHOA(:)
+  ZLW  (:) = PLW  (:)
+  ZRAIN(:) = PRAIN(:)
+  ZSNOW(:) = PSNOW(:)
 !
 ENDIF
 !
@@ -159,9 +184,9 @@ ENDIF
                  KI, KSV, KSW,                                                               &
                  PTSUN, PZENITH, PAZIM,                                                      &
                  PZREF, PUREF, XZS, PU, PV, ZQA, ZTA, ZRHOA,PSV, PCO2, HSV,                  &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,                   &
+                 ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                         &
                  'OK'                                                                        )  

@@ -30,6 +30,7 @@
 !!      Original    01/2004 
 !!      Modified    10/2004 by P. Le Moigne: add XZ0REL, XVEGTYPE_PATCH
 !!      Modified    11/2005 by P. Le Moigne: limit length of VEGTYPE_PATCH field names
+!!      Modified    11/2013 by B. Decharme : XPATCH now in writesurf_isban.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,9 +41,9 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA,                       
                               XLAI, XVEG, XZ0,XALBNIR_SOIL,XALBVIS_SOIL,XALBUV_SOIL,&
                               XRSMIN, XGAMMA, XRGL, XCV, XEMIS, XDG, XWRMAX_CF,     &
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
-                              XPATCH, XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,        &
+                              XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,                &
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
-                              XWSAT, XWFC, XWWILT, XRUNOFFD, CSOC, XFRACSOC   
+                              XWSAT, XWFC, XWWILT, XRUNOFFD, LSOC, XFRACSOC   
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -112,16 +113,6 @@ YRECFM='Z0VEG'
 YCOMMENT='surface roughness length (without snow) (M)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-!-------------------------------------------------------------------------------
-!
-!* Fraction for each patch
-!
-IF(.NOT.LFANOCOMPACT.OR.LPREP)THEN
-  YRECFM='PATCH'
-  YCOMMENT='fraction for each patch (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
-ENDIF
 !-------------------------------------------------------------------------------
 !
 !* Soil depth for each patch
@@ -193,7 +184,7 @@ IF(CISBA=='DIF')THEN
 !
 !* SOC fraction for each layer
 !
-  IF(CSOC=='SGH')THEN
+  IF(LSOC)THEN
     DO JL=1,SIZE(XDG,2)
      IF (JL<10) THEN
        WRITE(YRECFM,FMT='(A7,I1)') 'FRACSOC',JL

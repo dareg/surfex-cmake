@@ -63,7 +63,7 @@ TYPE DIAG_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XLEI    ! sublimation latent heat flux     (W/m2) 
   REAL, POINTER, DIMENSION(:,:) :: XGFLUX  ! net soil-vegetation flux         (W/m2)
   REAL, POINTER, DIMENSION(:,:) :: XTS     ! surface temperature              (K)
-  REAL, POINTER, DIMENSION(:,:) :: XTSRAD  ! surface temperature              (K)  
+  REAL, POINTER, DIMENSION(:,:) :: XTSRAD  ! surface radiative temperature    (K)  
   REAL, POINTER, DIMENSION(:,:) :: XT2M    ! temperature at 2 meters          (K)
   REAL, POINTER, DIMENSION(:,:) :: XQ2M    ! humidity    at 2 meters          (kg/kg)
   REAL, POINTER, DIMENSION(:,:) :: XHU2M   ! relative humidity at 2 meters    (-)
@@ -106,7 +106,6 @@ TYPE DIAG_ISBA_t
   REAL, POINTER, DIMENSION(:)   :: XAVG_LEI      ! sublimation latent heat flux     (W/m2) 
   REAL, POINTER, DIMENSION(:)   :: XAVG_GFLUX    ! net soil-vegetation flux         (W/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_TS       ! surface temperature              (K)
-  REAL, POINTER, DIMENSION(:)   :: XAVG_TSRAD    ! surface temperature              (K)  
   REAL, POINTER, DIMENSION(:)   :: XAVG_T2M      ! temperature at 2 meters          (K)
   REAL, POINTER, DIMENSION(:)   :: XAVG_T2M_MIN  ! Minimum temperature at 2 meters          (K)
   REAL, POINTER, DIMENSION(:)   :: XAVG_T2M_MAX  ! Maximum temperature at 2 meters          (K)
@@ -119,7 +118,7 @@ TYPE DIAG_ISBA_t
   REAL, POINTER, DIMENSION(:)   :: XAVG_MER10M   ! meridian wind at 10 meters       (m/s)
   REAL, POINTER, DIMENSION(:)   :: XAVG_WIND10M  ! wind at 10 meters                (m/s)
   REAL, POINTER, DIMENSION(:)   :: XAVG_WIND10M_MAX  ! Maximum wind at 10 meters    (m/s)
-  REAL, POINTER, DIMENSION(:)   :: XAVG_SFCO2    ! CO2 flux                         (kg/m2/s)
+  REAL, POINTER, DIMENSION(:)   :: XAVG_SFCO2    ! CO2 flux                         (m/s*kg_CO2/kg_air)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LWD      ! downward long wave radiation     (W/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LWU      ! upward long wave radiation       (W/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_SWD      ! downward short wave radiation    (W/m2)
@@ -257,8 +256,6 @@ REAL, POINTER, DIMENSION(:)   :: XAVG_GFLUX=>NULL()
 !$OMP THREADPRIVATE(XAVG_GFLUX)
 REAL, POINTER, DIMENSION(:)   :: XAVG_TS=>NULL()
 !$OMP THREADPRIVATE(XAVG_TS)
-REAL, POINTER, DIMENSION(:)   :: XAVG_TSRAD=>NULL()
-!$OMP THREADPRIVATE(XAVG_TSRAD)
 REAL, POINTER, DIMENSION(:)   :: XAVG_T2M=>NULL()
 !$OMP THREADPRIVATE(XAVG_T2M)
 REAL, POINTER, DIMENSION(:)   :: XAVG_T2M_MIN=>NULL()
@@ -374,7 +371,6 @@ DIAG_ISBA_MODEL(KFROM)%XAVG_LE=>XAVG_LE
 DIAG_ISBA_MODEL(KFROM)%XAVG_LEI=>XAVG_LEI
 DIAG_ISBA_MODEL(KFROM)%XAVG_GFLUX=>XAVG_GFLUX
 DIAG_ISBA_MODEL(KFROM)%XAVG_TS=>XAVG_TS
-DIAG_ISBA_MODEL(KFROM)%XAVG_TSRAD=>XAVG_TSRAD
 DIAG_ISBA_MODEL(KFROM)%XAVG_T2M=>XAVG_T2M
 DIAG_ISBA_MODEL(KFROM)%XAVG_T2M_MIN=>XAVG_T2M_MIN
 DIAG_ISBA_MODEL(KFROM)%XAVG_T2M_MAX=>XAVG_T2M_MAX
@@ -463,7 +459,6 @@ XAVG_LE=>DIAG_ISBA_MODEL(KTO)%XAVG_LE
 XAVG_LEI=>DIAG_ISBA_MODEL(KTO)%XAVG_LEI
 XAVG_GFLUX=>DIAG_ISBA_MODEL(KTO)%XAVG_GFLUX
 XAVG_TS=>DIAG_ISBA_MODEL(KTO)%XAVG_TS
-XAVG_TSRAD=>DIAG_ISBA_MODEL(KTO)%XAVG_TSRAD
 XAVG_T2M=>DIAG_ISBA_MODEL(KTO)%XAVG_T2M
 XAVG_T2M_MIN=>DIAG_ISBA_MODEL(KTO)%XAVG_T2M_MIN
 XAVG_T2M_MAX=>DIAG_ISBA_MODEL(KTO)%XAVG_T2M_MAX
@@ -551,7 +546,6 @@ DO J=1,KMODEL
   NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_LEI)
   NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_GFLUX)
   NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_TS)
-  NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_TSRAD)
   NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_T2M)
   NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_T2M_MIN)
   NULLIFY(DIAG_ISBA_MODEL(J)%XAVG_T2M_MAX)

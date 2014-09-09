@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!!      Modified    09/2013 : S. Senesi : handle seaice scheme
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -69,10 +70,12 @@ IF (ILUDES==0) RETURN
  CALL INIT_NAM_SEAFLUXn
  CALL INIT_NAM_CH_SEAFLUXn
  CALL INIT_NAM_DIAG_OCEANn
+ CALL INIT_NAM_SEAICEn
 !
 WRITE(UNIT=ILUDES,NML=NAM_SEAFLUXn)
 WRITE(UNIT=ILUDES,NML=NAM_CH_SEAFLUXn)
 WRITE(UNIT=ILUDES,NML=NAM_DIAG_OCEANn)
+WRITE(UNIT=ILUDES,NML=NAM_SEAICEn)
 WRITE(UNIT=ILUDES,NML=NAM_SURF_SLT)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_CONF_N',1,ZHOOK_HANDLE)
 !

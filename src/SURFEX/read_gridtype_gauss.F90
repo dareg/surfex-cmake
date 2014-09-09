@@ -75,6 +75,11 @@ REAL,    DIMENSION(KLU) :: ZLON    ! longitudes
 REAL,    DIMENSION(KLU) :: ZLAT_XY ! pseudo-latitudes
 REAL,    DIMENSION(KLU) :: ZLON_XY ! pseudo-longitudes
 REAL,    DIMENSION(KLU) :: ZMESH_SIZE ! Mesh size
+!                                                                 _____ Sup
+REAL,    DIMENSION(KLU) :: ZLATSUP     ! Grid corner Latitude    |     |
+REAL,    DIMENSION(KLU) :: ZLONSUP     ! Grid corner Longitude   |     |
+REAL,    DIMENSION(KLU) :: ZLATINF     ! Grid corner Latitude    |_____|
+REAL,    DIMENSION(KLU) :: ZLONINF     ! Grid corner Longitude  Inf
 !
 INTEGER                 :: ILUOUT
 !---------------------------------------------------------------------------
@@ -107,13 +112,19 @@ ENDIF
  CALL READ_SURF(HPROGRAM,'LAT_G_XY',ZLAT_XY(:),KRESP,HDIR=HDIR)
  CALL READ_SURF(HPROGRAM,'LON_G_XY',ZLON_XY(:),KRESP,HDIR=HDIR)
  CALL READ_SURF(HPROGRAM,'MESHGAUSS',ZMESH_SIZE(:),KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'LONINF',ZLONINF(:),KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'LATINF',ZLATINF(:),KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'LONSUP',ZLONSUP(:),KRESP,HDIR=HDIR)
+ CALL READ_SURF(HPROGRAM,'LATSUP',ZLATSUP(:),KRESP,HDIR=HDIR)
+
 !---------------------------------------------------------------------------
 !
 !*       4.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
  CALL PUT_GRIDTYPE_GAUSS(ZGRID_PAR,INLATI,ZLAPO,ZLOPO,ZCODIL,INLOPA, &
-                          KLU,ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE    )  
+                          KLU,ZLAT,ZLON,ZLAT_XY,ZLON_XY,ZMESH_SIZE,  & 
+                          ZLONINF,ZLATINF,ZLONSUP,ZLATSUP            )  
 !
 DEALLOCATE(INLOPA)
 !---------------------------------------------------------------------------

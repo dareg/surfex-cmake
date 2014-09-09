@@ -43,7 +43,10 @@
 !!    -------------
 !     Original    09/2011 
 !     C. de Munck   02/2013  irrigation (drip irrigation)
-!
+!     B. decharme 04/2013 : Variables required in TEB to allow coupling with AROME/ALADIN/ARPEGE
+!                           phasing call isba
+!                           calculation of vegetation CO2 flux
+!                           dummy for water table / surface coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -57,8 +60,8 @@ USE MODD_TEB_n,                ONLY: LECOCLIMAP, XCOVER, XT_ROOF, XD_ROOF, &
 USE MODD_TEB_GRID_n,           ONLY: XLAT, XLON
 USE MODD_TEB_VEG_n,            ONLY: CPHOTO, CC1DRY, NNBIOMASS, CRESPSL, &
                                      CALBEDO, CSOILFRZ, CDIFSFCOND, CCPSURF,  &
-                                     CSNOWRES, XCGMAX, CISBA
-USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, CSOC_GR, LTR_ML_GR,             &
+                                     CSNOWRES, XCGMAX, CISBA, LNITRO_DILU
+USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, LTR_ML_GR,                      &
                                      CISBA_GR, CRUNOFF_GR, CSCOND_GR,         &
                                      CKSAT_GR, CHORT_GR,                      &
                                      NLAYER_GR, NLAYER_HORT_GR, NLAYER_DUN_GR,&
@@ -145,7 +148,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GREENROOF         ! net radiation ove
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GREENROOF          ! sensible heat flux over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GREENROOF         ! latent heat flux over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_GREENROOF      ! flux through the greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2                ! flux of greenroof CO2       (kg/m2/s)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2                ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP_GREENROOF       ! total evaporation over greenroofs (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GREENROOF         ! friction flux (m2/s2)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GREENROOF         ! greenroof aerodynamical conductance
@@ -169,9 +172,14 @@ LOGICAL                              :: OGLACIER            ! True = Over perman
 !                                                             initialise WGI=WSAT,
 !                                                             Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                             ! False = No specific treatment
-REAL, DIMENSION(0)                   :: PSODELX             ! Pulsation for each layer (Only used if LTEMP_ARP=True)
-REAL, DIMENSION(SIZE(PPS))           :: PMUF                ! fraction of the grid cell reached by the rainfall
-REAL, DIMENSION(SIZE(PPS))           :: PFSAT               ! Topmodel saturated fraction
+REAL, DIMENSION(0)                   :: ZSODELX             ! Pulsation for each layer (Only used if LTEMP_ARP=True)
+REAL, DIMENSION(SIZE(PPS))           :: ZMUF                ! fraction of the grid cell reached by the rainfall
+REAL, DIMENSION(SIZE(PPS))           :: ZFSAT               ! Topmodel saturated fraction
+REAL, DIMENSION(SIZE(PPS),NLAYER_GR) :: ZTOPQS              ! Topmodel (SGH not used in TEB) lateral subsurface flow by layer
+REAL, DIMENSION(SIZE(PPS))           :: ZQSB                ! Topmodel (SGH not used in TEB) output lateral subsurface
+REAL, DIMENSION(SIZE(PPS))           :: ZFWTD               ! grid-cell fraction of water table to rise
+REAL, DIMENSION(SIZE(PPS))           :: ZWTD                ! water table depth from TRIP or MODCOU
+!
 REAL, DIMENSION(SIZE(PPS))           :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
 REAL, DIMENSION(SIZE(PPS),NNBIOMASS) :: ZRESP_BIOMASS_INST  ! instantaneous biomass respiration (kgCO2/kgair m/s)
 !
@@ -228,6 +236,7 @@ REAL, DIMENSION(SIZE(PPS))   :: ZLES
 REAL, DIMENSION(SIZE(PPS))   :: ZLER
 REAL, DIMENSION(SIZE(PPS))   :: ZLETR
 REAL, DIMENSION(SIZE(PPS))   :: ZEVAP
+REAL, DIMENSION(SIZE(PPS))   :: ZSUBL
 REAL, DIMENSION(SIZE(PPS))   :: ZGFLUX
 REAL, DIMENSION(SIZE(PPS))   :: ZRESTORE
 REAL, DIMENSION(SIZE(PPS))   :: ZUSTAR
@@ -263,6 +272,8 @@ REAL, DIMENSION(SIZE(PPS)) :: ZIRRIG_FLUX
 REAL, DIMENSION(0,0,0)     :: ZLITTER
 REAL, DIMENSION(0,0)       :: ZSOILCARB, ZLIGNIN_STRUC, ZTURNOVER
 !
+REAL, DIMENSION(SIZE(PPS)) :: ZSNDRIFT
+!
 !  surfaces relative fractions
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZFFG
@@ -286,7 +297,6 @@ REAL, DIMENSION(SIZE(PPS)) :: ZWATSUP
 REAL, DIMENSION(SIZE(PPS)) :: ZTHRESHOLDSPT
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIGATE
 LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIDAY
-!
 !
 !  variables for deep soil
 !
@@ -313,6 +323,8 @@ TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
 INTEGER                    :: ILU
 !
+LOGICAL :: GAGRI_TO_GRASS
+!
 !Snow options
 LOGICAL :: GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH
 CHARACTER(3) :: YSNOWMETAMO,YSNOWRAD
@@ -333,8 +345,15 @@ HRAIN     = 'DEF'
 OFLOOD    = .FALSE.
 OTEMP_ARP = .FALSE.
 OGLACIER  = .FALSE.
-PMUF      = 0.
-PFSAT     = 0.
+ZMUF      = 0.
+ZFSAT     = 0.
+ZTOPQS    = 0.
+ZQSB      = 0.
+ZFWTD     = 0.
+ZWTD      = XUNDEF
+ZSNDRIFT  = 0.
+!
+GAGRI_TO_GRASS = .FALSE.
 !
 ! Snow options
 GSNOWDRIFT=.TRUE.
@@ -382,6 +401,15 @@ ZGAMMAT = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
+!* Variables required in TEB to allow coupling
+!  with AROME/ALADIN/ARPEGE as LE or EVAP
+!
+ZLEI  = 0.0 ! sublimation heat flux (W/m2)
+ZSUBL = 0.0 ! sublimation (kg/m2/s)
+ZTS   = 0.0 ! surface temperature (K) (non-radiative)
+!
+!-------------------------------------------------------------------------------
+!
 !*      9.     Treatment of green areas
 !              ------------------------
 !
@@ -400,10 +428,10 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
 !
- CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR, CSOC_GR, &
+ CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR,     &
           HRAIN, CHORT_GR, CC1DRY, CSCOND_GR, TSNOW%SCHEME, &
           CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TPTIME, OFLOOD, &
-          OTEMP_ARP, OGLACIER, PTSTEP, HIMPLICIT_WIND, &
+          OTEMP_ARP, OGLACIER, PTSTEP, HIMPLICIT_WIND, GAGRI_TO_GRASS,&
           GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,           &
           YSNOWMETAMO,YSNOWRAD,                                    &          
           XCGMAX, PZREF, PUREF, ZDIRCOSZW, PTA,         &
@@ -422,11 +450,11 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX,&
           XT2AMAX, XABC, XDG, XDZG, XDZDIF, NWG_LAYER, XROOTFRAC,  &
           XWFC, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,        &
-          XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, PMUF, ZFF,&
+          XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, ZMUF, ZFF,&
           ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &
-          ZLEIFLOOD, PSODELX, XLAT, XLON, XTG, XWG, XWGI, XPCPS,      &
-          XPLVTT, XPLSTT, XWR, XRESA, XANFM, PFSAT, TSNOW%ALB(:,1),   &
+          ZLEIFLOOD, ZSODELX, XLAT, XLON, XTG, XWG, XWGI, XPCPS,      &
+          XPLVTT, XPLSTT, XWR, XRESA, XANFM, ZFSAT, TSNOW%ALB(:,1),   &
           TSNOW%WSNOW(:,:,1), TSNOW%HEAT(:,:,1), TSNOW%RHO(:,:,1),    &
           TSNOW%GRAN1(:,:,1), TSNOW%GRAN2(:,:,1), TSNOW%HIST(:,:,1),  &
           TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
@@ -442,7 +470,8 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          PDEEP_FLUX, PIRRIG_GREENROOF                                )  
+          PDEEP_FLUX, PIRRIG_GREENROOF,                               &
+          ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT                  )  
 !
 PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
 PDRAIN_GREENROOF(:)  = ZDRAIN(:)
@@ -466,6 +495,7 @@ END IF
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT') THEN
   CALL VEGETATION_EVOL(CISBA_GR, CPHOTO, CRESPSL, CALBEDO, .FALSE., LTR_ML_GR,&
+                       LNITRO_DILU, GAGRI_TO_GRASS,                        &
                        PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, 1,    &
                        TPTIME%TIME, XLAT, PRHOA, XDG, XDZG, NWG_LAYER,     & 
                        XTG, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,          &
@@ -483,7 +513,9 @@ END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2(:)=0.
+PSFCO2    (:)=0.
+ZRESP_ECO (:)=0.
+ZRESP_AUTO(:)=0.
 !
 IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
   ! faire intervenir le type de vegetation du greenroof ? (CTYP_GR)
@@ -494,7 +526,8 @@ IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
                      ZLITTER, ZLIGNIN_STRUC , ZSOILCARB,            &
                      ZRESP_AUTO, ZRESP_ECO                          ) 
   ! calculation of vegetation CO2 flux
-  PSFCO2(:) = ZGPP(:) - ZRESP_ECO(:)
+  ! Positive toward the atmosphere
+  PSFCO2(:) = ZRESP_ECO(:) - ZGPP(:)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

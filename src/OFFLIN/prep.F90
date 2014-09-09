@@ -30,7 +30,6 @@ PROGRAM PREP
 !!    ------------
 !!
 !!    Original     22/04/04
-!!    B. Decharme      2008 : FA type and TRIP prep coupling
 !!
 !----------------------------------------------------------------------------
 !
@@ -47,9 +46,9 @@ USE MODD_IO_SURF_NC
 USE MODD_SURF_PAR
 USE MODD_SURF_CONF, ONLY : CSOFTWARE
 !
-USE MODD_SURF_ATM, ONLY : LCPL_ESM
-!
 USE MODD_SURF_ATM_n, ONLY : TTIME
+!
+USE MODD_SFX_OASIS, ONLY : LOASIS
 !
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -72,6 +71,12 @@ USE MODI_FANDAR
 !
 USE MODI_GET_LONLAT_n
 USE MODI_FLAG_UPDATE
+USE MODI_ABOR1_SFX
+!
+USE MODI_SFX_OASIS_INIT
+USE MODI_SFX_OASIS_READ_NAM
+USE MODI_SFX_OASIS_PREP
+USE MODI_SFX_OASIS_END
 !
 USE MODN_IO_OFFLINE
 !------------------------------------------------------------------------------
@@ -83,7 +88,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 #ifndef AIX64
-INCLUDE 'omp_lib.h'
+!$ INCLUDE 'omp_lib.h'
+#endif
+!
+#ifndef SFXOASIS
+!$ INCLUDE 'mpif.h'
 #endif
 !
 !*    0.     Declaration of local variables
@@ -96,16 +105,17 @@ REAL               :: ZTIME
 LOGICAL            :: GFOUND
 
 REAL, DIMENSION(0) :: ZZS
- CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
- CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
- CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
- CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
- CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
+CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
+CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
+CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
+CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
 !
 INTEGER, DIMENSION(11)  :: IDATEF
 !
 INTEGER :: JNW, INW
 INTEGER :: IRET, INB
+INTEGER :: ILOCAL_COMM, INFOMPI, INPROC
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -114,8 +124,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.      Set default names and parallelized I/O
 !             --------------------------------------
 !
+#ifdef SFXOASIS
+!Must be call before DRHOOK !
+CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM,'PRE')
+#else
+LOASIS = .FALSE.
+#endif
+!
 IF (LHOOK) CALL DR_HOOK('PREP',0,ZHOOK_HANDLE)
- CALL ALLOC_SURFEX(1)
+!
+IF(LOASIS)THEN
+  CALL MPI_COMM_SIZE(ILOCAL_COMM,INPROC,INFOMPI)
+  IF(INPROC>1)THEN
+    CALL ABOR1_SFX('PREP: FOR PREP"WITH OASIS ONLY 1 PROC MUST BE USED')
+  ENDIF
+ENDIF
+!
+CALL ALLOC_SURFEX(1)
+!
 CSOFTWARE='PREP'
 !
 !     1.1     initializations
@@ -126,17 +152,17 @@ IMONTH   = NUNDEF
 IDAY     = NUNDEF
 ZTIME    = XUNDEF
 !
-LCPL_ESM = .FALSE.
 LPREP    = .TRUE.
 !
 !     1.2     output listing
 !             --------------
 CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
- CALL GET_LUOUT('ASCII ',ILUOUT)
+CALL GET_LUOUT('ASCII ',ILUOUT)
 OPEN (UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 !
 !     1.3     output file name read in namelist
 !             ---------------------------------
+!
  CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
 !
  CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
@@ -162,11 +188,19 @@ CFILEOUT_FA = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
 CFILEOUT_LFI= CPREPFILE
 CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
 !
- CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !
- CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'PRE',.FALSE.)
+CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'PRE',.FALSE.)
 !
- CALL GOTO_SURFEX(1,.TRUE.)
+!*      1.4.   Reads SFX - OASIS coupling namelists
+!              ------------------------------------
+!
+CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF,'PRE')
+!
+!*      1.5.   Allocations of Surfex Types
+!              ---------------------------
+!
+CALL GOTO_SURFEX(1,.TRUE.)
 !
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
@@ -182,7 +216,17 @@ CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
  CALL IO_BUFF_CLEAN_n
  CALL PREP_SURF_ATM(CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
- CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+!*    3.      Preparation of SFX-OASIS grid, mask, areas files
+!             ------------------------------------------------
+!
+IF(LOASIS)THEN
+  CALL SFX_OASIS_PREP(CSURF_FILETYPE)
+ENDIF
+!
+!*    4.      Store of surface physiographic fields
+!             -------------------------------------
+!
+CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !* opens the file
 IF (CSURF_FILETYPE=='FA    ') THEN
@@ -228,7 +272,7 @@ END IF
 IF (CSURF_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
 !
 !
-!*    3.     Close parallelized I/O
+!*    4.     Close parallelized I/O
 !            ----------------------
 !
 WRITE(ILUOUT,*) ' '
@@ -243,7 +287,7 @@ WRITE(*,*) '    -----------------------'
 !
 CLOSE(ILUOUT)
 !
- CALL DEALLOC_SURFEX
+CALL DEALLOC_SURFEX
 !
 IF (ASSOCIATED(NWORK)) DEALLOCATE(NWORK)
 IF (ASSOCIATED(XWORK)) DEALLOCATE(XWORK)
@@ -256,6 +300,12 @@ IF (ASSOCIATED(NWORK2_FULL)) DEALLOCATE(NWORK2_FULL)
 IF (ASSOCIATED(XWORK2_FULL)) DEALLOCATE(XWORK2_FULL)
 !
 IF (LHOOK) CALL DR_HOOK('PREP',1,ZHOOK_HANDLE)
+!
+! * OASIS must be finalized after the last DR_HOOK call
+!
+IF(LOASIS)THEN
+  CALL SFX_OASIS_END
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

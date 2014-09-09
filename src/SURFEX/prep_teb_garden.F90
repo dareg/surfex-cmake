@@ -117,25 +117,25 @@ IF (CPHOTO/='NON' .AND. CPHOTO/='AGS' .AND. CPHOTO/='LST')  &
 ! If whole ice reservoir is empty (grib from ecmwf case) and surface temperature is
 ! lower than -10°C, then ice content is maximum and water content minimum
 !
-   IF (ALL(XWGI(:,:)==0.)) THEN
-      WHERE(XTG(:,1:SIZE(XWG,2)) < XTT-10.)
-         XWGI(:,:) = XWSAT(:,:)-XWGMIN
-         XWG (:,:) = XWGMIN
-      END WHERE
-   ENDIF
+IF (ALL(XWGI(:,:)==0.)) THEN
+   WHERE(XTG(:,1:SIZE(XWG,2)) < XTT-10.)
+       XWGI(:,:) = XWSAT(:,:)-XWGMIN
+       XWG (:,:) = XWGMIN
+   END WHERE
+ENDIF
 !
 ! No ice for force restore third layer:
 IF (CISBA == '3-L') THEN
-      WHERE(XWG(:,3) /= XUNDEF)
+      WHERE(XWG(:,3)/=XUNDEF.AND.XWGI(:,3)/=XUNDEF)
         XWG(:,3)  = MIN(XWG(:,3)+XWGI(:,3),XWSAT(:,3))
         XWGI(:,3) = 0.
       END WHERE
 ENDIF
 !
 ! Total water content should not exceed saturation:
-   WHERE(XWG(:,:) /= XUNDEF .AND. (XWG(:,:) + XWGI(:,:)) > XWSAT(:,:) )
-      XWGI(:,:) = XWSAT(:,:) - XWG(:,:)
-   END WHERE
+WHERE(XWG(:,:) /= XUNDEF .AND. (XWG(:,:) + XWGI(:,:)) > XWSAT(:,:) )
+     XWGI(:,:) = XWSAT(:,:) - XWG(:,:)
+END WHERE
 !
 !-------------------------------------------------------------------------------------
 !

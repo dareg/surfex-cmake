@@ -68,24 +68,21 @@ TYPE TEB_GREENROOF_OPTIONS_t
   REAL, POINTER, DIMENSION(:)          :: XSOILGRID_GR        ! Soil layer grid as reference for DIF
 !-------------------------------------------------------------------------------
 !
-! - SGH scheme
+! - SGH scheme and vertical hydrology
 !                                                     
   CHARACTER(LEN=4)                :: CRUNOFF_GR      ! surface runoff formulation for green roofs
 !                                                    ! 'WSAT'
 !                                                    ! 'DT92'
 !                                                    ! 'SGH ' Topmodel
-  CHARACTER(LEN=3)                :: CTOPREG_GR      ! Wolock and McCabe (2000) linear regression for Topmodel
-!                                                    ! 'DEF' = Reg
-!                                                    ! 'NON' = no Reg  
   CHARACTER(LEN=3)                :: CKSAT_GR        ! ksat
 !                                                    ! 'DEF' = default value 
 !                                                    ! 'SGH' = profil exponentiel
   CHARACTER(LEN=3)                :: CHORT_GR        ! Horton runoff
 !                                                    ! 'DEF' = no Horton runoff
 !                                                    ! 'SGH' = Horton runoff
-  CHARACTER(LEN=3)               :: CSOC_GR          ! soil organic carbon effect
-!                                                   ! 'DEF' = default value 
-!                                                   ! 'SGH' = SOC profil
+  LOGICAL                         :: LSOC_GR         ! soil organic carbon effect
+!                                                    ! False = default value 
+!                                                    ! True = SOC profil
 !
 !-------------------------------------------------------------------------------
 !                                 
@@ -662,16 +659,14 @@ REAL, POINTER, DIMENSION(:)       :: XSNOWFREE_ALB_VEG=>NULL()
 REAL, POINTER, DIMENSION(:)       :: XSNOWFREE_ALB_SOIL=>NULL()
 !$OMP THREADPRIVATE(XSNOWFREE_ALB_SOIL)
 !
-!SGH scheme
+!SGH scheme and vertical hydrology
 !
- CHARACTER(LEN=3), POINTER         :: CTOPREG_GR=>NULL()
-!$OMP THREADPRIVATE(CTOPREG_GR)
- CHARACTER(LEN=3), POINTER         :: CKSAT_GR=>NULL()
+CHARACTER(LEN=3), POINTER         :: CKSAT_GR=>NULL()
 !$OMP THREADPRIVATE(CKSAT_GR)
- CHARACTER(LEN=3), POINTER         :: CHORT_GR=>NULL()
+CHARACTER(LEN=3), POINTER         :: CHORT_GR=>NULL()
 !$OMP THREADPRIVATE(CHORT_GR)
- CHARACTER(LEN=3), POINTER         :: CSOC_GR=>NULL()
-!$OMP THREADPRIVATE(CSOC_GR)
+LOGICAL, POINTER                  :: LSOC_GR=>NULL()
+!$OMP THREADPRIVATE(LSOC_GR)
 !
 REAL, POINTER, DIMENSION(:)       :: XD_ICE=>NULL()
 !$OMP THREADPRIVATE(XD_ICE)
@@ -705,11 +700,10 @@ CISBA_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CISBA_GR
 LTR_ML_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%LTR_ML_GR
 CRUNOFF_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CRUNOFF_GR
 CSCOND_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CSCOND_GR
-CTOPREG_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CTOPREG_GR
 CKSAT_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CKSAT_GR
 CHORT_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CHORT_GR
 CTYP_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CTYP_GR
-CSOC_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CSOC_GR
+LSOC_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%LSOC_GR
 NLAYER_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%NLAYER_GR
 NLAYER_HORT_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%NLAYER_HORT_GR
 NLAYER_DUN_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%NLAYER_DUN_GR
@@ -731,10 +725,9 @@ ENDDO
 TEB_GREENROOF_OPTIONS_MODEL(:)%LPAR_GREENROOF=.TRUE.
 TEB_GREENROOF_OPTIONS_MODEL(:)%CISBA_GR=' '
 TEB_GREENROOF_OPTIONS_MODEL(:)%LTR_ML_GR=.FALSE.
-TEB_GREENROOF_OPTIONS_MODEL(:)%CSOC_GR=' '
+TEB_GREENROOF_OPTIONS_MODEL(:)%LSOC_GR=.FALSE.
 TEB_GREENROOF_OPTIONS_MODEL(:)%CRUNOFF_GR=' '
 TEB_GREENROOF_OPTIONS_MODEL(:)%CSCOND_GR=' '
-TEB_GREENROOF_OPTIONS_MODEL(:)%CTOPREG_GR=' '
 TEB_GREENROOF_OPTIONS_MODEL(:)%CKSAT_GR=' '
 TEB_GREENROOF_OPTIONS_MODEL(:)%CHORT_GR=' '
 TEB_GREENROOF_OPTIONS_MODEL(:)%CTYP_GR=' '

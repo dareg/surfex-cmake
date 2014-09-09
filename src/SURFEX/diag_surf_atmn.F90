@@ -23,6 +23,7 @@ SUBROUTINE DIAG_SURF_ATM_n(HPROGRAM)
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2008 : cumulated fluxes
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
@@ -63,7 +64,9 @@ USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, LT2MMW, L2M_MIN_ZS, LSURF_BUDGET, LCOEF, LS
                                   XAVG_T2M_MAX, XAVG_LEIC, XHU2M_MIN_TILE,       &
                                   XHU2M_MAX_TILE, XAVG_HU2M_MIN, XAVG_HU2M_MAX,  &
                                   XWIND10M_TILE, XWIND10M_MAX_TILE,              &
-                                  XAVG_WIND10M, XAVG_WIND10M_MAX  
+                                  XAVG_WIND10M, XAVG_WIND10M_MAX,                &
+                                  XEVAP_TILE, XEVAPC_TILE, XAVG_EVAP, XAVG_EVAPC,&
+                                  XSUBL_TILE, XSUBLC_TILE, XAVG_SUBL, XAVG_SUBLC                                  
 !
 USE MODI_DIAG_NATURE_n 
 USE MODI_DIAG_SEA_n 
@@ -71,7 +74,7 @@ USE MODI_DIAG_INLAND_WATER_n
 USE MODI_DIAG_TOWN_n 
 USE MODI_AVERAGE_DIAG
 !
-USE MODI_FORCING_VERT_SHIFT
+USE MODI_MINZS_VERT_SHIFT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -208,7 +211,9 @@ CALL AVERAGE_DIAG(N2M, LT2MMW, LSURF_BUDGET, LSURF_BUDGETC, LCOEF, LSURF_VARS,  
                     XAVG_T2M_MAX, XAVG_LEIC,                             &
                     XHU2M_MIN_TILE, XHU2M_MAX_TILE, XAVG_HU2M_MIN,       &
                     XAVG_HU2M_MAX, XWIND10M_TILE, XWIND10M_MAX_TILE,     &
-                    XAVG_WIND10M, XAVG_WIND10M_MAX                       )  
+                    XAVG_WIND10M, XAVG_WIND10M_MAX,                      &
+                    XEVAP_TILE, XEVAPC_TILE, XAVG_EVAP, XAVG_EVAPC,      &
+                    XSUBL_TILE, XSUBLC_TILE, XAVG_SUBL, XAVG_SUBLC       )                    
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Quantities at 2 meters above the minimum orography of the grid mesh
@@ -227,8 +232,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',0,ZHOOK_HANDLE)
 !
-CALL FORCING_VERT_SHIFT(XZS,XMIN_ZS,XAVG_T2M,XAVG_Q2M,XPS,XRHOA, &
-                            XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,ZPS,ZRHOA)  
+CALL MINZS_VERT_SHIFT(XZS,XMIN_ZS,XAVG_T2M,XAVG_Q2M,XPS,XRHOA, &
+                      XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,ZPS,ZRHOA)  
 XAVG_HU2M_MIN_ZS = XAVG_HU2M
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',1,ZHOOK_HANDLE)
@@ -280,6 +285,8 @@ REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_H        ! sensible heat flux (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_LE       ! total latent heat flux (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_LEI      ! sublimation latent heat flux (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_GFLUX    ! storage flux (W/m2)
+REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_EVAP     ! total evapotranspiration (kg/m2/s)
+REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_SUBL     ! sublimation (kg/m2/s)
 !
 REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_SWD      ! short wave incoming radiation (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(1)) :: ZP_SWU      ! short wave outgoing radiation (W/m2)
@@ -295,6 +302,8 @@ REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_HC       ! Cumulated sensible heat flux (W
 REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_LEC      ! Cumulated total latent heat flux (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_LEIC     ! Cumulated sublimation latent heat flux (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_GFLUXC   ! Cumulated storage flux (W/m2)
+REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_EVAPC    ! Cumulated total evapotranspiration (kg/m2)
+REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_SUBLC    ! Cumulated sublimation (kg/m2)
 REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_SWDC     ! Cumulated short wave incoming radiation (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_SWUC     ! Cumulated short wave outgoing radiation (W/m2)
 REAL, DIMENSION(KSIZE*KFACT(2)) :: ZP_LWDC     ! Cumulated long wave incoming radiation (W/m2)
@@ -343,7 +352,8 @@ IF (KTILE==1) THEN
                   ZP_FMUC, ZP_FMVC, ZP_T2M_MIN,         &
                   ZP_T2M_MAX, ZP_LEIC, ZP_HU2M_MIN,     &
                   ZP_HU2M_MAX, ZP_WIND10M,              &
-                  ZP_WIND10M_MAX                        )   
+                  ZP_WIND10M_MAX,                       &
+                  ZP_EVAP, ZP_EVAPC, ZP_SUBL, ZP_SUBLC  )   
   !
 ELSEIF (KTILE==2) THEN
   !
@@ -360,7 +370,8 @@ ELSEIF (KTILE==2) THEN
                            ZP_FMUC, ZP_FMVC, ZP_T2M_MIN,        &
                            ZP_T2M_MAX, ZP_LEIC, ZP_HU2M_MIN,    &
                            ZP_HU2M_MAX, ZP_WIND10M,             &
-                           ZP_WIND10M_MAX                       )   
+                           ZP_WIND10M_MAX,                      &
+                           ZP_EVAP, ZP_EVAPC, ZP_SUBL, ZP_SUBLC  )   
   !
 ELSEIF (KTILE==3) THEN
   !
@@ -377,7 +388,8 @@ ELSEIF (KTILE==3) THEN
                      ZP_FMUC, ZP_FMVC, ZP_T2M_MIN,        &
                      ZP_T2M_MAX, ZP_LEIC, ZP_HU2M_MIN,    &
                      ZP_HU2M_MAX, ZP_WIND10M,             &
-                     ZP_WIND10M_MAX                       )   
+                     ZP_WIND10M_MAX,                      &
+                     ZP_EVAP, ZP_EVAPC, ZP_SUBL, ZP_SUBLC )   
   !
 ELSEIF (KTILE==4) THEN
   !
@@ -394,7 +406,8 @@ ELSEIF (KTILE==4) THEN
                    ZP_FMUC, ZP_FMVC, ZP_T2M_MIN,        &
                    ZP_T2M_MAX, ZP_LEIC, ZP_HU2M_MIN,    &
                    ZP_HU2M_MAX, ZP_WIND10M,             &
-                   ZP_WIND10M_MAX                       )  
+                   ZP_WIND10M_MAX,                      &
+                   ZP_EVAP, ZP_EVAPC, ZP_SUBL, ZP_SUBLC )  
   !
 ENDIF
 !
@@ -406,6 +419,8 @@ IF (LSURF_BUDGET) THEN
    XLE_TILE      (KMASK(JJ),KTILE)  = ZP_LE       (JJ)
    XLEI_TILE     (KMASK(JJ),KTILE)  = ZP_LEI      (JJ)
    XGFLUX_TILE   (KMASK(JJ),KTILE)  = ZP_GFLUX    (JJ)
+   XEVAP_TILE    (KMASK(JJ),KTILE)  = ZP_EVAP     (JJ)
+   XSUBL_TILE    (KMASK(JJ),KTILE)  = ZP_SUBL     (JJ)
    XSWD_TILE     (KMASK(JJ),KTILE)  = ZP_SWD      (JJ)
    XSWU_TILE     (KMASK(JJ),KTILE)  = ZP_SWU      (JJ)
    XLWD_TILE     (KMASK(JJ),KTILE)  = ZP_LWD      (JJ)
@@ -426,6 +441,8 @@ IF (LSURF_BUDGETC) THEN
    XLEC_TILE      (KMASK(JJ),KTILE)  = ZP_LEC       (JJ)
    XLEIC_TILE     (KMASK(JJ),KTILE)  = ZP_LEIC      (JJ)
    XGFLUXC_TILE   (KMASK(JJ),KTILE)  = ZP_GFLUXC    (JJ)
+   XEVAPC_TILE    (KMASK(JJ),KTILE)  = ZP_EVAPC     (JJ)
+   XSUBLC_TILE    (KMASK(JJ),KTILE)  = ZP_SUBLC     (JJ)
    XSWDC_TILE     (KMASK(JJ),KTILE)  = ZP_SWDC      (JJ)
    XSWUC_TILE     (KMASK(JJ),KTILE)  = ZP_SWUC      (JJ)
    XLWDC_TILE     (KMASK(JJ),KTILE)  = ZP_LWDC      (JJ)

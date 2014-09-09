@@ -82,7 +82,7 @@ INTEGER               :: JTIME     ! loop counter on time
 !
 INTEGER                                :: NTIME_GD
 INTEGER, PARAMETER                     :: NGROUND_MAX  = 20
-INTEGER, PARAMETER                     :: NVEGTYPE_MAX = 12
+INTEGER, PARAMETER                     :: NVEGTYPE_MAX = 19
 INTEGER, PARAMETER                     :: NTIME_MAX    = 12
 !
 ! type of vegetation

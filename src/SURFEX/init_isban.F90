@@ -3,7 +3,7 @@ SUBROUTINE INIT_ISBA_n    (HPROGRAM,HINIT,OLAND_USE,                    &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                             PEMIS,PTSRAD,                              &
+                             PEMIS,PTSRAD, PTSURF,                      &
                              KYEAR, KMONTH,KDAY, PTIME,                 &
                              HATMFILE,HATMFILETYPE,                     &
                              HTEST                                      )  
@@ -49,22 +49,41 @@ SUBROUTINE INIT_ISBA_n    (HPROGRAM,HINIT,OLAND_USE,                    &
 !!      B. Decharme    07/11 : read pgd+prep
 !!      R. Alkama      05/12 : new carbon spinup
 !!      J.Escobar      11/13 : add USE MODI_DEFAULT_CROCUS
+!!      B. Decharme  04/2013 new coupling variables
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_COVER_n, ONLY : XDATA_VEGTYPE, XDATA_NATURE
+!
+USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                          &
+                                XDATA_ALBNIR_VEG, XDATA_ALBVIS_VEG,               &
+                                XDATA_ALBUV_VEG, XDATA_RSMIN,                     &
+                                XDATA_ROOT_EXTINCTION,XDATA_ROOT_LIN,             &
+                                XDATA_RGL, XDATA_CV, XDATA_GAMMA, XDATA_GMES,     &
+                                XDATA_GC, XDATA_BSLAI, XDATA_SEFOLD, XDATA_LAIMIN,&
+                                XDATA_DMAX, XDATA_STRESS, XDATA_F2I,              &
+                                XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_Z0_O_Z0H, &
+                                XDATA_EMIS_ECO, XDATA_WRMAX_CF,                   &
+                                XDATA_CE_NITRO,XDATA_CF_NITRO,XDATA_CNA_NITRO,    &
+                                XDATA_BSLAI_NITRO,                                &
+                                XDATA_SOILRC_SO2, XDATA_SOILRC_O3, XDATA_RE25,    &
+                                XDATA_GMES_ST, XDATA_BSLAI_ST, XDATA_SEFOLD_ST,   &
+                                XDATA_GC_ST, XDATA_DMAX_ST
+!
 USE MODD_ISBA_n,   ONLY : CROUGH ,CISBA, CPHOTO, CRUNOFF, CALBEDO, CSCOND,    &
                           CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES, CRESPSL,    &
                           NNLITTER, NNLITTLEVS, NNSOILCARB, NPATCH,           &
                           TSNOW, TTIME, XTSTEP, XOUT_TSTEP,                   &
-                          LTRIP, LFLOOD, LGLACIER, LVEGUPD, LCANOPY_DRAG,     &
+                          LGLACIER, LVEGUPD, LCANOPY_DRAG,                    &
                           CCPSURF, CHORT, XCGMAX, XCDRAG, CKSAT,              &
-                          CSOC, CTOPREG, CRAIN, LSPINUPCARBS,                 &
-                          LSPINUPCARBW, NNBYEARSOLD, NSPINS, NSPINW,          &
+                          LSOC, CRAIN, LSPINUPCARBS, LSPINUPCARBW,            &
+                          NNBYEARSOLD, NSPINS, NSPINW, LAGRI_TO_GRASS,        &
                           XSPINMAXS, XSPINMAXW, NNBYEARSPINS, NNBYEARSPINW,   &
                           LSNOWDRIFT,LSNOWDRIFT_SUBLIM,LSNOW_ABS_ZENITH,      &
-                          CSNOWMETAMO,CSNOWRAD
+                          CSNOWMETAMO,CSNOWRAD,XCO2_START,XCO2_END,LNITRO_DILU
 !
 USE MODD_CH_ISBA_n,      ONLY : LCH_BIO_FLUX, CCH_DRY_DEP  
 
@@ -75,12 +94,15 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGE
                                   LWATER_BUDGET
 USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET, LSURF_DIAG_ALBEDO, LSURF_MISC_DIF  
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
-USE MODD_AGRI,           ONLY : LAGRIP               
+USE MODD_AGRI,           ONLY : LAGRIP
 !
 USE MODE_TARTES, ONLY : INIT_TARTES
 USE MODE_SNOWCRO_FLANNER, ONLY : READ_FZ06
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
+!
+USE MODD_CO2V_PAR,  ONLY : XMCO2, XSPIN_CO2
+USE MODD_CSTS,      ONLY : XMD
 !
 USE MODI_INIT_IO_SURF_n
 !
@@ -101,6 +123,7 @@ USE MODI_READ_ISBA_DATE
 USE MODI_READ_PGD_ISBA_n
 USE MODI_COMPUTE_ISBA_PARAMETERS
 USE MODI_READ_NAM_PREP_ISBA_n
+USE MODI_INI_DATA_PARAM
 !
 USE MODI_SET_SURFEX_FILEIN
 !
@@ -130,6 +153,8 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+!
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -144,11 +169,13 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: ILUOUT   ! unit of output listing file
+REAL, DIMENSION(KI) :: ZCO2     ! CO2 concentration  (kg/m3)
+REAL                :: ZSPINCO2
+INTEGER             :: ISPINEND
 !
-INTEGER           :: IVERSION       ! surface version
-!
-INTEGER :: IRESP   ! return code
+INTEGER             :: ILUOUT   ! unit of output listing file
+INTEGER             :: IVERSION       ! surface version
+INTEGER             :: IRESP   ! return code
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -178,12 +205,11 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_ISBA(XTSTEP, XOUT_TSTEP,                           &
                      CROUGH,CRUNOFF,CALBEDO,CSCOND,              &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
-                     CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
-                     CTOPREG, CRAIN, CHORT, LFLOOD, LTRIP,       &
-                     LGLACIER, LCANOPY_DRAG, LVEGUPD,            &
-                     LSPINUPCARBS, LSPINUPCARBW,                 &
-                     XSPINMAXS, XSPINMAXW,                       &
-                     NNBYEARSPINS, NNBYEARSPINW                  )
+                     CCPSURF, XCGMAX, XCDRAG, CKSAT, LSOC,       &
+                     CRAIN, CHORT, LGLACIER, LCANOPY_DRAG,       &
+                     LVEGUPD, LSPINUPCARBS, LSPINUPCARBW,        &
+                     XSPINMAXS, XSPINMAXW, XCO2_START, XCO2_END, &
+                     NNBYEARSPINS, NNBYEARSPINW, LNITRO_DILU     )
  !                  
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)                  
@@ -205,13 +231,16 @@ ENDIF
 !
  CALL READ_ISBA_CONF_n(HPROGRAM)
 !
+ CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','ISBA  ','READ ')
+ CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
+ CALL END_IO_SURF_n(HPROGRAM)
 !
 !*       1.     Reading of configuration:
 !               -------------------------
 !
 !* initialization of snow and carbon schemes
 !
-NNBYEARSOLD = 0
+NNBYEARSOLD = 1
 NSPINS      = 1
 NSPINW      = 1
 !
@@ -235,7 +264,6 @@ IF (HINIT=='PRE') THEN
 ELSEIF (HINIT=='ALL') THEN
 !
   CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
-  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
 !
   IF (IVERSION<6) THEN
     CRESPSL='DEF'
@@ -246,6 +274,8 @@ ELSEIF (HINIT=='ALL') THEN
     CALL READ_SURF(HPROGRAM,'NSOILCARB',NNSOILCARB,IRESP)
     IF(IVERSION>=7.AND.(LSPINUPCARBS.OR.LSPINUPCARBW))THEN
       CALL READ_SURF(HPROGRAM,'NBYEARSOLD',NNBYEARSOLD,IRESP)
+    ELSE
+      NNBYEARSOLD=NUNDEF
     ENDIF
   ENDIF
 !
@@ -295,6 +325,11 @@ END SELECT
 !               ---------------------------------
 !
  CALL READ_PGD_ISBA_n(HPROGRAM,OLAND_USE)
+!
+!
+!*       2.2    Check:
+!               ------
+!
 IF ( CPHOTO/='NON' .AND. NPATCH/=12) THEN
   CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND NPATCH')
 ENDIF
@@ -314,9 +349,67 @@ ENDIF
 IF(CRESPSL/='CNT'.AND.LSPINUPCARBS)THEN
   CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CRESPSL AND LSPINUPCARBS (if not CNT must be false)')
 ENDIF
+IF(LSPINUPCARBW.AND.REAL(NNBYEARSPINW)>REAL(NNBYEARSPINS)*0.5)THEN
+  WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  WRITE(ILUOUT,*)'INIT_ISBAN: INCONSISTENCY BETWEEN NNBYEARSPINW AND NNBYEARSPINS'
+  WRITE(ILUOUT,*)'NNBYEARSPINW MUST BE < TO 0.5 * NNBYEARSPINS'
+  WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN NNBYEARSPINW AND NNBYEARSPINS')
+ENDIF
+IF(LSPINUPCARBS.AND.(XCO2_START==XUNDEF.OR.XCO2_END==XUNDEF))THEN
+  WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  WRITE(ILUOUT,*)'INIT_ISBAN: INCONSISTENCY BETWEEN LSPINUPCARBS AND XCO2_START OR XCO2_END'
+  WRITE(ILUOUT,*)'FOR ISBA-CC SPINUP XCO2_START AND XCO2_END MUST BE DEFINED'
+  WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN LSPINUPCARBS AND XCO2_START OR XCO2_END')
+ENDIF
 !
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+!
+!-------------------------------------------------------------------------------
+!
+! During soil carbon spinup with ISBA-CC: 
+!        (1) grass parameters are attributed to all agricultural PFT with atmospheric CO2 concentration 
+!            fixed to Pre-industrial CO2 consentration XCO2_START
+!        (2) Atmospheric CO2 concentration rampin up from XCO2_START to XCO2_END
+!
+ISPINEND=NNBYEARSPINS-NINT(NNBYEARSPINS*XSPIN_CO2)
+!
+LAGRI_TO_GRASS = .FALSE.
+!
+IF ( LSPINUPCARBS .AND. (NNBYEARSOLD <= ISPINEND) ) THEN
+!
+   LAGRI_TO_GRASS = .TRUE.
+!
+   CALL INI_DATA_PARAM(XDATA_VEGTYPE, PSURF=XDATA_NATURE, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI,                   &
+                                  PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
+                                  PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
+                                  PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
+                                  PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
+                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN=XDATA_LAIMIN, PDMAX=XDATA_DMAX,                  &
+                                  PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
+                                  PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
+                                  PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
+                                  PROOT_LIN=XDATA_ROOT_LIN, PROOT_EXTINCTION=XDATA_ROOT_EXTINCTION,              &
+                                  PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
+                                  PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
+                                  PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
+                                  PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST, OAGRI_TO_GRASS=LAGRI_TO_GRASS)
+!
+   ZCO2(:) = PRHOA(:) * XCO2_START * 1.E-6 * XMCO2 / XMD
+!
+ELSEIF(LSPINUPCARBS .AND. (NNBYEARSOLD > ISPINEND) .AND. (NNBYEARSOLD <= NNBYEARSPINS) )THEN
+!
+   ZSPINCO2 = XCO2_START + (XCO2_END-XCO2_START) * REAL(NNBYEARSOLD - ISPINEND) / REAL(NNBYEARSPINS - ISPINEND)
+!
+   ZCO2(:) = PRHOA(:) * ZSPINCO2 * 1.E-6 * XMCO2 / XMD
+!
+ELSE
+!
+   ZCO2(:) = PCO2(:)
+!
+ENDIF
 !
 !-----------------------------------------------------------------------------------------------------
 ! END READ PGD FILE
@@ -327,11 +420,11 @@ IF (OLAND_USE .OR. HINIT=='PGD') THEN
   RETURN
 END IF
 !
- CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
+CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
                              KI,KSV,KSW,                                &
-                             HSV,PCO2,PRHOA,                            &
+                             HSV,ZCO2,PRHOA,                            &
                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                             PEMIS,PTSRAD,                              &
+                             PEMIS,PTSRAD,PTSURF,                       &
                              HTEST                                )
 !
 IF ( CSNOWMETAMO/="B92" ) THEN

@@ -3,7 +3,7 @@ SUBROUTINE INIT_SURF_LANDUSE_n(HPROGRAM,HINIT,OLAND_USE,                  &
                                KI,KSV,KSW,                                &
                                HSV,PCO2,PRHOA,                            &
                                PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                               PEMIS,PTSRAD,                              &
+                               PEMIS,PTSRAD,PTSURF,                       &
                                KYEAR, KMONTH,KDAY, PTIME,                 &
                                HATMFILE,HATMFILETYPE,                     &
                                HTEST                                      )  
@@ -35,6 +35,7 @@ SUBROUTINE INIT_SURF_LANDUSE_n(HPROGRAM,HINIT,OLAND_USE,                  &
 !!    MODIFICATIONS
 !!    -------------
 !!
+!!      modified    06-13  B. Decharme  : New coupling variable
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -81,6 +82,8 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+!
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -143,7 +146,7 @@ IF (.NOT.ASSOCIATED(XPAR_WATSUP)) ALLOCATE(XPAR_WATSUP(ILU,NTIME,NVEGTYPE))
 !* read old patch fraction
 !       
 ALLOCATE(XPATCH_OLD(ILU,NPATCH))       
-YRECFM = 'OLD_PATCH'
+YRECFM = 'PATCH'
  CALL READ_SURF(HPROGRAM,YRECFM,XPATCH_OLD(:,:),IRESP)
 !
 !* read old soil layer thicknesses (m)
@@ -175,7 +178,7 @@ DEALLOCATE(ZWORK)
                              ILU,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                             PEMIS,PTSRAD,                              &
+                             PEMIS,PTSRAD,PTSURF,                       &
                              HTEST                                      )
 !-------------------------------------------------------------------------------
 !                       

@@ -28,6 +28,7 @@ SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,OREAD_PGD, KI, KSV, HSV, KVER
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    09/2009
+!!                  11/2013 (B. Decharme) No exp profile with DIF
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -37,10 +38,10 @@ USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
 USE MODD_TEB_n,                ONLY: TTIME, XGREENROOF
-USE MODD_TEB_VEG_n,       ONLY: CPEDOTF, CPHOTO, NNBIOMASS, CCPSURF
+USE MODD_TEB_VEG_n,       ONLY: CPEDOTF, CPHOTO, NNBIOMASS, CCPSURF 
 USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     &
                                      CISBA_GR, CSCOND_GR, CKSAT_GR, LTR_ML_GR,           &
-                                     XCLAY_GR, XSAND_GR, XOM_GR,                         &
+                                     XCLAY_GR, XSAND_GR, XOM_GR, CRUNOFF_GR,             &
                                      XWWILT, XWFC, XWSAT,                                &
                                      XVEG, XRSMIN, XGAMMA, XRGL, XCV, XLAI,              &
                                      XDG, XZ0, XZ0_O_Z0H, XABC, XPOI,                    &
@@ -81,7 +82,6 @@ USE MODI_CONVERT_PATCH_TEB_GREENROOF
 USE MODI_INIT_FROM_DATA_GREENROOF_n
 USE MODI_INIT_VEG_PGD_GARDEN_n
 USE MODI_EXP_DECAY_SOIL_FR
-USE MODI_EXP_DECAY_SOIL_DIF
 USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -283,6 +283,7 @@ ENDDO
 !
  CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NLAYER_GR, TTIME%TDATE%MONTH,    &
                         XVEGTYPE, XTDEEP, XGAMMAT, CPHOTO, HINIT, LTR_ML_GR,        &
+                        CRUNOFF_GR,                                                 &
                         NNBIOMASS, PCO2, PRHOA, XABC, XPOI,                         &
                         XGMES, XGC, XDMAX, XANMAX, XFZERO, XEPSO, XGAMM, XQDGAMM,   &
                         XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX, XT2AMAX,&
@@ -397,31 +398,10 @@ ENDDO
 !*       6.1    Initialize of the SGH scheme:'
 !               ------------------------------
 !
-IF(CKSAT_GR=='SGH' .AND. HINIT/='PRE')THEN 
-  !
-  ZF (:) = XUNDEF
-  !  
-  !Soil organic carbon effect and/or Exponential decay for DIF option 
-  IF(CISBA_GR=='DIF') THEN
-    ZWORK(:) = XUNDEF
-    ZF(:) = 4.0/MERGE(XDROOT(:),XDG2(:),XDROOT(:)>0.0) 
-  ELSE
-    WHERE (ZF(:)==XUNDEF) ZF(:) =  4.0/XDG(:,2)
-  ENDIF
-  ZF(:)=MIN(ZF(:),XF_DECAY)
-  !
-  IF(CISBA_GR=='DIF') THEN
-    !   
-    ZWORK(:) = MERGE(XDROOT(:),XDG2(:),XDROOT(:)>0.0)      
-    CALL EXP_DECAY_SOIL_DIF(ZF(:),XDG(:,:),NWG_LAYER(:),ZWORK(:),XCONDSAT(:,:))   
-    !Exponential decay for ISBA-FR option
-  ELSE
-    !
-    CALL EXP_DECAY_SOIL_FR(CISBA_GR, ZF(:),XC1SAT(:),XC2REF(:),XDG(:,:),XD_ICE(:),&
-                           XC4REF(:),XC3(:,:),XCONDSAT(:,:),XKSAT_ICE(:))  
-    ! 
-  ENDIF
-  !
+IF(CKSAT_GR=='SGH' .AND. CISBA_GR/='DIF' .AND. HINIT/='PRE')THEN 
+  ZF(:)=MIN(4.0/XDG(:,2),XF_DECAY)
+  CALL EXP_DECAY_SOIL_FR(CISBA_GR, ZF(:),XC1SAT(:),XC2REF(:),XDG(:,:),XD_ICE(:),&
+                         XC4REF(:),XC3(:,:),XCONDSAT(:,:),XKSAT_ICE(:))
 ENDIF
 !
 !-------------------------------------------------------------------------------

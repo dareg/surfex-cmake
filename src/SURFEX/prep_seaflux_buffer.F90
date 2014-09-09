@@ -73,10 +73,11 @@ SELECT CASE(HSURF)
 !      ---------
 !
   CASE('ZS     ')
+    ALLOCATE(PFIELD(NNI,1))
+    PFIELD = 0.0
     SELECT CASE (YINMODEL)
       CASE ('ALADIN')
         CALL READ_BUFFER_ZS(KLUOUT,YINMODEL,ZFIELD)
-        ALLOCATE(PFIELD(NNI,1))
         PFIELD(:,1) = ZFIELD(:)
         DEALLOCATE(ZFIELD)
     END SELECT
@@ -86,14 +87,22 @@ SELECT CASE(HSURF)
 !      --------------------
 !
   CASE('SST    ')
+    ALLOCATE(PFIELD(NNI,1))
+    PFIELD = 0.0
     SELECT CASE (YINMODEL)
       CASE ('ALADIN')
         CALL READ_BUFFER_SST(KLUOUT,YINMODEL,ZFIELD)
-        ALLOCATE(PFIELD(NNI,1))
         PFIELD(:,1) = ZFIELD(:)
         DEALLOCATE(ZFIELD)
     END SELECT
-
+!
+!*      5.  Sea surface salinity and ice fraction
+!           -------------------------------------
+!
+  CASE('SSS    ', 'SIC    ')
+    ALLOCATE(PFIELD(NNI,1))
+    PFIELD = 0.0
+!
 END SELECT
 
 !

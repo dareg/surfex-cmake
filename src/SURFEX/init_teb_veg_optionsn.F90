@@ -29,6 +29,8 @@ SUBROUTINE INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
 !!    -------------
 !!      Original    09/2009
 !!      B. Decharme 07/2011 : read pgd+prep
+!!      B. Decharme 04/2013 : delete CTOPREG option (never used)
+!!                            water table / surface coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,8 +42,8 @@ USE MODD_TYPE_SNOW
 !
 USE MODD_TEB_VEG_n,       ONLY: CROUGH,CISBA,CPEDOTF,LTR_ML,CPHOTO,CRUNOFF,CALBEDO,   &
                                 CSCOND, CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,       &
-                                CRESPSL,NNBIOMASS, CSOC,                              & 
-                                CCPSURF, CHORT, CKSAT, CTOPREG, XCGMAX, XCDRAG
+                                CRESPSL,NNBIOMASS, LSOC,                              & 
+                                CCPSURF, CHORT, CKSAT, XCGMAX, XCDRAG, LNITRO_DILU
 !
 USE MODD_TEB_GARDEN_n,    ONLY: NGROUND_LAYER, XSOILGRID
 
@@ -88,13 +90,15 @@ REAL                              :: ZOUT_TSTEP
  CHARACTER(LEN=3)                  :: YRAIN 
 LOGICAL                           :: GCANOPY_DRAG
 LOGICAL                           :: GGLACIER
-LOGICAL                           :: GTRIP
 LOGICAL                           :: GFLOOD
+LOGICAL                           :: GWTD
 LOGICAL                           :: GVEGUPD
 LOGICAL                           :: GSPINUPCARBS
 LOGICAL                           :: GSPINUPCARBW
 REAL                              :: ZSPINMAXS
 REAL                              :: ZSPINMAXW
+REAL                              :: ZCO2_START
+REAL                              :: ZCO2_END
 INTEGER                           :: INBYEARSPINS
 INTEGER                           :: INBYEARSPINW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -125,12 +129,11 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_ISBA(XTSTEP, ZOUT_TSTEP,                         &
                    CROUGH, CRUNOFF, CALBEDO, CSCOND,           &
                    CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
-                   CCPSURF, XCGMAX, XCDRAG, CKSAT, CSOC,       &
-                   CTOPREG, YRAIN, CHORT, GFLOOD, GTRIP,       &
-                   GGLACIER, GCANOPY_DRAG, GVEGUPD,            &
-                   GSPINUPCARBS, GSPINUPCARBW,                 & 
-                   ZSPINMAXS, ZSPINMAXW,                       &
-                   INBYEARSPINS, INBYEARSPINW                  )
+                   CCPSURF, XCGMAX, XCDRAG, CKSAT, LSOC,       &
+                   YRAIN, CHORT, GGLACIER, GCANOPY_DRAG,       &
+                   GVEGUPD, GSPINUPCARBS, GSPINUPCARBW,        & 
+                   ZSPINMAXS, ZSPINMAXW, ZCO2_START, ZCO2_END, &
+                   INBYEARSPINS, INBYEARSPINW, LNITRO_DILU     )
  !
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)
  !

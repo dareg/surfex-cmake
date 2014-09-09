@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!!      Modified    04/2013, P. Le Moigne: FLake chemistry
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -68,11 +69,11 @@ IF (ILUDES==0) RETURN
 !
  CALL INIT_NAM_FLAKEn
  CALL INIT_NAM_DIAG_FLAKEn
- CALL INIT_NAM_CH_WATFLUXn
+ CALL INIT_NAM_CH_FLAKEn
 !
 WRITE(UNIT=ILUDES,NML=NAM_FLAKEn)
 WRITE(UNIT=ILUDES,NML=NAM_DIAG_FLAKEn)
-WRITE(UNIT=ILUDES,NML=NAM_CH_WATFLUXn)
+WRITE(UNIT=ILUDES,NML=NAM_CH_FLAKEn)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_FLAKE_CONF_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

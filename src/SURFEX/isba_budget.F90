@@ -4,6 +4,7 @@ SUBROUTINE ISBA_BUDGET(HISBA, HSNOW_ISBA, OGLACIER, PTSTEP,    &
                        PWG_INI, PWGI_INI, PWR_INI, PSWE_INI,   & 
                        PRAIN, PSNOW, PEVAP, PDRAIN, PRUNOFF,   &
                        PIFLOOD, PPFLOOD, PICEFLUX, PIRRIG_FLUX,&
+                       PSNDRIFT,                               &
                        PDWG, PDWGI, PDWR, PDSWE, PWATBUD       )
 !     ###############################################################################
 !
@@ -75,6 +76,7 @@ REAL, DIMENSION(:),    INTENT(IN)  :: PIFLOOD   ! Floodplain infiltration       
 REAL, DIMENSION(:),    INTENT(IN)  :: PPFLOOD   ! Floodplain direct precip runoff(kg/m2/s)
 REAL, DIMENSION(:),    INTENT(IN)  :: PICEFLUX  ! Ice flux from Snow reservoir   (kg/m2/s)
 REAL ,DIMENSION(:),    INTENT(IN)  :: PIRRIG_FLUX! additional water flux from irrigation (kg/m2/s)
+REAL ,DIMENSION(:),    INTENT(OUT) :: PSNDRIFT   ! blowing snow sublimation (kg/m2/s)
 ! 
 REAL, DIMENSION(:),    INTENT(OUT) :: PDWG
 REAL, DIMENSION(:),    INTENT(OUT) :: PDWGI
@@ -91,6 +93,7 @@ REAL, DIMENSION(SIZE(PWR)) :: ZICEFLUX
 REAL, DIMENSION(SIZE(PWR)) :: ZSWE_T
 REAL, DIMENSION(SIZE(PWR)) :: ZWG_T
 REAL, DIMENSION(SIZE(PWR)) :: ZWGI_T
+REAL, DIMENSION(SIZE(PWR)) :: ZSNDRIFT
 !
 INTEGER :: INI, INL, INLS
 INTEGER :: JI, JL
@@ -112,6 +115,11 @@ PDWGI(:) = XUNDEF
 PDWR (:) = XUNDEF
 PDSWE(:) = XUNDEF
 !
+IF (HSNOW_ISBA=='3-L'.OR.HSNOW_ISBA=='CRO') THEN
+   ZSNDRIFT(:)=PSNDRIFT(:)
+ELSE
+   ZSNDRIFT(:)=0.0
+ENDIF
 !
 !*      2.0    Comptut isba water budget in kg/m2/s
 !       -------------------------------------------
@@ -163,7 +171,8 @@ IF(LWATER_BUDGET)THEN
   ZINPUT(:)=PRAIN(:)+PSNOW(:)+PIFLOOD(:)+PIRRIG_FLUX(:)
 !
 ! total output water in the system at t
-  ZOUTPUT(:) = PEVAP(:)+PDRAIN(:)+PRUNOFF(:)+PPFLOOD(:)+ZICEFLUX(:)
+  ZOUTPUT(:) = PEVAP  (:)+PDRAIN  (:)+PRUNOFF (:) &
+             + PPFLOOD(:)+ZICEFLUX(:)+ZSNDRIFT(:)
 !
 ! total reservoir time tendencies at "t - (t-1)"
   ZTENDENCY(:) = PDWG(:)+PDWGI(:)+PDWR(:)+PDSWE(:)

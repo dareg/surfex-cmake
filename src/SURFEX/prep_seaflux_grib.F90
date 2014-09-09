@@ -32,7 +32,7 @@ USE MODD_TYPE_DATE_SURF
 USE MODI_PREP_GRIB_GRID
 !
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
-USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE
+USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE, NNI
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -88,7 +88,7 @@ SELECT CASE(HSURF)
     END SELECT
 
 !
-!* 3.  Temperature profiles
+!* 2.  Temperature profiles
 !      --------------------
 !
   CASE('SST    ')
@@ -99,7 +99,14 @@ SELECT CASE(HSURF)
         PFIELD(:,1) = ZFIELD(:)
         DEALLOCATE(ZFIELD)
     END SELECT
-
+!
+!* 3.  Sea surface salinity and ice fraction
+!      -------------------------------------
+!
+  CASE('SSS    ','SIC    ')
+      ALLOCATE(PFIELD(NNI,1))
+      PFIELD = 0.0
+!
 END SELECT
 !
 DEALLOCATE(ZMASK)

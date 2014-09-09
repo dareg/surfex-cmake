@@ -21,6 +21,7 @@ SUBROUTINE DEALLOC_FLAKE_n
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      Modified    04/2013, P. Le Moigne: FLake chemistry and XZ0
 !!------------------------------------------------------------------
 !
 
@@ -38,9 +39,10 @@ USE MODD_FLAKE_n,      ONLY : LCOVER          , XCOVER        , &
                                 XT_BOT        , XT_B1         , &
                                 XCT           , XH_SNOW       , &
                                 XH_ICE        , XH_ML         , &
-                                XH_B1         , XTS             
+                                XH_B1         , XTS           , &
+                                XZ0           
 USE MODD_FLAKE_GRID_n, ONLY : XGRID_PAR, XLAT, XLON, XMESH_SIZE
-USE MODD_CH_WATFLUX_n,   ONLY : XDEP, CCH_NAMES, CSV
+USE MODD_CH_FLAKE_n,   ONLY : XDEP, CCH_NAMES, CSV
 
 
 !
@@ -88,6 +90,7 @@ IF (ASSOCIATED(XH_ICE        ))  DEALLOCATE(XH_ICE        )
 IF (ASSOCIATED(XH_ML         ))  DEALLOCATE(XH_ML         )
 IF (ASSOCIATED(XH_B1         ))  DEALLOCATE(XH_B1         )
 IF (ASSOCIATED(XTS           ))  DEALLOCATE(XTS           )
+IF (ASSOCIATED(XZ0           ))  DEALLOCATE(XZ0           )
 !
 !-------------------------------------------------------------------------------------
 !

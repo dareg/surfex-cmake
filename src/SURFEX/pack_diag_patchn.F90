@@ -25,6 +25,8 @@ SUBROUTINE PACK_DIAG_PATCH_n(KSIZE,KSW)
 !!      Modified    10/2005 by P. Le Moigne: Allocation (not EBA case)
 !!      Modified       2008 by B. Decharme : Allocation for the floodplains
 !!      Modified      04-09 by A.L. Gibelin : Add carbon diagnostics
+!!      B. Decharme 04/2013 DIF lateral subsurface drainage
+!!                          Sublimation diag flux
 !!
 !!------------------------------------------------------------------
 !
@@ -43,12 +45,12 @@ USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW, XP_SMELTFLUX, 
                                   XP_SNOWLIQ, XP_SNOWDZ, XP_SNOWHMASS,          &
                                   XP_RN_ISBA, XP_H_ISBA, XP_LEG_ISBA,           &
                                   XP_LEGI_ISBA, XP_LEV_ISBA, XP_LETR_ISBA,      &
-                                  XP_USTAR_ISBA, XP_LER_ISBA,                   &
+                                  XP_USTAR_ISBA, XP_LER_ISBA, XP_SNDRIFT,       &
                                   XP_LE_ISBA, XP_GFLUX_ISBA, XP_MELTADV,        &
                                   XP_LEI_ISBA, XP_IACAN,                        &
                                   XP_CH, XP_CD, XP_CDN, XP_RI, XP_HU, XP_HUG,   &
                                   XP_RN, XP_H, XP_LEI, XP_LEG,                  &
-                                  XP_LEGI, XP_LEV,                              &
+                                  XP_LEGI, XP_LEV, XP_QSB, XP_SUBL,             &
                                   XP_LES, XP_LER, XP_LETR, XP_EVAP, XP_GFLUX,   &
                                   XP_RESTORE, XP_DRAIN, XP_RUNOFF, XP_MELT,     &
                                   XP_SNOWFREE_ALB, XP_Z0_WITH_SNOW,             &
@@ -147,9 +149,13 @@ XP_GFLUX       => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_EVAP        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+XP_SUBL        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_RESTORE     => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_DRAIN       => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+XP_QSB         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 XP_RUNOFF      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -253,6 +259,8 @@ IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_LESL      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_SNDRIFT   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_CDSNOW    => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_CHSNOW    => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
@@ -301,6 +309,8 @@ ELSE
   XP_GRNDFLUX  => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_LESL      => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNDRIFT   => XBLOCK_0(:,ISIZE_0)  
   ISIZE_0 = ISIZE_0 + 1
   XP_CDSNOW    => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1

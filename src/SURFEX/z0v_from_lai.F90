@@ -4,43 +4,47 @@ MODULE MODI_Z0V_FROM_LAI
 !
 INTERFACE Z0V_FROM_LAI
 !
-    FUNCTION Z0V_FROM_LAI_0D(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_0D(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !
 REAL,                 INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,                 INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:), INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,              INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL                             :: PZ0          ! vegetation roughness
 !
 END FUNCTION Z0V_FROM_LAI_0D
 !
 !
-    FUNCTION Z0V_FROM_LAI_1D(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_1D(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:,:), INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
 !
 END FUNCTION Z0V_FROM_LAI_1D
 !
 !
-    FUNCTION Z0V_FROM_LAI_2D(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_2D(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !
 REAL,   DIMENSION(:,:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:,:),   INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:,:,:), INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,                  INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PZ0  ! vegetation roughness
 !
 END FUNCTION Z0V_FROM_LAI_2D
 !
-    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:),   INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI)) :: PZ0  ! vegetation roughness
 !
@@ -52,7 +56,7 @@ END MODULE MODI_Z0V_FROM_LAI
 !
 
 !   ###########################################################
-    FUNCTION Z0V_FROM_LAI_0D(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_0D(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !   ###########################################################
 !!
 !!    PURPOSE
@@ -86,19 +90,20 @@ END MODULE MODI_Z0V_FROM_LAI
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    25/03/99
-!!      P. Aumond      10/10/2009     Because drag force applied in atmospheric 
-!!                                    model, Z0tree -> z0grass
-!!
+!!      P. Aumond   10/10/2009     Because drag force applied in atmospheric 
+!!                                 model, Z0tree -> z0grass
+!!      R. Alkama    05/2012   : Extantion from 12 to 19 vegtypes 
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW,   &
-                                  NVT_C3, NVT_C4, NVT_IRR,      &
-                                  NVT_CONI, NVT_TREE, NVT_EVER, &
-                                  NVT_TROG, NVT_PARK, NVT_GRAS  
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -111,6 +116,7 @@ IMPLICIT NONE
 REAL,                 INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,                 INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:), INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,              INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL                             :: PZ0          ! vegetation roughness
 !
@@ -139,20 +145,39 @@ IF ( PLAI /= XUNDEF) THEN
 END IF
 !
 ZH(NVT_PARK) = ZLAI / 6.                    ! irr. grassland
-ZH(NVT_C4  ) = MIN(2.5, ZALLEN_H )          ! C4 types
-ZH(NVT_IRR ) = MIN(2.5, ZALLEN_H )          ! irrigated crops (as C4)
 IF (LTREEDRAG) THEN
-  ZH(NVT_TREE) = ZLAI / 6.                  ! forest
-  ZH(NVT_CONI) = ZLAI / 6.                  ! forest
-  ZH(NVT_EVER) = ZLAI / 6.                  ! forest
+  ZH(NVT_TEBD) = ZLAI / 6.                  ! forest
+  ZH(NVT_BONE) = ZLAI / 6.                  ! forest
+  ZH(NVT_TRBE) = ZLAI / 6.                  ! forest
+  ZH(NVT_TRBD) = ZLAI / 6.                  ! forest
+  ZH(NVT_TEBE) = ZLAI / 6.                  ! forest
+  ZH(NVT_TENE) = ZLAI / 6.                  ! forest
+  ZH(NVT_BOBD) = ZLAI / 6.                  ! forest
+  ZH(NVT_BOND) = ZLAI / 6.                  ! forest
+  ZH(NVT_SHRB) = ZLAI / 6.                  ! forest  
 ELSE
-  ZH(NVT_TREE) = PH_TREE                    ! forest
-  ZH(NVT_CONI) = PH_TREE                    ! forest
-  ZH(NVT_EVER) = PH_TREE                    ! forest
+  ZH(NVT_TEBD) = PH_TREE                  ! forest
+  ZH(NVT_BONE) = PH_TREE                  ! forest
+  ZH(NVT_TRBE) = PH_TREE                  ! forest
+  ZH(NVT_TRBD) = PH_TREE                  ! forest
+  ZH(NVT_TEBE) = PH_TREE                  ! forest
+  ZH(NVT_TENE) = PH_TREE                  ! forest
+  ZH(NVT_BOBD) = PH_TREE                  ! forest
+  ZH(NVT_BOND) = PH_TREE                  ! forest
+  ZH(NVT_SHRB) = PH_TREE                  ! forest  
 END IF
 ZH(NVT_GRAS) = ZLAI / 6.                    ! grassland
+ZH(NVT_BOGR) = ZLAI / 6.                    ! boreal grassland
 ZH(NVT_TROG) = ZLAI / 6.                    ! tropical grassland
-ZH(NVT_C3  ) = MIN(1. , ZALLEN_H )          ! cultures
+IF(OAGRI_TO_GRASS)THEN
+  ZH(NVT_C3  ) = ZLAI / 6.
+  ZH(NVT_C4  ) = ZLAI / 6.
+  ZH(NVT_IRR ) = ZLAI / 6.
+ELSE
+  ZH(NVT_C3  ) = MIN(1. , ZALLEN_H )          ! cultures
+  ZH(NVT_C4  ) = MIN(2.5, ZALLEN_H )          ! C4 types
+  ZH(NVT_IRR ) = MIN(2.5, ZALLEN_H )          ! irrigated crops (as C4)
+ENDIF
 ZH(NVT_NO  ) = 0.1                          ! no vegetation (smooth)
 ZH(NVT_ROCK) = 1.                           ! no vegetation (rocks)
 ZH(NVT_SNOW) = 0.01                         ! no vegetation (snow)
@@ -176,7 +201,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_0D',1,ZHOOK_HANDLE)
 END FUNCTION Z0V_FROM_LAI_0D
 !
 !   ###########################################################
-    FUNCTION Z0V_FROM_LAI_1D(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_1D(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !   ###########################################################
 !!
 !!    PURPOSE
@@ -217,10 +242,11 @@ END FUNCTION Z0V_FROM_LAI_0D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW,   &
-                                  NVT_C3, NVT_C4, NVT_IRR,      &
-                                  NVT_CONI, NVT_TREE, NVT_EVER, &
-                                  NVT_TROG, NVT_PARK, NVT_GRAS  
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -233,6 +259,7 @@ IMPLICIT NONE
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:,:), INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
 !
@@ -264,23 +291,42 @@ END WHERE
 !
 !
 ZH(:,NVT_PARK) = ZLAI(:) / 6.                 ! irr. grassland
-ZH(:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:) )       ! C4 types
-ZH(:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:) )       ! irrigated crops (as C4)
 IF (LTREEDRAG) THEN
-  ZH(:,NVT_TREE) = ZLAI(:) / 6.               ! forest
-  ZH(:,NVT_CONI) = ZLAI(:) / 6.               ! forest
-  ZH(:,NVT_EVER) = ZLAI(:) / 6.               ! forest
+  ZH(:,NVT_TEBD) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_BONE) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_TRBE) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_TRBD) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_TEBE) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_TENE) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_BOBD) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_BOND) = ZLAI(:) / 6.         ! forest
+  ZH(:,NVT_SHRB) = ZLAI(:) / 6.         ! forest  
 ELSE
-  ZH(:,NVT_TREE) = PH_TREE(:)                 ! forest
-  ZH(:,NVT_CONI) = PH_TREE(:)                 ! forest
-  ZH(:,NVT_EVER) = PH_TREE(:)                 ! forest
+  ZH(:,NVT_TEBD) = PH_TREE(:)           ! forest
+  ZH(:,NVT_BONE) = PH_TREE(:)           ! forest
+  ZH(:,NVT_TRBE) = PH_TREE(:)           ! forest
+  ZH(:,NVT_TRBD) = PH_TREE(:)           ! forest
+  ZH(:,NVT_TEBE) = PH_TREE(:)           ! forest
+  ZH(:,NVT_TENE) = PH_TREE(:)           ! forest
+  ZH(:,NVT_BOBD) = PH_TREE(:)           ! forest
+  ZH(:,NVT_BOND) = PH_TREE(:)           ! forest
+  ZH(:,NVT_SHRB) = PH_TREE(:)           ! forest  
 END IF
-ZH(:,NVT_GRAS) = ZLAI(:) / 6.                 ! grassland
-ZH(:,NVT_TROG) = ZLAI(:) / 6.                 ! tropical grassland
-ZH(:,NVT_C3  ) = MIN(1. , ZALLEN_H(:) )       ! cultures
-ZH(:,NVT_NO  ) = 0.1                          ! no vegetation (smooth)
-ZH(:,NVT_ROCK) = 1.                           ! no vegetation (rocks)
-ZH(:,NVT_SNOW) = 0.01                         ! no vegetation (snow)
+ZH(:,NVT_GRAS) = ZLAI(:) / 6.           ! grassland
+ZH(:,NVT_BOGR) = ZLAI(:) / 6.           ! boreal grassland
+ZH(:,NVT_TROG) = ZLAI(:) / 6.           ! tropical grassland
+IF(OAGRI_TO_GRASS)THEN
+  ZH(:,NVT_C3  ) = ZLAI(:) / 6.
+  ZH(:,NVT_C4  ) = ZLAI(:) / 6.
+  ZH(:,NVT_IRR ) = ZLAI(:) / 6.
+ELSE
+  ZH(:,NVT_C3  ) = MIN(1. , ZALLEN_H(:) )          ! cultures
+  ZH(:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:) )          ! C4 types
+  ZH(:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:) )          ! irrigated crops (as C4)
+ENDIF
+ZH(:,NVT_NO  ) = 0.1                    ! no vegetation (smooth)
+ZH(:,NVT_ROCK) = 1.                     ! no vegetation (rocks)
+ZH(:,NVT_SNOW) = 0.01                   ! no vegetation (snow)
 !
 ZH(:,:) = MAX(ZH(:,:),0.001)
 !
@@ -301,7 +347,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_1D',1,ZHOOK_HANDLE)
 END FUNCTION Z0V_FROM_LAI_1D
 !
 !   ###########################################################
-    FUNCTION Z0V_FROM_LAI_2D(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_2D(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !   ###########################################################
 !!
 !!    PURPOSE
@@ -341,10 +387,11 @@ END FUNCTION Z0V_FROM_LAI_1D
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW,   &
-                                  NVT_C3, NVT_C4, NVT_IRR,      &
-                                  NVT_CONI, NVT_TREE, NVT_EVER, &
-                                  NVT_TROG, NVT_PARK, NVT_GRAS  
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
@@ -358,6 +405,7 @@ IMPLICIT NONE
 REAL,   DIMENSION(:,:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:,:),   INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:,:,:), INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,                  INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PZ0  ! vegetation roughness
 !
@@ -390,20 +438,39 @@ END WHERE
 !
 !
 ZH(:,:,NVT_PARK) = ZLAI(:,:) / 6.               ! irr. grassland
-ZH(:,:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:,:) )     ! C4 types
-ZH(:,:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:,:) )     ! irrigated crops (as C4)
 IF (LTREEDRAG) THEN
-  ZH(:,:,NVT_TREE) = ZLAI(:,:) / 6.             ! forest
-  ZH(:,:,NVT_CONI) = ZLAI(:,:) / 6.             ! forest
-  ZH(:,:,NVT_EVER) = ZLAI(:,:) / 6.             ! forest
+  ZH(:,:,NVT_TEBD) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_BONE) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_TRBE) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_TRBD) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_TEBE) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_TENE) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_BOBD) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_BOND) = ZLAI(:,:) / 6.         ! forest
+  ZH(:,:,NVT_SHRB) = ZLAI(:,:) / 6.         ! forest  
 ELSE
-  ZH(:,:,NVT_TREE) = PH_TREE(:,:)               ! forest
-  ZH(:,:,NVT_CONI) = PH_TREE(:,:)               ! forest
-  ZH(:,:,NVT_EVER) = PH_TREE(:,:)               ! forest
+  ZH(:,:,NVT_TEBD) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_BONE) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_TRBE) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_TRBD) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_TEBE) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_TENE) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_BOBD) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_BOND) = PH_TREE(:,:)           ! forest
+  ZH(:,:,NVT_SHRB) = PH_TREE(:,:)           ! forest   
 END IF
 ZH(:,:,NVT_GRAS) = ZLAI(:,:) / 6.               ! grassland
+ZH(:,:,NVT_BOGR) = ZLAI(:,:) / 6.               ! boreal grassland
 ZH(:,:,NVT_TROG) = ZLAI(:,:) / 6.               ! tropical grassland
-ZH(:,:,NVT_C3  ) = MIN(1. , ZALLEN_H(:,:) )     ! cultures
+IF(OAGRI_TO_GRASS)THEN
+  ZH(:,:,NVT_C3  ) = ZLAI(:,:) / 6.
+  ZH(:,:,NVT_C4  ) = ZLAI(:,:) / 6.
+  ZH(:,:,NVT_IRR ) = ZLAI(:,:) / 6.
+ELSE
+  ZH(:,:,NVT_C3  ) = MIN(1. , ZALLEN_H(:,:) )          ! cultures
+  ZH(:,:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:,:) )          ! C4 types
+  ZH(:,:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:,:) )          ! irrigated crops (as C4)
+ENDIF
 ZH(:,:,NVT_NO  ) = 0.1                          ! no vegetation (smooth)
 ZH(:,:,NVT_ROCK) = 1.                           ! no vegetation (rocks)
 ZH(:,:,NVT_SNOW) = 0.01                         ! no vegetation (snow)
@@ -431,7 +498,7 @@ END FUNCTION Z0V_FROM_LAI_2D
 !
 !
 !   ###########################################################
-    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !   ###########################################################
 !!
 !!    PURPOSE
@@ -471,10 +538,11 @@ END FUNCTION Z0V_FROM_LAI_2D
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW,   &
-                                  NVT_C3, NVT_C4, NVT_IRR,      &
-                                  NVT_CONI, NVT_TREE, NVT_EVER, &
-                                  NVT_TROG, NVT_PARK, NVT_GRAS  
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
@@ -488,6 +556,7 @@ IMPLICIT NONE
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
 REAL,   DIMENSION(:),   INTENT(IN) :: PVEGTYPE     ! type of vegetation
+LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
 !
@@ -508,20 +577,39 @@ END WHERE
 !
 !
 IF (PVEGTYPE(NVT_PARK)>0.) ZH(NVT_PARK) = PLAI(NVT_PARK) / 6.          ! irr. grasslands
-IF (PVEGTYPE(NVT_C4  )>0.) ZH(NVT_C4  ) = MIN(2.5, ZALLEN_H(NVT_C4) )  ! C4 types
-IF (PVEGTYPE(NVT_IRR )>0.) ZH(NVT_IRR ) = MIN(2.5, ZALLEN_H(NVT_IRR) ) ! irrigated crops (as C4)
 IF (LTREEDRAG) THEN
-  IF (PVEGTYPE(NVT_TREE)>0.) ZH(NVT_TREE) = PLAI(NVT_TREE) / 6.        ! broadleaf forest
-  IF (PVEGTYPE(NVT_CONI)>0.) ZH(NVT_CONI) = PLAI(NVT_CONI) / 6.        ! coniferous forest
-  IF (PVEGTYPE(NVT_EVER)>0.) ZH(NVT_EVER) = PLAI(NVT_EVER) / 6.        ! euqatorial forest
+  IF (PVEGTYPE(NVT_TEBD)>0.) ZH(NVT_TEBD) = PLAI(NVT_TEBD) / 6.        ! broadleaf forest
+  IF (PVEGTYPE(NVT_BONE)>0.) ZH(NVT_BONE) = PLAI(NVT_BONE) / 6.        ! coniferous forest
+  IF (PVEGTYPE(NVT_TRBE)>0.) ZH(NVT_TRBE) = PLAI(NVT_TRBE) / 6.        ! euqatorial forest
+  IF (PVEGTYPE(NVT_TRBD)>0.) ZH(NVT_TRBD) = PLAI(NVT_TRBD) / 6.        ! broadleaf forest
+  IF (PVEGTYPE(NVT_TEBE)>0.) ZH(NVT_TEBE) = PLAI(NVT_TEBE) / 6.        ! coniferous forest
+  IF (PVEGTYPE(NVT_TENE)>0.) ZH(NVT_TENE) = PLAI(NVT_TENE) / 6.        ! euqatorial forest
+  IF (PVEGTYPE(NVT_BOBD)>0.) ZH(NVT_BOBD) = PLAI(NVT_BOBD) / 6.        ! broadleaf forest
+  IF (PVEGTYPE(NVT_BOND)>0.) ZH(NVT_BOND) = PLAI(NVT_BOND) / 6.        ! coniferous forest
+  IF (PVEGTYPE(NVT_SHRB)>0.) ZH(NVT_SHRB) = PLAI(NVT_SHRB) / 6.        ! euqatorial forest  
 ELSE
-  IF (PVEGTYPE(NVT_TREE)>0.) ZH(NVT_TREE) = PH_TREE(NVT_TREE)          ! broadleaf forest
-  IF (PVEGTYPE(NVT_CONI)>0.) ZH(NVT_CONI) = PH_TREE(NVT_CONI)          ! coniferous forest
-  IF (PVEGTYPE(NVT_EVER)>0.) ZH(NVT_EVER) = PH_TREE(NVT_EVER)          ! euqatorial forest
+  IF (PVEGTYPE(NVT_TEBD)>0.) ZH(NVT_TEBD) = PH_TREE(NVT_TEBD)          ! broadleaf forest
+  IF (PVEGTYPE(NVT_BONE)>0.) ZH(NVT_BONE) = PH_TREE(NVT_BONE)          ! coniferous forest
+  IF (PVEGTYPE(NVT_TRBE)>0.) ZH(NVT_TRBE) = PH_TREE(NVT_TRBE)          ! euqatorial forest
+  IF (PVEGTYPE(NVT_TRBD)>0.) ZH(NVT_TRBD) = PH_TREE(NVT_TRBD)          ! broadleaf forest
+  IF (PVEGTYPE(NVT_TEBE)>0.) ZH(NVT_TEBE) = PH_TREE(NVT_TEBE)          ! coniferous forest
+  IF (PVEGTYPE(NVT_TENE)>0.) ZH(NVT_TENE) = PH_TREE(NVT_TENE)          ! euqatorial forest
+  IF (PVEGTYPE(NVT_BOBD)>0.) ZH(NVT_BOBD) = PH_TREE(NVT_BOBD)          ! broadleaf forest
+  IF (PVEGTYPE(NVT_BOND)>0.) ZH(NVT_BOND) = PH_TREE(NVT_BOND)          ! coniferous forest
+  IF (PVEGTYPE(NVT_SHRB)>0.) ZH(NVT_SHRB) = PH_TREE(NVT_SHRB)          ! euqatorial forest  
 END IF
 IF (PVEGTYPE(NVT_GRAS)>0.) ZH(NVT_GRAS) = PLAI(NVT_GRAS) / 6.          ! grassland
+IF (PVEGTYPE(NVT_BOGR)>0.) ZH(NVT_BOGR) = PLAI(NVT_BOGR) / 6.          ! boreal grassland
 IF (PVEGTYPE(NVT_TROG)>0.) ZH(NVT_TROG) = PLAI(NVT_TROG) / 6.          ! tropical grassland
-IF (PVEGTYPE(NVT_C3  )>0.) ZH(NVT_C3  ) = MIN(1. , ZALLEN_H(NVT_C3) )  ! cultures
+IF(OAGRI_TO_GRASS)THEN
+  IF (PVEGTYPE(NVT_C3  )>0.) ZH(NVT_C3  ) = PLAI(NVT_C3)  / 6.  ! cultures
+  IF (PVEGTYPE(NVT_C4  )>0.) ZH(NVT_C4  ) = PLAI(NVT_C4)  / 6.  ! C4 types
+  IF (PVEGTYPE(NVT_IRR )>0.) ZH(NVT_IRR ) = PLAI(NVT_IRR) / 6.  ! irrigated crops (as C4)
+ELSE
+  IF (PVEGTYPE(NVT_C3  )>0.) ZH(NVT_C3  ) = MIN(1. , ZALLEN_H(NVT_C3) )  ! cultures
+  IF (PVEGTYPE(NVT_C4  )>0.) ZH(NVT_C4  ) = MIN(2.5, ZALLEN_H(NVT_C4) )  ! C4 types
+  IF (PVEGTYPE(NVT_IRR )>0.) ZH(NVT_IRR ) = MIN(2.5, ZALLEN_H(NVT_IRR) ) ! irrigated crops (as C4)
+ENDIF
 IF (PVEGTYPE(NVT_NO  )>0.) ZH(NVT_NO  ) = 0.1                          ! no vegetation (smooth)
 IF (PVEGTYPE(NVT_ROCK)>0.) ZH(NVT_ROCK) = 1.                           ! no vegetation (rocks)
 IF (PVEGTYPE(NVT_SNOW)>0.) ZH(NVT_SNOW) = 0.01                         ! no vegetation (snow)

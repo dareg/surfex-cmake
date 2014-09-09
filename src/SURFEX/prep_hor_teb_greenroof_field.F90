@@ -173,7 +173,7 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
   CALL PREP_TEB_GREENROOF_ASCLLV(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_TEB_GREENROOF_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
-ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   ') THEN
+ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR. YFILETYPE=='FA    ') THEN
    CALL PREP_TEB_GREENROOF_EXTERN(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_TEB_GREENROOF_BUFFER(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
@@ -305,7 +305,7 @@ CONTAINS
 !
 SUBROUTINE INIT_FROM_REF_GRID(PGRID1,PT1,PD2,PT2)
 !
-USE MODI_INTERP_GRID
+USE MODI_INTERP_GRID_NAT
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PT1    ! variable profile
 REAL, DIMENSION(:),   INTENT(IN)  :: PGRID1 ! normalized grid
@@ -314,7 +314,6 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PT2    ! variable profile
 !
 INTEGER                                  :: JI, JL  ! loop counter
 REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
-REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
 !
 INTEGER :: ILAYER1, ILAYER2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -322,6 +321,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',0,ZHOOK_HANDLE)
+!
 IF (SIZE(PT1,2)==3) THEN
 !
 !* 1. case with only 3 input levels (typically coming from 'UNIF')
@@ -342,28 +342,24 @@ IF (SIZE(PT1,2)==3) THEN
              ENDIF
           END DO
        END DO 
-       IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',1,ZHOOK_HANDLE)
-    RETURN
 !
-END IF
-!
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ELSE
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !* 2. case with fine grid as input (general case)
 !     ----------------------------
 !
-  ZD2(:,:) = 0.
-  !
-  ZD2(:,1) = PD2(:,1)/2.
-  DO JL=2,SIZE(ZD2,2)
-    ZD2(:,JL) = (PD2(:,JL-1)+PD2(:,JL)) /2.
-  END DO
-  !
   DO JL=1,SIZE(PT1,2)
     ZD1(:,JL) = PGRID1(JL)
   END DO
-  !
-  CALL INTERP_GRID(ZD1,PT1(:,:),ZD2,PT2(:,:))
+!
+  CALL INTERP_GRID_NAT(ZD1,PT1(:,:),PD2,PT2(:,:))
+!
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+END IF
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!  
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',1,ZHOOK_HANDLE)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

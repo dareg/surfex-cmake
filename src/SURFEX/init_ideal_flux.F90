@@ -3,7 +3,7 @@
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
                                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                   PEMIS,PTSRAD,                              &
+                                   PEMIS,PTSRAD,PTSURF,                       &
                                    HTEST                                      )  
 !     ############################################################
 !
@@ -41,6 +41,7 @@
 !!      Original    06/01/95 
 !!      V. Masson      02/03  split the routine in two (initialization here, and run)
 !!      R. Honnert     07/10  allows reading of data in namelist
+!!      B. Decharme  04/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -82,6 +83,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 !
  CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
@@ -183,6 +185,8 @@ PTSRAD   = XTSRAD_t(1)
 PDIR_ALB = XALB
 PSCA_ALB = XALB
 PEMIS    = XEMIS
+!
+PTSURF   = PTSRAD
 !
 !-------------------------------------------------------------------------------
 !

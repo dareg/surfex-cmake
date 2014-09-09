@@ -44,7 +44,8 @@
 !!
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
-!!
+!!    R. Alkama   04/2012  add 6 new tree vegtype (9 instead 3)
+!
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -52,7 +53,10 @@
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_ISBA_n, ONLY : XPAR_VEG, XPAR_LAI
-USE MODD_DATA_COVER_PAR, ONLY : NVT_TREE, NVT_CONI, NVT_EVER, NVEGTYPE, XCDREF
+USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,  &
+                                NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVEGTYPE,  &
+                                XCDREF
+
 !
 USE MODI_VEGTYPE_TO_PATCH 
 !
@@ -174,14 +178,33 @@ SELECT CASE (HSFTYPE)
 
     CASE('TRE','GRT')
       ZWEIGHT(:,:)=0.
-      WHERE (PVEGTYPE(:,NVT_TREE)>0.)
-        ZWEIGHT(:,NVT_TREE)=PVEGTYPE(:,NVT_TREE)
+      WHERE (PVEGTYPE(:,NVT_TEBD)>0.)
+        ZWEIGHT(:,NVT_TEBD)=PVEGTYPE(:,NVT_TEBD)
       ENDWHERE
-      WHERE (PVEGTYPE(:,NVT_CONI)>0.)
-        ZWEIGHT(:,NVT_CONI)=PVEGTYPE(:,NVT_CONI)
+      WHERE (PVEGTYPE(:,NVT_BONE)>0.)
+        ZWEIGHT(:,NVT_BONE)=PVEGTYPE(:,NVT_BONE)
       ENDWHERE
-      WHERE (PVEGTYPE(:,NVT_EVER)>0.)
-        ZWEIGHT(:,NVT_EVER)=PVEGTYPE(:,NVT_EVER)
+      WHERE (PVEGTYPE(:,NVT_TRBE)>0.)
+        ZWEIGHT(:,NVT_TRBE)=PVEGTYPE(:,NVT_TRBE)
+      ENDWHERE
+
+      WHERE (PVEGTYPE(:,NVT_TRBD)>0.)
+        ZWEIGHT(:,NVT_TRBD)=PVEGTYPE(:,NVT_TRBD)
+      ENDWHERE
+      WHERE (PVEGTYPE(:,NVT_TEBE)>0.)
+        ZWEIGHT(:,NVT_TEBE)=PVEGTYPE(:,NVT_TEBE)
+      ENDWHERE
+      WHERE (PVEGTYPE(:,NVT_TENE)>0.)
+        ZWEIGHT(:,NVT_TENE)=PVEGTYPE(:,NVT_TENE)
+      ENDWHERE
+      WHERE (PVEGTYPE(:,NVT_BOBD)>0.)
+        ZWEIGHT(:,NVT_BOBD)=PVEGTYPE(:,NVT_BOBD)
+      ENDWHERE
+      WHERE (PVEGTYPE(:,NVT_BOND)>0.)
+        ZWEIGHT(:,NVT_BOND)=PVEGTYPE(:,NVT_BOND)
+      ENDWHERE
+      WHERE (PVEGTYPE(:,NVT_SHRB)>0.)
+        ZWEIGHT(:,NVT_SHRB)=PVEGTYPE(:,NVT_SHRB)
       ENDWHERE
 
     CASE DEFAULT
@@ -247,7 +270,7 @@ SELECT CASE (HATYPE)
         ZSUM_WEIGHT_PATCH(JJ,JPATCH) =  ZSUM_WEIGHT_PATCH(JJ,JPATCH)+ ZWEIGHT(JJ,JVEGTYPE)
         IF (PDATA(JJ,JVEGTYPE).NE.0.) THEN
           ZWORK(JJ,JPATCH)= ZWORK(JJ,JPATCH) + 1./(LOG(ZDZ(JJ,JPATCH)/ PDATA(JJ,JVEGTYPE)))**2    &
-                            * ZWEIGHT(JJ,JVEGTYPE)  
+                            * ZWEIGHT(JJ,JVEGTYPE)
         ENDIF
       ENDDO
     END DO   

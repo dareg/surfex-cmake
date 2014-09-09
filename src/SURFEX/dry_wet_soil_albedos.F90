@@ -96,13 +96,16 @@ END MODULE MODI_DRY_WET_SOIL_ALBEDOS
 !                                            Ba et al 2001; 
 !                                            Pinty et al 2000
 !      (V. Masson) 01/2004  Add UV albedo
+!      (R. Alkama) 05/2012  Add 7 new vegtype (19 rather than 12)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS, NVT_TROG, &
-                                  NVT_PARK, NVT_EVER, NVT_CONI, NVT_TREE  
+USE MODD_DATA_COVER_PAR, ONLY : NVT_PARK, NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, &
+                                NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, &
+                                NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS, NVT_BOGR,      &
+                                NVT_TROG                   
 !
 !
 !
@@ -136,9 +139,16 @@ PALBVIS_DRY(:) = 0.05 +  (   0.05 + MAX(0.30 * PSAND(:), 0.10) )  &
                                         + PVEGTYPE(:,NVT_GRAS)      &
                                         + PVEGTYPE(:,NVT_TROG)      &
                                         + PVEGTYPE(:,NVT_PARK)      &
-                                        + PVEGTYPE(:,NVT_EVER)      &
-                                        + PVEGTYPE(:,NVT_CONI)      &
-                                        + PVEGTYPE(:,NVT_TREE) )**2 )  
+                                        + PVEGTYPE(:,NVT_TRBE)      &
+                                        + PVEGTYPE(:,NVT_BONE)      &
+                                        + PVEGTYPE(:,NVT_TEBD)      &
+                                        + PVEGTYPE(:,NVT_TRBD)      & 
+                                        + PVEGTYPE(:,NVT_TEBE)      &
+                                        + PVEGTYPE(:,NVT_TENE)      &
+                                        + PVEGTYPE(:,NVT_BOBD)      &
+                                        + PVEGTYPE(:,NVT_BOND)      &
+                                        + PVEGTYPE(:,NVT_BOGR)      &
+                                        + PVEGTYPE(:,NVT_SHRB))**2 )  
 !
 PALBNIR_DRY(:) = PALBVIS_DRY(:) + 0.10
 !
@@ -198,8 +208,10 @@ END SUBROUTINE DRY_WET_SOIL_ALBEDOS_1D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS, NVT_TROG, &
-                                  NVT_PARK, NVT_EVER, NVT_CONI, NVT_TREE  
+USE MODD_DATA_COVER_PAR, ONLY : NVT_PARK, NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, &
+                                NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, &
+                                NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS, NVT_BOGR,      &
+                                NVT_TROG
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -233,15 +245,22 @@ PALBUV_WET (:,:) = XUNDEF
 !
 WHERE (PSAND(:,:)/=XUNDEF)
   PALBVIS_DRY(:,:) = 0.05 +  (   0.05 + MAX( 0.30 * PSAND(:,:), 0.10) ) &
-                             * ( 1. - 0.9 * ( PVEGTYPE(:,:,NVT_C3)        &
-                                            + PVEGTYPE(:,:,NVT_C4)        &
-                                            + PVEGTYPE(:,:,NVT_IRR)       &
-                                            + PVEGTYPE(:,:,NVT_GRAS)      &
-                                            + PVEGTYPE(:,:,NVT_TROG)      &
-                                            + PVEGTYPE(:,:,NVT_PARK)      &
-                                            + PVEGTYPE(:,:,NVT_EVER)      &
-                                            + PVEGTYPE(:,:,NVT_CONI)      &
-                                            + PVEGTYPE(:,:,NVT_TREE) )**2 )  
+                             * ( 1. - 0.9 * ( PVEGTYPE(:,:,NVT_C3)      &
+                                            + PVEGTYPE(:,:,NVT_C4)      &
+                                            + PVEGTYPE(:,:,NVT_IRR)     &
+                                            + PVEGTYPE(:,:,NVT_GRAS)    &
+                                            + PVEGTYPE(:,:,NVT_TROG)    &
+                                            + PVEGTYPE(:,:,NVT_PARK)    &
+                                            + PVEGTYPE(:,:,NVT_TRBE)    &
+                                            + PVEGTYPE(:,:,NVT_BONE)    &
+                                            + PVEGTYPE(:,:,NVT_TEBD)    & 
+                                            + PVEGTYPE(:,:,NVT_TRBD)      & 
+                                            + PVEGTYPE(:,:,NVT_TEBE)      &
+                                            + PVEGTYPE(:,:,NVT_TENE)      &
+                                            + PVEGTYPE(:,:,NVT_BOBD)      &
+                                            + PVEGTYPE(:,:,NVT_BOND)      &
+                                            + PVEGTYPE(:,:,NVT_BOGR)      &
+                                            + PVEGTYPE(:,:,NVT_SHRB))**2 ) 
   !
   PALBNIR_DRY(:,:) = PALBVIS_DRY(:,:) + 0.10
   !

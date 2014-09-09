@@ -91,6 +91,7 @@ REAL, DIMENSION(SIZE(PTA))   :: ZHUNM
 REAL, DIMENSION(SIZE(PTA))   :: ZHU
 INTEGER                      :: J
 INTEGER                      :: JLAYER
+LOGICAL                      :: GHANDLE_SIC = .FALSE. ! no sea-ice model
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -110,7 +111,7 @@ DO J=1,5
   CALL WATER_FLUX(PZ0,                                            &
                   PTA, ZEXNA, PRHOA, PTS, ZEXNS, ZQA, PRAIN,      &
                   PSNOW, XTT, ZWIND, PZREF, PUREF,                &
-                  PPS, ZQSAT,  PSFTH, PSFTQ, ZUSTAR,              &
+                  PPS, GHANDLE_SIC, ZQSAT,  PSFTH, PSFTQ, ZUSTAR, &
                   ZCD, ZCDN, ZCH, ZRI, ZRESA_SEA, ZZ0H            )
 ENDDO
 !

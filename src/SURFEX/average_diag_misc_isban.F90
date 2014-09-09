@@ -48,9 +48,9 @@ USE MODD_SURF_PAR,         ONLY : XUNDEF, NUNDEF
 USE MODD_CSTS,             ONLY : XRHOLW
 !
 USE MODD_ISBA_n,           ONLY : CISBA, XPATCH, NGROUND_LAYER, &
-                                  XDG, XDZG, XWG, XWGI,         &
+                                  XDG, XDZG, XTG, XWG, XWGI,    &
                                   NSIZE_NATURE_P, NWG_LAYER,    &
-                                  XDG2, XLAI, XROOTFRAC, XDROOT
+                                  XDG2, XLAI
 !
 USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET,      &
                                   LSURF_MISC_DIF,         &
@@ -68,17 +68,16 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET,      &
                                   XTWSNOW, XAVG_TWSNOW ,  &
                                   XTDSNOW, XAVG_TDSNOW ,  &
                                   XTTSNOW, XAVG_TTSNOW ,  &
-                                  XSOIL_TSWI, XSOIL_TWG,  &
-                                  XSOIL_TWGI, XSURF_TSWI, &
-                                  XSURF_TWG, XSURF_TWGI,  &
-                                  XROOT_TSWI, XROOT_TWG,  &
-                                  XROOT_TWGI, XFRD2_TSWI, &
-                                  XFRD2_TWG, XFRD2_TWGI,  &
-                                  XFRD3_TSWI, XFRD3_TWG,  &
-                                  XFRD3_TWGI,             &
-                                  XALT, XAVG_ALT,         &
-                                  XFLT, XAVG_FLT,         &
+                                  XSOIL_SWI, XSOIL_TSWI,  &
+                                  XSOIL_TWG, XSOIL_TWGI,  &                               
+                                  XSOIL_WG, XSOIL_WGI,    &                               
+                                  XFRD2_TSWI, XFRD2_TWG,  &
+                                  XFRD2_TWGI, XFRD3_TSWI, &
+                                  XFRD3_TWG, XFRD3_TWGI,  &
+                                  XAVG_ALT, XAVG_FLT,     &
                                   XAVG_LAI
+!
+USE MODI_COMPUT_COLD_LAYERS_THICK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -89,14 +88,12 @@ INTEGER                         :: JJ        ! grid-cell loop counter
 INTEGER                         :: JPATCH    ! tile loop counter
 INTEGER                         :: JLAYER    ! layer loop counter
 REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMPATCH
-REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMDG, ZSNOW, ZSUMSURF, ZSUMROOT, &
-                                   ZSUMFRD2, ZSUMFRD3, ZPONDF2
-REAL, DIMENSION(SIZE(XPATCH,1),SIZE(XPATCH,2))       :: ZLAI, ZDROOT
-REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2),SIZE(XDG,3)) :: ZROOTFRAC
+REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3, ZPONDF2
+REAL, DIMENSION(SIZE(XPATCH,1),SIZE(XPATCH,2)) :: ZLAI
 REAL                            :: ZWORK
 INTEGER                         :: INI,INP,IDEPTH,IWORK
 !
-REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2)) :: ZPOND
+REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2)) :: ZPOND, ZTG, ZDG
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -122,8 +119,6 @@ DO JPATCH=1,INP
    END DO
 END DO
 !
-ZSUMSURF(:)=0.0
-ZSUMROOT(:)=0.0
 ZSUMFRD2(:)=0.0
 ZSUMFRD3(:)=0.0
 ZSUMDG  (:)=0.0
@@ -157,9 +152,12 @@ XAVG_TDSNOW(:) = 0.
 XAVG_TTSNOW(:) = 0.
 XAVG_LAI   (:) = 0.
 !   
-XSOIL_TSWI(:)  = 0.
+XSOIL_SWI  (:)  = 0.
+XSOIL_TSWI (:)  = 0.
 XSOIL_TWG  (:) = 0.
 XSOIL_TWGI (:) = 0.
+XSOIL_WG   (:) = 0.
+XSOIL_WGI  (:) = 0.
 ! 
 IF(CISBA=='DIF')THEN
 !        
@@ -169,20 +167,6 @@ IF(CISBA=='DIF')THEN
 ENDIF
 
 IF(CISBA=='DIF'.AND.LSURF_MISC_DIF)THEN
-!
-  WHERE(XDROOT(:,:)/=XUNDEF)
-        ZDROOT(:,:)=XDROOT(:,:)
-  ELSEWHERE
-        ZDROOT(:,:)=0.0
-  ENDWHERE
-!
-  XSURF_TSWI (:) = 0.
-  XSURF_TWG  (:) = 0.
-  XSURF_TWGI (:) = 0.
-!  
-  XROOT_TSWI (:) = 0.
-  XROOT_TWG  (:) = 0.
-  XROOT_TWGI (:) = 0.
 !   
   XFRD2_TSWI (:) = 0.
   XFRD2_TWG  (:) = 0.
@@ -251,14 +235,17 @@ IF(CISBA=='DIF')THEN ! DIF case
 !---------------------------------------------
 !
 ! Active and Frozen layers thickness
+  ZTG(:,:)=0.0
+  ZDG(:,:)=0.0
   DO JPATCH=1,INP
-     DO JJ=1,INI
-        IF (ZSUMPATCH(JJ) > 0.) THEN
-           XAVG_ALT(JJ) = XAVG_ALT (JJ) + XPATCH(JJ,JPATCH) * XALT(JJ,JPATCH)
-           XAVG_FLT(JJ) = XAVG_FLT (JJ) + XPATCH(JJ,JPATCH) * XFLT(JJ,JPATCH)
-        ENDIF
+     DO JLAYER=1,NGROUND_LAYER
+        DO JJ=1,INI 
+           ZTG(JJ,JLAYER) = ZTG(JJ,JLAYER) + XPATCH(JJ,JPATCH) * XTG(JJ,JLAYER,JPATCH)
+           ZDG(JJ,JLAYER) = ZDG(JJ,JLAYER) + XPATCH(JJ,JPATCH) * XDG(JJ,JLAYER,JPATCH)
+        ENDDO
      ENDDO
   ENDDO
+  CALL COMPUT_COLD_LAYERS_THICK(ZDG,ZTG,XAVG_ALT,XAVG_FLT)
 !    
   ZPOND(:,:)=0.0
   DO JPATCH=1,INP      
@@ -274,6 +261,7 @@ IF(CISBA=='DIF')THEN ! DIF case
                XAVG_TSWI(JJ,JLAYER) = XAVG_TSWI(JJ,JLAYER)+ZWORK*XPATCH(JJ,JPATCH)*XTSWI(JJ,JLAYER,JPATCH)
                ZPOND    (JJ,JLAYER) = ZPOND    (JJ,JLAYER)+ZWORK*XPATCH(JJ,JPATCH)
                !Total soil wetness index, total water and ice contents
+               XSOIL_SWI (JJ) = XSOIL_SWI (JJ) + ZWORK * XPATCH(JJ,JPATCH) * XSWI (JJ,JLAYER,JPATCH)
                XSOIL_TSWI(JJ) = XSOIL_TSWI(JJ) + ZWORK * XPATCH(JJ,JPATCH) * XTSWI(JJ,JLAYER,JPATCH)
                ZSUMDG    (JJ) = ZSUMDG    (JJ) + ZWORK * XPATCH(JJ,JPATCH)
                XSOIL_TWG (JJ) = XSOIL_TWG (JJ) + ZWORK * XPATCH(JJ,JPATCH) * (XWG(JJ,JLAYER,JPATCH)+XWGI(JJ,JLAYER,JPATCH))
@@ -295,30 +283,6 @@ IF(CISBA=='DIF')THEN ! DIF case
 ! ---------------------------------------------
   IF(LSURF_MISC_DIF)THEN ! LSURF_MISC_DIF case
 ! ---------------------------------------------
-!
-    ZROOTFRAC(:,1,:)=XROOTFRAC(:,1,:)
-    DO JPATCH=1,INP      
-      IF(NSIZE_NATURE_P(JPATCH) > 0 )THEN
-        DO JLAYER = 2,NGROUND_LAYER
-!          cdir nodep 
-           DO JJ=1,INI
-              ZROOTFRAC(JJ,JLAYER,JPATCH) = XROOTFRAC(JJ,JLAYER,JPATCH) - XROOTFRAC(JJ,JLAYER-1,JPATCH)            
-           ENDDO
-        ENDDO
-      ENDIF
-    ENDDO
-!
-!   Surface soil wetness index, liquid water and ice contents
-    DO JPATCH=1,INP
-       DO JJ=1,INI
-          IF(ZSUMPATCH(JJ) > 0.)THEN
-            XSURF_TSWI(JJ) = XSURF_TSWI(JJ) + XPATCH(JJ,JPATCH) * XDG(JJ,1,JPATCH) * XTSWI(JJ,1,JPATCH)
-            XSURF_TWG (JJ) = XSURF_TWG (JJ) + XPATCH(JJ,JPATCH) * XDG(JJ,1,JPATCH) * XWG (JJ,1,JPATCH)
-            XSURF_TWGI(JJ) = XSURF_TWGI(JJ) + XPATCH(JJ,JPATCH) * XDG(JJ,1,JPATCH) * XWGI(JJ,1,JPATCH)
-            ZSUMSURF  (JJ) = ZSUMSURF  (JJ) + XPATCH(JJ,JPATCH) * XDG(JJ,1,JPATCH)
-          ENDIF
-       ENDDO
-    ENDDO
 !    
     DO JPATCH=1,INP
 !  
@@ -329,15 +293,6 @@ IF(CISBA=='DIF')THEN ! DIF case
         DO JJ=1,INI
           IDEPTH=NWG_LAYER(JJ,JPATCH)
           IF(JLAYER<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
-            !
-            ! Root zone soil wetness index,  Total water and ice contents
-            ZWORK=MIN(XDZG(JJ,JLAYER,JPATCH),MAX(0.0,ZDROOT(JJ,JPATCH)-XDG(JJ,JLAYER,JPATCH)+XDZG(JJ,JLAYER,JPATCH)))
-            IF(ZDROOT(JJ,JPATCH)>0.0)THEN
-              XROOT_TSWI (JJ) = XROOT_TSWI (JJ) + ZWORK * XPATCH(JJ,JPATCH) * XTSWI(JJ,JLAYER,JPATCH)
-              ZSUMROOT   (JJ) = ZSUMROOT   (JJ) + ZWORK * XPATCH(JJ,JPATCH)
-            ENDIF
-            XROOT_TWG  (JJ) = XROOT_TWG  (JJ) + ZWORK * XPATCH(JJ,JPATCH) * (XWG (JJ,JLAYER,JPATCH)+XWGI(JJ,JLAYER,JPATCH))
-            XROOT_TWGI (JJ) = XROOT_TWGI (JJ) + ZWORK * XPATCH(JJ,JPATCH) *  XWGI(JJ,JLAYER,JPATCH)
             !
             ! ISBA-FR-DG2 comparable soil wetness index, liquid water and ice contents
             ZWORK=MIN(XDZG(JJ,JLAYER,JPATCH),MAX(0.0,XDG2(JJ,JPATCH)-XDG(JJ,JLAYER,JPATCH)+XDZG(JJ,JLAYER,JPATCH)))
@@ -358,16 +313,6 @@ IF(CISBA=='DIF')THEN ! DIF case
       ENDDO
 !
     ENDDO
-!
-    WHERE(ZSUMSURF(:)>0.0) 
-          XSURF_TSWI (:) = XSURF_TSWI (:) / ZSUMSURF(:)
-          XSURF_TWG  (:) = XSURF_TWG  (:) / ZSUMSURF(:)
-          XSURF_TWGI (:) = XSURF_TWGI (:) / ZSUMSURF(:)
-    ELSEWHERE
-          XSURF_TSWI (:) = XUNDEF
-          XSURF_TWG  (:) = XUNDEF
-          XSURF_TWGI (:) = XUNDEF
-    ENDWHERE 
 !    
     WHERE(ZSUMFRD2(:)>0.0) 
           XFRD2_TSWI (:) = XFRD2_TSWI (:) / ZSUMFRD2(:)
@@ -389,15 +334,6 @@ IF(CISBA=='DIF')THEN ! DIF case
           XFRD3_TWGI (:) = XUNDEF
     ENDWHERE
 !
-    WHERE(ZSUMROOT(:)>0.0) 
-          XROOT_TSWI (:) = XROOT_TSWI (:) / ZSUMROOT(:)
-    ELSEWHERE
-          XROOT_TSWI (:) = XUNDEF
-    ENDWHERE
-!
-    XROOT_TWG  (:) = XROOT_TWG  (:) * XRHOLW
-    XROOT_TWGI (:) = XROOT_TWGI (:) * XRHOLW  
-!
 ! ---------------------------------------------
   ENDIF ! End LSURF_MISC_DIF case
 ! ---------------------------------------------
@@ -415,6 +351,7 @@ ELSE ! Force-restore case
           XAVG_TSWI(JJ,1) = XAVG_TSWI(JJ,1) + XPATCH(JJ,JPATCH) * XTSWI(JJ,1,JPATCH)
           XAVG_TSWI(JJ,2) = XAVG_TSWI(JJ,2) + XPATCH(JJ,JPATCH) * XTSWI(JJ,2,JPATCH)
 !
+          XSOIL_SWI (JJ) = XSOIL_SWI (JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * XSWI (JJ,2,JPATCH)
           XSOIL_TSWI(JJ) = XSOIL_TSWI(JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * XTSWI(JJ,2,JPATCH)
           XSOIL_TWG (JJ) = XSOIL_TWG (JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * (XWG(JJ,2,JPATCH)+XWGI(JJ,2,JPATCH))
           XSOIL_TWGI(JJ) = XSOIL_TWGI(JJ) + XPATCH(JJ,JPATCH) * XDG (JJ,2,JPATCH) * XWGI(JJ,2,JPATCH) 
@@ -437,6 +374,7 @@ ELSE ! Force-restore case
 !           Remenber: no ice in the third layer of 3-L
             ZPOND     (JJ,3) = ZPOND     (JJ,3) + XPATCH(JJ,JPATCH) * ZWORK
             XAVG_SWI  (JJ,3) = XAVG_SWI  (JJ,3) + XPATCH(JJ,JPATCH) * ZWORK * XSWI (JJ,3,JPATCH)
+            XSOIL_SWI (JJ  ) = XSOIL_SWI (JJ  ) + XPATCH(JJ,JPATCH) * ZWORK * XSWI (JJ,3,JPATCH)  
             XAVG_TSWI (JJ,3) = XAVG_TSWI (JJ,3) + XPATCH(JJ,JPATCH) * ZWORK * XTSWI(JJ,3,JPATCH)
             XSOIL_TSWI(JJ  ) = XSOIL_TSWI(JJ  ) + XPATCH(JJ,JPATCH) * ZWORK * XTSWI(JJ,3,JPATCH)  
             XSOIL_TWG (JJ  ) = XSOIL_TWG (JJ  ) + XPATCH(JJ,JPATCH) * ZWORK * XWG  (JJ,3,JPATCH)  
@@ -463,9 +401,15 @@ ENDIF ! End ISBA soil scheme case
 !       3.     Final computation for grid-cell diag
 !              ------------------------------------
 !
-!Total Soil Wetness Index
-WHERE(ZSUMDG(:)>0.0)XSOIL_TSWI(:) = XSOIL_TSWI(:)/ZSUMDG(:)
-        !Total Soil Water Content (Liquid+Solid) and Total Frozen Content (kg/m2)
+!Total Soil Wetness Index and Soil Water Content (m3.m-3)
+WHERE(ZSUMDG(:)>0.0)
+      XSOIL_SWI (:) = XSOIL_SWI (:)/ZSUMDG(:)
+      XSOIL_TSWI(:) = XSOIL_TSWI(:)/ZSUMDG(:)
+      XSOIL_WG  (:) = XSOIL_TWG (:)/ZSUMDG(:)
+      XSOIL_WGI (:) = XSOIL_TWGI(:)/ZSUMDG(:)
+ENDWHERE
+!       
+!Total Soil Water Content (Liquid+Solid) and Total Frozen Content (kg/m2)
 XSOIL_TWG (:)= XSOIL_TWG (:) * XRHOLW
 XSOIL_TWGI(:)= XSOIL_TWGI(:) * XRHOLW
 !

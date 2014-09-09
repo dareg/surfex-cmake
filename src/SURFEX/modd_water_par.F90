@@ -40,8 +40,14 @@ REAL, SAVE       :: XALBCOEF_TA96
 REAL, SAVE       :: XEMISWAT
 !                   water emissivity
 !
-REAL, SAVE       :: XALBWATICE 
+REAL, SAVE       :: XALBSEAICE 
 !                   sea ice global albedo
+!
+REAL, SAVE       :: XALBWATICE 
+!                   water ice global albedo
+!
+REAL, SAVE       :: XALBWATSNOW 
+!                   water snow global albedo (for lake)
 !
 REAL, SAVE       :: XEMISWATICE 
 !                   sea ice emissivity
