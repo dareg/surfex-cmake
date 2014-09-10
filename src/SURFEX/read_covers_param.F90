@@ -74,7 +74,6 @@ INTEGER, INTENT(IN)   :: KFILE
 INTEGER               :: INB_COVER, INB_AN
 INTEGER               :: ICOVER, IREC
 INTEGER               :: JCOVER
-!CHARACTER(LEN = 255)  :: YDIR, YFIL
 !
 !*    0.3    Declaration of namelists
 !            ------------------------
@@ -84,17 +83,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_COVERS_PARAM',0,ZHOOK_HANDLE)
 !
 !opening of the file
-!CALL GET_ENVIRONMENT_VARIABLE('SURFEX_EXPERIMENT',YDIR)
-!YDIR = TRIM(YDIR)//'/ecoclimap/'
 IF (KFILE==1) THEN
-  !YFIL = TRIM(YDIR)//'ecoclimapI_covers_param.bin'
-  !OPEN(41,FILE=TRIM(YFIL),FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
   OPEN(41,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)  
   INB_COVER = NCOVER_ECO1_END
   INB_AN = 1
 ELSEIF (KFILE==2) THEN
-  !YFIL = TRIM(YDIR)//'ecoclimapII_eu_covers_param.bin'
-  !OPEN(41,FILE=TRIM(YFIL),FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
   OPEN(41,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
   INB_COVER = JPCOVER - NCOVER_ECO2_START + 1
   INB_AN = NECO2_END_YEAR - NECO2_START_YEAR + 1
