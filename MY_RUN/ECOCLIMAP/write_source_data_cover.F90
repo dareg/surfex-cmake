@@ -46,7 +46,7 @@ IMPLICIT NONE
 !            ------------------------------
 !
 INTEGER, PARAMETER             :: JPCOVER   =573 ! number of cover types
-INTEGER, PARAMETER             :: NVEGTYPE  =12  ! number of vegtypes
+INTEGER, PARAMETER             :: NVEGTYPE  =19  ! number of vegtypes
 INTEGER, PARAMETER             :: NECOCLIMAP=2   ! number of ecoclimap data files
 INTEGER, PARAMETER             :: NECO2_START_YEAR=2002
 INTEGER, PARAMETER             :: NECO2_END_YEAR=2006
@@ -73,7 +73,12 @@ REAL*8, DIMENSION(JPCOVER,36,  NVEGTYPE) :: XDATA_LAI
 REAL*8, DIMENSION(JPCOVER,5*36,NVEGTYPE) :: XDATA_LAI_ALL_YEARS
 INTEGER*4, DIMENSION(JPCOVER,NVEGTYPE) :: IDATA_SEED_MONTH, IDATA_REAP_MONTH, &
                                           IDATA_SEED_DAY  , IDATA_REAP_DAY  
-
+!
+REAL*8, DIMENSION(JPCOVER,36,NVEGTYPE) ::  XDATA_ALB_VEG_NIR  ! near infra-red albedo
+REAL*8, DIMENSION(JPCOVER,36,NVEGTYPE) ::  XDATA_ALB_VEG_VIS  ! visible albedo
+REAL*8, DIMENSION(JPCOVER,36,NVEGTYPE) ::  XDATA_ALB_SOIL_NIR ! near infra-red albedo
+REAL*8, DIMENSION(JPCOVER,36,NVEGTYPE) ::  XDATA_ALB_SOIL_VIS ! visible albedo
+!
 
 INTEGER, DIMENSION(NECOCLIMAP) :: NBCOVERS, NBAN, NUNIT
 INTEGER         :: IECO         ! file being read
@@ -100,12 +105,12 @@ INTEGER         :: IOUT
 !
 !
 NUNIT(1)=11
-OPEN(NUNIT(1),FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+OPEN(NUNIT(1),FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
 NBCOVERS(1) = 255
 NBAN(1) = 1
 !
 NUNIT(2)=12
-OPEN(NUNIT(2),FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+OPEN(NUNIT(2),FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
 NBCOVERS(2) = 273
 NBAN(2) = 5
 !
@@ -114,7 +119,7 @@ NBAN(2) = 5
 !*    1.1    Open output fortran file
 !            ------------------------
 !
-OPEN(20,FILE='default_data_cover.F90',FORM='FORMATTED')
+OPEN(20,FILE='test/default_data_cover.F90',FORM='FORMATTED')
 !
 !------------------------------------------------------------------------------
 !
@@ -165,6 +170,11 @@ IDATA_SEED_MONTH(:,:) = 1E9
 IDATA_SEED_DAY  (:,:) = 1E9
 IDATA_REAP_MONTH(:,:) = 1E9
 IDATA_REAP_DAY  (:,:) = 1E9
+
+XDATA_ALB_VEG_NIR  = XUNDEF
+XDATA_ALB_VEG_VIS  = XUNDEF
+XDATA_ALB_SOIL_NIR = XUNDEF
+XDATA_ALB_SOIL_VIS = XUNDEF
 
 !------------------------------------------------------------------------------
 !
@@ -231,6 +241,8 @@ END DO
 !            ------------------------------------------
 !
 CALL WRITE_HEADER('DEFAULT_DATA_COVER')
+WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK(''DEFAULT_DATA_COVER'',0,ZHOOK_HANDLE) '  
+WRITE(20,FMT='(A)')'!'
 !
 CALL WRITE_SOURCE_DATA_A(IUNIT,'ALL',4,'F4.2','XDATA_TOWN          ',XDATA_TOWN(:))
 CALL WRITE_SOURCE_DATA_A(IUNIT,'ALL',4,'F4.2','XDATA_NATURE        ',XDATA_NATURE(:))
@@ -336,6 +348,9 @@ DO JL=1,NVEGTYPE
   CALL WRITE_SOURCE_DATA_B(IUNIT,YMASK,2,'I2.2','TDATA_REAP          ',ZSEED,KIND1=JL,HTYPE='%TDATE%MONTH')
 END DO
 !
+WRITE(20,FMT='(A)')'!'
+WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK(''DEFAULT_DATA_COVER'',1,ZHOOK_HANDLE) '  
+WRITE(20,FMT='(A)')'!'
 WRITE(20,FMT='(A,A)') 'END SUBROUTINE ','DEFAULT_DATA_COVER'
 !
 CLOSE(20)
@@ -347,18 +362,29 @@ CLOSE(20)
 !*    5.0    Writes the LAI for ecoclimap1 in one separate fortran file
 !            ------------------------------------------
 !
-YFILE = 'default_lai_eco1.F90'
+YFILE = 'test/default_lai_eco1.F90'
 OPEN(20,FILE=YFILE,FORM='FORMATTED')
 !
 DO JVEGTYPE=1,NVEGTYPE
   WRITE(YNAME,FMT='(A,I2.2)') 'DEFAULT_LAI_ECO1_',JVEGTYPE
+  IF(JVEGTYPE>1)THEN
+    WRITE(20,FMT='(A)') '!'
+    WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+    WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+    WRITE(20,FMT='(A)') '!'
+  ENDIF
   CALL WRITE_HEADER(YNAME)
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',0,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
 
   WRITE(YMASK,FMT='(A,I2,A)') 'XDATA_VEGTYPE(1:255,',JVEGTYPE,')>0.'
   DO JL=1,SIZE(XDATA_LAI,2)
     CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,3,'F3.1','XDATA_LAI           ',XDATA_LAI(:,JL,JVEGTYPE),&
                            KIND1=JL,KIND2=JVEGTYPE,KCOV1=1,KCOV2=255)
   END DO
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',1,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
   WRITE(20,FMT='(A,A)') 'END SUBROUTINE ',TRIM(YNAME)
 END DO
 !
@@ -369,15 +395,23 @@ CLOSE(20)
 !*    6.0    Writes the LAI for all ecoclimap2 years in the separate fortran files
 !            ------------------------------------------
 !
-YFILE = 'default_lai_eco2.F90'
+YFILE = 'test/default_lai_eco2.F90'
 OPEN(20,FILE=YFILE,FORM='FORMATTED')
 !
 DO JVEGTYPE=1,NVEGTYPE
   JL=0
   DO JYEAR=1,NBAN(2)
     WRITE(YNAME,FMT='(A,I4.4,A,I2.2)') 'DEFAULT_LAI_ECO2_Y',NECO2_START_YEAR-1+JYEAR,'_',JVEGTYPE
+    IF(JVEGTYPE>1.OR.JYEAR>1)THEN
+      WRITE(20,FMT='(A)') '!'
+      WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+      WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+      WRITE(20,FMT='(A)') '!'
+    ENDIF    
     CALL WRITE_HEADER(YNAME)
-
+    WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',0,ZHOOK_HANDLE) '  
+    WRITE(20,FMT='(A)')'!'
+    
     WRITE(YMASK,FMT='(A,I2,A)') 'XDATA_VEGTYPE(301:573,',JVEGTYPE,')>0.'
 
     DO J=1,SIZE(XDATA_LAI_ALL_YEARS,2)/NBAN(2)
@@ -385,12 +419,145 @@ DO JVEGTYPE=1,NVEGTYPE
       CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,3,'F3.1','XDATA_LAI_ALL_YEARS ',XDATA_LAI_ALL_YEARS(:,JL,JVEGTYPE),&
                            KIND1=JL,KIND2=JVEGTYPE,KCOV1=301,KCOV2=JPCOVER)
     END DO
+    WRITE(20,FMT='(A)')'!'
+    WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',1,ZHOOK_HANDLE) '  
+    WRITE(20,FMT='(A)')'!'    
     WRITE(20,FMT='(A,A)') 'END SUBROUTINE ',TRIM(YNAME)
   END DO
 END DO
 
 CLOSE(20)
+!
+!
+!*    7.0    Writes the albedo veg for ecoclimap1 in one separate fortran file
+!            ------------------------------------------
+!
+YFILE = 'test/default_alb_eco1.F90'
+OPEN(20,FILE=YFILE,FORM='FORMATTED')
+!
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!Soil albedo (the same for all 19 vegtypes)'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!'
+!
+DO JVEGTYPE=1,1
+  WRITE(YNAME,FMT='(A,I2.2)') 'DEFAULT_ALB_SOIL_ECO1'!_',JVEGTYPE
+  CALL WRITE_HEADER(YNAME)
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',0,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
 
+  WRITE(YMASK,FMT='(A,I2,A)') ' '
+  DO JL=1,SIZE(XDATA_ALB_SOIL_NIR,2)
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_SOIL_NIR   ',XDATA_ALB_SOIL_NIR(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=1,KCOV2=255)                   
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_SOIL_VIS   ',XDATA_ALB_SOIL_VIS(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=1,KCOV2=255)
+  END DO
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',1,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A,A)') 'END SUBROUTINE ',TRIM(YNAME)
+END DO
+!
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!Vegetation albedo for all 19 vegtypes'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!'
+!
+DO JVEGTYPE=1,NVEGTYPE
+  WRITE(YNAME,FMT='(A,I2.2)') 'DEFAULT_ALB_VEG_ECO1_',JVEGTYPE
+  IF(JVEGTYPE>1)THEN
+    WRITE(20,FMT='(A)') '!'
+    WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+    WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+    WRITE(20,FMT='(A)') '!'
+  ENDIF
+  CALL WRITE_HEADER(YNAME)
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',0,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+
+  WRITE(YMASK,FMT='(A,I2,A)') 'XDATA_VEGTYPE(1:255,',JVEGTYPE,')>0.'
+  DO JL=1,SIZE(XDATA_ALB_VEG_NIR,2)
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_VEG_NIR   ',XDATA_ALB_VEG_NIR(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=1,KCOV2=255)                   
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_VEG_VIS   ',XDATA_ALB_VEG_VIS(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=1,KCOV2=255)
+  END DO
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',1,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A,A)') 'END SUBROUTINE ',TRIM(YNAME)
+END DO
+!
+CLOSE(20)
+!
+!
+!*    8.0    Writes the albedo veg for ecoclimap1 in one separate fortran file
+!            ------------------------------------------
+!
+YFILE = 'test/default_alb_eco2.F90'
+OPEN(20,FILE=YFILE,FORM='FORMATTED')
+!
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!Soil albedo (the same for all 19 vegtypes)'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!'
+!
+DO JVEGTYPE=1,1
+  WRITE(YNAME,FMT='(A,I2.2)') 'DEFAULT_ALB_SOIL_ECO2'!_',JVEGTYPE
+  CALL WRITE_HEADER(YNAME)
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',0,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+
+  WRITE(YMASK,FMT='(A,I2,A)') ' '
+  DO JL=1,SIZE(XDATA_ALB_SOIL_NIR,2)
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_SOIL_NIR   ',XDATA_ALB_SOIL_NIR(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=301,KCOV2=JPCOVER)                   
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_SOIL_VIS   ',XDATA_ALB_SOIL_VIS(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=301,KCOV2=JPCOVER)
+  END DO
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',1,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A,A)') 'END SUBROUTINE ',TRIM(YNAME)
+END DO
+!
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!Vegetation albedo for all 19 vegtypes'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!'
+!
+DO JVEGTYPE=1,NVEGTYPE
+  WRITE(YNAME,FMT='(A,I2.2)') 'DEFAULT_ALB_VEG_ECO2_',JVEGTYPE
+  IF(JVEGTYPE>1)THEN
+    WRITE(20,FMT='(A)') '!'
+    WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+    WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+    WRITE(20,FMT='(A)') '!'
+  ENDIF
+  CALL WRITE_HEADER(YNAME)
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',0,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+
+  WRITE(YMASK,FMT='(A,I2,A)') 'XDATA_VEGTYPE(301:573,',JVEGTYPE,')>0.'
+  DO JL=1,SIZE(XDATA_ALB_VEG_NIR,2)
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_VEG_NIR   ',XDATA_ALB_VEG_NIR(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=301,KCOV2=JPCOVER)                   
+    CALL WRITE_SOURCE_DATA_A(IUNIT,YMASK,6,'F6.4','XDATA_ALB_VEG_VIS   ',XDATA_ALB_VEG_VIS(:,JL,JVEGTYPE),&
+                           KIND1=JL,KIND2=JVEGTYPE,KCOV1=301,KCOV2=JPCOVER)
+  END DO
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A)') 'IF (LHOOK) CALL DR_HOOK('''//TRIM(YNAME)//''',1,ZHOOK_HANDLE) '  
+  WRITE(20,FMT='(A)')'!'
+  WRITE(20,FMT='(A,A)') 'END SUBROUTINE ',TRIM(YNAME)
+END DO
+!
+CLOSE(20)
+!
 !------------------------------------------------------------------------------
 CONTAINS
 !------------------------------------------------------------------------------
@@ -402,6 +569,27 @@ INTEGER               :: JVEGTYPE, JLAI
 !fractions of vegtypes
 IREC=IREC+1
 READ(IUNIT,REC=IREC) XDATA_VEGTYPE(ICOVER,:)
+
+!albedos for the soil
+IF (IECO<=2 .AND. XDATA_NATURE(ICOVER)/=0.) THEN
+  IREC=IREC+1
+  READ(IUNIT,REC=IREC) XDATA_ALB_SOIL_NIR(ICOVER,1:12,1)
+  IREC=IREC+1
+  READ(IUNIT,REC=IREC) XDATA_ALB_SOIL_NIR(ICOVER,13:24,1)
+  IREC=IREC+1
+  READ(IUNIT,REC=IREC) XDATA_ALB_SOIL_NIR(ICOVER,25:36,1)
+  IREC=IREC+1
+  READ(IUNIT,REC=IREC) XDATA_ALB_SOIL_VIS(ICOVER,1:12,1)
+  IREC=IREC+1
+  READ(IUNIT,REC=IREC) XDATA_ALB_SOIL_VIS(ICOVER,13:24,1)
+  IREC=IREC+1
+  READ(IUNIT,REC=IREC) XDATA_ALB_SOIL_VIS(ICOVER,25:36,1)
+  DO JVEGTYPE=2,NVEGTYPE
+    XDATA_ALB_SOIL_NIR(ICOVER,:,JVEGTYPE) = XDATA_ALB_SOIL_NIR(ICOVER,:,1)
+    XDATA_ALB_SOIL_VIS(ICOVER,:,JVEGTYPE) = XDATA_ALB_SOIL_VIS(ICOVER,:,1)
+  ENDDO
+ENDIF
+
 DO JVEGTYPE=1,NVEGTYPE
   !not null fraction of vegtype
   IF (XDATA_VEGTYPE(ICOVER,JVEGTYPE).NE.0.) THEN
@@ -419,10 +607,27 @@ DO JVEGTYPE=1,NVEGTYPE
         ENDIF
       ENDDO
       !Heights of trees
-      IF (JVEGTYPE.LT.7) THEN
+      IF ((JVEGTYPE < 7) .OR. (JVEGTYPE > 12 .AND. JVEGTYPE /= 18)) THEN
         IREC=IREC+1
         READ(IUNIT,REC=IREC) XDATA_H_TREE(ICOVER,JVEGTYPE)
       ENDIF
+
+      !albedos for the vegetation
+      IF (IECO<=2 .AND. XDATA_NATURE(ICOVER)/=0.) THEN
+        IREC=IREC+1
+        READ(IUNIT,REC=IREC) XDATA_ALB_VEG_NIR(ICOVER,1:12,JVEGTYPE)
+        IREC=IREC+1
+        READ(IUNIT,REC=IREC) XDATA_ALB_VEG_NIR(ICOVER,13:24,JVEGTYPE)
+        IREC=IREC+1
+        READ(IUNIT,REC=IREC) XDATA_ALB_VEG_NIR(ICOVER,25:36,JVEGTYPE)
+        IREC=IREC+1
+        READ(IUNIT,REC=IREC) XDATA_ALB_VEG_VIS(ICOVER,1:12,JVEGTYPE)
+        IREC=IREC+1
+        READ(IUNIT,REC=IREC) XDATA_ALB_VEG_VIS(ICOVER,13:24,JVEGTYPE)
+        IREC=IREC+1
+        READ(IUNIT,REC=IREC) XDATA_ALB_VEG_VIS(ICOVER,25:36,JVEGTYPE)
+      ENDIF
+      
     ELSE
       !LAI for bare areas
       IF (IECO==1) THEN
@@ -430,6 +635,8 @@ DO JVEGTYPE=1,NVEGTYPE
       ELSEIF (IECO==2) THEN
         XDATA_LAI_ALL_YEARS(ICOVER,:,JVEGTYPE) = 0.
       ENDIF
+      XDATA_ALB_VEG_NIR(ICOVER,:,JVEGTYPE) = 0.3
+      XDATA_ALB_VEG_VIS(ICOVER,:,JVEGTYPE) = 0.1      
     ENDIF
     !irrigation
     IF (JVEGTYPE.EQ.8 .AND. IECO.EQ.1 .OR. JVEGTYPE.EQ.9 .AND. IECO.EQ.2) THEN
@@ -744,13 +951,21 @@ SUBROUTINE WRITE_HEADER(HNAME)
 
 CHARACTER(LEN=*), INTENT(IN) :: HNAME
 WRITE(20,FMT='(A,A)') 'SUBROUTINE ',TRIM(HNAME)
-WRITE(20,FMT='(A)') ' '
+WRITE(20,FMT='(A)') '!'
 WRITE(20,FMT='(A)') 'USE MODD_SURF_PAR'
 WRITE(20,FMT='(A)') 'USE MODD_DATA_COVER_PAR'
 WRITE(20,FMT='(A)') 'USE MODD_DATA_COVER'
+WRITE(20,FMT='(A)') 'USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK'
+WRITE(20,FMT='(A)') 'USE PARKIND1  ,ONLY : JPRB'
 WRITE(20,FMT='(A)') 'IMPLICIT NONE'
-WRITE(20,FMT='(A)') ' '
-
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') '!*    Declaration of local variables'
+WRITE(20,FMT='(A)') '!     ------------------------------ '
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') 'REAL(KIND=JPRB) :: ZHOOK_HANDLE'
+WRITE(20,FMT='(A)') '!'
+WRITE(20,FMT='(A)') '!------------------------------------------------------------------------------'
+WRITE(20,FMT='(A)') '!'
 END SUBROUTINE WRITE_HEADER
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

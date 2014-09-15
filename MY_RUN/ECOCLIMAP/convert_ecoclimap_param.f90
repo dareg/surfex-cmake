@@ -24,29 +24,29 @@ REAL*8, DIMENSION(3) :: ZALB, ZEMIS
 REAL*8, DIMENSION(3,3) :: ZHC,ZTC,ZD
 REAL*8, DIMENSION(2) :: ZTRAFFIC, ZINDUSTRY
 INTEGER*4, DIMENSION(2):: ISEED, IREAP
-REAL*8, DIMENSION(12) :: ZVEGTYPE
+REAL*8, DIMENSION(19) :: ZVEGTYPE
 REAL*8, DIMENSION(36) :: ZLAI
 REAL*8, DIMENSION(36) :: ZALB_SOIL_NIR, ZALB_SOIL_VIS, ZALB_VEG_NIR, ZALB_VEG_VIS
-CHARACTER(LEN=4),DIMENSION(12) :: CVEGTYPE
+CHARACTER(LEN=4),DIMENSION(19) :: CVEGTYPE
 CHARACTER(LEN=1), PARAMETER :: CSEP=' '
 
-DATA CVEGTYPE/'  No','Rock','Snow','Tree','Coni','Ever','  C3','  C4',' Irr',&
-                'Gras','Trog','Park'/
+DATA CVEGTYPE/'  No','Rock','Snow','Tebd','Bone','Trbe','  C3','  C4',' Irr',&
+       'Gras','Trog','Park','Trbd','Tebe','Tene','Bobd','Bond','Bogr','Shrb'/              
 !
 IF (KFILE==1) THEN
-  OPEN(11,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(11,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
   NBCOVERS = 255
   NBAN = 1
   IAN = 1992
   OPEN(12,FILE='ecoclimapI_covers_param2.dat',FORM='FORMATTED')
 ELSEIF (KFILE==2) THEN
-  OPEN(11,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(11,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
   NBCOVERS = 273
   NBAN = 5
   IAN = 2002
   OPEN(12,FILE='ecoclimapII_eu_covers_param2.dat',FORM='FORMATTED')
 ELSEIF (KFILE==3) THEN
-  OPEN(11,FILE='ecoclimapII_af_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(11,FILE='ecoclimapII_af_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
   NBCOVERS = 38
   NBAN = 8
   IAN = 2000
@@ -73,9 +73,10 @@ DO ICOVER=1,NBCOVERS
   IF (ZNATURE.GT.0.) THEN
     IREC = IREC+1
     READ(11,REC=IREC) ZVEGTYPE(:)
-    WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tree'//CSEP//'  Coni'//CSEP//&
-        '  Ever'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'
-    WRITE (12,FMT="(I9,12('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
+    WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tebd'//CSEP//'  Bone'//CSEP//&
+        '  Trbe'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'//CSEP//&
+        '  Trbd'//CSEP//'  Tebe'//CSEP//'  Tene'//CSEP//'  Bobd'//CSEP//'  Bond'//CSEP//'  Bogr'//CSEP//'  Shrb'
+    WRITE (12,FMT="(I9,19('"//CSEP//"',F6.2)))") JCOVER,ZVEGTYPE(:)
     !
     IF (KFILE<=2) THEN
       DO J=1,3
@@ -149,7 +150,7 @@ DO ICOVER=1,NBCOVERS
             WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F3.1))") JCOVER,CVEGTYPE(JVEGTYPE),ZLAI(25:36)            
             JAN=JAN+1
           ENDDO
-          IF (JVEGTYPE.LT.7) THEN 
+          IF ((JVEGTYPE.LT.7) .OR. (JVEGTYPE.GT.12 .AND. JVEGTYPE.NE.18)) THEN 
             IREC = IREC+1      
             READ(11,REC=IREC) ZHT
             WRITE(12,FMT="(A)") '         |    HT|'
@@ -268,9 +269,10 @@ DO ICOVER=1,NBCOVERS
     IF (ZGRD.NE.0. .AND. ZNATURE.EQ.0.) THEN
       IREC = IREC+1
       READ(11,REC=IREC) ZVEGTYPE(:)
-      WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tree'//CSEP//'  Coni'//CSEP//&
-        '  Ever'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'
-      WRITE(12,FMT="(I9,12('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
+      WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tebd'//CSEP//'  Bone'//CSEP//&
+        '  Trbe'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'//CSEP//&
+        '  Trbd'//CSEP//'  Tebe'//CSEP//'  Tene'//CSEP//'  Bobd'//CSEP//'  Bond'//CSEP//'  Bogr'//CSEP//'  Shrb'
+      WRITE(12,FMT="(I9,19('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
       !
       DO JVEGTYPE=1,SIZE(ZVEGTYPE)
         IF (ZVEGTYPE(JVEGTYPE).NE.0.) THEN
@@ -306,7 +308,7 @@ DO ICOVER=1,NBCOVERS
               WRITE(12,FMT="(I9,'"//CSEP//"',A6,36('"//CSEP//"',F3.1))") JCOVER,CVEGTYPE(JVEGTYPE),ZLAI(25:36)            
               JAN=JAN+1
             ENDDO
-            IF (JVEGTYPE.LT.7) THEN 
+            IF ((JVEGTYPE.LT.7) .OR. (JVEGTYPE.GT.12 .AND. JVEGTYPE.NE.18)) THEN 
               IREC = IREC+1      
               READ(11,REC=IREC) ZHT
               WRITE(12,FMT="(A)") '         |    HT|'
@@ -349,33 +351,33 @@ REAL*8, DIMENSION(3) :: ZALB, ZEMIS
 REAL*8, DIMENSION(3,3) :: ZHC,ZTC,ZD
 REAL*8, DIMENSION(2) :: ZTRAFFIC, ZINDUSTRY
 INTEGER, DIMENSION(2):: ISEED, IREAP
-REAL*8, DIMENSION(12) :: ZVEGTYPE
+REAL*8, DIMENSION(19) :: ZVEGTYPE
 REAL*8, DIMENSION(36) :: ZLAI
 REAL*8, DIMENSION(36) :: ZALB_SOIL_NIR, ZALB_SOIL_VIS, ZALB_VEG_NIR, ZALB_VEG_VIS
-CHARACTER(LEN=4),DIMENSION(12) :: CVEGTYPE
+CHARACTER(LEN=4),DIMENSION(19) :: CVEGTYPE
 CHARACTER(LEN=200) :: HPOUB
 
-DATA CVEGTYPE/'  No','Rock','Snow','Tree','Coni','Ever','  C3','  C4',' Irr',&
-                'Gras','Trog','Park'/
+DATA CVEGTYPE/'  No','Rock','Snow','Tebd','Bone','Trbe','  C3','  C4',' Irr', &
+       'Gras','Trog','Park','Trbd','Tebe','Tene','Bobd','Bond','Bogr','Shrb'/
 !
 IF (KFILE==1) THEN
   OPEN(12,FILE='ecoclimapI_covers_param.dat',FORM='FORMATTED')
   NBCOVERS = 255
   NBAN = 1
   IAN = 1992
-  OPEN(11,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(11,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
 ELSEIF (KFILE==2) THEN
   OPEN(12,FILE='ecoclimapII_eu_covers_param.dat',FORM='FORMATTED')
   NBCOVERS = 273
   NBAN = 5
   IAN = 2002
-  OPEN(11,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(11,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
 ELSEIF (KFILE==3) THEN
   OPEN(12,FILE='ecoclimapII_af_covers_param.dat',FORM='FORMATTED')
   NBCOVERS = 38
   NBAN = 8
   IAN = 2000
-  OPEN(11,FILE='ecoclimapII_af_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=13*8)
+  OPEN(11,FILE='ecoclimapII_af_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
 ENDIF
 !
 IREC = 0
@@ -462,7 +464,7 @@ DO ICOVER=1,NBCOVERS
             ENDDO          
             JAN=JAN+1
           ENDDO
-          IF (JVEGTYPE.LT.7) THEN   
+          IF ((JVEGTYPE.LT.7) .OR. (JVEGTYPE.GT.12 .AND. JVEGTYPE.NE.18)) THEN   
             READ(12,FMT=*) HPOUB
             READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZHT   
             IREC = IREC+1              
@@ -599,7 +601,7 @@ DO ICOVER=1,NBCOVERS
               ENDDO          
               JAN=JAN+1
             ENDDO
-            IF (JVEGTYPE.LT.7) THEN   
+            IF ((JVEGTYPE.LT.7) .OR. (JVEGTYPE.GT.12 .AND. JVEGTYPE.NE.18)) THEN   
               READ(12,FMT=*) HPOUB
               READ(12,FMT=*) JCOVER,CVEGTYPE(JVEGTYPE),ZHT   
               IREC = IREC+1              
