@@ -61,7 +61,7 @@ USE MODD_OL_FILEID,        ONLY : XVAR_TO_FILEOUT, XID, XOUT
 USE MODD_ISBA_n,           ONLY : CISBA, CPHOTO, LTR_ML, CRUNOFF, CRAIN,        &
                                   CRESPSL, LCANOPY, LFLOOD, LGLACIER, LTEMP_ARP,&
                                   NTEMPLAYER_ARP, TSNOW, TTIME, CHORT, NPATCH,  &
-                                  LSOC, LGW
+                                  LSOC, LGW, NPATCH
 USE MODD_ISBA_CANOPY_n,    ONLY : NLVL
 USE MODD_DIAG_ISBA_n
 USE MODD_DIAG_EVAP_ISBA_n
@@ -1009,6 +1009,10 @@ ELSEIF(LPGD)THEN
   DO JLAYER=1,INLVLD
     WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
     CALL DEF_VAR_NETCDF(IFILE_ID,'DG'//YLVL   ,'soil_depth_layer_'//YLVL ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
+    IF(NPATCH>1)THEN
+      CALL DEF_VAR_NETCDF(IFILE_ID,'DG'//YLVL(:LEN_TRIM(YLVL))//'_ISBA', &
+                          'averaged_soil_depth_layer_'//YLVL,IDDIM(1:1),YATT_TITLE,(/'m'/))
+    ENDIF
   ENDDO
   !
   DO JLAYER=1,INLVLD
@@ -1023,6 +1027,10 @@ ELSEIF(LPGD)THEN
     CALL DEF_VAR_NETCDF(IFILE_ID,'DG2_DIF'   ,'DG2_depth_in_ISBA-DIF'                    ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     CALL DEF_VAR_NETCDF(IFILE_ID,'RUNOFFD'   ,'Runoff_depth_in_ISBA-DIF'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     CALL DEF_VAR_NETCDF(IFILE_ID,'DTOT_DIF'  ,'Total_soil_depth_for_moisture_in_ISBA-DIF',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
+    IF(NPATCH>1)THEN
+     CALL DEF_VAR_NETCDF(IFILE_ID,'DG2_DIF_ISBA','averaged_DG2_depth_in_ISBA-DIF'                    ,IDDIM(1:1),YATT_TITLE,(/'m'/))
+     CALL DEF_VAR_NETCDF(IFILE_ID,'DTOTDF_ISBA' ,'averaged_Total_soil_depth_for_moisture_in_ISBA-DIF',IDDIM(1:1),YATT_TITLE,(/'m'/))
+    ENDIF
     DO JLAYER=1,INLVLD
       WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
       CALL DEF_VAR_NETCDF(IFILE_ID,'ROOTFRAC'//YLVL,'root_fraction_layer_'//YLVL ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))           

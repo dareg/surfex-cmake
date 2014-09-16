@@ -320,8 +320,6 @@ IF(CISBA=='DIF')THEN ! DIF case
           XFRD2_TWGI (:) = XFRD2_TWGI (:) / ZSUMFRD2(:)          
     ELSEWHERE
           XFRD2_TSWI (:) = XUNDEF
-          XFRD2_TWG  (:) = XUNDEF
-          XFRD2_TWGI (:) = XUNDEF 
     ENDWHERE 
 !    
     WHERE(ZSUMFRD3(:)>0.0) 
@@ -330,8 +328,6 @@ IF(CISBA=='DIF')THEN ! DIF case
           XFRD3_TWGI (:) = XFRD3_TWGI (:) / ZSUMFRD3(:) 
     ELSEWHERE
           XFRD3_TSWI (:) = XUNDEF
-          XFRD3_TWG  (:) = XUNDEF
-          XFRD3_TWGI (:) = XUNDEF
     ENDWHERE
 !
 ! ---------------------------------------------

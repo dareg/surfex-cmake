@@ -37,7 +37,7 @@
 !              ------------
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
-USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA,                           &
+USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA, XPATCH,                   &
                               XLAI, XVEG, XZ0,XALBNIR_SOIL,XALBVIS_SOIL,XALBUV_SOIL,&
                               XRSMIN, XGAMMA, XRGL, XCV, XEMIS, XDG, XWRMAX_CF,     &
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
@@ -70,20 +70,25 @@ IMPLICIT NONE
 !              -------------------------------
 !
 REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,3)) :: ZWORK ! Work array
+REAL, DIMENSION(SIZE(XDG,1),SIZE(XDG,2)) :: ZDG   ! Work array
+REAL, DIMENSION(SIZE(XDG,1)            ) :: ZDG2
+REAL, DIMENSION(SIZE(XDG,1)            ) :: ZDTOT
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=100):: YCOMMENT       ! Comment string
- CHARACTER(LEN=2)  :: YLVLV, YPAS
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=2)  :: YLVLV, YPAS
+CHARACTER(LEN=4)  :: YLVL
 !
-INTEGER           :: JJ, JL, JP, ILAYER
+INTEGER         :: JJ, JL, JP, ILAYER
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_PGD_ISBA_N',0,ZHOOK_HANDLE)
- CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+!
+CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -126,43 +131,81 @@ DO JL=1,SIZE(XDG,2)
   YCOMMENT='soil depth'//' (M)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDG(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
 END DO
+!
+!* Averaged Soil depth
+!
+IF(NPATCH>1)THEN
+!        
+  ZDG(:,:)=0.0
+  DO JP=1,NPATCH
+     DO JL=1,SIZE(XDG,2)
+        DO JJ=1,SIZE(XDG,1) 
+           ZDG(JJ,JL)=ZDG(JJ,JL)+XPATCH(JJ,JP)*XDG(JJ,JL,JP)
+        ENDDO
+     ENDDO
+  ENDDO
+!
+  DO JL=1,SIZE(XDG,2)
+    WRITE(YLVL,'(I4)')JL
+    YRECFM='DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+    YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
+    YCOMMENT='averaged soil depth layer '//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))//' (m)'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,ZDG(:,JL),IRESP,HCOMMENT=YCOMMENT)
+  END DO
+!        
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 IF(CISBA=='DIF')THEN
+!
+  ZDG2 (:)=0.0
+  ZDTOT(:)=0.0
+  ZWORK(:,:)=XUNDEF
+  DO JP=1,SIZE(XDG,3)
+     DO JJ=1,SIZE(XDG,1)
+        ZDG2(JJ)=ZDG2(JJ)+XPATCH(JJ,JP)*XDG2(JJ,JP)
+        JL=NWG_LAYER(JJ,JP)
+        IF(JL/=NUNDEF)THEN
+          ZWORK(JJ,JP)=XDG(JJ,JL,JP)
+          ZDTOT(JJ)=ZDTOT(JJ)+XPATCH(JJ,JP)*XDG(JJ,JL,JP)
+        ENDIF
+     ENDDO
+  ENDDO
 !
 !* Root depth
 !
   YRECFM='DROOT_DIF'
   YCOMMENT='Root depth in ISBA-DIF'
-!
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDROOT(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='DG2_DIF'
   YCOMMENT='DG2 depth in ISBA-DIF'
-!
   CALL WRITE_SURF(HPROGRAM,YRECFM,XDG2(:,:),IRESP,HCOMMENT=YCOMMENT)
+!  
+  IF(NPATCH>1)THEN
+    YRECFM='DG2_DIF_ISBA'
+    YCOMMENT='Averaged DG2 depth in ISBA-DIF'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,ZDG2(:),IRESP,HCOMMENT=YCOMMENT)          
+  ENDIF  
 !
 !* Runoff depth
 !
   YRECFM='RUNOFFD'
   YCOMMENT='Runoff deph in ISBA-DIF'
-!
   CALL WRITE_SURF(HPROGRAM,YRECFM,XRUNOFFD(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Total soil depth for mositure
 !
-  ZWORK(:,:)=XUNDEF
-  DO JP=1,SIZE(XDG,3)
-     DO JJ=1,SIZE(XDG,1)
-        JL=NWG_LAYER(JJ,JP)
-        IF(JL/=NUNDEF)THEN
-          ZWORK(JJ,JP)=XDG(JJ,JL,JP)
-        ENDIF
-     ENDDO
-  ENDDO
   YRECFM='DTOT_DIF'
   YCOMMENT='Total soil depth for moisture in ISBA-DIF'
   CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+  IF(NPATCH>1)THEN
+    YRECFM='DTOTDF_ISBA'
+    YCOMMENT='Averaged Total soil depth for moisture in ISBA-DIF'
+    CALL WRITE_SURF(HPROGRAM,YRECFM,ZDTOT(:),IRESP,HCOMMENT=YCOMMENT)          
+  ENDIF
 !
 !* Root fraction for each patch
 !
