@@ -16,6 +16,7 @@ export VER_MPI="MPIAUTO"
 #
 export VERSION_MASTER="SFX-V8-0"
 export VERSION_XYZ=${VERSION_MASTER}-${VERSION_BUG}
+export VER_USER=$NAME
 #
 TARG=$(uname -s -n)
 case "$TARG" in
