@@ -118,9 +118,10 @@ IF (HSURF=='SN_ROOF') THEN
                             ILUOUT,GUNIF,1,              &
                             SIZE(XLAT),TSNOW_ROOF, TTIME,&
                             XWSNOW_ROOF, XRSNOW_ROOF,    &
-                            XTSNOW_ROOF, XLWCSNOW_ROOF, XASNOW_ROOF,    &
+                            XTSNOW_ROOF, XLWCSNOW_ROOF,  &
+                            XASNOW_ROOF,                 &
                             LSNOW_IDEAL_TEB, ZSG1SNOW,   &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW )
+                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW)
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)
@@ -142,9 +143,10 @@ ELSE IF (HSURF=='SN_ROAD') THEN
                             ILUOUT,GUNIF,1,              &
                             SIZE(XLAT),TSNOW_ROAD, TTIME,&
                             XWSNOW_ROAD, XRSNOW_ROAD,    &
-                            XTSNOW_ROAD, XLWCSNOW_ROAD, XASNOW_ROAD,    &
-                            LSNOW_IDEAL_TEB, ZSG1SNOW,       &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW )
+                            XTSNOW_ROAD, XLWCSNOW_ROAD,  &
+                            XASNOW_ROAD,                 &
+                            LSNOW_IDEAL_TEB, ZSG1SNOW,   &
+                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW)
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)

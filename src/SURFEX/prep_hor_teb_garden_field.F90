@@ -153,10 +153,11 @@ IF (HSURF=='SN_VEG ') THEN
                             YFILEPGD, YFILEPGDTYPE,         &
                             ILUOUT,GUNIF_SNOW,1,            &
                             INI,TSNOW, TTIME,               &
-                            XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, XASNOW_GD, &
-                            LSNOW_IDEAL_GD, ZSG1SNOW,          &
+                            XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
+                            XLWCSNOW_GD, XASNOW_GD,         &
+                            LSNOW_IDEAL_GD, ZSG1SNOW,       &
                             ZSG2SNOW, ZHISTSNOW, ZAGESNOW,  &
-                            ZVEGTYPE_PATCH, ZPATCH          )
+                            XVEGTYPE,ZVEGTYPE_PATCH, ZPATCH )
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)

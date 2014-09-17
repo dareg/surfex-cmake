@@ -41,7 +41,8 @@ USE MODD_ISBA_n,    ONLY : TTIME, XWG, XWGI, XTG, XWR, XLAI,         &
                            NGROUND_LAYER, NPATCH, NWG_LAYER,         &
                            XVEGTYPE_PATCH, XDG, XWWILT, XWFC, XPATCH,&
                            CISBA, XDG2, XWSAT, TSNOW, XVEGTYPE,      &
-                           LTEMP_ARP, NTEMPLAYER_ARP, XICE_STO
+                           LTEMP_ARP, NTEMPLAYER_ARP, XICE_STO,      &
+                           XVEGTYPE
 
 USE MODD_ISBA_GRID_n,    ONLY : XLAT, XLON
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
@@ -146,7 +147,8 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
-                            XVEGTYPE_PATCH, XPATCH, OKEY         )
+                            XVEGTYPE, XVEGTYPE_PATCH, XPATCH,    &
+                            OKEY                                 )
   DEALLOCATE(XWSNOW)
   DEALLOCATE(XRSNOW)
   DEALLOCATE(XTSNOW)

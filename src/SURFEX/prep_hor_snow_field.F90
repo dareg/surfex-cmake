@@ -9,7 +9,8 @@ SUBROUTINE PREP_HOR_SNOW_FIELD( HPROGRAM,                       &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,   &                                
-                                PF,PDEPTH,PVEGTYPE_PATCH,PPATCH   )
+                                PF,PDEPTH,PVEGTYPE,             &
+                                PVEGTYPE_PATCH,PPATCH           )
 !     #######################################################
 !
 !!****  *PREP_HOR_SNOW_FIELD* - reads, interpolates and prepares a snow field
@@ -46,7 +47,6 @@ USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_SNOW
 USE MODD_PREP,           ONLY : LINTERP
-USE MODD_ISBA_n,         ONLY : XVEGTYPE
 !
 USE MODD_SNOW_PAR, ONLY : XANSMAX
 !
@@ -93,7 +93,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW !
 
 REAL,DIMENSION(:,:,:),  INTENT(OUT),OPTIONAL :: PF     ! output field (x,kpatch)
 REAL,DIMENSION(:,:,:),INTENT(IN), OPTIONAL :: PDEPTH ! thickness of each snow layer
-REAL,DIMENSION(:,:,:),  INTENT(IN), OPTIONAL :: PVEGTYPE_PATCH ! fraction of each patch
+REAL,DIMENSION(:,:),  INTENT(IN), OPTIONAL :: PVEGTYPE ! fraction of each vegtype
+REAL,DIMENSION(:,:,:),  INTENT(IN), OPTIONAL :: PVEGTYPE_PATCH ! fraction of each vegtype per patch
 REAL,DIMENSION(:,:),  INTENT(IN), OPTIONAL :: PPATCH ! fraction of each patch
 !
 !
@@ -154,7 +155,7 @@ ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,2)))
 DO JVEGTYPE = 1, SIZE(ZFIELDIN,3)
   !* horizontal interpolation
   ZFIELD=ZFIELDIN(:,:,JVEGTYPE)
-  IF(HSNSURF(3:9)=='SN_VEG'.AND.SIZE(ZFIELDIN,3)==NVEGTYPE) LINTERP(:) = (XVEGTYPE(:,JVEGTYPE) > 0.)
+  IF(PRESENT(PVEGTYPE).AND.SIZE(ZFIELDIN,3)==NVEGTYPE) LINTERP(:) = (PVEGTYPE(:,JVEGTYPE) > 0.)
   IF(PRESENT(PDEPTH)) THEN
      JPATCH = 1
      IF (KPATCH>1) JPATCH = VEGTYPE_TO_PATCH(JVEGTYPE,KPATCH)
