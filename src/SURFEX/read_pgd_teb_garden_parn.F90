@@ -87,8 +87,8 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER                               :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
+CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
 INTEGER                               :: JI, JLAYER     ! loop index
 INTEGER                               :: JTIME          ! loop index
 !
@@ -284,7 +284,7 @@ IF (CTYPE_LVEG == 'PARK') XDATA_VEGTYPE(:, NVT_PARK) = XDATA_FRAC_LVEG(:)
 
 !
 ! Dry/Wet soil albedo
- CALL DRY_WET_SOIL_ALBEDOS(XSAND(:,1),XCLAY(:,1),                             &
+CALL DRY_WET_SOIL_ALBEDOS(XSAND(:,1),XCLAY(:,1),                             &
                           XDATA_VEGTYPE,                                     &
                           XDATA_ALBNIR_DRY,XDATA_ALBVIS_DRY,XDATA_ALBUV_DRY, &
                           XDATA_ALBNIR_WET,XDATA_ALBVIS_WET,XDATA_ALBUV_WET  )  
@@ -682,7 +682,7 @@ DO JI=1,NDIM
                                             XDATA_VEGTYPE(JI,:),GAGRI_TO_GRASS)  
 ! Emissivity
   XDATA_EMIS    (JI,JTIME) = EMIS_FROM_VEG (XDATA_VEG    (JI,JTIME),       &
-                                            XDATA_VEGTYPE(JI,:))  
+                                            XDATA_VEGTYPE(JI,:))
  END DO
 !
 ENDDO

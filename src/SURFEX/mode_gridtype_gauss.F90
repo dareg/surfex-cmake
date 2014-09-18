@@ -303,7 +303,7 @@ DO JP = 1,KL
   ZLON1=ZCONR*PLON_XY(JP)
   ZLAT1=ZCONR*PLAT_XY(JP)
 ! move from the stretched to the no stretched sphere
-  ZINTERM=1./PCODIL*COS(ZLAT1)/(1.+SIN(ZLAT1))
+  ZINTERM=1./PCODIL*COS(ZLAT1)/MAX(1.E-12,1.+SIN(ZLAT1))
   ZLAT2=2.*ATAN((1.-ZINTERM)/(1.+ZINTERM))
   ZLON2=ZLON1
 ! move from the rotated sphere to the real one

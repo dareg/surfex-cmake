@@ -142,7 +142,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN_PAR',0,ZHOOK_HANDLE)
 
 NTIME_GD = 12
 !
-CTYP_GARDEN_HVEG   = 'TREE'           ! Forest and trees
+CTYP_GARDEN_HVEG   = 'TEBD'           ! Temperate broadleaf trees (forest)
 CTYP_GARDEN_LVEG   = 'PARK'           ! Grassland
 CTYP_GARDEN_NVEG   = 'NO  '           ! No vegetation
 !
