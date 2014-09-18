@@ -149,7 +149,7 @@ CISBA         = '   '
 CPEDOTF       = '   '
 CPHOTO        = '   '
 !
- CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
+CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
                        YISBA, YPEDOTF, YPHOTO,  GTR_ML, ZRM_PATCH,              &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,             &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,             &
