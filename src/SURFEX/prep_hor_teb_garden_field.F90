@@ -279,7 +279,7 @@ SELECT CASE (HSURF)
   ALLOCATE(XTG(SIZE(ZFIELDOUTV,1),IWORK))
   ALLOCATE(ZDG(SIZE(XDG,1),IWORK))
   IF (CISBA=='2-L'.OR.CISBA=='3-L') THEN
-    ZDG(:,1) = 0.
+    ZDG(:,1) = 0.01
     ZDG(:,2) = 0.40   ! deep temperature for force-restore taken at 20cm
     IF(CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used
   ELSE
