@@ -84,7 +84,19 @@ CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
 CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-IF (.NOT.GOLD_NAME) THEN
+!-------------------------------------------------------------------------------------
+!
+!*      2.     Reading of grid
+!              ---------------
+!
+CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+!* reads the grid
+CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+!* reads if TEB fields exist in the input file
+CALL TOWN_PRESENCE(HFILEPGDTYPE,GTEB)
+CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+!
+IF (.NOT.GOLD_NAME.AND.GTEB) THEN
    YRECFM='BEM'
    CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
    CALL READ_SURF(HFILEPGDTYPE,YRECFM,YBEM,IRESP)
@@ -92,19 +104,6 @@ IF (.NOT.GOLD_NAME) THEN
 ELSE
    YBEM='DEF'
 ENDIF
-!-------------------------------------------------------------------------------------
-!
-!*      2.     Reading of grid
-!              ---------------
-!
-CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
-!
-!* reads the grid
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
-!
-!* reads if TEB fields exist in the input file
-CALL TOWN_PRESENCE(HFILEPGDTYPE,GTEB)
-!
 !---------------------------------------------------------------------------------------
 !
 !*     3.      Orography
@@ -114,6 +113,7 @@ IF (HSURF=='ZS     ') THEN
   !
   ALLOCATE(PFIELD(INI,1))
   YRECFM='ZS'
+  CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   !
@@ -126,7 +126,6 @@ ELSE
 !
   IF (GTEB) THEN
 !
-    CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
     CALL READ_TEB_PATCH(HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
     CALL GET_CURRENT_TEB_PATCH(ICURRENT_PATCH)
     YPATCH='   '
@@ -310,8 +309,6 @@ ELSE
 !             -------------------------------------
 !
   ELSE
-
-    CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 
     SELECT CASE(HSURF)
 
