@@ -1181,11 +1181,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 include 'netcdf.inc'
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_NETCDF_MERCATOR:READ_NETCDF_SST',0,ZHOOK_HANDLE)
-if (NILENGTH<0) then
+IF (NILENGTH<0) then
   ALLOCATE(PFIELD(1))
   PFIELD(:)=XUNDEF
   CINTERP_TYPE='UNIF  ' !!prescribed uniform field
-elseif ((NINDEPTH<0).OR.(HNCVARNAME/='SST    ')) then
+ELSEIF (NINDEPTH<0) THEN
   ALLOCATE(ZLATI(NILENGTH) )
   ALLOCATE(ZLONG(NILENGTH) )
   ALLOCATE(ZVAL (NILENGTH) )
@@ -1193,13 +1193,13 @@ elseif ((NINDEPTH<0).OR.(HNCVARNAME/='SST    ')) then
   ALLOCATE(PFIELD(NILENGTH))
   PFIELD(:)=XUNDEF
   PFIELD(:) = ZVAL(:)
-  IF (HNCVARNAME == 'SST    ') THEN 
+  IF (TRIM(HNCVARNAME) == 'temperature') THEN 
      WHERE (ZVAL(:)/=ZUNDEF .AND. ZVAL(:)<100.) PFIELD(:)=PFIELD(:)+XTT
   ENDIF
   CINTERP_TYPE='HORIBL' !!interpolation from gaussian, legendre or regular grid
 !                       !!CINGRID_TYPE='GAUSS  ' ou ='AROME '
 !                       !!CINGRID_TYPE='LATLON '
-else 
+ELSE
   ALLOCATE(ZVALUE(NILENGTH,NINDEPTH))
   ALLOCATE(ZLATI(NILENGTH) )
   ALLOCATE(ZLONG(NILENGTH) )
@@ -1210,11 +1210,13 @@ else
   ALLOCATE(PFIELD(NILENGTH))
   PFIELD(:)=XUNDEF
   PFIELD(:)=ZVALUE(:,1)
-  WHERE (ZVALUE(:,1)/=ZUNDEF .AND. ZVALUE(:,1)<100.) PFIELD(:)=PFIELD(:)+XTT
+  IF (TRIM(HNCVARNAME) == 'temperature') THEN 
+     WHERE (ZVALUE(:,1)/=ZUNDEF .AND. ZVALUE(:,1)<100.) PFIELD(:)=PFIELD(:)+XTT
+  ENDIF
   CINTERP_TYPE='HORIBL' !!interpolation from gaussian, legendre or regular grid
 !                       !!CINGRID_TYPE='GAUSS  ' ou ='AROME '
 !                       !!CINGRID_TYPE='LATLON '
-endif
+ENDIF
 !
 IF (ALLOCATED(ZVALUE      ))  DEALLOCATE(ZVALUE )
 IF (ALLOCATED(ZLONG       ))  DEALLOCATE(ZLONG  )
