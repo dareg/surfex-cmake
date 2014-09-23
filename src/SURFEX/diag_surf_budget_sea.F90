@@ -5,7 +5,7 @@ SUBROUTINE  DIAG_SURF_BUDGET_SEA(PTT , PSST, PRHOA, PSFTH, PSFTH_ICE,    &
                                  PDIR_ALB,PSCA_ALB,PALB_ICE,PEMIS, PTRAD,&
                                  PSFZON, PSFZON_ICE, PSFMER, PSFMER_ICE, &
                                  OHANDLE_SIC, PSIC, PTICE,               &
-                                 PRN, PH, PLE, PLEI, PGFLUX,             &
+                                 PRN, PH, PLE, PLE_ICE, PGFLUX,             &
                                  PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU,   &
                                  PFMU, PFMV, PEVAP, PSUBL,               &
                                  PRN_ICE, PH_ICE, PGFLUX_ICE,            &
@@ -86,7 +86,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Sea ice temperature               
 REAL, DIMENSION(:), INTENT(OUT):: PRN       ! net radiation                         (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PH        ! sensible heat flux                    (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PLE       ! total latent heat flux                (W/m2)
-REAL, DIMENSION(:), INTENT(OUT):: PLEI      ! sublimation latent heat flux          (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PLE_ICE      ! sublimation latent heat flux          (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PGFLUX    ! storage flux                          (W/m2)
 !
 REAL, DIMENSION(:),  INTENT(OUT):: PSWD     ! total incoming short wave radiation   (W/m2)
@@ -119,8 +119,8 @@ INTEGER                      :: JSWB ! loop counter on number of SW bands
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
-!
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_SEA',0,ZHOOK_HANDLE)
+!
 ISWB = SIZE(PDIR_SW,2)
 ! 
 !* total incoming and outgoing SW
@@ -128,90 +128,107 @@ ISWB = SIZE(PDIR_SW,2)
 DO JSWB=1,ISWB
   PSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
   PSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
-  IF (OHANDLE_SIC) THEN 
-     ! Some day, Gelato will provide distinct scattered and direct sea-ice albedos ..
-     PSWBU_ICE(:,JSWB) = (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)) * PALB_ICE(:) 
-  ELSE
-     PSWBU_ICE(:,JSWB) = (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)) * XALBSEAICE
-  ENDIF
 ENDDO
 !
 PSWD(:) = 0.
 PSWU(:) = 0.
-PSWU_ICE(:) = 0.
 DO JSWB=1,ISWB
    PSWD(:)=PSWD(:)+PSWBD(:,JSWB)
    PSWU(:)=PSWU(:)+PSWBU(:,JSWB)
-   PSWU_ICE(:)=PSWU_ICE(:)+PSWBU_ICE(:,JSWB)
 ENDDO
-
 !
 !*incoming outgoing LW
 !
 PLWD(:)=PLW(:)
 PLWU(:)=PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
-IF (OHANDLE_SIC) THEN 
-   PLWU_ICE(:)=XEMISWATICE*XSTEFAN*PTICE(:)**4 + (1.-XEMISWATICE)*PLW(:)
-ELSE
-   PLWU_ICE(:)=XEMISWATICE*XSTEFAN*PTRAD(:)**4 + (1.-XEMISWATICE)*PLW(:)
-ENDIF
 !
 !* net radiation
 !
 PRN(:)    =   PSWD(:) - PSWU(:)     + PLWD(:) - PLWU    (:)
-PRN_ICE(:) =   PSWD(:) - PSWU_ICE(:) + PLWD(:) - PLWU_ICE(:) 
 !
-IF (OHANDLE_SIC) THEN
-   !* sensible heat flux
-   !
-   PH     = (1 - PSIC) * PSFTH         + PSIC * PSFTH_ICE 
-   PH_ICE =                                     PSFTH_ICE
-   !
-   !* latent heat flux
-   !
-   PLE    = (1 - PSIC) * PSFTQ * XLVTT + PSIC * PSFTQ_ICE * XLSTT
-   PLEI   =                              PSIC * PSFTQ_ICE * XLSTT
-   PEVAP  = (1 - PSIC) * PSFTQ         + PSIC * PSFTQ_ICE 
-   PSUBL  =                              PSIC * PSFTQ_ICE 
-   !
-   !* wind stress
-   !
-   PFMU = (1 - PSIC) * PSFZON + PSIC * PSFZON_ICE
-   PFMU_ICE =                          PSFZON_ICE
-   PFMV = (1 - PSIC) * PSFMER + PSIC * PSFMER_ICE
-   PFMV_ICE =                          PSFMER_ICE
+IF (.NOT.OHANDLE_SIC) THEN
+  !
+  !* sensible heat flux
+  !
+  PH     = PSFTH
+  !
+  !* latent heat flux
+  !
+  WHERE (PSST<PTT  )
+     PLE    = PSFTQ * XLSTT
+     PLE_ICE= PSFTQ * XLSTT
+     PEVAP  = PSFTQ
+     PSUBL  = PSFTQ
+  ELSEWHERE
+     PLE    = PSFTQ * XLVTT
+     PLE_ICE= 0.0
+     PEVAP  = PSFTQ
+     PSUBL  = 0.0
+  END WHERE
+  !
+  !* storage flux
+  !
+  PGFLUX = PRN - PH - PLE
+  !
+  !* wind stress
+  !
+  PFMU = PSFZON
+  PFMV = PSFMER
+!
 ELSE
-   !* sensible heat flux
-   !
-   PH     = PSFTH
-   PH_ICE = PSFTH_ICE
-   !
-   !* latent heat flux
-   !
-   WHERE (PSST<PTT  )
-      PLE    = PSFTQ * XLSTT
-      PLEI   = PSFTQ * XLSTT
-      PEVAP  = PSFTQ
-      PSUBL  = PSFTQ
-   ELSEWHERE
-      PLE    = PSFTQ * XLVTT
-      PLEI   = 0.0
-      PEVAP  = PSFTQ
-      PSUBL  = 0.0
-   END WHERE
-   !
-   !* wind stress
-   !
-   PFMU = PSFZON
-   PFMV = PSFMER
-   PFMU_ICE = PFMU
-   PFMV_ICE = PFMV
+  !
+  !---------------------------------------------------------------------------- 
+  ! Sea ice or mixed diag
+  !---------------------------------------------------------------------------- 
+  !
+  !
+  !* total incoming and outgoing SW
+  !
+  DO JSWB=1,ISWB
+   PSWBU_ICE(:,JSWB) = (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)) * PALB_ICE(:) 
+  ENDDO
+  !
+  PSWU_ICE(:) = 0.
+  DO JSWB=1,ISWB
+     PSWU_ICE(:)=PSWU_ICE(:)+PSWBU_ICE(:,JSWB)
+  ENDDO
+  !
+  !*incoming outgoing LW
+  !
+  PLWU_ICE(:)=XEMISWATICE*XSTEFAN*PTICE(:)**4 + (1.-XEMISWATICE)*PLW(:)
+  !
+  !* net radiation
+  !
+  PRN_ICE(:) =   PSWD(:) - PSWU_ICE(:) + PLWD(:) - PLWU_ICE(:)
+  !
+  !* sensible heat flux
+  !
+  PH     = (1 - PSIC) * PSFTH         + PSIC * PSFTH_ICE 
+  PH_ICE =                                     PSFTH_ICE
+  !
+  !* latent heat flux
+  !
+  PLE    = (1 - PSIC) * PSFTQ * XLVTT + PSIC * PSFTQ_ICE * XLSTT
+  PLE_ICE   =                              PSIC * PSFTQ_ICE * XLSTT
+  PEVAP  = (1 - PSIC) * PSFTQ         + PSIC * PSFTQ_ICE 
+  PSUBL  =                              PSIC * PSFTQ_ICE 
+  !
+  !* ice storage flux
+  !
+   PGFLUX_ICE = PRN_ICE - PH_ICE - PLE_ICE
+  !
+  !* wind stress
+  !
+  PFMU = (1 - PSIC) * PSFZON + PSIC * PSFZON_ICE
+  PFMU_ICE =                          PSFZON_ICE
+  PFMV = (1 - PSIC) * PSFMER + PSIC * PSFMER_ICE
+  PFMV_ICE =                          PSFMER_ICE
+!  
 ENDIF
 !
-!* storage flux
+!* total storage flux
 !
 PGFLUX = PRN - PH - PLE
-PGFLUX_ICE = PRN_ICE - PH_ICE - PLEI
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_SEA',1,ZHOOK_HANDLE)
 !

@@ -109,7 +109,7 @@ ENDIF
 !
 nx=KLU
 !
-ALLOCATE(XSIC(nx))
+ALLOCATE(XSIC(KLU))
 XSIC(:)=XUNDEF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -120,14 +120,14 @@ XSIC(:)=XUNDEF
 !
 IF(LINTERPOL_SIC)THEN
    !
-   ALLOCATE(XFSIC(SIZE(XSIC)))
+   ALLOCATE(XFSIC(KLU))
    !
    ! Precedent, Current and Next Monthly SIC
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SIC
    IF(CINTERPOL_SIC=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIC_MTH(SIZE(XSIC),INMTH))
+   ALLOCATE(XSIC_MTH(KLU,INMTH))
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIC_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
@@ -338,7 +338,7 @@ TGLT%bat(:,1)=-XSEABATHY
 !   Allocate for forcing fields of sea surface salinity and sea ice cover, and 
 !   read data (-possibly with interpolation)
 !
-ALLOCATE(XSSS(nx))
+ALLOCATE(XSSS(KLU))
 XSSS=XUNDEF
 !
 !* Sea surface salinity nudging data
@@ -375,14 +375,14 @@ ENDIF
 !
 IF(LINTERPOL_SIT)THEN
    !
-   ALLOCATE(XFSIT(nx))
+   ALLOCATE(XFSIT(KLU))
    !  
    ! Precedent, Current and Next Monthly SIT
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SIT
    IF(TRIM(CINTERPOL_SIT)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIT_MTH(SIZE(XSIC),INMTH))
+   ALLOCATE(XSIT_MTH(KLU,INMTH))
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIT_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))

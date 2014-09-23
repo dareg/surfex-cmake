@@ -38,11 +38,11 @@ SUBROUTINE DIAG_SEAFLUX_n(HPROGRAM,                                           &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SEAFLUX_n,      ONLY : TTIME
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_BUDGETC, LSURF_VARS,  &
-                                  XRN, XH, XLE, XLEI, XGFLUX, XRI, XT2M, XQ2M, XHU2M, &
+                                  XRN, XH, XLE, XLE_ICE, XGFLUX, XRI, XT2M, XQ2M, XHU2M, &
                                   XZON10M, XMER10M, XCD, XCH, XCE, XQS, XZ0, XZ0H,    &
                                   XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, XFMU, XFMV,   &
                                   XRNC, XHC, XLEC, XGFLUXC, XSWDC, XSWUC, XLWDC,      &
-                                  XLWUC, XFMUC, XFMVC, XT2M_MIN, XT2M_MAX, XLEIC,     &
+                                  XLWUC, XFMUC, XFMVC, XT2M_MIN, XT2M_MAX, XLEC_ICE,  &
                                   XTS, XHU2M_MIN, XHU2M_MAX, XWIND10M,                &
                                   XWIND10M_MAX, XEVAP, XEVAPC, XSUBL, XSUBLC  
 !
@@ -115,7 +115,7 @@ IF (LSURF_BUDGET) THEN
   PRN      = XRN
   PH       = XH
   PLE      = XLE
-  PLEI     = XLEI
+  PLEI     = XLE_ICE
   PGFLUX   = XGFLUX
   PEVAP    = XEVAP
   PSUBL    = XSUBL
@@ -133,7 +133,7 @@ IF (LSURF_BUDGETC) THEN
   PRNC      = XRNC
   PHC       = XHC
   PLEC      = XLEC
-  PLEIC     = XLEIC
+  PLEIC     = XLEC_ICE
   PGFLUXC   = XGFLUXC
   PEVAPC    = XEVAPC
   PSUBLC    = XSUBLC

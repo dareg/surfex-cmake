@@ -165,7 +165,9 @@ IF (LSURF_BUDGET) THEN
    CALL DEF_VAR_NETCDF(IFILE_ID,'RN_SEA'   ,'Averaged_Net_Radiation'                    ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'H_SEA'    ,'Averaged_Sensible_Heat_Flux'               ,IDDIM,YATT_TITLE,YATT)
    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_SEA'   ,'Averaged_Total_Latent_Heat_Flux  '         ,IDDIM,YATT_TITLE,YATT)
-   CALL DEF_VAR_NETCDF(IFILE_ID,'LEI_SEA'  ,'Averaged_SublimationLatent_Heat_Flux  '    ,IDDIM,YATT_TITLE,YATT)
+   IF(.NOT.LDIAG_SEAICE) THEN   
+     CALL DEF_VAR_NETCDF(IFILE_ID,'LEI_SEA'  ,'Averaged_SublimationLatent_Heat_Flux  '    ,IDDIM,YATT_TITLE,YATT)
+   ENDIF
    CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUX_SEA','Averaged_Ground_Heat_Flux  '               ,IDDIM,YATT_TITLE,YATT)
    IF(LRAD_BUDGET)THEN
       CALL DEF_VAR_NETCDF(IFILE_ID,'SWD_SEA'  ,'Averaged_Downward_SW       '             ,IDDIM,YATT_TITLE,YATT)
@@ -240,6 +242,7 @@ IF (LDIAG_SEAICE) THEN
    IF (LSURF_BUDGET) THEN
       CALL DEF_VAR_NETCDF(IFILE_ID,'RN_SEAICE','Sea Ice Net_Radiation',IDDIM,YATT_TITLE,YATT)
       CALL DEF_VAR_NETCDF(IFILE_ID,'H_SEAICE','Sea Ice Sensible_Heat_Flux',IDDIM,YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LE_SEAICE'  ,'Averaged_SublimationLatent_Heat_Flux  '    ,IDDIM,YATT_TITLE,YATT)
       CALL DEF_VAR_NETCDF(IFILE_ID,'GFLX_SEAICE','Sea Ice Ground_Heat_Flux ',IDDIM,YATT_TITLE,YATT)
       IF(LRAD_BUDGET)THEN
          CALL DEF_VAR_NETCDF(IFILE_ID,'LWU_SEAICE','Sea Ice Upward_LW',IDDIM,YATT_TITLE,YATT)
@@ -288,7 +291,9 @@ IF (LSURF_BUDGETC) THEN
   CALL DEF_VAR_NETCDF(IFILE_ID,'RNC_SEA'  ,'Cumulated_Averaged_Net_Radiation'        ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'HC_SEA'   ,'Cumulated_Averaged_Sensible_Heat_Flux'   ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'LEC_SEA'  ,'Cumulated_Averaged_Total_Latent_Heat_Flux',IDDIM,YATT_TITLE,YATT)
-  CALL DEF_VAR_NETCDF(IFILE_ID,'LEIC_SEA' ,'Cumulated_Averaged_Sublimation_Latent_Heat_Flux',IDDIM,YATT_TITLE,YATT)
+  IF (.NOT.LDIAG_SEAICE) THEN 
+     CALL DEF_VAR_NETCDF(IFILE_ID,'LEIC_SEA' ,'Cumulated_Averaged_Sublimation_Latent_Heat_Flux',IDDIM,YATT_TITLE,YATT)
+  ENDIF
   CALL DEF_VAR_NETCDF(IFILE_ID,'GFLUXC_SEA','Cumulated_Averaged_Ground_Heat_Flux'    ,IDDIM,YATT_TITLE,YATT)
   IF(LRAD_BUDGET)THEN
     CALL DEF_VAR_NETCDF(IFILE_ID,'SWDC_SEA'  ,'Cumulated_Averaged_Downward_SW  '    ,IDDIM,YATT_TITLE,YATT)
@@ -307,6 +312,7 @@ IF (LSURF_BUDGETC) THEN
      YATT='J/m2'
      CALL DEF_VAR_NETCDF(IFILE_ID,'RNC_SEAICE','Cumulated_Seaice_Net_Radiation',IDDIM,YATT_TITLE,YATT)
      CALL DEF_VAR_NETCDF(IFILE_ID,'HC_SEAICE','Cumulated_Seaice_Sensible_Heat_Flux',IDDIM,YATT_TITLE,YATT)
+     CALL DEF_VAR_NETCDF(IFILE_ID,'LEC_SEAICE' ,'Cumulated_Averaged_Sublimation_Latent_Heat_Flux',IDDIM,YATT_TITLE,YATT)
      CALL DEF_VAR_NETCDF(IFILE_ID,'GFLXC_SEAICE','Cumulated_Seaice_Ground_Heat_Flux',IDDIM,YATT_TITLE,YATT)
      IF(LRAD_BUDGET)THEN
         CALL DEF_VAR_NETCDF(IFILE_ID,'SWUC_SEAICE','Cumulated_Seaice_Upward_SW',IDDIM,YATT_TITLE,YATT)

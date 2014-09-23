@@ -1291,16 +1291,7 @@ IF ( LRESTART ) THEN
       CALL GOTO_SURFEX(NBLOCK,.TRUE.)
     ENDIF
     !  
-    !--------------------------------------------------  
-    !* writes prognostic variables into the restar file
-    !--------------------------------------------------  
-    !  
     CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
-    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
-    !
-    !--------------------------------------------------  
-    !* writes some diags into the restar file
-    !--------------------------------------------------  
     !
     IF (LRESTART_2M) THEN
       I2M       = 1
@@ -1339,6 +1330,8 @@ IF ( LRESTART ) THEN
                           GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
                           GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
     !
+    !* writes into the file
+    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
        CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
     ENDIF

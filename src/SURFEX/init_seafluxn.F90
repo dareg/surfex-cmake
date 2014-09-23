@@ -416,7 +416,11 @@ END IF
 !*       8.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_SEAFLUX_INIT_n(HPROGRAM,ILU,KSW)
+IF(.NOT.(LHANDLE_SIC.OR.LCPL_SEAICE))THEN
+  LDIAG_SEAICE=.FALSE.
+ENDIF
+!
+CALL DIAG_SEAFLUX_INIT_n(HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------
 !

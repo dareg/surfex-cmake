@@ -50,7 +50,7 @@ USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,       &
                                        XT2M, XQ2M, XHU2M, XZON10M, XMER10M,   &
                                        XRN, XH, XLE, XGFLUX, XRI, XCD, XCH,   &
                                        XCE, XZ0, XZ0H, XQS, XSWD, XSWU, XLWD, &
-                                       XLWU, XSWBD, XSWBU, XFMU, XFMV, XLEI,  &
+                                       XLWU, XSWBD, XSWBU, XFMU, XFMV, XLE_ICE,  &
                                        LSURF_BUDGETC, XT2M_MIN, XT2M_MAX,     &
                                        XTS, XTSRAD, XHU2M_MIN, XHU2M_MAX,     &
                                        XWIND10M, XWIND10M_MAX, XEVAP, XSUBL,  &  
@@ -141,7 +141,6 @@ REAL, DIMENSION(:), INTENT(IN)    :: PSFMER_ICE ! meridian friction
 LOGICAL                         :: GSIC
 REAL, DIMENSION(SIZE(PTA))      :: ZZ0W
 REAL, DIMENSION(SIZE(PTA))      :: ZH
-REAL, DIMENSION(SIZE(PTA))      :: ZRI
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -193,6 +192,7 @@ IF (.NOT. LSBL) THEN
   END IF
 !
   IF (N2M>=1) THEN
+    !* Richardson number
      IF (OHANDLE_SIC) THEN
         XT2M    = XT2M    * (1 - PSIC) + XT2M_ICE    * PSIC
         XQ2M    = XQ2M    * (1 - PSIC) + XQ2M_ICE    * PSIC
@@ -201,9 +201,10 @@ IF (.NOT. LSBL) THEN
         XMER10M = XMER10M * (1 - PSIC) + XMER10M_ICE * PSIC
         XWIND10M_ICE(:) = SQRT(XZON10M_ICE**2+XMER10M_ICE**2)
         !
-        ZRI     = PRI     * (1 - PSIC) + PRI_ICE     * PSIC
+        XRI    = PRI     * (1 - PSIC) + PRI_ICE     * PSIC
+        XRI_ICE=PRI_ICE
      ELSE
-        ZRI=PRI
+        XRI    =PRI
      ENDIF
     !
     XT2M_MIN(:) = MIN(XT2M_MIN(:),XT2M(:))
@@ -214,10 +215,6 @@ IF (.NOT. LSBL) THEN
     !
     XWIND10M    (:) = SQRT(XZON10M**2+XMER10M**2)
     XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
-    !
-    !* Richardson number
-    XRI = ZRI
-    XRI_ICE=PRI_ICE
     !
   ENDIF
 !
@@ -236,11 +233,11 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
 !
   CALL  DIAG_SURF_BUDGET_SEA   (XTTS, PSST, PRHOA, PSFTH, PSFTH_ICE,    &
                                   PSFTQ, PSFTQ_ICE,                     &
-                                  PDIR_SW, PSCA_SW, PLW,                &
-                                  PDIR_ALB, PSCA_ALB,PICE_ALB, PEMIS, PTRAD,&
-                                  PSFZON, PSFZON_ICE, PSFMER,PSFMER_ICE,&
-                                  OHANDLE_SIC, PSIC, PTICE,            &
-                                  XRN, XH, XLE, XLEI, XGFLUX,           &
+                                  PDIR_SW, PSCA_SW, PLW, PDIR_ALB,      &
+                                  PSCA_ALB,PICE_ALB, PEMIS, PTRAD,      &
+                                  PSFZON, PSFZON_ICE, PSFMER,           &
+                                  PSFMER_ICE, OHANDLE_SIC, PSIC, PTICE, &
+                                  XRN, XH, XLE, XLE_ICE, XGFLUX,        &
                                   XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
                                   XFMU, XFMV, XEVAP, XSUBL,             &
                                   XRN_ICE, XH_ICE, XGFLUX_ICE,          &
@@ -250,10 +247,10 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
 END IF
 !
 IF(LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_SEA(PTSTEP, XRN, XH, XLE, XLEI, XGFLUX,  &
-                               XSWD, XSWU, XLWD, XLWU, XFMU, XFMV,&
-                               XEVAP, XSUBL,                      &
-                               XRN_ICE, XH_ICE, XGFLUX_ICE,       &
+  CALL DIAG_SURF_BUDGETC_SEA(PTSTEP, XRN, XH, XLE, XLE_ICE, XGFLUX,  &
+                               XSWD, XSWU, XLWD, XLWU, XFMU, XFMV,   &
+                               XEVAP, XSUBL, OHANDLE_SIC,            &
+                               XRN_ICE, XH_ICE, XGFLUX_ICE,          &
                                XSWU_ICE, XLWU_ICE, XFMU_ICE, XFMV_ICE)
 ENDIF
 !

@@ -38,15 +38,17 @@ USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 USE MODD_SEAFLUX_n,     ONLY : LHANDLE_SIC
 !
-USE MODD_DIAG_SEAFLUX_n,ONLY : N2M, LRAD_BUDGET, LSURF_BUDGET,           &
+USE MODD_DIAG_SEAICE_n,  ONLY : LDIAG_SEAICE
+!
+USE MODD_DIAG_SEAFLUX_n,ONLY : N2M, LRAD_BUDGET, LSURF_BUDGET,             &
                                  LCOEF, LSURF_VARS, XTS, XTSRAD,           &
-                                 XRN, XH, XLE, XLEI, XGFLUX,               &
+                                 XRN, XH, XLE, XLE_ICE, XGFLUX,            &
                                  XRI, XCD, XCH, XCE, XZ0, XZ0H,            &
                                  XT2M, XQ2M, XHU2M, XT2M_MIN, XT2M_MAX,    &
                                  XZON10M, XMER10M, XQS,                    &
                                  XSWD, XSWU, XLWD, XLWU, XSWBD, XSWBU,     &
                                  XFMU, XFMV, LSURF_BUDGETC,                &
-                                 XRNC, XHC, XLEC, XLEIC, XGFLUXC, XSWDC,   &
+                                 XRNC, XHC, XLEC, XLEC_ICE, XGFLUXC, XSWDC,&
                                  XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,        &
                                  XHU2M_MIN, XHU2M_MAX, XWIND10M,           &
                                  XWIND10M_MAX, XEVAP, XEVAPC, XSUBL, XSUBLC
@@ -140,10 +142,11 @@ IF (LSURF_BUDGET) THEN
    !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XLE(:),IRESP,HCOMMENT=YCOMMENT)
    !
-   YRECFM='LEI_SEA'
-   YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-   !
-   CALL WRITE_SURF(HPROGRAM,YRECFM,XLEI(:),IRESP,HCOMMENT=YCOMMENT)
+   IF(.NOT.LDIAG_SEAICE)THEN
+     YRECFM='LEI_SEA'
+     YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+     CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_ICE(:),IRESP,HCOMMENT=YCOMMENT) 
+   ENDIF
    !
    YRECFM='GFLUX_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
@@ -226,12 +229,13 @@ IF (LSURF_BUDGETC) THEN
    YRECFM='LEC_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
    !
+   IF(.NOT.LDIAG_SEAICE)THEN
+     YRECFM='LEIC_SEA'
+     YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+     CALL WRITE_SURF(HPROGRAM,YRECFM,XLEC_ICE(:),IRESP,HCOMMENT=YCOMMENT) 
+   ENDIF
+   !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XLEC(:),IRESP,HCOMMENT=YCOMMENT)
-   !
-   YRECFM='LEIC_SEA'
-   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-   !
-   CALL WRITE_SURF(HPROGRAM,YRECFM,XLEIC(:),IRESP,HCOMMENT=YCOMMENT)
    !
    YRECFM='GFLUXC_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'

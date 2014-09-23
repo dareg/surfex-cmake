@@ -43,12 +43,12 @@ USE MODD_SFX_OASIS,      ONLY : LCPL_SEA,LCPL_SEAICE
 USE MODD_DIAG_SURF_ATM_n,ONLY : LREAD_BUDGETC
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,     &
                                   LSURF_BUDGETC, LRESET_BUDGETC,            &
-                                  XRN, XH, XLE, XLEI, XGFLUX, XEVAP, XSUBL, &
+                                  XRN, XH, XLE, XLE_ICE, XGFLUX, XEVAP, XSUBL, &
                                   XRI, XCD, XCH, XCE, XZ0, XZ0H, XT2M,      &
                                   XQ2M, XHU2M, XZON10M, XMER10M, XQS, XSWD, &
                                   XSWU, XLWD, XLWU, XT2M_MIN, XT2M_MAX,     &
                                   XSWBD, XSWBU, XFMU, XFMV, XTS, XTSRAD,    &
-                                  XRNC, XHC, XLEC, XLEIC, XGFLUXC,          &
+                                  XRNC, XHC, XLEC, XLEC_ICE, XGFLUXC,          &
                                   XEVAPC, XSUBLC,                           &
                                   XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC, &
                                   XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX,&
@@ -58,8 +58,8 @@ USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,     &
                                   XCD_ICE, XCH_ICE,                         &
                                   XZ0_ICE, XZ0H_ICE, XQS_ICE, XSWU_ICE,     &
                                   XLWU_ICE, XSWBU_ICE, XFMU_ICE, XFMV_ICE,  &
-                                  XRN_ICEC, XH_ICEC, XGFLUX_ICEC,           &
-                                  XSWU_ICEC, XLWU_ICEC, XFMU_ICEC, XFMV_ICEC 
+                                  XRNC_ICE, XHC_ICE, XGFLUXC_ICE,           &
+                                  XSWUC_ICE, XLWUC_ICE, XFMUC_ICE, XFMVC_ICE 
 
 !                                
 USE MODD_DIAG_OCEAN_n,   ONLY : LDIAG_OCEAN, XTOCMOY, XSOCMOY, XUOCMOY,   &
@@ -97,7 +97,6 @@ INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands
 INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
-LOGICAL           :: LREAD
 !
 REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
@@ -117,7 +116,7 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   ALLOCATE(XH      (KLU))
   ALLOCATE(XH_ICE  (KLU))
   ALLOCATE(XLE     (KLU))
-  ALLOCATE(XLEI    (KLU))
+  ALLOCATE(XLE_ICE (KLU))
   ALLOCATE(XGFLUX  (KLU))
   ALLOCATE(XGFLUX_ICE(KLU))
   ALLOCATE(XEVAP   (KLU))
@@ -141,7 +140,7 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   XH       = XUNDEF
   XH_ICE   = XUNDEF
   XLE      = XUNDEF
-  XLEI     = XUNDEF
+  XLE_ICE  = XUNDEF
   XGFLUX   = XUNDEF
   XGFLUX_ICE=XUNDEF
   XEVAP    = XUNDEF
@@ -164,7 +163,7 @@ ELSE
   ALLOCATE(XH      (0))
   ALLOCATE(XH_ICE  (0))
   ALLOCATE(XLE     (0))
-  ALLOCATE(XLEI    (0))
+  ALLOCATE(XLE_ICE (0))
   ALLOCATE(XGFLUX  (0))
   ALLOCATE(XGFLUX_ICE(0))
   ALLOCATE(XEVAP   (0))
@@ -189,69 +188,70 @@ ENDIF
 IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
 !        
   ALLOCATE(XRNC    (KLU))
-  ALLOCATE(XRN_ICEC(KLU))
+  ALLOCATE(XRNC_ICE(KLU))
   ALLOCATE(XHC     (KLU))
-  ALLOCATE(XH_ICEC (KLU))
+  ALLOCATE(XHC_ICE (KLU))
   ALLOCATE(XLEC    (KLU))
-  ALLOCATE(XLEIC   (KLU))
+  ALLOCATE(XLEC_ICE(KLU))
   ALLOCATE(XGFLUXC (KLU))
-  ALLOCATE(XGFLUX_ICEC(KLU))
+  ALLOCATE(XGFLUXC_ICE(KLU))
   ALLOCATE(XEVAPC  (KLU))
   ALLOCATE(XSUBLC  (KLU))  
   ALLOCATE(XSWDC   (KLU))
   ALLOCATE(XSWUC   (KLU))
-  ALLOCATE(XSWU_ICEC(KLU))
+  ALLOCATE(XSWUC_ICE(KLU))
   ALLOCATE(XLWDC   (KLU))
   ALLOCATE(XLWUC   (KLU))
-  ALLOCATE(XLWU_ICEC(KLU))
+  ALLOCATE(XLWUC_ICE(KLU))
   ALLOCATE(XFMUC   (KLU))
-  ALLOCATE(XFMU_ICEC(KLU))
+  ALLOCATE(XFMUC_ICE(KLU))
   ALLOCATE(XFMVC   (KLU))
-  ALLOCATE(XFMV_ICEC(KLU))
+  ALLOCATE(XFMVC_ICE(KLU))
 !
   IF (.NOT. LREAD_BUDGETC) THEN        
      XRNC    = 0.0
-     XRN_ICEC =0.0
+     XRNC_ICE =0.0
      XHC     = 0.0
-     XH_ICEC  =0.0
+     XHC_ICE  =0.0
      XLEC    = 0.0
-     XLEIC   = 0.0
+     XLEC_ICE= 0.0
      XGFLUXC = 0.0
-     XGFLUX_ICEC=0.0
+     XGFLUXC_ICE=0.0
      XEVAPC  = 0.0
      XSUBLC  = 0.0
      XSWDC   = 0.0
      XSWUC   = 0.0
-     XSWU_ICEC=0.0
+     XSWUC_ICE=0.0
      XLWDC   = 0.0
      XLWUC   = 0.0
-     XLWU_ICEC=0.0
+     XLWUC_ICE=0.0
      XFMUC   = 0.0
-     XFMU_ICEC=0.0
+     XFMUC_ICE=0.0
      XFMVC   = 0.0
-     XFMV_ICEC=0.0
+     XFMVC_ICE=0.0
   ELSEIF (LREAD_BUDGETC.AND.LRESET_BUDGETC) THEN
      XRNC    = 0.0
-     XRN_ICEC= 0.0
+     XRNC_ICE= 0.0
      XHC     = 0.0
-     XH_ICEC = 0.0
+     XHC_ICE = 0.0
      XLEC    = 0.0
-     XLEIC   = 0.0
+     XLEC_ICE= 0.0
      XGFLUXC = 0.0
-     XGFLUX_ICEC=0.0
+     XGFLUXC_ICE=0.0
      XEVAPC  = 0.0
      XSUBLC  = 0.0     
      XSWDC   = 0.0
      XSWUC   = 0.0
-     XSWU_ICEC=0.0
+     XSWUC_ICE=0.0
      XLWDC   = 0.0
      XLWUC   = 0.0
-     XLWU_ICEC=0.0
+     XLWUC_ICE=0.0
      XFMUC   = 0.0
-     XFMU_ICEC=0.0
+     XFMUC_ICE=0.0
      XFMVC   = 0.0
-     XFMV_ICEC=0.0
+     XFMVC_ICE=0.0
   ELSE
+     CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)    
      YREC='RNC_SEA'
      CALL READ_SURF(HPROGRAM,YREC,XRNC,IRESP)
      YREC='HC_SEA'
@@ -259,7 +259,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      YREC='LEC_SEA'
      CALL READ_SURF(HPROGRAM,YREC,XLEC,IRESP)
      YREC='LEIC_SEA'
-     CALL READ_SURF(HPROGRAM,YREC,XLEIC,IRESP)     
+     CALL READ_SURF(HPROGRAM,YREC,XLEC_ICE,IRESP) 
      YREC='GFLUXC_SEA'
      CALL READ_SURF(HPROGRAM,YREC,XGFLUXC ,IRESP)
      YREC='SWDC_SEA'
@@ -274,75 +274,45 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      CALL READ_SURF(HPROGRAM,YREC,XFMUC,IRESP)
      YREC='FMVC_SEA'
      CALL READ_SURF(HPROGRAM,YREC,XFMVC,IRESP)
-!
-     CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-      IF (IVERSION<8)THEN
-         XEVAPC      = 0.0
-         XSUBLC      = 0.0              
-         XRN_ICEC    = 0.0
-         XH_ICEC     = 0.0
-         XGFLUX_ICEC = 0.0
-         XSWU_ICEC   = 0.0
-         XLWU_ICEC   = 0.0
-         XFMU_ICEC   = 0.0
-         XFMV_ICEC   = 0.0
-      ELSE
-         !
-         YREC='EVAPC_SEA'
-         CALL READ_SURF(HPROGRAM,YREC,XEVAPC,IRESP)
-         YREC='SUBLC_SEA'
-         CALL READ_SURF(HPROGRAM,YREC,XSUBLC,IRESP)
-         !
-         CALL READ_SURF(HPROGRAM,'DIAG_SEAICE',LREAD,IRESP)
-         IF(LREAD)THEN
-           YREC='RNC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XRN_ICEC,IRESP)
-           YREC='HC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XH_ICEC ,IRESP)
-           YREC='GFLXC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XGFLUX_ICEC,IRESP)
-           YREC='SWUC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XSWU_ICEC,IRESP)
-           YREC='LWUC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XLWU_ICEC,IRESP)
-           YREC='FMUC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XFMU_ICEC,IRESP)
-           YREC='FMVC_SEAICE'
-           CALL READ_SURF(HPROGRAM,YREC,XFMV_ICEC,IRESP)
-         ELSE
-           XRN_ICEC    = 0.0
-           XH_ICEC     = 0.0
-           XGFLUX_ICEC = 0.0
-           XSWU_ICEC   = 0.0
-           XLWU_ICEC   = 0.0
-           XFMU_ICEC   = 0.0
-           XFMV_ICEC   = 0.0                 
-         ENDIF
-         !
-      ENDIF
-!
+     IF (IVERSION<8)THEN
+        XEVAPC      = 0.0
+        XSUBLC      = 0.0              
+     ELSE
+        !
+        YREC='EVAPC_SEA'
+        CALL READ_SURF(HPROGRAM,YREC,XEVAPC,IRESP)
+        YREC='SUBLC_SEA'
+        CALL READ_SURF(HPROGRAM,YREC,XSUBLC,IRESP)
+     ENDIF
+     XRNC_ICE    = 0.0
+     XHC_ICE     = 0.0
+     XGFLUXC_ICE = 0.0
+     XSWUC_ICE   = 0.0
+     XLWUC_ICE   = 0.0
+     XFMUC_ICE   = 0.0
+     XFMVC_ICE   = 0.0
   ENDIF   
 ELSE
   ALLOCATE(XRNC    (0))
-  ALLOCATE(XRN_ICEC(0))
+  ALLOCATE(XRNC_ICE(0))
   ALLOCATE(XHC     (0))
-  ALLOCATE(XH_ICEC (0))
+  ALLOCATE(XHC_ICE (0))
   ALLOCATE(XLEC    (0))
-  ALLOCATE(XLEIC   (0))
+  ALLOCATE(XLEC_ICE(0))
   ALLOCATE(XGFLUXC (0))
-  ALLOCATE(XGFLUX_ICEC(0))
+  ALLOCATE(XGFLUXC_ICE(0))
   ALLOCATE(XEVAPC  (0))
   ALLOCATE(XSUBLC  (0))  
   ALLOCATE(XSWDC   (0))
   ALLOCATE(XSWUC   (0))
-  ALLOCATE(XSWU_ICEC(0))
+  ALLOCATE(XSWUC_ICE(0))
   ALLOCATE(XLWDC   (0))
   ALLOCATE(XLWUC   (0))
-  ALLOCATE(XLWU_ICEC(0))
+  ALLOCATE(XLWUC_ICE(0))
   ALLOCATE(XFMUC   (0))
-  ALLOCATE(XFMU_ICEC(0))
+  ALLOCATE(XFMUC_ICE(0))
   ALLOCATE(XFMVC   (0))
-  ALLOCATE(XFMV_ICEC(0))
+  ALLOCATE(XFMVC_ICE(0))
 ENDIF
 !
 !* parameters at 2m

@@ -84,11 +84,6 @@ CALL WRITE_SURF(HPROGRAM,'HANDLE_SIC',LHANDLE_SIC,IRESP,YCOMMENT)
 !
 IF (LHANDLE_SIC) CALL WRITESURF_SEAICE_n(HPROGRAM)
 !
-!* flag to re-read if Sea Ice diag at restart
-!
-YCOMMENT='flag re-read sea ice diag at restart'
-CALL WRITE_SURF(HPROGRAM,'DIAG_SEAICE',LDIAG_SEAICE,IRESP,YCOMMENT)
-!
 !
 !*       3.     Prognostic fields:
 !               -----------------
