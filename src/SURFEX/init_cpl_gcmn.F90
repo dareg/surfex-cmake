@@ -67,7 +67,6 @@ INTEGER           :: IRESP      ! Error code after redding
 CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
 !
 INTEGER           :: IVERSION   ! surface version
-INTEGER           :: IBUG       ! surface bugfix
 !
 LOGICAL           :: LREAD      ! work key
 LOGICAL           :: LCPL_GCM   ! work key
@@ -105,10 +104,8 @@ ENDIF
 !
 YRECFM='VERSION'
 CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
-YRECFM='BUG'
-CALL READ_SURF(HPROGRAM,YRECFM,IBUG,IRESP)
 !
-LREAD=(HINIT/='PGD'.AND.HINIT/='PRE'.AND.(IVERSION>7.OR.(IVERSION==7.AND.IBUG>=3)))
+LREAD=(HINIT/='PGD'.AND.HINIT/='PRE'.AND.IVERSION>=8)
 !
 IF (LREAD) THEN
    YRECFM='LCPL_GCM'

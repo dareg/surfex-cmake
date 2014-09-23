@@ -77,7 +77,7 @@ INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: IVERSION, IBUG
+INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -212,8 +212,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
      CALL READ_SURF(HPROGRAM,YREC,XFMVC,IRESP)
 !
      CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-     CALL READ_SURF(HPROGRAM,'BUG ',IBUG,IRESP)
-      IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUG<3)THEN
+      IF (IVERSION<8)THEN
          XEVAPC  = 0.0
          XSUBLC  = 0.0              
       ELSE
