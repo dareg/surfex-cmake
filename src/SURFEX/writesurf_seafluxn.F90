@@ -39,6 +39,8 @@ USE MODD_SEAFLUX_n, ONLY : XSST, XZ0, TTIME, &
                            XSST_MTH,         &
                            LHANDLE_SIC
 !
+USE MODD_DIAG_SEAICE_n, ONLY: LDIAG_SEAICE
+!
 USE MODI_WRITE_SURF
 USE MODI_WRITESURF_OCEAN_n
 USE MODI_WRITESURF_SEAICE_N
@@ -81,6 +83,12 @@ YCOMMENT='flag to handle sea ice cover'
 CALL WRITE_SURF(HPROGRAM,'HANDLE_SIC',LHANDLE_SIC,IRESP,YCOMMENT)
 !
 IF (LHANDLE_SIC) CALL WRITESURF_SEAICE_n(HPROGRAM)
+!
+!* flag to re-read if Sea Ice diag at restart
+!
+YCOMMENT='flag re-read sea ice diag at restart'
+CALL WRITE_SURF(HPROGRAM,'DIAG_SEAICE',LDIAG_SEAICE,IRESP,YCOMMENT)
+!
 !
 !*       3.     Prognostic fields:
 !               -----------------
