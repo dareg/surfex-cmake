@@ -310,7 +310,7 @@ DO JLAYER = 1,TPSNOW%NLAYER
 !*       12.    Age parameter
 !              -------------------
 !
-  IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
+  IF ((TPSNOW%SCHEME=='3-L'.AND.IVERSION>=8) .OR. TPSNOW%SCHEME=='CRO') THEN
     IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
       WRITE(YFMT,'(A5,I1,A6)')     '(A5,A',ISURFTYPE_LEN,','//YNLAYER//')'
       WRITE(YRECFM,YFMT) 'SAGE_',HSURFTYPE,JLAYER
@@ -322,6 +322,12 @@ DO JLAYER = 1,TPSNOW%NLAYER
     CALL READ_SURF(HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
     TPSNOW%AGE(:,JLAYER,:)=ZWORK
     WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%AGE(:,JLAYER,:) = XUNDEF
+  ELSEIF(TPSNOW%SCHEME=='3-L'.AND.IVERSION<8)THEN
+    WHERE (TPSNOW%WSNOW(:,1,:) >= 0.0) 
+           TPSNOW%AGE(:,JLAYER,:) = 0.0
+    ELSEWHERE
+           TPSNOW%AGE(:,JLAYER,:) = XUNDEF
+    ENDWHERE
   END IF
 !-------------------------------------------------------------------------------
 !
