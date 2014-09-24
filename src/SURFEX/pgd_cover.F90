@@ -371,6 +371,15 @@ ELSE
         END WHERE 
       ENDIF
     ENDDO
+    !
+    DO JL=1,SIZE(NWATER)
+      IF (IMASK_WATER(JL)/=0) THEN
+        WHERE(XCOVER(:,IMASK_WATER(JL))>=XRM_COAST)
+          XCOVER(:,JCOVER) = 0.
+          XCOVER(:,IMASK_WATER(JL)) = 1.
+        END WHERE
+      ENDIF
+    ENDDO 
     !    
   ENDDO
 !
