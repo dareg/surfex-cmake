@@ -68,7 +68,7 @@ INTEGER,                 INTENT(IN) :: KSW       ! number of short-wave spectral
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: IVERSION, IBUG
+INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -351,8 +351,7 @@ IF (LSURF_BUDGETC) THEN
      CALL READ_SURF(HPROGRAM,YREC,XAVG_FMVC,IRESP)   
 !
      CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-     CALL READ_SURF(HPROGRAM,'BUG ',IBUG,IRESP)
-      IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUG<3)THEN
+      IF (IVERSION<8)THEN
          XAVG_EVAPC  = 0.0
          XAVG_SUBLC  = 0.0              
       ELSE
