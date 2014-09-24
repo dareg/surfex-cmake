@@ -332,9 +332,12 @@ ELSE
   ! * removes River if the user want
   ORM_RIVER=LRM_RIVER
   IF(LRM_RIVER.AND.IMASK_WATER(2)/=0)THEN
-     WHERE(XCOVER(:,IMASK_WATER(2)) > 0.)
-           XCOVER(:,IMASK_WATER(2)) = 0.
-     ENDWHERE
+    DO JL=1,SIZE(XCOVER,1)
+       IMAXCOVER(:) = MAXLOC(XCOVER(JL,:))
+       IF(IMASK_WATER(2)/=IMAXCOVER(1).AND.XCOVER(JL,IMASK_WATER(2))>0.)THEN
+         XCOVER(JL,IMASK_WATER(2)) = 0.
+       ENDIF
+    ENDDO
   ENDIF
   !
   ! * removes lake as the user want
