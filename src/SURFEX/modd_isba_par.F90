@@ -81,6 +81,12 @@ REAL, PARAMETER       :: XCONDWTR  = 0.57   ! W/(m K)  Water thermal conductivit
 ! Maximum depth of the water table for soil thermal computation
 !
 REAL, PARAMETER       :: XWTD_MAXDEPTH = 100. !m
+!                        
+! Minimun depth of permafrost and limit area
+!
+REAL, PARAMETER :: XPERMFRAC  = 0.25   ! permafrost limit area (fraction)
+!
+REAL, PARAMETER :: XPERMDEPTH = 12.0   ! permafrost depth (m)
 !
 !--------------------------------------------------------------------------------
 ! Vegetation radiative properties
