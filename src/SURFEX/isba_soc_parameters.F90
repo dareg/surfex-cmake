@@ -73,7 +73,6 @@ REAL, DIMENSION(:,:),  INTENT(OUT)   :: PFRACSOC
 !
 !*      0.2    declarations of local parameter
 !
-REAL,               PARAMETER :: ZRHO_PEAT = 130.               !Peat density                           (kg.m-3)
 REAL, DIMENSION(2), PARAMETER :: ZCONDSAT = (/24.192,0.00864/)  !Peatland hydraulic conductivity        (m/day)
 REAL, DIMENSION(2), PARAMETER :: ZBCOEF   = (/2.7,12.0/)        !Peatland b coef                        (-)
 REAL, DIMENSION(2), PARAMETER :: ZMPOTSAT = (/-1.03,-1.01/)     !Peatland matric potential              (cm)
@@ -82,9 +81,10 @@ REAL, DIMENSION(2), PARAMETER :: ZSY      = (/0.655,0.125/)     !Peatland specif
 REAL, DIMENSION(2), PARAMETER :: ZWWILT   = (/0.060,0.240/)     !Peatland wilting point                 (-)
 REAL, DIMENSION(2), PARAMETER :: ZWD0     = (/0.196,0.611/)     !Peatland Topmodel D0 water equivalent  (-)
 REAL, DIMENSION(2), PARAMETER :: ZANISO   = (/2.0,48.0/)        !Peatland ksat anisotropy factor        (-)
-REAL,               PARAMETER :: ZHCAPSOIL= 2.51E+6             !Peatland heat capacity                 (J.m–3.K–1)
 REAL,               PARAMETER :: ZCONDDRY = 0.05                !Peatland dry thermal conductivity      (W.m–1.K–1)
 REAL,               PARAMETER :: ZCONDSLD = 0.25                !Peatland solid conductivity            (W.m–1.K–1)
+REAL,               PARAMETER :: ZSPHEAT  = 1926.               !Peatland specific heat                 (J.kg-1.K-1)
+REAL,               PARAMETER :: ZRHO_PEAT= 130.                !Peat density                           (kg.m-3)
 !
 !HWSD data profile
 REAL, PARAMETER :: ZDGHWSD_TOP = 0.3
@@ -102,7 +102,7 @@ REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2))  :: ZDG_SOIL, ZDZG_SOIL, ZRHO_SOC, ZMID
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2))  :: ZPEAT_BCOEF,ZPEAT_MPOTSAT,&
                                              ZPEAT_WSAT,ZPEAT_WFC,     &
                                              ZPEAT_WWILT,ZPEAT_WD0,    &
-                                             ZPEAT_ANISO
+                                             ZPEAT_ANISO, ZPEAT_HCAP
 !
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3))  :: ZPEAT_CONDSAT, ZMID_CONDSAT
 !
@@ -296,6 +296,9 @@ DO JL=1,INL
 !
       ZPEAT_WFC    (JI,JL)=ZPEAT_WSAT(JI,JL)-ZSY(1)*EXP(ZF_SY(JI)*ZREFDEPTH(JI))
 !
+!     Peatland heat capacity (J.m–3.K–1)
+      ZPEAT_HCAP (JI,JL) =  ZRHO_PEAT * ZSPHEAT !* (1.0-ZPEAT_WSAT(JI,JL))
+!
       DO JP=1,INP
          IF(PPATCH(JI,JP)/=XUNDEF)THEN
            ZREFDEPTH(JI)=MIN(ZPEAT_PROFILE(JI),MAX(ZMOSS_DEPTH(JI),ZMID_CONDSAT(JI,JL,JP)))
@@ -316,7 +319,7 @@ DO JL=1,INL
 !      Soil organic carbon fraction
        PFRACSOC (JI,JL  ) = MIN(1.0,ZRHO_SOC(JI,JL)/ZRHO_PEAT)             
 !      New soil thermal properties      
-       PHCAPSOIL(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PHCAPSOIL(JI,JL) + PFRACSOC(JI,JL)*ZHCAPSOIL
+       PHCAPSOIL(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PHCAPSOIL(JI,JL) + PFRACSOC(JI,JL)*ZPEAT_HCAP(JI,JL)
        PCONDDRY (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PCONDDRY (JI,JL) + PFRACSOC(JI,JL)*ZCONDDRY
        PCONDSLD (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PCONDSLD (JI,JL) + PFRACSOC(JI,JL)*ZCONDSLD
 !      New soil hydraulic properties
