@@ -99,7 +99,7 @@ REAL, PARAMETER       :: XRED_EDGE = 0.0000007  ! (m)   0.7 micro-m
 !                        
 ! Wavelength between visible and UV parts of the solar spectra
 !
-REAL, PARAMETER       :: XUV_EDGE  = 0.0000002  ! (m)   0.1 micro-m
+REAL, PARAMETER       :: XUV_EDGE  = 0.0000002 ! (m)   0.1 micro-m
 !
 !--------------------------------------------------------------------------------
 ! Soil geometry if DF option

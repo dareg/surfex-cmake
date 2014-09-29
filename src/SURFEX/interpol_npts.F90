@@ -41,7 +41,6 @@
 !!
 !!    Original    03/2004
 !!    Modification
-!!    B. Decharme  2013  restore the "scan all point" case if it is possible
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -53,7 +52,6 @@ USE MODD_SURF_ATM_n,       ONLY : NSIZE_FULL, NDIM_FULL
 !
 USE MODI_GET_INTERP_HALO
 USE MODI_GET_NEAR_MESHES
-USE MODI_SUM_ON_ALL_PROCS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -90,42 +88,27 @@ REAL, DIMENSION(0:KNPTS)                :: ZNDIST ! 3 nearest square distances
 REAL, DIMENSION(0:KNPTS,SIZE(PFIELD,2)) :: ZNVAL  ! 3 corresponding field values
 REAL, DIMENSION(SIZE(PFIELD,2))         :: ZSUM
 !
-INTEGER                            :: INEAR_NBR      ! number of points to scan
-INTEGER                            :: JLIST          ! loop counter on points to interpolate
-INTEGER                            :: ICOUNT         ! counter
-INTEGER                            :: INPTS
-INTEGER                            :: ISCAN          ! number of points to scan
-INTEGER                            :: ISCAN_ALL      ! number of data points
-INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX       ! list of index to scan
-INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX_ALL   ! list of all data points
+INTEGER                          :: INEAR_NBR      ! number of points to scan
+INTEGER                          :: JLIST          ! loop counter on points to interpolate
+INTEGER                          :: ICOUNT         ! counter
+INTEGER                          :: INPTS
+INTEGER                          :: ISCAN          ! number of points to scan
+INTEGER, DIMENSION(:), ALLOCATABLE :: IINDEX       ! list of index to scan
 INTEGER                            :: IHALO        ! halo available
-INTEGER, DIMENSION(SIZE(KCODE))    :: ISIZE
-INTEGER                            :: ISIZE0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',0,ZHOOK_HANDLE)
 IL = SIZE(PFIELD,1)
 !
-ISIZE(:) = 1.
-ISIZE0 = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,ISIZE(:)==1)
-!
  CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
 !
 INEAR_NBR = (2*IHALO+1)**2
 !
-IINDEX    (:) = 0
-IINDEX_ALL(:) = 0
-!        
-ISCAN_ALL = COUNT(KCODE(:)>0)
 !
-JS = 0
-DO JD=1,IL
-  IF (KCODE(JD)>0) THEN
-    JS = JS+1
-    IINDEX_ALL(JS) = JD
-  END IF
-END DO       
+ALLOCATE(IINDEX(IL))
+IINDEX(:) = 0
+!
 !
 IF (.NOT.ASSOCIATED(NNEAR)) THEN
   ALLOCATE(NNEAR(IL,INEAR_NBR))
@@ -155,14 +138,8 @@ DO JL=1,IL
     ISCAN = ICOUNT
     INPTS = MIN(ICOUNT,KNPTS)
   ELSE
-    IF (NDIM_FULL/=ISIZE0) THEN
-      ! point can not be interpolated further than halo in multiprocessor run
-      KCODE(JL) = -4
-      CYCLE
-    END IF
-    INPTS     = KNPTS
-    ISCAN     = ISCAN_ALL
-    IINDEX(:) = IINDEX_ALL(:)          
+    KCODE(JL) = -4
+    CYCLE
   END IF
   !
   !
@@ -208,6 +185,7 @@ DO JL=1,IL
   !
 END DO
 !
+DEALLOCATE(IINDEX    )
 IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
