@@ -41,6 +41,7 @@
 !!      B. Decharme 07/2011 : read pgd+prep 
 !!      B. Decharme 04/2013 : new coupling variables
 !!      S. Senesi   01/2014 : introduce sea-ice model 
+!!      S. Belamari 03/2014 : add NZ0 (to choose PZ0SEA formulation)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -55,7 +56,7 @@ USE MODD_SEAFLUX_n,      ONLY : XCOVER, XDIR_ALB, XSCA_ALB,  &
                                   XEMIS, XSST, XTICE, CSEA_FLUX, &
                                   CSEA_ALB, LPWG,LPRECIP,LPWEBB, &
                                   XTSTEP, XOUT_TSTEP, TTIME,     &
-                                  NGRVWAVES, XSST_INI, LSBL,     &
+                                  NZ0, NGRVWAVES, XSST_INI, LSBL,&
                                   XZ0, XZ0H, XUMER, XVMER,XICHCE,&
                                   CINTERPOL_SST, LINTERPOL_SST,  &
                                   CINTERPOL_SSS, LINTERPOL_SSS,  &
@@ -187,12 +188,13 @@ IF (LNAM_READ) THEN
  !        0.1. Hard defaults
  !      
  
- CALL DEFAULT_SEAFLUX(XTSTEP,XOUT_TSTEP,CSEA_ALB,CSEA_FLUX,LPWG,       &
-                        LPRECIP,LPWEBB,NGRVWAVES,LPROGSST,NTIME_COUPLING,&
-                        XICHCE,CINTERPOL_SST)
- CALL DEFAULT_SEAICE(HPROGRAM, CSEAICE_SCHEME, CINTERPOL_SSS,             &
-                     CINTERPOL_SIC,CINTERPOL_SIT, XFREEZING_SST,          &
-                     XSEAICE_TSTEP, XSIC_EFOLDING_TIME,  &
+ CALL DEFAULT_SEAFLUX(XTSTEP,XOUT_TSTEP,CSEA_ALB,CSEA_FLUX,LPWG, &
+                        LPRECIP,LPWEBB,NZ0,NGRVWAVES,LPROGSST,   &
+                        NTIME_COUPLING,XICHCE,CINTERPOL_SST,     &
+                        CINTERPOL_SSS                            )
+ CALL DEFAULT_SEAICE(HPROGRAM, CSEAICE_SCHEME,                   &
+                     CINTERPOL_SIC,CINTERPOL_SIT, XFREEZING_SST, &
+                     XSEAICE_TSTEP, XSIC_EFOLDING_TIME,          &
                      XSIT_EFOLDING_TIME, XCD_ICE_CST, XSI_FLX_DRV)     
  !                     
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP) 
@@ -299,7 +301,7 @@ END IF
 !*       2.     Prognostic fields:
 !               ----------------
 !
- CALL READ_SEAFLUX_n(HPROGRAM)
+ CALL READ_SEAFLUX_n(HPROGRAM,ILUOUT)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -361,7 +363,7 @@ ENDIF
 !
 !*       4.     Seaice prognostic variables and forcings :
 !
-CALL READ_SEAICE_n(HPROGRAM,ILU)
+CALL READ_SEAICE_n(HPROGRAM,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !

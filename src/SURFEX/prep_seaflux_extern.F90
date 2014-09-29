@@ -30,10 +30,11 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 !
 !
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 !
 INTEGER           :: INI            ! total 1D dimension
+INTEGER           :: IVERSION       ! total 1D dimension
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -77,10 +78,27 @@ SELECT CASE(HSURF)
     CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
-!*      5.  Sea surface salinity and ice fraction
-!           -------------------------------------
+!*      5.  Sea surface salinity
+!           --------------------
 !
-  CASE('SSS    ','SIC    ')
+  CASE('SSS    ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='SSS'
+    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+!
+!*      6.  Sea ice fraction
+!           ----------------
+!
+  CASE('SIC    ')
     ALLOCATE(PFIELD(INI,1))
     PFIELD = 0.0
 !

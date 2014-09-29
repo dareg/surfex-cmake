@@ -27,6 +27,8 @@
 !!      Modified    01/2006 : sea flux parameterization.
 !!      B. Decharme 05/2013 : Qsat function of XTT
 !!                            so, Qsat=Qsati if Tg <= XTT and inversely
+!!      S. Belamari 03/2014 : new formula (QSAT_SEAWATER2) for sat. air pressure
+!!                            over seawater (with explicit salinity dependency)
 !!                            
 !--------------------------------------------------------------------------------
 !
@@ -55,6 +57,9 @@ INTERFACE QSAT
 END INTERFACE
 INTERFACE QSAT_SEAWATER
   MODULE PROCEDURE QSATSEAW_1D
+END INTERFACE
+INTERFACE QSAT_SEAWATER2
+  MODULE PROCEDURE QSATSEAW2_1D
 END INTERFACE
 INTERFACE DQSAT
   MODULE PROCEDURE DQSATW_O_DT_1D
@@ -720,6 +725,108 @@ IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END FUNCTION QSATSEAW_1D
+!
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!
+!     ######################################
+      FUNCTION QSATSEAW2_1D(PT,PP,PSSS) RESULT(PQSAT)
+!     ######################################
+!
+!!****  *QSATW * - function to compute saturation vapor humidity from
+!!                 temperature
+!!
+!!    PURPOSE
+!!    -------
+!       The purpose of this function is to compute the saturation vapor 
+!     pressure from temperature over saline seawater
+!      
+!
+!!**  METHOD
+!!    ------
+!!       Given temperature T (PT) and salinity S (PSSS), the saturation vapor 
+!!    pressure es(T,S) (FOES(PT,PSSS)) is computed following Weiss and Price
+!!    (1980).
+!!
+!!      Then, the specific humidity at saturation is deduced.
+!!  
+!!
+!!    EXTERNAL
+!!    --------
+!!      NONE
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!      Module MODD_CST : contains physical constants
+!!      
+!!    REFERENCE
+!!    ---------
+!!      Weiss, R.F., and Price, B.A., 1980 : Nitrous oxide solubility in water
+!!      and seawater. Marine Chemistry, n°8, pp 347-359.
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!	S. Belamari     * Meteo France *
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    19/03/2014 
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS, ONLY : XRD, XRV
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, DIMENSION(:), INTENT(IN)                :: PT     ! Temperature
+                                                        ! (Kelvin)
+REAL, DIMENSION(:), INTENT(IN)                :: PP     ! Pressure
+                                                        ! (Pascal)
+REAL, DIMENSION(:), INTENT(IN)                :: PSSS   ! Salinity
+                                                        ! (g/kg)
+REAL, DIMENSION(SIZE(PT))                   :: PQSAT  ! saturation vapor
+                                                        ! specific humidity
+                                                        ! with respect to
+                                                        ! water (kg/kg)
+!
+!*       0.2   Declarations of local variables
+!
+REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
+                                                        ! pressure
+                                                        ! (Pascal)
+!
+REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
+REAL                                        :: ZWORK2
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW2_1D',0,ZHOOK_HANDLE)
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+ZFOES(:) = EXP( 24.4543 -67.4509*(100.0/PT(:)) -4.8489*LOG(PT(:)/100.0)   &
+                -5.44E-04*(PSSS(:)/1.00472) ) !see Sharqawy et al (2010) Eq32 p368
+ZFOES(:) = ZFOES(:)*1013.25E+02             !convert from atm to Pa
+!
+ZWORK1(:) = ZFOES(:)/PP(:)
+ZWORK2    = XRD/XRV
+!
+!*       2.    COMPUTE SATURATION SPECIFIC HUMIDITY
+!              ------------------------------------
+!
+PQSAT(:) = ZWORK2*ZWORK1(:) / (1.0+(ZWORK2-1.0)*ZWORK1(:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW2_1D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION QSATSEAW2_1D
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

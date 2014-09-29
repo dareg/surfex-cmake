@@ -26,10 +26,16 @@
 !!      S.Bielli    11/2012 : write HU2M_WAT mis placed
 !!      B. Decharme  06/13   Add evap and sublimation diag
 !!                           Delete LPROVAR_TO_DIAG here
+!!      S. Belamari 06/2014 : Introduce GRESET to avoid errors due to NBLOCK=0
+!!                            when coupled with ARPEGE/ALADIN/AROME
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+#ifdef ARO
+USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+#endif
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
@@ -69,10 +75,11 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be written
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=2)  :: YNUM
 !
+LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -80,7 +87,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_WATFLUX_N',0,ZHOOK_HANDLE)
- CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','WATFLX','WRITE')
+!
+GRESET=.TRUE.
+#ifdef ARO
+GRESET=(.NOT.LCOUNTW)
+#endif
+!
+CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','WATFLX','WRITE')
 !
 !
 !*       2.     Richardson number :
@@ -320,13 +333,13 @@ YRECFM='T2MMIN_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-XT2M_MIN(:)=XUNDEF
+IF(GRESET)XT2M_MIN(:)=XUNDEF
 !
 YRECFM='T2MMAX_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-XT2M_MAX(:)=0.0
+IF(GRESET)XT2M_MAX(:)=0.0
 !
 YRECFM='Q2M_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
@@ -342,13 +355,13 @@ YRECFM='HU2MMIN_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-XHU2M_MIN(:)=XUNDEF
+IF(GRESET)XHU2M_MIN(:)=XUNDEF
 !
 YRECFM='HU2MMAX_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-XHU2M_MAX(:)=-XUNDEF
+IF(GRESET)XHU2M_MAX(:)=-XUNDEF
 !
 YRECFM='ZON10M_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'
@@ -369,7 +382,7 @@ YRECFM='W10MMAX_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-XWIND10M_MAX(:)=0.0
+IF(GRESET)XWIND10M_MAX(:)=0.0
 !
 END IF
 !

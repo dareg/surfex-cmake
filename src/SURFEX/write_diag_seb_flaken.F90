@@ -25,10 +25,16 @@
 !!      Modified    01/2006 : sea flux parameterization.
 !!      P.LeMoigne    04/2013 : Add accumulated diagnostics
 !!      Modified    04/2013, P. Le Moigne: FLake chemistry
+!!      S. Belamari 06/2014 : Introduce LCOUNTW to avoid errors due to NBLOCK=0
+!!                            when coupled with ARPEGE/ALADIN/AROME
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+#ifdef ARO
+USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+#endif
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
@@ -69,17 +75,24 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=100):: YCOMMENT       ! Comment string
- CHARACTER(LEN=2)  :: YNUM
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=2)  :: YNUM
 !
+LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_FLAKE_N',0,ZHOOK_HANDLE)
+!
+GRESET=.TRUE.
+#ifdef ARO
+GRESET=(.NOT.LCOUNTW)
+#endif
+!
  CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','FLAKE ','WRITE')
 !
 !
@@ -332,13 +345,13 @@ YRECFM='T2MMIN_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-XT2M_MIN(:)=XUNDEF
+IF(GRESET)XT2M_MIN(:)=XUNDEF
 !
 YRECFM='T2MMAX_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (K)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-XT2M_MAX(:)=0.0
+IF(GRESET)XT2M_MAX(:)=0.0
 !
 YRECFM='Q2M_WAT'
 YCOMMENT='2 meters specific humidity'//' (KG/KG)'
@@ -354,13 +367,13 @@ YRECFM='HU2MMIN_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-XHU2M_MIN(:)=XUNDEF
+IF(GRESET)XHU2M_MIN(:)=XUNDEF
 !
 YRECFM='HU2MMAX_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-XHU2M_MAX(:)=-XUNDEF
+IF(GRESET)XHU2M_MAX(:)=-XUNDEF
 !
 YRECFM='ZON10M_WAT'
 YCOMMENT='10 meters zonal wind'//' (M/S)'
@@ -381,7 +394,7 @@ YRECFM='W10MMAX_WAT'
 YCOMMENT='X_Y_'//YRECFM//' (M/S)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-XWIND10M_MAX(:)=0.0
+IF(GRESET)XWIND10M_MAX(:)=0.0
 !
 END IF
 !

@@ -36,11 +36,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n,      ONLY : TGLT, XSSS, XSIC,              &
-                                LINTERPOL_SSS, CINTERPOL_SSS,  &
+USE MODD_SEAFLUX_n,      ONLY : TGLT, XSIC,              &
                                 LINTERPOL_SIC, CINTERPOL_SIC,  &
                                 LINTERPOL_SIT, CINTERPOL_SIT,  &
-                                XSSS_MTH, XSIC_MTH, XSIT_MTH,  &
+                                XSIC_MTH, XSIT_MTH,  &
                                 CSEAICE_SCHEME
 !
 USE MODD_GLT_PARAM, ONLY : nl, nt
@@ -151,27 +150,6 @@ ENDIF
 !
 !
 !-------------------------------------------------------------------------------
-!
-!* Writes sea surface salinity and sea ice cover forcings
-!
-!* sea surface salinity
-!
-IF(LINTERPOL_SSS)THEN
-   !
-   INMTH=SIZE(XSSS_MTH,2)
-   !
-   DO JMTH=1,INMTH
-      WRITE(YMTH,'(I2)') (JMTH-1)
-      YRECFM='SSS_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      YCOMMENT='Sea Surface Salinity at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XSSS_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
-   ENDDO
-!
-ENDIF
-!
-YRECFM='SSS'
-YCOMMENT='Sea Surface Salinity'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XSSS(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !* sea ice cover
 !

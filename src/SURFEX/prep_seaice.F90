@@ -32,11 +32,10 @@ USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
 USE MODN_PREP_SEAFLUX,   ONLY : CPREP_SEAICE_SCHEME => CSEAICE_SCHEME
 USE MODD_SEAFLUX_n,      ONLY : CSEAICE_SCHEME,LHANDLE_SIC, TGLT, & 
-                                XSSS, XSIC,                       &
-                                LINTERPOL_SSS, CINTERPOL_SSS,     &
+                                XSIC,                             &
                                 LINTERPOL_SIC, CINTERPOL_SIC,     &
                                 LINTERPOL_SIT, CINTERPOL_SIT,     &
-                                XSSS_MTH, XSIC_MTH, XSIT_MTH
+                                XSIC_MTH, XSIT_MTH
 USE MODI_PREP_HOR_SEAFLUX_FIELD
 !
 ! Will be use later for interpolating input fields :
@@ -88,43 +87,16 @@ ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
-!*      2.     Reading and horizontal interpolations
-!
-!*      2.1    Salinity
-!
-CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-!
-!*      2.2    Seaice cover
+!*      2.     Reading and horizontal interpolations of Seaice cover
 !
 IF (LHANDLE_SIC) THEN 
    CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
-!
-!
-!*      4'     Optional preparation of interpolation of monthly Sea Surface salinity
-!
-LINTERPOL_SSS=.FALSE.
-IF (TRIM(CSEAICE_SCHEME) /= 'NONE') THEN
-   IF(TRIM(CINTERPOL_SSS)/='NONE')THEN
-      LINTERPOL_SSS=.TRUE.
-      !
-      ! Precedent, Current and Next Monthly SSS
-      INMTH=3
-      ! Precedent, Current and Next Annual Monthly SSS
-      IF(TRIM(CINTERPOL_SSS)=='ANNUAL')INMTH=14
-      !
-      ALLOCATE(XSSS_MTH(SIZE(XSSS),INMTH))
-      DO JMTH=1,INMTH
-         XSSS_MTH(:,JMTH)=XSSS(:)
-      ENDDO
-      !
-   ENDIF
-ENDIF
 !-------------------------------------------------------------------------------------
 !
-!*      4''     Optional preparation of interpolation of monthly sea ice cover and sea 
-!               ice thickness 
+!*      3.     Optional preparation of interpolation of monthly sea ice cover and sea 
+!              ice thickness 
 !
 LINTERPOL_SIC=.FALSE.
 IF(TRIM(CINTERPOL_SIC)/='NONE')THEN
@@ -142,7 +114,7 @@ IF(LINTERPOL_SIC)THEN
    ! Precedent, Current and Next Annual Monthly SIC
    IF(TRIM(CINTERPOL_SIC)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIC_MTH(SIZE(XSSS),INMTH))
+   ALLOCATE(XSIC_MTH(SIZE(XSIC),INMTH))
    DO JMTH=1,INMTH
       XSIC_MTH(:,JMTH)=XSIC(:)
    ENDDO
@@ -156,7 +128,7 @@ IF(LINTERPOL_SIT)THEN
    ! Precedent, Current and Next Annual Monthly SIT
    IF(TRIM(CINTERPOL_SIT)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIT_MTH(SIZE(XSSS),INMTH))
+   ALLOCATE(XSIT_MTH(SIZE(XSIC),INMTH))
    DO JMTH=1,INMTH
       XSIT_MTH(:,JMTH)=XUNDEF
    ENDDO

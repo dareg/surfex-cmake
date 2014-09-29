@@ -21,12 +21,16 @@ SUBROUTINE DEALLOC_SEAFLUX_n
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
-!!      Modified    09/2013 : S. Senesi : introduce sea-ice-cover ans sea-surface salinity
+!!      S. Belamari 03/2014   other _SEA_ variables
+!!      S. Senesi   09/2013   introduce sea-ice-cover ans sea-surface salinity
 !!------------------------------------------------------------------
 !
 !
-USE MODD_SEAFLUX_n,      ONLY : LCOVER, XCOVER, XZS, XSST, XSSS, XSIC, XZ0, XZ0H, &
-                       XSEABATHY, XEMIS, XDIR_ALB, XSCA_ALB, TGLT, XFSIC, XFSIT  
+USE MODD_SEAFLUX_n,      ONLY : LCOVER, XCOVER, XZS, XSST, XSSS, XSIC, XZ0, XZ0H,  &
+                                XSEABATHY, XEMIS, XDIR_ALB, XSCA_ALB, TGLT, XFSIC, &
+                                XFSIT, XCPL_SEA_WIND, XCPL_SEA_FWSU, XCPL_SEA_FWSV,&
+                                XCPL_SEA_SNET, XCPL_SEA_HEAT, XCPL_SEA_EVAP,       &
+                                XCPL_SEA_RAIN, XCPL_SEA_SNOW  
 USE MODD_SEAFLUX_GRID_n, ONLY : XGRID_PAR, XLAT, XLON, XMESH_SIZE
 USE MODD_CH_SEAFLUX_n,   ONLY : XDEP, CCH_NAMES, CSV
 !
@@ -75,6 +79,17 @@ IF (ASSOCIATED(XMESH_SIZE)) DEALLOCATE(XMESH_SIZE)
 IF(ASSOCIATED(XDEP))      DEALLOCATE(XDEP)
 IF(ASSOCIATED(CCH_NAMES)) DEALLOCATE(CCH_NAMES)
 IF(ASSOCIATED(CSV))       DEALLOCATE(CSV)
+!
+!-------------------------------------------------------------------------------------
+!
+IF(ASSOCIATED(XCPL_SEA_WIND))      DEALLOCATE(XCPL_SEA_WIND)
+IF(ASSOCIATED(XCPL_SEA_FWSU))      DEALLOCATE(XCPL_SEA_FWSU)
+IF(ASSOCIATED(XCPL_SEA_FWSV))      DEALLOCATE(XCPL_SEA_FWSV)
+IF(ASSOCIATED(XCPL_SEA_SNET))      DEALLOCATE(XCPL_SEA_SNET)
+IF(ASSOCIATED(XCPL_SEA_HEAT))      DEALLOCATE(XCPL_SEA_HEAT)
+IF(ASSOCIATED(XCPL_SEA_EVAP))      DEALLOCATE(XCPL_SEA_EVAP)
+IF(ASSOCIATED(XCPL_SEA_RAIN))      DEALLOCATE(XCPL_SEA_RAIN)
+IF(ASSOCIATED(XCPL_SEA_SNOW))      DEALLOCATE(XCPL_SEA_SNOW)
 !
 !-------------------------------------------------------------------------------------
 !

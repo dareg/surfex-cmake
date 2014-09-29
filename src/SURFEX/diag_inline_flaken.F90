@@ -30,6 +30,7 @@
 !!                           more argument (height of diagnostic)
 !!      P. Le Moigne 04/2013 : Accumulated diagnostics
 !!                             Coupling for ESM
+!!      S. Belamari  01/2014 : Wind module=XUNDEF if one component is XUNDEF
 !!------------------------------------------------------------------
 !
 
@@ -115,9 +116,8 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_FLAKE_N',0,ZHOOK_HANDLE)
 XDIAG_TS(:) = PTS(:)
 !
 IF (.NOT. LSBL) THEN
-!        
+!
   IF (N2M==1) THEN
-       
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
                      PSFTH, PSFTQ, PSFZON, PSFMER,                       &
                      XT2M, XQ2M, XHU2M, XZON10M, XMER10M                       )  
@@ -141,7 +141,11 @@ IF (.NOT. LSBL) THEN
     XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
     XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
     !
-    XWIND10M    (:) = SQRT(XZON10M**2+XMER10M**2)
+    WHERE(XZON10M(:) /= XUNDEF .AND. XMER10M(:) /= XUNDEF)
+      XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
+    ELSEWHERE
+      XWIND10M(:) = XUNDEF
+    ENDWHERE
     XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
     !
     !* Richardson number
@@ -157,9 +161,9 @@ ELSE
     XHU2M   = XUNDEF
     XZON10M = XUNDEF
     XMER10M = XUNDEF
-    XRI     = PRI           
+    XRI     = PRI
   ENDIF
-ENDIF        
+ENDIF
 !
 IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   !
@@ -181,7 +185,7 @@ END IF
 !
 IF(LSURF_BUDGETC)THEN
   CALL DIAG_SURF_BUDGETC_FLAKE(PTSTEP, XRN, XH, XLE, XLEI, XGFLUX,  &
-                                 XSWD, XSWU, XLWD, XLWU, XFMU, XFMV,&  
+                                 XSWD, XSWU, XLWD, XLWU, XFMU, XFMV,&
                                  XEVAP, XSUBL                       )  
 ENDIF
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_SEAICE_n(HPROGRAM,KLU)
+      SUBROUTINE READ_SEAICE_n(HPROGRAM,KLU,KLUOUT)
 !     #########################################
 !
 !!****  *READ_SEAICE_n* - read seaice scheme variables
@@ -41,11 +41,10 @@ USE MODD_CSTS, ONLY           : XPI, XTTSI, XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 USE MODD_SEAFLUX_n,      ONLY : LHANDLE_SIC, CSEAICE_SCHEME,   &
-                                TGLT, XSST, XSSS, XSIC,        &
-                                LINTERPOL_SSS, CINTERPOL_SSS,  &
+                                TGLT, XSST, XSIC,              &
                                 LINTERPOL_SIC, CINTERPOL_SIC,  &
                                 LINTERPOL_SIT, CINTERPOL_SIT,  &
-                                XSSS_MTH, XSIC_MTH, XSIT_MTH,  &
+                                XSIC_MTH, XSIT_MTH,            &
                                 XFSIC, XFSIT, XSEABATHY, TTIME,&
                                 XTICE, XICE_ALB, XUMER, XVMER
 USE MODD_SEAFLUX_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE
@@ -73,6 +72,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KLU      ! number of sea patch point
+INTEGER,           INTENT(IN)  :: KLUOUT
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -92,16 +92,12 @@ INTEGER :: JX,JK,JL                 ! loop counter on ice categories and layers 
 INTEGER :: inl_in_file,int_in_file  ! file values for ice catgories and layers numbers
 REAL :: ZFSIT
 !
-INTEGER         :: ILUOUT              ! output listing logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-!
 IF (.NOT.LHANDLE_SIC) THEN 
-   ALLOCATE(XSSS(0))
    ALLOCATE(XSIC(0))
    IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',1,ZHOOK_HANDLE)
    RETURN
@@ -162,7 +158,7 @@ IF (TRIM(CSEAICE_SCHEME) == 'NONE' ) THEN
    ENDIF
 ELSE 
    IF (TRIM(CSEAICE_SCHEME) /= 'GELATO') THEN 
-      WRITE(ILUOUT,*)  'CSEAICE_SCHEME read in PREP, ',CSEAICE_SCHEME,', is not yet handled'
+      WRITE(KLUOUT,*)  'CSEAICE_SCHEME read in PREP, ',CSEAICE_SCHEME,', is not yet handled'
       CALL ABOR1_SFX("CAN ONLY HANDLE GELATO SEAICE MODEL YET (and not the one quoted in PREP)") 
    ENDIF
 ENDIF
@@ -181,7 +177,7 @@ nxglo=nx
 CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
 #else
    IF (NPRINTO > 0) THEN
-      WRITE(ILUOUT,*)  'Gelato cannot yet compute global averages  when running in Arpege (because of collective comm vs. NPROMA blocks)'
+      WRITE(KLUOUT,*)  'Gelato cannot yet compute global averages  when running in Arpege (because of collective comm vs. NPROMA blocks)'
    ENDIF
    nxglo=max(nxglo,1)
 #endif
@@ -258,7 +254,7 @@ ENDWHERE
 DO JX=1,nx
    DO JL=1,nt 
       IF ( tglt%sit(JL,JX,1)%fsi<0. ) THEN
-         WRITE(iluout,*)  &
+         WRITE(KLUOUT,*)  &
               '**** WARNING **** Correcting problem in ice conc. < 0 at i=',  &
               1,' j=',JX,' k=',JL
          tglt%sit(JL,JX,1)%fsi = 0.
@@ -270,7 +266,7 @@ DO JX=1,nx
    ! .. Detect total concentrations that exceed unity
    !
    IF ( zfsit>1. ) THEN
-      WRITE(iluout,*)  &
+      WRITE(KLUOUT,*)  &
            '**** WARNING **** Correcting problem in total ice conc. >1 at i=',  &
            1,' j=',JX,' fsi=',zfsit
       tglt%sit(:,JX,1)%fsi = tglt%sit(:,JX,1)%fsi / zfsit
@@ -334,41 +330,6 @@ TGLT%ind%end=50000000
 !   8. Initalize Gelato bathymetry - change sign w.r.t Surfex
 !
 TGLT%bat(:,1)=-XSEABATHY
-!
-!   Allocate for forcing fields of sea surface salinity and sea ice cover, and 
-!   read data (-possibly with interpolation)
-!
-ALLOCATE(XSSS(KLU))
-XSSS=XUNDEF
-!
-!* Sea surface salinity nudging data
-!
-IF(LINTERPOL_SSS)THEN
-   !
-   ! Precedent, Current and Next Monthly/Annual SSS
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SSS
-   IF(TRIM(CINTERPOL_SSS)=='ANNUAL')INMTH=14
-   !
-   ALLOCATE(XSSS_MTH(SIZE(XSSS),INMTH))
-   DO JMTH=1,INMTH
-      WRITE(YMTH,'(I2)') (JMTH-1)
-      YRECFM='SSS_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(HPROGRAM,YRECFM,XSSS_MTH(:,JMTH),IRESP)
-      CALL CHECK_SEAICE(YRECFM,XSSS_MTH(:,JMTH))
-   ENDDO
-   !
-   CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'S',XSSS)
-   !
-ELSE
-   ! 
-   ALLOCATE(XSSS_MTH(0,0))
-   !
-   YRECFM='SSS'
-   CALL READ_SURF(HPROGRAM,YRECFM,XSSS,IRESP)
-   CALL CHECK_SEAICE(YRECFM,XSSS(:))
-   !
-ENDIF
 !
 !
 !* Sea ice thickness nudging data
@@ -440,7 +401,7 @@ IERRC=0
 DO JI=1,KLU
    IF(PFIELD(JI)>ZMAX.OR.PFIELD(JI)<ZMIN)THEN
       IERRC=IERRC+1
-      WRITE(ILUOUT,*)'PROBLEM FIELD '//TRIM(HFIELD)//' =',PFIELD(JI),&
+      WRITE(KLUOUT,*)'PROBLEM FIELD '//TRIM(HFIELD)//' =',PFIELD(JI),&
                      'NOT REALISTIC AT LOCATION (LAT/LON)',XLAT(JI),XLON(JI)
    ENDIF
 ENDDO

@@ -1,10 +1,11 @@
 !     #########
     SUBROUTINE ECUME_SEAFLUX(PZ0SEA,PMASK,KSIZE_WATER,KSIZE_ICE,       &
-                              PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,          &
-                              PRAIN,PSNOW,PVMOD,PZREF,PUREF,PPS,       &
-                              PICHCE,OPRECIP,OPWEBB, OPWG, OHANDLE_SIC,&
-                              PQSAT, PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,  &
-                              PCE,PRI,PRESA,PZ0HSEA,PPERTFLUX          ) 
+                              PTA,PEXNA,PRHOA,PSST,PSSS,PEXNS,PQA,     &
+                              PRAIN,PSNOW,PVMOD,PZREF,PUREF,PPS,PPA,   &
+                              PICHCE,OPRECIP,OPWEBB,OPWG,KZ0,          &
+                              OHANDLE_SIC,PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,&
+                              PCDN,PCH,PCE,PRI,PRESA,PZ0HSEA,          &
+                              OPERTFLUX,PPERTFLUX,HECUME               ) 
 !     #######################################################################
 !
 !
@@ -44,6 +45,7 @@
 !!      Modified        08/2009 B. Decharme
 !!      Modified        01/2014 S. Senesi : handle sea ice cover, discard 
 !!                                computing fluxes on seaice when done elsewhere
+!!      Modified        05/2014 S. Belamari NEW ECUME : Include salinity & atm. pressure impact
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -51,6 +53,7 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !!
 USE MODI_ICE_SEA_FLUX
+USE MODI_ECUMEV6_FLUX
 USE MODI_ECUME_FLUX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -72,8 +75,10 @@ REAL, DIMENSION(:), INTENT(IN)    :: PVMOD ! module of wind at atm. wind level (
 REAL, DIMENSION(:), INTENT(IN)    :: PZREF ! atm. level for temp. and humidity (m)
 REAL, DIMENSION(:), INTENT(IN)    :: PUREF ! atm. level for wind (m)
 REAL, DIMENSION(:), INTENT(IN)    :: PSST  ! Sea Surface Temperature (K)
+REAL, DIMENSION(:), INTENT(IN)    :: PSSS  ! Sea Surface Salinity (g/kg)
 REAL, DIMENSION(:), INTENT(IN)    :: PEXNS ! Exner function at sea surface
 REAL, DIMENSION(:), INTENT(IN)    :: PPS   ! air pressure at sea surface (Pa)
+REAL, DIMENSION(:), INTENT(IN)    :: PPA   ! air pressure at atm. level (Pa)
 REAL, DIMENSION(:), INTENT(IN)    :: PRAIN ! precipitation rate (kg/s/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PSNOW ! snow rate (kg/s/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PPERTFLUX   ! stochastic flux perturbation pattern
@@ -82,7 +87,11 @@ REAL,               INTENT(IN)    :: PICHCE !
 LOGICAL,            INTENT(IN)    :: OPRECIP! 
 LOGICAL,            INTENT(IN)    :: OPWEBB ! 
 LOGICAL,            INTENT(IN)    :: OPWG   ! 
+LOGICAL,            INTENT(IN)    :: OPERTFLUX !
+INTEGER,            INTENT(IN)    :: KZ0
 LOGICAL,            INTENT(IN)    :: OHANDLE_SIC ! Do we weight seaice and open sea fluxes
+CHARACTER(LEN=6),   INTENT(IN)    :: HECUME      ! type of ecume scheme
+!
 !
 REAL, DIMENSION(:), INTENT(INOUT)    :: PZ0SEA! roughness length over the ocean
 !                                                                                 
@@ -173,8 +182,10 @@ REAL, DIMENSION(SIZE(KMASK))      :: ZW_VMOD ! module of wind at atm. wind level
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_ZREF ! atm. level for temp. and humidity (m)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_UREF ! atm. level for wind (m)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_SST  ! Sea Surface Temperature (K)
+REAL, DIMENSION(SIZE(KMASK))      :: ZW_SSS  ! Sea Surface Salinity (g/kg)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_EXNS ! Exner function at sea surface
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_PS   ! air pressure at sea surface (Pa)
+REAL, DIMENSION(SIZE(KMASK))      :: ZW_PA   ! air pressure at atm. level (Pa)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_RAIN !precipitation rate (kg/s/m2)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_SNOW !snow rate (kg/s/m2)
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_PERTFLUX !stochastic flux perturbation pattern
@@ -208,8 +219,10 @@ DO JJ=1, SIZE(KMASK)
   ZW_ZREF(JJ) = PZREF(KMASK(JJ)) 
   ZW_UREF(JJ) = PUREF(KMASK(JJ))
   ZW_SST(JJ)  = PSST(KMASK(JJ))
+  ZW_SSS(JJ)  = PSSS(KMASK(JJ))
   ZW_EXNS(JJ) = PEXNS(KMASK(JJ)) 
   ZW_PS(JJ)   = PPS(KMASK(JJ))
+  ZW_PA(JJ)   = PPA(KMASK(JJ))
   ZW_RAIN(JJ) = PRAIN(KMASK(JJ))
   ZW_SNOW(JJ) = PSNOW(KMASK(JJ))
   ZW_PERTFLUX(JJ) = PPERTFLUX(KMASK(JJ))
@@ -230,10 +243,19 @@ ZW_Z0HSEA(:) = XUNDEF
 !
 IF (YTYPE=='W') THEN
   !
-  CALL ECUME_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,        &
-         ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,PICHCE,OPRECIP,OPWEBB,OPWG,&
-         ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,ZW_CD,ZW_CDN,ZW_CH,ZW_CE,     &
-         ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA,ZW_PERTFLUX)
+  IF(HECUME=='ECUME6')THEN
+    !new ecume scheme
+    CALL ECUMEV6_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_SSS,ZW_EXNS,  &
+             ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,ZW_PA,PICHCE,OPRECIP,OPWEBB,&
+             ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,ZW_CD,ZW_CDN,ZW_CH,ZW_CE,      &
+             ZW_RI,ZW_RESA,ZW_RAIN,KZ0,ZW_Z0HSEA,OPERTFLUX,ZW_PERTFLUX)    
+  ELSE
+    !old ecume scheme
+    CALL ECUME_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,        &
+           ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,PICHCE,OPRECIP,OPWEBB,OPWG,&
+           ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,ZW_CD,ZW_CDN,ZW_CH,ZW_CE,     &
+           ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA,OPERTFLUX,ZW_PERTFLUX)
+  ENDIF
   !
 ELSEIF ( (YTYPE=='I') .AND. (.NOT. OHANDLE_SIC)) THEN
   !

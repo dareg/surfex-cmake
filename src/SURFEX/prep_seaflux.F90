@@ -36,10 +36,9 @@ USE MODI_GET_LUOUT
 !
 USE MODN_PREP_SEAFLUX
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
-USE MODD_SEAFLUX_n,      ONLY : XZ0, XSST, LSBL, XZ0H, &
-                                LINTERPOL_SST,         &
-                                CINTERPOL_SST,         &
-                                XSST_MTH  
+USE MODD_SEAFLUX_n,      ONLY : XZ0, XSST, XSSS, LSBL, XZ0H,           &
+                                LINTERPOL_SST, CINTERPOL_SST, XSST_MTH,&
+                                LINTERPOL_SSS, CINTERPOL_SSS, XSSS_MTH    
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 USE MODD_OCEAN_n,        ONLY : LMERCATOR, LCURRENT
@@ -111,7 +110,11 @@ CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HP
 !
 CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
-!*      2.1.2   Sea-ice
+!*      2.1.2    Salinity
+!
+CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+!
+!*      2.1.3   Sea-ice
 !
 IF (CSEAICE_SCHEME /= 'NONE  ') THEN 
    CALL PREP_SEAICE(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
@@ -138,16 +141,15 @@ IF(LVERTSHIFT)THEN
 ENDIF
 !
 DEALLOCATE(XZS_LS)
+!
 !-------------------------------------------------------------------------------------
 !
 !*      4.     Preparation of optional interpolation of monthly sst
 !
 LINTERPOL_SST=.FALSE.
 IF(TRIM(CINTERPOL_SST)/='NONE')THEN
-  LINTERPOL_SST=.TRUE.
-ENDIF
 !
-IF(LINTERPOL_SST)THEN
+  LINTERPOL_SST=.TRUE.
 !
 ! Precedent, Current and Next Monthly SST
   INMTH=3
@@ -163,10 +165,35 @@ ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
-!*      5.     Preparation of SBL air variables
+!
+!*      5.     Optional preparation of interpolation of monthly Sea Surface salinity
+!
+LINTERPOL_SSS=.FALSE.
+IF(TRIM(CINTERPOL_SSS)/='NONE')THEN
+!
+   LINTERPOL_SSS=.TRUE.
+   !
+   ! Precedent, Current and Next Monthly SSS
+   INMTH=3
+   ! Precedent, Current and Next Annual Monthly SSS
+   IF(TRIM(CINTERPOL_SSS)=='ANNUAL')INMTH=14
+   !
+   ALLOCATE(XSSS_MTH(SIZE(XSSS),INMTH))
+   DO JMTH=1,INMTH
+      XSSS_MTH(:,JMTH)=XSSS(:)
+   ENDDO
+   !
+ENDIF
+!
+!-------------------------------------------------------------------------------------
+!
+!*      6.     Preparation of SBL air variables
 !
 !
 IF (LSBL) CALL PREP_SEAFLUX_SBL()
+!
+!-------------------------------------------------------------------------------------
+!
 IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

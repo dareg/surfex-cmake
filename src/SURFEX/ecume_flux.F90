@@ -2,7 +2,7 @@
     SUBROUTINE ECUME_FLUX(PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,PVMOD, &
                             PZREF,PUREF,PPS,PICHCE,OPRECIP,OPWEBB,OPWG,&
                             PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE, &
-                            PRI,PRESA,PRAIN,PZ0HSEA,PPERTFLUX    )  
+                            PRI,PRESA,PRAIN,PZ0HSEA,OPERTFLUX,PPERTFLUX)  
 !###############################################################################
 !!
 !!****  *ECUME_FLUX*
@@ -60,7 +60,6 @@ USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, &
                             XTT,XP00
 !
 USE MODD_REPROD_OPER,  ONLY : CCHARNOCK
-USE MODD_SEAFLUX_n,    ONLY : LPERTFLUX
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SNOW_PAR,   ONLY : XZ0SN, XZ0HSN
@@ -98,6 +97,7 @@ REAL,               INTENT(IN)    :: PICHCE    !
 LOGICAL,            INTENT(IN)    :: OPRECIP   !
 LOGICAL,            INTENT(IN)    :: OPWEBB    !
 LOGICAL,            INTENT(IN)    :: OPWG      !
+LOGICAL,            INTENT(IN)    :: OPERTFLUX !
 
 REAL, DIMENSION(:), INTENT(INOUT) :: PZ0SEA    ! roughness length over the ocean
 
@@ -416,7 +416,7 @@ DO JLON=1,SIZE(PTA)
 !
 !       4.3. Stochastic perturbation of turbulent fluxes
 
-  IF( LPERTFLUX )THEN
+  IF( OPERTFLUX )THEN
     ZTAU(JLON) = ZTAU(JLON)* ( 1. + PPERTFLUX(JLON) / 2. )
     ZHF (JLON) = ZHF(JLON)*  ( 1. + PPERTFLUX(JLON) / 2. )
     ZEF (JLON) = ZEF(JLON)*  ( 1. + PPERTFLUX(JLON) / 2. )

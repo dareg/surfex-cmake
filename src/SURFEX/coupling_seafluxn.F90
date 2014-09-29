@@ -41,11 +41,14 @@ SUBROUTINE COUPLING_SEAFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                      
 !!      Modified    04/2013 : B. Decharme new coupling variables
 !!      Modified    01/2014 : S. Senesi : handle sea-ice cover, sea-ice model interface, 
 !!                               and apply to Gelato
+!!      Modified    01/2014 : S. Belamari Remove MODE_THERMOS and XLVTT
+!!      Modified    05/2014 : S. Belamari New ECUME : Include salinity & atm. pressure impact 
+!!                                       
 !!---------------------------------------------------------------------
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
-USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XLVTT, XTT, XTTS, XTTSI, XDAY
+USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XTT, XTTS, XTTSI, XDAY
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SFX_OASIS,  ONLY : LCPL_SEA, LCPL_SEAICE
 USE MODD_WATER_PAR,  ONLY : XEMISWAT, XEMISWATICE
@@ -54,9 +57,10 @@ USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
 USE MODD_SEAFLUX_n,  ONLY : XSST, XSSS, XSIC, XTICE, XZ0, XDIR_ALB, XSCA_ALB, &
                               XEMIS, TTIME, CSEA_ALB, CSEA_FLUX, XUMER, XVMER,&
                               LINTERPOL_SST, LINTERPOL_SSS , LINTERPOL_SIC,   &
-                              LINTERPOL_SIT, XFSIC, XFSIT, XPERTFLUX,         &
+                              LINTERPOL_SIT, XFSIC, XFSIT, LPERTFLUX,         &
+                              XPERTFLUX,                                      &
                               XICHCE, LPRECIP, LPWEBB , LPWG, XICE_ALB,       &
-                              LHANDLE_SIC, CSEAICE_SCHEME, TGLT
+                              LHANDLE_SIC, CSEAICE_SCHEME, TGLT, NZ0
 USE MODD_DIAG_SEAFLUX_n, ONLY : XEVAP
 USE MODD_WATER_PAR, ONLY : XALBSEAICE
 !
@@ -98,8 +102,6 @@ USE MODI_COUPLING_ICEFLUX_n
 USE MODI_SEAICE_GELATO1D_n
 !
 USE MODI_COUPLING_SLT_n
-!
-USE MODE_THERMOS
 !
 IMPLICIT NONE
 !
@@ -356,15 +358,15 @@ SELECT CASE (CSEA_FLUX)
                       ZSFTH, ZSFTQ, ZUSTAR,                           &
                       ZCD, ZCDN, ZCH, ZRI, ZRESA_SEA, ZZ0H            )  
 
-  CASE ('ECUME ')
+  CASE ('ECUME ','ECUME6')
     CALL ECUME_SEAFLUX(XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,            &
-                      PTA, ZEXNA ,PRHOA, ZSST, ZEXNS, ZQA, PRAIN,     &
-                      PSNOW,                                          &
-                      ZWIND, PZREF, PUREF,                            &
-                      PPS, XICHCE, LPRECIP, LPWEBB, LPWG, LHANDLE_SIC,ZQSAT, &
-                      ZSFTH, ZSFTQ, ZUSTAR,                           &
+                      PTA, ZEXNA ,PRHOA, ZSST, XSSS, ZEXNS, ZQA,      &
+                      PRAIN, PSNOW,                                   &
+                      ZWIND, PZREF, PUREF, PPS, PPA,                  &
+                      XICHCE, LPRECIP, LPWEBB, LPWG, NZ0,             &
+                      LHANDLE_SIC, ZQSAT, ZSFTH, ZSFTQ, ZUSTAR,       &
                       ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H,      &
-                      XPERTFLUX                                       )
+                      LPERTFLUX, XPERTFLUX, CSEA_FLUX                 )
   CASE ('COARE3')
     CALL COARE30_SEAFLUX(XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,          &
                       PTA, ZEXNA ,PRHOA, ZSST, ZEXNS, ZQA, PRAIN,     &
@@ -543,16 +545,20 @@ ELSE
 ENDIF
 !
 !-------------------------------------------------------------------------------
+! IMPOSED SSS OR INTERPOLATED SSS AT TIME t+1
+!-------------------------------------------------------------------------------
+!
+! Daily update Sea surface salinity from monthly data
+!
+IF (LINTERPOL_SSS .AND. MOD(TTIME%TIME,XDAY) == 0.) THEN
+      CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'S',XSSS)
+ENDIF
+!
+!-------------------------------------------------------------------------------
 ! SEA-ICE coupling at time t+1
 !-------------------------------------------------------------------------------
 !
 IF (LHANDLE_SIC) THEN
-   IF (LINTERPOL_SSS) THEN
-      IF (MOD(TTIME%TIME,XDAY) == 0.) THEN
-         ! Daily update Sea surface salinity from monthly data
-         CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'S',XSSS)
-      ENDIF
-   ENDIF
    IF (LINTERPOL_SIC) THEN
       IF ((MOD(TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
       ! Daily update Sea Ice Cover constraint from monthly data
@@ -577,36 +583,36 @@ IF (LHANDLE_SIC) THEN
 ENDIF
 !
 !-------------------------------------------------------------------------------
-! OCEANIC COUPLING, IMPOSED SST OR iNTERPOLATED SST AT TIME t+1
+! OCEANIC COUPLING, IMPOSED SST OR INTERPOLATED SST AT TIME t+1
 !-------------------------------------------------------------------------------
 !
-  IF (LMERCATOR) THEN
-    !
-    ! Update SST reference profile for relaxation purpose
-    IF (LSST_DATA) THEN
+IF (LMERCATOR) THEN
+   !
+   ! Update SST reference profile for relaxation purpose
+   IF (LSST_DATA) THEN
       CALL SST_UPDATE(XSEAT_REL(:,NOCKMIN+1), TTIME)
       !
       ! Convert to degree C for ocean model
       XSEAT_REL(:,NOCKMIN+1) = XSEAT_REL(:,NOCKMIN+1) - XTT
-    ENDIF
-    !
-    CALL MOD1D_n(HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
-                 PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
-                 PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),XSST(:))
-    !
-  ELSEIF(LSST_DATA)THEN 
-    !
-    ! Imposed SST 
-    !
-    CALL SST_UPDATE(XSST, TTIME)
-    !
-  ELSEIF (LINTERPOL_SST.AND.MOD(TTIME%TIME,XDAY) == 0.) THEN
-    !
-    ! Imposed monthly SST 
-    !
-    CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'T',XSST)
-    !
-  ENDIF                             
+   ENDIF
+   !
+   CALL MOD1D_n(HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
+                PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
+                PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),XSST(:))
+   !
+ELSEIF(LSST_DATA)THEN 
+   !
+   ! Imposed SST 
+   !
+   CALL SST_UPDATE(XSST, TTIME)
+   !
+ELSEIF (LINTERPOL_SST.AND.MOD(TTIME%TIME,XDAY) == 0.) THEN
+   !
+   ! Imposed monthly SST 
+   !
+   CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'T',XSST)
+   !
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !Physical properties see by the atmosphere in order to close the energy budget 

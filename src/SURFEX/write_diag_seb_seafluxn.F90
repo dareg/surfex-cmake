@@ -27,10 +27,16 @@
 !!      B. Decharme 06/2013 : Add evap and sublimation diag
 !!                            Delete LPROVAR_TO_DIAG here
 !!      S.Senesi    01/2014 : add diags on seaice 
+!!      S. Belamari 06/2014 : Introduce GRESET to avoid errors due to NBLOCK=0
+!!                            when coupled with ARPEGE/ALADIN/AROME
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+#ifdef ARO
+USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+#endif
 !
 USE MODD_DIAG_SURF_ATM_n,ONLY : LRESET_BUDGETC
 !
@@ -77,6 +83,7 @@ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=2)  :: YNUM
 !
+LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
 LOGICAL           :: GMISC
 !
@@ -88,7 +95,12 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SEAFLUX_N',0,ZHOOK_HANDLE)
 !
 !         Initialisation for IO
 !
- CALL INIT_IO_SURF_n(HPROGRAM,'SEA   ','SEAFLX','WRITE')
+GRESET=.TRUE.
+#ifdef ARO
+GRESET=(.NOT.LCOUNTW)
+#endif
+!
+CALL INIT_IO_SURF_n(HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !
 !
 !*       1.     Surface temperature :
@@ -348,13 +360,13 @@ IF (N2M>=1) THEN
    YCOMMENT='X_Y_'//YRECFM//' (K)'
    !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-   XT2M_MIN(:)=XUNDEF
+   IF(GRESET)XT2M_MIN(:)=XUNDEF
    !
    YRECFM='T2MMAX_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (K)'
    !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-   XT2M_MAX(:)=0.0
+   IF(GRESET)XT2M_MAX(:)=0.0
    !
    YRECFM='Q2M_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
@@ -370,13 +382,13 @@ IF (N2M>=1) THEN
    YCOMMENT='X_Y_'//YRECFM//' (-)'
    !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-   XHU2M_MIN(:)=XUNDEF
+   IF(GRESET)XHU2M_MIN(:)=XUNDEF
    !
    YRECFM='HU2MMAX_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (-)'
    !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XHU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-   XHU2M_MAX(:)=-XUNDEF
+   IF(GRESET)XHU2M_MAX(:)=-XUNDEF
    !
    YRECFM='ZON10M_SEA'
    YCOMMENT='X_Y_'//YRECFM//' (M/S)'
@@ -397,7 +409,7 @@ IF (N2M>=1) THEN
    YCOMMENT='X_Y_'//YRECFM//' (M/S)'
    !
    CALL WRITE_SURF(HPROGRAM,YRECFM,XWIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-   XWIND10M_MAX(:)=0.0
+   IF(GRESET)XWIND10M_MAX(:)=0.0
    !
 END IF
 !

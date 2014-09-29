@@ -30,6 +30,7 @@
 !!      S. Riette   06/2009 CLS_2M becomes CLS_TQ, CLS_TQ and CLS_WIND have one
 !!                          more argument (height of diagnostic)
 !       B. decharme 04/2013 : Add EVAP and SUBL diag
+!!      S. Belamari 01/2014 : Wind module=XUNDEF if one component is XUNDEF
 !!------------------------------------------------------------------
 !
 
@@ -115,8 +116,8 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_WATFLUX_N',0,ZHOOK_HANDLE)
 XDIAG_TS(:) = PTS(:)
 !
 IF (.NOT. LSBL) THEN
-!        
-  IF (N2M==1) THEN      
+!
+  IF (N2M==1) THEN
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
                      PSFTH, PSFTQ, PSFZON, PSFMER,                    &
                      XT2M, XQ2M, XHU2M, XZON10M, XMER10M              )  
@@ -140,7 +141,11 @@ IF (.NOT. LSBL) THEN
     XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
     XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
     !
-    XWIND10M    (:) = SQRT(XZON10M**2+XMER10M**2)
+    WHERE(XZON10M(:) /= XUNDEF .AND. XMER10M(:) /= XUNDEF)
+      XWIND10M  (:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
+    ELSEWHERE
+      XWIND10M  (:) = XUNDEF
+    ENDWHERE
     XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
     !
     !* Richardson number
@@ -149,15 +154,15 @@ IF (.NOT. LSBL) THEN
   ENDIF
 !
 ELSE
-  IF (N2M>=1) THEN        
+  IF (N2M>=1) THEN
     XT2M    = XUNDEF
     XQ2M    = XUNDEF
     XHU2M   = XUNDEF
     XZON10M = XUNDEF
     XMER10M = XUNDEF
-    XRI     = PRI           
+    XRI     = PRI
   ENDIF
-ENDIF        
+ENDIF
 !
 IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   !

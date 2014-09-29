@@ -31,10 +31,16 @@
 !!      B. Decharme  06/13   Add diags (sublimation, lateral drainage)
 !!                           All snow outputs noted SN
 !!                           delete NWG_SIZE
+!!      S. Belamari 06/2014 : Introduce GRESET to avoid errors due to NBLOCK=0
+!!                            when coupled with ARPEGE/ALADIN/AROME
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+#ifdef ARO
+USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+#endif
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
 !
@@ -136,10 +142,11 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
- CHARACTER(LEN=100):: YCOMMENT       ! Comment string
- CHARACTER(LEN=2)  :: YNUM
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=2)  :: YNUM
 !
+LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -148,7 +155,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',0,ZHOOK_HANDLE)
- CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+!
+GRESET=.TRUE.
+#ifdef ARO
+GRESET=(.NOT.LCOUNTW)
+#endif
+!
+CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -605,12 +618,12 @@ IF (N2M>=1) THEN
   YRECFM='T2MMIN_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (K)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_T2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-  XAVG_T2M_MIN(:)=XUNDEF
+  IF(GRESET)XAVG_T2M_MIN(:)=XUNDEF
   !
   YRECFM='T2MMAX_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (K)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_T2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-  XAVG_T2M_MAX(:)=-XUNDEF
+  IF(GRESET)XAVG_T2M_MAX(:)=-XUNDEF
   !
   YRECFM='Q2M_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
@@ -623,12 +636,12 @@ IF (N2M>=1) THEN
   YRECFM='HU2MMIN_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HU2M_MIN(:),IRESP,HCOMMENT=YCOMMENT)
-  XAVG_HU2M_MIN(:)=XUNDEF
+  IF(GRESET)XAVG_HU2M_MIN(:)=XUNDEF
   !
   YRECFM='HU2MMAX_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (-)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_HU2M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-  XAVG_HU2M_MAX(:)=-XUNDEF
+  IF(GRESET)XAVG_HU2M_MAX(:)=-XUNDEF
   !
   YRECFM='ZON10M_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (M/S)'
@@ -645,7 +658,7 @@ IF (N2M>=1) THEN
   YRECFM='W10MMAX_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (M/S)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_WIND10M_MAX(:),IRESP,HCOMMENT=YCOMMENT)
-  XAVG_WIND10M_MAX(:)=0.0
+  IF(GRESET)XAVG_WIND10M_MAX(:)=0.0
   !
   YRECFM='SFCO2_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (M.kgCO2.S-1.kgAIR-1)'

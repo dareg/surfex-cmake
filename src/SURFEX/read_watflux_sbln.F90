@@ -155,7 +155,7 @@ IF(YREAD=='ALL') THEN
   END DO
   !
   !* Monin-Obhukov length
-  YRECFM='WAT_SBL_LMO     '
+  YRECFM='WAT_SBL_LMO '
   CALL READ_SURF(HPROGRAM,YRECFM,XLMO(:),IRESP)
   !
   !* Pressure

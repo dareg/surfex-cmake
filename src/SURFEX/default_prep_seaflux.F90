@@ -32,6 +32,7 @@
 !!                                        ! from MERCATOR analyses types
 !!      07/2012     P. Le Moigne          ! CMO1D phasing
 !!      01/2014     S. Senesi             ! introduce fractional seaice and sea-ice model 
+!!      03/2014     S. Belamari           ! initialize sea surface salinity
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS

@@ -37,6 +37,7 @@ SUBROUTINE DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, PSST, PQA, &
 !!                          more argument (height of diagnostic)
 !!      B. Decharme 04/2013 : Add EVAP and SUBL diag
 !!      S. Senesi   01/2014 ! introduce fractional seaice and sea-ice model 
+!!      S. Belamari 01/2014 : Wind module=XUNDEF if one component is XUNDEF
 !!------------------------------------------------------------------
 !
 
@@ -62,16 +63,16 @@ USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,       &
                                        XLWU_ICE, XSWBU_ICE, XFMU_ICE, XFMV_ICE
 !
 USE MODD_DIAG_SEAICE_n, ONLY : LDIAG_SEAICE, XSIT, XSND, XMLT
-USE MODE_GLT_STATS , ONLY : GLT_AVHICEM, GLT_AVHSNWM
+USE MODD_TYPES_GLT,     ONLY : T_GLT
+USE MODD_GLT_PARAM ,    ONLY : GELATO_DIM=>NX
+USE MODE_GLT_STATS ,    ONLY : GLT_AVHICEM, GLT_AVHSNWM
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_SEA
 USE MODI_DIAG_SURF_BUDGETC_SEA
 USE MODI_DIAG_CPL_ESM_SEA
-USE MODD_TYPES_GLT,   ONLY : T_GLT
-USE MODD_GLT_PARAM , ONLY : GELATO_DIM=>NX
-! 
+!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -192,14 +193,27 @@ IF (.NOT. LSBL) THEN
   END IF
 !
   IF (N2M>=1) THEN
-    !* Richardson number
      IF (OHANDLE_SIC) THEN
+        !
         XT2M    = XT2M    * (1 - PSIC) + XT2M_ICE    * PSIC
         XQ2M    = XQ2M    * (1 - PSIC) + XQ2M_ICE    * PSIC
         XHU2M   = XHU2M   * (1 - PSIC) + XHU2M_ICE   * PSIC
-        XZON10M = XZON10M * (1 - PSIC) + XZON10M_ICE * PSIC
-        XMER10M = XMER10M * (1 - PSIC) + XMER10M_ICE * PSIC
-        XWIND10M_ICE(:) = SQRT(XZON10M_ICE**2+XMER10M_ICE**2)
+        !
+        WHERE(XZON10M(:)/=XUNDEF.AND.XZON10M_ICE(:)/=XUNDEF)
+              XZON10M(:) = XZON10M(:) * (1 - PSIC(:)) + XZON10M_ICE(:) * PSIC(:)
+        ELSEWHERE
+              XZON10M(:) = XUNDEF
+        ENDWHERE
+        WHERE(XMER10M(:)/=XUNDEF.AND.XMER10M_ICE(:)/=XUNDEF)
+              XMER10M(:) = XMER10M(:) * (1 - PSIC(:)) + XMER10M_ICE(:) * PSIC(:)
+        ELSEWHERE
+              XMER10M(:) = XUNDEF
+        ENDWHERE
+        WHERE(XZON10M_ICE(:) /= XUNDEF .AND. XMER10M_ICE(:) /= XUNDEF)
+              XWIND10M_ICE(:) = SQRT(XZON10M_ICE(:)**2+XMER10M_ICE(:)**2)
+        ELSEWHERE
+              XWIND10M_ICE(:) = XUNDEF
+        ENDWHERE
         !
         XRI    = PRI     * (1 - PSIC) + PRI_ICE     * PSIC
         XRI_ICE=PRI_ICE
@@ -213,7 +227,11 @@ IF (.NOT. LSBL) THEN
     XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
     XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
     !
-    XWIND10M    (:) = SQRT(XZON10M**2+XMER10M**2)
+    WHERE(XZON10M(:) /= XUNDEF .AND. XMER10M(:) /= XUNDEF)
+      XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
+    ELSEWHERE
+      XWIND10M(:) = XUNDEF
+    ENDWHERE
     XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
     !
   ENDIF
@@ -225,7 +243,7 @@ ELSE
     XHU2M   = XUNDEF
     XZON10M = XUNDEF
     XMER10M = XUNDEF
-    XRI     = PRI        
+    XRI     = PRI
   ENDIF
 ENDIF
 !

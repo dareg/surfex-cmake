@@ -130,7 +130,12 @@ SELECT CASE (HVAR)
    CASE ('SST    ') 
       OUNIF = (XSST_UNIF/=XUNDEF) 
    CASE ('SSS    ') 
-      OUNIF = (XSSS_UNIF/=XUNDEF) 
+      IF (CSEAICE_SCHEME == 'NONE  '.AND. &
+         LEN_TRIM(HFILETYPE)==0.0   .AND. &
+         XSSS_UNIF==XUNDEF                )THEN
+         XSSS_UNIF=0.0
+      ENDIF
+      OUNIF = (XSSS_UNIF/=XUNDEF)
    CASE ('SIC    ') 
       OUNIF = (XSIC_UNIF/=XUNDEF) 
 END SELECT

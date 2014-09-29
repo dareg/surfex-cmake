@@ -23,7 +23,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original      01/2004
-!!      S. Senesi     01/2014 : adapt to fractional seaice, and to seaice scheme
+!!      S. Senesi     01/2014  adapt to fractional seaice, and to seaice scheme
+!!      S. Belamari   03/2014  Include NZ0
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -74,7 +75,9 @@ TYPE SEAFLUX_t
   CHARACTER(LEN=4)                  :: CSEA_ALB    ! type of albedo
   LOGICAL                           :: LPWG        ! flag for gust
   LOGICAL                           :: LPRECIP     ! flag for precip correction
-  LOGICAL                           :: LPWEBB      ! flag for heat flux correction
+  LOGICAL                           :: LPWEBB      ! flag for Webb correction
+  INTEGER                           :: NZ0         ! set to 0,1 or 2 according to Z0 formulation
+                                                   ! 0= ARPEGE / 1= Smith (1988) / 2= Direct
   INTEGER                           :: NGRVWAVES   ! set to 0,1 or 2 according to the 
                                                    ! gravity waves model used in coare30_flux
   REAL                              :: XICHCE      ! CE coef calculation for ECUME
@@ -197,6 +200,8 @@ LOGICAL, POINTER :: LPRECIP=>NULL()
 !$OMP THREADPRIVATE(LPRECIP)
 LOGICAL, POINTER :: LPWEBB=>NULL()
 !$OMP THREADPRIVATE(LPWEBB)
+INTEGER, POINTER :: NZ0=>NULL()
+!$OMP THREADPRIVATE(NZ0)
 INTEGER, POINTER :: NGRVWAVES=>NULL()
 !$OMP THREADPRIVATE(NGRVWAVES)
 REAL, POINTER :: XICHCE=>NULL()
@@ -357,6 +362,7 @@ XCD_ICE_CST=>SEAFLUX_MODEL(KTO)%XCD_ICE_CST
 XSI_FLX_DRV=>SEAFLUX_MODEL(KTO)%XSI_FLX_DRV
 XFREEZING_SST=>SEAFLUX_MODEL(KTO)%XFREEZING_SST
 LPWEBB=>SEAFLUX_MODEL(KTO)%LPWEBB
+NZ0=>SEAFLUX_MODEL(KTO)%NZ0
 NGRVWAVES=>SEAFLUX_MODEL(KTO)%NGRVWAVES
 XICHCE=>SEAFLUX_MODEL(KTO)%XICHCE
 LPERTFLUX=>SEAFLUX_MODEL(KTO)%LPERTFLUX
@@ -469,6 +475,7 @@ SEAFLUX_MODEL(:)%CSEA_ALB=' '
 SEAFLUX_MODEL(:)%LPWG=.FALSE.
 SEAFLUX_MODEL(:)%LPRECIP=.FALSE.
 SEAFLUX_MODEL(:)%LPWEBB=.FALSE.
+SEAFLUX_MODEL(:)%NZ0=0
 SEAFLUX_MODEL(:)%NGRVWAVES=0
 SEAFLUX_MODEL(:)%XICHCE=0.
 SEAFLUX_MODEL(:)%LPERTFLUX=.FALSE.

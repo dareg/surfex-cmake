@@ -29,6 +29,7 @@
 !!    -------------
 !!      Original    01/2003 
 !!      Modified    01/2014 : S. Senesi : handle seaice scheme
+!!      S. Belamari 03/2014   Include sea surface salinity XSSS
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -37,7 +38,10 @@
 USE MODD_SEAFLUX_n, ONLY : XSST, XZ0, TTIME, &
                            LINTERPOL_SST,    &
                            XSST_MTH,         &
-                           LHANDLE_SIC
+                           LHANDLE_SIC,      &
+                           XSSS, XSSS_MTH,   &
+                           LINTERPOL_SSS,    &
+                           CINTERPOL_SSS
 !
 USE MODD_DIAG_SEAICE_n, ONLY: LDIAG_SEAICE
 !
@@ -97,7 +101,7 @@ IF(LINTERPOL_SST)THEN
   DO JMTH=1,INMTH
      WRITE(YMTH,'(I2)') (JMTH-1)
      YRECFM='SST_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-     YCOMMENT='SST month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
+     YCOMMENT='SST at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
      CALL WRITE_SURF(HPROGRAM,YRECFM,XSST_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
   ENDDO
 !
@@ -105,7 +109,7 @@ ENDIF
 !
 YRECFM='SST'
 YCOMMENT='SST'
- CALL WRITE_SURF(HPROGRAM,YRECFM,XSST(:),IRESP,HCOMMENT=YCOMMENT)  
+CALL WRITE_SURF(HPROGRAM,YRECFM,XSST(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !-------------------------------------------------------------------------------
 !
@@ -116,7 +120,27 @@ YCOMMENT='SST'
 !
 YRECFM='Z0SEA'
 YCOMMENT='Z0SEA (m)'
- CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
+CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP,HCOMMENT=YCOMMENT)
+!
+!
+!* sea surface salinity
+!
+IF(LINTERPOL_SSS)THEN
+   !
+   INMTH=SIZE(XSSS_MTH,2)
+   !
+   DO JMTH=1,INMTH
+      WRITE(YMTH,'(I2)') (JMTH-1)
+      YRECFM='SSS_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
+      YCOMMENT='Sea Surface Salinity at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XSSS_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
+   ENDDO
+!
+ENDIF
+!
+YRECFM='SSS'
+YCOMMENT='Sea Surface Salinity'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XSSS(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !-------------------------------------------------------------------------------
 !
