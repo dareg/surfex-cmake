@@ -38,6 +38,7 @@ SUBROUTINE INI_SURF_CSTS
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_SURF_CONF, ONLY : CPROGNAME
 !
 USE MODD_WATER_PAR
@@ -90,14 +91,23 @@ NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XPERCENTAGEPORE
 !
 !-------------------------------------------------------------------------------
-!*	 1. Default values
+!*	 0. INIT
 !-------------------------------------------------------------------------------
-!
-! Snow emissivity:
 !
 IF (LHOOK) CALL DR_HOOK('INI_SURF_CSTS',0,ZHOOK_HANDLE)
 !
-XEMISSN = 1.0  ! (-)
+XALBWAT     = XUNDEF
+XALBSCA_WAT = XUNDEF
+XALBSEAICE  = XUNDEF
+XALBWATICE  = XUNDEF
+XALBWATSNOW = XUNDEF
+XEMISWAT    = XUNDEF
+XEMISWATICE = XUNDEF
+XEMISSN     = XUNDEF
+!
+!-------------------------------------------------------------------------------
+!*	 1. Default values
+!-------------------------------------------------------------------------------
 !
 ! Minimum and maximum values of the albedo of snow:
 !
@@ -117,35 +127,9 @@ XHGLA    = 33.3 !(m)
 !
 XWSNV = 5.0 !(-)
 !
-! Water global albedo (option "UNIF")
-!
-XALBWAT =  0.135
-!
 ! Water direct albedo coefficient (option "TA96")
 !
 XALBCOEF_TA96 =  0.037
-!
-! Water diffuse albedo
-!
-XALBSCA_WAT =  0.06
-!                        
-! Water emissivity
-!
-XEMISWAT =  0.98                      
-!
-! Sea ice albedo
-!
-XALBSEAICE = 0.71
-!
-! water ice and snow albedo
-!
-XALBWATICE = 0.40
-!
-XALBWATSNOW = 0.60
-!
-! Sea ice emissivity
-!
-XEMISWATICE = 1.0
 !
 ! Coefficient for calculation of floodplain fraction over vegetation
 !
@@ -250,7 +234,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_CSTS)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_SNOW_CSTS)
 !
 !-------------------------------------------------------------------------------
-!*	 3. For Reproductibility or not...
+!*	 3. For Reproductibility
 !-------------------------------------------------------------------------------
 !
  CALL POSNAM(ILUNAM,'NAM_REPROD_OPER',GFOUND,ILUOUT)
@@ -272,6 +256,84 @@ IF(LREPROD_OPER)THEN
   CDGDIF         = 'SOIL'
   CQSAT          = 'OLD'
   CCHARNOCK      = 'OLD'
+ENDIF
+!
+! Water diffuse albedo
+IF(XALBSCA_WAT==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XALBSCA_WAT =  0.06
+  ELSE
+    XALBSCA_WAT =  0.065
+  ENDIF
+ENDIF
+!
+! Water global albedo (option "UNIF")
+!
+IF(XALBWAT==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XALBWAT =  0.135
+  ELSE
+    XALBWAT =  0.065
+  ENDIF
+ENDIF
+!
+! Sea ice albedo
+!
+IF(XALBSEAICE==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XALBSEAICE =  0.85
+  ELSE
+    XALBSEAICE =  0.71
+  ENDIF
+ENDIF
+!
+! water ice and snow albedo
+!
+IF(XALBWATICE==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XALBWATICE =  0.85
+  ELSE
+    XALBWATICE =  0.40
+  ENDIF
+ENDIF
+!
+IF(XALBWATSNOW==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XALBWATSNOW =  0.85
+  ELSE
+    XALBWATSNOW =  0.60
+  ENDIF
+ENDIF
+!                   
+! Water emissivity
+!
+IF(XEMISWAT==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XEMISWAT =  0.98
+  ELSE
+    XEMISWAT =  0.96
+  ENDIF
+ENDIF
+!
+! Sea ice emissivity
+!
+IF(XEMISWATICE==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XEMISWATICE =  1.0
+  ELSE
+    XEMISWATICE =  0.97
+  ENDIF
+ENDIF
+!
+!
+! Snow emissivity:
+!
+IF(XEMISSN==XUNDEF)THEN
+  IF(LREPROD_OPER)THEN
+    XEMISSN =  1.0
+  ELSE
+    XEMISSN =  0.99
+  ENDIF
 ENDIF
 !
 !-------------------------------------------------------------------------------

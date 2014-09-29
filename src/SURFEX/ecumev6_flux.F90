@@ -261,7 +261,7 @@ ZVMOD(:) = WIND_THRESHOLD(PVMOD(:),PUREF(:))    !set a minimum value to wind
 !
 !       2.1. Specific humidity at saturation
 !
-WHERE(PSSS(:) /= XUNDEF)
+WHERE(PSSS(:)>0.0.AND.PSSS(:)/=XUNDEF)
   PQSAT (:) = QSAT_SEAWATER2(PSST(:),PPS(:),PSSS(:))    !at sea surface
 ELSEWHERE
   PQSAT (:) = QSAT_SEAWATER (PSST(:),PPS(:))            !at sea surface
@@ -278,7 +278,7 @@ ZDQ(:) = PQA(:)-PQSAT(:)
 !
 ZLVA(:) = XLVTT+(XCPV-XCL)*(PTA (:)-XTT)                !of pure water at atm level
 ZLVS(:) = XLVTT+(XCPV-XCL)*(PSST(:)-XTT)                !of pure water at sea surface
-WHERE(PSSS(:) /= XUNDEF)
+WHERE(PSSS(:)>0.0.AND.PSSS(:)/=XUNDEF)
   ZLVS(:) = ZLVS(:)*(1.0-1.00472E-3*PSSS(:))            !of seawater at sea surface
 ENDWHERE
 !
