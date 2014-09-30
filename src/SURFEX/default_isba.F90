@@ -153,8 +153,10 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',0,ZHOOK_HANDLE)
 !
 PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
-!
-HROUGH  = "UNDE"  ! undefined. Needs further information on canopy scheme use to set default
+!!!!!do not phased!!!!!!!
+HROUGH  = "NONE"
+!!!!!do not phased!!!!!!!
+!HROUGH  = "UNDE"  ! undefined. Needs further information on canopy scheme use to set default
 HSCOND  = "PL98"
 HALBEDO = "DRY "
 !

@@ -105,7 +105,6 @@ ELSE
           (HREC(1:8)/='ROOTFRAC'                     ) .AND.  &
           (HREC(1:4)/='WSAT'                         ) .AND.  &
           (HREC(1:3)/='WFC'                          ) .AND.  &
-          (HREC(1:3)/='W33'                          ) .AND.  &
           (HREC(1:5)/='WWILT'                        ) .AND.  &
           (HREC(1:4)/='DICE'                         ) .AND.  &
           (HREC(1:2)/='CV'                           ) .AND.  &

@@ -1207,10 +1207,10 @@ CONTAINS
       INTEGER, DIMENSION(kdim) ::   iwork
       !!----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, kdim, mpi_integer, mpi_max, localcomm, ierror )
 !$OMP END SINGLE
@@ -1234,10 +1234,10 @@ CONTAINS
       INTEGER ::   ierror, iwork, localcomm   ! temporary integer
       !!----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_max, localcomm, ierror)
 !$OMP END SINGLE
@@ -1263,10 +1263,10 @@ CONTAINS
       INTEGER, DIMENSION(kdim) ::   iwork
       !!----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, kdim, mpi_integer, mpi_min, localcomm, ierror )
 !$OMP END SINGLE
@@ -1290,10 +1290,10 @@ CONTAINS
       INTEGER ::  ierror, iwork, localcomm
       !!----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
      CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_min, localcomm, ierror )
 !$OMP END SINGLE
@@ -1367,10 +1367,10 @@ CONTAINS
       REAL, DIMENSION(kdim) ::  zwork
       !!----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) ) localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_max, localcomm, ierror )
 !$OMP END SINGLE
@@ -1394,10 +1394,10 @@ CONTAINS
       REAL ::   zwork
       !!----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, 1, mpi_double_precision, mpi_max, localcomm, ierror )
 !$OMP END SINGLE
@@ -1422,10 +1422,10 @@ CONTAINS
       REAL, DIMENSION(kdim) ::   zwork
       !!-----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) ) localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_min, localcomm, ierror )
 !$OMP END SINGLE
@@ -1450,10 +1450,10 @@ CONTAINS
       INTEGER :: localcomm
       !!-----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, 1, mpi_double_precision, mpi_min, localcomm, ierror )
 !$OMP END SINGLE
@@ -1479,10 +1479,10 @@ CONTAINS
       REAL, DIMENSION(kdim) ::   zwork     ! temporary workspace 
       !!-----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_sum, localcomm, ierror )
 !$OMP END SINGLE
@@ -1506,10 +1506,10 @@ CONTAINS
       REAL ::   zwork
       !!-----------------------------------------------------------------------
       !
+#if !defined in_surfex || ! defined NOMPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) ) localcomm = kcom
       !
-#if !defined in_surfex || ! defined NOMPI
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, 1, mpi_double_precision, mpi_sum, localcomm, ierror )
 !$OMP END SINGLE

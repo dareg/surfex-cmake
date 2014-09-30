@@ -200,6 +200,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
 ! mpp_comm_opa, which is the group of processors we use for sea ice,
 ! should be used instead.
 !
+#if !defined in_surfex || ! defined NOMPI
       IF ( lmpp ) THEN
          CALL MPI_ALLREDUCE(zshn,the_sum,1,mpi_double_precision,  &
            mpi_sum, mpi_comm_opa,ierror) ; 
@@ -220,6 +221,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
            mpi_sum, mpi_comm_opa,ierror) ; 
          zvhs=the_sum
       ENDIF
+#endif
 !
       IF (lwg) THEN
         WRITE(noutlu,*) '                              North        South'
