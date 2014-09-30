@@ -241,27 +241,30 @@ XDATA_SEA = 0.
 !!possible patches correspond to  vegetation types
 !
 !*    2.0    vegetation type fractions
+!
 NVEGTYPE = 19
 !  
-NVT_NO   = 1      ! no vegetation (smooth)
-NVT_ROCK = 2      ! no vegetation (rocks)
-NVT_SNOW = 3      ! permanent snow and ice
-NVT_TEBD = 4      ! temperate broadleaf cold-deciduous summergreen (TREE)
-NVT_BONE = 5      ! boreal needleleaf evergreen  (CONI)
-NVT_TRBE = 6      ! tropical broadleaf evergreen (EVER)
-NVT_C3   = 7      ! C3 cultures types
-NVT_C4   = 8      ! C4 cultures types
-NVT_IRR  = 9      ! irrigated crops
-NVT_GRAS =10      ! grassland
-NVT_TROG =11      ! tropical grassland
-NVT_PARK =12      ! peat bogs, parks and gardens (irrigated grass)
-NVT_TRBD =13      ! tropical broadleaf deciduous (TREE)
-NVT_TEBE =14      ! temperate broadleaf evergreen (TREE)
-NVT_TENE =15      ! temperate needleleaf evergreen (CONI)
-NVT_BOBD =16      ! boreal broadleaf cold-deciduous summergreen (TREE)
-NVT_BOND =17      ! boreal needleleaf cold-deciduous summergreen (CONI)
-NVT_BOGR =18      ! boral grass (GRAS)
-NVT_SHRB =19      ! shrub (TREE)
+!New name  N   Nold   Comments
+!-----------------------------
+NVT_NO   = 1   ! 1  ! no vegetation (smooth)
+NVT_ROCK = 2   ! 2  ! no vegetation (rocks)
+NVT_SNOW = 3   ! 3  ! permanent snow and ice
+NVT_TEBD = 4   ! 4  ! temperate broadleaf cold-deciduous summergreen (TREE)
+NVT_BONE = 5   ! 5  ! boreal needleleaf evergreen  (CONI)
+NVT_TRBE = 6   ! 6  ! tropical broadleaf evergreen (EVER)
+NVT_C3   = 7   ! 7  ! C3 cultures types
+NVT_C4   = 8   ! 8  ! C4 cultures types
+NVT_IRR  = 9   ! 9  ! irrigated crops
+NVT_GRAS =10   !10  ! grassland
+NVT_TROG =11   !11  ! tropical grassland
+NVT_PARK =12   !12  ! peat bogs, parks and gardens (irrigated grass)
+NVT_TRBD =13   ! 4  ! tropical broadleaf deciduous (TREE)
+NVT_TEBE =14   ! 4  ! temperate broadleaf evergreen (TREE)
+NVT_TENE =15   ! 5  ! temperate needleleaf evergreen (CONI)
+NVT_BOBD =16   ! 4  ! boreal broadleaf cold-deciduous summergreen (TREE)
+NVT_BOND =17   ! 5  ! boreal needleleaf cold-deciduous summergreen (CONI)
+NVT_BOGR =18   !10  ! boral grass (GRAS)
+NVT_SHRB =19   ! 4  ! shrub (TREE)
 !
 !*    2.1    leaf area index
 !            ---------------
