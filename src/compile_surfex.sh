@@ -2,7 +2,7 @@
 
 export ARCH=${ARCH=LXgfortran}
 export VER_MPI=${VER_MPI=NOMPI}
-export OPTLEVEL=${OPTLEVEL=O2}
+export OPTLEVEL=${OPTLEVEL=DEBUG}
 export VER_USER=${VER_USER=""}
 
 export XYZ=""
