@@ -91,7 +91,7 @@ IMPLICIT NONE
 !$ INCLUDE 'omp_lib.h'
 #endif
 !
-#ifndef SFXOASIS
+#ifdef SFXOASIS
 !$ INCLUDE 'mpif.h'
 #endif
 !
