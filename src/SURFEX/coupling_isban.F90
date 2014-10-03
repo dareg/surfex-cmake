@@ -61,6 +61,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!      B. Decharme  04/2013 new coupling variables
 !!                           Subsurface runoff if SGH (DIF option only)
 !!                   07/2013 Surface / Water table depth coupling
+!!      P Samuelsson 10/2014 : MEB
 !!-------------------------------------------------------------------
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
@@ -72,6 +73,7 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_SNOW_PAR,     ONLY : XZ0SN
 USE MODD_TYPE_DATE_SURF
 USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLACIER,     &
+                                LMEB_PATCH, LFORC_MEASURE,                               &
                                 NNBIOMASS, XABC, XPOI, CSNOWRES, CDIFSFCOND, CSOILFRZ,   &
                                 CSCOND, CC1DRY, CRUNOFF, CPHOTO, LTR_ML, CISBA, XPATCH,  &
                                 TTIME, CALBEDO, XCOVER, LCOVER, XLAI, XVEG, XZ0, XEMIS,  &
@@ -92,6 +94,9 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 LVEGUPD, NLAYER_HORT, NLAYER_DUN,                        &
                                 LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,        &
                                 NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, NSPINS, NSPINW, &
+                                XVEGGV,XZF_TALLVEG, XRGLGV,XGAMMAGV,                     &
+                                XRSMINGV, XWRMAX_CFGV,                                   &
+                                XH_VEG, XLAIGV, XZ0GV,                                   &
                                 XTOPQS, LCPL_RRM, LNITRO_DILU, LAGRI_TO_GRASS,           &
                                 LPERTSURF, XPERTVEG, XPERTLAI, XPERTCV, XPERTALB,XPERTZ0,&
                                 LSNOWDRIFT, LSNOWDRIFT_SUBLIM, LSNOW_ABS_ZENITH,         &
@@ -105,6 +110,7 @@ USE MODD_SLT_n,       ONLY : XSFSLT, XEMISRADIUS_SLT, XEMISSIG_SLT
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 USE MODE_DSLT_SURF
+USE MODE_MEB
 !
 USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_Z0EFFIM, XP_Z0EFFJP, XP_Z0EFFJM,               &
