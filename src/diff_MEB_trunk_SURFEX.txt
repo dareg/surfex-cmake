@@ -27,10 +27,10 @@ PS editing  SURFEX/coupling_isban.F90
  SURFEX/hydro_veg.F90
  SURFEX/ice_soildif.F90
  SURFEX/ini_data_cover.F90
-PS editing SURFEX/ini_data_param.F90
+PS done SURFEX/ini_data_param.F90
  SURFEX/ini_data_rootfrac.F90
  SURFEX/ini_surf_csts.F90
-PS editing SURFEX/init_isba_mixpar.F90
+PS done SURFEX/init_isba_mixpar.F90
  SURFEX/init_isban.F90
  SURFEX/init_teb_gardenn.F90
  SURFEX/isba_albedo.F90
@@ -91,4 +91,4 @@ PS editing SURFEX/init_isba_mixpar.F90
  SURFEX/writesurf_pgd_isban.F90
  SURFEX/writesurf_pgd_isba_parn.F90
  SURFEX/z0eff.F90
-PS Done SURFEX/z0v_from_lai.F90
+PS done SURFEX/z0v_from_lai.F90
