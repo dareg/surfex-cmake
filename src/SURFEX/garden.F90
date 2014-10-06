@@ -43,6 +43,7 @@
 !!    Original    05/2009
 !     B. decharme 04/2013 : variables for surf/atm coupling
 !                           dummy for water table / surface coupling
+!!    P. Samuelsson  10/2014  Introduced dummy variables in call to ISBA for MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -317,6 +318,31 @@ REAL, DIMENSION(0) :: ZZ0EFFJP! roughness length for increasing y
 REAL, DIMENSION(0) :: ZZ0EFFJM! roughness length for decreasing y
 REAL, DIMENSION(0) :: ZTAU_WOOD  ! residence time in wood (s)
 REAL, DIMENSION(0,0) :: ZINCREASE
+!
+! Dummy variables for MEB:
+LOGICAL,PARAMETER::OMEB=.FALSE.
+LOGICAL,PARAMETER::OFORC_MEASURE=.FALSE.
+REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW,                     &
+          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,         &
+          ZP_WRMAX_CFV, ZP_LAIV,                                 &
+          ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                  &
+          ZZ0G_WITHOUT_SNOW,                                     &
+          ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                        &
+          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                        &
+          ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                          &
+          ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL
+REAL, DIMENSION(SIZE(XROOTFRAC,1),SIZE(XROOTFRAC,2)) :: ZP_ROOTFRACV
+REAL, DIMENSION(SIZE(PPS)) :: ZP_WRV,ZP_WRVN,ZP_TV
+REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
+REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,    &
+          ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                                     &
+          ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                                  &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,           &
+          ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                             &
+          ZP_EVAP_N_C, ZP_EVAP_G_C,                                               & 
+          ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                                          &
+          ZP_SWDOWN_GN, ZP_LWDOWN_GN
+!
 TYPE (DATE_TIME),   DIMENSION(0) :: TPSEED ! seeding date
 TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !

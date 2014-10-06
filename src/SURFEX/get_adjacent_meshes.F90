@@ -23,6 +23,7 @@
 !!
 !!    Original    03/2004
 !!                10/2007 E. Martin IGN Grid
+!!                10/2014 P. Samuelsson SMHI  Rotated lonlat
 !!
 !----------------------------------------------------------------------------
 !
@@ -39,6 +40,7 @@ USE MODI_GET_ADJ_MES_GAUSS
 USE MODI_GET_ADJ_MES_IGN
 USE MODI_GET_ADJ_MES_LONLAT_REG
 USE MODI_GET_ADJ_MES_LONLATVAL
+USE MODI_GET_ADJ_MES_LONLAT_ROT
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
@@ -79,6 +81,9 @@ SELECT CASE (HGRID)
 
   CASE("LONLATVAL ")
          CALL GET_ADJ_MES_LONLATVAL(KGRID_PAR,KL,PGRID_PAR,KLEFT,KRIGHT,KTOP,KBOTTOM)
+
+  CASE("LONLAT ROT")
+         CALL GET_ADJ_MES_LONLAT_ROT(KGRID_PAR,KL,PGRID_PAR,KLEFT,KRIGHT,KTOP,KBOTTOM)
 
   CASE("NONE      ")
     KLEFT  (:) = 0

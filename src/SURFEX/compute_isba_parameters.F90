@@ -51,6 +51,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !!                                          Delete CTOPREG (never used)
 !!                                          Delete NWG_LAYER_TOT, NWG_SIZE
 !!                                          water table / Surface coupling
+!!      P. Samuelsson  02/14 : MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -101,7 +102,12 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           XSCA_ALB_WITH_SNOW, XALBF, XEMISF, XCPL_ICEFLUX,    &
                           NLAYER_HORT, NLAYER_DUN, XF_PARAM,  XKANISO, XTOPQS,&
                           LGW, LWTD, XFWTD, XWTD, LCPL_RRM, LAGRI_TO_GRASS,   &
-                          LPERTSURF,XPERTVEG,XPERTLAI,XPERTCV,XPERTALB,XPERTZ0
+                          LPERTSURF,XPERTVEG,XPERTLAI,XPERTCV,XPERTALB,       &
+                          XPERTZ0,                                            &
+                          LMEB_PATCH,                                         &
+                          XVEGGV, XZF_TALLVEG , XRGLGV,                       &
+                          XGAMMAGV, XRSMINGV, XROOTFRACGV,                    &
+                          XWRMAX_CFGV, XLAIGV, XZ0GV, XH_VEG, XTV
 !
 #ifdef TOPD
 USE MODD_DUMMY_EXP_PROFILE,ONLY : XC_DEPTH_RATIO
@@ -163,6 +169,7 @@ USE MODI_READ_AND_SEND_MPI
 USE MODI_ISBA_TO_TOPD
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
+USE MODI_FIX_MEB_VEG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -214,6 +221,7 @@ INTEGER           :: IDECADE, IDECADE2  ! decade of simulation
 INTEGER           :: JPATCH  ! loop counter on tiles
 INTEGER           :: IUNIT       ! unit of f/dc map file
 INTEGER           :: INFOMPI
+INTEGER           :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
 LOGICAL                           :: LWORK
 !
@@ -245,7 +253,9 @@ ZWORK(:)   = XUNDEF
                      XGMES, XGC, XF2I, XDMAX, LSTRESS,                   &
                      XCE_NITRO, XCF_NITRO, XCNA_NITRO,                   &
                      TSEED, TREAP, XWATSUP, XIRRIG,                      &
-                     XROOTFRAC, NWG_LAYER, XDROOT, XDG2                  )
+                     XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                 &
+                     XVEGGV,XZF_TALLVEG,XRGLGV,XGAMMAGV,XRSMINGV,        &
+                     XROOTFRACGV,XWRMAX_CFGV,XLAIGV,XZ0GV,XH_VEG         )
 !
 IF (TTIME%TDATE%MONTH /= NUNDEF) THEN
   IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
@@ -256,6 +266,11 @@ END IF
 IDECADE2 = IDECADE
 !
  CALL INIT_ISBA_MIXPAR(CISBA,IDECADE,IDECADE2,XCOVER,LCOVER,CPHOTO,'NAT')
+!
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+IF (ISIZE_LMEB_PATCH>0)  THEN
+  CALL FIX_MEB_VEG(NPATCH)
+ENDIF
 !
  CALL CONVERT_PATCH_ISBA(CISBA,IDECADE,IDECADE2,XCOVER,LCOVER,CPHOTO,LAGRIP,   &
                         LPERM,LTR_ML,'NAT',PVEG=XVEG,PLAI=XLAI,                &
@@ -271,7 +286,11 @@ IDECADE2 = IDECADE
                         PDMAX=XDMAX,PF2I=XF2I,OSTRESS=LSTRESS,PH_TREE=XH_TREE, &
                         PRE25=XRE25,PCE_NITRO=XCE_NITRO,PCF_NITRO=XCF_NITRO,   &
                         PCNA_NITRO=XCNA_NITRO,PD_ICE=XD_ICE,TPSEED=TSEED,      &
-                        TPREAP=TREAP,PWATSUP=XWATSUP,PIRRIG=XIRRIG             )
+                        TPREAP=TREAP,PWATSUP=XWATSUP,PIRRIG=XIRRIG,            &
+                        PVEGGV=XVEGGV,PZF_TALLVEG=XZF_TALLVEG,PRGLGV=XRGLGV,   &
+                        PGAMMAGV=XGAMMAGV,PRSMINGV=XRSMINGV,                   &
+                        PROOTFRACGV=XROOTFRACGV,PWRMAX_CFGV=XWRMAX_CFGV,       &
+                        PLAIGV=XLAIGV,PZ0GV=XZ0GV,PH_VEG=XH_VEG                )
 !
 !-------------------------------------------------------------------------------
 !
@@ -711,8 +730,11 @@ ENDIF
 ALLOCATE(XEMIS_NAT   (KI))
 XEMIS_NAT (:) = XUNDEF
 !
- CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                 &
-                                 XVEG,XZ0,XLAI,ZTG1,                     &
+ CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                &
+                                 XVEG,XZ0,XLAI,                          &
+                                 LMEB_PATCH,XVEGGV,XZ0GV,XLAIGV,         &
+                                 XZF_TALLVEG, XH_VEG, XTV,               &
+                                 ZTG1,                                   &
                                  XPATCH,                                 &
                                  PSW_BANDS,                              &
                                  XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &

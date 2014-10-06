@@ -30,6 +30,7 @@
 !!
 !!    Original     01/2004
 !!                 10/2007  E. Martin  IGN Grid
+!!                 10/2014  P. Samuelsson SMHI Rotated lonlat
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -55,6 +56,8 @@ USE MODI_GET_GRID_COORD_IGN
 USE MODI_GET_GRID_COORD_LONLAT_REG
 !
 USE MODI_GET_GRID_COORD_LONLATVAL
+!
+USE MODI_GET_GRID_COORD_LONLAT_ROT
 IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
@@ -142,14 +145,21 @@ SELECT CASE (YGRID)
         CALL GET_GRID_COORD_IGN(IGRID_PAR,IL,ZGRID_PAR,ZX,ZY)
 
 !
-!*    5.      lonlatval
+!*    6.      lonlatval
 !             -------------
 !
       CASE ('LONLATVAL ')
         CALL GET_GRID_COORD_LONLATVAL(IGRID_PAR,IL,ZGRID_PAR,ZX,ZY)
 
 !
-!*    5.      Other cases
+!*    7.      Rotated lonlat grid
+!             -------------------
+!
+      CASE ('LONLAT ROT')
+        CALL GET_GRID_COORD_LONLAT_ROT(IGRID_PAR,IL,ZGRID_PAR,ZX,ZY)
+
+!
+!*    8.      Other cases
 !             -----------
 !
       CASE DEFAULT
