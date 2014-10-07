@@ -34,6 +34,7 @@
 !!      A.L. Gibelin 04/2009 : dimension NBIOMASS for ISBA-A-gs
 !!      B. Decharme  07/2012  : files of data for permafrost area and for SOC top and sub soil
 !!                   11/2013  : same for groundwater distribution
+!!      P. Samuelsson 10/2014 : MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -55,7 +56,8 @@ USE MODD_ISBA_n, ONLY : NPATCH, TTIME, XCOVER, XZS, CISBA, CPEDOTF,  &
                           XZ0EFFJPDIR, LCOVER, LECOCLIMAP, LCTI,     &
                           XWDRAIN, XTI_MIN, XTI_MAX, XTI_MEAN,       &
                           XTI_STD, XTI_SKEW, XSOILGRID, XPH, XFERT,  &
-                          LPERM, XPERM, LGW, XGW  
+                          LPERM, XPERM, LGW, XGW,                    & 
+                          LMEB_PATCH, LFORC_MEASURE
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR, NDIM
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 USE MODD_GR_BIOG_n,   ONLY : XISOPOT, XMONOPOT
@@ -206,6 +208,16 @@ ENDIF
 !
 YRECFM='PATCH_NUMBER'
  CALL READ_SURF(HPROGRAM,YRECFM,NPATCH,IRESP)
+!
+!* logical vector indicating for which patches MEB should be applied
+!
+ALLOCATE(LMEB_PATCH(NPATCH))
+YRECFM='MEB_PATCH'
+ CALL READ_SURF(HPROGRAM,YRECFM,LMEB_PATCH(:),IRESP,HDIR='-')
+!
+!
+YRECFM='FORC_MEASURE'
+ CALL READ_SURF(HPROGRAM,YRECFM,LFORC_MEASURE,IRESP)
 !
 !
 !*       3.     Physiographic data fields:

@@ -31,18 +31,17 @@ PS done SURFEX/ini_data_param.F90
 PS done SURFEX/ini_data_rootfrac.F90
 PS done SURFEX/ini_surf_csts.F90
 PS done SURFEX/init_isba_mixpar.F90
- SURFEX/init_isban.F90
- SURFEX/init_teb_gardenn.F90
- SURFEX/isba_albedo.F90
+PS done SURFEX/init_isban.F90
+PS done SURFEX/isba_albedo.F90
  SURFEX/isba.F90
- SURFEX/isba_properties.F90
+PS done SURFEX/isba_properties.F90
  SURFEX/isba_snow_agr.F90
- SURFEX/latlon_grid.F90
- SURFEX/latlonmask.F90
- SURFEX/mkflag_snow.F90
+PS done SURFEX/latlon_grid.F90
+PS done SURFEX/latlonmask.F90
+PS done SURFEX/mkflag_snow.F90
 PS done SURFEX/modd_data_cover.F90
- SURFEX/modd_data_isban.F90
- SURFEX/modd_diag_evap_isban.F90
+PS done SURFEX/modd_data_isban.F90
+PS done SURFEX/modd_diag_evap_isban.F90
  SURFEX/modd_diag_isban.F90
  SURFEX/modd_isban.F90
  SURFEX/modd_isba_par.F90
@@ -58,22 +57,22 @@ PS done SURFEX/modd_data_cover.F90
  SURFEX/pack_grid.F90
  SURFEX/pack_isba_patch_get_sizen.F90
  SURFEX/pack_isba_patchn.F90
- SURFEX/pgd_grid.F90
- SURFEX/pgd_isba.F90
- SURFEX/pgd_isba_par.F90
- SURFEX/pgd_teb_veg.F90
- SURFEX/prep_hor_isba_field.F90
- SURFEX/prep_isba.F90
- SURFEX/prep_isba_unif.F90
- SURFEX/read_gridtype.F90
- SURFEX/read_isban.F90
- SURFEX/read_nam_gridtype.F90
- SURFEX/read_nam_pgd_gauss_index.F90
- SURFEX/read_nam_pgd_isba.F90
- SURFEX/read_pgd_isban.F90
- SURFEX/read_pgd_isba_parn.F90
- SURFEX/read_prep_greenroof_snow.F90
- SURFEX/read_prep_isba_conf.F90
+PS done SURFEX/pgd_grid.F90
+PS done SURFEX/pgd_isba.F90
+PS done SURFEX/pgd_isba_par.F90
+PS done SURFEX/pgd_teb_veg.F90
+PS done SURFEX/prep_hor_isba_field.F90
+PS done SURFEX/prep_isba.F90
+PS done SURFEX/prep_isba_unif.F90
+PS done SURFEX/read_gridtype.F90
+PS done SURFEX/read_isban.F90
+PS done SURFEX/read_nam_gridtype.F90
+PS done SURFEX/read_nam_pgd_gauss_index.F90
+PS done SURFEX/read_nam_pgd_isba.F90
+PS done SURFEX/read_pgd_isban.F90
+PS done SURFEX/read_pgd_isba_parn.F90
+PS done SURFEX/read_prep_greenroof_snow.F90
+PS done SURFEX/read_prep_isba_conf.F90
  SURFEX/snow3l.F90
  SURFEX/snow3L_isba.F90
  SURFEX/unpack_diag_patchn.F90
@@ -101,6 +100,10 @@ grep AV_PGD * | grep -v KDECADE
 related to 
 CALL AV_PGD (ZROOT_EXT(:,:),PCOVER,XDATA_ROOT_EXTINCTION(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
 
+
+This routine had to changed to make code work. Check
+if this is now okay on new version:
+SURFEX/read_prep_greenroof_snow.F90
 
 
 

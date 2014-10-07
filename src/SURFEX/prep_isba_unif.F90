@@ -21,6 +21,7 @@ SUBROUTINE PREP_ISBA_UNIF(KLUOUT,HSURF,PFIELD)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      P. Samuelsson  02/2012  MEB
 !!------------------------------------------------------------------
 !
 !
@@ -28,7 +29,8 @@ USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PREP_ISBA,      ONLY : XHUG_SURF, XHUG_ROOT, XHUG_DEEP,    &
                                   XTG_SURF, XTG_ROOT, XTG_DEEP,     &
-                                  XWR_DEF,                          &
+                                  XWR_DEF, XWRV_DEF, XWRVN_DEF,     &
+                                  XQC_DEF,                          &
                                   XHUGI_SURF, XHUGI_ROOT, XHUGI_DEEP  
 !
 !
@@ -88,6 +90,26 @@ SELECT CASE(HSURF)
   CASE('WR     ')
     ALLOCATE(PFIELD(1,1,1))
     PFIELD = XWR_DEF
+
+  CASE('WRV    ')
+    ALLOCATE(PFIELD(1,1,NVEGTYPE))
+    PFIELD = XWRV_DEF
+
+  CASE('WRVN   ')
+    ALLOCATE(PFIELD(1,1,NVEGTYPE))
+    PFIELD = XWRVN_DEF
+
+  CASE('TV     ')
+    ALLOCATE(PFIELD(1,1,NVEGTYPE))
+    PFIELD = XTG_SURF
+
+  CASE('TC     ')
+    ALLOCATE(PFIELD(1,1,NVEGTYPE))
+    PFIELD = XTG_SURF
+
+  CASE('QC     ')
+    ALLOCATE(PFIELD(1,1,NVEGTYPE))
+    PFIELD = XQC_DEF
 
   CASE('LAI    ')
     ALLOCATE(PFIELD(1,1,1))

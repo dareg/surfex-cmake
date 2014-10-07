@@ -5,7 +5,7 @@
                                    HSAND, HSANDFILETYPE, PUNIF_SAND, OIMP_SAND,             &
                                    HSOC_TOP, HSOC_SUB, HSOCFILETYPE, PUNIF_SOC_TOP,         &
                                    PUNIF_SOC_SUB, OIMP_SOC, HCTI, HCTIFILETYPE, OIMP_CTI,   &
-                                   HPERM, HPERMFILETYPE, PUNIF_PERM, OIMP_PERM,             &          
+                                   HPERM, HPERMFILETYPE, PUNIF_PERM, OIMP_PERM, OMEB,       &          
                                    HGW, HGWFILETYPE, PUNIF_GW, OIMP_GW,                     &          
                                    HRUNOFFB, HRUNOFFBFILETYPE, PUNIF_RUNOFFB,               &
                                    HWDRAIN,  HWDRAINFILETYPE , PUNIF_WDRAIN, PSOILGRID,     &
@@ -45,6 +45,7 @@
 !!                          and subgridrunoff
 !!    06/2009 B. Decharme : files of data for topographic index
 !!    07/2012 B. Decharme : files of data for permafrost area and for SOC top and sub soil
+!!    10/2014 P. Samuelsson: MEB
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -98,6 +99,7 @@ REAL,                INTENT(OUT)   :: PUNIF_GW      ! uniform value of groundwat
 LOGICAL,             INTENT(OUT)   :: OIMP_SAND     ! Imposed values for Sand
 LOGICAL,             INTENT(OUT)   :: OIMP_CLAY     ! Imposed values for Clay
 LOGICAL,             INTENT(OUT)   :: OIMP_CTI      ! Imposed values for topographic index statistics
+LOGICAL,             INTENT(OUT)   :: OMEB          ! MEB
 LOGICAL,             INTENT(OUT)   :: OIMP_PERM     ! Imposed maps of permafrost distribution
 LOGICAL,             INTENT(OUT)   :: OIMP_GW       ! Imposed maps of permafrost distribution
  CHARACTER(LEN=28),   INTENT(OUT)   :: HSOC_TOP      ! file name for organic carbon
@@ -153,6 +155,7 @@ REAL                     :: XRM_PATCH        ! threshold to remove little fracti
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand from another PGD file
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay from another PGD file
 LOGICAL                  :: LIMP_CTI         ! Imposed values for topographic index statistics from another PGD file
+LOGICAL                  :: LMEB             ! MEB
 LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
 LOGICAL                  :: LIMP_GW          ! Imposed maps of groundwater distribution
 REAL                     :: XUNIF_SAND    ! uniform value of sand fraction
@@ -180,7 +183,7 @@ NAMELIST/NAM_ISBA/ NPATCH, NGROUND_LAYER, CISBA, CPEDO_FUNCTION, CPHOTO,   &
                    LIMP_CLAY, YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND, &
                    YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,        &
                    XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,  &
-                   YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,            &                   
+                   YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM, LMEB,      &                   
                    YGW, YGWFILETYPE, XUNIF_GW, LIMP_GW,                    &                   
                    YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,              &
                    YWDRAIN,  YWDRAINFILETYPE,  XUNIF_WDRAIN, XSOILGRID,    &
@@ -242,6 +245,7 @@ LIMP_CLAY        = .FALSE.
 LIMP_SAND        = .FALSE.
 LIMP_SOC         = .FALSE.
 LIMP_CTI         = .FALSE.
+LMEB             = .FALSE.
 LIMP_PERM        = .FALSE.
 LIMP_GW          = .FALSE.
 !
@@ -299,6 +303,7 @@ OIMP_CLAY        = LIMP_CLAY        ! Imposed values for CLAY
 OIMP_SOC         = LIMP_SOC         ! Imposed values for organic carbon
 OIMP_CTI         = LIMP_CTI         ! Imposed values for topographic index statistics
 OIMP_PERM        = LIMP_PERM        ! Imposed values for permafrost distribution
+OMEB             = LMEB             ! MEB
 OIMP_GW        = LIMP_GW            ! Imposed values for groundwater distribution
 !
 HPH           = YPH           ! file name for pH value
