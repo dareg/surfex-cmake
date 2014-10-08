@@ -35,19 +35,20 @@ SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
 !!                                        isab water budget
 !!                  2013                  Sublimation
 !!                                        Subsurface runoff if SGH (DIF option only)
+!!      P. Samuelsson 10/2014: MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n,           ONLY : XPATCH, LGLACIER
+USE MODD_ISBA_n,           ONLY : XPATCH, LGLACIER, LMEB_PATCH
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : XRNC, XAVG_RNC, XHC, XAVG_HC,                  &
                                   XLEC, XAVG_LEC, XGFLUXC, XAVG_GFLUXC,          &
                                   XLEIC, XAVG_LEIC,                              &
                                   XLEG, XLEGC, XAVG_LEG, XAVG_LEGC,              &
                                   XLEGI, XLEGIC, XAVG_LEGI, XAVG_LEGIC,          &
                                   XLEV, XLEVC, XAVG_LEV, XAVG_LEVC,              &
-                                  XLES, XLESC, XAVG_LES, XAVG_LESC,              &
+                                  XLES, XLESAC, XAVG_LES, XAVG_LESAC,            &
                                   XLESL, XLESLC, XAVG_LESL, XAVG_LESLC,          &
                                   XLER, XLERC, XAVG_LER, XAVG_LERC,              &
                                   XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,          &
@@ -79,7 +80,59 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : XRNC, XAVG_RNC, XHC, XAVG_HC,                 
                                   XDSWE,XDSWEC,XAVG_DSWE,XAVG_DSWEC,             &
                                   XRAINFALL,XRAINFALLC,XSNOWFALL,XSNOWFALLC,     &
                                   XWATBUD,XWATBUDC,XAVG_WATBUD,XAVG_WATBUDC,     & 
-                                  XSNDRIFT,XSNDRIFTC,XAVG_SNDRIFT,XAVG_SNDRIFTC
+                                  XSNDRIFT,XSNDRIFTC,XAVG_SNDRIFT,XAVG_SNDRIFTC, &
+                                  XLEVCV, XLESC, XLETRGV,                        &
+                                  XAVG_LEVCV, XAVG_LESC, XAVG_LETRGV,            &
+                                  XLETRCV, XLERGV,XLERCV,                        &
+                                  XAVG_LETRCV, XAVG_LERGV,XAVG_LERCV,            &
+                                  XLE_C_A, XLE_V_C,                              &
+                                  XAVG_LE_C_A, XAVG_LE_V_C,                      &
+                                  XLE_G_C, XLE_N_C,                              &
+                                  XAVG_LE_G_C, XAVG_LE_N_C,                      &
+                                  XLEVCVC, XLESCC, XLETRGVC,                     &
+                                  XAVG_LEVCVC, XAVG_LESCC, XAVG_LETRGVC,         &
+                                  XLETRCVC, XLERGVC,XLERCVC,                     &
+                                  XAVG_LETRCVC, XAVG_LERGVC,XAVG_LERCVC,         &
+                                  XLE_C_AC, XLE_V_CC,                            &
+                                  XAVG_LE_C_AC, XAVG_LE_V_CC,                    &
+                                  XLE_G_CC, XLE_N_CC,                            &
+                                  XAVG_LE_G_CC, XAVG_LE_N_CC,                    &
+                                  XSWNET_V, XSWNET_G,                            &
+                                  XAVG_SWNET_V, XAVG_SWNET_G,                    &
+                                  XSWNET_N, XSWNET_NS,                           &
+                                  XAVG_SWNET_N, XAVG_SWNET_NS,                   &
+                                  XLWNET_V, XLWNET_G,                            &
+                                  XAVG_LWNET_V, XAVG_LWNET_G,                    &
+                                  XLWNET_N,                                      &
+                                  XAVG_LWNET_N,                                  &
+                                  XSWDOWN_GN, XLWDOWN_GN,                        &
+                                  XAVG_SWDOWN_GN, XAVG_LWDOWN_GN,                &
+                                  XH_V_C, XH_G_C,                                &
+                                  XAVG_H_V_C, XAVG_H_G_C,                        &
+                                  XH_C_A, XH_N_C,                                &
+                                  XAVG_H_C_A, XAVG_H_N_C,                        &
+                                  XSR_GN, XMELTCV,                               &
+                                  XAVG_SR_GN, XAVG_MELTCV,                       &
+                                  XFRZCV,                                        &
+                                  XAVG_FRZCV,                                    &
+                                  XSWNET_VC, XSWNET_GC,                          &
+                                  XAVG_SWNET_VC, XAVG_SWNET_GC,                  &
+                                  XSWNET_NC, XSWNET_NSC,                         &
+                                  XAVG_SWNET_NC, XAVG_SWNET_NSC,                 &
+                                  XLWNET_VC, XLWNET_GC,                          &
+                                  XAVG_LWNET_VC, XAVG_LWNET_GC,                  &
+                                  XLWNET_NC,                                     &
+                                  XAVG_LWNET_NC,                                 &
+                                  XSWDOWN_GNC, XLWDOWN_GNC,                      &
+                                  XAVG_SWDOWN_GNC, XAVG_LWDOWN_GNC,              &
+                                  XH_V_CC, XH_G_CC,                              &
+                                  XAVG_H_V_CC, XAVG_H_G_CC,                      &
+                                  XH_C_AC, XH_N_CC,                              &
+                                  XAVG_H_C_AC, XAVG_H_N_CC,                      &
+                                  XSR_GNC, XMELTCVC,                             &
+                                  XAVG_SR_GNC, XAVG_MELTCVC,                     &
+                                  XFRZCVC,                                       &
+                                  XAVG_FRZCVC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -96,6 +149,7 @@ REAL,    DIMENSION(:), INTENT(IN) :: PSNOW         ! snowfall rate
 !
 INTEGER :: JPATCH ! tile loop counter
 INTEGER :: JJ
+INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
 REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMPATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -105,6 +159,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG_EVAP_ISBA_N',0,ZHOOK_HANDLE)
+!
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+!
 ZSUMPATCH(:) = 0.
 DO JPATCH=1,SIZE(XPATCH,2)
    DO JJ=1,SIZE(XPATCH,1)
@@ -142,6 +199,36 @@ IF (LSURF_EVAP_BUDGET) THEN
    XAVG_GPP        (:) = 0.
    XAVG_RESP_AUTO  (:) = 0.
    XAVG_RESP_ECO   (:) = 0.
+!
+   IF (ISIZE_LMEB_PATCH>0) THEN
+     XAVG_LEVCV         (:) = 0.
+     XAVG_LESC          (:) = 0.
+     XAVG_LETRGV        (:) = 0.
+     XAVG_LETRCV        (:) = 0.
+     XAVG_LERGV         (:) = 0.
+     XAVG_LERCV         (:) = 0.
+     XAVG_LE_C_A        (:) = 0.
+     XAVG_LE_V_C        (:) = 0.
+     XAVG_LE_G_C        (:) = 0.
+     XAVG_LE_N_C        (:) = 0.
+     !
+     XAVG_SWNET_V       (:) = 0.
+     XAVG_SWNET_G       (:) = 0.
+     XAVG_SWNET_N       (:) = 0.
+     XAVG_SWNET_NS      (:) = 0.
+     XAVG_LWNET_V       (:) = 0.
+     XAVG_LWNET_G       (:) = 0.
+     XAVG_LWNET_N       (:) = 0.
+     XAVG_SWDOWN_GN     (:) = 0.
+     XAVG_LWDOWN_GN     (:) = 0.
+     XAVG_H_V_C         (:) = 0.
+     XAVG_H_G_C         (:) = 0.
+     XAVG_H_C_A         (:) = 0.
+     XAVG_H_N_C         (:) = 0.
+     XAVG_SR_GN         (:) = 0.
+     XAVG_MELTCV        (:) = 0.
+     XAVG_FRZCV         (:) = 0.
+   ENDIF
 !
   DO JPATCH=1,SIZE(XPATCH,2)
 !cdir nodep
@@ -245,6 +332,35 @@ IF (LSURF_EVAP_BUDGET) THEN
 !
         XAVG_RESP_ECO(JJ) = XAVG_RESP_ECO(JJ) + XPATCH(JJ,JPATCH) * XRESP_ECO(JJ,JPATCH)  
 !        
+        IF (ISIZE_LMEB_PATCH>0) THEN
+          XAVG_LEVCV(JJ) = XAVG_LEVCV(JJ) + XPATCH(JJ,JPATCH) * XLEVCV(JJ,JPATCH)
+          XAVG_LESC(JJ) = XAVG_LESC(JJ) + XPATCH(JJ,JPATCH) * XLESC(JJ,JPATCH)
+          XAVG_LETRGV(JJ) = XAVG_LETRGV(JJ) + XPATCH(JJ,JPATCH) * XLETRGV(JJ,JPATCH)
+          XAVG_LETRCV(JJ) = XAVG_LETRCV(JJ) + XPATCH(JJ,JPATCH) * XLETRCV(JJ,JPATCH)
+          XAVG_LERGV(JJ) = XAVG_LERGV(JJ) + XPATCH(JJ,JPATCH) * XLERGV(JJ,JPATCH)
+          XAVG_LERCV(JJ) = XAVG_LERCV(JJ) + XPATCH(JJ,JPATCH) * XLERCV(JJ,JPATCH)
+          XAVG_LE_C_A(JJ) = XAVG_LE_C_A(JJ) + XPATCH(JJ,JPATCH) * XLE_C_A(JJ,JPATCH)
+          XAVG_LE_V_C(JJ) = XAVG_LE_V_C(JJ) + XPATCH(JJ,JPATCH) * XLE_V_C(JJ,JPATCH)
+          XAVG_LE_G_C(JJ) = XAVG_LE_G_C(JJ) + XPATCH(JJ,JPATCH) * XLE_G_C(JJ,JPATCH)
+          XAVG_LE_N_C(JJ) = XAVG_LE_N_C(JJ) + XPATCH(JJ,JPATCH) * XLE_N_C(JJ,JPATCH)
+          XAVG_SWNET_V(JJ) = XAVG_SWNET_V(JJ) + XPATCH(JJ,JPATCH) * XSWNET_V(JJ,JPATCH)
+          XAVG_SWNET_G(JJ) = XAVG_SWNET_G(JJ) + XPATCH(JJ,JPATCH) * XSWNET_G(JJ,JPATCH)
+          XAVG_SWNET_N(JJ) = XAVG_SWNET_N(JJ) + XPATCH(JJ,JPATCH) * XSWNET_N(JJ,JPATCH)
+          XAVG_SWNET_NS(JJ) = XAVG_SWNET_NS(JJ) + XPATCH(JJ,JPATCH) * XSWNET_NS(JJ,JPATCH)
+          XAVG_LWNET_V(JJ) = XAVG_LWNET_V(JJ) + XPATCH(JJ,JPATCH) * XLWNET_V(JJ,JPATCH)
+          XAVG_LWNET_G(JJ) = XAVG_LWNET_G(JJ) + XPATCH(JJ,JPATCH) * XLWNET_G(JJ,JPATCH)
+          XAVG_LWNET_N(JJ) = XAVG_LWNET_N(JJ) + XPATCH(JJ,JPATCH) * XLWNET_N(JJ,JPATCH)
+          XAVG_SWDOWN_GN(JJ) = XAVG_SWDOWN_GN(JJ) + XPATCH(JJ,JPATCH) * XSWDOWN_GN(JJ,JPATCH)
+          XAVG_LWDOWN_GN(JJ) = XAVG_LWDOWN_GN(JJ) + XPATCH(JJ,JPATCH) * XLWDOWN_GN(JJ,JPATCH)
+          XAVG_H_V_C(JJ) = XAVG_H_V_C(JJ) + XPATCH(JJ,JPATCH) * XH_V_C(JJ,JPATCH)
+          XAVG_H_G_C(JJ) = XAVG_H_G_C(JJ) + XPATCH(JJ,JPATCH) * XH_G_C(JJ,JPATCH)
+          XAVG_H_C_A(JJ) = XAVG_H_C_A(JJ) + XPATCH(JJ,JPATCH) * XH_C_A(JJ,JPATCH)
+          XAVG_H_N_C(JJ) = XAVG_H_N_C(JJ) + XPATCH(JJ,JPATCH) * XH_N_C(JJ,JPATCH)
+          XAVG_SR_GN(JJ) = XAVG_SR_GN(JJ) + XPATCH(JJ,JPATCH) * XSR_GN(JJ,JPATCH)
+          XAVG_MELTCV(JJ) = XAVG_MELTCV(JJ) + XPATCH(JJ,JPATCH) * XMELTCV(JJ,JPATCH)
+          XAVG_FRZCV(JJ) = XAVG_FRZCV(JJ) + XPATCH(JJ,JPATCH) * XFRZCV(JJ,JPATCH)
+        ENDIF
+        !
       ENDIF
     END DO
   ENDDO
@@ -293,7 +409,7 @@ IF (LSURF_BUDGETC) THEN
    XAVG_LEGC       (:) = 0.
    XAVG_LEGIC      (:) = 0.
    XAVG_LEVC       (:) = 0.
-   XAVG_LESC       (:) = 0.
+   XAVG_LESAC      (:) = 0.
    XAVG_LESLC      (:) = 0.
    XAVG_LERC       (:) = 0.
    XAVG_LETRC      (:) = 0.
@@ -315,6 +431,35 @@ IF (LSURF_BUDGETC) THEN
    XAVG_GPPC       (:) = 0.
    XAVG_RESPC_AUTO (:) = 0.
    XAVG_RESPC_ECO  (:) = 0.
+!
+   IF (ISIZE_LMEB_PATCH>0) THEN
+        XAVG_LEVCVC    (:) = 0.
+        XAVG_LESCC     (:) = 0.
+        XAVG_LETRGVC   (:) = 0.
+        XAVG_LETRCVC   (:) = 0.
+        XAVG_LERGVC    (:) = 0.
+        XAVG_LERCVC    (:) = 0.
+        XAVG_LE_C_AC   (:) = 0.
+        XAVG_LE_V_CC   (:) = 0.
+        XAVG_LE_G_CC   (:) = 0.
+        XAVG_LE_N_CC   (:) = 0.
+        XAVG_SWNET_VC     (:) = 0.
+        XAVG_SWNET_GC     (:) = 0.
+        XAVG_SWNET_NC     (:) = 0.
+        XAVG_SWNET_NSC    (:) = 0.
+        XAVG_LWNET_VC     (:) = 0.
+        XAVG_LWNET_GC     (:) = 0.
+        XAVG_LWNET_NC     (:) = 0.
+        XAVG_SWDOWN_GNC   (:) = 0.
+        XAVG_LWDOWN_GNC   (:) = 0.
+        XAVG_H_V_CC       (:) = 0.
+        XAVG_H_G_CC       (:) = 0.
+        XAVG_H_C_AC       (:) = 0.
+        XAVG_H_N_CC       (:) = 0.
+        XAVG_SR_GNC       (:) = 0.
+        XAVG_MELTCVC      (:) = 0.
+        XAVG_FRZCVC       (:) = 0.
+   ENDIF
 !
   DO JPATCH=1,SIZE(XPATCH,2)
 !cdir nodep
@@ -355,7 +500,7 @@ IF (LSURF_BUDGETC) THEN
 !
 ! Latent heat of sublimation over snow
 !
-        XAVG_LESC(JJ)  = XAVG_LESC(JJ) + XPATCH(JJ,JPATCH) * XLESC(JJ,JPATCH)
+        XAVG_LESAC(JJ)  = XAVG_LESAC(JJ) + XPATCH(JJ,JPATCH) * XLESAC(JJ,JPATCH)
 !
 ! Latent heat of evaporation of liquid water over snow
 !
@@ -438,6 +583,35 @@ IF (LSURF_BUDGETC) THEN
 !
         XAVG_RESPC_ECO(JJ) = XAVG_RESPC_ECO(JJ) + XPATCH(JJ,JPATCH) * XRESPC_ECO(JJ,JPATCH)
 !      
+        IF (ISIZE_LMEB_PATCH>0) THEN
+          XAVG_LEVCVC(JJ) = XAVG_LEVCVC(JJ) + XPATCH(JJ,JPATCH) * XLEVCVC(JJ,JPATCH)
+          XAVG_LESCC(JJ) = XAVG_LESCC(JJ) + XPATCH(JJ,JPATCH) * XLESCC(JJ,JPATCH)
+          XAVG_LETRGVC(JJ) = XAVG_LETRGVC(JJ) + XPATCH(JJ,JPATCH) * XLETRGVC(JJ,JPATCH)
+          XAVG_LETRCVC(JJ) = XAVG_LETRCVC(JJ) + XPATCH(JJ,JPATCH) * XLETRCVC(JJ,JPATCH)
+          XAVG_LERGVC(JJ) = XAVG_LERGVC(JJ) + XPATCH(JJ,JPATCH) * XLERGVC(JJ,JPATCH)
+          XAVG_LERCVC(JJ) = XAVG_LERCVC(JJ) + XPATCH(JJ,JPATCH) * XLERCVC(JJ,JPATCH)
+          XAVG_LE_C_AC(JJ) = XAVG_LE_C_AC(JJ) + XPATCH(JJ,JPATCH) * XLE_C_AC(JJ,JPATCH)
+          XAVG_LE_V_CC(JJ) = XAVG_LE_V_CC(JJ) + XPATCH(JJ,JPATCH) * XLE_V_CC(JJ,JPATCH)
+          XAVG_LE_G_CC(JJ) = XAVG_LE_G_CC(JJ) + XPATCH(JJ,JPATCH) * XLE_G_CC(JJ,JPATCH)
+          XAVG_LE_N_CC(JJ) = XAVG_LE_N_CC(JJ) + XPATCH(JJ,JPATCH) * XLE_N_CC(JJ,JPATCH)
+          XAVG_SWNET_VC(JJ) = XAVG_SWNET_VC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_VC(JJ,JPATCH)
+          XAVG_SWNET_GC(JJ) = XAVG_SWNET_GC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_GC(JJ,JPATCH)
+          XAVG_SWNET_NC(JJ) = XAVG_SWNET_NC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_NC(JJ,JPATCH)
+          XAVG_SWNET_NSC(JJ) = XAVG_SWNET_NSC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_NSC(JJ,JPATCH)
+          XAVG_LWNET_VC(JJ) = XAVG_LWNET_VC(JJ) + XPATCH(JJ,JPATCH) * XLWNET_VC(JJ,JPATCH)
+          XAVG_LWNET_GC(JJ) = XAVG_LWNET_GC(JJ) + XPATCH(JJ,JPATCH) * XLWNET_GC(JJ,JPATCH)
+          XAVG_LWNET_NC(JJ) = XAVG_LWNET_NC(JJ) + XPATCH(JJ,JPATCH) * XLWNET_NC(JJ,JPATCH)
+          XAVG_SWDOWN_GNC(JJ) = XAVG_SWDOWN_GNC(JJ) + XPATCH(JJ,JPATCH) * XSWDOWN_GNC(JJ,JPATCH)
+          XAVG_LWDOWN_GNC(JJ) = XAVG_LWDOWN_GNC(JJ) + XPATCH(JJ,JPATCH) * XLWDOWN_GNC(JJ,JPATCH)
+          XAVG_H_V_CC(JJ) = XAVG_H_V_CC(JJ) + XPATCH(JJ,JPATCH) * XH_V_CC(JJ,JPATCH)
+          XAVG_H_G_CC(JJ) = XAVG_H_G_CC(JJ) + XPATCH(JJ,JPATCH) * XH_G_CC(JJ,JPATCH)
+          XAVG_H_C_AC(JJ) = XAVG_H_C_AC(JJ) + XPATCH(JJ,JPATCH) * XH_C_AC(JJ,JPATCH)
+          XAVG_H_N_CC(JJ) = XAVG_H_N_CC(JJ) + XPATCH(JJ,JPATCH) * XH_N_CC(JJ,JPATCH)
+          XAVG_SR_GNC(JJ) = XAVG_SR_GNC(JJ) + XPATCH(JJ,JPATCH) * XSR_GNC(JJ,JPATCH)
+          XAVG_MELTCVC(JJ) = XAVG_MELTCVC(JJ) + XPATCH(JJ,JPATCH) * XMELTCVC(JJ,JPATCH)
+          XAVG_FRZCVC(JJ) = XAVG_FRZCVC(JJ) + XPATCH(JJ,JPATCH) * XFRZCVC(JJ,JPATCH)
+        ENDIF
+        !
       ENDIF
     ENDDO
   END DO

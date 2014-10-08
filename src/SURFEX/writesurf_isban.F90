@@ -40,6 +40,7 @@
 !!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !!      B. Decharme  09/2012 : write some key for prep_read_external
 !!      B. Decharme  04/2013 : Only 2 temperature layer in ISBA-FR
+!!      P. Samuelsson 10/2014: MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -56,7 +57,8 @@ USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL, LSOC, &
                           XLITTER, XSOILCARB, XLIGNIN_STRUC,           &
                           LTEMP_ARP, NTEMPLAYER_ARP,                   &
                           LGLACIER, XICE_STO, LSPINUPCARBS,            &
-                          LSPINUPCARBW, NNBYEARSOLD
+                          LSPINUPCARBW, NNBYEARSOLD,                   &
+                          XWRV, XWRVN, XTV, XTC, XQC
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM
 !
@@ -152,6 +154,24 @@ YRECFM='WR'
 YCOMMENT='X_Y_WR (kg/m2)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
+!* water intercepted on canopy vegetation leaves
+!
+YRECFM='WRV'
+YCOMMENT='X_Y_WRV (kg/m2)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* snow intercepted on canopy vegetation leaves
+!
+YRECFM='WRVN'
+YCOMMENT='X_Y_WRVN (kg/m2)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XWRVN(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* canopy vegetation temperature
+!
+YRECFM='TV'
+YCOMMENT='X_Y_TV (K)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XTV(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
 !* Glacier ice storage
 !
 YRECFM = 'GLACIER'
@@ -225,6 +245,18 @@ YCOMMENT='X_TSRAD_NAT (K)'
 YRECFM='RESA'
 YCOMMENT='X_Y_RESA (s/m)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XRESA(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* vegetation canopy air temperature
+!
+YRECFM='TC'
+YCOMMENT='X_Y_TC (K)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XTC(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* vegetation canopy air specific humidity
+!
+YRECFM='QC'
+YCOMMENT='X_Y_QC (kg/kg)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,XQC(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Land use variables
 !

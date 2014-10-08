@@ -32,18 +32,26 @@ SUBROUTINE PACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
 !!      B. Decharme  04/2013 : DIF lateral subsurface drainage
 !!                             water table / surface coupling
+!!      P Samuelsson 10/2014 : MEB
+!!      P Samuelsson 10/2014 : Additional snow albedos
 !!
 !!------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 USE MODD_ISBA_n,      ONLY : NGROUND_LAYER,  NNBIOMASS, NNLITTER, NNSOILCARB,       &
                                NNLITTLEVS, CISBA, CPHOTO, CSCOND, CRESPSL, CRUNOFF, &
-                               LGLACIER, XZ0_O_Z0H, XEMIS, XZ0, XWRMAX_CF, XGAMMA,  &
+                               LGLACIER, LMEB_PATCH,                                &
+                               XZ0_O_Z0H, XEMIS, XZ0, XWRMAX_CF, XGAMMA,            &
                                XCV, XRGL, XVEGTYPE_PATCH, XDG, XRUNOFFD, XRUNOFFB,  &
                                XWDRAIN, XTAUICE, XZ0REL, XGAMMAT, NWG_LAYER,        &
                                XC1SAT, XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF,   &
                                XWFC, XWWILT, XWSAT, XBCOEF, XWR, XTG, XWG,          &
                                XWGI, XLAI, XRESA, XVEG, XTDEEP, TSNOW, XROOTFRAC,   &
+                               ! For multi-energy balance
+                               XVEGGV, XZF_TALLVEG , XRGLGV, XGAMMAGV, XRSMINGV,    &
+                               XROOTFRACGV, XWRMAX_CFGV, XLAIGV, XZ0GV, XH_VEG,     &
+                               XWRV,XWRVN,XTV,                                      &
+                               XTC,XQC,                                             &
                                XCONDSAT, XMPOTSAT, XCGSAT, XHCAPSOIL,               &
                                XCONDDRY, XCONDSLD, XRSMIN, XBSLAI, XLAIMIN,         &
                                XSEFOLD, XH_TREE, XANMAX, XFZERO, XEPSO,             &
@@ -92,6 +100,11 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF, XP_PCOEF,  &
                                XP_WFC, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG,         &
                                XP_WGI, XP_LAI, XP_RESA, XP_VEG, XP_TDEEP, XP_ROOTFRAC, XP_DZG,   &
+                               ! For multi-energy balance
+                               XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,                    &
+                               XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V, XP_H_VEG,            &
+                               XP_WRV,XP_WRVN,XP_TV,                                             &
+                               XP_TC,XP_QC,                                                      &
                                XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                                XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
                                XP_SEFOLD, XP_H_TREE, XP_ANF, XP_ANMAX, XP_FZERO, XP_EPSO,        &
@@ -102,6 +115,9 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM,                      &
                                XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                              &
                                XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM, XP_SSO_SLOPE,                &
+                               XP_SNOWSWE, XP_SNOWRHO, XP_SNOWALB,                               &
+                               XP_SNOWALBVIS, XP_SNOWALBNIR, XP_SNOWALBFIR,                      &
+                               XP_SNOWHEAT, XP_SNOWEMIS,                                         &
                                XP_SNOWSWE, XP_SNOWRHO, XP_SNOWALB, XP_SNOWHEAT, XP_SNOWEMIS,     &
                                XP_SNOWGRAN1, XP_SNOWGRAN2, XP_SNOWHIST, XP_SNOWAGE,              &
                                XP_LE, XP_ALBNIR, XP_ALBVIS, XP_ALBUV, XP_LAI_EFFC, XP_MUS,       &
@@ -374,6 +390,12 @@ IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
    XP_SNOWEMIS   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SNOW = ISIZE_SNOW + 1
    XP_SNOWAGE    => XBLOCK_SNOW(:,:,ISIZE_SNOW)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+   XP_SNOWALBVIS   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE) 
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+   XP_SNOWALBNIR   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE) 
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+   XP_SNOWALBFIR   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWHEAT   => XBLOCK_00(:,:,ISIZE_00) 
@@ -381,6 +403,12 @@ ELSE
   XP_SNOWEMIS   => XBLOCK_0(:,ISIZE_0)
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWAGE    => XBLOCK_00(:,:,ISIZE_00)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNOWALBVIS   => XBLOCK_0(:,ISIZE_0) 
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNOWALBNIR   => XBLOCK_0(:,ISIZE_0) 
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNOWALBFIR   => XBLOCK_0(:,ISIZE_0)
 END IF
 !
 IF(TSNOW%SCHEME=='CRO') THEN
