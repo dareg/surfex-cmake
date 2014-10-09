@@ -23,6 +23,8 @@
 !!      (V.Masson)     15/03/99 add number of layers
 !!      (A.Boone)      02/05/02 add ISBA-ES parameters
 !!      (A.Boone)      21/11/11 add Rsmax
+!!      (S.Gollvik)    20/02/12 add XFLXMAX
+!!      (A.Boone)      20/02/12 add ISBA-MEB parameters
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -102,6 +104,23 @@ REAL, PARAMETER       :: XRED_EDGE = 0.0000007  ! (m)   0.7 micro-m
 REAL, PARAMETER       :: XUV_EDGE  = 0.0000002 ! (m)   0.1 micro-m
 !
 !--------------------------------------------------------------------------------
+! MEB: Multiple energy balance  parameters
+!--------------------------------------------------------------------------------
+!                        
+REAL, PARAMETER       :: XFLXMAX = 5000.   ! [kg/(m**2*s)]
+!                        Maximum value of exchange coeffient
+!                        (should go to infinity, for some cases, i.e. when lai=>0) 
+!                        
+REAL, PARAMETER       :: XWETBIOMASS = 0.4 ! -
+!                        Fraction of biomass assumed to consist of water mass
+!
+!
+REAL, PARAMETER       :: XCVHEAT_MIN = 1.E+4 ! J/m2/K
+!                        Minimum vegetation canopy heat capacity
+!
+REAL, PARAMETER       :: XLIMH       = 2.0 ! m
+!                        Minimum forcing height above vegetation top (turbulence computations)
+!
 ! Soil geometry if DF option
 !--------------------------------------------------------------------------------
 !

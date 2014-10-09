@@ -28,6 +28,7 @@ MODULE MODD_ISBA_n
 !!      A.L. Gibelin    06/2009 : Soil carbon variables for CNT option
 !!      A.L. Gibelin    07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin    07/2009 : Suppress PPST and PPSTF as outputs
+!!      P. Samuelsson   02/2012 : MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -121,6 +122,12 @@ TYPE ISBA_t
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                              ! False = No specific treatment
+  LOGICAL, POINTER, DIMENSION(:) :: LMEB_PATCH ! Vector with T/F values
+                                               ! True = treat patch with multi-energy balance 
+!                                              ! False = treat patch with classical ISBA 
+  LOGICAL                        :: LFORC_MEASURE ! True = Forcing data from observations
+!                                                         ! False = Forcing data from atmospheric model (default)
+!
   LOGICAL                        :: LVEGUPD  ! True = update vegetation parameters every decade
                                              ! False = keep vegetation parameters constant in time
 !  
@@ -285,6 +292,24 @@ TYPE ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XRGL              ! maximum solar radiation
 !                                                      ! usable in photosynthesis                (W/m2)
   REAL, POINTER, DIMENSION(:,:,:) :: XROOTFRAC       ! root fraction profile ('DIF' option)
+!
+! - Multi-energy balance (MEB) parameters.
+! - Postfix GV denotes understory ground vegetation
+!
+  REAL, POINTER, DIMENSION(:,:) :: XVEGGV            ! understory veg cover fraction                  (-)
+  REAL, POINTER, DIMENSION(:,:) :: XRGLGV            ! understory veg maximum solar radiation
+!                                                    ! usable in photosynthesis                       (W/m2)
+  REAL, POINTER, DIMENSION(:,:) :: XGAMMAGV          ! understory veg coefficient for the calculation
+!                                                    ! of the surface stomatal resistance
+  REAL, POINTER, DIMENSION(:,:) :: XRSMINGV          ! understory veg minimum stomatal resistance     (s/m)
+  REAL, POINTER, DIMENSION(:,:,:) :: XROOTFRACGV     ! understory veg root fraction profile
+  REAL, POINTER, DIMENSION(:,:) :: XWRMAX_CFGV       ! understory veg coefficient for maximum water 
+!                                                    ! interception
+  REAL, POINTER, DIMENSION(:,:) :: XLAIGV            ! understory veg Leaf Area Index                 (m2/m2)
+  REAL, POINTER, DIMENSION(:,:) :: XZ0GV             ! understory veg surface roughness length        (m)
+!
+  REAL, POINTER, DIMENSION(:,:) :: XZF_TALLVEG       ! tall veg fraction                              (-)
+  REAL, POINTER, DIMENSION(:,:) :: XH_VEG            ! height of vegetation                           (m)
 !
 !-------------------------------------------------------------------------------
 !
@@ -462,6 +487,16 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
   REAL, POINTER, DIMENSION(:,:)     :: XPCPS
   REAL, POINTER, DIMENSION(:,:)     :: XPLVTT
   REAL, POINTER, DIMENSION(:,:)     :: XPLSTT 
+!
+! - For multi-energy balance:
+!
+  REAL, POINTER, DIMENSION(:,:)     :: XWRV          ! liquid water retained on the foliage
+!                                                    ! of the canopy vegetation                  (kg/m2)
+  REAL, POINTER, DIMENSION(:,:)     :: XWRVN         ! snow retained on the foliage
+!                                                    ! of the canopy vegetation                  (kg/m2)
+  REAL, POINTER, DIMENSION(:,:)     :: XTV           ! canopy vegetation temperature             (K)
+  REAL, POINTER, DIMENSION(:,:)     :: XTC           ! canopy air temperature                    (K)
+  REAL, POINTER, DIMENSION(:,:)     :: XQC           ! canopy air specific humidity              (kg/kg)
 !
 !-------------------------------------------------------------------------------
 !
@@ -687,6 +722,8 @@ LOGICAL, POINTER :: LTEMP_ARP=>NULL()
 !$OMP THREADPRIVATE(LTEMP_ARP)
 LOGICAL, POINTER :: LGLACIER=>NULL()
 !$OMP THREADPRIVATE(LGLACIER)
+LOGICAL, POINTER :: LFORC_MEASURE=>NULL()
+!$OMP THREADPRIVATE(LFORC_MEASURE)
 LOGICAL, POINTER :: LVEGUPD=>NULL()
 !$OMP THREADPRIVATE(LVEGUPD)
 LOGICAL, POINTER :: LNITRO_DILU=>NULL()
@@ -779,6 +816,8 @@ REAL, POINTER, DIMENSION(:,:) :: XCOVER=>NULL()
 !$OMP THREADPRIVATE(XCOVER)
 LOGICAL, POINTER, DIMENSION(:):: LCOVER=>NULL()
 !$OMP THREADPRIVATE(LCOVER)
+LOGICAL, POINTER, DIMENSION(:):: LMEB_PATCH=>NULL()
+!$OMP THREADPRIVATE(LMEB_PATCH)
 REAL, POINTER, DIMENSION(:)   :: XALBNIR_DRY=>NULL()
 !$OMP THREADPRIVATE(XALBNIR_DRY)
 REAL, POINTER, DIMENSION(:)   :: XALBVIS_DRY=>NULL()
@@ -1089,6 +1128,40 @@ REAL, POINTER, DIMENSION(:,:,:) :: XSCA_ALB_WITH_SNOW=>NULL()
 REAL, POINTER, DIMENSION(:,:) :: XICE_STO=>NULL()
 !$OMP THREADPRIVATE(XICE_STO)
 !
+! For multi-energy balance (MEB)
+!
+REAL, POINTER, DIMENSION(:,:) :: XTV=>NULL()
+!$OMP THREADPRIVATE(XTV)
+REAL, POINTER, DIMENSION(:,:) :: XWRV=>NULL()
+!$OMP THREADPRIVATE(XWRV)
+REAL, POINTER, DIMENSION(:,:) :: XWRVN=>NULL()
+!$OMP THREADPRIVATE(XWRVN)
+REAL, POINTER, DIMENSION(:,:) :: XTC=>NULL()
+!$OMP THREADPRIVATE(XTC)
+REAL, POINTER, DIMENSION(:,:) :: XQC=>NULL()
+!$OMP THREADPRIVATE(XQC)
+!
+REAL, POINTER, DIMENSION(:,:) :: XZF_TALLVEG=>NULL()
+!$OMP THREADPRIVATE(XZF_TALLVEG)
+REAL, POINTER, DIMENSION(:,:) :: XVEGGV=>NULL()
+!$OMP THREADPRIVATE(XVEGGV)
+REAL, POINTER, DIMENSION(:,:) :: XRGLGV=>NULL()
+!$OMP THREADPRIVATE(XRGLGV)
+REAL, POINTER, DIMENSION(:,:) :: XGAMMAGV=>NULL()
+!$OMP THREADPRIVATE(XGAMMAGV)
+REAL, POINTER, DIMENSION(:,:) :: XWRMAX_CFGV=>NULL()
+!$OMP THREADPRIVATE(XWRMAX_CFGV)
+REAL, POINTER, DIMENSION(:,:) :: XLAIGV=>NULL()
+!$OMP THREADPRIVATE(XLAIGV)
+REAL, POINTER, DIMENSION(:,:) :: XZ0GV=>NULL()
+!$OMP THREADPRIVATE(XZ0GV)
+REAL, POINTER, DIMENSION(:,:) :: XRSMINGV=>NULL()
+!$OMP THREADPRIVATE(XRSMINGV)
+REAL, POINTER, DIMENSION(:,:,:) :: XROOTFRACGV=>NULL()
+!$OMP THREADPRIVATE(XROOTFRACGV)
+REAL, POINTER, DIMENSION(:,:) :: XH_VEG=>NULL()
+!$OMP THREADPRIVATE(XH_VEG)
+!
 !SGH scheme and vertical hydrology
 !
 CHARACTER(LEN=3), POINTER      :: CKSAT=>NULL()
@@ -1208,6 +1281,7 @@ ISBA_MODEL(KFROM)%XSOILGRID=>XSOILGRID
 ISBA_MODEL(KFROM)%XZS=>XZS
 ISBA_MODEL(KFROM)%XCOVER=>XCOVER
 ISBA_MODEL(KFROM)%LCOVER=>LCOVER
+ISBA_MODEL(KFROM)%LMEB_PATCH=>LMEB_PATCH
 ISBA_MODEL(KFROM)%XALBNIR_DRY=>XALBNIR_DRY
 ISBA_MODEL(KFROM)%XALBVIS_DRY=>XALBVIS_DRY
 ISBA_MODEL(KFROM)%XALBUV_DRY=>XALBUV_DRY
@@ -1368,6 +1442,25 @@ ISBA_MODEL(KFROM)%XALBF=>XALBF
 ISBA_MODEL(KFROM)%XEMISF=>XEMISF
 ISBA_MODEL(KFROM)%XICE_STO=>XICE_STO
 !
+! For multi-energy balance (MEB)
+!
+ISBA_MODEL(KFROM)%XTV=>XTV
+ISBA_MODEL(KFROM)%XWRV=>XWRV
+ISBA_MODEL(KFROM)%XWRVN=>XWRVN
+ISBA_MODEL(KFROM)%XTC=>XTC
+ISBA_MODEL(KFROM)%XQC=>XQC
+!
+ISBA_MODEL(KFROM)%XZF_TALLVEG=>XZF_TALLVEG
+ISBA_MODEL(KFROM)%XVEGGV=>XVEGGV
+ISBA_MODEL(KFROM)%XRGLGV=>XRGLGV
+ISBA_MODEL(KFROM)%XGAMMAGV=>XGAMMAGV
+ISBA_MODEL(KFROM)%XWRMAX_CFGV=>XWRMAX_CFGV
+ISBA_MODEL(KFROM)%XLAIGV=>XLAIGV
+ISBA_MODEL(KFROM)%XZ0GV=>XZ0GV
+ISBA_MODEL(KFROM)%XRSMINGV=>XRSMINGV
+ISBA_MODEL(KFROM)%XROOTFRACGV=>XROOTFRACGV
+ISBA_MODEL(KFROM)%XH_VEG=>XH_VEG
+!
 !SGH scheme
 !
 ISBA_MODEL(KFROM)%XTI_MIN=>XTI_MIN
@@ -1436,6 +1529,7 @@ CRESPSL=>ISBA_MODEL(KTO)%CRESPSL
 CCPSURF=>ISBA_MODEL(KTO)%CCPSURF
 LTEMP_ARP=>ISBA_MODEL(KTO)%LTEMP_ARP
 LGLACIER=>ISBA_MODEL(KTO)%LGLACIER
+LFORC_MEASURE=>ISBA_MODEL(KTO)%LFORC_MEASURE
 LVEGUPD=>ISBA_MODEL(KTO)%LVEGUPD
 LNITRO_DILU=>ISBA_MODEL(KTO)%LNITRO_DILU
 LCANOPY=>ISBA_MODEL(KTO)%LCANOPY
@@ -1482,6 +1576,7 @@ NNSOILCARB=>ISBA_MODEL(KTO)%NNSOILCARB
 XZS=>ISBA_MODEL(KTO)%XZS
 XCOVER=>ISBA_MODEL(KTO)%XCOVER
 LCOVER=>ISBA_MODEL(KTO)%LCOVER
+LMEB_PATCH=>ISBA_MODEL(KTO)%LMEB_PATCH
 XALBNIR_DRY=>ISBA_MODEL(KTO)%XALBNIR_DRY
 XALBVIS_DRY=>ISBA_MODEL(KTO)%XALBVIS_DRY
 XALBUV_DRY=>ISBA_MODEL(KTO)%XALBUV_DRY
@@ -1648,6 +1743,25 @@ XALBF=>ISBA_MODEL(KTO)%XALBF
 XEMISF=>ISBA_MODEL(KTO)%XEMISF
 XICE_STO=>ISBA_MODEL(KTO)%XICE_STO
 !
+! For multi-energy balance (MEB)
+!
+XTV=>ISBA_MODEL(KTO)%XTV
+XWRV=>ISBA_MODEL(KTO)%XWRV
+XWRVN=>ISBA_MODEL(KTO)%XWRVN
+XTC=>ISBA_MODEL(KTO)%XTC
+XQC=>ISBA_MODEL(KTO)%XQC
+!
+XZF_TALLVEG=>ISBA_MODEL(KTO)%XZF_TALLVEG
+XVEGGV=>ISBA_MODEL(KTO)%XVEGGV
+XRGLGV=>ISBA_MODEL(KTO)%XRGLGV
+XGAMMAGV=>ISBA_MODEL(KTO)%XGAMMAGV
+XWRMAX_CFGV=>ISBA_MODEL(KTO)%XWRMAX_CFGV
+XLAIGV=>ISBA_MODEL(KTO)%XLAIGV
+XZ0GV=>ISBA_MODEL(KTO)%XZ0GV
+XRSMINGV=>ISBA_MODEL(KTO)%XRSMINGV
+XROOTFRACGV=>ISBA_MODEL(KTO)%XROOTFRACGV
+XH_VEG=>ISBA_MODEL(KTO)%XH_VEG
+!
 !SGH scheme
 !
 CKSAT=>ISBA_MODEL(KTO)%CKSAT
@@ -1729,6 +1843,7 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XZS)
   NULLIFY(ISBA_MODEL(J)%XCOVER)
   NULLIFY(ISBA_MODEL(J)%LCOVER)
+  NULLIFY(ISBA_MODEL(J)%LMEB_PATCH)
   NULLIFY(ISBA_MODEL(J)%XALBNIR_DRY)
   NULLIFY(ISBA_MODEL(J)%XALBVIS_DRY)
   NULLIFY(ISBA_MODEL(J)%XALBUV_DRY)
@@ -1912,6 +2027,23 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XPERTCV)
   NULLIFY(ISBA_MODEL(J)%XPERTALB)
   NULLIFY(ISBA_MODEL(J)%XPERTZ0)
+  !
+  NULLIFY(ISBA_MODEL(J)%XVEGGV)
+  NULLIFY(ISBA_MODEL(J)%XRGLGV)
+  NULLIFY(ISBA_MODEL(J)%XGAMMAGV)
+  NULLIFY(ISBA_MODEL(J)%XRSMINGV)
+  NULLIFY(ISBA_MODEL(J)%XROOTFRACGV)
+  NULLIFY(ISBA_MODEL(J)%XWRMAX_CFGV)
+  NULLIFY(ISBA_MODEL(J)%XLAIGV)
+  NULLIFY(ISBA_MODEL(J)%XZ0GV)
+  NULLIFY(ISBA_MODEL(J)%XZF_TALLVEG)
+  NULLIFY(ISBA_MODEL(J)%XH_VEG)
+  NULLIFY(ISBA_MODEL(J)%XWRV)
+  NULLIFY(ISBA_MODEL(J)%XWRVN)
+  NULLIFY(ISBA_MODEL(J)%XTV)
+  NULLIFY(ISBA_MODEL(J)%XTC)
+  NULLIFY(ISBA_MODEL(J)%XQC)
+  !
 ENDDO
 ISBA_MODEL(:)%CROUGH=' '
 ISBA_MODEL(:)%CISBA=' '
@@ -1929,6 +2061,7 @@ ISBA_MODEL(:)%CRESPSL=' '
 ISBA_MODEL(:)%CCPSURF=' '
 ISBA_MODEL(:)%LTEMP_ARP=.FALSE.
 ISBA_MODEL(:)%LGLACIER=.FALSE.
+ISBA_MODEL(:)%LFORC_MEASURE=.FALSE.
 ISBA_MODEL(:)%LVEGUPD=.FALSE.
 ISBA_MODEL(:)%LNITRO_DILU=.FALSE.
 ISBA_MODEL(:)%LCANOPY=.FALSE.

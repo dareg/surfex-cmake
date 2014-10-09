@@ -30,6 +30,7 @@ SUBROUTINE UNPACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
 !!      B. Decharme  06/2013 : add lateral drainage flux diag for DIF
 !!                             water table / surface coupling
+!!      P. Samuelsson 02/2012 : MEB
 !!
 !!------------------------------------------------------------------
 !
@@ -45,6 +46,10 @@ USE MODD_PACK_ISBA, ONLY :   LBLOCK_SIMPLE, LBLOCK_0, TBLOCK_SIMPLE, TBLOCK_0, X
                              XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF, XP_PCOEF,  &
                              XP_WFC, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG,         &
                              XP_WGI, XP_LAI, XP_RESA, XP_VEG, XP_TDEEP, XP_ROOTFRAC, XP_DZG,   &
+                             XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,                    &
+                             XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V, XP_H_VEG,            &
+                             XP_WRV,XP_WRVN,XP_TV,                                             &
+                             XP_TC,XP_QC,                                                      &
                              XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                              XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
                              XP_SEFOLD, XP_H_TREE, XP_ANF, XP_ANMAX, XP_FZERO, XP_EPSO,        &
@@ -57,6 +62,7 @@ USE MODD_PACK_ISBA, ONLY :   LBLOCK_SIMPLE, LBLOCK_0, TBLOCK_SIMPLE, TBLOCK_0, X
                              XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                              &
                              XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,XP_SSO_SLOPE,                 &
                              XP_SNOWSWE, XP_SNOWRHO, XP_SNOWHEAT, XP_SNOWEMIS, XP_SNOWALB,     &
+                             XP_SNOWALBVIS, XP_SNOWALBNIR, XP_SNOWALBFIR,                      &
                              XP_SNOWGRAN1, XP_SNOWGRAN2,  XP_SNOWHIST, XP_SNOWAGE,             &
                              XP_ALBNIR_VEG, XP_ALBVIS_VEG, XP_ALBUV_VEG,                       &
                              XP_ALBNIR_DRY, XP_ALBVIS_DRY, XP_ALBUV_DRY,                       &
@@ -79,6 +85,9 @@ USE MODD_AGRI_n,   ONLY :  LIRRIDAY
 USE MODD_ISBA_n,   ONLY : TSNOW, XWR, XTG, XWG, XWGI, XRESA, XLAI, XAN, XANFM,          &
                             XLE, XANDAY, CPHOTO, XALBNIR, XALBVIS, XALBUV,              &
                             XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG, LGLACIER, LTR_ML,     &
+                            LMEB_PATCH,                                                 &
+                            XZF_TALLVEG, XH_VEG, XWRV, XWRVN,XTV,                       &
+                            XTC,XQC,                                                    &
                             XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM, XLAI_EFFC, XMUS,    &
                             XVEG, XZ0, XEMIS, XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,  &
                             NPATCH, NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB,        &
@@ -109,6 +118,9 @@ IF (NPATCH==1) THEN
   TSNOW%WSNOW     (:, :, 1) = XP_SNOWSWE    (:, :)
   TSNOW%RHO       (:, :, 1) = XP_SNOWRHO    (:, :)
   TSNOW%ALB       (:, 1)    = XP_SNOWALB    (:)
+  TSNOW%ALBVIS    (:, 1)    = XP_SNOWALBVIS (:)
+  TSNOW%ALBNIR    (:, 1)    = XP_SNOWALBNIR (:)
+  TSNOW%ALBFIR    (:, 1)    = XP_SNOWALBFIR (:)
   XWR             (:, 1)    = XP_WR         (:)
   XTG             (:, :, 1) = XP_TG         (:, :)
   XWG             (:, :, 1) = XP_WG         (:, :)
@@ -127,14 +139,25 @@ IF (NPATCH==1) THEN
   XALBVIS_SOIL    (:, 1)    = XP_ALBVIS_SOIL(:) 
   XALBUV_SOIL     (:, 1)    = XP_ALBUV_SOIL (:) 
   XEMIS           (:, 1)    = XP_EMIS       (:) 
-  XLAI            (:, 1)    = XP_LAI        (:) 
-  XVEG            (:, 1)    = XP_VEG        (:) 
-  XZ0             (:, 1)    = XP_Z0         (:) 
   XZ0EFFIP        (:, 1)    = XP_Z0EFFIP    (:) 
   XZ0EFFIM        (:, 1)    = XP_Z0EFFIM    (:) 
   XZ0EFFJP        (:, 1)    = XP_Z0EFFJP    (:) 
   XZ0EFFJM        (:, 1)    = XP_Z0EFFJM    (:) 
   XLE             (:, 1)    = XP_LE         (:)
+  !
+   IF(LMEB_PATCH(KPATCH))THEN
+     XWRV            (:, 1)    = XP_WRV        (:)
+     XWRVN           (:, 1)    = XP_WRVN       (:)
+     XTV             (:, 1)    = XP_TV         (:)
+     XTC             (:, 1)    = XP_TC         (:)
+     XQC             (:, 1)    = XP_QC         (:)
+   ELSE
+! Please note that XLAI, XVEG, and XZ0 are not unpacked
+! in the case of MEB.
+     XLAI            (:, 1)    = XP_LAI        (:) 
+     XVEG            (:, 1)    = XP_VEG        (:) 
+     XZ0             (:, 1)    = XP_Z0         (:) 
+   ENDIF
   !
   IF (LTR_ML) THEN
     XFAPARC         (:, 1)    = XP_FAPARC     (:)
@@ -193,6 +216,9 @@ ELSE
   DO JJ=1,KSIZE
     JI                              = KMASK         (JJ)
     TSNOW%ALB       (JI, KPATCH)    = XP_SNOWALB    (JJ)
+    TSNOW%ALBVIS    (JI, KPATCH)    = XP_SNOWALBVIS (JJ)
+    TSNOW%ALBNIR    (JI, KPATCH)    = XP_SNOWALBNIR (JJ)
+    TSNOW%ALBFIR    (JI, KPATCH)    = XP_SNOWALBFIR (JJ)
     XWR             (JI, KPATCH)    = XP_WR         (JJ)
     XRESA           (JI, KPATCH)    = XP_RESA       (JJ) 
     XPCPS           (JI, KPATCH)    = XP_CPS        (JJ) 
@@ -208,9 +234,6 @@ ELSE
     XALBVIS_SOIL    (JI, KPATCH)    = XP_ALBVIS_SOIL(JJ) 
     XALBUV_SOIL     (JI, KPATCH)    = XP_ALBUV_SOIL (JJ) 
     XEMIS           (JI, KPATCH)    = XP_EMIS       (JJ) 
-    XLAI            (JI, KPATCH)    = XP_LAI        (JJ) 
-    XVEG            (JI, KPATCH)    = XP_VEG        (JJ) 
-    XZ0             (JI, KPATCH)    = XP_Z0         (JJ) 
     XZ0EFFIP        (JI, KPATCH)    = XP_Z0EFFIP    (JJ) 
     XZ0EFFIM        (JI, KPATCH)    = XP_Z0EFFIM    (JJ) 
     XZ0EFFJP        (JI, KPATCH)    = XP_Z0EFFJP    (JJ) 
@@ -218,6 +241,28 @@ ELSE
     XLE             (JI, KPATCH)    = XP_LE         (JJ)
   !
   END DO
+  !
+  IF(LMEB_PATCH(KPATCH))THEN
+    DO JJ=1,KSIZE
+      JI                              = KMASK         (JJ)
+      XWRV            (JI, KPATCH)    = XP_WRV        (JJ)
+      XWRVN           (JI, KPATCH)    = XP_WRVN       (JJ)
+      XTV             (JI, KPATCH)    = XP_TV         (JJ)
+      XTC             (JI, KPATCH)    = XP_TC         (JJ)
+      XQC             (JI, KPATCH)    = XP_QC         (JJ)
+    END DO
+  ELSE
+! Please note that XLAI, XVEG, and XZ0 are not unpacked
+! in the case of MEB yet. This must be done when interactive/carbon
+! vegetation is activated for MEB.
+    DO JJ=1,KSIZE
+      JI                              = KMASK         (JJ)
+      XLAI            (JI, KPATCH)    = XP_LAI        (JJ) 
+      XVEG            (JI, KPATCH)    = XP_VEG        (JJ) 
+      XZ0             (JI, KPATCH)    = XP_Z0         (JJ) 
+    END DO
+  ENDIF
+  !
   DO JK=1,SIZE(XTG,2)
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
@@ -384,6 +429,9 @@ XP_LVTT         => NULL()
 XP_LSTT         => NULL()
 XP_VEG          => NULL()
 XP_SNOWALB      => NULL()
+XP_SNOWALBVIS   => NULL()
+XP_SNOWALBNIR   => NULL()
+XP_SNOWALBFIR   => NULL()
 XP_LE           => NULL() 
 XP_PSN          => NULL()
 XP_PSNG         => NULL()
@@ -546,6 +594,22 @@ XP_FSAT=> NULL()
 XP_TOPQS=> NULL()
 !
 XP_MUF=> NULL()
+!
+XP_WRV          => NULL()
+XP_WRVN         => NULL() 
+XP_TV           => NULL() 
+XP_TC           => NULL() 
+XP_QC           => NULL() 
+
+XP_ZF_TALLVEG   => NULL()
+XP_H_VEG        => NULL()
+XP_RGLV         => NULL()
+XP_GAMMAV       => NULL()
+XP_WRMAX_CFV    => NULL()
+XP_LAIV         => NULL()
+XP_Z0V          => NULL()
+XP_RSMINV       => NULL()
+XP_ROOTFRACV    => NULL()
 !
 !
 DEALLOCATE(LBLOCK_SIMPLE)

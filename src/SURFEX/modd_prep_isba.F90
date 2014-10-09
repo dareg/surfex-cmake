@@ -23,6 +23,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       01/2004
+!!      P Samuelsson   02/2012  MEB
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -62,6 +63,9 @@ REAL              :: XTG_ROOT       ! root layer temperature
 REAL              :: XTG_DEEP       ! deep layer temperature
 !
 REAL              :: XWR_DEF        ! default for leaves interception reservoir
+REAL              :: XWRV_DEF       ! default for canopy vegetation leaves interception reservoir
+REAL              :: XWRVN_DEF      ! default for canopy vegetation leaves snow interception reservoir
+REAL              :: XQC_DEF        ! default for canopy air specific humidity
 !--------------------------------------------------------------------------
 !
 !* dimensions for interpolation grids for soil  
@@ -72,7 +76,7 @@ REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = &
 !
 !--------------------------------------------------------------------------
 !
-! Parameter for snow field uniforn initialization
+! Parameter for snow field uniform initialization
 !
 LOGICAL :: LSNOW_IDEAL 
 !
