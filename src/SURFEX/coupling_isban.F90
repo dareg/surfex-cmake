@@ -138,7 +138,9 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_FFROZEN, XP_ALBF, XP_EMISF, XP_FFLOOD,         &
                              XP_PIFLOOD, XP_LAT, XP_LON, XP_TG, XP_WG, XP_WGI, &
                              XP_CPS, XP_LVTT, XP_LSTT, XP_WR, XP_RESA, XP_ANFM,&
-                             XP_SNOWALB, XP_SNOWSWE, XP_SNOWHEAT, XP_SNOWRHO,  &
+                             XP_SNOWALB,                                       &
+                             XP_SNOWALBVIS, XP_SNOWALBNIR, XP_SNOWALBFIR,      &
+                             XP_SNOWSWE, XP_SNOWHEAT, XP_SNOWRHO,              &
                              XP_SNOWGRAN1, XP_SNOWGRAN2, XP_SNOWHIST,          &
                              XP_SNOWAGE, XP_SNOWEMIS, XP_LE, XP_FAPARC,        &
                              XP_FAPIRC, XP_LAI_EFFC, XP_MUS, XP_AN, XP_ANDAY,  &
@@ -151,7 +153,11 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_TAU_WOOD, TP_SEED, TP_REAP, XP_RE25, XP_LITTER,&
                              XP_LIGNIN_STRUC, XP_SOILCARB,  XP_CLAY, XP_SAND,  &
                              XP_DIR_ALB_WITH_SNOW, XP_SCA_ALB_WITH_SNOW,       &
-                             XP_TOPQS,XP_FWTD,XP_WTD
+                             XP_TOPQS,XP_FWTD,XP_WTD,                          &
+                             XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,    &
+                             XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V,      &
+                             XP_H_VEG, XP_WRV,XP_WRVN,XP_TV,                   &
+                             XP_TC,XP_QC
 !
 USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,          &
@@ -176,7 +182,17 @@ USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_FAPIR_BS, XP_ICEFLUX, XP_IRRIG_FLUX,        &
                                 XP_RESP_AUTO, XP_RESP_ECO, XP_DWG, XP_DWGI,    &
                                 XP_DWR, XP_DSWE, XP_WATBUD, XP_QSB, XP_SUBL,   &
-                                XP_SNDRIFT
+                                XP_SNDRIFT,                                    &
+                                XP_SWNET_V, XP_SWNET_G, XP_SWNET_N,            &
+                                XP_SWNET_NS,                                   &
+                                XP_LWNET_V, XP_LWNET_G, XP_LWNET_N,            &
+                                XP_LEVCV, XP_LESC, XP_H_V_C, XP_H_G_C,         &
+                                XP_LETRGV, XP_LETRCV, XP_LERGV, XP_LERCV,      &
+                                XP_H_C_A, XP_H_N_C,                            &
+                                XP_LE_C_A, XP_LE_V_C, XP_LE_G_C, XP_LE_N_C,    &
+                                XP_EVAP_N_C, XP_EVAP_G_C,                      &
+                                XP_SR_GN, XP_MELTCV, XP_FRZCV,                 &
+                                XP_SWDOWN_GN, XP_LWDOWN_GN
 !                         
 USE MODD_PACK_CH_ISBA,   ONLY : XP_SOILRC_SO2, XP_SOILRC_O3, XP_DEP
 
@@ -522,10 +538,6 @@ TTIME%TIME = TTIME%TIME + PTSTEP
 !
 !*      2.     Physical evolution
 !
- CALL PACK_ISBA_PATCH_GET_SIZE_n
-!
- CALL PACK_DIAG_PATCH_GET_SIZE_n
-!
 ! --------------------------------------------------------------------------------------
 ! Patch Dependent Calculations
 ! --------------------------------------------------------------------------------------
@@ -574,8 +586,13 @@ IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
                          CALBEDO, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,  &
                          XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,        &
                          XCE_NITRO, XCF_NITRO, XCNA_NITRO,               &
-                         TSEED, TREAP, XWATSUP, XIRRIG, LUPDATED         )  
+                         TSEED, TREAP, XWATSUP, XIRRIG,                  &
+                         XVEGGV,XZF_TALLVEG, XRGLGV,XGAMMAGV,            &
+                         XRSMINGV, XWRMAX_CFGV,                          &
+                         XH_VEG, XLAIGV, XZ0GV, LUPDATED                 )  
+!
 ELSEIF ((CPHOTO=='LAI'.OR.CPHOTO=='LST'.OR.CPHOTO=='NIT'.OR.CPHOTO=='NCB').AND.LVEGUPD) THEN
+!
   CALL ALBEDO_VEG_UPDATE(PTSTEP,TTIME,XCOVER, LCOVER,                    &
                          CISBA,LECOCLIMAP,CPHOTO,LAGRIP,LTR_ML,'NAT',    &
                          XVEG,XALBNIR,XALBVIS,XALBUV,                    &
@@ -629,8 +646,14 @@ ENDIF
 !-------------------------------------------------------------------------------------
 !
  CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,       &
-                       XVEG, XLAI, XZ0, XALBNIR, XALBVIS, XALBUV, XEMIS,&
-                       ZDIR_ALB_TILE,ZSCA_ALB_TILE,ZEMIS_TILE           )  
+                       XVEG, XLAI, XZ0,                                 &
+                       LMEB_PATCH,XLAIGV,XVEGGV,XZ0GV,XH_VEG,           &
+                       XALBNIR, XALBVIS, XALBUV, XEMIS,                 &
+                       ZDIR_ALB_TILE,ZSCA_ALB_TILE,ZEMIS_TILE,          &
+                       PDIR_SW, PSCA_SW,                                &
+                       XZF_TALLVEG,                                     &
+                       XALBNIR_VEG, XALBNIR_SOIL,                       &
+                       XALBVIS_VEG, XALBVIS_SOIL                        )
 !
  CALL AVERAGE_RAD(XPATCH,                                               &
                  ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
@@ -753,6 +776,20 @@ REAL, DIMENSION(KSIZE,NNBIOMASS) :: ZP_RESP_BIOMASS_INST         ! instantaneous
 REAL, DIMENSION(KSIZE) :: ZP_AC_AGG      ! aggregated aerodynamic resistance
 REAL, DIMENSION(KSIZE) :: ZP_HU_AGG      ! aggregated relative humidity
 !
+!*  For multi-energy balance
+!
+REAL, DIMENSION(KSIZE) :: ZPALPHAN                     ! snow/canopy transition coefficient
+REAL, DIMENSION(KSIZE) :: ZSNOWDEPTH                   ! total snow depth
+REAL, DIMENSION(KSIZE) :: ZZ0G_WITHOUT_SNOW            ! roughness length for momentum at snow-free canopy floor
+REAL, DIMENSION(KSIZE) :: ZZ0_MEBV                     ! roughness length for momentum over MEB vegetation part of patch
+REAL, DIMENSION(KSIZE) :: ZZ0H_MEBV                    ! roughness length for heat over MEB vegetation part of path
+REAL, DIMENSION(KSIZE) :: ZZ0EFF_MEBV                  ! roughness length for momentum over MEB vegetation part of patch
+REAL, DIMENSION(KSIZE) :: ZZ0_MEBN                     ! roughness length for momentum over MEB snow part of patch
+REAL, DIMENSION(KSIZE) :: ZZ0H_MEBN                    ! roughness length for heat over MEB snow part of path
+REAL, DIMENSION(KSIZE) :: ZZ0EFF_MEBN                  ! roughness length for momentum over MEB snow part of patch
+! Temporary
+REAL, DIMENSION(KSIZE) :: ZP_MEB_SCA_SW                ! diffuse incoming SW rad.
+!
 !*  ISBA water and energy budget
 !
 REAL, DIMENSION(KSIZE) :: ZP_WG_INI
@@ -765,6 +802,10 @@ REAL, DIMENSION(KSIZE) :: ZP_SWE_INI
 REAL, DIMENSION(KSIZE)               :: ZP_DEEP_FLUX ! Flux at the bottom of the soil
 REAL, DIMENSION(KSIZE)               :: ZP_TDEEP_A   ! coefficient for implicitation of Tdeep
 REAL, DIMENSION(KSIZE)               :: ZIRRIG_GR    ! green roof ground irrigation rate 
+!
+! For multi-energy balance
+LOGICAL :: GMEB  ! True if multi-energy balance should be used for the specific patch
+!
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -862,7 +903,14 @@ ENDIF
 !
 !--------------------------------------------------------------------------------------
 !
+! For multi-energy balance
+   GMEB=LMEB_PATCH(JPATCH)
+!
 ! Pack ISBA input and prognostic variables (modd_isban) for each patch:
+!
+ CALL PACK_ISBA_PATCH_GET_SIZE_n(JPATCH)
+!
+ CALL PACK_DIAG_PATCH_GET_SIZE_n(JPATCH)
 !
  CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
 !
@@ -876,7 +924,7 @@ END IF
 !
 ! Allocate ISBA diagnostics for each patch:
 !
- CALL PACK_DIAG_PATCH_n(KSIZE,ISWB)     
+ CALL PACK_DIAG_PATCH_n(KSIZE,ISWB,JPATCH)     
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Cosine of the slope typically encoutered in the grid mesh (including subgrid orography)
@@ -910,18 +958,27 @@ ELSE
   ZP_FFVNOS  = 0.0
 ENDIF
 !
-
+! For multi-energy balance
+   IF(GMEB)THEN
+     ZSNOWDEPTH(:) = SUM(XP_SNOWSWE(:,:)/XP_SNOWRHO(:,:),2)
+     ZPALPHAN(:)=MEBPALPHAN(ZSNOWDEPTH,XP_H_VEG)
+   ENDIF
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Surface Roughness lengths (m):
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !* effective roughness
 !
- CALL Z0EFF(CROUGH, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
+ CALL Z0EFF(CROUGH, GMEB, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
+     ZPALPHAN,XP_Z0V,                                                    &
      XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM, XP_FF, ZP_Z0FLOOD,     &
      XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                                &
      XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,                                &
-     XP_Z0_O_Z0H, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_Z0EFF            )  
+     XP_Z0_O_Z0H, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_Z0EFF,           &
+     ZZ0G_WITHOUT_SNOW,                                                  &
+     ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                                     &
+     ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN                                      )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Shortwave computations for outputs (albedo for radiative scheme)
@@ -941,14 +998,15 @@ ENDIF
 !
 !* Snow-free surface albedo for each wavelength
 !
- CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML,                                   &
+ CALL ISBA_ALBEDO(TSNOW%SCHEME, LTR_ML, GMEB,                            &
                    ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS,ISWB,                 &
                    XP_ALBNIR, XP_ALBVIS, XP_ALBUV,                       &
                    XP_ALBNIR_VEG, XP_ALBVIS_VEG, XP_ALBUV_VEG,           &
                    XP_ALBNIR_SOIL, XP_ALBVIS_SOIL, XP_ALBUV_SOIL,        &
                    XP_SNOWALB, XP_PSNV, XP_PSNG, XP_ALBF, XP_FFV, XP_FFG,& 
                    ZP_GLOBAL_SW, XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,   &
-                   XP_SNOWFREE_ALB_SOIL, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG, &
+                   XP_SNOWFREE_ALB_SOIL, ZP_MEB_SCA_SW,                  &
+                   ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG,                       &
                    ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL                      )  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -968,15 +1026,19 @@ ZIRRIG_GR(:)= 0.
 !
  CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, CRAIN, CHORT, CC1DRY, CSCOND,           &
           TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TTIME, LFLOOD, LTEMP_ARP,&
-          LGLACIER, PTSTEP, CIMPLICIT_WIND, LAGRI_TO_GRASS,                               &
+          LGLACIER, GMEB, LFORC_MEASURE, PTSTEP, CIMPLICIT_WIND, LAGRI_TO_GRASS,          &
           LSNOWDRIFT, LSNOWDRIFT_SUBLIM, LSNOW_ABS_ZENITH, CSNOWMETAMO, CSNOWRAD,         &
           XCGMAX, ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA,                  &
-          ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, ZP_SNOW, ZP_ZENITH, ZP_GLOBAL_SW, ZP_LW,      &
+          ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW,            &
+          ZP_GLOBAL_SW, ZP_LW,                                                            &
           ZP_WIND, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,            &
           ZP_PET_B_COEF, ZP_PEQ_B_COEF,  XP_RSMIN, XP_RGL, XP_GAMMA, XP_CV, XP_RUNOFFD,   &
           XP_SOILWGHT, NLAYER_HORT, NLAYER_DUN, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG,           &
           ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL, XP_SNOWFREE_ALB, XP_WRMAX_CF, XP_VEG, XP_LAI, &
           XP_EMIS, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_VEGTYPE_PATCH, XP_Z0EFF,         &
+          XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV, XP_ROOTFRACV, XP_WRMAX_CFV,      &
+          XP_LAIV, XP_BSLAI,XP_LAIMIN,XP_H_VEG,ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV,     &
+          ZZ0H_MEBV,ZZ0EFF_MEBV, ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                          &
           XP_RUNOFFB, XP_CGSAT, XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF,    &
           XP_PCOEF, XP_TAUICE, XP_WDRAIN, ZP_TDEEP_A, XP_TDEEP, XP_GAMMAT,                &
           XP_PSN, XP_PSNG, XP_PSNV,                                                       &
@@ -989,21 +1051,28 @@ ZIRRIG_GR(:)= 0.
           XP_CONDSLD, XP_D_ICE, XP_KSAT_ICE, XP_MUF, XP_FF, XP_FFG, XP_FFV, ZP_FFGNOS,    &
           ZP_FFVNOS, XP_FFROZEN, XP_ALBF, XP_EMISF, XP_FFLOOD, XP_PIFLOOD, XP_IFLOOD,     &
           XP_PFLOOD, XP_LE_FLOOD, XP_LEI_FLOOD, XSODELX, XP_LAT, XP_LON, XP_TG, XP_WG,    &
-          XP_WGI, XP_CPS, XP_LVTT, XP_LSTT, XP_WR, XP_RESA, XP_ANFM, XP_FSAT,             &
-          XP_SNOWALB, XP_SNOWSWE, XP_SNOWHEAT, XP_SNOWRHO, XP_SNOWGRAN1, XP_SNOWGRAN2,    &
+          XP_WGI, XP_CPS, XP_LVTT, XP_LSTT, XP_WR, XP_WRV,XP_WRVN,XP_TV,                  &
+          XP_RESA, XP_ANFM, XP_FSAT, XP_SNOWALB, XP_SNOWALBVIS, XP_SNOWALBNIR,            &
+          XP_SNOWALBFIR, XP_SNOWSWE, XP_SNOWHEAT, XP_SNOWRHO, XP_SNOWGRAN1, XP_SNOWGRAN2, &
           XP_SNOWHIST, XP_SNOWAGE, XP_GRNDFLUX, XP_HPSNOW, XP_SNOWHMASS,  XP_SMELTFLUX,   &
           XP_RNSNOW, XP_HSNOW, XP_GFLUXSNOW, XP_USTARSNOW, XP_SRSFC, XP_RRSFC, XP_LESL,   &
           XP_SNOWEMIS, XP_CDSNOW, XP_CHSNOW, XP_TSRAD, XP_TS, XP_HV, XP_QS, XP_SNOWTEMP,  &
           XP_SNOWLIQ, XP_SNOWDZ, XP_CG, XP_C1, XP_C2, XP_WGEQ, XP_CT, XP_CH, XP_CD,       &
           XP_CDN, XP_RI, XP_HU, XP_HUG, ZP_EMIS, XP_ALBT, XP_RS, XP_LE, XP_RN, XP_H,      &
           XP_LEI, XP_LEGI, XP_LEG, XP_LEV, XP_LES, XP_LER, XP_LETR, XP_EVAP, XP_GFLUX,    &
-          XP_RESTORE, ZP_USTAR, XP_DRAIN, XP_RUNOFF, XP_MELT, XP_MELTADV, XP_RN_ISBA,     &
+          XP_RESTORE, ZP_USTAR, XP_DRAIN, XP_RUNOFF, XP_MELT, XP_MELTADV,                 &
+          XP_TC,XP_QC, XP_RN_ISBA,                                                        &
           XP_H_ISBA, XP_LEG_ISBA, XP_LEGI_ISBA, XP_LEV_ISBA, XP_LETR_ISBA, XP_USTAR_ISBA, &
           XP_LER_ISBA, XP_LE_ISBA, XP_LEI_ISBA, XP_GFLUX_ISBA, XP_HORT, XP_DRIP, XP_RRVEG,&
           ZP_AC_AGG, ZP_HU_AGG, XP_FAPARC, XP_FAPIRC, XP_MUS, XP_LAI_EFFC, XP_AN,         &
           XP_ANDAY, ZP_RESP_BIOMASS_INST, XP_IACAN, XP_ANF, XP_GPP, XP_FAPAR, XP_FAPIR,   &
-          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX, ZIRRIG_GR,               &
-          XP_TOPQS, XP_QSB, XP_SUBL, XP_FWTD, XP_WTD, XP_SNDRIFT                          )  
+          XP_FAPAR_BS, XP_FAPIR_BS, XP_IRRIG_FLUX, ZP_DEEP_FLUX,                          &
+          XP_SWNET_V, XP_SWNET_G, XP_SWNET_N, XP_SWNET_NS, XP_LWNET_V, XP_LWNET_G,        &
+          XP_LWNET_N, XP_LEVCV, XP_LESC, XP_H_V_C, XP_H_G_C, XP_LETRGV, XP_LETRCV,        &
+          XP_LERGV, XP_LERCV, XP_H_C_A, XP_H_N_C, XP_LE_C_A, XP_LE_V_C, XP_LE_G_C,        &
+          XP_LE_N_C, XP_EVAP_N_C, XP_EVAP_G_C, XP_SR_GN, XP_MELTCV, XP_FRZCV,             &
+          XP_SWDOWN_GN, XP_LWDOWN_GN                                                      &
+          ZIRRIG_GR, XP_TOPQS, XP_QSB, XP_SUBL, XP_FWTD, XP_WTD, XP_SNDRIFT               )  
 !
 ZP_TRAD=XP_TSRAD
 !
@@ -1257,7 +1326,7 @@ ENDIF !Check on CSLTYN
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_ISBA_n(ZP_TA, XP_TS, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,      &
+ CALL DIAG_INLINE_ISBA_n(ZP_TA, XP_TS, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,       &
                           ZP_ZREF, ZP_UREF,                                            &
                           XP_CD, XP_CDN, XP_CH, XP_RI, XP_HU, XP_Z0_WITH_SNOW,         &
                           XP_Z0H_WITH_SNOW, XP_Z0EFF,                                  &

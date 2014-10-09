@@ -6,7 +6,7 @@ PS done SURFEX/average_diag_evap_isban.F90
 PS done SURFEX/compute_isba_parameters.F90
 PS done SURFEX/convert_cover_isba.F90
 PS done SURFEX/convert_patch_isba.F90
-PS editing  SURFEX/coupling_isban.F90
+PS done  SURFEX/coupling_isban.F90
 PS done SURFEX/dealloc_isban.F90
 PS done SURFEX/default_prep_isba.F90
  SURFEX/diag_evap_isban.F90
