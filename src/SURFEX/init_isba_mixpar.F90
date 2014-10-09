@@ -98,8 +98,6 @@ IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN)          :: HISBA 
 INTEGER,                INTENT(IN)    :: KDECADE
 INTEGER,                INTENT(OUT)   :: KDECADE2
-INTEGER,                INTENT(IN)    :: KDECADE
-INTEGER,                INTENT(OUT)   :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:),  INTENT(IN)    :: OCOVER
 CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis

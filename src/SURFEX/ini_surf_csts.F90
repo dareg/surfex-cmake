@@ -56,7 +56,7 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XPERCENTAGEPORE,                    &
                            LMEBREC,                            &
                            XANSFRACMEL, XTEMPANS,              &
-                           XANSMINMEB, XSNOWFALL_A_SN 
+                           XANSMINMEB
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -88,8 +88,7 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XZ0FLOOD, XALBWATSNOW,                         &
                         LMEBREC,                                       &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
-                        XTAU_LW, XTAU_V_CF, XRAGNC_FACTOR,             &
-                        XSNOWFALL_A_SN
+                        XTAU_LW, XTAU_V_CF, XRAGNC_FACTOR
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -146,10 +145,6 @@ XTEMPANS = 274.15 ! (K)
 !
 XANSMINMEB = 0.30 ! (-)
 !
-! Snowfall density coefficient:
-!
-XSNOWFALL_A_SN = 109.0 ! (kg/m3)
-! 
 ! Height of aged snow in glacier case (allows Pn=1)
 !
 XHGLA    = 33.3 !(m)

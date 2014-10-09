@@ -65,10 +65,6 @@ REAL, SAVE       :: XANSFRACMEL
 !
 REAL, SAVE       :: XTEMPANS
 !
-! Snowfall density coefficient:
-!
-REAL, SAVE       :: XSNOWFALL_A_SN
-!
 ! Minimum value of the albedo of snow reached under canopy vegetation:
 !
 REAL, SAVE       :: XANSMINMEB

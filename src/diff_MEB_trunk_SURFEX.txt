@@ -6,21 +6,21 @@ PS done SURFEX/average_diag_isban.F90
 PS done SURFEX/compute_isba_parameters.F90
 PS done SURFEX/convert_cover_isba.F90
 PS done SURFEX/convert_patch_isba.F90
-PS done SURFEX/coupling_isban.F90     call to isba commented!!
+PS call to isba commented!! SURFEX/coupling_isban.F90
 PS done SURFEX/dealloc_isban.F90
 PS done SURFEX/default_prep_isba.F90
 PS done SURFEX/diag_evap_isban.F90
 PS done SURFEX/diag_isba_initn.F90
 PS done SURFEX/extrapol_fields.F90
 PS done SURFEX/flag_gr_snow.F90
-PS editing SURFEX/garden.F90   call to isba commented!!
+PS call to isba commented!! SURFEX/garden.F90
 PS done SURFEX/get_adjacent_meshes.F90
 PS done SURFEX/get_grid_coord.F90
 PS done SURFEX/get_grid_dim.F90
 PS done SURFEX/get_mesh_dim.F90
 PS done SURFEX/get_mesh_index.F90
 PS done SURFEX/get_near_meshes.F90
-PS editing SURFEX/greenroof.F90   call to isba commented!!
+PS call to isba commented!! SURFEX/greenroof.F90
 PS done SURFEX/hor_interpol_rotlatlon.F90
  SURFEX/hydro.F90
  SURFEX/hydro_soildif.F90
@@ -51,7 +51,7 @@ PS done SURFEX/modd_prep_isba.F90
 PS done SURFEX/modd_snow_par.F90
 PS done SURFEX/modd_type_snow.F90
 PS unchanged SURFEX/mode_read_surf_fa.F90
- SURFEX/mode_snow3l.F90
+PS done SURFEX/mode_snow3l.F90
 PS done SURFEX/pack_diag_patch_get_sizen.F90
 PS done SURFEX/pack_diag_patchn.F90
 PS done SURFEX/pack_grid.F90
@@ -102,7 +102,7 @@ related to
 CALL AV_PGD (ZROOT_EXT(:,:),PCOVER,XDATA_ROOT_EXTINCTION(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
 
 
-This routine had to changed to make code work. Check
+This routine had to be changed to make code work. Check
 if this is now okay on new version:
 SURFEX/read_prep_greenroof_snow.F90
 

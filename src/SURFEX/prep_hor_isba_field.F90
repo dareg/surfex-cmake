@@ -335,7 +335,7 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WRV    ') 
-  ALLOCATE(XWRV(SIZE(INI,1),NPATCH))
+  ALLOCATE(XWRV(INI,NPATCH))
   DO JPATCH=1,NPATCH
     XWRV(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
@@ -343,7 +343,7 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WRVN   ') 
-  ALLOCATE(XWRVN(SIZE(INI,1),NPATCH))
+  ALLOCATE(XWRVN(INI,NPATCH))
   DO JPATCH=1,NPATCH
     XWRVN(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
@@ -351,7 +351,7 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TV     ') 
-  ALLOCATE(XTV(SIZE(INI,1),NPATCH))
+  ALLOCATE(XTV(INI,NPATCH))
   DO JPATCH=1,NPATCH
     XTV(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
@@ -359,7 +359,7 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TC     ') 
-  ALLOCATE(XTC(SIZE(INI,1),NPATCH))
+  ALLOCATE(XTC(INI,NPATCH))
   DO JPATCH=1,NPATCH
     XTC(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
@@ -367,7 +367,7 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('QC     ') 
-  ALLOCATE(XQC(SIZE(INI,1),NPATCH))
+  ALLOCATE(XQC(INI,NPATCH))
   DO JPATCH=1,NPATCH
     XQC(:,JPATCH) = ZW(:,1,JPATCH)
   END DO

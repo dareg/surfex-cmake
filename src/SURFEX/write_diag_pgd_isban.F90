@@ -44,7 +44,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA, XPATCH,               
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
                               XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,                &
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
-                              XWSAT, XWFC, XWWILT, XRUNOFFD, CSOC, XFRACSOC,        &
+                              XWSAT, XWFC, XWWILT, XRUNOFFD, LSOC, XFRACSOC,        &
                               LMEB_PATCH,                                           &
                               XVEGGV,XZF_TALLVEG, XRGLGV,XGAMMAGV,                  &
                               XRSMINGV, XWRMAX_CFGV,                                &

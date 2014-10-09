@@ -47,6 +47,7 @@
 !     M. Lafaysse       08/2013 - simplification of routine SNOW3LAVGRAIN (logical GDENDRITIC)
 !     B. Decharme       07/2013 - SNOW3LGRID cleanning 
 !                                 New algorithm to compute snow grid for 6-L or 12-L
+!     A. Boone          10/2014 - Added snow thermal conductivity routines
 !----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -105,6 +106,20 @@ END INTERFACE
 !
 INTERFACE GET_DIAM
   MODULE PROCEDURE GET_DIAM
+END INTERFACE
+!
+INTERFACE SNOW3LRADABS
+  MODULE PROCEDURE SNOW3LRADABS_3D
+  MODULE PROCEDURE SNOW3LRADABS_2D
+  MODULE PROCEDURE SNOW3LRADABS_1D
+  MODULE PROCEDURE SNOW3LRADABS_0D
+END INTERFACE
+!
+INTERFACE SNOW3LTHRMCOND
+  MODULE PROCEDURE SNOW3LTHRMCOND_3D
+  MODULE PROCEDURE SNOW3LTHRMCOND_2D
+  MODULE PROCEDURE SNOW3LTHRMCOND_1D
+  MODULE PROCEDURE SNOW3LTHRMCOND_0D
 END INTERFACE
 !
 !-------------------------------------------------------------------------------
@@ -1920,6 +1935,480 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('GET_DIAM',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE GET_DIAM
+!####################################################################
+!####################################################################
+!####################################################################
+      FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the transmission of shortwave radiation within the snowpack
+!     (with depth)
+!     A. Boone 02/2011
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
+REAL, INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+!
+REAL                               :: PCOEF    ! -
+!
+!*      0.2    declarations of local variables
+!
+REAL                               :: ZDSGRAIN, ZSXNU
+!
+REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
+REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
+REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
+REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_0D',0,ZHOOK_HANDLE)
+!
+! Snow grain size:
+!
+ZDSGRAIN = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO**4))
+!
+! Transmission coefficient:
+!
+ZSXNU    = ZSNOWRAD_CVEXT*PSNOWRHO/SQRT(ZDSGRAIN)
+!
+PCOEF    = EXP(-ZSXNU*PSNOWDZ)
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_0D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LRADABS_0D
+!####################################################################
+!####################################################################
+!####################################################################
+      FUNCTION SNOW3LRADABS_1D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the transmission of shortwave radiation within the snowpack
+!     (with depth)
+!     A. Boone 02/2011
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
+REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+!
+REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PCOEF    ! -
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PSNOWRHO))                  :: ZDSGRAIN, ZSXNU
+!
+REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
+REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
+REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
+REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_1D',0,ZHOOK_HANDLE)
+!
+! Snow grain size:
+!
+ZDSGRAIN(:) = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO(:)**4))
+!
+! Transmission coefficient:
+!
+ZSXNU(:)    = ZSNOWRAD_CVEXT*PSNOWRHO(:)/SQRT(ZDSGRAIN(:))
+!
+PCOEF(:)    = EXP(-ZSXNU(:)*PSNOWDZ(:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_1D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LRADABS_1D
+!####################################################################
+!####################################################################
+!####################################################################
+      FUNCTION SNOW3LRADABS_2D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the transmission of shortwave radiation within the snowpack
+!     (with depth)
+!     A. Boone 02/2011
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
+REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PCOEF    ! -
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDSGRAIN, ZSXNU
+!
+REAL(KIND=JPRB)                                    :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
+REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
+REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
+REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_2D',0,ZHOOK_HANDLE)
+!
+! Snow grain size:
+!
+ZDSGRAIN(:,:) = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO(:,:)**4))
+!
+! Transmission coefficient:
+!
+ZSXNU(:,:)    = ZSNOWRAD_CVEXT*PSNOWRHO(:,:)/SQRT(ZDSGRAIN(:,:))
+!
+PCOEF(:,:)    = EXP(-ZSXNU(:,:)*PSNOWDZ(:,:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_2D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LRADABS_2D
+!####################################################################
+!####################################################################
+!####################################################################
+      FUNCTION SNOW3LRADABS_3D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the transmission of shortwave radiation within the snowpack
+!     (with depth)
+!     A. Boone 02/2011
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
+REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PCOEF    ! -
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: ZDSGRAIN, ZSXNU
+!
+REAL(KIND=JPRB)                                                     :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
+REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
+REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
+REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_3D',0,ZHOOK_HANDLE)
+!
+! Snow grain size:
+!
+ZDSGRAIN(:,:,:) = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO(:,:,:)**4))
+!
+! Transmission coefficient:
+!
+ZSXNU(:,:,:)    = ZSNOWRAD_CVEXT*PSNOWRHO(:,:,:)/SQRT(ZDSGRAIN(:,:,:))
+!
+PCOEF(:,:,:)    = EXP(-ZSXNU(:,:,:)*PSNOWDZ(:,:,:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_3D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LRADABS_3D
+!####################################################################
+!####################################################################
+!####################################################################
+FUNCTION SNOW3LTHRMCOND_0D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the snow thermal conductivity from
+!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
+!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
+!     A. Boone 02/2011
+!
+USE MODD_CSTS,ONLY : XP00
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
+REAL, INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
+REAL, INTENT(IN)                   :: PPS       ! surface pressure (Pa)
+!
+REAL                               :: PSCOND    ! thermal cond. [W/(m K)]
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
+!
+! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
+! (sig only for new snow OR high altitudes)
+! from Sun et al. (1999): based on data from Jordan (1991)
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_0D',0,ZHOOK_HANDLE)
+!
+PSCOND = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO*PSNOWRHO)           &
+     + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP +    &
+     ZSNOWTHRMCOND_CVAP)))*(XP00/PPS))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_0D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LTHRMCOND_0D
+!####################################################################
+!####################################################################
+!####################################################################
+FUNCTION SNOW3LTHRMCOND_1D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the snow thermal conductivity from
+!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
+!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
+!     A. Boone 02/2011
+!
+USE MODD_CSTS,ONLY : XP00
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
+REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
+REAL,               INTENT(IN)                   :: PPS       ! surface pressure (Pa)
+!
+REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PSCOND ! thermal cond. [W/(m K)]
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
+!
+! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
+! (sig only for new snow OR high altitudes)
+! from Sun et al. (1999): based on data from Jordan (1991)
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_1D',0,ZHOOK_HANDLE)
+!
+PSCOND(:) = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO(:)*PSNOWRHO(:))           &
+             + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP(:) +  &
+             ZSNOWTHRMCOND_CVAP)))*(XP00/PPS))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_1D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LTHRMCOND_1D
+!####################################################################
+!####################################################################
+!####################################################################
+FUNCTION SNOW3LTHRMCOND_2D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the snow thermal conductivity from
+!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
+!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
+!     A. Boone 02/2011
+!
+USE MODD_CSTS,ONLY : XP00
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
+REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
+REAL, DIMENSION(:),   INTENT(IN)                   :: PPS       ! surface pressure (Pa)
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PSCOND ! thermal cond. [W/(m K)]
+!
+!*      0.2    declarations of local variables
+!
+INTEGER                                              :: JJ, JI
+!
+REAL(KIND=JPRB)                                      :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
+!
+! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
+! (sig only for new snow OR high altitudes)
+! from Sun et al. (1999): based on data from Jordan (1991)
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_2D',0,ZHOOK_HANDLE)
+!
+DO JJ=1,SIZE(PSNOWRHO,2)
+   DO JI=1,SIZE(PSNOWRHO,1)
+
+      PSCOND(JI,JJ) = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO(JI,JJ)*PSNOWRHO(JI,JJ))          &
+                     + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP(JI,JJ)+        &
+                     ZSNOWTHRMCOND_CVAP)))*(XP00/PPS(JI)))
+   ENDDO
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_2D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LTHRMCOND_2D
+!####################################################################
+!####################################################################
+!####################################################################
+FUNCTION SNOW3LTHRMCOND_3D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the snow thermal conductivity from
+!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
+!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
+!     A. Boone 02/2011
+!
+USE MODD_CSTS,ONLY : XP00
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
+REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
+REAL, DIMENSION(:,:),   INTENT(IN)                   :: PPS       ! surface pressure (Pa)
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PSCOND ! thermal cond. [W/(m K)]
+!
+!*      0.2    declarations of local variables
+!
+INTEGER                                              :: JJ, JI, JK
+!
+REAL(KIND=JPRB)                                      :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
+!
+! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
+! (sig only for new snow OR high altitudes)
+! from Sun et al. (1999): based on data from Jordan (1991)
+! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+!
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
+REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_3D',0,ZHOOK_HANDLE)
+!
+DO JK=1,SIZE(PSNOWRHO,3)
+   DO JJ=1,SIZE(PSNOWRHO,2)
+      DO JI=1,SIZE(PSNOWRHO,1)
+
+         PSCOND(JI,JJ,JK) = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO(JI,JJ,JK)*PSNOWRHO(JI,JJ,JK))      &
+                          + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP(JI,JJ,JK)+        &
+                          ZSNOWTHRMCOND_CVAP)))*(XP00/PPS(JI,JJ)))
+
+      ENDDO
+   ENDDO
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_3D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION SNOW3LTHRMCOND_3D
+!####################################################################
 !####################################################################
 !####################################################################
 

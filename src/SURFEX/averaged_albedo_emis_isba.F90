@@ -133,7 +133,7 @@ REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSRAD_PATCH  ! Tsrad
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSURF_PATCH  ! Tsurf
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS         ! emissivity with flood
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
 !
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZSNOWDEPTH    ! Total snow depth
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZPALPHAN      ! Snow/canopy ratio factor 
@@ -148,6 +148,7 @@ LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
 INTEGER :: INP, INI
 INTEGER :: JP, JI ! loop on patches
+INTEGER :: JPATCH ! loop on patches
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -228,7 +229,7 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
     ZSNOWDEPTH(:) = SUM(TPSNOW%WSNOW(:,:,JPATCH)/TPSNOW%RHO(:,:,JPATCH),2)
     ZPALPHAN(:)   = MEBPALPHAN(ZSNOWDEPTH,PH_VEG(:,JPATCH))
 !
-!   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTRAD_PATCH
+!   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTSRAD_PATCH
 !
     CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),XPSN(:,JPATCH),ZPALPHAN,   &
         TPSNOW%EMIS(:,JPATCH),                                    &
@@ -244,7 +245,7 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !   MEB patch radiative temperature
 !
     WHERE (ZEMIS_PATCH(:,JPATCH)/=0.)
-      ZTRAD_PATCH(:,JPATCH) = ((ZLW_UP(:) - ZLW_RAD(:)*(1.0-ZEMIS_PATCH(:,JPATCH)))/ &
+      ZTSRAD_PATCH(:,JPATCH) = ((ZLW_UP(:) - ZLW_RAD(:)*(1.0-ZEMIS_PATCH(:,JPATCH)))/ &
                               (XSTEFAN*ZEMIS_PATCH(:,JPATCH)))**0.25
     END WHERE
 !
@@ -259,10 +260,10 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
     ENDIF
 !
     IF (.NOT.LEXPLICIT_SNOW) THEN
-      ZTRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
+      ZTSRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
     ELSE IF (LEXPLICIT_SNOW) THEN
       WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF .AND. ZEMIS_PATCH(:,JPATCH)/=0.)
-        ZTRAD_PATCH(:,JPATCH) =( ( (1.-XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
+        ZTSRAD_PATCH(:,JPATCH) =( ( (1.-XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
                                     +    XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
                                  / ZEMIS_PATCH(:,JPATCH)**0.25  
       END WHERE

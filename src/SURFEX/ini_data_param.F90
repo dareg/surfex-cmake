@@ -901,9 +901,9 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !
     IF (PRESENT(PH_VEG) .AND. PRESENT(PLAI) .AND. PRESENT(PH_TREE)) THEN
       DO JMONTH=1,SIZE(PH_VEG,2)
-        PH_VEG(JLOOP,JMONTH,:) = VEG_HEIGHT_FROM_LAI(PLAI(JLOOP,JMONTH,:),   &
-                                                   PH_TREE(JLOOP,:),       &
-                                                   PTYPE(JLOOP,:)       )  
+        PH_VEG(JLOOP,JMONTH,:) = VEG_HEIGHT_FROM_LAI(PLAI(JLOOP,JMONTH,:),        &
+                                                   PH_TREE(JLOOP,:),              &
+                                                   PTYPE(JLOOP,:), GAGRI_TO_GRASS )  
       END DO
     ELSEIF (PRESENT(PH_VEG) .AND. (.NOT. PRESENT(PLAI) .OR. .NOT. PRESENT(PH_TREE))) THEN
       CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PH_VEG, PLAI AND PH_TREE MUST BE IN ARGUMENTS TOO")
