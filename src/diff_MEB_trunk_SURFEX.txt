@@ -92,7 +92,7 @@ PS done SURFEX/writesurf_pgd_isba_parn.F90
 PS done SURFEX/z0eff.F90
 PS done SURFEX/z0v_from_lai.F90
 
- OFFLIN/init_outfn_isban.F90
+PS done OFFLIN/init_outfn_isban.F90
 
 Check
 -----
@@ -102,8 +102,8 @@ related to
 CALL AV_PGD (ZROOT_EXT(:,:),PCOVER,XDATA_ROOT_EXTINCTION(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
 
 
-This routine had to be changed to make code work. Check
-if this is now okay on new version:
+This routine had to be modified in MEB_DEV2 to make code work.
+Maybe it works in V8...
 SURFEX/read_prep_greenroof_snow.F90
 
 Hmhm, don't remember changes in
