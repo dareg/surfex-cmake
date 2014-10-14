@@ -1,7 +1,7 @@
 !   ############################################################################
 SUBROUTINE PREPS_FOR_MEB_EBUD_RAD(PPS,                                         &
      PLAICV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                                       &
-     PSNOWTEMP,PSNOWDZ,PSCOND,PHEATCAPS,PEMISNOW,PTAU_N,PPNF,PSIGMA_F,PCHIP    )
+     PSNOWTEMP,PSNOWDZ,PSCOND,PHEATCAPS,PEMISNOW,PTAU_N,PSIGMA_F,PCHIP         )
 !   ############################################################################
 !
 !!****  *PREPS_FOR_MEB_EBUD_RAD*
@@ -69,7 +69,7 @@ REAL, DIMENSION(:),   INTENT(IN)  :: PPS
 REAL, DIMENSION(:,:), INTENT(IN)  :: PSNOWRHO, PSNOWSWE, PSNOWHEAT
 
 REAL, DIMENSION(:),   INTENT(OUT) :: PSIGMA_F, PCHIP
-REAL, DIMENSION(:),   INTENT(OUT) :: PTAU_N, PPNF
+REAL, DIMENSION(:),   INTENT(OUT) :: PTAU_N
 REAL, DIMENSION(:),   INTENT(OUT) :: PEMISNOW
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDZ, PSCOND, PHEATCAPS, PSNOWTEMP
 !
@@ -102,10 +102,6 @@ PSNOWDZ(:,:)     = PSNOWSWE(:,:)/ZSNOWRHO(:,:)
 ! snow temperature (K) and liquid water content (kg m-3)
 
 CALL SNOW_HEAT_TO_T_WLIQ(PSNOWHEAT,ZSNOWRHO,PSNOWTEMP,ZSNOWLIQ)
-
-! snow surface frozen fraction:
-
-PPNF(:)          = 1.0 - min(1.0, ZSNOWLIQ(:,1)/ZSNOWRHO(:,1) ) ! -
 
 ! Snow thermal conductivity:
 

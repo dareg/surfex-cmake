@@ -12,7 +12,7 @@
            PTHRMA_TA,PTHRMB_TA,PTHRMA_TC,PTHRMB_TC,                                           &
            PTHRMA_TG,PTHRMB_TG,PTHRMA_TV,PTHRMB_TV,PTHRMA_TN,PTHRMB_TN,                       &
            PQSAT_G,PQSAT_V,PQSATI_N,                                                          &
-           PFF,PPSN,PPSNA,PPSNCV,PPNF,PFROZEN1,PFFROZEN,                                      &
+           PFF,PPSN,PPSNA,PPSNCV,PFROZEN1,PFFROZEN,                                           &
            PLEG_DELTA,PLEGI_DELTA,PHUG,PHUGI,PHGV,PHVG,PHVN,                                  &
            PFLXC_C_A,PFLXC_G_C,PFLXC_VG_C,PFLXC_VN_C,PFLXC_N_C,PFLXC_N_A,                     &
            PFLXC_MOM,PFLXC_V_C,PHVGS,PHVNS,                                                   &
@@ -134,12 +134,11 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PQSAT_G, PQSAT_V, PQSATI_N
 !                                     PQSAT_V  = saturation specific humidity for the vegetation canopy (kg kg-1)
 !                                     PQSATI_N = saturation specific humidity over ice for the snowpack (kg kg-1)
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PFF, PPSN, PPSNA, PPSNCV, PPNF, PFROZEN1, PFFROZEN
+REAL, DIMENSION(:),   INTENT(IN)   :: PFF, PPSN, PPSNA, PPSNCV, PFROZEN1, PFFROZEN
 !                                     PFF      = total flooded fraction                                        (-) 
 !                                     PPSN     = fraction of snow on ground and understory vegetation          (-)
 !                                     PPSNA    = fraction of vegetation canopy buried by ground-based snowpack (-)
 !                                     PPSNCV   = fraction of vegetation canopy covered by intercepted snow     (-)
-!                                     PPNF     = frozen fraction of surface layer of ground-based snowpack     (-)
 !                                     PFROZEN1 = frozen fraction of surface ground layer                       (-)
 !                                     PFFROZEN = frozen fraction of flooded zone                               (-)
 !
@@ -459,7 +458,7 @@ PLE_V_C(:)   = PLEV_V_C(:) + PLES_V_C(:)
 
 ! - Vapor flux from the ground-based snowpack to the canopy air (kg m-2 s-1):
 
-PEVAP_N_C(:) = PFLXC_N_C(:)*(ZQSATIN_N(:) - PQC(:))*PPSN(:)*(1.0-PPSNA(:))*(1.0 - PPNF(:)*(1.0-(XLSTT/XLVTT)))
+PEVAP_N_C(:) = PFLXC_N_C(:)*(ZQSATIN_N(:) - PQC(:))*PPSN(:)*(1.0-PPSNA(:))*(XLSTT/XLVTT)
 
 PLE_N_C(:)   = XLVTT*PEVAP_N_C(:) ! W m-2
 
@@ -479,13 +478,12 @@ PLER(:)      = PLER_G_C(:) + PLER_V_C(:)
 
 ! - Vapor flux from the ground-based snowpack (part burying the canopy vegetation) to the atmosphere (kg m-2 s-1):
 
-PEVAP_N_A(:) = PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:))*       PPSN(:)*     PPSNA(:) *(1.0 - PPNF(:)*(1.0-(XLSTT/XLVTT)))
+PEVAP_N_A(:) = PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:))*       PPSN(:)*     PPSNA(:) *(XLSTT/XLVTT)
 
 ! - Net Snow (groud-based) sublimation latent heat flux (W m-2) to the canopy air space and the overlying atmosphere:
 
-PLES(:)      = ( PFLXC_N_C(:) *( ZQSATIN_N(:) - PQC(:)   )*       PPSN(:)*(1.0-PPSNA(:))  + &
-                 PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:))*       PPSN(:)*     PPSNA(:) ) * &
-                 PPNF(:) * XLSTT
+PLES(:)      = ( PFLXC_N_C(:) *( ZQSATIN_N(:) - PQC(:)   )*       PPSN(:)*(1.0-PPSNA(:))  +         &
+                 PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:))*       PPSN(:)*     PPSNA(:) ) * XLSTT
 
 ! - Net Snow evaporation (liquid water) latent heat flux (W m-2)
 

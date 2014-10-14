@@ -272,7 +272,7 @@ ELSE
         ZWORK3      = ZLOG_CONDWTR*ZUNFROZEN2DF        
         ZCONDSATDF  = EXP(ZWORK1+ZWORK2+ZWORK3)
 !
-        ZSATDEGDF   = MAX(0.1, PWG(JJ,JL)/PWSAT(JJ,JL))
+        ZSATDEGDF   = MAX(0.1, (PWG(JJ,JL)+PWGI(JJ,JL))/PWSAT(JJ,JL))
         ZKERSTENDF  = LOG10(ZSATDEGDF) + 1.0
         ZKERSTENDF  = (1.0-ZFROZEN2DF)*ZKERSTENDF + ZFROZEN2DF *ZSATDEGDF  
 !
@@ -313,8 +313,7 @@ ENDDO
 !
 ! Surface soil thermal inertia [(m2 K)/J]
 !
-PCG(:) = 2.*SQRT(XPI/(PSOILCONDZ(:,1)*PSOILHCAPZ(:,1)*XDAY))
-PCG(:) = MIN( PCG(:), PCGMAX )
+PCG(:) = 1/(PHCAPSOILZ(:,1)*PD_G(:,1))
 !
 !-------------------------------------------------------------------------------
 !
