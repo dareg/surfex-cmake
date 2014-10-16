@@ -240,7 +240,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PEVAPCOR, PGFLXCOR, PSNOWFLUX, 
 !                                      PDELHEATN = total snow heat content change in the surface layer (W m-2)
 !                                      PDELHEATN_SFC = total snow heat content change during the timestep (W m-2)
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PCDSNOW, PUSTAR, PCDSNOW, PSNDRIFT
+REAL, DIMENSION(:), INTENT(OUT)     :: PUSTAR, PCDSNOW, PSNDRIFT
 !                                      PCDSNOW     = drag coefficient for momentum over snow
 !                                      PUSTAR      = friction velocity over snow (m/s)
 !                                      PEVAP       = total evaporative flux (kg/m2/s)
@@ -2587,9 +2587,10 @@ END SUBROUTINE SNOW3LREFRZ
 !####################################################################
 !####################################################################
       SUBROUTINE SNOW3LFLUX(PSNOWTEMP,PSNOWDZ,PEXNS,PEXNA,            &
-                              PUSTAR2_IC,                               &
+                              PUSTAR2_IC,                             &
                               PTSTEP,PALBT,PSW_RAD,PEMIST,PLWUPSNOW,  &
-                              PLW_RAD,PTA,PSFCFRZ,PQA,PHPSNOW,        &
+                              PLW_RAD,PLWNETSNOW,                     &
+                              PTA,PSFCFRZ,PQA,PHPSNOW,                &
                               PSNOWTEMPO1,PSNOWFLUX,PCT,PRADSINK,     &
                               PQSAT,PDQSAT,PRSRA,                     &
                               PRN,PH,PGFLUX,PLES3L,PLEL3L,PEVAP,      &
@@ -2623,7 +2624,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PALBT, PSW_RAD, PEMIST, PLW_RAD,        &
 REAL, DIMENSION(:), INTENT(INOUT)   :: PSNOWTEMP
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PRN, PH, PGFLUX, PLES3L, PLEL3L,      &
-                                         PEVAP, PLWUPSNOW, PUSTAR  
+                                         PEVAP, PLWUPSNOW, PLWNETSNOW, PUSTAR  
 !
 LOGICAL, DIMENSION(:), INTENT(OUT)  :: OSFCMELT
 !
@@ -2657,7 +2658,9 @@ ZDELTAT(:)   = PSNOWTEMP(:) - PSNOWTEMPO1(:)   ! surface T time change:
 !
 PLWUPSNOW(:) = PEMIST(:) * XSTEFAN * ZSNOWTO3(:)*( PSNOWTEMPO1(:) + 4.* ZDELTAT(:) )
 !
-PRN(:)       = (1. - PALBT(:)) * PSW_RAD(:) + PEMIST(:) * PLW_RAD(:) -  PLWUPSNOW(:)
+PLWNETSNOW(:)= PEMIST(:) * PLW_RAD(:) -  PLWUPSNOW(:)
+!
+PRN(:)       = (1. - PALBT(:)) * PSW_RAD(:) + PLWNETSNOW(:)
 !
 PH(:)        = PRSRA(:) * XCPD * (PSNOWTEMP(:)/PEXNS(:) - PTA(:)/PEXNA(:))
 !
@@ -2690,7 +2693,9 @@ WHERE (PSNOWTEMP > XTT .AND. PSNOWTEMPO1 < XTT)
 !
    PLWUPSNOW(:) = PEMIST(:) * XSTEFAN * ZSNOWTO3(:)*( PSNOWTEMPO1(:) + 4.* ZDELTAT(:) ) 
 !
-   PRN(:)       = (1. - PALBT(:)) * PSW_RAD(:) + PEMIST(:) * PLW_RAD(:) - PLWUPSNOW(:)
+   PLWNETSNOW(:)= PEMIST(:) * PLW_RAD(:) -  PLWUPSNOW(:)
+!
+   PRN(:)       = (1. - PALBT(:)) * PSW_RAD(:) + PLWNETSNOW(:)
 !
    PH(:)        = PRSRA(:) * XCPD * (XTT/PEXNS(:) - PTA(:)/PEXNA(:))   
 !
@@ -2726,7 +2731,9 @@ WHERE(PSNOWTEMP(:) > XTT .AND. PSNOWTEMPO1(:) >= XTT)
 !
    PLWUPSNOW(:) = PEMIST(:) * XSTEFAN * (XTT ** 4) 
 !
-   PRN(:)       = (1. - PALBT(:)) * PSW_RAD(:) + PEMIST(:) * PLW_RAD(:) - PLWUPSNOW(:)
+   PLWNETSNOW(:)= PEMIST(:) * PLW_RAD(:) -  PLWUPSNOW(:)
+!
+   PRN(:)       = (1. - PALBT(:)) * PSW_RAD(:) + PLWNETSNOW(:)
 !
    PH(:)        = PRSRA(:) * XCPD * (XTT/PEXNS(:) - PTA(:)/PEXNA(:))
 !
