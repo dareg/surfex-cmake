@@ -740,6 +740,16 @@ REAL, DIMENSION(SIZE(PWR))   :: ZEMIST, ZZHV
 REAL, DIMENSION(SIZE(PWR))   :: ZALBT, ZEV, ZETR, ZER
 !
 LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
+
+!aabtmptest
+LOGICAL                                    :: OMEB
+REAL, DIMENSION(SIZE(PWR))                 :: ZPALPHAN, ZRESTOREN
+REAL, DIMENSION(SIZE(PWR))                 :: ZSWNETSNOW, ZSWNETSNOWS, ZLWNETSNOW
+REAL, DIMENSION(SIZE(PWR))                 :: ZSNOWSFCH, ZDELHEATN, ZDELHEATN_SFC
+REAL, DIMENSION(SIZE(PWR))                 :: ZDELHEATG, ZDELHEATG_SFC
+REAL, DIMENSION(SIZE(PWR))                 :: ZDELPHASEG, ZDELPHASEG_SFC                        
+REAL, DIMENSION(SIZE(PWR))                 :: ZSUBVCOR
+
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -806,9 +816,24 @@ ENDIF
 !*      3.0    Explicit snow scheme
 !              --------------------
 !
- CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OGLACIER, HIMPLICIT_WIND,         &
-           TPTIME, PTSTEP,                                                      &
-           PVEGTYPE, PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                   &
+
+!aabtmptest
+OMEB             = .false.
+ZPALPHAN(:)      = 0.0
+ZRESTOREN(:)     = 0.0
+ZSWNETSNOW(:)    = 0.0
+ZSWNETSNOWS(:)   = 0.0
+ZLWNETSNOW(:)    = 0.0
+ZSNOWSFCH(:)     = 0.0
+ZDELHEATN(:)     = 0.0
+ZDELHEATN_SFC(:) = 0.0
+ZDELHEATG(:)     = 0.0
+ZDELHEATG_SFC(:) = 0.0
+
+
+ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,  &
+           TPTIME, PTSTEP, ZPALPHAN, PLAI, PVEGTYPE,                            &
+           PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                   &
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                          &
            PTG(:,1), PCG, PCT, ZSOILCONDZ(:,1),                                 &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR, PSR,                    &
@@ -816,11 +841,15 @@ ENDIF
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G(:,1),       &
            PPEW_A_COEF, PPEW_B_COEF,                                            &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
-           ZSNOW_THRUFAL, PGRNDFLUX, ZEVAPCOR,                                  &
+           ZSNOW_THRUFAL, PGRNDFLUX, ZRESTOREN, ZEVAPCOR,                       &
+           ZSWNETSNOW, ZSWNETSNOWS, ZLWNETSNOW,                                 &
            PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,       &
-           PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSMELTFLUX,              &
+           PSNDRIFT, PUSTARSNOW,                                                &
+           PPSN, PSRSFC, PRRSFC, PSMELTFLUX, ZSNOWSFCH,                         &
+           ZDELHEATN, ZDELHEATN_SFC,                                            &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
-           PSNOWHMASS, ZRI3L, PZENITH, PLAT, PLON, ZQS3L,                       &
+           PSNOWHMASS, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC,                &
+           PLAT, PLON, ZQS3L,                                                   &
            OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
            HSNOWMETAMO,HSNOWRAD                                                 )  
 !
@@ -966,19 +995,25 @@ ENDWHERE
 !*     11.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
- CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OGLACIER, OFLOOD, PTSTEP,     &
-     PVEGTYPE, PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,      &
+
+ZSUBVCOR(:) = 0. !aabtmptest
+
+ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,               &
+     OFLOOD, PTSTEP, PVEGTYPE,                                                  &
+     PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
      PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, PVEG, PLAI, ZWRMAX, PMELT,   &
      PTAUICE, PLEGI, PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,              &     
-     PPSNV, PPSNG, ZSNOW_THRUFAL, ZEVAPCOR, PWR, ZSOILHCAPZ,                    &
+     PPSNV, PPSNG, ZSNOW_THRUFAL, ZEVAPCOR, ZSUBVCOR, PWR, ZSOILHCAPZ,          &
      PSNOWSWE(:,1), PSNOWALB, PSNOWRHO(:,1), PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, &
      PWFC, PWWILT, ZF2WGHT, ZF2, PD_G, PDZG, PDZDIF, PPS,                       &
      PWG, PWGI, PTG, KWG_LAYER, PDRAIN, PRUNOFF, PTOPQS,                        &
      PIRRIG, PWATSUP, PTHRESHOLD, LIRRIDAY, LIRRIGATE,                          &
      HKSAT, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE, PD_ICE, PHORT, PDRIP,         &
      PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,      &
-     PIRRIG_GR, PQSB, PFWTD, PWTD )
-!
+     PIRRIG_GR, PQSB, PFWTD, PWTD,                                              & 
+     ZDELHEATG, ZDELHEATG_SFC,                                                  &
+     ZDELPHASEG, ZDELPHASEG_SFC                                                 )
+
 !-------------------------------------------------------------------------------
 !
 !*     12.0    Aggregated output fluxes and diagnostics
