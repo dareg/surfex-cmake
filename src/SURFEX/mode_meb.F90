@@ -248,12 +248,12 @@ END FUNCTION MEBPALPHAN_0D
 !####################################################################
 !####################################################################
 !####################################################################
-FUNCTION SFC_HEATCAP_VEG_1D(PLAI,PWRN,PWR,PBSLAI) RESULT(ZCHEATV)
+FUNCTION SFC_HEATCAP_VEG_0D(PWRN,PWR,PCV) RESULT(ZCHEATV)
 
 ! Compute the bulk heat capacity of the vegetation canopy
 
 USE MODD_CSTS,     ONLY : XCL, XCI
-USE MODD_ISBA_PAR, ONLY : XWETBIOMASS, XCVHEAT_MIN
+USE MODD_ISBA_PAR, ONLY : XCVHEATF
 
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -262,18 +262,72 @@ IMPLICIT NONE
 
 !*      0.1    declarations of arguments
 !
-REAL, DIMENSION(:), INTENT(IN)  :: PWRN, PLAI, PWR, PBSLAI
+REAL,               INTENT(IN)  :: PWRN, PWR, PCV
 !                                  PWRN      = Liquid water equivalent mass of intercepted snow (kg m-2)
-!                                  PLAI      = Leaf Area Index (m2 m-2)
+!                                  PCV       = Thermal inertia of the vegetation (m2 K J-1)
 !                                  PWR       = Liquid water mass intercepted (kg m-2)
-!                                  PBSLAI    = Ratio of biomass to LAI  (kg m-2)
 !
 !*      0.2    declarations of local variables
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-REAL, DIMENSION(SIZE(PLAI))     :: ZCHEATV
+REAL                            :: ZCHEATV
 !                                  ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
+!
+!*      0.3    declarations of local parameters
+!
+REAL, PARAMETER                 :: ZCHEATVMIN = 1.E+4 ! minimum limit (J m-2 K-1)
+!
+!------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_0D',0,ZHOOK_HANDLE)
+!
+! Total bulk canopy heat capacity
+! Method: we use the ratio of biomass to LAI to get a total biomass estimate,
+! next assume that the dry biomass heat capacity is small compared to that
+! of the water contained in the vegetation to arrive at the vegetation part, then
+! we add the heat capacities of intercepted liquid and frozen water.
+! Finally, use a minimum value to avoid numerical jumps, while still ensuring that
+! the heat capacity of the vegetation is generally < a typical daily restore for the soil
+
+ZCHEATV   = MAX(ZCHEATVMIN,XCVHEATF/PCV)           +   & ! stems, branches, trunk...
+               XCI*PWRN                            +   & ! intercepted snow
+               XCL*PWR                                   ! intercepted water
+
+IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_0D',1,ZHOOK_HANDLE)
+
+END FUNCTION SFC_HEATCAP_VEG_0D
+!####################################################################
+!####################################################################
+!####################################################################
+FUNCTION SFC_HEATCAP_VEG_1D(PWRN,PWR,PCV) RESULT(ZCHEATV)
+
+! Compute the bulk heat capacity of the vegetation canopy
+
+USE MODD_CSTS,     ONLY : XCL, XCI
+USE MODD_ISBA_PAR, ONLY : XCVHEATF
+
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)  :: PWRN, PWR, PCV
+!                                  PWRN      = Liquid water equivalent mass of intercepted snow (kg m-2)
+!                                  PCV       = Thermal inertia of the vegetation (m2 K J-1)
+!                                  PWR       = Liquid water mass intercepted (kg m-2)
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+REAL, DIMENSION(SIZE(PCV))     :: ZCHEATV
+!                                  ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
+!
+!*      0.3    declarations of local parameters
+!
+REAL, PARAMETER                 :: ZCHEATVMIN = 1.E+4 ! minimum limit (J m-2 K-1)
 !
 !------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_1D',0,ZHOOK_HANDLE)
@@ -286,8 +340,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_1D',0,ZHOOK_HANDLE)
 ! Finally, use a minimum value to avoid numerical jumps, while still ensuring that
 ! the heat capacity of the vegetation is generally < a typical daily restore for the soil
 
-ZCHEATV(:)   = XCVHEAT_MIN                            +   & ! stems, branches...
-              (XCL*XWETBIOMASS)*PBSLAI(:)*PLAI(:)     +   & ! vegetation
+ZCHEATV(:)   = MAX(ZCHEATVMIN,XCVHEATF/PCV(:))        +   & ! stems, branches, trunk...
                XCI*PWRN(:)                            +   & ! intercepted snow
                XCL*PWR(:)                                   ! intercepted water
 
@@ -297,12 +350,12 @@ END FUNCTION SFC_HEATCAP_VEG_1D
 !####################################################################
 !####################################################################
 !####################################################################
-FUNCTION SFC_HEATCAP_VEG_2D(PLAI,PWRN,PWR,PBSLAI) RESULT(ZCHEATV)
+FUNCTION SFC_HEATCAP_VEG_2D(PWRN,PWR,PCV) RESULT(ZCHEATV)
 
 ! Compute the bulk heat capacity of the vegetation canopy
 
 USE MODD_CSTS,     ONLY : XCL, XCI
-USE MODD_ISBA_PAR, ONLY : XWETBIOMASS, XCVHEAT_MIN
+USE MODD_ISBA_PAR, ONLY : XCVHEATF
 
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -311,21 +364,25 @@ IMPLICIT NONE
 
 !*      0.1    declarations of arguments
 !
-REAL, DIMENSION(:,:), INTENT(IN)  :: PWRN, PLAI, PWR, PBSLAI
-!                                    PWRN      = Liquid water equivalent mass of intercepted snow (kg m-2)
-!                                    PLAI      = Leaf Area Index (m2 m-2)
-!                                    PWR       = Liquid water mass intercepted (kg m-2)
-!                                    PBSLAI    = Ratio of biomass to LAI  (kg m-2)
+REAL, DIMENSION(:,:), INTENT(IN) :: PWRN, PWR, PCV
+!                                   PWRN      = Liquid water equivalent mass of intercepted snow (kg m-2)
+!                                   PCV       = Thermal inertia of the vegetation (m2 K J-1)
+!                                   PWR       = Liquid water mass intercepted (kg m-2)
 !
 !*      0.2    declarations of local variables
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: ZCHEATV
-!                                    ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
+REAL, DIMENSION(SIZE(PCV),SIZE(PCV,2)) :: ZCHEATV
+!                                  ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
+!
+!*      0.3    declarations of local parameters
+!
+REAL, PARAMETER                 :: ZCHEATVMIN = 1.E+4 ! minimum limit (J m-2 K-1)
+!
 !------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_2D',0,ZHOOK_HANDLE)
-
+!
 ! Total bulk canopy heat capacity
 ! Method: we use the ratio of biomass to LAI to get a total biomass estimate,
 ! next assume that the dry biomass heat capacity is small compared to that
@@ -334,10 +391,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_2D',0,ZHOOK_HANDLE)
 ! Finally, use a minimum value to avoid numerical jumps, while still ensuring that
 ! the heat capacity of the vegetation is generally < a typical daily restore for the soil
 
-ZCHEATV(:,:)   = XCVHEAT_MIN                            +   & ! stems, branches...
-                (XCL*XWETBIOMASS)*PBSLAI(:,:)*PLAI(:,:) +   & ! vegetation
-                 XCI*PWRN(:,:)                          +   & ! intercepted snow
-                 XCL*PWR(:,:)                                 ! intercepted water
+ZCHEATV(:,:) = MAX(ZCHEATVMIN,XCVHEATF/PCV(:,:))      +   & ! stems, branches, trunk...
+               XCI*PWRN(:,:)                          +   & ! intercepted snow
+               XCL*PWR(:,:)                                 ! intercepted water
 
 IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_2D',1,ZHOOK_HANDLE)
 
@@ -345,51 +401,6 @@ END FUNCTION SFC_HEATCAP_VEG_2D
 !####################################################################
 !####################################################################
 !####################################################################
-FUNCTION SFC_HEATCAP_VEG_0D(PLAI,PWRN,PWR,PBSLAI) RESULT(ZCHEATV)
-
-! Compute the bulk heat capacity of the vegetation canopy
-
-USE MODD_CSTS,     ONLY : XCL, XCI
-USE MODD_ISBA_PAR, ONLY : XWETBIOMASS, XCVHEAT_MIN
-
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-
-!*      0.1    declarations of arguments
-!
-REAL,                 INTENT(IN)  :: PWRN, PLAI, PWR, PBSLAI
-!                                    PWRN      = Liquid water equivalent mass of intercepted snow (kg m-2)
-!                                    PLAI      = Leaf Area Index (m2 m-2)
-!                                    PWR       = Liquid water mass intercepted (kg m-2)
-!                                    PBSLAI    = Ratio of biomass to LAI  (kg m-2)
-!
-!*      0.2    declarations of local variables
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
-REAL                              :: ZCHEATV
-!                                    ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
-!------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_0D',0,ZHOOK_HANDLE)
-
-! Total bulk canopy heat capacity
-! Method: we use the ratio of biomass to LAI to get a total biomass estimate,
-! next assume that the dry biomass heat capacity is small compared to that
-! of the water contained in the vegetation to arrive at the vegetation part, then
-! we add the heat capacities of intercepted liquid and frozen water.
-! Finally, use a minimum value to avoid numerical jumps, while still ensuring that
-! the heat capacity of the vegetation is generally < a typical daily restore for the soil
-
-ZCHEATV    = XCVHEAT_MIN                   +   & ! stems, branches...
-            (XCL*XWETBIOMASS)*PBSLAI*PLAI  +   & ! vegetation
-             XCI*PWRN                      +   & ! intercepted snow
-             XCL*PWR                             ! intercepted water
-
-IF (LHOOK) CALL DR_HOOK('MODE_MEB:SFC_HEATCAP_VEG_0D',1,ZHOOK_HANDLE)
-
-END FUNCTION SFC_HEATCAP_VEG_0D
 !####################################################################
 !####################################################################
 !####################################################################

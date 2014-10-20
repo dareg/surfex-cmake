@@ -375,13 +375,9 @@ ZSNOW_COEF_B(:,:) = 0.0
 !               -----------------------------------------------------------
 ! - Effective Surface heat capacities for each energy budget (J m-2 K-1)
 !
-!   NOTE, can use SFC_HEATCAP_VEG from MODE_MEB to compute
-!   a CV which is a fn of LAI, presumed biomass/LAI ratio, intercepted
-!   water (heat capacity)...or simply use 1/PCV
+PCHEATG(:)    = 1/PCT(:)                                          ! understory soil/litter composite
 !
-PCHEATG(:)    = 1/PCT(:)                                          ! understory soil/veg composite
-!
-PCHEATV(:)    = SFC_HEATCAP_VEG(PLAIV,PWRVN,PWRV,PBSLAI)          ! vegetation canopy heat capacity
+PCHEATV(:)    = SFC_HEATCAP_VEG(PWRVN,PWRV,PCV)                   ! vegetation canopy heat capacity
 !
 PCHEATN(:)    = PSNOWHCAPZ(:,1)*PSNOWDZ(:,1)                      ! snow surface layer
 !
