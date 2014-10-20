@@ -54,6 +54,8 @@
 !!    -------------
 !!      Original    16/02/00   Boone
 !!      Modif       08/2011 B. Decharme : Optimization
+!!      Modif       10/2012 B. Decharme : geometric mean to compute 
+!!                                        thermal conductivity at the layers interface
 !
 !-------------------------------------------------------------------------------
 !
@@ -74,7 +76,7 @@ IMPLICIT NONE
 REAL, INTENT(IN)                    :: PTSTEP ! Model time step (s)
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PCT, PTERM1, PTERM2, PTDEEP_A, PTDEEP_B
-!                                      PCT    = thermal inertia [(m2 K)/J]
+!                                      PCT    = surface thermal inertia [(m2 K)/J]
 !                                      PTERM1 = coefficient of linearization
 !                                               of surface energy budget 
 !                                      PTERM2 = coefficient of linearization
@@ -110,10 +112,8 @@ INTEGER                                  :: JJ, JL
 INTEGER                                  :: INI, INLVLD ! Number of point and grid layers
 !
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZTGM, ZDTERM, ZCTERM,   &
-                                                    ZFRCV, ZAMTRX, ZBMTRX,     &
-                                                    ZCMTRX  
-!
-REAL :: ZWORK1, ZWORK2
+                                            ZFRCV, ZAMTRX, ZBMTRX,  &
+                                            ZCMTRX  
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -122,6 +122,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Initialize local variables:
 !
 IF (LHOOK) CALL DR_HOOK('SOIL_HEATDIF',0,ZHOOK_HANDLE)
+!
 ZDTERM(:,:)    = 0.0
 ZCTERM(:,:)    = 0.0
 ZFRCV(:,:)     = 0.0
@@ -137,18 +138,15 @@ INLVLD = SIZE(PTG(:,:),2)
 !
 ! Calculate tri-diagonal matrix coefficients:
 !
-DO JL=1,INLVLD
+DO JL=1,INLVLD-1
   DO JJ=1,INI
-     ZWORK1 = PDZG(JJ,JL)*PSOILCONDZ(JJ,JL)
-     IF(JL<INLVLD)THEN
-       ZWORK2 = PDZG(JJ,JL+1)*PSOILCONDZ(JJ,JL+1)
-     ELSE
-       ZWORK2 = 0.0
-     ENDIF
-     ZDTERM(JJ,JL)=(ZWORK1+ZWORK2)/(2.0*PDZDIF(JJ,JL)*PDZDIF(JJ,JL))
+     ZDTERM(JJ,JL)=SQRT(PSOILCONDZ(JJ,JL)*PSOILCONDZ(JJ,JL+1))/PDZDIF(JJ,JL)
      ZCTERM(JJ,JL)= PSOILHCAPZ(JJ,JL)*PDZG(JJ,JL)/PTSTEP
   ENDDO
 ENDDO 
+!
+ZDTERM(:,INLVLD)=PSOILCONDZ(:,INLVLD)/PDZDIF(:,INLVLD)
+ZCTERM(:,INLVLD)=PSOILHCAPZ(:,INLVLD)*PDZG(:,INLVLD)/PTSTEP
 !
 ! - - -------------------------------------------------
 !
@@ -193,7 +191,7 @@ WHERE(PTDEEP_B(:) /= XUNDEF)
                      + ZDTERM(:,INLVLD)*PTDEEP_B(:)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
 ELSEWHERE
    ZBMTRX(:,INLVLD) =  ZCTERM(:,INLVLD) + ZDTERM(:,INLVLD-1) 
-   ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) 
+   ZFRCV (:,INLVLD) =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) 
 END WHERE
 !
 ! - - -------------------------------------------------

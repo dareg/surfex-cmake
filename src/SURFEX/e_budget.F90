@@ -9,7 +9,7 @@
                             PVEG, PHUG, PHUI, PHV,                               &
                             PLEG_DELTA, PLEGI_DELTA,                             &
                             PEMIS, PALB, PRA,                                    &
-                            PCT, PPSN, PPSNV, PPSNG,                             &
+                            PCT, PCG, PPSN, PPSNV, PPSNG,                        &
                             PGRNDFLUX, PSMELTFLUX, PSNOW_THRUFAL,                &
                             PD_G, PDZG, PDZDIF, PSOILCONDZ, PSOILHCAPZ,          &
                             PALBT, PEMIST, PQSAT, PDQSAT,                        &
@@ -158,14 +158,15 @@ REAL, DIMENSION(:), INTENT(IN)  :: PPEW_A_COEF, PPEW_B_COEF,                   &
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PEXNS, PEXNA
 REAL, DIMENSION(:), INTENT(IN)   :: PVEG, PHUG, PHUI, PHV
-REAL, DIMENSION(:), INTENT(IN)   :: PEMIS, PALB, PCT, PPSN
-REAL, DIMENSION(:), INTENT(IN)   :: PPSNV, PPSNG
+REAL, DIMENSION(:), INTENT(IN)   :: PEMIS, PALB, PCT, PCG
+REAL, DIMENSION(:), INTENT(IN)   :: PPSNV, PPSNG, PPSN
 !                                     PVEG = fraction of vegetation
 !                                     PHUG = relative humidity of the soil
 !                                     PHV = Halstead coefficient
 !                                     PEMIS = emissivity
 !                                     PALB = albedo
 !                                     PCT = area-averaged heat capacity
+!                                     PCG = heat capacity of the ground
 !                                     PPSN = grid fraction covered by snow
 !                                     PPSNV = fraction of the vegetation covered by snow
 !                                     PPSNG = fraction of the ground covered by snow 
@@ -281,7 +282,7 @@ REAL, DIMENSION(SIZE(PALB)) :: ZXCPV_XCL_AVG, ZPTG_OLD
 REAL, DIMENSION(SIZE(PALB)) :: ZCNHUMA, ZPEQA2, ZDPQB, ZCDQSAT, ZINCR, ZTRAD, &
                                 ZCHUMS, ZCHUMA, ZPETA2, ZPETB2,ZTEMP, ZFGNFRZ, &
                                 ZFGFRZ, ZFV, ZFG, ZFNFRZ, ZFFRZ, ZFNSNOW, ZCPS,&
-                                ZLVTT, ZLSTT  
+                                ZLVTT, ZLSTT
 REAL                        :: ZSNOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -584,16 +585,19 @@ IF(HISBA == 'DIF')THEN
 !
 ! First determine terms needed for implicit linearization of surface:
 !
-
-   ZCONDAVG(:) = (PDZG(:,1)*PSOILCONDZ(:,1) + PDZG(:,2)*PSOILCONDZ(:,2))/PD_G(:,2)  
-   ZA(:)       = ZA(:) - (2. * XPI / XDAY) + 2.*ZCONDAVG(:)*PCT(:)/PD_G(:,2)  
-   ZTERM2(:)   = 2.*ZCONDAVG(:)*PCT(:)/(ZA(:)*PD_G(:,2))
+!  We use geometric mean to compute the thermal conductivity at the layers interface
+!  The advantage is that this average is not dependent of the grid geometry
+!
+   ZCONDAVG(:) =  SQRT(PSOILCONDZ(:,1)*PSOILCONDZ(:,2))
+!   
+   ZA(:)       = ZA(:) - (2. * XPI / XDAY) + ZCONDAVG(:)*PCG(:)/PDZDIF(:,1)  
+   ZTERM2(:)   = ZCONDAVG(:)*PCG(:)/(ZA(:)*PDZDIF(:,1))
    ZTERM1(:)   = (PTG(:,1)*ZB(:) + (ZC(:) - (2. * XPI * PTG(:,2) / XDAY)) )/ZA(:)  
 !
 ! Determine the soil temperatures:
 !
    CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
-                     PSOILHCAPZ,PCT,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
+                     PSOILHCAPZ,PCG,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
 !
 ELSE
 !

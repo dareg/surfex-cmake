@@ -805,10 +805,11 @@ IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
 !
 ELSE
 !
-   CALL SOILDIF (HSCOND, HDIFSFCOND, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
-     PCG, PCGMAX, PCT, ZFROZEN1, PD_G, PTG, PWG, PWGI, KWG_LAYER, PHCAPSOIL,    &
-     PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ,       &
-     PFWTD, PWTD                                                                )
+   CALL SOILDIF (HDIFSFCOND, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,               &
+     PCG, PCGMAX, PCT, ZFROZEN1, PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,         &
+     PHCAPSOIL, PCONDDRY, PCONDSLD,                                             &
+     PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ,                           &
+     PFWTD, PWTD, PWR                                                           )
 !
 ENDIF
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -924,13 +925,13 @@ ENDIF
 !*      9.0    Resolution of the surface and soil energy budget
 !              ------------------------------------------------
 !
- CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,             &
+ CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,            &
         PSODELX, PUREF,                                                         &
         PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,        &
         PPEQ_B_COEF, PVMOD, PCD, PTG, PTSTEP, PSNOWALB, PSW_RAD, PLW_RAD,       &
         PTA, PQA, PPS, PRHOA, PEXNS,PEXNA, PCPS, PLVTT, PLSTT,  PVEG,           &
         PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, PEMIS, PALB, PRESA,          &
-        PCT, PPSN, PPSNV, PPSNG, PGRNDFLUX, PSMELTFLUX, ZSNOW_THRUFAL,          &
+        PCT, PCG, PPSN, PPSNV, PPSNG, PGRNDFLUX, PSMELTFLUX, ZSNOW_THRUFAL,     &
         PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
         ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
         ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
