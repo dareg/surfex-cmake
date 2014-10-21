@@ -1,17 +1,24 @@
 !     #########
       SUBROUTINE ISBA(HISBA, HPHOTO, OTR_ML, HRUNOFF, HKSAT, HRAIN, HHORT,       &
                       HC1DRY, HSCOND, HSNOW_ISBA, HSNOWRES, HCPSURF, HSOILFRZ,   &
-                      HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER, PTSTEP,   &
-                      HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,                &
+                      HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER,           &
+                      OMEB, OFORC_MEASURE,                                       &
+                      PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
                       PCGMAX, PZREF, PUREF, PDIRCOSZW,                           &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
-                      PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,         &
+                      PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,&
                       PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, PRSMIN,&
                       PRGL, PGAMMA, PCV, PRUNOFFD, PSOILWGHT, KLAYER_HORT,       &
                       KLAYER_DUN, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,     &
                       PALBVIS_TSOIL, PALB, PWRMAX_CF, PVEG, PLAI, PEMIS,         &
                       PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PVEGTYPE, PZ0EFF, PRUNOFFB, &
+                      PZF_TALLVEG , PRGLCV, PGAMMACV, PRSMINCV,                  &
+                      PROOTFRACCV, PWRMAX_CFCV, PLAIV,                           &
+                      PBSLAI,PLAIMIN,PH_VEG,PPALPHAN,                            &
+                      PZ0G_WITHOUT_SNOW,                                         &
+                      PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                            &
+                      PZ0_MEBN,PZ0H_MEBN,PZ0EFF_MEBN,                            &
                       PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PC4REF, PACOEF, PPCOEF, &
                       PTAUICE, PWDRAIN, PTDEEP_A, PTDEEP_B, PGAMMAT,             &
                       PPSN, PPSNG, PPSNV,                                        &
@@ -25,7 +32,9 @@
                       PMUF, PFF, PFFG, PFFV, PFFG_NOSNOW, PFFV_NOSNOW, PFFROZEN, &
                       PFALB, PFEMIS, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD,        &
                       PLE_FLOOD, PLEI_FLOOD,  PSODELX, PLAT, PLON, PTG, PWG,     &
-                      PWGI, PCPS, PLVTT, PLSTT, PWR, PRESA, PANFM, PFSAT,        &
+                      PWGI, PCPS, PLVTT, PLSTT, PWR,                             &
+                      PWRV,PWRVN,PTV,PTC,PQC,                                    &
+                      PRESA, PANFM, PFSAT,                                       &
                       PSNOWALB, PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,       &
                       PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PGRNDFLUX, PHPSNOW,       &
                       PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,       &
@@ -41,7 +50,15 @@
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
                       PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
                       PIRRIG_FLUX, PDEEP_FLUX, PIRRIG_GR, PTOPQS, PQSB, PSUBL,   &
-                      PFWTD, PWTD, PSNDRIFT                                      )                     
+                      PFWTD, PWTD, PSNDRIFT,                                     &
+                      PSWNET_V, PSWNET_G, PSWNET_N, PSWNET_NS,                   &
+                      PLWNET_V, PLWNET_G, PLWNET_N,                              &
+                      PLEV_V_C, PLES_V_C, PH_V_C, PH_G_C,                        &
+                      PLETR_G_C, PLETR_V_C, PLER_G_C, PLER_V_C, PH_C_A, PH_N_C,  &
+                      PLE_C_A, PLE_V_C, PLE_G_C, PLE_N_C,                        &
+                      PEVAP_N_C, PEVAP_G_C,                                      & 
+                      PSR_GN, PMELTCV, PFRZCV,                                   &
+                      PSWDOWN_GN, PLWDOWN_GN                                     )                     
 !     ##########################################################################
 !
 !
@@ -123,13 +140,14 @@
 !!                            Sublimation diag flux
 !!                            Qs for 3l or crocus (needed for coupling with atm)
 !!                            water table / surface coupling
+!!      (A. Boone & P. Samuelsson) (10/2014) Added MEB v1
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 USE MODD_CO2V_PAR,   ONLY : XMC, XMCO2, XPCCO2
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_CSTS,       ONLY : XLVTT, XLSTT
+USE MODD_CSTS,       ONLY : XLVTT, XLSTT, XCPD, XRHOLW 
 !
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
@@ -223,6 +241,9 @@ LOGICAL, INTENT(IN)               :: OGLACIER   ! True = Over permanent snow and
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
                                                 ! False = No specific treatment
+LOGICAL, INTENT(IN)               :: OMEB       ! True = patch with multi-energy balance 
+!                                               ! False = patch with classical ISBA 
+LOGICAL, INTENT(IN)               :: OFORC_MEASURE
 !
 CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -283,6 +304,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PSR        ! Snow rate (in kg/m2/s)
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PZENITH    ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)  :: PSW_RAD    ! solar   incoming radiation
+REAL, DIMENSION(:), INTENT(IN)  :: PSCA_SW    ! solar diffuse incoming radiation
 REAL, DIMENSION(:), INTENT(IN)  :: PLW_RAD    ! thermal incoming radiation
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PVMOD      ! modulus of the wind
@@ -340,6 +362,44 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZ0_WITH_SNOW  ! roughness length for momentu
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0H_WITH_SNOW ! roughness length for heat
 !                                                 ! (with snow taken into account)
 !
+!
+! For multi-energy balance
+REAL, DIMENSION(:,:), INTENT(IN)  :: PROOTFRACCV
+REAL, DIMENSION(:), INTENT(IN)    :: PZF_TALLVEG
+REAL, DIMENSION(:), INTENT(IN)    :: PRGLCV
+REAL, DIMENSION(:), INTENT(IN)    :: PGAMMACV
+REAL, DIMENSION(:), INTENT(IN)    :: PRSMINCV
+REAL, DIMENSION(:), INTENT(IN)    :: PWRMAX_CFCV
+REAL, DIMENSION(:), INTENT(IN)    :: PLAIV              ! explicit canopy overstory LAI..."PLAI" is the composite surface  LAI 
+!                                                       ! (when MEB is ON, "PLAI" corresponds to understory LAI (possibly zero), 
+!                                                       ! while "PLAV" is the overstory LAI)
+REAL, DIMENSION(:), INTENT(IN)    :: PH_VEG             ! height of vegetation
+REAL, DIMENSION(:), INTENT(IN)    :: PBSLAI             ! ratio of biomass to LAI (kg m-2)
+REAL, DIMENSION(:), INTENT(IN)    :: PLAIMIN            ! Minimum LAI (m2 m-2)
+REAL, DIMENSION(:), INTENT(IN)    :: PPALPHAN           ! snow/canopy transition coefficient
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0G_WITHOUT_SNOW  ! roughness length for momentum at snow-free canopy floor
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0_MEBV           ! roughness length for momentum over MEB vegetation part of patch
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0H_MEBV          ! roughness length for heat over MEB vegetation part of path
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0EFF_MEBV        ! roughness length for momentum over MEB vegetation part of patch
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0_MEBN           ! roughness length for momentum over MEB snow part of patch
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0H_MEBN          ! roughness length for heat over MEB snow part of path
+REAL, DIMENSION(:), INTENT(IN)    :: PZ0EFF_MEBN        ! roughness length for momentum over MEB snow part of patch
+!
+
+
+!aabtmptest ---------------------------------------------------------------------------------
+!aabtmptest
+
+! these WILL BE arguments MEB (so remove SIZE once passed in/out) : !aabtmptest
+! 2 = spectral bands
+! 3 = points along integral for azimuth dependent computations
+!
+REAL, DIMENSION(SIZE(PLAI))                         :: PSWUP          !aabtmptest ---> INTENT(OUT)
+REAL, DIMENSION(SIZE(PLAI))                         :: PLWUP          !aabtmptest ---> INTENT(OUT) ... maybe NOT since can be computed
+
+!aabtmptest
+!aabtmptest ---------------------------------------------------------------------------------
+
 !* ISBA-Ags (with LAI evolution) parameters
 !  ----------------------------------------
 !
@@ -456,6 +516,15 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PABC       ! abscissa needed for integratio
 !                                               ! of net assimilation and stomatal
 !                                               ! conductance over canopy depth
 !
+!* Multi-energy balance variables:
+!  ---------------------------------
+!
+! diagnostic variables
+!
+REAL, DIMENSION(:), INTENT(INOUT)   :: PTC        ! Canopy air temperature
+REAL, DIMENSION(:), INTENT(INOUT)   :: PQC        ! Canopy air specific humidity
+!
+! Prognostic variables:
 !
 !* ISBA-DF variables/parameters:                  
 !  ------------------------------
@@ -515,8 +584,16 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PTG, PWG, PWGI
 REAL, DIMENSION(:), INTENT(INOUT)   :: PCPS, PLVTT, PLSTT
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PWR      ! liquid water retained on the
-!                                             ! foliage of the vegetation
-!                                             ! canopy
+!                                             ! foliage of the comosite vegetation
+!                                             ! canopy (understory in the case of MEB)
+! For multi-energy balance
+REAL, DIMENSION(:), INTENT(INOUT) :: PWRV, PWRVN, PTV
+!                                    PWRV    = liquid water retained on the foliage
+!                                              of the canopy vegetation
+!                                    PWRVN   = snow retained on the foliage
+!                                              of the canopy vegetation
+!                                    PTV     = canopy vegetation temperature
+!
 REAL, DIMENSION(:), INTENT(INOUT) :: PRESA    ! aerodynamic resistance
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PANFM    ! maximum leaf assimilation
@@ -673,6 +750,52 @@ REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR    ! Fapir of vegetation
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPAR_BS ! Fapar of bare soil
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR_BS ! Fapir of bare soil
 !
+!* diagnostic variables for multi-energy balance (MEB)
+!  ---------------------------------------------------
+!
+!REAL, DIMENSION(:),   INTENT(OUT) :: PSWUP          ! MEB: net *total* (surface) upwelling shortwave radiation to atmosphere [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_V       ! MEB: net vegetation canopy shortwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_G       ! MEB: net ground shortwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_N       ! MEB: net snow shortwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_NS      ! MEB: net snow shortwave radiation for *surface* layer 
+                                                    !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
+!REAL, DIMENSION(:),   INTENT(OUT) :: PLWUP          ! MEB: net *total* (surface) upwelling longwave radiation to atmosphere [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_V       ! MEB: net vegetation canopy longwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_G       ! MEB: net ground longwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_N       ! MEB: net snow longwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLEV_V_C       ! MEB: total evapotranspiration (no sublim) from vegetation canopy overstory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLES_V_C       ! MEB: total snow sublimation from vegetation canopy overstory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PH_V_C         ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PH_G_C         ! MEB: sensible heat flux from understory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLETR_G_C      ! MEB: transpiration from understory vegetation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLETR_V_C      ! MEB: transpiration from overstory canopy vegetation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLER_G_C       ! MEB: interception evaporation from understory vegetation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLER_V_C       ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PH_C_A         ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
+                                                    !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                                    !      includes a contribution from snow covering the canopy
+REAL, DIMENSION(:),   INTENT(OUT) :: PH_N_C         ! MEB: sensible heat flux from the snow on the ground [W/m2]
+                                                    !      NOTE total sensible heat flux from the snowpack
+                                                    !      possibly includes a contribution from snow covering the canopy
+REAL, DIMENSION(:),   INTENT(OUT) :: PLE_V_C        ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLE_G_C        ! MEB: latent heat flux from understory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLE_C_A        ! MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
+                                                    !      NOTE total latent heat flux to the atmosphere also possibly 
+                                                    !      includes a contribution from snow covering the canopy
+REAL, DIMENSION(:),   INTENT(OUT) :: PLE_N_C        ! MEB: latent heat flux from the snow on the ground [W/m2]
+                                                    !      NOTE total latent heat flux from the snowpack
+                                                    !      possibly includes a contribution from snow covering the canopy
+REAL, DIMENSION(:),   INTENT(OUT) :: PEVAP_N_C      ! MEB: Total evap from snow on the ground to canopy air space  [kg/m2/s]
+REAL, DIMENSION(:),   INTENT(OUT) :: PEVAP_G_C      ! MEB: Total evap from ground to canopy air space [kg/m2/s]
+REAL, DIMENSION(:),   INTENT(OUT) :: PSR_GN         ! MEB: total snow reaching the ground snow [kg/m2/s]
+REAL, DIMENSION(:),   INTENT(OUT) :: PMELTCV        ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
+REAL, DIMENSION(:),   INTENT(OUT) :: PFRZCV         ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
+REAL, DIMENSION(:),   INTENT(OUT) :: PSWDOWN_GN     ! MEB: total shortwave radiation transmitted through the canopy
+                                                    !      reaching the snowpack/ground understory [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT) :: PLWDOWN_GN     ! MEB: total shortwave radiation transmitted through and emitted by the canopy
+                                                    !      reaching the snowpack/ground understory (explicit part) [W/m2]
+!
+!
 REAL, DIMENSION(:),     INTENT(OUT) :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
 
 !
@@ -729,10 +852,136 @@ REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivi
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZF2WGHT    ! water stress factor
 !
 !
-! Other :
+! MEB:
+!
+INTEGER                                            :: JRK
+REAL                                               :: ZTSTEP
+!
+REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWCOND  ! snow thermal conductivity                                  [W/(m K)] 
+REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWHCAP  ! snow heat capacity                                         [J/(m3 K)]
+REAL, DIMENSION(SIZE(PWR))                         :: ZTAU_N     ! 
+REAL, DIMENSION(SIZE(PWR))                         :: ZSIGMA_F   !
+REAL, DIMENSION(SIZE(PWR))                         :: ZSIGMA_FN  !
+REAL, DIMENSION(SIZE(PWR))                         :: ZCHIP      !
+REAL, DIMENSION(SIZE(PWR))                         :: ZALBG      ! 
+!                                                                ! LWnet Jacobian matrix elements = d LWnet(x)/d T(x)         (W m-2 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDLWNET_V_DTV, ZDLWNET_V_DTG, ZDLWNET_V_DTN,    & 
+                                                      ZDLWNET_G_DTV, ZDLWNET_G_DTG, ZDLWNET_G_DTN,    &
+                                                      ZDLWNET_N_DTV, ZDLWNET_N_DTG, ZDLWNET_N_DTN
+REAL, DIMENSION(SIZE(PWR))                         :: ZWORK      ! local working variable                                     (*)
+REAL, DIMENSION(SIZE(PWR))                         :: ZWRMAXCV   ! Explicit canopy maximum liquid water interception capacity (kg m-2)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZDELTACV   ! Explicit canopy interception capacity fraction             (-)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZDELTACVK  ! Explicit canopy interception capacity fraction including K-factor (-)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZF5CV      ! water stress coefficient (based on F2CV) to force Etv=>0 as F2=>0 (-)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZF2CV      ! water stress coefficient for overstory (when using MEB) (-)  
+REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2))           :: ZF2WGHTCV  ! water stress factor for overstory (when using MEB) (-)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZRS_VG     ! canopy stomatal resistance (s m-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZRS_GV     ! canopy understory stomatal resistance (s m-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZRS_VN     ! partially snow-buried canopy stomatal resistance (s m-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZWRVNMAX   ! maximum liq water equivalent snow content in the canopy vegetation (kg m-2)
+REAL, DIMENSION(SIZE(PWR))                         :: ZPSNCV     ! canopy intercepted snow fraction (-)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZMELTVN    ! canopy snow reservoir freeze/melt rate (kg m-2 s-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZVELC      ! wind speed at top of vegetation (m s-1)                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZHVN       ! Halstead coefficient vegetation canopy above snow (-)                                            
+REAL, DIMENSION(SIZE(PWR))                         :: ZHVG       ! Halstead coefficient vegetation canopy above ground (-)                                              
+REAL, DIMENSION(SIZE(PWR))                         :: ZHSGL      ! surface halstead cofficient for bare soil (-)  
+REAL, DIMENSION(SIZE(PWR))                         :: ZHSGF      ! surface halstead cofficient for bare soil ice  (-)  
+!                                                                ! Exchange coefficients i.e. rho/resistance [kg/(m2 s)];
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_C_A  ! ...between vegetation canopy air and atmosphere                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_N_A  ! ...between the snow on the ground and atmosphere                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_G_C  ! ...between snow-free ground and canopy air                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_N_C  ! ...between snow on the ground and canopy air                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_VG_C ! ...between vegetation canopy over snow-free ground and canopy air                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_VN_C ! ...between vegetation canopy over the snow on the ground and canopy air                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_V_C  ! ...between vegetation canopy and canopy air                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_MOM  ! Effective drag coefficient for momentum [kg/(m2 s)]                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZQSATG     ! saturation specific humidity for PTG (ground surface: kg kg-1)                                             
+REAL, DIMENSION(SIZE(PWR))                         :: ZQSATV     ! saturation specific humidity for PTV (vegetation canopy: kg kg-1)                                           
+REAL, DIMENSION(SIZE(PWR))                         :: ZQSATC     ! saturation specific humidity for PTC (canopy air: kg kg-1)                                      
+REAL, DIMENSION(SIZE(PWR))                         :: ZQSATN     ! saturation specific humidity for PSNOWTEMP (snow surface: kg kg-1)                                            
+REAL, DIMENSION(SIZE(PWR))                         :: ZKVN       ! Snow interception efficiency coefficient (if=0, no interception) (-)
+REAL, DIMENSION(SIZE(PWR))                         :: ZPET_A_COEF! A-air temperature atmospheric coupling coefficient
+REAL, DIMENSION(SIZE(PWR))                         :: ZPET_B_COEF! B-air temperature atmospheric coupling coefficient
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TA  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TA  !  thermal variable for lowest atmospheric level:        (J kg-1)
+!                                                                !  Transform T to dry static energy or enthalpy.
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TC  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TC  !  thermal variable at the surface:                      (J kg-1)
+!                                                                !  Transform T to dry static energy or enthalpy.
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TV  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TV  !  thermal variable at the surface:                      (J kg-1)
+!                                                                !  Transform T to dry static energy or enthalpy.
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TG  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TG  !  thermal variable at the surface:                      (J kg-1)
+!                                                                !  Transform T to dry static energy or enthalpy.
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TN  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
+REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TN  !  thermal variable at the surface:                      (J kg-1)
+!                                                                !  Transform T to dry static energy or enthalpy.
+REAL, DIMENSION(SIZE(PWR))                         :: ZCHEATV    ! Vegetation canopy *effective surface* heat capacity    (J m-2 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZCHEATG    ! Understory-ground *effective surface* heat capacity    (J m-2 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZCHEATN    ! Ground-based snow *effective surface* heat capacity    (J m-2 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZHVGS      ! Dimensionless pseudo humidity factor for computing 
+!                                                                !  vapor fluxes from the non-buried part of the canopy 
+!                                                                !  to the canopy air                                     (-)
+REAL, DIMENSION(SIZE(PWR))                         :: ZHVNS      ! Dimensionless pseudo humidity factor for computing 
+!                                                                !  vapor fluxes from the partly-buried part of the canopy 
+!                                                                !  to the canopy air                                     (-)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDQSAT_G   ! saturation specific humidity derivative for understory (kg kg-1 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDQSAT_V   ! saturation specific humidity derivative for the  
+!                                                                !  vegetation canopy                                     (kg kg-1 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDQSATI_N  ! saturation specific humidity derivative over ice for 
+!                                                                !  the ground-based snowpack                             (kg kg-1 K-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDELTAT_G  ! Time change in soil surface temperature                (K)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDELTAT_V  ! Time change in vegetation canopy temperature           (K)
+REAL, DIMENSION(SIZE(PWR))                         :: ZDELTAT_N  ! Time change in snowpack surface temperature            (K)
+REAL, DIMENSION(SIZE(PWR))                         :: ZRNET_V    ! Net vegetation canopy radiation                        (W m-2)
+REAL, DIMENSION(SIZE(PWR))                         :: ZRNET_G    ! Net understory-ground radiation                        (W m-2)
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_C_A_F! Exchange coefficient between the snow on the ground and 
+!                                                                !  atmosphere modified by a partially to fully buried 
+!                                                                !  vegetation canopy                                     [kg/(m2 s)]
+REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_N_A_F! Exchange coefficient between vegetation canopy air and 
+!                                                                !  atmosphere modified by a partially to fully buried 
+!                                                                !  vegetation canopy                                     [kg/(m2 s)]
+REAL, DIMENSION(SIZE(PWR))                         :: ZEVAP_C_A  ! Total canopy evapotranspiration and sublimation
+!                                                                !  of intercepted snow                                    (kg m-2 s-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZEVAP_N_A  ! Vapor flux from the ground-based snowpack (part burying 
+!                                                                !  the canopy vegetation) to the atmosphere              (kg m-2 s-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZH_N_A     ! Sensible heat flux from the ground-based snowpack (part 
+!                                                                !  burying the canopy vegetation) to the atmosphere      (W m-2)
+REAL, DIMENSION(SIZE(PWR))                         :: ZLEV_G_C   ! Total evapotranspiration vapor flux from the understory 
+!                                                                !  vegetation: (W m-2)
+REAL, DIMENSION(SIZE(PWR))                         :: ZSUBVCOR   ! A possible snow mass correction (to be potentially    
+!                                                                !  removed from soil)                                    (kg m-2 s-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZVEGFACT   ! Fraction of canopy vegetation possibly receiving 
+!                                                                !  rainfall                                              (-)
+REAL, DIMENSION(SIZE(PWR))                         :: ZRRSFC     ! The sum of all non-intercepted rain and canopy drip    (kg m-2 s-1)
+REAL, DIMENSION(SIZE(PWR))                         :: ZRRVEGCV   ! 
+!
+! Misc :
+!
+! -----------------------------------------------------------------------------------------------------------------------------------------------------
+! Budget: Add to arguments, diags
+REAL, DIMENSION(SIZE(PTG,1))                         :: PDELHEATG, PDELHEATG_SFC, PDELPHASEG, PDELPHASEG_SFC ! Budget: Add to arguments, diags
+!                                                       PDELHEATG_SFC = change in heat storage of the surface soil layer over the current time step (W m-2)
+!                                                       PDELHEATG     = change in heat storage of the entire soil column over the current time step (W m-2)
+!                                                       PDELPHASEG_SFC= latent heating due to soil freeze-thaw in the surface soil layer            (W m-2)
+!                                                       PDELPHASEG    = latent heating due to soil freeze-thaw in the entire soil column            (W m-2)
+REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: PDELHEATN, PDELHEATN_SFC, PSNOWSFCH, PRESTOREN   ! Budget: Add to arguments, diags          
+!                                                       PDELHEATN_SFC = change in heat storage of the surface snow layer over the current time step (W m-2)
+!                                                       PDELHEATN     = change in heat storage of the entire snow column over the current time step (W m-2)
+!                                                       PSNOWSFCH  = snow surface layer pseudo-heating term owing to
+!                                                                    changes in grid thickness            (W m-2)
+!                                                       PRESTOREN  = conductive heat flux between the surface and sub-surface soil layers 
+!                                                                    for the multi-layer snow schemes..for composite snow, it is 
+!                                                                    equal to PRESTORE (W m-2)
+! Budget: Add to arguments, diags
+! -----------------------------------------------------------------------------------------------------------------------------------------------------
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
-!                                                      ! if implicit coupling with atmosphere used.
+!                                                        ! if implicit coupling with atmosphere used.
+!
+REAL, PARAMETER                                      :: ZTSTEP_EB     = 300. ! s Minimum time tstep required to time-split MEB energy budget
+INTEGER                                              :: KTSPLIT_EB
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
 !
@@ -742,13 +991,11 @@ REAL, DIMENSION(SIZE(PWR))   :: ZALBT, ZEV, ZETR, ZER
 LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
 
 !aabtmptest
-LOGICAL                                    :: OMEB
 REAL, DIMENSION(SIZE(PWR))                 :: ZPALPHAN, ZRESTOREN
 REAL, DIMENSION(SIZE(PWR))                 :: ZSWNETSNOW, ZSWNETSNOWS, ZLWNETSNOW
 REAL, DIMENSION(SIZE(PWR))                 :: ZSNOWSFCH, ZDELHEATN, ZDELHEATN_SFC
 REAL, DIMENSION(SIZE(PWR))                 :: ZDELHEATG, ZDELHEATG_SFC
 REAL, DIMENSION(SIZE(PWR))                 :: ZDELPHASEG, ZDELPHASEG_SFC                        
-REAL, DIMENSION(SIZE(PWR))                 :: ZSUBVCOR
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -819,7 +1066,6 @@ ENDIF
 !
 
 !aabtmptest
-OMEB             = .false.
 ZPALPHAN(:)      = 0.0
 ZRESTOREN(:)     = 0.0
 ZSWNETSNOW(:)    = 0.0
@@ -885,34 +1131,47 @@ IF (OTR_ML) THEN
 ENDIF
 !
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!*      7.0    Explicit Canopy Vegetation Option
+!              ---------------------------------
 !
-!*      7.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
+IF(OMEB)THEN
+
+   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                        &
+        PPS,                                                         &
+        PLAIV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                           &
+        PSNOWTEMP,PSNOWDZ,PEMISNOW                                   )
+
+ELSE
+!
+!  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+!*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
 !              --------------------------------------------------------------------
 !
-ZQSAT=QSAT(PTG(:,1),PPS(:))
+   ZQSAT=QSAT(PTG(:,1),PPS(:))
 !
-IF (HPHOTO=='NON') THEN
-  CALL VEG(PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN, PGAMMA, ZF2, PRS)
-ELSE IF (MAXVAL(PGMES).NE.XUNDEF .OR. MINVAL(PGMES).NE.XUNDEF) THEN
-  CALL COTWORES(PTSTEP, HPHOTO, OTR_ML, GSHADE,                         &
-            PVEGTYPE, OSTRESSDEF, PAH, PBH, PF2I, PDMAX,                &
-            PPOI, PCSP, PTG(:,1), ZF2, PSW_RAD, PRESA, PQA, ZQSAT, PLE, &
-            PPSNV, ZDELTA, PLAI, PRHOA, PZENITH, PFZERO, PEPSO,         &
-            PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,      &
-            PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, PFFV,                     &
-            ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN,             &
-            PABC, PAN, PANDAY, PRS, PANFM, PGPP, PANF, PRESP_BIOMASS_INST(:,1))
-ELSE
-  PRESP_BIOMASS_INST(:,1) = 0.0
-  PGPP(:) = 0.0
-ENDIF
+   IF (HPHOTO=='NON') THEN
+      CALL VEG(PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN, PGAMMA, ZF2, PRS)
+   ELSE IF (MAXVAL(PGMES).NE.XUNDEF .OR. MINVAL(PGMES).NE.XUNDEF) THEN
+      CALL COTWORES(PTSTEP, HPHOTO, OTR_ML, GSHADE,                    &
+           PVEGTYPE, OSTRESSDEF, PAH, PBH, PF2I, PDMAX,                &
+           PPOI, PCSP, PTG(:,1), ZF2, PSW_RAD, PRESA, PQA, ZQSAT, PLE, &
+           PPSNV, ZDELTA, PLAI, PRHOA, PZENITH, PFZERO, PEPSO,         &
+           PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,      &
+           PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, PFFV,                     &
+           ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN,             &
+           PABC, PAN, PANDAY, PRS, PANFM, PGPP, PANF, PRESP_BIOMASS_INST(:,1))
+   ELSE
+      PRESP_BIOMASS_INST(:,1) = 0.0
+      PGPP(:) = 0.0
+   ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      8.0    Aerodynamic drag and heat transfer coefficients
+!*      9.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !
- CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF, PTSTEP,                                  &
+   CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF, PTSTEP,                                &
     PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
     PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
     PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
@@ -922,10 +1181,10 @@ ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      9.0    Resolution of the surface and soil energy budget
-!              ------------------------------------------------
+!*      10.0    Resolution of the surface and soil energy budget
+!               ------------------------------------------------
 !
- CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,            &
+   CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,          &
         PSODELX, PUREF,                                                         &
         PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,        &
         PPEQ_B_COEF, PVMOD, PCD, PTG, PTSTEP, PSNOWALB, PSW_RAD, PLW_RAD,       &
@@ -941,7 +1200,7 @@ ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      10.0    Energy and momentum fluxes
+!*      11.0    Energy and momentum fluxes
 !              --------------------------
 !
 !*******************************************************************************
@@ -951,7 +1210,7 @@ ENDIF
 !  '3-L' : they represent                    flood + snow-flood-free  albedo and emissivity
 !*******************************************************************************
 !
- CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, OTEMP_ARP, PTSTEP, PSODELX,                &
+   CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, OTEMP_ARP, PTSTEP, PSODELX,              &
            PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC, ZUSTAR2_IC,                        &
            PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                             &
            PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,      &
@@ -968,20 +1227,21 @@ ENDIF
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEV+LEG+LEGI+LES) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
 !
-PAC_AGG(:) =   1. / PRESA(:) / XLVTT                              &
+   PAC_AGG(:) =   1. / PRESA(:) / XLVTT                             &
      * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
        + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))          &
        + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:)           &
        + XLSTT*                 PPSN (:)                            )  
 !
-WHERE(PAC_AGG(:)>0.0)
-      PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT               &
+   WHERE(PAC_AGG(:)>0.0)
+      PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT                 &
            * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
              + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))*PHUG(:)  &
              + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:) *ZHUGI(:) &
              + XLSTT*                 PPSN (:)                            )  
-ENDWHERE
+   ENDWHERE
 !
+ENDIF
 !
 !*******************************************************************************
 ! WARNING: at this stage, all fluxes have two different meanings according
@@ -993,13 +1253,13 @@ ENDWHERE
 !                                      PLER, PLETR, PEVAP, PUSTAR, PGFLUX
 !*******************************************************************************
 !
-!*     11.0    Water transfers and phase change in the soil
+!*     12.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
 
 ZSUBVCOR(:) = 0. !aabtmptest
 
- CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,               &
+CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                &
      OFLOOD, PTSTEP, PVEGTYPE,                                                  &
      PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
      PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, PVEG, PLAI, ZWRMAX, PMELT,   &
@@ -1017,7 +1277,7 @@ ZSUBVCOR(:) = 0. !aabtmptest
 
 !-------------------------------------------------------------------------------
 !
-!*     12.0    Aggregated output fluxes and diagnostics
+!*     13.0    Aggregated output fluxes and diagnostics
 !              -----------------------------------------
 !
 !* add snow component to output radiative parameters and fluxes in case 
