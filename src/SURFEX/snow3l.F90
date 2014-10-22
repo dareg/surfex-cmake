@@ -1856,7 +1856,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRI
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PTS))        :: ZAC, ZRI,                          &
+REAL, DIMENSION(SIZE(PTS))        :: ZAC, ZRI, ZCOND1, ZCOND2,          &
                                        ZSCONDA, ZA, ZB, ZC,             &
                                        ZCDN, ZSNOWDZM1, ZSNOWDZM2,      &
                                        ZVMOD, ZUSTAR2, ZTS3, ZLVT,      &
@@ -1959,8 +1959,10 @@ PSFCFRZ(:)  = 1.0 - PSNOWLIQ(:)*XRHOLW/(ZSNOWDZM1(:)*PSNOWRHO(:))
 !
 ! Thermal conductivity between uppermost and lower snow layers:
 !
-ZSCONDA(:)  = (ZSNOWDZM1(:)*PSCOND1(:) + ZSNOWDZM2(:)*PSCOND2(:))/           &
-                (ZSNOWDZM1(:)+ZSNOWDZM2(:))  
+ZCOND1 (:) = ZSNOWDZM1(:)/((ZSNOWDZM1(:)+ZSNOWDZM2(:))*PSCOND1(:))
+ZCOND2 (:) = ZSNOWDZM2(:)/((ZSNOWDZM1(:)+ZSNOWDZM2(:))*PSCOND2(:))
+!
+ZSCONDA(:) = 1.0/(ZCOND1(:)+ZCOND2(:))
 !
 ! Transform implicit coupling coefficients: 
 ! Note, surface humidity is 100% over snow.
@@ -1992,7 +1994,7 @@ ZLVT(:) = (1.-PSFCFRZ(:))*XLVTT + PSFCFRZ(:)*XLSTT
 ZA(:)   = 1. / PTSTEP + PCT(:) * (4. * ZTS3(:) +                               &
             PRSRA(:) *  ZLVT(:) * (PDQSAT(:) - PPEQ_A_COEF_T(:))                 &
             + PRSRA(:) * XCPD * ( (1./PEXNS(:))-(PPET_A_COEF_T(:)/PEXNA(:)) )    &
-            + (2*ZSCONDA(:)/(ZSNOWDZM2(:)+ZSNOWDZM1(:))) )  
+            + (2.*ZSCONDA(:)/(ZSNOWDZM2(:)+ZSNOWDZM1(:))) )  
 !
 ZB(:)   = 1. / PTSTEP + PCT(:) * (3. * ZTS3(:) +                               &
             PRSRA(:) * PDQSAT(:) *  ZLVT(:) )  
@@ -2006,7 +2008,7 @@ ZC(:)   = PCT(:) * (PRSRA(:) * XCPD * PPET_B_COEF_T(:)/PEXNA(:) + PSW_RAD(:) * &
 ! Coefficients needed for implicit solution
 ! of linearized surface energy budget:
 !
-PTSTERM2(:) = 2*ZSCONDA(:)*PCT(:)/(ZA(:)*(ZSNOWDZM2(:)+ZSNOWDZM1(:)))
+PTSTERM2(:) = 2.*ZSCONDA(:)*PCT(:)/(ZA(:)*(ZSNOWDZM2(:)+ZSNOWDZM1(:)))
 !
 PTSTERM1(:) = (PTS(:)*ZB(:) + ZC(:))/ZA(:)
 IF (LHOOK) CALL DR_HOOK('SNOW3LEBUD',1,ZHOOK_HANDLE)
@@ -2115,17 +2117,17 @@ INLVLS          = SIZE(PSNOWDZ(:,:),2)
 !
 ZSNOWDZM(:,:)  = MAX(PSNOWDZ(:,:), PSNOWDZMIN)
 !
-ZWORK1(:,:)      = ZSNOWDZM(:,:)*PSCOND(:,:)
 DO JJ=1,INLVLS-1
    DO JI=1,INI
-      ZDZDIF(JI,JJ)  = ZSNOWDZM(JI,JJ) + ZSNOWDZM(JI,JJ+1)
-      ZWORK2(JI,JJ)  = ZSNOWDZM(JI,JJ+1)*PSCOND(JI,JJ+1)
+      ZDZDIF(JI,JJ)  = 0.5*(ZSNOWDZM(JI,JJ)+ZSNOWDZM(JI,JJ+1))
+      ZWORK1(JI,JJ)  = ZSNOWDZM(JI,JJ  )/((ZSNOWDZM(JI,JJ)+ZSNOWDZM(JI,JJ+1))*PSCOND(JI,JJ  ))
+      ZWORK2(JI,JJ)  = ZSNOWDZM(JI,JJ+1)/((ZSNOWDZM(JI,JJ)+ZSNOWDZM(JI,JJ+1))*PSCOND(JI,JJ+1))
    ENDDO
 ENDDO
-ZDZDIF(:,INLVLS) = ZSNOWDZM(:,INLVLS) + PD_G(:)
-ZWORK2(:,INLVLS) = PD_G(:)*PSOILCOND(:)
+ZDZDIF(:,INLVLS) = 0.5*(ZSNOWDZM(:,INLVLS)+PD_G(:))
+ZWORK2(:,INLVLS) = PD_G(:)/((ZSNOWDZM(:,INLVLS)+PD_G(:))*PSOILCOND(:))
 !
-ZDTERM(:,:)      = 2.0*(ZWORK1(:,:)+ZWORK2(:,:))/(ZDZDIF(:,:)*ZDZDIF(:,:))
+ZDTERM(:,:)      = 1.0/(ZDZDIF(:,:)*(ZWORK1(:,:)+ZWORK2(:,:)))
 !
 ZCTERM(:,:)      = PSCAP(:,:)*ZSNOWDZM(:,:)/PTSTEP
 !

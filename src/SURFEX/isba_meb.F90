@@ -1,13 +1,17 @@
 !     #########
       SUBROUTINE ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                         &  
         PPS, PZENITH, PSCA_SW, PSW_RAD,                                        &
+        PTV, PTG, PTC, PQC, PWRV,                                              &
+        PWRMAX_CFCV, PZ0_MEBV,                                                 &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
         PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV,                         &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW,           &
-        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN      )
+        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
+        PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN                      )
 !     ##########################################################################
 !
+!                             
 !!****  *ISBA_MEB*  
 !!
 !!    PURPOSE
@@ -90,10 +94,11 @@ LOGICAL, INTENT(IN)                 :: OMEB          ! True = patch with multi-e
 !                                                    ! False = patch with classical ISBA 
 LOGICAL, INTENT(IN)                 :: OFORC_MEASURE ! 
 !
-REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure
+REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
 REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! solar zenith angle
-REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD       ! solar   incoming radiation
-REAL, DIMENSION(:),   INTENT(IN)    :: PSCA_SW       ! solar diffuse incoming radiation
+REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD       ! solar (shortwave) incoming radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(IN)    :: PLW_RAD       ! thermal (longwave) incoming radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(IN)    :: PSCA_SW       ! solar diffuse incoming radiation [W/m2]
 !
 REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! 
 REAL, DIMENSION(:),   INTENT(IN)    :: PLAIV         ! explicit canopy overstory LAI..."PLAI" is the 
@@ -114,7 +119,10 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PALBVIS_TVEG  ! albedo of vegetation in V
 REAL, DIMENSION(:),   INTENT(IN)    :: PALBNIR_TSOIL ! albedo of bare soil in NIR 
 !                                                    ! (needed for LM_TR or MEB)
 REAL, DIMENSION(:),   INTENT(IN)    :: PALBVIS_TSOIL ! albedo of bare soil in VIS 
-!
+REAL, DIMENSION(:),   INTENT(IN)    :: PWRMAX_CFCV   ! 
+REAL, DIMENSION(:),   INTENT(IN)    :: PZ0_MEBV      ! roughness length for momentum over vegetation (m)
+
+
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALB      ! Snow albedo
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBVIS   ! Snow VIS albedo
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBNIR   ! Snow NIR albedo
@@ -125,6 +133,12 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT     ! Snow layer heat content (
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO      ! Snow layer average density (kg/m3)
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWTEMP     ! Snow layer average temperature (K)
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWDZ       ! Snow layer thickness (m)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PTG           ! Soil layer average temperature (K)
+REAL, DIMENSION(:),   INTENT(INOUT) :: PTV           ! Canopy vegetation temperature (K)
+REAL, DIMENSION(:),   INTENT(INOUT) :: PTC           ! Canopy air temperature [K]
+REAL, DIMENSION(:),   INTENT(INOUT) :: PQC           ! Canopy air specific humidity [kg/kg]
+REAL, DIMENSION(:),   INTENT(INOUT) :: PWRV          ! liquid water retained on the foliage
+!                                                    ! of the canopy vegetation [kg/m2]
 !
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEMISNOW      ! Snow surface emissivity (-)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_N      ! net snow shortwave radiation [W/m2]
@@ -137,6 +151,11 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSWUP         ! net upwelling shortwave r
 REAL, DIMENSION(:),   INTENT(OUT)   :: PALBT         ! total surface albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWDOWN_GN    ! total shortwave radiation transmitted through 
                                                      ! the vegetation canopy
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLWNET_V      ! net vegetation canopy longwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLWNET_G      ! net ground longwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLWNET_N      ! net snow longwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLWDOWN_GN    ! total shortwave radiation transmitted through and emitted by the canopy
+!                                                    ! reaching the snowpack/ground understory (explicit part) [W/m2]
 !
 !
 !*      0.2    declarations of local variables
@@ -144,17 +163,28 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSWDOWN_GN    ! total shortwave radiation
 !
 REAL, PARAMETER                                    :: ZTSTEP_EB     = 300. ! s Minimum time tstep required 
 !                                                                          !   to time-split MEB energy budget
-INTEGER                                            :: KTSPLIT_EB
+INTEGER                                            :: JTSPLIT_EB           ! time split index
 !
+REAL, DIMENSION(SIZE(PPS))                         :: ZWORK                ! Working variable [*]
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWCOND            ! snow thermal conductivity  [W/(m K)] 
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWHCAP            ! snow heat capacity [J/(m3 K)]
-REAL, DIMENSION(SIZE(PSNOWSWE,1))                  :: ZSNOWALBVIS          ! Snow VIS albedo
-REAL, DIMENSION(SIZE(PSNOWSWE,1))                  :: ZSNOWALBNIR          ! Snow NIR albedo
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZTAU_N               ! 
-REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_F             ! 
-REAL, DIMENSION(SIZE(PPS))                         :: ZALBG                ! effective ground albedo
-!
+REAL, DIMENSION(SIZE(PPS))                         :: ZALBG                ! Effective ground albedo
+REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_F             ! LW transmission factor
+REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_FN            ! LW transmission factor - including buried (snow) 
+!                                                                          ! vegetation effect
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_V_DTV        ! LW Jacobian: flux derrivative d LWnet_v/dTv [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_V_DTG        ! LW Jacobian: flux derrivative d LWnet_v/dTg [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_V_DTN        ! LW Jacobian: flux derrivative d LWnet_v/dTn [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_G_DTV        ! LW Jacobian: flux derrivative d LWnet_g/dTv [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_G_DTG        ! LW Jacobian: flux derrivative d LWnet_g/dTg [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_G_DTN        ! LW Jacobian: flux derrivative d LWnet_g/dTn [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_N_DTV        ! LW Jacobian: flux derrivative d LWnet_n/dTv [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_N_DTG        ! LW Jacobian: flux derrivative d LWnet_n/dTg [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_N_DTN        ! LW Jacobian: flux derrivative d LWnet_n/dTn [W/(m K2)]
+REAL, DIMENSION(SIZE(PPS))                         :: ZWRMAXCV             ! [kg/m2]
+REAL, DIMENSION(SIZE(PPS))                         :: ZDELTACV             ! (-)
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -192,6 +222,44 @@ CALL ISBA_SWNET_MEB(PLAIV,PZF_TALLVEG,                                       &
         PALBT,ZALBG,PSWDOWN_GN                                               )
 
 !
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+!*      3.0    Longwave radiative transfer
+!              ---------------------------  
+!
+CALL ISBA_LWNET_MEB(PLAIV,PPSN,PPALPHAN,                                &
+        PEMISNOW,                                                       &
+        PTV,PTG(:,1),PSNOWTEMP(:,1),                                    &
+        PLW_RAD,PLWNET_N,PLWNET_V,PLWNET_G,                             &
+        ZDLWNET_V_DTV,ZDLWNET_V_DTG,ZDLWNET_V_DTN,                      &
+        ZDLWNET_G_DTV,ZDLWNET_G_DTG,ZDLWNET_G_DTN,                      &
+        ZDLWNET_N_DTV,ZDLWNET_N_DTG,ZDLWNET_N_DTN,                      &
+        ZSIGMA_F,ZSIGMA_FN,PLWDOWN_GN                                   )
+!
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+!*      4.0    Fraction of leaves occupied by intercepted water
+!              ------------------------------------------------
+!
+! Vegetation canopy:
+!
+! First, compute an effective veg fraction: it can only be < unity if vegetation is buried by snowpack...
+!
+ZWORK(:) = PLAIV(:)*(1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:))) 
+! 
+CALL WET_LEAVES_FRAC(PWRV, ZWORK, PWRMAX_CFCV, PZ0_MEBV, PLAIV, ZWRMAXCV, ZDELTACV) 
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

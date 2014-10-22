@@ -79,6 +79,8 @@
 !!                                 when hug(i)Qsat < Qa and Qsat > Qa
 !!      (B. Decharme)        09/12 new wind implicitation
 !!      (V. Masson)          01/13 Deep soil flux implicitation
+!!      (B. Decharme)        10/14 Bug in DIF composite budget
+!!                                 Use harmonic mean to compute interfacial thermal conductivities
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -262,7 +264,7 @@ REAL, DIMENSION(SIZE(PALB)) ::   ZRORA,                        &
 !
 ! ISBA-DF:
 !
-REAL, DIMENSION(SIZE(PALB)) ::  ZCONDAVG, ZTERM2, ZTERM1
+REAL, DIMENSION(SIZE(PALB)) ::  ZCONDAVG, ZCOND1, ZCOND2, ZTERM2, ZTERM1
 !
 ! implicit atmospheric coupling coefficients: (modified-form)
 !
@@ -291,8 +293,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       0.     Initialization:
 !               ---------------
 !
-!
 IF (LHOOK) CALL DR_HOOK('E_BUDGET',0,ZHOOK_HANDLE)
+!
 ZCONDAVG(:)  = 0.0
 ZTERM2(:)    = 0.0
 ZTERM1(:)    = 0.0
@@ -585,10 +587,12 @@ IF(HISBA == 'DIF')THEN
 !
 ! First determine terms needed for implicit linearization of surface:
 !
-!  We use geometric mean to compute the thermal conductivity at the layers interface
-!  The advantage is that this average is not dependent of the grid geometry
+!  We use harmonic mean to compute the thermal conductivity at the layers interface
 !
-   ZCONDAVG(:) =  SQRT(PSOILCONDZ(:,1)*PSOILCONDZ(:,2))
+   ZCOND1(:) = PDZG(:,1)/((PDZG(:,1)+PDZG(:,2))*PSOILCONDZ(:,1))
+   ZCOND2(:) = PDZG(:,2)/((PDZG(:,1)+PDZG(:,2))*PSOILCONDZ(:,2))
+!
+   ZCONDAVG(:) = 1.0/(ZCOND1(:)+ZCOND2(:))
 !   
    ZA(:)       = ZA(:) - (2. * XPI / XDAY) + ZCONDAVG(:)*PCG(:)/PDZDIF(:,1)  
    ZTERM2(:)   = ZCONDAVG(:)*PCG(:)/(ZA(:)*PDZDIF(:,1))

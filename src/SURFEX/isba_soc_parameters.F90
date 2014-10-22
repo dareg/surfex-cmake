@@ -42,6 +42,7 @@ SUBROUTINE ISBA_SOC_PARAMETERS (HRUNOFF,PPATCH,PDG,PSOC,PBCOEF,PMPOTSAT,   &
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,     ONLY : XDAY
+USE MODD_ISBA_PAR, ONLY : XOMRHO, XOMSPH, XOMCONDDRY, XOMCONDSLD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -81,10 +82,6 @@ REAL, DIMENSION(2), PARAMETER :: ZSY      = (/0.655,0.125/)     !Peatland specif
 REAL, DIMENSION(2), PARAMETER :: ZWWILT   = (/0.060,0.240/)     !Peatland wilting point                 (-)
 REAL, DIMENSION(2), PARAMETER :: ZWD0     = (/0.196,0.611/)     !Peatland Topmodel D0 water equivalent  (-)
 REAL, DIMENSION(2), PARAMETER :: ZANISO   = (/2.0,48.0/)        !Peatland ksat anisotropy factor        (-)
-REAL,               PARAMETER :: ZCONDDRY = 0.05                !Peatland dry thermal conductivity      (W.m–1.K–1)
-REAL,               PARAMETER :: ZCONDSLD = 0.25                !Peatland solid conductivity            (W.m–1.K–1)
-REAL,               PARAMETER :: ZSPHEAT  = 1926.               !Peatland specific heat                 (J.kg-1.K-1)
-REAL,               PARAMETER :: ZRHO_PEAT= 130.                !Peat density                           (kg.m-3)
 !
 !HWSD data profile
 REAL, PARAMETER :: ZDGHWSD_TOP = 0.3
@@ -102,7 +99,7 @@ REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2))  :: ZDG_SOIL, ZDZG_SOIL, ZRHO_SOC, ZMID
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2))  :: ZPEAT_BCOEF,ZPEAT_MPOTSAT,&
                                              ZPEAT_WSAT,ZPEAT_WFC,     &
                                              ZPEAT_WWILT,ZPEAT_WD0,    &
-                                             ZPEAT_ANISO, ZPEAT_HCAP
+                                             ZPEAT_ANISO, ZPEAT_RHO
 !
 REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3))  :: ZPEAT_CONDSAT, ZMID_CONDSAT
 !
@@ -135,6 +132,7 @@ ZMASK    (:)  =0.0
 ZDG_SOIL (:,:)=0.0
 ZRHO_SOC (:,:)=0.0
 !
+ZPEAT_RHO    (:,:  )=0.0
 ZPEAT_BCOEF  (:,:  )=0.0
 ZPEAT_MPOTSAT(:,:  )=0.0
 ZPEAT_WSAT   (:,:  )=0.0
@@ -206,7 +204,7 @@ DO JI=1,INI
        ZINF         = ZB*EXP(ZA*ZLOG3)
        ZRHO_INF(JI) = (ZINF-ZSUB)/(ZDGHWSD_INF-ZDGHWSD_SUB)
      ELSE
-       ZRHO_INF(JI) = ZRHO_SUB(JI)/ZRHO_PEAT
+       ZRHO_INF(JI) = ZRHO_SUB(JI)/((1.0-ZWSAT(2))*XOMRHO)
      ENDIF
    ENDIF
 ENDDO
@@ -296,8 +294,7 @@ DO JL=1,INL
 !
       ZPEAT_WFC    (JI,JL)=ZPEAT_WSAT(JI,JL)-ZSY(1)*EXP(ZF_SY(JI)*ZREFDEPTH(JI))
 !
-!     Peatland heat capacity (J.m–3.K–1)
-      ZPEAT_HCAP (JI,JL) =  ZRHO_PEAT * ZSPHEAT !* (1.0-ZPEAT_WSAT(JI,JL))
+      ZPEAT_RHO    (JI,JL)=(1.0-ZPEAT_WSAT(JI,JL))*XOMRHO
 !
       DO JP=1,INP
          IF(PPATCH(JI,JP)/=XUNDEF)THEN
@@ -317,20 +314,20 @@ DO JL=1,INL
    DO JI=1,INI
      IF(ZMASK(JI)>0.0)THEN            
 !      Soil organic carbon fraction
-       PFRACSOC (JI,JL  ) = MIN(1.0,ZRHO_SOC(JI,JL)/ZRHO_PEAT)             
+       PFRACSOC (JI,JL  ) = MIN(1.0,ZRHO_SOC(JI,JL)/ZPEAT_RHO(JI,JL))             
 !      New soil thermal properties      
-       PHCAPSOIL(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PHCAPSOIL(JI,JL) + PFRACSOC(JI,JL)*ZPEAT_HCAP(JI,JL)
-       PCONDDRY (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PCONDDRY (JI,JL) + PFRACSOC(JI,JL)*ZCONDDRY
-       PCONDSLD (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PCONDSLD (JI,JL) + PFRACSOC(JI,JL)*ZCONDSLD
+       PHCAPSOIL(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PHCAPSOIL(JI,JL) + PFRACSOC(JI,JL)*XOMRHO*XOMSPH
+       PCONDDRY (JI,JL  ) = 1.0/((1.0-PFRACSOC(JI,JL))/PCONDDRY (JI,JL) + PFRACSOC(JI,JL)/XOMCONDDRY)
+       PCONDSLD (JI,JL  ) = 1.0/((1.0-PFRACSOC(JI,JL))/PCONDSLD (JI,JL) + PFRACSOC(JI,JL)/XOMCONDSLD)
 !      New soil hydraulic properties
-       PBCOEF   (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PBCOEF   (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_BCOEF  (JI,JL) 
+       PBCOEF   (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PBCOEF   (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_BCOEF  (JI,JL)
        PMPOTSAT (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PMPOTSAT (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_MPOTSAT(JI,JL)
        PWSAT    (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWSAT    (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WSAT   (JI,JL)  
        PWFC     (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWFC     (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WFC    (JI,JL)
        PWWILT   (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWWILT   (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WWILT  (JI,JL)
        DO JP=1,INP
           IF(PPATCH(JI,JP)/=XUNDEF)THEN
-            PCONDSAT (JI,JL,JP) = (1.0-PFRACSOC(JI,JL))*PCONDSAT(JI,JL,JP)+PFRACSOC(JI,JL)*ZPEAT_CONDSAT(JI,JL,JP)
+            PCONDSAT (JI,JL,JP) = PCONDSAT(JI,JL,JP)**(1.0-PFRACSOC(JI,JL))*ZPEAT_CONDSAT(JI,JL,JP)**PFRACSOC(JI,JL)
           ENDIF
        ENDDO
      ENDIF

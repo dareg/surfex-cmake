@@ -1056,11 +1056,10 @@ IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
 !
 ELSE
 !
-   CALL SOILDIF (HDIFSFCOND, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,               &
+   CALL SOILDIF (HDIFSFCOND, OFLOOD, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
      PCG, PCGMAX, PCT, ZFROZEN1, PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,         &
-     PHCAPSOIL, PCONDDRY, PCONDSLD,                                             &
-     PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ, ZSOILHCAPZ,                           &
-     PFWTD, PWTD, PWR                                                           )
+     PHCAPSOIL, PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ,        &
+     ZSOILHCAPZ, PFWTD, PWTD, PWR, PPIFLOOD                                     )
 !
 ENDIF
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

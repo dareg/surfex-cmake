@@ -1,11 +1,11 @@
 !     #########
-      SUBROUTINE SOILDIF(HDIFSFCOND,                                             &
+      SUBROUTINE SOILDIF(HDIFSFCOND, OFLOOD,                                     &
                          PVEG, PCV, PFFG, PFFV,                                  &
                          PCG, PCGMAX, PCT, PFROZEN1,                             &
                          PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                  &
                          PHCAPSOILZ, PCONDDRYZ, PCONDSLDZ,                       &
                          PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, PSOILHCAPZ,        &
-                         PFWTD, PWTD, PWR                                        )
+                         PFWTD, PWTD, PWR, PPIFLOOD                              )
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -82,6 +82,8 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = D
 !                                               !         litter/mulch on the surface thermal cond.
 !                                               ! 'DEF' = no mulch effect
 !
+LOGICAL, INTENT(IN)               :: OFLOOD ! Flood scheme 
+!
 REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PFWTD, PWTD, PCV, PWR
 !                                      Soil and vegetation parameters
 !                                      PVEG = fraction of vegetation
@@ -130,6 +132,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFFG
 !                                   PFFV = Floodplain fraction over vegetation
 !                                   without snow (ES)
 !
+REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD
 !
 !*      0.2    declarations of local variables
 !
@@ -160,7 +163,8 @@ IF (LHOOK) CALL DR_HOOK('SOILDIF',0,ZHOOK_HANDLE)
 INI=SIZE(PWG,1)
 INL=SIZE(PWG,2)
 !
-ZCF    (:)   = XUNDEF
+ZFF (:) = 0.0
+ZCF (:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -323,9 +327,15 @@ ZCV(:) = 1.0 / ( MAX(1.E+4,XCVHEATF/PCV(:)) +  XCL * PWR(:) )
 !*       7.     THE HEAT CAPACITY OF FLOOD
 !               --------------------------------
 !
-ZFF(:) = PVEG(:)*PFFV(:) + (1.-PVEG(:))*PFFG(:)
+IF(OFLOOD)THEN
 !
-ZCF(:) = 1.0 / ( XRHOLW * XCL )
+  ZFF(:) = PVEG(:)*PFFV(:) + (1.-PVEG(:))*PFFG(:)
+!
+  WHERE(ZFF(:)>0.0)
+    ZCF(:) = 1.0 / ( XCL * PPIFLOOD(:) )
+  ENDWHERE
+!
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
