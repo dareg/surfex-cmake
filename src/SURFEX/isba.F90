@@ -168,6 +168,8 @@ USE MODI_COTWORES
 !
 USE MODI_ISBA_FLUXES
 !
+USE MODI_ISBA_MEB
+!
 USE MODE_THERMOS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -1139,14 +1141,17 @@ ENDIF
 !
 IF(OMEB)THEN
 
-   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                                  & 
+   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME, HISBA, KWG_LAYER,                &  
         PPS, PZENITH, PSCA_SW, PSW_RAD,                                        &
+        PTV, PTG, PTC, PQC, PWRV, PWG, PWGI,                                   &
+        PWRMAX_CFCV, PZ0_MEBV,                                                 &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV,                         &
+        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV, PROOTFRACCV,            &
+        PWSAT, PWFC, PWWILT,                                                   &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW,           &
-        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN      )
-
+        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
+        PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN                      )
 
 ELSE
 !

@@ -1,11 +1,12 @@
 !     #########
-      SUBROUTINE ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                         &  
+      SUBROUTINE ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME, HISBA, KWG_LAYER,       &  
         PPS, PZENITH, PSCA_SW, PSW_RAD,                                        &
-        PTV, PTG, PTC, PQC, PWRV,                                              &
+        PTV, PTG, PTC, PQC, PWRV, PWG, PWGI,                                   &
         PWRMAX_CFCV, PZ0_MEBV,                                                 &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV,                         &
+        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV, PROOTFRACCV,            &
+        PWSAT, PWFC, PWWILT,                                                   &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW,           &
         PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN                      )
@@ -53,13 +54,13 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_CSTS,       ONLY : XLVTT, XLSTT, XCPD, XRHOLW 
+USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_CSTS,           ONLY : XLVTT, XLSTT, XCPD, XRHOLW 
 !
-USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE MODE_THERMOS
-USE MODE_MEB,    ONLY     : SNOW_INTERCEPT_EFF
+USE MODE_MEB,            ONLY : SNOW_INTERCEPT_EFF
 !
 USE MODI_SOILSTRESS
 USE MODI_WET_LEAVES_FRAC
@@ -88,11 +89,18 @@ IMPLICIT NONE
 !* general variables
 !  -----------------
 !
-TYPE(DATE_TIME), INTENT(IN)         :: TPTIME        ! current date and time
+TYPE(DATE_TIME),      INTENT(IN)    :: TPTIME        ! current date and time
 !
-LOGICAL, INTENT(IN)                 :: OMEB          ! True = patch with multi-energy balance 
+LOGICAL,              INTENT(IN)    :: OMEB          ! True = patch with multi-energy balance 
 !                                                    ! False = patch with classical ISBA 
-LOGICAL, INTENT(IN)                 :: OFORC_MEASURE ! 
+LOGICAL,              INTENT(IN)    :: OFORC_MEASURE ! 
+!
+CHARACTER(LEN=*),     INTENT(IN)    :: HISBA         ! type of ISBA version:
+!                                                    ! '2-L' (default)
+!                                                    ! '3-L'
+!                                                    ! 'DIF'
+!
+INTEGER, DIMENSION(:),INTENT(IN)    :: KWG_LAYER     ! Number of soil moisture layers (DIF option)
 !
 REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
 REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! solar zenith angle
@@ -121,8 +129,13 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PALBNIR_TSOIL ! albedo of bare soil in NI
 REAL, DIMENSION(:),   INTENT(IN)    :: PALBVIS_TSOIL ! albedo of bare soil in VIS 
 REAL, DIMENSION(:),   INTENT(IN)    :: PWRMAX_CFCV   ! 
 REAL, DIMENSION(:),   INTENT(IN)    :: PZ0_MEBV      ! roughness length for momentum over vegetation (m)
-
-
+REAL, DIMENSION(:,:), INTENT(IN)    :: PROOTFRACCV   ! overstory root fraction                        (-)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PWFC          ! field capacity profile               (m3/m3)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PWWILT        ! wilting point profile                (m3/m3)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PWSAT         ! porosity profile                     (m3/m3)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PWG, PWGI     ! PWG  = soil liquid volumetric water content (m3/m3)
+!                                                    ! PWGI = soil frozen volumetric water content (m3/m3)
+!
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALB      ! Snow albedo
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBVIS   ! Snow VIS albedo
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBNIR   ! Snow NIR albedo
@@ -185,6 +198,9 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_N_DTG        ! LW 
 REAL, DIMENSION(SIZE(PPS))                         :: ZDLWNET_N_DTN        ! LW Jacobian: flux derrivative d LWnet_n/dTn [W/(m K2)]
 REAL, DIMENSION(SIZE(PPS))                         :: ZWRMAXCV             ! [kg/m2]
 REAL, DIMENSION(SIZE(PPS))                         :: ZDELTACV             ! (-)
+REAL, DIMENSION(SIZE(PPS))                         :: ZF2CV                ! water stress coefficient for overstory (-)  
+REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2))           :: ZF2WGHTCV            ! water stress factor for overstory (-)  
+REAL, DIMENSION(SIZE(PPS))                         :: ZF5CV                ! water stress coefficient (based on F2CV) to force Etv=>0 as F2=>0 (-)  
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -251,7 +267,16 @@ ZWORK(:) = PLAIV(:)*(1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:)))
 CALL WET_LEAVES_FRAC(PWRV, ZWORK, PWRMAX_CFCV, PZ0_MEBV, PLAIV, ZWRMAXCV, ZDELTACV) 
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
+!
+!*      5.0    Plant stress due to soil water deficit
+!              --------------------------------------
+!
+! Vegetation canopy:
+!
+CALL SOILSTRESS(HISBA, ZF2CV,                    &
+        PROOTFRACCV, PWSAT, PWFC, PWWILT,        &
+        PWG, PWGI, KWG_LAYER, ZF2WGHTCV, ZF5CV )  
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
