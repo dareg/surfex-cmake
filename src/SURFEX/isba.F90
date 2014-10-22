@@ -35,7 +35,8 @@
                       PWGI, PCPS, PLVTT, PLSTT, PWR,                             &
                       PWRV,PWRVN,PTV,PTC,PQC,                                    &
                       PRESA, PANFM, PFSAT,                                       &
-                      PSNOWALB, PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,       &
+                      PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
+                      PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,                 &
                       PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PGRNDFLUX, PHPSNOW,       &
                       PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,       &
                       PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW,      &
@@ -605,20 +606,23 @@ REAL, DIMENSION(:), INTENT(INOUT)  :: PFSAT   ! Topmodel saturated fraction
 !
 ! Prognostic variables:
 !
-REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALB   ! Snow albedo
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE   ! Snow model layer liquid water equivalent or SWE (kg m-2)  
-!                                                 ! NOTE for 'DEF' snow option, only uppermost element
-!                                                 ! of this array is non-zero (as it's a one layer scheme)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT  ! Snow layer heat content (J/m3) 
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO   ! Snow layer average density (kg/m3)
-!                                                 ! NOTE for 'DEF' snow option, only uppermost element
-!                                                 ! of this array is used (as it's a one layer scheme)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1 ! Snow grain parameter 1 
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN2 ! Snow grain parameter 2 
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST  ! Snow grain historical parameter
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE   ! Snow grain age
-!                                                  NOTE : methamorphism is only activated if the flag
-!                                                  OSNOW_METAMO=TRUE
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALB    ! Snow albedo
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBVIS ! Snow VIS albedo
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBNIR ! Snow NIR albedo
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBFIR ! Snow FIR albedo
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE    ! Snow model layer liquid water equivalent or SWE (kg m-2)  
+!                                                  ! NOTE for 'DEF' snow option, only uppermost element
+!                                                  ! of this array is non-zero (as it's a one layer scheme)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT   ! Snow layer heat content (J/m3) 
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO    ! Snow layer average density (kg/m3)
+!                                                  ! NOTE for 'DEF' snow option, only uppermost element
+!                                                  ! of this array is used (as it's a one layer scheme)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1  ! Snow grain parameter 1 
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN2  ! Snow grain parameter 2 
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST   ! Snow grain historical parameter
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE    ! Snow grain age
+!                                                   NOTE : methamorphism is only activated if the flag
+!                                                   OSNOW_METAMO=TRUE
 ! 
 ! Diagnostics:
 !
@@ -1136,10 +1140,14 @@ ENDIF
 !
 IF(OMEB)THEN
 
-   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                        &
-        PPS,                                                         &
-        PLAIV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                           &
-        PSNOWTEMP,PSNOWDZ,PEMISNOW                                   )
+   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                                  & 
+        PPS, PZENITH, PSCA_SW, PSW_RAD,                                        &
+        PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
+        PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
+        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV,                         &
+        PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW,           &
+        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN      )
+
 
 ELSE
 !

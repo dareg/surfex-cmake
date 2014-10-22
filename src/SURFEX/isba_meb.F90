@@ -1,10 +1,12 @@
 !     #########
-      SUBROUTINE ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,               &                
-        PPS,                                                         &
-        PLAIV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                           &
-        PSNOWTEMP,PSNOWDZ,PEMISNOW                                   )
+      SUBROUTINE ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME,                         &  
+        PPS, PZENITH, PSCA_SW, PSW_RAD,                                        &
+        PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
+        PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
+        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV,                         &
+        PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW,           &
+        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN      )
 !     ##########################################################################
-!
 !
 !!****  *ISBA_MEB*  
 !!
@@ -53,8 +55,8 @@ USE MODD_CSTS,       ONLY : XLVTT, XLSTT, XCPD, XRHOLW
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODE_THERMOS
-USE MODE_MEB,  ONLY       : SNOW_INTERCEPT_EFF
-
+USE MODE_MEB,    ONLY     : SNOW_INTERCEPT_EFF
+!
 USE MODI_SOILSTRESS
 USE MODI_WET_LEAVES_FRAC
 USE MODI_VEG
@@ -82,22 +84,60 @@ IMPLICIT NONE
 !* general variables
 !  -----------------
 !
-TYPE(DATE_TIME), INTENT(IN)         :: TPTIME     ! current date and time
+TYPE(DATE_TIME), INTENT(IN)         :: TPTIME        ! current date and time
 !
-LOGICAL, INTENT(IN)                 :: OMEB       ! True = patch with multi-energy balance 
-!                                                 ! False = patch with classical ISBA 
-LOGICAL, INTENT(IN)                 :: OFORC_MEASURE
+LOGICAL, INTENT(IN)                 :: OMEB          ! True = patch with multi-energy balance 
+!                                                    ! False = patch with classical ISBA 
+LOGICAL, INTENT(IN)                 :: OFORC_MEASURE ! 
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PPS        ! Pressure
-REAL, DIMENSION(:), INTENT(IN)      :: PLAIV      ! explicit canopy overstory LAI..."PLAI" is the 
-!                                                 ! composite surface  LAI 
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE   ! Snow model layer liquid water equivalent or SWE (kg m-2)  
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT  ! Snow layer heat content (J/m3) 
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO   ! Snow layer average density (kg/m3)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWTEMP  ! Snow layer average temperature (K)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWDZ    ! Snow layer thickness (m)
+REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure
+REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! solar zenith angle
+REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD       ! solar   incoming radiation
+REAL, DIMENSION(:),   INTENT(IN)    :: PSCA_SW       ! solar diffuse incoming radiation
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PEMISNOW   ! Snow surface emissivity (-)
+REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! 
+REAL, DIMENSION(:),   INTENT(IN)    :: PLAIV         ! explicit canopy overstory LAI..."PLAI" is the 
+!                                                    ! composite surface  LAI 
+REAL, DIMENSION(:),   INTENT(IN)    :: PVEG          ! fraction of vegetation of the
+!                                                    ! mesh covered by natural or
+!                                                    ! agricultural areas
+!                                                    ! 1-PVEG --> bare soil
+REAL, DIMENSION(:),   INTENT(IN)    :: PFF           ! Floodplain fraction at the surface
+REAL, DIMENSION(:),   INTENT(IN)    :: PPSN          ! fraction of the grid covered
+!                                                    ! by snow
+REAL, DIMENSION(:),   INTENT(IN)    :: PPALPHAN      ! snow/canopy transition coefficient
+REAL, DIMENSION(:),   INTENT(IN)    :: PFALB         ! Floodplain albedo
+REAL, DIMENSION(:),   INTENT(IN)    :: PALBNIR_TVEG  ! albedo of vegetation in NIR 
+!                                                    ! (needed for LM_TR or MEB)
+REAL, DIMENSION(:),   INTENT(IN)    :: PALBVIS_TVEG  ! albedo of vegetation in VIS 
+!                                                    ! (needed for LM_TR or MEB)
+REAL, DIMENSION(:),   INTENT(IN)    :: PALBNIR_TSOIL ! albedo of bare soil in NIR 
+!                                                    ! (needed for LM_TR or MEB)
+REAL, DIMENSION(:),   INTENT(IN)    :: PALBVIS_TSOIL ! albedo of bare soil in VIS 
+!
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALB      ! Snow albedo
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBVIS   ! Snow VIS albedo
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBNIR   ! Snow NIR albedo
+REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALBFIR   ! Snow FIR albedo
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE      ! Snow model layer liquid water equivalent or 
+!                                                    ! SWE (kg m-2)  
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT     ! Snow layer heat content (J/m3) 
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO      ! Snow layer average density (kg/m3)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWTEMP     ! Snow layer average temperature (K)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWDZ       ! Snow layer thickness (m)
+!
+REAL, DIMENSION(:),   INTENT(OUT)   :: PEMISNOW      ! Snow surface emissivity (-)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_N      ! net snow shortwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_NS     ! net snow shortwave radiation for 
+!                                                    ! the *surface* snow layer 
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_V      ! net vegetation canopy shortwave radiation 
+!                                                    ! [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_G      ! net surface (ground) shortwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSWUP         ! net upwelling shortwave radiation [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PALBT         ! total surface albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSWDOWN_GN    ! total shortwave radiation transmitted through 
+                                                     ! the vegetation canopy
+!
 !
 !*      0.2    declarations of local variables
 !
@@ -106,11 +146,14 @@ REAL, PARAMETER                                    :: ZTSTEP_EB     = 300. ! s M
 !                                                                          !   to time-split MEB energy budget
 INTEGER                                            :: KTSPLIT_EB
 !
-REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWCOND  ! snow thermal conductivity  [W/(m K)] 
-REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWHCAP  ! snow heat capacity [J/(m3 K)]
+REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWCOND            ! snow thermal conductivity  [W/(m K)] 
+REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWHCAP            ! snow heat capacity [J/(m3 K)]
+REAL, DIMENSION(SIZE(PSNOWSWE,1))                  :: ZSNOWALBVIS          ! Snow VIS albedo
+REAL, DIMENSION(SIZE(PSNOWSWE,1))                  :: ZSNOWALBNIR          ! Snow NIR albedo
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZTAU_N               ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_F             ! 
+REAL, DIMENSION(SIZE(PPS))                         :: ZALBG                ! effective ground albedo
 !
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -134,6 +177,20 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
         ZSIGMA_F,ZCHIP)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+!*      2.0    Shortwave radiative transfer
+!              ----------------------------  
+!
+!
+! NOTE, currently MEB only uses 2 of 3 potential snow albedo spectral bands
+!
+CALL ISBA_SWNET_MEB(PLAIV,PZF_TALLVEG,                                       &
+        PSNOWALBVIS,PSNOWALBNIR,                                             &
+        PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,      &
+        PVEG,PFF,PPSN,PPALPHAN,ZTAU_N,PZENITH,PSCA_SW,PSW_RAD,               &
+        PSWUP,PSWNET_N,PSWNET_V,PSWNET_G,PSWNET_NS,                          &
+        PALBT,ZALBG,PSWDOWN_GN                                               )
+
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB',1,ZHOOK_HANDLE)
 !
