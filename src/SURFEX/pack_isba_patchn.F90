@@ -104,7 +104,7 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,                    &
                                XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V, XP_H_VEG,            &
                                XP_WRV,XP_WRVN,XP_TV,                                             &
-                               XP_TC,XP_QC,                                                      &
+                               XP_TC,XP_QC, XP_VEGGV,                                            &
                                XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                                XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
                                XP_SEFOLD, XP_H_TREE, XP_ANF, XP_ANMAX, XP_FZERO, XP_EPSO,        &
@@ -810,10 +810,19 @@ ELSE
 ENDIF
 !
 ! MEB STUFF START
+!
+! Note that here the understory ground vegetation (GV) that was part of the original
+! MEB development has been eliminated. The reason is to avoid a composite
+! of vegetation and soil. Thus, most varibales with old extension V
+! (representing canopy vegetation) are now unassociated. Instead, the classical ISBA
+! variables (e.g. RGL, GAMMA, ...) will represent a composite vegetation in the
+! MEB case. We still keep the GV-variables in the system for future needs.
+! Code is commented with "nogv" in appropriate places.
+!
 IF (LMEB_PATCH(KPATCH))THEN
 !
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_WRV         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_WRV         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_WRVN        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -822,28 +831,30 @@ IF (LMEB_PATCH(KPATCH))THEN
   XP_TC          => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_QC          => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_RSMINV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_RSMINV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_ZF_TALLVEG  => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_H_VEG       => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_RGLV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_GAMMAV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_WRMAX_CFV   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_LAIV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_Z0V         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_RGLV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_GAMMAV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_WRMAX_CFV   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_LAIV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_Z0V         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  XP_VEGGV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 !
-  ISIZE_GROUND = ISIZE_GROUND + 1
-  XP_ROOTFRACV   => XBLOCK_GROUND(:,:,ISIZE_GROUND)  
+!nogv  ISIZE_GROUND = ISIZE_GROUND + 1
+!nogv  XP_ROOTFRACV   => XBLOCK_GROUND(:,:,ISIZE_GROUND)  
 ELSE
-  ISIZE_0 = ISIZE_0 + 1
-  XP_WRV         => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_WRV         => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_WRVN        => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
@@ -852,26 +863,44 @@ ELSE
   XP_TC          => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_QC          => XBLOCK_0(:,ISIZE_0)
-  ISIZE_0 = ISIZE_0 + 1
-  XP_RSMINV      => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_RSMINV      => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_ZF_TALLVEG  => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_H_VEG       => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_RGLV        => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_GAMMAV      => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_WRMAX_CFV   => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_LAIV        => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_Z0V         => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
-  XP_RGLV        => XBLOCK_0(:,ISIZE_0)
-  ISIZE_0 = ISIZE_0 + 1
-  XP_GAMMAV      => XBLOCK_0(:,ISIZE_0)
-  ISIZE_0 = ISIZE_0 + 1
-  XP_WRMAX_CFV   => XBLOCK_0(:,ISIZE_0)
-  ISIZE_0 = ISIZE_0 + 1
-  XP_LAIV        => XBLOCK_0(:,ISIZE_0)
-  ISIZE_0 = ISIZE_0 + 1
-  XP_Z0V         => XBLOCK_0(:,ISIZE_0)
+  XP_VEGGV        => XBLOCK_0(:,ISIZE_0)
 !
-  ISIZE_01 = ISIZE_01 + 1
-  XP_ROOTFRACV   => XBLOCK_01(:,:,ISIZE_01)
+!nogv  ISIZE_01 = ISIZE_01 + 1
+!nogv  XP_ROOTFRACV   => XBLOCK_01(:,:,ISIZE_01)
 ENDIF
+ISIZE_0 = ISIZE_0 + 1
+XP_WRV         => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_RSMINV      => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_RGLV        => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_GAMMAV      => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_WRMAX_CFV   => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_LAIV        => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_Z0V         => XBLOCK_0(:,ISIZE_0)
+ISIZE_01 = ISIZE_01 + 1
+XP_ROOTFRACV   => XBLOCK_01(:,:,ISIZE_01)
 ! MEB STUFF END
 !
 !
@@ -1093,9 +1122,17 @@ IF (NPATCH==1) THEN
 !
 ! For multi-energy balance (MEB):
 !
+! Note that here the understory ground vegetation (GV) that was part of the original
+! MEB development has been eliminated. The reason is to avoid a composite
+! of vegetation and soil. Thus, most varibales with old extension V
+! (representing canopy vegetation) are now unassociated. Instead, the classical ISBA
+! variables (e.g. RGL, GAMMA, ...) will represent a composite vegetation in the
+! MEB case. We still keep the GV-variables in the system for future needs.
+! Code is commented with "nogv" in appropriate places.
+!
   IF(LMEB_PATCH(1))THEN
 !
-    XP_WRV          (:)    =    XWRV          (:, 1) 
+!nogv    XP_WRV          (:)    =    XWRV          (:, 1) 
     XP_WRVN         (:)    =    XWRVN         (:, 1) 
     XP_TV           (:)    =    XTV           (:, 1) 
     XP_TC           (:)    =    XTC           (:, 1) 
@@ -1107,29 +1144,30 @@ IF (NPATCH==1) THEN
 ! physiography parameters are given to the canopy vegetation parameters.
 ! E.g. XLAI -> XP_LAIV and XLAIGV -> XP_LAI
 !
-    IF (CISBA=='DIF') THEN
-      XP_ROOTFRACV         =  XP_ROOTFRAC
-      XP_ROOTFRAC   (:, :) =  XROOTFRACGV   (:, :, 1)
-    END IF
-    IF (CPHOTO=='NON') THEN
-      XP_RSMINV        = XP_RSMIN
-      XP_RSMIN  (:)    = XRSMINGV  (:, 1)
-    END IF
+!nogv    IF (CISBA=='DIF') THEN
+!nogv      XP_ROOTFRACV         =  XP_ROOTFRAC
+!nogv      XP_ROOTFRAC   (:, :) =  XROOTFRACGV   (:, :, 1)
+!nogv    END IF
+!nogv    IF (CPHOTO=='NON') THEN
+!nogv      XP_RSMINV        = XP_RSMIN
+!nogv      XP_RSMIN  (:)    = XRSMINGV  (:, 1)
+!nogv    END IF
 !
     XP_ZF_TALLVEG   (:)    =    XZF_TALLVEG   (:, 1)
-    XP_RGLV         (:)    =    XRGL          (:, 1)
-    XP_GAMMAV       (:)    =    XGAMMA        (:, 1)
-    XP_WRMAX_CFV    (:)    =    XWRMAX_CF     (:, 1)
-    XP_LAIV         (:)    =    XLAI          (:, 1)
-    XP_Z0V          (:)    =    XZ0           (:, 1)
+!nogv    XP_RGLV         (:)    =    XRGL          (:, 1)
+!nogv    XP_GAMMAV       (:)    =    XGAMMA        (:, 1)
+!nogv    XP_WRMAX_CFV    (:)    =    XWRMAX_CF     (:, 1)
+!nogv    XP_LAIV         (:)    =    XLAI          (:, 1)
+!nogv    XP_Z0V          (:)    =    XZ0           (:, 1)
     XP_H_VEG        (:)    =    XH_VEG        (:, 1)
 !
-    XP_VEG          (:)    =    XVEGGV        (:, 1)
-    XP_RGL          (:)    =    XRGLGV        (:, 1)
-    XP_GAMMA        (:)    =    XGAMMAGV      (:, 1)
-    XP_WRMAX_CF     (:)    =    XWRMAX_CFGV   (:, 1)
-    XP_LAI          (:)    =    XLAIGV        (:, 1)
-    XP_Z0           (:)    =    XZ0GV         (:, 1)
+!nogv    XP_VEG          (:)    =    XVEGGV        (:, 1)
+!nogv    XP_RGL          (:)    =    XRGLGV        (:, 1)
+!nogv    XP_GAMMA        (:)    =    XGAMMAGV      (:, 1)
+!nogv    XP_WRMAX_CF     (:)    =    XWRMAX_CFGV   (:, 1)
+!nogv    XP_LAI          (:)    =    XLAIGV        (:, 1)
+!nogv    XP_Z0           (:)    =    XZ0GV         (:, 1)
+    XP_VEGGV        (:)    =    XVEGGV        (:, 1)
 
   ENDIF
 !
@@ -1483,7 +1521,7 @@ ELSE
 !
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      XP_WRV          (JJ)    =    XWRV          (JI, KPATCH) 
+!nogv      XP_WRV          (JJ)    =    XWRV          (JI, KPATCH) 
       XP_WRVN         (JJ)    =    XWRVN         (JI, KPATCH) 
       XP_TV           (JJ)    =    XTV           (JI, KPATCH) 
       XP_TC           (JJ)    =    XTC           (JI, KPATCH) 
@@ -1496,40 +1534,41 @@ ELSE
 ! physiography parameters are given to the canopy vegetation parameters.
 ! E.g. XLAI -> XP_LAIV and XLAIGV -> XP_LAI
 !
-    IF (CISBA=='DIF') THEN
-      XP_ROOTFRACV = XP_ROOTFRAC
-      DO JK=1,SIZE(XROOTFRAC,2)
-        DO JJ=1,KSIZE
-          JI                    =    KMASK(JJ)
-          XP_ROOTFRAC  (JJ, JK) =  XROOTFRACGV   (JI, JK, KPATCH)
-        ENDDO
-      ENDDO
-    END IF
+!nogv    IF (CISBA=='DIF') THEN
+!nogv      XP_ROOTFRACV = XP_ROOTFRAC
+!nogv      DO JK=1,SIZE(XROOTFRAC,2)
+!nogv        DO JJ=1,KSIZE
+!nogv          JI                    =    KMASK(JJ)
+!nogv          XP_ROOTFRAC  (JJ, JK) =  XROOTFRACGV   (JI, JK, KPATCH)
+!nogv        ENDDO
+!nogv      ENDDO
+!nogv    END IF
 !
-    IF (CPHOTO=='NON') THEN
-      XP_RSMINV = XP_RSMIN
-      DO JJ=1,KSIZE
-        JI                    =    KMASK(JJ)
-        XP_RSMIN      (JJ)    =    XRSMINGV      (JI, KPATCH)
-      END DO
-    END IF
+!nogv    IF (CPHOTO=='NON') THEN
+!nogv      XP_RSMINV = XP_RSMIN
+!nogv      DO JJ=1,KSIZE
+!nogv        JI                    =    KMASK(JJ)
+!nogv        XP_RSMIN      (JJ)    =    XRSMINGV      (JI, KPATCH)
+!nogv      END DO
+!nogv    END IF
 !
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
       XP_ZF_TALLVEG   (JJ)    =    XZF_TALLVEG   (JI, KPATCH)
       XP_H_VEG        (JJ)    =    XH_VEG        (JI, KPATCH)
-      XP_RGLV         (JJ)    =    XRGL          (JI, KPATCH)
-      XP_GAMMAV       (JJ)    =    XGAMMA        (JI, KPATCH)
-      XP_WRMAX_CFV    (JJ)    =    XWRMAX_CF     (JI, KPATCH)
-      XP_LAIV         (JJ)    =    XLAI          (JI, KPATCH)
-      XP_Z0V          (JJ)    =    XZ0           (JI, KPATCH)
+!nogv      XP_RGLV         (JJ)    =    XRGL          (JI, KPATCH)
+!nogv      XP_GAMMAV       (JJ)    =    XGAMMA        (JI, KPATCH)
+!nogv      XP_WRMAX_CFV    (JJ)    =    XWRMAX_CF     (JI, KPATCH)
+!nogv      XP_LAIV         (JJ)    =    XLAI          (JI, KPATCH)
+!nogv      XP_Z0V          (JJ)    =    XZ0           (JI, KPATCH)
 !
-      XP_VEG          (JJ)    =    XVEGGV        (JI, KPATCH)
-      XP_RGL          (JJ)    =    XRGLGV        (JI, KPATCH)
-      XP_GAMMA        (JJ)    =    XGAMMAGV      (JI, KPATCH)
-      XP_WRMAX_CF     (JJ)    =    XWRMAX_CFGV   (JI, KPATCH)
-      XP_LAI          (JJ)    =    XLAIGV        (JI, KPATCH)
-      XP_Z0           (JJ)    =    XZ0GV         (JI, KPATCH)
+!nogv      XP_VEG          (JJ)    =    XVEGGV        (JI, KPATCH)
+!nogv      XP_RGL          (JJ)    =    XRGLGV        (JI, KPATCH)
+!nogv      XP_GAMMA        (JJ)    =    XGAMMAGV      (JI, KPATCH)
+!nogv      XP_WRMAX_CF     (JJ)    =    XWRMAX_CFGV   (JI, KPATCH)
+!nogv      XP_LAI          (JJ)    =    XLAIGV        (JI, KPATCH)
+!nogv      XP_Z0           (JJ)    =    XZ0GV         (JI, KPATCH)
+      XP_VEGGV        (JJ)    =    XVEGGV        (JI, KPATCH)
     ENDDO
   ENDIF
 !

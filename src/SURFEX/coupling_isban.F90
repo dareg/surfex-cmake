@@ -156,8 +156,8 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_TOPQS,XP_FWTD,XP_WTD,                          &
                              XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,    &
                              XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V,      &
-                             XP_H_VEG, XP_WRV,XP_WRVN,XP_TV,                   &
-                             XP_TC,XP_QC
+                             XP_H_VEG, XP_WRV, XP_WRVN, XP_TV,                 &
+                             XP_TC, XP_QC, XP_VEGGV
 !
 USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,          &
@@ -1038,7 +1038,7 @@ ZIRRIG_GR(:)= 0.
 !          XP_EMIS, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_VEGTYPE_PATCH, XP_Z0EFF,         &
 !          XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV, XP_ROOTFRACV, XP_WRMAX_CFV,      &
 !          XP_LAIV, XP_BSLAI,XP_LAIMIN,XP_H_VEG,ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV,     &
-!          ZZ0H_MEBV,ZZ0EFF_MEBV, ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                          &
+!          ZZ0H_MEBV,ZZ0EFF_MEBV, ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, XP_VEGGV,                &
 !          XP_RUNOFFB, XP_CGSAT, XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF,    &
 !          XP_PCOEF, XP_TAUICE, XP_WDRAIN, ZP_TDEEP_A, XP_TDEEP, XP_GAMMAT,                &
 !          XP_PSN, XP_PSNG, XP_PSNV,                                                       &
