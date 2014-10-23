@@ -2,7 +2,7 @@
       SUBROUTINE ISBA_SWNET_MEB(PLAI,PF_TALLVEG,                                             &
            PALBVIS_SNOW,PALBNIR_SNOW,                                                        &
            PALBNIR_VEG, PALBVIS_VEG,PALBNIR_SOIL, PALBVIS_SOIL, PFALB,                       &
-           PVEG,PFF,PPSN,PPSNA,PTAU_N,                                                       &
+           PFF,PPSN,PPSNA,PTAU_N,                                                            &
            PZENITH,PSCA_SW,PSW_RAD,PSWUP,PSWNET_N,PSWNET_V,PSWNET_G,PSWNET_NS,PALBEDO,PALBG, &
            PSWDOWN_GN                                                                        )
 
@@ -65,7 +65,7 @@ REAL, DIMENSION(:),   INTENT(IN)  :: PLAI, PF_TALLVEG
 REAL, DIMENSION(:),   INTENT(IN)  :: PZENITH, PSW_RAD, PSCA_SW,                             &
                                      PPSN, PPSNA, PTAU_N
 !
-REAL, DIMENSION(:),   INTENT(IN)  :: PVEG, PFF
+REAL, DIMENSION(:),   INTENT(IN)  :: PFF
 !
 REAL, DIMENSION(:),   INTENT(IN)  :: PFALB
 !
@@ -283,10 +283,9 @@ SPECTRAL_BAND_INT: DO JBAND=1,SIZE(ZALPHA_VS_BND,2)
       ZALPHA_N(JJ)       = ZALPHA_N_BND(JJ,JBAND)
 
 ! - net (below canopy) surface
-!   incorporate any understory vegetation...we assume it has the same albedo as the overlying vegetation.
 !   Also, consider flooding....for now, just use constant water albedo
 
-      ZALPHA_S(JJ)     = (1.-PFF(JJ))*((1.-PVEG(JJ))*ZALPHA_G(JJ) + PVEG(JJ)*ZALPHA_V(JJ)) + PFF(JJ)*PFALB(JJ)
+      ZALPHA_S(JJ)     = (1.-PFF(JJ))*ZALPHA_G(JJ) + PFF(JJ)*PFALB(JJ)
 !
 !*       3.a    Radiation passing through part of canopy with no snow below
 !               ----------------------------------------------------------- 

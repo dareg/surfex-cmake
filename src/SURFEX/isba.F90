@@ -1142,16 +1142,46 @@ ENDIF
 IF(OMEB)THEN
 
    CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME, HISBA, KWG_LAYER,                &  
-        PPS, PZENITH, PSCA_SW, PSW_RAD,                                        &
-        PTV, PTG, PTC, PQC, PWRV, PWG, PWGI,                                   &
-        PWRMAX_CFCV, PZ0_MEBV,                                                 &
+        PTSTEP, PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA,        &
+        PTA, PQA, PH_VEG, PDIRCOSZW,                                           &
+        PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
+        PPEW_A_COEF, PPEW_B_COEF,                                              &
+        PZREF, PUREF, PCH, PCD, PCDN, PRI, PRESA, PHUG, PHV, PHU, PQS,         &
+        PZ0G_WITHOUT_SNOW,                                                     &
+        PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,                                      &
+        PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                                      &
+        PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF,                                 &
+        PTV, PTG, PTC, PQC, PWRV, PWRVN, PWG, PWGI,                            &
+        PWRMAX_CFCV, PRGLCV, PRSMINCV, PGAMMACV, PRS,                          &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
         PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAIV, PROOTFRACCV,            &
         PWSAT, PWFC, PWWILT,                                                   &
-        PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW,           &
+        PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW, PFEMIS,   &
         PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN                      )
+
+! WILL become (when no understory variables present):
+
+!   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME, HISBA, KWG_LAYER,                &  
+!        PTSTEP, PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA,        &
+!        PTA, PQA, PH_VEG, PDIRCOSZW,                                           &
+!        PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
+!        PPEW_A_COEF, PPEW_B_COEF,                                              &
+!        PZREF, PUREF, PCH, PCD, PCDN, PRI, PRESA, PHUG, PHV, PHU, PQS,         &
+!        PZ0G_WITHOUT_SNOW,                                                     &
+!        PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,                                      &
+!        PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                                      &
+!        PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF,                                 &
+!        PTV, PTG, PTC, PQC, PWR, PWRVN, PWG, PWGI,                             & ! 1
+!        PWRMAX_CFCV, PRGL, PRSMIN, PGAMMA, PRS,                                & ! 3
+!        PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
+!        PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
+!        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC,               & ! 2
+!        PWSAT, PWFC, PWWILT,                                                   &
+!        PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PEMISNOW, PFEMIS,   &
+!        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
+!        PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN                      )
 
 ELSE
 !

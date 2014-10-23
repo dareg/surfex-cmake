@@ -1,5 +1,5 @@
 !     ##########################################################################             
-      SUBROUTINE ISBA_LWNET_MEB(PLAI,PPSN,PPSNA,PEMIS_N,                                      &
+      SUBROUTINE ISBA_LWNET_MEB(PLAI,PPSN,PPSNA,PEMIS_N,PEMIS_F,PFF,                          &
            PTV,PTG,PTN,PLW_RAD,PLWNET_N,PLWNET_V,PLWNET_G,                                    &
            PLWNET_V_DTV,PLWNET_V_DTG,PLWNET_V_DTN,                                            &
            PLWNET_G_DTV,PLWNET_G_DTG,PLWNET_G_DTN,                                            &
@@ -68,7 +68,7 @@ REAL, DIMENSION(:),   INTENT(IN)  :: PLAI, PPSN, PPSNA, PLW_RAD, PSIGMA_F
 !
 REAL, DIMENSION(:),   INTENT(IN)  :: PTV, PTG, PTN
 !
-REAL, DIMENSION(:),   INTENT(IN)  :: PEMIS_N
+REAL, DIMENSION(:),   INTENT(IN)  :: PEMIS_N, PEMIS_F, PFF
 !
 REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_N, PLWNET_V, PLWNET_G
 !
@@ -116,7 +116,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('ISBA_LWNET_MEB',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
-ZEMIS_G(:)=XEMISSOIL
+! Soil with flooded part:
+!
+ZEMIS_G(:)    = XEMISSOIL*(1.-PFF(:)) + PFF(:)*PEMIS_F(:)
 !
 !*       1.     View factors: transmission
 !               --------------------------

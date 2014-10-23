@@ -605,6 +605,19 @@ CALL SNOW3LEVAPN(PPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
                    PSNOWDZ,PSNOWLIQ(:,1),PTA,PSNOWHEAT,                     &
                    PEVAPCOR,PGFLXCOR)
 !
+! Update snow temperatures and liquid
+! water portion of the snow from snow heat content
+! since vertical distribution of enthalpy might have been
+! modified in the previous routine:
+!
+ZSCAP(:,:)     = SNOW3LSCAP(PSNOWRHO)
+ZSNOWTEMP(:,:) = XTT + ( ((PSNOWHEAT(:,:)/PSNOWDZ(:,:))                   &
+                   + XLMTT*PSNOWRHO(:,:))/ZSCAP(:,:) )  
+PSNOWLIQ(:,:)  = MAX(0.0,ZSNOWTEMP(:,:)-XTT)*ZSCAP(:,:)*                  &
+                   PSNOWDZ(:,:)/(XLMTT*XRHOLW)  
+ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
+!
+!
 ! If all snow in uppermost layer evaporates/sublimates, re-distribute
 ! grid (below could be evoked for vanishingly thin snowpacks):
 !
@@ -676,6 +689,9 @@ PQS(:) = ZQSAT(:)
 !
 PGFLXCOR(:)     = (PGRNDFLUX(:) - ZGRNDFLUXI(:)) + PGFLXCOR(:)
 !
+!
+!*      14.     Energy Budget Diagnostics:
+!               --------------------------
 !
 ! NOTE: To check enthalpy conservation, the error in W m-2 is defined HERE as
 !
@@ -1954,8 +1970,10 @@ PCT(:)      = 1.0/(PSCAP(:)*ZSNOWDZM1(:))
 !
 ! Fraction of surface frozen (sublimation) with the remaining
 ! fraction being liquid (evaporation):
+! NOTE: currently, for simplicity, assume no liquid water flux
+! OFF: PSFCFRZ(:)  = 1.0 - PSNOWLIQ(:)*XRHOLW/(ZSNOWDZM1(:)*PSNOWRHO(:))
 !
-PSFCFRZ(:)  = 1.0 - PSNOWLIQ(:)*XRHOLW/(ZSNOWDZM1(:)*PSNOWRHO(:))
+PSFCFRZ(:)  = 1.0 
 !
 ! Thermal conductivity between uppermost and lower snow layers:
 !
@@ -2182,7 +2200,13 @@ PSNOWFLUX(:)      = ZDTERM(:,1)*(ZSNOWTEMP(:,1) - ZSNOWTEMP(:,2))
 ! snowpack temperatures. This is done as it is most likely
 ! most signigant melting will occur within a time step in surface layer.
 ! Surface energy budget (and fluxes) will
-! be re-calculated (outside of this routine):
+! be re-calculated (outside of this routine).
+!
+! NOTE: if MEB is active, then surface fluxes have been defined outside
+! of the snow routine and have been adjusted such that they are evaluated
+! at a snow surface temperature no greater than Tf. Thus, the implicit surface temperature
+! will likely never greatly exceed Tf (before melt computed and they are adjusted to Tf)
+! so we can skip the next block of code when MEB is active.
 !
 IF(.NOT.OMEB)THEN
 !
@@ -2208,7 +2232,7 @@ IF(.NOT.OMEB)THEN
 ! with one assuming T=Tf in surface layer:
 !
    ZSNOWTEMP_DELTA(:)    = 0.0
-   !
+!
    WHERE(ZSNOWTEMP(:,1) > XTT .AND. PSNOWTEMP(:,1) == XTT)
       PSNOWFLUX(:)       = ZDTERM(:,1)*(XTT - ZSNOWTEMP_M(:,1))
       ZSNOWTEMP_DELTA(:) = 1.0
@@ -2398,8 +2422,8 @@ END SUBROUTINE SNOW3LMELT
 !####################################################################
 !####################################################################
       SUBROUTINE SNOW3LREFRZ(PTSTEP,PRR,                            &
-                               PSNOWRHO,PSNOWTEMP,PSNOWDZ,PSNOWLIQ,   &
-                               PTHRUFAL                               )  
+                               PSNOWRHO,PSNOWTEMP,PSNOWDZ,PSNOWLIQ, &
+                               PTHRUFAL                             )
 !
 !
 !!    PURPOSE
@@ -2438,12 +2462,14 @@ INTEGER                               :: INLVLS
 !
 REAL, DIMENSION(SIZE(PRR))            :: ZPCPXS, ZTOTWCAP, ZRAINFALL
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE, ZFLOWLIQ,    &
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::   ZFLOWLIQ,            &
                                                         ZSNOWLIQ, ZSNOWRHO,  &
                                                         ZWHOLDMAX, ZSNOWDZ,  &
-                                                        ZSNOWTEMP, ZSCAP  
+                                                        ZSNOWTEMP, ZSCAP,    &  
+                                                        ZSNOWHEAT
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)) :: ZFLOWLIQT
+REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)):: ZFLOWLIQT
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -2462,24 +2488,19 @@ INLVLS         = SIZE(PSNOWDZ(:,:),2)
 ! 1. Refreeze due to heat transfer
 !    -----------------------------
 ! Freeze liquid water in any layers which cooled due
-! to heat transfer.
+! to heat transfer. First, update H and re-diagnose (update) T and Wl:
 !
 ZSCAP(:,:)     = SNOW3LSCAP(ZSNOWRHO)
-ZPHASE(:,:)    = MIN(ZSCAP(:,:)*                                          &
-                   MAX(0.0, XTT - ZSNOWTEMP(:,:))*PSNOWDZ(:,:),             &
-                   ZSNOWLIQ(:,:)*XLMTT*XRHOLW)  
 !
+ZSNOWHEAT(:,:) = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
+                        - XLMTT*ZSNOWRHO(:,:) ) + XLMTT*XRHOLW*ZSNOWLIQ(:,:)  
 !
-! Warm layer and reduce liquid if freezing occurs:
+ZSNOWTEMP(:,:) = XTT + ( ((ZSNOWHEAT(:,:)/MAX(PSNOWDZ(:,:),XSNOWDMIN/INLVLS))    &
+                   + XLMTT*ZSNOWRHO(:,:))/ZSCAP(:,:) )
 !
-ZSNOWDZ(:,:)   = MAX(XSNOWDMIN/INLVLS, PSNOWDZ(:,:))
+ZSNOWLIQ(:,:)  = MAX(0.0,ZSNOWTEMP(:,:)-XTT)*ZSCAP(:,:)*PSNOWDZ(:,:)/(XLMTT*XRHOLW)  
 !
-PSNOWTEMP(:,:) = ZSNOWTEMP(:,:) + ZPHASE(:,:)/(ZSCAP(:,:)*ZSNOWDZ(:,:))
-!
-! Reduce liquid portion if freezing occurs:
-!
-ZSNOWLIQ(:,:)  = ZSNOWLIQ(:,:) - ( (PSNOWTEMP(:,:)-ZSNOWTEMP(:,:))*       &
-                   ZSCAP(:,:)*ZSNOWDZ(:,:)/(XLMTT*XRHOLW) )  
+ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
 !
 !
 ! 2. Reduce thickness due to snowmelt in excess of holding capacity
@@ -2488,7 +2509,9 @@ ZSNOWLIQ(:,:)  = ZSNOWLIQ(:,:) - ( (PSNOWTEMP(:,:)-ZSNOWTEMP(:,:))*       &
 ! Maximum holding space for liquid water
 ! amount is drained into next layer down.
 ! Loss of water due to snowmelt causes a reduction
-! in snow layer mass by a reduction in thickness.
+! in snow layer mass by a reduction in thickness. Owing to a consistent
+! decrease in both liq and thickness (and the fact that T=Tf when liquid present), 
+! enthalpy is conserved.
 !
 ZWHOLDMAX(:,:) = SNOW3LHOLD(PSNOWRHO,PSNOWDZ)
 !
@@ -2554,9 +2577,15 @@ DO JJ=1,INLVLS
       ZSNOWLIQ(JI,JJ)  = ZSNOWLIQ(JI,JJ) + ZFLOWLIQT(JI,JJ-1)
       ZFLOWLIQ(JI,JJ)  = MAX(0.0, ZSNOWLIQ(JI,JJ)-ZWHOLDMAX(JI,JJ))
       ZSNOWLIQ(JI,JJ)  = ZSNOWLIQ(JI,JJ) - ZFLOWLIQ(JI,JJ)
+      ZFLOWLIQT(JI,JJ) = ZFLOWLIQT(JI,JJ) + ZFLOWLIQ(JI,JJ)
+
       ZSNOWRHO(JI,JJ)  = ZSNOWRHO(JI,JJ)  + (ZSNOWLIQ(JI,JJ) - PSNOWLIQ(JI,JJ))*       &
                           XRHOLW/MAX(XSNOWDMIN/INLVLS,ZSNOWDZ(JI,JJ))  
-      ZFLOWLIQT(JI,JJ) = ZFLOWLIQT(JI,JJ) + ZFLOWLIQ(JI,JJ)
+      ZSCAP(JI,JJ)     = SNOW3LSCAP(ZSNOWRHO(JI,JJ))
+      ZSNOWTEMP(JI,JJ) = XTT + ( ((ZSNOWHEAT(JI,JJ)/MAX(XSNOWDMIN/INLVLS,ZSNOWDZ(JI,JJ)))                 &
+                         + XLMTT*ZSNOWRHO(JI,JJ))/ZSCAP(JI,JJ) )  
+      ZSNOWLIQ(JI,JJ)  = MAX(0.0,ZSNOWTEMP(JI,JJ)-XTT)*ZSCAP(JI,JJ)*ZSNOWDZ(JI,JJ)/(XLMTT*XRHOLW)  
+      ZSNOWTEMP(JI,JJ) = MIN(XTT,ZSNOWTEMP(JI,JJ))
    ENDDO
 ENDDO
 !
@@ -2577,9 +2606,11 @@ PTHRUFAL(:)  = (PTHRUFAL(:) + ZPCPXS(:))*XRHOLW/PTSTEP
 ! 4. Update thickness and density and any freezing:
 !    ----------------------------------------------
 !
+PSNOWTEMP(:,:)= ZSNOWTEMP(:,:)
 PSNOWDZ(:,:)  = ZSNOWDZ(:,:)
 PSNOWRHO(:,:) = ZSNOWRHO(:,:)
 PSNOWLIQ(:,:) = ZSNOWLIQ(:,:)
+!
 IF (LHOOK) CALL DR_HOOK('SNOW3LREFRZ',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
@@ -2625,8 +2656,9 @@ REAL, DIMENSION(:), INTENT(IN)      :: PALBT, PSW_RAD, PEMIST, PLW_RAD,        &
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PSNOWTEMP
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PRN, PH, PGFLUX, PLES3L, PLEL3L,      &
-                                         PEVAP, PLWUPSNOW, PLWNETSNOW, PUSTAR  
+REAL, DIMENSION(:), INTENT(OUT)     :: PRN, PH, PGFLUX, PLES3L, PLEL3L,        &
+                                         PEVAP, PLWUPSNOW, PUSTAR,             &  
+                                         PLWNETSNOW
 !
 LOGICAL, DIMENSION(:), INTENT(OUT)  :: OSFCMELT
 !
@@ -2920,21 +2952,21 @@ WHERE(PSNOWDZ(:,1) > 0.0)
 ! here owing to a mass loss must be offset by possible adjustments to T and Wl
 ! to conserve Enthalpy.
 
-! For vanishingly thin snow, a decoupling can occur between forcing level T
-! and snow sfc T (as snowpack vanishes owing to sublimation), so a simple limit
-! imposed on this gradient:
-
    PSNOWTEMP(:)   = XTT + ( ((PSNOWHEAT(:,1)/MAX(ZSNOWDEMIN,PSNOWDZ(:,1)))   &
                     + XLMTT*PSNOWRHO(:))/ZSCAP(:) )
-
-   PSNOWTEMP(:)   = MAX(MIN(XTT,PTA(:)-ZTDIF), PSNOWTEMP(:))
-
-! Update surface enthalpy and re-diagnose T and liq:
 
    PSNOWLIQ(:)    = MAX(0.0,PSNOWTEMP(:)-XTT)*ZSCAP(:)*                  &
                     PSNOWDZ(:,1)/(XLMTT*XRHOLW)  
 
    PSNOWTEMP(:)   = MIN(XTT,PSNOWTEMP(:)) 
+
+! For vanishingly thin snow, a decoupling can occur between forcing level T
+! and snow sfc T (as snowpack vanishes owing to sublimation), so a simple limit
+! imposed on this gradient:
+
+   PSNOWTEMP(:)   = MAX(MIN(XTT,PTA(:)-ZTDIF), PSNOWTEMP(:))
+
+! Update surface enthalpy:
 
    ZSNOWHEAT(:)   = PSNOWHEAT(:,1)
    PSNOWHEAT(:,1) = PSNOWDZ(:,1)*( ZSCAP(:)*(PSNOWTEMP(:)-XTT)             &
@@ -3054,7 +3086,7 @@ ZSNOWGONE_DELTA(:)    = 1.0
 !
 WHERE(PGFLUXSNOW(:) - PGRNDFLUXO(:) + PRADSINK(:) >= (-ZSNOWHEATC(:)/PTSTEP) )
    PGRNDFLUX(:)       = PGFLUXSNOW(:) + (ZSNOWHEATC(:)/PTSTEP)
-   PEVAPCOR(:)        = PPSN3L(:)*((PLEL3L(:)/XLVTT) + (PLES3L(:)/(XLSTT*PSNOWRHO(:,1))))
+   PEVAPCOR(:)        = PPSN3L(:)*((PLEL3L(:)/XLVTT) + (PLES3L(:)/XLSTT))
    PRADXS(:)          = 0.0
    ZSNOWGONE_DELTA(:) = 0.0          ! FLAG...if=0 then snow vanishes, else=1
 END WHERE
@@ -3181,6 +3213,84 @@ ENDDO
 IF (LHOOK) CALL DR_HOOK('SNOW3LEVAPGONE',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOW3LEVAPGONE
+!####################################################################
+!####################################################################
+!####################################################################
+SUBROUTINE SNOW3LEBUDMEB(PTSTEP, PSNOWDZMIN,                        &
+           PTS, PSNOWDZ1, PSNOWDZ2, PSCOND1, PSCOND2, PSCAP,        &
+           PRNSNOW, PHSNOW, PLES3L, PLEL3L, PRADSINK, PHPSNOW,      &
+           PCT, PTSTERM1, PTSTERM2, PGFLUXSNOW                      )                          
+!
+!!    PURPOSE
+!!    -------
+!     Calculate surface energy budget with surface fluxes imposed.
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL,    INTENT(IN)               :: PTSTEP, PSNOWDZMIN
+!
+REAL, DIMENSION(:), INTENT(IN)    :: PTS, PSNOWDZ1, PSNOWDZ2, PSCOND1, PSCOND2, PSCAP,  &
+                                     PRNSNOW, PHSNOW, PLES3L, PLEL3L, PRADSINK, PHPSNOW
+!
+REAL, DIMENSION(:), INTENT(OUT)   :: PCT, PTSTERM1, PTSTERM2, PGFLUXSNOW
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PTS))        :: ZSCONDA, ZA, ZB, ZC,             &
+                                     ZSNOWDZM1, ZSNOWDZM2
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('SNOW3LEBUDMEB',0,ZHOOK_HANDLE)
+!
+! Calculate surface energy budget components:
+! ---------------------------------------------------------
+! To prevent numerical difficulties for very thin snow
+! layers, limit the grid "thinness": this is important as
+! layers become vanishing thin:
+!
+ZSNOWDZM1(:)  = MAX(PSNOWDZ1(:), PSNOWDZMIN)
+ZSNOWDZM2(:)  = MAX(PSNOWDZ2(:), PSNOWDZMIN)
+!
+! Surface thermal inertia:
+!
+PCT(:)        = 1.0/(PSCAP(:)*ZSNOWDZM1(:))
+!
+! Surface fluxes entering the snowpack (radiative and turbulent):
+!
+PGFLUXSNOW(:) = PRNSNOW(:) - PHSNOW(:) - PLES3L(:) - PLEL3L(:)
+!
+! Thermal conductivity between uppermost and lower snow layers:
+!
+ZSCONDA(:)    = (ZSNOWDZM1(:)+ZSNOWDZM2(:))/                           &
+               ((ZSNOWDZM1(:)/PSCOND1(:)) + (ZSNOWDZM2(:)/PSCOND2(:)))
+!
+!
+! Energy budget solution terms (with surface flux imposed):
+!
+ZB(:)         = 1./PTSTEP 
+!
+ZA(:)         = ZB(:) + PCT(:)*(2*ZSCONDA(:)/(ZSNOWDZM2(:)+ZSNOWDZM1(:)))
+!
+ZC(:)         = PCT(:)*( PGFLUXSNOW(:) + PHPSNOW(:) + PRADSINK(:) )
+!
+! Coefficients needed for implicit solution
+! of linearized surface energy budget:
+!
+PTSTERM2(:)   = 2*ZSCONDA(:)*PCT(:)/(ZA(:)*(ZSNOWDZM2(:)+ZSNOWDZM1(:)))
+!
+PTSTERM1(:)   = (PTS(:)*ZB(:) + ZC(:))/ZA(:)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('SNOW3LEBUDMEB',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SNOW3LEBUDMEB
+!####################################################################
+!####################################################################
+!####################################################################
 !
 !
 !
