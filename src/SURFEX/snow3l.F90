@@ -1,6 +1,5 @@
 !     #########
       SUBROUTINE SNOW3L(HSNOWRES, TPTIME, OMEB, HIMPLICIT_WIND,           &
-                PPALPHAN, PLAIV,                                          &
                 PPEW_A_COEF, PPEW_B_COEF,                                 &
                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
                 PSNOWSWE,PSNOWRHO,PSNOWHEAT,PSNOWALB,                     &
@@ -138,14 +137,12 @@ REAL, DIMENSION(:), INTENT(IN)    :: PPS, PTA, PSW_RAD, PQA,                    
 !                                      PQA     = atmospheric specific humidity
 !                                                at level za
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PSOILCOND, PD_G, PPSN3L, PCT, PPALPHAN, PLAIV
+REAL, DIMENSION(:), INTENT(IN)    :: PSOILCOND, PD_G, PPSN3L, PCT
 !                                      PCT       = thermal inertia of underlying soil (m2 K J-1)
 !                                      PSOILCOND = soil thermal conductivity [W/(m K)]
 !                                      PD_G      = Assumed first soil layer thickness (m)
 !                                                  Used to calculate ground/snow heat flux
 !                                      PPSN3L    = snow fraction
-!                                      PPALPHAN  = Snow/canopy transition coefficient
-!                                      PLAIV     = LAI of canopy
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0, PZ0EFF, &
                                        PALB, PZ0H, PPERMSNOWFRAC  

@@ -1,6 +1,6 @@
 !     #########
 SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
-                         TPTIME, PTSTEP, PPALPHAN, PLAIV, PVEGTYPE,                          &
+                         TPTIME, PTSTEP, PVEGTYPE,                                           &
                          PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                            &
                          PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                         &
                          PTG, PCG, PCT, PSOILCONDZ,                                          &
@@ -18,7 +18,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
                          PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
-                         HSNOWMETAMO,HSNOWRAD)                               
+                         HSNOWMETAMO, HSNOWRAD                                               )                               
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -162,10 +162,8 @@ REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PR
 !                                                  normal to the surface and the vertical
 !                                      PALB      = soil/vegetation albedo
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PPSN, PPALPHAN, PLAIV
+REAL, DIMENSION(:), INTENT(IN)      :: PPSN
 !                                      PPSN     = Snow cover fraction (total) 
-!                                      PPALPHAN = Snow/canopy transition coefficient
-!                                      PLAIV    = LAI of canopy veg
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                   &
                                        PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
@@ -557,8 +555,6 @@ REAL, DIMENSION(KSIZE1)        :: ZP_PS
 REAL, DIMENSION(KSIZE1)        :: ZP_SRSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_RRSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN3L
-REAL, DIMENSION(KSIZE1)        :: ZP_PALPHAN
-REAL, DIMENSION(KSIZE1)        :: ZP_LAIV
 REAL, DIMENSION(KSIZE1)        :: ZP_TA
 REAL, DIMENSION(KSIZE1)        :: ZP_CT
 REAL, DIMENSION(KSIZE1)        :: ZP_TG
@@ -662,8 +658,6 @@ DO JJ=1,KSIZE1
    ZP_SRSNOW  (JJ) = PSR      (JI)
    ZP_RRSNOW  (JJ) = ZRRSNOW  (JI)
    ZP_PSN3L   (JJ) = PPSN     (JI)
-   ZP_PALPHAN (JJ) = PPALPHAN (JI)
-   ZP_LAIV    (JJ) = PLAIV    (JI)
    ZP_CT      (JJ) = PCT      (JI)
    ZP_TA      (JJ) = PTA      (JI)
    ZP_TG      (JJ) = PTG      (JI)
@@ -793,7 +787,6 @@ IF (HSNOW_ISBA=='CRO') THEN
 ELSE 
 !
   CALL SNOW3L(HSNOWRES, TPTIME, OMEB, HIMPLICIT_WIND,                      &
-             ZP_PALPHAN, ZP_LAIV,                                          &
              ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
              ZP_PET_A_COEF, ZP_PEQ_A_COEF,ZP_PET_B_COEF, ZP_PEQ_B_COEF,    &
              ZP_SNOWSWE, ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,              &

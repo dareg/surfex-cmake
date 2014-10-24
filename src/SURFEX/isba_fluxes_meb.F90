@@ -13,20 +13,20 @@
            PTHRMA_TG,PTHRMB_TG,PTHRMA_TV,PTHRMB_TV,PTHRMA_TN,PTHRMB_TN,                       &
            PQSAT_G,PQSAT_V,PQSATI_N,                                                          &
            PFF,PPSN,PPSNA,PPSNCV,PFROZEN1,PFFROZEN,                                           &
-           PLEG_DELTA,PLEGI_DELTA,PHUG,PHUGI,PHGV,PHVG,PHVN,                                  &
+           PLEG_DELTA,PLEGI_DELTA,PHUG,PHUGI,PHVG,PHVN,                                       &
            PFLXC_C_A,PFLXC_G_C,PFLXC_VG_C,PFLXC_VN_C,PFLXC_N_C,PFLXC_N_A,                     &
            PFLXC_MOM,PFLXC_V_C,PHVGS,PHVNS,                                                   &
            PTG,PTV,PTN,                                                                       &
            PDQSAT_G,PDQSAT_V,PDQSATI_N,                                                       & 
            PTC,PQC,PTA_IC,PQA_IC,                                                             &
-           PDELTA_G,PDELTA_V,                                                                 &
+           PDELTA_V,                                                                          &
            PDELTAT_G,PDELTAT_V,PDELTAT_N,                                                     &
            PSW_UP,PSW_RAD,PLW_RAD,                                                            &
            PRNET,PLW_UP,                                                                      &
            PH_C_A,PH_V_C,PH_G_C,PH_N_C,PH_N_A,PH_N,PH,                                        &
            PLE_C_A,PLE_V_C,PLE_G_C,PLE_N_C,                                                   &
-           PEVAP_C_A,PLEV_V_C,PEVAP_G_C,PEVAP_N_C,PEVAP_N_A, PLEV_G_C,                        &
-           PEVAP,PLETR_G_C,PLETR_V_C,PLER_G_C,PLER_V_C,PLEG,PLEGI,                            &
+           PEVAP_C_A,PLEV_V_C,PEVAP_G_C,PEVAP_N_C,PEVAP_N_A,                                  &
+           PEVAP,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                               &
            PLE_FLOOD,PLEI_FLOOD,PLES,PLEL,                                                    &
            PEVAPN,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,PTS_RAD,PEMIS                             )
 !     ##########################################################################
@@ -143,9 +143,8 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PFF, PPSN, PPSNA, PPSNCV, PFROZEN1, PFFROZ
 !                                     PFFROZEN = frozen fraction of flooded zone                               (-)
 !
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PLEG_DELTA, PLEGI_DELTA, PHUGI, PHUG, PHGV, PHVG, PHVN
+REAL, DIMENSION(:),   INTENT(IN)   :: PLEG_DELTA, PLEGI_DELTA, PHUGI, PHUG, PHVG, PHVN
 !                                     PHUG = relative humidity of the soil                                     (-)                         
-!                                     PHGV = Halstead coefficient of understory vegetation                     (-)                         
 !                                     PHVG = Halstead coefficient of non-buried (snow) canopy vegetation       (-)                         
 !                                     PHVN = Halstead coefficient of paritally-buried (snow) canopy vegetation (-)                         
 !
@@ -195,8 +194,7 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PSW_UP, PSW_RAD, PLW_RAD
 !                                     PSW_RAD = downwelling shortwave radiation from the atmosphere above the canopy  (W m-2)
 !                                     PLW_RAD = downwelling longwave radiation from the atmosphere above the canopy  (W m-2)
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PDELTA_G, PDELTA_V
-!                                     PDELTA_G = Explicit vegetation understory interception fraction  (-)
+REAL, DIMENSION(:),   INTENT(IN)   :: PDELTA_V
 !                                     PDELTA_V = Explicit canopy interception fraction                 (-)
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PDELTAT_V, PDELTAT_N, PDELTAT_G
@@ -234,21 +232,18 @@ REAL, DIMENSION(:),   INTENT(OUT)  ::  PLE_C_A, PLE_V_C, PLE_G_C, PLE_N_C
 !                                     PLE_N_C = Latent heat flux: ground based snowpack to canopy air space  (W m-2)
 !
 REAL, DIMENSION(:),   INTENT(OUT)  :: PEVAP_C_A, PLEV_V_C, PEVAP_G_C, PEVAP_N_C, PEVAP_N_A,            &  
-                                      PLEV_G_C, PEVAP, PEVAPN
+                                      PEVAP, PEVAPN
 !                                     PEVAP_C_A = Water flux: canopy air space to overlying atmosphere (kg m-2 s-1)
 !                                     PLEV_V_C  = Water flux: vegetation canopy to canopy air space (kg m-2 s-1)
 !                                     PEVAP_G_C = Water flux: understory (soil & vegetation) to canopy air space (kg m-2 s-1)
 !                                     PEVAP_N_C = Water flux: ground based snowpack to canopy air space (kg m-2 s-1)
 !                                     PEVAP_N_A = Water flux: ground based snowpack to overlying atmosphere (kg m-2 s-1)
-!                                     PLEV_G_C  = Water flux: understory (transpiration and intercepted water) to canopy air space (kg m-2 s-1)
 !                                     PEVAP     = Water flux: total net water flux from surface to atmosphere  (kg m-2 s-1)
 !                                     PEVAPN    = Water flux: ground based snowpack to both canopy air space and overlying atmosphere (kg m-2 s-1)
 !
-REAL, DIMENSION(:),   INTENT(OUT)  :: PLETR_G_C, PLETR_V_C, PLER_G_C, PLER_V_C, PLEG, PLEGI, PLE_FLOOD,        &
+REAL, DIMENSION(:),   INTENT(OUT)  :: PLETR_V_C, PLER_V_C, PLEG, PLEGI, PLE_FLOOD,        &
                                       PLEI_FLOOD, PLES, PLEL, PLES_V_C, PLETR, PLEV, PLE, PLEI, PLER
-!                                     PLETR_G_C   = Latent heat flux: transpiration from the understory vegetation to canopy air (W m-2)
 !                                     PLETR_V_C   = Latent heat flux: transpiration from the canopy (overstory) vegetation to canopy air (W m-2)
-!                                     PLER_G_C    = Latent heat flux: evaporation of intercepted water from the understory vegetation to canopy air (W m-2)
 !                                     PLER_V_C    = Latent heat flux: evaporation of intercepted water from the canopy (overstory) vegetation to canopy air (W m-2)
 !                                     PLES_V_C    = Latent heat flux: sublimation of canopy intercepted snowpack to canopy air (W m-2)
 !                                     PLEG        = Latent heat flux: baresoil evaporation (W m-2)
@@ -408,20 +403,6 @@ PLEG(:)       = ZWORK(:)*PLEG_DELTA(:) *( PHUG(:) *ZQSATN_G(:) - PQC(:) )*(1.-PF
 
 PLEGI(:)      = ZWORK(:)*PLEGI_DELTA(:)*( PHUGI(:)*ZQSATN_G(:) - PQC(:) )*    PFROZEN1(:) *XLSTT
 
-! - Total evapotranspiration vapor flux from the understory vegetation: (W m-2)
-
-ZWORK(:)      = XLVTT*(1.-PPSN(:)-ZFFF(:)) * PVEG(:) * PFLXC_G_C(:) * ( ZQSATN_G(:) - PQC(:) )
-
-PLEV_G_C(:)   = ZWORK(:) * PHGV(:)
-
-! - Latent heat flux: from understory vegetation intercepted water (W m-2)
-
-PLER_G_C(:)   = ZWORK(:) * PDELTA_G(:) 
-
-! - Latent heat flux: from understory transpiration (W m-2)
-
-PLETR_G_C(:)  = PLEV_G_C(:) - PLER_G_C(:)
-
 ! - Latent heat flux from frozen and unfrozen flooded zones (W m-2)
 
 ZWORK(:)      = PFF(:) * PFLXC_G_C(:)*( ZQSATN_G(:) - PQC(:) )
@@ -462,19 +443,19 @@ PEVAP_N_C(:) = PFLXC_N_C(:)*(ZQSATIN_N(:) - PQC(:))*PPSN(:)*(1.0-PPSNA(:))*(XLST
 
 PLE_N_C(:)   = XLVTT*PEVAP_N_C(:) ! W m-2
 
-! - latent heat flux from transpiration from understory veg and canopy veg (evapotranspiration)
+! - latent heat flux from transpiration from canopy veg (evapotranspiration)
 
-PLETR(:)     = PLETR_G_C(:) + PLETR_V_C(:)
+PLETR(:)     = PLETR_V_C(:)
 
 ! Total latent heat flux from transpiration from understory veg and canopy veg (evapotranspiration and sublimation)
 !   and intercepted water on both reservoirs (W m-2) 
 
-PLEV(:)      = PLETR(:) + PLER_V_C(:) + PLER_G_C(:) 
+PLEV(:)      = PLETR(:) + PLER_V_C(:) 
 
 ! Total latent heat flux from intercepted water (canopy and understory vegetation):
 ! (does not include intercepted snow sublimation): W m-2
 
-PLER(:)      = PLER_G_C(:) + PLER_V_C(:)
+PLER(:)      = PLER_V_C(:)
 
 ! - Vapor flux from the ground-based snowpack (part burying the canopy vegetation) to the atmosphere (kg m-2 s-1):
 
@@ -496,7 +477,7 @@ PEVAPN(:)    = (PLEL(:) + PLES(:))/XLVTT
 ! - Total snow-free vapor flux from the understory (flooded areas, baresoil and understory vegetation)
 !   to the canopy air space (W m-2 and kg m-2 s-1, respectively):
 
-PLE_G_C(:)   = PLE_FLOOD(:) + PLEI_FLOOD(:) + PLEGI(:) + PLEG(:) + PLEV_G_C(:)
+PLE_G_C(:)   = PLE_FLOOD(:) + PLEI_FLOOD(:) + PLEGI(:) + PLEG(:) 
 
 PEVAP_G_C(:) = PLE_G_C(:)/XLVTT 
 

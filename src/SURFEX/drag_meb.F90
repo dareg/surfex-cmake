@@ -2,17 +2,18 @@
 !
 SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
                     PTG, PTC, PTV, PSNOWTEMP, PTA, PQC, PQA, PVMOD,    &
-                    PWG, PWGI, PWSAT, PWFC, PEXNS, PEXNA, PPS,         &
+                    PWG, PWGI, PWSAT, PWFC,                            &
+                    PEXNS, PEXNA, PPS,                                 &
                     PRR, PSR, PRHOA, PZ0G_WITHOUT_SNOW,                &
                     PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,                  &
                     PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                  &
                     PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF,             &
                     PSNOWSWE,                                          &
-                    PWRV, PWR, PCHIP, PTSTEP, PRS_GV, PRS_VG, PRS_VN,  &
+                    PWR, PCHIP, PTSTEP, PRS_VG, PRS_VN,                &
                     PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,   &
-                    PPSNCV, PDELTAV, PDELTAGV, PLAI, PLAIV,            &
+                    PPSNCV, PDELTA, PLAI,                              &
                     PCH, PCD, PCDN, PRI, PRA, PVELC,                   &
-                    PHUG, PHUGI, PHGV, PHVN, PHVG, PHU, PQS, PRS,      &
+                    PHUG, PHUGI, PHV, PHVG, PHVN, PHU, PQS, PRS,       &
                     PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF,             &
                     PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C,        &    
                     PFLXC_VG_C, PFLXC_VN_C, PFLXC_MOM,                 &
@@ -56,6 +57,7 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
 !!    -------------
 !!      Original    06/2010
 !!      For MEB     01/2011
+!                   10/2014 (A. Boone) Remove understory compsite vegetation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -134,15 +136,13 @@ REAL, DIMENSION(:), INTENT(IN)   :: PZ0G_WITHOUT_SNOW, &
 !                    PZ0EFF             ! roughness length for momentum over MEB total patch
 !                                         eventuelly including orograhic roughness
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PWRV,PWR,PCHIP
-!                                     PWRV = intercepted water for the canopy
-!                                     PWR  = intercepted water for the understory vegetation
+REAL, DIMENSION(:), INTENT(IN)   :: PWR,PCHIP
+!                                     PWR  = intercepted water for the canopy
 !                                     PCHIP = view factor (for LW) 
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PRS_GV, PRS_VG, PRS_VN, PPSN, PPSNCV,  &
+REAL, DIMENSION(:), INTENT(IN)   :: PRS_VG, PRS_VN, PPSN, PPSNCV,  &
                                     PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW
 !
-!                                     PRS_GV   = surface resistance for understory vegetation 
 !                                     PRS_VG   = surface resistance for canopy (1-png)
 !                                     PRS_VN   = surface resistance for canopy (png)
 !                                     PPSN     = fraction of the patch covered by snow
@@ -159,13 +159,10 @@ REAL, DIMENSION(:), INTENT(IN)   :: PRS_GV, PRS_VG, PRS_VN, PPSN, PPSNCV,  &
 !                                     PDIRCOSZW= Cosinus of the angle between 
 !                                                the normal to the surface and the vertical
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PDELTAV, PDELTAGV, PLAIV, PLAI
-!                                     PDELTAV  = fraction of the canopy foliage covered
+REAL, DIMENSION(:), INTENT(IN)    :: PDELTA, PLAI
+!                                     PDELTA   = fraction of the canopy foliage covered
 !                                                by intercepted water (-)
-!                                     PDELTAGV = fraction of the understory vegetation covered
-!                                                by intercepted water (-)
-!                                     PLAIV    = overstory vegetation LAI (m2 m-2)
-!                                     PLAI     = understory vegetation LAI (m2 m-2)
+!                                     PLAI     = vegetation LAI (m2 m-2)
 !
 REAL, DIMENSION(:), INTENT(OUT)  :: PDELTAVK
 !                                     PDELTAVK = fraction of the canopy foliage covered
@@ -183,17 +180,17 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PCH, PCD, PCDN, PRI, PRA, PVELC
 !                                           the whole patch and atmosphere
 !                                     PVELC = wind speed at top of vegetation
 !
-REAL, DIMENSION(:), INTENT(OUT)  :: PHUG, PHUGI, PHGV, PHVN, PHVG,  &
+REAL, DIMENSION(:), INTENT(OUT)  :: PHUG, PHUGI, PHVG, PHVN, PHV,                        &
                                     PHU, PQS, PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF, PRS
 !
 !                                    PRS   = total effective stomatal resistance (under and overstory) diagnostic (s m-1)
 !                                    PHUG  = ground relative humidity
 !                                    PHUGI = ground (ice) relative humidity
-!                                    PHGV = Halstead coefficient ground understory vegetation
-!                                    PHVN = Halstead coefficient vegetation canopy above snow
-!                                    PHVG = Halstead coefficient vegetation canopy above ground
-!                                    PHU = effective relative humidity at the surface
-!                                    PQS = effective specific humidity at surface
+!                                    PHV   = Total effective Halstead coefficient 
+!                                    PHVN  = Halstead coefficient vegetation canopy above snow
+!                                    PHVG  = Halstead coefficient vegetation canopy above ground
+!                                    PHU   = effective relative humidity at the surface
+!                                    PQS   = effective specific humidity at surface
 !                                    PLEG_DELTA  = soil evaporation delta fn
 !                                    PLEGI_DELTA = soil sublimation delta fn
 !                                    PHSGL = surface halstead cofficient for bare soil (currently==1)
@@ -202,17 +199,17 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PHUG, PHUGI, PHGV, PHVN, PHVG,  &
 !
 REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C, PFLXC_VG_C, PFLXC_VN_C
 !  
-!                                     EXCHANGE coefficients i.e. rho/resistance [kg/(m**2*s)]
+!                                     EXCHANGE coefficients i.e. rho/resistance [kg/m2/s]
 !  
-!                                    PFLXC_C_A between canopy air and atmosphere
-!                                    PFLXC_N_A  between the snow on the ground and atmosphere
-!                                    PFLXC_G_C between snow-free ground and canopy air
-!                                    PFLXC_N_C  between snow on the ground and canopy air
+!                                    PFLXC_C_A   between canopy air and atmosphere
+!                                    PFLXC_N_A   between the snow on the ground and atmosphere
+!                                    PFLXC_G_C   between snow-free ground and canopy air
+!                                    PFLXC_N_C   between snow on the ground and canopy air
 !                                    PFLXC_VG_C  between canopy over snow-free ground and canopy air
 !                                    PFLXC_VN_C  between canopy over the snow on the ground and canopy air
 !
 REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_MOM, PQSATG, PQSATV, PQSATC, PQSATN
-!                                    PFLXC_MOM = effective drag coefficient for momentum [kg/(m**2*s)]
+!                                    PFLXC_MOM = effective drag coefficient for momentum [kg/m2/s]
 !                                    PQSATG = qsat for PTG
 !                                    PQSATV = qsat for PTV
 !                                    PQSATC = qsat for PTC
@@ -246,7 +243,7 @@ REAL, DIMENSION(SIZE(PTG)) :: ZCHIL, ZLAISN, ZLW, ZDISPH, ZVELC, ZRICN, ZRA_C_A,
 REAL, DIMENSION(SIZE(PTG)) :: ZCHCN,ZCDNCN,ZCDCN !exchange coefficients between 
 !                                                 canopy air and atmosphere
 !
-REAL, DIMENSION(SIZE(PTG)) :: ZRINN,ZRANN,ZCHNN,ZCDNNN,ZCDNN,ZTEFF,ZDELTAMAX,ZDELTAV,ZDELTAGV,ZVMOD 
+REAL, DIMENSION(SIZE(PTG)) :: ZRINN,ZRANN,ZCHNN,ZCDNNN,ZCDNN,ZTEFF,ZDELTAMAX,ZDELTAV,ZVMOD 
 !
 REAL, DIMENSION(SIZE(PTG)) :: ZRSGL,ZRSGF,ZZ0SN
 !                             ZRSGL = surface resistance for bare soil (currently==0)
@@ -276,7 +273,7 @@ PCDN(:)  = 0.
 PRI(:)   = 0.
 PHUG(:)  = 0.
 PHUGI(:) = 0.
-PHGV(:)  = 0.
+PHV(:)   = 0.
 PHVN(:)  = 0.
 PHVG(:)  = 0.
 PHU(:)   = 0.
@@ -377,7 +374,7 @@ ZLW(:)=0.02
 !
 ! Calculate the displacement height
 !
-CALL DISPH_FOR_MEB(ZCHIL,PLAIV,ZLW,PH_VEG,PZREF,PZ0_MEBV,ZDISPH)
+CALL DISPH_FOR_MEB(ZCHIL,PLAI,ZLW,PH_VEG,PZREF,PZ0_MEBV,ZDISPH)
 !
 ! Here ZRICN,ZRA_C_A,ZCHCN,ZCDNCN,ZCDCN are valid for the snow free part in meb:
 !
@@ -411,14 +408,14 @@ PFLXC_MOM(:)=ZCDCN(:)*ZVMOD(:)*PRHOA(:)
 !Calculate the aerodynamic resistance between the snowfree part of the ground
 !and canopy air, ZRA_G_C, and the conductance between the canopy and canopy air, ZG_VG_C
 !  
-CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAIV,  &
+CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAI,   &
                      PTG, PTC, PTV, PVELC, ZLW,                              &
                      ZDISPH,                                                 &
                      ZRA_G_C, ZG_VG_C                                        )
 !
 !Compute the lai of the canopy that is above snow
 !
-ZLAISN(:)=PLAIV(:)*(1.-PPALPHAN(:))
+ZLAISN(:)=PLAI(:)*(1.-PPALPHAN(:))
 !
 ! Note that we use the same displacement height also for the snow covered part
 !
@@ -503,20 +500,20 @@ ENDIF
 ! The resistances between ground/snow and canopy air go to zero when lai => 0,
 ! limit exchange coefficients to 5000.
 !
-WHERE(ZRA_G_C>ZRAEPS)
-   PFLXC_G_C = PRHOA/ZRA_G_C
-   PHSGL=ZRA_G_C/(ZRA_G_C+ZRSGL)
-   PHSGF=ZRA_G_C/(ZRA_G_C+ZRSGF)
+WHERE(ZRA_G_C(:) > ZRAEPS)
+   PFLXC_G_C(:) = PRHOA(:)  / ZRA_G_C(:)
+   PHSGL(:)     = ZRA_G_C(:)/(ZRA_G_C(:)+ZRSGL(:))
+   PHSGF(:)     = ZRA_G_C(:)/(ZRA_G_C(:)+ZRSGF(:))
 ELSEWHERE
-   PFLXC_G_C = XFLXMAX
-   PHSGL=1.
-   PHSGF=1.
+   PFLXC_G_C(:) = XFLXMAX
+   PHSGL(:)     = 1.
+   PHSGF(:)     = 1.
 END WHERE
 !
 WHERE(ZRA_N_C>ZRAEPS)
-   PFLXC_N_C = PRHOA/ZRA_N_C
+   PFLXC_N_C(:) = PRHOA(:)/ZRA_N_C(:)
 ELSEWHERE
-   PFLXC_N_C = XFLXMAX
+   PFLXC_N_C(:) = XFLXMAX
 END WHERE
 !
 ! Reduce sublimation from ground based snowpack as it
@@ -525,30 +522,26 @@ END WHERE
 ! no impact on actual grid box average fluxes since sublimation is multiplied by the snow fraction,
 ! which in this case is quite small. 
 !
-PFLXC_N_C(:) = PFLXC_N_C(:)*MIN(1., (PSNOWSWE(:) + PSR(:)*PTSTEP)/ZSNOWSWESMIN)
+PFLXC_N_C(:)  = PFLXC_N_C(:)*MIN(1., (PSNOWSWE(:) + PSR(:)*PTSTEP)/ZSNOWSWESMIN)
 !
-PFLXC_VG_C = PRHOA*ZG_VG_C
-PFLXC_VN_C = PRHOA*ZG_VN_C
+! unit conversion:
+!
+PFLXC_VG_C(:) = PRHOA(:)*ZG_VG_C(:)
+PFLXC_VN_C(:) = PRHOA(:)*ZG_VN_C(:)
 !
 !-------------------------------------------------------------------------------
 !
 !*       5.     HALSTEAD COEFFICIENT (RELATIVE HUMIDITY OF THE VEGETATION)
 !               ----------------------------------------------------------
 !
-ZDELTAMAX(:) = (1.-PCHIP(:))*(1.-PPSN(:)*PPALPHAN(:))*PRR(:)+ PWRV(:)/PTSTEP
+ZDELTAMAX(:) = (1.-PCHIP(:))*(1.-PPSN(:)*PPALPHAN(:))*PRR(:)+ PWR(:)/PTSTEP
 ZDENOM(:)    = (1.-PPSNCV(:))*XKDELTA_WR*                                               &
                ( PPSN(:)*(1.-PPALPHAN(:))*PFLXC_VN_C(:) + (1.-PPSN(:))*PFLXC_VG_C(:) )* &
                ( PQSATV(:)-PQC(:))
 ZDELTAMAX(:) = MAX(0., MIN(1.0, ZDELTAMAX(:)/MAX(1.E-10,ZDENOM(:))))
 !
-ZDELTAV(:)   = XKDELTA_WR*MIN(ZDELTAMAX(:),PDELTAV(:))
-PDELTAVK(:)  = XKDELTA_WR*PDELTAV(:)                    ! delta including K factor
-!
-ZDELTAGV(:)  = PDELTAGV(:)
-!
-!
-PHGV(:) = 1. - MAX(0.,SIGN(1.,PQSATG(:)-PQC(:)))             &
-          *(1.-ZDELTAGV(:))*PRS_GV(:) / (ZRA_G_C(:)+PRS_GV(:))
+ZDELTAV(:)   = XKDELTA_WR*MIN(ZDELTAMAX(:),PDELTA(:))
+PDELTAVK(:)  = XKDELTA_WR*PDELTA(:)                    ! delta including K factor
 !
 PHVG(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PQC(:)))             &
           *(1.-ZDELTAV(:))*PRS_VG(:)*ZG_VG_C(:) / (1.+PRS_VG(:)*ZG_VG_C(:))
@@ -556,10 +549,11 @@ PHVG(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PQC(:)))             &
 PHVN(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PQC(:)))             &
           *(1.-ZDELTAV(:))*PRS_VN(:)*ZG_VN_C(:) / (1.+PRS_VN(:)*ZG_VN_C(:))
 
-! Compute an effective canopy stomatal resistance (s m-1: diagnostic): 
-! Rs is inversely prop to LAI via transpiration: weight by LAI of under and overstory vegetation
+! Diagnostics:
+! Compute an effective canopy stomatal resistance (s m-1) and Halstead Coef: 
 !
-PRS(:)  = (PLAIV(:) + PLAI(:))/(PLAIV(:)/(PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)) + PLAI(:)/PRS_GV(:))
+PRS(:)  = PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)
+PHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 !
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',1,ZHOOK_HANDLE)

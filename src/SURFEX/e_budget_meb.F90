@@ -1,6 +1,6 @@
 !     ##########################################################################
       SUBROUTINE E_BUDGET_MEB(HISBA,HCPSURF,PTSTEP,                                           &
-           PPS,PVEG,PCG,PCT,PCV,PLAIV,PWRVN,PWRV,PBSLAI,PLAIMIN,                              &
+           PPS,PCG,PCT,PCV,PWRVN,PWR,                                                         &
            PTDEEP_A,PTDEEP_B,PD_G,PSOILCONDZ,PSOILHCAPZ,                                      &  
            PSNOWDZ,PSNOWCONDZ,PSNOWHCAPZ,                                                     &  
            PSWNET_V,PSWNET_G,PSWNET_N,                                                        &
@@ -14,7 +14,7 @@
            PQSAT_G,PQSAT_V,PQSATI_N,                                                          &
            PFF,PFFROZEN,PPSN,PPSNA,PPSNCV,                                                    &
            PCHEATV,PCHEATG,PCHEATN,                                                           &
-           PLEG_DELTA,PLEGI_DELTA,PHUG,PHUGI,PHGV,PHVG,PHVN,PFROZEN1,                         &
+           PLEG_DELTA,PLEGI_DELTA,PHUG,PHUGI,PHVG,PHVN,PFROZEN1,                              &
            PFLXC_C_A,PFLXC_G_C,PFLXC_VG_C,PFLXC_VN_C,PFLXC_N_C,PFLXC_N_A,                     &
            PFLXC_MOM,                                                                         &
            PTG,PTV,PTN,                                                                       &
@@ -80,6 +80,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    22/01/11 
+!!                  10/10/14 (A. Boone) Removed understory vegetation
 !!
 !-------------------------------------------------------------------------------
 !
@@ -116,16 +117,12 @@ CHARACTER(LEN=*),      INTENT(IN)  :: HCPSURF   ! Specific heat
 REAL,                 INTENT(IN)   :: PTSTEP
 !                                     PTSTEP = timestep of the integration (s)
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PVEG, PCT, PCV, PLAIV, PWRVN, PWRV, PBSLAI, PLAIMIN, PCG
-!                                     PVEG    = vegetation cover fraction of understory or composite layer (-)
+REAL, DIMENSION(:),   INTENT(IN)   :: PCT, PCV, PWRVN, PWR, PCG
 !                                     PCG     = area-averaged soil heat capacity (m2 K J-1)
 !                                     PCT     = surface understory or composite thermal inertia (m2 K J-1)
 !                                     PCV     = vegetation canopy thermal inertia (m2 K J-1)
-!                                     PLAIV   = canopy LAI (m2 m-2)
 !                                     PWRVN   = liquid water equivalent snow  intercepted on the canopy (kg m-2)
-!                                     PWRV    = liquid water intercepted on the canopy (kg m-2)
-!                                     PBSLAI  = ratio of biomass to LAI (kg m-2 )
-!                                     PLAIMIN = minimum Leaf Area Index (LAI: m2 m-2)
+!                                     PWR     = liquid water intercepted on the canopy (kg m-2)
 !
 REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP_A, PTDEEP_B
 !                                      PTDEEP_A = Deep soil temperature
@@ -210,10 +207,9 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PFF, PFFROZEN, PPSN, PPSNA, PPSNCV
 !                                     PPSNA    = fraction of vegetation canopy buried by ground-based snowpack (-)
 !                                     PPSNCV   = fraction of vegetation canopy covered by intercepted snow     (-)
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PLEG_DELTA, PLEGI_DELTA, PHUG, PHUGI, PHGV, PHVG, PHVN, PFROZEN1
+REAL, DIMENSION(:),   INTENT(IN)   :: PLEG_DELTA, PLEGI_DELTA, PHUG, PHUGI, PHVG, PHVN, PFROZEN1
 !                                     PHUG        = relative humidity of the surface soil                             (-)  
 !                                     PHUGI       = relative humidity of the frozen surface soil                      (-)                         
-!                                     PHGV        = Halstead coefficient of understory vegetation                     (-)                   
 !                                     PHVG        = Halstead coefficient of non-buried (snow) canopy vegetation       (-)                         
 !                                     PHVN        = Halstead coefficient of paritally-buried (snow) canopy vegetation (-)  
 !                                     PLEG_DELTA  = soil evaporation delta fn                                         (-)
@@ -308,27 +304,27 @@ REAL, DIMENSION(SIZE(PTN,1),SIZE(PTN,2))  :: ZTNO
 !
 REAL, DIMENSION(SIZE(PTG,1))              :: ZTVO
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZHN, ZHS, ZHVS
+REAL, DIMENSION(SIZE(PPS))                :: ZHN, ZHS, ZHVS
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZPSNAG, ZWORK, ZFFF, ZGCOND1
+REAL, DIMENSION(SIZE(PPS))                :: ZPSNAG, ZWORK, ZFFF, ZGCOND1
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZPET_A_COEF_P, ZPET_B_COEF_P, ZPET_C_COEF_P
+REAL, DIMENSION(SIZE(PPS))                :: ZPET_A_COEF_P, ZPET_B_COEF_P, ZPET_C_COEF_P
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZPEQ_A_COEF_P, ZPEQ_B_COEF_P, ZPEQ_C_COEF_P
+REAL, DIMENSION(SIZE(PPS))                :: ZPEQ_A_COEF_P, ZPEQ_B_COEF_P, ZPEQ_C_COEF_P
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZCOEFA_TC, ZCOEFB_TC, ZCOEFC_TC, ZCOEFD_TC,          &
+REAL, DIMENSION(SIZE(PPS))                :: ZCOEFA_TC, ZCOEFB_TC, ZCOEFC_TC, ZCOEFD_TC,          &
                                              ZCOEFA_QC, ZCOEFB_QC, ZCOEFC_QC, ZCOEFD_QC
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZBETA_V, ZALPHA_V, ZGAMMA_V,                         &
+REAL, DIMENSION(SIZE(PPS))                :: ZBETA_V, ZALPHA_V, ZGAMMA_V,                         &
                                              ZBETA_G, ZALPHA_G, ZGAMMA_G,                         &
                                              ZBETA_N, ZALPHA_N, ZGAMMA_N,                         &
                                              ZBETA_P_V, ZALPHA_P_V, ZBETA_P_N, ZALPHA_P_N
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZRNET_NN, ZRNET_N_DTNN, ZRNET_N_DTGN, ZRNET_N_DTVN
+REAL, DIMENSION(SIZE(PPS))                :: ZRNET_NN, ZRNET_N_DTNN, ZRNET_N_DTGN, ZRNET_N_DTVN
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZVMOD, ZUSTAR2, ZPSNA
+REAL, DIMENSION(SIZE(PPS))                :: ZVMOD, ZUSTAR2, ZPSNA
 !
-REAL, DIMENSION(SIZE(PVEG))               :: ZTCONDA_DELZ_G, ZTCONDA_DELZ_N, ZTCONDA_DELZ_NG
+REAL, DIMENSION(SIZE(PPS))                :: ZTCONDA_DELZ_G, ZTCONDA_DELZ_N, ZTCONDA_DELZ_NG
 !
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))  :: ZSOIL_COEF_A, ZSOIL_COEF_B
 !
@@ -375,9 +371,9 @@ ZSNOW_COEF_B(:,:) = 0.0
 !               -----------------------------------------------------------
 ! - Effective Surface heat capacities for each energy budget (J m-2 K-1)
 !
-PCHEATG(:)    = 1/PCT(:)                                          ! understory soil/litter composite
+PCHEATG(:)    = 1/PCT(:)                                          ! understory soil/floodplain
 !
-PCHEATV(:)    = SFC_HEATCAP_VEG(PWRVN,PWRV,PCV)                   ! vegetation canopy heat capacity
+PCHEATV(:)    = SFC_HEATCAP_VEG(PWRVN,PWR,PCV)                    ! vegetation canopy heat capacity
 !
 PCHEATN(:)    = PSNOWHCAPZ(:,1)*PSNOWDZ(:,1)                      ! snow surface layer
 !
@@ -545,16 +541,14 @@ PFLXC_V_C(:)   = MAX(PFLXC_V_C(:), ZERTOL_FLX_C)
 ! Understory vegetation and ground factors:
 
 ZFFF(:)        = PFF(:)*( 1.0 - PFFROZEN(:)*(1.0 - (XLSTT/XLVTT)) )
+ 
+ZHN(:)         = (1.0-PPSN(:)-ZFFF(:))*(                                             &
+                            PLEG_DELTA(:) *(1.0-PFROZEN1(:))                         &
+                 +          PLEGI_DELTA(:)*     PFROZEN1(:)*(XLSTT/XLVTT) ) + ZFFF(:)         
 
-ZHN(:)         = (1.0-PPSN(:)-ZFFF(:))*((1.0-PVEG(:))                              &
-                 *(         PLEG_DELTA(:) *(1.0-PFROZEN1(:))                       &
-                 +          PLEGI_DELTA(:)*     PFROZEN1(:)*(XLSTT/XLVTT))         &
-                 + PVEG(:)*PHGV(:)) + ZFFF(:)         
-
-ZHS(:)         = (1.0-PPSN(:)-ZFFF(:))*((1.0-PVEG(:))                              &
-                 *(PHUG(:) *PLEG_DELTA(:) *(1.0-PFROZEN1(:))                       &
-                 + PHUGI(:)*PLEGI_DELTA(:)*     PFROZEN1(:)*(XLSTT/XLVTT))         &
-                 + PVEG(:)*PHGV(:)) + ZFFF(:)
+ZHS(:)         = (1.0-PPSN(:)-ZFFF(:))*(                                             &
+                   PHUG(:) *PLEG_DELTA(:) *(1.0-PFROZEN1(:))                         &
+                 + PHUGI(:)*PLEGI_DELTA(:)*     PFROZEN1(:)*(XLSTT/XLVTT) ) + ZFFF(:)
 
 ! adjust for local use in solution (since they are multiplied by 1-psn herein):
 
