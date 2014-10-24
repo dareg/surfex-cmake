@@ -293,7 +293,7 @@ IF(OMEB_PATCH(KPATCH))THEN
       CALL ISBA_SWNET_MEB(ZLAIV,ZZF_TALLVEG,                                   &
           ZSNOWALBVIS,ZSNOWALBNIR,                                             &
           ZALBNIR_VEG, ZALBVIS_VEG,ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBF,          &
-          ZVEG,ZFF,ZPSN,ZPALPHAN,ZTAU_N,ZZENITH,ZSCATTR_SW,ZGLOBAL_SW,         &
+          ZFF,ZPSN,ZPALPHAN,ZTAU_N,ZZENITH,ZSCATTR_SW,ZGLOBAL_SW,              &
           ZSWUP,ZSWNET_N,ZSWNET_V,ZSWNET_G,ZSWNET_NS,                          &
           ZALBT,ZALBG,ZSWDOWN_GN                                               )
 !

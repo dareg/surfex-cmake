@@ -232,7 +232,7 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTSRAD_PATCH
 !
     CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),XPSN(:,JPATCH),ZPALPHAN,   &
-        TPSNOW%EMIS(:,JPATCH),                                    &
+        TPSNOW%EMIS(:,JPATCH),XEMISF(:,JPATCH),XFF(:,JPATCH),     &
         PTV(:,JPATCH),PTG1(:,JPATCH),TPSNOW%TS(:,JPATCH),         &
         ZLW_RAD,ZLWNET_N,ZLWNET_V,ZLWNET_G,                       &
         ZDUMMY,ZDUMMY,ZDUMMY,                                     &
