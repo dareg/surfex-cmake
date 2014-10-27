@@ -714,7 +714,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PSNOWSWE(:,1),                                            &
               PWR, ZCHIP, ZTSTEP, ZRS, ZRSN,                            &
               PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,          &
-              ZPSNCV, ZDELTA, PLAI,                                     &
+              ZPSNCV, ZDELTA, PLAI, PVEGGV,                             &
               PCH, PCD, PCDN, PRI, PRESA, ZVELC,                        &
               PHUG, ZHUGI, PHV, ZHVG, ZHVN, PHU, PQS, PRS,              &
               ZLEG_DELTA, ZLEGI_DELTA, ZHSGL, ZHSGF,                    &

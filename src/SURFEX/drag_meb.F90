@@ -11,7 +11,7 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
                     PSNOWSWE,                                          &
                     PWR, PCHIP, PTSTEP, PRS_VG, PRS_VN,                &
                     PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,   &
-                    PPSNCV, PDELTA, PLAI,                              &
+                    PPSNCV, PDELTA, PLAI, PVEGGV,                      &
                     PCH, PCD, PCDN, PRI, PRA, PVELC,                   &
                     PHUG, PHUGI, PHV, PHVG, PHVN, PHU, PQS, PRS,       &
                     PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF,             &
@@ -58,6 +58,7 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
 !!      Original    06/2010
 !!      For MEB     01/2011
 !                   10/2014 (A. Boone) Remove understory compsite vegetation
+!                   10/2014 (A. Napoly) Added ground/litter resistance
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -164,6 +165,10 @@ REAL, DIMENSION(:), INTENT(IN)    :: PDELTA, PLAI
 !                                                by intercepted water (-)
 !                                     PLAI     = vegetation LAI (m2 m-2)
 !
+REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV  
+!                                      PVEGGV = fraction of litter on the surface (-)
+!                                               as==>0, baresoil below canopy,
+!                                               as==>1, litter layer below canopy
 REAL, DIMENSION(:), INTENT(OUT)  :: PDELTAVK
 !                                     PDELTAVK = fraction of the canopy foliage covered
 !                                                by intercepted water *including* K-factor (-)
@@ -219,12 +224,13 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_MOM, PQSATG, PQSATV, PQSATC, PQSATN
 !
 !
 !
-REAL, DIMENSION(SIZE(PTG)) :: ZAC,ZWFC,ZFP,ZRRCOR 
+REAL, DIMENSION(SIZE(PTG)) :: ZAC,ZWFC,ZWSAT,ZFP,ZRRCOR 
 !                              ZQSATG = specific humidity at saturation at ground
 !                              ZQSATN = specific humidity of snow
-!                              ZAC = aerodynamical conductance
-!                              ZWFC = field capacity in presence of ice
-!                              ZFP = working variable
+!                              ZAC    =  aerodynamical conductance
+!                              ZWFC   = field capacity in presence of ice
+!                              ZWSAT  = saturation in presence of ice
+!                              ZFP    = working variable
 !                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness
 !
 REAL, DIMENSION(SIZE(PTG)) :: ZCHIL, ZLAISN, ZLW, ZDISPH, ZVELC, ZRICN, ZRA_C_A, &
@@ -254,10 +260,15 @@ REAL, DIMENSION(SIZE(PTG)) :: ZRSNFRAC, ZDENOM
 !                             ZRSNFRAC = fraction to prevent/reduce sublimation of snow if too thin (-)
 !                             ZDENOM   = working variable for denominator of an expression (*)
 !
+!*      0.3    declarations of local parameters
+!
 REAL, PARAMETER            :: ZRAEPS       = 1.e-3  ! Safe limit of aerodynamic resistance to avoid dividing
 !                                                   ! by zero when calculating exchange coefficients
 REAL, PARAMETER            :: ZSNOWSWESMIN = 1.E-4  ! (kg m-2) Reduce sublimation from ground based snowpack as it
 !                                                   !          becomes vanishingly thin 
+REAL, PARAMETER            :: ZRG_COEF1    = 8.206  ! Ground/litter resistance coefficient 
+REAL, PARAMETER            :: ZRG_COEF2    = 4.255  ! Ground/litter resistance coefficient 
+!
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -301,9 +312,11 @@ ZZ0SN(:) = XZ0SN
 ! the superficial soil moisture and the
 ! field capacity of the ground
 !
-ZWFC(:)  = PWFC(:)*(PWSAT(:)-PWGI(:))/PWSAT(:)
+ZWSAT(:) = PWSAT(:)-PWGI(:)
+ZWFC(:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
 PHUG(:)  = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
-ZWFC(:)  = PWFC(:)*MAX(XWGMIN, PWSAT(:)-PWG(:))/PWSAT(:)
+ZWSAT(:) = MAX(XWGMIN, ZWSAT(:))
+ZWFC(:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
 PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 !
 ! there is a specific treatment for dew
@@ -313,33 +326,6 @@ PQSATG(:) = QSAT(PTG(:),PPS(:))
 PQSATV(:) = QSAT(PTV(:),PPS(:)) 
 PQSATC(:) = QSAT(PTC(:),PPS(:)) 
 PQSATN(:) = QSATI(PSNOWTEMP(:),PPS(:)) 
-!
-! when hu*qsat < qa, there are two
-! possibilities
-!
-! a) low-level air is dry, i.e., 
-!    qa < qsat
-!
-! NOTE the additional delta fn's
-! here are needed owing to linearization 
-! of Qsat in the surface energy budget.
-!
-PLEG_DELTA(:)    = 1.0
-PLEGI_DELTA(:)   = 1.0
-!
-WHERE ( PHUG*PQSATG < PQC .AND. PQSATG > PQC )
-  PHUG(:)  = PQC(:) / PQSATG(:)
-  PLEG_DELTA(:)  = 0.0
-END WHERE
-WHERE ( PHUGI*PQSATG < PQC .AND. PQSATG > PQC )
-  PHUGI(:) = PQC(:) / PQSATG(:)
-  PLEGI_DELTA(:) = 0.0
-END WHERE
-!
-! b) low-level air is humid, i.e., qa >= qsat
-!
-WHERE ( PHUG*PQSATG  < PQC .AND. PQSATG <= PQC )PHUG(:)  = 1.0
-WHERE ( PHUGI*PQSATG < PQC .AND. PQSATG <= PQC )PHUGI(:) = 1.0
 !
 !-------------------------------------------------------------------------------
 !
@@ -554,6 +540,46 @@ PHVN(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PQC(:)))             &
 !
 PRS(:)  = PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)
 PHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
+!
+!
+!-------------------------------------------------------------------------
+!*       6.    LITTER/GROUND RESISTANCE
+!              ------------------------
+!
+! Inclusion of a ground resistance due to litter in the computation of the ground evaporation. 
+! We use the existing LEG_DELTA (formerly a delta function) as a Beta-type-function
+! (based on Sellers et al., 1992, J Geophys Res)
+!
+PLEG_DELTA(:)  = 1.0 - PVEGGV(:) + PVEGGV(:)*ZRA_G_C(:) /                             &
+                 ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWG(:) / ZWSAT(:) ) )
+PLEGI_DELTA(:) = 1.0 - PVEGGV(:) + PVEGGV(:)*ZRA_G_C(:) /                             &
+                 ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWGI(:)/ ZWSAT(:) ) )
+!
+! when hu*qsat < qa, there are two
+! possibilities
+!
+! a) low-level air is dry, i.e., 
+!    qa < qsat
+!
+! NOTE the additional delta fn's
+! here are needed owing to linearization 
+! of Qsat in the surface energy budget.
+!
+WHERE ( PHUG(:)*PQSATG(:)  < PQC(:) .AND. PQSATG(:) > PQC(:) )
+  PHUG(:)        = PQC(:) / PQSATG(:)
+  PLEG_DELTA(:)  = 0.0
+END WHERE
+WHERE ( PHUGI(:)*PQSATG(:) < PQC(:) .AND. PQSATG(:) > PQC(:) )
+  PHUGI(:)       = PQC(:) / PQSATG(:)
+  PLEGI_DELTA(:) = 0.0
+END WHERE
+!
+! b) low-level air is humid, i.e., qa >= qsat (condensation)
+!
+WHERE ( PQSATG(:) <= PQC(:) )
+   PHUG(:)  = 1.0
+   PHUGI(:) = 1.0
+END WHERE
 !
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',1,ZHOOK_HANDLE)
