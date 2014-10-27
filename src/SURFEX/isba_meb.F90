@@ -21,8 +21,8 @@
         PWSAT, PWFC, PWWILT,                                                   &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
-        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
-        PLW_RAD, PLWUP, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,              &
+        PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
+        PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
         PLEV_V_C, PLES_V_C, PH_V_C, PH_G_C, PLETR_V_C, PLER_V_C, PH_C_A,       &
         PH_N_C, PLE_V_C, PLE_G_C, PLE_C_A, PLE_N_C, PEVAP_N_C, PEVAP_G_C,      &
         PSR_GN, PMELTCV, PFRZCV, PMELT, PMELTADV,                              &
@@ -304,8 +304,6 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_NS     ! net snow shortwave radiat
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_V      ! net vegetation canopy shortwave radiation 
 !                                                    ! [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_G      ! net surface (ground) shortwave radiation [W/m2]
-REAL, DIMENSION(:),   INTENT(OUT)   :: PSWUP         ! net upwelling shortwave radiation [W/m2]
-REAL, DIMENSION(:),   INTENT(OUT)   :: PLWUP         ! total upwelling longwave radiation to atmosphere [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PALBT         ! total surface albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWDOWN_GN    ! total shortwave radiation transmitted through 
                                                      ! the vegetation canopy
@@ -542,6 +540,8 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZQA_IC               ! atm
 REAL, DIMENSION(SIZE(PPS))                         :: ZFROZEN1             ! surface soil layer frozen fraction (-)
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))           :: ZSOILCONDZ           ! soil heat capacity profile        (J/m3/K)
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))           :: ZSOILHCAPZ           ! soil thermal conductivity profile (W/m/K)
+REAL, DIMENSION(SIZE(PPS))                         :: ZSWUP                ! net upwelling shortwave radiation [W/m2]
+REAL, DIMENSION(SIZE(PPS))                         :: ZLWUP                ! net upwelling longwave radiation [W/m2]
 !
 !
 ! Working sums for flux averaging over MEB time split
@@ -576,7 +576,7 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      1.0    Preliminaries for energy and radiation budget
+!*      2.0    Preliminaries for energy and radiation budget
 !              ---------------------------------------------
 !
 CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
@@ -586,7 +586,7 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      2.0    Shortwave radiative transfer
+!*      3.0    Shortwave radiative transfer
 !              ----------------------------  
 !
 !
@@ -596,13 +596,13 @@ CALL ISBA_SWNET_MEB(PLAI,PZF_TALLVEG,                                        &
         PSNOWALBVIS,PSNOWALBNIR,                                             &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,      &
         PFF,PPSN,PPALPHAN,ZTAU_N,PZENITH,PSCA_SW,PSW_RAD,                    &
-        PSWUP,PSWNET_N,PSWNET_V,PSWNET_G,PSWNET_NS,                          &
+        ZSWUP,PSWNET_N,PSWNET_V,PSWNET_G,PSWNET_NS,                          &
         PALBT,ZALBG,PSWDOWN_GN                                               )
 
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      3.0    Longwave radiative transfer
+!*      4.0    Longwave radiative transfer
 !              ---------------------------  
 !
 CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
@@ -616,7 +616,7 @@ CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      4.0    Fraction of leaves occupied by intercepted water
+!*      5.0    Fraction of leaves occupied by intercepted water
 !              ------------------------------------------------
 !
 ! Vegetation canopy:
@@ -775,8 +775,8 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PTC,PQC,ZTA_IC,ZQA_IC,                                                   &
               ZDELTA,                                                                  &
               ZDELTAT_G,ZDELTAT_V,ZDELTAT_N,                                           &
-              PSWUP,PSW_RAD,PLW_RAD,                                                   &
-              PRN,PLWUP,                                                               &
+              ZSWUP,PSW_RAD,PLW_RAD,                                                   &
+              PRN,ZLWUP,                                                               &
               PH_C_A,PH_V_C,PH_G_C,PH_N_C,ZH_N_A,PHSNOW,PH,                            &
               PLE_C_A,PLE_V_C,PLE_G_C,PLE_N_C,                                         &
               ZEVAP_C_A,PLEV_V_C,PEVAP_G_C,PEVAP_N_C,ZEVAP_N_A,                        &
@@ -993,8 +993,8 @@ ZLWNET_V_SUM(:)  = ZLWNET_V_SUM(:)  +   PLWNET_V(:)
 ZLWNET_G_SUM(:)  = ZLWNET_G_SUM(:)  +   PLWNET_G(:)
 ZLWNET_N_SUM(:)  = ZLWNET_N_SUM(:)  +   PLWNET_N(:) 
 ZEMIST_SUM(:)    = ZEMIST_SUM(:)    +   ZEMIST(:) 
-ZSWUP_SUM(:)     = ZSWUP_SUM(:)     +   PSWUP(:)
-ZLWUP_SUM(:)     = ZLWUP_SUM(:)     +   PLWUP(:)
+ZSWUP_SUM(:)     = ZSWUP_SUM(:)     +   ZSWUP(:)
+ZLWUP_SUM(:)     = ZLWUP_SUM(:)     +   ZLWUP(:)
 
 ZDELHEATV_SFC_SUM(:) = ZDELHEATV_SFC_SUM(:) +   PDELHEATV_SFC(:) 
 ZDELHEATG_SFC_SUM(:) = ZDELHEATG_SFC_SUM(:) +   PDELHEATG_SFC(:) 
@@ -1064,8 +1064,8 @@ PLWNET_V(:)  = ZLWNET_V_SUM(:)  /JTSPLIT_EB
 PLWNET_G(:)  = ZLWNET_G_SUM(:)  /JTSPLIT_EB
 PLWNET_N(:)  = ZLWNET_N_SUM(:)  /JTSPLIT_EB
 ZEMIST(:)    = ZEMIST_SUM(:)    /JTSPLIT_EB
-PSWUP(:)     = ZSWUP_SUM(:)     /JTSPLIT_EB
-PLWUP(:)     = ZLWUP_SUM(:)     /JTSPLIT_EB
+ZSWUP(:)     = ZSWUP_SUM(:)     /JTSPLIT_EB
+ZLWUP(:)     = ZLWUP_SUM(:)     /JTSPLIT_EB
 
 PDELHEATV_SFC(:) = ZDELHEATV_SFC_SUM(:) /JTSPLIT_EB 
 PDELHEATG_SFC(:) = ZDELHEATG_SFC_SUM(:) /JTSPLIT_EB 
@@ -1073,7 +1073,7 @@ PDELHEATG(:)     = ZDELHEATG_SUM(:)     /JTSPLIT_EB
 
 ! Additional diagnostics depending on AVG quantities:
 
-PTS_RAD(:)   = ((PLWUP(:) - PLW_RAD(:)*(1.0-ZEMIST(:)))/(XSTEFAN*ZEMIST(:)))**0.25
+PTS_RAD(:)   = ((ZLWUP(:) - PLW_RAD(:)*(1.0-ZEMIST(:)))/(XSTEFAN*ZEMIST(:)))**0.25
 
 ZRNET_V(:)   = PSWNET_V(:) + PLWNET_V(:)
 !

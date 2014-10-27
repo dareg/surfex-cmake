@@ -388,21 +388,6 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZ0_MEBN           ! roughness length for m
 REAL, DIMENSION(:), INTENT(IN)    :: PZ0H_MEBN          ! roughness length for heat over MEB snow part of path
 REAL, DIMENSION(:), INTENT(IN)    :: PZ0EFF_MEBN        ! roughness length for momentum over MEB snow part of patch
 !
-
-
-!aabtmptest ---------------------------------------------------------------------------------
-!aabtmptest
-
-! these WILL BE arguments MEB (so remove SIZE once passed in/out) : !aabtmptest
-! 2 = spectral bands
-! 3 = points along integral for azimuth dependent computations
-!
-REAL, DIMENSION(SIZE(PLAI))                         :: PSWUP          !aabtmptest ---> INTENT(OUT)
-REAL, DIMENSION(SIZE(PLAI))                         :: PLWUP          !aabtmptest ---> INTENT(OUT) ... maybe NOT since can be computed
-
-!aabtmptest
-!aabtmptest ---------------------------------------------------------------------------------
-
 !* ISBA-Ags (with LAI evolution) parameters
 !  ----------------------------------------
 !
@@ -759,13 +744,11 @@ REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR_BS ! Fapir of bare soil
 !* diagnostic variables for multi-energy balance (MEB)
 !  ---------------------------------------------------
 !
-!REAL, DIMENSION(:),   INTENT(OUT) :: PSWUP          ! MEB: net *total* (surface) upwelling shortwave radiation to atmosphere [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_V       ! MEB: net vegetation canopy shortwave radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_G       ! MEB: net ground shortwave radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_N       ! MEB: net snow shortwave radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PSWNET_NS      ! MEB: net snow shortwave radiation for *surface* layer 
                                                     !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
-!REAL, DIMENSION(:),   INTENT(OUT) :: PLWUP          ! MEB: net *total* (surface) upwelling longwave radiation to atmosphere [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_V       ! MEB: net vegetation canopy longwave radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_G       ! MEB: net ground longwave radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT) :: PLWNET_N       ! MEB: net snow longwave radiation [W/m2]
@@ -1111,8 +1094,8 @@ IF(OMEB)THEN
         PWSAT, PWFC, PWWILT,                                                   &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
-        PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
-        PLW_RAD, PLWUP, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,              &
+        PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
+        PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
         PLEV_V_C, PLES_V_C, PH_V_C, PH_G_C, PLETR_V_C, PLER_V_C, PH_C_A,       &
         PH_N_C, PLE_V_C, PLE_G_C, PLE_C_A, PLE_N_C, PEVAP_N_C, PEVAP_G_C,      &
         PSR_GN, PMELTCV, PFRZCV, PMELT, PMELTADV,                              &
