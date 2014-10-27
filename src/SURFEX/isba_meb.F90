@@ -17,7 +17,7 @@
         PWRMAX_CF, PRGL, PRSMIN, PGAMMA, PRS,                                  &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, PF2,          &
+        PVEGGV, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, PF2,        &
         PWSAT, PWFC, PWWILT,                                                   &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
@@ -193,7 +193,9 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PDIRCOSZW     ! Director Cosinus along th
 !                                                    ! direction at the surface w-point
 REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! 
 REAL, DIMENSION(:),   INTENT(IN)    :: PLAI          ! vegetation Leaf Area Index (m2/m2)
-REAL, DIMENSION(:),   INTENT(IN)    :: PVEG          ! fraction of litter on the surface
+REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV        ! fraction of litter on the surface
+                                                     ! as==>0, baresoil below canopy,
+                                                     ! as==>1, litter layer below canopy
 REAL, DIMENSION(:),   INTENT(IN)    :: PRGL          ! maximum solar radiation
 !                                                    ! usable in photosynthesis
 REAL, DIMENSION(:),   INTENT(IN)    :: PRSMIN        ! minimum stomatal resistance (s/m)
@@ -755,7 +757,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.3    Energy and momentum fluxes and radiative temperature and emissivity
 !              -------------------------------------------------------------------
 !
-   CALL ISBA_FLUXES_MEB(PVEG,PRHOA,                                                    &
+   CALL ISBA_FLUXES_MEB(PVEGGV,PRHOA,                                                  &
               ZSIGMA_F,ZSIGMA_FN,PEMISNOW,                                             &
               ZRNET_V,ZRNET_G,PRNSNOW,                                                 & 
               PSWNET_V,PSWNET_G,PSWNET_N,                                              &

@@ -1,6 +1,6 @@
 !     ##########################################################################
       SUBROUTINE ISBA_FLUXES_MEB(                                                             &
-           PVEG,PRHOA,                                                                        &
+           PVEGGV,PRHOA,                                                                      &
            PSIGMA_F,PSIGMA_FN,                                                                &
            PEMIS_N,                                                                           &
            PRNET_V,PRNET_G,PRNET_N,                                                           &
@@ -89,8 +89,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PVEG
-!                                     PVEG = vegetation cover fraction of understory layer (-)
+REAL, DIMENSION(:),   INTENT(IN)   :: PVEGGV
+!                                     PVEGGV = litter cover fraction of understory layer (-)
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PRHOA
 !                                     PRHOA = reference level air density (kg m-3)
@@ -267,18 +267,18 @@ REAL, DIMENSION(:),   INTENT(OUT)  :: PTS_RAD, PEMIS
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(SIZE(PVEG))        :: ZFFF, ZWORK
+REAL, DIMENSION(SIZE(PTV))         :: ZFFF, ZWORK
 !                                     ZFFF  = working variables to help distinguish between soil and snow hydrolology and intercepted water reservoirs (-)
 !                                     ZWORK = working array
 !
-REAL, DIMENSION(SIZE(PVEG))        :: ZSAIR, ZSAIRC
+REAL, DIMENSION(SIZE(PTV))         :: ZSAIR, ZSAIRC
 !                                     ZSAIR   = atmospheric value of the therodynamic variable
 !                                     ZSAIRC  = canopy air value of the therodynamic variable
 !
-REAL, DIMENSION(SIZE(PVEG))        :: ZEVAP_V_C
+REAL, DIMENSION(SIZE(PTV))         :: ZEVAP_V_C
 !                                     ZEVAP_V_C = Water flux: Evapotranspiration vapor flux from the vegetation canopy (kg m-2 s-1)
 !
-REAL, DIMENSION(SIZE(PVEG))        :: ZQSATN_V, ZQSATIN_N, ZQSATN_G
+REAL, DIMENSION(SIZE(PTV))         :: ZQSATN_V, ZQSATIN_N, ZQSATN_G
 !                                     ZQSATN_V  = saturation specific humidity (over water) for the vegetation canopy (kg kg-1)
 !                                     ZQSATIN_N = saturation specific humidity (over ice) for the snow (kg kg-1)
 !                                                 NOTE that liquid water can only exist when the snowpack T=XTT in the model, 
@@ -397,7 +397,7 @@ ZFFF(:)       = PFF(:)*( 1.0 - PFFROZEN(:)*(1.0 - (XLSTT/XLVTT)) )
 ! - Evaporation and Sublimation latent heat fluxes from the soil, respectively:
 ! (kg m-2 s-1)
 
-ZWORK(:)      = (1.-PPSN(:)-ZFFF(:)) * (1.-PVEG(:)) * PFLXC_G_C(:)
+ZWORK(:)      = (1.-PPSN(:)-ZFFF(:)) * (1.-PVEGGV(:)) * PFLXC_G_C(:)
 
 PLEG(:)       = ZWORK(:)*PLEG_DELTA(:) *( PHUG(:) *ZQSATN_G(:) - PQC(:) )*(1.-PFROZEN1(:))*XLVTT
 
