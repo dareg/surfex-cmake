@@ -13,13 +13,13 @@
                       KLAYER_DUN, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,     &
                       PALBVIS_TSOIL, PALB, PWRMAX_CF, PVEG, PLAI, PEMIS,         &
                       PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PVEGTYPE, PZ0EFF,           &
-                      PVEGGV, PRUNOFFB,                                          &
                       PZF_TALLVEG , PRGLCV, PGAMMACV, PRSMINCV,                  &
                       PROOTFRACCV, PWRMAX_CFCV, PLAIV,                           &
                       PBSLAI,PLAIMIN,PH_VEG,PPALPHAN,                            &
                       PZ0G_WITHOUT_SNOW,                                         &
                       PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                            &
                       PZ0_MEBN,PZ0H_MEBN,PZ0EFF_MEBN,                            &
+                      PVEGGV, PRUNOFFB,                                          &
                       PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PC4REF, PACOEF, PPCOEF, &
                       PTAUICE, PWDRAIN, PTDEEP_A, PTDEEP_B, PGAMMAT,             &
                       PPSN, PPSNG, PPSNV,                                        &
@@ -34,7 +34,7 @@
                       PFALB, PFEMIS, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD,        &
                       PLE_FLOOD, PLEI_FLOOD,  PSODELX, PLAT, PLON, PTG, PWG,     &
                       PWGI, PCPS, PLVTT, PLSTT, PWR,                             &
-                      PWRV,PWRVN,PTV,PTC,PQC,                                    &
+                      PWRV,PWRVN,PTV,                                            &
                       PRESA, PANFM, PFSAT,                                       &
                       PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
                       PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,                 &
@@ -45,14 +45,14 @@
                       PSNOWDZ, PCG, PC1, PC2, PWGEQ, PCT, PCH, PCD, PCDN, PRI,   &
                       PHU, PHUG, PEMIST, PALBT, PRS, PLE, PRN, PH, PLEI, PLEGI,  &
                       PLEG, PLEV, PLES, PLER, PLETR, PEVAP, PGFLUX, PRESTORE,    &
-                      PUSTAR, PDRAIN, PRUNOFF, PMELT, PMELTADV, PRN_ISBA,        &
+                      PUSTAR, PDRAIN, PRUNOFF, PMELT, PMELTADV,                  &
+                      PTC, PQC, PRN_ISBA,                                        &
                       PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA, PLETR_ISBA,     &
                       PUSTAR_ISBA, PLER_ISBA, PLE_ISBA, PLEI_ISBA, PGFLUX_ISBA,  &
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
                       PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
-                      PIRRIG_FLUX, PDEEP_FLUX, PIRRIG_GR, PTOPQS, PQSB, PSUBL,   &
-                      PFWTD, PWTD, PSNDRIFT,                                     &
+                      PIRRIG_FLUX, PDEEP_FLUX,                                   & 
                       PSWNET_V, PSWNET_G, PSWNET_N, PSWNET_NS,                   &
                       PLWNET_V, PLWNET_G, PLWNET_N,                              &
                       PLEV_V_C, PLES_V_C, PH_V_C, PH_G_C,                        &
@@ -60,7 +60,9 @@
                       PLE_C_A, PLE_V_C, PLE_G_C, PLE_N_C,                        &
                       PEVAP_N_C, PEVAP_G_C,                                      & 
                       PSR_GN, PMELTCV, PFRZCV,                                   &
-                      PSWDOWN_GN, PLWDOWN_GN                                     )                     
+                      PSWDOWN_GN, PLWDOWN_GN,                                    &                     
+                      PIRRIG_GR, PTOPQS, PQSB, PSUBL,                            &
+                      PFWTD, PWTD, PSNDRIFT                                      )
 !     ##########################################################################
 !
 !

@@ -1071,7 +1071,7 @@ ZIRRIG_GR(:)= 0.
           XP_LWNET_N, XP_LEVCV, XP_LESC, XP_H_V_C, XP_H_G_C, XP_LETRGV, XP_LETRCV,        &
           XP_LERGV, XP_LERCV, XP_H_C_A, XP_H_N_C, XP_LE_C_A, XP_LE_V_C, XP_LE_G_C,        &
           XP_LE_N_C, XP_EVAP_N_C, XP_EVAP_G_C, XP_SR_GN, XP_MELTCV, XP_FRZCV,             &
-          XP_SWDOWN_GN, XP_LWDOWN_GN                                                      &
+          XP_SWDOWN_GN, XP_LWDOWN_GN,                                                     &
           ZIRRIG_GR, XP_TOPQS, XP_QSB, XP_SUBL, XP_FWTD, XP_WTD, XP_SNDRIFT               )  
 !
 ZP_TRAD=XP_TSRAD
