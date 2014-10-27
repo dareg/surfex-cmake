@@ -843,107 +843,8 @@ REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZF2WGHT    ! water stress factor
 !
 ! MEB:
 !
-INTEGER                                            :: JRK
-REAL                                               :: ZTSTEP
-!
-REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWCOND  ! snow thermal conductivity                                  [W/(m K)] 
-REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWHCAP  ! snow heat capacity                                         [J/(m3 K)]
-REAL, DIMENSION(SIZE(PWR))                         :: ZTAU_N     ! 
-REAL, DIMENSION(SIZE(PWR))                         :: ZSIGMA_F   !
-REAL, DIMENSION(SIZE(PWR))                         :: ZSIGMA_FN  !
-REAL, DIMENSION(SIZE(PWR))                         :: ZCHIP      !
-REAL, DIMENSION(SIZE(PWR))                         :: ZALBG      ! 
-!                                                                ! LWnet Jacobian matrix elements = d LWnet(x)/d T(x)         (W m-2 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDLWNET_V_DTV, ZDLWNET_V_DTG, ZDLWNET_V_DTN,    & 
-                                                      ZDLWNET_G_DTV, ZDLWNET_G_DTG, ZDLWNET_G_DTN,    &
-                                                      ZDLWNET_N_DTV, ZDLWNET_N_DTG, ZDLWNET_N_DTN
-REAL, DIMENSION(SIZE(PWR))                         :: ZWORK      ! local working variable                                     (*)
-REAL, DIMENSION(SIZE(PWR))                         :: ZWRMAXCV   ! Explicit canopy maximum liquid water interception capacity (kg m-2)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZDELTACV   ! Explicit canopy interception capacity fraction             (-)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZDELTACVK  ! Explicit canopy interception capacity fraction including K-factor (-)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZF5CV      ! water stress coefficient (based on F2CV) to force Etv=>0 as F2=>0 (-)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZF2CV      ! water stress coefficient for overstory (when using MEB) (-)  
-REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2))           :: ZF2WGHTCV  ! water stress factor for overstory (when using MEB) (-)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZRS_VG     ! canopy stomatal resistance (s m-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZRS_GV     ! canopy understory stomatal resistance (s m-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZRS_VN     ! partially snow-buried canopy stomatal resistance (s m-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZWRVNMAX   ! maximum liq water equivalent snow content in the canopy vegetation (kg m-2)
-REAL, DIMENSION(SIZE(PWR))                         :: ZPSNCV     ! canopy intercepted snow fraction (-)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZMELTVN    ! canopy snow reservoir freeze/melt rate (kg m-2 s-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZVELC      ! wind speed at top of vegetation (m s-1)                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZHVN       ! Halstead coefficient vegetation canopy above snow (-)                                            
-REAL, DIMENSION(SIZE(PWR))                         :: ZHVG       ! Halstead coefficient vegetation canopy above ground (-)                                              
-REAL, DIMENSION(SIZE(PWR))                         :: ZHSGL      ! surface halstead cofficient for bare soil (-)  
-REAL, DIMENSION(SIZE(PWR))                         :: ZHSGF      ! surface halstead cofficient for bare soil ice  (-)  
-!                                                                ! Exchange coefficients i.e. rho/resistance [kg/(m2 s)];
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_C_A  ! ...between vegetation canopy air and atmosphere                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_N_A  ! ...between the snow on the ground and atmosphere                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_G_C  ! ...between snow-free ground and canopy air                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_N_C  ! ...between snow on the ground and canopy air                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_VG_C ! ...between vegetation canopy over snow-free ground and canopy air                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_VN_C ! ...between vegetation canopy over the snow on the ground and canopy air                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_V_C  ! ...between vegetation canopy and canopy air                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_MOM  ! Effective drag coefficient for momentum [kg/(m2 s)]                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZQSATG     ! saturation specific humidity for PTG (ground surface: kg kg-1)                                             
-REAL, DIMENSION(SIZE(PWR))                         :: ZQSATV     ! saturation specific humidity for PTV (vegetation canopy: kg kg-1)                                           
-REAL, DIMENSION(SIZE(PWR))                         :: ZQSATC     ! saturation specific humidity for PTC (canopy air: kg kg-1)                                      
-REAL, DIMENSION(SIZE(PWR))                         :: ZQSATN     ! saturation specific humidity for PSNOWTEMP (snow surface: kg kg-1)                                            
-REAL, DIMENSION(SIZE(PWR))                         :: ZKVN       ! Snow interception efficiency coefficient (if=0, no interception) (-)
-REAL, DIMENSION(SIZE(PWR))                         :: ZPET_A_COEF! A-air temperature atmospheric coupling coefficient
-REAL, DIMENSION(SIZE(PWR))                         :: ZPET_B_COEF! B-air temperature atmospheric coupling coefficient
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TA  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TA  !  thermal variable for lowest atmospheric level:        (J kg-1)
-!                                                                !  Transform T to dry static energy or enthalpy.
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TC  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TC  !  thermal variable at the surface:                      (J kg-1)
-!                                                                !  Transform T to dry static energy or enthalpy.
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TV  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TV  !  thermal variable at the surface:                      (J kg-1)
-!                                                                !  Transform T to dry static energy or enthalpy.
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TG  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TG  !  thermal variable at the surface:                      (J kg-1)
-!                                                                !  Transform T to dry static energy or enthalpy.
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMA_TN  ! Linear transform coefficinets for atmospheric          (J kg-1 K-1) 
-REAL, DIMENSION(SIZE(PWR))                         :: ZTHRMB_TN  !  thermal variable at the surface:                      (J kg-1)
-!                                                                !  Transform T to dry static energy or enthalpy.
-REAL, DIMENSION(SIZE(PWR))                         :: ZCHEATV    ! Vegetation canopy *effective surface* heat capacity    (J m-2 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZCHEATG    ! Understory-ground *effective surface* heat capacity    (J m-2 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZCHEATN    ! Ground-based snow *effective surface* heat capacity    (J m-2 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZHVGS      ! Dimensionless pseudo humidity factor for computing 
-!                                                                !  vapor fluxes from the non-buried part of the canopy 
-!                                                                !  to the canopy air                                     (-)
-REAL, DIMENSION(SIZE(PWR))                         :: ZHVNS      ! Dimensionless pseudo humidity factor for computing 
-!                                                                !  vapor fluxes from the partly-buried part of the canopy 
-!                                                                !  to the canopy air                                     (-)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDQSAT_G   ! saturation specific humidity derivative for understory (kg kg-1 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDQSAT_V   ! saturation specific humidity derivative for the  
-!                                                                !  vegetation canopy                                     (kg kg-1 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDQSATI_N  ! saturation specific humidity derivative over ice for 
-!                                                                !  the ground-based snowpack                             (kg kg-1 K-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDELTAT_G  ! Time change in soil surface temperature                (K)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDELTAT_V  ! Time change in vegetation canopy temperature           (K)
-REAL, DIMENSION(SIZE(PWR))                         :: ZDELTAT_N  ! Time change in snowpack surface temperature            (K)
-REAL, DIMENSION(SIZE(PWR))                         :: ZRNET_V    ! Net vegetation canopy radiation                        (W m-2)
-REAL, DIMENSION(SIZE(PWR))                         :: ZRNET_G    ! Net understory-ground radiation                        (W m-2)
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_C_A_F! Exchange coefficient between the snow on the ground and 
-!                                                                !  atmosphere modified by a partially to fully buried 
-!                                                                !  vegetation canopy                                     [kg/(m2 s)]
-REAL, DIMENSION(SIZE(PWR))                         :: ZFLXC_N_A_F! Exchange coefficient between vegetation canopy air and 
-!                                                                !  atmosphere modified by a partially to fully buried 
-!                                                                !  vegetation canopy                                     [kg/(m2 s)]
-REAL, DIMENSION(SIZE(PWR))                         :: ZEVAP_C_A  ! Total canopy evapotranspiration and sublimation
-!                                                                !  of intercepted snow                                    (kg m-2 s-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZEVAP_N_A  ! Vapor flux from the ground-based snowpack (part burying 
-!                                                                !  the canopy vegetation) to the atmosphere              (kg m-2 s-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZH_N_A     ! Sensible heat flux from the ground-based snowpack (part 
-!                                                                !  burying the canopy vegetation) to the atmosphere      (W m-2)
-REAL, DIMENSION(SIZE(PWR))                         :: ZLEV_G_C   ! Total evapotranspiration vapor flux from the understory 
-!                                                                !  vegetation: (W m-2)
-REAL, DIMENSION(SIZE(PWR))                         :: ZSUBVCOR   ! A possible snow mass correction (to be potentially    
-!                                                                !  removed from soil)                                    (kg m-2 s-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZVEGFACT   ! Fraction of canopy vegetation possibly receiving 
-!                                                                !  rainfall                                              (-)
-REAL, DIMENSION(SIZE(PWR))                         :: ZRRSFC     ! The sum of all non-intercepted rain and canopy drip    (kg m-2 s-1)
+REAL, DIMENSION(SIZE(PWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
+!                                                       (to be potentially removed from soil) when MEB activated (kg/m2/s)
 !
 ! Misc :
 !
@@ -970,9 +871,6 @@ REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZRESTOREN      ! conduct
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
 !                                                        ! if implicit coupling with atmosphere used.
-!
-REAL, PARAMETER                                      :: ZTSTEP_EB     = 300. ! s Minimum time tstep required to time-split MEB energy budget
-INTEGER                                              :: KTSPLIT_EB
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
 !
