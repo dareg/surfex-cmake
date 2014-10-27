@@ -1,6 +1,6 @@
 !     #########
     SUBROUTINE Z0EFF(HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
-                      PPALPHAN,PZ0V,                                            &
+                      PPALPHAN,PZ0GV,                                           &
                       PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,PFF,PZ0_FLOOD,        &
                       PAOSIP,PAOSIM,PAOSJP,PAOSJM,PHO2IP,PHO2IM,PHO2JP,PHO2JM,  &
                       PZ0_O_Z0H, PZ0_WITH_SNOW, PZ0H_WITH_SNOW,PZ0EFF,          &
@@ -103,7 +103,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PFF            ! fraction of flood
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0_FLOOD      ! floodplains roughness length
 !
 ! For multi-energy balance
-REAL, DIMENSION(:), INTENT(IN)  :: PZ0V           ! canopy vegetation roughness length for MEB
+REAL, DIMENSION(:), INTENT(IN)  :: PZ0GV          ! canopy floor roughness length for MEB
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0_WITH_SNOW  ! vegetation z0 modified by snow
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0H_WITH_SNOW ! vegetation z0h modified by snow
@@ -207,16 +207,16 @@ ENDIF
 IF(OMEB)THEN
 
 ! roughness length for momentum at snow-free canopy floor
-  PZ0G_WITHOUT_SNOW(:) = PZ0
+  PZ0G_WITHOUT_SNOW(:) = PZ0GV
   WHERE (PFF(:)>0.)
     ZPFF(:)=PFF(:)/(1-PPSN(:)+1.E-6)
     ZWORK(:) =  (    ZPFF (:)  * LOG(PZ0_FLOOD(:)) )   &
-              + ( (1.-ZPFF(:)) * LOG(PZ0      (:)) )
+              + ( (1.-ZPFF(:)) * LOG(PZ0GV    (:)) )
     PZ0G_WITHOUT_SNOW(:) = EXP( ZWORK(:) )
   END WHERE
 !
 ! roughness length for momentum over MEB vegetation part of patch
-  PZ0_MEBV(:)  = PZ0V(:)
+  PZ0_MEBV(:)  = PZ0(:)
 !
 ! roughness length for momentum over MEB snow part of patch
   ZWORK(:) =  (    PPALPHAN(:) /(LOG(PUREF(:)/XZ0SN       ))**2 ) &

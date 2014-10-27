@@ -951,16 +951,22 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !*    7.21   z0 understory vegetation
 !            ----------
 !
-    IF (PRESENT(PZ0GV) .AND. ( PRESENT(PLAIGV_IN) .OR. PRESENT(PLAIGV_OUT) ) ) THEN
-      DO JMONTH=1,SIZE(PZ0GV,2)
-        IF (PRESENT(PLAIGV_OUT)) THEN
-          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_OUT(JLOOP,JMONTH,:) / 6.)
-        ELSEIF (PRESENT(PLAIGV_IN)) THEN
-          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_IN(JLOOP,JMONTH,:) / 6.)
-        ENDIF
-      END DO
-    ELSEIF (PRESENT(PZ0GV) .AND. (.NOT.PRESENT(PLAIGV_IN) .AND. .NOT.PRESENT(PLAIGV_OUT)    )) THEN
-      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PZ0GV, PLAIGV_IN OR PLAIGV_OUT MUST BE IN ARGUMENTS TOO")
+! In original MEB development understory vegetation exicted but not anymore.
+! New z0 understory vegetation assumes bare soil only. Old formulation, based on
+! LAI, is kept but commenetd for later devlopment.
+!    IF (PRESENT(PZ0GV) .AND. ( PRESENT(PLAIGV_IN) .OR. PRESENT(PLAIGV_OUT) ) ) THEN
+!      DO JMONTH=1,SIZE(PZ0GV,2)
+!        IF (PRESENT(PLAIGV_OUT)) THEN
+!          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_OUT(JLOOP,JMONTH,:) / 6.)
+!        ELSEIF (PRESENT(PLAIGV_IN)) THEN
+!          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_IN(JLOOP,JMONTH,:) / 6.)
+!        ENDIF
+!      END DO
+!    ELSEIF (PRESENT(PZ0GV) .AND. (.NOT.PRESENT(PLAIGV_IN) .AND. .NOT.PRESENT(PLAIGV_OUT)    )) THEN
+!      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PZ0GV, PLAIGV_IN OR PLAIGV_OUT MUST BE IN ARGUMENTS TOO")
+!    ENDIF   
+    IF (PRESENT(PZ0GV)) THEN
+      PZ0GV(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
     ENDIF   
 !
 !-------------------------------------------------------------------------------

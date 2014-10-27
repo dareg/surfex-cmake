@@ -157,7 +157,7 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,    &
                              XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V,      &
                              XP_H_VEG, XP_WRV, XP_WRVN, XP_TV,                 &
-                             XP_TC, XP_QC, XP_VEGGV
+                             XP_TC, XP_QC, XP_VEGGV, XP_Z0GV
 !
 USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,          &
