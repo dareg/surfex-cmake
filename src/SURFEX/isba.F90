@@ -961,7 +961,6 @@ REAL, DIMENSION(SIZE(PWR))                         :: ZSUBVCOR   ! A possible sn
 REAL, DIMENSION(SIZE(PWR))                         :: ZVEGFACT   ! Fraction of canopy vegetation possibly receiving 
 !                                                                !  rainfall                                              (-)
 REAL, DIMENSION(SIZE(PWR))                         :: ZRRSFC     ! The sum of all non-intercepted rain and canopy drip    (kg m-2 s-1)
-REAL, DIMENSION(SIZE(PWR))                         :: ZRRVEGCV   ! 
 !
 ! Misc :
 !
@@ -1090,8 +1089,11 @@ ENDIF
 !
 IF(OMEB)THEN
 
-   CALL ISBA_MEB(OMEB, OFORC_MEASURE, TPTIME, HISBA, HCPSURF, HRAIN,           &
-        KWG_LAYER, PTSTEP,                                                     &
+   CALL ISBA_MEB(TPTIME, OMEB, OFORC_MEASURE, OGLACIER,                        &
+        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                       &
+        HSNOWMETAMO, HSNOWRAD,                                                 &   
+        HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
+        KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
@@ -1105,8 +1107,9 @@ IF(OMEB)THEN
         PWRMAX_CF, PRGL, PRSMIN, PGAMMA, PRS,                                  &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC,               &
+        PVEG, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, ZF2,          &
         PWSAT, PWFC, PWWILT,                                                   &
+        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
         PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,     &
         PLW_RAD, PLWUP, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,              &
@@ -1120,8 +1123,10 @@ IF(OMEB)THEN
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
         PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                        &
         ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG,                               &
+        ZDELHEATN, ZDELHEATN_SFC, ZRESTOREN,                                   &
         PD_G, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,                     &
-        PTDEEP_A, PTDEEP_B, PDEEP_FLUX, PMUF, PDRIP                            )
+        PTDEEP_A, PTDEEP_B, PDEEP_FLUX, PMUF, PDRIP, PRRVEG,                   &
+        ZRI3L, ZSNOW_THRUFAL, ZEVAPCOR, ZSUBVCOR, ZSNOWSFCH, PSNDRIFT, ZQS3L   )
 
 ELSE
 !
@@ -1272,9 +1277,6 @@ ENDIF
 !*     12.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
-
-ZSUBVCOR(:) = 0. !aabtmptest
-
 CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                &
      OFLOOD, PTSTEP, PVEGTYPE,                                                  &
      PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
