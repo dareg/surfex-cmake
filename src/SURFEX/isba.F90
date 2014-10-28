@@ -980,6 +980,7 @@ IF(OMEB)THEN
         HSNOWMETAMO, HSNOWRAD,                                                 &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
+        ZSOILHCAPZ, ZSOILCONDZ,                                                &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &

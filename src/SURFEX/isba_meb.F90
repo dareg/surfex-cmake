@@ -4,6 +4,7 @@
         HSNOWMETAMO, HSNOWRAD,                                                 &           
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
+        PSOILHCAPZ, PSOILCONDZ,                                                &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
@@ -191,7 +192,12 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PUREF         ! reference height of the w
 !                                                    ! NOT when coupled to a model (MesoNH)
 REAL, DIMENSION(:),   INTENT(IN)    :: PDIRCOSZW     ! Director Cosinus along the z
 !                                                    ! direction at the surface w-point
-REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! 
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILHCAPZ    ! ISBA-DF Soil heat capacity 
+!                                                    ! profile [J/(m3 K)]
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ    ! ISBA-DF Soil conductivity  
+!                                                    ! profile  [W/(m K)]
+REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! fraction of tall vegetation (compared to short veg) for
+!                                                    !  shortwave radiative transfer (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PLAI          ! vegetation Leaf Area Index (m2/m2)
 REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV        ! fraction of litter on the surface
                                                      ! as==>0, baresoil below canopy,
@@ -540,8 +546,6 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZUSTAR2_IC           ! fri
 REAL, DIMENSION(SIZE(PPS))                         :: ZTA_IC               ! atmospheric temperature (possibly implicitly coupled) (m/s)
 REAL, DIMENSION(SIZE(PPS))                         :: ZQA_IC               ! atmospheric specific humidity (possibly implicitly coupled) (m/s)
 REAL, DIMENSION(SIZE(PPS))                         :: ZFROZEN1             ! surface soil layer frozen fraction (-)
-REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))           :: ZSOILCONDZ           ! soil heat capacity profile        (J/m3/K)
-REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))           :: ZSOILHCAPZ           ! soil thermal conductivity profile (W/m/K)
 REAL, DIMENSION(SIZE(PPS))                         :: ZSWUP                ! net upwelling shortwave radiation [W/m2]
 REAL, DIMENSION(SIZE(PPS))                         :: ZLWUP                ! net upwelling longwave radiation [W/m2]
 !
@@ -730,7 +734,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !
    CALL E_BUDGET_MEB(HISBA,HCPSURF,ZTSTEP,                                             &
               PPS,PCG,PCT,PCV,PWRVN,PWR,                                               &
-              PTDEEP_A,PTDEEP_B,PD_G,ZSOILCONDZ,ZSOILHCAPZ,                            &
+              PTDEEP_A,PTDEEP_B,PD_G,PSOILCONDZ,PSOILHCAPZ,                            &
               PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,                                             &
               PSWNET_V,PSWNET_G,PSWNET_NS,                                             &
               PLWNET_V,PLWNET_G,PLWNET_N,                                              &
@@ -844,7 +848,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            TPTIME, PTSTEP, PVEGTYPE,                                                   &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                                    &
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                                 &
-           PTG(:,1), PCG, PCT, ZSOILCONDZ(:,1),                                        &
+           PTG(:,1), PCG, PCT, PSOILCONDZ(:,1),                                        &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, ZRRSFC, PSR_GN,                     &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,                                      &
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, ZALBG, PD_G(:,1),             &
