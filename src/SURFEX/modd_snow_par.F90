@@ -179,6 +179,12 @@ REAL, PARAMETER       :: XWSNOWHOLDMAX2   = 0.10  ! (-)
 REAL, PARAMETER       :: XWSNOWHOLDMAX1   = 0.03  ! (-)
 REAL, PARAMETER       :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
 !
+! ISBA-ES snow grain size parameters:
+!
+REAL, PARAMETER                      :: XSNOW_AGRAIN = 1.6e-4   ! (m)
+REAL, PARAMETER                      :: XSNOW_BGRAIN = 1.1e-13  ! (m13/kg4)
+REAL, PARAMETER                      :: XDSGRAIN_MAX = 2.796e-3 ! m
+!
 !--------------------------------------------------------------------------------
 ! Calibration coefficients for CROCUS albedo computation
 !--------------------------------------------------------------------------------

@@ -51,7 +51,9 @@
 !
 !*       0.     DECLARATIONS
 !               ------------
-USE MODD_MEB_PAR, ONLY : XTAU_V_CF
+!
+USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR, XTAU_V_CF, NSPB_MEB
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -81,9 +83,6 @@ REAL, DIMENSION(:),   INTENT(OUT) :: PSWUP, PSWNET_N, PSWNET_V, PSWNET_G, PSWNET
 !
 !
 !*      0.2    Declaration of local Arguments
-!
-INTEGER, PARAMETER             :: NSPB = 2   ! spectral bands considered...NOTE! coded herein for 
-!                                            ! this number (and for arguments!)
 !
 INTEGER                        :: JZENITHA, JBAND, JJ ! loop control
 !
@@ -122,8 +121,8 @@ REAL, DIMENSION(SIZE(PZENITH)) :: ZSWDOWNN_A, ZSWDOWNN_B,     &
 REAL, DIMENSION(SIZE(PZENITH)) :: ZLAIN, ZSWNET,              &
                                   ZINV_COSZENITH, ZCOSZENITH
 !
-REAL, DIMENSION(NSPB)               :: ZF_BND
-REAL, DIMENSION(SIZE(PZENITH),NSPB) :: ZALPHA_VS_BND, ZALPHA_VT_BND, ZALPHA_G_BND, ZALPHA_N_BND
+REAL, DIMENSION(NSPB_MEB)               :: ZF_BND
+REAL, DIMENSION(SIZE(PZENITH),NSPB_MEB) :: ZALPHA_VS_BND, ZALPHA_VT_BND, ZALPHA_G_BND, ZALPHA_N_BND
 !
 !*      0.3    Declaration of local Parameters
 !
@@ -154,8 +153,8 @@ ZALPHA_G_BND(:,2)  = PALBNIR_SOIL(:)
 ZALPHA_N_BND(:,1)  = PALBVIS_SNOW(:)
 ZALPHA_N_BND(:,2)  = PALBNIR_SNOW(:)
 !
-ZF_BND(1)          = 0.48              ! VIS
-ZF_BND(2)          = 0.52              ! NIR
+ZF_BND(1)          = XSW_WGHT_VIS      
+ZF_BND(2)          = XSW_WGHT_NIR      
 !
 !*       1.a    View factors: transmission: non-snow buried canopy
 !               --------------------------------------------------

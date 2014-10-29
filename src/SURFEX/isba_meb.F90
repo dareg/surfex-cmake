@@ -570,7 +570,6 @@ REAL, DIMENSION(SIZE(PPS))   :: ZSWNET_V_SUM, ZSWNET_G_SUM, ZSWNET_N_SUM, ZLWNET
                                 ZLWUP_SUM
 REAL, DIMENSION(SIZE(PPS))   :: ZDELHEATG_SFC_SUM, ZDELHEATV_SFC_SUM, ZDELHEATG_SUM
 !
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -595,6 +594,11 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
 !*      3.0    Shortwave radiative transfer
 !              ----------------------------  
 !
+! Calculate snow albedo: split into spectral bands:
+!
+CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO(:,1),PSNOWAGE(:,1),PPS, &
+                                PSNOWALBVIS,PSNOWALBNIR)
+!
 !
 ! NOTE, currently MEB only uses 2 of 3 potential snow albedo spectral bands
 !
@@ -604,7 +608,6 @@ CALL ISBA_SWNET_MEB(PLAI,PZF_TALLVEG,                                        &
         PFF,PPSN,PPALPHAN,ZTAU_N,PZENITH,PSCA_SW,PSW_RAD,                    &
         ZSWUP,PSWNET_N,PSWNET_V,PSWNET_G,PSWNET_NS,                          &
         PALBT,ZALBG,PSWDOWN_GN                                               )
-
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -1092,6 +1095,74 @@ PRN(:)       = ZRNET_V(:) + ZRNET_G(:) + PRNSNOW(:)
 IF (LHOOK) CALL DR_HOOK('AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE AVG_FLUXES_MEB_TSPLIT 
+!===============================================================================
+SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
+                                      PSNOWALBVIS,PSNOWALBNIR)
+!
+! Split Total snow albedo into N-spectral bands
+! NOTE currently MEB only uses 2 bands of the 3 possible.
+!
+USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
+USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
+!
+USE MODE_SNOW3L,         ONLY : SNOW3LALB
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PVEGTYPE      ! fraction of each vegetation (-)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWALB      ! Snow albedo (total)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWRHO      ! Snow layer average density (kg/m3)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWAGE      ! Snow grain age
+REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PPS))          :: ZWORK
+REAL, DIMENSION(SIZE(PPS))          :: ZPERMSNOWFRAC
+REAL, DIMENSION(SIZE(PPS),3)        :: ZSPECTRALALBEDO
+!                                      ZSPECTRALALBEDO = spectral albedo (3 bands in algo: 
+!                                                        MEB currently uses 2)
+!                                                        1=VIS, 2=NIR, 3=UV
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
+!
+ZWORK(:)         = PSNOWALB(:)
+ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
+!
+CALL SNOW3LALB(ZWORK,ZSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,ZPERMSNOWFRAC,PPS)
+!
+! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
+!
+WHERE(PSNOWALB(:)/=XUNDEF)
+
+   ZWORK(:)       = XSW_WGHT_VIS*ZSPECTRALALBEDO(:,1) + &
+                    XSW_WGHT_NIR*ZSPECTRALALBEDO(:,2)
+!
+   PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)*PSNOWALB(:)/ZWORK(:)
+   PSNOWALBNIR(:) = ZSPECTRALALBEDO(:,2)*PSNOWALB(:)/ZWORK(:)
+!
+ELSEWHERE
+!
+   PSNOWALBVIS(:) = XUNDEF
+   PSNOWALBNIR(:) = XUNDEF
+!
+END WHERE
+!
+IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
 !===============================================================================
 
 END SUBROUTINE ISBA_MEB
