@@ -25,11 +25,7 @@
 !!    PURPOSE
 !!    -------
 !
-!     3-Layer snow scheme option (Boone and Etchevers 1999)
-!     For shallow snow cover, Default method of Douville et al. (1995)
-!     used with this option: Model "turns on" when snow sufficiently
-!     deep/above some preset critical snow depth.
-!
+!     3-Layer snow scheme option (Boone and Etchevers, J Hydrometeor., 2000)
 !
 !!**  METHOD
 !!    ------

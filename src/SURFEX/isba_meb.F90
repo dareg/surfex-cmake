@@ -597,7 +597,7 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
 ! Calculate snow albedo: split into spectral bands:
 !
 CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO(:,1),PSNOWAGE(:,1),PPS, &
-                                PSNOWALBVIS,PSNOWALBNIR)
+                                PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR)
 !
 !
 ! NOTE, currently MEB only uses 2 of 3 potential snow albedo spectral bands
@@ -1097,7 +1097,7 @@ IF (LHOOK) CALL DR_HOOK('AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 END SUBROUTINE AVG_FLUXES_MEB_TSPLIT 
 !===============================================================================
 SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
-                                      PSNOWALBVIS,PSNOWALBNIR)
+                                      PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR)
 !
 ! Split Total snow albedo into N-spectral bands
 ! NOTE currently MEB only uses 2 bands of the 3 possible.
@@ -1122,10 +1122,11 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWAGE      ! Snow grain age
 REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBFIR   ! Snow FIR (UV) albedo
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PPS))          :: ZWORK
+REAL, DIMENSION(SIZE(PPS))          :: ZWORK, ZWORKA
 REAL, DIMENSION(SIZE(PPS))          :: ZPERMSNOWFRAC
 REAL, DIMENSION(SIZE(PPS),3)        :: ZSPECTRALALBEDO
 !                                      ZSPECTRALALBEDO = spectral albedo (3 bands in algo: 
@@ -1138,25 +1139,31 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
 !
-ZWORK(:)         = PSNOWALB(:)
+ZWORK(:)         = 0.0
+ZWORKA(:)        = PSNOWALB(:)
 ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
 !
-CALL SNOW3LALB(ZWORK,ZSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,ZPERMSNOWFRAC,PPS)
+CALL SNOW3LALB(ZWORKA,ZSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,ZPERMSNOWFRAC,PPS)
 !
 ! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
 !
 WHERE(PSNOWALB(:)/=XUNDEF)
-
+!
+! - renormalize so that total albedo is split into VIS and NIR bands:
+!
    ZWORK(:)       = XSW_WGHT_VIS*ZSPECTRALALBEDO(:,1) + &
                     XSW_WGHT_NIR*ZSPECTRALALBEDO(:,2)
-!
    PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)*PSNOWALB(:)/ZWORK(:)
    PSNOWALBNIR(:) = ZSPECTRALALBEDO(:,2)*PSNOWALB(:)/ZWORK(:)
+!
+   PSNOWALBFIR(:) = ZSPECTRALALBEDO(:,3)*PSNOWALB(:)/ZWORKA(:) ! just a diagnostic not 
+                                                               ! currently used by MEB
 !
 ELSEWHERE
 !
    PSNOWALBVIS(:) = XUNDEF
    PSNOWALBNIR(:) = XUNDEF
+   PSNOWALBFIR(:) = XUNDEF
 !
 END WHERE
 !
