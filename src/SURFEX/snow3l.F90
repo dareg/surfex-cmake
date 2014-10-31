@@ -89,6 +89,7 @@
 !
 USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT, XCL, XDAY, XLVTT
 USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_SNOW_PAR, ONLY : XSNOWDMIN
 !
 USE MODE_SNOW3L
 !
@@ -262,12 +263,13 @@ INTEGER                            :: INI        ! number of point
 INTEGER                            :: INLVLS     ! number of snow layers
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND,    &
-                                                        ZRADSINK  
+                                                        ZRADSINK, ZWORK2D  
 !                                      ZSNOWTEMP  = Snow layer(s) averaged temperature (K)
 !                                      ZSCAP      = Snow layer(s) heat capacity [J/(K m3)]
 !                                      ZSNOWDZN   = Updated snow layer thicknesses (m)
 !                                      ZSCOND     = Snow layer(s) thermal conducivity [W/(m K)]
 !                                      ZRADSINK   = Snow solar Radiation source terms (W/m2)
+!                                      ZWORK2D    = working variable (*)
 !
 REAL, DIMENSION(SIZE(PTA))          :: ZSNOW, ZSFCFRZ, ZTSTERM1, ZTSTERM2,                   &
                                        ZCT, ZRA, ZSNOWTEMPO1  
@@ -600,9 +602,10 @@ CALL SNOW3LEVAPN(PPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
 ! modified in the previous routine:
 !
 ZSCAP(:,:)     = SNOW3LSCAP(PSNOWRHO)
-ZSNOWTEMP(:,:) = XTT + ( ((PSNOWHEAT(:,:)/PSNOWDZ(:,:))                   &
+ZWORK2D(:,:)   = MIN(1.0, PSNOWDZ(:,:)/XSNOWDMIN)
+ZSNOWTEMP(:,:) = XTT + ZWORK2D(:,:)*( ((PSNOWHEAT(:,:)/MAX(XSNOWDMIN,PSNOWDZ(:,:)))  &
                    + XLMTT*PSNOWRHO(:,:))/ZSCAP(:,:) )  
-PSNOWLIQ(:,:)  = MAX(0.0,ZSNOWTEMP(:,:)-XTT)*ZSCAP(:,:)*                  &
+PSNOWLIQ(:,:)  = MAX(0.0,ZSNOWTEMP(:,:)-XTT)*ZSCAP(:,:)*                             &
                    PSNOWDZ(:,:)/(XLMTT*XRHOLW)  
 ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
 !
