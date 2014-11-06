@@ -549,6 +549,9 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZQA_IC               ! atm
 REAL, DIMENSION(SIZE(PPS))                         :: ZSWUP                ! net upwelling shortwave radiation [W/m2]
 REAL, DIMENSION(SIZE(PPS))                         :: ZLWUP                ! net upwelling longwave radiation [W/m2]
 REAL, DIMENSION(SIZE(PPS))                         :: ZUSTAR2SNOW          ! snow fraciton velocity squared (m2/s2)
+REAL, DIMENSION(SIZE(PPS))                         :: ZTA                  ! lowest level atmospheric temperature update estimate (K)
+REAL, DIMENSION(SIZE(PPS))                         :: ZQA                  ! lowest level atmospheric spec. humidity update estimate (K)
+REAL, DIMENSION(SIZE(PPS))                         :: ZVMOD                ! lowest level atmospheric wind speed update estimate (K)
 !
 !
 ! Working sums for flux averaging over MEB time split
@@ -705,14 +708,24 @@ ZTSTEP          = PTSTEP/JTSPLIT_EB          ! split time step...for relatively 
 !
 CALL INIT_SUM_FLUXES_MEB_TSPLIT 
 !
-! Time split loop:
+!
+! Note, when implicitly coupled to the atmosphere, these
+! 3 variables will evolve during the split...we used updated
+! values for turbulent exchange computations (drag_meb). 
+! NOTE...when explicit coupling used, these 3 variables do NOT vary
+! during the split.
+!
+ZVMOD(:) = PVMOD(:)
+ZTA(:)   = PTA(:)
+ZQA(:)   = PQA(:)
+!
 !
 LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.1    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !
    CALL DRAG_MEB(OFORC_MEASURE,                                         &
-              PTG(:,1), PTC, PTV, PSNOWTEMP(:,1), PTA, PQC, PQA, PVMOD, &
+              PTG(:,1), PTC, PTV, PSNOWTEMP(:,1), ZTA, PQC, ZQA, ZVMOD, &
               PWG(:,1), PWGI(:,1), PWSAT(:,1), PWFC(:,1),               &
               PEXNS, PEXNA, PPS,                                        &
               PRR, PSR, PRHOA, PZ0G_WITHOUT_SNOW,                       &
@@ -757,7 +770,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PTG,PTV,PSNOWTEMP,                                                       &
               ZFLXC_V_C,ZHVGS,ZHVNS,                                                   &
               ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,                                             &
-              PTC,PQC,ZTA_IC,ZQA_IC,ZUSTAR2_IC,                                        &
+              PTC,PQC,ZTA_IC,ZQA_IC,ZUSTAR2_IC,ZVMOD,                                  &
               ZDELTAT_G,ZDELTAT_V,ZDELTAT_N,PGRNDFLUX,PCPS,PLVTT,PLSTT,                &
               PHPSNOW,PMELTADV,PRESTORE,PDEEP_FLUX,                                    &
               PDELHEATV_SFC,PDELHEATG_SFC,PDELHEATG                                    )
