@@ -13,6 +13,7 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
                     PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,   &
                     PPSNCV, PDELTA, PLAI, PVEGGV,                      &
                     PCH, PCD, PCDN, PRI, PRA, PVELC,                   &
+                    PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW,            &
                     PHUG, PHUGI, PHV, PHVG, PHVN, PHU, PQS, PRS,       &
                     PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF,             &
                     PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C,        &    
@@ -220,6 +221,14 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_MOM, PQSATG, PQSATV, PQSATC, PQSATN
 !                                    PQSATC = qsat for PTC
 !                                    PQSATN = qsat for PSNOWTEMP
 !
+REAL, DIMENSION(:), INTENT(OUT)  :: PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW 
+!                                    PCDSNOW     = drag coefficient over snow (-)
+!                                    PCHSNOW     = heat/mass exchange coefficient over snow (-)
+!                                    PRISNOW     = Richardson number over snow (-)
+!                                    PUSTAR2SNOW = Surface friction velocity squared  (m2 s-2)
+!                                                   Just a diagnostic, not used in coupling
+
+!                                    
 !*      0.2    declarations of local variables
 !
 !
@@ -302,6 +311,11 @@ PFLXC_MOM(:) = 0.
 ZRSGL(:) = 0.
 ZRSGF(:) = 0.
 ZZ0SN(:) = XZ0SN
+!
+PCDSNOW(:)     = 0.
+PCHSNOW(:)     = 0.
+PRISNOW(:)     = 0.
+PUSTAR2SNOW(:) = 0. 
 !
 !-------------------------------------------------------------------------------
 !

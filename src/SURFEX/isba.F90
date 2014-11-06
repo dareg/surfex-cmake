@@ -883,7 +883,8 @@ REAL, DIMENSION(SIZE(PWR))   :: ZEMIST, ZZHV
 REAL, DIMENSION(SIZE(PWR))   :: ZALBT, ZEV, ZETR, ZER
 !
 LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
-
+!
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -980,7 +981,7 @@ IF(OMEB)THEN
         HSNOWMETAMO, HSNOWRAD,                                                 &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
-        ZSOILHCAPZ, ZSOILCONDZ,                                                &
+        ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1,                                      &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &

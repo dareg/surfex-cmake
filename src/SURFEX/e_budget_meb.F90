@@ -256,14 +256,14 @@ REAL, DIMENSION(:),   INTENT(OUT)  :: PFLXC_V_C, PHVGS, PHVNS
 !                                     PHVNS     = Dimensionless pseudo humidity factor for computing vapor
 !                                                 fluxes from the partly-buried part of the canopy to the canopy air (-)
 !
-REAL, DIMENSION(:),   INTENT(OUT)  :: PTC, PQC, PTA_IC, PQA_IC, PUSTAR2_IC  
-!                                     PTC       = Canopy air space temperature       (K)
-!                                     PQC       = Canopy air space specific humidity (kg kg-1)
-!                                     PTA_IC    = Near-ground air temperature        (K)
-!                                     PQA_IC    = Near-ground air specific humidity  (kg kg-1)
-!                                     PUSTAR2_IC= Surface friction velocity squared  (m2 s-2)
-!                                                 (modified if implicit coupling with
-!                                                  atmosphere used)
+REAL, DIMENSION(:),   INTENT(OUT)  :: PTC, PQC, PTA_IC, PQA_IC, PUSTAR2_IC
+!                                     PTC         = Canopy air space temperature       (K)
+!                                     PQC         = Canopy air space specific humidity (kg kg-1)
+!                                     PTA_IC      = Near-ground air temperature        (K)
+!                                     PQA_IC      = Near-ground air specific humidity  (kg kg-1)
+!                                     PUSTAR2_IC  = Surface friction velocity squared  (m2 s-2)
+!                                                   (modified if implicit coupling with
+!                                                   atmosphere used)
 !
 REAL, DIMENSION(:),   INTENT(OUT)  :: PDELTAT_V, PDELTAT_N, PDELTAT_G
 !                                     PDELTAT_V = Time change in vegetation canopy temperature (K)
@@ -424,9 +424,8 @@ END WHERE
 !
 PUSTAR2_IC(:)= ZUSTAR2(:) 
 !
-
 !aabtmptest put in new option HIMPLICIT_WIND=='OLD' or 'NEW' ?
-
+!
 !
 IF(HISBA == 'DIF')THEN
 !

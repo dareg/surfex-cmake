@@ -25,7 +25,7 @@
 !!    PURPOSE
 !!    -------
 !
-!     3-Layer snow scheme option (Boone and Etchevers, J Hydrometeor., 2000)
+!     3(N)-Layer snow scheme option (Boone and Etchevers, J Hydrometeor., 2000)
 !
 !!**  METHOD
 !!    ------
@@ -76,8 +76,12 @@
 !!      Modified by B. Decharme  (08/2013): Qsat as argument (needed for coupling with atm)
 !!                                          Add snow drift effect like in CROCUS
 !!                                          Improve snow albedo
-!!      Modified by A. Boone     (10/2014): MEB modifs: permit option to impose fluxes at sfc  
 !!      Modified by P. Samuelsson(10/2014): MEB added an optional snow albedo calculation
+!!                                          for litter
+!!      Modified by A. Boone     (10/2014): MEB modifs: removed above since spectral albedo 
+!!                                          method from CROCUS added...can eventually add above
+!!                                          back in a manner consistent with spectral bands...
+!!      Modified by A. Boone     (10/2014): MEB modifs: permit option to impose fluxes at sfc  
 !!      Modified by A. Boone     (10/2014): SNOW3LREFRZ and SNOW3LEVAPN edited to give
 !!                                          better enthalpy conservation.
 !!
@@ -92,6 +96,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_SNOW_PAR, ONLY : XSNOWDMIN
 !
 USE MODE_SNOW3L
+USE MODE_THERMOS,  ONLY : QSATI
 !
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
@@ -209,6 +214,12 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PSWNETSNOW, PLWNETSNOW, PSWNETSNOWS
 !                                      PLWNETSNOW = net longwave radiation entering top of snowpack 
 !                                                  (W m-2) Imposed if MEB=T, diagnosed herein if MEB=F
 !
+REAL, DIMENSION(:), INTENT(INOUT)   :: PUSTAR, PCDSNOW, PCHSNOW, PRI
+!                                      PCDSNOW    = drag coefficient for momentum over snow (-)
+!                                      PUSTAR     = friction velocity over snow (m/s)
+!                                      PCHSNOW    = drag coefficient for heat over snow (-)
+!                                      PRI        = Richardson number (-)
+!
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ, PSNOWTEMP, PSNOWDZ
 !                                      PSNOWLIQ  = Snow layer(s) liquid water content (m)
 !                                      PSNOWTEMP = Snow layer(s) temperature (m)
@@ -234,20 +245,15 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PEVAPCOR, PGFLXCOR, PSNOWFLUX, 
 !                                      PDELHEATN = total snow heat content change in the surface layer (W m-2)
 !                                      PDELHEATN_SFC = total snow heat content change during the timestep (W m-2)
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PUSTAR, PCDSNOW, PSNDRIFT
-!                                      PCDSNOW     = drag coefficient for momentum over snow
-!                                      PUSTAR      = friction velocity over snow (m/s)
-!                                      PEVAP       = total evaporative flux (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT)     :: PSNDRIFT
 !                                      PSNDRIFT    = blowing snow sublimation (kg/m2/s)
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PCHSNOW, PSNOWHMASS
-!                                      PCHSNOW     = drag coefficient for heat over snow
+REAL, DIMENSION(:), INTENT(OUT)   ::   PSNOWHMASS
 !                                      PSNOWHMASS  = heat content change due to mass
 !                                                    changes in snowpack (J/m2): for budget
 !                                                    calculations only.
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PRI, PQS
-!                                    PRI = Ridcharson number
+REAL, DIMENSION(:), INTENT(OUT)   :: PQS
 !                                    PQS = surface humidity
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PZENITH ! solar zenith angle
@@ -491,12 +497,6 @@ IF(OMEB)THEN
 
    ZPSN3L(:) = 1.0
 
-! - as prescribed, we don't need output from here, but must initialize
-
-   PCDSNOW(:) = 0.
-   PCHSNOW(:) = 0.
-   PUSTAR(:)  = 0.
-
 ELSE
 
    ZPSN3L(:) = PPSN3L(:)
@@ -665,7 +665,11 @@ ENDWHERE
 !*      15.     Update surface specific humidity:
 !               ---------------------------------
 !
-PQS(:) = ZQSAT(:)
+IF(OMEB)THEN
+   PQS(:) = QSATI(PSNOWTEMP(:,1),PPS) ! purely diagnostic
+ELSE
+   PQS(:) = ZQSAT(:)
+ENDIF
 !
 !
 !*      16.     Energy Budget Diagnostics:
