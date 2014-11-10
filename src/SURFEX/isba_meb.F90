@@ -32,7 +32,7 @@
         PGFLUX, PRESTORE, PGRNDFLUX, PUSTAR,                                   &
         PHPSNOW, PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,          &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
-        PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                        &
+        PEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
         PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,                               &
         PDELHEATN, PDELHEATN_SFC, PRESTOREN,                                   &
         PD_G, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,                     &
@@ -397,6 +397,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PRRSFC        ! Rain rate falling outside
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLESL         ! Evaporation (liquid) from wet snow (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PCDSNOW       ! drag coefficient for momentum over snow
 REAL, DIMENSION(:),   INTENT(OUT)   :: PCHSNOW       ! drag coefficient for heat over snow
+REAL, DIMENSION(:),   INTENT(OUT)   :: PEMIST        ! total effective surface emissivity...LWUP = EMIST*TS_RAD**4 (-)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PTS_RAD       ! effective radiative temperature 
 !                                                    !  of the natural surface (K)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ      ! snow layer liquid water content (m)
@@ -537,7 +538,6 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZH_N_A               ! Sen
 REAL, DIMENSION(SIZE(PPS))                         :: ZVEGFACT             ! Fraction of canopy vegetation possibly receiving 
 !                                                                          !  rainfall                                              (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZRRSFC               ! The sum of all non-intercepted rain and canopy drip    (kg/m2/s)
-REAL, DIMENSION(SIZE(PPS))                         :: ZEMIST               ! total effective surface emissivity (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLES3L               ! latent heat flux - sublimation of ice from the ground 
 !                                                                          !  based snowpack (W/m2)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLEL3L               ! latent heat flux - evaporation of liquid water from the 
@@ -806,7 +806,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PEVAP,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                     &
               PLE_FLOOD,PLEI_FLOOD,ZLES3L,ZLEL3L,                                      &
               ZEVAP3L,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,                               &
-              PTS_RAD,ZEMIST                                                           )
+              PTS_RAD,PEMIST                                                           )
 !
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEC+LES+LEL) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
@@ -1026,7 +1026,7 @@ ZSWNET_N_SUM(:)  = ZSWNET_N_SUM(:)  +   PSWNET_N(:)
 ZLWNET_V_SUM(:)  = ZLWNET_V_SUM(:)  +   PLWNET_V(:) 
 ZLWNET_G_SUM(:)  = ZLWNET_G_SUM(:)  +   PLWNET_G(:)
 ZLWNET_N_SUM(:)  = ZLWNET_N_SUM(:)  +   PLWNET_N(:) 
-ZEMIST_SUM(:)    = ZEMIST_SUM(:)    +   ZEMIST(:) 
+ZEMIST_SUM(:)    = ZEMIST_SUM(:)    +   PEMIST(:) 
 ZSWUP_SUM(:)     = ZSWUP_SUM(:)     +   ZSWUP(:)
 ZLWUP_SUM(:)     = ZLWUP_SUM(:)     +   ZLWUP(:)
 
@@ -1103,7 +1103,7 @@ PSWNET_N(:)  = ZSWNET_N_SUM(:)  /JTSPLIT_EB
 PLWNET_V(:)  = ZLWNET_V_SUM(:)  /JTSPLIT_EB
 PLWNET_G(:)  = ZLWNET_G_SUM(:)  /JTSPLIT_EB
 PLWNET_N(:)  = ZLWNET_N_SUM(:)  /JTSPLIT_EB
-ZEMIST(:)    = ZEMIST_SUM(:)    /JTSPLIT_EB
+PEMIST(:)    = ZEMIST_SUM(:)    /JTSPLIT_EB
 ZSWUP(:)     = ZSWUP_SUM(:)     /JTSPLIT_EB
 ZLWUP(:)     = ZLWUP_SUM(:)     /JTSPLIT_EB
 
@@ -1113,7 +1113,7 @@ PDELHEATG(:)     = ZDELHEATG_SUM(:)     /JTSPLIT_EB
 
 ! Additional diagnostics depending on AVG quantities:
 
-PTS_RAD(:)   = ((ZLWUP(:) - PLW_RAD(:)*(1.0-ZEMIST(:)))/(XSTEFAN*ZEMIST(:)))**0.25
+PTS_RAD(:)   = ((ZLWUP(:) - PLW_RAD(:)*(1.0-PEMIST(:)))/(XSTEFAN*PEMIST(:)))**0.25
 
 ZRNET_V(:)   = PSWNET_V(:) + PLWNET_V(:)
 !

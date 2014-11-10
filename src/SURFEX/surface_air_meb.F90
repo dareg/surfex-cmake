@@ -2,7 +2,8 @@
     SUBROUTINE SURFACE_AIR_MEB(PZ0, PZ0H, PZ0G, PH_VEG, PLAI,          &
                                PTG, PTC, PTV, PVELC, PLW,              &
                                PDISPH,                                 &
-                               PRAGNC, PGVNC                           )
+                               PRAGNC, PGVNC,                          &
+                               PUSTAR2, PCD, PCH, PRI                  )
 !
 ! typical values for nordic forest:
 !     PZ0 = 0.8 m
@@ -86,10 +87,17 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PRAGNC, PGVNC
 !                                     PGVNC = aerodynamic conductance between
 !                                              the canopy and canopy air
 !
+REAL, DIMENSION(:), INTENT(OUT)  :: PUSTAR2, PCD, PCH, PRI
+!                                   PUSTAR2 = canopy top friction velocity squared (m2/s2)
+!                                   PCD     = drag coefficient (-)
+!                                   PCH     = heat transfor coefficient (ground to canopy air) (-)
+!                                   PRI     = Richardson number (ground to canopy air) (-)
+!
+!
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(SIZE(PTG)) :: ZDIFFH, ZK, ZPIH, ZDIFFT, ZRI, ZRIF, ZZ0HG
+REAL, DIMENSION(SIZE(PTG)) :: ZDIFFH, ZK, ZPIH, ZDIFFT, ZRIF, ZZ0HG, ZUSTAR
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -119,6 +127,12 @@ ZDIFFH(:)  = MAX(PH_VEG(:)-PDISPH(:),0.1)
 !
 ZK(:)      = (XKARMAN*XKARMAN)*PVELC(:)*ZDIFFH(:)/LOG(ZDIFFH(:)/PZ0(:))
 !
+! Just a diagnostic: Ustar and the equivalent drag coef at the top of the canopy (m/s):
+!
+ZUSTAR(:)  = ZK(:)/(XKARMAN*ZDIFFH(:))
+PCD(:)     = ZUSTAR(:)/MAX(1.,PVELC(:))
+PUSTAR2(:) = ZUSTAR(:)**2
+!
 ! Aerodynamic resistance, Eq. 25 Choudhury and Monteith, 1988:
 !
 PRAGNC(:)=PH_VEG(:)*EXP(ZALPHA)/(ZALPHA*ZK(:))*(EXP(-ZALPHA*PZ0G(:)/PH_VEG(:)) &
@@ -143,21 +157,25 @@ PRAGNC(:)=PH_VEG(:)*EXP(ZALPHA)/(ZALPHA*ZK(:))*(EXP(-ZALPHA*PZ0G(:)/PH_VEG(:)) &
 ! Finally, note that we assume the ratio z0/z0h is the same for vegetation and 
 ! underlying surface (as done for composite ISBA).
 !
-ZRI(:)   = -XG*PH_VEG(:)*(PTG(:)-PTC(:))/(PTG(:)*PVELC(:)*PVELC(:))
+PRI(:)   = -XG*PH_VEG(:)*(PTG(:)-PTC(:))/(PTG(:)*PVELC(:)*PVELC(:))
 !
 ZRIF(:)  = 0.
 ZZ0HG(:) = PZ0G(:)
 !
-WHERE(ZRI(:) <= 0.)                                        ! Unstable - Sellers 
-   ZPIH(:) = SQRT(1. - ZRAFA*ZRI(:))                       
+WHERE(PRI(:) <= 0.)                                        ! Unstable - Sellers 
+   ZPIH(:) = SQRT(1. - ZRAFA*PRI(:))                       
 ELSEWHERE                                                  ! Stable   - Noilhan and Mahfouf
    ZZ0HG(:)= PZ0G(:)*PZ0H(:)/PZ0(:)                        
-   ZRIF(:) = MIN(1., ZRI(:)/XRIMAX)
-   ZPIH(:) = (1/(1. + 15*ZRI(:)*SQRT(1.+5*ZRI(:))))* &  
+   ZRIF(:) = MIN(1., PRI(:)/XRIMAX)
+   ZPIH(:) = (1/(1. + 15*PRI(:)*SQRT(1.+5*PRI(:))))* &  
              ((1.-ZRIF(:)) + ZRIF(:)*(LOG(ZDIFFH(:)/PZ0G(:))/LOG(ZDIFFH(:)/ZZ0HG(:))) )            ! continuous
 END WHERE
 !
 PRAGNC(:)  = PRAGNC(:)/ZPIH(:)
+!
+! Diagnose CH (transfer coefficient: -) just for diagnostic purposes:
+!
+PCH(:)     = 1/(PRAGNC(:)*MAX(1., PVELC(:)))
 !
 ! Aerodynamic resistance within the canopy layer, i.e. between canopy and canopy air
 ! Eq. 29 and 30, Choudhury and Monteith, 1988:

@@ -856,9 +856,6 @@ REAL, DIMENSION(SIZE(PWR))               :: ZSUBVCOR   ! A possible snow (interc
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
 ! Budget: Add to arguments, diags
 
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZSWNETSNOW     ! Shortwave net radiation within the snowpack (W/m2)
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZSWNETSNOWS    ! Shortwave net radiation within the surface layer of the snowpack (W/m2)
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZLWNETSNOW     ! Longwave net radiation within the snowpack (W/m2)
 REAL, DIMENSION(SIZE(PWR))                           :: ZDELHEATV_SFC  ! Change in heat storage of the explicit vegetation (MEB) layer over the current time step (W m-2)
 REAL, DIMENSION(SIZE(PWR))                           :: ZDELHEATG      ! change in heat storage of the entire soil column over the current time step (W m-2) 
 REAL, DIMENSION(SIZE(PWR))                           :: ZDELHEATG_SFC  ! change in heat storage of the surface soil layer over the current time step (W m-2)
@@ -868,7 +865,7 @@ REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZDELHEATN      ! change 
 REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZDELHEATN_SFC  ! change in heat storage of the surface snow layer over the current time step (W m-2)
 REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZSNOWSFCH      ! snow surface layer pseudo-heating term owing to
 !                                                                      !  changes in grid thickness            (W m-2)
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZRESTOREN      ! conductive heat flux between the surface and sub-surface soil layers 
+REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZGSFCSNOW      ! conductive heat flux between the surface and sub-surface soil layers 
 !                                                                      ! for the multi-layer snow schemes..for composite snow, it is 
 !                                                                      ! equal to PRESTORE (W m-2)
 ! Budget: Add to arguments, diags
@@ -920,6 +917,11 @@ PHU_AGG     (:)   = 0.0
 !
 ZTSM(:)         = PTG(:,1)
 ZT2M(:)         = PTG(:,2)
+!
+! MEB:
+!
+ZSUBVCOR(:)     = 0.0
+!aabtmptest need to initialize other vars, like paalphan etc...
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
 !
@@ -1009,9 +1011,9 @@ IF(OMEB)THEN
         PGFLUX, PRESTORE, PGRNDFLUX, PUSTAR,                                   &
         PHPSNOW, PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,          &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
-        PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                        &
+        ZEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
         ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG,                               &
-        ZDELHEATN, ZDELHEATN_SFC, ZRESTOREN,                                   &
+        ZDELHEATN, ZDELHEATN_SFC, ZGSFCSNOW,                                   &
         PD_G, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,                     &
         PTDEEP_A, PTDEEP_B, PDEEP_FLUX, PMUF, PDRIP, PRRVEG,                   &
         ZRI3L, ZSNOW_THRUFAL, ZEVAPCOR, ZSUBVCOR, ZSNOWSFCH, PSNDRIFT, ZQS3L   )
@@ -1040,8 +1042,8 @@ ELSE
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G(:,1),       &
            PPEW_A_COEF, PPEW_B_COEF,                                            &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
-           ZSNOW_THRUFAL, PGRNDFLUX, ZRESTOREN, ZEVAPCOR,                       &
-           ZSWNETSNOW, ZSWNETSNOWS, ZLWNETSNOW,                                 &
+           ZSNOW_THRUFAL, PGRNDFLUX, ZGSFCSNOW, ZEVAPCOR,                       &
+           PSWNET_N, PSWNET_NS, PLWNET_N,                                       &
            PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,       &
            PSNDRIFT, PUSTARSNOW,                                                &
            PPSN, PSRSFC, PRRSFC, PSMELTFLUX, ZSNOWSFCH,                         &
@@ -1187,26 +1189,29 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                
 !              -----------------------------------------
 !
 !* add snow component to output radiative parameters and fluxes in case 
-!  of 3-L snow scheme
+!  of ES or CROCUS snow schemes
 !
-!
- CALL ISBA_SNOW_AGR( HSNOW_ISBA,                                  &
+ CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                            &
           ZEMIST, ZALBT,                                          &
           PPSN, PPSNG, PPSNV,                                     &
           PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &
           PLETR, PEVAP, PSUBL, PGFLUX, PLVTT, PLSTT,              &
           PUSTAR,                                                 &
           ZLES3L, ZLEL3L, ZEVAP3L,                                &
+          PSWNET_V, PSWNET_G, PLWNET_V, PLWNET_G, PH_V_C, PH_G_C, &
+          PLEV_V_C, PLETR_V_C, PLES_V_C,                          &
           ZRI3L, ZQS3L, ZALB3L,                                   &
-          PRNSNOW, PHSNOW,  PHPSNOW,                              &
-          PGFLUXSNOW, PUSTARSNOW,                                 &
+          PRNSNOW, PHSNOW, PHPSNOW,                               &
+          PSWNET_N, PSWNET_NS, PLWNET_N,                          &
+          PGFLUXSNOW, ZGSFCSNOW, PUSTARSNOW,                      &
           PGRNDFLUX, PLESL,                                       &
           PEMISNOW,                                               &
-          PSNOWTEMP, PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,          &
+          PSNOWTEMP(:,1), PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,     &
           PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
           PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
-          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &
-          PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD, PFFG, PFFV, PFF   )  
+          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG(:,1),             &
+          PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD,                   &
+          PFFG, PFFV, PFF, PPALPHAN, PTC                          )  
 !
 !***************************************************************************
 ! All output fluxes and radiative variables have recovered the same physical
