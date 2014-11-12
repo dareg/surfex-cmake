@@ -778,7 +778,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.3    Energy and momentum fluxes and radiative temperature and emissivity
 !              -------------------------------------------------------------------
 !
-   CALL ISBA_FLUXES_MEB(PVEGGV,PRHOA,                                                  &
+   CALL ISBA_FLUXES_MEB(PRHOA,                                                         &
               ZSIGMA_F,ZSIGMA_FN,PEMISNOW,                                             &
               ZRNET_V,ZRNET_G,PRNSNOW,                                                 & 
               PSWNET_V,PSWNET_G,PSWNET_N,                                              &
