@@ -1135,7 +1135,7 @@ SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
-USE MODD_SNOW_PAR,       ONLY : XVSPEC1, XVSPEC2
+USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 !
 USE MODE_SNOW3L,         ONLY : SNOW3LALB
 !
@@ -1177,19 +1177,20 @@ ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
 CALL SNOW3LALB(ZWORKA,ZSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,ZPERMSNOWFRAC,PPS)
 !
 ! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
+! (also note, here PSNOWALB doesn't evolve...we just diagnose spectral components).
 !
 WHERE(PSNOWALB(:)/=XUNDEF)
 !
-! - renormalize so that total albedo is split into VIS and NIR bands:
+   PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)
 !
-   ZWORK(:)       = (ZSPECTRALALBEDO(:,1)*XVSPEC1 + ZSPECTRALALBEDO(:,2)*XVSPEC2)/ &
-                    (                     XVSPEC1 +                      XVSPEC2)
-
-   PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)*PSNOWALB(:)/ZWORK(:)
-   PSNOWALBNIR(:) = ZSPECTRALALBEDO(:,2)*PSNOWALB(:)/ZWORK(:)
+! We diagnose NIR albedo such that total albedo is conserved
+! (using just 2 spectral bands in MEB)
 !
-   PSNOWALBFIR(:) = ZSPECTRALALBEDO(:,3)*PSNOWALB(:)/ZWORKA(:) ! just a diagnostic not 
-                                                               ! currently used by MEB
+   PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
+!
+! currently NOT used by MEB
+!
+   PSNOWALBFIR(:) = XUNDEF                                     
 !
 ELSEWHERE
 !
@@ -1198,6 +1199,7 @@ ELSEWHERE
    PSNOWALBFIR(:) = XUNDEF
 !
 END WHERE
+!
 !
 IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
 !
