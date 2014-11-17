@@ -524,8 +524,8 @@ ELSE
 !
 ENDIF
 !
-! Interfacial ground-snowbase thermal conductivity:
-
+! Interfacial ground-snowbase thermal conductivity divided by interfacial dz:
+!
 ZTCONDA_DELZ_NG(:) = 2/((PSNOWDZ(:,JNSNOW)/PSNOWCONDZ(:,JNSNOW))+(PD_G(:,1)/ZGCOND1(:) ))
 !
 !

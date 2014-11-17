@@ -1,9 +1,10 @@
 !     #########
       SUBROUTINE ISBA_MEB(TPTIME, OMEB, OFORC_MEASURE, OGLACIER,               &
-        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                       &
+        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD,                                                 &           
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
+        PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
         PSOILHCAPZ, PSOILCONDZ, PFROZEN1,                                      &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
@@ -83,7 +84,7 @@
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_CSTS,           ONLY : XCPD 
+USE MODD_CSTS,           ONLY : XCPD, XDAY 
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
@@ -129,6 +130,8 @@ LOGICAL,              INTENT(IN)    :: OSNOWDRIFT    ! if=T, activate snowdrift
 LOGICAL,              INTENT(IN)    :: OSNOWDRIFT_SUBLIM ! if=T, activate snowdrift sublimation 
 LOGICAL,              INTENT(IN)    :: OSNOW_ABS_ZENITH  ! if=T, activate parametrization of solar absorption 
 !                                                        ! for polar regions
+LOGICAL, DIMENSION(:),INTENT(IN)    :: OIRRIGATE     ! Irrigation FLAG
+LOGICAL, DIMENSION(:),INTENT(INOUT) :: OIRRIDAY      ! Irrigation time 
 !
 CHARACTER(LEN=*),     INTENT(IN)    :: HISBA         ! type of ISBA version:
 !                                                    ! '2-L' (default)
@@ -271,6 +274,11 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PTDEEP_A, PTDEEP_B ! Deep soil temperatur
 !                                                 flux lower BC is applied.
 !                                                 Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
 !                                                 (with PDEEP_FLUX in W/m2)
+!
+REAL, DIMENSION(:),   INTENT(IN)    :: PTHRESHOLD, PWATSUP, PIRRIG
+!                                      PTHRESHOLD = threshold water level for irrigation (-)
+!                                      PWATSUP    = irrigation water need to maintain a given moisture thresold (kg/m2)
+!                                      PIRRIG     = irrigation mask (-)
 !
 ! - - - - - - - - - - - - - - - - - - - - 
 !
@@ -429,6 +437,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWSFCH     ! snow surface layer pseudo
 !                                                    !  changes in grid thickness            (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNDRIFT      ! blowing snow sublimation (kg/m2/s)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PQSNOW        ! snow surface specific humidity (kg/kg)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PIRRIG_FLUX   ! (kg/m2/s) irrigation flux (water need)
 !
 !
 !*      0.2    declarations of local variables
@@ -552,7 +561,8 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZUSTAR2SNOW          ! sno
 REAL, DIMENSION(SIZE(PPS))                         :: ZTA                  ! lowest level atmospheric temperature update estimate (K)
 REAL, DIMENSION(SIZE(PPS))                         :: ZQA                  ! lowest level atmospheric spec. humidity update estimate (K)
 REAL, DIMENSION(SIZE(PPS))                         :: ZVMOD                ! lowest level atmospheric wind speed update estimate (K)
-!
+REAL, DIMENSION(SIZE(PPS))                         :: ZRR                  ! combined rain rate (above canopy) and irrigation need (kg/m2/s)
+
 !
 ! Working sums for flux averaging over MEB time split
 !
@@ -583,6 +593,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -------------
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
+!
+!
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -637,7 +649,7 @@ CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
 !
 ! First, compute an effective veg fraction: it can only be < unity if vegetation is buried by snowpack...
 !
-ZWORK(:) = PLAI(:)*(1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:))) 
+ZWORK(:) = (1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:))) 
 ! 
 CALL WET_LEAVES_FRAC(PWR, ZWORK, PWRMAX_CF, PZ0_MEBV, PLAI, ZWRMAX, ZDELTA) 
 !
@@ -840,6 +852,20 @@ CALL SNOW_LOAD_MEB(PTSTEP,PSR,PTV,ZWRVNMAX,ZKVN,ZCHEATV,PLER_V_C,PLES_V_C,ZMELTV
 !*     9.0    Snow explicit canopy loading/interception 
 !             ------------------------------------------
 !
+ZRR(:)         = 0.0
+PIRRIG_FLUX(:) = 0.0
+!
+!* add irrigation over vegetation to liquid precipitation (rr)
+!  Water "need" treated as if sprayed from above (over vegetation and soil):
+!
+IF (SIZE(OIRRIGATE)>0) THEN
+   WHERE (OIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
+      PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
+      ZRR        (:) = PRR(:) + PWATSUP(:)/XDAY
+      OIRRIDAY   (:) = .TRUE.           
+   END WHERE
+ENDIF
+!
 ! Call canopy interception...here because meltwater should be allowed to fall
 ! on understory snowpack
 !
@@ -852,7 +878,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
 ! snowpack and part falling onto snow-free understory.
 !
 CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
-        PRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
+        ZRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
         PWR, ZWRMAX, ZRRSFC, PDRIP, PRRVEG               )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

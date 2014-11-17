@@ -262,7 +262,7 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PWATSUP
 REAL   ,DIMENSION(:),INTENT(IN)    :: PTHRESHOLD
 LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
 LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
-REAL   ,DIMENSION(:),INTENT(OUT)   :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
+REAL   ,DIMENSION(:),INTENT(INOUT) :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
 REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/s)
 !
 !
@@ -289,8 +289,8 @@ REAL, DIMENSION(:),  INTENT(INOUT):: PFSAT    !Topmodel/dt92 saturated fraction
 !
 REAL, DIMENSION(:),  INTENT(OUT)  :: PHORTON   !Horton runoff (kg/m2/s)
 !
-REAL, DIMENSION(:),  INTENT(OUT)   :: PDRIP    !Dripping from the vegetation (kg/m2/s)
-REAL, DIMENSION(:),  INTENT(OUT)   :: PRRVEG   !Precip. intercepted by vegetation (kg/m2/s)
+REAL, DIMENSION(:),  INTENT(INOUT) :: PDRIP    !Dripping from the vegetation (kg/m2/s)
+REAL, DIMENSION(:),  INTENT(INOUT) :: PRRVEG   !Precip. intercepted by vegetation (kg/m2/s)
 !
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFG,PFFV
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFLOOD  !Floodplain effective fraction
@@ -462,24 +462,30 @@ END IF
 !*       1.     EVOLUTION OF THE EQUIVALENT WATER CONTENT Wr
 !               --------------------------------------------
 !
+!
+!
+IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
+!
+   PIRRIG_FLUX(:)=0.0
+!
 !* add irrigation over vegetation to liquid precipitation (rr)
 !
-PIRRIG_FLUX(:)=0.0
 !
-IF (SIZE(LIRRIGATE)>0) THEN
-   WHERE (LIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
-      PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
-      ZRR        (:) = ZRR(:) + PWATSUP(:) / XDAY
-      LIRRIDAY   (:) = .TRUE.           
-   END WHERE
-ENDIF
+   IF (SIZE(LIRRIGATE)>0) THEN
+      WHERE (LIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
+         PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
+         ZRR        (:) = ZRR(:) + PWATSUP(:) / XDAY
+         LIRRIDAY   (:) = .TRUE.           
+      END WHERE
+   ENDIF
 !
 !* interception reservoir and dripping computation
 !
- CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
-                 ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
-                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
+   CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
+                   ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
+                   PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
 !
+ENDIF
 !
 !* add irrigation over ground to potential soil infiltration (pg)
 !

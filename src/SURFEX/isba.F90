@@ -581,8 +581,7 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PWR      ! liquid water retained on the
 !                                             ! canopy (understory in the case of MEB)
 ! For multi-energy balance
 REAL, DIMENSION(:), INTENT(INOUT) :: PWRV, PWRVN, PTV
-!                                    PWRV    = liquid water retained on the foliage
-!                                              of the canopy vegetation
+!                                    PWRV    = NOT used for now
 !                                    PWRVN   = snow retained on the foliage
 !                                              of the canopy vegetation
 !                                    PTV     = canopy vegetation temperature
@@ -830,6 +829,7 @@ REAL, DIMENSION(SIZE(PWR)) :: ZTSM     ! surface temperature before time integra
 REAL, DIMENSION(SIZE(PWR)) :: ZLEG_DELTA  ! soil evaporation delta fn
 REAL, DIMENSION(SIZE(PWR)) :: ZLEGI_DELTA ! soil sublimation delta fn
 REAL, DIMENSION(SIZE(PWR)) :: ZLER_DELTA
+REAL, DIMENSION(SIZE(PWR)) :: ZVEG
 !
 REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
 !                                      ! absorbed PAR of each level within the
@@ -923,6 +923,12 @@ ZT2M(:)         = PTG(:,2)
 ZSUBVCOR(:)     = 0.0
 !aabtmptest need to initialize other vars, like paalphan etc...
 !
+IF(OMEB)THEN
+   ZVEG(:) = 0.0
+ELSE
+   ZVEG(:) = PVEG(:)
+ENDIF
+!
 ! Save snow albedo values at beginning of time step for total albedo calculation
 !
 ZALB3L(:)=PSNOWALB(:)
@@ -934,7 +940,7 @@ ZALB3L(:)=PSNOWALB(:)
 !
 IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
 
-   CALL SOIL (HC1DRY, HSCOND, HSNOW_ISBA, PSNOWRHO(:,1), PVEG, PCGSAT, PCGMAX,  &
+   CALL SOIL (HC1DRY, HSCOND, HSNOW_ISBA, PSNOWRHO(:,1), ZVEG, PCGSAT, PCGMAX,  &
      PC1SAT, PC2REF, PACOEF, PPCOEF, PCV, PPSN, PPSNG, PPSNV, PFFG, PFFV, PFF,  &
      PCG, PC1, PC2, PWGEQ, PCT, ZCS, ZFROZEN1, PTG(:,1), PWG, PWGI,             &
      PHCAPSOIL(:,1), PCONDDRY(:,1), PCONDSLD(:,1), PBCOEF(:,1), PWSAT(:,1),     &
@@ -942,7 +948,7 @@ IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
 !
 ELSE
 !
-   CALL SOILDIF (HDIFSFCOND, OFLOOD, PVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
+   CALL SOILDIF (HDIFSFCOND, OFLOOD, ZVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
      PCG, PCGMAX, PCT, ZFROZEN1, PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,         &
      PHCAPSOIL, PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ,        &
      ZSOILHCAPZ, PFWTD, PWTD, PWR, PPIFLOOD                                     )
@@ -979,10 +985,11 @@ ENDIF
 IF(OMEB)THEN
 
    CALL ISBA_MEB(TPTIME, OMEB, OFORC_MEASURE, OGLACIER,                        &
-        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                       &
+        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD,                                                 &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
+        PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
         ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1,                                      &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
@@ -1170,7 +1177,7 @@ ENDIF
 CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                &
      OFLOOD, PTSTEP, PVEGTYPE,                                                  &
      PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
-     PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, PVEG, PLAI, ZWRMAX, PMELT,   &
+     PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, ZVEG, PLAI, ZWRMAX, PMELT,   &
      PTAUICE, PLEGI, PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,              &     
      PPSNV, PPSNG, ZSNOW_THRUFAL, ZEVAPCOR, ZSUBVCOR, PWR, ZSOILHCAPZ,          &
      PSNOWSWE(:,1), PSNOWALB, PSNOWRHO(:,1), PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, &
