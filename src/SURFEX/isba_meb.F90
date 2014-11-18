@@ -716,6 +716,11 @@ ZTHRMB_TV(:)    =  0.0
 JTSPLIT_EB      = 1 + INT(PTSTEP/ZTSTEP_EB)  ! number of split-time steps
 ZTSTEP          = PTSTEP/JTSPLIT_EB          ! split time step...for relatively small time steps, no split
 !
+
+JTSPLIT_EB      = 1
+ZTSTEP          = PTSTEP
+
+
 ! initialize time split sums for fluxes:
 !
 CALL INIT_SUM_FLUXES_MEB_TSPLIT 
@@ -852,7 +857,7 @@ CALL SNOW_LOAD_MEB(PTSTEP,PSR,PTV,ZWRVNMAX,ZKVN,ZCHEATV,PLER_V_C,PLES_V_C,ZMELTV
 !*     9.0    Snow explicit canopy loading/interception 
 !             ------------------------------------------
 !
-ZRR(:)         = 0.0
+ZRR(:)         = PRR(:)
 PIRRIG_FLUX(:) = 0.0
 !
 !* add irrigation over vegetation to liquid precipitation (rr)
