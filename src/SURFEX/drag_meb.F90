@@ -611,10 +611,8 @@ END WHERE
 !
 ! b) low-level air is humid, i.e., qa >= qsat (condensation)
 !
-WHERE ( PQSATG(:) <= PQC(:) )
-   PHUG(:)  = 1.0
-   PHUGI(:) = 1.0
-END WHERE
+WHERE ( PHUG*PQSATG  < PQC .AND. PQSATG <= PQC )PHUG(:)  = 1.0
+WHERE ( PHUGI*PQSATG < PQC .AND. PQSATG <= PQC )PHUGI(:) = 1.0
 !
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',1,ZHOOK_HANDLE)

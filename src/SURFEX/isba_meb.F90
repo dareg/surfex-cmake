@@ -716,11 +716,6 @@ ZTHRMB_TV(:)    =  0.0
 JTSPLIT_EB      = 1 + INT(PTSTEP/ZTSTEP_EB)  ! number of split-time steps
 ZTSTEP          = PTSTEP/JTSPLIT_EB          ! split time step...for relatively small time steps, no split
 !
-
-JTSPLIT_EB      = 1
-ZTSTEP          = PTSTEP
-
-
 ! initialize time split sums for fluxes:
 !
 CALL INIT_SUM_FLUXES_MEB_TSPLIT 
@@ -813,7 +808,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PTG,PTV,PSNOWTEMP,                                                       &
               ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,                                             &
               PTC,PQC,ZTA_IC,ZQA_IC,                                                   &
-              ZDELTA,                                                                  &
+              ZDELTAVK,                                                                &
               ZDELTAT_G,ZDELTAT_V,ZDELTAT_N,                                           &
               ZSWUP,PSW_RAD,PLW_RAD,                                                   &
               PRN,ZLWUP,                                                               &
@@ -881,6 +876,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
 ! The sum of all non-intercepted rain and drip is "ZRRSFC" (kg/m2/s):
 ! this is then partitioned by snow scheme into part falling on
 ! snowpack and part falling onto snow-free understory.
+!
 !
 CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
         ZRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
