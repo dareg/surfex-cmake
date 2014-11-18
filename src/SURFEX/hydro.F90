@@ -485,6 +485,17 @@ IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
                    ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
                    PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
 !
+!
+!
+ELSE
+!
+! For MEB case, interception interactions already computed and PRR represents
+! water falling (drip and not intercepted by vegetation) outside of snow covered
+! areas. Part for snow covered areas (net outflow at base of snowpack) accounted
+! for in PSNOW_THRUFAL.
+!
+   ZPG(:) = PRR(:)
+!
 ENDIF
 !
 !* add irrigation over ground to potential soil infiltration (pg)
