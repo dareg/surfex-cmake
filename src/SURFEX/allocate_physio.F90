@@ -8,7 +8,7 @@
                                PCE_NITRO, PCF_NITRO, PCNA_NITRO, &
                                PTSEED, PTREAP, PWATSUP, PIRRIG, &
                                PROOTFRAC, KWG_LAYER, PDROOT, PDG2, &
-                               PVEGGV,PZF_TALLVEG,PRGLGV,PGAMMAGV,PRSMINGV,        &
+                               PGNDLITTER,PZF_TALLVEG,PRGLGV,PGAMMAGV,PRSMINGV,        &
                                PROOTFRACGV,PWRMAX_CFGV,PLAIGV,PZ0GV,PH_VEG         )
 !   ##########################################################################
 !
@@ -102,7 +102,7 @@ INTEGER, DIMENSION(:,:), POINTER :: KWG_LAYER
 REAL, DIMENSION(:,:), POINTER :: PDROOT
 REAL, DIMENSION(:,:), POINTER :: PDG2
 !
-REAL, DIMENSION(:,:), POINTER :: PVEGGV
+REAL, DIMENSION(:,:), POINTER :: PGNDLITTER
 REAL, DIMENSION(:,:), POINTER :: PZF_TALLVEG
 REAL, DIMENSION(:,:), POINTER :: PRGLGV
 REAL, DIMENSION(:,:), POINTER :: PGAMMAGV
@@ -221,7 +221,7 @@ ELSE
   ALLOCATE(PDG2       (0,0)  )        
 ENDIF
 !
-ALLOCATE(PVEGGV     (KLU,KPATCH))
+ALLOCATE(PGNDLITTER (KLU,KPATCH))
 ALLOCATE(PZF_TALLVEG(KLU,KPATCH))
 ALLOCATE(PRGLGV     (KLU,KPATCH))
 ALLOCATE(PGAMMAGV   (KLU,KPATCH))

@@ -19,7 +19,7 @@
         PWRMAX_CF, PRGL, PRSMIN, PGAMMA, PRS,                                  &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEGGV, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, PF2,        &
+        PGNDLITTER, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, PF2,    &
         PWSAT, PWFC, PWWILT,                                                   &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
@@ -203,7 +203,7 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PFROZEN1      ! surface frozen fraction (
 REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! fraction of tall vegetation (compared to short veg) for
 !                                                    !  shortwave radiative transfer (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PLAI          ! vegetation Leaf Area Index (m2/m2)
-REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV        ! fraction of litter on the surface
+REAL, DIMENSION(:),   INTENT(IN)    :: PGNDLITTER    ! fraction of litter on the surface
                                                      ! as==>0, baresoil below canopy,
                                                      ! as==>1, litter layer below canopy
 REAL, DIMENSION(:),   INTENT(IN)    :: PRGL          ! maximum solar radiation
@@ -747,7 +747,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PSNOWSWE(:,1),                                            &
               PWR, ZCHIP, ZTSTEP, ZRS, ZRSN,                            &
               PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,          &
-              ZPSNCV, ZDELTA, PLAI, PVEGGV,                             &
+              ZPSNCV, ZDELTA, PLAI, PGNDLITTER,                         &
               PCH, PCD, PCDN, PRI, PRESA, ZVELC,                        &
               PCDSNOW, PCHSNOW, PRISNOW, ZUSTAR2SNOW,                   &
               PHUG, ZHUGI, PHV, ZHVG, ZHVN, PHU, PQS, PRS,              &

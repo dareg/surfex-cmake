@@ -19,7 +19,7 @@
                       PZ0G_WITHOUT_SNOW,                                         &
                       PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                            &
                       PZ0_MEBN,PZ0H_MEBN,PZ0EFF_MEBN,                            &
-                      PVEGGV, PRUNOFFB,                                          &
+                      PGNDLITTER, PRUNOFFB,                                      &
                       PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PC4REF, PACOEF, PPCOEF, &
                       PTAUICE, PWDRAIN, PTDEEP_A, PTDEEP_B, PGAMMAT,             &
                       PPSN, PPSNG, PPSNV,                                        &
@@ -358,7 +358,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PVEG       ! fraction of vegetation of the
 !                                             ! mesh covered by natural or
 !                                             ! agricultural areas
 !                                             ! 1-PVEG --> bare soil
-REAL, DIMENSION(:), INTENT(IN)  :: PVEGGV     ! fraction of litter on the ground below the explicit canopy (MEB option).
+REAL, DIMENSION(:), INTENT(IN)  :: PGNDLITTER ! fraction of litter on the ground below the explicit canopy (MEB option).
 !                                             ! if=0, baresoil below the canopy, if=1, litter layer. NOTE only in use if OMEB=T
 REAL, DIMENSION(:), INTENT(IN)  :: PLAI       ! LAI as a function of time:
 !                                             ! as a function of growth,
@@ -1004,7 +1004,7 @@ IF(OMEB)THEN
         PWRMAX_CF, PRGL, PRSMIN, PGAMMA, PRS,                                  &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEGGV, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, ZF2,        &
+        PGNDLITTER, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, ZF2,    &
         PWSAT, PWFC, PWWILT,                                                   &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &

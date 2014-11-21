@@ -49,7 +49,7 @@ USE MODD_PACK_ISBA, ONLY :   LBLOCK_SIMPLE, LBLOCK_0, TBLOCK_SIMPLE, TBLOCK_0, X
                              XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,                    &
                              XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V, XP_H_VEG,            &
                              XP_WRV,XP_WRVN,XP_TV,                                             &
-                             XP_TC,XP_QC, XP_VEGGV, XP_Z0GV,                                   &
+                             XP_TC,XP_QC, XP_GNDLITTER, XP_Z0GV,                               &
                              XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                              XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
                              XP_SEFOLD, XP_H_TREE, XP_ANF, XP_ANMAX, XP_FZERO, XP_EPSO,        &
@@ -610,7 +610,7 @@ XP_LAIV         => NULL()
 XP_Z0V          => NULL()
 XP_RSMINV       => NULL()
 XP_ROOTFRACV    => NULL()
-XP_VEGGV        => NULL()
+XP_GNDLITTER    => NULL()
 XP_Z0GV         => NULL()
 !
 !

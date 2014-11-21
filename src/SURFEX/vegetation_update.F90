@@ -14,7 +14,7 @@
                        PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,       &
                        PCE_NITRO, PCF_NITRO, PCNA_NITRO,              &
                        TPSEED, TPREAP, PWATSUP, PIRRIG,               &
-                       PVEGGV,PZF_TALLVEG, PRGLGV,PGAMMAGV,           &
+                       PGNDLITTER,PZF_TALLVEG, PRGLGV,PGAMMAGV,       &
                        PRSMINGV, PWRMAX_CFGV,                         &
                        PH_VEG, PLAIGV, PZ0GV,                         &
                        ODUPDATED, OABSENT                             )
@@ -115,7 +115,7 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PDMAX
 LOGICAL,DIMENSION(:,:), INTENT(INOUT) :: OSTRESS
 !
 ! MEB stuff
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PVEGGV
+REAL,   DIMENSION(:,:), INTENT(INOUT) :: PGNDLITTER
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PZF_TALLVEG
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PRGLGV
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PGAMMAGV
@@ -205,7 +205,8 @@ ODUPDATED=.FALSE.
                            PCNA_NITRO=PCNA_NITRO,                &
                            TPSEED=TPSEED, TPREAP=TPREAP,         &
                            PWATSUP=PWATSUP,PIRRIG=PIRRIG,        &
-                           PVEGGV=PVEGGV,PZF_TALLVEG=PZF_TALLVEG,&
+                           PGNDLITTER=PGNDLITTER,                &
+                           PZF_TALLVEG=PZF_TALLVEG,              &
                            PRGLGV=PRGLGV,PGAMMAGV=PGAMMAGV,      &
                            PRSMINGV=PRSMINGV,                    &
                            PWRMAX_CFGV=PWRMAX_CFGV,              &

@@ -48,7 +48,7 @@ USE MODD_ISBA_n,      ONLY : NGROUND_LAYER,  NNBIOMASS, NNLITTER, NNSOILCARB,   
                                XWFC, XWWILT, XWSAT, XBCOEF, XWR, XTG, XWG,          &
                                XWGI, XLAI, XRESA, XVEG, XTDEEP, TSNOW, XROOTFRAC,   &
                                ! For multi-energy balance
-                               XVEGGV, XZF_TALLVEG , XRGLGV, XGAMMAGV, XRSMINGV,      &
+                               XGNDLITTER, XZF_TALLVEG , XRGLGV, XGAMMAGV, XRSMINGV,  &
                                XROOTFRACGV, XWRMAX_CFGV, XLAIGV, XZ0GV, XH_VEG,       &
                                XWRV,XWRVN,XTV,                                        &
                                XTC,XQC,                                               &
@@ -104,7 +104,7 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,                    &
                                XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V, XP_H_VEG,            &
                                XP_WRV,XP_WRVN,XP_TV,                                             &
-                               XP_TC,XP_QC, XP_VEGGV, XP_Z0GV,                                   &
+                               XP_TC,XP_QC, XP_GNDLITTER, XP_Z0GV,                               &
                                XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                                XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
                                XP_SEFOLD, XP_H_TREE, XP_ANF, XP_ANMAX, XP_FZERO, XP_EPSO,        &
@@ -848,7 +848,7 @@ IF (LMEB_PATCH(KPATCH))THEN
 !nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 !nogv  XP_Z0V         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  XP_VEGGV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  XP_GNDLITTER   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   XP_Z0GV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 !
@@ -882,7 +882,7 @@ ELSE
 !nogv  ISIZE_0 = ISIZE_0 + 1
 !nogv  XP_Z0V         => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
-  XP_VEGGV        => XBLOCK_0(:,ISIZE_0)
+  XP_GNDLITTER   => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_Z0GV        => XBLOCK_0(:,ISIZE_0)
 !
@@ -1165,13 +1165,13 @@ IF (NPATCH==1) THEN
 !nogv    XP_Z0V          (:)    =    XZ0           (:, 1)
     XP_H_VEG        (:)    =    XH_VEG        (:, 1)
 !
-!nogv    XP_VEG          (:)    =    XVEGGV        (:, 1)
+!nogv    XP_VEG          (:)    =    XGNDLITTER    (:, 1)
 !nogv    XP_RGL          (:)    =    XRGLGV        (:, 1)
 !nogv    XP_GAMMA        (:)    =    XGAMMAGV      (:, 1)
 !nogv    XP_WRMAX_CF     (:)    =    XWRMAX_CFGV   (:, 1)
 !nogv    XP_LAI          (:)    =    XLAIGV        (:, 1)
 !nogv    XP_Z0           (:)    =    XZ0GV         (:, 1)
-    XP_VEGGV        (:)    =    XVEGGV        (:, 1)
+    XP_GNDLITTER    (:)    =    XGNDLITTER    (:, 1)
     XP_Z0GV         (:)    =    XZ0GV         (:, 1)
 
   ENDIF
@@ -1567,13 +1567,13 @@ ELSE
 !nogv      XP_LAIV         (JJ)    =    XLAI          (JI, KPATCH)
 !nogv      XP_Z0V          (JJ)    =    XZ0           (JI, KPATCH)
 !
-!nogv      XP_VEG          (JJ)    =    XVEGGV        (JI, KPATCH)
+!nogv      XP_VEG          (JJ)    =    XGNDLITTER    (JI, KPATCH)
 !nogv      XP_RGL          (JJ)    =    XRGLGV        (JI, KPATCH)
 !nogv      XP_GAMMA        (JJ)    =    XGAMMAGV      (JI, KPATCH)
 !nogv      XP_WRMAX_CF     (JJ)    =    XWRMAX_CFGV   (JI, KPATCH)
 !nogv      XP_LAI          (JJ)    =    XLAIGV        (JI, KPATCH)
 !nogv      XP_Z0           (JJ)    =    XZ0GV         (JI, KPATCH)
-      XP_VEGGV        (JJ)    =    XVEGGV        (JI, KPATCH)
+      XP_GNDLITTER    (JJ)    =    XGNDLITTER    (JI, KPATCH)
       XP_Z0GV         (JJ)    =    XZ0GV         (JI, KPATCH)
     ENDDO
   ENDIF

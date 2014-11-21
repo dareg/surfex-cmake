@@ -112,7 +112,7 @@ REAL, DIMENSION(KLU,1) :: ZCE_NITRO
 REAL, DIMENSION(KLU,1) :: ZCF_NITRO
 REAL, DIMENSION(KLU,1) :: ZCNA_NITRO
 ! MEB stuff
-REAL, DIMENSION(KLU,1) :: ZVEGGV
+REAL, DIMENSION(KLU,1) :: ZGNDLITTER
 REAL, DIMENSION(KLU,1) :: ZZF_TALLVEG
 REAL, DIMENSION(KLU,1) :: ZRGLGV
 REAL, DIMENSION(KLU,1) :: ZGAMMAGV
@@ -200,7 +200,7 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
                          TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
-                         ZVEGGV,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,            &
+                         ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
                          ZRSMINGV, ZWRMAX_CFGV,                          &
                          ZH_VEG, ZLAIGV, ZZ0GV,                          &
                          GUPDATED, OABSENT=(XGREENROOF==0.)              )

@@ -331,7 +331,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, &
           ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                                                 &
           ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                                                 &
           ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                                                   &
-          ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_VEGGV
+          ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_GNDLITTER
 REAL, DIMENSION(SIZE(XROOTFRAC,1),SIZE(XROOTFRAC,2)) :: ZP_ROOTFRACV
 REAL, DIMENSION(SIZE(PPS)) :: ZP_WRV,ZP_WRVN,ZP_TV
 REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
@@ -475,7 +475,7 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                       &
           ZZ0G_WITHOUT_SNOW,                                          &
           ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                             &
-          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, ZP_VEGGV,                   &
+          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, ZP_GNDLITTER,               &
           XRUNOFFB_GR, XCGSAT, XC1SAT,                                &
           XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF, XTAUICE, XWDRAIN_GR,&
           ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &

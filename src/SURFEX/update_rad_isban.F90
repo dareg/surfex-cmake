@@ -1,6 +1,6 @@
 !     #########
 SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                               OMEB_PATCH,PLAIGV,PVEGGV,PZ0GV, PH_VEG,     &
+                               OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0GV, PH_VEG, &
                                PALBNIR,PALBVIS,PALBUV,PEMIS,               &
                                PDIR_ALB_WITH_SNOW,PSCA_ALB_WITH_SNOW,PEMIST, &
                                PDIR_SW,PSCA_SW,                            &
@@ -81,7 +81,7 @@ REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS   ! visible albedo (soil+vegetat
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV    ! UV albedo (soil+vegetation) at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PEMIS     ! emissivity (soil+vegetation) at t+1
 LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logical vector
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PVEGGV    ! Understory vegetation fraction at t+1
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PGNDLITTER  ! Ground litter fraction at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV    ! Understory leaf area index at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0GV     ! Understory roughness length at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG
@@ -216,7 +216,7 @@ IF(OMEB_PATCH(KPATCH))THEN
 !  CALL PACK_SAME_RANK(IMASK(:),PLAIGV     (:,KPATCH),ZLAI        (:))
 !  CALL PACK_SAME_RANK(IMASK(:),PLAI       (:,KPATCH),ZLAIV       (:))
 !  CALL PACK_SAME_RANK(IMASK(:),PZ0GV      (:,KPATCH),ZZ0         (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PVEGGV     (:,KPATCH),ZVEG        (:))
+!  CALL PACK_SAME_RANK(IMASK(:),PGNDLITTER (:,KPATCH),ZVEG        (:))
   ZVEG(:)=0. ! Set veg=0 for MEB to get bare soil conditions for snow cover and
 !            ! flood fraction
   CALL PACK_SAME_RANK(IMASK(:),PH_VEG     (:,KPATCH),ZH_VEG      (:))

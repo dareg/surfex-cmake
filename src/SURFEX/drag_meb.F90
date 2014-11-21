@@ -11,7 +11,7 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
                     PSNOWSWE,                                          &
                     PWR, PCHIP, PTSTEP, PRS_VG, PRS_VN,                &
                     PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,   &
-                    PPSNCV, PDELTA, PLAI, PVEGGV,                      &
+                    PPSNCV, PDELTA, PLAI, PGNDLITTER,                  &
                     PCH, PCD, PCDN, PRI, PRA, PVELC,                   &
                     PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW,            &
                     PHUG, PHUGI, PHV, PHVG, PHVN, PHU, PQS, PRS,       &
@@ -166,8 +166,8 @@ REAL, DIMENSION(:), INTENT(IN)    :: PDELTA, PLAI
 !                                                by intercepted water (-)
 !                                     PLAI     = vegetation LAI (m2 m-2)
 !
-REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV  
-!                                      PVEGGV = fraction of litter on the surface (-)
+REAL, DIMENSION(:),   INTENT(IN)    :: PGNDLITTER  
+!                                      PGNDLITTER = fraction of litter on the surface (-)
 !                                               as==>0, baresoil below canopy,
 !                                               as==>1, litter layer below canopy
 REAL, DIMENSION(:), INTENT(OUT)  :: PDELTAVK
@@ -585,9 +585,9 @@ PHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 ! We use the existing LEG_DELTA (formerly a delta function) as a Beta-type-function
 ! (based on Sellers et al., 1992, J Geophys Res)
 !
-PLEG_DELTA(:)  = 1.0 - PVEGGV(:) + PVEGGV(:)*ZRA_G_C(:) /                             &
+PLEG_DELTA(:)  = 1.0 - PGNDLITTER(:) + PGNDLITTER(:)*ZRA_G_C(:) /                             &
                  ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWG(:) / ZWSAT(:) ) )
-PLEGI_DELTA(:) = 1.0 - PVEGGV(:) + PVEGGV(:)*ZRA_G_C(:) /                             &
+PLEGI_DELTA(:) = 1.0 - PGNDLITTER(:) + PGNDLITTER(:)*ZRA_G_C(:) /                             &
                  ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWGI(:)/ ZWSAT(:) ) )
 !
 ! when hu*qsat < qa, there are two

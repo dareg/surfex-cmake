@@ -12,7 +12,7 @@
                                   PD_ICE, PWG1,                          &
                                   PALBNIR_SOIL,PALBVIS_SOIL,PALBUV_SOIL, &
                                   TPSEED, TPREAP, PWATSUP, PIRRIG,       &
-                                  PVEGGV, PZF_TALLVEG , PRGLGV,          &
+                                  PGNDLITTER, PZF_TALLVEG , PRGLGV,      &
                                   PGAMMAGV, PRSMINGV, PROOTFRACGV,       &
                                   PWRMAX_CFGV, PLAIGV, PZ0GV, PH_VEG     )
 !     ##############################################################
@@ -90,7 +90,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                &
                                 XDATA_GMES_ST, XDATA_BSLAI_ST,          &
                                 XDATA_SEFOLD_ST, XDATA_GC_ST,           &
                                 XDATA_DMAX_ST, XDATA_WATSUP,            &
-                                XDATA_VEGGV, XDATA_ZF_TALLVEG,          &
+                                XDATA_GNDLITTER, XDATA_ZF_TALLVEG,      &
                                 XDATA_RGLGV, XDATA_GAMMAGV,             &
                                 XDATA_RSMINGV, XDATA_ROOT_DEPTHGV,      &
                                 XDATA_WRMAX_CFGV, XDATA_LAIGV,          &
@@ -112,7 +112,7 @@ USE MODD_DATA_ISBA_n,   ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, XP
                                 XPAR_GROUND_DEPTH, XPAR_ROOT_DEPTH,                              &
                                 XPAR_ROOT_EXTINCTION, XPAR_ROOT_LIN,                             &
                                 LPAR_STRESS, XPAR_IRRIG, XPAR_WATSUP,                            &
-                                XPAR_VEGGV, XPAR_ZF_TALLVEG , XPAR_RGLGV,                        &
+                                XPAR_GNDLITTER, XPAR_ZF_TALLVEG , XPAR_RGLGV,                    &
                                 XPAR_GAMMAGV, XPAR_RSMINGV,                                      &
                                 XPAR_ROOTFRACGV, XPAR_WRMAX_CFGV, XPAR_LAIGV,                    &
                                 XPAR_Z0GV, XPAR_H_VEG, XPAR_ROOT_DEPTHGV,                        &
@@ -127,7 +127,7 @@ USE MODD_DATA_ISBA_n,   ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, XP
                                 LDATA_RE25, LDATA_LAIMIN, LDATA_F2I,                             &
                                 LDATA_CE_NITRO,LDATA_CF_NITRO, LDATA_CNA_NITRO, LDATA_DICE,      &
                                 LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,                         &
-                                LDATA_VEGGV, LDATA_ZF_TALLVEG , LDATA_RGLGV, LDATA_GAMMAGV,      &
+                                LDATA_GNDLITTER, LDATA_ZF_TALLVEG , LDATA_RGLGV, LDATA_GAMMAGV,  &
                                 LDATA_RSMINGV, LDATA_ROOTFRACGV, LDATA_WRMAX_CFGV, LDATA_LAIGV,  &
                                 LDATA_Z0GV, LDATA_H_VEG,                                         &
                                 LDATA_ROOT_DEPTHGV, LDATA_ROOT_EXTINCTIONGV,                     &
@@ -207,7 +207,7 @@ TYPE(DATE_TIME), DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: TPREAP
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PWATSUP
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PIRRIG
 !
-REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PVEGGV
+REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGNDLITTER
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZF_TALLVEG 
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRGLGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGAMMAGV
@@ -295,13 +295,13 @@ IF (PRESENT(PVEG)) THEN
   ENDIF
 ENDIF
 !
-!   VEGGV
-!   ----
-IF (PRESENT(PVEGGV)) THEN
-  IF (GDATA .AND. LDATA_VEGGV) THEN
-    CALL AV_PGD_PARAM(PVEGGV,XPAR_VEGTYPE,XPAR_VEGGV(:,KDECADE2,:),YNAT,'ARI',KDECADE=KDECADE2)
+!   GNDLITTER
+!   ---------
+IF (PRESENT(PGNDLITTER)) THEN
+  IF (GDATA .AND. LDATA_GNDLITTER) THEN
+    CALL AV_PGD_PARAM(PGNDLITTER,XPAR_VEGTYPE,XPAR_GNDLITTER(:,KDECADE2,:),YNAT,'ARI',KDECADE=KDECADE2)
   ELSE
-    CALL AV_PGD (PVEGGV,PCOVER,XDATA_VEGGV(:,KDECADE,:),YNAT,'ARI',OCOVER,KDECADE=KDECADE)
+    CALL AV_PGD (PGNDLITTER,PCOVER,XDATA_GNDLITTER(:,KDECADE,:),YNAT,'ARI',OCOVER,KDECADE=KDECADE)
   ENDIF
 ENDIF
 !

@@ -12,7 +12,8 @@
                                          PDMAX, PF2I, OSTRESS, PH_TREE,PRE25,&
                                          PCE_NITRO, PCF_NITRO, PCNA_NITRO,   &
                                          TPSEED, TPREAP, PWATSUP, PIRRIG,    &
-                                         PVEGGV, PLAIGV, PRSMINGV, PGAMMAGV, &
+                                         PGNDLITTER, PLAIGV, PRSMINGV,       &
+                                         PGAMMAGV,                           &
                                          PWRMAX_CFGV, PRGLGV, PROOTFRACGV,   &
                                          PZ0GV, PZF_TALLVEG,PH_VEG           )  
 !     ##############################################################
@@ -76,7 +77,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
                                   TDATA_SEED, TDATA_REAP,XDATA_IRRIG,     &
                                   XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,   &
                                   XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN,  &
-                                  XDATA_VEGGV, XDATA_ZF_TALLVEG ,         &
+                                  XDATA_GNDLITTER, XDATA_ZF_TALLVEG,      &
                                   XDATA_RGLGV, XDATA_GAMMAGV,             &
                                   XDATA_RSMINGV, XDATA_WRMAX_CFGV,        &
                                   XDATA_LAIGV, XDATA_Z0GV,                &
@@ -128,7 +129,7 @@ REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PALBVIS_VEG
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PALBUV_VEG
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PEMIS_ECO
 !
-REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PVEGGV
+REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGNDLITTER
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PLAIGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRSMINGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGAMMAGV
@@ -242,8 +243,8 @@ IF (PRESENT(PVEG)) &
   CALL AV_PGD (PVEG ,PCOVER ,XDATA_VEG (:,KDECADE,:),YNAT,'ARI',OCOVER)  
 !
 !
-IF (PRESENT(PVEGGV)) &
- CALL AV_PGD (PVEGGV ,PCOVER ,XDATA_VEGGV (:,KDECADE,:),YNAT,'ARI',OCOVER)
+IF (PRESENT(PGNDLITTER)) &
+ CALL AV_PGD (PGNDLITTER ,PCOVER ,XDATA_GNDLITTER (:,KDECADE,:),YNAT,'ARI',OCOVER)
 !
 ! roughness length
 ! ----------------
