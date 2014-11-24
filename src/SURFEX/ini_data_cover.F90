@@ -100,7 +100,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_GNDLITTER, XDATA_ZF_TALLVEG ,               &
                                   XDATA_RGLGV, XDATA_GAMMAGV, XDATA_RSMINGV,        &
                                   XDATA_ROOT_EXTINCTIONGV, XDATA_WRMAX_CFGV,        &
-                                  XDATA_LAIGV, XDATA_Z0GV, XDATA_H_VEG
+                                  XDATA_LAIGV, XDATA_Z0LITTER, XDATA_H_VEG
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
                                   NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_C3,   &
@@ -686,8 +686,8 @@ XDATA_LAIGV (:,:,:) = XUNDEF
 ALLOCATE(XDATA_GNDLITTER(JPCOVER,36,NVEGTYPE))
 XDATA_GNDLITTER (:,:,:) = XUNDEF
 !
-ALLOCATE(XDATA_Z0GV(JPCOVER,36,NVEGTYPE))
-XDATA_Z0GV (:,:,:) = XUNDEF
+ALLOCATE(XDATA_Z0LITTER(JPCOVER,36,NVEGTYPE))
+XDATA_Z0LITTER (:,:,:) = XUNDEF
 !
 ALLOCATE(XDATA_H_VEG(JPCOVER,36,NVEGTYPE))
 XDATA_H_VEG (:,:,:) = XUNDEF
@@ -2257,7 +2257,7 @@ ENDIF
                                   PGNDLITTER=XDATA_GNDLITTER,PZF_TALLVEG=XDATA_ZF_TALLVEG,                       &
                                   PRGLGV=XDATA_RGLGV,PGAMMAGV=XDATA_GAMMAGV, PRSMINGV=XDATA_RSMINGV,             &
                                   PROOT_EXTINCTIONGV=XDATA_ROOT_EXTINCTIONGV, PWRMAX_CFGV=XDATA_WRMAX_CFGV,      &
-                                  PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0GV=XDATA_Z0GV                   )
+                                  PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0LITTER=XDATA_Z0LITTER           )
 !
 IDC = 1
 !

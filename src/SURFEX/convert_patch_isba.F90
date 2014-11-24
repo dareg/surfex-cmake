@@ -14,7 +14,7 @@
                                   TPSEED, TPREAP, PWATSUP, PIRRIG,       &
                                   PGNDLITTER, PZF_TALLVEG , PRGLGV,      &
                                   PGAMMAGV, PRSMINGV, PROOTFRACGV,       &
-                                  PWRMAX_CFGV, PLAIGV, PZ0GV, PH_VEG     )
+                                  PWRMAX_CFGV, PLAIGV, PZ0LITTER, PH_VEG )
 !     ##############################################################
 !
 !!**** *CONVERT_PATCH_ISBA* 
@@ -94,7 +94,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                &
                                 XDATA_RGLGV, XDATA_GAMMAGV,             &
                                 XDATA_RSMINGV, XDATA_ROOT_DEPTHGV,      &
                                 XDATA_WRMAX_CFGV, XDATA_LAIGV,          &
-                                XDATA_Z0GV, XDATA_H_VEG,                &
+                                XDATA_Z0LITTER, XDATA_H_VEG,            &
                                 XDATA_ROOT_EXTINCTIONGV,                &
                                 TDATA_SEED, TDATA_REAP,XDATA_IRRIG,     &
                                 XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,   &
@@ -115,7 +115,7 @@ USE MODD_DATA_ISBA_n,   ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, XP
                                 XPAR_GNDLITTER, XPAR_ZF_TALLVEG , XPAR_RGLGV,                    &
                                 XPAR_GAMMAGV, XPAR_RSMINGV,                                      &
                                 XPAR_ROOTFRACGV, XPAR_WRMAX_CFGV, XPAR_LAIGV,                    &
-                                XPAR_Z0GV, XPAR_H_VEG, XPAR_ROOT_DEPTHGV,                        &
+                                XPAR_Z0LITTER, XPAR_H_VEG, XPAR_ROOT_DEPTHGV,                    &
                                 XPAR_ROOT_EXTINCTIONGV,                                          &
                                 LDATA_VEGTYPE, LDATA_LAI, LDATA_H_TREE, LDATA_DG, LDATA_ROOTFRAC,&  
                                 LDATA_VEG, LDATA_Z0, LDATA_EMIS,                                 &
@@ -129,7 +129,7 @@ USE MODD_DATA_ISBA_n,   ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, XP
                                 LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,                         &
                                 LDATA_GNDLITTER, LDATA_ZF_TALLVEG , LDATA_RGLGV, LDATA_GAMMAGV,  &
                                 LDATA_RSMINGV, LDATA_ROOTFRACGV, LDATA_WRMAX_CFGV, LDATA_LAIGV,  &
-                                LDATA_Z0GV, LDATA_H_VEG,                                         &
+                                LDATA_Z0LITTER, LDATA_H_VEG,                                     &
                                 LDATA_ROOT_DEPTHGV, LDATA_ROOT_EXTINCTIONGV,                     &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH,                            &
                                 LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN
@@ -215,7 +215,7 @@ REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRSMINGV
 REAL, DIMENSION(:,:,:),   OPTIONAL, INTENT(OUT)   :: PROOTFRACGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PWRMAX_CFGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PLAIGV
-REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZ0GV
+REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZ0LITTER
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PH_VEG
 !
 !*    0.2    Declaration of local variables
@@ -368,13 +368,13 @@ IF (PRESENT(PZ0)) THEN
   ENDIF
 ENDIF
 !
-!    Z0GV
-!    ----
-IF (PRESENT(PZ0GV)) THEN
-  IF (GDATA .AND. LDATA_Z0GV) THEN
-    CALL AV_PGD_PARAM(PZ0GV,XPAR_VEGTYPE,XPAR_Z0GV(:,KDECADE2,:),YNAT,'CDN')
+!    Z0LITTER
+!    --------
+IF (PRESENT(PZ0LITTER)) THEN
+  IF (GDATA .AND. LDATA_Z0LITTER) THEN
+    CALL AV_PGD_PARAM(PZ0LITTER,XPAR_VEGTYPE,XPAR_Z0LITTER(:,KDECADE2,:),YNAT,'CDN')
   ELSE
-    CALL AV_PGD (PZ0GV ,PCOVER ,XDATA_Z0GV (:,KDECADE,:),YNAT,'CDN',OCOVER)
+    CALL AV_PGD (PZ0LITTER ,PCOVER ,XDATA_Z0LITTER (:,KDECADE,:),YNAT,'CDN',OCOVER)
   ENDIF
 ENDIF
 !

@@ -503,8 +503,8 @@ REAL, POINTER, DIMENSION(:)     :: XP_H_VEG        ! vegetation height          
 !$OMP THREADPRIVATE(XP_H_VEG)
 REAL, POINTER, DIMENSION(:)     :: XP_GNDLITTER    ! ground litter cover                     (-)
 !$OMP THREADPRIVATE(XP_GNDLITTER)
-REAL, POINTER, DIMENSION(:)     :: XP_Z0GV         ! canopy floor roughness length           (m)
-!$OMP THREADPRIVATE(XP_Z0GV)
+REAL, POINTER, DIMENSION(:)     :: XP_Z0LITTER     ! ground litter roughness length          (m)
+!$OMP THREADPRIVATE(XP_Z0LITTER)
 !
 ! - Vegetation: Ags Prognos
 !

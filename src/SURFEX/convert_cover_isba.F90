@@ -15,7 +15,7 @@
                                          PGNDLITTER, PLAIGV, PRSMINGV,       &
                                          PGAMMAGV,                           &
                                          PWRMAX_CFGV, PRGLGV, PROOTFRACGV,   &
-                                         PZ0GV, PZF_TALLVEG,PH_VEG           )  
+                                         PZ0LITTER, PZF_TALLVEG,PH_VEG       )  
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* convert surface cover classes into secondary 
@@ -80,7 +80,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
                                   XDATA_GNDLITTER, XDATA_ZF_TALLVEG,      &
                                   XDATA_RGLGV, XDATA_GAMMAGV,             &
                                   XDATA_RSMINGV, XDATA_WRMAX_CFGV,        &
-                                  XDATA_LAIGV, XDATA_Z0GV,                &
+                                  XDATA_LAIGV, XDATA_Z0LITTER,            &
                                   XDATA_ROOT_DEPTHGV, XDATA_H_VEG,        &
                                   XDATA_ROOT_EXTINCTIONGV
 
@@ -136,7 +136,7 @@ REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGAMMAGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PWRMAX_CFGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRGLGV
 REAL, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT)   :: PROOTFRACGV
-REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZ0GV
+REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZ0LITTER
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZF_TALLVEG
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PH_VEG
 !
@@ -255,8 +255,8 @@ IF (PRESENT(PZ0)) &
 IF (PRESENT(PZ0_O_Z0H)) &
   CALL AV_PGD (PZ0_O_Z0H ,PCOVER ,XDATA_Z0_O_Z0H (:,:),YNAT,'ARI',OCOVER)  
 !
-IF (PRESENT(PZ0GV)) &
- CALL AV_PGD (PZ0GV ,PCOVER ,XDATA_Z0GV (:,KDECADE,:),YNAT,'CDN',OCOVER) 
+IF (PRESENT(PZ0LITTER)) &
+ CALL AV_PGD (PZ0LITTER ,PCOVER ,XDATA_Z0LITTER (:,KDECADE,:),YNAT,'CDN',OCOVER) 
 !
 !emis-eco
 !--------

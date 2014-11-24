@@ -125,7 +125,7 @@ REAL, DIMENSION(KLU,1) :: ZRSMINGV
 REAL, DIMENSION(KLU,1) :: ZWRMAX_CFGV
 REAL, DIMENSION(KLU,1) :: ZH_VEG
 REAL, DIMENSION(KLU,1) :: ZLAIGV
-REAL, DIMENSION(KLU,1) :: ZZ0GV
+REAL, DIMENSION(KLU,1) :: ZZ0LITTER
 !
 TYPE (DATE_TIME),  DIMENSION(KLU,1) :: TZSEED
 TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZREAP
@@ -207,7 +207,7 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
                          ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
                          ZRSMINGV, ZWRMAX_CFGV,                          &
-                         ZH_VEG, ZLAIGV, ZZ0GV,                          &
+                         ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
                          GUPDATED, OABSENT=(XGARDEN==0.)                 )
 END IF
 !

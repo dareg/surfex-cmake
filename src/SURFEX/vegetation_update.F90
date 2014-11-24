@@ -16,7 +16,7 @@
                        TPSEED, TPREAP, PWATSUP, PIRRIG,               &
                        PGNDLITTER,PZF_TALLVEG, PRGLGV,PGAMMAGV,       &
                        PRSMINGV, PWRMAX_CFGV,                         &
-                       PH_VEG, PLAIGV, PZ0GV,                         &
+                       PH_VEG, PLAIGV, PZ0LITTER,                     &
                        ODUPDATED, OABSENT                             )
 !   ###############################################################
 !!****  *VEGETATION EVOL*
@@ -123,7 +123,7 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PRSMINGV
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PWRMAX_CFGV
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PH_VEG
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PLAIGV
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PZ0GV
+REAL,   DIMENSION(:,:), INTENT(INOUT) :: PZ0LITTER
 !
  CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
 !                                              ! 'DRY ' 
@@ -210,7 +210,7 @@ ODUPDATED=.FALSE.
                            PRGLGV=PRGLGV,PGAMMAGV=PGAMMAGV,      &
                            PRSMINGV=PRSMINGV,                    &
                            PWRMAX_CFGV=PWRMAX_CFGV,              &
-                           PLAIGV=PLAIGV,PZ0GV=PZ0GV,            &
+                           PLAIGV=PLAIGV,PZ0LITTER=PZ0LITTER,    &
                            PH_VEG=PH_VEG                         ) 
     ELSEIF (HSFTYPE=='GRD') THEN
       CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,                                      &

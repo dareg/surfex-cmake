@@ -48,7 +48,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA, XPATCH,               
                               LMEB_PATCH,                                           &
                               XGNDLITTER,XZF_TALLVEG, XRGLGV,XGAMMAGV,              &
                               XRSMINGV, XWRMAX_CFGV,                                &
-                              XH_VEG, XLAIGV, XZ0GV, XROOTFRACGV
+                              XH_VEG, XLAIGV, XZ0LITTER, XROOTFRACGV
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -146,7 +146,7 @@ IF (ISIZE_LMEB_PATCH>0) THEN
   YRECFM='Z0LITTER'
   YCOMMENT='MEB: ground litter roughness length (without snow) (m)'
   !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0GV(:,:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0LITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
 !

@@ -107,7 +107,7 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           LMEB_PATCH,                                         &
                           XGNDLITTER, XZF_TALLVEG , XRGLGV,                   &
                           XGAMMAGV, XRSMINGV, XROOTFRACGV,                    &
-                          XWRMAX_CFGV, XLAIGV, XZ0GV, XH_VEG, XTV
+                          XWRMAX_CFGV, XLAIGV, XZ0LITTER, XH_VEG, XTV
 !
 #ifdef TOPD
 USE MODD_DUMMY_EXP_PROFILE,ONLY : XC_DEPTH_RATIO
@@ -255,7 +255,7 @@ ZWORK(:)   = XUNDEF
                      TSEED, TREAP, XWATSUP, XIRRIG,                      &
                      XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                 &
                      XGNDLITTER,XZF_TALLVEG,XRGLGV,XGAMMAGV,XRSMINGV,    &
-                     XROOTFRACGV,XWRMAX_CFGV,XLAIGV,XZ0GV,XH_VEG         )
+                     XROOTFRACGV,XWRMAX_CFGV,XLAIGV,XZ0LITTER,XH_VEG     )
 !
 IF (TTIME%TDATE%MONTH /= NUNDEF) THEN
   IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
@@ -291,7 +291,7 @@ ENDIF
                         PRGLGV=XRGLGV,   &
                         PGAMMAGV=XGAMMAGV,PRSMINGV=XRSMINGV,                   &
                         PROOTFRACGV=XROOTFRACGV,PWRMAX_CFGV=XWRMAX_CFGV,       &
-                        PLAIGV=XLAIGV,PZ0GV=XZ0GV,PH_VEG=XH_VEG                )
+                        PLAIGV=XLAIGV,PZ0LITTER=XZ0LITTER,PH_VEG=XH_VEG        )
 !
 !-------------------------------------------------------------------------------
 !
@@ -733,7 +733,7 @@ XEMIS_NAT (:) = XUNDEF
 !
  CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                &
                                  XVEG,XZ0,XLAI,                          &
-                                 LMEB_PATCH,XGNDLITTER,XZ0GV,XLAIGV,     &
+                                 LMEB_PATCH,XGNDLITTER,XZ0LITTER,XLAIGV, &
                                  XZF_TALLVEG, XH_VEG, XTV,               &
                                  ZTG1,                                   &
                                  XPATCH,                                 &

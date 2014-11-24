@@ -10,7 +10,7 @@
                                 PGMES_ST, PGC_ST, PBSLAI_ST, PSEFOLD_ST, PDMAX_ST  ,&
                                 PGNDLITTER,PZF_TALLVEG, PRGLGV,PGAMMAGV,            &
                                 PRSMINGV, PROOT_EXTINCTIONGV, PWRMAX_CFGV,          &
-                                PH_VEG, PLAIGV_IN, PLAIGV_OUT, PZ0GV,               &
+                                PH_VEG, PLAIGV_IN, PLAIGV_OUT, PZ0LITTER,           &
                                 OAGRI_TO_GRASS                                      )
 !     #########################
 !
@@ -141,7 +141,7 @@ REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PWRMAX_CFGV
 REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PH_VEG
 REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PLAIGV_OUT
 REAL, DIMENSION(:,:,:), INTENT(IN), OPTIONAL  :: PLAIGV_IN
-REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PZ0GV
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PZ0LITTER
 REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PGNDLITTER
 !
 !*    0.2    Declaration of local variables
@@ -965,8 +965,8 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !    ELSEIF (PRESENT(PZ0GV) .AND. (.NOT.PRESENT(PLAIGV_IN) .AND. .NOT.PRESENT(PLAIGV_OUT)    )) THEN
 !      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PZ0GV, PLAIGV_IN OR PLAIGV_OUT MUST BE IN ARGUMENTS TOO")
 !    ENDIF   
-    IF (PRESENT(PZ0GV)) THEN
-      PZ0GV(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
+    IF (PRESENT(PZ0LITTER)) THEN
+      PZ0LITTER(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
     ENDIF   
 !
 !-------------------------------------------------------------------------------

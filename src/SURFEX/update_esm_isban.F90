@@ -44,7 +44,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_ISBA_n,   ONLY : NPATCH,XTG,TSNOW,XPSN,XVEG,XLAI,XZ0,    &
                           XALBNIR,XALBVIS,XALBUV,XEMIS,XPATCH,    &
                           LFLOOD,XFF,XEMISF,XEMIS_NAT,XTSRAD_NAT, &
-                          LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0GV,     &
+                          LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER, &
                           XH_VEG
 !
 USE MODI_AVERAGE_RAD
@@ -109,7 +109,7 @@ ZTSURF_PATCH (:,:) = XTG(:,1,:)
 !               -----------------------------------
 !
  CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,XZ0, &
-                         LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0GV,XH_VEG,          &
+                         LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER,XH_VEG,      &
                          XALBNIR,XALBVIS,XALBUV,XEMIS,                       &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH           )
 !

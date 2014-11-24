@@ -2,7 +2,7 @@
       SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA(OFLOOD, HALBEDO, &
                                  PZENITH,PVEG,PZ0,PLAI,     &
                                  OMEB_PATCH,PGNDLITTER,     &
-                                 PZ0GV,PLAIGV,              &
+                                 PZ0LITTER,PLAIGV,          &
                                  PZF_TALLVEG, PH_VEG, PTV,  &
                                  PTG1,PPATCH,               &
                                  PSW_BANDS,                 &
@@ -91,7 +91,7 @@ REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAI        ! leaf area index
 LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logical vector
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PGNDLITTER  ! Ground litter fraction
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV      ! Understory leaf area index
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0GV       ! Understory roughness length
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0LITTER   ! Ground litter roughness length
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PZF_TALLVEG ! Indicator for tall canopy vegetation
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG      ! Height of vegetation
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PTV         ! canopy vegetation temperature
@@ -201,7 +201,7 @@ IF(PRESENT(PDIR_SW))THEN
 ! For the case when MEB patch albedo is requested downweeling SW is needed
 !
   CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                         OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0GV, PH_VEG,            &
+                         OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG,        &
                          PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH,             &
                          PDIR_SW, PSCA_SW,                                      &
@@ -213,7 +213,7 @@ ELSE
 ! For cases when MEB patch albedo is not requested no downweeling SW is needed
 !
   CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                         OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0GV, PH_VEG,            &
+                         OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG,        &
                          PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH              )
 ENDIF
