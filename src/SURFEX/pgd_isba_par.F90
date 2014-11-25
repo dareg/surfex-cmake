@@ -919,12 +919,18 @@ IF (CPHOTO/='NON' .OR. ISIZE_LMEB_PATCH>0) THEN
   IF (.NOT. LDATA_BSLAI) DEALLOCATE(XPAR_BSLAI)
 ENDIF
 !
-IF (.NOT.LECOCLIMAP .AND. ISIZE_LMEB_PATCH>0 .AND. .NOT.LDATA_H_TREE)THEN
+IF (.NOT.LECOCLIMAP .AND. ISIZE_LMEB_PATCH>0 .AND. .NOT.(LDATA_H_TREE      &
+         .AND. LDATA_GNDLITTER .AND. LDATA_Z0LITTER .AND. LDATA_ZF_TALLVEG &
+         .AND. LDATA_BSLAI))THEN
   WRITE(ILUOUT,*) ' '
   WRITE(ILUOUT,*) '***********************************************************'
   WRITE(ILUOUT,*) '* Error in PGD field preparation of MEB fields            *'
   WRITE(ILUOUT,*) '* There is no prescribed value and no input file :        *'
-  IF (.NOT.LDATA_H_TREE ) WRITE(ILUOUT,*) '* for H_TREE                      *'
+  IF (.NOT.LDATA_GNDLITTER   ) WRITE(ILUOUT,*) '* for GNDLITTER              *'
+  IF (.NOT.LDATA_Z0LITTER    ) WRITE(ILUOUT,*) '* for Z0LITTER               *'
+  IF (.NOT.LDATA_H_TREE      ) WRITE(ILUOUT,*) '* for H_TREE                 *'
+  IF (.NOT.LDATA_ZF_TALLVEG  ) WRITE(ILUOUT,*) '* for ZF_TALLVEG             *'
+  IF (.NOT.LDATA_BSLAI       ) WRITE(ILUOUT,*) '* for BSLAI                  *'
   WRITE(ILUOUT,*) '* Without ECOCLIMAP, these fields must be prescribed      *'
   WRITE(ILUOUT,*) '***********************************************************'
   WRITE(ILUOUT,*) ' '
