@@ -557,7 +557,7 @@ ENDIF
 !
 ! First Test to see if snow pack vanishes during this time step:
 !
- CALL SNOW3LGONE(PTSTEP,PPSN3L,PLEL3L,PLES3L,PSNOWRHO,                     &
+ CALL SNOW3LGONE(PTSTEP,ZPSN3L,PLEL3L,PLES3L,PSNOWRHO,                     &
                   PSNOWHEAT,ZRADSINK(:,INLVLS),PEVAPCOR,PTHRUFAL,PGRNDFLUX, &
                   PGFLUXSNOW,ZGRNDFLUXO,PSNOWDZ,PSNOWLIQ,ZSNOWTEMP,ZRADXS)  
 !
@@ -592,7 +592,7 @@ PSNOWHEAT(:,:)    = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
 !*      11.     Snow Evaporation/Sublimation mass updates:
 !               ------------------------------------------
 !
-CALL SNOW3LEVAPN(PPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
+CALL SNOW3LEVAPN(ZPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),  &
                    PSNOWDZ,PSNOWLIQ(:,1),PTA,PSNOWHEAT,                     &
                    PEVAPCOR,PGFLXCOR)
 !
