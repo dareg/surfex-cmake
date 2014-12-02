@@ -603,7 +603,7 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
 !
 CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
         PLAI,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                            &
-        PSNOWTEMP,PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,PEMISNOW,ZTAU_N,       &
+        PSNOWTEMP,PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,PEMISNOW,              &
         ZSIGMA_F,ZCHIP)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -614,7 +614,8 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
 ! Calculate snow albedo: split into spectral bands:
 !
 CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO(:,1),PSNOWAGE(:,1),PPS, &
-                                PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR)
+                                PSNOWDZ(:,1), PZENITH,                             &
+                                PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,ZTAU_N)
 !
 !
 ! NOTE, currently MEB only uses 2 of 3 potential snow albedo spectral bands
@@ -1155,7 +1156,9 @@ IF (LHOOK) CALL DR_HOOK('AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 END SUBROUTINE AVG_FLUXES_MEB_TSPLIT 
 !===============================================================================
 SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
-                                      PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR)
+                                      PSNOWDZ, PZENITH,                        &
+                                      PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,     &
+                                      PTAU_N)
 !
 ! Split Total snow albedo into N-spectral bands
 ! NOTE currently MEB only uses 2 bands of the 3 possible.
@@ -1163,8 +1166,11 @@ SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
+USE MODD_SNOW_PAR,       ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,  &
+                                XVSPEC1, XVSPEC2, XVSPEC3,                 &
+                                XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
 !
-USE MODE_SNOW3L,         ONLY : SNOW3LALB
+USE MODE_SNOW3L,         ONLY : SNOW3LALB, SNOW3LRADABS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1176,26 +1182,36 @@ IMPLICIT NONE
 REAL, DIMENSION(:,:), INTENT(IN)    :: PVEGTYPE      ! fraction of each vegetation (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWALB      ! Snow albedo (total)
 REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWRHO      ! Snow layer average density (kg/m3)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWDZ       ! Snow layer thickness (m)
+REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! Zenith angle (rad)
 REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWAGE      ! Snow grain age
 REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBFIR   ! Snow FIR (UV) albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PTAU_N        ! SW absorption (coef) in uppermost snow layer (-)
 !
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PPS))          :: ZWORK, ZWORKA
+REAL, DIMENSION(SIZE(PPS))          :: ZPROJLAT, ZDSGRAIN, ZBETA1, ZBETA2, ZBETA3, &
+                                       ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
 REAL, DIMENSION(SIZE(PPS))          :: ZPERMSNOWFRAC
 REAL, DIMENSION(SIZE(PPS),3)        :: ZSPECTRALALBEDO
 !                                      ZSPECTRALALBEDO = spectral albedo (3 bands in algo: 
 !                                                        MEB currently uses 2)
 !                                                        1=VIS, 2=NIR, 3=UV
 !
+!
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
+!
+! 1) Spectral albedo
+! ------------------
 !
 ZWORK(:)         = 0.0
 ZWORKA(:)        = PSNOWALB(:)
@@ -1219,6 +1235,12 @@ WHERE(PSNOWALB(:)/=XUNDEF)
 !
    PSNOWALBFIR(:) = XUNDEF                                     
 !
+! For the surface layer absorbtion computation:
+!
+   ZSPECTRALALBEDO(:,1) = PSNOWALBVIS(:)
+   ZSPECTRALALBEDO(:,2) = PSNOWALBNIR(:)
+   ZSPECTRALALBEDO(:,3) = PSNOWALBFIR(:)
+!
 ELSEWHERE
 !
    PSNOWALBVIS(:) = XUNDEF
@@ -1227,6 +1249,11 @@ ELSEWHERE
 !
 END WHERE
 !
+!
+! 2) SW absorption in uppermost snow layer 
+! ----------------------------------------
+!
+PTAU_N(:) = SNOW3LRADABS(PSNOWRHO,PSNOWDZ,ZSPECTRALALBEDO,PZENITH,ZPERMSNOWFRAC)
 !
 IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
 !
