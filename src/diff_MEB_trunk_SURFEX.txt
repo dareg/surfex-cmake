@@ -1,0 +1,113 @@
+PS done SURFEX/allocate_gr_snow.F90
+PS done SURFEX/allocate_physio.F90
+PS done SURFEX/averaged_albedo_emis_isba.F90
+PS done SURFEX/average_diag_evap_isban.F90
+PS done SURFEX/average_diag_isban.F90
+PS done SURFEX/compute_isba_parameters.F90
+PS done SURFEX/convert_cover_isba.F90
+PS done SURFEX/convert_patch_isba.F90
+PS call to isba commented!! SURFEX/coupling_isban.F90
+PS done SURFEX/dealloc_isban.F90
+PS done SURFEX/default_prep_isba.F90
+PS done SURFEX/diag_evap_isban.F90
+PS done SURFEX/diag_isba_initn.F90
+PS done SURFEX/extrapol_fields.F90
+PS done SURFEX/flag_gr_snow.F90
+PS call to isba commented!! SURFEX/garden.F90
+PS done SURFEX/get_adjacent_meshes.F90
+PS done SURFEX/get_grid_coord.F90
+PS done SURFEX/get_grid_dim.F90
+PS done SURFEX/get_mesh_dim.F90
+PS done SURFEX/get_mesh_index.F90
+PS done SURFEX/get_near_meshes.F90
+PS call to isba commented!! SURFEX/greenroof.F90
+PS done SURFEX/hor_interpol_rotlatlon.F90
+ SURFEX/hydro.F90
+ SURFEX/hydro_soildif.F90
+ SURFEX/hydro_veg.F90
+ SURFEX/ice_soildif.F90
+PS done SURFEX/ini_data_cover.F90
+PS done SURFEX/ini_data_param.F90
+PS done SURFEX/ini_data_rootfrac.F90
+PS done SURFEX/ini_surf_csts.F90
+PS done SURFEX/init_isba_mixpar.F90
+PS done SURFEX/init_isban.F90
+PS done SURFEX/isba_albedo.F90
+ SURFEX/isba.F90
+PS done SURFEX/isba_properties.F90
+ SURFEX/isba_snow_agr.F90
+PS done SURFEX/latlon_grid.F90
+PS done SURFEX/latlonmask.F90
+PS done SURFEX/mkflag_snow.F90
+PS done SURFEX/modd_data_cover.F90
+PS done SURFEX/modd_data_isban.F90
+PS done SURFEX/modd_diag_evap_isban.F90
+PS done SURFEX/modd_diag_isban.F90
+PS done SURFEX/modd_isban.F90
+PS done SURFEX/modd_isba_par.F90
+PS done SURFEX/modd_pack_diag_isba.F90
+PS done SURFEX/modd_pack_isba.F90
+PS done SURFEX/modd_prep_isba.F90
+PS done SURFEX/modd_snow_par.F90
+PS done SURFEX/modd_type_snow.F90
+PS unchanged SURFEX/mode_read_surf_fa.F90
+PS done SURFEX/mode_snow3l.F90
+PS done SURFEX/pack_diag_patch_get_sizen.F90
+PS done SURFEX/pack_diag_patchn.F90
+PS done SURFEX/pack_grid.F90
+PS done SURFEX/pack_isba_patch_get_sizen.F90
+PS done SURFEX/pack_isba_patchn.F90
+PS done SURFEX/pgd_grid.F90
+PS done SURFEX/pgd_isba.F90
+PS done SURFEX/pgd_isba_par.F90
+PS done SURFEX/pgd_teb_veg.F90
+PS done SURFEX/prep_hor_isba_field.F90
+PS done SURFEX/prep_isba.F90
+PS done SURFEX/prep_isba_unif.F90
+PS done SURFEX/read_gridtype.F90
+PS done SURFEX/read_isban.F90
+PS done SURFEX/read_nam_gridtype.F90
+PS done SURFEX/read_nam_pgd_gauss_index.F90
+PS done SURFEX/read_nam_pgd_isba.F90
+PS done SURFEX/read_pgd_isban.F90
+PS done SURFEX/read_pgd_isba_parn.F90
+PS done SURFEX/read_prep_greenroof_snow.F90
+PS done SURFEX/read_prep_isba_conf.F90
+ SURFEX/snow3l.F90
+ SURFEX/snow3L_isba.F90
+PS done SURFEX/unpack_diag_patchn.F90
+PS done SURFEX/unpack_isba_patchn.F90
+PS done SURFEX/update_data_cover.F90
+PS done SURFEX/update_esm_isban.F90
+PS done SURFEX/update_rad_isban.F90
+PS done SURFEX/vegetation_update.F90
+PS done SURFEX/vegetation_update_garden.F90
+PS done SURFEX/vegetation_update_greenroof.F90
+PS done SURFEX/write_diag_pgd_isban.F90
+PS done SURFEX/write_diag_seb_isban.F90
+PS done SURFEX/write_grid.F90
+PS done SURFEX/writesurf_isban.F90
+PS done SURFEX/writesurf_pgd_isban.F90
+PS done SURFEX/writesurf_pgd_isba_parn.F90
+PS done SURFEX/z0eff.F90
+PS done SURFEX/z0v_from_lai.F90
+
+PS done OFFLIN/init_outfn_isban.F90
+
+Check
+-----
+Check hits for
+grep AV_PGD * | grep -v KDECADE
+related to 
+CALL AV_PGD (ZROOT_EXT(:,:),PCOVER,XDATA_ROOT_EXTINCTION(:,:),YDIF,'ARI',OCOVER,KDECADE=KDECADE)
+
+
+This routine had to be modified in MEB_DEV2 to make code work.
+Maybe it works in V8...
+SURFEX/read_prep_greenroof_snow.F90
+
+Hmhm, don't remember changes in
+SURFEX/mode_read_surf_fa.F90
+Assume that new v8 version is okay...
+
+
