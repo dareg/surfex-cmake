@@ -39,7 +39,6 @@ SUBROUTINE PREP_ISBA(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!      B. Decharme  (04/2013): Good computation for coherence between soil temp and 
 !!                              liquid/solid water with DIF (results don't change)
 !!                              if lglacier in input file, do not initialize again
-!!      P. Samuelsson            (10/2014): MEB
 !!------------------------------------------------------------------
 !
 !
@@ -63,9 +62,7 @@ USE MODD_ISBA_n,      ONLY : TSNOW, XRESA, XTSRAD_NAT, XEMIS, XLAI, XVEG,  &
                               XVEGTYPE_PATCH, LGLACIER,                      &
                               XPSN, XPSNG, XPSNV, XDIR_ALB_WITH_SNOW,        &
                               XSCA_ALB_WITH_SNOW, NGROUND_LAYER, XMPOTSAT,   &
-                              XBCOEF, XPSNV_A,                               &
-                              LMEB_PATCH,XGNDLITTER,XLAIGV, XZ0LITTER,       &
-                              XH_VEG, XZF_TALLVEG, XTV
+                              XBCOEF, XPSNV_A
 !                           
 USE MODD_DEEPSOIL,    ONLY : LPHYSDOMC
 USE MODD_CSTS,        ONLY : XTT, XG, XLMTT
@@ -190,17 +187,6 @@ IF(LGLACIER)THEN
   CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'ICE_STO',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
-!*      2.8    Canopy vegetation temperature and interception reservoirs
-!
-CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'TV     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WRV    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WRVN   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-!
-!*      2.9    Canopy vegetation air variables
-!
-CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'TC     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'QC     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-!
 !-------------------------------------------------------------------------------------
 !
 !*      3.    Physical limitation: 
@@ -307,8 +293,6 @@ ENDIF
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Half prognostic fields
-!              The only variable used from the AVERAGED_ALBEDO_EMIS_ISBA call
-!              is XTSRAD_NAT. All other variables are treated as dummies.
 !
 ALLOCATE(XRESA(SIZE(XLAI,1),SIZE(XLAI,2)))
 XRESA = 100.
@@ -332,10 +316,8 @@ ALLOCATE(XSCA_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
 XDIR_ALB_WITH_SNOW = 0.0
 XSCA_ALB_WITH_SNOW = 0.0
 CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
-                                 XVEG,XZ0,XLAI,                          &
-                                 LMEB_PATCH,XGNDLITTER,XZ0LITTER,XLAIGV, &
-                                 XZF_TALLVEG, XH_VEG, XTV,               &
-                                 XTG(:,1,:),XPATCH, ZSW_BANDS,           &
+                                 XVEG,XZ0,XLAI,XTG(:,1,:),               &
+                                 XPATCH, ZSW_BANDS,                      &
                                  XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &
                                  ZALBNIR_SOIL,ZALBVIS_SOIL,ZALBUV_SOIL,  &
                                  XEMIS,                                  &

@@ -14,9 +14,6 @@
                        PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,       &
                        PCE_NITRO, PCF_NITRO, PCNA_NITRO,              &
                        TPSEED, TPREAP, PWATSUP, PIRRIG,               &
-                       PGNDLITTER,PZF_TALLVEG, PRGLGV,PGAMMAGV,       &
-                       PRSMINGV, PWRMAX_CFGV,                         &
-                       PH_VEG, PLAIGV, PZ0LITTER,                     &
                        ODUPDATED, OABSENT                             )
 !   ###############################################################
 !!****  *VEGETATION EVOL*
@@ -53,7 +50,6 @@
 !!      Original    01/03/03 
 !!
 !!      P Le Moigne 09/2005 AGS modifs of L. Jarlan
-!!      P Samuelsson 10/2014 MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -113,17 +109,6 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PGC
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PF2I
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PDMAX
 LOGICAL,DIMENSION(:,:), INTENT(INOUT) :: OSTRESS
-!
-! MEB stuff
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PGNDLITTER
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PZF_TALLVEG
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PRGLGV
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PGAMMAGV
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PRSMINGV
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PWRMAX_CFGV
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PH_VEG
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PLAIGV
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PZ0LITTER
 !
  CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
 !                                              ! 'DRY ' 
@@ -204,14 +189,7 @@ ODUPDATED=.FALSE.
                            PCF_NITRO=PCF_NITRO,                  &
                            PCNA_NITRO=PCNA_NITRO,                &
                            TPSEED=TPSEED, TPREAP=TPREAP,         &
-                           PWATSUP=PWATSUP,PIRRIG=PIRRIG,        &
-                           PGNDLITTER=PGNDLITTER,                &
-                           PZF_TALLVEG=PZF_TALLVEG,              &
-                           PRGLGV=PRGLGV,PGAMMAGV=PGAMMAGV,      &
-                           PRSMINGV=PRSMINGV,                    &
-                           PWRMAX_CFGV=PWRMAX_CFGV,              &
-                           PLAIGV=PLAIGV,PZ0LITTER=PZ0LITTER,    &
-                           PH_VEG=PH_VEG                         ) 
+                           PWATSUP=PWATSUP,PIRRIG=PIRRIG     ) 
     ELSEIF (HSFTYPE=='GRD') THEN
       CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,                                      &
                        PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  

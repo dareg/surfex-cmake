@@ -28,7 +28,6 @@ MODULE MODD_PACK_ISBA
 !!      A.L. Gibelin    06/2009 : Soil carbon variables for CNT option
 !!      A.L. Gibelin    07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin    07/2009 : Suppress PPST and PPSTF as outputs
-!!      P. Samuelsson   10/2014 : MEB and additional snow albedos
 !!
 !-------------------------------------------------------------------------------
 !
@@ -436,14 +435,8 @@ REAL,  POINTER, DIMENSION(:,:) :: XP_SNOWHIST    ! historical parameter         
 !$OMP THREADPRIVATE(XP_SNOWHIST)
 REAL, POINTER, DIMENSION(:,:)  :: XP_SNOWAGE     ! Snow grain age                          (days)
 !$OMP THREADPRIVATE(XP_SNOWAGE)
-REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALB     ! snow tot albedo                         (-)
+REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALB     ! albedo                                  (-)
 !$OMP THREADPRIVATE(XP_SNOWALB)
-REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALBVIS     ! snow VIS albedo                                  (-)
-!$OMP THREADPRIVATE(XP_SNOWALBVIS)
-REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALBNIR     ! snow NIR albedo                                  (-)
-!$OMP THREADPRIVATE(XP_SNOWALBNIR)
-REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALBFIR     ! snow FIR albedo                                  (-)
-!$OMP THREADPRIVATE(XP_SNOWALBFIR)
 REAL,  POINTER, DIMENSION(:)   :: XP_SNOWEMIS    ! snow emissivity (ISBA-ES:3-L)           (-)
 !$OMP THREADPRIVATE(XP_SNOWEMIS)
 !
@@ -466,47 +459,6 @@ REAL, POINTER, DIMENSION(:,:)   :: XP_WGI        ! soil liquid water equivalent 
 !                                                    ! ice content profile                     (m3/m3)
 REAL, POINTER, DIMENSION(:)     :: XP_RESA       ! aerodynamic resistance                  (s/m)
 !$OMP THREADPRIVATE(XP_RESA)
-! - For multi-energy balance:
-!
-REAL, POINTER, DIMENSION(:)     :: XP_WRV        ! liquid water retained on the foliage
-!$OMP THREADPRIVATE(XP_WRV)
-!                                                    ! of the canopy vegetation                (kg/m2)
-REAL, POINTER, DIMENSION(:)     :: XP_WRVN       ! snow retained on the foliage
-!$OMP THREADPRIVATE(XP_WRVN)
-!                                                    ! of the canopy vegetation                (kg/m2)
-REAL, POINTER, DIMENSION(:)     :: XP_TV         ! canopy vegetation temperature           (K)
-!$OMP THREADPRIVATE(XP_TV)
-REAL, POINTER, DIMENSION(:)     :: XP_TC         ! canopy air temperature                  (K)
-!$OMP THREADPRIVATE(XP_TC)
-REAL, POINTER, DIMENSION(:)     :: XP_QC         ! canopy air specific humidity            (kg/kg)
-!$OMP THREADPRIVATE(XP_QC)
-!
-REAL, POINTER, DIMENSION(:)     :: XP_ZF_TALLVEG   ! MEB tall vegetation binary              (-)
-!$OMP THREADPRIVATE(XP_ZF_TALLVEG)
-REAL, POINTER, DIMENSION(:)     :: XP_RGLV         ! canopy veg maximum solar radiation
-!$OMP THREADPRIVATE(XP_RGLV)
-REAL, POINTER, DIMENSION(:)     :: XP_GAMMAV       ! coefficient for the calculation
-!$OMP THREADPRIVATE(XP_GAMMAV)
-!                                                      ! of the canopy veg surface stomatal
-REAL, POINTER, DIMENSION(:)     :: XP_RSMINV       ! canopy veg minimum stomatal resistance  (s/m)
-!$OMP THREADPRIVATE(XP_RSMINV)
-REAL, POINTER, DIMENSION(:,:)   :: XP_ROOTFRACV    ! canopy veg root fraction profile ('DIF' option)
-!$OMP THREADPRIVATE(XP_ROOTFRACV)
-REAL, POINTER, DIMENSION(:)     :: XP_WRMAX_CFV    ! canopy veg coefficient for maximum water 
-!$OMP THREADPRIVATE(XP_WRMAX_CFV)
-!                                                      ! interception
-REAL, POINTER, DIMENSION(:)     :: XP_LAIV         ! canopy veg Leaf Area Index              (m2/m2)
-!$OMP THREADPRIVATE(XP_LAIV)
-REAL, POINTER, DIMENSION(:)     :: XP_Z0V          ! canopy veg roughness length             (m)
-!$OMP THREADPRIVATE(XP_Z0V)
-REAL, POINTER, DIMENSION(:)     :: XP_H_VEG        ! vegetation height                       (m)
-!$OMP THREADPRIVATE(XP_H_VEG)
-REAL, POINTER, DIMENSION(:)     :: XP_GNDLITTER    ! ground litter cover                     (-)
-!$OMP THREADPRIVATE(XP_GNDLITTER)
-REAL, POINTER, DIMENSION(:)     :: XP_Z0LITTER     ! ground litter roughness length          (m)
-!$OMP THREADPRIVATE(XP_Z0LITTER)
-!
-! - Vegetation: Ags Prognos
 !
 REAL, POINTER, DIMENSION(:)     :: XP_FWTD       ! grid-cell fraction of water table to rise
 !$OMP THREADPRIVATE(XP_FWTD)

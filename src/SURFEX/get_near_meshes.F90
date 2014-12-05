@@ -23,7 +23,6 @@
 !!
 !!    Original    03/2004
 !!                10/2007 IGN Grids
-!!                P. Samuelsson  SMHI 10/2014 Rotated lonlat
 !!
 !----------------------------------------------------------------------------
 !
@@ -40,7 +39,6 @@ USE MODI_GET_NEAR_MESHES_GAUSS
 USE MODI_GET_NEAR_MESHES_IGN
 USE MODI_GET_NEAR_MESHES_LONLAT_REG
 USE MODI_GET_NEAR_MESHES_LONLATVAL
-USE MODI_GET_NEAR_MESHES_LONLAT_ROT
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
@@ -79,9 +77,6 @@ SELECT CASE (HGRID)
 
   CASE("LONLATVAL ")
     CALL GET_NEAR_MESHES_LONLATVAL(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
-
-  CASE("LONLAT ROT")
-    CALL GET_NEAR_MESHES_LONLAT_ROT(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 
   CASE("NONE      ")
     KNEAR(:,:) = 0

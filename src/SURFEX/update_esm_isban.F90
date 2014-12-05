@@ -33,7 +33,6 @@
 !!    -------------
 !!      Original    09/2009
 !!      B. Decharme 06/2013 new coupling variables
-!!      P. Samuelsson 10/2014 MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -41,11 +40,9 @@
 !
 USE MODD_TYPE_SNOW
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_ISBA_n,   ONLY : NPATCH,XTG,TSNOW,XPSN,XVEG,XLAI,XZ0,    &
-                          XALBNIR,XALBVIS,XALBUV,XEMIS,XPATCH,    &
-                          LFLOOD,XFF,XEMISF,XEMIS_NAT,XTSRAD_NAT, &
-                          LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER, &
-                          XH_VEG
+USE MODD_ISBA_n,   ONLY : NPATCH,XTG,TSNOW,XPSN,XVEG,XLAI,XZ0, &
+                          XALBNIR,XALBVIS,XALBUV,XEMIS,XPATCH, &
+                          LFLOOD,XFF,XEMISF,XEMIS_NAT,XTSRAD_NAT  
 !
 USE MODI_AVERAGE_RAD
 USE MODI_AVERAGE_TSURF
@@ -108,10 +105,9 @@ ZTSURF_PATCH (:,:) = XTG(:,1,:)
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,XZ0, &
-                         LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER,XH_VEG,      &
-                         XALBNIR,XALBVIS,XALBUV,XEMIS,                       &
-                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH           )
+ CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,&
+                         XZ0,XALBNIR,XALBVIS,XALBUV,XEMIS,             &
+                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH     )  
 !
 !*       3.     radiative surface temperature
 !               -----------------------------

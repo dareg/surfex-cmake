@@ -37,7 +37,6 @@
 !!      V. Masson   10/2013  coherence between canopy and min/max T2M diagnostics
 !!      B. Decharme    04/13 Averaged Trad already done in average_diag.F90
 !!                           Good dimension for CO2 flux
-!!      P. Samuelsson  10/13 Added min max for XT2M
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -63,8 +62,7 @@ USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,            &
                                XFMUC, XFMVC, XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, &
                                XAVG_LWUC, XAVG_FMUC, XAVG_FMVC, XTS, XAVG_TS, &
                                XAVG_HU2M_MIN, XAVG_HU2M_MAX, XAVG_WIND10M,    &
-                               XAVG_WIND10M_MAX, XWIND10M, XAVG_SFCO2,        &  
-                               XT2M_MIN, XT2M_MAX  
+                               XAVG_WIND10M_MAX, XWIND10M, XAVG_SFCO2  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -297,11 +295,6 @@ IF (N2M>=1) THEN
       XAVG_RI(:)  = XAVG_RI(:) + XPATCH(:,JPATCH) * XRI(:,JPATCH)
     END WHERE
   END DO
-!
-! min and max of XT2M
-!
-  XT2M_MIN(:,:) = MIN(XT2M_MIN(:,:),XT2M(:,:))
-  XT2M_MAX(:,:) = MAX(XT2M_MAX(:,:),XT2M(:,:))
 !
 END IF
 !

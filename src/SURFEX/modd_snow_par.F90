@@ -26,7 +26,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       01/2004                    
-!! P. Samuelsson  10/2014   MEB complements
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -51,23 +50,6 @@ REAL, SAVE       :: XANSMAX
 !
 REAL, SAVE       :: XAGLAMIN
 REAL, SAVE       :: XAGLAMAX
-!
-! Use recommended settings for snow albedo (FALSE = ISBA default)
-! 
-LOGICAL,SAVE     :: LMEBREC
-!
-! Fraction of maximum value of the albedo of snow that is reached for melting
-! snow
-!
-REAL, SAVE       :: XANSFRACMEL
-!
-! Threeshold temperature above which the snow albedo starts to decrease 
-!
-REAL, SAVE       :: XTEMPANS
-!
-! Minimum value of the albedo of snow reached under canopy vegetation:
-!
-REAL, SAVE       :: XANSMINMEB
 ! 
 ! Prescribed ice albedo in 3 spectral bands for glacier simulation with CROCUS scheme.
 REAL, SAVE       :: XALBICE1,XALBICE2,XALBICE3
@@ -113,15 +95,12 @@ REAL, SAVE       :: XTAU_SMELT
 ! Critical value of the equivalent water content
 ! of the snow reservoir for snow fractional coverage and albedo computations
 !
-REAL, PARAMETER       :: XWCRN      = 10.0   ! (kg m-2) Veg (default value)
+REAL, PARAMETER       :: XWCRN = 10.0   ! (kg m-2) Veg (default value)
 REAL, PARAMETER       :: XWCRN_EXPL =  1.0   ! (kg m-2) Veg explicit
 REAL, PARAMETER       :: XWCRN_ROOF =  1.0   ! (kg m-2)  Roofs 
 REAL, PARAMETER       :: XWCRN_ROAD =  1.0   ! (kg m-2)  Roads
 REAL, PARAMETER       :: XWCRN_VEG  =  1.0   ! (kg m-2)  Urban veg
 !
-! Critical value of the total snow depth for ground snow fractional coverage
-!
-REAL, PARAMETER       :: XDCRN_EXPL = 0.01  ! (m) Veg explicit
 !
 ! Critical value of snow emissivity
 !
@@ -140,12 +119,10 @@ REAL, PARAMETER       :: XANSMAX_ROAD = 0.85 ! (-)   Roads
 REAL, PARAMETER       :: XANS_TODRY    = 0.008     ! (-) Veg (default value)
 REAL, PARAMETER       :: XANS_TODRY_ROOF = 0.008   ! (-)  Roofs
 REAL, PARAMETER       :: XANS_TODRY_ROAD = 0.008   ! (-)  Roads
-REAL, PARAMETER       :: XANS_TODRY_MEB  = 0.016   ! (-) Surface under canopy vegetation
 !
 REAL, PARAMETER       :: XANS_T        = 0.240     ! (-) Veg (default value)
 REAL, PARAMETER       :: XANS_T_ROOF     = 0.174   ! (-)  Roofs
 REAL, PARAMETER       :: XANS_T_ROAD     = 0.174   ! (-)  Roads (alley simul)
-REAL, PARAMETER       :: XANS_T_MEB    = 0.480     ! (-) Surface under canopy vegetation
 !
 ! Minimum and maximum values of the density of snow 
 ! for Force-Restore snow option
@@ -168,10 +145,9 @@ REAL, PARAMETER       :: XRHOSMAX_ES = 750.  ! (kg m-3)
 !
 REAL, PARAMETER       :: XSNOWCRITD = 0.03  ! (m)
 !                                       
-! ISBA-ES Minimum total snow depth for thermal calculations. 
-! Used to prevent numerical problems as snow becomes vanishingly thin. 
+! ISBA-ES Minimum total snow depth for model 
 !
-REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
+ REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
 !                                      
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
@@ -182,17 +158,19 @@ REAL, PARAMETER       :: X_RI_MAX = 0.20
 REAL, PARAMETER       :: XWSNOWHOLDMAX2   = 0.10  ! (-) 
 REAL, PARAMETER       :: XWSNOWHOLDMAX1   = 0.03  ! (-)
 REAL, PARAMETER       :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
-!                                       
-! ISBA-ES arameters for grain size computation :
-!
-REAL, PARAMETER       :: XSNOW_AGRAIN = 1.6e-4   ! (m)
-REAL, PARAMETER       :: XSNOW_BGRAIN = 1.1e-13  ! (m13/kg4)
-REAL, PARAMETER       :: XDSGRAIN_MAX = 2.796e-3 ! m
 !
 !--------------------------------------------------------------------------------
-! Calibration coefficients for CROCUS and ES albedo computation
+! Calibration coefficients for CROCUS albedo computation
 !--------------------------------------------------------------------------------
-!
+! for grains effects:
+! REAL, PARAMETER :: XD1=1., XD2=3., XD3=4., XX=99.,XVALB2=.96, XVALB3=1.58,&
+!                     XVALB4=.94,XVALB5=.95,XVALB6=15.4,XVALB7=346.3, XVALB8=32.31,  &
+!                     XVALB9=.88, XVALB10=.175,XVALB11=.7,XVDIOP1=2.3E-3, &
+!                     XVRPRE1=.5,XVRPRE2=1. 
+! ! for ageing effects:
+! REAL, PARAMETER :: XVAGING_SOIL=90. , XVAGING_GLACIER=900. , XVPRES1=87000.
+
+! modifs SM 20110805 tests SIberie - albedo
 REAL, PARAMETER :: XD1 = 1., XD2 = 3., XD3 = 4., XX = 99., &
                    XVALB2 = .96, XVALB3 = 1.58, XVALB4 = .92, XVALB5 = .90, &
                    XVALB6 = 15.4, XVALB7 = 346.3, XVALB8 = 32.31, XVALB9 = .88, &
@@ -201,10 +179,14 @@ REAL, PARAMETER :: XD1 = 1., XD2 = 3., XD3 = 4., XX = 99., &
 !
 ! for ageing effects:
 REAL, PARAMETER :: XVPRES1 = 87000.
+! REAL, PARAMETER :: XZ_SWE_ALB=5.
+! end modifs SM 20110805 tests SIberie - albedo
 !
 ! for spectral distribution and thickness effects
 REAL, PARAMETER :: XVSPEC1 = .71, XVSPEC2 = .21, XVSPEC3 = .08
-!
+! modif SM 20110519
+!REAL, PARAMETER :: XVSPEC1=.68, XVSPEC2=.25 , XVSPEC3=.07
+! end modif SM 20110519
 ! for thickness effects
 REAL, PARAMETER :: XVW1 = .80, XVW2 = .20 , XVD1 = .02, XVD2 = .01
 !
@@ -212,13 +194,6 @@ REAL, PARAMETER :: XVW1 = .80, XVW2 = .20 , XVD1 = .02, XVD2 = .01
 ! calibration coefficients for exctinction computation
 REAL, PARAMETER :: XVBETA1 = 1.92E-3, XVBETA2 = 40., XVBETA3 = 1.098E-2, &
                    XVBETA4 = 100.,  XVBETA5 = 2000.
-!           
-! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):           
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-REAL, PARAMETER :: XES_CVEXT = 3.8e-3 ! [(m5/2)/kg]
-!
-! ISBA-ES minimum cosinus of zenithal angle
-REAL, PARAMETER :: XMINCOSZEN = 0.01
 !
 !--------------------------------------------------------------------------------
 ! ISBA-ES Thermal conductivity coefficients from Anderson (1976):

@@ -1,12 +1,7 @@
 !     #########
 SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                               OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG, &
                                PALBNIR,PALBVIS,PALBUV,PEMIS,               &
-                               PDIR_ALB_WITH_SNOW,PSCA_ALB_WITH_SNOW,PEMIST, &
-                               PDIR_SW,PSCA_SW,                            &
-                               PZF_TALLVEG,                                &
-                               PALBNIR_VEG, PALBNIR_SOIL,                  &
-                               PALBVIS_VEG, PALBVIS_SOIL                   )
+                               PDIR_ALB_WITH_SNOW,PSCA_ALB_WITH_SNOW,PEMIST)  
 !     ####################################################################
 !
 !!****  *UPDATE_RAD_ISBA_n * - Calculate snow/flood fraction, dir/dif albedo
@@ -31,7 +26,6 @@ SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    09/2009
-!!      P. Samuelsson 02/2012 MEB
 !!------------------------------------------------------------------
 !
 USE MODD_TYPE_SNOW
@@ -49,16 +43,12 @@ USE MODD_WATER_PAR, ONLY : XALBSCA_WAT, XEMISWAT, XALBWATICE, XEMISWATICE
 !
 USE MODE_SURF_FLOOD_FRAC
 USE MODE_SURF_SNOW_FRAC      
-USE MODE_MEB,       ONLY : MEB_SHIELD_FACTOR, MEBPALPHAN
-USE MODE_SNOW3L,    ONLY : SNOW3LRADABS
 !
 USE MODI_ALBEDO_TA96
 USE MODI_ALBEDO_FROM_NIR_VIS
 USE MODI_PACK_SAME_RANK
 USE MODI_UNPACK_SAME_RANK
 USE MODI_ISBA_SNOW_FRAC
-USE MODI_ISBA_EMIS_MEB
-USE MODI_ISBA_SWNET_MEB
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -80,23 +70,10 @@ REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBNIR   ! near-infra-red albedo (soil+
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS   ! visible albedo (soil+vegetation) at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV    ! UV albedo (soil+vegetation) at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PEMIS     ! emissivity (soil+vegetation) at t+1
-LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logical vector
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PGNDLITTER  ! Ground litter fraction at t+1
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV    ! Understory leaf area index at t+1
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0LITTER ! Ground litter roughness length at t+1
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG
 !
 REAL, DIMENSION(:,:,:), INTENT(OUT)  :: PDIR_ALB_WITH_SNOW ! Total direct albedo at t+1
 REAL, DIMENSION(:,:,:), INTENT(OUT)  :: PSCA_ALB_WITH_SNOW ! Total diffuse albedo at t+1
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PEMIST             ! Total emissivity at t+1
-!
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PDIR_SW   ! direct  solar radiation (on horizontal surf.)
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PSCA_SW   ! diffuse solar radiation (on horizontal surf.)
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PZF_TALLVEG
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PALBNIR_VEG   ! near-infra-red albedo (vegetation) at t+1
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PALBNIR_SOIL  ! near-infra-red albedo (soil) at t+1
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PALBVIS_VEG   ! visible albedo (vegetation) at t+1
-REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PALBVIS_SOIL  ! visible albedo (soil) at t+1
 !
 !*      0.2    declarations of local variables
 !
@@ -146,27 +123,19 @@ REAL, DIMENSION(KSIZE,ISWB) :: ZDIR_ALB_WITH_SNOW
 REAL, DIMENSION(KSIZE,ISWB) :: ZSCA_ALB_WITH_SNOW
 !
 REAL, DIMENSION(KSIZE) :: ZSNOWALB          
-REAL, DIMENSION(KSIZE) :: ZSNOWALBVIS
-REAL, DIMENSION(KSIZE) :: ZSNOWALBNIR
 REAL, DIMENSION(KSIZE) :: ZLAI             
-!REAL, DIMENSION(KSIZE) :: ZLAIV             
 REAL, DIMENSION(KSIZE) :: ZZ0               
 REAL, DIMENSION(KSIZE) :: ZVEG
 REAL, DIMENSION(KSIZE) :: ZEMIS    
 REAL, DIMENSION(KSIZE) :: ZALBNIR           
 REAL, DIMENSION(KSIZE) :: ZALBVIS           
 REAL, DIMENSION(KSIZE) :: ZALBUV  
-REAL, DIMENSION(KSIZE) :: ZALBNIR_VEG
-REAL, DIMENSION(KSIZE) :: ZALBNIR_SOIL
-REAL, DIMENSION(KSIZE) :: ZALBVIS_VEG
-REAL, DIMENSION(KSIZE) :: ZALBVIS_SOIL
 !
 REAL, DIMENSION(KSIZE) :: ZPSN
 REAL, DIMENSION(KSIZE) :: ZPSNV_A
 REAL, DIMENSION(KSIZE) :: ZPSNG             
 REAL, DIMENSION(KSIZE) :: ZPSNV 
 !
-REAL, DIMENSION(KSIZE) :: ZALBF
 REAL, DIMENSION(KSIZE) :: ZALBF_DIR
 REAL, DIMENSION(KSIZE) :: ZALBF_SCA
 REAL, DIMENSION(KSIZE) :: ZEMISF   
@@ -177,19 +146,9 @@ REAL, DIMENSION(KSIZE) :: ZALBVIS_WITH_SNOW
 REAL, DIMENSION(KSIZE) :: ZALBUV_WITH_SNOW
 !
 REAL, DIMENSION(KSIZE) :: ZEMIST    
-REAL, DIMENSION(KSIZE) :: ZZENITH
-REAL, DIMENSION(KSIZE) :: ZZF_TALLVEG, ZH_VEG
-REAL, DIMENSION(KSIZE) :: ZSNOWDEPTH, ZPALPHAN, ZTAU_N
-REAL, DIMENSION(KSIZE) :: ZSWUP, ZSWNET_N, ZSWNET_V, ZSWNET_G, ZSWNET_NS
-REAL, DIMENSION(KSIZE) :: ZGLOBAL_SW, ZSCATTR_SW
-REAL, DIMENSION(KSIZE) :: ZALBT, ZALBG, ZSWDOWN_GN
-REAL, DIMENSION(KSIZE) :: ZPSNA, ZSIGMA_F, ZSIGMA_FN, ZEMISSN
-REAL, DIMENSION(KSIZE,ISWB) :: ZDIR_SW, ZSCA_SW
-REAL, DIMENSION(KSIZE) :: ZPERMSNOWFRAC
-REAL, DIMENSION(KSIZE,3) :: ZSPECTRALALBEDO
 !
 REAL, PARAMETER :: ZPUT0 = 0.0
-INTEGER  :: JSWB
+INTEGER  :: JSWB, JI, JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_RAD_ISBA_N:TREAT_NATURE',0,ZHOOK_HANDLE)
@@ -200,64 +159,17 @@ IMASK(:)=NR_NATURE_P(1:KSIZE,KPATCH)
  CALL PACK_SAME_RANK(IMASK(:),TSNOW%RHO  (:,:,KPATCH),ZLAYERRHO(:,:))
 !  
  CALL PACK_SAME_RANK(IMASK(:),TSNOW%ALB  (:,KPATCH),ZSNOWALB(:))
-IF(OMEB_PATCH(KPATCH))THEN
-
-!  IF(NPATCH==1)THEN
-!    ZDIR_SW(:,:) = PDIR_SW(:,:)
-!  ELSE
-!    DO JK=1,SIZE(PDIR_SW,2)
-!      DO JJ=1,KSIZE
-!        JI=IMASK(JJ)
-!        ZDIR_SW(JJ,JK) = PDIR_SW (JI,JK)
-!        ZSCA_SW(JJ,JK) = PSCA_SW (JI,JK)
-!      ENDDO
-!    ENDDO
-!  ENDIF
-
-  CALL PACK_SAME_RANK(IMASK(:),PZENITH    (:),       ZZENITH     (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PLAIGV     (:,KPATCH),ZLAI        (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PLAI       (:,KPATCH),ZLAIV       (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PZ0LITTER  (:,KPATCH),ZZ0         (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PGNDLITTER (:,KPATCH),ZVEG        (:))
-  ZVEG(:)=0. ! Set veg=0 for MEB to get bare soil conditions for snow cover and
-!            ! flood fraction
-  CALL PACK_SAME_RANK(IMASK(:),PH_VEG     (:,KPATCH),ZH_VEG      (:))
-!
-  IF(PRESENT(PDIR_SW))THEN
-!
-    CALL PACK_SAME_RANK(IMASK(:),PDIR_SW    (:,:),     ZDIR_SW     (:,:))
-    CALL PACK_SAME_RANK(IMASK(:),PSCA_SW    (:,:),     ZSCA_SW     (:,:))
-    CALL PACK_SAME_RANK(IMASK(:),PZF_TALLVEG(:,KPATCH),ZZF_TALLVEG (:))
-    CALL PACK_SAME_RANK(IMASK(:),PALBNIR_VEG  (:,KPATCH),ZALBNIR_VEG  (:))
-    CALL PACK_SAME_RANK(IMASK(:),PALBNIR_SOIL (:,KPATCH),ZALBNIR_SOIL (:))
-    CALL PACK_SAME_RANK(IMASK(:),PALBVIS_VEG  (:,KPATCH),ZALBVIS_VEG  (:))
-    CALL PACK_SAME_RANK(IMASK(:),PALBVIS_SOIL (:,KPATCH),ZALBVIS_SOIL (:))
-!
-  ENDIF
-!
-ELSE
-!  CALL PACK_SAME_RANK(IMASK(:),PLAI       (:,KPATCH),ZLAI    (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PZ0        (:,KPATCH),ZZ0     (:))
-  CALL PACK_SAME_RANK(IMASK(:),PVEG       (:,KPATCH),ZVEG    (:))
-!  ZALBNIR_VEG(:)  = XUNDEF
-!  ZALBNIR_SOIL(:) = XUNDEF
-!  ZALBVIS_VEG(:)  = XUNDEF
-!  ZALBVIS_SOIL(:) = XUNDEF
-ENDIF
  CALL PACK_SAME_RANK(IMASK(:),PLAI       (:,KPATCH),ZLAI    (:))
  CALL PACK_SAME_RANK(IMASK(:),PZ0        (:,KPATCH),ZZ0     (:))
+ CALL PACK_SAME_RANK(IMASK(:),PVEG       (:,KPATCH),ZVEG    (:))
  CALL PACK_SAME_RANK(IMASK(:),PEMIS      (:,KPATCH),ZEMIS   (:))
  CALL PACK_SAME_RANK(IMASK(:),PALBNIR    (:,KPATCH),ZALBNIR (:))
  CALL PACK_SAME_RANK(IMASK(:),PALBVIS    (:,KPATCH),ZALBVIS (:))
  CALL PACK_SAME_RANK(IMASK(:),PALBUV     (:,KPATCH),ZALBUV  (:))
-IF (HSNOW=='3-L' .OR. HSNOW=='CRO') THEN
-  CALL PACK_SAME_RANK(IMASK(:),TSNOW%ALBVIS  (:,KPATCH),ZSNOWALBVIS(:))
-  CALL PACK_SAME_RANK(IMASK(:),TSNOW%ALBNIR  (:,KPATCH),ZSNOWALBNIR(:))
-ENDIF
 !   
 !-------------------------------------------------------------------------------
 !
- CALL ISBA_SNOW_FRAC(HSNOW, ZLAYERSWE, ZLAYERRHO, ZSNOWALB,    &
+CALL ISBA_SNOW_FRAC(HSNOW, ZLAYERSWE, ZLAYERRHO, ZSNOWALB,    &
          ZVEG, ZLAI, ZZ0,ZPSN(:), ZPSNV_A(:), ZPSNG(:), ZPSNV(:) )  
 IF ( HSNOW=='EBA' ) CALL UNPACK_SAME_RANK(IMASK(:),ZPSNV_A(:),XPSNV_A(:,KPATCH),ZPUT0) 
 !
@@ -267,9 +179,8 @@ IF ( HSNOW=='EBA' ) CALL UNPACK_SAME_RANK(IMASK(:),ZPSNV_A(:),XPSNV_A(:,KPATCH),
 !
 IF(OFLOOD)THEN   
   CALL TREAT_FLOOD(KSIZE,KPATCH,IMASK,ZPSNG,ZPSNV,ZLAI,ZVEG,&
-                ZALBF, ZALBF_DIR,ZALBF_SCA,ZEMISF,ZFF)
+                ZALBF_DIR,ZALBF_SCA,ZEMISF,ZFF)
 ELSE
-  ZALBF     (:)=0.0
   ZALBF_DIR (:)=0.0
   ZALBF_SCA (:)=0.0
   ZEMISF    (:)=0.0
@@ -277,85 +188,28 @@ ELSE
 ENDIF        
 !-------------------------------------------------------------------------------
 !
-ZTAU_N(:)            = 0.
-ZSPECTRALALBEDO(:,:) = 0.
-ZPERMSNOWFRAC(:)     = 0.
+!* albedo for near-infra-red and visible over snow-covered and snow-flood-free surface
 !
-IF(OMEB_PATCH(KPATCH))THEN
+ZALBNIR_WITH_SNOW(:) = ZALBNIR(:) * (1.-ZPSN(:)-ZFF(:)) + ZSNOWALB (:) * ZPSN(:)   
+ZALBVIS_WITH_SNOW(:) = ZALBVIS(:) * (1.-ZPSN(:)-ZFF(:)) + ZSNOWALB (:) * ZPSN(:)  
+ZALBUV_WITH_SNOW (:) = ZALBUV (:) * (1.-ZPSN(:)-ZFF(:)) + ZSNOWALB (:) * ZPSN(:)  
 !
-  ZSNOWDEPTH(:) = SUM(ZLAYERSWE(:,:)/ZLAYERRHO(:,:),2)
-  ZPALPHAN(:)   = MEBPALPHAN(ZSNOWDEPTH,ZH_VEG)
+!* snow-flood-covered surface albedo for each wavelength (needed for outputs)
 !
-!
-  ZDIR_ALB_WITH_SNOW(:,:)=XUNDEF
-  ZSCA_ALB_WITH_SNOW(:,:)=XUNDEF
-!
-  IF(PRESENT(PDIR_SW))THEN
-!
-! Albedo
-!
-    ZPERMSNOWFRAC(:)     = 0. ! assume no vegetation overlying permanent snow 
-
-    ZSPECTRALALBEDO(:,1) = ZSNOWALBVIS(:)
-    ZSPECTRALALBEDO(:,2) = ZSNOWALBNIR(:)
-    ZSPECTRALALBEDO(:,3) = XUNDEF ! Currently, MEB only considers 2 spectral bands
-    ZTAU_N(:)            = SNOW3LRADABS(ZLAYERRHO(:,1),ZSNOWDEPTH,  &
-                           ZSPECTRALALBEDO,ZZENITH,ZPERMSNOWFRAC)
-!
-    DO JSWB=1,ISWB
-      ZGLOBAL_SW(:) = ZDIR_SW(:,JSWB) + ZSCA_SW(:,JSWB)
-      ZSCATTR_SW(:) =                   ZSCA_SW(:,JSWB)
-!
-      CALL ISBA_SWNET_MEB(ZLAI,ZZF_TALLVEG,                                    &
-          ZSNOWALBVIS,ZSNOWALBNIR,                                             &
-          ZALBNIR_VEG, ZALBVIS_VEG,ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBF,          &
-          ZFF,ZPSN,ZPALPHAN,ZTAU_N,ZZENITH,ZSCATTR_SW,ZGLOBAL_SW,              &
-          ZSWUP,ZSWNET_N,ZSWNET_V,ZSWNET_G,ZSWNET_NS,                          &
-          ZALBT,ZALBG,ZSWDOWN_GN                                               )
-!
-      ZDIR_ALB_WITH_SNOW(:,JSWB)=ZALBT
-      ZSCA_ALB_WITH_SNOW(:,JSWB)=ZALBT
-!
-    END DO
-!
-  ENDIF
-!
-! Emissivity
-!
-  ZEMISSN(:)   = XEMISSN
-  ZPSNA(:)     = 0.
-  ZSIGMA_F(:)  = 1.0 - MEB_SHIELD_FACTOR(ZLAI,ZPSNA)
-  ZSIGMA_FN(:) = 1.0 - MEB_SHIELD_FACTOR(ZLAI,ZPALPHAN)
-!
-  CALL ISBA_EMIS_MEB(ZPSN, ZPALPHAN, ZSIGMA_F, ZSIGMA_FN,  &
-                     ZEMISSN, ZEMIST                       )
-
-!
-ELSE
-!  * albedo for near-infra-red and visible over snow-covered and snow-flood-free surface
-!
-  ZALBNIR_WITH_SNOW(:) = ZALBNIR(:) * (1.-ZPSN(:)-ZFF(:)) + ZSNOWALB (:) * ZPSN(:)   
-  ZALBVIS_WITH_SNOW(:) = ZALBVIS(:) * (1.-ZPSN(:)-ZFF(:)) + ZSNOWALB (:) * ZPSN(:)  
-  ZALBUV_WITH_SNOW (:) = ZALBUV (:) * (1.-ZPSN(:)-ZFF(:)) + ZSNOWALB (:) * ZPSN(:)  
-!
-!  * snow-flood-covered surface albedo for each wavelength (needed for outputs)
-!
-  CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS,                                            &
+ CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS,                                              &
                          ZALBNIR_WITH_SNOW,  ZALBVIS_WITH_SNOW, ZALBUV_WITH_SNOW,&
                          ZDIR_ALB_WITH_SNOW, ZSCA_ALB_WITH_SNOW                  )  
 !
-  DO JSWB=1,ISWB
-    ZDIR_ALB_WITH_SNOW(:,JSWB)=ZDIR_ALB_WITH_SNOW(:,JSWB) + ZFF(:)*ZALBF_DIR(:)
-    ZSCA_ALB_WITH_SNOW(:,JSWB)=ZSCA_ALB_WITH_SNOW(:,JSWB) + ZFF(:)*ZALBF_SCA(:)
-  ENDDO
+DO JSWB=1,ISWB
+  ZDIR_ALB_WITH_SNOW(:,JSWB)=ZDIR_ALB_WITH_SNOW(:,JSWB) + ZFF(:)*ZALBF_DIR(:)
+  ZSCA_ALB_WITH_SNOW(:,JSWB)=ZSCA_ALB_WITH_SNOW(:,JSWB) + ZFF(:)*ZALBF_SCA(:)
+ENDDO
 !
 !-------------------------------------------------------------------------------
 !
 ! longwave computations for outputs (emissivity for radiative scheme)
 !
-  ZEMIST(:) = (1.-ZPSN(:)-ZFF(:))*ZEMIS(:) + ZPSN(:) * XEMISSN + ZFF(:)*ZEMISF(:)
-!
-ENDIF
+ZEMIST(:) = (1.-ZPSN(:)-ZFF(:))*ZEMIS(:) + ZPSN(:) * XEMISSN + ZFF(:)*ZEMISF(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -374,7 +228,7 @@ IF (LHOOK) CALL DR_HOOK('UPDATE_RAD_ISBA_N:TREAT_NATURE',1,ZHOOK_HANDLE)
 END SUBROUTINE TREAT_NATURE
 !
 SUBROUTINE TREAT_FLOOD(KSIZE,KPATCH,KMASK,PPSNG,PPSNV,PLAI,PVEG,&
-               PALBF, PALBF_DIR,PALBF_SCA,PEMISF,PFF)
+               PALBF_DIR,PALBF_SCA,PEMISF,PFF)
 !
 IMPLICIT NONE
 !
@@ -387,7 +241,6 @@ REAL, DIMENSION(:),  INTENT(IN) :: PLAI
 REAL, DIMENSION(:),  INTENT(IN) :: PVEG
 REAL, DIMENSION(:), INTENT(OUT) :: PALBF_DIR
 REAL, DIMENSION(:), INTENT(OUT) :: PALBF_SCA
-REAL, DIMENSION(:), INTENT(OUT) :: PALBF
 REAL, DIMENSION(:), INTENT(OUT) :: PEMISF   
 REAL, DIMENSION(:), INTENT(OUT) :: PFF  
 !
@@ -396,6 +249,7 @@ REAL, DIMENSION(KSIZE) :: ZZENITH
 REAL, DIMENSION(KSIZE) :: ZFFLOOD
 REAL, DIMENSION(KSIZE) :: ZFFG   
 REAL, DIMENSION(KSIZE) :: ZFFV
+REAL, DIMENSION(KSIZE) :: ZALBF
 REAL, DIMENSION(KSIZE) :: ZFFROZEN
 REAL, DIMENSION(KSIZE) :: ZALBEDO
 !
@@ -417,7 +271,7 @@ ZALBEDO(:) = ALBEDO_TA96(ZZENITH(:))
 WHERE(ZFFLOOD==0.0)
   PALBF_DIR (:) = XUNDEF
   PALBF_SCA (:) = XUNDEF
-  PALBF     (:) = XUNDEF
+  ZALBF     (:) = XUNDEF
   PEMISF    (:) = XUNDEF
   ZFFROZEN  (:) = 0.0
 ELSEWHERE
@@ -432,7 +286,7 @@ ELSEWHERE
     PEMISF    (:) = XEMISWATICE
     ZFFROZEN  (:) = 1.0
   END WHERE
-  PALBF(:)=0.5*(PALBF_DIR(:)+PALBF_SCA(:))
+  ZALBF(:)=0.5*(PALBF_DIR(:)+PALBF_SCA(:))
 ENDWHERE
 !
  CALL UNPACK_SAME_RANK(KMASK(:),ZFFG    (:),XFFG    (:,KPATCH),ZPUT0)     
@@ -440,7 +294,7 @@ ENDWHERE
  CALL UNPACK_SAME_RANK(KMASK(:),ZFFROZEN(:),XFFROZEN(:,KPATCH),ZPUT0)     
  CALL UNPACK_SAME_RANK(KMASK(:),PFF     (:),XFF     (:,KPATCH),ZPUT0) 
  CALL UNPACK_SAME_RANK(KMASK(:),PEMISF  (:),XEMISF  (:,KPATCH),XUNDEF)
- CALL UNPACK_SAME_RANK(KMASK(:),PALBF   (:),XALBF   (:,KPATCH),XUNDEF)     
+ CALL UNPACK_SAME_RANK(KMASK(:),ZALBF   (:),XALBF   (:,KPATCH),XUNDEF)     
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_RAD_ISBA_N:TREAT_FLOOD',1,ZHOOK_HANDLE)
 !

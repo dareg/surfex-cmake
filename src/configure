@@ -170,34 +170,6 @@ export LD_LIBRARY_PATH=\$MPI_ROOT/lib:\$LD_LIBRARY_PATH
 export MANPATH=\$MPI_ROOT/share/man:\$MANPATH
 "}
               ;;
-'Linux krypton') #SMHI krypton@NSC
-	        export ARCH=${ARCH:-LXgfortran}
-                export VER_MPI=${VER_MPI:-NOMPI}
-                export OPTLEVEL=${OPTLEVEL:-O2}
-                export MVWORK=${MVWORK:-NO}
-                export VER_CDF=${VER_CDF:-CDFAUTO}
-                export VER_OASIS=${VER_OASIS:-mct}
-		export NEED_NCARG=${NEED_NCARG:-NO}
-		export NEED_TOOLS=NO
-
-                export SURFEX_BUILD_KRYPTON='/nobackup/rossby17/sm_psamu/SURFEX_BUILD_KRYPTON'
-                ln -s $SURFEX_BUILD_KRYPTON/* $LOCAL/src/LIB/.
-                if [[ $SURFEX_OBJROOT == "" ]]; then
-                  echo "*************************************************************"
-                  echo "You have to define environment variable SURFEX_OBJROOT which"
-                  echo "points to a nobackup root directory where your compiled code"
-                  echo "will end up!"
-                  echo "*************************************************************"
-                  exit
-                fi
-                LOCALBASE=`basename $LOCAL`
-                export OBJDIR_PATH=$SURFEX_OBJROOT/$LOCALBASE
-                mkdir -p $OBJDIR_PATH
-                echo "********************************"
-                echo "Your compiled code ends up here:"
-                echo $OBJDIR_PATH
-                echo "********************************"
-              ;;
 Linux*)      
                 export     ARCH=${ARCH:-LXgfortran} 
                 export  VER_MPI=${VER_MPI:-MPIVIDE} 

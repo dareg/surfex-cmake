@@ -32,12 +32,6 @@
 !!    ------
 !!
 !!	S. Belair           * Meteo-France *
-!!
-!!    MODIFICATIONS
-!!    ------------- 
-!!      
-!!      P. Samuelsson  02/2012  MEB
-!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -109,8 +103,6 @@ REAL, DIMENSION(SIZE(PALBNIR))   :: ZALBF
 REAL, DIMENSION(SIZE(PALBNIR))   :: ZFFV
 REAL, DIMENSION(SIZE(PALBNIR))   :: ZFFG
 !
-LOGICAL, PARAMETER :: GMEB=.FALSE.
-REAL, DIMENSION(SIZE(PDIR_SW,1))   :: ZP_MEB_SCA_SW, ZALBNIR_TSNOW, ZALBVIS_TSNOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -130,7 +122,7 @@ ZALBF         = 0.
 ZFFV          = 0.
 ZFFG          = 0.
 !
- CALL ISBA_ALBEDO(TPSNOW%SCHEME, OTR_ML, GMEB,                             &
+ CALL ISBA_ALBEDO(TPSNOW%SCHEME, OTR_ML,                                    &
                    PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                       &
                    PALBNIR, PALBVIS, PALBUV,                               &
                    PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG,                   &
@@ -138,7 +130,6 @@ ZFFG          = 0.
                    TPSNOW%ALB(:,1), PPSNV, PPSNG, ZALBF, ZFFV, ZFFG,       &
                    ZGLOBAL_SW, PANOSNOW,                                   &
                    PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL,                  &
-                   ZP_MEB_SCA_SW,                                          &
                    PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL)
 
 !-------------------------------------------------------------------------------

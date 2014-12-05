@@ -21,7 +21,6 @@ SUBROUTINE DEALLOC_ISBA_n
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
-!!      P Samuelsson 10/2014  MEB
 !!------------------------------------------------------------------
 !
 
@@ -47,8 +46,6 @@ USE MODD_ISBA_n,      ONLY : LCOVER, XCOVER, XZS, XZ0EFFJPDIR, XCLAY, XSAND,    
                                XWG, XTG, TSNOW, XALBNIR, XALBVIS, XALBUV,          &
                                XEMIS_NAT, XTSRAD_NAT,                              &
                                XVEGTYPE_PATCH,XROOTFRAC,XRUNOFFD,XSOILWGHT,        &
-                               XGNDLITTER, XZF_TALLVEG , XRGLGV, XGAMMAGV, XRSMINGV,&
-                               XROOTFRACGV, XWRMAX_CFGV, XLAIGV, XZ0LITTER, XH_VEG,&
                                XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF,  &
                                XTAUICE, XACOEF, XBCOEF, XCONDSAT,                  &
                                XHCAPSOIL, XCONDDRY, XCONDSLD, XC4REF, XMPOTSAT,    &
@@ -208,17 +205,6 @@ IF (ASSOCIATED(XALBVIS_WET)) DEALLOCATE(XALBVIS_WET)
 IF (ASSOCIATED(XALBUV_WET )) DEALLOCATE(XALBUV_WET )
 IF (ASSOCIATED(XABC)) DEALLOCATE(XABC)
 IF (ASSOCIATED(XPOI)) DEALLOCATE(XPOI)
-!
-IF (ASSOCIATED(XGNDLITTER  )) DEALLOCATE(XGNDLITTER  )
-IF (ASSOCIATED(XZF_TALLVEG )) DEALLOCATE(XZF_TALLVEG )
-IF (ASSOCIATED(XRGLGV      )) DEALLOCATE(XRGLGV      )
-IF (ASSOCIATED(XGAMMAGV    )) DEALLOCATE(XGAMMAGV    )
-IF (ASSOCIATED(XRSMINGV    )) DEALLOCATE(XRSMINGV    )
-IF (ASSOCIATED(XROOTFRACGV )) DEALLOCATE(XROOTFRACGV )
-IF (ASSOCIATED(XWRMAX_CFGV )) DEALLOCATE(XWRMAX_CFGV )
-IF (ASSOCIATED(XLAIGV      )) DEALLOCATE(XLAIGV      )
-IF (ASSOCIATED(XZ0LITTER   )) DEALLOCATE(XZ0LITTER   )
-IF (ASSOCIATED(XH_VEG      )) DEALLOCATE(XH_VEG      )
 !
 !-------------------------------------------------------------------------------------
 !

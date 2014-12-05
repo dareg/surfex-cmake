@@ -38,7 +38,6 @@
 !!      A.L. Gibelin    06/2009 : Soil carbon variables for CNT option
 !!      B. Decharme  09/2012 : suppress NWG_LAYER (parallelization problems)
 !!      T. Aspelien  08/2013 : Read diagnostics for assimilation
-!!      P. Samuelsson   10/2014 : MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -55,8 +54,7 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                 XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
                                 XLITTER, XSOILCARB, XLIGNIN_STRUC,  &
                                 LTEMP_ARP, NTEMPLAYER_ARP,          &
-                                LGLACIER, XICE_STO,                 &
-                                XWRV, XWRVN, XTV, XTC, XQC
+                                LGLACIER, XICE_STO
 !                          
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
                               & XAZON10M_ISBA,XAMER10M_ISBA,NIPERT,NVAR, &
@@ -202,27 +200,6 @@ ALLOCATE(XWR(ILU,NPATCH))
 YRECFM = 'WR'
  CALL READ_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP)
 !
-!* water intercepted on vegetation canopy leaves
-!
-ALLOCATE(XWRV(ILU,NPATCH))
-!
-YRECFM = 'WRV'
-CALL READ_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP)
-!
-!* snow intercepted on vegetation canopy leaves
-!
-ALLOCATE(XWRVN(ILU,NPATCH))
-!
-YRECFM = 'WRVN'
-CALL READ_SURF(HPROGRAM,YRECFM,XWRVN(:,:),IRESP)
-!
-!* vegetation canopy temperature
-!
-ALLOCATE(XTV(ILU,NPATCH))
-!
-YRECFM = 'TV'
-CALL READ_SURF(HPROGRAM,YRECFM,XTV(:,:),IRESP)
-!
 !* Leaf Area Index
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
@@ -284,18 +261,6 @@ END IF
 YRECFM = 'RESA'
 XRESA(:,:) = 100.
  CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:,:),IRESP)
-!
-!* vegetation canopy air temperature
-!
-ALLOCATE(XTC(ILU,NPATCH))
-YRECFM = 'TC'
-CALL READ_SURF(HPROGRAM,YRECFM,XTC(:,:),IRESP)
-!
-!* vegetation canopy air specific humidity
-!
-ALLOCATE(XQC(ILU,NPATCH))
-YRECFM = 'QC'
-CALL READ_SURF(HPROGRAM,YRECFM,XQC(:,:),IRESP)
 !
 !* patch averaged radiative temperature (K)
 !

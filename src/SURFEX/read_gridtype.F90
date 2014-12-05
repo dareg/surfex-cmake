@@ -29,7 +29,6 @@
 !!    -------------
 !!      Original    01/2003 
 !!                  10/2007  E. Martin  IGN Grids
-!!                  12/2012  P. Samuelsson  Rotated lonlat
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,8 +49,6 @@ USE MODI_READ_GRIDTYPE_IGN
 USE MODI_READ_GRIDTYPE_LONLAT_REG
 !
 USE MODI_READ_GRIDTYPE_LONLATVAL
-!
-USE MODI_READ_GRIDTYPE_LONLAT_ROT
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -116,8 +113,6 @@ SELECT CASE (HGRID)
   CASE ("LONLATVAL ")
     CALL READ_GRIDTYPE_LONLATVAL(HPROGRAM,KGRID_PAR,KLU,OREAD,IGRID_PAR,ZGRID_PAR,IRESP,YDIR)
 
-  CASE ("LONLAT ROT")
-    CALL READ_GRIDTYPE_LONLAT_ROT(HPROGRAM,KGRID_PAR,KLU,OREAD,IGRID_PAR,ZGRID_PAR,IRESP,YDIR)
 
 END SELECT
 !

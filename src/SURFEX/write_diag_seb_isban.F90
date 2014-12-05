@@ -33,7 +33,6 @@
 !!                           delete NWG_SIZE
 !!      S. Belamari 06/2014 : Introduce GRESET to avoid errors due to NBLOCK=0
 !!                            when coupled with ARPEGE/ALADIN/AROME
-!!      P. Samuelsson 10/2014 MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -51,7 +50,6 @@ USE MODD_DIAG_SURF_ATM_n,ONLY : LPROVAR_TO_DIAG, LRESET_BUDGETC
 !
 USE MODD_ISBA_n,     ONLY :   NPATCH, XPATCH, LFLOOD, CISBA, CHORT,   &
                               LGLACIER, NGROUND_LAYER, LTEMP_ARP,     &
-                              LMEB_PATCH,                             &
                               NTEMPLAYER_ARP, TSNOW, XLE, XDG, XTG,   &
                               XWG, XWGI, XWR, XICE_STO, XWSAT, XDZG,  &
                               NWG_LAYER, CPHOTO, CRESPSL, XBIOMASS,   &
@@ -78,7 +76,7 @@ USE MODD_DIAG_ISBA_n,ONLY :   N2M, LSURF_BUDGET, LRAD_BUDGET, LCOEF,            
                               XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,       &
                               XAVG_FMUC, XAVG_FMVC, XAVG_HU2M_MIN,              &
                               XAVG_HU2M_MAX, XAVG_WIND10M, XAVG_WIND10M_MAX,    &  
-                              XAVG_SFCO2, XT2M_MIN, XT2M_MAX
+                              XAVG_SFCO2
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -91,7 +89,7 @@ USE MODD_DIAG_EVAP_ISBA_n,ONLY :   LSURF_EVAP_BUDGET, LSURF_BUDGETC,            
                                    XLEG, XLEGC, XAVG_LEG, XAVG_LEGC,              &
                                    XLEGI, XLEGIC, XAVG_LEGI, XAVG_LEGIC,          &
                                    XLEV, XLEVC, XAVG_LEV, XAVG_LEVC,              &
-                                   XLES, XLESAC, XAVG_LES, XAVG_LESAC,            &
+                                   XLES, XLESC, XAVG_LES, XAVG_LESC,              &
                                    XLESL, XLESLC, XAVG_LESL, XAVG_LESLC,          &
                                    XLER, XLERC, XAVG_LER, XAVG_LERC,              &
                                    XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,          &
@@ -122,59 +120,7 @@ USE MODD_DIAG_EVAP_ISBA_n,ONLY :   LSURF_EVAP_BUDGET, LSURF_BUDGETC,            
                                    XDSWE, XDSWEC, XAVG_DSWE, XAVG_DSWEC,          &
                                    XRAINFALL, XRAINFALLC, XSNOWFALL, XSNOWFALLC,  &
                                    XWATBUD, XWATBUDC, XAVG_WATBUD, XAVG_WATBUDC,  &
-                                   XSNDRIFT,XSNDRIFTC,XAVG_SNDRIFT,XAVG_SNDRIFTC, &
-                                   XLEVCV, XLESC, XLETRGV,                        &
-                                   XAVG_LEVCV, XAVG_LESC, XAVG_LETRGV,            &
-                                   XLETRCV, XLERGV,XLERCV,                        &
-                                   XAVG_LETRCV, XAVG_LERGV,XAVG_LERCV,            &
-                                   XLE_C_A, XLE_V_C,                              &
-                                   XAVG_LE_C_A, XAVG_LE_V_C,                      &
-                                   XLE_G_C, XLE_N_C,                              &
-                                   XAVG_LE_G_C, XAVG_LE_N_C,                      &
-                                   XLEVCVC, XLESCC, XLETRGVC,                     &
-                                   XAVG_LEVCVC, XAVG_LESCC, XAVG_LETRGVC,         &
-                                   XLETRCVC, XLERGVC,XLERCVC,                     &
-                                   XAVG_LETRCVC, XAVG_LERGVC,XAVG_LERCVC,         &
-                                   XLE_C_AC, XLE_V_CC,                            &
-                                   XAVG_LE_C_AC, XAVG_LE_V_CC,                    &
-                                   XLE_G_CC, XLE_N_CC,                            &
-                                   XAVG_LE_G_CC, XAVG_LE_N_CC,                    &
-                                   XSWNET_V, XSWNET_G,                            &
-                                   XAVG_SWNET_V, XAVG_SWNET_G,                    &
-                                   XSWNET_N, XSWNET_NS,                           &
-                                   XAVG_SWNET_N, XAVG_SWNET_NS,                   &
-                                   XLWNET_V, XLWNET_G,                            &
-                                   XAVG_LWNET_V, XAVG_LWNET_G,                    &
-                                   XLWNET_N,                                      &
-                                   XAVG_LWNET_N,                                  &
-                                   XSWDOWN_GN, XLWDOWN_GN,                        &
-                                   XAVG_SWDOWN_GN, XAVG_LWDOWN_GN,                &
-                                   XH_V_C, XH_G_C,                                &
-                                   XAVG_H_V_C, XAVG_H_G_C,                        &
-                                   XH_C_A, XH_N_C,                                &
-                                   XAVG_H_C_A, XAVG_H_N_C,                        &
-                                   XSR_GN, XMELTCV,                               &
-                                   XAVG_SR_GN, XAVG_MELTCV,                       &
-                                   XFRZCV,                                        &
-                                   XAVG_FRZCV,                                    &
-                                   XSWNET_VC, XSWNET_GC,                          &
-                                   XAVG_SWNET_VC, XAVG_SWNET_GC,                  &
-                                   XSWNET_NC, XSWNET_NSC,                         &
-                                   XAVG_SWNET_NC, XAVG_SWNET_NSC,                 &
-                                   XLWNET_VC, XLWNET_GC,                          &
-                                   XAVG_LWNET_VC, XAVG_LWNET_GC,                  &
-                                   XLWNET_NC,                                     &
-                                   XAVG_LWNET_NC,                                 &
-                                   XSWDOWN_GNC, XLWDOWN_GNC,                      &
-                                   XAVG_SWDOWN_GNC, XAVG_LWDOWN_GNC,              &
-                                   XH_V_CC, XH_G_CC,                              &
-                                   XAVG_H_V_CC, XAVG_H_G_CC,                      &
-                                   XH_C_AC, XH_N_CC,                              &
-                                   XAVG_H_C_AC, XAVG_H_N_CC,                      &
-                                   XSR_GNC, XMELTCVC,                             &
-                                   XAVG_SR_GNC, XAVG_MELTCVC,                     &
-                                   XFRZCVC,                                       &
-                                   XAVG_FRZCVC
+                                   XSNDRIFT,XSNDRIFTC,XAVG_SNDRIFT,XAVG_SNDRIFTC
 !
 USE MODD_CH_ISBA_n,    ONLY : XDEP, CCH_DRY_DEP, LCH_BIO_FLUX, CCH_NAMES, NBEQ, &
                               NDSTEQ, LCH_NO_FLUX
@@ -202,7 +148,6 @@ CHARACTER(LEN=2)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
-INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -210,8 +155,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',0,ZHOOK_HANDLE)
-!
-ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
 !
 GRESET=.TRUE.
 #ifdef ARO
@@ -384,113 +327,6 @@ IF (LSURF_EVAP_BUDGET) THEN
     YCOMMENT='irrigation rate'//' (Kg/m2/s)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_IRRIG_FLUX(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF  
-! MEB STUFF
-  IF (ISIZE_LMEB_PATCH>0) THEN
-    YRECFM='LEVCV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEVCV(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LESC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LESC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LETRGV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETRGV(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LETRCV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETRCV(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LERGV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LERGV(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LERCV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LERCV(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_C_A_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_C_A(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_V_C_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_V_C(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_G_C_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_G_C(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_N_C_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_N_C(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_V_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_V(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_G_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_G(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_N_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_N(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_NS_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_NS(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWNET_V_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWNET_V(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWNET_G_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWNET_G(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWNET_N_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWNET_N(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWDOWN_GN_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWDOWN_GN(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWDOWN_GN_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWDOWN_GN(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_V_C_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_V_C(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_G_C_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_G_C(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_C_A_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_C_A(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_N_C_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_N_C(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SR_GN_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SR_GN(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='MELTCV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_MELTCV(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='FRZCV_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FRZCV(:),IRESP,HCOMMENT=YCOMMENT)
-  ENDIF
-  ! END MEB STUFF
   !
   IF(LFLOOD)THEN
     !        
@@ -581,7 +417,7 @@ IF (LSURF_BUDGETC) THEN
   !
   YRECFM='LESC_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LESAC(:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LESC(:),IRESP,HCOMMENT=YCOMMENT)
   !
   IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN  
     YRECFM='LESLC_ISBA'
@@ -639,114 +475,6 @@ IF (LSURF_BUDGETC) THEN
   YRECFM='SNOMLTC_ISBA'
   YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_MELTC(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  ! MEB STUFF
-  IF (ISIZE_LMEB_PATCH>0) THEN
-    YRECFM='LEVCVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LEVCVC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LESCC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LESCC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LETRGVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETRGVC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LETRCVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LETRCVC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LERGVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LERGVC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LERCVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LERCVC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_C_AC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_C_AC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_V_CC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_V_CC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_G_CC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_G_CC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LE_N_CC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LE_N_CC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_VC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_VC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_GC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_GC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_NC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_NC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWNET_NSC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWNET_NSC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWNET_VC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWNET_VC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWNET_GC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWNET_GC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWNET_NC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWNET_NC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWDOWN_GNC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SWDOWN_GNC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWDOWN_GNC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_LWDOWN_GNC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_V_CC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_V_CC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_G_CC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_G_CC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_C_AC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_C_AC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='H_N_CC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_H_N_CC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SR_GNC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_SR_GNC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='MELTCVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_MELTCVC(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='FRZCVC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XAVG_FRZCVC(:),IRESP,HCOMMENT=YCOMMENT)
-  ENDIF
-  ! END MEB STUFF
   !
   IF(LAGRIP)THEN
     YRECFM='IRRIGC_ISBA'
@@ -1148,114 +876,6 @@ IF(LPATCH_BUDGET.AND.(NPATCH >1))THEN
       YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XMELT(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
-      ! MEB STUFF
-      IF (ISIZE_LMEB_PATCH>0) THEN
-        YRECFM='LEVCV_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLEVCV(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LESC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLESC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-!        YRECFM='LETRGV_P'
-!        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-!        CALL WRITE_SURF(HPROGRAM,YRECFM,XLETRGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LETRCV_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLETRCV(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-!        YRECFM='LERGV_P'
-!        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-!        CALL WRITE_SURF(HPROGRAM,YRECFM,XLERGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LERCV_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLERCV(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_C_A_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_C_A(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_V_C_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_V_C(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_G_C_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_G_C(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_N_C_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_N_C(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_V_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_V(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_G_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_G(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_N_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_N(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_NS_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_NS(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWNET_V_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWNET_V(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWNET_G_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWNET_G(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWNET_N_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWNET_N(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWDOWN_GN_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWDOWN_GN(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWDOWN_GN_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWDOWN_GN(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_V_C_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_V_C(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_G_C_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_G_C(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_C_A_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_C_A(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_N_C_P'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_N_C(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SR_GN_P'
-        YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSR_GN(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='MELTCV_P'
-        YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XMELTCV(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='FRZCV_P'
-        YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XFRZCV(:,:),IRESP,HCOMMENT=YCOMMENT)
-      ENDIF
-      ! END MEB STUFF
-      !
       IF(LAGRIP)THEN
         YRECFM='IRRIG_P'
         YCOMMENT='X_Y_'//YRECFM//' (Kg/m2/s)'
@@ -1333,16 +953,6 @@ IF(LPATCH_BUDGET.AND.(NPATCH >1))THEN
       YCOMMENT='X_Y_'//YRECFM//' (K)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
-      YRECFM='T2MMIN_P'
-      YCOMMENT='X_Y_'//YRECFM//' (K)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MIN(:,:),IRESP,HCOMMENT=YCOMMENT)
-      XT2M_MIN(:,:)=XUNDEF
-      !
-      YRECFM='T2MMAX_P'
-      YCOMMENT='X_Y_'//YRECFM//' (K)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XT2M_MAX(:,:),IRESP,HCOMMENT=YCOMMENT)
-      XT2M_MAX(:,:)=0.0
-      !
       YRECFM='Q2M_P'
       YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XQ2M(:,:),IRESP,HCOMMENT=YCOMMENT)
@@ -1384,7 +994,7 @@ IF(LPATCH_BUDGET.AND.(NPATCH >1))THEN
       !
       YRECFM='LESC_P'
       YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XLESAC(:,:),IRESP,HCOMMENT=YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,YRECFM,XLESC(:,:),IRESP,HCOMMENT=YCOMMENT)
       !
       IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN  
         YRECFM='LESLC_P'
@@ -1442,114 +1052,6 @@ IF(LPATCH_BUDGET.AND.(NPATCH >1))THEN
       YRECFM='SNOMLTC_P'
       YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
       CALL WRITE_SURF(HPROGRAM,YRECFM,XMELTC(:,:),IRESP,HCOMMENT=YCOMMENT)
-      !
-      ! MEB STUFF
-      IF (ISIZE_LMEB_PATCH>0) THEN
-        YRECFM='LEVCVC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLEVCVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LESCC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLESCC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-!        YRECFM='LETRGVC_P'
-!        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-!        CALL WRITE_SURF(HPROGRAM,YRECFM,XLETRGVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LETRCVC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLETRCVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-!        YRECFM='LERGVC_P'
-!        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-!        CALL WRITE_SURF(HPROGRAM,YRECFM,XLERGVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LERCVC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLERCVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_C_AC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_C_AC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_V_CC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_V_CC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_G_CC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_G_CC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LE_N_CC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLE_N_CC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_VC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_VC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_GC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_GC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_NC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_NC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWNET_NSC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWNET_NSC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWNET_VC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWNET_VC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWNET_GC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWNET_GC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWNET_NC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWNET_NC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SWDOWN_GNC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSWDOWN_GNC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='LWDOWN_GNC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XLWDOWN_GNC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_V_CC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_V_CC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_G_CC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_G_CC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_C_AC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_C_AC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='H_N_CC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XH_N_CC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='SR_GNC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XSR_GNC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='MELTCVC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XMELTCVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        !
-        YRECFM='FRZCVC_P'
-        YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-        CALL WRITE_SURF(HPROGRAM,YRECFM,XFRZCVC(:,:),IRESP,HCOMMENT=YCOMMENT)
-      ENDIF
-      ! END MEB STUFF
       !
       IF(LAGRIP)THEN
         YRECFM='IRRIGC_P'

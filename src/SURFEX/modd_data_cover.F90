@@ -33,7 +33,6 @@
 !!      P Le Moigne 06/2006 seeding and irrigation
 !!      G Pigeon    08/2012 ROUGH_ROOF, ROUGH_WALL
 !!      V. Masson   08/2013  Adds solar panel variables
-!!      P Samuelsson 10/2014 Multi-energy balance (MEB)
 !!----------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -220,20 +219,6 @@ REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_LE_INDUSTRY ! anthropogenic latent
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_HC_FLOOR     ! heat capacity of floor layers [J m-3 K-1]
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_TC_FLOOR     ! thermal conductivity of floor layers [W m-1 K-1]
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_D_FLOOR      ! thickness of floor layers [m]
-!
-! For multi-energy balance (MEB)
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_ZF_TALLVEG         ! Binary for tall vegetation
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RGLGV              ! 
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_GAMMAGV            !
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RSMINGV            ! Understory minimum
-!                                                               ! stomatal resistance 
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_ROOT_EXTINCTIONGV  ! Understory Jackson coefficient
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_WRMAX_CFGV
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_LAIGV              ! Understory LAI
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_GNDLITTER          ! Ground litter coverage
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_Z0LITTER           ! Ground litter roughness length
-REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_ROOT_DEPTHGV       ! Understory root depth
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_H_VEG              ! Height of canopy vegetation
 !
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_TCOOL_TARGET ! cooling setpoint of indoor air
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_THEAT_TARGET ! heating setpoint of indoor air

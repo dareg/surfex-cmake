@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,&
+      SUBROUTINE HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OGLACIER,      &
                          OFLOOD, PTSTEP, PVEGTYPE,                          &
                          PRR, PSR, PLEV, PLETR, PLEG, PLES,                 &
                          PRUNOFFB, PWDRAIN,                                 &
@@ -7,7 +7,7 @@
                          PVEG, PLAI, PWRMAX, PMELT, PTAUICE, PLEGI,         &
                          PRUNOFFD, PSOILWGHT, KLAYER_HORT, KLAYER_DUN,      &
                          PPSNV, PPSNG,                                      &
-                         PSNOW_THRUFAL, PEVAPCOR, PSUBVCOR,                 &
+                         PSNOW_THRUFAL, PEVAPCOR,                           &
                          PWR, PSOILHCAPZ,                                   &
                          PSNOWSWE, PSNOWALB, PSNOWRHO,                      &
                          PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,           &
@@ -18,9 +18,7 @@
                          HKSAT, HRAIN, HHORT, PMUF, PFSAT, PKSAT_ICE,       &
                          PD_ICE, PHORTON, PDRIP, PFFG, PFFV , PFFLOOD,      &
                          PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,   &
-                         PIRRIG_GR, PQSB, PFWTD, PWTD,                      &
-                         PDELHEATG, PDELHEATG_SFC,                          &
-                         PDELPHASEG, PDELPHASEG_SFC                         )
+                         PIRRIG_GR, PQSB, PFWTD, PWTD                       )
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -85,13 +83,12 @@
 !!                                         Subsurface runoff if SGH (DIF option only)
 !!                                         water table / surface coupling
 !!                  02/2013  (C. de Munck) specified irrigation rate of ground added
-!!                  10/2014  (A. Boone)    MEB added
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT, XLMTT
+USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
@@ -137,9 +134,6 @@ LOGICAL, INTENT(IN)                :: OGLACIER ! True = Over permanent snow and 
 !                                                initialise WGI=WSAT,
 !                                                Hsnow>=10m and allow 0.8<SNOALB<0.85
 !                                                False = No specific treatment
-!
-LOGICAL, INTENT(IN)                :: OMEB   ! True  = patch with multi-energy balance 
-!                                            ! False = patch with classical (composite) ISBA 
 !
 LOGICAL, INTENT(IN)                :: OFLOOD ! Flood scheme 
 !
@@ -187,14 +181,11 @@ REAL, DIMENSION(:), INTENT(IN)    :: PTAUICE, PLEGI
 !                                                phase changes (s) 
 !                                    PLEGI   = surface soil ice sublimation 
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PSNOW_THRUFAL, PEVAPCOR, PSUBVCOR
+REAL, DIMENSION(:), INTENT(IN)    :: PSNOW_THRUFAL, PEVAPCOR
 !                                    PSNOW_THRUFAL = rate that liquid water leaves snow pack: 
 !                                               *ISBA-ES* [kg/(m2 s)]
 !                                    PEVAPCOR = correction if evaporation from snow exceeds
 !                                               actual amount on the surface [kg/(m2 s)]
-!                                    PSUBVCOR = correction if sublimation from snow intercepted 
-!                                               on the MEB canopy exceeds snow available as it 
-!                                               disappears [kg/(m2 s)]
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PPS, PF2                                       
 !                                    PPS  = surface pressure (Pa)
@@ -237,10 +228,6 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PWGI, PWG
 INTEGER, DIMENSION(:), INTENT(IN) :: KWG_LAYER  
 !                                    KWG_LAYER = Number of soil moisture layers (DIF option)
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PDELHEATG, PDELHEATG_SFC
-!                                      PDELHEATG_SFC = change in heat storage of the surface soil layer over the current time step (W m-2)
-!                                      PDELHEATG     = change in heat storage of the entire soil column over the current time step (W m-2)
-!
 REAL, DIMENSION(:), INTENT(INOUT) :: PWR, PSNOWSWE, PSNOWALB, PSNOWRHO
 REAL, DIMENSION(:), INTENT(INOUT) :: PMELT
 REAL, DIMENSION(:), INTENT(OUT)   :: PDRAIN, PRUNOFF
@@ -251,10 +238,8 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PDRAIN, PRUNOFF
 !                                      PSNOWALB = albedo of the snow at 't+dt'
 !                                      PSNOWRHO = density of the snow at 't+dt' 
 !                                      PMELT = melting rate of the snow
-!
-REAL, DIMENSION(:), INTENT(OUT)   :: PDELPHASEG, PDELPHASEG_SFC
-!                                     PDELPHASEG     = latent heating due to soil freeze-thaw in the entire soil column  (W m-2)
-!                                     PDELPHASEG_SFC = latent heating due to soil freeze-thaw in the surface soil layer  (W m-2)
+!                                      PDRAIN = drainage (kg/m2/s)
+!                                      PRUNOFF = runoff  (kg/m2/s)
 !
 !
 REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG
@@ -262,7 +247,7 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PWATSUP
 REAL   ,DIMENSION(:),INTENT(IN)    :: PTHRESHOLD
 LOGICAL,DIMENSION(:),INTENT(INOUT) :: LIRRIDAY
 LOGICAL,DIMENSION(:),INTENT(IN)    :: LIRRIGATE
-REAL   ,DIMENSION(:),INTENT(INOUT) :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
+REAL   ,DIMENSION(:),INTENT(OUT)   :: PIRRIG_FLUX ! irrigation rate (kg/m2/s)
 REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/s)
 !
 !
@@ -289,8 +274,8 @@ REAL, DIMENSION(:),  INTENT(INOUT):: PFSAT    !Topmodel/dt92 saturated fraction
 !
 REAL, DIMENSION(:),  INTENT(OUT)  :: PHORTON   !Horton runoff (kg/m2/s)
 !
-REAL, DIMENSION(:),  INTENT(INOUT) :: PDRIP    !Dripping from the vegetation (kg/m2/s)
-REAL, DIMENSION(:),  INTENT(INOUT) :: PRRVEG   !Precip. intercepted by vegetation (kg/m2/s)
+REAL, DIMENSION(:),  INTENT(OUT)   :: PDRIP    !Dripping from the vegetation (kg/m2/s)
+REAL, DIMENSION(:),  INTENT(OUT)   :: PRRVEG   !Precip. intercepted by vegetation (kg/m2/s)
 !
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFG,PFFV
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFLOOD  !Floodplain effective fraction
@@ -348,10 +333,6 @@ REAL, DIMENSION(SIZE(PVEG))    :: ZWGI_EXCESS
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZQSAT, ZQSATI, ZTI, ZPS
 !                                           For specific humidity at saturation computation (ISBA-DIF)
 !
-REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZWGI0
-!                                      ZWGI0 = initial soil ice content (m3 m-3) before update
-!                                              for budget diagnostics     
-!
 !*      0.3    declarations of local parameters
 !
 REAL, PARAMETER             :: ZINSOLFRZ_VEG = 0.20  ! (-)       Vegetation insolation coefficient
@@ -374,6 +355,7 @@ ZTSTEP = 0.0
 ZPG(:)           = 0.0
 ZPG_MELT(:)      = 0.0
 ZDUNNE(:)        = 0.0
+ZEVAPCOR(:)      = 0.0
 !
 ZWSAT_AVG(:)     = 0.0
 ZWWILT_AVG(:)    = 0.0
@@ -393,47 +375,21 @@ PRUNOFF(:)       = 0.
 PHORTON(:)       = 0.
 PQSB   (:)       = 0.
 !
-PDELPHASEG(:)    = 0.0
-PDELPHASEG_SFC(:)= 0.0
-ZWGI0(:,:)       = 0.0
-!
 ! Initialize evaporation components: variable definitions
-! depend on snow or explicit canopy scheme:
+! depend on snow scheme:
 !
-IF(OMEB)THEN
-!
-! MEB uses explicit snow scheme by default, but fluxes already aggregated
-! for snow and floods so no need to multiply by fractions here. 
-!
+IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO' .OR. HISBA == 'DIF')THEN
+   ZLEV(:)          = (1.0-PPSNV(:)-PFFV(:)) * PLEV(:)
+   ZLETR(:)         = (1.0-PPSNV(:)-PFFV(:)) * PLETR(:)
+   ZLEG(:)          = (1.0-PPSNG(:)-PFFG(:)) * PLEG(:)
+   ZLEGI(:)         = (1.0-PPSNG(:)-PFFG(:)) * PLEGI(:)
+   ZPSNV(:)         = 0.0
+ELSE
    ZLEV(:)          = PLEV(:)
    ZLETR(:)         = PLETR(:)
    ZLEG(:)          = PLEG(:)
    ZLEGI(:)         = PLEGI(:)
-   ZPSNV(:)         = 0.0
-!
-   ZEVAPCOR(:)      = PEVAPCOR(:) + PSUBVCOR(:)
-!
-ELSE
-!
-! Initialize evaporation components: variable definitions
-! depend on snow scheme:
-!
-   IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO' .OR. HISBA == 'DIF')THEN
-      ZLEV(:)          = (1.0-PPSNV(:)-PFFV(:)) * PLEV(:)
-      ZLETR(:)         = (1.0-PPSNV(:)-PFFV(:)) * PLETR(:)
-      ZLEG(:)          = (1.0-PPSNG(:)-PFFG(:)) * PLEG(:)
-      ZLEGI(:)         = (1.0-PPSNG(:)-PFFG(:)) * PLEGI(:)
-      ZPSNV(:)         = 0.0
-   ELSE
-      ZLEV(:)          = PLEV(:)
-      ZLETR(:)         = PLETR(:)
-      ZLEG(:)          = PLEG(:)
-      ZLEGI(:)         = PLEGI(:)
-      ZPSNV(:)         = PPSNV(:)+PFFV(:)
-   ENDIF
-!
-   ZEVAPCOR(:)         = PEVAPCOR(:) 
-
+   ZPSNV(:)         = PPSNV(:)+PFFV(:)
 ENDIF
 !
 ! Initialize average soil hydrological parameters
@@ -462,41 +418,24 @@ END IF
 !*       1.     EVOLUTION OF THE EQUIVALENT WATER CONTENT Wr
 !               --------------------------------------------
 !
-!
-!
-IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
-!
-   PIRRIG_FLUX(:)=0.0
-!
 !* add irrigation over vegetation to liquid precipitation (rr)
 !
+PIRRIG_FLUX(:)=0.0
 !
-   IF (SIZE(LIRRIGATE)>0) THEN
-      WHERE (LIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
-         PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
-         ZRR        (:) = ZRR(:) + PWATSUP(:) / XDAY
-         LIRRIDAY   (:) = .TRUE.           
-      END WHERE
-   ENDIF
+IF (SIZE(LIRRIGATE)>0) THEN
+   WHERE (LIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
+      PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
+      ZRR        (:) = ZRR(:) + PWATSUP(:) / XDAY
+      LIRRIDAY   (:) = .TRUE.           
+   END WHERE
+ENDIF
 !
 !* interception reservoir and dripping computation
 !
-   CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
-                   ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
-                   PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
+ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
+                 ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
+                 PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
 !
-!
-!
-ELSE
-!
-! For MEB case, interception interactions already computed and PRR represents
-! water falling (drip and not intercepted by vegetation) outside of snow covered
-! areas. Part for snow covered areas (net outflow at base of snowpack) accounted
-! for in PSNOW_THRUFAL.
-!
-   ZPG(:) = PRR(:)
-!
-ENDIF
 !
 !* add irrigation over ground to potential soil infiltration (pg)
 !
@@ -600,9 +539,6 @@ ELSEWHERE
     ZKSFC_IVEG(:) = 1.0 ! No vegetation
 ENDWHERE
 !
-!
-ZWGI0 (:,:) = PWGI(:,:) ! save initial ice content before phase changes and sublimation
-!
 IF (HISBA=='DIF') THEN                
 !
   INI = SIZE(PD_G(:,:),1)
@@ -640,37 +576,23 @@ IF (HISBA=='DIF') THEN
 !
   DO JDT = 1,INDT
 !                      
-     CALL HYDRO_SOILDIF(HRUNOFF, HHORT, ZTSTEP,                     &
+    CALL HYDRO_SOILDIF(HRUNOFF, HHORT, ZTSTEP,                      &
                 PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,            &
                 PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG, ZEVAPCOR,     &
                 PF2WGHT, PWG, PWGI, PTG, PPS, ZQSAT, ZQSATI,        &
                 ZDRAIN, ZHORTON, PFSAT, KWG_LAYER, INL,             &
                 KLAYER_HORT, PTOPQS, ZQSB, PFWTD, PWTD              )
 !
-     CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,    &
+    CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,     &
                      PSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF,    &
                      PTG, PWGI, PWG, KWG_LAYER,              &
                      PDZG,  ZWGI_EXCESS                      )
 !
-     PDRAIN (:)  = PDRAIN (:) + (ZDRAIN(:)+ZWGI_EXCESS(:))/REAL(INDT)
-     PQSB   (:)  = PQSB   (:) + ZQSB   (:)/REAL(INDT)
-     PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(INDT)
+    PDRAIN (:)  = PDRAIN (:) + (ZDRAIN(:)+ZWGI_EXCESS(:))/REAL(INDT)
+    PQSB   (:)  = PQSB   (:) + ZQSB   (:)/REAL(INDT)
+    PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(INDT)
 !
-! Output diagnostics:
-! Compute latent heating from phase change only in surface layer and total soil column,
-! then adjust surface and total soil heat content to maintain balance.
-!
-     PDELPHASEG_SFC(:)    = (PWGI(:,1)-ZWGI0(:,1))*(XLMTT*XRHOLW/PTSTEP)*PDZG(:,1) + ZLEGI(:)*(XRHOLW*XLSTT)
-     PDELPHASEG(:)        = PDELPHASEG_SFC(:)
-     DO JL=2,INL
-        DO JJ=1,INI
-           PDELPHASEG(JJ) = PDELPHASEG(JJ) + (PWGI(JJ,JL)-ZWGI0(JJ,JL))*(XLMTT*XRHOLW/PTSTEP)*PDZG(JJ,JL)
-        ENDDO
-     ENDDO
-     PDELHEATG_SFC(:)     = PDELHEATG_SFC(:) + PDELPHASEG_SFC(:)
-     PDELHEATG(:)         = PDELHEATG(:)     + PDELPHASEG(:)
-
-  ENDDO
+  ENDDO  
 !
 ELSE
 !
@@ -683,7 +605,7 @@ ELSE
 !
     CALL HYDRO_SOIL(HISBA,                                           &
                     ZTSTEP,                                          &
-                    ZLETR, ZLEG, ZPG, ZEVAPCOR,                      &
+                    ZLETR, ZLEG, ZPG, PEVAPCOR,                      &
                     PWDRAIN,                                         &
                     PC1, PC2, PC3, PC4B, PC4REF, PWGEQ,              &
                     PD_G(:,2), ZDG3, ZWSAT_AVG, ZWFC_AVG,            &
@@ -697,15 +619,6 @@ ELSE
     PRUNOFF(:)  = PRUNOFF(:) + ZRUNOFF(:)/REAL(INDT)
 !    
   ENDDO
-!
-! Output diagnostics:
-! Compute latent heating from phase change only in surface layer and total soil column,
-! then adjust surface and total soil heat content to maintain balance.
-!
-  PDELPHASEG_SFC(:)    = (PWGI(:,1)-ZWGI0(:,1))*(XLMTT*XRHOLW/PTSTEP)*PD_G(:,1) + ZLEGI(:)
-  PDELPHASEG(:)        = (PWGI(:,2)-ZWGI0(:,2))*(XLMTT*XRHOLW/PTSTEP)*PD_G(:,2)
-  PDELHEATG_SFC(:)     = PDELHEATG_SFC(:) + PDELPHASEG_SFC(:)
-  PDELHEATG(:)         = PDELHEATG(:)     + PDELPHASEG(:)
 !
   IF (HISBA == '3-L') PWG(:,3) = ZWG3(:)
 !

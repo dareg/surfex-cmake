@@ -383,15 +383,15 @@ IF (LSURF_MISC_BUDGET) THEN
     !        3.2    Snow fractions
     !               --------------
     !
-    YRECFM='PSNG_P'
+    YRECFM='PSNG'
     YCOMMENT='snow fraction per patch over ground '
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDPSNG(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='PSNV_P'
+    YRECFM='PSNV'
     YCOMMENT='snow fraction per patch over vegetation'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDPSNV(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YRECFM='PSN_P'
+    YRECFM='PSN'
     YCOMMENT='total snow fraction per patch'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XDPSN(:,:),IRESP,HCOMMENT=YCOMMENT)
     !

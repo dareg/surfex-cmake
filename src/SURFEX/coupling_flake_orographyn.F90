@@ -177,7 +177,7 @@ ELSE
   ZTA  (:) = PTA  (:)
   ZQA  (:) = PQA  (:)
   ZPS  (:) = PPS  (:)
-  ZPA  (:) = PPA  (:)
+  ZPA  (:) = PPS  (:)
   ZRHOA(:) = PRHOA(:)
   ZLW  (:) = PLW  (:)
   ZRAIN(:) = PRAIN(:)

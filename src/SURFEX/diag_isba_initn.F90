@@ -49,7 +49,6 @@
 !!                             restart mode)
 !       B. decharme 04/2013 : Add new diag for coupling
 !                             Delete XAVG_TSRAD (because same than XTSRAD_NAT)
-!!      P. Samuelsson 10/2014: MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.0    DECLARATIONS
@@ -58,8 +57,7 @@
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, LFLOOD, CHORT, LGLACIER,  &
-                                LTR_ML, TSNOW, CISBA, XABC, CPHOTO, CRUNOFF,     &
-                                LMEB_PATCH
+                                LTR_ML, TSNOW, CISBA, XABC, CPHOTO, CRUNOFF
 USE MODD_CH_ISBA_n,      ONLY : LCH_BIO_FLUX, NBEQ 
 USE MODD_TYPE_DATE_SURF
 USE MODD_AGRI,           ONLY : LAGRIP
@@ -82,8 +80,7 @@ USE MODD_DIAG_ISBA_n,    ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,           
                                 XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,      &
                                 XAVG_FMUC, XAVG_FMVC, XAVG_TS,                   &
                                 XAVG_HU2M_MIN, XAVG_HU2M_MAX, XWIND10M,          &
-                                XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2,      &
-                                XT2M_MIN, XT2M_MAX  
+                                XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_SFCO2  
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGETC,&
                                   LWATER_BUDGET,                                   &
@@ -93,7 +90,7 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGE
                                   XLEG, XLEGC, XAVG_LEG, XAVG_LEGC,                &
                                   XLEGI, XLEGIC, XAVG_LEGI, XAVG_LEGIC,            &
                                   XLEV, XLEVC, XAVG_LEV, XAVG_LEVC,                &
-                                  XLES, XLESAC, XAVG_LES, XAVG_LESAC,                &
+                                  XLES, XLESC, XAVG_LES, XAVG_LESC,                &
                                   XLESL, XLESLC, XAVG_LESL, XAVG_LESLC,            &
                                   XLER, XLERC, XAVG_LER, XAVG_LERC,                &
                                   XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,            &
@@ -123,59 +120,7 @@ USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_EVAP_BUDGET, LSURF_BUDGETC, LRESET_BUDGE
                                   XDWR,XDWRC,XAVG_DWR,XAVG_DWRC,                   &
                                   XDSWE,XDSWEC,XAVG_DSWE,XAVG_DSWEC,               &
                                   XRAINFALL,XRAINFALLC,XSNOWFALL,XSNOWFALLC,       &
-                                  XWATBUD,XWATBUDC,XAVG_WATBUD,XAVG_WATBUDC,       &
-                                  XLEVCV, XLESC, XLETRGV,                          &
-                                  XAVG_LEVCV, XAVG_LESC, XAVG_LETRGV,              &
-                                  XLETRCV, XLERGV,XLERCV,                          &
-                                  XAVG_LETRCV, XAVG_LERGV,XAVG_LERCV,              &
-                                  XLE_C_A, XLE_V_C,                                &
-                                  XAVG_LE_C_A, XAVG_LE_V_C,                        &
-                                  XLE_G_C, XLE_N_C,                                &
-                                  XAVG_LE_G_C, XAVG_LE_N_C,                        &
-                                  XLEVCVC, XLESCC, XLETRGVC,                       &
-                                  XAVG_LEVCVC, XAVG_LESCC, XAVG_LETRGVC,           &
-                                  XLETRCVC, XLERGVC,XLERCVC,                       &
-                                  XAVG_LETRCVC, XAVG_LERGVC,XAVG_LERCVC,           &
-                                  XLE_C_AC, XLE_V_CC,                              &
-                                  XAVG_LE_C_AC, XAVG_LE_V_CC,                      &
-                                  XLE_G_CC, XLE_N_CC,                              &
-                                  XAVG_LE_G_CC, XAVG_LE_N_CC,                      &
-                                  XSWNET_V, XSWNET_G,                              &
-                                  XAVG_SWNET_V, XAVG_SWNET_G,                      &
-                                  XSWNET_N, XSWNET_NS,                             &
-                                  XAVG_SWNET_N, XAVG_SWNET_NS,                     &
-                                  XLWNET_V, XLWNET_G,                              &
-                                  XAVG_LWNET_V, XAVG_LWNET_G,                      &
-                                  XLWNET_N,                                        &
-                                  XAVG_LWNET_N,                                    &
-                                  XSWDOWN_GN, XLWDOWN_GN,                          &
-                                  XAVG_SWDOWN_GN, XAVG_LWDOWN_GN,                  &
-                                  XH_V_C, XH_G_C,                                  &
-                                  XAVG_H_V_C, XAVG_H_G_C,                          &
-                                  XH_C_A, XH_N_C,                                  &
-                                  XAVG_H_C_A, XAVG_H_N_C,                          &
-                                  XSR_GN, XMELTCV,                                 &
-                                  XAVG_SR_GN, XAVG_MELTCV,                         &
-                                  XFRZCV,                                          &
-                                  XAVG_FRZCV,                                      &
-                                  XSWNET_VC, XSWNET_GC,                            &
-                                  XAVG_SWNET_VC, XAVG_SWNET_GC,                    &
-                                  XSWNET_NC, XSWNET_NSC,                           &
-                                  XAVG_SWNET_NC, XAVG_SWNET_NSC,                   &
-                                  XLWNET_VC, XLWNET_GC,                            &
-                                  XAVG_LWNET_VC, XAVG_LWNET_GC,                    &
-                                  XLWNET_NC,                                       &
-                                  XAVG_LWNET_NC,                                   &
-                                  XSWDOWN_GNC, XLWDOWN_GNC,                        &
-                                  XAVG_SWDOWN_GNC, XAVG_LWDOWN_GNC,                &
-                                  XH_V_CC, XH_G_CC,                                &
-                                  XAVG_H_V_CC, XAVG_H_G_CC,                        &
-                                  XH_C_AC, XH_N_CC,                                &
-                                  XAVG_H_C_AC, XAVG_H_N_CC,                        &
-                                  XSR_GNC, XMELTCVC,                               &
-                                  XAVG_SR_GNC, XAVG_MELTCVC,                       &
-                                  XFRZCVC,                                         &
-                                  XAVG_FRZCVC
+                                  XWATBUD,XWATBUDC,XAVG_WATBUD,XAVG_WATBUDC
 ! 
 USE MODD_DIAG_MISC_ISBA_n, ONLY : LSURF_MISC_BUDGET, LSURF_MISC_DIF,              &
                                   XHV,  XSWI, XTSWI, XTWSNOW, XTDSNOW, XTTSNOW,   &
@@ -216,7 +161,6 @@ INTEGER, INTENT(IN)         :: KSW       ! spectral bands
 !
 INTEGER           :: IVERSION, IBUG
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
  CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
  CHARACTER(LEN=4) :: YREC2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -226,8 +170,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* surface energy budget
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_ISBA_INIT_N',0,ZHOOK_HANDLE)
-!
-ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
 !
 IF (LSURF_BUDGET) THEN
   ALLOCATE(XAVG_RN           (KLU))
@@ -422,177 +364,6 @@ IF (LSURF_EVAP_BUDGET) THEN
   XLE_FLOOD      = XUNDEF
   XLEI_FLOOD     = XUNDEF
   !
-  IF (ISIZE_LMEB_PATCH>0) THEN
-    ALLOCATE(XAVG_LEVCV  (KLU))
-    ALLOCATE(XAVG_LESC   (KLU))
-    ALLOCATE(XAVG_LETRGV (KLU))
-    ALLOCATE(XAVG_LETRCV (KLU))
-    ALLOCATE(XAVG_LERGV  (KLU))
-    ALLOCATE(XAVG_LERCV  (KLU))
-    ALLOCATE(XAVG_LE_C_A (KLU))
-    ALLOCATE(XAVG_LE_V_C (KLU))
-    ALLOCATE(XAVG_LE_G_C (KLU))
-    ALLOCATE(XAVG_LE_N_C (KLU))
-    !
-    ALLOCATE(XAVG_SWNET_V    (KLU))
-    ALLOCATE(XAVG_SWNET_G    (KLU))
-    ALLOCATE(XAVG_SWNET_N    (KLU))
-    ALLOCATE(XAVG_SWNET_NS   (KLU))
-    ALLOCATE(XAVG_LWNET_V    (KLU))
-    ALLOCATE(XAVG_LWNET_G    (KLU))
-    ALLOCATE(XAVG_LWNET_N    (KLU))
-    ALLOCATE(XAVG_SWDOWN_GN  (KLU))
-    ALLOCATE(XAVG_LWDOWN_GN  (KLU))
-    ALLOCATE(XAVG_H_V_C      (KLU))
-    ALLOCATE(XAVG_H_G_C      (KLU))
-    ALLOCATE(XAVG_H_C_A      (KLU))
-    ALLOCATE(XAVG_H_N_C      (KLU))
-    ALLOCATE(XAVG_SR_GN      (KLU))
-    ALLOCATE(XAVG_MELTCV     (KLU))
-    ALLOCATE(XAVG_FRZCV      (KLU))
-!
-    XAVG_LEVCV         = XUNDEF
-    XAVG_LESC          = XUNDEF
-    XAVG_LETRGV        = XUNDEF
-    XAVG_LETRCV        = XUNDEF
-    XAVG_LERGV         = XUNDEF
-    XAVG_LERCV         = XUNDEF
-    XAVG_LE_C_A        = XUNDEF
-    XAVG_LE_V_C        = XUNDEF
-    XAVG_LE_G_C        = XUNDEF
-    XAVG_LE_N_C        = XUNDEF
-    !
-    XAVG_SWNET_V       = XUNDEF
-    XAVG_SWNET_G       = XUNDEF
-    XAVG_SWNET_N       = XUNDEF
-    XAVG_SWNET_NS      = XUNDEF
-    XAVG_LWNET_V       = XUNDEF
-    XAVG_LWNET_G       = XUNDEF
-    XAVG_LWNET_N       = XUNDEF
-    XAVG_SWDOWN_GN     = XUNDEF
-    XAVG_LWDOWN_GN     = XUNDEF
-    XAVG_H_V_C         = XUNDEF
-    XAVG_H_G_C         = XUNDEF
-    XAVG_H_C_A         = XUNDEF
-    XAVG_H_N_C         = XUNDEF
-    XAVG_SR_GN         = XUNDEF
-    XAVG_MELTCV        = XUNDEF
-    XAVG_FRZCV         = XUNDEF
-    !
-    ALLOCATE(XLEVCV  (KLU,NPATCH))
-    ALLOCATE(XLESC   (KLU,NPATCH))
-!    ALLOCATE(XLETRGV (KLU,NPATCH))
-    ALLOCATE(XLETRCV (KLU,NPATCH))
-!    ALLOCATE(XLERGV  (KLU,NPATCH))
-    ALLOCATE(XLERCV  (KLU,NPATCH))
-    ALLOCATE(XLE_C_A (KLU,NPATCH))
-    ALLOCATE(XLE_V_C (KLU,NPATCH))
-    ALLOCATE(XLE_G_C (KLU,NPATCH))
-    ALLOCATE(XLE_N_C (KLU,NPATCH))
-    !
-    ALLOCATE(XSWNET_V    (KLU,NPATCH))
-    ALLOCATE(XSWNET_G    (KLU,NPATCH))
-    ALLOCATE(XSWNET_N    (KLU,NPATCH))
-    ALLOCATE(XSWNET_NS   (KLU,NPATCH))
-    ALLOCATE(XLWNET_V    (KLU,NPATCH))
-    ALLOCATE(XLWNET_G    (KLU,NPATCH))
-    ALLOCATE(XLWNET_N    (KLU,NPATCH))
-    ALLOCATE(XSWDOWN_GN  (KLU,NPATCH))
-    ALLOCATE(XLWDOWN_GN  (KLU,NPATCH))
-    ALLOCATE(XH_V_C      (KLU,NPATCH))
-    ALLOCATE(XH_G_C      (KLU,NPATCH))
-    ALLOCATE(XH_C_A      (KLU,NPATCH))
-    ALLOCATE(XH_N_C      (KLU,NPATCH))
-    ALLOCATE(XSR_GN      (KLU,NPATCH))
-    ALLOCATE(XMELTCV     (KLU,NPATCH))
-    ALLOCATE(XFRZCV      (KLU,NPATCH))
-!
-    XLEVCV         = XUNDEF
-    XLESC          = XUNDEF
-!    XLETRGV        = XUNDEF
-    XLETRCV        = XUNDEF
-!    XLERGV         = XUNDEF
-    XLERCV         = XUNDEF
-    XLE_C_A        = XUNDEF
-    XLE_V_C        = XUNDEF
-    XLE_G_C        = XUNDEF
-    XLE_N_C        = XUNDEF
-    !
-    XSWNET_V       = XUNDEF
-    XSWNET_G       = XUNDEF
-    XSWNET_N       = XUNDEF
-    XSWNET_NS      = XUNDEF
-    XLWNET_V       = XUNDEF
-    XLWNET_G       = XUNDEF
-    XLWNET_N       = XUNDEF
-    XSWDOWN_GN     = XUNDEF
-    XLWDOWN_GN     = XUNDEF
-    XH_V_C         = XUNDEF
-    XH_G_C         = XUNDEF
-    XH_C_A         = XUNDEF
-    XH_N_C         = XUNDEF
-    XSR_GN         = XUNDEF
-    XMELTCV        = XUNDEF
-    XFRZCV         = XUNDEF
-  ELSE
-    ALLOCATE(XAVG_LEVCV  (0))
-    ALLOCATE(XAVG_LESC   (0))
-    ALLOCATE(XAVG_LETRGV (0))
-    ALLOCATE(XAVG_LETRCV (0))
-    ALLOCATE(XAVG_LERGV  (0))
-    ALLOCATE(XAVG_LERCV  (0))
-    ALLOCATE(XAVG_LE_C_A (0))
-    ALLOCATE(XAVG_LE_V_C (0))
-    ALLOCATE(XAVG_LE_G_C (0))
-    ALLOCATE(XAVG_LE_N_C (0))
-    !
-    ALLOCATE(XAVG_SWNET_V    (0))
-    ALLOCATE(XAVG_SWNET_G    (0))
-    ALLOCATE(XAVG_SWNET_N    (0))
-    ALLOCATE(XAVG_SWNET_NS   (0))
-    ALLOCATE(XAVG_LWNET_V    (0))
-    ALLOCATE(XAVG_LWNET_G    (0))
-    ALLOCATE(XAVG_LWNET_N    (0))
-    ALLOCATE(XAVG_SWDOWN_GN  (0))
-    ALLOCATE(XAVG_LWDOWN_GN  (0))
-    ALLOCATE(XAVG_H_V_C      (0))
-    ALLOCATE(XAVG_H_G_C      (0))
-    ALLOCATE(XAVG_H_C_A      (0))
-    ALLOCATE(XAVG_H_N_C      (0))
-    ALLOCATE(XAVG_SR_GN      (0))
-    ALLOCATE(XAVG_MELTCV     (0))
-    ALLOCATE(XAVG_FRZCV      (0))
-!
-    ALLOCATE(XLEVCV  (0,0))
-    ALLOCATE(XLESC   (0,0))
-!    ALLOCATE(XLETRGV (0,0))
-    ALLOCATE(XLETRCV (0,0))
-!    ALLOCATE(XLERGV  (0,0))
-    ALLOCATE(XLERCV  (0,0))
-    ALLOCATE(XLE_C_A (0,0))
-    ALLOCATE(XLE_V_C (0,0))
-    ALLOCATE(XLE_G_C (0,0))
-    ALLOCATE(XLE_N_C (0,0))
-    !
-    ALLOCATE(XSWNET_V    (0,0))
-    ALLOCATE(XSWNET_G    (0,0))
-    ALLOCATE(XSWNET_N    (0,0))
-    ALLOCATE(XSWNET_NS   (0,0))
-    ALLOCATE(XLWNET_V    (0,0))
-    ALLOCATE(XLWNET_G    (0,0))
-    ALLOCATE(XLWNET_N    (0,0))
-    ALLOCATE(XSWDOWN_GN  (0,0))
-    ALLOCATE(XLWDOWN_GN  (0,0))
-    ALLOCATE(XH_V_C      (0,0))
-    ALLOCATE(XH_G_C      (0,0))
-    ALLOCATE(XH_C_A      (0,0))
-    ALLOCATE(XH_N_C      (0,0))
-    ALLOCATE(XSR_GN      (0,0))
-    ALLOCATE(XMELTCV     (0,0))
-    ALLOCATE(XFRZCV      (0,0))
-
-  ENDIF
-  !
   IF(LWATER_BUDGET)THEN
     !      
     ALLOCATE(XRAINFALL  (KLU))
@@ -705,62 +476,6 @@ ELSE
   ALLOCATE(XDWR   (0,0))
   ALLOCATE(XDSWE  (0,0))
   ALLOCATE(XWATBUD(0,0))
-  !
-  ALLOCATE(XAVG_LEVCV  (0))
-  ALLOCATE(XAVG_LESC   (0))
-  ALLOCATE(XAVG_LETRGV (0))
-  ALLOCATE(XAVG_LETRCV (0))
-  ALLOCATE(XAVG_LERGV  (0))
-  ALLOCATE(XAVG_LERCV  (0))
-  ALLOCATE(XAVG_LE_C_A (0))
-  ALLOCATE(XAVG_LE_V_C (0))
-  ALLOCATE(XAVG_LE_G_C (0))
-  ALLOCATE(XAVG_LE_N_C (0))
-  !
-  ALLOCATE(XAVG_SWNET_V    (0))
-  ALLOCATE(XAVG_SWNET_G    (0))
-  ALLOCATE(XAVG_SWNET_N    (0))
-  ALLOCATE(XAVG_SWNET_NS   (0))
-  ALLOCATE(XAVG_LWNET_V    (0))
-  ALLOCATE(XAVG_LWNET_G    (0))
-  ALLOCATE(XAVG_LWNET_N    (0))
-  ALLOCATE(XAVG_SWDOWN_GN  (0))
-  ALLOCATE(XAVG_LWDOWN_GN  (0))
-  ALLOCATE(XAVG_H_V_C      (0))
-  ALLOCATE(XAVG_H_G_C      (0))
-  ALLOCATE(XAVG_H_C_A      (0))
-  ALLOCATE(XAVG_H_N_C      (0))
-  ALLOCATE(XAVG_SR_GN      (0))
-  ALLOCATE(XAVG_MELTCV     (0))
-  ALLOCATE(XAVG_FRZCV      (0))
-!
-  ALLOCATE(XLEVCV  (0,0))
-  ALLOCATE(XLESC   (0,0))
-!  ALLOCATE(XLETRGV (0,0))
-  ALLOCATE(XLETRCV (0,0))
-!  ALLOCATE(XLERGV  (0,0))
-  ALLOCATE(XLERCV  (0,0))
-  ALLOCATE(XLE_C_A (0,0))
-  ALLOCATE(XLE_V_C (0,0))
-  ALLOCATE(XLE_G_C (0,0))
-  ALLOCATE(XLE_N_C (0,0))
-  !
-  ALLOCATE(XSWNET_V    (0,0))
-  ALLOCATE(XSWNET_G    (0,0))
-  ALLOCATE(XSWNET_N    (0,0))
-  ALLOCATE(XSWNET_NS   (0,0))
-  ALLOCATE(XLWNET_V    (0,0))
-  ALLOCATE(XLWNET_G    (0,0))
-  ALLOCATE(XLWNET_N    (0,0))
-  ALLOCATE(XSWDOWN_GN  (0,0))
-  ALLOCATE(XLWDOWN_GN  (0,0))
-  ALLOCATE(XH_V_C      (0,0))
-  ALLOCATE(XH_G_C      (0,0))
-  ALLOCATE(XH_C_A      (0,0))
-  ALLOCATE(XH_N_C      (0,0))
-  ALLOCATE(XSR_GN      (0,0))
-  ALLOCATE(XMELTCV     (0,0))
-  ALLOCATE(XFRZCV      (0,0))
   ! 
 END IF
 !
@@ -775,7 +490,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XAVG_LEGC       (KLU))
   ALLOCATE(XAVG_LEGIC      (KLU))
   ALLOCATE(XAVG_LEVC       (KLU))
-  ALLOCATE(XAVG_LESAC      (KLU))
+  ALLOCATE(XAVG_LESC       (KLU))
   ALLOCATE(XAVG_LESLC      (KLU))
   ALLOCATE(XAVG_LERC       (KLU))
   ALLOCATE(XAVG_LETRC      (KLU))
@@ -806,7 +521,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XLEGC       (KLU,NPATCH))
   ALLOCATE(XLEGIC      (KLU,NPATCH))
   ALLOCATE(XLEVC       (KLU,NPATCH))
-  ALLOCATE(XLESAC      (KLU,NPATCH))
+  ALLOCATE(XLESC       (KLU,NPATCH))
   ALLOCATE(XLESLC      (KLU,NPATCH))
   ALLOCATE(XLERC       (KLU,NPATCH))
   ALLOCATE(XLETRC      (KLU,NPATCH))
@@ -828,120 +543,6 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
   ALLOCATE(XPFLOODC    (KLU,NPATCH))
   ALLOCATE(XLE_FLOODC  (KLU,NPATCH))
   ALLOCATE(XLEI_FLOODC (KLU,NPATCH))
-  !
-  IF (ISIZE_LMEB_PATCH>0) THEN
-    ALLOCATE(XAVG_LEVCVC  (KLU))
-    ALLOCATE(XAVG_LESCC   (KLU))
-    ALLOCATE(XAVG_LETRGVC  (KLU))
-    ALLOCATE(XAVG_LETRCVC  (KLU))
-    ALLOCATE(XAVG_LERGVC   (KLU))
-    ALLOCATE(XAVG_LERCVC   (KLU))
-    ALLOCATE(XAVG_LE_C_AC  (KLU))
-    ALLOCATE(XAVG_LE_V_CC  (KLU))
-    ALLOCATE(XAVG_LE_G_CC  (KLU))
-    ALLOCATE(XAVG_LE_N_CC  (KLU))
-    !
-    ALLOCATE(XAVG_SWNET_VC    (KLU))
-    ALLOCATE(XAVG_SWNET_GC    (KLU))
-    ALLOCATE(XAVG_SWNET_NC    (KLU))
-    ALLOCATE(XAVG_SWNET_NSC   (KLU))
-    ALLOCATE(XAVG_LWNET_VC    (KLU))
-    ALLOCATE(XAVG_LWNET_GC    (KLU))
-    ALLOCATE(XAVG_LWNET_NC    (KLU))
-    ALLOCATE(XAVG_SWDOWN_GNC  (KLU))
-    ALLOCATE(XAVG_LWDOWN_GNC  (KLU))
-    ALLOCATE(XAVG_H_V_CC      (KLU))
-    ALLOCATE(XAVG_H_G_CC      (KLU))
-    ALLOCATE(XAVG_H_C_AC      (KLU))
-    ALLOCATE(XAVG_H_N_CC      (KLU))
-    ALLOCATE(XAVG_SR_GNC      (KLU))
-    ALLOCATE(XAVG_MELTCVC     (KLU))
-    ALLOCATE(XAVG_FRZCVC      (KLU))
-    !
-    ALLOCATE(XLEVCVC  (KLU,NPATCH))
-    ALLOCATE(XLESCC   (KLU,NPATCH))
-!    ALLOCATE(XLETRGVC  (KLU,NPATCH))
-    ALLOCATE(XLETRCVC  (KLU,NPATCH))
-!    ALLOCATE(XLERGVC   (KLU,NPATCH))
-    ALLOCATE(XLERCVC   (KLU,NPATCH))
-    ALLOCATE(XLE_C_AC  (KLU,NPATCH))
-    ALLOCATE(XLE_V_CC  (KLU,NPATCH))
-    ALLOCATE(XLE_G_CC  (KLU,NPATCH))
-    ALLOCATE(XLE_N_CC  (KLU,NPATCH))
-    !
-    ALLOCATE(XSWNET_VC    (KLU,NPATCH))
-    ALLOCATE(XSWNET_GC    (KLU,NPATCH))
-    ALLOCATE(XSWNET_NC    (KLU,NPATCH))
-    ALLOCATE(XSWNET_NSC   (KLU,NPATCH))
-    ALLOCATE(XLWNET_VC    (KLU,NPATCH))
-    ALLOCATE(XLWNET_GC    (KLU,NPATCH))
-    ALLOCATE(XLWNET_NC    (KLU,NPATCH))
-    ALLOCATE(XSWDOWN_GNC  (KLU,NPATCH))
-    ALLOCATE(XLWDOWN_GNC  (KLU,NPATCH))
-    ALLOCATE(XH_V_CC      (KLU,NPATCH))
-    ALLOCATE(XH_G_CC      (KLU,NPATCH))
-    ALLOCATE(XH_C_AC      (KLU,NPATCH))
-    ALLOCATE(XH_N_CC      (KLU,NPATCH))
-    ALLOCATE(XSR_GNC      (KLU,NPATCH))
-    ALLOCATE(XMELTCVC     (KLU,NPATCH))
-    ALLOCATE(XFRZCVC      (KLU,NPATCH))
-  ELSE
-    ALLOCATE(XAVG_LEVCVC  (0))
-    ALLOCATE(XAVG_LESCC   (0))
-    ALLOCATE(XAVG_LETRGVC  (0))
-    ALLOCATE(XAVG_LETRCVC  (0))
-    ALLOCATE(XAVG_LERGVC   (0))
-    ALLOCATE(XAVG_LERCVC   (0))
-    ALLOCATE(XAVG_LE_C_AC  (0))
-    ALLOCATE(XAVG_LE_V_CC  (0))
-    ALLOCATE(XAVG_LE_G_CC  (0))
-    ALLOCATE(XAVG_LE_N_CC  (0))
-    !
-    ALLOCATE(XAVG_SWNET_VC    (0))
-    ALLOCATE(XAVG_SWNET_GC    (0))
-    ALLOCATE(XAVG_SWNET_NC    (0))
-    ALLOCATE(XAVG_SWNET_NSC   (0))
-    ALLOCATE(XAVG_LWNET_VC    (0))
-    ALLOCATE(XAVG_LWNET_GC    (0))
-    ALLOCATE(XAVG_LWNET_NC    (0))
-    ALLOCATE(XAVG_SWDOWN_GNC  (0))
-    ALLOCATE(XAVG_LWDOWN_GNC  (0))
-    ALLOCATE(XAVG_H_V_CC      (0))
-    ALLOCATE(XAVG_H_G_CC      (0))
-    ALLOCATE(XAVG_H_C_AC      (0))
-    ALLOCATE(XAVG_H_N_CC      (0))
-    ALLOCATE(XAVG_SR_GNC      (0))
-    ALLOCATE(XAVG_MELTCVC     (0))
-    ALLOCATE(XAVG_FRZCVC      (0))
-    !
-    ALLOCATE(XLEVCVC  (0,0))
-    ALLOCATE(XLESCC   (0,0))
-!    ALLOCATE(XLETRGVC  (0,0))
-    ALLOCATE(XLETRCVC  (0,0))
-!    ALLOCATE(XLERGVC   (0,0))
-    ALLOCATE(XLERCVC   (0,0))
-    ALLOCATE(XLE_C_AC  (0,0))
-    ALLOCATE(XLE_V_CC  (0,0))
-    ALLOCATE(XLE_G_CC  (0,0))
-    ALLOCATE(XLE_N_CC  (0,0))
-    !
-    ALLOCATE(XSWNET_VC    (0,0))
-    ALLOCATE(XSWNET_GC    (0,0))
-    ALLOCATE(XSWNET_NC    (0,0))
-    ALLOCATE(XSWNET_NSC   (0,0))
-    ALLOCATE(XLWNET_VC    (0,0))
-    ALLOCATE(XLWNET_GC    (0,0))
-    ALLOCATE(XLWNET_NC    (0,0))
-    ALLOCATE(XSWDOWN_GNC  (0,0))
-    ALLOCATE(XLWDOWN_GNC  (0,0))
-    ALLOCATE(XH_V_CC      (0,0))
-    ALLOCATE(XH_G_CC      (0,0))
-    ALLOCATE(XH_C_AC      (0,0))
-    ALLOCATE(XH_N_CC      (0,0))
-    ALLOCATE(XSR_GNC      (0,0))
-    ALLOCATE(XMELTCVC     (0,0))
-    ALLOCATE(XFRZCVC      (0,0))
-  ENDIF
   !
   ALLOCATE(XAVG_SWDC        (KLU))
   ALLOCATE(XAVG_SWUC        (KLU))
@@ -1004,7 +605,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XAVG_LEGC        = 0.0
       XAVG_LEGIC       = 0.0
       XAVG_LEVC        = 0.0
-      XAVG_LESAC       = 0.0
+      XAVG_LESC        = 0.0
       XAVG_LESLC       = 0.0
       XAVG_LERC        = 0.0
       XAVG_LETRC       = 0.0
@@ -1035,7 +636,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XLEGC        = 0.0 
       XLEGIC       = 0.0
       XLEVC        = 0.0
-      XLESAC       = 0.0
+      XLESC        = 0.0
       XLESLC       = 0.0
       XLERC        = 0.0
       XLETRC       = 0.0
@@ -1057,64 +658,6 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XPFLOODC     = 0.0
       XLE_FLOODC   = 0.0
       XLEI_FLOODC  = 0.0
-      !
-      IF (ISIZE_LMEB_PATCH>0) THEN
-        XAVG_LEVCVC    = 0.0
-        XAVG_LESCC     = 0.0
-        XAVG_LETRGVC   = 0.0
-        XAVG_LETRCVC   = 0.0
-        XAVG_LERGVC    = 0.0
-        XAVG_LERCVC    = 0.0
-        XAVG_LE_C_AC   = 0.0
-        XAVG_LE_V_CC   = 0.0
-        XAVG_LE_G_CC   = 0.0
-        XAVG_LE_N_CC   = 0.0
-        !
-        XAVG_SWNET_VC     = 0.0
-        XAVG_SWNET_GC     = 0.0
-        XAVG_SWNET_NC     = 0.0
-        XAVG_SWNET_NSC    = 0.0
-        XAVG_LWNET_VC     = 0.0
-        XAVG_LWNET_GC     = 0.0
-        XAVG_LWNET_NC     = 0.0
-        XAVG_SWDOWN_GNC   = 0.0
-        XAVG_LWDOWN_GNC   = 0.0
-        XAVG_H_V_CC       = 0.0
-        XAVG_H_G_CC       = 0.0
-        XAVG_H_C_AC       = 0.0
-        XAVG_H_N_CC       = 0.0
-        XAVG_SR_GNC       = 0.0
-        XAVG_MELTCVC      = 0.0
-        XAVG_FRZCVC       = 0.0
-!
-        XLEVCVC    = 0.0
-        XLESCC     = 0.0
-!        XLETRGVC   = 0.0
-        XLETRCVC   = 0.0
-!        XLERGVC    = 0.0
-        XLERCVC    = 0.0
-        XLE_C_AC   = 0.0
-        XLE_V_CC   = 0.0
-        XLE_G_CC   = 0.0
-        XLE_N_CC   = 0.0
-        !
-        XSWNET_VC     = 0.0
-        XSWNET_GC     = 0.0
-        XSWNET_NC     = 0.0
-        XSWNET_NSC    = 0.0
-        XLWNET_VC     = 0.0
-        XLWNET_GC     = 0.0
-        XLWNET_NC     = 0.0
-        XSWDOWN_GNC   = 0.0
-        XLWDOWN_GNC   = 0.0
-        XH_V_CC       = 0.0
-        XH_G_CC       = 0.0
-        XH_C_AC       = 0.0
-        XH_N_CC       = 0.0
-        XSR_GNC       = 0.0
-        XMELTCVC      = 0.0
-        XFRZCVC       = 0.0
-      ENDIF
       !
       XAVG_SWDC = 0.0
       XAVG_SWUC = 0.0
@@ -1162,7 +705,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XAVG_LEGC        = 0.0
       XAVG_LEGIC       = 0.0
       XAVG_LEVC        = 0.0
-      XAVG_LESAC       = 0.0
+      XAVG_LESC        = 0.0
       XAVG_LESLC       = 0.0
       XAVG_LERC        = 0.0
       XAVG_LETRC       = 0.0
@@ -1185,64 +728,6 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XAVG_LE_FLOODC   = 0.0
       XAVG_LEI_FLOODC  = 0.0      
       !
-      IF (ISIZE_LMEB_PATCH>0) THEN
-        XAVG_LEVCVC    = 0.0
-        XAVG_LESCC     = 0.0
-        XAVG_LETRGVC   = 0.0
-        XAVG_LETRCVC   = 0.0
-        XAVG_LERGVC    = 0.0
-        XAVG_LERCVC    = 0.0
-        XAVG_LE_C_AC   = 0.0
-        XAVG_LE_V_CC   = 0.0
-        XAVG_LE_G_CC   = 0.0
-        XAVG_LE_N_CC   = 0.0
-        !
-        XAVG_SWNET_VC     = 0.0
-        XAVG_SWNET_GC     = 0.0
-        XAVG_SWNET_NC     = 0.0
-        XAVG_SWNET_NSC    = 0.0
-        XAVG_LWNET_VC     = 0.0
-        XAVG_LWNET_GC     = 0.0
-        XAVG_LWNET_NC     = 0.0
-        XAVG_SWDOWN_GNC   = 0.0
-        XAVG_LWDOWN_GNC   = 0.0
-        XAVG_H_V_CC       = 0.0
-        XAVG_H_G_CC       = 0.0
-        XAVG_H_C_AC       = 0.0
-        XAVG_H_N_CC       = 0.0
-        XAVG_SR_GNC       = 0.0
-        XAVG_MELTCVC      = 0.0
-        XAVG_FRZCVC       = 0.0
-        !
-        XLEVCVC    = 0.0
-        XLESCC     = 0.0
-!        XLETRGVC   = 0.0
-        XLETRCVC   = 0.0
-!        XLERGVC    = 0.0
-        XLERCVC    = 0.0
-        XLE_C_AC   = 0.0
-        XLE_V_CC   = 0.0
-        XLE_G_CC   = 0.0
-        XLE_N_CC   = 0.0
-        !
-        XSWNET_VC     = 0.0
-        XSWNET_GC     = 0.0
-        XSWNET_NC     = 0.0
-        XSWNET_NSC    = 0.0
-        XLWNET_VC     = 0.0
-        XLWNET_GC     = 0.0
-        XLWNET_NC     = 0.0
-        XSWDOWN_GNC   = 0.0
-        XLWDOWN_GNC   = 0.0
-        XH_V_CC       = 0.0
-        XH_G_CC       = 0.0
-        XH_C_AC       = 0.0
-        XH_N_CC       = 0.0
-        XSR_GNC       = 0.0
-        XMELTCVC      = 0.0
-        XFRZCVC       = 0.0
-      ENDIF
-      !
       XRNC         = 0.0
       XHC          = 0.0
       XLEC         = 0.0
@@ -1251,7 +736,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XLEGC        = 0.0 
       XLEGIC       = 0.0
       XLEVC        = 0.0
-      XLESAC       = 0.0
+      XLESC        = 0.0
       XLESLC       = 0.0
       XLERC        = 0.0
       XLETRC       = 0.0
@@ -1332,7 +817,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
     YREC='LEVC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_LEVC   ,IRESP)
     YREC='LESC_ISBA'
-    CALL READ_SURF(HPROGRAM,YREC,XAVG_LESAC  ,IRESP)
+    CALL READ_SURF(HPROGRAM,YREC,XAVG_LESC   ,IRESP)
     IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
        IF(IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3)THEN
          YREC='LESLC_ISBA'
@@ -1372,63 +857,6 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
     CALL READ_SURF(HPROGRAM,YREC,XAVG_RRVEGC ,IRESP)
     YREC='SNOMLTC_ISBA'
     CALL READ_SURF(HPROGRAM,YREC,XAVG_MELTC,IRESP)
-    !
-    IF (ISIZE_LMEB_PATCH>0) THEN
-      YREC='LEVCVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LEVCVC ,IRESP)
-      YREC='LESCC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LESCC ,IRESP)
-      YREC='LETRGVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LETRGVC ,IRESP)
-      YREC='LETRCVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LETRCVC ,IRESP)
-      YREC='LERGVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LERGVC ,IRESP)
-      YREC='LERCVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LERCVC ,IRESP)
-      YREC='LE_C_AC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LE_C_AC ,IRESP)
-      YREC='LE_V_CC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LE_V_CC ,IRESP)
-      YREC='LE_G_CC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LE_G_CC ,IRESP)
-      YREC='LE_N_CC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LE_N_CC ,IRESP)
-      !
-      YREC='SWNET_VC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWNET_VC ,IRESP)
-      YREC='SWNET_GC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWNET_GC ,IRESP)
-      YREC='SWNET_NC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWNET_NC ,IRESP)
-      YREC='SWNET_NSC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWNET_NSC ,IRESP)
-      YREC='LWNET_VC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LWNET_VC ,IRESP)
-      YREC='LWNET_GC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LWNET_GC ,IRESP)
-      YREC='LWNET_NC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LWNET_NC ,IRESP)
-      YREC='SWDOWN_GNC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_SWDOWN_GNC ,IRESP)
-      YREC='LWDOWN_GNC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_LWDOWN_GNC ,IRESP)
-      YREC='H_V_CC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_H_V_CC ,IRESP)
-      YREC='H_G_CC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_H_G_CC ,IRESP)
-      YREC='H_C_AC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_H_C_AC ,IRESP)
-      YREC='H_N_CC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_H_N_CC ,IRESP)
-      YREC='SR_GNC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_SR_GNC ,IRESP)
-      YREC='MELTCVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_MELTCVC ,IRESP)
-      YREC='FRZCVC_ISBA'
-      CALL READ_SURF(HPROGRAM,YREC,XAVG_FRZCVC ,IRESP)
-    ENDIF
-    !
     IF (LAGRIP) THEN
       YREC='IRRIGC_ISBA'
       CALL READ_SURF(HPROGRAM,YREC,XAVG_IRRIG_FLUXC,IRESP)    
@@ -1547,7 +975,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       YREC='LEVC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLEVC   ,IRESP)
       YREC='LESC_P'
-      CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESAC  ,IRESP)
+      CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XLESC   ,IRESP)
       IF(TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO')THEN
          IF(IVERSION>7 .OR. IVERSION==7 .AND. IBUG>=3)THEN
            YREC='LESLC_P'
@@ -1587,62 +1015,6 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XRRVEGC,IRESP)
       YREC='SNOMLTC_P'
       CALL READ_SURF(HPROGRAM,TRIM(YREC)//YREC2,XMELTC,IRESP)
-      !
-      IF (ISIZE_LMEB_PATCH>0) THEN
-        YREC='LEVCVC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLEVCVC ,IRESP)
-        YREC='LESCC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLESCC ,IRESP)
-!        YREC='LETRGVC_P'
-!        CALL READ_SURF(HPROGRAM,YREC,XLETRGVC ,IRESP)
-        YREC='LETRCVC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLETRCVC ,IRESP)
-!        YREC='LERGVC_P'
-!        CALL READ_SURF(HPROGRAM,YREC,XLERGVC ,IRESP)
-        YREC='LERCVC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLERCVC ,IRESP)
-        YREC='LE_C_AC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLE_C_AC ,IRESP)
-        YREC='LE_V_CC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLE_V_CC ,IRESP)
-        YREC='LE_G_CC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLE_G_CC ,IRESP)
-        YREC='LE_N_CC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLE_N_CC ,IRESP)
-        !
-        YREC='SWNET_VC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XSWNET_VC ,IRESP)
-        YREC='SWNET_GC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XSWNET_GC ,IRESP)
-        YREC='SWNET_NC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XSWNET_NC ,IRESP)
-        YREC='SWNET_NSC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XSWNET_NSC ,IRESP)
-        YREC='LWNET_VC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLWNET_VC ,IRESP)
-        YREC='LWNET_GC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLWNET_GC ,IRESP)
-        YREC='LWNET_NC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLWNET_NC ,IRESP)
-        YREC='SWDOWN_GNC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XSWDOWN_GNC ,IRESP)
-        YREC='LWDOWN_GNC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XLWDOWN_GNC ,IRESP)
-        YREC='H_V_CC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XH_V_CC ,IRESP)
-        YREC='H_G_CC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XH_G_CC ,IRESP)
-        YREC='H_C_AC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XH_C_AC ,IRESP)
-        YREC='H_N_CC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XH_N_CC ,IRESP)
-        YREC='SR_GNC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XSR_GNC ,IRESP)
-        YREC='MELTCVC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XMELTCVC ,IRESP)
-        YREC='FRZCVC_P'
-        CALL READ_SURF(HPROGRAM,YREC,XFRZCVC ,IRESP)
-      ENDIF
       !
       IF((CRUNOFF=='SGH'.AND.CISBA=='DIF').AND.IVERSION>=8)THEN
         YREC='QSBC_P'
@@ -1743,7 +1115,7 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XLEGC        = 0.0 
       XLEGIC       = 0.0
       XLEVC        = 0.0
-      XLESAC       = 0.0
+      XLESC        = 0.0
       XLESLC       = 0.0
       XLERC        = 0.0
       XLETRC       = 0.0
@@ -1765,36 +1137,6 @@ IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
       XPFLOODC     = 0.0
       XLE_FLOODC   = 0.0
       XLEI_FLOODC  = 0.0
-      !
-      IF (ISIZE_LMEB_PATCH>0) THEN
-        XLEVCVC    = 0.0
-        XLESCC     = 0.0
-!        XLETRGVC   = 0.0
-        XLETRCVC   = 0.0
-!        XLERGVC    = 0.0
-        XLERCVC    = 0.0
-        XLE_C_AC   = 0.0
-        XLE_V_CC   = 0.0
-        XLE_G_CC   = 0.0
-        XLE_N_CC   = 0.0
-        !
-        XSWNET_VC     = 0.0
-        XSWNET_GC     = 0.0
-        XSWNET_NC     = 0.0
-        XSWNET_NSC    = 0.0
-        XLWNET_VC     = 0.0
-        XLWNET_GC     = 0.0
-        XLWNET_NC     = 0.0
-        XSWDOWN_GNC   = 0.0
-        XLWDOWN_GNC   = 0.0
-        XH_V_CC       = 0.0
-        XH_G_CC       = 0.0
-        XH_C_AC       = 0.0
-        XH_N_CC       = 0.0
-        XSR_GNC       = 0.0
-        XMELTCVC      = 0.0
-        XFRZCVC       = 0.0
-      ENDIF
       !
       XSWDC     = 0.0
       XSWUC     = 0.0
@@ -1827,7 +1169,7 @@ ELSE
   ALLOCATE(XAVG_LEGC       (0))
   ALLOCATE(XAVG_LEGIC      (0))
   ALLOCATE(XAVG_LEVC       (0))
-  ALLOCATE(XAVG_LESAC      (0))
+  ALLOCATE(XAVG_LESC       (0))
   ALLOCATE(XAVG_LESLC      (0))
   ALLOCATE(XAVG_LERC       (0))
   ALLOCATE(XAVG_LETRC      (0))
@@ -1859,7 +1201,7 @@ ELSE
   ALLOCATE(XLEGC       (0,0))
   ALLOCATE(XLEGIC      (0,0))
   ALLOCATE(XLEVC       (0,0))
-  ALLOCATE(XLESAC      (0,0))
+  ALLOCATE(XLESC       (0,0))
   ALLOCATE(XLESLC      (0,0))
   ALLOCATE(XLERC       (0,0))
   ALLOCATE(XLETRC      (0,0))
@@ -1908,62 +1250,6 @@ ELSE
   ALLOCATE(XDWRC   (0,0))
   ALLOCATE(XDSWEC  (0,0))
   ALLOCATE(XWATBUDC(0,0))
-  !
-  ALLOCATE(XAVG_LEVCVC  (0))
-  ALLOCATE(XAVG_LESCC   (0))
-  ALLOCATE(XAVG_LETRGVC  (0))
-  ALLOCATE(XAVG_LETRCVC  (0))
-  ALLOCATE(XAVG_LERGVC   (0))
-  ALLOCATE(XAVG_LERCVC   (0))
-  ALLOCATE(XAVG_LE_C_AC  (0))
-  ALLOCATE(XAVG_LE_V_CC  (0))
-  ALLOCATE(XAVG_LE_G_CC  (0))
-  ALLOCATE(XAVG_LE_N_CC  (0))
-  !
-  ALLOCATE(XAVG_SWNET_VC    (0))
-  ALLOCATE(XAVG_SWNET_GC    (0))
-  ALLOCATE(XAVG_SWNET_NC    (0))
-  ALLOCATE(XAVG_SWNET_NSC   (0))
-  ALLOCATE(XAVG_LWNET_VC    (0))
-  ALLOCATE(XAVG_LWNET_GC    (0))
-  ALLOCATE(XAVG_LWNET_NC    (0))
-  ALLOCATE(XAVG_SWDOWN_GNC  (0))
-  ALLOCATE(XAVG_LWDOWN_GNC  (0))
-  ALLOCATE(XAVG_H_V_CC      (0))
-  ALLOCATE(XAVG_H_G_CC      (0))
-  ALLOCATE(XAVG_H_C_AC      (0))
-  ALLOCATE(XAVG_H_N_CC      (0))
-  ALLOCATE(XAVG_SR_GNC      (0))
-  ALLOCATE(XAVG_MELTCVC     (0))
-  ALLOCATE(XAVG_FRZCVC      (0))
-  !
-  ALLOCATE(XLEVCVC  (0,0))
-  ALLOCATE(XLESCC   (0,0))
-!  ALLOCATE(XLETRGVC  (0,0))
-  ALLOCATE(XLETRCVC  (0,0))
-!  ALLOCATE(XLERGVC   (0,0))
-  ALLOCATE(XLERCVC   (0,0))
-  ALLOCATE(XLE_C_AC  (0,0))
-  ALLOCATE(XLE_V_CC  (0,0))
-  ALLOCATE(XLE_G_CC  (0,0))
-  ALLOCATE(XLE_N_CC  (0,0))
-  !
-  ALLOCATE(XSWNET_VC    (0,0))
-  ALLOCATE(XSWNET_GC    (0,0))
-  ALLOCATE(XSWNET_NC    (0,0))
-  ALLOCATE(XSWNET_NSC   (0,0))
-  ALLOCATE(XLWNET_VC    (0,0))
-  ALLOCATE(XLWNET_GC    (0,0))
-  ALLOCATE(XLWNET_NC    (0,0))
-  ALLOCATE(XSWDOWN_GNC  (0,0))
-  ALLOCATE(XLWDOWN_GNC  (0,0))
-  ALLOCATE(XH_V_CC      (0,0))
-  ALLOCATE(XH_G_CC      (0,0))
-  ALLOCATE(XH_C_AC      (0,0))
-  ALLOCATE(XH_N_CC      (0,0))
-  ALLOCATE(XSR_GNC      (0,0))
-  ALLOCATE(XMELTCVC     (0,0))
-  ALLOCATE(XFRZCVC      (0,0))
   !
 ENDIF
 !
@@ -2017,8 +1303,6 @@ IF (N2M>=1) THEN
   ALLOCATE(XZON10M (KLU,NPATCH))
   ALLOCATE(XMER10M (KLU,NPATCH))
   ALLOCATE(XWIND10M(KLU,NPATCH))
-  ALLOCATE(XT2M_MIN(KLU,NPATCH))
-  ALLOCATE(XT2M_MAX(KLU,NPATCH))
   !
   XRI      = XUNDEF
   XT2M     = XUNDEF
@@ -2027,8 +1311,6 @@ IF (N2M>=1) THEN
   XZON10M  = XUNDEF
   XMER10M  = XUNDEF
   XWIND10M = XUNDEF
-  XT2M_MIN = XUNDEF
-  XT2M_MAX = 0.0
 ELSE
   ALLOCATE(XAVG_RI           (0))
   ALLOCATE(XAVG_T2M          (0))
@@ -2050,8 +1332,6 @@ ELSE
   ALLOCATE(XZON10M (0,0))
   ALLOCATE(XMER10M (0,0))
   ALLOCATE(XWIND10M(0,0))
-  ALLOCATE(XT2M_MIN(0,0))
-  ALLOCATE(XT2M_MAX(0,0))
 END IF
 !
 !* miscellaneous surface fields

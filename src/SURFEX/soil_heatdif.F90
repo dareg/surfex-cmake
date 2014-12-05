@@ -54,8 +54,7 @@
 !!    -------------
 !!      Original    16/02/00   Boone
 !!      Modif       08/2011 B. Decharme : Optimization
-!!      Modif       10/2014 B. Decharme : Use harmonic mean to compute 
-!!                                        interfacial thermal conductivities
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -140,14 +139,13 @@ INLVLD = SIZE(PTG(:,:),2)
 !
 DO JL=1,INLVLD
   DO JJ=1,INI
+     ZWORK1 = PDZG(JJ,JL)*PSOILCONDZ(JJ,JL)
      IF(JL<INLVLD)THEN
-       ZWORK1 = PDZG(JJ,JL  )/((PDZG(JJ,JL)+PDZG(JJ,JL+1))*PSOILCONDZ(JJ,JL  ))
-       ZWORK2 = PDZG(JJ,JL+1)/((PDZG(JJ,JL)+PDZG(JJ,JL+1))*PSOILCONDZ(JJ,JL+1))
+       ZWORK2 = PDZG(JJ,JL+1)*PSOILCONDZ(JJ,JL+1)
      ELSE
-       ZWORK1 = 1.0/PSOILCONDZ(JJ,JL)
        ZWORK2 = 0.0
      ENDIF
-     ZDTERM(JJ,JL)=1.0/(PDZDIF(JJ,JL)*(ZWORK1+ZWORK2))
+     ZDTERM(JJ,JL)=(ZWORK1+ZWORK2)/(2.0*PDZDIF(JJ,JL)*PDZDIF(JJ,JL))
      ZCTERM(JJ,JL)= PSOILHCAPZ(JJ,JL)*PDZG(JJ,JL)/PTSTEP
   ENDDO
 ENDDO 

@@ -33,8 +33,6 @@
 !!
 !!    J.Escobar   11/2013   Add USE MODI_PGD_TEB_GREENROOF
 !!    V. Masson   04/2014   Adds Irrigation
-!!    P. Samuelsson 02/2014 Introduced dummy variable in call to READ_NAM_PGD_ISBA for MEB
-!!
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -127,7 +125,6 @@ REAL                     :: XUNIF_PERM    ! uniform permafrost distribution
 REAL                     :: XUNIF_GW         ! uniform groundwater distribution
 LOGICAL                  :: LIMP_SOC      ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_PERM     ! Imposed maps of permafrost distribution
-LOGICAL                  :: GMEB          ! Multi-energy balance (MEB)
 LOGICAL                  :: LIMP_GW          ! Imposed maps of groundwater distribution
  CHARACTER(LEN=28)        :: YPH           ! file name for pH
  CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
@@ -158,7 +155,7 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,             &
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,         &
                        XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,   &
-                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM, GMEB,       &                     
+                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,             &                     
                        YGW, YGWFILETYPE, XUNIF_GW, LIMP_GW,                     &                     
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,               &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,     &

@@ -24,7 +24,6 @@ SUBROUTINE MKFLAG_SNOW(TPSNOW)
 !!      Original    01/2004
 !!     A. Bogatchev 09/2005 EBA snow option
 !!     B. Decharme  01/2009 Limit snow mass if Density=undef
-!!     P. Samuelsson 10/2014 Additional snow albedos
 !!------------------------------------------------------------------
 !
 USE MODD_TYPE_SNOW
@@ -98,9 +97,6 @@ IF (TPSNOW%SCHEME=='CRO') THEN
           .OR. TPSNOW%SCHEME=='CRO') THEN  
    WHERE ( TPSNOW%WSNOW(:,1,JPATCH)==0. .OR. TPSNOW%WSNOW(:,1,JPATCH)== XUNDEF )
     TPSNOW%ALB(:,JPATCH) = XUNDEF
-    TPSNOW%ALBVIS(:,JPATCH) = XUNDEF
-    TPSNOW%ALBNIR(:,JPATCH) = XUNDEF
-    TPSNOW%ALBFIR(:,JPATCH) = XUNDEF
    END WHERE
  END IF
 !

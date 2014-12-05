@@ -25,7 +25,6 @@ MODULE MODD_PACK_DIAG_ISBA
 !!      Modified       10/2004 by P. Le Moigne: add Halstead coefficient
 !!      Modified       11/2009 by S. Senesi: add precipitation intercepted by the vegetation (XP_RRVEG)
 !!      Modified       04-09 by A.L. Gibelin  : Add carbon diagnostics
-!!      Modified       10-14 by P. Samuelsson: MEB
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -310,81 +309,6 @@ REAL, POINTER, DIMENSION(:) :: XP_FAPAR_BS    ! Fapar of bare soil
 !$OMP THREADPRIVATE(XP_FAPAR_BS)
 REAL, POINTER, DIMENSION(:) :: XP_FAPIR_BS    ! Fapir of bare soil
 !$OMP THREADPRIVATE(XP_FAPIR_BS)
-!
-!------------------------------------------------------------------------------
-!
-!* diagnostic variables for multi-energy balance (MEB)
-!  ---------------------------------------------------
-!
-REAL, POINTER, DIMENSION(:) :: XP_SWUP          ! MEB: net *total* (surface) upwelling shortwave radiation to atmosphere [W/m2]
-!$OMP THREADPRIVATE(XP_SWUP)
-REAL, POINTER, DIMENSION(:) :: XP_SWNET_V       ! MEB: net vegetation canopy shortwave radiation [W/m2]
-!$OMP THREADPRIVATE(XP_SWNET_V)
-REAL, POINTER, DIMENSION(:) :: XP_SWNET_G       ! MEB: net ground shortwave radiation [W/m2]
-!$OMP THREADPRIVATE(XP_SWNET_G)
-REAL, POINTER, DIMENSION(:) :: XP_SWNET_N       ! MEB: net snow shortwave radiation [W/m2]
-!$OMP THREADPRIVATE(XP_SWNET_N)
-REAL, POINTER, DIMENSION(:) :: XP_SWNET_NS      ! MEB: net snow shortwave radiation for *surface* layer 
-                                                !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
-!$OMP THREADPRIVATE(XP_SWNET_NS)
-REAL, POINTER, DIMENSION(:) :: XP_LWUP          ! MEB: net *total* (surface) upwelling longwave radiation to atmosphere [W/m2]
-!$OMP THREADPRIVATE(XP_LWUP)
-REAL, POINTER, DIMENSION(:) :: XP_LWNET_V       ! MEB: net vegetation canopy longwave radiation [W/m2]
-!$OMP THREADPRIVATE(XP_LWNET_V)
-REAL, POINTER, DIMENSION(:) :: XP_LWNET_G       ! MEB: net ground longwave radiation [W/m2]
-!$OMP THREADPRIVATE(XP_LWNET_G)
-REAL, POINTER, DIMENSION(:) :: XP_LWNET_N       ! MEB: net snow longwave radiation [W/m2]
-!$OMP THREADPRIVATE(XP_LWNET_N)
-REAL, POINTER, DIMENSION(:) :: XP_LEVCV         ! MEB: total evapotranspiration from vegetation canopy overstory [W/m2]
-!$OMP THREADPRIVATE(XP_LEVCV)
-REAL, POINTER, DIMENSION(:) :: XP_LESC          ! MEB: total snow sublimation from vegetation canopy overstory [W/m2]
-!$OMP THREADPRIVATE(XP_LESC)
-REAL, POINTER, DIMENSION(:) :: XP_H_V_C         ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
-!$OMP THREADPRIVATE(XP_H_V_C)
-REAL, POINTER, DIMENSION(:) :: XP_H_G_C         ! MEB: sensible heat flux from understory [W/m2]
-!$OMP THREADPRIVATE(XP_H_G_C)
-REAL, POINTER, DIMENSION(:) :: XP_LETRGV        ! MEB: transpiration from understory vegetation [W/m2]
-!$OMP THREADPRIVATE(XP_LETRGV)
-REAL, POINTER, DIMENSION(:) :: XP_LETRCV        ! MEB: transpiration from overstory canopy vegetation [W/m2]
-!$OMP THREADPRIVATE(XP_LETRCV)
-REAL, POINTER, DIMENSION(:) :: XP_LERGV         ! MEB: interception evaporation from understory vegetation [W/m2]
-!$OMP THREADPRIVATE(XP_LERGV)
-REAL, POINTER, DIMENSION(:) :: XP_LERCV         ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
-!$OMP THREADPRIVATE(XP_LERCV)
-REAL, POINTER, DIMENSION(:) :: XP_H_C_A         ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
-!$OMP THREADPRIVATE(XP_H_C_A)
-REAL, POINTER, DIMENSION(:) :: XP_H_N_C         ! MEB: sensible heat flux from the snow on the ground [W/m2]
-                                                !      NOTE total sensible heat flux to the atmosphere also possibly 
-                                                !      includes a contribution from snow covering the canopy
-!$OMP THREADPRIVATE(XP_H_N_C)
-REAL, POINTER, DIMENSION(:) :: XP_LE_V_C        ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
-!$OMP THREADPRIVATE(XP_LE_V_C)
-REAL, POINTER, DIMENSION(:) :: XP_LE_G_C        ! MEB: latent heat flux from understory [W/m2]
-!$OMP THREADPRIVATE(XP_LE_G_C)
-REAL, POINTER, DIMENSION(:) :: XP_LE_C_A        ! MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
-                                                !      NOTE total latent heat flux to the atmosphere also possibly 
-                                                !      includes a contribution from snow covering the canopy
-!$OMP THREADPRIVATE(XP_LE_C_A)
-REAL, POINTER, DIMENSION(:) :: XP_LE_N_C        ! MEB: latent heat flux from the snow on the ground [W/m2]
-                                                !      NOTE total latent heat flux from the snowpack
-                                                !      possibly includes a contribution from snow covering the canopy
-!$OMP THREADPRIVATE(XP_LE_N_C)
-REAL, POINTER, DIMENSION(:) :: XP_EVAP_N_C      ! MEB: Total evap from snow on the ground to canopy air space  [kg/m2/s]
-!$OMP THREADPRIVATE(XP_EVAP_N_C)
-REAL, POINTER, DIMENSION(:) :: XP_EVAP_G_C      ! MEB: Total evap from ground to canopy air space [kg/m2/s]
-!$OMP THREADPRIVATE(XP_EVAP_G_C)
-REAL, POINTER, DIMENSION(:) :: XP_SR_GN         ! MEB: total snow reacing the ground snow [kg/m2/s]
-!$OMP THREADPRIVATE(XP_SR_GN)
-REAL, POINTER, DIMENSION(:) :: XP_MELTCV        ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
-!$OMP THREADPRIVATE(XP_MELTCV)
-REAL, POINTER, DIMENSION(:) :: XP_FRZCV         ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
-!$OMP THREADPRIVATE(XP_FRZCV)
-REAL, POINTER, DIMENSION(:) :: XP_SWDOWN_GN     ! MEB: total shortwave radiation transmitted through the canopy
-                                                !      reaching the snowpack/ground understory [W/m2]
-!$OMP THREADPRIVATE(XP_SWDOWN_GN)
-REAL, POINTER, DIMENSION(:) :: XP_LWDOWN_GN     ! MEB: total shortwave radiation transmitted through and emitted by the canopy
-!                                               !      reaching the snowpack/ground understory (explicit part) [W/m2]
-!$OMP THREADPRIVATE(XP_LWDOWN_GN)
 !
 !------------------------------------------------------------------------------
 !

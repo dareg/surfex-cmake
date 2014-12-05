@@ -30,7 +30,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
-!!      P. Samuelsson  02/2012  MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -103,7 +102,7 @@ SELECT CASE (HVAR)
       HFILE     = CFILE_HUG
       HFILETYPE = CTYPE_HUG
     END IF
-  CASE ('TG     ','TV     ','TC     ')
+  CASE ('TG     ')
     IF (LEN_TRIM(CFILE_TG)>0 .AND. LEN_TRIM(CTYPE_TG)>0 ) THEN
       HFILE     = CFILE_TG
       HFILETYPE = CTYPE_TG
@@ -149,7 +148,7 @@ SELECT CASE (HVAR)
        IF (LHOOK) CALL DR_HOOK('READ_PREP_ISBA_CONF',1,ZHOOK_HANDLE)
        RETURN
     ENDIF
-  CASE ('TG     ','TV     ','TC     ')
+  CASE ('TG     ')
     IF ( LEN_TRIM(CTYPE_TG )>0       .AND. &
            LEN_TRIM(CFILE_TG_SURF)>0   .AND. &
            LEN_TRIM(CFILE_TG_ROOT)>0   .AND. &
@@ -194,7 +193,7 @@ SELECT CASE (HVAR)
        CALL ABOR1_SFX('READ_PREP_ISBA_CONF: XHUGI_DEEP MUST BE SET')
     END IF
    !
-  CASE ('TG     ','TV     ','TC     ')
+  CASE ('TG     ')
     OUNIF = (XTG_SURF/=XUNDEF)  .OR. (XTG_ROOT/=XUNDEF)  .OR. (XTG_DEEP/=XUNDEF)
     IF (OUNIF .AND. (XTG_SURF==XUNDEF)) THEN
        WRITE(KLUOUT,*)'ONE OF XTG_SURF, XTG_ROOT OR XTG_DEEP IS GIVEN'

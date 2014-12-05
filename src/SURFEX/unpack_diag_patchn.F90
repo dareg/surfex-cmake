@@ -34,7 +34,6 @@ SUBROUTINE UNPACK_DIAG_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH,    &
 !!      Modified    06/2013 by B. Decharme : add lateral drainage flux diag for DIF
 !!                                           add tiotale sublimation flux
 !!      Modified    04/2014 by S. Belamari : Wind module=XUNDEF if one component is XUNDEF
-!!      Modified    10/2014 by P. Samuelsson: MEB
 !!
 !!------------------------------------------------------------------
 !
@@ -71,15 +70,7 @@ USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW, XP_SMELTFLUX, 
                                   XP_IRRIG_FLUX,XP_DWG,XP_DWGI,XP_DSWE,         &
                                   XP_WATBUD, XP_SUBL, XP_QSB,                   &                                  
                                   XBLOCK_SIMPLE, XBLOCK_GROUND, XBLOCK_SNOW,    &
-                                  XBLOCK_KSW, XBLOCK_ABC, XBLOCK_0, XBLOCK_00,  &
-                                  XP_SWUP, XP_SWNET_V, XP_SWNET_G, XP_SWNET_N,  &
-                                  XP_SWNET_NS, XP_LWUP, XP_LWNET_V, XP_LWNET_G, &
-                                  XP_LWNET_N, XP_LEVCV, XP_LESC, XP_H_V_C,      &
-                                  XP_H_G_C, XP_LETRGV, XP_LETRCV, XP_LERGV,     &
-                                  XP_LERCV, XP_H_C_A, XP_H_N_C, XP_LE_C_A,      &
-                                  XP_LE_V_C, XP_LE_G_C, XP_LE_N_C, XP_EVAP_N_C, &
-                                  XP_EVAP_G_C, XP_SR_GN, XP_MELTCV, XP_FRZCV,   &
-                                  XP_SWDOWN_GN, XP_LWDOWN_GN
+                                  XBLOCK_KSW, XBLOCK_ABC, XBLOCK_0, XBLOCK_00
 !
 USE MODD_DIAG_ISBA_n,    ONLY :   N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,         &
                                   XRN, XH, XLEI, XGFLUX, XRI, XCD, XCH, XCE,    &
@@ -428,38 +419,6 @@ XP_DWG          => NULL()
 XP_DWGI         => NULL()
 XP_DSWE         => NULL()
 XP_WATBUD       => NULL()
-!
-XP_SWUP       => NULL()
-! MEB stuff
-XP_SWNET_V       => NULL()
-XP_SWNET_G       => NULL()
-XP_SWNET_N       => NULL()
-XP_SWNET_NS       => NULL()
-XP_LWUP       => NULL()
-XP_LWNET_V       => NULL()
-XP_LWNET_G       => NULL()
-XP_LWNET_N       => NULL()
-XP_LEVCV       => NULL()
-XP_LESC       => NULL()
-XP_H_V_C       => NULL()
-XP_H_G_C       => NULL()
-XP_LETRGV       => NULL()
-XP_LETRCV       => NULL()
-XP_LERGV       => NULL()
-XP_LERCV       => NULL()
-XP_H_C_A       => NULL()
-XP_H_N_C       => NULL()
-XP_LE_C_A       => NULL()
-XP_LE_V_C       => NULL()
-XP_LE_G_C       => NULL()
-XP_LE_N_C       => NULL()
-XP_EVAP_N_C       => NULL()
-XP_EVAP_G_C       => NULL()
-XP_SR_GN       => NULL()
-XP_MELTCV       => NULL()
-XP_FRZCV       => NULL()
-XP_SWDOWN_GN       => NULL()
-XP_LWDOWN_GN       => NULL()
 !
 DEALLOCATE(XBLOCK_SIMPLE)
 DEALLOCATE(XBLOCK_GROUND)

@@ -31,7 +31,6 @@
 !!      Modified    10/2004 by P. Le Moigne: add XZ0REL, XVEGTYPE_PATCH
 !!      Modified    11/2005 by P. Le Moigne: limit length of VEGTYPE_PATCH field names
 !!      Modified    11/2013 by B. Decharme : XPATCH now in writesurf_isban.F90
-!!      Modified    10/2014 by P. Samuelsson: MEB variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -44,11 +43,7 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA, XPATCH,               
                               XZ0REL, XVEGTYPE_PATCH, XALBNIR, XALBVIS, XALBUV,     &
                               XWATSUP, TSEED, TREAP, XIRRIG, XD_ICE,                &
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
-                              XWSAT, XWFC, XWWILT, XRUNOFFD, LSOC, XFRACSOC,        &
-                              LMEB_PATCH,                                           &
-                              XGNDLITTER,XZF_TALLVEG, XRGLGV,XGAMMAGV,              &
-                              XRSMINGV, XWRMAX_CFGV,                                &
-                              XH_VEG, XLAIGV, XZ0LITTER, XROOTFRACGV
+                              XWSAT, XWFC, XWWILT, XRUNOFFD, LSOC, XFRACSOC   
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -86,7 +81,6 @@ CHARACTER(LEN=2)  :: YLVLV, YPAS
 CHARACTER(LEN=4)  :: YLVL
 !
 INTEGER         :: JJ, JL, JP, ILAYER
-INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -94,9 +88,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_PGD_ISBA_N',0,ZHOOK_HANDLE)
 !
-ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
-!
- CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
+CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -108,15 +100,6 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
   YCOMMENT='leaf area index (-)'
   !
   CALL WRITE_SURF(HPROGRAM,YRECFM,XLAI(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  IF (ISIZE_LMEB_PATCH>0) THEN
-    !
-    YRECFM='LAIGV'
-    YCOMMENT='MEB: understory leaf area index (-)'
-    !
-    CALL WRITE_SURF(HPROGRAM,YRECFM,XLAIGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-    !
-  ENDIF
   !
 ENDIF
 !
@@ -132,24 +115,9 @@ YCOMMENT='vegetation fraction (-)'
 !* Surface roughness length (without snow)
 !
 YRECFM='Z0VEG'
-YCOMMENT='surface roughness length (without snow) (m)'
+YCOMMENT='surface roughness length (without snow) (M)'
 !
  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-IF (ISIZE_LMEB_PATCH>0) THEN
-  !
-  YRECFM='GNDLITTER'
-  YCOMMENT='MEB: ground litter fraction (-)'
-  !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XGNDLITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='Z0LITTER'
-  YCOMMENT='MEB: ground litter roughness length (without snow) (m)'
-  !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0LITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-ENDIF
-!
 !-------------------------------------------------------------------------------
 !
 !* Soil depth for each patch
@@ -256,24 +224,6 @@ IF(CISBA=='DIF')THEN
      ENDDO
      CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
   END DO
-  !
-  IF (ISIZE_LMEB_PATCH>0) THEN
-    DO JL=1,SIZE(XROOTFRACGV,2)
-       IF (JL<10) THEN
-         WRITE(YRECFM,FMT='(A10,I1)') 'ROOTFRACGV',JL
-       ELSE
-         WRITE(YRECFM,FMT='(A10,I2)') 'ROOTFRACGV',JL          
-       ENDIF  
-       YCOMMENT='MEB: understory root fraction by layer (-)'
-       ZWORK(:,:)=XUNDEF
-       DO JJ=1,SIZE(XDG,1)
-          WHERE(JL<=NWG_LAYER(JJ,:).AND.NWG_LAYER(JJ,:)/=NUNDEF)
-                ZWORK(JJ,:)=XROOTFRACGV(JJ,JL,:)
-          ENDWHERE
-       ENDDO
-       CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
-    END DO
-  ENDIF
 !
 !* SOC fraction for each layer
 !
@@ -364,7 +314,7 @@ END DO
 !* other surface parameters
 !
 YRECFM='RSMIN'
-YCOMMENT='minimum stomatal resistance (sm-1)'
+YCOMMENT='minimum stomatal resistance (SM-1)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XRSMIN(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GAMMA'
@@ -386,34 +336,6 @@ YCOMMENT='surface emissivity (-)'
 YRECFM='WRMAX_CF'
 YCOMMENT='coefficient for maximum water interception (-)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XWRMAX_CF(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-IF (ISIZE_LMEB_PATCH>0) THEN
-  !
-  YRECFM='RSMINGV'
-  YCOMMENT='MEB: understory minimum stomatal resistance (sm-1)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XRSMINGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='GAMMAGV'
-  YCOMMENT='MEB: understory coefficient for RSMIN calculation (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XGAMMAGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='RGLGV'
-  YCOMMENT='MEB: understory maximum solar radiation usable in photosynthesis (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XRGLGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='WRMAX_CFGV'
-  YCOMMENT='MEB: understory coefficient for maximum water interception (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XWRMAX_CFGV(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='ZF_TALLVEG'
-  YCOMMENT='MEB: identification variable for tall vegetation (-)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XZF_TALLVEG(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='H_VEG'
-  YCOMMENT='MEB: height of vegetation (m)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XH_VEG(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
-ENDIF
 !
 !-------------------------------------------------------------------------------
 !

@@ -32,7 +32,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original    05/2009
-!!    P. Samuelsson  10/2014  Introduced MEB dummy variables in call to VEGETATION_UPDATE
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -115,18 +114,6 @@ REAL, DIMENSION(KLU,1) :: ZALBUV_SOIL
 REAL, DIMENSION(KLU,1) :: ZCE_NITRO
 REAL, DIMENSION(KLU,1) :: ZCF_NITRO
 REAL, DIMENSION(KLU,1) :: ZCNA_NITRO
-!
-! MEB stuff
-REAL, DIMENSION(KLU,1) :: ZGNDLITTER
-REAL, DIMENSION(KLU,1) :: ZZF_TALLVEG
-REAL, DIMENSION(KLU,1) :: ZRGLGV
-REAL, DIMENSION(KLU,1) :: ZGAMMAGV
-REAL, DIMENSION(KLU,1) :: ZRSMINGV
-REAL, DIMENSION(KLU,1) :: ZWRMAX_CFGV
-REAL, DIMENSION(KLU,1) :: ZH_VEG
-REAL, DIMENSION(KLU,1) :: ZLAIGV
-REAL, DIMENSION(KLU,1) :: ZZ0LITTER
-!
 TYPE (DATE_TIME),  DIMENSION(KLU,1) :: TZSEED
 TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZREAP
 REAL, DIMENSION(KLU,1) :: ZWATSUP
@@ -205,9 +192,6 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
                          TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
-                         ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
-                         ZRSMINGV, ZWRMAX_CFGV,                          &
-                         ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
                          GUPDATED, OABSENT=(XGARDEN==0.)                 )
 END IF
 !
