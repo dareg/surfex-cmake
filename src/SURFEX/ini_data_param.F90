@@ -2,13 +2,16 @@
       SUBROUTINE INI_DATA_PARAM(PTYPE,PSURF, PSURF2, PLAI, PH_TREE,                 &
                                 PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, PRSMIN,       &
                                 PRGL, PCV, PGAMMA, PGMES, PGC, PBSLAI, PSEFOLD,     &
-                                PLAIMIN, PDMAX, PSTRESS, PF2I, PVEG_IN, PVEG_OUT,   &
+                                PLAIMIN_IN, PLAIMIN_OUT, PDMAX, PSTRESS, PF2I,      &
+                                PVEG_IN, PVEG_OUT,                                  &
                                 PGREEN, PZ0, PZ0_O_Z0H, PEMIS_ECO, PWRMAX_CF,       &
                                 PROOT_LIN, PROOT_EXTINCTION, PSOILRC_SO2,           &
                                 PSOILRC_O3, PRE25, PCE_NITRO, PCF_NITRO, PCNA_NITRO,&
                                 PGMES_ST, PGC_ST, PBSLAI_ST, PSEFOLD_ST, PDMAX_ST  ,&
+                                PVEGGV,PZF_TALLVEG, PRGLGV,PGAMMAGV,                &
+                                PRSMINGV, PROOT_EXTINCTIONGV, PWRMAX_CFGV,          &
+                                PH_VEG, PLAIGV_IN, PLAIGV_OUT, PZ0GV,               &
                                 OAGRI_TO_GRASS                                      )
-
 !     #########################
 !
 !!**** *INI_DATA_PARAM* initializes secondary cover-field correspondance arrays
@@ -50,7 +53,8 @@
 !!    B. Decharme    07/12 : Ponderation coefficient for cumulative root fraction of evergreen forest
 !!    R. Alkama      05/12 : Add 7 new vegtype (19 rather than 12)
 !!    B. Decharme    05/13 : new param for equatorial forest
-!!        
+!!    P. Samuelsson  10/14 : Multi-energy balance (MEB)
+!!
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -71,6 +75,7 @@ USE MODI_GREEN_FROM_LAI
 USE MODI_Z0V_FROM_LAI
 USE MODI_EMIS_FROM_VEG
 USE MODI_ABOR1_SFX
+USE MODI_VEG_HEIGHT_FROM_LAI
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -97,7 +102,8 @@ REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PGMES
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PGC
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PBSLAI
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PSEFOLD
-REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PLAIMIN
+REAL, DIMENSION(:,:), INTENT(IN),  OPTIONAL :: PLAIMIN_IN
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PLAIMIN_OUT
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PDMAX
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PSTRESS
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PF2I
@@ -124,11 +130,26 @@ REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PDMAX_ST
 !
 LOGICAL, OPTIONAL, INTENT(IN) :: OAGRI_TO_GRASS
 !
+!            MEB parameters
+!            --------------
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PZF_TALLVEG
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PRGLGV
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PGAMMAGV
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PRSMINGV
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PROOT_EXTINCTIONGV
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PWRMAX_CFGV
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PH_VEG
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PLAIGV_OUT
+REAL, DIMENSION(:,:,:), INTENT(IN), OPTIONAL  :: PLAIGV_IN
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PZ0GV
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PVEGGV
+!
 !*    0.2    Declaration of local variables
 !      ------------------------------
 !
 REAL, DIMENSION(SIZE(PTYPE,1)) :: ZGARDEN
 LOGICAL            :: GSURF, GAGRI_TO_GRASS
+REAL, DIMENSION(SIZE(PTYPE,1),NVEGTYPE) :: ZLAIFRGV
 INTEGER            :: JLOOP                     ! class loop counter
 !
 INTEGER            :: JMONTH                     ! month loop counter
@@ -369,7 +390,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
       !ecosystem respiration only if vegetetation is present
       IF(PTYPE(JLOOP,NVT_NO  )>0. )  PRE25(JLOOP,NVT_NO  )= 0.
       IF(PTYPE(JLOOP,NVT_ROCK)>0. )  PRE25(JLOOP,NVT_ROCK)= 0.
-      IF(PTYPE(JLOOP,NVT_SNOW)>0. )  PRE25(JLOOP,NVT_SNOW)= 0.      
+      IF(PTYPE(JLOOP,NVT_SNOW)>0. )  PRE25(JLOOP,NVT_SNOW)= 0.
     ENDIF
 !-------------------------------------------------------------------------------
 !*    7.11   cuticular conductance (m s-1)
@@ -451,7 +472,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
         IF(PTYPE(JLOOP,NVT_IRR )>0. )  PBSLAI_ST(JLOOP,NVT_IRR )= 0.06
       ENDIF
     ENDIF
-!    
+!
 !-------------------------------------------------------------------------------
 !*    7.12   maximum air saturation deficit tolerate by vegetation (kg/kg)
 !            -----------------------------------------------------
@@ -553,14 +574,96 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !*    7.14   Minimum LAI (m2/m2)
 !            -------------------
 ! Modi lai/patch defined
-    IF (PRESENT(PLAIMIN)) THEN
-      PLAIMIN (JLOOP,:) = 0.3
-      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PLAIMIN(JLOOP,NVT_BONE)= 1.0
-      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PLAIMIN(JLOOP,NVT_TENE)= 1.0
-      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PLAIMIN(JLOOP,NVT_BOND)= 1.0
-      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PLAIMIN(JLOOP,NVT_TRBE)= 1.0
+    IF (PRESENT(PLAIMIN_OUT)) THEN
+      PLAIMIN_OUT (JLOOP,:) = 0.3
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PLAIMIN_OUT(JLOOP,NVT_BONE)= 1.0
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PLAIMIN_OUT(JLOOP,NVT_TENE)= 1.0
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PLAIMIN_OUT(JLOOP,NVT_BOND)= 1.0
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PLAIMIN_OUT(JLOOP,NVT_TRBE)= 1.0
     ENDIF 
+!--------------------------------------------------------------------
 !
+!*    7.16   Vegetation cover of understory vegetation
+!            ------------------------------------------
+! 	 
+    IF (PRESENT(PVEGGV)) THEN
+      PVEGGV (JLOOP,:,:) = 0.
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PVEGGV (JLOOP,:,NVT_TEBD) = 0.95
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PVEGGV (JLOOP,:,NVT_BONE) = 0.95
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PVEGGV (JLOOP,:,NVT_TRBE) = 0.99
+      IF(PTYPE(JLOOP,NVT_GRAS)>0. )  PVEGGV (JLOOP,:,NVT_GRAS) = 0.95
+      IF(PTYPE(JLOOP,NVT_TROG)>0. )  PVEGGV (JLOOP,:,NVT_TROG) = 0.95
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PVEGGV (JLOOP,:,NVT_TRBD) = 0.95
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PVEGGV (JLOOP,:,NVT_TEBE) = 0.95
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PVEGGV (JLOOP,:,NVT_TENE) = 0.95
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PVEGGV (JLOOP,:,NVT_BOBD) = 0.95
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PVEGGV (JLOOP,:,NVT_BOND) = 0.95
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PVEGGV (JLOOP,:,NVT_BOGR) = 0.95
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PVEGGV (JLOOP,:,NVT_SHRB) = 0.95
+    ENDIF
+!-------------------------------------------------------------------------------
+!*    7.16   Binary for tall vegetation
+!            --------------------------------------------------------------------------
+! parameters use in case LMEB == .TRUE.
+!
+    IF (PRESENT(PZF_TALLVEG)) THEN
+      PZF_TALLVEG (JLOOP,:) = 0.
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PZF_TALLVEG (JLOOP,NVT_TEBD) = 1.0
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PZF_TALLVEG (JLOOP,NVT_BONE) = 1.0
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PZF_TALLVEG (JLOOP,NVT_TRBE) = 1.0
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PZF_TALLVEG (JLOOP,NVT_TRBD) = 1.0
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PZF_TALLVEG (JLOOP,NVT_TEBE) = 1.0
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PZF_TALLVEG (JLOOP,NVT_TENE) = 1.0
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PZF_TALLVEG (JLOOP,NVT_BOBD) = 1.0
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PZF_TALLVEG (JLOOP,NVT_BOND) = 1.0
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PZF_TALLVEG (JLOOP,NVT_SHRB) = 1.0
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.17    Rgl for understory vegetation
+!             ------------------------------
+!
+    IF (PRESENT(PRGLGV)) THEN
+      PRGLGV (JLOOP,:) = 100.
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.18    Gamma for understory vegetation
+!             -------------------------------
+!
+    IF (PRESENT(PGAMMAGV)) THEN
+      PGAMMAGV (JLOOP,:) = 0.
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.19    Rsmin for understory vegetation
+!             -------------------------------
+!   
+    IF (PRESENT(PRSMINGV)) THEN
+      PRSMINGV (JLOOP,:) = 40.
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.20   Jackson (1996) coefficient for cumulative root fraction
+!            for understory vegetataion. Assumed equal to grass value
+!            -------------------------------------------------------
+!
+    IF (PRESENT(PROOT_EXTINCTIONGV)) THEN
+      PROOT_EXTINCTIONGV (JLOOP,:) = 0.943
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.21    Wrmax_cf for understory vegetation
+!             ----------------------------------
+!
+    IF (PRESENT(PWRMAX_CFGV)) THEN
+      PWRMAX_CFGV (JLOOP,:) = 0.2
+    ENDIF   
 !------------------------------------------------------------------------
 !*    2.20   leaf aera ratio sensitivity to nitrogen concentration
 !            ----------
@@ -790,7 +893,84 @@ DO JLOOP=1,SIZE(PTYPE,1)
     ELSEIF (PRESENT(PEMIS_ECO) .AND. .NOT.PRESENT(PVEG_IN) .AND. .NOT.PRESENT(PVEG_OUT)) THEN
       CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PEMIS_ECO, PVEG_IN OR PVEG_OUT MUST BE IN ARGUMENTS TOO")
     ENDIF
+!
 !-------------------------------------------------------------------------------
+!
+!*    7.19   vegetation height
+!            -----------------
+!
+    IF (PRESENT(PH_VEG) .AND. PRESENT(PLAI) .AND. PRESENT(PH_TREE)) THEN
+      DO JMONTH=1,SIZE(PH_VEG,2)
+        PH_VEG(JLOOP,JMONTH,:) = VEG_HEIGHT_FROM_LAI(PLAI(JLOOP,JMONTH,:),        &
+                                                   PH_TREE(JLOOP,:),              &
+                                                   PTYPE(JLOOP,:), GAGRI_TO_GRASS )  
+      END DO
+    ELSEIF (PRESENT(PH_VEG) .AND. (.NOT. PRESENT(PLAI) .OR. .NOT. PRESENT(PH_TREE))) THEN
+      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PH_VEG, PLAI AND PH_TREE MUST BE IN ARGUMENTS TOO")
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.20   LAI understory vegetation
+!            ----------
+!-------------------------------------------------------------------------------
+    IF (PRESENT(PLAIGV_OUT) .AND. PRESENT(PLAI) .AND. ( PRESENT(PLAIMIN_IN) .OR. PRESENT(PLAIMIN_OUT) ) ) THEN
+!
+!            LAI understoty vegetation defined as fraction of LAI upperstory vegetation 
+!            -------------------
+      ZLAIFRGV (JLOOP,:) = 0.
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  ZLAIFRGV (JLOOP,NVT_TEBD) = 0.1
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  ZLAIFRGV (JLOOP,NVT_BONE) = 0.1
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  ZLAIFRGV (JLOOP,NVT_TRBE) = 0.1
+      IF(PTYPE(JLOOP,NVT_GRAS)>0. )  ZLAIFRGV (JLOOP,NVT_GRAS) = 0.1
+      IF(PTYPE(JLOOP,NVT_TROG)>0. )  ZLAIFRGV (JLOOP,NVT_TROG) = 0.1
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  ZLAIFRGV (JLOOP,NVT_TRBD) = 0.1
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  ZLAIFRGV (JLOOP,NVT_TEBE) = 0.1
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  ZLAIFRGV (JLOOP,NVT_TENE) = 0.1
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  ZLAIFRGV (JLOOP,NVT_BOBD) = 0.1
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  ZLAIFRGV (JLOOP,NVT_BOND) = 0.1
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  ZLAIFRGV (JLOOP,NVT_BOGR) = 0.1
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  ZLAIFRGV (JLOOP,NVT_SHRB) = 0.1
+!
+      DO JMONTH=1,SIZE(PLAIGV_OUT,2)
+        IF(PRESENT(PLAIMIN_OUT))THEN
+          PLAIGV_OUT(JLOOP,JMONTH,:) = MAX( PLAI(JLOOP,JMONTH,:)* &
+                                       ZLAIFRGV(JLOOP,:), PLAIMIN_OUT(JLOOP,:) )
+        ELSEIF(PRESENT(PLAIMIN_IN))THEN
+          PLAIGV_OUT(JLOOP,JMONTH,:) = MAX( PLAI(JLOOP,JMONTH,:)* &
+                                       ZLAIFRGV(JLOOP,:), PLAIMIN_IN(JLOOP,:) )
+        ENDIF
+      END DO
+    ELSEIF (PRESENT(PLAIGV_OUT) .AND. ( .NOT.PRESENT(PLAI) .OR. &
+            (.NOT.PRESENT(PLAIMIN_IN) .AND. .NOT.PRESENT(PLAIMIN_OUT) ) ) ) THEN
+      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PLAIGV_OUT, PLAI AND PLAIMIN_IN OR PLAIMIN_OUT MUST BE IN ARGUMENTS TOO")
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
+!*    7.21   z0 understory vegetation
+!            ----------
+!
+! In original MEB development understory vegetation exicted but not anymore.
+! New z0 understory vegetation assumes bare soil only. Old formulation, based on
+! LAI, is kept but commenetd for later devlopment.
+!    IF (PRESENT(PZ0GV) .AND. ( PRESENT(PLAIGV_IN) .OR. PRESENT(PLAIGV_OUT) ) ) THEN
+!      DO JMONTH=1,SIZE(PZ0GV,2)
+!        IF (PRESENT(PLAIGV_OUT)) THEN
+!          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_OUT(JLOOP,JMONTH,:) / 6.)
+!        ELSEIF (PRESENT(PLAIGV_IN)) THEN
+!          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_IN(JLOOP,JMONTH,:) / 6.)
+!        ENDIF
+!      END DO
+!    ELSEIF (PRESENT(PZ0GV) .AND. (.NOT.PRESENT(PLAIGV_IN) .AND. .NOT.PRESENT(PLAIGV_OUT)    )) THEN
+!      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PZ0GV, PLAIGV_IN OR PLAIGV_OUT MUST BE IN ARGUMENTS TOO")
+!    ENDIF   
+    IF (PRESENT(PZ0GV)) THEN
+      PZ0GV(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
+    ENDIF   
+!
+!-------------------------------------------------------------------------------
+!
   END IF
 !-------------------------------------------------------------------------------
 END DO

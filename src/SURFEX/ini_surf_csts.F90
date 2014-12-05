@@ -2,7 +2,7 @@ SUBROUTINE INI_SURF_CSTS
 !     ##################
 !
 !!****  *INI_SURF_CSTS * - routine to initialize all surface parameter as
-!!                         emissivity and anbedo
+!!                         emissivity and albedo
 !!
 !!    PURPOSE
 !!    -------
@@ -32,6 +32,7 @@ SUBROUTINE INI_SURF_CSTS
 !!      Original    08/2009
 !!      M Lafaysse 05/2014 : snow parameters
 !!      B. Decharme    05/13 : Add NAM_SURF_REPROD_OPER for versions reproductibility
+!!      P. Samuelsson 10/2014 MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -43,14 +44,19 @@ USE MODD_SURF_CONF, ONLY : CPROGNAME
 !
 USE MODD_WATER_PAR
 USE MODD_FLOOD_PAR
-USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX, &
-                           XAGLAMIN, XAGLAMAX, XHGLA, &
-                           XWSNV, XZ0SN, XZ0HSN,      &
-                           XTAU_SMELT,                &
-                           XALBICE1, XALBICE2, XALBICE3,&
-                           XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW, &
+USE MODD_MEB_PAR,   ONLY : XTAU_LW, XTAU_V_CF,        &
+                           XRAGNC_FACTOR, XKDELTA_WR
+USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
+                           XAGLAMIN, XAGLAMAX, XHGLA,          &
+                           XWSNV, XZ0SN, XZ0HSN,               &
+                           XTAU_SMELT,                         &
+                           XALBICE1, XALBICE2, XALBICE3,       &
+                           XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW,    &
                            XVAGING_NOGLACIER, XVAGING_GLACIER, &
-                           XPERCENTAGEPORE
+                           XPERCENTAGEPORE,                    &
+                           LMEBREC,                            &
+                           XANSFRACMEL, XTEMPANS,              &
+                           XANSMINMEB
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -79,7 +85,10 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XALBWAT, XALBCOEF_TA96, XALBSCA_WAT, XEMISWAT, &
                         XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XCFFV,  &
                         XZ0SN, XZ0HSN, XTAU_SMELT, XALBSEAICE,         &
-                        XZ0FLOOD, XALBWATSNOW
+                        XZ0FLOOD, XALBWATSNOW,                         &
+                        LMEBREC,                                       &
+                        XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
+                        XTAU_LW, XTAU_V_CF, XRAGNC_FACTOR
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -118,7 +127,24 @@ XANSMAX = 0.85 ! (-)
 !
 XAGLAMIN = 0.8 ! (-)
 XAGLAMAX = 0.85 ! (-)
+!
+! Use recommended settings for snow albedo (FALSE = ISBA default)
 ! 
+LMEBREC=.FALSE.
+!
+! Fraction of maximum value of the albedo of snow that is reached for melting
+! snow
+!
+XANSFRACMEL = 1.0 ! (-)
+!
+! Threeshold temperature above which the snow albedo starts to decrease 
+!
+XTEMPANS = 274.15 ! (K)
+!
+! Minimum value of the albedo of snow reached under canopy vegetation:
+!
+XANSMINMEB = 0.30 ! (-)
+!
 ! Height of aged snow in glacier case (allows Pn=1)
 !
 XHGLA    = 33.3 !(m)
@@ -147,6 +173,26 @@ XZ0HSN = 0.0001
 ! dependence of melt when snow fraction < unity.
 !
 XTAU_SMELT = 300.
+!
+! Extinction coefficient for view factor for long-wave radiation 
+!
+XTAU_LW = 0.5   ! -
+!
+! Extinction coefficient for view factor for short-wave radiation 
+!
+XTAU_V_CF = 0.5 ! -
+!
+! MEB resistance increase factor for canopy air sapce.
+! If=1, then NO effect. It is generally >=1
+! and is needed because the original parameterization
+! does not account for extremely stable conditions,
+! such as over a snowpack.
+!
+XRAGNC_FACTOR= 200. ! -
+!
+! MEB maximum intercepted water fraction (on vegetation)
+!
+XKDELTA_WR   = 0.25 ! -
 !
 ! NAM_SURF_SNOW_CSTS
 !
@@ -229,6 +275,18 @@ CCHARNOCK = 'NEW'
 !
  CALL POSNAM(ILUNAM,'NAM_SURF_CSTS',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_CSTS)
+!
+IF(LMEBREC)THEN
+! Fraction of maximum value of the albedo of snow that is reached for melting
+! snow
+!
+  XANSFRACMEL = 0.85 ! (-)
+!
+! Threeshold temperature above which the snow albedo starts to decrease 
+!
+  XTEMPANS = 268.15 ! (K)
+!
+ENDIF
 !
  CALL POSNAM(ILUNAM,'NAM_SURF_SNOW_CSTS',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_SNOW_CSTS)

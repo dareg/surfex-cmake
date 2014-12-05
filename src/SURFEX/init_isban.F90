@@ -50,6 +50,7 @@ SUBROUTINE INIT_ISBA_n    (HPROGRAM,HINIT,OLAND_USE,                    &
 !!      R. Alkama      05/12 : new carbon spinup
 !!      J.Escobar      11/13 : add USE MODI_DEFAULT_CROCUS
 !!      B. Decharme  04/2013 new coupling variables
+!!      P. Samuelsson  10/14 : MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -75,6 +76,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                        
 !
 USE MODD_ISBA_n,   ONLY : CROUGH ,CISBA, CPHOTO, CRUNOFF, CALBEDO, CSCOND,    &
                           CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES, CRESPSL,    &
+                          LMEB_PATCH,                                         &
                           NNLITTER, NNLITTLEVS, NNSOILCARB, NPATCH,           &
                           TSNOW, TTIME, XTSTEP, XOUT_TSTEP,                   &
                           LGLACIER, LVEGUPD, LCANOPY_DRAG,                    &
@@ -176,6 +178,7 @@ INTEGER             :: ISPINEND
 INTEGER             :: ILUOUT   ! unit of output listing file
 INTEGER             :: IVERSION       ! surface version
 INTEGER             :: IRESP   ! return code
+INTEGER             :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -326,6 +329,8 @@ END SELECT
 !
  CALL READ_PGD_ISBA_n(HPROGRAM,OLAND_USE)
 !
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+!
 !
 !*       2.2    Check:
 !               ------
@@ -342,6 +347,9 @@ IF ( CPHOTO/='LAI' .AND. CPHOTO/='LST' .AND. CPHOTO/='NIT' .AND. CPHOTO/='NCB' .
 ENDIF
 IF ( CPHOTO/='NCB' .AND. CRESPSL=='CNT') THEN
   CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND CRESPSL')
+ENDIF
+IF (HINIT=='PRE' .AND. ISIZE_LMEB_PATCH>0 .AND. TSNOW%SCHEME.NE.'3-L' .AND. TSNOW%SCHEME.NE.'CRO') THEN
+    CALL ABOR1_SFX("INIT_ISBAN: WITH LMEB_PATCH = TRUE, CSNOW MUST BE 3-L OR CRO")
 ENDIF
 IF(CPHOTO/='NCB'.AND.LSPINUPCARBW)THEN
   CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND LSPINUPCARBW (if not NCB must be false)')
@@ -387,7 +395,7 @@ IF ( LSPINUPCARBS .AND. (NNBYEARSOLD <= ISPINEND) ) THEN
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                                   PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
                                   PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
-                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN=XDATA_LAIMIN, PDMAX=XDATA_DMAX,                  &
+                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
                                   PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
                                   PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
                                   PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &

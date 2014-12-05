@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE ISBA_ALBEDO(HSNOW, OTR_ML,                               &
+      SUBROUTINE ISBA_ALBEDO(HSNOW, OTR_ML, OMEB,                         &
                                PDIR_SW, PSCA_SW, PSW_BANDS, KSW,          &
                                PALBNIR, PALBVIS, PALBUV,                  &
                                PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG,      &
@@ -7,8 +7,9 @@
                                PSNOWALB, PPSNV, PPSNG, PFALB, PFFV, PFFG, &
                                PGLOBAL_SW, PSNOWFREE_ALB,                 &
                                PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL,     &
+                               PMEB_SCA_SW,                               &
                                PALBNIR_TVEG, PALBVIS_TVEG,                &
-                               PALBNIR_TSOIL, PALBVIS_TSOIL             )  
+                               PALBNIR_TSOIL, PALBVIS_TSOIL               )
 !     ##########################################################################
 !
 !!****  *ISBA_ALBEDO*  
@@ -30,6 +31,12 @@
 !!    ------
 !!
 !!	S. Belair           * Meteo-France *
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    
+!!      P. Samuelsson  02/2012  MEB
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -50,6 +57,8 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=*)    , INTENT(IN)   :: HSNOW      ! ISBA snow scheme
 LOGICAL,              INTENT(IN)   :: OTR_ML
+LOGICAL,              INTENT(IN)   :: OMEB        ! True = patch with multi-energy balance 
+!                                                 ! False = patch with classical ISBA
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PDIR_SW            ! direct incoming solar radiation
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSCA_SW            ! diffus incoming solar radiation
@@ -74,6 +83,7 @@ REAL, DIMENSION(:)  , INTENT(IN)   :: PFFV               ! Floodplain fraction o
 REAL, DIMENSION(:)  , INTENT(IN)   :: PFFG               ! Floodplain fraction over the ground
 !
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PGLOBAL_SW         ! global incoming SW rad.
+REAL, DIMENSION(:)  , INTENT(OUT)  :: PMEB_SCA_SW        ! diffuse incoming SW rad.
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PSNOWFREE_ALB      !snow free albedo 
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PSNOWFREE_ALB_VEG  !snow free albedo of vegetation for EBA
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PSNOWFREE_ALB_SOIL !snow free albedo of soil for EBA option
@@ -112,6 +122,16 @@ IF (OTR_ML) THEN
   PALBNIR_TSOIL(:) = ( 1.-PPSNG(:)-PFFG(:))*PALBNIR_SOIL(:) + PPSNG(:)*PSNOWALB(:) + PFFG(:)*PFALB(:)   
   PALBVIS_TVEG (:) = ( 1.-PPSNV(:)-PFFV(:))*PALBVIS_VEG(:)  + PPSNV(:)*PSNOWALB(:) + PFFV(:)*PFALB(:)
   PALBVIS_TSOIL(:) = ( 1.-PPSNG(:)-PFFG(:))*PALBVIS_SOIL(:) + PPSNG(:)*PSNOWALB(:) + PFFG(:)*PFALB(:)
+ELSEIF (OMEB) THEN
+  PALBNIR_TVEG (:) = PALBNIR_VEG(:)
+  PALBNIR_TSOIL(:) = PALBNIR_SOIL(:)
+  PALBVIS_TVEG (:) = PALBVIS_VEG(:)
+  PALBVIS_TSOIL(:) = PALBVIS_SOIL(:)
+ELSE
+  PALBNIR_TVEG (:) = XUNDEF
+  PALBNIR_TSOIL(:) = XUNDEF
+  PALBVIS_TVEG (:) = XUNDEF
+  PALBVIS_TSOIL(:) = XUNDEF
 ENDIF
 !
  CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS, PALBNIR, PALBVIS, PALBUV,         &
@@ -120,8 +140,10 @@ ENDIF
 !* total shortwave incoming radiation
 !
   PGLOBAL_SW(:) = 0.
+  PMEB_SCA_SW(:) = 0.
   DO JSWB=1,KSW
     PGLOBAL_SW(:) = PGLOBAL_SW(:) + (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB))
+    PMEB_SCA_SW(:) = PMEB_SCA_SW(:) + (PSCA_SW(:,JSWB))
   END DO
 !
 !* snow-free global albedo (needed by ISBA)

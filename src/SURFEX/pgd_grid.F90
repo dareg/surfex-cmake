@@ -30,6 +30,7 @@
 !!
 !!    Original     01/2004
 !!    E. Martin    10/2007 IGN grid
+!!    P. Samuelsson  12/2012 Rotated lonlat
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -134,7 +135,7 @@ END IF
 !              ----------------------------------
 ! 
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CGRID',CGRID,'CONF PROJ ','NONE      ','LONLAT REG','CARTESIAN ','GAUSS     ',&
-          'IGN       ','LONLATVAL ')  
+          'IGN       ','LONLATVAL ','LONLAT ROT')  
  CALL TEST_NAM_VAR_SURF(ILUOUT,'YINIFILETYPE',YINIFILETYPE,'      ','MESONH','LFI   ','ASCII ','NC    ')
 !
 !

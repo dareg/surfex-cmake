@@ -29,6 +29,7 @@ SUBROUTINE PREP_HOR_ISBA_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPG
 !!      M. Lafaysse 11/2012,  snow liquid water content
 !!      B. Decharme  03/2014, external init with FA files
 !!                            new vertical interpolation
+!!      P Samuelsson 10/2014, MEB
 !!------------------------------------------------------------------
 !
 USE MODD_PREP,     ONLY : XZS_LS, LINTERP, CMASK
@@ -42,7 +43,8 @@ USE MODD_ISBA_n,    ONLY : TTIME, XWG, XWGI, XTG, XWR, XLAI,         &
                            XVEGTYPE_PATCH, XDG, XWWILT, XWFC, XPATCH,&
                            CISBA, XDG2, XWSAT, TSNOW, XVEGTYPE,      &
                            LTEMP_ARP, NTEMPLAYER_ARP, XICE_STO,      &
-                           XVEGTYPE
+                           XVEGTYPE,                                 &
+                           XWRV, XWRVN, XTV, XTC, XQC
 
 USE MODD_ISBA_GRID_n,    ONLY : XLAT, XLON
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
@@ -328,6 +330,46 @@ SELECT CASE (HSURF)
   ALLOCATE(XWR(INI,NPATCH))
   DO JPATCH=1,NPATCH
     XWR(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+ CASE('WRV    ') 
+  ALLOCATE(XWRV(INI,NPATCH))
+  DO JPATCH=1,NPATCH
+    XWRV(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+ CASE('WRVN   ') 
+  ALLOCATE(XWRVN(INI,NPATCH))
+  DO JPATCH=1,NPATCH
+    XWRVN(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+ CASE('TV     ') 
+  ALLOCATE(XTV(INI,NPATCH))
+  DO JPATCH=1,NPATCH
+    XTV(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+ CASE('TC     ') 
+  ALLOCATE(XTC(INI,NPATCH))
+  DO JPATCH=1,NPATCH
+    XTC(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+ CASE('QC     ') 
+  ALLOCATE(XQC(INI,NPATCH))
+  DO JPATCH=1,NPATCH
+    XQC(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

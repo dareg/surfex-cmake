@@ -96,7 +96,11 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_SHADE, XDATA_NATVENT, XDATA_ROUGH_ROOF,     &
                                   XDATA_ROUGH_WALL, XDATA_FRAC_GR,XDATA_RESIDENTIAL,&
                                   XDATA_EMIS_PANEL, XDATA_ALB_PANEL,                &
-                                  XDATA_EFF_PANEL, XDATA_FRAC_PANEL
+                                  XDATA_EFF_PANEL, XDATA_FRAC_PANEL,                &
+                                  XDATA_VEGGV, XDATA_ZF_TALLVEG ,                   &
+                                  XDATA_RGLGV, XDATA_GAMMAGV, XDATA_RSMINGV,        &
+                                  XDATA_ROOT_EXTINCTIONGV, XDATA_WRMAX_CFGV,        &
+                                  XDATA_LAIGV, XDATA_Z0GV, XDATA_H_VEG
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
                                   NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_C3,   &
@@ -652,6 +656,41 @@ XDATA_IRRIG (:,:) = 0.
 ALLOCATE(XDATA_WATSUP(JPCOVER,NVEGTYPE))
 !
 XDATA_WATSUP (:,:) = 0.                                
+!
+!-------------------------------------------------------------------------------
+!
+!*    2.26   For multi-energy balance (MEB)
+!            ------------------------------
+!
+ALLOCATE(XDATA_ZF_TALLVEG(JPCOVER,NVEGTYPE))
+XDATA_ZF_TALLVEG (:,:) = 0.                                
+!
+ALLOCATE(XDATA_RGLGV(JPCOVER,NVEGTYPE))
+XDATA_RGLGV (:,:) = XUNDEF                                
+!
+ALLOCATE(XDATA_GAMMAGV(JPCOVER,NVEGTYPE))
+XDATA_GAMMAGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_RSMINGV(JPCOVER,NVEGTYPE))
+XDATA_RSMINGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_ROOT_EXTINCTIONGV(JPCOVER,NVEGTYPE))
+XDATA_ROOT_EXTINCTIONGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_WRMAX_CFGV(JPCOVER,NVEGTYPE))
+XDATA_WRMAX_CFGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_LAIGV(JPCOVER,36,NVEGTYPE))
+XDATA_LAIGV (:,:,:) = XUNDEF
+!
+ALLOCATE(XDATA_VEGGV(JPCOVER,36,NVEGTYPE))
+XDATA_VEGGV (:,:,:) = XUNDEF
+!
+ALLOCATE(XDATA_Z0GV(JPCOVER,36,NVEGTYPE))
+XDATA_Z0GV (:,:,:) = XUNDEF
+!
+ALLOCATE(XDATA_H_VEG(JPCOVER,36,NVEGTYPE))
+XDATA_H_VEG (:,:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -2206,7 +2245,7 @@ ENDIF
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                                   PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
                                   PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
-                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN=XDATA_LAIMIN, PDMAX=XDATA_DMAX,                  &
+                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
                                   PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
                                   PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
                                   PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
@@ -2214,7 +2253,11 @@ ENDIF
                                   PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
                                   PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
                                   PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
-                                  PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST)
+                                  PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST,                            &
+                                  PVEGGV=XDATA_VEGGV,PZF_TALLVEG=XDATA_ZF_TALLVEG,                               &
+                                  PRGLGV=XDATA_RGLGV,PGAMMAGV=XDATA_GAMMAGV, PRSMINGV=XDATA_RSMINGV,             &
+                                  PROOT_EXTINCTIONGV=XDATA_ROOT_EXTINCTIONGV, PWRMAX_CFGV=XDATA_WRMAX_CFGV,      &
+                                  PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0GV=XDATA_Z0GV                   )
 !
 IDC = 1
 !

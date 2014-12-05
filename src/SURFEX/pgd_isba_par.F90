@@ -32,6 +32,7 @@
 !!
 !!       Modified 08/12/05, P. Le Moigne: user defined fields
 !!                 05/2012  R. Alkama   : 19 vegtypes rather than 12    
+!!       Modified 02/2012,  P. Samuelsson: MEB
 !!
 !----------------------------------------------------------------------------
 !
@@ -41,7 +42,7 @@
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ISBA_GRID_n,    ONLY : NDIM
-USE MODD_ISBA_n,         ONLY : LECOCLIMAP, CISBA, CPHOTO, NGROUND_LAYER, XSOILGRID
+USE MODD_ISBA_n,         ONLY : LECOCLIMAP, LMEB_PATCH, CISBA, CPHOTO, NGROUND_LAYER, XSOILGRID
 USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 XPAR_ROOTFRAC, XPAR_VEG, XPAR_Z0, XPAR_EMIS, XPAR_DICE, &
                                 XPAR_RSMIN, XPAR_GAMMA, XPAR_WRMAX_CF, XPAR_RGL, &
@@ -51,6 +52,9 @@ USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 XPAR_GMES, XPAR_BSLAI, XPAR_SEFOLD, XPAR_GC, XPAR_DMAX, &
                                 XPAR_RE25, XPAR_LAIMIN, XPAR_F2I,  &
                                 XPAR_CE_NITRO,XPAR_CF_NITRO,XPAR_CNA_NITRO, &
+                                XPAR_VEGGV, XPAR_ZF_TALLVEG , XPAR_RGLGV, XPAR_GAMMAGV, XPAR_RSMINGV,   &
+                                XPAR_ROOTFRACGV, XPAR_WRMAX_CFGV, XPAR_LAIGV, XPAR_Z0GV, XPAR_H_VEG,    &
+                                XPAR_ROOT_EXTINCTIONGV,                           &
                                 XPAR_GROUND_DEPTH, XPAR_ROOT_DEPTH,               &
                                 XPAR_ROOT_EXTINCTION, XPAR_ROOT_LIN,              &
                                 LPAR_STRESS, XPAR_IRRIG, XPAR_WATSUP, &
@@ -63,7 +67,10 @@ USE MODD_DATA_ISBA_n,    ONLY : XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE, XPAR_DG, &
                                 LDATA_GMES, LDATA_BSLAI, LDATA_SEFOLD, LDATA_GC, LDATA_DMAX, &
                                 LDATA_RE25, LDATA_LAIMIN, LDATA_F2I, &
                                 LDATA_CE_NITRO,LDATA_CF_NITRO, LDATA_CNA_NITRO,&
-                                LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,              &
+                                LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP,   &
+                                LDATA_VEGGV, LDATA_ZF_TALLVEG , LDATA_RGLGV, LDATA_GAMMAGV, LDATA_RSMINGV,   &
+                                LDATA_ROOTFRACGV, LDATA_WRMAX_CFGV, LDATA_LAIGV, LDATA_Z0GV, LDATA_H_VEG,  &
+                                LDATA_ROOT_EXTINCTIONGV, &
                                 LDATA_GROUND_DEPTH, LDATA_ROOT_DEPTH,             &
                                 LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN, &
                                 NTIME_n=>NTIME
@@ -93,12 +100,17 @@ IMPLICIT NONE
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
+REAL, DIMENSION(NDIM,NVEGTYPE)     :: ZROOTFRACGV,TEST,TEST2,TEST3
 INTEGER               :: ILUOUT    ! output listing logical unit
 INTEGER               :: ILUNAM    ! namelist file  logical unit
+INTEGER               :: IHGROUND_LAYER ! Half number of NGROUND_LAYER
+INTEGER               :: IIH       ! Ground layer counter
 LOGICAL               :: GFOUND    ! true if namelist is found
 !
 INTEGER               :: JVEGTYPE  ! loop counter on patch
 LOGICAL               :: GPAR_STRESS   ! type of stress
+!
+INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
 !*    0.3    Declaration of namelists
 !            ------------------------
@@ -150,6 +162,18 @@ REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_CE_NITRO   ! CE for nitroge
 REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_CF_NITRO   ! CF for nitrogen
 REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_CNA_NITRO  ! CNA for nitrogen
 !
+REAL, DIMENSION(NVEGTYPE_MAX,NTIME_MAX)     :: XUNIF_LAIGV
+REAL, DIMENSION(NVEGTYPE_MAX,NTIME_MAX)     :: XUNIF_Z0GV
+REAL, DIMENSION(NVEGTYPE_MAX,NTIME_MAX)     :: XUNIF_VEGGV
+REAL, DIMENSION(NVEGTYPE_MAX,NGROUND_MAX)   :: XUNIF_ROOTFRACGV
+REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_RSMINGV
+REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_GAMMAGV
+REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_WRMAX_CFGV
+REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_RGLGV
+REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_ZF_TALLVEG
+REAL, DIMENSION(NVEGTYPE_MAX,NTIME_MAX)     :: XUNIF_H_VEG
+REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_ROOT_EXTINCTIONGV! root extinction parameter
+!
 LOGICAL, DIMENSION(NVEGTYPE_MAX)            :: LUNIF_STRESS     ! stress type
 !
 ! name of files containing data
@@ -194,6 +218,18 @@ LOGICAL, DIMENSION(NVEGTYPE_MAX)            :: LUNIF_STRESS     ! stress type
  CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_CF_NITRO   ! CF for nitrogen
  CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_CNA_NITRO  ! CNA for nitrogen
 !
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFNAM_LAIGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFNAM_Z0GV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFNAM_VEGGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX,NGROUND_MAX) :: CFNAM_ROOTFRACGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_RSMINGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_GAMMAGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_WRMAX_CFGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_RGLGV
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_ZF_TALLVEG
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFNAM_H_VEG
+CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_ROOT_EXTINCTIONGV! root extinction parameter
+!
 ! types of file containing data
 !
  CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)           :: CFTYP_VEGTYPE    ! fractions of each vegtypes
@@ -235,6 +271,19 @@ LOGICAL, DIMENSION(NVEGTYPE_MAX)            :: LUNIF_STRESS     ! stress type
  CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_CE_NITRO   ! CE for nitrogen
  CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_CF_NITRO   ! CF for nitrogen
  CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_CNA_NITRO  ! CNA for nitrogen
+!
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFTYP_LAIGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFTYP_Z0GV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFTYP_VEGGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX,NGROUND_MAX) :: CFTYP_ROOTFRACGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_RSMINGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_GAMMAGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_WRMAX_CFGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_RGLGV
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_ZF_TALLVEG
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFTYP_H_VEG
+CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_ROOT_EXTINCTIONGV! root extinction parameter
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_ISBA/NTIME, XUNIF_VEGTYPE, XUNIF_DG, XUNIF_ROOTFRAC, XUNIF_DICE,                  &
@@ -266,7 +315,16 @@ NAMELIST/NAM_DATA_ISBA/NTIME, XUNIF_VEGTYPE, XUNIF_DG, XUNIF_ROOTFRAC, XUNIF_DIC
                          CFTYP_GROUND_DEPTH,CFTYP_ROOT_DEPTH,CFTYP_ROOT_EXTINCTION,CFTYP_ROOT_LIN,  &
                          CFTYP_GMES,CFTYP_BSLAI,CFTYP_LAIMIN,CFTYP_SEFOLD,CFTYP_GC,                 &
                          CFTYP_DMAX,CFTYP_F2I, CFTYP_H_TREE,CFTYP_RE25,                             &
-                         CFTYP_CE_NITRO,CFTYP_CF_NITRO,CFTYP_CNA_NITRO  
+                         CFTYP_CE_NITRO,CFTYP_CF_NITRO,CFTYP_CNA_NITRO,                             &
+                         XUNIF_LAIGV, XUNIF_Z0GV, XUNIF_ROOTFRACGV, XUNIF_VEGGV, XUNIF_RSMINGV,     &
+                         XUNIF_GAMMAGV, XUNIF_WRMAX_CFGV, XUNIF_RGLGV, XUNIF_ZF_TALLVEG ,           &
+                         XUNIF_H_VEG, XUNIF_ROOT_EXTINCTIONGV,                                      &
+                         CFNAM_LAIGV, CFNAM_Z0GV, CFNAM_ROOTFRACGV, CFNAM_VEGGV, CFNAM_RSMINGV,     &
+                         CFNAM_GAMMAGV, CFNAM_WRMAX_CFGV, CFNAM_RGLGV, CFNAM_ZF_TALLVEG ,           &
+                         CFNAM_H_VEG, CFNAM_ROOT_EXTINCTIONGV,                                      &
+                         CFTYP_LAIGV, CFTYP_Z0GV, CFTYP_ROOTFRACGV, CFTYP_VEGGV, CFTYP_RSMINGV,     &
+                         CFTYP_GAMMAGV, CFTYP_WRMAX_CFGV, CFTYP_RGLGV, CFTYP_ZF_TALLVEG,            &
+                         CFTYP_H_VEG, CFTYP_ROOT_EXTINCTIONGV
 
 DATA XSTRESS /1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./
 !-------------------------------------------------------------------------------
@@ -314,6 +372,18 @@ XUNIF_CE_NITRO        = XUNDEF ! CE for nitrogen
 XUNIF_CF_NITRO        = XUNDEF ! CF for nitrogen
 XUNIF_CNA_NITRO       = XUNDEF ! CNA for nitrogen
 !
+XUNIF_LAIGV           = XUNDEF
+XUNIF_Z0GV            = XUNDEF
+XUNIF_ROOTFRACGV      = XUNDEF
+XUNIF_VEGGV           = XUNDEF
+XUNIF_RSMINGV         = XUNDEF
+XUNIF_GAMMAGV         = XUNDEF
+XUNIF_WRMAX_CFGV      = XUNDEF
+XUNIF_RGLGV           = XUNDEF
+XUNIF_ZF_TALLVEG      = XUNDEF
+XUNIF_H_VEG           = XUNDEF
+XUNIF_ROOT_EXTINCTIONGV = XUNDEF ! root extinction parameter
+!
 CFNAM_VEGTYPE (:)     = '                            '
 !
 CFNAM_VEG  (:,:)      = '                            '
@@ -355,6 +425,18 @@ CFNAM_CE_NITRO    (:) = '                            '
 CFNAM_CF_NITRO    (:) = '                            '
 CFNAM_CNA_NITRO   (:) = '                            '
 !
+CFNAM_LAIGV       (:,:) = '                            '
+CFNAM_Z0GV        (:,:) = '                            '
+CFNAM_VEGGV       (:,:) = '                            '
+CFNAM_ROOTFRACGV  (:,:) = '                            '
+CFNAM_RSMINGV     (:) = '                            '
+CFNAM_GAMMAGV     (:) = '                            '
+CFNAM_WRMAX_CFGV  (:) = '                            '
+CFNAM_RGLGV       (:) = '                            '
+CFNAM_ZF_TALLVEG  (:) = '                            '
+CFNAM_H_VEG       (:,:) = '                            '
+CFNAM_ROOT_EXTINCTIONGV (:) = '                            '
+
 CFTYP_VEGTYPE (:)     = '      '
 !
 CFTYP_VEG  (:,:)      = '      '
@@ -396,6 +478,19 @@ CFTYP_CE_NITRO    (:) = '      '
 CFTYP_CF_NITRO    (:) = '      '
 CFTYP_CNA_NITRO   (:) = '      '
 !
+CFTYP_LAIGV       (:,:) = '      '
+CFTYP_Z0GV        (:,:) = '      '
+CFTYP_VEGGV       (:,:) = '      '
+CFTYP_ROOTFRACGV  (:,:) = '      '
+CFTYP_RSMINGV     (:) = '      '
+CFTYP_GAMMAGV     (:) = '      '
+CFTYP_WRMAX_CFGV  (:) = '      '
+CFTYP_RGLGV       (:) = '      '
+CFTYP_ZF_TALLVEG  (:) = '      '
+CFTYP_H_VEG       (:,:) = '      '
+CFTYP_ROOT_EXTINCTIONGV (:) = '      '
+!
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
 !-------------------------------------------------------------------------------
 !
 !*    2.      Input file for cover types
@@ -475,6 +570,10 @@ ALLOCATE(XPAR_LAI      (NDIM,NTIME,NVEGTYPE))
  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','LAI: leaf area index','NAT',CFNAM_LAI,CFTYP_LAI,XUNIF_LAI,XPAR_LAI,LDATA_LAI) 
 IF (.NOT. LDATA_VEGTYPE .AND. .NOT. LDATA_LAI) DEALLOCATE(XPAR_LAI)
 !
+ALLOCATE(XPAR_H_VEG       (NDIM,NTIME,NVEGTYPE))
+CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','H_VEG: vegetation height','NAT',CFNAM_H_VEG,CFTYP_H_VEG,XUNIF_H_VEG,XPAR_H_VEG,LDATA_H_VEG) 
+IF (.NOT. LDATA_H_VEG) DEALLOCATE(XPAR_H_VEG)
+!
 ALLOCATE(XPAR_Z0       (NDIM,NTIME,NVEGTYPE))
  CALL INI_VAR_FROM_DATA(HPROGRAM,'CDN','Z0: roughness length','NAT',CFNAM_Z0,CFTYP_Z0,XUNIF_Z0,XPAR_Z0,LDATA_Z0)
 IF (.NOT. LDATA_Z0) DEALLOCATE(XPAR_Z0)
@@ -500,6 +599,27 @@ IF (.NOT.LECOCLIMAP .AND. .NOT.(LDATA_VEG .AND. LDATA_LAI .AND. LDATA_Z0 .AND. L
   !
 ENDIF
 !
+! ------------ Begin MEB parameters ---------------------
+IF(ISIZE_LMEB_PATCH>0) THEN
+  !
+  ALLOCATE(XPAR_LAIGV       (NDIM,NTIME,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','LAIGV: GV leaf area index','NAT', &
+                         CFNAM_LAIGV,CFTYP_LAIGV,XUNIF_LAIGV,XPAR_LAIGV,LDATA_LAIGV) 
+  IF (.NOT. LDATA_LAIGV) DEALLOCATE(XPAR_LAIGV)
+  !
+  ALLOCATE(XPAR_VEGGV       (NDIM,NTIME,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','VEGGV: GV veg fraction','NAT',&
+                         CFNAM_VEGGV,CFTYP_VEGGV,XUNIF_VEGGV,XPAR_VEGGV,LDATA_VEGGV)
+  IF (.NOT. LDATA_VEGGV) DEALLOCATE(XPAR_VEGGV)
+  !
+  ALLOCATE(XPAR_Z0GV        (NDIM,NTIME,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'CDN','Z0GV: GV roughness length','NAT', &
+                         CFNAM_Z0GV,CFTYP_Z0GV,XUNIF_Z0GV,XPAR_Z0GV,LDATA_Z0GV)
+  IF (.NOT. LDATA_Z0GV) DEALLOCATE(XPAR_Z0GV)
+  !
+ENDIF
+! ------------ End MEB parameters ---------------------
+!
 !--------------------------------depths fields-----------------------------------
 !
 ALLOCATE(XPAR_DG          (NDIM,NGROUND_LAYER,NVEGTYPE))
@@ -520,7 +640,7 @@ IF(CISBA=='DIF')THEN
   CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','ROOTFRAC: root fraction','NAT',CFNAM_ROOTFRAC,CFTYP_ROOTFRAC,&
         XUNIF_ROOTFRAC,XPAR_ROOTFRAC,LDATA_ROOTFRAC)
   IF (.NOT. LDATA_ROOTFRAC) DEALLOCATE(XPAR_ROOTFRAC)
-  !        
+  !
   ALLOCATE(XPAR_ROOT_EXTINCTION    (NDIM,NVEGTYPE))
   CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','ROOT_EXTINCTION: root extinction','NAT',CFNAM_ROOT_EXTINCTION,CFTYP_ROOT_EXTINCTION,&
         XUNIF_ROOT_EXTINCTION,XPAR_ROOT_EXTINCTION,LDATA_ROOT_EXTINCTION)
@@ -530,6 +650,47 @@ IF(CISBA=='DIF')THEN
   CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','ROOT_LIN: root linear','NAT',CFNAM_ROOT_LIN,CFTYP_ROOT_LIN,&
         XUNIF_ROOT_LIN,XPAR_ROOT_LIN,LDATA_ROOT_LIN)
   IF (.NOT. LDATA_ROOT_LIN) DEALLOCATE(XPAR_ROOT_LIN)
+  !
+  ! ------------ Begin MEB parameters ---------------------
+  IF(ISIZE_LMEB_PATCH>0) THEN
+    !
+    ALLOCATE(XPAR_ROOTFRACGV  (NDIM,NGROUND_LAYER,NVEGTYPE))
+    CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','ROOTFRACGV: GV root fraction','NAT',CFNAM_ROOTFRACGV,CFTYP_ROOTFRACGV,&
+            XUNIF_ROOTFRACGV,XPAR_ROOTFRACGV,LDATA_ROOTFRACGV)
+    IF (.NOT. LDATA_ROOTFRACGV) DEALLOCATE(XPAR_ROOTFRACGV)
+    !
+    !  Apply a function of XPAR_ROOTFRAC on XPAR_ROOTFRACGV if XUNIF_ROOTFRACGV is undefined
+    IF (.NOT. LDATA_ROOTFRACGV .AND. LDATA_ROOTFRAC)THEN
+      ALLOCATE(XPAR_ROOTFRACGV  (NDIM,NGROUND_LAYER,NVEGTYPE))
+      IHGROUND_LAYER=INT(CEILING(REAL(NGROUND_LAYER)/2.0))
+      XPAR_ROOTFRACGV=0.
+      DO IIH=1,IHGROUND_LAYER
+        XPAR_ROOTFRACGV(:,IIH,:)=XPAR_ROOTFRAC(:,IIH,:)
+      ENDDO
+      ZROOTFRACGV(:,:)=SUM(XPAR_ROOTFRACGV,DIM=2)
+      DO IIH=1,IHGROUND_LAYER
+        TEST=RESHAPE(XPAR_ROOTFRACGV(:,IIH,:),(/NDIM,NVEGTYPE/))
+        TEST2=1.
+        WHERE(ZROOTFRACGV>0.)TEST2 = 1./ZROOTFRACGV
+        TEST3=TEST * TEST2
+        XPAR_ROOTFRACGV(:,IIH,:)=TEST3
+      ENDDO
+      LDATA_ROOTFRACGV = .TRUE.
+    ENDIF
+    !                                     '                                '
+    ALLOCATE(XPAR_ROOT_EXTINCTIONGV(NDIM,NVEGTYPE))
+    CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','ROOT_EXTINCTIONGV: root ext gv  ','NAT',CFNAM_ROOT_EXTINCTIONGV,CFTYP_ROOT_EXTINCTIONGV,&
+          XUNIF_ROOT_EXTINCTIONGV,XPAR_ROOT_EXTINCTIONGV,LDATA_ROOT_EXTINCTIONGV)
+    IF (.NOT. LDATA_ROOT_EXTINCTIONGV) DEALLOCATE(XPAR_ROOT_EXTINCTIONGV)
+    !
+    IF (.NOT. LDATA_ROOT_EXTINCTIONGV .AND. LDATA_ROOT_EXTINCTION)THEN
+      ALLOCATE(XPAR_ROOT_EXTINCTIONGV(NDIM,NVEGTYPE))
+      XPAR_ROOT_EXTINCTIONGV = XPAR_ROOT_EXTINCTION
+      LDATA_ROOT_EXTINCTIONGV = .TRUE.
+    ENDIF
+    !
+  ENDIF
+  ! ------------ End MEB parameters ---------------------
   !
   IF (.NOT.LECOCLIMAP) THEN
     IF(LDATA_DG .AND. .NOT.LDATA_ROOTFRAC .AND. &
@@ -709,9 +870,40 @@ IF (.NOT.LECOCLIMAP .AND. .NOT.(LDATA_RSMIN.AND.LDATA_GAMMA.AND.LDATA_WRMAX_CF.A
   !
 ENDIF
 !
+! ------------ Begin MEB parameters ---------------------
+IF(ISIZE_LMEB_PATCH>0) THEN
+  !
+  ALLOCATE(XPAR_RSMINGV     (NDIM,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'INV','RSMINGV: GV min stomatal res','NAT',CFNAM_RSMINGV,   &
+         CFTYP_RSMINGV,XUNIF_RSMINGV,XPAR_RSMINGV,LDATA_RSMINGV)
+  IF (.NOT. LDATA_RSMINGV) DEALLOCATE(XPAR_RSMINGV)
+  !                                     '                            '
+  ALLOCATE(XPAR_GAMMAGV     (NDIM,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','GAMMAGV: GV gamma coeff','NAT',CFNAM_GAMMAGV,   &
+         CFTYP_GAMMAGV,XUNIF_GAMMAGV,XPAR_GAMMAGV,LDATA_GAMMAGV)
+  IF (.NOT. LDATA_GAMMAGV) DEALLOCATE(XPAR_GAMMAGV)
+  !                                     '                            '
+  ALLOCATE(XPAR_WRMAX_CFGV  (NDIM,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','WRMAX_CFGV: cff max GV WR','NAT',CFNAM_WRMAX_CFGV,   &
+         CFTYP_WRMAX_CFGV,XUNIF_WRMAX_CFGV,XPAR_WRMAX_CFGV,LDATA_WRMAX_CFGV)
+  IF (.NOT. LDATA_WRMAX_CFGV) DEALLOCATE(XPAR_WRMAX_CFGV)
+  !                                     '                            '
+  ALLOCATE(XPAR_RGLGV       (NDIM,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','RGLGV: max GV SW photosynth','NAT',CFNAM_RGLGV,   &
+         CFTYP_RGLGV,XUNIF_RGLGV,XPAR_RGLGV,LDATA_RGLGV)  
+  IF (.NOT. LDATA_RGLGV) DEALLOCATE(XPAR_RGLGV)
+  !
+  ALLOCATE(XPAR_ZF_TALLVEG  (NDIM,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','ZF_TALLVEG: MEB tall vegetation binary','NAT',CFNAM_ZF_TALLVEG,   &
+         CFTYP_ZF_TALLVEG,XUNIF_ZF_TALLVEG,XPAR_ZF_TALLVEG,LDATA_ZF_TALLVEG)  
+  IF (.NOT. LDATA_ZF_TALLVEG) DEALLOCATE(XPAR_ZF_TALLVEG)
+  !
+ENDIF
+! ------------ End MEB parameters ---------------------
+!
 !--------------------------------------AGS parameters----------------------------
 !
-IF (CPHOTO/='NON' .OR. (.NOT.LDATA_Z0.AND.(LDATA_LAI.OR.LDATA_VEGTYPE))) THEN
+IF (CPHOTO/='NON' .OR. (.NOT.LDATA_Z0.AND.(LDATA_LAI.OR.LDATA_VEGTYPE)) .OR. ISIZE_LMEB_PATCH>0) THEN
   !
   ALLOCATE(XPAR_H_TREE      (NDIM,NVEGTYPE))
   CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','H_TREE: height of trees','NAT',CFNAM_H_TREE,   &
@@ -719,7 +911,27 @@ IF (CPHOTO/='NON' .OR. (.NOT.LDATA_Z0.AND.(LDATA_LAI.OR.LDATA_VEGTYPE))) THEN
   IF (.NOT. LDATA_VEGTYPE .AND. .NOT. LDATA_H_TREE) DEALLOCATE(XPAR_H_TREE)
   !
 ENDIF
-  
+
+IF (CPHOTO/='NON' .OR. ISIZE_LMEB_PATCH>0) THEN
+  ALLOCATE(XPAR_BSLAI       (NDIM,NVEGTYPE))
+  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','BSLAI: biomass over LAI','NAT',CFNAM_BSLAI,   &
+       CFTYP_BSLAI,XUNIF_BSLAI,XPAR_BSLAI,LDATA_BSLAI)  
+  IF (.NOT. LDATA_BSLAI) DEALLOCATE(XPAR_BSLAI)
+ENDIF
+!
+IF (.NOT.LECOCLIMAP .AND. ISIZE_LMEB_PATCH>0 .AND. .NOT.LDATA_H_TREE)THEN
+  WRITE(ILUOUT,*) ' '
+  WRITE(ILUOUT,*) '***********************************************************'
+  WRITE(ILUOUT,*) '* Error in PGD field preparation of MEB fields            *'
+  WRITE(ILUOUT,*) '* There is no prescribed value and no input file :        *'
+  IF (.NOT.LDATA_H_TREE ) WRITE(ILUOUT,*) '* for H_TREE                      *'
+  WRITE(ILUOUT,*) '* Without ECOCLIMAP, these fields must be prescribed      *'
+  WRITE(ILUOUT,*) '***********************************************************'
+  WRITE(ILUOUT,*) ' '
+  CALL ABOR1_SFX('PGD_ISBA_PAR: NO PRESCRIBED VALUE NOR INPUT FILE FOR MEB PARAMETERS')
+  !
+ENDIF
+!
 IF (CPHOTO/='NON') THEN
   !
   ALLOCATE(XPAR_RE25        (NDIM,NVEGTYPE))
@@ -731,11 +943,6 @@ IF (CPHOTO/='NON') THEN
   CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','LAIMIN: minimum LAI','NAT',CFNAM_LAIMIN,   &
          CFTYP_LAIMIN,XUNIF_LAIMIN,XPAR_LAIMIN,LDATA_LAIMIN)  
   IF (.NOT. LDATA_LAIMIN) DEALLOCATE(XPAR_LAIMIN)          
-  !
-  ALLOCATE(XPAR_BSLAI       (NDIM,NVEGTYPE))
-  CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','BSLAI: biomass over LAI','NAT',CFNAM_BSLAI,   &
-       CFTYP_BSLAI,XUNIF_BSLAI,XPAR_BSLAI,LDATA_BSLAI)  
-  IF (.NOT. LDATA_BSLAI) DEALLOCATE(XPAR_BSLAI)
   !
   ALLOCATE(XPAR_SEFOLD      (NDIM,NVEGTYPE))
   CALL INI_VAR_FROM_DATA(HPROGRAM,'ARI','SEFOLD: e-folding time for senescence','NAT',CFNAM_SEFOLD,   &

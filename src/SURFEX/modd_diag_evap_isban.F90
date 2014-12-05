@@ -22,6 +22,7 @@ MODULE MODD_DIAG_EVAP_ISBA_n
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       07/11/03
+!!      P. Samuelsson  04/2012   MEB
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -70,6 +71,44 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XRESP_AUTO    ! Autotrophic respiration                      (kgCO2/m2/s)
   REAL, POINTER, DIMENSION(:,:) :: XRESP_ECO     ! Ecosystem respiration                        (kgCO2/m2/s)
 !
+  REAL, POINTER, DIMENSION(:,:) :: XLEVCV        ! MEB: total evapotranspiration from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLESC         ! MEB: total snow sublimation from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLETRGV       ! MEB: transpiration from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLETRCV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLERGV        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLERCV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLE_V_C       ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLE_G_C       ! MEB: latent heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLE_C_A       ! MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
+                                                 !      NOTE total latent heat flux to the atmosphere also possibly 
+                                                 !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XLE_N_C       ! MEB: latent heat flux from the snow on the ground [W/m2]
+                                                 !      NOTE total latent heat flux from the snowpack
+                                                 !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_V      ! MEB: net vegetation canopy shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_G      ! MEB: net ground shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_N      ! MEB: net snow shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_NS     ! MEB: net snow shortwave radiation for *surface* layer 
+                                                 !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWNET_V      ! MEB: net vegetation canopy longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWNET_G      ! MEB: net ground longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWNET_N      ! MEB: net snow longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XH_V_C        ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XH_G_C        ! MEB: sensible heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XH_C_A        ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
+                                                 !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                                 !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XH_N_C        ! MEB: sensible heat flux from the snow on the ground [W/m2]
+                                                 !      NOTE total sensible heat flux from the snowpack
+                                                 !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XSR_GN        ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:,:) :: XMELTCV       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:,:) :: XFRZCV        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:,:) :: XSWDOWN_GN    ! MEB: total shortwave radiation transmitted through the canopy
+                                                 !      reaching the snowpack/ground understory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWDOWN_GN    ! MEB: total shortwave radiation transmitted through and emitted by the canopy
+                                                 !      reaching the snowpack/ground understory (explicit part) [W/m2]
+!
   REAL, POINTER, DIMENSION(:,:) :: XDWG          ! liquid soil moisture time tendencies         (kg/m2/s)
   REAL, POINTER, DIMENSION(:,:) :: XDWGI         ! solid soil moisture time tendencies          (kg/m2/s)
   REAL, POINTER, DIMENSION(:,:) :: XDWR          ! canopy water time tendencies                 (kg/m2/s)
@@ -105,6 +144,44 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:)   :: XAVG_RESP_AUTO! Autotrophic respiration                      (kgCO2/m2/s)
   REAL, POINTER, DIMENSION(:)   :: XAVG_RESP_ECO ! Ecosystem respiration                        (kgCO2/m2/s)
 !
+  REAL, POINTER, DIMENSION(:) :: XAVG_LEVCV        ! MEB: total evapotranspiration from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LESC         ! MEB: total snow sublimation from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LETRGV       ! MEB: transpiration from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LETRCV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LERGV        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LERCV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_V_C       ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_G_C       ! MEB: latent heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_C_A       ! MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
+                                                 !      NOTE total latent heat flux to the atmosphere also possibly 
+                                                 !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_N_C       ! MEB: latent heat flux from the snow on the ground [W/m2]
+                                                 !      NOTE total latent heat flux from the snowpack
+                                                 !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_V      ! MEB: net vegetation canopy shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_G      ! MEB: net ground shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_N      ! MEB: net snow shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_NS     ! MEB: net snow shortwave radiation for *surface* layer 
+                                                 !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_V      ! MEB: net vegetation canopy longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_G      ! MEB: net ground longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_N      ! MEB: net snow longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_V_C        ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_G_C        ! MEB: sensible heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_C_A        ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
+                                                 !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                                 !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_N_C        ! MEB: sensible heat flux from the snow on the ground [W/m2]
+                                                 !      NOTE total sensible heat flux from the snowpack
+                                                 !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_SR_GN        ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XAVG_MELTCV       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XAVG_FRZCV        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWDOWN_GN    ! MEB: total shortwave radiation transmitted through the canopy
+                                                 !      reaching the snowpack/ground understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWDOWN_GN    ! MEB: total shortwave radiation transmitted through and emitted by the canopy
+                                                 !      reaching the snowpack/ground understory (explicit part) [W/m2]
+!
   REAL, POINTER, DIMENSION(:)   :: XRAINFALL     ! input rainfall rate for LWATER_BUDGET        (kg/m2/s)
   REAL, POINTER, DIMENSION(:)   :: XSNOWFALL     ! input snowfall rate for LWATER_BUDGET        (kg/m2/s)
   REAL, POINTER, DIMENSION(:)   :: XAVG_DWG      ! liquid soil moisture time tendencies         (kg/m2/s)
@@ -123,7 +200,7 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XLEGC         ! latent heat of evaporation over the ground   (J/m2)
   REAL, POINTER, DIMENSION(:,:) :: XLEGIC        ! surface soil ice sublimation                 (J/m2)
   REAL, POINTER, DIMENSION(:,:) :: XLEVC         ! latent heat of evaporation over vegetation   (J/m2)
-  REAL, POINTER, DIMENSION(:,:) :: XLESC         ! latent heat of sublimation over the snow     (J/m2)
+  REAL, POINTER, DIMENSION(:,:) :: XLESAC         ! latent heat of sublimation over the snow     (J/m2)
   REAL, POINTER, DIMENSION(:,:) :: XLESLC        ! latent heat of evaporation over the snow     (J/m2)
   REAL, POINTER, DIMENSION(:,:) :: XLERC         ! evaporation from canopy water interception   (J/m2)
   REAL, POINTER, DIMENSION(:,:) :: XLETRC        ! evapotranspiration of the vegetation         (J/m2)
@@ -148,6 +225,44 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XRESPC_AUTO   ! Autotrophic respiration                      (kgCO2/m2)
   REAL, POINTER, DIMENSION(:,:) :: XRESPC_ECO    ! Ecosystem respiration                        (kgCO2/m2)
 !
+  REAL, POINTER, DIMENSION(:,:) :: XLEVCVC        ! MEB: total evapotranspiration from vegetation canopy overstory [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLESCC         ! MEB: total snow sublimation from vegetation canopy overstory [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLETRGVC       ! MEB: transpiration from understory vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLETRCVC       ! MEB: transpiration from overstory canopy vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLERGVC        ! MEB: interception evaporation from understory vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLERCVC        ! MEB: interception evaporation from overstory canopy vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLE_V_CC       ! MEB: latent heat flux from vegetation canopy overstory [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLE_G_CC       ! MEB: latent heat flux from understory [J/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLE_C_AC       ! MEB: latent heat flux from canopy air space to the atmosphere [J/m2] 
+                                                  !      NOTE total latent heat flux to the atmosphere also possibly 
+                                                  !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XLE_N_CC       ! MEB: latent heat flux from the snow on the ground [J/m2]
+                                                  !      NOTE total latent heat flux from the snowpack
+                                                  !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_VC      ! MEB: net vegetation canopy shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_GC      ! MEB: net ground shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_NC      ! MEB: net snow shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XSWNET_NSC     ! MEB: net snow shortwave radiation for *surface* layer 
+                                                  !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWNET_VC      ! MEB: net vegetation canopy longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWNET_GC      ! MEB: net ground longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWNET_NC      ! MEB: net snow longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XH_V_CC        ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XH_G_CC        ! MEB: sensible heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XH_C_AC        ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
+                                                  !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                                  !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XH_N_CC        ! MEB: sensible heat flux from the snow on the ground [W/m2]
+                                                  !      NOTE total sensible heat flux from the snowpack
+                                                  !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:,:) :: XSR_GNC        ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:,:) :: XMELTCVC       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:,:) :: XFRZCVC        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:,:) :: XSWDOWN_GNC    ! MEB: total shortwave radiation transmitted through the canopy
+                                                  !      reaching the snowpack/ground understory [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLWDOWN_GNC    ! MEB: total shortwave radiation transmitted through and emitted by the canopy
+                                                  !      reaching the snowpack/ground understory (explicit part) [W/m2]
+!
   REAL, POINTER, DIMENSION(:,:) :: XDWGC         ! liquid soil moisture time tendencies         (kg/m2)
   REAL, POINTER, DIMENSION(:,:) :: XDWGIC        ! solid soil moisture time tendencies          (kg/m2)
   REAL, POINTER, DIMENSION(:,:) :: XDWRC         ! canopy water time tendencies                 (kg/m2)
@@ -164,7 +279,7 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:)   :: XAVG_LEGC      ! latent heat of evaporation over the ground   (J/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LEGIC     ! surface soil ice sublimation                 (J/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LEVC      ! latent heat of evaporation over vegetation   (J/m2)
-  REAL, POINTER, DIMENSION(:)   :: XAVG_LESC      ! latent heat of sublimation over the snow     (J/m2)
+  REAL, POINTER, DIMENSION(:)   :: XAVG_LESAC      ! latent heat of sublimation over the snow     (J/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LESLC     ! latent heat of evaporation over the snow     (J/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LERC      ! evaporation from canopy water interception   (J/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_LETRC     ! evapotranspiration of the vegetation         (J/m2)
@@ -188,6 +303,44 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:)   :: XAVG_GPPC      ! Gross Primary Production                     (kgCO2/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_RESPC_AUTO! Autotrophic respiration                      (kgCO2/m2)
   REAL, POINTER, DIMENSION(:)   :: XAVG_RESPC_ECO ! Ecosystem respiration                        (kgCO2/m2)  
+!
+  REAL, POINTER, DIMENSION(:) :: XAVG_LEVCVC        ! MEB: total evapotranspiration from vegetation canopy overstory [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LESCC         ! MEB: total snow sublimation from vegetation canopy overstory [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LETRGVC       ! MEB: transpiration from understory vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LETRCVC       ! MEB: transpiration from overstory canopy vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LERGVC        ! MEB: interception evaporation from understory vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LERCVC        ! MEB: interception evaporation from overstory canopy vegetation [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_V_CC       ! MEB: latent heat flux from vegetation canopy overstory [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_G_CC       ! MEB: latent heat flux from understory [J/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_C_AC       ! MEB: latent heat flux from canopy air space to the atmosphere [J/m2] 
+                                                  !      NOTE total latent heat flux to the atmosphere also possibly 
+                                                  !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_LE_N_CC       ! MEB: latent heat flux from the snow on the ground [J/m2]
+                                                  !      NOTE total latent heat flux from the snowpack
+                                                  !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_VC      ! MEB: net vegetation canopy shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_GC      ! MEB: net ground shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_NC      ! MEB: net snow shortwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_NSC     ! MEB: net snow shortwave radiation for *surface* layer 
+                                                  !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_VC      ! MEB: net vegetation canopy longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_GC      ! MEB: net ground longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_NC      ! MEB: net snow longwave radiation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_V_CC        ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_G_CC        ! MEB: sensible heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_C_AC        ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
+                                                  !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                                  !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_H_N_CC        ! MEB: sensible heat flux from the snow on the ground [W/m2]
+                                                  !      NOTE total sensible heat flux from the snowpack
+                                                  !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XAVG_SR_GNC        ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XAVG_MELTCVC       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XAVG_FRZCVC        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XAVG_SWDOWN_GNC    ! MEB: total shortwave radiation transmitted through the canopy
+                                                  !      reaching the snowpack/ground understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LWDOWN_GNC    ! MEB: total shortwave radiation transmitted through and emitted by the canopy
+                                                  !      reaching the snowpack/ground understory (explicit part) [W/m2]
 !
   REAL, POINTER, DIMENSION(:)   :: XRAINFALLC     ! input rainfall rate for LWATER_BUDGET        (kg/m2)
   REAL, POINTER, DIMENSION(:)   :: XSNOWFALLC     ! input snowfall rate for LWATER_BUDGET        (kg/m2)
@@ -254,6 +407,61 @@ REAL, POINTER, DIMENSION(:,:) :: XLEI_FLOOD=>NULL()
 !$OMP THREADPRIVATE(XLEI_FLOOD)
 REAL, POINTER, DIMENSION(:,:) :: XRRVEG=>NULL()
 !$OMP THREADPRIVATE(XRRVEG)
+!
+REAL, POINTER, DIMENSION(:,:) :: XLEVCV=>NULL()
+!$OMP THREADPRIVATE(XLEVCV)
+REAL, POINTER, DIMENSION(:,:) :: XLESC=>NULL()
+!$OMP THREADPRIVATE(XLESC)
+REAL, POINTER, DIMENSION(:,:) :: XLETRGV=>NULL()
+!$OMP THREADPRIVATE(XLETRGV)
+REAL, POINTER, DIMENSION(:,:) :: XLETRCV=>NULL()
+!$OMP THREADPRIVATE(XLETRCV)
+REAL, POINTER, DIMENSION(:,:) :: XLERGV=>NULL()
+!$OMP THREADPRIVATE(XLERGV)
+REAL, POINTER, DIMENSION(:,:) :: XLERCV=>NULL()
+!$OMP THREADPRIVATE(XLERCV)
+REAL, POINTER, DIMENSION(:,:) :: XLE_V_C=>NULL()
+!$OMP THREADPRIVATE(XLE_V_C)
+REAL, POINTER, DIMENSION(:,:) :: XLE_G_C=>NULL()
+!$OMP THREADPRIVATE(XLE_G_C)
+REAL, POINTER, DIMENSION(:,:) :: XLE_C_A=>NULL()
+!$OMP THREADPRIVATE(XLE_C_A)
+REAL, POINTER, DIMENSION(:,:) :: XLE_N_C=>NULL()
+!$OMP THREADPRIVATE(XLE_N_C)
+!
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_V=>NULL()
+!$OMP THREADPRIVATE(XSWNET_V)
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_G=>NULL()
+!$OMP THREADPRIVATE(XSWNET_G)
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_N=>NULL()
+!$OMP THREADPRIVATE(XSWNET_N)
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_NS=>NULL()
+!$OMP THREADPRIVATE(XSWNET_NS)
+REAL, POINTER, DIMENSION(:,:) :: XLWNET_V=>NULL()
+!$OMP THREADPRIVATE(XLWNET_V)
+REAL, POINTER, DIMENSION(:,:) :: XLWNET_G=>NULL()
+!$OMP THREADPRIVATE(XLWNET_G)
+REAL, POINTER, DIMENSION(:,:) :: XLWNET_N=>NULL()
+!$OMP THREADPRIVATE(XLWNET_N)
+REAL, POINTER, DIMENSION(:,:) :: XSWDOWN_GN=>NULL()
+!$OMP THREADPRIVATE(XSWDOWN_GN)
+REAL, POINTER, DIMENSION(:,:) :: XLWDOWN_GN=>NULL()
+!$OMP THREADPRIVATE(XLWDOWN_GN)
+REAL, POINTER, DIMENSION(:,:) :: XH_V_C=>NULL()
+!$OMP THREADPRIVATE(XH_V_C)
+REAL, POINTER, DIMENSION(:,:) :: XH_G_C=>NULL()
+!$OMP THREADPRIVATE(XH_G_C)
+REAL, POINTER, DIMENSION(:,:) :: XH_C_A=>NULL()
+!$OMP THREADPRIVATE(XH_C_A)
+REAL, POINTER, DIMENSION(:,:) :: XH_N_C=>NULL()
+!$OMP THREADPRIVATE(XH_N_C)
+REAL, POINTER, DIMENSION(:,:) :: XSR_GN=>NULL()
+!$OMP THREADPRIVATE(XSR_GN)
+REAL, POINTER, DIMENSION(:,:) :: XMELTCV=>NULL()
+!$OMP THREADPRIVATE(XMELTCV)
+REAL, POINTER, DIMENSION(:,:) :: XFRZCV=>NULL()
+!$OMP THREADPRIVATE(XFRZCV)
+!
 REAL, POINTER, DIMENSION(:,:) :: XIRRIG_FLUX=>NULL()
 !$OMP THREADPRIVATE(XIRRIG_FLUX)
 REAL, POINTER, DIMENSION(:,:) :: XGPP=>NULL()
@@ -314,6 +522,61 @@ REAL, POINTER, DIMENSION(:)   :: XAVG_LEI_FLOOD=>NULL()
 !$OMP THREADPRIVATE(XAVG_LEI_FLOOD)
 REAL, POINTER, DIMENSION(:)   :: XAVG_RRVEG=>NULL()
 !$OMP THREADPRIVATE(XAVG_RRVEG)
+!
+REAL, POINTER, DIMENSION(:) :: XAVG_LEVCV=>NULL()
+!$OMP THREADPRIVATE(XAVG_LEVCV)
+REAL, POINTER, DIMENSION(:) :: XAVG_LESC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LESC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LETRGV=>NULL()
+!$OMP THREADPRIVATE(XAVG_LETRGV)
+REAL, POINTER, DIMENSION(:) :: XAVG_LETRCV=>NULL()
+!$OMP THREADPRIVATE(XAVG_LETRCV)
+REAL, POINTER, DIMENSION(:) :: XAVG_LERGV=>NULL()
+!$OMP THREADPRIVATE(XAVG_LERGV)
+REAL, POINTER, DIMENSION(:) :: XAVG_LERCV=>NULL()
+!$OMP THREADPRIVATE(XAVG_LERCV)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_V_C=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_V_C)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_G_C=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_G_C)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_C_A=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_C_A)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_N_C=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_N_C)
+!
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_V=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_V)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_G=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_G)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_N=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_N)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_NS=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_NS)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_V=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWNET_V)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_G=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWNET_G)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_N=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWNET_N)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWDOWN_GN=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWDOWN_GN)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWDOWN_GN=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWDOWN_GN)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_V_C=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_V_C)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_G_C=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_G_C)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_C_A=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_C_A)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_N_C=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_N_C)
+REAL, POINTER, DIMENSION(:) :: XAVG_SR_GN=>NULL()
+!$OMP THREADPRIVATE(XAVG_SR_GN)
+REAL, POINTER, DIMENSION(:) :: XAVG_MELTCV=>NULL()
+!$OMP THREADPRIVATE(XAVG_MELTCV)
+REAL, POINTER, DIMENSION(:) :: XAVG_FRZCV=>NULL()
+!$OMP THREADPRIVATE(XAVG_FRZCV)
+!
 REAL, POINTER, DIMENSION(:)   :: XAVG_IRRIG_FLUX=>NULL()
 !$OMP THREADPRIVATE(XAVG_IRRIG_FLUX)
 REAL, POINTER, DIMENSION(:)   :: XAVG_GPP=>NULL()
@@ -352,8 +615,8 @@ REAL, POINTER, DIMENSION(:,:) :: XLEGIC=>NULL()
 !$OMP THREADPRIVATE(XLEGIC)
 REAL, POINTER, DIMENSION(:,:) :: XLEVC=>NULL()
 !$OMP THREADPRIVATE(XLEVC)
-REAL, POINTER, DIMENSION(:,:) :: XLESC=>NULL()
-!$OMP THREADPRIVATE(XLESC)
+REAL, POINTER, DIMENSION(:,:) :: XLESAC=>NULL()
+!$OMP THREADPRIVATE(XLESAC)
 REAL, POINTER, DIMENSION(:,:) :: XLESLC=>NULL()
 !$OMP THREADPRIVATE(XLESLC)
 REAL, POINTER, DIMENSION(:,:) :: XLERC=>NULL()
@@ -390,6 +653,61 @@ REAL, POINTER, DIMENSION(:,:) :: XICEFLUXC=>NULL()
 !$OMP THREADPRIVATE(XICEFLUXC)
 REAL, POINTER, DIMENSION(:,:) :: XRRVEGC=>NULL()
 !$OMP THREADPRIVATE(XRRVEGC)
+!
+REAL, POINTER, DIMENSION(:,:) :: XLEVCVC=>NULL()
+!$OMP THREADPRIVATE(XLEVCVC)
+REAL, POINTER, DIMENSION(:,:) :: XLESCC=>NULL()
+!$OMP THREADPRIVATE(XLESCC)
+REAL, POINTER, DIMENSION(:,:) :: XLETRGVC=>NULL()
+!$OMP THREADPRIVATE(XLETRGVC)
+REAL, POINTER, DIMENSION(:,:) :: XLETRCVC=>NULL()
+!$OMP THREADPRIVATE(XLETRCVC)
+REAL, POINTER, DIMENSION(:,:) :: XLERGVC=>NULL()
+!$OMP THREADPRIVATE(XLERGVC)
+REAL, POINTER, DIMENSION(:,:) :: XLERCVC=>NULL()
+!$OMP THREADPRIVATE(XLERCVC)
+REAL, POINTER, DIMENSION(:,:) :: XLE_V_CC=>NULL()
+!$OMP THREADPRIVATE(XLE_V_CC)
+REAL, POINTER, DIMENSION(:,:) :: XLE_G_CC=>NULL()
+!$OMP THREADPRIVATE(XLE_G_CC)
+REAL, POINTER, DIMENSION(:,:) :: XLE_C_AC=>NULL()
+!$OMP THREADPRIVATE(XLE_C_AC)
+REAL, POINTER, DIMENSION(:,:) :: XLE_N_CC=>NULL()
+!$OMP THREADPRIVATE(XLE_N_CC)
+!
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_VC=>NULL()
+!$OMP THREADPRIVATE(XSWNET_VC)
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_GC=>NULL()
+!$OMP THREADPRIVATE(XSWNET_GC)
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_NC=>NULL()
+!$OMP THREADPRIVATE(XSWNET_NC)
+REAL, POINTER, DIMENSION(:,:) :: XSWNET_NSC=>NULL()
+!$OMP THREADPRIVATE(XSWNET_NSC)
+REAL, POINTER, DIMENSION(:,:) :: XLWNET_VC=>NULL()
+!$OMP THREADPRIVATE(XLWNET_VC)
+REAL, POINTER, DIMENSION(:,:) :: XLWNET_GC=>NULL()
+!$OMP THREADPRIVATE(XLWNET_GC)
+REAL, POINTER, DIMENSION(:,:) :: XLWNET_NC=>NULL()
+!$OMP THREADPRIVATE(XLWNET_NC)
+REAL, POINTER, DIMENSION(:,:) :: XSWDOWN_GNC=>NULL()
+!$OMP THREADPRIVATE(XSWDOWN_GNC)
+REAL, POINTER, DIMENSION(:,:) :: XLWDOWN_GNC=>NULL()
+!$OMP THREADPRIVATE(XLWDOWN_GNC)
+REAL, POINTER, DIMENSION(:,:) :: XH_V_CC=>NULL()
+!$OMP THREADPRIVATE(XH_V_CC)
+REAL, POINTER, DIMENSION(:,:) :: XH_G_CC=>NULL()
+!$OMP THREADPRIVATE(XH_G_CC)
+REAL, POINTER, DIMENSION(:,:) :: XH_C_AC=>NULL()
+!$OMP THREADPRIVATE(XH_C_AC)
+REAL, POINTER, DIMENSION(:,:) :: XH_N_CC=>NULL()
+!$OMP THREADPRIVATE(XH_N_CC)
+REAL, POINTER, DIMENSION(:,:) :: XSR_GNC=>NULL()
+!$OMP THREADPRIVATE(XSR_GNC)
+REAL, POINTER, DIMENSION(:,:) :: XMELTCVC=>NULL()
+!$OMP THREADPRIVATE(XMELTCVC)
+REAL, POINTER, DIMENSION(:,:) :: XFRZCVC=>NULL()
+!$OMP THREADPRIVATE(XFRZCVC)
+!
 REAL, POINTER, DIMENSION(:,:) :: XIRRIG_FLUXC=>NULL()
 !$OMP THREADPRIVATE(XIRRIG_FLUXC)
 REAL, POINTER, DIMENSION(:,:) :: XGPPC=>NULL()
@@ -424,8 +742,8 @@ REAL, POINTER, DIMENSION(:)   :: XAVG_LEGIC=>NULL()
 !$OMP THREADPRIVATE(XAVG_LEGIC)
 REAL, POINTER, DIMENSION(:)   :: XAVG_LEVC=>NULL()
 !$OMP THREADPRIVATE(XAVG_LEVC)
-REAL, POINTER, DIMENSION(:)   :: XAVG_LESC=>NULL()
-!$OMP THREADPRIVATE(XAVG_LESC)
+REAL, POINTER, DIMENSION(:)   :: XAVG_LESAC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LESAC)
 REAL, POINTER, DIMENSION(:)   :: XAVG_LESLC=>NULL()
 !$OMP THREADPRIVATE(XAVG_LESLC)
 REAL, POINTER, DIMENSION(:)   :: XAVG_LERC=>NULL()
@@ -462,6 +780,61 @@ REAL, POINTER, DIMENSION(:)   :: XAVG_ICEFLUXC=>NULL()
 !$OMP THREADPRIVATE(XAVG_ICEFLUXC)
 REAL, POINTER, DIMENSION(:)   :: XAVG_RRVEGC=>NULL()
 !$OMP THREADPRIVATE(XAVG_RRVEGC)
+!
+REAL, POINTER, DIMENSION(:) :: XAVG_LEVCVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LEVCVC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LESCC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LESCC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LETRGVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LETRGVC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LETRCVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LETRCVC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LERGVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LERGVC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LERCVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LERCVC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_V_CC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_V_CC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_G_CC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_G_CC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_C_AC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_C_AC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LE_N_CC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LE_N_CC)
+!
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_VC=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_VC)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_GC=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_GC)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_NC=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_NC)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWNET_NSC=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWNET_NSC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_VC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWNET_VC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_GC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWNET_GC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWNET_NC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWNET_NC)
+REAL, POINTER, DIMENSION(:) :: XAVG_SWDOWN_GNC=>NULL()
+!$OMP THREADPRIVATE(XAVG_SWDOWN_GNC)
+REAL, POINTER, DIMENSION(:) :: XAVG_LWDOWN_GNC=>NULL()
+!$OMP THREADPRIVATE(XAVG_LWDOWN_GNC)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_V_CC=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_V_CC)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_G_CC=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_G_CC)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_C_AC=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_C_AC)
+REAL, POINTER, DIMENSION(:) :: XAVG_H_N_CC=>NULL()
+!$OMP THREADPRIVATE(XAVG_H_N_CC)
+REAL, POINTER, DIMENSION(:) :: XAVG_SR_GNC=>NULL()
+!$OMP THREADPRIVATE(XAVG_SR_GNC)
+REAL, POINTER, DIMENSION(:) :: XAVG_MELTCVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_MELTCVC)
+REAL, POINTER, DIMENSION(:) :: XAVG_FRZCVC=>NULL()
+!$OMP THREADPRIVATE(XAVG_FRZCVC)
+!
 REAL, POINTER, DIMENSION(:)   :: XAVG_IRRIG_FLUXC=>NULL()
 !$OMP THREADPRIVATE(XAVG_IRRIG_FLUXC)
 REAL, POINTER, DIMENSION(:)   :: XAVG_GPPC=>NULL()
@@ -491,6 +864,7 @@ SUBROUTINE DIAG_EVAP_ISBA_GOTO_MODEL(KFROM, KTO, LKFROM)
 LOGICAL, INTENT(IN) :: LKFROM
 INTEGER, INTENT(IN) :: KFROM, KTO
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK('MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_GOTO_MODEL',0,ZHOOK_HANDLE)
 !
 ! Save current state for allocated arrays
 IF (LKFROM) THEN
@@ -515,6 +889,35 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XPFLOOD=>XPFLOOD
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_FLOOD=>XLE_FLOOD
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLEI_FLOOD=>XLEI_FLOOD
 DIAG_EVAP_ISBA_MODEL(KFROM)%XRRVEG=>XRRVEG
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLEVCV=>XLEVCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLESC=>XLESC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLETRGV=>XLETRGV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLETRCV=>XLETRCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLERGV=>XLERGV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLERCV=>XLERCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_V_C=>XLE_V_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_G_C=>XLE_G_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_C_A=>XLE_C_A
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_N_C=>XLE_N_C
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_V=> XSWNET_V
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_G=> XSWNET_G
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_N=> XSWNET_N
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_NS=> XSWNET_NS
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWNET_V=> XLWNET_V
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWNET_G=> XLWNET_G
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWNET_N=> XLWNET_N
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWDOWN_GN=> XSWDOWN_GN
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWDOWN_GN=> XLWDOWN_GN
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_V_C=> XH_V_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_G_C=> XH_G_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_C_A=> XH_C_A
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_N_C=> XH_N_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSR_GN=> XSR_GN
+DIAG_EVAP_ISBA_MODEL(KFROM)%XMELTCV=> XMELTCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XFRZCV=> XFRZCV
+!
 DIAG_EVAP_ISBA_MODEL(KFROM)%XIRRIG_FLUX=>XIRRIG_FLUX
 DIAG_EVAP_ISBA_MODEL(KFROM)%XGPP=>XGPP
 DIAG_EVAP_ISBA_MODEL(KFROM)%XRESP_AUTO=>XRESP_AUTO
@@ -545,6 +948,35 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_PFLOOD=>XAVG_PFLOOD
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_FLOOD=>XAVG_LE_FLOOD
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEI_FLOOD=>XAVG_LEI_FLOOD
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_RRVEG=>XAVG_RRVEG
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEVCV=>XAVG_LEVCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LESC=>XAVG_LESC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LETRGV=>XAVG_LETRGV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LETRCV=>XAVG_LETRCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LERGV=>XAVG_LERGV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LERCV=>XAVG_LERCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_V_C=>XAVG_LE_V_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_G_C=>XAVG_LE_G_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_C_A=>XAVG_LE_C_A
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_N_C=>XAVG_LE_N_C
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_V=> XAVG_SWNET_V
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_G=> XAVG_SWNET_G
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_N=> XAVG_SWNET_N
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_NS=> XAVG_SWNET_NS
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWNET_V=> XAVG_LWNET_V
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWNET_G=> XAVG_LWNET_G
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWNET_N=> XAVG_LWNET_N
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWDOWN_GN=> XAVG_SWDOWN_GN
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWDOWN_GN=> XAVG_LWDOWN_GN
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_V_C=> XAVG_H_V_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_G_C=> XAVG_H_G_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_C_A=> XAVG_H_C_A
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_N_C=> XAVG_H_N_C
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SR_GN=> XAVG_SR_GN
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_MELTCV=> XAVG_MELTCV
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_FRZCV=> XAVG_FRZCV
+!
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_IRRIG_FLUX=>XAVG_IRRIG_FLUX
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_GPP=>XAVG_GPP
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_RESP_AUTO=>XAVG_RESP_AUTO
@@ -564,7 +996,7 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XGFLUXC=>XGFLUXC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLEGC=>XLEGC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLEGIC=>XLEGIC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLEVC=>XLEVC
-DIAG_EVAP_ISBA_MODEL(KFROM)%XLESC=>XLESC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLESAC=>XLESAC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLESLC=>XLESLC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLERC=>XLERC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLETRC=>XLETRC
@@ -583,6 +1015,35 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_FLOODC=>XLE_FLOODC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XLEI_FLOODC=>XLEI_FLOODC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XICEFLUXC=>XICEFLUXC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XRRVEGC=>XRRVEGC
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLEVCVC=>XLEVCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLESCC=>XLESCC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLETRGVC=>XLETRGVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLETRCVC=>XLETRCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLERGVC=>XLERGVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLERCVC=>XLERCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_V_CC=>XLE_V_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_G_CC=>XLE_G_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_C_AC=>XLE_C_AC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLE_N_CC=>XLE_N_CC
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_VC=> XSWNET_VC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_GC=> XSWNET_GC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_NC=> XSWNET_NC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWNET_NSC=> XSWNET_NSC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWNET_VC=> XLWNET_VC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWNET_GC=> XLWNET_GC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWNET_NC=> XLWNET_NC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSWDOWN_GNC=> XSWDOWN_GNC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XLWDOWN_GNC=> XLWDOWN_GNC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_V_CC=> XH_V_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_G_CC=> XH_G_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_C_AC=> XH_C_AC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XH_N_CC=> XH_N_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XSR_GNC=> XSR_GNC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XMELTCVC=> XMELTCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XFRZCVC=> XFRZCVC
+!
 DIAG_EVAP_ISBA_MODEL(KFROM)%XIRRIG_FLUXC=>XIRRIG_FLUXC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XGPPC=>XGPPC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XRESPC_AUTO=>XRESPC_AUTO
@@ -600,7 +1061,7 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_GFLUXC=>XAVG_GFLUXC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEGC=>XAVG_LEGC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEGIC=>XAVG_LEGIC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEVC=>XAVG_LEVC
-DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LESC=>XAVG_LESC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LESAC=>XAVG_LESAC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LESLC=>XAVG_LESLC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LERC=>XAVG_LERC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LETRC=>XAVG_LETRC
@@ -619,6 +1080,35 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_FLOODC=>XAVG_LE_FLOODC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEI_FLOODC=>XAVG_LEI_FLOODC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_ICEFLUXC=>XAVG_ICEFLUXC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_RRVEGC=>XAVG_RRVEGC
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LEVCVC=>XAVG_LEVCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LESCC=>XAVG_LESCC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LETRGVC=>XAVG_LETRGVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LETRCVC=>XAVG_LETRCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LERGVC=>XAVG_LERGVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LERCVC=>XAVG_LERCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_V_CC=>XAVG_LE_V_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_G_CC=>XAVG_LE_G_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_C_AC=>XAVG_LE_C_AC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LE_N_CC=>XAVG_LE_N_CC
+!
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_VC=> XAVG_SWNET_VC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_GC=> XAVG_SWNET_GC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_NC=> XAVG_SWNET_NC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWNET_NSC=> XAVG_SWNET_NSC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWNET_VC=> XAVG_LWNET_VC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWNET_GC=> XAVG_LWNET_GC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWNET_NC=> XAVG_LWNET_NC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SWDOWN_GNC=> XAVG_SWDOWN_GNC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_LWDOWN_GNC=> XAVG_LWDOWN_GNC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_V_CC=> XAVG_H_V_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_G_CC=> XAVG_H_G_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_C_AC=> XAVG_H_C_AC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_H_N_CC=> XAVG_H_N_CC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_SR_GNC=> XAVG_SR_GNC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_MELTCVC=> XAVG_MELTCVC
+DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_FRZCVC=> XAVG_FRZCVC
+!
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_IRRIG_FLUXC=>XAVG_IRRIG_FLUXC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_GPPC=>XAVG_GPPC
 DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_RESPC_AUTO=>XAVG_RESPC_AUTO
@@ -633,7 +1123,6 @@ DIAG_EVAP_ISBA_MODEL(KFROM)%XAVG_WATBUDC=>XAVG_WATBUDC
 ENDIF
 !
 ! Current model is set to model KTO
-IF (LHOOK) CALL DR_HOOK('MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_GOTO_MODEL',0,ZHOOK_HANDLE)
 LSURF_EVAP_BUDGET=>DIAG_EVAP_ISBA_MODEL(KTO)%LSURF_EVAP_BUDGET
 LSURF_BUDGETC=>DIAG_EVAP_ISBA_MODEL(KTO)%LSURF_BUDGETC
 LRESET_BUDGETC=>DIAG_EVAP_ISBA_MODEL(KTO)%LRESET_BUDGETC
@@ -659,6 +1148,35 @@ XPFLOOD=>DIAG_EVAP_ISBA_MODEL(KTO)%XPFLOOD
 XLE_FLOOD=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_FLOOD
 XLEI_FLOOD=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEI_FLOOD
 XRRVEG=>DIAG_EVAP_ISBA_MODEL(KTO)%XRRVEG
+!
+XLEVCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEVCV
+XLESC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLESC
+XLETRGV=>DIAG_EVAP_ISBA_MODEL(KTO)%XLETRGV
+XLETRCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XLETRCV
+XLERGV=>DIAG_EVAP_ISBA_MODEL(KTO)%XLERGV
+XLERCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XLERCV
+XLE_V_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_V_C
+XLE_G_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_G_C
+XLE_C_A=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_C_A
+XLE_N_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_N_C
+!
+XSWNET_V=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_V
+XSWNET_G=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_G
+XSWNET_N=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_N
+XSWNET_NS=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_NS
+XLWNET_V=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWNET_V
+XLWNET_G=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWNET_G
+XLWNET_N=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWNET_N
+XSWDOWN_GN=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWDOWN_GN
+XLWDOWN_GN=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWDOWN_GN
+XH_V_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_V_C
+XH_G_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_G_C
+XH_C_A=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_C_A
+XH_N_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_N_C
+XSR_GN=>DIAG_EVAP_ISBA_MODEL(KTO)%XSR_GN
+XMELTCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XMELTCV
+XFRZCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XFRZCV
+!
 XIRRIG_FLUX=>DIAG_EVAP_ISBA_MODEL(KTO)%XIRRIG_FLUX
 XGPP=>DIAG_EVAP_ISBA_MODEL(KTO)%XGPP
 XRESP_AUTO=>DIAG_EVAP_ISBA_MODEL(KTO)%XRESP_AUTO
@@ -689,6 +1207,35 @@ XAVG_PFLOOD=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_PFLOOD
 XAVG_LE_FLOOD=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_FLOOD
 XAVG_LEI_FLOOD=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEI_FLOOD
 XAVG_RRVEG=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_RRVEG
+!
+XAVG_LEVCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEVCV
+XAVG_LESC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LESC
+XAVG_LETRGV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LETRGV
+XAVG_LETRCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LETRCV
+XAVG_LERGV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LERGV
+XAVG_LERCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LERCV
+XAVG_LE_V_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_V_C
+XAVG_LE_G_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_G_C
+XAVG_LE_C_A=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_C_A
+XAVG_LE_N_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_N_C
+!
+XAVG_SWNET_V=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_V
+XAVG_SWNET_G=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_G
+XAVG_SWNET_N=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_N
+XAVG_SWNET_NS=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_NS
+XAVG_LWNET_V=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWNET_V
+XAVG_LWNET_G=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWNET_G
+XAVG_LWNET_N=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWNET_N
+XAVG_SWDOWN_GN=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWDOWN_GN
+XAVG_LWDOWN_GN=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWDOWN_GN
+XAVG_H_V_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_V_C
+XAVG_H_G_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_G_C
+XAVG_H_C_A=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_C_A
+XAVG_H_N_C=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_N_C
+XAVG_SR_GN=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SR_GN
+XAVG_MELTCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_MELTCV
+XAVG_FRZCV=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_FRZCV
+!
 XAVG_IRRIG_FLUX=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_IRRIG_FLUX
 XAVG_GPP=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_GPP
 XAVG_RESP_AUTO=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_RESP_AUTO
@@ -708,7 +1255,7 @@ XGFLUXC=>DIAG_EVAP_ISBA_MODEL(KTO)%XGFLUXC
 XLEGC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEGC
 XLEGIC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEGIC
 XLEVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEVC
-XLESC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLESC
+XLESAC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLESAC
 XLESLC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLESLC
 XLERC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLERC
 XLETRC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLETRC
@@ -727,6 +1274,35 @@ XLE_FLOODC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_FLOODC
 XLEI_FLOODC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEI_FLOODC
 XICEFLUXC=>DIAG_EVAP_ISBA_MODEL(KTO)%XICEFLUXC
 XRRVEGC=>DIAG_EVAP_ISBA_MODEL(KTO)%XRRVEGC
+!
+XLEVCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLEVCVC
+XLESCC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLESCC
+XLETRGVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLETRGVC
+XLETRCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLETRCVC
+XLERGVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLERGVC
+XLERCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLERCVC
+XLE_V_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_V_CC
+XLE_G_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_G_CC
+XLE_C_AC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_C_AC
+XLE_N_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLE_N_CC
+!
+XSWNET_VC=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_VC
+XSWNET_GC=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_GC
+XSWNET_NC=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_NC
+XSWNET_NSC=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWNET_NSC
+XLWNET_VC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWNET_VC
+XLWNET_GC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWNET_GC
+XLWNET_NC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWNET_NC
+XSWDOWN_GNC=>DIAG_EVAP_ISBA_MODEL(KTO)%XSWDOWN_GNC
+XLWDOWN_GNC=>DIAG_EVAP_ISBA_MODEL(KTO)%XLWDOWN_GNC
+XH_V_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_V_CC
+XH_G_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_G_CC
+XH_C_AC=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_C_AC
+XH_N_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XH_N_CC
+XSR_GNC=>DIAG_EVAP_ISBA_MODEL(KTO)%XSR_GNC
+XMELTCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XMELTCVC
+XFRZCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XFRZCVC
+!
 XIRRIG_FLUXC=>DIAG_EVAP_ISBA_MODEL(KTO)%XIRRIG_FLUXC
 XGPPC=>DIAG_EVAP_ISBA_MODEL(KTO)%XGPPC
 XRESPC_AUTO=>DIAG_EVAP_ISBA_MODEL(KTO)%XRESPC_AUTO
@@ -744,7 +1320,7 @@ XAVG_GFLUXC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_GFLUXC
 XAVG_LEGC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEGC
 XAVG_LEGIC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEGIC
 XAVG_LEVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEVC
-XAVG_LESC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LESC
+XAVG_LESAC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LESAC
 XAVG_LESLC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LESLC
 XAVG_LERC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LERC
 XAVG_LETRC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LETRC
@@ -763,6 +1339,35 @@ XAVG_LE_FLOODC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_FLOODC
 XAVG_LEI_FLOODC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEI_FLOODC
 XAVG_ICEFLUXC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_ICEFLUXC
 XAVG_RRVEGC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_RRVEGC
+!
+XAVG_LEVCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LEVCVC
+XAVG_LESCC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LESCC
+XAVG_LETRGVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LETRGVC
+XAVG_LETRCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LETRCVC
+XAVG_LERGVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LERGVC
+XAVG_LERCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LERCVC
+XAVG_LE_V_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_V_CC
+XAVG_LE_G_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_G_CC
+XAVG_LE_C_AC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_C_AC
+XAVG_LE_N_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LE_N_CC
+!
+XAVG_SWNET_VC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_VC
+XAVG_SWNET_GC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_GC
+XAVG_SWNET_NC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_NC
+XAVG_SWNET_NSC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWNET_NSC
+XAVG_LWNET_VC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWNET_VC
+XAVG_LWNET_GC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWNET_GC
+XAVG_LWNET_NC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWNET_NC
+XAVG_SWDOWN_GNC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SWDOWN_GNC
+XAVG_LWDOWN_GNC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_LWDOWN_GNC
+XAVG_H_V_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_V_CC
+XAVG_H_G_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_G_CC
+XAVG_H_C_AC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_C_AC
+XAVG_H_N_CC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_H_N_CC
+XAVG_SR_GNC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_SR_GNC
+XAVG_MELTCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_MELTCVC
+XAVG_FRZCVC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_FRZCVC
+!
 XAVG_IRRIG_FLUXC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_IRRIG_FLUXC
 XAVG_GPPC=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_GPPC
 XAVG_RESPC_AUTO=>DIAG_EVAP_ISBA_MODEL(KTO)%XAVG_RESPC_AUTO
@@ -805,6 +1410,35 @@ DO J=1,KMODEL
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XPFLOOD)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_FLOOD)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEI_FLOOD)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEVCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLESC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLETRGV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLETRCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLERGV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLERCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_V_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_G_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_C_A)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_N_C)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_V)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_G)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_N)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_NS)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWNET_V)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWNET_G)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWNET_N)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWDOWN_GN)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWDOWN_GN)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_V_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_G_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_C_A)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_N_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSR_GN)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XMELTCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XFRZCV)
+!
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XDRIP)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XIRRIG_FLUX)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XGPP)
@@ -836,6 +1470,35 @@ DO J=1,KMODEL
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_FLOOD)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEI_FLOOD)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_RRVEG)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEVCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LESC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LETRGV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LETRCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LERGV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LERCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_V_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_G_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_C_A)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_N_C)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_V)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_G)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_N)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_NS)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWNET_V)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWNET_G)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWNET_N)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWDOWN_GN)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWDOWN_GN)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_V_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_G_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_C_A)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_N_C)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SR_GN)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_MELTCV)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_FRZCV)
+!
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_IRRIG_FLUX)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_GPP)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_RESP_AUTO)
@@ -855,7 +1518,7 @@ DO J=1,KMODEL
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEGC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEGIC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEVC)
-  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLESC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLESAC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLESLC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLERC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLETRC)
@@ -874,6 +1537,35 @@ DO J=1,KMODEL
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEI_FLOODC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XICEFLUXC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XRRVEGC)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLEVCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLESCC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLETRGVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLETRCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLERGVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLERCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_V_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_G_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_C_AC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLE_N_CC)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_VC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_GC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_NC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWNET_NSC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWNET_VC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWNET_GC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWNET_NC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSWDOWN_GNC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XLWDOWN_GNC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_V_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_G_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_C_AC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XH_N_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XSR_GNC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XMELTCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XFRZCVC)
+!
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XIRRIG_FLUXC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XGPPC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XRESPC_AUTO)
@@ -891,7 +1583,7 @@ DO J=1,KMODEL
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEGC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEGIC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEVC)
-  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LESC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LESAC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LESLC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LERC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LETRC)
@@ -910,6 +1602,35 @@ DO J=1,KMODEL
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEI_FLOODC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_ICEFLUXC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_RRVEGC)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LEVCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LESCC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LETRGVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LETRCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LERGVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LERCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_V_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_G_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_C_AC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LE_N_CC)
+!
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_VC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_GC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_NC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWNET_NSC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWNET_VC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWNET_GC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWNET_NC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SWDOWN_GNC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_LWDOWN_GNC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_V_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_G_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_C_AC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_H_N_CC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_SR_GNC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_MELTCVC)
+  NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_FRZCVC)
+!
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_IRRIG_FLUXC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_GPPC)
   NULLIFY(DIAG_EVAP_ISBA_MODEL(J)%XAVG_RESPC_AUTO)

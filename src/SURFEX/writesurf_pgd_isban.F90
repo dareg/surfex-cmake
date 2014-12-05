@@ -35,6 +35,7 @@
 !!      B. Decharme  07/2011 : delete argument HWRITE
 !!      B. Decharme  07/2012 : files of data for permafrost area and for SOC top and sub soil
 !!                   11/2013 : same for groundwater distribution
+!!      P. Samuelsson 10/2014 : MEB
 !!
 !-------------------------------------------------------------------------------
 !
@@ -54,7 +55,8 @@ USE MODD_ISBA_n, ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA,&
                         XZ0EFFJPDIR,                            &
                         LCOVER, LECOCLIMAP, LCTI, LSOCP, LNOF,  &
                         XSOILGRID, XPH, XFERT, LPERM, XPERM,    &
-                        LGW, XGW
+                        LGW, XGW,                               &
+                        LMEB_PATCH, LFORC_MEASURE
 !
 USE MODD_ISBA_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE, CGRID, XGRID_PAR
 !
@@ -149,6 +151,19 @@ YCOMMENT=YRECFM
 YRECFM='ECOCLIMAP'
 YCOMMENT=YRECFM
  CALL WRITE_SURF(HPROGRAM,YRECFM,LECOCLIMAP,IRESP,HCOMMENT=YCOMMENT)
+!
+!* logical vector indicating for which patches MEB should be applied
+!
+YRECFM='MEB_PATCH'
+YCOMMENT='(LOGICAL LIST)'
+CALL WRITE_SURF(HPROGRAM,YRECFM,LMEB_PATCH(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+!
+!
+!* flag indicating if forcing is from observed measurements or not
+!
+YRECFM='FORC_MEASURE'
+YCOMMENT=YRECFM
+CALL WRITE_SURF(HPROGRAM,YRECFM,LFORC_MEASURE,IRESP,HCOMMENT=YCOMMENT)
 !
 !
 !*       2.     Physiographic data fields:

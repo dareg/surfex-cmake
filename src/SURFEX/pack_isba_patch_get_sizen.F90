@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n
+SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n(KPATCH)
 !##############################################
 !
 !
@@ -32,13 +32,15 @@ SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
 !!      B. Decharme  04/2013 : DIF lateral subsurface drainage
 !!                             water table / surface coupling
+!!      P Samuelsson 10/2014 : MEB
 !!
 !!------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 !
 USE MODD_ISBA_n,      ONLY : TSNOW, LGLACIER, CSCOND, CISBA, CPHOTO, &
-                             CRESPSL, CRAIN, LTR_ML, CRUNOFF
+                             CRESPSL, CRAIN, LTR_ML, CRUNOFF,        &
+                             LMEB_PATCH
 USE MODD_AGRI,        ONLY : LAGRIP
 !
 USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE, NSIZE_T0, NSIZE_SIMPLE,   &
@@ -51,6 +53,8 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+INTEGER, INTENT(IN)               :: KPATCH
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------
@@ -89,11 +93,11 @@ ELSE
 ENDIF
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
-  NSIZE_SIMPLE=NSIZE_SIMPLE+1
+  NSIZE_SIMPLE=NSIZE_SIMPLE+4
   NSIZE_SNOW=NSIZE_SNOW+2
 ELSE
+  NSIZE_0=NSIZE_0+4
   NSIZE_00=NSIZE_00+2
-  NSIZE_0=NSIZE_0+1
 ENDIF
 !
 IF(TSNOW%SCHEME=='CRO') THEN
@@ -217,6 +221,20 @@ IF (CRAIN=='SGH') THEN
 ELSE
   NSIZE_0=NSIZE_0+1
 ENDIF
+! MEB STUFF START
+IF (LMEB_PATCH(KPATCH))THEN
+!  NSIZE_SIMPLE=NSIZE_SIMPLE+14
+  NSIZE_SIMPLE=NSIZE_SIMPLE+9
+!  NSIZE_GROUND=NSIZE_GROUND+1
+ELSE
+!  NSIZE_0=NSIZE_0+14
+  NSIZE_0=NSIZE_0+9
+!  NSIZE_01=NSIZE_01+1
+ENDIF
+! Old MEB varibales now eliminated
+NSIZE_0=NSIZE_0+7
+NSIZE_01=NSIZE_01+1
+! MEB STUFF END
 !
 IF (LHOOK) CALL DR_HOOK('PACK_ISBA_PATCH_GET_SIZE_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------

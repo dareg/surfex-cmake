@@ -47,6 +47,7 @@
 !                           phasing call isba
 !                           calculation of vegetation CO2 flux
 !                           dummy for water table / surface coupling
+!!    P. Samuelsson  10/2014  Introduced dummy variables in call to ISBA for MEB
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -318,6 +319,31 @@ REAL, DIMENSION(0) :: ZZ0EFFJP! roughness length for increasing y
 REAL, DIMENSION(0) :: ZZ0EFFJM! roughness length for decreasing y
 REAL, DIMENSION(0) :: ZTAU_WOOD  ! residence time in wood (s)
 REAL, DIMENSION(0,0) :: ZINCREASE
+!
+! Dummy variables for MEB:
+LOGICAL,PARAMETER::OMEB=.FALSE.
+LOGICAL,PARAMETER::OFORC_MEASURE=.FALSE.
+REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, &
+          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                                  &
+          ZP_WRMAX_CFV, ZP_LAIV,                                                          &
+          ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                                           &
+          ZZ0G_WITHOUT_SNOW,                                                              &
+          ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                                                 &
+          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                                                 &
+          ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                                                   &
+          ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_VEGGV
+REAL, DIMENSION(SIZE(XROOTFRAC,1),SIZE(XROOTFRAC,2)) :: ZP_ROOTFRACV
+REAL, DIMENSION(SIZE(PPS)) :: ZP_WRV,ZP_WRVN,ZP_TV
+REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
+REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,       &
+          ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                    &
+          ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                          &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
+          ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                     &
+          ZP_EVAP_N_C, ZP_EVAP_G_C,                                       & 
+          ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                                  &
+          ZP_SWDOWN_GN, ZP_LWDOWN_GN
+!
 TYPE (DATE_TIME),   DIMENSION(0) :: TPSEED ! seeding date
 TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
@@ -431,17 +457,26 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
  CALL ISBA(CISBA_GR, CPHOTO, LTR_ML_GR, 'WSAT', CKSAT_GR,     &
           HRAIN, CHORT_GR, CC1DRY, CSCOND_GR, TSNOW%SCHEME, &
           CSNOWRES, CCPSURF, CSOILFRZ, CDIFSFCOND, TPTIME, OFLOOD, &
-          OTEMP_ARP, OGLACIER, PTSTEP, HIMPLICIT_WIND, GAGRI_TO_GRASS,&
+          OTEMP_ARP, OGLACIER, OMEB, OFORC_MEASURE, PTSTEP,        &
+          HIMPLICIT_WIND, GAGRI_TO_GRASS,                          &
           GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,           &
           YSNOWMETAMO,YSNOWRAD,                                    &          
           XCGMAX, PZREF, PUREF, ZDIRCOSZW, PTA,         &
           PQA, PEXNA, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
+          ZP_MEB_SCA_SW,                                           &
           PSW, PLW, PVMOD, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &
           PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, XRSMIN, XRGL, XGAMMA,&
           XCV, XRUNOFFD, XSOILWGHT, NLAYER_HORT_GR, NLAYER_DUN_GR,    &
           XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,   &
           XSNOWFREE_ALB, XWRMAX_CF, XVEG, XLAI, XEMIS, XZ0,           &
-          XZ0/XZ0_O_Z0H, XVEGTYPE, XZ0, XRUNOFFB_GR, XCGSAT, XC1SAT,     &
+          XZ0/XZ0_O_Z0H, XVEGTYPE, XZ0,                               &
+          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,              &
+          ZP_ROOTFRACV, ZP_WRMAX_CFV, ZP_LAIV,                        &
+          ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                       &
+          ZZ0G_WITHOUT_SNOW,                                          &
+          ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                             &
+          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, ZP_VEGGV,                   &
+          XRUNOFFB_GR, XCGSAT, XC1SAT,                                &
           XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF, XTAUICE, XWDRAIN_GR,&
           ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &
           XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL, ZIRRIG, ZWATSUP,     &
@@ -454,7 +489,10 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &
           ZLEIFLOOD, ZSODELX, XLAT, XLON, XTG, XWG, XWGI, XPCPS,      &
-          XPLVTT, XPLSTT, XWR, XRESA, XANFM, ZFSAT, TSNOW%ALB(:,1),   &
+          XPLVTT, XPLSTT, XWR,                                        &
+          ZP_WRV,ZP_WRVN,ZP_TV,                                       &
+          XRESA, XANFM, ZFSAT, TSNOW%ALB(:,1),                        &
+          TSNOW%ALBVIS(:,1), TSNOW%ALBNIR(:,1), TSNOW%ALBFIR(:,1),    &
           TSNOW%WSNOW(:,:,1), TSNOW%HEAT(:,:,1), TSNOW%RHO(:,:,1),    &
           TSNOW%GRAN1(:,:,1), TSNOW%GRAN2(:,:,1), TSNOW%HIST(:,:,1),  &
           TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
@@ -464,14 +502,24 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZCG, ZC1, ZC2, ZWGEQ, ZCT, ZCH, ZCD, ZCDN, ZRI, ZHU, ZHUG,  &
           ZEMIST, ZALBT, ZRS, XLE,  ZRN, ZH, ZLEI, ZLEGI, ZLEG, ZLEV, &
           ZLES, ZLER, ZLETR, ZEVAP, ZGFLUX, ZRESTORE, ZUSTAR, ZDRAIN, &
-          ZRUNOFF, ZMELT, ZMELTADV, ZRN_ISBA, ZH_ISBA, ZLEG_ISBA,     &
+          ZRUNOFF, ZMELT, ZMELTADV,                                   &
+          ZP_TC,ZP_QC,                                                &
+          ZRN_ISBA, ZH_ISBA, ZLEG_ISBA,                               &
           ZLEGI_ISBA, ZLEV_ISBA, ZLETR_ISBA, ZUSTAR_ISBA, ZLER_ISBA,  &
           ZLE_ISBA, ZLEI_ISBA, ZGFLUX_ISBA, ZHORT, ZDRIP, ZRRVEG,     &
           PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, ZFAPARC, ZFAPIRC, ZMUS,     &
           ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          PDEEP_FLUX, PIRRIG_GREENROOF,                               &
-          ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT                  )  
+          PDEEP_FLUX,                                                 &
+          ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,            &
+          ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                         &
+          ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                      &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
+          ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                 &
+          ZP_EVAP_N_C, ZP_EVAP_G_C,                                   & 
+          ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                              &
+          ZP_SWDOWN_GN, ZP_LWDOWN_GN,                                 &
+          PIRRIG_GREENROOF, ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT)  
 !
 PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
 PDRAIN_GREENROOF(:)  = ZDRAIN(:)

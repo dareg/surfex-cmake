@@ -1,7 +1,9 @@
 !     #########
       SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA(OFLOOD, HALBEDO, &
-                                 PZENITH,PVEG,PZ0,PLAI,PTG1,&
-                                 PPATCH,                    &
+                                 PZENITH,PVEG,PZ0,PLAI,     &
+                                 OMEB_PATCH,PVEGGV,PZ0GV,PLAIGV, &
+                                 PZF_TALLVEG, PH_VEG, PTV,  &
+                                 PTG1,PPATCH,               &
                                  PSW_BANDS,                 &
                                  PALBNIR_VEG,PALBVIS_VEG,   &
                                  PALBUV_VEG,                &
@@ -12,7 +14,8 @@
                                  PALBNIR_ECO,PALBVIS_ECO,   &
                                  PALBUV_ECO,                &
                                  PDIR_ALB,PSCA_ALB,         &
-                                 PEMIS,PTSRAD,PTSURF        )  
+                                 PEMIS,PTSRAD,PTSURF,       &
+                                 PDIR_SW, PSCA_SW           )
 !     ###################################################
 !
 !!**** ** computes radiative fields used in ISBA
@@ -45,6 +48,7 @@
 !!     B. Decharme  2008    The fraction of vegetation covered by snow must be
 !                            <= to ZSNG
 !!     B. Decharme  2013    new coupling variable and optimization    
+!!     P. Samuelsson 10/2014 MEB
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -55,10 +59,13 @@ USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_TYPE_SNOW
 !
 USE MODD_ISBA_n,    ONLY : XPSN,XFF,XEMISF
+USE MODD_CSTS,      ONLY : XSTEFAN
+USE MODE_MEB,       ONLY : MEBPALPHAN
 !
 USE MODI_ALBEDO
 USE MODI_AVERAGE_RAD
 USE MODI_UPDATE_RAD_ISBA_n
+USE MODI_ISBA_LWNET_MEB
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -80,6 +87,13 @@ LOGICAL,                INTENT(IN)   :: OFLOOD
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PVEG        ! vegetation fraction
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0         ! roughness length
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAI        ! leaf area index
+LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logical vector
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PVEGGV      ! Understory vegetation fraction
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV      ! Understory leaf area index
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0GV       ! Understory roughness length
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PZF_TALLVEG ! Indicator for tall canopy vegetation
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG      ! Height of vegetation
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PTV         ! canopy vegetation temperature
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PTG1        ! soil surface temperature
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PPATCH      ! tile fraction
 REAL, DIMENSION(:),     INTENT(IN)   :: PSW_BANDS   ! middle wavelength of each band
@@ -104,6 +118,9 @@ REAL, DIMENSION(:),     INTENT(OUT)  :: PEMIS       ! averaged emissivity
 REAL, DIMENSION(:),     INTENT(OUT)  :: PTSRAD      ! averaged radiaitve temp.
 REAL, DIMENSION(:),     INTENT(OUT)  :: PTSURF      ! surface effective temperature         (K)
 !
+REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PDIR_SW ! Downwelling direct SW radiation
+REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PSCA_SW ! Downwelling diffuse SW radiation
+!
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -116,12 +133,22 @@ REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSRAD_PATCH  ! Tsrad
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSURF_PATCH  ! Tsurf
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS         ! emissivity with flood
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
+!
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZSNOWDEPTH    ! Total snow depth
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZPALPHAN      ! Snow/canopy ratio factor 
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLW_RAD       ! Fake downwelling LW rad
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLW_UP        ! Upwelling LW rad
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_N      ! LW net for snow surface
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_V      ! LW net for canopy veg
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_G      ! LW net for ground
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZDUMMY
 !
 LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
 INTEGER :: INP, INI
 INTEGER :: JP, JI ! loop on patches
+INTEGER :: JPATCH ! loop on patches
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -161,29 +188,88 @@ ZTSURF_PATCH (:,:) = PTG1(:,:)
 !
 !*    2.      averaged albedo and emis. on natural continental surfaces (with prognostic snow)
 !             ---------------------------------------------------------
+!
+! A dummy downwelling LW radiation can be used for calculation of radiative surface temp 
+!
+ZLW_RAD(:) = 300.0
+!    
 !* Initialization of albedo for each wavelength, emissivity and snow/flood fractions
 !
- CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI, &
-                         PZ0,PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,&
-                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH        )  
+IF(PRESENT(PDIR_SW))THEN
+!
+! For the case when MEB patch albedo is requested downweeling SW is needed
+!
+  CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
+                         OMEB_PATCH,PLAIGV,PVEGGV,PZ0GV, PH_VEG,                &
+                         PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
+                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH,             &
+                         PDIR_SW, PSCA_SW,                                      &
+                         PZF_TALLVEG,                                           &
+                         PALBNIR_VEG, PALBNIR_SOIL,                             &
+                         PALBVIS_VEG, PALBVIS_SOIL                              )
+ELSE
+!
+! For cases when MEB patch albedo is not requested no downweeling SW is needed
+!
+  CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
+                         OMEB_PATCH,PLAIGV,PVEGGV,PZ0GV, PH_VEG,                &
+                         PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
+                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH              )
+ENDIF
+!
 !
 !* radiative surface temperature
 !
-ZEMIS(:,:)=PEMIS_ECO(:,:)
+DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !
-IF(LEXPLICIT_SNOW.AND.OFLOOD)THEN
-  WHERE(XPSN(:,:)<1.0.AND.PEMIS_ECO(:,:)/=XUNDEF)
-       ZEMIS(:,:) = ((1.-XFF(:,:)-XPSN(:,:))*PEMIS_ECO(:,:) + XFF(:,:)*XEMISF(:,:)) / (1.-XPSN(:,:))
-  ENDWHERE
-ENDIF
+  IF(OMEB_PATCH(JPATCH))THEN  ! MEB patches
 !
-IF(LEXPLICIT_SNOW)THEN
-  WHERE(PEMIS_ECO(:,:)/=XUNDEF.AND.ZEMIS_PATCH(:,:)/=0.)
-       ZTSRAD_PATCH(:,:) = ( ( (1.-XPSN(:,:))*ZEMIS      (:,:)*PTG1     (:,:)**4            &
-                             +     XPSN(:,:) *TPSNOW%EMIS(:,:)*TPSNOW%TS(:,:)**4 )   &
-                           / ZEMIS_PATCH(:,:) )**0.25        
-  ENDWHERE
-ENDIF
+!   ZPALPHAN is needed as input to ISBA_LWNET_MEB
+!
+    ZSNOWDEPTH(:) = SUM(TPSNOW%WSNOW(:,:,JPATCH)/TPSNOW%RHO(:,:,JPATCH),2)
+    ZPALPHAN(:)   = MEBPALPHAN(ZSNOWDEPTH,PH_VEG(:,JPATCH))
+!
+!   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTSRAD_PATCH
+!
+    CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),XPSN(:,JPATCH),ZPALPHAN,   &
+        TPSNOW%EMIS(:,JPATCH),XEMISF(:,JPATCH),XFF(:,JPATCH),     &
+        PTV(:,JPATCH),PTG1(:,JPATCH),TPSNOW%TS(:,JPATCH),         &
+        ZLW_RAD,ZLWNET_N,ZLWNET_V,ZLWNET_G,                       &
+        ZDUMMY,ZDUMMY,ZDUMMY,                                     &
+        ZDUMMY,ZDUMMY,ZDUMMY,                                     &
+        ZDUMMY,ZDUMMY,ZDUMMY,                                     &
+        ZDUMMY,ZDUMMY,ZDUMMY                                      )
+!
+    ZLW_UP(:)   = ZLW_RAD(:) - (ZLWNET_V(:) + ZLWNET_G(:) + ZLWNET_N(:))
+!
+!   MEB patch radiative temperature
+!
+    WHERE (ZEMIS_PATCH(:,JPATCH)/=0.)
+      ZTSRAD_PATCH(:,JPATCH) = ((ZLW_UP(:) - ZLW_RAD(:)*(1.0-ZEMIS_PATCH(:,JPATCH)))/ &
+                              (XSTEFAN*ZEMIS_PATCH(:,JPATCH)))**0.25
+    END WHERE
+!
+  ELSE   ! Non-MEB patches
+
+    ZEMIS(:) = PEMIS_ECO(:,JPATCH)
+!
+    IF(OFLOOD.AND.LEXPLICIT_SNOW)THEN
+      WHERE(XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
+        ZEMIS(:) = ((1.-XFF(:,JPATCH)-XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + XFF(:,JPATCH)*XEMISF(:,JPATCH))/(1.-XPSN(:,JPATCH))
+      ENDWHERE   
+    ENDIF
+!
+    IF (.NOT.LEXPLICIT_SNOW) THEN
+      ZTSRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
+    ELSE IF (LEXPLICIT_SNOW) THEN
+      WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF .AND. ZEMIS_PATCH(:,JPATCH)/=0.)
+        ZTSRAD_PATCH(:,JPATCH) =( ( (1.-XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
+                                    +    XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
+                                 / ZEMIS_PATCH(:,JPATCH)**0.25  
+      END WHERE
+    END IF
+  ENDIF
+END DO
 !
 !* averaged radiative fields
 !

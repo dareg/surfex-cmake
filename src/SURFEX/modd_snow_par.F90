@@ -26,6 +26,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       01/2004                    
+!! P. Samuelsson  10/2014   MEB complements
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -50,6 +51,23 @@ REAL, SAVE       :: XANSMAX
 !
 REAL, SAVE       :: XAGLAMIN
 REAL, SAVE       :: XAGLAMAX
+!
+! Use recommended settings for snow albedo (FALSE = ISBA default)
+! 
+LOGICAL,SAVE     :: LMEBREC
+!
+! Fraction of maximum value of the albedo of snow that is reached for melting
+! snow
+!
+REAL, SAVE       :: XANSFRACMEL
+!
+! Threeshold temperature above which the snow albedo starts to decrease 
+!
+REAL, SAVE       :: XTEMPANS
+!
+! Minimum value of the albedo of snow reached under canopy vegetation:
+!
+REAL, SAVE       :: XANSMINMEB
 ! 
 ! Prescribed ice albedo in 3 spectral bands for glacier simulation with CROCUS scheme.
 REAL, SAVE       :: XALBICE1,XALBICE2,XALBICE3
@@ -119,10 +137,12 @@ REAL, PARAMETER       :: XANSMAX_ROAD = 0.85 ! (-)   Roads
 REAL, PARAMETER       :: XANS_TODRY    = 0.008     ! (-) Veg (default value)
 REAL, PARAMETER       :: XANS_TODRY_ROOF = 0.008   ! (-)  Roofs
 REAL, PARAMETER       :: XANS_TODRY_ROAD = 0.008   ! (-)  Roads
+REAL, PARAMETER       :: XANS_TODRY_MEB  = 0.016   ! (-) Surface under canopy vegetation
 !
 REAL, PARAMETER       :: XANS_T        = 0.240     ! (-) Veg (default value)
 REAL, PARAMETER       :: XANS_T_ROOF     = 0.174   ! (-)  Roofs
 REAL, PARAMETER       :: XANS_T_ROAD     = 0.174   ! (-)  Roads (alley simul)
+REAL, PARAMETER       :: XANS_T_MEB    = 0.480     ! (-) Surface under canopy vegetation
 !
 ! Minimum and maximum values of the density of snow 
 ! for Force-Restore snow option

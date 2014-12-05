@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PACK_DIAG_PATCH_GET_SIZE_n
+SUBROUTINE PACK_DIAG_PATCH_GET_SIZE_n(KPATCH)
 !##############################################
 !
 !!****  *PACK_DIAG_PATCH_GET_SIZE_n* - packs ISBA diagnostics
@@ -25,10 +25,11 @@ SUBROUTINE PACK_DIAG_PATCH_GET_SIZE_n
 !!      Modified    10/2005 by P. Le Moigne: Allocation (not EBA case)
 !!      Modified       2008 by B. Decharme : Allocation for the floodplains
 !!      Modified      04-09 by A.L. Gibelin : Add carbon diagnostics
+!!      Modified      10-14 by P. Samuelsson: MEB
 !!
 !!------------------------------------------------------------------
 !
-USE MODD_ISBA_n,            ONLY : TSNOW, CPHOTO, LTR_ML, LGLACIER
+USE MODD_ISBA_n,            ONLY : TSNOW, CPHOTO, LTR_ML, LGLACIER, LMEB_PATCH
 USE MODD_DIAG_ISBA_n,       ONLY : N2M
 USE MODD_DIAG_MISC_ISBA_n,  ONLY : LSURF_MISC_BUDGET
 USE MODD_DIAG_EVAP_ISBA_n,  ONLY : LWATER_BUDGET
@@ -43,6 +44,7 @@ IMPLICIT NONE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+INTEGER, INTENT(IN)               :: KPATCH
 !------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PACK_DIAG_PATCH_GET_SIZE_N',0,ZHOOK_HANDLE)
 !
@@ -55,10 +57,10 @@ NSIZE_0=0
 NSIZE_00=0
 !
 IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
-  NSIZE_SIMPLE=NSIZE_SIMPLE+23
+  NSIZE_SIMPLE=NSIZE_SIMPLE+26
   NSIZE_SNOW=NSIZE_SNOW+2
 ELSE
-  NSIZE_0=NSIZE_0+23
+  NSIZE_0=NSIZE_0+26
   NSIZE_00=NSIZE_00+2 
 ENDIF
 !
@@ -105,6 +107,17 @@ IF(LGLACIER)THEN
 ELSE
   NSIZE_0=NSIZE_0+1 
 ENDIF
+!
+! MEB STUFF START
+IF (LMEB_PATCH(KPATCH))THEN
+!  NSIZE_SIMPLE=NSIZE_SIMPLE+27
+  NSIZE_SIMPLE=NSIZE_SIMPLE+25
+ELSE
+!  NSIZE_0=NSIZE_0+27
+  NSIZE_0=NSIZE_0+25
+ENDIF
+NSIZE_0=NSIZE_0+2
+! MEB STUFF END
 !
 IF(LWATER_BUDGET)THEN
   NSIZE_SIMPLE=NSIZE_SIMPLE+5 

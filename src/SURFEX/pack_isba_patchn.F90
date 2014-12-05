@@ -32,18 +32,26 @@ SUBROUTINE PACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
 !!      A.L. Gibelin 07/2009 : Suppress PPST and PPSTF as outputs
 !!      B. Decharme  04/2013 : DIF lateral subsurface drainage
 !!                             water table / surface coupling
+!!      P Samuelsson 10/2014 : MEB
+!!      P Samuelsson 10/2014 : Additional snow albedos
 !!
 !!------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 USE MODD_ISBA_n,      ONLY : NGROUND_LAYER,  NNBIOMASS, NNLITTER, NNSOILCARB,       &
                                NNLITTLEVS, CISBA, CPHOTO, CSCOND, CRESPSL, CRUNOFF, &
-                               LGLACIER, XZ0_O_Z0H, XEMIS, XZ0, XWRMAX_CF, XGAMMA,  &
+                               LGLACIER, LMEB_PATCH,                                &
+                               XZ0_O_Z0H, XEMIS, XZ0, XWRMAX_CF, XGAMMA,            &
                                XCV, XRGL, XVEGTYPE_PATCH, XDG, XRUNOFFD, XRUNOFFB,  &
                                XWDRAIN, XTAUICE, XZ0REL, XGAMMAT, NWG_LAYER,        &
                                XC1SAT, XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF,   &
                                XWFC, XWWILT, XWSAT, XBCOEF, XWR, XTG, XWG,          &
                                XWGI, XLAI, XRESA, XVEG, XTDEEP, TSNOW, XROOTFRAC,   &
+                               ! For multi-energy balance
+                               XVEGGV, XZF_TALLVEG , XRGLGV, XGAMMAGV, XRSMINGV,      &
+                               XROOTFRACGV, XWRMAX_CFGV, XLAIGV, XZ0GV, XH_VEG,       &
+                               XWRV,XWRVN,XTV,                                        &
+                               XTC,XQC,                                               &
                                XCONDSAT, XMPOTSAT, XCGSAT, XHCAPSOIL,               &
                                XCONDDRY, XCONDSLD, XRSMIN, XBSLAI, XLAIMIN,         &
                                XSEFOLD, XH_TREE, XANMAX, XFZERO, XEPSO,             &
@@ -92,6 +100,11 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF, XP_PCOEF,  &
                                XP_WFC, XP_WWILT, XP_WSAT, XP_BCOEF, XP_WR, XP_TG, XP_WG,         &
                                XP_WGI, XP_LAI, XP_RESA, XP_VEG, XP_TDEEP, XP_ROOTFRAC, XP_DZG,   &
+                               ! For multi-energy balance
+                               XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,                    &
+                               XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V, XP_H_VEG,            &
+                               XP_WRV,XP_WRVN,XP_TV,                                             &
+                               XP_TC,XP_QC, XP_VEGGV, XP_Z0GV,                                   &
                                XP_DZDIF, XP_CONDSAT, XP_MPOTSAT, XP_CGSAT, XP_HCAPSOIL,          &
                                XP_CONDDRY, XP_CONDSLD, XP_RSMIN, XP_BSLAI, XP_LAIMIN,            &
                                XP_SEFOLD, XP_H_TREE, XP_ANF, XP_ANMAX, XP_FZERO, XP_EPSO,        &
@@ -102,7 +115,9 @@ USE MODD_PACK_ISBA,  ONLY :    NSIZE_LSIMPLE, NSIZE_L0, NSIZE_TSIMPLE,  NSIZE_T0
                                XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM,                      &
                                XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                              &
                                XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM, XP_SSO_SLOPE,                &
-                               XP_SNOWSWE, XP_SNOWRHO, XP_SNOWALB, XP_SNOWHEAT, XP_SNOWEMIS,     &
+                               XP_SNOWSWE, XP_SNOWRHO, XP_SNOWALB,                               &
+                               XP_SNOWALBVIS, XP_SNOWALBNIR, XP_SNOWALBFIR,                      &
+                               XP_SNOWHEAT, XP_SNOWEMIS,                                         &
                                XP_SNOWGRAN1, XP_SNOWGRAN2, XP_SNOWHIST, XP_SNOWAGE,              &
                                XP_LE, XP_ALBNIR, XP_ALBVIS, XP_ALBUV, XP_LAI_EFFC, XP_MUS,       &
                                XP_ALBNIR_VEG, XP_ALBUV_VEG, XP_ALBVIS_VEG,                       &
@@ -140,6 +155,7 @@ INTEGER :: ISIZE_LSIMPLE, ISIZE_L0, ISIZE_TSIMPLE, ISIZE_T0, ISIZE_SIMPLE,  &
 !
 INTEGER :: JJ, JI, JK, JL 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PACK_ISBA_PATCH_N',0,ZHOOK_HANDLE)
 !
@@ -374,6 +390,12 @@ IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
    XP_SNOWEMIS   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SNOW = ISIZE_SNOW + 1
    XP_SNOWAGE    => XBLOCK_SNOW(:,:,ISIZE_SNOW)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+   XP_SNOWALBVIS   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE) 
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+   XP_SNOWALBNIR   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE) 
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+   XP_SNOWALBFIR   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE) 
 ELSE
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWHEAT   => XBLOCK_00(:,:,ISIZE_00) 
@@ -381,6 +403,12 @@ ELSE
   XP_SNOWEMIS   => XBLOCK_0(:,ISIZE_0)
   ISIZE_00 = ISIZE_00 + 1
   XP_SNOWAGE    => XBLOCK_00(:,:,ISIZE_00)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNOWALBVIS   => XBLOCK_0(:,ISIZE_0) 
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNOWALBNIR   => XBLOCK_0(:,ISIZE_0) 
+  ISIZE_0 = ISIZE_0 + 1
+  XP_SNOWALBFIR   => XBLOCK_0(:,ISIZE_0) 
 END IF
 !
 IF(TSNOW%SCHEME=='CRO') THEN
@@ -548,10 +576,15 @@ ELSE
   XP_RSMIN      => XBLOCK_0(:,ISIZE_0)
 END IF
 !
-!
-IF (CPHOTO/='NON') THEN
+IF (CPHOTO/='NON' .OR. LMEB_PATCH(KPATCH)) THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    XP_BSLAI      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+ELSE
+  ISIZE_0 = ISIZE_0 + 1
+  XP_BSLAI      => XBLOCK_0(:,ISIZE_0)
+ENDIF
+!
+IF (CPHOTO/='NON') THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    XP_LAIMIN     => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -601,8 +634,6 @@ IF (CPHOTO/='NON') THEN
   ISIZE_BIOMASS = ISIZE_BIOMASS + 1 
   XP_RESP_BIOMASS   => XBLOCK_BIOMASS(:,:,ISIZE_BIOMASS)
 ELSE
-  ISIZE_0 = ISIZE_0 + 1
-  XP_BSLAI      => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   XP_LAIMIN     => XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
@@ -778,6 +809,104 @@ ELSE
   XP_MUF=> XBLOCK_0(:,ISIZE_0)
 ENDIF
 !
+! MEB STUFF START
+!
+! Note that here the understory ground vegetation (GV) that was part of the original
+! MEB development has been eliminated. The reason is to avoid a composite
+! of vegetation and soil. Thus, most varibales with old extension V
+! (representing canopy vegetation) are now unassociated. Instead, the classical ISBA
+! variables (e.g. RGL, GAMMA, ...) will represent a composite vegetation in the
+! MEB case. We still keep the GV-variables in the system for future needs.
+! Code is commented with "nogv" in appropriate places.
+!
+IF (LMEB_PATCH(KPATCH))THEN
+!
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_WRV         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_WRVN        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_TV          => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_TC          => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_QC          => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_RSMINV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_ZF_TALLVEG  => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_H_VEG       => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_RGLV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_GAMMAV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_WRMAX_CFV   => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_LAIV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+!nogv  XP_Z0V         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_VEGGV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  XP_Z0GV        => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+!
+!nogv  ISIZE_GROUND = ISIZE_GROUND + 1
+!nogv  XP_ROOTFRACV   => XBLOCK_GROUND(:,:,ISIZE_GROUND)  
+ELSE
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_WRV         => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_WRVN        => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_TV          => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_TC          => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_QC          => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_RSMINV      => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_ZF_TALLVEG  => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_H_VEG       => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_RGLV        => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_GAMMAV      => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_WRMAX_CFV   => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_LAIV        => XBLOCK_0(:,ISIZE_0)
+!nogv  ISIZE_0 = ISIZE_0 + 1
+!nogv  XP_Z0V         => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_VEGGV        => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  XP_Z0GV        => XBLOCK_0(:,ISIZE_0)
+!
+!nogv  ISIZE_01 = ISIZE_01 + 1
+!nogv  XP_ROOTFRACV   => XBLOCK_01(:,:,ISIZE_01)
+ENDIF
+ISIZE_0 = ISIZE_0 + 1
+XP_WRV         => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_RSMINV      => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_RGLV        => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_GAMMAV      => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_WRMAX_CFV   => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_LAIV        => XBLOCK_0(:,ISIZE_0)
+ISIZE_0 = ISIZE_0 + 1
+XP_Z0V         => XBLOCK_0(:,ISIZE_0)
+ISIZE_01 = ISIZE_01 + 1
+XP_ROOTFRACV   => XBLOCK_01(:,:,ISIZE_01)
+! MEB STUFF END
+!
 !
 IF (ISIZE_SIMPLE.GT.NSIZE_SIMPLE) &
   CALL ABOR1_SFX("PACK_ISBA_PATCH_n: PROBLEM DEFINING SIZE_SIMPLE / NUMBER OF FIELDS")
@@ -935,6 +1064,9 @@ IF (NPATCH==1) THEN
   IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
     XP_SNOWHEAT   (:,:) =    TSNOW%HEAT  (:,:,1)
     XP_SNOWAGE    (:,:) =    TSNOW%AGE   (:,:,1)  
+    XP_SNOWALBVIS   (:)    =    TSNOW%ALBVIS  (:, 1) 
+    XP_SNOWALBNIR   (:)    =    TSNOW%ALBNIR  (:, 1) 
+    XP_SNOWALBFIR   (:)    =    TSNOW%ALBFIR  (:, 1) 
   END IF
   !
   IF(TSNOW%SCHEME=='CRO') THEN
@@ -991,9 +1123,64 @@ IF (NPATCH==1) THEN
   IF (CPHOTO=='NON') THEN
     XP_RSMIN      (:)    =    XRSMIN      (:, 1) 
   END IF
-  !
-  IF (CPHOTO/='NON') THEN
+!
+! For multi-energy balance (MEB):
+!
+! Note that here the understory ground vegetation (GV) that was part of the original
+! MEB development has been eliminated. The reason is to avoid a composite
+! of vegetation and soil. Thus, most varibales with old extension V
+! (representing canopy vegetation) are now unassociated. Instead, the classical ISBA
+! variables (e.g. RGL, GAMMA, ...) will represent a composite vegetation in the
+! MEB case. We still keep the GV-variables in the system for future needs.
+! Code is commented with "nogv" in appropriate places.
+!
+  IF(LMEB_PATCH(1))THEN
+!
+!nogv    XP_WRV          (:)    =    XWRV          (:, 1) 
+    XP_WRVN         (:)    =    XWRVN         (:, 1) 
+    XP_TV           (:)    =    XTV           (:, 1) 
+    XP_TC           (:)    =    XTC           (:, 1) 
+    XP_QC           (:)    =    XQC           (:, 1) 
+!
+! Please note that secondary Ecoclimap parameters, i.e. those
+! with postfix GV, are given to the corresponing original ISBA physiography
+! parameters in the case of LMEB_PATCH/OMEB=true. And the original ISBA
+! physiography parameters are given to the canopy vegetation parameters.
+! E.g. XLAI -> XP_LAIV and XLAIGV -> XP_LAI
+!
+!nogv    IF (CISBA=='DIF') THEN
+!nogv      XP_ROOTFRACV         =  XP_ROOTFRAC
+!nogv      XP_ROOTFRAC   (:, :) =  XROOTFRACGV   (:, :, 1)
+!nogv    END IF
+!nogv    IF (CPHOTO=='NON') THEN
+!nogv      XP_RSMINV        = XP_RSMIN
+!nogv      XP_RSMIN  (:)    = XRSMINGV  (:, 1)
+!nogv    END IF
+!
+    XP_ZF_TALLVEG   (:)    =    XZF_TALLVEG   (:, 1)
+!nogv    XP_RGLV         (:)    =    XRGL          (:, 1)
+!nogv    XP_GAMMAV       (:)    =    XGAMMA        (:, 1)
+!nogv    XP_WRMAX_CFV    (:)    =    XWRMAX_CF     (:, 1)
+!nogv    XP_LAIV         (:)    =    XLAI          (:, 1)
+!nogv    XP_Z0V          (:)    =    XZ0           (:, 1)
+    XP_H_VEG        (:)    =    XH_VEG        (:, 1)
+!
+!nogv    XP_VEG          (:)    =    XVEGGV        (:, 1)
+!nogv    XP_RGL          (:)    =    XRGLGV        (:, 1)
+!nogv    XP_GAMMA        (:)    =    XGAMMAGV      (:, 1)
+!nogv    XP_WRMAX_CF     (:)    =    XWRMAX_CFGV   (:, 1)
+!nogv    XP_LAI          (:)    =    XLAIGV        (:, 1)
+!nogv    XP_Z0           (:)    =    XZ0GV         (:, 1)
+    XP_VEGGV        (:)    =    XVEGGV        (:, 1)
+    XP_Z0GV         (:)    =    XZ0GV         (:, 1)
+
+  ENDIF
+!
+  IF(CPHOTO/='NON' .OR. LMEB_PATCH(1))THEN
     XP_BSLAI      (:)    =    XBSLAI      (:, 1)
+  ENDIF
+!
+  IF (CPHOTO/='NON') THEN
     XP_LAIMIN     (:)    =    XLAIMIN     (:, 1)
     XP_SEFOLD     (:)    =    XSEFOLD     (:, 1)
     XP_H_TREE     (:)    =    XH_TREE     (:, 1)
@@ -1218,6 +1405,12 @@ ELSE
         XP_SNOWAGE    (JJ, JK) =    TSNOW%AGE    (JI, JK, KPATCH)
       ENDDO
     END DO
+    DO JJ=1,KSIZE
+      JI                      =    KMASK(JJ)
+      XP_SNOWALBVIS   (JJ)    =    TSNOW%ALBVIS  (JI, KPATCH) 
+      XP_SNOWALBNIR   (JJ)    =    TSNOW%ALBNIR  (JI, KPATCH) 
+      XP_SNOWALBFIR   (JJ)    =    TSNOW%ALBFIR  (JI, KPATCH) 
+    ENDDO
   END IF
   !
   IF (TSNOW%SCHEME=='CRO') THEN
@@ -1329,10 +1522,72 @@ ELSE
     END DO
   END IF
   !
-  IF (CPHOTO/='NON') THEN
+  IF(LMEB_PATCH(KPATCH))THEN
+!
+    DO JJ=1,KSIZE
+      JI                      =    KMASK(JJ)
+!nogv      XP_WRV          (JJ)    =    XWRV          (JI, KPATCH) 
+      XP_WRVN         (JJ)    =    XWRVN         (JI, KPATCH) 
+      XP_TV           (JJ)    =    XTV           (JI, KPATCH) 
+      XP_TC           (JJ)    =    XTC           (JI, KPATCH) 
+      XP_QC           (JJ)    =    XQC           (JI, KPATCH) 
+    ENDDO
+!
+! Please note that secondary Ecoclimap parameters, i.e. those
+! with postfix GV, are given to the corresponing original ISBA physiography
+! parameters in the case of LMEB_PATCH/OMEB=true. And the original ISBA
+! physiography parameters are given to the canopy vegetation parameters.
+! E.g. XLAI -> XP_LAIV and XLAIGV -> XP_LAI
+!
+!nogv    IF (CISBA=='DIF') THEN
+!nogv      XP_ROOTFRACV = XP_ROOTFRAC
+!nogv      DO JK=1,SIZE(XROOTFRAC,2)
+!nogv        DO JJ=1,KSIZE
+!nogv          JI                    =    KMASK(JJ)
+!nogv          XP_ROOTFRAC  (JJ, JK) =  XROOTFRACGV   (JI, JK, KPATCH)
+!nogv        ENDDO
+!nogv      ENDDO
+!nogv    END IF
+!
+!nogv    IF (CPHOTO=='NON') THEN
+!nogv      XP_RSMINV = XP_RSMIN
+!nogv      DO JJ=1,KSIZE
+!nogv        JI                    =    KMASK(JJ)
+!nogv        XP_RSMIN      (JJ)    =    XRSMINGV      (JI, KPATCH)
+!nogv      END DO
+!nogv    END IF
+!
+    DO JJ=1,KSIZE
+      JI                      =    KMASK(JJ)
+      XP_ZF_TALLVEG   (JJ)    =    XZF_TALLVEG   (JI, KPATCH)
+      XP_H_VEG        (JJ)    =    XH_VEG        (JI, KPATCH)
+!nogv      XP_RGLV         (JJ)    =    XRGL          (JI, KPATCH)
+!nogv      XP_GAMMAV       (JJ)    =    XGAMMA        (JI, KPATCH)
+!nogv      XP_WRMAX_CFV    (JJ)    =    XWRMAX_CF     (JI, KPATCH)
+!nogv      XP_LAIV         (JJ)    =    XLAI          (JI, KPATCH)
+!nogv      XP_Z0V          (JJ)    =    XZ0           (JI, KPATCH)
+!
+!nogv      XP_VEG          (JJ)    =    XVEGGV        (JI, KPATCH)
+!nogv      XP_RGL          (JJ)    =    XRGLGV        (JI, KPATCH)
+!nogv      XP_GAMMA        (JJ)    =    XGAMMAGV      (JI, KPATCH)
+!nogv      XP_WRMAX_CF     (JJ)    =    XWRMAX_CFGV   (JI, KPATCH)
+!nogv      XP_LAI          (JJ)    =    XLAIGV        (JI, KPATCH)
+!nogv      XP_Z0           (JJ)    =    XZ0GV         (JI, KPATCH)
+      XP_VEGGV        (JJ)    =    XVEGGV        (JI, KPATCH)
+      XP_Z0GV         (JJ)    =    XZ0GV         (JI, KPATCH)
+    ENDDO
+  ENDIF
+!
+  IF(CPHOTO/='NON' .OR. LMEB_PATCH(KPATCH))THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
       XP_BSLAI      (JJ)    =    XBSLAI      (JI, KPATCH)
+    ENDDO
+  ENDIF
+!
+  IF (CPHOTO/='NON') THEN
+    DO JJ=1,KSIZE
+      JI                    =    KMASK(JJ)
       XP_LAIMIN     (JJ)    =    XLAIMIN     (JI, KPATCH)
       XP_SEFOLD     (JJ)    =    XSEFOLD     (JI, KPATCH)
       XP_H_TREE     (JJ)    =    XH_TREE     (JI, KPATCH)

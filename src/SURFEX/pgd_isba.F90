@@ -38,6 +38,7 @@
 !!    A.L. Gibelin  04/2009 : dimension NBIOMASS for ISBA-A-gs
 !!    R. Alkama     05/2012 : npatch must be 12 or 19 if CPHOTO/='NON'
 !!    B. Decharme   11/2013 : groundwater distribution for water table/surface coupling
+!!    P. Samuelsson 02/2012 : MEB
 !!
 !----------------------------------------------------------------------------
 !
@@ -54,7 +55,8 @@ USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 XCLAY, XSAND, XSOC, LSOCP, LNOF,         &
                                 XRUNOFFB, XWDRAIN, LECOCLIMAP,           &
                                 XSOILGRID, LPERM, XPERM, XPH, XFERT,     &
-                                LGW, XGW
+                                LGW, XGW,                                &
+                                LMEB_PATCH, LFORC_MEASURE
 USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE
 !
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
@@ -72,8 +74,11 @@ USE MODI_PACK_PGD
 USE MODI_WRITE_COVER_TEX_ISBA
 USE MODI_WRITE_COVER_TEX_ISBA_PAR
 USE MODI_PGD_TOPO_INDEX
+USE MODI_OPEN_NAMELIST
+USE MODI_CLOSE_NAMELIST
 USE MODI_PGD_ISBA_PAR
 USE MODI_PGD_TOPD
+USE MODE_POS_SURF
 !
 USE MODI_READ_SURF
 USE MODI_INIT_IO_SURF_n
@@ -109,6 +114,7 @@ LOGICAL,          INTENT(IN)  :: OECOCLIMAP ! T if parameters are computed with 
 INTEGER                           :: ILUOUT    ! output listing logical unit
 INTEGER                           :: JLAYER    ! loop counter
 INTEGER                           :: ILU       ! number of points
+INTEGER                           :: ILUNAM    ! namelist file logical unit
 REAL, DIMENSION(NL)               :: ZAOSIP    ! A/S i+ on all surface points
 REAL, DIMENSION(NL)               :: ZAOSIM    ! A/S i- on all surface points
 REAL, DIMENSION(NL)               :: ZAOSJP    ! A/S j+ on all surface points
@@ -119,6 +125,8 @@ REAL, DIMENSION(NL)               :: ZHO2JP    ! h/2 j+ on all surface points
 REAL, DIMENSION(NL)               :: ZHO2JM    ! h/2 j- on all surface points
 REAL, DIMENSION(NL)               :: ZSSO_SLOPE! subgrid slope on all surface points
 INTEGER                           :: IRESP     ! error code
+LOGICAL                           :: GMEB      ! Multi-energy balance (MEB)
+LOGICAL                           :: GFOUND    ! flag when namelist is present
 !
 !*    0.3    Declaration of namelists
 !            ------------------------
@@ -172,6 +180,11 @@ REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+LOGICAL, DIMENSION(19) :: TEMP_LMEB_PATCH
+LOGICAL, DIMENSION(1)  :: TEMP_LFORC_MEASURE
+
+NAMELIST/NAM_MEB_ISBA/ TEMP_LMEB_PATCH, TEMP_LFORC_MEASURE
+
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
@@ -188,7 +201,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,          &
                        XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,    &
-                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM,              &                       
+                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM, GMEB,        &                       
                        YGW, YGWFILETYPE, XUNIF_GW, LIMP_GW,                      &                       
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,      &
@@ -202,6 +215,33 @@ CPEDOTF       = YPEDOTF
 CPHOTO        = YPHOTO
 LTR_ML        = GTR_ML
 XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
+!
+!
+!++++++++++++++++++++++++++++++++++++++
+!
+  ALLOCATE(LMEB_PATCH(IPATCH))
+  IF(IPATCH>19)THEN
+    STOP 'IPATCH must be 19 or less!!'
+  ENDIF
+
+! Default values of LMEB_PATCH
+  TEMP_LMEB_PATCH(:)    =.FALSE.
+  TEMP_LFORC_MEASURE(1) =.FALSE.
+
+IF(GMEB)THEN
+!
+  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+!
+  CALL POSNAM(ILUNAM,'NAM_MEB_ISBA',GFOUND,ILUOUT)
+  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_MEB_ISBA)
+!
+  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+!
+ENDIF
+LMEB_PATCH=TEMP_LMEB_PATCH(1:IPATCH)
+LFORC_MEASURE=TEMP_LFORC_MEASURE(1)
+!
+!++++++++++++++++++++++++++++++++++++++
 !
 !-------------------------------------------------------------------------------
 !

@@ -23,6 +23,8 @@
 !!      (V.Masson)     15/03/99 add number of layers
 !!      (A.Boone)      02/05/02 add ISBA-ES parameters
 !!      (A.Boone)      21/11/11 add Rsmax
+!!      (S.Gollvik)    20/02/12 add XFLXMAX
+!!      (A.Boone)      20/02/12 add ISBA-MEB parameters
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -52,6 +54,10 @@ REAL, PARAMETER       :: XVEGMIN   = 0.95
 !
 REAL, PARAMETER       :: XRS_MAX   = 5000. 
 !
+! Factor to restore explicit Cv value (DIF option)
+!
+REAL, PARAMETER       :: XCVHEATF  = 0.25 
+!
 !--------------------------------------------------------------------------------
 ! Soil:
 !--------------------------------------------------------------------------------
@@ -77,6 +83,11 @@ REAL, PARAMETER       :: XCONDQRTZ = 7.7    ! W/(m K)  Quartz thermal conductivi
 REAL, PARAMETER       :: XCONDOTH1 = 2.0    ! W/(m K)  Other thermal conductivity
 REAL, PARAMETER       :: XCONDOTH2 = 3.0    ! W/(m K)  Other thermal conductivity
 REAL, PARAMETER       :: XCONDWTR  = 0.57   ! W/(m K)  Water thermal conductivity
+!
+REAL, PARAMETER       :: XOMRHO     = 1300.   !Organic mater density (kg.m-3)
+REAL, PARAMETER       :: XOMSPH     = 1926.   !Organic mater specific heat              (J/(kg K))
+REAL, PARAMETER       :: XOMCONDDRY = 0.05    !Organic mater dry thermal conductivity   (W.m–1.K–1)
+REAL, PARAMETER       :: XOMCONDSLD = 0.25    !Organic mater solid thermal conductivity (W.m–1.K–1)
 !                        
 ! Maximum depth of the water table for soil thermal computation
 !
@@ -102,6 +113,16 @@ REAL, PARAMETER       :: XRED_EDGE = 0.0000007  ! (m)   0.7 micro-m
 REAL, PARAMETER       :: XUV_EDGE  = 0.0000002 ! (m)   0.1 micro-m
 !
 !--------------------------------------------------------------------------------
+! MEB: Multiple energy balance  parameters
+!--------------------------------------------------------------------------------
+!                        
+REAL, PARAMETER       :: XFLXMAX = 5000.   ! [kg/(m**2*s)]
+!                        Maximum value of exchange coeffient
+!                        (should go to infinity, for some cases, i.e. when lai=>0) 
+!                        
+REAL, PARAMETER       :: XLIMH       = 2.0 ! m
+!                        Minimum forcing height above vegetation top (turbulence computations)
+!
 ! Soil geometry if DF option
 !--------------------------------------------------------------------------------
 !

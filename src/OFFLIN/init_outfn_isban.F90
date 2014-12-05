@@ -47,6 +47,7 @@
 !!                                           bug : TSN_VEG if Snowlayer = 1 ; 
 !!                                           bug : TSRAD_P and not TTSRAD_P
 !!                                           add diag (Qsb, Subl) and Snow noted SN
+!!      modified    10-14, by P. Samuelsson: Added MEB output
 !!
 !-------------------------------------------------------------------------------
 !
@@ -61,7 +62,7 @@ USE MODD_OL_FILEID,        ONLY : XVAR_TO_FILEOUT, XID, XOUT
 USE MODD_ISBA_n,           ONLY : CISBA, CPHOTO, LTR_ML, CRUNOFF, CRAIN,        &
                                   CRESPSL, LCANOPY, LFLOOD, LGLACIER, LTEMP_ARP,&
                                   NTEMPLAYER_ARP, TSNOW, TTIME, CHORT, NPATCH,  &
-                                  LSOC, LGW, NPATCH
+                                  LSOC, LGW, NPATCH, LMEB_PATCH
 USE MODD_ISBA_CANOPY_n,    ONLY : NLVL
 USE MODD_DIAG_ISBA_n
 USE MODD_DIAG_EVAP_ISBA_n
@@ -116,6 +117,7 @@ INTEGER                          :: JLAYER, JVEG, JNBIOMASS, JNLITTER, JNLITTLEV
 INTEGER                          :: IDIM1, INDIMS
 INTEGER                          :: IFILE_ID, IDIMID, JSV
 INTEGER                          :: IL, JRET
+INTEGER                          :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -124,6 +126,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------
 
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_ISBA_N',0,ZHOOK_HANDLE)
+!
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+!
  CALL GET_DIM_FULL_n(INI)
  CALL GET_ISBA_CONF_n(YISBA, INPATCH, INLVLD, INLVLS, INBIOMASS, &
                        INLITTER, INLITTLEVS, INSOILCARB)  
@@ -189,6 +194,19 @@ ENDDO
 !
  CALL DEF_VAR_NETCDF(IFILE_ID, 'WR'  , 'Interception_reservoir', IDDIM, YATT_TITLE, (/'mm'/))
  CALL DEF_VAR_NETCDF(IFILE_ID, 'RESA', 'Aerodynamic_resistance', IDDIM, YATT_TITLE, (/'s/m'/))
+!
+IF (ISIZE_LMEB_PATCH>0) THEN
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'WRV'  , 'MEB: water intercepted on canopy vegetation leaves', &
+                      IDDIM, YATT_TITLE, (/'mm'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'WRVN' , 'MEB: snow intercepted on canopy vegetation leaves', &
+                      IDDIM, YATT_TITLE, (/'mm'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'TV'   , 'MEB: canopy vegetation temperature', &
+                      IDDIM, YATT_TITLE, (/'K'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'TC'   , 'MEB: vegetation canopy air temperature', &
+                      IDDIM, YATT_TITLE, (/'K'/))
+  CALL DEF_VAR_NETCDF(IFILE_ID, 'QC'   , 'MEB: vegetation canopy specifc humidity', &
+                      IDDIM, YATT_TITLE, (/'kg/kg'/))
+ENDIF
 !
 IF(LGLACIER)THEN
   CALL DEF_VAR_NETCDF(IFILE_ID, 'ICE_STO',   'Glacier_reservoir',        IDDIM, YATT_TITLE, (/'Kg/m2'/))
@@ -322,6 +340,8 @@ IF (N2M>0) THEN
   IF(LPATCH_BUDGET) THEN
     YATT='K'
     CALL DEF_VAR_NETCDF(IFILE_ID,'T2M_P'   ,'2m_Temperature'        ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'T2MMIN_P','Minimum_2m_Temperature',IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'T2MMAX_P','Maximum_2m_Temperature',IDDIM,YATT_TITLE,YATT)
     YATT='kg/kg'
     CALL DEF_VAR_NETCDF(IFILE_ID,'Q2M_P'   ,'2m_Specific_Humidity'  ,IDDIM,YATT_TITLE,YATT)
     YATT='(-)'
@@ -413,6 +433,67 @@ IF (LSURF_EVAP_BUDGET) THEN
   CALL DEF_VAR_NETCDF(IFILE_ID,'SNOMLT_ISBA'  ,'Averaged_Snow_melt_flux'                           ,JDIM,YATT_TITLE,YATT)
   IF(LAGRIP) CALL DEF_VAR_NETCDF(IFILE_ID,'IRRIG_ISBA'   ,'Averaged_irrigation_rate'              ,JDIM,YATT_TITLE,YATT)
   !
+  IF (ISIZE_LMEB_PATCH>0) THEN
+    YATT = 'W/m2'
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LEVCV_ISBA'  ,'MEB: total evapotranspiration from vegetation canopy overstory' ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LESC_ISBA'   ,'MEB: total snow sublimation from vegetation canopy overstory'   ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LETRGV_ISBA' ,'MEB: transpiration from understory vegetation'                  ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LETRCV_ISBA' ,'MEB: transpiration from overstory canopy vegetation'            ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LERGV_ISBA'  ,'MEB: interception evaporation from understory vegetation'       ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LERCV_ISBA'  ,'MEB: interception evaporation from overstory canopy vegetation' ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_V_C_ISBA' ,'MEB: latent heat flux from vegetation canopy overstory'         ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_G_C_ISBA' ,'MEB: latent heat flux from understory'                          ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_C_A_ISBA' ,'MEB: latent heat flux from canopy air space to the atmosphere'  ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LE_N_C_ISBA' ,'MEB: latent heat flux from the snow on the ground'              ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_V_ISBA' ,'MEB: net vegetation canopy shortwave radiation'                ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_G_ISBA' ,'MEB: net ground shortwave radiation'                           ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_N_ISBA' ,'MEB: net snow shortwave radiation'                             ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_NS_ISBA' ,'MEB: net snow shortwave radiation for surface layer'          ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LWNET_V_ISBA' ,'MEB: net vegetation canopy longwave radiation'                 ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LWNET_G_ISBA' ,'MEB: net ground longwave radiation'                            ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LWNET_N_ISBA' ,'MEB: net snow longwave radiation'                              ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'H_V_C_ISBA' ,'MEB: sensible heat flux from vegetation canopy overstory'        ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'H_G_C_ISBA' ,'MEB: sensible heat flux from understory'                         ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'H_C_A_ISBA' ,'MEB: sensible heat flux from canopy air space to the atmosphere' ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'H_N_C_ISBA' ,'MEB: sensible heat flux from the snow on the ground'             ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SWDOWN_GN_ISBA' ,'MEB: SW reaching the snowpack/ground understory'             ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LWDOWN_GN_ISBA' ,'MEB: LW reaching the snowpack/ground understory'             ,IDDIM,  &
+                        YATT_TITLE,YATT)      
+    YATT = 'kg/m2s'
+    CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP_N_C_ISBA','MEB: Total evap from snow on the ground to canopy air space'   ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP_G_C_ISBA','MEB: Total evap from ground to canopy air space'               ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'SR_GN_ISBA','MEB: total snow reaching the ground snow'                         ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'MELTCV_ISBA','MEB: snow melt rate from the overstory snow reservoir'           ,IDDIM,  &
+                        YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'FRZCV_ISBA','MEB: snow refreeze rate from the overstory snow reservoir'        ,IDDIM,  &
+                        YATT_TITLE,YATT)
+  ENDIF
+  !
   IF(LFLOOD) THEN
     YATT = 'kg/m2s'
     CALL DEF_VAR_NETCDF(IFILE_ID,'IFLOOD_ISBA'  ,'Averaged_Floodplains_infiltration'                    ,JDIM,YATT_TITLE,YATT)
@@ -466,6 +547,67 @@ IF (LSURF_EVAP_BUDGET) THEN
     CALL DEF_VAR_NETCDF(IFILE_ID,'RRVEG_P'  ,'Precipitation_Intercepted_by_Vegetation'             ,IDDIM,YATT_TITLE,YATT)    
     CALL DEF_VAR_NETCDF(IFILE_ID,'SNOMLT_P' ,'Snow_melt_flux'                                      ,IDDIM,YATT_TITLE,YATT)
     IF(LAGRIP) CALL DEF_VAR_NETCDF(IFILE_ID,'IRRIG_P'  ,'Irrigation_rate'                          ,IDDIM,YATT_TITLE,YATT)
+    !
+    IF (ISIZE_LMEB_PATCH>0) THEN
+      YATT = 'W/m2'
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LEVCV_P'  ,'MEB: total evapotranspiration from vegetation canopy overstory' ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LESC_P'   ,'MEB: total snow sublimation from vegetation canopy overstory'   ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LETRGV_P' ,'MEB: transpiration from understory vegetation'                  ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LETRCV_P' ,'MEB: transpiration from overstory canopy vegetation'            ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LERGV_P'  ,'MEB: interception evaporation from understory vegetation'       ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LERCV_P'  ,'MEB: interception evaporation from overstory canopy vegetation' ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LE_V_C_P' ,'MEB: latent heat flux from vegetation canopy overstory'         ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LE_G_C_P' ,'MEB: latent heat flux from understory'                          ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LE_C_A_P' ,'MEB: latent heat flux from canopy air space to the atmosphere'  ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LE_N_C_P' ,'MEB: latent heat flux from the snow on the ground'              ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_V_P' ,'MEB: net vegetation canopy shortwave radiation'                ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_G_P' ,'MEB: net ground shortwave radiation'                           ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_N_P' ,'MEB: net snow shortwave radiation'                             ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWNET_NS_P' ,'MEB: net snow shortwave radiation for surface layer'          ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWNET_V_P' ,'MEB: net vegetation canopy longwave radiation'                 ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWNET_G_P' ,'MEB: net ground longwave radiation'                            ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWNET_N_P' ,'MEB: net snow longwave radiation'                              ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'H_V_C_P' ,'MEB: sensible heat flux from vegetation canopy overstory'        ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'H_G_C_P' ,'MEB: sensible heat flux from understory'                         ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'H_C_A_P' ,'MEB: sensible heat flux from canopy air space to the atmosphere' ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'H_N_C_P' ,'MEB: sensible heat flux from the snow on the ground'             ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SWDOWN_GN_P' ,'MEB: SW reaching the snowpack/ground understory'             ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      CALL DEF_VAR_NETCDF(IFILE_ID,'LWDOWN_GN_P' ,'MEB: LW reaching the snowpack/ground understory'             ,IDDIM,  &
+                          YATT_TITLE,YATT)      
+      YATT = 'kg/m2s'
+      CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP_N_C_P','MEB: Total evap from snow on the ground to canopy air space'   ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'EVAP_G_C_P','MEB: Total evap from ground to canopy air space'               ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'SR_GN_P','MEB: total snow reaching the ground snow'                         ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'MELTCV_P','MEB: snow melt rate from the overstory snow reservoir'           ,IDDIM,  &
+                          YATT_TITLE,YATT)
+      CALL DEF_VAR_NETCDF(IFILE_ID,'FRZCV_P','MEB: snow refreeze rate from the overstory snow reservoir'        ,IDDIM,  &
+                          YATT_TITLE,YATT)
+    ENDIF
     !
     IF(LFLOOD)THEN
       YATT = 'kg/m2s'
@@ -1006,6 +1148,12 @@ ELSEIF(LPGD)THEN
   !
   CALL DEF_VAR_NETCDF(IFILE_ID,'Z0REL'       ,'orography_roughness_length',IDDIM(1:1),YATT_TITLE,(/'m'/))
   !
+  IF (ISIZE_LMEB_PATCH>0) THEN
+    CALL DEF_VAR_NETCDF(IFILE_ID,'VEGGV'         ,'MEB: Output_understory_vegetation_fraction'         ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'LAIGV'         ,'MEB: Output_understory_LAI_per_patch'               ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'Z0VEGGV'       ,'MEB: Understory_Roughness_Length_Vegetation'        ,IDDIM,YATT_TITLE,YATT)
+  ENDIF
+  !
   DO JLAYER=1,INLVLD
     WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
     CALL DEF_VAR_NETCDF(IFILE_ID,'DG'//YLVL   ,'soil_depth_layer_'//YLVL ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
@@ -1035,6 +1183,13 @@ ELSEIF(LPGD)THEN
       WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
       CALL DEF_VAR_NETCDF(IFILE_ID,'ROOTFRAC'//YLVL,'root_fraction_layer_'//YLVL ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))           
     ENDDO
+    IF (ISIZE_LMEB_PATCH>0) THEN
+      DO JLAYER=1,INLVLD
+        WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+        CALL DEF_VAR_NETCDF(IFILE_ID,'ROOTFRACGV'//YLVL,'MEB: understory_root_fraction_layer_'//YLVL ,&
+                            IDDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))           
+      ENDDO
+    ENDIF
     IF(LSOC)THEN
       DO JLAYER=1,INLVLD
          WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
@@ -1065,6 +1220,15 @@ ELSEIF(LPGD)THEN
   CALL DEF_VAR_NETCDF(IFILE_ID,'ALBNIR_ISBA' ,'total_near-infra-red albedo'        ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'ALBVIS_ISBA' ,'total_visible_albedo'               ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'ALBUV_ISBA'  ,'total_UV_albedo'                    ,IDDIM,YATT_TITLE,YATT)
+  !
+  IF (ISIZE_LMEB_PATCH>0) THEN
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RSMINGV'       ,'MEB: Understory_Minimal_Stomatal_Resistance'        ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'GAMMAGV'       ,'MEB: Understory_Coefficient_Computation_Rsmin'      ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'RGLGV'         ,'MEB: Understory_Max_Solar_Radiation_Photosynthesis' ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'WRMAX_CFGV'    ,'MEB: Understory_Coefficient_Max_Water_Interception' ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'ZF_TALLVEG'    ,'MEB: identification_variable_for tall_vegetation'   ,IDDIM,YATT_TITLE,YATT)
+    CALL DEF_VAR_NETCDF(IFILE_ID,'H_VEG'         ,'MEB: height_of_vegetation'                          ,IDDIM,YATT_TITLE,YATT)
+  ENDIF
   !  
   IF (LAGRIP .AND. (CPHOTO=='NIT' .OR. CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NCB') ) THEN
     CALL DEF_VAR_NETCDF(IFILE_ID,'WATSUP' ,'Water_Supply_Irrigation' ,IDDIM,YATT_TITLE,YATT)
