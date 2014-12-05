@@ -1,6 +1,6 @@
 !     #########
 SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                               OMEB_PATCH,PLAIGV,PVEGGV,PZ0GV, PH_VEG,     &
+                               OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG, &
                                PALBNIR,PALBVIS,PALBUV,PEMIS,               &
                                PDIR_ALB_WITH_SNOW,PSCA_ALB_WITH_SNOW,PEMIST, &
                                PDIR_SW,PSCA_SW,                            &
@@ -81,9 +81,9 @@ REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS   ! visible albedo (soil+vegetat
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV    ! UV albedo (soil+vegetation) at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PEMIS     ! emissivity (soil+vegetation) at t+1
 LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logical vector
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PVEGGV    ! Understory vegetation fraction at t+1
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PGNDLITTER  ! Ground litter fraction at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV    ! Understory leaf area index at t+1
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0GV     ! Understory roughness length at t+1
+REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0LITTER ! Ground litter roughness length at t+1
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG
 !
 REAL, DIMENSION(:,:,:), INTENT(OUT)  :: PDIR_ALB_WITH_SNOW ! Total direct albedo at t+1
@@ -185,6 +185,8 @@ REAL, DIMENSION(KSIZE) :: ZGLOBAL_SW, ZSCATTR_SW
 REAL, DIMENSION(KSIZE) :: ZALBT, ZALBG, ZSWDOWN_GN
 REAL, DIMENSION(KSIZE) :: ZPSNA, ZSIGMA_F, ZSIGMA_FN, ZEMISSN
 REAL, DIMENSION(KSIZE,ISWB) :: ZDIR_SW, ZSCA_SW
+REAL, DIMENSION(KSIZE) :: ZPERMSNOWFRAC
+REAL, DIMENSION(KSIZE,3) :: ZSPECTRALALBEDO
 !
 REAL, PARAMETER :: ZPUT0 = 0.0
 INTEGER  :: JSWB
@@ -215,8 +217,8 @@ IF(OMEB_PATCH(KPATCH))THEN
   CALL PACK_SAME_RANK(IMASK(:),PZENITH    (:),       ZZENITH     (:))
 !  CALL PACK_SAME_RANK(IMASK(:),PLAIGV     (:,KPATCH),ZLAI        (:))
 !  CALL PACK_SAME_RANK(IMASK(:),PLAI       (:,KPATCH),ZLAIV       (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PZ0GV      (:,KPATCH),ZZ0         (:))
-!  CALL PACK_SAME_RANK(IMASK(:),PVEGGV     (:,KPATCH),ZVEG        (:))
+!  CALL PACK_SAME_RANK(IMASK(:),PZ0LITTER  (:,KPATCH),ZZ0         (:))
+!  CALL PACK_SAME_RANK(IMASK(:),PGNDLITTER (:,KPATCH),ZVEG        (:))
   ZVEG(:)=0. ! Set veg=0 for MEB to get bare soil conditions for snow cover and
 !            ! flood fraction
   CALL PACK_SAME_RANK(IMASK(:),PH_VEG     (:,KPATCH),ZH_VEG      (:))
@@ -275,6 +277,10 @@ ELSE
 ENDIF        
 !-------------------------------------------------------------------------------
 !
+ZTAU_N(:)            = 0.
+ZSPECTRALALBEDO(:,:) = 0.
+ZPERMSNOWFRAC(:)     = 0.
+!
 IF(OMEB_PATCH(KPATCH))THEN
 !
   ZSNOWDEPTH(:) = SUM(ZLAYERSWE(:,:)/ZLAYERRHO(:,:),2)
@@ -288,7 +294,13 @@ IF(OMEB_PATCH(KPATCH))THEN
 !
 ! Albedo
 !
-    ZTAU_N(:)     = SNOW3LRADABS(ZLAYERRHO(:,1),ZSNOWDEPTH(:))
+    ZPERMSNOWFRAC(:)     = 0. ! assume no vegetation overlying permanent snow 
+
+    ZSPECTRALALBEDO(:,1) = ZSNOWALBVIS(:)
+    ZSPECTRALALBEDO(:,2) = ZSNOWALBNIR(:)
+    ZSPECTRALALBEDO(:,3) = XUNDEF ! Currently, MEB only considers 2 spectral bands
+    ZTAU_N(:)            = SNOW3LRADABS(ZLAYERRHO(:,1),ZSNOWDEPTH,  &
+                           ZSPECTRALALBEDO,ZZENITH,ZPERMSNOWFRAC)
 !
     DO JSWB=1,ISWB
       ZGLOBAL_SW(:) = ZDIR_SW(:,JSWB) + ZSCA_SW(:,JSWB)

@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE SOILDIF(HDIFSFCOND, OFLOOD,                                     &
                          PVEG, PCV, PFFG, PFFV,                                  &
-                         PCG, PCGMAX, PCT, PFROZEN1,                             &
+                         PCG, PCT, PFROZEN1,                                     &
                          PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                  &
                          PHCAPSOILZ, PCONDDRYZ, PCONDSLDZ,                       &
                          PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, PSOILHCAPZ,        &
@@ -118,9 +118,6 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PFROZEN1, PCG, PCT
 !                                      PCT      = averaged surface heat capacity of the grid (m2 K J-1)
 !                                      PCG      = averaged surface soil heat capacity (m2 K J-1)
 !
-REAL,               INTENT(IN)    :: PCGMAX
-!                                      Maximum soil heat capacity
-!
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSOILCONDZ, PSOILHCAPZ
 !                                    PSOILHCAP = soil heat capacity        (J m-3 K-1)
 !                                    PSOILCOND = soil thermal conductivity (W m-1 K-1)
@@ -136,13 +133,14 @@ REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZMATPOT, ZHCAPSOILZ, ZCONDDRYZ, ZCONDSLDZ, &
-                                            ZVEGMULCH
+REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
 !                                           ZMATPOT    = soil matric potential (m)
 !
 REAL                         :: ZFROZEN2DF, ZUNFROZEN2DF, ZCONDSATDF, ZLOG_CONDI, ZLOG_CONDWTR,  &
                                 ZSATDEGDF, ZKERSTENDF, ZWORK1, ZWORK2, ZWORK3, ZLOG, ZWTOT, ZWL
-!                        
+!    
+REAL, PARAMETER              :: ZCTMAX = 1.E-4 ! Maximum thermal inertia
+!
 REAL, PARAMETER              :: ZTHICKM = 0.04 ! Mulch thickness (m)
 !
 REAL, DIMENSION(SIZE(PVEG)) :: ZFF, ZCF, ZCV !Thermal inertia of the flood or vegetation
@@ -239,7 +237,6 @@ PFROZEN1(:) = PWGI(:,1)/(PWGI(:,1) + MAX(PWG(:,1),XWGMIN))
 ! uppermost soil layers thermal properties. Use organic matter thermal properties.
 !
 !
-ZHCAPSOILZ(:,:) = PHCAPSOILZ(:,:)
 ZCONDDRYZ (:,:) = PCONDDRYZ (:,:)
 ZCONDSLDZ (:,:) = PCONDSLDZ (:,:)
 !
@@ -251,9 +248,8 @@ IF(HDIFSFCOND == 'MLCH') THEN
         ZVEGMULCH(JJ,JL) = PVEG(JJ)*MIN(PDZG(JJ,JL),MAX(0.0,ZTHICKM-PD_G(JJ,JL)+PDZG(JJ,JL)))/PDZG(JJ,JL)     
 !
         IF(ZVEGMULCH(JJ,JL)>0.0)THEN
-           ZHCAPSOILZ(JJ,JL) = (1.0-ZVEGMULCH(JJ,JL))*PHCAPSOILZ(JJ,JL) + ZVEGMULCH(JJ,JL)*XOMRHO*XOMSPH
-           ZCONDDRYZ (JJ,JL) = EXP((1.0-ZVEGMULCH(JJ,JL))*LOG(PCONDDRYZ(JJ,JL))+ZVEGMULCH(JJ,JL)*LOG(XOMCONDDRY))
-           ZCONDSLDZ (JJ,JL) = EXP((1.0-ZVEGMULCH(JJ,JL))*LOG(PCONDSLDZ(JJ,JL))+ZVEGMULCH(JJ,JL)*LOG(XOMCONDSLD))
+           ZCONDDRYZ (JJ,JL) = 1.0/((1.0-ZVEGMULCH(JJ,JL))/PCONDDRYZ(JJ,JL)+ZVEGMULCH(JJ,JL)/XOMCONDDRY)
+           ZCONDSLDZ (JJ,JL) = 1.0/((1.0-ZVEGMULCH(JJ,JL))/PCONDSLDZ(JJ,JL)+ZVEGMULCH(JJ,JL)/XOMCONDSLD)
         ENDIF
 !
      ENDDO
@@ -280,10 +276,11 @@ DO JL=1,INL
 !Old: CONDSATDF=(CONDSLDZ**(1.0-WSAT))*(CONDI**(WSAT-UNFROZEN2DF))*(CONDWTR**UNFROZEN2DF)  
       ZWORK1      = LOG(ZCONDSLDZ(JJ,JL))*(1.0-PWSAT(JJ,JL))
       ZWORK2      = ZLOG_CONDI*(PWSAT(JJ,JL)-ZUNFROZEN2DF)
-      ZWORK3      = ZLOG_CONDWTR*ZUNFROZEN2DF        
+      ZWORK3      = ZLOG_CONDWTR*ZUNFROZEN2DF
       ZCONDSATDF  = EXP(ZWORK1+ZWORK2+ZWORK3)
 !
-      ZSATDEGDF   = MIN(1.0,MAX(0.1, (PWGI(JJ,JL)+PWG(JJ,JL))/PWSAT(JJ,JL)))
+      ZSATDEGDF   = MAX(0.1, (PWGI(JJ,JL)+PWG(JJ,JL))/PWSAT(JJ,JL))
+      ZSATDEGDF   = MIN(1.0,ZSATDEGDF)
       ZKERSTENDF  = LOG10(ZSATDEGDF) + 1.0
       ZKERSTENDF  = (1.0-ZFROZEN2DF)*ZKERSTENDF + ZFROZEN2DF *ZSATDEGDF  
 !
@@ -303,7 +300,7 @@ ENDDO
 !
 DO JL=1,INL
    DO JJ=1,INI
-      PSOILHCAPZ(JJ,JL) = (1.0-PWSAT(JJ,JL))*ZHCAPSOILZ(JJ,JL) +         &
+      PSOILHCAPZ(JJ,JL) = (1.0-PWSAT(JJ,JL))*PHCAPSOILZ(JJ,JL) +         &
                                PWG  (JJ,JL) *XCL*XRHOLW        +         &
                                PWGI (JJ,JL) *XCI*XRHOLI    
    ENDDO
@@ -313,6 +310,8 @@ ENDDO
 !
 PCG(:) = 1.0 / ( PD_G(:,1) * PSOILHCAPZ(:,1) )
 !
+PCG(:) = MIN(ZCTMAX,PCG(:))
+!
 !-------------------------------------------------------------------------------
 !
 !*       6.     THE HEAT CAPACITY OF VEGETATION
@@ -320,7 +319,9 @@ PCG(:) = 1.0 / ( PD_G(:,1) * PSOILHCAPZ(:,1) )
 !
 ! Vegetation thermal inertia [(m2 K)/J]
 !
-ZCV(:) = 1.0 / ( MAX(1.E+4,XCVHEATF/PCV(:)) +  XCL * PWR(:) )
+ZCV(:) = 1.0 / ( XCVHEATF/PCV(:) +  XCL * PWR(:) )
+!
+ZCV(:) = MIN(ZCTMAX,ZCV(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -334,6 +335,8 @@ IF(OFLOOD)THEN
   WHERE(ZFF(:)>0.0)
     ZCF(:) = 1.0 / ( XCL * PPIFLOOD(:) )
   ENDWHERE
+!
+  ZCF(:) = MIN(ZCTMAX,ZCF(:))
 !
 ENDIF
 !

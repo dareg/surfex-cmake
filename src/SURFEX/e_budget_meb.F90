@@ -20,7 +20,7 @@
            PTG,PTV,PTN,                                                                       &
            PFLXC_V_C,PHVGS,PHVNS,                                                             & 
            PDQSAT_G,PDQSAT_V,PDQSATI_N,                                                       & 
-           PTC,PQC,PTA_IC,PQA_IC,PUSTAR2_IC,                                                  &
+           PTC,PQC,PTA_IC,PQA_IC,PUSTAR2_IC,PVMOD,                                            &
            PDELTAT_G,PDELTAT_V,PDELTAT_N,PGRNDFLUX,PCPS,PLVTT,PLSTT,                          &
            PHPSNOW,PMELTADV,PRESTORE,PDEEP_FLUX,                                              &
            PDELHEATV_SFC,PDELHEATG_SFC,PDELHEATG                                              )
@@ -256,14 +256,15 @@ REAL, DIMENSION(:),   INTENT(OUT)  :: PFLXC_V_C, PHVGS, PHVNS
 !                                     PHVNS     = Dimensionless pseudo humidity factor for computing vapor
 !                                                 fluxes from the partly-buried part of the canopy to the canopy air (-)
 !
-REAL, DIMENSION(:),   INTENT(OUT)  :: PTC, PQC, PTA_IC, PQA_IC, PUSTAR2_IC  
-!                                     PTC       = Canopy air space temperature       (K)
-!                                     PQC       = Canopy air space specific humidity (kg kg-1)
-!                                     PTA_IC    = Near-ground air temperature        (K)
-!                                     PQA_IC    = Near-ground air specific humidity  (kg kg-1)
-!                                     PUSTAR2_IC= Surface friction velocity squared  (m2 s-2)
-!                                                 (modified if implicit coupling with
-!                                                  atmosphere used)
+REAL, DIMENSION(:),   INTENT(OUT)  :: PTC, PQC, PTA_IC, PQA_IC, PUSTAR2_IC, PVMOD
+!                                     PTC         = Canopy air space temperature       (K)
+!                                     PQC         = Canopy air space specific humidity (kg kg-1)
+!                                     PTA_IC      = Near-ground air temperature        (K)
+!                                     PQA_IC      = Near-ground air specific humidity  (kg kg-1)
+!                                     PUSTAR2_IC  = Surface friction velocity squared  (m2 s-2)
+!                                                   (modified if implicit coupling with
+!                                                   atmosphere used)
+!                                     PVMOD       = lowest level wind speed            (m s-1)
 !
 REAL, DIMENSION(:),   INTENT(OUT)  :: PDELTAT_V, PDELTAT_N, PDELTAT_G
 !                                     PDELTAT_V = Time change in vegetation canopy temperature (K)
@@ -416,17 +417,16 @@ ZUSTAR2(:)   =    (PFLXC_MOM(:)*PPEW_B_COEF(:))/        &
 !
 ZVMOD(:)     = PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
 !
-ZVMOD        = MAX(ZVMOD,0.)
+PVMOD(:)     = MAX(ZVMOD,0.)
 !
 WHERE (PPEW_A_COEF(:) /= 0.) 
-     ZUSTAR2(:) = MAX(0., ( ZVMOD(:) - PPEW_B_COEF(:) ) / PPEW_A_COEF(:) )
+     ZUSTAR2(:) = MAX(0., ( PVMOD(:) - PPEW_B_COEF(:) ) / PPEW_A_COEF(:) )
 END WHERE
 !
 PUSTAR2_IC(:)= ZUSTAR2(:) 
 !
-
 !aabtmptest put in new option HIMPLICIT_WIND=='OLD' or 'NEW' ?
-
+!
 !
 IF(HISBA == 'DIF')THEN
 !
@@ -524,8 +524,8 @@ ELSE
 !
 ENDIF
 !
-! Interfacial ground-snowbase thermal conductivity:
-
+! Interfacial ground-snowbase thermal conductivity divided by interfacial dz:
+!
 ZTCONDA_DELZ_NG(:) = 2/((PSNOWDZ(:,JNSNOW)/PSNOWCONDZ(:,JNSNOW))+(PD_G(:,1)/ZGCOND1(:) ))
 !
 !

@@ -109,7 +109,6 @@ INTERFACE GET_DIAM
 END INTERFACE
 !
 INTERFACE SNOW3LRADABS
-  MODULE PROCEDURE SNOW3LRADABS_3D
   MODULE PROCEDURE SNOW3LRADABS_2D
   MODULE PROCEDURE SNOW3LRADABS_1D
   MODULE PROCEDURE SNOW3LRADABS_0D
@@ -120,6 +119,10 @@ INTERFACE SNOW3LTHRMCOND
   MODULE PROCEDURE SNOW3LTHRMCOND_2D
   MODULE PROCEDURE SNOW3LTHRMCOND_1D
   MODULE PROCEDURE SNOW3LTHRMCOND_0D
+END INTERFACE
+!
+INTERFACE SNOW3LALB
+  MODULE PROCEDURE SNOW3LALB
 END INTERFACE
 !
 !-------------------------------------------------------------------------------
@@ -1938,13 +1941,21 @@ END SUBROUTINE GET_DIAM
 !####################################################################
 !####################################################################
 !####################################################################
-      FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+      FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC) RESULT(PCOEF)
 !
 !!    PURPOSE
 !!    -------
 !     Calculate the transmission of shortwave radiation within the snowpack
 !     (with depth)
 !     A. Boone 02/2011
+!     A. Boone 11/2014 Updated to use spectral dependence.
+!                      NOTE, assumes 3 spectral bands
+!
+USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
+USE MODD_SNOW_PAR, ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,        &
+                          XVSPEC1, XVSPEC2, XVSPEC3,                       &
+                          XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1953,38 +1964,55 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-REAL, INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
-REAL, INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+REAL,               INTENT(IN)                   :: PSNOWRHO        ! snow density    (kg m-3)
+REAL,               INTENT(IN)                   :: PSNOWDZ         ! layer thickness (m)
+REAL,               INTENT(IN)                   :: PZENITH         ! zenith angle    (rad)
+REAL,               INTENT(IN)                   :: PPERMSNOWFRAC   ! permanent snow fraction (-)
+REAL, DIMENSION(:), INTENT(IN)                   :: PSPECTRALALBEDO ! spectral albedo (-)
 !
-REAL                               :: PCOEF    ! -
+REAL                                             :: PCOEF           ! -
 !
 !*      0.2    declarations of local variables
 !
-REAL                               :: ZDSGRAIN, ZSXNU
+REAL                                             :: ZWORK, ZDSGRAIN, ZPROJLAT,                  &
+                                                    ZBETA1, ZBETA2, ZBETA3,                     &
+                                                    ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
 !
-REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
+REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
 !
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
-REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
-REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
-REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_0D',0,ZHOOK_HANDLE)
 !
-! Snow grain size:
+! Coefficient for taking into account the increase of path length of rays
+! in snow due to zenithal angle
 !
-ZDSGRAIN = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO**4))
+ZPROJLAT         = (1.0-PPERMSNOWFRAC)+PPERMSNOWFRAC/ &
+                   MAX(XMINCOSZEN,COS(PZENITH))
 !
-! Transmission coefficient:
+! Snow grain size (m):
 !
-ZSXNU    = ZSNOWRAD_CVEXT*PSNOWRHO/SQRT(ZDSGRAIN)
+ZDSGRAIN         = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO**4))
 !
-PCOEF    = EXP(-ZSXNU*PSNOWDZ)
+! Extinction coefficient:
+!
+ZWORK            = SQRT(ZDSGRAIN)
+ZBETA1           = XES_CVEXT*PSNOWRHO/ZWORK
+ZBETA2           = XVBETA3*PSNOWRHO/ZWORK
+ZBETA3           = XVBETA5
+!
+ZOPTICALPATH1    = ZBETA1*PSNOWDZ
+ZOPTICALPATH2    = ZBETA2*PSNOWDZ
+ZOPTICALPATH3    = XUNDEF
+!
+IF(PSPECTRALALBEDO(3)==XUNDEF)THEN 
+   PCOEF         = XSW_WGHT_VIS*(1.0-PSPECTRALALBEDO(1))*EXP(-ZOPTICALPATH1*ZPROJLAT) &
+                 + XSW_WGHT_NIR*(1.0-PSPECTRALALBEDO(2))*EXP(-ZOPTICALPATH2*ZPROJLAT) 
+ELSE
+   ZOPTICALPATH3 = ZBETA3*PSNOWDZ
+   PCOEF         = XVSPEC1*(1.0-PSPECTRALALBEDO(1))*EXP(-ZOPTICALPATH1*ZPROJLAT) &
+                 + XVSPEC2*(1.0-PSPECTRALALBEDO(2))*EXP(-ZOPTICALPATH2*ZPROJLAT) &
+                 + XVSPEC3*(1.0-PSPECTRALALBEDO(3))*EXP(-ZOPTICALPATH3*ZPROJLAT)
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_0D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
@@ -1993,13 +2021,21 @@ END FUNCTION SNOW3LRADABS_0D
 !####################################################################
 !####################################################################
 !####################################################################
-      FUNCTION SNOW3LRADABS_1D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+      FUNCTION SNOW3LRADABS_1D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC) RESULT(PCOEF)
 !
 !!    PURPOSE
 !!    -------
 !     Calculate the transmission of shortwave radiation within the snowpack
 !     (with depth)
 !     A. Boone 02/2011
+!     A. Boone 11/2014 Updated to use spectral dependence
+!                      NOTE, assumes 3 spectral bands
+!
+USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
+USE MODD_SNOW_PAR, ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,        &
+                          XVSPEC1, XVSPEC2, XVSPEC3,                       &
+                          XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2008,38 +2044,55 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
-REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+REAL, DIMENSION(:),   INTENT(IN)                 :: PSNOWRHO        ! snow density    (kg m-3)
+REAL, DIMENSION(:),   INTENT(IN)                 :: PSNOWDZ         ! layer thickness (m)
+REAL, DIMENSION(:),   INTENT(IN)                 :: PZENITH         ! zenith angle    (rad)
+REAL, DIMENSION(:),   INTENT(IN)                 :: PPERMSNOWFRAC   ! permanent snow fraction (-)
+REAL, DIMENSION(:,:), INTENT(IN)                 :: PSPECTRALALBEDO ! spectral albedo (-)
 !
-REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PCOEF    ! -
+REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PCOEF           ! -
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSNOWRHO))                  :: ZDSGRAIN, ZSXNU
+REAL, DIMENSION(SIZE(PSNOWRHO))                  :: ZWORK, ZDSGRAIN, ZPROJLAT,                  &
+                                                    ZBETA1, ZBETA2, ZBETA3,                     &
+                                                    ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
 !
 REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
 !
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
-REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
-REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
-REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_1D',0,ZHOOK_HANDLE)
 !
-! Snow grain size:
+! Coefficient for taking into account the increase of path length of rays
+! in snow due to zenithal angle
 !
-ZDSGRAIN(:) = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO(:)**4))
+ZPROJLAT(:)         = (1.0-PPERMSNOWFRAC(:))+PPERMSNOWFRAC(:)/ &
+                      MAX(XMINCOSZEN,COS(PZENITH(:)))
 !
-! Transmission coefficient:
+! Snow grain size (m):
 !
-ZSXNU(:)    = ZSNOWRAD_CVEXT*PSNOWRHO(:)/SQRT(ZDSGRAIN(:))
+ZDSGRAIN(:)         = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:)**4))
 !
-PCOEF(:)    = EXP(-ZSXNU(:)*PSNOWDZ(:))
+! Extinction coefficient:
+!
+ZWORK(:)            = SQRT(ZDSGRAIN(:))
+ZBETA1(:)           = XES_CVEXT*PSNOWRHO(:)/ZWORK(:)
+ZBETA2(:)           = XVBETA3*PSNOWRHO(:)/ZWORK(:)
+ZBETA3(:)           = XVBETA5
+!
+ZOPTICALPATH1(:)    = ZBETA1(:)*PSNOWDZ(:)
+ZOPTICALPATH2(:)    = ZBETA2(:)*PSNOWDZ(:)
+ZOPTICALPATH3(:)    = XUNDEF
+!
+WHERE(PSPECTRALALBEDO(:,3)==XUNDEF)
+   PCOEF(:)         = XSW_WGHT_VIS*(1.0-PSPECTRALALBEDO(:,1))*EXP(-ZOPTICALPATH1(:)*ZPROJLAT(:)) &
+                    + XSW_WGHT_NIR*(1.0-PSPECTRALALBEDO(:,2))*EXP(-ZOPTICALPATH2(:)*ZPROJLAT(:)) 
+ELSEWHERE
+   ZOPTICALPATH3(:) = ZBETA3(:)*PSNOWDZ(:)
+   PCOEF(:)         = XVSPEC1*(1.0-PSPECTRALALBEDO(:,1))*EXP(-ZOPTICALPATH1(:)*ZPROJLAT(:)) &
+                    + XVSPEC2*(1.0-PSPECTRALALBEDO(:,2))*EXP(-ZOPTICALPATH2(:)*ZPROJLAT(:)) &
+                    + XVSPEC3*(1.0-PSPECTRALALBEDO(:,3))*EXP(-ZOPTICALPATH3(:)*ZPROJLAT(:))
+END WHERE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
@@ -2048,13 +2101,21 @@ END FUNCTION SNOW3LRADABS_1D
 !####################################################################
 !####################################################################
 !####################################################################
-      FUNCTION SNOW3LRADABS_2D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
+      FUNCTION SNOW3LRADABS_2D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC) RESULT(PCOEF)
 !
 !!    PURPOSE
 !!    -------
 !     Calculate the transmission of shortwave radiation within the snowpack
 !     (with depth)
 !     A. Boone 02/2011
+!     A. Boone 11/2014 Updated to use spectral dependence
+!                      NOTE, assumes 3 spectral bands
+!
+USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
+USE MODD_SNOW_PAR, ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,        &
+                          XVSPEC1, XVSPEC2, XVSPEC3,                       &
+                          XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2063,98 +2124,60 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
-REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
+REAL, DIMENSION(:,:),   INTENT(IN)                 :: PSNOWRHO        ! snow density    (kg m-3)
+REAL, DIMENSION(:,:),   INTENT(IN)                 :: PSNOWDZ         ! layer thickness (m)
+REAL, DIMENSION(:,:),   INTENT(IN)                 :: PZENITH         ! zenith angle    (rad)
+REAL, DIMENSION(:,:),   INTENT(IN)                 :: PPERMSNOWFRAC   ! permanent snow fraction (-)
+REAL, DIMENSION(:,:,:), INTENT(IN)                 :: PSPECTRALALBEDO ! spectral albedo (-)
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PCOEF    ! -
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PCOEF           ! -
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDSGRAIN, ZSXNU
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZWORK, ZDSGRAIN, ZPROJLAT,                  &
+                                                      ZBETA1, ZBETA2, ZBETA3,                     &
+                                                      ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
 !
 REAL(KIND=JPRB)                                    :: ZHOOK_HANDLE
 !
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
-REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
-REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
-REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_2D',0,ZHOOK_HANDLE)
 !
-! Snow grain size:
+! Coefficient for taking into account the increase of path length of rays
+! in snow due to zenithal angle
 !
-ZDSGRAIN(:,:) = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO(:,:)**4))
+ZPROJLAT(:,:)         = (1.0-PPERMSNOWFRAC(:,:))+PPERMSNOWFRAC(:,:)/ &
+                        MAX(XMINCOSZEN,COS(PZENITH(:,:)))
 !
-! Transmission coefficient:
+! Snow grain size (m):
 !
-ZSXNU(:,:)    = ZSNOWRAD_CVEXT*PSNOWRHO(:,:)/SQRT(ZDSGRAIN(:,:))
+ZDSGRAIN(:,:)         = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:,:)**4))
 !
-PCOEF(:,:)    = EXP(-ZSXNU(:,:)*PSNOWDZ(:,:))
+! Extinction coefficient:
+!
+ZWORK(:,:)            = SQRT(ZDSGRAIN(:,:))
+ZBETA1(:,:)           = XES_CVEXT*PSNOWRHO(:,:)/ZWORK(:,:)
+ZBETA2(:,:)           = XVBETA3*PSNOWRHO(:,:)/ZWORK(:,:)
+ZBETA3(:,:)           = XVBETA5
+!
+ZOPTICALPATH1(:,:)    = ZBETA1(:,:)*PSNOWDZ(:,:)
+ZOPTICALPATH2(:,:)    = ZBETA2(:,:)*PSNOWDZ(:,:)
+ZOPTICALPATH3(:,:)    = XUNDEF
+!
+WHERE(PSPECTRALALBEDO(:,:,3)==XUNDEF)
+   PCOEF(:,:)         = XSW_WGHT_VIS*(1.0-PSPECTRALALBEDO(:,:,1))*EXP(-ZOPTICALPATH1(:,:)*ZPROJLAT(:,:)) &
+                      + XSW_WGHT_NIR*(1.0-PSPECTRALALBEDO(:,:,2))*EXP(-ZOPTICALPATH2(:,:)*ZPROJLAT(:,:)) 
+ELSEWHERE
+   ZOPTICALPATH3(:,:) = ZBETA3(:,:)*PSNOWDZ(:,:)
+   PCOEF(:,:)         = XVSPEC1*(1.0-PSPECTRALALBEDO(:,:,1))*EXP(-ZOPTICALPATH1(:,:)*ZPROJLAT(:,:)) &
+                      + XVSPEC2*(1.0-PSPECTRALALBEDO(:,:,2))*EXP(-ZOPTICALPATH2(:,:)*ZPROJLAT(:,:)) &
+                      + XVSPEC3*(1.0-PSPECTRALALBEDO(:,:,3))*EXP(-ZOPTICALPATH3(:,:)*ZPROJLAT(:,:))
+END WHERE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_2D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END FUNCTION SNOW3LRADABS_2D
-!####################################################################
-!####################################################################
-!####################################################################
-      FUNCTION SNOW3LRADABS_3D(PSNOWRHO,PSNOWDZ) RESULT(PCOEF)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the transmission of shortwave radiation within the snowpack
-!     (with depth)
-!     A. Boone 02/2011
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWRHO ! snow density    (kg m-3)
-REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWDZ  ! layer thickness (m)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PCOEF    ! -
-!
-!*      0.2    declarations of local variables
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: ZDSGRAIN, ZSXNU
-!
-REAL(KIND=JPRB)                                                     :: ZHOOK_HANDLE
-!
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWRAD_CVEXT  = 3.8e-3   ! [(m5/2)/kg]
-REAL, PARAMETER                      :: ZSNOWRAD_AGRAIN = 1.6e-4   ! (m)
-REAL, PARAMETER                      :: ZSNOWRAD_BGRAIN = 1.1e-13  ! (m13/kg4)
-REAL, PARAMETER                      :: ZDSGRAIN_MAX    = 2.796e-3 ! m
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_3D',0,ZHOOK_HANDLE)
-!
-! Snow grain size:
-!
-ZDSGRAIN(:,:,:) = MIN(ZDSGRAIN_MAX, ZSNOWRAD_AGRAIN + ZSNOWRAD_BGRAIN*(PSNOWRHO(:,:,:)**4))
-!
-! Transmission coefficient:
-!
-ZSXNU(:,:,:)    = ZSNOWRAD_CVEXT*PSNOWRHO(:,:,:)/SQRT(ZDSGRAIN(:,:,:))
-!
-PCOEF(:,:,:)    = EXP(-ZSXNU(:,:,:)*PSNOWDZ(:,:,:))
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_3D',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-!
-END FUNCTION SNOW3LRADABS_3D
 !####################################################################
 !####################################################################
 !####################################################################
@@ -2408,6 +2431,93 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_3D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END FUNCTION SNOW3LTHRMCOND_3D
+!####################################################################
+!####################################################################
+!####################################################################
+SUBROUTINE SNOW3LALB(PALBEDOSC,PSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,   &
+                     PPERMSNOWFRAC,PPS )  
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the snow surface albedo. Use the method of
+!     CROCUS with 3 spectral albedo depending on snow density 
+!     and age
+!
+!
+USE MODD_SNOW_PAR, ONLY : XVAGING_GLACIER, XVAGING_NOGLACIER,     &
+                          XVALB2,XVALB3,XVALB4,XVALB5,XVALB6,     &
+                          XVALB7,XVALB8,XVALB9,XVALB10,XVALB11,   &
+                          XVDIOP1,XVRPRE1,XVRPRE2,XVPRES1,        &
+                          XVW1,XVW2,XVSPEC1,XVSPEC2,XVSPEC3,      &
+                          XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)      :: PSNOWRHO
+REAL, DIMENSION(:), INTENT(IN)      :: PSNOWAGE
+REAL, DIMENSION(:), INTENT(IN)      :: PPERMSNOWFRAC
+REAL, DIMENSION(:), INTENT(IN)      :: PPS
+!
+REAL, DIMENSION(:),   INTENT(INOUT) :: PALBEDOSC
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSPECTRALALBEDO
+!
+!
+!*      0.2    declarations of local variables
+!
+REAL, PARAMETER                 :: ZALBIR = 0.3
+REAL, PARAMETER                 :: ZALBUV = 0.0
+!
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZNVAGE, ZDIAM
+!
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZALB1, ZALB2, ZALB3
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+! 0. Initialize:
+! ------------------
+!
+IF (LHOOK) CALL DR_HOOK('SNOW3LALB',0,ZHOOK_HANDLE)
+!
+ZNVAGE(:)=XVAGING_GLACIER * PPERMSNOWFRAC(:) + XVAGING_NOGLACIER * (1.0-PPERMSNOWFRAC(:))
+!
+! 1. Snow grain size :
+! --------------------
+!
+ZDIAM(:) = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:)**4))
+!
+! 3. spectral albedo over 3 bands :
+! ---------------------------------
+!
+ZALB1(:)=MIN(XVALB4,XVALB2-XVALB3*SQRT(ZDIAM(:)))
+ZALB1(:)=MAX(XVALB11,ZALB1(:)-MIN(MAX(PPS(:)/XVPRES1,XVRPRE1),XVRPRE2)*XVALB10*PSNOWAGE(:)/ZNVAGE(:))
+!
+ZALB2(:)=MAX(ZALBIR,XVALB5-XVALB6*SQRT(ZDIAM(:)))
+!
+ZDIAM(:)=MIN(XVDIOP1,ZDIAM(:))
+ZALB3(:)=MAX(ZALBUV,XVALB7*ZDIAM(:)-XVALB8*SQRT(ZDIAM(:))+XVALB9)
+!
+PSPECTRALALBEDO(:,1)=ZALB1(:)
+PSPECTRALALBEDO(:,2)=ZALB2(:)
+PSPECTRALALBEDO(:,3)=ZALB3(:)
+!
+! 4. total albedo :
+! -----------------
+!
+PALBEDOSC(:)=XVSPEC1*ZALB1(:)+XVSPEC2*ZALB2(:)+XVSPEC3*ZALB3(:) 
+!
+!
+IF (LHOOK) CALL DR_HOOK('SNOW3LALB',1,ZHOOK_HANDLE)
+!
+!-------------------------------------------------------------------------------
+!
+END SUBROUTINE SNOW3LALB
 !####################################################################
 !####################################################################
 !####################################################################

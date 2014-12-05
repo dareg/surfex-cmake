@@ -112,7 +112,7 @@ REAL, DIMENSION(KLU,1) :: ZCE_NITRO
 REAL, DIMENSION(KLU,1) :: ZCF_NITRO
 REAL, DIMENSION(KLU,1) :: ZCNA_NITRO
 ! MEB stuff
-REAL, DIMENSION(KLU,1) :: ZVEGGV
+REAL, DIMENSION(KLU,1) :: ZGNDLITTER
 REAL, DIMENSION(KLU,1) :: ZZF_TALLVEG
 REAL, DIMENSION(KLU,1) :: ZRGLGV
 REAL, DIMENSION(KLU,1) :: ZGAMMAGV
@@ -120,7 +120,7 @@ REAL, DIMENSION(KLU,1) :: ZRSMINGV
 REAL, DIMENSION(KLU,1) :: ZWRMAX_CFGV
 REAL, DIMENSION(KLU,1) :: ZH_VEG
 REAL, DIMENSION(KLU,1) :: ZLAIGV
-REAL, DIMENSION(KLU,1) :: ZZ0GV
+REAL, DIMENSION(KLU,1) :: ZZ0LITTER
 !
 TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZSEED
 TYPE (DATE_TIME), DIMENSION(KLU,1) :: TZREAP
@@ -200,9 +200,9 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
                          TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
-                         ZVEGGV,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,            &
+                         ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
                          ZRSMINGV, ZWRMAX_CFGV,                          &
-                         ZH_VEG, ZLAIGV, ZZ0GV,                          &
+                         ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
                          GUPDATED, OABSENT=(XGREENROOF==0.)              )
 END IF
 !

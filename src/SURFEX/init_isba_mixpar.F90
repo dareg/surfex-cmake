@@ -57,10 +57,10 @@ USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE,    
                                 XPAR_RE25, XPAR_LAIMIN, XPAR_F2I,                          &
                                 XPAR_CE_NITRO,XPAR_CF_NITRO,XPAR_CNA_NITRO,                &
                                 LPAR_STRESS, XPAR_IRRIG, XPAR_WATSUP,                      &
-                                XPAR_VEGGV, XPAR_ZF_TALLVEG , XPAR_RGLGV,                  &
+                                XPAR_GNDLITTER, XPAR_ZF_TALLVEG , XPAR_RGLGV,              &
                                 XPAR_GAMMAGV, XPAR_RSMINGV,                                &
                                 XPAR_WRMAX_CFGV, XPAR_LAIGV,                               &
-                                XPAR_Z0GV, XPAR_H_VEG,                                     &
+                                XPAR_Z0LITTER, XPAR_H_VEG,                                 &
                                 XPAR_DG, XPAR_ROOT_EXTINCTION, XPAR_ROOT_LIN, LDATA_DG,    &
                                 XPAR_ROOT_EXTINCTIONGV,                                    &
                                 LDATA_ROOTFRAC, LDATA_ROOT_EXTINCTION, LDATA_ROOT_LIN,     &
@@ -74,10 +74,10 @@ USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_VEGTYPE,  XPAR_LAI, XPAR_H_TREE,    
                                 LDATA_RE25, LDATA_LAIMIN, LDATA_F2I,                       &
                                 LDATA_CE_NITRO,LDATA_CF_NITRO, LDATA_CNA_NITRO,            &
                                 LDATA_STRESS, LDATA_IRRIG, LDATA_WATSUP, LDATA_MIXPAR,     &
-                                LDATA_VEGGV, LDATA_ZF_TALLVEG ,LDATA_RGLGV,                &
+                                LDATA_GNDLITTER, LDATA_ZF_TALLVEG ,LDATA_RGLGV,            &
                                 LDATA_GAMMAGV, LDATA_RSMINGV,                              &
                                 LDATA_ROOTFRACGV, LDATA_WRMAX_CFGV, LDATA_LAIGV,           &
-                                LDATA_Z0GV, LDATA_H_VEG, LDATA_ROOT_DEPTHGV,               &
+                                LDATA_Z0LITTER, LDATA_H_VEG, LDATA_ROOT_DEPTHGV,           &
                                 LDATA_ROOT_EXTINCTIONGV
 !
 USE MODD_DATA_COVER_n,   ONLY : XDATA_VEGTYPE
@@ -368,12 +368,12 @@ IF (LDATA_VEG) THEN
     LDATA_LAIGV=.TRUE.
   ENDIF
 !
-!Z0GV
-  IF (.NOT.LDATA_Z0GV) THEN
-    ALLOCATE(XPAR_Z0GV(NDIM,NTIME,NVEGTYPE))
+!Z0LITTER
+  IF (.NOT.LDATA_Z0LITTER) THEN
+    ALLOCATE(XPAR_Z0LITTER(NDIM,NTIME,NVEGTYPE))
     CALL INI_DATA_PARAM(XPAR_VEGTYPE,PLAI=XPAR_LAI,PLAIGV_IN=XPAR_LAIGV,  &
-                        PZ0GV=XPAR_Z0GV)
-    LDATA_Z0GV=.TRUE.
+                        PZ0LITTER=XPAR_Z0LITTER)
+    LDATA_Z0LITTER=.TRUE.
   ENDIF
 !
 !H_VEG
@@ -384,12 +384,12 @@ IF (LDATA_VEG) THEN
     LDATA_H_VEG=.TRUE.
   ENDIF
 !
-!VEGGV
-  IF (.NOT.LDATA_VEGGV .AND. LDATA_LAIGV) THEN
-    ALLOCATE(XPAR_VEGGV(NDIM,NTIME,NVEGTYPE))
+!GNDLITTER
+  IF (.NOT.LDATA_GNDLITTER .AND. LDATA_LAIGV) THEN
+    ALLOCATE(XPAR_GNDLITTER(NDIM,NTIME,NVEGTYPE))
     CALL INI_DATA_PARAM(XPAR_VEGTYPE,PLAI=XPAR_LAI,PLAIGV_IN=XPAR_LAIGV, &
-                        PVEGGV=XPAR_VEGGV)
-    LDATA_VEGGV=.TRUE.
+                        PGNDLITTER=XPAR_GNDLITTER)
+    LDATA_GNDLITTER=.TRUE.
   ENDIF
   !
 ENDIF

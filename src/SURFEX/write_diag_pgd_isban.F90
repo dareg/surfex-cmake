@@ -46,9 +46,9 @@ USE MODD_ISBA_n,     ONLY : NPATCH, CPHOTO, CHORT, CISBA, XPATCH,               
                               XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                   &
                               XWSAT, XWFC, XWWILT, XRUNOFFD, LSOC, XFRACSOC,        &
                               LMEB_PATCH,                                           &
-                              XVEGGV,XZF_TALLVEG, XRGLGV,XGAMMAGV,                  &
+                              XGNDLITTER,XZF_TALLVEG, XRGLGV,XGAMMAGV,              &
                               XRSMINGV, XWRMAX_CFGV,                                &
-                              XH_VEG, XLAIGV, XZ0GV, XROOTFRACGV
+                              XH_VEG, XLAIGV, XZ0LITTER, XROOTFRACGV
 USE MODD_AGRI,       ONLY : LAGRIP
 !
 USE MODD_DIAG_MISC_ISBA_n,ONLY : LSURF_DIAG_ALBEDO
@@ -138,15 +138,15 @@ YCOMMENT='surface roughness length (without snow) (m)'
 !
 IF (ISIZE_LMEB_PATCH>0) THEN
   !
-  YRECFM='VEGGV'
-  YCOMMENT='MEB: understory vegetation fraction (-)'
+  YRECFM='GNDLITTER'
+  YCOMMENT='MEB: ground litter fraction (-)'
   !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XVEGGV(:,:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XGNDLITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
-  YRECFM='Z0VEGGV'
-  YCOMMENT='MEB: understory surface roughness length (without snow) (m)'
+  YRECFM='Z0LITTER'
+  YCOMMENT='MEB: ground litter roughness length (without snow) (m)'
   !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0GV(:,:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XZ0LITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
 !

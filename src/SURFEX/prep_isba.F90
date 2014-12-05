@@ -64,7 +64,7 @@ USE MODD_ISBA_n,      ONLY : TSNOW, XRESA, XTSRAD_NAT, XEMIS, XLAI, XVEG,  &
                               XPSN, XPSNG, XPSNV, XDIR_ALB_WITH_SNOW,        &
                               XSCA_ALB_WITH_SNOW, NGROUND_LAYER, XMPOTSAT,   &
                               XBCOEF, XPSNV_A,                               &
-                              LMEB_PATCH,XVEGGV,XLAIGV, XZ0GV,               &
+                              LMEB_PATCH,XGNDLITTER,XLAIGV, XZ0LITTER,       &
                               XH_VEG, XZF_TALLVEG, XTV
 !                           
 USE MODD_DEEPSOIL,    ONLY : LPHYSDOMC
@@ -333,7 +333,7 @@ XDIR_ALB_WITH_SNOW = 0.0
 XSCA_ALB_WITH_SNOW = 0.0
 CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
                                  XVEG,XZ0,XLAI,                          &
-                                 LMEB_PATCH,XVEGGV,XZ0GV,XLAIGV,         &
+                                 LMEB_PATCH,XGNDLITTER,XZ0LITTER,XLAIGV, &
                                  XZF_TALLVEG, XH_VEG, XTV,               &
                                  XTG(:,1,:),XPATCH, ZSW_BANDS,           &
                                  XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &

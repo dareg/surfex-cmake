@@ -9,7 +9,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PZREF, PZ0NAT, PZ0EFF, PZ0HNAT, PALB, PD_G1,                        &
                          PPEW_A_COEF, PPEW_B_COEF,                                           &
                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                 &
-                         PTHRUFAL, PGRNDFLUX, PRESTOREN, PEVAPCOR,                           &
+                         PTHRUFAL, PGRNDFLUX, PGSFCSNOW, PEVAPCOR,                           &
                          PSWNETSNOW, PSWNETSNOWS, PLWNETSNOW,                                &
                          PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, PLES3L, PLEL3L, PEVAP,        &
                          PSNDRIFT, PUSTARSNOW,                                               &
@@ -218,7 +218,13 @@ REAL, DIMENSION(:), INTENT(INOUT)   :: PRNSNOW, PHSNOW, PGFLUXSNOW, PLES3L, PLEL
 !                                      PDELHEATG_SFC = ground heat content change in sfc only (diagnostic) (W/m2)
 !                                                      note, modified if ground-snow flux adjusted
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PEVAPCOR, PSNOWHMASS, PRESTOREN
+REAL, DIMENSION(:), INTENT(INOUT)   :: PUSTARSNOW, PCDSNOW, PCHSNOW, PRI
+!                                      PCDSNOW    = drag coefficient for momentum over snow (-)
+!                                      PUSTARSNOW = friction velocity over snow (m/s)
+!                                      PCHSNOW    = drag coefficient for heat over snow (-)
+!                                      PRI        = Richardson number (-)
+!
+REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PEVAPCOR, PSNOWHMASS, PGSFCSNOW
 !                                      PTHRUFAL  = rate that liquid water leaves snow pack: 
 !                                                  paritioned into soil infiltration/runoff 
 !                                                  by ISBA [kg/(m2 s)]
@@ -230,15 +236,11 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PEVAPCOR, PSNOWHMASS, PRESTOREN
 !                                      PSNOWHMASS = heat content change due to mass
 !                                                   changes in snowpack (J/m2): for budget
 !                                                   calculations only.
-!                                      PRESTOREN  = heat flux between the surface and sub-surface 
+!                                      PGSFCSNOW  = heat flux between the surface and sub-surface 
 !                                                   snow layers (for energy budget diagnostics) (W/m2)
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PUSTARSNOW, PCHSNOW, PCDSNOW, PSNDRIFT
-!                                      PUSTARSNOW  = friction velocity over snow (m/s)
-!                                      PCDSNOW     = drag coefficient for momentum over snow
-!                                      PCHSNOW     = drag coefficient for heat over snow
+REAL, DIMENSION(:), INTENT(OUT)     :: PSNDRIFT
 !                                      PSNDRIFT    = blowing snow sublimation (kg/m2/s)
-!                                      PUSTARSNOW  = friction velocity over snow (m/s)
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PSRSFC, PRRSFC, PSMELTFLUX, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC
 !                                      PSRSFC = snow rate on soil/veg surface when SNOW3L in use
@@ -251,8 +253,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ, PSNOWTEMP, PSNOWDZ
 !                                      PSNOWTEMP = Snow layer(s) temperature (m)
 !                                      PSNOWDZ   = Snow layer(s) thickness (m)
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PRI, PQS
-!                                      PRI = Ridcharson number
+REAL, DIMENSION(:), INTENT(OUT)     :: PQS
 !                                      PQS = surface humidity (kg/kg)
 !
 ! ajout_EB pour prendre en compte angle zenithal du soleil dans LRAD
@@ -315,25 +316,13 @@ IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',0,ZHOOK_HANDLE)
 !*       0.     Initialize variables:
 !               ---------------------
 !
-PGRNDFLUX(:)   = 0.0
 PTHRUFAL(:)    = 0.0
 PEVAPCOR(:)    = 0.0
-PLES3L(:)      = 0.0
-PLEL3L(:)      = 0.0
-PEVAP(:)       = 0.0
 PSNDRIFT(:)    = 0.0
-PRNSNOW(:)     = 0.0
-PHSNOW(:)      = 0.0
-PGFLUXSNOW(:)  = 0.0
-PHPSNOW(:)     = 0.0
 PSNOWHMASS(:)  = 0.0
-PUSTARSNOW(:)  = 0.0
 PSRSFC(:)      = PSR(:)         ! these are snow and rain rates passed to ISBA,
 PRRSFC(:)      = PRR(:)         ! so initialize here if SNOW3L not used:
-PEMISNOW(:)    = 1.0
 PSMELTFLUX(:)  = 0.0
-PCDSNOW(:)     = 0.0
-PRI(:)         = XUNDEF
 PQS(:)         = XUNDEF
 !
 ZSNOW(:)       = 0.0
@@ -368,6 +357,10 @@ IF(.NOT.OMEB)THEN
    PSWNETSNOWS(:) = 0.0
    PLWNETSNOW(:)  = 0.0
    PEMISNOW(:)    = XEMISSN
+   PUSTARSNOW(:)  = 0.0
+   PCDSNOW(:)     = 0.0
+   PCHSNOW(:)     = 0.0
+   PRI(:)         = XUNDEF
 END IF
 !
 !
@@ -462,11 +455,11 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       PEVAPCOR(:)         = 0.0
       PGFLUXSNOW(:)       = PRNSNOW(:) - PHSNOW(:) - PLES3L(:) - PLEL3L(:)
       PSNOWHMASS(:)       = -PSR(:)*(XLMTT*PTSTEP)
-      PRESTOREN(:)        = 0.0
+      PGSFCSNOW(:)        = 0.0
       PDELHEATN(:)        = -ZSNOWH(:) /PTSTEP
       PDELHEATN_SFC(:)    = -ZSNOWH1(:)/PTSTEP
       PSNOWSFCH(:)        = PDELHEATN_SFC(:) - (PSWNETSNOWS(:) + PLWNETSNOW(:)      &
-                          - PHSNOW(:) - PLES3L(:) - PLEL3L(:)) + PRESTOREN(:)     &
+                          - PHSNOW(:) - PLES3L(:) - PLEL3L(:)) + PGSFCSNOW(:)     &
                           - PSNOWHMASS(:)/PTSTEP
 
 ! If MEB used, soil T already computed, therefore correct heating/cooling effect of
@@ -578,7 +571,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_SOILCOND
 REAL, DIMENSION(KSIZE1)        :: ZP_D_G
 REAL, DIMENSION(KSIZE1)        :: ZP_THRUFAL
 REAL, DIMENSION(KSIZE1)        :: ZP_GRNDFLUX
-REAL, DIMENSION(KSIZE1)        :: ZP_RESTOREN
+REAL, DIMENSION(KSIZE1)        :: ZP_GSFCSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_EVAPCOR
 REAL, DIMENSION(KSIZE1)        :: ZP_GFLXCOR
 REAL, DIMENSION(KSIZE1)        :: ZP_RNSNOW
@@ -798,7 +791,7 @@ ELSE
              ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX ,             &
              ZP_EVAPCOR,ZP_GFLXCOR, ZP_SNOWSFCH,                           &
              ZP_DELHEATN, ZP_DELHEATN_SFC,                                 &
-             ZP_SWNETSNOW, ZP_SWNETSNOWS, ZP_LWNETSNOW, ZP_RESTOREN,       &
+             ZP_SWNETSNOW, ZP_SWNETSNOWS, ZP_LWNETSNOW, ZP_GSFCSNOW,       &
              ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,       &
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
@@ -824,7 +817,7 @@ ELSE
      ZP_DELHEATN(:)    = ZP_DELHEATN(:)    /ZP_PSN_INV(:) 
      ZP_DELHEATN_SFC(:)= ZP_DELHEATN_SFC(:)/ZP_PSN_INV(:) 
      ZP_SNOWSFCH(:)    = ZP_SNOWSFCH(:)    /ZP_PSN_INV(:) 
-     ZP_RESTOREN(:)    = ZP_RESTOREN(:)    /ZP_PSN_INV(:) 
+     ZP_GSFCSNOW(:)    = ZP_GSFCSNOW(:)    /ZP_PSN_INV(:) 
 
      ZP_SRSNOW(:)      = ZP_SRSNOW(:)      /ZP_PSN_INV(:)
      ZP_RRSNOW(:)      = ZP_RRSNOW(:)      /ZP_PSN_INV(:)
@@ -915,7 +908,7 @@ DO JJ=1,KSIZE1
   PDELHEATN    (JI)   = ZP_DELHEATN    (JJ)
   PDELHEATN_SFC(JI)   = ZP_DELHEATN_SFC(JJ)
   PSNOWSFCH    (JI)   = ZP_SNOWSFCH    (JJ)
-  PRESTOREN    (JI)   = ZP_RESTOREN    (JJ)
+  PGSFCSNOW    (JI)   = ZP_GSFCSNOW    (JJ)
   PHPSNOW      (JI)   = ZP_HPSNOW      (JJ)
   PLES3L       (JI)   = ZP_LES3L       (JJ)
   PLEL3L       (JI)   = ZP_LEL3L       (JJ)

@@ -43,6 +43,19 @@ REAL, SAVE       :: XRAGNC_FACTOR
 !
 REAL, SAVE       :: XKDELTA_WR
 !
+! Constants
+! ---------
+!
+! Cuurently MEB considers 2 spectral bands, with weights below.
+! As more bands are eventually added, one must adjust these weights
+! and add more so that the total = NSPB_MEB 
+!
+INTEGER, PARAMETER   :: NSPB_MEB     = 2      ! number of bands (below)
+!
+REAL,    PARAMETER   :: XSW_WGHT_VIS = 0.48
+!
+REAL,    PARAMETER   :: XSW_WGHT_NIR = 0.52
+!
 !-------------------------------------------------------------------------------
 !
 END MODULE MODD_MEB_PAR

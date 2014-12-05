@@ -230,8 +230,8 @@ REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RSMINGV            ! Understory min
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_ROOT_EXTINCTIONGV  ! Understory Jackson coefficient
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_WRMAX_CFGV
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_LAIGV              ! Understory LAI
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_VEGGV              ! Understory vegetation cover
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_Z0GV               ! Understory roughness length
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_GNDLITTER          ! Ground litter coverage
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_Z0LITTER           ! Ground litter roughness length
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_ROOT_DEPTHGV       ! Understory root depth
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_H_VEG              ! Height of canopy vegetation
 !

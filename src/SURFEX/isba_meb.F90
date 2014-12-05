@@ -1,10 +1,11 @@
 !     #########
       SUBROUTINE ISBA_MEB(TPTIME, OMEB, OFORC_MEASURE, OGLACIER,               &
-        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                       &
+        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD,                                                 &           
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
-        PSOILHCAPZ, PSOILCONDZ,                                                &
+        PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
+        PSOILHCAPZ, PSOILCONDZ, PFROZEN1,                                      &
         PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,      &
         PH_VEG, PDIRCOSZW,                                                     &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
@@ -18,7 +19,7 @@
         PWRMAX_CF, PRGL, PRSMIN, PGAMMA, PRS,                                  &
         PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, PFALB,        &
         PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,                       &
-        PVEGGV, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, PF2,        &
+        PGNDLITTER, PFF, PPSN, PPALPHAN, PZF_TALLVEG, PLAI, PROOTFRAC, PF2,    &
         PWSAT, PWFC, PWWILT,                                                   &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
@@ -32,7 +33,7 @@
         PGFLUX, PRESTORE, PGRNDFLUX, PUSTAR,                                   &
         PHPSNOW, PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,          &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
-        PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                        &
+        PEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
         PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,                               &
         PDELHEATN, PDELHEATN_SFC, PRESTOREN,                                   &
         PD_G, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,                     &
@@ -83,7 +84,7 @@
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_CSTS,           ONLY : XCPD 
+USE MODD_CSTS,           ONLY : XCPD, XDAY 
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
@@ -129,6 +130,8 @@ LOGICAL,              INTENT(IN)    :: OSNOWDRIFT    ! if=T, activate snowdrift
 LOGICAL,              INTENT(IN)    :: OSNOWDRIFT_SUBLIM ! if=T, activate snowdrift sublimation 
 LOGICAL,              INTENT(IN)    :: OSNOW_ABS_ZENITH  ! if=T, activate parametrization of solar absorption 
 !                                                        ! for polar regions
+LOGICAL, DIMENSION(:),INTENT(IN)    :: OIRRIGATE     ! Irrigation FLAG
+LOGICAL, DIMENSION(:),INTENT(INOUT) :: OIRRIDAY      ! Irrigation time 
 !
 CHARACTER(LEN=*),     INTENT(IN)    :: HISBA         ! type of ISBA version:
 !                                                    ! '2-L' (default)
@@ -196,10 +199,11 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILHCAPZ    ! ISBA-DF Soil heat capacit
 !                                                    ! profile [J/(m3 K)]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ    ! ISBA-DF Soil conductivity  
 !                                                    ! profile  [W/(m K)]
+REAL, DIMENSION(:),   INTENT(IN)    :: PFROZEN1      ! surface frozen fraction (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PZF_TALLVEG   ! fraction of tall vegetation (compared to short veg) for
 !                                                    !  shortwave radiative transfer (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PLAI          ! vegetation Leaf Area Index (m2/m2)
-REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV        ! fraction of litter on the surface
+REAL, DIMENSION(:),   INTENT(IN)    :: PGNDLITTER    ! fraction of litter on the surface
                                                      ! as==>0, baresoil below canopy,
                                                      ! as==>1, litter layer below canopy
 REAL, DIMENSION(:),   INTENT(IN)    :: PRGL          ! maximum solar radiation
@@ -271,6 +275,11 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PTDEEP_A, PTDEEP_B ! Deep soil temperatur
 !                                                 Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
 !                                                 (with PDEEP_FLUX in W/m2)
 !
+REAL, DIMENSION(:),   INTENT(IN)    :: PTHRESHOLD, PWATSUP, PIRRIG
+!                                      PTHRESHOLD = threshold water level for irrigation (-)
+!                                      PWATSUP    = irrigation water need to maintain a given moisture thresold (kg/m2)
+!                                      PIRRIG     = irrigation mask (-)
+!
 ! - - - - - - - - - - - - - - - - - - - - 
 !
 REAL, DIMENSION(:),   INTENT(INOUT) :: PSNOWALB      ! Snow albedo
@@ -281,8 +290,6 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE      ! Snow model layer liquid w
 !                                                    ! SWE (kg m-2)  
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT     ! Snow layer heat content (J/m3) 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO      ! Snow layer average density (kg/m3)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWTEMP     ! Snow layer average temperature (K)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWDZ       ! Snow layer thickness (m)
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1    ! Snow grain parameter 1 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN2    ! Snow grain parameter 2 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST     ! Snow grain historical parameter
@@ -305,6 +312,8 @@ REAL, DIMENSION(:),   INTENT(INOUT) :: PLEI_FLOOD    ! Floodplains latent heat f
 !
 ! - - - - - - - - - - - - - - - - - - - - 
 !
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWTEMP     ! Snow layer average temperature (K)
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ       ! Snow layer thickness (m)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEMISNOW      ! Snow surface emissivity (-)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_N      ! net snow shortwave radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSWNET_NS     ! net snow shortwave radiation for 
@@ -396,6 +405,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PRRSFC        ! Rain rate falling outside
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLESL         ! Evaporation (liquid) from wet snow (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PCDSNOW       ! drag coefficient for momentum over snow
 REAL, DIMENSION(:),   INTENT(OUT)   :: PCHSNOW       ! drag coefficient for heat over snow
+REAL, DIMENSION(:),   INTENT(OUT)   :: PEMIST        ! total effective surface emissivity...LWUP = EMIST*TS_RAD**4 (-)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PTS_RAD       ! effective radiative temperature 
 !                                                    !  of the natural surface (K)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ      ! snow layer liquid water content (m)
@@ -427,6 +437,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWSFCH     ! snow surface layer pseudo
 !                                                    !  changes in grid thickness            (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNDRIFT      ! blowing snow sublimation (kg/m2/s)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PQSNOW        ! snow surface specific humidity (kg/kg)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PIRRIG_FLUX   ! (kg/m2/s) irrigation flux (water need)
 !
 !
 !*      0.2    declarations of local variables
@@ -536,7 +547,6 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZH_N_A               ! Sen
 REAL, DIMENSION(SIZE(PPS))                         :: ZVEGFACT             ! Fraction of canopy vegetation possibly receiving 
 !                                                                          !  rainfall                                              (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZRRSFC               ! The sum of all non-intercepted rain and canopy drip    (kg/m2/s)
-REAL, DIMENSION(SIZE(PPS))                         :: ZEMIST               ! total effective surface emissivity (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLES3L               ! latent heat flux - sublimation of ice from the ground 
 !                                                                          !  based snowpack (W/m2)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLEL3L               ! latent heat flux - evaporation of liquid water from the 
@@ -545,15 +555,19 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZEVAP3L              ! tot
 REAL, DIMENSION(SIZE(PPS))                         :: ZUSTAR2_IC           ! friction velocity (possibly implicitly coupled) (m/s)
 REAL, DIMENSION(SIZE(PPS))                         :: ZTA_IC               ! atmospheric temperature (possibly implicitly coupled) (m/s)
 REAL, DIMENSION(SIZE(PPS))                         :: ZQA_IC               ! atmospheric specific humidity (possibly implicitly coupled) (m/s)
-REAL, DIMENSION(SIZE(PPS))                         :: ZFROZEN1             ! surface soil layer frozen fraction (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZSWUP                ! net upwelling shortwave radiation [W/m2]
 REAL, DIMENSION(SIZE(PPS))                         :: ZLWUP                ! net upwelling longwave radiation [W/m2]
-!
+REAL, DIMENSION(SIZE(PPS))                         :: ZUSTAR2SNOW          ! snow fraciton velocity squared (m2/s2)
+REAL, DIMENSION(SIZE(PPS))                         :: ZTA                  ! lowest level atmospheric temperature update estimate (K)
+REAL, DIMENSION(SIZE(PPS))                         :: ZQA                  ! lowest level atmospheric spec. humidity update estimate (K)
+REAL, DIMENSION(SIZE(PPS))                         :: ZVMOD                ! lowest level atmospheric wind speed update estimate (K)
+REAL, DIMENSION(SIZE(PPS))                         :: ZRR                  ! combined rain rate (above canopy) and irrigation need (kg/m2/s)
+
 !
 ! Working sums for flux averaging over MEB time split
 !
 REAL, DIMENSION(SIZE(PPS))   :: ZH_SUM, ZH_C_A_SUM, ZH_N_A_SUM, ZH_V_C_SUM, ZH_G_C_SUM, &
-                                ZH_N_C_SUM, ZHSNOW_SUM
+                                ZH_N_C_SUM, ZHSNOW_SUM, ZHPSNOW_SUM, ZGFLUXSNOW_SUM
 REAL, DIMENSION(SIZE(PPS))   :: ZHU_AGG_SUM, ZAC_AGG_SUM
 
 REAL, DIMENSION(SIZE(PPS))   :: ZLE_SUM, ZLE_C_A_SUM, ZLE_V_C_SUM, ZLE_G_C_SUM,           &
@@ -561,7 +575,8 @@ REAL, DIMENSION(SIZE(PPS))   :: ZLE_SUM, ZLE_C_A_SUM, ZLE_V_C_SUM, ZLE_G_C_SUM, 
                                 ZLER_V_C_SUM, ZLE_FLOOD_SUM, ZLEI_FLOOD_SUM,              &
                                 ZLES_V_C_SUM, ZLETR_SUM, ZLER_SUM, ZLEV_SUM,              &
                                 ZLEI_SUM, ZLES3L_SUM, ZLEL3L_SUM, ZEVAP3L_SUM,            &
-                                ZUSTAR2_SUM 
+                                ZUSTAR2_SUM, ZUSTAR2SNOW_SUM, ZCDSNOW_SUM,                &
+                                ZCHSNOW_SUM, ZRISNOW_SUM
 
 REAL, DIMENSION(SIZE(PPS))   :: ZGRNDFLUX_SUM, ZRESTORE_SUM
 
@@ -569,7 +584,6 @@ REAL, DIMENSION(SIZE(PPS))   :: ZSWNET_V_SUM, ZSWNET_G_SUM, ZSWNET_N_SUM, ZLWNET
                                 ZLWNET_G_SUM, ZLWNET_N_SUM, ZEMIST_SUM, ZSWUP_SUM,      &
                                 ZLWUP_SUM
 REAL, DIMENSION(SIZE(PPS))   :: ZDELHEATG_SFC_SUM, ZDELHEATV_SFC_SUM, ZDELHEATG_SUM
-!
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -580,6 +594,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
 !
+!
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      2.0    Preliminaries for energy and radiation budget
@@ -587,13 +603,19 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
 !
 CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
         PLAI,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                            &
-        PSNOWTEMP,PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,PEMISNOW,ZTAU_N,       &
+        PSNOWTEMP,PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,PEMISNOW,              &
         ZSIGMA_F,ZCHIP)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      3.0    Shortwave radiative transfer
 !              ----------------------------  
+!
+! Calculate snow albedo: split into spectral bands:
+!
+CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO(:,1),PSNOWAGE(:,1),PPS, &
+                                PSNOWDZ(:,1), PZENITH,                             &
+                                PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,ZTAU_N)
 !
 !
 ! NOTE, currently MEB only uses 2 of 3 potential snow albedo spectral bands
@@ -604,7 +626,6 @@ CALL ISBA_SWNET_MEB(PLAI,PZF_TALLVEG,                                        &
         PFF,PPSN,PPALPHAN,ZTAU_N,PZENITH,PSCA_SW,PSW_RAD,                    &
         ZSWUP,PSWNET_N,PSWNET_V,PSWNET_G,PSWNET_NS,                          &
         PALBT,ZALBG,PSWDOWN_GN                                               )
-
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -629,7 +650,7 @@ CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
 !
 ! First, compute an effective veg fraction: it can only be < unity if vegetation is buried by snowpack...
 !
-ZWORK(:) = PLAI(:)*(1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:))) 
+ZWORK(:) = (1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:))) 
 ! 
 CALL WET_LEAVES_FRAC(PWR, ZWORK, PWRMAX_CF, PZ0_MEBV, PLAI, ZWRMAX, ZDELTA) 
 !
@@ -700,15 +721,24 @@ ZTSTEP          = PTSTEP/JTSPLIT_EB          ! split time step...for relatively 
 !
 CALL INIT_SUM_FLUXES_MEB_TSPLIT 
 !
-! Time split loop:
+!
+! Note, when implicitly coupled to the atmosphere, these
+! 3 variables will evolve during the split...we used updated
+! values for turbulent exchange computations (drag_meb). 
+! NOTE...when explicit coupling used, these 3 variables do NOT vary
+! during the split.
+!
+ZVMOD(:) = PVMOD(:)
+ZTA(:)   = PTA(:)
+ZQA(:)   = PQA(:)
+!
 !
 LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
-
 !*      7.1    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
-
+!
    CALL DRAG_MEB(OFORC_MEASURE,                                         &
-              PTG(:,1), PTC, PTV, PSNOWTEMP(:,1), PTA, PQC, PQA, PVMOD, &
+              PTG(:,1), PTC, PTV, PSNOWTEMP(:,1), ZTA, PQC, ZQA, ZVMOD, &
               PWG(:,1), PWGI(:,1), PWSAT(:,1), PWFC(:,1),               &
               PEXNS, PEXNA, PPS,                                        &
               PRR, PSR, PRHOA, PZ0G_WITHOUT_SNOW,                       &
@@ -718,15 +748,15 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PSNOWSWE(:,1),                                            &
               PWR, ZCHIP, ZTSTEP, ZRS, ZRSN,                            &
               PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,          &
-              ZPSNCV, ZDELTA, PLAI, PVEGGV,                             &
+              ZPSNCV, ZDELTA, PLAI, PGNDLITTER,                         &
               PCH, PCD, PCDN, PRI, PRESA, ZVELC,                        &
+              PCDSNOW, PCHSNOW, PRISNOW, ZUSTAR2SNOW,                   &
               PHUG, ZHUGI, PHV, ZHVG, ZHVN, PHU, PQS, PRS,              &
               ZLEG_DELTA, ZLEGI_DELTA, ZHSGL, ZHSGF,                    &
               ZFLXC_C_A, ZFLXC_N_A, ZFLXC_G_C, ZFLXC_N_C,               &    
               ZFLXC_VG_C, ZFLXC_VN_C, ZFLXC_MOM,                        &
               ZQSATG, ZQSATV, ZQSATC, ZQSATN, ZDELTAVK                  )
-
-
+!
    ZKVN(:) = SNOW_INTERCEPT_EFF(ZCHIP,ZVELC,ZWRVNMAX)
 
 !*      7.2    Resolution of the surface energy budgets
@@ -747,13 +777,13 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               ZQSATG,ZQSATV,ZQSATN,                                                    &
               PFF,PFFROZEN,PPSN,PPALPHAN,ZPSNCV,                                       &
               ZCHEATV,ZCHEATG,ZCHEATN,                                                 &
-              ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,ZFROZEN1,                    &
+              ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,PFROZEN1,                    &
               ZFLXC_C_A,ZFLXC_G_C,ZFLXC_VG_C,ZFLXC_VN_C,ZFLXC_N_C,ZFLXC_N_A,           &
               ZFLXC_MOM,                                                               &
               PTG,PTV,PSNOWTEMP,                                                       &
               ZFLXC_V_C,ZHVGS,ZHVNS,                                                   &
               ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,                                             &
-              PTC,PQC,ZTA_IC,ZQA_IC,ZUSTAR2_IC,                                        &
+              PTC,PQC,ZTA_IC,ZQA_IC,ZUSTAR2_IC,ZVMOD,                                  &
               ZDELTAT_G,ZDELTAT_V,ZDELTAT_N,PGRNDFLUX,PCPS,PLVTT,PLSTT,                &
               PHPSNOW,PMELTADV,PRESTORE,PDEEP_FLUX,                                    &
               PDELHEATV_SFC,PDELHEATG_SFC,PDELHEATG                                    )
@@ -761,7 +791,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.3    Energy and momentum fluxes and radiative temperature and emissivity
 !              -------------------------------------------------------------------
 !
-   CALL ISBA_FLUXES_MEB(PVEGGV,PRHOA,                                                  &
+   CALL ISBA_FLUXES_MEB(PRHOA,                                                         &
               ZSIGMA_F,ZSIGMA_FN,PEMISNOW,                                             &
               ZRNET_V,ZRNET_G,PRNSNOW,                                                 & 
               PSWNET_V,PSWNET_G,PSWNET_N,                                              &
@@ -772,14 +802,14 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               ZTHRMA_TA,ZTHRMB_TA,ZTHRMA_TC,ZTHRMB_TC,                                 &
               ZTHRMA_TG,ZTHRMB_TG,ZTHRMA_TV,ZTHRMB_TV,ZTHRMA_TN,ZTHRMB_TN,             &
               ZQSATG,ZQSATV,ZQSATN,                                                    &
-              PFF,PPSN,PPALPHAN,ZPSNCV,ZFROZEN1,PFFROZEN,                              &
+              PFF,PPSN,PPALPHAN,ZPSNCV,PFROZEN1,PFFROZEN,                              &
               ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,                             &
               ZFLXC_C_A,ZFLXC_G_C,ZFLXC_VG_C,ZFLXC_VN_C,ZFLXC_N_C,ZFLXC_N_A,           &
               ZFLXC_MOM,ZFLXC_V_C,ZHVGS,ZHVNS,                                         &
               PTG,PTV,PSNOWTEMP,                                                       &
               ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,                                             &
               PTC,PQC,ZTA_IC,ZQA_IC,                                                   &
-              ZDELTA,                                                                  &
+              ZDELTAVK,                                                                &
               ZDELTAT_G,ZDELTAT_V,ZDELTAT_N,                                           &
               ZSWUP,PSW_RAD,PLW_RAD,                                                   &
               PRN,ZLWUP,                                                               &
@@ -789,7 +819,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PEVAP,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                     &
               PLE_FLOOD,PLEI_FLOOD,ZLES3L,ZLEL3L,                                      &
               ZEVAP3L,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,                               &
-              PTS_RAD,ZEMIST                                                           )
+              PTS_RAD,PEMIST                                                           )
 !
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEC+LES+LEL) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
@@ -803,13 +833,12 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
    PAC_AGG(:)     = ZFLXC_C_A_F(:) + ZFLXC_N_A_F(:) ! kg/m2/s
 !
 ! Sum fluxes over time split:
-!
+
    CALL SUM_FLUXES_MEB_TSPLIT  
 
 ENDDO LOOP_TIME_SPLIT_EB
 !
 CALL AVG_FLUXES_MEB_TSPLIT     ! average fluxes over time split
-!
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -824,6 +853,20 @@ CALL SNOW_LOAD_MEB(PTSTEP,PSR,PTV,ZWRVNMAX,ZKVN,ZCHEATV,PLER_V_C,PLES_V_C,ZMELTV
 !*     9.0    Snow explicit canopy loading/interception 
 !             ------------------------------------------
 !
+ZRR(:)         = PRR(:)
+PIRRIG_FLUX(:) = 0.0
+!
+!* add irrigation over vegetation to liquid precipitation (rr)
+!  Water "need" treated as if sprayed from above (over vegetation and soil):
+!
+IF (SIZE(OIRRIGATE)>0) THEN
+   WHERE (OIRRIGATE(:) .AND. PIRRIG(:)>0. .AND. PIRRIG(:) /= XUNDEF .AND. (PF2(:)<PTHRESHOLD(:)) )
+      PIRRIG_FLUX(:) = PWATSUP(:) / XDAY           
+      ZRR        (:) = PRR(:) + PWATSUP(:)/XDAY
+      OIRRIDAY   (:) = .TRUE.           
+   END WHERE
+ENDIF
+!
 ! Call canopy interception...here because meltwater should be allowed to fall
 ! on understory snowpack
 !
@@ -835,8 +878,9 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
 ! this is then partitioned by snow scheme into part falling on
 ! snowpack and part falling onto snow-free understory.
 !
+!
 CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
-        PRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
+        ZRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
         PWR, ZWRMAX, ZRRSFC, PDRIP, PRRVEG               )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -912,14 +956,20 @@ ZEVAP3L_SUM(:)   = 0.0
 ZHU_AGG_SUM(:)   = 0.0
 ZAC_AGG_SUM(:)   = 0.0
 
-! momentum:
+! momentum/turb:
 
-ZUSTAR2_SUM(:)   = 0.0
+ZUSTAR2_SUM(:)     = 0.0
+ZUSTAR2SNOW_SUM(:) = 0.
+ZCDSNOW_SUM(:)     = 0.
+ZCHSNOW_SUM(:)     = 0.
+ZRISNOW_SUM(:)     = 0.
 
 ! surface interfacial/sub-surface heat fluxes:
 
 ZGRNDFLUX_SUM(:) = 0.0
 ZRESTORE_SUM(:)  = 0.0
+ZGFLUXSNOW_SUM(:)= 0.0
+ZHPSNOW_SUM(:)   = 0.0
 
 ! radiative fluxes:
 
@@ -981,14 +1031,20 @@ ZEVAP3L_SUM(:)   = ZEVAP3L_SUM(:)   + ZEVAP3L(:)
 ZHU_AGG_SUM(:)   = ZHU_AGG_SUM(:)   + PHU_AGG(:)
 ZAC_AGG_SUM(:)   = ZAC_AGG_SUM(:)   + PAC_AGG(:)
 
-! momentum:
+! momentum/turb:
 
-ZUSTAR2_SUM(:)   = ZUSTAR2_SUM(:)   + ZUSTAR2_IC(:)
+ZUSTAR2_SUM(:)     = ZUSTAR2_SUM(:)     + ZUSTAR2_IC(:)
+ZUSTAR2SNOW_SUM(:) = ZUSTAR2SNOW_SUM(:) + ZUSTAR2SNOW(:)
+ZCDSNOW_SUM(:)     = ZCDSNOW_SUM(:)     + PCDSNOW(:)
+ZCHSNOW_SUM(:)     = ZCHSNOW_SUM(:)     + PCHSNOW(:)
+ZRISNOW_SUM(:)     = ZRISNOW_SUM(:)     + PRISNOW(:)
 
 ! surface interfacial/sub-surface heat fluxes:
 
 ZGRNDFLUX_SUM(:) = ZGRNDFLUX_SUM(:) + PGRNDFLUX(:) 
 ZRESTORE_SUM(:)  = ZRESTORE_SUM(:)  + PRESTORE(:) 
+ZGFLUXSNOW_SUM(:)= ZGFLUXSNOW_SUM(:)+ PGFLUXSNOW(:) 
+ZHPSNOW_SUM(:)   = ZHPSNOW_SUM(:)   + PHPSNOW(:)
 
 ! radiative fluxes:
 
@@ -998,7 +1054,7 @@ ZSWNET_N_SUM(:)  = ZSWNET_N_SUM(:)  +   PSWNET_N(:)
 ZLWNET_V_SUM(:)  = ZLWNET_V_SUM(:)  +   PLWNET_V(:) 
 ZLWNET_G_SUM(:)  = ZLWNET_G_SUM(:)  +   PLWNET_G(:)
 ZLWNET_N_SUM(:)  = ZLWNET_N_SUM(:)  +   PLWNET_N(:) 
-ZEMIST_SUM(:)    = ZEMIST_SUM(:)    +   ZEMIST(:) 
+ZEMIST_SUM(:)    = ZEMIST_SUM(:)    +   PEMIST(:) 
 ZSWUP_SUM(:)     = ZSWUP_SUM(:)     +   ZSWUP(:)
 ZLWUP_SUM(:)     = ZLWUP_SUM(:)     +   ZLWUP(:)
 
@@ -1052,14 +1108,20 @@ ZEVAP3L(:)   = ZEVAP3L_SUM(:)   /JTSPLIT_EB
 PHU_AGG(:)   = ZHU_AGG_SUM(:)   /JTSPLIT_EB
 PAC_AGG(:)   = ZAC_AGG_SUM(:)   /JTSPLIT_EB
 
-! momentum:
+! momentum/turb:
 
-PUSTAR(:)    = SQRT( ZUSTAR2_SUM(:) /JTSPLIT_EB )
+PUSTAR(:)     = SQRT( ZUSTAR2_SUM(:)    /JTSPLIT_EB )
+PUSTARSNOW(:) = SQRT( ZUSTAR2SNOW_SUM(:)/JTSPLIT_EB )
+PCDSNOW(:)    = ZCDSNOW_SUM(:)          /JTSPLIT_EB 
+PCHSNOW(:)    = ZCHSNOW_SUM(:)          /JTSPLIT_EB 
+PRISNOW(:)    = ZRISNOW_SUM(:)          /JTSPLIT_EB 
 
 ! surface interfacial/sub-surface heat fluxes:
 
 PGRNDFLUX(:) = ZGRNDFLUX_SUM(:) /JTSPLIT_EB
 PRESTORE(:)  = ZRESTORE_SUM(:)  /JTSPLIT_EB
+PGFLUXSNOW(:)= ZGFLUXSNOW_SUM(:)/JTSPLIT_EB
+PHPSNOW(:)   = ZHPSNOW_SUM(:)   /JTSPLIT_EB
 
 ! radiative fluxes:
 
@@ -1069,7 +1131,7 @@ PSWNET_N(:)  = ZSWNET_N_SUM(:)  /JTSPLIT_EB
 PLWNET_V(:)  = ZLWNET_V_SUM(:)  /JTSPLIT_EB
 PLWNET_G(:)  = ZLWNET_G_SUM(:)  /JTSPLIT_EB
 PLWNET_N(:)  = ZLWNET_N_SUM(:)  /JTSPLIT_EB
-ZEMIST(:)    = ZEMIST_SUM(:)    /JTSPLIT_EB
+PEMIST(:)    = ZEMIST_SUM(:)    /JTSPLIT_EB
 ZSWUP(:)     = ZSWUP_SUM(:)     /JTSPLIT_EB
 ZLWUP(:)     = ZLWUP_SUM(:)     /JTSPLIT_EB
 
@@ -1079,7 +1141,7 @@ PDELHEATG(:)     = ZDELHEATG_SUM(:)     /JTSPLIT_EB
 
 ! Additional diagnostics depending on AVG quantities:
 
-PTS_RAD(:)   = ((ZLWUP(:) - PLW_RAD(:)*(1.0-ZEMIST(:)))/(XSTEFAN*ZEMIST(:)))**0.25
+PTS_RAD(:)   = ((ZLWUP(:) - PLW_RAD(:)*(1.0-PEMIST(:)))/(XSTEFAN*PEMIST(:)))**0.25
 
 ZRNET_V(:)   = PSWNET_V(:) + PLWNET_V(:)
 !
@@ -1092,6 +1154,110 @@ PRN(:)       = ZRNET_V(:) + ZRNET_G(:) + PRNSNOW(:)
 IF (LHOOK) CALL DR_HOOK('AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE AVG_FLUXES_MEB_TSPLIT 
+!===============================================================================
+SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
+                                      PSNOWDZ, PZENITH,                        &
+                                      PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,     &
+                                      PTAU_N)
+!
+! Split Total snow albedo into N-spectral bands
+! NOTE currently MEB only uses 2 bands of the 3 possible.
+!
+USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
+USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
+USE MODD_SNOW_PAR,       ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,  &
+                                XVSPEC1, XVSPEC2, XVSPEC3,                 &
+                                XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
+!
+USE MODE_SNOW3L,         ONLY : SNOW3LALB, SNOW3LRADABS
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PVEGTYPE      ! fraction of each vegetation (-)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWALB      ! Snow albedo (total)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWRHO      ! Snow layer average density (kg/m3)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWDZ       ! Snow layer thickness (m)
+REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! Zenith angle (rad)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSNOWAGE      ! Snow grain age
+REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBFIR   ! Snow FIR (UV) albedo
+REAL, DIMENSION(:),   INTENT(OUT)   :: PTAU_N        ! SW absorption (coef) in uppermost snow layer (-)
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PPS))          :: ZWORK, ZWORKA
+REAL, DIMENSION(SIZE(PPS))          :: ZPROJLAT, ZDSGRAIN, ZBETA1, ZBETA2, ZBETA3, &
+                                       ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
+REAL, DIMENSION(SIZE(PPS))          :: ZPERMSNOWFRAC
+REAL, DIMENSION(SIZE(PPS),3)        :: ZSPECTRALALBEDO
+!                                      ZSPECTRALALBEDO = spectral albedo (3 bands in algo: 
+!                                                        MEB currently uses 2)
+!                                                        1=VIS, 2=NIR, 3=UV
+!
+!
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
+!
+! 1) Spectral albedo
+! ------------------
+!
+ZWORK(:)         = 0.0
+ZWORKA(:)        = PSNOWALB(:)
+ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
+!
+CALL SNOW3LALB(ZWORKA,ZSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,ZPERMSNOWFRAC,PPS)
+!
+! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
+! (also note, here PSNOWALB doesn't evolve...we just diagnose spectral components).
+!
+WHERE(PSNOWALB(:)/=XUNDEF)
+!
+   PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)
+!
+! We diagnose NIR albedo such that total albedo is conserved
+! (using just 2 spectral bands in MEB)
+!
+   PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
+!
+! currently NOT used by MEB
+!
+   PSNOWALBFIR(:) = XUNDEF                                     
+!
+! For the surface layer absorbtion computation:
+!
+   ZSPECTRALALBEDO(:,1) = PSNOWALBVIS(:)
+   ZSPECTRALALBEDO(:,2) = PSNOWALBNIR(:)
+   ZSPECTRALALBEDO(:,3) = PSNOWALBFIR(:)
+!
+ELSEWHERE
+!
+   PSNOWALBVIS(:) = XUNDEF
+   PSNOWALBNIR(:) = XUNDEF
+   PSNOWALBFIR(:) = XUNDEF
+!
+END WHERE
+!
+!
+! 2) SW absorption in uppermost snow layer 
+! ----------------------------------------
+!
+PTAU_N(:) = SNOW3LRADABS(PSNOWRHO,PSNOWDZ,ZSPECTRALALBEDO,PZENITH,ZPERMSNOWFRAC)
+!
+IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
 !===============================================================================
 
 END SUBROUTINE ISBA_MEB

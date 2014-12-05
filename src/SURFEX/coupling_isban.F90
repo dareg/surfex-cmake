@@ -94,9 +94,9 @@ USE MODD_ISBA_n,       ONLY : NSIZE_NATURE_P, NR_NATURE_P, CROUGH, NPATCH, LGLAC
                                 LVEGUPD, NLAYER_HORT, NLAYER_DUN,                        &
                                 LSPINUPCARBS, LSPINUPCARBW, XSPINMAXS, XSPINMAXW,        &
                                 NNBYEARSPINS, NNBYEARSPINW, NNBYEARSOLD, NSPINS, NSPINW, &
-                                XVEGGV,XZF_TALLVEG, XRGLGV,XGAMMAGV,                     &
+                                XGNDLITTER,XZF_TALLVEG, XRGLGV,XGAMMAGV,                 &
                                 XRSMINGV, XWRMAX_CFGV,                                   &
-                                XH_VEG, XLAIGV, XZ0GV,                                   &
+                                XH_VEG, XLAIGV, XZ0LITTER,                               &
                                 XTOPQS, LCPL_RRM, LNITRO_DILU, LAGRI_TO_GRASS,           &
                                 LPERTSURF, XPERTVEG, XPERTLAI, XPERTCV, XPERTALB,XPERTZ0,&
                                 LSNOWDRIFT, LSNOWDRIFT_SUBLIM, LSNOW_ABS_ZENITH,         &
@@ -157,7 +157,7 @@ USE MODD_PACK_ISBA,   ONLY : XP_SSO_SLOPE, XP_Z0, XP_Z0REL, XP_Z0EFFIP,        &
                              XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV,    &
                              XP_ROOTFRACV, XP_WRMAX_CFV, XP_LAIV, XP_Z0V,      &
                              XP_H_VEG, XP_WRV, XP_WRVN, XP_TV,                 &
-                             XP_TC, XP_QC, XP_VEGGV, XP_Z0GV
+                             XP_TC, XP_QC, XP_GNDLITTER, XP_Z0LITTER
 !
 USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,          &
@@ -587,9 +587,9 @@ IF ((CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') .AND. LVEGUPD) THEN
                          XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,        &
                          XCE_NITRO, XCF_NITRO, XCNA_NITRO,               &
                          TSEED, TREAP, XWATSUP, XIRRIG,                  &
-                         XVEGGV,XZF_TALLVEG, XRGLGV,XGAMMAGV,            &
+                         XGNDLITTER,XZF_TALLVEG, XRGLGV,XGAMMAGV,        &
                          XRSMINGV, XWRMAX_CFGV,                          &
-                         XH_VEG, XLAIGV, XZ0GV, LUPDATED                 )  
+                         XH_VEG, XLAIGV, XZ0LITTER, LUPDATED             )  
 !
 ELSEIF ((CPHOTO=='LAI'.OR.CPHOTO=='LST'.OR.CPHOTO=='NIT'.OR.CPHOTO=='NCB').AND.LVEGUPD) THEN
 !
@@ -645,9 +645,9 @@ ENDIF
 !the energy budget between surfex and the atmosphere
 !-------------------------------------------------------------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,       &
+ CALL UPDATE_RAD_ISBA_n(LFLOOD, TSNOW%SCHEME, PZENITH2, PSW_BANDS,      &
                        XVEG, XLAI, XZ0,                                 &
-                       LMEB_PATCH,XLAIGV,XVEGGV,XZ0GV,XH_VEG,           &
+                       LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER,XH_VEG,   &
                        XALBNIR, XALBVIS, XALBUV, XEMIS,                 &
                        ZDIR_ALB_TILE,ZSCA_ALB_TILE,ZEMIS_TILE,          &
                        PDIR_SW, PSCA_SW,                                &
@@ -655,7 +655,7 @@ ENDIF
                        XALBNIR_VEG, XALBNIR_SOIL,                       &
                        XALBVIS_VEG, XALBVIS_SOIL                        )
 !
- CALL AVERAGE_RAD(XPATCH,                                               &
+ CALL AVERAGE_RAD(XPATCH,                                              &
                  ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
                  PDIR_ALB,      PSCA_ALB,      XEMIS_NAT,  XTSRAD_NAT  )  
 !
@@ -971,7 +971,7 @@ ENDIF
 !* effective roughness
 !
  CALL Z0EFF(CROUGH, GMEB, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
-     ZPALPHAN,XP_Z0GV,                                                    &
+     ZPALPHAN,XP_Z0LITTER,                                               &
      XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM, XP_FF, ZP_Z0FLOOD,     &
      XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                                &
      XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,                                &
@@ -1038,7 +1038,7 @@ ZIRRIG_GR(:)= 0.
           XP_EMIS, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW, XP_VEGTYPE_PATCH, XP_Z0EFF,         &
           XP_ZF_TALLVEG , XP_RGLV, XP_GAMMAV, XP_RSMINV, XP_ROOTFRACV, XP_WRMAX_CFV,      &
           XP_LAIV, XP_BSLAI,XP_LAIMIN,XP_H_VEG,ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV,     &
-          ZZ0H_MEBV,ZZ0EFF_MEBV, ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, XP_VEGGV,                &
+          ZZ0H_MEBV,ZZ0EFF_MEBV, ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, XP_GNDLITTER,            &
           XP_RUNOFFB, XP_CGSAT, XP_C1SAT, XP_C2REF, XP_C3, XP_C4B, XP_C4REF, XP_ACOEF,    &
           XP_PCOEF, XP_TAUICE, XP_WDRAIN, ZP_TDEEP_A, XP_TDEEP, XP_GAMMAT,                &
           XP_PSN, XP_PSNG, XP_PSNV,                                                       &

@@ -1,7 +1,7 @@
 !   ############################################################################
 SUBROUTINE PREPS_FOR_MEB_EBUD_RAD(PPS,                                         &
      PLAICV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                                       &
-     PSNOWTEMP,PSNOWDZ,PSCOND,PHEATCAPS,PEMISNOW,PTAU_N,PSIGMA_F,PCHIP         )
+     PSNOWTEMP,PSNOWDZ,PSCOND,PHEATCAPS,PEMISNOW,PSIGMA_F,PCHIP                )
 !   ############################################################################
 !
 !!****  *PREPS_FOR_MEB_EBUD_RAD*
@@ -50,7 +50,7 @@ USE MODD_SNOW_PAR,            ONLY : XRHOSMAX_ES, XRHOSMIN_ES, XEMISSN
 !
 USE MODD_SURF_PAR,            ONLY : XUNDEF
 !
-USE MODE_SNOW3L,              ONLY : SNOW3LRADABS, SNOW3LTHRMCOND, SNOW3LSCAP
+USE MODE_SNOW3L,              ONLY : SNOW3LTHRMCOND, SNOW3LSCAP
 !
 USE MODE_MEB,                 ONLY : MEB_SHIELD_FACTOR
 !
@@ -69,7 +69,6 @@ REAL, DIMENSION(:),   INTENT(IN)  :: PPS
 REAL, DIMENSION(:,:), INTENT(IN)  :: PSNOWRHO, PSNOWSWE, PSNOWHEAT
 
 REAL, DIMENSION(:),   INTENT(OUT) :: PSIGMA_F, PCHIP
-REAL, DIMENSION(:),   INTENT(OUT) :: PTAU_N
 REAL, DIMENSION(:),   INTENT(OUT) :: PEMISNOW
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDZ, PSCOND, PHEATCAPS, PSNOWTEMP
 !
@@ -110,10 +109,6 @@ PSCOND(:,:)      = SNOW3LTHRMCOND(ZSNOWRHO,PSNOWTEMP,PPS)  ! W m-1 K-1
 ! Snow heat capacity:
 
 PHEATCAPS(:,:)   = SNOW3LSCAP(ZSNOWRHO)                    ! J m-3 K-1
-
-! Snow transmission factor in uppermost layer
-
-PTAU_N(:)         = SNOW3LRADABS(ZSNOWRHO(:,1),PSNOWDZ(:,1))
 
 ! View factor: (1 - shielding factor)
 

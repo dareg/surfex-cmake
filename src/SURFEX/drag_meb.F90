@@ -11,8 +11,9 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
                     PSNOWSWE,                                          &
                     PWR, PCHIP, PTSTEP, PRS_VG, PRS_VN,                &
                     PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,   &
-                    PPSNCV, PDELTA, PLAI, PVEGGV,                      &
+                    PPSNCV, PDELTA, PLAI, PGNDLITTER,                  &
                     PCH, PCD, PCDN, PRI, PRA, PVELC,                   &
+                    PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW,            &
                     PHUG, PHUGI, PHV, PHVG, PHVN, PHU, PQS, PRS,       &
                     PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF,             &
                     PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C,        &    
@@ -165,8 +166,8 @@ REAL, DIMENSION(:), INTENT(IN)    :: PDELTA, PLAI
 !                                                by intercepted water (-)
 !                                     PLAI     = vegetation LAI (m2 m-2)
 !
-REAL, DIMENSION(:),   INTENT(IN)    :: PVEGGV  
-!                                      PVEGGV = fraction of litter on the surface (-)
+REAL, DIMENSION(:),   INTENT(IN)    :: PGNDLITTER  
+!                                      PGNDLITTER = fraction of litter on the surface (-)
 !                                               as==>0, baresoil below canopy,
 !                                               as==>1, litter layer below canopy
 REAL, DIMENSION(:), INTENT(OUT)  :: PDELTAVK
@@ -220,6 +221,14 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_MOM, PQSATG, PQSATV, PQSATC, PQSATN
 !                                    PQSATC = qsat for PTC
 !                                    PQSATN = qsat for PSNOWTEMP
 !
+REAL, DIMENSION(:), INTENT(OUT)  :: PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW 
+!                                    PCDSNOW     = drag coefficient over snow (-)
+!                                    PCHSNOW     = heat/mass exchange coefficient over snow (-)
+!                                    PRISNOW     = Richardson number over snow (-)
+!                                    PUSTAR2SNOW = Surface friction velocity squared  (m2 s-2)
+!                                                   Just a diagnostic, not used in coupling
+
+!                                    
 !*      0.2    declarations of local variables
 !
 !
@@ -259,6 +268,13 @@ REAL, DIMENSION(SIZE(PTG)) :: ZRSGL,ZRSGF,ZZ0SN
 REAL, DIMENSION(SIZE(PTG)) :: ZRSNFRAC, ZDENOM
 !                             ZRSNFRAC = fraction to prevent/reduce sublimation of snow if too thin (-)
 !                             ZDENOM   = working variable for denominator of an expression (*)
+!
+REAL, DIMENSION(SIZE(PTG)) :: ZUSTAR2G, ZCDG, ZCHG, ZRIG, ZPSNA 
+!                                   ZUSTAR2G = canopy top friction velocity squared (m2/s2)
+!                                   ZCDG     = drag coefficient (-)
+!                                   ZCHG     = heat transfor coefficient (ground to canopy air) (-)
+!                                   ZRIG     = Richardson number (ground to canopy air) (-)!                             
+!                                   ZPSNA    = buried (by snow) canopy fraction (-)
 !
 !*      0.3    declarations of local parameters
 !
@@ -397,7 +413,8 @@ PFLXC_MOM(:)=ZCDCN(:)*ZVMOD(:)*PRHOA(:)
 CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAI,   &
                      PTG, PTC, PTV, PVELC, ZLW,                              &
                      ZDISPH,                                                 &
-                     ZRA_G_C, ZG_VG_C                                        )
+                     ZRA_G_C, ZG_VG_C,                                       &
+                     ZUSTAR2G, ZCDG, ZCHG, ZRIG                              )
 !
 !Compute the lai of the canopy that is above snow
 !
@@ -410,7 +427,15 @@ ZLAISN(:)=PLAI(:)*(1.-PPALPHAN(:))
 CALL SURFACE_AIR_MEB(PZ0_MEBN, PZ0H_MEBN, ZZ0SN, PH_VEG, ZLAISN,     &
                      PSNOWTEMP, PTC, PTV, PVELC, ZLW,                &
                      ZDISPH,                                         &
-                     ZRA_N_C, ZG_VN_C                                )
+                     ZRA_N_C, ZG_VN_C,                               &
+                     ZUSTAR2G, ZCDG, ZCHG, ZRIG                      )
+
+! save values over snow for diagnostic purposes:
+
+PUSTAR2SNOW(:) = ZUSTAR2G(:)
+PCDSNOW(:)     = ZCDG(:)  
+PCHSNOW(:)     = ZCHG(:)
+PRISNOW(:)     = ZRIG(:)
 !
 !------------------------------------------------------------------------------
 ! Now calculate the aerodynamic resistance for the completely snow covered part,
@@ -446,7 +471,17 @@ PFLXC_MOM(:)=(1.-PPSN(:)*PPALPHAN(:))*PFLXC_MOM(:) +  &
 !
 ! Calculate  the effective temperature
 !
-   ZTEFF(:) =(1.-PPSN(:)*PPALPHAN(:))*PTC(:)+ PPSN(:)*PPALPHAN(:)*PSNOWTEMP(:)
+ZPSNA(:)   = PPSN(:)*PPALPHAN(:)
+!
+ZTEFF(:)   = (1.-ZPSNA(:))*PTC(:)+ ZPSNA(:)*PSNOWTEMP(:)
+!
+! Some additional diagnostics:
+!
+PUSTAR2SNOW(:) = (1.-ZPSNA(:))*PUSTAR2SNOW(:) + ZPSNA(:)*ZCDNN(:)*ZVMOD(:)**2
+PCDSNOW(:)     = (1.-ZPSNA(:))*PCDSNOW(:)     + ZPSNA(:)*ZCDNN(:)
+PCHSNOW(:)     = (1.-ZPSNA(:))*PCHSNOW(:)     + ZPSNA(:)*ZCHNN(:)
+PRISNOW(:)     = (1.-ZPSNA(:))*PRISNOW(:)     + ZPSNA(:)*ZRINN(:)
+!
 !-------------------------------------------------------------------------------
 !
 CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,            & 
@@ -550,9 +585,9 @@ PHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 ! We use the existing LEG_DELTA (formerly a delta function) as a Beta-type-function
 ! (based on Sellers et al., 1992, J Geophys Res)
 !
-PLEG_DELTA(:)  = 1.0 - PVEGGV(:) + PVEGGV(:)*ZRA_G_C(:) /                             &
+PLEG_DELTA(:)  = 1.0 - PGNDLITTER(:) + PGNDLITTER(:)*ZRA_G_C(:) /                             &
                  ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWG(:) / ZWSAT(:) ) )
-PLEGI_DELTA(:) = 1.0 - PVEGGV(:) + PVEGGV(:)*ZRA_G_C(:) /                             &
+PLEGI_DELTA(:) = 1.0 - PGNDLITTER(:) + PGNDLITTER(:)*ZRA_G_C(:) /                             &
                  ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWGI(:)/ ZWSAT(:) ) )
 !
 ! when hu*qsat < qa, there are two
@@ -576,10 +611,8 @@ END WHERE
 !
 ! b) low-level air is humid, i.e., qa >= qsat (condensation)
 !
-WHERE ( PQSATG(:) <= PQC(:) )
-   PHUG(:)  = 1.0
-   PHUGI(:) = 1.0
-END WHERE
+WHERE ( PHUG*PQSATG  < PQC .AND. PQSATG <= PQC )PHUG(:)  = 1.0
+WHERE ( PHUGI*PQSATG < PQC .AND. PQSATG <= PQC )PHUGI(:) = 1.0
 !
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',1,ZHOOK_HANDLE)

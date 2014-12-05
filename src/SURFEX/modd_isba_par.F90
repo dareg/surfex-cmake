@@ -56,7 +56,7 @@ REAL, PARAMETER       :: XRS_MAX   = 5000.
 !
 ! Factor to restore explicit Cv value (DIF option)
 !
-REAL, PARAMETER       :: XCVHEATF  = 0.25 
+REAL, PARAMETER       :: XCVHEATF  = 0.20 
 !
 !--------------------------------------------------------------------------------
 ! Soil:

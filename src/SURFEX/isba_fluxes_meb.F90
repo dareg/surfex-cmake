@@ -1,6 +1,6 @@
 !     ##########################################################################
       SUBROUTINE ISBA_FLUXES_MEB(                                                             &
-           PVEGGV,PRHOA,                                                                      &
+           PRHOA,                                                                             &
            PSIGMA_F,PSIGMA_FN,                                                                &
            PEMIS_N,                                                                           &
            PRNET_V,PRNET_G,PRNET_N,                                                           &
@@ -88,9 +88,6 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:),   INTENT(IN)   :: PVEGGV
-!                                     PVEGGV = litter cover fraction of understory layer (-)
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PRHOA
 !                                     PRHOA = reference level air density (kg m-3)
@@ -397,7 +394,7 @@ ZFFF(:)       = PFF(:)*( 1.0 - PFFROZEN(:)*(1.0 - (XLSTT/XLVTT)) )
 ! - Evaporation and Sublimation latent heat fluxes from the soil, respectively:
 ! (kg m-2 s-1)
 
-ZWORK(:)      = (1.-PPSN(:)-ZFFF(:)) * (1.-PVEGGV(:)) * PFLXC_G_C(:)
+ZWORK(:)      = (1.-PPSN(:)-ZFFF(:)) * PFLXC_G_C(:)
 
 PLEG(:)       = ZWORK(:)*PLEG_DELTA(:) *( PHUG(:) *ZQSATN_G(:) - PQC(:) )*(1.-PFROZEN1(:))*XLVTT
 

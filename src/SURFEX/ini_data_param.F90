@@ -8,9 +8,9 @@
                                 PROOT_LIN, PROOT_EXTINCTION, PSOILRC_SO2,           &
                                 PSOILRC_O3, PRE25, PCE_NITRO, PCF_NITRO, PCNA_NITRO,&
                                 PGMES_ST, PGC_ST, PBSLAI_ST, PSEFOLD_ST, PDMAX_ST  ,&
-                                PVEGGV,PZF_TALLVEG, PRGLGV,PGAMMAGV,                &
+                                PGNDLITTER,PZF_TALLVEG, PRGLGV,PGAMMAGV,            &
                                 PRSMINGV, PROOT_EXTINCTIONGV, PWRMAX_CFGV,          &
-                                PH_VEG, PLAIGV_IN, PLAIGV_OUT, PZ0GV,               &
+                                PH_VEG, PLAIGV_IN, PLAIGV_OUT, PZ0LITTER,           &
                                 OAGRI_TO_GRASS                                      )
 !     #########################
 !
@@ -141,8 +141,8 @@ REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PWRMAX_CFGV
 REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PH_VEG
 REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PLAIGV_OUT
 REAL, DIMENSION(:,:,:), INTENT(IN), OPTIONAL  :: PLAIGV_IN
-REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PZ0GV
-REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PVEGGV
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PZ0LITTER
+REAL, DIMENSION(:,:,:), INTENT(OUT), OPTIONAL :: PGNDLITTER
 !
 !*    0.2    Declaration of local variables
 !      ------------------------------
@@ -583,23 +583,23 @@ DO JLOOP=1,SIZE(PTYPE,1)
     ENDIF 
 !--------------------------------------------------------------------
 !
-!*    7.16   Vegetation cover of understory vegetation
-!            ------------------------------------------
+!*    7.16   Fraction of ground litter coverage
+!            ----------------------------------
 ! 	 
-    IF (PRESENT(PVEGGV)) THEN
-      PVEGGV (JLOOP,:,:) = 0.
-      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PVEGGV (JLOOP,:,NVT_TEBD) = 0.95
-      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PVEGGV (JLOOP,:,NVT_BONE) = 0.95
-      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PVEGGV (JLOOP,:,NVT_TRBE) = 0.99
-      IF(PTYPE(JLOOP,NVT_GRAS)>0. )  PVEGGV (JLOOP,:,NVT_GRAS) = 0.95
-      IF(PTYPE(JLOOP,NVT_TROG)>0. )  PVEGGV (JLOOP,:,NVT_TROG) = 0.95
-      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PVEGGV (JLOOP,:,NVT_TRBD) = 0.95
-      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PVEGGV (JLOOP,:,NVT_TEBE) = 0.95
-      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PVEGGV (JLOOP,:,NVT_TENE) = 0.95
-      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PVEGGV (JLOOP,:,NVT_BOBD) = 0.95
-      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PVEGGV (JLOOP,:,NVT_BOND) = 0.95
-      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PVEGGV (JLOOP,:,NVT_BOGR) = 0.95
-      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PVEGGV (JLOOP,:,NVT_SHRB) = 0.95
+    IF (PRESENT(PGNDLITTER)) THEN
+      PGNDLITTER (JLOOP,:,:) = 0.
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBD) = 0.95
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PGNDLITTER (JLOOP,:,NVT_BONE) = 0.95
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PGNDLITTER (JLOOP,:,NVT_TRBE) = 0.99
+      IF(PTYPE(JLOOP,NVT_GRAS)>0. )  PGNDLITTER (JLOOP,:,NVT_GRAS) = 0.95
+      IF(PTYPE(JLOOP,NVT_TROG)>0. )  PGNDLITTER (JLOOP,:,NVT_TROG) = 0.95
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TRBD) = 0.95
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBE) = 0.95
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PGNDLITTER (JLOOP,:,NVT_TENE) = 0.95
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PGNDLITTER (JLOOP,:,NVT_BOBD) = 0.95
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PGNDLITTER (JLOOP,:,NVT_BOND) = 0.95
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PGNDLITTER (JLOOP,:,NVT_BOGR) = 0.95
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PGNDLITTER (JLOOP,:,NVT_SHRB) = 0.95
     ENDIF
 !-------------------------------------------------------------------------------
 !*    7.16   Binary for tall vegetation
@@ -965,8 +965,8 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !    ELSEIF (PRESENT(PZ0GV) .AND. (.NOT.PRESENT(PLAIGV_IN) .AND. .NOT.PRESENT(PLAIGV_OUT)    )) THEN
 !      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PZ0GV, PLAIGV_IN OR PLAIGV_OUT MUST BE IN ARGUMENTS TOO")
 !    ENDIF   
-    IF (PRESENT(PZ0GV)) THEN
-      PZ0GV(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
+    IF (PRESENT(PZ0LITTER)) THEN
+      PZ0LITTER(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
     ENDIF   
 !
 !-------------------------------------------------------------------------------

@@ -105,9 +105,9 @@ USE MODD_ISBA_n,   ONLY : CROUGH, CISBA, CPEDOTF, CPHOTO, CRUNOFF, CALBEDO,   &
                           LPERTSURF,XPERTVEG,XPERTLAI,XPERTCV,XPERTALB,       &
                           XPERTZ0,                                            &
                           LMEB_PATCH,                                         &
-                          XVEGGV, XZF_TALLVEG , XRGLGV,                       &
+                          XGNDLITTER, XZF_TALLVEG , XRGLGV,                   &
                           XGAMMAGV, XRSMINGV, XROOTFRACGV,                    &
-                          XWRMAX_CFGV, XLAIGV, XZ0GV, XH_VEG, XTV
+                          XWRMAX_CFGV, XLAIGV, XZ0LITTER, XH_VEG, XTV
 !
 #ifdef TOPD
 USE MODD_DUMMY_EXP_PROFILE,ONLY : XC_DEPTH_RATIO
@@ -254,8 +254,8 @@ ZWORK(:)   = XUNDEF
                      XCE_NITRO, XCF_NITRO, XCNA_NITRO,                   &
                      TSEED, TREAP, XWATSUP, XIRRIG,                      &
                      XROOTFRAC, NWG_LAYER, XDROOT, XDG2,                 &
-                     XVEGGV,XZF_TALLVEG,XRGLGV,XGAMMAGV,XRSMINGV,        &
-                     XROOTFRACGV,XWRMAX_CFGV,XLAIGV,XZ0GV,XH_VEG         )
+                     XGNDLITTER,XZF_TALLVEG,XRGLGV,XGAMMAGV,XRSMINGV,    &
+                     XROOTFRACGV,XWRMAX_CFGV,XLAIGV,XZ0LITTER,XH_VEG     )
 !
 IF (TTIME%TDATE%MONTH /= NUNDEF) THEN
   IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
@@ -287,10 +287,11 @@ ENDIF
                         PRE25=XRE25,PCE_NITRO=XCE_NITRO,PCF_NITRO=XCF_NITRO,   &
                         PCNA_NITRO=XCNA_NITRO,PD_ICE=XD_ICE,TPSEED=TSEED,      &
                         TPREAP=TREAP,PWATSUP=XWATSUP,PIRRIG=XIRRIG,            &
-                        PVEGGV=XVEGGV,PZF_TALLVEG=XZF_TALLVEG,PRGLGV=XRGLGV,   &
+                        PGNDLITTER=XGNDLITTER,PZF_TALLVEG=XZF_TALLVEG,         &
+                        PRGLGV=XRGLGV,   &
                         PGAMMAGV=XGAMMAGV,PRSMINGV=XRSMINGV,                   &
                         PROOTFRACGV=XROOTFRACGV,PWRMAX_CFGV=XWRMAX_CFGV,       &
-                        PLAIGV=XLAIGV,PZ0GV=XZ0GV,PH_VEG=XH_VEG                )
+                        PLAIGV=XLAIGV,PZ0LITTER=XZ0LITTER,PH_VEG=XH_VEG        )
 !
 !-------------------------------------------------------------------------------
 !
@@ -732,7 +733,7 @@ XEMIS_NAT (:) = XUNDEF
 !
  CALL AVERAGED_ALBEDO_EMIS_ISBA(LFLOOD, CALBEDO, PZENITH,                &
                                  XVEG,XZ0,XLAI,                          &
-                                 LMEB_PATCH,XVEGGV,XZ0GV,XLAIGV,         &
+                                 LMEB_PATCH,XGNDLITTER,XZ0LITTER,XLAIGV, &
                                  XZF_TALLVEG, XH_VEG, XTV,               &
                                  ZTG1,                                   &
                                  XPATCH,                                 &
