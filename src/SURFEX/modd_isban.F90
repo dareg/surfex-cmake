@@ -648,7 +648,7 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !
   LOGICAL                      :: LFLOOD       ! Activation of the flooding scheme
   REAL, POINTER, DIMENSION(:)  :: XFFLOOD      ! Grid-cell flood fraction
-  REAL, POINTER, DIMENSION(:)  :: XPIFLOOD     ! flood potential infiltration
+  REAL, POINTER, DIMENSION(:)  :: XPIFLOOD     ! flood potential infiltration (kg/m2)
 !
 !-------------------------------------------------------------------------------
 !

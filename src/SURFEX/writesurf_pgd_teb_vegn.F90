@@ -49,15 +49,17 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
-
+CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=4 ) :: YLVL
+!
+INTEGER :: JJ, JLAYER
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -74,9 +76,12 @@ YCOMMENT=YRECFM
 !* Reference grid for DIF
 !
 IF(CISBA=='DIF') THEN
-  YRECFM='GD_SOILGRID'
-  YCOMMENT=YRECFM
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOILGRID,IRESP,HCOMMENT=YCOMMENT,HDIR='-',HNAM_DIM='Nground_layers  ')
+  DO JLAYER=1,NGROUND_LAYER
+     WRITE(YLVL,'(I4)') JLAYER     
+     YRECFM='GD_SGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+     YCOMMENT='Depth of TEB Garden soilgrid layer '//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+     CALL WRITE_SURF(HPROGRAM,YRECFM,XSOILGRID(JLAYER),IRESP,HCOMMENT=YCOMMENT)
+  END DO 
 ENDIF
 !
 !* number of soil layers

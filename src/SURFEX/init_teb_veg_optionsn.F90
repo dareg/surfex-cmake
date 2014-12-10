@@ -83,11 +83,13 @@ IMPLICIT NONE
 INTEGER           :: IVERSION, IBUGFIX  ! surface version
 INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IRESP    ! Error code after redding
- CHARACTER(LEN=12) :: YRECFM   ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM   ! Name of the article to be read
+CHARACTER(LEN=4 ) :: YLVL
 !
+INTEGER :: JLAYER ! loop counter on layers
 !
 REAL                              :: ZOUT_TSTEP
- CHARACTER(LEN=3)                  :: YRAIN 
+CHARACTER(LEN=3)                  :: YRAIN 
 LOGICAL                           :: GCANOPY_DRAG
 LOGICAL                           :: GGLACIER
 LOGICAL                           :: GFLOOD
@@ -202,7 +204,12 @@ ENDIF
 IF(CISBA=='DIF') THEN
   ALLOCATE(XSOILGRID(NGROUND_LAYER))
   XSOILGRID=XUNDEF
-  IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
+  IF (IVERSION>=8) THEN
+     DO JLAYER=1,NGROUND_LAYER
+        YRECFM='GD_SGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+        CALL READ_SURF(HPROGRAM,YRECFM,XSOILGRID(JLAYER),IRESP)
+     ENDDO
+  ELSEIF (IVERSION==7 .AND. IBUGFIX>=2) THEN
     YRECFM='TWN_SOILGRID'
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_SOILGRID'
     CALL READ_SURF(HPROGRAM,YRECFM,XSOILGRID,IRESP,HDIR='-')

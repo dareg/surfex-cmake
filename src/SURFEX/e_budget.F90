@@ -1,22 +1,23 @@
 !     #########
       SUBROUTINE E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,  &
-                            PSODELX, PUREF, PPEW_A_COEF, PPEW_B_COEF,            &
+                            PTSTEP, PSODELX, PUREF, PPEW_A_COEF, PPEW_B_COEF,    &
                             PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,  &
                             PVMOD, PCD,                                          &
-                            PTG, PTSTEP, PSNOWALBM,                              &
+                            PTG, PTSM, PT2M, PSNOWALBM,                          &
                             PSW_RAD, PLW_RAD, PTA, PQA, PPS, PRHOA,              &
                             PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                    &
                             PVEG, PHUG, PHUI, PHV,                               &
                             PLEG_DELTA, PLEGI_DELTA,                             &
                             PEMIS, PALB, PRA,                                    &
                             PCT, PCG, PPSN, PPSNV, PPSNG,                        &
-                            PGRNDFLUX, PSMELTFLUX, PSNOW_THRUFAL,                &
+                            PGRNDFLUX, PFLUX_COR,                                &
                             PD_G, PDZG, PDZDIF, PSOILCONDZ, PSOILHCAPZ,          &
                             PALBT, PEMIST, PQSAT, PDQSAT,                        &
                             PFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,               &
                             PTA_IC, PQA_IC, PUSTAR2_IC,                          &
                             PSNOWFREE_ALB_VEG, PPSNV_A,PSNOWFREE_ALB_SOIL,       &
-                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDEEP_FLUX )  
+                            PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDEEP_FLUX,&
+                            PRESTORE                                             )  
 !     ##########################################################################
 !
 !!****  *E_BUDGET*  
@@ -81,6 +82,7 @@
 !!      (V. Masson)          01/13 Deep soil flux implicitation
 !!      (B. Decharme)        10/14 Bug in DIF composite budget
 !!                                 Use harmonic mean to compute interfacial thermal conductivities
+!!                                 "Restore" flux computed here
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -123,7 +125,10 @@ LOGICAL, INTENT(IN)               :: OTEMP_ARP ! True  = time-varying force-rest
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
-!                                               
+!   
+REAL, INTENT(IN)                 :: PTSTEP
+!                                   timestep of the integration
+!!
 REAL, DIMENSION(:), INTENT (IN)   ::  PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
                                                
 !
@@ -132,9 +137,6 @@ REAL, DIMENSION(:), INTENT(IN)   :: PSNOWALBM
 !                                     prognostic variables at time 't-dt'
 !                                     PSNOWALBM = albedo of the snow
 !
-!
-REAL, INTENT(IN)                 :: PTSTEP
-!                                   timestep of the integration
 !
 REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PPS, PRHOA, PTA, PQA, PCD, PVMOD
 !                                     PSW_RAD = incoming solar radiation
@@ -193,14 +195,12 @@ REAL, DIMENSION(:), INTENT(IN)     :: PTDEEP_A, PTDEEP_B, PGAMMAT
 !                                                (1/days): associated time scale with
 !                                                PTDEEP.
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PGRNDFLUX, PSMELTFLUX, PSNOW_THRUFAL 
+REAL, DIMENSION(:), INTENT(IN)      :: PGRNDFLUX 
 !                                      PGRNDFLUX = soil/snow interface flux (W/m2) using
 !                                                  ISBA-SNOW3L option
-!                                      PSMELTFLUX= soil/snow interface flux (W/m2) using
-!                                                  ISBA-SNOW3L option: when last traces of snow melt
-!                                      PSNOW_THRUFAL  = snow runoff/melt leaving pack and available
-!                                                  at the surface for runoff or infiltration
-!                                                  [kg/(m2 s)]
+!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PFLUX_COR
+!                                      PFLUX_COR = correction flux to conserve energy (W/m2)
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PD_G,  PSOILCONDZ, PSOILHCAPZ
 !                                      PD_G      = Depth of bottom of Soil layers (m)
@@ -232,6 +232,12 @@ REAL, DIMENSION(:), INTENT(IN)   :: PRA
 REAL, DIMENSION(:,:), INTENT(INOUT):: PTG
 !                                     PTG    = soil temperature profile (K)
 !
+REAL, DIMENSION(:), INTENT (IN)     :: PTSM, PT2M
+!                                      PTSM   = surface temperature at start 
+!                                               of time step (K)
+!                                      PT2M   = mean surface (or restore) temperature at start 
+!                                               of time step (K)
+!
 REAL, DIMENSION(:), INTENT(INOUT)  :: PCPS
 !                                     PCPS   =  heat capacity at surface
 !
@@ -251,7 +257,10 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFF, PFFG, PFALB, PFEMIS, PFFROZEN
 !
 REAL, DIMENSION(:), INTENT(INOUT)  :: PLSTT, PLVTT
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+REAL, DIMENSION(:), INTENT(OUT)    :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
+!
+REAL, DIMENSION(:), INTENT(OUT)    :: PRESTORE
+!                                     PRESTORE = surface restore flux (W m-2)
 !
 !*      0.2    declarations of local variables
 !
@@ -280,12 +289,13 @@ REAL, DIMENSION(SIZE(PALB)) :: ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF,      &
 REAL, DIMENSION(SIZE(PALB)) :: ZUSTAR2, ZVMOD
 !                              ZUSTAR2 = friction     (m2/s2)
 !                              ZVMOD   = wind modulus (m/s)
-REAL, DIMENSION(SIZE(PALB)) :: ZXCPV_XCL_AVG, ZPTG_OLD
+REAL, DIMENSION(SIZE(PALB)) :: ZXCPV_XCL_AVG
 REAL, DIMENSION(SIZE(PALB)) :: ZCNHUMA, ZPEQA2, ZDPQB, ZCDQSAT, ZINCR, ZTRAD, &
                                 ZCHUMS, ZCHUMA, ZPETA2, ZPETB2,ZTEMP, ZFGNFRZ, &
                                 ZFGFRZ, ZFV, ZFG, ZFNFRZ, ZFFRZ, ZFNSNOW, ZCPS,&
                                 ZLVTT, ZLSTT
 REAL                        :: ZSNOW
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -298,7 +308,6 @@ IF (LHOOK) CALL DR_HOOK('E_BUDGET',0,ZHOOK_HANDLE)
 ZCONDAVG(:)  = 0.0
 ZTERM2(:)    = 0.0
 ZTERM1(:)    = 0.0
-ZPTG_OLD(:)  = PTG(:,1)
 ZHUMSD(:)    = 0.0
 ZHUMAD(:)    = 0.0
 !
@@ -530,12 +539,8 @@ IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO' .OR. HISBA == 'DIF')THEN
 !       5.2. With CSNOW=SNOW3L or CSNOW=CRO or HISBA=DIF
 !       -------------------------------------------------
 !
-!OFF  ZA(:) = ZA(:) + PPSN(:) * PCT(:) * XCL * PSNOW_THRUFAL(:) 
+   ZC(:) = ZC(:) + PCT(:)*(PPSN(:)*PGRNDFLUX(:)+PFLUX_COR(:,1))
 !
-   ZC(:) = ZC(:) + PCT(:)*PPSN(:)*(PGRNDFLUX(:) + PSMELTFLUX(:))
-!OFF        + PCT(:)*( PPSN(:)*XTT*XCL*PSNOW_THRUFAL(:)) 
-!
-
 ELSEIF (LCPL_ARP) THEN
 !
 !       5.3. With Arpege
@@ -594,14 +599,22 @@ IF(HISBA == 'DIF')THEN
 !
    ZCONDAVG(:) = 1.0/(ZCOND1(:)+ZCOND2(:))
 !   
-   ZA(:)       = ZA(:) - (2. * XPI / XDAY) + ZCONDAVG(:)*PCG(:)/PDZDIF(:,1)  
+   ZA(:)       = ZA(:) - (2. * XPI / XDAY) + ZCONDAVG(:)*PCG(:)/PDZDIF(:,1)
    ZTERM2(:)   = ZCONDAVG(:)*PCG(:)/(ZA(:)*PDZDIF(:,1))
    ZTERM1(:)   = (PTG(:,1)*ZB(:) + (ZC(:) - (2. * XPI * PTG(:,2) / XDAY)) )/ZA(:)  
 !
 ! Determine the soil temperatures:
 !
    CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
-                     PSOILHCAPZ,PCG,ZTERM1,ZTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX  )  
+                     PSOILHCAPZ,PCG,ZTERM1,ZTERM2,       &
+                     PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX,   &
+                     PFLUX_COR                           )
+!
+!
+! "Restore" flux here is actually the heat flux between the surface
+! and sub-surface layers (W m-2):
+!
+   PRESTORE(:) = ZCONDAVG(:)*(PTG(:,1)-PTG(:,2))/PDZDIF(:,1)
 !
 ELSE
 !
@@ -609,6 +622,9 @@ ELSE
 !
       CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP_B,PSODELX,PTG)
 !
+!     "Restore" flux between surface and deep layer(W m-2):
+      PRESTORE(:)=2.0*XPI*(PTG(:,1)-PTG(:,2))/(PCT(:)*XDAY*PSODELX(1)*(PSODELX(1)+PSODELX(2)))
+!      
    ELSE
 !
       PTG(:,1) = ( PTG(:,1)*ZB(:) + ZC(:) ) / ZA(:)
@@ -620,6 +636,9 @@ ELSE
             PTG(:,2) = (PTG(:,2) + (PTSTEP/XDAY)*PTG(:,1))/                          &
                          (1.+(PTSTEP/XDAY) )  
       END WHERE
+!
+!     "Restore" flux between surface and deep layer(W m-2):
+      PRESTORE(:) = 2.0*XPI*(PTG(:,1)-PT2M(:))/(PCT(:)*XDAY)  
 !
    ENDIF
 !
@@ -644,21 +663,22 @@ PUSTAR2_IC(:) =  ZUSTAR2(:)
 IF (LCPL_ARP) THEN
 
   IF (.NOT.LQVNPLUS) THEN
-    PCPS(:) =  PCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PTG(:,1)-ZPTG_OLD(:))
+    PCPS(:) =  PCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PTG(:,1)-PTSM(:))
   ENDIF
 
 
   IF (LQVNPLUS) THEN
-    PCPS(:) =  PCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PTG(:,1)-ZPTG_OLD(:))  &
+    PCPS(:) =  PCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PTG(:,1)-PTSM(:))  &
                        + (XCPV-XCPD) *(1-ZHUMA(:))*(PQA_IC(:)-PQA(:))  
   ENDIF
 
-  PLSTT(:) = PLSTT(:) + (XCPV-XCI)*(PTG(:,1)-ZPTG_OLD(:))
+  PLSTT(:) = PLSTT(:) + (XCPV-XCI)*(PTG(:,1)-PTSM(:))
 
-  PLVTT(:) = PLVTT(:) + (XCPV-XCL)*(PTG(:,1)-ZPTG_OLD(:))
+  PLVTT(:) = PLVTT(:) + (XCPV-XCL)*(PTG(:,1)-PTSM(:))
 
 
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('E_BUDGET',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

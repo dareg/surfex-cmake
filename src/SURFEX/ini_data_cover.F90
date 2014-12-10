@@ -66,7 +66,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_Z0_O_Z0H, &
                                   XDATA_EMIS_ECO, XDATA_WRMAX_CF,                   &
                                   XDATA_CE_NITRO,XDATA_CF_NITRO,XDATA_CNA_NITRO,    &
-                                  XDATA_BSLAI_NITRO,                                &
                                   XDATA_GROUND_DEPTH, XDATA_ROOT_DEPTH,             &
                                   XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN,            &
                                   XDATA_SOILRC_SO2, XDATA_SOILRC_O3,                &
@@ -267,7 +266,7 @@ NVT_TEBE =14   ! 4  ! temperate broadleaf evergreen (TREE)
 NVT_TENE =15   ! 5  ! temperate needleleaf evergreen (CONI)
 NVT_BOBD =16   ! 4  ! boreal broadleaf cold-deciduous summergreen (TREE)
 NVT_BOND =17   ! 5  ! boreal needleleaf cold-deciduous summergreen (CONI)
-NVT_BOGR =18   !10  ! boral grass (GRAS)
+NVT_BOGR =18   !10  ! boreal grass (GRAS)
 NVT_SHRB =19   ! 4  ! shrub (TREE)
 !
 !*    2.1    leaf area index
@@ -610,15 +609,6 @@ XDATA_CF_NITRO (:,:) = XUNDEF
 ALLOCATE(XDATA_CNA_NITRO(JPCOVER,NVEGTYPE))
 !
 XDATA_CNA_NITRO (:,:) = XUNDEF
-!
-!-------------------------------------------------------------------------------
-!
-!*    2.23   biomass/LAI ratio from nitrogen decline theory
-!            ----------------------------------------------
-!
-ALLOCATE(XDATA_BSLAI_NITRO(JPCOVER,NVEGTYPE))
-!
-XDATA_BSLAI_NITRO (:,:) = XUNDEF                                
 !
 !-------------------------------------------------------------------------------
 !

@@ -114,11 +114,8 @@ INTERFACE SNOW3LRADABS
   MODULE PROCEDURE SNOW3LRADABS_0D
 END INTERFACE
 !
-INTERFACE SNOW3LTHRMCOND
-  MODULE PROCEDURE SNOW3LTHRMCOND_3D
-  MODULE PROCEDURE SNOW3LTHRMCOND_2D
-  MODULE PROCEDURE SNOW3LTHRMCOND_1D
-  MODULE PROCEDURE SNOW3LTHRMCOND_0D
+INTERFACE SNOW3LTHRM
+  MODULE PROCEDURE SNOW3LTHRM
 END INTERFACE
 !
 INTERFACE SNOW3LALB
@@ -895,6 +892,8 @@ LOGICAL , DIMENSION(SIZE(PSNOW))  :: GREGRID
 REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF1  = (/0.25, 0.50, 0.25/) 
 REAL, PARAMETER, DIMENSION(2)     :: ZSGCOEF2  = (/0.05, 0.34/)       
 !      
+REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF   = (/0.3, 0.4, 0.3/) 
+!
 ! Minimum total snow depth at which surface layer thickness is constant:
 !
 REAL, PARAMETER                   :: ZSNOWTRANS = 0.20                ! (m)
@@ -983,24 +982,73 @@ ELSEIF(INLVLS == 6)THEN
                & PSNOWDZ_OLD(:,1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:,2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:,2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,6) < ZCOEF3 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,6) > ZCOEF4 * MIN(ZDZN0,PSNOW(:)/INLVLS)
+               & PSNOWDZ_OLD(:,6) < ZCOEF1 * MIN(ZDZN1,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,6) > ZCOEF4 * MIN(ZDZN1,PSNOW(:)/INLVLS)
   ENDIF
 !
   WHERE(GREGRID(:))  
 !      top layers 
-       PSNOWDZ(:,1) = MIN(ZDZ1       ,PSNOW(:)/INLVLS) 
-       PSNOWDZ(:,2) = MIN(ZDZ2       ,PSNOW(:)/INLVLS) 
-       PSNOWDZ(:,3) = MIN(ZSGCOEF2(2),PSNOW(:)/INLVLS)
+       PSNOWDZ(:,1) = MIN(ZDZ1,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,2) = MIN(ZDZ2,PSNOW(:)/INLVLS) 
 !      last layers 
-       PSNOWDZ(:,6) = MIN(ZDZN0,PSNOW(:)/INLVLS)
-       PSNOWDZ(:,5) = MIN(ZDZN2,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,6) = MIN(ZDZN1,PSNOW(:)/INLVLS)
 !      remaining snow for remaining layers
-       PSNOWDZ(:,4) = PSNOW(:) - PSNOWDZ(:,1) - PSNOWDZ(:,2) - PSNOWDZ(:,3) &
-                               - PSNOWDZ(:,5) - PSNOWDZ(:,6) 
+       ZWORK(:)     = PSNOW(:) - PSNOWDZ(:,1) - PSNOWDZ(:,2) - PSNOWDZ(:,6)
+       PSNOWDZ(:,3) = ZWORK(:)*ZSGCOEF(1)
+       PSNOWDZ(:,4) = ZWORK(:)*ZSGCOEF(2)
+       PSNOWDZ(:,5) = ZWORK(:)*ZSGCOEF(3)
+!      layer 3 tickness >= layer 2 tickness
+       ZWORK(:)=MIN(0.0,PSNOWDZ(:,3)-PSNOWDZ(:,2))
+       PSNOWDZ(:,3)=PSNOWDZ(:,3)-ZWORK(:)
+       PSNOWDZ(:,4)=PSNOWDZ(:,4)+ZWORK(:) 
+!      layer 5 tickness >= layer 6 tickness  
+       ZWORK(:)=MIN(0.0,PSNOWDZ(:,5)-PSNOWDZ(:,6))
+       PSNOWDZ(:,5)=PSNOWDZ(:,5)-ZWORK(:)
+       PSNOWDZ(:,4)=PSNOWDZ(:,4)+ZWORK(:)
   ENDWHERE
 !
-! 3. Calculate current grid for 12-layer :
+! 3. Calculate current grid for 9-layer :
+! ---------------------------------------------------------------
+!
+ELSEIF(INLVLS == 9)THEN
+!
+! critere a satisfaire pour remaillage
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID(:) = PSNOWDZ_OLD(:,1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,9) < ZCOEF3 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,9) > ZCOEF4 * MIN(ZDZN0,PSNOW(:)/INLVLS) 
+  ENDIF
+!             
+  WHERE(GREGRID(:))  
+!      top layers 
+       PSNOWDZ(:,1) = MIN(ZDZ1,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,2) = MIN(ZDZ2,PSNOW(:)/INLVLS) 
+       PSNOWDZ(:,3) = MIN(ZDZ3,PSNOW(:)/INLVLS)
+!      last layers 
+       PSNOWDZ(:,9)= MIN(ZDZN0,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,8)= MIN(ZDZN1,PSNOW(:)/INLVLS)
+       PSNOWDZ(:,7)= MIN(ZDZN2,PSNOW(:)/INLVLS)
+!      remaining snow for remaining layers
+       ZWORK(:) = PSNOW(:) - PSNOWDZ(:, 1) - PSNOWDZ(:, 2) - PSNOWDZ(:, 3) &
+                           - PSNOWDZ(:, 7) - PSNOWDZ(:, 8) - PSNOWDZ(:, 9)
+       PSNOWDZ(:,4) = ZWORK(:)*ZSGCOEF(1)
+       PSNOWDZ(:,5) = ZWORK(:)*ZSGCOEF(2)
+       PSNOWDZ(:,6) = ZWORK(:)*ZSGCOEF(3)
+!      layer 4 tickness >= layer 3 tickness
+       ZWORK(:)=MIN(0.0,PSNOWDZ(:,4)-PSNOWDZ(:,3))
+       PSNOWDZ(:,4)=PSNOWDZ(:,4)-ZWORK(:)
+       PSNOWDZ(:,5)=PSNOWDZ(:,5)+ZWORK(:) 
+!      layer 6 tickness >= layer 7 tickness  
+       ZWORK(:)=MIN(0.0,PSNOWDZ(:,6)-PSNOWDZ(:,7))
+       PSNOWDZ(:,6)=PSNOWDZ(:,6)-ZWORK(:)
+       PSNOWDZ(:,5)=PSNOWDZ(:,5)+ZWORK(:)
+  ENDWHERE
+!
+! 4. Calculate current grid for 12-layer :
 ! ---------------------------------------------------------------
 !
 ELSEIF(INLVLS == 12)THEN
@@ -1032,9 +1080,9 @@ ELSEIF(INLVLS == 12)THEN
        ZWORK(:) = PSNOW(:) - PSNOWDZ(:, 1) - PSNOWDZ(:, 2) - PSNOWDZ(:, 3) &
                            - PSNOWDZ(:, 4) - PSNOWDZ(:, 5) - PSNOWDZ(:, 9) &
                            - PSNOWDZ(:,10) - PSNOWDZ(:,11) - PSNOWDZ(:,12)
-       PSNOWDZ(:,6) = ZWORK(:)*ZSGCOEF1(1)
-       PSNOWDZ(:,7) = ZWORK(:)*ZSGCOEF1(2)
-       PSNOWDZ(:,8) = ZWORK(:)*ZSGCOEF1(3)
+       PSNOWDZ(:,6) = ZWORK(:)*ZSGCOEF(1)
+       PSNOWDZ(:,7) = ZWORK(:)*ZSGCOEF(2)
+       PSNOWDZ(:,8) = ZWORK(:)*ZSGCOEF(3)
 !      layer 6 tickness >= layer 5 tickness
        ZWORK(:)=MIN(0.0,PSNOWDZ(:,6)-PSNOWDZ(:,5))
        PSNOWDZ(:,6)=PSNOWDZ(:,6)-ZWORK(:)
@@ -1048,7 +1096,7 @@ ELSEIF(INLVLS == 12)THEN
 ! 4. Calculate other non-optimized grid :
 ! ---------------------------------------
 ! 
-ELSEIF(INLVLS<10.AND.INLVLS/=3.AND.INLVLS/=6) THEN
+ELSEIF(INLVLS<10.AND.INLVLS/=3.AND.INLVLS/=6.AND.INLVLS/=9) THEN
 !
   DO JJ=1,INLVLS
      DO JI=1,INI
@@ -1157,6 +1205,8 @@ LOGICAL                           :: GREGRID
 REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF1  = (/0.25, 0.50, 0.25/) 
 REAL, PARAMETER, DIMENSION(2)     :: ZSGCOEF2  = (/0.05, 0.34/)       
 !      
+REAL, PARAMETER, DIMENSION(3)     :: ZSGCOEF   = (/0.3, 0.4, 0.3/) 
+!
 ! Minimum total snow depth at which surface layer thickness is constant:
 !
 REAL, PARAMETER                   :: ZSNOWTRANS  = 0.20                ! (m)
@@ -1234,30 +1284,80 @@ ELSEIF(INLVLS == 3)THEN
 !
 ELSEIF(INLVLS == 6)THEN
 !
+! critere a satisfaire pour remaillage
+!
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID    = PSNOWDZ_OLD(1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(6) < ZCOEF3 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(6) > ZCOEF4 * MIN(ZDZN0,PSNOW/INLVLS) 
+               & PSNOWDZ_OLD(6) < ZCOEF1 * MIN(ZDZN1,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(6) > ZCOEF4 * MIN(ZDZN1,PSNOW/INLVLS)
   ENDIF
 !
-  IF (GREGRID)THEN
-!    top layers 
-     PSNOWDZ(1) = MIN(ZDZ1,PSNOW/INLVLS) 
-     PSNOWDZ(2) = MIN(ZDZ2,PSNOW/INLVLS) 
-     PSNOWDZ(3) = MIN(ZSGCOEF2(2),PSNOW/INLVLS)
-!    last layers 
-     PSNOWDZ(6)= MIN(ZDZN0,PSNOW/INLVLS)
-     PSNOWDZ(5)= MIN(ZDZN2,PSNOW/INLVLS)
-!    remaining snow for remaining layers
-     PSNOWDZ(4) = PSNOW - PSNOWDZ(1) - PSNOWDZ(2) - PSNOWDZ(3) &
-                        - PSNOWDZ(5) - PSNOWDZ(6)
+  IF(GREGRID)THEN
+!      top layers 
+       PSNOWDZ(1) = MIN(ZDZ1,PSNOW/INLVLS) 
+       PSNOWDZ(2) = MIN(ZDZ2,PSNOW/INLVLS) 
+!      last layers 
+       PSNOWDZ(6) = MIN(ZDZN1,PSNOW/INLVLS)
+!      remaining snow for remaining layers
+       ZWORK      = PSNOW - PSNOWDZ(1) - PSNOWDZ(2) - PSNOWDZ(6)
+       PSNOWDZ(3) = ZWORK*ZSGCOEF(1)
+       PSNOWDZ(4) = ZWORK*ZSGCOEF(2)
+       PSNOWDZ(5) = ZWORK*ZSGCOEF(3)
+!      layer 3 tickness >= layer 2 tickness
+       ZWORK=MIN(0.0,PSNOWDZ(3)-PSNOWDZ(2))
+       PSNOWDZ(3)=PSNOWDZ(3)-ZWORK
+       PSNOWDZ(4)=PSNOWDZ(4)+ZWORK
+!      layer 5 tickness >= layer 6 tickness  
+       ZWORK=MIN(0.0,PSNOWDZ(5)-PSNOWDZ(6))
+       PSNOWDZ(5)=PSNOWDZ(5)-ZWORK
+       PSNOWDZ(4)=PSNOWDZ(4)+ZWORK
   ENDIF
 !
+! 3. Calculate current grid for 9-layer :
+! ---------------------------------------------------------------
 !
-! 3. Calculate current grid for 12-layer :
+ELSEIF(INLVLS == 9)THEN
+!
+! critere a satisfaire pour remaillage
+!
+  IF(PRESENT(PSNOWDZ_OLD))THEN
+    GREGRID    = PSNOWDZ_OLD(1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(9) < ZCOEF3 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(9) > ZCOEF4 * MIN(ZDZN0,PSNOW/INLVLS) 
+  ENDIF
+!             
+  IF(GREGRID)THEN
+!      top layers 
+       PSNOWDZ(1) = MIN(ZDZ1,PSNOW/INLVLS) 
+       PSNOWDZ(2) = MIN(ZDZ2,PSNOW/INLVLS) 
+       PSNOWDZ(3) = MIN(ZDZ3,PSNOW/INLVLS)
+!      last layers 
+       PSNOWDZ(9)= MIN(ZDZN0,PSNOW/INLVLS)
+       PSNOWDZ(8)= MIN(ZDZN1,PSNOW/INLVLS)
+       PSNOWDZ(7)= MIN(ZDZN2,PSNOW/INLVLS)
+!      remaining snow for remaining layers
+       ZWORK = PSNOW - PSNOWDZ( 1) - PSNOWDZ( 2) - PSNOWDZ( 3) &
+                     - PSNOWDZ( 7) - PSNOWDZ( 8) - PSNOWDZ( 9)
+       PSNOWDZ(4) = ZWORK*ZSGCOEF(1)
+       PSNOWDZ(5) = ZWORK*ZSGCOEF(2)
+       PSNOWDZ(6) = ZWORK*ZSGCOEF(3)
+!      layer 4 tickness >= layer 3 tickness
+       ZWORK=MIN(0.0,PSNOWDZ(4)-PSNOWDZ(3))
+       PSNOWDZ(4)=PSNOWDZ(4)-ZWORK
+       PSNOWDZ(5)=PSNOWDZ(5)+ZWORK
+!      layer 6 tickness >= layer 7 tickness  
+       ZWORK=MIN(0.0,PSNOWDZ(6)-PSNOWDZ(7))
+       PSNOWDZ(6)=PSNOWDZ(6)-ZWORK
+       PSNOWDZ(5)=PSNOWDZ(5)+ZWORK
+  ENDIF
+!
+! 4. Calculate current grid for 12-layer :
 ! ---------------------------------------------------------------
 !
 ELSEIF(INLVLS == 12)THEN
@@ -1289,9 +1389,9 @@ ELSEIF(INLVLS == 12)THEN
      ZWORK = PSNOW - PSNOWDZ( 1) - PSNOWDZ( 2) - PSNOWDZ( 3) &
                    - PSNOWDZ( 4) - PSNOWDZ( 5) - PSNOWDZ( 9) &
                    - PSNOWDZ(10) - PSNOWDZ(11) - PSNOWDZ(12)
-     PSNOWDZ(6) = ZWORK*ZSGCOEF1(1)
-     PSNOWDZ(7) = ZWORK*ZSGCOEF1(2)
-     PSNOWDZ(8) = ZWORK*ZSGCOEF1(3)
+     PSNOWDZ(6) = ZWORK*ZSGCOEF(1)
+     PSNOWDZ(7) = ZWORK*ZSGCOEF(2)
+     PSNOWDZ(8) = ZWORK*ZSGCOEF(3)
 !    layer 6 tickness >= layer 5 tickness
      ZWORK=MIN(0.0,PSNOWDZ(6)-PSNOWDZ(5))
      PSNOWDZ(6)=PSNOWDZ(6)-ZWORK
@@ -1305,7 +1405,7 @@ ELSEIF(INLVLS == 12)THEN
 ! 4. Calculate other non-optimized grid to allow CROCUS PREP :
 ! ------------------------------------------------------------
 ! 
-ELSE IF(INLVLS<10.AND.INLVLS/=3.AND.INLVLS/=6) THEN
+ELSE IF(INLVLS<10.AND.INLVLS/=3.AND.INLVLS/=6.AND.INLVLS/=9) THEN
 !        
   DO JJ=1,INLVLS
      PSNOWDZ(JJ)  = PSNOW/INLVLS
@@ -2181,16 +2281,22 @@ END FUNCTION SNOW3LRADABS_2D
 !####################################################################
 !####################################################################
 !####################################################################
-FUNCTION SNOW3LTHRMCOND_0D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
+      SUBROUTINE SNOW3LTHRM(PSNOWRHO,PSCOND,PSNOWTEMP,PPS)
 !
 !!    PURPOSE
 !!    -------
-!     Calculate the snow thermal conductivity from
+!     Calculate snow thermal conductivity from
 !     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
 !     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
-!     A. Boone 02/2011
 !
-USE MODD_CSTS,ONLY : XP00
+!
+USE MODD_CSTS,     ONLY : XP00, XCONDI, XRHOLW
+!
+USE MODD_SNOW_PAR, ONLY : XVRKZ6, XSNOWTHRMCOND1, &
+                          XSNOWTHRMCOND2,         &
+                          XSNOWTHRMCOND_AVAP,     &
+                          XSNOWTHRMCOND_BVAP,     &
+                          XSNOWTHRMCOND_CVAP 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2199,238 +2305,58 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-REAL, INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
-REAL, INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
-REAL, INTENT(IN)                   :: PPS       ! surface pressure (Pa)
+REAL, DIMENSION(:), INTENT(IN)      :: PPS
 !
-REAL                               :: PSCOND    ! thermal cond. [W/(m K)]
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWTEMP, PSNOWRHO
 !
-!*      0.2    declarations of local variables
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSCOND
 !
-REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
-!
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
-!
-! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
-! (sig only for new snow OR high altitudes)
-! from Sun et al. (1999): based on data from Jordan (1991)
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
-!
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_0D',0,ZHOOK_HANDLE)
-!
-PSCOND = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO*PSNOWRHO)           &
-     + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP +    &
-     ZSNOWTHRMCOND_CVAP)))*(XP00/PPS))
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_0D',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-!
-END FUNCTION SNOW3LTHRMCOND_0D
-!####################################################################
-!####################################################################
-!####################################################################
-FUNCTION SNOW3LTHRMCOND_1D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the snow thermal conductivity from
-!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
-!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
-!     A. Boone 02/2011
-!
-USE MODD_CSTS,ONLY : XP00
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
-REAL, DIMENSION(:), INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
-REAL,               INTENT(IN)                   :: PPS       ! surface pressure (Pa)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PSCOND ! thermal cond. [W/(m K)]
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
+INTEGER                              :: JJ, JI
 !
-!*      0.3    declarations of local parameters
+INTEGER                              :: INI
+INTEGER                              :: INLVLS
 !
-! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
+CHARACTER(LEN=5)                     :: YSNOWCOND !should be in namelist
 !
-REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
-!
-! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
-! (sig only for new snow OR high altitudes)
-! from Sun et al. (1999): based on data from Jordan (1991)
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
-!
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_1D',0,ZHOOK_HANDLE)
-!
-PSCOND(:) = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO(:)*PSNOWRHO(:))           &
-             + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP(:) +  &
-             ZSNOWTHRMCOND_CVAP)))*(XP00/PPS))
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_1D',1,ZHOOK_HANDLE)
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
-END FUNCTION SNOW3LTHRMCOND_1D
-!####################################################################
-!####################################################################
-!####################################################################
-FUNCTION SNOW3LTHRMCOND_2D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRM',0,ZHOOK_HANDLE)
 !
-!!    PURPOSE
-!!    -------
-!     Calculate the snow thermal conductivity from
-!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
-!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
-!     A. Boone 02/2011
+INI    = SIZE(PSNOWRHO(:,:),1)
+INLVLS = SIZE(PSNOWRHO(:,:),2)
 !
-USE MODD_CSTS,ONLY : XP00
+! 1. Snow thermal conductivity
+! ----------------------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+YSNOWCOND='YEN81' !should be in namelist
 !
-IMPLICIT NONE
+IF(YSNOWCOND=='AND76')THEN
+!  Thermal conductivity coefficients from Anderson (1976)
+  PSCOND(:,:) = (XSNOWTHRMCOND1 + XSNOWTHRMCOND2*PSNOWRHO(:,:)*PSNOWRHO(:,:))
+ELSE
+! Thermal conductivity coefficients from Yen (1981)
+  PSCOND(:,:) = XCONDI * EXP(XVRKZ6*LOG(PSNOWRHO(:,:)/XRHOLW))
+ENDIF
 !
-!*      0.1    declarations of arguments
+! 2. Implicit vapor diffn effects
+! -------------------------------
 !
-REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
-REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
-REAL, DIMENSION(:),   INTENT(IN)                   :: PPS       ! surface pressure (Pa)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PSCOND ! thermal cond. [W/(m K)]
-!
-!*      0.2    declarations of local variables
-!
-INTEGER                                              :: JJ, JI
-!
-REAL(KIND=JPRB)                                      :: ZHOOK_HANDLE
-!
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
-!
-! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
-! (sig only for new snow OR high altitudes)
-! from Sun et al. (1999): based on data from Jordan (1991)
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
-!
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_2D',0,ZHOOK_HANDLE)
-!
-DO JJ=1,SIZE(PSNOWRHO,2)
-   DO JI=1,SIZE(PSNOWRHO,1)
-
-      PSCOND(JI,JJ) = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO(JI,JJ)*PSNOWRHO(JI,JJ))          &
-                     + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP(JI,JJ)+        &
-                     ZSNOWTHRMCOND_CVAP)))*(XP00/PPS(JI)))
+DO JJ=1,INLVLS
+   DO JI=1,INI
+    PSCOND(JI,JJ) = PSCOND(JI,JJ) + MAX(0.0,(XSNOWTHRMCOND_AVAP+(XSNOWTHRMCOND_BVAP/(PSNOWTEMP(JI,JJ) &
+                                  + XSNOWTHRMCOND_CVAP)))*(XP00/PPS(JI)))
    ENDDO
 ENDDO
 !
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_2D',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-!
-END FUNCTION SNOW3LTHRMCOND_2D
-!####################################################################
-!####################################################################
-!####################################################################
-FUNCTION SNOW3LTHRMCOND_3D(PSNOWRHO,PSNOWTEMP,PPS) RESULT(PSCOND)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the snow thermal conductivity from
-!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
-!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
-!     A. Boone 02/2011
-!
-USE MODD_CSTS,ONLY : XP00
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWRHO  ! snow density     (kg m-3)
-REAL, DIMENSION(:,:,:), INTENT(IN)                   :: PSNOWTEMP ! snow temperature (K)
-REAL, DIMENSION(:,:),   INTENT(IN)                   :: PPS       ! surface pressure (Pa)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),SIZE(PSNOWRHO,3)) :: PSCOND ! thermal cond. [W/(m K)]
-!
-!*      0.2    declarations of local variables
-!
-INTEGER                                              :: JJ, JI, JK
-!
-REAL(KIND=JPRB)                                      :: ZHOOK_HANDLE
-!
-!*      0.3    declarations of local parameters
-!
-! ISBA-ES Thermal conductivity coefficients from Anderson (1976):
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND1 = 0.02    ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND2 = 2.5E-6  ! [W m5/(kg2 K)]
-!
-! ISBA-ES Thermal conductivity: Implicit vapor diffn effects
-! (sig only for new snow OR high altitudes)
-! from Sun et al. (1999): based on data from Jordan (1991)
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-!
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_AVAP  = -0.06023 ! [W/(m K)]
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_BVAP  = -2.5425  ! (W/m)
-REAL, PARAMETER                      :: ZSNOWTHRMCOND_CVAP  = -289.99  ! (K)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRM',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_3D',0,ZHOOK_HANDLE)
 !
-DO JK=1,SIZE(PSNOWRHO,3)
-   DO JJ=1,SIZE(PSNOWRHO,2)
-      DO JI=1,SIZE(PSNOWRHO,1)
-
-         PSCOND(JI,JJ,JK) = (ZSNOWTHRMCOND1 + ZSNOWTHRMCOND2*PSNOWRHO(JI,JJ,JK)*PSNOWRHO(JI,JJ,JK))      &
-                          + MAX(0.0,(ZSNOWTHRMCOND_AVAP+(ZSNOWTHRMCOND_BVAP/(PSNOWTEMP(JI,JJ,JK)+        &
-                          ZSNOWTHRMCOND_CVAP)))*(XP00/PPS(JI,JJ)))
-
-      ENDDO
-   ENDDO
-ENDDO
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTHRMCOND_3D',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-!
-END FUNCTION SNOW3LTHRMCOND_3D
+END SUBROUTINE SNOW3LTHRM
 !####################################################################
 !####################################################################
 !####################################################################
@@ -2469,10 +2395,10 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSPECTRALALBEDO
 !
 !*      0.2    declarations of local variables
 !
-REAL, PARAMETER                 :: ZALBIR = 0.3
-REAL, PARAMETER                 :: ZALBUV = 0.0
+REAL, PARAMETER                 :: ZALBNIR1 = 0.3
+REAL, PARAMETER                 :: ZALBNIR2 = 0.0
 !
-REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZNVAGE, ZDIAM
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZNVAGE, ZDIAM, ZWORK
 !
 REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZALB1, ZALB2, ZALB3
 !
@@ -2483,7 +2409,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! 0. Initialize:
 ! ------------------
 !
-IF (LHOOK) CALL DR_HOOK('SNOW3LALB',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LALB',0,ZHOOK_HANDLE)
 !
 ZNVAGE(:)=XVAGING_GLACIER * PPERMSNOWFRAC(:) + XVAGING_NOGLACIER * (1.0-PPERMSNOWFRAC(:))
 !
@@ -2495,13 +2421,18 @@ ZDIAM(:) = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:)**4))
 ! 3. spectral albedo over 3 bands :
 ! ---------------------------------
 !
-ZALB1(:)=MIN(XVALB4,XVALB2-XVALB3*SQRT(ZDIAM(:)))
+ZWORK(:)=SQRT(ZDIAM(:))
+!
+! Visible
+ZALB1(:)=MIN(XVALB4,XVALB2-XVALB3*ZWORK(:))
 ZALB1(:)=MAX(XVALB11,ZALB1(:)-MIN(MAX(PPS(:)/XVPRES1,XVRPRE1),XVRPRE2)*XVALB10*PSNOWAGE(:)/ZNVAGE(:))
 !
-ZALB2(:)=MAX(ZALBIR,XVALB5-XVALB6*SQRT(ZDIAM(:)))
+! near Infra-red 1
+ZALB2(:)=MAX(ZALBNIR1,XVALB5-XVALB6*ZWORK(:))
 !
+! near Infra-red 2
 ZDIAM(:)=MIN(XVDIOP1,ZDIAM(:))
-ZALB3(:)=MAX(ZALBUV,XVALB7*ZDIAM(:)-XVALB8*SQRT(ZDIAM(:))+XVALB9)
+ZALB3(:)=MAX(ZALBNIR2,XVALB7*ZDIAM(:)-XVALB8*ZWORK(:)+XVALB9)
 !
 PSPECTRALALBEDO(:,1)=ZALB1(:)
 PSPECTRALALBEDO(:,2)=ZALB2(:)
@@ -2510,10 +2441,9 @@ PSPECTRALALBEDO(:,3)=ZALB3(:)
 ! 4. total albedo :
 ! -----------------
 !
-PALBEDOSC(:)=XVSPEC1*ZALB1(:)+XVSPEC2*ZALB2(:)+XVSPEC3*ZALB3(:) 
+PALBEDOSC(:)=XVSPEC1*ZALB1(:)+XVSPEC2*ZALB2(:)+XVSPEC3*ZALB3(:)
 !
-!
-IF (LHOOK) CALL DR_HOOK('SNOW3LALB',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LALB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !

@@ -294,7 +294,7 @@ REAL, DIMENSION(:),  INTENT(INOUT) :: PRRVEG   !Precip. intercepted by vegetatio
 !
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFG,PFFV
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFLOOD  !Floodplain effective fraction
-REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltration [kg/m²/s]
+REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltration [kg/m²]
 !
 REAL, DIMENSION(:), INTENT(INOUT)  :: PIFLOOD  !Floodplain real infiltration      [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT)  :: PPFLOOD  !Floodplain interception           [kg/m²/s]
@@ -652,7 +652,7 @@ IF (HISBA=='DIF') THEN
                      PTG, PWGI, PWG, KWG_LAYER,              &
                      PDZG,  ZWGI_EXCESS                      )
 !
-     PDRAIN (:)  = PDRAIN (:) + (ZDRAIN(:)+ZWGI_EXCESS(:))/REAL(INDT)
+     PDRAIN (:)  = PDRAIN (:) + (ZDRAIN(:)+ZQSB(:)+ZWGI_EXCESS(:))/REAL(INDT)
      PQSB   (:)  = PQSB   (:) + ZQSB   (:)/REAL(INDT)
      PHORTON(:)  = PHORTON(:) + ZHORTON(:)/REAL(INDT)
 !
@@ -736,7 +736,7 @@ ENDIF
 !
 ! Add sub-grid surface and subsurface runoff to saturation excess:
 !
-PRUNOFF(:) = PRUNOFF(:) + ZDUNNE(:) + PHORTON(:) + PQSB (:)
+PRUNOFF(:) = PRUNOFF(:) + ZDUNNE(:) + PHORTON(:)
 !
 !-------------------------------------------------------------------------------
 !

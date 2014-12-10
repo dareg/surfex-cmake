@@ -314,18 +314,26 @@ END IF
 !              -----------------
 !
 IF (K2M>=1) THEN
-  !
+!
   CALL MAKE_AVERAGE(PFRAC_TILE,PRI_TILE,PRI)
-  !
+!
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !       3.     Operational parameters at surface, 2 and 10 meters
 !              --------------------------------------------------
 !
 !
+IF (K2M>=1.OR.OSURF_BUDGET.OR.OSURF_BUDGETC) THEN
+!
 ! Surface temperature
 !
   CALL MAKE_AVERAGE(PFRAC_TILE,PTS_TILE,PTS)
+!
+ENDIF
+!
+IF (K2M>=1) THEN
 !
 ! Temperature at 2 meters
 !

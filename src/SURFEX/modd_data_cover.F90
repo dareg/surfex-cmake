@@ -157,8 +157,6 @@ REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_WATER  ! inland water fraction
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_SEA    ! sea fraction
 !
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_GREEN  ! greeness fraction   (monthly)
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_BSLAI_NITRO ! biomass/LAI ratio from nitrogen
-!                                                           ! decline theory
 REAL, DIMENSION(:,:),  ALLOCATABLE :: XDATA_SOILRC_SO2 ! for SO2 deposition
 REAL, DIMENSION(:,:),  ALLOCATABLE :: XDATA_SOILRC_O3  ! for O3  deposition
 !

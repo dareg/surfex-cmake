@@ -26,7 +26,7 @@
            PH_C_A,PH_V_C,PH_G_C,PH_N_C,PH_N_A,PH_N,PH,                                        &
            PLE_C_A,PLE_V_C,PLE_G_C,PLE_N_C,                                                   &
            PEVAP_C_A,PLEV_V_C,PEVAP_G_C,PEVAP_N_C,PEVAP_N_A,                                  &
-           PEVAP,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                               &
+           PEVAP,PSUBL,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                         &
            PLE_FLOOD,PLEI_FLOOD,PLES,PLEL,                                                    &
            PEVAPN,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,PTS_RAD,PEMIS                             )
 !     ##########################################################################
@@ -229,13 +229,14 @@ REAL, DIMENSION(:),   INTENT(OUT)  ::  PLE_C_A, PLE_V_C, PLE_G_C, PLE_N_C
 !                                     PLE_N_C = Latent heat flux: ground based snowpack to canopy air space  (W m-2)
 !
 REAL, DIMENSION(:),   INTENT(OUT)  :: PEVAP_C_A, PLEV_V_C, PEVAP_G_C, PEVAP_N_C, PEVAP_N_A,            &  
-                                      PEVAP, PEVAPN
+                                      PEVAP, PSUBL, PEVAPN
 !                                     PEVAP_C_A = Water flux: canopy air space to overlying atmosphere (kg m-2 s-1)
 !                                     PLEV_V_C  = Water flux: vegetation canopy to canopy air space (kg m-2 s-1)
 !                                     PEVAP_G_C = Water flux: understory (soil & vegetation) to canopy air space (kg m-2 s-1)
 !                                     PEVAP_N_C = Water flux: ground based snowpack to canopy air space (kg m-2 s-1)
 !                                     PEVAP_N_A = Water flux: ground based snowpack to overlying atmosphere (kg m-2 s-1)
 !                                     PEVAP     = Water flux: total net water flux from surface to atmosphere  (kg m-2 s-1)
+!                                     PSUBL     = Water flux: total sublimation flux (kg/m2/s)
 !                                     PEVAPN    = Water flux: ground based snowpack to both canopy air space and overlying atmosphere (kg m-2 s-1)
 !
 REAL, DIMENSION(:),   INTENT(OUT)  :: PLETR_V_C, PLER_V_C, PLEG, PLEGI, PLE_FLOOD,        &
@@ -497,6 +498,10 @@ PLE(:)       = PEVAP(:)*XLVTT
 ! Total sublimation from the surface/snow/vegetation: W m-2
 !
 PLEI(:)      = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
+!
+! Total sublimation from the surface/snow/vegetation: kg m-2 s-1
+!
+PSUBL(:)     = PLEI(:)/XLSTT
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_FLUXES_MEB',1,ZHOOK_HANDLE)
 !

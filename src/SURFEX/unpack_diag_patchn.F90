@@ -40,7 +40,7 @@ SUBROUTINE UNPACK_DIAG_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH,    &
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PACK_ISBA,      ONLY : XP_LVTT, XP_LSTT
-USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW, XP_SMELTFLUX, &
+USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW,               &
                                   XP_GFLUXSNOW, XP_USTARSNOW,                   &
                                   XP_GRNDFLUX, XP_SRSFC, XP_RRSFC, XP_LESL,     &
                                   XP_CDSNOW, XP_CHSNOW, XP_SNOWTEMP,            &
@@ -381,7 +381,6 @@ XP_LEI_FLOOD    => NULL()
 XP_RNSNOW       => NULL()
 XP_HSNOW        => NULL()
 XP_HPSNOW       => NULL()
-XP_SMELTFLUX    => NULL()
 XP_GFLUXSNOW    => NULL()
 XP_USTARSNOW    => NULL()
 XP_GRNDFLUX     => NULL()

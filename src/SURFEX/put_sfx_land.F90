@@ -54,10 +54,10 @@ INTEGER,           INTENT(IN)  :: KLUOUT
 LOGICAL,           INTENT(IN)  :: OCPL_WTD
 LOGICAL,           INTENT(IN)  :: OCPL_FLOOD
 !
-REAL, DIMENSION(:), INTENT(IN) :: PWTD
+REAL, DIMENSION(:), INTENT(IN) :: PWTD     !(m)
 REAL, DIMENSION(:), INTENT(IN) :: PFWTD
 REAL, DIMENSION(:), INTENT(IN) :: PFFLOOD
-REAL, DIMENSION(:), INTENT(IN) :: PPIFLOOD
+REAL, DIMENSION(:), INTENT(IN) :: PPIFLOOD !(kg/m2)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

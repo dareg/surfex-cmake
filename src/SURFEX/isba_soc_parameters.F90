@@ -76,7 +76,7 @@ REAL, DIMENSION(:,:),  INTENT(OUT)   :: PFRACSOC
 !
 REAL, DIMENSION(2), PARAMETER :: ZCONDSAT = (/24.192,0.00864/)  !Peatland hydraulic conductivity        (m/day)
 REAL, DIMENSION(2), PARAMETER :: ZBCOEF   = (/2.7,12.0/)        !Peatland b coef                        (-)
-REAL, DIMENSION(2), PARAMETER :: ZMPOTSAT = (/-1.03,-1.01/)     !Peatland matric potential              (cm)
+REAL, DIMENSION(2), PARAMETER :: ZMPOTSAT = (/-0.0103,-0.0101/) !Peatland matric potential              (m)
 REAL, DIMENSION(2), PARAMETER :: ZWSAT    = (/0.930,0.830/)     !Peatland porosity                      (-)
 REAL, DIMENSION(2), PARAMETER :: ZSY      = (/0.655,0.125/)     !Peatland specific yield                (-)
 REAL, DIMENSION(2), PARAMETER :: ZWWILT   = (/0.060,0.240/)     !Peatland wilting point                 (-)
@@ -108,8 +108,8 @@ REAL, DIMENSION(SIZE(PDG,1))              ::  ZREFDEPTH,ZF_BCOEF,ZF_MPOTSAT,    
                                               ZF_WSAT,ZF_CONDSAT,ZF_SY,         &
                                               ZF_WWILT, ZF_WD0, ZF_ANISO
 
-REAL :: ZA, ZB, ZLOG1, ZLOG2, ZLOG3,   &
-        ZTOP, ZSUB, ZINF, ZFTOP, ZFSUB                                 
+REAL :: ZA, ZB, ZLOG1, ZLOG2, ZLOG3, ZMOSS_DENSITY,  &
+        ZNOMOSS, ZTOP, ZSUB, ZINF, ZFTOP, ZFSUB                                 
 !
 REAL, DIMENSION(2) :: ZLOG_CONDSAT,ZLOG_BCOEF,ZLOG_MPOTSAT, &
                       ZLOG_WSAT,ZLOG_SY,ZLOG_WWILT,ZLOG_WD0,&
@@ -204,7 +204,7 @@ DO JI=1,INI
        ZINF         = ZB*EXP(ZA*ZLOG3)
        ZRHO_INF(JI) = (ZINF-ZSUB)/(ZDGHWSD_INF-ZDGHWSD_SUB)
      ELSE
-       ZRHO_INF(JI) = ZRHO_SUB(JI)/((1.0-ZWSAT(2))*XOMRHO)
+       ZRHO_INF(JI) = ZRHO_SUB(JI)
      ENDIF
    ENDIF
 ENDDO
@@ -251,12 +251,15 @@ ZLOG_ANISO  (:) = LOG(ZANISO   (:))
 !
 ZPEAT_PROFILE(:) = 1.0
 !
-WHERE(ZRHO_TOP(:)<=25.0)
+ZMOSS_DENSITY=(1.0-ZWSAT(1))*XOMRHO
+ZNOMOSS=ZMOSS_DENSITY/3.0
+!
+WHERE(ZRHO_TOP(:)<ZNOMOSS)
    ZMOSS_DEPTH(:) = 2.5E-3 ! => Small fibric soil at surface (<=> moss=2.5mm)
-ELSEWHERE(ZRHO_TOP(:)>25.0.AND.ZRHO_TOP(:)<=50.0)
+ELSEWHERE(ZRHO_TOP(:)>=ZNOMOSS.AND.ZRHO_TOP(:)<ZMOSS_DENSITY)
    ZMOSS_DEPTH(:) = 0.01   ! => Fibric soil at surface (<=> moss=1cm)
-ELSEWHERE(ZRHO_TOP(:)>50.0)
-   ZMOSS_DEPTH(:) = 0.04   ! => Fibric soil at surface (<=> moss=4cm)
+ELSEWHERE(ZRHO_TOP(:)>=ZMOSS_DENSITY)
+   ZMOSS_DEPTH(:) = 0.04   ! => Fibric soil with moss at surface  (<=> moss=4cm)
 ENDWHERE
 !
 WHERE(ZMASK(:)>0.0)
@@ -285,7 +288,7 @@ DO JL=1,INL
 !      
       ZREFDEPTH(JI)=MIN(ZPEAT_PROFILE(JI),MAX(ZMOSS_DEPTH(JI),ZMID_SOIL(JI,JL)))
       ZREFDEPTH(JI)=LOG(ZREFDEPTH(JI))-ZLOG_MOSS(JI)
-      ZPEAT_MPOTSAT(JI,JL)=ZMPOTSAT(1)*EXP(ZF_MPOTSAT(JI)*ZREFDEPTH(JI))*1.E-2 !cm to m  
+      ZPEAT_MPOTSAT(JI,JL)=ZMPOTSAT(1)*EXP(ZF_MPOTSAT(JI)*ZREFDEPTH(JI)) 
       ZPEAT_WSAT   (JI,JL)=ZWSAT   (1)*EXP(ZF_WSAT   (JI)*ZREFDEPTH(JI))
       ZPEAT_BCOEF  (JI,JL)=ZBCOEF  (1)*EXP(ZF_BCOEF  (JI)*ZREFDEPTH(JI))
       ZPEAT_WWILT  (JI,JL)=ZWWILT  (1)*EXP(ZF_WWILT  (JI)*ZREFDEPTH(JI))
@@ -314,7 +317,7 @@ DO JL=1,INL
    DO JI=1,INI
      IF(ZMASK(JI)>0.0)THEN            
 !      Soil organic carbon fraction
-       PFRACSOC (JI,JL  ) = MIN(1.0,ZRHO_SOC(JI,JL)/ZPEAT_RHO(JI,JL))             
+       PFRACSOC (JI,JL  ) = MIN(1.0,ZRHO_SOC(JI,JL)/ZPEAT_RHO(JI,JL))   
 !      New soil thermal properties      
        PHCAPSOIL(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PHCAPSOIL(JI,JL) + PFRACSOC(JI,JL)*XOMRHO*XOMSPH
        PCONDDRY (JI,JL  ) = 1.0/((1.0-PFRACSOC(JI,JL))/PCONDDRY (JI,JL) + PFRACSOC(JI,JL)/XOMCONDDRY)

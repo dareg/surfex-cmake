@@ -1,5 +1,5 @@
 !#############################
-SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
+SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
 !#############################
 !
 !
@@ -141,6 +141,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+REAL,                  INTENT(IN) :: PTSTEP        ! time step (s)
 REAL,    DIMENSION(:), INTENT(IN) :: PRAIN         ! rainfall rate
 REAL,    DIMENSION(:), INTENT(IN) :: PSNOW         ! snowfall rate
 !
@@ -369,8 +370,8 @@ IF (LSURF_EVAP_BUDGET) THEN
 !
   IF(LWATER_BUDGET)THEN
 !  
-    XRAINFALL  (:) = PRAIN(:)
-    XSNOWFALL  (:) = PSNOW(:)
+    XRAINFALL  (:) = PRAIN(:) * PTSTEP
+    XSNOWFALL  (:) = PSNOW(:) * PTSTEP
     XAVG_DWG   (:) = 0.0
     XAVG_DWGI  (:) = 0.0
     XAVG_DWR   (:) = 0.0

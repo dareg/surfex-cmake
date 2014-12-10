@@ -38,7 +38,6 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,        ONLY : XLVTT, XRHOLW
 USE MODD_ISBA_GRID_n, ONLY : XMESH_SIZE
 USE MODD_ISBA_n,      ONLY : XPATCH, LFLOOD, LGLACIER, &
                              CISBA, LWTD, XGW,         &

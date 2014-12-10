@@ -39,7 +39,8 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      P. Le Moigne 04/2013 Remove ECUME option for FLake
 !!      P. Le Moigne 04/2013 Chemistry, UPDATE_RAD_FLAKE
 !!      B. Decharme  04/2013 New diag, new coupling variables
-!!------------------------------------------------------------------
+!!      P. Le Moigne 10/2014 Threshold on Cd when fluxes computed by FLake
+!!------------------------------------------------------------------------------
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
@@ -208,6 +209,8 @@ INTEGER              :: ILUOUT ! output logical unit
 !
 LOGICAL              :: GPWG        = .FALSE.
 LOGICAL              :: GHANDLE_SIC = .FALSE. ! no sea-ice model
+!
+REAL                 :: ZEPS = 1.E-7
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -454,14 +457,15 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake code
-  ZCH = 1.E-7
+!
+  ZCH = ZEPS
 !
   WHERE (ABS((XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2 .AND. ZWIND(:)/=0.)
-     ZCH = MAX(1.E-7,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
+     ZCH = MAX(ZEPS,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
   END WHERE
 !
-!
-  ZCDN = (XKARMAN/LOG(PUREF(:)/XZ0(:)))**2
+  ZCDN(:) = (XKARMAN/LOG(PUREF(:)/XZ0(:)))**2
+  ZCD (:) = MAX(ZEPS,ZCD(:))
 !
 ENDIF
 !

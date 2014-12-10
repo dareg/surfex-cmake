@@ -34,6 +34,7 @@
 !!      A.L. Gibelin 04/2009 : dimension NBIOMASS for ISBA-A-gs
 !!      B. Decharme  07/2012  : files of data for permafrost area and for SOC top and sub soil
 !!                   11/2013  : same for groundwater distribution
+!!                   11/2014  : Read XSOILGRID as a series of real 
 !!      P. Samuelsson 10/2014 : MEB
 !-------------------------------------------------------------------------------
 !
@@ -89,7 +90,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 LOGICAL,           INTENT(IN)  :: OLAND_USE ! 
 !
 !*       0.2   Declarations of local variables
@@ -99,13 +100,15 @@ INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field 
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK
 !
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=4 ) :: YLVL
 !
 INTEGER :: ILU    ! expected physical size of full surface array
 INTEGER :: ILUOUT ! output listing logical unit
-INTEGER :: IRESP          ! Error code after redding
-INTEGER :: JLAYER  ! loop counter on layers
+INTEGER :: IRESP  ! Error code after redding
+INTEGER :: JLAYER ! loop counter on layers
 INTEGER :: IVERSION, IBUGFIX   ! surface version
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -178,7 +181,13 @@ YRECFM='GROUND_LAYER'
 IF(CISBA=='DIF') THEN
   ALLOCATE(XSOILGRID(NGROUND_LAYER))
   XSOILGRID=XUNDEF
-  IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
+  IF (IVERSION>=8) THEN
+     DO JLAYER=1,NGROUND_LAYER
+        WRITE(YLVL,'(I4)') JLAYER
+        YRECFM='SOILGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+        CALL READ_SURF(HPROGRAM,YRECFM,XSOILGRID(JLAYER),IRESP)
+     ENDDO    
+  ELSEIF (IVERSION==7 .AND. IBUGFIX>=2) THEN
     YRECFM='SOILGRID'
     CALL READ_SURF(HPROGRAM,YRECFM,XSOILGRID,IRESP,HDIR='-')
   ELSE

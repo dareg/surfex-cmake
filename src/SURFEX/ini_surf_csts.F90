@@ -106,7 +106,6 @@ NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
 IF (LHOOK) CALL DR_HOOK('INI_SURF_CSTS',0,ZHOOK_HANDLE)
 !
 XALBWAT     = XUNDEF
-XALBSCA_WAT = XUNDEF
 XALBSEAICE  = XUNDEF
 XALBWATICE  = XUNDEF
 XALBWATSNOW = XUNDEF
@@ -157,6 +156,10 @@ XWSNV = 5.0 !(-)
 !
 XALBCOEF_TA96 =  0.037
 !
+! Water diffuse albedo
+!
+XALBSCA_WAT =  0.06
+
 ! Coefficient for calculation of floodplain fraction over vegetation
 !
 XCFFV = 3.0
@@ -311,18 +314,8 @@ IF(LREPROD_OPER)THEN
   XEVERG_RSMIN   = 250.
   XEVERG_VEG     = 0.99
   CDGAVG         = 'ARI'
-  CDGDIF         = 'SOIL'
   CQSAT          = 'OLD'
   CCHARNOCK      = 'OLD'
-ENDIF
-!
-! Water diffuse albedo
-IF(XALBSCA_WAT==XUNDEF)THEN
-  IF(LREPROD_OPER)THEN
-    XALBSCA_WAT =  0.06
-  ELSE
-    XALBSCA_WAT =  0.065
-  ENDIF
 ENDIF
 !
 ! Water global albedo (option "UNIF")

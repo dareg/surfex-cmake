@@ -69,7 +69,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                        
                                 XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_Z0_O_Z0H, &
                                 XDATA_EMIS_ECO, XDATA_WRMAX_CF,                   &
                                 XDATA_CE_NITRO,XDATA_CF_NITRO,XDATA_CNA_NITRO,    &
-                                XDATA_BSLAI_NITRO,                                &
                                 XDATA_SOILRC_SO2, XDATA_SOILRC_O3, XDATA_RE25,    &
                                 XDATA_GMES_ST, XDATA_BSLAI_ST, XDATA_SEFOLD_ST,   &
                                 XDATA_GC_ST, XDATA_DMAX_ST

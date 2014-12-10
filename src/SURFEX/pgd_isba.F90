@@ -55,14 +55,14 @@ USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, NNBIOMASS, CISBA, &
                                 XCLAY, XSAND, XSOC, LSOCP, LNOF,         &
                                 XRUNOFFB, XWDRAIN, LECOCLIMAP,           &
                                 XSOILGRID, LPERM, XPERM, XPH, XFERT,     &
-                                LGW, XGW,                                &
-                                LMEB_PATCH, LFORC_MEASURE
+                                LGW, XGW, LMEB_PATCH, LFORC_MEASURE
 USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE
 !
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_NAM_PGD_ISBA
+USE MODI_READ_NAM_PGD_ISBA_MEB
 USE MODI_PGD_FIELD
 USE MODI_TEST_NAM_VAR_SURF
 !
@@ -83,6 +83,7 @@ USE MODE_POS_SURF
 USE MODI_READ_SURF
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
+!
 #ifdef ASC
 USE MODD_IO_SURF_ASC, ONLY : CFILEIN
 #endif
@@ -180,22 +181,18 @@ REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-LOGICAL, DIMENSION(19) :: TEMP_LMEB_PATCH
-LOGICAL, DIMENSION(1)  :: TEMP_LFORC_MEASURE
-
-NAMELIST/NAM_MEB_ISBA/ TEMP_LMEB_PATCH, TEMP_LFORC_MEASURE
-
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
- CALL GET_LUOUT(HPROGRAM,ILUOUT)
+!
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
-!*    2.      Reading of namelist
-!             -------------------
+!*    2.1      Reading of ISBA namelist
+!             -------------------------
 !
- CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
+CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
                        YISBA,  YPEDOTF, YPHOTO, GTR_ML, ZRM_PATCH,               &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,              &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
@@ -217,31 +214,28 @@ LTR_ML        = GTR_ML
 XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
 !
 !
-!++++++++++++++++++++++++++++++++++++++
+!-------------------------------------------------------------------------------
 !
-  ALLOCATE(LMEB_PATCH(IPATCH))
-  IF(IPATCH>19)THEN
-    STOP 'IPATCH must be 19 or less!!'
-  ENDIF
-
-! Default values of LMEB_PATCH
-  TEMP_LMEB_PATCH(:)    =.FALSE.
-  TEMP_LFORC_MEASURE(1) =.FALSE.
-
+!*    2.2      Reading of ISBA MEB namelist
+!             -----------------------------
+!
+IF (NPATCH<1 .OR. NPATCH>NVEGTYPE) THEN
+  WRITE(ILUOUT,*) '*****************************************'
+  WRITE(ILUOUT,*) '* Number of patch must be between 1 and ', NVEGTYPE
+  WRITE(ILUOUT,*) '* You have chosen NPATCH = ', NPATCH
+  WRITE(ILUOUT,*) '*****************************************'
+  CALL ABOR1_SFX('PGD_ISBA: NPATCH MUST BE BETWEEN 1 AND NVEGTYPE')
+END IF
+!
+ALLOCATE(LMEB_PATCH(NPATCH))
+!
 IF(GMEB)THEN
-!
-  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-!
-  CALL POSNAM(ILUNAM,'NAM_MEB_ISBA',GFOUND,ILUOUT)
-  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_MEB_ISBA)
-!
-  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-!
+  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,NPATCH, &
+                             LMEB_PATCH,LFORC_MEASURE)
+ELSE
+  LMEB_PATCH(:) = .FALSE.
+  LFORC_MEASURE = .FALSE.
 ENDIF
-LMEB_PATCH=TEMP_LMEB_PATCH(1:IPATCH)
-LFORC_MEASURE=TEMP_LFORC_MEASURE(1)
-!
-!++++++++++++++++++++++++++++++++++++++
 !
 !-------------------------------------------------------------------------------
 !
@@ -324,14 +318,6 @@ WRITE(ILUOUT,*) '*****************************************'
 WRITE(ILUOUT,*) '* With option CPHOTO = ',CPHOTO,'               *'
 WRITE(ILUOUT,*) '* the number of biomass pools is set to ', NNBIOMASS
 WRITE(ILUOUT,*) '*****************************************'
-!
-IF (NPATCH<1 .OR. NPATCH>NVEGTYPE) THEN
-  WRITE(ILUOUT,*) '*****************************************'
-  WRITE(ILUOUT,*) '* Number of patch must be between 1 and ', NVEGTYPE
-  WRITE(ILUOUT,*) '* You have chosen NPATCH = ', NPATCH
-  WRITE(ILUOUT,*) '*****************************************'
-  CALL ABOR1_SFX('PGD_ISBA: NPATCH MUST BE BETWEEN 1 AND NVEGTYPE')
-END IF
 !
 IF ( CPHOTO/='NON' .AND. NPATCH/=12 .AND. NPATCH/=19 ) THEN
   WRITE(ILUOUT,*) '*****************************************'

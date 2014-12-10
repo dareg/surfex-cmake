@@ -93,7 +93,7 @@ INTEGER                          :: JLIST          ! loop counter on points to i
 INTEGER                          :: ICOUNT         ! counter
 INTEGER                          :: INPTS
 INTEGER                          :: ISCAN          ! number of points to scan
-INTEGER, DIMENSION(:), ALLOCATABLE :: IINDEX       ! list of index to scan
+INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX       ! list of index to scan
 INTEGER                            :: IHALO        ! halo available
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -101,12 +101,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',0,ZHOOK_HANDLE)
 IL = SIZE(PFIELD,1)
 !
- CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
+CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
 !
 INEAR_NBR = (2*IHALO+1)**2
 !
-!
-ALLOCATE(IINDEX(IL))
 IINDEX(:) = 0
 !
 !
@@ -185,7 +183,6 @@ DO JL=1,IL
   !
 END DO
 !
-DEALLOCATE(IINDEX    )
 IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

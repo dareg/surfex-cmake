@@ -117,7 +117,7 @@ LOGICAL          :: LLAND_USE = .FALSE.
 !*    General flag for using simple coherence between solar zenithal angle and radiation
 !     ----------
 !
-LOGICAL          :: LADAPT_SW = .TRUE.
+LOGICAL          :: LADAPT_SW = .FALSE.
 !
 !*    General flag to modify direct solar radiation due to slopes and shadows.
 !     ----------

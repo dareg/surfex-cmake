@@ -122,6 +122,8 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PDUNNE, PHORTON
 !
 REAL, DIMENSION(:), INTENT(IN   ) :: PFFLOOD
 REAL, DIMENSION(:), INTENT(IN   ) :: PPIFLOOD
+!                                    PPIFLOOD = Floodplain potential infiltration [kg/m²]
+!                                             = Floodplain mass
 REAL, DIMENSION(:), INTENT(INOUT) :: PIFLOOD, PPFLOOD
 !                                    PIFLOOD = Floodplain infiltration     [kg/m²/s]
 !                                    PPFLOOD = Floodplain interception     [kg/m²/s]
@@ -290,7 +292,7 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !
       ZSOILHEATCAP = XCL*XRHOLW*PWG (JJ,2) +                           &
                      XCI*XRHOLI*PWGI(JJ,2) +                           &
-                     XSPHSOIL*XDRYWGHT*(1.0-PWSAT(JJ,1))*(1.0-PWSAT(JJ,1))
+                     XSPHSOIL*XDRYWGHT*(1.0-PWSAT(JJ,1))
 !                     
 !     Soil thickness which corresponds to the diurnal surface temperature
 !     wave penetration depth as T2 is the average temperature for this layer:
@@ -462,10 +464,10 @@ IF(OFLOOD)THEN
 !
 ! calculate the maximum flood infiltration
 !
-  ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX(:)*XRHOLW &   !unfrozen soil
-             +      ZFROZEN(:) * ZIMAX_ICE(:)*XRHOLW     !frozen soil
+  ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX    (:)*XRHOLW &   !unfrozen soil
+             +             ZFROZEN(:)   * ZIMAX_ICE(:)*XRHOLW     !frozen soil
 !
-  PIFLOOD(:)=MAX(0.0,(PFFLOOD(:)-PFSAT(:)))*MIN(PPIFLOOD(:),ZIF_MAX(:))
+  PIFLOOD(:)=MAX(0.0,(PFFLOOD(:)-PFSAT(:)))*MIN(PPIFLOOD(:)/PTSTEP,ZIF_MAX(:))
 !
   IF(HISBA == 'DIF')THEN
     ZDEPTH(:)=0.0

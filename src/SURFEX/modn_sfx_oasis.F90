@@ -2,7 +2,7 @@
 MODULE MODN_SFX_OASIS
 !###############
 !
-!!****  *MODN_SFX_OASIS - declaration of namelist for TRIP-OASIS coupling
+!!****  *MODN_SFX_OASIS - declaration of namelist for SFX-OASIS coupling
 !!
 !!    PURPOSE
 !!    -------

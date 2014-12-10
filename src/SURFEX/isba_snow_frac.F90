@@ -31,7 +31,7 @@
 !
 USE MODD_SNOW_PAR   , ONLY : XEMISSN, XEMCRIN, XSNOWDMIN, &
                              XRHOSMAX_ES, XRHOSMIN_ES, &
-                             XWCRN_EXPL 
+                             XWCRN_EXPL, XDCRN_EXPL
 !
 USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
 !
@@ -103,7 +103,7 @@ END IF
 !              -------------------------
 !
 IF (HSNOW == 'CRO' .OR. HSNOW == '3-L') THEN
-   PPSNG(:) = MIN(1.0, ZSNOWSWE(:)/XWCRN_EXPL)
+   PPSNG(:) = MIN(1.0, ZSNOWD(:)/XDCRN_EXPL)
 ELSE
    PPSNG(:) = SNOW_FRAC_GROUND(ZSNOWSWE)
 ENDIF

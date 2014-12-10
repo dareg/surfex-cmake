@@ -30,8 +30,8 @@
         PSR_GN, PMELTCV, PFRZCV, PMELT, PMELTADV,                              &
         PLE_FLOOD, PLEI_FLOOD,                                                 &
         PLE, PH, PRN, PLEI, PLEGI, PLEG, PLEV, PLES, PLER, PLETR, PEVAP,       &
-        PGFLUX, PRESTORE, PGRNDFLUX, PUSTAR,                                   &
-        PHPSNOW, PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,          &
+        PSUBL, PGFLUX, PRESTORE, PGRNDFLUX, PFLSN_COR, PUSTAR,                 &
+        PHPSNOW, PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                      &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
         PEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
         PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,                               &
@@ -355,6 +355,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PLER          ! latent heat of the fracti
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLETR         ! evapotranspiration of the rest
 !                                                    ! of the vegetation
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEVAP         ! total evaporative flux (kg/m2/s)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSUBL         ! sublimation flux (kg/m2/s)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PGFLUX        ! flux through the ground
 REAL, DIMENSION(:),   INTENT(OUT)   :: PRESTORE      ! surface restore flux for Force-Restore, diffusive flux between uppermost and second soil layers
 !                                                    ! when using the DIF soil option (W/m2)
@@ -390,10 +391,9 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSR_GN        ! MEB: total snow reaching 
 REAL, DIMENSION(:),   INTENT(OUT)   :: PMELTCV       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PFRZCV        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PGRNDFLUX     ! snow/soil-biomass interface flux (W/m2)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PFLSN_COR     ! soil/snow interface correction flux to conserve energy (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PHPSNOW       ! heat release from rainfall (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWHMASS    ! snow heat content change from mass changes (J/m2)
-REAL, DIMENSION(:),   INTENT(OUT)   :: PSMELTFLUX    ! energy removed from soil/vegetation surface
-!                                                    ! when last traces of snow melted (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PRNSNOW       ! net radiative flux from snow (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PHSNOW        ! sensible heat flux from snow (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PGFLUXSNOW    ! net heat flux from snow (W/m2)
@@ -562,7 +562,8 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZTA                  ! low
 REAL, DIMENSION(SIZE(PPS))                         :: ZQA                  ! lowest level atmospheric spec. humidity update estimate (K)
 REAL, DIMENSION(SIZE(PPS))                         :: ZVMOD                ! lowest level atmospheric wind speed update estimate (K)
 REAL, DIMENSION(SIZE(PPS))                         :: ZRR                  ! combined rain rate (above canopy) and irrigation need (kg/m2/s)
-
+REAL, DIMENSION(SIZE(PPS))                         :: ZFLSN_COR            ! snow/soil-biomass correction flux (W/m2) (not MEB)
+!
 !
 ! Working sums for flux averaging over MEB time split
 !
@@ -593,7 +594,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -------------
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
-!
 !
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -816,7 +816,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PH_C_A,PH_V_C,PH_G_C,PH_N_C,ZH_N_A,PHSNOW,PH,                            &
               PLE_C_A,PLE_V_C,PLE_G_C,PLE_N_C,                                         &
               ZEVAP_C_A,PLEV_V_C,PEVAP_G_C,PEVAP_N_C,ZEVAP_N_A,                        &
-              PEVAP,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                     &
+              PEVAP,PSUBL,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                               &
               PLE_FLOOD,PLEI_FLOOD,ZLES3L,ZLEL3L,                                      &
               ZEVAP3L,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,                               &
               PTS_RAD,PEMIST                                                           )
@@ -898,12 +898,11 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, ZALBG, PD_G(:,1),             &
            PPEW_A_COEF, PPEW_B_COEF,                                                   &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-           PSNOW_THRUFAL, PGRNDFLUX, PRESTOREN, PEVAPCOR,                              &
+           PSNOW_THRUFAL, PGRNDFLUX, PFLSN_COR, PRESTOREN, PEVAPCOR,                   &
            PSWNET_N, PSWNET_NS, PLWNET_N,                                              &
            PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,              &
            PSNDRIFT, PUSTARSNOW,                                                       & 
-           PPSN, PSRSFC, PRRSFC, PSMELTFLUX, PSNOWSFCH,                                &
-           PDELHEATN, PDELHEATN_SFC,                                                   &
+           PPSN, PSRSFC, PRRSFC, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC,                  &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
            PSNOWHMASS, PRISNOW, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
            OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
@@ -917,13 +916,24 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 CONTAINS
+!
 !===============================================================================
+!
 SUBROUTINE INIT_SUM_FLUXES_MEB_TSPLIT 
-
-IF (LHOOK) CALL DR_HOOK('INIT_SUM_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
-
+!
+IMPLICIT NONE
+!
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:INIT_SUM_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
+!
 ! sensible heat fluxes:
-
+!
 ZH_SUM(:)        = 0.0
 ZH_C_A_SUM(:)    = 0.0
 ZH_N_A_SUM(:)    = 0.0
@@ -931,9 +941,9 @@ ZH_V_C_SUM(:)    = 0.0
 ZH_G_C_SUM(:)    = 0.0
 ZH_N_C_SUM(:)    = 0.0
 ZHSNOW_SUM(:)    = 0.0
-
+!
 ! latent heat/water vapor fluxes:
-
+!
 ZLE_SUM(:)       = 0.0
 ZLE_C_A_SUM(:)   = 0.0
 ZLE_V_C_SUM(:)   = 0.0
@@ -952,27 +962,27 @@ ZLEI_SUM(:)      = 0.0
 ZLES3L_SUM(:)    = 0.0
 ZLEL3L_SUM(:)    = 0.0
 ZEVAP3L_SUM(:)   = 0.0
-
+!
 ZHU_AGG_SUM(:)   = 0.0
 ZAC_AGG_SUM(:)   = 0.0
-
+!
 ! momentum/turb:
-
+!
 ZUSTAR2_SUM(:)     = 0.0
 ZUSTAR2SNOW_SUM(:) = 0.
 ZCDSNOW_SUM(:)     = 0.
 ZCHSNOW_SUM(:)     = 0.
 ZRISNOW_SUM(:)     = 0.
-
+!
 ! surface interfacial/sub-surface heat fluxes:
-
+!
 ZGRNDFLUX_SUM(:) = 0.0
 ZRESTORE_SUM(:)  = 0.0
 ZGFLUXSNOW_SUM(:)= 0.0
 ZHPSNOW_SUM(:)   = 0.0
-
+!
 ! radiative fluxes:
-
+!
 ZSWNET_V_SUM(:)  = 0.0
 ZSWNET_G_SUM(:)  = 0.0
 ZSWNET_N_SUM(:)  = 0.0
@@ -982,21 +992,31 @@ ZLWNET_N_SUM(:)  = 0.0
 ZEMIST_SUM(:)    = 0.0
 ZSWUP_SUM(:)     = 0.0
 ZLWUP_SUM(:)     = 0.0
-
+!
 ZDELHEATV_SFC_SUM(:) = 0.0 
 ZDELHEATG_SFC_SUM(:) = 0.0 
 ZDELHEATG_SUM(:)     = 0.0 
-
-IF (LHOOK) CALL DR_HOOK('INIT_SUM_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
-
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:INIT_SUM_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
+!
 END SUBROUTINE INIT_SUM_FLUXES_MEB_TSPLIT
+!
 !===============================================================================
+!
 SUBROUTINE SUM_FLUXES_MEB_TSPLIT 
-
-IF (LHOOK) CALL DR_HOOK('SUM_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
-
+!
+IMPLICIT NONE
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SUM_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
+!
 ! Sum fluxes over MEB TIME SPLIT:
-
+!
 ! sensible heat fluxes:
 
 ZH_SUM(:)        = ZH_SUM(:)        + PH(:)
@@ -1006,9 +1026,9 @@ ZH_V_C_SUM(:)    = ZH_V_C_SUM(:)    + PH_V_C(:)
 ZH_G_C_SUM(:)    = ZH_G_C_SUM(:)    + PH_G_C(:)
 ZH_N_C_SUM(:)    = ZH_N_C_SUM(:)    + PH_N_C(:)
 ZHSNOW_SUM(:)    = ZHSNOW_SUM(:)    + PHSNOW(:)
-
+!
 ! latent heat/water vapor fluxes:
-
+!
 ZLE_SUM(:)       = ZLE_SUM(:)       + PLE(:)
 ZLE_C_A_SUM(:)   = ZLE_C_A_SUM(:)   + PLE_C_A(:)
 ZLE_V_C_SUM(:)   = ZLE_V_C_SUM(:)   + PLE_V_C(:) 
@@ -1027,27 +1047,27 @@ ZLEI_SUM(:)      = ZLEI_SUM(:)      + PLEI(:)
 ZLES3L_SUM(:)    = ZLES3L_SUM(:)    + ZLES3L(:) 
 ZLEL3L_SUM(:)    = ZLEL3L_SUM(:)    + ZLEL3L(:) 
 ZEVAP3L_SUM(:)   = ZEVAP3L_SUM(:)   + ZEVAP3L(:) 
-
+!
 ZHU_AGG_SUM(:)   = ZHU_AGG_SUM(:)   + PHU_AGG(:)
 ZAC_AGG_SUM(:)   = ZAC_AGG_SUM(:)   + PAC_AGG(:)
-
+!
 ! momentum/turb:
-
+!
 ZUSTAR2_SUM(:)     = ZUSTAR2_SUM(:)     + ZUSTAR2_IC(:)
 ZUSTAR2SNOW_SUM(:) = ZUSTAR2SNOW_SUM(:) + ZUSTAR2SNOW(:)
 ZCDSNOW_SUM(:)     = ZCDSNOW_SUM(:)     + PCDSNOW(:)
 ZCHSNOW_SUM(:)     = ZCHSNOW_SUM(:)     + PCHSNOW(:)
 ZRISNOW_SUM(:)     = ZRISNOW_SUM(:)     + PRISNOW(:)
-
+!
 ! surface interfacial/sub-surface heat fluxes:
-
+!
 ZGRNDFLUX_SUM(:) = ZGRNDFLUX_SUM(:) + PGRNDFLUX(:) 
 ZRESTORE_SUM(:)  = ZRESTORE_SUM(:)  + PRESTORE(:) 
 ZGFLUXSNOW_SUM(:)= ZGFLUXSNOW_SUM(:)+ PGFLUXSNOW(:) 
 ZHPSNOW_SUM(:)   = ZHPSNOW_SUM(:)   + PHPSNOW(:)
-
+!
 ! radiative fluxes:
-
+!
 ZSWNET_V_SUM(:)  = ZSWNET_V_SUM(:)  +   PSWNET_V(:)
 ZSWNET_G_SUM(:)  = ZSWNET_G_SUM(:)  +   PSWNET_G(:) 
 ZSWNET_N_SUM(:)  = ZSWNET_N_SUM(:)  +   PSWNET_N(:) 
@@ -1057,25 +1077,35 @@ ZLWNET_N_SUM(:)  = ZLWNET_N_SUM(:)  +   PLWNET_N(:)
 ZEMIST_SUM(:)    = ZEMIST_SUM(:)    +   PEMIST(:) 
 ZSWUP_SUM(:)     = ZSWUP_SUM(:)     +   ZSWUP(:)
 ZLWUP_SUM(:)     = ZLWUP_SUM(:)     +   ZLWUP(:)
-
+!
 ZDELHEATV_SFC_SUM(:) = ZDELHEATV_SFC_SUM(:) +   PDELHEATV_SFC(:) 
 ZDELHEATG_SFC_SUM(:) = ZDELHEATG_SFC_SUM(:) +   PDELHEATG_SFC(:) 
 ZDELHEATG_SUM(:)     = ZDELHEATG_SUM(:)     +   PDELHEATG(:) 
-
-IF (LHOOK) CALL DR_HOOK('SUM_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
-
-END SUBROUTINE SUM_FLUXES_MEB_TSPLIT 
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SUM_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SUM_FLUXES_MEB_TSPLIT
+!
 !===============================================================================
+!
 SUBROUTINE AVG_FLUXES_MEB_TSPLIT 
-
+!
 USE MODD_CSTS, ONLY : XSTEFAN
-
-IF (LHOOK) CALL DR_HOOK('AVG_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
-
+!
+IMPLICIT NONE
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:AVG_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
+!
 ! Average fluxes over MEB TIME SPLIT:
-
+!
 ! sensible heat fluxes:
-
+!
 PH(:)        = ZH_SUM(:)        /JTSPLIT_EB
 PH_C_A(:)    = ZH_C_A_SUM(:)    /JTSPLIT_EB
 ZH_N_A(:)    = ZH_N_A_SUM(:)    /JTSPLIT_EB
@@ -1083,9 +1113,9 @@ PH_V_C(:)    = ZH_V_C_SUM(:)    /JTSPLIT_EB
 PH_G_C(:)    = ZH_G_C_SUM(:)    /JTSPLIT_EB
 PH_N_C(:)    = ZH_N_C_SUM(:)    /JTSPLIT_EB
 PHSNOW(:)    = ZHSNOW_SUM(:)    /JTSPLIT_EB
-
+!
 ! latent heat/water vapor fluxes:
-
+!
 PLE(:)       = ZLE_SUM(:)       /JTSPLIT_EB
 PLE_C_A(:)   = ZLE_C_A_SUM(:)   /JTSPLIT_EB
 PLE_V_C(:)   = ZLE_V_C_SUM(:)   /JTSPLIT_EB
@@ -1104,27 +1134,27 @@ PLEI(:)      = ZLEI_SUM(:)      /JTSPLIT_EB
 ZLES3L(:)    = ZLES3L_SUM(:)    /JTSPLIT_EB
 ZLEL3L(:)    = ZLEL3L_SUM(:)    /JTSPLIT_EB
 ZEVAP3L(:)   = ZEVAP3L_SUM(:)   /JTSPLIT_EB
-
+!
 PHU_AGG(:)   = ZHU_AGG_SUM(:)   /JTSPLIT_EB
 PAC_AGG(:)   = ZAC_AGG_SUM(:)   /JTSPLIT_EB
-
+!
 ! momentum/turb:
-
+!
 PUSTAR(:)     = SQRT( ZUSTAR2_SUM(:)    /JTSPLIT_EB )
 PUSTARSNOW(:) = SQRT( ZUSTAR2SNOW_SUM(:)/JTSPLIT_EB )
 PCDSNOW(:)    = ZCDSNOW_SUM(:)          /JTSPLIT_EB 
 PCHSNOW(:)    = ZCHSNOW_SUM(:)          /JTSPLIT_EB 
 PRISNOW(:)    = ZRISNOW_SUM(:)          /JTSPLIT_EB 
-
+!
 ! surface interfacial/sub-surface heat fluxes:
-
+!
 PGRNDFLUX(:) = ZGRNDFLUX_SUM(:) /JTSPLIT_EB
 PRESTORE(:)  = ZRESTORE_SUM(:)  /JTSPLIT_EB
 PGFLUXSNOW(:)= ZGFLUXSNOW_SUM(:)/JTSPLIT_EB
 PHPSNOW(:)   = ZHPSNOW_SUM(:)   /JTSPLIT_EB
-
+!
 ! radiative fluxes:
-
+!
 PSWNET_V(:)  = ZSWNET_V_SUM(:)  /JTSPLIT_EB
 PSWNET_G(:)  = ZSWNET_G_SUM(:)  /JTSPLIT_EB
 PSWNET_N(:)  = ZSWNET_N_SUM(:)  /JTSPLIT_EB
@@ -1134,15 +1164,15 @@ PLWNET_N(:)  = ZLWNET_N_SUM(:)  /JTSPLIT_EB
 PEMIST(:)    = ZEMIST_SUM(:)    /JTSPLIT_EB
 ZSWUP(:)     = ZSWUP_SUM(:)     /JTSPLIT_EB
 ZLWUP(:)     = ZLWUP_SUM(:)     /JTSPLIT_EB
-
+!
 PDELHEATV_SFC(:) = ZDELHEATV_SFC_SUM(:) /JTSPLIT_EB 
 PDELHEATG_SFC(:) = ZDELHEATG_SFC_SUM(:) /JTSPLIT_EB 
 PDELHEATG(:)     = ZDELHEATG_SUM(:)     /JTSPLIT_EB 
-
+!
 ! Additional diagnostics depending on AVG quantities:
-
+!
 PTS_RAD(:)   = ((ZLWUP(:) - PLW_RAD(:)*(1.0-PEMIST(:)))/(XSTEFAN*PEMIST(:)))**0.25
-
+!
 ZRNET_V(:)   = PSWNET_V(:) + PLWNET_V(:)
 !
 ZRNET_G(:)   = PSWNET_G(:) + PLWNET_G(:)
@@ -1151,10 +1181,12 @@ PRNSNOW(:)   = PSWNET_N(:) + PLWNET_N(:)
 !
 PRN(:)       = ZRNET_V(:) + ZRNET_G(:) + PRNSNOW(:) 
 !
-IF (LHOOK) CALL DR_HOOK('AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE AVG_FLUXES_MEB_TSPLIT 
+!
 !===============================================================================
+!
 SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
                                       PSNOWDZ, PZENITH,                        &
                                       PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,     &
@@ -1171,9 +1203,6 @@ USE MODD_SNOW_PAR,       ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,  &
                                 XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
 !
 USE MODE_SNOW3L,         ONLY : SNOW3LALB, SNOW3LRADABS
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
@@ -1202,13 +1231,11 @@ REAL, DIMENSION(SIZE(PPS),3)        :: ZSPECTRALALBEDO
 !                                                        MEB currently uses 2)
 !                                                        1=VIS, 2=NIR, 3=UV
 !
-!
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
 !
 ! 1) Spectral albedo
 ! ------------------
@@ -1255,7 +1282,7 @@ END WHERE
 !
 PTAU_N(:) = SNOW3LRADABS(PSNOWRHO,PSNOWDZ,ZSPECTRALALBEDO,PZENITH,ZPERMSNOWFRAC)
 !
-IF (LHOOK) CALL DR_HOOK('SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
 !===============================================================================

@@ -69,14 +69,14 @@ CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
 INTEGER           :: IVERSION   ! surface version
 !
 LOGICAL           :: LREAD      ! work key
-LOGICAL           :: LCPL_GCM   ! work key
+LOGICAL           :: GCPL_GCM   ! work key
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_CPL_GCM_N',0,ZHOOK_HANDLE)
 !
-LCPL_GCM = .FALSE.
+GCPL_GCM = .FALSE.
 !
 IF (HINIT=='PGD') THEN
 !     
@@ -109,10 +109,10 @@ LREAD=(HINIT/='PGD'.AND.HINIT/='PRE'.AND.IVERSION>=8)
 !
 IF (LREAD) THEN
    YRECFM='LCPL_GCM'
-   CALL READ_SURF(HPROGRAM,YRECFM,LCPL_GCM,IRESP)
+   CALL READ_SURF(HPROGRAM,YRECFM,GCPL_GCM,IRESP)
 ENDIF  
 !
-IF (LREAD.AND.LCPL_GCM) THEN
+IF (LREAD.AND.GCPL_GCM) THEN
 !
    YRECFM='RAIN_GCM'
    CALL READ_SURF(HPROGRAM,YRECFM,XRAIN(:),IRESP)

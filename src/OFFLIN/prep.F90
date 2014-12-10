@@ -38,7 +38,6 @@ USE MODE_POS_SURF
 USE MODD_SURFEX_OMP, ONLY : NWORK, NWORK2, XWORK, XWORK2, XWORK3, NBLOCKTOT, &
                              NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
 !
-USE MODN_IO_OFFLINE, ONLY : LLAND_USE
 USE MODD_IO_SURF_ASC
 USE MODD_IO_SURF_FA
 USE MODD_IO_SURF_LFI
@@ -88,11 +87,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 #ifndef AIX64
-!$ INCLUDE 'omp_lib.h'
+INCLUDE 'omp_lib.h'
 #endif
 !
 #ifdef SFXOASIS
-!$ INCLUDE 'mpif.h'
+INCLUDE 'mpif.h'
 #endif
 !
 !*    0.     Declaration of local variables

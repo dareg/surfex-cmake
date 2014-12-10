@@ -407,7 +407,7 @@ IF(LCPL_SEAICE.OR.LHANDLE_SIC)THEN
   CALL COUPLING_ICEFLUX_n(KI, PTA, ZEXNA, PRHOA, XTICE, ZEXNS, &
                      ZQA, PRAIN, PSNOW, ZWIND, PZREF, PUREF,   &
                      PPS, XSST, XTTS, ZSFTH_ICE, ZSFTQ_ICE,    &  
-                     LHANDLE_SIC, XSIC, ZQSAT_ICE, ZZ0_ICE,    &
+                     LHANDLE_SIC, ZMASK, ZQSAT_ICE, ZZ0_ICE,   &
                      ZUSTAR_ICE, ZCD_ICE, ZCDN_ICE, ZCH_ICE,   &
                      ZRI_ICE, ZRESA_SEA_ICE, ZZ0H_ICE          )
 ENDIF

@@ -198,7 +198,7 @@ REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2)) :: ZAMTRX, ZBMTRX, ZCMTRX, ZFRC, ZSOL
 !                                      ZFRC      = forcing function (vector)
 !                                      ZSOL      = solution vector
 !
-REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2))  :: ZINFLAYER, ZWG
+REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2))  :: ZINFLAYER
 !
 REAL, PARAMETER                     :: ZWGHT = 0.5  ! time scheme weight for calculating flux.
 !                                                     varies from 0 (explicit time scheme)
@@ -479,9 +479,7 @@ ENDDO
 ! 9. Final calculations and diagnostics:
 !    -----------------------------------
 !
-
-ZWG=PWG
-
+!
 DO JL=1,INL
    DO JJ=1,INI
 !   

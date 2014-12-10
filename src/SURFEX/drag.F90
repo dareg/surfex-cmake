@@ -8,7 +8,7 @@
                       PCH, PCD, PCDN, PRI, PHUG, PHUGI,                  &
                       PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF,              &
                       PFFG_NOSNOW, PFFV_NOSNOW,                          &
-                      PLEG_DELTA, PLEGI_DELTA, PWR, PRHOA, PLVTT         )  
+                      PLEG_DELTA, PLEGI_DELTA, PWR, PRHOA, PLVTT, PQSAT  )  
 !   ############################################################################
 !
 !!****  *DRAG*  
@@ -99,15 +99,15 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HISBA      ! type of ISBA version:
+CHARACTER(LEN=*),     INTENT(IN)  :: HISBA      ! type of ISBA version:
 !                                               ! '2-L' (default)
 !                                               ! '3-L'
 !                                               ! 'DIF'
- CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                               !         (Douville et al. 1995)
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)
- CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! option for specific heat Cp:
+CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! option for specific heat Cp:
 !                                               ! 'DRY' = dry Cp
 !                                               ! 'HUM' = Cp as a function of qs
 !
@@ -187,6 +187,8 @@ REAL, DIMENSION(:), INTENT(IN)   :: PWR, PRHOA, PLVTT
 !                                   PRHOA = near-ground air density
 !                                   PLVTT = Vaporization heat
 !
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PQSAT
+!                                            PQSAT = specific humidity at saturation
 !
 !*      0.2    declarations of local variables
 !
@@ -227,6 +229,10 @@ PRI(:)      =0.
 !
 ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !
+ZQSAT(:) = QSAT(PTG(:),PPS(:)) 
+!
+IF(PRESENT(PQSAT))PQSAT(:)=ZQSAT(:)
+!
 !-------------------------------------------------------------------------------
 !
 !*       1.     RELATIVE HUMIDITY OF THE GROUND HU
@@ -248,9 +254,6 @@ PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 !
 !                                         there is a specific treatment for dew
 !                                         (see Mahfouf and Noilhan, jam, 1991)
-!
-ZQSAT(:) = QSAT(PTG(:),PPS(:)) 
-!
 !                                         when hu*qsat < qa, there are two
 !                                         possibilities
 !

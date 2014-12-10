@@ -39,7 +39,7 @@
                       PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
                       PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,                 &
                       PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PGRNDFLUX, PHPSNOW,       &
-                      PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,       &
+                      PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                   &
                       PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW,      &
                       PCHSNOW, PTS_RAD, PTS, PHV, PQS, PSNOWTEMP, PSNOWLIQ,      &
                       PSNOWDZ, PCG, PC1, PC2, PWGEQ, PCT, PCH, PCD, PCDN, PRI,   &
@@ -144,6 +144,7 @@
 !!                            Sublimation diag flux
 !!                            Qs for 3l or crocus (needed for coupling with atm)
 !!                            water table / surface coupling
+!!                            Routines drag, e_budget and isba_fluxes now in isba_ceb
 !!      (A. Boone & P. Samuelsson) (10/2014) Added MEB v1
 !-------------------------------------------------------------------------------
 !
@@ -151,7 +152,6 @@
 !               ------------
 USE MODD_CO2V_PAR,   ONLY : XMC, XMCO2, XPCCO2
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_CSTS,       ONLY : XLVTT, XLSTT, XCPD, XRHOLW 
 !
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
@@ -160,17 +160,15 @@ USE MODI_SOILDIF
 USE MODI_SOILSTRESS
 USE MODI_WET_LEAVES_FRAC
 USE MODI_VEG
-USE MODI_DRAG
 USE MODI_SNOW3L_ISBA
-USE MODI_E_BUDGET
 USE MODI_HYDRO
 USE MODI_ISBA_SNOW_AGR
 !
 USE MODI_RADIATIVE_TRANSFERT
 USE MODI_COTWORES
 !
-USE MODI_ISBA_FLUXES
 !
+USE MODI_ISBA_CEB
 USE MODI_ISBA_MEB
 !
 USE MODE_THERMOS
@@ -553,7 +551,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFROZEN  !Fraction of frozen flood
 REAL, DIMENSION(:), INTENT(IN)   :: PFALB     !Floodplain albedo
 REAL, DIMENSION(:), INTENT(IN)   :: PFEMIS    !Floodplain emis
 REAL, DIMENSION(:), INTENT(IN)   :: PFFLOOD   !Efective floodplain fraction
-REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD  !Floodplains potential infiltration           [kg/m²/s]
+REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD  !Floodplains potential infiltration           [kg/m²]
 REAL, DIMENSION(:), INTENT(INOUT):: PIFLOOD   !Floodplains infiltration                     [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT):: PPFLOOD   !Floodplains direct precipitation             [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT):: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux     [W/m²]
@@ -621,8 +619,6 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PGRNDFLUX  ! snow/soil-biomass interface 
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PHPSNOW    ! heat release from rainfall (W/m2)
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNOWHMASS ! snow heat content change from mass changes (J/m2)
-REAL, DIMENSION(:), INTENT(OUT)     :: PSMELTFLUX ! energy removed from soil/vegetation surface
-!                                                 ! when last traces of snow melted (W/m2)
 REAL, DIMENSION(:), INTENT(OUT)     :: PRNSNOW    ! net radiative flux from snow (W/m2)
 REAL, DIMENSION(:), INTENT(OUT)     :: PHSNOW     ! sensible heat flux from snow (W/m2)
 REAL, DIMENSION(:), INTENT(OUT)     :: PGFLUXSNOW ! net heat flux from snow (W/m2)
@@ -801,8 +797,6 @@ REAL, DIMENSION(SIZE(PWR)) :: ZDELTA    ! fraction of the foliage
 !                                       ! water
 REAL, DIMENSION(SIZE(PWR)) :: ZQSAT     ! expression for the saturation 
 !                                       ! specific humidity 
-REAL, DIMENSION(SIZE(PWR)) :: ZDQSAT    ! expression for the saturation
-!                                       ! specific humidity derivative
 !
 REAL, DIMENSION(SIZE(PWR)) :: ZWRMAX    ! maximum canopy water interception
 !
@@ -823,12 +817,7 @@ REAL, DIMENSION(SIZE(PWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow
 REAL, DIMENSION(SIZE(PWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
 REAL, DIMENSION(SIZE(PWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
 REAL, DIMENSION(SIZE(PWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
-REAL, DIMENSION(SIZE(PWR)) :: ZT2M     ! restore temperature before time integration (K)
-REAL, DIMENSION(SIZE(PWR)) :: ZTSM     ! surface temperature before time integration (K)
 !
-REAL, DIMENSION(SIZE(PWR)) :: ZLEG_DELTA  ! soil evaporation delta fn
-REAL, DIMENSION(SIZE(PWR)) :: ZLEGI_DELTA ! soil sublimation delta fn
-REAL, DIMENSION(SIZE(PWR)) :: ZLER_DELTA
 REAL, DIMENSION(SIZE(PWR)) :: ZVEG
 !
 REAL, DIMENSION(SIZE(PWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
@@ -845,6 +834,8 @@ REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivi
 !
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZF2WGHT    ! water stress factor
 !
+REAL, DIMENSION(SIZE(PWR))               :: ZGRNDFLUX  ! snow/soil-biomass interface flux (W/m2)
+REAL, DIMENSION(SIZE(PWR))               :: ZFLSN_COR  ! snow/soil-biomass correction flux (W/m2)
 !
 ! MEB:
 !
@@ -868,11 +859,7 @@ REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZSNOWSFCH      ! snow su
 REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZGSFCSNOW      ! conductive heat flux between the surface and sub-surface soil layers 
 !                                                                      ! for the multi-layer snow schemes..for composite snow, it is 
 !                                                                      ! equal to PRESTORE (W m-2)
-! Budget: Add to arguments, diags
-! -----------------------------------------------------------------------------------------------------------------------------------------------------
 !
-REAL, DIMENSION(SIZE(PWR)) :: ZTA_IC, ZQA_IC, ZUSTAR2_IC ! TA, QA and friction updated values
-!                                                        ! if implicit coupling with atmosphere used.
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
 !
@@ -896,10 +883,6 @@ PC2(:)          = XUNDEF
 PWGEQ(:)        = XUNDEF
 ZCS(:)          = XUNDEF           
 !
-ZTA_IC(:)       = XUNDEF
-ZQA_IC(:)       = XUNDEF
-ZUSTAR2_IC(:)   = 0.0
-!
 ZEMIST      (:) = XUNDEF
 ZALBT       (:) = XUNDEF
 ZRI3L       (:) = XUNDEF
@@ -912,11 +895,6 @@ PRS         (:)   = 0.0
 PAC_AGG     (:)   = 0.0
 PHU_AGG     (:)   = 0.0
 !
-! Save surface and sub-surface temperature values at beginning of time step for 
-! budget and flux calculations:
-!
-ZTSM(:)         = PTG(:,1)
-ZT2M(:)         = PTG(:,2)
 !
 ! MEB:
 !
@@ -960,7 +938,7 @@ ENDIF
 !*      3.0    Plant stress due to soil water deficit
 !              --------------------------------------
 !
- CALL SOILSTRESS(HISBA, ZF2,                 &
+CALL SOILSTRESS(HISBA, ZF2,                 &
          PROOTFRAC, PWSAT, PWFC, PWWILT,    &
          PWG, PWGI, KWG_LAYER, ZF2WGHT, ZF5 )  
 !
@@ -1015,8 +993,8 @@ IF(OMEB)THEN
         PSR_GN, PMELTCV, PFRZCV, PMELT, PMELTADV,                              &
         PLE_FLOOD, PLEI_FLOOD,                                                 &
         PLE, PH, PRN, PLEI, PLEGI, PLEG, PLEV, PLES, PLER, PLETR, PEVAP,       &
-        PGFLUX, PRESTORE, PGRNDFLUX, PUSTAR,                                   &
-        PHPSNOW, PSNOWHMASS, PSMELTFLUX, PRNSNOW, PHSNOW, PGFLUXSNOW,          &
+        PSUBL, PGFLUX, PRESTORE, ZGRNDFLUX, ZFLSN_COR, PUSTAR,                 &
+        PHPSNOW, PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                      &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
         ZEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
         ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG,                               &
@@ -1049,11 +1027,10 @@ ELSE
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G(:,1),       &
            PPEW_A_COEF, PPEW_B_COEF,                                            &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
-           ZSNOW_THRUFAL, PGRNDFLUX, ZGSFCSNOW, ZEVAPCOR,                       &
+           ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR, ZGSFCSNOW, ZEVAPCOR,            &
            PSWNET_N, PSWNET_NS, PLWNET_N,                                       &
            PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,       &
-           PSNDRIFT, PUSTARSNOW,                                                &
-           PPSN, PSRSFC, PRRSFC, PSMELTFLUX, ZSNOWSFCH,                         &
+           PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, ZSNOWSFCH,               &
            ZDELHEATN, ZDELHEATN_SFC,                                            &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
            PSNOWHMASS, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC,                &
@@ -1066,11 +1043,10 @@ ELSE
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
 !              --------------------------------------------------------------------
 !
-   ZQSAT=QSAT(PTG(:,1),PPS(:))
-!
    IF (HPHOTO=='NON') THEN
       CALL VEG(PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN, PGAMMA, ZF2, PRS)
    ELSE IF (MAXVAL(PGMES).NE.XUNDEF .OR. MINVAL(PGMES).NE.XUNDEF) THEN
+      ZQSAT(:)=QSAT(PTG(:,1),PPS(:))  
       CALL COTWORES(PTSTEP, HPHOTO, OTR_ML, GSHADE,                    &
            PVEGTYPE, OSTRESSDEF, PAH, PBH, PF2I, PDMAX,                &
            PPOI, PCSP, PTG(:,1), ZF2, PSW_RAD, PRESA, PQA, ZQSAT, PLE, &
@@ -1086,78 +1062,26 @@ ELSE
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-!*      9.0    Aerodynamic drag and heat transfer coefficients
+!*      9.0    ISBA Composit Energy Budget
 !              -----------------------------------------------
 !
-   CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF, PTSTEP,                                &
-    PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
-    PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
-    PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
-    PDIRCOSZW, ZDELTA, ZF5, PRESA,  PCH, PCD, PCDN, PRI, PHUG, ZHUGI,           &
-    PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF, PFFG_NOSNOW, PFFV_NOSNOW,             &
-    ZLEG_DELTA, ZLEGI_DELTA, PWR, PRHOA, PLVTT                                  )  
-!
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!
-!*      10.0    Resolution of the surface and soil energy budget
-!               ------------------------------------------------
-!
-   CALL E_BUDGET(HISBA, HSNOW_ISBA, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND,          &
-        PSODELX, PUREF,                                                         &
-        PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,        &
-        PPEQ_B_COEF, PVMOD, PCD, PTG, PTSTEP, PSNOWALB, PSW_RAD, PLW_RAD,       &
-        PTA, PQA, PPS, PRHOA, PEXNS,PEXNA, PCPS, PLVTT, PLSTT,  PVEG,           &
-        PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, PEMIS, PALB, PRESA,          &
-        PCT, PCG, PPSN, PPSNV, PPSNG, PGRNDFLUX, PSMELTFLUX, ZSNOW_THRUFAL,     &
-        PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZALBT, ZEMIST,             &
-        ZQSAT, ZDQSAT, ZFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
-        ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
-        PSNOWFREE_ALB_VEG, PPSNV_A, PSNOWFREE_ALB_SOIL,                         &
-        PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, PDEEP_FLUX                    )
-!
-!
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!
-!*      11.0    Energy and momentum fluxes
-!              --------------------------
-!
-!*******************************************************************************
-! WARNING: at this stage, ZALBT and ZEMIST have two different meanings according
-!          to the ISBA snow-scheme option:
-!  'D95' : they represent aggregated (snow + flood + snow-flood-free) albedo and emissivity
-!  '3-L' : they represent                    flood + snow-flood-free  albedo and emissivity
-!*******************************************************************************
-!
-   CALL ISBA_FLUXES(HISBA, HSNOW_ISBA, OTEMP_ARP, PTSTEP, PSODELX,              &
-           PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC, ZUSTAR2_IC,                        &
-           PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,                             &
-           PVEG, PHUG, ZHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, ZDELTA, PRESA,      &
-           ZF5, PRS, ZCS, PCG, PCT, PSNOWSWE(:,1), ZT2M, ZTSM,                  &
-           PPSN, PPSNV, PPSNG, ZFROZEN1,                                        &
-           ZALBT, ZEMIST, ZQSAT, ZDQSAT, ZSNOW_THRUFAL,                         &
-           PRN, PH, PLE, PLEG, PLEGI, PLEV, PLES, PLER, PLETR, PEVAP, PGFLUX,   &
-           PMELTADV, PMELT, PRESTORE, PUSTAR,                                   &
-           ZSOILCONDZ,  PD_G, PDZG, PTG,                                        &
-           PSRSFC, PPSNV_A, PFFG, PFFV, PFF, PFFROZEN,                          &
-           PLE_FLOOD, PLEI_FLOOD, PSNOWTEMP(:,1)                                ) 
-!
-!
-! Compute aggregated coefficients for evaporation
-! Sum(LEV+LEG+LEGI+LES) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
-!
-   PAC_AGG(:) =   1. / PRESA(:) / XLVTT                             &
-     * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
-       + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))          &
-       + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:)           &
-       + XLSTT*                 PPSN (:)                            )  
-!
-   WHERE(PAC_AGG(:)>0.0)
-      PHU_AGG(:) =   1. / (PRESA(:) * PAC_AGG(:)) / XLVTT                 &
-           * ( XLVTT*    PVEG(:) *(1.-PPSNV(:))                 *PHV(:)   &
-             + XLVTT*(1.-PVEG(:))*(1.-PPSNG(:))*(1.-ZFROZEN1(:))*PHUG(:)  &
-             + XLSTT*(1.-PVEG(:))*(1.-PPSNG(:))*    ZFROZEN1(:) *ZHUGI(:) &
-             + XLSTT*                 PPSN (:)                            )  
-   ENDWHERE
+  CALL ISBA_CEB(HISBA, HSNOW_ISBA, HCPSURF, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND, &
+                PTSTEP, PSODELX, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,        &
+                PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, PSNOWALB,               &
+                PSW_RAD, PLW_RAD, PWG, PWGI, PEXNS, PEXNA, PTA, PVMOD,         &
+                PQA, PRR, PSR, PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF,          &
+                PZ0H_WITH_SNOW, PWFC, PWSAT, PPSN, PPSNG, PPSNV, PZREF,        &
+                PUREF, PDIRCOSZW, ZF5, PFFG, PFFV, PFF, PFFG_NOSNOW,           &
+                PFFV_NOSNOW, PWR, PRHOA, PEMIS, PALB, PCT, ZCS, PCG,           &
+                PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZFROZEN1,         &
+                PTDEEP_A, PTDEEP_B, PGAMMAT,  PPSNV_A, PSNOWFREE_ALB_VEG,      &
+                PSNOWFREE_ALB_SOIL, ZGRNDFLUX, ZFLSN_COR, ZSNOW_THRUFAL,       &
+                PFFROZEN, PFALB, PFEMIS, PSNOWSWE(:,1), PSRSFC,                &
+                PTG, PRESA, PLVTT, PLSTT, PCPS, ZDELTA, PCH, PCD, PCDN,        &
+                PRI, PHUG, ZHUGI, PHV, PHU, PQS, ZALBT, ZEMIST, PDEEP_FLUX,    &
+                PRN, PH, PLE, PLEG, PLEGI, PLEV, PLES, PLER, PLETR, PEVAP,     &
+                PGFLUX, PMELTADV, PMELT, PRESTORE, PUSTAR, PLE_FLOOD,          &
+                PLEI_FLOOD, PSNOWTEMP(:,1), PAC_AGG, PHU_AGG                   )
 !
 ENDIF
 !
@@ -1198,7 +1122,7 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                
 !* add snow component to output radiative parameters and fluxes in case 
 !  of ES or CROCUS snow schemes
 !
- CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                            &
+CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                            &
           ZEMIST, ZALBT,                                          &
           PPSN, PPSNG, PPSNV,                                     &
           PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &
@@ -1211,7 +1135,7 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                
           PRNSNOW, PHSNOW, PHPSNOW,                               &
           PSWNET_N, PSWNET_NS, PLWNET_N,                          &
           PGFLUXSNOW, ZGSFCSNOW, PUSTARSNOW,                      &
-          PGRNDFLUX, PLESL,                                       &
+          ZGRNDFLUX, ZFLSN_COR, PGRNDFLUX, PLESL,                 &
           PEMISNOW,                                               &
           PSNOWTEMP(:,1), PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,     &
           PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &

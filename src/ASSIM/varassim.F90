@@ -563,8 +563,6 @@ LPATCH(:,:) = .FALSE.
    PRINT *,'   |   EXITING VARASSIM AFTER LPRT   |'
    PRINT *,'   -----------------------------------'
    PRINT *
-   RETURN
-   IF (LHOOK) CALL DR_HOOK('VARASSIM',1,ZHOOK_HANDLE)   
  ENDIF
 ! ====================================================================
 !
@@ -654,8 +652,6 @@ LPATCH(:,:) = .FALSE.
    PRINT *,'   |   EXITING VARASSIM AFTER LSIM   |'
    PRINT *,'   -----------------------------------'
    PRINT *
-   RETURN
-   IF (LHOOK) CALL DR_HOOK('VARASSIM',1,ZHOOK_HANDLE)
  ENDIF
 !
 ! ====================================================================
@@ -804,8 +800,6 @@ DO L=1,NVAR    ! control variable (x at previous time step)
    PRINT *,'   -----------------------------------'
    PRINT *,'   |   EXITING VARASSIM AFTER LBEV   |'
    PRINT *,'   -----------------------------------'
-   RETURN
-   IF (LHOOK) CALL DR_HOOK('VARASSIM',1,ZHOOK_HANDLE)
  ENDIF
 ! ====================================================================
 !

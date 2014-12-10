@@ -50,7 +50,7 @@ USE MODD_SNOW_PAR,            ONLY : XRHOSMAX_ES, XRHOSMIN_ES, XEMISSN
 !
 USE MODD_SURF_PAR,            ONLY : XUNDEF
 !
-USE MODE_SNOW3L,              ONLY : SNOW3LTHRMCOND, SNOW3LSCAP
+USE MODE_SNOW3L,              ONLY : SNOW3LTHRM, SNOW3LSCAP
 !
 USE MODE_MEB,                 ONLY : MEB_SHIELD_FACTOR
 !
@@ -93,33 +93,33 @@ ZSNOWRHO(:,:)    = PSNOWRHO(:,:)
 WHERE(PSNOWRHO(:,:)==XUNDEF)
    ZSNOWRHO(:,:) = XRHOSMIN_ES
 ENDWHERE
-
+!
 ! Snow layer thicknesses (m)
-
+!
 PSNOWDZ(:,:)     = PSNOWSWE(:,:)/ZSNOWRHO(:,:)             
-
+!
 ! snow temperature (K) and liquid water content (kg m-3)
-
+!
 CALL SNOW_HEAT_TO_T_WLIQ(PSNOWHEAT,ZSNOWRHO,PSNOWTEMP,ZSNOWLIQ)
-
+!
 ! Snow thermal conductivity:
-
-PSCOND(:,:)      = SNOW3LTHRMCOND(ZSNOWRHO,PSNOWTEMP,PPS)  ! W m-1 K-1
-
+!
+CALL SNOW3LTHRM(ZSNOWRHO(:,:),PSCOND(:,:),PSNOWTEMP(:,:),PPS(:))
+!
 ! Snow heat capacity:
-
+!
 PHEATCAPS(:,:)   = SNOW3LSCAP(ZSNOWRHO)                    ! J m-3 K-1
-
+!
 ! View factor: (1 - shielding factor)
-
+!
 ZPSNA(:)          = 0.
 PCHIP(:)          = MEB_SHIELD_FACTOR(PLAICV,ZPSNA)
 PSIGMA_F(:)       = 1.0 - PCHIP(:)
-
+!
 ! snow emissivity
-
+!
 PEMISNOW(:)       = XEMISSN
-
+!
 IF (LHOOK) CALL DR_HOOK('PREPS_FOR_MEB_EBUD_RAD',1,ZHOOK_HANDLE)
-
+!
 END SUBROUTINE PREPS_FOR_MEB_EBUD_RAD

@@ -163,7 +163,7 @@ USE MODD_PACK_DIAG_ISBA, ONLY : XP_Z0EFF, XP_Z0_WITH_SNOW, XP_Z0H_WITH_SNOW,   &
                                 XP_SNOWFREE_ALB, XP_SNOWFREE_ALB_VEG,          &
                                 XP_SNOWFREE_ALB_SOIL, XP_IFLOOD, XP_PFLOOD,    &
                                 XP_LE_FLOOD, XP_LEI_FLOOD, XP_GRNDFLUX,        &
-                                XP_HPSNOW, XP_SNOWHMASS, XP_SMELTFLUX,         &
+                                XP_HPSNOW, XP_SNOWHMASS,                       &
                                 XP_RNSNOW, XP_HSNOW, XP_GFLUXSNOW,             &
                                 XP_USTARSNOW, XP_SRSFC, XP_RRSFC, XP_LESL,     &
                                 XP_CDSNOW, XP_CHSNOW, XP_TSRAD, XP_TS, XP_HV,  &
@@ -670,7 +670,7 @@ PTRAD = XTSRAD_NAT
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
- CALL AVERAGE_DIAG_EVAP_ISBA_n(PRAIN,PSNOW)
+ CALL AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
 !
 ! Miscellaneous diagnostics (stored in MODD_DIAG_MISC_ISBA_n)
 !
@@ -1054,7 +1054,7 @@ ZIRRIG_GR(:)= 0.
           XP_WGI, XP_CPS, XP_LVTT, XP_LSTT, XP_WR, XP_WRV,XP_WRVN,XP_TV,                  &
           XP_RESA, XP_ANFM, XP_FSAT, XP_SNOWALB, XP_SNOWALBVIS, XP_SNOWALBNIR,            &
           XP_SNOWALBFIR, XP_SNOWSWE, XP_SNOWHEAT, XP_SNOWRHO, XP_SNOWGRAN1, XP_SNOWGRAN2, &
-          XP_SNOWHIST, XP_SNOWAGE, XP_GRNDFLUX, XP_HPSNOW, XP_SNOWHMASS,  XP_SMELTFLUX,   &
+          XP_SNOWHIST, XP_SNOWAGE, XP_GRNDFLUX, XP_HPSNOW, XP_SNOWHMASS,                  &
           XP_RNSNOW, XP_HSNOW, XP_GFLUXSNOW, XP_USTARSNOW, XP_SRSFC, XP_RRSFC, XP_LESL,   &
           XP_SNOWEMIS, XP_CDSNOW, XP_CHSNOW, XP_TSRAD, XP_TS, XP_HV, XP_QS, XP_SNOWTEMP,  &
           XP_SNOWLIQ, XP_SNOWDZ, XP_CG, XP_C1, XP_C2, XP_WGEQ, XP_CT, XP_CH, XP_CD,       &

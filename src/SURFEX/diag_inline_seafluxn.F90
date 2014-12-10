@@ -289,6 +289,11 @@ IF (LCOEF) THEN
       ZZ0W = ( 1 - PSIC ) * 1.0/(LOG(PHW/PZ0H)    **2)  +  &
                    PSIC   * 1.0/(LOG(PHW/PZ0H_ICE)**2)  
       XZ0H = PHW  * EXP ( - SQRT ( 1./  ZZ0W ))
+
+      XCD_ICE  = PCD_ICE
+      XCH_ICE  = PCH_ICE
+      XZ0_ICE  = PZ0_ICE
+      XZ0H_ICE = PZ0H_ICE
       !
    ELSE
       !
@@ -311,7 +316,8 @@ IF (LSURF_VARS) THEN
   !* Humidity at saturation
   !
    IF (OHANDLE_SIC) THEN 
-      XQS = (1 - PSIC) * PQSAT + PSIC * PQSAT_ICE
+      XQS     = (1 - PSIC) * PQSAT + PSIC * PQSAT_ICE
+      XQS_ICE = PQSAT_ICE
    ELSE 
       XQS = PQSAT
    ENDIF

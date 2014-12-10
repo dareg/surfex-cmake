@@ -12,7 +12,7 @@
                          PRNSNOW, PHSNOW, PHPSNOW,                               &
                          PSWNETSNOW, PSWNETSNOWS, PLWNETSNOW,                    &
                          PGFLUXSNOW, PGSFCSNOW, PUSTARSNOW,                      &
-                         PGRNDFLUX, PLESL,                                       &
+                         PZGRNDFLUX, PFLSN_COR, PGRNDFLUX, PLESL,                &
                          PEMISNOW,                                               &
                          PSNOWTEMP, PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,          &
                          PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
@@ -118,6 +118,9 @@ REAL, DIMENSION(:),   INTENT(IN) :: PRI3L       ! Snow Ridcharson number
 REAL, DIMENSION(:),   INTENT(IN) :: PQS3L       ! Surface humidity
 ! 
 ! Diagnostics:
+!
+REAL, DIMENSION(:), INTENT(IN)    :: PZGRNDFLUX ! snow/soil-biomass interface flux (W/m2)
+REAL, DIMENSION(:), INTENT(IN)    :: PFLSN_COR  ! snow/soil-biomass correction flux (W/m2)
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PGRNDFLUX  ! snow/soil-biomass interface flux (W/m2)
 !
@@ -245,7 +248,7 @@ IF(OMEB)THEN
    PLWNETSNOW(:)  =  PPSN(:) * PLWNETSNOW(:)
    PSWNETSNOW(:)  =  PPSN(:) * PSWNETSNOW(:)
    PSWNETSNOWS(:) =  PPSN(:) * PSWNETSNOWS(:)
-   PGRNDFLUX(:)   =  PPSN(:) * PGRNDFLUX(:) 
+   PGRNDFLUX(:)   =  PPSN(:) * (PZGRNDFLUX(:)+PFLSN_COR(:))
    PMELTADV(:)    =  PPSN(:) * PMELTADV(:)
 
 ! Snow free (ground-based snow) diagnostics: canopy and ground blended (W m-2):
@@ -263,8 +266,7 @@ IF(OMEB)THEN
 ! LER does not include intercepted snow sublimation
    PLER_ISBA(:)   = PLEV_V_C(:) - PLETR_V_C(:) 
 ! LE includes intercepted snow sublimation
-   PLE_ISBA(:)    = PLEG_ISBA(:) + PLEGI_ISBA(:) + PLEV_ISBA(:) + PLE_FLOOD(:) &
-                    + PLES_V_C(:) + PLEI_FLOOD(:)
+   PLE_ISBA(:)    = PLEG_ISBA(:) + PLEGI_ISBA(:) + PLEV_ISBA(:) + PLE_FLOOD(:) + PLES_V_C(:) + PLEI_FLOOD(:)
    PGFLUX_ISBA(:) = PRN_ISBA(:) - PH_ISBA(:) - PLE_ISBA(:)
    PLEI_ISBA(:)   = PLEGI(:) + PLEI_FLOOD(:) 
 !
@@ -286,8 +288,8 @@ ELSE
 !
    IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
 !
-! Save fluxes from Force-Restore snow/explicit snow-free
-! portion of grid box (vegetation/soil):
+!     Save fluxes from Force-Restore snow/explicit snow-free
+!     portion of grid box (vegetation/soil):
 !
       PRN_ISBA(:)    = PRN(:)
       PH_ISBA(:)     = PH(:)
@@ -302,11 +304,11 @@ ELSE
 !  
       PLEI_ISBA(:)   = PLEGI(:)+PLEI_FLOOD(:)+PLES(:)
 !
-! Effective surface temperature (for diag):
+!     Effective surface temperature (for diag):
 !
       PTS(:)       = (1.-PPSN(:))*PTG(:)+PPSN(:)*PSNOWTEMP(:)
 !
-! Effective surface radiating temperature:
+!     Effective surface radiating temperature:
 !
       PALBT (:)    = PALB (:)*(1.-PPSN(:)) + PPSN(:)*PALB3L  (:)
       PEMIST(:)    = PEMIS(:)*(1.-PPSN(:)) + PPSN(:)*PEMISNOW(:)
@@ -315,11 +317,11 @@ ELSE
                             PPSN(:) *PEMISNOW(:)*PSNOWTEMP(:)**4     &
                             )/PEMIST(:) )**(0.25)  
 !
-! Calculate actual fluxes from snow-free natural
-! portion of surface: NET flux from surface is the sum of
-! fluxes from snow free and snow covered portions
-! of natural portion of grid box when *ISBA-ES* in force.
-! when NOT in use, then these fluxes equal those above.
+!     Calculate actual fluxes from snow-free natural
+!     portion of surface: NET flux from surface is the sum of
+!     fluxes from snow free and snow covered portions
+!     of natural portion of grid box when *ISBA-ES* in force.
+!     when NOT in use, then these fluxes equal those above.
 !
       PRN(:)       = (1.-PPSN(:))  * PRN(:)   + PPSN(:) * PRNSNOW(:)
       PH(:)        = (1.-PPSN(:))  * PH(:)    + PPSN(:) * PHSNOW(:)
@@ -330,16 +332,16 @@ ELSE
       PLETR(:)     = (1.-PPSNV(:)-PFFV(:)) * PLETR(:)  
       PLER(:)      = (1.-PPSNV(:)-PFFV(:)) * PLER(:)  
 !
-! Total evapotranspiration flux (kg/m2/s):
+!     Total evapotranspiration flux (kg/m2/s):
 !
       PEVAP(:)     = (PLEV(:) + PLEG(:))/PLVTT(:) + PLEGI(:)/PLSTT(:) + PLE_FLOOD(:)/PLVTT(:) + &
                       PLEI_FLOOD(:)/PLSTT(:) + PPSN(:) * PEVAP3L(:)
 !
-! Momentum fluxes:
+!     Momentum fluxes:
 !
       PUSTAR(:)    = SQRT( (1.-PPSN(:))  * PUSTAR(:)**2  + PPSN(:) * PUSTARSNOW(:)**2 )
 !
-! ISBA-ES/SNOW3L fluxes:
+!     ISBA-ES/SNOW3L fluxes:
 !
       PLES(:)       =                           PPSN(:) * PLES3L(:)
       PLESL(:)      =                           PPSN(:) * PLEL3L(:)
@@ -352,33 +354,33 @@ ELSE
       PSWNETSNOW(:) =                           PPSN(:) * PSWNETSNOW(:)
       PSWNETSNOWS(:)=                           PPSN(:) * PSWNETSNOWS(:)
       PEVAP3L(:)    =                           PPSN(:) * PEVAP3L(:)
-
-! Total heat flux between snow and soil
 !
-      PGRNDFLUX(:) =                            PPSN(:) * PGRNDFLUX(:) 
+!     Total heat flux between snow and soil
+!
+      PGRNDFLUX(:) =                            PPSN(:) * (PZGRNDFLUX(:)+PFLSN_COR(:))
       PMELTADV(:)  =                            PPSN(:) * PMELTADV(:)
 !
-! Total evaporative flux (W/m2) :
+!     Total evaporative flux (W/m2) :
 !
       PLE(:)       = PLEG(:) + PLEV(:) + PLES(:) + PLESL(:) + PLEGI(:) + PLE_FLOOD(:) + PLEI_FLOOD(:)
 !
-! Total sublimation flux (W/m2) :
+!     Total sublimation flux (W/m2) :
 !
       PLEI(:)      = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
-! Total sublimation flux (kg/m2/s):
+!     Total sublimation flux (kg/m2/s):
 !
       PSUBL(:)     = PLEI(:)/PLSTT(:)
 !
-! Total FLUX into snow/soil/vegetation surface:
+!     Total FLUX into snow/soil/vegetation surface:
 !
       PGFLUX(:)    = PRN(:) - PH(:) - PLE(:) + PHPSNOW(:) 
 !
-! Ridcharson number:
+!     Ridcharson number:
 !
       PRI(:)       = (1.-PPSN(:))  * PRI(:)   + PPSN(:) * PRI3L(:)  
 !
-! surface humidity:
+!     surface humidity:
 !
       PQS(:)       = (1.-PPSN(:))  * PQS(:)   + PPSN(:) * PQS3L(:)
 !  
@@ -389,10 +391,10 @@ ELSE
       PALBT  (:)  = PALB (:)
       PEMIST (:)  = PEMIS(:)
 !  
-! Total sublimation flux (W/m2) :
+!     Total sublimation flux (W/m2) :
       PLEI   (:)  = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
-! Total sublimation flux (kg/m2/s):
+!     Total sublimation flux (kg/m2/s):
       PSUBL  (:)  = PLEI(:)/PLSTT(:)
 !
    ENDIF

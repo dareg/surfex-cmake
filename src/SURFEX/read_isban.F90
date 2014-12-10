@@ -55,7 +55,7 @@ USE MODD_ISBA_n,         ONLY : NGROUND_LAYER, NPATCH, NNBIOMASS,   &
                                 XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
                                 XLITTER, XSOILCARB, XLIGNIN_STRUC,  &
                                 LTEMP_ARP, NTEMPLAYER_ARP,          &
-                                LGLACIER, XICE_STO,                 &
+                                LGLACIER, XICE_STO, LMEB_PATCH,     &
                                 XWRV, XWRVN, XTV, XTC, XQC
 !                          
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
@@ -103,6 +103,7 @@ INTEGER           :: IBUGFIX
 INTEGER           :: IIVAR
 INTEGER           :: IOBS
 INTEGER           :: IBSUP
+INTEGER           :: ISIZE_LMEB_PATCH
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -202,27 +203,6 @@ ALLOCATE(XWR(ILU,NPATCH))
 YRECFM = 'WR'
  CALL READ_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP)
 !
-!* water intercepted on vegetation canopy leaves
-!
-ALLOCATE(XWRV(ILU,NPATCH))
-!
-YRECFM = 'WRV'
-CALL READ_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP)
-!
-!* snow intercepted on vegetation canopy leaves
-!
-ALLOCATE(XWRVN(ILU,NPATCH))
-!
-YRECFM = 'WRVN'
-CALL READ_SURF(HPROGRAM,YRECFM,XWRVN(:,:),IRESP)
-!
-!* vegetation canopy temperature
-!
-ALLOCATE(XTV(ILU,NPATCH))
-!
-YRECFM = 'TV'
-CALL READ_SURF(HPROGRAM,YRECFM,XTV(:,:),IRESP)
-!
 !* Leaf Area Index
 !
 IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
@@ -262,6 +242,47 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
+!*       3.  MEB Prognostic or Semi-prognostic variables
+!            -------------------------------------------
+!
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+!
+IF (ISIZE_LMEB_PATCH>0) THEN
+!
+!* water intercepted on vegetation canopy leaves
+!
+  ALLOCATE(XWRV(ILU,NPATCH))
+  YRECFM = 'WRV'
+  CALL READ_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP)
+!
+!* snow intercepted on vegetation canopy leaves
+!
+  ALLOCATE(XWRVN(ILU,NPATCH))
+  YRECFM = 'WRVN'
+  CALL READ_SURF(HPROGRAM,YRECFM,XWRVN(:,:),IRESP)
+!
+!* vegetation canopy temperature
+!
+  ALLOCATE(XTV(ILU,NPATCH))
+  YRECFM = 'TV'
+  CALL READ_SURF(HPROGRAM,YRECFM,XTV(:,:),IRESP)
+!
+!* vegetation canopy air temperature
+!
+  ALLOCATE(XTC(ILU,NPATCH))
+  YRECFM = 'TC'
+  CALL READ_SURF(HPROGRAM,YRECFM,XTC(:,:),IRESP)
+!
+!* vegetation canopy air specific humidity
+!
+  ALLOCATE(XQC(ILU,NPATCH))
+  YRECFM = 'QC'
+  CALL READ_SURF(HPROGRAM,YRECFM,XQC(:,:),IRESP)
+!
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
 !*       4.  Semi-prognostic variables
 !            -------------------------
 !
@@ -284,18 +305,6 @@ END IF
 YRECFM = 'RESA'
 XRESA(:,:) = 100.
  CALL READ_SURF(HPROGRAM,YRECFM,XRESA(:,:),IRESP)
-!
-!* vegetation canopy air temperature
-!
-ALLOCATE(XTC(ILU,NPATCH))
-YRECFM = 'TC'
-CALL READ_SURF(HPROGRAM,YRECFM,XTC(:,:),IRESP)
-!
-!* vegetation canopy air specific humidity
-!
-ALLOCATE(XQC(ILU,NPATCH))
-YRECFM = 'QC'
-CALL READ_SURF(HPROGRAM,YRECFM,XQC(:,:),IRESP)
 !
 !* patch averaged radiative temperature (K)
 !

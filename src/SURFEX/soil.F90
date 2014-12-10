@@ -83,19 +83,19 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
- CHARACTER(LEN=*),     INTENT(IN)   :: HC1DRY  ! C1 for dry soil formulation
+CHARACTER(LEN=*),     INTENT(IN)   :: HC1DRY  ! C1 for dry soil formulation
 !                                             ! 'DEF' Default: Giard and Bazile
 !                                             ! 'GB93' Giordani 1993, Braud 1993
 !                                             ! (discontinuous at WILT)
 !
- CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
+CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
 !                                             ! 'NP89':  Noilhan and Planton 
 !                                             !  (1989: McCumber-Pielke (1981) and
 !                                             !  Clapp and Hornberger (1978))
 !                                             ! 'PL98' Method of Johansen (1975) as
 !                                             ! presented by Peters-Lidard (JAS: 1998)
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                               !         (Douville et al. 1995)
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)
@@ -155,7 +155,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCS, PFROZEN1
 !                                      PFROZEN1   = fraction of ice in superficial
 !                                               soil
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
+CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
 !
@@ -321,7 +321,7 @@ ELSE
 !
 ! Degree of saturation of soil:
 !
-    ZSATDEG(JJ)   = MAX(0.1, PWG(JJ,2)/PWSAT(JJ))
+    ZSATDEG(JJ)   = MAX(0.1, (PWGI(JJ,2)+PWG(JJ,2))/PWSAT(JJ))
 !
 ! Kersten number:
 !
@@ -332,7 +332,7 @@ ELSE
 ! in soil:
 !
     ZKERSTEN(JJ)  = (1.0-ZFROZEN2(JJ))*ZKERSTEN(JJ) +           &
-                        ZFROZEN2(JJ) *ZSATDEG(JJ)  
+                         ZFROZEN2(JJ) *ZSATDEG (JJ)  
 !
 ! Thermal conductivity of soil:
 !
@@ -340,9 +340,9 @@ ELSE
 !
 ! Heat capacity of soil:
 !
-    ZHCAP(JJ)     = (1.0-PWSAT(JJ))*PHCAPSOILZ(JJ)      +     &
-                         PWG(JJ,2)  *XCL*XRHOLW       +     &
-                         PWGI(JJ,2) *XCI*XRHOLI       
+    ZHCAP(JJ)     = (1.0-PWSAT(JJ)) * PHCAPSOILZ(JJ) +     &
+                         PWG (JJ,2) * XCL * XRHOLW   +     &
+                         PWGI(JJ,2) * XCI * XRHOLI       
 !
 ! Explicit CG calculation:
 !

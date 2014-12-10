@@ -311,7 +311,7 @@ IF (LSURF_MISC_BUDGET) THEN
     CALL WRITE_SURF(HPROGRAM,YRECFM,XFFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
     YRECFM='PIFLOOD_ISBA'
-    YCOMMENT='Grdi-cell Potential_floodplain_infiltration (kg/m2s)'
+    YCOMMENT='Grdi-cell Potential_floodplain_infiltration (kg/m2)'
     CALL WRITE_SURF(HPROGRAM,YRECFM,XPIFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF

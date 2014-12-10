@@ -57,7 +57,7 @@ USE MODD_ISBA_n, ONLY :   NGROUND_LAYER, CISBA, CPHOTO, CRESPSL, LSOC, &
                           XLITTER, XSOILCARB, XLIGNIN_STRUC,           &
                           LTEMP_ARP, NTEMPLAYER_ARP,                   &
                           LGLACIER, XICE_STO, LSPINUPCARBS,            &
-                          LSPINUPCARBW, NNBYEARSOLD,                   &
+                          LSPINUPCARBW, NNBYEARSOLD, LMEB_PATCH,       &
                           XWRV, XWRVN, XTV, XTC, XQC
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM
@@ -93,6 +93,8 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER :: JJ, JLAYER, JP, JNBIOMASS, JNLITTER, JNSOILCARB, JNLITTLEVS  ! loop counter on levels
 INTEGER :: IWORK   ! Work integer
 INTEGER :: JSV
+INTEGER :: ISIZE_LMEB_PATCH
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -154,24 +156,6 @@ YRECFM='WR'
 YCOMMENT='X_Y_WR (kg/m2)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XWR(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
-!* water intercepted on canopy vegetation leaves
-!
-YRECFM='WRV'
-YCOMMENT='X_Y_WRV (kg/m2)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-!* snow intercepted on canopy vegetation leaves
-!
-YRECFM='WRVN'
-YCOMMENT='X_Y_WRVN (kg/m2)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XWRVN(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-!* canopy vegetation temperature
-!
-YRECFM='TV'
-YCOMMENT='X_Y_TV (K)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XTV(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
 !* Glacier ice storage
 !
 YRECFM = 'GLACIER'
@@ -224,6 +208,48 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
+!*       3.  MEB Prognostic or Semi-prognostic variables
+!            -------------------------------------------
+!
+!
+ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+!
+IF (ISIZE_LMEB_PATCH>0) THEN
+!
+!* water intercepted on canopy vegetation leaves
+!
+  YRECFM='WRV'
+  YCOMMENT='X_Y_WRV (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* snow intercepted on canopy vegetation leaves
+!
+  YRECFM='WRVN'
+  YCOMMENT='X_Y_WRVN (kg/m2)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XWRVN(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* canopy vegetation temperature
+!
+  YRECFM='TV'
+  YCOMMENT='X_Y_TV (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XTV(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* vegetation canopy air temperature
+!
+  YRECFM='TC'
+  YCOMMENT='X_Y_TC (K)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XTC(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* vegetation canopy air specific humidity
+!
+  YRECFM='QC'
+  YCOMMENT='X_Y_QC (kg/kg)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XQC(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
 !*       4.  Semi-prognostic variables
 !            -------------------------
 !
@@ -245,18 +271,6 @@ YCOMMENT='X_TSRAD_NAT (K)'
 YRECFM='RESA'
 YCOMMENT='X_Y_RESA (s/m)'
  CALL WRITE_SURF(HPROGRAM,YRECFM,XRESA(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-!* vegetation canopy air temperature
-!
-YRECFM='TC'
-YCOMMENT='X_Y_TC (K)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XTC(:,:),IRESP,HCOMMENT=YCOMMENT)
-!
-!* vegetation canopy air specific humidity
-!
-YRECFM='QC'
-YCOMMENT='X_Y_QC (kg/kg)'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XQC(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Land use variables
 !

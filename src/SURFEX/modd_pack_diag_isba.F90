@@ -69,8 +69,6 @@ REAL, POINTER, DIMENSION(:) :: XP_HSNOW     ! sensible heat flux from snow (ISBA
 !$OMP THREADPRIVATE(XP_HSNOW)
 REAL, POINTER, DIMENSION(:) :: XP_HPSNOW    ! heat release from rainfall (ISBA-ES:3-L)      (W/m2)
 !$OMP THREADPRIVATE(XP_HPSNOW)
-REAL, POINTER, DIMENSION(:) :: XP_SMELTFLUX ! energy removed from soil/vegetation surface
-!$OMP THREADPRIVATE(XP_SMELTFLUX)
 REAL, POINTER, DIMENSION(:) :: XP_GFLUXSNOW ! net surface energy flux into snowpack      
 !$OMP THREADPRIVATE(XP_GFLUXSNOW)
 !                                               ! (ISBA-ES:3-L)                                 (W/m2)

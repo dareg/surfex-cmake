@@ -35,6 +35,7 @@
 !!      B. Decharme  07/2011 : delete argument HWRITE
 !!      B. Decharme  07/2012 : files of data for permafrost area and for SOC top and sub soil
 !!                   11/2013 : same for groundwater distribution
+!!                   11/2014 : Write XSOILGRID as a series of real 
 !!      P. Samuelsson 10/2014 : MEB
 !!
 !-------------------------------------------------------------------------------
@@ -81,8 +82,12 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+CHARACTER(LEN=4 ) :: YLVL
+!
+INTEGER :: JJ, JLAYER
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -129,9 +134,12 @@ YCOMMENT=YRECFM
 !* Reference grid for DIF
 !
 IF(CISBA=='DIF') THEN
-  YRECFM='SOILGRID'
-  YCOMMENT=YRECFM
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOILGRID,IRESP,HCOMMENT=YCOMMENT,HDIR='-',HNAM_DIM='Nground_layers  ')
+  DO JLAYER=1,NGROUND_LAYER
+     WRITE(YLVL,'(I4)') JLAYER     
+     YRECFM='SOILGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+     YCOMMENT='Depth of ISBA soilgrid layer '//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+     CALL WRITE_SURF(HPROGRAM,YRECFM,XSOILGRID(JLAYER),IRESP,HCOMMENT=YCOMMENT)
+  END DO 
 ENDIF
 !
 !* number of biomass pools
