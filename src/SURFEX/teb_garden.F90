@@ -574,6 +574,16 @@ REAL, DIMENSION(SIZE(PTA)) :: ZEMIS_GARDEN   ! emissivity for green areas
 REAL, DIMENSION(SIZE(PTA)) :: ZALB_GREENROOF ! albedo     for green roofs
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIS_GREENROOF! emissivity for green roofs
 !
+REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TVEG_GARDEN      ! nearIR  veg tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TVEG_GARDEN      ! visible veg tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TSOIL_GARDEN     ! nearIR  soil tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TSOIL_GARDEN     ! visible soil tot albedo
+!
+REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TVEG_GREENROOF      ! nearIR  veg tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TVEG_GREENROOF      ! visible veg tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TSOIL_GREENROOF     ! nearIR  soil tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TSOIL_GREENROOF     ! visible soil tot albedo
+!
 ! radiation received by surfaces
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_ROAD        ! solar rad received by roads
@@ -791,8 +801,13 @@ ZEMIS_GARDEN  = XUNDEF
 ZTS_GARDEN    = XUNDEF
 !
 IF (OGARDEN) THEN
- CALL GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                    &
-                        ZTS_GARDEN, ZEMIS_GARDEN, ZALB_GARDEN, PTA=PT_LOWCAN )
+ CALL GARDEN_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,      &
+                        ZTS_GARDEN, ZEMIS_GARDEN, ZALB_GARDEN, &
+                        PTA=PT_LOWCAN,                         &
+                        PALBNIR_TVEG=ZALBNIR_TVEG_GARDEN,      &
+                        PALBVIS_TVEG=ZALBVIS_TVEG_GARDEN,      &
+                        PALBNIR_TSOIL=ZALBNIR_TSOIL_GARDEN,    &
+                        PALBVIS_TSOIL=ZALBVIS_TSOIL_GARDEN     )
 ENDIF
 !
 ! for greenroofs :
@@ -802,8 +817,13 @@ ZEMIS_GREENROOF  = XUNDEF
 ZTS_GREENROOF    = XUNDEF
 !
 IF (OGREENROOF) THEN
- CALL GREENROOF_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                       &
-                           ZTS_GREENROOF, ZEMIS_GREENROOF, ZALB_GREENROOF, PTA=PTA )
+ CALL GREENROOF_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,      &
+                           ZTS_GREENROOF, ZEMIS_GREENROOF,        &
+                           ZALB_GREENROOF, PTA=PTA,               &
+                           PALBNIR_TVEG=ZALBNIR_TVEG_GREENROOF,   &
+                           PALBVIS_TVEG=ZALBVIS_TVEG_GREENROOF,   &
+                           PALBNIR_TSOIL=ZALBNIR_TSOIL_GREENROOF, &
+                           PALBVIS_TSOIL=ZALBVIS_TSOIL_GREENROOF  ) 
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -967,6 +987,8 @@ IF (OGARDEN) THEN
               PTSTEP, PZ_LOWCAN,                                                   &
               PT_LOWCAN, PQ_LOWCAN, PEXNS, PRHOA, PCO2, PPS, PRR, PSR, PZENITH,    &
               ZREC_SW_GARDEN, ZREC_LW_GARDEN, PU_LOWCAN,                           &
+              ZALBNIR_TVEG_GARDEN, ZALBVIS_TVEG_GARDEN,                            &
+              ZALBNIR_TSOIL_GARDEN, ZALBVIS_TSOIL_GARDEN,                          &
               PRN_GARDEN,PH_GARDEN,PLE_GARDEN,PGFLUX_GARDEN, ZSFCO2_GARDEN,        &
               ZEVAP_GARDEN, ZUW_GARDEN,PRUNOFF_GARDEN,                             &
               PAC_GARDEN,ZQSAT_GARDEN,ZTS_GARDEN,                                  &
@@ -1016,6 +1038,8 @@ IF (OGREENROOF) THEN
                 PTSTEP, PZREF, PUREF,                                                &
                 PTA, PQA, PEXNS, PEXNA,PRHOA, PCO2, PPS, PRR, PSR, PZENITH,          &
                 ZREC_SW_ROOF, ZREC_LW_ROOF, PVMOD,                                   &
+                ZALBNIR_TVEG_GREENROOF, ZALBVIS_TVEG_GREENROOF,                      &
+                ZALBNIR_TSOIL_GREENROOF, ZALBVIS_TSOIL_GREENROOF,                    &                
                 PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF,PGFLUX_GREENROOF,           &
                 ZSFCO2_GREENROOF,ZEVAP_GREENROOF, ZUW_GREENROOF,                     &
                 PAC_GREENROOF,ZQSAT_GREENROOF,ZTS_GREENROOF,                         &

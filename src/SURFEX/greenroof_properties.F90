@@ -1,6 +1,8 @@
 !     #########
       SUBROUTINE GREENROOF_PROPERTIES(PDIR_SW, PSCA_SW, PSW_BANDS, KSW,&
-                                      PTS, PEMIS, PALB, PTA            )  
+                                      PTS, PEMIS, PALB, PTA,           &  
+                                      PALBNIR_TVEG, PALBVIS_TVEG,      &
+                                      PALBNIR_TSOIL, PALBVIS_TSOIL     )  
 !     ##########################################################################
 !
 !!****  *GREENROOF_PROPERTIES*  
@@ -67,6 +69,12 @@ REAL, DIMENSION(:)  , INTENT(OUT)  :: PEMIS              ! green areas emissivit
 REAL, DIMENSION(:)  , INTENT(OUT)  :: PALB               ! green areas albedo
 !
 REAL, DIMENSION(:)  , INTENT(IN), OPTIONAL :: PTA        ! Air temperature (K)
+!
+REAL, DIMENSION(:)  , INTENT(OUT), OPTIONAL  :: PALBNIR_TVEG       ! nearIR  veg tot albedo
+REAL, DIMENSION(:)  , INTENT(OUT), OPTIONAL  :: PALBVIS_TVEG       ! visible veg tot albedo
+REAL, DIMENSION(:)  , INTENT(OUT), OPTIONAL  :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
+REAL, DIMENSION(:)  , INTENT(OUT), OPTIONAL  :: PALBVIS_TSOIL      ! visible soil tot albedo
+!
 !-------------------------------------------------------------------------------
 !
 !*      0.2    Local variables
@@ -81,6 +89,11 @@ REAL, DIMENSION(SIZE(PALB))    :: ZANOSNOW  ! snow-free surface albedo
 REAL, DIMENSION(SIZE(PALB))    :: ZASNOW    ! snow albedo
 REAL, DIMENSION(SIZE(PALB))    :: ZENOSNOW  ! snow-free surface emissivity
 REAL, DIMENSION(SIZE(PALB))    :: ZESNOW    ! snow emissivity
+!
+REAL, DIMENSION(SIZE(PALB))    :: ZALBNIR_TVEG       ! nearIR  veg tot albedo
+REAL, DIMENSION(SIZE(PALB))    :: ZALBVIS_TVEG       ! visible veg tot albedo
+REAL, DIMENSION(SIZE(PALB))    :: ZALBNIR_TSOIL      ! nearIR  soil tot albedo
+REAL, DIMENSION(SIZE(PALB))    :: ZALBVIS_TSOIL      ! visible soil tot albedo
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -111,7 +124,8 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
                       ZESNOW,ZENOSNOW,                           &
                       ZTSSNOW,ZTSNOSNOW,                         &
                       XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,     &
-                      XALBNIR_VEG, XALBVIS_VEG, XALBNIR_SOIL, XALBVIS_SOIL, &
+                      ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, &
+                      ZALBVIS_TSOIL,                             &
                       XPSN, XPSNV_A, XPSNG, XPSNV                )
 !
 XSNOWFREE_ALB = ZANOSNOW
@@ -123,6 +137,12 @@ PEMIS=  XPSN(:)    * ZESNOW              + (1.-XPSN(:)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
 PTS  =((XPSN(:)    * ZESNOW * ZTSSNOW**4 + (1.-XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+!
+IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
+IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)
+IF(PRESENT(PALBNIR_TSOIL))PALBNIR_TSOIL(:)=ZALBNIR_TSOIL(:)
+IF(PRESENT(PALBVIS_TSOIL))PALBVIS_TSOIL(:)=ZALBVIS_TSOIL(:)
+!
 IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

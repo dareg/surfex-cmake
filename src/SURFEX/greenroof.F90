@@ -4,6 +4,7 @@
                 PTSTEP, PZREF, PUREF,                                                &
                 PTA, PQA, PEXNS, PEXNA,PRHOA, PCO2, PPS, PRR, PSR, PZENITH,          &
                 PSW,PLW, PVMOD,                                                      &
+                PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,            &                
                 PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF,PGFLUX_GREENROOF,           &
                 PSFCO2,PEVAP_GREENROOF, PUW_GREENROOF,                               &
                 PAC_GREENROOF,PQSAT_GREENROOF,PTS_GREENROOF,                         &
@@ -89,8 +90,6 @@ USE MODD_TEB_GREENROOF_n,      ONLY: LSTRESS, LTR_ML_GR,                      &
                                      XALBNIR, XALBVIS, XALBUV,                &
                                      XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                      XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                     XALBNIR_TVEG, XALBVIS_TVEG,              &
-                                     XALBNIR_TSOIL, XALBVIS_TSOIL,            &
                                      XLE, XANF, XSAND_GR,                     &
                                      XPSN, XPSNV, XPSNG, XPSNV_A,             &
                                      XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,   &
@@ -144,7 +143,11 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PZENITH            ! solar zenithal angle
 REAL, DIMENSION(:)  , INTENT(IN)    :: PSW                ! incoming total solar rad on an horizontal surface
 REAL, DIMENSION(:)  , INTENT(IN)    :: PLW                ! atmospheric infrared radiation
 REAL, DIMENSION(:)  , INTENT(IN)    :: PVMOD              ! module of horizontal wind near first atm. level
-
+REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TVEG       ! nearIR  veg tot albedo
+REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TVEG       ! visible veg tot albedo
+REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
+REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TSOIL      ! visible soil tot albedo
+!
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GREENROOF         ! net radiation over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GREENROOF          ! sensible heat flux over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GREENROOF         ! latent heat flux over greenroofs
@@ -466,7 +469,7 @@ CALL TEB_IRRIG(LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           PSW, PLW, PVMOD, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &
           PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, XRSMIN, XRGL, XGAMMA,&
           XCV, XRUNOFFD, XSOILWGHT, NLAYER_HORT_GR, NLAYER_DUN_GR,    &
-          XALBNIR_TVEG, XALBVIS_TVEG, XALBNIR_TSOIL, XALBVIS_TSOIL,   &
+          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,   &
           XSNOWFREE_ALB, XWRMAX_CF, XVEG, XLAI, XEMIS, XZ0,           &
           XZ0/XZ0_O_Z0H, XVEGTYPE, XZ0,                               &
           ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,              &

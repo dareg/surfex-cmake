@@ -118,9 +118,6 @@ IF (NPATCH==1) THEN
   TSNOW%WSNOW     (:, :, 1) = XP_SNOWSWE    (:, :)
   TSNOW%RHO       (:, :, 1) = XP_SNOWRHO    (:, :)
   TSNOW%ALB       (:, 1)    = XP_SNOWALB    (:)
-  TSNOW%ALBVIS    (:, 1)    = XP_SNOWALBVIS (:)
-  TSNOW%ALBNIR    (:, 1)    = XP_SNOWALBNIR (:)
-  TSNOW%ALBFIR    (:, 1)    = XP_SNOWALBFIR (:)
   XWR             (:, 1)    = XP_WR         (:)
   XTG             (:, :, 1) = XP_TG         (:, :)
   XWG             (:, :, 1) = XP_WG         (:, :)
@@ -197,6 +194,9 @@ IF (NPATCH==1) THEN
      TSNOW%HEAT      (:, :, 1) = XP_SNOWHEAT   (:, :)
      TSNOW%EMIS      (:, 1)    = XP_SNOWEMIS   (:)
      TSNOW%AGE       (:, :, 1) = XP_SNOWAGE    (:, :)
+     TSNOW%ALBVIS    (:, 1)    = XP_SNOWALBVIS (:)
+     TSNOW%ALBNIR    (:, 1)    = XP_SNOWALBNIR (:)
+     TSNOW%ALBFIR    (:, 1)    = XP_SNOWALBFIR (:)     
   END IF
 
   IF (TSNOW%SCHEME=='CRO') THEN
@@ -216,9 +216,6 @@ ELSE
   DO JJ=1,KSIZE
     JI                              = KMASK         (JJ)
     TSNOW%ALB       (JI, KPATCH)    = XP_SNOWALB    (JJ)
-    TSNOW%ALBVIS    (JI, KPATCH)    = XP_SNOWALBVIS (JJ)
-    TSNOW%ALBNIR    (JI, KPATCH)    = XP_SNOWALBNIR (JJ)
-    TSNOW%ALBFIR    (JI, KPATCH)    = XP_SNOWALBFIR (JJ)
     XWR             (JI, KPATCH)    = XP_WR         (JJ)
     XRESA           (JI, KPATCH)    = XP_RESA       (JJ) 
     XPCPS           (JI, KPATCH)    = XP_CPS        (JJ) 
@@ -375,6 +372,9 @@ ELSE
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
       TSNOW%EMIS      (JI, KPATCH)    = XP_SNOWEMIS   (JJ)
+      TSNOW%ALBVIS    (JI, KPATCH)    = XP_SNOWALBVIS (JJ)
+      TSNOW%ALBNIR    (JI, KPATCH)    = XP_SNOWALBNIR (JJ)
+      TSNOW%ALBFIR    (JI, KPATCH)    = XP_SNOWALBFIR (JJ)     
     END DO
   END IF
 

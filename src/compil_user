@@ -28,9 +28,12 @@ case "$TARG" in
         ;;
 esac	
 #
+#export OPTLEVEL="DEBUG"
+export OPTLEVEL="O2"
+#
 ./configure
 #
-. ../conf/profile_surfex-$ARCH-$VERSION_XYZ-$NAME-$VER_MPI-O2
+. ../conf/profile_surfex-$ARCH-$VERSION_XYZ-$NAME-$VER_MPI-$OPTLEVEL
 #
 iflag=0
 #

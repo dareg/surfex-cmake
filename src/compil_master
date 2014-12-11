@@ -21,11 +21,15 @@ case "$TARG" in
 'Linux beaufix'*) #BEAUFIX     
         export ARCH=${ARCH:-LXifort} 	
         ;;
-esac	
+esac
+
+#export OPTLEVEL="DEBUG"
+export OPTLEVEL="O2"
+
 #
 ./configure
 #
-. ../conf/profile_surfex-$ARCH-$VERSION_XYZ-$VER_MPI-O2
+. ../conf/profile_surfex-$ARCH-$VERSION_XYZ-$VER_MPI-$OPTLEVEL
 #
 iflag=0
 #
