@@ -33,6 +33,7 @@ USE MODD_PREP_ISBA,      ONLY : XHUG_SURF, XHUG_ROOT, XHUG_DEEP,    &
                                   XQC_DEF,                          &
                                   XHUGI_SURF, XHUGI_ROOT, XHUGI_DEEP  
 !
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -52,6 +53,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA_UNIF',0,ZHOOK_HANDLE)
+!
 SELECT CASE(HSURF)
 !
 !*      3.0    Orography
@@ -118,13 +120,17 @@ SELECT CASE(HSURF)
   CASE('ICE_STO')
     ALLOCATE(PFIELD(1,1,1))
     PFIELD = 0.0
-
+!
+  CASE DEFAULT
+    CALL ABOR1_SFX('PREP_ISBA_UNIF: '//TRIM(HSURF)//" initialization not implemented !")
+!
 END SELECT
 !
 !*      4.     Interpolation method
 !              --------------------
 !
 CINTERP_TYPE='UNIF  '
+!
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA_UNIF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -118,7 +118,10 @@ SELECT CASE(HSURF)
       PFIELD(:,2,JV) = ZFIELD(:,2)
       PFIELD(:,3,JV) = ZFIELD(:,3)
     END DO
-
+!
+  CASE DEFAULT
+    CALL ABOR1_SFX('PREP_ISBA_ASCLLV: '//TRIM(HSURF)//" initialization not implemented !")
+!
 END SELECT
 !
 !*      6.     Interpolation method
@@ -126,6 +129,7 @@ END SELECT
 !
 CINTERP_TYPE='NONE  '
 DEALLOCATE(ZFIELD)
+!
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA_ASCLLV',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------
