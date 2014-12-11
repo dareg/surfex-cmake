@@ -133,7 +133,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
+REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
 !                                           ZMATPOT    = soil matric potential (m)
 !
 REAL                         :: ZFROZEN2DF, ZUNFROZEN2DF, ZCONDSATDF, ZLOG_CONDI, ZLOG_CONDWTR,  &
