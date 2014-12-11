@@ -438,17 +438,13 @@ ENDIF
 IF (CSCOND=='PL98'.OR.CISBA=='DIF') THEN
   ISIZE_GROUND = ISIZE_GROUND + 1
    XP_HCAPSOIL   => XBLOCK_GROUND(:,:,ISIZE_GROUND)
-ELSE
-  ISIZE_01 = ISIZE_01 + 1
-  XP_HCAPSOIL   => XBLOCK_01(:,:,ISIZE_01)
-END IF
-!
-IF (CSCOND=='PL98') THEN
   ISIZE_GROUND = ISIZE_GROUND + 1
    XP_CONDDRY    => XBLOCK_GROUND(:,:,ISIZE_GROUND)
   ISIZE_GROUND = ISIZE_GROUND + 1
-   XP_CONDSLD    => XBLOCK_GROUND(:,:,ISIZE_GROUND)
+   XP_CONDSLD    => XBLOCK_GROUND(:,:,ISIZE_GROUND)   
 ELSE
+  ISIZE_01 = ISIZE_01 + 1
+  XP_HCAPSOIL   => XBLOCK_01(:,:,ISIZE_01)
   ISIZE_01 = ISIZE_01 + 1
   XP_CONDDRY    => XBLOCK_01(:,:,ISIZE_01)
   ISIZE_01 = ISIZE_01 + 1
@@ -1081,11 +1077,8 @@ IF (NPATCH==1) THEN
   !  
   IF (CSCOND=='PL98'.OR.CISBA=='DIF') THEN
     XP_HCAPSOIL(:, :) = XHCAPSOIL    (:, :)
-  END IF
-  !  
-  IF (CSCOND=='PL98') THEN
-    XP_CONDDRY    (:, :) =    XCONDDRY     (:, :)
-    XP_CONDSLD    (:, :) =    XCONDSLD     (:, :)
+    XP_CONDDRY (:, :) = XCONDDRY     (:, :)
+    XP_CONDSLD (:, :) = XCONDSLD     (:, :)    
   END IF
   !
   IF (CISBA=='2-L' .OR. CISBA=='3-L') THEN
@@ -1436,14 +1429,6 @@ ELSE
       DO JJ=1,KSIZE
         JI                    =    KMASK(JJ)
         XP_HCAPSOIL   (JJ, JK) =    XHCAPSOIL    (JI, JK)
-      ENDDO
-    ENDDO
-  END IF
-  !
-  IF (CSCOND=='PL98') THEN
-    DO JK=1,SIZE(XCONDDRY,2)
-      DO JJ=1,KSIZE
-        JI                    =    KMASK(JJ)
         XP_CONDDRY    (JJ, JK) =    XCONDDRY     (JI, JK)
         XP_CONDSLD    (JJ, JK) =    XCONDSLD     (JI, JK)
       ENDDO

@@ -316,12 +316,6 @@ IF (CSCOND_GR=='PL98' .OR. CISBA_GR=='DIF') THEN
   DO JLAYER=1,NLAYER_GR
      XHCAPSOIL(:,JLAYER) =    XOM_GR(:,JLAYER)  * ZHCAPSOIL_OM +      &
                            (1-XOM_GR(:,JLAYER)) * XHCAPSOIL(:,JLAYER)  
-  ENDDO
-ELSE
-END IF
-!
-IF (CSCOND_GR=='PL98') THEN
-  DO JLAYER=1,NLAYER_GR
      XCONDDRY(:,JLAYER) = (ZCONDDRY_OM         * XCONDDRY(:,JLAYER))    &
                          /(  XOM_GR(:,JLAYER)  * XCONDDRY(:,JLAYER) +   &
                           (1-XOM_GR(:,JLAYER)) * ZCONDDRY_OM)
@@ -329,7 +323,6 @@ IF (CSCOND_GR=='PL98') THEN
                          /(  XOM_GR(:,JLAYER)  * XCONDSLD(:,JLAYER) +   &
                           (1-XOM_GR(:,JLAYER)) * ZCONDSLD_OM)
   ENDDO
-ELSE
 END IF
 !
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -608,24 +608,23 @@ PPLVTT(:,:) = XLVTT
 PPLSTT(:,:) = XLSTT
 !
 !CSCOND used in soil.F90 and soildif.F90
+!
+IF (HSCOND=='NP89'.AND.HISBA=='DIF') THEN
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(KLUOUT,*)'IF CISBA=DIF, CSCOND=NP89 is not available'
+   WRITE(KLUOUT,*)'because not physic. CSCOND is put to PL98 '
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+ENDIF
+!
 IF (HSCOND=='PL98'.OR.HISBA=='DIF') THEN
   ALLOCATE(PHCAPSOIL(KI,KGROUND_LAYER))
+  ALLOCATE(PCONDDRY (KI,KGROUND_LAYER))
+  ALLOCATE(PCONDSLD (KI,KGROUND_LAYER))
   ! 
   CALL HEATCAPZ(PSAND,PHCAPSOIL)
-  !
-  IF (HSCOND=='PL98') THEN
-    !
-    ALLOCATE(PCONDDRY (KI,KGROUND_LAYER))
-    ALLOCATE(PCONDSLD (KI,KGROUND_LAYER))
-    ! 
-    CALL THRMCONDZ(PSAND,PWSAT,PCONDDRY,PCONDSLD)
-    !
-  ELSE
-    !
-    ALLOCATE(PCONDDRY (0,0))
-    ALLOCATE(PCONDSLD (0,0))
-    !
-  ENDIF
+  CALL THRMCONDZ(PSAND,PWSAT,PCONDDRY,PCONDSLD)
   !
 ELSE
   ALLOCATE(PHCAPSOIL(0,0))
