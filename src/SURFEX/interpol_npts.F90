@@ -41,6 +41,7 @@
 !!
 !!    Original    03/2004
 !!    Modification
+!!    B. Decharme  2014  scan all point case if gaussien grid or NHALO = 0
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -52,6 +53,7 @@ USE MODD_SURF_ATM_n,       ONLY : NSIZE_FULL, NDIM_FULL
 !
 USE MODI_GET_INTERP_HALO
 USE MODI_GET_NEAR_MESHES
+USE MODI_SUM_ON_ALL_PROCS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -88,27 +90,49 @@ REAL, DIMENSION(0:KNPTS)                :: ZNDIST ! 3 nearest square distances
 REAL, DIMENSION(0:KNPTS,SIZE(PFIELD,2)) :: ZNVAL  ! 3 corresponding field values
 REAL, DIMENSION(SIZE(PFIELD,2))         :: ZSUM
 !
-INTEGER                          :: INEAR_NBR      ! number of points to scan
-INTEGER                          :: JLIST          ! loop counter on points to interpolate
-INTEGER                          :: ICOUNT         ! counter
-INTEGER                          :: INPTS
-INTEGER                          :: ISCAN          ! number of points to scan
+INTEGER                            :: INEAR_NBR      ! number of points to scan
+INTEGER                            :: JLIST          ! loop counter on points to interpolate
+INTEGER                            :: ICOUNT         ! counter
+INTEGER                            :: INPTS
+INTEGER                            :: ISCAN          ! number of points to scan
+INTEGER                            :: ISCAN_ALL      ! number of data points
 INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX       ! list of index to scan
+INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX_ALL   ! list of all data points
 INTEGER                            :: IHALO        ! halo available
+INTEGER, DIMENSION(SIZE(KCODE))    :: ISIZE
+INTEGER                            :: ISIZE0
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',0,ZHOOK_HANDLE)
+!
 IL = SIZE(PFIELD,1)
 !
 CALL GET_INTERP_HALO(HPROGRAM,CGRID,IHALO)
 !
 INEAR_NBR = (2*IHALO+1)**2
 !
-IINDEX(:) = 0
+IINDEX    (:) = 0
 !
+IF(CGRID=='GAUSS'.OR.IHALO==0)THEN
 !
-IF (.NOT.ASSOCIATED(NNEAR)) THEN
+  ISIZE(:) = 1.
+  ISIZE0 = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,ISIZE(:)==1)
+!
+  IINDEX_ALL(:) = 0
+!        
+  ISCAN_ALL = COUNT(KCODE(:)>0)
+!
+  JS = 0
+  DO JD=1,IL
+    IF (KCODE(JD)>0) THEN
+      JS = JS+1
+      IINDEX_ALL(JS) = JD
+    END IF
+  END DO 
+!
+ELSEIF (.NOT.ASSOCIATED(NNEAR)) THEN
   ALLOCATE(NNEAR(IL,INEAR_NBR))
   NNEAR(:,:) = 0
   CALL GET_NEAR_MESHES(CGRID,NGRID_PAR,NSIZE_FULL,XGRID_PAR,INEAR_NBR,NNEAR)
@@ -122,24 +146,38 @@ DO JL=1,IL
   ZNDIST (0) = 0.
   ZNVAL(0:KNPTS,:) = 0.
   !
-  ICOUNT = 0
-  DO JD=1,INEAR_NBR
-    IF (NNEAR(JL,JD)>0) THEN
-      IF (KCODE(NNEAR(JL,JD))>0) THEN  
-        ICOUNT = ICOUNT+1
-        IINDEX(ICOUNT) = NNEAR(JL,JD)
-      END IF
+  IF(CGRID=='GAUSS'.OR.IHALO==0)THEN
+    !
+    IF (NDIM_FULL/=ISIZE0) THEN
+      ! point can not be interpolated further than halo in multiprocessor run
+      KCODE(JL) = -4
+      CYCLE
     END IF
-  END DO
-  !
-  IF (ICOUNT>=1) THEN
-    ISCAN = ICOUNT
-    INPTS = MIN(ICOUNT,KNPTS)
+    INPTS     = KNPTS
+    ISCAN     = ISCAN_ALL
+    IINDEX(:) = IINDEX_ALL(:)
+    !
   ELSE
-    KCODE(JL) = -4
-    CYCLE
+    !
+    ICOUNT = 0
+    DO JD=1,INEAR_NBR
+      IF (NNEAR(JL,JD)>0) THEN
+        IF (KCODE(NNEAR(JL,JD))>0) THEN  
+          ICOUNT = ICOUNT+1
+          IINDEX(ICOUNT) = NNEAR(JL,JD)
+        END IF
+      END IF
+    END DO
+    !
+    IF (ICOUNT>=1) THEN
+      ISCAN = ICOUNT
+      INPTS = MIN(ICOUNT,KNPTS)
+    ELSE
+      KCODE(JL) = -4
+      CYCLE
+    END IF
+    !
   END IF
-  !
   !
   DO JS=1,ISCAN
     !
