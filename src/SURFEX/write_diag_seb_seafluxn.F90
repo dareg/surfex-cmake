@@ -51,7 +51,7 @@ USE MODD_DIAG_SEAFLUX_n,ONLY : N2M, LRAD_BUDGET, LSURF_BUDGET,             &
                                  XRN, XH, XLE, XLE_ICE, XGFLUX,            &
                                  XRI, XCD, XCH, XCE, XZ0, XZ0H,            &
                                  XT2M, XQ2M, XHU2M, XT2M_MIN, XT2M_MAX,    &
-                                 XZON10M, XMER10M, XQS,                    &
+                                 XZON10M, XMER10M, XQS, XALBT,             &
                                  XSWD, XSWU, XLWD, XLWU, XSWBD, XSWBU,     &
                                  XFMU, XFMV, LSURF_BUDGETC,                &
                                  XRNC, XHC, XLEC, XLEC_ICE, XGFLUXC, XSWDC,&
@@ -299,6 +299,14 @@ IF (LSURF_BUDGETC) THEN
    CALL WRITE_SURF(HPROGRAM,YRECFM,XFMVC(:),IRESP,HCOMMENT=YCOMMENT)
    !
 END IF
+!
+IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
+!
+  YRECFM='TALB_SEA'
+  YCOMMENT='total albedo over tile sea (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XALBT(:),IRESP,HCOMMENT=YCOMMENT)
+!        
+ENDIF
 !
 !*       4.     transfer coefficients
 !               ---------------------

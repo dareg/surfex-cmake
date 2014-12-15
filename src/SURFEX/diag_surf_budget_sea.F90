@@ -166,10 +166,6 @@ IF (.NOT.OHANDLE_SIC) THEN
      PSUBL  = 0.0
   END WHERE
   !
-  !* storage flux
-  !
-  PGFLUX = PRN - PH - PLE
-  !
   !* wind stress
   !
   PFMU = PSFZON
@@ -229,6 +225,7 @@ ENDIF
 !* total storage flux
 !
 PGFLUX = PRN - PH - PLE
+!
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_SEA',1,ZHOOK_HANDLE)
 !

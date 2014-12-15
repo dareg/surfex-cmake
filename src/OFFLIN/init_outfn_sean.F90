@@ -183,6 +183,11 @@ IF (LSURF_BUDGET) THEN
    CALL DEF_VAR_NETCDF(IFILE_ID,'SUBL_SEA'  ,'Averaged_Sublimation_of_seaice',IDDIM,YATT_TITLE,YATT)   
 ENDIF
 !
+IF (LSURF_BUDGET.OR.LSURF_BUDGETC)  THEN
+   YATT='-'
+   CALL DEF_VAR_NETCDF(IFILE_ID,'TALB_SEA'  , 'Sea_total_albedo         '               ,IDDIM,YATT_TITLE,YATT)
+ENDIF
+!
 IF (LDIAG_OCEAN) THEN
      ! Mean cmo temperature
      YATT='K'

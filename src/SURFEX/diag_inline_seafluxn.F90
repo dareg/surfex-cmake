@@ -48,19 +48,19 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
 USE MODD_SEAFLUX_n,      ONLY : LSBL, CSEAICE_SCHEME, LHANDLE_SIC
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,       &
-                                       XT2M, XQ2M, XHU2M, XZON10M, XMER10M,   &
-                                       XRN, XH, XLE, XGFLUX, XRI, XCD, XCH,   &
-                                       XCE, XZ0, XZ0H, XQS, XSWD, XSWU, XLWD, &
-                                       XLWU, XSWBD, XSWBU, XFMU, XFMV, XLE_ICE,  &
-                                       LSURF_BUDGETC, XT2M_MIN, XT2M_MAX,     &
-                                       XTS, XTSRAD, XHU2M_MIN, XHU2M_MAX,     &
-                                       XWIND10M, XWIND10M_MAX, XEVAP, XSUBL,  &  
-                                       XT2M_ICE, XQ2M_ICE, XHU2M_ICE,         &
-                                       XZON10M_ICE, XMER10M_ICE, XWIND10M_ICE,&
-                                       XRN_ICE, XH_ICE, XGFLUX_ICE, XRI_ICE,  &
-                                       XCD_ICE, XCH_ICE,                      &
-                                       XZ0_ICE, XZ0H_ICE, XQS_ICE, XSWU_ICE,  &
-                                       XLWU_ICE, XSWBU_ICE, XFMU_ICE, XFMV_ICE
+                                     XT2M, XQ2M, XHU2M, XZON10M, XMER10M,   &
+                                     XRN, XH, XLE, XGFLUX, XRI, XCD, XCH,   &
+                                     XCE, XZ0, XZ0H, XQS, XSWD, XSWU, XLWD, &
+                                     XLWU, XSWBD, XSWBU, XFMU, XFMV, XLE_ICE,  &
+                                     LSURF_BUDGETC, XT2M_MIN, XT2M_MAX,     &
+                                     XTS, XTSRAD, XHU2M_MIN, XHU2M_MAX,     &
+                                     XWIND10M, XWIND10M_MAX, XEVAP, XSUBL,  &  
+                                     XT2M_ICE, XQ2M_ICE, XHU2M_ICE,         &
+                                     XZON10M_ICE, XMER10M_ICE, XWIND10M_ICE,&
+                                     XRN_ICE, XH_ICE, XGFLUX_ICE, XRI_ICE,  &
+                                     XCD_ICE, XCH_ICE, XALBT,               &
+                                     XZ0_ICE, XZ0H_ICE, XQS_ICE, XSWU_ICE,  &
+                                     XLWU_ICE, XSWBU_ICE, XFMU_ICE, XFMV_ICE
 !
 USE MODD_DIAG_SEAICE_n, ONLY : LDIAG_SEAICE, XSIT, XSND, XMLT
 USE MODD_TYPES_GLT,     ONLY : T_GLT
@@ -73,6 +73,7 @@ USE MODI_DIAG_SURF_BUDGET_SEA
 USE MODI_DIAG_SURF_BUDGETC_SEA
 USE MODI_DIAG_CPL_ESM_SEA
 !
+USE MODI_SEAFLUX_ALBEDO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -249,18 +250,20 @@ ENDIF
 !
 IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
 !
-  CALL  DIAG_SURF_BUDGET_SEA   (XTTS, PSST, PRHOA, PSFTH, PSFTH_ICE,    &
-                                  PSFTQ, PSFTQ_ICE,                     &
-                                  PDIR_SW, PSCA_SW, PLW, PDIR_ALB,      &
-                                  PSCA_ALB,PICE_ALB, PEMIS, PTRAD,      &
-                                  PSFZON, PSFZON_ICE, PSFMER,           &
-                                  PSFMER_ICE, OHANDLE_SIC, PSIC, PTICE, &
-                                  XRN, XH, XLE, XLE_ICE, XGFLUX,        &
-                                  XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
-                                  XFMU, XFMV, XEVAP, XSUBL,             &
-                                  XRN_ICE, XH_ICE, XGFLUX_ICE,          &
-                                  XSWU_ICE, XSWBU_ICE, XLWU_ICE,        &
-                                  XFMU_ICE, XFMV_ICE                    )  
+  CALL SEAFLUX_ALBEDO(PDIR_SW,PSCA_SW,PDIR_ALB,PSCA_ALB,XALBT)
+!
+  CALL DIAG_SURF_BUDGET_SEA   (XTTS, PSST, PRHOA, PSFTH, PSFTH_ICE,    &
+                                 PSFTQ, PSFTQ_ICE,                     &
+                                 PDIR_SW, PSCA_SW, PLW, PDIR_ALB,      &
+                                 PSCA_ALB,PICE_ALB, PEMIS, PTRAD,      &
+                                 PSFZON, PSFZON_ICE, PSFMER,           &
+                                 PSFMER_ICE, OHANDLE_SIC, PSIC, PTICE, &
+                                 XRN, XH, XLE, XLE_ICE, XGFLUX,        &
+                                 XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
+                                 XFMU, XFMV, XEVAP, XSUBL,             &
+                                 XRN_ICE, XH_ICE, XGFLUX_ICE,          &
+                                 XSWU_ICE, XSWBU_ICE, XLWU_ICE,        &
+                                 XFMU_ICE, XFMV_ICE                    ) 
 !
 END IF
 !

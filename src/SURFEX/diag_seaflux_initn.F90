@@ -48,8 +48,8 @@ USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,     &
                                   XQ2M, XHU2M, XZON10M, XMER10M, XQS, XSWD, &
                                   XSWU, XLWD, XLWU, XT2M_MIN, XT2M_MAX,     &
                                   XSWBD, XSWBU, XFMU, XFMV, XTS, XTSRAD,    &
-                                  XRNC, XHC, XLEC, XLEC_ICE, XGFLUXC,          &
-                                  XEVAPC, XSUBLC,                           &
+                                  XRNC, XHC, XLEC, XLEC_ICE, XGFLUXC,       &
+                                  XEVAPC, XSUBLC, XALBT,                    &
                                   XSWDC, XSWUC, XLWDC, XLWUC, XFMUC, XFMVC, &
                                   XHU2M_MIN, XHU2M_MAX, XWIND10M, XWIND10M_MAX,&
                                   XT2M_ICE, XQ2M_ICE, XHU2M_ICE,            &
@@ -134,6 +134,7 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   ALLOCATE(XFMU_ICE(KLU))
   ALLOCATE(XFMV    (KLU))
   ALLOCATE(XFMV_ICE(KLU))
+  ALLOCATE(XALBT   (KLU))
   !
   XRN      = XUNDEF
   XRN_ICE  = XUNDEF
@@ -156,6 +157,7 @@ IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
   XSWBU_ICE= XUNDEF
   XFMU_ICE = XUNDEF
   XFMV_ICE = XUNDEF
+  XALBT    = XUNDEF
   !
 ELSE
   ALLOCATE(XRN     (0))
@@ -181,6 +183,7 @@ ELSE
   ALLOCATE(XFMU_ICE(0))
   ALLOCATE(XFMV    (0))
   ALLOCATE(XFMV_ICE(0))
+  ALLOCATE(XALBT   (0))
 ENDIF
 !
 !* cumulative surface energy budget
