@@ -477,7 +477,7 @@ ZRRVEG(:) = PTSTEP*PVEG(:)*(1.-PPSNV(:))*PRR(:)
 !
 ZWR_DELTA(:)=1.0
 !
-WHERE( ZZHV(:)>0.0 .AND. (PWR(:)+ZRRVEG(:))<ZER(:) )
+WHERE( ZZHV(:)>0.0 .AND. ZER(:)/=0.0 .AND. (PWR(:)+ZRRVEG(:))<ZER(:) )
 !
        ZWR_DELTA(:) = MAX(0.25,MIN(1.0,(PWR(:)+ZRRVEG(:))/ZER(:)))
 !       

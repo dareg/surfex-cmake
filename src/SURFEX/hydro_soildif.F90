@@ -278,9 +278,6 @@ DO JL=1,INL
 !       Old : 10.**(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL))))
         ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL)))))
 !
-!       Simple volumetric water holding capacity estimate for wetting front penetration
-        ZCAPACITY(JJ,JL) = MAX(0.0,ZWSAT(JJ,JL)-PWG(JJ,JL))*PDZG(JJ,JL)
-!
      ENDIF
 !
    ENDDO
@@ -310,8 +307,8 @@ IF(HHORT/='SGH')THEN
 ENDIF
 !
 !
-! 2. Initialise soil moisture profile according to the sink linear terms at "t"
-!    ----------------------------------------------------------------------------
+! 2. Initialise soil moisture profile according to infiltration terms at "t"
+!    ----------------------------------------------------------------------
 !
 !Surface cumulative infiltration  (m)
 ZINFILTC(:) = MAX(0.0,PPG(:)-PHORTON(:))*PTSTEP
@@ -320,6 +317,8 @@ DO JL=1,INL
    DO JJ=1,INI
       IDEPTH=KWG_LAYER(JJ)
       IF(JL<=IDEPTH)THEN
+!       Simple volumetric water holding capacity estimate for wetting front penetration
+        ZCAPACITY(JJ,JL) = MAX(0.0,ZWSAT(JJ,JL)-PWG(JJ,JL))*PDZG(JJ,JL)
 !       Infiltration terms (m) :
         ZINFLAYER(JJ,JL) = MIN(ZINFILTC(JJ),ZCAPACITY(JJ,JL))
 !       Soil moisture (m3/m3) :
@@ -471,10 +470,10 @@ DO JL=2,INL
    ENDDO
 ENDDO
 !
-! Solve Matrix Equation: tridiagonal system: solve for soil
-! water (volumetric water content) tendencies:
+!Solve Matrix Equation: tridiagonal system: solve for soil
+!water (volumetric water content) tendencies:
 !
- CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,KWG_LAYER,INL,ZSOL)
+CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,KWG_LAYER,INL,ZSOL)
 !
 ! 9. Final calculations and diagnostics:
 !    -----------------------------------

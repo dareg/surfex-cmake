@@ -624,7 +624,7 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
+CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !*      10.     Prognostic and semi-prognostic fields
 !               -------------------------------------

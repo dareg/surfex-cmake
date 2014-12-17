@@ -5,13 +5,13 @@
                        HALBEDO, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
                        PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL        )  
 !   ###############################################################
-!!****  *VEGETATION EVOL*
+!!****  *ALBEDO_VEG_UPDATE*
 !!
 !!    PURPOSE
 !!    -------
 !
-!     performs the time evolution of vegetation parameters
-!       at UTC midnight for prescribed parameters, with effective change each ten days
+!     performs the time evolution of albedo for vegetation and soil
+!     at UTC midnight, with effective change each ten days
 !              
 !!**  METHOD
 !!    ------
@@ -32,13 +32,12 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson          * Meteo-France *
+!!	B. Decharme          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    01/03/03 
+!!      Original    02/02/13 
 !!
-!!      P Le Moigne 09/2005 AGS modifs of L. Jarlan
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -46,13 +45,8 @@
 !
 USE MODD_TYPE_DATE_SURF
 !
-USE MODD_TEB_n,   ONLY : XGARDEN
-!
 USE MODI_INIT_ISBA_MIXPAR
 USE MODI_CONVERT_PATCH_ISBA
-USE MODI_INIT_FROM_DATA_GRDN_n
-USE MODI_INIT_FROM_DATA_GREENROOF_n
-USE MODI_SUBSCALE_Z0EFF
 USE MODI_ALBEDO
 USE MODI_UPDATE_DATA_COVER
 !
@@ -82,6 +76,7 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBVIS ! snow-free visible albedo
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBUV  ! snow-free UV albedo
 !
  CHARACTER(LEN=4),     INTENT(IN)    :: HALBEDO ! albedo type
+!                                              ! 'CM13' 
 !                                              ! 'DRY ' 
 !                                              ! 'EVOL' 
 !                                              ! 'WET ' 
@@ -89,9 +84,9 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBUV  ! snow-free UV albedo
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBVIS_VEG ! visible, near infra-red and UV
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBNIR_VEG ! albedo of the vegetation
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBUV_VEG  !
-REAL,   DIMENSION(:,:), INTENT(IN)    :: PALBVIS_SOIL! visible, near infra-red and UV
-REAL,   DIMENSION(:,:), INTENT(IN)    :: PALBNIR_SOIL! soil albedo
-REAL,   DIMENSION(:,:), INTENT(IN)    :: PALBUV_SOIL !
+REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBVIS_SOIL! visible, near infra-red and UV
+REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBNIR_SOIL! soil albedo
+REAL,   DIMENSION(:,:), INTENT(INOUT) :: PALBUV_SOIL !
 !
 !*      0.2    declarations of local variables
 !
@@ -112,6 +107,13 @@ IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
                            PALBNIR_VEG=PALBNIR_VEG,              &
                            PALBVIS_VEG=PALBVIS_VEG,              &
                            PALBUV_VEG=PALBUV_VEG                 ) 
+    IF ( HALBEDO=='CM13') THEN
+       CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
+                              HPHOTO,OAGRIP,.FALSE.,OTR_ML,HSFTYPE, &
+                              PALBNIR_SOIL=PALBNIR_SOIL, &
+                              PALBVIS_SOIL=PALBVIS_SOIL, &
+                              PALBUV_SOIL=PALBUV_SOIL )
+    ENDIF                   
     CALL ALBEDO(HALBEDO,                                   &
                 PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,   &
                 PALBVIS_SOIL,PALBNIR_SOIL,PALBUV_SOIL,     &

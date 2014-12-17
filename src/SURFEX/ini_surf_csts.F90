@@ -90,14 +90,14 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
                         XTAU_LW, XTAU_V_CF, XRAGNC_FACTOR
 !
-NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
-                          CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
-                          CCHARNOCK
-!
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
                              XPERCENTAGEPORE
+!
+NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
+                          CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
+                          CCHARNOCK
 !
 !-------------------------------------------------------------------------------
 !*	 0. INIT
