@@ -31,7 +31,8 @@ SUBROUTINE COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                 
 !!    -------------
 !!      Original    01/2004
 !!      Modified    09/2012 : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
-!!      B. Decharme  04/2013 new coupling variables
+!!      B. Decharme 04/2013 new coupling variables
+!!      P. LeMoigne 12/2014 bug in "implicit" coefficients 
 !!------------------------------------------------------------------
 !
 !
@@ -165,19 +166,8 @@ IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
   ZEMISN(:,:)  = TSNOW%EMIS (:,:)
 END IF
 !
-!*      3.     Explicit coupling only
-!              ----------------------
 !
-ZPET_A_COEF =  XUNDEF
-!this modif changes results in MUSC
-ZPET_B_COEF =  XUNDEF
-ZPEQ_A_COEF =  XUNDEF
-ZPEQ_B_COEF =  XUNDEF
-ZPEW_A_COEF =  XUNDEF
-ZPEW_B_COEF =  XUNDEF
-!
-!
-!*      4.     Call to surface scheme
+!*      3.     Call to surface scheme
 !              ----------------------
 !
  CALL COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, 'E',                                              &
@@ -188,12 +178,12 @@ ZPEW_B_COEF =  XUNDEF
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 ZPEW_A_COEF, ZPEW_B_COEF,                                                   &
-                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                         &
+                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
+                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
 !
 !
-!*      5.     Removes temporal evolution of ISBA variables
+!*      4.     Removes temporal evolution of ISBA variables
 !              --------------------------------------------
 !
 !

@@ -1,6 +1,6 @@
 !     #########
     SUBROUTINE Z0EFF(HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
-                      PPALPHAN,PZ0LITTER,                                       &
+                      PPALPHAN,PZ0LITTER, PWSNOW,                               &
                       PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,PFF,PZ0_FLOOD,        &
                       PAOSIP,PAOSIM,PAOSJP,PAOSJM,PHO2IP,PHO2IM,PHO2JP,PHO2JM,  &
                       PZ0_O_Z0H, PZ0_WITH_SNOW, PZ0H_WITH_SNOW,PZ0EFF,          &
@@ -52,8 +52,9 @@
 !!      (A.Boone)    11/26/98 Option for PDELTA: forested vs default surface
 !!      (V Masson)   12/07/01 new formulation for aggregation with snow z0
 !!      (P.LeMoigne) 09/02/06 computation of z0h in presence of snow
-!!      (B; Decharme)    2008 floodplains
+!!      (B. Decharme)    2008 floodplains
 !!      (P. Samuelsson) 10/2014 MEB
+!!      P. LeMoigne  12/2014 EBA scheme update
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -105,6 +106,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZ0_FLOOD      ! floodplains roughness length
 ! For multi-energy balance
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0LITTER      ! ground litter roughness length for MEB
 !
+REAL, DIMENSION(:), INTENT(IN)  :: PWSNOW         ! equivalent snow water content
+!
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0_WITH_SNOW  ! vegetation z0 modified by snow
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0H_WITH_SNOW ! vegetation z0h modified by snow
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0EFF         ! effective z0
@@ -137,10 +140,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('Z0EFF',0,ZHOOK_HANDLE)
-ZALRCN1=1.E-03
+ZALRCN1=1.E-02
 ZALRCN2=2.5E-03
-Z0CR = XG*ZALRCN1
-ZUZ0CN=1./(XG*ZALRCN2)
+Z0CR = ZALRCN1
+ZUZ0CN=1./ZALRCN2
 ZALFA(:) = PALFA(:)
 WHERE(ZALFA(:)<=-XPI) ZALFA = ZALFA + 2.*XPI
 WHERE(ZALFA(:)>  XPI) ZALFA = ZALFA - 2.*XPI
@@ -170,7 +173,7 @@ IF(TSNOW%SCHEME=='EBA') THEN
 !
 !!!!!Flooding scheme not implemented with this option 
       PZ0_WITH_SNOW(:) = PZ0_WITH_SNOW(:) + ( Z0CR - PZ0(:))* &
-        PPSN(:)/(PPSN(:) + XWCRN*(1.0+ZUZ0CN*PZ0(:)))  
+        PWSNOW(:)/(PWSNOW(:) + XWCRN*(1.0+ZUZ0CN*PZ0(:)))  
 !        
    END WHERE 
 
@@ -178,7 +181,7 @@ IF(TSNOW%SCHEME=='EBA') THEN
    IF (LALDZ0H) THEN  
      WHERE (PPSN(:)>0.)
          PZ0H_WITH_SNOW(:) = PZ0H_WITH_SNOW(:) + ( Z0CR - PZ0H_WITH_SNOW(:))* &
-           PPSN(:)/(PPSN(:) + XWCRN*(1.0+ZUZ0CN*PZ0H_WITH_SNOW(:)))   
+           PWSNOW(:)/(PWSNOW(:) + XWCRN*(1.0+ZUZ0CN*PZ0H_WITH_SNOW(:)))   
      END WHERE  
   END IF   
     

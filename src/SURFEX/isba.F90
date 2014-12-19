@@ -146,6 +146,7 @@
 !!                            water table / surface coupling
 !!                            Routines drag, e_budget and isba_fluxes now in isba_ceb
 !!      (A. Boone & P. Samuelsson) (10/2014) Added MEB v1
+!!      (P. LeMoigne) 12/2014 EBA scheme update
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -921,9 +922,9 @@ ZALB3L(:)=PSNOWALB(:)
 !
 IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
 
-   CALL SOIL (HC1DRY, HSCOND, HSNOW_ISBA, PSNOWRHO(:,1), ZVEG, PCGSAT, PCGMAX,  &
-     PC1SAT, PC2REF, PACOEF, PPCOEF, PCV, PPSN, PPSNG, PPSNV, PFFG, PFFV, PFF,  &
-     PCG, PC1, PC2, PWGEQ, PCT, ZCS, ZFROZEN1, PTG(:,1), PWG, PWGI,             &
+   CALL SOIL (HC1DRY, HSCOND, HSNOW_ISBA, OGLACIER, PSNOWRHO(:,1), ZVEG, PCGSAT,&
+     PCGMAX, PC1SAT, PC2REF, PACOEF, PPCOEF, PCV, PPSN, PPSNG, PPSNV, PFFG,     &
+     PFFV, PFF, PCG, PC1, PC2, PWGEQ, PCT, ZCS, ZFROZEN1, PTG(:,1), PWG, PWGI,  &
      PHCAPSOIL(:,1), PCONDDRY(:,1), PCONDSLD(:,1), PBCOEF(:,1), PWSAT(:,1),     &
      PWWILT(:,1), HKSAT,PCONDSAT,PFFG_NOSNOW,PFFV_NOSNOW                        )  
 !

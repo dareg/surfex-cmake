@@ -62,6 +62,7 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!                           Subsurface runoff if SGH (DIF option only)
 !!                   07/2013 Surface / Water table depth coupling
 !!      P Samuelsson 10/2014 : MEB
+!!      P. LeMoigne  12/2014 EBA scheme update
 !!-------------------------------------------------------------------
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
@@ -971,7 +972,7 @@ ENDIF
 !* effective roughness
 !
  CALL Z0EFF(CROUGH, GMEB, ZP_ALFA, ZP_ZREF, ZP_UREF, XP_Z0, XP_Z0REL, XP_PSN,   &
-     ZPALPHAN,XP_Z0LITTER,                                               &
+     ZPALPHAN,XP_Z0LITTER, XP_SNOWSWE(:,1),                              &
      XP_Z0EFFIP,XP_Z0EFFIM,XP_Z0EFFJP,XP_Z0EFFJM, XP_FF, ZP_Z0FLOOD,     &
      XP_AOSIP,XP_AOSIM,XP_AOSJP,XP_AOSJM,                                &
      XP_HO2IP,XP_HO2IM,XP_HO2JP,XP_HO2JM,                                &

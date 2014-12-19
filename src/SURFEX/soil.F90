@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE SOIL( HC1DRY, HSCOND, HSNOW_ISBA,                             &
+      SUBROUTINE SOIL( HC1DRY, HSCOND, HSNOW_ISBA, OGLACIER,                     &
                          PSNOWRHOM, PVEG,                                        &
                          PCGSAT, PCGMAX,                                         &
                          PC1SAT, PC2REF, PACOEF, PPCOEF, PCV,                    &
@@ -64,6 +64,7 @@
 !!                                          to solve numerical problem
 !!                     10/10     (Decharme) The previous computation of WGEQ as ( 1.-ZX(JJ)**(PPCOEF(JJ)*8.) )
 !!                                          can introduced some model explosions for heavy clay soil
+!!                     12/14     (LeMoigne) EBA scheme update
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -100,6 +101,11 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow schem
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)
 !
+LOGICAL, INTENT(IN)               :: OGLACIER   ! T = Over permanent snow and ice, 
+!                                               !     initialise WGI=WSAT, Hsnow>=10m 
+!                                               !     and allow 0.8<SNOWALB<0.85
+!                                               ! F = No specific treatment
+!                                                  
 REAL, DIMENSION(:), INTENT(IN)    :: PSNOWRHOM
 !                                      Prognostic variables of ISBA at 't-dt'
 !                                      PSNOWRHOM = density of snow
@@ -365,7 +371,7 @@ WHERE (PFF(:) > 0.)
        ZCF(:) = 2.0 * SQRT( XPI/(XCONDWTR*XRHOLW*XCL*XDAY) )
 END WHERE  
 !
-IF(HSNOW_ISBA == 'D95')THEN
+IF(HSNOW_ISBA == 'D95' .OR. (HSNOW_ISBA == 'EBA' .AND. OGLACIER) )THEN
 !
    WHERE (PPSN > 0.)
       ZLAMS(:) = XCONDI * (PSNOWRHOM(:)/XRHOLW)**1.885              ! first calculate the

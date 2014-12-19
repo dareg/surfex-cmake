@@ -1,7 +1,6 @@
 !     #########
-      SUBROUTINE READ_NAM_PGD_ISBA_MEB(HPROGRAM, KLUOUT, KPATCH,    &
-                                       OMEB_PATCH, OFORC_MEASURE    )  
-!     ##############################################################
+      SUBROUTINE READ_NAM_PGD_ISBA_MEB(HPROGRAM, KLUOUT, OMEB_PATCH, OFORC_MEASURE)  
+!     #############################################################################
 !
 !!**** *READ_NAM_PGD_ISBA_MEB* reads namelist for ISBA
 !!
@@ -53,7 +52,6 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM      ! Type of program
 INTEGER,             INTENT(IN)    :: KLUOUT
-INTEGER,             INTENT(IN)    :: KPATCH        ! number of patches
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OMEB_PATCH
 LOGICAL              , INTENT(OUT) :: OFORC_MEASURE
@@ -69,8 +67,8 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-LOGICAL, DIMENSION(KPATCH) :: LMEB_PATCH
-LOGICAL                    :: LFORC_MEASURE
+LOGICAL, DIMENSION(19) :: LMEB_PATCH
+LOGICAL                :: LFORC_MEASURE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
