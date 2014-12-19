@@ -1,25 +1,27 @@
 !     #########
       SUBROUTINE ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                                &
-                         PEMIS, PALB,                                            &
-                         PPSN, PPSNG, PPSNV,                                     &
+                         PEXNS, PEXNA, PTA, PQA, PZREF, PUREF, PDIRCOSZW, PVMOD, &
+                         PZ0EFF, PZ0, PZ0H, PRR, PSR,                            &
+                         PEMIS, PALB, PPSN, PPSNG, PPSNV,                        &
                          PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &
                          PLETR, PEVAP, PSUBL, PGFLUX, PLVTT, PLSTT,              &
                          PUSTAR,                                                 &
                          PLES3L, PLEL3L, PEVAP3L,                                &
                          PSWNET_V, PSWNET_G, PLWNET_V, PLWNET_G, PH_V, PH_G,     &
                          PLEV_V_C, PLETR_V_C, PLES_V_C,                          &
-                         PRI3L, PQS3L, PALB3L,                                   &
+                         PQS3L, PALB3L,                                          &
                          PRNSNOW, PHSNOW, PHPSNOW,                               &
                          PSWNETSNOW, PSWNETSNOWS, PLWNETSNOW,                    &
                          PGFLUXSNOW, PGSFCSNOW, PUSTARSNOW,                      &
                          PZGRNDFLUX, PFLSN_COR, PGRNDFLUX, PLESL,                &
                          PEMISNOW,                                               &
-                         PSNOWTEMP, PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,          &
+                         PSNOWTEMP, PTS_RAD, PTS, PRI, PQS, PHU,                 &
+                         PCD, PCDN, PCH, PSNOWHMASS,                             &
                          PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
                          PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
                          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &
                          PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD,                   &
-                         PFFG, PFFV, PFF, PPALPHAN, PTC                          )  
+                         PFFG, PFFV, PFF, PPALPHAN, PTC                          )
 !     ##########################################################################
 !
 !
@@ -85,6 +87,23 @@ IMPLICIT NONE
 LOGICAL,              INTENT(IN)  :: OMEB       ! True = patch with multi-energy balance 
 !                                               ! False = patch with classical ISBA 
 !
+!* surface and atmospheric parameters
+!  ----------------------------------
+!
+REAL, DIMENSION(:), INTENT(IN)  :: PEXNS     ! Exner function at the surface
+REAL, DIMENSION(:), INTENT(IN)  :: PEXNA     ! Exner function
+REAL, DIMENSION(:), INTENT(IN)  :: PTA       ! air temperature
+REAL, DIMENSION(:), INTENT(IN)  :: PQA       ! air specific humidity
+REAL, DIMENSION(:), INTENT(IN)  :: PZREF     ! reference height of the first atmospheric level
+REAL, DIMENSION(:), INTENT(IN)  :: PUREF     ! reference height of the wind
+REAL, DIMENSION(:), INTENT(IN)  :: PDIRCOSZW ! Cosinus of the angle between the normal to the surface and the vertical
+REAL, DIMENSION(:), INTENT(IN)  :: PVMOD     ! module of the horizontal wind
+REAL, DIMENSION(:), INTENT(IN)  :: PZ0EFF    ! effective roughness length
+REAL, DIMENSION(:), INTENT(IN)  :: PZ0       ! roughness length for momentum
+REAL, DIMENSION(:), INTENT(IN)  :: PZ0H      ! roughness length for heat
+REAL, DIMENSION(:), INTENT(IN)  :: PRR       ! Rain rate (in kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)  :: PSR       ! Snow rate (in kg/m2/s)
+!
 !* surface parameters
 !  ------------------
 !
@@ -114,7 +133,6 @@ REAL, DIMENSION(:), INTENT(IN)  :: PPALPHAN   ! fraction of the the explicit veg
 ! Prognostic variables:
 !
 REAL, DIMENSION(:),   INTENT(IN) :: PALB3L      ! Snow albedo
-REAL, DIMENSION(:),   INTENT(IN) :: PRI3L       ! Snow Ridcharson number
 REAL, DIMENSION(:),   INTENT(IN) :: PQS3L       ! Surface humidity
 ! 
 ! Diagnostics:
@@ -214,12 +232,17 @@ REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX_ISBA! flux through the ground
 REAL, DIMENSION(:), INTENT(IN)    :: PFFG,PFFV,PFF
 REAL, DIMENSION(:), INTENT(INOUT) :: PLE_FLOOD, PLEI_FLOOD ! Flood evaporation
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PRI       ! Total Ridcharson number
-REAL, DIMENSION(:), INTENT(INOUT) :: PQS       ! Surface humidity
+REAL, DIMENSION(:), INTENT(INOUT) :: PRI       ! grid-area Ridcharson number
+REAL, DIMENSION(:), INTENT(INOUT) :: PQS       ! grid-area Surface humidity
+REAL, DIMENSION(:), INTENT(INOUT) :: PHU       ! grid-area near surface humidity
+REAL, DIMENSION(:), INTENT(INOUT) :: PCH       ! grid-area drag coefficient for heat
+REAL, DIMENSION(:), INTENT(INOUT) :: PCD       ! grid-area drag coefficient for momentum
+REAL, DIMENSION(:), INTENT(INOUT) :: PCDN      ! grid-area neutral drag coefficient for momentum
+!
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PPSN))       :: ZWORK
+REAL, DIMENSION(SIZE(PTA))       :: ZWORK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -337,10 +360,6 @@ ELSE
       PEVAP(:)     = (PLEV(:) + PLEG(:))/PLVTT(:) + PLEGI(:)/PLSTT(:) + PLE_FLOOD(:)/PLVTT(:) + &
                       PLEI_FLOOD(:)/PLSTT(:) + PPSN(:) * PEVAP3L(:)
 !
-!     Momentum fluxes:
-!
-      PUSTAR(:)    = SQRT( (1.-PPSN(:))  * PUSTAR(:)**2  + PPSN(:) * PUSTARSNOW(:)**2 )
-!
 !     ISBA-ES/SNOW3L fluxes:
 !
       PLES(:)       =                           PPSN(:) * PLES3L(:)
@@ -374,16 +393,24 @@ ELSE
 !
 !     Total FLUX into snow/soil/vegetation surface:
 !
-      PGFLUX(:)    = PRN(:) - PH(:) - PLE(:) + PHPSNOW(:) 
-!
-!     Ridcharson number:
-!
-      PRI(:)       = (1.-PPSN(:))  * PRI(:)   + PPSN(:) * PRI3L(:)  
+      PGFLUX(:)    = PRN(:) - PH(:) - PLE(:) + PHPSNOW(:)  
 !
 !     surface humidity:
 !
       PQS(:)       = (1.-PPSN(:))  * PQS(:)   + PPSN(:) * PQS3L(:)
+!
+!     near-surface humidity :
 !  
+      PHU(:)       = (1.-PPSN(:))  * PHU(:)   + PPSN(:)
+!
+!     Momentum fluxes:
+!
+      PUSTAR(:)    = SQRT( (1.-PPSN(:))  * PUSTAR(:)**2  + PPSN(:) * PUSTARSNOW(:)**2 )
+!
+!     Richardson number and Drag coeff:
+!
+      CALL COMPUT_RI_DRAG
+!
    ELSE
 !
       PTS    (:)  = PTG  (:)
@@ -403,7 +430,62 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR',1,ZHOOK_HANDLE)
 !
+!-------------------------------------------------------------------------------
+CONTAINS
+!-------------------------------------------------------------------------------
 !
+SUBROUTINE COMPUT_RI_DRAG
+!
+USE MODD_SURF_ATM, ONLY : LDRAG_COEF_ARP, LRRGUST_ARP,   &
+                          XRRSCALE, XRRGAMMA, XUTILGUST  
+!
+USE MODI_SURFACE_RI
+USE MODI_SURFACE_AERO_COND
+USE MODI_SURFACE_CD
+USE MODI_SURFACE_CDCH_1DARP
+USE MODI_WIND_THRESHOLD
+!
+!*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PTA)) :: ZFP, ZRRCOR, ZVMOD, ZAC, ZRA
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR:COMPUT_RI_DRAG',0,ZHOOK_HANDLE)
+!
+! * Richardson number
+!
+CALL SURFACE_RI(PTS, PQS, PEXNS, PEXNA, PTA, PQA,  &
+                PZREF, PUREF, PDIRCOSZW, PVMOD, PRI)  
+!
+! * Wind check
+!
+ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
+!
+! * Drag coefficient for heat and momentum
+!
+IF (LDRAG_COEF_ARP) THEN
+   CALL SURFACE_CDCH_1DARP(PZREF, PZ0EFF, PZ0H, ZVMOD, PTA, PTG, &
+                             PQA, PQS, PCD, PCDN, PCH              )
+ELSE
+   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0, PZ0H, ZAC, ZRA, PCH)
+   CALL SURFACE_CD(PRI, PZREF, PUREF, PZ0EFF, PZ0H, PCD, PCDN)
+ENDIF
+!
+IF (LRRGUST_ARP) THEN
+   ZFP(:)=MAX(0.0,PRR(:)+PSR(:))
+   ZRRCOR(:)=SQRT(1.0+((((ZFP(:)/(ZFP(:)+XRRSCALE))**XRRGAMMA)*XUTILGUST)**2) &
+       /(PCD(:)*ZVMOD(:)**2))  
+   PCD  = PCD  * ZRRCOR
+   PCH  = PCH  * ZRRCOR
+   PCDN = PCDN * ZRRCOR
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR:COMPUT_RI_DRAG',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE COMPUT_RI_DRAG
 !
 !-------------------------------------------------------------------------------
 !

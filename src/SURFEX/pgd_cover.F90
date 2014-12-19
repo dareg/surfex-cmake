@@ -598,7 +598,7 @@ ELSE
   '*********************************************************************'
   NSIZE(:) = 1
   WHERE (XSEA(:).NE.0. .AND. ZSEA(:).EQ.0.) NSIZE(:)=0
-! if sea imposed to 1 in a grid cell: no extrapolation          
+! if sea imposed to 1 in a grid cell: no extrapolation 
   DO JL=1,SIZE(XCOVER,1)
      IF(XSEA(JL)==1.0)THEN
         ZCOVER_SEA(JL,:)=0.0             
@@ -662,6 +662,8 @@ INTEGER, INTENT(INOUT) :: KCOVER
 INTEGER, INTENT(OUT) :: KC_SURF
 !
 LOGICAL :: GPRESENT
+!
+KC_SURF=KSURF
 !
 GPRESENT = .FALSE.
 DO JCOVER=1,KCOVER

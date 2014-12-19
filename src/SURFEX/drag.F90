@@ -345,8 +345,8 @@ ENDIF
 !*       6.     COMPUTATION OF RESISTANCE AND DRAG COEFFICIENT
 !               ----------------------------------------------
 !
- CALL SURFACE_RI(PTG, PQS, PEXNS, PEXNA, PTA, PQA,                    &
-                  PZREF, PUREF, PDIRCOSZW, PVMOD, PRI                  )  
+CALL SURFACE_RI(PTG, PQS, PEXNS, PEXNA, PTA, PQA,                    &
+                PZREF, PUREF, PDIRCOSZW, PVMOD, PRI                  )  
 !
 !-------------------------------------------------------------------------------
 !

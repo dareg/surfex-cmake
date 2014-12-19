@@ -251,9 +251,9 @@ IF (ISIZE_LMEB_PATCH>0) THEN
 !
 !* water intercepted on vegetation canopy leaves
 !
-  ALLOCATE(XWRV(ILU,NPATCH))
-  YRECFM = 'WRV'
-  CALL READ_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP)
+  !nogv ALLOCATE(XWRV(ILU,NPATCH))
+  !nogv YRECFM = 'WRV'
+  !nogv CALL READ_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP)
 !
 !* snow intercepted on vegetation canopy leaves
 !

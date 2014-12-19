@@ -144,6 +144,8 @@ REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_N      ! LW net for snow surface
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_V      ! LW net for canopy veg
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_G      ! LW net for ground
 REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZDUMMY
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMISF
+REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZFF
 !
 LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
@@ -232,8 +234,16 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !
 !   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTSRAD_PATCH
 !
+    IF(OFLOOD)THEN
+      ZEMISF(:) = XEMISF(:,JPATCH)
+      ZFF   (:) = XFF   (:,JPATCH)
+    ELSE
+      ZEMISF(:) = XUNDEF
+      ZFF   (:) = 0.0
+    ENDIF
+!
     CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),XPSN(:,JPATCH),ZPALPHAN,   &
-        TPSNOW%EMIS(:,JPATCH),XEMISF(:,JPATCH),XFF(:,JPATCH),     &
+        TPSNOW%EMIS(:,JPATCH),ZEMISF(:),ZFF(:),                   &
         PTV(:,JPATCH),PTG1(:,JPATCH),TPSNOW%TS(:,JPATCH),         &
         ZLW_RAD,ZLWNET_N,ZLWNET_V,ZLWNET_G,                       &
         ZDUMMY,ZDUMMY,ZDUMMY,                                     &

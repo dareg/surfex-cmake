@@ -33,7 +33,7 @@
         PSUBL, PGFLUX, PRESTORE, PGRNDFLUX, PFLSN_COR, PUSTAR,                 &
         PHPSNOW, PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                      &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
-        PEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
+        PEMIST, PTS_RAD, PHU_AGG, PAC_AGG,                                     &
         PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,                               &
         PDELHEATN, PDELHEATN_SFC, PRESTOREN,                                   &
         PD_G, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,                     &
@@ -338,7 +338,6 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PHV           ! Total effective Halstead 
 REAL, DIMENSION(:),   INTENT(OUT)   :: PHU           ! grid-area humidity of the soil
 REAL, DIMENSION(:),   INTENT(OUT)   :: PHUG          ! ground relative humidity
 REAL, DIMENSION(:),   INTENT(OUT)   :: PQS           ! surface humidity (kg/kg)
-REAL, DIMENSION(:),   INTENT(OUT)   :: PTS           ! effective surface temperature (K)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PRN           ! net radiation
 REAL, DIMENSION(:),   INTENT(OUT)   :: PH            ! sensible heat flux
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLEI          ! sublimation latent heat flux

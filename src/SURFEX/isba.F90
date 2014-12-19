@@ -578,8 +578,10 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PWR      ! liquid water retained on the
 !                                             ! foliage of the comosite vegetation
 !                                             ! canopy (understory in the case of MEB)
 ! For multi-energy balance
-REAL, DIMENSION(:), INTENT(INOUT) :: PWRV, PWRVN, PTV
+REAL, DIMENSION(:), INTENT(INOUT) :: PWRV
 !                                    PWRV    = NOT used for now
+!
+REAL, DIMENSION(:), INTENT(INOUT) :: PWRVN, PTV
 !                                    PWRVN   = snow retained on the foliage
 !                                              of the canopy vegetation
 !                                    PTV     = canopy vegetation temperature
@@ -635,7 +637,6 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PTS_RAD    ! effective radiative temperat
 !                                                   of the natural surface (K)
 REAL, DIMENSION(:), INTENT(OUT)     :: PTS        ! effective surface temperature (K)
 REAL, DIMENSION(:), INTENT(OUT)     :: PHV        ! Halstead coefficient
-REAL, DIMENSION(:), INTENT(OUT)     :: PQS        ! surface humidity (kg/kg)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWTEMP  ! snow layer temperatures (K)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ   ! snow layer liquid water content (m)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ    ! snow layer thickness (m)
@@ -655,14 +656,16 @@ REAL, DIMENSION(:), INTENT(OUT) :: PCT        ! area-averaged heat capacity
 !* diagnostic variables
 !  --------------------
 !
-REAL, DIMENSION(:), INTENT(OUT) :: PCH        ! drag coefficient for heat
-REAL, DIMENSION(:), INTENT(OUT) :: PCD        ! drag coefficient for momentum
-REAL, DIMENSION(:), INTENT(OUT) :: PCDN       ! neutral drag coefficient for momentum
-REAL, DIMENSION(:), INTENT(OUT) :: PRI        ! Richardson number
+REAL, DIMENSION(:), INTENT(OUT) :: PCH        ! grid-area drag coefficient for heat
+REAL, DIMENSION(:), INTENT(OUT) :: PCD        ! grid-area drag coefficient for momentum
+REAL, DIMENSION(:), INTENT(OUT) :: PCDN       ! grid-area neutral drag coefficient for momentum
+REAL, DIMENSION(:), INTENT(OUT) :: PRI        ! grid-area Richardson number
+REAL, DIMENSION(:), INTENT(OUT) :: PQS        ! grid-area surface humidity (kg/kg)
 REAL, DIMENSION(:), INTENT(OUT) :: PHU        ! grid-area humidity of the soil
+REAL, DIMENSION(:), INTENT(OUT) :: PEMIST     ! grid-area surface emissivity
+REAL, DIMENSION(:), INTENT(OUT) :: PALBT      ! grid-area surface albedo
+!
 REAL, DIMENSION(:), INTENT(OUT) :: PHUG       ! ground relative humidity
-REAL, DIMENSION(:), INTENT(OUT) :: PEMIST     ! total surface emissivity
-REAL, DIMENSION(:), INTENT(OUT) :: PALBT      ! total surface albedo
 REAL, DIMENSION(:), INTENT(OUT) :: PRS        ! surface stomatal resistance
 !
 !* surface fluxes
@@ -996,7 +999,7 @@ IF(OMEB)THEN
         PSUBL, PGFLUX, PRESTORE, ZGRNDFLUX, ZFLSN_COR, PUSTAR,                 &
         PHPSNOW, PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                      &
         PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW, PCHSNOW,         &
-        ZEMIST, PTS_RAD, PTS, PHU_AGG, PAC_AGG,                                &
+        ZEMIST, PTS_RAD, PHU_AGG, PAC_AGG,                                     &
         ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG,                               &
         ZDELHEATN, ZDELHEATN_SFC, ZGSFCSNOW,                                   &
         PD_G, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,                     &
@@ -1122,22 +1125,24 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                
 !* add snow component to output radiative parameters and fluxes in case 
 !  of ES or CROCUS snow schemes
 !
-CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                            &
-          ZEMIST, ZALBT,                                          &
-          PPSN, PPSNG, PPSNV,                                     &
+CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                             &
+          PEXNS, PEXNA, PTA, PQA, PZREF, PUREF, PDIRCOSZW, PVMOD, &
+          PZ0EFF, PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PRR, PSR,        &
+          ZEMIST, ZALBT, PPSN, PPSNG, PPSNV,                      &
           PRN, PH, PLE, PLEI, PLEG, PLEGI, PLEV, PLES, PLER,      &
           PLETR, PEVAP, PSUBL, PGFLUX, PLVTT, PLSTT,              &
           PUSTAR,                                                 &
           ZLES3L, ZLEL3L, ZEVAP3L,                                &
           PSWNET_V, PSWNET_G, PLWNET_V, PLWNET_G, PH_V_C, PH_G_C, &
           PLEV_V_C, PLETR_V_C, PLES_V_C,                          &
-          ZRI3L, ZQS3L, ZALB3L,                                   &
+          ZQS3L, ZALB3L,                                          &
           PRNSNOW, PHSNOW, PHPSNOW,                               &
           PSWNET_N, PSWNET_NS, PLWNET_N,                          &
           PGFLUXSNOW, ZGSFCSNOW, PUSTARSNOW,                      &
           ZGRNDFLUX, ZFLSN_COR, PGRNDFLUX, PLESL,                 &
           PEMISNOW,                                               &
-          PSNOWTEMP(:,1), PTS_RAD, PTS, PRI, PQS, PSNOWHMASS,     &
+          PSNOWTEMP(:,1), PTS_RAD, PTS, PRI, PQS, PHU,            &
+          PCD, PCDN, PCH, PSNOWHMASS,                             &
           PRN_ISBA, PH_ISBA, PLEG_ISBA, PLEGI_ISBA, PLEV_ISBA,    &
           PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
           PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG(:,1),             &

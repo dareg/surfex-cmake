@@ -37,10 +37,10 @@ USE MODD_ISBA_n,           ONLY : LCANOPY
 USE MODD_DIAG_ISBA_n,      ONLY : N2M, LCOEF, LSURF_VARS, LSURF_BUDGET
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_BUDGETC
 USE MODD_PACK_DIAG_ISBA,   ONLY : XP_T2M, XP_Q2M, XP_HU2M, XP_ZON10M, XP_MER10M, &
-                                    XP_CD, XP_CH, XP_CE, XP_RI, XP_Z0_WITH_SNOW,   &
-                                    XP_Z0H_WITH_SNOW, XP_Z0EFF, XP_QS,             &
-                                    XP_SWD, XP_SWU, XP_SWBD, XP_SWBU,              &
-                                    XP_LWD, XP_LWU, XP_FMU, XP_FMV  
+                                  XP_CD, XP_CH, XP_CE, XP_RI, XP_Z0_WITH_SNOW,   &
+                                  XP_Z0H_WITH_SNOW, XP_Z0EFF, XP_QS,             &
+                                  XP_SWD, XP_SWU, XP_SWBD, XP_SWBU,              &
+                                  XP_LWD, XP_LWU, XP_FMU, XP_FMV  
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -93,13 +93,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_ISBA_N',0,ZHOOK_HANDLE)
+!
+! * Richardson number
+!
+IF (N2M>=1) THEN
+    XP_RI     = PRI        
+ENDIF
+!
+! * Near surface atmospheric variables
+!
 IF (.NOT. LCANOPY) THEN
 !        
   IF (N2M==1) THEN
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW,  &
                      PSFTH, PSFTQ, PSFZON, PSFMER,                     &
                      XP_T2M, XP_Q2M, XP_HU2M, XP_ZON10M, XP_MER10M     )  
-    XP_RI     = PRI        
   ELSE IF (N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,           &
@@ -110,7 +118,6 @@ IF (.NOT. LCANOPY) THEN
     CALL CLS_WIND(PZONA, PMERA, PHW,               &
                     PCD, PCDN, PRI, ZH,            &
                     XP_ZON10M, XP_MER10M           )  
-    XP_RI     = PRI        
   END IF
 !
 ELSE
@@ -121,10 +128,11 @@ ELSE
     XP_HU2M   = XUNDEF
     XP_ZON10M = XUNDEF
     XP_MER10M = XUNDEF
-    XP_RI     = PRI        
   ENDIF
   !        
 ENDIF
+!
+! * Surface energy budget
 !
 IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
    !

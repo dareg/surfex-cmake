@@ -218,9 +218,9 @@ IF (ISIZE_LMEB_PATCH>0) THEN
 !
 !* water intercepted on canopy vegetation leaves
 !
-  YRECFM='WRV'
-  YCOMMENT='X_Y_WRV (kg/m2)'
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP,HCOMMENT=YCOMMENT)
+  !nogv YRECFM='WRV'
+  !nogv YCOMMENT='X_Y_WRV (kg/m2)'
+  !nogv CALL WRITE_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* snow intercepted on canopy vegetation leaves
 !

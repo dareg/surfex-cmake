@@ -143,7 +143,7 @@ IF (NPATCH==1) THEN
   XLE             (:, 1)    = XP_LE         (:)
   !
    IF(LMEB_PATCH(KPATCH))THEN
-     XWRV            (:, 1)    = XP_WRV        (:)
+     !nogv XWRV            (:, 1)    = XP_WRV        (:)
      XWRVN           (:, 1)    = XP_WRVN       (:)
      XTV             (:, 1)    = XP_TV         (:)
      XTC             (:, 1)    = XP_TC         (:)
@@ -242,7 +242,7 @@ ELSE
   IF(LMEB_PATCH(KPATCH))THEN
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
-      XWRV            (JI, KPATCH)    = XP_WRV        (JJ)
+      !nogv XWRV            (JI, KPATCH)    = XP_WRV        (JJ)
       XWRVN           (JI, KPATCH)    = XP_WRVN       (JJ)
       XTV             (JI, KPATCH)    = XP_TV         (JJ)
       XTC             (JI, KPATCH)    = XP_TC         (JJ)
