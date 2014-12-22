@@ -1068,12 +1068,12 @@ DO JFORC_STEP=1,INB_STEP_ATM
           !
           IF (CTIMESERIES_FILETYPE=='FA    ') THEN
             LFANOCOMPACT = LDIAG_FA_NOCOMPACT
-            IDATEF(1)= IYEAR_OUT
-            IDATEF(2)= IMONTH_OUT
-            IDATEF(3)= IDAY_OUT
-            IDATEF(4)= FLOOR(ZTIME_OUT/3600.)
-            IDATEF(5)= FLOOR(ZTIME_OUT/60.) - IDATEF(4) * 60 
-            IDATEF(6)= NINT(ZTIME_OUT) - IDATEF(4) * 3600 - IDATEF(5) * 60
+            IDATEF(1)= IYEAR!_OUT
+            IDATEF(2)= IMONTH!_OUT
+            IDATEF(3)= IDAY!_OUT
+            IDATEF(4)= FLOOR(ZTIME/3600.)
+            IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
+            IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
             IDATEF(7:11) = 0
             IF (CSURF_FILETYPE/='FA    ') THEN
               CALL WRITE_HEADER_FA(CSURF_FILETYPE,'ALL')
