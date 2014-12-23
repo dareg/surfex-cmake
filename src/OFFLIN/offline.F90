@@ -1071,6 +1071,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
             IDATEF(1)= IYEAR!_OUT
             IDATEF(2)= IMONTH!_OUT
             IDATEF(3)= IDAY!_OUT
+            !ZTIME instead of ZTIME_OUT (FA XRD39 do not like 24h)
             IDATEF(4)= FLOOR(ZTIME/3600.)
             IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
             IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60

@@ -296,7 +296,16 @@ REAL, DIMENSION(:),  INTENT(OUT) :: PHU_AGG  ! aggregated relative humidity
                                     ! for evaporative flux calculations
 !
 !
-!*      0.2    declarations of local variables
+!*      0.2    declarations of local parameters
+!
+REAL, PARAMETER            :: ZDEPTH_COR = 0.6
+!                             ZDEPTH_COR = depth over which the correction flux is applied
+!
+REAL, PARAMETER            :: ZDTG1_COR = 10.0 
+!                             ZDTG1_COR = Delta temperature limit to comput the correction flux (K)
+!
+!
+!*      0.3    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZQSAT     ! expression for the saturation specific humidity 
 !
@@ -314,15 +323,12 @@ REAL, DIMENSION(SIZE(PTA)) :: ZTSM     ! surface temperature before time integra
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZFLUX_COR, ZLAYERHCAP
 !                                           ZFLUX_COR = correction flux by layer to conserve energy (W/m2)
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZTOTALHCAP, ZWORK
-!
-REAL, PARAMETER            :: ZDEPTH_COR = 0.6
-!                             ZDEPTH_COR = depth over which the correction flux is applied
+REAL, DIMENSION(SIZE(PTA)) :: ZGRNDFLUX, ZTOTALHCAP, ZWORK
 !
 INTEGER                    :: INI, INL, JI, JL
 LOGICAL                    :: LEXPLICIT_SNOW
 !
-!*      0.3    declarations of local time spliting variables
+!*      0.4    declarations of local time spliting variables
 !
 ! Working arrays for flux averaging over time split
 !
@@ -412,7 +418,11 @@ ZRESTORE_SUM  (:) = 0.0
 ZAC_AGG_SUM   (:) = 0.0
 ZHU_AGG_SUM   (:) = 0.0
 !
-ZFLUX_COR   (:,:) = 0.0
+!-------------------------------------------------------------------------------
+!
+ZGRNDFLUX(:  ) = PGRNDFLUX(:)
+!
+ZFLUX_COR(:,:) = 0.0
 !
 !-------------------------------------------------------------------------------
 !
@@ -431,8 +441,8 @@ ELSEIF(LEXPLICIT_SNOW.AND.HISBA=='DIF')THEN
   ZTOTALHCAP    (:) = 0.0
 !
 ! To conserv energy, the correction flux is distributed at least
-! over the first 60cm depth. This method prevent numerical oscillations
-! especially when explicit snow vanishes
+! over the first layers of the soil, ZDEPTH_COR. This method prevent 
+! numerical oscillations especially when explicit snow vanishes
 !
   ZWORK(:)=MIN(PD_G(:,INL),ZDEPTH_COR)
 !
@@ -451,6 +461,25 @@ ELSEIF(LEXPLICIT_SNOW.AND.HISBA=='DIF')THEN
           ZFLUX_COR(JI,JL)=PPSN(JI)*PFLSN_COR(JI)*ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
         ENDIF
     ENDDO
+  ENDDO
+!
+! The second correction is computed if the delta temperature
+! due to snow/soil ground flux is superior to ZDTG1_COR (K)
+! Especially relevant when PPSN ~ 1 over vegetated area
+!
+  ZWORK(:)=PTSTEP*PCT(:)*PPSN(:)*ABS(PGRNDFLUX(:))
+!
+  WHERE(ZTOTALHCAP(:)>0.0.AND.ZWORK(:)>=ZDTG1_COR)
+       ZGRNDFLUX(:) = PGRNDFLUX(:)*ZLAYERHCAP(:,1)/ZTOTALHCAP(:)
+  ENDWHERE
+!
+  DO JL=2,INL
+     DO JI=1,INI
+        IF(ZTOTALHCAP(JI)>0.0.AND.ZWORK(JI)>=ZDTG1_COR)THEN
+          ZFLUX_COR(JI,JL)=ZFLUX_COR(JI,JL)+PPSN(JI)*PGRNDFLUX(JI) &
+                                           *ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
+        ENDIF
+     ENDDO
   ENDDO
 !
 ENDIF
@@ -500,7 +529,7 @@ DO JSPLIT=1,ITSPLIT
                  PPEQ_B_COEF, PVMOD, PCD, PTG, ZTSM, ZT2M, PSNOWALB, PSW_RAD, PLW_RAD,   &
                  PTA, PQA, PPS, PRHOA, PEXNS, PEXNA, PCPS, PLVTT, PLSTT,  PVEG,          &
                  PHUG, PHUGI, PHV, ZLEG_DELTA, ZLEGI_DELTA, PEMIS, PALB, PRESA,          &
-                 PCT, PCG, PPSN, PPSNV, PPSNG, PGRNDFLUX, ZFLUX_COR,                     &
+                 PCT, PCG, PPSN, PPSNV, PPSNG, ZGRNDFLUX, ZFLUX_COR,                     &
                  PD_G, PDZG, PDZDIF, PSOILCONDZ, PSOILHCAPZ,  PALBT, PEMIST,             &
                  ZQSAT, ZDQSAT, PFROZEN1, PTDEEP_A, PTDEEP_B, PGAMMAT,                   &
                  ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
