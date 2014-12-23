@@ -496,8 +496,8 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       PTG(:)              = PTG(:) + PTSTEP*PCT(:)*ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
       PDELHEATG(:)        = PDELHEATG(:)     + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
       PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      PGRNDFLUX(:)        = 0.0
-      PFLSN_COR(:)        = ZGRNDFLUXN(:)
+      PGRNDFLUX(:)        = ZGRNDFLUXN(:)
+      PFLSN_COR(:)        = 0.0
      END WHERE
 !
 !

@@ -851,18 +851,18 @@ REAL, DIMENSION(SIZE(PWR))               :: ZSUBVCOR   ! A possible snow (interc
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
 ! Budget: Add to arguments, diags
 
-REAL, DIMENSION(SIZE(PWR))                           :: ZDELHEATV_SFC  ! Change in heat storage of the explicit vegetation (MEB) layer over the current time step (W m-2)
-REAL, DIMENSION(SIZE(PWR))                           :: ZDELHEATG      ! change in heat storage of the entire soil column over the current time step (W m-2) 
-REAL, DIMENSION(SIZE(PWR))                           :: ZDELHEATG_SFC  ! change in heat storage of the surface soil layer over the current time step (W m-2)
-REAL, DIMENSION(SIZE(PWR))                           :: ZDELPHASEG     ! latent heating due to soil freeze-thaw in the entire soil column            (W m-2) 
-REAL, DIMENSION(SIZE(PWR))                           :: ZDELPHASEG_SFC ! latent heating due to soil freeze-thaw in the surface soil layer            (W m-2) 
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZDELHEATN      ! change in heat storage of the entire snow column over the current time step (W m-2)
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZDELHEATN_SFC  ! change in heat storage of the surface snow layer over the current time step (W m-2)
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZSNOWSFCH      ! snow surface layer pseudo-heating term owing to
-!                                                                      !  changes in grid thickness            (W m-2)
-REAL, DIMENSION(SIZE(PSNOWTEMP,1))                   :: ZGSFCSNOW      ! conductive heat flux between the surface and sub-surface soil layers 
-!                                                                      ! for the multi-layer snow schemes..for composite snow, it is 
-!                                                                      ! equal to PRESTORE (W m-2)
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELHEATV_SFC  ! Change in heat storage of the explicit vegetation (MEB) layer over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELHEATG      ! change in heat storage of the entire soil column over the current time step (W m-2) 
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELHEATG_SFC  ! change in heat storage of the surface soil layer over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELPHASEG     ! latent heating due to soil freeze-thaw in the entire soil column            (W m-2) 
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELPHASEG_SFC ! latent heating due to soil freeze-thaw in the surface soil layer            (W m-2) 
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELHEATN      ! change in heat storage of the entire snow column over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PWR))                   :: ZDELHEATN_SFC  ! change in heat storage of the surface snow layer over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PWR))                   :: ZSNOWSFCH      ! snow surface layer pseudo-heating term owing to
+!                                                              !  changes in grid thickness            (W m-2)
+REAL, DIMENSION(SIZE(PWR))                   :: ZGSFCSNOW      ! conductive heat flux between the surface and sub-surface soil layers 
+!                                                              ! for the multi-layer snow schemes..for composite snow, it is 
+!                                                              ! equal to PRESTORE (W m-2)
 !
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
@@ -901,6 +901,16 @@ PHU_AGG     (:)   = 0.0
 !
 !
 ! MEB:
+!
+ZDELHEATV_SFC (:) = 0.0
+ZDELHEATG     (:) = 0.0 
+ZDELHEATG_SFC (:) = 0.0
+ZDELPHASEG    (:) = 0.0 
+ZDELPHASEG_SFC(:) = 0.0 
+ZDELHEATN     (:) = 0.0
+ZDELHEATN_SFC (:) = 0.0
+ZSNOWSFCH     (:) = 0.0
+ZGSFCSNOW     (:) = 0.0
 !
 ZSUBVCOR(:)     = 0.0
 !aabtmptest need to initialize other vars, like paalphan etc...
