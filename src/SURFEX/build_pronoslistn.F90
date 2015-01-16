@@ -22,6 +22,7 @@
 !!    C. Mari  30/10/00 call to MODD_TYPE_EFUTIL
 !!    D. Gazen 01/12/03 change emissions handling for surf. externalization
 !!    P. Tulet 01/05/05 aerosols primary emission
+!!    M.Leriche 04/2014  change length of CHARACTER for emission 6->12
 !!
 !!    EXTERNAL
 !!    --------
@@ -47,7 +48,7 @@ IMPLICIT NONE
 !*       0.1  declaration of arguments
 !
 INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
- CHARACTER(LEN=6), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
+ CHARACTER(LEN=12), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
 TYPE(PRONOSVAR_T),             POINTER     :: TPPRONOS
 INTEGER,                       INTENT(IN)  :: KCH     ! logical unit of input chemistry file
 INTEGER,                       INTENT(IN)  :: KLUOUT  ! output listing channel

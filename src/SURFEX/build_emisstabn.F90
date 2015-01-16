@@ -22,6 +22,8 @@
 !!    D.Gazen  01/12/03  change emissions handling for surf. externalization!!
 !!    P.Tulet  01/01/04  change conversion for externalization (flux unit is
 !!                        molec./m2/s)
+!!    M.Leriche  04/14   apply conversion factor if lead = f
+!!                       change emissions name EMIS_ -> E_ name for coherence with PGD
 !!
 !!    EXTERNAL
 !!    --------
@@ -155,9 +157,9 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
       TPEMISS(JSPEC)%XEMISDATA(:,:) = 0. 
     END WHERE
       DO ITIME=1,INBTS
-      ! XCONVERSION HAS BEEN ALREADY APPLY IN CH_EMISSION_FLUXN 
-      !TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME) * XCONVERSION(:)
-      TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME)
+      ! XCONVERSION HAS BEEN ALREADY APPLY IN CH_EMISSION_FLUXN ONLY FOR LREAD = T
+      TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME) * XCONVERSION(:)
+      !TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME)
       END DO
     ELSE
 ! Read window size is smaller than number of emission times

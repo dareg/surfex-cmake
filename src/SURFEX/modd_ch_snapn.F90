@@ -26,6 +26,7 @@
 !!    -------------
 !!      Original    08/03/2001                      
 !!      01/12/03    (D.Gazen) change emissions handling for surf. externalization
+!!      M.Leriche 04/2014  change length of CHARACTER for emission 6->12
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -51,7 +52,7 @@ TYPE CH_EMIS_SNAP_t
 !                          !  'LEGAL' : LEGAL time
 !                          !
 
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CEMIS_NAME
+  CHARACTER(LEN=12), DIMENSION(:), POINTER :: CEMIS_NAME
 !                          ! name of the chemical fields (emitted species)
   CHARACTER(LEN=40), DIMENSION(:), POINTER :: CEMIS_COMMENT
 !                          ! comment on the chemical fields (emitted species)
@@ -89,7 +90,7 @@ INTEGER, POINTER :: NEMIS_NBR=>NULL()
 !$OMP THREADPRIVATE(CSNAP_TIME_REF)
  CHARACTER(LEN=40), DIMENSION(:), POINTER :: CEMIS_COMMENT=>NULL()
 !$OMP THREADPRIVATE(CEMIS_COMMENT)
- CHARACTER(LEN=6), DIMENSION(:), POINTER :: CEMIS_NAME=>NULL()
+ CHARACTER(LEN=12), DIMENSION(:), POINTER :: CEMIS_NAME=>NULL()
 !$OMP THREADPRIVATE(CEMIS_NAME)
 REAL,              DIMENSION(:,:), POINTER:: XEMIS_FIELDS=>NULL()
 !$OMP THREADPRIVATE(XEMIS_FIELDS)

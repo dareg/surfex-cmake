@@ -21,6 +21,7 @@
 !!    -------------
 !!      Original        11/2011
 !!      A. Alias        07/2013 add MODI_ABOR1_SFX
+!!      M. Leriche      04/2014 correct conversion factor
 !!-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,13 +51,11 @@ IF (LHOOK) CALL DR_HOOK('CH_CONVERSION_FACTOR',0,ZHOOK_HANDLE)
 XCONVERSION(:) = 1.
 SELECT CASE (HCONVERSION)
   CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
-  ! where 1 molecule/cm2/s = (224.14/6.022136E23) ppp*m/s
     XCONVERSION(:) = XAVOGADRO * PRHOA(:) / XMD
   CASE ('CON') ! flux given in molecules/cm2/s, conversion to molec/m2/s 
     XCONVERSION(:) =  1E4
   CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s  
-    ! where 1 microMol/m2/day = (22.414/86.400)*1E-12 ppp*m/s
-    XCONVERSION(:) = (22.414/86.400)*1E-12 * XAVOGADRO * PRHOA(:) / XMD
+    XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
   CASE DEFAULT
     CALL ABOR1_SFX('CH_BUILDEMISSN: UNKNOWN CONVERSION FACTOR')
 END SELECT

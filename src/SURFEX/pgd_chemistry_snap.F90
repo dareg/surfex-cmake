@@ -30,6 +30,7 @@
 !!
 !!    Original    09/2011
 !!
+!!      M.Leriche 04/2014  change length of CHARACTER for emission 6->12
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -86,7 +87,7 @@ INTEGER                           :: JSNAP     ! loop counter on SNAP categories
 !            ------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
- CHARACTER(LEN=6),  DIMENSION(JPEMISMAX_S):: CEMIS_NAME
+ CHARACTER(LEN=12),  DIMENSION(JPEMISMAX_S):: CEMIS_NAME
  CHARACTER(LEN=40), DIMENSION(JPEMISMAX_S):: CEMIS_COMMENT
  CHARACTER(LEN=28), DIMENSION(JPEMISMAX_S):: CSNAP_MONTHLY_FILE
  CHARACTER(LEN=28), DIMENSION(JPEMISMAX_S):: CSNAP_DAILY_FILE

@@ -1,5 +1,4 @@
 !     #########
-irint*,shape(XWORKD2)
       SUBROUTINE CH_INIT_SNAP_n(HPROGRAM,KLU,HINIT,KCH,PRHOA)
 !     #######################################
 !
@@ -132,7 +131,7 @@ DO JSPEC = 1,NEMIS_NBR ! Loop on the number of species
     CALL ABOR1_SFX('CH_INIT_SNAPN: PROBLEM WHEN READING NAME OF EMITTED CHEMICAL SPECIES')
   END IF
   WRITE(ILUOUT,*) ' Emission ',JSPEC,' : ',TRIM(YSPEC_NAME)
-  CEMIS_NAME(JSPEC) = YSPEC_NAME
+  CEMIS_NAME(JSPEC) = YSPEC_NAME(1:12)
 ! 
 ! Read  the potential emission of species for each snap
   DO JSNAP=1,NEMIS_SNAP

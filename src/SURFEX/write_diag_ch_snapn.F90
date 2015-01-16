@@ -23,6 +23,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2012
+!!    M.Leriche 04/2014  change emissions name EMIS_ -> E_ name for coherence with PGD
+!!                       change length of CHARACTER for emission 6->12
 !!-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,7 +52,7 @@ IMPLICIT NONE
 !
 
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 !
 INTEGER           :: JSPEC
