@@ -29,6 +29,7 @@
 !!      J. Stein    25/07/97  add XTH00                    
 !!      V. Masson   05/10/98  add XRHOLI
 !!      C. Mari     31/10/00  add NDAYSEC
+!!      J. Escobar     06/13  add XSURF_TIMY XSURF_TIMY_12 XSURF_EPSILON for REAL*4
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -77,6 +78,10 @@ REAL,SAVE :: XRHOLI             ! Volumic mass of ice
 REAL,SAVE :: XCONDI             ! thermal conductivity of ice (W m-1 K-1)
 !
 INTEGER, SAVE :: NDAYSEC        ! Number of seconds in a day
+!
+REAL,SAVE     :: XSURF_TINY          ! minimum real on this machine
+REAL,SAVE     :: XSURF_TINY_12       ! sqrt(minimum real on this machine)
+REAL,SAVE     :: XSURF_EPSILON       ! minimum space with 1.0
 !
 END MODULE MODD_CSTS
 

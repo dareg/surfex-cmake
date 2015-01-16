@@ -17,7 +17,8 @@
   !!
   !!    MODIFICATIONS
   !!    -------------
-  !!      Original      20/02/05 
+  !!      Original      20/02/05
+  !!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
   !!
   !-------------------------------------------------------------------------------
   !
@@ -31,6 +32,7 @@
 !
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
   USE PARKIND1  ,ONLY : JPRB
+  USE MODD_SURF_PAR , ONLY : XSURF_TINY
 !
   IMPLICIT NONE
   !
@@ -95,7 +97,7 @@ ZRESA(:) = MIN(MAX(PRESA(:),   1.E-20), 9999.)
 DO JSV=1,SIZE(PSVT,2)
 ZSVT(:,JSV) = PSVT(:,JSV) * XMD / (XAVOGADRO * PRHODREF(:))
 ENDDO
-ZSVT(:,:) = MAX(ZSVT(:,:),1E-80)
+ZSVT(:,:) = MAX(ZSVT(:,:),XSURF_TINY)
  CALL PPP2AERO_SURF(ZSVT, PRHODREF, PSIG1D=ZSIG, PRG1D=ZRG, PN1D=ZN, PCTOTA=ZCTOTA)
 ZRHOP(:,:) = 0.
 DO JN=1,JPMODE

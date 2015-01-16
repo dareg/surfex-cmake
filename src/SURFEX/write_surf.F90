@@ -2,6 +2,13 @@
 MODULE MODI_WRITE_SURF
 !##################
 !
+!----------------------------------------------------
+!!    MODIFICATIONS
+!!    -------------
+!!      Original       
+!!      J.Escobar      10/06/2013: replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
+!----------------------------------------------------
+!
   INTERFACE WRITE_SURF
 !
      SUBROUTINE WRITE_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT)
@@ -200,7 +207,7 @@ INTEGER,           INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem ap
 !
  CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX0',0,ZHOOK_HANDLE)
@@ -754,7 +761,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
  CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN0',0,ZHOOK_HANDLE)
@@ -1029,7 +1036,7 @@ INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem
  CHARACTER(LEN=12)  :: YREC
  CHARACTER(LEN=40)  :: YFIELD
 LOGICAL :: LNOWRITE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFC0',0,ZHOOK_HANDLE)
@@ -1171,7 +1178,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
  CHARACTER(LEN=12)  :: YREC
 LOGICAL :: LNOWRITE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFL0',0,ZHOOK_HANDLE)
@@ -1441,7 +1448,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
  CHARACTER(LEN=12)  :: YREC
 REAL    :: ZTIME
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER :: IDAY
 INTEGER :: IMONTH
 INTEGER :: IYEAR

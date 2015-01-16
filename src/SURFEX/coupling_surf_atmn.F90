@@ -33,6 +33,7 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      Modified    09/2011 by S.Queguiner: Add total CO2 surface flux (anthropo+biogenic) as diagnostic
 !!      Modified    11/2011 by S.Queguiner: Add total Chemical surface flux (anthropo) as diagnostic
 !!      B. Decharme 04/2013 new coupling variables and replace RW_PRECIP_n by CPL_GCM_n
+!!      Modified    06/2013 by J.Escobar  : replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
@@ -194,7 +195,7 @@ REAL, DIMENSION(KI,NTILESFC) :: ZQSURF_TILE    ! specific humidity at surface
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 !
-DOUBLE PRECISION :: XTIME0
+REAL :: XTIME0
 !
 INTEGER :: IINDEXEND
 INTEGER :: INBTS, JI

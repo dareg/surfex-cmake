@@ -47,6 +47,7 @@
 !!      B. Decharme    06/2009 limitation of Ri
 !!      B. Decharme    09/2012 Bug in Ri calculation and limitation of Ri in surface_ri.F90
 !!      B. Decharme    06/2013 bug in z0 (output) computation 
+!!      J.Escobar      06/2013  for REAL4/8 add EPSILON management
 !!      C. Lebeaupin   03/2014 bug if PTA=PSST and PEXNA=PEXNS: set a minimum value
 !!	   	       	       add abort if no convergence
 !-------------------------------------------------------------------------------
@@ -60,7 +61,7 @@ USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, XPI, &
 USE MODD_SURF_ATM,   ONLY : XVZ0CM
 !
 USE MODD_SEAFLUX_n
-USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SURF_PAR,   ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_WATER_PAR
 !
 USE MODI_SURFACE_RI
@@ -490,7 +491,7 @@ CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,ZTA,ZQASAT,&
 !       5.2     Aerodynamical conductance and resistance
 !             
 ZAC(:) = PCH(:)*ZVMOD(:)
-PRESA(:) = 1. / ZAC(:)
+PRESA(:) = 1. / MAX(ZAC(:),XSURF_EPSILON)
 !
 !       5.3 Z0 and Z0H over sea
 !

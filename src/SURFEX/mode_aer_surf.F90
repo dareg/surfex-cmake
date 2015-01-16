@@ -5,12 +5,19 @@ MODULE MODE_AER_SURF
 !! MODULE DUST PSD (Particle Size Distribution)
 !! Purpose: Contains subroutines to convert from transported variables (ppp)
 !! to understandable aerosol variables, e.g. #/m3, kg/m3, sigma, R_{n}
-
+!-------------------------------------------------------------------------------
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
+!!
+!------------------------------------------------------------------------------- 
   USE MODD_CHS_AEROSOL
   USE MODD_DST_SURF, ONLY : XDENSITY_DST
 !
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
   USE PARKIND1  ,ONLY : JPRB
+  USE MODD_SURF_PAR , ONLY : XSURF_TINY
 !
   IMPLICIT NONE
 !!
@@ -229,8 +236,8 @@ ENDDO
 !
 !*       3    set  moment 0 
 !
-ZM(:,1)=   MAX(ZSV(:,JP_CH_M0i) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
-ZM(:,4)=   MAX(ZSV(:,JP_CH_M0j) * 1E+6, 1.E-80) ! molec_{aer}/m3_{air}
+ZM(:,1)=   MAX(ZSV(:,JP_CH_M0i) * 1E+6, XSURF_TINY) ! molec_{aer}/m3_{air}
+ZM(:,4)=   MAX(ZSV(:,JP_CH_M0j) * 1E+6, XSURF_TINY) ! molec_{aer}/m3_{air}
 WHERE ((ZM(:,1) .LT. ZMMIN(1))) !.OR.(ZM(:,2) .LT. ZMMIN(2)))
   ZM(:,1)= ZMMIN(1)
 !  ZM(:,2)= ZMMIN(2)
@@ -258,7 +265,7 @@ END WHERE
 !*       4    set moment 6  ==> um6_{aer}/m3_{air}
 !
 IF (LVARSIGI) THEN ! set M6 variable standard deviation
-  ZM(:,3) = MAX(ZSV(:,JP_CH_M6i), 1E-80)
+  ZM(:,3) = MAX(ZSV(:,JP_CH_M6i), XSURF_TINY)
 
   ZSIGMA(:)=ZM(:,2)**2/(ZM(:,1)*ZM(:,3))
   ZSIGMA(:)=MIN(1-1E-10,ZSIGMA(:))
@@ -282,7 +289,7 @@ ELSE ! fixed standard deviation
 END IF
 
 IF (LVARSIGJ) THEN ! set M6 variable standard deviation
-  ZM(:,6) = MAX(ZSV(:,JP_CH_M6j), 1E-80)
+  ZM(:,6) = MAX(ZSV(:,JP_CH_M6j), XSURF_TINY)
 
   ZSIGMA(:)=ZM(:,5)**2/(ZM(:,4)*ZM(:,6))
   ZSIGMA(:)=MIN(1-1E-10,ZSIGMA(:))

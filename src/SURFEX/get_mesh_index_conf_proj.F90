@@ -17,6 +17,7 @@
 !!
 !!    Original    12/09/95
 !!    J.Escobar  22/10/2011 : reintroduce optimisation for JI/JJ number of lines computation
+!!     J. Escobar  06/2013  : modif for REAL*4
 !!
 !----------------------------------------------------------------------------
 !
@@ -31,6 +32,7 @@ USE MODE_GRIDTYPE_CONF_PROJ
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODD_CSTS ,ONLY : XSURF_EPSILON
 !
 IMPLICIT NONE
 !
@@ -114,7 +116,7 @@ ZDYLIM = XYLIM(2) - XYLIM(1)
 !*    2.     Reshifts the longitudes with respect to projection reference point
 !            ------------------------------------------------------------------
 !
-ZLON(:) = PLON(:)+NINT((XLON0-PLON(:))/360.)*360.
+ZLON(:) = PLON(:)+NINT((XLON0-PLON(:)+180.0*XSURF_EPSILON)/360.)*360.
 !
 !*    3.     Projection
 !            ----------
@@ -133,8 +135,8 @@ ALLOCATE(ZY (SIZE(PLAT)))
 KINDEX(:,:) = 0
 !
 DO JL=1,SIZE(PLON)
-  IF (     ZX(JL)<XXLIM(1) .OR. ZX(JL)>XXLIM(NIMAX+1) &
-        .OR. ZY(JL)<XYLIM(1) .OR. ZY(JL)>XYLIM(NJMAX+1) ) THEN  
+  IF (     ZX(JL)<XXLIM(1) .OR. ZX(JL)>=XXLIM(NIMAX+1) &
+        .OR. ZY(JL)<XYLIM(1) .OR. ZY(JL)>=XYLIM(NJMAX+1) ) THEN  
     KINDEX(1,JL) = 0
     IF (KSSO/=0) THEN
       KISSOX(1,JL) = 0

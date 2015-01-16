@@ -1,4 +1,10 @@
 MODULE MODI_GATHER_AND_WRITE_MPI_K4
+!----------------------------------------------------
+!!    MODIFICATIONS
+!!    -------------
+!!      Original       
+!!      J.Escobar      10/06/2013: replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
+!----------------------------------------------------
 !
 INTERFACE GATHER_AND_WRITE_MPI_K4
 !
@@ -52,7 +58,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PWORK2
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
 REAL, DIMENSION(NSIZE) :: ZINTER
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 !
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
@@ -199,7 +205,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PWORK2
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
 REAL, DIMENSION(NSIZE,SIZE(PWORK2,2)) :: ZINTER
-DOUBLE PRECISION   :: XTIME0
+REAL:: XTIME0
 !
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS

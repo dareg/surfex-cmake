@@ -16,7 +16,8 @@ SUBROUTINE DSLT_DEP (PSVT, PFSVT, PUSTAR, PRESA, PTA, PRHODREF,             &
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original      20/02/05 
+!!      Original      20/02/05
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
 !!
 !-------------------------------------------------------------------------------
 !
@@ -30,6 +31,7 @@ USE MODI_DSLT_VELGRAV1D
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODD_SURF_PAR , ONLY : XSURF_TINY
 !
 IMPLICIT NONE
 !
@@ -83,7 +85,7 @@ IF (LHOOK) CALL DR_HOOK('DSLT_DEP',0,ZHOOK_HANDLE)
 ZUSTAR(:) = MAX(PUSTAR(:), 1.E-20)
 ZRESA (:) = MIN(MAX(PRESA(:), 1.E-20), 9999.)
 ! Save scalars in local array
-ZSVT(:,:) = MAX(PSVT(:,:), 1E-60)
+ZSVT(:,:) = MAX(PSVT(:,:), XSURF_TINY)
 !
 ZMU(:)    = 0.
 ZVGK(:,:) = 0.

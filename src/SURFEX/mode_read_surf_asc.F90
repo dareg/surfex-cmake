@@ -30,6 +30,7 @@ MODULE MODE_READ_SURF_ASC
 !!    -------------
 !!
 !!      original                                                     01/08/03
+!!      J.Escobar      10/06/2013: replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
 !----------------------------------------------------------------------------
 !
 INTERFACE READ_SURF0_ASC
@@ -151,7 +152,7 @@ INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem
  CHARACTER(LEN=6)  :: YMASK
 INTEGER           :: IL1, INFOMPI
 !
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
@@ -294,7 +295,7 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
  CHARACTER(LEN=6)  :: YMASK
 INTEGER           :: IL1, IL2, INFOMPI
 !
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
@@ -499,7 +500,7 @@ INTEGER           :: IL1, INFOMPI
 #ifndef NOMPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN1_ASC',0,ZHOOK_HANDLE)
@@ -752,7 +753,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
 !
  CHARACTER(LEN=6) :: YMASK
 INTEGER          :: INFOMPI, IL1
-DOUBLE PRECISION :: XTIME0
+REAL :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL1_ASC',0,ZHOOK_HANDLE)

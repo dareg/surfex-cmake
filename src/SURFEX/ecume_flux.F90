@@ -49,6 +49,7 @@
 !!      Modified        09/2012  B. Decharme: limitation of Ri in surface_ri.F90
 !!      Modified        10/2012  P. Le Moigne: extra inputs for FLake use
 !!      Modified        06/2013  B. Decharme: bug in z0 (output) computation 
+!!      Modified        06/2013  J.Escobar : for REAL4/8 add EPSILON management
 !!!
 !-------------------------------------------------------------------------------
 
@@ -58,6 +59,7 @@
 USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, &
                             XLVTT, XCL, XCPD, XCPV, XRHOLW, &
                             XTT,XP00
+USE MODD_SURF_PAR,   ONLY : XUNDEF, XSURF_EPSILON                    
 !
 USE MODD_REPROD_OPER,  ONLY : CCHARNOCK
 !
@@ -169,7 +171,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ECUME_FLUX',0,ZHOOK_HANDLE)
 !
-NITERFL = 6
+NITERFL = 10
 !
 !-------------------------------------------------------------------------------
 !
@@ -182,7 +184,7 @@ ZP00    = 1013.25E+02
 ZPIS2   = 2.0*ATAN(1.0)
 ZPI     = 2.0*ZPIS2
 ZSQR3   = SQRT(3.0)
-ZEPS    = 1.E-12
+ZEPS    = 1.E-8
 ZETV    = XRV/XRD-1.0
 ZRDSRV  = XRD/XRV
 !
@@ -498,7 +500,7 @@ PUSTAR(:)=SQRT(ZUSTAR2(:))
 !       7.3. Aerodynamical conductance and resistance
 !
 ZAC(:)=PCH(:)*ZVMOD(:)
-PRESA(:)=1./ZAC(:)
+PRESA(:)=1./ MAX(ZAC(:),XSURF_EPSILON)
 !
 !       7.4. Total surface fluxes
 !

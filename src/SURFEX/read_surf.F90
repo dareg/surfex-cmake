@@ -34,6 +34,7 @@ MODULE MODI_READ_SURF
 !!    -------------
 !!
 !!      original                                                     01/08/03
+!!      J.Escobar      10/06/2013: replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
 !----------------------------------------------------------------------------
 !
   INTERFACE READ_SURF
@@ -252,7 +253,7 @@ INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem ap
 !
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER            :: INFOMPI
 REAL               :: ZWORK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -792,7 +793,7 @@ INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem app
 !
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER            :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1043,7 +1044,7 @@ INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem ap
 !
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER            :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1180,7 +1181,7 @@ INTEGER, INTENT(OUT) :: KRESP           ! KRESP  : return-code if a problem appe
 !
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER            :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1412,7 +1413,7 @@ INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem app
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
 !
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER :: ILUOUT
 INTEGER :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1579,7 +1580,7 @@ INTEGER, INTENT(OUT) :: KRESP              ! KRESP  : return-code if a problem a
 INTEGER            :: ILUOUT
 INTEGER            :: INFOMPI
 !
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 INTEGER :: IL1
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1742,7 +1743,7 @@ INTEGER            :: ILUOUT
 INTEGER            :: INFOMPI
 !
 INTEGER :: IL1, IL2
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFT2',0,ZHOOK_HANDLE)
