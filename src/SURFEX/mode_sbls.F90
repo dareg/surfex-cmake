@@ -32,6 +32,7 @@
 !!    -------------
 !!      Original        13/10/99
 !!      V. Masson       06/11/02 optimization and add Businger fonction for TKE
+!!      J. EScobar      28/11/2013 really avoid / 0 in test in real*4 
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -541,8 +542,8 @@ FUNCTION LMO_1D(PUSTAR,PTHETA,PRV,PSFTH,PSFRV)
   LMO_1D(:) = XUNDEF
   WHERE ( PSFTH(:)/ZTHETAV(:)+ZEPS*PSFRV(:)/=0. )                  &
       LMO_1D(:) = - MAX(PUSTAR(:),1.E-6)**3                          &
-                / ( XKARMAN * (  XG / ZTHETAV(:)    * PSFTH(:)       &
-                               + XG * ZEPS * PSFRV(:) )  )  
+                / ( XKARMAN * XG   &
+                    * (  PSFTH(:) / ZTHETAV(:) + ZEPS * PSFRV(:) )  )  
 
   WHERE(ABS(LMO_1D)>10000.) LMO_1D=XUNDEF
 IF (LHOOK) CALL DR_HOOK('MODE_SBLS:LMO_1D',1,ZHOOK_HANDLE)
