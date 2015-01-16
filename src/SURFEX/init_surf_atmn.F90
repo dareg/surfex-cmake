@@ -48,6 +48,8 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !!      B. Decharme  04/2013  new coupling variables
 !!                            Delete LPROVAR_TO_DIAG check
 !!                            Delete NWG_LAYER_TOT
+!!     (J.Escobar)      10/06/2013: replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
+!!     (J.Durand)      2014   add activation of chemical deposition if LCH_EMIS=F
 !!      R. Séférian 03/2014   Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !-------------------------------------------------------------------------------
 !
@@ -236,7 +238,7 @@ REAL, DIMENSION(:),     ALLOCATABLE :: ZP_EMIS     ! emissivity
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSRAD    ! radiative temperature
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSURF    ! surface effective temperature
 !
-DOUBLE PRECISION :: XTIME0
+REAL :: XTIME0
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -462,15 +464,21 @@ IF (LCH_EMIS) THEN
         CALL CH_INIT_SNAP_n(HPROGRAM,NSIZE_FULL,HINIT,ICH,PRHOA)
       END IF
     ENDIF
+    CALL CLOSE_NAMELIST(HPROGRAM,ICH)
+  ENDIF
+  !
+END IF
     !
     !*       2.5 Initialization of dry deposition scheme (chemistry)
     !    
-    IF (HINIT=='ALL') CALL CH_INIT_DEPCONST(ICH,ILUOUT,CSV(NSV_CHSBEG:NSV_CHSEND))
-    !
-    CALL CLOSE_NAMELIST(HPROGRAM,ICH)
-    !
-  ENDIF
-  !
+!
+IF (NBEQ .GT. 0) THEN
+  CALL OPEN_NAMELIST(HPROGRAM,ICH,HFILE=CCHEM_SURF_FILE)
+!
+  IF (HINIT=='ALL') CALL CH_INIT_DEPCONST(ICH,ILUOUT,CSV(NSV_CHSBEG:NSV_CHSEND))
+!
+  CALL CLOSE_NAMELIST(HPROGRAM,ICH)
+!
 END IF
 !
 !*       2.5 Subgrid orography
