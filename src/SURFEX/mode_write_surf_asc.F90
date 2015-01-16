@@ -258,7 +258,7 @@ INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem 
 !*      0.2   Declarations of local variables
 !
 INTEGER :: ISIZE, J
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD))) :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -351,7 +351,7 @@ INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a pro
 !*      0.2   Declarations of local variables
 ! 
 INTEGER :: ISIZE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2)) :: ZWORK   ! work array read in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -445,7 +445,7 @@ INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a probl
 !
 INTEGER :: ISIZE
 INTEGER, DIMENSION(MAX(NFULL,SIZE(KFIELD))) :: IWORK  ! work array read in the file
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFN1_ASC',0,ZHOOK_HANDLE)
@@ -533,7 +533,7 @@ INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a probl
                                                ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFL1_ASC',0,ZHOOK_HANDLE)
@@ -676,7 +676,7 @@ INTEGER,               INTENT(OUT):: KRESP    ! KRESP  : return-code if a proble
 !*      0.2   Declarations of local variables
 !
 INTEGER, DIMENSION(3,SIZE(KYEAR)) :: ITDATE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT1_ASC',0,ZHOOK_HANDLE)
@@ -765,7 +765,7 @@ INTEGER,                 INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pro
 !*      0.2   Declarations of local variables
 !
 INTEGER, DIMENSION(3,SIZE(KYEAR,1),SIZE(KYEAR,2)) :: ITDATE
-DOUBLE PRECISION   :: XTIME0
+REAL   :: XTIME0
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFT2_ASC',0,ZHOOK_HANDLE)
