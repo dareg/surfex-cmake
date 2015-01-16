@@ -55,6 +55,7 @@ FUNCTION TRAD_BODY(PSCA_SW, PREF_SW_FAC, PREF_SW_GRND, PEMIT_LW_FAC, PEMIT_LW_GR
 !!    MODIFICATIONS
 !!    -------------
 !!      Original  03/2011
+!!      V.MASSON   08/2014 : bug in road view factor in computation of Universal Thermal Climate Index (diagnostic only)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -113,7 +114,7 @@ DO JJ = 1, SIZE(PBLD_HEIGHT)
   !
   ZFFAC (JJ) = (ZL1(JJ) + ZL2(JJ) - ZWROAD(JJ)/2. - ZL4(JJ)) / (2. * ZHB)
   ZFGRND(JJ) = 0.5*ZWROAD(JJ)/ZHB
-  ZFGRND(JJ) = 0.5 * (ZFGRND(JJ) + 1. - SQRT(ZFGRND(JJ))**2 + 1.) 
+  ZFGRND(JJ) = 0.5 * (ZFGRND(JJ) + 1. - SQRT(ZFGRND(JJ)**2 + 1.))
   ZFSKY (JJ) = 1. - ZFFAC(JJ) - ZFGRND(JJ)
   !
   !*  2 - base calculation for both sun and shade
