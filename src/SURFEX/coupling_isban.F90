@@ -1226,19 +1226,19 @@ ENDIF
 IF(NDSTEQ>0)THEN
   IDST = NSV_DSTEND - NSV_DSTBEG + 1
 
-  CALL COUPLING_DST_n(           &
+  CALL COUPLING_DST_n(                   &
             HPROGRAM,                    &!I [char] Name of program
             KSIZE,      &!I [nbr] number of points in patch
             IDST,                        &!I [nbr] number of dust emissions variables
             JPATCH,                      &!I [idx] patch in question
             XP_CLAY(:,1),                &!I [frc] mass fraction clay in first soil layer
             ZP_PS,                       &!I [Pa] surface pressure
+            XP_TS,                       &!I [K] surface temperature
             ZP_QA,                       &!I [kg/kg] specific humidity
             XP_RESA,                     &!I [s/m] atmospheric resistance
             ZP_RHOA,                     &!I [kg/m3] atmospheric density
             XP_SAND(:,1),                &!I [frc] mass fraction of sand in first soil layer
-            ZP_SFTH,                     &!I [W/m2] surface heat flux
-            ZP_SFTQ,                     &!I [kg/m2/s] surface vapor flux
+            ZP_PA,                       &!I [K] Atmospheric pressure
             ZP_TA,                       &!I [K] Atmospheric temperature
             XP_TG(:,1),                  &!I [K] Ground temperature
             ZP_U,                        &!I [m/s] zonal wind at atmospheric height 
@@ -1247,8 +1247,10 @@ IF(NDSTEQ>0)THEN
             XP_WG(:,1),                  &!I [m3/m3] ground volumetric water content
             XP_WSAT(:,1),                &!I [m3/m3] saturation volumetric water content
             ZP_ZREF,                     &!I [m] reference height of wind
-            XP_CD,                       &
-            XP_RI,                       &
+            XP_CD,                       &!I [] Drag Coefficient for momentum
+            XP_CDN,                      &!I [] Drag neutral Coefficient for momentum
+            XP_CH,                       &!I [] drag coefficient for heat
+            XP_RI,                       &!I [] Richardson number
             XP_Z0H_WITH_SNOW,            &!I [frc] Z0 (heat) with snow
             ZP_SFTS(:,NSV_DSTBEG:NSV_DSTEND)  &!O [kg/m2/sec] flux of dust            
             )  
