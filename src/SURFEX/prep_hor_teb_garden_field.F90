@@ -35,7 +35,8 @@ USE MODD_PREP,            ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,       &
                                  LINTERP, CMASK
 
 USE MODD_PREP_TEB_GARDEN, ONLY : XGRID_SOIL, NGRID_LEVEL,                  &
-                                 XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, XASNOW_GD, LSNOW_IDEAL_GD
+                                 XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, &
+                                 XAGESNOW_GD, XASNOW_GD, LSNOW_IDEAL_GD
 
 USE MODD_TEB_n,           ONLY : TTIME
 USE MODD_TEB_VEG_n,       ONLY : CISBA
@@ -96,7 +97,7 @@ REAL, ALLOCATABLE, DIMENSION(:)     :: ZSUM
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZF        ! work array (x, output soil grid)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZDG       ! out T grid (x, output soil grid)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZPATCH    ! work array for patches
-REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
+REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW
 INTEGER                             :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                             :: GUNIF     ! flag for prescribed uniform field
@@ -142,7 +143,6 @@ IF (HSURF=='SN_VEG ') THEN
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_GD)))
-  ALLOCATE(ZAGESNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZPATCH(SIZE(XVEGTYPE,1),1))
   ALLOCATE(ZVEGTYPE_PATCH (SIZE(XVEGTYPE,1),SIZE(XVEGTYPE,2),1))
   !
@@ -156,12 +156,16 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
                             XLWCSNOW_GD, XASNOW_GD,         &
                             LSNOW_IDEAL_GD, ZSG1SNOW,       &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW,  &
+                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GD,  &
                             XVEGTYPE,ZVEGTYPE_PATCH, ZPATCH )
+  DEALLOCATE(XWSNOW_GD)
+  DEALLOCATE(XRSNOW_GD)
+  DEALLOCATE(XTSNOW_GD)
+  DEALLOCATE(XLWCSNOW_GD)
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
-  DEALLOCATE(ZHISTSNOW)
-  DEALLOCATE(ZAGESNOW)                            
+  DEALLOCATE(ZHISTSNOW)  
+  DEALLOCATE(XAGESNOW_GD)  
   DEALLOCATE(ZPATCH)
   DEALLOCATE(ZVEGTYPE_PATCH)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GARDEN_FIELD',1,ZHOOK_HANDLE)
