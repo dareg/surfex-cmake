@@ -171,11 +171,11 @@ REAL,DIMENSION(:),    INTENT(IN)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PGMES, PGC, 
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PIACAN_SUNLIT, PIACAN_SHADE, PFRAC_SUN
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PFFV ! Floodplain fraction over vegetation
+REAL, DIMENSION(:), INTENT(IN)      :: PFFV, PABC ! Floodplain fraction over vegetation
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PIACAN ! PAR in the canopy at different gauss level
 !
-REAL,DIMENSION(:),  INTENT(INOUT) :: PABC, PAN, PANDAY, PRS, PANFM, PGPP
+REAL,DIMENSION(:),  INTENT(INOUT) :: PAN, PANDAY, PRS, PANFM, PGPP
 !                                    PABC  = Carrer radiative transfer: normalized heigh of considered layer (bottom=0, top=1)
 !                                            Calvet radiative transfer: abcissa of the 3-points Gaussian quadrature 
 !                                                (Goudriaan, Agric&For.Meteor, 38,1986)                                            
@@ -281,6 +281,8 @@ IF (HPHOTO=='AGS' .OR. HPHOTO=='LAI') THEN
   !  Compute conductance and assimilation of CO2: 
   !
   ZDMAX = XDMAX_AGS
+  !
+  GTROP(:) = .FALSE.
   !
   ! Add soil moisture stress effect to leaf conductance:
   !
