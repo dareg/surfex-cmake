@@ -43,6 +43,8 @@
 USE MODD_TYPE_DATE_SURF
 USE MODD_ISBA_n,         ONLY : LMEB_PATCH
 !
+USE MODD_TREEDRAG,       ONLY : LTREEDRAG
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -149,6 +151,10 @@ ELSE
   ALLOCATE(PBSLAI     (0,0))  
 ENDIF
 ! - vegetation: Ags parameters ('AGS', 'LAI', 'AST', 'LST', 'NIT' options)
+!
+IF (HPHOTO/='NON'.OR.LTREEDRAG) THEN
+  ALLOCATE(PH_TREE                 (KLU,KPATCH              ))
+ENDIF
 !
 IF (HPHOTO/='NON') THEN
   ALLOCATE(PH_TREE                 (KLU,KPATCH              )) 
