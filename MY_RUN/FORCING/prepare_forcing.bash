@@ -47,6 +47,7 @@ then
 fi
 #------------------------------------------------------------
 mkdir ${SRC_SURFEX}/MY_RUN/KTEST/$1    > $HOME/.bidon 2>&1
+cp ${SRC_SURFEX}/MY_RUN/NAMELIST/$1/OPTIONS.nam .
 cp ${SRC_SURFEX}/MY_RUN/NAMELIST/$1/MY_PARAM.nam .
 /bin/vi MY_PARAM.nam
 export OMP_NUM_THREADS=1
