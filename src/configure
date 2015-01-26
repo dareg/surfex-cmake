@@ -373,19 +373,19 @@ fi
 #
 #  Install DR_HOOK
 #
-cd $LOCAL/src/LIB 
-if [ "x${VER_MPI}" == "xNOMPI" ] ; then
-   [ ! -d drhook_CY31R2.032 ] && tar -xvf drhook_CY31R2.032.tar
-else
-  if [ ! -d drhook_CY31R2.032_mpi ]; then
-    mkdir drhook_CY31R2.032_mpi
-    cp -f drhook_CY31R2.032.tar drhook_CY31R2.032_mpi
-    cd drhook_CY31R2.032_mpi
-    tar xvf drhook_CY31R2.032.tar
-    mv drhook_CY31R2.032/* .
-    rm -r drhook_CY31R2.032
-  fi
-fi
+#cd $LOCAL/src/LIB 
+#if [ "x${VER_MPI}" == "xNOMPI" ] ; then
+#   [ ! -d drhook_CY31R2.032 ] && tar -xvf drhook_CY31R2.032.tar
+#else
+#  if [ ! -d drhook_CY31R2.032_mpi ]; then
+#    mkdir drhook_CY31R2.032_mpi
+#    cp -f drhook_CY31R2.032.tar drhook_CY31R2.032_mpi
+#    cd drhook_CY31R2.032_mpi
+#    tar xvf drhook_CY31R2.032.tar
+#    mv drhook_CY31R2.032/* .
+#    rm -r drhook_CY31R2.032
+#  fi
+#fi
 #
 #  Install OASIS
 #

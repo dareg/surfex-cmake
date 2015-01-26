@@ -169,9 +169,9 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 #                                                        #
 ##########################################################
 ifeq "$(VER_CDF)" "CDFAUTO"
-all : drhook ecoclimap gribapi cdf oasis progmaster
+all : ecoclimap gribapi cdf oasis progmaster
 else
-all : drhook ecoclimap gribapi oasis progmaster
+all : ecoclimap gribapi oasis progmaster
 endif
 
 objdirmaster :  $(OBJDIR_MASTER)/.dummy
@@ -366,12 +366,12 @@ endif
 endif
 endif
 
-drhook : $(DIR_HOOK)/parkind1.mod
-$(DIR_HOOK)/parkind1.mod : 
-	cd ${DIR_HOOK} && ./configure ARCH=$(ARCHOOK) -a $(ARCHOOK) && make ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make 
+#drhook : $(DIR_HOOK)/parkind1.mod
+#$(DIR_HOOK)/parkind1.mod : 
+#	cd ${DIR_HOOK} && ./configure ARCH=$(ARCHOOK) -a $(ARCHOOK) && make ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make 
 
-cleandrhook : 
-	cd ${DIR_HOOK} && rm -f *.mod *.a
+#cleandrhook : 
+#	cd ${DIR_HOOK} && rm -f *.mod *.a
 ##########################################################
 #                                                        #
 # EXTRA LIB : ECOCLIMAP                                  #
