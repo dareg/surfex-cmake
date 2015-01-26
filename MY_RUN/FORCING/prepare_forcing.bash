@@ -122,6 +122,7 @@ fi
 	option1=$(grep CFORCING_FILETYPE OPTIONS.nam | cut -f2 -d "'")
 	option2=$(grep YFORCING_FILETYPE ${SRC_SURFEX}/MY_RUN/FORCING/MY_PARAM.nam | cut -f2 -d "'")
 	rm ${SRC_SURFEX}/MY_RUN/FORCING/MY_PARAM.nam*
+	rm ${SRC_SURFEX}/MY_RUN/FORCING/OPTIONS.nam*
 
 	if [ "$option1" != "$option2" ] 
 	then
