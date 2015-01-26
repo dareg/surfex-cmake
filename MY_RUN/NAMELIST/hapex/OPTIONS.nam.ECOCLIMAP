@@ -142,7 +142,7 @@
                        XUNIF_NATURE = 1.
 /
 &NAM_COVER             YCOVER    = 'ecoclimats_v2',
-                       YFILETYPE = 'DIRECT'
+                       YCOVERFILETYPE = 'DIRECT'
 /
 &NAM_PGD_GRID          CGRID = 'LONLAT REG' 
 /
@@ -159,7 +159,7 @@
                        CWATER  = 'WATFLX' 
 /
 &NAM_ZS                YZS='gtopo30',
-                       YFILETYPE='DIRECT'
+                       YZSFILETYPE='DIRECT'
 /
 &NAM_ISBA              XUNIF_CLAY    = 0.37          ,
                        XUNIF_SAND    = 0.37          ,

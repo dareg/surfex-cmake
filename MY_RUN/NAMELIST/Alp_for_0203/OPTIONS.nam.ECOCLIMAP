@@ -1,7 +1,7 @@
 &NAM_FRAC              LECOCLIMAP = T
 /
 &NAM_COVER             YCOVER    = 'ECOCLIMAP_I_GLOBAL',
-                       YFILETYPE = 'DIRECT'
+                       YCOVERFILETYPE = 'DIRECT'
 /
 &NAM_PGD_GRID          CGRID = 'LONLAT REG' 
 /
@@ -18,7 +18,7 @@
                        CWATER  = 'WATFLX' 
 /
 &NAM_ZS                YZS='gtopo30',
-                       YFILETYPE='DIRECT'
+                       YZSFILETYPE='DIRECT'
 /
 &NAM_ISBA              XUNIF_CLAY    = 0.37          ,
                        XUNIF_SAND    = 0.37          ,

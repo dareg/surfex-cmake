@@ -9,7 +9,7 @@
                        LGARDEN = .FALSE.
 /
 &NAM_COVER             YCOVER  = 'ECOCLIMAP_II_EUROP',
-                       YFILETYPE ='DIRECT'           ,
+                       YCOVERFILETYPE ='DIRECT'           ,
                        XRM_COVER = 0.001 
 /
 &NAM_WRITE_DIAG_SURFn  LSELECT=T,
@@ -24,7 +24,7 @@
 &NAM_ECOCLIMAP2        LCLIM_LAI=T 
 /
 &NAM_ZS                YZS       = 'Z.SIM'       ,
-                       YFILETYPE = 'ASCLLV'      ,    
+                       YZSFILETYPE = 'ASCLLV'      ,    
                        COROGTYPE = 'MAX' 
 /
 &NAM_ISBA              YCLAY         = 'CLAY.SIM', 
