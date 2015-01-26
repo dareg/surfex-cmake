@@ -12,6 +12,8 @@ SUBROUTINE ISBA_SOC_PARAMETERS (HRUNOFF,PPATCH,PDG,PSOC,PBCOEF,PMPOTSAT,   &
 !    ISBA parameterizations for soil thermal and hydraulic properties 
 !    are modified to accommodate both mineral and organic carbon soils
 !    according to observations from Boelter (1969).
+!    Disctinction is made for Fibric soil (76.8038 % of fiber content)
+!    and Sapric soil (21.7815 % of fiber content)
 !     
 !!**  METHOD
 !!    ------
@@ -75,13 +77,32 @@ REAL, DIMENSION(:,:),  INTENT(OUT)   :: PFRACSOC
 !*      0.2    declarations of local parameter
 !
 REAL, DIMENSION(2), PARAMETER :: ZCONDSAT = (/24.192,0.00864/)  !Peatland hydraulic conductivity        (m/day)
+                                                                !from Letts et al. (2000)
+!                                                                
 REAL, DIMENSION(2), PARAMETER :: ZBCOEF   = (/2.7,12.0/)        !Peatland b coef                        (-)
+                                                                !from Letts et al. (2000)
+!                                                                
 REAL, DIMENSION(2), PARAMETER :: ZMPOTSAT = (/-0.0103,-0.0101/) !Peatland matric potential              (m)
-REAL, DIMENSION(2), PARAMETER :: ZWSAT    = (/0.930,0.830/)     !Peatland porosity                      (-)
-REAL, DIMENSION(2), PARAMETER :: ZSY      = (/0.655,0.125/)     !Peatland specific yield                (-)
-REAL, DIMENSION(2), PARAMETER :: ZWWILT   = (/0.060,0.240/)     !Peatland wilting point                 (-)
-REAL, DIMENSION(2), PARAMETER :: ZWD0     = (/0.196,0.611/)     !Peatland Topmodel D0 water equivalent  (-)
+                                                                !from Letts et al. (2000)
+!                                                                
+REAL, DIMENSION(2), PARAMETER :: ZWSAT    = (/0.930,0.845/)     !Peatland porosity                      (-)
+                                                                !from Boelter (1969) PTF for 
+                                                                !Fibric soil = 76.8038 % of fiber content
+                                                                !Sapric soil = 21.7815 % of fiber content
+
+REAL, DIMENSION(2), PARAMETER :: ZWFC     = (/0.369,0.719/)     !Peatland field capacity                (-)
+                                                                !Water potential at -0.1 bar given by  
+                                                                !Boelter (1969) PTF 
+!                                                                
+REAL, DIMENSION(2), PARAMETER :: ZWWILT   = (/0.073,0.222/)     !Peatland wilting point                 (-)
+                                                                !Water potential at -15 bar given by 
+                                                                !Boelter (1969) PTF
+!                                                                
+REAL, DIMENSION(2), PARAMETER :: ZWD0     = (/0.212,0.716/)     !Peatland Topmodel D0 water equivalent  (-)
+                                                                !using hydro cond at 0.1mm/days
+!                                                                
 REAL, DIMENSION(2), PARAMETER :: ZANISO   = (/2.0,48.0/)        !Peatland ksat anisotropy factor        (-)
+!
 !
 !HWSD data profile
 REAL, PARAMETER :: ZDGHWSD_TOP = 0.3
@@ -105,14 +126,14 @@ REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3))  :: ZPEAT_CONDSAT, ZMID_CON
 !
 REAL, DIMENSION(SIZE(PDG,1))              ::  ZREFDEPTH,ZF_BCOEF,ZF_MPOTSAT,    &
                                               ZLOG_MOSS,ZLOG_PEAT_DEPTH    ,    &
-                                              ZF_WSAT,ZF_CONDSAT,ZF_SY,         &
+                                              ZF_WSAT,ZF_CONDSAT,ZF_WFC,        &
                                               ZF_WWILT, ZF_WD0, ZF_ANISO
 
 REAL :: ZA, ZB, ZLOG1, ZLOG2, ZLOG3, ZMOSS_DENSITY,  &
-        ZNOMOSS, ZTOP, ZSUB, ZINF, ZFTOP, ZFSUB                                 
+        ZTOP, ZSUB, ZINF, ZFTOP, ZFSUB                                 
 !
 REAL, DIMENSION(2) :: ZLOG_CONDSAT,ZLOG_BCOEF,ZLOG_MPOTSAT, &
-                      ZLOG_WSAT,ZLOG_SY,ZLOG_WWILT,ZLOG_WD0,&
+                      ZLOG_WSAT,ZLOG_WFC,ZLOG_WWILT,ZLOG_WD0,&
                       ZLOG_ANISO
 !
 INTEGER :: INI, INL, INP, JI, JL, JP
@@ -244,7 +265,7 @@ ZLOG_CONDSAT(:) = LOG(ZCONDSAT (:))
 ZLOG_BCOEF  (:) = LOG(ZBCOEF   (:))
 ZLOG_MPOTSAT(:) = LOG(-ZMPOTSAT(:))
 ZLOG_WSAT   (:) = LOG(ZWSAT    (:))
-ZLOG_SY     (:) = LOG(ZSY      (:))
+ZLOG_WFC    (:) = LOG(ZWFC     (:))
 ZLOG_WWILT  (:) = LOG(ZWWILT   (:))
 ZLOG_WD0    (:) = LOG(ZWD0     (:))
 ZLOG_ANISO  (:) = LOG(ZANISO   (:))
@@ -252,26 +273,25 @@ ZLOG_ANISO  (:) = LOG(ZANISO   (:))
 ZPEAT_PROFILE(:) = 1.0
 !
 ZMOSS_DENSITY=(1.0-ZWSAT(1))*XOMRHO
-ZNOMOSS=ZMOSS_DENSITY/3.0
 !
-WHERE(ZRHO_TOP(:)<ZNOMOSS)
+WHERE(ZRHO_TOP(:)<ZMOSS_DENSITY)
    ZMOSS_DEPTH(:) = 2.5E-3 ! => Small fibric soil at surface (<=> moss=2.5mm)
-ELSEWHERE(ZRHO_TOP(:)>=ZNOMOSS.AND.ZRHO_TOP(:)<ZMOSS_DENSITY)
+ELSEWHERE
    ZMOSS_DEPTH(:) = 0.01   ! => Fibric soil at surface (<=> moss=1cm)
-ELSEWHERE(ZRHO_TOP(:)>=ZMOSS_DENSITY)
-   ZMOSS_DEPTH(:) = 0.04   ! => Fibric soil with moss at surface  (<=> moss=4cm)
 ENDWHERE
+
+ZMOSS_DEPTH(:) = 0.01
 !
 WHERE(ZMASK(:)>0.0)
 !
-  ZLOG_MOSS       (:) = LOG(ZMOSS_DEPTH(:))
-  ZLOG_PEAT_DEPTH (:) = LOG(ZPEAT_PROFILE)
+  ZLOG_MOSS       (:) = LOG(ZMOSS_DEPTH  (:))
+  ZLOG_PEAT_DEPTH (:) = LOG(ZPEAT_PROFILE(:))
 !
   ZF_CONDSAT(:) =(ZLOG_CONDSAT(2)-ZLOG_CONDSAT(1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
   ZF_BCOEF  (:) =(ZLOG_BCOEF  (2)-ZLOG_BCOEF  (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
   ZF_MPOTSAT(:) =(ZLOG_MPOTSAT(2)-ZLOG_MPOTSAT(1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
   ZF_WSAT   (:) =(ZLOG_WSAT   (2)-ZLOG_WSAT   (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
-  ZF_SY     (:) =(ZLOG_SY     (2)-ZLOG_SY     (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
+  ZF_WFC    (:) =(ZLOG_WFC    (2)-ZLOG_WFC    (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
   ZF_WWILT  (:) =(ZLOG_WWILT  (2)-ZLOG_WWILT  (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
   ZF_WD0    (:) =(ZLOG_WD0    (2)-ZLOG_WD0    (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
   ZF_ANISO  (:) =(ZLOG_ANISO  (2)-ZLOG_ANISO  (1))/(ZLOG_PEAT_DEPTH(:)-ZLOG_MOSS(:))
@@ -294,8 +314,7 @@ DO JL=1,INL
       ZPEAT_WWILT  (JI,JL)=ZWWILT  (1)*EXP(ZF_WWILT  (JI)*ZREFDEPTH(JI))
       ZPEAT_WD0    (JI,JL)=ZWD0    (1)*EXP(ZF_WD0    (JI)*ZREFDEPTH(JI))
       ZPEAT_ANISO  (JI,JL)=ZANISO  (1)*EXP(ZF_ANISO  (JI)*ZREFDEPTH(JI))
-!
-      ZPEAT_WFC    (JI,JL)=ZPEAT_WSAT(JI,JL)-ZSY(1)*EXP(ZF_SY(JI)*ZREFDEPTH(JI))
+      ZPEAT_WFC    (JI,JL)=ZWFC    (1)*EXP(ZF_WFC    (JI)*ZREFDEPTH(JI))
 !
       ZPEAT_RHO    (JI,JL)=(1.0-ZPEAT_WSAT(JI,JL))*XOMRHO
 !
@@ -341,8 +360,8 @@ IF(HRUNOFF=='SGH')THEN
   DO JL=1,INL
      DO JI=1,INI
        IF(ZMASK(JI)>0.0)THEN
-         PWD0  (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PWD0  (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WD0  (JI,JL)
-         PANISO(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PANISO(JI,JL) + PFRACSOC(JI,JL)*ZPEAT_ANISO(JI,JL)
+         PWD0  (JI,JL) = (1.0-PFRACSOC(JI,JL))*PWD0  (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_WD0  (JI,JL)
+         PANISO(JI,JL) = (1.0-PFRACSOC(JI,JL))*PANISO(JI,JL) + PFRACSOC(JI,JL)*ZPEAT_ANISO(JI,JL)
        ENDIF
      ENDDO   
   ENDDO

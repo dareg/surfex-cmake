@@ -1,5 +1,4 @@
 SUBROUTINE INIT_SLOPE_PARAM(PZS,KI,PLAT)
-
 !
 !!**** *INIT_SLOPE_PARAM
 !!                         Compute physiographic field necessary to account for
@@ -127,7 +126,8 @@ IF (NPROC>1) THEN
      IRANK=INEXTRANK
   END DO
 
-  CALL MPI_ALLGATHERV(PZS,SIZE(PZS)*KIND(PZS)/4,MPI_REAL,ZZS1D_FULL,NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
+  CALL MPI_ALLGATHERV(PZS,SIZE(PZS)*KIND(PZS)/4,MPI_REAL,ZZS1D_FULL,          &
+                      NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
 
 ELSE
   ZZS1D_FULL=PZS
@@ -174,13 +174,8 @@ IF (SIZE(ZZS1D_FULL) /= NIX * NIY) STOP "BIG PROBLEM WITH SIZE"
 !            ------------------------------------------------
 !
 ALLOCATE(ZZS (NIX,NIY))
-! PRINT*,"init"
-! PRINT*,NNX,NNY
 ALLOCATE(XZSL (NNX,NNY))
-! PRINT*,"fin init"
 !
-! PRINT*,SIZE(XZSL,1),SIZE(XZSL,2)
-
 ! 2d grid should be increasing in latitude
 LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
 
@@ -210,11 +205,9 @@ XZSL(:,NNY) = XZSL(:,NNY-1)
 !*    3.2.    Orography of SW corner of grid meshes
 !     -------------------------------------
 !
-
 ALLOCATE(XZS_XY (NNX,NNY))
-
-XZS_XY(2:NNX,2:NNY) = 0.25*(  XZSL(2:NNX,2:NNY)   + XZSL(1:NNX-1,2:NNY)   &
-                          + XZSL(2:NNX,1:NNY-1) + XZSL(1:NNX-1,1:NNY-1) )
+XZS_XY(2:NNX,2:NNY) = 0.25*(XZSL(2:NNX,2:NNY)  +XZSL(1:NNX-1,2:NNY) +&
+                            XZSL(2:NNX,1:NNY-1)+XZSL(1:NNX-1,1:NNY-1))
 !
 XZS_XY(1,:) = XZS_XY(2,:)
 XZS_XY(:,1) = XZS_XY(:,2)
@@ -310,8 +303,6 @@ DO JT=1,4
 !
 !       XSSO_SURF(JI,JJ) = XSSO_SURF(JI,JJ) + 0.25*XSURF_TRIANGLE(JI,JJ,JT)
 !
-
-
     END DO
   END DO
 END DO

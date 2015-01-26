@@ -39,7 +39,8 @@ USE MODD_ISBA_n,      ONLY : TTIME
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_BUDGETC, XAVG_RNC,       &
                                     XAVG_HC, XAVG_LEC, XAVG_LEIC,  &
                                     XAVG_GFLUXC, XAVG_EVAP,        &
-                                    XAVG_EVAPC, XAVG_SUBL, XAVG_SUBLC
+                                    XAVG_EVAPC, XAVG_SUBL, XAVG_SUBLC, &
+                                    LSURF_EVAP_BUDGET
 !                                  
 USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,       &
                                XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX,     &
@@ -126,8 +127,6 @@ IF (LSURF_BUDGET) THEN
   PLE      = XAVG_LE
   PLEI     = XAVG_LEI
   PGFLUX   = XAVG_GFLUX
-  PEVAP    = XAVG_EVAP
-  PSUBL    = XAVG_SUBL
   PSWD     = XAVG_SWD
   PSWU     = XAVG_SWU
   PLWD     = XAVG_LWD
@@ -137,6 +136,11 @@ IF (LSURF_BUDGET) THEN
   PFMU     = XAVG_FMU
   PFMV     = XAVG_FMV
 END IF
+!
+IF (LSURF_EVAP_BUDGET) THEN
+  PEVAP    = XAVG_EVAP
+  PSUBL    = XAVG_SUBL
+ENDIF
 !
 IF (LSURF_BUDGETC) THEN
   PRNC      = XAVG_RNC

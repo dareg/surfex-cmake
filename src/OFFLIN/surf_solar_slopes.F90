@@ -1,8 +1,7 @@
-!     #########################################################################
-      SUBROUTINE SURF_SOLAR_SLOPES (PCOSZEN, PSINZEN, PAZIMSOL,               &
-                  PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,              &
-                  PDIRSRFSWD, PDIRSWDT               )
-!     #########################################################################
+!#########################################################################
+SUBROUTINE SURF_SOLAR_SLOPES (PCOSZEN,PSINZEN,PAZIMSOL,PSLOPANG, PSLOPAZI, &
+                              PSURF_TRIANGLE,PDIRSRFSWD,PDIRSWDT           )
+!#########################################################################
 !
 !!****  * SURF_SOLAR_SLOPES * - computes the modifications to the downwards
 !!                           direct solar flux at the surface, due to
@@ -42,7 +41,7 @@
 !              ------------
 !
 USE MODD_SLOPE_EFFECT, ONLY:NNXLOC,NNYLOC
-
+!
 IMPLICIT NONE
 !
 !*       0.1   DECLARATIONS OF DUMMY ARGUMENTS :
@@ -131,11 +130,6 @@ DO JT=1,4
     END DO
   END DO
 END DO
-
-
-! PRINT*,MINVAL(PDIRSRFSWD),MAXVAL(PDIRSRFSWD)
-! PRINT*,MINVAL(PDIRSWDT),MAXVAL(PDIRSWDT)
-
 !
 !-------------------------------------------------------------------------------
 !

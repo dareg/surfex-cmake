@@ -124,6 +124,7 @@ PSURF_STO2 (:,:) = 0.0
 PSIN       (:,:) = 0.0
 PSOUT      (:,:) = 0.0
 PVEL       (:,:) = 0.0
+PHS        (:,:) = XUNDEF
 !
 ZQIN       (:,:) = 0.0
 ZRADIUS    (:,:) = 0.0
@@ -132,6 +133,21 @@ ZHS        (:,:) = 0.0
 ZRC        (:,:) = 0.0
 ZQOUT      (:,:) = 0.0
 ZSTOMAX    (:,:) = 0.0
+!
+!-------------------------------------------------------------------------------
+! * River channel velocity             
+!-------------------------------------------------------------------------------
+!           
+WHERE(OMASK_VEL(:,:))
+    PHS     (:,:)=PSURF_STO(:,:)/(XRHOLW*PLEN(:,:)*PWIDTH(:,:))
+    ZHS     (:,:)=MAX(XHSMIN,PHS(:,:))
+    ZRADIUS (:,:)=LOG(PWIDTH(:,:)*ZHS(:,:)/(PWIDTH(:,:)+2.0*ZHS(:,:)))
+    ZVEL    (:,:)=MAX(XVELMIN,EXP(XM*ZRADIUS(:,:))*SQRT(PSLOPEBED(:,:))/PN(:,:))
+    PVEL    (:,:)=MIN(ZVEL(:,:),PLEN(:,:)/PTSTEP)
+    ZRC     (:,:)=PVEL(:,:)/PLEN(:,:)
+ELSEWHERE(KSEQ(:,:)>0)
+    ZRC     (:,:)=XCVEL/PLEN(:,:)
+ENDWHERE
 !
 !-------------------------------------------------------------------------------
 ! * Sequence loop
@@ -148,22 +164,6 @@ DO ISEQ=1,KSEQMAX
 !
          ZQIN(JLON,JLAT)=ZQIN(JLON,JLAT)+PRUNOFF(JLON,JLAT)+PGOUT(JLON,JLAT)+PQFR(JLON,JLAT)-PQRF(JLON,JLAT)
          PSIN(JLON,JLAT)=ZQIN(JLON,JLAT)
-!
-!        ------------------------------------------------------------------
-!        River channel velocity             
-!           
-         IF(OMASK_VEL(JLON,JLAT))THEN
-            PHS     (JLON,JLAT)=PSURF_STO(JLON,JLAT)/(XRHOLW*PLEN(JLON,JLAT)*PWIDTH(JLON,JLAT))
-            ZHS     (JLON,JLAT)=MAX(XHSMIN,PHS(JLON,JLAT))
-            ZRADIUS (JLON,JLAT)=LOG(PWIDTH(JLON,JLAT)*ZHS(JLON,JLAT)/(PWIDTH(JLON,JLAT)+2.0*ZHS(JLON,JLAT)))
-            ZVEL    (JLON,JLAT)=MAX(XVELMIN,EXP(XM*ZRADIUS(JLON,JLAT))*SQRT(PSLOPEBED(JLON,JLAT))/PN(JLON,JLAT))
-            PVEL    (JLON,JLAT)=MIN(ZVEL(JLON,JLAT),PLEN(JLON,JLAT)/PTSTEP)
-            ZRC     (JLON,JLAT)=PVEL(JLON,JLAT) / PLEN(JLON,JLAT)
-         ELSE
-            PHS     (JLON,JLAT)=XUNDEF
-            PVEL    (JLON,JLAT)=XUNDEF
-            ZRC     (JLON,JLAT)=XCVEL / PLEN(JLON,JLAT)
-         ENDIF
 !
 !        ------------------------------------------------------------------
 !        river channel storage calculation

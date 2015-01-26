@@ -1,8 +1,8 @@
 !     #########
-SUBROUTINE DEFAULT_SEAICE(  HPROGRAM, HSEAICE_MODEL,                   &
-                           HINTERPOL_SIC, HINTERPOL_SIT, PFREEZING_SST,&
-                           PSEAICE_TSTEP, PSIC_EFOLDING_TIME,          &
-                           PSIT_EFOLDING_TIME, PCD_ICE, PSI_FLX_DRV)  
+SUBROUTINE DEFAULT_SEAICE(HPROGRAM,                                   &
+                          HINTERPOL_SIC, HINTERPOL_SIT, PFREEZING_SST,&
+                          PSEAICE_TSTEP, PSIC_EFOLDING_TIME,          &
+                          PSIT_EFOLDING_TIME, PCD_ICE, PSI_FLX_DRV    )  
 !     ########################################################################
 !
 !!****  *DEFAULT_SEAICE* - routine to set default values for the configuration for SEAICE scheme
@@ -71,7 +71,6 @@ IMPLICIT NONE
 !
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
-CHARACTER(LEN=6),  INTENT(OUT) :: HSEAICE_MODEL ! Name of the seaice scheme
 CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_SIC ! Quadratic interpolation of monthly SIC
 CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_SIT ! Quadratic interpolation of monthly SIT
 REAL,              INTENT(OUT) :: PFREEZING_SST ! Value marking frozen sea in SST data
@@ -96,7 +95,6 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_SEAICE',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-HSEAICE_MODEL = "NONE"
 HINTERPOL_SIC = "NONE"
 HINTERPOL_SIT = "NONE"
 PFREEZING_SST = -1.8 ! °C

@@ -64,9 +64,8 @@ USE MODD_SEAFLUX_n,      ONLY : XCOVER, XDIR_ALB, XSCA_ALB,  &
                                   CINTERPOL_SIT, LINTERPOL_SIT,  &
                                   LHANDLE_SIC, XICE_ALB,  XFREEZING_SST,&
                                   XSIC_EFOLDING_TIME, XSIT_EFOLDING_TIME,&
-                                  XSEAICE_TSTEP, CSEAICE_SCHEME, &
-                                  XCD_ICE_CST, XSI_FLX_DRV, TGLT,&
-                                  XSIC
+                                  XSEAICE_TSTEP, XCD_ICE_CST,    &
+                                  XSI_FLX_DRV, TGLT, XSIC
 USE MODD_OCEAN_n,        ONLY : LPROGSST,NTIME_COUPLING,LMERCATOR,LCURRENT
 USE MODD_DIAG_SEAFLUX_n, ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET, XDIAG_TSTEP, L2M_MIN_ZS, &
                                   LCOEF, LSURF_VARS, LSURF_BUDGETC, LRESET_BUDGETC  
@@ -108,7 +107,6 @@ USE MODI_INIT_CHEMICAL_n
 USE MODI_PREP_CTRL_SEAFLUX
 USE MODI_UPDATE_RAD_SEA
 USE MODI_READ_SEAFLUX_SBL_n
-USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 USE MODI_ABOR1_SFX
 !
 USE MODI_SET_SURFEX_FILEIN
@@ -122,12 +120,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
- CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -142,11 +140,11 @@ INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
-                                                          !  midnight (UTC, s)
+                                                           !  midnight (UTC, s)
 !
- CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
- CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
- CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
+CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !
 !*       0.2   Declarations of local variables
@@ -192,7 +190,7 @@ IF (LNAM_READ) THEN
                         LPRECIP,LPWEBB,NZ0,NGRVWAVES,LPROGSST,   &
                         NTIME_COUPLING,XICHCE,CINTERPOL_SST,     &
                         CINTERPOL_SSS                            )
- CALL DEFAULT_SEAICE(HPROGRAM, CSEAICE_SCHEME,                   &
+ CALL DEFAULT_SEAICE(HPROGRAM,                                   &
                      CINTERPOL_SIC,CINTERPOL_SIT, XFREEZING_SST, &
                      XSEAICE_TSTEP, XSIC_EFOLDING_TIME,          &
                      XSIT_EFOLDING_TIME, XCD_ICE_CST, XSI_FLX_DRV)     
@@ -241,31 +239,33 @@ ELSE
       LINTERPOL_SIT=.TRUE.
    ENDIF
 ENDIF
-IF (TRIM(CSEAICE_SCHEME) == 'GELATO' .AND. (NBLOCKTOT>1)) THEN 
-   CALL ABOR1_SFX("INIT_SEAFLUX_N: GELATO CANNOT YET RUN MULTI-THREAD")
-ENDIF
 !
 !*       1.     Cover fields and grid:
 !               ---------------------
 !* date
 !
 SELECT CASE (HINIT)
+!
   CASE ('PGD')
+!
     TTIME%TDATE%YEAR = NUNDEF
     TTIME%TDATE%MONTH= NUNDEF
     TTIME%TDATE%DAY  = NUNDEF
     TTIME%TIME       = XUNDEF
-
+!
   CASE ('PRE')
+!
     CALL PREP_CTRL_SEAFLUX(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
                              LDIAG_OCEAN,LDIAG_SEAICE,ILUOUT,LSURF_BUDGETC ) 
     IF (LNAM_READ) CALL READ_NAM_PREP_SEAFLUX_n(HPROGRAM)      
     CALL READ_SEAFLUX_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,TTIME)
-
+!
   CASE DEFAULT
+!
     CALL INIT_IO_SURF_n(HPROGRAM,'SEA   ','SEAFLX','READ ')
     CALL READ_SURF(HPROGRAM,'DTCUR',TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
+!
 END SELECT
 !
 !-----------------------------------------------------------------------------------------------------

@@ -171,11 +171,11 @@ REAL,DIMENSION(:),    INTENT(IN)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PGMES, PGC, 
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PIACAN_SUNLIT, PIACAN_SHADE, PFRAC_SUN
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PFFV, PABC ! Floodplain fraction over vegetation
+REAL, DIMENSION(:), INTENT(IN)      :: PFFV ! Floodplain fraction over vegetation
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PIACAN ! PAR in the canopy at different gauss level
 !
-REAL,DIMENSION(:),  INTENT(INOUT) :: PAN, PANDAY, PRS, PANFM, PGPP
+REAL,DIMENSION(:),  INTENT(INOUT) :: PABC, PAN, PANDAY, PRS, PANFM, PGPP
 !                                    PABC  = Carrer radiative transfer: normalized heigh of considered layer (bottom=0, top=1)
 !                                            Calvet radiative transfer: abcissa of the 3-points Gaussian quadrature 
 !                                                (Goudriaan, Agric&For.Meteor, 38,1986)                                            
@@ -276,13 +276,15 @@ ZLAI(:)   = PLAI(:)
 ZGMEST(:) = PGMES(:)
 ZFZERO(:) = PFZERO(:)
 !
+!GTROP = linear stress in case of tropical evergreen forest 
+!        (with fixed f0=0.74 for Carrer rad. transf., f0=0.7 with Calvet rad. transf.)
+GTROP (:) = (PVEGTYPE(:,NVT_TRBE) > 0.8) 
+!
 IF (HPHOTO=='AGS' .OR. HPHOTO=='LAI') THEN
   !
   !  Compute conductance and assimilation of CO2: 
   !
   ZDMAX = XDMAX_AGS
-  !
-  GTROP(:) = .FALSE.
   !
   ! Add soil moisture stress effect to leaf conductance:
   !
@@ -299,16 +301,13 @@ ELSEIF (HPHOTO=='AST' .OR. HPHOTO=='LST' .OR. HPHOTO=='NIT' .OR. HPHOTO=='NCB') 
   !
   !-------------------------------------
   ! Add soil moisture stress effect to leaf conductance:
-  ! OFFENSIVE and DEFENSIVE water stress response
-  ! GTROP = linear stress in case of tropical evergreen forest 
-  !         (with fixed f0=0.74 for Carrer rad. transf., f0=0.7 with Calvet rad. transf.) 
+  ! OFFENSIVE and DEFENSIVE water stress response 
   !  
   ZDMAX(:)  = PDMAX(:)
   !
   GHERB(:) = (PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBE) + PVEGTYPE(:,NVT_BONE)   &
              +PVEGTYPE(:,NVT_TRBD) + PVEGTYPE(:,NVT_TEBE) + PVEGTYPE(:,NVT_TENE)   & 
              +PVEGTYPE(:,NVT_BOBD) + PVEGTYPE(:,NVT_BOND) + PVEGTYPE(:,NVT_SHRB)<0.5)
-  GTROP      (:) = (PVEGTYPE(:,NVT_TRBE) > 0.8) 
   GWOOD      (:) = (.NOT.GHERB (:).AND.(.NOT.GTROP(:)))
   GF2_INF_F2I(:) = (PF2(:)<PF2I(:))
   !

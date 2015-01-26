@@ -1,6 +1,6 @@
-SUBROUTINE SLOPE_RADIATIVE_EFFECT(PTSTEP,PZENITH,PAZIM,PPS,PTA,PRAIN,PDIR_SW,PLW,&
-      PZS,PZS_XY,PSLOPANG,PSLOPAZI,PSURF_TRIANGLE)
-!     ##############################################################
+SUBROUTINE SLOPE_RADIATIVE_EFFECT(PTSTEP,PZENITH,PAZIM,PPS,PTA,PRAIN,PDIR_SW,PLW, &
+                                  PZS,PZS_XY,PSLOPANG,PSLOPAZI,PSURF_TRIANGLE     )
+!##############################################################
 !
 !!**** *SLOPE_RADIATIVE_EFFECT* compute direct short-wave radiation modified by slopes and shadows, 
 !                               BUT renormalized on the horizontal surface of the grid mesh  

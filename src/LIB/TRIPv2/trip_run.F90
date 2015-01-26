@@ -69,9 +69,9 @@ REAL,    INTENT(OUT) :: PTIME         ! current time           (s)
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZDRAIN_OL         ! Drainage from the forcing file          (kg/s)
-REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZRUNOFF_OL        ! Surface runoff from the forcing file    (kg/s)
-REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZSRC_FLOOD_OL     ! Flood source term from the forcing file (kg/s)
+REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZDRAIN_OL         ! Drainage from the forcing file          (kg)
+REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZRUNOFF_OL        ! Surface runoff from the forcing file    (kg)
+REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZSRC_FLOOD_OL     ! Flood source term from the forcing file (kg)
 !
 REAL, DIMENSION(KLON,KLAT) :: ZRUNOFF           ! Surface runoff               (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZDRAIN            ! Drainage                     (kg/s)

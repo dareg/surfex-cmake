@@ -1,10 +1,8 @@
-!     ###################################################################
-      SUBROUTINE SURF_RAD_MODIF ( PMAP, PXHAT, PYHAT,                   &
-                  PCOSZEN, PSINZEN, PAZIMSOL,PZS,PZS_XY,                &
-                  PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,                     &
-                  ZXHAT_ll,ZYHAT_ll,IIOR_ll,IJOR_ll,ZZS_ll,ZZS_XY_ll,   &
-                  PDIRFLASWD, PDIRSRFSWD                     )
-!     ###################################################################
+SUBROUTINE SURF_RAD_MODIF (PMAP,PXHAT,PYHAT,PCOSZEN,PSINZEN,PAZIMSOL,  &
+                           PZS,PZS_XY,PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,&
+                           ZXHAT_ll,ZYHAT_ll,IIOR_ll,IJOR_ll,ZZS_ll,   &
+                           ZZS_XY_ll,PDIRFLASWD, PDIRSRFSWD            )
+!###################################################################
 !
 !!****  * SURF_RAD_MODIF * - computes the modifications to the downwards
 !!                           radiative fluxes at the surface, due to

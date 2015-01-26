@@ -38,9 +38,6 @@ USE MODD_SEAFLUX_n,      ONLY : CSEAICE_SCHEME,LHANDLE_SIC, TGLT, &
                                 XSIC_MTH, XSIT_MTH
 USE MODI_PREP_HOR_SEAFLUX_FIELD
 !
-! Will be use later for interpolating input fields :
-! USE MODD_SEAFLUX_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
-!
 USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo 
 USE MODI_GLTOOLS_ALLOC
 !
@@ -51,11 +48,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
- CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
- CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
- CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
+CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
+CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
+CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
 !
 !*      0.2    declarations of local variables
 !
@@ -65,14 +62,15 @@ INTEGER :: ILUOUT
 LOGICAL :: GFOUND         ! Return code when searching namelist
 INTEGER :: ILUNAM         ! logical unit of namelist file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
+!
 !-------------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',0,ZHOOK_HANDLE)
 !
 !*      0.     Default of configuration
 !
 !
-IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',0,ZHOOK_HANDLE)
- CALL GET_LUOUT(HPROGRAM,ILUOUT)
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------------
 !
