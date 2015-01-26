@@ -154,10 +154,11 @@ ENDIF
 !
 IF (HPHOTO/='NON'.OR.LTREEDRAG) THEN
   ALLOCATE(PH_TREE                 (KLU,KPATCH              ))
+ELSE
+  ALLOCATE(PH_TREE                 (0,0                     ))
 ENDIF
 !
 IF (HPHOTO/='NON') THEN
-  ALLOCATE(PH_TREE                 (KLU,KPATCH              )) 
   ALLOCATE(PRE25                   (KLU,KPATCH              )) 
   ALLOCATE(PLAIMIN                 (KLU,KPATCH              )) 
   ALLOCATE(PSEFOLD                 (KLU,KPATCH              )) 
@@ -185,7 +186,6 @@ IF (HPHOTO/='NON') THEN
     ALLOCATE(PCNA_NITRO   (0,0))
   ENDIF
 ELSE
-  ALLOCATE(PH_TREE    (0,0)) 
   ALLOCATE(PRE25      (0,0))
   ALLOCATE(PLAIMIN    (0,0))
   ALLOCATE(PSEFOLD    (0,0))  
