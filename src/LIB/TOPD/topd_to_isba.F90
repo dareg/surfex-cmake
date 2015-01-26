@@ -53,6 +53,7 @@ USE MODI_WRITE_FILE_ISBAMAP
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,         ONLY : NNCAT, NNMC, NNB_TOPD_STEP
 USE MODD_COUPLING_TOPD,   ONLY : XWG_FULL, XDTOPT, XWTOPT, XWSUPSAT,&
                                  NMASKT, XTOTBV_IN_MESH, NNPIX,&
@@ -80,7 +81,6 @@ LOGICAL, DIMENSION(:), INTENT(INOUT)   :: GTOPD     !
 !
 !
 INTEGER                   :: JJ, JI , JMESH, JCAT         ! loop control 
-INTEGER                   :: IUNIT               
 REAL, DIMENSION(KI)       :: ZW              ! TOPODYN water content on ISBA grid (mm)
 REAL, DIMENSION(KI)       :: ZWSAT_FULL      ! Water content at saturation on the layer 2 
                                           ! on the full grid
@@ -199,9 +199,9 @@ IF ( (NFREQ_MAPS_WG/=0 .AND. MOD(KSTEP,NFREQ_MAPS_WG)==0) .OR.&
     WRITE(YSTEP,'(I3)') KSTEP
   ENDIF
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')
-  CALL WRITE_FILE_ISBAMAP(IUNIT,XWG_FULL,KI)
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL OPEN_FILE('ASCII ',NUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')
+  CALL WRITE_FILE_ISBAMAP(NUNIT,XWG_FULL,KI)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !
 ENDIF
 !

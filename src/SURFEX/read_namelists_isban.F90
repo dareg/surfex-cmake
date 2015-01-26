@@ -57,8 +57,8 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
 !           
  CALL DEFAULT_DIAG_ISBA(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,   &
                        LCOEF,LSURF_VARS,LSURF_EVAP_BUDGET,        &
-                       LSURF_MISC_BUDGET,LSURF_BUDGETC,           &
-                       LSURF_MISC_DIF,LPATCH_BUDGET,              &
+                       LSURF_MISC_BUDGET,LSURF_DIAG_ALBEDO,       &
+                       LSURF_BUDGETC,LSURF_MISC_DIF,LPATCH_BUDGET,&
                        LPGD,LRESET_BUDGETC,LWATER_BUDGET,         &
                        XDIAG_TSTEP                                )     
 !      

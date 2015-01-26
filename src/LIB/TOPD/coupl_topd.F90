@@ -52,6 +52,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,        ONLY   : NNCAT, NMESHT, NNMC, XMPARA, XDMAXT
 USE MODD_COUPLING_TOPD,  ONLY   : XWG_FULL, XDTOPI, XKAC_PRE, XDTOPT, XWTOPT, XWSTOPT, XAS_NATURE,&
                                   XKA_PRE, NMASKT, XWSUPSAT,&
@@ -133,7 +134,6 @@ REAL, DIMENSION(NNCAT)        :: Z_DW1,Z_DW2     ! Wsat-Wfc to actualise M in fo
 REAL                          :: ZAVG_MESH_SIZE, ZWSATMAX
 LOGICAL, DIMENSION(NNCAT)     :: GTOPD           ! logical variable = true if topodyn_lat runs
 INTEGER                       :: JJ, JI, JLAYER, JPATCH    ! loop control 
-INTEGER                       :: IUNIT           ! unit number of results files
 INTEGER                       :: ILUOUT          ! unit number of listing file
 INTEGER                       :: IACT_GROUND_LAYER, IDEPTH !number of active ground layers
 !
@@ -428,9 +428,9 @@ XKAC_PRE(:) = ZKAPPAC(:)
 !              ----------------------------
 !
 IF (NFREQ_MAPS_ASAT/=0.AND.MOD(KSTEP,NFREQ_MAPS_ASAT)==0) THEN
-  CALL OPEN_FILE('ASCII ',IUNIT,HFILE='carte_surfcont'//HSTEP,HFORM='FORMATTED',HACTION='WRITE')
-  CALL WRITE_FILE_ISBAMAP(IUNIT,ZAS,KI)
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL OPEN_FILE('ASCII ',NUNIT,HFILE='carte_surfcont'//HSTEP,HFORM='FORMATTED',HACTION='WRITE')
+  CALL WRITE_FILE_ISBAMAP(NUNIT,ZAS,KI)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('COUPL_TOPD',1,ZHOOK_HANDLE)

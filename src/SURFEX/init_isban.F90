@@ -195,8 +195,6 @@ END IF
 !
 !               Other little things
 !
-LSURF_DIAG_ALBEDO = .FALSE.
-!
 IF (LNAM_READ) THEN
  !
  !*       0.     Defaults
@@ -217,8 +215,8 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX)                  
  CALL DEFAULT_DIAG_ISBA(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,   &
                         LCOEF,LSURF_VARS,LSURF_EVAP_BUDGET,        &
-                        LSURF_MISC_BUDGET,LSURF_BUDGETC,           &
-                        LSURF_MISC_DIF,LPATCH_BUDGET,              &
+                        LSURF_MISC_BUDGET,LSURF_DIAG_ALBEDO,       &
+                        LSURF_BUDGETC,LSURF_MISC_DIF,LPATCH_BUDGET,&
                         LPGD,LRESET_BUDGETC,LWATER_BUDGET,         &
                         XDIAG_TSTEP                                )  
  !

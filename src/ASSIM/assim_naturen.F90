@@ -2,7 +2,7 @@
 SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
                           PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
-                          PSWEC,     PTSC,                                &
+                          PSWEC,     PTSC,   PUCLS, PVCLS,                &
                           PTS,       PT2M,        PHU2M,     PSWE,        &
                           HTEST, OD_MASKEXT, PLON, PLAT)
 
@@ -52,6 +52,8 @@ REAL, DIMENSION(KI), INTENT(IN) :: PEVAPTR
 REAL, DIMENSION(KI), INTENT(IN) :: PEVAP
 REAL, DIMENSION(KI), INTENT(IN) :: PSWEC
 REAL, DIMENSION(KI), INTENT(IN) :: PTSC
+REAL, DIMENSION(KI), INTENT(IN) :: PUCLS
+REAL, DIMENSION(KI), INTENT(IN) :: PVCLS
 REAL, DIMENSION(KI), INTENT(IN) :: PTS
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
@@ -78,7 +80,7 @@ IF (CNATURE=='ISBA  ') THEN
   CALL ASSIM_ISBA_n(HPROGRAM,KI,                                    &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
-                    PSWEC,     PTSC,                                &
+                    PSWEC,     PTSC,     PUCLS, PVCLS,              &
                     PTS,       PT2M,        PHU2M,     PSWE,        &
                     HTEST, OD_MASKEXT, PLON, PLAT )
 ELSE

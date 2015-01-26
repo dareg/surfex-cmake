@@ -35,7 +35,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
+USE MODD_SURF_ATM_n, ONLY : LCOVER
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -61,7 +61,7 @@ IF (LHOOK) CALL DR_HOOK('GET_JCOVER_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-KCOVER = JPCOVER
+KCOVER = COUNT(LCOVER)
 IF (LHOOK) CALL DR_HOOK('GET_JCOVER_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================

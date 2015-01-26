@@ -25,6 +25,7 @@ SUBROUTINE PREP_RESTART_COUPL_TOPD(HPROGRAM,KI)
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,       ONLY : NNCAT, XQTOT, NNB_TOPD_STEP,&
                                  XQB_RUN, XQB_DR
 USE MODD_COUPLING_TOPD, ONLY : XAS_NATURE,&
@@ -54,7 +55,6 @@ INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
 !*      0.2    declarations of local variables
 !
 INTEGER                        :: ILUOUT      ! unit of output listing file
-INTEGER                        :: IUNIT       ! unit of restart files
 INTEGER                        :: JSTP, JJ    ! loop control indexes
 REAL, DIMENSION(:),ALLOCATABLE :: ZAS         ! Saturated area fraction for each Isba meshes
  CHARACTER(LEN=30)              :: YVAR        ! name of results file
@@ -68,11 +68,11 @@ IF (LHOOK) CALL DR_HOOK('PREP_RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
 !          
 WRITE(ILUOUT,*) 'Write STOCK file'
 !
- CALL OPEN_FILE('ASCII ',IUNIT,HFILE='stocks_sav.txt',HFORM='FORMATTED',HACTION='WRITE')
+ CALL OPEN_FILE('ASCII ',NUNIT,HFILE='stocks_sav.txt',HFORM='FORMATTED',HACTION='WRITE')
 DO JSTP = 1,NNB_STP_RESTART
-  WRITE(IUNIT,*)  XRUN_TOROUT(1:NNCAT,JSTP+NNB_TOPD_STEP), XDR_TOROUT(1:NNCAT,JSTP+NNB_TOPD_STEP)
+  WRITE(NUNIT,*)  XRUN_TOROUT(1:NNCAT,JSTP+NNB_TOPD_STEP), XDR_TOROUT(1:NNCAT,JSTP+NNB_TOPD_STEP)
 ENDDO
- CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL CLOSE_FILE('ASCII ',NUNIT)
 !  
 ! * 2. Write pixels water content
 !
@@ -88,9 +88,9 @@ WRITE(ILUOUT,*) 'Write Asat files'
 ALLOCATE(ZAS(KI))
  CALL UNPACK_SAME_RANK(NR_NATURE,XAS_NATURE,ZAS)
 !
- CALL OPEN_FILE('ASCII ',IUNIT,HFILE='surfcont_sav.map',HFORM='FORMATTED',HACTION='WRITE')
- CALL WRITE_FILE_ISBAMAP(IUNIT,ZAS,KI)
- CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL OPEN_FILE('ASCII ',NUNIT,HFILE='surfcont_sav.map',HFORM='FORMATTED',HACTION='WRITE')
+ CALL WRITE_FILE_ISBAMAP(NUNIT,ZAS,KI)
+ CALL CLOSE_FILE('ASCII ',NUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('PREP_RESTART_COUPL_TOPD',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

@@ -36,6 +36,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : CCAT, NNCAT, NNYC, NNXC, XX0, XY0, XDXT, NLINE, &
                          XTOPD, XNUL
 !
@@ -61,7 +62,7 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PVAR   ! variable to write in the file
  CHARACTER(*),PARAMETER     :: YPFMT1="('(',I4,'(F10.3,')"
 INTEGER                    :: JWRK1,JJ,JI,JCAT
 INTEGER                    :: IINDEX ! reference number of the pixel
-INTEGER                    :: IUNIT,ILUOUT
+INTEGER                    :: ILUOUT
 REAL                       :: ZOUT ! pixel not included in the catchment
 REAL                       :: ZMIN,ZMAX
 REAL                       :: ZX1, ZY1, ZX2, ZY2 ! left top and right bottom pixels coordinates
@@ -82,7 +83,7 @@ DO JCAT=1,NNCAT
   !
   WRITE(ILUOUT,*) CNAME(JCAT)
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,HFILE=CNAME(JCAT),HFORM='FORMATTED')
+  CALL OPEN_FILE('ASCII ',NUNIT,HFILE=CNAME(JCAT),HFORM='FORMATTED')
   !
   !*       1.0    writing header map file
   !               --------------------------------------
@@ -96,17 +97,17 @@ DO JCAT=1,NNCAT
   ZMAX = MAXVAL(PVAR(JCAT,:),MASK=PVAR(JCAT,:)/=XUNDEF)
   !
   DO JJ=1,5
-    WRITE(IUNIT,*)
+    WRITE(NUNIT,*)
   ENDDO
   !
-  WRITE(IUNIT,*) XX0(JCAT)
-  WRITE(IUNIT,*) XY0(JCAT)
-  WRITE(IUNIT,*) NNXC(JCAT) 
-  WRITE(IUNIT,*) NNYC(JCAT)
-  WRITE(IUNIT,*) ZOUT
-  WRITE(IUNIT,*) XDXT(JCAT)
-  WRITE(IUNIT,*) ZMIN
-  WRITE(IUNIT,*) ZMAX
+  WRITE(NUNIT,*) XX0(JCAT)
+  WRITE(NUNIT,*) XY0(JCAT)
+  WRITE(NUNIT,*) NNXC(JCAT) 
+  WRITE(NUNIT,*) NNYC(JCAT)
+  WRITE(NUNIT,*) ZOUT
+  WRITE(NUNIT,*) XDXT(JCAT)
+  WRITE(NUNIT,*) ZMIN
+  WRITE(NUNIT,*) ZMAX
   !
   DO JJ=1,NNYC(JCAT)
     !
@@ -118,15 +119,15 @@ DO JCAT=1,NNCAT
       !
       IF ( XTOPD(JCAT,IINDEX).EQ.XNUL(JCAT) ) THEN
         !
-        WRITE(IUNIT,*) ZOUT
+        WRITE(NUNIT,*) ZOUT
         !
       ELSEIF (NLINE(JCAT,IINDEX)/=0) THEN
         !
-        WRITE(IUNIT,*) PVAR(JCAT,NLINE(JCAT,IINDEX))
+        WRITE(NUNIT,*) PVAR(JCAT,NLINE(JCAT,IINDEX))
         !
       ELSE
         !
-        WRITE(IUNIT,*) ZOUT
+        WRITE(NUNIT,*) ZOUT
         !
       ENDIF
       !
@@ -134,7 +135,7 @@ DO JCAT=1,NNCAT
     !
   ENDDO
   !
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !
 ENDDO
 !

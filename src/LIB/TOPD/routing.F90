@@ -74,7 +74,6 @@ INTEGER, INTENT(IN)              :: KSTEP   ! current integration step
 !*      0.2    declarations of local variables
 !
 !
-INTEGER                            :: IUNIT        ! unit of discharge files
 INTEGER                            :: JCAT, JJ, JI ! Loop variables
 INTEGER                            :: JSTEP        ! current or future integration steps
 REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZRUN_TOROUT,ZDR_TOROUT ! Kg/m2

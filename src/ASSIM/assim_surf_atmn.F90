@@ -4,7 +4,7 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                       
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
                             PSWEC,     PTSC,                                            &
                             PTS,       PT2M,        PHU2M,     PSWE,                    &
-                            PSST,      PSIC,                                            &
+                            PSST,      PSIC,  PUCLS, PVCLS,                             &
                             HTEST , OD_MASKEXT, PLON, PLAT, OLKEEPEXTZONE )
 !     #################################################################################
 !
@@ -78,6 +78,8 @@ REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
 REAL, DIMENSION(KI), INTENT(IN) :: PSST
 REAL, DIMENSION(KI), INTENT(IN) :: PSIC
+REAL, DIMENSION(KI), INTENT(IN) :: PUCLS
+REAL, DIMENSION(KI), INTENT(IN) :: PVCLS
 CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
@@ -202,6 +204,8 @@ REAL,DIMENSION(KSIZE)                 :: ZP_PHU2M
 REAL,DIMENSION(KSIZE)                 :: ZP_PSWE
 REAL,DIMENSION(KSIZE)                 :: ZP_PSST
 REAL,DIMENSION(KSIZE)                 :: ZP_PSIC
+REAL,DIMENSION(KSIZE)                 :: ZP_UCLS
+REAL,DIMENSION(KSIZE)                 :: ZP_VCLS
 REAL,DIMENSION(KSIZE)                 :: ZP_LON
 REAL,DIMENSION(KSIZE)                 :: ZP_LAT
 LOGICAL,DIMENSION(KSIZE)              :: GD_MASKEXT
@@ -225,6 +229,8 @@ DO JJ=1,KSIZE
   ZP_PHU2M(JJ)       = PHU2M(JI)
   ZP_PSST(JJ)        = PSST(JI)
   ZP_PSIC(JJ)        = PSIC(JI)
+  ZP_UCLS(JJ)        = PUCLS(JI)
+  ZP_VCLS(JJ)        = PVCLS(JI)
   ZP_LON(JJ)         = PLON(JI)
   ZP_LAT(JJ)         = PLAT(JI)
   GD_MASKEXT(JJ)     = OD_MASKEXT(JI)
@@ -255,7 +261,7 @@ ELSEIF (KTILE==3) THEN
   CALL ASSIM_NATURE_n(HPROGRAM,KSIZE,                                             &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
-                      ZP_PSWEC,     ZP_PTSC,                                      &
+                      ZP_PSWEC,     ZP_PTSC,   ZP_UCLS, ZP_VCLS,                  &
                       ZP_PTS,       ZP_PT2M,        ZP_PHU2M,     ZP_PSWE,        & 
                       HTEST, GD_MASKEXT, ZP_LON, ZP_LAT )
   

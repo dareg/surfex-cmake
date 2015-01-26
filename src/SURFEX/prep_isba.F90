@@ -55,6 +55,10 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
 USE MODD_ISBA_n,      ONLY : TSNOW, XRESA, XTSRAD_NAT, XEMIS, XLAI, XVEG,  &
                               XZ0, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,     &
+                              XALBNIR, XALBVIS, XALBUV,                      &
+                              XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,       &
+                              XALBNIR_WET, XALBVIS_WET, XALBUV_WET,          &
+                              XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,          &                              
                               CPHOTO, CRESPSL, XAN, XANFM, XANDAY, XLE,      &
                               NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB,   &
                               XBSLAI, XBIOMASS, XRESP_BIOMASS,               &
@@ -87,6 +91,7 @@ USE MODI_PREP_PERM_SNOW
 USE MODI_INIT_SNOW_LW
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
 USE MODI_PREP_HOR_ISBA_CC_FIELD
+USE MODI_SOIL_ALBEDO
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -116,12 +121,6 @@ REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZDIR_ALB  ! direct alb
 REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(SIZE(XLAI,1))   :: ZEMIS     ! emissivity
 REAL,             DIMENSION(SIZE(XLAI,1))   :: ZZENITH   ! solar zenithal angle
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBNIR  ! near-infra-red albedo   (-)
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBVIS  ! visible albedo          (-)
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV   ! UV albedo               (-)
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBNIR_SOIL  ! soil near-infra-red albedo   (-)
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBVIS_SOIL  ! soil visible albedo          (-)
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZALBUV_SOIL   ! soil UV albedo               (-)
 REAL,             DIMENSION(SIZE(XLAI,1))   :: ZTSURF     ! surface effective temperature
 !
 LOGICAL         :: GPERMSNOW
@@ -317,11 +316,24 @@ ALLOCATE(XRESA(SIZE(XLAI,1),SIZE(XLAI,2)))
 XRESA = 100.
 !
 ALLOCATE(XTSRAD_NAT(SIZE(XLAI,1)))
-ZALBNIR_SOIL(:,:)=0.
-ZALBVIS_SOIL(:,:)=0.
-ZALBUV_SOIL(:,:)=0.
 ZZENITH(:)=0.
 ZSW_BANDS(:)=0.
+!
+ALLOCATE(XALBNIR(SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XALBVIS(SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XALBUV(SIZE(XLAI,1),SIZE(XLAI,2)))
+XALBNIR = 0.0
+XALBVIS = 0.0
+XALBUV = 0.0
+!
+ALLOCATE(XALBNIR_SOIL(SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XALBVIS_SOIL(SIZE(XLAI,1),SIZE(XLAI,2)))
+ALLOCATE(XALBUV_SOIL(SIZE(XLAI,1),SIZE(XLAI,2)))
+ CALL SOIL_ALBEDO (CALBEDO, XWSAT(:,1),XWG(:,1,:),     &
+                    XALBVIS_DRY,XALBNIR_DRY,XALBUV_DRY, &
+                    XALBVIS_WET,XALBNIR_WET,XALBUV_WET, &
+                    XALBVIS_SOIL,XALBNIR_SOIL,XALBUV_SOIL )
+!
 ALLOCATE(XPSN   (SIZE(XLAI,1),SIZE(XLAI,2)))
 ALLOCATE(XPSNG  (SIZE(XLAI,1),SIZE(XLAI,2)))
 ALLOCATE(XPSNV  (SIZE(XLAI,1),SIZE(XLAI,2)))
@@ -340,10 +352,10 @@ CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
                                  XZF_TALLVEG, XH_VEG, XTV,               &
                                  XTG(:,1,:),XPATCH, ZSW_BANDS,           &
                                  XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &
-                                 ZALBNIR_SOIL,ZALBVIS_SOIL,ZALBUV_SOIL,  &
+                                 XALBNIR_SOIL,XALBVIS_SOIL,XALBUV_SOIL,  &
                                  XEMIS,                                  &
                                  TSNOW,                                  &
-                                 ZALBNIR,ZALBVIS,ZALBUV,                 &
+                                 XALBNIR,XALBVIS,XALBUV,                 &
                                  ZDIR_ALB, ZSCA_ALB,                     &
                                  ZEMIS,XTSRAD_NAT,ZTSURF                 )
 DEALLOCATE(XPSN)

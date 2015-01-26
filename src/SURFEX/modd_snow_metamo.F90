@@ -134,6 +134,13 @@ REAL, PARAMETER                 :: XVTELV1 = 0.005
 !
 INTEGER,PARAMETER               :: NVDENT1 = 3
 !
+INTEGER :: NVARDIMS !number of dimensions of netcdf input variable
+INTEGER :: NLENDIM1,NLENDIM2,NLENDIM3
+INTEGER :: NID_VAR ! Netcdf IDs for  variable
+!
+INTEGER :: NID_FILE
+REAL, DIMENSION(:,:,:), POINTER :: XDRDT0,XTAU,XKAPPA   ! field read
+!
 END MODULE MODD_SNOW_METAMO
 
 

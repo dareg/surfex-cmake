@@ -44,6 +44,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY  : CCAT, NNCAT, NNB_TOPD_STEP
 !
 USE MODI_GET_LUOUT
@@ -71,7 +72,6 @@ REAL, DIMENSION(:,:) , INTENT(IN)  :: PQTOT      ! Discharge to be writen
 !*      0.2    declarations of local variables
 !
 INTEGER                   :: JJ,JCAT ! loop control 
-INTEGER                   :: IUNIT       ! Unit of the files
 INTEGER                   :: ILUOUT      ! Unit of the files
 !
  CHARACTER(LEN=28) :: YFILE
@@ -90,15 +90,15 @@ DO JCAT=1,NNCAT
   !
   YFILE = TRIM(CCAT(JCAT))//'_'//TRIM(HFILE)
   !
-  CALL OPEN_FILE(HPROGRAM,IUNIT,YFILE,HFORM,HACTION='WRITE')
+  CALL OPEN_FILE(HPROGRAM,NUNIT,YFILE,HFORM,HACTION='WRITE')
   !
-  WRITE(IUNIT,*) 'YEAR;MO;DA;HO;MI;',CCAT(JCAT)
+  WRITE(NUNIT,*) 'YEAR;MO;DA;HO;MI;',CCAT(JCAT)
   DO JJ=1,NNB_TOPD_STEP
-    WRITE(IUNIT,YFORM) KYEAR(JJ),';',KMONTH(JJ),';',KDAY(JJ),';',&
+    WRITE(NUNIT,YFORM) KYEAR(JJ),';',KMONTH(JJ),';',KDAY(JJ),';',&
                        KH(JJ)   ,';',KM(JJ)    ,';',PQTOT(JCAT,JJ)
   ENDDO
   !
-  CALL CLOSE_FILE(HPROGRAM,IUNIT)
+  CALL CLOSE_FILE(HPROGRAM,NUNIT)
   !
 ENDDO
 !

@@ -1,7 +1,7 @@
 SUBROUTINE ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                     &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
-                                PSNC,     PTSC,                   &
+                                PSNC,     PTSC,   PUCLS, PVCLS,   &
                                 PTS_O,    PT2M_O, PHU2M_O, PSWE,  &
                                 HTEST, OD_MASKEXT,      &
                                 PLON_IN, PLAT_IN )
@@ -58,6 +58,8 @@ REAL, DIMENSION(KI), INTENT(IN) :: PEVAPTR
 REAL, DIMENSION(KI), INTENT(IN) :: PEVAP
 REAL, DIMENSION(KI), INTENT(IN) :: PSNC
 REAL, DIMENSION(KI), INTENT(IN) :: PTSC
+REAL, DIMENSION(KI), INTENT(IN) :: PUCLS
+REAL, DIMENSION(KI), INTENT(IN) :: PVCLS
 REAL, DIMENSION(KI), INTENT(IN) :: PTS_O
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M_O
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M_O
@@ -72,7 +74,7 @@ REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
 ! Arrays for soil OI analysis
 !
 REAL, DIMENSION (KI) :: ZSAB, ZARG, ZWS, ZWP, ZTL, ZWS0, ZWP0, ZTL0,         &
-                        ZTS, ZTP, ZSNS, ZTCLS, ZHCLS, ZUCLS, ZVCLS, ZD2,     &
+                        ZTS, ZTP, ZSNS, ZTCLS, ZHCLS, ZD2, ZUCLS, ZVCLS,     &
                         ZRSMIN, ZLAI, ZVEG, ZSNS0, ZTS0, ZTP0,               &
                         ZIVEG,  ZSM_O, ZSIG_SMO, ZLSM_O, ZWS_O, ZLON, ZLAT,  &           
                         ZT2INC, ZH2INC, ZWGINC, ZWPINC1, ZWPINC2, ZWPINC3,   &
@@ -154,13 +156,14 @@ ZSNS (:) = ZSNS0(:)
 !
 ZTCLS (:) = XAT2M_ISBA   (:,IP)
 ZHCLS (:) = XAHU2M_ISBA  (:,IP)
-ZUCLS (:) = XAZON10M_ISBA(:,IP)
-ZVCLS (:) = XAMER10M_ISBA(:,IP)
 !
 ZD2   (:) = XDG   (:,2,IP)
 ZRSMIN(:) = XRSMIN(:,IP)
 ZLAI  (:) = XLAI  (:,IP)
 ZVEG  (:) = XVEG  (:,IP)
+!
+ZUCLS(:) = PUCLS(:)
+ZVCLS(:) = PVCLS(:)
 !
 ZWPINC1 (:) = XUNDEF
 ZWPINC2 (:) = XUNDEF

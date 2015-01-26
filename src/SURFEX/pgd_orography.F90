@@ -59,6 +59,7 @@ USE MODI_INI_SSOWORK
 USE MODI_SSO
 USE MODI_SUBSCALE_AOS
 USE MODI_GET_SIZE_FULL_n
+USE MODI_TEST_NAM_VAR_SURF
 !
 USE MODI_READ_SSO_n
 USE MODI_INIT_IO_SURF_n
@@ -121,7 +122,7 @@ INTEGER                  :: IZS         ! size of orographic array in atmospheri
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
  CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
 CHARACTER(LEN=28)        :: YSLOPE         ! file name for orography
-CHARACTER(LEN=6)         :: YFILESLOPETYPE   ! data file type
+CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
@@ -149,7 +150,9 @@ IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !
  CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YFILETYPE, XUNIF_ZS, &
                               COROGTYPE, XENV, LIMP_ZS , &
-                              YSLOPE, YFILESLOPETYPE, LEXPLICIT_SLOPE)  
+                              YSLOPE, YSLOPEFILETYPE, LEXPLICIT_SLOPE)  
+!
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'YSLOPEFILETYPE',YSLOPEFILETYPE,'      ','NETCDF')
 !
 !-------------------------------------------------------------------------------
 !
@@ -331,19 +334,19 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
      
      
     ! read slope in file
-	IF (LEN_TRIM(YSLOPE)/=0) THEN
-	    ALLOCATE(ZSLOPE(NL))
+    IF (LEN_TRIM(YSLOPE)/=0) THEN
+      ALLOCATE(ZSLOPE(NL))
 
-	! Read field on the same grid as FORCING
-	    CALL READ_PGD_NETCDF(HPROGRAM,'SURF  ','      ',YSLOPE,'slope               ',ZSLOPE)
+    ! Read field on the same grid as FORCING
+      CALL READ_PGD_NETCDF(HPROGRAM,'SURF  ','      ',YSLOPE,'slope               ',ZSLOPE)
 
-	    DO JJ=1,NL
-		XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
-	    END DO
-	    DEALLOCATE(ZSLOPE)     
-	ELSE
-	  XSSO_SLOPE=0.
-	ENDIF
+      DO JJ=1,NL
+       XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
+      END DO
+      DEALLOCATE(ZSLOPE)     
+    ELSE
+      XSSO_SLOPE=0.
+    ENDIF
      
      
      
@@ -474,27 +477,11 @@ WHERE(.NOT. GSSO(:))                 IFLAG(:) = 0
 WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
  CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_DIR,  'subgrid orography direction',PDEF=0.)
+!
 IF (LEXPLICIT_SLOPE) THEN
-    
-    CALL EXPLICIT_SLOPE(XZS,XSSO_SLOPE)
-    
-ELSE
-
-    ! read slope in file
-    IF (LEN_TRIM(YSLOPE)/=0) THEN
-    ALLOCATE(ZSLOPE(NL))
-
-    ! Read field on the same grid as FORCING
-    CALL READ_PGD_NETCDF(HPROGRAM,'SURF  ','      ',YSLOPE,'slope               ',ZSLOPE)
-
-    DO JJ=1,NL
-	XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
-    END DO
-    DEALLOCATE(ZSLOPE)
-    ELSE
-    CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_SLOPE,'subgrid orography slope',PDEF=0.)
-    END IF
-    
+  CALL EXPLICIT_SLOPE(XZS,XSSO_SLOPE) 
+ELSEIF (LEN_TRIM(YSLOPE)==0) THEN
+  CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,XSSO_SLOPE,'subgrid orography slope',PDEF=0.)  
 END IF
 !
 IFLAG(:) = NSIZE(:)

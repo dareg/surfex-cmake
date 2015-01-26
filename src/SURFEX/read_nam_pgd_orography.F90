@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE READ_NAM_PGD_OROGRAPHY(HPROGRAM, HZS, HFILETYPE, PUNIF_ZS, &
                                           HOROGTYPE, PENV, OIMP_ZS,&
-                                  HSLOPE, HFILESLOPETYPE, OEXPLICIT_SLOPE )  
+                                  HSLOPE, HSLOPEFILETYPE, OEXPLICIT_SLOPE )  
 !     ##############################################################
 !
 !!**** *READ_NAM_PGD_OROGRAPHY* reads namelist for Orography
@@ -62,7 +62,7 @@ REAL,                INTENT(OUT)   :: PUNIF_ZS    ! uniform orography
 REAL,                INTENT(OUT)   :: PENV        ! parameter for enveloppe orography:
 LOGICAL,             INTENT(OUT)   :: OIMP_ZS     ! Imposed orography from another PGD file
 CHARACTER(LEN=28),   INTENT(OUT),OPTIONAL   :: HSLOPE         ! file name for slope
-CHARACTER(LEN=6),    INTENT(OUT),OPTIONAL   :: HFILESLOPETYPE   ! data file type
+CHARACTER(LEN=6),    INTENT(OUT),OPTIONAL   :: HSLOPEFILETYPE   ! data file type
 LOGICAL,             INTENT(OUT),OPTIONAL   :: OEXPLICIT_SLOPE ! Slope is computed from explicit ZS field and not subgrid orography
 !                                  
 !
@@ -79,7 +79,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
  CHARACTER(LEN=6)         :: YZSFILETYPE   ! data file type
 CHARACTER(LEN=28)        :: YSLOPE         ! file name for slope
-CHARACTER(LEN=6)         :: YFILESLOPETYPE   ! data file type
+CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
@@ -92,7 +92,7 @@ LOGICAL                  :: LEXPLICIT_SLOPE ! Slope is computed from explicit ZS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_ZS/YZS, YZSFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS , & 
-                YSLOPE, YFILESLOPETYPE, LEXPLICIT_SLOPE
+                YSLOPE, YSLOPEFILETYPE, LEXPLICIT_SLOPE
 !
 !-------------------------------------------------------------------------------
 !
@@ -104,7 +104,7 @@ XUNIF_ZS       = XUNDEF
 YZS            = '                          '
 YZSFILETYPE    = '      '
 YSLOPE            = '                          '
-YFILESLOPETYPE      = '      '
+YSLOPEFILETYPE      = '      '
 !
 COROGTYPE      = 'ENV'
 XENV           = 0.
@@ -131,7 +131,7 @@ HZS       = YZS       ! file name for orography
 HFILETYPE = YZSFILETYPE ! data file type
 IF (PRESENT(HSLOPE)) THEN
   HSLOPE       = YSLOPE       ! file name for slope
-  HFILESLOPETYPE = YFILESLOPETYPE ! data file type
+  HSLOPEFILETYPE = YSLOPEFILETYPE ! data file type
 END IF
 PUNIF_ZS  = XUNIF_ZS  ! uniform orography
 HOROGTYPE = COROGTYPE ! orogpraphy type 

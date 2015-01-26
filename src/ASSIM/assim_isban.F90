@@ -2,7 +2,7 @@
 SUBROUTINE ASSIM_ISBA_n(HPROGRAM,KI,                                   &
                         PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                         PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
-                        PSWEC,     PTSC,                               &
+                        PSWEC,     PTSC,      PUCLS, PVCLS,            &
                         PTS,       PT2M,        PHU2M,     PSWE,       &
                         HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
 
@@ -45,6 +45,7 @@ USE MODI_OI_HOR_EXTRAPOL_SURF
 USE MODI_ASSIM_ISBA_UPDATE_SNOW
 USE MODI_ASSIM_NATURE_ISBA_EKF
 USE MODI_ASSIM_NATURE_ISBA_OI
+USE MODI_AVERAGE_DIAG_MISC_ISBA_n
 !
 IMPLICIT NONE
 !
@@ -62,6 +63,8 @@ REAL, DIMENSION(KI), INTENT(IN) :: PEVAPTR
 REAL, DIMENSION(KI), INTENT(IN) :: PEVAP
 REAL, DIMENSION(KI), INTENT(IN) :: PSWEC
 REAL, DIMENSION(KI), INTENT(IN) :: PTSC
+REAL, DIMENSION(KI), INTENT(IN) :: PUCLS
+REAL, DIMENSION(KI), INTENT(IN) :: PVCLS
 REAL, DIMENSION(KI), INTENT(IN) :: PTS
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
@@ -131,7 +134,7 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
   CALL ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                                  &
                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
-                            PSWEC,     PTSC,                               &
+                            PSWEC,     PTSC,     PUCLS, PVCLS,             &
                             PTS,       PT2M,        PHU2M,     ZSWE,       &
                             HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
   !
@@ -258,6 +261,9 @@ IF (LAESNM) THEN
   !
 ENDIF
 !
+!to be improved later - needed for surfex course
+ CALL AVERAGE_DIAG_MISC_ISBA_n
+ !
 IF (LHOOK) CALL DR_HOOK('ASSIM_ISBA_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

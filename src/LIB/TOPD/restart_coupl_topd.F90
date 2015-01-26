@@ -27,6 +27,7 @@ USE MODD_SURF_PAR,        ONLY : XUNDEF,NUNDEF
 USE MODD_SURF_ATM_n,      ONLY:  NR_NATURE
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,       ONLY : NNCAT, CCAT, NNPT, NLINE, NNMC, NPMAX,&
                                NNB_TOPD_STEP
 
@@ -60,7 +61,6 @@ INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
 !
 INTEGER :: JJ
 INTEGER                                     :: ILUOUT   ! unit of output listing file
-INTEGER                                     :: IUNIT    ! unit of restart files
 INTEGER                                     :: JSTP,JCAT,JPIX! loop control indexes
 REAL, DIMENSION(:),ALLOCATABLE              :: ZAS      ! Saturated area fraction for each Isba meshes
 REAL, DIMENSION(:),ALLOCATABLE              :: ZWTOPT   ! Initial water content in case of restart
@@ -90,11 +90,11 @@ ELSEIF (.NOT.LASAT) THEN
   CALL ABOR1_SFX("RESTART_COUPL_TOPD_n: contributive area file is missing")
 ELSE
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,'stocks_init.txt','FORMATTED',HACTION='READ ')
+  CALL OPEN_FILE('ASCII ',NUNIT,'stocks_init.txt','FORMATTED',HACTION='READ ')
   DO JSTP=1,NNB_STP_STOCK
-    READ(IUNIT,*)  XRUN_TOROUT(1:NNCAT,JSTP),XDR_TOROUT(1:NNCAT,JSTP)
+    READ(NUNIT,*)  XRUN_TOROUT(1:NNCAT,JSTP),XDR_TOROUT(1:NNCAT,JSTP)
   ENDDO
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !  
   ! * 2. Read pixels water content
   !
@@ -178,11 +178,11 @@ ELSE
   ! 
   ! * 3. Read Asat files
   ! 
-  WRITE(*,*) 'Write Asat files'
+  WRITE(*,*) 'Read Asat files'
   ALLOCATE(ZAS(KI))
-  CALL OPEN_FILE('ASCII ',IUNIT,'surfcont_init.map','FORMATTED',HACTION='READ ')
-  CALL READ_FILE_ISBAMAP(IUNIT,ZAS,KI)
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL OPEN_FILE('ASCII ',NUNIT,'surfcont_init.map','FORMATTED',HACTION='READ ')
+  CALL READ_FILE_ISBAMAP(NUNIT,ZAS,KI)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   CALL PACK_SAME_RANK(NR_NATURE,ZAS,XAS_NATURE)
   !
 ENDIF

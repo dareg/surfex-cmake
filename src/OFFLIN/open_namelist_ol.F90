@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!       10/2014 : add status='old'  E. Martin
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -35,6 +36,7 @@
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -49,7 +51,8 @@ INTEGER,           INTENT(OUT) :: KLUNAM   ! logical unit of namelist
 !              -------------------------------
 !
  CHARACTER(LEN=28) :: YNAM
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB)    :: ZHOOK_HANDLE
+INTEGER            :: IERR
 !
 !-------------------------------------------------------------------------------
 !
@@ -64,7 +67,14 @@ ELSE
 END IF
 !
 KLUNAM=11
-OPEN(KLUNAM,FILE=YNAM,ACTION='READ',FORM="FORMATTED",POSITION="REWIND")
+OPEN(KLUNAM,FILE=YNAM,ACTION='READ',FORM="FORMATTED",POSITION="REWIND", &
+        STATUS='OLD',IOSTAT=IERR)
+ IF (IERR /= 0 ) THEN
+    CALL ABOR1_SFX ('ERROR WHILE OPENING '//YNAM//' THIS FILE IS MISSING'// &
+                  ' IN THE RUN DIRECTORY')
+  ENDIF
+
+
 IF (LHOOK) CALL DR_HOOK('OPEN_NAMELIST_OL',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

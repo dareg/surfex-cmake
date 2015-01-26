@@ -41,6 +41,8 @@ INTEGER, PARAMETER :: NDIM = 20       ! dimension of the XCONN array third
                                       ! index 
 INTEGER, PARAMETER :: JPCAT = 10      ! number max of catchments
 !
+INTEGER :: NUNIT = 19
+!
 !values for each catchment
 REAL, DIMENSION(JPCAT) :: XF_PARAM_BV
 REAL, DIMENSION(JPCAT) :: XC_DEPTH_RATIO_BV

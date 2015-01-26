@@ -31,6 +31,7 @@
 !!    Original    23/03/11
 !!
 !!    R. Alkama    05/2012 : read 19 vegtypes rather than 12
+!     10/2014 : add status='old' for ecoclimap.bin files E. Martin
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -58,6 +59,8 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER, NCOVER_ECO1_END, NCOVER_ECO2_START
 !
+USE MODI_ABOR1_SFX
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -71,6 +74,7 @@ INTEGER, INTENT(IN)   :: KFILE
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
+INTEGER               :: IERR_OPEN
 INTEGER               :: INB_COVER, INB_AN
 INTEGER               :: ICOVER, IREC
 INTEGER               :: JCOVER
@@ -84,11 +88,21 @@ IF (LHOOK) CALL DR_HOOK('READ_COVERS_PARAM',0,ZHOOK_HANDLE)
 !
 !opening of the file
 IF (KFILE==1) THEN
-  OPEN(41,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)  
+  OPEN(41,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT', &
+          recl=20*8,STATUS='OLD',IOSTAT=IERR_OPEN)  
+  IF (IERR_OPEN /= 0 ) THEN
+          CALL ABOR1_SFX ('ERROR WHILE OPENING ''ecoclimapI_covers_param.bin'' THIS FILE IS NEEDED AND MUST BE'// &
+                  ' IN (OR LINKED TO) THE RUN DIRECTORY')
+  ENDIF        
   INB_COVER = NCOVER_ECO1_END
   INB_AN = 1
 ELSEIF (KFILE==2) THEN
-  OPEN(41,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',recl=20*8)
+  OPEN(41,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',  &
+          recl=20*8,STATUS='OLD',IOSTAT=IERR_OPEN)
+  IF (IERR_OPEN /= 0 ) THEN
+          CALL ABOR1_SFX ('ERROR WHILE OPENING ''ecoclimapII_eu_covers_param.bin'' THIS FILE IS NEEDED AND MUST BE'// &
+                  ' IN (OR LINKED TO) THE RUN DIRECTORY')
+  ENDIF
   INB_COVER = JPCOVER - NCOVER_ECO2_START + 1
   INB_AN = NECO2_END_YEAR - NECO2_START_YEAR + 1
 ENDIF

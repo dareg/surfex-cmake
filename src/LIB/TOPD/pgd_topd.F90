@@ -35,6 +35,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,         ONLY : CCAT, NNCAT, XRTOP_D2, NMESHT, XDXT
 USE MODD_COUPLING_TOPD,   ONLY : LCOUPL_TOPD, NIMAX, NJMAX, &
                                  XXI, XYI, NMASKI, NMASKT, NNPIX,&
@@ -77,7 +78,6 @@ INTEGER                   :: IL                     ! number of points
 INTEGER                   :: JJ,JI,JK,JWRK ! loop control 
 INTEGER                   :: JCAT,JMESH,JPIX ! loop control 
 INTEGER                           :: ILUOUT       ! Logical unit for output filr
-INTEGER                           :: IUNIT       ! Logical unit for carte_asat file
 INTEGER                           :: IMESHL       !  number of ISBA grid nodes
 INTEGER                           :: ILAMBERT     ! Lambert projection type
 !
@@ -361,11 +361,11 @@ CALL TOPD_TO_ISBA_SLOPE(NDIM_FULL)
   !write(*,*) 'f min max isba',MINVAL(ZF_PARAM),MAXVAL(ZF_PARAM)
   !write(*,*) 'dc min max isba',MINVAL(ZC_DEPTH_RATIO),MAXVAL(ZC_DEPTH_RATIO)
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,'carte_f_dc.txt','FORMATTED',HACTION='WRITE')
+  CALL OPEN_FILE('ASCII ',NUNIT,'carte_f_dc.txt','FORMATTED',HACTION='WRITE')
   DO JMESH=1,NDIM_FULL
-    WRITE(IUNIT,*) ZF_PARAM(JMESH),ZC_DEPTH_RATIO(JMESH)
+    WRITE(NUNIT,*) ZF_PARAM(JMESH),ZC_DEPTH_RATIO(JMESH)
   ENDDO
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !
   DEALLOCATE(ZF_PARAM)
   DEALLOCATE(ZC_DEPTH_RATIO)

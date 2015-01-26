@@ -48,6 +48,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -72,7 +73,6 @@ REAL, DIMENSION(:),  INTENT(OUT)   :: PLAMBDA ! pure topographic index
 !
 INTEGER                   :: JJ ! loop control 
 INTEGER                   :: IWRK        ! work variable
-INTEGER                   :: IUNIT       ! Unit of the files
 INTEGER                   :: ILUOUT      ! Unit of the files
 !
 REAL                      :: ZWRK        ! work variable
@@ -87,25 +87,25 @@ IF (LHOOK) CALL DR_HOOK('READ_SLOPE_FILE',0,ZHOOK_HANDLE)
 !               ----------------------
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,NUNIT,HFILE,HFORM,HACTION='READ')
 !
-READ(IUNIT,*) YHEADER
+READ(NUNIT,*) YHEADER
 !
 IF (INDEX(YHEADER,'pixel_REF')/=0) THEN !Slope file from new java+GRASS chain
  write(ILUOUT,*) 'Slope file from new java + GRASS chain'
  DO JJ=1,KNMC
-  READ(IUNIT,*,END=110) IWRK, PTANB(JJ),PLAMBDA(JJ) 
+  READ(NUNIT,*,END=110) IWRK, PTANB(JJ),PLAMBDA(JJ) 
  ENDDO
  PSLOP(:)=PLAMBDA(:) !not used
  PDAREA(:)=PLAMBDA(:) !not used
 ELSE !Slope file from old f77  chain
  write(*,*) 'Slope file from old f77 chain'
  DO JJ=1,KNMC
-   READ(IUNIT,*,END=110) IWRK, PTANB(JJ), PSLOP(JJ), ZWRK, PDAREA(JJ)
+   READ(NUNIT,*,END=110) IWRK, PTANB(JJ), PSLOP(JJ), ZWRK, PDAREA(JJ)
   PLAMBDA(JJ) = LOG(PDAREA(JJ)/PSLOP(JJ))
  ENDDO
 ENDIF
-110 CALL CLOSE_FILE(HPROGRAM,IUNIT)
+110 CALL CLOSE_FILE(HPROGRAM,NUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_SLOPE_FILE',1,ZHOOK_HANDLE)
 !

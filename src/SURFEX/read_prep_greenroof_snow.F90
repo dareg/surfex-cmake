@@ -105,7 +105,8 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
 
 NAMELIST/NAM_PREP_GREENROOF_SNOW/CSNOW_GR, NSNOW_LAYER_GR, CFILE_SNOW_GR, CTYPE_SNOW, &
                             CFILEPGD_SNOW_GR, CTYPEPGD_SNOW,                & 
-                            LSNOW_IDEAL_GR, XWSNOW_GR, XTSNOW_GR, XRSNOW_GR, XASNOW_GR
+                            LSNOW_IDEAL_GR, XWSNOW_GR, XZSNOW_GR, XTSNOW_GR, &
+                            XLWCSNOW_GR, XRSNOW_GR, XASNOW_GR
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_PREP_GREENROOF_SNOW',0,ZHOOK_HANDLE)
 !

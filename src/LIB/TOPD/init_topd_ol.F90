@@ -82,7 +82,7 @@ IMPLICIT NONE
 !
 !
 INTEGER                   :: JI,JJ,JCAT,JO ! loop control 
-INTEGER                   :: IUNIT,IOVER                  ! Unit of the files
+INTEGER                   :: IOVER                  ! Unit of the files
 INTEGER                   :: ILUOUT                 ! Unit of the files
 INTEGER                   :: IOS
 !

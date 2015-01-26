@@ -79,7 +79,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODI_HOR_EXTRAPOL_SURF
+USE MODI_HOR_EXTRAPOL_SURF_CHEAP
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -112,9 +112,6 @@ REAL, DIMENSION (:,:), ALLOCATABLE   :: ZFIELD_Y ! FIELD at mesh interface
 REAL, DIMENSION (:,:), ALLOCATABLE   :: ZFIELD_XY! FIELD at mesh corner
 REAL, DIMENSION (SIZE(PX1)+1)        :: ZX       ! X coordinate of left   limit of input meshes
 REAL, DIMENSION (SIZE(PY1)+1)        :: ZY       ! Y coordinate of bottom limit of input meshes
-REAL, DIMENSION (:),   ALLOCATABLE   :: ZX1      ! input X coordinate of all points
-REAL, DIMENSION (:),   ALLOCATABLE   :: ZY1      ! input Y coordinate of all points
-REAL, DIMENSION (:),   ALLOCATABLE   :: ZFIELD1  ! input field of all points
 !
 INTEGER, DIMENSION(SIZE(PFIELD2))    :: ICI, ICJ
 REAL                                 :: ZC1_X    ! coefficient for left   points
@@ -138,6 +135,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('BILIN_1',0,ZHOOK_HANDLE)
+
 IIU=SIZE(PFIELD1,1)
 IJU=SIZE(PFIELD1,2)
 !
@@ -315,8 +313,8 @@ PFIELD2(:) = XUNDEF
 IF (LHOOK) CALL DR_HOOK('BILIN_1',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('BILIN_2',0,ZHOOK_HANDLE)
 !
-ICI(:) = 0
-ICJ(:) = 0
+ICI(:) = 1
+ICJ(:) = 1
 !$OMP PARALLEL DO PRIVATE(JL,JJ)
 DO JL=1,SIZE(PFIELD2)
   DO JJ=SIZE(ZX),1,-1
@@ -421,24 +419,8 @@ WRITE(KLUOUT,*) ' Number of points to interpolate: ',COUNT(PFIELD2(:)==XUNDEF .A
 !
 !* input grid coordinates
 !
-ALLOCATE(ZX1(IIU*IJU))
-ALLOCATE(ZY1(IIU*IJU))
-ALLOCATE(ZFIELD1(IIU*IJU))
-IIN=0
-DO JJ=1,IJU
-  DO JI=1,IIU
-    IIN = IIN +1
-    ZX1    (IIN) = PX1    (JI)
-    ZY1    (IIN) = PY1       (JJ)
-    ZFIELD1(IIN) = PFIELD1(JI,JJ)
-  END DO
-END DO
+CALL HOR_EXTRAPOL_SURF_CHEAP(KLUOUT,'XY  ',PY1,PX1,PFIELD1,PY2,PX2,PFIELD2,OINTERP)
 !
-CALL HOR_EXTRAPOL_SURF(KLUOUT,'XY  ',ZY1,ZX1,ZFIELD1,PY2,PX2,PFIELD2,OINTERP)
-!
-DEALLOCATE(ZX1)
-DEALLOCATE(ZY1)
-DEALLOCATE(ZFIELD1)
 IF (LHOOK) CALL DR_HOOK('BILIN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

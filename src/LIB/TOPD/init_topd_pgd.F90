@@ -76,7 +76,6 @@ IMPLICIT NONE
 !
 !
 INTEGER                   :: JJ,JCAT ! loop control 
-INTEGER                   :: IUNIT                  ! Unit of the files
 INTEGER                   :: ILUOUT                 ! Unit of the files
 !
 REAL, DIMENSION(:),ALLOCATABLE    :: ZTOPD_READ !Topgraphic variable read

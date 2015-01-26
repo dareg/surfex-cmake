@@ -34,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+#ifdef OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
+#endif
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 USE MODD_DIAG_SURF_ATM_n,ONLY : LREAD_BUDGETC
@@ -143,7 +145,11 @@ END IF
 !
 !* cumulative surface energy budget
 !
+#ifdef OL
 IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
+#else
+IF (LSURF_BUDGETC .OR. .NOT.LRESET_BUDGETC) THEN
+#endif
 !        
   ALLOCATE(XRNC    (KLU))
   ALLOCATE(XHC     (KLU))

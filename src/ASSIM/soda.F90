@@ -145,7 +145,6 @@ REAL,ALLOCATABLE, DIMENSION(:)   :: ZCON_RAIN           ! Amount of convective l
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZSTRAT_RAIN         ! Amount of stratiform liquid precipitation
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZCON_SNOW           ! Amount of convective solid precipitation
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZSTRAT_SNOW         ! Amount of stratiform solid precipitation
-REAL,ALLOCATABLE, DIMENSION(:)   :: ZCON_GRAUPEL        ! Amount of convective graupel pecipitation (AROME)
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZCLOUDS             ! Cloudcover
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZEVAPTR             ! Evaporation
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZEVAP               ! Evaporation
@@ -336,6 +335,7 @@ ALLOCATE(XTSURF(INI))
 ! Indicate that zenith and azimuth angles are not initialized
 XZENITH = XUNDEF
 XAZIM   = XUNDEF
+XRHOA   = 1.
 !
 IF ( CASSIM_ISBA == 'EKF  ' ) THEN
  ! Has to do initialization for all the perturbations + 
@@ -446,7 +446,7 @@ DO ISTEP = 1,NBOUTPUT
             CASE("LAI")
               XF_PATCH(:,:,NIPERT,IIOBS) = XLAI(:,:)
             CASE DEFAULT
-              CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA_CONTROL!")
+              CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
           END SELECT
         ENDDO
         !
@@ -464,7 +464,7 @@ DO ISTEP = 1,NBOUTPUT
             CASE("LAI")
               XF(:,:,NIPERT,L) = XLAI(:,:)
             CASE DEFAULT
-              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_!")
           END SELECT
         ENDDO
         !
@@ -488,6 +488,8 @@ DO ISTEP = 1,NBOUTPUT
               CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
           END SELECT
           !
+          XLAI_PASS(:,:) = XLAI(:,:)          
+          !
         ENDIF
         !
       ELSE
@@ -505,10 +507,9 @@ DO ISTEP = 1,NBOUTPUT
             CASE("LAI")
               XI(:,:,L) = XLAI(:,:)
             CASE DEFAULT
-              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_CONTROL!")
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA!")
           END SELECT
         ENDDO        
-        XLAI_PASS(:,:) = XLAI(:,:)
         !
       ENDIF
       !
@@ -547,7 +548,7 @@ ENDDO
 !
 IF ( NOBS==0 .AND. CASSIM_ISBA=="EKF  " ) THEN
   IF ( NPRINTLEV > 0 ) WRITE(*,*) 'No observations read for LAI in OBS file - stop'
-  CALL ABOR1_SFX("SODA_CONTROL: No observations read for LAI in OBS file - stop")
+  CALL ABOR1_SFX("SODA: No observations read for LAI in OBS file - stop")
 ENDIF
 !
  CALL GET_SIZE_FULL_n(CSURF_FILETYPE,INI,NSIZE_FULL)
@@ -559,7 +560,6 @@ ALLOCATE(ZCON_RAIN   (INI))
 ALLOCATE(ZSTRAT_RAIN (INI))
 ALLOCATE(ZCON_SNOW   (INI))
 ALLOCATE(ZSTRAT_SNOW (INI))
-ALLOCATE(ZCON_GRAUPEL(INI))
 ALLOCATE(ZCLOUDS     (INI))
 ALLOCATE(ZEVAPTR     (INI))
 ALLOCATE(ZEVAP       (INI))
@@ -573,47 +573,49 @@ ALLOCATE(ZUCLS       (INI))
 ALLOCATE(ZVCLS       (INI))
 ALLOCATE(ZSST        (INI))
 ALLOCATE(ZSIC        (INI))
-
-!  Read atmospheric forecast fields from FA files 
+!
+IF (CASSIM_ISBA=="OI   " .OR. .NOT.LOBSFILE) THEN
+  !
+  !  Read atmospheric forecast fields from FA files 
 #ifdef FA
-CFILEIN_FA = 'FG_OI_MAIN'
-CDNOMC     = 'oimain'                  ! new frame name
+  CFILEIN_FA = 'FG_OI_MAIN'
+  CDNOMC     = 'oimain'                  ! new frame name
 #endif
-!  Open FA file (LAM version with extension zone)
- CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
-!
-!  Read model forecast quantities
-IF (LAROME) THEN  
-  CALL READ_SURF(YPROGRAM2,'SURFACCPLUIE',    ZCON_RAIN    ,IRESP)
-  CALL READ_SURF(YPROGRAM2,'SURFACCNEIGE',    ZCON_SNOW    ,IRESP)
-  CALL READ_SURF(YPROGRAM2,'SURFACCGRAUPEL',  ZCON_GRAUPEL ,IRESP)
-  ! So far graupel has not been used
-  !ZCON_SNOW=ZCON_SNOW+ZCON_GRAUPEL
-  ZSTRAT_RAIN(:) = 0.0
-  ZSTRAT_SNOW(:) = 0.0  
-ELSE    
-  CALL READ_SURF(YPROGRAM2,'SURFPREC.EAU.CON',ZCON_RAIN    ,IRESP)
-  CALL READ_SURF(YPROGRAM2,'SURFPREC.EAU.GEC',ZSTRAT_RAIN  ,IRESP)
-  CALL READ_SURF(YPROGRAM2,'SURFPREC.NEI.CON',ZCON_SNOW    ,IRESP)
-  CALL READ_SURF(YPROGRAM2,'SURFPREC.NEI.GEC',ZSTRAT_SNOW  ,IRESP)
-  ZCON_GRAUPEL(:) = 0.0
+  !  Open FA file (LAM version with extension zone)
+  CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+  !
+  !  Read model forecast quantities
+  IF (LAROME) THEN  
+   CALL READ_SURF(YPROGRAM2,'SURFACCPLUIE',    ZCON_RAIN    ,IRESP)
+     CALL READ_SURF(YPROGRAM2,'SURFACCNEIGE',  ZSTRAT_SNOW  ,IRESP)
+    CALL READ_SURF(YPROGRAM2,'SURFACCGRAUPEL',  ZCON_SNOW   ,IRESP)
+    ! So far graupel has not been used
+    !ZCON_SNOW=ZCON_SNOW+ZCON_GRAUPEL
+    ZCON_RAIN(:) = 0.0
+  ELSE    
+    CALL READ_SURF(YPROGRAM2,'SURFPREC.EAU.CON',ZCON_RAIN    ,IRESP)
+    CALL READ_SURF(YPROGRAM2,'SURFPREC.EAU.GEC',ZSTRAT_RAIN  ,IRESP)
+    CALL READ_SURF(YPROGRAM2,'SURFPREC.NEI.CON',ZCON_SNOW    ,IRESP)
+    CALL READ_SURF(YPROGRAM2,'SURFPREC.NEI.GEC',ZSTRAT_SNOW  ,IRESP)
+  ENDIF
+  !
+  CALL READ_SURF(YPROGRAM2,'ATMONEBUL.BASSE ',ZCLOUDS,IRESP)
+  CALL READ_SURF(YPROGRAM2,'SURFIND.TERREMER',ZLSM   ,IRESP)
+  CALL READ_SURF(YPROGRAM2,'SURFFLU.LAT.MEVA',ZEVAP  ,IRESP) ! accumulated fluxes (not available in LFI)
+  !
+  IF (.NOT.LALADSURF) THEN    
+    CALL READ_SURF(YPROGRAM2,'SURFXEVAPOTRANSP',ZEVAPTR,IRESP) ! not in ALADIN SURFEX
+  ELSE
+    ZEVAPTR(:) = 0.0
+  ENDIF
+  !
+  !  Close FA file
+  CALL END_IO_SURF_n(YPROGRAM2)
+  CALL IO_BUFF_CLEAN_n
+  WRITE(*,*)'READ FG_OI_MAIN OK'
+  !
 ENDIF
 !
- CALL READ_SURF(YPROGRAM2,'ATMONEBUL.BASSE ',ZCLOUDS,IRESP)
- CALL READ_SURF(YPROGRAM2,'SURFIND.TERREMER',ZLSM   ,IRESP)
- CALL READ_SURF(YPROGRAM2,'SURFFLU.LAT.MEVA',ZEVAP  ,IRESP) ! accumulated fluxes (not available in LFI)
-!
-IF (.NOT.LALADSURF) THEN    
-  CALL READ_SURF(YPROGRAM2,'SURFXEVAPOTRANSP',ZEVAPTR,IRESP) ! not in ALADIN SURFEX
-ELSE
-  ZEVAPTR(:) = 0.0
-ENDIF
-
-!  Close FA file
- CALL END_IO_SURF_n(YPROGRAM2)
- CALL IO_BUFF_CLEAN_n
-WRITE(*,*)'READ FG_OI_MAIN OK'
-
 !  Define FA file name for CANARI analysis
 #ifdef FA
 CFILEIN_FA = 'CANARI'        ! input CANARI analysis
@@ -672,14 +674,13 @@ WRITE(*,*) 'PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...'
                       ZCLOUDS,    ZLSM,        ZEVAPTR,   ZEVAP,       &
                       ZSWEC,      ZTSC,       &
                       ZTS,        ZT2M,        ZHU2M,     ZSWE,        &
-                      ZSST,       ZSIC,       &
+                      ZSST,       ZSIC,  ZUCLS,     ZVCLS,       &
                       YTEST, GD_MASKEXT, ZLON, ZLAT, GLKEEPEXTZONE )
 
 DEALLOCATE(ZCON_RAIN)
 DEALLOCATE(ZSTRAT_RAIN)
 DEALLOCATE(ZCON_SNOW)
 DEALLOCATE(ZSTRAT_SNOW)
-DEALLOCATE(ZCON_GRAUPEL)
 DEALLOCATE(ZCLOUDS)
 DEALLOCATE(ZLSM)
 DEALLOCATE(ZEVAPTR)
@@ -695,9 +696,7 @@ DEALLOCATE(ZVCLS)
 DEALLOCATE(ZSST)
 DEALLOCATE(ZSIC)
 !
-!       
-INW = 1
-IF (CSURF_FILETYPE=="NC    ") INW = 2
+!
 !
 ZTIME_OUT  = ZTIME
 IDAY_OUT   = IDAY
@@ -747,6 +746,19 @@ IF (CSURF_FILETYPE=='FA    ') THEN
   CALL FANDAR(IRET,NUNIT_FA,IDATEF)
 END IF
 !
+INW = 1
+IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
+LDEF = .TRUE.
+DO JNW = 1,INW
+  CALL IO_BUFF_CLEAN_n
+  CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+  CALL WRITE_DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL')
+  LDEF = .FALSE.
+  
+ENDDO
+!
+INW = 1
+IF (CSURF_FILETYPE=="NC    ") INW = 2
 LDEF = .TRUE.
 DO JNW = 1,INW
   !

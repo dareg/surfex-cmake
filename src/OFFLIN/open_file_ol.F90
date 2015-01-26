@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!       10/2014 : add 'status='old' E. Martin
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -63,14 +64,14 @@ KUNIT = 20
 !
 IF (HFORM=='FORMATTED') THEN
   OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION,   &
-         FORM=HFORM, ERR=100                     )  
+         FORM=HFORM, STATUS='OLD', ERR=100            )  
 ELSE 
   IF (HACCESS=='DIRECT') THEN
     OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION,                       &
-                   FORM=HFORM,ACCESS=HACCESS,RECL=KRECL, ERR=100       )  
+                   FORM=HFORM,ACCESS=HACCESS,RECL=KRECL, STATUS='OLD',ERR=100 )  
   ELSE
     OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION, &
-           FORM=HFORM, ERR=100           )  
+           FORM=HFORM, STATUS='OLD', ERR=100           )  
   END IF
 END IF
 !

@@ -37,6 +37,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : CCAT, NNCAT
 USE MODD_COUPLING_TOPD, ONLY : NMASKI, NNPIX
 USE MODD_SURF_PAR,        ONLY : NUNDEF
@@ -57,7 +58,6 @@ INTEGER, INTENT(IN)             :: KI    ! Grid dimensions
 !
 !*      0.2    declarations of local variables
 INTEGER           :: JCAT,JMESH,JPIX
-INTEGER           :: IUNIT
  CHARACTER(LEN=50) :: YNAME
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -70,16 +70,16 @@ DO JCAT=1,NNCAT
   !
   YNAME = TRIM(CCAT(JCAT))//TRIM('.mask_surf')
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,YNAME,'FORMATTED',HACTION='WRITE')
+  CALL OPEN_FILE('ASCII ',NUNIT,YNAME,'FORMATTED',HACTION='WRITE')
   !
   DO JMESH=1,KI
     DO JPIX=1,NNPIX(JMESH)
     IF (NMASKI(JMESH,JCAT,JPIX)/=NUNDEF)&
-      WRITE(IUNIT,*) JMESH,NMASKI(JMESH,JCAT,JPIX)
+      WRITE(NUNIT,*) JMESH,NMASKI(JMESH,JCAT,JPIX)
     ENDDO
   ENDDO
   !
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !
 ENDDO
 !

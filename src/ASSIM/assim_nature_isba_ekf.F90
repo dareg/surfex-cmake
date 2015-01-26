@@ -85,7 +85,7 @@ REAL,DIMENSION(KI,NPATCH*NVAR,NPATCH*NVAR) :: ZB           ! background error co
 REAL,DIMENSION(NPATCH*NVAR,NPATCH*NVAR) :: ZLTM         ! linear tangent matrix for the f'ward model
 REAL,DIMENSION(NPATCH*NVAR,NPATCH*NVAR) :: ZQ           ! model error matrix
 !
-REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NPATCH*NVAR) :: ZHO             ! Jacobian of observation operator
+REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NPATCH*NVAR) :: ZHO, ZHOWR             ! Jacobian of observation operator
 REAL,DIMENSION(NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZHOT            ! Transpose of HO
 REAL,DIMENSION(NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
 !
@@ -470,6 +470,7 @@ DO I=1,KI
   ZR   (:,:) = 0. ! Observation error matrix
   !
   ZHO  (:,:) = XUNDEF  ! Linearized observation matrix
+  ZHOWR  (:,:) = XUNDEF
   ZB2  (:)   = XUNDEF  ! Innovation vector
   
   DO ISTEP=1,NBOUTPUT
@@ -492,6 +493,8 @@ DO I=1,KI
         DO J=1,NPATCH
           !
           L1 = J + NPATCH*(L-1)
+          !
+          ZHOWR(K1,L1) = XPATCH(I,J)*(XF_PATCH(I,J,L+1,K) - XF_PATCH(I,J,1,K))/ZEPS(I,J,L)
           !
           IF( XYO(I,K1).NE.XUNDEF .AND. XYO(I,K1).NE.999.0 ) THEN         !if obs available
             ! Jacobian of obs operator
@@ -530,7 +533,6 @@ DO I=1,KI
   CALL CHOLDC(NOBSTYPE,ZK1(:,:),ZP(:))                         ! Cholesky decomposition (1)
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
   ZXINCR(:) = MATMUL(ZB(I,:,:),MATMUL(ZHOT(:,:),ZX(:)))
-  
   DO L=1,NVAR
     DO J=1,NPATCH
       !
@@ -580,7 +582,7 @@ DO I=1,KI
     DO K = 1,NOBSTYPE
       IUNIT = IUNIT + 1
       DO J=1,NPATCH
-        WRITE(IUNIT,*) ZHO(K,J+NPATCH*(L-1)),ZGAIN(J+NPATCH*(L-1),K)
+        WRITE(IUNIT,*) ZHOWR(K,J+NPATCH*(L-1)),ZGAIN(J+NPATCH*(L-1),K)
       ENDDO
     ENDDO
   ENDDO

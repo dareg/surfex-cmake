@@ -75,7 +75,6 @@ INTEGER, INTENT(IN)          :: KSTEP  ! current time step
 !*      0.2    declarations of local variables
 !
 INTEGER                       :: JJ,JI  ! loop control 
-INTEGER                       :: IUNIT       ! unit number of results files
 INTEGER                       :: ILUOUT      ! unit number of listing file
  CHARACTER(LEN=30)             :: YVAR
 REAL, DIMENSION(KI)           :: ZRUNOFFC_FULL  ! Cumulated runoff from isba on the full domain (kg/m2)

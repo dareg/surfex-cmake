@@ -48,6 +48,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -70,7 +71,6 @@ REAL,              INTENT(OUT) :: PDXT       ! catchment rid mesh size
 !*      0.2    declarations of local variables
 !
 INTEGER                   :: JJ          ! loop control 
-INTEGER                   :: IUNIT       ! Unit of the files
 INTEGER                   :: ILUOUT      ! Unit of the files
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -82,22 +82,22 @@ IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_DTM',0,ZHOOK_HANDLE)
 !
 WRITE(ILUOUT,*) 'Open ',HFILE,'header'
 !
- CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,NUNIT,HFILE,HFORM,HACTION='READ')
 !
 DO JJ=1,5
-  READ(IUNIT,*) 
+  READ(NUNIT,*) 
 ENDDO
 !
-READ(IUNIT,*) PX0
-READ(IUNIT,*) PY0
-READ(IUNIT,*) KNXC
-READ(IUNIT,*) KNYC
-READ(IUNIT,*) PNUL
-READ(IUNIT,*) PDXT
-READ(IUNIT,*)
-READ(IUNIT,*)
+READ(NUNIT,*) PX0
+READ(NUNIT,*) PY0
+READ(NUNIT,*) KNXC
+READ(NUNIT,*) KNYC
+READ(NUNIT,*) PNUL
+READ(NUNIT,*) PDXT
+READ(NUNIT,*)
+READ(NUNIT,*)
 !
- CALL CLOSE_FILE(HPROGRAM,IUNIT)
+ CALL CLOSE_FILE(HPROGRAM,NUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_DTM',1,ZHOOK_HANDLE)
 !

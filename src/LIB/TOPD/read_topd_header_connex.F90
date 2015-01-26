@@ -46,6 +46,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -64,7 +65,6 @@ INTEGER,           INTENT(OUT) :: KNMC     ! number of pixels in a catchment
 !
 !
 INTEGER                   :: JJ ! loop control 
-INTEGER                   :: IUNIT       ! Unit of the files
 INTEGER                   :: ILUOUT      ! Unit of the files
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -77,16 +77,16 @@ IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_CONNEX',0,ZHOOK_HANDLE)
 !
 WRITE(ILUOUT,*) 'Open ',HFILE,'header'
 !
- CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,NUNIT,HFILE,HFORM,HACTION='READ')
 !
-READ(IUNIT,*)
-READ(IUNIT,*) KNMC
+READ(NUNIT,*)
+READ(NUNIT,*) KNMC
 !
 DO JJ=1,5
-  READ(IUNIT,*) 
+  READ(NUNIT,*) 
 ENDDO
 !
- CALL CLOSE_FILE(HPROGRAM,IUNIT)
+ CALL CLOSE_FILE(HPROGRAM,NUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_CONNEX',1,ZHOOK_HANDLE)
 !
