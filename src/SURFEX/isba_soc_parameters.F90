@@ -279,8 +279,6 @@ WHERE(ZRHO_TOP(:)<ZMOSS_DENSITY)
 ELSEWHERE
    ZMOSS_DEPTH(:) = 0.01   ! => Fibric soil at surface (<=> moss=1cm)
 ENDWHERE
-
-ZMOSS_DEPTH(:) = 0.01
 !
 WHERE(ZMASK(:)>0.0)
 !
