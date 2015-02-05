@@ -123,58 +123,63 @@ ENDIF
  CALL READ_DEFAULT_IDEAL_n(HPROGRAM)
  CALL READ_IDEAL_CONF_n(HPROGRAM)
 !
+IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
+
 !$OMP SINGLE
-ALLOCATE(XTIMEF_f (NFORCF+1))
-ALLOCATE(XSFTH_f  (NFORCF+1))
-ALLOCATE(XSFTQ_f  (NFORCF+1))
-ALLOCATE(XSFCO2_f (NFORCF+1))
-IF (CUSTARTYPE=='USTAR') ALLOCATE(XUSTAR_f (NFORCF+1))
+  ALLOCATE(XTIMEF_f (NFORCF+1))
+  ALLOCATE(XSFTH_f  (NFORCF+1))
+  ALLOCATE(XSFTQ_f  (NFORCF+1))
+  ALLOCATE(XSFCO2_f (NFORCF+1))
+  IF (CUSTARTYPE=='USTAR') ALLOCATE(XUSTAR_f (NFORCF+1))
 !
-ALLOCATE(XTIMET_t (NFORCT+1))
-ALLOCATE(XTSRAD_t (NFORCT+1))
+  ALLOCATE(XTIMET_t (NFORCT+1))
+  ALLOCATE(XTSRAD_t (NFORCT+1))
 !$OMP END SINGLE
 !
-XTIMEF_f(1:NFORCF) = XTIMEF(1:NFORCF)
-XSFTH_f (1:NFORCF) = XSFTH (1:NFORCF)
-XSFTQ_f (1:NFORCF) = XSFTQ (1:NFORCF)
-XSFCO2_f(1:NFORCF) = XSFCO2(1:NFORCF)
-IF (CUSTARTYPE=='USTAR') XUSTAR_f(1:NFORCF) = XUSTAR(1:NFORCF)
+  XTIMEF_f(1:NFORCF) = XTIMEF(1:NFORCF)
+  XSFTH_f (1:NFORCF) = XSFTH (1:NFORCF)
+  XSFTQ_f (1:NFORCF) = XSFTQ (1:NFORCF)
+  XSFCO2_f(1:NFORCF) = XSFCO2(1:NFORCF)
+  IF (CUSTARTYPE=='USTAR') XUSTAR_f(1:NFORCF) = XUSTAR(1:NFORCF)
 !
-XTIMET_t(1:NFORCT) = XTIMET(1:NFORCT)
-XTSRAD_t(1:NFORCT) = XTSRAD(1:NFORCT)
+  XTIMET_t(1:NFORCT) = XTIMET(1:NFORCT)
+  XTSRAD_t(1:NFORCT) = XTSRAD(1:NFORCT)
 !
-XTIMEF_f(NFORCF+1) = XTIMEF_f(NFORCF)+1
-XSFTH_f (NFORCF+1) = XSFTH_f (NFORCF)
-XSFTQ_f (NFORCF+1) = XSFTQ_f (NFORCF)
-XSFCO2_f(NFORCF+1) = XSFCO2_f(NFORCF)
-IF (CUSTARTYPE=='USTAR') XUSTAR_f(NFORCF+1) = XUSTAR_f(NFORCF)
+  XTIMEF_f(NFORCF+1) = XTIMEF_f(NFORCF)+1
+  XSFTH_f (NFORCF+1) = XSFTH_f (NFORCF)
+  XSFTQ_f (NFORCF+1) = XSFTQ_f (NFORCF)
+  XSFCO2_f(NFORCF+1) = XSFCO2_f(NFORCF)
+  IF (CUSTARTYPE=='USTAR') XUSTAR_f(NFORCF+1) = XUSTAR_f(NFORCF)
 !
-XTIMET_t(NFORCT+1) = XTIMET(NFORCT)+1
-XTSRAD_t(NFORCT+1) = XTSRAD(NFORCT)
+  XTIMET_t(NFORCT+1) = XTIMET(NFORCT)+1
+  XTSRAD_t(NFORCT+1) = XTSRAD(NFORCT)
 !
 !----------------------------------------------------------------------------------
 !
 !*       0.3    control
 !               -------
 !
-IF (HINIT=='PRE') THEN
-   CALL PREP_CTRL_IDEAL(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
+  IF (HINIT=='PRE') THEN
+    CALL PREP_CTRL_IDEAL(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
                           ILUOUT,LSURF_BUDGETC)  
-ENDIF
+  ENDIF
 !
 !----------------------------------------------------------------------------------
 !
 !*       3.    HOURLY surface scalar mixing ratio fluxes (NFORCF+1 values per scalar from 00UTC to 24UTC)
 !              -----------------------------------------
 !
-ISV = SIZE(HSV)
+  ISV = SIZE(HSV)
 !
-IF(.NOT. ALLOCATED (XSFTS) )ALLOCATE(XSFTS(NFORCF+1,ISV))
+  IF(.NOT. ALLOCATED (XSFTS) )ALLOCATE(XSFTS(NFORCF+1,ISV))
 !
 !* unit: kg/m2/s
 !
-XSFTS = 0.
-!                                                          
+  XSFTS = 0.
+!
+ CALL DIAG_IDEAL_INIT_n(KI,KSW)
+!
+ENDIF
 !-------------------------------------------------------------------------------
 !
 !*       8.    Radiative outputs
@@ -193,7 +198,6 @@ PTSURF   = PTSRAD
 !*       9.    Fluxes as diagnostics
 !              ---------------------
 !
- CALL DIAG_IDEAL_INIT_n(KI,KSW)
 IF (LHOOK) CALL DR_HOOK('INIT_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
