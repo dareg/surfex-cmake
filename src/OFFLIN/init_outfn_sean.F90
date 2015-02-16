@@ -345,8 +345,11 @@ CALL DEF_VAR_NETCDF(IFILE_ID,'Z0SEA' ,'Roughness_Length'                        
 IF(LMERCATOR)THEN
 !
   DO JLAYER=NOCKMIN+1,NOCKMAX
-     WRITE(YPAS,'(I1.1,1X)') JLAYER
-     IF (JLAYER>=10) WRITE(YPAS,'(I2.2,1X)') JLAYER
+    IF (JLAYER<10) THEN
+      WRITE(YPAS,'(I1.1,1X)') JLAYER
+    ELSE
+      WRITE(YPAS,'(I2.2,1X)') JLAYER
+    ENDIF
      YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
      ! Ocean temperature
      YATT='K'
