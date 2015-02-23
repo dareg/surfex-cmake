@@ -71,8 +71,12 @@ export VERSION_GRIBAPI=1.9.9
 #
 # Version of OASIS
 #
-export VER_OASIS=mct
+export VER_OASIS=NOmct
 export VERSION_OASIS=3-mct
+#
+# Version of DR_HOOK
+#
+export VER_DRHOOK=BYPASS
 #
 # Version of Def integer
 #
@@ -90,7 +94,7 @@ export MNH_INT=
 export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}-${VER_MPI}-${OPTLEVEL}"
 #[ "x${VER_USER}" != "x" ] && export XYZ="${XYZ}-${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
-export BIN_TOOLS=
+export BIN_TOOLS=NO
 export PATH=.:$SRC_SURFEX/bin:$SRC_SURFEX/exe:$SRC_SURFEX/bin_tools/${BIN_TOOLS}:$PATH
 #
 # NCARG_ROOT : for use of graphic tools : diaprog 

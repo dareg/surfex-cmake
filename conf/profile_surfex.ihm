@@ -74,6 +74,10 @@ export VERSION_GRIBAPI=${VERSION_GRIBAPI}
 export VER_OASIS=${VER_OASIS}
 export VERSION_OASIS=${VERSION_OASIS}
 #
+# Version of DR_HOOK
+#
+export VER_DRHOOK=${VER_DRHOOK}
+#
 # Version of Def integer
 #
 export MNH_INT=${MNH_INT}

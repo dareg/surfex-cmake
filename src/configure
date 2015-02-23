@@ -272,12 +272,26 @@ if [ "x${NEED_TOOLS}" = "xYES" ] ; then
 fi
 
 #
+# Prepare defaults, if not provided
+#
+# DRHOOK library
+if [ -z  "${VER_DRHOOK}" ]
+then
+  export VER_DRHOOK=SIMPLE
+fi
 #
 # OASIS coupler
 #RJ: provide default to NOmct, to avoid hard dependency on mpi
 if [ -z ${VER_OASIS} ] ; then
   export VER_OASIS=NOmct
 fi
+#
+# BIN_TOOLS
+if [ -z ${BIN_TOOLS} ] ; then
+  export BIN_TOOLS=NO
+fi
+
+#
 # Generate profile_surfex
 #
 "${LOCAL}/bin/eval_dollar"  profile_surfex.ihm > profile_surfex
@@ -410,6 +424,7 @@ echo  "VER_USER=${VER_USER-' pas de version user ...'}"
 echo  "OPTLEVEL=${OPTLEVEL}"
 echo  "CONF_DOLLAR=${CONF_DOLLAR}"
 echo  "VER_CDF=${VER_CDF}"
+echo  "VER_DRHOOK=${VER_DRHOOK}"
 echo  "BIN_TOOLS=${BIN_TOOLS}"
 echo  "VER_OASIS=${VER_OASIS}"
 echo 

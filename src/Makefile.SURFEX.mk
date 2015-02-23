@@ -166,6 +166,11 @@ endif
 ##########################################################
 #           Librairie DR_HOOK                            #
 ##########################################################
+ifeq "$(VER_DRHOOK)" "BYPASS"
+DIR_HOOK = LIB/DRHOOK/BYPASS
+endif
+
+ifeq "$(VER_DRHOOK)" "SIMPLE"
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
 CPPFLAGS_HOOK += -DLINUX
@@ -173,6 +178,7 @@ CPPFLAGS_HOOK += -DLINUX
 OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o getcurheap.o 
 OBJS_LISTE_MASTER += gethwm.o getpag.o getrss.o  getstackusage.o getstatm.o getstk.o 
 OBJS_LISTE_MASTER += linuxtrbk.o mpe_locking.o
+endif
 #
 ifdef DIR_HOOK
 DIR_MASTER += $(DIR_HOOK)
