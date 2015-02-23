@@ -10,6 +10,10 @@
 #RJ: few extra features
 #DO_ASM = YES
 DO_ASM = NO
+USE_SPLR = YES
+#USE_SPLR = NO
+#AVOID_CPP = NO
+AVOID_CPP = YES
 #
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #

@@ -585,18 +585,44 @@ ARFLAGS=r
 
 #
 #  GENERATION OF DEPENDANCE FILES : *.D
-# 
+#
+SPLR_FLAGS = --split --modi --deps
+
+ifeq "$(AVOID_CPP)" "YES"
+FUNDEFS ?= -UASC -UARO -UBIN -UFA -ULFI -UMNH -UNC -UOFF -UOL -UTOPD -UTXT -UAIX64 -URS6K
+#RJ: mpi specific
+FUNDEFS += -UNOMPI
+#RJ: xrd specific
+FUNDEFS += -UFA_GRIBEX -UUSE_SAMIO -UNECSX -UVPP
+#RJ: drhook specific
+FUNDEFS += -USFX_MPL
+#RJ: gelato specific
+FUNDEFS += -Uin_surfex -Uin_nemo -Uin_arpege -Ukey_mpp_mpi
+#RJ: oasis specific
+FUNDEFS += -USFXOASIS -UTRIPOASIS
 
 %.D:%.F90
+	splr.pl $(FUNDEFS) $(FPPFLAGS) --fpp $(SPLR_FLAGS) --odir=$(OBJDIR) $<
+else
+%.D:%.F90
 	$(CPP) $(INC) $(FPPFLAGS) $< >  $(OBJDIR)/$(*F).f90
+ifeq "$(USE_SPLR)" "YES"
+	splr.pl $(SPLR_FLAGS) --odir=$(OBJDIR) $(OBJDIR)/$(*F).f90
+else
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f90
+endif
 	-@rm -f $(OBJDIR)/$(*F).f90
+endif
 
 #RJ: no cpp for lower case ones, actually even dangerous a bit
 %.D:%.f90
+ifeq "$(USE_SPLR)" "YES"
+	splr.pl $(SPLR_FLAGS) --odir=$(OBJDIR) $<
+else
 	cp $< $(OBJDIR)/$(*F).f90
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f90
 	-@rm -f $(OBJDIR)/$(*F).f90
+endif
 
 #RJ: strange
 #%.D:%.fx90
