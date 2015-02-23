@@ -54,8 +54,10 @@
 void
 LinuxTraceBack(void *sigcontextptr)
 {
+#ifdef debuggers_needed
   extern void gdb_trbk_();
   extern void dbx_trbk_();
+#endif
 #if defined(__GNUC__) && defined(LINUX) && !defined(CYGWIN)
   ucontext_t ctx;
 #endif
@@ -158,8 +160,10 @@ LinuxTraceBack(void *sigcontextptr)
   }
 #endif /* defined(PSTACKTRACE) */
 
+#ifdef debuggers_needed
   gdb_trbk_();
   dbx_trbk_();
+#endif
 
  finish:
   fprintf(stderr,"[LinuxTraceBack] : End of backtrace(s)\n");
@@ -185,6 +189,8 @@ void linux_trbk(void)
 {
   linux_trbk_();
 }
+/* RJ: avoid this in user codes */
+#ifdef debuggers_needed
 
 /* GNU-debugger traceback */
 
@@ -278,3 +284,4 @@ void dbx_trbk_()
 }
 
 void dbx_trbk() { dbx_trbk_(); }
+#endif

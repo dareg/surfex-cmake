@@ -45,6 +45,7 @@ int ec_is_little_endian_() { return ec_is_little_endian(); }
 /* A routine to be called at the very end in case MPI wasn't finalized */
 /* Registered *only* by MPL_INIT */
 
+#ifdef SFX_MPL
 void ec_mpi_atexit_(void)
 {
   static int callnum = 0;
@@ -65,6 +66,7 @@ void ec_mpi_atexit(void)
 {
   ec_mpi_atexit_();
 }
+#endif
 
 void ec_set_umask_(void)
 {

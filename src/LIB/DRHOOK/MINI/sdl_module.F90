@@ -38,6 +38,7 @@ SUBROUTINE SDL_TRACEBACK(KTID)
 
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL :: KTID
 INTEGER(KIND=JPIM) ITID, IPRINT_OPTION, ILEVEL
+CHARACTER(LEN=256),SAVE :: CLENV
 #ifdef NEC
 CHARACTER(LEN=*), PARAMETER :: necmsg = '*** Calling NEC traceback ***'
 #endif
@@ -67,6 +68,12 @@ ENDIF
   WRITE(0,*)'SDL_TRACEBACK: Done INTEL_TRBK, THRD = ',ITID
 #elif defined(LINUX) || defined(SUN4)
   WRITE(0,*)'SDL_TRACEBACK: Calling LINUX_TRBK, THRD = ',ITID
+!RJ: in case of NON MPL version for more verbose *hopefully* backtrace
+#ifndef SFX_MPL
+  CALL PUTARG_INFO(0, TRIM(' ')) ! (see ifsaux/support/cargs.c)
+  CALL GETARG(0,CLENV)           ! The executable name (normal F90 way)
+  CALL PUTARG_C(0,TRIM(CLENV))   ! (see ifsaux/support/cargs.c)
+#endif
   CALL LINUX_TRBK() ! See ifsaux/utilities/linuxtrbk.c
   WRITE(0,*)'SDL_TRACEBACK: Done LINUX_TRBK, THRD = ',ITID
 #elif defined(NEC)
@@ -74,17 +81,20 @@ ENDIF
   CALL MESPUT(necmsg, len(necmsg), 1)
   WRITE(0,*)'SDL_TRACEBACK: Done NEC/MESPUT, THRD = ',ITID
 #else
+!RJ: these are not safe for users
   WRITE(0,*)'SDL_TRACEBACK: No proper traceback implemented.'
-  ! A traceback using dbx-debugger, if available AND 
-  ! activated via 'export DBXDEBUGGER=1'
-  WRITE(0,*)'SDL_TRACEBACK: Calling DBX_TRBK, THRD = ',ITID
-  CALL DBX_TRBK() ! See ifsaux/utilities/linuxtrbk.c
-  WRITE(0,*)'SDL_TRACEBACK: Done DBX_TRBK, THRD = ',ITID
-  ! A traceback using gdb-debugger, if available AND 
-  ! activated via 'export GDBDEBUGGER=1'
-  WRITE(0,*)'SDL_TRACEBACK: Calling GDB_TRBK, THRD = ',ITID
-  CALL GDB_TRBK() ! See ifsaux/utilities/linuxtrbk.c
-  WRITE(0,*)'SDL_TRACEBACK: Done GDB_TRBK, THRD = ',ITID
+!RJ   ! A traceback using dbx-debugger, if available AND 
+!RJ   ! activated via 'export DBXDEBUGGER=1'
+!RJ   WRITE(0,*)'SDL_TRACEBACK: Calling DBX_TRBK, THRD = ',ITID
+!RJ   CALL DBX_TRBK() ! See ifsaux/utilities/linuxtrbk.c
+!RJ   WRITE(0,*)'SDL_TRACEBACK: Done DBX_TRBK, THRD = ',ITID
+!RJ   ! A traceback using gdb-debugger, if available AND 
+!RJ   ! activated via 'export GDBDEBUGGER=1'
+!RJ   WRITE(0,*)'SDL_TRACEBACK: Calling GDB_TRBK, THRD = ',ITID
+!RJ   CALL GDB_TRBK() ! See ifsaux/utilities/linuxtrbk.c
+!RJ   WRITE(0,*)'SDL_TRACEBACK: Done GDB_TRBK, THRD = ',ITID
+!RJ: try simple abort?
+  CALL ABORT()
 #endif
 
 END SUBROUTINE SDL_TRACEBACK
@@ -95,7 +105,9 @@ SUBROUTINE SDL_SRLABORT
 ! -------
 !   To abort in serial environment
 
-CALL EC_RAISE(SIGABRT)
+!RJ: simple abort here is more portable, gives backtrace, but is extension
+!RJ CALL EC_RAISE(SIGABRT)
+CALL ABORT()
 STOP 'SDL_SRLABORT'
 
 END SUBROUTINE SDL_SRLABORT
@@ -119,11 +131,16 @@ CALL VPP_ABORT()
 #else
 
 IRETURN_CODE=1
+!RJ: seriously? even without mpif.h??
+#ifndef NOMPI
 CALL MPI_ABORT(KCOMM,IRETURN_CODE,IERROR)
+#endif
 
 #endif
 
-CALL EC_RAISE(SIGABRT) ! In case ever ends up here
+!RJ: simple abort here is more portable, gives backtrace, but is extension
+!RJ CALL EC_RAISE(SIGABRT) ! In case ever ends up here
+CALL ABORT()
 STOP 'SDL_DISABORT'
 
 END SUBROUTINE SDL_DISABORT

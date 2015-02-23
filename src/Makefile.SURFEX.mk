@@ -170,6 +170,16 @@ ifeq "$(VER_DRHOOK)" "BYPASS"
 DIR_HOOK = LIB/DRHOOK/BYPASS
 endif
 
+#RJ: minimal version of DRHOOK, mainly for profiling only
+ifeq "$(VER_DRHOOK)" "MINI"
+DIR_HOOK = LIB/DRHOOK/MINI
+INC_HOOK = -I$(B)LIB/DRHOOK/MINI
+CPPFLAGS_HOOK += -DLINUX
+
+OBJS_LISTE_MASTER += drhook.o crc.o addrdiff.o cargs.o endian.o env.o linuxtrbk.o
+OBJS_LISTE_MASTER += gethwm.o getstatm.o getrss.o getstk.o getpag.o getstackusage.o getcurheap.o
+endif
+
 ifeq "$(VER_DRHOOK)" "SIMPLE"
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
@@ -194,7 +204,7 @@ DIR_XRD += LIB/XRD39/FA
 DIR_XRD += LIB/XRD39/LFI
 DIR_XRD += LIB/XRD39/grib_mf
 DIR_XRD += LIB/XRD39/module
-DIR_XRD += LIB/XRD39/support
+#DIR_XRD += LIB/XRD39/support
 DIR_XRD += LIB/XRD39/utilities
 INC_XRD = -I$(B)LIB/XRD39/include -I$(B)LIB/XRD39/FA -I$(B)LIB/XRD39/LFI
 CPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
