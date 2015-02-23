@@ -22,8 +22,9 @@ ARCH_XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}
 ##########################################################
 ifdef VER_USER
 DIR_USER += ${VER_USER}
-DIR_USER += ${VER_USER}_OFFLIN
-DIR_USER += ${VER_USER}_ASSIM
+#RJ: unsafe
+#RJ DIR_USER += ${VER_USER}_OFFLIN
+#RJ DIR_USER += ${VER_USER}_ASSIM
 endif
 ##########################################################
 #           Source OFFLIN                                #
@@ -567,9 +568,15 @@ PROG_LIST += PGD PREP OFFLINE SODA
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 endif
 #
+#RJ: only include during 'make user' to avoid 'bad' programs
+#
+#RJ: should PGD,PREP,OFFLINE,SODA be in VER_USER==smth case?
+#PROG_LIST_USER+=PGD PREP OFFLINE SODA
+#
 ifeq "$(VER_USER)" "FORC"
-PROG_LIST += PRE_INPUT_EXPERIMENT
+PROG_LIST_USER += PRE_INPUT_EXPERIMENT OFFLINE
 endif
+#
 ##########################################################
 #                                                        #
 # LIB_OBJS : Librarie of all *.o                         #

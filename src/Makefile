@@ -307,7 +307,8 @@ $(OBJDIR_USER)/.dummy :
 	-mkdir -p $(OBJDIR_USER)/.dummy
 	-mkdir -p $(OBJDIR_USER)/MOD
 
-depuser : objdiruser
+#RJ: guessing that depmaster is missing here for filemaster dependency
+depuser : objdiruser depmaster
 	@$(MAKE) DO_DEP_USER=YES OBJDIR=$(OBJDIR_USER) filedepalluser
 
 filedepalluser : $(DEP_ALL_USER)
@@ -333,16 +334,18 @@ proguser : libuser
 	OBJDIR=$(OBJDIR_USER) \
 	LIB_MNH=$(LIB_USER) \
 	PROG_DIR="$(OBJDIR_USER) $(OBJDIR_MASTER)" \
-	$(PROG_LIST) # cleanlibuser
+	PROG_LIST="$(PROG_LIST_USER)" \
+	$(PROG_LIST_USER) # cleanlibuser
 
 cleanlibuser :
 	rm -f  $(LIB_USER)
 
 installuser :
-	@$(MAKE)  -I $(OBJDIR_USER) DO_COMP_USER=YES  OBJDIR=$(OBJDIR_USER) install	
+	@$(MAKE)  -I $(OBJDIR_USER) DO_COMP_USER=YES  OBJDIR=$(OBJDIR_USER) \
+	PROG_LIST="$(PROG_LIST_USER)" install
 
 cleanproguser :
-	test -d $(OBJDIR_USER) && cd $(OBJDIR_USER) && rm -f $(PROG_LIST)
+	test -d $(OBJDIR_USER) && cd $(OBJDIR_USER) && rm -f $(PROG_LIST_USER)
 
 ##########################################################
 #                                                        #
@@ -480,23 +483,38 @@ ifdef PROG_LIST
 prog :   lib $(LIB_GRIBEX)
 	@$(MAKE) -I $(OBJDIR) DEP=YES  $(PROG_LIST)
 
+ifeq "$(DO_COMP_USER)" "YES"
+install : $(patsubst %,%-${ARCH_XYZ}-${VER_USER},$(PROG_LIST))
+else
 install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
+endif
 
 $(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -iname "spll_*.f*" \
               | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/gI' | head -1 )
 
+#RJ: added hack when linking user if no master was linked
 $(PROG_LIST) :  $(LIB_MNH)  $(LIB_GRIBEX)
+ifeq "$(DO_COMP_USER)" "YES"
+	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ \
+	  $(shell ([ -e $(OBJ_PROG) ] && echo $(OBJ_PROG)) || echo $(OBJ_PROG) | sed -e 's@/MASTER/spll_@/$(VER_USER)/spll_@') \
+	  $(LIB_MNH) $(LIBS)
+else
 	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ $(OBJ_PROG) $(LIB_MNH) $(LIBS)
+endif
+
+ifeq "$(DO_COMP_USER)" "YES"
+%-${ARCH_XYZ}-${VER_USER} :%
+	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}-${VER_USER}
+#RJ #	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}-${VER_USER}
+#RJ 	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)${XYZ}
+#	-rm -f $(SRC_SURFEX)/exe/$(*F)_${ARCH_XYZ}~
+endif
 
 %-${ARCH_XYZ} :%
-ifndef DO_COMP_USER
 	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}
-else
-#	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}-${VER_USER}
-	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)${XYZ}
-endif
-	rm -f $(SRC_SURFEX)/exe/$(*F)_${ARCH_XYZ}~
+#	-rm -f $(SRC_SURFEX)/exe/$(*F)_${ARCH_XYZ}~
 
+endif
 ##########################################################
 #                                                        #
 # EXAMPLES RULES                                         #
@@ -561,10 +579,6 @@ stat_f90 :
 stat_o :
 	cd $(OBJDIR_MASTER) ; find . -name "*.o" | wc -l
 
-endif
-
-
-
 
 
 cleanuser :
@@ -573,7 +587,7 @@ cleanuser :
 clean :  examplesclean cleanmaster $(addprefix clean_,$(REDISTS)) $(addprefix clean_,$(EXTCOUPLERS))
 	rm -fr  $(OBJDIR_ROOT)
 cleanprog :
-	cd $(OBJDIR_ROOT) ; rm -f $(PROG_LIST)
+	cd $(OBJDIR_MASTER) ; rm -f $(PROG_LIST)
 
 print :
 	@echo $(VAR)=$($(VAR))
