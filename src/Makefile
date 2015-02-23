@@ -169,9 +169,12 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 #                                                        #
 ##########################################################
 ifeq "$(VER_CDF)" "CDFAUTO"
-all : ecoclimap gribapi cdf oasis progmaster
+#RJ: temporary disable oasis target, renable after fixed serial compilation
+#all : ecoclimap gribapi cdf oasis progmaster
+all : ecoclimap gribapi cdf progmaster
 else
-all : ecoclimap gribapi oasis progmaster
+#all : ecoclimap gribapi oasis progmaster
+all : ecoclimap gribapi progmaster
 endif
 
 objdirmaster :  $(OBJDIR_MASTER)/.dummy

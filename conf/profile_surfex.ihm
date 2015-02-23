@@ -71,8 +71,8 @@ export VERSION_GRIBAPI=${VERSION_GRIBAPI}
 #
 # Version of OASIS
 #
-export VER_OASIS=mct
-export VERSION_OASIS=3-mct
+export VER_OASIS=${VER_OASIS}
+export VERSION_OASIS=${VERSION_OASIS}
 #
 # Version of Def integer
 #
