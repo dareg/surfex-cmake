@@ -1,3 +1,6 @@
+###
+#  arch file for DragonFly BSD with gfortran5(gcc5) openmpi 3.1.3 & openmp
+###
 ##########################################################
 #                                                        #
 # Compiler Options                                       #
@@ -5,12 +8,12 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid  -fbacktrace -fconvert=swap
+OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Wsurprising
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
-OPT_CHECK = -fbounds-check -finit-real=nan
-OPT_I8    = -fdefault-integer-8 
+OPT_CHECK = -fbounds-check -finit-real=nan -ffpe-trap=overflow,zero,invalid
+OPT_I8    = -fdefault-integer-8
 #
 #
 # Integer 4/8 option
@@ -28,8 +31,8 @@ LFI_INT           ?=4
 endif
 #
 #
-OPT       = $(OPT_BASE) $(OPT_PERF2) 
-OPT0      = $(OPT_BASE) $(OPT_PERF0) 
+OPT       = $(OPT_BASE) $(OPT_PERF2)
+OPT0      = $(OPT_BASE) $(OPT_PERF0)
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF2)
 #
 ifeq "$(OPTLEVEL)" "DEBUG"
@@ -42,26 +45,32 @@ ifneq "$(OPTLEVEL)" "DEBUG"
 OBJSD += spll_teb_garden.o
 $(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF0)
 endif
-#  
+#
 ifeq "$(VER_MPI)" "NOMPI"
-F90 = gfortran
-CC  = gcc
-else         
-F90 = mpif90
-CC  = mpicc
+F90= gfortran5r
+F77= gfortran5r
+else
+F90= mpifort
+F77= mpifort
 endif
 #
 FC = $(F90)
 #
-F90FLAGS      =  $(OPT) 
-F77 = $(F90)
-F77FLAGS      =  $(OPT) 
-FX90 = $(F90)
-FX90FLAGS     =  $(OPT) 
+F90FLAGS      = $(OPT) -ffree-form -ffree-line-length-none
+F77FLAGS      = $(OPT) -ffixed-form
+FX90          = $(F77)
+FX90FLAGS     = $(OPT) -ffixed-form
 #
-LDFLAGS   =   -Wl,-warn-once -fopenmp
+CC            = gcc5r
+CFLAGS        =
 #
-# preprocessing flags 
+#LDFLAGS   = -fbacktrace -fuse-ld=bfd -Wl,-warn-once
+#zRJ: on DragonFly BSD libc doesn't have bactrace_symbols_fd(), unlike g(arbage)libc
+#zRJ: bactrace functions can be used from devel/libexecinfo port library libexecinfo.so
+LDFLAGS   = $(F90FLAGS) -fbacktrace -L/usr/local/lib -lexecinfo -fuse-ld=gold
+LDFLAGS   =  -Wl,-warn-once -fopenmp -fbacktrace -L/usr/local/lib -lexecinfo
+#
+# preprocessing flags
 #
 CPP = cpp -P -traditional -Wcomment
 #
@@ -81,7 +90,7 @@ CNAME_GRIBEX=_gfortran
 #                                                        #
 ##########################################################
 #
-include ${SRC_SURFEX}/src/Makefile.SURFEX.mk
+include Makefile.SURFEX.mk
 #
 ifeq "$(VER_MPI)" "NOMPI"
 CPPFLAGS += -DNOMPI
@@ -104,7 +113,7 @@ endif
 #                                                        #
 ##########################################################
 
-ifneq "$(findstring 8,$(LFI_INT))" ""
-OBJS_I8=spll_NEWLFI_ALL.o
-$(OBJS_I8) : OPT = $(OPT_BASE) $(OPT_PERF2) $(OPT_I8)
-endif
+#RJ ifneq "$(findstring 8,$(LFI_INT))" ""
+#RJ OBJS_I8=spll_NEWLFI_ALL.o
+#RJ $(OBJS_I8) : OPT = $(OPT_BASE) $(OPT_PERF2) $(OPT_I8)
+#RJ endif

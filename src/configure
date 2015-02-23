@@ -22,6 +22,59 @@ cd "${LOCAL}/conf"
 #
 TARG=$(uname -s -n)
 #
+#RJ: if arch is provided as argument configure directly
+if [ $# -ne 0 ]
+then
+  case "$1" in
+  'bgfortran'*)
+    export ARCH=${ARCH:-bgfortran}
+    export VER_MPI=${VER_MPI:-NOMPI}
+    export OPTLEVEL=${OPTLEVEL:-O2}
+    export VER_CDF=${VER_CDF:-CDFAUTO}
+    export VER_DRHOOK=${VER_DRHOOK:-BYPASS}
+    export NEED_NCARG=${NEED_NCARG:-NO}
+    export MVWORK=${MVWORK:-NO}
+    export MNHENV=${MNHENV:-"
+#start new subshell
+bash --norc
+#sh
+"}
+  ;;
+  'zgfortran'*)
+    export ARCH=${ARCH:-zgfortran}
+    export VER_MPI=${VER_MPI:-MPIAUTO}
+    export OPTLEVEL=${OPTLEVEL:-O2}
+    export VER_CDF=${VER_CDF:-CDFAUTO}
+    export VER_DRHOOK=${VER_DRHOOK:-BYPASS}
+    export NEED_NCARG=${NEED_NCARG:-NO}
+    export MVWORK=${MVWORK:-NO}
+    export MNHENV=${MNHENV:-"
+#start new subshell
+bash --norc
+#sh
+"}
+  ;;
+  'zifort'*)
+    export ARCH=${ARCH:-zifort}
+    export VER_MPI=${VER_MPI:-NOMPI}
+    export OPTLEVEL=${OPTLEVEL:-O2}
+    export VER_CDF=${VER_CDF:-CDFAUTO}
+    export VER_DRHOOK=${VER_DRHOOK:-BYPASS}
+    export NEED_NCARG=${NEED_NCARG:-NO}
+    export MVWORK=${MVWORK:-NO}
+    export MNHENV=${MNHENV:-"
+#start new subshell
+bash --norc
+#sh
+"}
+  ;;
+  *)
+    echo "WARNING ; system not declared"
+    exit 1
+  ;;
+  esac
+else
+#RJ: continue on guessing
 case "$TARG" in
 'Linux service'*) 
                 export     ARCH=${ARCH:-LXifort} 
@@ -203,6 +256,7 @@ Linux*)
                 export OPTLEVEL=${OPTLEVEL:-DEBUG}
               ;;
 esac
+fi
 ##
 ## Environnement for scandollar 
 ##
