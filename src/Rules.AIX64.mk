@@ -97,19 +97,11 @@ CNAME_GRIBEX=""
 #DIR_SURFEX      += ARCH_SRC/surfex 
 #DIR_SURCOUCHE   += ARCH_SRC/bug_surcouche
 #
-include ${SRC_SURFEX}/src/Makefile.SURFEX.mk
+include Makefile.SURFEX.mk
 #
 INC += -I/usr/lpp/xlf/include
 VPATH += /usr/lpp/xlf/include
 CPPFLAGS += -DAIX64
-#
-ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
-else
-ifeq "$(VER_OASIS)" "mct"
-CPPFLAGS += -DSFXOASIS -DTRIPOASIS
-endif
-endif
 #
 ##########################################################
 #                                                        #

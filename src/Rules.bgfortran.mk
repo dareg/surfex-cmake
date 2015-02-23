@@ -118,18 +118,6 @@ CNAME_GRIBEX=_gfortran
 #
 include Makefile.SURFEX.mk
 #
-ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
-else
-ifeq "$(VER_OASIS)" "mct"
-CPPFLAGS += -DSFXOASIS -DTRIPOASIS
-endif
-endif
-#
-ifeq "$(VER_CDF)" "CDFBOFX"
-  LDFLAGS += -Wl,-rpath,$(CDF_PATH)/lib
-endif
-#
 ##########################################################
 #                                                        #
 # extra VPATH, Compilation flag modification             #

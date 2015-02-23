@@ -81,19 +81,7 @@ CNAME_GRIBEX=_gfortran
 #                                                        #
 ##########################################################
 #
-include ${SRC_SURFEX}/src/Makefile.SURFEX.mk
-#
-ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
-else
-ifeq "$(VER_OASIS)" "mct"
-CPPFLAGS += -DSFXOASIS -DTRIPOASIS
-endif
-endif
-#
-ifeq "$(VER_CDF)" "CDFBOFX"
-  LDFLAGS += -Wl,-rpath,$(CDF_PATH)/lib
-endif
+include Makefile.SURFEX.mk
 #
 ##########################################################
 #                                                        #

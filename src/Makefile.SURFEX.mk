@@ -241,6 +241,11 @@ endif
 #           Source MPIVIDE                               #
 ##########################################################
 #
+#RJ: moved from all configs here
+ifeq "$(VER_MPI)" "NOMPI"
+CPPFLAGS += -DNOMPI
+endif
+#
 ifndef VER_MPI
 VER_MPI=MPIVIDE
 endif
@@ -492,7 +497,7 @@ endif
 ifeq "$(VER_CDF)" "CDFBOFX"
 CDF_PATH       ?= /opt/softs/libraries/ICC13.1.4.183/netcdf-4.3.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
-LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf
+LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
 endif
 
 ifneq "x$(VER_GRIBAPI)" "x"
@@ -506,11 +511,13 @@ endif
 ifneq "$(VER_MPI)" "NOMPI"
 #
 ifeq "$(VER_OASIS)" "mct"
+CPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
 DIR_OASIS?=${SRC_SURFEX}/src/LIB/oasis3-mct
 LIB_OASIS?=-L$(DIR_OASIS)/SFX/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
 INC_OASIS?=-I$(DIR_OASIS)/SFX/build/lib/psmile.MPI1
 OASIS_KEY?=${DIR_OASIS}/SFX/build/lib/psmile.MPI1/mod_oasis.mod
 #
+CPPFLAGS   += $(CPPFLAGS_OASIS)
 LIBS       += $(LIB_OASIS)
 INC        += $(INC_OASIS)
 VPATH      += $(DIR_OASIS)/SFX/build/lib/psmile.MPI1

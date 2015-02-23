@@ -116,14 +116,6 @@ CNAME_GRIBEX=_ifort
 #
 include Makefile.SURFEX.mk
 #
-ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
-else
-ifeq "$(VER_OASIS)" "mct"
-CPPFLAGS += -DSFXOASIS -DTRIPOASIS
-endif
-endif
-#
 ##########################################################
 #                                                        #
 # extra VPATH, Compilation flag modification             #
