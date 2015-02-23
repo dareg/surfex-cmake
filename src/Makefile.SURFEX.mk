@@ -33,11 +33,11 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_OFFLIN += OFFLIN
-CPPFLAGS_OFFLIN= -DBIN -DTXT -DLFI=lfi -DOL -DNC=nc
+FPPFLAGS_OFFLIN= -DBIN -DTXT -DLFI=lfi -DOL -DNC=nc
 #
 ifdef DIR_OFFLIN
 DIR_MASTER += $(DIR_OFFLIN)
-CPPFLAGS   += $(CPPFLAGS_OFFLIN)
+FPPFLAGS   += $(FPPFLAGS_OFFLIN)
 #VER_SURFEX=SURFEX-7-2-0
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MYSRC)
 
@@ -55,12 +55,12 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_SURFEX += SURFEX
-CPPFLAGS_SURFEX= -DASC -DFA=fa
+FPPFLAGS_SURFEX= -DASC -DFA=fa
 INC_SURFEX = -I$(B)include
 #
 ifdef DIR_SURFEX
 DIR_MASTER += $(DIR_SURFEX)
-CPPFLAGS   += $(CPPFLAGS_SURFEX)
+FPPFLAGS   += $(FPPFLAGS_SURFEX)
 INC         += $(INC_SURFEX)
 VER_SURFEX=SURFEX-7-2-0
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MYSRC)
@@ -79,11 +79,11 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_ASSIM += ASSIM
-#CPPFLAGS_ASSIM=
+#FPPFLAGS_ASSIM=
 #
 ifdef DIR_ASSIM
 DIR_MASTER += $(DIR_ASSIM)
-CPPFLAGS   += $(CPPFLAGS_ASSIM)
+FPPFLAGS   += $(FPPFLAGS_ASSIM)
 #VER_SURFEX=SURFEX-7-2-0
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MYSRC)
 
@@ -101,11 +101,11 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_TRIP += LIB/TRIPv2
-#CPPFLAGS_TRIP=
+#FPPFLAGS_TRIP=
 #
 ifdef DIR_TRIP
 DIR_MASTER += $(DIR_TRIP)
-CPPFLAGS   += $(CPPFLAGS_TRIP)
+FPPFLAGS   += $(FPPFLAGS_TRIP)
 #VER_SURFEX=SURFEX-7-2-0
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MYSRC)
 
@@ -119,11 +119,11 @@ endif
 ##########################################################
 #
 DIR_TOPD += LIB/TOPD
-CPPFLAGS_TOPD= -DTOPD
+FPPFLAGS_TOPD= -DTOPD
 #
 ifdef DIR_TOPD
 DIR_MASTER += $(DIR_TOPD)
-CPPFLAGS   += $(CPPFLAGS_TOPD)
+FPPFLAGS   += $(FPPFLAGS_TOPD)
 
 $(OBJS0): OPT = $(OPT0) 
 
@@ -132,11 +132,11 @@ endif
 #           Source GELATO                                #
 ##########################################################
 DIR_GELATO += LIB/GELATO
-CPPFLAGS_GELATO= -Din_surfex
+FPPFLAGS_GELATO= -Din_surfex
 #
 ifdef DIR_GELATO
 DIR_MASTER += $(DIR_GELATO)
-CPPFLAGS   += $(CPPFLAGS_GELATO)
+FPPFLAGS   += $(FPPFLAGS_GELATO)
 VER_GELATO=GELATO-6-0-34
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_GELATO)
 
@@ -185,6 +185,7 @@ OBJS_LISTE_MASTER += gethwm.o getstatm.o getrss.o getstk.o getpag.o getstackusag
 #RJ: optional MPL layer support in DRHOOK for testing compatibility only!
 ifneq "$(VER_MPI)" "NOMPI"
 ifeq "$(USE_MPL)" "YES"
+FPPFLAGS_HOOK += -DSFX_MPL
 CPPFLAGS_HOOK += -DSFX_MPL
 DIR_HOOK += LIB/DRHOOK/MPL
 endif
@@ -203,6 +204,7 @@ endif
 #
 ifdef DIR_HOOK
 DIR_MASTER += $(DIR_HOOK)
+FPPFLAGS   += $(FPPFLAGS_HOOK)
 CPPFLAGS   += $(CPPFLAGS_HOOK)
 INC        += $(INC_HOOK)
 VPATH      += $(DIR_HOOK)
@@ -218,10 +220,12 @@ DIR_XRD += LIB/XRD39/module
 #DIR_XRD += LIB/XRD39/support
 DIR_XRD += LIB/XRD39/utilities
 INC_XRD = -I$(B)LIB/XRD39/include -I$(B)LIB/XRD39/FA -I$(B)LIB/XRD39/LFI
-CPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
+FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
+CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE
 #
 ifdef DIR_XRD
 DIR_MASTER += $(DIR_XRD)
+FPPFLAGS   += $(FPPFLAGS_XRD)
 CPPFLAGS   += $(CPPFLAGS_XRD)
 INC        += $(INC_XRD)
 endif
@@ -229,12 +233,12 @@ endif
 #           Source FM                                    #
 ##########################################################
 DIR_FM += LIB/FM
-#CPPFLAGS_FM =
+#FPPFLAGS_FM =
 #INC_FM=
 #
 ifdef DIR_FM
 DIR_MASTER += $(DIR_FM)
-#CPPFLAGS   += $(CPPFLAGS_FM)
+#FPPFLAGS   += $(FPPFLAGS_FM)
 INC        += $(INC_FM)
 endif
 ##########################################################
@@ -243,7 +247,7 @@ endif
 #
 #RJ: moved from all configs here
 ifeq "$(VER_MPI)" "NOMPI"
-CPPFLAGS += -DNOMPI
+FPPFLAGS += -DNOMPI
 endif
 #
 ifndef VER_MPI
@@ -511,13 +515,13 @@ endif
 ifneq "$(VER_MPI)" "NOMPI"
 #
 ifeq "$(VER_OASIS)" "mct"
-CPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
 DIR_OASIS?=${SRC_SURFEX}/src/LIB/oasis3-mct
 LIB_OASIS?=-L$(DIR_OASIS)/SFX/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
 INC_OASIS?=-I$(DIR_OASIS)/SFX/build/lib/psmile.MPI1
 OASIS_KEY?=${DIR_OASIS}/SFX/build/lib/psmile.MPI1/mod_oasis.mod
 #
-CPPFLAGS   += $(CPPFLAGS_OASIS)
+FPPFLAGS   += $(FPPFLAGS_OASIS)
 LIBS       += $(LIB_OASIS)
 INC        += $(INC_OASIS)
 VPATH      += $(DIR_OASIS)/SFX/build/lib/psmile.MPI1

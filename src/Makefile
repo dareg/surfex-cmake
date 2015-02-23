@@ -570,13 +570,14 @@ ARFLAGS=r
 # 
 
 %.D:%.F90
-	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f90 
-	spll $(NSOURCE) $(OBJDIR)/$(*F).f90 
+	$(CPP) $(INC) $(FPPFLAGS) $< >  $(OBJDIR)/$(*F).f90
+	spll $(NSOURCE) $(OBJDIR)/$(*F).f90
 	-@rm -f $(OBJDIR)/$(*F).f90
 
+#RJ: no cpp for lower case ones, actually even dangerous a bit
 %.D:%.f90
-	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f90 
-	spll $(NSOURCE) $(OBJDIR)/$(*F).f90 
+	cp $< $(OBJDIR)/$(*F).f90
+	spll $(NSOURCE) $(OBJDIR)/$(*F).f90
 	-@rm -f $(OBJDIR)/$(*F).f90
 
 #RJ: strange
@@ -586,15 +587,15 @@ ARFLAGS=r
 #	-@rm -f $(OBJDIR)/$(*F).fx90
 
 %.D:%.F
-	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f
+	$(CPP) $(INC) $(FPPFLAGS) $< >  $(OBJDIR)/$(*F).f
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f
 	-@rm -f $(OBJDIR)/$(*F).f
 
 %.D:%.f
-	$(CPP)  $(INC) $(CPPFLAGS) $< > $(OBJDIR)/$(*F).f
-	spll $(NSOURCE) $(OBJDIR)/$(*F).f 
+	cp $< $(OBJDIR)/$(*F).f
+	spll $(NSOURCE) $(OBJDIR)/$(*F).f
 	-@rm -f $(OBJDIR)/$(*F).f
- 
+
 #
 # GENERATION OF OBJET FILES : *.o
 #
@@ -624,10 +625,8 @@ endif
 
 ifeq "$(DO_COMP_MASTER)" "YES"
 include  filedepallmaster
-endif 
+endif
 
 ifeq "$(DO_COMP_USER)" "YES"
 include  filedepalluser
-endif 
-
-
+endif

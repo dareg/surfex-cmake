@@ -21,15 +21,15 @@ OPT_I8    = -qintsize=8
 # Integer 4/8 option
 #
 MNH_INT   ?=I4
-LFI_RECL  ?=512
+#RJ LFI_RECL  ?=512
 #
 ifeq "$(MNH_INT)" "I8"
 OPT_BASE         += $(OPT_I8)
-LFI_INT           ?=8
+#RJ LFI_INT           ?=8
 MNH_MPI_RANK_KIND ?=8
 else
 MNH_MPI_RANK_KIND ?=4
-LFI_INT           ?=4
+#RJ LFI_INT           ?=4
 endif
 OPT       = $(OPT_BASE) $(OPT_PERF2) 
 OPT0      = $(OPT_BASE) $(OPT_PERF0) 
@@ -77,11 +77,11 @@ endif
 #
 CPP = /usr/lib/cpp -C -P -qlanglvl=classic
 #
-CPPFLAGS_SURFEX    =
-CPPFLAGS_SURCOUCHE = -DMNH_MPI_DOUBLE_PRECISION -DMNH_LINUX -DMNH_SP4 -DMNH_MPI_ISEND  -DMNH_MPI_RANK_KIND=$(MNH_MPI_RANK_KIND)
-CPPFLAGS_RAD       =
-CPPFLAGS_NEWLFI    = -DLINUX -DLFI_INT=${LFI_INT} -DLFI_RECL=${LFI_RECL}
-CPPFLAGS_MNH       = -DAMAX1=MAX -DMNH
+FPPFLAGS_SURFEX    =
+#RJ FPPFLAGS_SURCOUCHE = -DMNH_MPI_DOUBLE_PRECISION -DMNH_LINUX -DMNH_SP4 -DMNH_MPI_ISEND  -DMNH_MPI_RANK_KIND=$(MNH_MPI_RANK_KIND)
+#RJ FPPFLAGS_RAD       =
+#RJ FPPFLAGS_NEWLFI    = -DLINUX -DLFI_INT=${LFI_INT} -DLFI_RECL=${LFI_RECL}
+#RJ FPPFLAGS_MNH       = -DAMAX1=MAX -DMNH
 #
 # Gribex flags
 #
@@ -101,6 +101,7 @@ include Makefile.SURFEX.mk
 #
 INC += -I/usr/lpp/xlf/include
 VPATH += /usr/lpp/xlf/include
+FPPFLAGS += -DAIX64
 CPPFLAGS += -DAIX64
 #
 ##########################################################
