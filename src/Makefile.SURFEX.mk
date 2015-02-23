@@ -214,7 +214,9 @@ endif
 #           Source XRD                                   #
 ##########################################################
 
+#RJ: XRD40 for cross validation
 VER_XRD ?= XRD39
+#VER_XRD ?= XRD40
 
 DIR_XRD += LIB/$(VER_XRD)/FA
 DIR_XRD += LIB/$(VER_XRD)/LFI

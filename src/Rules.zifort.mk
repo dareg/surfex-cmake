@@ -98,6 +98,9 @@ endif
 #
 CPP = cpp -P -traditional -Wcomment
 #
+#RJ: bug in ifort when creating modis in XRD40
+VER_XRD=XRD39
+#
 FPPFLAGS_SURFEX    =
 #RJ FPPFLAGS_SURCOUCHE = -DMNH_MPI_DOUBLE_PRECISION -DMNH_LINUX -DMNH_MPI_BSEND -DDEV_NULL -DMNH_MPI_RANK_KIND=$(MNH_MPI_RANK_KIND)
 #RJ FPPFLAGS_RAD       =
