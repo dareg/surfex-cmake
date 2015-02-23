@@ -125,7 +125,7 @@ IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
-INTEGER (KIND=JPLIKB)  KDATEF     (:)                 !   OUT
+INTEGER (KIND=JPLIKB)  KDATEF     (*)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
@@ -144,7 +144,7 @@ IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
-INTEGER (KIND=JPLIKM)  KDATEF     (:)                 !   OUT
+INTEGER (KIND=JPLIKM)  KDATEF     (*)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 

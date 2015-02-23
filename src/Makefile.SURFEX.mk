@@ -213,14 +213,19 @@ endif
 ##########################################################
 #           Source XRD                                   #
 ##########################################################
-DIR_XRD += LIB/XRD39/FA
-DIR_XRD += LIB/XRD39/LFI
-DIR_XRD += LIB/XRD39/grib_mf
-DIR_XRD += LIB/XRD39/module
-#DIR_XRD += LIB/XRD39/support
-DIR_XRD += LIB/XRD39/utilities
-INC_XRD = -I$(B)LIB/XRD39/include -I$(B)LIB/XRD39/FA -I$(B)LIB/XRD39/LFI
-FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
+
+VER_XRD ?= XRD39
+
+DIR_XRD += LIB/$(VER_XRD)/FA
+DIR_XRD += LIB/$(VER_XRD)/LFI
+DIR_XRD += LIB/$(VER_XRD)/grib_mf
+DIR_XRD += LIB/$(VER_XRD)/module
+#DIR_XRD += LIB/$(VER_XRD)/support
+DIR_XRD += LIB/$(VER_XRD)/utilities
+INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/FA -I$(B)LIB/$(VER_XRD)/LFI
+#RJ: for time being avoid interfaces usage from xrd/fa cpp prototyping, not needed with backported patches
+#RJ FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
+FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE
 CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE
 #
 ifdef DIR_XRD

@@ -439,7 +439,7 @@ INTEGER (KIND=JPDBLE)  KCHAMP     (*)                         ! IN
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPDBLE)  KVALCO     (*)                         !   OUT
 INTEGER (KIND=JPLIKB)  KLONGD                                 !   OUT
-INTEGER (KIND=JPLIKB)  KB1PAR     (:)                 ! INOUT
+INTEGER (KIND=JPLIKB)  KB1PAR     (*)                 ! INOUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
@@ -465,7 +465,7 @@ INTEGER (KIND=JPDBLE)  KCHAMP     (*)                         ! IN
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPDBLE)  KVALCO     (*)                         !   OUT
 INTEGER (KIND=JPLIKM)  KLONGD                                 !   OUT
-INTEGER (KIND=JPLIKM)  KB1PAR     (:)                 ! INOUT
+INTEGER (KIND=JPLIKM)  KB1PAR     (*)                 ! INOUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 

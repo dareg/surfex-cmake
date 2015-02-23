@@ -88,7 +88,7 @@ INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKB)  KREC                                   ! IN   
 INTEGER (KIND=JPLIKB)  KFACTM                                 ! IN   
-INTEGER (KIND=JPDBLE)  KTAB       (:)         !   OUT
+INTEGER (KIND=JPDBLE)  KTAB       (*)         !   OUT
 INTEGER (KIND=JPLIKB)  KNBECR                                 ! INOUT
 INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
@@ -112,7 +112,7 @@ INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKM)  KREC                                   ! IN   
 INTEGER (KIND=JPLIKM)  KFACTM                                 ! IN   
-INTEGER (KIND=JPDBLE)  KTAB       (:)         !   OUT
+INTEGER (KIND=JPDBLE)  KTAB       (*)         !   OUT
 INTEGER (KIND=JPLIKM)  KNBECR                                 ! INOUT
 INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 

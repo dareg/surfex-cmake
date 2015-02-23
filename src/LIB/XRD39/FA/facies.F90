@@ -252,13 +252,13 @@ REAL (KIND=JPDBLR)     PCODIL                                 !   OUT
 INTEGER (KIND=JPLIKB)  KTRONC                                 !   OUT
 INTEGER (KIND=JPLIKB)  KNLATI                                 !   OUT
 INTEGER (KIND=JPLIKB)  KNXLON                                 !   OUT
-INTEGER (KIND=JPLIKB)  KNLOPA     (:)                 !   OUT
-INTEGER (KIND=JPLIKB)  KNOZPA     (:)                 !   OUT
-REAL (KIND=JPDBLR)     PSINLA     (:)                 !   OUT
+INTEGER (KIND=JPLIKB)  KNLOPA     (*)                 !   OUT
+INTEGER (KIND=JPLIKB)  KNOZPA     (*)                 !   OUT
+REAL (KIND=JPDBLR)     PSINLA     (*)                 !   OUT
 INTEGER (KIND=JPLIKB)  KNIVER                                 !   OUT
 REAL (KIND=JPDBLR)     PREFER                                 !   OUT
-REAL (KIND=JPDBLR)     PAHYBR     (:)               !   OUT
-REAL (KIND=JPDBLR)     PBHYBR     (:)               !   OUT
+REAL (KIND=JPDBLR)     PAHYBR     (*)               !   OUT
+REAL (KIND=JPDBLR)     PBHYBR     (*)               !   OUT
 LOGICAL                LDGARD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
@@ -289,13 +289,13 @@ REAL (KIND=JPDBLR)     PCODIL                                 !   OUT
 INTEGER (KIND=JPLIKM)  KTRONC                                 !   OUT
 INTEGER (KIND=JPLIKM)  KNLATI                                 !   OUT
 INTEGER (KIND=JPLIKM)  KNXLON                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNLOPA     (:)                 !   OUT
-INTEGER (KIND=JPLIKM)  KNOZPA     (:)                 !   OUT
-REAL (KIND=JPDBLR)     PSINLA     (:)                 !   OUT
+INTEGER (KIND=JPLIKM)  KNLOPA     (*)                 !   OUT
+INTEGER (KIND=JPLIKM)  KNOZPA     (*)                 !   OUT
+REAL (KIND=JPDBLR)     PSINLA     (*)                 !   OUT
 INTEGER (KIND=JPLIKM)  KNIVER                                 !   OUT
 REAL (KIND=JPDBLR)     PREFER                                 !   OUT
-REAL (KIND=JPDBLR)     PAHYBR     (:)               !   OUT
-REAL (KIND=JPDBLR)     PBHYBR     (:)               !   OUT
+REAL (KIND=JPDBLR)     PAHYBR     (*)               !   OUT
+REAL (KIND=JPDBLR)     PBHYBR     (*)               !   OUT
 LOGICAL                LDGARD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()

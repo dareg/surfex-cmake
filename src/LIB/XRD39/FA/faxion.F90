@@ -414,7 +414,7 @@ INTEGER (KIND=JPLIKB)  KNBITS                                 ! IN
 LOGICAL                LDARPE                                 ! IN   
 REAL (KIND=JPDBLR)     PECART                                 !   OUT
 LOGICAL                LDMLAM                                 ! IN   
-INTEGER (KIND=JPLIKB)  KNOZPA     (:)                 ! IN   
+INTEGER (KIND=JPLIKB)  KNOZPA     (*)                 ! IN   
 INTEGER (KIND=JPLIKB)  KSTROF                                 ! IN   
 INTEGER (KIND=JPLIKB)  KTRONC                                 ! IN   
 INTEGER (KIND=JPLIKB)  KXLOPA                                 ! IN   
@@ -448,7 +448,7 @@ INTEGER (KIND=JPLIKM)  KNBITS                                 ! IN
 LOGICAL                LDARPE                                 ! IN   
 REAL (KIND=JPDBLR)     PECART                                 !   OUT
 LOGICAL                LDMLAM                                 ! IN   
-INTEGER (KIND=JPLIKM)  KNOZPA     (:)                 ! IN   
+INTEGER (KIND=JPLIKM)  KNOZPA     (*)                 ! IN   
 INTEGER (KIND=JPLIKM)  KSTROF                                 ! IN   
 INTEGER (KIND=JPLIKM)  KTRONC                                 ! IN   
 INTEGER (KIND=JPLIKM)  KXLOPA                                 ! IN   

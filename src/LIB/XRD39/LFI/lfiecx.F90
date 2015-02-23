@@ -420,7 +420,7 @@ IMPLICIT NONE
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKB)  KREC                                   ! IN   
-INTEGER (KIND=JPDBLE)  KZONE      (:)                ! IN   
+INTEGER (KIND=JPDBLE)  KZONE      (*)                ! IN   
 LOGICAL                LDADON                                 ! IN   
 INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
@@ -442,7 +442,7 @@ IMPLICIT NONE
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKM)  KREC                                   ! IN   
-INTEGER (KIND=JPDBLE)  KZONE      (:)                ! IN   
+INTEGER (KIND=JPDBLE)  KZONE      (*)                ! IN   
 LOGICAL                LDADON                                 ! IN   
 INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
