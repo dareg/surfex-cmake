@@ -3,7 +3,7 @@
 !     ##################
 INTERFACE AV_PGD
 !
-      SUBROUTINE AV_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_2D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
 !
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct
@@ -16,7 +16,7 @@ LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
 REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
 INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
-END SUBROUTINE AV_PGD
+END SUBROUTINE AV_PGD_2D
 !
       SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
@@ -822,7 +822,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_4',1,ZHOOK_HANDLE)
 END SUBROUTINE AV_PATCH_PGD_1D
 !
 !     ################################################################
-      SUBROUTINE AV_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_2D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PGD* average a secondary physiographic variable from the
@@ -920,8 +920,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.1    field does not exist
 !            --------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD',0,ZHOOK_HANDLE)
-IF (SIZE(PFIELD)==0 .AND. LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_2D',0,ZHOOK_HANDLE)
+IF (SIZE(PFIELD)==0 .AND. LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_2D',1,ZHOOK_HANDLE)
 IF (SIZE(PFIELD)==0) RETURN
 !
 !-------------------------------------------------------------------------------
@@ -1111,15 +1111,15 @@ END DO
 !-------------------------------------------------------------------------------
 !
   CASE DEFAULT
-    CALL ABOR1_SFX('AV_PGD: (2) AVERAGING TYPE NOT ALLOWED')
+    CALL ABOR1_SFX('AV_PGD_2D: (2) AVERAGING TYPE NOT ALLOWED')
 !
 END SELECT
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_2D',1,ZHOOK_HANDLE)
 ! 
 !
 !-------------------------------------------------------------------------------
 !
-END SUBROUTINE AV_PGD
+END SUBROUTINE AV_PGD_2D
 !
 !
 !
