@@ -119,6 +119,9 @@ include Makefile.SURFEX.mk
 #                                                        #
 ##########################################################
 
+#RJ: force lfi output binary reproducibility (avoid use of unix timestamps inside)
+FPPFLAGS += -DLFI_BFB
+
 #RJ ifneq "$(findstring 8,$(LFI_INT))" ""
 #RJ OBJS_I8=spll_NEWLFI_ALL.o
 #RJ $(OBJS_I8) : OPT = $(OPT_BASE) $(OPT_PERF2) $(OPT_I8)
