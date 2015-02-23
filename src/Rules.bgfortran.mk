@@ -6,6 +6,11 @@
 # Compiler Options                                       #
 #                                                        #
 ##########################################################
+#
+#RJ: few extra features
+#DO_ASM = YES
+DO_ASM = NO
+#
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
 OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Wsurprising

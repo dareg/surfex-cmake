@@ -618,20 +618,30 @@ ARFLAGS=r
 # GENERATION OF OBJET FILES : *.o
 #
 
+#RJ: add asm_lst capabilities for debugging
 #RJ: rules for F90 sources
 %.o:%.F90
+ifeq "$(DO_ASM)" "YES"
+	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c -S $< -o $(OBJDIR)/$(*F).s
+endif
 	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
 ifeq "x$(MODOUT_FLAG)" "x"
 	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
 endif
 
 %.o:%.f90
+ifeq "$(DO_ASM)" "YES"
+	$(F90) $(MODOUT) $(INC) -c -S $(F90FLAGS) $< -o $(OBJDIR)/$(*F).s
+endif
 	$(F90) $(MODOUT) $(INC) -c $(F90FLAGS) $< -o $(OBJDIR)/$(*F).o
 ifeq "x$(MODOUT_FLAG)" "x"
 	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
 endif
 
 %.o:%.f
+ifeq "$(DO_ASM)" "YES"
+	$(F77) $(MODOUT) $(INC) -c -S $(F77FLAGS) $< -o $(OBJDIR)/$(*F).s
+endif
 	$(F77) $(MODOUT) $(INC) -c $(F77FLAGS)  $< -o $(OBJDIR)/$(*F).o
 ifeq "x$(MODOUT_FLAG)" "x"
 	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK

@@ -6,6 +6,11 @@
 # Compiler Options                                       #
 #                                                        #
 ##########################################################
+#
+#RJ: few extra features
+#DO_ASM = YES
+DO_ASM = NO
+#
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
 #RJ: if using any interrupt signal watchers, dr_hook, mpi, valgrind or ifort itself do not forget to add:
@@ -13,6 +18,7 @@
 #
 #OPT_BASE  = -openmp -openmp-threadprivate=compat -r8 -g -u -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
 OPT_BASE  = -r8 -g -u -assume nosource_include -assume byterecl -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
+OPT_BASE += -fsource-asm
 #
 OPT_PERF0 = -O0 -fpe0 -ftz
 OPT_PERF2 = -O2 -fpe0 -ftz
