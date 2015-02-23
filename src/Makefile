@@ -318,7 +318,7 @@ gribex_clean :
 ##########################################################
 gribapi : $(GRIBAPI_INC)
 $(GRIBAPI_INC) : 
-	cd $(DIR_GRIBAPI) && \
+	cd $(DIR_GRIBAPI) && LDFLAGS= \
 	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(FC)" && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
@@ -336,7 +336,7 @@ ifeq "$(VER_CDF)" "CDFAUTO"
 #
 cdf : $(CDF_INC)
 $(CDF_INC) :
-	cd $(DIR_CDF) && \
+	cd $(DIR_CDF) && LDFLAGS= \
 	 ./configure --prefix=${CDF_PATH} FC="$(FC)" FCFLAGS="$(OPT_BASE)" CPPFLAGS="-DpgiFortran" && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
