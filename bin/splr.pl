@@ -517,7 +517,7 @@ use Fortran90_stuff qw( create_intfb $f90s_ALLOW_DIRTY_MOD_REGEX
     ${f90s_ALLOW_DIRTY_MOD_REGEX}.='|MODD_FMDECLAR|MODD_TYPE_DATE_SURF|MODD_TYPE_SNOW|MODD_TYPE_EFUTIL'; #from surfex
     ${f90s_ALLOW_DIRTY_MOD_REGEX}.='|YOMCMEMTYPES|YOAMSU|MOD_KFGRID'; #from sat
     ${f90s_ALLOW_DIRTY_MOD_REGEX}.='|ODB_MODULE|ISO_C_BINDING|EXTR_MODULE_1C|RAD_BIAS_1C_UTI'; #from odb
-    ${f90s_ALLOW_DIRTY_MOD_REGEX}.='|MODD_TYPE'; #from gelato
+    ${f90s_ALLOW_DIRTY_MOD_REGEX}.='|MODD_TYPE|MODD_GLT_PARAM'; #from gelato
   }
 
 # Gather information needed to create interface block for routine

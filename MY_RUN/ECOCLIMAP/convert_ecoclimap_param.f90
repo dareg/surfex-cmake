@@ -76,7 +76,7 @@ DO ICOVER=1,NBCOVERS
     WRITE(12,FMT="(A)") ' FRACTION'//CSEP//'    No'//CSEP//'  Rock'//CSEP//'  Snow'//CSEP//'  Tebd'//CSEP//'  Bone'//CSEP//&
         '  Trbe'//CSEP//'    C3'//CSEP//'    C4'//CSEP//'   Irr'//CSEP//'  Gras'//CSEP//'  Trog'//CSEP//'  Park'//CSEP//&
         '  Trbd'//CSEP//'  Tebe'//CSEP//'  Tene'//CSEP//'  Bobd'//CSEP//'  Bond'//CSEP//'  Bogr'//CSEP//'  Shrb'
-    WRITE (12,FMT="(I9,19('"//CSEP//"',F6.2)))") JCOVER,ZVEGTYPE(:)
+    WRITE (12,FMT="(I9,19('"//CSEP//"',F6.2))") JCOVER,ZVEGTYPE(:)
     !
     IF (KFILE<=2) THEN
       DO J=1,3

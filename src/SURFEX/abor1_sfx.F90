@@ -95,6 +95,7 @@ WRITE(ILUOUT,*) '---------------------------------------------------------------
 #ifdef ARO
 call abor1('abort by abor1_sfx')
 #else
+ write(0,*) "aborted with text:",trim(ytext),"|"
  CALL ABORT
 STOP
 #endif

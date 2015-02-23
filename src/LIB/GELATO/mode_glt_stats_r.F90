@@ -64,7 +64,7 @@ FUNCTION glt_thinice_concm_r(tpsit)
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
         tpsit
   REAL, DIMENSION(np) ::                                             &
-        glt_thinice_concm 
+        glt_thinice_concm_r
 END FUNCTION glt_thinice_concm_r
 
 FUNCTION glt_thickice_concm_r(tpsit)

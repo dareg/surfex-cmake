@@ -69,7 +69,7 @@ FCFLAGS_OMP=
 CCFLAGS_OMP=
 endif
 #
-F90FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffree-form -ffree-line-length-none
+F90FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffree-form -ffree-line-length-none -fimplicit-none
 F77FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffixed-form
 FX90          = $(F77)
 FX90FLAGS     = $(OPT) $(FCFLAGS_OMP) -ffixed-form

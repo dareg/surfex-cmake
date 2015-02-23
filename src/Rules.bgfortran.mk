@@ -19,7 +19,12 @@ AVOID_CPP = YES
 #
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Wsurprising
+##OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Wall -Wextra -Waliasing -Wampersand -Warray-temporaries -Wcharacter-truncation -Wconversion-extra -Wsurprising -Wunderflow -Wno-compare-reals
+#OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Wall -Wextra -Waliasing -Wampersand -Wcharacter-truncation -Wconversion-extra -Wsurprising -Wunderflow -Wno-compare-reals
+#OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap
+OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap 
+OPT_BASE += -ffpe-trap=overflow,zero,invalid
+OPT_BASE += -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Wsurprising
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
@@ -74,7 +79,7 @@ FCFLAGS_OMP=
 CFLAGS_OMP=
 endif
 #
-F90FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffree-form -ffree-line-length-none
+F90FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffree-form -ffree-line-length-none -fimplicit-none
 F77FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffixed-form
 FX90          = $(F77)
 FX90FLAGS     = $(OPT) $(FCFLAGS_OMP) -ffixed-form
