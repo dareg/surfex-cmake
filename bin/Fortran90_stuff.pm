@@ -549,6 +549,10 @@ CRACK:    {
             if(/^[^\w]++THEN\b/) {
               $content="IF_construct";
             }
+#RJ: extra case, arithmetic if, should be avoided
+            elsif(/^[ \t]*+[0-9]++[ \t]*+[,][ \t]*+[0-9]++[ \t]*+[,][ \t]*+[0-9]++/) {
+              $content="IF_arith";
+            }
             elsif(/^(TRY|THROW_L|THROWM_L|THROW|THROWM|CATCH_L|CATCH_C|CATCH|PCATCH|INFO|WARN)\b/) {
               $content='cpp_sat_bad';
               if(${f90s_VERBOSITY}>=2) {

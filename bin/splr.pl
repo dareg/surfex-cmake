@@ -426,6 +426,7 @@ ttt:    foreach my $ii (0..$#splitted_units) {
         eval{&study(\@statements,\%prog_info);};
         if($@) {
           warn "Warning[mkintfbl]: study crashed- ".$cur_fname."\n";
+  die;
           next ttt;
         }
       }
@@ -440,6 +441,7 @@ ttt:    foreach my $ii (0..$#splitted_units) {
         eval{&hm_create_interface_module (\@statements,\@interface_block,\$ftemp);};
         if($@) {
           warn "Warning[mkintfbl]: create_intfb crashed- ".$cur_fname."\n";
+  die;
           next;
         }
       }
