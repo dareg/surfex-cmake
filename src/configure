@@ -429,18 +429,18 @@ fi
 #
 #  Install OASIS
 #
-if [ "x${VERSION_OASIS}" = "xmct" ] ; then
-cd "$LOCAL/src/LIB"
+if [ "x${VER_OASIS}" = "xmct" ] ; then
 if [ "x${VER_MPI}" = "xNOMPI" ] ; then
-  echo'!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-  echo'OASIS can not be compiled without mpi'
-  echo'SURFEX-TRIP coupling will not be able to run'
-  echo'!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  echo 'OASIS can not be compiled without mpi'
+  echo 'SURFEX-TRIP coupling will not be able to run'
+  echo 'OASIS building DISABLED'
+  echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 else
-  if [ ! -d oasis3-mct ]; then
-    tar -zxf oasis3-mct.tar.gz
-    cd oasis3-mct/util/make_dir
-    cp make.inc_cnrm make.inc
+  if [ ! -d "$LOCAL/src/LIB"/oasis"${VERSION_OASIS}" ]; then
+    cd "$LOCAL/src/LIB"
+    tar xvfz oasis"${VERSION_OASIS}".tar.gz
+    cp -f oasis_sfx_make.inc oasis"${VERSION_OASIS}"/util/make_dir/make.inc
   fi
 fi
 fi

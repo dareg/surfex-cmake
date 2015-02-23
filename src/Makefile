@@ -225,14 +225,20 @@ ifeq "$(VER_CDF)" "CDFAUTO"
 REDISTS += cdf
 endif
 
-#RJ: temporary disable oasis target, renable after fixed serial compilation
+#RJ: re-add oasis back
+ifeq "$(VER_OASIS)" "mct"
+ifneq "$(VER_MPI)" "NOMPI"
+EXTCOUPLERS += oasis
+endif
+endif
+
 # main projectes
 PROJECTS += ecoclimap progmaster
 
 #RJ: add new main target, must come first!
-all : $(REDISTS) $(PROJECTS)
+all : $(REDISTS) $(EXTCOUPLERS) $(PROJECTS)
 
-objdirmaster :  $(OBJDIR_MASTER)/.dummy $(REDISTS)
+objdirmaster :  $(OBJDIR_MASTER)/.dummy $(REDISTS) $(EXTCOUPLERS)
 
 $(OBJDIR_MASTER)/.dummy :
 	-mkdir -p $(OBJDIR_MASTER)/.dummy
@@ -295,7 +301,7 @@ clean_progmaster :
 
 user : proguser
 
-objdiruser :  $(OBJDIR_USER)/.dummy $(REDISTS)
+objdiruser :  $(OBJDIR_USER)/.dummy $(REDISTS) $(EXTCOUPLERS)
 
 $(OBJDIR_USER)/.dummy :
 	-mkdir -p $(OBJDIR_USER)/.dummy
@@ -422,14 +428,26 @@ endif
 #                                                        #
 ##########################################################
 ifeq "$(VER_OASIS)" "mct"
+ifneq "$(VER_MPI)" "NOMPI"
+#
 oasis : $(OASIS_KEY)
-$(OASIS_KEY) : 
-	cd ${DIR_OASIS}/util/make_dir && \
-	 cp -f make.inc_cnrm make.inc && \
-	 $(MAKE) -f TopMakefileOasis3
+$(OASIS_KEY) : $(CDF_INC)
+	([ ! -d ${OASIS_PATH} ] && mkdir ${OASIS_PATH}) || true
+	@echo '=> Compiling oasis'
+	@echo '===> check util/make_dir/COMP.log STDOUT messages'
+	@echo '===> check util/make_dir/COMP.err for STDERR logs'
+	cd $(DIR_OASIS)/util/make_dir && \
+	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS= \
+	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(OPT) $(INC_NETCDF) $(LIB_NETCDF)" \
+	    $(MAKE) -j 1 -f TopMakefileOasis3
+	echo '=> Compiling oasis DONE'
 
-cleanoasis : 
-	cd ${DIR_OASIS}/util/make_dir && $(MAKE) realclean -f TopMakefileOasis3
+clean_oasis :
+	cd ${DIR_OASIS}/util/make_dir && \
+	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" \
+	    $(MAKE) -j 1 realclean -f TopMakefileOasis3
+	- [ ! -d ${OASIS_PATH} ] || rm -fr  ${OASIS_PATH}
+endif
 endif
 ##########################################################
 #                                                        #
@@ -552,7 +570,7 @@ endif
 cleanuser :
 	test -d $(OBJDIR_USER) && rm -fr  $(OBJDIR_USER)
 
-clean :  examplesclean cleanmaster $(addprefix clean_,$(REDISTS))
+clean :  examplesclean cleanmaster $(addprefix clean_,$(REDISTS)) $(addprefix clean_,$(EXTCOUPLERS))
 	rm -fr  $(OBJDIR_ROOT)
 cleanprog :
 	cd $(OBJDIR_ROOT) ; rm -f $(PROG_LIST)

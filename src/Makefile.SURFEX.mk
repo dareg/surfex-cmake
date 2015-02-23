@@ -249,6 +249,37 @@ DIR_MASTER += $(DIR_FM)
 INC        += $(INC_FM)
 endif
 ##########################################################
+#           Librairie OASIS3-MCT                         #
+##########################################################
+#RJ: must be before netcdf LIBS to correctly link
+#
+ifeq "$(VER_OASIS)" "mct"
+ifneq "$(VER_MPI)" "NOMPI"
+#
+DIR_OASIS?=${SRC_SURFEX}/src/LIB/oasis${VERSION_OASIS}
+OASIS_PATH?=${DIR_OASIS}-${ARCH}
+LIB_OASIS?=-L${OASIS_PATH}/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
+INC_OASIS?=-I${OASIS_PATH}/build/lib/psmile.MPI1
+OASIS_KEY?=${OASIS_PATH}/build/lib/psmile.MPI1/mod_oasis.mod
+#
+FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
+endif
+endif
+#
+ifeq "$(VER_OASIS)" "mct_EXT"
+ifneq "$(VER_MPI)" "NOMPI"
+FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
+endif
+endif
+#
+ifneq "x$(VER_OASIS)" "x"
+FPPFLAGS   += $(FPPFLAGS_OASIS)
+LIBS       += $(LIB_OASIS)
+INC        += $(INC_OASIS)
+endif
+##########################################################
 #           Source MPIVIDE                               #
 ##########################################################
 #
@@ -514,26 +545,6 @@ endif
 ifneq "x$(VER_GRIBAPI)" "x"
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
-endif
-##########################################################
-#           Librairie OASIS3-MCT                         #
-##########################################################
-#
-ifneq "$(VER_MPI)" "NOMPI"
-#
-ifeq "$(VER_OASIS)" "mct"
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
-DIR_OASIS?=${SRC_SURFEX}/src/LIB/oasis3-mct
-LIB_OASIS?=-L$(DIR_OASIS)/SFX/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
-INC_OASIS?=-I$(DIR_OASIS)/SFX/build/lib/psmile.MPI1
-OASIS_KEY?=${DIR_OASIS}/SFX/build/lib/psmile.MPI1/mod_oasis.mod
-#
-FPPFLAGS   += $(FPPFLAGS_OASIS)
-LIBS       += $(LIB_OASIS)
-INC        += $(INC_OASIS)
-VPATH      += $(DIR_OASIS)/SFX/build/lib/psmile.MPI1
-endif
-#
 endif
 #
 ##########################################################
