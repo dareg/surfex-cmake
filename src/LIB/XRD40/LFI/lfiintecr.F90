@@ -1,12 +1,10 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIINTECR_MT_BB                                       &
-&                        (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG )
+
+SUBROUTINE LFIINTECR_MT64                          &
+&           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 USE LFIMOD, ONLY : LFICOM
-USE PARKIND1, ONLY : JPRB
-USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !
 !****
@@ -22,55 +20,52 @@ IMPLICIT NONE
 !                KLONG  (ENTREE) ==> LONGUEUR DE L'ARTICLE A LIRE.
 !
 !
-TYPE(LFICOM) :: LFI
-CHARACTER CDNOMA*(*)
-INTEGER (KIND=JPLIKB) KREP, KNUMER, KLONG, KTAB(KLONG)
+! Arguments
+TYPE (LFICOM)          LFI                                    ! INOUT
+INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
+INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
+CHARACTER (LEN=*)      CDNOMA                                 ! IN   
+INTEGER (KIND=JPLIKB)  KLONG                                  ! IN   
+INTEGER (KIND=JPLIKM)  KTAB       (KLONG)                     ! IN   
+! Local integers
+INTEGER (KIND=JPLIKB)  ITAB       (KLONG)                     ! IN   
+! Convert arguments
 
-INTEGER (KIND=JPLIKB) JI
-INTEGER (KIND=JPDBLE)  ITAB (KLONG)
+ITAB       = INT (      KTAB, JPLIKB)
 
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIINTECR_MT',0,ZHOOK_HANDLE)
-DO JI=1,KLONG
-  ITAB(JI)=INT(KTAB(JI),KIND=JPDBLE)
-ENDDO
-CALL LFIECR_MT_BB                                        &
-&               (LFI,  KREP, KNUMER, CDNOMA, ITAB, KLONG )
-!
-IF (LHOOK) CALL DR_HOOK('LFIINTECR_MT',1,ZHOOK_HANDLE)
+CALL LFIECR_MT64                                 &
+&           (LFI, KREP, KNUMER, CDNOMA, ITAB, KLONG)
+
 END SUBROUTINE
 
-
-
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIINTECR_BB                       &
+SUBROUTINE LFIINTECR64                        &
 &           (KREP, KNUMER, CDNOMA, KTAB, KLONG)
-USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
+USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT,  &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
 CHARACTER (LEN=*)      CDNOMA                                 ! IN   
 INTEGER (KIND=JPLIKB)  KLONG                                  ! IN   
-INTEGER (KIND=JPLIKB)  KTAB       (KLONG)                     ! IN   
+INTEGER (KIND=JPLIKM)  KTAB       (KLONG)                     ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIINTECR_MT_BB                               &
+CALL LFIINTECR_MT64                                 &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE
 
-SUBROUTINE LFIINTECR_MM                       &
+SUBROUTINE LFIINTECR                          &
 &           (KREP, KNUMER, CDNOMA, KTAB, KLONG)
-USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
+USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT,  &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -81,17 +76,15 @@ INTEGER (KIND=JPLIKM)  KTAB       (KLONG)                     ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIINTECR_MT_MM                               &
+CALL LFIINTECR_MT                                  &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE
 
-SUBROUTINE LFIINTECR_MT_MM                         &
+SUBROUTINE LFIINTECR_MT                            &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -103,16 +96,14 @@ INTEGER (KIND=JPLIKM)  KTAB       (KLONG)                     ! IN
 ! Local integers
 INTEGER (KIND=JPLIKB)  IREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  INUMER                                 ! IN   
-INTEGER (KIND=JPLIKB)  ITAB       (KLONG)                     ! IN   
 INTEGER (KIND=JPLIKB)  ILONG                                  ! IN   
 ! Convert arguments
 
 INUMER     = INT (    KNUMER, JPLIKB)
-ITAB       = INT (      KTAB, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFIINTECR_MT_BB                               &
-&           (LFI, IREP, INUMER, CDNOMA, ITAB, ILONG)
+CALL LFIECR_MT64                                 &
+&           (LFI, IREP, INUMER, CDNOMA, KTAB, ILONG)
 
 KREP       = INT (      IREP, JPLIKM)
 

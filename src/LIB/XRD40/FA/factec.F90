@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACTEC_MT_BB                                     &
+SUBROUTINE FACTEC_MT64                                      &
 &                     (FA, KREP, PA, KNBIT, KDEC, KE, KNUTIL)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de calcul du FACTeur d'EChelle binaire associe
@@ -102,12 +101,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACTEC_BB                          &
+SUBROUTINE FACTEC64                           &
 &           (KREP, PA, KNBIT, KDEC, KE, KNUTIL)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -119,17 +118,17 @@ INTEGER (KIND=JPLIKB)  KNUTIL                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTEC_MT_BB                                 &
+CALL FACTEC_MT64                                  &
 &           (FA, KREP, PA, KNBIT, KDEC, KE, KNUTIL)
 
 END SUBROUTINE
 
-SUBROUTINE FACTEC_MM                          &
+SUBROUTINE FACTEC                             &
 &           (KREP, PA, KNBIT, KDEC, KE, KNUTIL)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -141,17 +140,15 @@ INTEGER (KIND=JPLIKM)  KNUTIL                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTEC_MT_MM                                 &
+CALL FACTEC_MT                                    &
 &           (FA, KREP, PA, KNBIT, KDEC, KE, KNUTIL)
 
 END SUBROUTINE
 
-SUBROUTINE FACTEC_MT_MM                           &
+SUBROUTINE FACTEC_MT                              &
 &           (FA, KREP, PA, KNBIT, KDEC, KE, KNUTIL)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -172,7 +169,7 @@ INTEGER (KIND=JPLIKB)  INUTIL                                 !   OUT
 INBIT      = INT (     KNBIT, JPLIKB)
 IDEC       = INT (      KDEC, JPLIKB)
 
-CALL FACTEC_MT_BB                                 &
+CALL FACTEC_MT64                                  &
 &           (FA, IREP, PA, INBIT, IDEC, IE, INUTIL)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud Use JNGEOM & JNEXPL parameters
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACOCH_MT_BB                          &
+SUBROUTINE FACOCH_MT64                           &
 &                     (FA,  KREP, KNUME1, KNUME2,  &
 &                      CDPREF, KNIVAU, CDSUFF )
 USE FA_MOD, ONLY : FA_COM, JPNIIL, JNGEOM, JNEXPL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de reCOpie d'un Champ Horizontal d'un fichier
@@ -79,7 +78,7 @@ IRANG(2)=0
 !
 DO J=1,2
 INUMFI=J
-CALL FANUMU_MT_BB                      &
+CALL FANUMU_MT64                       &
 &               (FA, INUMER(J),IRANG(J))
 !
 IF (IRANG(J).EQ.0) THEN
@@ -89,7 +88,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                                &
+IF (FA%LFAMUL) CALL LFIVER_MT64                                  &
 &                              (FA%LFI, FA%FICHIER(IRANG(J))%VRFICH,'ON')
 LLVERF(J)=FA%LFAMUL
 !
@@ -101,7 +100,7 @@ ENDIF
 !       FABRICATION DU NOM D'ARTICLE VIA LE SOUS-PROGRAMME "FANFAR"
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !
-CALL FANFAR_MT_BB                               &
+CALL FANFAR_MT64                                &
 &               (FA, IREP,IRANG(J),CDPREF,KNIVAU, &
 &             CDSUFF,CLNOMA,IB1PAR,               &
 &             ILPRFU,ILSUFU,ILNOMU)
@@ -113,7 +112,7 @@ LLNOMU=.TRUE.
 !     2.  -  LECTURE DE L'ARTICLE SUR LE FICHIER, CONTROLES.
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT_BB                                    &
+CALL LFINFO_MT64                                      &
 &               (FA%LFI, IREP,KNUME1,CLNOMA(1:ILNOMU), &
 &             ILONGA,IPOSEX)
 !
@@ -129,7 +128,7 @@ ELSEIF (ILONGA.GT.FA%JPXCHA+2) THEN
 ENDIF
 !
 ALLOCATE (IVALCO (ILONGA))
-CALL LFILEC_MT_BB                           &
+CALL LFILEC_MT64                             &
 &               (FA%LFI, IREP,KNUME1,         &
 &             CLNOMA(1:ILNOMU),IVALCO,ILONGA)
 LLRLFI=IREP.NE.0
@@ -250,11 +249,11 @@ ENDIF
 !
 !        Deverrouillage eventuel de l'unite logique d'entree.
 !
-IF (LLVERF(1)) CALL LFIVER_MT_BB                                 &
+IF (LLVERF(1)) CALL LFIVER_MT64                                   &
 &                              (FA%LFI, FA%FICHIER(IRANG(1))%VRFICH,'OFF')
 LLVERF(1)=.FALSE.
 !
-CALL LFIECR_MT_BB                                    &
+CALL LFIECR_MT64                                      &
 &               (FA%LFI, IREP,KNUME2,CLNOMA(1:ILNOMU), &
 &             IVALCO,ILONGA)
 INUMFI=2
@@ -315,9 +314,9 @@ LLFATA=LLMOER (IREP,IRANG(INUMFI))
 !
 !        Deverrouillage eventuel des fichiers.
 !
-IF (LLVERF(1)) CALL LFIVER_MT_BB                                 &
+IF (LLVERF(1)) CALL LFIVER_MT64                                   &
 &                              (FA%LFI, FA%FICHIER(IRANG(1))%VRFICH,'OFF')
-IF (LLVERF(2)) CALL LFIVER_MT_BB                                 &
+IF (LLVERF(2)) CALL LFIVER_MT64                                   &
 &                              (FA%LFI, FA%FICHIER(IRANG(2))%VRFICH,'OFF')
 !
 CLNSPR='FACOCH'
@@ -331,7 +330,7 @@ IF (FA%NIMSGA.NE.0.AND.IREP.EQ.0) THEN
     WRITE (UNIT=CLMESS,FMT='(''*ATTENTION* - LES UNITES'',I3,      &
 &   '' ET'',I3,'' ONT DES CARACTERISTIQUES "CADRE" DIFFERENTES'')') &
 &    KNUME1,KNUME2
-    CALL FAIPAR_MT_BB                                        &
+    CALL FAIPAR_MT64                                         &
 &                   (FA, JPNIIL,INIMES,IREP,.FALSE.,CLMESS, &
 &                 CLNSPR,CLACTI,.FALSE.)
   ELSEIF (IRANC1.NE.IRANC2) THEN
@@ -342,7 +341,7 @@ IF (FA%NIMSGA.NE.0.AND.IREP.EQ.0) THEN
 &           I3,'' ET'',I3,'' )'')')                               &
 &      FA%CADRE(IRANC1)%CNOMCA(1:FA%CADRE(IRANC1)%NLCCAD),                    &
 &      FA%CADRE(IRANC2)%CNOMCA(1:FA%CADRE(IRANC2)%NLCCAD),KNUME1,KNUME2
-    CALL FAIPAR_MT_BB                                        &
+    CALL FAIPAR_MT64                                         &
 &                   (FA, JPNIIL,INIMES,IREP,.FALSE.,CLMESS, &
 &                 CLNSPR,CLACTI,.FALSE.)
   ENDIF
@@ -392,7 +391,7 @@ ELSE
   INUMRO=INUMER(INUMFI)
 ENDIF
 !
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMRO,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CLNOMA(1:ILNOMU),LLRLFI)
 !
@@ -408,12 +407,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACOCH_BB                                     &
+SUBROUTINE FACOCH64                                      &
 &           (KREP, KNUME1, KNUME2, CDPREF, KNIVAU, CDSUFF)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -425,17 +424,17 @@ CHARACTER (LEN=*)      CDSUFF                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACOCH_MT_BB                                            &
+CALL FACOCH_MT64                                             &
 &           (FA, KREP, KNUME1, KNUME2, CDPREF, KNIVAU, CDSUFF)
 
 END SUBROUTINE
 
-SUBROUTINE FACOCH_MM                                     &
+SUBROUTINE FACOCH                                        &
 &           (KREP, KNUME1, KNUME2, CDPREF, KNIVAU, CDSUFF)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -447,17 +446,15 @@ CHARACTER (LEN=*)      CDSUFF                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACOCH_MT_MM                                            &
+CALL FACOCH_MT                                               &
 &           (FA, KREP, KNUME1, KNUME2, CDPREF, KNIVAU, CDSUFF)
 
 END SUBROUTINE
 
-SUBROUTINE FACOCH_MT_MM                                      &
+SUBROUTINE FACOCH_MT                                         &
 &           (FA, KREP, KNUME1, KNUME2, CDPREF, KNIVAU, CDSUFF)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -478,7 +475,7 @@ INUME1     = INT (    KNUME1, JPLIKB)
 INUME2     = INT (    KNUME2, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FACOCH_MT_BB                                            &
+CALL FACOCH_MT64                                             &
 &           (FA, IREP, INUME1, INUME2, CDPREF, INIVAU, CDSUFF)
 
 KREP       = INT (      IREP, JPLIKM)

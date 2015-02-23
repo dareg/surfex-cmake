@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIPIM_MT_BB                                 &
+SUBROUTINE LFIPIM_MT64                                    &
 &                     (LFI, KREP ,KRANG, KRANGM, KRGPIM,  &
 &                      KRGPIF, KRGFOR, KNPILE, KRETIN )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
@@ -74,7 +73,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIPIM_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIPIM_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 KRANGM=0
 KRGPIM=0
@@ -125,7 +124,7 @@ ELSEIF (LFI%JPNPIS.GT.0) THEN
 !
 !           VERROUILLAGE EVENTUEL POUR L'UTILISATION DE *LFI%NPISAF*
 !
-   IF (LFI%LMULTI) CALL LFIVER_MT_BB                    &
+   IF (LFI%LMULTI) CALL LFIVER_MT64                       &
 &                                  (LFI, LFI%VERGLA,'ON')
 !
   IF (LFI%NPISAF.LT.LFI%JPNPIS) THEN
@@ -149,7 +148,7 @@ ELSEIF (LFI%JPNPIS.GT.0) THEN
 !
 !              Chou blanc... on deverrouille globalement.
 !
-     IF (LFI%LMULTI) CALL LFIVER_MT_BB                     &
+     IF (LFI%LMULTI) CALL LFIVER_MT64                        &
 &                                    (LFI, LFI%VERGLA,'OFF')
     IF (IFACTM.GT.1) GOTO 230
 !
@@ -171,7 +170,7 @@ ELSEIF (LFI%JPNPIS.GT.0) THEN
 !         ON DEVERROUILLE "GLOBALEMENT", CAR CE QUI SUIT ALORS
 !         NE CONCERNE PLUS QUE LE FICHIER.
 !
-     IF (LFI%LMULTI) CALL LFIVER_MT_BB                     &
+     IF (LFI%LMULTI) CALL LFIVER_MT64                        &
 &                                    (LFI, LFI%VERGLA,'OFF')
     INPPIM=INPPIM+1
     IRANGM=INPPIM
@@ -185,7 +184,7 @@ ELSEIF (LFI%JPNPIS.GT.0) THEN
 !         ON DEVERROUILLE "GLOBALEMENT", CAR CE QUI SUIT ALORS
 !         NE CONCERNE PLUS QUE LE FICHIER.
 !
-     IF (LFI%LMULTI) CALL LFIVER_MT_BB                     &
+     IF (LFI%LMULTI) CALL LFIVER_MT64                        &
 &                                    (LFI, LFI%VERGLA,'OFF')
   ENDIF
 !
@@ -221,15 +220,16 @@ LLAUX2=LFI%LECRPI(IRGPIM,2).AND.LFI%LPHASP(IRGPIM)
 !       LA OU LES PAGES D'INDEX qu'on va reutiliser.
 !
 IF (LLAUX1.OR.LLAUX2) THEN
-  CALL LFIREC_MT_BB                                  &
+  CALL LFIREC_MT64                                     &
 &                 (LFI, LFI%MRGPIF(IRGPIM),IRANG,IREC)
 !
   IF (LLAUX1) THEN
     INAPHY=IREC
-    CALL LFIECC_MT_BB                                 &
+    CALL LFIECC_MT64                                      &
 &                   (LFI, KREP,INUMER,IREC,             &
 &                    LFI%CNOMAR(IXC(1_JPLIKB ,IRGPIM)), &
-&                    LFI%NBWRIT(IRANG),IFACTM,IRETIN)
+&                    LFI%NBWRIT(IRANG),IFACTM,          &
+&                    IRETIN)
 !
     IF (IRETIN.NE.0) THEN
       GOTO 903
@@ -239,7 +239,7 @@ IF (LLAUX1.OR.LLAUX2) THEN
   ENDIF
 !
   IF (LLAUX2) THEN
-    CALL LFIECX_MT_BB                                 &
+    CALL LFIECX_MT64                                      &
 &                   (LFI, KREP,IRANG,IREC+1,            &
 &                    LFI%MLGPOS(IXM(1_JPLIKB ,IRGPIM)), &
 &                    LLADON, IRETIN)
@@ -275,13 +275,14 @@ LFI%MRGPIF(IRGPIM)=KRGPIF
 !-----------------------------------------------------------------------
 !
 IF (KNPILE.NE.0) THEN
-  CALL LFIREC_MT_BB                      &
+  CALL LFIREC_MT64                         &
 &                 (LFI, KRGPIF,IRANG,IREC)
   INAPHY=IREC
-  CALL LFILCC_MT_BB                                 &
+  CALL LFILCC_MT64                                      &
 &                 (LFI, KREP,INUMER,IREC,             &
 &                  LFI%CNOMAR(IXC(1_JPLIKB ,IRGPIM)), &
-&                  LFI%NBREAD(IRANG),IFACTM,IRETIN)
+&                  LFI%NBREAD(IRANG),IFACTM,          &
+&                  IRETIN)
 !
   IF (IRETIN.NE.0) THEN
     GOTO 904
@@ -292,10 +293,11 @@ IF (KNPILE.NE.0) THEN
 !             PHASAGE DIRECT, SANS APPEL AU SOUS-PROGRAMME "LFIPHA" .
 !
     INAPHY=IREC+1
-    CALL LFILDO_MT_BB                                 &
+    CALL LFILDO_MT64                                      &
 &                   (LFI, KREP,INUMER,IREC+1,           &
 &                    LFI%MLGPOS(IXM(1_JPLIKB ,IRGPIM)), &
-&                    LFI%NBREAD(IRANG),IFACTM,IRETIN)
+&                    LFI%NBREAD(IRANG),IFACTM,          &
+&                    IRETIN)
 !
     IF (IRETIN.NE.0) THEN
       GOTO 904
@@ -326,7 +328,7 @@ GOTO 909
 !     DE L'ARTICLE D'INDEX "NOMS".
 !
 IF (INPPIM.GT.LFI%JPNPIA) THEN
-   IF (LFI%LMULTI) CALL LFIVER_MT_BB                    &
+   IF (LFI%LMULTI) CALL LFIVER_MT64                       &
 &                                  (LFI, LFI%VERGLA,'ON')
   LFI%NPISAF=LFI%NPISAF-IFACTM
 !
@@ -334,7 +336,7 @@ IF (INPPIM.GT.LFI%JPNPIA) THEN
   LFI%MCOPIF(JR)=LFI%JPNIL
   ENDDO
 !
-   IF (LFI%LMULTI) CALL LFIVER_MT_BB                     &
+   IF (LFI%LMULTI) CALL LFIVER_MT64                        &
 &                                  (LFI, LFI%VERGLA,'OFF')
 ENDIF
 !
@@ -371,12 +373,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
 &       '', KRANGM='',I3,'', KRGPIM='',I3,'', KRGPIF='',I4,   &
 &       '', KRGFOR='',I4,'', KNPILE='',I2,'', KRETIN='',I2)') &
 &    KREP,KRANG,KRANGM,KRGPIM,KRGPIF,KRGFOR,KNPILE,KRETIN
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, INUMER,INIMES,KREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIPIM_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIPIM_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -389,13 +391,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIPIM_BB                                    &
+SUBROUTINE LFIPIM64                                     &
 &           (KREP, KRANG, KRANGM, KRGPIM, KRGPIF, KRGFOR, &
 &           KNPILE, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -409,19 +411,19 @@ INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPIM_MT_BB                                            &
+CALL LFIPIM_MT64                                             &
 &           (LFI, KREP, KRANG, KRANGM, KRGPIM, KRGPIF, KRGFOR, &
 &           KNPILE, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIPIM_MM                                    &
+SUBROUTINE LFIPIM                                       &
 &           (KREP, KRANG, KRANGM, KRGPIM, KRGPIF, KRGFOR, &
 &           KNPILE, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -435,19 +437,17 @@ INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPIM_MT_MM                                            &
+CALL LFIPIM_MT                                               &
 &           (LFI, KREP, KRANG, KRANGM, KRGPIM, KRGPIF, KRGFOR, &
 &           KNPILE, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIPIM_MT_MM                                      &
+SUBROUTINE LFIPIM_MT                                         &
 &           (LFI, KREP, KRANG, KRANGM, KRGPIM, KRGPIF, KRGFOR, &
 &           KNPILE, KRETIN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -475,7 +475,7 @@ IRGPIF     = INT (    KRGPIF, JPLIKB)
 IRGFOR     = INT (    KRGFOR, JPLIKB)
 INPILE     = INT (    KNPILE, JPLIKB)
 
-CALL LFIPIM_MT_BB                                            &
+CALL LFIPIM_MT64                                             &
 &           (LFI, IREP, IRANG, IRANGM, IRGPIM, IRGPIF, IRGFOR, &
 &           INPILE, IRETIN)
 

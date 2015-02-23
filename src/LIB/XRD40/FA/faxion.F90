@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAXION_MT_BB                                          &
+SUBROUTINE FAXION_MT64                                           &
 &                     (FA,  PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN,  &
 &                      PMAX, KNBITS, LDARPE, PECART, LDMLAM,       &
 &                      KNOZPA, KSTROF, KTRONC, KXLOPA )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -175,7 +174,7 @@ ELSE
 !     Il y aurait gain en calcul, mais reference memoire supplementaire.
 !
     IF (LDMLAM) THEN
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP PARALLEL DO PRIVATE(JN,JIND,IOFF,IM,INDLAP) &
 !$OMP&  IF(FA%LOPENMP)
 #endif
@@ -187,7 +186,7 @@ ELSE
       ZERR(JIND)=ZCRITR(JIND,FA%XLAP2DA(INDLAP,IPUISX,INDICE))
       ENDDO
       ENDDO
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP END PARALLEL DO
 #endif
     ELSE
@@ -202,7 +201,7 @@ ELSE
     IF (IPUISX.EQ.2*IPUIS2) THEN
 !
       IF (LDMLAM) THEN
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP PARALLEL DO PRIVATE(JN,JIND,IOFF,IM,INDLAP) &
 !$OMP&  IF(FA%LOPENMP)
 #endif
@@ -215,7 +214,7 @@ ELSE
 &                   FA%XLAP2DA(INDLAP,IPUIS2,INDICE)**2)
         ENDDO
         ENDDO
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP END PARALLEL DO
 #endif
       ELSE
@@ -227,7 +226,7 @@ ELSE
     ELSE
 !
     IF (LDMLAM) THEN
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP PARALLEL DO PRIVATE(JN,JIND,IOFF,IM,INDLAP) &
 !$OMP&  IF(FA%LOPENMP)
 #endif
@@ -240,7 +239,7 @@ ELSE
 &             *FA%XLAP2DA(INDLAP,IPUISX-FA%JPUILA,INDICE))
        ENDDO
        ENDDO
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP END PARALLEL DO
 #endif
     ELSE
@@ -259,7 +258,7 @@ ELSE
     IF (IPUISX.EQ.IRAPOR*IPUISR) THEN
 !
       IF (LDMLAM) THEN
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP PARALLEL DO PRIVATE(JN,JIND,IOFF,IM,INDLAP) &
 !$OMP&  IF(FA%LOPENMP)
 #endif
@@ -272,7 +271,7 @@ ELSE
 &               FA%XLAP2DA(INDLAP,IPUISR,INDICE)**IRAPOR)
         ENDDO
         ENDDO
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP END PARALLEL DO
 #endif
       ELSE
@@ -284,7 +283,7 @@ ELSE
     ELSE
 !
      IF (LDMLAM) THEN
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP PARALLEL DO PRIVATE(JN,JIND,IOFF,IM,INDLAP) &
 !$OMP&  IF(FA%LOPENMP)
 #endif
@@ -298,7 +297,7 @@ ELSE
 &          *FA%XLAP2DA(INDLAP,IPUISX-FA%JPUILA*(IRAPOR-1),INDICE))
         ENDDO
         ENDDO
-#if !defined(RS6K)
+#ifndef RS6K
 !$OMP END PARALLEL DO
 #endif
      ELSE
@@ -394,14 +393,14 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAXION_BB                                           &
+SUBROUTINE FAXION64                                            &
 &           (PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN, PMAX, KNBITS, &
 &           LDARPE, PECART, LDMLAM, KNOZPA, KSTROF, KTRONC,      &
 &           KXLOPA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KLCHAM                                 ! IN   
@@ -414,28 +413,28 @@ INTEGER (KIND=JPLIKB)  KNBITS                                 ! IN
 LOGICAL                LDARPE                                 ! IN   
 REAL (KIND=JPDBLR)     PECART                                 !   OUT
 LOGICAL                LDMLAM                                 ! IN   
-INTEGER (KIND=JPLIKB)  KNOZPA     (*)                 ! IN   
+INTEGER (KIND=JPLIKB)  KNOZPA     (FA%JPXIND)                 ! IN   
 INTEGER (KIND=JPLIKB)  KSTROF                                 ! IN   
 INTEGER (KIND=JPLIKB)  KTRONC                                 ! IN   
 INTEGER (KIND=JPLIKB)  KXLOPA                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAXION_MT_BB                                          &
+CALL FAXION_MT64                                           &
 &           (FA, PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN, PMAX, &
 &           KNBITS, LDARPE, PECART, LDMLAM, KNOZPA, KSTROF,  &
 &           KTRONC, KXLOPA)
 
 END SUBROUTINE
 
-SUBROUTINE FAXION_MM                                           &
+SUBROUTINE FAXION                                              &
 &           (PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN, PMAX, KNBITS, &
 &           LDARPE, PECART, LDMLAM, KNOZPA, KSTROF, KTRONC,      &
 &           KXLOPA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KLCHAM                                 ! IN   
@@ -448,28 +447,26 @@ INTEGER (KIND=JPLIKM)  KNBITS                                 ! IN
 LOGICAL                LDARPE                                 ! IN   
 REAL (KIND=JPDBLR)     PECART                                 !   OUT
 LOGICAL                LDMLAM                                 ! IN   
-INTEGER (KIND=JPLIKM)  KNOZPA     (*)                 ! IN   
+INTEGER (KIND=JPLIKM)  KNOZPA     (FA%JPXIND)                 ! IN   
 INTEGER (KIND=JPLIKM)  KSTROF                                 ! IN   
 INTEGER (KIND=JPLIKM)  KTRONC                                 ! IN   
 INTEGER (KIND=JPLIKM)  KXLOPA                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAXION_MT_MM                                          &
+CALL FAXION_MT                                             &
 &           (FA, PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN, PMAX, &
 &           KNBITS, LDARPE, PECART, LDMLAM, KNOZPA, KSTROF,  &
 &           KTRONC, KXLOPA)
 
 END SUBROUTINE
 
-SUBROUTINE FAXION_MT_MM                                    &
+SUBROUTINE FAXION_MT                                       &
 &           (FA, PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN, PMAX, &
 &           KNBITS, LDARPE, PECART, LDMLAM, KNOZPA, KSTROF,  &
 &           KTRONC, KXLOPA)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -507,7 +504,7 @@ ISTROF     = INT (    KSTROF, JPLIKB)
 ITRONC     = INT (    KTRONC, JPLIKB)
 IXLOPA     = INT (    KXLOPA, JPLIKB)
 
-CALL FAXION_MT_BB                                          &
+CALL FAXION_MT64                                           &
 &           (FA, PCHAME, IPUISS, IDIMNC, ILCHAM, PMIN, PMAX, &
 &           INBITS, LDARPE, PECART, LDMLAM, INOZPA, ISTROF,  &
 &           ITRONC, IXLOPA)

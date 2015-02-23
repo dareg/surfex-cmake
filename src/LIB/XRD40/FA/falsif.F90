@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FALSIF_MT_BB                          &
+SUBROUTINE FALSIF_MT64                           &
 &                     (FA,  KREP, KNUMER, CDIDEN )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme renvoyant le NOM de l'Identificateur
@@ -44,7 +43,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILIDEN=INT (LEN (CDIDEN), JPLIKB)
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -59,7 +58,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -103,7 +102,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -130,7 +129,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDIDEN='''''',A,'''''''')')                  &
 &   KREP,KNUMER,CLACTI(1:ILACTI)
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILACTI),LLRLFI)
 !
@@ -147,12 +146,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FALSIF_BB             &
+SUBROUTINE FALSIF64              &
 &           (KREP, KNUMER, CDIDEN)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -161,17 +160,17 @@ CHARACTER (LEN=*)      CDIDEN                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALSIF_MT_BB                    &
+CALL FALSIF_MT64                     &
 &           (FA, KREP, KNUMER, CDIDEN)
 
 END SUBROUTINE
 
-SUBROUTINE FALSIF_MM             &
+SUBROUTINE FALSIF                &
 &           (KREP, KNUMER, CDIDEN)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -180,17 +179,15 @@ CHARACTER (LEN=*)      CDIDEN                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALSIF_MT_MM                    &
+CALL FALSIF_MT                       &
 &           (FA, KREP, KNUMER, CDIDEN)
 
 END SUBROUTINE
 
-SUBROUTINE FALSIF_MT_MM              &
+SUBROUTINE FALSIF_MT                 &
 &           (FA, KREP, KNUMER, CDIDEN)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -204,7 +201,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FALSIF_MT_BB                    &
+CALL FALSIF_MT64                     &
 &           (FA, IREP, INUMER, CDIDEN)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FALIMU_MT_BB                                    &
+SUBROUTINE FALIMU_MT64                                     &
 &                     (FA,  KXNIVV, KXTRON, KXLATI, KXLONG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme servant a obtenir les valeurs courantes
@@ -43,14 +42,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FALIMU_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FALIMU_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FALIMU_LLPREA=.FALSE.
 ENDIF
 !
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !**
@@ -69,7 +68,7 @@ KXLONG=FA%NXLONG
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (FA%NIMSGA.EQ.2) THEN
@@ -80,7 +79,7 @@ IF (FA%NIMSGA.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KXNIVV='',I4,'', KXTRON='',I4, &
 &         '', KXLATI='',I4,'', KXLONG='',I4)')               &
 &     KXNIVV,KXTRON,KXLATI,KXLONG
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -91,12 +90,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FALIMU_BB                       &
+SUBROUTINE FALIMU64                        &
 &           (KXNIVV, KXTRON, KXLATI, KXLONG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KXNIVV                                 !   OUT
@@ -106,17 +105,17 @@ INTEGER (KIND=JPLIKB)  KXLONG                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALIMU_MT_BB                              &
+CALL FALIMU_MT64                               &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
 
 END SUBROUTINE
 
-SUBROUTINE FALIMU_MM                       &
+SUBROUTINE FALIMU                          &
 &           (KXNIVV, KXTRON, KXLATI, KXLONG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KXNIVV                                 !   OUT
@@ -126,17 +125,15 @@ INTEGER (KIND=JPLIKM)  KXLONG                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALIMU_MT_MM                              &
+CALL FALIMU_MT                                 &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
 
 END SUBROUTINE
 
-SUBROUTINE FALIMU_MT_MM                        &
+SUBROUTINE FALIMU_MT                           &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -152,7 +149,7 @@ INTEGER (KIND=JPLIKB)  IXLONG                                 !   OUT
 ! Convert arguments
 
 
-CALL FALIMU_MT_BB                              &
+CALL FALIMU_MT64                               &
 &           (FA, IXNIVV, IXTRON, IXLATI, IXLONG)
 
 KXNIVV     = INT (    IXNIVV, JPLIKM)

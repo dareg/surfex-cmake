@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFISUP_MT_BB                                  &
+
+SUBROUTINE LFISUP_MT64                                     &
 &                     (LFI, KREP, KNUMER, CDNOMA, KLONUT )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME PERMETTANT DE *SUPPRIMER* UN ARTICLE LOGIQUE
@@ -49,9 +49,9 @@ LOGICAL LLFATA
 !     tion des variables globales du logiciel a la 1ere utilisation.
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFISUP_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFISUP_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 LLVERF=.FALSE.
 IREP=0
@@ -101,7 +101,7 @@ IF (IRANG.EQ.0) THEN
   GOTO 1001
 ENDIF
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                           &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                              &
 &                                (LFI, LFI%VERRUE(IRANG),'ON')
 LLVERF=LFI%LMULTI
 !
@@ -123,7 +123,7 @@ IF (INBALO.NE.0) THEN
 !            A LA RECHERCHE DE L'ARTICLE LOGIQUE A SUPPRIMER.
 !-----------------------------------------------------------------------
 !
-  CALL LFIRAN_MT_BB                               &
+  CALL LFIRAN_MT64                                  &
 &                 (LFI, IREP,IRANG,CLNOMA(:ILCLNO), &
 &                  IRGPIM,IARTEX,IRETIN)
 !
@@ -150,7 +150,7 @@ IRGPIF=LFI%MRGPIF(IRGPIM)
 !
 IF (.NOT.LFI%LPHASP(IRGPIM)) THEN
 !
-  CALL LFIPHA_MT_BB                             &
+  CALL LFIPHA_MT64                                &
 &                 (LFI, IREP,IRANG,IRGPIM,IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
@@ -222,7 +222,7 @@ ELSE
 !
     IF (.NOT.LFI%LPHASP(IRPIMS)) THEN
 !
-      CALL LFIPHA_MT_BB                             &
+      CALL LFIPHA_MT64                                &
 &                     (LFI, IREP,IRANG,IRPIMS,IRETIN)
 !
       IF (IRETIN.EQ.1) THEN
@@ -245,7 +245,7 @@ ELSE
 !          EN MEMOIRE; DECIDEMENT, CELA SE GATE ! ... ON L'Y MET.
 !
   INPILE=2
-  CALL LFIPIM_MT_BB                              &
+  CALL LFIPIM_MT64                                 &
 &                 (LFI, KREP,IRANG,IRNGMS,IRPIMS,  &
 &                  IRGPIF+1,IRGPIF,INPILE, IRETIN)
 !
@@ -289,7 +289,7 @@ IF (.NOT.LFI%LMODIF(IRANG)) THEN
 !         CAS DE LA PREMIERE MODIFICATION DEPUIS L'OUVERTURE DU FICHIER.
 !
   LFI%LMODIF(IRANG)=.TRUE.
-  CALL LFIMOE_MT_BB                      &
+  CALL LFIMOE_MT64                         &
 &                 (LFI, IREP,IRANG,IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
@@ -331,14 +331,14 @@ LLFATA=LLMOER (IREP,IRANG)
 IF (IRANG.NE.0) THEN
   LFI%NDEROP(IRANG)=15
   LFI%NDERCO(IRANG)=IREP
-   IF (LLVERF) CALL LFIVER_MT_BB                            &
+   IF (LLVERF) CALL LFIVER_MT64                               &
 &                              (LFI, LFI%VERRUE(IRANG),'OFF')
 ENDIF
 !
 IF (LLFATA.OR.IXNIMS (IRANG).EQ.2) THEN
   INIMES=2
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFISUP_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFISUP_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -346,11 +346,11 @@ CLNSPR='LFISUP'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDNOMA='''''',A,'''''', KLONUT='',I8)')      &
 &     KREP,KNUMER,CLNOMA(:ILCLNO),KLONUT
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFISUP_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFISUP_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -364,12 +364,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFISUP_BB                     &
+SUBROUTINE LFISUP64                      &
 &           (KREP, KNUMER, CDNOMA, KLONUT)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -379,17 +379,17 @@ INTEGER (KIND=JPLIKB)  KLONUT                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFISUP_MT_BB                             &
+CALL LFISUP_MT64                               &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONUT)
 
 END SUBROUTINE
 
-SUBROUTINE LFISUP_MM                     &
+SUBROUTINE LFISUP                        &
 &           (KREP, KNUMER, CDNOMA, KLONUT)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -399,17 +399,15 @@ INTEGER (KIND=JPLIKM)  KLONUT                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFISUP_MT_MM                             &
+CALL LFISUP_MT                                &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONUT)
 
 END SUBROUTINE
 
-SUBROUTINE LFISUP_MT_MM                       &
+SUBROUTINE LFISUP_MT                          &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONUT)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -425,7 +423,7 @@ INTEGER (KIND=JPLIKB)  ILONUT                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFISUP_MT_BB                             &
+CALL LFISUP_MT64                               &
 &           (LFI, IREP, INUMER, CDNOMA, ILONUT)
 
 KREP       = INT (      IREP, JPLIKM)

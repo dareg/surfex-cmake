@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIOPT_MT_BB                                          &
+SUBROUTINE FAIOPT_MT64                                           &
 &                     (FA,  KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU,  &
 &                      LDERFA, LDIMST, KNIMES, CDNOMC)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme de recuperation des options d'OUVERTURE d'une unite 
@@ -63,7 +62,7 @@ IF (LHOOK) CALL DR_HOOK('FAIOPT_MT',0,ZHOOK_HANDLE)
 
 IREP=0
 IRANG=0
-CALL FANUMU_MT_BB                 &
+CALL FANUMU_MT64                  &
 &               (FA, KNUMER, IRANG)
 
 IF (IRANG .EQ. 0) THEN
@@ -81,7 +80,7 @@ CDSTTU=''
 LDIMST=.FALSE.
 
 IF (LDNOMM) THEN
-  CALL LFIOPT_MT_BB                                     &
+  CALL LFIOPT_MT64                                       &
 &                 (FA%LFI, IREP, KNUMER, LDNOMM, CDNOMF,  &
 &                  CDSTTU, LDERFA, LDIMST, KNIMES)
 
@@ -97,13 +96,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAIOPT_BB                                     &
+SUBROUTINE FAIOPT64                                      &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -118,19 +117,19 @@ CHARACTER (LEN=*)      CDNOMC                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIOPT_MT_BB                                            &
+CALL FAIOPT_MT64                                             &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FAIOPT_MM                                     &
+SUBROUTINE FAIOPT                                        &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -145,19 +144,17 @@ CHARACTER (LEN=*)      CDNOMC                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIOPT_MT_MM                                            &
+CALL FAIOPT_MT                                               &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FAIOPT_MT_MM                                      &
+SUBROUTINE FAIOPT_MT                                         &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, CDNOMC)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -178,7 +175,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAIOPT_MT_BB                                            &
+CALL FAIOPT_MT64                                             &
 &           (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, INIMES, CDNOMC)
 

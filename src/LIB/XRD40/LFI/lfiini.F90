@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIINI_MT_BB            &
+
+SUBROUTINE LFIINI_MT64               &
 &                     (LFI, KOPTIO )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        CE SOUS-PROGRAMME EST CHARGE DES INITIALISATIONS DU LOGICIEL
@@ -33,7 +33,7 @@ LOGICAL LLFATA
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIINI_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIINI_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (LFI%LFIINI_LLPREA) THEN
 !
@@ -155,10 +155,10 @@ ENDIF
 IREP=0
 !
 IF (LLASGN) THEN
-  CALL LFIVER_MT_BB                      &
+  CALL LFIVER_MT64                         &
 &                 (LFI, LFI%VERGLA,'ASGN')
 ELSEIF (LLREL) THEN
-  CALL LFIVER_MT_BB                     &
+  CALL LFIVER_MT64                        &
 &                 (LFI, LFI%VERGLA,'REL')
 ENDIF
 !
@@ -175,7 +175,7 @@ ELSEIF (IREP.NE.0) THEN
 ELSEIF (LFI%NIMESG.EQ.2.OR.(LFI%NIMESG.EQ.1.AND.KOPTIO.NE.2)) THEN
   INIMES=LFI%NIMESG
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFIINI_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFIINI_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -194,13 +194,13 @@ IF (MAX (INIMES,LFI%NIMESG).EQ.2) THEN
 &           I4)') KOPTIO,IREP
   ENDIF
 !
-  IF (INIMES.NE.2) CALL LFIEMS_MT_BB                           &
+  IF (INIMES.NE.2) CALL LFIEMS_MT64                              &
 &                                  (LFI, INUMER,LFI%NIMESG,IREP, &
 &                                   .FALSE.,CLMESS,              &
 &                                   CLNSPR,CLACTI)
 ENDIF
 !
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
@@ -227,57 +227,55 @@ IF (INIMES.GE.1.AND.KOPTIO.NE.2) THEN
 !
   ENDIF
 !
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, INUMER,INIMES,IREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIINI_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIINI_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIINI_BB          &
+SUBROUTINE LFIINI64           &
 &           (KOPTIO)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KOPTIO                                 ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIINI_MT_BB          &
+CALL LFIINI_MT64            &
 &           (LFI, KOPTIO)
 
 END SUBROUTINE
 
-SUBROUTINE LFIINI_MM          &
+SUBROUTINE LFIINI             &
 &           (KOPTIO)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KOPTIO                                 ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIINI_MT_MM          &
+CALL LFIINI_MT             &
 &           (LFI, KOPTIO)
 
 END SUBROUTINE
 
-SUBROUTINE LFIINI_MT_MM          &
+SUBROUTINE LFIINI_MT             &
 &           (LFI, KOPTIO)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -288,7 +286,7 @@ INTEGER (KIND=JPLIKB)  IOPTIO                                 ! IN
 
 IOPTIO     = INT (    KOPTIO, JPLIKB)
 
-CALL LFIINI_MT_BB          &
+CALL LFIINI_MT64            &
 &           (LFI, IOPTIO)
 
 

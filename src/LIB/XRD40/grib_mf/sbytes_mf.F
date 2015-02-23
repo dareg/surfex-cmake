@@ -1,80 +1,86 @@
       SUBROUTINE SBYTES_MF(KD,KS,KSKIP1,KBSIZ,KSKIP2,KBYTES)
-      USE PARKIND1, ONLY : JPRB
+      USE PARKIND1, ONLY : JPIM, JPRB
       USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-C
-C REVERSES THE ACTION OF GBYTES, TAKING FIELDS FROM KS AND
-C INSERTING THEM INTO A BIT STRING IN KD. SEE GBYTES.
-C AUTHOR D. ROBERTSON  AUG,1981
-C*
-C*    Modified by Mats HAMRUD, ECMWF, 1988, to have a constant number
-C*    number af arguments , as within the GRIB package calls,
-C*    and to make some cleanings.
-C*
-C*    Modifications by Jean CLOCHARD, French DMN, January 1990,
-C*    essentially to get a vectorising code on CRAY (no recurrences),
-C*    and to make some cleanings.
-C
-#include "precision.h"
-C
-      INTEGER KSKIP1, KBSIZ, KSKIP2, KBYTES
-C
-      INTEGER (KIND=JPDBLE) KD(*), KS(KBYTES)
-C
-      INTEGER INBPW, ISTEP, JBYTE, IAUXIL, ID, ISKIP, ISH1, ISH2, ISH3
-C
-C     LOGICAL LLSTOP
-C
+      USE LFI_PRECISION, ONLY : JPDBLE
+!
+! REVERSES THE ACTION OF GBYTES, TAKING FIELDS FROM KS AND
+! INSERTING THEM INTO A BIT STRING IN KD. SEE GBYTES.
+! AUTHOR D. ROBERTSON  AUG,1981
+!*
+!*    Modified by Mats HAMRUD, ECMWF, 1988, to have a constant number
+!*    number af arguments , as within the GRIB package calls,
+!*    and to make some cleanings.
+!*
+!*    Modifications by Jean CLOCHARD, French DMN, January 1990,
+!*    essentially to get a vectorising code on CRAY (no recurrences),
+!*    and to make some cleanings.
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=JPIM) :: KSKIP1
+      INTEGER(KIND=JPIM) :: KBSIZ
+      INTEGER(KIND=JPIM) :: KSKIP2
+      INTEGER(KIND=JPIM) :: KBYTES
+!
+      INTEGER (KIND=JPDBLE) :: KD(*)
+      INTEGER (KIND=JPDBLE) :: KS(KBYTES)
+!
+      INTEGER(KIND=JPIM) :: INBPW, ISTEP, JBYTE, IAUXIL
+      INTEGER(KIND=JPIM) :: ID, ISKIP, ISH1, ISH2, ISH3
+!
+!     LOGICAL LLSTOP
+!
       REAL(KIND=JPRB) :: ZHOOK_HANDLE
       IF (LHOOK) CALL DR_HOOK('SBYTES_MF',0,ZHOOK_HANDLE)
       INBPW=64
       ISTEP = KSKIP2+KBSIZ
-C
+!
       DO 75 JBYTE = 1 , KBYTES
-C
-C WITH THE STARTING WORD AND BIT POSITION KNOWN, THE
-C DESIRED INSERTION CAN BE DONE BY
-C**      CALL SBYTE(KD(ID),KS(JBYTE),ISKIP,KBSIZ)
-C BUT THE CODE IS SHORT ENOUGH TO GO IN-LINE.
-C
+!
+! WITH THE STARTING WORD AND BIT POSITION KNOWN, THE
+! DESIRED INSERTION CAN BE DONE BY
+!**      CALL SBYTE(KD(ID),KS(JBYTE),ISKIP,KBSIZ)
+! BUT THE CODE IS SHORT ENOUGH TO GO IN-LINE.
+!
       IAUXIL=KSKIP1+(JBYTE-1)*ISTEP
       ID=1+IAUXIL/INBPW
       ISKIP=IAUXIL-(ID-1)*INBPW
       ISH1=ISKIP+KBSIZ-INBPW
-C     LLSTOP=ISH1.GT.0
-C
+!     LLSTOP=ISH1.GT.0
+!
       IF(ISH1.LE.0) THEN
-C*
-C BYTE GOES INTO 1 WORD OF KD.
-C
-C        PRINT '(''a'',2(TR1,B64))', KD(ID),KS(JBYTE)
-         KD(ID) = ISHFTC(IOR(ISHFT(ISHFTC(KD(ID),ISKIP,BIT_SIZE(KD(ID)))
-     s            ,KBSIZ),IBITS (KS(JBYTE),0,KBSIZ)),-ISH1,
-     s            BIT_SIZE(IOR(ISHFT( ISHFTC(KD(ID),ISKIP,
-     s            BIT_SIZE(KD(ID))),KBSIZ),IBITS (KS(JBYTE),0,KBSIZ))))  
-C        PRINT '(''a'',TR1,B64))', KD(ID)
+!*
+! BYTE GOES INTO 1 WORD OF KD.
+!
+!        PRINT '(''a'',2(TR1,B64))', KD(ID),KS(JBYTE)
+         KD(ID) = ISHFTC(IOR(ISHFT(ISHFTC(KD(ID),ISKIP,BIT_SIZE(KD(ID)))&
+     &            ,KBSIZ),IBITS (KS(JBYTE),0,KBSIZ)),-ISH1,             &
+     &            BIT_SIZE(IOR(ISHFT( ISHFTC(KD(ID),ISKIP,              &
+     &            BIT_SIZE(KD(ID))),KBSIZ),IBITS (KS(JBYTE),0,KBSIZ))))
+!        PRINT '(''a'',TR1,B64))', KD(ID)
       ELSE
-C*
-C BYTE GOES INTO 2 WORDS OF KD.
-C
-C        PRINT *, JBYTE, INBPW, KSKIP1, KBSIZ, ISTEP, ID, ISKIP, ISH1
-C        PRINT '(''b1 KD(ID  ) ='',B64.64))', KD(ID)
-C        PRINT '(''b1 KD(ID+1) ='',B64.64))', KD(ID+1)
-C        PRINT '(''b1 KS(JBYTE)='',B64.64))', KS(JBYTE)
-         KD(ID)=IOR(ISHFTC(ISHFT(KD(ID),ISKIP-INBPW), INBPW-ISKIP,
-     s          BIT_SIZE(ISHFT(KD(ID),ISKIP-INBPW))),
-     s          ISHFT(IBITS(KS(JBYTE),0,KBSIZ),-ISH1))
-         KD(ID+1)=ISHFTC(IOR(ISHFT(KD(ID+1),ISH1),
-     s            IBITS(KS(JBYTE),0,ISH1)),-ISH1,
-     s            BIT_SIZE(IOR(ISHFT(KD(ID+1),ISH1),
-     s            IBITS(KS(JBYTE),0,ISH1))))
-C        PRINT '(''b2 KD(ID  ) ='',B64.64))', KD(ID)
-C        PRINT '(''b2 KD(ID+1) ='',B64.64))', KD(ID+1)
-C        IF (JBYTE.GT.10) STOP 'provisoire b'
+!*
+! BYTE GOES INTO 2 WORDS OF KD.
+!
+!        PRINT *, JBYTE, INBPW, KSKIP1, KBSIZ, ISTEP, ID, ISKIP, ISH1
+!        PRINT '(''b1 KD(ID  ) ='',B64.64))', KD(ID)
+!        PRINT '(''b1 KD(ID+1) ='',B64.64))', KD(ID+1)
+!        PRINT '(''b1 KS(JBYTE)='',B64.64))', KS(JBYTE)
+         KD(ID)=IOR(ISHFTC(ISHFT(KD(ID),ISKIP-INBPW), INBPW-ISKIP,      &
+     &          BIT_SIZE(ISHFT(KD(ID),ISKIP-INBPW))),                   &
+     &          ISHFT(IBITS(KS(JBYTE),0,KBSIZ),-ISH1))
+         KD(ID+1)=ISHFTC(IOR(ISHFT(KD(ID+1),ISH1),                      &
+     &            IBITS(KS(JBYTE),0,ISH1)),-ISH1,                       &
+     &            BIT_SIZE(IOR(ISHFT(KD(ID+1),ISH1),                    &
+     &            IBITS(KS(JBYTE),0,ISH1))))
+!        PRINT '(''b2 KD(ID  ) ='',B64.64))', KD(ID)
+!        PRINT '(''b2 KD(ID+1) ='',B64.64))', KD(ID+1)
+!        IF (JBYTE.GT.10) STOP 'provisoire b'
       ENDIF
-C
+!
    75 CONTINUE
-C
-C     IF (LLSTOP) STOP 'provisoire'
-C
+!
+!     IF (LLSTOP) STOP 'provisoire'
+!
       IF (LHOOK) CALL DR_HOOK('SBYTES_MF',1,ZHOOK_HANDLE)
-      END
+      ENDSUBROUTINE SBYTES_MF

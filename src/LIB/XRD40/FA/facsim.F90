@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACSIM_MT_BB                                 &
+SUBROUTINE FACSIM_MT64                                  &
 &                     (FA,  KREP, KRANG, PCHAME, PCHAMS,  &
 &                   KPULAS, KSTRON )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -82,7 +81,7 @@ REAL (KIND=JPDBLR) ZECART (2,0:1)
 !
 LOGICAL LLARPE,LLMLAM
 !
-INTEGER (KIND=JPLIKB), EXTERNAL :: ISMIN_1_BB, ISMAX_1_BB
+INTEGER (KIND=JPLIKB), EXTERNAL :: ISMIN_164 , ISMAX_164 
 !
 CHARACTER(LEN=FA%JPXNOM) CLACTI 
 CHARACTER(LEN=FA%JPLMES) CLMESS 
@@ -107,12 +106,12 @@ ENDIF
 ! Si ce n'est pas encore fait, initialisation des tableaux XLAP... et FA%FLAP1D.
 !
 IF (FA%LIXLAP) THEN
-  CALL FAIXLA_MT_BB          &
+  CALL FAIXLA_MT64           &
 &                 (FA)
   FA%LIXLAP = .FALSE.
 ENDIF
 IF (FA%FICHIER(KRANG)%LIFLAP) THEN
-  CALL FAIFLA_MT_BB          &
+  CALL FAIFLA_MT64           &
 &                (FA, KRANG)
   FA%FICHIER(KRANG)%LIFLAP = .FALSE.
 ENDIF
@@ -200,9 +199,9 @@ ELSE
   DO JN=KSTRON+1,ITRONC
   ILONG=2*JN+1
   IDECAL=JN**2
-  IMAXI=ISMAX_1_BB (ILONG, PCHAME(IDECAL+1))
+  IMAXI=ISMAX_164  (ILONG, PCHAME(IDECAL+1))
   ZMAXI(JN,0)=PCHAME(IDECAL+IMAXI)
-  IMINI=ISMIN_1_BB (ILONG, PCHAME(IDECAL+1))
+  IMINI=ISMIN_164  (ILONG, PCHAME(IDECAL+1))
   ZMINI(JN,0)=PCHAME(IDECAL+IMINI)
   ENDDO
 !
@@ -214,9 +213,9 @@ ELSE
   ENDDO
 !
 !
-  IMAXI=KSTRON+ISMAX_1_BB &
+  IMAXI=KSTRON+ISMAX_164  &
 &                (ITRONC-KSTRON,ZMAXI(KSTRON+1,1))
-  IMINI=KSTRON+ISMIN_1_BB &
+  IMINI=KSTRON+ISMIN_164  &
 &                (ITRONC-KSTRON,ZMINI(KSTRON+1,1))
   ZMIN=ZMINI(IMINI,1)
   ZMAX=ZMAXI(IMAXI,1)
@@ -236,7 +235,7 @@ ENDIF
 !
 !        Calcul de l'erreur de compactage initiale.
 !
-CALL FAXION_MT_BB                                                 &
+CALL FAXION_MT64                                                  &
 &               (FA, PCHAME,IPUFLA,IDIMNC,ILCHAM,ZMIN,              &
 &             ZMAX,INBITS,LLARPE,ZERRXI,LLMLAM,FA%CADRE(IRANGC)%NOZPAR(1), &
 &             KSTRON,ITRONC,IXLOPA)
@@ -332,9 +331,9 @@ ELSE
   ZMINI(JN,IPOSEX)=ZMINI(JN,3-IPOSEX)*FA%XLAP1D(JN,INDICE)
   ENDDO
 !
-  IMAXI=KSTRON+ISMAX_1_BB &
+  IMAXI=KSTRON+ISMAX_164  &
 &               (ITRONC-KSTRON,ZMAXI(KSTRON+1,IPOSEX))
-  IMINI=KSTRON+ISMIN_1_BB &
+  IMINI=KSTRON+ISMIN_164  &
 &               (ITRONC-KSTRON,ZMINI(KSTRON+1,IPOSEX))
   ZMIN=ZMINI(IMINI,IPOSEX)
   ZMAX=ZMAXI(IMAXI,IPOSEX)
@@ -350,7 +349,7 @@ ENDIF
 !
 !        Calcul de la nouvelle erreur de compactage.
 !
-CALL FAXION_MT_BB                                                &
+CALL FAXION_MT64                                                 &
 &               (FA, PCHAME,IPUISS,IDIMNC,ILCHAM,ZMIN,ZMAX,INBITS, &
 &             LLARPE,ZECART(IPOSEX,INDICE),LLMLAM,                 &
 &             FA%CADRE(IRANGC)%NOZPAR(1),KSTRON,ITRONC,IXLOPA)
@@ -570,7 +569,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', PCHAME(1)='',G12.5,'', PCHAMS('',I3,'')='',G12.5, &
 &         '', KPULAS='',I3)')                                   &
 &     KREP,KRANG,PCHAME(1),IDIMNC+1,PCHAMS(IDIMNC+1),KPULAS
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -586,12 +585,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACSIM_BB                                    &
+SUBROUTINE FACSIM64                                     &
 &           (KREP, KRANG, PCHAME, PCHAMS, KPULAS, KSTRON)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -603,17 +602,17 @@ INTEGER (KIND=JPLIKB)  KSTRON                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACSIM_MT_BB                                           &
+CALL FACSIM_MT64                                            &
 &           (FA, KREP, KRANG, PCHAME, PCHAMS, KPULAS, KSTRON)
 
 END SUBROUTINE
 
-SUBROUTINE FACSIM_MM                                    &
+SUBROUTINE FACSIM                                       &
 &           (KREP, KRANG, PCHAME, PCHAMS, KPULAS, KSTRON)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -625,17 +624,15 @@ INTEGER (KIND=JPLIKM)  KSTRON                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACSIM_MT_MM                                           &
+CALL FACSIM_MT                                              &
 &           (FA, KREP, KRANG, PCHAME, PCHAMS, KPULAS, KSTRON)
 
 END SUBROUTINE
 
-SUBROUTINE FACSIM_MT_MM                                     &
+SUBROUTINE FACSIM_MT                                        &
 &           (FA, KREP, KRANG, PCHAME, PCHAMS, KPULAS, KSTRON)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -655,7 +652,7 @@ INTEGER (KIND=JPLIKB)  ISTRON                                 ! IN
 IRANG      = INT (     KRANG, JPLIKB)
 ISTRON     = INT (    KSTRON, JPLIKB)
 
-CALL FACSIM_MT_BB                                           &
+CALL FACSIM_MT64                                            &
 &           (FA, IREP, IRANG, PCHAME, PCHAMS, IPULAS, ISTRON)
 
 KREP       = INT (      IREP, JPLIKM)

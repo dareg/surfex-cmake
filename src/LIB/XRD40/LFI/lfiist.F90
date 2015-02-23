@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIIST_MT_BB                   &
+
+SUBROUTINE LFIIST_MT64                      &
 &                     (LFI, KRANG, LDAPFE )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME IMPRIMANT LES STATISTIQUES D'UTILISATION D'UNE
@@ -59,7 +59,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIIST_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIIST_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (KRANG.LE.0.OR.KRANG.GT.LFI%JPNXFI) THEN
   INUMER=LFI%JPNIL
@@ -76,7 +76,7 @@ ENDIF
 !     2.  -  IMPRESSION DES STATISTIQUES.
 !-----------------------------------------------------------------------
 !
-CALL LFIDAH_MT_BB                  &
+CALL LFIDAH_MT64                     &
 &               (LFI, IIDATE,IIHEUR)
 IDATEM=IIDATE
 IHEURM=IIHEUR
@@ -393,12 +393,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
   CLNSPR='LFIIST'
   WRITE (UNIT=CLMESS,FMT='(''IREP='',I4,'', KRANG='',I3, &
 &         '', LDAPFE= '',L1)') IREP,KRANG,LDAPFE
-  CALL LFIEMS_MT_BB                              &
+  CALL LFIEMS_MT64                                 &
 &                 (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIIST_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIIST_MT64',1,ZHOOK_HANDLE)
 RETURN
 !
  9010 FORMAT (/,/,T2,110('X'),/,' X',T111,'X',/,' X',T15,            &
@@ -519,12 +519,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIIST_BB          &
+SUBROUTINE LFIIST64           &
 &           (KRANG, LDAPFE)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
@@ -532,17 +532,17 @@ LOGICAL                LDAPFE                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIIST_MT_BB              &
+CALL LFIIST_MT64               &
 &           (LFI, KRANG, LDAPFE)
 
 END SUBROUTINE
 
-SUBROUTINE LFIIST_MM          &
+SUBROUTINE LFIIST             &
 &           (KRANG, LDAPFE)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
@@ -550,17 +550,15 @@ LOGICAL                LDAPFE                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIIST_MT_MM              &
+CALL LFIIST_MT                 &
 &           (LFI, KRANG, LDAPFE)
 
 END SUBROUTINE
 
-SUBROUTINE LFIIST_MT_MM          &
+SUBROUTINE LFIIST_MT             &
 &           (LFI, KRANG, LDAPFE)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -572,7 +570,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  ! IN
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL LFIIST_MT_BB              &
+CALL LFIIST_MT64               &
 &           (LFI, IRANG, LDAPFE)
 
 

@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIFMD_MT_BB            &
+
+SUBROUTINE LFIFMD_MT64               &
 &                     (LFI, KFACMD )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet de changer le Facteur Multiplicatif
@@ -31,10 +31,10 @@ LOGICAL LLFATA
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIFMD_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFMD_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (LFI%LFIFMD_LLPREA) THEN
-  CALL LFIINI_MT_BB              &
+  CALL LFIINI_MT64                 &
 &                 (LFI, 2_JPLIKB )
   LFI%LFIFMD_LLPREA=.FALSE.
 ENDIF
@@ -48,12 +48,12 @@ ELSE
 !
 !          Modification, sous Verrouillage Global eventuel.
 !
-  IF (LFI%LMULTI) CALL LFIVER_MT_BB                    &
+  IF (LFI%LMULTI) CALL LFIVER_MT64                       &
 &                                 (LFI, LFI%VERGLA,'ON')
 !
   LFI%MFACTU(0)=KFACMD
 !
-  IF (LFI%LMULTI) CALL LFIVER_MT_BB                     &
+  IF (LFI%LMULTI) CALL LFIVER_MT64                        &
 &                                 (LFI, LFI%VERGLA,'OFF')
 ENDIF
 !
@@ -66,7 +66,7 @@ IF (LLFATA) THEN
 ELSEIF (IREP.NE.0) THEN
   INIMES=0
 ELSEIF (LFI%NIMESG.EQ.0) THEN
-  IF (LHOOK) CALL DR_HOOK('LFIFMD_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFIFMD_MT64',1,ZHOOK_HANDLE)
   RETURN
 ELSE
   INIMES=LFI%NIMESG
@@ -87,7 +87,7 @@ IF (INIMES.EQ.2) THEN
 &           I4)') KFACMD,IREP
   ENDIF
 !
-  CALL LFIEMS_MT_BB                              &
+  CALL LFIEMS_MT64                                 &
 &                 (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
@@ -106,56 +106,54 @@ IF (INIMES.GE.1) THEN
 !
 ENDIF
 !
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFIFMD_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFMD_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIFMD_BB          &
+SUBROUTINE LFIFMD64           &
 &           (KFACMD)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KFACMD                                 ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFMD_MT_BB          &
+CALL LFIFMD_MT64            &
 &           (LFI, KFACMD)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFMD_MM          &
+SUBROUTINE LFIFMD             &
 &           (KFACMD)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KFACMD                                 ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFMD_MT_MM          &
+CALL LFIFMD_MT             &
 &           (LFI, KFACMD)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFMD_MT_MM          &
+SUBROUTINE LFIFMD_MT             &
 &           (LFI, KFACMD)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -166,7 +164,7 @@ INTEGER (KIND=JPLIKB)  IFACMD                                 ! IN
 
 IFACMD     = INT (    KFACMD, JPLIKB)
 
-CALL LFIFMD_MT_BB          &
+CALL LFIFMD_MT64            &
 &           (LFI, IFACMD)
 
 

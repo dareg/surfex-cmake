@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIPHA_MT_BB                                 &
+SUBROUTINE LFIPHA_MT64                                    &
 &                     (LFI, KREP, KRANG, KRGPIM, KRETIN )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
@@ -33,17 +32,18 @@ LOGICAL LLFATA
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIPHA_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIPHA_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IRETOU=0
 INUMER=LFI%NUMERO(KRANG)
-CALL LFIREC_MT_BB                                  &
+CALL LFIREC_MT64                                     &
 &               (LFI, LFI%MRGPIF(KRGPIM),KRANG,IREC)
 INAPHY=IREC+1
-CALL LFILDO_MT_BB                                          &
-&               (LFI, KREP,INUMER,IREC+1,                    &
-&                LFI%MLGPOS(IXM(1_JPLIKB ,KRGPIM)),          &
-&                LFI%NBREAD(KRANG),LFI%MFACTM(KRANG),IRETIN)
+CALL LFILDO_MT64                                         &
+&               (LFI, KREP,INUMER,IREC+1,              &
+&                LFI%MLGPOS(IXM(1_JPLIKB ,KRGPIM)),    &
+&                LFI%NBREAD(KRANG),LFI%MFACTM(KRANG),  &
+&                IRETIN)
 !
 IF (IRETIN.NE.0) THEN
   GOTO 904
@@ -82,12 +82,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I3, &
 &         '', KRGPIM='',I3,'', KRETIN='',I2)')            &
 &    KREP,KRANG,KRGPIM,KRETIN
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, INUMER,INIMES,KREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIPHA_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIPHA_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -99,12 +99,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIPHA_BB                    &
+SUBROUTINE LFIPHA64                     &
 &           (KREP, KRANG, KRGPIM, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -114,17 +114,17 @@ INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPHA_MT_BB                            &
+CALL LFIPHA_MT64                             &
 &           (LFI, KREP, KRANG, KRGPIM, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIPHA_MM                    &
+SUBROUTINE LFIPHA                       &
 &           (KREP, KRANG, KRGPIM, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -134,17 +134,15 @@ INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPHA_MT_MM                            &
+CALL LFIPHA_MT                               &
 &           (LFI, KREP, KRANG, KRGPIM, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIPHA_MT_MM                      &
+SUBROUTINE LFIPHA_MT                         &
 &           (LFI, KREP, KRANG, KRGPIM, KRETIN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -162,7 +160,7 @@ INTEGER (KIND=JPLIKB)  IRETIN                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 IRGPIM     = INT (    KRGPIM, JPLIKB)
 
-CALL LFIPHA_MT_BB                            &
+CALL LFIPHA_MT64                             &
 &           (LFI, IREP, IRANG, IRGPIM, IRETIN)
 
 KREP       = INT (      IREP, JPLIKM)

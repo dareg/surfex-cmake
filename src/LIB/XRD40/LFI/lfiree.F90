@@ -1,7 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIREE_MT_BB                                        &
+SUBROUTINE LFIREE_MT64                                           &
 &                     (LFI, KREP, KRANG, CDNOMA, KLONG, KRPIEX,  &
 &                    KARTEX,                                     &
 &                    KLONEX, KRPIEC, KARTEC, KPOSEC, KDTROU,     &
@@ -9,7 +8,7 @@ SUBROUTINE LFIREE_MT_BB                                        &
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
@@ -89,7 +88,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIREE_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIREE_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
 !
@@ -149,7 +148,7 @@ ENDIF
 !
 IF (LLTTRU) THEN
 !
-  CALL LFIRAN_MT_BB                                           &
+  CALL LFIRAN_MT64                                              &
 &                 (LFI, KREP,IRANG,CDNOMA,IRGPIM,IARTIC,IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
@@ -233,7 +232,7 @@ ELSE
 !
   ILFORC=1
   INPILE=1
-  CALL LFIPIM_MT_BB                                            &
+  CALL LFIPIM_MT64                                               &
 &                 (LFI, KREP,IRANG,IRANGM,IRGPIM,IRGPIF,ILFORC,  &
 &                  INPILE, IRETIN)
 !
@@ -280,7 +279,7 @@ IF (IARTIC.NE.0) THEN
 !
   IF (.NOT.LFI%LPHASP(IRGPIM)) THEN
 !
-    CALL LFIPHA_MT_BB                             &
+    CALL LFIPHA_MT64                                &
 &                   (LFI, KREP,IRANG,IRGPIM,IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
@@ -413,7 +412,7 @@ IF (IARTIC.NE.0) THEN
 !
       IF (.NOT.LFI%LPHASP(IRPIMS)) THEN
 !
-        CALL LFIPHA_MT_BB                             &
+        CALL LFIPHA_MT64                                &
 &                       (LFI, KREP,IRANG,IRPIMS,IRETIN)
 !
         IF (IRETIN.EQ.1) THEN
@@ -439,7 +438,7 @@ IF (IARTIC.NE.0) THEN
 !          seule fois par exploration de l'index.
 !
     INPILE=2
-    CALL LFIPIM_MT_BB                                             &
+    CALL LFIPIM_MT64                                                &
 &                   (LFI, KREP,IRANG,IRNGMS,IRPIMS,IRGPIF+1,IRGPIF, &
 &                    INPILE, IRETIN)
 !
@@ -550,7 +549,7 @@ IF (INTRPI.NE.0) THEN
 !
   IF (.NOT.LFI%LPHASP(IRGPIM)) THEN
 !
-    CALL LFIPHA_MT_BB                             &
+    CALL LFIPHA_MT64                                &
 &                   (LFI, KREP,IRANG,IRGPIM,IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
@@ -728,12 +727,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
 &  KREP,KRANG,CDNOMA,KLONG,KRPIEX,KARTEX,KLONEX,                    &
 &  KRPIEC,KARTEC,KPOSEC,KDTROU,KLONUT,KRETIN
   INUMER=LFI%NUMERO(KRANG)
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, INUMER,INIMES,KREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIREE_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIREE_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -746,13 +745,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIREE_BB                                           &
+SUBROUTINE LFIREE64                                            &
 &           (KREP, KRANG, CDNOMA, KLONG, KRPIEX, KARTEX, KLONEX, &
 &           KRPIEC, KARTEC, KPOSEC, KDTROU, KLONUT, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -771,20 +770,20 @@ INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIREE_MT_BB                                           &
+CALL LFIREE_MT64                                            &
 &           (LFI, KREP, KRANG, CDNOMA, KLONG, KRPIEX, KARTEX, &
 &           KLONEX, KRPIEC, KARTEC, KPOSEC, KDTROU, KLONUT,   &
 &           KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIREE_MM                                           &
+SUBROUTINE LFIREE                                              &
 &           (KREP, KRANG, CDNOMA, KLONG, KRPIEX, KARTEX, KLONEX, &
 &           KRPIEC, KARTEC, KPOSEC, KDTROU, KLONUT, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -803,21 +802,19 @@ INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIREE_MT_MM                                           &
+CALL LFIREE_MT                                              &
 &           (LFI, KREP, KRANG, CDNOMA, KLONG, KRPIEX, KARTEX, &
 &           KLONEX, KRPIEC, KARTEC, KPOSEC, KDTROU, KLONUT,   &
 &           KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIREE_MT_MM                                     &
+SUBROUTINE LFIREE_MT                                        &
 &           (LFI, KREP, KRANG, CDNOMA, KLONG, KRPIEX, KARTEX, &
 &           KLONEX, KRPIEC, KARTEC, KPOSEC, KDTROU, KLONUT,   &
 &           KRETIN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -852,7 +849,7 @@ INTEGER (KIND=JPLIKB)  IRETIN                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFIREE_MT_BB                                           &
+CALL LFIREE_MT64                                            &
 &           (LFI, IREP, IRANG, CDNOMA, ILONG, IRPIEX, IARTEX, &
 &           ILONEX, IRPIEC, IARTEC, IPOSEC, IDTROU, ILONUT,   &
 &           IRETIN)

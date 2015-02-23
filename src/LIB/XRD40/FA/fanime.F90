@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANIME_MT_BB                          &
+SUBROUTINE FANIME_MT64                           &
 &                     (FA,  KREP, KNUMER, KNIMES )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet d'ajuster le Niveau de Messagerie
@@ -39,7 +38,7 @@ LOGICAL                  LLFATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANIME_MT',0,ZHOOK_HANDLE)
 CLACTI=''
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 INIMEX=0
 !
@@ -48,7 +47,7 @@ IF (IRANG.EQ.0) THEN
 ELSEIF (KNIMES.GE.0.AND.KNIMES.LE.2) THEN
   INIMEX=IXNVMS (IRANG)
   FA%FICHIER(IRANG)%NIVOMS=KNIMES
-  CALL LFINIM_MT_BB                          &
+  CALL LFINIM_MT64                            &
 &                 (FA%LFI, IREP,KNUMER,KNIMES)
   LLRLFI=IREP.NE.0
 ELSE
@@ -68,7 +67,7 @@ ENDIF
 CLNSPR='FANIME'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', KNIMES='',I3)') KREP,KNUMER,KNIMES
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,.FALSE.)
 !
@@ -84,12 +83,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANIME_BB             &
+SUBROUTINE FANIME64              &
 &           (KREP, KNUMER, KNIMES)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -98,17 +97,17 @@ INTEGER (KIND=JPLIKB)  KNIMES                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANIME_MT_BB                    &
+CALL FANIME_MT64                     &
 &           (FA, KREP, KNUMER, KNIMES)
 
 END SUBROUTINE
 
-SUBROUTINE FANIME_MM             &
+SUBROUTINE FANIME                &
 &           (KREP, KNUMER, KNIMES)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -117,17 +116,15 @@ INTEGER (KIND=JPLIKM)  KNIMES                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANIME_MT_MM                    &
+CALL FANIME_MT                       &
 &           (FA, KREP, KNUMER, KNIMES)
 
 END SUBROUTINE
 
-SUBROUTINE FANIME_MT_MM              &
+SUBROUTINE FANIME_MT                 &
 &           (FA, KREP, KNUMER, KNIMES)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -143,7 +140,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 
-CALL FANIME_MT_BB                    &
+CALL FANIME_MT64                     &
 &           (FA, IREP, INUMER, INIMES)
 
 KREP       = INT (      IREP, JPLIKM)

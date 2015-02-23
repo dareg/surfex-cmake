@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAMISO_MT_BB            &
+SUBROUTINE FAMISO_MT64             &
 &                     (FA,  LDEBUG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet d'activer ou de desactiver le mode
@@ -32,7 +31,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAMISO_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FAMISO_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FAMISO_LLPREA=.FALSE.
 ENDIF
@@ -58,7 +57,7 @@ INIMES=2
 IREP=0
 CLNSPR='FAMISO'
 WRITE (UNIT=CLMESS,FMT='(''LDEBUG= '',L1)') LDEBUG
-CALL FAIPAR_MT_BB                                     &
+CALL FAIPAR_MT64                                      &
 &               (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                CLNSPR,CLACTI,.FALSE.)
 !
@@ -68,46 +67,44 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAMISO_BB          &
+SUBROUTINE FAMISO64           &
 &           (LDEBUG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 LOGICAL                LDEBUG                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAMISO_MT_BB          &
+CALL FAMISO_MT64           &
 &           (FA, LDEBUG)
 
 END SUBROUTINE
 
-SUBROUTINE FAMISO_MM          &
+SUBROUTINE FAMISO             &
 &           (LDEBUG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 LOGICAL                LDEBUG                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAMISO_MT_MM          &
+CALL FAMISO_MT             &
 &           (FA, LDEBUG)
 
 END SUBROUTINE
 
-SUBROUTINE FAMISO_MT_MM          &
+SUBROUTINE FAMISO_MT             &
 &           (FA, LDEBUG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -116,7 +113,7 @@ LOGICAL                LDEBUG                                 ! IN
 ! Convert arguments
 
 
-CALL FAMISO_MT_BB          &
+CALL FAMISO_MT64           &
 &           (FA, LDEBUG)
 
 

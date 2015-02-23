@@ -1,13 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIEMS_MT_BB                                   &
+
+SUBROUTINE LFIEMS_MT64                                      &
 &                     (LFI, KNUMER, KNIMES, KCODE, LDFATA,  &
 &                      CDMESS, CDNSPR, CDACTI )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        CE SOUS-PROGRAMME EST CHARGE DE FAIRE L'ECHO DES MESSAGES
@@ -47,7 +47,7 @@ CHARACTER  CDNSPR*(*), CDMESS*(*), CDACTI*(*)
 !     traduit par le code-reponse (-30).
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIEMS_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIEMS_MT64',0,ZHOOK_HANDLE)
 IF (KCODE.EQ.-1) THEN
   ICODE=-30
   INQUIRE (UNIT=KNUMER,EXIST=LLEXUL,ERR=101,IOSTAT=IREPON)
@@ -62,28 +62,28 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 IF (LFI%LFRANC) THEN
-  CALL LFIEFR_MT_BB                               &
+  CALL LFIEFR_MT64                                  &
 &                 (LFI, KNUMER,KNIMES,ICODE,LDFATA, &
 &                  CDMESS,CDNSPR,CDACTI)
 ELSE
-  CALL LFIENG_MT_BB                               &
+  CALL LFIENG_MT64                                  &
 &                 (LFI, KNUMER,KNIMES,ICODE,LDFATA, &
 &                  CDMESS,CDNSPR,CDACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIEMS_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIEMS_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIEMS_BB                                      &
+SUBROUTINE LFIEMS64                                       &
 &           (KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
@@ -96,19 +96,19 @@ CHARACTER (LEN=*)      CDACTI                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIEMS_MT_BB                                              &
+CALL LFIEMS_MT64                                               &
 &           (LFI, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 
 END SUBROUTINE
 
-SUBROUTINE LFIEMS_MM                                      &
+SUBROUTINE LFIEMS                                         &
 &           (KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
@@ -121,19 +121,17 @@ CHARACTER (LEN=*)      CDACTI                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIEMS_MT_MM                                              &
+CALL LFIEMS_MT                                                 &
 &           (LFI, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 
 END SUBROUTINE
 
-SUBROUTINE LFIEMS_MT_MM                                        &
+SUBROUTINE LFIEMS_MT                                           &
 &           (LFI, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -154,7 +152,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 ICODE      = INT (     KCODE, JPLIKB)
 
-CALL LFIEMS_MT_BB                                              &
+CALL LFIEMS_MT64                                               &
 &           (LFI, INUMER, INIMES, ICODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 

@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAVEUR_MT_BB                                          &
-&                     (FA,  KREP, KNUMER, KNGRIB, KNBPDG, KNBCSP,  &
-&                    KSTRON, KPUILA, KDMOPL )
+SUBROUTINE FAVEUR_MT64                                             &
+&                     (FA,  KREP, KNUMER, KNGRIB, KNARG1, KNARG2,  &
+&                      KNARG3, KNARG4, KNARG5)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet d'obtenir, pour un fichier ARPEGE
@@ -16,22 +15,25 @@ IMPLICIT NONE
 !     codes en GRIB.
 !       ( Visualisation (?) options Effectives pour l'UtilisateuR )
 !**
-!     Arguments : KREP   ==> Code-reponse du sous-programme;
-!     (tous de    KNUMER ==> Numero d'Unite Logique concernee;
-!      SORTIE)    KNGRIB ==> Niveau de codage GRIB (-1,0,1,2,3);
-!                 KNBPDG ==> Nombre de bits par valeur point-de-grille;
-!                 KNBCSP ==> Nombre de bits par partie reelle/imaginaire
-!                            de coefficient spectral;
-!                 KSTRON ==> Sous-troncature non compactee;
-!                 KPUILA ==> Puissance de laplacien;
-!                 KDMOPL ==> Degre de modulation de KPUILA.
+!     Arguments : KREP   (Sortie) ==> Code-reponse du sous-programme;
+!                 KNUMER (Entree) ==> Numero d'Unite Logique concernee;
+!                 KNGRIB (Sortie) ==> Niveau de codage GRIB (-1,0,1,2,3);
+!
+!               * Pour KNGRIB compris entre -1 et 3, les arguments 
+!                 de sortie ont la signification suivante:
+!                 KNARG1 (Sortie) ==> Nombre de bits par valeur point-de-grille;
+!                 KNARG2 (Sortie) ==> Nombre de bits par partie reelle/imaginaire
+!                                     de coefficient spectral;
+!                 KNARG3 (Sortie) ==> Sous-troncature non compactee;
+!                 KNARG4 (Sortie) ==> Puissance de laplacien;
+!                 KNARG5 (Sortie) ==> Degre de modulation de KNARG4.
 !
 !
 !
 TYPE(FA_COM) :: FA
 INTEGER (KIND=JPLIKB) KREP, KNUMER, KNGRIB
-INTEGER (KIND=JPLIKB) KNBPDG, KNBCSP, KSTRON, KPUILA
-INTEGER (KIND=JPLIKB) KDMOPL
+INTEGER (KIND=JPLIKB) KNARG1, KNARG2, KNARG3, KNARG4
+INTEGER (KIND=JPLIKB) KNARG5
 !
 INTEGER (KIND=JPLIKB) IREP, IRANG, INIMES
 !
@@ -50,7 +52,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAVEUR_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 LLVERF=.FALSE.
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -60,7 +62,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -68,11 +70,17 @@ LLVERF=FA%LFAMUL
 !-----------------------------------------------------------------------
 !
 KNGRIB=FA%FICHIER(IRANG)%NFGRIB
-KNBPDG=FA%FICHIER(IRANG)%NBFPDG
-KNBCSP=FA%FICHIER(IRANG)%NBFCSP
-KSTRON=FA%FICHIER(IRANG)%NSTROF
-KPUILA=FA%FICHIER(IRANG)%NPUFLA
-KDMOPL=FA%FICHIER(IRANG)%NMFDPL
+
+IF (KNGRIB /= 4) THEN
+  KNARG1=FA%FICHIER(IRANG)%NBFPDG
+  KNARG2=FA%FICHIER(IRANG)%NBFCSP
+  KNARG3=FA%FICHIER(IRANG)%NSTROF
+  KNARG4=FA%FICHIER(IRANG)%NPUFLA
+  KNARG5=FA%FICHIER(IRANG)%NMFDPL
+ELSE
+!RJ: something fishy here
+  CALL ABORT
+ENDIF
 IREP=0
 !**
 !    10.  -  PHASE TERMINALE : MESSAGERIE, AVEC "ABORT" EVENTUEL,
@@ -85,7 +93,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -102,10 +110,10 @@ ENDIF
 CLNSPR='FAVEUR'
 !
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,      &
-&       '', KNGRIB='',I2,'', KNBPDG='',I3,'', KNBCSP='',I3,   &
-&       '', KSTRON='',I2,'', KPUILA='',I3,'', KDMOPL='',I3)') &
-&   KREP,KNUMER,KNGRIB,KNBPDG,KNBCSP,KSTRON,KPUILA,KDMOPL
-CALL FAIPAR_MT_BB                                    &
+&       '', KNGRIB='',I2,'', KNARG1='',I3,'', KNARG2='',I3,   &
+&       '', KNARG3='',I2,'', KNARG4='',I3,'', KNARG5='',I3)') &
+&   KREP,KNUMER,KNGRIB,KNARG1,KNARG2,KNARG3,KNARG4,KNARG5
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI,.FALSE.)
 !
@@ -121,108 +129,107 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAVEUR_BB                                     &
-&           (KREP, KNUMER, KNGRIB, KNBPDG, KNBCSP, KSTRON, &
-&           KPUILA, KDMOPL)
+SUBROUTINE FAVEUR64                                      &
+&           (KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
+&           KNARG4, KNARG5)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKB)  KNGRIB                                 !   OUT
-INTEGER (KIND=JPLIKB)  KNBPDG                                 !   OUT
-INTEGER (KIND=JPLIKB)  KNBCSP                                 !   OUT
-INTEGER (KIND=JPLIKB)  KSTRON                                 !   OUT
-INTEGER (KIND=JPLIKB)  KPUILA                                 !   OUT
-INTEGER (KIND=JPLIKB)  KDMOPL                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG1                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG2                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG3                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG4                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG5                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAVEUR_MT_BB                                            &
-&           (FA, KREP, KNUMER, KNGRIB, KNBPDG, KNBCSP, KSTRON, &
-&           KPUILA, KDMOPL)
+CALL FAVEUR_MT64                                               &
+&           (FA, KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
+&           KNARG4, KNARG5)
 
 END SUBROUTINE
 
-SUBROUTINE FAVEUR_MM                                     &
-&           (KREP, KNUMER, KNGRIB, KNBPDG, KNBCSP, KSTRON, &
-&           KPUILA, KDMOPL)
-USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
+SUBROUTINE FAVEUR                                          &
+&           (KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
+&           KNARG4, KNARG5)
+USE FA_MOD, ONLY : FA => FA_COM_DEFAULT,  &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKM)  KNGRIB                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNBPDG                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNBCSP                                 !   OUT
-INTEGER (KIND=JPLIKM)  KSTRON                                 !   OUT
-INTEGER (KIND=JPLIKM)  KPUILA                                 !   OUT
-INTEGER (KIND=JPLIKM)  KDMOPL                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG1                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG2                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG3                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG4                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG5                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAVEUR_MT_MM                                            &
-&           (FA, KREP, KNUMER, KNGRIB, KNBPDG, KNBCSP, KSTRON, &
-&           KPUILA, KDMOPL)
+CALL FAVEUR_MT                                                 &
+&           (FA, KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
+&           KNARG4, KNARG5)
 
 END SUBROUTINE
 
-SUBROUTINE FAVEUR_MT_MM                                      &
-&           (FA, KREP, KNUMER, KNGRIB, KNBPDG, KNBCSP, KSTRON, &
-&           KPUILA, KDMOPL)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+SUBROUTINE FAVEUR_MT                                           &
+&           (FA, KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
+&           KNARG4, KNARG5)
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKM)  KNGRIB                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNBPDG                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNBCSP                                 !   OUT
-INTEGER (KIND=JPLIKM)  KSTRON                                 !   OUT
-INTEGER (KIND=JPLIKM)  KPUILA                                 !   OUT
-INTEGER (KIND=JPLIKM)  KDMOPL                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG1                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG2                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG3                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG4                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG5                                 !   OUT
 ! Local integers
 INTEGER (KIND=JPLIKB)  IREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  INUMER                                 ! IN   
 INTEGER (KIND=JPLIKB)  INGRIB                                 !   OUT
-INTEGER (KIND=JPLIKB)  INBPDG                                 !   OUT
-INTEGER (KIND=JPLIKB)  INBCSP                                 !   OUT
-INTEGER (KIND=JPLIKB)  ISTRON                                 !   OUT
-INTEGER (KIND=JPLIKB)  IPUILA                                 !   OUT
-INTEGER (KIND=JPLIKB)  IDMOPL                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG1                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG2                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG3                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG4                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG5                                 !   OUT
 ! Convert arguments
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAVEUR_MT_BB                                            &
-&           (FA, IREP, INUMER, INGRIB, INBPDG, INBCSP, ISTRON, &
-&           IPUILA, IDMOPL)
+CALL FAVEUR_MT64                                               &
+&           (FA, IREP, INUMER, INGRIB, INARG1, INARG2, INARG3, &
+&           INARG4, INARG5)
 
 KREP       = INT (      IREP, JPLIKM)
 KNGRIB     = INT (    INGRIB, JPLIKM)
-KNBPDG     = INT (    INBPDG, JPLIKM)
-KNBCSP     = INT (    INBCSP, JPLIKM)
-KSTRON     = INT (    ISTRON, JPLIKM)
-KPUILA     = INT (    IPUILA, JPLIKM)
-KDMOPL     = INT (    IDMOPL, JPLIKM)
+KNARG1     = INT (    INARG1, JPLIKM)
+KNARG2     = INT (    INARG2, JPLIKM)
+KNARG3     = INT (    INARG3, JPLIKM)
+KNARG4     = INT (    INARG4, JPLIKM)
+KNARG5     = INT (    INARG5, JPLIKM)
 
 END SUBROUTINE
 
 !INTF KREP            OUT 
 !INTF KNUMER        IN    
 !INTF KNGRIB          OUT 
-!INTF KNBPDG          OUT 
-!INTF KNBCSP          OUT 
-!INTF KSTRON          OUT 
-!INTF KPUILA          OUT 
-!INTF KDMOPL          OUT 
+!INTF KNARG1          OUT 
+!INTF KNARG2          OUT 
+!INTF KNARG3          OUT 
+!INTF KNARG4          OUT 
+!INTF KNARG5          OUT 
+

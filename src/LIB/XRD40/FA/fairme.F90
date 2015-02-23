@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIRME_MT_BB                          &
+SUBROUTINE FAIRME_MT64                           &
 &                     (FA,  KREP, KNUMER, CDSTTU )
 USE FA_MOD, ONLY : FA_COM, FREE_FICHIER, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !       Sous-programme de FERMETURE d'une unite logique "Fichier ARPEGE"
@@ -43,12 +42,12 @@ CLACTI=''
 IREP=0
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 !         Verrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 !
 IF (IRANG.EQ.0) THEN
@@ -68,7 +67,7 @@ ELSE
 !
 ENDIF
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -83,7 +82,7 @@ ENDIF
 !     2.  -  FERMETURE DU FICHIER, AU SENS DU LOGICIEL LFI.
 !-----------------------------------------------------------------------
 !
-CALL LFIFER_MT_BB                          &
+CALL LFIFER_MT64                            &
 &               (FA%LFI, IREP,KNUMER,CLSTTU)
 !
 IF (IREP.NE.0) THEN
@@ -118,9 +117,9 @@ FA%NULIND(J)=FA%NULIND(J+1)
 ENDDO
 !
 IF (FA%LFAMUL) THEN
-  CALL LFIVER_MT_BB                              &
+  CALL LFIVER_MT64                                &
 &                 (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
-  CALL LFIVER_MT_BB                              &
+  CALL LFIVER_MT64                                &
 &                 (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'REL')
 ENDIF
 !
@@ -136,7 +135,7 @@ IF (FA%CADRE(IRANGC)%NULCAD.LE.0.AND. &
 &   (FA%CADRE(IRANGC)%NGARDE.EQ.0.OR.  &
 &   (FA%CADRE(IRANGC)%NGARDE.EQ.1.AND. &
 &   .NOT.FA%LIGARD)))                  &
-&      CALL FACTUI_MT_BB               &
+&      CALL FACTUI_MT64                &
 &                     (FA, IREP,IRANGC)
 CALL FREE_FICHIER (FA%FICHIER(IRANG))
 !**
@@ -150,9 +149,9 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage(s) eventuel(s).
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                       &
+IF (FA%LFAMUL) CALL LFIVER_MT64                         &
 &                              (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (LLFATA) THEN
@@ -183,7 +182,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &         '', CDSTTU='''''',A,'''''''')') KREP,KNUMER,     &
 &       CLACTI(1:ILNOMC)
-  CALL FAIPAR_MT_BB                             &
+  CALL FAIPAR_MT64                              &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA, &
 &               CLMESS,CLNSPR,                    &
 &               CLACTI(1:ILNOMC),LLRLFI)
@@ -202,12 +201,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAIRME_BB             &
+SUBROUTINE FAIRME64              &
 &           (KREP, KNUMER, CDSTTU)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -216,17 +215,17 @@ CHARACTER (LEN=*)      CDSTTU                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIRME_MT_BB                    &
+CALL FAIRME_MT64                     &
 &           (FA, KREP, KNUMER, CDSTTU)
 
 END SUBROUTINE
 
-SUBROUTINE FAIRME_MM             &
+SUBROUTINE FAIRME                &
 &           (KREP, KNUMER, CDSTTU)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -235,17 +234,15 @@ CHARACTER (LEN=*)      CDSTTU                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIRME_MT_MM                    &
+CALL FAIRME_MT                       &
 &           (FA, KREP, KNUMER, CDSTTU)
 
 END SUBROUTINE
 
-SUBROUTINE FAIRME_MT_MM              &
+SUBROUTINE FAIRME_MT                 &
 &           (FA, KREP, KNUMER, CDSTTU)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -259,7 +256,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAIRME_MT_BB                    &
+CALL FAIRME_MT64                     &
 &           (FA, IREP, INUMER, CDSTTU)
 
 KREP       = INT (      IREP, JPLIKM)

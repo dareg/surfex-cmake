@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Sep-2012 P. Marguinaud Fix uninitialized variables
-SUBROUTINE FACINE_MT_BB                                           &
+SUBROUTINE FACINE_MT64                                            &
 &                     (FA,  KREP,   KRANG,  CDNOMA, KCHAMP, LDCOSP, &
 &                      KVALCO, KLONGD, KB1PAR )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLE
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -233,7 +232,7 @@ ELSE
 !     laplacien du champ a la place du champ, de maniere a augmenter
 !     la precision du champ en "aplanissant" le spectre.
 !
-    CALL FACSIM_MT_BB                                             &
+    CALL FACSIM_MT64                                              &
 &                   (FA, KREP,KRANG,KCHAMP,FA%ICHAMP,IPUILA,ICPACK)
     IF (FA%LFAMOP) THEN
       print *,'FACINE: puissance Dolby selectionnee ',IPUILA
@@ -407,7 +406,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', CDNOMA='''''',A,'''''', LDCOSP= '',L1,      &
 &         '', KLONGD='',I8)')                             &
 &     KREP, KRANG, CDNOMA, LDCOSP, KLONGD
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR, CDNOMA,.FALSE.)
 ENDIF
@@ -423,13 +422,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACINE_BB                                    &
+SUBROUTINE FACINE64                                     &
 &           (KREP, KRANG, CDNOMA, KCHAMP, LDCOSP, KVALCO, &
 &           KLONGD, KB1PAR)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLE
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -439,23 +438,23 @@ INTEGER (KIND=JPDBLE)  KCHAMP     (*)                         ! IN
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPDBLE)  KVALCO     (*)                         !   OUT
 INTEGER (KIND=JPLIKB)  KLONGD                                 !   OUT
-INTEGER (KIND=JPLIKB)  KB1PAR     (*)                 ! INOUT
+INTEGER (KIND=JPLIKB)  KB1PAR     (FA%JPLB1P)                 ! INOUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACINE_MT_BB                                           &
+CALL FACINE_MT64                                            &
 &           (FA, KREP, KRANG, CDNOMA, KCHAMP, LDCOSP, KVALCO, &
 &           KLONGD, KB1PAR)
 
 END SUBROUTINE
 
-SUBROUTINE FACINE_MM                                    &
+SUBROUTINE FACINE                                       &
 &           (KREP, KRANG, CDNOMA, KCHAMP, LDCOSP, KVALCO, &
 &           KLONGD, KB1PAR)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM, JPDBLE
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -465,23 +464,21 @@ INTEGER (KIND=JPDBLE)  KCHAMP     (*)                         ! IN
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPDBLE)  KVALCO     (*)                         !   OUT
 INTEGER (KIND=JPLIKM)  KLONGD                                 !   OUT
-INTEGER (KIND=JPLIKM)  KB1PAR     (*)                 ! INOUT
+INTEGER (KIND=JPLIKM)  KB1PAR     (FA%JPLB1P)                 ! INOUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACINE_MT_MM                                           &
+CALL FACINE_MT                                              &
 &           (FA, KREP, KRANG, CDNOMA, KCHAMP, LDCOSP, KVALCO, &
 &           KLONGD, KB1PAR)
 
 END SUBROUTINE
 
-SUBROUTINE FACINE_MT_MM                                     &
+SUBROUTINE FACINE_MT                                        &
 &           (FA, KREP, KRANG, CDNOMA, KCHAMP, LDCOSP, KVALCO, &
 &           KLONGD, KB1PAR)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLE, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -503,7 +500,7 @@ INTEGER (KIND=JPLIKB)  IB1PAR     (FA%JPLB1P)                 ! INOUT
 IRANG      = INT (     KRANG, JPLIKB)
 IB1PAR     = INT (    KB1PAR, JPLIKB)
 
-CALL FACINE_MT_BB                                           &
+CALL FACINE_MT64                                            &
 &           (FA, IREP, IRANG, CDNOMA, KCHAMP, LDCOSP, KVALCO, &
 &           ILONGD, IB1PAR)
 

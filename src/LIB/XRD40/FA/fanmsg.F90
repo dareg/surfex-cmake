@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! R. El Khatib 30-Mar-2012 KULOUT
-SUBROUTINE FANMSG_MT_BB                   &
+SUBROUTINE FANMSG_MT64                    &
 &                     (FA,  KNIVAU, KULOUT)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme se charge de mettre le Niveau Global d'
@@ -48,7 +47,7 @@ IF (LHOOK) CALL DR_HOOK('FANMSG_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 
 IF (FA%FANMSG_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FANMSG_LLPREA=.FALSE.
 ENDIF
@@ -56,7 +55,7 @@ ENDIF
 IF (KNIVAU.GE.0.AND.KNIVAU.LE.2) THEN
   INIMES=MAX (FA%NIMSGA,KNIVAU)
   FA%NIMSGA=KNIVAU
-  CALL LFINMG_MT_BB                     &
+  CALL LFINMG_MT64                       &
 &                 (FA%LFI, KNIVAU,KULOUT)
   IREP=0
 ELSE
@@ -82,13 +81,13 @@ IF (MAX (INIMES,FA%NIMSGA).EQ.2) THEN
   WRITE (UNIT=CLMESS,                                  &
 &         FMT='(''KNIVAU='',I5,'', CODE INTERNE='',I4)' &
 &         ) KNIVAU,IREP
-  IF (INIMES.NE.2) CALL FAIPAR_MT_BB                         &
+  IF (INIMES.NE.2) CALL FAIPAR_MT64                          &
 &                                  (FA, INUMER,FA%NIMSGA,IREP, &
 &                                .FALSE.,CLMESS,               &
 &                                CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,                           &
 &             .FALSE.)
@@ -98,12 +97,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANMSG_BB          &
+SUBROUTINE FANMSG64           &
 &           (KNIVAU, KULOUT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNIVAU                                 ! IN   
@@ -111,17 +110,17 @@ INTEGER (KIND=JPLIKB)  KULOUT                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANMSG_MT_BB              &
+CALL FANMSG_MT64               &
 &           (FA, KNIVAU, KULOUT)
 
 END SUBROUTINE
 
-SUBROUTINE FANMSG_MM          &
+SUBROUTINE FANMSG             &
 &           (KNIVAU, KULOUT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNIVAU                                 ! IN   
@@ -129,17 +128,15 @@ INTEGER (KIND=JPLIKM)  KULOUT                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANMSG_MT_MM              &
+CALL FANMSG_MT                 &
 &           (FA, KNIVAU, KULOUT)
 
 END SUBROUTINE
 
-SUBROUTINE FANMSG_MT_MM          &
+SUBROUTINE FANMSG_MT             &
 &           (FA, KNIVAU, KULOUT)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -153,7 +150,7 @@ INTEGER (KIND=JPLIKB)  IULOUT                                 ! IN
 INIVAU     = INT (    KNIVAU, JPLIKB)
 IULOUT     = INT (    KULOUT, JPLIKB)
 
-CALL FANMSG_MT_BB              &
+CALL FANMSG_MT64               &
 &           (FA, INIVAU, IULOUT)
 
 

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADIES_MT_BB                          &
+SUBROUTINE FADIES_MT64                           &
 &                     (FA,  KREP, KNUMER, KDATEF )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme permettant d'obtenir la date d'un fichier ouvert
@@ -40,7 +39,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FADIES_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 LLVERF=.FALSE.
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -50,7 +49,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -81,7 +80,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA.OR.IXNVMS(IRANG).EQ.2) THEN
@@ -98,7 +97,7 @@ IF (INIMES.EQ.2) THEN
 &       '', KDATEF(1:5)='',I5,2(''/'',I2),I3,'':'',I2.2,   &
 &       '', KDATEF(7:8)='',I6,''-'',I6)') KREP,KNUMER,     &
 &     (KDATEF(J),J=1,5),(KDATEF(J),J=7,8)
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -115,50 +114,48 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FADIES_BB             &
+SUBROUTINE FADIES64              &
 &           (KREP, KNUMER, KDATEF)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
-INTEGER (KIND=JPLIKB)  KDATEF     (*)                 !   OUT
+INTEGER (KIND=JPLIKB)  KDATEF     (FA%JPLDAT)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADIES_MT_BB                    &
+CALL FADIES_MT64                     &
 &           (FA, KREP, KNUMER, KDATEF)
 
 END SUBROUTINE
 
-SUBROUTINE FADIES_MM             &
+SUBROUTINE FADIES                &
 &           (KREP, KNUMER, KDATEF)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
-INTEGER (KIND=JPLIKM)  KDATEF     (*)                 !   OUT
+INTEGER (KIND=JPLIKM)  KDATEF     (FA%JPLDAT)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADIES_MT_MM                    &
+CALL FADIES_MT                       &
 &           (FA, KREP, KNUMER, KDATEF)
 
 END SUBROUTINE
 
-SUBROUTINE FADIES_MT_MM              &
+SUBROUTINE FADIES_MT                 &
 &           (FA, KREP, KNUMER, KDATEF)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -173,7 +170,7 @@ INTEGER (KIND=JPLIKB)  IDATEF     (FA%JPLDAT)                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FADIES_MT_BB                    &
+CALL FADIES_MT64                     &
 &           (FA, IREP, INUMER, IDATEF)
 
 KREP       = INT (      IREP, JPLIKM)
@@ -184,3 +181,5 @@ END SUBROUTINE
 !INTF KREP            OUT                               
 !INTF KNUMER        IN                                  
 !INTF KDATEF          OUT DIMS=FA%JPLDAT                
+
+

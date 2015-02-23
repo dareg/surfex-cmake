@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIFRA_MT_BB            &
+
+SUBROUTINE LFIFRA_MT64               &
 &                     (LFI, LDFRAN )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce Sous-Programme permet aux messages (ulterieurs) emis par le
@@ -30,7 +30,7 @@ CHARACTER(LEN=LFI%JPLFTX) CLACTI
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIFRA_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFRA_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (LFI%LFIFRA_LLPREA) THEN
 !
@@ -40,7 +40,7 @@ IF (LFI%LFIFRA_LLPREA) THEN
 !        At first routine call, initialisation of software global
 !     variables (if not already done) .
 !
-  CALL LFIINI_MT_BB              &
+  CALL LFIINI_MT64                 &
 &                 (LFI, 2_JPLIKB )
   LFI%LFIFRA_LLPREA=.FALSE.
 ENDIF
@@ -50,7 +50,7 @@ LFI%LFRANC=LDFRAN
 !        MESSAGERIE EVENTUELLE . MESSAGE, IF NECESSARY .
 !
 IF (LFI%NIMESG.NE.2)  THEN 
-  IF (LHOOK) CALL DR_HOOK('LFIFRA_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFIFRA_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 INUMER=LFI%JPNIL
@@ -58,56 +58,54 @@ INIMES=2
 IREP=0
 CLNSPR='LFIFRA'
 WRITE (UNIT=CLMESS,FMT='(''LDFRAN= '',L1)') LDFRAN
-CALL LFIEMS_MT_BB                                      &
+CALL LFIEMS_MT64                                         &
 &               (LFI, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFIFRA_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFRA_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIFRA_BB          &
+SUBROUTINE LFIFRA64           &
 &           (LDFRAN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 LOGICAL                LDFRAN                                 ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFRA_MT_BB          &
+CALL LFIFRA_MT64            &
 &           (LFI, LDFRAN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFRA_MM          &
+SUBROUTINE LFIFRA             &
 &           (LDFRAN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 LOGICAL                LDFRAN                                 ! IN   
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFRA_MT_MM          &
+CALL LFIFRA_MT             &
 &           (LFI, LDFRAN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFRA_MT_MM          &
+SUBROUTINE LFIFRA_MT             &
 &           (LFI, LDFRAN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -116,7 +114,7 @@ LOGICAL                LDFRAN                                 ! IN
 ! Convert arguments
 
 
-CALL LFIFRA_MT_BB          &
+CALL LFIFRA_MT64            &
 &           (LFI, LDFRAN)
 
 

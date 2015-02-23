@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARINE_MT_BB            &
+SUBROUTINE FARINE_MT64             &
 &                     (FA,  KOPTIO )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme est charge des INITIALISATIONS du logiciel
@@ -199,17 +198,20 @@ IF (FA%FARINE_LLPREA) THEN
   FA%NIVDSC(2,14)=10**3-1
   FA%NIVDSC(3,14)=113
 
+!RJ: if gribex use is unavoidable
+#ifdef FA_GRIBEX
 !
 !  Initialisations pour la mise en oeuvre de GRIBEX
 !
 !  1/ On force GRIBEX a calculer la puissance de laplacien
-!  CALL GRSMKP(1)
+  CALL GRSMKP(1)
 !  2/ On retire l'arrondi du message GRIB a un multiple de 120 octets
-!  CALL GRSRND(0)
+  CALL GRSRND(0)
+#endif
 !
 !  3/ Creation de la correspondance "nom article FA" et
 !                                   "descripteurs GRIBEX"
-  CALL FAICOR_MT_BB          &
+  CALL FAICOR_MT64           &
 &                 (FA)
 !
 !
@@ -255,7 +257,7 @@ IF (FA%FARINE_LLPREA) THEN
   LLNMUL=(KOPTIO.EQ.1).OR.(KOPTIO.EQ.2.AND.FA%FARINE_LLDEFM)
   LLASGN=LLNMUL
   LLREL=.FALSE.
-  CALL LFIINI_MT_BB             &
+  CALL LFIINI_MT64               &
 &                (FA%LFI, KOPTIO)
 !
 ELSEIF (KOPTIO.EQ.2) THEN
@@ -279,7 +281,7 @@ ELSE
     GOTO 1001
   ENDIF
 !
-  CALL LFIINI_MT_BB             &
+  CALL LFIINI_MT64               &
 &                (FA%LFI, KOPTIO)
 !
 ENDIF
@@ -288,10 +290,10 @@ FA%LFAMUL=LLNMUL
 IREP=0
 !
 IF (LLASGN) THEN
-  CALL LFIVER_MT_BB                        &
+  CALL LFIVER_MT64                          &
 &                 (FA%LFI, FA%VRGLAS,'ASGN')
 ELSEIF (LLREL) THEN
-  CALL LFIVER_MT_BB                       &
+  CALL LFIVER_MT64                         &
 &                 (FA%LFI, FA%VRGLAS,'REL')
 ENDIF
 !
@@ -319,13 +321,13 @@ IF (MAX (INIMES,FA%NIMSGA).EQ.2) THEN
   WRITE (UNIT=CLMESS,                                  &
 &         FMT='(''KOPTIO='',I5,'', CODE INTERNE='',I4)' &
 &         ) KOPTIO,IREP
-  IF (INIMES.NE.2) CALL FAIPAR_MT_BB                         &
+  IF (INIMES.NE.2) CALL FAIPAR_MT64                          &
 &                                  (FA, INUMER,FA%NIMSGA,IREP, &
 &                                .FALSE.,CLMESS,               &
 &                                CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,.FALSE.)
 !
@@ -335,46 +337,44 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FARINE_BB          &
+SUBROUTINE FARINE64           &
 &           (KOPTIO)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KOPTIO                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARINE_MT_BB          &
+CALL FARINE_MT64           &
 &           (FA, KOPTIO)
 
 END SUBROUTINE
 
-SUBROUTINE FARINE_MM          &
+SUBROUTINE FARINE             &
 &           (KOPTIO)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KOPTIO                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARINE_MT_MM          &
+CALL FARINE_MT             &
 &           (FA, KOPTIO)
 
 END SUBROUTINE
 
-SUBROUTINE FARINE_MT_MM          &
+SUBROUTINE FARINE_MT             &
 &           (FA, KOPTIO)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -385,7 +385,7 @@ INTEGER (KIND=JPLIKB)  IOPTIO                                 ! IN
 
 IOPTIO     = INT (    KOPTIO, JPLIKB)
 
-CALL FARINE_MT_BB          &
+CALL FARINE_MT64           &
 &           (FA, IOPTIO)
 
 

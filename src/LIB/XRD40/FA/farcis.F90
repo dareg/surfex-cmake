@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARCIS_MT_BB                                         &
+SUBROUTINE FARCIS_MT64                                          &
 &                     (FA,  KREP, KRANG, PCHAMP, KSTRON, KPUILA )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -60,7 +59,7 @@ IF (KRANG.LE.0.OR.KRANG.GT.FA%JPNXFA) THEN
 ENDIF
 !
 IF (FA%LIXLAP) THEN
-  CALL FAIXLA_MT_BB          &
+  CALL FAIXLA_MT64           &
 &                 (FA)
   FA%LIXLAP=.FALSE.
 ENDIF
@@ -267,7 +266,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I4,        &
 &    '', PCHAMP(1)='',G12.5,'', KSTRON='',I4,'', KPUILA='',I3)') &
 &     KREP,KRANG,PCHAMP(1),KSTRON,KPUILA
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -283,54 +282,52 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FARCIS_BB                            &
+SUBROUTINE FARCIS64                             &
 &           (KREP, KRANG, PCHAMP, KSTRON, KPUILA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
-REAL (KIND=JPDBLR)     PCHAMP     (*)                 ! INOUT
+REAL (KIND=JPDBLR)     PCHAMP     (FA%JPXCSP)                 ! INOUT
 INTEGER (KIND=JPLIKB)  KSTRON                                 ! IN   
 INTEGER (KIND=JPLIKB)  KPUILA                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARCIS_MT_BB                                   &
+CALL FARCIS_MT64                                    &
 &           (FA, KREP, KRANG, PCHAMP, KSTRON, KPUILA)
 
 END SUBROUTINE
 
-SUBROUTINE FARCIS_MM                            &
+SUBROUTINE FARCIS                               &
 &           (KREP, KRANG, PCHAMP, KSTRON, KPUILA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
-REAL (KIND=JPDBLR)     PCHAMP     (*)                 ! INOUT
+REAL (KIND=JPDBLR)     PCHAMP     (FA%JPXCSP)                 ! INOUT
 INTEGER (KIND=JPLIKM)  KSTRON                                 ! IN   
 INTEGER (KIND=JPLIKM)  KPUILA                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARCIS_MT_MM                                   &
+CALL FARCIS_MT                                      &
 &           (FA, KREP, KRANG, PCHAMP, KSTRON, KPUILA)
 
 END SUBROUTINE
 
-SUBROUTINE FARCIS_MT_MM                             &
+SUBROUTINE FARCIS_MT                                &
 &           (FA, KREP, KRANG, PCHAMP, KSTRON, KPUILA)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -350,7 +347,7 @@ IRANG      = INT (     KRANG, JPLIKB)
 ISTRON     = INT (    KSTRON, JPLIKB)
 IPUILA     = INT (    KPUILA, JPLIKB)
 
-CALL FARCIS_MT_BB                                   &
+CALL FARCIS_MT64                                    &
 &           (FA, IREP, IRANG, PCHAMP, ISTRON, IPUILA)
 
 KREP       = INT (      IREP, JPLIKM)

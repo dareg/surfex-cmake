@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAINIG_MT_BB                                           &
+SUBROUTINE FAINIG_MT64                                            &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF, &
 &                    LDCOSP, KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3,    &
 &                    PSEC3, KSEC4 )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -100,7 +99,7 @@ ENDIF
 ! du tableau FA%NSEC1(2:21,KRANG) qui va servir comme base pour KSEC1:
 !
 IF (FA%FICHIER(KRANG)%LISEC1) THEN
-  CALL FAISC1_MT_BB             &
+  CALL FAISC1_MT64              &
 &                (FA, KREP,KRANG)
   IF (KREP.NE.0) GOTO 1001
   FA%FICHIER(KRANG)%LISEC1=.FALSE.
@@ -110,7 +109,7 @@ KSEC1(2:21)=FA%FICHIER(KRANG)%NSEC1(2:21)
 !
 !  Initialisation de INIPAR (5 elts de KSEC1 (1 et 6:9) et un indicateur
 !  de type de champ: 0->RAS; 2->min/max; 4->cumul)
-CALL FAIPAG_MT_BB                                                 &
+CALL FAIPAG_MT64                                                  &
 &               (FA,  KREP, KRANG, CDPREF, KNIVAU, CDSUFF, INIPAR )
 IF (KREP.NE.0) GOTO 1001
 !  Element 1: version number of code table 2
@@ -157,7 +156,7 @@ ENDIF
 ! les tableaux NSEC2xxx et FA%XSEC2.
 !
 IF (FA%CADRE(IRANGC)%LISEC2) THEN
-  CALL FAISC2_MT_BB              &
+  CALL FAISC2_MT64               &
 &                (FA, KREP,IRANGC)
   IF (KREP.NE.0) GOTO 1001
   FA%CADRE(IRANGC)%LISEC2=.FALSE.
@@ -168,7 +167,7 @@ ENDIF
 ! de la ss-tronc dans FAGOTE).
 !
 IF (LLMLAM.AND.FA%FICHIER(KRANG)%LISC2F) THEN
-  CALL FAIS2F_MT_BB             &
+  CALL FAIS2F_MT64              &
 &                (FA, KREP,KRANG)
   IF (KREP.NE.0) GOTO 1001
   FA%FICHIER(KRANG)%LISC2F=.FALSE.
@@ -328,7 +327,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')      &
 &         KREP,KRANG,CDPREF(1:LEN_TRIM(CDPREF)),KNIVAU,   &
 &         CDSUFF(1:LEN_TRIM(CDSUFF)),LDCOSP
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,                                &
 &                  CLNSPR,.FALSE.)
@@ -345,13 +344,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAINIG_BB                                        &
+SUBROUTINE FAINIG64                                         &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP,     &
 &           KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3, PSEC3, KSEC4)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -361,28 +360,28 @@ INTEGER (KIND=JPLIKB)  KNIVAU                                 ! IN
 CHARACTER (LEN=*)      CDSUFF                                 ! IN   
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPLIKB)  KLCHAM                                 ! IN   
-INTEGER (KIND=JPLIKB)  KSEC1      (*)                 !   OUT
-INTEGER (KIND=JPLIKB)  KSEC2      (*)                 !   OUT
+INTEGER (KIND=JPLIKB)  KSEC1      (FA%JPSEC1)                 !   OUT
+INTEGER (KIND=JPLIKB)  KSEC2      (FA%JPSEC2)                 !   OUT
 REAL (KIND=JPDBLR)     PSEC2      (*)                         !   OUT
 INTEGER (KIND=JPLIKB)  KSEC3      (2)                         !   OUT
 REAL (KIND=JPDBLR)     PSEC3      (*)                         !   OUT
-INTEGER (KIND=JPLIKB)  KSEC4      (*)                 !   OUT
+INTEGER (KIND=JPLIKB)  KSEC4      (FA%JPSEC4)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAINIG_MT_BB                                           &
+CALL FAINIG_MT64                                            &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &           KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3, PSEC3, KSEC4)
 
 END SUBROUTINE
 
-SUBROUTINE FAINIG_MM                                        &
+SUBROUTINE FAINIG                                           &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP,     &
 &           KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3, PSEC3, KSEC4)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -392,28 +391,26 @@ INTEGER (KIND=JPLIKM)  KNIVAU                                 ! IN
 CHARACTER (LEN=*)      CDSUFF                                 ! IN   
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPLIKM)  KLCHAM                                 ! IN   
-INTEGER (KIND=JPLIKM)  KSEC1      (*)                 !   OUT
-INTEGER (KIND=JPLIKM)  KSEC2      (*)                 !   OUT
+INTEGER (KIND=JPLIKM)  KSEC1      (FA%JPSEC1)                 !   OUT
+INTEGER (KIND=JPLIKM)  KSEC2      (FA%JPSEC2)                 !   OUT
 REAL (KIND=JPDBLR)     PSEC2      (*)                         !   OUT
 INTEGER (KIND=JPLIKM)  KSEC3      (2)                         !   OUT
 REAL (KIND=JPDBLR)     PSEC3      (*)                         !   OUT
-INTEGER (KIND=JPLIKM)  KSEC4      (*)                 !   OUT
+INTEGER (KIND=JPLIKM)  KSEC4      (FA%JPSEC4)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAINIG_MT_MM                                           &
+CALL FAINIG_MT                                              &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &           KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3, PSEC3, KSEC4)
 
 END SUBROUTINE
 
-SUBROUTINE FAINIG_MT_MM                                     &
+SUBROUTINE FAINIG_MT                                        &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &           KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3, PSEC3, KSEC4)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -445,7 +442,7 @@ IRANG      = INT (     KRANG, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 ILCHAM     = INT (    KLCHAM, JPLIKB)
 
-CALL FAINIG_MT_BB                                           &
+CALL FAINIG_MT64                                            &
 &           (FA, IREP, IRANG, CDPREF, INIVAU, CDSUFF, LDCOSP, &
 &           ILCHAM, ISEC1, ISEC2, PSEC2, ISEC3, PSEC3, ISEC4)
 

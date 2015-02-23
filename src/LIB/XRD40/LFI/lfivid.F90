@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIVID_MT_BB                                         &
+SUBROUTINE LFIVID_MT64                                            &
 &                     (LFI, KREP, KRANG, KNUMPD, KTAMPO, KRETIN )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
@@ -42,7 +41,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIVID_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIVID_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (KRANG.LE.0.OR.KRANG.GT.LFI%JPNXFI) THEN
   INUMER=LFI%JPNIL
@@ -87,9 +86,10 @@ IF (ILONPD.NE.ILARPH) THEN
 !-----------------------------------------------------------------------
 !
     INAPHY=INUMAE
-    CALL LFILDO_MT_BB                               &
-&                   (LFI, KREP,INUMER,INUMAE,KTAMPO,  &
-&                    LFI%NBREAD(KRANG),IFACTM,IRETIN)
+    CALL LFILDO_MT64                                  &
+&                   (LFI, KREP,INUMER,INUMAE,KTAMPO,&
+&                    LFI%NBREAD(KRANG),IFACTM,      &
+&                    IRETIN)
 !
     IF (IRETIN.NE.0) THEN
       GOTO 904
@@ -109,7 +109,7 @@ ENDIF
 !
 LLADON=.TRUE.
 INAPHY=0
-CALL LFIECX_MT_BB                                       &
+CALL LFIECX_MT64                                          &
 &               (LFI,KREP,KRANG,INUMAE,                   &
 &                LFI%MTAMPD(IXT(1_JPLIKB ,KNUMPD,KRANG)), &
 &                LLADON,IRETIN)
@@ -163,12 +163,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I3, &
 &         '', KNUMPD='',I3,'', KRETIN='',I2)')            &
 &     KREP,KRANG,KNUMPD,KRETIN
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, INUMER,INIMES,KREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIVID_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIVID_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -181,54 +181,52 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIVID_BB                            &
+SUBROUTINE LFIVID64                             &
 &           (KREP, KRANG, KNUMPD, KTAMPO, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKB)  KNUMPD                                 ! IN   
-INTEGER (KIND=JPDBLE)  KTAMPO     (*)                ! IN   
+INTEGER (KIND=JPDBLE)  KTAMPO     (LFI%JPLARX)                ! IN   
 INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIVID_MT_BB                                    &
+CALL LFIVID_MT64                                     &
 &           (LFI, KREP, KRANG, KNUMPD, KTAMPO, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIVID_MM                            &
+SUBROUTINE LFIVID                               &
 &           (KREP, KRANG, KNUMPD, KTAMPO, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKM)  KNUMPD                                 ! IN   
-INTEGER (KIND=JPDBLE)  KTAMPO     (*)                ! IN   
+INTEGER (KIND=JPDBLE)  KTAMPO     (LFI%JPLARX)                ! IN   
 INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIVID_MT_MM                                    &
+CALL LFIVID_MT                                       &
 &           (LFI, KREP, KRANG, KNUMPD, KTAMPO, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIVID_MT_MM                              &
+SUBROUTINE LFIVID_MT                                 &
 &           (LFI, KREP, KRANG, KNUMPD, KTAMPO, KRETIN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -247,7 +245,7 @@ INTEGER (KIND=JPLIKB)  IRETIN                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 INUMPD     = INT (    KNUMPD, JPLIKB)
 
-CALL LFIVID_MT_BB                                    &
+CALL LFIVID_MT64                                     &
 &           (LFI, IREP, IRANG, INUMPD, KTAMPO, IRETIN)
 
 KREP       = INT (      IREP, JPLIKM)

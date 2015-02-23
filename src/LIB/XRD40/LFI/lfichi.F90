@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFICHI_MT_BB                                &
+SUBROUTINE LFICHI_MT64                                   &
 &                     (LFI, KREP, CDSTRU, KVAL, KPOSC2 )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI;
@@ -27,7 +26,7 @@ INTEGER (KIND=JPLIKB) ILUSTR, J, IPOSC1, IPOSC2
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFICHI_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFICHI_MT64',0,ZHOOK_HANDLE)
 KREP=0
 ILUSTR=INT (LEN (CDSTRU), JPLIKB)
 !
@@ -77,18 +76,18 @@ KREP=-40
 !
 1001 CONTINUE
 !
-IF (LHOOK) CALL DR_HOOK('LFICHI_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFICHI_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFICHI_BB                   &
+SUBROUTINE LFICHI64                    &
 &           (KREP, CDSTRU, KVAL, KPOSC2)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -98,17 +97,17 @@ INTEGER (KIND=JPLIKB)  KPOSC2                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICHI_MT_BB                           &
+CALL LFICHI_MT64                            &
 &           (LFI, KREP, CDSTRU, KVAL, KPOSC2)
 
 END SUBROUTINE
 
-SUBROUTINE LFICHI_MM                   &
+SUBROUTINE LFICHI                      &
 &           (KREP, CDSTRU, KVAL, KPOSC2)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -118,17 +117,15 @@ INTEGER (KIND=JPLIKM)  KPOSC2                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICHI_MT_MM                           &
+CALL LFICHI_MT                              &
 &           (LFI, KREP, CDSTRU, KVAL, KPOSC2)
 
 END SUBROUTINE
 
-SUBROUTINE LFICHI_MT_MM                     &
+SUBROUTINE LFICHI_MT                        &
 &           (LFI, KREP, CDSTRU, KVAL, KPOSC2)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -143,7 +140,7 @@ INTEGER (KIND=JPLIKB)  IPOSC2                                 !   OUT
 ! Convert arguments
 
 
-CALL LFICHI_MT_BB                           &
+CALL LFICHI_MT64                            &
 &           (LFI, IREP, CDSTRU, IVAL, IPOSC2)
 
 KREP       = INT (      IREP, JPLIKM)

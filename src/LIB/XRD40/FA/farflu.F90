@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARFLU_MT_BB                                    &
+SUBROUTINE FARFLU_MT64                                     &
 &                     (FA,  KXNIVV, KXTRON, KXLATI, KXLONG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme servant a specifier des Limites Utilisateur
@@ -53,7 +52,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FARFLU_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FARFLU_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FARFLU_LLPREA=.FALSE.
 ENDIF
@@ -79,7 +78,7 @@ ENDIF
 !
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
@@ -126,7 +125,7 @@ IREP=0
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=IREP.NE.0.AND.FA%NRFAGA.NE.2
@@ -147,7 +146,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KXNIVV='',I4,'', KXTRON='',I4, &
 &         '', KXLATI='',I4,'', KXLONG='',I4)')               &
 &     KXNIVV,KXTRON,KXLATI,KXLONG
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -166,7 +165,7 @@ IF (INIMES.GE.1) THEN
 &     FA%NXNIVV,FA%NXTRON,FA%NXLATI,FA%NXLONG
   ENDIF
 !
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -177,12 +176,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FARFLU_BB                       &
+SUBROUTINE FARFLU64                        &
 &           (KXNIVV, KXTRON, KXLATI, KXLONG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KXNIVV                                 ! IN   
@@ -192,17 +191,17 @@ INTEGER (KIND=JPLIKB)  KXLONG                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARFLU_MT_BB                              &
+CALL FARFLU_MT64                               &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
 
 END SUBROUTINE
 
-SUBROUTINE FARFLU_MM                       &
+SUBROUTINE FARFLU                          &
 &           (KXNIVV, KXTRON, KXLATI, KXLONG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KXNIVV                                 ! IN   
@@ -212,17 +211,15 @@ INTEGER (KIND=JPLIKM)  KXLONG                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARFLU_MT_MM                              &
+CALL FARFLU_MT                                 &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
 
 END SUBROUTINE
 
-SUBROUTINE FARFLU_MT_MM                        &
+SUBROUTINE FARFLU_MT                           &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -242,7 +239,7 @@ IXTRON     = INT (    KXTRON, JPLIKB)
 IXLATI     = INT (    KXLATI, JPLIKB)
 IXLONG     = INT (    KXLONG, JPLIKB)
 
-CALL FARFLU_MT_BB                              &
+CALL FARFLU_MT64                               &
 &           (FA, IXNIVV, IXTRON, IXLATI, IXLONG)
 
 

@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFILAF_MT_BB                          &
+
+SUBROUTINE LFILAF_MT64                             &
 &                     (LFI, KREP, KNUMER, LDTOUT )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme donnant, pour une unite logique ouverte au sens
@@ -50,12 +50,12 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFILAF_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFILAF_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IREP=0
 IRANG=0
 CLNSPR='LFILAF'
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -63,7 +63,7 @@ IF (IRANG.EQ.0) THEN
   GOTO 1001
 ENDIF
 !
-IF (LFI%LMULTI) CALL LFIVER_MT_BB                           &
+IF (LFI%LMULTI) CALL LFIVER_MT64                              &
 &                               (LFI, LFI%VERRUE(IRANG),'ON')
 INTROU=LFI%MDES1D(IXM(LFI%JPNTRU,IRANG))+LFI%NBTROU(IRANG)
 INBPIR=LFI%MDES1D(IXM(LFI%JPNPIR,IRANG))
@@ -91,7 +91,7 @@ ENDIF
 !
 INIMES=2
 LLFATA=.FALSE.
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !**
@@ -273,7 +273,7 @@ ELSEIF (JRGPIF.NE.1) THEN
 !
     IF (.NOT.LFI%LPHASP(IRGPIM)) THEN
 !
-      CALL LFIPHA_MT_BB                             &
+      CALL LFIPHA_MT64                                &
 &                     (LFI, IREP,IRANG,IRGPIM,IRETIN)
 !
       IF (IRETIN.EQ.1) THEN
@@ -294,7 +294,7 @@ ELSEIF (JRGPIF.NE.1) THEN
 !
 !          Mise en memoire de la Paire d'Articles d'Index cherchee.
 !
-  CALL LFIPIM_MT_BB                                           &
+  CALL LFIPIM_MT64                                              &
 &                 (LFI, IREP,IRANG,IRANGM,IRGPIM,JRGPIF,IRGPFS, &
 &                  INPILE,IRETIN)
 !
@@ -330,7 +330,7 @@ ELSE
 !
     IF (.NOT.LFI%LPHASP(IRPIMS)) THEN
 !
-      CALL LFIPHA_MT_BB                             &
+      CALL LFIPHA_MT64                                &
 &                     (LFI, IREP,IRANG,IRPIMS,IRETIN)
 !
       IF (IRETIN.EQ.1) THEN
@@ -351,7 +351,7 @@ ELSE
 !
 !          Mise en memoire de la Paire d'Articles d'Index cherchee.
 !
-  CALL LFIPIM_MT_BB                                           &
+  CALL LFIPIM_MT64                                              &
 &                 (LFI, IREP,IRANG,IRANGM,IRPIMS,IRGPFS,JRGPIF, &
 &                  INPILE,IRETIN)
 !
@@ -531,7 +531,7 @@ IF (INALDI.EQ.INALDO.AND.(.NOT.LDTOUT.OR.INTROI.EQ.INTROU)) THEN
 &       '' logical Records for whole file'')') KNUMER,INBALO
   ENDIF
 !
-  CALL LFIEMS_MT_BB                              &
+  CALL LFIEMS_MT64                                 &
 &                 (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                  CLMESS,CLNSPR,CLACTI)
   WRITE (UNIT=LFI%NULOUT,FMT='(///)')
@@ -568,24 +568,24 @@ LLFATA=LLMOER (IREP,IRANG)
 IF (IRANG.NE.0) THEN
   LFI%NDEROP(IRANG)=18
   LFI%NDERCO(IRANG)=IREP
-  IF (LFI%LMULTI) CALL LFIVER_MT_BB                            &
+  IF (LFI%LMULTI) CALL LFIVER_MT64                               &
 &                                 (LFI, LFI%VERRUE(IRANG),'OFF')
 ENDIF
 !
 IF (LLFATA.OR.IXNIMS (IRANG).EQ.2) THEN
   INIMES=2
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFILAF_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFILAF_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &    '', LDTOUT= '',L1)') KREP,KNUMER,LDTOUT
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFILAF_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFILAF_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -599,12 +599,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFILAF_BB             &
+SUBROUTINE LFILAF64              &
 &           (KREP, KNUMER, LDTOUT)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -613,17 +613,17 @@ LOGICAL                LDTOUT                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFILAF_MT_BB                     &
+CALL LFILAF_MT64                       &
 &           (LFI, KREP, KNUMER, LDTOUT)
 
 END SUBROUTINE
 
-SUBROUTINE LFILAF_MM             &
+SUBROUTINE LFILAF                &
 &           (KREP, KNUMER, LDTOUT)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -632,17 +632,15 @@ LOGICAL                LDTOUT                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFILAF_MT_MM                     &
+CALL LFILAF_MT                        &
 &           (LFI, KREP, KNUMER, LDTOUT)
 
 END SUBROUTINE
 
-SUBROUTINE LFILAF_MT_MM               &
+SUBROUTINE LFILAF_MT                  &
 &           (LFI, KREP, KNUMER, LDTOUT)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -656,7 +654,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFILAF_MT_BB                     &
+CALL LFILAF_MT64                       &
 &           (LFI, IREP, INUMER, LDTOUT)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,10 +1,9 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 SUBROUTINE FACODEGA                                           &
 &           (PFDATA, KLENF, KBITS, KNBIT, KB1PAR, KB2PAR,      &
 &           PVERT, KLENV, KGRIB, KLENG, KWORD, KROUND, KCPACK, &
 &           KSCALP, KERR, PMIN, PMAX, LDARPE)
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 REAL (KIND=JPDBLR)     PFDATA     (*)                         ! IN   

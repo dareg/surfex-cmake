@@ -1,103 +1,111 @@
       SUBROUTINE OFFSET_MF  (KOFF,KVAL,KWORD,KBYTE,KNBIT,KLEN,KERR)
-      USE PARKIND1, ONLY : JPRB
+      USE PARKIND1, ONLY : JPIM, JPRB
       USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-C
-C
-C
-C
-C
-C********************************************************************
-C*
-C*    NAME      : OFFSET
-C*
-C*    FUNCTION  : CALCULATES THE WORD AND BIT OFFSET OF THE START
-C*                OF THE NEXT BIT-FIELD IN AN ARRAY OF BINARY
-C*                DATA, FOLLOWING THE INSERTION/EXTRACTION OF ONE
-C*                OR MORE CONSECUTIVE BIT-FIELDS.
-C*
-C*    INPUT     : KOFF  - BIT OFFSET AT WHICH LAST INSERTION OR
-C*                        EXTRACTION STARTED.
-C*                KVAL - NUMBER OF FIELDS INSERTED OR EXTRACTED IN
-C*                        LAST OPERATION.
-C*                KWORD - WORD NUMBER OF ARRAY AT WHICH LAST OPERATION
-C*                        STARTED.
-C*                KBYTE - LENGTH, IN BITS, OF LAST FIELD(S) INSERTED
-C*                        OR EXTRACTED.
-C*                KNBIT - NUMBER OF BITS IN COMPUTER WORD.
-C*                KLEN  - NUMBER OF WORDS IN ARRAY.
-C*
-C*    OUTPUT    : KOFF  - BIT OFFSET AT WHICH NEXT INSERTION OR
-C*                        EXTRACTION STARTS.
-C*                KVAL - UNCHANGED.
-C*                KWORD - WORD NUMBER OF ARRAY AT WHICH NEXT OPERATION
-C*                        STARTS.
-C*                KBYTE - UNCHANGED.
-C*                KNBIT - UNCHANGED.
-C*                KLEN  - UNCHANGED.
-C*
-C*                KERR  - EQUAL 0 IF NO ERROR.
-C*                        EQUAL -2 IF NEXT OPERATION IS OUTSIDE ARRAY
-C*                        BOUNDS.
-C*
-C*    GENERAL   : OFFSET CALLS -----
-C*
-C*    AUTHOR    : J.HENNESSY  15.4.85
-C*
-C*    MODIFIED  : J.HENNESSY  28.11.85
-C*    Modified by Jean CLOCHARD, February 1990, to comply with "DOCTOR".
-C*
-C********************************************************************
-C
-      INTEGER KOFF, KVAL, KWORD, KBYTE, KNBIT, KLEN, KERR
-C
-      INTEGER IBITL, INTER, IOFFS
-C
-C
-C     CLEAR ERROR INDICATOR
-C
+!
+!
+!
+!
+!
+!********************************************************************
+!*
+!*    NAME      : OFFSET
+!*
+!*    FUNCTION  : CALCULATES THE WORD AND BIT OFFSET OF THE START
+!*                OF THE NEXT BIT-FIELD IN AN ARRAY OF BINARY
+!*                DATA, FOLLOWING THE INSERTION/EXTRACTION OF ONE
+!*                OR MORE CONSECUTIVE BIT-FIELDS.
+!*
+!*    INPUT     : KOFF  - BIT OFFSET AT WHICH LAST INSERTION OR
+!*                        EXTRACTION STARTED.
+!*                KVAL - NUMBER OF FIELDS INSERTED OR EXTRACTED IN
+!*                        LAST OPERATION.
+!*                KWORD - WORD NUMBER OF ARRAY AT WHICH LAST OPERATION
+!*                        STARTED.
+!*                KBYTE - LENGTH, IN BITS, OF LAST FIELD(S) INSERTED
+!*                        OR EXTRACTED.
+!*                KNBIT - NUMBER OF BITS IN COMPUTER WORD.
+!*                KLEN  - NUMBER OF WORDS IN ARRAY.
+!*
+!*    OUTPUT    : KOFF  - BIT OFFSET AT WHICH NEXT INSERTION OR
+!*                        EXTRACTION STARTS.
+!*                KVAL - UNCHANGED.
+!*                KWORD - WORD NUMBER OF ARRAY AT WHICH NEXT OPERATION
+!*                        STARTS.
+!*                KBYTE - UNCHANGED.
+!*                KNBIT - UNCHANGED.
+!*                KLEN  - UNCHANGED.
+!*
+!*                KERR  - EQUAL 0 IF NO ERROR.
+!*                        EQUAL -2 IF NEXT OPERATION IS OUTSIDE ARRAY
+!*                        BOUNDS.
+!*
+!*    GENERAL   : OFFSET CALLS -----
+!*
+!*    AUTHOR    : J.HENNESSY  15.4.85
+!*
+!*    MODIFIED  : J.HENNESSY  28.11.85
+!*    Modified by Jean CLOCHARD, February 1990, to comply with "DOCTOR".
+!*
+!********************************************************************
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=JPIM) :: KOFF
+      INTEGER(KIND=JPIM) :: KVAL
+      INTEGER(KIND=JPIM) :: KWORD
+      INTEGER(KIND=JPIM) :: KBYTE
+      INTEGER(KIND=JPIM) :: KNBIT
+      INTEGER(KIND=JPIM) :: KLEN
+      INTEGER(KIND=JPIM) :: KERR
+!
+      INTEGER(KIND=JPIM) :: IBITL, INTER, IOFFS
+!
+!
+!     CLEAR ERROR INDICATOR
+!
       REAL(KIND=JPRB) :: ZHOOK_HANDLE
       IF (LHOOK) CALL DR_HOOK('OFFSET_MF',0,ZHOOK_HANDLE)
       KERR = 0
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C     CALCULATE NEXT WORD AND BIT POSITIONS.
-C
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!     CALCULATE NEXT WORD AND BIT POSITIONS.
+!
       IBITL = KVAL * KBYTE
       INTER = IBITL / KNBIT
       IOFFS = IBITL - INTER * KNBIT
       KWORD = KWORD + INTER
       KOFF  = KOFF  + IOFFS
-C
-      IF (KOFF.GE.KNBIT)
-     C   THEN
+!
+      IF (KOFF.GE.KNBIT)                                                &
+     &   THEN
              KWORD = KWORD + 1
              KOFF  = KOFF  - KNBIT
          END IF
-C
-C
-C
-C
-C
-C
-C
-C
-C     CHECK THAT NEXT WORD TO BE ACCESSED LIES WITHIN THE ARRAY BOUNDS.
-C
-      IF (KWORD.GT.KLEN)
-     C   THEN
+!
+!
+!
+!
+!
+!
+!
+!
+!     CHECK THAT NEXT WORD TO BE ACCESSED LIES WITHIN THE ARRAY BOUNDS.
+!
+      IF (KWORD.GT.KLEN)                                                &
+     &   THEN
              KERR = -2
              WRITE (*,9001) KWORD,KLEN
  9001        FORMAT (1H ,'WORD ',I8,' IS OUTSIDE ARRAY BOUNDS ',I8)
          ENDIF
-C
-C
+!
+!
       IF (LHOOK) CALL DR_HOOK('OFFSET_MF',1,ZHOOK_HANDLE)
-      END
+      ENDSUBROUTINE OFFSET_MF

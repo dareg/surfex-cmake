@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADECX_MT_BB                                       &
+SUBROUTINE FADECX_MT64                                          &
 &                     (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, &
-&                      KCHAMP, LDCOSP )
+&                      KCHAMP, LDCOSP)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -38,7 +37,7 @@ LOGICAL LDCOSP
 !
 CHARACTER CDNOMA*(*)
 !
-!#include "fagribexi.h"
+#include "fagribexi.h"
 !
 REAL (KIND=JPDBLR) ZSEC2(10+2*(FA%JPXNIV+1)), ZSEC3(2)
 REAL (KIND=JPDBLR), ALLOCATABLE ::  ZSEC4(:), ZCHAMP(:)
@@ -63,6 +62,7 @@ INTEGER (KIND=JPLIKB) I7,I10,I16
 LOGICAL LLMLAM, LLCOSP
 !
 CHARACTER(LEN=1) CLOPER
+CHARACTER(LEN=8) CLGRIB
 !
 INTEGER (KIND=JPLIKB) DECF10
 EXTERNAL DECF10
@@ -139,6 +139,18 @@ IF (LDCOSP) THEN
   IVALC4=KVALCO(4)
   IVALC5=KVALCO(5)
 ENDIF
+
+! C'est un champ GRIB, mais les octets ont peut-etre ete 
+! inverses s'il a ete produit sur une architecture differente
+! On cherche donc a deviner s'il faut les inverser a nouveau,
+! et on inverse le cas echeant
+
+CLGRIB=TRANSFER (KVALCO(IDECAL+1), CLGRIB)
+IF ((CLGRIB (1:4) /= 'GRIB') .AND. (CLGRIB (5:8) == 'BIRG')) &
+!RJ: avoiding early in surfex, file looks to be on different endianess
+!RJ & CALL JSWAP (KVALCO(IDECAL+1), KVALCO(IDECAL+1), 8_JPLIKM, INT (KLONGA-IDECAL, JPLIKM))
+& call abort
+
 IILCHAM=ILCHAM
 !
 ! Pour Aladin, le calcul du nb de coeff spectraux qui ont
@@ -151,7 +163,7 @@ IF (LDCOSP.AND.LLMLAM) THEN
   IILCHAM=ILCHAM-ISTRIA
 ENDIF
 ! ILENG=longueur disponible en entiers declares INTEGER dans KVALCO.
-ILENG=(KIND(KVALCO)/4)*(KLONGA-IDECAL)
+ILENG=2*(KLONGA-IDECAL)
 !
 !     3.1 -  CHANGEMENT D'UNITE DE CERTAINS CHAMPS.
 !            Il s'agit de champs dont les valeurs sont comprises
@@ -205,9 +217,9 @@ ENDIF
 !
 IWORD=0
 IRET=-1
-!CALL FAGRIBEX(ISEC0,ISEC1,ISEC2,ZSEC2,ISEC3,ZSEC3,ISEC4,   &
-!&              KCHAMP,IILCHAM,KVALCO(IDECAL+1),ILENG,IWORD, &
-!&              CLOPER,IRET)
+CALL FAGRIBEX(ISEC0,ISEC1,ISEC2,ZSEC2,ISEC3,ZSEC3,ISEC4,   &
+&              KCHAMP,IILCHAM,KVALCO(IDECAL+1),ILENG,IWORD, &
+&              CLOPER,IRET)
 IF (FA%LFAMOP) THEN
   WRITE (UNIT=FA%NULOUT,FMT=*)                         &
 &         ' FADECX: KLONGA, IDECAL, ILENG, IILCHAM = ', &
@@ -427,7 +439,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', CDNOMA='''''',A,'''''', KLONGA= '',I8,      &
 &         '', LDCOSP='',L1)')                             &
 &     KREP, KRANG, CDNOMA, KLONGA, LDCOSP
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CDNOMA,.FALSE.)
 ENDIF
@@ -443,13 +455,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FADECX_BB                                    &
+SUBROUTINE FADECX64                                     &
 &           (KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -462,19 +474,19 @@ LOGICAL                LDCOSP                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADECX_MT_BB                                           &
+CALL FADECX_MT64                                            &
 &           (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 
 END SUBROUTINE
 
-SUBROUTINE FADECX_MM                                    &
+SUBROUTINE FADECX                                       &
 &           (KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -487,19 +499,17 @@ LOGICAL                LDCOSP                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADECX_MT_MM                                           &
+CALL FADECX_MT                                              &
 &           (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 
 END SUBROUTINE
 
-SUBROUTINE FADECX_MT_MM                                     &
+SUBROUTINE FADECX_MT                                        &
 &           (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -519,7 +529,7 @@ INTEGER (KIND=JPLIKB)  ILONGA                                 ! IN
 IRANG      = INT (     KRANG, JPLIKB)
 ILONGA     = INT (    KLONGA, JPLIKB)
 
-CALL FADECX_MT_BB                                           &
+CALL FADECX_MT64                                            &
 &           (FA, IREP, IRANG, CDNOMA, KVALCO, ILONGA, KCHAMP, &
 &           LDCOSP)
 

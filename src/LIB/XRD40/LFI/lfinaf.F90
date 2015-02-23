@@ -1,13 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFINAF_MT_BB                                  &
+
+SUBROUTINE LFINAF_MT64                                     &
 &                     (LFI, KREP, KNUMER, KNALDO, KNTROU,  &
 &                      KNARES, KNAMAX )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME DONNANT DES NOMBRES D'ARTICLES LOGIQUES DIVERS
@@ -47,9 +47,9 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFINAF_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFINAF_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -61,7 +61,7 @@ IF (IRANG.EQ.0) THEN
   GOTO 1001
 ENDIF
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                           &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                              &
 &                                (LFI, LFI%VERRUE(IRANG),'ON')
 !**
 !     2.  -  CALCUL DIRECT DES ARGUMENTS DE SORTIE DU SOUS-PROGRAMME.
@@ -87,14 +87,14 @@ LLFATA=LLMOER (IREP,IRANG)
 IF (IRANG.NE.0) THEN
   LFI%NDEROP(IRANG)=12
   LFI%NDERCO(IRANG)=IREP
-   IF (LFI%LMULTI) CALL LFIVER_MT_BB                            &
+   IF (LFI%LMULTI) CALL LFIVER_MT64                               &
 &                                  (LFI, LFI%VERRUE(IRANG),'OFF')
 ENDIF
 !
 IF (LLFATA.OR.IXNIMS (IRANG).EQ.2) THEN
   INIMES=2
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFINAF_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFINAF_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -102,11 +102,11 @@ CLNSPR='LFINAF'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,            &
 &       '', KNALDO='',I6,'', KNTROU='',I6,'', KNARES='',I6,         &
 &       '', KNAMAX='',I6)') KREP,KNUMER,KNALDO,KNTROU,KNARES,KNAMAX
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFINAF_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFINAF_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -119,12 +119,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFINAF_BB                                     &
+SUBROUTINE LFINAF64                                      &
 &           (KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -136,17 +136,17 @@ INTEGER (KIND=JPLIKB)  KNAMAX                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINAF_MT_BB                                             &
+CALL LFINAF_MT64                                               &
 &           (LFI, KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX)
 
 END SUBROUTINE
 
-SUBROUTINE LFINAF_MM                                     &
+SUBROUTINE LFINAF                                        &
 &           (KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -158,17 +158,15 @@ INTEGER (KIND=JPLIKM)  KNAMAX                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINAF_MT_MM                                             &
+CALL LFINAF_MT                                                &
 &           (LFI, KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX)
 
 END SUBROUTINE
 
-SUBROUTINE LFINAF_MT_MM                                       &
+SUBROUTINE LFINAF_MT                                          &
 &           (LFI, KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -189,7 +187,7 @@ INTEGER (KIND=JPLIKB)  INAMAX                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFINAF_MT_BB                                             &
+CALL LFINAF_MT64                                               &
 &           (LFI, IREP, INUMER, INALDO, INTROU, INARES, INAMAX)
 
 KREP       = INT (      IREP, JPLIKM)

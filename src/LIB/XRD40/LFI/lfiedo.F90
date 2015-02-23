@@ -1,16 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIEDO_MT_BB                                      &
+SUBROUTINE LFIEDO_MT64                                           &
 &                     (LFI, KREP, KNUMER, KREC, KTAB, KNBECR,  &
-&                      KFACTM, KRETIN )
+&                      KFACTM, KRETIN)
 USE LFIMOD, ONLY : LFICOM
-USE PARKIND1, ONLY : JPRB
+USE PARKIND1, ONLY : JPRB, JPIA, JPIB, JPIM
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-#ifdef USE_SAMIO
-USE SAMIO_MOD
-#endif
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme charge des Ecritures de DOnnees du logiciel LFI,
@@ -30,30 +26,22 @@ IMPLICIT NONE
 !
 !
 TYPE(LFICOM) :: LFI
-INTEGER (KIND=JPLIKB) KREP, KNUMER, KREC
-INTEGER (KIND=JPLIKB) KNBECR, KFACTM, KRETIN
+INTEGER (KIND=JPLIKB) KREP, KNUMER, KREC, KNBECR, KFACTM, KRETIN
 !
-INTEGER (KIND=JPDBLE)  KTAB (LFI%JPLARD*KFACTM)
-LOGICAL :: LLSAMIO
+INTEGER (KIND=JPDBLE) KTAB (LFI%JPLARD*KFACTM)
 
 !
 !        ECRITURE .
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIEDO_MT',0,ZHOOK_HANDLE)
-LLSAMIO = .FALSE.
-#ifdef USE_SAMIO
-LLSAMIO = SAMIO_HAS_OPENED(KNUMER)
-IF (LLSAMIO) THEN
-   CALL SAMIO_WRITE (UNIT=KNUMER,REC=KREC,ERR=901,IOSTAT=KREP,  &
-&        ARRAY=KTAB)
-   IF (KREP /= 0) GOTO 901
-ELSE
-#endif
-   WRITE (UNIT=KNUMER,REC=KREC,ERR=901,IOSTAT=KREP) KTAB
-#ifdef USE_SAMIO
-ENDIF
-#endif
+
+IF (LHOOK) CALL DR_HOOK('LFIEDO_MT64',0,ZHOOK_HANDLE)
+   IF (KNUMER > 0) THEN
+     WRITE (UNIT=KNUMER,REC=KREC,ERR=901,IOSTAT=KREP) KTAB
+   ELSE
+!RJ: something fishy here
+     CALL ABORT
+   ENDIF
 !
 IF (LFI%LMISOP) THEN
   WRITE (UNIT=LFI%NULOUT,FMT=*)                             &
@@ -70,67 +58,65 @@ KRETIN=1
 !
 1001 CONTINUE
 !
-IF (LHOOK) CALL DR_HOOK('LFIEDO_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIEDO_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIEDO_BB                                         &
+SUBROUTINE LFIEDO64                                          &
 &           (KREP, KNUMER, KREC, KTAB, KNBECR, KFACTM, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKB)  KREC                                   ! IN   
 INTEGER (KIND=JPLIKB)  KFACTM                                 ! IN   
-INTEGER (KIND=JPDBLE)  KTAB       (*)         !   OUT
+INTEGER (KIND=JPDBLE)  KTAB       (LFI%JPLARD*KFACTM)         !   OUT
 INTEGER (KIND=JPLIKB)  KNBECR                                 ! INOUT
 INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIEDO_MT_BB                                         &
+CALL LFIEDO_MT64                                          &
 &           (LFI, KREP, KNUMER, KREC, KTAB, KNBECR, KFACTM, &
 &           KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIEDO_MM                                         &
+SUBROUTINE LFIEDO                                            &
 &           (KREP, KNUMER, KREC, KTAB, KNBECR, KFACTM, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
 INTEGER (KIND=JPLIKM)  KREC                                   ! IN   
 INTEGER (KIND=JPLIKM)  KFACTM                                 ! IN   
-INTEGER (KIND=JPDBLE)  KTAB       (*)         !   OUT
+INTEGER (KIND=JPDBLE)  KTAB       (LFI%JPLARD*KFACTM)         !   OUT
 INTEGER (KIND=JPLIKM)  KNBECR                                 ! INOUT
 INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIEDO_MT_MM                                         &
+CALL LFIEDO_MT                                            &
 &           (LFI, KREP, KNUMER, KREC, KTAB, KNBECR, KFACTM, &
 &           KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIEDO_MT_MM                                   &
+SUBROUTINE LFIEDO_MT                                      &
 &           (LFI, KREP, KNUMER, KREC, KTAB, KNBECR, KFACTM, &
 &           KRETIN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -155,7 +141,7 @@ IREC       = INT (      KREC, JPLIKB)
 INBECR     = INT (    KNBECR, JPLIKB)
 IFACTM     = INT (    KFACTM, JPLIKB)
 
-CALL LFIEDO_MT_BB                                         &
+CALL LFIEDO_MT64                                          &
 &           (LFI, IREP, INUMER, IREC, KTAB, INBECR, IFACTM, &
 &           IRETIN)
 

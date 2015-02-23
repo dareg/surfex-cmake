@@ -1,16 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
 ! Sep-2012 P. Marguinaud Fix uninitialized variables
-SUBROUTINE LFIFER_MT_BB                          &
+
+SUBROUTINE LFIFER_MT64                             &
 &                     (LFI, KREP, KNUMER, CDSTTC )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-#ifdef USE_SAMIO
-USE SAMIO_MOD
-#endif
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME DE FERMETURE D'UN FICHIER INDEXE AU SENS DU
@@ -65,7 +62,6 @@ INTEGER (KIND=JPLIKB) ILONGA, INALDO, IPOSNU, IRANIE, IRETIN
 INTEGER (KIND=JPLIKB) IAUXIL
 !
 LOGICAL LLSTTU, LLVERF, LLVERG, LLECRD, LLIMST
-LOGICAL :: LLSAMIO
 !
 CHARACTER(LEN=LFI%JPLSPX) CLNSPR
 CHARACTER(LEN=LFI%JPLMES) CLMESS
@@ -77,15 +73,9 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIFER_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFER_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 ITAMPO=0
-
-LLSAMIO = .FALSE.
-
-#ifdef USE_SAMIO
-LLSAMIO = SAMIO_HAS_OPENED(KNUMER)
-#endif
 
 IF (LFI%LMISOP) WRITE (UNIT=LFI%NULOUT,FMT=*)'DEBUT LFIFER'
 CLACTI=''
@@ -97,7 +87,7 @@ IREPX=0
 INAPHY=0
 LLVERF=.FALSE.
 LLVERG=.FALSE.
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -105,7 +95,7 @@ IF (IRANG.EQ.0) THEN
   GOTO 1001
 ENDIF
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                           &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                              &
 &                                (LFI, LFI%VERRUE(IRANG),'ON')
 LLVERF=LFI%LMULTI
 !
@@ -175,7 +165,7 @@ IF (LFI%MRGPIF(IRGPMC).EQ.IRGPFC) THEN
 !
 IF (.NOT.LFI%LPHASP(IRGPMC)) THEN
 !
-  CALL LFIPHA_MT_BB                             &
+  CALL LFIPHA_MT64                                &
 &                 (LFI, IREP,IRANG,IRGPMC,IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
@@ -196,7 +186,7 @@ ENDDO
 !
 ILFORC=IRGPFC+1
 INPILE=2
-CALL LFIPIM_MT_BB                                    &
+CALL LFIPIM_MT64                                       &
 &               (LFI, IREP,IRANG,IRANGM,IRGPMC,IRGPFC, &
 &                ILFORC,INPILE,IRETIN)
 !
@@ -242,7 +232,7 @@ IF (LFI%MRGPIF(IRGPME).EQ.IRGPFE) THEN
 !
   IF (.NOT.LFI%LPHASP(IRGPME)) THEN
 !
-    CALL LFIPHA_MT_BB                             &
+    CALL LFIPHA_MT64                                &
 &                   (LFI, IREP,IRANG,IRGPME,IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
@@ -262,7 +252,7 @@ ENDIF
 ENDDO
 !
 INPILE=2
-CALL LFIPIM_MT_BB                             &
+CALL LFIPIM_MT64                                &
 &               (LFI, IREP,IRANG,IRANGM,IRGPME, &
 &                IRGPFE,IRGPFC,INPILE,IRETIN)
 !
@@ -328,7 +318,7 @@ ELSE
 !
       IF (.NOT.LFI%LPHASP(IRGPME)) THEN
 !
-        CALL LFIPHA_MT_BB                             &
+        CALL LFIPHA_MT64                                &
 &                       (LFI, IREP,IRANG,IRGPME,IRETIN)
 !
         IF (IRETIN.EQ.1) THEN
@@ -348,7 +338,7 @@ ELSE
     ENDDO
 !
     INPILE=2
-    CALL LFIPIM_MT_BB                                    &
+    CALL LFIPIM_MT64                                       &
 &                   (LFI, IREP,IRANG,IRANGM,IRGPME,JNPAGE, &
 &                    IRGPFC,INPILE,IRETIN)
 !
@@ -402,7 +392,7 @@ IF (IRGPC2.NE.IRGPFC) THEN
 !
     IF (.NOT.LFI%LPHASP(IRGPMC)) THEN
 !
-      CALL LFIPHA_MT_BB                             &
+      CALL LFIPHA_MT64                                &
 &                     (LFI, IREP,IRANG,IRGPMC,IRETIN)
 !
       IF (IRETIN.EQ.1) THEN
@@ -422,7 +412,7 @@ IF (IRGPC2.NE.IRGPFC) THEN
   ENDDO
 !
   INPILE=2
-  CALL LFIPIM_MT_BB                                    &
+  CALL LFIPIM_MT64                                       &
 &                 (LFI, IREP,IRANG,IRANGM,IRGPMC,IRGPFC, &
 &                  IRGPS2,INPILE,IRETIN)
 !
@@ -449,7 +439,7 @@ IF (IRGPS2.NE.IRGPFS) THEN
 !
     IF (.NOT.LFI%LPHASP(IRGPMS)) THEN
 !
-      CALL LFIPHA_MT_BB                             &
+      CALL LFIPHA_MT64                                &
 &                     (LFI, IREP,IRANG,IRGPMS,IRETIN)
 !
       IF (IRETIN.EQ.1) THEN
@@ -469,7 +459,7 @@ IF (IRGPS2.NE.IRGPFS) THEN
   ENDDO
 !
   INPILE=2
-  CALL LFIPIM_MT_BB                                    &
+  CALL LFIPIM_MT64                                       &
 &                 (LFI, IREP,IRANG,IRANGM,IRGPMS,IRGPFS, &
 &                  IRGPFC,INPILE,IRETIN)
 !
@@ -565,7 +555,7 @@ IF (JNPAGE.LE.INPPIM) THEN
 !
   IF (.NOT.LFI%LPHASP(IRGPIM)) THEN
 !
-    CALL LFIPHA_MT_BB                             &
+    CALL LFIPHA_MT64                                &
 &                   (LFI, IREP,IRANG,IRGPIM,IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
@@ -594,7 +584,7 @@ ELSE
 !
   ILFORC=1
   INPILE=2
-  CALL LFIPIM_MT_BB                                    &
+  CALL LFIPIM_MT64                                       &
 &                 (LFI, IREP,IRANG,IRANGM,IRGPIM,IRGPIF, &
 &                  ILFORC,INPILE,IRETIN)
 !
@@ -660,7 +650,7 @@ DO J=0,LFI%JPNPDF-1
 !
 IF (LFI%LECRPD(J,IRANG)) THEN
 !
-  CALL LFIVID_MT_BB                                  &
+  CALL LFIVID_MT64                                     &
 &                 (LFI, IREP,IRANG,J,ITAMPO(1),IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
@@ -683,7 +673,7 @@ INPPIM=LFI%NPPIMM(IRANG)
 DO J=1,INPPIM
 IRGPIM=LFI%MRGPIM(J,IRANG)
 IRGPIF=LFI%MRGPIF(IRGPIM)
-CALL LFIREC_MT_BB                      &
+CALL LFIREC_MT64                         &
 &               (LFI, IRGPIF,IRANG,IREC)
 !
 IF (LFI%LECRPI(IRGPIM,1)) THEN
@@ -700,10 +690,11 @@ IF (LFI%LECRPI(IRGPIM,1)) THEN
   ENDIF
 !
   INAPHY=IREC
-  CALL LFIECC_MT_BB                                 &
+  CALL LFIECC_MT64                                      &
 &                 (LFI, IREP,KNUMER,IREC,             &
 &                  LFI%CNOMAR(IXC(1_JPLIKB ,IRGPIM)), &
-&                  LFI%NBWRIT(IRANG),IFACTM,IRETIN)
+&                  LFI%NBWRIT(IRANG),IFACTM,          &
+&                  IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
     GOTO 903
@@ -728,10 +719,11 @@ IF (LFI%LECRPI(IRGPIM,2).AND.LFI%LPHASP(IRGPIM)) THEN
   ENDIF
 !
   INAPHY=IREC+1
-  CALL LFIEDO_MT_BB                                 &
+  CALL LFIEDO_MT64                                      &
 &                 (LFI, IREP,KNUMER,IREC+1,           &
 &                  LFI%MLGPOS(IXM(1_JPLIKB ,IRGPIM)), &
-&                  LFI%NBWRIT(IRANG),IFACTM,IRETIN)
+&                  LFI%NBWRIT(IRANG),IFACTM,          &
+&                  IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
     GOTO 903
@@ -761,15 +753,16 @@ IF (LLECRD) THEN
   LFI%MDES1D(IAUXIL)=LFI%MDES1D(IAUXIL)+LFI%NREELO(IRANG)
   IAUXIL=IXM(LFI%JPNTRU,IRANG)
   LFI%MDES1D(IAUXIL)=LFI%MDES1D(IAUXIL)+LFI%NBTROU(IRANG)
-  CALL LFIDAH_MT_BB                                      &
+  CALL LFIDAH_MT64                                         &
 &                 (LFI, LFI%MDES1D(IXM(LFI%JPDDMG,IRANG)), &
 &               LFI%MDES1D(IXM(LFI%JPHDMG,IRANG)))
   IREC=1
   INAPHY=IREC
-  CALL LFIEDO_MT_BB                                &
+  CALL LFIEDO_MT64                                     &
 &                 (LFI, IREP,KNUMER,IREC,            &
 &                  LFI%MDES1D(IXM(1_JPLIKB ,IRANG)), &
-&                  LFI%NBWRIT(IRANG),IFACTM,IRETIN)
+&                  LFI%NBWRIT(IRANG),IFACTM,         &
+&                  IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
     GOTO 903
@@ -786,14 +779,11 @@ INALDO=INBALO-LFI%MDES1D(IXM(LFI%JPNTRU,IRANG))
 INAPHY=0
 !
 IF (LLSTTU) THEN
-  IF (LLSAMIO) THEN
-#ifdef USE_SAMIO
-     CALL SAMIO_CLOSE (UNIT=KNUMER,STATUS=CLSTTC,ERR=905, &
-&          IOSTAT=IREP)
-     IF (IREP /= 0) GOTO 905
-#endif
+  IF (KNUMER < 0) THEN
+!RJ: something fishy here
+    CALL ABORT
   ELSE
-     CLOSE (UNIT=KNUMER,STATUS=CLSTTC,ERR=905,IOSTAT=IREP)
+    CLOSE (UNIT=KNUMER,STATUS=CLSTTC,ERR=905,IOSTAT=IREP)
   ENDIF
 ELSE
 !
@@ -806,14 +796,11 @@ ELSE
 !       ON N'A PAS DE GARANTIE D'Y ARRIVER, DANS LA MESURE OU ON N'EST
 !       PAS SUR D'AVOIR DES DROITS D'ACCES SUFFISANTS.
 !
-    IF (LLSAMIO) THEN
-#ifdef USE_SAMIO
-       CALL SAMIO_CLOSE (UNIT=KNUMER,STATUS='DELETE',ERR=511, &
-&            IOSTAT=IREP)
-       IF (IREP /= 0) GOTO 511
-#endif
+    IF (KNUMER < 0) THEN
+!RJ: something fishy here
+      CALL ABORT
     ELSE
-       CLOSE (UNIT=KNUMER,STATUS='DELETE',ERR=511)
+      CLOSE (UNIT=KNUMER,STATUS='DELETE',ERR=511)
     ENDIF
     CLSTTC='DELETE'
     LLSTTU=.TRUE.
@@ -822,14 +809,12 @@ ELSE
 !
 511 CONTINUE
 !
-  IF (LLSAMIO) THEN
-#ifdef USE_SAMIO
-     CALL SAMIO_CLOSE (UNIT=KNUMER,ERR=905,IOSTAT=IREP)
-     IF (IREP /= 0) GOTO 905
-#endif
-  ELSE
-     CLOSE (UNIT=KNUMER,ERR=905,IOSTAT=IREP)
-  ENDIF
+IF (KNUMER < 0) THEN
+!RJ: something fishy here
+  CALL ABORT
+ELSE
+  CLOSE (UNIT=KNUMER,ERR=905,IOSTAT=IREP)
+ENDIF
 !
 ENDIF
 !
@@ -841,7 +826,7 @@ ENDIF
 LFI%NDEROP(IRANG)=9
 LFI%NDERCO(IRANG)=IREP
 LLIMST=LFI%NISTAG.EQ.2.OR.(LFI%NISTAG.EQ.1.AND.LFI%LISTAT(IRANG))
-IF (LLIMST) CALL LFIIST_MT_BB                 &
+IF (LLIMST) CALL LFIIST_MT64                    &
 &                           (LFI, IRANG,.TRUE.)
 !**
 !     7.  -  "NETTOYAGE" DES TABLES AYANT PERMIS DE GERER LE FICHIER.
@@ -850,7 +835,7 @@ IF (LLIMST) CALL LFIIST_MT_BB                 &
 !              PAGES D'INDEX PREAFFECTEES )
 !-----------------------------------------------------------------------
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                    &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                       &
 &                                (LFI, LFI%VERGLA,'ON')
 LLVERG=LFI%LMULTI
 !
@@ -910,7 +895,7 @@ IF (LFI%NEXPOR(IRANG).GT.0.OR.LFI%NIMPOR(IRANG).GT.0) THEN
   IF (INIMES.GE.1) THEN
     WRITE (UNIT=CLMESS,FMT='(''KNUMER='',I3,                    &
 &           '', ATTENTION: IMPORT/EXPORT NON TERMINE'')') KNUMER
-    CALL LFIEMS_MT_BB                               &
+    CALL LFIEMS_MT64                                  &
 &                   (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                    CLMESS,CLNSPR,CLACTI)
   ENDIF
@@ -939,9 +924,9 @@ IF (LFI%NEXPOR(IRANG).GT.0.OR.LFI%NIMPOR(IRANG).GT.0) THEN
 ENDIF
 !
  IF (LFI%LMULTI) THEN
-   CALL LFIVER_MT_BB                            &
+   CALL LFIVER_MT64                               &
 &                  (LFI, LFI%VERRUE(IRANG),'OFF')
-   CALL LFIVER_MT_BB                            &
+   CALL LFIVER_MT64                               &
 &                  (LFI, LFI%VERRUE(IRANG),'REL')
  ENDIF
 !
@@ -984,13 +969,13 @@ ELSE
   INIMES=IXNIMS (IRANG)
 ENDIF
 !
- IF (LLVERF) CALL LFIVER_MT_BB                            &
+ IF (LLVERF) CALL LFIVER_MT64                               &
 &                            (LFI, LFI%VERRUE(IRANG),'OFF')
- IF (LLVERG) CALL LFIVER_MT_BB                     &
+ IF (LLVERG) CALL LFIVER_MT64                        &
 &                            (LFI, LFI%VERGLA,'OFF')
 !
 IF (.NOT.LLFATA.AND.INIMES.EQ.0)  THEN 
-  IF (LHOOK) CALL DR_HOOK('LFIFER_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFIFER_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -998,7 +983,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &         '', CDSTTC='''''',A,'''''''')')                  &
 &      KREP,KNUMER,CLSTTC(:ILSTTU)
-  CALL LFIEMS_MT_BB                              &
+  CALL LFIEMS_MT64                                 &
 &                 (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
@@ -1092,7 +1077,7 @@ IF (INIMES.GE.1.AND.(IREP.EQ.0.OR.IREP.EQ.-19)) THEN
 !
   ENDIF
 !
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 !
@@ -1106,7 +1091,7 @@ IF (INIMES.GE.1.AND.(IREP.EQ.0.OR.IREP.EQ.-19)) THEN
     CLMESS='Name='''//LFI%CNOMFI(IRANG)(1:INLNOM)//''''
   ENDIF
 !
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 !
@@ -1125,14 +1110,14 @@ IF (INIMES.GE.1.AND.(IREP.EQ.0.OR.IREP.EQ.-19)) THEN
 &                  LFI%CNOMSY(IRANG)(1:INLNOM)//''''
     ENDIF
 !
-    CALL LFIEMS_MT_BB                               &
+    CALL LFIEMS_MT64                                  &
 &                   (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                    CLMESS,CLNSPR,CLACTI)
   ENDIF
 !
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIFER_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFER_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -1146,12 +1131,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIFER_BB             &
+SUBROUTINE LFIFER64              &
 &           (KREP, KNUMER, CDSTTC)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -1160,17 +1145,17 @@ CHARACTER (LEN=*)      CDSTTC                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFER_MT_BB                     &
+CALL LFIFER_MT64                       &
 &           (LFI, KREP, KNUMER, CDSTTC)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFER_MM             &
+SUBROUTINE LFIFER                &
 &           (KREP, KNUMER, CDSTTC)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -1179,17 +1164,15 @@ CHARACTER (LEN=*)      CDSTTC                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFER_MT_MM                     &
+CALL LFIFER_MT                        &
 &           (LFI, KREP, KNUMER, CDSTTC)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFER_MT_MM               &
+SUBROUTINE LFIFER_MT                  &
 &           (LFI, KREP, KNUMER, CDSTTC)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -1203,7 +1186,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIFER_MT_BB                     &
+CALL LFIFER_MT64                       &
 &           (LFI, IREP, INUMER, CDSTTC)
 
 KREP       = INT (      IREP, JPLIKM)

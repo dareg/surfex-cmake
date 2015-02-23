@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIENG_MT_BB                                   &
+SUBROUTINE LFIENG_MT64                                      &
 &                     (LFI, KNUMER, KNIMES, KCODE, LDFATA,  &
 &                      CDMESS, CDNSPR,CDACTI )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
 USE SDL_MOD   , ONLY : SDL_SRLABORT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        THIS SUBROUTINE PRINTS STANDARD MESSAGES FROM LFI INDEXED-
@@ -171,7 +170,7 @@ CHARACTER(LEN=LFI%JPLMES) CLMESS
 !        (i.e. not taking into account any blank characters at the end)
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIENG_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIENG_MT64',0,ZHOOK_HANDLE)
 IDECBL=0
 !
 101 CONTINUE
@@ -521,7 +520,7 @@ IF (KNIMES.EQ.0.OR.LDFATA) THEN
 !
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIENG_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIENG_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -532,13 +531,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIENG_BB                                      &
+SUBROUTINE LFIENG64                                       &
 &           (KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
@@ -551,19 +550,19 @@ CHARACTER (LEN=*)      CDACTI                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIENG_MT_BB                                              &
+CALL LFIENG_MT64                                               &
 &           (LFI, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 
 END SUBROUTINE
 
-SUBROUTINE LFIENG_MM                                      &
+SUBROUTINE LFIENG                                         &
 &           (KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
@@ -576,19 +575,17 @@ CHARACTER (LEN=*)      CDACTI                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIENG_MT_MM                                              &
+CALL LFIENG_MT                                                 &
 &           (LFI, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 
 END SUBROUTINE
 
-SUBROUTINE LFIENG_MT_MM                                        &
+SUBROUTINE LFIENG_MT                                           &
 &           (LFI, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -609,7 +606,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 ICODE      = INT (     KCODE, JPLIKB)
 
-CALL LFIENG_MT_BB                                              &
+CALL LFIENG_MT64                                               &
 &           (LFI, INUMER, INIMES, ICODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI)
 

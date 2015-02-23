@@ -1,11 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFICFG_MT_BB (LFI)
+
+SUBROUTINE LFICFG_MT64    (LFI)
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !         Sous-programme imprimant les "PARAMETER" de base definissant
@@ -28,10 +28,10 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFICFG_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFICFG_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (LFI%LFICFG_LLPREA) THEN
-  CALL LFIINI_MT_BB              &
+  CALL LFIINI_MT64                 &
 &                 (LFI, 2_JPLIKB )
   LFI%LFICFG_LLPREA=.FALSE.
 ENDIF
@@ -52,7 +52,7 @@ ENDIF
 !
 INIMES=2
 LLFATA=.FALSE.
-CALL LFIEMS_MT_BB                                     &
+CALL LFIEMS_MT64                                        &
 &               (LFI, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI)
 WRITE (UNIT=LFI%NULOUT,FMT='(/)')
@@ -113,12 +113,12 @@ ELSE
   CLMESS='End of dump of LFI software configuration'
 ENDIF
 !
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 WRITE (UNIT=LFI%NULOUT,FMT='(///)')
 !
-IF (LHOOK) CALL DR_HOOK('LFICFG_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFICFG_MT64',1,ZHOOK_HANDLE)
 RETURN
 !
  9005 FORMAT(' Nombre de Bits par mot machine.......................', &
@@ -256,41 +256,39 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFICFG_BB ()
+SUBROUTINE LFICFG64  ()
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICFG_MT_BB          &
+CALL LFICFG_MT64            &
 &           (LFI)
 
 END SUBROUTINE
 
-SUBROUTINE LFICFG_MM ()
+SUBROUTINE LFICFG    ()
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICFG_MT_MM          &
+CALL LFICFG_MT             &
 &           (LFI)
 
 END SUBROUTINE
 
-SUBROUTINE LFICFG_MT_MM (LFI)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+SUBROUTINE LFICFG_MT    (LFI)
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -298,7 +296,7 @@ TYPE (LFICOM)          LFI                                    ! INOUT
 ! Convert arguments
 
 
-CALL LFICFG_MT_BB          &
+CALL LFICFG_MT64            &
 &           (LFI)
 
 

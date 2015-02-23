@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFILEC_MT_BB                                       &
+
+SUBROUTINE LFILEC_MT64                                          &
 &                     (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME DE LECTURE D'UN ARTICLE (DE DONNEES) PAR *NOM*
@@ -45,11 +45,11 @@ LOGICAL LLFATA
 !     tion des variables globales du logiciel a la 1ere utilisation.
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFILEC_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFILEC_MT64',0,ZHOOK_HANDLE)
 
 CLACTI=''
 
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 LLVERF=.FALSE.
 IREP=0
@@ -102,7 +102,7 @@ ELSEIF (IRANG.EQ.0) THEN
   GOTO 1001
 ENDIF
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                           &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                              &
 &                                (LFI, LFI%VERRUE(IRANG),'ON')
 LLVERF=LFI%LMULTI
 !
@@ -116,7 +116,7 @@ IF (INBALO.NE.0) THEN
 !            A LA RECHERCHE DE L'ARTICLE LOGIQUE DEMANDE.
 !-----------------------------------------------------------------------
 !
-  CALL LFIRAN_MT_BB                               &
+  CALL LFIRAN_MT64                                  &
 &                 (LFI, IREP,IRANG,CLNOMA(:ILCLNO), &
 &                  IRGPIM,IARTEX,IRETIN)
 !
@@ -142,7 +142,7 @@ IRGPIF=LFI%MRGPIF(IRGPIM)
 !
 IF (.NOT.LFI%LPHASP(IRGPIM)) THEN
 !
-  CALL LFIPHA_MT_BB                             &
+  CALL LFIPHA_MT64                                &
 &                 (LFI, IREP,IRANG,IRGPIM,IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
@@ -183,7 +183,7 @@ IREPX=IREP
 !     3.  -  LECTURE DES DONNEES PROPREMENT DITE.
 !-----------------------------------------------------------------------
 !
-CALL LFILED_MT_BB                                               &
+CALL LFILED_MT64                                                  &
 &               (LFI, IREP,IRANG,KTAB,KLONG,IRGPIM,IPOSEX,IRETIN)
 !
 IF (IRETIN.EQ.1) THEN
@@ -234,14 +234,14 @@ LLFATA=LLMOER (IREP,IRANG)
 IF (IRANG.NE.0) THEN
   LFI%NDEROP(IRANG)=2
   LFI%NDERCO(IRANG)=IREP
-   IF (LLVERF) CALL LFIVER_MT_BB                            &
+   IF (LLVERF) CALL LFIVER_MT64                               &
 &                              (LFI, LFI%VERRUE(IRANG),'OFF')
 ENDIF
 !
 IF (LLFATA.OR.IXNIMS (IRANG).EQ.2) THEN
   INIMES=2
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFILEC_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFILEC_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -249,11 +249,11 @@ CLNSPR='LFILEC'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDNOMA='''''',A,'''''', KLONG='',I7)')       &
 &     KREP,KNUMER,CLNOMA(:ILCLNO),KLONG
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFILEC_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFILEC_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -266,12 +266,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFILEC_BB                          &
+SUBROUTINE LFILEC64                           &
 &           (KREP, KNUMER, CDNOMA, KTAB, KLONG)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -282,17 +282,17 @@ INTEGER (KIND=JPDBLE)  KTAB       (KLONG)                     ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFILEC_MT_BB                                  &
+CALL LFILEC_MT64                                    &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE
 
-SUBROUTINE LFILEC_MM                          &
+SUBROUTINE LFILEC                             &
 &           (KREP, KNUMER, CDNOMA, KTAB, KLONG)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -303,17 +303,15 @@ INTEGER (KIND=JPDBLE)  KTAB       (KLONG)                     ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFILEC_MT_MM                                  &
+CALL LFILEC_MT                                     &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE
 
-SUBROUTINE LFILEC_MT_MM                            &
+SUBROUTINE LFILEC_MT                               &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -331,7 +329,7 @@ INTEGER (KIND=JPLIKB)  ILONG                                  ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFILEC_MT_BB                                  &
+CALL LFILEC_MT64                                    &
 &           (LFI, IREP, INUMER, CDNOMA, KTAB, ILONG)
 
 KREP       = INT (      IREP, JPLIKM)

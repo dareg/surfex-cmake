@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIPOS_MT_BB                  &
+
+SUBROUTINE LFIPOS_MT64                     &
 &                     (LFI, KREP, KNUMER )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME REMETTANT A LA VALEUR INITIALE LE "POINTEUR" DU
@@ -35,10 +35,10 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIPOS_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIPOS_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IREP=0
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -46,7 +46,7 @@ IF (IRANG.EQ.0) THEN
   GOTO 1001
 ENDIF
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                           &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                              &
 &                                (LFI, LFI%VERRUE(IRANG),'ON')
 !**
 !     2.  -  REINITIALISATION DU "POINTEUR" ET DES VALEURS "SUIVANTE"
@@ -69,25 +69,25 @@ LLFATA=LLMOER (IREP,IRANG)
 IF (IRANG.NE.0) THEN
   LFI%NDEROP(IRANG)=14
   LFI%NDERCO(IRANG)=IREP
-   IF (LFI%LMULTI) CALL LFIVER_MT_BB                            &
+   IF (LFI%LMULTI) CALL LFIVER_MT64                               &
 &                                  (LFI, LFI%VERRUE(IRANG),'OFF')
 ENDIF
 !
 IF (LLFATA.OR.IXNIMS (IRANG).EQ.2) THEN
   INIMES=2
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFIPOS_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFIPOS_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
 CLNSPR='LFIPOS'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3)') &
 &     KREP,KNUMER
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFIPOS_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIPOS_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -99,12 +99,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIPOS_BB          &
+SUBROUTINE LFIPOS64           &
 &           (KREP, KNUMER)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -112,17 +112,17 @@ INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPOS_MT_BB             &
+CALL LFIPOS_MT64               &
 &           (LFI, KREP, KNUMER)
 
 END SUBROUTINE
 
-SUBROUTINE LFIPOS_MM          &
+SUBROUTINE LFIPOS             &
 &           (KREP, KNUMER)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -130,17 +130,15 @@ INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPOS_MT_MM             &
+CALL LFIPOS_MT                &
 &           (LFI, KREP, KNUMER)
 
 END SUBROUTINE
 
-SUBROUTINE LFIPOS_MT_MM          &
+SUBROUTINE LFIPOS_MT             &
 &           (LFI, KREP, KNUMER)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -153,7 +151,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIPOS_MT_BB             &
+CALL LFIPOS_MT64               &
 &           (LFI, IREP, INUMER)
 
 KREP       = INT (      IREP, JPLIKM)

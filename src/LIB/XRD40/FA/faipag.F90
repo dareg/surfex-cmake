@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIPAG_MT_BB                                           &
+SUBROUTINE FAIPAG_MT64                                            &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF, &
 &                      KNIPAR )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -170,7 +169,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &       '', CDSUFF='''''',A,'''''''')')                   &
 &     KREP, KRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF))
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CDPREF,.FALSE.)
 ENDIF
@@ -186,12 +185,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAIPAG_BB                                    &
+SUBROUTINE FAIPAG64                                     &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, KNIPAR)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -203,17 +202,17 @@ INTEGER (KIND=JPLIKB)  KNIPAR     (6)                         !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIPAG_MT_BB                                           &
+CALL FAIPAG_MT64                                            &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, KNIPAR)
 
 END SUBROUTINE
 
-SUBROUTINE FAIPAG_MM                                    &
+SUBROUTINE FAIPAG                                       &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, KNIPAR)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -225,17 +224,15 @@ INTEGER (KIND=JPLIKM)  KNIPAR     (6)                         !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIPAG_MT_MM                                           &
+CALL FAIPAG_MT                                              &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, KNIPAR)
 
 END SUBROUTINE
 
-SUBROUTINE FAIPAG_MT_MM                                     &
+SUBROUTINE FAIPAG_MT                                        &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, KNIPAR)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -255,7 +252,7 @@ INTEGER (KIND=JPLIKB)  INIPAR     (6)                         !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FAIPAG_MT_BB                                           &
+CALL FAIPAG_MT64                                            &
 &           (FA, IREP, IRANG, CDPREF, INIVAU, CDSUFF, INIPAR)
 
 KREP       = INT (      IREP, JPLIKM)

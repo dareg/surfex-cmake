@@ -1,13 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
 ! R. El Khatib 30-Mar-2012 KULOUT
-SUBROUTINE LFINMG_MT_BB                    &
+
+SUBROUTINE LFINMG_MT64                       &
 &                     (LFI, KNIVAU, KULOUT )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        CE SOUS-PROGRAMME SE CHARGE DE METTRE LE NIVEAU GLOBAL
@@ -38,10 +38,10 @@ LOGICAL LLFATA
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFINMG_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFINMG_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (LFI%LFINMG_LLPREA) THEN
-  CALL LFIINI_MT_BB              &
+  CALL LFIINI_MT64                 &
 &                 (LFI, 2_JPLIKB )
   LFI%LFINMG_LLPREA=.FALSE.
 ENDIF
@@ -75,7 +75,7 @@ ELSEIF (IREP.NE.0) THEN
 ELSEIF (INIMES.EQ.2) THEN
   INIMES=2
 ELSE
-  IF (LHOOK) CALL DR_HOOK('LFINMG_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFINMG_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -94,28 +94,28 @@ IF (MAX (INIMES,LFI%NIMESG).EQ.2) THEN
 &           I4)') KNIVAU,IREP
   ENDIF
 !
-  IF (INIMES.NE.2) CALL LFIEMS_MT_BB                           &
+  IF (INIMES.NE.2) CALL LFIEMS_MT64                              &
 &                                  (LFI, INUMER,LFI%NIMESG,IREP, &
 &                                   .FALSE.,CLMESS,              &
 &                                   CLNSPR,CLACTI)
 ENDIF
 !
-CALL LFIEMS_MT_BB                              &
+CALL LFIEMS_MT64                                 &
 &               (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFINMG_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFINMG_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFINMG_BB          &
+SUBROUTINE LFINMG64           &
 &           (KNIVAU, KULOUT)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNIVAU                                 ! IN   
@@ -123,17 +123,17 @@ INTEGER (KIND=JPLIKB)  KULOUT                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINMG_MT_BB               &
+CALL LFINMG_MT64                 &
 &           (LFI, KNIVAU, KULOUT)
 
 END SUBROUTINE
 
-SUBROUTINE LFINMG_MM          &
+SUBROUTINE LFINMG             &
 &           (KNIVAU, KULOUT)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNIVAU                                 ! IN   
@@ -141,17 +141,15 @@ INTEGER (KIND=JPLIKM)  KULOUT                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINMG_MT_MM               &
+CALL LFINMG_MT                  &
 &           (LFI, KNIVAU, KULOUT)
 
 END SUBROUTINE
 
-SUBROUTINE LFINMG_MT_MM          &
+SUBROUTINE LFINMG_MT             &
 &           (LFI, KNIVAU, KULOUT)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -165,7 +163,7 @@ INTEGER (KIND=JPLIKB)  IULOUT                                 ! IN
 INIVAU     = INT (    KNIVAU, JPLIKB)
 IULOUT     = INT (    KULOUT, JPLIKB)
 
-CALL LFINMG_MT_BB               &
+CALL LFINMG_MT64                 &
 &           (LFI, INIVAU, IULOUT)
 
 

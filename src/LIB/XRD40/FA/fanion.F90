@@ -1,14 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANION_MT_BB                                          &
-&                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,  &
-&                      LDEXIS,                                     &
-&                      LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA )
+SUBROUTINE FANION_MT64                                                &
+&                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,     &
+&                      LDEXIS, LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme renseignant sur l'EXISTENCE et les CARACTERISTI-
@@ -25,12 +23,14 @@ IMPLICIT NONE
 !                LDCOSP (Sortie) ==> Vrai si le champ est represente
 !                                    par des coefficients spectraux;
 !                KNGRIB (Sortie) ==> Niveau de codage GRIB;
-!                KNBITS (Sortie) ==> Nombre de bits de codage eventuel;
-!                KSTRON (Sortie) ==> Sous-troncature non codee   " -le;
-!                KPUILA (Sortie) ==> Puissance de laplacien eventuelle.
+!    Si KNGRIB vaut -1,0,1,2,3, alors les arguments de sortie ont la 
+!    signification suivante:
+!                KNARG1 (Sortie) ==> Nombre de bits de codage eventuel;
+!                KNARG2 (Sortie) ==> Sous-troncature non codee   " -le;
+!                KNARG3 (Sortie) ==> Puissance de laplacien eventuelle.
 !
-!        KNBITS n'a de sens que si l'article existe et a ete code;
-!     de meme pour KSTRON et KPUILA, qui ne sont applicables qu'a un
+!        KNARG1 n'a de sens que si l'article existe et a ete code;
+!     de meme pour KNARG2 et KNARG3, qui ne sont applicables qu'a un
 !     champ represente en coefficients spectraux.
 !        Les arguments de sortie n'ayant pas de sens sont mis a
 !     0 pour les entiers, .FALSE. pour les logiques.
@@ -39,7 +39,7 @@ IMPLICIT NONE
 !
 TYPE(FA_COM) :: FA
 INTEGER (KIND=JPLIKB) KREP, KNUMER, KNIVAU, KNGRIB
-INTEGER (KIND=JPLIKB) KNBITS, KSTRON, KPUILA
+INTEGER (KIND=JPLIKB) KNARG1, KNARG2, KNARG3
 !
 INTEGER (KIND=JPLIKB) IREP, ILPRFU, ILSUFU, ILNOMU
 INTEGER (KIND=JPLIKB) ILONGA, IRANG, INIMES
@@ -75,10 +75,10 @@ ILSUFU=INT (LEN (CDSUFF), JPLIKB)
 LDEXIS=.FALSE.
 LDCOSP=.FALSE.
 KNGRIB=0
-KNBITS=0
-KSTRON=0
-KPUILA=0
-CALL FANUMU_MT_BB                &
+KNARG1=0
+KNARG2=0
+KNARG3=0
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -88,7 +88,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -98,7 +98,7 @@ IF (FA%FICHIER(IRANG)%LCREAF) GOTO 1001
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT_BB                                          &
+CALL FANFAR_MT64                                             &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CLNOMA, &
 &                IB1PAR,ILPRFU,ILSUFU,ILNOMU)
 IF (IREP.NE.0) GOTO 1001
@@ -107,7 +107,7 @@ LLNOMU=.TRUE.
 !     3.  -  RECHERCHE DE L'ARTICLE SUR LE FICHIER, LECTURE PARTIELLE.
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT_BB                                    &
+CALL LFINFO_MT64                                       &
 &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMU), &
 &             ILONGA,IPOSEX)
 LLRLFI=IREP.NE.0
@@ -126,14 +126,14 @@ IF (FA%FICHIER(IRANG)%LERRFA) THEN
 !     LFI, on va temporairement annuler l'option LFI afin de pouvoir
 !     faire une lecture partielle de l'entete de l'article Champ.
 !
-  CALL LFIERF_MT_BB                           &
+  CALL LFIERF_MT64                             &
 &                 (FA%LFI, IREP,KNUMER,.FALSE.)
   LLRLFI=IREP.NE.0
   IF (LLRLFI) GOTO 1001
   LLTEMP=.TRUE.
 ENDIF
 !
-CALL LFILEC_MT_BB                                    &
+CALL LFILEC_MT64                                       &
 &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMU), &
 &               IVALCO,5_JPLIKB )
 !
@@ -144,7 +144,7 @@ ELSEIF (IREP.NE.-21) THEN
   LLRLFI=.TRUE.
   GOTO 1001
 ELSEIF (IVALCO(1).LT.-1 .OR. IVALCO(1).GT.3 .OR.                   &
-&        IVALCO(2).LT.0  .OR. IVALCO(2).GT.1 .OR.                   &
+&        IVALCO(2).LT.0  .OR. IVALCO(2).GT.1 .OR.                  &
 &  (IVALCO(1).GT.0 .AND. IVALCO(2).EQ.1 .AND. IVALCO(4).LT.0)) THEN
   IREP=-91
   GOTO 1001
@@ -183,17 +183,21 @@ IF (KNGRIB.EQ.-1 .OR. KNGRIB.EQ.0) THEN
     IF (LLMOER(IREP,IRANG)) GOTO 1001
   ENDIF
 !
+ELSEIF (KNGRIB.EQ.4) THEN
+!RJ: something fishy here
+  CALL ABORT
 ELSE
+!RJ: unsafe, should actually check if it is == 3 case
 !
 !        Cas avec codage GRIB (standard ou non).
 !
-  KNBITS=IVALCO(3)
+  KNARG1=IVALCO(3)
 !
   IF (LDCOSP) THEN
-    KSTRON=IVALCO(4)
-    KPUILA=IVALCO(5)
+    KNARG2=IVALCO(4)
+    KNARG3=IVALCO(5)
 !
-    IF (KNGRIB.EQ.2.AND.ILONGA.LT.(5+(1+KSTRON)**2)) THEN
+    IF (KNGRIB.EQ.2.AND.ILONGA.LT.(5+(1+KNARG2)**2)) THEN
       IREP=-93
       GOTO 1001
     ENDIF
@@ -213,7 +217,7 @@ IF (LLTEMP) THEN
 !         On remet le fichier en mode "toute erreur fatale" au niveau
 !     du logiciel LFI.
 !
-  CALL LFIERF_MT_BB                          &
+  CALL LFIERF_MT64                            &
 &                 (FA%LFI, IREP,KNUMER,.TRUE.)
   LLRLFI=IREP.NE.0
 ENDIF
@@ -223,7 +227,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -260,14 +264,14 @@ IF (.NOT.LLNOMU) THEN
   CLNOMA(1:ILNOMU)=CLPREF(1:ILPREF)
 ENDIF
 !
-WRITE (UNIT=CLMESS,                                             &
+WRITE (UNIT=CLMESS,                                              &
 &       FMT='(''ARGUMENTS:'',I4,'','',I3,'','''''',A,            &
 &       '''''','',I6,'','''''',A,'''''', LDEXIS= '',L1,          &
-&       '', LDCOSP= '',L1,'', KNGRIB='',I2,'', KNBITS='',I3,     &
-&       '',KSTRON='',I3,'',KPUILA='',I6)')                       &
+&       '', LDCOSP= '',L1,'', KNGRIB='',I2,'', KNARG1='',I3,     &
+&       '',KNARG2='',I3,'',KNARG3='',I6)')                       &
 &   KREP,KNUMER,CLPREF(1:ILPREF),KNIVAU,CLSUFF(1:ILSUFF),LDEXIS, &
-&   LDCOSP,KNGRIB,KNBITS,KSTRON,KPUILA
-CALL FAIPAR_MT_BB                                    &
+&   LDCOSP,KNGRIB,KNARG1,KNARG2,KNARG3
+CALL FAIPAR_MT64                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLNOMA(1:ILNOMU),LLRLFI)
 !
@@ -283,13 +287,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANION_BB                                     &
+SUBROUTINE FANION64                                        &
 &           (KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDEXIS, &
-&           LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA)
+&           LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
-&                   FA_COM_DEFAULT_INIT,  &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+&                  FA_COM_DEFAULT_INIT,  &
+&                  NEW_FA_DEFAULT
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -300,25 +304,25 @@ CHARACTER (LEN=*)      CDSUFF                                 ! IN
 LOGICAL                LDEXIS                                 !   OUT
 LOGICAL                LDCOSP                                 !   OUT
 INTEGER (KIND=JPLIKB)  KNGRIB                                 !   OUT
-INTEGER (KIND=JPLIKB)  KNBITS                                 !   OUT
-INTEGER (KIND=JPLIKB)  KSTRON                                 !   OUT
-INTEGER (KIND=JPLIKB)  KPUILA                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG1                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG2                                 !   OUT
+INTEGER (KIND=JPLIKB)  KNARG3                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANION_MT_BB                                            &
+CALL FANION_MT64                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDEXIS, &
-&           LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA)
+&           LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 
 END SUBROUTINE
 
-SUBROUTINE FANION_MM                                     &
+SUBROUTINE FANION                                          &
 &           (KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDEXIS, &
-&           LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA)
+&           LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
-&                   FA_COM_DEFAULT_INIT,  &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+&                  FA_COM_DEFAULT_INIT,  &
+&                  NEW_FA_DEFAULT
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -329,25 +333,23 @@ CHARACTER (LEN=*)      CDSUFF                                 ! IN
 LOGICAL                LDEXIS                                 !   OUT
 LOGICAL                LDCOSP                                 !   OUT
 INTEGER (KIND=JPLIKM)  KNGRIB                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNBITS                                 !   OUT
-INTEGER (KIND=JPLIKM)  KSTRON                                 !   OUT
-INTEGER (KIND=JPLIKM)  KPUILA                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG1                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG2                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG3                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANION_MT_MM                                            &
+CALL FANION_MT                                                 &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDEXIS, &
-&           LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA)
+&           LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 
 END SUBROUTINE
 
-SUBROUTINE FANION_MT_MM                                      &
+SUBROUTINE FANION_MT                                           &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDEXIS, &
-&           LDCOSP, KNGRIB, KNBITS, KSTRON, KPUILA)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+&           LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -359,31 +361,31 @@ CHARACTER (LEN=*)      CDSUFF                                 ! IN
 LOGICAL                LDEXIS                                 !   OUT
 LOGICAL                LDCOSP                                 !   OUT
 INTEGER (KIND=JPLIKM)  KNGRIB                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNBITS                                 !   OUT
-INTEGER (KIND=JPLIKM)  KSTRON                                 !   OUT
-INTEGER (KIND=JPLIKM)  KPUILA                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG1                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG2                                 !   OUT
+INTEGER (KIND=JPLIKM)  KNARG3                                 !   OUT
 ! Local integers
 INTEGER (KIND=JPLIKB)  IREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  INUMER                                 ! IN   
 INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN   
 INTEGER (KIND=JPLIKB)  INGRIB                                 !   OUT
-INTEGER (KIND=JPLIKB)  INBITS                                 !   OUT
-INTEGER (KIND=JPLIKB)  ISTRON                                 !   OUT
-INTEGER (KIND=JPLIKB)  IPUILA                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG1                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG2                                 !   OUT
+INTEGER (KIND=JPLIKB)  INARG3                                 !   OUT
 ! Convert arguments
 
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANION_MT_BB                                            &
+CALL FANION_MT64                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, LDEXIS, &
-&           LDCOSP, INGRIB, INBITS, ISTRON, IPUILA)
+&           LDCOSP, INGRIB, INARG1, INARG2, INARG3)
 
 KREP       = INT (      IREP, JPLIKM)
 KNGRIB     = INT (    INGRIB, JPLIKM)
-KNBITS     = INT (    INBITS, JPLIKM)
-KSTRON     = INT (    ISTRON, JPLIKM)
-KPUILA     = INT (    IPUILA, JPLIKM)
+KNARG1     = INT (    INARG1, JPLIKM)
+KNARG2     = INT (    INARG2, JPLIKM)
+KNARG3     = INT (    INARG3, JPLIKM)
 
 END SUBROUTINE
 
@@ -395,6 +397,6 @@ END SUBROUTINE
 !INTF LDEXIS          OUT 
 !INTF LDCOSP          OUT 
 !INTF KNGRIB          OUT 
-!INTF KNBITS          OUT 
-!INTF KSTRON          OUT 
-!INTF KPUILA          OUT 
+!INTF KNARG1          OUT 
+!INTF KNARG2          OUT 
+!INTF KNARG3          OUT 

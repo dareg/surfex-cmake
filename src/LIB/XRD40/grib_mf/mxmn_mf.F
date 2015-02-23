@@ -1,49 +1,56 @@
       SUBROUTINE MXMN_MF (PARRAY,KLEN,PMAX,PMIN)
-      USE PARKIND1, ONLY : JPRB
+      USE PARKIND1, ONLY : JPIM, JPRB
       USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-C
-C*******************************************************************
-C*
-C*    NAME      : MXMN
-C*
-C*    FUNCTION  : RETURN MAXIMUM AND MINIMUM VALUES FROM AN ARRAY
-C*                OF FLOATING POINT NUMBERS.
-C*
-C*    INPUT     : PARRAY - ARRAY OF NUMBERS
-C*                KLEN   - LAST WORD OF THIS ARRAY
-C*
-C*    OUTPUT    : PMAX - MAXIMUM VALUE
-C*                PMIN - MINIMUM VALUE
-C*
-C*
-C*     JOHN HENNESSY, ECMWF, 22 APRIL 1985
-C*
-C*    Modified by Jean CLOCHARD, French DMN, January 1990.
-C*    R. El Khatib 2004-10-12 MAXVAL,MINVAL
-C*    F. Vana + NEC Apr-2009: OpenMP
-C*
-C*******************************************************************
-C
-C      USE OML_MOD , ONLY : OML_MY_THREAD , OML_GET_NUM_THREADS
-C
-#include "precision.h"
-C
-      INTEGER KLEN
-      REAL (KIND=JPDBLR) PMAX, PMIN
-      REAL (KIND=JPDBLR) PARRAY (KLEN)
-      INTEGER START, END, BLOCKS, MY_THREAD, THREADS
-      REAL (KIND=JPDBLR) PMAX_LOCAL, PMIN_LOCAL
-C
+      USE LFI_PRECISION, ONLY : JPDBLR
+!
+!*******************************************************************
+!*
+!*    NAME      : MXMN
+!*
+!*    FUNCTION  : RETURN MAXIMUM AND MINIMUM VALUES FROM AN ARRAY
+!*                OF FLOATING POINT NUMBERS.
+!*
+!*    INPUT     : PARRAY - ARRAY OF NUMBERS
+!*                KLEN   - LAST WORD OF THIS ARRAY
+!*
+!*    OUTPUT    : PMAX - MAXIMUM VALUE
+!*                PMIN - MINIMUM VALUE
+!*
+!*
+!*     JOHN HENNESSY, ECMWF, 22 APRIL 1985
+!*
+!*    Modified by Jean CLOCHARD, French DMN, January 1990.
+!*    R. El Khatib 2004-10-12 MAXVAL,MINVAL
+!*    F. Vana + NEC Apr-2009: OpenMP
+!*
+!*******************************************************************
+!
+!RJ       USE OML_MOD , ONLY : OML_MY_THREAD , OML_GET_NUM_THREADS
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=JPIM) :: KLEN
+      REAL (KIND=JPDBLR) :: PMAX
+      REAL (KIND=JPDBLR) :: PMIN
+      REAL (KIND=JPDBLR) :: PARRAY (KLEN)
+      INTEGER(KIND=JPIM) :: START, END, BLOCKS, MY_THREAD, THREADS
+      REAL (KIND=JPDBLR) :: PMAX_LOCAL, PMIN_LOCAL
+!RJ: some omp declarations
+!$    INTEGER,EXTERNAL :: OMP_GET_THREAD_NUM,OMP_GET_NUM_THREADS
+!
       REAL(KIND=JPRB) :: ZHOOK_HANDLE
       IF (LHOOK) CALL DR_HOOK('MXMN_MF',0,ZHOOK_HANDLE)
       PMAX = -HUGE(PARRAY)
       PMIN = HUGE(PARRAY)
-!$OMP PARALLEL
+!RJ: skip oml_module, but preserve omp region
+!$OMP PARALLEL                                                          &
 !$OMP&PRIVATE(START,END,BLOCKS,MY_THREAD,THREADS,PMAX_LOCAL,PMIN_LOCAL)
-      !MY_THREAD = OML_MY_THREAD() - 1
+!RJ       MY_THREAD = OML_MY_THREAD() - 1
       MY_THREAD = 0
-      !THREADS = OML_GET_NUM_THREADS()
+!$    MY_THREAD = OMP_GET_THREAD_NUM()
+!RJ       THREADS = OML_GET_NUM_THREADS()
       THREADS = 1
+!$    THREADS = OMP_GET_NUM_THREADS()
       BLOCKS = (KLEN + THREADS) / THREADS
       START = MY_THREAD * BLOCKS + 1
       END = MIN(START+BLOCKS-1,KLEN)
@@ -55,4 +62,4 @@ C
 !$OMP END CRITICAL
 !$OMP END PARALLEL
       IF (LHOOK) CALL DR_HOOK('MXMN_MF',1,ZHOOK_HANDLE)
-      END
+      ENDSUBROUTINE MXMN_MF

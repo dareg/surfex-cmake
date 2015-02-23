@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACTUI_MT_BB                  &
+SUBROUTINE FACTUI_MT64                   &
 &                     (FA,  KREP, KRANGC )
 USE FA_MOD, ONLY : FA_COM, FREE_CADRE, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme A USAGE INTERNE AU LOGICIEL. Fait la suppression
@@ -91,7 +90,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   INUMER=JPNIIL
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANGC='',I4)') &
 &     KREP,KRANGC
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -102,12 +101,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACTUI_BB          &
+SUBROUTINE FACTUI64           &
 &           (KREP, KRANGC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -115,17 +114,17 @@ INTEGER (KIND=JPLIKB)  KRANGC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTUI_MT_BB            &
+CALL FACTUI_MT64             &
 &           (FA, KREP, KRANGC)
 
 END SUBROUTINE
 
-SUBROUTINE FACTUI_MM          &
+SUBROUTINE FACTUI             &
 &           (KREP, KRANGC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -133,17 +132,15 @@ INTEGER (KIND=JPLIKM)  KRANGC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTUI_MT_MM            &
+CALL FACTUI_MT               &
 &           (FA, KREP, KRANGC)
 
 END SUBROUTINE
 
-SUBROUTINE FACTUI_MT_MM          &
+SUBROUTINE FACTUI_MT             &
 &           (FA, KREP, KRANGC)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -156,7 +153,7 @@ INTEGER (KIND=JPLIKB)  IRANGC                                 ! IN
 
 IRANGC     = INT (    KRANGC, JPLIKB)
 
-CALL FACTUI_MT_BB            &
+CALL FACTUI_MT64             &
 &           (FA, IREP, IRANGC)
 
 KREP       = INT (      IREP, JPLIKM)

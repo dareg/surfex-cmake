@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FATALE_MT_BB                          &
+SUBROUTINE FATALE_MT64                           &
 &                     (FA,  KREP, KNUMER, LDERFA )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet d'activer ou de desactiver l'option
@@ -39,12 +38,12 @@ LOGICAL                  LLFATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FATALE_MT',0,ZHOOK_HANDLE)
 CLACTI=''
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.NE.0) THEN
   FA%FICHIER(IRANG)%LERRFA=LDERFA
-  CALL LFIERF_MT_BB                          &
+  CALL LFIERF_MT64                            &
 &                 (FA%LFI, IREP,KNUMER,LDERFA)
   LLRLFI=IREP.NE.0
 ELSE
@@ -65,7 +64,7 @@ ENDIF
 CLNSPR='FATALE'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', LDERFA= '',L1)') KREP,KNUMER,LDERFA
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,LLRLFI)
 !
@@ -81,12 +80,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FATALE_BB             &
+SUBROUTINE FATALE64              &
 &           (KREP, KNUMER, LDERFA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -95,17 +94,17 @@ LOGICAL                LDERFA                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATALE_MT_BB                    &
+CALL FATALE_MT64                     &
 &           (FA, KREP, KNUMER, LDERFA)
 
 END SUBROUTINE
 
-SUBROUTINE FATALE_MM             &
+SUBROUTINE FATALE                &
 &           (KREP, KNUMER, LDERFA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -114,17 +113,15 @@ LOGICAL                LDERFA                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATALE_MT_MM                    &
+CALL FATALE_MT                       &
 &           (FA, KREP, KNUMER, LDERFA)
 
 END SUBROUTINE
 
-SUBROUTINE FATALE_MT_MM              &
+SUBROUTINE FATALE_MT                 &
 &           (FA, KREP, KNUMER, LDERFA)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -138,7 +135,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FATALE_MT_BB                    &
+CALL FATALE_MT64                     &
 &           (FA, IREP, INUMER, LDERFA)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,14 +1,14 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIOPT_MT_BB                                  &
+
+SUBROUTINE LFIOPT_MT64                                     &
 &                     (LFI, KREP, KNUMER, LDNOMM, CDNOMF,  &
 &                      CDSTTO, LDERFA,                     &
 &                      LDIMST, KNIMES)
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME DE RECUPERATION DES OPTIONS D'OUVERTURE
@@ -42,11 +42,11 @@ LOGICAL LDNOMM, LDERFA, LDIMST
 CHARACTER CDNOMF*(*), CDSTTO*(*)
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIOPT_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIOPT_MT64',0,ZHOOK_HANDLE)
 
 IREP=0
 IRANG=0
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 
 IF (IRANG .EQ. 0) THEN
@@ -65,20 +65,20 @@ KNIMES=LFI%NIVMES(IRANG)
 
 KREP=IREP
 
-IF (LHOOK) CALL DR_HOOK('LFIOPT_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIOPT_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIOPT_BB                                     &
+SUBROUTINE LFIOPT64                                      &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -92,19 +92,19 @@ INTEGER (KIND=JPLIKB)  KNIMES                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOPT_MT_BB                                             &
+CALL LFIOPT_MT64                                               &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES)
 
 END SUBROUTINE
 
-SUBROUTINE LFIOPT_MM                                     &
+SUBROUTINE LFIOPT                                        &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -118,19 +118,17 @@ INTEGER (KIND=JPLIKM)  KNIMES                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOPT_MT_MM                                             &
+CALL LFIOPT_MT                                                &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES)
 
 END SUBROUTINE
 
-SUBROUTINE LFIOPT_MT_MM                                       &
+SUBROUTINE LFIOPT_MT                                          &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -150,7 +148,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIOPT_MT_BB                                             &
+CALL LFIOPT_MT64                                               &
 &           (LFI, IREP, INUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, INIMES)
 

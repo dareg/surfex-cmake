@@ -1,16 +1,15 @@
 ! Feb-2013 P. Marguinaud fix uninitialized output variable
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Sep-2012 P. Marguinaud Remove unused local variables
-SUBROUTINE FANOUV_MT_BB                                          &
+SUBROUTINE FANOUV_MT64                                           &
 &                     (FA,  KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU,  &
 &                      LDERFA, LDIMST, KNIMES, KNBARP, KNBARI,     &
 &                      CDNOMC )
 USE FA_MOD, ONLY : FA_COM, NEW_FICHIER, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme d'initialisation SANS OUVERTURE d'une unite logique 
@@ -106,7 +105,7 @@ ILOMIN=MIN ( INT (LEN (CDNOMF), JPLIKB),         &
 !     initialiser les variables globales du logiciel s'il s'agit
 !     du premier appel a un sous-programme de ce logiciel.
 !
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (ILOMIN.LE.0) THEN
@@ -153,7 +152,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 LLNOUF=KNBARI.EQ.0
-CALL FANUCA_MT_BB                         &
+CALL FANUCA_MT64                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 LLNOUC=IRANGC.EQ.0
 !
@@ -202,6 +201,7 @@ DO J=1,FA%JPLDAT
   FA%FICHIER(IRANG)%MADATE(J)=IDATEF(J)
 ENDDO
 
+
 !**
 !     3.  -  ON MET A JOUR LES TABLES RELATIVES AUX FICHIERS.
 !-----------------------------------------------------------------------
@@ -236,7 +236,7 @@ ENDIF
 ! de -1 pris par FA%NBFPDG, FA%NBFCSP, FA%NSTROF et FA%NPUFLA en
 ! IRANG-ieme position.
 !
-CALL FAINOC_MT_BB           &
+CALL FAINOC_MT64            &
 &               (FA,  IRANG )
 !
 IRANER=IRANG
@@ -302,11 +302,11 @@ IF (INIMES.EQ.2) THEN
 &     '',  LDIMST= '',L1,                                           &
 &         '', KNIMES='',I2,'', KNBARP='',I6,'' KNBARI='',I6)')      &
 &   KREP,KNUMER,LDNOMM,CDSTTU,LDERFA,LDIMST,KNIMES,KNBARP,KNBARI
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILACTI),LLRLFI)
   CLMESS='CDNOMC='''//CLACTI(1:ILACTI)//''''
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,                                  &
 &               CLACTI(1:ILACTI),LLRLFI)
@@ -325,13 +325,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANOUV_BB                                     &
+SUBROUTINE FANOUV64                                      &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -348,19 +348,19 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANOUV_MT_BB                                            &
+CALL FANOUV_MT64                                             &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FANOUV_MM                                     &
+SUBROUTINE FANOUV                                        &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -377,19 +377,17 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANOUV_MT_MM                                            &
+CALL FANOUV_MT                                               &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FANOUV_MT_MM                                      &
+SUBROUTINE FANOUV_MT                                         &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -416,14 +414,20 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 INBARP     = INT (    KNBARP, JPLIKB)
 
-CALL FANOUV_MT_BB                                            &
+CALL FANOUV_MT64                                             &
 &           (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, INIMES, INBARP, INBARI, CDNOMC)
 
 KREP       = INT (      IREP, JPLIKM)
 KNBARI     = INT (    INBARI, JPLIKM)
 
+IF (KNUMER == 0) THEN
+  KNUMER = INT (    INUMER, JPLIKM)
+ENDIF
+
 END SUBROUTINE
+
+
 
 !INTF KREP            OUT 
 !INTF KNUMER        IN    
@@ -436,5 +440,3 @@ END SUBROUTINE
 !INTF KNBARP        IN    
 !INTF KNBARI          OUT 
 !INTF CDNOMC        IN    
-
-

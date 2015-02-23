@@ -1,16 +1,15 @@
 ! Jan-2013 P. Marguinaud Use JNGEOM & JNEXPL parameters
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACIES_MT_BB                                           &
-&                     (FA,  CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, &
-&                    PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,        &
-&                    KNOZPA, PSINLA, KNIVER, PREFER, PAHYBR,        &
+SUBROUTINE FACIES_MT64                                            &
+&                   (FA,  CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, &
+&                    PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,      &
+&                    KNOZPA, PSINLA, KNIVER, PREFER, PAHYBR,      &
 &                    PBHYBR, LDGARD )
 USE FA_MOD, ONLY : FA_COM, JPNIIL, JNGEOM, JNEXPL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLR 
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme servant a obtenir le contenu d'un Cadre.
@@ -60,7 +59,7 @@ LOGICAL LDGARD
 !
 INTEGER (KIND=JPLIKB) IREP, IRANGC, ILNOMC
 INTEGER (KIND=JPLIKB) INIMES, INUMER, ILCDNO, J
-INTEGER (KIND=JPLIKB) INPAHE, ISULEI, INPIND, INPGEO
+INTEGER (KIND=JPLIKB) INPAHE, ISULEI, INPIND
 !
 LOGICAL LLVERG, LLMLAM
 CHARACTER(LEN=FA%JPXNOM) CLACTI 
@@ -78,7 +77,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FACIES_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FACIES_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FACIES_LLPREA=.FALSE.
 ENDIF
@@ -119,11 +118,11 @@ ENDIF
 !
 !             Verrouillage global prealable, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
-CALL FANUCA_MT_BB                         &
+CALL FANUCA_MT64                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 !
 IF (IRANGC.EQ.0) THEN
@@ -194,7 +193,7 @@ IREP=0
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=IREP.NE.0.AND.FA%NRFAGA.NE.2
@@ -223,7 +222,7 @@ WRITE (UNIT=CLMESS,                                               &
 &     CLACTI(1:ILNOMC),KTYPTR,PSLAPO,PCLOPO,PSLOPO,PCODIL,         &
 &     KTRONC,KNLATI,KNXLON,KNIVER,PREFER,LDGARD
 INUMER=JPNIIL
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILNOMC),.FALSE.)
 !
@@ -233,14 +232,14 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACIES_BB                                       &
+SUBROUTINE FACIES64                                        &
 &           (CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,  &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLR
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
@@ -252,32 +251,32 @@ REAL (KIND=JPDBLR)     PCODIL                                 !   OUT
 INTEGER (KIND=JPLIKB)  KTRONC                                 !   OUT
 INTEGER (KIND=JPLIKB)  KNLATI                                 !   OUT
 INTEGER (KIND=JPLIKB)  KNXLON                                 !   OUT
-INTEGER (KIND=JPLIKB)  KNLOPA     (*)                 !   OUT
-INTEGER (KIND=JPLIKB)  KNOZPA     (*)                 !   OUT
-REAL (KIND=JPDBLR)     PSINLA     (*)                 !   OUT
+INTEGER (KIND=JPLIKB)  KNLOPA     (FA%JPXPAH)                 !   OUT
+INTEGER (KIND=JPLIKB)  KNOZPA     (FA%JPXIND)                 !   OUT
+REAL (KIND=JPDBLR)     PSINLA     (FA%JPXGEO)                 !   OUT
 INTEGER (KIND=JPLIKB)  KNIVER                                 !   OUT
 REAL (KIND=JPDBLR)     PREFER                                 !   OUT
-REAL (KIND=JPDBLR)     PAHYBR     (*)               !   OUT
-REAL (KIND=JPDBLR)     PBHYBR     (*)               !   OUT
+REAL (KIND=JPDBLR)     PAHYBR     (0:FA%JPXNIV)               !   OUT
+REAL (KIND=JPDBLR)     PBHYBR     (0:FA%JPXNIV)               !   OUT
 LOGICAL                LDGARD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACIES_MT_BB                                              &
+CALL FACIES_MT64                                               &
 &           (FA, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,      &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
 
 END SUBROUTINE
 
-SUBROUTINE FACIES_MM                                       &
+SUBROUTINE FACIES                                          &
 &           (CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,  &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM, JPDBLR
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
@@ -289,32 +288,30 @@ REAL (KIND=JPDBLR)     PCODIL                                 !   OUT
 INTEGER (KIND=JPLIKM)  KTRONC                                 !   OUT
 INTEGER (KIND=JPLIKM)  KNLATI                                 !   OUT
 INTEGER (KIND=JPLIKM)  KNXLON                                 !   OUT
-INTEGER (KIND=JPLIKM)  KNLOPA     (*)                 !   OUT
-INTEGER (KIND=JPLIKM)  KNOZPA     (*)                 !   OUT
-REAL (KIND=JPDBLR)     PSINLA     (*)                 !   OUT
+INTEGER (KIND=JPLIKM)  KNLOPA     (FA%JPXPAH)                 !   OUT
+INTEGER (KIND=JPLIKM)  KNOZPA     (FA%JPXIND)                 !   OUT
+REAL (KIND=JPDBLR)     PSINLA     (FA%JPXGEO)                 !   OUT
 INTEGER (KIND=JPLIKM)  KNIVER                                 !   OUT
 REAL (KIND=JPDBLR)     PREFER                                 !   OUT
-REAL (KIND=JPDBLR)     PAHYBR     (*)               !   OUT
-REAL (KIND=JPDBLR)     PBHYBR     (*)               !   OUT
+REAL (KIND=JPDBLR)     PAHYBR     (0:FA%JPXNIV)               !   OUT
+REAL (KIND=JPDBLR)     PBHYBR     (0:FA%JPXNIV)               !   OUT
 LOGICAL                LDGARD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACIES_MT_MM                                              &
+CALL FACIES_MT                                                 &
 &           (FA, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,      &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
 
 END SUBROUTINE
 
-SUBROUTINE FACIES_MT_MM                                        &
+SUBROUTINE FACIES_MT                                           &
 &           (FA, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,      &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM, JPDBLR, JPLIKB
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -351,12 +348,12 @@ LOGICAL                LLMLAM
 ! Convert arguments
 
 
-CALL FACIES_MT_BB                                              &
+CALL FACIES_MT64                                               &
 &           (FA, CDNOMC, ITYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           ITRONC, INLATI, INXLON, INLOPA, INOZPA, PSINLA,      &
 &           INIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
 
-CALL FANUCA_MT_BB                    &
+CALL FANUCA_MT64                     &
 &           (FA,CDNOMC,IRANGC,.FALSE.)
 
 IF (IRANGC.NE.0) THEN

@@ -1,15 +1,14 @@
 ! Jan-2013 P. Marguinaud Use JNGEOM & JNEXPL parameters
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAITOU_MT_BB                                          &
+SUBROUTINE FAITOU_MT64                                             &
 &                     (FA,  KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU,  &
 &                      LDERFA, LDIMST, KNIMES, KNBARP, KNBARI,     &
-&                      CDNOMC )
+&                      CDNOMC)
 USE FA_MOD, ONLY : FA_COM, NEW_FICHIER, JPNIIL, JNGEOM, JNEXPL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme d'OUVERTURE d'une unite logique "Fichier ARPEGE"
@@ -113,7 +112,7 @@ ILOMIN=MIN ( INT (LEN (CDNOMF), JPLIKB),         &
 !     initialiser les variables globales du logiciel s'il s'agit
 !     du premier appel a un sous-programme de ce logiciel.
 !
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (ILOMIN.LE.0) THEN
@@ -130,7 +129,7 @@ ENDIF
 !
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
@@ -164,7 +163,7 @@ ENDIF
 !      articles constituant le cadre, la date et l'identificateur)
 !
 INBARP=KNBARP+7
-CALL LFIOUV_MT_BB                                          &
+CALL LFIOUV_MT64                                            &
 &               (FA%LFI, IREPOU,KNUMER,LDNOMM,CDNOMF,CDSTTU, &
 &             LDERFA,LDIMST,                                 &
 &             KNIMES,INBARP,KNBARI)
@@ -179,7 +178,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 LLNOUF=KNBARI.EQ.0
-CALL FANUCA_MT_BB                         &
+CALL FANUCA_MT64                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 LLNOUC=IRANGC.EQ.0
 !
@@ -249,12 +248,12 @@ IF (LLNOUF) THEN
 !
     LLRLFI=.TRUE.
     ILDIMEN=IDIMEN
-    CALL LFIECR_MT_BB                                             &
+    CALL LFIECR_MT64                                               &
 &                  (FA%LFI,IREP,KNUMER,FA%CPCADI,ILDIMEN,FA%JPCADI)
     IDIMEN=ILDIMEN
     IF (IREP.NE.0) GOTO 1001
 !
-    CALL LFIECR_MT_BB                                            &
+    CALL LFIECR_MT64                                              &
 &                  (FA%LFI,IREP,KNUMER,FA%CPCAFS,ZCHMID,FA%JPCAFS)
     IF (IREP.NE.0) GOTO 1001
 !
@@ -262,13 +261,13 @@ IF (LLNOUF) THEN
 !
        ILONGA=INPAHE*2
        ILRDPOL=IRDPOL
-       CALL LFIECR_MT_BB                                          &
+       CALL LFIECR_MT64                                            &
 &                     (FA%LFI,IREP,KNUMER,FA%CPCARP,ILRDPOL,ILONGA)
        IRDPOL=ILRDPOL
        IF (IREP.NE.0) GOTO 1001
 !
        ILONGA=INPAHE
-       CALL LFIECR_MT_BB                                         &
+       CALL LFIECR_MT64                                           &
 &                     (FA%LFI,IREP,KNUMER,FA%CPCASL,ZSINLA,ILONGA)
        IF (IREP.NE.0) GOTO 1001
 !
@@ -276,25 +275,25 @@ IF (LLNOUF) THEN
 !
        ILONGA=JNEXPL+INPIND
        ILRDPOL=IRDPOL
-       CALL LFIECR_MT_BB                                          &
+       CALL LFIECR_MT64                                            &
 &                     (FA%LFI,IREP,KNUMER,FA%CPCARP,ILRDPOL,ILONGA)
        IRDPOL=ILRDPOL
        IF (IREP.NE.0) GOTO 1001
 !
        ILONGA=JNGEOM
-       CALL LFIECR_MT_BB                                         &
+       CALL LFIECR_MT64                                           &
 &                     (FA%LFI,IREP,KNUMER,FA%CPCASL,ZSINLA,ILONGA)
        IF (IREP.NE.0) GOTO 1001
 !
     ENDIF
 !           
     ILONGA=1+(1+INIVER)*2
-    CALL LFIECR_MT_BB                                           &
+    CALL LFIECR_MT64                                             &
 &                   (FA%LFI, IREP,KNUMER,FA%CPCACH,ZHYBRI,ILONGA)
     IF (IREP.NE.0) GOTO 1001
 !
     ILPNVER=FA%JPNVER
-    CALL LFIECR_MT_BB                                 &
+    CALL LFIECR_MT64                                   &
 &                   (FA%LFI, IREP,KNUMER,               &
 &                   CLNOMA(1:ILNOMC),ILPNVER,1_JPLIKB )
     IF (IREP.NE.0) GOTO 1001
@@ -308,7 +307,7 @@ ENDIF
 !     2.1 - Fichier preexistant...lecture et controle du Cadre "Fichier"
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT_BB                                           &
+CALL LFINFO_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCADI,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -323,7 +322,7 @@ ELSEIF (ILONGA.NE.FA%JPCADI) THEN
 ENDIF
 !
 ILDIMEN=IDIMEN
-CALL LFILEC_MT_BB                                               &
+CALL LFILEC_MT64                                                 &
 &               (FA%LFI, IREP,KNUMER,FA%CPCADI,ILDIMEN,FA%JPCADI)
 IDIMEN=ILDIMEN
 !
@@ -332,7 +331,7 @@ IF (IREP.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFINFO_MT_BB                                           &
+CALL LFINFO_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCAFS,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -346,7 +345,7 @@ ELSEIF (ILONGA.NE.FA%JPCAFS) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFILEC_MT_BB                                              &
+CALL LFILEC_MT64                                                &
 &               (FA%LFI, IREP,KNUMER,FA%CPCAFS,ZCHMID,FA%JPCAFS)
 !
 IF (IREP.NE.0) THEN
@@ -366,7 +365,7 @@ INIVER=IDIMEN(4)
 ITYPTR=IDIMEN(5)
 IPHASE=1
 IGARDE=1
-CALL FACADI_MT_BB                                                 &
+CALL FACADI_MT64                                                  &
 &              (FA, IREP,CDNOMC,ITYPTR,ZCHMID(1),ZCHMID(2),         &
 &               ZCHMID(3),ZCHMID(4),ITRONC,INLATI,INXLON,IRDPOL(1), &
 &               IRDPOL(FA%JPXPAH+1),ZSINLA,                         &
@@ -374,7 +373,7 @@ CALL FACADI_MT_BB                                                 &
 &               LLMODC,LLREDF,IPHASE,IRANGC,ILNOMC,IGARDE)
 IF (IREP.NE.0) GOTO 1001
 !
-CALL LFINFO_MT_BB                                           &
+CALL LFINFO_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCARP,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -391,7 +390,7 @@ ELSEIF (ILONGA.NE.INPAHE*2) THEN
 ENDIF
 !
 ILRDPOL=IRDPOL
-CALL LFILEC_MT_BB                                            &
+CALL LFILEC_MT64                                              &
 &               (FA%LFI, IREP,KNUMER,FA%CPCARP,ILRDPOL,ILONGA)
 IRDPOL=ILRDPOL
 !
@@ -400,7 +399,7 @@ IF (IREP.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFINFO_MT_BB                                           &
+CALL LFINFO_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCASL,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -416,7 +415,7 @@ ELSEIF (ILONGA.NE.INPAHE) THEN
   ENDIF      
 ENDIF
 !
-CALL LFILEC_MT_BB                                           &
+CALL LFILEC_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCASL,ZSINLA,ILONGA)
 !
 IF (IREP.NE.0) THEN
@@ -424,7 +423,7 @@ IF (IREP.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFINFO_MT_BB                                           &
+CALL LFINFO_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCACH,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -440,7 +439,7 @@ ELSEIF (ILONGA.NE.1+(1+INIVER)*2) THEN
   ENDIF      
 ENDIF
 !
-CALL LFILEC_MT_BB                                           &
+CALL LFILEC_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCACH,ZHYBRI,ILONGA)
 !
 IF (IREP.NE.0) THEN
@@ -451,7 +450,7 @@ ENDIF
 !        Tests complementaires sur les valeurs lues.
 !
 IPHASE=2
-CALL FACADI_MT_BB                                                 &
+CALL FACADI_MT64                                                  &
 &              (FA, IREP,CDNOMC,ITYPTR,ZCHMID(1),ZCHMID(2),         &
 &               ZCHMID(3),ZCHMID(4),ITRONC,INLATI,INXLON,IRDPOL(1), &
 &               IRDPOL(INPAHE+1),ZSINLA,                            &
@@ -463,7 +462,7 @@ IF (IREP.NE.0) GOTO 1001
 !           premier article suivant les articles du cadre.
 !-----------------------------------------------------------------------
 !
-CALL LFICAS_MT_BB                                 &
+CALL LFICAS_MT64                                   &
 &               (FA%LFI, IREP,KNUMER,CLNOMA,ILONGA, &
 &                IPOSEX,.FALSE.)
 !
@@ -479,7 +478,7 @@ ENDIF
 !     2.3 - Fichier preexistant...lecture et controle de l'article DATE.
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT_BB                                           &
+CALL LFINFO_MT64                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPDATE,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -494,7 +493,7 @@ ELSEIF (ILONGA.NE.FA%JPLDAT) THEN
 ENDIF
 !
 ILDATEF=IDATEF
-CALL LFILEC_MT_BB                                               &
+CALL LFILEC_MT64                                                 &
 &               (FA%LFI, IREP,KNUMER,FA%CPDATE,ILDATEF,FA%JPLDAT)
 IDATEF=ILDATEF
 !
@@ -514,14 +513,14 @@ FA%FICHIER(IRANG)%LCREAF=.TRUE.
 !
 !        Controle de la Date fichier, et stockage dans FA%MADATE.
 !
-CALL FANDAI_MT_BB                            &
+CALL FANDAI_MT64                             &
 &               (FA, IREP,IRANG,IDATEF,LLMODA)
 IF (IREP.NE.0) GOTO 1001
 !
 !         Definition du Cadre proprement dite.
 !
 IPHASE=3
-CALL FACADI_MT_BB                                                 &
+CALL FACADI_MT64                                                  &
 &              (FA, IREP,CDNOMC,ITYPTR,ZCHMID(1),ZCHMID(2),         &
 &               ZCHMID(3),ZCHMID(4),ITRONC,INLATI,INXLON,IRDPOL(1), &
 &               IRDPOL(INPAHE+1),ZSINLA,                            &
@@ -568,7 +567,7 @@ ENDIF
 ! de -1 pris par FA%NBFPDG, FA%NBFCSP, FA%NSTROF et FA%NPUFLA en
 ! IRANG-ieme position.
 !
-CALL FAINOC_MT_BB           &
+CALL FAINOC_MT64            &
 &               (FA,  IRANG )
 !
 IRANER=IRANG
@@ -584,7 +583,7 @@ FA%FICHIER(IRANG)%NRASVE = 0
 FA%FICHIER(IRANG)%LIFLAP=.TRUE.
 !
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                               &
+IF (FA%LFAMUL) CALL LFIVER_MT64                                 &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ASGN')
 !
 !        On incremente le nombre de fichiers attaches au cadre specifie.
@@ -618,7 +617,7 @@ ENDIF
 !
 !           Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (.NOT.LLFATA.AND.INIMES.EQ.0)  THEN 
@@ -643,11 +642,11 @@ IF (INIMES.EQ.2) THEN
 &     '',  LDIMST= '',L1,                                           &
 &         '', KNIMES='',I2,'', KNBARP='',I6,'' KNBARI='',I6)')      &
 &   KREP,KNUMER,LDNOMM,CDSTTU,LDERFA,LDIMST,KNIMES,KNBARP,KNBARI
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILACTI),LLRLFI)
   CLMESS='CDNOMC='''//CLACTI(1:ILACTI)//''''
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI(1:ILACTI),LLRLFI)
 ENDIF
@@ -664,13 +663,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAITOU_BB                                     &
+SUBROUTINE FAITOU64                                      &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -687,19 +686,19 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAITOU_MT_BB                                            &
+CALL FAITOU_MT64                                             &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FAITOU_MM                                     &
+SUBROUTINE FAITOU                                        &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -716,19 +715,17 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAITOU_MT_MM                                            &
+CALL FAITOU_MT                                                 &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
-&           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
+&            LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FAITOU_MT_MM                                      &
+SUBROUTINE FAITOU_MT                                           &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
-&           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+&            LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -755,12 +752,16 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 INBARP     = INT (    KNBARP, JPLIKB)
 
-CALL FAITOU_MT_BB                                            &
-&           (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
+CALL FAITOU_MT64                                              &
+&          (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, INIMES, INBARP, INBARI, CDNOMC)
 
 KREP       = INT (      IREP, JPLIKM)
 KNBARI     = INT (    INBARI, JPLIKM)
+
+IF (KNUMER == 0) THEN
+  KNUMER = INT (    INUMER, JPLIKM)
+ENDIF
 
 END SUBROUTINE
 

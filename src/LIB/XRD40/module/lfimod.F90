@@ -1,8 +1,7 @@
-#include "lfisuffix.h"
+MODULE LFIMOD
 ! Jan-2011 P. Marguinaud Interface to thread-safe LFI
 ! Sep-2012 P. Marguinaud Initialize data + DrHook
-MODULE LFIMOD
-USE PARKIND1, ONLY : JPIM, JPRB
+USE PARKIND1, ONLY : JPIM, JPRB, JPIB, JPIA
 USE YOMHOOK, ONLY : LHOOK, DR_HOOK
 USE LFI_PRECISION
 IMPLICIT NONE
@@ -219,6 +218,7 @@ IMPLICIT NONE
 !     CTYPMX = Liste des types de variables valides pour Import/eXport.
 !
       TYPE LFICOM
+      SEQUENCE
 ! lficom0
       INTEGER (KIND=JPLIKB) JPNBIM, JPNBIC, JPNCPN, JPLARD
       INTEGER (KIND=JPLIKB) JPNPDF, JPXUFM, JPNXFI
@@ -504,13 +504,13 @@ IMPLICIT NONE
      & STAT = KERR )
       IF (KERR /= 0) GOTO 999
 
-      LFI%CNOMAR = ''; LFI%CNDERA = ''; LFI%CNOMFI = '';
-      LFI%CNOMSY = ''; LFI%CSTAOP = ''; LFI%CNEXPL = '';
-      LFI%CNIMPL = ''; LFI%CFGMXD = ''; LFI%MLGPOS  = 0;
-      LFI%MTAMPD =  0; LFI%MDES1D =  0; LFI%MRGPIM  = 0;
-      LFI%NDERPD =  0; LFI%MCOPIF =  0; LFI%MRGPIF  = 0;
-      LFI%NLNOMS =  0; LFI%NUMERO =  0; LFI%NLNOMF  = 0;
-      LFI%NDERCO =  0; LFI%NPODPI =  0;
+      LFI%CNOMAR = ''; LFI%CNDERA = ''; LFI%CNOMFI  = '';
+      LFI%CNOMSY = ''; LFI%CSTAOP = ''; LFI%CNEXPL  = '';
+      LFI%CNIMPL = ''; LFI%CFGMXD = ''; LFI%MLGPOS  =  0;
+      LFI%MTAMPD =  0; LFI%MDES1D =  0; LFI%MRGPIM  =  0;
+      LFI%NDERPD =  0; LFI%MCOPIF =  0; LFI%MRGPIF  =  0;
+      LFI%NLNOMS =  0; LFI%NUMERO =  0; LFI%NLNOMF  =  0;
+      LFI%NDERCO =  0; LFI%NPODPI =  0; 
 
       ALLOCATE (                                                         &
      & LFI%NUMAPH (0:LFI%JPNXFI), LFI%NALDPI (LFI%JPNXFI),               &
@@ -653,4 +653,5 @@ IMPLICIT NONE
       END SUBROUTINE
 
 END MODULE LFIMOD
+
 

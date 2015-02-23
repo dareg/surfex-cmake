@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FA_LIMITS_MT_BB                              &
+SUBROUTINE FA_LIMITS_MT64                               &
 &                       (FA, KPXPAH,KPXIND,KPXGEO,KPXNIV)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPLIKB
+USE LFI_PRECISION
 IMPLICIT NONE
 
 ! -----
@@ -44,12 +43,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FA_LIMITS_BB                    &
+SUBROUTINE FA_LIMITS64                     &
 &           (KPXPAH, KPXIND, KPXGEO, KPXNIV)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKB
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KPXPAH                                 !   OUT
@@ -59,17 +58,17 @@ INTEGER (KIND=JPLIKB)  KPXNIV                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FA_LIMITS_MT_BB                           &
+CALL FA_LIMITS_MT64                            &
 &           (FA, KPXPAH, KPXIND, KPXGEO, KPXNIV)
 
 END SUBROUTINE
 
-SUBROUTINE FA_LIMITS_MM                    &
+SUBROUTINE FA_LIMITS                       &
 &           (KPXPAH, KPXIND, KPXGEO, KPXNIV)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KPXPAH                                 !   OUT
@@ -79,17 +78,15 @@ INTEGER (KIND=JPLIKM)  KPXNIV                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FA_LIMITS_MT_MM                           &
+CALL FA_LIMITS_MT                              &
 &           (FA, KPXPAH, KPXIND, KPXGEO, KPXNIV)
 
 END SUBROUTINE
 
-SUBROUTINE FA_LIMITS_MT_MM                     &
+SUBROUTINE FA_LIMITS_MT                        &
 &           (FA, KPXPAH, KPXIND, KPXGEO, KPXNIV)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM, JPLIKB
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -105,7 +102,7 @@ INTEGER (KIND=JPLIKB)  IPXNIV                                 !   OUT
 ! Convert arguments
 
 
-CALL FA_LIMITS_MT_BB                           &
+CALL FA_LIMITS_MT64                            &
 &           (FA, IPXPAH, IPXIND, IPXGEO, IPXNIV)
 
 KPXPAH     = INT (    IPXPAH, JPLIKM)

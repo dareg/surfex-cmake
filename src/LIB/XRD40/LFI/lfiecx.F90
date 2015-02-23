@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIECX_MT_BB                              &
+SUBROUTINE LFIECX_MT64                                 &
 &                     (LFI, KREP, KRANG, KREC, KZONE,  &
 &                      LDADON, KRETIN )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
@@ -52,7 +51,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIECX_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIECX_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (KRANG.LE.0.OR.KRANG.GT.LFI%JPNXFI) THEN
   INUMER=LFI%JPNIL
@@ -121,10 +120,12 @@ IF (LLLOIN) THEN
     ENDIF
 !
     INAPHY=JREC
-    CALL LFIEDO_MT_BB                                       &
+    CALL LFIEDO_MT64                                            &
 &                   (LFI, KREP,INUMER,JREC,                   &
 &                    LFI%MTAMPD(IXT(1_JPLIKB ,INUMPD,KRANG)), &
-&                    LFI%NBWRIT(KRANG),IFACTM,IRETIN)
+&                    LFI%NBWRIT(KRANG),IFACTM,                &
+&                    IRETIN)
+
 !
     IF (IRETIN.EQ.1) THEN
       GOTO 903
@@ -162,7 +163,7 @@ IF (LLLOIN) THEN
   IRGPIM=LFI%MRGPIM(IJ,KRANG)
   IRGPIF=LFI%MRGPIF(IRGPIM)
   IF (IRGPIF.LE.INBPIR) CYCLE
-  CALL LFIREC_MT_BB                      &
+  CALL LFIREC_MT64                         &
 &                 (LFI, IRGPIF,KRANG,IREC)
 !
   IF (IREC.EQ.JREC) THEN
@@ -174,10 +175,11 @@ IF (LLLOIN) THEN
     ENDIF
 !
     INAPHY=JREC
-    CALL LFIECC_MT_BB                                 &
+    CALL LFIECC_MT64                                      &
 &                   (LFI, KREP,INUMER,JREC,             &
 &                    LFI%CNOMAR(IXC(1_JPLIKB ,IRGPIM)), &
-&                    LFI%NBWRIT(KRANG),IFACTM,IRETIN)
+&                    LFI%NBWRIT(KRANG),IFACTM,          &
+&                    IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
       GOTO 903
@@ -186,10 +188,11 @@ IF (LLLOIN) THEN
     ENDIF
 !
     INAPHY=JREC+1
-    CALL LFIEDO_MT_BB                                 &
+    CALL LFIEDO_MT64                                      &
 &                   (LFI, KREP,INUMER,JREC+1,           &
 &                    LFI%MLGPOS(IXM(1_JPLIKB ,IRGPIM)), &
-&                    LFI%NBWRIT(KRANG),IFACTM,IRETIN)
+&                    LFI%NBWRIT(KRANG),IFACTM,          &
+&                    IRETIN)
 !
     IF (IRETIN.EQ.1) THEN
       GOTO 903
@@ -286,10 +289,11 @@ IF (.NOT.LLLOIN) THEN
   DO J=INADJA(1),1,-1
   IJ=IPOSAD(J)
   INAPHY=IREC
-  CALL LFIEDO_MT_BB                                   &
+  CALL LFIEDO_MT64                                        &
 &                 (LFI, KREP,INUMER,IREC,               &
 &                  LFI%MTAMPD(IXT(1_JPLIKB ,IJ,KRANG)), &
-&                  LFI%NBWRIT(KRANG),IFACTM,IRETIN)
+&                  LFI%NBWRIT(KRANG),IFACTM,            &
+&                  IRETIN)
 !
   IF (IRETIN.EQ.1) THEN
     GOTO 903
@@ -307,9 +311,10 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 INAPHY=KREC
-CALL LFIEDO_MT_BB                               &
+CALL LFIEDO_MT64                                    &
 &               (LFI, KREP,INUMER,KREC,KZONE,     &
-&                LFI%NBWRIT(KRANG),IFACTM,IRETIN)
+&                LFI%NBWRIT(KRANG),IFACTM,        &
+&                IRETIN)
 !
 IF (IRETIN.EQ.1) THEN
   GOTO 903
@@ -328,10 +333,11 @@ DO J=LFI%JPNPDF,INADJA(2),-1
 IREC=IREC+1
 IJ=IPOSAD(J)
 INAPHY=IREC
-CALL LFIEDO_MT_BB                                   &
+CALL LFIEDO_MT64                                        &
 &               (LFI, KREP,INUMER,IREC,               &
 &                LFI%MTAMPD(IXT(1_JPLIKB ,IJ,KRANG)), &
-&                LFI%NBWRIT(KRANG),IFACTM,IRETIN)
+&                LFI%NBWRIT(KRANG),IFACTM,            &
+&                IRETIN)
 !
 IF (IRETIN.EQ.1) THEN
   GOTO 903
@@ -390,12 +396,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KRANG='',I3,   &
 &       '', KREC='',I6,'', LDADON='',L2,'', KRETIN='',I2)') &
 &    KREP,KRANG,KREC,LDADON,KRETIN
-  CALL LFIEMS_MT_BB                                      &
+  CALL LFIEMS_MT64                                         &
 &                 (LFI, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIECX_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIECX_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -409,56 +415,54 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIECX_BB                                 &
+SUBROUTINE LFIECX64                                  &
 &           (KREP, KRANG, KREC, KZONE, LDADON, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKB)  KREC                                   ! IN   
-INTEGER (KIND=JPDBLE)  KZONE      (*)                ! IN   
+INTEGER (KIND=JPDBLE)  KZONE      (LFI%JPLARX)                ! IN   
 LOGICAL                LDADON                                 ! IN   
 INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIECX_MT_BB                                         &
+CALL LFIECX_MT64                                          &
 &           (LFI, KREP, KRANG, KREC, KZONE, LDADON, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIECX_MM                                 &
+SUBROUTINE LFIECX                                    &
 &           (KREP, KRANG, KREC, KZONE, LDADON, KRETIN)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKM)  KREC                                   ! IN   
-INTEGER (KIND=JPDBLE)  KZONE      (*)                ! IN   
+INTEGER (KIND=JPDBLE)  KZONE      (LFI%JPLARX)                ! IN   
 LOGICAL                LDADON                                 ! IN   
 INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIECX_MT_MM                                         &
+CALL LFIECX_MT                                            &
 &           (LFI, KREP, KRANG, KREC, KZONE, LDADON, KRETIN)
 
 END SUBROUTINE
 
-SUBROUTINE LFIECX_MT_MM                                   &
+SUBROUTINE LFIECX_MT                                      &
 &           (LFI, KREP, KRANG, KREC, KZONE, LDADON, KRETIN)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -478,7 +482,7 @@ INTEGER (KIND=JPLIKB)  IRETIN                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 IREC       = INT (      KREC, JPLIKB)
 
-CALL LFIECX_MT_BB                                         &
+CALL LFIECX_MT64                                          &
 &           (LFI, IREP, IRANG, IREC, KZONE, LDADON, IRETIN)
 
 KREP       = INT (      IREP, JPLIKM)

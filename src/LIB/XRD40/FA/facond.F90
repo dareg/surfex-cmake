@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACOND_MT_BB                                           &
+SUBROUTINE FACOND_MT64                                            &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                    PCHAMP, LDCOSP, CDNOMA, KLNOMA, PVALCO,        &
 &                    KLONGD )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de CODAGE d'un CHAMP HORIZONTAL destine a etre
@@ -75,7 +74,7 @@ ILPRFU=INT (LEN (CDPREF), JPLIKB)
 ILSUFU=INT (LEN (CDSUFF), JPLIKB)
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
 KLNOMA=0
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -90,7 +89,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -103,7 +102,7 @@ ENDIF
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT_BB                                          &
+CALL FANFAR_MT64                                           &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CDNOMA, &
 &                IB1PAR(6),ILPRFU,ILSUFU,ILNOMU)
 IF (IREP.NE.0) GOTO 1001
@@ -158,8 +157,10 @@ ENDIF
 500 CONTINUE
 !
 IF (FA%FICHIER(IRANG)%NFGRIB.EQ.3) THEN
+!RJ: if gribex use is unavoidable
+#ifdef FA_GRIBEX
 ! Cas d'un champ qu'il faut "griber" avec GRIBEX
-  CALL FACODX_MT_BB                                         &
+  CALL FACODX_MT64                                            &
 &                 (FA,  IREP, IRANG, CDPREF, KNIVAU, CDSUFF,  &
 &                  PCHAMP, LDCOSP, PVALCO, KLONGD)
 !
@@ -177,10 +178,16 @@ IF (FA%FICHIER(IRANG)%NFGRIB.EQ.3) THEN
     LLNOPA = .TRUE.
     GOTO 500
   ENDIF
+#else
+  CALL ABORT
+#endif
+ELSEIF (FA%FICHIER(IRANG)%NFGRIB.EQ.4) THEN
+!RJ: something fishy here
+  CALL ABORT
 ELSE
-  CALL FACINE_MT_BB                                          &
+  CALL FACINE_MT64                                             &
 &                 (FA,  IREP, IRANG, CDNOMA(1:ILNOMU), PCHAMP, &
-&                LDCOSP, PVALCO, KLONGD, IB1PAR )
+&                  LDCOSP, PVALCO, KLONGD, IB1PAR )
   IF (LLNOPA) FA%FICHIER(IRANG)%NFGRIB = 3
 !  Le codage num 3 avait ete demande mais se revelait etre
 !  plus gourmand en place que le num -1: on avait donc force
@@ -199,7 +206,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -240,7 +247,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,        &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,               &
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')            &
 &   KREP,KNUMER,CLPREF(1:ILPREF),KNIVAU,CLSUFF(1:ILSUFF),LDCOSP
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CDNOMA(1:ILNOMU),LLRLFI)
 !
@@ -256,13 +263,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACOND_BB                                     &
+SUBROUTINE FACOND64                                      &
 &           (KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -279,19 +286,19 @@ INTEGER (KIND=JPLIKB)  KLONGD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACOND_MT_BB                                            &
+CALL FACOND_MT64                                             &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD)
 
 END SUBROUTINE
 
-SUBROUTINE FACOND_MM                                     &
+SUBROUTINE FACOND                                        &
 &           (KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -308,19 +315,17 @@ INTEGER (KIND=JPLIKM)  KLONGD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACOND_MT_MM                                            &
+CALL FACOND_MT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD)
 
 END SUBROUTINE
 
-SUBROUTINE FACOND_MT_MM                                      &
+SUBROUTINE FACOND_MT                                         &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -346,7 +351,7 @@ INTEGER (KIND=JPLIKB)  ILONGD                                 !   OUT
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FACOND_MT_BB                                            &
+CALL FACOND_MT64                                             &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, ILNOMA, PVALCO, ILONGD)
 

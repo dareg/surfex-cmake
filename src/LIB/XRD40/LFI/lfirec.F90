@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIREC_MT_BB                         &
+SUBROUTINE LFIREC_MT64                            &
 &                     (LFI, KRGPIF, KRANG, KREC )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI
@@ -30,7 +29,7 @@ LOGICAL LLFATA
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIREC_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIREC_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 INBPIR=LFI%MDES1D(IXM(LFI%JPNPIR,KRANG))
 INBALO=LFI%MDES1D(IXM(LFI%JPNALO,KRANG))
@@ -78,14 +77,14 @@ ELSE
 &        KRGPIF,KRANG,KREC,IREP
     ENDIF
 !
-    CALL LFIEMS_MT_BB                              &
+    CALL LFIEMS_MT64                                 &
 &                   (LFI, INUMER,INIMES,IREP,LLFATA, &
 &                    CLMESS,CLNSPR,CLACTI)
   ENDIF
 !
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIREC_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIREC_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -97,12 +96,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIREC_BB            &
+SUBROUTINE LFIREC64             &
 &           (KRGPIF, KRANG, KREC)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KRGPIF                                 ! IN   
@@ -111,17 +110,17 @@ INTEGER (KIND=JPLIKB)  KREC                                   !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIREC_MT_BB                    &
+CALL LFIREC_MT64                     &
 &           (LFI, KRGPIF, KRANG, KREC)
 
 END SUBROUTINE
 
-SUBROUTINE LFIREC_MM            &
+SUBROUTINE LFIREC               &
 &           (KRGPIF, KRANG, KREC)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KRGPIF                                 ! IN   
@@ -130,17 +129,15 @@ INTEGER (KIND=JPLIKM)  KREC                                   !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIREC_MT_MM                    &
+CALL LFIREC_MT                       &
 &           (LFI, KRGPIF, KRANG, KREC)
 
 END SUBROUTINE
 
-SUBROUTINE LFIREC_MT_MM              &
+SUBROUTINE LFIREC_MT                 &
 &           (LFI, KRGPIF, KRANG, KREC)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -156,7 +153,7 @@ INTEGER (KIND=JPLIKB)  IREC                                   !   OUT
 IRGPIF     = INT (    KRGPIF, JPLIKB)
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL LFIREC_MT_BB                    &
+CALL LFIREC_MT64                     &
 &           (LFI, IRGPIF, IRANG, IREC)
 
 KREC       = INT (      IREC, JPLIKM)

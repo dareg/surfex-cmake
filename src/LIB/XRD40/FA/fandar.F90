@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANDAR_MT_BB                          &
-&                     (FA,  KREP, KNUMER, KDATEF )
+SUBROUTINE FANDAR_MT64                           &
+&                     (FA,  KREP, KNUMER, KDATEF)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de definition d'une (Nouvelle) Date sur un fichier
@@ -45,7 +44,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 LLMODA=.FALSE.
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -55,7 +54,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -63,19 +62,25 @@ LLVERF=FA%LFAMUL
 !            ( controles, puis mise a jour de FA%MADATE(.,IRANG) )
 !-----------------------------------------------------------------------
 !
-CALL FANDAI_MT_BB                            &
+CALL FANDAI_MT64                             &
 &               (FA, IREP,IRANG,KDATEF,LLMODA)
 !
 IF (IREP.EQ.0) THEN
+  IF (FA%FICHIER(IRANG)%LNOMME) THEN
 !**
 !     3.  -  ECRITURE DE LA DATE SUR LE FICHIER.
 !-----------------------------------------------------------------------
 !
   KLDATEF=KDATEF
-  CALL LFIECR_MT_BB                                               &
-&                 (FA%LFI, IREP,KNUMER,FA%CPDATE,KLDATEF,FA%JPLDAT)
-  LLRLFI=IREP.NE.0
-  FA%FICHIER(IRANG)%LCREAF=FA%FICHIER(IRANG)%LCREAF.AND.LLRLFI
+    CALL LFIECR_MT64                                                 &
+&                   (FA%LFI,IREP,KNUMER,FA%CPDATE,KLDATEF,FA%JPLDAT)
+    LLRLFI=IREP.NE.0
+    FA%FICHIER(IRANG)%LCREAF=FA%FICHIER(IRANG)%LCREAF.AND.LLRLFI
+!RJ: some fishy stuff avoided here, something having to do with ILONG > 0
+  ELSE
+    LLRLFI=.FALSE.
+    FA%FICHIER(IRANG)%LCREAF=.FALSE.
+  ENDIF
 ENDIF
 !**
 !    10.  -  PHASE TERMINALE : MESSAGERIE, AVEC "ABORT" EVENTUEL,
@@ -88,7 +93,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -109,7 +114,7 @@ CLNSPR='FANDAR'
 IF (INIMES.GE.1.AND.LLMODA) THEN
   WRITE (UNIT=CLMESS,FMT=                                  &
 &         '(''MODIFICATION DE LA DATE, UNITE'',I3)') KNUMER
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -121,7 +126,7 @@ IF (INIMES.EQ.2) THEN
 &       '', KDATEF(1:5)='',I5,2(''/'',I2),I3,'':'',I2.2,   &
 &       '', KDATEF(7:8)='',I6,''-'',I6)') KREP,KNUMER,     &
 &     (KDATEF(J),J=1,5),(KDATEF(J),J=7,8)
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,LLRLFI)
 ENDIF
@@ -138,50 +143,48 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANDAR_BB             &
+SUBROUTINE FANDAR64              &
 &           (KREP, KNUMER, KDATEF)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
-INTEGER (KIND=JPLIKB)  KDATEF     (*)                 ! IN   
+INTEGER (KIND=JPLIKB)  KDATEF     (FA%JPLDAT)                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANDAR_MT_BB                    &
+CALL FANDAR_MT64                     &
 &           (FA, KREP, KNUMER, KDATEF)
 
 END SUBROUTINE
 
-SUBROUTINE FANDAR_MM             &
+SUBROUTINE FANDAR                &
 &           (KREP, KNUMER, KDATEF)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
-INTEGER (KIND=JPLIKM)  KDATEF     (*)                 ! IN   
+INTEGER (KIND=JPLIKM)  KDATEF     (FA%JPLDAT)                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANDAR_MT_MM                    &
+CALL FANDAR_MT                       &
 &           (FA, KREP, KNUMER, KDATEF)
 
 END SUBROUTINE
 
-SUBROUTINE FANDAR_MT_MM              &
+SUBROUTINE FANDAR_MT                 &
 &           (FA, KREP, KNUMER, KDATEF)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -197,7 +200,7 @@ INTEGER (KIND=JPLIKB)  IDATEF     (FA%JPLDAT)                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 IDATEF     = INT (    KDATEF, JPLIKB)
 
-CALL FANDAR_MT_BB                    &
+CALL FANDAR_MT64                     &
 &           (FA, IREP, INUMER, IDATEF)
 
 KREP       = INT (      IREP, JPLIKM)
@@ -207,3 +210,5 @@ END SUBROUTINE
 !INTF KREP            OUT                               
 !INTF KNUMER        IN                                  
 !INTF KDATEF        IN    DIMS=FA%JPLDAT                
+
+

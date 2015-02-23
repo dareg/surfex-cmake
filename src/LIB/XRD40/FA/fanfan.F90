@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANFAN_MT_BB                                          &
+SUBROUTINE FANFAN_MT64                                           &
 &                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,  &
 &                      CDNOMA, KLNOMA)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de construction du nom d'un article associe a un 
@@ -48,7 +47,7 @@ LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILPRFU=INT (LEN (CDPREF), JPLIKB)
 ILSUFU=INT (LEN (CDSUFF), JPLIKB)
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -58,7 +57,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -71,7 +70,7 @@ ENDIF
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT_BB                                          &
+CALL FANFAR_MT64                                           &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CDNOMA, &
 &             IB1PAR(6),ILPRFU,ILSUFU,KLNOMA)
 
@@ -82,7 +81,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 
 IF (LLFATA) THEN
@@ -102,7 +101,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KNUMER='',I3, &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,        &
 &       '', CDSUFF='''''',A,'''')')                      &
 &   KREP,KNUMER,CDPREF(1:ILPRFU),KNIVAU,CDSUFF(1:ILSUFU)
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CDNOMA(1:KLNOMA),LLRLFI)
 !
@@ -118,13 +117,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANFAN_BB                                     &
+SUBROUTINE FANFAN64                                      &
 &           (KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KLNOMA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -137,19 +136,19 @@ INTEGER (KIND=JPLIKB)  KLNOMA                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANFAN_MT_BB                                            &
+CALL FANFAN_MT64                                             &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KLNOMA)
 
 END SUBROUTINE
 
-SUBROUTINE FANFAN_MM                                     &
+SUBROUTINE FANFAN                                        &
 &           (KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KLNOMA)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -162,19 +161,17 @@ INTEGER (KIND=JPLIKM)  KLNOMA                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANFAN_MT_MM                                            &
+CALL FANFAN_MT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KLNOMA)
 
 END SUBROUTINE
 
-SUBROUTINE FANFAN_MT_MM                                      &
+SUBROUTINE FANFAN_MT                                         &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KLNOMA)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -195,7 +192,7 @@ INTEGER (KIND=JPLIKB)  ILNOMA                                 !   OUT
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANFAN_MT_BB                                            &
+CALL FANFAN_MT64                                             &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, CDNOMA, &
 &           ILNOMA)
 

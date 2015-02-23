@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIFLA_MT_BB          &
+SUBROUTINE FAIFLA_MT64           &
 &                     (FA, KRANG)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme est charge des Initialisations des
@@ -66,46 +65,44 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAIFLA_BB          &
+SUBROUTINE FAIFLA64           &
 &           (KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIFLA_MT_BB          &
+CALL FAIFLA_MT64           &
 &           (FA, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FAIFLA_MM          &
+SUBROUTINE FAIFLA             &
 &           (KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIFLA_MT_MM          &
+CALL FAIFLA_MT             &
 &           (FA, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FAIFLA_MT_MM          &
+SUBROUTINE FAIFLA_MT             &
 &           (FA, KRANG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -116,7 +113,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  ! IN
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL FAIFLA_MT_BB          &
+CALL FAIFLA_MT64           &
 &           (FA, IRANG)
 
 

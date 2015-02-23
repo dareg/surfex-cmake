@@ -1,13 +1,12 @@
 ! Nov-2012 P. Marguinaud Use local INDIRECT array
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FATRAN_MT_BB                                           &
+SUBROUTINE FATRAN_MT64                                            &
 &                     (FA,  KREP,  KNUMER,  PCHAME, PCHAMS, LDOPT )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme du logiciel de Fichiers ARPEGE permettant la
@@ -60,7 +59,7 @@ LOGICAL                  LLFATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FATRAN_MT',0,ZHOOK_HANDLE)
 KREP=0
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -221,7 +220,7 @@ CLNSPR='FATRAN'
 !
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', IRANG='',I4, &
 &         '', LDOPT='',L2)')  KREP, IRANG, LDOPT
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,KREP,LLFATA,CLMESS, &
 &               CLNSPR,CLNSPR,.FALSE.)
 !
@@ -237,12 +236,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FATRAN_BB                            &
+SUBROUTINE FATRAN64                             &
 &           (KREP, KNUMER, PCHAME, PCHAMS, LDOPT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -253,17 +252,17 @@ LOGICAL                LDOPT                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATRAN_MT_BB                                   &
+CALL FATRAN_MT64                                    &
 &           (FA, KREP, KNUMER, PCHAME, PCHAMS, LDOPT)
 
 END SUBROUTINE
 
-SUBROUTINE FATRAN_MM                            &
+SUBROUTINE FATRAN                               &
 &           (KREP, KNUMER, PCHAME, PCHAMS, LDOPT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -274,17 +273,15 @@ LOGICAL                LDOPT                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATRAN_MT_MM                                   &
+CALL FATRAN_MT                                      &
 &           (FA, KREP, KNUMER, PCHAME, PCHAMS, LDOPT)
 
 END SUBROUTINE
 
-SUBROUTINE FATRAN_MT_MM                             &
+SUBROUTINE FATRAN_MT                                &
 &           (FA, KREP, KNUMER, PCHAME, PCHAMS, LDOPT)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -300,7 +297,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FATRAN_MT_BB                                   &
+CALL FATRAN_MT64                                    &
 &           (FA, IREP, INUMER, PCHAME, PCHAMS, LDOPT)
 
 KREP       = INT (      IREP, JPLIKM)

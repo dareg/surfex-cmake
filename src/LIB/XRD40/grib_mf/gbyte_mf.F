@@ -1,63 +1,65 @@
       SUBROUTINE GBYTE_MF(KSOURC,KDEST,KOFSET,KBYTSZ)
-      USE PARKIND1, ONLY : JPRB
+      USE PARKIND1, ONLY : JPIM, JPRB
       USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-C*****
-C*
-C*    FUNCTION: GET A SINGLE BIT FIELD FROM KSOURC INTO KDEST
-C*
-C*    INPUT   : KSOURC(1)= WORD CONTAINING START OF BIT FIELD
-C*              KDEST    = TARGET WORD
-C*              KOFSET   = OFFSET IN BITS FOR START OF THE FIELD
-C*              KBYTSZ   = LENGTH OF FIELD IN BITS
-C*
-C*    OUTPUT  : KSOURC,KOFSET,KBYTSZ UNCHANGED
-C*              KDEST CONTAINS FIELD RIGHT JUSTIFIED
-C*
-C*    AUTHOR  : M.MIQUEU   08/1981 (REWRITTEN FROM J.MARTELLET'S)
-C*
-C*****
-C
-#include "precision.h"
-C
-      INTEGER KOFSET, KBYTSZ
-      INTEGER (KIND=JPDBLE) KDEST
-C
-      INTEGER (KIND=JPDBLE) KSOURC (2)
-C
-      INTEGER INBPW, ISH1
-C
+      USE LFI_PRECISION, ONLY : JPDBLE
+!*****
+!*
+!*    FUNCTION: GET A SINGLE BIT FIELD FROM KSOURC INTO KDEST
+!*
+!*    INPUT   : KSOURC(1)= WORD CONTAINING START OF BIT FIELD
+!*              KDEST    = TARGET WORD
+!*              KOFSET   = OFFSET IN BITS FOR START OF THE FIELD
+!*              KBYTSZ   = LENGTH OF FIELD IN BITS
+!*
+!*    OUTPUT  : KSOURC,KOFSET,KBYTSZ UNCHANGED
+!*              KDEST CONTAINS FIELD RIGHT JUSTIFIED
+!*
+!*    AUTHOR  : M.MIQUEU   08/1981 (REWRITTEN FROM J.MARTELLET'S)
+!*
+!*****
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=JPIM) :: KOFSET
+      INTEGER(KIND=JPIM) :: KBYTSZ
+      INTEGER (KIND=JPDBLE) :: KDEST
+!
+      INTEGER (KIND=JPDBLE) :: KSOURC (2)
+!
+      INTEGER(KIND=JPIM) :: INBPW, ISH1
+!
       REAL(KIND=JPRB) :: ZHOOK_HANDLE
       IF (LHOOK) CALL DR_HOOK('GBYTE_MF',0,ZHOOK_HANDLE)
       INBPW=64
       ISH1=KOFSET+KBYTSZ-INBPW
-C
+!
       IF(ISH1.LE.0) THEN
-C
-C
-C     BYTES DO NOT SPAN WORDS
-C
-C
+!
+!
+!     BYTES DO NOT SPAN WORDS
+!
+!
         ISH1=-ISH1
-C
-C
+!
+!
         KDEST=IBITS (KSOURC(1),ISH1,KBYTSZ)
-C
+!
       ELSE
-C
-C     BYTE SPANS WORDS
-C
-C
-        KDEST=IOR (
-     1              ISHFT (
-     2                      IBITS (KSOURC(1),0,INBPW-KOFSET)
-     3                     , ISH1 )
-     4             ,
-     5              IBITS (KSOURC(2),INBPW-ISH1,ISH1)
-     6            )
-C
-C
-C
+!
+!     BYTE SPANS WORDS
+!
+!
+        KDEST=IOR (                                                     &
+     &              ISHFT (                                             &
+     &                      IBITS (KSOURC(1),0,INBPW-KOFSET)            &
+     &                     , ISH1 )                                     &
+     &             ,                                                    &
+     &              IBITS (KSOURC(2),INBPW-ISH1,ISH1)                   &
+     &            )
+!
+!
+!
       ENDIF
-C
+!
       IF (LHOOK) CALL DR_HOOK('GBYTE_MF',1,ZHOOK_HANDLE)
-      END
+      ENDSUBROUTINE GBYTE_MF

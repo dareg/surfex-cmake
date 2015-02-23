@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FALAIS_MT_BB                                          &
+SUBROUTINE FALAIS_MT64                                           &
 &                     (FA,  KREP, KNUMER, CDNOMA, PDONNE, KLONGD )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de lecture d'un article de donnees non assimila-
@@ -49,7 +48,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -65,7 +64,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -85,7 +84,7 @@ ENDIF
 ILNOMA=MIN ( FA%NCPCAD, INT (LEN (CDNOMA), JPLIKB) )
 CLNOMA(1:ILNOMA)=CDNOMA(1:ILNOMA)
 !
-CALL LFILEC_MT_BB                                    &
+CALL LFILEC_MT64                                      &
 &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMA), &
 &             PDONNE,KLONGD)
 LLRLFI=IREP.NE.0
@@ -100,7 +99,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -127,7 +126,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDNOMA='''''',A,'''''', KLONGD='',I8)')      &
 &   KREP,KNUMER,CLACTI(1:ILACTI),KLONGD
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILACTI),LLRLFI)
 !
@@ -143,12 +142,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FALAIS_BB                             &
+SUBROUTINE FALAIS64                              &
 &           (KREP, KNUMER, CDNOMA, PDONNE, KLONGD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -159,17 +158,17 @@ REAL (KIND=JPDBLR)     PDONNE     (KLONGD)                    ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALAIS_MT_BB                                    &
+CALL FALAIS_MT64                                     &
 &           (FA, KREP, KNUMER, CDNOMA, PDONNE, KLONGD)
 
 END SUBROUTINE
 
-SUBROUTINE FALAIS_MM                             &
+SUBROUTINE FALAIS                                &
 &           (KREP, KNUMER, CDNOMA, PDONNE, KLONGD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -180,17 +179,15 @@ REAL (KIND=JPDBLR)     PDONNE     (KLONGD)                    ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALAIS_MT_MM                                    &
+CALL FALAIS_MT                                       &
 &           (FA, KREP, KNUMER, CDNOMA, PDONNE, KLONGD)
 
 END SUBROUTINE
 
-SUBROUTINE FALAIS_MT_MM                              &
+SUBROUTINE FALAIS_MT                                 &
 &           (FA, KREP, KNUMER, CDNOMA, PDONNE, KLONGD)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -208,7 +205,7 @@ INTEGER (KIND=JPLIKB)  ILONGD                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONGD     = INT (    KLONGD, JPLIKB)
 
-CALL FALAIS_MT_BB                                    &
+CALL FALAIS_MT64                                     &
 &           (FA, IREP, INUMER, CDNOMA, PDONNE, ILONGD)
 
 KREP       = INT (      IREP, JPLIKM)

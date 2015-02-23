@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAGIOT_MT_BB                                           &
+SUBROUTINE FAGIOT_MT64                                            &
 &                     (FA,  KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, &
 &                    KDMOPL )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet de modifier les options implicites
@@ -65,7 +64,7 @@ IF (FA%FAGIOT_LLPREA) THEN
 !
 !          A la premiere utilisation, appel au sous-programme "FARINE".
 !
-  CALL FARINE_MT_BB            &
+  CALL FARINE_MT64             &
 &                (FA, 2_JPLIKB )
   FA%FAGIOT_LLPREA=.FALSE.
 ENDIF
@@ -92,7 +91,7 @@ ENDIF
 !
 !         Verrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
@@ -150,7 +149,7 @@ LLFATA=LLMOER (IREP,0_JPLIKB )
 !
 !        Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (LLFATA) THEN
@@ -171,7 +170,7 @@ WRITE (UNIT=CLMESS,FMT='(''KNGRIB='',I2,'', KNBPDG='',I3,  &
 &       '', KDMOPL='',I3)')                                 &
 &   KNGRIB,KNBPDG,KNBCSP,KSTRON,KPUILA,KDMOPL
 INUMER=JPNIIL
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI,.FALSE.)
 !
@@ -186,12 +185,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAGIOT_BB                                       &
+SUBROUTINE FAGIOT64                                        &
 &           (KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNGRIB                                 ! IN   
@@ -203,17 +202,17 @@ INTEGER (KIND=JPLIKB)  KDMOPL                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAGIOT_MT_BB                                              &
+CALL FAGIOT_MT64                                               &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 
 END SUBROUTINE
 
-SUBROUTINE FAGIOT_MM                                       &
+SUBROUTINE FAGIOT                                          &
 &           (KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNGRIB                                 ! IN   
@@ -225,17 +224,15 @@ INTEGER (KIND=JPLIKM)  KDMOPL                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAGIOT_MT_MM                                              &
+CALL FAGIOT_MT                                                 &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 
 END SUBROUTINE
 
-SUBROUTINE FAGIOT_MT_MM                                        &
+SUBROUTINE FAGIOT_MT                                           &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -261,7 +258,7 @@ ISTRON     = INT (    KSTRON, JPLIKB)
 IPUILA     = INT (    KPUILA, JPLIKB)
 IDMOPL     = INT (    KDMOPL, JPLIKB)
 
-CALL FAGIOT_MT_BB                                              &
+CALL FAGIOT_MT64                                               &
 &           (FA, INGRIB, INBPDG, INBCSP, ISTRON, IPUILA, IDMOPL)
 
 

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAREGI_MT_BB                        &
+SUBROUTINE FAREGI_MT64                         &
 &                     (FA,  CDCLEF, KVAL, KOPT )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Ce sous-programme controle (lecture/ecriture) les options
@@ -69,7 +68,7 @@ IF (FA%FAREGI_LLPREA) THEN
 !
 !          A la premiere utilisation, appel au sous-programme "FARINE".
 !
-  CALL FARINE_MT_BB            &
+  CALL FARINE_MT64             &
 &                (FA, 2_JPLIKB )
   FA%FAREGI_LLPREA=.FALSE.
 ENDIF
@@ -374,7 +373,7 @@ WRITE (UNIT=CLMESS,FMT='(''IREP='',I2,           &
 &        '', KOPT='',I4)')                        &
 &        IREP,CDCLEF,KVAL,KOPT
 INUMER=JPNIIL
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLNSPR,.FALSE.)
 !
@@ -389,12 +388,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAREGI_BB           &
+SUBROUTINE FAREGI64            &
 &           (CDCLEF, KVAL, KOPT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDCLEF                                 ! IN   
@@ -403,17 +402,17 @@ INTEGER (KIND=JPLIKB)  KOPT                                   ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREGI_MT_BB                  &
+CALL FAREGI_MT64                   &
 &           (FA, CDCLEF, KVAL, KOPT)
 
 END SUBROUTINE
 
-SUBROUTINE FAREGI_MM           &
+SUBROUTINE FAREGI              &
 &           (CDCLEF, KVAL, KOPT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDCLEF                                 ! IN   
@@ -422,17 +421,15 @@ INTEGER (KIND=JPLIKM)  KOPT                                   ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREGI_MT_MM                  &
+CALL FAREGI_MT                     &
 &           (FA, CDCLEF, KVAL, KOPT)
 
 END SUBROUTINE
 
-SUBROUTINE FAREGI_MT_MM            &
+SUBROUTINE FAREGI_MT               &
 &           (FA, CDCLEF, KVAL, KOPT)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -449,7 +446,7 @@ IF (KOPT==1) THEN
 ENDIF
 IOPT       = INT (      KOPT, JPLIKB)
 
-CALL FAREGI_MT_BB                  &
+CALL FAREGI_MT64                   &
 &           (FA, CDCLEF, IVAL, IOPT)
 
 IF (KOPT==0) THEN

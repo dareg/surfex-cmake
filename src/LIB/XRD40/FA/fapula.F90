@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAPULA_MT_BB                                &
+SUBROUTINE FAPULA_MT64                                 &
 &                     (FA,  KREP, KRANG, PSPEC, KPULAP )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -324,7 +323,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I4, &
 &         '', ISTRON='',I4,'', KPULAP='',I6)')            &
 &     KREP,KRANG,ISTRON,KPULAP
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLNSPR,.FALSE.)
 ENDIF
@@ -340,12 +339,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAPULA_BB                   &
+SUBROUTINE FAPULA64                    &
 &           (KREP, KRANG, PSPEC, KPULAP)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -355,17 +354,17 @@ INTEGER (KIND=JPLIKB)  KPULAP                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAPULA_MT_BB                          &
+CALL FAPULA_MT64                           &
 &           (FA, KREP, KRANG, PSPEC, KPULAP)
 
 END SUBROUTINE
 
-SUBROUTINE FAPULA_MM                   &
+SUBROUTINE FAPULA                      &
 &           (KREP, KRANG, PSPEC, KPULAP)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -375,17 +374,15 @@ INTEGER (KIND=JPLIKM)  KPULAP                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAPULA_MT_MM                          &
+CALL FAPULA_MT                             &
 &           (FA, KREP, KRANG, PSPEC, KPULAP)
 
 END SUBROUTINE
 
-SUBROUTINE FAPULA_MT_MM                    &
+SUBROUTINE FAPULA_MT                       &
 &           (FA, KREP, KRANG, PSPEC, KPULAP)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -401,7 +398,7 @@ INTEGER (KIND=JPLIKB)  IPULAP                                 !   OUT
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL FAPULA_MT_BB                          &
+CALL FAPULA_MT64                           &
 &           (FA, IREP, IRANG, PSPEC, IPULAP)
 
 KREP       = INT (      IREP, JPLIKM)

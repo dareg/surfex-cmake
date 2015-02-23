@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANFAR_MT_BB                                         &
+SUBROUTINE FANFAR_MT64                                          &
 &                     (FA,  KREP, KRANG, CDPREF, KNIVAU, CDSUFF,  &
 &                      CDNOMA, KB1PAR, KLPRFU, KLSUFU, KLNOMU )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -176,8 +175,8 @@ ELSE
 ENDIF
 !
 IF (CDNOMA.EQ.FA%CPCACH.OR.CDNOMA.EQ.FA%CPCADI.OR.CDNOMA.EQ. &
-&    FA%CPCAFS.OR.                                            &
-&    CDNOMA.EQ.FA%CPCARP.OR.CDNOMA.EQ.FA%CPDATE.OR.           &
+&    FA%CPCAFS.OR.                                           &
+&    CDNOMA.EQ.FA%CPCARP.OR.CDNOMA.EQ.FA%CPDATE.OR.          &
 &    CDNOMA.EQ.FA%FICHIER(KRANG)%CIDENT) THEN
   KREP=-111
   GOTO 1001
@@ -229,7 +228,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         2('','',I4),'','',I6,3('','',I3))')                   &
 &     KREP,KRANG,CLACTI(1:ILACTI),KNIVAU,CLNOMA(1:ILNOMA),      &
 &     CLAUXI(1:ILAUXI),KB1PAR,KLPRFU,KLSUFU,KLNOMU
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR, CLACTI(1:ILACTI),.FALSE.)
 ENDIF
@@ -250,13 +249,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANFAR_BB                                    &
+SUBROUTINE FANFAR64                                     &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KB1PAR, KLPRFU, KLSUFU, KLNOMU)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -272,19 +271,19 @@ INTEGER (KIND=JPLIKB)  KLNOMU                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANFAR_MT_BB                                           &
+CALL FANFAR_MT64                                            &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KB1PAR, KLPRFU, KLSUFU, KLNOMU)
 
 END SUBROUTINE
 
-SUBROUTINE FANFAR_MM                                    &
+SUBROUTINE FANFAR                                       &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KB1PAR, KLPRFU, KLSUFU, KLNOMU)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -300,19 +299,17 @@ INTEGER (KIND=JPLIKM)  KLNOMU                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANFAR_MT_MM                                           &
+CALL FANFAR_MT                                              &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KB1PAR, KLPRFU, KLSUFU, KLNOMU)
 
 END SUBROUTINE
 
-SUBROUTINE FANFAR_MT_MM                                     &
+SUBROUTINE FANFAR_MT                                        &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KB1PAR, KLPRFU, KLSUFU, KLNOMU)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -339,7 +336,7 @@ INTEGER (KIND=JPLIKB)  ILNOMU                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANFAR_MT_BB                                           &
+CALL FANFAR_MT64                                            &
 &           (FA, IREP, IRANG, CDPREF, INIVAU, CDSUFF, CDNOMA, &
 &           IB1PAR, ILPRFU, ILSUFU, ILNOMU)
 

@@ -1,14 +1,13 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Sep-2012 P. Marguinaud Fix unitialized variables
-SUBROUTINE FADECI_MT_BB                                           &
+SUBROUTINE FADECI_MT64                                            &
 &                     (FA,  KREP,   KRANG,  CDNOMA, KVALCO, KLONGA, &
 &                    KCHAMP, LDCOSP )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -73,6 +72,7 @@ LOGICAL                  LLFATA
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FADECI_MT',0,ZHOOK_HANDLE)
+KREP=0
 IF (KRANG.LE.0.OR.KRANG.GT.FA%JPNXFA) THEN
   KREP=-66
   GOTO 1001
@@ -82,6 +82,9 @@ ISTRIA=0
 INBITS=0
 ICPACK=0
 IPUILA=0
+IVALC3=0
+IVALC4=0
+IVALC5=0
 !**
 !     2.  -  CONTROLE DES DONNEES DE L'ARTICLE
 !-----------------------------------------------------------------------
@@ -311,7 +314,7 @@ ELSE
 !-----------------------------------------------------------------------
 !
     IF (IPUILA.NE.0) THEN
-      CALL FARCIS_MT_BB                                   &
+      CALL FARCIS_MT64                                    &
 &                     (FA, KREP,KRANG,KCHAMP,ICPACK,IPUILA)
       IF (KREP.NE.0) GOTO 1001
     ENDIF
@@ -336,7 +339,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', CDNOMA='''''',A,'''''', LDCOSP= '',L1,      &
 &         '', KLONGA='',I8)')                             &
 &     KREP, KRANG, CDNOMA, LDCOSP, KLONGA
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CDNOMA,.FALSE.)
 ENDIF
@@ -353,13 +356,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FADECI_BB                                    &
+SUBROUTINE FADECI64                                     &
 &           (KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -372,19 +375,19 @@ LOGICAL                LDCOSP                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADECI_MT_BB                                           &
+CALL FADECI_MT64                                            &
 &           (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 
 END SUBROUTINE
 
-SUBROUTINE FADECI_MM                                    &
+SUBROUTINE FADECI                                       &
 &           (KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -397,19 +400,17 @@ LOGICAL                LDCOSP                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADECI_MT_MM                                           &
+CALL FADECI_MT                                              &
 &           (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
 
 END SUBROUTINE
 
-SUBROUTINE FADECI_MT_MM                                     &
+SUBROUTINE FADECI_MT                                        &
 &           (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, KCHAMP, &
 &           LDCOSP)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -429,7 +430,7 @@ INTEGER (KIND=JPLIKB)  ILONGA                                 ! IN
 IRANG      = INT (     KRANG, JPLIKB)
 ILONGA     = INT (    KLONGA, JPLIKB)
 
-CALL FADECI_MT_BB                                           &
+CALL FADECI_MT64                                            &
 &           (FA, IREP, IRANG, CDNOMA, KVALCO, ILONGA, KCHAMP, &
 &           LDCOSP)
 

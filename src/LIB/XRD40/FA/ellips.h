@@ -1,9 +1,8 @@
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Interface to thread-safe FA
 SUBROUTINE _ELLIPS_ (KSMAX,KMSMAX,KNTMP,KMTMP)
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLR, JLIK
+USE LFI_PRECISION
 IMPLICIT NONE
 !
 ! ***ELLIPS*** - General routine for computing elliptic truncation

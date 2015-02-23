@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIDST_MT_BB                                        &
+SUBROUTINE LFIDST_MT64                                           &
 &                     (LFI, KREP, KRANG, KRANIE, CDSTRU, KLONG )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME *INTERNE* DU LOGICIEL DE FICHIERS INDEXES LFI;
@@ -59,7 +58,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIDST_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIDST_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 ILUSTR=INT (LEN (CDSTRU), JPLIKB)
 CLSTRU=' '
@@ -179,7 +178,7 @@ ELSEIF (CDSTRU(J:J).NE.' ') THEN
 !
   ELSE
 !
-    CALL LFICHI_MT_BB                            &
+    CALL LFICHI_MT64                               &
 &                   (LFI, KREP,CDSTRU(J+1:ILUSTR), &
 &                    LFI%NDEXPL(IDEXPL+2,KRANIE),  &
 &                 IJ)
@@ -215,12 +214,12 @@ IF (LFI%LMISOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I3, &
 &         '''''', CDSTRU='''''',A,'''''', KLONG='',I7)')  &
 &    KREP,KRANG,CLSTRU(:ILCLST),KLONG
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, INUMER,INIMES,KREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIDST_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIDST_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -231,12 +230,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIDST_BB                           &
+SUBROUTINE LFIDST64                            &
 &           (KREP, KRANG, KRANIE, CDSTRU, KLONG)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -247,17 +246,17 @@ INTEGER (KIND=JPLIKB)  KLONG                                  ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIDST_MT_BB                                   &
+CALL LFIDST_MT64                                    &
 &           (LFI, KREP, KRANG, KRANIE, CDSTRU, KLONG)
 
 END SUBROUTINE
 
-SUBROUTINE LFIDST_MM                           &
+SUBROUTINE LFIDST                              &
 &           (KREP, KRANG, KRANIE, CDSTRU, KLONG)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -268,17 +267,15 @@ INTEGER (KIND=JPLIKM)  KLONG                                  ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIDST_MT_MM                                   &
+CALL LFIDST_MT                                      &
 &           (LFI, KREP, KRANG, KRANIE, CDSTRU, KLONG)
 
 END SUBROUTINE
 
-SUBROUTINE LFIDST_MT_MM                             &
+SUBROUTINE LFIDST_MT                                &
 &           (LFI, KREP, KRANG, KRANIE, CDSTRU, KLONG)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -298,7 +295,7 @@ IRANG      = INT (     KRANG, JPLIKB)
 IRANIE     = INT (    KRANIE, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFIDST_MT_BB                                   &
+CALL LFIDST_MT64                                    &
 &           (LFI, IREP, IRANG, IRANIE, CDSTRU, ILONG)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACAGE_MT_BB                    &
+SUBROUTINE FACAGE_MT64                     &
 &                     (FA,  CDNOMC, LDGARD )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme servant a redefinir l'option de conservation
@@ -41,7 +40,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FACAGE_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FACAGE_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FACAGE_LLPREA=.FALSE.
 ENDIF
@@ -82,11 +81,11 @@ ENDIF
 !
 !             Verrouillage global prealable, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
-CALL FANUCA_MT_BB                         &
+CALL FANUCA_MT64                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 !
 IF (IRANGC.EQ.0) THEN
@@ -113,7 +112,7 @@ IREP=0
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=IREP.NE.0.AND.FA%NRFAGA.NE.2
@@ -136,7 +135,7 @@ IF (LLFATA.OR.FA%NIMSGA.EQ.2) THEN
 &         L1,'', CODE INTERNE='',I4)')                 &
 &         CLACTI(1:ILNOMC),LDGARD,IREP
   INUMER=JPNIIL
-  CALL FAIPAR_MT_BB                                    &
+  CALL FAIPAR_MT64                                     &
 &                 (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI(1:ILNOMC),.FALSE.)
 ENDIF
@@ -147,12 +146,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACAGE_BB          &
+SUBROUTINE FACAGE64           &
 &           (CDNOMC, LDGARD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
@@ -160,17 +159,17 @@ LOGICAL                LDGARD                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACAGE_MT_BB              &
+CALL FACAGE_MT64               &
 &           (FA, CDNOMC, LDGARD)
 
 END SUBROUTINE
 
-SUBROUTINE FACAGE_MM          &
+SUBROUTINE FACAGE             &
 &           (CDNOMC, LDGARD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
@@ -178,17 +177,15 @@ LOGICAL                LDGARD                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACAGE_MT_MM              &
+CALL FACAGE_MT                 &
 &           (FA, CDNOMC, LDGARD)
 
 END SUBROUTINE
 
-SUBROUTINE FACAGE_MT_MM          &
+SUBROUTINE FACAGE_MT             &
 &           (FA, CDNOMC, LDGARD)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -198,7 +195,7 @@ LOGICAL                LDGARD                                 ! IN
 ! Convert arguments
 
 
-CALL FACAGE_MT_BB              &
+CALL FACAGE_MT64               &
 &           (FA, CDNOMC, LDGARD)
 
 

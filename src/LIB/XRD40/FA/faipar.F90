@@ -1,14 +1,15 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIPAR_MT_BB                                           &
+SUBROUTINE FAIPAR_MT64                                            &
 &                     (FA,  KNUMER, KNIMES, KCODE, LDFATA, CDMESS,  &
 &                      CDNSPR, CDACTI, LDRLFI )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
-USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE SDL_MOD   , ONLY : SDL_SRLABORT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE YOMHOOK, ONLY : LHOOK, DR_HOOK
+USE SDL_MOD, ONLY : SDL_SRLABORT
+!RJ: avoiding OML_MOD in surfex
+!RJ USE OML_MOD, ONLY : OML_MY_THREAD, OML_IN_PARALLEL
+USE LFI_PRECISION
 IMPLICIT NONE
 !**** 
 !        Ce sous-programme est charge de FAIre PARt des Messages
@@ -161,6 +162,7 @@ LOGICAL LDFATA, LDRLFI
 !
 CHARACTER(LEN=*)  CDNSPR
 CHARACTER(LEN=6)  CLJOLI
+!RJ CHARACTER(LEN=6)  CLITID
 CHARACTER(LEN=*)  CDMESS
 CHARACTER(LEN=80) CLMESA
 CHARACTER(LEN=*)  CDACTI
@@ -180,11 +182,17 @@ ELSEIF (KNIMES.EQ.0.OR.KCODE.NE.0) THEN
 ELSE
   CLJOLI=' /////'
 ENDIF
+!RJ IF (OML_IN_PARALLEL ()) THEN
+!RJ   WRITE (CLITID, '(" @",I4.4)') OML_MY_THREAD ()
+!RJ ELSE
+!RJ   CLITID=''
+!R ENDIF
 !
 IF (KNIMES.NE.0) THEN
   ILMESU=MIN (INT (LEN (CLMESS), JPLIKB)-          &
 &              INT (LEN (CLJOLI), JPLIKB)-ILNSPR-4, &
 &              INT (LEN (CDMESS), JPLIKB))
+!RJ   CLMESS=CLJOLI//' '//CDNSPR(1:ILNSPR)//' - '//TRIM (CDMESS(1:ILMESU))//CLITID
   CLMESS=CLJOLI//' '//CDNSPR(1:ILNSPR)//' - '//CDMESS(1:ILMESU)
   WRITE (UNIT=FA%NULOUT,FMT='(A)') TRIM (CLMESS)
 ENDIF
@@ -848,6 +856,7 @@ IF (KNIMES.EQ.0.OR.LDFATA) THEN
   ILMESU=ILMESA-1-2*INT (LEN (CLJOLI), JPLIKB)-ILNSPR-4
   CLMESA=CLJOLI//' '//CDNSPR(1:ILNSPR)//' - '//CLMESS(1:ILMESU) &
 &         //CLJOLI
+!RJ   CLMESA=TRIM (CLMESA)//CLITID
   WRITE (UNIT=FA%NULOUT,FMT='(A)') CLMESA
 !
   WRITE (UNIT=FA%NULOUT,FMT=*) CLMESA
@@ -864,13 +873,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAIPAR_BB                                      &
+SUBROUTINE FAIPAR64                                       &
 &           (KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
@@ -884,19 +893,19 @@ LOGICAL                LDRLFI                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIPAR_MT_BB                                             &
+CALL FAIPAR_MT64                                              &
 &           (FA, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 
 END SUBROUTINE
 
-SUBROUTINE FAIPAR_MM                                      &
+SUBROUTINE FAIPAR                                         &
 &           (KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
@@ -910,19 +919,17 @@ LOGICAL                LDRLFI                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIPAR_MT_MM                                             &
+CALL FAIPAR_MT                                                &
 &           (FA, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 
 END SUBROUTINE
 
-SUBROUTINE FAIPAR_MT_MM                                       &
+SUBROUTINE FAIPAR_MT                                          &
 &           (FA, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -944,7 +951,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 ICODE      = INT (     KCODE, JPLIKB)
 
-CALL FAIPAR_MT_BB                                             &
+CALL FAIPAR_MT64                                              &
 &           (FA, INUMER, INIMES, ICODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 

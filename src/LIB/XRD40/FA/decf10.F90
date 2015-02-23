@@ -1,11 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Interface to thread-safe FA
-FUNCTION DECF10     (KGRIB,  KLENG, KDECAL,  &
-                           KFAORI, KFAMOD, KNBIMO) RESULT(DECF10R)
+FUNCTION DECF10               &
+&                           (KGRIB,  KLENG, KDECAL,  &
+&                           KFAORI, KFAMOD, KNBIMO)
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !     Fonction "DECF10"
@@ -96,13 +96,14 @@ IMPLICIT NONE
 !     JPDGRB => Nombre d'octets a decoder pour controler le message GRIB
 !     JPGRIB => Nombre d'octets a decoder pour controler l'entete GRIB
 !
-INTEGER JPDGRB, JPGRIB
+INTEGER (KIND=JPLIKB) DECF10
 !
-PARAMETER ( JPDGRB = 8, JPGRIB = 4 )
+INTEGER,PARAMETER :: JPDGRB=8
+INTEGER,PARAMETER :: JPGRIB=4
 !
 !     Arguments d'appel.
 !
-INTEGER (KIND=JPLIKB) KLENG, KDECAL, KFAORI, KFAMOD, KNBIMO, DECF10R
+INTEGER (KIND=JPLIKB) KLENG, KDECAL, KFAORI, KFAMOD, KNBIMO
 !
 INTEGER KGRIB (KLENG)
 !
@@ -115,11 +116,10 @@ INTEGER ILENG, INBIMO
 !
 !     Caracteres G, R, I, B en code CCITT IA-5
 !
-INTEGER :: IBLOCD (JPGRIB)
+INTEGER, PARAMETER :: IBLOCD (JPGRIB) = (/ 71, 82, 73, 66 /)
 !
 CHARACTER(LEN=1) CLOPER
 !**
-DATA IBLOCD/ 71, 82, 73, 66 /
 !     1.  -  INITIALISATIONS ET CONTROLES.
 !-----------------------------------------------------------------------
 !
@@ -144,8 +144,8 @@ IDECAL = 0
 IAUXIL = JPDGRB
 ILODES = 8
 !
-!CALL INXBIT( KGRIB,  ILENG, IDECAL, IDGRIB, IAUXIL, INBIMO, &
-!&             ILODES, CLOPER, IREPON )
+CALL INXBIT( KGRIB,  ILENG, IDECAL, IDGRIB, IAUXIL, INBIMO, &
+&             ILODES, CLOPER, IREPON )
 !
 IF ( IREPON .NE. 0 ) THEN
 !
@@ -186,8 +186,8 @@ IPIVOT = 2**15
 !-----------------------------------------------------------------------
 !
 !
-!CALL INXBIT( KGRIB,  ILENG, IDECAL, IFACOD, IAUXIL, INBIMO, &
-!&             ILODES, CLOPER, IREPON )
+CALL INXBIT( KGRIB,  ILENG, IDECAL, IFACOD, IAUXIL, INBIMO, &
+&             ILODES, CLOPER, IREPON )
 IDECAL = IDECAL-ILODES*IAUXIL
 !
 IF ( IREPON .NE. 0 ) THEN
@@ -224,16 +224,15 @@ ELSE
 !
 ENDIF
 !
-!CALL INXBIT( KGRIB,  ILENG, IDECAL, IFACOD, IAUXIL, INBIMO, &
-!&             ILODES, CLOPER, IREPON )
+CALL INXBIT( KGRIB,  ILENG, IDECAL, IFACOD, IAUXIL, INBIMO, &
+&             ILODES, CLOPER, IREPON )
 !**
 !     9.  -  MESSAGERIE EVENTUELLE, RETOUR A L'APPLICATIF APPELANT.
 !-----------------------------------------------------------------------
 !
 900 CONTINUE
 !
-DECF10R = INT (IREPON, JPLIKB)
+DECF10 = INT (IREPON, JPLIKB)
 !
 IF (LHOOK) CALL DR_HOOK('DECF10',1,ZHOOK_HANDLE)
-!
-END FUNCTION DECF10
+END

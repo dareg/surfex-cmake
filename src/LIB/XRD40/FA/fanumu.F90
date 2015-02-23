@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANUMU_MT_BB                   &
+SUBROUTINE FANUMU_MT64                    &
 &                     (FA,  KNUMER, KRANG )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme calcule le RANG du Numero d'Unite logique
@@ -34,14 +33,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANUMU_MT',0,ZHOOK_HANDLE)
 
 IF (FA%FANUMU_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FANUMU_LLPREA=.FALSE.
 ENDIF
 !
 !          VERROUILLAGE GLOBAL (A CAUSE DE L'UTILISATION DE FA%NFIOUV )
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 !
 DO J=1,FA%NFIOUV
@@ -59,7 +58,7 @@ IRESUL=0
 !
 !          DEVERROUILLAGE GLOBAL
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                       &
+IF (FA%LFAMUL) CALL LFIVER_MT64                         &
 &                              (FA%LFI, FA%VRGLAS,'OFF')
 KRANG=IRESUL
 !
@@ -69,12 +68,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANUMU_BB          &
+SUBROUTINE FANUMU64           &
 &           (KNUMER, KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
@@ -82,17 +81,17 @@ INTEGER (KIND=JPLIKB)  KRANG                                  !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANUMU_MT_BB             &
+CALL FANUMU_MT64              &
 &           (FA, KNUMER, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FANUMU_MM          &
+SUBROUTINE FANUMU             &
 &           (KNUMER, KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
@@ -100,17 +99,15 @@ INTEGER (KIND=JPLIKM)  KRANG                                  !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANUMU_MT_MM             &
+CALL FANUMU_MT                &
 &           (FA, KNUMER, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FANUMU_MT_MM          &
+SUBROUTINE FANUMU_MT             &
 &           (FA, KNUMER, KRANG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -123,7 +120,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FANUMU_MT_BB             &
+CALL FANUMU_MT64              &
 &           (FA, INUMER, IRANG)
 
 KRANG      = INT (     IRANG, JPLIKM)

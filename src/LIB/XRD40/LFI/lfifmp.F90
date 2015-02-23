@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFIFMP_MT_BB                    &
+SUBROUTINE LFIFMP_MT64                       &
 &                     (LFI, KNUMER, KRANFM )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme *INTERNE* du Logiciel de Fichiers Indexes LFI.
@@ -31,7 +30,7 @@ INTEGER (KIND=JPLIKB) KNUMER, KRANFM, J, IRANFM
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIFMP_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFMP_MT64',0,ZHOOK_HANDLE)
 DO J=1,LFI%NULOFM
 !
 IF (KNUMER.EQ.LFI%MULOFM(J)) THEN
@@ -46,18 +45,18 @@ IRANFM=0
 102 CONTINUE
 KRANFM=IRANFM
 !
-IF (LHOOK) CALL DR_HOOK('LFIFMP_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIFMP_MT64',1,ZHOOK_HANDLE)
 END SUBROUTINE
 
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIFMP_BB          &
+SUBROUTINE LFIFMP64           &
 &           (KNUMER, KRANFM)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
@@ -65,17 +64,17 @@ INTEGER (KIND=JPLIKB)  KRANFM                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFMP_MT_BB               &
+CALL LFIFMP_MT64                &
 &           (LFI, KNUMER, KRANFM)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFMP_MM          &
+SUBROUTINE LFIFMP             &
 &           (KNUMER, KRANFM)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
@@ -83,17 +82,15 @@ INTEGER (KIND=JPLIKM)  KRANFM                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFMP_MT_MM               &
+CALL LFIFMP_MT                  &
 &           (LFI, KNUMER, KRANFM)
 
 END SUBROUTINE
 
-SUBROUTINE LFIFMP_MT_MM          &
+SUBROUTINE LFIFMP_MT             &
 &           (LFI, KNUMER, KRANFM)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -106,7 +103,7 @@ INTEGER (KIND=JPLIKB)  IRANFM                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIFMP_MT_BB               &
+CALL LFIFMP_MT64                &
 &           (LFI, INUMER, IRANFM)
 
 KRANFM     = INT (    IRANFM, JPLIKM)

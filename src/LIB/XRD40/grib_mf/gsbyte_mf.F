@@ -1,38 +1,45 @@
-      SUBROUTINE GSBYTE_MF ( KS, KD, KOFF, KSIZE, KSKBTW, K, KBPW,
-     S                    CDADIR, KLENG, KERR, KWORD, LDNEXT )
-      USE PARKIND1, ONLY : JPRB
+      SUBROUTINE GSBYTE_MF ( KS, KD, KOFF, KSIZE, KSKBTW, K, KBPW,      &
+     &                    CDADIR, KLENG, KERR, KWORD, LDNEXT )
+      USE PARKIND1, ONLY : JPIM, JPRB
       USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-C
-      INTEGER JPSHOR
-C
-      PARAMETER ( JPSHOR=100 )
-C
-#include "precision.h"
-C
-      INTEGER KOFF, KSIZE, KSKBTW, K, KBPW, KLENG, KERR, KWORD
-C
-      INTEGER (KIND=JPDBLE) KS (*), KD (*)
-C
-      LOGICAL LDNEXT
-C
-      CHARACTER*1 CDADIR
-C
-      INTEGER IWORD, IOFF, IOFF2
-      INTEGER (KIND=JPDBLE) IMASKS (128)
-C
+      USE LFI_PRECISION, ONLY : JPDBLE
+!
+      IMPLICIT NONE
+      INTEGER(KIND=JPIM),PARAMETER :: JPSHOR=100
+!
+!
+      INTEGER(KIND=JPIM) :: KOFF
+      INTEGER(KIND=JPIM) :: KSIZE
+      INTEGER(KIND=JPIM) :: KSKBTW
+      INTEGER(KIND=JPIM) :: K
+      INTEGER(KIND=JPIM) :: KBPW
+      INTEGER(KIND=JPIM) :: KLENG
+      INTEGER(KIND=JPIM) :: KERR
+      INTEGER(KIND=JPIM) :: KWORD
+!
+      INTEGER (KIND=JPDBLE) :: KS (*)
+      INTEGER (KIND=JPDBLE) :: KD (*)
+!
+      LOGICAL :: LDNEXT
+!
+      CHARACTER(LEN=1) :: CDADIR
+!
+      INTEGER(KIND=JPIM) :: IWORD, IOFF, IOFF2
+      INTEGER (KIND=JPDBLE) :: IMASKS (128)
+!
       SAVE IMASKS
-C
+!
       DATA IMASKS(2) / 0 /
-C
+!
       REAL(KIND=JPRB) :: ZHOOK_HANDLE
       IF (LHOOK) CALL DR_HOOK('GSBYTE_MF',0,ZHOOK_HANDLE)
       KERR=0
-C
+!
       IF (K.GT.0) THEN
         IOFF2=KOFF+(KSIZE+KSKBTW)*K
-C
+!
         IF (LDNEXT) THEN
-C
+!
           IWORD=KWORD+IOFF2/KBPW
           IOFF=MOD (IOFF2,KBPW)
         ELSE
@@ -42,18 +49,18 @@ C
         IF (IWORD.GT.KLENG) THEN
           KERR = -2
           IF (CDADIR.EQ.'D') THEN
-            WRITE (UNIT=*,FMT=*)
-     S'GSBYTE - UNABLE TO PROCEED REQUESTED EXTRACTION FROM BIT STREAM:'
+            WRITE (UNIT=*,FMT=*)                                        &
+     &'GSBYTE - UNABLE TO PROCEED REQUESTED EXTRACTION FROM BIT STREAM:'
           ELSE
-            WRITE (UNIT=*,FMT=*)
-     S'GSBYTE - UNABLE TO PROCEED REQUESTED INSERTION INTO BIT STREAM:'
+            WRITE (UNIT=*,FMT=*)                                        &
+     &'GSBYTE - UNABLE TO PROCEED REQUESTED INSERTION INTO BIT STREAM:'
           ENDIF
           IF (LDNEXT) THEN
-            WRITE (UNIT=*,FMT='('' GSBYTE - NEXT WORD'',I9,
-     S             '' WOULD BE OUTSIDE ARRAY BOUNDS'',I9)') IWORD,KLENG
+            WRITE (UNIT=*,FMT='('' GSBYTE - NEXT WORD'',I9,             &
+     &             '' WOULD BE OUTSIDE ARRAY BOUNDS'',I9)') IWORD,KLENG
           ELSE
-            WRITE (UNIT=*,FMT='('' GSBYTE - LAST WORD'',I9,
-     S             '' WOULD BE OUTSIDE ARRAY BOUNDS'',I9)') IWORD,KLENG
+            WRITE (UNIT=*,FMT='('' GSBYTE - LAST WORD'',I9,             &
+     &             '' WOULD BE OUTSIDE ARRAY BOUNDS'',I9)') IWORD,KLENG
           ENDIF
           IF (LHOOK) CALL DR_HOOK('GSBYTE_MF',1,ZHOOK_HANDLE)
           RETURN
@@ -62,7 +69,7 @@ C
         IWORD=KWORD
         IOFF=KOFF
       ENDIF
-C     Vector machines use preferably GSBITE_MF :
+!     Vector machines use preferably GSBITE_MF :
 #if  defined ( NECSX ) || defined ( VPP ) || defined ( CRAY )
       IF (K.GT.JPSHOR.OR.K.LE.0) THEN
         CALL GSBITE_MF (KS,KD,KOFF,KSIZE,KSKBTW,K,KBPW,IMASKS,CDADIR)
@@ -82,4 +89,4 @@ C     Vector machines use preferably GSBITE_MF :
       KWORD=IWORD
       KOFF=IOFF
       IF (LHOOK) CALL DR_HOOK('GSBYTE_MF',1,ZHOOK_HANDLE)
-      END
+      ENDSUBROUTINE GSBYTE_MF

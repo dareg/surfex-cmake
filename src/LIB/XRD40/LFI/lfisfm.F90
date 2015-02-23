@@ -1,12 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
-SUBROUTINE LFISFM_MT_BB                  &
+
+SUBROUTINE LFISFM_MT64                     &
 &                     (LFI, KREP, KNUMER )
 USE LFIMOD, ONLY : LFICOM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-Programme Suprimant un Facteur Multiplicatif
@@ -40,11 +40,11 @@ LOGICAL LLFATA
 !     variables globales du logiciel a la 1ere utilisation.
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFISFM_MT',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFISFM_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 IFACTM=0
 LLVERG=.FALSE.
-CALL LFINUM_MT_BB                 &
+CALL LFINUM_MT64                    &
 &               (LFI, KNUMER,IRANG)
 !
 IF (IRANG.NE.0) THEN
@@ -54,7 +54,7 @@ ENDIF
 !
 !        Controle de validite FORTRAN du Numero d'Unite Logique.
 !
-INQUIRE (UNIT=KNUMER,EXIST=LLEXUL,ERR=901,IOSTAT=IREP)
+  INQUIRE (UNIT=KNUMER,EXIST=LLEXUL,ERR=901,IOSTAT=IREP)
 !
 IF (.NOT.LLEXUL) THEN
   IREP=-30
@@ -63,7 +63,7 @@ ENDIF
 !
 !              Verrouillage Global eventuel.
 !
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                    &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                       &
 &                                (LFI, LFI%VERGLA,'ON')
 LLVERG=LFI%LMULTI
 !**
@@ -71,7 +71,7 @@ LLVERG=LFI%LMULTI
 !            UNITES LOGIQUES/FACTEURS.
 !-----------------------------------------------------------------------
 !
-CALL LFIFMP_MT_BB                  &
+CALL LFIFMP_MT64                     &
 &               (LFI, KNUMER,IRANFM)
 !
 IF (IRANFM.EQ.0) THEN
@@ -111,7 +111,7 @@ IREP=ABS (IREP)
 KREP=IREP
 LLFATA=LLMOER (IREP,IRANG)
 !
-IF (LLVERG) CALL LFIVER_MT_BB                     &
+IF (LLVERG) CALL LFIVER_MT64                        &
 &                           (LFI, LFI%VERGLA,'OFF')
 !
 IF (LLFATA) THEN
@@ -123,7 +123,7 @@ ELSE
 ENDIF
 !
 IF (INIMES.EQ.0)  THEN 
-  IF (LHOOK) CALL DR_HOOK('LFISFM_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFISFM_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 CLNSPR='LFISFM'
@@ -131,7 +131,7 @@ CLNSPR='LFISFM'
 IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3)') &
 &       KREP,KNUMER
-  CALL LFIEMS_MT_BB                              &
+  CALL LFIEMS_MT64                                 &
 &                 (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
@@ -146,11 +146,11 @@ ELSE
 &           '' suppressed, Logical Unit'',I3)') IFACTM,KNUMER
 ENDIF
 !
-CALL LFIEMS_MT_BB                               &
+CALL LFIEMS_MT64                                  &
 &               (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                CLMESS,CLNSPR,CLACTI)
 !
-IF (LHOOK) CALL DR_HOOK('LFISFM_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFISFM_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -162,12 +162,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFISFM_BB          &
+SUBROUTINE LFISFM64           &
 &           (KREP, KNUMER)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -175,17 +175,17 @@ INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFISFM_MT_BB             &
+CALL LFISFM_MT64               &
 &           (LFI, KREP, KNUMER)
 
 END SUBROUTINE
 
-SUBROUTINE LFISFM_MM          &
+SUBROUTINE LFISFM             &
 &           (KREP, KNUMER)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -193,17 +193,15 @@ INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFISFM_MT_MM             &
+CALL LFISFM_MT                &
 &           (LFI, KREP, KNUMER)
 
 END SUBROUTINE
 
-SUBROUTINE LFISFM_MT_MM          &
+SUBROUTINE LFISFM_MT             &
 &           (LFI, KREP, KNUMER)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -216,7 +214,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFISFM_MT_BB             &
+CALL LFISFM_MT64               &
 &           (LFI, IREP, INUMER)
 
 KREP       = INT (      IREP, JPLIKM)

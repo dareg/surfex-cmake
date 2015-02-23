@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACTUM_MT_BB            &
+SUBROUTINE FACTUM_MT64             &
 &                     (FA,  CDNOMC )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme servant a supprimer un cadre.
@@ -42,7 +41,7 @@ IF (FA%FACTUM_LLPREA) THEN
 !
 !         Initialisation eventuelle des variables globales du logiciel.
 !
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FACTUM_LLPREA=.FALSE.
 ENDIF
@@ -75,13 +74,13 @@ IF (ILNOMC.GT.FA%NCPCAD) THEN
 ENDIF
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
 !          Controle d'existence du cadre specifie.
 !
-CALL FANUCA_MT_BB                         &
+CALL FANUCA_MT64                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 !
 IF (IRANGC.EQ.0) THEN
@@ -92,7 +91,7 @@ ENDIF
 !     2.  -  SUPPRESSION PROPREMENT DITE VIA LE SOUS-PROGRAMME "FACTUI".
 !-----------------------------------------------------------------------
 !
-CALL FACTUI_MT_BB               &
+CALL FACTUI_MT64                &
 &               (FA, IREP,IRANGC)
 !**
 !    10.  -  PHASE TERMINALE : MESSAGERIE, AVEC "ABORT" EVENTUEL,
@@ -103,7 +102,7 @@ CALL FACTUI_MT_BB               &
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=LLMOER(IREP,0_JPLIKB )
@@ -127,7 +126,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''CDNOMC='''''',A,'''''''')') &
 &     CLACTI(1:ILNOMC)
 INUMER=JPNIIL
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CLACTI(1:ILNOMC),.FALSE.)
 !
@@ -142,46 +141,44 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACTUM_BB          &
+SUBROUTINE FACTUM64           &
 &           (CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTUM_MT_BB          &
+CALL FACTUM_MT64           &
 &           (FA, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FACTUM_MM          &
+SUBROUTINE FACTUM             &
 &           (CDNOMC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTUM_MT_MM          &
+CALL FACTUM_MT             &
 &           (FA, CDNOMC)
 
 END SUBROUTINE
 
-SUBROUTINE FACTUM_MT_MM          &
+SUBROUTINE FACTUM_MT             &
 &           (FA, CDNOMC)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -190,7 +187,7 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 ! Convert arguments
 
 
-CALL FACTUM_MT_BB          &
+CALL FACTUM_MT64           &
 &           (FA, CDNOMC)
 
 

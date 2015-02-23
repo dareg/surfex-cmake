@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAVORI_MT_BB                                           &
+SUBROUTINE FAVORI_MT64                                            &
 &                     (FA,  KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, &
 &                    KDMOPL )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet de connaitre les options implicites
@@ -52,14 +51,14 @@ IF (FA%FAVORI_LLPREA) THEN
 !
 !          A la premiere utilisation, appel au sous-programme "FARINE".
 !
-  CALL FARINE_MT_BB            &
+  CALL FARINE_MT64             &
 &                (FA, 2_JPLIKB )
   FA%FAVORI_LLPREA=.FALSE.
 ENDIF
 !
 !         Verrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                      &
+IF (FA%LFAMUL) CALL LFIVER_MT64                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !**
@@ -79,7 +78,7 @@ KDMOPL=FA%NMIDPL
 !
 !        Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (FA%NIMSGA.EQ.2) THEN
@@ -91,7 +90,7 @@ IF (FA%NIMSGA.EQ.2) THEN
 &         '', KDMOPL='',I3)')                                 &
 &    KNGRIB,KNBPDG,KNBCSP,KSTRON,KPUILA,KDMOPL
   INUMER=JPNIIL
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -102,12 +101,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAVORI_BB                                       &
+SUBROUTINE FAVORI64                                        &
 &           (KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNGRIB                                 !   OUT
@@ -119,17 +118,17 @@ INTEGER (KIND=JPLIKB)  KDMOPL                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAVORI_MT_BB                                              &
+CALL FAVORI_MT64                                               &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 
 END SUBROUTINE
 
-SUBROUTINE FAVORI_MM                                       &
+SUBROUTINE FAVORI                                          &
 &           (KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNGRIB                                 !   OUT
@@ -141,17 +140,15 @@ INTEGER (KIND=JPLIKM)  KDMOPL                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAVORI_MT_MM                                              &
+CALL FAVORI_MT                                                 &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 
 END SUBROUTINE
 
-SUBROUTINE FAVORI_MT_MM                                        &
+SUBROUTINE FAVORI_MT                                           &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -171,7 +168,7 @@ INTEGER (KIND=JPLIKB)  IDMOPL                                 !   OUT
 ! Convert arguments
 
 
-CALL FAVORI_MT_BB                                              &
+CALL FAVORI_MT64                                               &
 &           (FA, INGRIB, INBPDG, INBCSP, ISTRON, IPUILA, IDMOPL)
 
 KNGRIB     = INT (    INGRIB, JPLIKM)

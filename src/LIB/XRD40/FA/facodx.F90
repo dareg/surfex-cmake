@@ -1,13 +1,12 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACODX_MT_BB                                           &
+SUBROUTINE FACODX_MT64                                            &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF, &
 &                    PSEC4, LDCOSP, KVALCO, KLONGD )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme INTERNE du logiciel de Fichiers ARPEGE:
@@ -47,7 +46,7 @@ LOGICAL LDCOSP
 !
 CHARACTER CDPREF*(*), CDSUFF*(*)
 !
-!#include "fagribexr.h"
+#include "fagribexr.h"
 !
 REAL (KIND=JPDBLR), ALLOCATABLE :: ZSEC4(:)
 INTEGER (KIND=JPDBLE), ALLOCATABLE :: IVALCO(:)
@@ -142,7 +141,7 @@ IF (LDCOSP .AND. LLMLAM) THEN
 !
 !     Determination de la puissance de Laplacien (en 1/1000 ieme)
 !
-  CALL FAPULA_MT_BB                                &
+  CALL FAPULA_MT64                                 &
 &                 (FA,  KREP, KRANG, PSEC4, IPULAP )
   ZPULAP=REAL(IPULAP,JPDBLR)/1000._JPDBLR
 !       ZPULAP=0.
@@ -183,7 +182,7 @@ IF (LDCOSP .AND. LLMLAM) THEN
     WRITE (UNIT=FA%NULOUT,FMT=*)'FACODX: traitement du champ: ', &
 &          CDPREF,KNIVAU,CDSUFF
   ENDIF
-  CALL FACDEC_MT_BB                                   &
+  CALL FACDEC_MT64                                    &
 &                 (FA, KREP, ZA, ZMIN, INBITS, IDECOPT)
   IF (KREP.NE.0) THEN
     IDECOPT = 0
@@ -257,7 +256,7 @@ ENDIF
   WRITE (UNIT=FA%NULOUT,FMT=*)'FACODX: traitement du champ: ', &
 &          CDPREF,KNIVAU,CDSUFF
   ENDIF
-  CALL FACDEC_MT_BB                                   &
+  CALL FACDEC_MT64                                    &
 &                 (FA, KREP, ZA, ZMIN, INBITS, IDECOPT)
   IF (KREP.NE.0) THEN
     IDECOPT = 0
@@ -270,7 +269,7 @@ ENDIF
 !
 !     3.1 -  Sections 1, 2, 3 et 4 (sf la partie reelle pour 4)
 !
-CALL FAINIG_MT_BB                                                &
+CALL FAINIG_MT64                                                 &
 &               (FA,  KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &              IILCHAM, ISEC1, ISEC2, ZSEC2, ISEC3, ZSEC3, ISEC4)
 IF (KREP.NE.0) THEN
@@ -318,12 +317,12 @@ IF (FA%LFAMOP) THEN
 &                              ZSEC4(1:20)
 ENDIF
 !     WARNING GRIBEX ENLEVE 
-!CALL GRSDBG(0)
-!CALL GRSVCK(0)
-!
-!CALL FAGRIBEX(ISEC0,ISEC1,ISEC2,ZSEC2,ISEC3,ZSEC3,ISEC4,  &
-!&              ZSEC4,IILCHAM,KVALCO(IDECAL+1),ILENG,IWORD, &
-!&              CLOPER,IRET)
+CALL GRSDBG(0)
+CALL GRSVCK(0)
+
+CALL FAGRIBEX(ISEC0,ISEC1,ISEC2,ZSEC2,ISEC3,ZSEC3,ISEC4,  &
+&              ZSEC4,IILCHAM,KVALCO(IDECAL+1),ILENG,IWORD, &
+&              CLOPER,IRET)
 !
 IF (IRET.GT.0) THEN
 ! Erreur rapportee par GRIBEX
@@ -525,12 +524,12 @@ IF (IRET==710) THEN
 &         '', KLONGD='',I6)')                             &
 &     KREP, KRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF)), LDCOSP, KLONGD
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
   CLMESS=                                                          &
 & ' CAUTION: this field is not packed or it will occupy more space'
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
   IF (LHOOK) CALL DR_HOOK('FACODX_MT',1,ZHOOK_HANDLE)
@@ -552,7 +551,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', KLONGD='',I6)')                             &
 &     KREP, KRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF)), LDCOSP, KLONGD
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -568,13 +567,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACODX_BB                                           &
+SUBROUTINE FACODX64                                            &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PSEC4, LDCOSP, &
 &           KVALCO, KLONGD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -589,19 +588,19 @@ INTEGER (KIND=JPLIKB)  KLONGD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACODX_MT_BB                                          &
+CALL FACODX_MT64                                           &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PSEC4, &
 &           LDCOSP, KVALCO, KLONGD)
 
 END SUBROUTINE
 
-SUBROUTINE FACODX_MM                                           &
+SUBROUTINE FACODX                                              &
 &           (KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PSEC4, LDCOSP, &
 &           KVALCO, KLONGD)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -616,19 +615,17 @@ INTEGER (KIND=JPLIKM)  KLONGD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACODX_MT_MM                                          &
+CALL FACODX_MT                                             &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PSEC4, &
 &           LDCOSP, KVALCO, KLONGD)
 
 END SUBROUTINE
 
-SUBROUTINE FACODX_MT_MM                                    &
+SUBROUTINE FACODX_MT                                       &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PSEC4, &
 &           LDCOSP, KVALCO, KLONGD)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -651,7 +648,7 @@ INTEGER (KIND=JPLIKB)  ILONGD                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FACODX_MT_BB                                          &
+CALL FACODX_MT64                                           &
 &           (FA, IREP, IRANG, CDPREF, INIVAU, CDSUFF, PSEC4, &
 &           LDCOSP, KVALCO, ILONGD)
 

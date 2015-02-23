@@ -1,18 +1,15 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe LFI
 ! Sep-2012 P. Marguinaud Fix uninitialized variables
-SUBROUTINE LFIOUV_MT_BB                                  &
+
+SUBROUTINE LFIOUV_MT64                                     &
 &                     (LFI, KREP, KNUMER, LDNOMM, CDNOMF,  &
 &                      CDSTTO, LDERFA,                     &
 &                      LDIMST, KNIMES, KNBARP, KNBARI )
 USE LFIMOD, ONLY : LFICOM
-USE PARKIND1, ONLY : JPRB
+USE PARKIND1, ONLY : JPRB, JPIA, JPIM, JPIB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-#ifdef USE_SAMIO
-USE SAMIO_MOD
-#endif
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        SOUS-PROGRAMME D'OUVERTURE D'UNE UNITE LOGIQUE DEVANT ETRE
@@ -77,8 +74,6 @@ CHARACTER CDNOMF*(*), CDSTTO*(*)
 CHARACTER*(LFI%JPLSTX) CLSTTO
 CHARACTER*(LFI%JPLFTX) CLNOMF, CLNOMS
 
-LOGICAL :: LLSAMIO
-
 !
 CHARACTER(LEN=LFI%JPLSPX) CLNSPR
 CHARACTER(LEN=LFI%JPLMES) CLMESS
@@ -93,11 +88,7 @@ LOGICAL LLFATA
 !-----------------------------------------------------------------------
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK('LFIOUV_MT',0,ZHOOK_HANDLE)
-CLACTI=''
-
-LLSAMIO = .FALSE.
-
+IF (LHOOK) CALL DR_HOOK('LFIOUV_MT64',0,ZHOOK_HANDLE)
 CLACTI=''
 ILSTTU=MIN (INT (LEN (CLSTTO), JPLIKB),  &
 &            INT (LEN (CDSTTO), JPLIKB))
@@ -110,8 +101,8 @@ LLVERG=.FALSE.
 !        Appel legerement anticipe a LFINUM, permettant une initialisa-
 !     tion des variables globales du logiciel a la 1ere utilisation.
 !
-CALL LFINUM_MT_BB                 &
-&               (LFI, KNUMER,IRANG)
+CALL LFINUM_MT64                    &
+&               (LFI, KNUMER, IRANG)
 !
 IF (LDNOMM) THEN
 !
@@ -158,7 +149,7 @@ IF (LDNOMM) THEN
 &                 '' CHARACTERS...'')') LFI%JPLFTX
       ENDIF
 !
-      CALL LFIEMS_MT_BB                               &
+      CALL LFIEMS_MT64                                  &
 &                     (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                      CLMESS,CLNSPR,                   &
 &                      CLACTI)
@@ -184,7 +175,7 @@ IFACTM=0
 !
 !        Controle de validite FORTRAN du Numero d'Unite Logique.
 !
-INQUIRE (UNIT=KNUMER,EXIST=LLEXUL,ERR=901,IOSTAT=IREP)
+  INQUIRE (UNIT=KNUMER,EXIST=LLEXUL,ERR=901,IOSTAT=IREP)
 !
 IF (.NOT.LLEXUL) THEN
   IREP=-30
@@ -221,14 +212,14 @@ IF (IRANG.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-IF (LFI%LMULTI) CALL LFIVER_MT_BB                    &
+IF (LFI%LMULTI) CALL LFIVER_MT64                       &
 &                               (LFI, LFI%VERGLA,'ON')
 LLVERG=LFI%LMULTI
 !
 !        Recherche d'un eventuel facteur multiplicatif predefini pour
 !     l'unite logique en question.
 !
-CALL LFIFMP_MT_BB                  &
+CALL LFIFMP_MT64                     &
 &               (LFI, KNUMER,IRANFM)
 IFACTM=LFI%MFACTU(IRANFM)
 !
@@ -350,7 +341,7 @@ INWRIT=0
 !     DE PARADE AU MAUVAIS COMPORTEMENT DU "READ" SUR UN FICHIER VIDE,
 !     sur CRAY-2 sous UNICOS 4.0 et 5.0... ( Debut )
 !
-CALL LFIDAH_MT_BB                 &
+CALL LFIDAH_MT64                    &
 &               (LFI, IDATE,IHEURE)
 IBASE=IHEURE+LFI%JPNIL
 !
@@ -384,21 +375,14 @@ IF (LDNOMM) THEN
 !
 !     APRES TOUS CES CONTROLES DE BASE, ON TENTE L'"OPEN" DU FICHIER .
 !
-#ifdef USE_SAMIO
-  LLSAMIO = (SAMIO_MYPE == 1 .AND. LLNOUF)
-  IF (LLSAMIO) THEN
-     CALL SAMIO_OPEN (UNIT=KNUMER,FILE=CDNOMF,STATUS=CLSTTO,      &
-&          ERR=902,FORM='UNFORMATTED',ACCESS='DIRECT',RECL=ILOREC, &
-&          IOSTAT=IREP)
-     IF (IREP /= 0) GOTO 902
+  IF (KNUMER < 0) THEN
+!RJ: something fishy here
+    CALL ABORT
   ELSE
-#endif
-     OPEN (UNIT=KNUMER,FILE=CDNOMF,STATUS=CLSTTO,                 &
-&          ERR=902,FORM='UNFORMATTED',ACCESS='DIRECT',RECL=ILOREC, &
-&          IOSTAT=IREP)
-#ifdef USE_SAMIO
+    OPEN (UNIT=KNUMER,FILE=CDNOMF,STATUS=CLSTTO,                 &
+&         ERR=902,FORM='UNFORMATTED',ACCESS='DIRECT',RECL=ILOREC, &
+&         IOSTAT=IREP)
   ENDIF
-#endif
 !
 ELSE
 !*
@@ -406,7 +390,10 @@ ELSE
 !           EXPLICITE; ON TENTE DIRECTEMENT L'"OPEN" .
 !-----------------------------------------------------------------------
 !
-  IF (CLSTTO.NE.'OLD'.AND.CLSTTO.NE.'NEW') THEN
+  IF (KNUMER < 0) THEN
+!RJ: something fishy here
+    CALL ABORT
+  ELSEIF (CLSTTO.NE.'OLD'.AND.CLSTTO.NE.'NEW') THEN
     OPEN (UNIT=KNUMER,STATUS=CLSTTO,FORM='UNFORMATTED',    &
 &          ACCESS='DIRECT',RECL=ILOREC,ERR=902,IOSTAT=IREP)
   ELSE
@@ -423,13 +410,9 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 
-IF (LLSAMIO) THEN
-   CLNOMS = CDNOMF
-   LLNOMS = .TRUE.
-   IREP = 0
-ELSE
-   INQUIRE (UNIT=KNUMER,NAMED=LLNOMS,NAME=CLNOMS,ERR=901, &
-&            IOSTAT=IREP)
+IF (KNUMER > 0) THEN
+  INQUIRE (UNIT=KNUMER,NAMED=LLNOMS,NAME=CLNOMS,ERR=901, &
+  &        IOSTAT=IREP)
 ENDIF
 !
 IF (LLNOMS) THEN
@@ -490,12 +473,14 @@ IF (CLSTTO.EQ.'OLD'.OR..NOT.LLNOUF) THEN
 !       L'AMBIGUITE: FICHIER DEJA ECRIT PAR LE LOGICIEL, OU DEVANT ETRE
 !       CREE PAR LUI ?
 !
+
   DO JREC=3,1,-2
   INAPHY=JREC
-  CALL LFILDO_MT_BB                                &
+  CALL LFILDO_MT64                                     &
 &                 (LFI, IREP,KNUMER,JREC,            &
 &                  LFI%MDES1D(IXM(1_JPLIKB ,IRANG)), &
-&                  INREAD,IFACTM,IRETIN)
+&                  INREAD,IFACTM,                    &
+&                  IRETIN)
 !
   IF (IRETIN.NE.0) THEN
     GOTO 302
@@ -570,7 +555,7 @@ IF (CLSTTO.EQ.'OLD'.OR..NOT.LLNOUF) THEN
 !
         IREPX=IREP
         IREP=0
-        CALL LFIEMS_MT_BB                               &
+        CALL LFIEMS_MT64                                  &
 &                       (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                        CLMESS,CLNSPR,CLACTI)
 !
@@ -584,7 +569,7 @@ IF (CLSTTO.EQ.'OLD'.OR..NOT.LLNOUF) THEN
           CLMESS='Name='''//CLNOMF(:ILUTIL)//''''
         ENDIF
 !
-        CALL LFIEMS_MT_BB                               &
+        CALL LFIEMS_MT64                                  &
 &                       (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                        CLMESS,CLNSPR,CLACTI)
 !
@@ -600,7 +585,7 @@ IF (CLSTTO.EQ.'OLD'.OR..NOT.LLNOUF) THEN
             CLMESS='SYSTEM Name='''//CLNOMS(:ILUTIL)//''''
           ENDIF
 !
-          CALL LFIEMS_MT_BB                               &
+          CALL LFIEMS_MT64                                  &
 &                         (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                          CLMESS,CLNSPR,CLACTI)
         ENDIF
@@ -613,7 +598,7 @@ IF (CLSTTO.EQ.'OLD'.OR..NOT.LLNOUF) THEN
 &               //'factor read on the file...'
         ENDIF
 !
-        CALL LFIEMS_MT_BB                               &
+        CALL LFIEMS_MT64                                  &
 &                       (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                        CLMESS,CLNSPR,CLACTI)
         IREP=IREPX
@@ -625,7 +610,12 @@ IF (CLSTTO.EQ.'OLD'.OR..NOT.LLNOUF) THEN
 !
       IRANG=0
       IRANMS=0
-      CLOSE (UNIT=KNUMER,STATUS='KEEP',ERR=905,IOSTAT=IREP)
+      IF (KNUMER > 0) THEN
+        CLOSE (UNIT=KNUMER,STATUS='KEEP',ERR=905,IOSTAT=IREP)
+      ELSE
+!RJ: something fishy here
+        CALL ABORT
+      ENDIF
 !
       IF (IFACPH.GT.LFI%JPFACX) THEN
         IREP=-28
@@ -710,7 +700,7 @@ LFI%NBRENO(IRANG)=0
 LFI%NBSUPP(IRANG)=0
 LFI%LISTAT(IRANG)=LDIMST
 LFI%LMIMAL(IRANG)=.FALSE.
- IF (LFI%LMULTI) CALL LFIVER_MT_BB                             &
+ IF (LFI%LMULTI) CALL LFIVER_MT64                                &
 &                                (LFI, LFI%VERRUE(IRANG),'ASGN')
 !
 IF (LLNOUF) THEN
@@ -749,18 +739,18 @@ IF (LLNOUF) THEN
   LFI%NALDPI(IRANG)=0
   LFI%NPPIMM(IRANG)=1
   IRANGD=IRANG
-  CALL LFIDAH_MT_BB                                      &
+  CALL LFIDAH_MT64                                           &
 &                 (LFI, LFI%MDES1D(IXM(LFI%JPDCRE,IRANG)), &
-&               LFI%MDES1D(IXM(LFI%JPHCRE,IRANG)))
+&                  LFI%MDES1D(IXM(LFI%JPHCRE,IRANG)))
 !
 !          ECRITURE DU PREMIER ARTICLE (DESCRIPTIF)
 !
   IREC=1
   INAPHY=IREC
-  CALL LFIEDO_MT_BB                                &
+  CALL LFIEDO_MT64                                     &
 &                 (LFI, IREP,KNUMER,IREC,            &
 &                  LFI%MDES1D(IXM(1_JPLIKB ,IRANG)), &
-&                  INWRIT,IFACTM,IRETIN)
+&                  INWRIT,  IFACTM, IRETIN)
 !
   IF (IRETIN.NE.0) THEN
     GOTO 904
@@ -777,10 +767,10 @@ IF (LLNOUF) THEN
   DO J=1,INBPIR
   IREC=IREC+1
   INAPHY=IREC
-  CALL LFIECC_MT_BB                                &
+  CALL LFIECC_MT64                                     &
 &                 (LFI, IREP,KNUMER,IREC,            &
 &                  LFI%CNOMAR(IXC(1_JPLIKB ,IRANG)), &
-&                  INWRIT,IFACTM,IRETIN)
+&                  INWRIT,IFACTM, IRETIN)
 !
   IF (IRETIN.NE.0) THEN
     GOTO 903
@@ -788,10 +778,10 @@ IF (LLNOUF) THEN
 !
   IREC=IREC+1
   INAPHY=IREC
-  CALL LFIEDO_MT_BB                                &
+  CALL LFIEDO_MT64                                     &
 &                 (LFI, IREP,KNUMER,IREC,            &
 &                  LFI%MLGPOS(IXM(1_JPLIKB ,IRANG)), &
-&                  INWRIT,IFACTM,IRETIN)
+&                  INWRIT,  IFACTM, IRETIN)
 !
   IF (IRETIN.NE.0) THEN
     GOTO 904
@@ -809,7 +799,7 @@ ELSE
   INBPIR=LFI%MDES1D(IXM(LFI%JPNPIR,IRANG))
   IREC=2
   INAPHY=IREC
-  CALL LFILCC_MT_BB                                &
+  CALL LFILCC_MT64                                     &
 &                 (LFI, IREP,KNUMER,IREC,            &
 &                  LFI%CNOMAR(IXC(1_JPLIKB ,IRANG)), &
 &                  INREAD,IFACTM,IRETIN)
@@ -820,10 +810,11 @@ ELSE
 !
   IREC=3
   INAPHY=IREC
-  CALL LFILDO_MT_BB                                &
+  CALL LFILDO_MT64                                     &
 &                 (LFI, IREP,KNUMER,IREC,            &
 &                  LFI%MLGPOS(IXM(1_JPLIKB ,IRANG)), &
-&                  INREAD,IFACTM,IRETIN)
+&                  INREAD,IFACTM,                    &
+&                  IRETIN)
 !
   IF (IRETIN.NE.0) THEN
     GOTO 904
@@ -839,11 +830,11 @@ ELSE
 !          CAS OU IL Y A AU MOINS 2 PAIRES D'ARTICLES D'INDEX UTILISEES.
 !
     IRGPIF=1+(INBALO-1)/INALPP
-    CALL LFIREC_MT_BB                      &
+    CALL LFIREC_MT64                         &
 &                   (LFI, IRGPIF,IRANG,IREC)
     IRANGD=IRANG+LFI%JPNXFI
     INAPHY=IREC
-    CALL LFILCC_MT_BB                                 &
+    CALL LFILCC_MT64                                      &
 &                   (LFI, IREP,KNUMER,IREC,             &
 &                    LFI%CNOMAR(IXC(1_JPLIKB ,IRANGD)), &
 &                    INREAD,IFACTM,IRETIN)
@@ -854,10 +845,11 @@ ELSE
 !
     IREC=IREC+1
     INAPHY=IREC
-    CALL LFILDO_MT_BB                                 &
+    CALL LFILDO_MT64                                      &
 &                   (LFI, IREP,KNUMER,IREC,             &
 &                    LFI%MLGPOS(IXM(1_JPLIKB ,IRANGD)), &
-&                    INREAD,IFACTM,IRETIN)
+&                    INREAD,IFACTM,                     &
+&                    IRETIN)
 !
     IF (IRETIN.NE.0) THEN
       GOTO 904
@@ -962,11 +954,11 @@ ELSE
   INIMES=IXNIMS (IRANMS)
 ENDIF
 !
- IF (LFI%LMULTI.AND.LLVERG) CALL LFIVER_MT_BB                     &
+ IF (LFI%LMULTI.AND.LLVERG) CALL LFIVER_MT64                        &
 &                                           (LFI, LFI%VERGLA,'OFF')
 !
 IF (.NOT.LLFATA.AND.INIMES.EQ.0)  THEN 
-  IF (LHOOK) CALL DR_HOOK('LFIOUV_MT',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('LFIOUV_MT64',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -986,7 +978,7 @@ IF (INIMES.GE.1) THEN
     CLMESS='Name='''//CLNOMF(:ILUTIL)//''''
   ENDIF
 !
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 !
@@ -1002,7 +994,7 @@ IF (INIMES.GE.1) THEN
       CLMESS='SYSTEM Name='''//CLNOMS(:ILUTIL)//''''
     ENDIF
 !
-    CALL LFIEMS_MT_BB                               &
+    CALL LFIEMS_MT64                                  &
 &                   (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                    CLMESS,CLNSPR,CLACTI)
   ENDIF
@@ -1016,7 +1008,7 @@ IF (INIMES.EQ.2) THEN
 &         '', KNIMES='',I2,'', KNBARP='',I6,'' KNBARI='',I6)')      &
 &   KREP,KNUMER,LDNOMM,CDSTTO(:ILSTTU),LDERFA,LDIMST,KNIMES,KNBARP, &
 &   KNBARI
-  CALL LFIEMS_MT_BB                              &
+  CALL LFIEMS_MT64                                 &
 &                 (LFI, KNUMER,INIMES,IREP,LLFATA, &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
@@ -1059,12 +1051,12 @@ IF (INIMES.GE.1.AND.(IREP.EQ.0.OR.IREP.EQ.-11)) THEN
 !
   ENDIF
 !
-  CALL LFIEMS_MT_BB                               &
+  CALL LFIEMS_MT64                                  &
 &                 (LFI, KNUMER,INIMES,IREP,.FALSE., &
 &                  CLMESS,CLNSPR,CLACTI)
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('LFIOUV_MT',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('LFIOUV_MT64',1,ZHOOK_HANDLE)
 
 CONTAINS
 
@@ -1078,13 +1070,13 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE LFIOUV_BB                                     &
+SUBROUTINE LFIOUV64                                      &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -1100,19 +1092,19 @@ INTEGER (KIND=JPLIKB)  KNBARI                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOUV_MT_BB                                             &
+CALL LFIOUV_MT64                                               &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI)
 
 END SUBROUTINE
 
-SUBROUTINE LFIOUV_MM                                     &
+SUBROUTINE LFIOUV                                        &
 &           (KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI)
 USE LFIMOD, ONLY : LFI => LFICOM_DEFAULT, &
 &                   LFICOM_DEFAULT_INIT,   &
 &                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -1128,19 +1120,17 @@ INTEGER (KIND=JPLIKM)  KNBARI                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOUV_MT_MM                                             &
+CALL LFIOUV_MT                                                &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI)
 
 END SUBROUTINE
 
-SUBROUTINE LFIOUV_MT_MM                                       &
+SUBROUTINE LFIOUV_MT                                          &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI)
-USE LFIMOD, ONLY : LFICOM,              &
-&                   LFICOM_DEFAULT_INIT, &
-&                   NEW_LFI_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFIMOD, ONLY : LFICOM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (LFICOM)          LFI                                    ! INOUT
@@ -1166,12 +1156,16 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 INBARP     = INT (    KNBARP, JPLIKB)
 
-CALL LFIOUV_MT_BB                                             &
+CALL LFIOUV_MT64                                               &
 &           (LFI, IREP, INUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, INIMES, INBARP, INBARI)
 
 KREP       = INT (      IREP, JPLIKM)
 KNBARI     = INT (    INBARI, JPLIKM)
+
+IF (KNUMER == 0) THEN
+  KNUMER = INT (    INUMER, JPLIKM)
+ENDIF
 
 END SUBROUTINE
 

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAREGU_MT_BB                                &
+SUBROUTINE FAREGU_MT64                                 &
 &                     (FA,  KNUMER, CDCLEF, KVAL, KOPT )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Ce sous-programme controle (lecture/ecriture) les options
@@ -68,7 +67,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAREGU_MT',0,ZHOOK_HANDLE)
 IREP=0
 !
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -81,7 +80,7 @@ ENDIF
 ! les eventuelles modifs apportees par IDCEN et/ou IDMOD
 !
 IF (FA%FICHIER(IRANG)%LISEC1) THEN
-  CALL FAISC1_MT_BB             &
+  CALL FAISC1_MT64              &
 &                (FA, IREP,IRANG)
   IF (IREP.NE.0) THEN
     WRITE (UNIT=FA%NULOUT,FMT=*)                           &
@@ -456,7 +455,7 @@ WRITE (UNIT=CLMESS,FMT='(''IREP='',I4,'', KNUMER='',I3, &
 &         '', CDCLEF='''''',A,'''''', KVAL='',I12,       &
 &        '', KOPT='',I4)')                               &
 &              IREP,KNUMER,CDCLEF,KVAL,KOPT
-CALL FAIPAR_MT_BB                                    &
+CALL FAIPAR_MT64                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLNSPR,.FALSE.)
 !
@@ -472,12 +471,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAREGU_BB                   &
+SUBROUTINE FAREGU64                    &
 &           (KNUMER, CDCLEF, KVAL, KOPT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN   
@@ -487,17 +486,17 @@ INTEGER (KIND=JPLIKB)  KOPT                                   ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREGU_MT_BB                          &
+CALL FAREGU_MT64                           &
 &           (FA, KNUMER, CDCLEF, KVAL, KOPT)
 
 END SUBROUTINE
 
-SUBROUTINE FAREGU_MM                   &
+SUBROUTINE FAREGU                      &
 &           (KNUMER, CDCLEF, KVAL, KOPT)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KNUMER                                 ! IN   
@@ -507,17 +506,15 @@ INTEGER (KIND=JPLIKM)  KOPT                                   ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREGU_MT_MM                          &
+CALL FAREGU_MT                             &
 &           (FA, KNUMER, CDCLEF, KVAL, KOPT)
 
 END SUBROUTINE
 
-SUBROUTINE FAREGU_MT_MM                    &
+SUBROUTINE FAREGU_MT                       &
 &           (FA, KNUMER, CDCLEF, KVAL, KOPT)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -537,7 +534,7 @@ IF (KOPT==1) THEN
 ENDIF
 IOPT       = INT (      KOPT, JPLIKB)
 
-CALL FAREGU_MT_BB                          &
+CALL FAREGU_MT64                           &
 &           (FA, INUMER, CDCLEF, IVAL, IOPT)
 
 IF (KOPT==0) THEN

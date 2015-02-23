@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANUCA_MT_BB                            &
+SUBROUTINE FANUCA_MT64                             &
 &                     (FA,  CDNOMC, KRANGC, LDVERR )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme calcule le RANG du Cadre de NOM
@@ -40,7 +39,7 @@ LOGICAL LDVERR, LLVERG
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANUCA_MT',0,ZHOOK_HANDLE)
 IF (FA%FANUCA_LLPREA) THEN
-  CALL FARINE_MT_BB             &
+  CALL FARINE_MT64              &
 &                 (FA, 2_JPLIKB )
   FA%FANUCA_LLPREA=.FALSE.
 ENDIF
@@ -48,7 +47,7 @@ ENDIF
 !          VERROUILLAGE GLOBAL (A CAUSE DE L'UTILISATION DE FA%NFIOUV )
 !
 LLVERG=FA%LFAMUL.AND.LDVERR
-IF (LLVERG) CALL LFIVER_MT_BB                      &
+IF (LLVERG) CALL LFIVER_MT64                        &
 &                           (FA%LFI, FA%VRGLAS,'ON')
 !
 DO J=1,FA%NCADEF
@@ -66,7 +65,7 @@ IRESUL=0
 !
 !          DEVERROUILLAGE GLOBAL
 !
-IF (LLVERG) CALL LFIVER_MT_BB                       &
+IF (LLVERG) CALL LFIVER_MT64                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 KRANGC=IRESUL
 !
@@ -76,12 +75,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FANUCA_BB               &
+SUBROUTINE FANUCA64                &
 &           (CDNOMC, KRANGC, LDVERR)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
@@ -90,17 +89,17 @@ LOGICAL                LDVERR                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANUCA_MT_BB                      &
+CALL FANUCA_MT64                       &
 &           (FA, CDNOMC, KRANGC, LDVERR)
 
 END SUBROUTINE
 
-SUBROUTINE FANUCA_MM               &
+SUBROUTINE FANUCA                  &
 &           (CDNOMC, KRANGC, LDVERR)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 CHARACTER (LEN=*)      CDNOMC                                 ! IN   
@@ -109,17 +108,15 @@ LOGICAL                LDVERR                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANUCA_MT_MM                      &
+CALL FANUCA_MT                         &
 &           (FA, CDNOMC, KRANGC, LDVERR)
 
 END SUBROUTINE
 
-SUBROUTINE FANUCA_MT_MM                &
+SUBROUTINE FANUCA_MT                   &
 &           (FA, CDNOMC, KRANGC, LDVERR)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -131,7 +128,7 @@ INTEGER (KIND=JPLIKB)  IRANGC                                 !   OUT
 ! Convert arguments
 
 
-CALL FANUCA_MT_BB                      &
+CALL FANUCA_MT64                       &
 &           (FA, CDNOMC, IRANGC, LDVERR)
 
 KRANGC     = INT (    IRANGC, JPLIKM)

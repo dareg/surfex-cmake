@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAUTIF_MT_BB                          &
+SUBROUTINE FAUTIF_MT64                           &
 &                     (FA,  KREP, KNUMER, CDIDEN )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme permettant de donner un NOM a l'Identificateur
@@ -46,7 +45,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILIDEN=INT (LEN (CDIDEN), JPLIKB)
-CALL FANUMU_MT_BB                &
+CALL FANUMU_MT64                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -59,14 +58,14 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 CLNOMA=FA%FICHIER(IRANG)%CIDENT
 !
 IF (CDIDEN.EQ.FA%CPCACH.OR.CDIDEN.EQ.FA%CPCADI.OR. &
-&    CDIDEN.EQ.FA%CPCAFS.OR.CDIDEN.EQ.FA%CPCARP.OR. &
-&    CDIDEN.EQ.FA%CPDATE) THEN
+&   CDIDEN.EQ.FA%CPCAFS.OR.CDIDEN.EQ.FA%CPCARP.OR. &
+&   CDIDEN.EQ.FA%CPDATE) THEN
   IREP=-111
   GOTO 1001
 ENDIF
@@ -76,7 +75,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 IF (CDIDEN.NE.FA%FICHIER(IRANG)%CIDENT) THEN
-  CALL LFIREN_MT_BB                                           &
+  CALL LFIREN_MT64                                             &
 &                 (FA%LFI, IREP,KNUMER,FA%FICHIER(IRANG)%CIDENT,CDIDEN)
   LLRLFI=IREP.NE.0
   IF (.NOT.LLRLFI) FA%FICHIER(IRANG)%CIDENT=CDIDEN
@@ -94,7 +93,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -122,7 +121,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &         '', CDIDEN='''''',A,'''''''')')                  &
 &   KREP,KNUMER,CLACTI(1:ILACTI)
-  CALL FAIPAR_MT_BB                             &
+  CALL FAIPAR_MT64                              &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA, &
 &               CLMESS,CLNSPR,                    &
 &               CLACTI(1:ILACTI),LLRLFI)
@@ -135,7 +134,7 @@ IF (INIMES.GE.1.AND.IRANG.NE.0) THEN
 &  '(''Ancien Identificateur de l''''unite logique'',I3, &
 &    '' : '''''',A,'''''', Nouveau: '''''',A,'''''''')') &
 &  KNUMER,CLNOMA,FA%FICHIER(IRANG)%CIDENT
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILACTI),.FALSE.)
 ENDIF
@@ -152,12 +151,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAUTIF_BB             &
+SUBROUTINE FAUTIF64              &
 &           (KREP, KNUMER, CDIDEN)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -166,17 +165,17 @@ CHARACTER (LEN=*)      CDIDEN                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAUTIF_MT_BB                    &
+CALL FAUTIF_MT64                     &
 &           (FA, KREP, KNUMER, CDIDEN)
 
 END SUBROUTINE
 
-SUBROUTINE FAUTIF_MM             &
+SUBROUTINE FAUTIF                &
 &           (KREP, KNUMER, CDIDEN)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -185,17 +184,15 @@ CHARACTER (LEN=*)      CDIDEN                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAUTIF_MT_MM                    &
+CALL FAUTIF_MT                       &
 &           (FA, KREP, KNUMER, CDIDEN)
 
 END SUBROUTINE
 
-SUBROUTINE FAUTIF_MT_MM              &
+SUBROUTINE FAUTIF_MT                 &
 &           (FA, KREP, KNUMER, CDIDEN)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -209,7 +206,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAUTIF_MT_BB                    &
+CALL FAUTIF_MT64                     &
 &           (FA, IREP, INUMER, CDIDEN)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACDEC_MT_BB                               &
+SUBROUTINE FACDEC_MT64                                &
 &                     (FA, KREP, PA, PMIN, KNBIT, KDEC)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLR, JPLIKB
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de calcul du FACteur d'echelle DECimal optimal
@@ -75,7 +74,7 @@ INBINT  = 2**KNBIT -1
 XNBINT  = REAL (INBINT, JPDBLR)
 ! Cas du facteur decimal nul (reference a calculer dans tous les cas)
 JDEC    = 0
-CALL FACTEC_MT_BB                                   &
+CALL FACTEC_MT64                                    &
 &              (FA, KREP, PA, KNBIT, JDEC, IE0, INU0)
 
 !
@@ -105,7 +104,7 @@ DO JDEC = IDECMIN, IDECMAX
   IF (ABS(LOG10(ABS(PA))+REAL (JDEC, JPDBLR))  &
 &      .GE. REAL (RANGE(PA), JPDBLR)) CYCLE
 !
-  CALL FACTEC_MT_BB                                    &
+  CALL FACTEC_MT64                                     &
 &                (FA, KREP, PA, KNBIT, JDEC, IE, INUTIL)
   IF (KREP.NE.0) CYCLE
 ! 3/ PMIN*10**JDEC + (2**KNBIT-1)*2**IE < HUGE(real*4) pour decodage
@@ -165,12 +164,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACDEC_BB                    &
+SUBROUTINE FACDEC64                     &
 &           (KREP, PA, PMIN, KNBIT, KDEC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLR, JPLIKB
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -181,17 +180,17 @@ INTEGER (KIND=JPLIKB)  KDEC                                   !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACDEC_MT_BB                           &
+CALL FACDEC_MT64                            &
 &           (FA, KREP, PA, PMIN, KNBIT, KDEC)
 
 END SUBROUTINE
 
-SUBROUTINE FACDEC_MM                    &
+SUBROUTINE FACDEC                       &
 &           (KREP, PA, PMIN, KNBIT, KDEC)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLR, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -202,17 +201,15 @@ INTEGER (KIND=JPLIKM)  KDEC                                   !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACDEC_MT_MM                           &
+CALL FACDEC_MT                              &
 &           (FA, KREP, PA, PMIN, KNBIT, KDEC)
 
 END SUBROUTINE
 
-SUBROUTINE FACDEC_MT_MM                     &
+SUBROUTINE FACDEC_MT                        &
 &           (FA, KREP, PA, PMIN, KNBIT, KDEC)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLR, JPLIKM, JPLIKB
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -229,7 +226,7 @@ INTEGER (KIND=JPLIKB)  IDEC                                   !   OUT
 
 INBIT      = INT (     KNBIT, JPLIKB)
 
-CALL FACDEC_MT_BB                           &
+CALL FACDEC_MT64                            &
 &           (FA, IREP, PA, PMIN, INBIT, IDEC)
 
 KREP       = INT (      IREP, JPLIKM)

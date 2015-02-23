@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIS2F_MT_BB                 &
+SUBROUTINE FAIS2F_MT64                  &
 &                     (FA,  KREP, KRANG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Ce sous-programme initialise un tableau "reference" de
@@ -77,7 +76,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 !
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I4)') &
 &     KREP, KRANG
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLNSPR,.FALSE.)
 ENDIF
@@ -93,12 +92,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAIS2F_BB          &
+SUBROUTINE FAIS2F64           &
 &           (KREP, KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -106,17 +105,17 @@ INTEGER (KIND=JPLIKB)  KRANG                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIS2F_MT_BB           &
+CALL FAIS2F_MT64            &
 &           (FA, KREP, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FAIS2F_MM          &
+SUBROUTINE FAIS2F             &
 &           (KREP, KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -124,17 +123,15 @@ INTEGER (KIND=JPLIKM)  KRANG                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIS2F_MT_MM           &
+CALL FAIS2F_MT              &
 &           (FA, KREP, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FAIS2F_MT_MM          &
+SUBROUTINE FAIS2F_MT             &
 &           (FA, KREP, KRANG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -147,7 +144,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  ! IN
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL FAIS2F_MT_BB           &
+CALL FAIS2F_MT64            &
 &           (FA, IREP, IRANG)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAINOC_MT_BB           &
+SUBROUTINE FAINOC_MT64            &
 &                     (FA,  KRANG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Ce sous-programme permet d'INterpreter, pour un fichier ARPEGE
@@ -44,7 +43,7 @@ LLVERF=.FALSE.
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT_BB                             &
+IF (FA%LFAMUL) CALL LFIVER_MT64                               &
 &                              (FA%LFI, FA%FICHIER(KRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -114,7 +113,7 @@ ENDIF
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT_BB                              &
+IF (LLVERF) CALL LFIVER_MT64                                &
 &                           (FA%LFI, FA%FICHIER(KRANG)%VRFICH,'OFF')
 !
 IF (IXNVMS(KRANG).NE.2)  THEN 
@@ -127,7 +126,7 @@ INIMES=IXNVMS (KRANG)
 IREP=0
 CLNSPR='FAINOC'
 WRITE (UNIT=CLMESS,FMT='(''KRANG='',I4)') KRANG
-CALL FAIPAR_MT_BB                                     &
+CALL FAIPAR_MT64                                      &
 &               (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                CLNSPR,' ',.FALSE.)
 !
@@ -142,46 +141,44 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FAINOC_BB          &
+SUBROUTINE FAINOC64           &
 &           (KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAINOC_MT_BB          &
+CALL FAINOC_MT64           &
 &           (FA, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FAINOC_MM          &
+SUBROUTINE FAINOC             &
 &           (KRANG)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAINOC_MT_MM          &
+CALL FAINOC_MT             &
 &           (FA, KRANG)
 
 END SUBROUTINE
 
-SUBROUTINE FAINOC_MT_MM          &
+SUBROUTINE FAINOC_MT             &
 &           (FA, KRANG)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -192,7 +189,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  ! IN
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL FAINOC_MT_BB          &
+CALL FAINOC_MT64           &
 &           (FA, IRANG)
 
 

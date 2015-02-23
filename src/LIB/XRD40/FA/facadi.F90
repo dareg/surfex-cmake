@@ -1,9 +1,8 @@
 ! Feb-2013 P. Marguinaud Use JNGEOM & JNEXPL parameters
 !                        Reallocate cadre when redefinition happens
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACADI_MT_BB                                          &
+SUBROUTINE FACADI_MT64                                           &
 &                     (FA,  KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO,  &
 &                    PSLOPO,                                       &
 &                    PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,       &
@@ -13,7 +12,7 @@ SUBROUTINE FACADI_MT_BB                                          &
 USE FA_MOD, ONLY : FA_COM, NEW_CADRE, FREE_CADRE, JPNIIL, JNGEOM, JNEXPL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLR
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !        Sous-programme A USAGE INTERNE AU LOGICIEL. Fait la plupart
@@ -338,7 +337,7 @@ IF (KPHASE.EQ.2) GOTO 1001
 !
 !        Le nom de cadre specifie est-il deja defini ?
 !
-CALL FANUCA_MT_BB                         &
+CALL FANUCA_MT64                          &
 &               (FA, CDNOMC,KRANGC,.FALSE.)
 LDREDF=KRANGC.NE.0
 IF (LDREDF) GOTO 500
@@ -424,7 +423,7 @@ ELSE
    ZMSMAX=REAL(-KTYPTR, JPDBLR)
    IMSMAX = -KTYPTR
    ISFLAM = 0
-   CALL ELLIPS_BB (KTRONC,IMSMAX,IKNTMP,IKMTMP)
+   CALL ELLIPS64  (KTRONC,IMSMAX,IKNTMP,IKMTMP)
 !DP      CALL ELLIPS(IMSMAX,KTRONC,IKNTMP,IKMTMP)
 !
 ! Initialisation de FA%NOMPAR (du module FAMODU)
@@ -574,7 +573,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &  KREP,CLACTI(1:ILNOMC),PSLAPO,PCLOPO,PSLOPO,PCODIL,          &
 &  KTRONC,KNLATI,KNXLON,KNIVER,PREFER,LDMODC,LDREDF,KPHASE,    &
 &  KRANGC,KLNOMC,KGARDE
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILNOMC),.FALSE.)
 ELSEIF (KTRONC.LE.FA%NSTROI.AND.(KPHASE.EQ.0.OR.KPHASE.EQ.1)) THEN
@@ -586,7 +585,7 @@ ELSEIF (KTRONC.LE.FA%NSTROI.AND.(KPHASE.EQ.0.OR.KPHASE.EQ.1)) THEN
 &         FMT='(''TRONCATURE ('',I2,'') INFERIEURE '',              &
 & ''OU EGALE A LA SOUS-TRONCATURE "NON COMPACTEE" IMPLICITE ('',I2, &
 & ''), CADRE '''''',A,'''''''')') KTRONC,FA%NSTROI,CDNOMC(1:ILNOMC)
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -597,7 +596,7 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FACADI_BB                                      &
+SUBROUTINE FACADI64                                       &
 &           (KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO,  &
 &           PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, &
 &           PSINLA, KNIVER, PREFER, PAHYBR, PBHYBR, LDMODC, &
@@ -605,7 +604,7 @@ SUBROUTINE FACADI_BB                                      &
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKB, JPDBLR
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   ! IN   
@@ -618,9 +617,9 @@ REAL (KIND=JPDBLR)     PCODIL                                 ! IN
 INTEGER (KIND=JPLIKB)  KTRONC                                 ! IN   
 INTEGER (KIND=JPLIKB)  KNLATI                                 ! IN   
 INTEGER (KIND=JPLIKB)  KNXLON                                 ! IN   
-INTEGER (KIND=JPLIKB)  KNLOPA     (*)                 ! IN   
-INTEGER (KIND=JPLIKB)  KNOZPA     (*)                 ! IN   
-REAL (KIND=JPDBLR)     PSINLA     (*)                 ! IN   
+INTEGER (KIND=JPLIKB)  KNLOPA     (FA%JPXPAH)                 ! IN   
+INTEGER (KIND=JPLIKB)  KNOZPA     (FA%JPXIND)                 ! IN   
+REAL (KIND=JPDBLR)     PSINLA     (FA%JPXGEO)                 ! IN   
 INTEGER (KIND=JPLIKB)  KNIVER                                 ! IN   
 REAL (KIND=JPDBLR)     PREFER                                 ! IN   
 REAL (KIND=JPDBLR)     PAHYBR     (0:KNIVER)                  ! IN   
@@ -634,7 +633,7 @@ INTEGER (KIND=JPLIKB)  KGARDE                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACADI_MT_BB                                            &
+CALL FACADI_MT64                                             &
 &           (FA, KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, &
 &           PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA,    &
 &           PSINLA, KNIVER, PREFER, PAHYBR, PBHYBR, LDMODC,    &
@@ -642,7 +641,7 @@ CALL FACADI_MT_BB                                            &
 
 END SUBROUTINE
 
-SUBROUTINE FACADI_MM                                      &
+SUBROUTINE FACADI                                         &
 &           (KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO,  &
 &           PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, &
 &           PSINLA, KNIVER, PREFER, PAHYBR, PBHYBR, LDMODC, &
@@ -650,7 +649,7 @@ SUBROUTINE FACADI_MM                                      &
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM, JPDBLR
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   ! IN   
@@ -663,9 +662,9 @@ REAL (KIND=JPDBLR)     PCODIL                                 ! IN
 INTEGER (KIND=JPLIKM)  KTRONC                                 ! IN   
 INTEGER (KIND=JPLIKM)  KNLATI                                 ! IN   
 INTEGER (KIND=JPLIKM)  KNXLON                                 ! IN   
-INTEGER (KIND=JPLIKM)  KNLOPA     (*)                 ! IN   
-INTEGER (KIND=JPLIKM)  KNOZPA     (*)                 ! IN   
-REAL (KIND=JPDBLR)     PSINLA     (*)                 ! IN   
+INTEGER (KIND=JPLIKM)  KNLOPA     (FA%JPXPAH)                 ! IN   
+INTEGER (KIND=JPLIKM)  KNOZPA     (FA%JPXIND)                 ! IN   
+REAL (KIND=JPDBLR)     PSINLA     (FA%JPXGEO)                 ! IN   
 INTEGER (KIND=JPLIKM)  KNIVER                                 ! IN   
 REAL (KIND=JPDBLR)     PREFER                                 ! IN   
 REAL (KIND=JPDBLR)     PAHYBR     (0:KNIVER)                  ! IN   
@@ -679,7 +678,7 @@ INTEGER (KIND=JPLIKM)  KGARDE                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACADI_MT_MM                                            &
+CALL FACADI_MT                                               &
 &           (FA, KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, &
 &           PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA,    &
 &           PSINLA, KNIVER, PREFER, PAHYBR, PBHYBR, LDMODC,    &
@@ -687,15 +686,13 @@ CALL FACADI_MT_MM                                            &
 
 END SUBROUTINE
 
-SUBROUTINE FACADI_MT_MM                                      &
+SUBROUTINE FACADI_MT                                         &
 &           (FA, KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, &
 &           PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA,    &
 &           PSINLA, KNIVER, PREFER, PAHYBR, PBHYBR, LDMODC,    &
 &           LDREDF, KPHASE, KRANGC, KLNOMC, KGARDE)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPLIKM, JPLIKB, JPDBLR
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -751,7 +748,7 @@ IF (KPHASE==1) THEN
 ENDIF
 IGARDE     = INT (    KGARDE, JPLIKB)
 
-CALL FACADI_MT_BB                                            &
+CALL FACADI_MT64                                             &
 &           (FA, IREP, CDNOMC, ITYPTR, PSLAPO, PCLOPO, PSLOPO, &
 &           PCODIL, ITRONC, INLATI, INXLON, INLOPA, INOZPA,    &
 &           PSINLA, INIVER, PREFER, PAHYBR, PBHYBR, LDMODC,    &
@@ -763,6 +760,8 @@ IF (KPHASE/=1) THEN
 ENDIF
 
 END SUBROUTINE
+
+
 
 !INTF KREP          IN                                                                                                
 !INTF CDNOMC        IN                                                                                                
@@ -787,5 +786,3 @@ END SUBROUTINE
 !INTF KRANGC          OUT                                                                                             
 !INTF KLNOMC        INOUT                                IN_IF=KPHASE==1                OUT_IF=KPHASE/=1              
 !INTF KGARDE        IN                                                                                                
-
-

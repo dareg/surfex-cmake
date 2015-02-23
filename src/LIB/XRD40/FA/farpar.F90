@@ -1,12 +1,11 @@
 ! Oct-2012 P. Marguinaud 64b LFI
-#include "lfisuffix.h"
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARPAR_MT_BB                                        &
+SUBROUTINE FARPAR_MT64                                         &
 &                     (FA,  KREP, CDPREF, CDSUFF, KCODPA, KNUM )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
 USE YOMHOOK , ONLY : LHOOK, DR_HOOK
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 !****
 !      Sous-programme de reglage de la correspondance "nom d'article FA"
@@ -180,7 +179,7 @@ IF (FA%LFAMOP) THEN
   INUMER=JPNIIL
 !
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4)') KREP
-  CALL FAIPAR_MT_BB                                     &
+  CALL FAIPAR_MT64                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLNSPR,.FALSE.)
 ENDIF
@@ -191,12 +190,12 @@ END SUBROUTINE
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
-SUBROUTINE FARPAR_BB                           &
+SUBROUTINE FARPAR64                            &
 &           (KREP, CDPREF, CDSUFF, KCODPA, KNUM)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
@@ -207,17 +206,17 @@ INTEGER (KIND=JPLIKB)  KCODPA     (KNUM,6)                    ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARPAR_MT_BB                                  &
+CALL FARPAR_MT64                                   &
 &           (FA, KREP, CDPREF, CDSUFF, KCODPA, KNUM)
 
 END SUBROUTINE
 
-SUBROUTINE FARPAR_MM                           &
+SUBROUTINE FARPAR                              &
 &           (KREP, CDPREF, CDSUFF, KCODPA, KNUM)
 USE FA_MOD, ONLY : FA => FA_COM_DEFAULT, &
 &                   FA_COM_DEFAULT_INIT,  &
 &                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
@@ -228,17 +227,15 @@ INTEGER (KIND=JPLIKM)  KCODPA     (KNUM,6)                    ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARPAR_MT_MM                                  &
+CALL FARPAR_MT                                     &
 &           (FA, KREP, CDPREF, CDSUFF, KCODPA, KNUM)
 
 END SUBROUTINE
 
-SUBROUTINE FARPAR_MT_MM                            &
+SUBROUTINE FARPAR_MT                               &
 &           (FA, KREP, CDPREF, CDSUFF, KCODPA, KNUM)
-USE FA_MOD, ONLY : FA_COM,              &
-&                   FA_COM_DEFAULT_INIT, &
-&                   NEW_FA_DEFAULT
-USE LFI_PRECISION, ONLY : JPDBLE, JPDBLR, JPLIKB, JPLIKM
+USE FA_MOD, ONLY : FA_COM
+USE LFI_PRECISION
 IMPLICIT NONE
 ! Arguments
 TYPE (FA_COM)          FA                                     ! INOUT
@@ -256,7 +253,7 @@ INTEGER (KIND=JPLIKB)  INUM                                   ! INOUT
 ICODPA     = INT (    KCODPA, JPLIKB)
 INUM       = INT (      KNUM, JPLIKB)
 
-CALL FARPAR_MT_BB                                  &
+CALL FARPAR_MT64                                   &
 &           (FA, IREP, CDPREF, CDSUFF, ICODPA, INUM)
 
 KREP       = INT (      IREP, JPLIKM)
