@@ -364,7 +364,7 @@ LIBS           += $(LIB_MPI)
 endif
 
 
-ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)
+ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)-$(VER_OMP)
 ##########################################################
 #           Librairie GRIBEX                             #
 ##########################################################

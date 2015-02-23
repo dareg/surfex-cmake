@@ -45,6 +45,10 @@ export ARCH=LXgfortran
 #
 export VER_MPI=MPIAUTO
 #
+#  Version of OMP
+#
+export VER_OMP=NOOMP
+#
 # OPTIMIZATION LEVEL
 #
 #export OPTLEVEL=DEBUG,O2
@@ -91,7 +95,7 @@ export MNH_INT=
 ##########################################################
 ##########################################################
 #
-export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}-${VER_MPI}-${OPTLEVEL}"
+export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}-${VER_MPI}-${VER_OMP}-${OPTLEVEL}"
 #[ "x${VER_USER}" != "x" ] && export XYZ="${XYZ}-${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
 export BIN_TOOLS=NO

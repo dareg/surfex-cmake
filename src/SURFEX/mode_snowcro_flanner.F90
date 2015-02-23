@@ -40,7 +40,7 @@ IMPLICIT NONE
 INCLUDE 'netcdf.inc'
 !
 #ifndef NOMPI
-!$ INCLUDE 'mpif.h'
+INCLUDE 'mpif.h'
 #endif
 !
 #ifndef AIX64

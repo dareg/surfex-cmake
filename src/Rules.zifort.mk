@@ -12,7 +12,7 @@
 #RJ -fpe0 -fp-model precise -assume ieee_fpe_flags ; specially ieee_fpe_flags one on mixed MPI/OMP
 #
 #OPT_BASE  = -openmp -openmp-threadprivate=compat -r8 -g -u -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
-OPT_BASE  = -openmp -openmp-threadprivate=compat -r8 -g -u -assume nosource_include -assume byterecl -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
+OPT_BASE  = -r8 -g -u -assume nosource_include -assume byterecl -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
 #
 OPT_PERF0 = -O0 -fpe0 -ftz
 OPT_PERF2 = -O2 -fpe0 -ftz
@@ -53,15 +53,26 @@ endif
 #
 REALFC=ifort
 #
-F90FLAGS  = $(OPT) -free
-F77FLAGS  = $(OPT) -nofree
+#RJ: on ifort 12.1.6 with -openmp-threadprivate=compat compiler crashes on spll_modd_teb_irrig_n.f90
+#    catastrophic error: **Internal compiler error: internal abort**, nice
+FCFLAGS_OMP= -openmp -openmp-threadprivate=compat
+#RJ: temporary solution for OMP segfaults on TSNOW subcomponents in unpack_isba_patchn.F90
+FCFLAGS_OMP += -check pointers
+CFLAGS_OMP=
+ifeq "$(VER_OMP)" "NOOMP"
+FCFLAGS_OMP=
+CFLAGS_OMP=
+endif
+#
+F90FLAGS  = $(OPT) $(FCFLAGS_OMP) -free
+F77FLAGS  = $(OPT) $(FCFLAGS_OMP) -nofree
 FX90      = $(F77)
-FX90FLAGS = $(OPT) -nofree
+FX90FLAGS = $(OPT) $(FCFLAGS_OMP) -nofree
 #
 CC        = gcc
-CFLAGS    =
+CFLAGS    = $(CFLAGS_OMP)
 #
-LDFLAGS   =  -Wl,-warn-once -openmp -openmp-threadprivate=compat -traceback
+LDFLAGS   = $(FCFLAGS_OMP) -Wl,-warn-once -traceback
 #
 # NetCDF external
 #

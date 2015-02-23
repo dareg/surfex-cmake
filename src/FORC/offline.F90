@@ -179,7 +179,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 #ifndef NOMPI
-!$ INCLUDE 'mpif.h'
+INCLUDE 'mpif.h'
 #endif
 !
 #ifndef AIX64

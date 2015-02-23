@@ -8,7 +8,7 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Wall -Wextra -Waliasing -Wampersand -Warray-temporaries -Wcharacter-truncation -Wconversion-extra -Wsurprising -Wunderflow -Wno-compare-reals
+OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Wall -Wextra -Waliasing -Wampersand -Warray-temporaries -Wcharacter-truncation -Wconversion-extra -Wsurprising -Wunderflow -Wno-compare-reals
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
@@ -51,15 +51,22 @@ endif
 #
 REALFC=gfortran
 #
-F90FLAGS      = $(OPT) -ffree-form -ffree-line-length-none
-F77FLAGS      = $(OPT) -ffixed-form
+FCFLAGS_OMP= -fopenmp
+CCFLAGS_OMP= -fopenmp
+ifeq "$(VER_OMP)" "NOOMP"
+FCFLAGS_OMP=
+CCFLAGS_OMP=
+endif
+#
+F90FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffree-form -ffree-line-length-none
+F77FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffixed-form
 FX90          = $(F77)
-FX90FLAGS     = $(OPT) -ffixed-form
+FX90FLAGS     = $(OPT) $(FCFLAGS_OMP) -ffixed-form
 #
 CC            = gcc
-CFLAGS        =
+CFLAGS        = $(CFLAGS_OMP)
 #
-LDFLAGS   = -fopenmp -fbacktrace -fuse-ld=gold
+LDFLAGS   =  $(FCFLAGS_OMP) -fbacktrace -fuse-ld=gold
 #
 # NetCDF external
 #

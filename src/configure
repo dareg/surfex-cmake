@@ -29,6 +29,7 @@ then
   'bgfortran'*)
     export ARCH=${ARCH:-bgfortran}
     export VER_MPI=${VER_MPI:-NOMPI}
+    export VER_OMP=${VER_OMP:-NOOMP}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFEXT}
     export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_EXT}
@@ -44,6 +45,7 @@ bash --norc
   'zgfortran'*)
     export ARCH=${ARCH:-zgfortran}
     export VER_MPI=${VER_MPI:-MPIAUTO}
+    export VER_OMP=${VER_OMP:-NOOMP}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFAUTO}
     export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_AUTO}
@@ -59,6 +61,7 @@ bash --norc
   'zifort'*)
     export ARCH=${ARCH:-zifort}
     export VER_MPI=${VER_MPI:-NOMPI}
+    export VER_OMP=${VER_OMP:-OMP}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFEXT}
     export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_EXT}
@@ -331,6 +334,18 @@ fi
 #
 # Prepare defaults, if not provided
 #
+# Compile non MPI version of surfex by default
+if [ -z  "${VER_MPI}" ]
+then
+  export VER_MPI="NOMPI"
+fi
+#
+# Compile OpenMP version of surfex by default, long story..
+if [ -z  "${VER_OMP}" ]
+then
+  export VER_OMP="OMP"
+fi
+#
 # NETCDF library
 if [ -z  "${VER_CDF}" ]
 then
@@ -365,7 +380,7 @@ fi
 #
 "${LOCAL}/bin/eval_dollar"  profile_surfex.ihm > profile_surfex
 chmod +x profile_surfex
-XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}${VER_MPI:+-${VER_MPI}}-${OPTLEVEL}
+XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}${VER_MPI:+-${VER_MPI}}${VER_OMP:+-${VER_OMP}}-${OPTLEVEL}
 cp profile_surfex "profile_surfex-${XYZ}"
 #
 #  Do some post-install stuff
@@ -438,6 +453,7 @@ fi
 
 echo  "ARCH=${ARCH}"
 echo  "VER_MPI=${VER_MPI}"
+echo  "VER_OMP=${VER_OMP}"
 echo  "VER_USER=${VER_USER-' pas de version user ...'}"
 echo  "OPTLEVEL=${OPTLEVEL}"
 echo  "CONF_DOLLAR=${CONF_DOLLAR}"

@@ -8,7 +8,7 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Wsurprising
+OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic -fbacktrace -fconvert=swap -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Wsurprising
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
@@ -56,18 +56,25 @@ endif
 #
 REALFC=gfortran5r
 #
-F90FLAGS      = $(OPT) -ffree-form -ffree-line-length-none
-F77FLAGS      = $(OPT) -ffixed-form
+FCFLAGS_OMP= -fopenmp
+CFLAGS_OMP= -fopenmp
+ifeq "$(VER_OMP)" "NOOMP"
+FCFLAGS_OMP=
+CFLAGS_OMP=
+endif
+#
+F90FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffree-form -ffree-line-length-none
+F77FLAGS      = $(OPT) $(FCFLAGS_OMP) -ffixed-form
 FX90          = $(F77)
-FX90FLAGS     = $(OPT) -ffixed-form
+FX90FLAGS     = $(OPT) $(FCFLAGS_OMP) -ffixed-form
 #
 CC            = gcc5r
-CFLAGS        =
+CFLAGS        = $(CFLAGS_OMP)
 #
 #LDFLAGS   = -fbacktrace -fuse-ld=bfd -Wl,-warn-once
 #zRJ: on DragonFly BSD libc doesn't have bactrace_symbols_fd(), unlike g(arbage)libc
 #zRJ: bactrace functions can be used from devel/libexecinfo port library libexecinfo.so
-LDFLAGS   =  -Wl,-warn-once -fopenmp -fbacktrace -L/usr/local/lib -lexecinfo
+LDFLAGS   =  $(FCFLAGS_OMP) -Wl,-warn-once -fbacktrace -L/usr/local/lib -lexecinfo
 #
 # NetCDF external
 #
