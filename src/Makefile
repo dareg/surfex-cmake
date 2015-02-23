@@ -1,3 +1,6 @@
+####
+MAKEFLAGS += -r
+####
 ##########################################################
 #                                                        #
 #  MACRO : dependance_flist                              #
@@ -228,16 +231,16 @@ installmaster : libmaster
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  OBJDIR=$(OBJDIR_MASTER) install
 
 cleanlibmaster :
-	rm -f  $(LIB_MASTER) 
+	-rm -f  $(LIB_MASTER)
 
-cleanmaster : gribex_clean 
-	test -d $(OBJDIR_MASTER) && rm -fr  $(OBJDIR_MASTER)
+cleanmaster : $(addprefix clean_,$(PROJECTS))
+	-test -d $(OBJDIR_MASTER) && rm -fr $(OBJDIR_MASTER)
 
-cleanobjmaster :  
-	test -d $(OBJDIR_MASTER) && find $(OBJDIR_MASTER) -follow -name "*.o" -o -name "*.mod" | xargs rm 
+cleanobjmaster :
+	-test -d $(OBJDIR_MASTER) && find $(OBJDIR_MASTER) -follow -name "*.o" -o -name "*.mod" | xargs rm
 
-cleanprogmaster :
-	test -d $(OBJDIR_MASTER) && cd $(OBJDIR_MASTER) && rm -f $(PROG_LIST)
+clean_progmaster :
+	-test -d $(OBJDIR_MASTER) && cd $(OBJDIR_MASTER) && rm -f $(PROG_LIST)
 
 ##########################################################
 #                                                        #
@@ -319,7 +322,7 @@ endif
 endif
 
 gribex_clean :
-	- [  -d $(DIR_GRIBEX)_$(ARCH) ] && rm -fr $(DIR_GRIBEX)_$(ARCH) 
+	- [ ! -d $(DIR_GRIBEX)_$(ARCH) ] || rm -fr $(DIR_GRIBEX)_$(ARCH)
 endif
 ##########################################################
 #                                                        #
@@ -337,8 +340,8 @@ $(GRIBAPI_INC) :
 	 $(MAKE) -j 1 install && \
 	 $(MAKE) -j 1 clean
 
-gribapi_clean :
-	- [  -d ${GRIBAPI_PATH} ] && rm -fr ${GRIBAPI_PATH} 
+clean_gribapi :
+	- [ ! -d ${GRIBAPI_PATH} ] || rm -fr ${GRIBAPI_PATH}
 endif
 ##########################################################
 #                                                        #
@@ -364,9 +367,8 @@ $(CDF_INC) :
 	 $(MAKE) -j 1 install && \
 	 $(MAKE) -j 1 clean
 
-cleanmaster : cleancdf
-cleancdf :
-	- [ -d ${CDF_PATH} ] && rm -fr  ${CDF_PATH}
+clean_cdf :
+	- [ ! -d ${CDF_PATH} ] || rm -fr  ${CDF_PATH}
 endif
 
 ##########################################################
@@ -391,37 +393,19 @@ endif
 ##########################################################
 ecoclimap:${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin
 
-
-ifeq "$(F90)" "ifort"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && ./a.out
-else
-ifeq "$(F90)" "mpiifort"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && ./a.out
-else
-ifeq "$(F90)" "pgf90"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -byteswapio convert_ecoclimap_param.f90  && ./a.out
-else
-ifeq "$(ARCH)" "SX8"
 ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && qsub job_ecoclimap_sx8
+ifeq "$(ARCH)" "SX8"
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && qsub job_ecoclimap_sx8
 else
 ifeq "$(ARCH)" "AIX64"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && llsubmit job_ecoclimap_aix64
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && llsubmit job_ecoclimap_aix64
 else
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -fconvert=swap convert_ecoclimap_param.f90 && ./a.out
-endif
-endif
-endif
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && ./a.out
 endif
 endif
 
-cleanecoclimap :
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && rm -f ./*.bin
+clean_ecoclimap :
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && rm -f ./*.bin ./a.out
 
 ##########################################################
 #                                                        #
@@ -479,7 +463,7 @@ $(EXAMPLES) :
 	cd $(PWD_KTEST)/$(*F) ; run_$(*F) all_ncl_lfi2cdf
 
 %_clean :
-	cd $(PWD_KTEST)/$(*F) ; $(MAKE) clean
+	[ ! -d "$(PWD_KTEST)/$(*F)" ] || (cd $(PWD_KTEST)/$(*F) ; $(MAKE) clean)
 
 EXAMPLES_CHIMIE=009_ICARTT 011_KW78CHEM
 
@@ -520,10 +504,10 @@ endif
 
 
 
-cleanuser :  
+cleanuser :
 	test -d $(OBJDIR_USER) && rm -fr  $(OBJDIR_USER)
 
-clean :  examplesclean gribex_clean
+clean :  examplesclean cleanmaster $(addprefix clean_,$(REDISTS))
 	rm -fr  $(OBJDIR_ROOT)
 cleanprog :
 	cd $(OBJDIR_ROOT) ; rm -f $(PROG_LIST)
@@ -543,27 +527,28 @@ ARFLAGS=r
 %.D:%.F90
 	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f90 
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f90 
-	rm -f $(OBJDIR)/$(*F).f90 
+	-@rm -f $(OBJDIR)/$(*F).f90
 
 %.D:%.f90
 	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f90 
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f90 
-	rm -f $(OBJDIR)/$(*F).f90 
+	-@rm -f $(OBJDIR)/$(*F).f90
 
-%.D:%.fx90
-	$(CPP)  $(INC) $(CPPFLAGS) $< > $(OBJDIR)/$(*F).fx90
-	spll $(NSOURCE) $(OBJDIR)/$(*F).fx90 
-	rm -f $(OBJDIR)/$(*F).fx90
- 
+#RJ: strange
+#%.D:%.fx90
+#	$(CPP)  $(INC) $(FPPFLAGS) $< > $(OBJDIR)/$(*F).fx90
+#	spll $(NSOURCE) $(OBJDIR)/$(*F).fx90
+#	-@rm -f $(OBJDIR)/$(*F).fx90
+
 %.D:%.F
 	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f
-	rm -f $(OBJDIR)/$(*F).f
+	-@rm -f $(OBJDIR)/$(*F).f
 
 %.D:%.f
 	$(CPP)  $(INC) $(CPPFLAGS) $< > $(OBJDIR)/$(*F).f
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f 
-	rm -f $(OBJDIR)/$(*F).f
+	-@rm -f $(OBJDIR)/$(*F).f
  
 #
 # GENERATION OF OBJET FILES : *.o
@@ -571,20 +556,20 @@ ARFLAGS=r
 
 %.o:%.f90
 	$(F90) -I$(OBJDIR) $(INC) -c $(F90FLAGS) $< 
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
 
 %.o:%.f
 	$(F77) -I$(OBJDIR) $(INC) -c $(F77FLAGS)  $<  
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
 
 %.o:%.fx90
 	cp $< $(OBJDIR)/$(*F).f 
 	$(FX90) -I$(OBJDIR) $(INC) -c $(FX90FLAGS) $(OBJDIR)/$(*F).f   
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
 
 %.o : %.c
 	$(CC) $(INC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
 
 ifeq "$(DO_COMP_MASTER)" "YES"
 include  filedepallmaster
