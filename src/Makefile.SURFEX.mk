@@ -166,25 +166,6 @@ endif
 ##########################################################
 #           Librairie DR_HOOK                            #
 ##########################################################
-#ifeq "$(VER_MPI)" "NOMPI"
-#DIR_HOOK     +=  LIB/drhook_CY31R2.032
-#INC_HOOK = -I$(B)LIB/drhook_CY31R2.032
-#else
-#DIR_HOOK     +=  LIB/drhook_CY31R2.032_mpi
-#INC_HOOK = -I$(B)LIB/drhook_CY31R2.032_mpi
-#endif
-##
-#ifdef DIR_HOOK
-#LIBS       += $(DIR_HOOK)/libdrhook.a $(DIR_HOOK)/libodbdummy.a
-##$(DIR_HOOK)/libodbdummy.a 
-##$(DIR_HOOK)/libodbmain.a
-#INC        += $(INC_HOOK)
-#VPATH      += $(DIR_HOOK)
-#endif
-##
-#ifeq "$(VER_MPI)" "NOMPI"
-#LIBS       += $(DIR_HOOK)/libmpi_serial.a
-#endif
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
 CPPGLAGS_HOOK += -DLINUX

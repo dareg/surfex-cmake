@@ -365,36 +365,6 @@ cleanoasis :
 endif
 ##########################################################
 #                                                        #
-# EXTRA LIB : DR_HOOK                                    #
-#                                                        #
-##########################################################
-ifeq "$(F90)" "gfortran"
-ARCHOOK="linuxgfortran"
-#ARCHOOK="linuxgfortran_ubuntu"
-else
-ifeq "$(F90)" "mpif90"
-ARCHOOK="linuxmpif90"
-#ARCHOOK="linuxmpif90_ubuntu"
-else
-ifeq "$(F90)" "LXpgi"
-ARCHOOK="linux"
-else
-ARCHOOK=$(ARCH)
-ifeq "$(VER_MPI)" "NOMPI"
-ARCHOOK=$(ARCH)_nompi
-endif
-endif
-endif
-endif
-
-#drhook : $(DIR_HOOK)/parkind1.mod
-#$(DIR_HOOK)/parkind1.mod :
-#	cd $(DIR_HOOK) && ./configure ARCH=$(ARCHOOK) && $(MAKE) ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make
-
-#cleandrhook :
-#	cd $(DIR_HOOK) && rm -f *.mod *.a
-##########################################################
-#                                                        #
 # EXTRA LIB : ECOCLIMAP                                  #
 #                                                        #
 ##########################################################
