@@ -30,7 +30,8 @@ then
     export ARCH=${ARCH:-bgfortran}
     export VER_MPI=${VER_MPI:-NOMPI}
     export OPTLEVEL=${OPTLEVEL:-O2}
-    export VER_CDF=${VER_CDF:-CDFAUTO}
+    export VER_CDF=${VER_CDF:-CDFEXT}
+    export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_EXT}
     export VER_DRHOOK=${VER_DRHOOK:-BYPASS}
     export NEED_NCARG=${NEED_NCARG:-NO}
     export MVWORK=${MVWORK:-NO}
@@ -45,6 +46,7 @@ bash --norc
     export VER_MPI=${VER_MPI:-MPIAUTO}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFAUTO}
+    export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_AUTO}
     export VER_DRHOOK=${VER_DRHOOK:-BYPASS}
     export NEED_NCARG=${NEED_NCARG:-NO}
     export MVWORK=${MVWORK:-NO}
@@ -58,7 +60,8 @@ bash --norc
     export ARCH=${ARCH:-zifort}
     export VER_MPI=${VER_MPI:-NOMPI}
     export OPTLEVEL=${OPTLEVEL:-O2}
-    export VER_CDF=${VER_CDF:-CDFAUTO}
+    export VER_CDF=${VER_CDF:-CDFEXT}
+    export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_EXT}
     export VER_DRHOOK=${VER_DRHOOK:-BYPASS}
     export NEED_NCARG=${NEED_NCARG:-NO}
     export MVWORK=${MVWORK:-NO}
@@ -328,6 +331,18 @@ fi
 #
 # Prepare defaults, if not provided
 #
+# NETCDF library
+if [ -z  "${VER_CDF}" ]
+then
+  export VER_CDF=CDFAUTO
+fi
+#
+# GRIBAPI library
+if [ -z  "${VER_GRIBAPI}" ]
+then
+  export VER_GRIBAPI=GRIBAPI_AUTO
+fi
+#
 # DRHOOK library
 if [ -z  "${VER_DRHOOK}" ]
 then
@@ -384,69 +399,18 @@ fi
 #  Install CDF if VER_CDF=CDFAUTO
 #
 if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
-cd "$LOCAL/src/LIB"
-if [ "x${VER_MPI}" = "xNOMPI" ] ; then
-( [ ! -d "netcdf-${VERSION_CDF}" ] && tar xvfz "netcdf-${VERSION_CDF}.tar.gz" )
-else
-if [ ! -d "netcdf-${VERSION_CDF}-mpi" ] ; then
-  mkdir "netcdf-${VERSION_CDF}-mpi"
-  cp -f "netcdf-${VERSION_CDF}.tar.gz" "netcdf-${VERSION_CDF}-mpi/"
-  cd "netcdf-${VERSION_CDF}-mpi"
-  tar xvfz "netcdf-${VERSION_CDF}.tar.gz"
-  mv "netcdf-${VERSION_CDF}"/* .
-  rm -r "netcdf-${VERSION_CDF}"
-fi
+if [ ! -d "$LOCAL/src/LIB"/"netcdf-${VERSION_CDF}" ] ; then
+  ( cd "$LOCAL/src/LIB" ; tar xvfz netcdf-${VERSION_CDF}.tar.gz )
 fi
 fi
 #
-#  Install GRIBAPI 
+#  Install GRIBAPI if VER_GRIBAPI=GRIBAPI_AUTO
 #
-if [ "$TARG" = "Linux yuki" -o "$TARG" = "Linux tori"  ] ; then
-  cd "$LOCAL/src/LIB"
-  if [ "x${VER_MPI}" = "xNOMPI" ] ; then
-    if [ ! -d "grib_api-${VERSION_GRIBAPI}-${ARCH}${MNH_INT}" ] ; then
-	  mkdir "grib_api-${VERSION_GRIBAPI}-${ARCH}${MNH_INT}"
-	  cd "grib_api-${VERSION_GRIBAPI}-${ARCH}${MNH_INT}"
-          ln -s /usr/local/SX/grib_api/* .
-    fi
-  else
-    if [ ! -d "grib_api-${VERSION_GRIBAPI}-mpi-${ARCH}${MNH_INT}" ] ; then
-	  mkdir "grib_api-${VERSION_GRIBAPI}-mpi-${ARCH}${MNH_INT}"
-	  cd "grib_api-${VERSION_GRIBAPI}-mpi-${ARCH}${MNH_INT}"
-          ln -s /usr/local/SX/grib_api/* .
-    fi	  
-  fi
-else
-  cd "$LOCAL/src/LIB"
-  if [ "x${VER_MPI}" = "xNOMPI" ] ; then
-  ( [ ! -d "grib_api-${VERSION_GRIBAPI}" ] && gunzip -c "grib_api-${VERSION_GRIBAPI}.tar.gz" |tar -xvf - )
-  else
-    if [ ! -d "grib_api-${VERSION_GRIBAPI}-mpi" ]; then
-	    mkdir "grib_api-${VERSION_GRIBAPI}-mpi"
-	    cp -f "grib_api-${VERSION_GRIBAPI}.tar.gz" "grib_api-${VERSION_GRIBAPI}-mpi/"
-	    cd  "grib_api-${VERSION_GRIBAPI}-mpi"
-	    tar xzvf "grib_api-${VERSION_GRIBAPI}.tar.gz"
-	    mv "grib_api-${VERSION_GRIBAPI}"/* .
-	    rm -r "grib_api-${VERSION_GRIBAPI}"
-    fi
-  fi
+if [ "x${VER_GRIBAPI}" = "xGRIBAPI_AUTO" ] ; then
+if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}" ] ; then
+  ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}.tar.gz )
 fi
-#
-#  Install DR_HOOK
-#
-#cd "$LOCAL/src/LIB"
-#if [ "x${VER_MPI}" = "xNOMPI" ] ; then
-#   [ ! -d drhook_CY31R2.032 ] && tar -xvf drhook_CY31R2.032.tar
-#else
-#  if [ ! -d drhook_CY31R2.032_mpi ]; then
-#    mkdir drhook_CY31R2.032_mpi
-#    cp -f drhook_CY31R2.032.tar drhook_CY31R2.032_mpi
-#    cd drhook_CY31R2.032_mpi
-#    tar xvf drhook_CY31R2.032.tar
-#    mv drhook_CY31R2.032/* .
-#    rm -r drhook_CY31R2.032
-#  fi
-#fi
+fi
 #
 #  Install OASIS
 #
@@ -478,6 +442,7 @@ echo  "VER_USER=${VER_USER-' pas de version user ...'}"
 echo  "OPTLEVEL=${OPTLEVEL}"
 echo  "CONF_DOLLAR=${CONF_DOLLAR}"
 echo  "VER_CDF=${VER_CDF}"
+echo  "VER_GRIBAPI=${VER_GRIBAPI}"
 echo  "VER_DRHOOK=${VER_DRHOOK}"
 echo  "BIN_TOOLS=${BIN_TOOLS}"
 echo  "VER_OASIS=${VER_OASIS}"

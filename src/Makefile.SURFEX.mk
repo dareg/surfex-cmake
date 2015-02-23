@@ -146,6 +146,8 @@ endif
 ##########################################################
 #           Source LFI                                   #
 ##########################################################
+#RJ: unneeded?
+ifdef LFI_COMPRESS
 DIR_LFIC      += LIB/LFI_COMPRESS/src
 PATH_LFIC     += LIB/LFI_COMPRESS/srcc
 CPPFLAGS_LFIC = -DSWAPIO -DLINUX -DBIG_endian -Df2cFortran
@@ -162,6 +164,7 @@ INC                 += $(INC_LFIC)
 VPATH               += $(PATH_LFIC)
 #VER_NEWLFI=
 #ARCH_XYZ    := $(ARCH_XYZ)-$(VER_NEWLFI)
+endif
 endif
 ##########################################################
 #           Librairie DR_HOOK                            #
@@ -378,53 +381,44 @@ ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)
 ##########################################################
 #           Librairie GRIBAPI                            #
 ##########################################################
-ifneq "$(ARCH)" "BG"
-# Gribapi bypass on BG for the moment
-ifeq "$(VER_MPI)" "NOMPI"
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}
-else
-DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}-mpi
-endif
-GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}${MNH_INT}
+#RJ: avoid non standard libs! Can create non conforming outputs
+GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
+#
+INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api
 endif
 
 ifeq "$(VER_GRIBAPI)" "SOPRANO"
-DIR_GRIBAPI=/usr/local/sopra/grib_api
-GRIBAPI_PATH=${DIR_GRIBAPI}
-GRIBAPI_INC=${GRIBAPI_PATH}/include/grib_api.mod
-endif
-
-#
-ifdef DIR_GRIBAPI
+GRIBAPI_PATH=/usr/local/sopra/grib_api
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
 LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api
+endif
+
+ifneq "x$(VER_GRIBAPI)" "x"
 INC           += $(INC_GRIBAPI)
 LIBS          += $(LIB_GRIBAPI)
-VPATH         += $(GRIBAPI_PATH)/include
-R64_GRIBAPI=R64
 endif
 ##########################################################
 #           Librairie NETCDF                             #
 ##########################################################
 #
-# NetCDF  : AUTO install of netcdf-3.6.X on PC linux to avoid problem with compiler
-#  
+# NetCDF  : AUTO install of netcdf-3.6.X or 4.x.x on PC linux to avoid problem with compiler
 #
 ifeq "$(VER_CDF)" "CDFAUTO"
-ifeq "$(VER_MPI)" "NOMPI"
 DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}
-else
-DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}-mpi
-endif
-CDF_PATH?=${DIR_CDF}-${ARCH}${MNH_INT}
-CDF_INC?=${CDF_PATH}/include/netcdf.inc
+#RJ: avoid non standard libs! Can create non conforming outputs
+CDF_PATH?=${DIR_CDF}-${ARCH}
+CDF_INC?=${CDF_PATH}/include/netcdf.mod
 #
 INC_NETCDF     ?= -I${CDF_PATH}/include
-LIB_NETCDF     ?= -L${CDF_PATH}/lib -L${CDF_PATH}/lib64 -lnetcdf_c++ -lnetcdf
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
+ifeq "$(VERSION_CDF)" "3.6.3"
+LIB_NETCDF     ?= -L${CDF_PATH}/lib -L${CDF_PATH}/lib64 -lnetcdf
+else
+LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf
+endif
 endif
 #
 # NetCDF in SGI ICE
@@ -433,9 +427,6 @@ ifeq "$(VER_CDF)" "CDFICE"
 CDF_PATH?=/opt/software/SGI/netcdf/4.0
 INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff  -lnetcdf -i_dynamic 
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 #
 # NetCDF in NEC SX
@@ -444,18 +435,12 @@ ifeq "$(VER_CDF)" "CDFSX"
 CDF_PATH?=/SXlocal/pub/netcdf/3.6.1
 INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdf_c++ -lnetcdf
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 #
 ifeq "$(VER_CDF)" "CDFMFSX"
 CDF_PATH?=/usr/local/SX/lib/NETCDF_size_t32
 INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdf
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 #
 # NetCDF in AIX S
@@ -464,9 +449,6 @@ ifeq "$(VER_CDF)" "CDFAIX"
 CDF_PATH?=/usr/local/pub/NetCDF/3.6.2
 INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdf_c++ -lnetcdf
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -475,10 +457,6 @@ endif
 ifeq "$(VER_CDF)" "CDFGFOR"
 INC_NETCDF     ?=  -I/usr/include
 LIB_NETCDF     ?=  -lnetcdf -lnetcdff /usr/lib64/libgfortran.so.2
-#LIB_NETCDF     ?=  -lnetcdf -lnetcdff 
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -488,9 +466,6 @@ ifeq "$(VER_CDF)" "CDFCTI"
 CDF_PATH?=/usr
 INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -500,9 +475,6 @@ ifeq "$(VER_CDF)" "CDF3GFOR"
 CDF_PATH       ?=/opt/netcdf3
 INC_NETCDF     ?= -I${CDF_PATH}/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib64  -lnetcdf_c++ -lnetcdf
-INC            +=  $(INC_NETCDF)
-LIBS           +=  $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -512,9 +484,6 @@ ifeq "$(VER_CDF)" "CDFSOPRANO"
 CDF_PATH?=/usr
 INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 
 #
@@ -523,19 +492,13 @@ endif
 ifeq "$(VER_CDF)" "CDFBOFX"
 CDF_PATH       ?= /opt/softs/libraries/ICC13.1.4.183/netcdf-4.3.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
-#INC_NETCDF     += -I${CDF_PATH}/zlib-1.2.5/include
-#INC_NETCDF     += -I${CDF_PATH}/szip-2.1/include
-#INC_NETCDF     += -I${CDF_PATH}/hdf5-1.8.11/include
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf
-#LIB_NETCDF     += -L${CDF_PATH}/zlib-1.2.5/lib -lz
-#LIB_NETCDF     += -L${CDF_PATH}/szip-2.1/lib -lsz
-#LIB_NETCDF     += -L${CDF_PATH}/hdf5-1.8.11/lib -lhdf5_hl -lhdf5
-INC            += $(INC_NETCDF)
-LIBS           += $(LIB_NETCDF)
-VPATH          += ${CDF_PATH}/include
 endif
 
-
+ifneq "x$(VER_GRIBAPI)" "x"
+INC            += $(INC_NETCDF)
+LIBS           += $(LIB_NETCDF)
+endif
 ##########################################################
 #           Librairie OASIS3-MCT                         #
 ##########################################################

@@ -7,6 +7,13 @@ exit 1
 fi
 NSOURCE=$1
 file=$2
+
+#RJ: list of module names not to include in dependencies, avoid spaces! \<(${EXTERNAL})\>
+EXTERNAL="PROCEDURE|IFCORE|GRIB_API|NETCDF|HDF5|MPI|MPI_F08"
+EXTERNAL="${EXTERNAL}|ISO_FORTRAN_ENV|OMP_LIB|OMP_LIB_KINDS"
+EXTERNAL="${EXTERNAL}|IEEE_EXCEPTIONS|IEEE_ARITHMETIC|IEEE_FEATURES"
+EXTERNAL="${EXTERNAL}|ISO_C_BINDING"
+
 DIRNAME=$(dirname "$file")
 BASENAME=$(basename "$file")
 SUF=$(echo "$BASENAME" | awk -F'.' '{print$2}')
@@ -114,8 +121,11 @@ then
   cp "$spllfile" "$DIRNAME/$spllfile"
   touch "$DIRNAME/$BASENAME2.D"
 fi
+#RJ: expanding dep removal list
+EXTERNAL=$(echo ${EXTERNAL-PROCEDURE} |sed -e "s/[, .\t\n]//g")
 #RJ: avoid problems with locales - grep outputs "Binary file matches" if extended ascii characters are present - file.mod for spll_modd_diag_ocean.f90
-dep=$(egrep -a -i "^[[:space:]]*use"    "$spllfile" | sed -e 's/,/ /g' | awk '{ print '"${TOCASE}"'($2)".mod"}' | sort -u |tr "\n" " " )
+#dep=$(egrep -a -i "^[[:space:]]*use"    "$spllfile" | sed -e 's/,/ /g' | awk '{ print '"${TOCASE}"'($2)".mod"}' | sort -u |tr "\n" " " )
+dep=$(egrep -a -i "^[[:space:]]*use"    "$spllfile" | sed -e 's/,/ /g' | awk '{ print '"${TOCASE}"'($2)".mod"}' | sort -u | egrep -iv "\<(${EXTERNAL})\>" |tr "\n" " " )
 mod=$(egrep -a -i "^[[:space:]]*module" "$spllfile" | sed -e 's/,/ /g' | awk '{ print '"${TOCASE}"'($2)".mod"}' | sort -u | grep -iv procedure |tr "\n" " " )
 
 if [ -n "$mod" ]

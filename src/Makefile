@@ -168,16 +168,23 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 # MASTER RULES                                           #
 #                                                        #
 ##########################################################
-ifeq "$(VER_CDF)" "CDFAUTO"
-#RJ: temporary disable oasis target, renable after fixed serial compilation
-#all : ecoclimap gribapi cdf oasis progmaster
-all : ecoclimap gribapi cdf progmaster
-else
-#all : ecoclimap gribapi oasis progmaster
-all : ecoclimap gribapi progmaster
+#RJ: compile internal packages as REDISTS, before compilation of the SURFEX code
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
+REDISTS += gribapi
 endif
 
-objdirmaster :  $(OBJDIR_MASTER)/.dummy
+ifeq "$(VER_CDF)" "CDFAUTO"
+REDISTS += cdf
+endif
+
+#RJ: temporary disable oasis target, renable after fixed serial compilation
+# main projectes
+PROJECTS += ecoclimap progmaster
+
+#RJ: add new main target, must come first!
+all : $(REDISTS) $(PROJECTS)
+
+objdirmaster :  $(OBJDIR_MASTER)/.dummy $(REDISTS)
 
 $(OBJDIR_MASTER)/.dummy :
 	-mkdir -p $(OBJDIR_MASTER)/.dummy
@@ -240,7 +247,7 @@ cleanprogmaster :
 
 user : proguser
 
-objdiruser :  $(OBJDIR_USER)/.dummy
+objdiruser :  $(OBJDIR_USER)/.dummy $(REDISTS)
 
 $(OBJDIR_USER)/.dummy :
 	-mkdir -p $(OBJDIR_USER)/.dummy
@@ -288,6 +295,8 @@ cleanproguser :
 # EXTRA LIB : GRIBEX                                     #
 #                                                        #
 ##########################################################
+#RJ: seems not needed
+ifdef GRIBEX
 ifneq "$(findstring 64,$(shell uname -m))" ""
 A64=A64
 endif
@@ -311,14 +320,17 @@ endif
 
 gribex_clean :
 	- [  -d $(DIR_GRIBEX)_$(ARCH) ] && rm -fr $(DIR_GRIBEX)_$(ARCH) 
+endif
 ##########################################################
 #                                                        #
 # EXTRA LIB : GRIBAPI                                    #
 #                                                        #
 ##########################################################
+#RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 gribapi : $(GRIBAPI_INC)
-$(GRIBAPI_INC) : 
-	cd $(DIR_GRIBAPI) && LDFLAGS= \
+$(GRIBAPI_INC) :
+	cd $(DIR_GRIBAPI) && LDFLAGS= CFLAGS= CPPFLAGS=  \
 	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(FC)" && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
@@ -327,17 +339,26 @@ $(GRIBAPI_INC) :
 
 gribapi_clean :
 	- [  -d ${GRIBAPI_PATH} ] && rm -fr ${GRIBAPI_PATH} 
+endif
 ##########################################################
 #                                                        #
 # EXTRA LIB : NETCDF                                     #
 #                                                        #
 ##########################################################
+#RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
 ifeq "$(VER_CDF)" "CDFAUTO"
+#
+ifeq "$(VERSION_CDF)" "3.6.3"
+NETCDF_OPTS ?= FC="$(FC)" CPPFLAGS="-DpgiFortran" --disable-shared --disable-cxx
+else
+#RJ: assume to build netcdf4 library with only netcdf3-classic file support
+NETCDF_OPTS ?= FC="$(FC)" --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-compiler-recover --with-pic
+endif
 #
 cdf : $(CDF_INC)
 $(CDF_INC) :
-	cd $(DIR_CDF) && LDFLAGS= \
-	 ./configure --prefix=${CDF_PATH} FC="$(FC)" FCFLAGS="$(OPT_BASE)" CPPFLAGS="-DpgiFortran" && \
+	cd $(DIR_CDF) && LDFLAGS= CFLAGS= CPPFLAGS=  \
+	 ./configure --prefix=${CDF_PATH} $(NETCDF_OPTS) && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
 	 $(MAKE) -j 1 install && \

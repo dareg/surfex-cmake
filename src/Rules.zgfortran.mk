@@ -61,6 +61,26 @@ CFLAGS        =
 #
 LDFLAGS   = -fopenmp -fbacktrace -fuse-ld=gold
 #
+# NetCDF external
+#
+ifeq "$(VER_CDF)" "CDFEXT"
+NETCDF = /opt/zgcc/hm_libs/netcdf_413
+NETCDF_INC = $(NETCDF)/include
+NETCDF_LIB = $(NETCDF)/lib
+INC_NETCDF = -I$(NETCDF_INC)
+LIB_NETCDF = -L$(NETCDF_LIB) -lnetcdff -lnetcdf
+endif
+#
+# GRIBAPI external
+#
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_EXT"
+GRIB_API = /opt/zgcc/hm_libs/grib_api_111
+GRIB_API_INC = $(GRIB_API)/include
+GRIB_API_LIB = $(GRIB_API)/lib
+INC_GRIBAPI = -I$(GRIB_API_INC)
+LIB_GRIBAPI = $(GRIB_API_LIB)/libgrib_api_f90.a $(GRIB_API_LIB)/libgrib_api.a -lopenjpeg
+endif
+#
 # preprocessing flags
 #
 CPP = cpp -P -traditional -Wcomment

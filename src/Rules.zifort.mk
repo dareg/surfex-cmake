@@ -63,6 +63,26 @@ CFLAGS    =
 #
 LDFLAGS   =  -Wl,-warn-once -openmp -openmp-threadprivate=compat -traceback
 #
+# NetCDF external
+#
+ifeq "$(VER_CDF)" "CDFEXT"
+NETCDF = $(HOME)/hm_libs/ifort/netcdf_432
+NETCDF_INC = $(NETCDF)/include
+NETCDF_LIB = $(NETCDF)/lib
+INC_NETCDF = -I$(NETCDF_INC)
+LIB_NETCDF = -L$(NETCDF_LIB) -lnetcdff -lnetcdf
+endif
+#
+# GRIBAPI external
+#
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_EXT"
+GRIB_API = $(HOME)/hm_libs/ifort/grib_api_112
+GRIB_API_INC = $(GRIB_API)/include
+GRIB_API_LIB = $(GRIB_API)/lib
+INC_GRIBAPI = -I$(GRIB_API_INC)
+LIB_GRIBAPI = $(GRIB_API_LIB)/libgrib_api_f90.a $(GRIB_API_LIB)/libgrib_api.a
+endif
+#
 # preprocessing flags
 #
 CPP = cpp -P -traditional -Wcomment

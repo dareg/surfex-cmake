@@ -67,8 +67,27 @@ CFLAGS        =
 #LDFLAGS   = -fbacktrace -fuse-ld=bfd -Wl,-warn-once
 #zRJ: on DragonFly BSD libc doesn't have bactrace_symbols_fd(), unlike g(arbage)libc
 #zRJ: bactrace functions can be used from devel/libexecinfo port library libexecinfo.so
-LDFLAGS   = $(F90FLAGS) -fbacktrace -L/usr/local/lib -lexecinfo -fuse-ld=gold
 LDFLAGS   =  -Wl,-warn-once -fopenmp -fbacktrace -L/usr/local/lib -lexecinfo
+#
+# NetCDF external
+#
+ifeq "$(VER_CDF)" "CDFEXT"
+NETCDF = /opt/gcc5/netcdf_413
+NETCDF_INC = $(NETCDF)/include
+NETCDF_LIB = $(NETCDF)/lib
+INC_NETCDF = -I$(NETCDF_INC)
+LIB_NETCDF = -L$(NETCDF_LIB) -lnetcdff -lnetcdf
+endif
+#
+# GRIBAPI external
+#
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_EXT"
+GRIB_API = /opt/gcc5/grib_api_113
+GRIB_API_INC = $(GRIB_API)/include
+GRIB_API_LIB = $(GRIB_API)/lib
+INC_GRIBAPI = -I$(GRIB_API_INC)
+LIB_GRIBAPI = -L$(GRIB_API_LIB) -lgrib_api_f90 -lgrib_api -lopenjpeg
+endif
 #
 # preprocessing flags
 #
