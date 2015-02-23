@@ -1471,7 +1471,7 @@ sub expcont {
     elsif($prev && /^[ \t]*+$/) {
       next;
     }
-    elsif(!/^[\!]/ && (s/[\&][ \t]*+$//) ) {
+    elsif(!/[\!]/ && (s/[\&][ \t]*+$//) ) {
       $statm.=$_;
       $first_line=$line_number unless($prev);
       $prev=1;

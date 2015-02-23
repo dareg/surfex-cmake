@@ -587,6 +587,10 @@ ARFLAGS=r
 #  GENERATION OF DEPENDANCE FILES : *.D
 #
 SPLR_FLAGS = --split --modi --deps
+#RJ: implement part No.7 of Hirlam technical contribution, currently breaks on recursive dependencies
+ifeq "$(USE_SPLR_WRAP)" "YES"
+SPLR_FLAGS += --wrap
+endif
 
 ifeq "$(AVOID_CPP)" "YES"
 FUNDEFS ?= -UASC -UARO -UBIN -UFA -ULFI -UMNH -UNC -UOFF -UOL -UTOPD -UTXT -UAIX64 -URS6K

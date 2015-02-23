@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_GARDEN_OPTIONS_n(HPROGRAM)
+SUBROUTINE INIT_GARDEN_OPTIONS_n
 !#############################################################
 !
 !!****  *INIT_TEB_GARDEN_n* - routine to initialize ISBA

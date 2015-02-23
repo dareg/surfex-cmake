@@ -121,6 +121,12 @@ use Data::Dumper;
 #RJ: if path contains LIB/XRDnn/{FA,LFI} better try not to create modis, intel ifort compiler bug for 'FA=>FACOM_DEFAULT'
     ${safe_modi}=0 if($fname=~/\bLIB[\/]XRD40[\/](?:FA|LFI)[\/]/i);
 
+#RJ-later
+#RJ: something is wery wrong if read_surf.F90 is plitted and compiled as separate units...
+if($fname=~/[\/]read_surf[\.][fF]90/){
+  ${splr_dosplit}=0 ;
+  warn "zRJ [WARNING] not splitting: $fname=";
+}
     my @splitted_units;
     if(${splr_dosplit} && ${safe_split}) {
       &slurp_split(\$slurp_org,\$fname,\@splitted_units);

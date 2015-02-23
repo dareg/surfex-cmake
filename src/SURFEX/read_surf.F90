@@ -43,7 +43,7 @@ MODULE MODI_READ_SURF
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
-REAL, INTENT(INOUT) :: PFIELD            ! real scalar to be read  
+REAL, INTENT(OUT) :: PFIELD            ! real scalar to be read
 INTEGER,INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears 
  CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT  ! name of the article to be read
  CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR
@@ -1403,7 +1403,9 @@ INCLUDE "mpif.h"
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
-TYPE(DATE_TIME), INTENT(OUT) :: TFIELD   ! array containing the data field  
+!RJ: to match actual interface used above, can silently not update values in TFIELD
+!RJ TYPE(DATE_TIME), INTENT(OUT) :: TFIELD   ! array containing the data field
+TYPE(DATE_TIME), INTENT(INOUT) :: TFIELD   ! array containing the data field
 INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem appears
  CHARACTER(LEN=*), OPTIONAL, INTENT(OUT) :: HCOMMENT   ! name of the article to be read
  CHARACTER(LEN=1), OPTIONAL, INTENT(IN)  :: HDIR

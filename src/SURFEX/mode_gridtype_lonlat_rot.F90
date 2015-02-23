@@ -168,6 +168,9 @@ END SUBROUTINE GET_GRIDTYPE_LONLAT_ROT
 !*     0.     DECLARATIONS
 !             ------------
 !
+!RJ: missing modi
+USE MODI_REGROT_LONLAT_ROT
+!
 IMPLICIT NONE
 !
 !*     0.1    Declarations of arguments and results

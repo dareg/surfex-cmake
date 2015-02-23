@@ -41,6 +41,7 @@ SUBROUTINE BEM_MORPHO(PBLD, PWALL_O_HOR, PBLD_HEIGHT, PFLOOR_HEIGHT,            
 !*       0.    DECLARATIONS
 !              ------------
 !
+IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -74,6 +75,9 @@ REAL, DIMENSION(:),   INTENT(INOUT)::PF_WASTE_CAN !fraction of waste heat releas
 !*      0.2    Declarations of local variables 
 !
 REAL, DIMENSION(SIZE(PBLD)):: ZF_AUX2       ! Auxiliar view factor
+!
+!RJ: missing declaration
+INTEGER :: JJ
 !
 !------------------------------------------------------------------------------
 !
