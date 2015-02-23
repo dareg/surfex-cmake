@@ -6,14 +6,14 @@
 !
 !
 
-*   COMPUTES THE LOGARITHM
+!   COMPUTES THE LOGARITHM
 
-#include "impnone.h"
+      IMPLICIT NONE
 
-      INTEGER N
-      REAL PA(N), PLOG(N)
+      INTEGER :: N
+      REAL :: PA(N), PLOG(N)
 
-      INTEGER J
+      INTEGER :: J
       REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
       IF (LHOOK) CALL DR_HOOK('VSLOG',0,ZHOOK_HANDLE)

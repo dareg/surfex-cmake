@@ -666,7 +666,7 @@ endif
 #RJ: rules for F90 sources
 %.o:%.F90
 ifeq "$(DO_ASM)" "YES"
-	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c -S $< -o $(OBJDIR)/$(*F).s
+	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c -S $< -g0 -o $(OBJDIR)/$(*F).s
 endif
 	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
 ifeq "x$(MODOUT_FLAG)" "x"
@@ -675,7 +675,7 @@ endif
 
 %.o:%.f90
 ifeq "$(DO_ASM)" "YES"
-	$(F90) $(MODOUT) $(INC) -c -S $(F90FLAGS) $< -o $(OBJDIR)/$(*F).s
+	$(F90) $(MODOUT) $(INC) -c -S $(F90FLAGS) $< -g0 -o $(OBJDIR)/$(*F).s
 endif
 	$(F90) $(MODOUT) $(INC) -c $(F90FLAGS) $< -o $(OBJDIR)/$(*F).o
 ifeq "x$(MODOUT_FLAG)" "x"
@@ -684,7 +684,7 @@ endif
 
 %.o:%.f
 ifeq "$(DO_ASM)" "YES"
-	$(F77) $(MODOUT) $(INC) -c -S $(F77FLAGS) $< -o $(OBJDIR)/$(*F).s
+	$(F77) $(MODOUT) $(INC) -c -S $(F77FLAGS) $< -g0 -o $(OBJDIR)/$(*F).s
 endif
 	$(F77) $(MODOUT) $(INC) -c $(F77FLAGS)  $< -o $(OBJDIR)/$(*F).o
 ifeq "x$(MODOUT_FLAG)" "x"

@@ -128,6 +128,7 @@ IF (HZ0H=='MASC95') THEN
 ELSEIF(HZ0H=='BRUT82' .OR. HZ0H=='KAND07')THEN
   ! initialisations
   fcor(:)=1.0372462E-04
+!RJ: can be removed
   CALL INIT_SURFCONSPHY
   N=SIZE(PTA)
   !
