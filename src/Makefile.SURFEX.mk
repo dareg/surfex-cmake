@@ -178,6 +178,14 @@ CPPFLAGS_HOOK += -DLINUX
 
 OBJS_LISTE_MASTER += drhook.o crc.o addrdiff.o cargs.o endian.o env.o linuxtrbk.o
 OBJS_LISTE_MASTER += gethwm.o getstatm.o getrss.o getstk.o getpag.o getstackusage.o getcurheap.o
+
+#RJ: optional MPL layer support in DRHOOK for testing compatibility only!
+ifneq "$(VER_MPI)" "NOMPI"
+ifeq "$(USE_MPL)" "YES"
+CPPFLAGS_HOOK += -DSFX_MPL
+DIR_HOOK += LIB/DRHOOK/MPL
+endif
+endif
 endif
 
 ifeq "$(VER_DRHOOK)" "SIMPLE"
