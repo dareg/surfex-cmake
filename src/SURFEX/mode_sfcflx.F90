@@ -169,11 +169,14 @@ REAL , PARAMETER ::     &
 
 !  sfcflx variables of type REAL
 
+!RJ: provide default unreasonable value to init for 'ifort -fpic -openmp', to avoid ICE
+REAL,PARAMETER,PRIVATE :: Z_=-HUGE(0.0)
+
 !  Roughness lengths
 REAL  ::    &
-    z0u_sf                 ,  &! Roughness length with respect to wind velocity [m]
-    z0t_sf                 ,  &! Roughness length with respect to potential temperature [m]
-    z0q_sf                     ! Roughness length with respect to specific humidity [m]  
+    z0u_sf=Z_                 ,  &! Roughness length with respect to wind velocity [m]
+    z0t_sf=Z_                 ,  &! Roughness length with respect to potential temperature [m]
+    z0q_sf=Z_                     ! Roughness length with respect to specific humidity [m]  
 !$OMP THREADPRIVATE(z0u_sf,z0t_sf,z0q_sf)
 !  Security constants
 REAL , PARAMETER ::   &

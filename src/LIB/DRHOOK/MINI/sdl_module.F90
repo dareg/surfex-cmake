@@ -62,10 +62,10 @@ ENDIF
   WRITE(0,*)'SDL_TRACEBACK: Calling XL_TRBK, THRD = ',ITID
   CALL XL__TRBK()
   WRITE(0,*)'SDL_TRACEBACK: Done XL_TRBK, THRD = ',ITID
-#elif __INTEL_COMPILER
-  WRITE(0,*)'SDL_TRACEBACK: Calling INTEL_TRBK, THRD = ',ITID
-  CALL INTEL_TRBK() ! See ifsaux/utilities/gentrbk.F90
-  WRITE(0,*)'SDL_TRACEBACK: Done INTEL_TRBK, THRD = ',ITID
+!RJ #elif __INTEL_COMPILER
+!RJ   WRITE(0,*)'SDL_TRACEBACK: Calling INTEL_TRBK, THRD = ',ITID
+!RJ   CALL INTEL_TRBK() ! See ifsaux/utilities/gentrbk.F90
+!RJ   WRITE(0,*)'SDL_TRACEBACK: Done INTEL_TRBK, THRD = ',ITID
 #elif defined(LINUX) || defined(SUN4)
   WRITE(0,*)'SDL_TRACEBACK: Calling LINUX_TRBK, THRD = ',ITID
 !RJ: in case of NON MPL version for more verbose *hopefully* backtrace
