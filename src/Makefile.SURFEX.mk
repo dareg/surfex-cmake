@@ -246,8 +246,7 @@ INC_MPI                = -I$(B)$(DIR_MPI)
 DIR_MASTER            += $(DIR_MPI)
 OBJS_LISTE_MASTER     += mpivide.o
 INC                   += $(INC_MPI)
-mpivide.o  : CPPFLAGS  = -DFUJI \
-                        -I$(DIR_MPI)/include
+mpivide.o  : CPPFLAGS  = -DFUJI -I$(DIR_MPI)/include
 VPATH                 += $(DIR_MPI)
 endif
 #
@@ -604,6 +603,3 @@ IGNORE_DEP_MASTER +=
 #
 VPATH_EXCLUDE= %/CVS
 #
-
-
-

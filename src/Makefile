@@ -24,7 +24,7 @@ include Rules.$(ARCH)$(F).mk
 ##########################################################
 ##########################################################
 #                                                        #
-#    DONT MODIFY LINES AFTER THIS  !!!!!!!!!!!!!         #         
+#    DONT MODIFY LINES AFTER THIS  !!!!!!!!!!!!!         #
 #                                                        #
 ##########################################################
 ##########################################################
@@ -36,7 +36,7 @@ include Rules.$(ARCH)$(F).mk
 #                                                        #
 #   "*.D" files contain dependance deduceed              #
 #   form all "*.f*" FORTRAN sources files                #
-#                                                        #   
+#                                                        #
 # "use" key word                                         #
 #     --> dependance on "*.mod" module files             #
 # "module" key word key word                             #
@@ -54,7 +54,7 @@ include Rules.$(ARCH)$(F).mk
 #   All modification are allowed !!!!!                   #
 #   adding new subroutines                               #
 #       or                                               #
-#   adding new modules                                   #       
+#   adding new modules                                   #
 #                                                        #
 #   REM : if during modification, you deleting some      #
 #         FORTRAN subroutines you must also deleted the  #
@@ -123,12 +123,12 @@ endif
 #                                                        #
 ##########################################################
 #
-# MASTER 
+# MASTER
 #
 OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find $(OBJDIR_MASTER) -follow -type f -name "spll_*.f*" | sed -e 's/\..*/.o/g' )) 
-#OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(obj_flist $(OBJDIR_MASTER)) 
+#OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(obj_flist $(OBJDIR_MASTER))
 #
-OBJS_LISTE_MASTER := $(sort $(filter-out $(IGNORE_OBJS),$(OBJS_LISTE_MASTER))) 
+OBJS_LISTE_MASTER := $(sort $(filter-out $(IGNORE_OBJS),$(OBJS_LISTE_MASTER)))
 #
 LIB_MASTER=$(OBJDIR_MASTER)/$(LIB_OBJS_ROOT)-MASTER.a
 #
@@ -136,9 +136,9 @@ LIB_MASTER=$(OBJDIR_MASTER)/$(LIB_OBJS_ROOT)-MASTER.a
 #
 #ifdef DO_COMP_USER
 OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find $(OBJDIR_USER) -follow -type f -name "spll_*.f*" | sed -e 's/\..*/.o/g' )) 
-#OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(obj_flist $(OBJDIR_USER)) 
+#OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(obj_flist $(OBJDIR_USER))
 #
-OBJS_LISTE_USER := $(sort $(filter-out $(IGNORE_OBJS), $(OBJS_LISTE_USER) $(OBJS_LISTE_MASTER) )) 
+OBJS_LISTE_USER := $(sort $(filter-out $(IGNORE_OBJS), $(OBJS_LISTE_USER) $(OBJS_LISTE_MASTER) ))
 #
 LIB_USER=$(OBJDIR_USER)/$(LIB_OBJS_ROOT)-$(VER_USER).a
 #endif
@@ -155,7 +155,7 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 
 .PHONY : clean all objdir objdirmaster depall objs lib prog print
 
-.DELETE_ON_ERROR:  
+.DELETE_ON_ERROR:
 
 .SUFFIXES:
 .SUFFIXES:  .o .f90 .f .fx90 .mod .D .a
@@ -200,14 +200,19 @@ bibmaster :  libmaster
 objmaster :  $(OBJS_LISTE_MASTER)
 
 $(LIB_MASTER) :  $(OBJS_LISTE_MASTER)
-	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER) 
+	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER)
 
 progmaster : libmaster
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
 	OBJDIR=$(OBJDIR_MASTER) \
 	LIB_MNH=$(LIB_MASTER) \
 	PROG_DIR=$(OBJDIR_MASTER) \
-	$(PROG_LIST) cleanlibmaster
+	$(PROG_LIST)
+	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
+	OBJDIR=$(OBJDIR_MASTER) \
+	LIB_MNH=$(LIB_MASTER) \
+	PROG_DIR=$(OBJDIR_MASTER) \
+	cleanlibmaster
 
 installmaster : libmaster
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  OBJDIR=$(OBJDIR_MASTER) install
@@ -242,22 +247,22 @@ depuser : objdiruser
 	@$(MAKE) DO_DEP_USER=YES OBJDIR=$(OBJDIR_USER) filedepalluser
 
 filedepalluser : $(DEP_ALL_USER)
-	find  $(OBJDIR_USER) -follow -name "*.D" >  $(OBJDIR_USER)/fileuser 
+	find  $(OBJDIR_USER) -follow -name "*.D" >  $(OBJDIR_USER)/fileuser
 	cat $(OBJDIR_USER)/fileuser | sed -e "s!$(OBJDIR_USER)!$(OBJDIR_MASTER)!g"  >  $(OBJDIR_USER)/filenotmaster
 	grep -F -v -f   $(OBJDIR_USER)/filenotmaster  $(OBJDIR_MASTER)/filemaster >  $(OBJDIR_USER)/filemaster
 	rm -f  $(OBJDIR_USER)/filedepalluser
 	cat $(OBJDIR_USER)/fileuser $(OBJDIR_USER)/filemaster | xargs cat >>  $(OBJDIR_USER)/filedepalluser
 
 
-libuser :   depuser 
+libuser :   depuser
 	@$(MAKE) -I $(OBJDIR_USER) DO_COMP_USER=YES OBJDIR=$(OBJDIR_USER) objuser
 
 objuser :  $(OBJS_LISTE_USER)
 
 $(LIB_USER) :  $(OBJS_LISTE_USER)
 	rm -f $(LIB_USER)
-	cd $(OBJDIR_MASTER) ; find . -name "*.o" | xargs $(AR) r $(LIB_USER) 
-	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER) 
+	cd $(OBJDIR_MASTER) ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
+	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
 
 proguser : libuser
 	@$(MAKE) -I $(OBJDIR_USER)  DO_COMP_USER=YES \
@@ -267,9 +272,9 @@ proguser : libuser
 	$(PROG_LIST) # cleanlibuser
 
 cleanlibuser :
-	rm -f  $(LIB_USER) 
+	rm -f  $(LIB_USER)
 
-installuser : 
+installuser :
 	@$(MAKE)  -I $(OBJDIR_USER) DO_COMP_USER=YES  OBJDIR=$(OBJDIR_USER) install	
 
 cleanproguser :
@@ -284,9 +289,9 @@ ifneq "$(findstring 64,$(shell uname -m))" ""
 A64=A64
 endif
 #$(LIB_GRIBEX) : libmaster
-$(LIB_GRIBEX) : 
+$(LIB_GRIBEX) :
 ifneq "$(ARCH)" "SX8"
-	- [ ! -d $(DIR_GRIBEX)_$(ARCH) ] && cp -Rp  $(DIR_GRIBEX) $(DIR_GRIBEX)_$(ARCH) 
+	- [ ! -d $(DIR_GRIBEX)_$(ARCH) ] && cp -Rp  $(DIR_GRIBEX) $(DIR_GRIBEX)_$(ARCH)
 	cd $(DIR_GRIBEX)_$(ARCH) && $(MAKE) -j 1 ARCH=$(TARGET_GRIBEX) R64=$(R64_GRIBEX) CNAME=$(CNAME_GRIBEX) A64=$(A64)
 else
 ifneq "$(findstring brodie,$(shell uname -n))" ""
@@ -310,7 +315,12 @@ gribex_clean :
 ##########################################################
 gribapi : $(GRIBAPI_INC)
 $(GRIBAPI_INC) : 
-	cd ${DIR_GRIBAPI} && ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(FC)" && $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install	
+	cd $(DIR_GRIBAPI) && \
+	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(FC)" && \
+	 $(MAKE) -j 1 clean && \
+	 $(MAKE) -j 1 && \
+	 $(MAKE) -j 1 install && \
+	 $(MAKE) -j 1 clean
 
 gribapi_clean :
 	- [  -d ${GRIBAPI_PATH} ] && rm -fr ${GRIBAPI_PATH} 
@@ -322,13 +332,19 @@ gribapi_clean :
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
 cdf : $(CDF_INC)
-$(CDF_INC) : 
-	cd ${DIR_CDF} && ./configure --prefix=${CDF_PATH} FC="$(FC)" FCFLAGS="$(OPT_BASE)" CPPFLAGS="-DpgiFortran" && make && make install
+$(CDF_INC) :
+	cd $(DIR_CDF) && \
+	 ./configure --prefix=${CDF_PATH} FC="$(FC)" FCFLAGS="$(OPT_BASE)" CPPFLAGS="-DpgiFortran" && \
+	 $(MAKE) -j 1 clean && \
+	 $(MAKE) -j 1 && \
+	 $(MAKE) -j 1 install && \
+	 $(MAKE) -j 1 clean
 
 cleanmaster : cleancdf
 cleancdf :
 	- [ -d ${CDF_PATH} ] && rm -fr  ${CDF_PATH}
 endif
+
 ##########################################################
 #                                                        #
 # EXTRA LIB : OASIS3-MCT                                 #
@@ -337,10 +353,12 @@ endif
 ifeq "$(VER_OASIS)" "mct"
 oasis : $(OASIS_KEY)
 $(OASIS_KEY) : 
-	cd ${DIR_OASIS}/util/make_dir && cp -f make.inc_cnrm make.inc && make -f TopMakefileOasis3
+	cd ${DIR_OASIS}/util/make_dir && \
+	 cp -f make.inc_cnrm make.inc && \
+	 $(MAKE) -f TopMakefileOasis3
 
 cleanoasis : 
-	cd ${DIR_OASIS}/util/make_dir && make realclean -f TopMakefileOasis3
+	cd ${DIR_OASIS}/util/make_dir && $(MAKE) realclean -f TopMakefileOasis3
 endif
 ##########################################################
 #                                                        #
@@ -350,7 +368,7 @@ endif
 ifeq "$(F90)" "gfortran"
 ARCHOOK="linuxgfortran"
 #ARCHOOK="linuxgfortran_ubuntu"
-else 
+else
 ifeq "$(F90)" "mpif90"
 ARCHOOK="linuxmpif90"
 #ARCHOOK="linuxmpif90_ubuntu"
@@ -367,11 +385,11 @@ endif
 endif
 
 #drhook : $(DIR_HOOK)/parkind1.mod
-#$(DIR_HOOK)/parkind1.mod : 
-#	cd ${DIR_HOOK} && ./configure ARCH=$(ARCHOOK) -a $(ARCHOOK) && make ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make 
+#$(DIR_HOOK)/parkind1.mod :
+#	cd $(DIR_HOOK) && ./configure ARCH=$(ARCHOOK) && $(MAKE) ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make
 
-#cleandrhook : 
-#	cd ${DIR_HOOK} && rm -f *.mod *.a
+#cleandrhook :
+#	cd $(DIR_HOOK) && rm -f *.mod *.a
 ##########################################################
 #                                                        #
 # EXTRA LIB : ECOCLIMAP                                  #
@@ -408,8 +426,8 @@ endif
 endif
 endif
 
-cleanecoclimap : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && rm -f *.bin
+cleanecoclimap :
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && rm -f ./*.bin
 
 ##########################################################
 #                                                        #
@@ -419,7 +437,7 @@ cleanecoclimap :
 ifdef PROG_LIST
 
 prog :   lib $(LIB_GRIBEX)
-	@$(MAKE) -I $(OBJDIR) DEP=YES  $(PROG_LIST)  
+	@$(MAKE) -I $(OBJDIR) DEP=YES  $(PROG_LIST)
 
 install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
 
@@ -460,13 +478,13 @@ examplesclean :  $(patsubst %,%_clean,$(EXAMPLES))
 $(EXAMPLES) :
 	cd $(PWD_KTEST)/$@ ; run_$@
 
-%_ncl1 : 
+%_ncl1 :
 	cd $(PWD_KTEST)/$(*F) ; run_$(*F) all_ncl_extractdia
 
-%_ncl2 : 
+%_ncl2 :
 	cd $(PWD_KTEST)/$(*F) ; run_$(*F) all_ncl_lfi2cdf
 
-%_clean : 
+%_clean :
 	cd $(PWD_KTEST)/$(*F) ; $(MAKE) clean
 
 EXAMPLES_CHIMIE=009_ICARTT 011_KW78CHEM
@@ -480,11 +498,11 @@ $(EXAMPLES_CHIMIE) :
 #
 purgelist : $(patsubst %,purge_%,$(notdir $(PL)))
 purge_%.f90 :
-	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster 
+	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster
 purge_%.fx90 :
-	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster 
+	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster
 purge_%.f :
-	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster 
+	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster
 
 #
 # rules to remove spll* source on USER directory

@@ -2164,7 +2164,7 @@ sub create_interface_block {
 	    }
       }
       else{ 
-        if (/^USEMODD_TYPE/ || /^USEMODD_FMDECLAR/) {
+        if (/^USEMODD_TYPE/ || /^USEMODD_FMDECLAR/ || /^USELFI_/) {
 	push(@$interface_block,$myhref);  # Always include USE without ONLY for safety
       }  
     }}

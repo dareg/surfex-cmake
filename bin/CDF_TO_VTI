@@ -66,19 +66,19 @@ export L1=`echo ${LEVEL} | bc `
 
 #exit 
 
-#NB_VAR=` echo "${DIMX} * ${DIMY} * ${DIMZ}" | bc `
+#NB_VAR=$((DIMX*DIMY*DIMZ))
 #echo NB_VAR=$NB_VAR
 
-export EXTX=`echo ${DIMX} -1 | bc `
-export EXTY=`echo ${DIMY} -1 | bc `
-export EXTZ=`echo ${DIMZ} -1 | bc `
+export EXTX=$((DIMX-1))
+export EXTY=$((DIMY-1))
+export EXTZ=$((DIMZ-1))
 
-export L2=`echo ${LEVEL} +1  | bc `
-[ $L2 -gt $DIMZ ] && L2=$DIMZ
+export L2=$((LEVEL+1))
+[ "$L2" -gt "$DIMZ" ] && L2=$DIMZ
 
-export LEVEL2=`printf "%4.4d\n" ${L2} `
+export LEVEL2=$(printf "%4.4d\n" "${L2}" )
 
-cat > ${FILE_ORIG1}/$file.$VAR.vti <<EOF
+cat > "${FILE_ORIG1}/$file.$VAR.vti" <<EOF
 <?xml version="1.0"?>
 <VTKFile type="ImageData" version="0.1" >
 <ImageData WholeExtent="1 ${DIMX} 1 ${DIMY} 1 ${DIMZ}"  Origin="0 0 0" Spacing="1 1 1">
@@ -87,10 +87,10 @@ cat > ${FILE_ORIG1}/$file.$VAR.vti <<EOF
 <DataArray type="Float64" Name="${VAR}" format="ascii">
 EOF
 
-ncks -s '%f\n' -H -v ${VAR}${LEVEL} $file  >> ${FILE_ORIG1}/$file.$VAR.vti
-[ "${file2}x" != "x" ] && ncks -s '%f\n' -H -v ${VAR}${LEVEL2} ${file2}  >> ${FILE_ORIG1}/$file.$VAR.vti
+ncks -s '%f\n' -H -v "${VAR}${LEVEL}" "$file"  >> "${FILE_ORIG1}/$file.$VAR.vti"
+[ "${file2}x" != "x" ] && ncks -s '%f\n' -H -v "${VAR}${LEVEL2}" "${file2}"  >> "${FILE_ORIG1}/$file.$VAR.vti"
 
-cat >> ${FILE_ORIG1}/$file.$VAR.vti <<EOF
+cat >> "${FILE_ORIG1}/$file.$VAR.vti" <<EOF
 </DataArray>
 </PointData>
 </Piece>
@@ -98,13 +98,13 @@ cat >> ${FILE_ORIG1}/$file.$VAR.vti <<EOF
 </VTKFile>
 EOF
 
-cat >>  ${FILE_ORIG1}.${VAR}.pvti <<EOF
+cat >> "${FILE_ORIG1}.${VAR}.pvti" <<EOF
   <Piece Extent="1 ${DIMX} 1 ${DIMY} ${L1} ${L2} " Source="${FILE_ORIG1}/$file.$VAR.vti"/>
 EOF
 
 done
 
-cat >> ${FILE_ORIG1}.${VAR}.pvti <<EOF
+cat >> "${FILE_ORIG1}.${VAR}.pvti" <<EOF
  </PImageData>
 </VTKFile>
 EOF

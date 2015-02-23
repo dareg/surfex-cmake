@@ -1,4 +1,4 @@
-#! /bin/ksh
+#! /bin/sh
 # fin de conversion d unfichier format CDL cree par extractdia 
 # vers le format netcdf
 # modif 26/08/2008 pour prise en compte du traitemnt des fichiers de couplage
