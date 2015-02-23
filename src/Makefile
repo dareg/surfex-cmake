@@ -23,6 +23,50 @@ obj_flist        = $(notdir $(shell find $(1) -follow -type f \
 #
 include Rules.$(ARCH)$(F).mk
 #
+#RJ guess real FC if using wrappers
+REALFC ?= $(F90)
+#
+#RJ try to get fortran module output flag if not provided
+#RJ if fails, use workaround for *.mod file movement
+ifeq "x$(MODOUT_FLAG)" "x"
+ifneq (,$(findstring gfortran,$(REALFC)))
+MODOUT_FLAG=-J
+endif
+#RJ be more careful, since all mpi implemetations switched to common mpifort wrapper
+ifneq (,$(findstring _ifort,_$(REALFC)))
+MODOUT_FLAG=-module
+endif
+ifneq (,$(findstring ftn,$(REALFC)))
+MODOUT_FLAG=-e m -J
+endif
+ifneq (,$(findstring pgf90,$(REALFC)))
+MODOUT_FLAG=-module
+endif
+#RJ from xlf documentation -I path is also needed search paths
+ifneq (,$(findstring xlf,$(REALFC)))
+MODOUT_FLAG=-qmoddir
+##MODOUT?=$(MODOUT_FLAG) $(OBJDIR)/MOD -I $(OBJDIR)/MOD
+endif
+#sun
+#MODOUT_FLAG=-moddir=
+endif
+#
+#RJ check if needed workaround to move *.mod files and force serial compilation
+ifeq "x$(MODOUT_FLAG)" "x"
+MODOUT=-I $(OBJDIR)/MOD
+.NOTPARALLEL :
+else
+#RJ be more generous to all compilers
+#RJ however it might be useful to strip part of fullpath in OBJDIR and OBJDIR_MASTER here...
+MODOUT?=$(MODOUT_FLAG) $(OBJDIR)/MOD -I$(OBJDIR)/MOD
+endif
+#
+#RJ add 'make user' support
+ifdef DO_COMP_USER
+MODOUT+= -I$(OBJDIR_MASTER)/MOD
+endif
+
+#
 ##########################################################
 ##########################################################
 ##########################################################
@@ -107,7 +151,8 @@ endif
 #
 ifdef DO_COMP_USER
 VPATH += $(OBJDIR_USER) $(OBJDIR_USER)/MOD $(OBJDIR_MASTER) $(OBJDIR_MASTER)/MOD
-INC += -I $(OBJDIR_MASTER)/MOD
+#RJ fix, include it above
+##INC += -I $(OBJDIR_MASTER)/MOD
 endif
 #
 endif
@@ -334,7 +379,7 @@ ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 gribapi : $(GRIBAPI_INC)
 $(GRIBAPI_INC) :
 	cd $(DIR_GRIBAPI) && LDFLAGS= CFLAGS= CPPFLAGS=  \
-	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(FC)" && \
+	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(REALFC)" && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
 	 $(MAKE) -j 1 install && \
@@ -352,10 +397,10 @@ endif
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
 ifeq "$(VERSION_CDF)" "3.6.3"
-NETCDF_OPTS ?= FC="$(FC)" CPPFLAGS="-DpgiFortran" --disable-shared --disable-cxx
+NETCDF_OPTS ?= FC="$(REALFC)" CPPFLAGS="-DpgiFortran" --disable-shared --disable-cxx
 else
 #RJ: assume to build netcdf4 library with only netcdf3-classic file support
-NETCDF_OPTS ?= FC="$(FC)" --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-compiler-recover --with-pic
+NETCDF_OPTS ?= FC="$(REALFC)" --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-compiler-recover --with-pic
 endif
 #
 cdf : $(CDF_INC)
@@ -555,21 +600,27 @@ ARFLAGS=r
 #
 
 %.o:%.f90
-	$(F90) -I$(OBJDIR) $(INC) -c $(F90FLAGS) $< 
-	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	$(F90) $(MODOUT) $(INC) -c $(F90FLAGS) $< -o $(OBJDIR)/$(*F).o
+ifeq "x$(MODOUT_FLAG)" "x"
+	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+endif
 
 %.o:%.f
-	$(F77) -I$(OBJDIR) $(INC) -c $(F77FLAGS)  $<  
-	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	$(F77) $(MODOUT) $(INC) -c $(F77FLAGS)  $< -o $(OBJDIR)/$(*F).o
+ifeq "x$(MODOUT_FLAG)" "x"
+	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+endif
 
-%.o:%.fx90
-	cp $< $(OBJDIR)/$(*F).f 
-	$(FX90) -I$(OBJDIR) $(INC) -c $(FX90FLAGS) $(OBJDIR)/$(*F).f   
-	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+#RJ: unneeded
+#%.o:%.fx90
+#	@cp $< $(OBJDIR)/$(*F).f
+#	$(FX90) $(MODOUT) $(INC) -c $(FX90FLAGS) $(OBJDIR)/$(*F).f
+#ifeq "x$(MODOUT_FLAG)" "x"
+#	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+#endif
 
 %.o : %.c
-	$(CC) $(INC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
-	-@mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	$(CC) $(INC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o -o $(OBJDIR)/$(*F).o
 
 ifeq "$(DO_COMP_MASTER)" "YES"
 include  filedepallmaster

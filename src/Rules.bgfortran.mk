@@ -54,7 +54,7 @@ F90= mpifort
 F77= mpifort
 endif
 #
-FC = $(F90)
+REALFC=gfortran5r
 #
 F90FLAGS      = $(OPT) -ffree-form -ffree-line-length-none
 F77FLAGS      = $(OPT) -ffixed-form

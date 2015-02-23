@@ -51,7 +51,7 @@ F90= mpif90
 F77= mpif77
 endif
 #
-FC = ifort
+REALFC=ifort
 #
 F90FLAGS  = $(OPT) -free
 F77FLAGS  = $(OPT) -nofree

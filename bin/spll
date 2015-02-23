@@ -134,6 +134,8 @@ echo "$mod"        : "$spllbase.o"    >> "$DIRNAME/$BASENAME2.D"
 fi
 echo "$spllbase.o" : "$spllfile" "$dep" >> "$DIRNAME/$BASENAME2.D"
 
+#RJ: disabling, often still breaks parallel builds, now handled by $(MODOUT) and .NOTPARALLEL
+if [ 0 = 1 ]; then
 if [ "$SUF" = "f90" ]
 then
 printf '\t%s\n' ' $(F90) -I$(OBJDIR)/MOD  $(INC) -c $(F90FLAGS) $<' >> "$DIRNAME/$BASENAME2.D"
@@ -153,6 +155,7 @@ for filemod in $mod
 do
 printf '\t%s%s%s\n' " -@mv  $filemod "' $(OBJDIR)/MOD/. || '"echo OK $filemod " >> "$DIRNAME/$BASENAME2.D"
 done
+fi
 
 unset dep mod
 

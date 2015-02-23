@@ -49,7 +49,7 @@ F90= mpif90
 F77= mpif77
 endif
 #
-FC = $(F90)
+REALFC=gfortran
 #
 F90FLAGS      = $(OPT) -ffree-form -ffree-line-length-none
 F77FLAGS      = $(OPT) -ffixed-form
