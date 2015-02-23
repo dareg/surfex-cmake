@@ -10,10 +10,10 @@ MAKEFLAGS += -r
 ##########################################################
 #
 dependance_flist = $(notdir $(shell find $(1) -follow -type f \
-               -name '*.f' -o -name '*.f90' -o -name '*.fx90' -o -name '*.F' -o -name '*.F90'\
-               | grep -v ',v' | grep -v "\.\#" | sed -e 's/\.f.*/.D/g' -e 's/\.F.*/.D/g' ))
+               -iname '*.f' -o -iname '*.f90' -o -name '*.fx90' \
+               | grep -v ',v' | sed -e 's/\.f.*/.D/g' -e 's/\.F.*/.D/g' ))
 obj_flist        = $(notdir $(shell find $(1) -follow -type f \
-               -name 'spll_*.f*' | sed -e 's/\..*/.o/g' )) 
+               -iname 'spll_*.f*' | sed -e 's/\..*/.o/g' ))
 #
 ##########################################################
 #                                                        #
@@ -173,7 +173,7 @@ endif
 #
 # MASTER
 #
-OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find $(OBJDIR_MASTER) -follow -type f -name "spll_*.f*" | sed -e 's/\..*/.o/g' )) 
+OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find $(OBJDIR_MASTER) -follow -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
 #OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(obj_flist $(OBJDIR_MASTER))
 #
 OBJS_LISTE_MASTER := $(sort $(filter-out $(IGNORE_OBJS),$(OBJS_LISTE_MASTER)))
@@ -183,7 +183,7 @@ LIB_MASTER=$(OBJDIR_MASTER)/$(LIB_OBJS_ROOT)-MASTER.a
 # USER
 #
 #ifdef DO_COMP_USER
-OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find $(OBJDIR_USER) -follow -type f -name "spll_*.f*" | sed -e 's/\..*/.o/g' )) 
+OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find $(OBJDIR_USER) -follow -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
 #OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(obj_flist $(OBJDIR_USER))
 #
 OBJS_LISTE_USER := $(sort $(filter-out $(IGNORE_OBJS), $(OBJS_LISTE_USER) $(OBJS_LISTE_MASTER) ))
@@ -206,7 +206,7 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 .DELETE_ON_ERROR:
 
 .SUFFIXES:
-.SUFFIXES:  .o .f90 .f .fx90 .mod .D .a
+.SUFFIXES:  .o .F90 .f90 .f .fx90 .mod .D .a
 
 .INTERMEDIATE:   $(LIB_MASTER)
 
@@ -464,8 +464,8 @@ prog :   lib $(LIB_GRIBEX)
 
 install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
 
-$(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -name "spll_*.f*" \
-              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/g' | head -1 )  
+$(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -iname "spll_*.f*" \
+              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/gI' | head -1 )
 
 $(PROG_LIST) :  $(LIB_MNH)  $(LIB_GRIBEX)
 	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ $(OBJ_PROG) $(LIB_MNH) $(LIBS)
@@ -599,6 +599,13 @@ ARFLAGS=r
 #
 # GENERATION OF OBJET FILES : *.o
 #
+
+#RJ: rules for F90 sources
+%.o:%.F90
+	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
+ifeq "x$(MODOUT_FLAG)" "x"
+	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+endif
 
 %.o:%.f90
 	$(F90) $(MODOUT) $(INC) -c $(F90FLAGS) $< -o $(OBJDIR)/$(*F).o
