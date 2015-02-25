@@ -162,7 +162,12 @@ DO JPATCH=1,KPATCH
              NSIZE_PATCH_DST(JVEG,JPATCH),             &!I Size of dust emitter vector
              KSIZE_NATURE_P(JPATCH),                   &!I Size of patch vector
              NSIZE_NATURE,                             &!I Size of nature vector
+!RJ: attempt to make this call generic
+#ifdef RJ_OFIX
+             KR_NATURE_P(:KSIZE_NATURE_P(JPATCH),JPATCH),&!I Mask from patch to nature
+#else
              KR_NATURE_P,                              &!I Mask from patch to nature
+#endif
              PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
              NR_PATCH_DST(:NSIZE_PATCH_DST(JVEG,JPATCH),JVEG,JPATCH),  &!O Part of mask array to fill with values
              KPATCH,                                   &!I Number of possible patches

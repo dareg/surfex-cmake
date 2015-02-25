@@ -23,7 +23,7 @@ AVOID_CPP = YES
 #RJ -fpe0 -fp-model precise -assume ieee_fpe_flags ; specially ieee_fpe_flags one on mixed MPI/OMP
 #
 #OPT_BASE  = -openmp -openmp-threadprivate=compat -r8 -g -u -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
-OPT_BASE  = -r8 -g -u -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
+OPT_BASE  = -r8 -g -u -assume nosource_include -assume byterecl -traceback -fp-model precise -assume ieee_fpe_flags -convert big_endian
 OPT_BASE += -fsource-asm
 #
 OPT_PERF0 = -O0 -fpe0 -ftz
@@ -141,7 +141,12 @@ include Makefile.SURFEX.mk
 ##########################################################
 
 #RJ: force lfi output binary reproducibility (avoid use of unix timestamps inside)
+FUNDEFS  += -ULFI_BFB
 FPPFLAGS += -DLFI_BFB
+
+#RJ: changes to allow successful serial runtime
+FUNDEFS  += -URJ_OFIX
+FPPFLAGS += -DRJ_OFIX
 
 #RJ ifneq "$(findstring 8,$(LFI_INT))" ""
 #RJ OBJS_I8=spll_NEWLFI_ALL.o

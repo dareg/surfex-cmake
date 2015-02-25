@@ -176,6 +176,8 @@ IF (SIZE(ZZS1D_FULL) /= NIX * NIY) STOP "BIG PROBLEM WITH SIZE"
 ALLOCATE(ZZS (NIX,NIY))
 ALLOCATE(XZSL (NNX,NNY))
 !
+!RJ: next one does not work with NPROC>4
+!RJ 'Fortran runtime error: Index '13' of dimension 1 of array 'plat' above upper bound of 12'
 ! 2d grid should be increasing in latitude
 LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
 

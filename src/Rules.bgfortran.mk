@@ -28,7 +28,7 @@ OPT_BASE += -Wimplicit-interface -Wimplicit-procedure -Waliasing -Wampersand -Ws
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
-OPT_CHECK = -fbounds-check -finit-real=nan -ffpe-trap=overflow,zero,invalid
+OPT_CHECK = -fcheck=bounds,do,mem,pointer,recursion -finit-real=nan -ffpe-trap=overflow,zero,invalid
 OPT_I8    = -fdefault-integer-8
 #
 #
@@ -146,7 +146,12 @@ include Makefile.SURFEX.mk
 ##########################################################
 
 #RJ: force lfi output binary reproducibility (avoid use of unix timestamps inside)
+FUNDEFS  += -ULFI_BFB
 FPPFLAGS += -DLFI_BFB
+
+#RJ: changes to allow successful serial runtime
+FUNDEFS  += -URJ_OFIX
+FPPFLAGS += -DRJ_OFIX
 
 #RJ ifneq "$(findstring 8,$(LFI_INT))" ""
 #RJ OBJS_I8=spll_NEWLFI_ALL.o

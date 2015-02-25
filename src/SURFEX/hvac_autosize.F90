@@ -63,7 +63,15 @@ USE MODI_GET_SIZES_PARALLEL
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+#ifdef AIX64 
+USE OMP_LIB
+#endif
+!
 IMPLICIT NONE
+!
+#ifndef AIX64
+  INCLUDE 'omp_lib.h'
+#endif
 !
 !arguments
 INTEGER,       INTENT(IN)    :: KI     ! number of points
@@ -335,6 +343,11 @@ REAL, DIMENSION(KI) :: ZIRRIG_ROAD
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 !
+!RJ: temp variable for OMP region handling
+#ifdef RJ_OFIX
+INTEGER :: INBLOCKTOT
+#endif
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.     Initialization
@@ -521,8 +534,18 @@ ZAC_GARDEN    (:) = 0.
 ZSVF_GARDEN   (:) = 0.
 !
 !
+!RJ: fix for OMP races
+!RJ: run parallely for prep, but pseudo serially for offline (already in OMP here)
+#ifdef RJ_OFIX
+INBLOCKTOT=NBLOCKTOT
+!RJ: next one prevents double split in OMP parallel region
+!$ IF(OMP_IN_PARALLEL()) INBLOCKTOT=1
+ALLOCATE(ISIZE_OMP(0:INBLOCKTOT-1))
+ CALL GET_SIZES_PARALLEL(INBLOCKTOT,KI,0,ISIZE_OMP)
+#else
 ALLOCATE(ISIZE_OMP(0:0))
  CALL GET_SIZES_PARALLEL(1,KI,0,ISIZE_OMP)
+#endif
 
 DO JFORC_STEP= 1,INB_STEP_ATM
 !

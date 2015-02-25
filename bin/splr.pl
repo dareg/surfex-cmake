@@ -509,6 +509,15 @@ use Fortran90_stuff qw( create_intfb $f90s_ALLOW_DIRTY_MOD_REGEX
   ${f90s_INTFB_GENERIC}=0;
   ${f90s_INTFB_INC_IMPNONE}=1;
 
+#RJ-later
+#RJ: if file name contains lonlat_rot DO NOT attempt to do generic intefaces, must be fixed first
+  my $TT=$$foldname;
+##  warn $TT;
+  if($TT=~/(?:lonlat_rot|gltools_newice_r|glt_constrain_r)/i ){
+    ${f90s_INTFB_GENERIC}=0;
+  warn "zRJ [Warning]: not making generic modi for $$foldname";
+  }
+
 #RJ: attempt to clean up interface dependencies, most can be avoided by code fixes,except third one
 #RJ: if left empty - includes all without only
   if(${f90s_ALLOW_DIRTY_MOD_REGEX} eq '') {
