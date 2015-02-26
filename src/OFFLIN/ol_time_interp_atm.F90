@@ -67,7 +67,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-INCLUDE "netcdf.inc"
 !
 #ifndef AIX64
 !$ INCLUDE 'omp_lib.h'

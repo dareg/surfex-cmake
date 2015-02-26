@@ -34,7 +34,8 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_OFFLIN += OFFLIN
-FPPFLAGS_OFFLIN= -DBIN -DTXT -DLFI=lfi -DOL -DNC=nc
+FPPFLAGS_OFFLIN= -DBIN -DTXT -DOL=ol -DNC=nc
+#FPPFLAGS_OFFLIN += -DTXT
 #
 ifdef DIR_OFFLIN
 DIR_MASTER += $(DIR_OFFLIN)
@@ -55,8 +56,11 @@ endif
 #DIR_SURFEX += ARCH_SRC/bug_surfex
 # PRE_BUG TEST !!!
 #
+FUNDEFS += -UASC -UFA -ULFI -UOL -UNC -UBIN -UTXT
+FUNDEFS += -UARO -UMNH -UOFF -UAIX64 -URS6K
+#
 DIR_SURFEX += SURFEX
-FPPFLAGS_SURFEX= -DASC -DFA=fa
+FPPFLAGS_SURFEX= -DASC -DFA=fa -DLFI=lfi
 INC_SURFEX = -I$(B)include
 #
 ifdef DIR_SURFEX
@@ -101,6 +105,8 @@ endif
 #DIR_SURFEX += ARCH_SRC/bug_surfex
 # PRE_BUG TEST !!!
 #
+FUNDEFS += -USFXOASIS -UTRIPOASIS
+#
 DIR_TRIP += LIB/TRIPv2
 #FPPFLAGS_TRIP=
 #
@@ -119,6 +125,8 @@ endif
 #           Source TOPD                                 #
 ##########################################################
 #
+FUNDEFS += -UTOPD
+#
 DIR_TOPD += LIB/TOPD
 FPPFLAGS_TOPD= -DTOPD
 #
@@ -132,6 +140,9 @@ endif
 ##########################################################
 #           Source GELATO                                #
 ##########################################################
+#
+FUNDEFS += -Uin_surfex -Uin_nemo -Uin_arpege -Ukey_mpp_mpi
+#
 DIR_GELATO += LIB/GELATO
 FPPFLAGS_GELATO= -Din_surfex
 #
@@ -170,6 +181,9 @@ endif
 ##########################################################
 #           Librairie DR_HOOK                            #
 ##########################################################
+
+FUNDEFS += -USFX_MPL -ULINUX
+
 ifeq "$(VER_DRHOOK)" "BYPASS"
 DIR_HOOK = LIB/DRHOOK/BYPASS
 endif
@@ -178,6 +192,7 @@ endif
 ifeq "$(VER_DRHOOK)" "MINI"
 DIR_HOOK = LIB/DRHOOK/MINI
 INC_HOOK = -I$(B)LIB/DRHOOK/MINI
+FPPFLAGS_HOOK += -DLINUX
 CPPFLAGS_HOOK += -DLINUX
 
 OBJS_LISTE_MASTER += drhook.o crc.o addrdiff.o cargs.o endian.o env.o linuxtrbk.o
@@ -196,6 +211,7 @@ endif
 ifeq "$(VER_DRHOOK)" "SIMPLE"
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
+FPPFLAGS_HOOK += -DLINUX
 CPPFLAGS_HOOK += -DLINUX
 
 OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o getcurheap.o 
@@ -215,10 +231,13 @@ endif
 #           Source XRD                                   #
 ##########################################################
 
+FUNDEFS += -UFA_GRIBEX -UUSE_SAMIO -UNECSX -UVPP
+
 #RJ: XRD40 for cross validation
 VER_XRD ?= XRD39
 #VER_XRD ?= XRD40
 
+ifneq "$(VER_XRD)" "NONE"
 DIR_XRD += LIB/$(VER_XRD)/FA
 DIR_XRD += LIB/$(VER_XRD)/LFI
 DIR_XRD += LIB/$(VER_XRD)/grib_mf
@@ -230,6 +249,7 @@ INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/FA -I$(B)LIB/$(VER_X
 #RJ FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
 FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE
 CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE
+endif
 #
 ifdef DIR_XRD
 DIR_MASTER += $(DIR_XRD)
@@ -240,6 +260,7 @@ endif
 ##########################################################
 #           Source FM                                    #
 ##########################################################
+ifneq "$(VER_XRD)" "NONE"
 DIR_FM += LIB/FM
 #FPPFLAGS_FM =
 #INC_FM=
@@ -248,6 +269,7 @@ ifdef DIR_FM
 DIR_MASTER += $(DIR_FM)
 #FPPFLAGS   += $(FPPFLAGS_FM)
 INC        += $(INC_FM)
+endif
 endif
 ##########################################################
 #           Librairie OASIS3-MCT                         #
@@ -283,6 +305,8 @@ endif
 ##########################################################
 #           Source MPIVIDE                               #
 ##########################################################
+#
+FUNDEFS += -UNOMPI
 #
 #RJ: moved from all configs here
 ifeq "$(VER_MPI)" "NOMPI"
@@ -429,6 +453,9 @@ ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)-$(VER_OMP)
 ##########################################################
 #           Librairie GRIBAPI                            #
 ##########################################################
+#
+ifneq "$(VER_GRIBAPI)" "NONE"
+#
 ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}
 #RJ: avoid non standard libs! Can create non conforming outputs
@@ -449,11 +476,16 @@ ifneq "x$(VER_GRIBAPI)" "x"
 INC           += $(INC_GRIBAPI)
 LIBS          += $(LIB_GRIBAPI)
 endif
+#
+endif
+#
 ##########################################################
 #           Librairie NETCDF                             #
 ##########################################################
 #
 # NetCDF  : AUTO install of netcdf-3.6.X or 4.x.x on PC linux to avoid problem with compiler
+#
+ifneq "$(VER_CDF)" "NONE"
 #
 ifeq "$(VER_CDF)" "CDFAUTO"
 DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}
@@ -546,6 +578,8 @@ endif
 ifneq "x$(VER_GRIBAPI)" "x"
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
+endif
+#
 endif
 #
 ##########################################################

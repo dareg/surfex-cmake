@@ -50,8 +50,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-INCLUDE "netcdf.inc"
-
+!
 ! global variables
 REAL, DIMENSION(:,:),INTENT(OUT) :: PTA
 REAL, DIMENSION(:,:),INTENT(OUT) :: PQA
