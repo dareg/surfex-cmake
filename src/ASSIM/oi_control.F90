@@ -62,15 +62,15 @@ USE MODD_SURF_ATM_n, ONLY : CSEA,        CWATER,      CTOWN,      CNATURE,      
                             NDIM_NATURE, NDIM_SEA,    NDIM_WATER, NDIM_TOWN 
 USE MODD_ISBA_n, ONLY : NPATCH
 
-#ifdef LFI 
+#ifdef SFX_LFI
 USE MODD_IO_SURF_LFI,ONLY : CFILEIN_LFI, CFILEOUT_LFI, CFILEPGD_LFI, CFILEIN_LFI_SAVE
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE, CDNOMC, &
                             NDGUX,  NDLUX,  PERPK,  PELON0, PELAT0, &
                             PEDELX, PEDELY, PELON1, PELAT1, PEBETA
-#endif 
-#ifdef ARO 
+#endif
+#ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,ONLY : NGPTOT, NGPTOT_CAP, NPROMA, NINDX1, NINDX2, NBLOCK, NKPROMA, &
                             LWRITE, LCOUNTW, LFMWRIT, XGPGW, YSURFEX_CACHE_OUT,          &
                             SURFEX_FIELD_BUF_PREALLOC, SURFEX_FIELD_BUF_SET_RECORD,      &
@@ -196,7 +196,7 @@ CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
 IF (LDINLINE) THEN
 
   YPROGRAM = 'AROME'
-#ifdef ARO   
+#ifdef SFX_ARO
   IGPCOMP = MIN (NGPTOT, NGPTOT_CAP)
   
   NBLOCK   = 1
@@ -232,7 +232,7 @@ CALL INI_DATA_COVER
 !   File handling definition
 
 IF (.NOT. LDINLINE) THEN
-#ifdef LFI
+#ifdef SFX_LFI
   CFILEPGD_LFI = 'PGD'
   CFILEIN_LFI = 'PREP'        ! input PREP file (surface fields) 
   CFILEIN_LFI_SAVE = CFILEIN_LFI
@@ -494,7 +494,7 @@ ALLOCATE (ZWGINC(ISIZE))
 IF (.NOT. LDINLINE) THEN
 
 !  Read atmospheric forecast fields from FA files 
-#ifdef FA
+#ifdef SFX_FA
   CFILEIN_FA = 'FG_OI_MAIN'        ! input forecast
   CFILEIN_FA_SAVE  = CFILEIN_FA
 #endif
@@ -559,7 +559,7 @@ ENDIF
 
 IF (.NOT. LDINLINE) THEN
 !  Define FA file name for CANARI analysis
-#ifdef FA
+#ifdef SFX_FA
   CFILEIN_FA = 'CANARI'        ! input CANARI analysis
   CFILEIN_FA_SAVE  = CFILEIN_FA
 #endif
@@ -617,7 +617,7 @@ CALL OI_BC_SOIL_MOISTURE(ISIZE,PSM_O,PSAB,PWS_O)
 
 IF (.NOT. LDINLINE) THEN
 !  Define FA file name for surface climatology
-#ifdef FA
+#ifdef SFX_FA
   CFILEIN_FA = 'clim_isba'               ! input climatology
   CFILEIN_FA_SAVE  = CFILEIN_FA
   CDNOMC     = 'climat'                  ! new frame name
@@ -641,7 +641,7 @@ IF (.NOT. LDINLINE) THEN
 ENDIF
 
 IF (.NOT. LDINLINE) THEN
-#ifdef FA
+#ifdef SFX_FA
   PLAT0  = PELAT0 
   PLON0  = PELON0 
   PLATOR = PELAT1 
@@ -979,7 +979,7 @@ PRINT *,'---------------------------------------------------------------'
 
 IF (.NOT. LDINLINE) THEN 
 !   Write analysis in LFI file PREP
-#ifdef LFI
+#ifdef SFX_LFI
   CFILEOUT_LFI='PREP'
 #endif
 ENDIF
@@ -988,7 +988,7 @@ ENDIF
  CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','WRITE')
 
 IF (LDINLINE) THEN
-#ifdef ARO
+#ifdef SFX_ARO
 ! Count 2D fields in MSE
   NCOUNTW_TOT = 0
   LWRITE      = .FALSE.
@@ -1018,7 +1018,7 @@ ENDIF
  CALL WRITE
 
 IF (LDINLINE) THEN
-#ifdef ARO
+#ifdef SFX_ARO
   IF (LFMWRIT) DEALLOCATE (XGPGW)
 #endif
 ENDIF
@@ -1122,7 +1122,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 0, ZHOOK_HANDLE)
 
 IF (LDINLINE) THEN
-#ifdef ARO
+#ifdef SFX_ARO
   IF (.NOT.LWRITE.AND.LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 1, ZHOOK_HANDLE)
   IF (.NOT.LWRITE) RETURN
 #endif

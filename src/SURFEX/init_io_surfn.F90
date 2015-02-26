@@ -36,28 +36,28 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODI_INIT_IO_SURF_ASC_n
 #endif
-#ifdef BIN
+#ifdef SFX_BIN
 USE MODI_INIT_IO_SURF_BIN_n
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODI_INIT_IO_SURF_FA_n
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODI_INIT_IO_SURF_LFI_n
 #endif
-#ifdef NC
+#ifdef SFX_NC
 USE MODI_INIT_IO_SURF_NC_n
 #endif
-#ifdef OL
+#ifdef SFX_OL
 USE MODI_INIT_IO_SURF_OL_n
 #endif
-#ifdef TXT
+#ifdef SFX_TXT
 USE MODI_INIT_IO_SURF_TXT_n
 #endif
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_MNHINIT_IO_SURF_n
 #endif
 !
@@ -82,55 +82,55 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_N',0,ZHOOK_HANDLE)
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH
+#ifdef SFX_MNH
   CALL MNHINIT_IO_SURF_n(HPROGRAM,HMASK,HACTION)
 #endif
 END IF
 !
 IF (HPROGRAM=='OFFLIN' ) THEN
-#ifdef OL
+#ifdef SFX_OL
   CALL INIT_IO_SURF_OL_n(HPROGRAM,HMASK,HSCHEME,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='ASCII ' ) THEN
-#ifdef ASC
+#ifdef SFX_ASC
   CALL INIT_IO_SURF_ASC_n(HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='TEXTE ' ) THEN
-#ifdef TXT
+#ifdef SFX_TXT
   CALL INIT_IO_SURF_TXT_n(HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='BINARY' ) THEN
-#ifdef BIN
+#ifdef SFX_BIN
   CALL INIT_IO_SURF_BIN_n(HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='AROME ' ) THEN
-#ifdef ARO
+#ifdef SFX_ARO
   CALL AROINIT_IO_SURF_n(HPROGRAM,HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='FA    ' ) THEN
-#ifdef FA
+#ifdef SFX_FA
   CALL INIT_IO_SURF_FA_n(HPROGRAM,HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='LFI   ' ) THEN
-#ifdef LFI
+#ifdef SFX_LFI
   CALL INIT_IO_SURF_LFI_n(HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='NC    ' ) THEN
-#ifdef NC
+#ifdef SFX_NC
   CALL INIT_IO_SURF_NC_n(HMASK,HACTION)
 #endif
 ENDIF

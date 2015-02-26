@@ -64,13 +64,13 @@ USE MODI_TEST_NAM_VAR_SURF
 USE MODI_READ_SSO_n
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODD_IO_SURF_ASC, ONLY : CFILEIN
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA,  ONLY : CFILEIN_FA
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 #endif
 !
@@ -351,13 +351,13 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
      
      
   ELSE
-#ifdef ASC
+#ifdef SFX_ASC
      CFILEIN     = ADJUSTL(ADJUSTR(YZS)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
      CFILEIN_FA  = ADJUSTL(ADJUSTR(YZS)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YZS)
 #endif
      CALL INIT_IO_SURF_n(YFILETYPE,'FULL  ','SURF  ','READ ')

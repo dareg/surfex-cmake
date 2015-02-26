@@ -34,7 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ARO
+#ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
 #endif
 !
@@ -96,7 +96,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SEAFLUX_N',0,ZHOOK_HANDLE)
 !         Initialisation for IO
 !
 GRESET=.TRUE.
-#ifdef ARO
+#ifdef SFX_ARO
 GRESET=(.NOT.LCOUNTW)
 #endif
 !

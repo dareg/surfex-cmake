@@ -35,7 +35,7 @@ IMPLICIT NONE
 INTEGER :: NVERSION  ! surface version
 INTEGER :: NBUGFIX   ! bugfix number of this version
 !
-#ifndef MNH
+#ifndef SFX_MNH
 REAL,    PARAMETER :: XUNDEF = 1.E+20
 #else 
 #ifdef MNH_MPI_DOUBLE_PRECISION

@@ -33,22 +33,22 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODI_END_IO_SURF_ASC_n
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODI_END_IO_SURF_FA_n
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODI_END_IO_SURF_LFI_n
 #endif
-#ifdef NC
+#ifdef SFX_NC
 USE MODI_END_IO_SURF_NC_n
 #endif
-#ifdef OL
+#ifdef SFX_OL
 USE MODI_END_IO_SURF_OL_n
 #endif
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_MNHEND_IO_SURF_n
 #endif
 !
@@ -70,31 +70,31 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_N',0,ZHOOK_HANDLE)
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH
+#ifdef SFX_MNH
   CALL MNHEND_IO_SURF_n(HPROGRAM)
 #endif
 ELSEIF (HPROGRAM=='ASCII ') THEN
-#ifdef ASC
+#ifdef SFX_ASC
   CALL END_IO_SURF_ASC_n(HPROGRAM)
 #endif
 ELSEIF (HPROGRAM=='OFFLIN') THEN
-#ifdef OL
+#ifdef SFX_OL
   CALL END_IO_SURF_OL_n(HPROGRAM)
 #endif
 ELSEIF (HPROGRAM=='AROME ') THEN
-#ifdef ARO
+#ifdef SFX_ARO
   CALL AROEND_IO_SURF_n(HPROGRAM)
 #endif
 ELSEIF (HPROGRAM=='FA    ') THEN
-#ifdef FA
+#ifdef SFX_FA
   CALL END_IO_SURF_FA_n(HPROGRAM)
 #endif
 ELSEIF (HPROGRAM=='LFI   ') THEN
-#ifdef LFI
+#ifdef SFX_LFI
   CALL END_IO_SURF_LFI_n(HPROGRAM)
 #endif
 ELSEIF (HPROGRAM=='NC    ') THEN
-#ifdef NC
+#ifdef SFX_NC
   CALL END_IO_SURF_NC_n(HPROGRAM)
 #endif
 END IF

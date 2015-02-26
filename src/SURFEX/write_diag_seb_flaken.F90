@@ -32,7 +32,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ARO
+#ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
 #endif
 !
@@ -89,7 +89,7 @@ REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_FLAKE_N',0,ZHOOK_HANDLE)
 !
 GRESET=.TRUE.
-#ifdef ARO
+#ifdef SFX_ARO
 GRESET=(.NOT.LCOUNTW)
 #endif
 !

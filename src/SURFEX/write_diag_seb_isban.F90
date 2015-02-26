@@ -39,7 +39,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef ARO
+#ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
 #endif
 !
@@ -214,7 +214,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',0,ZHOOK_HANDLE)
 ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
 !
 GRESET=.TRUE.
-#ifdef ARO
+#ifdef SFX_ARO
 GRESET=(.NOT.LCOUNTW)
 #endif
 !

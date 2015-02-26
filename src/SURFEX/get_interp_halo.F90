@@ -34,10 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef OL
+#ifdef SFX_OL
 USE MODI_GET_INTERP_HALO_OL
 #endif
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_GET_INTERP_HALO_MNH
 #endif
 !
@@ -63,11 +63,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('GET_INTERP_HALO',0,ZHOOK_HANDLE)
 !
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH
+#ifdef SFX_MNH
   CALL GET_INTERP_HALO_MNH(KHALO)
 #endif
 ELSE
-#ifdef OL
+#ifdef SFX_OL
   ! to be coded properly once Offline version is parallelized
   CALL GET_INTERP_HALO_OL(HGRID,KHALO)
 #endif

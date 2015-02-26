@@ -31,7 +31,7 @@ USE MODD_SURF_ATM_n,    ONLY : NDIM_FULL
 USE MODD_ISBA_n,        ONLY : XTG, XWG, XWGI, XLAI, XSAND, XCLAY, TTIME, &
                                NPATCH, XPATCH, XBIOMASS, XRESP_BIOMASS
 !
-#ifdef ARO   
+#ifdef SFX_ARO
 USE YOMMP,              ONLY : MYPROC 
 #endif
 !
@@ -136,7 +136,7 @@ IF ( NPRINTLEV>0 ) THEN
   WRITE(*,*)
 ENDIF
 !
-#ifdef ARO
+#ifdef SFX_ARO
 IF ( MYPROC > 0 ) THEN 
   IMYPROC = MYPROC
 ELSE

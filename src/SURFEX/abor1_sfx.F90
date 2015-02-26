@@ -58,7 +58,7 @@ IMPLICIT NONE
 INTEGER           :: ILUOUT         ! logical unit of output file      
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-#ifdef ARO
+#ifdef SFX_ARO
 #include "abor1.intfb.h"
 #endif
 !-------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ WRITE(ILUOUT,*) '---------------------------------------------------------------
 WRITE(ILUOUT,*) '---------------------------------------------------------------------------'
  CALL CLOSE_FILE(YPROGRAM,ILUOUT)
 !
-#ifdef ARO
+#ifdef SFX_ARO
 call abor1('abort by abor1_sfx')
 #else
  write(0,*) "aborted with text:",trim(ytext),"|"

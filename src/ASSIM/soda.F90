@@ -64,22 +64,22 @@ USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, X
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
                                 XZENITH, XAZIM, XCO2, XRHOA, XTSURF
 !
-#ifdef ARO 
+#ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,ONLY : NGPTOT, NGPTOT_CAP, NPROMA, NINDX1, NINDX2, NBLOCK, NKPROMA
 #endif
 !
-#ifdef NC
+#ifdef SFX_NC
 USE MODD_IO_SURF_NC,   ONLY : CFILEIN_NC, CFILEIN_NC_SAVE, CFILEPGD_NC, CFILEOUT_NC, LDEF, &
                               CLUOUT_NC
 #endif
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODD_IO_SURF_ASC,  ONLY : CFILEIN, CFILEIN_SAVE, CFILEPGD, CFILEOUT
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA,   ONLY : CFILEIN_FA, CFILEIN_FA_SAVE, CFILEPGD_FA, CDNOMC, CFILEOUT_FA, &
                               NUNIT_FA, IVERBFA, LFANOCOMPACT
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, &
                                 CFILEPGD_LFI, CFILE_LFI, CLUOUT_LFI, CFILEOUT_LFI 
 #endif
@@ -113,10 +113,6 @@ USE MODI_FLAG_UPDATE
 USE MODI_FLAG_DIAG_UPDATE
 !
 USE MODE_EKF, ONLY : GET_FILE_NAME
-!
-#ifdef OFF
-USE MODI_FANDAR
-#endif
 !
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
@@ -237,10 +233,10 @@ IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
  CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 
 ! Open ascii outputfile for writing
-#ifdef LFI
+#ifdef SFX_LFI
 CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
 #endif
-#ifdef NC
+#ifdef SFX_NC
 CLUOUT_NC = ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
 #endif
  CALL GET_LUOUT(CSURF_FILETYPE,ILUOUT)
@@ -256,7 +252,7 @@ CALL GOTO_SURFEX(1,.TRUE.)
 !
 ! Setting input files read from namelist
 IF ( CSURF_FILETYPE == "LFI   " ) THEN
-#ifdef LFI
+#ifdef SFX_LFI
   CFILEIN_LFI      = CPREPFILE
   CFILE_LFI        = CPREPFILE
   CFILEIN_LFI_SAVE = CPREPFILE
@@ -264,21 +260,21 @@ IF ( CSURF_FILETYPE == "LFI   " ) THEN
   CFILEOUT_LFI     = CSURFFILE
 #endif
 ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
-#ifdef FA
+#ifdef SFX_FA
   CFILEIN_FA      = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
   CFILEIN_FA_SAVE = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
   CFILEPGD_FA     = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
   CFILEOUT_FA  = ADJUSTL(ADJUSTR(CSURFFILE)//'.fa')
 #endif
 ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
-#ifdef ASC
+#ifdef SFX_ASC
   CFILEIN      = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
   CFILEIN_SAVE = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
   CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
   CFILEOUT = ADJUSTL(ADJUSTR(CSURFFILE)//'.txt')
 #endif
 ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
-#ifdef ASC
+#ifdef SFX_ASC
   CFILEIN_NC      = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
   CFILEIN_NC_SAVE = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
   CFILEPGD_NC     = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
@@ -384,29 +380,29 @@ DO ISTEP = 1,NBOUTPUT
       !
       IF ( CSURF_FILETYPE == "LFI   " ) THEN
         YFILEIN = TRIM(YFILEIN)
-#ifdef LFI
+#ifdef SFX_LFI
         CFILEIN_LFI      = YFILEIN 
         CFILE_LFI        = YFILEIN
         CFILEIN_LFI_SAVE = YFILEIN
-#endif    
+#endif
       ELSEIF ( CSURF_FILETYPE == "FA    " ) THEN
         YFILEIN = TRIM(YFILEIN)//'.fa'
-#ifdef FA
+#ifdef SFX_FA
         CFILEIN_FA      = YFILEIN
         CFILEIN_FA_SAVE = YFILEIN
-#endif    
+#endif
       ELSEIF ( CSURF_FILETYPE == "ASCII " ) THEN
         YFILEIN = TRIM(YFILEIN)//'.txt'
-#ifdef ASC
+#ifdef SFX_ASC
         CFILEIN      = YFILEIN
         CFILEIN_SAVE = YFILEIN
-#endif    
+#endif
       ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
         YFILEIN = TRIM(YFILEIN)//'.nc'
-#ifdef NC
+#ifdef SFX_NC
         CFILEIN_NC      = YFILEIN
         CFILEIN_NC_SAVE = YFILEIN
-#endif    
+#endif
       ELSE
         CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
       ENDIF
@@ -577,7 +573,7 @@ ALLOCATE(ZSIC        (INI))
 IF (CASSIM_ISBA=="OI   " .OR. .NOT.LOBSFILE) THEN
   !
   !  Read atmospheric forecast fields from FA files 
-#ifdef FA
+#ifdef SFX_FA
   CFILEIN_FA = 'FG_OI_MAIN'
   CDNOMC     = 'oimain'                  ! new frame name
 #endif
@@ -617,7 +613,7 @@ IF (CASSIM_ISBA=="OI   " .OR. .NOT.LOBSFILE) THEN
 ENDIF
 !
 !  Define FA file name for CANARI analysis
-#ifdef FA
+#ifdef SFX_FA
 CFILEIN_FA = 'CANARI'        ! input CANARI analysis
 CDNOMC     = 'canari'                  ! new frame name
 #endif
@@ -638,7 +634,7 @@ CDNOMC     = 'canari'                  ! new frame name
  WRITE(*,*) 'READ CANARI OK'
 
 !  Define FA file name for surface climatology
-#ifdef FA
+#ifdef SFX_FA
 CFILEIN_FA = 'clim_isba'               ! input climatology
 CDNOMC     = 'climat'                  ! new frame name
 #endif

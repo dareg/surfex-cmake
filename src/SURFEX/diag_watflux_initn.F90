@@ -34,7 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef OL
+#ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 #endif
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -145,7 +145,7 @@ END IF
 !
 !* cumulative surface energy budget
 !
-#ifdef OL
+#ifdef SFX_OL
 IF (LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.LRESET_BUDGETC)) THEN
 #else
 IF (LSURF_BUDGETC .OR. .NOT.LRESET_BUDGETC) THEN

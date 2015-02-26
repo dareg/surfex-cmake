@@ -76,13 +76,13 @@ USE MODI_ABOR1_SFX
 !
 USE MODI_PGD_ECOCLIMAP2_DATA
 !
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODD_IO_SURF_ASC, ONLY : CFILEIN
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA,  ONLY : CFILEIN_FA
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 #endif
 !
@@ -230,13 +230,13 @@ ELSEIF(LIMP_COVER)THEN !LIMP_COVER (impose cover from input file at the same res
   IF(YFILETYPE=='NETCDF')THEN
     CALL ABOR1_SFX('Use another format than netcdf for cover input file with LIMP_COVER')
   ELSE
-#ifdef ASC
+#ifdef SFX_ASC
     CFILEIN     = ADJUSTL(ADJUSTR(YCOVER)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
     CFILEIN_FA  = ADJUSTL(ADJUSTR(YCOVER)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
     CFILEIN_LFI = ADJUSTL(YCOVER)
 #endif
     CALL INIT_IO_SURF_n(YFILETYPE,'FULL  ','SURF  ','READ ')

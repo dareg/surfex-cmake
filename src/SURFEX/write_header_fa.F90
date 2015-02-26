@@ -57,11 +57,6 @@ USE MODI_IO_BUFF_CLEAN_n
 !
 USE MODI_GET_LUOUT
 !
-#ifdef OFF
-USE MODI_FACADE
-USE MODI_FANDAR
-#endif
-!
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments

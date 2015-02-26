@@ -84,13 +84,13 @@ USE MODI_READ_SURF
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
 !
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODD_IO_SURF_ASC, ONLY : CFILEIN
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA,  ONLY : CFILEIN_FA
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 #endif
 !
@@ -390,13 +390,13 @@ IF(LIMP_SAND)THEN
   IF(YSANDFILETYPE=='NETCDF')THEN
      CALL ABOR1_SFX('Use another format than netcdf for sand input file with LIMP_SAND')
   ELSE
-#ifdef ASC
+#ifdef SFX_ASC
      CFILEIN     = ADJUSTL(ADJUSTR(YSAND)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
      CFILEIN_FA  = ADJUSTL(ADJUSTR(YSAND)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YSAND)
 #endif
      CALL INIT_IO_SURF_n(YSANDFILETYPE,'NATURE','ISBA  ','READ ')
@@ -425,13 +425,13 @@ IF(LIMP_CLAY)THEN
   IF(YCLAYFILETYPE=='NETCDF')THEN
      CALL ABOR1_SFX('Use another format than netcdf for clay input file with LIMP_CLAY')
   ELSE
-#ifdef ASC
+#ifdef SFX_ASC
      CFILEIN     = ADJUSTL(ADJUSTR(YSAND)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
      CFILEIN_FA  = ADJUSTL(ADJUSTR(YSAND)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YSAND)
 #endif
      CALL INIT_IO_SURF_n(YCLAYFILETYPE,'NATURE','ISBA  ','READ ')
@@ -477,13 +477,13 @@ IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF
     IF(YSOCFILETYPE=='NETCDF')THEN
        CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOC')
     ELSE
-#ifdef ASC
+#ifdef SFX_ASC
        CFILEIN     = ADJUSTL(ADJUSTR(YSOC_TOP)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
        CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOC_TOP)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YSOC_TOP)
 #endif
        CALL INIT_IO_SURF_n(YSOCFILETYPE,'NATURE','ISBA  ','READ ')
@@ -498,13 +498,13 @@ IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF
     IF(YSOCFILETYPE=='NETCDF')THEN
        CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOC')
     ELSE
-#ifdef ASC
+#ifdef SFX_ASC
        CFILEIN     = ADJUSTL(ADJUSTR(YSOC_SUB)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
        CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOC_SUB)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YSOC_SUB)
 #endif
        CALL INIT_IO_SURF_n(YSOCFILETYPE,'NATURE','ISBA  ','READ ')
@@ -544,13 +544,13 @@ IF(LEN_TRIM(YPERM)/=0.OR.XUNIF_PERM/=XUNDEF)THEN
     IF(YPERMFILETYPE=='NETCDF')THEN
        CALL ABOR1_SFX('Use another format than netcdf for permafrost input file with LIMP_PERM')
     ELSE
-#ifdef ASC
+#ifdef SFX_ASC
        CFILEIN     = ADJUSTL(ADJUSTR(YPERM)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
        CFILEIN_FA  = ADJUSTL(ADJUSTR(YPERM)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YPERM)
 #endif
        CALL INIT_IO_SURF_n(YPERMFILETYPE,'NATURE','ISBA  ','READ ')
@@ -584,13 +584,13 @@ IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
     IF(YGWFILETYPE=='NETCDF')THEN
        CALL ABOR1_SFX('Use another format than netcdf for groundwater input file with LIMP_GW')
     ELSE
-#ifdef ASC
+#ifdef SFX_ASC
        CFILEIN     = ADJUSTL(ADJUSTR(YGW)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
        CFILEIN_FA  = ADJUSTL(ADJUSTR(YGW)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YGW)
 #endif
        CALL INIT_IO_SURF_n(YGWFILETYPE,'NATURE','ISBA  ','READ ')

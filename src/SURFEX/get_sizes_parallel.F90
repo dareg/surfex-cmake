@@ -6,7 +6,7 @@ SUBROUTINE GET_SIZES_PARALLEL(KPROC,KSIZE,KPROCMIN,KSIZE_TASK,OSHADOWS)
 ! Modif Matthieu Lafaysse 04/2014
 ! For shadows routines, we need strictly rectangular subdomains
 
-#ifdef OL
+#ifdef SFX_OL
 USE MODD_SLOPE_EFFECT, ONLY : NIX,NIY
 USE MODN_IO_OFFLINE, ONLY : CSURF_FILETYPE
 #endif
@@ -57,7 +57,7 @@ IF (GSHADOWS) THEN
   ! We want only rectangular subdomains
   
   ! Get x and y dimension lengths
-#ifdef OL
+#ifdef SFX_OL
 !$OMP SINGLE
   IF (NIX==0) THEN
 
@@ -91,7 +91,7 @@ IF (GSHADOWS) THEN
   DO J=KPROCMIN+KPROC-INY_RESTE,KPROCMIN+KPROC-1
     KSIZE_TASK(MOD(J,KPROC))=KSIZE_TASK(MOD(J,KPROC))+NIX
   END DO
-#endif  
+#endif
 ELSE
   ISIZE = CEILING(KSIZE*1./KPROC) !nb of points by task
 

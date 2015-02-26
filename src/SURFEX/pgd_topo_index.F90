@@ -61,13 +61,13 @@ USE MODI_INTERPOL_FIELD
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
-#ifdef ASC
+#ifdef SFX_ASC
 USE MODD_IO_SURF_ASC, ONLY : CFILEIN
 #endif
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA,  ONLY : CFILEIN_FA
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
 USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 #endif
 !
@@ -197,13 +197,13 @@ ELSE
      IF(HCTIFILETYPE=='NETCDF')THEN
         CALL ABOR1_SFX('Use another format than netcdf for cti input file with LIMP_CTI')
      ELSE
-#ifdef ASC
+#ifdef SFX_ASC
        CFILEIN     = ADJUSTL(ADJUSTR(HCTI)//'.txt')
 #endif
-#ifdef FA
+#ifdef SFX_FA
        CFILEIN_FA  = ADJUSTL(ADJUSTR(HCTI)//'.fa')
 #endif
-#ifdef LFI
+#ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(HCTI)
 #endif
        CALL INIT_IO_SURF_n(YFILETYPE,'FULL  ','SURF  ','READ ')

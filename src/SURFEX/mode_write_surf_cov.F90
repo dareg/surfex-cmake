@@ -12,7 +12,7 @@ CONTAINS
 !     #############################################################
 !
 USE MODI_WRITE_SURF, ONLY: WRITE_SURF
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_WRITE_SURFX2COV_MNH
 #endif
 !
@@ -52,7 +52,7 @@ IL1  = SIZE(PFIELD,1)
 IL2  = SIZE(OFLAG)
 !
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH
+#ifdef SFX_MNH
     CALL WRITE_SURFX2COV_MNH(YREC,IL1,IL2,PFIELD,OFLAG,KRESP,HCOMMENT,YDIR)
 #endif
 ELSE

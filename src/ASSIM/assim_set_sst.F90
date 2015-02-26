@@ -30,7 +30,7 @@ USE MODD_SEAFLUX_n, ONLY : XSST
 USE MODD_ASSIM,         ONLY : LECSST, LREAD_SST_FROM_FILE
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
-#ifdef FA
+#ifdef SFX_FA
 USE MODD_IO_SURF_FA,    ONLY : CFILEIN_FA, CDNOMC
 #endif
 !
@@ -78,7 +78,7 @@ IF ( LREAD_SST_FROM_FILE ) THEN
   !
   !  Define FA file name for SST analysis interpolated from boundary file 
   !
-#ifdef FA
+#ifdef SFX_FA
   CFILEIN_FA = 'SST_SIC'        ! input SST and SIC analysis  
   CDNOMC     = 'CADRE SST'      ! new frame name 
   WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
