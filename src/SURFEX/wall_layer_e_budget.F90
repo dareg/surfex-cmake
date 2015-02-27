@@ -153,7 +153,7 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PDQS_WALL    ! heat storage inside the wall
 REAL, DIMENSION(:), INTENT(IN)    :: PT_WIN2      ! indoor window temperature [K]
 REAL, DIMENSION(:), INTENT(OUT)   :: PABS_LW_WALL ! absorbed infrared rad. [W m-2(wall)]
 REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_WALL  ! LW flux emitted by the wall [W m-2(wall)]
-REAL, DIMENSION(:), INTENT(OUT)   :: PH_WALL      ! Sensible heat flux from wall to air [W/m²(wall)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PH_WALL      ! Sensible heat flux from wall to air [W/m2(wall)]
                                                   ! wall = facade - glazing
 REAL, DIMENSION(:), INTENT(OUT)   :: PIMB_WALL    ! wall residual energy imbalance 
                                                   ! for verification [W m-2]
@@ -168,7 +168,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WALL_FLOOR! rad. fluxes from wall to f
 REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_WALL_MASS ! rad. fluxes from wall to mass [W m-2(wall)]
 REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_WALL_BLD ! conv. fluxes from wall to bld [W m-2(wall)]
 
-REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_IN_WALL  ! LOAD from solar heat gain + rad int. gains  W/m² [Wall]
+REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_IN_WALL  ! LOAD from solar heat gain + rad int. gains  W/m2 [Wall]
 
 
 !

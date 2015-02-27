@@ -127,7 +127,7 @@ PSNOWENERGY = 0.
 PSOILENERGY = 0.
 ZALB        = PALB
 !
-ZMUDIFF = XP_MUDIFF !the diffuse incident flux is treated as direct flux at zenithal angle 53°
+ZMUDIFF = XP_MUDIFF !the diffuse incident flux is treated as direct flux at zenithal angle 53deg
 !
 IMAX_USE = MAXVAL(KNLVLS_USE)
 !

@@ -113,7 +113,7 @@ REAL    :: ZLONMIN   ! minimum longitude (degrees)
 REAL    :: ZLONMAX   ! maximum longitude (degrees)
 REAL    :: ZLATMIN   ! minimum latitude  (degrees)
 REAL    :: ZLATMAX   ! maximum latitude  (degrees)
-REAL    :: ZGRID_RES ! 1° or 0.5° resolution
+REAL    :: ZGRID_RES ! 1deg or 0.5deg resolution
 !
 INTEGER :: IWORK, IFLOOD, INI, JLON, JLAT
 !
@@ -227,12 +227,12 @@ IF(MOD(PTSTEP_DIAG,XTSTEP)*MOD(XTSTEP,PTSTEP_DIAG)/=0.)THEN
   CALL ABORT_TRIP('INIT_TRIP: PTSTEP_DIAG and XTSTEP are not good !!!')
 ENDIF
 !
-WRITE(NLISTING,*)'! ',ZGRID_RES,'° TRIP run !!!'  
+WRITE(NLISTING,*)'! ',ZGRID_RES,'deg TRIP run !!!'
 !
 IF(ZGRID_RES<0.5.AND.XRATMED==1.4)THEN
-     WRITE(NLISTING,*)'! meandering ratio is 1.4 at 0.5° or 1° resolution !!!'   
-     WRITE(NLISTING,*)'! for other resolution change XRATMED in namelist  !!!' 
-     CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5° or 1° resolution !!!')
+     WRITE(NLISTING,*)'! meandering ratio is 1.4 at 0.5deg or 1deg resolution !!!'
+     WRITE(NLISTING,*)'! for other resolution change XRATMED in namelist      !!!'
+     CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5deg or 1deg resolution !!!')
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -614,9 +614,9 @@ WRITE(NLISTING,*)'Sequence max :                 ',TGRID%NSEQMAX
 WRITE(NLISTING,*)''
 WRITE(NLISTING,*)'MEANDERING RATIO FIXED TO      ',XRATMED
 WRITE(NLISTING,*)'CELL LENGTH MIN, MAX (km):     ',MINVAL(TGRID%XLEN/1.E3, TGRID%GMASK),  &
-                                                   MAXVAL(TGRID%XLEN/1.E3, TGRID%GMASK)                                 
-WRITE(NLISTING,*)'CELL AREA MIN, MAX (km²):      ',MINVAL(TGRID%XAREA/1.E6,TGRID%GMASK),  &
-                                                   MAXVAL(TGRID%XAREA/1.E6,TGRID%GMASK)  
+                                                   MAXVAL(TGRID%XLEN/1.E3, TGRID%GMASK)
+WRITE(NLISTING,*)'CELL AREA MIN, MAX (km2):      ',MINVAL(TGRID%XAREA/1.E6,TGRID%GMASK),  &
+                                                   MAXVAL(TGRID%XAREA/1.E6,TGRID%GMASK)
 WRITE(NLISTING,*)''
 IF(CGROUNDW=='CST')THEN
   WRITE(NLISTING,*)''

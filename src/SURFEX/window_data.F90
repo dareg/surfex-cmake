@@ -16,7 +16,7 @@ SUBROUTINE WINDOW_DATA(KI,PSHGC, PU_WIN, PALB_WIN, PABS_WIN, PUGG_WIN, PTRAN_WIN
 !! uses U_WIN (window conductivity) and SHGC (window solar heat gain coef)
 !! to compute the normal incident transmittance/reflectance
 !! a factor to normal incident tran/ref is applied to take into account all
-!! possible incidence between 18° and 72°
+!! possible incidence between 18deg and 72deg
 !!
 !!
 !!    EXTERNAL

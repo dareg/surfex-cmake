@@ -329,7 +329,7 @@ IF (LHANDLE_SIC) THEN
    ! time-step (incl. under forcing). ZMASK value is set to 1. on these points
    ZMASK(:)=0.
    WHERE ( XSIC(:) > 0. ) ZMASK(:)=1. 
-   ! To be large, assume that seaice may form where SST is < 10°C
+   ! To be large, assume that seaice may form where SST is < 10C
    WHERE ( XSST(:) - XTTS <= 10. ) ZMASK(:)=1.
    IF (LINTERPOL_SIC) WHERE (XFSIC(:) > 0. ) ZMASK(:)=1. 
    IF (LINTERPOL_SIT) WHERE (XFSIT(:) > 0. ) ZMASK(:)=1.
@@ -433,9 +433,9 @@ PSFCO2(:) = 0.0
 !ELSEIF(CSEACO2=='CST ')THEN
 !  PSFCO2 = E * deltapCO2 
 !  According to Wanninkhof (medium hypothesis) : 
-!  E = 1.13.10^-3 * WIND^2 CO2mol.m-2.yr-1.µatm-1 
+!  E = 1.13.10^-3 * WIND^2 CO2mol.m-2.yr-1.uatm-1
 !    = 1.13.10^-3 * WIND^2 * Mco2.10^-3 * (1/365*24*3600)
-!  deltapCO2 = -8.7 µatm (Table 1 half hypothesis)
+!  deltapCO2 = -8.7 uatm (Table 1 half hypothesis)
 PSFCO2(:) = - ZWIND(:)**2 * 1.13E-3 * 8.7 * 44.E-3 / ( 365*24*3600 )
 !ENDIF
 !

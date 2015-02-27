@@ -56,7 +56,7 @@ LOGICAL,                 INTENT(IN)    :: OPRINT   !Printable budget key
 LOGICAL,                 INTENT(IN)    :: OFLOOD       !Flood scheme key
 CHARACTER(LEN=3),        INTENT(IN)    :: HGROUNDW     !Groundwater scheme key
 LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_GW     !Groundwater mask
-REAL,    DIMENSION(:,:), INTENT(IN)    :: PAREA        ! Grid-cell area                  [m²]
+REAL,    DIMENSION(:,:), INTENT(IN)    :: PAREA        ! Grid-cell area                  [m2]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PWEFF        ! Effective porosity              [-]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PSURF_STO2   ! river channel storage           [kg]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PFLOOD_STO2  ! Floodplain water storage        [kg]

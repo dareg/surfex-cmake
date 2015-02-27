@@ -45,7 +45,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 REAL,                 INTENT(IN)     :: PTSTEP ! time-step (s)
-REAL, DIMENSION(:),   INTENT(IN)     :: PUTCI  ! UTCI  (°C)
+REAL, DIMENSION(:),   INTENT(IN)     :: PUTCI  ! UTCI  (C)
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PUTCIC ! Time cumulated in each sheat-stress range (s)
 !
 !*      0.2    declarations of local variables

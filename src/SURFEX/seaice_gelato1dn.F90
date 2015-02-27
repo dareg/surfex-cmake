@@ -40,7 +40,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!     S.Senesi  *Météo-France* CNRM - GAME
+!!     S.Senesi  *Meteo-France* CNRM - GAME
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -95,7 +95,7 @@ REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSIC ! sea ice cover constraint ([0-1]
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSIT ! sea ice thickness constraint (m). 
 !
 REAL, DIMENSION(:)  ,INTENT(OUT)      :: PSIC      ! Sea-ice Cover ([0-1])
-REAL, DIMENSION(:)  ,INTENT(OUT)      :: PTICE     ! Sea-ice temperature (°K)
+REAL, DIMENSION(:)  ,INTENT(OUT)      :: PTICE     ! Sea-ice temperature (K)
 REAL, DIMENSION(:)  ,INTENT(OUT)      :: PICE_ALB  ! Sea-ce albedo ([0-1])
 !
 !*      0.2    declarations of local variables

@@ -102,7 +102,7 @@ REAL, DIMENSION(NPNBANDS), PARAMETER :: XPRATIO_DIF = (/4.68915470846e-05, 0.023
 ! Fraction of diffuse solar radiation between 2520 and 4000 nanometers 
 REAL, PARAMETER :: XPCOEFNIR_DIF = 0.01216941
 !
-REAL, PARAMETER :: XP_MUDIFF = 0.601815023 ! =cos(53./180.*XPI) : diffuse incident flux is treated as direct flux at incident angle 53°
+REAL, PARAMETER :: XP_MUDIFF = 0.601815023 ! =cos(53./180.*XPI) : diffuse incident flux is treated as direct flux at incident angle 53deg
 !
 REAL, PARAMETER :: XPMAX_OPTICALDEPTH = 200. !maximum optical depth per layer
 REAL, PARAMETER :: XPTAUMAX = 30. !above this optical depth, absorbed energy can be neglected

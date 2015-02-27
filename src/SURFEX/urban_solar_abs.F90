@@ -221,7 +221,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PAZIM             ! solar azimuthal angle
 REAL, DIMENSION(:), INTENT(IN)    :: PBLD              ! buildings fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PGARDEN           ! GARDEN area fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PROAD_DIR         ! Road direction
-                                                       ! (° from N, clockwise)
+                                                       ! (deg from N, clockwise)
 REAL, DIMENSION(:), INTENT(IN)    :: PROAD             ! road fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PFRAC_GR          ! green roof fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PWALL_O_HOR       ! wall surf. / hor. surf
@@ -289,12 +289,12 @@ REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_WIN      ! solar radiation receive
 REAL, DIMENSION(:), INTENT(OUT)    :: PREF_SW_GRND     ! total solar radiation reflected by ground
 REAL, DIMENSION(:), INTENT(OUT)    :: PREF_SW_FAC      ! total solar radiation reflected by wall
 REAL, DIMENSION(:), INTENT(OUT)    :: PTR_SW_WIN       ! Solar radiation transmitted
-                                                       ! through glazing [W/m²(bld)]
+                                                       ! through glazing [W/m2(bld)]
 !new arguments for shading
 REAL, DIMENSION(:), INTENT(OUT)    :: PE_SHADING       ! Energy that is not reflected 
                                                        ! by the shading, nor transmitted through
                                                        ! the bld, nor absorbed by the
-                                                       ! [W/m²(win)]
+                                                       ! [W/m2(win)]
 LOGICAL, DIMENSION(:),INTENT(INOUT):: OSHAD_DAY        ! has shading been necessary this day ?
 LOGICAL, DIMENSION(:),INTENT(IN)   :: OSHADE           ! are building conditions favorable for 
 !                                                      ! shading (independantly of solar irradiance) ?

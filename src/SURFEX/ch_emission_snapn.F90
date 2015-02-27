@@ -56,8 +56,8 @@ REAL,                   INTENT(IN)  :: PSIMTIME! time of simulation in sec UTC
 REAL, DIMENSION(KSIZE), INTENT(IN)  :: PSUNTIME! Solar time (s since midnight)
 INTEGER,                INTENT(IN)  :: KYEAR,KMONTH,KDAY ! UTC year, month, day
 REAL, DIMENSION(KSIZE), INTENT(IN)  :: PRHOA   ! Air density
-REAL, DIMENSION(KSIZE), INTENT(IN)  :: PLON    ! Longitude (°, from Greenwich)
-!                                              ! (must be between -180° and 180°)
+REAL, DIMENSION(KSIZE), INTENT(IN)  :: PLON    ! Longitude (deg, from Greenwich)
+!                                              ! (must be between -180deg and 180deg)
 !
 !*       0.2  declaration of local variables
 !

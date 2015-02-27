@@ -1055,7 +1055,7 @@ DO JJ = 1,SIZE(ZSNOW)
       WRITE(*,*) 'point',JJ,"/",SIZE(ZSNOW)
       WRITE(*,*) 'layer',JST
       WRITE(*,*) 'pressure',PPS(JJ)
-      WRITE(*,*) 'slope',ACOS(PDIRCOSZW(JJ))*(180./XPI),"°"
+      WRITE(*,*) 'slope',ACOS(PDIRCOSZW(JJ))*(180./XPI),"deg"
       WRITE(*,*) 'XLAT=',PXLAT(JJ),'XLON=',PXLON(JJ)
       WRITE(*,*) 'solar radiation=',PSW_RAD(JJ)
       WRITE(*,*) 'INLVLS_USE(JJ):',INLVLS_USE(JJ)

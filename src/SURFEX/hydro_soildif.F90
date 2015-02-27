@@ -149,7 +149,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PDRAIN, PHORTON
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTOPQS
 !                                      PTOPQS = Topmodel subsurface flow by layer (m/s)
 !
-REAL, DIMENSION(:),   INTENT(OUT)   :: PQSB     !Lateral subsurface flow [kg/m²/s]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PQSB     !Lateral subsurface flow [kg/m2/s]
 !
 !
 !*      0.2    declarations of local variables

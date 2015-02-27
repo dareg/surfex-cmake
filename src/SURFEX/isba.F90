@@ -552,15 +552,15 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFROZEN  !Fraction of frozen flood
 REAL, DIMENSION(:), INTENT(IN)   :: PFALB     !Floodplain albedo
 REAL, DIMENSION(:), INTENT(IN)   :: PFEMIS    !Floodplain emis
 REAL, DIMENSION(:), INTENT(IN)   :: PFFLOOD   !Efective floodplain fraction
-REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD  !Floodplains potential infiltration           [kg/m²]
-REAL, DIMENSION(:), INTENT(INOUT):: PIFLOOD   !Floodplains infiltration                     [kg/m²/s]
-REAL, DIMENSION(:), INTENT(INOUT):: PPFLOOD   !Floodplains direct precipitation             [kg/m²/s]
-REAL, DIMENSION(:), INTENT(INOUT):: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux     [W/m²]
+REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD  !Floodplains potential infiltration           [kg/m2]
+REAL, DIMENSION(:), INTENT(INOUT):: PIFLOOD   !Floodplains infiltration                     [kg/m2/s]
+REAL, DIMENSION(:), INTENT(INOUT):: PPFLOOD   !Floodplains direct precipitation             [kg/m2/s]
+REAL, DIMENSION(:), INTENT(INOUT):: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux     [W/m2]
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PSODELX  ! Pulsation for each layer (Only used if LTEMP_ARP=True)
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PTOPQS !Topmodel (HRUNOFF=SGH) subsurface flow by layer for DIF (m/s)
-REAL, DIMENSION(:), INTENT(OUT)  :: PQSB   !Topmodel (HRUNOFF=SGH) Lateral subsurface flow for DIF [kg/m²/s]
+REAL, DIMENSION(:), INTENT(OUT)  :: PQSB   !Topmodel (HRUNOFF=SGH) Lateral subsurface flow for DIF [kg/m2/s]
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PFWTD    ! grid-cell fraction of water table rises
 REAL, DIMENSION(:), INTENT(IN)   :: PWTD     ! water table depth from hydrological model (m)

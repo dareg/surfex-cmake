@@ -569,8 +569,8 @@ REAL, DIMENSION(:), INTENT(IN)   :: PABS_SW_WIN   ! window absorbed shortwave ra
 REAL, DIMENSION(:), INTENT(OUT)  :: PABS_LW_WIN   ! absorbed infrared rad. [W m-2]
 REAL, DIMENSION(:), INTENT(IN)   :: PUGG_WIN      ! window glass-to-glass U-factro [W m-2 K-1]
  !new argument for PET calculation
-REAL, DIMENSION(:), INTENT(OUT) :: PEMIT_LW_ROAD ! LW fluxes emitted by road (W/m² surf road)
-REAL, DIMENSION(:), INTENT(OUT) :: PEMIT_LW_FAC  ! LW fluxes emitted by wall (W/m² surf wall)
+REAL, DIMENSION(:), INTENT(OUT) :: PEMIT_LW_ROAD ! LW fluxes emitted by road (W/m2 surf road)
+REAL, DIMENSION(:), INTENT(OUT) :: PEMIT_LW_FAC  ! LW fluxes emitted by wall (W/m2 surf wall)
 REAL, DIMENSION(:), INTENT(OUT) :: PT_RAD_IND    ! Indoor mean radiant temperature [K]
 REAL, DIMENSION(:), INTENT(OUT) :: PHU_BLD       ! Indoor relative humidity 0 < (-) < 1
 REAL,                INTENT(IN)  :: PTIME        ! current time since midnight (UTC, s)
@@ -680,11 +680,11 @@ REAL, DIMENSION(SIZE(PTA)) :: ZCONV_WALL_BLD  ! rad. flux from roof to bld [W m-
 REAL, DIMENSION(SIZE(PTA)) :: ZCONV_WIN_BLD   ! rad. flux from roof to bld [W m-2(win)]
 REAL, DIMENSION(SIZE(PTA)) :: ZAC_WIN         ! window aerodynamic conductance
 
-REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_ROOF   ! indoor load on roof W/m²[roof]
-REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_FLOOR   ! indoor load on floor W/m²[floor]
-REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_WALL   ! indoor load on wall W/m²[wall]
-REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_WIN   ! indoor load on win W/m²[win]
-REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_MASS   ! indoor load on mass W/m²[mass]
+REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_ROOF   ! indoor load on roof W/m2[roof]
+REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_FLOOR   ! indoor load on floor W/m2[floor]
+REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_WALL   ! indoor load on wall W/m2[wall]
+REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_WIN   ! indoor load on win W/m2[win]
+REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_MASS   ! indoor load on mass W/m2[mass]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE                                             
 !-------------------------------------------------------------------------------
@@ -731,7 +731,7 @@ ZTS_ROOF    (:)=PT_ROOF     (:,1)
 IF (HBEM=='BEM') THEN
   !
   ZLOAD_IN_ROOF = PF_FLOOR_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
-           / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD ) ! W/m² [ROOF]
+           / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD ) ! W/m2 [ROOF]
   ZLOAD_IN_FLOOR = PF_FLOOR_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &
            / (2 + PWALL_O_BLD + PGLAZ_O_BLD + PMASS_O_BLD )
   ZLOAD_IN_MASS = PF_MASS_WIN * PTR_SW_WIN + PQIN * PN_FLOOR * (1-PQIN_FLAT) * PQIN_FRAD  &

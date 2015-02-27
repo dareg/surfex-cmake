@@ -88,7 +88,7 @@ TYPE DATA_TEB_t
   INTEGER, POINTER, DIMENSION(:):: NPAR_USETYPE      ! type of use in the buildings
   REAL, POINTER, DIMENSION(:)   :: XPAR_GARDEN       ! fraction of veg in the streets   (-)
   REAL, POINTER, DIMENSION(:)   :: XPAR_GREENROOF    ! fraction of greenroofs on roofs  (-)
-  REAL, POINTER, DIMENSION(:)   :: XPAR_ROAD_DIR     ! road direction (° from North, clockwise)
+  REAL, POINTER, DIMENSION(:)   :: XPAR_ROAD_DIR     ! road direction (deg from North, clockwise)
   REAL, POINTER, DIMENSION(:)   :: XPAR_BLD          ! fraction of buildings            (-)
   REAL, POINTER, DIMENSION(:)   :: XPAR_BLD_HEIGHT   ! buildings height 'h'             (m)
   REAL, POINTER, DIMENSION(:)   :: XPAR_WALL_O_HOR   ! wall surf. / hor. surf.          (-)

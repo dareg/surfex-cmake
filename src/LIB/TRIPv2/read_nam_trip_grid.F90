@@ -68,7 +68,7 @@ REAL    :: TLONMIN = 0.  ! minimum longitude (degrees)
 REAL    :: TLONMAX = 0.  ! maximum longitude (degrees)
 REAL    :: TLATMIN = 0.  ! minimum latitude  (degrees)
 REAL    :: TLATMAX = 0.  ! maximum latitude  (degrees)
-REAL    :: TRES    = 0.  ! 1° or 0.5° resolution
+REAL    :: TRES    = 0.  ! 1deg or 0.5deg resolution
 !
 REAL, DIMENSION(:), ALLOCATABLE ::  ZLON
 REAL, DIMENSION(:), ALLOCATABLE ::  ZLAT
@@ -103,10 +103,10 @@ CALL CLOSE_TRIP_NAMELIST(ILUNAM)
 !
 IF(TRES/=0.5.AND.TRES/=1.0)THEN
   IF(TRES<0.08.OR.TRES>0.09)THEN
-    WRITE(KLISTING,*)'Error : The resolution of the TRIP grid must be 1° or 0.5°     '
-    WRITE(KLISTING,*)'        or 0.083333° over France                               '
+    WRITE(KLISTING,*)'Error : The resolution of the TRIP grid must be 1deg or 0.5deg '
+    WRITE(KLISTING,*)'        or 0.083333deg over France                             '
     WRITE(KLISTING,*)'        In NAM_TRIP_GRID, TRES should be 0.083333 or 0.5 or 1. '
-    CALL ABORT_TRIP('READ_NAM_TRIP_GRID: The resolution of the TRIP grid must be 1° or 0.5° or 0.083333°')
+    CALL ABORT_TRIP('READ_NAM_TRIP_GRID: The resolution of the TRIP grid must be 1deg or 0.5deg or 0.083333deg')
   ELSE
     TRES=REAL(NINT(TRES*12.))/12.    
   ENDIF

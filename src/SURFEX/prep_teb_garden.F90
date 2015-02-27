@@ -115,7 +115,7 @@ IF (CPHOTO/='NON' .AND. CPHOTO/='AGS' .AND. CPHOTO/='LST')  &
 !*      3.    Physical limitation: 
 !
 ! If whole ice reservoir is empty (grib from ecmwf case) and surface temperature is
-! lower than -10°C, then ice content is maximum and water content minimum
+! lower than -10C, then ice content is maximum and water content minimum
 !
 IF (ALL(XWGI(:,:)==0.)) THEN
    WHERE(XTG(:,1:SIZE(XWG,2)) < XTT-10.)

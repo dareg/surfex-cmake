@@ -102,7 +102,7 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                :: PTS     ! Surface temperature (Kelvin)
 REAL, INTENT(IN)                :: PTA     ! Air temperature (Kelvin)
-REAL                            :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL                            :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), INTENT(IN)                :: PTS     ! Surface temperature (Kelvin)
 REAL, DIMENSION(:), INTENT(IN)                :: PTA     ! Air temperature (Kelvin)
-REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), INTENT(IN)                :: PTS     ! Surface temperature (Kelvin)
 REAL, DIMENSION(:), INTENT(IN)                :: PTA     ! Air temperature (Kelvin)
-REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -289,7 +289,7 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                :: PTS     ! Surface temperature (Kelvin)
 REAL, INTENT(IN)                :: PTA     ! Air temperature (Kelvin)
-REAL                            :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL                            :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -355,7 +355,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), INTENT(IN)                :: PTS     ! Surface temperature (Kelvin)
 REAL, DIMENSION(:), INTENT(IN)                :: PTA     ! Air temperature (Kelvin)
-REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -421,9 +421,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments and results
 !
-REAL,INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m²K)]
+REAL,INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m2.K)]
 REAL,INTENT(IN)                :: PVMOD   ! wind speed (m/s)
-REAL                           :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL                           :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 !*       0.2   Declarations of local variables
 !
@@ -494,9 +494,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments and results
 !
-REAL, DIMENSION(:), INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m²K)]
+REAL, DIMENSION(:), INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m2.K)]
 REAL, DIMENSION(:), INTENT(IN)                :: PVMOD   ! wind speed (m/s)
-REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 !*       0.2   Declarations of local variables
 !
@@ -566,9 +566,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments and results
 !
-REAL,INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m²K)]
+REAL,INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m2.K)]
 REAL,INTENT(IN)                :: PVMOD   ! wind speed (m/s)
-REAL                           :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL                           :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 !*       0.2   Declarations of local variables
 !
@@ -639,9 +639,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments and results
 !
-REAL, DIMENSION(:), INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m²K)]
+REAL, DIMENSION(:), INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m2.K)]
 REAL, DIMENSION(:), INTENT(IN)                :: PVMOD   ! wind speed (m/s)
-REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 !*       0.2   Declarations of local variables
 !
@@ -710,10 +710,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments and results
 !
-REAL, INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m²K)]
-REAL, INTENT(IN)                :: PCHTCS  ! Convective heat transfer coefficient for a smooth surface [W/(m²K)]
-REAL, INTENT(IN)                :: PROUGH  ! Convective heat transfer coefficient for a smooth surface [W/(m²K)]
-REAL                            :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m2.K)]
+REAL, INTENT(IN)                :: PCHTCS  ! Convective heat transfer coefficient for a smooth surface [W/(m2.K)]
+REAL, INTENT(IN)                :: PROUGH  ! Convective heat transfer coefficient for a smooth surface [W/(m2.K)]
+REAL                            :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 !*       0.2   Declarations of local variables
 !
@@ -775,10 +775,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments and results
 !
-REAL, DIMENSION(:), INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m²K)]
-REAL, DIMENSION(:), INTENT(IN)                :: PCHTCS  ! Convective heat transfer coefficient for a smooth surface [W/(m²K)]
-REAL, DIMENSION(:), INTENT(IN)                :: PROUGH  ! Convective heat transfer coefficient for a smooth surface [W/(m²K)]
-REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat transfer coefficient [W/(m²K)]
+REAL, DIMENSION(:), INTENT(IN)                :: PCHTCN  ! Convective heat transfer coefficient for natural conv. [W/(m2.K)]
+REAL, DIMENSION(:), INTENT(IN)                :: PCHTCS  ! Convective heat transfer coefficient for a smooth surface [W/(m2.K)]
+REAL, DIMENSION(:), INTENT(IN)                :: PROUGH  ! Convective heat transfer coefficient for a smooth surface [W/(m2.K)]
+REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 !*       0.2   Declarations of local variables
 !

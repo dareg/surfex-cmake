@@ -244,7 +244,7 @@ REAL                , INTENT(IN)    :: PTSTEP             ! time step
 REAL, DIMENSION(:)  , INTENT(IN)    :: PZ0_TOWN           ! town roughness length for momentum
 REAL, DIMENSION(:)  , INTENT(IN)    :: PBLD               ! fraction of buildings
 REAL, DIMENSION(:)  , INTENT(IN)    :: PGARDEN            ! fraction of green areas
-REAL, DIMENSION(:)  , INTENT(IN)    :: PROAD_DIR          ! road direction (° from North, clockwise)
+REAL, DIMENSION(:)  , INTENT(IN)    :: PROAD_DIR          ! road direction (deg from North, clockwise)
 REAL, DIMENSION(:)  , INTENT(IN)    :: PROAD              ! fraction of roads
 REAL, DIMENSION(:)  , INTENT(IN)    :: PFRAC_GR           ! fraction of green roofs
 REAL, DIMENSION(:)  , INTENT(IN)    :: PBLD_HEIGHT        ! buildings h
@@ -460,8 +460,8 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PABS_WIN           ! window absortance
 REAL, DIMENSION(:)  , INTENT(IN)    :: PTRAN_WIN          ! window transmittance
 !
 ! new argument for the UTCI calculation
-REAL, DIMENSION(:)  , INTENT(OUT)    :: PEMIT_LW_GRND     ! LW flux emitted by the ground (W/m² ground)
-REAL, DIMENSION(:)  , INTENT(OUT)    :: PEMIT_LW_FAC      ! LW flux emitted by the facade (W/m² ground)
+REAL, DIMENSION(:)  , INTENT(OUT)    :: PEMIT_LW_GRND     ! LW flux emitted by the ground (W/m2 ground)
+REAL, DIMENSION(:)  , INTENT(OUT)    :: PEMIT_LW_FAC      ! LW flux emitted by the facade (W/m2 ground)
 REAL, DIMENSION(:)  , INTENT(OUT)    :: PT_RAD_IND        ! Indoor mean radiant temperature [K]
 REAL, DIMENSION(:)  , INTENT(OUT)    :: PREF_SW_GRND      ! total solar rad reflected from ground
 REAL, DIMENSION(:)  , INTENT(OUT)    :: PREF_SW_FAC       ! total solar rad reflected from facade
@@ -681,17 +681,17 @@ REAL, DIMENSION(SIZE(PTA)) :: ZMTC_O_GR_R1        ! mean thermal conductivity ov
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GARDEN        ! evaporation (kg/m2/s)
 REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GARDEN       ! CO2 fluxes (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_GARDEN     ! LW flux emitted by the garden (W/m² garden)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_GARDEN     ! LW flux emitted by the garden (W/m2 garden)
 REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GREENROOF     ! evaporation over greenroofs (kg/m2/s)
 REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GREENROOF    ! CO2 fluxes over greenroofs (m/s*kg_CO2/kg_air)
 !
 ! fluxes from built surfaces
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROAD       ! LW flux emitted by the road (W/m² road)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROAD       ! LW flux emitted by the road (W/m2 road)
 !
 ! fluxes from/to solar panel
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWDN_PANEL    ! LW flux emitted DOWNWARDS by the solar panel (W/m² panel)
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWUP_PANEL    ! LW flux emitted UPWARDS   by the solar panel (W/m² panel)
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROOF       ! LW flux emitted UPWARDS   by the roof        (W/m² roof )
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWDN_PANEL    ! LW flux emitted DOWNWARDS by the solar panel (W/m2 panel)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWUP_PANEL    ! LW flux emitted UPWARDS   by the solar panel (W/m2 panel)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_ROOF       ! LW flux emitted UPWARDS   by the roof        (W/m2 roof )
 !
 !new local variables for shading
 REAL, DIMENSION(SIZE(PTA)) :: ZE_SHADING          ! energy not ref., nor absorbed, nor

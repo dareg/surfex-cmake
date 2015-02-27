@@ -199,10 +199,10 @@ REAL, PARAMETER               :: XBIOMASST_LIM = 4.7540042445E-2
 ! Nitrogen option with allocation of carbon (YPHOTO='NCB') parameters:
 !
 REAL, PARAMETER               :: XCOEFF_MAINT_RESP_ZERO = 1.19E-4/86400.
-!                                value of coefficient for maintenance respiration at 0°C (g/g/s)
+!                                value of coefficient for maintenance respiration at 0C (g/g/s)
 !
 REAL, PARAMETER               :: XSLOPE_MAINT_RESP = 0.16
-!                                slope for maintenance respiration for temperature dependance (1/°C)
+!                                slope for maintenance respiration for temperature dependance (1/C)
 !
 REAL, PARAMETER, DIMENSION(19) :: XTAU_WOOD = &
         (/ 0., 0., 0., 40.*365.*86400., 50.*365.*86400., 30.*365.*86400., 0., 0., 0., 0., &

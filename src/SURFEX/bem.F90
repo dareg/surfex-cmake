@@ -295,8 +295,8 @@ REAL, DIMENSION(:)  , INTENT(IN)  :: PRAD_WIN_FLOOR  ! Rad. fluxes between wind.
 REAL, DIMENSION(:)  , INTENT(IN)  :: PCONV_ROOF_BLD  ! Conv. fluxes between roof and indoor air
 REAL, DIMENSION(:)  , INTENT(IN)  :: PCONV_WALL_BLD  ! Conv. fluxes between wall and indoor air
 REAL, DIMENSION(:)  , INTENT(IN)  :: PCONV_WIN_BLD   ! Conv. fluxes between wind. and indoor air
-REAL, DIMENSION(:)  , INTENT(IN)  :: PLOAD_IN_FLOOR  ! solar + int heat gain on floor W/m² [floor]
-REAL, DIMENSION(:)  , INTENT(IN)  :: PLOAD_IN_MASS   ! solar + int heat gain on floor W/m² [mass]
+REAL, DIMENSION(:)  , INTENT(IN)  :: PLOAD_IN_FLOOR  ! solar + int heat gain on floor W/m2 [floor]
+REAL, DIMENSION(:)  , INTENT(IN)  :: PLOAD_IN_MASS   ! solar + int heat gain on floor W/m2 [mass]
 !
 !*      0.2    Declarations of local variables 
 !

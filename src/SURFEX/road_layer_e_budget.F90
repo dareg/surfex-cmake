@@ -141,7 +141,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PLW_WIN_TO_R ! LW interactions window -> ro
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PEMIS_ROAD   ! road emissivity
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_ROAD! LW flux emitted by the road (W/m² of road)
+REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_ROAD! LW flux emitted by the road (W/m2 of road)
 REAL, DIMENSION(:), INTENT(OUT)   :: PDQS_ROAD    !heat storage inside the road
 REAL, DIMENSION(:), INTENT(OUT)   :: PABS_LW_ROAD ! absorbed infrared rad.
 REAL, DIMENSION(:), INTENT(OUT)   :: PHFREE_ROAD  ! sensible heat flux on the
@@ -289,7 +289,7 @@ DO JJ=1,SIZE(PT_ROAD,1)
   !
   !*      12     heat storage inside roads
   !              -------------------------
-  !²
+  !
   !*      13     road energy residual imbalance for verification
   !              -----------------------------------------------
   !

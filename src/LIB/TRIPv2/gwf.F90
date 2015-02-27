@@ -42,9 +42,9 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PWIDTH     ! river widths                
 REAL, DIMENSION(:,:), INTENT(IN)    :: PHC_BED    ! River bed depth               [m]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTOPO_RIV  ! River elevatation             [m]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTAUG      ! ground water transfer time    [s]
-REAL, DIMENSION(:,:), INTENT(IN)    :: PAREA      ! Grid-cell area                [m²]
+REAL, DIMENSION(:,:), INTENT(IN)    :: PAREA      ! Grid-cell area                [m2]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PELEV      ! Grdi cell elevation           [m]
-REAL, DIMENSION(:,:), INTENT(IN)    :: PTRANS     ! Transmissivity                [m²/s]
+REAL, DIMENSION(:,:), INTENT(IN)    :: PTRANS     ! Transmissivity                [m2/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWEFF      ! Effective porosity            [-]
 !
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTABGW_F   !  Groundwater fraction         [-]

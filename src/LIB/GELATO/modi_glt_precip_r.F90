@@ -402,7 +402,7 @@ end do
 !
 !
 ! .. Without any information about rain temperature, we assume that rain falls
-! at 0°C (i.e. gltools_enthalpy = 0), hence total snow gltools_enthalpy does not change (i.e. 
+! at 0C (i.e. gltools_enthalpy = 0), hence total snow gltools_enthalpy does not change (i.e. 
 ! new snow massic gltools_enthalpy is:
 !    enth_snow = enth_snow_old * mass_snow_old / (mass_snow_old + mass_rain)
 !      tpsil(nilay+1,jk,:)%ent = tpsil(nilay+1,jk,:)%ent *  &

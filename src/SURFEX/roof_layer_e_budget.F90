@@ -162,7 +162,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_ROOF_FLOOR! rad. fluxes from roof to f
 REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_ROOF_MASS ! rad. fluxes from roof to mass [W m-2(roof)]
 REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_ROOF_BLD ! conv. fluxes from roof to bld [W m-2(roof)]
 REAL, DIMENSION(:), INTENT(IN)    :: PRR ! rain rate [kg m-2 s-1]
-REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_IN_ROOF ! solar + int heat gain on roof W/m² [roof]
+REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_IN_ROOF ! solar + int heat gain on roof W/m2 [roof]
 !
 !*      0.2    declarations of local variables
 !

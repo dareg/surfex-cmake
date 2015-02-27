@@ -79,7 +79,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PAZIM         ! solar azimuthal angle
 REAL, DIMENSION(:), INTENT(IN) :: PBLD          ! building fraction
 REAL, DIMENSION(:), INTENT(IN) :: PGARDEN       ! green area fraction
 REAL, DIMENSION(:), INTENT(IN) :: PROAD_DIR     ! Road direction
-                                                ! (° from N, clockwise)
+                                                ! (deg from N, clockwise)
 REAL, DIMENSION(:), INTENT(IN) :: PROAD         ! road fraction
 REAL, DIMENSION(:), INTENT(IN) :: PFRAC_GR      ! fraction of greenroof
 REAL, DIMENSION(:), INTENT(IN) :: PFRAC_PANEL   ! fraction of solar panels

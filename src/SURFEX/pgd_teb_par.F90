@@ -146,7 +146,7 @@ REAL                                    :: XUNIF_WALL_O_HOR   ! wall surf. / hor
 REAL                                    :: XUNIF_Z0_TOWN      ! roughness length for momentum    (m)
 REAL                                    :: XUNIF_GARDEN       ! fraction of veg in the streets   (-)
 REAL                                    :: XUNIF_GREENROOF    ! fraction of greenroofs on roofs  (-)
-REAL                                    :: XUNIF_ROAD_DIR     ! road direction (° from North, clockwise)
+REAL                                    :: XUNIF_ROAD_DIR     ! road direction (deg from North, clockwise)
  CHARACTER(LEN=28)                       :: CFNAM_BLD          ! file name for BLD 
  CHARACTER(LEN=28)                       :: CFNAM_BLD_HEIGHT   ! file name for BLD_HEIGHT
  CHARACTER(LEN=28)                       :: CFNAM_WALL_O_HOR   ! file name for WALL_O_HOR

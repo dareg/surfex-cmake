@@ -253,9 +253,9 @@ REAL, DIMENSION(:), INTENT(IN)    :: PABS_LW_WIN  ! absorbed LW radiation by win
 REAL, DIMENSION(:), INTENT(IN)    :: PT_WIN1      ! window outdoor temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PGR          ! glazing ratio
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_ROAD ! LW emitted by the road (W/m² road)
-REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_GARDEN ! LW emitted by the garden (W/m² garden)
-REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_GRND ! LW emitted by the ground (road+garden) (W/m² ground)
+REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_ROAD ! LW emitted by the road (W/m2 road)
+REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_GARDEN ! LW emitted by the garden (W/m2 garden)
+REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_GRND ! LW emitted by the ground (road+garden) (W/m2 ground)
 CHARACTER(LEN=3), INTENT(IN)      :: HBEM ! Building Energy model 'DEF' or 'BEM'
 REAL, DIMENSION(:), INTENT(IN)    :: PGARDEN_O_GRND! garden surf. / (road+garden surf.) 
 REAL, DIMENSION(:), INTENT(IN)    :: PROAD_O_GRND  ! road surf.   / (road+garden surf.) 

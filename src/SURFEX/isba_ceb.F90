@@ -287,7 +287,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PLEGI, PUSTAR
 !                                                latent heat flux from the soil surface
 !                                      PUSTAR  = friction velocity
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux [W/m²]
+REAL, DIMENSION(:), INTENT(OUT)     :: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux [W/m2]
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNOWTEMP  ! snow layer temperatures (K)
 !
 REAL, DIMENSION(:),  INTENT(OUT) :: PAC_AGG  ! aggregated aerodynamic conductance

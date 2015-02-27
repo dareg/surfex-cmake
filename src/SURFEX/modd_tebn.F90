@@ -166,7 +166,7 @@ TYPE TEB_t
 !
 ! Geometric Parameters:
 !
-  REAL, POINTER, DIMENSION(:)   :: XROAD_DIR     ! Road direction (° from North, clockwise)
+  REAL, POINTER, DIMENSION(:)   :: XROAD_DIR     ! Road direction (deg from North, clockwise)
   REAL, POINTER, DIMENSION(:)   :: XGARDEN       ! fraction of veg in the streets   (-)
   REAL, POINTER, DIMENSION(:)   :: XGREENROOF    ! fraction of greenroofs on roofs  (-)
   REAL, POINTER, DIMENSION(:)   :: XBLD          ! fraction of buildings            (-)

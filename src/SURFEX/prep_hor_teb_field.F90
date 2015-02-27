@@ -81,7 +81,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
 REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN  ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:) :: ZFIELDOUT ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:) :: ZPS !surface pressure
-REAL, PARAMETER               :: ZRHOA=1.19 ! volumic mass of air at 20°C and 1000hPa
+REAL, PARAMETER               :: ZRHOA=1.19 ! volumic mass of air at 20C and 1000hPa
 INTEGER                       :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                       :: GUNIF     ! flag for prescribed uniform field

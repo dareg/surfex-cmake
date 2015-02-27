@@ -81,7 +81,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSFMER_ICE! meridional friction
 !
 LOGICAL, INTENT(IN)         :: OHANDLE_SIC  ! Do we weight seaice and open sea fluxes
 REAL, DIMENSION(:), INTENT(IN) :: PSIC      ! Sea ice cover                         (-)
-REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Sea ice temperature                   (°K)
+REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Sea ice temperature                   (K)
 !
 REAL, DIMENSION(:), INTENT(OUT):: PRN       ! net radiation                         (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PH        ! sensible heat flux                    (W/m2)

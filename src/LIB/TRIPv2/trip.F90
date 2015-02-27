@@ -81,7 +81,7 @@ REAL,DIMENSION(:,:), INTENT(IN)      :: PN         ! Manning roughness coeficien
 REAL,DIMENSION(:,:), INTENT(IN)      :: PN_FLOOD   ! Manning coeficient over floodplains   [-] (0.1)
 REAL,DIMENSION(:,:), INTENT(IN)      :: PHC_BED    ! River bed depth              [m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PSOURCE    ! precip-infiltration-evaporation [kg/s]
-REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m²]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m2]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PDRAIN     ! Subsurface runoff from ISBA [kg/s]
 REAL,DIMENSION(:,:), INTENT(INOUT)   :: PRUNOFF    ! Surface runoff from ISBA    [kg/s]
 !
@@ -222,7 +222,7 @@ IF(OPRINT.AND.KTRIP==1.AND.KTSEPT==1)THEN
 !
   WRITE(KLISTING,*)''
   WRITE(KLISTING,*)'        START RUN ISBA-TRIP-FP     '
-  WRITE(KLISTING,*)'          Budget en  kg/m²         '
+  WRITE(KLISTING,*)'          Budget en  kg/m2         '
   WRITE(KLISTING,*)''
   WRITE(KLISTING,'(a90)')'RUN TSTEP   S_err    F_err     G_err    MR(mm/y) Vel(m/s)  Hs      Hf         Ff    UNCSV'
   WRITE(KLISTING,*)''
