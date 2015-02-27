@@ -5,12 +5,14 @@
 ##########################################################
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
+# use splr.pl script for dependency generation
+USE_SPLR = YES
+#
 #OPT_BASE  = -q64 -qsigtrap -qfloat=nans \
             -qflttrap=enable:overflow:zerodivide:invalid \
             -qautodbl=dbl4 -qzerosize -g -qstrict -qfullpath -qspillsize=32648 \
             -qinitauto=0 -qdpc=e -qmaxmem=-1 -qnoescape
-OPT_BASE = -g -w -qsmp=omp -qrealsize=8 -qnoescape -q64 -qextname \
-	   -NS32648 -qmaxmem=-1 -bbigtoc
+OPT_BASE = -g -w -qrealsize=8 -qnoescape -q64 -qextname -NS32648 -qmaxmem=-1 -bbigtoc
 OPT_PERF0 = -O0 -qnooptimize
 OPT_PERF2 = -O2 
 OPT_PERF2 = -O3 -qarch=pwr6 -qstrict
@@ -31,8 +33,8 @@ else
 MNH_MPI_RANK_KIND ?=4
 #RJ LFI_INT           ?=4
 endif
-OPT       = $(OPT_BASE) $(OPT_PERF2) 
-OPT0      = $(OPT_BASE) $(OPT_PERF0) 
+OPT       = $(OPT_BASE) $(OPT_PERF2)
+OPT0      = $(OPT_BASE) $(OPT_PERF0)
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF2)
 #
 ifeq "$(OPTLEVEL)" "DEBUG"
@@ -47,30 +49,38 @@ OPT0      = $(OPT_BASE) $(OPT_PERF0)
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF3)
 endif
 #
-#         
+#
 ifeq "$(VER_MPI)" "NOMPI"
 F90 = xlf95_r
 CC  =
-else         
+else
 F90 = mpxlf95_r
 CC  =
 endif
-
-F90FLAGS =       $(OPT) -qfree=f90 -qsuffix=f=f90 
+#
+REALFC=xlf95_r
+#
+FCFLAGS_OMP= -qsmp=omp
+CFLAGS_OMP=
+ifeq "$(VER_OMP)" "NOOMP"
+FCFLAGS_OMP=
+CFLAGS_OMP=
+endif
+#
+F90FLAGS =      $(FCFLAGS_OMP) $(OPT) -qfree=f90 -qsuffix=f=f90
 F77 = $(F90)
-F77FLAGS      =  $(OPT) -qfixed
+F77FLAGS      = $(FCFLAGS_OMP) $(OPT) -qfixed
 FX90 = $(F90)
-FX90FLAGS     =  $(OPT) -qfixed
-FC = $(F90)
+FX90FLAGS     = $(FCFLAGS_OMP) $(OPT) -qfixed
 #
 
 #
 # vargas / c1a underscore management 
 #
 ifneq "$(findstring c1a,$(shell uname -n))" ""
-LDFLAGS   =  $(OPT) -brename:.fminbits_in_word_,.fminbits_in_word__ -bloadmap:exec.log.out
+LDFLAGS   = $(FCFLAGS_OMP) $(OPT) -brename:.fminbits_in_word_,.fminbits_in_word__ -bloadmap:exec.log.out
 else
-LDFLAGS   =  $(OPT) -brename:.flush,.flush_ 
+LDFLAGS   = $(FCFLAGS_OMP) $(OPT) -brename:.flush,.flush_ 
 endif
 #
 # preprocessing flags 

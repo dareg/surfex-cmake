@@ -3,14 +3,18 @@
 # Compiler Options                                       #
 #                                                        #
 ##########################################################
+#
+# use splr.pl script for dependency generation
+USE_SPLR = YES
+#
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fopenmp -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid  -fbacktrace -fconvert=swap
+OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid -fbacktrace -fconvert=swap
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
-OPT_CHECK = -fbounds-check -finit-real=nan
-OPT_I8    = -fdefault-integer-8 
+OPT_CHECK = -fcheck=bounds,do,mem,pointer,recursion -finit-real=nan
+OPT_I8    = -fdefault-integer-8
 #
 #
 # Integer 4/8 option
@@ -28,8 +32,8 @@ MNH_MPI_RANK_KIND ?=4
 endif
 #
 #
-OPT       = $(OPT_BASE) $(OPT_PERF2) 
-OPT0      = $(OPT_BASE) $(OPT_PERF0) 
+OPT       = $(OPT_BASE) $(OPT_PERF2)
+OPT0      = $(OPT_BASE) $(OPT_PERF0)
 OPT_NOCB  = $(OPT_BASE) $(OPT_PERF2)
 #
 ifeq "$(OPTLEVEL)" "DEBUG"
@@ -42,26 +46,33 @@ ifneq "$(OPTLEVEL)" "DEBUG"
 OBJSD += spll_teb_garden.o
 $(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF0)
 endif
-#  
+#
 ifeq "$(VER_MPI)" "NOMPI"
-F90 = gfortran
-CC  = gcc
-else         
+F90= gfortran
+CC = gcc
+else
 F90 = mpif90
 CC  = mpicc
 endif
 #
-FC = $(F90)
+REALFC=gfortran
 #
-F90FLAGS      =  $(OPT) 
+FCFLAGS_OMP= -fopenmp
+CFLAGS_OMP= -fopenmp
+ifeq "$(VER_OMP)" "NOOMP"
+FCFLAGS_OMP=
+CFLAGS_OMP=
+endif
+#
+F90FLAGS      = $(FCFLAGS_OMP) $(OPT)
 F77 = $(F90)
-F77FLAGS      =  $(OPT) 
+F77FLAGS      = $(FCFLAGS_OMP) $(OPT)
 FX90 = $(F90)
-FX90FLAGS     =  $(OPT) 
+FX90FLAGS     = $(FCFLAGS_OMP) $(OPT)
 #
-LDFLAGS   =   -Wl,-warn-once -fopenmp
+LDFLAGS   =  $(FCFLAGS_OMP) -Wl,-warn-once
 #
-# preprocessing flags 
+# preprocessing flags
 #
 CPP = cpp -P -traditional -Wcomment
 #
