@@ -243,7 +243,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -288,7 +288,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP SINGLE
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !   
@@ -334,7 +334,7 @@ IF (NRANK==NPIO) THEN
   ! 
 !$OMP END SINGLE
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -430,7 +430,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -470,7 +470,7 @@ IF (HDIR=='H') CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI 
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !  
@@ -494,7 +494,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE
   !   
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -579,7 +579,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -616,7 +616,7 @@ IF (HDIR=='H') CALL GATHER_AND_WRITE_MPI(KFIELD,IWORK,NMASK)
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -632,7 +632,7 @@ IF (NRANK==NPIO) THEN
   !
   CALL ERROR_WRITE_SURF_LFI(HREC,NWORKB)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !   
@@ -666,7 +666,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -699,7 +699,7 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -719,7 +719,7 @@ IF (NRANK==NPIO) THEN
     CALL ERROR_WRITE_SURF_LFI(HREC,NWORKB)
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -811,7 +811,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -845,7 +845,7 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !  
@@ -867,7 +867,7 @@ IF (NRANK==NPIO) THEN
   !   
   CALL ERROR_WRITE_SURF_LFI(HREC,NWORKB)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -899,7 +899,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -932,7 +932,7 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !  
@@ -957,7 +957,7 @@ IF (NRANK==NPIO) THEN
   !   
   CALL ERROR_WRITE_SURF_LFI(HREC,NWORKB)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  

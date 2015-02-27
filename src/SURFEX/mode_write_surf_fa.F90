@@ -292,7 +292,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -337,7 +337,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -367,8 +367,8 @@ IF (NRANK==NPIO) THEN
   ENDIF
   !
 !$OMP END SINGLE
-  !    
-#ifndef NOMPI  
+  !
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -403,7 +403,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -447,7 +447,7 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !    
@@ -488,7 +488,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE
   !  
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -523,7 +523,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -565,7 +565,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !    
@@ -589,7 +589,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE
   !   
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -624,7 +624,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -659,7 +659,7 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !  
@@ -682,7 +682,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE
   !  
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -806,7 +806,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -842,7 +842,7 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !  
@@ -858,7 +858,7 @@ IF (NRANK==NPIO) THEN
   WRITE(NLUOUT,*) ' WRITE_SURFT2_FA : time in 2 dimensions not yet implemented : YNAME=',YNAME,'ITDATE=',ITDATE
   CALL ABOR1_SFX('MODE_WRITE_SURF_FA:WRITE_SURFT2_FA: time in 2 dimensions not yet implemented')
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  

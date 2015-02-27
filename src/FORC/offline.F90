@@ -175,7 +175,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -301,7 +301,7 @@ LOASIS   = .FALSE.
 XRUNTIME = 0.0
 #endif
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 IF(.NOT.LOASIS)THEN
  CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
  IF (INFOMPI /= MPI_SUCCESS) THEN 
@@ -314,7 +314,7 @@ IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
 !
 CSOFTWARE='OFFLINE'
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 IF(LOASIS)THEN
   NCOMM=ILOCAL_COMM
 ELSE
@@ -335,7 +335,7 @@ ENDIF
 !
  CALL WLOG_MPI('NBLOCKTOT ',KLOG=NBLOCKTOT)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -442,11 +442,11 @@ IF (NRANK==NPIO) THEN
   !
 ENDIF
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI('READ NAMELISTS ',PLOG=XTIME)
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -471,13 +471,13 @@ CALL INIT_INDEX_MPI(CSURF_FILETYPE, YALG_MPI, XIO_FRAC, GSHADOWS)
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('INIT_INDEX_MPI ',PLOG=XTIME)
  CALL WLOG_MPI(' ')
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -493,12 +493,12 @@ XTIME0 = MPI_WTIME()
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI('OL_READ_ATM_CONF ',PLOG=XTIME)
  CALL WLOG_MPI(' ')
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -603,11 +603,11 @@ IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
 !      computes initial air co2 concentration and  density
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI('COMPARE_OROGRAPHY SUNPOS ',PLOG=XTIME)
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -625,13 +625,13 @@ IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOS
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('OL_READ_ATM0 ',PLOG=XTIME)
  CALL WLOG_MPI(' ')
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -640,7 +640,7 @@ XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * X
 !                 
 !       surface Initialisation     
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI('CO2 RHOA ',PLOG=XTIME)
@@ -658,7 +658,7 @@ ENDDO
 !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME,XTIME0)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -697,7 +697,7 @@ END IF
 !
  CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI(' ')
@@ -726,7 +726,7 @@ XTIME_COMM_READ = 0.
                        IYEAR, IMONTH, IDAY, ZTIME,                   &
                        YATMFILE, YATMFILETYPE, YTEST                 )
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -745,11 +745,11 @@ IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
 !
 NWRITE = 0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
  CALL WLOG_MPI('INIT FINISHED ',PLOG=XTIME)
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !*      2.    Temporal loops
@@ -759,7 +759,7 @@ XTIME_WRITE(:) = 0.
 !
 DO JFORC_STEP=1,INB_STEP_ATM
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME1 = MPI_WTIME()
 #endif
   ! read Forcing
@@ -793,7 +793,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                      ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
 
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_CALC(1) = XTIME_CALC(1) + (MPI_WTIME() - XTIME1)
   XTIME1 = MPI_WTIME()
 #endif
@@ -802,14 +802,14 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     ! time interpolation of the forcing
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME1 = MPI_WTIME()
 #endif
     CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME, &
                 ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
     CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME+XTSTEP_SURF, &
                 ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
-#ifndef NOMPI                
+#ifdef SFX_MPI
     XTIME_CALC(2) = XTIME_CALC(2) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
 #endif
@@ -825,7 +825,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
                             ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
-#ifndef NOMPI                            
+#ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()    
 #endif
@@ -854,9 +854,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     ! run Surface
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1) 
-#endif   
+#endif
     !
     CALL IO_BUFF_CLEAN_n
     !
@@ -869,7 +869,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME1 = MPI_WTIME()    
 #endif
     !    
@@ -921,13 +921,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
 #endif
     !
 !$OMP END PARALLEL
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME1 = MPI_WTIME()  
 #endif
     !
@@ -938,11 +938,11 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     ZTIME = ZTIME + XTSTEP_SURF
     CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_CALC(6) = XTIME_CALC(6) + (MPI_WTIME() - XTIME1)
     !
     XTIME1 =  MPI_WTIME()
-#endif    
+#endif
     ! ecrit Surface
     !
     IF ( LCOUPL_TOPD .AND. LTOPD_STEP ) THEN
@@ -1089,10 +1089,10 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !
       ENDIF
       !
-#ifndef NOMPI      
+#ifdef SFX_MPI
       XTIME_WRITE(1) = XTIME_WRITE(1) + (MPI_WTIME() - XTIME1)
-#endif      
-      !      
+#endif
+      !
       IDX_W = 0
       !
       LDEF = .TRUE.
@@ -1116,23 +1116,23 @@ DO JFORC_STEP=1,INB_STEP_ATM
           CALL GOTO_SURFEX(NBLOCK,.TRUE.)
         ENDIF
         !
-#ifndef NOMPI      
+#ifdef SFX_MPI
         XTIME1 =  MPI_WTIME()
-#endif 
+#endif
         CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
-#ifndef NOMPI      
+#ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
-#endif      
+#endif
         CALL DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE)
-#ifndef NOMPI      
+#ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
-#endif    
+#endif
         CALL WRITE_DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL')
-#ifndef NOMPI      
+#ifdef SFX_MPI
         XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
-#endif  
+#endif
         !
         CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
         !
@@ -1158,9 +1158,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !
       ENDIF
       !
-#ifndef NOMPI      
+#ifdef SFX_MPI
       XTIME1 =  MPI_WTIME()
-#endif      
+#endif
       !
       IF (NRANK==NPIO) THEN
         IF (CTIMESERIES_FILETYPE=='FA    ') THEN
@@ -1169,9 +1169,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !* add informations in the file
         IF (CTIMESERIES_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
       ENDIF
-#ifndef NOMPI      
+#ifdef SFX_MPI
       XTIME_WRITE(5) = XTIME_WRITE(5) + (MPI_WTIME() - XTIME1)
-#endif      
+#endif
       !
     ENDIF
     !
@@ -1194,7 +1194,7 @@ END DO
 !
 !$OMP PARALLEL PRIVATE(XTIME)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -1533,7 +1533,7 @@ IF (LHOOK) CALL DR_HOOK('OFFLINE',1,ZHOOK_HANDLE)
 IF(LOASIS)THEN
   CALL SFX_OASIS_END
 ELSE
-#ifndef NOMPI
+#ifdef SFX_MPI
  CALL MPI_FINALIZE(INFOMPI)
 #endif
 ENDIF

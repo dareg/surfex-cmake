@@ -86,7 +86,7 @@ IMPLICIT NONE
 INCLUDE 'omp_lib.h'
 #endif
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !

@@ -71,7 +71,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -80,7 +80,7 @@ INTEGER, DIMENSION(:), INTENT(OUT) :: KWORK2
 !
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: ICPT
@@ -102,7 +102,7 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC-1
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     !
@@ -119,7 +119,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !  
     IF (I<NPROC) THEN
@@ -139,7 +139,7 @@ ELSE
   ! 
   IDX_R = IDX_R + 1
   !  
-#ifndef NOMPI
+#ifdef SFX_MPI
   NWORK(:) = 0
   !  
   XTIME0 = MPI_WTIME()
@@ -177,7 +177,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -186,7 +186,7 @@ INTEGER, DIMENSION(:,:), INTENT(OUT) :: KWORK2
 !
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: IS2, IP2
@@ -219,7 +219,7 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC-1
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     !
@@ -236,7 +236,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !  
     IF (I<NPROC) THEN
@@ -256,7 +256,7 @@ ELSE
   ! 
   IDX_R = IDX_R + 1
   !  
-#ifndef NOMPI
+#ifdef SFX_MPI
   NWORK2(:,1:IP2) = 0
   !  
   XTIME0 = MPI_WTIME()
@@ -294,7 +294,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -303,7 +303,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PWORK2
 !
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: ICPT
@@ -325,7 +325,7 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC
     !
-#ifndef NOMPI
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     !
@@ -342,7 +342,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !
     IF (I<NPROC) THEN
@@ -362,7 +362,7 @@ ELSE
   !  
   IDX_R = IDX_R + 1
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XWORK(:) = 0.
   !
   XTIME0 = MPI_WTIME()
@@ -399,7 +399,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -408,7 +408,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PWORK2
 !
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: IS2, IP2
@@ -441,9 +441,9 @@ IF (NRANK==NPIO) THEN
   !
   DO I=1,NPROC
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     !
     ICPT = 0
     !    
@@ -458,7 +458,7 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
     !
     IF (I<NPROC) THEN
@@ -478,7 +478,7 @@ ELSE
   !
   IDX_R = IDX_R + 1
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XWORK2(:,1:IP2) = 0.
   !
   XTIME0 = MPI_WTIME()
@@ -514,7 +514,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -523,7 +523,7 @@ REAL, DIMENSION(:,:,:), INTENT(OUT) :: PWORK2
 !
 INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: IP2, IS2, IP3, IS3
@@ -558,9 +558,9 @@ IF (NRANK==NPIO) THEN
   !  
   DO I=1,NPROC
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     ! 
     ICPT = 0
     !
@@ -575,9 +575,9 @@ IF (NRANK==NPIO) THEN
       !
     ENDDO
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
-    !    
+    !
     IF (I<NPROC) THEN
       XTIME0 = MPI_WTIME()
       CALL MPI_SEND(XWORK3(:,1:IP2,1:IP3),NSIZE*IP2*IP3*KIND(XWORK3)/4,MPI_REAL,I,IDX_R,NCOMM,INFOMPI)
@@ -595,7 +595,7 @@ ELSE
   !  
   IDX_R = IDX_R + 1
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XWORK3(:,1:IP2,1:IP3) = 0.
   !
   XTIME0 = MPI_WTIME()  

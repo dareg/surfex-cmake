@@ -4,7 +4,7 @@ USE PARKIND1  ,ONLY : JPIM     ,JPRB
 use mpl_data_module, only : MPL_RANK,MPL_NUMPROC
 #endif
 implicit none
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 INTEGER(KIND=JPIM),intent(out) :: kmyproc, knproc
@@ -16,7 +16,7 @@ knproc = mpl_numproc
 #else
 IRNK=0
 ISZ=1
-#ifndef NOMPI
+#ifdef SFX_MPI
 CALL MPI_INITIALIZED(LLINIT, IERR)
 IF(LLINIT) THEN
   CALL MPI_COMM_RANK(MPI_COMM_WORLD,IRNK,IERR)

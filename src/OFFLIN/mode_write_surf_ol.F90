@@ -362,7 +362,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -412,12 +412,12 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN 
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
-  !  
+  !
 !$OMP SINGLE
-  !    
+  !
   ! 0. find filename
   ! -----------------
   CALL OL_FIND_FILE_WRITE(HREC,NWORK0)
@@ -451,10 +451,10 @@ IF (NRANK==NPIO) THEN
   IDIMLEN = NWORKLEN
   YNAME = CWORK0
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
-  !  
+  !
 ELSE
   IVAR_ID = 0
   INDIMS = 0
@@ -466,9 +466,9 @@ ENDIF
 KRESP = NWORKB
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI        
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-!$OMP SINGLE  
+!$OMP SINGLE
   CALL MPI_BCAST(NWORK0,KIND(NWORK0)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 !$OMP END SINGLE
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
@@ -530,7 +530,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -561,7 +561,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -597,7 +597,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -637,12 +637,12 @@ NWORKB=0
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
-  !  
+  !
 !$OMP SINGLE
-  !  
+  !
   ! 0. find filename
   ! -----------------
   CALL OL_FIND_FILE_WRITE(HREC,NWORK0)
@@ -677,10 +677,10 @@ IF (NRANK==NPIO) THEN
   IDIMLEN = NWORKLEN
   YNAME = CWORK0
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
-  ! 
+  !
 ELSE
   IVAR_ID = 0
   INDIMS = 0
@@ -693,9 +693,9 @@ ENDIF
 KRESP = NWORKB
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI        
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-!$OMP SINGLE  
+!$OMP SINGLE
   CALL MPI_BCAST(NWORK0,KIND(NWORK0)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 !$OMP END SINGLE
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)  
@@ -761,12 +761,12 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
-  !   
+  !
 !$OMP SINGLE
-  !   
+  !
   ! 2. Put variable
   !----------------------------
   IF (LPARTW) THEN
@@ -794,10 +794,10 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
-  !  
+  !
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFX2_OL:WRITE_DATAX2_OL',1,ZHOOK_HANDLE)
@@ -859,7 +859,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -891,7 +891,7 @@ KRESP=0
 !
 IF ( NRANK==NPIO ) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
 
@@ -924,8 +924,8 @@ IF ( NRANK==NPIO ) THEN
   ENDDO
   !
 !$OMP END SINGLE
-  !   
-#ifndef NOMPI  
+  !
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !

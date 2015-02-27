@@ -63,9 +63,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
-INCLUDE "mpif.h"
-#endif
+!RJ #ifdef SFX_MPI
+!RJ INCLUDE "mpif.h"
+!RJ #endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------

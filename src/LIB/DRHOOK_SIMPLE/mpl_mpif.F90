@@ -1,5 +1,5 @@
 MODULE MPL_MPIF
-#ifndef NOMPI
+#ifdef SFX_MPI
 include "mpif.h"
 #endif
 END MODULE MPL_MPIF

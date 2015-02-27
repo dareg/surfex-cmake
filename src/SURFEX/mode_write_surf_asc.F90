@@ -241,7 +241,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -287,9 +287,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
 !$OMP SINGLE
   !
@@ -301,7 +301,7 @@ IF (NRANK==NPIO) THEN
   !  
   IF (NWORKB/=0) CALL ERROR_WRITE_SURF_ASC(HREC,NWORKB)
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -334,7 +334,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -380,12 +380,12 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
 !$OMP SINGLE
-  !    
+  !
   WRITE(NUNIT,FMT=*,IOSTAT=NWORKB) '&'//CMASK//' '//HREC
   WRITE(NUNIT,FMT='(A50)',IOSTAT=NWORKB) HCOMMENT(1:50)
   WRITE(NUNIT,FMT='(50D20.8)',IOSTAT=NWORKB) ZWORK(1:ISIZE,:)
@@ -394,9 +394,9 @@ IF (NRANK==NPIO) THEN
   !  
   IF (NWORKB/=0) CALL ERROR_WRITE_SURF_ASC(HREC,NWORKB)
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
-#endif  
+#endif
   !  
 ENDIF
 !
@@ -427,7 +427,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -471,10 +471,10 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
-  !  
+  !
 !$OMP SINGLE
   !   
   WRITE(NUNIT,FMT=*,IOSTAT=NWORKB) '&'//CMASK//' '//HREC
@@ -482,13 +482,13 @@ IF (NRANK==NPIO) THEN
   WRITE(NUNIT,FMT='(100I8)',IOSTAT=NWORKB) IWORK(1:ISIZE)
   !
 !$OMP END SINGLE
-  !  
+  !
   IF (NWORKB/=0) CALL ERROR_WRITE_SURF_ASC(HREC,NWORKB)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
-  !  
+  !
 ENDIF
 !
 KRESP = NWORKB
@@ -517,7 +517,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -551,9 +551,9 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
 !$OMP SINGLE
   !  
@@ -565,9 +565,9 @@ IF (NRANK==NPIO) THEN
   !
   IF (NWORKB/=0) CALL ERROR_WRITE_SURF_ASC(HREC,NWORKB)
   !  
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
-#endif  
+#endif
   !
 ENDIF
 !
@@ -659,7 +659,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -694,9 +694,9 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
 !$OMP SINGLE
   !
@@ -716,9 +716,9 @@ IF (NRANK==NPIO) THEN
   !   
   IF (NWORKB/=0) CALL ERROR_WRITE_SURF_ASC(HREC,NWORKB)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
-#endif  
+#endif
   !
 ENDIF
 !
@@ -748,7 +748,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -781,9 +781,9 @@ IF (LWORK0) RETURN
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
 !$OMP SINGLE
   !    
@@ -799,13 +799,13 @@ IF (NRANK==NPIO) THEN
   WRITE(NUNIT,FMT='(A50)',IOSTAT=NWORKB) HCOMMENT(1:50)
   WRITE(NUNIT,FMT=*,IOSTAT=NWORKB) PTIME
   !
-!$OMP END SINGLE  
+!$OMP END SINGLE
   !
   IF (NWORKB/=0) CALL ERROR_WRITE_SURF_ASC(HREC,NWORKB)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
-#endif  
+#endif
   !
 ENDIF
 !

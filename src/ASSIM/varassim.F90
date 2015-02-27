@@ -68,7 +68,7 @@ USE MODD_MASK, ONLY: NMASK_FULL
 !
  IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -195,13 +195,13 @@ INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 !
 !     0.1.   MPI and dr_hook initializations
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
  CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
 #endif
 
  IF (LHOOK) CALL DR_HOOK('VARASSIM',0,ZHOOK_HANDLE)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 NCOMM = MPI_COMM_WORLD
  CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
  CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
@@ -1284,7 +1284,7 @@ CALL END_LOG_MPI
 
 IF (LHOOK) CALL DR_HOOK('VARASSIM',1,ZHOOK_HANDLE)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
  CALL MPI_FINALIZE(INFOMPI)
 #endif
 !-------------------------------------------------------------------------------

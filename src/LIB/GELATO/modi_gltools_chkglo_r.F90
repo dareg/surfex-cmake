@@ -61,7 +61,7 @@
 !THXS_SFX!#if ! defined in_surfex
 !THXS_SFX!  USE mpi
 !THXS_SFX!#else
-!THXS_SFX!#ifndef NOMPI
+!THXS_SFX!#ifdef SFX_MPI
 !THXS_SFX!   !!  define mpp_min, mpp_max, mpp_sum for Surfex case with MPI
 !THXS_SFX!   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
 !THXS_SFX!#endif
@@ -95,7 +95,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
   USE mpi
   USE lib_mpp, only : mpi_comm_opa
 #else
-#ifndef NOMPI
+#ifdef SFX_MPI
    !!  define mpp_min, mpp_max, mpp_sum for Surfex case with MPI
    USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
 #endif
@@ -103,7 +103,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
   IMPLICIT NONE
 
 #if defined in_surfex
-#ifndef NOMPI
+#ifdef SFX_MPI
   INCLUDE "mpif.h"
 #endif
 #endif
@@ -200,7 +200,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
 ! mpp_comm_opa, which is the group of processors we use for sea ice,
 ! should be used instead.
 !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       IF ( lmpp ) THEN
          CALL MPI_ALLREDUCE(zshn,the_sum,1,mpi_double_precision,  &
            mpi_sum, mpi_comm_opa,ierror) ; 

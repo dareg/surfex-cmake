@@ -87,7 +87,7 @@ USE MODI_CPL_GCM_n
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -278,7 +278,7 @@ END IF
 ! Call ALMA interfaces for sea, water, nature and town here...
 !--------------------------------------------------------------------------------------
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -298,7 +298,7 @@ IF(GSEA)THEN
 !
 ENDIF
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
 XTIME0 = MPI_WTIME()
 #endif
@@ -317,7 +317,7 @@ IF(GWATER)THEN
 !
 ENDIF 
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
 XTIME0 = MPI_WTIME()
 #endif
@@ -336,7 +336,7 @@ IF(GNATURE)THEN
 !
 ENDIF 
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
 XTIME0 = MPI_WTIME()
 #endif
@@ -355,7 +355,7 @@ IF(GTOWN)THEN
 !
 ENDIF 
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
 #endif
 !

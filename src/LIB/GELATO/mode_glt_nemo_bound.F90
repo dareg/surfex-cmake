@@ -57,7 +57,7 @@ MODULE mode_glt_nemo_bound
    USE modd_glt_mppv
    USE mpi
 #else
-#ifndef NOMPI
+#ifdef SFX_MPI
    !!  define mpp_min, mpp_max, mpp_sum for Offline Surfex case with MPI
    USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
 #else
@@ -71,7 +71,7 @@ MODULE mode_glt_nemo_bound
 #if ! defined in_surfex
    !! empty
 #else
-#ifndef NOMPI
+#ifdef SFX_MPI
    INCLUDE 'mpif.h'
 #endif
 #endif
@@ -1207,7 +1207,7 @@ CONTAINS
       INTEGER, DIMENSION(kdim) ::   iwork
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1234,7 +1234,7 @@ CONTAINS
       INTEGER ::   ierror, iwork, localcomm   ! temporary integer
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1263,7 +1263,7 @@ CONTAINS
       INTEGER, DIMENSION(kdim) ::   iwork
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1290,7 +1290,7 @@ CONTAINS
       INTEGER ::  ierror, iwork, localcomm
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1318,7 +1318,7 @@ CONTAINS
       INTEGER, DIMENSION (kdim) ::  iwork
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, kdim, mpi_integer, mpi_sum, mpi_comm_opa, ierror )
 !$OMP END SINGLE
@@ -1341,7 +1341,7 @@ CONTAINS
       INTEGER :: ierror, iwork
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_sum, mpi_comm_opa, ierror )
 !$OMP END SINGLE
@@ -1367,7 +1367,7 @@ CONTAINS
       REAL, DIMENSION(kdim) ::  zwork
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1394,7 +1394,7 @@ CONTAINS
       REAL ::   zwork
       !!----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1422,7 +1422,7 @@ CONTAINS
       REAL, DIMENSION(kdim) ::   zwork
       !!-----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1450,7 +1450,7 @@ CONTAINS
       INTEGER :: localcomm
       !!-----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1479,7 +1479,7 @@ CONTAINS
       REAL, DIMENSION(kdim) ::   zwork     ! temporary workspace 
       !!-----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1506,7 +1506,7 @@ CONTAINS
       REAL ::   zwork
       !!-----------------------------------------------------------------------
       !
-#if !defined in_surfex || ! defined NOMPI
+#if !defined in_surfex || defined SFX_MPI
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) ) localcomm = kcom
       !

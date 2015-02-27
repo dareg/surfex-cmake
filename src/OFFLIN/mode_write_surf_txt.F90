@@ -192,7 +192,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -228,7 +228,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   ! 
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -242,7 +242,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !  
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  
@@ -271,7 +271,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -307,7 +307,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !  
@@ -321,7 +321,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !    
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !  

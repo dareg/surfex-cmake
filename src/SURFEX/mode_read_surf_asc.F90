@@ -133,7 +133,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -153,7 +153,7 @@ INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem
 INTEGER           :: IL1, INFOMPI
 !
 REAL   :: XTIME0
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -166,7 +166,7 @@ IL1 = SIZE(PFIELD)
 NWORKB=0
 !$OMP END SINGLE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -211,7 +211,7 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -219,23 +219,23 @@ IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif   
+#endif
     PFIELD(:) = XWORKD(1:IL1)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-!$OMP SINGLE    
-#ifndef NOMPI
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(XWORKD,IL1*KIND(XWORKD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   PFIELD(:) = XWORKD(1:IL1)
 ELSE
@@ -276,7 +276,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -296,7 +296,7 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
 INTEGER           :: IL1, IL2, INFOMPI
 !
 REAL   :: XTIME0
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -310,7 +310,7 @@ IL2 = SIZE(PFIELD,2)
 NWORKB=0
 !$OMP END SINGLE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -355,7 +355,7 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -363,23 +363,23 @@ IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 !
 IF (HDIR=='A') THEN
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     PFIELD(:,:) = XWORKD2(1:IL1,:)
-#ifndef NOMPI
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
 #endif
   ENDIF
 ELSEIF (HDIR=='-') THEN
-!$OMP SINGLE    
-#ifndef NOMPI       
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(XWORKD2,IL1*IL2*KIND(XWORKD2)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   IF (NRANK==NPIO) PFIELD(:,:) = XWORKD2(1:IL1,:)
 ELSE
@@ -478,7 +478,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -497,7 +497,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
  CHARACTER(LEN=6)  :: YMASK
 INTEGER           :: IL1, INFOMPI
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL   :: XTIME0
@@ -511,7 +511,7 @@ IL1 = SIZE(KFIELD)
 NWORKB = 0
 !$OMP END SINGLE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -556,7 +556,7 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -564,23 +564,23 @@ IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 !
 IF (HDIR=='A') THEN
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     KFIELD(:) = NWORKD(1:IL1)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN
-!$OMP SINGLE    
-#ifndef NOMPI     
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(NWORKD,IL1*KIND(NWORKD)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   KFIELD(:) = NWORKD(1:IL1)
 ELSE
@@ -735,7 +735,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -764,7 +764,7 @@ NWORKB = 0
 !
 !$OMP BARRIER
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -794,13 +794,13 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (KRESP/=0) CALL ERROR_READ_SURF_ASC(HREC,KRESP)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 IF (NPROC>1 .AND. HDIR/='A') THEN
 !$OMP SINGLE 
   XTIME0 = MPI_WTIME()

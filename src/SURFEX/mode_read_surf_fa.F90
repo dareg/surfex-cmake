@@ -179,7 +179,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -201,7 +201,7 @@ CHARACTER(LEN=3)           :: YPREF
 LOGICAL                    :: GV8
 !
 INTEGER ::  I, J, INFOMPI
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 !
@@ -217,7 +217,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFX1_FA',0,ZHOOK_HANDLE)
 NWORKB=0
 !$OMP END SINGLE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -263,22 +263,22 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     PFIELD(:) = XWORKD(1:KL)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
 !$OMP SINGLE
     XTIME0 = MPI_WTIME()
@@ -288,7 +288,7 @@ ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
 !$OMP END SINGLE
   ENDIF
-#endif   
+#endif
   PFIELD(:) = XWORKD(1:KL)
 ELSE
   CALL READ_AND_SEND_MPI(XWORKD,PFIELD,NMASK)
@@ -329,7 +329,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -354,7 +354,7 @@ LOGICAL                    :: GV8
 !
 INTEGER :: JL, I, INFOMPI ! loop counter
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK   ! work array read in the file
@@ -369,7 +369,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFX2_FA',0,ZHOOK_HANDLE)
 NWORKB=0
 !$OMP END SINGLE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -409,23 +409,23 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     PFIELD(:,:) = XWORKD2(1:KL1,1:KL2)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
 !$OMP SINGLE
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(NFULL,KIND(NFULL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
@@ -433,7 +433,7 @@ ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
     CALL MPI_BCAST(XWORKD2(1:KL1,1:KL2),KL1*KL2*KIND(XWORKD2)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   PFIELD(:,:) = XWORKD2(1:KL1,1:KL2)
 ELSE
@@ -538,7 +538,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -560,7 +560,7 @@ CHARACTER(LEN=18) :: YNAME ! Field Name
 LOGICAL           :: GV8
 !
 INTEGER ::  I, INFOMPI
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 !
@@ -573,7 +573,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFN1_FA',0,ZHOOK_HANDLE)
 NWORKB = 0
 !$OMP END SINGLE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -620,23 +620,23 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     KFIELD(:) = NWORKD(1:KL)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-!$OMP SINGLE     
-#ifndef NOMPI
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(NFULL,KIND(NFULL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
@@ -644,7 +644,7 @@ ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
     CALL MPI_BCAST(NWORKD(1:KL),KL*KIND(NWORKD)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   KFIELD(:) = NWORKD(1:KL)
 ELSE
@@ -812,7 +812,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -839,7 +839,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFL1_FA',0,ZHOOK_HANDLE)
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -876,11 +876,11 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 IF (NPROC>1 .AND. HDIR/='A') THEN
 !$OMP SINGLE         
   XTIME0 = MPI_WTIME()

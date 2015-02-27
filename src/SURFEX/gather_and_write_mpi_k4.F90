@@ -48,7 +48,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -60,7 +60,7 @@ INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 REAL, DIMENSION(NSIZE) :: ZINTER
 REAL   :: XTIME0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: ICPT
@@ -74,7 +74,7 @@ IF (LHOOK) CALL DR_HOOK('GATHER_AND_WRITE_MPI_X1D0',0,ZHOOK_HANDLE)
 !
 XWORK(NINDX1SFX:NINDX2SFX) = XUNDEF
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -86,7 +86,7 @@ IF (SIZE(PWORK)>0) THEN
   ENDIF
 ENDIF
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_CALC_WRITE = XTIME_CALC_WRITE + (MPI_WTIME() - XTIME0)
 !
 XTIME0 = MPI_WTIME()
@@ -94,7 +94,7 @@ XTIME0 = MPI_WTIME()
 !
 !$OMP BARRIER
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_OMP_BARR = XTIME_OMP_BARR + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -104,7 +104,7 @@ IF (NRANK/=NPIO) THEN
   !
   IDX_W = IDX_W + 1
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
   CALL MPI_SEND(XWORK,SIZE(XWORK)*KIND(XWORK)/4,MPI_REAL,NPIO,IDX_W,NCOMM,INFOMPI)
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
@@ -131,24 +131,24 @@ ELSE
   !
   DO I=1,NPROC
     !
-#ifndef NOMPI   
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     !
     IF (I<NPROC) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
       CALL MPI_RECV(ZINTER,SIZE(ZINTER)*KIND(ZINTER)/4,MPI_REAL,I,IDX_W,NCOMM,ISTATUS,INFOMPI)
 #endif
     ELSE
       ZINTER(1:SIZE(XWORK)) = XWORK(:)
     ENDIF
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
     !
     XTIME0 = MPI_WTIME()
-#endif     
-    !    
+#endif
+    !
     ICPT = 0
     !
     DO J=1,SIZE(NINDEX)
@@ -160,9 +160,9 @@ ELSE
       !
     ENDDO
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_CALC_WRITE = XTIME_CALC_WRITE + (MPI_WTIME() - XTIME0)
-#endif      
+#endif
     !
   ENDDO
   !
@@ -195,7 +195,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -207,7 +207,7 @@ INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: KMASK
 REAL, DIMENSION(NSIZE,SIZE(PWORK2,2)) :: ZINTER
 REAL:: XTIME0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: ICPT, IX2, IS1, IS2, IP1, IP2
@@ -233,7 +233,7 @@ ENDIF
 !
 XWORK2(NINDX1SFX:NINDX2SFX,1:IP2) = XUNDEF
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -245,7 +245,7 @@ IF (SIZE(PWORK,1)>0) THEN
   ENDIF
 ENDIF
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_CALC_WRITE = XTIME_CALC_WRITE + (MPI_WTIME() - XTIME0)
 !
 XTIME0 = MPI_WTIME()
@@ -253,7 +253,7 @@ XTIME0 = MPI_WTIME()
 !
 !$OMP BARRIER
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_OMP_BARR = XTIME_OMP_BARR + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -263,7 +263,7 @@ IF (NRANK/=NPIO) THEN
   !  
   IDX_W = IDX_W + 1
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
   CALL MPI_SEND(XWORK2(:,1:IP2),NSIZE*IP2*KIND(XWORK2)/4,MPI_REAL,NPIO,IDX_W,NCOMM,INFOMPI)
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
@@ -291,26 +291,26 @@ ELSE
   !
   DO I=1,NPROC
     !
-#ifndef NOMPI   
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
-    !   
+#endif
+    !
     IF (I<NPROC) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
       CALL MPI_RECV(ZINTER,SIZE(ZINTER)*KIND(ZINTER)/4,MPI_REAL,I,IDX_W,NCOMM,ISTATUS,INFOMPI)
 #endif
     ELSE
       ZINTER(:,:) = XWORK2(:,1:IP2)
     ENDIF
 !    !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
     !
     XTIME0 = MPI_WTIME()
-#endif     
-    !    
+#endif
+    !
     ICPT = 0
-    !    
+    !
     DO J=1,SIZE(NINDEX)
       !
       IF ( NINDEX(J)==MOD(I,NPROC) ) THEN
@@ -320,10 +320,10 @@ ELSE
       !
     ENDDO
      !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_CALC_WRITE = XTIME_CALC_WRITE + (MPI_WTIME() - XTIME0)
-#endif      
-     ! 
+#endif
+     !
   ENDDO
   !
 !$OMP END SINGLE

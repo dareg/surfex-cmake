@@ -119,7 +119,7 @@ USE PARKIND1,            ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -197,14 +197,14 @@ LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
 !
 ! ******************************************************************************************
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
  CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
 #endif
 !
 IF (LHOOK) CALL DR_HOOK('SODA',0,ZHOOK_HANDLE)
 !
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 NCOMM = MPI_COMM_WORLD
  CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
  CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)

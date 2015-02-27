@@ -306,11 +306,11 @@ endif
 #           Source MPIVIDE                               #
 ##########################################################
 #
-FUNDEFS += -UNOMPI
+FUNDEFS += -UNOMPI -USFX_MPI
 #
 #RJ: moved from all configs here
-ifeq "$(VER_MPI)" "NOMPI"
-FPPFLAGS += -DNOMPI
+ifneq "$(VER_MPI)" "NOMPI"
+FPPFLAGS += -DSFX_MPI
 endif
 #
 ifndef VER_MPI

@@ -224,7 +224,7 @@ USE MODI_READ_SURFX0_MNH
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -274,13 +274,13 @@ IF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     HPROGRAM=='NC    ') THEN 
   !
   IF (NRANK==NPIO) THEN
-    ! 
-#ifndef NOMPI    
+    !
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     !
 !$OMP SINGLE
-    !    
+    !
     IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
       CALL READ_SURF0_OL(YREC,XWORK0,NWORKB,CWORKB)
@@ -305,13 +305,13 @@ IF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     !
 !$OMP END SINGLE
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
-#endif    
-    !    
+#endif
+    !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN
     XTIME0 = MPI_WTIME()
 !$OMP SINGLE   
@@ -641,7 +641,7 @@ USE MODI_READ_SURFN0_MNH
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -691,7 +691,7 @@ IF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
   !
   IF (NRANK==NPIO) THEN
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     !
@@ -729,13 +729,13 @@ IF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     !
 !$OMP END SINGLE
     !    
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
     !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN          
     XTIME0 = MPI_WTIME()  
 !$OMP SINGLE
@@ -892,7 +892,7 @@ USE MODI_READ_SURFC0_MNH
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -938,18 +938,18 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
   !
   IF (NRANK==NPIO) THEN
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
 #endif
     !  
-!$OMP SINGLE    
+!$OMP SINGLE
     !    
     IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
       CALL READ_SURF0_OL(YREC,CWORK0(1:40),NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='LFI   ') THEN
-#ifdef SFX_LFI 
+#ifdef SFX_LFI
       CALL READ_SURF0_LFI(YREC,CWORK0(1:40),NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='NC    ') THEN
@@ -968,20 +968,20 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     !  
 !$OMP END SINGLE
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)  
-#endif    
-    !    
+#endif
+    !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN
-    XTIME0 = MPI_WTIME()            
+    XTIME0 = MPI_WTIME()
 !$OMP SINGLE
     CALL MPI_BCAST(CWORK0(1:40),40,MPI_CHARACTER,NPIO,NCOMM,INFOMPI)
-!$OMP END SINGLE   
+!$OMP END SINGLE
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-  ENDIF    
+  ENDIF
 #endif
   !
 ENDIF
@@ -1029,7 +1029,7 @@ USE MODI_READ_SURFL0_MNH
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1075,12 +1075,12 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
   !  
   IF (NRANK==NPIO) THEN
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     ! 
 !$OMP SINGLE
-    !    
+    !
     IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
       CALL READ_SURF0_OL(YREC,LWORK0,NWORKB,CWORKB)
@@ -1105,21 +1105,21 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     !
 !$OMP END SINGLE
     ! 
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
-    !      
+    !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN
-    XTIME0 = MPI_WTIME()       
-!$OMP SINGLE    
+    XTIME0 = MPI_WTIME()
+!$OMP SINGLE
     CALL MPI_BCAST(LWORK0,1,MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
-!$OMP END SINGLE   
+!$OMP END SINGLE
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)    
   ENDIF
-#endif 
+#endif
   !
 ENDIF
 !
@@ -1260,7 +1260,7 @@ USE MODI_GET_LUOUT
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1314,9 +1314,9 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
   !  
   IF (NRANK==NPIO) THEN
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     !
 !$OMP SINGLE
     !    
@@ -1342,15 +1342,15 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ENDIF
     !
-!$OMP END SINGLE  
+!$OMP END SINGLE
     ! 
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
-#endif    
-    !    
+#endif
+    !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN
     XTIME0 = MPI_WTIME() 
 !$OMP SINGLE    
@@ -1427,7 +1427,7 @@ USE MODI_GET_LUOUT
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1482,12 +1482,12 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
   !
   IF (NRANK==NPIO) THEN
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     !
 !$OMP SINGLE
-    !    
+    !
     IF (HPROGRAM=='OFFLIN') THEN
       CALL ABOR1_SFX('READ_SURFT1: NOT AVAILABLE FOR OFFLIN')
     ELSE IF (HPROGRAM=='FA    ') THEN
@@ -1495,26 +1495,26 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
       CALL READ_SURFT_ASC(YREC,NWORKD2(:,1),NWORKD2(:,2),NWORKD2(:,3),XWORKD,NWORKB,CWORKB)
-#endif 
+#endif
     ELSE IF (HPROGRAM=='LFI   ') THEN
 #ifdef SFX_LFI
       CALL READ_SURFT_LFI(YREC,NWORKD2(:,1),NWORKD2(:,2),NWORKD2(:,3),XWORKD,NWORKB,CWORKB)
-#endif  
+#endif
     ELSE IF (HPROGRAM=='NC    ') THEN
 #ifdef SFX_NC
       CALL READ_SURFT_NC(YREC,NWORKD2(:,1),NWORKD2(:,2),NWORKD2(:,3),XWORKD,NWORKB,CWORKB)
-#endif  
+#endif
     ENDIF
     !
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
-#endif    
-    !      
+#endif
+    !
 !$OMP END SINGLE
-    !  
+    !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN
     XTIME0 = MPI_WTIME()         
 !$OMP SINGLE    
@@ -1589,7 +1589,7 @@ USE MODE_READ_SURF_LFI, ONLY: READ_SURFT_LFI
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1641,19 +1641,19 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
   !  
   IF (NRANK==NPIO) THEN
     !
-#ifndef NOMPI   
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif    
+#endif
     !
 !$OMP SINGLE
-    !     
+    !
     IF (HPROGRAM=='OFFLIN') THEN
       CALL ABOR1_SFX('READ_SURFT2: NOT AVAILABLE FOR OFFLIN')
     ELSE IF (HPROGRAM=='LFI   ') THEN
 #ifdef SFX_LFI
       CALL READ_SURFT_LFI(YREC,NWORKD3(:,:,1),NWORKD3(:,:,2),NWORKD3(:,:,3),&
         XWORKD2,NWORKB,CWORKB)
-#endif                  
+#endif
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
       CALL READ_SURFT_ASC(YREC,NWORKD3(:,:,1),NWORKD3(:,:,2),NWORKD3(:,:,3),&
@@ -1671,15 +1671,15 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ENDIF
     !
-#ifndef NOMPI
+#ifdef SFX_MPI
     XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
     !    
 !$OMP END SINGLE
-    !    
+    !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   IF (YDIR/='A' .AND. NPROC>1) THEN
     XTIME0 = MPI_WTIME()   
 !$OMP SINGLE

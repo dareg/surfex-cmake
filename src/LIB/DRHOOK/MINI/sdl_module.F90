@@ -132,7 +132,7 @@ CALL VPP_ABORT()
 
 IRETURN_CODE=1
 !RJ: seriously? even without mpif.h??
-#ifndef NOMPI
+#ifdef SFX_MPI
 CALL MPI_ABORT(KCOMM,IRETURN_CODE,IERROR)
 #endif
 

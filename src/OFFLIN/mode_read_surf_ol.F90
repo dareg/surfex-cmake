@@ -210,7 +210,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -246,7 +246,7 @@ NWORKB=0
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -346,7 +346,7 @@ ENDIF
 !
 KRESP = NWORKB
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -390,7 +390,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -425,7 +425,7 @@ NWORKB=0
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -526,7 +526,7 @@ ENDIF
 !
 KRESP = NWORKB
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -570,7 +570,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -605,7 +605,7 @@ NWORKB=0
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -705,7 +705,7 @@ ENDIF
 !
 KRESP = NWORKB
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
@@ -991,7 +991,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1028,7 +1028,7 @@ NWORKB=0
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -1085,12 +1085,12 @@ ENDIF
 !
 KRESP = NWORKB
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 !$OMP SINGLE  
   CALL MPI_BCAST(LWORKD,SIZE(LWORKD),MPI_LOGICAL,NPIO,NCOMM,INFOMPI)

@@ -205,7 +205,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -234,7 +234,7 @@ KRESP=0
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -250,7 +250,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE NOWAIT
   !  
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -280,7 +280,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -309,12 +309,12 @@ KRESP=0
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI   
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
-  !    
+  !
 !$OMP SINGLE
-  !  
+  !
   CALL INIT_WRITE_BIN(HREC,SIZE(PFIELD,2),LWFL)
   !
   IF (LWFL) THEN
@@ -324,11 +324,11 @@ IF (NRANK==NPIO) THEN
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
   !
 !$OMP END SINGLE NOWAIT
-  !  
-#ifndef NOMPI   
+  !
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
-  !  
+  !
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX2_BIN',1,ZHOOK_HANDLE)

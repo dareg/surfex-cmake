@@ -180,7 +180,7 @@ USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -221,9 +221,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
 !$OMP SINGLE
   !
@@ -271,11 +271,11 @@ IF (NRANK==NPIO) THEN
 #ifdef SFX_NC
     CALL WRITE_SURF0_NC(YREC,PFIELD,KRESP,HCOMMENT)
 #endif
-  ENDIF  
+  ENDIF
   !
 !$OMP END SINGLE
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -591,7 +591,7 @@ USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -633,7 +633,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -683,7 +683,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE 
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -865,7 +865,7 @@ USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -909,7 +909,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -959,7 +959,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE 
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -1008,7 +1008,7 @@ USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1049,12 +1049,12 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME() 
-#endif 
+#endif
   !
 !$OMP SINGLE
-  !  
+  !
   IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
     CALL WRITE_SURF0_ASC(YREC,OFIELD,KRESP,HCOMMENT)
@@ -1099,7 +1099,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE 
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -1278,7 +1278,7 @@ USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1328,7 +1328,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -1378,7 +1378,7 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP END SINGLE 
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
   !
@@ -1584,7 +1584,7 @@ ENDIF
 IF (HPROGRAM=='LFI   ') THEN
 #ifdef SFX_LFI
   CALL WRITE_SURFT_LFI(YREC,IYEAR,IMONTH,IDAY,ZTIME,KRESP,HCOMMENT)
-#endif              
+#endif
 ENDIF
 !
 IF (HPROGRAM=='TEXTE ') THEN

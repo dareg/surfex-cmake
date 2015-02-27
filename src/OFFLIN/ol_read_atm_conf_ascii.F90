@@ -58,7 +58,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -93,8 +93,8 @@ IF (NRANK==NPIO) THEN
   !
   CALL GET_LUOUT(HSURF_FILETYPE,ILUOUT) 
   !
-#ifndef NOMPI  
-  XTIME0 = MPI_WTIME()  
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
 #endif
   !
   !*      1.    Define configuration parameters
@@ -121,14 +121,14 @@ IF (NRANK==NPIO) THEN
   READ(21,*) IDAY
   READ(21,*) ZTIME
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
   !
 ENDIF
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI        
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
   CALL MPI_BCAST(PTSTEP_FORC,KIND(PTSTEP_FORC)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
   CALL MPI_BCAST(PDURATION,KIND(PDURATION)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
@@ -169,9 +169,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
   IF (INI==1) THEN
     READ(UNIT=21,FMT='(F15.8)') ZWORK0
@@ -180,7 +180,7 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
@@ -188,26 +188,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
-  XTIME0 = MPI_WTIME()  
-#endif
-  !
-  IF (INI==1) THEN
-    READ(UNIT=21,FMT='(F15.8)') ZWORK0
-    ZWORK(:) = ZWORK0
-  ELSE
-    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
-  END IF
-  !
-#ifndef NOMPI  
-  XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
-#endif
-ENDIF
- CALL READ_AND_SEND_MPI(ZWORK,PLAT)
-!
-IF (NRANK==NPIO) THEN
-  !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -218,7 +199,26 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
+  XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+ENDIF
+ CALL READ_AND_SEND_MPI(ZWORK,PLAT)
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
+  !
+  IF (INI==1) THEN
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
+    ZWORK(:) = ZWORK0
+  ELSE
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
+  END IF
+  !
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
@@ -226,7 +226,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME() 
 #endif
   !
@@ -237,7 +237,7 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
@@ -245,9 +245,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
-  XTIME0 = MPI_WTIME() 
-#endif 
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
   !
   IF (INI==1) THEN
     READ(UNIT=21,FMT='(F15.8)') ZWORK0
@@ -256,7 +256,7 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF

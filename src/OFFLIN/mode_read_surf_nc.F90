@@ -228,7 +228,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -265,7 +265,7 @@ CWORK0 = " "
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -345,29 +345,29 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif   
+#endif
     PFIELD(:) = XWORKD(1:SIZE(PFIELD))
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-!$OMP SINGLE    
-#ifndef NOMPI
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(XWORKD,SIZE(XWORKD)*KIND(XWORKD)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   PFIELD(:) = XWORKD(1:SIZE(PFIELD))
 ELSE
@@ -412,7 +412,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -450,7 +450,7 @@ CWORK0 = " "
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -532,29 +532,29 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif   
+#endif
     PFIELD(:,:) = XWORKD2(:,1:SIZE(PFIELD,2))
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-!$OMP SINGLE    
-#ifndef NOMPI
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(XWORKD2,SIZE(XWORKD2)*KIND(XWORKD2)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   PFIELD(:,:) = XWORKD2(:,1:SIZE(PFIELD,2))
 ELSE
@@ -668,7 +668,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -704,7 +704,7 @@ CWORK0 = " "
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -771,29 +771,29 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif   
+#endif
     KFIELD(:) = NWORKD(1:SIZE(KFIELD))
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-!$OMP SINGLE    
-#ifndef NOMPI
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(NWORKD,SIZE(NWORKD)*KIND(NWORKD)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   KFIELD(:) = NWORKD(1:SIZE(KFIELD))
 ELSE
@@ -838,7 +838,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -875,7 +875,7 @@ CWORK0 = " "
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -941,29 +941,29 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
-#ifndef NOMPI          
+#ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
-#endif   
+#endif
     KFIELD(:,:) = NWORKD2(:,:)
-#ifndef NOMPI    
+#ifdef SFX_MPI
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
-#endif    
+#endif
   ENDIF
 ELSEIF (HDIR=='-') THEN ! distribution of the total field on other tasks
-!$OMP SINGLE    
-#ifndef NOMPI
+!$OMP SINGLE
+#ifdef SFX_MPI
   IF (NPROC>1) THEN
     XTIME0 = MPI_WTIME()
     CALL MPI_BCAST(NWORKD2,SIZE(NWORKD2)*KIND(NWORKD2)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)   
     XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
   ENDIF
-#endif    
+#endif
 !$OMP END SINGLE
   KFIELD(:,:) = NWORKD2(:,:)
 ELSE
@@ -1143,7 +1143,7 @@ IMPLICIT NONE
 !
 INCLUDE "netcdf.inc"
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -1181,7 +1181,7 @@ CWORK0 = " "
 !
 HCOMMENT = " "
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -1237,12 +1237,12 @@ ENDIF
 KRESP = NWORKB
 HCOMMENT = CWORK0
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
 IF (NPROC>1 .AND. HDIR/='A') THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 !$OMP SINGLE  
   CALL MPI_BCAST(LWORKD,SIZE(LWORKD),MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
