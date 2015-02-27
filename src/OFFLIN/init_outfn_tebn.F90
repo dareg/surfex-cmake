@@ -388,6 +388,7 @@ IF (N2M>0) THEN
 ENDIF
 !
 IF (LUTCI .AND. N2M >0) THEN
+!RJ: extended ascii should be avoided in I/O
   YATT='°C'
   CALL DEF_VAR_NETCDF(IFILE_ID,'UTCI_IN','UTCI for person indoor'   ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(IFILE_ID,'UTCI_OUTSUN','UTCI for person at sun'   ,IDDIM,YATT_TITLE,YATT)

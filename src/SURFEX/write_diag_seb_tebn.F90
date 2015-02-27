@@ -304,14 +304,17 @@ END IF
 !
 IF (LUTCI .AND. N2M >0) THEN
   YRECFM='UTCI_IN'
+!RJ: extended ascii should be avoided in I/O
   YCOMMENT='UTCI for person indoor'//' (°C)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCI_IN(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='UTCI_OUTSUN'
+!RJ: extended ascii should be avoided in I/O
   YCOMMENT='UTCI for person at sun'//' (°C)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCI_OUTSUN(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='UTCI_OUTSHAD'
+!RJ: extended ascii should be avoided in I/O
   YCOMMENT='UTCI for person in shade'//' (°C)'
   CALL WRITE_SURF(HPROGRAM,YRECFM,XUTCI_OUTSHADE(:),IRESP,HCOMMENT=YCOMMENT)
   !
