@@ -40,7 +40,7 @@ SUBROUTINE TRIDIAG_GROUND_RM_COEFS(PTSTEP,PDEPTH,PTEMP,PHEATCAP,PCONDTRM,       
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

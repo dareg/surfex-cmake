@@ -18,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon   *Meteo France*
+!!      G. Pigeon   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

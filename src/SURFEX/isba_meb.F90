@@ -72,7 +72,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      P. Samuelsson      * SMHI *
 !!
 !!    MODIFICATIONS

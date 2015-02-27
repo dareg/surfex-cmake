@@ -23,7 +23,7 @@ SUBROUTINE TRIP_OASIS_END
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

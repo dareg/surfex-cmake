@@ -14,7 +14,7 @@ MODULE MODD_TRIP_PAR
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

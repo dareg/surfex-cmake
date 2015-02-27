@@ -17,7 +17,7 @@ MODULE MODD_DIAG_ISBA_n
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

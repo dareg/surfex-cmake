@@ -28,7 +28,7 @@ SUBROUTINE SURF_SOLAR_SHADOWS (PMAP,PXHAT,PYHAT,PCOSZEN,PSINZEN,PAZIMSOL,  &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson      * Meteo-France *
+!!      V. Masson      * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -158,240 +158,240 @@ PDIRSRFSWD=0.
 !              --------------------------------
 !
 IF (LSHADOWS_OTHER) THEN
-	DO JJ=IJB,IJE
-	DO JI=IIB,IIE
-	!
-	!* If zenithal angle greater than Pi/2, sun is down.
-	!
-	IF (PCOSZEN(JI,JJ)<0.) CYCLE
-	!
-	!
-	!* If zenithal angle is vertical, there is no shadow
-	!
-	IF (PCOSZEN(JI,JJ)==1.) CYCLE
-	!
-	!-------------------------------------------------------------------------------
-	!
-	!*       3.    DEFINITION OF SOLAR ANGLES
-	!              --------------------------
-	!
-	!
-	!* zenithal angle between 0 and Pi/2. Equals zero for sun at zenith.
-	!
-	ZCOSZEN =PCOSZEN(JI,JJ)
-	!
-	!* Azimuthal angle set between 0 and 2*Pi, being equal to zero
-	!  in the East direction, Pi/2 in the North direction, etc...
-	!
-	ZSINZEN =PSINZEN(JI,JJ)
-	
-! 	PRINT*,ZCOSZEN,ZSINZEN
-	
-	
-	ZAZIM=PAZIMSOL(JI,JJ)
-	!
-	!
-	!ZAZIM = ZAZIM - XPI/2.
-        ZAZIM = XPI/2. - ZAZIM
-	!
-	!* cosine and sine of azimuthal solar angle
-	!
-	ZCOSAZIM=COS(ZAZIM)
-	ZSINAZIM=SIN(ZAZIM)
-	!
-	!* indices of grid point relative to the entire domain
-	!
-	JI_ll = JI + IIOR_ll - 1
-	JJ_ll = JJ + IJOR_ll - 1
-	!
-	!-------------------------------------------------------------------------------
-	!
-	!*       4.    EXPLORATION OF INTERCEPTING OROGRAPHY FOLLOWING SUN BEAM
-	!              --------------------------------------------------------
-	!
-	DO JT=1,4
-	!
-	!* slope already in its own shadow
-	!
-	IF (ALL(PDIRSWDT(JI,JJ,JT,:)==0.)) CYCLE
-	!
-	!* coordinates of the point in the center of the triangle
-	!
-	SELECT CASE (JT)
-	CASE (1)
-		ZX=(5.*PXHAT(JI)+PXHAT(JI+1))/6.
-		ZY=0.5*(PYHAT(JJ)+PYHAT(JJ+1))
-		ZZ=(PZS(JI,JJ)+PZS_XY(JI,JJ)+PZS_XY(JI,JJ+1))/3.
-	CASE (2)
-		ZX=0.5*(PXHAT(JI)+PXHAT(JI+1))
-		ZY=(5.*PYHAT(JJ+1)+PYHAT(JJ))/6.
-		ZZ=(PZS(JI,JJ)+PZS_XY(JI,JJ+1)+PZS_XY(JI+1,JJ+1))/3.
-	CASE (3)
-		ZX=(5.*PXHAT(JI+1)+PXHAT(JI))/6.
-		ZY=0.5*(PYHAT(JJ)+PYHAT(JJ+1))
-		ZZ=(PZS(JI,JJ)+PZS_XY(JI+1,JJ)+PZS_XY(JI+1,JJ+1))/3.
-	CASE (4)
-		ZX=0.5*(PXHAT(JI)+PXHAT(JI+1))
-		ZY=(5.*PYHAT(JJ)+PYHAT(JJ+1))/6.
-		ZZ=(PZS(JI,JJ)+PZS_XY(JI,JJ)+PZS_XY(JI+1,JJ))/3.
-	END SELECT
-	!
-	!* projection of this point according to sun direction
-	!
-	CALL PROJ_SOLAR(ZX,ZY,ZZ,ZA,ZB)
-	!
-	!* starts exploration at this point
-	!
-	II_ll = JI_ll
-	IJ_ll = JJ_ll
-	!
-	ZZI = ZZ
-	!
-	!
-	!* loop following sun beam until interception
-	!
-	DO JLOOP=1,2*(IIU_ll+IJU_ll)
-	!
-	!* go to the next grid point encountered by the sun beam
-	!
-		IF (ZSINAZIM>0. .AND. ZCOSAZIM>0.) THEN
-		ZDY=(ZYHAT_ll(IJ_ll+1)-ZY)/ZSINAZIM
-		ZDX=(ZXHAT_ll(II_ll+1)-ZX)/ZCOSAZIM
-		ELSE IF (ZSINAZIM<0. .AND. ZCOSAZIM>0.) THEN
-		ZDY=(ZYHAT_ll(IJ_ll)  -ZY)/ZSINAZIM
-		ZDX=(ZXHAT_ll(II_ll+1)-ZX)/ZCOSAZIM
-		ELSE IF (ZSINAZIM>0. .AND. ZCOSAZIM<0.) THEN
-		ZDY=(ZYHAT_ll(IJ_ll+1)-ZY)/ZSINAZIM
-		ZDX=(ZXHAT_ll(II_ll)  -ZX)/ZCOSAZIM
-		ELSE IF (ZSINAZIM<0. .AND. ZCOSAZIM<0.) THEN
-		ZDY=(ZYHAT_ll(IJ_ll)  -ZY)/ZSINAZIM
-		ZDX=(ZXHAT_ll(II_ll)  -ZX)/ZCOSAZIM
-		ELSE IF (ZSINAZIM==0. .AND. ZCOSAZIM<0.) THEN
-		ZDX=-(ZXHAT_ll(II_ll)  -ZX)
-		ZDY=2.*ZDX
-		ELSE IF (ZSINAZIM==0. .AND. ZCOSAZIM>0.) THEN
-		ZDX=(ZXHAT_ll(II_ll+1)-ZX)
-		ZDY=2.*ZDX
-		ELSE IF (ZSINAZIM<0. .AND. ZCOSAZIM==0.) THEN
-		ZDY=-(ZYHAT_ll(IJ_ll)  -ZY)
-		ZDX=2.*ZDY
-		ELSE IF (ZSINAZIM>0. .AND. ZCOSAZIM==0.) THEN
-		ZDY=(ZYHAT_ll(IJ_ll+1)-ZY)
-		ZDX=2.*ZDY
-		END IF
-	!
-		IF (ZDY<ZDX) THEN
-		ZX = ZX + ZDY * ZCOSAZIM
-		ZY = ZY + ZDY * ZSINAZIM
-		ZZ = ZZ + ZDY * ZCOSZEN / PMAP(JI,JJ) / ZSINZEN
-		IF (ZSINAZIM>0.) THEN
-		IJ_ll = IJ_ll + 1
-		ELSE
-		IJ_ll = IJ_ll - 1
-		END IF
-		ELSE
-		ZX = ZX + ZDX * ZCOSAZIM
-		ZY = ZY + ZDX * ZSINAZIM
-		ZZ = ZZ + ZDX * ZCOSZEN / PMAP(JI,JJ) / ZSINZEN
-		IF (ZCOSAZIM>0.) THEN
-		II_ll = II_ll + 1
-		ELSE
-		II_ll = II_ll - 1
-		END IF
-		END IF
-	!
-	!* effect of curvature of the earth surface
-	!
-		IF (LSPHERE) ZZCURV =  ((ZZ-ZZI)*ZSINZEN/ZCOSZEN)**2 &
-					/ (2.*XRADIUS)
-	!
-	!* sun beam goes to high
-	!
-		IF (ZZ > ZZS_MAX_ll-ZZCURV) EXIT
-	!
-	!* sun beam goes outside of the domain
-	!
-		IF (     II_ll<IIB_ll .OR. II_ll>IIE_ll &
-		.OR. IJ_ll<IJB_ll .OR. IJ_ll>IJE_ll ) EXIT
-	!
-	!
-	!* treatment where the sun beam is currently located
-	!
-		IF (.NOT. ( ZZS_ll   (II_ll  ,IJ_ll  ) -ZZCURV < ZZ .AND. &
-			ZZS_XY_ll(II_ll  ,IJ_ll  ) -ZZCURV < ZZ .AND. &
-			ZZS_XY_ll(II_ll+1,IJ_ll  ) -ZZCURV < ZZ .AND. &
-			ZZS_XY_ll(II_ll  ,IJ_ll+1) -ZZCURV < ZZ .AND. &
-			ZZS_XY_ll(II_ll+1,IJ_ll+1) -ZZCURV < ZZ  )    ) THEN
-	!
-	!* exploration of the 4 triangles in the grid mesh encoutered by the sun beam
-	!
-	!* left triangle
-	!
-		ZXT(1) =0.5*(ZXHAT_ll(II_ll)+ZXHAT_ll(II_ll+1))
-		ZYT(1) =0.5*(ZYHAT_ll(IJ_ll)+ZYHAT_ll(IJ_ll+1))
-		ZZT(1) =ZZS_ll   (II_ll          ,IJ_ll          ) - ZZCURV
-		ZXT(2) =ZXHAT_ll(II_ll)
-		ZYT(2) =ZYHAT_ll(IJ_ll)
-		ZZT(2) =ZZS_XY_ll(II_ll  ,IJ_ll  ) - ZZCURV
-		ZXT(3) =ZXHAT_ll(II_ll)
-		ZYT(3) =ZYHAT_ll(IJ_ll+1)
-		ZZT(3) =ZZS_XY_ll(II_ll  ,IJ_ll+1) - ZZCURV
-		CALL PROJ_SOLAR(ZXT(1),ZYT(1),ZZT(1),ZAT(1),ZBT(1))
-		CALL PROJ_SOLAR(ZXT(2),ZYT(2),ZZT(2),ZAT(2),ZBT(2))
-		CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
-		CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
-		IF (GF) THEN
-		PDIRSWDT(JI,JJ,JT,:)=0.
-		EXIT
-		END IF
-	!
-	!* top triangle
-	!
-		ZAT(2) =ZAT(3)
-		ZBT(2) =ZBT(3)
-		ZXT(3) =ZXHAT_ll(II_ll+1)
-		ZYT(3) =ZYHAT_ll(IJ_ll+1)
-		ZZT(3) =ZZS_XY_ll(II_ll+1,IJ_ll+1) - ZZCURV
-		CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
-		CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
-		IF (GF) THEN
-		PDIRSWDT(JI,JJ,JT,:)=0.
-		EXIT
-		END IF
-	!
-	!* right triangle
-	!
-		ZAT(2) =ZAT(3)
-		ZBT(2) =ZBT(3)
-		ZXT(3) =ZXHAT_ll(II_ll+1)
-		ZYT(3) =ZYHAT_ll(IJ_ll)
-		ZZT(3) =ZZS_XY_ll(II_ll+1,IJ_ll  ) - ZZCURV
-		CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
-		CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
-		IF (GF) THEN
-		PDIRSWDT(JI,JJ,JT,:)=0.
-		EXIT
-		END IF
-	!
-	!* bottom triangle
-	!
-		ZAT(2) =ZAT(3)
-		ZBT(2) =ZBT(3)
-		ZXT(3) =ZXHAT_ll(II_ll)
-		ZYT(3) =ZYHAT_ll(IJ_ll)
-		ZZT(3) =ZZS_XY_ll(II_ll  ,IJ_ll  ) - ZZCURV
-		CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
-		CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
-		IF (GF) THEN
-		PDIRSWDT(JI,JJ,JT,:)=0.
-		EXIT
-		END IF
-		END IF
-	END DO
-	!
-	END DO
-	END DO
-	END DO
+  DO JJ=IJB,IJE
+    DO JI=IIB,IIE
+!
+!* If zenithal angle greater than Pi/2, sun is down.
+!
+      IF (PCOSZEN(JI,JJ)<0.) CYCLE
+!
+!
+!* If zenithal angle is vertical, there is no shadow
+!
+      IF (PCOSZEN(JI,JJ)==1.) CYCLE
+!
+!-------------------------------------------------------------------------------
+!
+!*       3.    DEFINITION OF SOLAR ANGLES
+!              --------------------------
+!
+!
+!* zenithal angle between 0 and Pi/2. Equals zero for sun at zenith.
+!
+      ZCOSZEN =PCOSZEN(JI,JJ)
+!
+!* Azimuthal angle set between 0 and 2*Pi, being equal to zero
+!  in the East direction, Pi/2 in the North direction, etc...
+!
+      ZSINZEN =PSINZEN(JI,JJ)
+
+!      PRINT*,ZCOSZEN,ZSINZEN
+
+
+       ZAZIM=PAZIMSOL(JI,JJ)
+!
+!
+!       ZAZIM = ZAZIM - XPI/2.
+       ZAZIM = XPI/2. - ZAZIM
+!
+!* cosine and sine of azimuthal solar angle
+!
+      ZCOSAZIM=COS(ZAZIM)
+      ZSINAZIM=SIN(ZAZIM)
+!
+!* indices of grid point relative to the entire domain
+!
+      JI_ll = JI + IIOR_ll - 1
+      JJ_ll = JJ + IJOR_ll - 1
+!
+!-------------------------------------------------------------------------------
+!
+!*       4.    EXPLORATION OF INTERCEPTING OROGRAPHY FOLLOWING SUN BEAM
+!              --------------------------------------------------------
+!
+      DO JT=1,4
+!
+!* slope already in its own shadow
+!
+        IF (ALL(PDIRSWDT(JI,JJ,JT,:)==0.)) CYCLE
+!
+!* coordinates of the point in the center of the triangle
+!
+        SELECT CASE (JT)
+          CASE (1)
+            ZX=(5.*PXHAT(JI)+PXHAT(JI+1))/6.
+            ZY=0.5*(PYHAT(JJ)+PYHAT(JJ+1))
+            ZZ=(PZS(JI,JJ)+PZS_XY(JI,JJ)+PZS_XY(JI,JJ+1))/3.
+          CASE (2)
+            ZX=0.5*(PXHAT(JI)+PXHAT(JI+1))
+            ZY=(5.*PYHAT(JJ+1)+PYHAT(JJ))/6.
+            ZZ=(PZS(JI,JJ)+PZS_XY(JI,JJ+1)+PZS_XY(JI+1,JJ+1))/3.
+          CASE (3)
+            ZX=(5.*PXHAT(JI+1)+PXHAT(JI))/6.
+            ZY=0.5*(PYHAT(JJ)+PYHAT(JJ+1))
+            ZZ=(PZS(JI,JJ)+PZS_XY(JI+1,JJ)+PZS_XY(JI+1,JJ+1))/3.
+          CASE (4)
+            ZX=0.5*(PXHAT(JI)+PXHAT(JI+1))
+            ZY=(5.*PYHAT(JJ)+PYHAT(JJ+1))/6.
+            ZZ=(PZS(JI,JJ)+PZS_XY(JI,JJ)+PZS_XY(JI+1,JJ))/3.
+        END SELECT
+!
+!* projection of this point according to sun direction
+!
+        CALL PROJ_SOLAR(ZX,ZY,ZZ,ZA,ZB)
+!
+!* starts exploration at this point
+!
+        II_ll = JI_ll
+        IJ_ll = JJ_ll
+!
+        ZZI = ZZ
+!
+!
+!* loop following sun beam until interception
+!
+        DO JLOOP=1,2*(IIU_ll+IJU_ll)
+!
+!* go to the next grid point encountered by the sun beam
+!
+          IF (ZSINAZIM>0. .AND. ZCOSAZIM>0.) THEN
+            ZDY=(ZYHAT_ll(IJ_ll+1)-ZY)/ZSINAZIM
+            ZDX=(ZXHAT_ll(II_ll+1)-ZX)/ZCOSAZIM
+          ELSE IF (ZSINAZIM<0. .AND. ZCOSAZIM>0.) THEN
+            ZDY=(ZYHAT_ll(IJ_ll)  -ZY)/ZSINAZIM
+            ZDX=(ZXHAT_ll(II_ll+1)-ZX)/ZCOSAZIM
+          ELSE IF (ZSINAZIM>0. .AND. ZCOSAZIM<0.) THEN
+            ZDY=(ZYHAT_ll(IJ_ll+1)-ZY)/ZSINAZIM
+            ZDX=(ZXHAT_ll(II_ll)  -ZX)/ZCOSAZIM
+          ELSE IF (ZSINAZIM<0. .AND. ZCOSAZIM<0.) THEN
+            ZDY=(ZYHAT_ll(IJ_ll)  -ZY)/ZSINAZIM
+            ZDX=(ZXHAT_ll(II_ll)  -ZX)/ZCOSAZIM
+          ELSE IF (ZSINAZIM==0. .AND. ZCOSAZIM<0.) THEN
+            ZDX=-(ZXHAT_ll(II_ll)  -ZX)
+            ZDY=2.*ZDX
+          ELSE IF (ZSINAZIM==0. .AND. ZCOSAZIM>0.) THEN
+            ZDX=(ZXHAT_ll(II_ll+1)-ZX)
+            ZDY=2.*ZDX
+          ELSE IF (ZSINAZIM<0. .AND. ZCOSAZIM==0.) THEN
+            ZDY=-(ZYHAT_ll(IJ_ll)  -ZY)
+            ZDX=2.*ZDY
+          ELSE IF (ZSINAZIM>0. .AND. ZCOSAZIM==0.) THEN
+            ZDY=(ZYHAT_ll(IJ_ll+1)-ZY)
+            ZDX=2.*ZDY
+          END IF
+!
+          IF (ZDY<ZDX) THEN
+            ZX = ZX + ZDY * ZCOSAZIM
+            ZY = ZY + ZDY * ZSINAZIM
+            ZZ = ZZ + ZDY * ZCOSZEN / PMAP(JI,JJ) / ZSINZEN
+            IF (ZSINAZIM>0.) THEN
+              IJ_ll = IJ_ll + 1
+            ELSE
+              IJ_ll = IJ_ll - 1
+            END IF
+          ELSE
+            ZX = ZX + ZDX * ZCOSAZIM
+            ZY = ZY + ZDX * ZSINAZIM
+            ZZ = ZZ + ZDX * ZCOSZEN / PMAP(JI,JJ) / ZSINZEN
+            IF (ZCOSAZIM>0.) THEN
+              II_ll = II_ll + 1
+            ELSE
+              II_ll = II_ll - 1
+            END IF
+          END IF
+!
+!* effect of curvature of the earth surface
+!
+          IF (LSPHERE) ZZCURV =  ((ZZ-ZZI)*ZSINZEN/ZCOSZEN)**2 &
+                                  / (2.*XRADIUS)
+!
+!* sun beam goes to high
+!
+          IF (ZZ > ZZS_MAX_ll-ZZCURV) EXIT
+!
+!* sun beam goes outside of the domain
+!
+          IF (     II_ll<IIB_ll .OR. II_ll>IIE_ll &
+              .OR. IJ_ll<IJB_ll .OR. IJ_ll>IJE_ll ) EXIT
+!
+!
+!* treatment where the sun beam is currently located
+!
+          IF (.NOT. ( ZZS_ll   (II_ll  ,IJ_ll  ) -ZZCURV < ZZ .AND. &
+                      ZZS_XY_ll(II_ll  ,IJ_ll  ) -ZZCURV < ZZ .AND. &
+                      ZZS_XY_ll(II_ll+1,IJ_ll  ) -ZZCURV < ZZ .AND. &
+                      ZZS_XY_ll(II_ll  ,IJ_ll+1) -ZZCURV < ZZ .AND. &
+                      ZZS_XY_ll(II_ll+1,IJ_ll+1) -ZZCURV < ZZ  )    ) THEN
+!
+!* exploration of the 4 triangles in the grid mesh encoutered by the sun beam
+!
+!* left triangle
+!
+            ZXT(1) =0.5*(ZXHAT_ll(II_ll)+ZXHAT_ll(II_ll+1))
+            ZYT(1) =0.5*(ZYHAT_ll(IJ_ll)+ZYHAT_ll(IJ_ll+1))
+            ZZT(1) =ZZS_ll   (II_ll  ,IJ_ll  ) - ZZCURV
+            ZXT(2) =ZXHAT_ll(II_ll)
+            ZYT(2) =ZYHAT_ll(IJ_ll)
+            ZZT(2) =ZZS_XY_ll(II_ll  ,IJ_ll  ) - ZZCURV
+            ZXT(3) =ZXHAT_ll(II_ll)
+            ZYT(3) =ZYHAT_ll(IJ_ll+1)
+            ZZT(3) =ZZS_XY_ll(II_ll  ,IJ_ll+1) - ZZCURV
+            CALL PROJ_SOLAR(ZXT(1),ZYT(1),ZZT(1),ZAT(1),ZBT(1))
+            CALL PROJ_SOLAR(ZXT(2),ZYT(2),ZZT(2),ZAT(2),ZBT(2))
+            CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
+            CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
+            IF (GF) THEN
+              PDIRSWDT(JI,JJ,JT,:)=0.
+              EXIT
+            END IF
+!
+!* top triangle
+!
+            ZAT(2) =ZAT(3)
+            ZBT(2) =ZBT(3)
+            ZXT(3) =ZXHAT_ll(II_ll+1)
+            ZYT(3) =ZYHAT_ll(IJ_ll+1)
+            ZZT(3) =ZZS_XY_ll(II_ll+1,IJ_ll+1) - ZZCURV
+            CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
+            CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
+            IF (GF) THEN
+              PDIRSWDT(JI,JJ,JT,:)=0.
+              EXIT
+            END IF
+!
+!* right triangle
+!
+            ZAT(2) =ZAT(3)
+            ZBT(2) =ZBT(3)
+            ZXT(3) =ZXHAT_ll(II_ll+1)
+            ZYT(3) =ZYHAT_ll(IJ_ll)
+            ZZT(3) =ZZS_XY_ll(II_ll+1,IJ_ll  ) - ZZCURV
+            CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
+            CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
+            IF (GF) THEN
+              PDIRSWDT(JI,JJ,JT,:)=0.
+              EXIT
+            END IF
+!
+!* bottom triangle
+!
+            ZAT(2) =ZAT(3)
+            ZBT(2) =ZBT(3)
+            ZXT(3) =ZXHAT_ll(II_ll)
+            ZYT(3) =ZYHAT_ll(IJ_ll)
+            ZZT(3) =ZZS_XY_ll(II_ll  ,IJ_ll  ) - ZZCURV
+            CALL PROJ_SOLAR(ZXT(3),ZYT(3),ZZT(3),ZAT(3),ZBT(3))
+            CALL SOLAR_INTERC(ZAT(:),ZBT(:),ZA,ZB,GF)
+            IF (GF) THEN
+              PDIRSWDT(JI,JJ,JT,:)=0.
+              EXIT
+            END IF
+          END IF
+        END DO
+!
+      END DO
+    END DO
+  END DO
 !
 
 END IF

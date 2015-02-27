@@ -15,7 +15,7 @@ SUBROUTINE COUPLING_SURF_TOPD (HPROGRAM,KI)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Vincendon    
+!!      B. Vincendon    
 !!
 !!    MODIFICATIONS
 !!    -------------

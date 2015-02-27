@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

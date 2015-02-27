@@ -20,7 +20,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	D. Gazen   *L.A.*
+!!      D. Gazen   *L.A.*
 !!
 !!    MODIFICATIONS
 !!    -------------

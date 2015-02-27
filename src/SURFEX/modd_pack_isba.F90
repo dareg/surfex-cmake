@@ -17,7 +17,7 @@ MODULE MODD_PACK_ISBA
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Boone   *Meteo France*
+!!      A. Boone   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

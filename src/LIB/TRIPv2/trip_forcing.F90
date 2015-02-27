@@ -10,7 +10,7 @@ SUBROUTINE TRIP_FORCING(KLUOUT,KLON,KLAT,KNB_TSTEP_RUN, &
 !!
 !!    AUTHOR
 !!    ------
-!!	B. decharme   *Meteo France*	
+!!      B. decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

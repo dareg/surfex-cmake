@@ -57,7 +57,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	S. Belair           * Meteo-France *
+!!      S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -204,8 +204,8 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PFLUX_COR
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PD_G,  PSOILCONDZ, PSOILHCAPZ
 !                                      PD_G      = Depth of bottom of Soil layers (m)
-!				       PSOILCONDZ= ISBA-DF Soil conductivity profile  [W/(m K)]
-!				       PSOILHCAPZ=ISBA-DF Soil heat capacity profile [J/(m3 K)]
+!                                      PSOILCONDZ= ISBA-DF Soil conductivity profile  [W/(m K)]
+!                                      PSOILHCAPZ=ISBA-DF Soil heat capacity profile [J/(m3 K)]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDZG       ! soil layers thicknesses (DIF option) (m)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDZDIF     ! distance between consecuative layer mid-points (DIF option) (m)
 !

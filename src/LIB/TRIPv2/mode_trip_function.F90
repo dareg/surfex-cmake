@@ -21,7 +21,7 @@ MODULE MODE_TRIP_FUNCTION
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme       * Meteo France *
+!!      B. Decharme       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------

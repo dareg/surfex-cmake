@@ -25,7 +25,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	R. Alkama           * Meteo-France *
+!!      R. Alkama           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

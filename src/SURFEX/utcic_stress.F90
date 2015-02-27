@@ -26,7 +26,7 @@ SUBROUTINE UTCIC_STRESS(PTSTEP, PUTCI, PUTCIC )
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

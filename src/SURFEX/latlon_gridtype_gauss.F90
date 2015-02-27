@@ -21,7 +21,7 @@ SUBROUTINE LATLON_GRIDTYPE_GAUSS(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDI
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

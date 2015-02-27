@@ -23,7 +23,7 @@ SUBROUTINE OL_DEFINE_DIM(HPROGRAM, KLUOUT, KNI, KDIM1, HUNIT1, HUNIT2, &
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Faroux   *Meteo France*	
+!!      S. Faroux   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -28,7 +28,7 @@ SUBROUTINE PERMAFROST_DEPTH (KNI,KPATCH,PPERM,PSOILDEPTH)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme     
 !!
 !!    MODIFICATIONS
 !!    -------------

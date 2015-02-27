@@ -29,7 +29,7 @@ SUBROUTINE OL_READ_ATM_NETCDF (HSURF_FILETYPE,                            &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

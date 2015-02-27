@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	M. Lafaysse   *Meteo France*	
+!!      M. Lafaysse   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

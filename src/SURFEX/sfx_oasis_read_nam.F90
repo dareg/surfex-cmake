@@ -23,7 +23,7 @@ SUBROUTINE SFX_OASIS_READ_NAM(HPROGRAM,PTSTEP_SURF,HINIT)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

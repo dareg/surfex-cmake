@@ -25,7 +25,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      K. Chancibault	* Meteo-France *
+!!      K. Chancibault  * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

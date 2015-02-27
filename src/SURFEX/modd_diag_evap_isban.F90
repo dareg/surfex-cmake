@@ -17,7 +17,7 @@ MODULE MODD_DIAG_EVAP_ISBA_n
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne   *Meteo France*
+!!      P. Le Moigne   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

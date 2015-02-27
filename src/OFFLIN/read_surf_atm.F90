@@ -27,7 +27,7 @@ SUBROUTINE READ_SURF_ATM     (HPROGRAM, PFIELD, KFORC_STEP, KNB, KINIT)
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

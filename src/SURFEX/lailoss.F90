@@ -31,7 +31,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      (following Belair)
 !!
 !!    MODIFICATIONS

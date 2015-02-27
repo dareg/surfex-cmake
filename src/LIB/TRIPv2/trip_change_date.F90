@@ -13,7 +13,7 @@ PROGRAM TRIP_CHANGE_DATE
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

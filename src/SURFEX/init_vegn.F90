@@ -28,7 +28,7 @@ SUBROUTINE INIT_VEG_n(KPATCH, KI, OCANOPY, HROUGH, OAGRI_TO_GRASS, TPSNOW, &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!

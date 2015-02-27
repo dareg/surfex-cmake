@@ -10,7 +10,7 @@ SUBROUTINE HVAC_AUTOSIZE(KI,KLUOUT)
 !!    AUTHOR
 !!    ------
 !!
-!!	G. Pigeon           * Meteo-France *
+!!      G. Pigeon           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

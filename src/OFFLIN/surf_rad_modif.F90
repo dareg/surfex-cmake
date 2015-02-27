@@ -45,7 +45,7 @@ SUBROUTINE SURF_RAD_MODIF (PMAP,PXHAT,PYHAT,PCOSZEN,PSINZEN,PAZIMSOL,  &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson        * Meteo-France *
+!!      V. Masson        * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -139,8 +139,8 @@ ISWB = SIZE(PDIRFLASWD,3)
 !
 
 CALL SURF_SOLAR_SLOPES  ( PCOSZEN, PSINZEN, PAZIMSOL,                    &
-		  PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,&
-		  PDIRFLASWD, ZDIRSWDT   )
+                          PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,&
+                          PDIRFLASWD, ZDIRSWDT   )
 
 
 !

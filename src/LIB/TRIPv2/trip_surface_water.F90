@@ -35,7 +35,7 @@ SUBROUTINE TRIP_SURFACE_WATER (KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX,
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

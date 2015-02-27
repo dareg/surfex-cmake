@@ -30,8 +30,8 @@ SUBROUTINE SNOW_LOAD_MEB(PTSTEP,PSR,PTV,PWRVNMAX,PKVN,PCHEATV,PLERCV,PLESC,PMELT
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Samuelsson           * SMHI *
-!!	A. Boone                * CNRM-GAME, Meteo-France *
+!!      P. Samuelsson           * SMHI *
+!!      A. Boone                * CNRM-GAME, Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

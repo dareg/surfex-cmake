@@ -11,7 +11,7 @@ SUBROUTINE TRIP_DIAG_CPL_ESM(PTSTEP_RUN,PDISCHARGE,PCALVING,PWTD,PFWTD)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

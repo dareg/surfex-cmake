@@ -21,7 +21,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Samuelsson            * SMHI *
+!!      P. Samuelsson            * SMHI *
 !!      A. Boone                 * Meteo France *       
 !!      S. Gollvik               * SMHI *
 !!
@@ -590,7 +590,7 @@ FUNCTION SNOW_INTERCEPT_EFF_0D(PCHIP,PVELC,PWRVNMAX) RESULT(ZKVN)
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Samuelsson           * SMHI *
+!!      P. Samuelsson           * SMHI *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -666,7 +666,7 @@ FUNCTION SNOW_INTERCEPT_EFF_1D(PCHIP,PVELC,PWRVNMAX) RESULT(ZKVN)
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Samuelsson           * SMHI *
+!!      P. Samuelsson           * SMHI *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -742,7 +742,7 @@ FUNCTION SNOW_INTERCEPT_EFF_2D(PCHIP,PVELC,PWRVNMAX) RESULT(ZKVN)
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Samuelsson           * SMHI *
+!!      P. Samuelsson           * SMHI *
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -11,7 +11,7 @@ SUBROUTINE INIT_TRIP_CPL_ESM(KLON,KLAT)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

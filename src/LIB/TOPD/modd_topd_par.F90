@@ -21,7 +21,7 @@
 !!          
 !!    AUTHOR
 !!    ------
-!!	V. Ducrocq   *Meteo France*
+!!      V. Ducrocq   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

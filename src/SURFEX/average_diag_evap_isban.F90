@@ -24,7 +24,7 @@ SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
 !!      
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne           * Meteo-France *
+!!      P. Le Moigne           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -296,7 +296,7 @@ IF (LSURF_EVAP_BUDGET) THEN
 !
         XAVG_DRIP(JJ)  = XAVG_DRIP(JJ) + XPATCH(JJ,JPATCH) * XDRIP(JJ,JPATCH)
 !
-! Precipitation intercepted by the	vegetation
+! Precipitation intercepted by the vegetation
 !
         XAVG_RRVEG(JJ)  = XAVG_RRVEG(JJ) + XPATCH(JJ,JPATCH) * XRRVEG(JJ,JPATCH)
 !      
@@ -547,7 +547,7 @@ IF (LSURF_BUDGETC) THEN
 !
         XAVG_DRIPC(JJ)  = XAVG_DRIPC(JJ) + XPATCH(JJ,JPATCH) * XDRIPC(JJ,JPATCH)
 !
-! precipitation intercepted by the	vegetation
+! precipitation intercepted by the vegetation
 !
         XAVG_RRVEGC(JJ)  = XAVG_RRVEGC(JJ) + XPATCH(JJ,JPATCH) * XRRVEGC(JJ,JPATCH)
 !      

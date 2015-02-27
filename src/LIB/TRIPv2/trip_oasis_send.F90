@@ -23,7 +23,7 @@ SUBROUTINE TRIP_OASIS_SEND(KLISTING,KLON,KLAT,PTIMEC)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

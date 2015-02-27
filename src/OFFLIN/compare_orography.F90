@@ -21,7 +21,7 @@ SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne   *Meteo France*	
+!!      P. Le Moigne   *Meteo France*
 !!
 !
 USE MODI_INIT_IO_SURF_n

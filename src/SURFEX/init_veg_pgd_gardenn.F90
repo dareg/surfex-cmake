@@ -42,7 +42,7 @@ SUBROUTINE INIT_VEG_PGD_GARDEN_n(HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,   
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

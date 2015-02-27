@@ -19,7 +19,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Ducrocq       * Meteo France *
+!!      V. Ducrocq       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -329,7 +329,7 @@ END FUNCTION DPSAT_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -431,7 +431,7 @@ END FUNCTION QSATW_0D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -540,7 +540,7 @@ END FUNCTION QSATW_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -668,7 +668,7 @@ END FUNCTION QSATW_2D
 !!
 !!    AUTHOR
 !!    ------
-!!	C. Lebeaupin    * Meteo France *
+!!      C. Lebeaupin    * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -767,7 +767,7 @@ END FUNCTION QSATSEAW_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Belamari     * Meteo France *
+!!      S. Belamari     * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -880,7 +880,7 @@ END FUNCTION QSATSEAW2_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -997,7 +997,7 @@ END FUNCTION DQSATW_O_DT_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -1112,7 +1112,7 @@ END FUNCTION DQSATI_O_DT_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -1219,7 +1219,7 @@ END FUNCTION QSATI_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -19,7 +19,7 @@ MODULE MODD_SLOPE_EFFECT
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Vionnet   *Meteo France*
+!!      V. Vionnet   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

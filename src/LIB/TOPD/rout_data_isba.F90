@@ -34,7 +34,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      B. Vincendon	*  Meteo-France *
+!!      B. Vincendon    *  Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -97,11 +97,11 @@ IF (PRESENT(PFIELD)) THEN
   DO JPOINT=1,INFIELD
 
 ! On pourrait faire un controle des coordonnées ?
-! 		IF ((ABS(ZLAT(JPOINT)-????XLAT???)<0.001)  .AND. (ABS(ZLON(JPOINT)-????XLON???)<0.001)) THEN
+!    IF ((ABS(ZLAT(JPOINT)-????XLAT???)<0.001)  .AND. (ABS(ZLON(JPOINT)-????XLON???)<0.001)) THEN
 
     PFIELD(JPOINT)=ZFIELD(JPOINT)
 
-! 		END IF
+!    END IF
   END DO
 
 ELSE
@@ -199,7 +199,7 @@ END SELECT
 DEALLOCATE(IVARDIMSID)
 
 ! IF(ILENDIM/=NL) CALL ABOR1_SFX('READ_PGD_NETCDF: incorrect number of points &
-! &				in netcdf file for variable '//TRIM(HFIELD))	
+! &                             in netcdf file for variable '//TRIM(HFIELD))
 
 ALLOCATE(PFIELD(ILENDIM))
 

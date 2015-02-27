@@ -22,7 +22,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Vionnet   *Meteo France*
+!!      V. Vionnet   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -52,7 +52,7 @@ REAL, PARAMETER        :: XVVISC3 = 0.023       ! density adjustement in the exp
 REAL, PARAMETER        :: XVVISC4 = .1          ! temperature adjustement in the exponential correction for viscosity (UNIT : K-1)
 REAL, PARAMETER        :: XVVISC5 = 1.          ! factor for viscosity adjustement to grain type - to be checked
 REAL, PARAMETER        :: XVVISC6 = 60.         ! factor for viscosity adjustement to grain type - to be checked 
-!							      (especially this one ; inconsistency with Crocus v2.4)
+!                                                             (especially this one ; inconsistency with Crocus v2.4)
 REAL, PARAMETER        :: XVVISC7 = 10.         ! factor for viscosity adjustement to grain type - to be checked
 REAL, PARAMETER        :: XVRO11 = 250.  ! normalization term for density dependence of the viscosity calculation (UNIT : kg m-3)
 ! 

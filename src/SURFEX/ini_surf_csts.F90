@@ -25,7 +25,7 @@ SUBROUTINE INI_SURF_CSTS
 !!
 !!    AUTHOR
 !!    ------
-!!  	B. Decharme       * Meteo France *
+!!      B. Decharme       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -100,7 +100,7 @@ NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CCHARNOCK
 !
 !-------------------------------------------------------------------------------
-!*	 0. INIT
+!*       0. INIT
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INI_SURF_CSTS',0,ZHOOK_HANDLE)
@@ -114,7 +114,7 @@ XEMISWATICE = XUNDEF
 XEMISSN     = XUNDEF
 !
 !-------------------------------------------------------------------------------
-!*	 1. Default values
+!*       1. Default values
 !-------------------------------------------------------------------------------
 !
 ! Minimum and maximum values of the albedo of snow:
@@ -269,7 +269,7 @@ CQSAT = 'NEW'
 CCHARNOCK = 'NEW'
 !
 !-------------------------------------------------------------------------------
-!*	 2. User values
+!*       2. User values
 !-------------------------------------------------------------------------------
 !
  CALL GET_LUOUT(CPROGNAME,ILUOUT)
@@ -295,7 +295,7 @@ ENDIF
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_SURF_SNOW_CSTS)
 !
 !-------------------------------------------------------------------------------
-!*	 3. For Reproductibility
+!*       3. For Reproductibility
 !-------------------------------------------------------------------------------
 !
  CALL POSNAM(ILUNAM,'NAM_REPROD_OPER',GFOUND,ILUOUT)

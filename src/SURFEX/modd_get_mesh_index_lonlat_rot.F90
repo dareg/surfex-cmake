@@ -18,7 +18,7 @@ MODULE MODD_GET_MESH_INDEX_LONLAT_ROT
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Samuelsson  SMHI
+!!      P. Samuelsson  SMHI
 !!
 !!    MODIFICATIONS
 !!    -------------

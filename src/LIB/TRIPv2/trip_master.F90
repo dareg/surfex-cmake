@@ -14,7 +14,7 @@ PROGRAM TRIP_MASTER
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

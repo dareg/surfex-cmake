@@ -32,7 +32,7 @@ SUBROUTINE CARBON_SOIL (PTSTEP, PSAND,                                      &
 !!    AUTHOR
 !!    ------
 !!
-!!	A.-L. Gibelin           * Meteo-France *
+!!      A.-L. Gibelin           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

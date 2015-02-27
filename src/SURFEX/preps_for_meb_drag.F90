@@ -32,7 +32,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Samuelsson/S.Gollvik           * SMHI *
+!!      P. Samuelsson/S.Gollvik           * SMHI *
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -28,7 +28,7 @@ CONTAINS
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -110,7 +110,7 @@ END SUBROUTINE PUT_GRIDTYPE_GAUSS
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -252,7 +252,7 @@ END SUBROUTINE GET_GRIDTYPE_GAUSS
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Taillefer  *Meteo France*	
+!!      F. Taillefer  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -367,7 +367,7 @@ END SUBROUTINE LATLON_GAUSS
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -458,7 +458,7 @@ END SUBROUTINE COMP_GRIDTYPE_GAUSS
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

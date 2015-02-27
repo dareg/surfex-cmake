@@ -27,7 +27,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Le Moigne          * Meteo-France *
+!!      P. Le Moigne          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

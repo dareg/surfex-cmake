@@ -41,7 +41,7 @@ SUBROUTINE COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                   &
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      (following Belair)
 !!
 !!    MODIFICATIONS
@@ -137,7 +137,7 @@ REAL,DIMENSION(:),   INTENT(IN)  :: PQA, PQSAT, PLE, PPSNV, PDELTA, PLAI, PRHOA
 !                                    PRHOA = air density
 !
 REAL,DIMENSION(:),    INTENT(IN)  :: PZENITH
-!	                             PZENITH = solar zenith angle needed 
+!                                    PZENITH = solar zenith angle needed 
 !                                    for computation of diffusuion of solar
 !                                    radiation: for CO2 model.
 !
@@ -186,10 +186,10 @@ REAL,DIMENSION(:),  INTENT(INOUT) :: PABC, PAN, PANDAY, PRS, PANFM, PGPP
 !                                    PGPP  = Gross Primary Production
 !
 REAL,DIMENSION(:),    INTENT(OUT) :: PANF
-!	                             PANF  = total assimilation over canopy
+!                                    PANF  = total assimilation over canopy
 !
 REAL,DIMENSION(:),    INTENT(OUT) :: PRESP_LEAF
-!	                             PRESP_LEAF = dark respiration over canopy
+!                                    PRESP_LEAF = dark respiration over canopy
 !
 !*      0.2    declarations of local variables
 !
@@ -200,7 +200,7 @@ INTEGER                     :: JINT, JJ ! index for loops
 !
 REAL, DIMENSION(SIZE(PLAI)) :: ZCONVE1, ZTSPC, ZIA
 !                                 ZTSPC = temperature conversion (K to C) 
-!	                          ZIA   = absorbed PAR
+!                                 ZIA   = absorbed PAR
 REAL, DIMENSION(SIZE(PLAI)) :: ZLAI, ZGMEST, ZFZERO, ZDMAX
 !                                 ZLAI = LAI 
 !                                 ZFZERO  = ideal value of F, no photorespiration or 
@@ -210,7 +210,7 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZLAI, ZGMEST, ZFZERO, ZDMAX
 !
 REAL, DIMENSION(SIZE(PLAI)) :: ZGAMMT, ZDSP, ZANMAX
 !                                 ZGAMMT  = compensation point 
-!	                          ZDSP    = saturation deficit of atmosphere 
+!                                 ZDSP    = saturation deficit of atmosphere 
 !                                           verses the leaf surface (with correction)
 !
 REAL, DIMENSION(SIZE(PLAI)) :: ZXMUS, ZTAN, ZTGS, ZXIA, ZAN0, ZGS0, ZXTGS, ZRDK,ZLAITOP,ZTRDK,ZZLAI  

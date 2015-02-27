@@ -38,7 +38,7 @@ SUBROUTINE SOILSTRESS( HISBA, PF2,                                   &
 !!    AUTHOR
 !!    ------
 !!
-!!	S. Belair           * Meteo-France *
+!!      S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -88,9 +88,9 @@ REAL, DIMENSION(:,:), INTENT(OUT):: PF2WGHT  ! water stress coefficient profile 
 !
 !
 REAL, DIMENSION(SIZE(PWFC,1)) ::  ZWFC_AVGZ, ZWSAT_AVGZ, ZWWILT_AVGZ
-!	                           ZWFC_AVGZ   = field capacity averaged over entire soil column
-!	                           ZWSAT_AVGZ  = porosity averaged over entire soil column
-!	                           ZWWILT_AVGZ = wilting point averaged over entire soil column
+!                                  ZWFC_AVGZ   = field capacity averaged over entire soil column
+!                                  ZWSAT_AVGZ  = porosity averaged over entire soil column
+!                                  ZWWILT_AVGZ = wilting point averaged over entire soil column
 !
 ! ISBA-DF:
 !

@@ -54,7 +54,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
 !!      
 !!    AUTHOR
 !!    ------
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

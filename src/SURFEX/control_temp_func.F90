@@ -30,7 +30,7 @@ FUNCTION CONTROL_TEMP_FUNC (PTEMP_IN) RESULT (PTEMPFUNC_RESULT)
 !!    AUTHOR
 !!    ------
 !!
-!!	A.-L. Gibelin           * Meteo-France *
+!!      A.-L. Gibelin           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

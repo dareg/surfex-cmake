@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	C. de Munck   *Meteo France*	
+!!      C. de Munck   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

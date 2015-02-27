@@ -17,7 +17,7 @@ MODULE MODD_FORC_ATM
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

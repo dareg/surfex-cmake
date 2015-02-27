@@ -36,16 +36,16 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      (following Belair)
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    27/10/97
-!!	(V. Rivalland) 10/04/02	 Add: PAH and PBH coefficients for
+!!      (V. Rivalland) 10/04/02  Add: PAH and PBH coefficients for
 !!                               herbaceous water stress response
-!!	(P. LeMoigne) 03/2004:   computation of zgmest in SI units
-!!	(P. LeMoigne) 10/2004:   possibility of 2 different FZERO
+!!      (P. LeMoigne) 03/2004:   computation of zgmest in SI units
+!!      (P. LeMoigne) 10/2004:   possibility of 2 different FZERO
 !!      (L. Jarlan)   10/2004:   initialization of DMAX
 !!      P Le Moigne   09/2005    AGS modifs of L. Jarlan
 !!      S. Lafont     03/2009    change unit of AMAX
@@ -369,7 +369,7 @@ CONTAINS
    !!    AUTHOR
    !!    ------
    !!
-   !!	A. Boone           * Meteo-France *
+   !!      A. Boone           * Meteo-France *
    !!      (following Belair)
    !!
    !!    MODIFICATIONS

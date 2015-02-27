@@ -47,7 +47,7 @@
 !--------------------------------------------------------------------------
 !
 !       0. DECLARATIONS
-!	   ------------
+!          ------------
 !
 USE MODD_EMIS_NOX
 USE MODD_ISBA_n,     ONLY : XSAND, XTG, XWG, XLAI, XPH, XFERT
@@ -158,14 +158,14 @@ WHERE (XNOFLUX(:).LT. 0.) XNOFLUX(:)=0.
 !
 !  6- Changing units from gN/ha/d to molecules/m2/s
 ! 1 ha=10000 m2, 1d=86400s, 1mole(NO)=30g, 1mole=Avogadro molec (6.022E23).
-!			    1mole(N) =14g
+!                           1mole(N) =14g
 XNOFLUX(:) = XNOFLUX(:)*XAVOGADRO/(1.0E4*8.64E4*14)
 !
 !PRINT*,'flux de NO en molec/cm2/s = ',XNOFLUX(JI)
 !
 !  7- Reduction du flux dans la canopee
 !          WHERE (XLAI(:,1)/=XUNDEF) 
-!	  ZCRF(:) = -0.0917*XLAI(:,1) + 0.9429
+!         ZCRF(:) = -0.0917*XLAI(:,1) + 0.9429
 WHERE (XLAI(:,1) > 1.9 .AND. XLAI(:,1) < 5.)
   ZCRF(:) = 0.5
 ELSEWHERE (XLAI(:,1) > 5.)
@@ -173,9 +173,9 @@ ELSEWHERE (XLAI(:,1) > 5.)
 ELSEWHERE
   ZCRF(:) = 1.
 ENDWHERE
-!	PRINT*,'LAI, CRF', XLAI(:), ZCRF(:)
+!       PRINT*,'LAI, CRF', XLAI(:), ZCRF(:)
 XNOFLUX(:) = XNOFLUX(:)*ZCRF(:)
-! 	PRINT*,'flux de NO en molec/m2/s apres CRF = ',XNOFLUX(:)	
+!       PRINT*,'flux de NO en molec/m2/s apres CRF = ',XNOFLUX(:)
 !
 !  8- Introduction du Flux de NO final dans la chimie apres reduction par le CRF (avec MesoNH chimie)
 !  IF (NBEQ>0) THEN

@@ -22,7 +22,7 @@ CONTAINS
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
+!!      E. Martin   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -93,7 +93,7 @@ END SUBROUTINE PUT_GRIDTYPE_IGN
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
+!!      E. Martin   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

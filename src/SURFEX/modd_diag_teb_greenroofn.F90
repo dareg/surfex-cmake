@@ -18,7 +18,7 @@ MODULE MODD_DIAG_TEB_GREENROOF_n
 !!
 !!    AUTHOR
 !!    ------
-!!	C. de Munck & A. Lemonsu   *Meteo France
+!!      C. de Munck & A. Lemonsu   *Meteo France
 !!
 !!    MODIFICATIONS
 !!    -------------

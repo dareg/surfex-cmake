@@ -27,7 +27,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme      *Meteo France*	
+!!      B. Decharme      *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

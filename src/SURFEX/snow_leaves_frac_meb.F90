@@ -35,7 +35,7 @@ SUBROUTINE SNOW_LEAVES_FRAC_MEB(PPSN, PPALPHAN,      &
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Samuelsson           * SMHI *
+!!      P. Samuelsson           * SMHI *
 !!
 !!    MODIFICATIONS
 !!    -------------

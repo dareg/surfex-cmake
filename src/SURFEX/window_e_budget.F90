@@ -39,7 +39,7 @@ SUBROUTINE WINDOW_E_BUDGET(PU_WIN, PEMIS_WIN, PF_WIN_FLOOR, PF_WIN_WALL, PF_WIN_
 !!    AUTHOR
 !!    ------
 !!
-!!	B. Bueno           * Meteo-France *
+!!      B. Bueno           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

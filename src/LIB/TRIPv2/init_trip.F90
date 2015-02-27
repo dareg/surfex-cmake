@@ -28,7 +28,7 @@ SUBROUTINE INIT_TRIP (KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,PTSTEP_RUN,PTSTEP_DIAG,O
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

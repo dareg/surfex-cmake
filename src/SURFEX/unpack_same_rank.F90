@@ -90,7 +90,7 @@ END MODULE MODI_UNPACK_SAME_RANK
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -168,7 +168,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM1D
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -244,7 +244,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM1DI
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -324,7 +324,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM2DI
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -400,7 +400,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM1DL
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -481,7 +481,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM2D
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -563,7 +563,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM3D
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

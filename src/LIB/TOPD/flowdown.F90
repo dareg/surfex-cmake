@@ -33,7 +33,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      K. Chancibault	* CNRM / Meteo-France *
+!!      K. Chancibault  * CNRM / Meteo-France *
 !!      G-M Saulnier    * LTHE *
 !!
 !!    MODIFICATIONS

@@ -141,7 +141,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	B. Bueno           * Meteo-France *
+!!      B. Bueno           * Meteo-France *
 !!
 !!!    MODIFICATIONS
 !!    -------------

@@ -30,7 +30,7 @@ FUNCTION CONTROL_MOIST_FUNC (PMOIST,PSAT) RESULT (PMOISTFUNC)
 !!    AUTHOR
 !!    ------
 !!
-!!	A.-L. Gibelin           * Meteo-France *
+!!      A.-L. Gibelin           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

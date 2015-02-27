@@ -28,7 +28,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	J. Stein           * Meteo-France *
+!!      J. Stein           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

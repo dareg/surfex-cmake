@@ -37,7 +37,7 @@ SUBROUTINE WINDOW_DATA(KI,PSHGC, PU_WIN, PALB_WIN, PABS_WIN, PUGG_WIN, PTRAN_WIN
 !!    AUTHOR
 !!    ------
 !!
-!!	B. Bueno           * Meteo-France *
+!!      B. Bueno           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -80,7 +80,7 @@ REAL:: TA, RA, TBCD, RBCD, TD, RD, TE, RE, TFGHI, RFGHI, TFH, RFH, TJ, RJ
 
 !* initialization and determine transmittance and reflectance factor of the window
 
-!Curve AT temp Et  	 RA = R temp Et
+!Curve AT temp Et        RA = R temp Et
 TA = 0.9237767331    ; RA = 1.6911265959
 TBCD = 0.8802058937  ; RBCD = 1.5239470129
 TD = 0.893430955     ; RD = 1.0888507586

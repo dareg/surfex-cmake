@@ -30,7 +30,7 @@ SUBROUTINE INIT_SURF_LANDUSE_n(HPROGRAM,HINIT,OLAND_USE,                  &
 !!
 !!    AUTHOR
 !!    ------
-!!    S. Faroux	   *Meteo France*	
+!!    S. Faroux    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

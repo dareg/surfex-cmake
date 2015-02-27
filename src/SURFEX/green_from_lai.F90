@@ -81,7 +81,7 @@ END MODULE MODI_GREEN_FROM_LAI
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -187,7 +187,7 @@ END FUNCTION GREEN_FROM_LAI_0D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -292,7 +292,7 @@ END FUNCTION GREEN_FROM_LAI_1D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -18,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

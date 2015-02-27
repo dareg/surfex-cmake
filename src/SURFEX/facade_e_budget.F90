@@ -56,7 +56,7 @@ SUBROUTINE FACADE_E_BUDGET(HWALL_OPT, HBEM,                                    &
 !!    AUTHOR
 !!    ------
 !!
-!!	G. Pigeon           * Meteo-France *
+!!      G. Pigeon           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

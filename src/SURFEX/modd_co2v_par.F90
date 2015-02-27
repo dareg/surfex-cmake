@@ -21,7 +21,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -68,10 +68,10 @@ REAL, PARAMETER                      :: XRACCF = 1.00
 !                                       Factor for aerodynamic resistance for CO2
 !
 REAL, PARAMETER                      :: XPCCO2 = 0.40
-!	                              	proportion of Carbon in dry plant biomass (kgC/kgDM)
+!                                       proportion of Carbon in dry plant biomass (kgC/kgDM)
 !
 REAL, PARAMETER                      :: XIAOPT = 500.,  XDSPOPT = 0.0
-!	                                	optimum/initial values for absorbed global 
+!                                       optimum/initial values for absorbed global 
 !                                       radiation, saturation deficit, respectively.
 
 REAL, PARAMETER                      :: XXGT = 0.5
@@ -165,11 +165,11 @@ REAL, PARAMETER, DIMENSION(2) :: XT2AMAX = (/38.0, 38.0/)
 !                                       capacity: maximum temperature
 !
 REAL, PARAMETER, DIMENSION(2) :: XAH     = (/2.381, 5.323/)
-!										
+!
 !
 REAL, PARAMETER, DIMENSION(2) :: XBH     = (/-0.6103, -0.8929/)
-!										coefficient of stress universal relationship
-!										for herbaceous plants
+!                                       coefficient of stress universal relationship
+!                                       for herbaceous plants
 !
 !
 ! Nitrogen option (YPHOTO='NIT' OR YPHOTO='NCB') parameters:

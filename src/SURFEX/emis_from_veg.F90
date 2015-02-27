@@ -74,7 +74,7 @@ END MODULE MODI_EMIS_FROM_VEG
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -149,7 +149,7 @@ END FUNCTION EMIS_FROM_VEG_0D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -224,7 +224,7 @@ END FUNCTION EMIS_FROM_VEG_1D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -303,7 +303,7 @@ END FUNCTION EMIS_FROM_VEG_2D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

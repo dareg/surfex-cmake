@@ -23,7 +23,7 @@ SUBROUTINE SFX_OASIS_SEND_OL(HPROGRAM,KI,PTIMEC,PSTEP_SURF,KSIZE_OMP)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

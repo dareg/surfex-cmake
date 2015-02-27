@@ -17,7 +17,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Sénési   *Meteo France*
+!!      S.Sénési   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

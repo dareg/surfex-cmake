@@ -43,7 +43,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	S. Belair           * Meteo-France *
+!!      S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -434,7 +434,7 @@ WHERE (PWG(:,1) > ZWWILT(:))
 END WHERE
 !
 !
-! 	                              Calculate C1 coefficient for dry soil.
+!                                     Calculate C1 coefficient for dry soil.
 !                                     The default option is the continuous
 !                                     formulation of Giard and Bazile. The
 !                                     alternate approach is a discontinuous

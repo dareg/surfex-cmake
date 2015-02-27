@@ -15,7 +15,7 @@
 !!    
 !!    AUTHOR
 !!    ------
-!!	S.QUEGUINER 
+!!      S.QUEGUINER 
 !!
 !!    MODIFICATIONS
 !!    -------------

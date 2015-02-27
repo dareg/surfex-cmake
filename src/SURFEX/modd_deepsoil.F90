@@ -19,7 +19,7 @@
 !!          
 !!    AUTHOR
 !!    ------
-!!	P. LE MOIGNE *Meteo France*
+!!      P. LE MOIGNE *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

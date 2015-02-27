@@ -23,7 +23,7 @@ SUBROUTINE CONVERT_PATCH_TEB_GREENROOF(KLU,KDECADE)
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

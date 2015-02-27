@@ -36,7 +36,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	A.L. Gibelin       * Meteo-France *
+!!      A.L. Gibelin       * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

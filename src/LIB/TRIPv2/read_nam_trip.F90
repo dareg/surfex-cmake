@@ -23,7 +23,7 @@ SUBROUTINE READ_NAM_TRIP(KLISTING)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -23,7 +23,7 @@ SUBROUTINE GET_XYALL_IGN(PX,PY,PDX,PDY,PXALL,PYALL,KDIMX,KDIMY)
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Faroux   *Meteo France*	
+!!      S. Faroux   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

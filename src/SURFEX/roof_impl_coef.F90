@@ -33,7 +33,7 @@ SUBROUTINE ROOF_IMPL_COEF(PTSTEP, KROOF_LAYER, PD_ROOF, PTC_ROOF, PHC_ROOF, PT_R
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

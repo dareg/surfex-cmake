@@ -30,7 +30,7 @@ SUBROUTINE PUT_SFXCPL_n(HPROGRAM,KI,KSW,PSW_BANDS,PZENITH, &
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme      *Meteo France*	
+!!      B. Decharme      *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

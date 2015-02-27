@@ -20,7 +20,7 @@ SUBROUTINE SEAFLUX_ALBEDO(PDIR_SW,PSCA_SW,PDIR_ALB,PSCA_ALB,PALB)
 !!    AUTHOR
 !!    ------
 !!
-!!	B. Decharme           * Meteo-France *
+!!      B. Decharme           * Meteo-France *
 !!
 !-------------------------------------------------------------------------------
 !

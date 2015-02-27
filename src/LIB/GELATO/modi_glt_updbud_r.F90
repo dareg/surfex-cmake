@@ -40,7 +40,7 @@
 ! -----
 !   This module contains a subroutine that manages the energy budget 
 ! variable on the thermodynamics, reduced grid:
-!	- total sea ice gltools_enthalpy (reference temperature is the melting
+!       - total sea ice gltools_enthalpy (reference temperature is the melting
 !       temperature of snow and ice)
 !       - total sea ice latent heat (i.e. the latent heat needed to 
 !       melt sea ice and snow covers on the whole ocean domain). Note 

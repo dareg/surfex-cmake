@@ -5,7 +5,7 @@
                         PFD_SKY, PFD_VEG, PTR, PXIA, PLAI_EFF               )
    
 !
-!!***	*CCETR_PAIR* ***
+!!***   *CCETR_PAIR* ***
 !!
 !!    PURPOSE
 !!    -------
@@ -29,7 +29,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	  D. Carrer           * Meteo-France *
+!!      D. Carrer           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

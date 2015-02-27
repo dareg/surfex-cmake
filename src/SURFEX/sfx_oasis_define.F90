@@ -23,7 +23,7 @@ SUBROUTINE SFX_OASIS_DEFINE(HPROGRAM,KNPTS,KPARAL)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

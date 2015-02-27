@@ -18,7 +18,7 @@ SUBROUTINE VEGTYPE_GRID_TO_PATCH_GRID(KPATCH,PVEGTYPE_PATCH,PPATCH,PFIELDOUT,PW)
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson          * Meteo-France *
+!!      V. Masson          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

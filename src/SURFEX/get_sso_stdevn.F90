@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Riette   *Meteo France*
+!!      S. Riette   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

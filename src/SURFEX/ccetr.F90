@@ -1,7 +1,7 @@
 !     #########
    SUBROUTINE CCETR(PXIA,PIA,PXMUS,PABC,PLAI)
 !
-!!***	*CCETR* ***
+!!***   *CCETR* ***
 !!
 !!    PURPOSE
 !!    -------
@@ -26,7 +26,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	  A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      (following Belair)
 !!
 !!    MODIFICATIONS
@@ -54,7 +54,7 @@ REAL, INTENT(IN)               :: PABC
 !                                        conductance over canopy depth
 !
 REAL, DIMENSION(:), INTENT(IN) :: PIA,PXMUS,PLAI
-!	                          PIA   = absorbed PAR
+!                                 PIA   = absorbed PAR
 !                                 PXMUS = cosine of solar zenith angle
 !                                 PLAI  = leaf area index
 !

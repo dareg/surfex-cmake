@@ -43,7 +43,7 @@ SUBROUTINE ISBA_CEB(HISBA, HSNOW_ISBA, HCPSURF, OFLOOD, OTEMP_ARP, HIMPLICIT_WIN
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme           * Meteo-France *
+!!      B. Decharme           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -184,8 +184,8 @@ REAL, DIMENSION(:), INTENT(IN)   :: PGRNDFLUX, PFLSN_COR, PSNOW_THRUFAL
 !                                                  [kg/(m2 s)]
 REAL, DIMENSION(:,:), INTENT(IN)  :: PD_G,  PSOILCONDZ, PSOILHCAPZ
 !                                     PD_G      = Depth of bottom of Soil layers (m)
-!				      PSOILCONDZ= ISBA-DF Soil conductivity profile  [W/(m K)]
-!				      PSOILHCAPZ=ISBA-DF Soil heat capacity profile [J/(m3 K)]
+!                                     PSOILCONDZ= ISBA-DF Soil conductivity profile  [W/(m K)]
+!                                     PSOILHCAPZ=ISBA-DF Soil heat capacity profile [J/(m3 K)]
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PDZG       ! soil layers thicknesses (DIF option) (m)
 REAL, DIMENSION(:,:), INTENT(IN)  :: PDZDIF     ! distance between consecuative layer mid-points (DIF option) (m)

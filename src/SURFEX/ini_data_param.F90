@@ -585,7 +585,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !
 !*    7.16   Fraction of ground litter coverage
 !            ----------------------------------
-! 	 
+!
     IF (PRESENT(PGNDLITTER)) THEN
       PGNDLITTER (JLOOP,:,:) = 0.
       IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBD) = 0.95

@@ -32,7 +32,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      (following Belair)
 !!
 !!    MODIFICATIONS
@@ -70,7 +70,7 @@ REAL, DIMENSION(:),   INTENT(IN):: PCSP, PF2, PIA, PDS,PGAMMT
 !                                      PCSP  = atmospheric concentration of CO2
 !                                      PF2   = normalized soil water stress
 !                                      PIA   = incident solar radiation
-!	                               PDS   = saturation deficit of atmosphere
+!                                      PDS   = saturation deficit of atmosphere
 !                                              verses the leaf surface (with correction)
 !                                      PGAMMT = compensation point
 !
@@ -121,7 +121,7 @@ REAL, DIMENSION(SIZE(PAN)) :: ZAM, ZEPS, ZLEF, ZAGR, ZAG
 !                                                 function of CO2 deficit
 !                                       ZEPS   = initial quantum 
 !                                                use efficiency
-!	                                ZLEF    = leaf transpiration 
+!                                       ZLEF    = leaf transpiration 
 !                                        ZAGR = assimilation rate ratio
 !                                        ZAG  = modified gross assimilation 
 !                                               rate
@@ -260,5 +260,5 @@ ENDDO
 PGS(:) = XCO2TOH2O*ZGSC(:) + PGC(:)
 !
 IF (LHOOK) CALL DR_HOOK('COTWO',1,ZHOOK_HANDLE)
-!	
+!
 END SUBROUTINE COTWO

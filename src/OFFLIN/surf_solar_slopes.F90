@@ -27,7 +27,7 @@ SUBROUTINE SURF_SOLAR_SLOPES (PCOSZEN,PSINZEN,PAZIMSOL,PSLOPANG, PSLOPAZI, &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson      * Meteo-France *
+!!      V. Masson      * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

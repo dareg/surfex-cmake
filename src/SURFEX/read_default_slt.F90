@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Grini / P. Tulet  *Meteo France*	
+!!      A. Grini / P. Tulet  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

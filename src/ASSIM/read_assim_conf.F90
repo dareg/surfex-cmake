@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	T. Aspelien met.no
+!!      T. Aspelien met.no
 !!
 !!    MODIFICATIONS
 !!    -------------

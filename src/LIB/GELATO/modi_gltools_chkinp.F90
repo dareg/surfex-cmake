@@ -172,7 +172,7 @@ SUBROUTINE gltools_chkinp( kdate,tpglt )
 !
       IF ( lwg ) THEN
         WRITE(noutlu,*) 
-	WRITE(noutlu,*)  &
+        WRITE(noutlu,*)  &
         '===================== Control Gelato input data ' //  &
         '====================='
 !

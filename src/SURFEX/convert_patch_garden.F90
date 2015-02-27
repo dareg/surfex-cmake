@@ -23,7 +23,7 @@ SUBROUTINE CONVERT_PATCH_GARDEN(KLU,KDECADE)
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

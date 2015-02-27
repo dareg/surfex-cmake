@@ -24,7 +24,7 @@ SUBROUTINE CUMUL_DIAG_TEB_n(PTSTEP)
 !!      
 !!    AUTHOR
 !!    ------
-!!	C. de Munck       * Meteo-France *
+!!      C. de Munck       * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

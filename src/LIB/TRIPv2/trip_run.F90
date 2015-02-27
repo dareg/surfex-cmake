@@ -16,7 +16,7 @@ SUBROUTINE TRIP_RUN(OOASIS,                           &
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

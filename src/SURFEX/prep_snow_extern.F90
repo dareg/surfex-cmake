@@ -26,7 +26,7 @@ SUBROUTINE PREP_SNOW_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE
 !!    
 !!    AUTHOR
 !!    ------
-!!	   * Meteo-France *
+!!         * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

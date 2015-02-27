@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	Alf Grini CNRM
+!!      Alf Grini CNRM
 !!
 !!    MODIFICATIONS
 !!    -------------

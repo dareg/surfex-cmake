@@ -17,7 +17,7 @@ MODULE MODD_TRIP_GRID
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

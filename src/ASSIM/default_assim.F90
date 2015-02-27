@@ -35,7 +35,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	L. Jarlan  *Meteo France*	
+!!      L. Jarlan  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

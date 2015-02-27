@@ -23,7 +23,7 @@ SUBROUTINE READ_GRIDTYPE_GAUSS(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRES
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

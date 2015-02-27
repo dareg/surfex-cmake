@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
+!!      E. Martin   *Meteo France*
 !!      M Lafaysse 08/2013 missing deallocate
 !!    MODIFICATIONS
 !!    -------------

@@ -73,7 +73,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * CNRM-GAME, Meteo-France *
+!!      A. Boone           * CNRM-GAME, Meteo-France *
 !!      P. Samuelsson      * SMHI *
 !!      S. Gollvik         * SMHI * 
 !!

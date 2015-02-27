@@ -17,7 +17,7 @@ MODULE MODD_TEB_GREENROOF_n
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu *Meteo France*
+!!      A. Lemonsu *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -34,7 +34,7 @@ SUBROUTINE ISBA_SOC_PARAMETERS (HRUNOFF,PPATCH,PDG,PSOC,PBCOEF,PMPOTSAT,   &
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme     
 !!
 !!    MODIFICATIONS
 !!    -------------

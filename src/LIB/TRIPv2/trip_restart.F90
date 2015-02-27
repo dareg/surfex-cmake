@@ -12,7 +12,7 @@ SUBROUTINE TRIP_RESTART(KLISTING,KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

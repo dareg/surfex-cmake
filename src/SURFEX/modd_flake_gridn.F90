@@ -17,7 +17,7 @@ MODULE MODD_FLAKE_GRID_n
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -29,7 +29,7 @@ SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

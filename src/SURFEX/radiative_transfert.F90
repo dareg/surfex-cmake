@@ -43,7 +43,7 @@ SUBROUTINE RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,          &
 !!    AUTHOR
 !!    ------
 !!
-!!	  D. Carrer           * Meteo-France *
+!!        D. Carrer           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

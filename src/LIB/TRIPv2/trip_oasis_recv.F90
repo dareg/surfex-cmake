@@ -24,7 +24,7 @@ SUBROUTINE TRIP_OASIS_RECV(KLISTING,KLON,KLAT,PTIMEC,PRUNOFF,  &
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

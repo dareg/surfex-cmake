@@ -230,7 +230,7 @@ REAL, PARAMETER ::  &
 ! Parameters for melt ponds depth/fraction relation
 !   depth = dptfr1 * fraction + dptfr2
     REAL, PARAMETER ::  &
-	dptfr1 = 0.8, dptfr2 = -1.E-4
+        dptfr1 = 0.8, dptfr2 = -1.E-4
 !        dptfr1 = 1.16, dptfr2 = -0.09
 ! Maximum ratio melt pond depth / ice thickness 
     REAL, PARAMETER ::  &

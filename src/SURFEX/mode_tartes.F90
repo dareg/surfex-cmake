@@ -745,7 +745,7 @@ IF (LHOOK) CALL DR_HOOK('GP_GM_VECTORS',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE GP_GM_VECTORS
 !--------------------------------------------------------------------------------
-!--------------------------------------------------------------------------------	
+!--------------------------------------------------------------------------------
 SUBROUTINE TWO_STREAM_MATRIX(PSNOWALBEDO,PSOILALBEDO,PKESTAR,PDTAUSTAR,KNLVLS_EFF,KMAX_EFF,PDM,PD,PDP)
 !compute the matrix in the system describing the continuity and boundary conditions at one point and one wavelength.
 ! see doc section 1.5

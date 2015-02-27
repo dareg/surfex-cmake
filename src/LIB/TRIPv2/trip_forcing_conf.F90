@@ -26,7 +26,7 @@ SUBROUTINE TRIP_FORCING_CONF(KLISTING,KYEAR,KMONTH,KDAY,PTIME,  &
 !!
 !!    AUTHOR
 !!    ------
-!!	B. decharme   *Meteo France*	
+!!      B. decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

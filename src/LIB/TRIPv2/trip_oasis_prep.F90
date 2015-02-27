@@ -23,7 +23,7 @@ SUBROUTINE TRIP_OASIS_PREP(KLISTING,KLON,KLAT)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

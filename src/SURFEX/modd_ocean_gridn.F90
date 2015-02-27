@@ -17,7 +17,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	C. Lebeaupin Brossier   *Meteo France*
+!!      C. Lebeaupin Brossier   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

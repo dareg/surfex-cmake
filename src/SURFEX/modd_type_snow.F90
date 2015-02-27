@@ -19,7 +19,7 @@
 !!       
 !!    AUTHOR
 !!    ------
-!!	P. Jabouille   *Meteo France*
+!!      P. Jabouille   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

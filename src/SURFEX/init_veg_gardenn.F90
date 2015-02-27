@@ -28,7 +28,7 @@ SUBROUTINE INIT_VEG_GARDEN_n(KI, OCANOPY, HROUGH, TPSNOW, &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!

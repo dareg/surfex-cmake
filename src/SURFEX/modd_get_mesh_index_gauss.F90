@@ -18,7 +18,7 @@ MODULE MODD_GET_MESH_INDEX_GAUSS
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

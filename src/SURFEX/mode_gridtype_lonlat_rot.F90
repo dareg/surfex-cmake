@@ -23,7 +23,7 @@ CONTAINS
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Samuelsson   SMHI
+!!      P. Samuelsson   SMHI
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -87,7 +87,7 @@ END SUBROUTINE PUT_GRIDTYPE_LONLAT_ROT
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Samuelsson   SMHI
+!!      P. Samuelsson   SMHI
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -158,7 +158,7 @@ END SUBROUTINE GET_GRIDTYPE_LONLAT_ROT
 !!       
 !!     AUTHOR
 !!     ------
-!!	P. Samuelsson   SMHI
+!!      P. Samuelsson   SMHI
 !!
 !!    MODIFICATIONS
 !!    -------------

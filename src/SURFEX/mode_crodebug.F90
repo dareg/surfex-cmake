@@ -18,12 +18,12 @@ MODULE MODE_CRODEBUG
 !!
 !!    AUTHOR
 !!    ------
-!!	M. Lafaysse       * Meteo France *
+!!      M. Lafaysse       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    11/06/2012
-!!	Modification M Lafaysse 03/10/2012 : add energy balance control
+!!      Modification M Lafaysse 03/10/2012 : add energy balance control
 !--------------------------------------------------------------------------------
 !
 USE MODD_ISBA_n,       ONLY : TSNOW
@@ -89,14 +89,14 @@ IF (TSNOW%SCHEME=='CRO') THEN
       LPRINTGRAN=.FALSE.
     CASE ("3")
       PRINT*,"CROCUS DEBUGGING MODE : print snow profile at the end of each &
-	& time step and forcing data"
+            & time step and forcing data"
       LCRODEBUG=.TRUE.
       LCRODEBUGDETAILS=.FALSE.
       LCRODEBUGATM=.TRUE.
       LPRINTGRAN=.FALSE.
     CASE ("4")
       PRINT*,"CROCUS DEBUGGING MODE : print snow profile after each CROCUS routine &
-	& and forcing data"
+            & and forcing data"
       LCRODEBUG=.TRUE.
       LCRODEBUGDETAILS=.TRUE.
       LCRODEBUGATM=.TRUE.

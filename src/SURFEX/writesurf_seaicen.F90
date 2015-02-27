@@ -24,7 +24,7 @@
 !!    REFERENCE : 
 !!    ---------
 !!
-!!    AUTHOR : S. Sénési   *Meteo France*	
+!!    AUTHOR : S. Sénési   *Meteo France*
 !!    ------
 !!
 !!    MODIFICATIONS

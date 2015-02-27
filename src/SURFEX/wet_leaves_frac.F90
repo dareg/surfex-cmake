@@ -28,7 +28,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	S. Belair           * Meteo-France *
+!!      S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -116,8 +116,8 @@ WHERE (PVEG(:)>0. .AND. PWRMAX>0.)
 !*       2.2    High vegetation, Manzi (1993) formulmation:
 !               ------------------------------------------
 !
-!			                    Manzi (1993) [see also Delire et al. JGR 1997]
-!	                                    The dynamic vegetation roughness length
+!                                           Manzi (1993) [see also Delire et al. JGR 1997]
+!                                           The dynamic vegetation roughness length
 !                                           is used to determine which formulation
 !                                           for 'DELTA' is used. This formulation
 !                                           was calibrated for ARME (tropical forrest)

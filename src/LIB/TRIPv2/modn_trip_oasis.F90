@@ -17,7 +17,7 @@ MODULE MODN_TRIP_OASIS
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

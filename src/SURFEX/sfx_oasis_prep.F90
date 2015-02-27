@@ -23,7 +23,7 @@ SUBROUTINE SFX_OASIS_PREP(HPROGRAM)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

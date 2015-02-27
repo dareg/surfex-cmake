@@ -34,7 +34,7 @@ SUBROUTINE DEFAULT_SEAICE(HPROGRAM,                                   &
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Senesi   *Meteo France*	
+!!      S.Senesi   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

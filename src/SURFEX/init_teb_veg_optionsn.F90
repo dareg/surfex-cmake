@@ -23,7 +23,7 @@ SUBROUTINE INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

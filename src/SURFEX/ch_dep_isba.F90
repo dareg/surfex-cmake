@@ -17,12 +17,12 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original      20/02/97 
-!!	Modification  21/07/00  (Guenais/Tulet) add deposition on town  and
+!!      Modification  21/07/00  (Guenais/Tulet) add deposition on town  and
 !!                                              vegetation class   
-!!	Modification  18/01/01  (Solmon/Tulet) patch dry deposition
-!!	Modification  18/07/03  (Tulet) surface externalization
-!!	Modification  01/2004   (Tulet Masson) removes patch calculation
-!!	Modification  03/2006   (Le Moigne) pb in where test with some
+!!      Modification  18/01/01  (Solmon/Tulet) patch dry deposition
+!!      Modification  18/07/03  (Tulet) surface externalization
+!!      Modification  01/2004   (Tulet Masson) removes patch calculation
+!!      Modification  03/2006   (Le Moigne) pb in where test with some
 !!                            compilation options
 !!
 !-------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZNATRB
 !
 REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZHENRYVALCOR
 REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZSTOMRC 
-! stomatal surface  resistance	
+! stomatal surface  resistance
 REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZMESORC 
 ! mesophyl  resistance
 REAL             , DIMENSION(SIZE(PTRAD,1),size(HSV,1)) :: ZEXTRC   
@@ -435,7 +435,7 @@ DO JSV = 1, SIZE(HSV,1)
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('CH_DEP_ISBA',1,ZHOOK_HANDLE)
-!							       	       
+!
 !---------------------------------------------------------------------
 !
 END SUBROUTINE CH_DEP_ISBA

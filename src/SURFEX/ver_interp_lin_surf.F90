@@ -82,7 +82,7 @@ END MODULE MODI_VER_INTERP_LIN_SURF
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!
 !     V.Masson  Meteo-France
 !!
 !!    MODIFICATIONS
@@ -159,7 +159,7 @@ END FUNCTION VER_INTERP_LIN3D_SURF_BIS
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!
 !     V.Masson  Meteo-France
 !!
 !!    MODIFICATIONS
@@ -248,7 +248,7 @@ END FUNCTION VER_INTERP_LIN2D_SURF
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!
 !     V.Masson  Meteo-France
 !!
 !!    MODIFICATIONS

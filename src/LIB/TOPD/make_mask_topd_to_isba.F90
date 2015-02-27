@@ -28,7 +28,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      L. Labatut & K. Chancibault	* CNRM *
+!!      L. Labatut & K. Chancibault     * CNRM *
 !!
 !!    MODIFICATIONS
 !!    -------------

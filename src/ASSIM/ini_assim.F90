@@ -21,7 +21,7 @@
 !! 
 !!    AUTHOR
 !!    ------
-!!  	J.-F. Mahfouf       * Meteo France *
+!!      J.-F. Mahfouf       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------

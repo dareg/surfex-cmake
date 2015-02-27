@@ -18,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson and A. Boone   *Meteo France*
+!!      V. Masson and A. Boone   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

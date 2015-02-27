@@ -30,7 +30,7 @@ SUBROUTINE INIT_FLAKE_n(HPROGRAM,HINIT,                            &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

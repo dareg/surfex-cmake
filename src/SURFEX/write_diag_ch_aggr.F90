@@ -18,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson & S. Queguiner  *Meteo France*	
+!!      V. Masson & S. Queguiner  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

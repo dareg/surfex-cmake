@@ -34,7 +34,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	    J. Cuxart and J. Stein       * Meteo France *
+!!      J. Cuxart and J. Stein       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------

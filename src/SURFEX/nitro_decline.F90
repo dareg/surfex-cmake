@@ -39,7 +39,7 @@ SUBROUTINE NITRO_DECLINE(HPHOTO, HRESPSL, OTR_ML, KSPINW ,            &
 !!    AUTHOR
 !!    ------
 !!
-!!	A.-L. Gibelin           * Meteo-France *
+!!      A.-L. Gibelin           * Meteo-France *
 !!      (following Belair)
 !!
 !!    MODIFICATIONS

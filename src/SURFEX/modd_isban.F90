@@ -17,7 +17,7 @@ MODULE MODD_ISBA_n
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Boone   *Meteo France*
+!!      A. Boone   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -101,8 +101,8 @@ TYPE ISBA_t
 !                           NOTE: Only used when YISBA = DIF
 !
   CHARACTER(LEN=3)               :: CSNOWRES ! Turbulent exchanges over snow
-!	                                   ! 'DEF' = Default: Louis (ISBA)
-!       	                           ! 'RIL' = Maximum Richardson number limit
+!                                          ! 'DEF' = Default: Louis (ISBA)
+!                                          ! 'RIL' = Maximum Richardson number limit
 !                                          !         for stable conditions ISBA-SNOW3L
 !                                          !         turbulent exchange option
 !                                           

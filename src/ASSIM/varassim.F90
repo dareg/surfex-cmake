@@ -9,7 +9,7 @@ PROGRAM VARASSIM
 !
 ! First version including patches (15 October 2008)
 ! Modifications to allow for LAI assimilation by C. Rüdiger (8 Jan 2009)
-!		- added Biomass as control and LAI as observation variable
+!               - added Biomass as control and LAI as observation variable
 
 ! Modifications to allow for SWI assimilation by A.Barbu (25 Sept 2009)
 ! The new state vector can be any element of (WG2, WG1, LAI, Biomass) - Choice in namelist
@@ -74,10 +74,10 @@ INCLUDE 'mpif.h'
 !
  INTEGER                                  :: NOBSTYPE, NOBS           
  CHARACTER(LEN=28)                        :: YNAMELIST = 'OPTIONS.nam '
- INTEGER, PARAMETER                       :: NVARMAX = 4      ! WG2, WG1, Biomass (order convention)			      
+ INTEGER, PARAMETER                       :: NVARMAX = 4      ! WG2, WG1, Biomass (order convention)
  INTEGER, PARAMETER                       :: NOBSMAX = 3      ! WG1, LAI (order convention)
- REAL,DIMENSION(NOBSMAX)                  :: XERROBS_M        ! Observational standard deviation (max dimension)		
- REAL,DIMENSION(:),ALLOCATABLE            :: ERROBS          ! Observational standard deviation (observation dimension)	
+ REAL,DIMENSION(NOBSMAX)                  :: XERROBS_M        ! Observational standard deviation (max dimension)
+ REAL,DIMENSION(:),ALLOCATABLE            :: ERROBS          ! Observational standard deviation (observation dimension)
 !
 !    Declarations of local variables
 !
@@ -280,7 +280,7 @@ NNCV(:) = 0
  ALLOCATE (XOBS(NOBSTYPE))
  ALLOCATE (ERROBS(NOBSTYPE))
 !
-!	assigning of observation variable names farther down
+!       assigning of observation variable names farther down
 !
 !      1.    Initializations
 !
@@ -532,8 +532,8 @@ LPATCH(:,:) = .FALSE.
           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*COFSWI(I)*COFSWI(I)
          ELSEIF (XVAR(L) .EQ. 'LAI') THEN 
           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)!*LAI_PASS(I,J)*LAI_PASS(I,J)
-         ELSE								
-           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)                    		     
+         ELSE
+           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)
          ENDIF
        ENDDO
      ENDDO
@@ -959,7 +959,7 @@ DO L=1,NVAR    ! control variable (x at previous time step)
          READ(111,*) (YF_PATCH(I,J,L+1,K+NOBS-NOBSTYPE),K=1,NOBSTYPE)
        ENDDO
      ENDDO
-     CLOSE(111)		
+     CLOSE(111)
    ENDDO
 !
    NMFILE_CANARI='OBSIMU_REFR_'
@@ -973,7 +973,7 @@ DO L=1,NVAR    ! control variable (x at previous time step)
      ENDDO
    ENDDO
    CLOSE(111)
-   PRINT *, 'read in ref forecasts for H', YF_PATCH(1,10,1,:)				
+   PRINT *, 'read in ref forecasts for H', YF_PATCH(1,10,1,:)
    10  CONTINUE ! if T2m HU2m observations does not exist
    CLOSE(ILOBS)
 !
@@ -990,7 +990,7 @@ DO L=1,NVAR    ! control variable (x at previous time step)
        ENDDO
      ENDDO
    ENDDO
- PRINT *, 'read in sim obs yf', YF(1,:,1)	
+ PRINT *, 'read in sim obs yf', YF(1,:,1)
  ENDDO TIMELOOP
 !
 ! SET OBSERVATION ERROR 
@@ -1005,12 +1005,12 @@ DO L=1,NVAR    ! control variable (x at previous time step)
  DO I=1,NSIZE_NATURE
    DO K=1,NOBS
      IF (XOBS(K) .EQ. 'LAI') THEN
-            R(I,K,K) = ERROBS(K)*ERROBS(K)*YO(I,K)*YO(I,K)                                                  	                                                        
-     ELSEIF (XOBS(K) .EQ. 'WG1') THEN					        
+            R(I,K,K) = ERROBS(K)*ERROBS(K)*YO(I,K)*YO(I,K)
+     ELSEIF (XOBS(K) .EQ. 'WG1') THEN
 !  convert R for wg1 from SWI to abs value
        R(I,K,K) = ERROBS(K)*ERROBS(K)*COFSWI(I)*COFSWI(I) 
-     ELSE								         
-       R(I,K,K) = ERROBS(K)*ERROBS(K)	                                
+     ELSE
+       R(I,K,K) = ERROBS(K)*ERROBS(K)
      ENDIF
    ENDDO
  ENDDO
@@ -1032,12 +1032,12 @@ DO L=1,NVAR    ! control variable (x at previous time step)
    DO L=1,NVAR
      DO I=1,NSIZE_NATURE
        DO J=1,PATCH_NUMBER
-         IF (XVAR(L) .EQ. 'WG1' .OR. XVAR(L) .EQ. 'WG2') THEN		
+         IF (XVAR(L) .EQ. 'WG1' .OR. XVAR(L) .EQ. 'WG2') THEN
            B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*COFSWI(I)*COFSWI(I)
-         ELSEIF (XVAR(L) .EQ. 'LAI') THEN                                  	
+         ELSEIF (XVAR(L) .EQ. 'LAI') THEN
            B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*LAI_PASS(I,J)*LAI_PASS(I,J)
-         ELSE								
-           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)                    		     
+         ELSE
+           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)
          ENDIF
        ENDDO
      ENDDO

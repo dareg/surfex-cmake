@@ -31,7 +31,7 @@ SUBROUTINE BEM_MORPHO(PBLD, PWALL_O_HOR, PBLD_HEIGHT, PFLOOR_HEIGHT,            
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon   *Meteo France*	
+!!      G. Pigeon   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

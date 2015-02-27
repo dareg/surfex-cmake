@@ -1688,15 +1688,15 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
         ! Compute SSA (method from Jacobi, 2010)
 !   ZSSA = 6./(XRHOLI*PSNOWGRAN1(JJ,JST))*10.
 !    ZSSA_t = (0.5+0.5*TANH(0.5*(ZGRADT-10.)))*(ZA-ZB*LOG(PSNOWAGE(JJ,JST)*24+EXP(ZC/ZB))) + &
-!     	  (0.5-0.5*TANH(0.5*(ZGRADT-10.)))*(ZA2-ZB2*LOG(PSNOWAGE(JJ,JST)*24+EXP(ZC2/ZB2)))
-! 			  
+!         (0.5-0.5*TANH(0.5*(ZGRADT-10.)))*(ZA2-ZB2*LOG(PSNOWAGE(JJ,JST)*24+EXP(ZC2/ZB2)))
+!
 !   ZSSA_t_dt = (0.5+0.5*TANH(0.5*(ZGRADT-10.)))*(ZA-ZB*LOG(PSNOWAGE(JJ,JST)*24+PTSTEP/3600.+EXP(ZC/ZB))) + &
-! 	      (0.5-0.5*TANH(0.5*(ZGRADT-10.)))*(ZA2-ZB2*LOG(PSNOWAGE(JJ,JST)*24+PTSTEP/3600.+EXP(ZC2/ZB2)))
+!             (0.5-0.5*TANH(0.5*(ZGRADT-10.)))*(ZA2-ZB2*LOG(PSNOWAGE(JJ,JST)*24+PTSTEP/3600.+EXP(ZC2/ZB2)))
 ! 
 !   ZSSA = ZSSA + (ZSSA_t_dt-ZSSA_t)
-! 	  
+!
 !   ZSSA = MAX(ZSSA,8.*10.)
-! 
+!
 !   PSNOWGRAN1(JJ,JST) = 6./(XRHOLI*ZSSA)*10.
         !
         ! Compute SSA (rate equation with Taylor series)
@@ -1956,10 +1956,10 @@ END IF
 !
 ! ! ! ! ! ! should be moved with other time controls to not compute MAXVAL(PSNOWAGE_TOP) at each time step
 ! ! ! ! ! IF ((ZAGE_NOW - MAXVAL(PSNOWAGE_TOP))<-0.001) THEN
-! ! ! ! ! 	WRITE(*,*),"ZAGE_NOW=",ZAGE_NOW
-! ! ! ! ! 	WRITE(*,*),"MAXVAL(PSNOWAGE_TOP)=",MAXVAL(PSNOWAGE_TOP)
-! ! ! ! ! 	CALL ABOR1_SFX(&
-! ! ! ! ! 	'FATAL ERROR in SNOWCRO: Snow layer date inconsistent with the current day !')
+! ! ! ! !       WRITE(*,*),"ZAGE_NOW=",ZAGE_NOW
+! ! ! ! !       WRITE(*,*),"MAXVAL(PSNOWAGE_TOP)=",MAXVAL(PSNOWAGE_TOP)
+! ! ! ! !       CALL ABOR1_SFX(&
+! ! ! ! !       'FATAL ERROR in SNOWCRO: Snow layer date inconsistent with the current day !')
 ! ! ! ! ! END IF
 !
 DO JJ=1, SIZE(PALBEDOSC)
@@ -2050,8 +2050,8 @@ IF ( PSNOWRHO_IN<XRHOTHRESHOLD_ICE ) THEN
   PALB(3) = MAX( 0., XVALB7*ZDIAM - XVALB8*ZDIAM_SQRT + XVALB9 ) 
  ! AGE CORRECTION ONLY FOR VISIBLE BAND
  
-! ! ! ! ! 		PALB(1)=MAX(XVALB11,PALB(1)-MIN(MAX(PPS_IN/XVPRES1,XVRPRE1), &
-! ! ! ! ! 			XVRPRE2)*XVALB10*MIN(365.,ZAGE_NOW-PSNOWAGE)/PVAGE1)
+! ! ! ! !               PALB(1)=MAX(XVALB11,PALB(1)-MIN(MAX(PPS_IN/XVPRES1,XVRPRE1), &
+! ! ! ! !                       XVRPRE2)*XVALB10*MIN(365.,ZAGE_NOW-PSNOWAGE)/PVAGE1)
 
   PALB(1) = MAX( XVALB11, PALB(1) - MIN( MAX(PPS_IN/XVPRES1,XVRPRE1), XVRPRE2 ) * &
                    XVALB10 * PSNOWAGE / PVAGE1 )

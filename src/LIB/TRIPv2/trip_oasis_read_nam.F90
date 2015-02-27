@@ -23,7 +23,7 @@ SUBROUTINE TRIP_OASIS_READ_NAM(KLISTING,PRUNTIME)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

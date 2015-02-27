@@ -34,7 +34,7 @@ SUBROUTINE UTCI_TEB(PT_CAN, PQ_CAN, PTI_BLD, PQI_BLD, PU10, PPS,         &
 !!    AUTHOR
 !!    ------
 !!
-!!	G. Pigeon           * Meteo-France *
+!!      G. Pigeon           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

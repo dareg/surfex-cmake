@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Samuelsson   SMHI
+!!      P. Samuelsson   SMHI
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -23,7 +23,7 @@ SUBROUTINE SFX_OASIS_DEF_OL(HPROGRAM,HALG_MPI)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

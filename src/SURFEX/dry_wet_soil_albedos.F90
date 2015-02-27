@@ -86,7 +86,7 @@ END MODULE MODI_DRY_WET_SOIL_ALBEDOS
 !!      
 !!    AUTHOR
 !!    ------
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -193,7 +193,7 @@ END SUBROUTINE DRY_WET_SOIL_ALBEDOS_1D
 !!      
 !!    AUTHOR
 !!    ------
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

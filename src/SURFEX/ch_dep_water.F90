@@ -17,7 +17,7 @@
   !!    MODIFICATIONS
   !!    -------------
   !!      Original      20/02/97 
-  !!	Modification  18/07/03  (Tulet) surface externalization
+  !!    Modification  18/07/03  (Tulet) surface externalization
   !!
   !-------------------------------------------------------------------------------
   !
@@ -124,7 +124,7 @@
     ZWATRC(:,JSV) = ZWATRC(:,JSV)+ZTCOR(:)   
   ENDDO
   !
-  !							       	       
+  !
   !       5.0  Compute  water resistance (in land water and sea)
   !            -------------------------------------------------
   !

@@ -29,7 +29,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      K. Chancibault	* LTHE / Meteo-France *
+!!      K. Chancibault  * LTHE / Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

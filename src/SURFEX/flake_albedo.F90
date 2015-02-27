@@ -22,7 +22,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Le Moigne           * Meteo-France *
+!!      P. Le Moigne           * Meteo-France *
 !!
 !!      Modified by P. Le Moigne - 10/2013 : bug in ZSW_UP declaration
 !-------------------------------------------------------------------------------

@@ -23,7 +23,7 @@ SUBROUTINE INIT_TEB_GREENROOF_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

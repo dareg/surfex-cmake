@@ -34,7 +34,7 @@ SUBROUTINE FAPAIR(PABC, PFD_SKY, PIA, PLAI, PXMUS, PSSA_SUP, PSSA_INF, &
 !!      
 !!    AUTHOR
 !!    ------
-!!	D. Carrer          * Meteo-France *
+!!      D. Carrer          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -62,7 +62,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PABC    ! abscissa needed for integration
 !                                         ! of net assimilation and stomatal
 !                                         ! conductance over canopy depth
 REAL, DIMENSION(:), INTENT(IN) :: PFD_SKY ! fraction of diffused radiation in sky
-REAL, DIMENSION(:), INTENT(IN) :: PIA     ! incident PAR or NIR	                             
+REAL, DIMENSION(:), INTENT(IN) :: PIA     ! incident PAR or NIR
 REAL, DIMENSION(:), INTENT(IN) :: PLAI    ! leaf area index
 REAL, DIMENSION(:), INTENT(IN) :: PXMUS   ! cosine of solar zenith angle
 REAL,               INTENT(IN) :: PSSA_SUP, PSSA_INF  !single scatering albedo (PAR or NIR)

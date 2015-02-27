@@ -49,7 +49,7 @@
 !!      B. Decharme    06/2013 bug in z0 (output) computation 
 !!      J.Escobar      06/2013  for REAL4/8 add EPSILON management
 !!      C. Lebeaupin   03/2014 bug if PTA=PSST and PEXNA=PEXNS: set a minimum value
-!!	   	       	       add abort if no convergence
+!!                             add abort if no convergence
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS

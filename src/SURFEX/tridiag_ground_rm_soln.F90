@@ -31,7 +31,7 @@ SUBROUTINE TRIDIAG_GROUND_RM_SOLN(PSOLN,PA_COEF,PB_COEF)
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

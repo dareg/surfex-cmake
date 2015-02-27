@@ -31,7 +31,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -87,8 +87,8 @@ CHARACTER(LEN=4),  INTENT(OUT) :: HDIFSFCOND ! Mulch effects
 !                           NOTE: Only used when YISBA = DIF
 !
 CHARACTER(LEN=3), INTENT(OUT) :: HSNOWRES  ! Turbulent exchanges over snow
-!	                                   ! 'DEF' = Default: Louis (ISBA)
-!       	                           ! 'RIL' = Maximum Richardson number limit
+!                                          ! 'DEF' = Default: Louis (ISBA)
+!                                          ! 'RIL' = Maximum Richardson number limit
 !                                          !         for stable conditions ISBA-SNOW3L
 !                                          !         turbulent exchange option
 CHARACTER(LEN=3), INTENT(OUT) :: HCPSURF   ! SPECIFIC HEAT

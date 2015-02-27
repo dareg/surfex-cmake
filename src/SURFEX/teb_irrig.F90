@@ -31,7 +31,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	C. DeMunck & V. Masson           * Meteo-France *
+!!      C. DeMunck & V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

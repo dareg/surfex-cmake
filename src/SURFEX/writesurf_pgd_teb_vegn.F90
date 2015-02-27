@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu & C. de Munck   *Meteo France*	
+!!      A. Lemonsu & C. de Munck   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

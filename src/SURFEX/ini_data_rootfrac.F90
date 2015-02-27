@@ -38,9 +38,9 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      new version :
-!!	B. Decharme        * Meteo-France *
+!!      B. Decharme        * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

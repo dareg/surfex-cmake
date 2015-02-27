@@ -17,7 +17,7 @@ MODULE MODD_TEB_GARDEN_n
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu   *Meteo France*
+!!      A. Lemonsu   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -19,7 +19,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	C. Lebeaupin   *Meteo France*
+!!      C. Lebeaupin   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

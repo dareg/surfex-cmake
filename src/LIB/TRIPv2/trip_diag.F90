@@ -14,7 +14,7 @@ SUBROUTINE TRIP_DIAG(PTSTEP,PSOUT,PSIN,PVEL,PHS,PGOUT,PGNEG,    &
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

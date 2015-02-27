@@ -27,7 +27,7 @@ SUBROUTINE SFX_OASIS_RECV(HPROGRAM,KI,KSW,PTIMEC,OOASIS_PUT,     &
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

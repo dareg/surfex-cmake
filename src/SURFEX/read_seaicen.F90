@@ -26,7 +26,7 @@
 !!    REFERENCE : routine restartr in original Gelato sources (V6.0.20)
 !!    ---------
 !!
-!!    AUTHOR : S. Sénési   *Meteo France*	
+!!    AUTHOR : S. Sénési   *Meteo France*
 !!    ------
 !!
 !!    MODIFICATIONS

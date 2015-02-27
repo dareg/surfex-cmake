@@ -35,7 +35,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	J.-P. Pinty      * Laboratoire d'Aerologie*
+!!      J.-P. Pinty      * Laboratoire d'Aerologie*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -135,7 +135,7 @@ ZTSIDER = (7.67825*SIN(ZA1)+10.09176*SIN(ZA2)) / 60.0
 !-------------------------------------------------------------------------------
 !
 !*       2.     COMPUTE THE SOLAR DECLINATION ANGLE
-!	        -----------------------------------
+!               -----------------------------------
 !
 ZDECSOL = 0.006918-0.399912*COS(ZAD)   +0.070257*SIN(ZAD)    &
            -0.006758*COS(2.*ZAD)+0.000907*SIN(2.*ZAD) &

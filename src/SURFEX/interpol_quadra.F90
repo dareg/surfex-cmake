@@ -31,7 +31,7 @@
 !!    ------------
 !!
 !!    Original    08/2009
-!!    18-11-2010 by F. Chauvin	: bugfix for temporal interpolation coeff.
+!!    18-11-2010 by F. Chauvin  : bugfix for temporal interpolation coeff.
 !!
 !----------------------------------------------------------------------------
 !

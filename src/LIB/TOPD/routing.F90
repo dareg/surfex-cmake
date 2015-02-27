@@ -31,7 +31,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      K. Chancibault	* Meteo-France *
+!!      K. Chancibault  * Meteo-France *
 !!      G-M. Saulnier  * LTHE *
 !!
 !!    MODIFICATIONS

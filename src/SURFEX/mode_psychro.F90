@@ -19,7 +19,7 @@ MODULE MODE_PSYCHRO
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!      
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -267,7 +267,7 @@ end function TWB_FROM_TPQ_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!      
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -337,7 +337,7 @@ END FUNCTION ENTH_FN_T_Q
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!      
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -81,7 +81,7 @@ END MODULE MODI_VEG_FROM_LAI
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -187,7 +187,7 @@ END FUNCTION VEG_FROM_LAI_0D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -293,7 +293,7 @@ END FUNCTION VEG_FROM_LAI_1D
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson and A. Boone          * Meteo-France *
+!!      V. Masson and A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

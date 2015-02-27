@@ -17,7 +17,7 @@ MODULE MODN_SFX_OASIS
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

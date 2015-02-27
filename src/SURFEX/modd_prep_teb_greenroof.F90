@@ -18,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu & C. de Munck 
+!!      A. Lemonsu & C. de Munck 
 !!
 !!    MODIFICATIONS
 !!    -------------

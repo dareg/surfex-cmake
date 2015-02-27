@@ -19,7 +19,7 @@ MODULE MODE_CONV_DOE
 !!
 !!    AUTHOR
 !!    ------
-!!    G. Pigeon	
+!!    G. Pigeon
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -85,7 +85,7 @@ FUNCTION CHTC_VERT_DOE_0D(PTS, PTA) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -146,7 +146,7 @@ FUNCTION CHTC_VERT_DOE_1D(PTS, PTA) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -208,7 +208,7 @@ FUNCTION CHTC_UP_DOE_1D(PTS, PTA) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -273,7 +273,7 @@ FUNCTION CHTC_UP_DOE_0D(PTS, PTA) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -339,7 +339,7 @@ FUNCTION CHTC_DOWN_DOE(PTS, PTA) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -407,7 +407,7 @@ FUNCTION CHTC_SMOOTH_LEE_DOE_0D(PCHTCN, PVMOD) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -480,7 +480,7 @@ FUNCTION CHTC_SMOOTH_LEE_DOE_1D(PCHTCN, PVMOD) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -552,7 +552,7 @@ FUNCTION CHTC_SMOOTH_WIND_DOE_0D(PCHTCN, PVMOD) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -625,7 +625,7 @@ FUNCTION CHTC_SMOOTH_WIND_DOE_1D(PCHTCN, PVMOD) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -696,7 +696,7 @@ FUNCTION CHTC_ROUGH_DOE_0D(PCHTCN, PCHTCS, PROUGH) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -761,7 +761,7 @@ FUNCTION CHTC_ROUGH_DOE_1D(PCHTCN, PCHTCS, PROUGH) RESULT(PCHTC)
 !!
 !!    AUTHOR
 !!    ------
-!!	G. Pigeon       * Meteo France *
+!!      G. Pigeon       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------

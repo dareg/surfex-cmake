@@ -4,7 +4,7 @@
 !
 !!    AUTHOR
 !!    ------
-!!	R. El Khatib   *Meteo France*	
+!!      R. El Khatib   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

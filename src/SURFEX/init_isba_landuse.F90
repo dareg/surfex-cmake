@@ -29,7 +29,7 @@ SUBROUTINE INIT_ISBA_LANDUSE (HPROGRAM)
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -17,7 +17,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	A. LEMONSU   *Meteo France*
+!!      A. LEMONSU   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

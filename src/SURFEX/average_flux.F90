@@ -30,7 +30,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	S. Belair           * Meteo-France *
+!!      S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

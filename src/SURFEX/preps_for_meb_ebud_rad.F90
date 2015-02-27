@@ -33,7 +33,7 @@ SUBROUTINE PREPS_FOR_MEB_EBUD_RAD(PPS,                                         &
 !!    AUTHOR
 !!    ------
 !!
-!!	A. Boone                * CNRM-GAME, Meteo-France *
+!!      A. Boone                * CNRM-GAME, Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

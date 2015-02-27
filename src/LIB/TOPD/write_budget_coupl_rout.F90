@@ -25,7 +25,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      L. Bouilloud & B. Vincendon	* Meteo-France *
+!!      L. Bouilloud & B. Vincendon     * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

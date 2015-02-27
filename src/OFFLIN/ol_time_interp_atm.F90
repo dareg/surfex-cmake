@@ -29,7 +29,7 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

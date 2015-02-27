@@ -20,7 +20,7 @@ SUBROUTINE TRIP_INTERFACE (KLISTING,KLON,KLAT,PTIME,OPRINT, &
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -13,7 +13,7 @@ SUBROUTINE RESTART_COUPL_TOPD(HPROGRAM,KI)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Vincendon    
+!!      B. Vincendon
 !!
 !!    MODIFICATIONS
 !!    -------------

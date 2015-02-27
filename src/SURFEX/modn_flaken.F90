@@ -18,7 +18,7 @@ MODULE MODN_FLAKE_n
 !!       
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

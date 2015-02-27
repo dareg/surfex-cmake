@@ -50,7 +50,7 @@ FUNCTION TRAD_BODY(PSCA_SW, PREF_SW_FAC, PREF_SW_GRND, PEMIT_LW_FAC, PEMIT_LW_GR
 !!    AUTHOR
 !!    ------
 !!
-!!	G. Pigeon           * Meteo-France *
+!!      G. Pigeon           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

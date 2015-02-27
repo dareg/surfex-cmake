@@ -3,7 +3,7 @@ SUBROUTINE EXPLICIT_SLOPE(PZS,PSSO_SLOPE)
 !     #########################################################################
 !!    AUTHOR
 !!    ------
-!!	M. Lafaysse      * Meteo-France *
+!!      M. Lafaysse      * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
