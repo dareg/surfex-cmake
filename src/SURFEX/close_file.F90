@@ -33,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#if defined(SFX_ASC) || defined(SFX_ARO) || defined(SFX_MNH)
+#if defined(SFX_ASC) || defined(SFX_ARO) || defined(SFX_MNH) || defined(SFX_NC)
 USE MODI_CLOSE_FILE_ASC
 #endif
 #ifdef SFX_FA
