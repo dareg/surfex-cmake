@@ -197,7 +197,14 @@ PRNSNOW(:) = 0.
 PHSNOW (:) = 0.
 PLESNOW(:) = 0.
 PGSNOW (:) = 0.
+!RJ: workaround to prevent decomposition unstable xundef masks for Tx_LWA_SN_RD fields
+!RJ: in TEB_DIAGNOSTICS.nc during TEB_GARDEN_GREENROOF_BEM_3L_IRRIG_* tests
+!RJ: problem with decomposition handling somewhere else
+#ifdef RJ_PFIX
+PABS_LW(:) = 0.0
+#else
 PABS_LW(:) = XUNDEF
+#endif
 !
 !* snow reservoir before evolution
 !

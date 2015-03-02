@@ -147,6 +147,9 @@ FPPFLAGS += -DLFI_BFB
 #RJ: changes to allow successful serial runtime
 FUNDEFS  += -URJ_OFIX
 FPPFLAGS += -DRJ_OFIX
+#RJ: changes to allow successful MPI/OMP runtime
+FUNDEFS  += -URJ_PFIX
+FPPFLAGS += -DRJ_PFIX
 
 #RJ ifneq "$(findstring 8,$(LFI_INT))" ""
 #RJ OBJS_I8=spll_NEWLFI_ALL.o

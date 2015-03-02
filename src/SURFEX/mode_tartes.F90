@@ -1310,12 +1310,26 @@ IF ( IPOINTDAY>=1 ) THEN
     !
   END DO
   !
+!RJ: fix fp-invalid(nan) trapping in ISBA_DIF8_SN3L_NIT_SNCRO8_C13_SNOWRAD_TAR, ISBA_DIF8_SN3L_NIT_SNCRO8_C13_SNOWRAD_TA2 tests
+#ifdef RJ_OFIX
+!RJ: temp fix to avoid accessing uninited values (NANS) in mode_tartes.F90 by explicit inited shape, no inpact for results, problem in array padding
+  CALL SNOWCRO_CALL_TARTES(ZSNOWGRAN1_P(1:IPOINTDAY,1:IMAX_USE),ZSNOWGRAN2_P(1:IPOINTDAY,1:IMAX_USE), &
+                           ZSNOWRHO_P(1:IPOINTDAY,1:IMAX_USE),ZSNOWDZ_P(1:IPOINTDAY,1:IMAX_USE),      &
+                           ZSNOWG0_P(1:IPOINTDAY,1:IMAX_USE),ZSNOWY0_P(1:IPOINTDAY,1:IMAX_USE),       &
+                           ZSNOWW0_P(1:IPOINTDAY,1:IMAX_USE),ZSNOWB0_P(1:IPOINTDAY,1:IMAX_USE),       &
+                           ZSNOWIMP_DENSITY_P(1:IPOINTDAY,1:IMAX_USE,1:NPNIMP),                       &
+                           ZSNOWIMP_CONTENT_P(1:IPOINTDAY,1:IMAX_USE,1:NPNIMP),                       &
+                           ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),                                &
+                           ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),  & 
+                           ZRADSINK_P(1:IPOINTDAY,1:IMAX_USE),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO)
+#else
   CALL SNOWCRO_CALL_TARTES(ZSNOWGRAN1_P(1:IPOINTDAY,:),ZSNOWGRAN2_P(1:IPOINTDAY,:),ZSNOWRHO_P(1:IPOINTDAY,:),     &
                            ZSNOWDZ_P(1:IPOINTDAY,:),ZSNOWG0_P(1:IPOINTDAY,:),ZSNOWY0_P(1:IPOINTDAY,:),            &
                            ZSNOWW0_P(1:IPOINTDAY,:),ZSNOWB0_P(1:IPOINTDAY,:),ZSNOWIMP_DENSITY_P(1:IPOINTDAY,:,:), &
                            ZSNOWIMP_CONTENT_P(1:IPOINTDAY,:,:),ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),        &
                            ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),              &
                            ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO)
+#endif
   !
   !Unpack 1d output variables
   !
