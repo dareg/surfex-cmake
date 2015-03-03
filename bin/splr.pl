@@ -123,10 +123,11 @@ use Data::Dumper;
 
 #RJ-later
 #RJ: something is wery wrong if read_surf.F90 is plitted and compiled as separate units...
-if($fname=~/[\/]read_surf[\.][fF]90/){
-  ${splr_dosplit}=0 ;
-  warn "zRJ [WARNING] not splitting: $fname=";
-}
+#RJ: disabled for now not to mask out bug in SODA_OI2 test nc outputs
+#if($fname=~/[\/]read_surf[\.][fF]90/){
+#  ${splr_dosplit}=0 ;
+#  warn "zRJ [WARNING] not splitting: $fname=";
+#}
     my @splitted_units;
     if(${splr_dosplit} && ${safe_split}) {
       &slurp_split(\$slurp_org,\$fname,\@splitted_units);
@@ -160,7 +161,7 @@ if($fname=~/[\/]read_surf[\.][fF]90/){
 #          ${try_wrap}=0 if($fname=~/\bLIB[\/]/);
 #RJ: for simplicity try wrapping only if supplied file path has some specific directory (Yeah, I'm lazy...)
 #          ${try_wrap}=0 unless($fname=~/\b(?:ASSIM|FORC|OFFLIN|SURFEX|TOPD|TRIP)[\/]/);
-          ${try_wrap}=0 unless($fname=~/\b(?:ASSIM|FORC|OFFLIN|SURFEX|TRIP)[\/]/);
+          ${try_wrap}=0 unless($fname=~/\b(?:ASSIM|FORC|OFFLIN|SURFEX)[\/]/);
         }
 
         if(${try_wrap}) {

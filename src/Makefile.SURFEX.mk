@@ -58,6 +58,8 @@ endif
 #
 FUNDEFS += -USFX_ASC -USFX_FA -USFX_LFI -USFX_OL -USFX_NC -USFX_BIN -USFX_TXT
 FUNDEFS += -USFX_ARO -USFX_MNH -USFX_OFF -UAIX64 -URS6K
+#RJ: next ones are only for phasing and must be removed from code in final version
+FUNDEFS += -URJ_OFIX -URJ_PFIX
 #
 DIR_SURFEX += SURFEX
 FPPFLAGS_SURFEX= -DSFX_ASC -DSFX_FA -DSFX_LFI

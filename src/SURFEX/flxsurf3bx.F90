@@ -23,6 +23,8 @@
 !
       USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
       USE PARKIND1  ,ONLY : JPRB
+!RJ: added modi, after freeform conversion
+      USE MODI_VSLOG
 !
       IMPLICIT NONE
       INTEGER :: N
