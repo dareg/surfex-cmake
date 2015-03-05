@@ -334,7 +334,7 @@ proguser : libuser
 	OBJDIR=$(OBJDIR_USER) \
 	LIB_MNH=$(LIB_USER) \
 	PROG_DIR="$(OBJDIR_USER) $(OBJDIR_MASTER)" \
-	PROG_LIST="$(PROG_LIST_USER)" \
+	PROG_LIST="$(or $(PROG_LIST_USER), PROG_LIST_USER_not_set)" \
 	$(PROG_LIST_USER) # cleanlibuser
 
 cleanlibuser :
