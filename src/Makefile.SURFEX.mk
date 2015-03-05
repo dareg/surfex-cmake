@@ -609,8 +609,10 @@ endif
 #RJ: should PGD,PREP,OFFLINE,SODA be in VER_USER==smth case?
 #PROG_LIST_USER+=PGD PREP OFFLINE SODA
 #
+PROG_LIST_USER = $(PROG_LIST)
+#
 ifeq "$(VER_USER)" "FORC"
-PROG_LIST_USER += PRE_INPUT_EXPERIMENT OFFLINE
+PROG_LIST_USER += PRE_INPUT_EXPERIMENT
 endif
 #
 ##########################################################
