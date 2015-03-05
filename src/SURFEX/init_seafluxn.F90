@@ -42,6 +42,7 @@
 !!      B. Decharme 04/2013 : new coupling variables
 !!      S. Senesi   01/2014 : introduce sea-ice model 
 !!      S. Belamari 03/2014 : add NZ0 (to choose PZ0SEA formulation)
+!!      R. Séférian 01/2015 : introduce interactive ocean surface albedo
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -370,11 +371,7 @@ CALL READ_SEAICE_n(HPROGRAM,ILU,ILUOUT)
 !*       5.     Albedo, emissivity and temperature fields on the mix (open sea + sea ice)
 !               -----------------------------------------------------------------
 !
-ALLOCATE(XDIR_ALB (ILU))
-ALLOCATE(XSCA_ALB (ILU))
 ALLOCATE(XEMIS    (ILU))
-XDIR_ALB = 0.0
-XSCA_ALB = 0.0
 XEMIS    = 0.0
 !
 CALL UPDATE_RAD_SEA(CSEA_ALB,XSST,PZENITH,XTTS,XEMIS,XDIR_ALB,&

@@ -28,17 +28,18 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!      J. Stein           * Meteo-France *
+!!	J. Stein           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    25/01/96 
-!!                  25/03/96   spatialize the input TS, WG, SST fields
-!!                  22/05/96   correct igrid value for the rain rate
-!!                  27/11/96   set realistic values for z0 fields on sea
-!!      (V.Masson)  09/07/97  add directional z0 computations and RESA correction
-!!      (V.Masson)  15/03/99  some computations are now done in GROUND_PARAMn
-!!      (V.Masson)  04/01/00  all computations are now done in ISBA
+!!      Original     25/01/96 
+!!                   25/03/96 spatialize the input TS, WG, SST fields
+!!                   22/05/96 correct igrid value for the rain rate
+!!                   27/11/96 set realistic values for z0 fields on sea
+!!      V.Masson     09/07/97 add directional z0 computations and RESA correction
+!!      V.Masson     15/03/99 some computations are now done in GROUND_PARAMn
+!!      V.Masson     04/01/00 all computations are now done in ISBA
+!!      P. Le Moigne 03/2015  tsz0 time management
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -99,16 +100,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TSZ0',0,ZHOOK_HANDLE)
 !
-ZTIMEP = MOD(PTIME+PTSTEP,86400.)  ! recover the time from O HTU
+IF (NTIME==25) THEN
+   ZTIMEP = MOD(PTIME+PTSTEP,86400.)  ! recover the time from O HTU
+ELSE
+   ZTIMEP = PTIME+PTSTEP              ! accumulated time since beginning of run
+ENDIF
 !
 IHOURP = INT(ZTIMEP/3600.)+1
 !
-IF (NTIME==25) THEN
+IF (NTIME==1) THEN
+  ZDTS_HOUR    = XDATA_DTS   (1)
+  ZDHUGRD_HOUR = XDATA_DHUGRD(1)        
+ELSE
   ZDTS_HOUR    = XDATA_DTS   (IHOURP)
   ZDHUGRD_HOUR = XDATA_DHUGRD(IHOURP)
-ELSEIF (NTIME==1) THEN
-  ZDTS_HOUR    = XDATA_DTS   (1)
-  ZDHUGRD_HOUR = XDATA_DHUGRD(1)
 ENDIF
 !
 ! temporal interpolation of the surface temperature increment  over land at time t

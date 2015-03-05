@@ -81,7 +81,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSFMER_ICE! meridional friction
 !
 LOGICAL, INTENT(IN)         :: OHANDLE_SIC  ! Do we weight seaice and open sea fluxes
 REAL, DIMENSION(:), INTENT(IN) :: PSIC      ! Sea ice cover                         (-)
-REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Sea ice temperature                   (K)
+REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Sea ice temperature                   (°K)
 !
 REAL, DIMENSION(:), INTENT(OUT):: PRN       ! net radiation                         (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PH        ! sensible heat flux                    (W/m2)
@@ -204,10 +204,10 @@ ELSE
   !
   !* latent heat flux
   !
-  PLE    = (1 - PSIC) * PSFTQ * XLVTT + PSIC * PSFTQ_ICE * XLSTT
-  PLE_ICE   =                              PSIC * PSFTQ_ICE * XLSTT
-  PEVAP  = (1 - PSIC) * PSFTQ         + PSIC * PSFTQ_ICE 
-  PSUBL  =                              PSIC * PSFTQ_ICE 
+  PLE     = (1 - PSIC) * PSFTQ * XLVTT + PSIC * PSFTQ_ICE * XLSTT
+  PLE_ICE =                                     PSFTQ_ICE * XLSTT
+  PEVAP   = (1 - PSIC) * PSFTQ         + PSIC * PSFTQ_ICE 
+  PSUBL   =                              PSIC * PSFTQ_ICE 
   !
   !* ice storage flux
   !

@@ -33,12 +33,10 @@ SUBROUTINE UNPACK_DIAG_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH,    &
 !!      Modified    08/2012 by B. Decharme : optimization
 !!      Modified    06/2013 by B. Decharme : add lateral drainage flux diag for DIF
 !!                                           add tiotale sublimation flux
-!!      Modified    04/2014 by S. Belamari : Wind module=XUNDEF if one component is XUNDEF
 !!      Modified    10/2014 by P. Samuelsson: MEB
 !!
 !!------------------------------------------------------------------
 !
-USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PACK_ISBA,      ONLY : XP_LVTT, XP_LSTT
 USE MODD_PACK_DIAG_ISBA, ONLY :   XP_RNSNOW, XP_HSNOW, XP_HPSNOW,               &
                                   XP_GFLUXSNOW, XP_USTARSNOW,                   &
@@ -126,11 +124,7 @@ IF (KNPATCH==1) THEN
     XMER10M (:, KPATCH)    = XP_MER10M (:)
     XRI     (:, KPATCH)    = XP_RI     (:)
 !    
-    WHERE(XP_ZON10M(:) /= XUNDEF .AND. XP_MER10M(:) /= XUNDEF)
-      XWIND10M(:, KPATCH)  = SQRT(XP_ZON10M(:)**2+XP_MER10M(:)**2)
-    ELSEWHERE
-      XWIND10M(:, KPATCH)  = XUNDEF
-    ENDWHERE
+    XWIND10M(:, KPATCH)  = SQRT(XP_ZON10M(:)**2+XP_MER10M(:)**2)
 !    
   END IF
   !
@@ -206,11 +200,7 @@ ELSE
       XMER10M (JI, KPATCH)    = XP_MER10M (JJ)
       XRI     (JI, KPATCH)    = XP_RI     (JJ)
       !     
-      IF(XP_ZON10M(JJ) /= XUNDEF .AND. XP_MER10M(JJ) /= XUNDEF) THEN
-        XWIND10M(JI, KPATCH)  = SQRT(XP_ZON10M(JJ)**2+XP_MER10M(JJ)**2)
-      ELSE
-        XWIND10M(JI, KPATCH)  = XUNDEF
-      ENDIF
+      XWIND10M(JI, KPATCH)  = SQRT(XP_ZON10M(JJ)**2+XP_MER10M(JJ)**2)
       !      
     END DO
   END IF

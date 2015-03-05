@@ -43,6 +43,7 @@ SUBROUTINE COUPLING_SEAFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                      
 !!                               and apply to Gelato
 !!      Modified    01/2014 : S. Belamari Remove MODE_THERMOS and XLVTT
 !!      Modified    05/2014 : S. Belamari New ECUME : Include salinity & atm. pressure impact 
+!!      Modified    01/2015 : R. Séférian interactive ocaen surface albedo
 !!                                       
 !!---------------------------------------------------------------------
 !
@@ -185,7 +186,6 @@ REAL, DIMENSION(KI) :: ZEXNS      ! Exner function at surface level
 REAL, DIMENSION(KI) :: ZU         ! zonal wind
 REAL, DIMENSION(KI) :: ZV         ! meridian wind
 REAL, DIMENSION(KI) :: ZWIND      ! Wind
-REAL, DIMENSION(KI) :: ZWORK      ! Work array
 REAL, DIMENSION(KI) :: ZCD        ! Drag coefficient on open sea
 REAL, DIMENSION(KI) :: ZCD_ICE    ! "     "          on seaice
 REAL, DIMENSION(KI) :: ZCDN       ! Neutral Drag coefficient on open sea
@@ -252,7 +252,6 @@ ZEXNS    (:) = XUNDEF
 ZU       (:) = XUNDEF
 ZV       (:) = XUNDEF
 ZWIND    (:) = XUNDEF
-ZWORK    (:) = XUNDEF
 ZSFTQ    (:) = XUNDEF
 ZSFTH    (:) = XUNDEF
 ZCD      (:) = XUNDEF    
@@ -573,10 +572,6 @@ IF (LHANDLE_SIC) THEN
    ENDIF
    IF (CSEAICE_SCHEME=='GELATO') THEN
       CALL SEAICE_GELATO1D_n(HPROGRAM,PTIMEC, PTSTEP, TGLT, XSST, XSSS, XFSIC, XFSIT, XSIC, XTICE, XICE_ALB)
-   ELSE
-      XTICE=XSST
-      XSIC=XFSIC
-      XICE_ALB=XALBSEAICE
    ENDIF
    ! Update of cell-averaged albedo, emissivity and radiative 
    ! temperature is done later
@@ -621,6 +616,11 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF (LHANDLE_SIC) THEN
+   IF (CSEAICE_SCHEME/='GELATO') THEN
+      XTICE=XSST
+      XSIC=XFSIC
+      XICE_ALB=XALBSEAICE           
+   ENDIF         
    PTSURF (:) = XSST  (:) * ( 1 - XSIC (:)) +     XTICE(:) * XSIC(:)
    PQSURF (:) = ZQSAT (:) * ( 1 - XSIC (:)) + ZQSAT_ICE(:) * XSIC(:)
    ZZ0W   (:) = ( 1 - XSIC(:) ) * 1.0/(LOG(PUREF(:)/ZZ0(:))    **2)  +  &
@@ -644,7 +644,7 @@ ENDIF
  CALL UPDATE_RAD_SEA(CSEA_ALB,XSST,PZENITH2,XTTS,XEMIS,  &
                      XDIR_ALB,XSCA_ALB,PDIR_ALB,PSCA_ALB,&
                      PEMIS,PTRAD,LHANDLE_SIC,XTICE,XSIC, &
-                     XICE_ALB)
+                     XICE_ALB,PU,PV)
 !
 !=======================================================================================
 !

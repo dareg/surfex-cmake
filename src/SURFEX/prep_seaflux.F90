@@ -24,6 +24,7 @@ SUBROUTINE PREP_SEAFLUX(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!      S. Riette   06/2009 PREP_SEAFLUX_SBL has no more argument
 !!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!      Modified    01/2014, S. Senesi : introduce sea-ice model 
+!!      Modified    01/2015, R. Séférian : introduce ocean surface albedo 
 !!------------------------------------------------------------------
 !
 !
@@ -38,7 +39,8 @@ USE MODN_PREP_SEAFLUX
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SEAFLUX_n,      ONLY : XZ0, XSST, XSSS, LSBL, XZ0H,           &
                                 LINTERPOL_SST, CINTERPOL_SST, XSST_MTH,&
-                                LINTERPOL_SSS, CINTERPOL_SSS, XSSS_MTH    
+                                LINTERPOL_SSS, CINTERPOL_SSS, XSSS_MTH,&
+                                CSEA_ALB, XDIR_ALB, XSCA_ALB
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 USE MODD_OCEAN_n,        ONLY : LMERCATOR, LCURRENT
@@ -130,6 +132,14 @@ XZ0 = 0.001
 ALLOCATE(XZ0H(SIZE(XSST)))
 XZ0H = XZ0
 !
+!*      2.3   Ocean Surface Albedo
+!
+IF(CSEA_ALB=='RS14')THEN
+  ALLOCATE(XDIR_ALB(SIZE(XSST)))
+  ALLOCATE(XSCA_ALB(SIZE(XSST)))
+  XDIR_ALB = 0.065
+  XSCA_ALB = 0.065
+ENDIF
 !
 !-------------------------------------------------------------------------------------
  CALL CLEAN_PREP_OUTPUT_GRID

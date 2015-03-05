@@ -23,13 +23,14 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      V. Masson   *Meteo France*
+!!	V. Masson   *Meteo France*	
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
 !!      Modified    01/2014 : S. Senesi : handle seaice scheme
 !!      S. Belamari 03/2014   Include sea surface salinity XSSS
+!!      R. Séférian 01/2015 : introduce interactive ocean surface albedo
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -41,9 +42,9 @@ USE MODD_SEAFLUX_n, ONLY : XSST, XZ0, TTIME, &
                            LHANDLE_SIC,      &
                            XSSS, XSSS_MTH,   &
                            LINTERPOL_SSS,    &
-                           CINTERPOL_SSS
-!
-USE MODD_DIAG_SEAICE_n, ONLY: LDIAG_SEAICE
+                           CINTERPOL_SSS,    &
+                           CSEA_ALB,         &
+                           XDIR_ALB, XSCA_ALB
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITESURF_OCEAN_n
@@ -141,6 +142,21 @@ ENDIF
 YRECFM='SSS'
 YCOMMENT='Sea Surface Salinity'
 CALL WRITE_SURF(HPROGRAM,YRECFM,XSSS(:),IRESP,HCOMMENT=YCOMMENT)  
+!
+!
+!* ocean surface albedo (direct and diffuse fraction)
+!
+IF(CSEA_ALB=='RS14')THEN
+!
+  YRECFM='OSA_DIR'
+  YCOMMENT='direct ocean surface albedo (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XDIR_ALB(:),IRESP,HCOMMENT=YCOMMENT)
+!
+  YRECFM='OSA_SCA'
+  YCOMMENT='diffuse ocean surface albedo (-)'
+  CALL WRITE_SURF(HPROGRAM,YRECFM,XSCA_ALB(:),IRESP,HCOMMENT=YCOMMENT)
+!
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

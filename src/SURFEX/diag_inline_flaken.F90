@@ -30,7 +30,6 @@
 !!                           more argument (height of diagnostic)
 !!      P. Le Moigne 04/2013 : Accumulated diagnostics
 !!                             Coupling for ESM
-!!      S. Belamari  01/2014 : Wind module=XUNDEF if one component is XUNDEF
 !!------------------------------------------------------------------
 !
 
@@ -141,11 +140,7 @@ IF (.NOT. LSBL) THEN
     XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
     XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
     !
-    WHERE(XZON10M(:) /= XUNDEF .AND. XMER10M(:) /= XUNDEF)
-      XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
-    ELSEWHERE
-      XWIND10M(:) = XUNDEF
-    ENDWHERE
+    XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
     XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
     !
     !* Richardson number

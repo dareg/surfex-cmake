@@ -21,7 +21,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      V. Masson   *Meteo France*
+!!	V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -212,10 +212,6 @@ REAL, PARAMETER :: XVW1 = .80, XVW2 = .20 , XVD1 = .02, XVD2 = .01
 ! calibration coefficients for exctinction computation
 REAL, PARAMETER :: XVBETA1 = 1.92E-3, XVBETA2 = 40., XVBETA3 = 1.098E-2, &
                    XVBETA4 = 100.,  XVBETA5 = 2000.
-!           
-! ISBA-ES Radiation extinction coefficients: (see Loth and Graf 1993):           
-! see Boone, Meteo-France/CNRM Note de Centre No. 70 (2002)
-REAL, PARAMETER :: XES_CVEXT = 3.8e-3 ! [(m5/2)/kg]
 !
 ! ISBA-ES minimum cosinus of zenithal angle
 REAL, PARAMETER :: XMINCOSZEN = 0.01

@@ -72,7 +72,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!      A. Boone           * Meteo-France *
+!!	A. Boone           * Meteo-France *
 !!      P. Samuelsson      * SMHI *
 !!
 !!    MODIFICATIONS
@@ -1197,9 +1197,6 @@ SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,PPS, &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
-USE MODD_SNOW_PAR,       ONLY : XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN,  &
-                                XVSPEC1, XVSPEC2, XVSPEC3,                 &
-                                XES_CVEXT, XVBETA3, XVBETA5, XMINCOSZEN
 !
 USE MODE_SNOW3L,         ONLY : SNOW3LALB, SNOW3LRADABS
 !

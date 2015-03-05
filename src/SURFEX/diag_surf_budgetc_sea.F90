@@ -134,7 +134,7 @@ IF (OHANDLE_SIC) THEN
 !
 !* storage flux
 !
-   XGFLUXC(:) = XGFLUXC(:) + PGFLUX(:) * PTSTEP 
+   XGFLUXC_ICE(:) = XGFLUXC_ICE(:) + PGFLUX_ICE(:) * PTSTEP 
 !
 !* wind stress
 !

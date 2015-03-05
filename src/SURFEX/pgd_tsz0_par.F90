@@ -28,7 +28,8 @@
 !!    MODIFICATION
 !!    ------------
 !!
-!!    Original    09/2007
+!!    Original     09/2007
+!!    P. Le Moigne 03/2015 tsz0 time management
 !!
 !!
 !----------------------------------------------------------------------------
@@ -70,7 +71,7 @@ INTEGER               :: JTIME     ! loop counter on time
 !            ------------------------
 !
 INTEGER            :: NTIME
-INTEGER, PARAMETER :: NTIME_MAX    = 25
+INTEGER, PARAMETER :: NTIME_MAX    = 37
 !
 REAL, DIMENSION(NTIME_MAX)     :: XUNIF_DTS
 REAL, DIMENSION(NTIME_MAX)     :: XUNIF_DHUGRD
@@ -114,8 +115,6 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_TSZ0)
 IF (NTIME > NTIME_MAX) THEN
    WRITE(ILUOUT,*)'NTIME SHOULD NOT EXCEED',NTIME_MAX
    CALL ABOR1_SFX('PGD_TSZ0_PAR: NTIME TOO BIG')
-ELSEIF (NTIME.NE.1 .AND. NTIME.NE.25) THEN
-  CALL ABOR1_SFX('PGD_TSZ0_PAR: NTIME MUST BE 1 OR 25')
 ENDIF
 !
 ALLOCATE(XDATA_DTS    (NTIME))
@@ -126,15 +125,16 @@ ALLOCATE(XDATA_DHUGRD (NTIME))
 !*    3.      Uniform fields are prescribed
 !             -----------------------------
 !
-IF (NTIME==25) THEN
+IF (NTIME==1) THEN
+  XDATA_DTS   (:) = XUNIF_DTS   (1)
+  XDATA_DHUGRD(:) = XUNIF_DHUGRD(1)
+ELSE
   DO JTIME=1,NTIME
     XDATA_DTS   (JTIME) = XUNIF_DTS   (JTIME)
     XDATA_DHUGRD(JTIME) = XUNIF_DHUGRD(JTIME)
   END DO
-ELSEIF (NTIME==1) THEN
-  XDATA_DTS   (:) = XUNIF_DTS   (1)
-  XDATA_DHUGRD(:) = XUNIF_DHUGRD(1)
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('PGD_TSZ0_PAR',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -24,13 +24,14 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      V. Masson   *Meteo France*
+!!	V. Masson   *Meteo France*	
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
 !!      Modified    02/2008 Add oceanic variables initialisation
 !!      S. Belamari 04/2014 Suppress LMERCATOR
+!!      R. Séférian 01/2015 introduce new ocean surface albedo 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -41,16 +42,17 @@ USE MODD_SEAFLUX_n,      ONLY : XSST, XZ0, LINTERPOL_SST, CINTERPOL_SST, &
                                 XPERTFLUX, LPERTFLUX,                    &
                                 XSST_MTH, TTIME, LHANDLE_SIC,            &
                                 XSSS, XSSS_MTH, LINTERPOL_SSS,           &
-                                CINTERPOL_SSS
+                                CINTERPOL_SSS,                           &
+                                CSEA_ALB, XDIR_ALB, XSCA_ALB
 !
 USE MODI_READ_SURF
 USE MODI_INTERPOL_SST_MTH
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
 USE MODI_GET_TYPE_DIM_n
 USE MODI_ABOR1_SFX
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
@@ -181,6 +183,26 @@ ELSEIF (IVERSION>=8) THEN
      CALL CHECK_SEA(YRECFM,XSSS(:))
    ENDIF
    !
+ENDIF
+!
+!* ocean surface albedo (direct and diffuse fraction)
+!
+ALLOCATE(XDIR_ALB (ILU))
+ALLOCATE(XSCA_ALB (ILU))
+!
+IF(CSEA_ALB=='RS14')THEN
+!
+  YRECFM='OSA_DIR'
+  CALL READ_SURF(HPROGRAM,YRECFM,XDIR_ALB(:),IRESP)
+!
+  YRECFM='OSA_SCA'
+  CALL READ_SURF(HPROGRAM,YRECFM,XSCA_ALB(:),IRESP)
+!
+ELSE
+!
+  XDIR_ALB(:)=0.065
+  XSCA_ALB(:)=0.065
+!
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('READ_SEAFLUX_N',1,ZHOOK_HANDLE)

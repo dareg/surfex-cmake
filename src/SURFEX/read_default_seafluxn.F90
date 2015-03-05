@@ -23,13 +23,14 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      V. Masson   *Meteo France*
+!!	V. Masson   *Meteo France*	
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    09/2013 : S. Senesi : introduce sea-ice scheme
+!!      Modified    01/2015 : R. Séférian : introduce ocean surface albedo 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -108,7 +109,7 @@ IF (LNAM_READ) THEN
  IF (GFOUND) READ(UNIT=ILUDES,NML=NAM_SEAICEn)
  !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSEA_FLUX',CSEA_FLUX,'DIRECT','ITERAT','ECUME ','ECUME6','COARE3')
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CSEA_ALB', CSEA_ALB, 'UNIF','TA96','MK10')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CSEA_ALB', CSEA_ALB, 'UNIF','TA96','MK10','RS14')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CCH_DRY_DEP',CCH_DRY_DEP,'      ','WES89 ','NONE  ')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CINTERPOL_SST',CINTERPOL_SST,'ANNUAL','MONTH ','NONE  ')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CINTERPOL_SSS',CINTERPOL_SSS,'ANNUAL','MONTH ','NONE  ')

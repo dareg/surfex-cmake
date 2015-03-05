@@ -30,6 +30,7 @@ SUBROUTINE COUPLING_NATURE_n(HPROGRAM, HCOUPLING, PTIMEC,                       
 !!    -------------
 !!      Original    01/2004
 !!      B. Decharme  04/2013 new coupling variables
+!!      P. Le Moigne 03/2015 tsz0 time management
 !!--------------------------------------------------------------------
 !
 USE MODD_SURF_ATM_n, ONLY : CNATURE
@@ -124,7 +125,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_NATURE_N',0,ZHOOK_HANDLE)
 IF (CNATURE=='ISBA  ') THEN
-  CALL COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                                           &
+  CALL COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                                             &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI,KSV,KSW,                                                                 &
                  PTSUN, PZENITH, PZENITH2, PAZIM,                                            &
@@ -136,8 +137,8 @@ IF (CNATURE=='ISBA  ') THEN
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
 ELSE IF (CNATURE=='TSZ0  ') THEN
-  CALL COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                                &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
+  CALL COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                                  &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIMEC,                                        &
                  KI,KSV,KSW,                                                                 &
                  PTSUN, PZENITH,  PZENITH2, PAZIM,                                           &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &

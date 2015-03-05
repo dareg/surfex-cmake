@@ -251,7 +251,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 REAL, PARAMETER  :: ZTIMEMAX      = 300.  ! s  Maximum timescale without time spliting
 !
 INTEGER  :: JDT, INDT
-REAL :: zaux, ZTSTEP
+REAL :: zaux, zcond, zloc, ZTSTEP
 !
 !==============================================================================
 !  Start calculations
@@ -435,11 +435,20 @@ opticpar_water(JL) = opticpar_medium(1,                       &
 !  Compute skin temperature in case of no ice nor snow
 !------------------------------------------------------------------------------
 !
-   IF (lflk_skintemp .AND. hflk_flux=='FLAKE') THEN
-         zaux  = (1.-exp(-opticpar_water(JL)%extincoef_optic(1) * h_skinlayer_flk)) &
-                  / opticpar_water(JL)%extincoef_optic(1)
-         T_sfc(JL)  = T_sfc_n + ((I_w_flk + Q_w_flk)*h_skinlayer_flk-I_w_flk*zaux) &
-                       / tpl_kappa_w
+!  Q_w_flk=LWD-LWU-(QH+QE)      accounts for water phase (water, ice, snow)
+!  (1-albedo)*I_atm_flk=SWD-SWU accounts for water phase (water, ice, snow)
+!
+   IF (lflk_skintemp.AND.(h_ice(JL)<h_Ice_min_flk).AND.(hflk_flux=='FLAKE')) THEN
+
+         zaux  = (1.0-exp(-opticpar_water(JL)%extincoef_optic(1) * h_skinlayer_flk)) &
+                        / opticpar_water(JL)%extincoef_optic(1)
+
+         zcond = tpl_kappa_w
+
+         zloc = ((1.0-albedo(JL))*I_atm_flk+Q_w_flk)*h_skinlayer_flk-(1.0-albedo(JL))*I_atm_flk*zaux
+
+         T_sfc(JL)  = T_sfc_n + zloc / zcond
+
    ENDIF
 !   
 ENDDO H_POINT_LOOP

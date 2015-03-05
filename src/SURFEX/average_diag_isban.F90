@@ -24,7 +24,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!      S. Belair           * Meteo-France *
+!!	S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -38,6 +38,7 @@
 !!      B. Decharme    04/13 Averaged Trad already done in average_diag.F90
 !!                           Good dimension for CO2 flux
 !!      P. Samuelsson  10/13 Added min max for XT2M
+!!      B. Decharme    02/15 No dependence on HW for 10M Wind diags
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -257,17 +258,11 @@ IF (.NOT. LCANOPY .AND. N2M>=1) THEN
 !
 ! 10 meters wind
 !
-  WHERE(PHW(:)>=10.) 
-    XAVG_ZON10M (:)  = 0.
-    XAVG_MER10M (:)  = 0.
-    XAVG_WIND10M(:)  = 0.
-  ELSEWHERE
-    XAVG_ZON10M (:)  = XUNDEF
-    XAVG_MER10M (:)  = XUNDEF
-    XAVG_WIND10M(:)  = XUNDEF
-  END WHERE
+  XAVG_ZON10M (:)  = 0.
+  XAVG_MER10M (:)  = 0.
+  XAVG_WIND10M(:)  = 0.
   DO JPATCH=1,SIZE(XPATCH,2)
-    WHERE (ZSUMPATCH(:) > 0. .AND. PHW(:)>=10.)
+    WHERE (ZSUMPATCH(:) > 0.)
       XAVG_ZON10M(:)  = XAVG_ZON10M (:) + XPATCH(:,JPATCH) * XZON10M (:,JPATCH)
       XAVG_MER10M(:)  = XAVG_MER10M (:) + XPATCH(:,JPATCH) * XMER10M (:,JPATCH)
       XAVG_WIND10M(:) = XAVG_WIND10M(:) + XPATCH(:,JPATCH) * XWIND10M(:,JPATCH)

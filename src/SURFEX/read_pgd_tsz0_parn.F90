@@ -24,11 +24,12 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      P. Le Moigne   *Meteo France*
+!!	P. Le Moigne   *Meteo France*	
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    09/2007 
+!!      Original     09/2007 
+!!      P. Le Moigne 03/2015 tsz0 time management
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -70,7 +71,7 @@ IF (IVERSION.GT.7 .OR. (IVERSION==7 .AND. IBUGFIX.GT.1)) THEN
   YCOMMENT = '(-)'
   CALL READ_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
 ELSE 
-  NTIME=25
+  NTIME=37
 ENDIF
 !
 ALLOCATE(XDATA_DTS   (NTIME))

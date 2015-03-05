@@ -37,7 +37,6 @@ SUBROUTINE DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, PSST, PQA, &
 !!                          more argument (height of diagnostic)
 !!      B. Decharme 04/2013 : Add EVAP and SUBL diag
 !!      S. Senesi   01/2014 ! introduce fractional seaice and sea-ice model 
-!!      S. Belamari 01/2014 : Wind module=XUNDEF if one component is XUNDEF
 !!------------------------------------------------------------------
 !
 
@@ -200,21 +199,9 @@ IF (.NOT. LSBL) THEN
         XQ2M    = XQ2M    * (1 - PSIC) + XQ2M_ICE    * PSIC
         XHU2M   = XHU2M   * (1 - PSIC) + XHU2M_ICE   * PSIC
         !
-        WHERE(XZON10M(:)/=XUNDEF.AND.XZON10M_ICE(:)/=XUNDEF)
-              XZON10M(:) = XZON10M(:) * (1 - PSIC(:)) + XZON10M_ICE(:) * PSIC(:)
-        ELSEWHERE
-              XZON10M(:) = XUNDEF
-        ENDWHERE
-        WHERE(XMER10M(:)/=XUNDEF.AND.XMER10M_ICE(:)/=XUNDEF)
-              XMER10M(:) = XMER10M(:) * (1 - PSIC(:)) + XMER10M_ICE(:) * PSIC(:)
-        ELSEWHERE
-              XMER10M(:) = XUNDEF
-        ENDWHERE
-        WHERE(XZON10M_ICE(:) /= XUNDEF .AND. XMER10M_ICE(:) /= XUNDEF)
-              XWIND10M_ICE(:) = SQRT(XZON10M_ICE(:)**2+XMER10M_ICE(:)**2)
-        ELSEWHERE
-              XWIND10M_ICE(:) = XUNDEF
-        ENDWHERE
+        XZON10M(:) = XZON10M(:) * (1 - PSIC(:)) + XZON10M_ICE(:) * PSIC(:)
+        XMER10M(:) = XMER10M(:) * (1 - PSIC(:)) + XMER10M_ICE(:) * PSIC(:)
+        XWIND10M_ICE(:) = SQRT(XZON10M_ICE(:)**2+XMER10M_ICE(:)**2)
         !
         XRI    = PRI     * (1 - PSIC) + PRI_ICE     * PSIC
         XRI_ICE=PRI_ICE
@@ -228,11 +215,7 @@ IF (.NOT. LSBL) THEN
     XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
     XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
     !
-    WHERE(XZON10M(:) /= XUNDEF .AND. XMER10M(:) /= XUNDEF)
-      XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
-    ELSEWHERE
-      XWIND10M(:) = XUNDEF
-    ENDWHERE
+    XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
     XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
     !
   ENDIF

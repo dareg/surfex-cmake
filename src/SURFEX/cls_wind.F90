@@ -1,7 +1,7 @@
 !     #########
        SUBROUTINE CLS_WIND( PZONA, PMERA, PHW,                 &
-                              PCD, PCDN, PRI, PHV,               &
-                              PZON10M, PMER10M                   )  
+                            PCD, PCDN, PRI, PHV,               &
+                            PZON10M, PMER10M                   )  
 !     ###############################################################
 !
 !!****  *PARAMCLS*  
@@ -41,6 +41,7 @@
 !!      S. Riette   06/2009  height of diagnostic becomes an argument
 !!      S. Riette   01/2010 XUNDEF is sent where forcing level is below heigt of
 !!                          diagnostic (no extrapolation, only interpolation)
+!!      P. LeMoigne 02/2015 Suppress XUNDEF
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -72,7 +73,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PMER10M! meridian wind at 10 meters
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PHW)) :: ZBN,ZBD,ZRU, ZMUL
+REAL, DIMENSION(SIZE(PHW)) :: ZBN,ZBD,ZRU
 REAL, DIMENSION(SIZE(PHW)) :: ZLOGU,ZCORU,ZIV
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -96,7 +97,11 @@ ZBN(:)=XKARMAN/SQRT(PCDN(:))
 !
 ZBD(:)=XKARMAN/SQRT(PCD(:))
 !
-ZRU(:)=MIN(PHV(:)/PHW(:),1.)
+WHERE(PHV(:)<=PHW(:))
+   ZRU(:)=MIN(PHV(:)/PHW(:),1.)
+ELSEWHERE
+   ZRU(:)=MIN(PHW(:)/PHV(:),1.)
+END WHERE
 !
 ZLOGU(:)=LOG(1.+ZRU(:)*(EXP(ZBN(:)) -1.))
 !
@@ -116,14 +121,13 @@ END WHERE
 !
 !
 ZIV(:)=MAX(0.,MIN(1.,(ZLOGU(:)-ZCORU(:))/ZBD(:)))
-ZMUL(:)=(LOG(PHV(:)/PHW(:)))/ZBN (:) - 1
-
+!
 WHERE(PHV(:)<=PHW(:))
   PZON10M(:)=PZONA(:)*ZIV(:)
   PMER10M(:)=PMERA(:)*ZIV(:)
 ELSEWHERE
-  PZON10M(:)=PZONA(:)*ZMUL(:)
-  PMER10M(:)=PMERA(:)*ZMUL(:)
+  PZON10M(:)=PZONA(:)/MAX(1.,ZIV(:))
+  PMER10M(:)=PMERA(:)/MAX(1.,ZIV(:))  
 END WHERE
 IF (LHOOK) CALL DR_HOOK('CLS_WIND',1,ZHOOK_HANDLE)
 !

@@ -933,7 +933,6 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2, ZVISCOCITY, ZF1
                                                       ZTEMP, ZSMASS, ZSNOWDZ,     &
                                                       ZWSNOWDZ  
 !
-REAL, DIMENSION(SIZE(PSNOW))         :: ZSMASSC
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -969,14 +968,7 @@ ZSMASS(:,1) = 0.5 * PSNOWDZ(:,1) * PSNOWRHO(:,1)
 !
 !Liquid water effect
 !
-ZF1(:,:) = 1.0
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      IF(PSNOWRHO(JI,JJ)<XRHOSMAX_ES.AND.PSNOWLIQ(JI,JJ)>0.0)THEN
-         ZF1(JI,JJ) = ZF1(JI,JJ)/(XVVISC5+XVVISC6*PSNOWLIQ(JI,JJ)/ZSNOWDZ(JI,JJ))
-      ENDIF
-   ENDDO
-ENDDO
+ZF1(:,:) = 1.0/(XVVISC5+10.*XVVISC6*PSNOWLIQ(:,:)/ZSNOWDZ(:,:))
 !
 !Snow viscocity, density and grid thicknesses
 !
@@ -994,7 +986,7 @@ DO JJ=1,INLVLS
 !       Calculate snow density:
         ZSNOWRHO2(JI,JJ) = PSNOWRHO(JI,JJ) + PSNOWRHO(JI,JJ)*PTSTEP &
                          * ( (XG*ZSMASS(JI,JJ)/ZVISCOCITY(JI,JJ)) )
-!                         
+!         
 !       Conserve mass by decreasing grid thicknesses in response to density increases
         PSNOWDZ(JI,JJ) = PSNOWDZ(JI,JJ)*(PSNOWRHO(JI,JJ)/ZSNOWRHO2(JI,JJ))  
 !        
@@ -1449,9 +1441,9 @@ END SUBROUTINE SNOW3LTRANSF
 !     through the snowpack (using a form of Beer's Law: exponential
 !     decay of radiation with increasing snow depth).
 !
-USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA3,XVBETA5, &          
-                          XDSGRAIN_MAX,XSNOW_AGRAIN,XSNOW_BGRAIN,  &
-                          XES_CVEXT, XMINCOSZEN
+USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA1,XVBETA2, &
+                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN,     &          
+                          XDSGRAIN_MAX,XSNOW_AGRAIN,XSNOW_BGRAIN
 !
 IMPLICIT NONE
 !
@@ -1538,8 +1530,8 @@ ZDSGRAIN(:,:) = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:,:)**4)
 !
 ZWORK(:,:)=SQRT(ZDSGRAIN(:,:))
 !
-ZBETA1(:,:)=XES_CVEXT*PSNOWRHO(:,:)/ZWORK(:,:)
-ZBETA2(:,:)=XVBETA3*PSNOWRHO(:,:)/ZWORK(:,:)
+ZBETA1(:,:)=MAX(XVBETA1*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA2)
+ZBETA2(:,:)=MAX(XVBETA3*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA4)
 ZBETA3(:,:)=XVBETA5
 !
 ZOPTICALPATH1(:) = 0.0
@@ -1549,9 +1541,9 @@ ZOPTICALPATH3(:) = 0.0
 DO JJ=1,INLVLS
    DO JI=1,INI
       !
-      ZOPTICALPATH1(JI   ) = ZOPTICALPATH1(JI) + ZBETA1(JI,JJ)*ZSNOWDZ(JI,JJ)
-      ZOPTICALPATH2(JI   ) = ZOPTICALPATH2(JI) + ZBETA2(JI,JJ)*ZSNOWDZ(JI,JJ)
-      ZOPTICALPATH3(JI   ) = ZOPTICALPATH3(JI) + ZBETA3(JI,JJ)*ZSNOWDZ(JI,JJ)
+      ZOPTICALPATH1(JI) = ZOPTICALPATH1(JI) + ZBETA1(JI,JJ)*ZSNOWDZ(JI,JJ)
+      ZOPTICALPATH2(JI) = ZOPTICALPATH2(JI) + ZBETA2(JI,JJ)*ZSNOWDZ(JI,JJ)
+      ZOPTICALPATH3(JI) = ZOPTICALPATH3(JI) + ZBETA3(JI,JJ)*ZSNOWDZ(JI,JJ)
       !
       ZCOEF (JI,JJ) = XVSPEC1*(1.0-PSPECTRALALBEDO(JI,1))*EXP(-ZOPTICALPATH1(JI)*ZPROJLAT(JI)) &
                     + XVSPEC2*(1.0-PSPECTRALALBEDO(JI,2))*EXP(-ZOPTICALPATH2(JI)*ZPROJLAT(JI)) &

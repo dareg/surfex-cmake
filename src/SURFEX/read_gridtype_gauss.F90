@@ -83,7 +83,8 @@ REAL,    DIMENSION(KLU) :: ZLONINF     ! Grid corner Longitude  Inf
 !
 INTEGER                 :: ILUOUT
 !---------------------------------------------------------------------------
-REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR
+REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR=>NULL()
+!$OMP THREADPRIVATE(ZGRID_PAR)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !

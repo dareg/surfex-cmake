@@ -26,7 +26,7 @@
 !!    REFERENCE : routine restartr in original Gelato sources (V6.0.20)
 !!    ---------
 !!
-!!    AUTHOR : S. Sénési   *Meteo France*
+!!    AUTHOR : S. Sénési   *Meteo France*	
 !!    ------
 !!
 !!    MODIFICATIONS
@@ -48,6 +48,7 @@ USE MODD_SEAFLUX_n,      ONLY : LHANDLE_SIC, CSEAICE_SCHEME,   &
                                 XFSIC, XFSIT, XSEABATHY, TTIME,&
                                 XTICE, XICE_ALB, XUMER, XVMER
 USE MODD_SEAFLUX_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE
+USE MODD_WATER_PAR,      ONLY : XALBSEAICE
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo, xdomsrf, xdomsrf_g, nprinto
@@ -155,7 +156,9 @@ ENDIF
 !
 IF (TRIM(CSEAICE_SCHEME) == 'NONE' ) THEN
    IF (LINTERPOL_SIC ) THEN
+      XTICE=XSST
       XSIC=XFSIC
+      XICE_ALB=XALBSEAICE           
       IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',1,ZHOOK_HANDLE)
       RETURN
    ELSE
