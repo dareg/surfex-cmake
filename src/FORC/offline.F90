@@ -163,6 +163,8 @@ USE MODI_SFX_OASIS_DEF_OL
 USE MODI_SFX_OASIS_RECV_OL
 USE MODI_SFX_OASIS_SEND_OL
 USE MODI_SFX_OASIS_END
+!RJ: missing modi
+USE MODI_LOCAL_SLOPE_PARAM
 !
 USE MODE_GLT_DIA_LU
 !
@@ -254,11 +256,10 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar
 !
 INTEGER                           :: I2M, IBEQ, IDSTEQ
 LOGICAL                           :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
-                                     GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GINTERPOL_SST,   &
-                                     GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,            &
-                                     GWATER_PROFILE, GINTERPOL_TS,                           &
-                                     GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,&
-                                     GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB
+                                     GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GWATER_PROFILE,  &
+                                     GINTERPOL_TS, GSURF_EVAP_BUDGET, GFLOOD, GPGD_ISBA,     &
+                                     GCH_NO_FLUX_ISBA, GSURF_MISC_BUDGET_ISBA, GPGD_TEB,     &
+                                     GSURF_MISC_BUDGET_TEB
 !
 ! Inquiry mode arrays:
 !
@@ -324,9 +325,10 @@ ENDIF
  CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
 !
-!
+!RJ: init modd_surefx_omp
 !$OMP PARALLEL
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
+!$ NBLOCK = OMP_GET_THREAD_NUM()
 !$OMP END PARALLEL
 !
  CALL PREP_LOG_MPI
@@ -356,11 +358,14 @@ IF ( NRANK==NPIO ) THEN
   !
 !$OMP SINGLE
   !
-  WRITE(*,*) "CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?"
-  WRITE(*,*) "PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL" 
+!RJ: be verbose just for openmp
+  IF(NBLOCKTOT==1) THEN
+!$  WRITE(*,*) "CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?"
+!$  WRITE(*,*) "PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL" 
   !
-  WRITE(ILUOUT,*) "CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?"
-  WRITE(ILUOUT,*) "PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL" 
+!$  WRITE(ILUOUT,*) "CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?"
+!$  WRITE(ILUOUT,*) "PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL" 
+  ENDIF
   !
 !$OMP END SINGLE
   !
@@ -393,19 +398,20 @@ IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
 !
 IF (NRANK==NPIO) THEN
   !
-  CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
+  CFILEPGD = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
+  CFILEIN  = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
+  CFILEIN_SAVE = CFILEIN
+  !
   CFILEPGD_LFI = CPGDFILE
-  CFILEPGD_FA  = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
-  CFILEPGD_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
-  !
-  CFILEIN     = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
-  CFILEIN_LFI = CPREPFILE
-  CFILEIN_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
-  CFILEIN_NC  = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
-  !
-  CFILEIN_SAVE     = CFILEIN
+  CFILEIN_LFI  = CPREPFILE
   CFILEIN_LFI_SAVE = CFILEIN_LFI
+  !
+  CFILEPGD_FA = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+  CFILEIN_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
   CFILEIN_FA_SAVE  = CFILEIN_FA
+  !
+  CFILEPGD_NC = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+  CFILEIN_NC  = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
   CFILEIN_NC_SAVE  = CFILEIN_NC
   !
 ENDIF
@@ -827,7 +833,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
 #ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
-    XTIME1 = MPI_WTIME()    
+    XTIME1 = MPI_WTIME()
 #endif
     !
     IF(LADAPT_SW)THEN
@@ -846,7 +852,21 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XDIR_SW(:,JLOOP) = XDIR_SW(:,JLOOP) * ZCOEF(:)
       ENDDO
       !
-    ENDIF
+    ELSE
+      !
+      ZSW(:) = 0.
+      DO JLOOP=1,SIZE(XDIR_SW,2)
+        ZSW(:) = ZSW(:) + XDIR_SW(:,JLOOP) + XSCA_SW(:,JLOOP)
+      END DO
+      WHERE (ZSW(:)>0.)
+        XZENITH  = MIN (XZENITH ,XPI/2.-0.01)
+        XZENITH2 = MIN (XZENITH2,XPI/2.-0.01)
+      ELSEWHERE
+        XZENITH  = MAX (XZENITH ,XPI/2.)
+        XZENITH2 = MAX (XZENITH2,XPI/2.)
+      END WHERE
+      !
+    ENDIF       
     !
     ! updates time
     ZTIMEC= ZTIMEC+XTSTEP_SURF
@@ -855,7 +875,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     ! run Surface
     !
 #ifdef SFX_MPI
-    XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1) 
+    XTIME_CALC(4) = XTIME_CALC(4) + (MPI_WTIME() - XTIME1)
 #endif
     !
     CALL IO_BUFF_CLEAN_n
@@ -870,9 +890,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
 !$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
     !
 #ifdef SFX_MPI
-    XTIME1 = MPI_WTIME()    
+    XTIME1 = MPI_WTIME()
 #endif
-    !    
+    !
 !$ NBLOCK = OMP_GET_THREAD_NUM()
     !
     IF (NBLOCK==NBLOCKTOT) THEN
@@ -928,7 +948,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
 !$OMP END PARALLEL
     !
 #ifdef SFX_MPI
-    XTIME1 = MPI_WTIME()  
+    XTIME1 = MPI_WTIME()
 #endif
     !
     IF(LOASIS)THEN
@@ -1298,7 +1318,7 @@ IF ( LRESTART ) THEN
       I2M       = 0
       GPGD_ISBA = .FALSE.
     ENDIF
-    GFRAC                  = .FALSE.
+    GFRAC                  = .TRUE.
     GDIAG_GRID             = .TRUE.
     GSURF_BUDGET           = .FALSE.
     GRAD_BUDGET            = .FALSE.
@@ -1308,12 +1328,7 @@ IF ( LRESTART ) THEN
     IDSTEQ                 = 0
     GDIAG_OCEAN            = .FALSE.
     GDIAG_SEAICE           = .FALSE.
-    GINTERPOL_SST          = .FALSE.
-    GINTERPOL_SSS          = .FALSE.
-    GINTERPOL_SIC          = .FALSE.
-    GINTERPOL_SIT          = .FALSE.
     GWATER_PROFILE         = .FALSE.
-    GINTERPOL_TS           = .FALSE.
     GSURF_EVAP_BUDGET      = .FALSE.
     GFLOOD                 = .FALSE.
     GCH_NO_FLUX_ISBA       = .FALSE.
@@ -1323,8 +1338,7 @@ IF ( LRESTART ) THEN
     !
     CALL FLAG_DIAG_UPDATE(GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                           GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
-                          GINTERPOL_SST, GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,&
-                          GWATER_PROFILE, GINTERPOL_TS,                              &
+                          GWATER_PROFILE,                                            &                          
                           GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
                           GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
     !
