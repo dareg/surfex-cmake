@@ -371,11 +371,7 @@ CALL READ_SEAICE_n(HPROGRAM,ILU,ILUOUT)
 !*       5.     Albedo, emissivity and temperature fields on the mix (open sea + sea ice)
 !               -----------------------------------------------------------------
 !
-ALLOCATE(XDIR_ALB (ILU))
-ALLOCATE(XSCA_ALB (ILU))
 ALLOCATE(XEMIS    (ILU))
-XDIR_ALB = 0.0
-XSCA_ALB = 0.0
 XEMIS    = 0.0
 !
 CALL UPDATE_RAD_SEA(CSEA_ALB,XSST,PZENITH,XTTS,XEMIS,XDIR_ALB,&

@@ -107,19 +107,26 @@ KNI = SUM(INLOPA)
 !*   3 Computes additional quantities used in interpolation
 !      ----------------------------------------------------
 !
-INLATI2=NINT(REAL(INLATI)/2.0_JPRB)
-NINLA = INLATI
-NINLO = INLOPA
-NILEN = KNI
-LROTPOLE = .TRUE.
-XLOP = ZLOPO
-XLAP = ZLAPO
-XCOEF=ZCODIL
+INLATI2  = NINT(REAL(INLATI)/2.0)
+NINLA    = INLATI
+NILEN    = KNI
+XLOP     = ZLOPO
+XLAP     = ZLAPO
+XCOEF    = ZCODIL
 !
-XILA1=90.0*(1.0-0.5/REAL(INLATI,JPRB))
+NINLO(:) = INLOPA(:)
+!
+!* type of transform
+IF (ZLAPO>89.99 .AND. ABS(ZLOPO)<0.00001) THEN
+  LROTPOLE = .FALSE.
+ELSE
+  LROTPOLE = .TRUE.
+ENDIF
+!
+XILA1=90.0*(1.0-0.5/REAL(INLATI))
 XILO1=0.0
-XILA2=-90.0*(1.0-0.5/REAL(INLATI,JPRB))
-XILO2=360.0*(REAL(INLOPA(INLATI2),JPRB)-1.0)/REAL(INLOPA(INLATI2),JPRB)
+XILA2=-90.0*(1.0-0.5/REAL(INLATI))
+XILO2=360.0*(REAL(INLOPA(INLATI2))-1.0)/REAL(INLOPA(INLATI2))
 !
 HINTERP_TYPE = 'HORIBL'
 !-----------------------------------------------------------------------
