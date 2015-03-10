@@ -38,32 +38,35 @@ SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSIO
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
-USE MODD_TEB_n,           ONLY: TTIME, XGARDEN
+USE MODD_TEB_n,           ONLY: XGARDEN
+USE MODD_TEB_OPTION_n,    ONLY: TTIME
 USE MODD_TEB_VEG_n,       ONLY: CISBA, CPEDOTF, CPHOTO, CSCOND, LTR_ML, NNBIOMASS,  &
                                 CCPSURF, CKSAT, LSOC, CRUNOFF
-USE MODD_TEB_GARDEN_n,    ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     &
+USE MODD_TEB_GARDEN_OPTION_n,  ONLY :NGROUND_LAYER, NLAYER_HORT, NLAYER_DUN,        &
+                                LPAR_GARDEN      
+USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY: XLAI, XVEG, XEMIS, XZ0,                        &
+                                XALBNIR, XALBVIS, XALBUV
+USE MODD_TEB_GARDEN_PGD_n,ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     & 
                                 XCLAY, XSAND, XWWILT, XWFC, XWSAT,                  &
-                                XVEG, XRSMIN, XGAMMA, XRGL, XCV, XLAI,              &
-                                XDG, XZ0, XZ0_O_Z0H, XABC, XPOI,                    &
+                                XRSMIN, XGAMMA, XRGL, XCV,                          &
+                                XDG, XZ0_O_Z0H, XABC, XPOI,                         &
                                 XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,               &
-                                XEMIS, XVEGTYPE, XGMES, XRE25, XBSLAI, XLAIMIN, XGC,&
+                                XVEGTYPE, XGMES, XRE25, XBSLAI, XLAIMIN, XGC,       &
                                 XDMAX, XF2I, XDG2, XDROOT, NWG_LAYER,               &
                                 XSEFOLD, XH_TREE, XWRMAX_CF, XDZG, XDZDIF,          &
                                 XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,               &
                                 XALBNIR_WET, XALBVIS_WET, XALBUV_WET,               &
                                 XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,            &
-                                XALBNIR, XALBVIS, XALBUV,                           &
                                 XROOTFRAC,XRUNOFFD, XANMAX, XFZERO, XEPSO, XGAMM,   &
                                 XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, &
-                                XT1AMAX, XT2AMAX, XAH, XBH,              &
+                                XT1AMAX, XT2AMAX, XAH, XBH,                         &
                                 XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF,  &
-                                XTAUICE, XACOEF, XPCOEF, XBCOEF, XCONDSAT, &
+                                XTAUICE, XACOEF, XPCOEF, XBCOEF, XCONDSAT,          &
                                 XHCAPSOIL, XCONDDRY, XCONDSLD, XC4REF, XMPOTSAT,    &
-                                XTDEEP, XGAMMAT, NGROUND_LAYER, XSOILWGHT,          &
-                                XCE_NITRO, XCF_NITRO, NLAYER_HORT, NLAYER_DUN,      &
+                                XTDEEP, XGAMMAT, XSOILWGHT,                         &
+                                XCE_NITRO, XCF_NITRO,                               &
                                 XCNA_NITRO, XBSLAI_NITRO,                           &
-                                XD_ICE, XKSAT_ICE,                                  &
-                                LPAR_GARDEN      
+                                XD_ICE, XKSAT_ICE
 USE MODD_CH_TEB_n,        ONLY: CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,       &
                                 CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,    &
                                 NSV_AERBEG, NSV_AEREND, NAEREQ, CDSTNAMES,          &

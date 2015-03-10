@@ -40,10 +40,11 @@
 !              ------------
 USE MODD_TEB_VEG_n,    ONLY : CPHOTO, CRESPSL, NNBIOMASS
 
-USE MODD_TEB_GARDEN_n, ONLY : NGROUND_LAYER,                               &
-                              XTG, XWG, XWGI, XWR, XLAI, TSNOW,            &
-                              XRESA, XAN, XANFM, XLE, XANDAY,              &
-                              XRESP_BIOMASS, XBIOMASS
+USE MODD_TEB_GARDEN_OPTION_n,  ONLY : NGROUND_LAYER
+USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY : XLAI
+USE MODD_TEB_GARDEN_n,         ONLY : XTG, XWG, XWGI, XWR, TSNOW,      &
+                                      XRESA, XAN, XANFM, XLE, XANDAY,  &
+                                      XRESP_BIOMASS, XBIOMASS
 !
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !

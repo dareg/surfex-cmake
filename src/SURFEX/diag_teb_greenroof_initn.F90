@@ -41,11 +41,11 @@
 !
 USE MODD_SURF_PAR,             ONLY : XUNDEF
 USE MODD_TEB_VEG_n,            ONLY : CPHOTO, CHORT
-USE MODD_TEB_GREENROOF_n,      ONLY : NLAYER_GR
+USE MODD_TEB_GREENROOF_OPTION_n,ONLY: NLAYER_GR
 USE MODD_TYPE_DATE_SURF
 USE MODD_DIAG_SURF_ATM_n,      ONLY : LREAD_BUDGETC
 USE MODD_DIAG_TEB_n,           ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS
-USE MODD_DIAG_MISC_TEB_n,      ONLY : LSURF_EVAP_BUDGET, LSURF_MISC_BUDGET  
+USE MODD_DIAG_MISC_TEB_OPTION_n,ONLY: LSURF_EVAP_BUDGET, LSURF_MISC_BUDGET  
 USE MODD_DIAG_TEB_GREENROOF_n, ONLY : XRN, XH, XGFLUX, XLEI, XRI, XCD, XCDN, XCH, XCE, &
                                       XTS, XTSRAD,                                     &
                                       XZ0_WITH_SNOW, XZ0H_WITH_SNOW, XZ0EFF, XQS,      &
@@ -54,7 +54,7 @@ USE MODD_DIAG_TEB_GREENROOF_n, ONLY : XRN, XH, XGFLUX, XLEI, XRI, XCD, XCDN, XCH
                                       XDRAIN, XRUNOFF, XHORT, XDRIP, XMELT,            &
                                       XRRVEG, XHV,  XSWI, XTSWI, XTWSNOW,              &
                                       XTDSNOW, XSEUIL, XGPP, XRESP_AUTO, XRESP_ECO,    &
-                                      XALBT, XEMIST, XALBT,                            &
+                                      XALBT, XEMIST,                                   &
                                       XCG, XC1, XC2, XWGEQ, XCT, XRS, XHU, XHUG,       &
                                       XRESTORE, XUSTAR,                                &
                                       XSNOWTEMP, XSNOWLIQ, XSNOWDZ, XSNOWHMASS,        &

@@ -36,18 +36,19 @@
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
-USE MODD_TEB_n,          ONLY : NROOF_LAYER, XT_ROOF, XWS_ROOF, &
-                                  NROAD_LAYER, XT_ROAD, XWS_ROAD, &
-                                  NWALL_LAYER,XT_WALL_A,XT_WALL_B,&
-                                  XTI_ROAD, CBEM,                 &
-                                  TSNOW_ROOF, TSNOW_ROAD,         &
-                                  XT_CANYON, XQ_CANYON,           &
-                                  NTEB_PATCH, CROAD_DIR, CWALL_OPT,&
-                                  LSOLAR_PANEL
+USE MODD_TEB_OPTION_n,   ONLY : NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
+                                NTEB_PATCH, CROAD_DIR, CWALL_OPT, CBEM,&
+                                LSOLAR_PANEL
+USE MODD_TEB_n,          ONLY : XT_ROOF, XWS_ROOF,              &
+                                XT_ROAD, XWS_ROAD,              &
+                                XT_WALL_A,XT_WALL_B,            &
+                                XTI_ROAD,                       &
+                                TSNOW_ROOF, TSNOW_ROAD,         &
+                                XT_CANYON, XQ_CANYON
+USE MODD_BEM_OPTION_n,   ONLY : NFLOOR_LAYER
+USE MODD_BEM_n,          ONLY : XT_FLOOR, XT_MASS,              &
+                                XT_WIN1, XT_WIN2, XQI_BLD, XTI_BLD                                   
 USE MODD_TEB_PANEL_n,    ONLY : XTHER_PRODC_DAY
-
-USE MODD_BEM_n, ONLY : NFLOOR_LAYER, XT_FLOOR, XT_MASS,           &
-                       XT_WIN1, XT_WIN2, XQI_BLD, XTI_BLD                                   
 USE MODD_ASSIM, ONLY : LASSIM,XAT2M_TEB,NIPERT,NVAR
 !
 USE MODI_READ_SURF

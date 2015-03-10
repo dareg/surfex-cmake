@@ -35,7 +35,7 @@ SUBROUTINE CUMUL_DIAG_TEB_n(PTSTEP)
 !*       0.     DECLARATIONS
 !               ------------
 USE MODD_SURF_PAR,        ONLY :  XUNDEF
-USE MODD_TEB_n,           ONLY :  CBEM, LGREENROOF, LSOLAR_PANEL
+USE MODD_TEB_OPTION_n,    ONLY :  CBEM, LGREENROOF, LSOLAR_PANEL
 USE MODD_TEB_PANEL_n,     ONLY :  XFRAC_PANEL 
 USE MODD_DIAG_MISC_TEB_n, ONLY :  XHVAC_COOL,        &
                                   XHVAC_HEAT,        &

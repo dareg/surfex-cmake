@@ -38,12 +38,13 @@ USE MODD_PREP_TEB_GARDEN, ONLY : XGRID_SOIL, NGRID_LEVEL,                  &
                                  XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, &
                                  XAGESNOW_GD, XASNOW_GD, LSNOW_IDEAL_GD
 
-USE MODD_TEB_n,           ONLY : TTIME
+USE MODD_TEB_OPTION_n,    ONLY : TTIME
 USE MODD_TEB_VEG_n,       ONLY : CISBA
-USE MODD_TEB_GARDEN_n,    ONLY : XWG, XWGI, XTG, XWR, XLAI,                &
-                                 NGROUND_LAYER,                            &
-                                 XVEGTYPE, XDG, XWWILT, XWFC,              &
-                                 XROOTFRAC, XWSAT, TSNOW
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : NGROUND_LAYER
+USE MODD_TEB_GARDEN_PGD_n,ONLY : XVEGTYPE, XDG, XWWILT, XWFC,              &
+                                 XROOTFRAC, XWSAT
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : XLAI
+USE MODD_TEB_GARDEN_n,    ONLY : XWG, XWGI, XTG, XWR, TSNOW
 USE MODD_TEB_GRID_n,      ONLY : XLAT, XLON
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE

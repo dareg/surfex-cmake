@@ -39,11 +39,11 @@
 USE MODD_DATA_COVER_PAR,  ONLY : JPCOVER
 USE MODD_TEB_GRID_n,      ONLY : XLAT, XLON, CGRID, XGRID_PAR,          &
                                  XMESH_SIZE, NDIM
-USE MODD_TEB_n,           ONLY : XCOVER, LCOVER, XZS,                   &
+USE MODD_TEB_OPTION_n,    ONLY : XCOVER, LCOVER, XZS,                   &
                                  NROOF_LAYER, NROAD_LAYER, NWALL_LAYER, &
                                  LECOCLIMAP, LGARDEN, NTEB_PATCH,       &
                                  CBEM, CBLD_ATYPE
-USE MODD_BEM_n,           ONLY : NFLOOR_LAYER
+USE MODD_BEM_OPTION_n,    ONLY : NFLOOR_LAYER
 !
 USE MODD_PREP,            ONLY : CINGRID_TYPE, CINTERP_TYPE, LINTERP
 !
@@ -205,9 +205,8 @@ USE MODI_HOR_INTERPOL
 !
 USE MODD_TEB_VEG_n,    ONLY : CPHOTO, CISBA,                &
                               CPEDOTF, NNBIOMASS
-USE MODD_TEB_GARDEN_n, ONLY : NGROUND_LAYER,                &
-                              XSAND, XCLAY,                 &
-                              XWDRAIN, XRUNOFFB, LPAR_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : NGROUND_LAYER, LPAR_GARDEN
+USE MODD_TEB_GARDEN_PGD_n,    ONLY : XSAND, XCLAY, XWDRAIN, XRUNOFFB
 !
 IMPLICIT NONE
 !

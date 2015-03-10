@@ -37,16 +37,15 @@
 !
 USE MODD_SURF_PAR,            ONLY : XUNDEF
 !
-USE MODD_TEB_GREENROOF_n,     ONLY :  CISBA_GR, TSNOW, XALBNIR, XALBVIS, XALBUV, &
-                                      XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,      &
-                                      XALBNIR_SOIL, XALBVIS_SOIL,                &
-                                      XALBUV_SOIL, LTR_ML_GR,                    &
-                                      XVEG, XLAI, XZ0,                           &
-                                      XEMIS, XTG,                                &
-                                      XPSN, XPSNV, XPSNG, XPSNV_A,               &
-                                      XSNOWFREE_ALB_VEG,                         &
-                                      XSNOWFREE_ALB_SOIL,                        &
-                                      XSNOWFREE_ALB                                                    
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY :  CISBA_GR, LTR_ML_GR
+!
+USE MODD_TEB_GREENROOF_PGD_n,      ONLY : XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,      &
+                                          XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : XVEG, XLAI, XZ0, XEMIS, &
+                                          XALBNIR, XALBVIS, XALBUV
+USE MODD_TEB_GREENROOF_n,     ONLY :  TSNOW, XTG, XPSN, XPSNV, XPSNG, XPSNV_A,  &
+                                      XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,    &
+                                      XSNOWFREE_ALB
 !
 USE MODI_ISBA_PROPERTIES
 USE MODI_FLAG_TEB_GREENROOF_n

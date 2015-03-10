@@ -34,20 +34,22 @@ SUBROUTINE CONVERT_PATCH_TEB_GREENROOF(KLU,KDECADE)
 !              ------------
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
-USE MODD_TEB_n,             ONLY: XCOVER, LCOVER
+USE MODD_TEB_OPTION_n,      ONLY: XCOVER, LCOVER
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, LTR_ML
-USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS, NLAYER_GR,      &
-                                  XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
+USE MODD_TEB_GREENROOF_OPTION_n,   ONLY: LPAR_GREENROOF, NLAYER_GR, XSOILGRID_GR
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY: XVEG, XLAI, XZ0, XEMIS, &
+                                         XALBNIR, XALBVIS, XALBUV
+USE MODD_TEB_GREENROOF_PGD_n,      ONLY: XWRMAX_CF, XRSMIN, LSTRESS,       &
                                   XGAMMA, XCV, XRGL,                       &
-                                  XZ0, XDG2, XDROOT, NWG_LAYER,            &
-                                  XGMES, XSOILGRID_GR,                     &
+                                  XDG2, XDROOT, NWG_LAYER,                 &
+                                  XGMES,                                   &
                                   XBSLAI, XLAIMIN, XSEFOLD,                &
                                   XF2I, XGC,                               &
                                   XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
                                   XRE25,                                   &
                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XDMAX, XALBNIR, XALBVIS, XALBUV,         &
+                                  XDMAX,                                   &
                                   XVEGTYPE,                                &
                                   XD_ICE, XDG, XH_TREE, XRE25, XROOTFRAC,  &
                                   XZ0_O_Z0H

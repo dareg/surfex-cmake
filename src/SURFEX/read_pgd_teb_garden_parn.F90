@@ -46,8 +46,8 @@ USE MODD_DATA_COVER_PAR,    ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     &
                                      NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
                                      NVT_BOND, NVT_BOGR, NVT_SHRB, NVEGTYPE
 USE MODD_TEB_GRID_n,        ONLY : NDIM
-USE MODD_TEB_GARDEN_n,      ONLY : NGROUND_LAYER, CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG,     &
-                                     XSAND, XCLAY  
+USE MODD_TEB_GARDEN_OPTION_n,ONLY: NGROUND_LAYER
+USE MODD_TEB_GARDEN_PGD_n,  ONLY : CTYPE_HVEG, CTYPE_LVEG, CTYPE_NVEG, XSAND, XCLAY  
 USE MODD_DATA_TEB_GARDEN_n, ONLY : NTIME,                                                       &
                                      XDATA_FRAC_HVEG, XDATA_FRAC_LVEG, XDATA_FRAC_NVEG,           &
                                      XDATA_LAI_HVEG, XDATA_LAI_LVEG, XDATA_H_HVEG,                &

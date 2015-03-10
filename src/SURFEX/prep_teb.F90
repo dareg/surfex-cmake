@@ -47,9 +47,8 @@ USE MODD_PREP_TEB_GREENROOF, ONLY : XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, XLWCSNOW_GR
                                     XAGESNOW_GR
 !
 USE MODD_SURF_ATM,   ONLY : LVERTSHIFT
-USE MODD_TEB_n,      ONLY : TSNOW_ROOF,TSNOW_ROAD, NTEB_PATCH,              &
-                            LCANOPY, LGARDEN, LGREENROOF,                   &
-                            CBEM,                                           &
+USE MODD_TEB_n,      ONLY : TSNOW_ROOF,TSNOW_ROAD
+USE MODD_TEB_OPTION_n,ONLY: NTEB_PATCH, LCANOPY, LGARDEN, LGREENROOF, CBEM, &
                             CROAD_DIR_n=>CROAD_DIR, CWALL_OPT_n=>CWALL_OPT
 USE MODD_TEB_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
 !

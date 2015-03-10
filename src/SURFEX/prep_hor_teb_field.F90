@@ -32,12 +32,13 @@ USE MODD_PREP_TEB, ONLY : XGRID_ROOF, XGRID_ROAD, XGRID_WALL, XGRID_FLOOR, LSNOW
                           XWSNOW_ROOF, XRSNOW_ROOF, XTSNOW_ROOF, XLWCSNOW_ROOF, XASNOW_ROOF, &
                           XWSNOW_ROAD, XRSNOW_ROAD, XTSNOW_ROAD, XLWCSNOW_ROAD, XASNOW_ROAD, &
                           XHUI_BLD, XHUI_BLD_DEF
-USE MODD_TEB_n,     ONLY : TTIME, XWS_ROAD, XWS_ROOF, XT_ROAD, XT_ROOF,           &
+USE MODD_TEB_OPTION_n, ONLY : TTIME, NROAD_LAYER, NWALL_LAYER, NROOF_LAYER, CWALL_OPT
+USE MODD_TEB_n,    ONLY : XWS_ROAD, XWS_ROOF, XT_ROAD, XT_ROOF,                   &
                           XT_WALL_A, XT_WALL_B,                                   &
                           XT_CANYON,XQ_CANYON,XD_ROAD,XD_WALL,XD_ROOF,            &
-                          NROAD_LAYER, NWALL_LAYER, NROOF_LAYER,                  &
-                          TSNOW_ROOF, TSNOW_ROAD, XTI_ROAD, CWALL_OPT
-USE MODD_BEM_n,     ONLY :XTI_BLD, XT_FLOOR, NFLOOR_LAYER, XD_FLOOR, XT_MASS, &
+                          TSNOW_ROOF, TSNOW_ROAD, XTI_ROAD
+USE MODD_BEM_OPTION_n,ONLY :NFLOOR_LAYER
+USE MODD_BEM_n,     ONLY :XTI_BLD, XT_FLOOR, XD_FLOOR, XT_MASS, &
                           XQI_BLD, XT_WIN1, XT_WIN2                              
 USE MODD_TEB_GRID_n,ONLY:  XLAT, XLON
 !

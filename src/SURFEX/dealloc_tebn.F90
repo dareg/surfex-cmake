@@ -27,8 +27,9 @@ SUBROUTINE DEALLOC_TEB_n
 !
 
 !
-USE MODD_TEB_n,      ONLY : LCOVER, XCOVER, XZS,                                     &
-                              XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,    &
+USE MODD_TEB_OPTION_n, ONLY : LCOVER, XCOVER, XZS,                                   &
+                              NROOF_LAYER, NROAD_LAYER, NWALL_LAYER
+USE MODD_TEB_n,        ONLY : XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,    &
                               XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XGREENROOF,        &
                               XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,               &
                               XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND,            &
@@ -36,7 +37,6 @@ USE MODD_TEB_n,      ONLY : LCOVER, XCOVER, XZS,                                
                               XALB_ROAD, XEMIS_ROAD, XHC_ROAD,XTC_ROAD, XD_ROAD,     &
                               XALB_WALL, XEMIS_WALL, XHC_WALL,XTC_WALL, XD_WALL,     &
                               XSVF_ROAD, XSVF_WALL, TSNOW_ROOF, TSNOW_ROAD,          &
-                              NROOF_LAYER, NROAD_LAYER, NWALL_LAYER,                 &
                               XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B,                &
                               XAC_ROOF, XAC_ROAD, XAC_WALL, XAC_TOP,                 &
                               XAC_ROOF_WAT, XAC_ROAD_WAT,                            &
@@ -63,10 +63,11 @@ USE MODD_DATA_TEB_n, ONLY : XPAR_Z0_TOWN, XPAR_BLD, XPAR_ALB_ROOF,         &
                               XPAR_ROUGH_ROOF, XPAR_ROUGH_WALL,            &
                               XPAR_RESIDENTIAL
 !
+USE MODD_BEM_OPTION_n, ONLY : CHEAT_COIL
 USE MODD_BEM_n,      ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR, XTCOOL_TARGET,           &
                             XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT, XTI_BLD,         &
                             XT_FLOOR, XT_MASS, XQIN, XQIN_FRAD, XSHGC, XSHGC_SH,     &
-                            XU_WIN, XGR, XINF, CHEAT_COIL,                           &
+                            XU_WIN, XGR, XINF,                                       &
                             XF_WATER_COND, XAUX_MAX, XQIN_FLAT,                      &
                             XHR_TARGET, XT_WIN2, XQI_BLD, XV_VENT, XCAP_SYS_HEAT,    &
                             XCAP_SYS_RAT, XT_ADP, XM_SYS_RAT, XCOP_RAT, XT_WIN1,     &

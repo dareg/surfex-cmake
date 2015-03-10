@@ -59,8 +59,8 @@
 !
 !
 !
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : LSURF_MISC_BUDGET
 USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,       &
-                                    LSURF_MISC_BUDGET,                            &
                                     XRN_ROAD, XH_ROAD, XLE_ROAD,                  &
                                     XGFLUX_ROAD,                                  &
                                     XRN_WALL_A, XH_WALL_A, XGFLUX_WALL_A,         &
@@ -98,7 +98,7 @@ USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,     
                                     XH_PANEL, XTHER_PROD_PANEL, XPHOT_PROD_PANEL, &
                                     XPROD_PANEL, XTHER_PROD_BLD, XPHOT_PROD_BLD
 !
-USE MODD_TEB_n,              ONLY : CBEM, LSOLAR_PANEL 
+USE MODD_TEB_OPTION_n,       ONLY : CBEM, LSOLAR_PANEL 
 USE MODI_CUMUL_DIAG_TEB_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK

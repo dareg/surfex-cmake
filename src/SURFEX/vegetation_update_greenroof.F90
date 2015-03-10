@@ -38,12 +38,15 @@
 !               ------------
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
-USE MODD_TEB_n,             ONLY: XCOVER, LCOVER, XGREENROOF
+USE MODD_TEB_OPTION_n,      ONLY: XCOVER, LCOVER
+USE MODD_TEB_n,             ONLY: XGREENROOF
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO, LTR_ML
-USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS,                 &
-                                  XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
+USE MODD_TEB_GREENROOF_OPTION_n,   ONLY: LPAR_GREENROOF
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY: XEMIS, XVEG, XLAI, XZ0,           &
+                                         XALBNIR, XALBVIS, XALBUV
+USE MODD_TEB_GREENROOF_PGD_n,      ONLY: LSTRESS,                          &
+                                  XWRMAX_CF, XRSMIN,                       &
                                   XGAMMA, XCV, XRGL,                       &
-                                  XZ0,                                     &
                                   XGMES,                                   &
                                   XBSLAI, XLAIMIN, XSEFOLD,                &
                                   XF2I, XGC,                               &
@@ -51,7 +54,7 @@ USE MODD_TEB_GREENROOF_n,   ONLY: LPAR_GREENROOF, LSTRESS,                 &
                                   XRE25,                                   &
                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XALBNIR, XALBVIS, XALBUV, XDMAX  
+                                  XDMAX
 !
 USE MODI_VEGETATION_UPDATE
 !

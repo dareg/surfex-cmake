@@ -2,7 +2,8 @@
     SUBROUTINE ALLOCATE_TEB_GARDEN_PGD(OALLOC,KLU,KVEGTYPE,KGROUND_LAYER, KDIMTAB)  
 !   ##########################################################################
 !
-USE MODD_TEB_GARDEN_n
+USE MODD_TEB_GARDEN_PGD_n
+USE MODD_TEB_GARDEN_PGD_EVOL_n
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK

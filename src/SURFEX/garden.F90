@@ -53,45 +53,52 @@
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_CSTS,              ONLY: XCPD
-USE MODD_TEB_n,             ONLY: XCOVER, XGARDEN
+USE MODD_TEB_OPTION_n,      ONLY: XCOVER
+USE MODD_TEB_n,             ONLY: XGARDEN
 USE MODD_TEB_GRID_n,        ONLY: XLAT, XLON
 USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CRESPSL, LTR_ML, CRUNOFF, &
                                   CC1DRY,  LNITRO_DILU,                    &
                                   CSCOND, NNBIOMASS, CRESPSL, CALBEDO,     &
                                   CSOILFRZ, CDIFSFCOND, CCPSURF,           &
                                   CKSAT, CHORT, CSNOWRES, XCGMAX
-USE MODD_TEB_GARDEN_n,      ONLY: LPAR_GARDEN, LSTRESS,                    &
-                                  TSNOW,                                   &
-                                  XEMIS, XVEG, XLAI, XWRMAX_CF, XRSMIN,    &
+USE MODD_TEB_GARDEN_OPTION_n,   ONLY: LPAR_GARDEN,                         &
+                                  NLAYER_HORT, NLAYER_DUN, NGROUND_LAYER
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY: XEMIS, XVEG, XLAI, XZ0,              &
+                                      XALBNIR, XALBVIS, XALBUV
+USE MODD_TEB_GARDEN_PGD_n,      ONLY: LSTRESS,                             &
+                                  XWRMAX_CF, XRSMIN,                       &
                                   XGAMMA, XCV, XRGL, XRUNOFFD,             &
-                                  XZ0, XZ0_O_Z0H, XRUNOFFB, XWDRAIN,       &
+                                  XZ0_O_Z0H, XRUNOFFB, XWDRAIN,            &
                                   XCGSAT, XC1SAT, XC2REF, XC3, XC4B,       &
                                   XC4REF, XACOEF, XPCOEF, XTAUICE,         &
-                                  XWR, XRESA, XAN,                         &
-                                  XANFM, XANDAY, XABC, XPOI,               &
+                                  XABC, XPOI,                              &
                                   XFZERO, XEPSO, XGAMM, XQDGAMM,           &
                                   XGMES, XQDGMES, XT1GMES, XT2GMES,        &
-                                  XRESP_BIOMASS, XBSLAI, XLAIMIN, XSEFOLD, &
+                                  XBSLAI, XLAIMIN, XSEFOLD,                &
                                   XAMAX, XQDAMAX, XT1AMAX, XT2AMAX,        &
                                   XF2I, XGC, XAH, XBH, XDMAX,              &
                                   XDG, XROOTFRAC, XDZG, XDZDIF, NWG_LAYER, & 
-                                  XTG, XWG, XWGI, XPCPS,                   &
+                                  XPCPS,                                   &
                                   XPLVTT, XPLSTT, XWFC, XWWILT, XWSAT,     &
                                   XBCOEF, XCONDSAT, XMPOTSAT, XHCAPSOIL,   &
                                   XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
                                   XCONDDRY, XCONDSLD, XRE25,               &
                                   XKSAT_ICE, XD_ICE,                       &
-                                  XALBNIR, XALBVIS, XALBUV,                &
                                   XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XLE, XANF, XSAND, XSOILWGHT,             &
+                                  XANF, XSAND, XSOILWGHT,                  &
+                                  XVEGTYPE,                                &
+                                  XANMAX,                                  &
+                                  XBSLAI_NITRO, XH_TREE 
+USE MODD_TEB_GARDEN_n,      ONLY: TSNOW,                                   &
+                                  XWR, XRESA, XAN,                         &
+                                  XANFM, XANDAY,                           &
+                                  XTG, XWG, XWGI,                          &
                                   XPSN, XPSNV, XPSNG, XPSNV_A,             &
-                                  XLAI_EFFC, XFAPARC, XFAPIRC, XMUS,       &
-                                  NLAYER_HORT, NLAYER_DUN,                 &
+                                  XFAPARC, XFAPIRC, XMUS,                  &
+                                  XRESP_BIOMASS, XLE, XLAI_EFFC,           &
                                   XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,   &
-                                  XSNOWFREE_ALB, XVEGTYPE,                 &
-                                  XANMAX, XBIOMASS,                        &
-                                  XBSLAI_NITRO, XH_TREE, NGROUND_LAYER
+                                  XSNOWFREE_ALB, XBIOMASS
 !
 USE MODD_TEB_IRRIG_n, ONLY : LPAR_GD_IRRIG,                                  &
                              XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR, &

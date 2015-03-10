@@ -48,9 +48,12 @@ USE MODD_SNOW_PAR, ONLY : XEMISSN
 !
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 
-USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF, LSOLAR_PANEL,                       &
+USE MODD_TEB_OPTION_n,    ONLY: LGARDEN, LGREENROOF, LSOLAR_PANEL,                       &
                                 XTSTEP, XOUT_TSTEP, TTIME, XCOVER, LCOVER,               &
-                                XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
+                                NROOF_LAYER, NROAD_LAYER, NWALL_LAYER,                   &
+                                NTEB_PATCH, XTEB_PATCH, CBEM, CCH_BEM, CZ0H,             &
+                                CROAD_DIR, CWALL_OPT
+USE MODD_TEB_n,           ONLY: XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
                                 XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XGREENROOF,          &
                                 XROAD, XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,          &
                                 XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND, XWALL_O_BLD, &
@@ -59,27 +62,25 @@ USE MODD_TEB_n,           ONLY: LGARDEN, LGREENROOF, LSOLAR_PANEL,              
                                 XALB_WALL, XEMIS_WALL, XHC_WALL,XTC_WALL, XD_WALL,       &
                                 XSVF_ROAD, XSVF_GARDEN, XSVF_WALL,                       &
                                 TSNOW_ROOF, TSNOW_ROAD,                                  &
-                                NROOF_LAYER, NROAD_LAYER, NWALL_LAYER,                   &
-                                XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B, CZ0H,            &
-                                CROAD_DIR, CWALL_OPT,                                    &
+                                XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B,                  &
                                 XT_CANYON, XQ_CANYON,                                    &
                                 XAC_ROOF, XAC_ROAD, XAC_WALL, XAC_TOP,                   &
                                 XAC_ROOF_WAT, XAC_ROAD_WAT,                              &
                                 XQSAT_ROOF, XQSAT_ROAD, XDELT_ROOF, XDELT_ROAD,          &
-                                NTEB_PATCH, XTEB_PATCH, CBEM, CCH_BEM,                   &
                                 XROUGH_ROOF, XROUGH_WALL, XRESIDENTIAL, XDT_RES, XDT_OFF
 
 USE MODD_TEB_PANEL_n,     ONLY: XEMIS_PANEL, XALB_PANEL, XEFF_PANEL, XFRAC_PANEL
 
-USE MODD_BEM_n,           ONLY: NFLOOR_LAYER, XHC_FLOOR, XTC_FLOOR, XD_FLOOR,            &
+USE MODD_BEM_OPTION_n,    ONLY: NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
+USE MODD_BEM_n,           ONLY: XHC_FLOOR, XTC_FLOOR, XD_FLOOR,                          &
                                 XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT,   &
                                 XQIN, XQIN_FRAD, XSHGC, XSHGC_SH, XU_WIN, XGR,           &
                                 XFLOOR_HEIGHT, XINF, XQIN_FLAT, XHR_TARGET, XV_VENT,     &
                                 XCAP_SYS_HEAT, XAUX_MAX, XCAP_SYS_RAT, XT_ADP,           &
                                 XM_SYS_RAT, XCOP_RAT, XT_SIZE_MAX, XT_SIZE_MIN,          &
-                                CCOOL_COIL, CHEAT_COIL, XF_WATER_COND, LSHAD_DAY,        &
+                                XF_WATER_COND, LSHAD_DAY,                                &
                                 LNATVENT_NIGHT, LSHADE, XSHADE, CNATVENT, XNATVENT,      &
-                                LAUTOSIZE, XT_WIN1, XALB_WIN, XABS_WIN, XUGG_WIN,        &
+                                XT_WIN1, XALB_WIN, XABS_WIN, XUGG_WIN,                   &
                                 XN_FLOOR, XGLAZ_O_BLD, XMASS_O_BLD, XFLOOR_HW_RATIO,     &
                                 XF_FLOOR_MASS, XF_FLOOR_WALL, XF_FLOOR_WIN,              &
                                 XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS,              &
@@ -103,13 +104,14 @@ USE MODD_DST_SURF,        ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST
 USE MODD_SLT_SURF,        ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
 USE MODD_DIAG_TEB_n,      ONLY: N2M, LSURF_BUDGET, LRAD_BUDGET, XDIAG_TSTEP,             &
                                   LPGD, LPGD_FIX, L2M_MIN_ZS, LCOEF, LSURF_VARS  
-USE MODD_DIAG_MISC_TEB_n, ONLY: LSURF_MISC_BUDGET,                                       &
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY: LSURF_MISC_BUDGET,                                &
                                   LSURF_DIAG_ALBEDO, LSURF_EVAP_BUDGET  
 USE MODD_DIAG_UTCI_TEB_n, ONLY: LUTCI
 USE MODD_SURF_PAR,        ONLY: XUNDEF, NUNDEF
 !
-USE MODD_TEB_GARDEN_n,    ONLY : XLAI_GARDEN => XLAI
-USE MODD_TEB_GREENROOF_n, ONLY : XLAI_GREENROOF => XLAI, NLAYER_GR
+USE MODD_TEB_GARDEN_PGD_EVOL_n,    ONLY : XLAI_GARDEN => XLAI
+USE MODD_TEB_GREENROOF_OPTION_n,   ONLY : NLAYER_GR
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : XLAI_GREENROOF => XLAI
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_DEFAULT_CH_DEP

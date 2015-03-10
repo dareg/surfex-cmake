@@ -40,10 +40,12 @@
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 USE MODD_TEB_n,          ONLY : XGREENROOF
 USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CISBA, CRESPSL
-USE MODD_TEB_GREENROOF_n,   ONLY : NLAYER_GR,                      &
-                                XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
+USE MODD_TEB_GREENROOF_OPTION_n,  ONLY : NLAYER_GR
+USE MODD_TEB_GREENROOF_PGD_n,     ONLY : XBSLAI
+USE MODD_TEB_GREENROOF_PGD_EVOL_n,ONLY : XLAI
+USE MODD_TEB_GREENROOF_n,   ONLY : XTG, XWG, XWGI, XWR, TSNOW,      &
                                 XRESA, XANFM, XAN, XLE, XANDAY,     &
-                                XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
+                                XBIOMASS, XRESP_BIOMASS,            &
                                 XSNOWFREE_ALB, XSNOWFREE_ALB_VEG,   &
                                 XSNOWFREE_ALB_SOIL
 !                                

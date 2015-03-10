@@ -40,10 +40,12 @@
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 USE MODD_TEB_n,          ONLY : XGARDEN
 USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CISBA, CRESPSL
-USE MODD_TEB_GARDEN_n,   ONLY : NGROUND_LAYER,                      &
-                                XTG, XWG, XWGI, XWR, XLAI, TSNOW,   &
+USE MODD_TEB_GARDEN_OPTION_n,  ONLY : NGROUND_LAYER
+USE MODD_TEB_GARDEN_PGD_n,     ONLY : XBSLAI
+USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY : XLAI
+USE MODD_TEB_GARDEN_n,   ONLY : XTG, XWG, XWGI, XWR, TSNOW,         &
                                 XRESA, XANFM, XAN, XLE, XANDAY,     &
-                                XBSLAI, XBIOMASS, XRESP_BIOMASS,    &
+                                XBIOMASS, XRESP_BIOMASS,            &
                                 XSNOWFREE_ALB, XSNOWFREE_ALB_VEG,   &
                                 XSNOWFREE_ALB_SOIL
 !                                
