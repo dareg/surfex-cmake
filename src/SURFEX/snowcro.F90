@@ -597,7 +597,7 @@ DO JJ = 1,SIZE(ZSNOW)
   DO JST=1,INLVLS_USE(JJ)
     PSNOWSWE (JJ,JST) = PSNOWDZ(JJ,JST) * PSNOWRHO(JJ,JST)
 !
-    ZSCAP    (JJ,JST) = SNOW3LSCAP(PSNOWRHO(JJ,JST))
+    ZSCAP    (JJ,JST) = PSNOWRHO(JJ,JST) * XCI
 !
     ZSNOWTEMP(JJ,JST) = XTT + &
                         ( ( PSNOWHEAT(JJ,JST)/PSNOWDZ(JJ,JST) + XLMTT*PSNOWRHO(JJ,JST) )/ZSCAP(JJ,JST) ) 
@@ -691,8 +691,8 @@ ENDIF
 !
 DO JJ = 1,SIZE(ZSNOW)
   DO JST = 1,INLVLS_USE(JJ)
-    ZSCAP(JJ,JST) = SNOW3LSCAP( PSNOWRHO(JJ,JST) - &
-                                PSNOWLIQ(JJ,JST) * XRHOLW / MAX( PSNOWDZ(JJ,JST),XSNOWDZMIN) ) 
+    ZSCAP(JJ,JST) = ( PSNOWRHO(JJ,JST) - &
+                      PSNOWLIQ(JJ,JST) * XRHOLW / MAX( PSNOWDZ(JJ,JST),XSNOWDZMIN) ) * XCI
     PSNOWHEAT(JJ,JST) = PSNOWDZ(JJ,JST) * &
                         ( ZSCAP(JJ,JST)*(ZSNOWTEMP(JJ,JST)-XTT) - XLMTT*PSNOWRHO(JJ,JST) ) + &
                         XLMTT * XRHOLW * PSNOWLIQ(JJ,JST) 
@@ -1006,7 +1006,7 @@ DO JJ = 1,SIZE(ZSNOW)
     PGRNDFLUX (JJ)     = PGRNDFLUX(JJ) + ZLIQHEATXS(JJ)
     PSNOWTEMP (JJ,JST) = ZSNOWTEMP(JJ,JST)
 !   Heat content using total density
-    ZSCAP     (JJ,JST) = SNOW3LSCAP( PSNOWRHO(JJ,JST) )
+    ZSCAP     (JJ,JST) = PSNOWRHO(JJ,JST) * XCI
     PSNOWHEAT (JJ,JST) = PSNOWDZ(JJ,JST) * &
                         ( ZSCAP(JJ,JST)*(PSNOWTEMP(JJ,JST)-XTT) - XLMTT*PSNOWRHO(JJ,JST) ) + &
                         XLMTT * XRHOLW * PSNOWLIQ(JJ,JST) 
@@ -3450,7 +3450,7 @@ SUBROUTINE SNOWCROEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,PSNOWTEMP,PSNOWLIQ,      &
 !                       content
 !
 !
-USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT
+USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT, XCI
 USE MODD_SNOW_PAR, ONLY : XRHOSMIN_ES, XSNOWDMIN, XRHOSMAX_ES
 USE MODE_SNOW3L
 USE MODD_SNOW_METAMO
@@ -3514,7 +3514,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
      DO JST = 2,KNLVLS_USE(JJ)
        !
        ZSNOWHEAT_1D(JJ) = ZSNOWHEAT_1D(JJ) + PSNOWDZ(JJ,JST) * &
-                          ( SNOW3LSCAP(PSNOWRHO(JJ,JST)) * (ZSNOWTEMP(JJ,JST)-XTT) &
+                          ( PSNOWRHO(JJ,JST)*XCI * (ZSNOWTEMP(JJ,JST)-XTT) &
                             - XLMTT * PSNOWRHO(JJ,JST) ) &
                           + XLMTT * XRHOLW * PSNOWLIQ(JJ,JST) 
        ZSNOW       (JJ) = ZSNOW       (JJ) + PSNOWDZ(JJ,JST)
@@ -3559,7 +3559,7 @@ DO JJ=1,SIZE(PSNOWRHO,1)
     PSNOWHEAT(JJ,1:KNLVLS_USE(JJ)) = ZSNOWHEAT_1D(JJ) / KNLVLS_USE(JJ)
     PSNOWRHO (JJ,1:KNLVLS_USE(JJ)) = ZSNOWRHO_1D(JJ)
     !
-    ZSCAP(JJ) = SNOW3LSCAP( ZSNOWRHO_1D(JJ) )
+    ZSCAP(JJ) = ZSNOWRHO_1D(JJ) * XCI
     !
     DO JST = 1,KNLVLS_USE(JJ)
       !
@@ -4960,7 +4960,7 @@ SUBROUTINE SNOWCROLAYER_GONE(PTSTEP,PSCAP,PSNOWTEMP,PSNOWDZ,          &
 !     a new merged layer keeps the grain, histo and age properties of the 
 !     non-melted layer
 !
-USE MODD_CSTS,ONLY : XTT, XLMTT, XRHOLW, XRHOLI, XLVTT
+USE MODD_CSTS,ONLY : XTT, XLMTT, XRHOLW, XRHOLI, XLVTT, XCI
 !
 USE MODE_SNOW3L
 !
@@ -5043,9 +5043,9 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
         PSNOWLIQ (JJ,ID_1) = ZLIQ
         !
         ! Temperature of the merged layer is deduced from the heat content 
-        PSCAP    (JJ,ID_1) = SNOW3LSCAP( PSNOWRHO(JJ,ID_1) - &
-                                         PSNOWLIQ(JJ,ID_1) * XRHOLW / &
-                                         MAX( PSNOWDZ(JJ,ID_1),XSNOWDZMIN ) ) 
+        PSCAP    (JJ,ID_1) = ( PSNOWRHO(JJ,ID_1) - &
+                               PSNOWLIQ(JJ,ID_1) * XRHOLW / &
+                               MAX( PSNOWDZ(JJ,ID_1),XSNOWDZMIN ) ) * XCI
         PSNOWTEMP(JJ,ID_1) = XTT + &
           ( ( ( ( ZHEAT - XLMTT*XRHOLW*PSNOWLIQ(JJ,ID_1) ) / PSNOWDZ(JJ,ID_1) ) + &
               XLMTT*PSNOWRHO(JJ,ID_1) ) &
