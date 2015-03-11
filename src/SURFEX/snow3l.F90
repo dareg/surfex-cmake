@@ -2273,12 +2273,11 @@ REAL, DIMENSION(SIZE(PRR))            :: ZPCPXS, ZTOTWCAP, ZRAINFALL
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::   ZFLOWLIQ,            &
                                                         ZSNOWLIQ, ZSNOWRHO,  &
                                                         ZWHOLDMAX, ZSNOWDZ,  &
-                                                        ZSNOWTEMP,    &  
+                                                        ZSNOWTEMP, ZSCAP,   &  
                                                         ZSNOWHEAT
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)):: ZFLOWLIQT
 !
-REAL :: ZSCAP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -2300,7 +2299,7 @@ INLVLS         = SIZE(PSNOWDZ(:,:),2)
 ! Freeze liquid water in any layers which cooled due
 ! to heat transfer. First, update H and re-diagnose (update) T and Wl:
 !
-ZSCAP(:,:)     = SNOW3LSCAP(ZSNOWRHO)
+ZSCAP(:,:)     = ZSNOWRHO(:,:) * XCI
 !
 ZSNOWHEAT(:,:) = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
                         - XLMTT*ZSNOWRHO(:,:) ) + XLMTT*XRHOLW*ZSNOWLIQ(:,:)  
