@@ -105,19 +105,17 @@ ELSE
   KSIZE_TASK(:) = ISIZE
   IF (INRESTE>0) THEN
     DO J = KPROCMIN+KPROC-INRESTE,KPROCMIN+KPROC-1
-      KSIZE_TASK(MOD(J,KPROC-1)) = IRESTE     
+      KSIZE_TASK(MOD(J,KPROC)) = IRESTE
     ENDDO
   ENDIF
-
-
 !
 !so:
-!(nproc-nreste)*isize + nreste*ireste = 
+!(nproc-nreste)*isize + nreste*ireste = ndim_full
 !if nreste==1: 
 !(nproc-1)*isize + ireste = 
 !(nproc-1)*isize + NDIM_FULL - (nproc-1)*isize = NDIM_FULL
 !if (ireste==isize-1):
-!nproc*isize - nreste*isize + nreste*isize - nerste = 
+!nproc*isize - nreste*isize + nreste*isize - nreste = 
 !nproc*isize - nreste = NDIM_FULL
 
 

@@ -92,7 +92,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT, XCL, XDAY
+USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT, XCL, XDAY, XCI
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODD_SNOW_METAMO, ONLY : XSNOWDZMIN
@@ -418,7 +418,7 @@ CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,PSNOWHEAT,PSNOWAGE)
 ! First diagnose snow temperatures and liquid
 ! water portion of the snow from snow heat content:
 !
-ZSCAP(:,:)     = SNOW3LSCAP(PSNOWRHO)
+ZSCAP(:,:)     = PSNOWRHO(:,:) * XCI
 !
 ZSNOWTEMP(:,:) = XTT + ( ((PSNOWHEAT(:,:)/PSNOWDZ(:,:))                   &
                    + XLMTT*PSNOWRHO(:,:))/ZSCAP(:,:) )  
@@ -446,7 +446,7 @@ ENDIF
 !
 ! Update snow heat content (J/m2):
 !
-ZSCAP(:,:)     = SNOW3LSCAP(PSNOWRHO)
+ZSCAP(:,:)     = PSNOWRHO(:,:) * XCI
 PSNOWHEAT(:,:) = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
                    - XLMTT*PSNOWRHO(:,:) ) + XLMTT*XRHOLW*PSNOWLIQ(:,:)  
 !
@@ -573,7 +573,7 @@ CALL SNOW3LMELT(PTSTEP,ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,PSNOWLIQ,ZMELTXS)
 !
 CALL SNOW3LREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL)
 !
-ZSCAP(:,:)        = SNOW3LSCAP(PSNOWRHO)
+ZSCAP(:,:)        = PSNOWRHO(:,:) * XCI
 PSNOWHEAT(:,:)    = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
                       - XLMTT*PSNOWRHO(:,:) ) + XLMTT*XRHOLW*PSNOWLIQ(:,:) 
 !
@@ -589,7 +589,7 @@ CALL SNOW3LEVAPN(ZPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1), &
 ! since vertical distribution of enthalpy might have been
 ! modified in the previous routine:
 !
-ZSCAP(:,:)     = SNOW3LSCAP(PSNOWRHO)
+ZSCAP(:,:)     = PSNOWRHO(:,:) * XCI
 ZWORK2D(:,:)   = MIN(1.0, PSNOWDZ(:,:)/XSNOWDMIN)
 ZSNOWTEMP(:,:) = XTT + ZWORK2D(:,:)*( ((PSNOWHEAT(:,:)/MAX(XSNOWDMIN,PSNOWDZ(:,:)))  &
                    + XLMTT*PSNOWRHO(:,:))/ZSCAP(:,:) )  
@@ -628,7 +628,7 @@ ENDDO
 !
 PSNOWTEMP(:,:)    = ZSNOWTEMP(:,:)
 !
-ZSCAP(:,:)        = SNOW3LSCAP(PSNOWRHO)
+ZSCAP(:,:)        = PSNOWRHO(:,:) * XCI
 !
 PSNOWHEAT(:,:)    = PSNOWDZ(:,:)*( ZSCAP(:,:)*(PSNOWTEMP(:,:)-XTT)        &
                       - XLMTT*PSNOWRHO(:,:) ) + XLMTT*XRHOLW*PSNOWLIQ(:,:)  
@@ -805,7 +805,7 @@ PSNOWHMASS(:)   = 0.0
 ZSNOWTEMP(:)  = XTT
 !
 WHERE (PSR(:) > 0.0 .AND. PSNOWDZ(:,1)>0.)
-  ZSCAP(:)      = SNOW3LSCAP(PSNOWRHO(:,1))
+  ZSCAP(:)      = PSNOWRHO(:,1) * XCI
   ZSNOWTEMP(:)  = XTT + (PSNOWHEAT(:,1) +                              &
                     XLMTT*PSNOWRHO(:,1)*PSNOWDZ(:,1))/                   &
                     (ZSCAP(:)*MAX(XSNOWDMIN/INLVLS,PSNOWDZ(:,1)))  
@@ -2242,7 +2242,7 @@ END SUBROUTINE SNOW3LMELT
 !     rapid densification of a layer.
 !
 !
-USE MODD_CSTS,     ONLY : XTT, XLMTT, XRHOLW
+USE MODD_CSTS,     ONLY : XTT, XLMTT, XRHOLW, XCI
 USE MODD_SNOW_PAR, ONLY : XSNOWDMIN
 !
 USE MODE_SNOW3L
@@ -2273,11 +2273,12 @@ REAL, DIMENSION(SIZE(PRR))            :: ZPCPXS, ZTOTWCAP, ZRAINFALL
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::   ZFLOWLIQ,            &
                                                         ZSNOWLIQ, ZSNOWRHO,  &
                                                         ZWHOLDMAX, ZSNOWDZ,  &
-                                                        ZSNOWTEMP, ZSCAP,    &  
+                                                        ZSNOWTEMP,    &  
                                                         ZSNOWHEAT
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)):: ZFLOWLIQT
 !
+REAL :: ZSCAP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -2334,7 +2335,6 @@ ZSNOWDZ(:,:)   = MAX(0.0, ZSNOWDZ(:,:))  ! to prevent possible very small
 !                                          negative values (machine prescision
 !                                          as snow vanishes
 !
-!
 ! 3. Liquid water flow: liquid precipitation and meltwater
 !    -----------------------------------------------------
 !
@@ -2344,10 +2344,11 @@ ZSNOWDZ(:,:)   = MAX(0.0, ZSNOWDZ(:,:))  ! to prevent possible very small
 ! the total snow pack available liquid water holding capacity:
 !
 ZTOTWCAP(:)   = 0.
+!
 DO JJ=1,INLVLS
-   DO JI=1,INI
-      ZTOTWCAP(JI) = ZTOTWCAP(JI) + ZWHOLDMAX(JI,JJ)
-   ENDDO
+  DO JI=1,INI
+    ZTOTWCAP(JI) = ZTOTWCAP(JI) + ZWHOLDMAX(JI,JJ)
+  ENDDO
 ENDDO
 !
 ! Rain entering snow (m):
@@ -2387,13 +2388,12 @@ DO JJ=1,INLVLS
       ZFLOWLIQ(JI,JJ)  = MAX(0.0, ZSNOWLIQ(JI,JJ)-ZWHOLDMAX(JI,JJ))
       ZSNOWLIQ(JI,JJ)  = ZSNOWLIQ(JI,JJ) - ZFLOWLIQ(JI,JJ)
       ZFLOWLIQT(JI,JJ) = ZFLOWLIQT(JI,JJ) + ZFLOWLIQ(JI,JJ)
-
       ZSNOWRHO(JI,JJ)  = ZSNOWRHO(JI,JJ)  + (ZSNOWLIQ(JI,JJ) - PSNOWLIQ(JI,JJ))*       &
                           XRHOLW/MAX(XSNOWDMIN/INLVLS,ZSNOWDZ(JI,JJ))  
-      ZSCAP(JI,JJ)     = SNOW3LSCAP(ZSNOWRHO(JI,JJ))
+      ZSCAP            = ZSNOWRHO(JI,JJ) * XCI
       ZSNOWTEMP(JI,JJ) = XTT + ( ((ZSNOWHEAT(JI,JJ)/MAX(XSNOWDMIN/INLVLS,ZSNOWDZ(JI,JJ)))                 &
-                         + XLMTT*ZSNOWRHO(JI,JJ))/ZSCAP(JI,JJ) )  
-      ZSNOWLIQ(JI,JJ)  = MAX(0.0,ZSNOWTEMP(JI,JJ)-XTT)*ZSCAP(JI,JJ)*ZSNOWDZ(JI,JJ)/(XLMTT*XRHOLW)  
+                         + XLMTT*ZSNOWRHO(JI,JJ))/ZSCAP )  
+      ZSNOWLIQ(JI,JJ)  = MAX(0.0,ZSNOWTEMP(JI,JJ)-XTT)*ZSCAP*ZSNOWDZ(JI,JJ)/(XLMTT*XRHOLW)  
       ZSNOWTEMP(JI,JJ) = MIN(XTT,ZSNOWTEMP(JI,JJ))
    ENDDO
 ENDDO
@@ -2728,7 +2728,7 @@ WHERE(PSNOWDZ(:,1) > 0.0)
 
 ! Update heat capacity:
 
-   ZSCAP(:)       = SNOW3LSCAP(PSNOWRHO)
+   ZSCAP(:)       = PSNOWRHO(:) * XCI
 !
 ! Budget check: as last traces of liquid in snow evaporates, it is possible
 ! evaporation could exceed liquid present in snow. If this is the case,
@@ -2925,7 +2925,7 @@ SUBROUTINE SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,PSNOWTEMP,PSNOWLIQ)
 !     constant).
 !
 !
-USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT
+USE MODD_CSTS,     ONLY : XTT, XRHOLW, XLMTT, XCI
 USE MODD_SNOW_PAR, ONLY : XRHOSMIN_ES, XSNOWDMIN, XRHOSMAX_ES
 !
 IMPLICIT NONE
@@ -2968,7 +2968,7 @@ ZSNOWHEAT_1D(:) = 0.
 ZSNOW(:)        = 0.
 ZMASS(:)        = 0.
 !
-ZSCAP(:,:) = SNOW3LSCAP(PSNOWRHO(:,:))
+ZSCAP(:,:) = PSNOWRHO(:,:) * XCI
 !
 DO JJ=2,INLVLS
    DO JI=1,INI
@@ -2996,7 +2996,7 @@ DO JJ=1,INLVLS
     ENDDO
 ENDDO        
 !
-ZSCAP(:,:) = SNOW3LSCAP(PSNOWRHO(:,:))
+ZSCAP(:,:) = PSNOWRHO(:,:) * XCI
 !
 DO JJ=1,INLVLS
    DO JI=1,INI
