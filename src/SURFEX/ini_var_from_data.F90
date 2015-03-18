@@ -4,10 +4,6 @@ INTERFACE INI_VAR_FROM_DATA
 !
 SUBROUTINE INI_VAR_FROM_DATA_1D(HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
                                 HFTYP, PUNIF, PFIELD, OPRESENT)
-IMPLICIT NONE
-!
-!*    0.1    Declaration of arguments
-!            ------------------------
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HATYPE
@@ -25,11 +21,6 @@ END SUBROUTINE INI_VAR_FROM_DATA_1D
       SUBROUTINE INI_VAR_FROM_DATA_2D(HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
                                       HFTYP, PUNIF, PFIELD_TIME, OPRESENT)
 !                                         
-IMPLICIT NONE
-!
-!*    0.1    Declaration of arguments
-!            ------------------------
-!
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HATYPE
  CHARACTER(LEN=*), INTENT(IN) :: HNAME

@@ -76,11 +76,15 @@ IMPLICIT NONE
   INCLUDE 'omp_lib.h'
 #endif
 !
-!arguments
+!*    0.1    Declaration of arguments
+!            ------------------------
+!
 INTEGER,       INTENT(IN)    :: KI     ! number of points
 INTEGER,       INTENT(IN)    :: KLUOUT ! output listing logical unit
-
-!local parameters
+!
+!*    0.2    Declaration of local variables
+!            ------------------------------
+!
 LOGICAL, PARAMETER :: GCANOPY=.FALSE.
  CHARACTER(LEN=3), PARAMETER :: YBEM='BEM'
 

@@ -54,7 +54,7 @@ USE MODD_DATA_ISBA_n,    ONLY : NTIME, XPAR_VEG, XPAR_LAI,XPAR_RSMIN,XPAR_GAMMA,
                                 XPAR_ROOT_EXTINCTIONGV, XPAR_ROOT_DEPTHGV,        &
                                 XPAR_GROUND_DEPTH, XPAR_ROOT_DEPTH,               &
                                 XPAR_ROOT_EXTINCTION, XPAR_ROOT_LIN,              &
-                                LPAR_STRESS, XPAR_IRRIG, XPAR_WATSUP, &
+                                XPAR_IRRIG, XPAR_WATSUP, &
                                 LDATA_VEGTYPE, LDATA_LAI, LDATA_H_TREE, LDATA_DG, LDATA_ROOTFRAC,&  
                                 LDATA_VEG, LDATA_Z0, LDATA_EMIS, LDATA_DICE, &
                                 LDATA_RSMIN, LDATA_GAMMA, LDATA_WRMAX_CF, LDATA_RGL, &

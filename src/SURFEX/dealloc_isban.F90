@@ -40,7 +40,7 @@ USE MODD_ISBA_n,      ONLY : LCOVER, XCOVER, XZS, XZ0EFFJPDIR, XCLAY, XSAND,    
                                XEMIS, XVEGTYPE, XGMES, XRE25, XBSLAI, XLAIMIN, XGC,&
                                XDMAX, LSTRESS, XF2I,                               &
                                XSEFOLD, XH_TREE, XPATCH, NPATCH, XWRMAX_CF,        &
-                               NR_NATURE_P, NSIZE_NATURE_P,NPATCH,                 &
+                               NR_NATURE_P, NSIZE_NATURE_P,                        &
                                XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,               &
                                XALBNIR_WET, XALBVIS_WET, XALBUV_WET,               &
                                XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,            &
@@ -50,7 +50,7 @@ USE MODD_ISBA_n,      ONLY : LCOVER, XCOVER, XZS, XZ0EFFJPDIR, XCLAY, XSAND,    
                                XGNDLITTER, XZF_TALLVEG , XRGLGV, XGAMMAGV, XRSMINGV,&
                                XROOTFRACGV, XWRMAX_CFGV, XLAIGV, XZ0LITTER, XH_VEG,&
                                XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF,  &
-                               XTAUICE, XACOEF, XBCOEF, XCONDSAT,                  &
+                               XTAUICE, XBCOEF, XCONDSAT,                          &
                                XHCAPSOIL, XCONDDRY, XCONDSLD, XC4REF, XMPOTSAT,    &
                                XTDEEP, XGAMMAT, XWDRAIN,                           &
                                XCE_NITRO, XCF_NITRO, XCNA_NITRO, XBSLAI_NITRO,     &

@@ -75,6 +75,9 @@ TYPE TEB_GREENROOF_OPTIONS_t
 !                                                    ! 'WSAT'
 !                                                    ! 'DT92'
 !                                                    ! 'SGH ' Topmodel
+!
+!SGH scheme and vertical hydrology
+!
   CHARACTER(LEN=3)                :: CKSAT_GR        ! ksat
 !                                                    ! 'DEF' = default value 
 !                                                    ! 'SGH' = profil exponentiel
@@ -120,9 +123,6 @@ REAL, POINTER, DIMENSION(:)      :: XSOILGRID_GR=>NULL()
 !$OMP THREADPRIVATE(XSOILGRID_GR)
 INTEGER, POINTER                 :: NTIME_GR=>NULL()
 !$OMP THREADPRIVATE(NTIME_GR)
-!
-!SGH scheme and vertical hydrology
-!
 CHARACTER(LEN=3), POINTER         :: CKSAT_GR=>NULL()
 !$OMP THREADPRIVATE(CKSAT_GR)
 CHARACTER(LEN=3), POINTER         :: CHORT_GR=>NULL()
@@ -136,8 +136,6 @@ LOGICAL, POINTER                  :: LSOC_GR=>NULL()
 !
 CONTAINS
 
-
-
 SUBROUTINE TEB_GREENROOF_OPTIONS_GOTO_MODEL(KFROM, KTO, LKFROM)
 LOGICAL, INTENT(IN) :: LKFROM
 INTEGER, INTENT(IN) :: KFROM, KTO
@@ -145,14 +143,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! Save current state for allocated arrays
 IF (LKFROM) THEN
+TEB_GREENROOF_OPTIONS_MODEL(KFROM)%XSOILGRID_GR=>XSOILGRID_GR
 ENDIF
 !
 ! Current model is set to model KTO
 IF (LHOOK) CALL DR_HOOK('MODD_TEB_GREENROOF_N:TEB_GREENROOF_OPTIONS_GOTO_MODEL',0,ZHOOK_HANDLE)
 LPAR_GREENROOF=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%LPAR_GREENROOF
-IF (LKFROM) THEN
-TEB_GREENROOF_OPTIONS_MODEL(KFROM)%XSOILGRID_GR=>XSOILGRID_GR
-ENDIF
 CISBA_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CISBA_GR
 LTR_ML_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%LTR_ML_GR
 CRUNOFF_GR=>TEB_GREENROOF_OPTIONS_MODEL(KTO)%CRUNOFF_GR

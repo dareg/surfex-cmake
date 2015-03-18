@@ -137,7 +137,7 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PPEQ_B_COEF        ! for humidity
 REAL, DIMENSION(:)  , INTENT(IN)    :: PPET_A_COEF        ! implicit coefficients
 REAL, DIMENSION(:)  , INTENT(IN)    :: PPET_B_COEF        ! for temperature
 REAL                , INTENT(IN)    :: PTSTEP             ! time step
-REAL, DIMENSION(:)  , INTENT(IN)    :: PZREF              ! height of the first atmospheric level                                                !
+REAL, DIMENSION(:)  , INTENT(IN)    :: PZREF              ! height of the first atmospheric level
 REAL, DIMENSION(:)  , INTENT(IN)    :: PUREF              ! reference height for the wind
 REAL, DIMENSION(:)  , INTENT(IN)    :: PTA                ! temperature at first atm. level 
 REAL, DIMENSION(:)  , INTENT(IN)    :: PQA                ! specific humidity at first atm. level

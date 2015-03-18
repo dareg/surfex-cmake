@@ -54,9 +54,6 @@ USE MODD_PREP_FLAKE, ONLY : CFILE_FLAKE, CFILEPGD_FLAKE, CTYPE, CTYPEPGD, &
                               XUNIF_H_B1,       &
                               LCLIM_LAKE   
 !
-!
-USE MODD_FLAKE_n,      ONLY : XTS ! to use as flag
-!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !

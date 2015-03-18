@@ -56,7 +56,7 @@ USE MODD_DIAG_TEB_GARDEN_n, ONLY : XRN, XH, XGFLUX, XLEI, XRI, XCD, XCDN, XCH, X
                                    XRESP_AUTO, XRESP_ECO, XALBT, XEMIST, XCG, XC1, XC2, &
                                    XWGEQ, XCT, XRS, XHU, XHUG, XRESTORE, XUSTAR, XDLAI_EFFC, & 
                                    XIACAN, XSNOWTEMP, XSNOWLIQ, XSNOWDZ, XSNOWHMASS,        &
-                                   XMELTADV, XIACAN, XIRRIG_FLUX  
+                                   XMELTADV, XIRRIG_FLUX  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
