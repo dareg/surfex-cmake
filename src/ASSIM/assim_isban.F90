@@ -91,7 +91,7 @@ REAL,    DIMENSION(:), ALLOCATABLE :: ZSNR_EP,ZSNR_EP0
 REAL,    DIMENSION(:), ALLOCATABLE :: ZSNA_EP,ZSNA_EP0
 REAL,    DIMENSION(KI) :: ZSWE
 REAL,    DIMENSION(KI) :: ZSWE_ORIG
-INTEGER :: I,IL,IP
+INTEGER :: JI,JL,JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_ISBA_N',0,ZHOOK_HANDLE)
@@ -101,8 +101,8 @@ IF (HTEST/='OK') THEN
 END IF
 !
 ! Set snow layers and patches
-IP = 1
-IL = 1
+JP = 1
+JL = 1
 !
 ZSWE = PSWE
 !
@@ -156,15 +156,15 @@ IF ( LEXTRAP_NATURE ) THEN
   ALLOCATE(ZWS_EP(KI),ZWP_EP(KI),ZTS_EP(KI),ZTP_EP(KI),ZT3_EP(KI),&
            ZTL_EP(KI),ZSWE_EP(KI),ZSNR_EP(KI),ZSNA_EP(KI))
   !  
-  ZWS_EP  = XWG(:,1,IP)
-  ZWP_EP  = XWG(:,2,IP)
-  ZTS_EP  = XTG(:,1,IP)
-  ZTP_EP  = XTG(:,2,IP)
-  ZT3_EP  = XTG(:,3,IP)
-  ZTL_EP  = XWGI(:,2,IP)
-  ZSWE_EP = TSNOW%WSNOW(:,IL,IP)
-  ZSNR_EP = TSNOW%RHO  (:,IL,IP)
-  ZSNA_EP = TSNOW%ALB  (:,   IP)
+  ZWS_EP  = XWG(:,1,JP)
+  ZWP_EP  = XWG(:,2,JP)
+  ZTS_EP  = XTG(:,1,JP)
+  ZTP_EP  = XTG(:,2,JP)
+  ZT3_EP  = XTG(:,3,JP)
+  ZTL_EP  = XWGI(:,2,JP)
+  ZSWE_EP = TSNOW%WSNOW(:,JL,JP)
+  ZSNR_EP = TSNOW%RHO  (:,JL,JP)
+  ZSNA_EP = TSNOW%ALB  (:,   JP)
   !
   ALLOCATE(GINTERP_NATURE(KI),GINTERP_SN(KI))
   !
@@ -223,9 +223,9 @@ IF ( LEXTRAP_NATURE ) THEN
   !
   ! PRINT values produced by OI_HO_EXTRAPOL_SURF for TS
   IF ( NPRINTLEV > 2 ) THEN
-    DO I=1,KI
-     IF (GINTERP_NATURE(I)) THEN
-       PRINT *,'Surface temperature set to ',ZTS_EP(I),'from nearest neighbour at I=',NR_NATURE(I)
+    DO JI=1,KI
+     IF (GINTERP_NATURE(JI)) THEN
+       PRINT *,'Surface temperature set to ',ZTS_EP(JI),'from nearest neighbour at I=',NR_NATURE(JI)
      ENDIF
     ENDDO
   ENDIF
@@ -233,15 +233,15 @@ IF ( LEXTRAP_NATURE ) THEN
   DEALLOCATE(GINTERP_NATURE,GINTERP_SN)
   !
   ! Set extrpolated fields to global
-  XWG (:,1,IP) = ZWS_EP(:)
-  XWG (:,2,IP) = ZWP_EP(:)
-  XTG (:,1,IP) = ZTS_EP(:)
-  XTG (:,2,IP) = ZTP_EP(:)
-  XTG (:,3,IP) = ZT3_EP(:)
-  XWGI(:,2,IP) = ZTL_EP(:)
-  TSNOW%WSNOW(:,IL,IP) = ZSWE_EP(:)
-  TSNOW%RHO  (:,IL,IP) = ZSNR_EP(:)
-  TSNOW%ALB  (:,   IP) = ZSNA_EP(:)
+  XWG (:,1,JP) = ZWS_EP(:)
+  XWG (:,2,JP) = ZWP_EP(:)
+  XTG (:,1,JP) = ZTS_EP(:)
+  XTG (:,2,JP) = ZTP_EP(:)
+  XTG (:,3,JP) = ZT3_EP(:)
+  XWGI(:,2,JP) = ZTL_EP(:)
+  TSNOW%WSNOW(:,JL,JP) = ZSWE_EP(:)
+  TSNOW%RHO  (:,JL,JP) = ZSNR_EP(:)
+  TSNOW%ALB  (:,   JP) = ZSNA_EP(:)
   !
   DEALLOCATE(ZWS_EP,ZWP_EP,ZTS_EP,ZTP_EP,ZT3_EP,ZTL_EP,ZSWE_EP,ZSNR_EP,ZSNA_EP)
   !
@@ -251,12 +251,12 @@ ENDIF
 IF (LAESNM) THEN
 
   ! removes very small values due to computation precision
-  WHERE( TSNOW%WSNOW(:,IL,IP) < 1.0E-10 ) TSNOW%WSNOW(:,IL,IP) = 0.0
+  WHERE( TSNOW%WSNOW(:,JL,JP) < 1.0E-10 ) TSNOW%WSNOW(:,JL,JP) = 0.0
 
   ! No SNOW
-  WHERE ( TSNOW%WSNOW(:,IL,IP) == 0.0 )
-    TSNOW%RHO(:,IL,IP) = XUNDEF
-    TSNOW%ALB(:,IP)    = XUNDEF
+  WHERE ( TSNOW%WSNOW(:,JL,JP) == 0.0 )
+    TSNOW%RHO(:,JL,JP) = XUNDEF
+    TSNOW%ALB(:,JP)    = XUNDEF
   END WHERE
   !
 ENDIF

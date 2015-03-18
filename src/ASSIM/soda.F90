@@ -174,7 +174,7 @@ INTEGER :: ISV                 ! Number of scalar species
 INTEGER :: ISW                 ! Number of radiative bands 
 INTEGER :: IYEAR, IMONTH, IDAY, IHOUR
 INTEGER :: IYEAR_OUT, IMONTH_OUT, IDAY_OUT
-INTEGER :: L,I,J,INBPERT
+INTEGER :: JL,JI,JJ,INBPERT
 INTEGER :: INW, JNW
 INTEGER :: ISTEP
 INTEGER :: IOBS, IIOBS
@@ -447,20 +447,20 @@ DO ISTEP = 1,NBOUTPUT
         ENDDO
         !
         ! Prognostic fields for assimilation (Control vector)
-        DO L = 1,NVAR
-          SELECT CASE (TRIM(CVAR(L)))
+        DO JL = 1,NVAR
+          SELECT CASE (TRIM(CVAR(JL)))
             CASE("TG1")
-              XF(:,:,NIPERT,L) = XTG(:,1,:)
+              XF(:,:,NIPERT,JL) = XTG(:,1,:)
             CASE("TG2")
-              XF(:,:,NIPERT,L) = XTG(:,2,:)
+              XF(:,:,NIPERT,JL) = XTG(:,2,:)
             CASE("WG1")
-              XF(:,:,NIPERT,L) = XWG(:,1,:)
+              XF(:,:,NIPERT,JL) = XWG(:,1,:)
             CASE("WG2")
-              XF(:,:,NIPERT,L) = XWG(:,2,:)
+              XF(:,:,NIPERT,JL) = XWG(:,2,:)
             CASE("LAI")
-              XF(:,:,NIPERT,L) = XLAI(:,:)
+              XF(:,:,NIPERT,JL) = XLAI(:,:)
             CASE DEFAULT
-              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA_!")
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA_!")
           END SELECT
         ENDDO
         !
@@ -490,20 +490,20 @@ DO ISTEP = 1,NBOUTPUT
         !
       ELSE
         !
-        DO L = 1,NVAR
-          SELECT CASE (TRIM(CVAR(L)))
+        DO JL = 1,NVAR
+          SELECT CASE (TRIM(CVAR(JL)))
             CASE("TG1")
-              XI(:,:,L) = XTG(:,1,:)
+              XI(:,:,JL) = XTG(:,1,:)
             CASE("TG2")
-              XI(:,:,L) = XTG(:,2,:)
+              XI(:,:,JL) = XTG(:,2,:)
             CASE("WG1")
-              XI(:,:,L) = XWG(:,1,:)
+              XI(:,:,JL) = XWG(:,1,:)
             CASE("WG2")
-              XI(:,:,L) = XWG(:,2,:)
+              XI(:,:,JL) = XWG(:,2,:)
             CASE("LAI")
-              XI(:,:,L) = XLAI(:,:)
+              XI(:,:,JL) = XLAI(:,:)
             CASE DEFAULT
-              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(L))//" is not defined in SODA!")
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
           END SELECT
         ENDDO        
         !
@@ -524,8 +524,8 @@ DO ISTEP = 1,NBOUTPUT
       OPEN(UNIT=55,FILE=TRIM(YMFILE)//".DAT",FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
       IF ( ISTAT==0 ) THEN
         !   If it exists, read observations
-        DO I = 1,NSIZE_NATURE
-          READ (55,*)  (XYO(I,NOBS+J),J=1,NOBSTYPE)
+        DO JI = 1,NSIZE_NATURE
+          READ (55,*)  (XYO(JI,NOBS+JJ),JJ=1,NOBSTYPE)
         ENDDO
         NOBS = NOBS + NOBSTYPE      
         IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', XYO(1,:), NOBS

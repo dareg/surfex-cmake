@@ -162,7 +162,7 @@ REAL, DIMENSION (:),   ALLOCATABLE :: PSST, PSAB, PARG, PLAT, PLON, PTCLS, PHCLS
 REAL, DIMENSION (:),   ALLOCATABLE :: ZSST1, ZLST1, PSST1, PLST1, PLAT1, PLON1, ZALT1
 
 INTEGER                            :: IVERSION, IBUGFIX
-INTEGER                            :: J,J1
+INTEGER                            :: JJ,J1
 CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
 CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                            :: ILUOUT  ! ascii output unit number
@@ -418,21 +418,21 @@ CALL READ_SURF(YPROGRAM,'LAI',       PLAI,  IRESP)
 CALL READ_SURF(YPROGRAM,'VEG',       PVEG,  IRESP)
 
 IF (NPRINTLEV>0) THEN
-  J = NR_NATURE(1)
-  PRINT *,'value in PREP file => WG1       ',PWS(J,1)
-  PRINT *,'value in PREP file => WG2       ',PWP(J,1)
-  PRINT *,'value in PREP file => TG1       ',PTS(J,1)
-  PRINT *,'value in PREP file => TG2       ',PTP(J,1)
-  PRINT *,'value in PREP file => WGI2      ',PTL(J,1)
-  PRINT *,'value in PREP file => WSNOW_VEG1',PSNS(J,1)
-  PRINT *,'value in PREP file => SST       ',PSST(J)
-  PRINT *,'value in PREP file => LAI       ',PLAI(J,1)
-  PRINT *,'value in PREP file => VEG       ',PVEG(J,1)
-  PRINT *,'value in PREP file => RSMIN     ',PRSMIN(J,1)
-  PRINT *,'value in PREP file => DATA_DG2  ',PD2(J,1)
-  PRINT *,'value in PREP file => SAND      ',PSAB(J)
-  PRINT *,'value in PREP file => CLAY      ',PARG(J)
-  PRINT *,'value in PREP file => ZS        ',ZALT(J)
+  JJ = NR_NATURE(1)
+  PRINT *,'value in PREP file => WG1       ',PWS(JJ,1)
+  PRINT *,'value in PREP file => WG2       ',PWP(JJ,1)
+  PRINT *,'value in PREP file => TG1       ',PTS(JJ,1)
+  PRINT *,'value in PREP file => TG2       ',PTP(JJ,1)
+  PRINT *,'value in PREP file => WGI2      ',PTL(JJ,1)
+  PRINT *,'value in PREP file => WSNOW_VEG1',PSNS(JJ,1)
+  PRINT *,'value in PREP file => SST       ',PSST(JJ)
+  PRINT *,'value in PREP file => LAI       ',PLAI(JJ,1)
+  PRINT *,'value in PREP file => VEG       ',PVEG(JJ,1)
+  PRINT *,'value in PREP file => RSMIN     ',PRSMIN(JJ,1)
+  PRINT *,'value in PREP file => DATA_DG2  ',PD2(JJ,1)
+  PRINT *,'value in PREP file => SAND      ',PSAB(JJ)
+  PRINT *,'value in PREP file => CLAY      ',PARG(JJ)
+  PRINT *,'value in PREP file => ZS        ',ZALT(JJ)
 ENDIF
 
 CALL END_IO_SURF_n(YPROGRAM)
@@ -594,11 +594,11 @@ ENDIF
 INOBS = 0
 IF (LOBSWG) THEN
   OPEN(UNIT=111,FILE='ASCAT_SM.DAT')
-  DO J=1,NDIM_FULL
-    READ(111,*,END=990) PSM_O(J),PSIG_SMO(J),PLSM_O(J)
-    IF (PLSM_O(J) < 1.0)          PSM_O(J) = 999.0 ! data rejection if not on land
-    IF (PSIG_SMO(J) > XSIGWGO_MAX) PSM_O(J) = 999.0 ! data rejection of error too large
-    IF (PSM_O(J) /= 999.0) INOBS = INOBS + 1
+  DO JJ=1,NDIM_FULL
+    READ(111,*,END=990) PSM_O(JJ),PSIG_SMO(JJ),PLSM_O(JJ)
+    IF (PLSM_O(JJ) < 1.0)          PSM_O(JJ) = 999.0 ! data rejection if not on land
+    IF (PSIG_SMO(JJ) > XSIGWGO_MAX) PSM_O(JJ) = 999.0 ! data rejection of error too large
+    IF (PSM_O(JJ) /= 999.0) INOBS = INOBS + 1
   ENDDO
 990 CONTINUE
   CLOSE(UNIT=111)
@@ -652,10 +652,10 @@ IF (.NOT. LDINLINE) THEN
   DELY   = PEDELY 
   IF (PLONOR > 180.0) PLONOR = PLONOR - 360.0
   IF (PLON0  > 180.0) PLON0  = PLON0  - 360.0
-  DO J=1,NDGUX
+  DO JJ=1,NDGUX
     DO J1=1,NDLUX
-      ZPX((J-1)*NDLUX + J1) = DELX*REAL(J1-1)
-      ZPY((J-1)*NDLUX + J1) = DELY*REAL(J-1)
+      ZPX((JJ-1)*NDLUX + J1) = DELX*REAL(J1-1)
+      ZPY((JJ-1)*NDLUX + J1) = DELY*REAL(JJ-1)
     ENDDO
   ENDDO
 #endif
@@ -687,16 +687,16 @@ ZTHRES=XRTHR_QC*SQRT(XSIGWGO**2 + XSIGWGB**2)
 
 ! Superficial soil moisture innovations in (m3/m3)
 
-DO J = 1, ISIZE
-  IF (PWS_O(J) /= 999.0) THEN
-    ZWGINC(J) = PWS_O(J) - PWS(J,1)
-    IF (ABS(ZWGINC(J)) > ZTHRES) THEN 
-      ZWGINC(J) = 0.0 ! background check
+DO JJ = 1, ISIZE
+  IF (PWS_O(JJ) /= 999.0) THEN
+    ZWGINC(JJ) = PWS_O(JJ) - PWS(JJ,1)
+    IF (ABS(ZWGINC(JJ)) > ZTHRES) THEN 
+      ZWGINC(JJ) = 0.0 ! background check
     ELSE
       INOBS = INOBS + 1
     ENDIF
   ELSE
-    ZWGINC(J) = 0.0
+    ZWGINC(JJ) = 0.0
   ENDIF
 ENDDO
 PRINT *,' NUMBER OF ASCAT OBSERVATIONS AFTER BACKGROUND CHECK  :: ',INOBS
@@ -742,19 +742,19 @@ PWPC(:)     =  XUNDEF
 PTSC(:)     =  XUNDEF
 PTPC(:)     =  XUNDEF
 
-DO J = 1, ISIZE
-  PGELAT(J)   = PLAT(J)
-  PGELAM(J)   = PLON(J)
-  PGEMU(J)    = SIN(PLAT(J)*ZPIS180)
+DO JJ = 1, ISIZE
+  PGELAT(JJ)   = PLAT(JJ)
+  PGELAM(JJ)   = PLON(JJ)
+  PGEMU(JJ)    = SIN(PLAT(JJ)*ZPIS180)
 ENDDO
 
 ZEVAP(:)   =  (PEVAP(:)/XLVTT*XDAY)/(NECHGU*3600.) ! conversion W/m2 -> mm/day
 ZEVAPTR(:) =  PEVAPTR(:)*XDAY
 ZSNS(:)    =  PSNS(:,1)
 
-DO J = 1, ISIZE
-  ZTS(J) = PTS(J,1)
-  ZTP(J) = PTP(J,1)
+DO JJ = 1, ISIZE
+  ZTS(JJ) = PTS(JJ,1)
+  ZTP(JJ) = PTP(JJ,1)
 ENDDO
 
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
@@ -837,23 +837,23 @@ END WHERE
 
 ! b) Temperature analysis of SEA and LAKE points
 
-DO J = 1, ISIZE
-  IF (PITM(J) < 0.5_JPRB) THEN
-    IF (PSST(J)/=XUNDEF) THEN
-      ZTSINC(J) = PTS_O(J) - PSST(J)
-      PSST(J) = PTS_O(J)   ! canari
+DO JJ = 1, ISIZE
+  IF (PITM(JJ) < 0.5_JPRB) THEN
+    IF (PSST(JJ)/=XUNDEF) THEN
+      ZTSINC(JJ) = PTS_O(JJ) - PSST(JJ)
+      PSST(JJ) = PTS_O(JJ)   ! canari
     ENDIF
-    IF (PLST(J)/=XUNDEF) THEN
-      PLST(J) = PTS_O(J)   ! canari
+    IF (PLST(JJ)/=XUNDEF) THEN
+      PLST(JJ) = PTS_O(JJ)   ! canari
     ENDIF
   ELSE
-    IF (PSST(J)/=XUNDEF) THEN
-      PSST(J) = XUNDEF
-      OINTERP_SST(J) = .TRUE.
+    IF (PSST(JJ)/=XUNDEF) THEN
+      PSST(JJ) = XUNDEF
+      OINTERP_SST(JJ) = .TRUE.
     ENDIF
-    IF (PLST(J)/=XUNDEF) THEN
-      PLST(J) = XUNDEF
-      OINTERP_LST(J) = .TRUE.
+    IF (PLST(JJ)/=XUNDEF) THEN
+      PLST(JJ) = XUNDEF
+      OINTERP_LST(JJ) = .TRUE.
     ENDIF
   ENDIF
 ENDDO
@@ -901,17 +901,17 @@ IF (LDINLINE) THEN
             & PLON1 (ISIZE1), ZALT1 (ISIZE1), OINTERP_LST1 (ISIZE1), OINTERP_SST1 (ISIZE1))
    
     ! remove extension zone
-    J = 1
+    JJ = 1
     DO J1 = 1, ISIZE
       IF (.NOT. LD_MASKEXT (J1)) THEN
-        PSST1 (J) = PSST (J1)
-        PLST1 (J) = PLST (J1)
-        PLAT1 (J) = PLAT (J1)
-        PLON1 (J) = PLON (J1)
-        ZALT1 (J) = ZALT (J1)
-        OINTERP_LST1 (J) = OINTERP_LST (J1)
-        OINTERP_SST1 (J) = OINTERP_SST (J1)
-        J = J + 1
+        PSST1 (JJ) = PSST (J1)
+        PLST1 (JJ) = PLST (J1)
+        PLAT1 (JJ) = PLAT (J1)
+        PLON1 (JJ) = PLON (J1)
+        ZALT1 (JJ) = ZALT (J1)
+        OINTERP_LST1 (JJ) = OINTERP_LST (J1)
+        OINTERP_SST1 (JJ) = OINTERP_SST (J1)
+        JJ = JJ + 1
       ENDIF
     ENDDO
    
@@ -922,12 +922,12 @@ IF (LDINLINE) THEN
     CALL OI_HOR_EXTRAPOL_SURF(ISIZE1,PLAT1,PLON1,ZSST1,PLAT1,PLON1,PSST1,OINTERP_SST1,ZALT1)
    
     ! copy back
-    J = 1
+    JJ = 1
     DO J1 = 1, ISIZE
       IF (.NOT. LD_MASKEXT (J1)) THEN
-        PSST (J1) = PSST1 (J)
-        PLST (J1) = PLST1 (J) 
-        J = J + 1
+        PSST (J1) = PSST1 (JJ)
+        PLST (J1) = PLST1 (JJ) 
+        JJ = JJ + 1
       ENDIF
     ENDDO
    
@@ -949,12 +949,12 @@ ENDIF
 ! PRINT values produced by OI_HO_EXTRAPOL_SURF
 
 IF (NPRINTLEV>0) THEN
-  DO J = 1, ISIZE
-    IF (OINTERP_LST(J)) THEN
-      PRINT *,'Lake surface temperature set to ',PLST(J),'from nearest neighbour at J=',J
+  DO JJ = 1, ISIZE
+    IF (OINTERP_LST(JJ)) THEN
+      PRINT *,'Lake surface temperature set to ',PLST(JJ),'from nearest neighbour at J=',JJ
     ENDIF
-    IF (OINTERP_SST(J)) THEN
-      PRINT *,'Sea surface temperature set to ',PSST(J),'from nearest neighbour at J=',J
+    IF (OINTERP_SST(JJ)) THEN
+      PRINT *,'Sea surface temperature set to ',PSST(JJ),'from nearest neighbour at J=',JJ
     ENDIF
   ENDDO
 ENDIF
@@ -1116,7 +1116,7 @@ CHARACTER(LEN=*), INTENT (IN) :: CDN
 REAL, INTENT (IN) :: PX (:)
 
 REAL :: ZX (SIZE (PX))
-INTEGER :: I, N
+INTEGER :: JI, JN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 0, ZHOOK_HANDLE)
@@ -1126,15 +1126,15 @@ IF (LDINLINE) THEN
   IF (.NOT.LWRITE.AND.LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 1, ZHOOK_HANDLE)
   IF (.NOT.LWRITE) RETURN
 #endif
-  N = COUNT (.NOT. LD_MASKEXT)
-  ZX (1:N) = PACK (PX, .NOT. LD_MASKEXT)
+  JN = COUNT (.NOT. LD_MASKEXT)
+  ZX (1:JN) = PACK (PX, .NOT. LD_MASKEXT)
 ELSE
   ZX = PX
-  N = SIZE (PX)
+  JN = SIZE (PX)
 ENDIF
 
 WRITE (0, *) TRIM(CDN)//" = " 
-WRITE (0, *) N, MINVAL(ZX(1:N)), MAXVAL(ZX(1:N))
+WRITE (0, *) JN, MINVAL(ZX(1:JN)), MAXVAL(ZX(1:JN))
 !WRITE (0, '(10(E14.6,", "))') ZX (1:N)
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 1, ZHOOK_HANDLE)

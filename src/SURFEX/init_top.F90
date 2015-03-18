@@ -138,7 +138,7 @@ REAL                  :: ZFUP, ZFDOWN, ZQUP, ZQDOWN, ZSLOPEQ, ZWUP, ZWDOWN, ZSLO
 !
 INTEGER, DIMENSION (1):: ID
 !
-INTEGER               :: INI, I, IND, JSI_MIN, JSI_MAX, IPAS, &
+INTEGER               :: INI, JI, IND, JSI_MIN, JSI_MAX, IPAS, &
                          JL, INL, JPATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -172,10 +172,10 @@ IF (HISBA == 'DIF') THEN
   DO JPATCH=1,NPATCH
     IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
     DO JL=1,INL
-       DO I=1,INI
-          ZD_TOP   (I) = ZD_TOP   (I) + PPATCH(I,JPATCH)*PSOILWGHT(I,JL,JPATCH)
-          ZWSAT_AVG(I) = ZWSAT_AVG(I) + PPATCH(I,JPATCH)*PSOILWGHT(I,JL,JPATCH)*PWSAT(I,JL)
-          ZWD0_AVG (I) = ZWD0_AVG (I) + PPATCH(I,JPATCH)*PSOILWGHT(I,JL,JPATCH)*PWD0 (I,JL)
+       DO JI=1,INI
+          ZD_TOP   (JI) = ZD_TOP   (JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)
+          ZWSAT_AVG(JI) = ZWSAT_AVG(JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)*PWSAT(JI,JL)
+          ZWD0_AVG (JI) = ZWD0_AVG (JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)*PWD0 (JI,JL)
        ENDDO
     ENDDO
   ENDDO
@@ -189,8 +189,8 @@ ELSE
 !     
   DO JPATCH=1,NPATCH
      IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-     DO I=1,INI
-        ZD_TOP(I)=ZD_TOP(I)+PRUNOFFD(I,JPATCH)*PPATCH(I,JPATCH)
+     DO JI=1,INI
+        ZD_TOP(JI)=ZD_TOP(JI)+PRUNOFFD(JI,JPATCH)*PPATCH(JI,JPATCH)
      ENDDO
   ENDDO
 !     
@@ -209,18 +209,18 @@ ZAR = 0.0
 ZTOT= 0.0
 ZNO = 0.0
 !
-DO I=1,INI
+DO JI=1,INI
 !   
-   IF(PTI_MEAN(I)==XUNDEF)THEN
+   IF(PTI_MEAN(JI)==XUNDEF)THEN
 !
 !    *Case where the Topographics index are not defined.
 !    --------------------------------------------------------         
      ZNO=ZNO+1.0
-     PTAB_FSAT(I,:)=0.0     
-     PTAB_WTOP(I,:)=XUNDEF
-     PTAB_QTOP(I,:)=0.0
+     PTAB_FSAT(JI,:)=0.0     
+     PTAB_WTOP(JI,:)=XUNDEF
+     PTAB_QTOP(JI,:)=0.0
 !     
-     PM(I) =XUNDEF
+     PM(JI) =XUNDEF
 !
    ELSE 
 !
@@ -236,11 +236,11 @@ DO I=1,INI
 !    New version : Regressions directly in the pgd
 !    1000 meter DEM to 2m DEM (PAN AND KING 2012)
 !             
-     ZTI_MEAN=PTI_MEAN(I)
-     ZTI_MIN =PTI_MIN (I)
-     ZTI_MAX =PTI_MAX (I)
-     ZTI_STD =PTI_STD (I)
-     ZTI_SKEW=PTI_SKEW(I)
+     ZTI_MEAN=PTI_MEAN(JI)
+     ZTI_MIN =PTI_MIN (JI)
+     ZTI_MAX =PTI_MAX (JI)
+     ZTI_STD =PTI_STD (JI)
+     ZTI_SKEW=PTI_SKEW(JI)
 !
 !    Calculate topographic index pdf parameters 
 !
@@ -250,7 +250,7 @@ DO I=1,INI
        ZTI_SKEW=0.2
 !       
        WRITE(KLUOUT,*)'TI_SKEW is too low or negatif (=',ZTI_SKEW,'),' 
-       WRITE(KLUOUT,*)'then PHI is too big for the grid-cell',I,'So,GAMMA(PHI) -> +inf.'
+       WRITE(KLUOUT,*)'then PHI is too big for the grid-cell',JI,'So,GAMMA(PHI) -> +inf.'
        WRITE(KLUOUT,*)'The applied solution is to put TI_SKEW = 0.2'
        IF(ZTI_STD<1.0)THEN
          WRITE(KLUOUT,*)'In addition TI_STD is too low (=',ZTI_STD,'),' 
@@ -274,14 +274,14 @@ DO I=1,INI
 !
 !    Exponential decay factor of the local deficit
 !
-     PM(I) =(ZWSAT_AVG(I)-ZWD0_AVG(I))*ZD_TOP(I)/X4 
+     PM(JI) =(ZWSAT_AVG(JI)-ZWD0_AVG(JI))*ZD_TOP(JI)/X4 
 !
 !    1.2.1 Calculate grid cell pdf total density FTOT = F(ymin --> ymax)
 !    -------------------------------------------------------------------
 !
 !    Normalized TOPMODEL maximum deficit D0/M coefficient
 !
-     ZD0 = (ZWSAT_AVG(I)-ZWD0_AVG(I))*ZD_TOP(I)/PM(I)
+     ZD0 = (ZWSAT_AVG(JI)-ZWD0_AVG(JI))*ZD_TOP(JI)/PM(JI)
 !
 !    Initialise
 !
@@ -316,7 +316,7 @@ DO I=1,INI
 !    if the incomplete gamma function don't work, print why
 !
      IF (IFLGST/=0)THEN
-        WRITE(KLUOUT,*)'GRID-CELL =',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMIN= ',ZYMIN 
+        WRITE(KLUOUT,*)'GRID-CELL =',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMIN= ',ZYMIN 
         CALL ABOR1_SFX('INIT_TOP: (1) PROBLEM WITH DGAM FUNCTION')
      ENDIF      
 !
@@ -327,7 +327,7 @@ DO I=1,INI
 !    if the incomplete gamma function don't work, print why
 !
      IF (IFLGST/=0)THEN
-        WRITE(KLUOUT,*)'GRID-CELL =',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMAX= ',ZYMAX
+        WRITE(KLUOUT,*)'GRID-CELL =',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YMAX= ',ZYMAX
         CALL ABOR1_SFX('INIT_TOP: (2) PROBLEM WITH DGAM FUNCTION')
      ENDIF      
 !
@@ -337,13 +337,13 @@ DO I=1,INI
 !
 !    initialization water content and fraction
 !
-     PTAB_WTOP(I,1) = ZWSAT_AVG(I)
-     PTAB_FSAT(I,1) = 1.0
-     PTAB_QTOP(I,1) = 0.0
+     PTAB_WTOP(JI,1) = ZWSAT_AVG(JI)
+     PTAB_FSAT(JI,1) = 1.0
+     PTAB_QTOP(JI,1) = 0.0
 !     
-     PTAB_WTOP(I,IPAS) = ZWD0_AVG(I)
-     PTAB_FSAT(I,IPAS) = 0.0
-     PTAB_QTOP(I,IPAS) = 0.0
+     PTAB_WTOP(JI,IPAS) = ZWD0_AVG(JI)
+     PTAB_FSAT(JI,IPAS) = 0.0
+     PTAB_QTOP(JI,IPAS) = 0.0
 !
 !    Define the new limits for the satured index loop
 !
@@ -395,7 +395,7 @@ DO I=1,INI
 !       if the incomplete gamma function don't works, print why
 !
         IF (IFLGST/=0)THEN
-           WRITE(KLUOUT,*)'GRID-CELL= ',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YSAT= ',ZYSAT
+           WRITE(KLUOUT,*)'GRID-CELL= ',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'YSAT= ',ZYSAT
            CALL ABOR1_SFX('INIT_TOP: (3) PROBLEM WITH DGAM FUNCTION')
         ENDIF 
 !
@@ -406,13 +406,13 @@ DO I=1,INI
 !       if the incomplete gamma function don't works, print why
 !
         IF (IFLGST/=0)THEN
-           WRITE(KLUOUT,*)'GRID-CELL= ',I,'FLGST= ',IFLGST,'PHI= ',ZPHI,'Y0= ',ZY0
+           WRITE(KLUOUT,*)'GRID-CELL= ',JI,'FLGST= ',IFLGST,'PHI= ',ZPHI,'Y0= ',ZY0
            CALL ABOR1_SFX('INIT_TOP: (4) PROBLEM WITH DGAM FUNCTION')
         ENDIF 
 !
 !       compute satured fraction as FSAT = F(0 --> ymax) - F(0 --> ysat)
 !       
-        PTAB_FSAT(I,IND)=MAX(0.0,(ZGYMAX-ZGYSAT)/ZFTOT)
+        PTAB_FSAT(JI,IND)=MAX(0.0,(ZGYMAX-ZGYSAT)/ZFTOT)
 !
 !       Compute driest fraction
 !
@@ -420,7 +420,7 @@ DO I=1,INI
 !
 !       Calculate FMED
 !        
-        ZFMED=(1.0-PTAB_FSAT(I,IND)-ZF0)
+        ZFMED=(1.0-PTAB_FSAT(JI,IND)-ZF0)
 !
         IF (ZFMED/=0.0) THEN
 !
@@ -445,11 +445,11 @@ DO I=1,INI
 !
 !       Solves Dbar = (Wsat-WT)*d_top with Dbar/M (=ZDMOY) = (Wsat-WT)*d_top/M
 !
-        PTAB_WTOP(I,IND) = ZWSAT_AVG(I)-(PM(I)*ZDMOY/ZD_TOP(I))
+        PTAB_WTOP(JI,IND) = ZWSAT_AVG(JI)-(PM(JI)*ZDMOY/ZD_TOP(JI))
 !
 !       Solves Qs = FMED * M * Ks * exp(-Xsat) / Ks (dimentionless)
 !
-        PTAB_QTOP(I,IND) = ZFMED*PM(I)*EXP(-ZXSAT_IND)
+        PTAB_QTOP(JI,IND) = ZFMED*PM(JI)*EXP(-ZXSAT_IND)
 !        
       ENDDO
 !
@@ -459,41 +459,41 @@ ENDDO
 !
 ! supress numerical artifacs for boundaries conditions
 !
-DO I=1,INI
+DO JI=1,INI
 !
 !  Upper boundary
 !
-   IF(PTAB_WTOP(I,2)==ZWSAT_AVG(I))THEN
+   IF(PTAB_WTOP(JI,2)==ZWSAT_AVG(JI))THEN
 !
-     ZFUP=PTAB_FSAT(I,1)
-     ZWUP=PTAB_WTOP(I,1)
-     ZQUP=PTAB_QTOP(I,1)
+     ZFUP=PTAB_FSAT(JI,1)
+     ZWUP=PTAB_WTOP(JI,1)
+     ZQUP=PTAB_QTOP(JI,1)
 !   
-     ID(:)=MAXLOC(PTAB_WTOP(I,:),PTAB_WTOP(I,:)<ZWSAT_AVG(I))
+     ID(:)=MAXLOC(PTAB_WTOP(JI,:),PTAB_WTOP(JI,:)<ZWSAT_AVG(JI))
 !   
-     ZFDOWN=PTAB_FSAT(I,ID(1))
-     ZWDOWN=PTAB_WTOP(I,ID(1))
-     ZQDOWN=PTAB_QTOP(I,ID(1))
+     ZFDOWN=PTAB_FSAT(JI,ID(1))
+     ZWDOWN=PTAB_WTOP(JI,ID(1))
+     ZQDOWN=PTAB_QTOP(JI,ID(1))
 !     
      ZSLOPEW=(ZWUP-ZWDOWN)/(ZFUP-ZFDOWN)   
      ZSLOPEQ=(ZQUP-ZQDOWN)/(ZFUP-ZFDOWN)   
 !
      DO IND=2,ID(1)-1
-        PTAB_WTOP(I,IND)=ZWDOWN+(PTAB_FSAT(I,IND)-ZFDOWN)*ZSLOPEW
-        PTAB_QTOP(I,IND)=ZQDOWN+(PTAB_FSAT(I,IND)-ZFDOWN)*ZSLOPEQ
+        PTAB_WTOP(JI,IND)=ZWDOWN+(PTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEW
+        PTAB_QTOP(JI,IND)=ZQDOWN+(PTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEQ
      ENDDO
 !   
    ENDIF
 !
 !  Lower boundary
 !
-   WHERE(PTAB_FSAT(I,:)<=0.0      )
-         PTAB_WTOP(I,:)=ZWD0_AVG(I)
-         PTAB_QTOP(I,:)=0.0
+   WHERE(PTAB_FSAT(JI,:)<=0.0      )
+         PTAB_WTOP(JI,:)=ZWD0_AVG(JI)
+         PTAB_QTOP(JI,:)=0.0
    ENDWHERE
-   WHERE(PTAB_WTOP(I,:)<=ZWD0_AVG(I))
-         PTAB_FSAT(I,:)=0.0
-         PTAB_QTOP(I,:)=0.0
+   WHERE(PTAB_WTOP(JI,:)<=ZWD0_AVG(JI))
+         PTAB_FSAT(JI,:)=0.0
+         PTAB_QTOP(JI,:)=0.0
    ENDWHERE
 !   
 ENDDO

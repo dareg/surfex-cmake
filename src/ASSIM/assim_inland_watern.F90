@@ -64,7 +64,7 @@ REAL, DIMENSION(:), ALLOCATABLE  :: ZLST01, ZLST1, ZLON1, ZLAT1, ZALT1
 !
 LOGICAL,DIMENSION(KI) :: GINTERP_LST
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GINTERP_LST1
-INTEGER  :: IRESP,I,J,IS1,J1
+INTEGER  :: IRESP,JI,JJ,IS1,J1
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',0,ZHOOK_HANDLE)
@@ -80,18 +80,18 @@ WRITE(*,*) 'UPDATING LST FOR INLAND_WATER: ',TRIM(CWATER)
 ZLST(:) = XUNDEF
 IF (.NOT.LWATERTG2 ) THEN
   !*     ZLST updated from from CANARI analysis
-  DO I=1,KI
-    IF ( PITM(I)<0.5 ) ZLST(I) = PTS_IN(I)
+  DO JI=1,KI
+    IF ( PITM(JI)<0.5 ) ZLST(JI) = PTS_IN(JI)
   ENDDO
   !
 ELSE
   ! Set TG2 from global array
-  DO I=1,KI
-    IF ( PITM(I)>0.5 ) THEN
+  DO JI=1,KI
+    IF ( PITM(JI)>0.5 ) THEN
       !*     ZLST updated from LAND values of climatological TS
-      DO J=1,NSIZE_NATURE
-        IF ( NR_WATER(I)==NR_NATURE(J) ) THEN
-          ZLST(I) = XTG(J,2,1)
+      DO JJ=1,NSIZE_NATURE
+        IF ( NR_WATER(JI)==NR_NATURE(JJ) ) THEN
+          ZLST(JI) = XTG(JJ,2,1)
           EXIT
         ENDIF
       ENDDO
@@ -102,15 +102,15 @@ ENDIF
 !
 ! Set local array from global
 GINTERP_LST(:) = .FALSE.
-DO I=1,KI
-  IF ( ZLST(I)/=XUNDEF ) THEN
-    ZLST0(I) = ZLST(I)
+DO JI=1,KI
+  IF ( ZLST(JI)/=XUNDEF ) THEN
+    ZLST0(JI) = ZLST(JI)
   ELSEIF ( LEXTRAP_WATER ) THEN
     ! Keep ZLST or do extrapolation from neighbour points
-    ZLST0(I) = XUNDEF
-    GINTERP_LST(I) = .TRUE.  
+    ZLST0(JI) = XUNDEF
+    GINTERP_LST(JI) = .TRUE.  
   ELSE
-    ZLST0(I) = XTS(I)
+    ZLST0(JI) = XTS(JI)
   ENDIF
 ENDDO
 !
@@ -128,15 +128,15 @@ IF ( LEXTRAP_WATER ) THEN
     ALLOCATE (ZLST1(IS1), ZLST01(IS1), ZLAT1(IS1), ZLON1(IS1), ZALT1(IS1), GINTERP_LST1(IS1))
     !
     ! remove extension zone
-    J = 1
+    JJ = 1
     DO J1 = 1, KI
       IF ( .NOT.OD_MASKEXT(J1) )  THEN
-        ZLST01(J) = ZLST0(J1)
-        ZLAT1 (J) = PLAT_IN (J1)
-        ZLON1 (J) = PLON_IN (J1)
-        ZALT1 (J) = XZS  (J1)
-        GINTERP_LST1(J) = GINTERP_LST(J1)
-        J = J + 1
+        ZLST01(JJ) = ZLST0(J1)
+        ZLAT1 (JJ) = PLAT_IN (J1)
+        ZLON1 (JJ) = PLON_IN (J1)
+        ZALT1 (JJ) = XZS  (J1)
+        GINTERP_LST1(JJ) = GINTERP_LST(J1)
+        JJ = JJ + 1
       ENDIF
     ENDDO
        
@@ -144,11 +144,11 @@ IF ( LEXTRAP_WATER ) THEN
     CALL OI_HOR_EXTRAPOL_SURF(IS1,ZLAT1,ZLON1,ZLST01,ZLAT1,ZLON1,ZLST1,GINTERP_LST1,ZALT1)
     !
     ! copy back
-    J = 1
+    JJ = 1
     DO J1 = 1, KI
       IF ( .NOT.OD_MASKEXT(J1) ) THEN
-        ZLST(J1) = ZLST1(J)
-        J = J + 1
+        ZLST(J1) = ZLST1(JJ)
+        JJ = JJ + 1
       ENDIF
     ENDDO
     !
@@ -160,9 +160,9 @@ ENDIF
 !
 !*     Print values produced by OI_HO_EXTRAPOL_SURF
 IF ( NPRINTLEV > 2 ) THEN
-  DO I=1,KI
-    IF (GINTERP_LST(I)) THEN
-      PRINT *,'Lake surface temperature set to ',ZLST(I),'from nearest neighbour at I=',NR_WATER(I)
+  DO JI=1,KI
+    IF (GINTERP_LST(JI)) THEN
+      PRINT *,'Lake surface temperature set to ',ZLST(JI),'from nearest neighbour at I=',NR_WATER(JI)
     ENDIF
   ENDDO
 ENDIF

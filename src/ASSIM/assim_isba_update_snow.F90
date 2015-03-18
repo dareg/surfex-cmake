@@ -37,7 +37,7 @@ REAL, DIMENSION(KI) :: ZTS
 !    Addtional snow fields with D95 snow scheme 
 REAL, DIMENSION(KI) :: ZSNR     ! Snow density 
 REAL, DIMENSION(KI) :: ZSNA     ! Snow albedo 
-INTEGER  :: IL,IP
+INTEGER  :: JL,JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! ----------------------------------------------------------------------------------
@@ -49,17 +49,17 @@ IF (HTEST/='OK') THEN
 END IF
 !
 IF ( TSNOW%SCHEME=='D95' ) THEN
-  IL = 1
-  IP = 1
+  JL = 1
+  JP = 1
 ELSE
   CALL ABOR1_SFX("Update of snow is only implemented for D95")
 ENDIF
 !
 IF ( OINITSNOW ) THEN
   !
-  PSWE_ORIG(:) = TSNOW%WSNOW(:,IL,IP)
+  PSWE_ORIG(:) = TSNOW%WSNOW(:,JL,JP)
   !
-  ZTS(:) = XTG(:,1,IP)
+  ZTS(:) = XTG(:,1,JP)
   !
   ZSWE(:) = PSWE(:)
   ! Set snow=0 where 1. guess = 0 and Ts>0, to avoid that the snow analysis introduce snow where it is no snow.
@@ -67,7 +67,7 @@ IF ( OINITSNOW ) THEN
     ZSWE(:)   = 0.0
   END WHERE
   !
-  TSNOW%WSNOW(:,IL,IP) = ZSWE(:)
+  TSNOW%WSNOW(:,JL,JP) = ZSWE(:)
   !
 ENDIF
 
@@ -75,9 +75,9 @@ ENDIF
 ! Update snow
 IF ( OINC ) THEN
 
-  ZSWE(:) = TSNOW%WSNOW(:,IL,IP)  
-  ZSNA(:) = TSNOW%ALB  (:,IP)
-  ZSNR(:) = TSNOW%RHO  (:,IL,IP)
+  ZSWE(:) = TSNOW%WSNOW(:,JL,JP)  
+  ZSNA(:) = TSNOW%ALB  (:,JP)
+  ZSNR(:) = TSNOW%RHO  (:,JL,JP)
 
   ! If we only do second step, we must set working SWE as input SWE
   IF ( .NOT. OINITSNOW ) ZSWE(:) = PSWE(:)
@@ -94,9 +94,9 @@ IF ( OINC ) THEN
     ZSNR(:)    = 0.5 * ( XRHOSMIN + XRHOSMAX )
   END WHERE 
   !
-  TSNOW%WSNOW(:,IL,IP) = ZSWE(:)
-  TSNOW%ALB  (:,IP)    = ZSNA(:)
-  TSNOW%RHO  (:,IL,IP) = ZSNR(:)
+  TSNOW%WSNOW(:,JL,JP) = ZSWE(:)
+  TSNOW%ALB  (:,JP)    = ZSNA(:)
+  TSNOW%RHO  (:,JL,JP) = ZSNR(:)
   !
 ENDIF
 !

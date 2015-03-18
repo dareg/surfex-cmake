@@ -89,7 +89,7 @@ INTEGER  :: IYEAR                      ! current year (UTC)
 INTEGER  :: IMONTH                     ! current month (UTC)
 INTEGER  :: IDAY                       ! current day (UTC)
 INTEGER  :: ISSSSS                     ! current time since start of the run (s)
-INTEGER  :: I, J, IP, IL
+INTEGER  :: JI, JJ, JP, JL
 INTEGER  :: INOBS   ! number of observations
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 !
@@ -127,40 +127,40 @@ IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 !
 !
-DO I=1,KI     
-  ZGELAM(I) = PLON_IN(I)  
-  ZGELAT(I) = PLAT_IN(I)
+DO JI=1,KI     
+  ZGELAM(JI) = PLON_IN(JI)  
+  ZGELAT(JI) = PLAT_IN(JI)
 ENDDO
 !
-DO I=1,KI
-  ZGEMU (I) = SIN(ZGELAT(I)*XPI/180.)
+DO JI=1,KI
+  ZGEMU (JI) = SIN(ZGELAT(JI)*XPI/180.)
 ENDDO
 !
 !
-IP = 1
-IL = 1
+JP = 1
+JL = 1
 !
 !
-ZSAB  (:) = XSAND(:,IP)*100.
-ZARG  (:) = XCLAY(:,IP)*100.
+ZSAB  (:) = XSAND(:,JP)*100.
+ZARG  (:) = XCLAY(:,JP)*100.
 !
-ZTS0  (:) = XTG  (:,1,IP)
-ZTP0  (:) = XTG  (:,2,IP)
+ZTS0  (:) = XTG  (:,1,JP)
+ZTP0  (:) = XTG  (:,2,JP)
 !
-ZWS0  (:) = XWG  (:,1,IP)
-ZWP0  (:) = XWG  (:,2,IP)
-ZTL0  (:) = XWGI (:,2,IP)
+ZWS0  (:) = XWG  (:,1,JP)
+ZWP0  (:) = XWG  (:,2,JP)
+ZTL0  (:) = XWGI (:,2,JP)
 !
-ZSNS0(:) = TSNOW%WSNOW(:,IL,IP)
+ZSNS0(:) = TSNOW%WSNOW(:,JL,JP)
 ZSNS (:) = ZSNS0(:)
 !
-ZTCLS (:) = XAT2M_ISBA   (:,IP)
-ZHCLS (:) = XAHU2M_ISBA  (:,IP)
+ZTCLS (:) = XAT2M_ISBA   (:,JP)
+ZHCLS (:) = XAHU2M_ISBA  (:,JP)
 !
-ZD2   (:) = XDG   (:,2,IP)
-ZRSMIN(:) = XRSMIN(:,IP)
-ZLAI  (:) = XLAI  (:,IP)
-ZVEG  (:) = XVEG  (:,IP)
+ZD2   (:) = XDG   (:,2,JP)
+ZRSMIN(:) = XRSMIN(:,JP)
+ZLAI  (:) = XLAI  (:,JP)
+ZVEG  (:) = XVEG  (:,JP)
 !
 ZUCLS(:) = PUCLS(:)
 ZVCLS(:) = PVCLS(:)
@@ -220,12 +220,12 @@ ZIVEG(:) = 0.0
 INOBS = 0
 IF ( LOBSWG ) THEN
   OPEN(UNIT=111,FILE='ASCAT_SM.DAT')
-  DO I=1,KI
-    READ(111,*) ZSM_O(I),ZSIG_SMO(I),ZLSM_O(I)
+  DO JI=1,KI
+    READ(111,*) ZSM_O(JI),ZSIG_SMO(JI),ZLSM_O(JI)
     ! data rejection if not on land
     ! data rejection of error too large
-    IF ( ZLSM_O(I)<1.0 .OR. ZSIG_SMO(I)>XSIGWGO_MAX ) ZSM_O(I) = 999.0 
-    IF ( ZSM_O(I)/=999.0 ) INOBS = INOBS + 1
+    IF ( ZLSM_O(JI)<1.0 .OR. ZSIG_SMO(JI)>XSIGWGO_MAX ) ZSM_O(JI) = 999.0 
+    IF ( ZSM_O(JI)/=999.0 ) INOBS = INOBS + 1
   ENDDO
   CLOSE(UNIT=111)
   IF ( NPRINTLEV > 0 ) WRITE(*,*) 'READ ASCAT SM OK'
@@ -256,16 +256,16 @@ END WHERE
 ZTHRES = XRTHR_QC*SQRT(XSIGWGO**2 + XSIGWGB**2)
 ! Superficial soil moisture innovations in (m3/m3)
 INOBS = 0
-DO I=1,KI
-  IF ( ZWS_O(I)/=999.0 ) THEN
-    ZWGINC(I) = ZWS_O(I) - ZWS(I)
-    IF ( ABS(ZWGINC(I))>ZTHRES ) THEN 
-      ZWGINC(I) = 0.0 ! background check
+DO JI=1,KI
+  IF ( ZWS_O(JI)/=999.0 ) THEN
+    ZWGINC(JI) = ZWS_O(JI) - ZWS(JI)
+    IF ( ABS(ZWGINC(JI))>ZTHRES ) THEN 
+      ZWGINC(JI) = 0.0 ! background check
     ELSE
       INOBS = INOBS + 1
     ENDIF
   ELSE
-    ZWGINC(I) = 0.0
+    ZWGINC(JI) = 0.0
   ENDIF
 ENDDO
 IF ( NPRINTLEV > 0 ) THEN
@@ -334,11 +334,11 @@ WRITE(*,*) 'Mean TL increments over NATURE ',SUM(ZTLINC)/KI
 WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
-XWG (:,1,IP) = ZWS0(:)
-XWG (:,2,IP) = ZWP0(:)
-XTG (:,1,IP) = ZTS0(:)
-XTG (:,2,IP) = ZTP0(:)
-XWGI(:,2,IP) = ZTL0(:)
+XWG (:,1,JP) = ZWS0(:)
+XWG (:,2,JP) = ZWP0(:)
+XTG (:,1,JP) = ZTS0(:)
+XTG (:,2,JP) = ZTP0(:)
+XWGI(:,2,JP) = ZTL0(:)
 
 !
 ! -------------------------------------------------------------------------------------
