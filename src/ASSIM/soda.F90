@@ -189,9 +189,7 @@ INTEGER :: INFOMPI, ILEVEL
 !
 INTEGER :: I2M, IBEQ, IDSTEQ
 LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
-           GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GINTERPOL_SST,   &
-           GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,            &
-           GWATER_PROFILE, GINTERPOL_TS,                           &
+           GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GWATER_PROFILE, &
            GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,&
            GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB
 !
@@ -778,12 +776,7 @@ DO JNW = 1,INW
   IDSTEQ                 = 0
   GDIAG_OCEAN            = .FALSE.
   GDIAG_SEAICE           = .FALSE.
-  GINTERPOL_SST          = .FALSE.
-  GINTERPOL_SSS          = .FALSE.
-  GINTERPOL_SIC          = .FALSE.
-  GINTERPOL_SIT          = .FALSE.
   GWATER_PROFILE         = .FALSE.
-  GINTERPOL_TS           = .FALSE.
   GSURF_EVAP_BUDGET      = .FALSE.
   GFLOOD                 = .FALSE.
   GPGD_ISBA              = .FALSE.  
@@ -794,8 +787,7 @@ DO JNW = 1,INW
   !
   CALL FLAG_DIAG_UPDATE(GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                         GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
-                        GINTERPOL_SST, GINTERPOL_SSS, GINTERPOL_SIC, GINTERPOL_SIT,&
-                        GWATER_PROFILE, GINTERPOL_TS,                              &
+                        GWATER_PROFILE,                                            &
                         GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
                         GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
   ! 
