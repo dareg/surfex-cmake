@@ -136,7 +136,8 @@ SELECT CASE(HSURF)
 
               ZFIELD_EP_IN(:) = ZFIELD_EP(:)
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:), &
+                                        XLAT,XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
 #endif
 
               ! Unpack to full rank
@@ -192,7 +193,8 @@ SELECT CASE(HSURF)
 
               ZFIELD_EP_IN(:) = ZFIELD_EP
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:), &
+                                        XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 #endif
 
               ! Unpack to full rank
@@ -251,7 +253,8 @@ SELECT CASE(HSURF)
           
               ZFIELD_EP_IN(:) = ZFIELD_EP
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:),XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(NSIZE_NATURE,XLAT,XLON,ZFIELD_EP_IN(:), &
+                                        XLAT,XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 #endif
 
               ! Unpack to full rank

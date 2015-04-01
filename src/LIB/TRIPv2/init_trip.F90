@@ -673,15 +673,15 @@ IF(LFLOOD)THEN
   WRITE(NLISTING,*)'% of flooded area in the domain :',100.0*SUM(TTRIP%XFFLOOD*TGRID%XAREA)/SUM(TGRID%XAREA)
   WRITE(NLISTING,*)''
   WRITE(NLISTING,*)'Initial flood depth (m) :      ',MINVAL(TTRIP%XHFLOOD,                 TGRID%GMASK_FLD), &
-                                                     MAXVAL(TTRIP%XHFLOOD,                 TGRID%GMASK_FLD)  
+                                                     MAXVAL(TTRIP%XHFLOOD,                 TGRID%GMASK_FLD)
   WRITE(NLISTING,*)'Initial flood fraction :       ',MINVAL(TTRIP%XFFLOOD,                 TGRID%GMASK_FLD), &
-                                                     MAXVAL(TTRIP%XFFLOOD,                 TGRID%GMASK_FLD)  
+                                                     MAXVAL(TTRIP%XFFLOOD,                 TGRID%GMASK_FLD)
   WRITE(NLISTING,*)'Initial flood volume m3/1E9 :  ',MINVAL(TTRIP%XFLOOD_STO/(XRHOLW*1.E9),TGRID%GMASK_FLD), &
-                                                     MAXVAL(TTRIP%XFLOOD_STO/(XRHOLW*1.E9),TGRID%GMASK_FLD)   
+                                                     MAXVAL(TTRIP%XFLOOD_STO/(XRHOLW*1.E9),TGRID%GMASK_FLD)
   WRITE(NLISTING,*)'Initial flood length (km):     ',MINVAL(TTRIP%XFLOOD_LEN/1.E3,         TGRID%GMASK_FLD), &
-                                                     MAXVAL(TTRIP%XFLOOD_LEN/1.E3,         TGRID%GMASK_FLD)                           
+                                                     MAXVAL(TTRIP%XFLOOD_LEN/1.E3,         TGRID%GMASK_FLD)
   WRITE(NLISTING,*)'Initial flood WIDTH (km) :     ',MINVAL(TTRIP%XWFLOOD/1.E3,            TGRID%GMASK_FLD), &
-                                                     MAXVAL(TTRIP%XWFLOOD/1.E3,            TGRID%GMASK_FLD)      
+                                                     MAXVAL(TTRIP%XWFLOOD/1.E3,            TGRID%GMASK_FLD)
   WRITE(NLISTING,*)''
 ENDIF
 !

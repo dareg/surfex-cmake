@@ -184,10 +184,10 @@ nxglo=nx
 #if ! defined in_arpege
 CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
 #else
-   IF (NPRINTO > 0) THEN
-      WRITE(KLUOUT,*)  'Gelato cannot yet compute global averages  when running in Arpege (because of collective comm vs. NPROMA blocks)'
-   ENDIF
-   nxglo=max(nxglo,1)
+IF (NPRINTO > 0) THEN
+   WRITE(KLUOUT,*)'Gelato cannot yet compute global averages when running in Arpege (because of collective comm vs. NPROMA blocks)'
+ENDIF
+nxglo=max(nxglo,1)
 #endif
 !
 !* Physical dimensions are set for Gelato , as a 1D field (second dimension is degenerated)
@@ -261,15 +261,15 @@ ENDWHERE
 !
 DO JX=1,nx
    DO JL=1,nt 
-      IF ( tglt%sit(JL,JX,1)%fsi<0. ) THEN
+      IF ( TGLT%sit(JL,JX,1)%fsi<0. ) THEN
          WRITE(KLUOUT,*)  &
               '**** WARNING **** Correcting problem in ice conc. < 0 at i=',  &
               1,' j=',JX,' k=',JL
-         tglt%sit(JL,JX,1)%fsi = 0.
+         TGLT%sit(JL,JX,1)%fsi = 0.
       ENDIF
    END DO
    !
-   zfsit = SUM( tglt%sit(:,JX,1)%fsi )
+   zfsit = SUM( TGLT%sit(:,JX,1)%fsi )
    !
    ! .. Detect total concentrations that exceed unity
    !
@@ -277,15 +277,15 @@ DO JX=1,nx
       WRITE(KLUOUT,*)  &
            '**** WARNING **** Correcting problem in total ice conc. >1 at i=',  &
            1,' j=',JX,' fsi=',zfsit
-      tglt%sit(:,JX,1)%fsi = tglt%sit(:,JX,1)%fsi / zfsit
+      TGLT%sit(:,JX,1)%fsi = TGLT%sit(:,JX,1)%fsi / zfsit
    ENDIF
    !
    ! .. Detect non zero concentrations but zero thickness (no consequence) 
    !
-   WHERE( tglt%sit(:,JX,1)%fsi>epsil1 .AND. tglt%sit(:,JX,1)%hsi<epsil1)
-      tglt%sit(:,JX,1)%fsi=0.
-      tglt%sit(:,JX,1)%hsi=0.
-      tglt%sit(:,JX,1)%hsn=0.
+   WHERE( TGLT%sit(:,JX,1)%fsi>epsil1 .AND. TGLT%sit(:,JX,1)%hsi<epsil1)
+      TGLT%sit(:,JX,1)%fsi=0.
+      TGLT%sit(:,JX,1)%hsi=0.
+      TGLT%sit(:,JX,1)%hsn=0.
    ENDWHERE
    !
 END DO

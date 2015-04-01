@@ -72,7 +72,7 @@ USE MODD_MASK, ONLY: NMASK_FULL
 INCLUDE 'mpif.h'
 #endif
 !
- INTEGER                                  :: NOBSTYPE, NOBS           
+ INTEGER                                  :: NOBSTYPE, NOBS
  CHARACTER(LEN=28)                        :: YNAMELIST = 'OPTIONS.nam '
  INTEGER, PARAMETER                       :: NVARMAX = 4      ! WG2, WG1, Biomass (order convention)
  INTEGER, PARAMETER                       :: NOBSMAX = 3      ! WG1, LAI (order convention)
@@ -113,7 +113,7 @@ INCLUDE 'mpif.h'
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: R                          ! covariance matrix of observation errors
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: B                          ! background error covariance matrix
  REAL,DIMENSION(:,:),ALLOCATABLE            :: IDENT                      ! identitiy matrix, used for Ba
- REAL, DIMENSION(:,:,:), ALLOCATABLE        :: GAIN                       ! Kalman gain (used explicitly for Ba)               
+ REAL, DIMENSION(:,:,:), ALLOCATABLE        :: GAIN                       ! Kalman gain (used explicitly for Ba)
  REAL, DIMENSION(:,:,:), ALLOCATABLE        :: LTM                        ! linear tangent matrix for the f'ward model
  REAL, DIMENSION(:,:,:), ALLOCATABLE        :: Q                          ! model error matrix
  REAL,DIMENSION(:,:),ALLOCATABLE            :: YO                         ! vector of observations
@@ -121,7 +121,7 @@ INCLUDE 'mpif.h'
  REAL,DIMENSION(:),ALLOCATABLE              :: ZSAND
  REAL,DIMENSION(:),ALLOCATABLE              :: COFSWI                     ! dynamic range (Wfc - Wwilt)
  REAL,DIMENSION(:),ALLOCATABLE              :: SMSAT                      ! saturation
- REAL,DIMENSION(:),ALLOCATABLE              :: WILT                       ! wilting point  
+ REAL,DIMENSION(:),ALLOCATABLE              :: WILT                       ! wilting point
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: ZEPS                       ! The perturbation amplitude
  REAL,DIMENSION(:,:),ALLOCATABLE            :: XINCR                      ! Analysis increment
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: SIMOBS                     ! Simulated temp, relative hum and LAI(available per patch?)
@@ -129,11 +129,11 @@ INCLUDE 'mpif.h'
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: SIMMOD                     ! Control variables (for B propagation)
  REAL,DIMENSION(:,:),ALLOCATABLE            :: VECT                       ! The analysed variable
  
- CHARACTER(LEN=200)                         :: NMFILE_CANARI              ! Name of the observation, perturbed or reference file!  
+ CHARACTER(LEN=200)                         :: NMFILE_CANARI              ! Name of the observation, perturbed or reference file!
  CHARACTER(LEN=9)                           :: HFNAME
  CHARACTER(LEN=17)                          :: LFNAME
- CHARACTER(LEN=200)                         :: MINMAX  
- REAL,DIMENSION(:,:),ALLOCATABLE            :: cpt                       ! index of abnormal LAI values                                           
+ CHARACTER(LEN=200)                         :: MINMAX
+ REAL,DIMENSION(:,:),ALLOCATABLE            :: cpt                       ! index of abnormal LAI values
 !
 ! Local Matrix for Analysis calculation
 !
@@ -179,7 +179,7 @@ INCLUDE 'mpif.h'
  REAL,DIMENSION(:),ALLOCATABLE              :: XVLAIMIN
  CHARACTER(LEN=50)                          :: OFORMAT
  REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
- LOGICAL                                    :: LVARASSIM  
+ LOGICAL                                    :: LVARASSIM
 !
 !
 ! MPI variables
@@ -189,8 +189,8 @@ INTEGER :: ILEVEL, INFOMPI, INKPROMA, JBLOCK
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 
 !
- NAMELIST/NAM_IO_VARASSIM/LPRT, LSIM, LBEV, LBFIXED  
- NAMELIST/NAM_OBS/NOBSTYPE, XERROBS_M, NNCO                                        
+ NAMELIST/NAM_IO_VARASSIM/LPRT, LSIM, LBEV, LBFIXED
+ NAMELIST/NAM_OBS/NOBSTYPE, XERROBS_M, NNCO
  NAMELIST/NAM_VAR/NIVAR, NVAR, CVAR_M, CPREFIX_M, XSIGMA_M, XTPRT_M, NNCV, XSCALE_Q, XSCALE_QLAI, CBIO, CPREFIX_BIO, XALPH
 !
 !     0.1.   MPI and dr_hook initializations
@@ -290,7 +290,7 @@ NNCV(:) = 0
 !
  CALL INI_DATA_COVER
 
- CFILEIN = 'PREP.txt'          
+ CFILEIN = 'PREP.txt'
  CFILEPGD = 'PGD.txt'
  CFILEIN_SAVE = CFILEIN
 !
@@ -409,7 +409,7 @@ ENDIF
    IF (XVAR(L) .EQ. 'LAI') THEN
       LAI_PASS=XI(:,:,L)
       IF (CBIO .NE. 'LAI') THEN
-        CALL READ_SURF(YPROGRAM,CBIO,ZBIO_PASS(:,:),IRESP)        
+        CALL READ_SURF(YPROGRAM,CBIO,ZBIO_PASS(:,:),IRESP)
       ELSE
         ZBIO_PASS(:,:) = XI(:,:,L)
       ENDIF
@@ -450,7 +450,7 @@ LPATCH(:,:) = .FALSE.
  DO I=1,NSIZE_NATURE
   COFSWI(I)=0.001*(89.0467*((100.*ZCLAY(I))**0.3496)-37.1342*((100.*ZCLAY(I))**0.5))
   SMSAT(I)=0.001*(-1.08*100*ZSAND(I)+494.305) 
-  WILT(I)=0.001*37.1342*((100.*ZCLAY(I))**0.5)   
+  WILT(I)=0.001*37.1342*((100.*ZCLAY(I))**0.5)
  ENDDO
 !
 !   Frequency of assimilation cycling and data availability
@@ -488,24 +488,24 @@ LPATCH(:,:) = .FALSE.
      DO J=1,PATCH_NUMBER
        IF (XI(I,J,NIVAR).NE.XUNDEF) THEN                                 ! check whether values are undefined
           VECT(I,J) = XI(I,J,NIVAR) + TPRT(NIVAR)*XI(I,J,NIVAR) 
-       ELSE                                                             
+       ELSE
           VECT(I,J) = XI(I,J,NIVAR)
-       ENDIF                 
+       ENDIF
        IF (XI(I,J,NIVAR).NE.XUNDEF .AND. XVAR(NIVAR).EQ.'LAI') THEN
           ZBIO_OUT(I,J) = ZBIO_PASS(I,J) + TPRT(NIVAR)*ZBIO_PASS(I,J)
-       ELSE                                                     
+       ELSE
           ZBIO_OUT(I,J) = ZBIO_PASS(I,J)
-       ENDIF      
+       ENDIF
      ENDDO
    ENDDO
 
    CALL END_IO_SURF_n(YPROGRAM)
-   CALL IO_BUFF_CLEAN_n  
+   CALL IO_BUFF_CLEAN_n
    CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','WRITE')
    CALL WRITE_SURF(YPROGRAM,XVAR(NIVAR),VECT,IRESP,HCOMMENT=PREFIX(NIVAR))
    IF (XVAR(NIVAR).EQ.'LAI') THEN
      CALL WRITE_SURF(YPROGRAM,CBIO,ZBIO_OUT,IRESP,HCOMMENT=CPREFIX_BIO)
-   ENDIF  
+   ENDIF
    CALL END_IO_SURF_n(YPROGRAM)
    CALL IO_BUFF_CLEAN_n
 !
@@ -518,7 +518,7 @@ LPATCH(:,:) = .FALSE.
        ELSE
          WRITE (111,*) 1.0
        ENDIF
-     ENDDO  
+     ENDDO
    ENDDO
    CLOSE(111)
 !
@@ -584,7 +584,7 @@ LPATCH(:,:) = .FALSE.
    PRINT *,'   ----------------------------------'
    CALL END_IO_SURF_n(YPROGRAM)
    CALL IO_BUFF_CLEAN_n
-   CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')    
+   CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')
    CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
 !
    ALLOCATE(SIMOBS(NSIZE_NATURE,PATCH_NUMBER,NOBSTYPE))
@@ -621,8 +621,8 @@ LPATCH(:,:) = .FALSE.
        DEALLOCATE(MWG2)
        DEALLOCATE(XWG2)
      ENDIF
-  ENDDO
-                                                                                                                                                                                                                                                                                       
+   ENDDO
+
    CALL END_IO_SURF_n(YPROGRAM)
    CALL IO_BUFF_CLEAN_n
    CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')
@@ -674,18 +674,18 @@ LPATCH(:,:) = .FALSE.
    ALLOCATE(XF(NSIZE_NATURE,PATCH_NUMBER,NVAR+1,NVAR))
 
 !
-   PRINT *, 'evolving B to time ', IYEAR,IMONTH,IDAY,IHOUR  
+   PRINT *, 'evolving B to time ', IYEAR,IMONTH,IDAY,IHOUR
 !
  !read B matrix from previous analysis step: B(t-1)
   OPEN (unit=111,file='BGROUNDin',status='old',IOSTAT=istat)
   DO L=1,NVAR   ! control variable (x at previous time step)
      DO K=1,NVAR
        DO I=1,NSIZE_NATURE
-         DO J=1,PATCH_NUMBER   
-           DO JJ=1,PATCH_NUMBER   
+         DO J=1,PATCH_NUMBER
+           DO JJ=1,PATCH_NUMBER
              READ (111,*) B(I,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
            ENDDO
-         ENDDO                 
+         ENDDO
        ENDDO
      ENDDO
    ENDDO
@@ -758,7 +758,7 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 ! e) evolve B 
 !
    DO I=1,NSIZE_NATURE
-     B(I,:,:)=MATMUL(LTM(I,:,:),MATMUL(B(I,:,:),TRANSPOSE(LTM(I,:,:))))     
+     B(I,:,:)=MATMUL(LTM(I,:,:),MATMUL(B(I,:,:),TRANSPOSE(LTM(I,:,:))))
    ENDDO
 !
 ! write out the LTM for the forward model
@@ -779,7 +779,7 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 ! write out current B (for use in next cycle)
 !
   PRINT *,'writing out B in BGROUNDout'
-  OPEN (unit=111,file='BGROUNDout',status='unknown')   
+  OPEN (unit=111,file='BGROUNDout',status='unknown')
   DO L=1,NVAR
     DO K=1,NVAR
       DO I=1,NSIZE_NATURE
@@ -1049,7 +1049,7 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
    DO L=1,NVAR
      DO I=1,NSIZE_NATURE
        DO J=1,PATCH_NUMBER
-           IF (XVAR(L) .EQ. 'WG2' .OR. XVAR(L) .EQ. 'WG1') THEN                     
+           IF (XVAR(L) .EQ. 'WG2' .OR. XVAR(L) .EQ. 'WG1') THEN
              Q(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)*COFSWI(I)*COFSWI(I)
            ELSEIF (XVAR(L) .EQ. 'LAI') THEN
              Q(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_QLAI*XSCALE_QLAI*XSIGMA(L)*XSIGMA(L)
@@ -1087,7 +1087,7 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
 !  check for frozen conditions
 !
    CALL READ_SURF(YPROGRAM,'WGI1', FROZ(:,:),IRESP)
-   DO I=1,NSIZE_NATURE     
+   DO I=1,NSIZE_NATURE
      IF ( minval(FROZ(I,:)) .GT. 0) THEN 
          YO(I,:)=999.0
      ENDIF
@@ -1104,9 +1104,9 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
    DO I=1,NSIZE_NATURE
      DO J=1,PATCH_NUMBER  
            HOWR(I,K,J+PATCH_NUMBER*(L-1)) = XPATCH(I,J)*(YF_PATCH(I,J,L+1,K) - YF_PATCH(I,J,1,K))/ZEPS(I,J,L) 
-            IF(YO(I,K) .NE. 999.0) THEN         
+            IF(YO(I,K) .NE. 999.0) THEN
               HO(I,K,J+PATCH_NUMBER*(L-1)) = XPATCH(I,J)*(YF_PATCH(I,J,L+1,K) - YF_PATCH(I,J,1,K))/ZEPS(I,J,L)  ! Jacobian of obs operator
-              HO(I,K,J+PATCH_NUMBER*(L-1)) = max(-0.1,HO(I,K,J+PATCH_NUMBER*(L-1)))             
+              HO(I,K,J+PATCH_NUMBER*(L-1)) = max(-0.1,HO(I,K,J+PATCH_NUMBER*(L-1)))
               HO(I,K,J+PATCH_NUMBER*(L-1)) = min(1.0, HO(I,K,J+PATCH_NUMBER*(L-1)))
               ZB(I,K) = YO(I,K) - YF(I,1,K)                                                    ! innovation vector
               OBSCOUNT = OBSCOUNT + 1
@@ -1127,7 +1127,7 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  ENDDO
  CLOSE(UNIT=111)
 
- OBSCOUNT = OBSCOUNT / PATCH_NUMBER / NVAR        
+ OBSCOUNT = OBSCOUNT / PATCH_NUMBER / NVAR
 !-----------------------------------------------------
 !
 !            ******  SOIL ANALYSIS *******
@@ -1140,7 +1140,7 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
     HOT(I,:,:) = TRANSPOSE(HO(I,:,:)) 
     K1(I,:,:) = MATMUL(HO(I,:,:),MATMUL(B(I,:,:),HOT(I,:,:))) + R(I,:,:)
     CALL CHOLDC(NOBS,K1(I,:,:),ZP(I,:))                                       ! Cholesky decomposition (1)
-    CALL CHOLSL(NOBS,K1(I,:,:),ZP(I,:),ZB(I,:),ZX(I,:))                       ! Cholesky decomposition (2)     
+    CALL CHOLSL(NOBS,K1(I,:,:),ZP(I,:),ZB(I,:),ZX(I,:))                       ! Cholesky decomposition (2)
     XINCR(I,:) = MATMUL(B(I,:,:),MATMUL(HOT(I,:,:),ZX(I,:)))
     DO L=1,NVAR 
        IF (XVAR(L).EQ.'LAI') THEN
@@ -1153,10 +1153,10 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
          DO J=1,PATCH_NUMBER           
             if (XI(I,J,L)+ XINCR(I,J+PATCH_NUMBER*(L-1)) .LT. 0) then
                  XINCR(I,J+PATCH_NUMBER*(L-1))=0 
-                !XINCR(I,J+PATCH_NUMBER*(L-1))= MAX( XINCR(I,J+PATCH_NUMBER*(L-1)), 0 - XI(I,J,L) )         
+                !XINCR(I,J+PATCH_NUMBER*(L-1))= MAX( XINCR(I,J+PATCH_NUMBER*(L-1)), 0 - XI(I,J,L) )
             endif
                 XI(I,J,L) = XI(I,J,L) + XINCR(I,J+PATCH_NUMBER*(L-1))
-          ENDDO    
+          ENDDO
        ENDIF
      ENDDO
    ENDDO
@@ -1181,8 +1181,8 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  DO L = 1,NVAR
    CALL WRITE_SURF(YPROGRAM,XVAR(L),XI(:,:,L),IRESP,HCOMMENT=PREFIX(L))
    IF (XVAR(NVAR).EQ.'LAI') THEN
-     CALL WRITE_SURF(YPROGRAM,CBIO,ZBIO_PASS(:,:),IRESP,HCOMMENT=CPREFIX_BIO)         
-   ENDIF   
+     CALL WRITE_SURF(YPROGRAM,CBIO,ZBIO_PASS(:,:),IRESP,HCOMMENT=CPREFIX_BIO)
+   ENDIF
  ENDDO
 
  CALL END_IO_SURF_n(YPROGRAM)
@@ -1250,7 +1250,7 @@ ALLOCATE(Q(NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  DEALLOCATE(ZX)
  DEALLOCATE(XINCR)
  DEALLOCATE(HOWR)
- DEALLOCATE(LAI_PASS)  
+ DEALLOCATE(LAI_PASS)
  DEALLOCATE(ZBIO_PASS)
  DEALLOCATE(ZBIO_OUT)
  DEALLOCATE(KH)
