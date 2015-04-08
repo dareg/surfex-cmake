@@ -34,8 +34,8 @@
 !            -----------
 !
 USE MODD_SURF_PAR,        ONLY : XUNDEF
-USE MODD_SURF_ATM_n,      ONLY : NSIZE_FULL
-USE MODD_ISBA_n,          ONLY : XPATCH_OLD, XPATCH, XLAI
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_GET_SURF_MASK_n
 USE MODI_INTERPOL_FIELD
@@ -61,12 +61,12 @@ REAL, DIMENSION(:  ), OPTIONAL, INTENT(IN) :: PDEF
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-LOGICAL, DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: GVEG
+LOGICAL, DIMENSION(SIZE(I%XLAI,1),SIZE(I%XLAI,2)) :: GVEG
 REAL,    DIMENSION(SIZE(PFIELD,1)) :: ZFIELD1_TOT, ZFIELD2_TOT
 INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IMASK  ! mask for packing from complete field to nature field
 INTEGER, DIMENSION(SIZE(PFIELD,1)) :: NSIZE
-INTEGER, DIMENSION(NSIZE_FULL)     :: NSIZE_TOT
-REAL,    DIMENSION(NSIZE_FULL)     :: ZFIELD_TOT
+INTEGER, DIMENSION(U%NSIZE_FULL)     :: NSIZE_TOT
+REAL,    DIMENSION(U%NSIZE_FULL)     :: ZFIELD_TOT
 INTEGER                            :: INI, IPATCH, IFULL, INPTS
 INTEGER                            :: JPATCH  ! loop counter on patch
 REAL                               :: ZRATIO_TOT
@@ -84,12 +84,12 @@ IPATCH=SIZE(PFIELD,2)
 !
 IF (KPTS>0)THEN
   !
-  CALL GET_SURF_MASK_n('NATURE',INI,IMASK,NSIZE_FULL,KLUOUT)
+  CALL GET_SURF_MASK_n('NATURE',INI,IMASK,U%NSIZE_FULL,KLUOUT)
   !
   DO JPATCH=1,IPATCH
     NSIZE(:)=0
     WHERE (PFIELD(:,JPATCH).NE.XUNDEF) NSIZE(:)=1
-    WHERE (XPATCH(:,JPATCH)==0.) NSIZE(:)=-1
+    WHERE (I%XPATCH(:,JPATCH)==0.) NSIZE(:)=-1
     CALL UNPACK_SAME_RANK(IMASK,NSIZE,NSIZE_TOT,-1)
     CALL UNPACK_SAME_RANK(IMASK,PFIELD(:,JPATCH),ZFIELD_TOT)
     IF(PRESENT(PDEF))THEN
@@ -116,7 +116,7 @@ ELSE
   IF (TRIM(HNAME)=='WR')THEN
     !no interception over soil(1), roc(2) and glaciers(3)
     DO JPATCH=1,IPATCH
-      WHERE(XPATCH(:,JPATCH) /=0. .AND. XPATCH_OLD(:,JPATCH) ==0..AND.XLAI(:,JPATCH)==0.)
+      WHERE(I%XPATCH(:,JPATCH) /=0. .AND. I%XPATCH_OLD(:,JPATCH) ==0..AND.I%XLAI(:,JPATCH)==0.)
           PFIELD(:,JPATCH) = 0.  
           GVEG  (:,JPATCH) = .FALSE.
       ENDWHERE
@@ -125,17 +125,17 @@ ELSE
   !
   !quantity of water before restart in each grid point
   DO JPATCH=1,IPATCH 
-    ZFIELD1_TOT(:)=ZFIELD1_TOT(:)+ XPATCH_OLD(:,JPATCH)*PFIELD(:,JPATCH)
+    ZFIELD1_TOT(:)=ZFIELD1_TOT(:)+ I%XPATCH_OLD(:,JPATCH)*PFIELD(:,JPATCH)
   END DO
   !
   DO JPATCH=1,IPATCH
     !if a patch appears in a grid point, it takes the quantity of water in the
     !whole grid point before
-    WHERE(XPATCH(:,JPATCH) /=0. .AND. XPATCH_OLD(:,JPATCH)==0. .AND. GVEG  (:,JPATCH))
+    WHERE(I%XPATCH(:,JPATCH) /=0. .AND. I%XPATCH_OLD(:,JPATCH)==0. .AND. GVEG  (:,JPATCH))
           PFIELD(:,JPATCH)=ZFIELD1_TOT(:)
     ENDWHERE
     !quantity of water after restart and landuse in each grid point 
-    ZFIELD2_TOT(:)=ZFIELD2_TOT(:)+ XPATCH(:,JPATCH)*PFIELD(:,JPATCH)           
+    ZFIELD2_TOT(:)=ZFIELD2_TOT(:)+ I%XPATCH(:,JPATCH)*PFIELD(:,JPATCH)           
   END DO
   !
   ! Conserve cell mass if not WG and WGI
@@ -150,7 +150,7 @@ ELSE
     END DO
   ENDIF
   !
-  WHERE(XPATCH(:,:) ==0.)PFIELD(:,:)=XUNDEF
+  WHERE(I%XPATCH(:,:) ==0.)PFIELD(:,:)=XUNDEF
   !
 ENDIF
 !

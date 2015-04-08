@@ -45,7 +45,7 @@ USE MODD_IO_SURF_FA,ONLY: NUNIT_FA, CFILEIN_FA,CFILEOUT_FA,CDNOMC,IVERBFA,  &
                           NDGL, NDLON, NDLUX, NDGUX, PERPK, PEBETA,         &
                           PELON0, PELAT0, PEDELX, PEDELY, PELON1, PELAT1 
 !
-USE MODD_SURF_ATM_n, ONLY: NDIM_FULL
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
@@ -121,7 +121,7 @@ IF (HACTION == 'READ ') THEN
     !  
     NFULL_EXT = NFULL
     IF (HPROGRAM=='AROME ') THEN
-      NDIM_FULL = NFULL
+      U%NDIM_FULL = NFULL
     ENDIF
   ENDIF
   !
@@ -165,7 +165,7 @@ CMASK=HMASK
 !------------------------------------------------------------------------------
 !
 IF (HPROGRAM=='AROME ') THEN
-  NFULL  = NDIM_FULL
+  NFULL  = U%NDIM_FULL
   ILU    = NFULL
   IL     = NFULL
   NSIZE  = NFULL

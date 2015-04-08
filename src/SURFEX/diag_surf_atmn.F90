@@ -29,43 +29,10 @@ SUBROUTINE DIAG_SURF_ATM_n(HPROGRAM)
 
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
-USE MODD_SURF_ATM_n,     ONLY : XSEA, XTOWN, XNATURE, XWATER, TTIME, XZS,           &
-                                  NSIZE_SEA, NSIZE_TOWN, NSIZE_NATURE, NSIZE_WATER, &
-                                  NDIM_SEA,  NDIM_TOWN,  NDIM_NATURE,  NDIM_WATER,  &
-                                  NR_SEA, NR_TOWN, NR_NATURE, NR_WATER  
-USE MODD_SURF_ATM_SSO_n, ONLY : XMIN_ZS
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
-USE MODD_DIAG_SURF_ATM_n,ONLY : N2M, LT2MMW, L2M_MIN_ZS, LSURF_BUDGET, LCOEF, LSURF_VARS,&
-                                  XRN_TILE, XH_TILE, XLE_TILE, XGFLUX_TILE,      &
-                                  XRI_TILE, XCD_TILE, XCH_TILE, XCE_TILE,        &
-                                  XT2M_TILE, XTS_TILE, XQ2M_TILE, XHU2M_TILE,    &
-                                  XZON10M_TILE, XMER10M_TILE, XLEI_TILE,         &
-                                  XQS_TILE, XZ0_TILE, XZ0H_TILE, XT2M_MIN_TILE,  &
-                                  XT2M_MAX_TILE,                                 &
-                                  XSWD_TILE, XSWU_TILE, XLWD_TILE, XLWU_TILE,    &
-                                  XSWBD_TILE, XSWBU_TILE, XFMU_TILE, XFMV_TILE,  &
-                                  XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX,          &
-                                  XAVG_RI, XAVG_CD, XAVG_CH, XAVG_CE,            &
-                                  XAVG_T2M, XAVG_TS, XAVG_Q2M, XAVG_HU2M,        &
-                                  XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,               &
-                                  XAVG_HU2M_MIN_ZS, XAVG_ZON10M, XAVG_MER10M,    &
-                                  XAVG_QS, XAVG_Z0, XAVG_Z0H, XAVG_LEI,          &
-                                  XDIAG_UREF, XDIAG_ZREF,                        &
-                                  XAVG_SWD, XAVG_SWU, XAVG_LWD, XAVG_LWU,        &
-                                  XAVG_SWBD, XAVG_SWBU, XAVG_FMU, XAVG_FMV,      &
-                                  XPS, XRHOA, LSURF_BUDGETC,                     &
-                                  XRNC_TILE, XHC_TILE, XLEC_TILE, XGFLUXC_TILE,  &
-                                  XSWDC_TILE, XSWUC_TILE, XLWDC_TILE, XLWUC_TILE,&
-                                  XFMUC_TILE, XFMVC_TILE, XLEIC_TILE,            &
-                                  XAVG_RNC, XAVG_HC, XAVG_LEC, XAVG_GFLUXC,      &
-                                  XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,    &
-                                  XAVG_FMUC, XAVG_FMVC, XAVG_T2M_MIN,            &
-                                  XAVG_T2M_MAX, XAVG_LEIC, XHU2M_MIN_TILE,       &
-                                  XHU2M_MAX_TILE, XAVG_HU2M_MIN, XAVG_HU2M_MAX,  &
-                                  XWIND10M_TILE, XWIND10M_MAX_TILE,              &
-                                  XAVG_WIND10M, XAVG_WIND10M_MAX,                &
-                                  XEVAP_TILE, XEVAPC_TILE, XAVG_EVAP, XAVG_EVAPC,&
-                                  XSUBL_TILE, XSUBLC_TILE, XAVG_SUBL, XAVG_SUBLC                                  
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODI_DIAG_NATURE_n 
 USE MODI_DIAG_SEA_n 
@@ -92,7 +59,7 @@ INTEGER :: JTILE                        ! loop on type of surface
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
 INTEGER :: JSW                          ! number of spectral whort wave bands
 !
-REAL, DIMENSION(SIZE(XSEA),NTILESFC) :: ZFRAC_TILE! fraction of each tile
+REAL, DIMENSION(SIZE(U%XSEA),NTILESFC) :: ZFRAC_TILE! fraction of each tile
 INTEGER, DIMENSION(5) :: IFACT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -104,10 +71,10 @@ CPROGNAME = HPROGRAM
 !
 ! FLAGS for the various surfaces:
 !
-GSEA      = NDIM_SEA    >0
-GWATER    = NDIM_WATER  >0
-GTOWN     = NDIM_TOWN   >0
-GNATURE   = NDIM_NATURE >0
+GSEA      = U%NDIM_SEA    >0
+GWATER    = U%NDIM_WATER  >0
+GTOWN     = U%NDIM_TOWN   >0
+GNATURE   = U%NDIM_NATURE >0
 !
 ! Tile counter:
 !
@@ -118,7 +85,7 @@ JTILE     = 0
 ZFRAC_TILE(:,:)    = 0.0
 !
 ! Number of spectral short wave bands for detailed radiation budget
-JSW = SIZE(XSWBD_TILE,3)
+JSW = SIZE(DGU%XSWBD_TILE,3)
 !
 !
 CALL GET_DIMS(IFACT)
@@ -133,9 +100,9 @@ JTILE               = JTILE + 1
 !
 IF(GSEA)THEN
 ! 
-  ZFRAC_TILE(:,JTILE) = XSEA(:)
+  ZFRAC_TILE(:,JTILE) = U%XSEA(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_SEA,NR_SEA,IFACT)
+  CALL TREAT_SURF(JTILE,U%NSIZE_SEA,U%NR_SEA,IFACT)
 !
 ENDIF
 !
@@ -147,9 +114,9 @@ JTILE               = JTILE + 1
 !
 IF(GWATER)THEN
 !
-  ZFRAC_TILE(:,JTILE) = XWATER(:)
+  ZFRAC_TILE(:,JTILE) = U%XWATER(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_WATER,NR_WATER,IFACT)
+  CALL TREAT_SURF(JTILE,U%NSIZE_WATER,U%NR_WATER,IFACT)
 !
 ENDIF 
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -160,9 +127,9 @@ JTILE               = JTILE + 1
 !
 IF(GNATURE)THEN
 !
-    ZFRAC_TILE(:,JTILE) = XNATURE(:)
+    ZFRAC_TILE(:,JTILE) = U%XNATURE(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_NATURE,NR_NATURE,IFACT)  
+  CALL TREAT_SURF(JTILE,U%NSIZE_NATURE,U%NR_NATURE,IFACT)  
 !
 ENDIF 
 !
@@ -174,9 +141,9 @@ JTILE               = JTILE + 1
 !
 IF(GTOWN)THEN
 !
-    ZFRAC_TILE(:,JTILE) = XTOWN(:)
+    ZFRAC_TILE(:,JTILE) = U%XTOWN(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_TOWN,NR_TOWN,IFACT)  
+  CALL TREAT_SURF(JTILE,U%NSIZE_TOWN,U%NR_TOWN,IFACT)  
 !
 ENDIF 
 !
@@ -184,56 +151,56 @@ ENDIF
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL AVERAGE_DIAG(N2M, LT2MMW, LSURF_BUDGET, LSURF_BUDGETC, LCOEF, LSURF_VARS,   &
-                    ZFRAC_TILE, XRN_TILE, XH_TILE, XLE_TILE, XLEI_TILE , &
-                    XGFLUX_TILE,XRI_TILE, XCD_TILE, XCH_TILE, XCE_TILE,  &
-                    XT2M_TILE, XTS_TILE, XQ2M_TILE, XHU2M_TILE,          &
-                    XZON10M_TILE, XMER10M_TILE,                          &
-                    XQS_TILE, XZ0_TILE, XZ0H_TILE,                       &
-                    XSWD_TILE, XSWU_TILE, XSWBD_TILE, XSWBU_TILE,        &
-                    XLWD_TILE, XLWU_TILE, XFMU_TILE, XFMV_TILE,          &
-                    XRNC_TILE, XHC_TILE, XLEC_TILE, XGFLUXC_TILE,        &
-                    XSWDC_TILE, XSWUC_TILE, XLWDC_TILE, XLWUC_TILE,      &
-                    XFMUC_TILE, XFMVC_TILE, XT2M_MIN_TILE,               &
-                    XT2M_MAX_TILE, XLEIC_TILE,                           &
-                    XAVG_RN, XAVG_H, XAVG_LE, XAVG_LEI, XAVG_GFLUX,      &
-                    XAVG_RI, XAVG_CD, XAVG_CH, XAVG_CE,                  &
-                    XAVG_T2M, XAVG_TS, XAVG_Q2M, XAVG_HU2M,              &
-                    XAVG_ZON10M, XAVG_MER10M,                            &
-                    XAVG_QS, XAVG_Z0, XAVG_Z0H,                          &
-                    XDIAG_UREF, XDIAG_ZREF,                              &
-                    XAVG_SWD, XAVG_SWU, XAVG_SWBD, XAVG_SWBU,            &
-                    XAVG_LWD, XAVG_LWU, XAVG_FMU, XAVG_FMV,              &
-                    XAVG_RNC, XAVG_HC, XAVG_LEC, XAVG_GFLUXC,            &
-                    XAVG_SWDC, XAVG_SWUC, XAVG_LWDC, XAVG_LWUC,          &
-                    XAVG_FMUC, XAVG_FMVC, XAVG_T2M_MIN,                  &
-                    XAVG_T2M_MAX, XAVG_LEIC,                             &
-                    XHU2M_MIN_TILE, XHU2M_MAX_TILE, XAVG_HU2M_MIN,       &
-                    XAVG_HU2M_MAX, XWIND10M_TILE, XWIND10M_MAX_TILE,     &
-                    XAVG_WIND10M, XAVG_WIND10M_MAX,                      &
-                    XEVAP_TILE, XEVAPC_TILE, XAVG_EVAP, XAVG_EVAPC,      &
-                    XSUBL_TILE, XSUBLC_TILE, XAVG_SUBL, XAVG_SUBLC       )                    
+CALL AVERAGE_DIAG(DGU%N2M, DGU%LT2MMW, DGU%LSURF_BUDGET, DGU%LSURF_BUDGETC, DGU%LCOEF, DGU%LSURF_VARS,   &
+                    ZFRAC_TILE, DGU%XRN_TILE, DGU%XH_TILE, DGU%XLE_TILE, DGU%XLEI_TILE , &
+                    DGU%XGFLUX_TILE,DGU%XRI_TILE, DGU%XCD_TILE, DGU%XCH_TILE, DGU%XCE_TILE,  &
+                    DGU%XT2M_TILE, DGU%XTS_TILE, DGU%XQ2M_TILE, DGU%XHU2M_TILE,          &
+                    DGU%XZON10M_TILE, DGU%XMER10M_TILE,                          &
+                    DGU%XQS_TILE, DGU%XZ0_TILE, DGU%XZ0H_TILE,                       &
+                    DGU%XSWD_TILE, DGU%XSWU_TILE, DGU%XSWBD_TILE, DGU%XSWBU_TILE,        &
+                    DGU%XLWD_TILE, DGU%XLWU_TILE, DGU%XFMU_TILE, DGU%XFMV_TILE,          &
+                    DGU%XRNC_TILE, DGU%XHC_TILE, DGU%XLEC_TILE, DGU%XGFLUXC_TILE,        &
+                    DGU%XSWDC_TILE, DGU%XSWUC_TILE, DGU%XLWDC_TILE, DGU%XLWUC_TILE,      &
+                    DGU%XFMUC_TILE, DGU%XFMVC_TILE, DGU%XT2M_MIN_TILE,               &
+                    DGU%XT2M_MAX_TILE, DGU%XLEIC_TILE,                           &
+                    DGU%XAVG_RN, DGU%XAVG_H, DGU%XAVG_LE, DGU%XAVG_LEI, DGU%XAVG_GFLUX,      &
+                    DGU%XAVG_RI, DGU%XAVG_CD, DGU%XAVG_CH, DGU%XAVG_CE,                  &
+                    DGU%XAVG_T2M, DGU%XAVG_TS, DGU%XAVG_Q2M, DGU%XAVG_HU2M,              &
+                    DGU%XAVG_ZON10M, DGU%XAVG_MER10M,                            &
+                    DGU%XAVG_QS, DGU%XAVG_Z0, DGU%XAVG_Z0H,                          &
+                    DGU%XDIAG_UREF, DGU%XDIAG_ZREF,                              &
+                    DGU%XAVG_SWD, DGU%XAVG_SWU, DGU%XAVG_SWBD, DGU%XAVG_SWBU,            &
+                    DGU%XAVG_LWD, DGU%XAVG_LWU, DGU%XAVG_FMU, DGU%XAVG_FMV,              &
+                    DGU%XAVG_RNC, DGU%XAVG_HC, DGU%XAVG_LEC, DGU%XAVG_GFLUXC,            &
+                    DGU%XAVG_SWDC, DGU%XAVG_SWUC, DGU%XAVG_LWDC, DGU%XAVG_LWUC,          &
+                    DGU%XAVG_FMUC, DGU%XAVG_FMVC, DGU%XAVG_T2M_MIN,                  &
+                    DGU%XAVG_T2M_MAX, DGU%XAVG_LEIC,                             &
+                    DGU%XHU2M_MIN_TILE, DGU%XHU2M_MAX_TILE, DGU%XAVG_HU2M_MIN,       &
+                    DGU%XAVG_HU2M_MAX, DGU%XWIND10M_TILE, DGU%XWIND10M_MAX_TILE,     &
+                    DGU%XAVG_WIND10M, DGU%XAVG_WIND10M_MAX,                      &
+                    DGU%XEVAP_TILE, DGU%XEVAPC_TILE, DGU%XAVG_EVAP, DGU%XAVG_EVAPC,      &
+                    DGU%XSUBL_TILE, DGU%XSUBLC_TILE, DGU%XAVG_SUBL, DGU%XAVG_SUBLC       )                    
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Quantities at 2 meters above the minimum orography of the grid mesh
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF (L2M_MIN_ZS) CALL GET_2M
+IF (DGU%L2M_MIN_ZS) CALL GET_2M
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_N',1,ZHOOK_HANDLE)
 CONTAINS
 !=======================================================================================
 SUBROUTINE GET_2M
 !
-REAL, DIMENSION(SIZE(XSEA)) :: ZPS         ! surface air pressure
-REAL, DIMENSION(SIZE(XSEA)) :: ZRHOA       ! surface air density
+REAL, DIMENSION(SIZE(U%XSEA)) :: ZPS         ! surface air pressure
+REAL, DIMENSION(SIZE(U%XSEA)) :: ZRHOA       ! surface air density
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',0,ZHOOK_HANDLE)
 !
-CALL MINZS_VERT_SHIFT(XZS,XMIN_ZS,XAVG_T2M,XAVG_Q2M,XPS,XRHOA, &
-                      XAVG_T2M_MIN_ZS,XAVG_Q2M_MIN_ZS,ZPS,ZRHOA)  
-XAVG_HU2M_MIN_ZS = XAVG_HU2M
+CALL MINZS_VERT_SHIFT(U%XZS,USS%XMIN_ZS,DGU%XAVG_T2M,DGU%XAVG_Q2M,DGU%XPS,DGU%XRHOA, &
+                      DGU%XAVG_T2M_MIN_ZS,DGU%XAVG_Q2M_MIN_ZS,ZPS,ZRHOA)  
+DGU%XAVG_HU2M_MIN_ZS = DGU%XAVG_HU2M
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',1,ZHOOK_HANDLE)
 !
@@ -252,15 +219,15 @@ IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_DIMS',0,ZHOOK_HANDLE)
 !
 KFACT(:)=0
 !
-IF (LSURF_BUDGET) KFACT(1)=1
+IF (DGU%LSURF_BUDGET) KFACT(1)=1
 !
-IF (LSURF_BUDGETC) KFACT(2)=1
+IF (DGU%LSURF_BUDGETC) KFACT(2)=1
 !
-IF (N2M>=1) KFACT(3)=1
+IF (DGU%N2M>=1) KFACT(3)=1
 !
-IF (LCOEF) KFACT(4)=1
+IF (DGU%LCOEF) KFACT(4)=1
 !
-IF (LSURF_VARS) KFACT(5)=1
+IF (DGU%LSURF_VARS) KFACT(5)=1
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_DIMS',1,ZHOOK_HANDLE)
 !
@@ -411,75 +378,75 @@ ELSEIF (KTILE==4) THEN
 ENDIF
 !
 !----------------------------------------------------------------------
-IF (LSURF_BUDGET) THEN
+IF (DGU%LSURF_BUDGET) THEN
   DO JJ=1,KSIZE
-   XRN_TILE      (KMASK(JJ),KTILE)  = ZP_RN       (JJ)
-   XH_TILE       (KMASK(JJ),KTILE)  = ZP_H        (JJ)
-   XLE_TILE      (KMASK(JJ),KTILE)  = ZP_LE       (JJ)
-   XLEI_TILE     (KMASK(JJ),KTILE)  = ZP_LEI      (JJ)
-   XGFLUX_TILE   (KMASK(JJ),KTILE)  = ZP_GFLUX    (JJ)
-   XEVAP_TILE    (KMASK(JJ),KTILE)  = ZP_EVAP     (JJ)
-   XSUBL_TILE    (KMASK(JJ),KTILE)  = ZP_SUBL     (JJ)
-   XSWD_TILE     (KMASK(JJ),KTILE)  = ZP_SWD      (JJ)
-   XSWU_TILE     (KMASK(JJ),KTILE)  = ZP_SWU      (JJ)
-   XLWD_TILE     (KMASK(JJ),KTILE)  = ZP_LWD      (JJ)
-   XLWU_TILE     (KMASK(JJ),KTILE)  = ZP_LWU      (JJ)
-   XFMU_TILE     (KMASK(JJ),KTILE)  = ZP_FMU      (JJ)
-   XFMV_TILE     (KMASK(JJ),KTILE)  = ZP_FMV      (JJ)
-   DO JJSW=1, SIZE(XSWBD_TILE,3)
-      XSWBD_TILE    (KMASK(JJ),KTILE,JJSW) = ZP_SWBD     (JJ,JJSW)
-      XSWBU_TILE    (KMASK(JJ),KTILE,JJSW) = ZP_SWBU     (JJ,JJSW)
+   DGU%XRN_TILE      (KMASK(JJ),KTILE)  = ZP_RN       (JJ)
+   DGU%XH_TILE       (KMASK(JJ),KTILE)  = ZP_H        (JJ)
+   DGU%XLE_TILE      (KMASK(JJ),KTILE)  = ZP_LE       (JJ)
+   DGU%XLEI_TILE     (KMASK(JJ),KTILE)  = ZP_LEI      (JJ)
+   DGU%XGFLUX_TILE   (KMASK(JJ),KTILE)  = ZP_GFLUX    (JJ)
+   DGU%XEVAP_TILE    (KMASK(JJ),KTILE)  = ZP_EVAP     (JJ)
+   DGU%XSUBL_TILE    (KMASK(JJ),KTILE)  = ZP_SUBL     (JJ)
+   DGU%XSWD_TILE     (KMASK(JJ),KTILE)  = ZP_SWD      (JJ)
+   DGU%XSWU_TILE     (KMASK(JJ),KTILE)  = ZP_SWU      (JJ)
+   DGU%XLWD_TILE     (KMASK(JJ),KTILE)  = ZP_LWD      (JJ)
+   DGU%XLWU_TILE     (KMASK(JJ),KTILE)  = ZP_LWU      (JJ)
+   DGU%XFMU_TILE     (KMASK(JJ),KTILE)  = ZP_FMU      (JJ)
+   DGU%XFMV_TILE     (KMASK(JJ),KTILE)  = ZP_FMV      (JJ)
+   DO JJSW=1, SIZE(DGU%XSWBD_TILE,3)
+      DGU%XSWBD_TILE    (KMASK(JJ),KTILE,JJSW) = ZP_SWBD     (JJ,JJSW)
+      DGU%XSWBU_TILE    (KMASK(JJ),KTILE,JJSW) = ZP_SWBU     (JJ,JJSW)
    ENDDO
   ENDDO
 END IF
 !
-IF (LSURF_BUDGETC) THEN
+IF (DGU%LSURF_BUDGETC) THEN
   DO JJ=1,KSIZE
-   XRNC_TILE      (KMASK(JJ),KTILE)  = ZP_RNC       (JJ)
-   XHC_TILE       (KMASK(JJ),KTILE)  = ZP_HC        (JJ)
-   XLEC_TILE      (KMASK(JJ),KTILE)  = ZP_LEC       (JJ)
-   XLEIC_TILE     (KMASK(JJ),KTILE)  = ZP_LEIC      (JJ)
-   XGFLUXC_TILE   (KMASK(JJ),KTILE)  = ZP_GFLUXC    (JJ)
-   XEVAPC_TILE    (KMASK(JJ),KTILE)  = ZP_EVAPC     (JJ)
-   XSUBLC_TILE    (KMASK(JJ),KTILE)  = ZP_SUBLC     (JJ)
-   XSWDC_TILE     (KMASK(JJ),KTILE)  = ZP_SWDC      (JJ)
-   XSWUC_TILE     (KMASK(JJ),KTILE)  = ZP_SWUC      (JJ)
-   XLWDC_TILE     (KMASK(JJ),KTILE)  = ZP_LWDC      (JJ)
-   XLWUC_TILE     (KMASK(JJ),KTILE)  = ZP_LWUC      (JJ)
-   XFMUC_TILE     (KMASK(JJ),KTILE)  = ZP_FMUC      (JJ)
-   XFMVC_TILE     (KMASK(JJ),KTILE)  = ZP_FMVC      (JJ)
+   DGU%XRNC_TILE      (KMASK(JJ),KTILE)  = ZP_RNC       (JJ)
+   DGU%XHC_TILE       (KMASK(JJ),KTILE)  = ZP_HC        (JJ)
+   DGU%XLEC_TILE      (KMASK(JJ),KTILE)  = ZP_LEC       (JJ)
+   DGU%XLEIC_TILE     (KMASK(JJ),KTILE)  = ZP_LEIC      (JJ)
+   DGU%XGFLUXC_TILE   (KMASK(JJ),KTILE)  = ZP_GFLUXC    (JJ)
+   DGU%XEVAPC_TILE    (KMASK(JJ),KTILE)  = ZP_EVAPC     (JJ)
+   DGU%XSUBLC_TILE    (KMASK(JJ),KTILE)  = ZP_SUBLC     (JJ)
+   DGU%XSWDC_TILE     (KMASK(JJ),KTILE)  = ZP_SWDC      (JJ)
+   DGU%XSWUC_TILE     (KMASK(JJ),KTILE)  = ZP_SWUC      (JJ)
+   DGU%XLWDC_TILE     (KMASK(JJ),KTILE)  = ZP_LWDC      (JJ)
+   DGU%XLWUC_TILE     (KMASK(JJ),KTILE)  = ZP_LWUC      (JJ)
+   DGU%XFMUC_TILE     (KMASK(JJ),KTILE)  = ZP_FMUC      (JJ)
+   DGU%XFMVC_TILE     (KMASK(JJ),KTILE)  = ZP_FMVC      (JJ)
   ENDDO
 END IF
 !
 DO JJ=1,KSIZE
-   XTS_TILE       (KMASK(JJ),KTILE)  = ZP_TS      (JJ)
+   DGU%XTS_TILE       (KMASK(JJ),KTILE)  = ZP_TS      (JJ)
 ENDDO
 !
-IF (N2M>=1) THEN
+IF (DGU%N2M>=1) THEN
   DO JJ=1,KSIZE
-   XRI_TILE      (KMASK(JJ),KTILE)  = ZP_RI       (JJ)
-   XT2M_TILE     (KMASK(JJ),KTILE)  = ZP_T2M      (JJ)
-   XT2M_MIN_TILE (KMASK(JJ),KTILE)  = ZP_T2M_MIN  (JJ)
-   XT2M_MAX_TILE (KMASK(JJ),KTILE)  = ZP_T2M_MAX  (JJ)
-   XQ2M_TILE     (KMASK(JJ),KTILE)  = ZP_Q2M      (JJ)
-   XHU2M_TILE    (KMASK(JJ),KTILE)  = ZP_HU2M     (JJ)
-   XHU2M_MIN_TILE(KMASK(JJ),KTILE)  = ZP_HU2M_MIN (JJ)
-   XHU2M_MAX_TILE(KMASK(JJ),KTILE)  = ZP_HU2M_MAX (JJ)
-   XZON10M_TILE  (KMASK(JJ),KTILE)  = ZP_ZON10M   (JJ)
-   XMER10M_TILE  (KMASK(JJ),KTILE)  = ZP_MER10M   (JJ)
-   XWIND10M_TILE (KMASK(JJ),KTILE)  = ZP_WIND10M   (JJ)
-   XWIND10M_MAX_TILE (KMASK(JJ),KTILE)  = ZP_WIND10M_MAX   (JJ)
+   DGU%XRI_TILE      (KMASK(JJ),KTILE)  = ZP_RI       (JJ)
+   DGU%XT2M_TILE     (KMASK(JJ),KTILE)  = ZP_T2M      (JJ)
+   DGU%XT2M_MIN_TILE (KMASK(JJ),KTILE)  = ZP_T2M_MIN  (JJ)
+   DGU%XT2M_MAX_TILE (KMASK(JJ),KTILE)  = ZP_T2M_MAX  (JJ)
+   DGU%XQ2M_TILE     (KMASK(JJ),KTILE)  = ZP_Q2M      (JJ)
+   DGU%XHU2M_TILE    (KMASK(JJ),KTILE)  = ZP_HU2M     (JJ)
+   DGU%XHU2M_MIN_TILE(KMASK(JJ),KTILE)  = ZP_HU2M_MIN (JJ)
+   DGU%XHU2M_MAX_TILE(KMASK(JJ),KTILE)  = ZP_HU2M_MAX (JJ)
+   DGU%XZON10M_TILE  (KMASK(JJ),KTILE)  = ZP_ZON10M   (JJ)
+   DGU%XMER10M_TILE  (KMASK(JJ),KTILE)  = ZP_MER10M   (JJ)
+   DGU%XWIND10M_TILE (KMASK(JJ),KTILE)  = ZP_WIND10M   (JJ)
+   DGU%XWIND10M_MAX_TILE (KMASK(JJ),KTILE)  = ZP_WIND10M_MAX   (JJ)
   ENDDO
 END IF
 !
-IF (LCOEF) THEN
+IF (DGU%LCOEF) THEN
   DO JJ=1,KSIZE
-   XCD_TILE      (KMASK(JJ),KTILE)  = ZP_CD       (JJ)
-   XCH_TILE      (KMASK(JJ),KTILE)  = ZP_CH       (JJ)
-   XCE_TILE      (KMASK(JJ),KTILE)  = ZP_CE       (JJ)
-   XQS_TILE      (KMASK(JJ),KTILE)  = ZP_QS       (JJ)
-   XZ0_TILE      (KMASK(JJ),KTILE)  = ZP_Z0       (JJ)
-   XZ0H_TILE     (KMASK(JJ),KTILE)  = ZP_Z0H      (JJ)
+   DGU%XCD_TILE      (KMASK(JJ),KTILE)  = ZP_CD       (JJ)
+   DGU%XCH_TILE      (KMASK(JJ),KTILE)  = ZP_CH       (JJ)
+   DGU%XCE_TILE      (KMASK(JJ),KTILE)  = ZP_CE       (JJ)
+   DGU%XQS_TILE      (KMASK(JJ),KTILE)  = ZP_QS       (JJ)
+   DGU%XZ0_TILE      (KMASK(JJ),KTILE)  = ZP_Z0       (JJ)
+   DGU%XZ0H_TILE     (KMASK(JJ),KTILE)  = ZP_Z0H      (JJ)
   ENDDO
 END IF
 !----------------------------------------------------------------------

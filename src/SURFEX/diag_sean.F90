@@ -36,7 +36,7 @@ SUBROUTINE DIAG_SEA_n(HPROGRAM,                                           &
 
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : CSEA
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_DIAG_SEAFLUX_n
 USE MODI_DIAG_IDEAL_n
@@ -105,7 +105,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SEA_N',0,ZHOOK_HANDLE)
-IF (CSEA=='SEAFLX') THEN
+IF (U%CSEA=='SEAFLX') THEN
   CALL DIAG_SEAFLUX_n(HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -114,7 +114,7 @@ IF (CSEA=='SEAFLX') THEN
                         PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
-ELSEIF (CSEA=='FLUX') THEN
+ELSEIF (U%CSEA=='FLUX') THEN
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
   PEVAP    = XUNDEF
@@ -156,7 +156,7 @@ ELSEIF (CSEA=='FLUX') THEN
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF
   PWIND10M_MAX = XUNDEF
-ELSE IF (CSEA=='NONE  ') THEN
+ELSE IF (U%CSEA=='NONE  ') THEN
   PRN      = XUNDEF
   PH       = XUNDEF
   PLE      = XUNDEF

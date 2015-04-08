@@ -35,7 +35,7 @@
 !-------------------------------------------------------------------------------
 !
 USE MODD_SURF_PAR,ONLY : XUNDEF
-USE MODD_ISBA_n,  ONLY : NPATCH, NGROUND_LAYER, NSIZE_NATURE_P
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_SGH_PAR, ONLY : X2, X4, XREGP, XREGA
 !
@@ -169,8 +169,8 @@ ZWD0_AVG(:) = 0.0
 !
 IF (HISBA == 'DIF') THEN                                   
 !
-  DO JPATCH=1,NPATCH
-    IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+  DO JPATCH=1,I%NPATCH
+    IF (I%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
     DO JL=1,INL
        DO JI=1,INI
           ZD_TOP   (JI) = ZD_TOP   (JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)
@@ -187,8 +187,8 @@ IF (HISBA == 'DIF') THEN
 !
 ELSE
 !     
-  DO JPATCH=1,NPATCH
-     IF (NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+  DO JPATCH=1,I%NPATCH
+     IF (I%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
      DO JI=1,INI
         ZD_TOP(JI)=ZD_TOP(JI)+PRUNOFFD(JI,JPATCH)*PPATCH(JI,JPATCH)
      ENDDO

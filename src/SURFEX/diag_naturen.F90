@@ -37,7 +37,7 @@ SUBROUTINE DIAG_NATURE_n(HPROGRAM,                                              
 
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : CNATURE
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_DIAG_ISBA_n
 USE MODI_DIAG_IDEAL_n
@@ -107,7 +107,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_NATURE_N',0,ZHOOK_HANDLE)
-IF (CNATURE=='ISBA  ' .OR. CNATURE=='TSZ0  ' ) THEN
+IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0  ' ) THEN
 !        
   CALL DIAG_ISBA_n(HPROGRAM,                                              &
                      PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,   &
@@ -118,7 +118,7 @@ IF (CNATURE=='ISBA  ' .OR. CNATURE=='TSZ0  ' ) THEN
                      PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,          &
                      PEVAP, PEVAPC, PSUBL, PSUBLC                           )
 !                   
-ELSE IF (CNATURE=='FLUX  ') THEN
+ELSE IF (U%CNATURE=='FLUX  ') THEN
 !   
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
@@ -161,7 +161,7 @@ ELSE IF (CNATURE=='FLUX  ') THEN
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF
   PWIND10M_MAX = XUNDEF
-ELSE IF (CNATURE=='NONE  ') THEN
+ELSE IF (U%CNATURE=='NONE  ') THEN
   PRN      = XUNDEF
   PH       = XUNDEF
   PLE      = XUNDEF

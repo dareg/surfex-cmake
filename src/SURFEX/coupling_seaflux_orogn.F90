@@ -38,10 +38,9 @@ SUBROUTINE COUPLING_SEAFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                 
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00
-USE MODD_SEAFLUX_n,        ONLY : LSBL, XSST, XZ0, XZS
-USE MODD_SEAFLUX_SBL_n,    ONLY : XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP
-USE MODD_DIAG_SEAFLUX_n,   ONLY : N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M, XWIND10M, &
-                                  XWIND10M_MAX, XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -160,7 +159,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,S%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -187,12 +186,12 @@ ENDIF
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                               &
                KI, KSV, KSW,                                                     &
                PTSUN, PZENITH, PZENITH2, PAZIM,                                  &
-               PZREF, PUREF, XZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,       &
+               PZREF, PUREF, S%XZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,       &
                ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,         &
-               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, LSBL, XSST, XZ0,         &
-               XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP,             &
-               N2M, XT2M, XQ2M, XHU2M, XZON10M, XMER10M, XWIND10M, XWIND10M_MAX, &
-               XT2M_MIN, XT2M_MAX, XHU2M_MIN, XHU2M_MAX,                         &
+               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, S%LSBL, S%XSST, S%XZ0,         &
+               SSB%XZ, SSB%XU, SSB%NLVL, SSB%XTKE, SSB%XT, SSB%XQ, SSB%XLMO, SSB%XZF, SSB%XDZ, SSB%XDZF, SSB%XP,             &
+               DGS%N2M, DGS%XT2M, DGS%XQ2M, DGS%XHU2M, DGS%XZON10M, DGS%XMER10M, DGS%XWIND10M, DGS%XWIND10M_MAX, &
+               DGS%XT2M_MIN, DGS%XT2M_MAX, DGS%XHU2M_MIN, DGS%XHU2M_MAX,                         &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,      &
                PPEW_A_COEF, PPEW_B_COEF,                                         &
                PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,               &

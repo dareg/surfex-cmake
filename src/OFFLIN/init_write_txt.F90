@@ -30,7 +30,7 @@
 !
 USE MODD_IO_SURF_TXT,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_TXT,  ONLY:NUNIT0, NVAR, CVAR, CVARN, JPVAR, NIND
-USE MODD_DIAG_SURF_ATM_n, ONLY:LSELECT, CSELECT
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODI_ABOR1_SFX
 USE MODI_TEST_RECORD_LEN
@@ -75,7 +75,7 @@ ELSE
   IF (CVAR(1).NE.'                ') IVAR=MAXVAL(NVAR(:))
 !
 !
-  IF (.NOT.LSELECT) THEN
+  IF (.NOT.DGU%LSELECT) THEN
 !
     IF ( (HREC(5:7)/='_OC'                          ) .AND.  & 
           (HREC(4:6)/='_OC'                          ) .AND.  &           
@@ -150,8 +150,8 @@ ELSE
   ELSE
 !        
     IFIELD=0
-    DO JFIELD=1,SIZE(CSELECT)
-      IF (CSELECT(JFIELD)== '            ') EXIT
+    DO JFIELD=1,SIZE(DGU%CSELECT)
+      IF (DGU%CSELECT(JFIELD)== '            ') EXIT
       IFIELD=IFIELD+1
     ENDDO
   

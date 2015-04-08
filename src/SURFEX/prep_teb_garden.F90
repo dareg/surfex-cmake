@@ -35,15 +35,10 @@ USE MODI_PREP_VER_TEB_GARDEN
 !
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 !
-USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CRESPSL,                              &
-                                NNBIOMASS,                                    &
-                                CISBA
-USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY: XLAI
-USE MODD_TEB_GARDEN_PGD_n,     ONLY: XVEGTYPE, XWSAT, XBSLAI, XBSLAI_NITRO
-USE MODD_TEB_GARDEN_n,   ONLY : XRESA,                                        &
-                                XAN, XANFM, XANDAY, XLE,                      &
-                                XBIOMASS, XRESP_BIOMASS,                      &
-                                XWG, XWGI, XTG
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
                                 ! A FAIRE :
                                 ! IL FAUT RAJOUTER TSNOW
                                 ! ----------------------
@@ -109,7 +104,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN',0,ZHOOK_HANDLE)
 !
 !*      2.6    LAI
 !
-IF (CPHOTO/='NON' .AND. CPHOTO/='AGS' .AND. CPHOTO/='LST')  &
+IF (TVG%CPHOTO/='NON' .AND. TVG%CPHOTO/='AGS' .AND. TVG%CPHOTO/='LST')  &
  CALL PREP_HOR_TEB_GARDEN_FIELD(HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !-------------------------------------------------------------------------------------
@@ -119,24 +114,24 @@ IF (CPHOTO/='NON' .AND. CPHOTO/='AGS' .AND. CPHOTO/='LST')  &
 ! If whole ice reservoir is empty (grib from ecmwf case) and surface temperature is
 ! lower than -10C, then ice content is maximum and water content minimum
 !
-IF (ALL(XWGI(:,:)==0.)) THEN
-   WHERE(XTG(:,1:SIZE(XWG,2)) < XTT-10.)
-       XWGI(:,:) = XWSAT(:,:)-XWGMIN
-       XWG (:,:) = XWGMIN
+IF (ALL(TGD%XWGI(:,:)==0.)) THEN
+   WHERE(TGD%XTG(:,1:SIZE(TGD%XWG,2)) < XTT-10.)
+       TGD%XWGI(:,:) = TGDP%XWSAT(:,:)-XWGMIN
+       TGD%XWG (:,:) = XWGMIN
    END WHERE
 ENDIF
 !
 ! No ice for force restore third layer:
-IF (CISBA == '3-L') THEN
-      WHERE(XWG(:,3)/=XUNDEF.AND.XWGI(:,3)/=XUNDEF)
-        XWG(:,3)  = MIN(XWG(:,3)+XWGI(:,3),XWSAT(:,3))
-        XWGI(:,3) = 0.
+IF (TVG%CISBA == '3-L') THEN
+      WHERE(TGD%XWG(:,3)/=XUNDEF.AND.TGD%XWGI(:,3)/=XUNDEF)
+        TGD%XWG(:,3)  = MIN(TGD%XWG(:,3)+TGD%XWGI(:,3),TGDP%XWSAT(:,3))
+        TGD%XWGI(:,3) = 0.
       END WHERE
 ENDIF
 !
 ! Total water content should not exceed saturation:
-WHERE(XWG(:,:) /= XUNDEF .AND. (XWG(:,:) + XWGI(:,:)) > XWSAT(:,:) )
-     XWGI(:,:) = XWSAT(:,:) - XWG(:,:)
+WHERE(TGD%XWG(:,:) /= XUNDEF .AND. (TGD%XWG(:,:) + TGD%XWGI(:,:)) > TGDP%XWSAT(:,:) )
+     TGD%XWGI(:,:) = TGDP%XWSAT(:,:) - TGD%XWG(:,:)
 END WHERE
 !
 !-------------------------------------------------------------------------------------
@@ -152,55 +147,55 @@ ENDIF
 !
 !*      5.     Half prognostic fields
 !
-ALLOCATE(XRESA(SIZE(XLAI,1)))
-XRESA = 100.
+ALLOCATE(TGD%XRESA(SIZE(TGDPE%XLAI,1)))
+TGD%XRESA = 100.
 !
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Isba-Ags prognostic fields
 !
-IF (CPHOTO /= 'NON') THEN
+IF (TVG%CPHOTO /= 'NON') THEN
 !
-   ALLOCATE(XAN(SIZE(XLAI,1)))
-   XAN = 0.
+   ALLOCATE(TGD%XAN(SIZE(TGDPE%XLAI,1)))
+   TGD%XAN = 0.
 !
-   ALLOCATE(XANDAY(SIZE(XLAI,1)))
-   XANDAY = 0.
+   ALLOCATE(TGD%XANDAY(SIZE(TGDPE%XLAI,1)))
+   TGD%XANDAY = 0.
 !
-   ALLOCATE(XANFM(SIZE(XLAI,1)))
-   XANFM = XANFMINIT
+   ALLOCATE(TGD%XANFM(SIZE(TGDPE%XLAI,1)))
+   TGD%XANFM = XANFMINIT
 !
-   ALLOCATE(XLE(SIZE(XLAI,1)))
-   XLE = 0.
+   ALLOCATE(TGD%XLE(SIZE(TGDPE%XLAI,1)))
+   TGD%XLE = 0.
 !
 ENDIF
 !
-IF (CPHOTO == 'AGS' .OR. CPHOTO == 'AST') THEN
+IF (TVG%CPHOTO == 'AGS' .OR. TVG%CPHOTO == 'AST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS))
-   XBIOMASS(:,1) = 0.
+   ALLOCATE(TGD%XBIOMASS(SIZE(TGDPE%XLAI,1),TVG%NNBIOMASS))
+   TGD%XBIOMASS(:,1) = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS))
-   XRESP_BIOMASS(:,:) = 0.
+   ALLOCATE(TGD%XRESP_BIOMASS(SIZE(TGDPE%XLAI,1),TVG%NNBIOMASS))
+   TGD%XRESP_BIOMASS(:,:) = 0.
 !
-ELSEIF (CPHOTO == 'LAI' .OR. CPHOTO == 'LST') THEN
+ELSEIF (TVG%CPHOTO == 'LAI' .OR. TVG%CPHOTO == 'LST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS))
-   XBIOMASS(:,1) = XLAI(:) * XBSLAI(:)
+   ALLOCATE(TGD%XBIOMASS(SIZE(TGDPE%XLAI,1),TVG%NNBIOMASS))
+   TGD%XBIOMASS(:,1) = TGDPE%XLAI(:) * TGDP%XBSLAI(:)
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS))
-   XRESP_BIOMASS(:,:) = 0.
+   ALLOCATE(TGD%XRESP_BIOMASS(SIZE(TGDPE%XLAI,1),TVG%NNBIOMASS))
+   TGD%XRESP_BIOMASS(:,:) = 0.
 !
-ELSEIF (CPHOTO == 'NIT' .OR. CPHOTO == 'NCB') THEN
+ELSEIF (TVG%CPHOTO == 'NIT' .OR. TVG%CPHOTO == 'NCB') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS))
-   XBIOMASS(:,1) = XLAI(:) * XBSLAI_NITRO(:)
-   XBIOMASS(:,2) = MAX( 0., (XBIOMASS(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
-                              **(1.0/(1.0-XCA_NIT)) - XBIOMASS(:,1) )  
-   XBIOMASS(:,3:NNBIOMASS) = 0.
+   ALLOCATE(TGD%XBIOMASS(SIZE(TGDPE%XLAI,1),TVG%NNBIOMASS))
+   TGD%XBIOMASS(:,1) = TGDPE%XLAI(:) * TGDP%XBSLAI_NITRO(:)
+   TGD%XBIOMASS(:,2) = MAX( 0., (TGD%XBIOMASS(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
+                              **(1.0/(1.0-XCA_NIT)) - TGD%XBIOMASS(:,1) )  
+   TGD%XBIOMASS(:,3:TVG%NNBIOMASS) = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS))
-   XRESP_BIOMASS(:,:) = 0.
+   ALLOCATE(TGD%XRESP_BIOMASS(SIZE(TGDPE%XLAI,1),TVG%NNBIOMASS))
+   TGD%XRESP_BIOMASS(:,:) = 0.
 !
 ENDIF
 !

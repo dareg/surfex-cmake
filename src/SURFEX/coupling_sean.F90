@@ -32,7 +32,7 @@ SUBROUTINE COUPLING_SEA_n(HPROGRAM, HCOUPLING, PTIMEC,                          
 !!      B. Decharme  04/2013 new coupling variables
 !!-----------------------------------------------------------------------
 !
-USE MODD_SURF_ATM_n, ONLY : CSEA
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -121,7 +121,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SEA_N',0,ZHOOK_HANDLE)
-IF (CSEA=='SEAFLX') THEN
+IF (U%CSEA=='SEAFLX') THEN
   CALL COUPLING_SEAFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                                  &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
@@ -133,7 +133,7 @@ IF (CSEA=='SEAFLX') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CSEA=='FLUX  ') THEN
+ELSE IF (U%CSEA=='FLUX  ') THEN
   CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
@@ -145,7 +145,7 @@ ELSE IF (CSEA=='FLUX  ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CSEA=='NONE  ') THEN
+ELSE IF (U%CSEA=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.
   PSFTS = 0.

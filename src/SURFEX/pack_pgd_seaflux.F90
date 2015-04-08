@@ -36,8 +36,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SEAFLUX_n,          ONLY : XSST, XSEABATHY
-USE MODD_SEAFLUX_GRID_n,     ONLY : NDIM, CGRID, XGRID_PAR
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE MODI_PACK_SAME_RANK
 !
@@ -73,10 +73,10 @@ IF (LHOOK) CALL DR_HOOK('PACK_PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !*    1.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_TYPE_DIM_n('SEA   ',NDIM)
-ALLOCATE(IMASK(NDIM))
+ CALL GET_TYPE_DIM_n('SEA   ',SG%NDIM)
+ALLOCATE(IMASK(SG%NDIM))
 ILU=0
- CALL GET_SURF_MASK_n('SEA   ',NDIM,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n('SEA   ',SG%NDIM,IMASK,ILU,ILUOUT)
 !
 !
 !-------------------------------------------------------------------------------
@@ -84,8 +84,8 @@ ILU=0
 !*    2.      Packing of fields
 !             -----------------
 !
-ALLOCATE(XSEABATHY(NDIM))
- CALL PACK_SAME_RANK(IMASK,PSEABATHY(:),XSEABATHY(:))
+ALLOCATE(S%XSEABATHY(SG%NDIM))
+ CALL PACK_SAME_RANK(IMASK,PSEABATHY(:),S%XSEABATHY(:))
 IF (LHOOK) CALL DR_HOOK('PACK_PGD_SEAFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -36,10 +36,8 @@
 !
 USE MODD_PGDWORK,        ONLY : NSSO, XSSQO, LSSQO
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR, NGRID_PAR
-USE MODD_SURF_ATM_GRID_n, ONLY : XMESH_SIZE
-USE MODD_SURF_ATM_SSO_n,  ONLY : XAOSIP, XAOSIM, XAOSJP, XAOSJM, &
-                                  XHO2IP, XHO2IM, XHO2JP, XHO2JM, &
-                                  XAVG_ZS  
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE MODI_GET_ADJACENT_MESHES
 !
@@ -136,7 +134,7 @@ OZ0EFFJ(:)=.FALSE.
 !*    1.2    Grid dimension (meters)
 !            -----------------------
 !
- CALL GET_MESH_DIM(CGRID,NGRID_PAR,NL,XGRID_PAR,ZDX,ZDY,XMESH_SIZE)
+ CALL GET_MESH_DIM(CGRID,NGRID_PAR,NL,XGRID_PAR,ZDX,ZDY,UG%XMESH_SIZE)
 !
 !
 !*    1.3    Left, top, right and bottom adjacent gris meshes
@@ -153,17 +151,17 @@ ZSLOPEJP(0) = 0.
 !
 DO JL=1,NL
   IF (IRIGHT(JL)/=0 .AND. ILEFT(JL)/=0) THEN
-    ZSLOPEIP(JL) =  0.5 * ( XAVG_ZS(IRIGHT(JL)) - XAVG_ZS(JL) ) &
+    ZSLOPEIP(JL) =  0.5 * ( USS%XAVG_ZS(IRIGHT(JL)) - USS%XAVG_ZS(JL) ) &
                           / ( 0.5 * (ZDX(IRIGHT(JL)) + ZDX(JL)) ) &
-                    + 0.5 * ( XAVG_ZS(JL) - XAVG_ZS(ILEFT (JL)) ) &
+                    + 0.5 * ( USS%XAVG_ZS(JL) - USS%XAVG_ZS(ILEFT (JL)) ) &
                           / ( 0.5 * (ZDX(JL)  + ZDX(ILEFT(JL))) )  
   ELSE
     ZSLOPEIP(JL) = 0.
   END IF
   IF (ITOP(JL)/=0 .AND. IBOTTOM(JL)/=0) THEN
-    ZSLOPEJP(JL) =  0.5 * ( XAVG_ZS(ITOP(JL))     - XAVG_ZS(JL) ) &
+    ZSLOPEJP(JL) =  0.5 * ( USS%XAVG_ZS(ITOP(JL))     - USS%XAVG_ZS(JL) ) &
                           / ( 0.5 * (ZDY(ITOP(JL))     + ZDY(JL)) ) &
-                    + 0.5 * ( XAVG_ZS(JL) - XAVG_ZS(IBOTTOM (JL)) ) &
+                    + 0.5 * ( USS%XAVG_ZS(JL) - USS%XAVG_ZS(IBOTTOM (JL)) ) &
                           / ( 0.5 * (ZDY(JL)  + ZDY(IBOTTOM(JL))) )  
   ELSE
     ZSLOPEJP(JL) = 0.
@@ -298,17 +296,17 @@ DO JL=1,NL
 !            -----------------------------
 !
     IF (IAOSCOUNTER>0) THEN
-      XAOSIP(JL)=SUM(ZAOSIP) / IAOSCOUNTER
-      XAOSIM(JL)=SUM(ZAOSIM) / IAOSCOUNTER
+      USS%XAOSIP(JL)=SUM(ZAOSIP) / IAOSCOUNTER
+      USS%XAOSIM(JL)=SUM(ZAOSIM) / IAOSCOUNTER
       IF (IHO2COUNTERIP>0) THEN
-        XHO2IP(JL)=ZSUMHO2IP   / IHO2COUNTERIP
+        USS%XHO2IP(JL)=ZSUMHO2IP   / IHO2COUNTERIP
       ELSE
-        XHO2IP(JL)=0.
+        USS%XHO2IP(JL)=0.
       END IF
       IF (IHO2COUNTERIM>0) THEN
-        XHO2IM(JL)=ZSUMHO2IM   / IHO2COUNTERIM
+        USS%XHO2IM(JL)=ZSUMHO2IM   / IHO2COUNTERIM
       ELSE
-        XHO2IM(JL)=0.
+        USS%XHO2IM(JL)=0.
       END IF
       OZ0EFFI(JL)=.TRUE.
     END IF
@@ -424,17 +422,17 @@ DO JL=1,NL
 !            -----------------------------
 !
     IF (IAOSCOUNTER>0) THEN
-      XAOSJP(JL)=SUM(ZAOSJP) /IAOSCOUNTER
-      XAOSJM(JL)=SUM(ZAOSJM) /IAOSCOUNTER
+      USS%XAOSJP(JL)=SUM(ZAOSJP) /IAOSCOUNTER
+      USS%XAOSJM(JL)=SUM(ZAOSJM) /IAOSCOUNTER
       IF (IHO2COUNTERJP>0) THEN
-        XHO2JP(JL)=ZSUMHO2JP   /IHO2COUNTERJP
+        USS%XHO2JP(JL)=ZSUMHO2JP   /IHO2COUNTERJP
       ELSE
-        XHO2JP(JL)=0.
+        USS%XHO2JP(JL)=0.
       END IF
       IF (IHO2COUNTERJM>0) THEN
-        XHO2JM(JL)=ZSUMHO2JM   /IHO2COUNTERJM
+        USS%XHO2JM(JL)=ZSUMHO2JM   /IHO2COUNTERJM
       ELSE
-        XHO2JM(JL)=0.
+        USS%XHO2JM(JL)=0.
       END IF
       OZ0EFFJ(JL)=.TRUE.
     END IF

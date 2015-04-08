@@ -43,7 +43,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE, CATYPE,      &
                                 NVALNBR, NVALCOUNT, XVALLIST, JPVALMAX
-USE MODD_SURF_ATM_n,     ONLY : XNATURE, XSEA, XTOWN, XWATER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_GET_LUOUT
 USE MODI_TREAT_FIELD
@@ -155,17 +155,17 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   SELECT CASE (HAREA)
     CASE ('LAN')
-      WHERE ((XTOWN(:)+XNATURE(:))==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE ((U%XTOWN(:)+U%XNATURE(:))==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('TWN')
-      WHERE (XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('BLD')
-      WHERE (XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1              
+      WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1              
     CASE ('NAT')
-      WHERE (XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('SEA')
-      WHERE (XSEA   (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XSEA   (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('WAT')
-      WHERE (XWATER (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XWATER (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
   END SELECT
 !
 !-------------------------------------------------------------------------------

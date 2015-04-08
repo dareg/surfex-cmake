@@ -33,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n,     ONLY : NDIM_FULL
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -54,7 +54,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_DIM_FULL_N',0,ZHOOK_HANDLE)
-KDIM_FULL = NDIM_FULL
+KDIM_FULL = U%NDIM_FULL
 IF (LHOOK) CALL DR_HOOK('GET_DIM_FULL_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================

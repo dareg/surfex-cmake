@@ -39,16 +39,9 @@
 !
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_PGD_GRID,        ONLY : LLATLONMASK
-USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CWATER, CTOWN,     &
-                                 XSEA, XWATER,                     &
-                                 NDIM_NATURE, NDIM_SEA,            &
-                                 NDIM_TOWN,NDIM_WATER,             &
-                                 LECOCLIMAP, LWATER_TO_NATURE,     &
-                                 LTOWN_TO_ROCK, LGARDEN, NDIM_FULL,&
-                                 NSIZE_FULL
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR, XLAT, &
-                                 XLON, XMESH_SIZE, XJPDIR   
-USE MODD_CH_SURF_n,       ONLY : LCH_EMIS, CCH_EMIS
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_PGD_ARRANGE_COVER
@@ -110,16 +103,16 @@ CPROGNAME=HPROGRAM
 !*    1.      Set default constant values 
 !             ---------------------------
 !
- CALL READ_PGD_ARRANGE_COVER(HPROGRAM,LWATER_TO_NATURE,LTOWN_TO_ROCK)
+ CALL READ_PGD_ARRANGE_COVER(HPROGRAM,U%LWATER_TO_NATURE,U%LTOWN_TO_ROCK)
 !
- CALL READ_PGD_COVER_GARDEN(HPROGRAM,LGARDEN)
+ CALL READ_PGD_COVER_GARDEN(HPROGRAM,U%LGARDEN)
 !
  CALL INIT_READ_DATA_COVER(HPROGRAM)
 !
  CALL INI_DATA_COVER
 !
 !*    1.2     surface schemes
- CALL READ_PGD_SCHEMES(HPROGRAM,CNATURE,CSEA,CTOWN,CWATER)
+ CALL READ_PGD_SCHEMES(HPROGRAM,U%CNATURE,U%CSEA,U%CTOWN,U%CWATER)
 !
 !*    1.3     prints all parameters in a Latex file
  CALL READ_NAM_WRITE_COVER_TEX(HPROGRAM)
@@ -131,59 +124,59 @@ CPROGNAME=HPROGRAM
 !*    2.      Grid
 !             ----
 !
-ALLOCATE(XLAT(NSIZE_FULL))
-ALLOCATE(XLON(NSIZE_FULL))
-ALLOCATE(XMESH_SIZE(NSIZE_FULL))
-ALLOCATE(XJPDIR(NSIZE_FULL))
- CALL LATLON_GRID(CGRID,NGRID_PAR,NSIZE_FULL,ILUOUT,XGRID_PAR,XLAT,XLON,XMESH_SIZE,XJPDIR)
+ALLOCATE(UG%XLAT(U%NSIZE_FULL))
+ALLOCATE(UG%XLON(U%NSIZE_FULL))
+ALLOCATE(UG%XMESH_SIZE(U%NSIZE_FULL))
+ALLOCATE(UG%XJPDIR(U%NSIZE_FULL))
+ CALL LATLON_GRID(UG%CGRID,UG%NGRID_PAR,U%NSIZE_FULL,ILUOUT,UG%XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,UG%XJPDIR)
 !
 !
 !*    2.3     Stores the grid in the module MODD_PGD_GRID
 !
- CALL PUT_PGD_GRID(CGRID,NSIZE_FULL,NGRID_PAR,XGRID_PAR)
+ CALL PUT_PGD_GRID(UG%CGRID,U%NSIZE_FULL,UG%NGRID_PAR,UG%XGRID_PAR)
 !
 !*    2.4     mask to limit the number of input data to read
- CALL LATLONMASK      (CGRID,NGRID_PAR,XGRID_PAR,LLATLONMASK)
+ CALL LATLONMASK      (UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR,LLATLONMASK)
 !
 !-------------------------------------------------------------------------------
 !
 !*    3.      surface cover
 !             -------------
 !
- CALL PGD_FRAC(HPROGRAM,LECOCLIMAP)
-IF (LECOCLIMAP) CALL PGD_COVER(HPROGRAM,LRM_RIVER)
+ CALL PGD_FRAC(HPROGRAM,U%LECOCLIMAP)
+IF (U%LECOCLIMAP) CALL PGD_COVER(HPROGRAM,LRM_RIVER)
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Orography
 !             ---------
 !
- CALL PGD_OROGRAPHY(HPROGRAM,XSEA,XWATER,HFILE,HFILETYPE,OZS)
+ CALL PGD_OROGRAPHY(HPROGRAM,U%XSEA,U%XWATER,HFILE,HFILETYPE,OZS)
 !
 !_______________________________________________________________________________
 !
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (NDIM_NATURE>0) CALL PGD_NATURE(HPROGRAM,LECOCLIMAP)  
+IF (U%NDIM_NATURE>0) CALL PGD_NATURE(HPROGRAM,U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
-IF (NDIM_TOWN>0) CALL PGD_TOWN(HPROGRAM,LECOCLIMAP,LGARDEN)  
+IF (U%NDIM_TOWN>0) CALL PGD_TOWN(HPROGRAM,U%LECOCLIMAP,U%LGARDEN)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
 !             ------------------------------------------
 !
-IF (NDIM_WATER>0) CALL PGD_INLAND_WATER(HPROGRAM,LECOCLIMAP,LRM_RIVER)   
+IF (U%NDIM_WATER>0) CALL PGD_INLAND_WATER(HPROGRAM,U%LECOCLIMAP,LRM_RIVER)   
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme
 !             ---------------------------------
 !
-IF (NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)  
+IF (U%NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)  
 !
 !_______________________________________________________________________________
 !
@@ -196,11 +189,11 @@ IF (NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)
 !*   10.      Chemical Emission fields
 !             ------------------------
 !
- CALL READ_NAM_PGD_CHEMISTRY(HPROGRAM,CCH_EMIS)
-IF (CCH_EMIS=='SNAP') THEN
-  CALL PGD_CHEMISTRY_SNAP(HPROGRAM,LCH_EMIS)
-ELSE IF (CCH_EMIS=='AGGR') THEN
-  CALL PGD_CHEMISTRY(HPROGRAM,LCH_EMIS)
+ CALL READ_NAM_PGD_CHEMISTRY(HPROGRAM,CHU%CCH_EMIS)
+IF (CHU%CCH_EMIS=='SNAP') THEN
+  CALL PGD_CHEMISTRY_SNAP(HPROGRAM,CHU%LCH_EMIS)
+ELSE IF (CHU%CCH_EMIS=='AGGR') THEN
+  CALL PGD_CHEMISTRY(HPROGRAM,CHU%LCH_EMIS)
 ENDIF
 !_______________________________________________________________________________
 !

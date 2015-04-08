@@ -38,8 +38,8 @@
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,    ONLY   : XUNDEF
 !
-USE MODD_DIAG_ISBA_n,      ONLY   : XAVG_QS, LSURF_VARS, XAVG_Z0EFF, LCOEF, XAVG_Z0, XAVG_Z0H
-USE MODD_DIAG_MISC_ISBA_n, ONLY   : XAVG_PSNG, XAVG_PSNV, XAVG_TWSNOW,LSURF_MISC_BUDGET
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -72,26 +72,26 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_NATURE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LSURF_VARS) THEN 
-        PQS      = XAVG_QS      
+IF (DGI%LSURF_VARS) THEN 
+        PQS      = DGI%XAVG_QS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
 !
-IF (LSURF_MISC_BUDGET) THEN 
-        PSNG     = XAVG_PSNG      
-        PSNV     = XAVG_PSNV      
-        PTWSNOW  = XAVG_TWSNOW
+IF (DGMI%LSURF_MISC_BUDGET) THEN 
+        PSNG     = DGMI%XAVG_PSNG      
+        PSNV     = DGMI%XAVG_PSNV      
+        PTWSNOW  = DGMI%XAVG_TWSNOW
    ELSE 
         PSNG     = XUNDEF      
         PSNV     = XUNDEF      
         PTWSNOW  = XUNDEF
 ENDIF           
 !
-IF (LCOEF) THEN
-   PZ0EFF   = XAVG_Z0EFF
-   PZ0      = XAVG_Z0      
-   PZ0H     = XAVG_Z0H
+IF (DGI%LCOEF) THEN
+   PZ0EFF   = DGI%XAVG_Z0EFF
+   PZ0      = DGI%XAVG_Z0      
+   PZ0H     = DGI%XAVG_Z0H
 ELSE
    PZ0EFF   = XUNDEF
    PZ0      = XUNDEF      

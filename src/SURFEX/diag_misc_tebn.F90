@@ -59,46 +59,10 @@
 !
 !
 !
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : LSURF_MISC_BUDGET
-USE MODD_DIAG_MISC_TEB_n,    ONLY : XQF_BLD, XQF_TOWN, XDQS_TOWN, XFLX_BLD,       &
-                                    XRN_ROAD, XH_ROAD, XLE_ROAD,                  &
-                                    XGFLUX_ROAD,                                  &
-                                    XRN_WALL_A, XH_WALL_A, XGFLUX_WALL_A,         &
-                                    XRN_WALL_B, XH_WALL_B, XGFLUX_WALL_B,         &
-                                    XRN_ROOF, XH_ROOF, XLE_ROOF,                  &
-                                    XGFLUX_ROOF,                                  &
-                                    XRN_STRLROOF, XH_STRLROOF,                    &
-                                    XLE_STRLROOF, XGFLUX_STRLROOF,                &
-                                    XRN_GREENROOF, XH_GREENROOF,                  &
-                                    XLE_GREENROOF, XGFLUX_GREENROOF,              &
-                                    XG_GREENROOF_ROOF,                            &
-                                    XRN_GARDEN,XH_GARDEN,XLE_GARDEN,XGFLUX_GARDEN,&
-                                    XRN_BLT,XH_BLT,XLE_BLT,XGFLUX_BLT,            &
-                                    XRUNOFF_TOWN, XRUNOFF_GARDEN,                 &
-                                    XRUNOFF_ROAD, XRUNOFF_ROOF,XRUNOFF_STRLROOF,  &
-                                    XRUNOFF_GREENROOF, XDRAIN_GREENROOF,          &
-                                    XIRRIG_GREENROOF, XIRRIG_GARDEN,              &
-                                    XIRRIG_ROAD, XDRAIN_GARDEN,                   &
-                                    XABS_SW_ROOF,XABS_LW_ROOF,                    &
-                                    XABS_SW_SNOW_ROOF,XABS_LW_SNOW_ROOF,          &
-                                    XABS_SW_ROAD,XABS_LW_ROAD,                    &
-                                    XABS_SW_SNOW_ROAD,XABS_LW_SNOW_ROAD,          &
-                                    XABS_SW_WALL_A,XABS_LW_WALL_A,                &
-                                    XABS_SW_WALL_B,XABS_LW_WALL_B,                &
-                                    XABS_SW_GARDEN,XABS_LW_GARDEN,                &  
-                                    XABS_SW_GREENROOF,XABS_LW_GREENROOF,          &  
-                                    XH_BLD_COOL, XT_BLD_COOL,                     &     
-                                    XH_BLD_HEAT, XLE_BLD_COOL, XLE_BLD_HEAT,      &
-                                    XH_WASTE, XLE_WASTE, XHVAC_COOL,              &
-                                    XHVAC_HEAT, XCAP_SYS, XM_SYS, XCOP,           &
-                                    XQ_SYS, XT_SYS, XTR_SW_WIN, XFAN_POWER,       &
-                                    XABS_SW_WIN, XABS_LW_WIN,                     &
-                                    XTCOOL_CUR_TARGET, XTHEAT_CUR_TARGET,XCUR_QIN,&
-                                    XABS_SW_PANEL, XABS_LW_PANEL, XRN_PANEL,      &
-                                    XH_PANEL, XTHER_PROD_PANEL, XPHOT_PROD_PANEL, &
-                                    XPROD_PANEL, XTHER_PROD_BLD, XPHOT_PROD_BLD
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
+USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
 !
-USE MODD_TEB_OPTION_n,       ONLY : CBEM, LSOLAR_PANEL 
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS 
 USE MODI_CUMUL_DIAG_TEB_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -224,107 +188,107 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_MISC_TEB_N',0,ZHOOK_HANDLE)
-IF (LSURF_MISC_BUDGET) THEN
-   XQF_BLD            =  PQF_BLD
-   XFLX_BLD           =  PFLX_BLD
-   XQF_TOWN           =  PQF_TOWN
-   XDQS_TOWN          =  PDQS_TOWN
-   XRN_ROAD           = PRN_ROAD
-   XH_ROAD            = PH_ROAD
-   XLE_ROAD           = PLE_ROAD
-   XGFLUX_ROAD        = PGFLUX_ROAD
-   XRN_WALL_A         = PRN_WALL_A
-   XH_WALL_A          = PH_WALL_A
-   XGFLUX_WALL_A      = PGFLUX_WALL_A
-   XRN_WALL_B         = PRN_WALL_B
-   XH_WALL_B          = PH_WALL_B
-   XGFLUX_WALL_B      = PGFLUX_WALL_B
-   XRN_ROOF           = PRN_ROOF
-   XH_ROOF            = PH_ROOF
-   XLE_ROOF           = PLE_ROOF
-   XGFLUX_ROOF        = PGFLUX_ROOF   
-   XRN_STRLROOF       = PRN_STRLROOF
-   XH_STRLROOF        = PH_STRLROOF
-   XLE_STRLROOF       = PLE_STRLROOF
-   XGFLUX_STRLROOF    = PGFLUX_STRLROOF
-   XRN_GREENROOF      = PRN_GREENROOF
-   XH_GREENROOF       = PH_GREENROOF
-   XLE_GREENROOF      = PLE_GREENROOF
-   XGFLUX_GREENROOF   = PGFLUX_GREENROOF
-   XG_GREENROOF_ROOF  = PG_GREENROOF_ROOF
-   XRUNOFF_TOWN       = PRUNOFF_TOWN
-   XRUNOFF_GARDEN     = PRUNOFF_GARDEN
-   XRUNOFF_ROAD       = PRUNOFF_ROAD
-   XRUNOFF_ROOF       = PRUNOFF_ROOF
-   XRUNOFF_STRLROOF   = PRUNOFF_STRLROOF
-   XRUNOFF_GREENROOF  = PRUNOFF_GREENROOF
-   XDRAIN_GARDEN      = PDRAIN_GARDEN
-   XDRAIN_GREENROOF   = PDRAIN_GREENROOF
-   XIRRIG_ROAD        = PIRRIG_ROAD
-   XIRRIG_GARDEN      = PIRRIG_GARDEN
-   XIRRIG_GREENROOF   = PIRRIG_GREENROOF
-   XRN_GARDEN         = PRN_GARDEN
-   XH_GARDEN          = PH_GARDEN
-   XLE_GARDEN         = PLE_GARDEN
-   XGFLUX_GARDEN      = PGFLUX_GARDEN  
-   XRN_BLT            = PRN_BLT  
-   XH_BLT             = PH_BLT  
-   XLE_BLT            = PLE_BLT  
-   XGFLUX_BLT         = PGFLUX_BLT    
+IF (DGMTO%LSURF_MISC_BUDGET) THEN
+   DGMT%XQF_BLD            =  PQF_BLD
+   DGMT%XFLX_BLD           =  PFLX_BLD
+   DGMT%XQF_TOWN           =  PQF_TOWN
+   DGMT%XDQS_TOWN          =  PDQS_TOWN
+   DGMT%XRN_ROAD           = PRN_ROAD
+   DGMT%XH_ROAD            = PH_ROAD
+   DGMT%XLE_ROAD           = PLE_ROAD
+   DGMT%XGFLUX_ROAD        = PGFLUX_ROAD
+   DGMT%XRN_WALL_A         = PRN_WALL_A
+   DGMT%XH_WALL_A          = PH_WALL_A
+   DGMT%XGFLUX_WALL_A      = PGFLUX_WALL_A
+   DGMT%XRN_WALL_B         = PRN_WALL_B
+   DGMT%XH_WALL_B          = PH_WALL_B
+   DGMT%XGFLUX_WALL_B      = PGFLUX_WALL_B
+   DGMT%XRN_ROOF           = PRN_ROOF
+   DGMT%XH_ROOF            = PH_ROOF
+   DGMT%XLE_ROOF           = PLE_ROOF
+   DGMT%XGFLUX_ROOF        = PGFLUX_ROOF   
+   DGMT%XRN_STRLROOF       = PRN_STRLROOF
+   DGMT%XH_STRLROOF        = PH_STRLROOF
+   DGMT%XLE_STRLROOF       = PLE_STRLROOF
+   DGMT%XGFLUX_STRLROOF    = PGFLUX_STRLROOF
+   DGMT%XRN_GREENROOF      = PRN_GREENROOF
+   DGMT%XH_GREENROOF       = PH_GREENROOF
+   DGMT%XLE_GREENROOF      = PLE_GREENROOF
+   DGMT%XGFLUX_GREENROOF   = PGFLUX_GREENROOF
+   DGMT%XG_GREENROOF_ROOF  = PG_GREENROOF_ROOF
+   DGMT%XRUNOFF_TOWN       = PRUNOFF_TOWN
+   DGMT%XRUNOFF_GARDEN     = PRUNOFF_GARDEN
+   DGMT%XRUNOFF_ROAD       = PRUNOFF_ROAD
+   DGMT%XRUNOFF_ROOF       = PRUNOFF_ROOF
+   DGMT%XRUNOFF_STRLROOF   = PRUNOFF_STRLROOF
+   DGMT%XRUNOFF_GREENROOF  = PRUNOFF_GREENROOF
+   DGMT%XDRAIN_GARDEN      = PDRAIN_GARDEN
+   DGMT%XDRAIN_GREENROOF   = PDRAIN_GREENROOF
+   DGMT%XIRRIG_ROAD        = PIRRIG_ROAD
+   DGMT%XIRRIG_GARDEN      = PIRRIG_GARDEN
+   DGMT%XIRRIG_GREENROOF   = PIRRIG_GREENROOF
+   DGMT%XRN_GARDEN         = PRN_GARDEN
+   DGMT%XH_GARDEN          = PH_GARDEN
+   DGMT%XLE_GARDEN         = PLE_GARDEN
+   DGMT%XGFLUX_GARDEN      = PGFLUX_GARDEN  
+   DGMT%XRN_BLT            = PRN_BLT  
+   DGMT%XH_BLT             = PH_BLT  
+   DGMT%XLE_BLT            = PLE_BLT  
+   DGMT%XGFLUX_BLT         = PGFLUX_BLT    
 !
-   XABS_SW_ROOF       = PABS_SW_ROOF
-   XABS_LW_ROOF       = PABS_LW_ROOF
-   XABS_SW_SNOW_ROOF  = PABS_SW_SNOW_ROOF
-   XABS_LW_SNOW_ROOF  = PABS_LW_SNOW_ROOF
-   XABS_SW_ROAD       = PABS_SW_ROAD
-   XABS_LW_ROAD       = PABS_LW_ROAD
-   XABS_SW_SNOW_ROAD  = PABS_SW_SNOW_ROAD
-   XABS_LW_SNOW_ROAD  = PABS_LW_SNOW_ROAD
-   XABS_SW_WALL_A     = PABS_SW_WALL_A
-   XABS_LW_WALL_A     = PABS_LW_WALL_A
-   XABS_SW_WALL_B     = PABS_SW_WALL_B
-   XABS_LW_WALL_B     = PABS_LW_WALL_B
-   XABS_SW_GARDEN     = PABS_SW_GARDEN
-   XABS_LW_GARDEN     = PABS_LW_GARDEN
-   XABS_SW_GREENROOF  = PABS_SW_GREENROOF
-   XABS_LW_GREENROOF  = PABS_LW_GREENROOF
+   DGMT%XABS_SW_ROOF       = PABS_SW_ROOF
+   DGMT%XABS_LW_ROOF       = PABS_LW_ROOF
+   DGMT%XABS_SW_SNOW_ROOF  = PABS_SW_SNOW_ROOF
+   DGMT%XABS_LW_SNOW_ROOF  = PABS_LW_SNOW_ROOF
+   DGMT%XABS_SW_ROAD       = PABS_SW_ROAD
+   DGMT%XABS_LW_ROAD       = PABS_LW_ROAD
+   DGMT%XABS_SW_SNOW_ROAD  = PABS_SW_SNOW_ROAD
+   DGMT%XABS_LW_SNOW_ROAD  = PABS_LW_SNOW_ROAD
+   DGMT%XABS_SW_WALL_A     = PABS_SW_WALL_A
+   DGMT%XABS_LW_WALL_A     = PABS_LW_WALL_A
+   DGMT%XABS_SW_WALL_B     = PABS_SW_WALL_B
+   DGMT%XABS_LW_WALL_B     = PABS_LW_WALL_B
+   DGMT%XABS_SW_GARDEN     = PABS_SW_GARDEN
+   DGMT%XABS_LW_GARDEN     = PABS_LW_GARDEN
+   DGMT%XABS_SW_GREENROOF  = PABS_SW_GREENROOF
+   DGMT%XABS_LW_GREENROOF  = PABS_LW_GREENROOF
    !
-   IF (CBEM=='BEM') THEN
-     XH_BLD_COOL = PH_BLD_COOL 
-     XT_BLD_COOL = PT_BLD_COOL  
-     XH_BLD_HEAT = PH_BLD_HEAT  
-     XLE_BLD_COOL= PLE_BLD_COOL  
-     XLE_BLD_HEAT= PLE_BLD_HEAT 
-     XH_WASTE    = PH_WASTE      
-     XLE_WASTE   = PLE_WASTE     
-     XHVAC_COOL  = PHVAC_COOL    
-     XHVAC_HEAT  = PHVAC_HEAT     
-     XCAP_SYS    = PCAP_SYS        
-     XM_SYS      = PM_SYS         
-     XCOP        = PCOP          
-     XQ_SYS      = PQ_SYS     
-     XT_SYS      = PT_SYS  
-     XTR_SW_WIN  = PTR_SW_WIN
-     XFAN_POWER  = PFAN_POWER 
+   IF (TOP%CBEM=='BEM') THEN
+     DGMT%XH_BLD_COOL = PH_BLD_COOL 
+     DGMT%XT_BLD_COOL = PT_BLD_COOL  
+     DGMT%XH_BLD_HEAT = PH_BLD_HEAT  
+     DGMT%XLE_BLD_COOL= PLE_BLD_COOL  
+     DGMT%XLE_BLD_HEAT= PLE_BLD_HEAT 
+     DGMT%XH_WASTE    = PH_WASTE      
+     DGMT%XLE_WASTE   = PLE_WASTE     
+     DGMT%XHVAC_COOL  = PHVAC_COOL    
+     DGMT%XHVAC_HEAT  = PHVAC_HEAT     
+     DGMT%XCAP_SYS    = PCAP_SYS        
+     DGMT%XM_SYS      = PM_SYS         
+     DGMT%XCOP        = PCOP          
+     DGMT%XQ_SYS      = PQ_SYS     
+     DGMT%XT_SYS      = PT_SYS  
+     DGMT%XTR_SW_WIN  = PTR_SW_WIN
+     DGMT%XFAN_POWER  = PFAN_POWER 
      !
-     XABS_SW_WIN = PABS_SW_WIN 
-     XABS_LW_WIN = PABS_LW_WIN
+     DGMT%XABS_SW_WIN = PABS_SW_WIN 
+     DGMT%XABS_LW_WIN = PABS_LW_WIN
      !
-     XTCOOL_CUR_TARGET  = PTCOOL_TARGET    
-     XTHEAT_CUR_TARGET  = PTHEAT_TARGET    
-     XCUR_QIN           = PQIN    
+     DGMT%XTCOOL_CUR_TARGET  = PTCOOL_TARGET    
+     DGMT%XTHEAT_CUR_TARGET  = PTHEAT_TARGET    
+     DGMT%XCUR_QIN           = PQIN    
    ENDIF
    !
-   IF (LSOLAR_PANEL) THEN
-     XABS_SW_PANEL    = PABS_SW_PANEL
-     XABS_LW_PANEL    = PABS_LW_PANEL
-     XRN_PANEL        = PRN_PANEL
-     XH_PANEL         = PH_PANEL
-     XTHER_PROD_PANEL = PTHER_PROD_PANEL
-     XPHOT_PROD_PANEL = PPHOT_PROD_PANEL
-     XPROD_PANEL      = PPROD_PANEL
-     XTHER_PROD_BLD   = PTHER_PROD_BLD
-     XPHOT_PROD_BLD   = PPHOT_PROD_BLD
+   IF (TOP%LSOLAR_PANEL) THEN
+     DGMT%XABS_SW_PANEL    = PABS_SW_PANEL
+     DGMT%XABS_LW_PANEL    = PABS_LW_PANEL
+     DGMT%XRN_PANEL        = PRN_PANEL
+     DGMT%XH_PANEL         = PH_PANEL
+     DGMT%XTHER_PROD_PANEL = PTHER_PROD_PANEL
+     DGMT%XPHOT_PROD_PANEL = PPHOT_PROD_PANEL
+     DGMT%XPROD_PANEL      = PPROD_PANEL
+     DGMT%XTHER_PROD_BLD   = PTHER_PROD_BLD
+     DGMT%XPHOT_PROD_BLD   = PPHOT_PROD_BLD
    END IF
    !
    ! cumulated diagnostics 

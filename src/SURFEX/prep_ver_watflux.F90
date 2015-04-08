@@ -25,7 +25,7 @@ SUBROUTINE PREP_VER_WATFLUX
 !
 
 !
-USE MODD_WATFLUX_n,   ONLY : XZS, XTS 
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX 
 USE MODD_PREP,       ONLY : XZS_LS, XT_CLIM_GRAD
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -48,10 +48,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.     Surface temperature of water
 !
 IF (LHOOK) CALL DR_HOOK('PREP_VER_WATFLUX',0,ZHOOK_HANDLE)
-ALLOCATE(ZTS_LS(SIZE(XTS)))
-ZTS_LS = XTS
+ALLOCATE(ZTS_LS(SIZE(W%XTS)))
+ZTS_LS = W%XTS
 !
-XTS = ZTS_LS  + XT_CLIM_GRAD  * (XZS - XZS_LS)
+W%XTS = ZTS_LS  + XT_CLIM_GRAD  * (W%XZS - XZS_LS)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -60,7 +60,7 @@ XTS = ZTS_LS  + XT_CLIM_GRAD  * (XZS - XZS_LS)
 !* if water was already frozen, it can be considered liquid only for
 !  temperatures that are larger than 4 C
 !
-WHERE (ZTS_LS < XTT .AND. XTS < XTT + 4.) XTS = MIN(XTS,XTT)
+WHERE (ZTS_LS < XTT .AND. W%XTS < XTT + 4.) W%XTS = MIN(W%XTS,XTT)
 !
 !* if water was liquid, it can be considered frozen only for
 !  very cold temperatures, colder than 20 C. It should obviously 
@@ -69,7 +69,7 @@ WHERE (ZTS_LS < XTT .AND. XTS < XTT + 4.) XTS = MIN(XTS,XTT)
 !
 !  4 C is used here for the water of lowest density.
 !
-WHERE (ZTS_LS > XTT .AND. XTS > XTT - 20.) XTS = MAX(XTS,XTT+4.)
+WHERE (ZTS_LS > XTT .AND. W%XTS > XTT - 20.) W%XTS = MAX(W%XTS,XTT+4.)
 !
 !-------------------------------------------------------------------------------------
 !

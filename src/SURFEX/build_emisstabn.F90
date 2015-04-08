@@ -34,7 +34,7 @@ USE MODI_READ_SURF
 !!    ------------------
 USE MODD_TYPE_EFUTIL, ONLY : EMISSVAR_T
 USE MODD_CSTS,        ONLY : NDAYSEC, XMD, XAVOGADRO
-USE MODD_CH_SURF_n,   ONLY : XCONVERSION
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -99,19 +99,19 @@ READ(KCH,'(A3)') YUNIT
 !*       2.   MAP DATA ONTO PROGNOSTIC VARIABLES
 !        ---------------------------------------
 !
-ALLOCATE (XCONVERSION(SIZE(PRHODREF,1)))
+ALLOCATE (CHU%XCONVERSION(SIZE(PRHODREF,1)))
 ! determine the conversion factor
-  XCONVERSION(:) = 1.
+  CHU%XCONVERSION(:) = 1.
 SELECT CASE (YUNIT)
 CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
 ! where 1 molecule/cm2/s = (224.14/6.022136E23) ppp*m/s
-  XCONVERSION(:) = XAVOGADRO * PRHODREF(:) / XMD
+  CHU%XCONVERSION(:) = XAVOGADRO * PRHODREF(:) / XMD
 CASE ('CON') ! flux given in molecules/cm2/s, conversion to molec/m2/s 
-  XCONVERSION(:) =  1E4
+  CHU%XCONVERSION(:) =  1E4
 CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s  
 ! where 1 microMol/m2/day = (22.414/86.400)*1E-12 ppp*m/s
   !XCONVERSION(:) = (22.414/86.400)*1E-12 * XAVOGADRO * PRHODREF(:) / XMD
-  XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
+  CHU%XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
 
 CASE DEFAULT
   CALL ABOR1_SFX('CH_BUILDEMISSN: UNKNOWN CONVERSION FACTOR')
@@ -158,7 +158,7 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
     END WHERE
       DO ITIME=1,INBTS
       ! XCONVERSION HAS BEEN ALREADY APPLY IN CH_EMISSION_FLUXN ONLY FOR LREAD = T
-      TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME) * XCONVERSION(:)
+      TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME) * CHU%XCONVERSION(:)
       !TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME)
       END DO
     ELSE

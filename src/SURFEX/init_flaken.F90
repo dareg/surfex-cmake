@@ -48,31 +48,14 @@ USE MODD_CSTS,          ONLY : XTT, XPI, XOMEGA
 USE MODD_WATER_PAR,     ONLY : XALBWATICE, XALBWATSNOW
 USE MODD_SNOW_PAR,      ONLY : XANSMIN, XANSMAX
 !
-USE MODD_FLAKE_GRID_n,  ONLY : XLAT
-USE MODD_FLAKE_n,  ONLY : XCOVER          , TTIME         , XTSTEP        , &
-                            XOUT_TSTEP    , XEMIS         , XWATER_DEPTH  , &
-                            XWATER_FETCH  , XT_BS         , XDEPTH_BS     , &
-                            XCORIO        , XDIR_ALB      , XSCA_ALB      , &
-                            XICE_ALB      , XSNOW_ALB     , XEXTCOEF_WATER, &
-                            XEXTCOEF_ICE  , XEXTCOEF_SNOW , XT_SNOW       , &
-                            XT_ICE        , XT_MNW        , XT_WML        , &
-                            XT_BOT        , XT_B1         , XCT           , &
-                            XH_SNOW       , XH_ICE        , XH_ML         , &
-                            XH_B1         , XTS           , LSEDIMENTS    , &
-                            CSNOW_FLK     , CFLK_FLUX     , CFLK_ALB      , &
-                            LSBL          , LSKINTEMP
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
-USE MODD_DIAG_FLAKE_n, ONLY : N2M, LSURF_BUDGET, LRAD_BUDGET, XDIAG_TSTEP, &
-                                L2M_MIN_ZS, LCOEF, LSURF_VARS, LSURF_BUDGETC,&
-                                LRESET_BUDGETC  
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
-USE MODD_DIAG_MISC_FLAKE_n,    ONLY : LWATER_PROFILE, XZWAT_PROFILE
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
 !
-USE MODD_CH_FLAKE_n,   ONLY : XDEP, CCH_DRY_DEP, CSV, CCH_NAMES, &
-                                NBEQ, NSV_CHSBEG, NSV_CHSEND,  &
-                                NAEREQ, NSV_AERBEG, NSV_AEREND, CAER_NAMES,&
-                                NSV_DSTBEG, NSV_DSTEND, NDSTEQ, CDSTNAMES, &
-                                NSV_SLTBEG, NSV_SLTEND, NSLTEQ, CSLTNAMES  
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
 USE MODD_CHS_AEROSOL,    ONLY: LVARSIGI, LVARSIGJ
 USE MODD_DST_SURF,       ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST
 USE MODD_SLT_SURF,       ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
@@ -163,7 +146,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('INIT_FLAKEN: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-ALLOCATE(XZWAT_PROFILE(100))
+ALLOCATE(DGMF%XZWAT_PROFILE(100))
 !
 !         Others litlle things
 !
@@ -180,12 +163,12 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_FLAKE(XTSTEP,XOUT_TSTEP,LSEDIMENTS,CSNOW_FLK,CFLK_FLUX,CFLK_ALB,&
-                    LSKINTEMP)
- CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
- CALL DEFAULT_DIAG_FLAKE(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
-                         LWATER_PROFILE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP,  &
-                         XZWAT_PROFILE             )  
+ CALL DEFAULT_FLAKE(F%XTSTEP,F%XOUT_TSTEP,F%LSEDIMENTS,F%CSNOW_FLK,F%CFLK_FLUX,F%CFLK_ALB,&
+                    F%LSKINTEMP)
+ CALL DEFAULT_CH_DEP(CHF%CCH_DRY_DEP)
+ CALL DEFAULT_DIAG_FLAKE(DGF%N2M,DGF%LSURF_BUDGET,DGF%L2M_MIN_ZS,DGF%LRAD_BUDGET,DGF%LCOEF,DGF%LSURF_VARS, &
+                         DGMF%LWATER_PROFILE,DGF%LSURF_BUDGETC,DGF%LRESET_BUDGETC,DGF%XDIAG_TSTEP,  &
+                         DGMF%XZWAT_PROFILE             )  
  !
 ENDIF
 !
@@ -207,20 +190,20 @@ ENDIF
 !
 SELECT CASE (HINIT)
   CASE ('PGD')
-    TTIME%TDATE%YEAR = NUNDEF
-    TTIME%TDATE%MONTH= NUNDEF
-    TTIME%TDATE%DAY  = NUNDEF
-    TTIME%TIME       = XUNDEF
+    F%TTIME%TDATE%YEAR = NUNDEF
+    F%TTIME%TDATE%MONTH= NUNDEF
+    F%TTIME%TDATE%DAY  = NUNDEF
+    F%TTIME%TIME       = XUNDEF
 
   CASE ('PRE')
-    CALL PREP_CTRL_FLAKE(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
-                             ILUOUT,LWATER_PROFILE,LSURF_BUDGETC) 
+    CALL PREP_CTRL_FLAKE(DGF%N2M,DGF%LSURF_BUDGET,DGF%L2M_MIN_ZS,DGF%LRAD_BUDGET,DGF%LCOEF,DGF%LSURF_VARS,&
+                             ILUOUT,DGMF%LWATER_PROFILE,DGF%LSURF_BUDGETC) 
     IF (LNAM_READ) CALL READ_NAM_PREP_FLAKE_n(HPROGRAM)                            
-    CALL READ_FLAKE_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,TTIME)
+    CALL READ_FLAKE_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,F%TTIME)
 
   CASE DEFAULT
     CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','FLAKE ','READ ')
-    CALL READ_SURF(HPROGRAM,'DTCUR',TTIME,IRESP)
+    CALL READ_SURF(HPROGRAM,'DTCUR',F%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
 !
@@ -260,42 +243,42 @@ END IF
 !
  CALL READ_FLAKE_n(HPROGRAM)
 !
-ILU = SIZE(XCOVER,1)
+ILU = SIZE(F%XCOVER,1)
 !
 !-------------------------------------------------------------------------------
 !
 !*       3.     Specific fields 
 !               ---------------
 !
-ALLOCATE(XCORIO         (ILU))
-ALLOCATE(XICE_ALB       (ILU))
-ALLOCATE(XSNOW_ALB      (ILU))
-ALLOCATE(XEXTCOEF_ICE   (ILU))
-ALLOCATE(XEXTCOEF_SNOW  (ILU))
+ALLOCATE(F%XCORIO         (ILU))
+ALLOCATE(F%XICE_ALB       (ILU))
+ALLOCATE(F%XSNOW_ALB      (ILU))
+ALLOCATE(F%XEXTCOEF_ICE   (ILU))
+ALLOCATE(F%XEXTCOEF_SNOW  (ILU))
 !
-XCORIO(:) = 2*XOMEGA*SIN(XLAT(:)*XPI/180.)
+F%XCORIO(:) = 2*XOMEGA*SIN(FG%XLAT(:)*XPI/180.)
 !
-XICE_ALB  = XALBWATICE  ! constant, should be improved latter
-XSNOW_ALB = XALBWATSNOW ! constant, should be improved latter
+F%XICE_ALB  = XALBWATICE  ! constant, should be improved latter
+F%XSNOW_ALB = XALBWATSNOW ! constant, should be improved latter
 !
-XEXTCOEF_ICE  = XUNDEF !not used
-XEXTCOEF_SNOW = XUNDEF !not used
+F%XEXTCOEF_ICE  = XUNDEF !not used
+F%XEXTCOEF_SNOW = XUNDEF !not used
 !-------------------------------------------------------------------------------
 !
 !*       4.     Albedo, emissivity and radiative fields on lake
 !               -----------------------------------------------
 !
-ALLOCATE(XDIR_ALB (ILU))
-ALLOCATE(XSCA_ALB (ILU))
-ALLOCATE(XEMIS    (ILU))
-XDIR_ALB = 0.0
-XSCA_ALB = 0.0
-XEMIS    = 0.0
+ALLOCATE(F%XDIR_ALB (ILU))
+ALLOCATE(F%XSCA_ALB (ILU))
+ALLOCATE(F%XEMIS    (ILU))
+F%XDIR_ALB = 0.0
+F%XSCA_ALB = 0.0
+F%XEMIS    = 0.0
 !
- CALL UPDATE_RAD_FLAKE(CFLK_ALB,XTS,PZENITH,XH_ICE,XH_SNOW,XICE_ALB,XSNOW_ALB, &
-                       XDIR_ALB,XSCA_ALB,XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )
+ CALL UPDATE_RAD_FLAKE(F%CFLK_ALB,F%XTS,PZENITH,F%XH_ICE,F%XH_SNOW,F%XICE_ALB,F%XSNOW_ALB, &
+                       F%XDIR_ALB,F%XSCA_ALB,F%XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )
 !
-PTSURF(:) = XTS(:)
+PTSURF(:) = F%XTS(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -310,18 +293,18 @@ PTSURF(:) = XTS(:)
 !               ----------------
 !
 !
- CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, NBEQ, CSV, NAEREQ,            &
-                     NSV_CHSBEG, NSV_CHSEND, NSV_AERBEG, NSV_AEREND, &
-                     CCH_NAMES, CAER_NAMES, NDSTEQ, NSV_DSTBEG,      &
-                     NSV_DSTEND, NSLTEQ, NSV_SLTBEG, NSV_SLTEND,     &
-                     HDSTNAMES=CDSTNAMES, HSLTNAMES=CSLTNAMES        )
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, CHF%NBEQ, CHF%CSV, CHF%NAEREQ,            &
+                     CHF%NSV_CHSBEG, CHF%NSV_CHSEND, CHF%NSV_AERBEG, CHF%NSV_AEREND, &
+                     CHF%CCH_NAMES, CHF%CAER_NAMES, CHF%NDSTEQ, CHF%NSV_DSTBEG,      &
+                     CHF%NSV_DSTEND, CHF%NSLTEQ, CHF%NSV_SLTBEG, CHF%NSV_SLTEND,     &
+                     HDSTNAMES=CHF%CDSTNAMES, HSLTNAMES=CHF%CSLTNAMES        )
 !
 !* depositiion scheme
 !
-IF (NBEQ>0 .AND. CCH_DRY_DEP=='WES89') THEN
-  ALLOCATE(XDEP(ILU,NBEQ))
+IF (CHF%NBEQ>0 .AND. CHF%CCH_DRY_DEP=='WES89') THEN
+  ALLOCATE(CHF%XDEP(ILU,CHF%NBEQ))
 ELSE
-  ALLOCATE(XDEP(0,0))
+  ALLOCATE(CHF%XDEP(0,0))
 END IF
 !
 !-------------------------------------------------------------------------------

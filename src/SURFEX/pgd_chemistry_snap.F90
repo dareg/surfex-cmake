@@ -40,14 +40,7 @@ USE MODD_PGDWORK,            ONLY : CATYPE
 USE MODD_SURF_PAR,           ONLY : XUNDEF
 USE MODD_PGD_GRID,           ONLY : NL
 USE MODD_CH_SURF,            ONLY : JPEMISMAX_S, JPSNAPMAX
-USE MODD_CH_SNAP_n,          ONLY : NEMIS_SNAP_n=>NEMIS_SNAP,                &
-                                    NEMIS_NBR_n=>NEMIS_NBR,                  & 
-                                    CEMIS_NAME_n=>CEMIS_NAME,                &
-                                    CEMIS_COMMENT_n=>CEMIS_COMMENT,          &
-                                    XSNAP_MONTHLY,XSNAP_DAILY, XSNAP_HOURLY, &
-                                    NSNAP_M, NSNAP_D, NSNAP_H,               &
-                                    XEMIS_FIELDS_SNAP, CSNAP_TIME_REF,       &
-                                    XDELTA_LEGAL_TIME
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -125,9 +118,9 @@ CEMIS_NAME(:)              = '                           '
 CEMIS_COMMENT(:)           = ''
 !
 NEMIS_SNAP = 0
-NSNAP_M   = 12
-NSNAP_D   = 7
-NSNAP_H   = 24
+CHN%NSNAP_M   = 12
+CHN%NSNAP_D   = 7
+CHN%NSNAP_H   = 24
 XUNIF_SNAP             = XUNDEF
 XUNIF_DELTA_LEGAL_TIME = XUNDEF
 CSNAP_MONTHLY_FILE(:)      = '                           '
@@ -158,20 +151,20 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CH_SNAP_EMIS_PGD)
 !*    3.      Allocation
 !             ----------
 !
-NEMIS_NBR_n  = NEMIS_NBR
-NEMIS_SNAP_n = NEMIS_SNAP
+CHN%NEMIS_NBR  = NEMIS_NBR
+CHN%NEMIS_SNAP = NEMIS_SNAP
 !
-ALLOCATE(CEMIS_NAME_n(NEMIS_NBR))
-ALLOCATE(CEMIS_COMMENT_n(NEMIS_NBR))
+ALLOCATE(CHN%CEMIS_NAME(NEMIS_NBR))
+ALLOCATE(CHN%CEMIS_COMMENT(NEMIS_NBR))
 !
-ALLOCATE(XSNAP_MONTHLY (NSNAP_M,NEMIS_SNAP,NEMIS_NBR))
-ALLOCATE(XSNAP_DAILY   (NSNAP_D,NEMIS_SNAP,NEMIS_NBR))
-ALLOCATE(XSNAP_HOURLY  (NSNAP_H,NEMIS_SNAP,NEMIS_NBR))
+ALLOCATE(CHN%XSNAP_MONTHLY (CHN%NSNAP_M,NEMIS_SNAP,NEMIS_NBR))
+ALLOCATE(CHN%XSNAP_DAILY   (CHN%NSNAP_D,NEMIS_SNAP,NEMIS_NBR))
+ALLOCATE(CHN%XSNAP_HOURLY  (CHN%NSNAP_H,NEMIS_SNAP,NEMIS_NBR))
 !
-CEMIS_NAME_n         (:) = CEMIS_NAME   (1:NEMIS_NBR)
-CEMIS_COMMENT_n      (:) = CEMIS_COMMENT(1:NEMIS_NBR)
+CHN%CEMIS_NAME         (:) = CEMIS_NAME   (1:NEMIS_NBR)
+CHN%CEMIS_COMMENT      (:) = CEMIS_COMMENT(1:NEMIS_NBR)
 !
-ALLOCATE(XEMIS_FIELDS_SNAP(NL,NEMIS_SNAP,NEMIS_NBR))
+ALLOCATE(CHN%XEMIS_FIELDS_SNAP(NL,NEMIS_SNAP,NEMIS_NBR))
 !
 !-------------------------------------------------------------------------------
 OCH_EMIS = NEMIS_NBR > 0
@@ -184,13 +177,13 @@ YSNAP_TIME_REF = '     '
 !
 DO JSPEC=1,NEMIS_NBR
 
-  CALL PGD_SNAP_TEMP_PROFILE('ASCII  ',CSNAP_MONTHLY_FILE(JSPEC),XSNAP_MONTHLY(:,:,JSPEC),NEMIS_SNAP,NSNAP_M)
-  CALL PGD_SNAP_TEMP_PROFILE('ASCII  ',CSNAP_DAILY_FILE(JSPEC),  XSNAP_DAILY(:,:,JSPEC),NEMIS_SNAP,NSNAP_D)
-  CALL PGD_SNAP_TEMP_PROFILE('ASCII  ',CSNAP_HOURLY_FILE(JSPEC), XSNAP_HOURLY(:,:,JSPEC), &
-                             NEMIS_SNAP,NSNAP_H,CSNAP_TIME_REF)
+  CALL PGD_SNAP_TEMP_PROFILE('ASCII  ',CSNAP_MONTHLY_FILE(JSPEC),CHN%XSNAP_MONTHLY(:,:,JSPEC),NEMIS_SNAP,CHN%NSNAP_M)
+  CALL PGD_SNAP_TEMP_PROFILE('ASCII  ',CSNAP_DAILY_FILE(JSPEC),  CHN%XSNAP_DAILY(:,:,JSPEC),NEMIS_SNAP,CHN%NSNAP_D)
+  CALL PGD_SNAP_TEMP_PROFILE('ASCII  ',CSNAP_HOURLY_FILE(JSPEC), CHN%XSNAP_HOURLY(:,:,JSPEC), &
+                             NEMIS_SNAP,CHN%NSNAP_H,CHN%CSNAP_TIME_REF)
 
-  IF (JSPEC==1) YSNAP_TIME_REF = CSNAP_TIME_REF
-  IF (YSNAP_TIME_REF/=CSNAP_TIME_REF) THEN
+  IF (JSPEC==1) YSNAP_TIME_REF = CHN%CSNAP_TIME_REF
+  IF (YSNAP_TIME_REF/=CHN%CSNAP_TIME_REF) THEN
     CALL ABOR1_SFX('ALL SNAP HOURLY PROFILES MUST HAVE THE SAME TIME REFERENCE')
   END IF
 
@@ -198,7 +191,7 @@ DO JSPEC=1,NEMIS_NBR
     CATYPE = 'ARI'
     CALL PGD_FIELD(HPROGRAM,'SNAP','ALL',CSNAP_POTENTIAL_FILE(JSPEC,JSNAP), &
                    CSNAP_POTENTIAL_FILETYPE(JSPEC),XUNIF_SNAP(JSPEC,JSNAP), &
-                   XEMIS_FIELDS_SNAP(:,JSNAP,JSPEC)                         )
+                   CHN%XEMIS_FIELDS_SNAP(:,JSNAP,JSPEC)                         )
   ENDDO
 ENDDO
 !
@@ -207,18 +200,18 @@ ENDDO
 !*    5.      Computes legal time map if legal time option is used
 !             ----------------------------------------------------
 !
-IF (CSNAP_TIME_REF=='LEGAL') THEN
-  ALLOCATE(XDELTA_LEGAL_TIME(NL))
+IF (CHN%CSNAP_TIME_REF=='LEGAL') THEN
+  ALLOCATE(CHN%XDELTA_LEGAL_TIME(NL))
   CALL PGD_FIELD(HPROGRAM,'LEGAL_TIME','ALL', CDELTA_LEGAL_TIME_FILE, &
                  CDELTA_LEGAL_TIME_FILETYPE,XUNIF_DELTA_LEGAL_TIME,   &
-                 XDELTA_LEGAL_TIME(:)                                 )
+                 CHN%XDELTA_LEGAL_TIME(:)                                 )
   !* conversion from seconds to hours
   !  Beware: 
   !  one uses the fact here that no legal hour increment is less more than 24h. 
   !  Legal hour is either zero (in which case division has no effect) 
   !  or specified unit is second
-  WHERE(ABS(XDELTA_LEGAL_TIME(:))>=24.) &
-  XDELTA_LEGAL_TIME(:) = XDELTA_LEGAL_TIME(:) / 3600.
+  WHERE(ABS(CHN%XDELTA_LEGAL_TIME(:))>=24.) &
+  CHN%XDELTA_LEGAL_TIME(:) = CHN%XDELTA_LEGAL_TIME(:) / 3600.
 END IF
 !
 !-------------------------------------------------------------------------------

@@ -35,8 +35,7 @@ USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XKARMAN, XPI
-USE MODD_SURF_ATM_SSO_n,   ONLY : CROUGH, XZ0EFFJPDIR, XZ0REL, XFRACZ0,      &
-                                  XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -91,22 +90,22 @@ WHERE (ZWIND(:)>0.)  ZDIR(:)=ATAN2(PU(:),PV(:))
 !
 !* default value
 !
-GMASK(:)=(PSEA(:)/=1..AND. XZ0REL(:)/=0.)
+GMASK(:)=(PSEA(:)/=1..AND. USS%XZ0REL(:)/=0.)
 ZZ0EFF(:) = XUNDEF
 !
 !*      2.     Constant orographic roughness length
 !              ------------------------------------
 !
-IF (CROUGH=="Z01D") ZZ0EFF(:) = XZ0REL(:)
+IF (USS%CROUGH=="Z01D") ZZ0EFF(:) = USS%XZ0REL(:)
 !
 !*      3.     Directionnal roughness length
 !              -----------------------------
 !
-IF (CROUGH=="Z04D") THEN
+IF (USS%CROUGH=="Z04D") THEN
    DO II=1,SIZE(GMASK)
       IF (GMASK(II)) THEN
          !
-         ZALFA(II) = ZDIR(II) - XZ0EFFJPDIR(II) * XPI/180.
+         ZALFA(II) = ZDIR(II) - USS%XZ0EFFJPDIR(II) * XPI/180.
          !
          IF    (ZALFA(II)<=-XPI) THEN
             ZALFA(II) = ZALFA(II) + 2.*XPI
@@ -120,15 +119,15 @@ IF (CROUGH=="Z04D") THEN
             ZCOS2(II) = COS(ZALFA(II))**2
             !
             IF (ZALFA(II)<0.) THEN
-               ZZ0EFF(II)=XZ0EFFIM(II)*ZSIN2(II)
+               ZZ0EFF(II)=USS%XZ0EFFIM(II)*ZSIN2(II)
             ELSE
-               ZZ0EFF(II)=XZ0EFFIP(II)*ZSIN2(II)
+               ZZ0EFF(II)=USS%XZ0EFFIP(II)*ZSIN2(II)
             END IF
             !
             IF (ZALFA(II)>=-XPI/2. .AND. ZALFA(II)<XPI/2.) THEN
-               ZZ0EFF(II) = ZZ0EFF(II) + XZ0EFFJP(II)*ZCOS2(II)
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJP(II)*ZCOS2(II)
             ELSE
-               ZZ0EFF(II) = ZZ0EFF(II) + XZ0EFFJM(II)*ZCOS2(II)
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJM(II)*ZCOS2(II)
             END IF
             !
          END IF
@@ -148,7 +147,7 @@ GMASK(:)=(GMASK(:).AND.ZZ0EFF(:)>0.)
 WHERE (GMASK(:))
 !
 !* sets a limit to roughness length
-  ZZ0EFF(:) = MIN(ZZ0EFF(:),PUREF(:)/XFRACZ0)
+  ZZ0EFF(:) = MIN(ZZ0EFF(:),PUREF(:)/USS%XFRACZ0)
 !
 ! neutral case
   ZCD(:) = (XKARMAN/LOG(PUREF(:)/ZZ0EFF(:)))**2

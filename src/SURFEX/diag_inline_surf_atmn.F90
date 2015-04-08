@@ -25,9 +25,7 @@
 
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : LCOEF, XDIAG_UREF, XDIAG_ZREF, &
-                                 XPS, XRHOA, XDIAG_TRAD, XDIAG_EMIS,&
-                                 XSSO_FMU, XSSO_FMV, XAVG_SFCO2
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -52,20 +50,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SURF_ATM_N',0,ZHOOK_HANDLE)
-IF (LCOEF) THEN
-  XDIAG_UREF = PHW
-  XDIAG_ZREF = PHT
+IF (DGU%LCOEF) THEN
+  DGU%XDIAG_UREF = PHW
+  DGU%XDIAG_ZREF = PHT
 END IF
 !
-XRHOA = PRHOA
-XPS   = PPS
-XDIAG_TRAD = PTRAD
-XDIAG_EMIS = PEMIS
+DGU%XRHOA = PRHOA
+DGU%XPS   = PPS
+DGU%XDIAG_TRAD = PTRAD
+DGU%XDIAG_EMIS = PEMIS
 !
-XSSO_FMU   = PSFU
-XSSO_FMV   = PSFV
+DGU%XSSO_FMU   = PSFU
+DGU%XSSO_FMV   = PSFV
 !
-XAVG_SFCO2 = PSFCO2
+DGU%XAVG_SFCO2 = PSFCO2
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SURF_ATM_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

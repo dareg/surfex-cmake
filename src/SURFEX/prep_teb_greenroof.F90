@@ -28,13 +28,11 @@ SUBROUTINE PREP_TEB_GREENROOF(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETY
 USE MODI_PREP_HOR_TEB_GREENROOF_FIELD
 USE MODI_PREP_VER_TEB_GREENROOF
 !
-USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CRESPSL,                                &
-                                NNBIOMASS
-USE MODD_TEB_n,          ONLY : XT_ROOF
-USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : XLAI
-USE MODD_TEB_GREENROOF_PGD_n,      ONLY : XBSLAI, XBSLAI_NITRO, XWSAT, XTDEEP
-USE MODD_TEB_GREENROOF_n,ONLY : XRESA, XAN, XANFM, XANDAY, XLE,            &
-                                XBIOMASS, XRESP_BIOMASS, XWG, XWGI, XTG
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
                                 ! A FAIRE :
                                 ! IL FAUT RAJOUTER TSNOW
                                 ! ----------------------
@@ -99,7 +97,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GREENROOF',0,ZHOOK_HANDLE)
 !
 ! Initializing deep GR temp. with that of the outer layer of the structural roof 
 !
-XTDEEP(:) = XT_ROOF(:,1)
+TGRP%XTDEEP(:) = T%XT_ROOF(:,1)
 !
 !*      2.5    Snow variables
 !
@@ -116,17 +114,17 @@ XTDEEP(:) = XT_ROOF(:,1)
 ! 3.1  If whole ice reservoir is empty (grib from ecmwf case) and surface temperature is
 !      lower than -10C, then ice content is maximum and water content minimum
 !
-IF (ALL(XWGI(:,:)==0.)) THEN
-   WHERE(XTG(:,1:SIZE(XWG,2)) < XTT-10.)
-      XWGI(:,:) = XWSAT(:,:)-XWGMIN
-      XWG (:,:) = XWGMIN
+IF (ALL(TGR%XWGI(:,:)==0.)) THEN
+   WHERE(TGR%XTG(:,1:SIZE(TGR%XWG,2)) < XTT-10.)
+      TGR%XWGI(:,:) = TGRP%XWSAT(:,:)-XWGMIN
+      TGR%XWG (:,:) = XWGMIN
    END WHERE
 ENDIF
 !
 !
 ! 3.2.  Total water content should not exceed saturation:
-WHERE(XWG(:,:) /= XUNDEF .AND. (XWG(:,:) + XWGI(:,:)) > XWSAT(:,:) )
-   XWGI(:,:) = XWSAT(:,:) - XWG(:,:)
+WHERE(TGR%XWG(:,:) /= XUNDEF .AND. (TGR%XWG(:,:) + TGR%XWGI(:,:)) > TGRP%XWSAT(:,:) )
+   TGR%XWGI(:,:) = TGRP%XWSAT(:,:) - TGR%XWG(:,:)
 END WHERE
 !
 !-------------------------------------------------------------------------------------
@@ -142,55 +140,55 @@ ENDIF
 !
 !*      5.     Half prognostic fields
 !
-ALLOCATE(XRESA(SIZE(XLAI)))
-XRESA(:) = 100.
+ALLOCATE(TGR%XRESA(SIZE(TGRPE%XLAI)))
+TGR%XRESA(:) = 100.
 !
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Isba-Ags prognostic fields
 !
-IF (CPHOTO /= 'NON') THEN
+IF (TVG%CPHOTO /= 'NON') THEN
 !
-   ALLOCATE(XAN(SIZE(XLAI)))
-   XAN = 0.
+   ALLOCATE(TGR%XAN(SIZE(TGRPE%XLAI)))
+   TGR%XAN = 0.
 !
-   ALLOCATE(XANDAY(SIZE(XLAI)))
-   XANDAY = 0.
+   ALLOCATE(TGR%XANDAY(SIZE(TGRPE%XLAI)))
+   TGR%XANDAY = 0.
 !
-   ALLOCATE(XANFM(SIZE(XLAI)))
-   XANFM = XANFMINIT
+   ALLOCATE(TGR%XANFM(SIZE(TGRPE%XLAI)))
+   TGR%XANFM = XANFMINIT
 !
-   ALLOCATE(XLE(SIZE(XLAI)))
-   XLE = 0.
+   ALLOCATE(TGR%XLE(SIZE(TGRPE%XLAI)))
+   TGR%XLE = 0.
 !
 ENDIF
 !
-IF (CPHOTO == 'AGS' .OR. CPHOTO == 'AST') THEN
+IF (TVG%CPHOTO == 'AGS' .OR. TVG%CPHOTO == 'AST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI),NNBIOMASS))
-   XBIOMASS(:,1) = 0.
+   ALLOCATE(TGR%XBIOMASS(SIZE(TGRPE%XLAI),TVG%NNBIOMASS))
+   TGR%XBIOMASS(:,1) = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI),NNBIOMASS))
-   XRESP_BIOMASS(:,:) = 0.
+   ALLOCATE(TGR%XRESP_BIOMASS(SIZE(TGRPE%XLAI),TVG%NNBIOMASS))
+   TGR%XRESP_BIOMASS(:,:) = 0.
 !
-ELSEIF (CPHOTO == 'LAI' .OR. CPHOTO == 'LST') THEN
+ELSEIF (TVG%CPHOTO == 'LAI' .OR. TVG%CPHOTO == 'LST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI),NNBIOMASS))
-   XBIOMASS(:,1) = XLAI(:) * XBSLAI(:)
+   ALLOCATE(TGR%XBIOMASS(SIZE(TGRPE%XLAI),TVG%NNBIOMASS))
+   TGR%XBIOMASS(:,1) = TGRPE%XLAI(:) * TGRP%XBSLAI(:)
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI),NNBIOMASS))
-   XRESP_BIOMASS(:,:) = 0.
+   ALLOCATE(TGR%XRESP_BIOMASS(SIZE(TGRPE%XLAI),TVG%NNBIOMASS))
+   TGR%XRESP_BIOMASS(:,:) = 0.
 !
-ELSEIF (CPHOTO == 'NIT' .OR. CPHOTO == 'NCB') THEN
+ELSEIF (TVG%CPHOTO == 'NIT' .OR. TVG%CPHOTO == 'NCB') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI),NNBIOMASS))
-   XBIOMASS(:,1) = XLAI(:) * XBSLAI_NITRO(:)
-   XBIOMASS(:,2) = MAX( 0., (XBIOMASS(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
-                              **(1.0/(1.0-XCA_NIT)) - XBIOMASS(:,1) )  
-   XBIOMASS(:,3:NNBIOMASS) = 0.
+   ALLOCATE(TGR%XBIOMASS(SIZE(TGRPE%XLAI),TVG%NNBIOMASS))
+   TGR%XBIOMASS(:,1) = TGRPE%XLAI(:) * TGRP%XBSLAI_NITRO(:)
+   TGR%XBIOMASS(:,2) = MAX( 0., (TGR%XBIOMASS(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
+                              **(1.0/(1.0-XCA_NIT)) - TGR%XBIOMASS(:,1) )  
+   TGR%XBIOMASS(:,3:TVG%NNBIOMASS) = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI),NNBIOMASS))
-   XRESP_BIOMASS(:,:) = 0.
+   ALLOCATE(TGR%XRESP_BIOMASS(SIZE(TGRPE%XLAI),TVG%NNBIOMASS))
+   TGR%XRESP_BIOMASS(:,:) = 0.
 !
 ENDIF
 !

@@ -36,7 +36,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_SEAFLUX_n,     ONLY : XZS
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -64,13 +64,13 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_SEA_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(S%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field over sea                          (XZS) :', SIZE(XZS)
+  WRITE(ILUOUT,*) 'size of field over sea                          (XZS) :', SIZE(S%XZS)
   STOP
 ELSE
-  XZS = PZS
+  S%XZS = PZS
 END IF
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_SEA_N',1,ZHOOK_HANDLE)
 !

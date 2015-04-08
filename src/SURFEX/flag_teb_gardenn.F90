@@ -38,16 +38,12 @@
 !
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
-USE MODD_TEB_n,          ONLY : XGARDEN
-USE MODD_TEB_VEG_n,      ONLY : CPHOTO, CISBA, CRESPSL
-USE MODD_TEB_GARDEN_OPTION_n,  ONLY : NGROUND_LAYER
-USE MODD_TEB_GARDEN_PGD_n,     ONLY : XBSLAI
-USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY : XLAI
-USE MODD_TEB_GARDEN_n,   ONLY : XTG, XWG, XWGI, XWR, TSNOW,         &
-                                XRESA, XANFM, XAN, XLE, XANDAY,     &
-                                XBIOMASS, XRESP_BIOMASS,            &
-                                XSNOWFREE_ALB, XSNOWFREE_ALB_VEG,   &
-                                XSNOWFREE_ALB_SOIL
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -97,38 +93,38 @@ ENDIF
 !-------------------------------------------------------------------------------
 !     
   !
-  DO JL1=1,NGROUND_LAYER
-    WHERE (XGARDEN(:)==0.) 
-      XTG (:,JL1) = ZTG
-      XWG (:,JL1) = ZWG
-      XWGI(:,JL1) = ZDEF
+  DO JL1=1,TGDO%NGROUND_LAYER
+    WHERE (T%XGARDEN(:)==0.) 
+      TGD%XTG (:,JL1) = ZTG
+      TGD%XWG (:,JL1) = ZWG
+      TGD%XWGI(:,JL1) = ZDEF
     END WHERE
   END DO
   !
-  WHERE (XGARDEN(:)==0.) 
-    XWR  (:) = ZWR
-    XRESA(:) = ZRESA
+  WHERE (T%XGARDEN(:)==0.) 
+    TGD%XWR  (:) = ZWR
+    TGD%XRESA(:) = ZRESA
   END WHERE
   !
-  IF (CPHOTO/='NON') THEN
+  IF (TVG%CPHOTO/='NON') THEN
     !
-    WHERE (XGARDEN(:)==0.)
-      XANFM (:) = ZANFM              
-      XAN   (:) = ZDEF
-      XANDAY(:) = ZDEF
-      XLE   (:) = ZDEF
+    WHERE (T%XGARDEN(:)==0.)
+      TGD%XANFM (:) = ZANFM              
+      TGD%XAN   (:) = ZDEF
+      TGD%XANDAY(:) = ZDEF
+      TGD%XLE   (:) = ZDEF
     END WHERE
     !
-    IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
+    IF (TVG%CPHOTO=='LAI' .OR. TVG%CPHOTO=='LST' .OR. TVG%CPHOTO=='NIT' .OR. TVG%CPHOTO=='NCB') THEN
       !
-      WHERE (XGARDEN(:)==0.) XLAI(:) = ZDEF
+      WHERE (T%XGARDEN(:)==0.) TGDPE%XLAI(:) = ZDEF
       !
-    ELSE IF (CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
+    ELSE IF (TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
       !
-      DO JL1=1,SIZE(XBIOMASS,2)
-        WHERE (XGARDEN(:)==0.)
-          XBIOMASS     (:,JL1) = ZDEF
-          XRESP_BIOMASS(:,JL1) = ZDEF
+      DO JL1=1,SIZE(TGD%XBIOMASS,2)
+        WHERE (T%XGARDEN(:)==0.)
+          TGD%XBIOMASS     (:,JL1) = ZDEF
+          TGD%XRESP_BIOMASS(:,JL1) = ZDEF
         END WHERE
       END DO
       !
@@ -141,19 +137,19 @@ ENDIF
 !
 !* Flag snow characteristics
 !
- CALL FLAG_GR_SNOW(KFLAG,XGARDEN(:)==0.,TSNOW)
+ CALL FLAG_GR_SNOW(KFLAG,T%XGARDEN(:)==0.,TGD%TSNOW)
 !
 !
 !* snow-free characteristics
 !
 IF (KFLAG==1) THEN
-  WHERE (XGARDEN==0.) XSNOWFREE_ALB      = 0.2
-  WHERE (XGARDEN==0.) XSNOWFREE_ALB_VEG  = 0.2
-  WHERE (XGARDEN==0.) XSNOWFREE_ALB_SOIL = 0.2
+  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB      = 0.2
+  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_VEG  = 0.2
+  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_SOIL = 0.2
 ELSEIF (KFLAG==2) THEN
-  WHERE (XGARDEN==0.) XSNOWFREE_ALB      = XUNDEF
-  WHERE (XGARDEN==0.) XSNOWFREE_ALB_VEG  = XUNDEF
-  WHERE (XGARDEN==0.) XSNOWFREE_ALB_SOIL = XUNDEF
+  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB      = XUNDEF
+  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_VEG  = XUNDEF
+  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_SOIL = XUNDEF
 END IF
 !
 !-------------------------------------------------------------------------------

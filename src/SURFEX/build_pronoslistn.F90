@@ -32,7 +32,7 @@ USE MODI_CH_OPEN_INPUTB
 !!    ------------------
 USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_TYPE_EFUTIL
-USE MODD_SV_n,  ONLY: CSV
+USE MODD_SV_n, ONLY : SV => SV
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -77,8 +77,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
 !
 ! CNAMES points on chemical variables name
-CNAMES => CSV
-IEQ = SIZE(CSV)
+CNAMES => SV%CSV
+IEQ = SIZE(SV%CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !

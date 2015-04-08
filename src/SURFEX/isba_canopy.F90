@@ -25,7 +25,7 @@ SUBROUTINE ISBA_CANOPY(KI,KLVL,PZ,PZF,PDZ,PDZF,PHEIGHT,PCANOPY_DENSITY,PU,PTKE, 
 !!      Original    07/2006
 !!---------------------------------------------------------------
 !
-USE MODD_ISBA_n  ,     ONLY : XCDRAG
+USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XG
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
@@ -95,7 +95,7 @@ END DO
 !*      2.1    Drag coefficient by vegetation (Patton et al 2001)
 !              ------------------------------
 !
-ZCDRAG(:,:) = XCDRAG
+ZCDRAG(:,:) = I%XCDRAG
 !
 !*      1.4    No building volume
 !

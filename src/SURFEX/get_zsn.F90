@@ -35,7 +35,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_n,     ONLY : XZS
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -64,13 +64,13 @@ IF (LHOOK) CALL DR_HOOK('GET_ZS_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(U%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field inthe surface                     (XZS) :', SIZE(XZS)
+  WRITE(ILUOUT,*) 'size of field inthe surface                     (XZS) :', SIZE(U%XZS)
   CALL ABOR1_SFX('GET_ZSN: ZS SIZE NOT CORRECT')
 ELSE
-  PZS = XZS
+  PZS = U%XZS
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_ZS_N',1,ZHOOK_HANDLE)
 !

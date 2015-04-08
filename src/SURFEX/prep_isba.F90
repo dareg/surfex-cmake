@@ -53,30 +53,14 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
-USE MODD_ISBA_n,      ONLY : TSNOW, XRESA, XTSRAD_NAT, XEMIS, XLAI, XVEG,  &
-                              XZ0, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,     &
-                              XALBNIR, XALBVIS, XALBUV,                      &
-                              XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,       &
-                              XALBNIR_WET, XALBVIS_WET, XALBUV_WET,          &
-                              XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,          &                              
-                              CPHOTO, CRESPSL, XAN, XANFM, XANDAY, XLE,      &
-                              NNBIOMASS, NNLITTER, NNLITTLEVS, NNSOILCARB,   &
-                              XBSLAI, XBIOMASS, XRESP_BIOMASS,               &
-                              NPATCH, XWSAT, XWG, XWGI, CISBA, XTG, LCANOPY, &
-                              XPATCH, CALBEDO,                               &
-                              XVEGTYPE_PATCH, LGLACIER,                      &
-                              XPSN, XPSNG, XPSNV, XDIR_ALB_WITH_SNOW,        &
-                              XSCA_ALB_WITH_SNOW, NGROUND_LAYER, XMPOTSAT,   &
-                              XBCOEF, XPSNV_A,                               &
-                              LMEB_PATCH,XGNDLITTER,XLAIGV, XZ0LITTER,       &
-                              XH_VEG, XZF_TALLVEG, XTV
+USE MODD_ISBA_n, ONLY : I => ISBA
 !                           
 USE MODD_DEEPSOIL,    ONLY : LPHYSDOMC
 USE MODD_CSTS,        ONLY : XTT, XG, XLMTT
 USE MODD_SNOW_PAR,    ONLY : XEMISSN
 USE MODD_ISBA_PAR,    ONLY : XWGMIN
 !
-USE MODD_ISBA_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 USE MODD_CO2V_PAR,    ONLY : XANFMINIT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_PREP,        ONLY : XZS_LS
@@ -117,11 +101,11 @@ INTEGER :: ISNOW          ! patch number where permanent snow is
 REAL    :: ZWORK, ZLOG, ZWTOT, ZMATPOT, ZWL
 !
 REAL,             DIMENSION(1)   :: ZSW_BANDS ! middle wavelength of each band
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZDIR_ALB  ! direct albedo for each band
-REAL,             DIMENSION(SIZE(XLAI,1),SIZE(XLAI,2)) :: ZSCA_ALB  ! diffuse albedo for each band
-REAL,             DIMENSION(SIZE(XLAI,1))   :: ZEMIS     ! emissivity
-REAL,             DIMENSION(SIZE(XLAI,1))   :: ZZENITH   ! solar zenithal angle
-REAL,             DIMENSION(SIZE(XLAI,1))   :: ZTSURF     ! surface effective temperature
+REAL,             DIMENSION(SIZE(I%XLAI,1),SIZE(I%XLAI,2)) :: ZDIR_ALB  ! direct albedo for each band
+REAL,             DIMENSION(SIZE(I%XLAI,1),SIZE(I%XLAI,2)) :: ZSCA_ALB  ! diffuse albedo for each band
+REAL,             DIMENSION(SIZE(I%XLAI,1))   :: ZEMIS     ! emissivity
+REAL,             DIMENSION(SIZE(I%XLAI,1))   :: ZZENITH   ! solar zenithal angle
+REAL,             DIMENSION(SIZE(I%XLAI,1))   :: ZTSURF     ! surface effective temperature
 !
 LOGICAL         :: GPERMSNOW
 LOGICAL         :: GTEMP2WGI
@@ -146,13 +130,13 @@ GWG       = .TRUE.
 GWGI      = .TRUE.
 GTG       = .TRUE.
 !
-ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
 !*      1.1    Default
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL PREP_OUTPUT_GRID(ILUOUT,CGRID,XGRID_PAR,XLAT,XLON)
+ CALL PREP_OUTPUT_GRID(ILUOUT,IG%CGRID,IG%XGRID_PAR,IG%XLAT,IG%XLON)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -189,7 +173,7 @@ ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
 !
 !*      2.7    GLACIER
 !
-IF(LGLACIER)THEN
+IF(I%LGLACIER)THEN
   CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'ICE_STO',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
@@ -208,19 +192,19 @@ ENDIF
 !*      3.    Physical limitation: 
 !
 ! No ice for force restore third layer:
-IF (CISBA == '3-L') THEN
-   DO JP=1,NPATCH
-      WHERE(XWG(:,3,JP) /= XUNDEF)
-        XWG(:,3,JP)  = MIN(XWG(:,3,JP)+XWGI(:,3,JP),XWSAT(:,3))
-        XWGI(:,3,JP) = 0.
+IF (I%CISBA == '3-L') THEN
+   DO JP=1,I%NPATCH
+      WHERE(I%XWG(:,3,JP) /= XUNDEF)
+        I%XWG(:,3,JP)  = MIN(I%XWG(:,3,JP)+I%XWGI(:,3,JP),I%XWSAT(:,3))
+        I%XWGI(:,3,JP) = 0.
       END WHERE
    ENDDO
 ENDIF
 !
 ! Total water content should not exceed saturation:
-DO JP=1,NPATCH
-   WHERE(XWG(:,:,JP) /= XUNDEF .AND. (XWG(:,:,JP) + XWGI(:,:,JP)) > XWSAT(:,:) )
-      XWGI(:,:,JP) = XWSAT(:,:) - XWG(:,:,JP)
+DO JP=1,I%NPATCH
+   WHERE(I%XWG(:,:,JP) /= XUNDEF .AND. (I%XWG(:,:,JP) + I%XWGI(:,:,JP)) > I%XWSAT(:,:) )
+      I%XWGI(:,:,JP) = I%XWSAT(:,:) - I%XWG(:,:,JP)
    END WHERE
 ENDDO
 !
@@ -238,24 +222,24 @@ DEALLOCATE(XZS_LS)
 !*      4.     Treatment of permanent snow
 !
 IF (GPERMSNOW.AND.LSNOW_PREP_PERM) THEN
-  ISNOW = VEGTYPE_TO_PATCH(NVT_SNOW,NPATCH)
-  CALL PREP_PERM_SNOW(TSNOW,XTG(:,:,ISNOW),XVEGTYPE_PATCH(:,:,ISNOW),ISNOW)
+  ISNOW = VEGTYPE_TO_PATCH(NVT_SNOW,I%NPATCH)
+  CALL PREP_PERM_SNOW(I%TSNOW,I%XTG(:,:,ISNOW),I%XVEGTYPE_PATCH(:,:,ISNOW),ISNOW)
 ENDIF
 !
-CALL INIT_SNOW_LW(XEMISSN,TSNOW)
+CALL INIT_SNOW_LW(XEMISSN,I%TSNOW)
 !
 IF (LPHYSDOMC) THEN
-   TSNOW%WSNOW(:,:,:)=0.
+   I%TSNOW%WSNOW(:,:,:)=0.
 ENDIF 
 !------------------------------------------------------------------------------------- 
 ! 
 !*      4.b     Possibility for setting an upper limit on the initial snow water equivalent field 
 IF (LSWEMAX) THEN 
-  SMAX = MAXVAL(TSNOW%WSNOW(:,:,:)) 
+  SMAX = MAXVAL(I%TSNOW%WSNOW(:,:,:)) 
   WRITE(*,*) ' MAX(Snow content (kg/m2)): ', SMAX 
   WRITE(*,*) ' Set MAX to', XSWEMAX, '(kg/m2)' 
-  TSNOW%WSNOW(:,:,:) = MIN(TSNOW%WSNOW(:,:,:),XSWEMAX) 
-  SMAX = MAXVAL(TSNOW%WSNOW(:,:,:)) 
+  I%TSNOW%WSNOW(:,:,:) = MIN(I%TSNOW%WSNOW(:,:,:),XSWEMAX) 
+  SMAX = MAXVAL(I%TSNOW%WSNOW(:,:,:)) 
   WRITE(*,*) ' MAX(Snow content (kg/m2)): ', SMAX 
 ENDIF
 !
@@ -265,39 +249,39 @@ ENDIF
 !
 GTEMP2WGI=(GWG.OR.GWGI.OR.GTG)
 !
-IF (CISBA == 'DIF'.AND.GTEMP2WGI) THEN
-   INI=SIZE(XWSAT,1)
-   DO JP=1,NPATCH
-      DO JL=1,NGROUND_LAYER
+IF (I%CISBA == 'DIF'.AND.GTEMP2WGI) THEN
+   INI=SIZE(I%XWSAT,1)
+   DO JP=1,I%NPATCH
+      DO JL=1,I%NGROUND_LAYER
          DO JJ=1,INI
-            IF(XWG(JJ,JL,JP)/=XUNDEF)THEN
+            IF(I%XWG(JJ,JL,JP)/=XUNDEF)THEN
 !     
 !             total soil moisture
-              ZWTOT = XWG(JJ,JL,JP)+XWGI(JJ,JL,JP)
-              ZWTOT = MIN(ZWTOT,XWSAT(JJ,JL))
+              ZWTOT = I%XWG(JJ,JL,JP)+I%XWGI(JJ,JL,JP)
+              ZWTOT = MIN(ZWTOT,I%XWSAT(JJ,JL))
 !              
 !             total matric potential
 !             psi=mpotsat*(w/wsat)**(-bcoef)
-              ZWORK   = ZWTOT/XWSAT(JJ,JL)
-              ZLOG    = XBCOEF(JJ,JL)*LOG(ZWORK)
-              ZMATPOT = XMPOTSAT(JJ,JL)*EXP(-ZLOG)
+              ZWORK   = ZWTOT/I%XWSAT(JJ,JL)
+              ZLOG    = I%XBCOEF(JJ,JL)*LOG(ZWORK)
+              ZMATPOT = I%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
 !
 !             soil liquid water content computation
 !             w=wsat*(psi/mpotsat)**(-1/bcoef)
-              ZMATPOT       = MIN(XMPOTSAT(JJ,JL),XLMTT*(XTG(JJ,JL,JP)-XTT)/(XG*XTG(JJ,JL,JP)))
-              ZWORK         = MAX(1.0,ZMATPOT/XMPOTSAT(JJ,JL))
+              ZMATPOT       = MIN(I%XMPOTSAT(JJ,JL),XLMTT*(I%XTG(JJ,JL,JP)-XTT)/(XG*I%XTG(JJ,JL,JP)))
+              ZWORK         = MAX(1.0,ZMATPOT/I%XMPOTSAT(JJ,JL))
               ZLOG          = LOG(ZWORK)
-              ZWL           = XWSAT(JJ,JL)*EXP(-ZLOG/XBCOEF(JJ,JL))
+              ZWL           = I%XWSAT(JJ,JL)*EXP(-ZLOG/I%XBCOEF(JJ,JL))
               ZWL           = MAX(ZWL,XWGMIN)
-              XWG(JJ,JL,JP) = MIN(ZWL,ZWTOT )
+              I%XWG(JJ,JL,JP) = MIN(ZWL,ZWTOT )
 !        
 !             soil ice computation    
-              XWGI(JJ,JL,JP) = MAX(0.0,ZWTOT-XWG(JJ,JL,JP))
+              I%XWGI(JJ,JL,JP) = MAX(0.0,ZWTOT-I%XWG(JJ,JL,JP))
 ! 
 !             supress numerical artefact
-              IF(XTG(JJ,JL,JP)>=XTT)THEN
-                XWG (JJ,JL,JP) = MIN(XWG(JJ,JL,JP)+XWGI(JJ,JL,JP),XWSAT(JJ,JL))
-                XWGI(JJ,JL,JP) = 0.0
+              IF(I%XTG(JJ,JL,JP)>=XTT)THEN
+                I%XWG (JJ,JL,JP) = MIN(I%XWG(JJ,JL,JP)+I%XWGI(JJ,JL,JP),I%XWSAT(JJ,JL))
+                I%XWGI(JJ,JL,JP) = 0.0
               ENDIF
 !
             ENDIF
@@ -312,97 +296,97 @@ ENDIF
 !              The only variable used from the AVERAGED_ALBEDO_EMIS_ISBA call
 !              is XTSRAD_NAT. All other variables are treated as dummies.
 !
-ALLOCATE(XRESA(SIZE(XLAI,1),SIZE(XLAI,2)))
-XRESA = 100.
+ALLOCATE(I%XRESA(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+I%XRESA = 100.
 !
-ALLOCATE(XTSRAD_NAT(SIZE(XLAI,1)))
+ALLOCATE(I%XTSRAD_NAT(SIZE(I%XLAI,1)))
 ZZENITH(:)=0.
 ZSW_BANDS(:)=0.
 !
-ALLOCATE(XALBNIR(SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XALBVIS(SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XALBUV(SIZE(XLAI,1),SIZE(XLAI,2)))
-XALBNIR = 0.0
-XALBVIS = 0.0
-XALBUV = 0.0
+ALLOCATE(I%XALBNIR(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XALBVIS(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XALBUV(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+I%XALBNIR = 0.0
+I%XALBVIS = 0.0
+I%XALBUV = 0.0
 !
-ALLOCATE(XALBNIR_SOIL(SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XALBVIS_SOIL(SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XALBUV_SOIL(SIZE(XLAI,1),SIZE(XLAI,2)))
- CALL SOIL_ALBEDO (CALBEDO, XWSAT(:,1),XWG(:,1,:),     &
-                    XALBVIS_DRY,XALBNIR_DRY,XALBUV_DRY, &
-                    XALBVIS_WET,XALBNIR_WET,XALBUV_WET, &
-                    XALBVIS_SOIL,XALBNIR_SOIL,XALBUV_SOIL )
+ALLOCATE(I%XALBNIR_SOIL(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XALBVIS_SOIL(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XALBUV_SOIL(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ CALL SOIL_ALBEDO (I%CALBEDO, I%XWSAT(:,1),I%XWG(:,1,:),     &
+                    I%XALBVIS_DRY,I%XALBNIR_DRY,I%XALBUV_DRY, &
+                    I%XALBVIS_WET,I%XALBNIR_WET,I%XALBUV_WET, &
+                    I%XALBVIS_SOIL,I%XALBNIR_SOIL,I%XALBUV_SOIL )
 !
-ALLOCATE(XPSN   (SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XPSNG  (SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XPSNV  (SIZE(XLAI,1),SIZE(XLAI,2)))
-ALLOCATE(XPSNV_A(SIZE(XLAI,1),SIZE(XLAI,2)))
-XPSN    = 0.0
-XPSNG   = 0.0
-XPSNV   = 0.0
-XPSNV_A = 0.0
-ALLOCATE(XDIR_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
-ALLOCATE(XSCA_ALB_WITH_SNOW(SIZE(XLAI,1),1,SIZE(XLAI,2)))
-XDIR_ALB_WITH_SNOW = 0.0
-XSCA_ALB_WITH_SNOW = 0.0
-CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., CALBEDO, ZZENITH,                &
-                                 XVEG,XZ0,XLAI,                          &
-                                 LMEB_PATCH,XGNDLITTER,XZ0LITTER,XLAIGV, &
-                                 XZF_TALLVEG, XH_VEG, XTV,               &
-                                 XTG(:,1,:),XPATCH, ZSW_BANDS,           &
-                                 XALBNIR_VEG,XALBVIS_VEG,XALBUV_VEG,     &
-                                 XALBNIR_SOIL,XALBVIS_SOIL,XALBUV_SOIL,  &
-                                 XEMIS,                                  &
-                                 TSNOW,                                  &
-                                 XALBNIR,XALBVIS,XALBUV,                 &
+ALLOCATE(I%XPSN   (SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XPSNG  (SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XPSNV  (SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+ALLOCATE(I%XPSNV_A(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+I%XPSN    = 0.0
+I%XPSNG   = 0.0
+I%XPSNV   = 0.0
+I%XPSNV_A = 0.0
+ALLOCATE(I%XDIR_ALB_WITH_SNOW(SIZE(I%XLAI,1),1,SIZE(I%XLAI,2)))
+ALLOCATE(I%XSCA_ALB_WITH_SNOW(SIZE(I%XLAI,1),1,SIZE(I%XLAI,2)))
+I%XDIR_ALB_WITH_SNOW = 0.0
+I%XSCA_ALB_WITH_SNOW = 0.0
+CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., I%CALBEDO, ZZENITH,                &
+                                 I%XVEG,I%XZ0,I%XLAI,                          &
+                                 I%LMEB_PATCH,I%XGNDLITTER,I%XZ0LITTER,I%XLAIGV, &
+                                 I%XZF_TALLVEG, I%XH_VEG, I%XTV,               &
+                                 I%XTG(:,1,:),I%XPATCH, ZSW_BANDS,           &
+                                 I%XALBNIR_VEG,I%XALBVIS_VEG,I%XALBUV_VEG,     &
+                                 I%XALBNIR_SOIL,I%XALBVIS_SOIL,I%XALBUV_SOIL,  &
+                                 I%XEMIS,                                  &
+                                 I%TSNOW,                                  &
+                                 I%XALBNIR,I%XALBVIS,I%XALBUV,                 &
                                  ZDIR_ALB, ZSCA_ALB,                     &
-                                 ZEMIS,XTSRAD_NAT,ZTSURF                 )
-DEALLOCATE(XPSN)
-DEALLOCATE(XPSNG)
-DEALLOCATE(XPSNV)
-DEALLOCATE(XPSNV_A)
-DEALLOCATE(XDIR_ALB_WITH_SNOW)
-DEALLOCATE(XSCA_ALB_WITH_SNOW)
+                                 ZEMIS,I%XTSRAD_NAT,ZTSURF                 )
+DEALLOCATE(I%XPSN)
+DEALLOCATE(I%XPSNG)
+DEALLOCATE(I%XPSNV)
+DEALLOCATE(I%XPSNV_A)
+DEALLOCATE(I%XDIR_ALB_WITH_SNOW)
+DEALLOCATE(I%XSCA_ALB_WITH_SNOW)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      7.     Isba-Ags prognostic fields
 !
-IF (CPHOTO /= 'NON') THEN
+IF (I%CPHOTO /= 'NON') THEN
 !
-   ALLOCATE(XAN(SIZE(XLAI,1),SIZE(XLAI,2)))
-   XAN = 0.
+   ALLOCATE(I%XAN(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+   I%XAN = 0.
 !
-   ALLOCATE(XANDAY(SIZE(XLAI,1),SIZE(XLAI,2)))
-   XANDAY = 0.
+   ALLOCATE(I%XANDAY(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+   I%XANDAY = 0.
 !
-   ALLOCATE(XANFM(SIZE(XLAI,1),SIZE(XLAI,2)))
-   XANFM = XANFMINIT
+   ALLOCATE(I%XANFM(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+   I%XANFM = XANFMINIT
 !
-   ALLOCATE(XLE(SIZE(XLAI,1),SIZE(XLAI,2)))
-   XLE = 0.
+   ALLOCATE(I%XLE(SIZE(I%XLAI,1),SIZE(I%XLAI,2)))
+   I%XLE = 0.
 !
-   ALLOCATE(XRESP_BIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XRESP_BIOMASS(:,:,:) = 0.
+   ALLOCATE(I%XRESP_BIOMASS(SIZE(I%XLAI,1),I%NNBIOMASS,SIZE(I%XLAI,2)))
+   I%XRESP_BIOMASS(:,:,:) = 0.
 !
 ENDIF
 !
-IF (CPHOTO == 'AGS' .OR. CPHOTO == 'AST') THEN
+IF (I%CPHOTO == 'AGS' .OR. I%CPHOTO == 'AST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   XBIOMASS(:,:,:) = 0.
+   ALLOCATE(I%XBIOMASS(SIZE(I%XLAI,1),I%NNBIOMASS,SIZE(I%XLAI,2)))
+   I%XBIOMASS(:,:,:) = 0.
 !
-ELSEIF (CPHOTO == 'LAI' .OR. CPHOTO == 'LST') THEN
+ELSEIF (I%CPHOTO == 'LAI' .OR. I%CPHOTO == 'LST') THEN
 !
-   ALLOCATE(XBIOMASS(SIZE(XLAI,1),NNBIOMASS,SIZE(XLAI,2)))
-   WHERE(XLAI(:,:)/=XUNDEF)
-         XBIOMASS(:,1,:) = XLAI(:,:) * XBSLAI(:,:)
+   ALLOCATE(I%XBIOMASS(SIZE(I%XLAI,1),I%NNBIOMASS,SIZE(I%XLAI,2)))
+   WHERE(I%XLAI(:,:)/=XUNDEF)
+         I%XBIOMASS(:,1,:) = I%XLAI(:,:) * I%XBSLAI(:,:)
    ELSEWHERE
-         XBIOMASS(:,1,:) = 0.0
+         I%XBIOMASS(:,1,:) = 0.0
    ENDWHERE
 !
-ELSEIF (CPHOTO == 'NIT' .OR. CPHOTO == 'NCB') THEN
+ELSEIF (I%CPHOTO == 'NIT' .OR. I%CPHOTO == 'NCB') THEN
 !
    CALL PREP_HOR_ISBA_CC_FIELD(HPROGRAM,'BIOMASS ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)   
 !
@@ -412,7 +396,7 @@ ENDIF
 !
 !*      8.     Isba-CC prognostic fields
 !
-IF (CRESPSL == 'CNT') THEN
+IF (I%CRESPSL == 'CNT') THEN
 !
 !*      8.1    Litter
 !
@@ -435,8 +419,8 @@ ENDIF
 !*      10.     Preparation of canopy air variables
 !
 !
-LCANOPY = LISBA_CANOPY
-IF (LCANOPY) CALL PREP_ISBA_CANOPY()
+I%LCANOPY = LISBA_CANOPY
+IF (I%LCANOPY) CALL PREP_ISBA_CANOPY()
 !
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA',1,ZHOOK_HANDLE)
 !

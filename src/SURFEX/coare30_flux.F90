@@ -39,7 +39,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!     C. Lebeaupin  *Météo-France* (adapted from C. Fairall's code)
+!!     C. Lebeaupin  *MÃ©tÃ©o-France* (adapted from C. Fairall's code)
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -60,7 +60,7 @@ USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, XPI, &
                             XP00
 USE MODD_SURF_ATM,   ONLY : XVZ0CM
 !
-USE MODD_SEAFLUX_n
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_SURF_PAR,   ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_WATER_PAR
 !
@@ -190,7 +190,7 @@ IF (LHOOK) CALL DR_HOOK('COARE30_FLUX',0,ZHOOK_HANDLE)
 !
 ZRVSRDM1  = XRV/XRD-1. ! 0.607766
 ZRDSRV    = XRD/XRV    ! 0.62198
-ZR2       = 1.-ZRDSRV  ! pas utilisé dans cette routine
+ZR2       = 1.-ZRDSRV  ! pas utilisÃ© dans cette routine
 ZBETAGUST = 1.2        ! value based on TOGA-COARE experiment
 ZZBL      = 600.       ! Set a default value for boundary layer depth
 ZS        = 10.        ! Standard heigth =10m
@@ -244,7 +244,7 @@ ZQASAT(:) = QSAT(ZTA(:),ZPA(:))
 !
 ZO(:)  = 0.0001
 ZWG(:) = 0.
-IF (LPWG) ZWG(:) = 0.5
+IF (S%LPWG) ZWG(:) = 0.5
 !
 ZCHARN(:) = 0.011  
 !
@@ -330,12 +330,12 @@ DO JLOOP=1,MAXVAL(ITERMAX) ! begin of iterative loop
     !
     IF (JLOOP.GT.ITERMAX(J)) CYCLE
     !
-    IF (NGRVWAVES==0) THEN
+    IF (S%NGRVWAVES==0) THEN
       ZO(J) = ZCHARN(J)*ZUSR(J)*ZUSR(J)/XG + 0.11*ZVISA(J)/ZUSR(J) !Smith 1988
-    ELSE IF (NGRVWAVES==1) THEN
+    ELSE IF (S%NGRVWAVES==1) THEN
       ZO(J) = (50./(2.*XPI))*ZLWAVE(J)*(ZUSR(J)/ZCWAVE(J))**4.5 &
               + 0.11*ZVISA(J)/ZUSR(J)                       !Oost et al. 2002  
-    ELSE IF (NGRVWAVES==2) THEN
+    ELSE IF (S%NGRVWAVES==2) THEN
       ZO(J) = 1200.*ZHWAVE(J)*(ZHWAVE(J)/ZLWAVE(J))**4.5 &
               + 0.11*ZVISA(J)/ZUSR(J)                       !Taulor and Yelland 2001  
     ENDIF
@@ -367,7 +367,7 @@ DO JLOOP=1,MAXVAL(ITERMAX) ! begin of iterative loop
     !
     !             3.2 Gustiness factor (ZWG)
     !
-    IF(LPWG) THEN
+    IF(S%LPWG) THEN
       ZBF(J) = -XG/ZTA(J)*ZUSR(J)*(ZTSR(J)+ZRVSRDM1*ZTA(J)*ZQSR(J))
       IF (ZBF(J)>0.) THEN
         ZWG(J) = ZBETAGUST*(ZBF(J)*ZZBL)**(1./3.)
@@ -430,7 +430,7 @@ DO J=1,SIZE(PTA)
     ! SB: a priori, le facteur ZRDSRV=XRD/XRV est introduit pour
     !     adapter la formule de Clausius-Clapeyron (pour l'air
     !     sec) au cas humide.
-    IF (LPRECIP) THEN
+    IF (S%LPRECIP) THEN
       ! 
       ! heat surface  fluxes
       !

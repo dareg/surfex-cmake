@@ -29,9 +29,9 @@ SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : NPRINTLEV,LAESST,LEXTRAP_SEA
 !
-USE MODD_SURF_ATM_n,     ONLY : CSEA, NR_SEA, XSEA, XZS
-USE MODD_SEAFLUX_n,      ONLY : XSST
-USE MODD_SEAFLUX_GRID_n, ONLY : XLAT, XLON
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
@@ -77,13 +77,13 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SEA_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-WRITE(*,*) 'UPDATING SST FOR SCHEME: ',TRIM(CSEA)
-IF (CSEA=="NONE") THEN
+WRITE(*,*) 'UPDATING SST FOR SCHEME: ',TRIM(U%CSEA)
+IF (U%CSEA=="NONE") THEN
   IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
-CALL PACK_SAME_RANK(NR_SEA,XZS,ZALT)
+CALL PACK_SAME_RANK(U%NR_SEA,U%XZS,ZALT)
 !
 ! Read SST from file or set it to input SST
 IF ( .NOT.LAESST ) THEN
@@ -94,7 +94,7 @@ ELSE
   ! SST analysed in CANARI 
   ZSST(:) = XUNDEF
   DO I=1,KI
-    IF (PITM(I)<0.5 .AND. XSEA(NR_SEA(I))/=0. ) THEN
+    IF (PITM(I)<0.5 .AND. U%XSEA(U%NR_SEA(I))/=0. ) THEN
      ZSST(I) = PTS_IN(I)   ! set SST analysis from CANARI
     ENDIF
   END DO
@@ -116,7 +116,7 @@ DO I=1,KI
     ZSST0(I) = XUNDEF
     GINTERP_SST(I) = .TRUE.
   ELSE
-    ZSST0(I) = XSST(I)
+    ZSST0(I) = S%XSST(I)
   ENDIF
   !
 ENDDO
@@ -141,7 +141,7 @@ IF ( LEXTRAP_SEA ) THEN
         ZSST01(J) = ZSST0(J1)
         ZLAT1 (J) = PLAT_IN (J1)
         ZLON1 (J) = PLON_IN (J1)
-        ZALT1 (J) = XZS  (J1)
+        ZALT1 (J) = U%XZS  (J1)
         GINTERP_SST1(J) = GINTERP_SST(J1)
         J = J + 1
       ENDIF
@@ -169,17 +169,17 @@ ENDIF
 IF ( NPRINTLEV > 2 ) THEN
   DO I=1,KI
     IF (GINTERP_SST(I)) THEN
-      PRINT *,'Sea surface temperature set to ',ZSST(I),'from nearest neighbour at I=',NR_SEA(I)
+      PRINT *,'Sea surface temperature set to ',ZSST(I),'from nearest neighbour at I=',U%NR_SEA(I)
     ENDIF
   ENDDO
 ENDIF
 !
 ! Sum the increments
-ZSSTINC(:) = ZSST(:) - XSST(:)
+ZSSTINC(:) = ZSST(:) - S%XSST(:)
 WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
 !
 ! Setting modified variables
-XSST(:) = ZSST(:)
+S%XSST(:) = ZSST(:)
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',1,ZHOOK_HANDLE)
 !

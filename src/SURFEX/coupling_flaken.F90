@@ -47,26 +47,14 @@ USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XLSTT, XKARMAN, XTT
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE MODD_FLAKE_n,  ONLY :   TTIME         , XEMIS         , XWATER_DEPTH  , &
-                            XWATER_FETCH  , XT_BS         , XDEPTH_BS     , &
-                            XCORIO        , XDIR_ALB      , XSCA_ALB      , &
-                            XICE_ALB      , XSNOW_ALB     , XEXTCOEF_WATER, &
-                            XEXTCOEF_ICE  , XEXTCOEF_SNOW , XT_SNOW       , &
-                            XT_ICE        , XT_MNW        , XT_WML        , &
-                            XT_BOT        , XT_B1         , XCT           , &
-                            XH_SNOW       , XH_ICE        , XH_ML         , &
-                            XH_B1         , XTS           , XZ0           , &
-                            XUSTAR        , LSEDIMENTS    , CFLK_FLUX     , &
-                            CFLK_ALB      , LSKINTEMP
+USE MODD_FLAKE_n, ONLY : F => FLAKE
 !                          
-USE MODD_CH_FLAKE_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
-                            NSV_DSTBEG, NSV_DSTEND, NAEREQ, NDSTEQ, NSLTEQ,      &
-                            NSV_AERBEG, NSV_AEREND, NSV_SLTBEG, NSV_SLTEND  
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
 !
 USE MODD_SLT_SURF
 USE MODD_DST_SURF
-USE MODD_SLT_n,       ONLY: XEMISRADIUS_SLT,XEMISSIG_SLT
-USE MODD_DST_n,       ONLY: XEMISRADIUS_DST,XEMISSIG_DST
+USE MODD_SLT_n, ONLY : SLT => SLT
+USE MODD_DST_n, ONLY : DST => DST
 !
 USE MODE_DSLT_SURF
 USE MODE_THERMOS
@@ -262,8 +250,8 @@ ZHU(:) = 1.
 ! Time evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-TTIME%TIME = TTIME%TIME + PTSTEP
- CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+F%TTIME%TIME = F%TTIME%TIME + PTSTEP
+ CALL ADD_FORECAST_TO_DATE_SURF(F%TTIME%TDATE%YEAR,F%TTIME%TDATE%MONTH,F%TTIME%TDATE%DAY,F%TTIME%TIME)
 !
 !----------------------------------------
 !
@@ -271,16 +259,16 @@ PSFU(:) = 0.
 PSFV(:) = 0.
 ZSFM(:) = 0.
 !
-IF (CFLK_FLUX=='DEF  ') THEN
+IF (F%CFLK_FLUX=='DEF  ') THEN
 !
-    CALL WATER_FLUX(XZ0,                                             &
-                    PTA, ZEXNA, PRHOA, XTS, ZEXNS, PQA,PRAIN, PSNOW, &
+    CALL WATER_FLUX(F%XZ0,                                             &
+                    PTA, ZEXNA, PRHOA, F%XTS, ZEXNS, PQA,PRAIN, PSNOW, &
                     XTT, ZWIND, PZREF, PUREF,                        &
                     PPS, GHANDLE_SIC, ZQSAT,                         &
                     PSFTH, PSFTQ, ZUSTAR,                            &
                     ZCD, ZCDN, ZCH, ZRI, ZRESA_WATER, ZZ0H           )  
 !                  
-    WHERE (XTS(:)<XTT)
+    WHERE (F%XTS(:)<XTT)
       ZLE  (:) = PSFTQ(:) * XLSTT
       ZLEI (:) = PSFTQ(:) * XLSTT
       ZSUBL(:) = PSFTQ(:)
@@ -315,8 +303,8 @@ IF (CFLK_FLUX=='DEF  ') THEN
     END WHERE
 !
 ELSE
-   ZUSTAR(:) = XUSTAR(:)
-   ZZ0H  (:) = XZ0   (:)
+   ZUSTAR(:) = F%XUSTAR(:)
+   ZZ0H  (:) = F%XZ0   (:)
 ENDIF
 !
 !----------------------------------------
@@ -326,11 +314,11 @@ ENDIF
 ISWB = SIZE(PSW_BANDS)
 !
 DO JSWB=1,ISWB 
-  ZDIR_ALB(:,JSWB) = XDIR_ALB(:)
-  ZSCA_ALB(:,JSWB) = XSCA_ALB(:)
+  ZDIR_ALB(:,JSWB) = F%XDIR_ALB(:)
+  ZSCA_ALB(:,JSWB) = F%XSCA_ALB(:)
 END DO
 !
-ZTRAD = XTS
+ZTRAD = F%XTS
 !
  CALL FLAKE_ALBEDO(PDIR_SW,PSCA_SW,KSW,ZDIR_ALB,ZSCA_ALB,ZGLOBAL_SW,ZALB)
 !
@@ -338,27 +326,27 @@ ZTRAD = XTS
 ! Atmospheric forcing:
                        PSNOW, ZGLOBAL_SW, PLW, PUREF, PZREF, ZWIND, PTA, ZQA, PPS, &
 ! Constant parameters
-                       XWATER_DEPTH, XWATER_FETCH, XDEPTH_BS, XT_BS, XCORIO,&
+                       F%XWATER_DEPTH, F%XWATER_FETCH, F%XDEPTH_BS, F%XT_BS, F%XCORIO,&
                        ZTSTEP,                                              &
 ! surface albedo
-                       XEMIS, ZALB,                                         &
+                       F%XEMIS, ZALB,                                         &
 ! Parameters that may change (constants for the moment)
-                       XEXTCOEF_WATER, XEXTCOEF_ICE, XEXTCOEF_SNOW,         &
+                       F%XEXTCOEF_WATER, F%XEXTCOEF_ICE, F%XEXTCOEF_SNOW,         &
 ! Flake variables
-                       XT_SNOW, XT_ICE, XT_MNW, XT_WML, XT_BOT, XT_B1, XCT, &
-                       XH_SNOW, XH_ICE, XH_ML, XH_B1, XTS,                  &
+                       F%XT_SNOW, F%XT_ICE, F%XT_MNW, F%XT_WML, F%XT_BOT, F%XT_B1, F%XCT, &
+                       F%XH_SNOW, F%XH_ICE, F%XH_ML, F%XH_B1, F%XTS,                  &
 ! Surface heat, momentum fluxes, and other diags
-                       PSFTH, ZLE, ZSFM, XZ0, ZZ0H, ZQSAT, ZRI, ZUSTAR,     &
+                       PSFTH, ZLE, ZSFM, F%XZ0, ZZ0H, ZQSAT, ZRI, ZUSTAR,     &
                        ZCD, PSFTQ, ZLEI, ZSUBL, ZLWUP, ZSWE,                &
 ! Flags              
-                       LSEDIMENTS, LSKINTEMP, CFLK_FLUX, PPEW_A_COEF,       &
+                       F%LSEDIMENTS, F%LSKINTEMP, F%CFLK_FLUX, PPEW_A_COEF,       &
                        PPEW_B_COEF, PRHOA, CIMPLICIT_WIND                   )
 !
 !-------------------------------------------------------------------------------------
 !
 ! Momentum fluxes
 !
-IF (CFLK_FLUX=='FLAKE') THEN
+IF (F%CFLK_FLUX=='FLAKE') THEN
    PSFU = 0.
    PSFV = 0.
   WHERE (ZWIND(:)>0.)
@@ -373,13 +361,13 @@ IF (CFLK_FLUX=='FLAKE') THEN
   ZEXNA (:)       = (PPA(:)/XP00)**(XRD/XCPD)
   ZRESA_WATER=2.E4
   WHERE (PSFTH/=0.)
-  ZRESA_WATER (:) = XCPD * PRHOA(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:)) &
+  ZRESA_WATER (:) = XCPD * PRHOA(:) * (F%XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:)) &
                      / (PSFTH(:) * ZEXNS(:))  
   END WHERE
 !
 ENDIF
 !                               
-XUSTAR(:) = ZUSTAR(:)
+F%XUSTAR(:) = ZUSTAR(:)
 !
 ! CO2 flux
 !
@@ -391,39 +379,39 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 !
 !
 !salgado The scalar fluxes are computed as in watflux
-IF (NBEQ>0) THEN
-  IF (CCH_DRY_DEP == "WES89") THEN
+IF (CHF%NBEQ>0) THEN
+  IF (CHF%CCH_DRY_DEP == "WES89") THEN
     CALL CH_DEP_WATER  (ZRESA_WATER, ZUSTAR, PTA, ZTRAD,      &
-                          PSV(:,NSV_CHSBEG:NSV_CHSEND),       &
-                          CSV(NSV_CHSBEG:NSV_CHSEND),         &
-                          XDEP(:,1:NBEQ) )  
+                          PSV(:,CHF%NSV_CHSBEG:CHF%NSV_CHSEND),       &
+                          CHF%CSV(CHF%NSV_CHSBEG:CHF%NSV_CHSEND),         &
+                          CHF%XDEP(:,1:CHF%NBEQ) )  
 
-   PSFTS(:,NSV_CHSBEG:NSV_CHSEND) = - PSV(:,NSV_CHSBEG:NSV_CHSEND)  &
-                                               * XDEP(:,1:NBEQ)  
-     IF (NAEREQ > 0 ) THEN
-        CALL CH_AER_DEP(PSV(:,NSV_AERBEG:NSV_AEREND),&
-                          PSFTS(:,NSV_AERBEG:NSV_AEREND),&
+   PSFTS(:,CHF%NSV_CHSBEG:CHF%NSV_CHSEND) = - PSV(:,CHF%NSV_CHSBEG:CHF%NSV_CHSEND)  &
+                                               * CHF%XDEP(:,1:CHF%NBEQ)  
+     IF (CHF%NAEREQ > 0 ) THEN
+        CALL CH_AER_DEP(PSV(:,CHF%NSV_AERBEG:CHF%NSV_AEREND),&
+                          PSFTS(:,CHF%NSV_AERBEG:CHF%NSV_AEREND),&
                           ZUSTAR,ZRESA_WATER,PTA,PRHOA)     
       END IF
 
   ELSE
-    PSFTS(:,NSV_CHSBEG:NSV_CHSEND) =0.
-    IF(NSV_AERBEG.LT.NSV_AEREND) PSFTS(:,NSV_AERBEG:NSV_AEREND) =0.
+    PSFTS(:,CHF%NSV_CHSBEG:CHF%NSV_CHSEND) =0.
+    IF(CHF%NSV_AERBEG.LT.CHF%NSV_AEREND) PSFTS(:,CHF%NSV_AERBEG:CHF%NSV_AEREND) =0.
   ENDIF
 ENDIF
 
-IF (NDSTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,NSV_DSTBEG:NSV_DSTEND), PSFTS(:,NSV_DSTBEG:NSV_DSTEND),   &
-                ZUSTAR, ZRESA_WATER, PTA, PRHOA, XEMISSIG_DST, XEMISRADIUS_DST, &
+IF (CHF%NDSTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,CHF%NSV_DSTBEG:CHF%NSV_DSTEND), PSFTS(:,CHF%NSV_DSTBEG:CHF%NSV_DSTEND),   &
+                ZUSTAR, ZRESA_WATER, PTA, PRHOA, DST%XEMISSIG_DST, DST%XEMISRADIUS_DST, &
                 JPMODE_DST, XDENSITY_DST, XMOLARWEIGHT_DST, ZCONVERTFACM0_DST,  &
                 ZCONVERTFACM6_DST, ZCONVERTFACM3_DST, LVARSIG_DST, LRGFIX_DST,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,NSV_DSTBEG:NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,CHF%NSV_DSTBEG:CHF%NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
-    XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
-    XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
+    DST%XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
+    DST%XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
     NDSTMDE,                        &
     ZCONVERTFACM0_DST,              &
     ZCONVERTFACM6_DST,              &
@@ -432,18 +420,18 @@ IF (NDSTEQ>0) THEN
 ENDIF
 
 
-IF (NSLTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,NSV_SLTBEG:NSV_SLTEND), PSFTS(:,NSV_SLTBEG:NSV_SLTEND),   &
-                ZUSTAR, ZRESA_WATER, PTA, PRHOA, XEMISSIG_SLT, XEMISRADIUS_SLT, &
+IF (CHF%NSLTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,CHF%NSV_SLTBEG:CHF%NSV_SLTEND), PSFTS(:,CHF%NSV_SLTBEG:CHF%NSV_SLTEND),   &
+                ZUSTAR, ZRESA_WATER, PTA, PRHOA, SLT%XEMISSIG_SLT, SLT%XEMISRADIUS_SLT, &
                 JPMODE_SLT, XDENSITY_SLT, XMOLARWEIGHT_SLT, ZCONVERTFACM0_SLT,  &
                 ZCONVERTFACM6_SLT, ZCONVERTFACM3_SLT, LVARSIG_SLT, LRGFIX_SLT,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,NSV_SLTBEG:NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,CHF%NSV_SLTBEG:CHF%NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
-    XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
-    XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
+    SLT%XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
+    SLT%XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
     NSLTMDE,                        &
     ZCONVERTFACM0_SLT,              &
     ZCONVERTFACM6_SLT,              &
@@ -456,29 +444,29 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake code
+IF (F%CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake code
 !
   ZCH = ZEPS
 !
-  WHERE (ABS((XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2 .AND. ZWIND(:)/=0.)
-     ZCH = MAX(ZEPS,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
+  WHERE (ABS((F%XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) > 1.E-2 .AND. ZWIND(:)/=0.)
+     ZCH = MAX(ZEPS,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (F%XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
   END WHERE
 !
-  ZCDN(:) = (XKARMAN/LOG(PUREF(:)/XZ0(:)))**2
+  ZCDN(:) = (XKARMAN/LOG(PUREF(:)/F%XZ0(:)))**2
   ZCD (:) = MAX(ZEPS,ZCD(:))
 !
 ENDIF
 !
- CALL DIAG_INLINE_FLAKE_n(PTSTEP, PTA, XTS, ZQA, PPA, PPS, PRHOA, PU,        &
+ CALL DIAG_INLINE_FLAKE_n(PTSTEP, PTA, F%XTS, ZQA, PPA, PPS, PRHOA, PU,        &
                             PV, PZREF, PUREF, PRAIN, PSNOW,                  &
-                            ZCD, ZCDN, ZCH, ZRI, ZHU, XZ0,                   &
+                            ZCD, ZCDN, ZCH, ZRI, ZHU, F%XZ0,                   &
                             ZZ0H, ZQSAT, PSFTH, PSFTQ, PSFU, PSFV,           &
                             PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB,       &
                             ZLE, ZLEI, ZSUBL, ZLWUP, ZALB, ZSWE              )  
 !
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_MISC_FLAKE_n(XT_WML,XT_BOT,XH_ML,XCT,XWATER_DEPTH)
+ CALL DIAG_MISC_FLAKE_n(F%XT_WML,F%XT_BOT,F%XH_ML,F%XCT,F%XWATER_DEPTH)
 !
 !-------------------------------------------------------------------------------
 !Physical properties see by the atmosphere in order to close the energy budget 
@@ -486,8 +474,8 @@ ENDIF
 !difficult to do. Maybe it will be done later. However, Ts can be at time t+1
 !-------------------------------------------------------------------------------
 !
-PTSURF (:) = XTS  (:)
-PZ0    (:) = XZ0  (:)
+PTSURF (:) = F%XTS  (:)
+PZ0    (:) = F%XZ0  (:)
 PZ0H   (:) = ZZ0H (:)
 PQSURF (:) = ZQSAT(:)
 !
@@ -496,8 +484,8 @@ PQSURF (:) = ZQSAT(:)
 !the energy budget between surfex and the atmosphere
 !-------------------------------------------------------------------------------------
 !
- CALL UPDATE_RAD_FLAKE(CFLK_ALB,XTS,PZENITH2,XH_ICE,XH_SNOW,XICE_ALB,XSNOW_ALB, &
-                       XDIR_ALB,XSCA_ALB,XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )                       
+ CALL UPDATE_RAD_FLAKE(F%CFLK_ALB,F%XTS,PZENITH2,F%XH_ICE,F%XH_SNOW,F%XICE_ALB,F%XSNOW_ALB, &
+                       F%XDIR_ALB,F%XSCA_ALB,F%XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )                       
 !                         
 IF (LHOOK) CALL DR_HOOK('COUPLING_FLAKE_N',1,ZHOOK_HANDLE)
 !

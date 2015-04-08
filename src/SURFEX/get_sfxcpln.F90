@@ -42,7 +42,7 @@
 !              ------------
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : NSIZE_FULL
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODN_SFX_OASIS,  ONLY : LWATER
 USE MODD_SFX_OASIS,  ONLY : LCPL_LAND, LCPL_CALVING, LCPL_GW, &
@@ -119,9 +119,9 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 ! Global argument
 !
-IF(KI/=NSIZE_FULL)THEN
+IF(KI/=U%NSIZE_FULL)THEN
   WRITE(ILUOUT,*) 'size of field expected by the coupling :', KI
-  WRITE(ILUOUT,*) 'size of field in SURFEX                :', NSIZE_FULL
+  WRITE(ILUOUT,*) 'size of field in SURFEX                :', U%NSIZE_FULL
   CALL ABOR1_SFX('GET_SFXCPL_N: VECTOR SIZE NOT CORRECT FOR COUPLING')
 ENDIF
 !

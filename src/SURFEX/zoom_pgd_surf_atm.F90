@@ -35,15 +35,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR
-USE MODD_SURF_ATM_n,      ONLY : CNATURE, CSEA, CWATER, CTOWN, &
-                                   XSEA, XWATER,                 &
-                                   NDIM_NATURE, NDIM_SEA,        &
-                                   NDIM_TOWN,NDIM_WATER,         &
-                                   XNATURE, NDIM_FULL, LGARDEN,  &
-                                   LECOCLIMAP
-USE MODD_CH_SURF_n,       ONLY : LCH_EMIS
-USE MODD_DUMMY_SURF_FIELDS_n, ONLY : NDUMMY_NBR
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
 !
 USE MODI_INI_CSTS
 USE MODI_READ_NAM_WRITE_COVER_TEX
@@ -99,14 +94,14 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    2.      Initialisation of output grid and schemes
 !             -----------------------------------------
 !
- CALL PGD_GRID(HPROGRAM,HFILE,HFILETYPE,.TRUE.,CGRID,NGRID_PAR,XGRID_PAR)
+ CALL PGD_GRID(HPROGRAM,HFILE,HFILETYPE,.TRUE.,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 !
  CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
- CALL READ_SURF(HINIFILETYPE,'SEA',   CSEA,   IRESP)
- CALL READ_SURF(HINIFILETYPE,'NATURE',CNATURE,IRESP)
- CALL READ_SURF(HINIFILETYPE,'WATER', CWATER, IRESP)
- CALL READ_SURF(HINIFILETYPE,'TOWN',  CTOWN,  IRESP)
- CALL READ_COVER_GARDEN(HINIFILETYPE,LGARDEN)
+ CALL READ_SURF(HINIFILETYPE,'SEA',   U%CSEA,   IRESP)
+ CALL READ_SURF(HINIFILETYPE,'NATURE',U%CNATURE,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'WATER', U%CWATER, IRESP)
+ CALL READ_SURF(HINIFILETYPE,'TOWN',  U%CTOWN,  IRESP)
+ CALL READ_COVER_GARDEN(HINIFILETYPE,U%LGARDEN)
  CALL INIT_READ_DATA_COVER(HPROGRAM)
  CALL INI_DATA_COVER
  CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
@@ -116,42 +111,42 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    3.      surface cover
 !             -------------
 !
- CALL ZOOM_PGD_COVER(HPROGRAM,HINIFILE,HINIFILETYPE,LECOCLIMAP)
+ CALL ZOOM_PGD_COVER(HPROGRAM,HINIFILE,HINIFILETYPE,U%LECOCLIMAP)
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Orography
 !             ---------
 !
- CALL ZOOM_PGD_OROGRAPHY(HPROGRAM,XSEA,XWATER,HINIFILE,HINIFILETYPE)
+ CALL ZOOM_PGD_OROGRAPHY(HPROGRAM,U%XSEA,U%XWATER,HINIFILE,HINIFILETYPE)
 !
 !_______________________________________________________________________________
 !
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (NDIM_NATURE>0)                                 &
-  CALL ZOOM_PGD_NATURE(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,LECOCLIMAP)  
+IF (U%NDIM_NATURE>0)                                 &
+  CALL ZOOM_PGD_NATURE(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
-IF (NDIM_TOWN>0)                                 &
-  CALL ZOOM_PGD_TOWN(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,LECOCLIMAP,LGARDEN)  
+IF (U%NDIM_TOWN>0)                                 &
+  CALL ZOOM_PGD_TOWN(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP,U%LGARDEN)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
 !             ------------------------------------------
 !
-IF (NDIM_WATER>0)                                 &
-  CALL ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,LECOCLIMAP)  
+IF (U%NDIM_WATER>0)                                 &
+  CALL ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme
 !             ---------------------------------
 !
-IF (NDIM_SEA>0)                                 &
+IF (U%NDIM_SEA>0)                                 &
   CALL ZOOM_PGD_SEA(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)  
 !
 !_______________________________________________________________________________
@@ -159,13 +154,13 @@ IF (NDIM_SEA>0)                                 &
 !*    9.      Dummy fields
 !             ------------
 !
-NDUMMY_NBR = 0
+DUU%NDUMMY_NBR = 0
 !_______________________________________________________________________________
 !
 !*   10.      Chemical Emission fields
 !             ------------------------
 !
-LCH_EMIS = .FALSE.
+CHU%LCH_EMIS = .FALSE.
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',1,ZHOOK_HANDLE)
 !_______________________________________________________________________________
 !

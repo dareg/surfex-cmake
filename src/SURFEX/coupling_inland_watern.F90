@@ -32,7 +32,7 @@ SUBROUTINE COUPLING_INLAND_WATER_n(HPROGRAM, HCOUPLING, PTIMEC,                 
 !!      B. Decharme  04/2013 new coupling variables
 !----------------------------------------------------------------
 !
-USE MODD_SURF_ATM_n, ONLY : CWATER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -123,7 +123,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_INLAND_WATER_N',0,ZHOOK_HANDLE)
-IF (CWATER=='WATFLX') THEN
+IF (U%CWATER=='WATFLX') THEN
   CALL COUPLING_WATFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                                 &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
@@ -135,7 +135,7 @@ IF (CWATER=='WATFLX') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                  &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
                  'OK'                                                                       )  
-ELSE IF (CWATER=='FLUX  ') THEN
+ELSE IF (U%CWATER=='FLUX  ') THEN
   CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                     &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
@@ -147,7 +147,7 @@ ELSE IF (CWATER=='FLUX  ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                  &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
                  'OK'                                                                       )  
-ELSE IF (CWATER=='FLAKE ') THEN
+ELSE IF (U%CWATER=='FLAKE ') THEN
   CALL COUPLING_FLAKE_OROGRAPHY_n(HPROGRAM, HCOUPLING, PTIMEC,                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
@@ -159,7 +159,7 @@ ELSE IF (CWATER=='FLAKE ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                  &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
                  'OK'                                                                       )  
-ELSE IF (CWATER=='NONE  ') THEN
+ELSE IF (U%CWATER=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.
   PSFTS = 0.

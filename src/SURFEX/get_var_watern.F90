@@ -74,7 +74,7 @@ CONTAINS
 !
 SUBROUTINE GET_VAR_WATFLX_n
 !
-USE MODD_DIAG_WATFLUX_n, ONLY   : XZ0, XZ0H, XQS, LSURF_VARS, LCOEF
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
 !-------------------------------------------------------------------------------
 
@@ -84,14 +84,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_WATFLX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LSURF_VARS) THEN 
-        PQS      = XQS      
+IF (DGW%LSURF_VARS) THEN 
+        PQS      = DGW%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (LCOEF) THEN 
-        PZ0      = XZ0
-        PZ0H     = XZ0H
+IF (DGW%LCOEF) THEN 
+        PZ0      = DGW%XZ0
+        PZ0H     = DGW%XZ0H
 ELSE 
         PZ0      = XUNDEF
         PZ0H     = XUNDEF
@@ -104,7 +104,7 @@ END SUBROUTINE GET_VAR_WATFLX_n
 !
 SUBROUTINE GET_VAR_FLAKE_n
 !
-USE MODD_DIAG_FLAKE_n, ONLY   : XZ0, XZ0H, XQS, LSURF_VARS, LCOEF
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
 !-------------------------------------------------------------------------------
 
@@ -114,14 +114,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_FLAKE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LSURF_VARS) THEN 
-        PQS      = XQS      
+IF (DGF%LSURF_VARS) THEN 
+        PQS      = DGF%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (LCOEF) THEN 
-        PZ0      = XZ0
-        PZ0H     = XZ0H
+IF (DGF%LCOEF) THEN 
+        PZ0      = DGF%XZ0
+        PZ0H     = DGF%XZ0H
 ELSE 
         PZ0      = XUNDEF
         PZ0H     = XUNDEF

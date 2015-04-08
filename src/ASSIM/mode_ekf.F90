@@ -58,7 +58,7 @@ END SUBROUTINE GET_FILE_NAME
 SUBROUTINE B_BIG_LOOP(HACTION,HFILE,PTAB,PTAB_IN)
 !
 USE MODD_ASSIM, ONLY : NVAR
-USE MODD_ISBA_n, ONLY : NPATCH
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 CHARACTER(LEN=4), INTENT(IN) :: HACTION
 CHARACTER(LEN=*), INTENT(IN) :: HFILE
@@ -80,11 +80,11 @@ IKI = SIZE(PTAB,1)
 DO JL = 1,NVAR   ! control variable (x at previous time step)
   DO JK = 1,NVAR
     DO JI = 1,IKI
-      DO JJ = 1,NPATCH   
-        DO JJJ = 1,NPATCH
+      DO JJ = 1,I%NPATCH   
+        DO JJJ = 1,I%NPATCH
           !
-          L1 = JJ+NPATCH*(JL-1)
-          K1 = JJJ+NPATCH*(JK-1)
+          L1 = JJ+I%NPATCH*(JL-1)
+          K1 = JJJ+I%NPATCH*(JK-1)
           !
           IF ( HACTION=="READ" ) THEN
             READ (111,*) PTAB(JI,L1,K1)

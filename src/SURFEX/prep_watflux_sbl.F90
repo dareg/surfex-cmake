@@ -27,8 +27,8 @@ SUBROUTINE PREP_WATFLUX_SBL()
 !!------------------------------------------------------------------
 !
 !
-USE MODD_WATFLUX_GRID_n,     ONLY : NDIM
-USE MODD_WATFLUX_SBL_n,   ONLY : NLVL, XZ
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -51,13 +51,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX_SBL',0,ZHOOK_HANDLE)
-NLVL = 6
+WSB%NLVL = 6
 !
 !*      2.    height of half levels (where turbulent fluxes will be)
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(NDIM,NLVL))
+ALLOCATE(ZZF(WG%NDIM,WSB%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1
 ZZF(:,3) = 3.
@@ -65,11 +65,11 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(XZ(NDIM,NLVL))
-DO JLAYER=1,NLVL-1
-  XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
+ALLOCATE(WSB%XZ(WG%NDIM,WSB%NLVL))
+DO JLAYER=1,WSB%NLVL-1
+  WSB%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO
-XZ(:,NLVL) = 1.5 * ZZF(:,NLVL) - 0.5 * ZZF(:,NLVL-1)
+WSB%XZ(:,WSB%NLVL) = 1.5 * ZZF(:,WSB%NLVL) - 0.5 * ZZF(:,WSB%NLVL-1)
 !
 DEALLOCATE(ZZF)
 !

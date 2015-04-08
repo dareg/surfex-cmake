@@ -38,40 +38,13 @@ SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSIO
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
-USE MODD_TEB_n,           ONLY: XGARDEN
-USE MODD_TEB_OPTION_n,    ONLY: TTIME
-USE MODD_TEB_VEG_n,       ONLY: CISBA, CPEDOTF, CPHOTO, CSCOND, LTR_ML, NNBIOMASS,  &
-                                CCPSURF, CKSAT, LSOC, CRUNOFF
-USE MODD_TEB_GARDEN_OPTION_n,  ONLY :NGROUND_LAYER, NLAYER_HORT, NLAYER_DUN,        &
-                                LPAR_GARDEN      
-USE MODD_TEB_GARDEN_PGD_EVOL_n,ONLY: XLAI, XVEG, XEMIS, XZ0,                        &
-                                XALBNIR, XALBVIS, XALBUV
-USE MODD_TEB_GARDEN_PGD_n,ONLY: LSTRESS, XPCPS, XPLVTT, XPLSTT,                     & 
-                                XCLAY, XSAND, XWWILT, XWFC, XWSAT,                  &
-                                XRSMIN, XGAMMA, XRGL, XCV,                          &
-                                XDG, XZ0_O_Z0H, XABC, XPOI,                         &
-                                XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,               &
-                                XVEGTYPE, XGMES, XRE25, XBSLAI, XLAIMIN, XGC,       &
-                                XDMAX, XF2I, XDG2, XDROOT, NWG_LAYER,               &
-                                XSEFOLD, XH_TREE, XWRMAX_CF, XDZG, XDZDIF,          &
-                                XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,               &
-                                XALBNIR_WET, XALBVIS_WET, XALBUV_WET,               &
-                                XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,            &
-                                XROOTFRAC,XRUNOFFD, XANMAX, XFZERO, XEPSO, XGAMM,   &
-                                XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, &
-                                XT1AMAX, XT2AMAX, XAH, XBH,                         &
-                                XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF,  &
-                                XTAUICE, XACOEF, XPCOEF, XBCOEF, XCONDSAT,          &
-                                XHCAPSOIL, XCONDDRY, XCONDSLD, XC4REF, XMPOTSAT,    &
-                                XTDEEP, XGAMMAT, XSOILWGHT,                         &
-                                XCE_NITRO, XCF_NITRO,                               &
-                                XCNA_NITRO, XBSLAI_NITRO,                           &
-                                XD_ICE, XKSAT_ICE
-USE MODD_CH_TEB_n,        ONLY: CSV, CCH_NAMES, NBEQ, NSV_CHSBEG, NSV_CHSEND,       &
-                                CCHEM_SURF_FILE, NDSTEQ, NSV_DSTBEG, NSV_DSTEND,    &
-                                NSV_AERBEG, NSV_AEREND, NAEREQ, CDSTNAMES,          &
-                                CAER_NAMES, NSLTEQ, NSV_SLTBEG,                     &
-                                NSV_SLTEND, CSLTNAMES, CCH_DRY_DEP, LCH_BIO_FLUX 
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
                                 
 USE MODD_DATA_COVER_PAR,  ONLY: NVEGTYPE
 USE MODD_SURF_PAR,        ONLY: XUNDEF, NUNDEF
@@ -136,7 +109,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_PGD_n',0,ZHOOK_HANDLE)
 !
 !* allocation of urban green area variables
 !
- CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, NGROUND_LAYER, NDIMTAB)  
+ CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, TGDO%NGROUND_LAYER, NDIMTAB)  
 !
 !
 !*       2.1    Cover, soil and orographic fields:
@@ -149,38 +122,38 @@ IF (OREAD_PGD) &
 !*       2.3    Physiographic data fields from land cover:
 !               -----------------------------------------
 !
-IF (TTIME%TDATE%MONTH /= NUNDEF) THEN
-  IDECADE = 3 * ( TTIME%TDATE%MONTH - 1 ) + MIN(TTIME%TDATE%DAY-1,29) / 10 + 1
+IF (TOP%TTIME%TDATE%MONTH /= NUNDEF) THEN
+  IDECADE = 3 * ( TOP%TTIME%TDATE%MONTH - 1 ) + MIN(TOP%TTIME%TDATE%DAY-1,29) / 10 + 1
 ELSE
   IDECADE = 1
 END IF
 !
 !
-IF (.NOT. LPAR_GARDEN) THEN
+IF (.NOT. TGDO%LPAR_GARDEN) THEN
   CALL CONVERT_PATCH_GARDEN(KI,IDECADE)
 ELSE
- CALL INIT_FROM_DATA_GRDN_n(IDECADE,CPHOTO,                     &
-                            XVEG,                               &
-                            XLAI,XRSMIN,XGAMMA,XWRMAX_CF,       &
-                            XRGL,XCV,XDG,XD_ICE,XZ0,XZ0_O_Z0H,  &
-                            XALBNIR_VEG,XALBVIS_VEG,            &
-                            XALBUV_VEG,XEMIS,                   &
-                            XVEGTYPE,XROOTFRAC,                 &
-                            XGMES,XBSLAI,XLAIMIN,XSEFOLD,XGC,   &
-                            XDMAX, XF2I, LSTRESS, XH_TREE,XRE25,&
-                            XCE_NITRO,XCF_NITRO,XCNA_NITRO      )  
+ CALL INIT_FROM_DATA_GRDN_n(IDECADE,TVG%CPHOTO,                     &
+                            TGDPE%XVEG,                               &
+                            TGDPE%XLAI,TGDP%XRSMIN,TGDP%XGAMMA,TGDP%XWRMAX_CF,       &
+                            TGDP%XRGL,TGDP%XCV,TGDP%XDG,TGDP%XD_ICE,TGDPE%XZ0,TGDP%XZ0_O_Z0H,  &
+                            TGDP%XALBNIR_VEG,TGDP%XALBVIS_VEG,            &
+                            TGDP%XALBUV_VEG,TGDPE%XEMIS,                   &
+                            TGDP%XVEGTYPE,TGDP%XROOTFRAC,                 &
+                            TGDP%XGMES,TGDP%XBSLAI,TGDP%XLAIMIN,TGDP%XSEFOLD,TGDP%XGC,   &
+                            TGDP%XDMAX, TGDP%XF2I, TGDP%LSTRESS, TGDP%XH_TREE,TGDP%XRE25,&
+                            TGDP%XCE_NITRO,TGDP%XCF_NITRO,TGDP%XCNA_NITRO      )  
 
-  IF (CISBA=='DIF') THEN
-    WHERE(XGARDEN(:)/=0.)
-      NWG_LAYER(:)=NGROUND_LAYER 
-      XDG2  (:)=0.0
-      XDROOT(:)=0.0
+  IF (TVG%CISBA=='DIF') THEN
+    WHERE(T%XGARDEN(:)/=0.)
+      TGDP%NWG_LAYER(:)=TGDO%NGROUND_LAYER 
+      TGDP%XDG2  (:)=0.0
+      TGDP%XDROOT(:)=0.0
     ENDWHERE
-    DO JLAYER=NGROUND_LAYER,1,-1
+    DO JLAYER=TGDO%NGROUND_LAYER,1,-1
       DO JILU=1,KI
-        IF(XGARDEN(JILU)/=0..AND.XROOTFRAC(JILU,JLAYER)>=1.0)THEN
-          XDG2  (JILU)=XDG(JILU,JLAYER)
-          XDROOT(JILU)=XDG(JILU,JLAYER)
+        IF(T%XGARDEN(JILU)/=0..AND.TGDP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
+          TGDP%XDG2  (JILU)=TGDP%XDG(JILU,JLAYER)
+          TGDP%XDROOT(JILU)=TGDP%XDG(JILU,JLAYER)
         ENDIF
       ENDDO
     ENDDO
@@ -189,114 +162,114 @@ ELSE
 END IF
 !
 
-WHERE (XGARDEN(:)==0.)
-  XVEG(:)=0.
-  XLAI(:)=0.
-  XRSMIN(:)=40.
-  XGAMMA(:)=0.
-  XWRMAX_CF(:)=0.2
-  XRGL(:)=100.
-  XCV(:)=2.E-5
-  XZ0(:)=0.013
-  XZ0_O_Z0H(:)=10.
-  XALBNIR_VEG(:)=0.30
-  XALBVIS_VEG(:)=0.30
-  XALBUV_VEG(:)=0.06
-  XEMIS(:)=0.94
+WHERE (T%XGARDEN(:)==0.)
+  TGDPE%XVEG(:)=0.
+  TGDPE%XLAI(:)=0.
+  TGDP%XRSMIN(:)=40.
+  TGDP%XGAMMA(:)=0.
+  TGDP%XWRMAX_CF(:)=0.2
+  TGDP%XRGL(:)=100.
+  TGDP%XCV(:)=2.E-5
+  TGDPE%XZ0(:)=0.013
+  TGDP%XZ0_O_Z0H(:)=10.
+  TGDP%XALBNIR_VEG(:)=0.30
+  TGDP%XALBVIS_VEG(:)=0.30
+  TGDP%XALBUV_VEG(:)=0.06
+  TGDPE%XEMIS(:)=0.94
 ENDWHERE  
-IF (CPHOTO/='NON') THEN
-  WHERE (XGARDEN(:)==0.)
-    XGMES(:)=0.020
-    XBSLAI(:)=0.36
-    XLAIMIN(:)=0.3
-    XSEFOLD(:)=90*86400.
-    XH_TREE(:)=0.
-    XRE25(:)=3.6E-7
-    XGC(:)=0.00025
+IF (TVG%CPHOTO/='NON') THEN
+  WHERE (T%XGARDEN(:)==0.)
+    TGDP%XGMES(:)=0.020
+    TGDP%XBSLAI(:)=0.36
+    TGDP%XLAIMIN(:)=0.3
+    TGDP%XSEFOLD(:)=90*86400.
+    TGDP%XH_TREE(:)=0.
+    TGDP%XRE25(:)=3.6E-7
+    TGDP%XGC(:)=0.00025
   END WHERE
-  IF (CPHOTO/='AGS' .AND. CPHOTO/='LAI') THEN
-    WHERE (XGARDEN(:)==0.) 
-      XDMAX(:)=0.1
-      XF2I(:)=0.3
+  IF (TVG%CPHOTO/='AGS' .AND. TVG%CPHOTO/='LAI') THEN
+    WHERE (T%XGARDEN(:)==0.) 
+      TGDP%XDMAX(:)=0.1
+      TGDP%XF2I(:)=0.3
     END WHERE
-    IF (CPHOTO=='NIT' .OR. CPHOTO=='NCB') THEN
-      WHERE (XGARDEN(:)==0.)      
-        XCE_NITRO(:)=7.68
-        XCF_NITRO(:)=-4.33
-        XCNA_NITRO(:)=1.3
+    IF (TVG%CPHOTO=='NIT' .OR. TVG%CPHOTO=='NCB') THEN
+      WHERE (T%XGARDEN(:)==0.)      
+        TGDP%XCE_NITRO(:)=7.68
+        TGDP%XCF_NITRO(:)=-4.33
+        TGDP%XCNA_NITRO(:)=1.3
       END WHERE
     ENDIF
   ENDIF
 ENDIF
-IF(CISBA/='DIF')THEN
-  DO JLAYER=1,NGROUND_LAYER
-    WHERE (XGARDEN(:)==0.)
-      XDG(:,JLAYER)=0.2*JLAYER
+IF(TVG%CISBA/='DIF')THEN
+  DO JLAYER=1,TGDO%NGROUND_LAYER
+    WHERE (T%XGARDEN(:)==0.)
+      TGDP%XDG(:,JLAYER)=0.2*JLAYER
     END WHERE
   ENDDO
 ELSE
-  WHERE (XGARDEN(:)==0.) 
-    XDG(:,1)=0.01
-    XDG(:,2)=0.04
-    XROOTFRAC(:,1)=0.
-    XROOTFRAC(:,2)=0.
+  WHERE (T%XGARDEN(:)==0.) 
+    TGDP%XDG(:,1)=0.01
+    TGDP%XDG(:,2)=0.04
+    TGDP%XROOTFRAC(:,1)=0.
+    TGDP%XROOTFRAC(:,2)=0.
   END WHERE        
-  DO JLAYER=3,NGROUND_LAYER
-    WHERE (XGARDEN(:)==0.)
-      XDG(:,JLAYER)=0.1*(JLAYER-2)
-      XROOTFRAC(:,JLAYER)=0.
+  DO JLAYER=3,TGDO%NGROUND_LAYER
+    WHERE (T%XGARDEN(:)==0.)
+      TGDP%XDG(:,JLAYER)=0.1*(JLAYER-2)
+      TGDP%XROOTFRAC(:,JLAYER)=0.
     END WHERE
   ENDDO               
-  WHERE (XGARDEN(:)==0.) 
-    NWG_LAYER(:)=NGROUND_LAYER
-    XDROOT   (:)=0.0
-    XDG2     (:)=XDG(:,NGROUND_LAYER-1)
+  WHERE (T%XGARDEN(:)==0.) 
+    TGDP%NWG_LAYER(:)=TGDO%NGROUND_LAYER
+    TGDP%XDROOT   (:)=0.0
+    TGDP%XDG2     (:)=TGDP%XDG(:,TGDO%NGROUND_LAYER-1)
   ENDWHERE    
 ENDIF  
-WHERE (XGARDEN(:)==0.) 
-  XD_ICE(:)=0.8*XDG(:,2)
+WHERE (T%XGARDEN(:)==0.) 
+  TGDP%XD_ICE(:)=0.8*TGDP%XDG(:,2)
 END WHERE  
 DO JVEGTYPE=1,NVEGTYPE
-  WHERE (XGARDEN(:)==0.)
-    XVEGTYPE(:,JVEGTYPE)=0.
-    XVEGTYPE(:,1)=1.
+  WHERE (T%XGARDEN(:)==0.)
+    TGDP%XVEGTYPE(:,JVEGTYPE)=0.
+    TGDP%XVEGTYPE(:,1)=1.
   END WHERE
 ENDDO
 !
- CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, NGROUND_LAYER, TTIME%TDATE%MONTH,    &
-                        XVEGTYPE, XTDEEP, XGAMMAT, CPHOTO, HINIT, LTR_ML, CRUNOFF,  &
-                        NNBIOMASS, PCO2, PRHOA, XABC, XPOI,                         &
-                        XGMES, XGC, XDMAX, XANMAX, XFZERO, XEPSO, XGAMM, XQDGAMM,   &
-                        XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX, XT2AMAX,&
-                        XAH, XBH,                                                   &
-                        KSV, HSV, NBEQ, CSV, NAEREQ, NSV_CHSBEG, NSV_CHSEND,        &
-                        NSV_AERBEG, NSV_AEREND, CCH_NAMES, CAER_NAMES, NDSTEQ,      &
-                        NSV_DSTBEG, NSV_DSTEND, NSLTEQ, NSV_SLTBEG, NSV_SLTEND,     &
-                        CDSTNAMES, CSLTNAMES, CCHEM_SURF_FILE,                      &
-                        XCLAY, XSAND, CPEDOTF,                                      &
-                        XCONDSAT, XMPOTSAT, XBCOEF, XWWILT, XWFC, XWSAT,            &
-                        XTAUICE, XCGSAT, XC1SAT, XC2REF, XC3, XC4B, XACOEF, XPCOEF, &
-                        XC4REF, XPCPS, XPLVTT, XPLSTT,                              &
-                        CSCOND, CISBA, XHCAPSOIL, XCONDDRY, XCONDSLD, CCPSURF,      &
-                        XDG, XDROOT, XDG2, XROOTFRAC, XRUNOFFD, XDZG, XDZDIF,       &
-                        XSOILWGHT, NWG_LAYER, NLAYER_HORT, NLAYER_DUN, XD_ICE,      &
-                        XKSAT_ICE, XALBNIR_DRY, XALBVIS_DRY, XALBUV_DRY,            &
-                        XALBNIR_WET, XALBVIS_WET, XALBUV_WET, XBSLAI_NITRO,         &
-                        XCE_NITRO, XCNA_NITRO, XCF_NITRO                            )
+ CALL INIT_VEG_PGD_GARDEN_n(HPROGRAM, ILUOUT, KI, TGDO%NGROUND_LAYER, TOP%TTIME%TDATE%MONTH,    &
+                        TGDP%XVEGTYPE, TGDP%XTDEEP, TGDP%XGAMMAT, TVG%CPHOTO, HINIT, TVG%LTR_ML, TVG%CRUNOFF,  &
+                        TVG%NNBIOMASS, PCO2, PRHOA, TGDP%XABC, TGDP%XPOI,                         &
+                        TGDP%XGMES, TGDP%XGC, TGDP%XDMAX, TGDP%XANMAX, TGDP%XFZERO, TGDP%XEPSO, TGDP%XGAMM, TGDP%XQDGAMM,   &
+                        TGDP%XQDGMES, TGDP%XT1GMES, TGDP%XT2GMES, TGDP%XAMAX, TGDP%XQDAMAX, TGDP%XT1AMAX, TGDP%XT2AMAX,&
+                        TGDP%XAH, TGDP%XBH,                                                   &
+                        KSV, HSV, CHT%NBEQ, CHT%CSV, CHT%NAEREQ, CHT%NSV_CHSBEG, CHT%NSV_CHSEND,        &
+                        CHT%NSV_AERBEG, CHT%NSV_AEREND, CHT%CCH_NAMES, CHT%CAER_NAMES, CHT%NDSTEQ,      &
+                        CHT%NSV_DSTBEG, CHT%NSV_DSTEND, CHT%NSLTEQ, CHT%NSV_SLTBEG, CHT%NSV_SLTEND,     &
+                        CHT%CDSTNAMES, CHT%CSLTNAMES, CHT%CCHEM_SURF_FILE,                      &
+                        TGDP%XCLAY, TGDP%XSAND, TVG%CPEDOTF,                                      &
+                        TGDP%XCONDSAT, TGDP%XMPOTSAT, TGDP%XBCOEF, TGDP%XWWILT, TGDP%XWFC, TGDP%XWSAT,            &
+                        TGDP%XTAUICE, TGDP%XCGSAT, TGDP%XC1SAT, TGDP%XC2REF, TGDP%XC3, TGDP%XC4B, TGDP%XACOEF, TGDP%XPCOEF, &
+                        TGDP%XC4REF, TGDP%XPCPS, TGDP%XPLVTT, TGDP%XPLSTT,                              &
+                        TVG%CSCOND, TVG%CISBA, TGDP%XHCAPSOIL, TGDP%XCONDDRY, TGDP%XCONDSLD, TVG%CCPSURF,      &
+                        TGDP%XDG, TGDP%XDROOT, TGDP%XDG2, TGDP%XROOTFRAC, TGDP%XRUNOFFD, TGDP%XDZG, TGDP%XDZDIF,       &
+                        TGDP%XSOILWGHT, TGDP%NWG_LAYER, TGDO%NLAYER_HORT, TGDO%NLAYER_DUN, TGDP%XD_ICE,      &
+                        TGDP%XKSAT_ICE, TGDP%XALBNIR_DRY, TGDP%XALBVIS_DRY, TGDP%XALBUV_DRY,            &
+                        TGDP%XALBNIR_WET, TGDP%XALBVIS_WET, TGDP%XALBUV_WET, TGDP%XBSLAI_NITRO,         &
+                        TGDP%XCE_NITRO, TGDP%XCNA_NITRO, TGDP%XCF_NITRO                            )
 !
 !-------------------------------------------------------------------------------
 !
-IF(CISBA=='DIF'.AND.LSOC)THEN
+IF(TVG%CISBA=='DIF'.AND.TVG%LSOC)THEN
   CALL ABOR1_SFX('INIT_TEB_GARDEN_PGDn: SUBGRID Soil organic matter'//&
                  ' effect (LSOC) NOT YET IMPLEMENTED FOR GARDEN')
-ELSEIF (CISBA=='3-L'.AND.CKSAT=='EXP') THEN 
+ELSEIF (TVG%CISBA=='3-L'.AND.TVG%CKSAT=='EXP') THEN 
   CALL ABOR1_SFX('INIT_TEB_GARDEN_PGDn: topmodel exponential decay not implemented for garden')
 ENDIF
 !
-IF(CKSAT=='SGH' .AND. CISBA/='DIF' .AND. HINIT/='PRE')THEN 
-  ZF(:)=MIN(4.0/XDG(:,2),XF_DECAY)
-  CALL EXP_DECAY_SOIL_FR(CISBA, ZF(:),XC1SAT(:),XC2REF(:),XDG(:,:),XD_ICE(:),&
-                         XC4REF(:),XC3(:,:),XCONDSAT(:,:),XKSAT_ICE(:))
+IF(TVG%CKSAT=='SGH' .AND. TVG%CISBA/='DIF' .AND. HINIT/='PRE')THEN 
+  ZF(:)=MIN(4.0/TGDP%XDG(:,2),XF_DECAY)
+  CALL EXP_DECAY_SOIL_FR(TVG%CISBA, ZF(:),TGDP%XC1SAT(:),TGDP%XC2REF(:),TGDP%XDG(:,:),TGDP%XD_ICE(:),&
+                         TGDP%XC4REF(:),TGDP%XC3(:,:),TGDP%XCONDSAT(:,:),TGDP%XKSAT_ICE(:))
 ENDIF
 !
 !-------------------------------------------------------------------------------

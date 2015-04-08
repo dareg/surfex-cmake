@@ -35,7 +35,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_n,     ONLY : LCOVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -64,13 +64,13 @@ IF (LHOOK) CALL DR_HOOK('GET_LCOVER_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(OCOVER) /= SIZE(LCOVER) ) THEN
+IF ( SIZE(OCOVER) /= SIZE(U%LCOVER) ) THEN
   WRITE(ILUOUT,*) 'try to get COVER field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (OCOVER) :', SIZE(OCOVER)
-  WRITE(ILUOUT,*) 'size of field inthe surface                     (LCOVER) :', SIZE(LCOVER)
+  WRITE(ILUOUT,*) 'size of field inthe surface                     (LCOVER) :', SIZE(U%LCOVER)
   CALL ABOR1_SFX('GET_LCOVERN: (1) LCOVER SIZE NOT CORRECT')
 ELSE
-  OCOVER = LCOVER
+  OCOVER = U%LCOVER
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_LCOVER_N',1,ZHOOK_HANDLE)
 !

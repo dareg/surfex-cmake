@@ -55,7 +55,7 @@ USE MODD_TYPE_SNOW
 USE MODD_SNOW_PAR,   ONLY : XEMISSN
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_TEB_GARDEN_n,    ONLY : TSNOW, XPSN, XPSNV_A, XPSNG, XPSNV
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
 !
 USE MODI_ALBEDO
 USE MODI_ALBEDO_FROM_NIR_VIS
@@ -137,25 +137,25 @@ PEMIS   (:)  =0.
 PTSRAD  (:)  =0.
 !   
 !
-  CALL ISBA_SNOW_FRAC(TSNOW%SCHEME,           &
-         TSNOW%WSNOW(:,:,1), TSNOW%RHO(:,:,1),&
-         TSNOW%ALB  (:,1),                    &
+  CALL ISBA_SNOW_FRAC(TGD%TSNOW%SCHEME,           &
+         TGD%TSNOW%WSNOW(:,:,1), TGD%TSNOW%RHO(:,:,1),&
+         TGD%TSNOW%ALB  (:,1),                    &
          PVEG(:), PLAI(:), PZ0(:),            &
-         XPSN(:), XPSNV_A(:),                 &
-         XPSNG(:), XPSNV(:)                   )
+         TGD%XPSN(:), TGD%XPSNV_A(:),                 &
+         TGD%XPSNG(:), TGD%XPSNV(:)                   )
 !
  WHERE (PVEG(:)/=XUNDEF)
 !
 ! albedo on this tile
 !
-    ZALBNIR(:) = (1.-XPSN(:))*PALBNIR_ECO(:) &
-                +    XPSN(:) *TPSNOW%ALB (:,1)  
+    ZALBNIR(:) = (1.-TGD%XPSN(:))*PALBNIR_ECO(:) &
+                +    TGD%XPSN(:) *TPSNOW%ALB (:,1)  
       
-    ZALBVIS(:) = (1.-XPSN(:))*PALBVIS_ECO(:) &
-                +    XPSN(:) *TPSNOW%ALB (:,1)  
+    ZALBVIS(:) = (1.-TGD%XPSN(:))*PALBVIS_ECO(:) &
+                +    TGD%XPSN(:) *TPSNOW%ALB (:,1)  
       
-    ZALBUV(:)  = (1.-XPSN(:))*PALBUV_ECO (:) &
-                +    XPSN(:) *TPSNOW%ALB (:,1)  
+    ZALBUV(:)  = (1.-TGD%XPSN(:))*PALBUV_ECO (:) &
+                +    TGD%XPSN(:) *TPSNOW%ALB (:,1)  
   END WHERE
 !
 !* albedo for each wavelength
@@ -166,8 +166,8 @@ PTSRAD  (:)  =0.
 ! emissivity
 !
   WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PEMIS(:)   = (1.-XPSN(:))*PEMIS_ECO  (:) &
-                +    XPSN(:) *XEMISSN  
+    PEMIS(:)   = (1.-TGD%XPSN(:))*PEMIS_ECO  (:) &
+                +    TGD%XPSN(:) *XEMISSN  
   END WHERE
 !
 !* radiative surface temperature
@@ -176,8 +176,8 @@ PTSRAD  (:)  =0.
     PTSRAD(:) = PTG1(:)
   ELSE IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
     WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PTSRAD(:) =( ( (1.-XPSN(:))*PEMIS      (:)       *PTG1     (:)**4         &
-                  +    XPSN(:) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
+    PTSRAD(:) =( ( (1.-TGD%XPSN(:))*PEMIS      (:)       *PTG1     (:)**4         &
+                  +    TGD%XPSN(:) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
                              / PEMIS(:)**0.25  
     END WHERE
   END IF

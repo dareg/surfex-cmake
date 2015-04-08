@@ -36,16 +36,9 @@ SUBROUTINE COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                          
 !----------------------------------------------------------------
 !
 USE MODD_CSTS,          ONLY : XCPD
-USE MODD_ISBA_n,        ONLY : LCANOPY, LCANOPY_DRAG, CROUGH, XZ0, XLAI, XPATCH, &
-                               XSSO_STDEV, XSSO_SLOPE, XZ0_O_Z0H, XTG, CISBA,    &
-                               TSNOW, CCPSURF, XWFC, XVEG, XGAMMA, XRSMIN, XWR,  &
-                               XWRMAX_CF, XRESA, XRGL, XWSAT, XWG, XWGI
-USE MODD_ISBA_CANOPY_n, ONLY : XZ, XU, NLVL, XTKE, XT, XQ, XLMO, XZF, XDZ, XDZF, XP
-USE MODD_DIAG_ISBA_n,   ONLY : N2M, XAVG_T2M, XAVG_Q2M, XAVG_HU2M,               &
-                               XAVG_ZON10M, XAVG_MER10M, XAVG_WIND10M,           &
-                               XAVG_WIND10M_MAX, XAVG_T2M_MIN, XAVG_T2M_MAX,     &
-                               XAVG_HU2M_MIN, XAVG_HU2M_MAX,                     &
-                               LSURF_BUDGET, XAVG_FMU, XAVG_FMV
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 USE MODD_CANOPY_TURB,   ONLY : XALPSBL
 !
@@ -159,21 +152,21 @@ REAL, DIMENSION(KI)        :: ZCANOPY   ! height of canopy   (m)
 REAL, DIMENSION(KI)        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
 REAL, DIMENSION(KI)        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
 REAL, DIMENSION(KI)        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(KI,NLVL)   :: ZLMO      ! MO length
-REAL, DIMENSION(KI,NLVL)   :: ZLM       ! mixing length
-REAL, DIMENSION(KI,NLVL)   :: ZLEPS     ! dissipative length
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZLMO      ! MO length
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZLM       ! mixing length
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZLEPS     ! dissipative length
 REAL, DIMENSION(KI)     :: ZH           ! canopy height (m)
 REAL, DIMENSION(KI)     :: ZUSTAR       ! friction velocity including drag effect (m/s)
 REAL, DIMENSION(KI)     :: ZUSTAR_GROUND! friction velocity at ground only (ISBA) (m/s)
@@ -196,7 +189,7 @@ REAL, DIMENSION(KI)   ::ZCANOPY_DENSITY
 REAL, DIMENSION(KI)   ::ZUW_GROUND
 REAL, DIMENSION(KI)   ::ZDUWDU_GROUND
 !
-REAL, DIMENSION(KI,NLVL)   :: ZZ        ! height above displacement height
+REAL, DIMENSION(KI,ICP%NLVL)   :: ZZ        ! height above displacement height
 !
 INTEGER                      :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -208,7 +201,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_CANOPY_N',0,ZHOOK_HANDLE)
-IF (LCANOPY) THEN
+IF (I%LCANOPY) THEN
 !
 !*      1.1    Updates canopy vertical grid as a function of forcing height
 !              ------------------------------------------------------------
@@ -216,7 +209,7 @@ IF (LCANOPY) THEN
 !* determines where is the forcing level and modifies the upper levels of the canopy grid
 !
   ZCANOPY = 0.
-  CALL CANOPY_GRID_UPDATE(KI,NLVL,ZCANOPY,PUREF,XZ,XZF,XDZ,XDZF)
+  CALL CANOPY_GRID_UPDATE(KI,ICP%NLVL,ZCANOPY,PUREF,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF)
 !
 !
 !
@@ -226,13 +219,13 @@ IF (LCANOPY) THEN
 !
 !       1.2.1  First time step canopy initialisation
 !
-  IF(ANY(XT(:,:) == XUNDEF)) THEN
-    CALL INIT_ISBA_SBL(CISBA, CCPSURF, NLVL, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV,   &
+  IF(ANY(ICP%XT(:,:) == XUNDEF)) THEN
+    CALL INIT_ISBA_SBL(I%CISBA, I%CCPSURF, ICP%NLVL, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV,   &
                        PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW,                         &
-                       PZREF, PUREF, XTG(:,1,:), XPATCH, XWG(:,1,:), XWGI(:,1,:),         &
-                       XZ0, XSSO_SLOPE, XRESA, XVEG, XLAI, XWR, XRGL, XRSMIN,             &
-                       XGAMMA, XWRMAX_CF, XZ0_O_Z0H, XWFC, XWSAT, TSNOW, XZ,              &
-                       XT, XQ, XU, XTKE, XP)
+                       PZREF, PUREF, I%XTG(:,1,:), I%XPATCH, I%XWG(:,1,:), I%XWGI(:,1,:),         &
+                       I%XZ0, I%XSSO_SLOPE, I%XRESA, I%XVEG, I%XLAI, I%XWR, I%XRGL, I%XRSMIN,             &
+                       I%XGAMMA, I%XWRMAX_CF, I%XZ0_O_Z0H, I%XWFC, I%XWSAT, I%TSNOW, ICP%XZ,              &
+                       ICP%XT, ICP%XQ, ICP%XU, ICP%XTKE, ICP%XP)
   ENDIF
 !
 !*      1.3    Allocations
@@ -245,7 +238,7 @@ IF (LCANOPY) THEN
   ZSFLUX_T = 0.
   ZSFLUX_Q = 0.
 !
-  ZLMO = SPREAD(XLMO,2,NLVL)
+  ZLMO = SPREAD(ICP%XLMO,2,ICP%NLVL)
 !
 !* default :
 !* no canopy in ISBA scheme
@@ -255,29 +248,29 @@ IF (LCANOPY) THEN
 !
 !* determine for each level the height above displacement height
 !
-  ZZ(:,:) = XZ(:,:)
+  ZZ(:,:) = ICP%XZ(:,:)
 !
 !*      1.4   canopy for wind drag only
 !             -------------------------
 !
-  IF (LCANOPY_DRAG) THEN
+  IF (I%LCANOPY_DRAG) THEN
 !* mean canopy height
 !
 !* in ecoclimap, height is set retrieved from roughness length (z0/0.13)
     DO JJ=1,KI
-      ZH(JJ) = SUM(XPATCH(JJ,:)*XZ0(JJ,:)/0.13)
-      ZH(JJ) = MIN(ZH(JJ), XZF(JJ,NLVL))
-      IF (ZH(JJ)<=XDZ(JJ,1)) ZH(JJ) = 0.
+      ZH(JJ) = SUM(I%XPATCH(JJ,:)*I%XZ0(JJ,:)/0.13)
+      ZH(JJ) = MIN(ZH(JJ), ICP%XZF(JJ,ICP%NLVL))
+      IF (ZH(JJ)<=ICP%XDZ(JJ,1)) ZH(JJ) = 0.
 !
 !* canopy for wind drag only
-      ZCANOPY_DENSITY(JJ) = SUM(XPATCH(JJ,:)*XLAI(JJ,:))
+      ZCANOPY_DENSITY(JJ) = SUM(I%XPATCH(JJ,:)*I%XLAI(JJ,:))
       ZUW_GROUND(JJ)      = 0.
       ZDUWDU_GROUND(JJ)   = 0.
       !
     ENDDO
 !
 !* computes tendencies on wind and Tke due to canopy
-    CALL ISBA_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZH,ZCANOPY_DENSITY,XU,XTKE,    &
+    CALL ISBA_CANOPY(KI,ICP%NLVL,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ZH,ZCANOPY_DENSITY,ICP%XU,ICP%XTKE,    &
                     ZUW_GROUND, ZDUWDU_GROUND,                              &
                     ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE                   )
 !
@@ -286,10 +279,10 @@ IF (LCANOPY) THEN
 !*      1.4   Subgrid-scale orographic drag (Beljaars et al 2004)
 !             -----------------------------
 !
-  IF (CROUGH=='BE04') THEN
+  IF (I%CROUGH=='BE04') THEN
 !
 !* computes tendencies on wind and Tke due to subgridscale orography
-    CALL SSO_BELJAARS04(KI,NLVL,XZ,XSSO_STDEV,XU,ZFORC_U,ZDFORC_UDU )
+    CALL SSO_BELJAARS04(KI,ICP%NLVL,ICP%XZ,I%XSSO_STDEV,ICP%XU,ZFORC_U,ZDFORC_UDU )
 !
   ENDIF
 !
@@ -298,11 +291,11 @@ IF (LCANOPY) THEN
 !             ---------------------------------------
 !
   ZWIND = SQRT(PU**2+PV**2)
-  CALL CANOPY_EVOL(KI,NLVL,PTSTEP,1,ZZ,ZWIND,PTA,PQA,PPA,PRHOA,             &
+  CALL CANOPY_EVOL(KI,ICP%NLVL,PTSTEP,1,ZZ,ZWIND,PTA,PQA,PPA,PRHOA,             &
                    ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,                              &
                    ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                   &
                    ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                   &
-                   XZ,XZF,XDZ,XDZF,XU,XTKE,XT,XQ,ZLMO,ZLM,ZLEPS,XP,ZUSTAR,  &
+                   ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ICP%XU,ICP%XTKE,ICP%XT,ICP%XQ,ZLMO,ZLM,ZLEPS,ICP%XP,ZUSTAR,  &
                    ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ              )
 !
 !*     1.6     Goes from atmospheric forcing to canopy forcing height
@@ -310,8 +303,8 @@ IF (LCANOPY) THEN
 !
   GCOUPLING ='I'
 !
-  CALL INIT_COUPLING_CANOPY( XP(:,1), PPA, XT(:,1), XQ(:,1), &
-                           PU, PV, XZ(:,1), XU(:,1),         &
+  CALL INIT_COUPLING_CANOPY( ICP%XP(:,1), PPA, ICP%XT(:,1), ICP%XQ(:,1), &
+                           PU, PV, ICP%XZ(:,1), ICP%XU(:,1),         &
                            PRHOA, ZALFAU, ZBETAU, ZALFATH,   &
                            ZBETATH, ZALFAQ, ZBETAQ,          &
                            ZPA, ZTA, ZQA, ZU, ZV,            &
@@ -365,8 +358,8 @@ END IF
 !*      3.     End if no canopy is used
 !              ------------------------
 !
-IF (.NOT. LCANOPY .AND. LHOOK) CALL DR_HOOK('COUPLING_ISBA_CANOPY_N',1,ZHOOK_HANDLE)
-IF (.NOT. LCANOPY) RETURN
+IF (.NOT. I%LCANOPY .AND. LHOOK) CALL DR_HOOK('COUPLING_ISBA_CANOPY_N',1,ZHOOK_HANDLE)
+IF (.NOT. I%LCANOPY) RETURN
 !
 !-------------------------------------------------------------------------------------
 !
@@ -385,16 +378,16 @@ ZSFLUX_Q(:) = PSFTQ(:)
 !*      5.     Computes the impact of canopy on air
 !              ------------------------------------
 !
-IF (LCANOPY_DRAG) THEN
+IF (I%LCANOPY_DRAG) THEN
 !
   DO JJ=1,KI
     ZUW_GROUND(JJ)    = -SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/ PRHOA(JJ)
     ZDUWDU_GROUND(JJ) = 0.
-    IF (XU(JJ,1)   /=0.) ZDUWDU_GROUND(JJ) = 2. * ZUW_GROUND(JJ) / XU(JJ,1)
+    IF (ICP%XU(JJ,1)   /=0.) ZDUWDU_GROUND(JJ) = 2. * ZUW_GROUND(JJ) / ICP%XU(JJ,1)
   ENDDO
 
 !* computes tendencies on wind and Tke due to canopy and surface
-  CALL ISBA_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZH,ZCANOPY_DENSITY,XU,XTKE,  &
+  CALL ISBA_CANOPY(KI,ICP%NLVL,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ZH,ZCANOPY_DENSITY,ICP%XU,ICP%XTKE,  &
                   ZUW_GROUND, ZDUWDU_GROUND,                            &
                   ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE                 )
 
@@ -403,10 +396,10 @@ IF (LCANOPY_DRAG) THEN
 END IF
 !
 !
-IF (CROUGH=='BE04') THEN
+IF (I%CROUGH=='BE04') THEN
 !
 !* computes tendencies on wind and Tke due to subgridscale orography
-  CALL SSO_BELJAARS04(KI,NLVL,XZ,XSSO_STDEV,XU,ZFORC_U,ZDFORC_UDU     )
+  CALL SSO_BELJAARS04(KI,ICP%NLVL,ICP%XZ,I%XSSO_STDEV,ICP%XU,ZFORC_U,ZDFORC_UDU     )
 !
 ENDIF
 !
@@ -416,19 +409,19 @@ ENDIF
 !             --------------------------------------------
 !
 ZWIND = SQRT(PU**2+PV**2)
- CALL CANOPY_EVOL(KI,NLVL,PTSTEP,2,ZZ,ZWIND,PTA,PQA,PPA,PRHOA,                 &
+ CALL CANOPY_EVOL(KI,ICP%NLVL,PTSTEP,2,ZZ,ZWIND,PTA,PQA,PPA,PRHOA,                 &
                  ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,                                  &
                  ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                       &
                  ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                       &
-                 XZ,XZF,XDZ,XDZF,XU,XTKE,XT,XQ,ZLMO,ZLM,ZLEPS,XP,ZUSTAR,       &
+                 ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ICP%XU,ICP%XTKE,ICP%XT,ICP%XQ,ZLMO,ZLM,ZLEPS,ICP%XP,ZUSTAR,       &
                  ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ                  )
 !
-XLMO(:) = ZLMO(:,NLVL)
+ICP%XLMO(:) = ZLMO(:,ICP%NLVL)
 !
 ! Momentum fluxes if canopy is used
 !
 !* Total friction due to surface averaged friction and averaged canopy drag
-IF (LCANOPY_DRAG .OR. CROUGH=='BE04') THEN
+IF (I%LCANOPY_DRAG .OR. I%CROUGH=='BE04') THEN
   DO JJ=1,KI
     ZUSTAR_GROUND(JJ) = SQRT(SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/PRHOA(JJ))
     IF (ZUSTAR_GROUND(JJ)>0.) THEN
@@ -437,9 +430,9 @@ IF (LCANOPY_DRAG .OR. CROUGH=='BE04') THEN
     ENDIF
   ENDDO
 !* Total friction due to surface averaged friction and averaged canopy drag
-  IF (LSURF_BUDGET) THEN
-    XAVG_FMU = PSFU
-    XAVG_FMV = PSFV          
+  IF (DGI%LSURF_BUDGET) THEN
+    DGI%XAVG_FMU = PSFU
+    DGI%XAVG_FMV = PSFV          
   ENDIF
 END IF
 !
@@ -449,11 +442,11 @@ END IF
 !             ----------------------------------------
 !
 !
-IF (N2M>=1) CALL INIT_2M_10M( XP(:,2), XT(:,2), XQ(:,2),  XU, XZ, &
+IF (DGI%N2M>=1) CALL INIT_2M_10M( ICP%XP(:,2), ICP%XT(:,2), ICP%XQ(:,2),  ICP%XU, ICP%XZ, &
                               PU, PV, ZWIND, PRHOA,               &
-                              XAVG_T2M, XAVG_Q2M, XAVG_HU2M, XAVG_ZON10M, XAVG_MER10M, &
-                              XAVG_WIND10M, XAVG_WIND10M_MAX, XAVG_T2M_MIN,            &
-                              XAVG_T2M_MAX, XAVG_HU2M_MIN, XAVG_HU2M_MAX )
+                              DGI%XAVG_T2M, DGI%XAVG_Q2M, DGI%XAVG_HU2M, DGI%XAVG_ZON10M, DGI%XAVG_MER10M, &
+                              DGI%XAVG_WIND10M, DGI%XAVG_WIND10M_MAX, DGI%XAVG_T2M_MIN,            &
+                              DGI%XAVG_T2M_MAX, DGI%XAVG_HU2M_MIN, DGI%XAVG_HU2M_MAX )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_CANOPY_N',1,ZHOOK_HANDLE)
 !

@@ -41,7 +41,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CSEA
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 !
@@ -95,17 +95,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_SEA_N',0,ZHOOK_HANDLE)
-IF (CSEA=='NONE  ') THEN
+IF (U%CSEA=='NONE  ') THEN
   PDIR_ALB=0.
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
   PTSURF  =XTT
-ELSE IF (CSEA=='FLUX  ') THEN
+ELSE IF (U%CSEA=='FLUX  ') THEN
   CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
-ELSE IF (CSEA=='SEAFLX') THEN
+ELSE IF (U%CSEA=='SEAFLX') THEN
   CALL INIT_SEAFLUX_n(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &

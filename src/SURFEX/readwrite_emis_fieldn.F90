@@ -12,7 +12,7 @@ USE MODI_END_IO_SURF_n
 USE MODI_READ_SURF
 USE MODI_WRITE_SURF
 !
-USE MODD_SURF_ATM_n, ONLY : NSIZE_FULL
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -101,7 +101,7 @@ DO JSPEC=1,IEMISPEC_NBR
 !-------------------------------------------------------------------------------
 !
   ALLOCATE(ITIMES(IEMISPEC_NTIMES))
-  ALLOCATE(ZWORK(NSIZE_FULL,IEMISPEC_NTIMES))
+  ALLOCATE(ZWORK(U%NSIZE_FULL,IEMISPEC_NTIMES))
 !
 !-------------------------------------------------------------------------------
 !

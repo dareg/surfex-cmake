@@ -62,7 +62,7 @@
 !
 USE MODD_CSTS,     ONLY : XPI, XG
 USE MODD_SNOW_PAR, ONLY : XZ0SN, XWCRN, XZ0HSN
-USE MODD_ISBA_n,   ONLY : TSNOW
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_SUBSCALE_Z0EFF
 USE MODD_SURF_ATM, ONLY : LALDZ0H
@@ -167,7 +167,7 @@ PZ0EFF_MEBN=0.
 PZ0_WITH_SNOW(:)  = PZ0(:)
 PZ0H_WITH_SNOW(:) = PZ0(:) / PZ0_O_Z0H(:)
 !
-IF(TSNOW%SCHEME=='EBA') THEN
+IF(I%TSNOW%SCHEME=='EBA') THEN
 !        
    WHERE (PPSN(:)>0.)
 !
@@ -234,7 +234,7 @@ IF(OMEB)THEN
 !
 ! roughness length for heat over MEB vegetation part of path
   PZ0H_MEBV(:) = PZ0_MEBV(:)/PZ0_O_Z0H(:)
-! for nordic forest, z0h=z0m according to Mölder (tested in Hirlam):
+! for nordic forest, z0h=z0m according to MÃ¶lder (tested in Hirlam):
 !
 ! PZ0H_MEBV(:) = PZ0_MEBV(:)   
 !

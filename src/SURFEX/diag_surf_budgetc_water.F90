@@ -25,9 +25,7 @@
 !!      Original    08/2009
 !!------------------------------------------------------------------
 ! 
-USE MODD_DIAG_WATFLUX_n, ONLY : XRNC, XHC, XLEC, XGFLUXC, XSWDC,  &
-                                XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,&
-                                XLEIC, XEVAPC, XSUBLC  
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -60,40 +58,40 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* total incoming and outgoing SW
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_WATER',0,ZHOOK_HANDLE)
-XSWDC(:) = XSWDC(:) + PSWD(:) * PTSTEP
-XSWUC(:) = XSWUC(:) + PSWU(:) * PTSTEP
+DGW%XSWDC(:) = DGW%XSWDC(:) + PSWD(:) * PTSTEP
+DGW%XSWUC(:) = DGW%XSWUC(:) + PSWU(:) * PTSTEP
 !
 !*incoming outgoing LW
 !
-XLWDC(:) = XLWDC(:) + PLWD(:) * PTSTEP
-XLWUC(:) = XLWUC(:) + PLWU(:) * PTSTEP
+DGW%XLWDC(:) = DGW%XLWDC(:) + PLWD(:) * PTSTEP
+DGW%XLWUC(:) = DGW%XLWUC(:) + PLWU(:) * PTSTEP
 !
 !* net radiation
 !
-XRNC(:) = XRNC(:) + PRN(:) * PTSTEP
+DGW%XRNC(:) = DGW%XRNC(:) + PRN(:) * PTSTEP
 !
 !* sensible heat flux
 !
-XHC(:) = XHC(:) + PH(:) * PTSTEP 
+DGW%XHC(:) = DGW%XHC(:) + PH(:) * PTSTEP 
 !
 !* latent heat flux (J/m2)
 !
-XLEC (:) = XLEC (:) + PLE (:) * PTSTEP 
-XLEIC(:) = XLEIC(:) + PLEI(:) * PTSTEP 
+DGW%XLEC (:) = DGW%XLEC (:) + PLE (:) * PTSTEP 
+DGW%XLEIC(:) = DGW%XLEIC(:) + PLEI(:) * PTSTEP 
 !
 !* evaporation and sublimation (kg/m2)
 !
-XEVAPC(:) = XEVAPC(:) + PEVAP(:) * PTSTEP
-XSUBLC(:) = XSUBLC(:) + PSUBL(:) * PTSTEP
+DGW%XEVAPC(:) = DGW%XEVAPC(:) + PEVAP(:) * PTSTEP
+DGW%XSUBLC(:) = DGW%XSUBLC(:) + PSUBL(:) * PTSTEP
 !
 !* storage flux
 !
-XGFLUXC(:) = XGFLUXC(:) + PGFLUX(:) * PTSTEP 
+DGW%XGFLUXC(:) = DGW%XGFLUXC(:) + PGFLUX(:) * PTSTEP 
 !
 !* wind stress
 !
-XFMUC(:) = XFMUC(:) + PFMU(:) * PTSTEP 
-XFMVC(:) = XFMVC(:) + PFMV(:) * PTSTEP
+DGW%XFMUC(:) = DGW%XFMUC(:) + PFMU(:) * PTSTEP 
+DGW%XFMVC(:) = DGW%XFMVC(:) + PFMV(:) * PTSTEP
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_WATER',1,ZHOOK_HANDLE)
 !

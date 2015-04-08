@@ -41,98 +41,8 @@ SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n,           ONLY : XPATCH, LGLACIER, LMEB_PATCH
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : XRNC, XAVG_RNC, XHC, XAVG_HC,                  &
-                                  XLEC, XAVG_LEC, XGFLUXC, XAVG_GFLUXC,          &
-                                  XLEIC, XAVG_LEIC,                              &
-                                  XLEG, XLEGC, XAVG_LEG, XAVG_LEGC,              &
-                                  XLEGI, XLEGIC, XAVG_LEGI, XAVG_LEGIC,          &
-                                  XLEV, XLEVC, XAVG_LEV, XAVG_LEVC,              &
-                                  XLES, XLESAC, XAVG_LES, XAVG_LESAC,            &
-                                  XLESL, XLESLC, XAVG_LESL, XAVG_LESLC,          &
-                                  XLER, XLERC, XAVG_LER, XAVG_LERC,              &
-                                  XLETR, XLETRC, XAVG_LETR, XAVG_LETRC,          &
-                                  XEVAP, XEVAPC, XAVG_EVAP, XAVG_EVAPC,          &
-                                  XSUBL, XSUBLC, XAVG_SUBL, XAVG_SUBLC,          &
-                                  XDRAIN, XDRAINC, XAVG_DRAIN, XAVG_DRAINC,      &
-                                  XQSB, XQSBC, XAVG_QSB, XAVG_QSBC,              &
-                                  XRUNOFF, XRUNOFFC, XAVG_RUNOFF, XAVG_RUNOFFC,  &
-                                  XMELT, XMELTC, XAVG_MELT, XAVG_MELTC,          &
-                                  LSURF_EVAP_BUDGET, LSURF_BUDGETC,              &
-                                  LWATER_BUDGET,                                 &
-                                  XHORT, XHORTC, XAVG_HORT, XAVG_HORTC,          &
-                                  XDRIP, XDRIPC, XAVG_DRIP, XAVG_DRIPC,          &
-                                  XIFLOOD, XIFLOODC, XAVG_IFLOOD, XAVG_IFLOODC,  &
-                                  XPFLOOD, XPFLOODC, XAVG_PFLOOD, XAVG_PFLOODC,  &
-                                  XLE_FLOOD, XLE_FLOODC, XAVG_LE_FLOOD,          &
-                                  XAVG_LE_FLOODC, XLEI_FLOOD, XLEI_FLOODC,       &
-                                  XAVG_LEI_FLOOD, XAVG_LEI_FLOODC,               &
-                                  XICEFLUXC, XAVG_ICEFLUXC,                      &
-                                  XRRVEG, XRRVEGC, XAVG_RRVEG, XAVG_RRVEGC,      &
-                                  XIRRIG_FLUX, XIRRIG_FLUXC, XAVG_IRRIG_FLUX,    &
-                                  XAVG_IRRIG_FLUXC,                              &
-                                  XGPP,XGPPC,XAVG_GPP,XAVG_GPPC, XRESP_AUTO,     &
-                                  XRESPC_AUTO,XAVG_RESP_AUTO,XAVG_RESPC_AUTO,    &
-                                  XRESP_ECO,XRESPC_ECO,XAVG_RESP_ECO,            &
-                                  XAVG_RESPC_ECO,XDWG,XDWGC,XAVG_DWG,XAVG_DWGC,  &     
-                                  XDWGI,XDWGIC,XAVG_DWGI,XAVG_DWGIC,             &
-                                  XDWR,XDWRC,XAVG_DWR,XAVG_DWRC,                 &
-                                  XDSWE,XDSWEC,XAVG_DSWE,XAVG_DSWEC,             &
-                                  XRAINFALL,XRAINFALLC,XSNOWFALL,XSNOWFALLC,     &
-                                  XWATBUD,XWATBUDC,XAVG_WATBUD,XAVG_WATBUDC,     & 
-                                  XSNDRIFT,XSNDRIFTC,XAVG_SNDRIFT,XAVG_SNDRIFTC, &
-                                  XLEVCV, XLESC, XLETRGV,                        &
-                                  XAVG_LEVCV, XAVG_LESC, XAVG_LETRGV,            &
-                                  XLETRCV, XLERGV,XLERCV,                        &
-                                  XAVG_LETRCV, XAVG_LERGV,XAVG_LERCV,            &
-                                  XLE_C_A, XLE_V_C,                              &
-                                  XAVG_LE_C_A, XAVG_LE_V_C,                      &
-                                  XLE_G_C, XLE_N_C,                              &
-                                  XAVG_LE_G_C, XAVG_LE_N_C,                      &
-                                  XLEVCVC, XLESCC, XLETRGVC,                     &
-                                  XAVG_LEVCVC, XAVG_LESCC, XAVG_LETRGVC,         &
-                                  XLETRCVC, XLERGVC,XLERCVC,                     &
-                                  XAVG_LETRCVC, XAVG_LERGVC,XAVG_LERCVC,         &
-                                  XLE_C_AC, XLE_V_CC,                            &
-                                  XAVG_LE_C_AC, XAVG_LE_V_CC,                    &
-                                  XLE_G_CC, XLE_N_CC,                            &
-                                  XAVG_LE_G_CC, XAVG_LE_N_CC,                    &
-                                  XSWNET_V, XSWNET_G,                            &
-                                  XAVG_SWNET_V, XAVG_SWNET_G,                    &
-                                  XSWNET_N, XSWNET_NS,                           &
-                                  XAVG_SWNET_N, XAVG_SWNET_NS,                   &
-                                  XLWNET_V, XLWNET_G,                            &
-                                  XAVG_LWNET_V, XAVG_LWNET_G,                    &
-                                  XLWNET_N,                                      &
-                                  XAVG_LWNET_N,                                  &
-                                  XSWDOWN_GN, XLWDOWN_GN,                        &
-                                  XAVG_SWDOWN_GN, XAVG_LWDOWN_GN,                &
-                                  XH_V_C, XH_G_C,                                &
-                                  XAVG_H_V_C, XAVG_H_G_C,                        &
-                                  XH_C_A, XH_N_C,                                &
-                                  XAVG_H_C_A, XAVG_H_N_C,                        &
-                                  XSR_GN, XMELTCV,                               &
-                                  XAVG_SR_GN, XAVG_MELTCV,                       &
-                                  XFRZCV,                                        &
-                                  XAVG_FRZCV,                                    &
-                                  XSWNET_VC, XSWNET_GC,                          &
-                                  XAVG_SWNET_VC, XAVG_SWNET_GC,                  &
-                                  XSWNET_NC, XSWNET_NSC,                         &
-                                  XAVG_SWNET_NC, XAVG_SWNET_NSC,                 &
-                                  XLWNET_VC, XLWNET_GC,                          &
-                                  XAVG_LWNET_VC, XAVG_LWNET_GC,                  &
-                                  XLWNET_NC,                                     &
-                                  XAVG_LWNET_NC,                                 &
-                                  XSWDOWN_GNC, XLWDOWN_GNC,                      &
-                                  XAVG_SWDOWN_GNC, XAVG_LWDOWN_GNC,              &
-                                  XH_V_CC, XH_G_CC,                              &
-                                  XAVG_H_V_CC, XAVG_H_G_CC,                      &
-                                  XH_C_AC, XH_N_CC,                              &
-                                  XAVG_H_C_AC, XAVG_H_N_CC,                      &
-                                  XSR_GNC, XMELTCVC,                             &
-                                  XAVG_SR_GNC, XAVG_MELTCVC,                     &
-                                  XFRZCVC,                                       &
-                                  XAVG_FRZCVC
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -151,7 +61,7 @@ REAL,    DIMENSION(:), INTENT(IN) :: PSNOW         ! snowfall rate
 INTEGER :: JPATCH ! tile loop counter
 INTEGER :: JJ
 INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
-REAL, DIMENSION(SIZE(XPATCH,1)) :: ZSUMPATCH
+REAL, DIMENSION(SIZE(I%XPATCH,1)) :: ZSUMPATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -161,205 +71,205 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG_EVAP_ISBA_N',0,ZHOOK_HANDLE)
 !
-ISIZE_LMEB_PATCH=COUNT(LMEB_PATCH(:))
+ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
 ZSUMPATCH(:) = 0.
-DO JPATCH=1,SIZE(XPATCH,2)
-   DO JJ=1,SIZE(XPATCH,1)
-      ZSUMPATCH(JJ) = ZSUMPATCH(JJ) + XPATCH(JJ,JPATCH)
+DO JPATCH=1,SIZE(I%XPATCH,2)
+   DO JJ=1,SIZE(I%XPATCH,1)
+      ZSUMPATCH(JJ) = ZSUMPATCH(JJ) + I%XPATCH(JJ,JPATCH)
   ENDDO
 ENDDO
 !
 !       1.     Surface Energy fluxes
 !              -----------------------
 !
-IF (LSURF_EVAP_BUDGET) THEN
+IF (DGEI%LSURF_EVAP_BUDGET) THEN
 !        
-   XAVG_LEG        (:) = 0.
-   XAVG_LEGI       (:) = 0.
-   XAVG_LEV        (:) = 0.
-   XAVG_LES        (:) = 0.
-   XAVG_LESL       (:) = 0.
-   XAVG_LER        (:) = 0.
-   XAVG_LETR       (:) = 0.
-   XAVG_EVAP       (:) = 0.
-   XAVG_SUBL       (:) = 0.
-   XAVG_SNDRIFT    (:) = 0.
-   XAVG_DRAIN      (:) = 0.
-   XAVG_QSB        (:) = 0.
-   XAVG_RUNOFF     (:) = 0.
-   XAVG_HORT       (:) = 0.
-   XAVG_DRIP       (:) = 0.
-   XAVG_RRVEG      (:) = 0.
-   XAVG_MELT       (:) = 0.
-   XAVG_IFLOOD     (:) = 0.
-   XAVG_PFLOOD     (:) = 0.
-   XAVG_LE_FLOOD   (:) = 0.
-   XAVG_LEI_FLOOD  (:) = 0.
-   XAVG_IRRIG_FLUXC(:) = 0.
-   XAVG_GPP        (:) = 0.
-   XAVG_RESP_AUTO  (:) = 0.
-   XAVG_RESP_ECO   (:) = 0.
+   DGEI%XAVG_LEG        (:) = 0.
+   DGEI%XAVG_LEGI       (:) = 0.
+   DGEI%XAVG_LEV        (:) = 0.
+   DGEI%XAVG_LES        (:) = 0.
+   DGEI%XAVG_LESL       (:) = 0.
+   DGEI%XAVG_LER        (:) = 0.
+   DGEI%XAVG_LETR       (:) = 0.
+   DGEI%XAVG_EVAP       (:) = 0.
+   DGEI%XAVG_SUBL       (:) = 0.
+   DGEI%XAVG_SNDRIFT    (:) = 0.
+   DGEI%XAVG_DRAIN      (:) = 0.
+   DGEI%XAVG_QSB        (:) = 0.
+   DGEI%XAVG_RUNOFF     (:) = 0.
+   DGEI%XAVG_HORT       (:) = 0.
+   DGEI%XAVG_DRIP       (:) = 0.
+   DGEI%XAVG_RRVEG      (:) = 0.
+   DGEI%XAVG_MELT       (:) = 0.
+   DGEI%XAVG_IFLOOD     (:) = 0.
+   DGEI%XAVG_PFLOOD     (:) = 0.
+   DGEI%XAVG_LE_FLOOD   (:) = 0.
+   DGEI%XAVG_LEI_FLOOD  (:) = 0.
+   DGEI%XAVG_IRRIG_FLUXC(:) = 0.
+   DGEI%XAVG_GPP        (:) = 0.
+   DGEI%XAVG_RESP_AUTO  (:) = 0.
+   DGEI%XAVG_RESP_ECO   (:) = 0.
 !
    IF (ISIZE_LMEB_PATCH>0) THEN
-     XAVG_LEVCV         (:) = 0.
-     XAVG_LESC          (:) = 0.
-     XAVG_LETRGV        (:) = 0.
-     XAVG_LETRCV        (:) = 0.
-     XAVG_LERGV         (:) = 0.
-     XAVG_LERCV         (:) = 0.
-     XAVG_LE_C_A        (:) = 0.
-     XAVG_LE_V_C        (:) = 0.
-     XAVG_LE_G_C        (:) = 0.
-     XAVG_LE_N_C        (:) = 0.
+     DGEI%XAVG_LEVCV         (:) = 0.
+     DGEI%XAVG_LESC          (:) = 0.
+     DGEI%XAVG_LETRGV        (:) = 0.
+     DGEI%XAVG_LETRCV        (:) = 0.
+     DGEI%XAVG_LERGV         (:) = 0.
+     DGEI%XAVG_LERCV         (:) = 0.
+     DGEI%XAVG_LE_C_A        (:) = 0.
+     DGEI%XAVG_LE_V_C        (:) = 0.
+     DGEI%XAVG_LE_G_C        (:) = 0.
+     DGEI%XAVG_LE_N_C        (:) = 0.
      !
-     XAVG_SWNET_V       (:) = 0.
-     XAVG_SWNET_G       (:) = 0.
-     XAVG_SWNET_N       (:) = 0.
-     XAVG_SWNET_NS      (:) = 0.
-     XAVG_LWNET_V       (:) = 0.
-     XAVG_LWNET_G       (:) = 0.
-     XAVG_LWNET_N       (:) = 0.
-     XAVG_SWDOWN_GN     (:) = 0.
-     XAVG_LWDOWN_GN     (:) = 0.
-     XAVG_H_V_C         (:) = 0.
-     XAVG_H_G_C         (:) = 0.
-     XAVG_H_C_A         (:) = 0.
-     XAVG_H_N_C         (:) = 0.
-     XAVG_SR_GN         (:) = 0.
-     XAVG_MELTCV        (:) = 0.
-     XAVG_FRZCV         (:) = 0.
+     DGEI%XAVG_SWNET_V       (:) = 0.
+     DGEI%XAVG_SWNET_G       (:) = 0.
+     DGEI%XAVG_SWNET_N       (:) = 0.
+     DGEI%XAVG_SWNET_NS      (:) = 0.
+     DGEI%XAVG_LWNET_V       (:) = 0.
+     DGEI%XAVG_LWNET_G       (:) = 0.
+     DGEI%XAVG_LWNET_N       (:) = 0.
+     DGEI%XAVG_SWDOWN_GN     (:) = 0.
+     DGEI%XAVG_LWDOWN_GN     (:) = 0.
+     DGEI%XAVG_H_V_C         (:) = 0.
+     DGEI%XAVG_H_G_C         (:) = 0.
+     DGEI%XAVG_H_C_A         (:) = 0.
+     DGEI%XAVG_H_N_C         (:) = 0.
+     DGEI%XAVG_SR_GN         (:) = 0.
+     DGEI%XAVG_MELTCV        (:) = 0.
+     DGEI%XAVG_FRZCV         (:) = 0.
    ENDIF
 !
-  DO JPATCH=1,SIZE(XPATCH,2)
+  DO JPATCH=1,SIZE(I%XPATCH,2)
 !cdir nodep
     DO JJ=1,SIZE(ZSUMPATCH)
       IF (ZSUMPATCH(JJ) > 0.) THEN
 !
 ! Latent heat of evaporation over the ground
 !
-        XAVG_LEG(JJ)  = XAVG_LEG(JJ) + XPATCH(JJ,JPATCH) * XLEG(JJ,JPATCH)
+        DGEI%XAVG_LEG(JJ)  = DGEI%XAVG_LEG(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEG(JJ,JPATCH)
 !
 ! Surface soil ice sublimation
 !
-        XAVG_LEGI(JJ) = XAVG_LEGI(JJ) + XPATCH(JJ,JPATCH) * XLEGI(JJ,JPATCH)
+        DGEI%XAVG_LEGI(JJ) = DGEI%XAVG_LEGI(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEGI(JJ,JPATCH)
 !
 ! Latent heat of evaporation over vegetation
 !
-        XAVG_LEV(JJ)  = XAVG_LEV(JJ) + XPATCH(JJ,JPATCH) * XLEV(JJ,JPATCH)
+        DGEI%XAVG_LEV(JJ)  = DGEI%XAVG_LEV(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEV(JJ,JPATCH)
 !
 ! Latent heat of sublimation over snow
 !
-        XAVG_LES(JJ)  = XAVG_LES(JJ) + XPATCH(JJ,JPATCH) * XLES(JJ,JPATCH)
+        DGEI%XAVG_LES(JJ)  = DGEI%XAVG_LES(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLES(JJ,JPATCH)
 !
 ! Latent heat of evaporation of liquid water over snow
 !
-        XAVG_LESL(JJ)  = XAVG_LESL(JJ) + XPATCH(JJ,JPATCH) * XLESL(JJ,JPATCH)
+        DGEI%XAVG_LESL(JJ)  = DGEI%XAVG_LESL(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLESL(JJ,JPATCH)
 !
 ! Evaporation from canopy water interception
 !
-        XAVG_LER(JJ)  = XAVG_LER(JJ) + XPATCH(JJ,JPATCH) * XLER(JJ,JPATCH)
+        DGEI%XAVG_LER(JJ)  = DGEI%XAVG_LER(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLER(JJ,JPATCH)
 !
 ! Evapotranspiration of the vegetation
 !
-        XAVG_LETR(JJ)  = XAVG_LETR(JJ) + XPATCH(JJ,JPATCH) * XLETR(JJ,JPATCH)
+        DGEI%XAVG_LETR(JJ)  = DGEI%XAVG_LETR(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLETR(JJ,JPATCH)
 !
 ! Evapotranspiration
 !
-        XAVG_EVAP(JJ)  = XAVG_EVAP(JJ) + XPATCH(JJ,JPATCH) * XEVAP(JJ,JPATCH)
+        DGEI%XAVG_EVAP(JJ)  = DGEI%XAVG_EVAP(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XEVAP(JJ,JPATCH)
 !
 ! Sublimation
 !
-        XAVG_SUBL(JJ)  = XAVG_SUBL(JJ) + XPATCH(JJ,JPATCH) * XSUBL(JJ,JPATCH)
+        DGEI%XAVG_SUBL(JJ)  = DGEI%XAVG_SUBL(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSUBL(JJ,JPATCH)
 !
 ! Blowing snow sublimation (ES or Crocus)
 !
-        XAVG_SNDRIFT(JJ)  = XAVG_SNDRIFT(JJ) + XPATCH(JJ,JPATCH) * XSNDRIFT(JJ,JPATCH)
+        DGEI%XAVG_SNDRIFT(JJ)  = DGEI%XAVG_SNDRIFT(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSNDRIFT(JJ,JPATCH)
 !
 ! Soil drainage flux
 !
-        XAVG_DRAIN(JJ)  = XAVG_DRAIN(JJ) + XPATCH(JJ,JPATCH) * XDRAIN(JJ,JPATCH)
+        DGEI%XAVG_DRAIN(JJ)  = DGEI%XAVG_DRAIN(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDRAIN(JJ,JPATCH)
 !
 ! Soil lateral subsurface flux
 !
-        XAVG_QSB(JJ)  = XAVG_QSB(JJ) + XPATCH(JJ,JPATCH) * XQSB(JJ,JPATCH)        
+        DGEI%XAVG_QSB(JJ)  = DGEI%XAVG_QSB(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XQSB(JJ,JPATCH)        
 !
 ! Supersaturation runoff
 !
-        XAVG_RUNOFF(JJ) = XAVG_RUNOFF(JJ) + XPATCH(JJ,JPATCH) * XRUNOFF(JJ,JPATCH)
+        DGEI%XAVG_RUNOFF(JJ) = DGEI%XAVG_RUNOFF(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRUNOFF(JJ,JPATCH)
 !
 ! Horton runoff
 !
-        XAVG_HORT(JJ)  = XAVG_HORT(JJ) + XPATCH(JJ,JPATCH) * XHORT(JJ,JPATCH)
+        DGEI%XAVG_HORT(JJ)  = DGEI%XAVG_HORT(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XHORT(JJ,JPATCH)
 !
 ! Vegetation dripping
 !
-        XAVG_DRIP(JJ)  = XAVG_DRIP(JJ) + XPATCH(JJ,JPATCH) * XDRIP(JJ,JPATCH)
+        DGEI%XAVG_DRIP(JJ)  = DGEI%XAVG_DRIP(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDRIP(JJ,JPATCH)
 !
 ! Precipitation intercepted by the vegetation
 !
-        XAVG_RRVEG(JJ)  = XAVG_RRVEG(JJ) + XPATCH(JJ,JPATCH) * XRRVEG(JJ,JPATCH)
+        DGEI%XAVG_RRVEG(JJ)  = DGEI%XAVG_RRVEG(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRRVEG(JJ,JPATCH)
 !      
 ! Snow melt
 !
-        XAVG_MELT(JJ)  = XAVG_MELT(JJ) + XPATCH(JJ,JPATCH) * XMELT(JJ,JPATCH)
+        DGEI%XAVG_MELT(JJ)  = DGEI%XAVG_MELT(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XMELT(JJ,JPATCH)
 !      
 ! Flood infiltartion
 !
-        XAVG_IFLOOD(JJ) = XAVG_IFLOOD(JJ) + XPATCH(JJ,JPATCH) * XIFLOOD(JJ,JPATCH)
+        DGEI%XAVG_IFLOOD(JJ) = DGEI%XAVG_IFLOOD(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XIFLOOD(JJ,JPATCH)
 !      
 ! Precipitation intercepted by the floodplains
 !     
-        XAVG_PFLOOD(JJ) = XAVG_PFLOOD(JJ) + XPATCH(JJ,JPATCH) * XPFLOOD(JJ,JPATCH)
+        DGEI%XAVG_PFLOOD(JJ) = DGEI%XAVG_PFLOOD(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XPFLOOD(JJ,JPATCH)
 !      
 ! Floodplains evaporation
 !     
-        XAVG_LE_FLOOD (JJ) = XAVG_LE_FLOOD (JJ) + XPATCH(JJ,JPATCH) * XLE_FLOOD (JJ,JPATCH)
-        XAVG_LEI_FLOOD(JJ) = XAVG_LEI_FLOOD(JJ) + XPATCH(JJ,JPATCH) * XLEI_FLOOD(JJ,JPATCH)
+        DGEI%XAVG_LE_FLOOD (JJ) = DGEI%XAVG_LE_FLOOD (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_FLOOD (JJ,JPATCH)
+        DGEI%XAVG_LEI_FLOOD(JJ) = DGEI%XAVG_LEI_FLOOD(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEI_FLOOD(JJ,JPATCH)
 !      
 ! irrigation rate (as soil input)
 !
-        XAVG_IRRIG_FLUX(JJ)  = XAVG_IRRIG_FLUX(JJ) + XPATCH(JJ,JPATCH) * XIRRIG_FLUX(JJ,JPATCH)
+        DGEI%XAVG_IRRIG_FLUX(JJ)  = DGEI%XAVG_IRRIG_FLUX(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XIRRIG_FLUX(JJ,JPATCH)
 !
 ! Gross primary production
 !
-        XAVG_GPP(JJ) = XAVG_GPP(JJ) + XPATCH(JJ,JPATCH) * XGPP(JJ,JPATCH)
+        DGEI%XAVG_GPP(JJ) = DGEI%XAVG_GPP(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XGPP(JJ,JPATCH)
 !
 ! Autotrophic respiration
 !   
-        XAVG_RESP_AUTO(JJ) = XAVG_RESP_AUTO(JJ) + XPATCH(JJ,JPATCH) * XRESP_AUTO(JJ,JPATCH)
+        DGEI%XAVG_RESP_AUTO(JJ) = DGEI%XAVG_RESP_AUTO(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRESP_AUTO(JJ,JPATCH)
 !
 ! Ecosystem respiration
 !
-        XAVG_RESP_ECO(JJ) = XAVG_RESP_ECO(JJ) + XPATCH(JJ,JPATCH) * XRESP_ECO(JJ,JPATCH)  
+        DGEI%XAVG_RESP_ECO(JJ) = DGEI%XAVG_RESP_ECO(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRESP_ECO(JJ,JPATCH)  
 !        
         IF (ISIZE_LMEB_PATCH>0) THEN
-          XAVG_LEVCV(JJ) = XAVG_LEVCV(JJ) + XPATCH(JJ,JPATCH) * XLEVCV(JJ,JPATCH)
-          XAVG_LESC(JJ) = XAVG_LESC(JJ) + XPATCH(JJ,JPATCH) * XLESC(JJ,JPATCH)
+          DGEI%XAVG_LEVCV(JJ) = DGEI%XAVG_LEVCV(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEVCV(JJ,JPATCH)
+          DGEI%XAVG_LESC(JJ) = DGEI%XAVG_LESC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLESC(JJ,JPATCH)
 !          XAVG_LETRGV(JJ) = XAVG_LETRGV(JJ) + XPATCH(JJ,JPATCH) * XLETRGV(JJ,JPATCH)
-          XAVG_LETRCV(JJ) = XAVG_LETRCV(JJ) + XPATCH(JJ,JPATCH) * XLETRCV(JJ,JPATCH)
+          DGEI%XAVG_LETRCV(JJ) = DGEI%XAVG_LETRCV(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLETRCV(JJ,JPATCH)
 !          XAVG_LERGV(JJ) = XAVG_LERGV(JJ) + XPATCH(JJ,JPATCH) * XLERGV(JJ,JPATCH)
-          XAVG_LERCV(JJ) = XAVG_LERCV(JJ) + XPATCH(JJ,JPATCH) * XLERCV(JJ,JPATCH)
-          XAVG_LE_C_A(JJ) = XAVG_LE_C_A(JJ) + XPATCH(JJ,JPATCH) * XLE_C_A(JJ,JPATCH)
-          XAVG_LE_V_C(JJ) = XAVG_LE_V_C(JJ) + XPATCH(JJ,JPATCH) * XLE_V_C(JJ,JPATCH)
-          XAVG_LE_G_C(JJ) = XAVG_LE_G_C(JJ) + XPATCH(JJ,JPATCH) * XLE_G_C(JJ,JPATCH)
-          XAVG_LE_N_C(JJ) = XAVG_LE_N_C(JJ) + XPATCH(JJ,JPATCH) * XLE_N_C(JJ,JPATCH)
-          XAVG_SWNET_V(JJ) = XAVG_SWNET_V(JJ) + XPATCH(JJ,JPATCH) * XSWNET_V(JJ,JPATCH)
-          XAVG_SWNET_G(JJ) = XAVG_SWNET_G(JJ) + XPATCH(JJ,JPATCH) * XSWNET_G(JJ,JPATCH)
-          XAVG_SWNET_N(JJ) = XAVG_SWNET_N(JJ) + XPATCH(JJ,JPATCH) * XSWNET_N(JJ,JPATCH)
-          XAVG_SWNET_NS(JJ) = XAVG_SWNET_NS(JJ) + XPATCH(JJ,JPATCH) * XSWNET_NS(JJ,JPATCH)
-          XAVG_LWNET_V(JJ) = XAVG_LWNET_V(JJ) + XPATCH(JJ,JPATCH) * XLWNET_V(JJ,JPATCH)
-          XAVG_LWNET_G(JJ) = XAVG_LWNET_G(JJ) + XPATCH(JJ,JPATCH) * XLWNET_G(JJ,JPATCH)
-          XAVG_LWNET_N(JJ) = XAVG_LWNET_N(JJ) + XPATCH(JJ,JPATCH) * XLWNET_N(JJ,JPATCH)
-          XAVG_SWDOWN_GN(JJ) = XAVG_SWDOWN_GN(JJ) + XPATCH(JJ,JPATCH) * XSWDOWN_GN(JJ,JPATCH)
-          XAVG_LWDOWN_GN(JJ) = XAVG_LWDOWN_GN(JJ) + XPATCH(JJ,JPATCH) * XLWDOWN_GN(JJ,JPATCH)
-          XAVG_H_V_C(JJ) = XAVG_H_V_C(JJ) + XPATCH(JJ,JPATCH) * XH_V_C(JJ,JPATCH)
-          XAVG_H_G_C(JJ) = XAVG_H_G_C(JJ) + XPATCH(JJ,JPATCH) * XH_G_C(JJ,JPATCH)
-          XAVG_H_C_A(JJ) = XAVG_H_C_A(JJ) + XPATCH(JJ,JPATCH) * XH_C_A(JJ,JPATCH)
-          XAVG_H_N_C(JJ) = XAVG_H_N_C(JJ) + XPATCH(JJ,JPATCH) * XH_N_C(JJ,JPATCH)
-          XAVG_SR_GN(JJ) = XAVG_SR_GN(JJ) + XPATCH(JJ,JPATCH) * XSR_GN(JJ,JPATCH)
-          XAVG_MELTCV(JJ) = XAVG_MELTCV(JJ) + XPATCH(JJ,JPATCH) * XMELTCV(JJ,JPATCH)
-          XAVG_FRZCV(JJ) = XAVG_FRZCV(JJ) + XPATCH(JJ,JPATCH) * XFRZCV(JJ,JPATCH)
+          DGEI%XAVG_LERCV(JJ) = DGEI%XAVG_LERCV(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLERCV(JJ,JPATCH)
+          DGEI%XAVG_LE_C_A(JJ) = DGEI%XAVG_LE_C_A(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_C_A(JJ,JPATCH)
+          DGEI%XAVG_LE_V_C(JJ) = DGEI%XAVG_LE_V_C(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_V_C(JJ,JPATCH)
+          DGEI%XAVG_LE_G_C(JJ) = DGEI%XAVG_LE_G_C(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_G_C(JJ,JPATCH)
+          DGEI%XAVG_LE_N_C(JJ) = DGEI%XAVG_LE_N_C(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_N_C(JJ,JPATCH)
+          DGEI%XAVG_SWNET_V(JJ) = DGEI%XAVG_SWNET_V(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_V(JJ,JPATCH)
+          DGEI%XAVG_SWNET_G(JJ) = DGEI%XAVG_SWNET_G(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_G(JJ,JPATCH)
+          DGEI%XAVG_SWNET_N(JJ) = DGEI%XAVG_SWNET_N(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_N(JJ,JPATCH)
+          DGEI%XAVG_SWNET_NS(JJ) = DGEI%XAVG_SWNET_NS(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_NS(JJ,JPATCH)
+          DGEI%XAVG_LWNET_V(JJ) = DGEI%XAVG_LWNET_V(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWNET_V(JJ,JPATCH)
+          DGEI%XAVG_LWNET_G(JJ) = DGEI%XAVG_LWNET_G(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWNET_G(JJ,JPATCH)
+          DGEI%XAVG_LWNET_N(JJ) = DGEI%XAVG_LWNET_N(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWNET_N(JJ,JPATCH)
+          DGEI%XAVG_SWDOWN_GN(JJ) = DGEI%XAVG_SWDOWN_GN(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWDOWN_GN(JJ,JPATCH)
+          DGEI%XAVG_LWDOWN_GN(JJ) = DGEI%XAVG_LWDOWN_GN(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWDOWN_GN(JJ,JPATCH)
+          DGEI%XAVG_H_V_C(JJ) = DGEI%XAVG_H_V_C(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_V_C(JJ,JPATCH)
+          DGEI%XAVG_H_G_C(JJ) = DGEI%XAVG_H_G_C(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_G_C(JJ,JPATCH)
+          DGEI%XAVG_H_C_A(JJ) = DGEI%XAVG_H_C_A(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_C_A(JJ,JPATCH)
+          DGEI%XAVG_H_N_C(JJ) = DGEI%XAVG_H_N_C(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_N_C(JJ,JPATCH)
+          DGEI%XAVG_SR_GN(JJ) = DGEI%XAVG_SR_GN(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSR_GN(JJ,JPATCH)
+          DGEI%XAVG_MELTCV(JJ) = DGEI%XAVG_MELTCV(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XMELTCV(JJ,JPATCH)
+          DGEI%XAVG_FRZCV(JJ) = DGEI%XAVG_FRZCV(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XFRZCV(JJ,JPATCH)
         ENDIF
         !
       ENDIF
@@ -368,26 +278,26 @@ IF (LSURF_EVAP_BUDGET) THEN
 !
 ! Isba water budget and reservoir time tendencies
 !
-  IF(LWATER_BUDGET)THEN
+  IF(DGEI%LWATER_BUDGET)THEN
 !  
-    XRAINFALL  (:) = PRAIN(:) * PTSTEP
-    XSNOWFALL  (:) = PSNOW(:) * PTSTEP
-    XAVG_DWG   (:) = 0.0
-    XAVG_DWGI  (:) = 0.0
-    XAVG_DWR   (:) = 0.0
-    XAVG_DSWE  (:) = 0.0
-    XAVG_WATBUD(:) = 0.0
+    DGEI%XRAINFALL  (:) = PRAIN(:) * PTSTEP
+    DGEI%XSNOWFALL  (:) = PSNOW(:) * PTSTEP
+    DGEI%XAVG_DWG   (:) = 0.0
+    DGEI%XAVG_DWGI  (:) = 0.0
+    DGEI%XAVG_DWR   (:) = 0.0
+    DGEI%XAVG_DSWE  (:) = 0.0
+    DGEI%XAVG_WATBUD(:) = 0.0
 !
-    DO JPATCH=1,SIZE(XPATCH,2)
+    DO JPATCH=1,SIZE(I%XPATCH,2)
 !     cdir nodep
       DO JJ=1,SIZE(ZSUMPATCH)
         IF (ZSUMPATCH(JJ) > 0.) THEN
 !
-           XAVG_DWG   (JJ) = XAVG_DWG   (JJ) + XPATCH(JJ,JPATCH) * XDWG   (JJ,JPATCH)
-           XAVG_DWGI  (JJ) = XAVG_DWGI  (JJ) + XPATCH(JJ,JPATCH) * XDWGI  (JJ,JPATCH)
-           XAVG_DWR   (JJ) = XAVG_DWR   (JJ) + XPATCH(JJ,JPATCH) * XDWR   (JJ,JPATCH)
-           XAVG_DSWE  (JJ) = XAVG_DSWE  (JJ) + XPATCH(JJ,JPATCH) * XDSWE  (JJ,JPATCH)
-           XAVG_WATBUD(JJ) = XAVG_WATBUD(JJ) + XPATCH(JJ,JPATCH) * XWATBUD(JJ,JPATCH)
+           DGEI%XAVG_DWG   (JJ) = DGEI%XAVG_DWG   (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDWG   (JJ,JPATCH)
+           DGEI%XAVG_DWGI  (JJ) = DGEI%XAVG_DWGI  (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDWGI  (JJ,JPATCH)
+           DGEI%XAVG_DWR   (JJ) = DGEI%XAVG_DWR   (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDWR   (JJ,JPATCH)
+           DGEI%XAVG_DSWE  (JJ) = DGEI%XAVG_DSWE  (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDSWE  (JJ,JPATCH)
+           DGEI%XAVG_WATBUD(JJ) = DGEI%XAVG_WATBUD(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XWATBUD(JJ,JPATCH)
 !
         ENDIF
       ENDDO
@@ -401,216 +311,216 @@ END IF
 !       2.     Surface Cumulated Energy fluxes
 !              -------------------------------
 !
-IF (LSURF_BUDGETC) THEN
-   XAVG_RNC        (:) = 0.
-   XAVG_HC         (:) = 0.
-   XAVG_LEC        (:) = 0.
-   XAVG_GFLUXC     (:) = 0.
-   XAVG_LEIC       (:) = 0.
-   XAVG_LEGC       (:) = 0.
-   XAVG_LEGIC      (:) = 0.
-   XAVG_LEVC       (:) = 0.
-   XAVG_LESAC      (:) = 0.
-   XAVG_LESLC      (:) = 0.
-   XAVG_LERC       (:) = 0.
-   XAVG_LETRC      (:) = 0.
-   XAVG_EVAPC      (:) = 0.
-   XAVG_SUBLC      (:) = 0.
-   XAVG_SNDRIFTC   (:) = 0.
-   XAVG_DRAINC     (:) = 0.
-   XAVG_QSBC       (:) = 0.
-   XAVG_RUNOFFC    (:) = 0.
-   XAVG_HORTC      (:) = 0.
-   XAVG_DRIPC      (:) = 0.
-   XAVG_RRVEGC     (:) = 0.
-   XAVG_MELTC      (:) = 0.
-   XAVG_IFLOODC    (:) = 0.
-   XAVG_PFLOODC    (:) = 0.
-   XAVG_LE_FLOODC  (:) = 0.
-   XAVG_LEI_FLOODC (:) = 0.
-   XAVG_IRRIG_FLUXC(:) = 0.
-   XAVG_GPPC       (:) = 0.
-   XAVG_RESPC_AUTO (:) = 0.
-   XAVG_RESPC_ECO  (:) = 0.
+IF (DGEI%LSURF_BUDGETC) THEN
+   DGEI%XAVG_RNC        (:) = 0.
+   DGEI%XAVG_HC         (:) = 0.
+   DGEI%XAVG_LEC        (:) = 0.
+   DGEI%XAVG_GFLUXC     (:) = 0.
+   DGEI%XAVG_LEIC       (:) = 0.
+   DGEI%XAVG_LEGC       (:) = 0.
+   DGEI%XAVG_LEGIC      (:) = 0.
+   DGEI%XAVG_LEVC       (:) = 0.
+   DGEI%XAVG_LESAC      (:) = 0.
+   DGEI%XAVG_LESLC      (:) = 0.
+   DGEI%XAVG_LERC       (:) = 0.
+   DGEI%XAVG_LETRC      (:) = 0.
+   DGEI%XAVG_EVAPC      (:) = 0.
+   DGEI%XAVG_SUBLC      (:) = 0.
+   DGEI%XAVG_SNDRIFTC   (:) = 0.
+   DGEI%XAVG_DRAINC     (:) = 0.
+   DGEI%XAVG_QSBC       (:) = 0.
+   DGEI%XAVG_RUNOFFC    (:) = 0.
+   DGEI%XAVG_HORTC      (:) = 0.
+   DGEI%XAVG_DRIPC      (:) = 0.
+   DGEI%XAVG_RRVEGC     (:) = 0.
+   DGEI%XAVG_MELTC      (:) = 0.
+   DGEI%XAVG_IFLOODC    (:) = 0.
+   DGEI%XAVG_PFLOODC    (:) = 0.
+   DGEI%XAVG_LE_FLOODC  (:) = 0.
+   DGEI%XAVG_LEI_FLOODC (:) = 0.
+   DGEI%XAVG_IRRIG_FLUXC(:) = 0.
+   DGEI%XAVG_GPPC       (:) = 0.
+   DGEI%XAVG_RESPC_AUTO (:) = 0.
+   DGEI%XAVG_RESPC_ECO  (:) = 0.
 !
    IF (ISIZE_LMEB_PATCH>0) THEN
-        XAVG_LEVCVC    (:) = 0.
-        XAVG_LESCC     (:) = 0.
-        XAVG_LETRGVC   (:) = 0.
-        XAVG_LETRCVC   (:) = 0.
-        XAVG_LERGVC    (:) = 0.
-        XAVG_LERCVC    (:) = 0.
-        XAVG_LE_C_AC   (:) = 0.
-        XAVG_LE_V_CC   (:) = 0.
-        XAVG_LE_G_CC   (:) = 0.
-        XAVG_LE_N_CC   (:) = 0.
-        XAVG_SWNET_VC     (:) = 0.
-        XAVG_SWNET_GC     (:) = 0.
-        XAVG_SWNET_NC     (:) = 0.
-        XAVG_SWNET_NSC    (:) = 0.
-        XAVG_LWNET_VC     (:) = 0.
-        XAVG_LWNET_GC     (:) = 0.
-        XAVG_LWNET_NC     (:) = 0.
-        XAVG_SWDOWN_GNC   (:) = 0.
-        XAVG_LWDOWN_GNC   (:) = 0.
-        XAVG_H_V_CC       (:) = 0.
-        XAVG_H_G_CC       (:) = 0.
-        XAVG_H_C_AC       (:) = 0.
-        XAVG_H_N_CC       (:) = 0.
-        XAVG_SR_GNC       (:) = 0.
-        XAVG_MELTCVC      (:) = 0.
-        XAVG_FRZCVC       (:) = 0.
+        DGEI%XAVG_LEVCVC    (:) = 0.
+        DGEI%XAVG_LESCC     (:) = 0.
+        DGEI%XAVG_LETRGVC   (:) = 0.
+        DGEI%XAVG_LETRCVC   (:) = 0.
+        DGEI%XAVG_LERGVC    (:) = 0.
+        DGEI%XAVG_LERCVC    (:) = 0.
+        DGEI%XAVG_LE_C_AC   (:) = 0.
+        DGEI%XAVG_LE_V_CC   (:) = 0.
+        DGEI%XAVG_LE_G_CC   (:) = 0.
+        DGEI%XAVG_LE_N_CC   (:) = 0.
+        DGEI%XAVG_SWNET_VC     (:) = 0.
+        DGEI%XAVG_SWNET_GC     (:) = 0.
+        DGEI%XAVG_SWNET_NC     (:) = 0.
+        DGEI%XAVG_SWNET_NSC    (:) = 0.
+        DGEI%XAVG_LWNET_VC     (:) = 0.
+        DGEI%XAVG_LWNET_GC     (:) = 0.
+        DGEI%XAVG_LWNET_NC     (:) = 0.
+        DGEI%XAVG_SWDOWN_GNC   (:) = 0.
+        DGEI%XAVG_LWDOWN_GNC   (:) = 0.
+        DGEI%XAVG_H_V_CC       (:) = 0.
+        DGEI%XAVG_H_G_CC       (:) = 0.
+        DGEI%XAVG_H_C_AC       (:) = 0.
+        DGEI%XAVG_H_N_CC       (:) = 0.
+        DGEI%XAVG_SR_GNC       (:) = 0.
+        DGEI%XAVG_MELTCVC      (:) = 0.
+        DGEI%XAVG_FRZCVC       (:) = 0.
    ENDIF
 !
-  DO JPATCH=1,SIZE(XPATCH,2)
+  DO JPATCH=1,SIZE(I%XPATCH,2)
 !cdir nodep
     DO JJ=1,SIZE(ZSUMPATCH)
       IF (ZSUMPATCH(JJ) > 0.) THEN
 !
 ! Net radiation
 !
-        XAVG_RNC(JJ)  = XAVG_RNC(JJ) + XPATCH(JJ,JPATCH) * XRNC(JJ,JPATCH)
+        DGEI%XAVG_RNC(JJ)  = DGEI%XAVG_RNC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRNC(JJ,JPATCH)
 !
 ! Sensible heat flux
 !
-        XAVG_HC(JJ)  = XAVG_HC(JJ) + XPATCH(JJ,JPATCH) * XHC(JJ,JPATCH)
+        DGEI%XAVG_HC(JJ)  = DGEI%XAVG_HC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XHC(JJ,JPATCH)
 !
 ! Total latent heat flux
 !
-        XAVG_LEC(JJ)  = XAVG_LEC(JJ) + XPATCH(JJ,JPATCH) * XLEC(JJ,JPATCH)
+        DGEI%XAVG_LEC(JJ)  = DGEI%XAVG_LEC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEC(JJ,JPATCH)
 !
 ! Storage flux
 !
-        XAVG_GFLUXC(JJ)  = XAVG_GFLUXC(JJ) + XPATCH(JJ,JPATCH) * XGFLUXC(JJ,JPATCH)
+        DGEI%XAVG_GFLUXC(JJ)  = DGEI%XAVG_GFLUXC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XGFLUXC(JJ,JPATCH)
 !
 ! Total surface sublimation
 !
-        XAVG_LEIC(JJ)  = XAVG_LEIC(JJ) + XPATCH(JJ,JPATCH) * XLEIC(JJ,JPATCH)
+        DGEI%XAVG_LEIC(JJ)  = DGEI%XAVG_LEIC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEIC(JJ,JPATCH)
 !
 ! Latent heat of evaporation over the ground
 !
-        XAVG_LEGC(JJ)  = XAVG_LEGC(JJ) + XPATCH(JJ,JPATCH) * XLEGC(JJ,JPATCH)
+        DGEI%XAVG_LEGC(JJ)  = DGEI%XAVG_LEGC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEGC(JJ,JPATCH)
 !
 ! Surface soil ice sublimation
 !
-        XAVG_LEGIC(JJ)  = XAVG_LEGIC(JJ) + XPATCH(JJ,JPATCH) * XLEGIC(JJ,JPATCH)
+        DGEI%XAVG_LEGIC(JJ)  = DGEI%XAVG_LEGIC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEGIC(JJ,JPATCH)
 !
 ! Latent heat of evaporation over vegetation
 !
-        XAVG_LEVC(JJ)  = XAVG_LEVC(JJ) + XPATCH(JJ,JPATCH) * XLEVC(JJ,JPATCH)
+        DGEI%XAVG_LEVC(JJ)  = DGEI%XAVG_LEVC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEVC(JJ,JPATCH)
 !
 ! Latent heat of sublimation over snow
 !
-        XAVG_LESAC(JJ)  = XAVG_LESAC(JJ) + XPATCH(JJ,JPATCH) * XLESAC(JJ,JPATCH)
+        DGEI%XAVG_LESAC(JJ)  = DGEI%XAVG_LESAC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLESAC(JJ,JPATCH)
 !
 ! Latent heat of evaporation of liquid water over snow
 !
-        XAVG_LESLC(JJ)  = XAVG_LESLC(JJ) + XPATCH(JJ,JPATCH) * XLESLC(JJ,JPATCH)
+        DGEI%XAVG_LESLC(JJ)  = DGEI%XAVG_LESLC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLESLC(JJ,JPATCH)
 !
 ! Evaporation from canopy water interception
 !
-        XAVG_LERC(JJ)  = XAVG_LERC(JJ) + XPATCH(JJ,JPATCH) * XLERC(JJ,JPATCH)
+        DGEI%XAVG_LERC(JJ)  = DGEI%XAVG_LERC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLERC(JJ,JPATCH)
 !
 ! Evapotranspiration of the vegetation
 !
-        XAVG_LETRC(JJ)  = XAVG_LETRC(JJ) + XPATCH(JJ,JPATCH) * XLETRC(JJ,JPATCH)
+        DGEI%XAVG_LETRC(JJ)  = DGEI%XAVG_LETRC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLETRC(JJ,JPATCH)
 !
 ! Evapotranspiration
 !
-        XAVG_EVAPC(JJ)  = XAVG_EVAPC(JJ) + XPATCH(JJ,JPATCH) * XEVAPC(JJ,JPATCH)
+        DGEI%XAVG_EVAPC(JJ)  = DGEI%XAVG_EVAPC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XEVAPC(JJ,JPATCH)
 !
 ! Sublimation
 !
-        XAVG_SUBLC(JJ)  = XAVG_SUBLC(JJ) + XPATCH(JJ,JPATCH) * XSUBLC(JJ,JPATCH)
+        DGEI%XAVG_SUBLC(JJ)  = DGEI%XAVG_SUBLC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSUBLC(JJ,JPATCH)
 !
 ! Blowing snow sublimation (ES or Crocus)
 !
-        XAVG_SNDRIFTC(JJ)  = XAVG_SNDRIFTC(JJ) + XPATCH(JJ,JPATCH) * XSNDRIFTC(JJ,JPATCH)
+        DGEI%XAVG_SNDRIFTC(JJ)  = DGEI%XAVG_SNDRIFTC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSNDRIFTC(JJ,JPATCH)
 !
 ! Soil drainage flux
 !
-        XAVG_DRAINC(JJ)  = XAVG_DRAINC(JJ) + XPATCH(JJ,JPATCH) * XDRAINC(JJ,JPATCH)
+        DGEI%XAVG_DRAINC(JJ)  = DGEI%XAVG_DRAINC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDRAINC(JJ,JPATCH)
 !
 ! Soil lateral subsurface flux
 !
-        XAVG_QSBC(JJ)  = XAVG_QSBC(JJ) + XPATCH(JJ,JPATCH) * XQSBC(JJ,JPATCH)        
+        DGEI%XAVG_QSBC(JJ)  = DGEI%XAVG_QSBC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XQSBC(JJ,JPATCH)        
 !
 ! Supersaturation runoff
 !
-        XAVG_RUNOFFC(JJ)  = XAVG_RUNOFFC(JJ) + XPATCH(JJ,JPATCH) * XRUNOFFC(JJ,JPATCH)
+        DGEI%XAVG_RUNOFFC(JJ)  = DGEI%XAVG_RUNOFFC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRUNOFFC(JJ,JPATCH)
 !
 ! Horton runoff
 !
-        XAVG_HORTC(JJ)  = XAVG_HORTC(JJ) + XPATCH(JJ,JPATCH) * XHORTC(JJ,JPATCH)
+        DGEI%XAVG_HORTC(JJ)  = DGEI%XAVG_HORTC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XHORTC(JJ,JPATCH)
 !
 ! Vegetation dripping
 !
-        XAVG_DRIPC(JJ)  = XAVG_DRIPC(JJ) + XPATCH(JJ,JPATCH) * XDRIPC(JJ,JPATCH)
+        DGEI%XAVG_DRIPC(JJ)  = DGEI%XAVG_DRIPC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDRIPC(JJ,JPATCH)
 !
 ! precipitation intercepted by the vegetation
 !
-        XAVG_RRVEGC(JJ)  = XAVG_RRVEGC(JJ) + XPATCH(JJ,JPATCH) * XRRVEGC(JJ,JPATCH)
+        DGEI%XAVG_RRVEGC(JJ)  = DGEI%XAVG_RRVEGC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRRVEGC(JJ,JPATCH)
 !      
 ! Snow melt
 !
-        XAVG_MELTC(JJ)  = XAVG_MELTC(JJ) + XPATCH(JJ,JPATCH) * XMELTC(JJ,JPATCH)
+        DGEI%XAVG_MELTC(JJ)  = DGEI%XAVG_MELTC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XMELTC(JJ,JPATCH)
 !      
 ! Flood infiltartion
 !
-        XAVG_IFLOODC(JJ) = XAVG_IFLOODC(JJ) + XPATCH(JJ,JPATCH) * XIFLOODC(JJ,JPATCH)
+        DGEI%XAVG_IFLOODC(JJ) = DGEI%XAVG_IFLOODC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XIFLOODC(JJ,JPATCH)
 !      
 ! Precipitation intercepted by the floodplains
 !     
-        XAVG_PFLOODC(JJ) = XAVG_PFLOODC(JJ) + XPATCH(JJ,JPATCH) * XPFLOODC(JJ,JPATCH)
+        DGEI%XAVG_PFLOODC(JJ) = DGEI%XAVG_PFLOODC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XPFLOODC(JJ,JPATCH)
 !      
 ! Floodplains evaporation
 !     
-        XAVG_LE_FLOODC (JJ) = XAVG_LE_FLOODC (JJ) + XPATCH(JJ,JPATCH) * XLE_FLOODC (JJ,JPATCH)
-        XAVG_LEI_FLOODC(JJ) = XAVG_LEI_FLOODC(JJ) + XPATCH(JJ,JPATCH) * XLEI_FLOODC(JJ,JPATCH)
+        DGEI%XAVG_LE_FLOODC (JJ) = DGEI%XAVG_LE_FLOODC (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_FLOODC (JJ,JPATCH)
+        DGEI%XAVG_LEI_FLOODC(JJ) = DGEI%XAVG_LEI_FLOODC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEI_FLOODC(JJ,JPATCH)
 !      
 ! irrigation rate (as soil input)
 !
-        XAVG_IRRIG_FLUXC(JJ)  = XAVG_IRRIG_FLUXC(JJ) + XPATCH(JJ,JPATCH) * XIRRIG_FLUXC(JJ,JPATCH)
+        DGEI%XAVG_IRRIG_FLUXC(JJ)  = DGEI%XAVG_IRRIG_FLUXC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XIRRIG_FLUXC(JJ,JPATCH)
 !
 ! Gross primary production
 !
-        XAVG_GPPC(JJ) = XAVG_GPPC(JJ) + XPATCH(JJ,JPATCH) * XGPPC(JJ,JPATCH)
+        DGEI%XAVG_GPPC(JJ) = DGEI%XAVG_GPPC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XGPPC(JJ,JPATCH)
 !
 ! Autotrophic respiration
 !   
-        XAVG_RESPC_AUTO(JJ) = XAVG_RESPC_AUTO(JJ) + XPATCH(JJ,JPATCH) * XRESPC_AUTO(JJ,JPATCH)
+        DGEI%XAVG_RESPC_AUTO(JJ) = DGEI%XAVG_RESPC_AUTO(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRESPC_AUTO(JJ,JPATCH)
 !
 ! Ecosystem respiration
 !
-        XAVG_RESPC_ECO(JJ) = XAVG_RESPC_ECO(JJ) + XPATCH(JJ,JPATCH) * XRESPC_ECO(JJ,JPATCH)
+        DGEI%XAVG_RESPC_ECO(JJ) = DGEI%XAVG_RESPC_ECO(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XRESPC_ECO(JJ,JPATCH)
 !      
         IF (ISIZE_LMEB_PATCH>0) THEN
-          XAVG_LEVCVC(JJ) = XAVG_LEVCVC(JJ) + XPATCH(JJ,JPATCH) * XLEVCVC(JJ,JPATCH)
-          XAVG_LESCC(JJ) = XAVG_LESCC(JJ) + XPATCH(JJ,JPATCH) * XLESCC(JJ,JPATCH)
+          DGEI%XAVG_LEVCVC(JJ) = DGEI%XAVG_LEVCVC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLEVCVC(JJ,JPATCH)
+          DGEI%XAVG_LESCC(JJ) = DGEI%XAVG_LESCC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLESCC(JJ,JPATCH)
 !          XAVG_LETRGVC(JJ) = XAVG_LETRGVC(JJ) + XPATCH(JJ,JPATCH) * XLETRGVC(JJ,JPATCH)
-          XAVG_LETRCVC(JJ) = XAVG_LETRCVC(JJ) + XPATCH(JJ,JPATCH) * XLETRCVC(JJ,JPATCH)
+          DGEI%XAVG_LETRCVC(JJ) = DGEI%XAVG_LETRCVC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLETRCVC(JJ,JPATCH)
 !          XAVG_LERGVC(JJ) = XAVG_LERGVC(JJ) + XPATCH(JJ,JPATCH) * XLERGVC(JJ,JPATCH)
-          XAVG_LERCVC(JJ) = XAVG_LERCVC(JJ) + XPATCH(JJ,JPATCH) * XLERCVC(JJ,JPATCH)
-          XAVG_LE_C_AC(JJ) = XAVG_LE_C_AC(JJ) + XPATCH(JJ,JPATCH) * XLE_C_AC(JJ,JPATCH)
-          XAVG_LE_V_CC(JJ) = XAVG_LE_V_CC(JJ) + XPATCH(JJ,JPATCH) * XLE_V_CC(JJ,JPATCH)
-          XAVG_LE_G_CC(JJ) = XAVG_LE_G_CC(JJ) + XPATCH(JJ,JPATCH) * XLE_G_CC(JJ,JPATCH)
-          XAVG_LE_N_CC(JJ) = XAVG_LE_N_CC(JJ) + XPATCH(JJ,JPATCH) * XLE_N_CC(JJ,JPATCH)
-          XAVG_SWNET_VC(JJ) = XAVG_SWNET_VC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_VC(JJ,JPATCH)
-          XAVG_SWNET_GC(JJ) = XAVG_SWNET_GC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_GC(JJ,JPATCH)
-          XAVG_SWNET_NC(JJ) = XAVG_SWNET_NC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_NC(JJ,JPATCH)
-          XAVG_SWNET_NSC(JJ) = XAVG_SWNET_NSC(JJ) + XPATCH(JJ,JPATCH) * XSWNET_NSC(JJ,JPATCH)
-          XAVG_LWNET_VC(JJ) = XAVG_LWNET_VC(JJ) + XPATCH(JJ,JPATCH) * XLWNET_VC(JJ,JPATCH)
-          XAVG_LWNET_GC(JJ) = XAVG_LWNET_GC(JJ) + XPATCH(JJ,JPATCH) * XLWNET_GC(JJ,JPATCH)
-          XAVG_LWNET_NC(JJ) = XAVG_LWNET_NC(JJ) + XPATCH(JJ,JPATCH) * XLWNET_NC(JJ,JPATCH)
-          XAVG_SWDOWN_GNC(JJ) = XAVG_SWDOWN_GNC(JJ) + XPATCH(JJ,JPATCH) * XSWDOWN_GNC(JJ,JPATCH)
-          XAVG_LWDOWN_GNC(JJ) = XAVG_LWDOWN_GNC(JJ) + XPATCH(JJ,JPATCH) * XLWDOWN_GNC(JJ,JPATCH)
-          XAVG_H_V_CC(JJ) = XAVG_H_V_CC(JJ) + XPATCH(JJ,JPATCH) * XH_V_CC(JJ,JPATCH)
-          XAVG_H_G_CC(JJ) = XAVG_H_G_CC(JJ) + XPATCH(JJ,JPATCH) * XH_G_CC(JJ,JPATCH)
-          XAVG_H_C_AC(JJ) = XAVG_H_C_AC(JJ) + XPATCH(JJ,JPATCH) * XH_C_AC(JJ,JPATCH)
-          XAVG_H_N_CC(JJ) = XAVG_H_N_CC(JJ) + XPATCH(JJ,JPATCH) * XH_N_CC(JJ,JPATCH)
-          XAVG_SR_GNC(JJ) = XAVG_SR_GNC(JJ) + XPATCH(JJ,JPATCH) * XSR_GNC(JJ,JPATCH)
-          XAVG_MELTCVC(JJ) = XAVG_MELTCVC(JJ) + XPATCH(JJ,JPATCH) * XMELTCVC(JJ,JPATCH)
-          XAVG_FRZCVC(JJ) = XAVG_FRZCVC(JJ) + XPATCH(JJ,JPATCH) * XFRZCVC(JJ,JPATCH)
+          DGEI%XAVG_LERCVC(JJ) = DGEI%XAVG_LERCVC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLERCVC(JJ,JPATCH)
+          DGEI%XAVG_LE_C_AC(JJ) = DGEI%XAVG_LE_C_AC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_C_AC(JJ,JPATCH)
+          DGEI%XAVG_LE_V_CC(JJ) = DGEI%XAVG_LE_V_CC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_V_CC(JJ,JPATCH)
+          DGEI%XAVG_LE_G_CC(JJ) = DGEI%XAVG_LE_G_CC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_G_CC(JJ,JPATCH)
+          DGEI%XAVG_LE_N_CC(JJ) = DGEI%XAVG_LE_N_CC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLE_N_CC(JJ,JPATCH)
+          DGEI%XAVG_SWNET_VC(JJ) = DGEI%XAVG_SWNET_VC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_VC(JJ,JPATCH)
+          DGEI%XAVG_SWNET_GC(JJ) = DGEI%XAVG_SWNET_GC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_GC(JJ,JPATCH)
+          DGEI%XAVG_SWNET_NC(JJ) = DGEI%XAVG_SWNET_NC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_NC(JJ,JPATCH)
+          DGEI%XAVG_SWNET_NSC(JJ) = DGEI%XAVG_SWNET_NSC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWNET_NSC(JJ,JPATCH)
+          DGEI%XAVG_LWNET_VC(JJ) = DGEI%XAVG_LWNET_VC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWNET_VC(JJ,JPATCH)
+          DGEI%XAVG_LWNET_GC(JJ) = DGEI%XAVG_LWNET_GC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWNET_GC(JJ,JPATCH)
+          DGEI%XAVG_LWNET_NC(JJ) = DGEI%XAVG_LWNET_NC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWNET_NC(JJ,JPATCH)
+          DGEI%XAVG_SWDOWN_GNC(JJ) = DGEI%XAVG_SWDOWN_GNC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSWDOWN_GNC(JJ,JPATCH)
+          DGEI%XAVG_LWDOWN_GNC(JJ) = DGEI%XAVG_LWDOWN_GNC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XLWDOWN_GNC(JJ,JPATCH)
+          DGEI%XAVG_H_V_CC(JJ) = DGEI%XAVG_H_V_CC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_V_CC(JJ,JPATCH)
+          DGEI%XAVG_H_G_CC(JJ) = DGEI%XAVG_H_G_CC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_G_CC(JJ,JPATCH)
+          DGEI%XAVG_H_C_AC(JJ) = DGEI%XAVG_H_C_AC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_C_AC(JJ,JPATCH)
+          DGEI%XAVG_H_N_CC(JJ) = DGEI%XAVG_H_N_CC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XH_N_CC(JJ,JPATCH)
+          DGEI%XAVG_SR_GNC(JJ) = DGEI%XAVG_SR_GNC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XSR_GNC(JJ,JPATCH)
+          DGEI%XAVG_MELTCVC(JJ) = DGEI%XAVG_MELTCVC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XMELTCVC(JJ,JPATCH)
+          DGEI%XAVG_FRZCVC(JJ) = DGEI%XAVG_FRZCVC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XFRZCVC(JJ,JPATCH)
         ENDIF
         !
       ENDIF
@@ -619,26 +529,26 @@ IF (LSURF_BUDGETC) THEN
 !
 ! Isba water budget and reservoir time tendencies
 !
-  IF(LWATER_BUDGET)THEN
+  IF(DGEI%LWATER_BUDGET)THEN
 !  
-    XRAINFALLC  (:) = XRAINFALLC (:) + PRAIN(:)
-    XSNOWFALLC  (:) = XSNOWFALLC (:) + PSNOW(:)
-    XAVG_DWGC   (:) = 0.0
-    XAVG_DWGIC  (:) = 0.0
-    XAVG_DWRC   (:) = 0.0
-    XAVG_DSWEC  (:) = 0.0
-    XAVG_WATBUDC(:) = 0.0
+    DGEI%XRAINFALLC  (:) = DGEI%XRAINFALLC (:) + PRAIN(:)
+    DGEI%XSNOWFALLC  (:) = DGEI%XSNOWFALLC (:) + PSNOW(:)
+    DGEI%XAVG_DWGC   (:) = 0.0
+    DGEI%XAVG_DWGIC  (:) = 0.0
+    DGEI%XAVG_DWRC   (:) = 0.0
+    DGEI%XAVG_DSWEC  (:) = 0.0
+    DGEI%XAVG_WATBUDC(:) = 0.0
 !
-    DO JPATCH=1,SIZE(XPATCH,2)
+    DO JPATCH=1,SIZE(I%XPATCH,2)
 !     cdir nodep
       DO JJ=1,SIZE(ZSUMPATCH)
         IF (ZSUMPATCH(JJ) > 0.) THEN
 !
-           XAVG_DWGC   (JJ) = XAVG_DWGC   (JJ) + XPATCH(JJ,JPATCH) * XDWGC   (JJ,JPATCH)
-           XAVG_DWGIC  (JJ) = XAVG_DWGIC  (JJ) + XPATCH(JJ,JPATCH) * XDWGIC  (JJ,JPATCH)
-           XAVG_DWRC   (JJ) = XAVG_DWRC   (JJ) + XPATCH(JJ,JPATCH) * XDWRC   (JJ,JPATCH)
-           XAVG_DSWEC  (JJ) = XAVG_DSWEC  (JJ) + XPATCH(JJ,JPATCH) * XDSWEC  (JJ,JPATCH)
-           XAVG_WATBUDC(JJ) = XAVG_WATBUDC(JJ) + XPATCH(JJ,JPATCH) * XWATBUDC(JJ,JPATCH)
+           DGEI%XAVG_DWGC   (JJ) = DGEI%XAVG_DWGC   (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDWGC   (JJ,JPATCH)
+           DGEI%XAVG_DWGIC  (JJ) = DGEI%XAVG_DWGIC  (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDWGIC  (JJ,JPATCH)
+           DGEI%XAVG_DWRC   (JJ) = DGEI%XAVG_DWRC   (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDWRC   (JJ,JPATCH)
+           DGEI%XAVG_DSWEC  (JJ) = DGEI%XAVG_DSWEC  (JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XDSWEC  (JJ,JPATCH)
+           DGEI%XAVG_WATBUDC(JJ) = DGEI%XAVG_WATBUDC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XWATBUDC(JJ,JPATCH)
 !
         ENDIF
       ENDDO
@@ -648,13 +558,13 @@ IF (LSURF_BUDGETC) THEN
 !
 ! Ice calving flux
 !  
-  IF(LGLACIER)THEN 
-    XAVG_ICEFLUXC(:)= 0.
-    DO JPATCH=1,SIZE(XPATCH,2)
+  IF(I%LGLACIER)THEN 
+    DGEI%XAVG_ICEFLUXC(:)= 0.
+    DO JPATCH=1,SIZE(I%XPATCH,2)
 !     cdir nodep  
       DO JJ=1,SIZE(ZSUMPATCH)
          IF(ZSUMPATCH(JJ) > 0.)THEN
-            XAVG_ICEFLUXC(JJ) = XAVG_ICEFLUXC(JJ) + XPATCH(JJ,JPATCH) * XICEFLUXC(JJ,JPATCH)      
+            DGEI%XAVG_ICEFLUXC(JJ) = DGEI%XAVG_ICEFLUXC(JJ) + I%XPATCH(JJ,JPATCH) * DGEI%XICEFLUXC(JJ,JPATCH)      
          ENDIF
       END DO
     END DO

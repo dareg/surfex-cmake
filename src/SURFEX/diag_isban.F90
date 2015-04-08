@@ -35,26 +35,10 @@ SUBROUTINE DIAG_ISBA_n(HPROGRAM,                                               &
 !
 !
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_ISBA_n,      ONLY : TTIME
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : LSURF_BUDGETC, XAVG_RNC,       &
-                                    XAVG_HC, XAVG_LEC, XAVG_LEIC,  &
-                                    XAVG_GFLUXC, XAVG_EVAP,        &
-                                    XAVG_EVAPC, XAVG_SUBL, XAVG_SUBLC, &
-                                    LSURF_EVAP_BUDGET
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 !                                  
-USE MODD_DIAG_ISBA_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,       &
-                               XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX,     &
-                               XAVG_RI, XAVG_CD, XAVG_CH, XAVG_CE,       &
-                               XAVG_T2M, XAVG_Q2M, XAVG_HU2M,            &
-                               XAVG_ZON10M, XAVG_MER10M, XAVG_T2M_MAX,   &
-                               XAVG_QS, XAVG_Z0, XAVG_Z0H, XAVG_T2M_MIN, &
-                               XAVG_SWD, XAVG_SWU, XAVG_SWBD, XAVG_SWBU, &
-                               XAVG_LWD, XAVG_LWU, XAVG_FMU, XAVG_FMV  , &
-                               XAVG_SWDC, XAVG_SWUC, XAVG_LWDC,          &
-                               XAVG_LWUC, XAVG_FMUC, XAVG_FMVC,          &
-                               XAVG_TS, XAVG_LEI, XAVG_HU2M_MIN,         &
-                               XAVG_HU2M_MAX, XAVG_WIND10M,              &
-                               XAVG_WIND10M_MAX  
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -121,70 +105,70 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_ISBA_N',0,ZHOOK_HANDLE)
-IF (LSURF_BUDGET) THEN
-  PRN      = XAVG_RN
-  PH       = XAVG_H
-  PLE      = XAVG_LE
-  PLEI     = XAVG_LEI
-  PGFLUX   = XAVG_GFLUX
-  PSWD     = XAVG_SWD
-  PSWU     = XAVG_SWU
-  PLWD     = XAVG_LWD
-  PLWU     = XAVG_LWU
-  PSWBD    = XAVG_SWBD
-  PSWBU    = XAVG_SWBU
-  PFMU     = XAVG_FMU
-  PFMV     = XAVG_FMV
+IF (DGI%LSURF_BUDGET) THEN
+  PRN      = DGI%XAVG_RN
+  PH       = DGI%XAVG_H
+  PLE      = DGI%XAVG_LE
+  PLEI     = DGI%XAVG_LEI
+  PGFLUX   = DGI%XAVG_GFLUX
+  PSWD     = DGI%XAVG_SWD
+  PSWU     = DGI%XAVG_SWU
+  PLWD     = DGI%XAVG_LWD
+  PLWU     = DGI%XAVG_LWU
+  PSWBD    = DGI%XAVG_SWBD
+  PSWBU    = DGI%XAVG_SWBU
+  PFMU     = DGI%XAVG_FMU
+  PFMV     = DGI%XAVG_FMV
 END IF
 !
-IF (LSURF_EVAP_BUDGET) THEN
-  PEVAP    = XAVG_EVAP
-  PSUBL    = XAVG_SUBL
+IF (DGEI%LSURF_EVAP_BUDGET) THEN
+  PEVAP    = DGEI%XAVG_EVAP
+  PSUBL    = DGEI%XAVG_SUBL
 ENDIF
 !
-IF (LSURF_BUDGETC) THEN
-  PRNC      = XAVG_RNC
-  PHC       = XAVG_HC
-  PLEC      = XAVG_LEC
-  PLEIC     = XAVG_LEIC
-  PGFLUXC   = XAVG_GFLUXC
-  PEVAPC    = XAVG_EVAPC
-  PSUBLC    = XAVG_SUBLC
-  PSWDC     = XAVG_SWDC
-  PSWUC     = XAVG_SWUC
-  PLWDC     = XAVG_LWDC
-  PLWUC     = XAVG_LWUC
-  PFMUC     = XAVG_FMUC
-  PFMVC     = XAVG_FMVC
+IF (DGEI%LSURF_BUDGETC) THEN
+  PRNC      = DGEI%XAVG_RNC
+  PHC       = DGEI%XAVG_HC
+  PLEC      = DGEI%XAVG_LEC
+  PLEIC     = DGEI%XAVG_LEIC
+  PGFLUXC   = DGEI%XAVG_GFLUXC
+  PEVAPC    = DGEI%XAVG_EVAPC
+  PSUBLC    = DGEI%XAVG_SUBLC
+  PSWDC     = DGI%XAVG_SWDC
+  PSWUC     = DGI%XAVG_SWUC
+  PLWDC     = DGI%XAVG_LWDC
+  PLWUC     = DGI%XAVG_LWUC
+  PFMUC     = DGI%XAVG_FMUC
+  PFMVC     = DGI%XAVG_FMVC
 END IF
 !
-IF (N2M>=1 .OR. LSURF_BUDGET .OR. LSURF_BUDGETC) PTS = XAVG_TS
+IF (DGI%N2M>=1 .OR. DGI%LSURF_BUDGET .OR. DGEI%LSURF_BUDGETC) PTS = DGI%XAVG_TS
 !
-IF (N2M>=1) THEN
-  PRI      = XAVG_RI
-  PT2M     = XAVG_T2M
-  PT2M_MIN = XAVG_T2M_MIN
-  PT2M_MAX = XAVG_T2M_MAX
-  PQ2M     = XAVG_Q2M
-  PHU2M    = XAVG_HU2M
-  PHU2M_MIN= XAVG_HU2M_MIN
-  PHU2M_MAX= XAVG_HU2M_MAX
-  PZON10M  = XAVG_ZON10M
-  PMER10M  = XAVG_MER10M
-  PWIND10M = XAVG_WIND10M
-  PWIND10M_MAX = XAVG_WIND10M_MAX
+IF (DGI%N2M>=1) THEN
+  PRI      = DGI%XAVG_RI
+  PT2M     = DGI%XAVG_T2M
+  PT2M_MIN = DGI%XAVG_T2M_MIN
+  PT2M_MAX = DGI%XAVG_T2M_MAX
+  PQ2M     = DGI%XAVG_Q2M
+  PHU2M    = DGI%XAVG_HU2M
+  PHU2M_MIN= DGI%XAVG_HU2M_MIN
+  PHU2M_MAX= DGI%XAVG_HU2M_MAX
+  PZON10M  = DGI%XAVG_ZON10M
+  PMER10M  = DGI%XAVG_MER10M
+  PWIND10M = DGI%XAVG_WIND10M
+  PWIND10M_MAX = DGI%XAVG_WIND10M_MAX
 END IF
 !
-IF (LCOEF) THEN
-  PCD      = XAVG_CD
-  PCH      = XAVG_CH
-  PCE      = XAVG_CE
-  PZ0      = XAVG_Z0
-  PZ0H     = XAVG_Z0H
+IF (DGI%LCOEF) THEN
+  PCD      = DGI%XAVG_CD
+  PCH      = DGI%XAVG_CH
+  PCE      = DGI%XAVG_CE
+  PZ0      = DGI%XAVG_Z0
+  PZ0H     = DGI%XAVG_Z0H
 END IF
 !
-IF (LSURF_VARS) THEN
-  PQS = XAVG_QS
+IF (DGI%LSURF_VARS) THEN
+  PQS = DGI%XAVG_QS
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_ISBA_N',1,ZHOOK_HANDLE)

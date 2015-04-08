@@ -96,18 +96,18 @@ DO JCAT=1,NNCAT
       !
       IDX = (JJ-1) * NNXC(JCAT) + JI   ! index of the point among all in the catchment
       !
-      !* on vérifie que le pixel du MNT appartient au BV
+      !* on vÃ©rifie que le pixel du MNT appartient au BV
       IF ( XTOPD(JCAT,IDX).NE.XNUL(JCAT) ) THEN
-        !* calcule des coordonées X et Y inf et sup de la maille ISBA considérée
+        !* calcule des coordonÃ©es X et Y inf et sup de la maille ISBA considÃ©rÃ©e
         CALL GET_COORD(ZXT,ZYT,ZX1,ZX2,ZX3,ZX4,ZY1,ZY2,ZY3,ZY4,ZXA,ZYA,ZXB,ZYB)
         !* si on se trouve sur le premier pixel du MNT ou si le pixel du MNT n'est pas 
-        !dans la maille Isba considérée (qui est celle dans laquelle se trouve le pixel précédent)
+        !dans la maille Isba considÃ©rÃ©e (qui est celle dans laquelle se trouve le pixel prÃ©cÃ©dent)
         IF (ZXT.LT.ZXA.OR.ZXT.GE.ZXB.OR.ZYT.LT.ZYA.OR.ZYT.GE.ZYB) THEN
-          !* on repart de la première maille de la grille Isba
+          !* on repart de la premiÃ¨re maille de la grille Isba
           IDXM = 1
           CALL INIT_4POINTS(IDXM,ZX1,ZX2,ZX3,ZX4,ZY1,ZY2,ZY3,ZY4)
           CALL GET_COORD(ZXT,ZYT,ZX1,ZX2,ZX3,ZX4,ZY1,ZY2,ZY3,ZY4,ZXA,ZYA,ZXB,ZYB)
-          !* on parcours les mailles de la grille Isba, jusqu'à ce qu'on trouve la maille à laquelle appartient le pixel du MNT
+          !* on parcours les mailles de la grille Isba, jusqu'Ã  ce qu'on trouve la maille Ã  laquelle appartient le pixel du MNT
           DO WHILE (ZXT.LT.ZXA.OR.ZXT.GE.ZXB.OR.ZYT.LT.ZYA.OR.ZYT.GE.ZYB)
             IDXM = IDXM + 1
             IF (IDXM.GE.KI) THEN
@@ -141,7 +141,7 @@ CONTAINS
 SUBROUTINE INIT_4POINTS(KDXM,PX1,PX2,PX3,PX4,PY1,PY2,PY3,PY4)
 !
 USE MODD_COUPLING_TOPD, ONLY: NIMAX, XXI, XYI
-USE MODD_SURF_ATM_GRID_n,   ONLY :  CGRID, XGRID_PAR    
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID    
 USE MODE_GRIDTYPE_IGN
 !
 INTEGER, INTENT(IN) :: KDXM
@@ -154,32 +154,32 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA:INIT_4POINTS',0,ZHOOK_HANDLE)
 !
-IF (CGRID=='IGN') THEN 
-CALL GET_GRIDTYPE_IGN(XGRID_PAR,PDX=ZDX,PDY=ZDY)
+IF (UG%CGRID=='IGN') THEN 
+CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,PDX=ZDX,PDY=ZDY)
  IDXN=KDXM
- PX1 = XXI(IDXN)              ! coordonnée X du point courant
- PX2 = XXI(IDXN+1)            ! coordonnée X du point suivant
- PX3 = XXI(IDXN)    ! coordonnée X du point aligné sur la ligne suivante 
- PX4 = XXI(IDXN+1)  ! coordonnée X du point suivant sur la ligne suivante
+ PX1 = XXI(IDXN)              ! coordonnÃ©e X du point courant
+ PX2 = XXI(IDXN+1)            ! coordonnÃ©e X du point suivant
+ PX3 = XXI(IDXN)    ! coordonnÃ©e X du point alignÃ© sur la ligne suivante 
+ PX4 = XXI(IDXN+1)  ! coordonnÃ©e X du point suivant sur la ligne suivante
 !
- PY1 = XYI(IDXN)              ! coordonnée Y du point courant
- PY2 = XYI(IDXN+1)            ! coordonnée Y du point suivant
- PY3 = XYI(IDXN)+ZDY(IDXN)    ! coordonnée Y du point aligné sur la ligne suivante
- PY4 = XYI(IDXN+1)+ZDY(IDXN+1)  ! coordonnée Y du point suivant sur la ligne suivante
+ PY1 = XYI(IDXN)              ! coordonnÃ©e Y du point courant
+ PY2 = XYI(IDXN+1)            ! coordonnÃ©e Y du point suivant
+ PY3 = XYI(IDXN)+ZDY(IDXN)    ! coordonnÃ©e Y du point alignÃ© sur la ligne suivante
+ PY4 = XYI(IDXN+1)+ZDY(IDXN+1)  ! coordonnÃ©e Y du point suivant sur la ligne suivante
 ELSE
  ILINE = INT(KDXM/(NIMAX))+1      ! number of the current line
  II    = KDXM-((ILINE-1)*NIMAX)   ! index of point in the line
  IDXN  = (ILINE-1)*(NIMAX+1)+II   ! indice du point dans la grille isba
 !
- PX1 = XXI(IDXN)              ! coordonnée X du point courant
- PX2 = XXI(IDXN+1)            ! coordonnée X du point suivant
- PX3 = XXI(IDXN+(NIMAX+1))    ! coordonnée X du point aligné sur la ligne suivante 
- PX4 = XXI(IDXN+1+(NIMAX+1))  ! coordonnée X du point suivant sur la ligne suivante
+ PX1 = XXI(IDXN)              ! coordonnÃ©e X du point courant
+ PX2 = XXI(IDXN+1)            ! coordonnÃ©e X du point suivant
+ PX3 = XXI(IDXN+(NIMAX+1))    ! coordonnÃ©e X du point alignÃ© sur la ligne suivante 
+ PX4 = XXI(IDXN+1+(NIMAX+1))  ! coordonnÃ©e X du point suivant sur la ligne suivante
 !
- PY1 = XYI(IDXN)              ! coordonnée Y du point courant
- PY2 = XYI(IDXN+1)            ! coordonnée Y du point suivant
- PY3 = XYI(IDXN+(NIMAX+1))    ! coordonnée Y du point aligné sur la ligne suivante
- PY4 = XYI(IDXN+1+(NIMAX+1))  ! coordonnée Y du point suivant sur la ligne suivante
+ PY1 = XYI(IDXN)              ! coordonnÃ©e Y du point courant
+ PY2 = XYI(IDXN+1)            ! coordonnÃ©e Y du point suivant
+ PY3 = XYI(IDXN+(NIMAX+1))    ! coordonnÃ©e Y du point alignÃ© sur la ligne suivante
+ PY4 = XYI(IDXN+1+(NIMAX+1))  ! coordonnÃ©e Y du point suivant sur la ligne suivante
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA:INIT_4POINTS',1,ZHOOK_HANDLE)

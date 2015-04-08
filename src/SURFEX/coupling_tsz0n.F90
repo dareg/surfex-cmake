@@ -38,7 +38,7 @@ SUBROUTINE COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                 
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,   ONLY : XP00, XRD, XCPD
-USE MODD_ISBA_n, ONLY : XTG, XWG, XWGI, XWR, XRESA, TSNOW, NPATCH, NGROUND_LAYER, XWFC
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_TSZ0
 USE MODI_COUPLING_ISBA_OROGRAPHY_n
@@ -122,16 +122,16 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(KI,NGROUND_LAYER,NPATCH) :: ZTG   ! soil temperature
-REAL, DIMENSION(KI,NGROUND_LAYER,NPATCH) :: ZWG   ! soil water content
-REAL, DIMENSION(KI,NGROUND_LAYER,NPATCH) :: ZWGI  ! soil ice content
-REAL, DIMENSION(KI,NPATCH) :: ZWR   ! interception reservoir
-REAL, DIMENSION(KI,NPATCH) :: ZRESA ! aerodynamical resistance
-REAL, DIMENSION(KI,TSNOW%NLAYER,NPATCH) :: ZWSNOW! snow reservoir
-REAL, DIMENSION(KI,TSNOW%NLAYER,NPATCH) :: ZRHOSN! snow density
-REAL, DIMENSION(KI,TSNOW%NLAYER,NPATCH) :: ZHEASN! snow heat content
-REAL, DIMENSION(KI,NPATCH) :: ZALBSN! snow albedo
-REAL, DIMENSION(KI,NPATCH) :: ZEMISN! snow emissivity
+REAL, DIMENSION(KI,I%NGROUND_LAYER,I%NPATCH) :: ZTG   ! soil temperature
+REAL, DIMENSION(KI,I%NGROUND_LAYER,I%NPATCH) :: ZWG   ! soil water content
+REAL, DIMENSION(KI,I%NGROUND_LAYER,I%NPATCH) :: ZWGI  ! soil ice content
+REAL, DIMENSION(KI,I%NPATCH) :: ZWR   ! interception reservoir
+REAL, DIMENSION(KI,I%NPATCH) :: ZRESA ! aerodynamical resistance
+REAL, DIMENSION(KI,I%TSNOW%NLAYER,I%NPATCH) :: ZWSNOW! snow reservoir
+REAL, DIMENSION(KI,I%TSNOW%NLAYER,I%NPATCH) :: ZRHOSN! snow density
+REAL, DIMENSION(KI,I%TSNOW%NLAYER,I%NPATCH) :: ZHEASN! snow heat content
+REAL, DIMENSION(KI,I%NPATCH) :: ZALBSN! snow albedo
+REAL, DIMENSION(KI,I%NPATCH) :: ZEMISN! snow emissivity
 !
 REAL, DIMENSION(KI)     :: ZPEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KI)     :: ZPEW_B_COEF ! needed if HCOUPLING='I'
@@ -147,23 +147,23 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',0,ZHOOK_HANDLE)
 !*      1.     Specified evolution of ISBA prognostic variables
 !              ------------------------------------------------
 !
- CALL TSZ0(PTIME, PTSTEP, XWFC, XTG, XWG)
+ CALL TSZ0(PTIME, PTSTEP, I%XWFC, I%XTG, I%XWG)
 !
 !
 !*      2.     Saves the prognostic variables
 !              ------------------------------
 !
-ZTG  (:,:,:) = XTG        (:,:,:)
-ZWG  (:,:,:) = XWG        (:,:,:)
-ZWGI (:,:,:) = XWGI       (:,:,:)
-ZWR  (:,:)   = XWR        (:,:)
-ZRESA(:,:)   = XRESA      (:,:)
-ZWSNOW(:,:,:)= TSNOW%WSNOW(:,:,:)
-ZRHOSN(:,:,:)= TSNOW%RHO  (:,:,:)
-ZALBSN(:,:)  = TSNOW%ALB  (:,:)
-IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
-  ZHEASN(:,:,:)= TSNOW%HEAT (:,:,:)
-  ZEMISN(:,:)  = TSNOW%EMIS (:,:)
+ZTG  (:,:,:) = I%XTG        (:,:,:)
+ZWG  (:,:,:) = I%XWG        (:,:,:)
+ZWGI (:,:,:) = I%XWGI       (:,:,:)
+ZWR  (:,:)   = I%XWR        (:,:)
+ZRESA(:,:)   = I%XRESA      (:,:)
+ZWSNOW(:,:,:)= I%TSNOW%WSNOW(:,:,:)
+ZRHOSN(:,:,:)= I%TSNOW%RHO  (:,:,:)
+ZALBSN(:,:)  = I%TSNOW%ALB  (:,:)
+IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+  ZHEASN(:,:,:)= I%TSNOW%HEAT (:,:,:)
+  ZEMISN(:,:)  = I%TSNOW%EMIS (:,:)
 END IF
 !
 !
@@ -187,17 +187,17 @@ END IF
 !              --------------------------------------------
 !
 !
-XTG  (:,:,:) = ZTG
-XWG  (:,:,:) = ZWG
-XWGI (:,:,:) = ZWGI
-XWR  (:,:)   = ZWR
-XRESA(:,:)   = ZRESA
-TSNOW%WSNOW(:,:,:) = ZWSNOW
-TSNOW%RHO  (:,:,:) = ZRHOSN
-TSNOW%ALB  (:,:)   = ZALBSN
-IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') THEN
-  TSNOW%HEAT (:,:,:) = ZHEASN
-  TSNOW%EMIS (:,:)   = ZEMISN
+I%XTG  (:,:,:) = ZTG
+I%XWG  (:,:,:) = ZWG
+I%XWGI (:,:,:) = ZWGI
+I%XWR  (:,:)   = ZWR
+I%XRESA(:,:)   = ZRESA
+I%TSNOW%WSNOW(:,:,:) = ZWSNOW
+I%TSNOW%RHO  (:,:,:) = ZRHOSN
+I%TSNOW%ALB  (:,:)   = ZALBSN
+IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+  I%TSNOW%HEAT (:,:,:) = ZHEASN
+  I%TSNOW%EMIS (:,:)   = ZEMISN
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',1,ZHOOK_HANDLE)

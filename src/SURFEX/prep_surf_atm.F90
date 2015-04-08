@@ -26,7 +26,7 @@ SUBROUTINE PREP_SURF_ATM(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 
 !
-USE MODD_SURF_ATM_n,     ONLY : NDIM_SEA, NDIM_TOWN, NDIM_NATURE, NDIM_WATER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_PREP_NATURE
 USE MODI_PREP_SEA
@@ -91,25 +91,25 @@ ENDIF
 ! SEA Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(NDIM_SEA>0) CALL PREP_SEA(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(U%NDIM_SEA>0) CALL PREP_SEA(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! INLAND WATER Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(NDIM_WATER>0) CALL PREP_INLAND_WATER(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(U%NDIM_WATER>0) CALL PREP_INLAND_WATER(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(NDIM_NATURE>0) CALL PREP_NATURE(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(U%NDIM_NATURE>0) CALL PREP_NATURE(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(NDIM_TOWN>0) CALL PREP_TOWN(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(U%NDIM_TOWN>0) CALL PREP_TOWN(HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
  CALL CLEAR_GRIB_INDEX
 !

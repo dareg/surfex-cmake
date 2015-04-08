@@ -29,14 +29,9 @@ USE MODD_CO2V_PAR,  ONLY : XCA_NIT, XCC_NIT
 !
 USE MODD_PREP,      ONLY : LINTERP, CMASK
 !
-USE MODD_ISBA_n,    ONLY : CISBA, CPHOTO, XLAI, NPATCH,      &
-                           XVEGTYPE_PATCH, XPATCH, XVEGTYPE, &
-                           XBIOMASS, XBSLAI_NITRO,           &
-                           NNBIOMASS, NNLITTER, NNLITTLEVS,  &
-                           NNSOILCARB, XLITTER, XSOILCARB,   &
-                           XLIGNIN_STRUC
+USE MODD_ISBA_n, ONLY : I => ISBA
 
-USE MODD_ISBA_GRID_n,    ONLY : XLAT
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
 !
@@ -97,7 +92,7 @@ CALL READ_PREP_ISBA_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,  
 !
 CMASK = 'NATURE'
 !
-INI=SIZE(XLAT)
+INI=SIZE(IG%XLAT)
 !
 GPREP_AGS = .TRUE.
 !
@@ -136,9 +131,9 @@ IF(GPREP_AGS)THEN
   DO JPATCH = 1, INP
     ZFIELD(:,:)=ZFIELDIN(:,:,JPATCH)
     IF (INP==NVEGTYPE) THEN
-       LINTERP = (XVEGTYPE(:,JPATCH) > 0.)
-    ELSEIF(INP==NPATCH)THEN
-       LINTERP = (XPATCH(:,JPATCH) > 0.)
+       LINTERP = (I%XVEGTYPE(:,JPATCH) > 0.)
+    ELSEIF(INP==I%NPATCH)THEN
+       LINTERP = (I%XPATCH(:,JPATCH) > 0.)
     ENDIF
     CALL HOR_INTERPOL(ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
     LINTERP = .TRUE.
@@ -162,10 +157,10 @@ ENDIF
 !
 IF(GPREP_AGS)THEN
 !
-  ALLOCATE(ZW (INI,SIZE(ZFIELDOUTV,2),NPATCH))
+  ALLOCATE(ZW (INI,SIZE(ZFIELDOUTV,2),I%NPATCH))
 !
   ZW(:,:,:) = 0.
-  CALL VEGTYPE_GRID_TO_PATCH_GRID(NPATCH,XVEGTYPE_PATCH,XPATCH,ZFIELDOUTV,ZW)
+  CALL VEGTYPE_GRID_TO_PATCH_GRID(I%NPATCH,I%XVEGTYPE_PATCH,I%XPATCH,ZFIELDOUTV,ZW)
 !
 ELSE
 !
@@ -174,10 +169,10 @@ ELSE
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !  
     CASE('BIOMASS') 
-     ALLOCATE(ZW(INI,NNBIOMASS,NPATCH))
+     ALLOCATE(ZW(INI,I%NNBIOMASS,I%NPATCH))
      ZW(:,:,:) = 0.
-     WHERE(XLAI(:,:)/=XUNDEF)
-       ZW(:,1,:) = XLAI(:,:) * XBSLAI_NITRO(:,:)
+     WHERE(I%XLAI(:,:)/=XUNDEF)
+       ZW(:,1,:) = I%XLAI(:,:) * I%XBSLAI_NITRO(:,:)
      ENDWHERE
      ZW(:,2,:) = MAX( 0., (ZW(:,1,:)/ (XCC_NIT/10.**XCA_NIT))  &
                           **(1.0/(1.0-XCA_NIT)) - ZW(:,1,:) )
@@ -185,19 +180,19 @@ ELSE
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !
     CASE('LITTER') 
-     ALLOCATE(ZW(INI,NNLITTER*NNLITTLEVS,NPATCH))
+     ALLOCATE(ZW(INI,I%NNLITTER*I%NNLITTLEVS,I%NPATCH))
      ZW(:,:,:) = 0.0
     !
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !
     CASE('SOILCARB') 
-     ALLOCATE(ZW(INI,NNSOILCARB,NPATCH))
+     ALLOCATE(ZW(INI,I%NNSOILCARB,I%NPATCH))
      ZW(:,:,:) = 0.0
     !
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !
     CASE('LIGNIN') 
-     ALLOCATE(ZW(INI,NNLITTLEVS,NPATCH))
+     ALLOCATE(ZW(INI,I%NNLITTLEVS,I%NPATCH))
      ZW(:,:,:) = 0.0
     !
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -215,21 +210,21 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('BIOMASS') 
-  ALLOCATE(XBIOMASS(INI,NNBIOMASS,NPATCH))
-  INL=MIN(NNBIOMASS,SIZE(ZW,2))
+  ALLOCATE(I%XBIOMASS(INI,I%NNBIOMASS,I%NPATCH))
+  INL=MIN(I%NNBIOMASS,SIZE(ZW,2))
   DO JL=1,INL
      WHERE(ZW(:,JL,:)/=XUNDEF)
-       XBIOMASS(:,JL,:) = ZW(:,JL,:)
+       I%XBIOMASS(:,JL,:) = ZW(:,JL,:)
      ELSEWHERE
-       XBIOMASS(:,JL,:) = 0.0
+       I%XBIOMASS(:,JL,:) = 0.0
      ENDWHERE
   ENDDO
-  IF(NNBIOMASS>INL)THEN
-    DO JL=INL+1,NNBIOMASS
+  IF(I%NNBIOMASS>INL)THEN
+    DO JL=INL+1,I%NNBIOMASS
        WHERE(ZW(:,JL,:)/=XUNDEF)
-         XBIOMASS(:,JL,:) = ZW(:,INL,:)
+         I%XBIOMASS(:,JL,:) = ZW(:,INL,:)
        ELSEWHERE
-         XBIOMASS(:,JL,:) = 0.0
+         I%XBIOMASS(:,JL,:) = 0.0
        ENDWHERE
     ENDDO          
   ENDIF
@@ -237,16 +232,16 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LITTER') 
-  ALLOCATE(XLITTER(INI,NNLITTER,NNLITTLEVS,NPATCH))
-  DO JPATCH=1,NPATCH
+  ALLOCATE(I%XLITTER(INI,I%NNLITTER,I%NNLITTLEVS,I%NPATCH))
+  DO JPATCH=1,I%NPATCH
     INL=0
-    DO JJ=1,NNLITTER
-       DO JL=1,NNLITTLEVS
+    DO JJ=1,I%NNLITTER
+       DO JL=1,I%NNLITTLEVS
           INL=INL+1
           WHERE(ZW(:,INL,JPATCH)/=XUNDEF)
-             XLITTER(:,JJ,JL,JPATCH) = ZW(:,INL,JPATCH)
+             I%XLITTER(:,JJ,JL,JPATCH) = ZW(:,INL,JPATCH)
           ELSEWHERE
-             XLITTER(:,JJ,JL,JPATCH) = 0.0
+             I%XLITTER(:,JJ,JL,JPATCH) = 0.0
           ENDWHERE
        ENDDO
     ENDDO
@@ -255,21 +250,21 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('SOILCARB') 
-  ALLOCATE(XSOILCARB(INI,NNSOILCARB,NPATCH))
+  ALLOCATE(I%XSOILCARB(INI,I%NNSOILCARB,I%NPATCH))
   WHERE(ZW(:,:,:)/=XUNDEF)
-    XSOILCARB(:,:,:) = ZW(:,:,:)
+    I%XSOILCARB(:,:,:) = ZW(:,:,:)
   ELSEWHERE
-    XSOILCARB(:,:,:) = 0.0
+    I%XSOILCARB(:,:,:) = 0.0
   ENDWHERE
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LIGNIN') 
-  ALLOCATE(XLIGNIN_STRUC(INI,NNLITTLEVS,NPATCH))
+  ALLOCATE(I%XLIGNIN_STRUC(INI,I%NNLITTLEVS,I%NPATCH))
   WHERE(ZW(:,:,:)/=XUNDEF)
-    XLIGNIN_STRUC(:,:,:) = ZW(:,:,:)
+    I%XLIGNIN_STRUC(:,:,:) = ZW(:,:,:)
   ELSEWHERE
-    XLIGNIN_STRUC(:,:,:) = 0.0
+    I%XLIGNIN_STRUC(:,:,:) = 0.0
   ENDWHERE
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

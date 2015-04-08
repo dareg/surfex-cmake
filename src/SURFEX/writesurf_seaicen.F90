@@ -36,11 +36,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n,      ONLY : TGLT, XSIC,              &
-                                LINTERPOL_SIC, CINTERPOL_SIC,  &
-                                LINTERPOL_SIT, CINTERPOL_SIT,  &
-                                XSIC_MTH, XSIT_MTH,  &
-                                CSEAICE_SCHEME
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODD_GLT_PARAM, ONLY : nl, nt
 USE MODD_TYPES_GLT,   ONLY : T_GLT
@@ -85,10 +81,10 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAICE_n',0,ZHOOK_HANDLE)
 !
 !
 YCOMMENT='(-)'
-CALL WRITE_SURF(HPROGRAM,'SEAICE_SCHEM',CSEAICE_SCHEME,IRESP,YCOMMENT)
+CALL WRITE_SURF(HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP,YCOMMENT)
 !
 !
-IF (CSEAICE_SCHEME == 'GELATO') THEN 
+IF (S%CSEAICE_SCHEME == 'GELATO') THEN 
    YCOMMENT='Number of sea-ice layers'
    CALL WRITE_SURF(HPROGRAM,'ICENL',nl,IRESP,YCOMMENT)
    YCOMMENT='Number of ice categories'
@@ -97,7 +93,7 @@ IF (CSEAICE_SCHEME == 'GELATO') THEN
    !*       1.     Prognostic fields with only space dimension(s) :
    !
    YCOMMENT='ICEUSTAR ()'
-   CALL WRITE_SURF(HPROGRAM,'ICEUSTAR',TGLT%ust(:,1),IRESP,YCOMMENT)
+   CALL WRITE_SURF(HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP,YCOMMENT)
    !
    !*       2.     Prognostic fields with space and ice-category dimension(s) :
    !
@@ -106,31 +102,31 @@ IF (CSEAICE_SCHEME == 'GELATO') THEN
       YCATEG='_'//ADJUSTL(YICECAT)
       ! .. Write sea ice age for type JK
       YCOMMENT='X_Y_ICEAGE'//YCATEG//' (s)'
-      CALL WRITE_SURF(HPROGRAM,'ICEAGE'//YCATEG,TGLT%sit(JK,:,1)%age,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICEAGE'//YCATEG,S%TGLT%sit(JK,:,1)%age,IRESP,YCOMMENT)
       ! .. Write melt pond volume for type JK
       YCOMMENT='X_Y_ICEVMP'//YCATEG//' (m3)'
-      CALL WRITE_SURF(HPROGRAM,'ICEVMP'//YCATEG,TGLT%sit(JK,:,1)%vmp,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICEVMP'//YCATEG,S%TGLT%sit(JK,:,1)%vmp,IRESP,YCOMMENT)
       ! .. Write sea ice surface albedo for type JK
       YCOMMENT='X_Y_ICEASN'//YCATEG//' ([0-1])'
-      CALL WRITE_SURF(HPROGRAM,'ICEASN'//YCATEG,TGLT%sit(JK,:,1)%asn,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICEASN'//YCATEG,S%TGLT%sit(JK,:,1)%asn,IRESP,YCOMMENT)
       ! .. Write sea ice fraction for type JK
       YCOMMENT='X_Y_ICEFSI'//YCATEG//' ([0-1])'
-      CALL WRITE_SURF(HPROGRAM,'ICEFSI'//YCATEG, TGLT%sit(JK,:,1)%fsi,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICEFSI'//YCATEG, S%TGLT%sit(JK,:,1)%fsi,IRESP,YCOMMENT)
       ! .. Write sea ice thickness for type JK
       YCOMMENT='X_Y_ICEHSI'//YCATEG//' (m)'
-      CALL WRITE_SURF(HPROGRAM,'ICEHSI'//YCATEG, TGLT%sit(JK,:,1)%hsi,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICEHSI'//YCATEG, S%TGLT%sit(JK,:,1)%hsi,IRESP,YCOMMENT)
       ! .. Write sea ice salinity for type JK
       YCOMMENT='X_Y_ICESSI'//YCATEG//' (psu)'
-      CALL WRITE_SURF(HPROGRAM,'ICESSI'//YCATEG, TGLT%sit(JK,:,1)%ssi,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICESSI'//YCATEG, S%TGLT%sit(JK,:,1)%ssi,IRESP,YCOMMENT)
       ! .. Write sea ice surface temperature for type JK
       YCOMMENT='X_Y_ICETSF'//YCATEG//' (K)'
-      CALL WRITE_SURF(HPROGRAM,'ICETSF'//YCATEG, TGLT%sit(JK,:,1)%tsf,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICETSF'//YCATEG, S%TGLT%sit(JK,:,1)%tsf,IRESP,YCOMMENT)
       ! .. Write snow thickness for type JK
       YCOMMENT='X_Y_ICEHSN'//YCATEG//' (m)'
-      CALL WRITE_SURF(HPROGRAM,'ICEHSN'//YCATEG, TGLT%sit(JK,:,1)%hsn,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICEHSN'//YCATEG, S%TGLT%sit(JK,:,1)%hsn,IRESP,YCOMMENT)
       ! .. Write snow density for type JK
       YCOMMENT='X_Y_ICERSN'//YCATEG//' (kg m-3)'
-      CALL WRITE_SURF(HPROGRAM,'ICERSN'//YCATEG, TGLT%sit(JK,:,1)%rsn,IRESP,YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,'ICERSN'//YCATEG, S%TGLT%sit(JK,:,1)%rsn,IRESP,YCOMMENT)
       !
       !*       3.     Prognostic fields with space and ice-category and layer dimension(s) :
       !
@@ -141,7 +137,7 @@ IF (CSEAICE_SCHEME == 'GELATO') THEN
          IF (JL >= 10)  YFORM='(A6,I2.2,A4)'
          WRITE(YCOMMENT,FMT=YFORM) 'X_Y_ICEH',JL,' (J/kg)'
          ! .. Write sea ice vertical gltools_enthalpy profile for type JK and level JL  
-         CALL WRITE_SURF(HPROGRAM,'ICEH'//YLEVEL, TGLT%sil(JL,JK,:,1)%ent,IRESP,YCOMMENT)
+         CALL WRITE_SURF(HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP,YCOMMENT)
       END DO
    END DO
 ELSE
@@ -153,35 +149,35 @@ ENDIF
 !
 !* sea ice cover
 !
-IF(LINTERPOL_SIC)THEN
+IF(S%LINTERPOL_SIC)THEN
 !
-   INMTH=SIZE(XSIC_MTH,2)
+   INMTH=SIZE(S%XSIC_MTH,2)
 !
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIC_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
       YCOMMENT='Sea ice coverage at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XSIC_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,YRECFM,S%XSIC_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
    ENDDO
 !
 ENDIF
 !
 YRECFM='SIC'
 YCOMMENT='Sea ice coverage'
-CALL WRITE_SURF(HPROGRAM,YRECFM,XSIC(:),IRESP,HCOMMENT=YCOMMENT)  
+CALL WRITE_SURF(HPROGRAM,YRECFM,S%XSIC(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !
 !* sea ice thickness constraint
 !
-IF(LINTERPOL_SIT)THEN
+IF(S%LINTERPOL_SIT)THEN
 !
-   INMTH=SIZE(XSIT_MTH,2)
+   INMTH=SIZE(S%XSIT_MTH,2)
 !
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIT_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
       YCOMMENT='Sea ice thickness constraint at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL WRITE_SURF(HPROGRAM,YRECFM,XSIT_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
+      CALL WRITE_SURF(HPROGRAM,YRECFM,S%XSIT_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
    ENDDO
 !
 ENDIF

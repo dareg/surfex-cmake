@@ -29,10 +29,10 @@ SUBROUTINE ASSIM_INLAND_WATER_n(HPROGRAM,KI,PTS_IN,PITM,HTEST, &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : NPRINTLEV,LEXTRAP_WATER,LWATERTG2
 !
-USE MODD_SURF_ATM_n,     ONLY : CWATER,NR_WATER,NR_NATURE,NSIZE_NATURE
-USE MODD_ISBA_n,         ONLY : XTG
-USE MODD_WATFLUX_n,      ONLY : XTS,XZS
-USE MODD_WATFLUX_GRID_n, ONLY : XLAT, XLON
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
 !
@@ -73,7 +73,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_INLAND_WATER_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 
-WRITE(*,*) 'UPDATING LST FOR INLAND_WATER: ',TRIM(CWATER)
+WRITE(*,*) 'UPDATING LST FOR INLAND_WATER: ',TRIM(U%CWATER)
 !
 !*     ZLST updated!
 !
@@ -89,9 +89,9 @@ ELSE
   DO JI=1,KI
     IF ( PITM(JI)>0.5 ) THEN
       !*     ZLST updated from LAND values of climatological TS
-      DO JJ=1,NSIZE_NATURE
-        IF ( NR_WATER(JI)==NR_NATURE(JJ) ) THEN
-          ZLST(JI) = XTG(JJ,2,1)
+      DO JJ=1,U%NSIZE_NATURE
+        IF ( U%NR_WATER(JI)==U%NR_NATURE(JJ) ) THEN
+          ZLST(JI) = I%XTG(JJ,2,1)
           EXIT
         ENDIF
       ENDDO
@@ -110,7 +110,7 @@ DO JI=1,KI
     ZLST0(JI) = XUNDEF
     GINTERP_LST(JI) = .TRUE.  
   ELSE
-    ZLST0(JI) = XTS(JI)
+    ZLST0(JI) = W%XTS(JI)
   ENDIF
 ENDDO
 !
@@ -120,7 +120,7 @@ IF ( LEXTRAP_WATER ) THEN
     !     
     ZLST(:) = ZLST0(:)
     WHERE ( OD_MASKEXT(:) ) ZLST0(:) = XUNDEF
-    CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZLST0,PLAT_IN,PLON_IN,ZLST,GINTERP_LST,XZS)
+    CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZLST0,PLAT_IN,PLON_IN,ZLST,GINTERP_LST,W%XZS)
     !
   ELSE
     !
@@ -134,7 +134,7 @@ IF ( LEXTRAP_WATER ) THEN
         ZLST01(JJ) = ZLST0(J1)
         ZLAT1 (JJ) = PLAT_IN (J1)
         ZLON1 (JJ) = PLON_IN (J1)
-        ZALT1 (JJ) = XZS  (J1)
+        ZALT1 (JJ) = W%XZS  (J1)
         GINTERP_LST1(JJ) = GINTERP_LST(J1)
         JJ = JJ + 1
       ENDIF
@@ -162,17 +162,17 @@ ENDIF
 IF ( NPRINTLEV > 2 ) THEN
   DO JI=1,KI
     IF (GINTERP_LST(JI)) THEN
-      PRINT *,'Lake surface temperature set to ',ZLST(JI),'from nearest neighbour at I=',NR_WATER(JI)
+      PRINT *,'Lake surface temperature set to ',ZLST(JI),'from nearest neighbour at I=',U%NR_WATER(JI)
     ENDIF
   ENDDO
 ENDIF
 !
 ! Sum the increments
-ZLSTINC(:) = ZLST(:) - XTS(:)
+ZLSTINC(:) = ZLST(:) - W%XTS(:)
 WRITE(*,*) 'Mean LST increments over inland water   ',SUM(ZLSTINC)/KI
 !
 ! Setting modified variables
-XTS(:) = ZLST(:)
+W%XTS(:) = ZLST(:)
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',1,ZHOOK_HANDLE)
 !

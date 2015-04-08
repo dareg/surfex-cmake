@@ -53,56 +53,16 @@
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_CSTS,              ONLY: XCPD
-USE MODD_TEB_OPTION_n,      ONLY: XCOVER
-USE MODD_TEB_n,             ONLY: XGARDEN
-USE MODD_TEB_GRID_n,        ONLY: XLAT, XLON
-USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CRESPSL, LTR_ML, CRUNOFF, &
-                                  CC1DRY,  LNITRO_DILU,                    &
-                                  CSCOND, NNBIOMASS, CRESPSL, CALBEDO,     &
-                                  CSOILFRZ, CDIFSFCOND, CCPSURF,           &
-                                  CKSAT, CHORT, CSNOWRES, XCGMAX
-USE MODD_TEB_GARDEN_OPTION_n,   ONLY: LPAR_GARDEN,                         &
-                                  NLAYER_HORT, NLAYER_DUN, NGROUND_LAYER
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY: XEMIS, XVEG, XLAI, XZ0,              &
-                                      XALBNIR, XALBVIS, XALBUV
-USE MODD_TEB_GARDEN_PGD_n,      ONLY: LSTRESS,                             &
-                                  XWRMAX_CF, XRSMIN,                       &
-                                  XGAMMA, XCV, XRGL, XRUNOFFD,             &
-                                  XZ0_O_Z0H, XRUNOFFB, XWDRAIN,            &
-                                  XCGSAT, XC1SAT, XC2REF, XC3, XC4B,       &
-                                  XC4REF, XACOEF, XPCOEF, XTAUICE,         &
-                                  XABC, XPOI,                              &
-                                  XFZERO, XEPSO, XGAMM, XQDGAMM,           &
-                                  XGMES, XQDGMES, XT1GMES, XT2GMES,        &
-                                  XBSLAI, XLAIMIN, XSEFOLD,                &
-                                  XAMAX, XQDAMAX, XT1AMAX, XT2AMAX,        &
-                                  XF2I, XGC, XAH, XBH, XDMAX,              &
-                                  XDG, XROOTFRAC, XDZG, XDZDIF, NWG_LAYER, & 
-                                  XPCPS,                                   &
-                                  XPLVTT, XPLSTT, XWFC, XWWILT, XWSAT,     &
-                                  XBCOEF, XCONDSAT, XMPOTSAT, XHCAPSOIL,   &
-                                  XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
-                                  XCONDDRY, XCONDSLD, XRE25,               &
-                                  XKSAT_ICE, XD_ICE,                       &
-                                  XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
-                                  XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XANF, XSAND, XSOILWGHT,                  &
-                                  XVEGTYPE,                                &
-                                  XANMAX,                                  &
-                                  XBSLAI_NITRO, XH_TREE 
-USE MODD_TEB_GARDEN_n,      ONLY: TSNOW,                                   &
-                                  XWR, XRESA, XAN,                         &
-                                  XANFM, XANDAY,                           &
-                                  XTG, XWG, XWGI,                          &
-                                  XPSN, XPSNV, XPSNG, XPSNV_A,             &
-                                  XFAPARC, XFAPIRC, XMUS,                  &
-                                  XRESP_BIOMASS, XLE, XLAI_EFFC,           &
-                                  XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,   &
-                                  XSNOWFREE_ALB, XBIOMASS
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
 !
-USE MODD_TEB_IRRIG_n, ONLY : LPAR_GD_IRRIG,                                  &
-                             XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR, &
-                             XGD_END_HOUR, XGD_24H_IRRIG
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE_GARDEN
@@ -184,13 +144,13 @@ REAL, DIMENSION(0)   ::  ZSODELX   ! Pulsation for each layer (Only used if LTEM
 !
 REAL, DIMENSION(SIZE(PPS))               :: ZMUF    ! fraction of the grid cell reached by the rainfall
 REAL, DIMENSION(SIZE(PPS))               :: ZFSAT   ! Topmodel (SGH not used in TEB) saturated fraction
-REAL, DIMENSION(SIZE(PPS),NGROUND_LAYER) :: ZTOPQS  ! Topmodel (SGH not used in TEB) lateral subsurface flow by layer
+REAL, DIMENSION(SIZE(PPS),TGDO%NGROUND_LAYER) :: ZTOPQS  ! Topmodel (SGH not used in TEB) lateral subsurface flow by layer
 REAL, DIMENSION(SIZE(PPS))               :: ZQSB    ! Topmodel (SGH not used in TEB) output lateral subsurface
 REAL, DIMENSION(SIZE(PPS))               :: ZFWTD   ! grid-cell fraction of water table to rise
 REAL, DIMENSION(SIZE(PPS))               :: ZWTD    ! water table depth from Obs, TRIP or MODCOU
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
-REAL, DIMENSION(SIZE(PPS),NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PPS),TVG%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 !
 !  temperatures
 !
@@ -250,12 +210,12 @@ REAL, DIMENSION(SIZE(PPS)) :: ZGFLUX
 REAL, DIMENSION(SIZE(PPS)) :: ZRESTORE
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
 REAL, DIMENSION(SIZE(PPS)) :: ZMELT
-REAL, DIMENSION(SIZE(PPS),TSNOW%NLAYER) :: ZSNOWTEMP
-REAL, DIMENSION(SIZE(PPS),TSNOW%NLAYER) :: ZSNOWLIQ
-REAL, DIMENSION(SIZE(PPS),TSNOW%NLAYER) :: ZSNOWDZ
+REAL, DIMENSION(SIZE(PPS),TGD%TSNOW%NLAYER) :: ZSNOWTEMP
+REAL, DIMENSION(SIZE(PPS),TGD%TSNOW%NLAYER) :: ZSNOWLIQ
+REAL, DIMENSION(SIZE(PPS),TGD%TSNOW%NLAYER) :: ZSNOWDZ
 REAL, DIMENSION(SIZE(PPS)) :: ZSNOWHMASS
 REAL, DIMENSION(SIZE(PPS)) :: ZMELTADV
-REAL, DIMENSION(SIZE(PPS),SIZE(XABC)) :: ZIACAN
+REAL, DIMENSION(SIZE(PPS),SIZE(TGDP%XABC)) :: ZIACAN
 REAL, DIMENSION(SIZE(PPS)) :: ZQS
 REAL, DIMENSION(SIZE(PPS)) :: ZHV
 REAL, DIMENSION(SIZE(PPS)) :: ZHORT
@@ -341,7 +301,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW,                     &
           ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                        &
           ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                          &
           ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_GNDLITTER
-REAL, DIMENSION(SIZE(XROOTFRAC,1),SIZE(XROOTFRAC,2)) :: ZP_ROOTFRACV
+REAL, DIMENSION(SIZE(TGDP%XROOTFRAC,1),SIZE(TGDP%XROOTFRAC,2)) :: ZP_ROOTFRACV
 REAL, DIMENSION(SIZE(PPS)) :: ZP_WRV,ZP_WRVN,ZP_TV
 REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
 REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,    &
@@ -446,60 +406,60 @@ YSNOWRAD="B92"
 !*      2.1    Automatic irrigation
 !              --------------------
 !
-CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
-               XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR,   &
-               XGD_END_HOUR, XGD_24H_IRRIG, PIRRIG_GARDEN        ) 
+CALL TEB_IRRIG(TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
+               TIR%XGD_START_MONTH, TIR%XGD_END_MONTH, TIR%XGD_START_HOUR,   &
+               TIR%XGD_END_HOUR, TIR%XGD_24H_IRRIG, PIRRIG_GARDEN        ) 
 !
 !*      2.2    Call ISBA for green areas
 !              -------------------------
 !
 !
- CALL ISBA(CISBA, CPHOTO, LTR_ML, CRUNOFF, CKSAT, HRAIN, CHORT,       &
-          CC1DRY, CSCOND, TSNOW%SCHEME, CSNOWRES, CCPSURF, CSOILFRZ,  &
-          CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER,            &
+ CALL ISBA(TVG%CISBA, TVG%CPHOTO, TVG%LTR_ML, TVG%CRUNOFF, TVG%CKSAT, HRAIN, TVG%CHORT,       &
+          TVG%CC1DRY, TVG%CSCOND, TGD%TSNOW%SCHEME, TVG%CSNOWRES, TVG%CCPSURF, TVG%CSOILFRZ,  &
+          TVG%CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER,            &
           OMEB, OFORC_MEASURE, PTSTEP, HIMPLICIT_WIND, GAGRI_TO_GRASS,&
           GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,              &
           YSNOWMETAMO,YSNOWRAD,                                       &
-          XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,         &
+          TVG%XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,         &
           PQ_LOWCAN, PEXNS, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
           ZP_MEB_SCA_SW,                                              &
           PSW, PLW, PU_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &
-          PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, XRSMIN, XRGL, XGAMMA,&
-          XCV, XRUNOFFD, XSOILWGHT, NLAYER_HORT, NLAYER_DUN,          &
+          PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, TGDP%XRSMIN, TGDP%XRGL, TGDP%XGAMMA,&
+          TGDP%XCV, TGDP%XRUNOFFD, TGDP%XSOILWGHT, TGDO%NLAYER_HORT, TGDO%NLAYER_DUN,          &
           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,   &
-          XSNOWFREE_ALB, XWRMAX_CF, XVEG, XLAI, XEMIS, XZ0,           &
-          XZ0/XZ0_O_Z0H, XVEGTYPE, XZ0,                               &
+          TGD%XSNOWFREE_ALB, TGDP%XWRMAX_CF, TGDPE%XVEG, TGDPE%XLAI, TGDPE%XEMIS, TGDPE%XZ0,           &
+          TGDPE%XZ0/TGDP%XZ0_O_Z0H, TGDP%XVEGTYPE, TGDPE%XZ0,                               &
           ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,              &
           ZP_ROOTFRACV, ZP_WRMAX_CFV, ZP_LAIV,                        &
           ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                       &
           ZZ0G_WITHOUT_SNOW,                                          &
           ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                             &
           ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, ZP_GNDLITTER,               &
-          XRUNOFFB, XCGSAT, XC1SAT,                                   &
-          XC2REF, XC3, XC4B, XC4REF, XACOEF, XPCOEF, XTAUICE, XWDRAIN,&
-          ZTDEEP_A, ZTDEEP_B, ZGAMMAT, XPSN, XPSNG, XPSNV, XPSNV_A,   &
-          XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL, ZIRRIG, ZWATSUP,     &
-          ZTHRESHOLDSPT, GIRRIGATE, GIRRIDAY, LSTRESS, XGC, XF2I,     &
-          XDMAX, XAH, XBH, PCO2, XGMES, XPOI, XFZERO, XEPSO, XGAMM,   &
-          XQDGAMM, XQDGMES, XT1GMES, XT2GMES, XAMAX, XQDAMAX, XT1AMAX,&
-          XT2AMAX, XABC, XDG, XDZG, XDZDIF, NWG_LAYER, XROOTFRAC,     &
-          XWFC, XWWILT, XWSAT, XBCOEF,  XCONDSAT, XMPOTSAT,           &
-          XHCAPSOIL, XCONDDRY, XCONDSLD, XD_ICE, XKSAT_ICE, ZMUF, ZFF,&
+          TGDP%XRUNOFFB, TGDP%XCGSAT, TGDP%XC1SAT,                                   &
+          TGDP%XC2REF, TGDP%XC3, TGDP%XC4B, TGDP%XC4REF, TGDP%XACOEF, TGDP%XPCOEF, TGDP%XTAUICE, TGDP%XWDRAIN,&
+          ZTDEEP_A, ZTDEEP_B, ZGAMMAT, TGD%XPSN, TGD%XPSNG, TGD%XPSNV, TGD%XPSNV_A,   &
+          TGD%XSNOWFREE_ALB_VEG, TGD%XSNOWFREE_ALB_SOIL, ZIRRIG, ZWATSUP,     &
+          ZTHRESHOLDSPT, GIRRIGATE, GIRRIDAY, TGDP%LSTRESS, TGDP%XGC, TGDP%XF2I,     &
+          TGDP%XDMAX, TGDP%XAH, TGDP%XBH, PCO2, TGDP%XGMES, TGDP%XPOI, TGDP%XFZERO, TGDP%XEPSO, TGDP%XGAMM,   &
+          TGDP%XQDGAMM, TGDP%XQDGMES, TGDP%XT1GMES, TGDP%XT2GMES, TGDP%XAMAX, TGDP%XQDAMAX, TGDP%XT1AMAX,&
+          TGDP%XT2AMAX, TGDP%XABC, TGDP%XDG, TGDP%XDZG, TGDP%XDZDIF, TGDP%NWG_LAYER, TGDP%XROOTFRAC,     &
+          TGDP%XWFC, TGDP%XWWILT, TGDP%XWSAT, TGDP%XBCOEF,  TGDP%XCONDSAT, TGDP%XMPOTSAT,           &
+          TGDP%XHCAPSOIL, TGDP%XCONDDRY, TGDP%XCONDSLD, TGDP%XD_ICE, TGDP%XKSAT_ICE, ZMUF, ZFF,&
           ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &
-          ZLEIFLOOD, ZSODELX, XLAT, XLON, XTG, XWG, XWGI, XPCPS,      &
-          XPLVTT, XPLSTT, XWR,                                        &
+          ZLEIFLOOD, ZSODELX, TG%XLAT, TG%XLON, TGD%XTG, TGD%XWG, TGD%XWGI, TGDP%XPCPS,      &
+          TGDP%XPLVTT, TGDP%XPLSTT, TGD%XWR,                                        &
           ZP_WRV,ZP_WRVN,ZP_TV,                                       &
-          XRESA, XANFM, ZFSAT, TSNOW%ALB(:,1),                        &
-          TSNOW%ALBVIS(:,1), TSNOW%ALBNIR(:,1), TSNOW%ALBFIR(:,1),    &
-          TSNOW%WSNOW(:,:,1), TSNOW%HEAT(:,:,1), TSNOW%RHO(:,:,1),    &
-          TSNOW%GRAN1(:,:,1), TSNOW%GRAN2(:,:,1), TSNOW%HIST(:,:,1),  &
-          TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
+          TGD%XRESA, TGD%XANFM, ZFSAT, TGD%TSNOW%ALB(:,1),                        &
+          TGD%TSNOW%ALBVIS(:,1), TGD%TSNOW%ALBNIR(:,1), TGD%TSNOW%ALBFIR(:,1),    &
+          TGD%TSNOW%WSNOW(:,:,1), TGD%TSNOW%HEAT(:,:,1), TGD%TSNOW%RHO(:,:,1),    &
+          TGD%TSNOW%GRAN1(:,:,1), TGD%TSNOW%GRAN2(:,:,1), TGD%TSNOW%HIST(:,:,1),  &
+          TGD%TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
           ZRNSNOW, ZHSNOW,  ZGFLUXSNOW, ZUSTARSNOW,                   &
-          ZSRSFC, ZRRSFC, ZLESL, TSNOW%EMIS(:,1), ZCDSNOW, ZCHSNOW,   &
+          ZSRSFC, ZRRSFC, ZLESL, TGD%TSNOW%EMIS(:,1), ZCDSNOW, ZCHSNOW,   &
           PTS_GARDEN, ZTS, ZHV, ZQS, ZSNOWTEMP, ZSNOWLIQ, ZSNOWDZ,    &
           ZCG, ZC1, ZC2, ZWGEQ, ZCT, ZCH, ZCD, ZCDN, ZRI, ZHU, ZHUG,  &
-          ZEMIST, ZALBT, ZRS, XLE,  ZRN, ZH, ZLEI, ZLEGI, ZLEG, ZLEV, &
+          ZEMIST, ZALBT, ZRS, TGD%XLE,  ZRN, ZH, ZLEI, ZLEGI, ZLEG, ZLEV, &
           ZLES, ZLER, ZLETR, ZEVAP, ZGFLUX, ZRESTORE, ZUSTAR,         &
           PDRAIN_GARDEN, PRUNOFF_GARDEN,                              &
           ZMELT, ZMELTADV,                                            &
@@ -508,7 +468,7 @@ CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZLEGI_ISBA, ZLEV_ISBA, ZLETR_ISBA, ZUSTAR_ISBA, ZLER_ISBA,  &
           ZLE_ISBA, ZLEI_ISBA, ZGFLUX_ISBA, ZHORT, ZDRIP, ZRRVEG,     &
           PAC_AGG_GARDEN, PHU_AGG_GARDEN, ZFAPARC, ZFAPIRC, ZMUS,     &
-          ZLAI_EFFC, XAN, XANDAY, ZRESP_BIOMASS_INST, ZIACAN, XANF,   &
+          ZLAI_EFFC, TGD%XAN, TGD%XANDAY, ZRESP_BIOMASS_INST, ZIACAN, TGDP%XANF,   &
           ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
           ZDEEP_FLUX,                                                 &
           ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,            &
@@ -522,9 +482,9 @@ CALL TEB_IRRIG(LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           PIRRIG_GARDEN, ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT   )                                                           
 !
 !
-IF (TSNOW%SCHEME=='3-L' .OR. TSNOW%SCHEME=='CRO') TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
+IF (TGD%TSNOW%SCHEME=='3-L' .OR. TGD%TSNOW%SCHEME=='CRO') TGD%TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
 !
-IF (LTR_ML) THEN
+IF (TVG%LTR_ML) THEN
   GMASK = ( TPTIME%TIME - PTSTEP < 0. ) .AND. ( TPTIME%TIME >= 0. )
   IF (GMASK) THEN
     ZDFAPARC  (:) = ZFAPARC   (:) / ZMUS (:)
@@ -537,28 +497,28 @@ ENDIF
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
-IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
+IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE_GARDEN(TPTIME,PTSTEP,ILU)  
 END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Vegetation evolution for interactive LAI
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (CPHOTO=='LAI' .OR. CPHOTO=='LST' .OR. CPHOTO=='NIT') THEN
-  CALL VEGETATION_EVOL(CISBA, CPHOTO, CRESPSL, CALBEDO, .FALSE., LTR_ML,   &
-                       LNITRO_DILU, GAGRI_TO_GRASS,                        &
+IF (TVG%CPHOTO=='LAI' .OR. TVG%CPHOTO=='LST' .OR. TVG%CPHOTO=='NIT') THEN
+  CALL VEGETATION_EVOL(TVG%CISBA, TVG%CPHOTO, TVG%CRESPSL, TVG%CALBEDO, .FALSE., TVG%LTR_ML,   &
+                       TVG%LNITRO_DILU, GAGRI_TO_GRASS,                        &
                        PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, 1,    &
-                       TPTIME%TIME, XLAT, PRHOA, XDG, XDZG, NWG_LAYER,     & 
-                       XTG, XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,          &
-                       XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL,            &
-                       XVEGTYPE, XSEFOLD, XANMAX, XH_TREE, XBSLAI,         &
-                       XLAIMIN, PCO2, XCE_NITRO, XCF_NITRO, XCNA_NITRO,    &
-                       XBSLAI_NITRO, XGMES, ZTAU_WOOD, TPSEED,             &
+                       TPTIME%TIME, TG%XLAT, PRHOA, TGDP%XDG, TGDP%XDZG, TGDP%NWG_LAYER,     & 
+                       TGD%XTG, TGDP%XALBNIR_VEG, TGDP%XALBVIS_VEG, TGDP%XALBUV_VEG,          &
+                       TGDP%XALBNIR_SOIL, TGDP%XALBVIS_SOIL, TGDP%XALBUV_SOIL,            &
+                       TGDP%XVEGTYPE, TGDP%XSEFOLD, TGDP%XANMAX, TGDP%XH_TREE, TGDP%XBSLAI,         &
+                       TGDP%XLAIMIN, PCO2, TGDP%XCE_NITRO, TGDP%XCF_NITRO, TGDP%XCNA_NITRO,    &
+                       TGDP%XBSLAI_NITRO, TGDP%XGMES, ZTAU_WOOD, TPSEED,             &
                        TPREAP, ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,             &
                        ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM, ZZ0EFFIP,           &
-                       ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, XLAI, XVEG,           &
-                       XZ0, XALBNIR, XALBVIS, XALBUV, XEMIS,               &
-                       XANFM, XANDAY, XBIOMASS, XRESP_BIOMASS,             &
+                       ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, TGDPE%XLAI, TGDPE%XVEG,           &
+                       TGDPE%XZ0, TGDPE%XALBNIR, TGDPE%XALBVIS, TGDPE%XALBUV, TGDPE%XEMIS,               &
+                       TGD%XANFM, TGD%XANDAY, TGD%XBIOMASS, TGD%XRESP_BIOMASS,             &
                        ZRESP_BIOMASS_INST, ZINCREASE, ZTURNOVER             )         
 END IF
 !
@@ -570,11 +530,11 @@ PSFCO2(:)=0.
 ZRESP_ECO (:)=0.
 ZRESP_AUTO(:)=0.
 !
-IF (CPHOTO/='NON' .AND. CRESPSL/='NON' .AND. ANY(XLAI(:)/=XUNDEF)) THEN
-  CALL CARBON_EVOL(CISBA, CRESPSL, CPHOTO, PTSTEP, 1,             &
-                   PRHOA, XTG, XWG, XWFC, XWWILT, XWSAT, XSAND,   &
-                   XDG, XDZG, NWG_LAYER,                          &                   
-                   XRE25, XLAI, ZRESP_BIOMASS_INST, ZTURNOVER,    &
+IF (TVG%CPHOTO/='NON' .AND. TVG%CRESPSL/='NON' .AND. ANY(TGDPE%XLAI(:)/=XUNDEF)) THEN
+  CALL CARBON_EVOL(TVG%CISBA, TVG%CRESPSL, TVG%CPHOTO, PTSTEP, 1,             &
+                   PRHOA, TGD%XTG, TGD%XWG, TGDP%XWFC, TGDP%XWWILT, TGDP%XWSAT, TGDP%XSAND,   &
+                   TGDP%XDG, TGDP%XDZG, TGDP%NWG_LAYER,                          &                   
+                   TGDP%XRE25, TGDPE%XLAI, ZRESP_BIOMASS_INST, ZTURNOVER,    &
                    ZLITTER, ZLIGNIN_STRUC , ZSOILCARB,            &
                    ZRESP_AUTO, ZRESP_ECO                          )
   ! calculation of vegetation CO2 flux
@@ -596,13 +556,13 @@ END IF
 !*      9.     Fields required for TEB
 !              -----------------------
 !
-WHERE (XGARDEN/=0.)
+WHERE (T%XGARDEN/=0.)
   !
   ! energy balance
   !
    PRN_GARDEN    (:) = ZRN    (:)
    PH_GARDEN     (:) = ZH     (:)
-   PLE_GARDEN    (:) = XLE    
+   PLE_GARDEN    (:) = TGD%XLE    
    PGFLUX_GARDEN (:) = ZGFLUX (:)
    PEVAP_GARDEN  (:) = ZEVAP  (:)
   !
@@ -616,7 +576,7 @@ WHERE (XGARDEN/=0.)
   ENDWHERE
   !
   ! Humidity of saturation for green areas
-  PQSAT_GARDEN(:) = QSAT(XTG(:,1),PPS(:))
+  PQSAT_GARDEN(:) = QSAT(TGD%XTG(:,1),PPS(:))
   !
   !* friction flux
   PUW_GARDEN(:)    = -ZUSTAR(:)**2

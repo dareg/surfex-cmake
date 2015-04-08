@@ -37,7 +37,7 @@
 !            -----------
 !
 USE MODD_PGD_GRID,       ONLY : CGRID, XGRID_PAR
-USE MODD_SURF_ATM_n,     ONLY : XZS, XSEA
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_READ_NAM_PGD_OROG_FILTER
 USE MODI_OROGRAPHY_FILTER
@@ -81,7 +81,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !*   11.      Filtering of orography
 !             ----------------------
 !
- CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, XSEA, NZSFILTER, XZS)
+ CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, U%XSEA, NZSFILTER, U%XZS)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_OROG_FILTER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

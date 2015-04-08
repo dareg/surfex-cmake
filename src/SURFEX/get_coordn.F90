@@ -35,7 +35,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_GRID_n,     ONLY : XLON, XLAT
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -64,16 +64,16 @@ IF (LHOOK) CALL DR_HOOK('GET_COORD_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PLON) /= SIZE(XLON) .OR. SIZE(PLAT) /= SIZE(XLAT) ) THEN
+IF ( SIZE(PLON) /= SIZE(UG%XLON) .OR. SIZE(PLAT) /= SIZE(UG%XLAT) ) THEN
   WRITE(ILUOUT,*) 'try to get LON/LAT field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PLON) :', SIZE(PLON)
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PLAT) :', SIZE(PLAT)
-  WRITE(ILUOUT,*) 'size of field in the surface                    (XLAT) :', SIZE(XLAT)
-  WRITE(ILUOUT,*) 'size of field in the surface                    (XLAT) :', SIZE(XLAT)
+  WRITE(ILUOUT,*) 'size of field in the surface                    (XLAT) :', SIZE(UG%XLAT)
+  WRITE(ILUOUT,*) 'size of field in the surface                    (XLAT) :', SIZE(UG%XLAT)
   CALL ABOR1_SFX('GET_COORDN: LON/LAT SIZE NOT CORRECT')
 ELSE
-  PLON = XLON
-  PLAT = XLAT
+  PLON = UG%XLON
+  PLAT = UG%XLAT
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_COORD_N',1,ZHOOK_HANDLE)
 !

@@ -31,7 +31,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n,  ONLY : XRAIN, XSNOW, XZ0, XZ0H, XQSURF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,11 +57,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CPL_GCM_N',0,ZHOOK_HANDLE)
 !
-IF(PRESENT(PRAIN )) XRAIN (:) = PRAIN (:)
-IF(PRESENT(PSNOW )) XSNOW (:) = PSNOW (:)
-IF(PRESENT(PZ0   )) XZ0   (:) = PZ0   (:)
-IF(PRESENT(PZ0H  )) XZ0H  (:) = PZ0H  (:)
-IF(PRESENT(PQSURF)) XQSURF(:) = PQSURF(:)
+IF(PRESENT(PRAIN )) U%XRAIN (:) = PRAIN (:)
+IF(PRESENT(PSNOW )) U%XSNOW (:) = PSNOW (:)
+IF(PRESENT(PZ0   )) U%XZ0   (:) = PZ0   (:)
+IF(PRESENT(PZ0H  )) U%XZ0H  (:) = PZ0H  (:)
+IF(PRESENT(PQSURF)) U%XQSURF(:) = PQSURF(:)
 !
 IF (LHOOK) CALL DR_HOOK('CPL_GCM_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

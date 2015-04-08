@@ -36,7 +36,7 @@
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_Z0, XAVG_Z0H, LCOEF
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -64,9 +64,9 @@ IF (LHOOK) CALL DR_HOOK('GET_Z0_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LCOEF)      THEN 
-        PZ0      = XAVG_Z0      
-        PZ0H     = XAVG_Z0H
+IF (DGU%LCOEF)      THEN 
+        PZ0      = DGU%XAVG_Z0      
+        PZ0H     = DGU%XAVG_Z0H
    ELSE 
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF

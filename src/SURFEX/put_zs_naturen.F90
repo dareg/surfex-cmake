@@ -36,7 +36,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_ISBA_n,     ONLY : XZS
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -65,13 +65,13 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_NATURE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(I%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field over nature                       (XZS) :', SIZE(XZS)
+  WRITE(ILUOUT,*) 'size of field over nature                       (XZS) :', SIZE(I%XZS)
   CALL ABOR1_SFX('PUT_ZS_NATUREN: GET ZS FROM ATMOSPHERIC MODEL: SIZE NOT CORRECT')
 ELSE
-  XZS = PZS
+  I%XZS = PZS
 END IF
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_NATURE_N',1,ZHOOK_HANDLE)
 !

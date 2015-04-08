@@ -9,7 +9,7 @@ SUBROUTINE TEST_RECORD_LEN(HPROGRAM,HREC,ONOWRITE)
 !-------------------------------------------------------------------------------
 !
 USE MODI_GET_LUOUT
-USE MODD_DIAG_SURF_ATM_n,  ONLY : LSELECT, CSELECT
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,11 +47,11 @@ CASE("TEB1","TEB2","TEB3","TEB4","TEB5","TEB6","TEB7","TEB8","TEB9")
         YREC=HREC(6:LEN(HREC))
 END SELECT
 ! if output fields selection is active, test if this field is to be written
-IF (LSELECT)  THEN
-   IFIELD=COUNT(CSELECT /= '            ')
+IF (DGU%LSELECT)  THEN
+   IFIELD=COUNT(DGU%CSELECT /= '            ')
    ONOWRITE=.TRUE.
    DO JFIELD=1,IFIELD
-      IF ( TRIM(CSELECT(JFIELD))==TRIM(YREC) ) THEN
+      IF ( TRIM(DGU%CSELECT(JFIELD))==TRIM(YREC) ) THEN
          ONOWRITE=.FALSE.
       ENDIF
    ENDDO

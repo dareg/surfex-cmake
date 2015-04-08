@@ -53,9 +53,7 @@ USE MODD_IDEAL_FLUX, ONLY : NFORCF, NFORCT, XSFTH, XSFTQ, XSFTS, XSFCO2, &
                             CUSTARTYPE, XUSTAR, XZ0, XALB, XEMIS, XTSRAD, &
                             XTIMEF, XTIMET 
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_DIAG_IDEAL_n, ONLY : XH, XLE, XRN, XGFLUX, LSURF_BUDGET, &
-                              LCOEF, XZ0_d=>XZ0, XZ0H_d=>XZ0H, &
-                              LSURF_VARS, XQS
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
 USE MODE_SBLS
 USE MODE_THERMOS
@@ -290,20 +288,20 @@ PQSURF(:) = QSAT(PTSURF(:),PPS(:))
 !  
 !*       9.    turbulent fluxes as diagnostics
 !              ------------------------------------
-IF (LSURF_BUDGET) THEN
-  XH  = PSFTH
-  XLE = XLVTT * PSFTQ
-  XRN = XH+XLE
-  XGFLUX = 0.
+IF (DGL%LSURF_BUDGET) THEN
+  DGL%XH  = PSFTH
+  DGL%XLE = XLVTT * PSFTQ
+  DGL%XRN = DGL%XH+DGL%XLE
+  DGL%XGFLUX = 0.
 ENDIF
 !
-IF (LCOEF) THEN
-  XZ0_d  = PZ0 (:)
-  XZ0H_d = PZ0H(:)
+IF (DGL%LCOEF) THEN
+  DGL%XZ0  = PZ0 (:)
+  DGL%XZ0H = PZ0H(:)
 ENDIF
 !
-IF (LSURF_VARS) THEN
-  XQS(:) = PQSURF(:)
+IF (DGL%LSURF_VARS) THEN
+  DGL%XQS(:) = PQSURF(:)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)

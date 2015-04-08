@@ -34,7 +34,7 @@
 !              ------------
 !
 USE MODE_TRIP_GRID
-USE MODD_TRIP_GRID, ONLY : TGRID
+USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -55,7 +55,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_LAT_GWF',0,ZHOOK_HANDLE)
-CALL GET_TRIP_GRID(TGRID%XTRIP_GRID,PRES=PRES,PLAT=PLAT)
+CALL GET_TRIP_GRID(TPG%XTRIP_GRID,PRES=PRES,PLAT=PLAT)
 IF (LHOOK) CALL DR_HOOK('GET_LAT_GWF',1,ZHOOK_HANDLE)
 !    
 !---------------------------------------------------------------------------

@@ -41,11 +41,7 @@
 !
 USE MODD_TYPE_SNOW
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_ISBA_n,   ONLY : NPATCH,XTG,TSNOW,XPSN,XVEG,XLAI,XZ0,    &
-                          XALBNIR,XALBVIS,XALBUV,XEMIS,XPATCH,    &
-                          LFLOOD,XFF,XEMISF,XEMIS_NAT,XTSRAD_NAT, &
-                          LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER, &
-                          XH_VEG
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_AVERAGE_RAD
 USE MODI_AVERAGE_TSURF
@@ -76,12 +72,12 @@ REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! surface effective
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(KI,KSW,NPATCH) :: ZDIR_ALB_PATCH
-REAL, DIMENSION(KI,KSW,NPATCH) :: ZSCA_ALB_PATCH
-REAL, DIMENSION(KI,NPATCH)     :: ZEMIS_PATCH
-REAL, DIMENSION(KI,NPATCH)     :: ZTSRAD_PATCH
-REAL, DIMENSION(KI,NPATCH)     :: ZTSURF_PATCH
-REAL, DIMENSION(KI,NPATCH)     :: ZEMIS          ! emissivity with flood
+REAL, DIMENSION(KI,KSW,I%NPATCH) :: ZDIR_ALB_PATCH
+REAL, DIMENSION(KI,KSW,I%NPATCH) :: ZSCA_ALB_PATCH
+REAL, DIMENSION(KI,I%NPATCH)     :: ZEMIS_PATCH
+REAL, DIMENSION(KI,I%NPATCH)     :: ZTSRAD_PATCH
+REAL, DIMENSION(KI,I%NPATCH)     :: ZTSURF_PATCH
+REAL, DIMENSION(KI,I%NPATCH)     :: ZEMIS          ! emissivity with flood
 !
 LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
@@ -97,35 +93,35 @@ IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_ISBA_N',0,ZHOOK_HANDLE)
 ZDIR_ALB_PATCH(:,:,:) = 0.0
 ZSCA_ALB_PATCH(:,:,:) = 0.0
 ZEMIS_PATCH   (:,:  ) = 0.0
-ZEMIS         (:,:  ) = XEMIS(:,:)
+ZEMIS         (:,:  ) = I%XEMIS(:,:)
 !
-LEXPLICIT_SNOW = (TSNOW%SCHEME=='3-L'.OR.TSNOW%SCHEME=='CRO')
+LEXPLICIT_SNOW = (I%TSNOW%SCHEME=='3-L'.OR.I%TSNOW%SCHEME=='CRO')
 !
-ZTSRAD_PATCH (:,:) = XTG(:,1,:)
-ZTSURF_PATCH (:,:) = XTG(:,1,:)
+ZTSRAD_PATCH (:,:) = I%XTG(:,1,:)
+ZTSURF_PATCH (:,:) = I%XTG(:,1,:)
 !
 !
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(LFLOOD,TSNOW%SCHEME,PZENITH,PSW_BANDS,XVEG,XLAI,XZ0, &
-                         LMEB_PATCH,XLAIGV,XGNDLITTER,XZ0LITTER,XH_VEG,      &
-                         XALBNIR,XALBVIS,XALBUV,XEMIS,                       &
+ CALL UPDATE_RAD_ISBA_n(I%LFLOOD,I%TSNOW%SCHEME,PZENITH,PSW_BANDS,I%XVEG,I%XLAI,I%XZ0, &
+                         I%LMEB_PATCH,I%XLAIGV,I%XGNDLITTER,I%XZ0LITTER,I%XH_VEG,      &
+                         I%XALBNIR,I%XALBVIS,I%XALBUV,I%XEMIS,                       &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH           )
 !
 !*       3.     radiative surface temperature
 !               -----------------------------
 !
-IF(LEXPLICIT_SNOW.AND.LFLOOD)THEN
-  WHERE(XPSN(:,:)<1.0.AND.XEMIS(:,:)/=XUNDEF)
-       ZEMIS(:,:) = ((1.-XFF(:,:)-XPSN(:,:))*XEMIS(:,:) + XFF(:,:)*XEMISF(:,:)) / (1.-XPSN(:,:))
+IF(LEXPLICIT_SNOW.AND.I%LFLOOD)THEN
+  WHERE(I%XPSN(:,:)<1.0.AND.I%XEMIS(:,:)/=XUNDEF)
+       ZEMIS(:,:) = ((1.-I%XFF(:,:)-I%XPSN(:,:))*I%XEMIS(:,:) + I%XFF(:,:)*I%XEMISF(:,:)) / (1.-I%XPSN(:,:))
   ENDWHERE
 ENDIF
 !
 IF(LEXPLICIT_SNOW)THEN
-  WHERE(XEMIS(:,:)/=XUNDEF.AND.ZEMIS_PATCH(:,:)/=0.)
-       ZTSRAD_PATCH(:,:) = ( ( (1.-XPSN(:,:))*ZEMIS     (:,:)*XTG   (:,1,:)**4     &
-                             +     XPSN(:,:) *TSNOW%EMIS(:,:)*TSNOW%TS(:,:)**4 )   &
+  WHERE(I%XEMIS(:,:)/=XUNDEF.AND.ZEMIS_PATCH(:,:)/=0.)
+       ZTSRAD_PATCH(:,:) = ( ( (1.-I%XPSN(:,:))*ZEMIS     (:,:)*I%XTG   (:,1,:)**4     &
+                             +     I%XPSN(:,:) *I%TSNOW%EMIS(:,:)*I%TSNOW%TS(:,:)**4 )   &
                            / ZEMIS_PATCH(:,:) )**0.25         
   ENDWHERE
 ENDIF        
@@ -134,20 +130,20 @@ ENDIF
 !*       4.     averaged fields
 !               ---------------
 !
- CALL AVERAGE_RAD(XPATCH,                                                     &
+ CALL AVERAGE_RAD(I%XPATCH,                                                     &
                    ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTSRAD_PATCH, &
-                   PDIR_ALB,       PSCA_ALB,       XEMIS_NAT,   XTSRAD_NAT    )  
+                   PDIR_ALB,       PSCA_ALB,       I%XEMIS_NAT,   I%XTSRAD_NAT    )  
 !
-PEMIS = XEMIS_NAT
-PTSRAD = XTSRAD_NAT
+PEMIS = I%XEMIS_NAT
+PTSRAD = I%XTSRAD_NAT
 !
 !* averaged effective temperature
 !
 IF(LEXPLICIT_SNOW)THEN
-  ZTSURF_PATCH(:,:) = XTG(:,1,:)*(1.-XPSN(:,:)) + TSNOW%TS(:,:)*XPSN(:,:)
+  ZTSURF_PATCH(:,:) = I%XTG(:,1,:)*(1.-I%XPSN(:,:)) + I%TSNOW%TS(:,:)*I%XPSN(:,:)
 ENDIF
 !
- CALL AVERAGE_TSURF(XPATCH, ZTSURF_PATCH, PTSURF)
+ CALL AVERAGE_TSURF(I%XPATCH, ZTSURF_PATCH, PTSURF)
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_ISBA_N',1,ZHOOK_HANDLE)
 !

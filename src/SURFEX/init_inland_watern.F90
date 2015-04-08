@@ -41,7 +41,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CWATER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 !
@@ -97,23 +97,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_INLAND_WATER_N',0,ZHOOK_HANDLE)
-IF (CWATER=='NONE  ') THEN
+IF (U%CWATER=='NONE  ') THEN
   PDIR_ALB=0.
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
   PTSURF  =XTT
-ELSE IF (CWATER=='FLUX  ') THEN
+ELSE IF (U%CWATER=='FLUX  ') THEN
   CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,   &
                          PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                          PEMIS,PTSRAD,PTSURF,'OK'                    )  
-ELSE IF (CWATER=='WATFLX') THEN
+ELSE IF (U%CWATER=='WATFLX') THEN
   CALL INIT_WATFLUX_n(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &
                         KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK'                                          )  
-ELSE IF (CWATER=='FLAKE ') THEN
+ELSE IF (U%CWATER=='FLAKE ') THEN
   CALL INIT_FLAKE_n(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,       &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &

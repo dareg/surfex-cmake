@@ -37,17 +37,13 @@ USE MODI_GET_LUOUT
 !
 USE MODN_PREP_SEAFLUX
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
-USE MODD_SEAFLUX_n,      ONLY : XZ0, XSST, XSSS, LSBL, XZ0H,           &
-                                LINTERPOL_SST, CINTERPOL_SST, XSST_MTH,&
-                                LINTERPOL_SSS, CINTERPOL_SSS, XSSS_MTH,&
-                                CSEA_ALB, XDIR_ALB, XSCA_ALB
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
-USE MODD_OCEAN_n,        ONLY : LMERCATOR, LCURRENT
-USE MODD_SEAFLUX_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
-USE MODD_OCEAN_REL_n, ONLY : XTAU_REL,LREL_CUR,LREL_TS, LFLUX_NULL, &
-                           XQCORR,LFLX_CORR,LDIAPYCNAL
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -80,24 +76,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL PREP_OUTPUT_GRID(ILUOUT,CGRID,XGRID_PAR,XLAT,XLON)
+ CALL PREP_OUTPUT_GRID(ILUOUT,SG%CGRID,SG%XGRID_PAR,SG%XLAT,SG%XLON)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.     Read namelist
 !
-LSBL = LSEA_SBL
-LMERCATOR = LOCEAN_MERCATOR
-LCURRENT  = LOCEAN_CURRENT
+S%LSBL = LSEA_SBL
+O%LMERCATOR = LOCEAN_MERCATOR
+O%LCURRENT  = LOCEAN_CURRENT
 ! Relaxation-forcing parameters
-XTAU_REL   = XTIME_REL
-XQCORR     = XCORFLX
+OR%XTAU_REL   = XTIME_REL
+OR%XQCORR     = XCORFLX
 !
-LREL_CUR   = LCUR_REL
-LREL_TS    = LTS_REL
-LFLUX_NULL = LZERO_FLUX
-LFLX_CORR  = LCORR_FLUX
-LDIAPYCNAL = LDIAPYC
+OR%LREL_CUR   = LCUR_REL
+OR%LREL_TS    = LTS_REL
+OR%LFLUX_NULL = LZERO_FLUX
+OR%LFLX_CORR  = LCORR_FLUX
+OR%LDIAPYCNAL = LDIAPYC
 !
 !-------------------------------------------------------------------------------------
 !
@@ -126,19 +122,19 @@ ENDIF
 !
 !*      2.2    Roughness
 !
-ALLOCATE(XZ0(SIZE(XSST)))
-XZ0 = 0.001
+ALLOCATE(S%XZ0(SIZE(S%XSST)))
+S%XZ0 = 0.001
 !
-ALLOCATE(XZ0H(SIZE(XSST)))
-XZ0H = XZ0
+ALLOCATE(S%XZ0H(SIZE(S%XSST)))
+S%XZ0H = S%XZ0
 !
 !*      2.3   Ocean Surface Albedo
 !
-IF(CSEA_ALB=='RS14')THEN
-  ALLOCATE(XDIR_ALB(SIZE(XSST)))
-  ALLOCATE(XSCA_ALB(SIZE(XSST)))
-  XDIR_ALB = 0.065
-  XSCA_ALB = 0.065
+IF(S%CSEA_ALB=='RS14')THEN
+  ALLOCATE(S%XDIR_ALB(SIZE(S%XSST)))
+  ALLOCATE(S%XSCA_ALB(SIZE(S%XSST)))
+  S%XDIR_ALB = 0.065
+  S%XSCA_ALB = 0.065
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -157,19 +153,19 @@ DEALLOCATE(XZS_LS)
 !
 !*      4.     Preparation of optional interpolation of monthly sst
 !
-LINTERPOL_SST=.FALSE.
-IF(TRIM(CINTERPOL_SST)/='NONE')THEN
+S%LINTERPOL_SST=.FALSE.
+IF(TRIM(S%CINTERPOL_SST)/='NONE')THEN
 !
-  LINTERPOL_SST=.TRUE.
+  S%LINTERPOL_SST=.TRUE.
 !
 ! Precedent, Current and Next Monthly SST
   INMTH=3
 ! Precedent, Current and Next Annual Monthly SST
-  IF(TRIM(CINTERPOL_SST)=='ANNUAL')INMTH=14
+  IF(TRIM(S%CINTERPOL_SST)=='ANNUAL')INMTH=14
 !
-  ALLOCATE(XSST_MTH(SIZE(XSST),INMTH))
+  ALLOCATE(S%XSST_MTH(SIZE(S%XSST),INMTH))
   DO JMTH=1,INMTH
-     XSST_MTH(:,JMTH)=XSST(:)
+     S%XSST_MTH(:,JMTH)=S%XSST(:)
   ENDDO
 !
 ENDIF
@@ -179,19 +175,19 @@ ENDIF
 !
 !*      5.     Optional preparation of interpolation of monthly Sea Surface salinity
 !
-LINTERPOL_SSS=.FALSE.
-IF(TRIM(CINTERPOL_SSS)/='NONE')THEN
+S%LINTERPOL_SSS=.FALSE.
+IF(TRIM(S%CINTERPOL_SSS)/='NONE')THEN
 !
-   LINTERPOL_SSS=.TRUE.
+   S%LINTERPOL_SSS=.TRUE.
    !
    ! Precedent, Current and Next Monthly SSS
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SSS
-   IF(TRIM(CINTERPOL_SSS)=='ANNUAL')INMTH=14
+   IF(TRIM(S%CINTERPOL_SSS)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSSS_MTH(SIZE(XSSS),INMTH))
+   ALLOCATE(S%XSSS_MTH(SIZE(S%XSSS),INMTH))
    DO JMTH=1,INMTH
-      XSSS_MTH(:,JMTH)=XSSS(:)
+      S%XSSS_MTH(:,JMTH)=S%XSSS(:)
    ENDDO
    !
 ENDIF
@@ -201,7 +197,7 @@ ENDIF
 !*      6.     Preparation of SBL air variables
 !
 !
-IF (LSBL) CALL PREP_SEAFLUX_SBL()
+IF (S%LSBL) CALL PREP_SEAFLUX_SBL()
 !
 !-------------------------------------------------------------------------------------
 !

@@ -13,7 +13,7 @@ USE MODD_CSTS,        ONLY : XTT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_SNOW_PAR,    ONLY : XANSMIN, XANSMAX, XRHOSMIN, XRHOSMAX
 !
-USE MODD_ISBA_n,      ONLY : XTG,TSNOW
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_ABOR1_SFX
 !
@@ -48,7 +48,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_ISBA_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-IF ( TSNOW%SCHEME=='D95' ) THEN
+IF ( I%TSNOW%SCHEME=='D95' ) THEN
   JL = 1
   JP = 1
 ELSE
@@ -57,9 +57,9 @@ ENDIF
 !
 IF ( OINITSNOW ) THEN
   !
-  PSWE_ORIG(:) = TSNOW%WSNOW(:,JL,JP)
+  PSWE_ORIG(:) = I%TSNOW%WSNOW(:,JL,JP)
   !
-  ZTS(:) = XTG(:,1,JP)
+  ZTS(:) = I%XTG(:,1,JP)
   !
   ZSWE(:) = PSWE(:)
   ! Set snow=0 where 1. guess = 0 and Ts>0, to avoid that the snow analysis introduce snow where it is no snow.
@@ -67,7 +67,7 @@ IF ( OINITSNOW ) THEN
     ZSWE(:)   = 0.0
   END WHERE
   !
-  TSNOW%WSNOW(:,JL,JP) = ZSWE(:)
+  I%TSNOW%WSNOW(:,JL,JP) = ZSWE(:)
   !
 ENDIF
 
@@ -75,9 +75,9 @@ ENDIF
 ! Update snow
 IF ( OINC ) THEN
 
-  ZSWE(:) = TSNOW%WSNOW(:,JL,JP)  
-  ZSNA(:) = TSNOW%ALB  (:,JP)
-  ZSNR(:) = TSNOW%RHO  (:,JL,JP)
+  ZSWE(:) = I%TSNOW%WSNOW(:,JL,JP)  
+  ZSNA(:) = I%TSNOW%ALB  (:,JP)
+  ZSNR(:) = I%TSNOW%RHO  (:,JL,JP)
 
   ! If we only do second step, we must set working SWE as input SWE
   IF ( .NOT. OINITSNOW ) ZSWE(:) = PSWE(:)
@@ -94,9 +94,9 @@ IF ( OINC ) THEN
     ZSNR(:)    = 0.5 * ( XRHOSMIN + XRHOSMAX )
   END WHERE 
   !
-  TSNOW%WSNOW(:,JL,JP) = ZSWE(:)
-  TSNOW%ALB  (:,JP)    = ZSNA(:)
-  TSNOW%RHO  (:,JL,JP) = ZSNR(:)
+  I%TSNOW%WSNOW(:,JL,JP) = ZSWE(:)
+  I%TSNOW%ALB  (:,JP)    = ZSNA(:)
+  I%TSNOW%RHO  (:,JL,JP) = ZSNR(:)
   !
 ENDIF
 !

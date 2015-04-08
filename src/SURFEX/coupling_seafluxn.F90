@@ -54,21 +54,13 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SFX_OASIS,  ONLY : LCPL_SEA, LCPL_SEAICE
 USE MODD_WATER_PAR,  ONLY : XEMISWAT, XEMISWATICE
 !
-USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
-USE MODD_SEAFLUX_n,  ONLY : XSST, XSSS, XSIC, XTICE, XZ0, XDIR_ALB, XSCA_ALB, &
-                              XEMIS, TTIME, CSEA_ALB, CSEA_FLUX, XUMER, XVMER,&
-                              LINTERPOL_SST, LINTERPOL_SSS , LINTERPOL_SIC,   &
-                              LINTERPOL_SIT, XFSIC, XFSIT, LPERTFLUX,         &
-                              XPERTFLUX,                                      &
-                              XICHCE, LPRECIP, LPWEBB , LPWG, XICE_ALB,       &
-                              LHANDLE_SIC, CSEAICE_SCHEME, TGLT, NZ0
-USE MODD_DIAG_SEAFLUX_n, ONLY : XEVAP
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 USE MODD_WATER_PAR, ONLY : XALBSEAICE
 !
-USE MODD_OCEAN_n, ONLY : LMERCATOR                            
-USE MODD_CH_SEAFLUX_n, ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,&
-                                NSV_DSTBEG, NSV_DSTEND, NAEREQ, NDSTEQ, NSLTEQ, &
-                                NSV_AERBEG, NSV_AEREND, NSV_SLTBEG, NSV_SLTEND  
+USE MODD_OCEAN_n, ONLY : O => OCEAN                            
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
 !
 USE MODI_WATER_FLUX
 USE MODI_MR98
@@ -87,12 +79,12 @@ USE MODI_UPDATE_RAD_SEA
 USE MODE_DSLT_SURF
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
-USE MODD_DST_n,    ONLY: XEMISRADIUS_DST, XEMISSIG_DST
-USE MODD_SLT_n,    ONLY: XEMISRADIUS_SLT, XEMISSIG_SLT
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_SLT_n, ONLY : SLT => SLT
 ! 
-USE MODD_SEAFLUX_GRID_n, ONLY : XLAT
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 USE MODD_OCEAN_CSTS,   ONLY : NOCKMIN
-USE MODD_OCEAN_REL_n,      ONLY : XSEAT_REL
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -291,8 +283,8 @@ ZEXNA(:)     = (PPA(:)/XP00)**(XRD/XCPD)
 !
 IF(LCPL_SEA)THEN 
   !Sea currents are taken into account
-  ZU(:)=PU(:)-XUMER(:)
-  ZV(:)=PV(:)-XVMER(:)
+  ZU(:)=PU(:)-S%XUMER(:)
+  ZV(:)=PV(:)-S%XVMER(:)
 ELSE
   ZU(:)=PU(:)
   ZV(:)=PV(:)        
@@ -310,47 +302,47 @@ ZQA(:) = PQA(:) / PRHOA(:)
 ! Time evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-TTIME%TIME = TTIME%TIME + PTSTEP
- CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+S%TTIME%TIME = S%TTIME%TIME + PTSTEP
+ CALL ADD_FORECAST_TO_DATE_SURF(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,S%TTIME%TIME)
 !
 !--------------------------------------------------------------------------------------
 ! Fluxes over water according to Charnock formulae
 !--------------------------------------------------------------------------------------
 !
-IF (LHANDLE_SIC) THEN 
+IF (S%LHANDLE_SIC) THEN 
    ! Flux for sea are computed everywhere
    ISIZE_WATER = SIZE(ZMASK)
    ! Ensure freezing SST values where XSST actually has very low (sea-ice) values (old habits)
-   ZSST(:)=MAX(XSST(:), XTTSI) 
+   ZSST(:)=MAX(S%XSST(:), XTTSI) 
    ! Flux over sea-ice will not be computed by next calls, but by coupling_iceflux. Hence :
    ISIZE_ICE   = 0
    ! Flux over sea-ice will be computed by coupling_iceflux anywhere sea-ice could form in one 
    ! time-step (incl. under forcing). ZMASK value is set to 1. on these points
    ZMASK(:)=0.
-   WHERE ( XSIC(:) > 0. ) ZMASK(:)=1. 
+   WHERE ( S%XSIC(:) > 0. ) ZMASK(:)=1. 
    ! To be large, assume that seaice may form where SST is < 10C
-   WHERE ( XSST(:) - XTTS <= 10. ) ZMASK(:)=1.
-   IF (LINTERPOL_SIC) WHERE (XFSIC(:) > 0. ) ZMASK(:)=1. 
-   IF (LINTERPOL_SIT) WHERE (XFSIT(:) > 0. ) ZMASK(:)=1.
+   WHERE ( S%XSST(:) - XTTS <= 10. ) ZMASK(:)=1.
+   IF (S%LINTERPOL_SIC) WHERE (S%XFSIC(:) > 0. ) ZMASK(:)=1. 
+   IF (S%LINTERPOL_SIT) WHERE (S%XFSIT(:) > 0. ) ZMASK(:)=1.
 ELSE
-   ZSST (:) = XSST(:)
-   ZMASK(:) = XSST(:) - XTTS
+   ZSST (:) = S%XSST(:)
+   ZMASK(:) = S%XSST(:) - XTTS
    ISIZE_WATER = COUNT(ZMASK(:)>=0.)
-   ISIZE_ICE   = SIZE(XSST) - ISIZE_WATER
+   ISIZE_ICE   = SIZE(S%XSST) - ISIZE_WATER
 ENDIF
 !
-SELECT CASE (CSEA_FLUX)
+SELECT CASE (S%CSEA_FLUX)
   CASE ('DIRECT')
-    CALL WATER_FLUX(XZ0,                                              &
+    CALL WATER_FLUX(S%XZ0,                                              &
                       PTA, ZEXNA, PRHOA, ZSST, ZEXNS, ZQA, PRAIN,     &
                       PSNOW, XTTS,                                    &
                       ZWIND, PZREF, PUREF,                            &
-                      PPS, LHANDLE_SIC, ZQSAT,                        &
+                      PPS, S%LHANDLE_SIC, ZQSAT,                        &
                       ZSFTH, ZSFTQ, ZUSTAR,                           &
                       ZCD, ZCDN, ZCH, ZRI, ZRESA_SEA, ZZ0H            )  
   CASE ('ITERAT')
-    CALL MR98      (XZ0,                                              &
-                      PTA, ZEXNA, PRHOA, XSST, ZEXNS, ZQA,            &
+    CALL MR98      (S%XZ0,                                              &
+                      PTA, ZEXNA, PRHOA, S%XSST, ZEXNS, ZQA,            &
                       XTTS,                                           &
                       ZWIND, PZREF, PUREF,                            &
                       PPS, ZQSAT,                                     &
@@ -358,20 +350,20 @@ SELECT CASE (CSEA_FLUX)
                       ZCD, ZCDN, ZCH, ZRI, ZRESA_SEA, ZZ0H            )  
 
   CASE ('ECUME ','ECUME6')
-    CALL ECUME_SEAFLUX(XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,            &
-                      PTA, ZEXNA ,PRHOA, ZSST, XSSS, ZEXNS, ZQA,      &
+    CALL ECUME_SEAFLUX(S%XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,            &
+                      PTA, ZEXNA ,PRHOA, ZSST, S%XSSS, ZEXNS, ZQA,      &
                       PRAIN, PSNOW,                                   &
                       ZWIND, PZREF, PUREF, PPS, PPA,                  &
-                      XICHCE, LPRECIP, LPWEBB, LPWG, NZ0,             &
-                      LHANDLE_SIC, ZQSAT, ZSFTH, ZSFTQ, ZUSTAR,       &
+                      S%XICHCE, S%LPRECIP, S%LPWEBB, S%LPWG, S%NZ0,             &
+                      S%LHANDLE_SIC, ZQSAT, ZSFTH, ZSFTQ, ZUSTAR,       &
                       ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H,      &
-                      LPERTFLUX, XPERTFLUX, CSEA_FLUX                 )
+                      S%LPERTFLUX, S%XPERTFLUX, S%CSEA_FLUX                 )
   CASE ('COARE3')
-    CALL COARE30_SEAFLUX(XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,          &
+    CALL COARE30_SEAFLUX(S%XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,          &
                       PTA, ZEXNA ,PRHOA, ZSST, ZEXNS, ZQA, PRAIN,     &
                       PSNOW,                                          &
                       ZWIND, PZREF, PUREF,                            &
-                      PPS, LHANDLE_SIC, ZQSAT,                        &
+                      PPS, S%LHANDLE_SIC, ZQSAT,                        &
                       ZSFTH, ZSFTQ, ZUSTAR,                           &
                       ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H       )  
 END SELECT
@@ -383,18 +375,18 @@ END SELECT
 ISWB = SIZE(PSW_BANDS)
 !
 DO JSWB=1,ISWB
-  ZDIR_ALB(:,JSWB) = XDIR_ALB(:)
-  ZSCA_ALB(:,JSWB) = XSCA_ALB(:)
+  ZDIR_ALB(:,JSWB) = S%XDIR_ALB(:)
+  ZSCA_ALB(:,JSWB) = S%XSCA_ALB(:)
 END DO
 !
-IF (LHANDLE_SIC) THEN 
-   ZEMIS(:) =   (1 - XSIC(:)) * XEMISWAT    + XSIC(:) * XEMISWATICE
-   ZTRAD(:) = (((1 - XSIC(:)) * XEMISWAT    * XSST (:)**4 + &
-                     XSIC(:)  * XEMISWATICE * XTICE(:)**4)/ &
+IF (S%LHANDLE_SIC) THEN 
+   ZEMIS(:) =   (1 - S%XSIC(:)) * XEMISWAT    + S%XSIC(:) * XEMISWATICE
+   ZTRAD(:) = (((1 - S%XSIC(:)) * XEMISWAT    * S%XSST (:)**4 + &
+                     S%XSIC(:)  * XEMISWATICE * S%XTICE(:)**4)/ &
                      ZEMIS(:)) ** 0.25
 ELSE
-   ZTRAD(:) = XSST (:)
-   ZEMIS(:) = XEMIS(:)
+   ZTRAD(:) = S%XSST (:)
+   ZEMIS(:) = S%XEMIS(:)
 END IF
 !
 !-------------------------------------------------------------------------------------
@@ -402,16 +394,16 @@ END IF
 !seaice scheme)
 !-------------------------------------------------------------------------------------
 !
-IF(LCPL_SEAICE.OR.LHANDLE_SIC)THEN
-  CALL COUPLING_ICEFLUX_n(KI, PTA, ZEXNA, PRHOA, XTICE, ZEXNS, &
+IF(LCPL_SEAICE.OR.S%LHANDLE_SIC)THEN
+  CALL COUPLING_ICEFLUX_n(KI, PTA, ZEXNA, PRHOA, S%XTICE, ZEXNS, &
                      ZQA, PRAIN, PSNOW, ZWIND, PZREF, PUREF,   &
-                     PPS, XSST, XTTS, ZSFTH_ICE, ZSFTQ_ICE,    &  
-                     LHANDLE_SIC, ZMASK, ZQSAT_ICE, ZZ0_ICE,   &
+                     PPS, S%XSST, XTTS, ZSFTH_ICE, ZSFTQ_ICE,    &  
+                     S%LHANDLE_SIC, ZMASK, ZQSAT_ICE, ZZ0_ICE,   &
                      ZUSTAR_ICE, ZCD_ICE, ZCDN_ICE, ZCH_ICE,   &
                      ZRI_ICE, ZRESA_SEA_ICE, ZZ0H_ICE          )
 ENDIF
 !
-IF (LHANDLE_SIC) CALL COMPLEMENT_EACH_OTHER_FLUX
+IF (S%LHANDLE_SIC) CALL COMPLEMENT_EACH_OTHER_FLUX
 !
 !-------------------------------------------------------------------------------------
 ! Momentum fluxes over sea or se-ice
@@ -421,7 +413,7 @@ CALL SEA_MOMENTUM_FLUXES(ZCD, ZSFU, ZSFV)
 !
 ! Momentum fluxes over sea-ice if embedded seaice scheme is used
 !
-IF (LHANDLE_SIC) CALL SEA_MOMENTUM_FLUXES(ZCD_ICE, ZSFU_ICE, ZSFV_ICE)
+IF (S%LHANDLE_SIC) CALL SEA_MOMENTUM_FLUXES(ZCD_ICE, ZSFU_ICE, ZSFV_ICE)
 !
 ! CO2 flux
 !
@@ -442,50 +434,50 @@ PSFCO2(:) = - ZWIND(:)**2 * 1.13E-3 * 8.7 * 44.E-3 / ( 365*24*3600 )
 ! Scalar fluxes:
 !-------------------------------------------------------------------------------------
 !
-IF (NBEQ>0) THEN
-  IF (CCH_DRY_DEP == "WES89") THEN
+IF (CHS%NBEQ>0) THEN
+  IF (CHS%CCH_DRY_DEP == "WES89") THEN
 
     CALL CH_DEP_WATER  (ZRESA_SEA, ZUSTAR, PTA, ZTRAD,      &
-                          PSV(:,NSV_CHSBEG:NSV_CHSEND),       &
-                          CSV(NSV_CHSBEG:NSV_CHSEND),         &
-                          XDEP(:,1:NBEQ) )  
+                          PSV(:,CHS%NSV_CHSBEG:CHS%NSV_CHSEND),       &
+                          CHS%CSV(CHS%NSV_CHSBEG:CHS%NSV_CHSEND),         &
+                          CHS%XDEP(:,1:CHS%NBEQ) )  
 
-   PSFTS(:,NSV_CHSBEG:NSV_CHSEND) = - PSV(:,NSV_CHSBEG:NSV_CHSEND)  &
-                                               * XDEP(:,1:NBEQ)  
-     IF (NAEREQ > 0 ) THEN
-        CALL CH_AER_DEP(PSV(:,NSV_AERBEG:NSV_AEREND),&
-                          PSFTS(:,NSV_AERBEG:NSV_AEREND),&
+   PSFTS(:,CHS%NSV_CHSBEG:CHS%NSV_CHSEND) = - PSV(:,CHS%NSV_CHSBEG:CHS%NSV_CHSEND)  &
+                                               * CHS%XDEP(:,1:CHS%NBEQ)  
+     IF (CHS%NAEREQ > 0 ) THEN
+        CALL CH_AER_DEP(PSV(:,CHS%NSV_AERBEG:CHS%NSV_AEREND),&
+                          PSFTS(:,CHS%NSV_AERBEG:CHS%NSV_AEREND),&
                           ZUSTAR,ZRESA_SEA,PTA,PRHOA)     
       END IF
 
   ELSE
-    PSFTS(:,NSV_CHSBEG:NSV_CHSEND) =0.
-    IF (NSV_AEREND.GT.NSV_AERBEG)     PSFTS(:,NSV_AERBEG:NSV_AEREND) =0.
+    PSFTS(:,CHS%NSV_CHSBEG:CHS%NSV_CHSEND) =0.
+    IF (CHS%NSV_AEREND.GT.CHS%NSV_AERBEG)     PSFTS(:,CHS%NSV_AERBEG:CHS%NSV_AEREND) =0.
   ENDIF
 ENDIF
 !
-IF (NSLTEQ>0) THEN
-  ISLT = NSV_SLTEND - NSV_SLTBEG + 1
+IF (CHS%NSLTEQ>0) THEN
+  ISLT = CHS%NSV_SLTEND - CHS%NSV_SLTBEG + 1
 
   CALL COUPLING_SLT_n(           &
        SIZE(ZUSTAR,1),           & !I [nbr] number of sea point
        ISLT,                     & !I [nbr] number of sea salt variables
        ZWIND,                    & !I [m/s] wind velocity
-       PSFTS(:,NSV_SLTBEG:NSV_SLTEND) )   
+       PSFTS(:,CHS%NSV_SLTBEG:CHS%NSV_SLTEND) )   
 ENDIF
 !
-IF (NDSTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,NSV_DSTBEG:NSV_DSTEND), PSFTS(:,NSV_DSTBEG:NSV_DSTEND),   &
-                ZUSTAR, ZRESA_SEA, PTA, PRHOA, XEMISSIG_DST, XEMISRADIUS_DST,   &
+IF (CHS%NDSTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,CHS%NSV_DSTBEG:CHS%NSV_DSTEND), PSFTS(:,CHS%NSV_DSTBEG:CHS%NSV_DSTEND),   &
+                ZUSTAR, ZRESA_SEA, PTA, PRHOA, DST%XEMISSIG_DST, DST%XEMISRADIUS_DST,   &
                 JPMODE_DST, XDENSITY_DST, XMOLARWEIGHT_DST, ZCONVERTFACM0_DST,  &
                 ZCONVERTFACM6_DST, ZCONVERTFACM3_DST, LVARSIG_DST, LRGFIX_DST,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,NSV_DSTBEG:NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,CHS%NSV_DSTBEG:CHS%NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
-    XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
-    XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
+    DST%XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
+    DST%XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
     NDSTMDE,                        &
     ZCONVERTFACM0_DST,              &
     ZCONVERTFACM6_DST,              &
@@ -494,18 +486,18 @@ IF (NDSTEQ>0) THEN
 ENDIF
 
 
-IF (NSLTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,NSV_SLTBEG:NSV_SLTEND), PSFTS(:,NSV_SLTBEG:NSV_SLTEND),   &
-                ZUSTAR, ZRESA_SEA, PTA, PRHOA, XEMISSIG_SLT, XEMISRADIUS_SLT,   &
+IF (CHS%NSLTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,CHS%NSV_SLTBEG:CHS%NSV_SLTEND), PSFTS(:,CHS%NSV_SLTBEG:CHS%NSV_SLTEND),   &
+                ZUSTAR, ZRESA_SEA, PTA, PRHOA, SLT%XEMISSIG_SLT, SLT%XEMISRADIUS_SLT,   &
                 JPMODE_SLT, XDENSITY_SLT, XMOLARWEIGHT_SLT, ZCONVERTFACM0_SLT,  &
                 ZCONVERTFACM6_SLT, ZCONVERTFACM3_SLT, LVARSIG_SLT, LRGFIX_SLT,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,NSV_SLTBEG:NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,CHS%NSV_SLTBEG:CHS%NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
-    XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
-    XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
+    SLT%XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
+    SLT%XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
     NSLTMDE,                        &
     ZCONVERTFACM0_SLT,              &
     ZCONVERTFACM6_SLT,              &
@@ -517,12 +509,12 @@ ENDIF
 ! Inline diagnostics at time t for SST and TRAD
 !-------------------------------------------------------------------------------
 !
-CALL DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, XSST, ZQA, PPA, PPS, PRHOA, PU, &
+CALL DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, S%XSST, ZQA, PPA, PPS, PRHOA, PU, &
      PV, PZREF, PUREF, ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU,       &
-     XZ0, ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,            &
-     PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB, XICE_ALB,   &
+     S%XZ0, ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,            &
+     PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB, S%XICE_ALB,   &
      ZEMIS, ZTRAD, PRAIN, PSNOW,                            &
-     TGLT, XSIC, LHANDLE_SIC, XTICE,                        &
+     S%TGLT, S%XSIC, S%LHANDLE_SIC, S%XTICE,                        &
      ZCD_ICE, ZCDN_ICE, ZCH_ICE, ZCE_ICE, ZRI_ICE,          &
      ZZ0_ICE, ZZ0H_ICE, ZQSAT_ICE, ZSFTH_ICE, ZSFTQ_ICE,    &
      ZSFU_ICE, ZSFV_ICE)
@@ -531,11 +523,11 @@ CALL DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, XSST, ZQA, PPA, PPS, PRHOA, PU, &
 ! A kind of "average_flux"
 !-------------------------------------------------------------------------------
 !
-IF (LHANDLE_SIC) THEN
-   PSFTH  (:) = ZSFTH (:) * ( 1 - XSIC (:)) + ZSFTH_ICE(:) * XSIC(:)
-   PSFTQ  (:) = ZSFTQ (:) * ( 1 - XSIC (:)) + ZSFTQ_ICE(:) * XSIC(:)
-   PSFU   (:) = ZSFU  (:) * ( 1 - XSIC (:)) +  ZSFU_ICE(:) * XSIC(:)
-   PSFV   (:) = ZSFV  (:) * ( 1 - XSIC (:)) +  ZSFV_ICE(:) * XSIC(:)
+IF (S%LHANDLE_SIC) THEN
+   PSFTH  (:) = ZSFTH (:) * ( 1 - S%XSIC (:)) + ZSFTH_ICE(:) * S%XSIC(:)
+   PSFTQ  (:) = ZSFTQ (:) * ( 1 - S%XSIC (:)) + ZSFTQ_ICE(:) * S%XSIC(:)
+   PSFU   (:) = ZSFU  (:) * ( 1 - S%XSIC (:)) +  ZSFU_ICE(:) * S%XSIC(:)
+   PSFV   (:) = ZSFV  (:) * ( 1 - S%XSIC (:)) +  ZSFV_ICE(:) * S%XSIC(:)
 ELSE
    PSFTH  (:) = ZSFTH (:) 
    PSFTQ  (:) = ZSFTQ (:) 
@@ -549,29 +541,29 @@ ENDIF
 !
 ! Daily update Sea surface salinity from monthly data
 !
-IF (LINTERPOL_SSS .AND. MOD(TTIME%TIME,XDAY) == 0.) THEN
-      CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'S',XSSS)
+IF (S%LINTERPOL_SSS .AND. MOD(S%TTIME%TIME,XDAY) == 0.) THEN
+      CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'S',S%XSSS)
 ENDIF
 !
 !-------------------------------------------------------------------------------
 ! SEA-ICE coupling at time t+1
 !-------------------------------------------------------------------------------
 !
-IF (LHANDLE_SIC) THEN
-   IF (LINTERPOL_SIC) THEN
-      IF ((MOD(TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
+IF (S%LHANDLE_SIC) THEN
+   IF (S%LINTERPOL_SIC) THEN
+      IF ((MOD(S%TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
       ! Daily update Sea Ice Cover constraint from monthly data
-         CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'C',XFSIC)
+         CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
       ENDIF
    ENDIF
-   IF (LINTERPOL_SIT) THEN
-      IF ((MOD(TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
+   IF (S%LINTERPOL_SIT) THEN
+      IF ((MOD(S%TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
       ! Daily update Sea Ice Thickness constraint from monthly data
-         CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'H',XFSIT)
+         CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
       ENDIF
    ENDIF
-   IF (CSEAICE_SCHEME=='GELATO') THEN
-      CALL SEAICE_GELATO1D_n(HPROGRAM,PTIMEC, PTSTEP, TGLT, XSST, XSSS, XFSIC, XFSIT, XSIC, XTICE, XICE_ALB)
+   IF (S%CSEAICE_SCHEME=='GELATO') THEN
+      CALL SEAICE_GELATO1D_n(HPROGRAM,PTIMEC, PTSTEP, S%TGLT, S%XSST, S%XSSS, S%XFSIC, S%XFSIT, S%XSIC, S%XTICE, S%XICE_ALB)
    ENDIF
    ! Update of cell-averaged albedo, emissivity and radiative 
    ! temperature is done later
@@ -581,31 +573,31 @@ ENDIF
 ! OCEANIC COUPLING, IMPOSED SST OR INTERPOLATED SST AT TIME t+1
 !-------------------------------------------------------------------------------
 !
-IF (LMERCATOR) THEN
+IF (O%LMERCATOR) THEN
    !
    ! Update SST reference profile for relaxation purpose
-   IF (LSST_DATA) THEN
-      CALL SST_UPDATE(XSEAT_REL(:,NOCKMIN+1), TTIME)
+   IF (DTS%LSST_DATA) THEN
+      CALL SST_UPDATE(OR%XSEAT_REL(:,NOCKMIN+1), S%TTIME)
       !
       ! Convert to degree C for ocean model
-      XSEAT_REL(:,NOCKMIN+1) = XSEAT_REL(:,NOCKMIN+1) - XTT
+      OR%XSEAT_REL(:,NOCKMIN+1) = OR%XSEAT_REL(:,NOCKMIN+1) - XTT
    ENDIF
    !
    CALL MOD1D_n(HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
                 PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
-                PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),XSST(:))
+                PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),S%XSST(:))
    !
-ELSEIF(LSST_DATA)THEN 
+ELSEIF(DTS%LSST_DATA)THEN 
    !
    ! Imposed SST 
    !
-   CALL SST_UPDATE(XSST, TTIME)
+   CALL SST_UPDATE(S%XSST, S%TTIME)
    !
-ELSEIF (LINTERPOL_SST.AND.MOD(TTIME%TIME,XDAY) == 0.) THEN
+ELSEIF (S%LINTERPOL_SST.AND.MOD(S%TTIME%TIME,XDAY) == 0.) THEN
    !
    ! Imposed monthly SST 
    !
-   CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'T',XSST)
+   CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'T',S%XSST)
    !
 ENDIF
 !
@@ -615,24 +607,24 @@ ENDIF
 !difficult to do. Maybe it will be done later. However, Ts is at time t+1
 !-------------------------------------------------------------------------------
 !
-IF (LHANDLE_SIC) THEN
-   IF (CSEAICE_SCHEME/='GELATO') THEN
-      XTICE=XSST
-      XSIC=XFSIC
-      XICE_ALB=XALBSEAICE           
+IF (S%LHANDLE_SIC) THEN
+   IF (S%CSEAICE_SCHEME/='GELATO') THEN
+      S%XTICE=S%XSST
+      S%XSIC=S%XFSIC
+      S%XICE_ALB=XALBSEAICE           
    ENDIF         
-   PTSURF (:) = XSST  (:) * ( 1 - XSIC (:)) +     XTICE(:) * XSIC(:)
-   PQSURF (:) = ZQSAT (:) * ( 1 - XSIC (:)) + ZQSAT_ICE(:) * XSIC(:)
-   ZZ0W   (:) = ( 1 - XSIC(:) ) * 1.0/(LOG(PUREF(:)/ZZ0(:))    **2)  +  &
-                      XSIC(:)   * 1.0/(LOG(PUREF(:)/ZZ0_ICE(:))**2)  
+   PTSURF (:) = S%XSST  (:) * ( 1 - S%XSIC (:)) +     S%XTICE(:) * S%XSIC(:)
+   PQSURF (:) = ZQSAT (:) * ( 1 - S%XSIC (:)) + ZQSAT_ICE(:) * S%XSIC(:)
+   ZZ0W   (:) = ( 1 - S%XSIC(:) ) * 1.0/(LOG(PUREF(:)/ZZ0(:))    **2)  +  &
+                      S%XSIC(:)   * 1.0/(LOG(PUREF(:)/ZZ0_ICE(:))**2)  
    PZ0    (:) = PUREF (:) * EXP ( - SQRT ( 1./  ZZ0W(:) ))
-   ZZ0W   (:) = ( 1 - XSIC(:) ) * 1.0/(LOG(PZREF(:)/ZZ0H(:))    **2)  +  &
-                      XSIC(:)   * 1.0/(LOG(PZREF(:)/ZZ0H_ICE(:))**2)  
+   ZZ0W   (:) = ( 1 - S%XSIC(:) ) * 1.0/(LOG(PZREF(:)/ZZ0H(:))    **2)  +  &
+                      S%XSIC(:)   * 1.0/(LOG(PZREF(:)/ZZ0H_ICE(:))**2)  
    PZ0H   (:) = PZREF (:) * EXP ( - SQRT ( 1./  ZZ0W(:) ))
 ELSE
-   PTSURF (:) = XSST  (:) 
+   PTSURF (:) = S%XSST  (:) 
    PQSURF (:) = ZQSAT (:) 
-   PZ0    (:) = XZ0   (:) 
+   PZ0    (:) = S%XZ0   (:) 
    PZ0H   (:) = ZZ0H  (:) 
 ENDIF
 !
@@ -641,10 +633,10 @@ ENDIF
 !the energy budget between surfex and the atmosphere
 !-------------------------------------------------------------------------------
 !
- CALL UPDATE_RAD_SEA(CSEA_ALB,XSST,PZENITH2,XTTS,XEMIS,  &
-                     XDIR_ALB,XSCA_ALB,PDIR_ALB,PSCA_ALB,&
-                     PEMIS,PTRAD,LHANDLE_SIC,XTICE,XSIC, &
-                     XICE_ALB,PU,PV)
+ CALL UPDATE_RAD_SEA(S%CSEA_ALB,S%XSST,PZENITH2,XTTS,S%XEMIS,  &
+                     S%XDIR_ALB,S%XSCA_ALB,PDIR_ALB,PSCA_ALB,&
+                     PEMIS,PTRAD,S%LHANDLE_SIC,S%XTICE,S%XSIC, &
+                     S%XICE_ALB,PU,PV)
 !
 !=======================================================================================
 !
@@ -715,7 +707,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SEAFLUX_N: COMPLEMENT_EACH_OTHER_FLUX',0,ZHOOK_HANDLE)
 !
-  WHERE (XSIC(:) == 1.)
+  WHERE (S%XSIC(:) == 1.)
      ZSFTH=ZSFTH_ICE 
      ZSFTQ=ZSFTQ_ICE 
      ZSFU=ZSFU_ICE
@@ -728,7 +720,7 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SEAFLUX_N: COMPLEMENT_EACH_OTHER_FLUX',0,ZHOOK
      ZRI=ZRI_ICE 
      ZZ0H=ZZ0H_ICE
   END WHERE
-  WHERE (XSIC(:) == 0.)
+  WHERE (S%XSIC(:) == 0.)
      ZSFTH_ICE=ZSFTH 
      ZSFTQ_ICE=ZSFTQ 
      ZSFU_ICE=ZSFU

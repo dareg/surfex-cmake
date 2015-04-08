@@ -28,7 +28,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!     C. Lebeaupin  *Météo-France* 
+!!     C. Lebeaupin  *MÃ©tÃ©o-France* 
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -41,14 +41,14 @@
 !
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
-USE MODD_OCEAN_n, ONLY : LPROGSST, NOCTCOUNT, XSEAHMO
-USE MODD_SEAFLUX_n
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODI_MIXTL_n
 USE MODI_DIAG_INLINE_OCEAN_n
 !
-USE MODD_OCEAN_REL_n , ONLY : LFLUX_NULL
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 USE MODI_GET_LUOUT
 !
 !
@@ -104,7 +104,7 @@ ITIME=INT(PTIME)
 NOCEAN_STEP=INT(XOCEAN_TSTEP)
 !
 GTIMEOK=(MOD(ITIME,NOCEAN_STEP)==0)
-GCALLMIXT=((MOD(ITIME,NOCEAN_STEP)==0).AND.(NOCTCOUNT>0))
+GCALLMIXT=((MOD(ITIME,NOCEAN_STEP)==0).AND.(O%NOCTCOUNT>0))
 !
 !Call 1D model if ptime proportional to the oceanic model time step
 !
@@ -135,7 +135,7 @@ IF (GCALLMIXT) THEN
 !        2. Call oceanic TKE model
 !           ----------------------
 !
-  IF (LFLUX_NULL) THEN
+  IF (OR%LFLUX_NULL) THEN
      WRITE(ILUOUT,*) 'Caution : SURFACE FLUX ARE SET TO 0 '
      ZFSOL(:)   = 0.
      ZFNSOL(:)  = 0.
@@ -147,7 +147,7 @@ IF (GCALLMIXT) THEN
 !---------------------------------------------------------------------------
 !        3. Coupling with SURFEX by SST (and relative wind) evolution
 !
-  IF (LPROGSST) THEN 
+  IF (O%LPROGSST) THEN 
     PSST(:)=ZSEATEMP(:)
     !WRITE(ILUOUT,*) '**SST CHANGED FOR THE ',NOCTCOUNT,'TIME BY FIRST LEVEL OCEANIC MODEL TEMPERATURE AT ', ITIME,' s **'
   ENDIF
@@ -156,7 +156,7 @@ ENDIF
 !
 IF (GTIMEOK) THEN
   CALL DIAG_INLINE_OCEAN_n
-  NOCTCOUNT=NOCTCOUNT+1
+  O%NOCTCOUNT=O%NOCTCOUNT+1
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MOD1D_N',1,ZHOOK_HANDLE)

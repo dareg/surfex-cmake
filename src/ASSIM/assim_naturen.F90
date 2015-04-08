@@ -29,7 +29,7 @@ SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
-USE MODD_SURF_ATM_n, ONLY : CNATURE
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,        ONLY : JPRB
 !
@@ -75,7 +75,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_NATURE_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-IF (CNATURE=='ISBA  ') THEN
+IF (U%CNATURE=='ISBA  ') THEN
   !
   CALL ASSIM_ISBA_n(HPROGRAM,KI,                                    &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
@@ -84,7 +84,7 @@ IF (CNATURE=='ISBA  ') THEN
                     PTS,       PT2M,        PHU2M,     PSWE,        &
                     HTEST, OD_MASKEXT, PLON, PLAT )
 ELSE
-  WRITE(*,*) 'No assimilation done for scheme: ',TRIM(CNATURE)
+  WRITE(*,*) 'No assimilation done for scheme: ',TRIM(U%CNATURE)
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_N',1,ZHOOK_HANDLE)

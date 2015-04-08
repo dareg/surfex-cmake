@@ -47,60 +47,21 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
 !
 !
-USE MODD_TEB_OPTION_n, ONLY : LGARDEN, LGREENROOF, LSOLAR_PANEL,                       &
-                              CBEM, TTIME,LCANOPY,CZ0H,CROAD_DIR,CWALL_OPT,            &
-                              NTEB_PATCH, XTEB_PATCH, CCH_BEM
-USE MODD_TEB_n,        ONLY : XT_CANYON, XQ_CANYON,                                    &
-                              XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B,                  &
-                              XWS_ROOF, XWS_ROAD,                                      &
-                              TSNOW_ROOF, TSNOW_ROAD,                                  &
-                              XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
-                              XZ0_TOWN, XBLD, XGARDEN, XROAD_DIR, XROAD, XGREENROOF,   &
-                              XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,                 &
-                              XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND,              &
-                              XALB_ROOF, XEMIS_ROOF, XHC_ROOF,XTC_ROOF, XD_ROOF,       &
-                              XALB_ROAD, XEMIS_ROAD, XHC_ROAD,XTC_ROAD, XD_ROAD,       &
-                              XALB_WALL, XEMIS_WALL, XHC_WALL,XTC_WALL, XD_WALL,       &
-                              XSVF_ROAD, XSVF_WALL,                                    &
-                              XSVF_GARDEN, XWALL_O_BLD,                                &
-                              XQSAT_ROOF, XQSAT_ROAD, XDELT_ROOF, XDELT_ROAD,          &
-                              XROUGH_ROOF,XROUGH_WALL,                                 &
-                              XRESIDENTIAL, XDT_RES, XDT_OFF
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
 !
-USE MODD_TEB_PANEL_n,  ONLY : XEMIS_PANEL, XALB_PANEL, XEFF_PANEL, XFRAC_PANEL,        &
-                              XTHER_PRODC_DAY
+USE MODD_TEB_PANEL_n, ONLY : TPN => TEB_PANEL
 !
-USE MODD_BEM_OPTION_n, ONLY : CCOOL_COIL, CHEAT_COIL
-USE MODD_BEM_n,        ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR, XTCOOL_TARGET,           &
-                              XTHEAT_TARGET, XF_WASTE_CAN, XEFF_HEAT, XTI_BLD,         &
-                              XT_FLOOR, XT_MASS, XQIN, XQIN_FRAD, XSHGC, XSHGC_SH,     &
-                              XU_WIN, XGR, XINF,                                       &
-                              XF_WATER_COND, XAUX_MAX, XQIN_FLAT,                      &
-                              XHR_TARGET, XT_WIN2, XQI_BLD, XV_VENT, XCAP_SYS_HEAT,    &
-                              XCAP_SYS_RAT, XT_ADP, XM_SYS_RAT, XCOP_RAT, XT_WIN1,     &
-                              XALB_WIN, XABS_WIN, XT_SIZE_MAX, XT_SIZE_MIN, XUGG_WIN,  &
-                              LSHADE, CNATVENT, LSHAD_DAY, LNATVENT_NIGHT,             &
-                              XN_FLOOR, XGLAZ_O_BLD, XMASS_O_BLD, XFLOOR_HW_RATIO,     &
-                              XF_FLOOR_MASS, XF_FLOOR_WALL, XF_FLOOR_WIN,              &
-                              XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS,              &
-                              XF_WALL_WIN, XF_WIN_FLOOR, XF_WIN_MASS, XF_WIN_WALL,     &
-                              XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN,                &
-                              XTRAN_WIN, XF_WIN_WIN
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_BEM_n, ONLY : B => BEM
                                
-USE MODD_CH_TEB_n,     ONLY : CSV, CCH_DRY_DEP, XDEP, NBEQ, NSV_CHSBEG, NSV_CHSEND,    &
-                              NSV_DSTBEG, NSV_DSTEND, NAEREQ, NDSTEQ, NSLTEQ,          &
-                              NSV_AERBEG, NSV_AEREND, NSV_SLTBEG, NSV_SLTEND
-USE MODD_TEB_CANOPY_n, ONLY : XZ, XU, NLVL, XTKE, XT, XQ,                              &
-                              XLMO, XLM, XLEPS,XZF, XDZ, XDZF, XP
-USE MODD_DIAG_TEB_n,   ONLY : N2M, XZON10M, XMER10M
-USE MODD_DIAG_UTCI_TEB_n, ONLY : LUTCI, XUTCI_IN, XUTCI_OUTSUN,          &
-                                 XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE, &
-                                 XUTCIC_IN, XUTCIC_OUTSUN, XUTCIC_OUTSHADE
-USE MODD_TEB_IRRIG_n,  ONLY : LPAR_RD_IRRIG,                                  &
-                              XRD_START_MONTH, XRD_END_MONTH, XRD_START_HOUR, &
-                              XRD_END_HOUR, XRD_24H_IRRIG
-USE MODD_DST_n,        ONLY : XEMISRADIUS_DST, XEMISSIG_DST
-USE MODD_SLT_n,        ONLY : XEMISRADIUS_SLT, XEMISSIG_SLT
+USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_SLT_n, ONLY : SLT => SLT
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 !
@@ -290,10 +251,10 @@ REAL, DIMENSION(KI)  :: ZMELT_ROAD    ! snow melt
 !
 REAL, DIMENSION(KI)  :: ZTRAD         ! radiative temperature for current patch
 REAL, DIMENSION(KI)  :: ZEMIS         ! emissivity for current patch
-REAL, DIMENSION(KI,NTEB_PATCH) :: ZTRAD_PATCH ! radiative temperature for each patch
-REAL, DIMENSION(KI,NTEB_PATCH) :: ZEMIS_PATCH ! emissivity for each patch
-REAL, DIMENSION(KI,KSW,NTEB_PATCH) :: ZDIR_ALB_PATCH ! direct albedo per wavelength and patch
-REAL, DIMENSION(KI,KSW,NTEB_PATCH) :: ZSCA_ALB_PATCH ! diffuse albedo per wavelength and patch
+REAL, DIMENSION(KI,TOP%NTEB_PATCH) :: ZTRAD_PATCH ! radiative temperature for each patch
+REAL, DIMENSION(KI,TOP%NTEB_PATCH) :: ZEMIS_PATCH ! emissivity for each patch
+REAL, DIMENSION(KI,KSW,TOP%NTEB_PATCH) :: ZDIR_ALB_PATCH ! direct albedo per wavelength and patch
+REAL, DIMENSION(KI,KSW,TOP%NTEB_PATCH) :: ZSCA_ALB_PATCH ! diffuse albedo per wavelength and patch
 !
 REAL, DIMENSION(KI)  :: ZRN           ! net radiation over town
 REAL, DIMENSION(KI)  :: ZH            ! sensible heat flux over town
@@ -356,17 +317,17 @@ REAL, DIMENSION(KI)  :: ZPEW_B_COEF   ! needed if HCOUPLING='I'
 REAL, DIMENSION(KI)        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
 REAL, DIMENSION(KI)        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
 REAL, DIMENSION(KI)        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
-REAL, DIMENSION(KI,NLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
 
 REAL, DIMENSION(KI)        :: ZAVG_UW_GRND
@@ -411,7 +372,7 @@ REAL, DIMENSION(KI)        :: ZUREF      ! height      of canyon level just abov
 REAL, DIMENSION(KI)        :: ZZREF      ! height      of canyon level just above roof (m)
 REAL, DIMENSION(KI)        :: ZLAMBDA_F  ! frontal density (-)
 REAL, DIMENSION(KI)        :: ZLMO       ! Monin-Obukhov length at canopy height (m)
-REAL, DIMENSION(KI,NLVL)   :: ZL         ! Mixing length generic profile at mid levels
+REAL, DIMENSION(KI,TCP%NLVL)   :: ZL         ! Mixing length generic profile at mid levels
 !
 ! absorbed solar and infra-red radiation by road, wall and roof
 !                                                      
@@ -555,8 +516,8 @@ END IF
 ! Time evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-TTIME%TIME = TTIME%TIME + PTSTEP
- CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+TOP%TTIME%TIME = TOP%TTIME%TIME + PTSTEP
+ CALL ADD_FORECAST_TO_DATE_SURF(TOP%TTIME%TDATE%YEAR,TOP%TTIME%TDATE%MONTH,TOP%TTIME%TDATE%DAY,TOP%TTIME%TIME)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !  Anthropogenic fluxes (except building heating)
@@ -567,8 +528,8 @@ ZEND_TRAFFIC_TIME   = 64800.
 !
 WHERE(       PTSUN>ZBEGIN_TRAFFIC_TIME   &
       .AND.  PTSUN<ZEND_TRAFFIC_TIME     )
-  ZH_TRAFFIC  (:) = XH_TRAFFIC   (:)
-  ZLE_TRAFFIC (:) = XLE_TRAFFIC  (:)
+  ZH_TRAFFIC  (:) = T%XH_TRAFFIC   (:)
+  ZLE_TRAFFIC (:) = T%XLE_TRAFFIC  (:)
 ELSEWHERE
   ZH_TRAFFIC  (:) = 0.
   ZLE_TRAFFIC (:) = 0.   
@@ -581,76 +542,76 @@ END WHERE
 ! Town averaged quantities to force canopy atmospheric layers
 !-------------------------------------------------------------------------------------
 
-DO JTEB_PATCH=1,NTEB_PATCH
+DO JTEB_PATCH=1,TOP%NTEB_PATCH
   CALL GOTO_TEB(JTEB_PATCH)
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD,         XBLD         )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD_HEIGHT,  XBLD_HEIGHT  )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_WALL_O_HOR,  XWALL_O_HOR  )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CAN_HW_RATIO,XCAN_HW_RATIO)
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_Z0_TOWN,     XZ0_TOWN     )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD,         T%XBLD         )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD_HEIGHT,  T%XBLD_HEIGHT  )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_WALL_O_HOR,  T%XWALL_O_HOR  )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CAN_HW_RATIO,T%XCAN_HW_RATIO)
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_Z0_TOWN,     T%XZ0_TOWN     )
 END DO
 !
-IF (LCANOPY) THEN
+IF (TOP%LCANOPY) THEN
 !-------------------------------------------------------------------------------------
 ! Updates canopy vertical grid as a function of forcing height
 !-------------------------------------------------------------------------------------
 !
 !* determines where is the forcing level and modifies the upper levels of the canopy grid
 !
-  CALL CANOPY_GRID_UPDATE(KI,NLVL,ZAVG_BLD_HEIGHT,ZAVG_BLD_HEIGHT+PUREF,XZ,XZF,XDZ,XDZF)
+  CALL CANOPY_GRID_UPDATE(KI,TCP%NLVL,ZAVG_BLD_HEIGHT,ZAVG_BLD_HEIGHT+PUREF,TCP%XZ,TCP%XZF,TCP%XDZ,TCP%XDZF)
 !
 !* Initialisations of T, Q, TKE and wind at first time step
 !
 
-  IF(ANY(XT(:,:) == XUNDEF)) THEN
-    DO JLAYER=1,NLVL
-      XT(:,JLAYER) = PTA(:)
-      XQ(:,JLAYER) = PQA(:)
-      XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
-              * LOG( (          2.* XBLD_HEIGHT(:)/3.) / XZ0_TOWN(:))   &
-              / LOG( (PUREF(:)+ 2.* XBLD_HEIGHT(:)/3.) / XZ0_TOWN(:))
+  IF(ANY(TCP%XT(:,:) == XUNDEF)) THEN
+    DO JLAYER=1,TCP%NLVL
+      TCP%XT(:,JLAYER) = PTA(:)
+      TCP%XQ(:,JLAYER) = PQA(:)
+      TCP%XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
+              * LOG( (          2.* T%XBLD_HEIGHT(:)/3.) / T%XZ0_TOWN(:))   &
+              / LOG( (PUREF(:)+ 2.* T%XBLD_HEIGHT(:)/3.) / T%XZ0_TOWN(:))
     END  DO
-    XTKE(:,:) = 1.
+    TCP%XTKE(:,:) = 1.
   ENDIF
 !
 !* default forcing above roof: forcing level
 ZUREF(:)     = PUREF(:)
 ZZREF(:)     = PZREF(:)
-ZUA(:)       = XU(:,NLVL)
-ZTA(:)       = XT(:,NLVL)
-ZQA(:)       = XQ(:,NLVL)/PRHOA(:)
-ZPA(:)       = XP(:,NLVL)
+ZUA(:)       = TCP%XU(:,TCP%NLVL)
+ZTA(:)       = TCP%XT(:,TCP%NLVL)
+ZQA(:)       = TCP%XQ(:,TCP%NLVL)/PRHOA(:)
+ZPA(:)       = TCP%XP(:,TCP%NLVL)
 !* for the time being, only one value is kept for wall in-canyon forcing, in the middle of the canyon
 ZU_CANYON(:) = ZUA(:)
 ZT_CANYON(:) = ZTA(:)
 ZQ_CANYON(:) = ZQA(:)
-  DO JLAYER=1,NLVL-1
+  DO JLAYER=1,TCP%NLVL-1
     DO JI=1,KI
       !* finds middle canyon layer
-      IF (XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)/2. .AND. XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)/2.) THEN
-        ZCOEF(JI) = (ZAVG_BLD_HEIGHT(JI)/2.-XZ(JI,JLAYER))/(XZ(JI,JLAYER+1)-XZ(JI,JLAYER))
-        ZU_CANYON(JI) = XU(JI,JLAYER) + ZCOEF(JI) * (XU(JI,JLAYER+1)-XU(JI,JLAYER))
-        ZT_CANYON(JI) = XT(JI,JLAYER) + ZCOEF(JI) * (XT(JI,JLAYER+1)-XT(JI,JLAYER))
-        ZQ_CANYON(JI) =(XQ(JI,JLAYER) + ZCOEF(JI) * (XQ(JI,JLAYER+1)-XQ(JI,JLAYER)))/PRHOA(JI)
+      IF (TCP%XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)/2. .AND. TCP%XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)/2.) THEN
+        ZCOEF(JI) = (ZAVG_BLD_HEIGHT(JI)/2.-TCP%XZ(JI,JLAYER))/(TCP%XZ(JI,JLAYER+1)-TCP%XZ(JI,JLAYER))
+        ZU_CANYON(JI) = TCP%XU(JI,JLAYER) + ZCOEF(JI) * (TCP%XU(JI,JLAYER+1)-TCP%XU(JI,JLAYER))
+        ZT_CANYON(JI) = TCP%XT(JI,JLAYER) + ZCOEF(JI) * (TCP%XT(JI,JLAYER+1)-TCP%XT(JI,JLAYER))
+        ZQ_CANYON(JI) =(TCP%XQ(JI,JLAYER) + ZCOEF(JI) * (TCP%XQ(JI,JLAYER+1)-TCP%XQ(JI,JLAYER)))/PRHOA(JI)
       END IF
       !* finds layer just above roof (at least 1m above roof)
-      IF (XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)+1. .AND. XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)+1.) THEN
-        ZUREF(JI) = XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
-        ZZREF(JI) = XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
-        ZTA  (JI) = XT(JI,JLAYER+1)
-        ZQA  (JI) = XQ(JI,JLAYER+1)/PRHOA(JI)
+      IF (TCP%XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)+1. .AND. TCP%XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)+1.) THEN
+        ZUREF(JI) = TCP%XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
+        ZZREF(JI) = TCP%XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
+        ZTA  (JI) = TCP%XT(JI,JLAYER+1)
+        ZQA  (JI) = TCP%XQ(JI,JLAYER+1)/PRHOA(JI)
         !ZUA  (JI) = XU(JI,JLAYER+1)
-        ZUA  (JI) = MAX(XU(JI,JLAYER+1) - 2.*SQRT(XTKE(JI,JLAYER+1)) , XU(JI,JLAYER+1)/3.)
-        ZPA  (JI) = XP(JI,JLAYER+1)
-        ZLMO (JI) = XLMO(JI,JLAYER+1)
+        ZUA  (JI) = MAX(TCP%XU(JI,JLAYER+1) - 2.*SQRT(TCP%XTKE(JI,JLAYER+1)) , TCP%XU(JI,JLAYER+1)/3.)
+        ZPA  (JI) = TCP%XP(JI,JLAYER+1)
+        ZLMO (JI) = TCP%XLMO(JI,JLAYER+1)
       END IF
     END DO
   END DO
   ZU_CANYON= MAX(ZU_CANYON,0.2)
-  ZU_LOWCAN=XU(:,1)
-  ZT_LOWCAN=XT(:,1)
-  ZQ_LOWCAN=XQ(:,1) / PRHOA(:)
-  ZZ_LOWCAN=XZ(:,1)
+  ZU_LOWCAN=TCP%XU(:,1)
+  ZT_LOWCAN=TCP%XT(:,1)
+  ZQ_LOWCAN=TCP%XQ(:,1) / PRHOA(:)
+  ZZ_LOWCAN=TCP%XZ(:,1)
   WHERE(ZPA==XUNDEF) ZPA = PPA   ! security for first time step
 !
 !-------------------------------------------------------------------------------------
@@ -660,7 +621,7 @@ ZQ_CANYON(:) = ZQA(:)
 ! frontal density
   ZLAMBDA_F(:) = ZAVG_CAN_HW_RATIO*ZAVG_BLD / (0.5*XPI)
 !
-  CALL SM10(XZ,ZAVG_BLD_HEIGHT,ZLAMBDA_F,ZL)
+  CALL SM10(TCP%XZ,ZAVG_BLD_HEIGHT,ZLAMBDA_F,ZL)
 !
 !-------------------------------------------------------------------------------------
 ! computes coefficients for implicitation
@@ -681,28 +642,28 @@ ZQ_CANYON(:) = ZQA(:)
   ZSFLUX_T(:)          = 0.
   ZSFLUX_Q(:)          = 0.
 !
-  DO JLAYER=1,NLVL-1
+  DO JLAYER=1,TCP%NLVL-1
       !* Monin-Obuhkov theory not used inside the urban canopy
       ! => neutral mixing  if layer is below : (roof level +1 meter)
-      WHERE (XZ(:,JLAYER)<=ZAVG_BLD_HEIGHT(:)+1.) XLMO(:,JLAYER) = XUNDEF
+      WHERE (TCP%XZ(:,JLAYER)<=ZAVG_BLD_HEIGHT(:)+1.) TCP%XLMO(:,JLAYER) = XUNDEF
   ENDDO
 !
 !
 !* computes tendencies on wind and Tke due to canopy
- CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
-                PPA,PRHOA,XU,                                                         &
+ CALL TEB_CANOPY(KI,TCP%NLVL,TCP%XZ,TCP%XZF,TCP%XDZ,TCP%XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
+                PPA,PRHOA,TCP%XU,                                                         &
                 ZAVG_DUWDU_GRND, ZAVG_UW_ROOF, ZAVG_DUWDU_ROOF,                       &
                 ZAVG_H_WALL,ZAVG_H_ROOF,ZAVG_E_ROOF,ZAVG_AC_GRND,ZAVG_AC_GRND_WAT,    &
                 ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ)
 !
 !* computes coefficients for implicitation
-  CALL CANOPY_EVOL(KI,NLVL,PTSTEP,1,                         &
+  CALL CANOPY_EVOL(KI,TCP%NLVL,PTSTEP,1,                         &
                      ZL,ZWIND,PTA,PQA,PPA,PRHOA,             &
                      ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,             &
                      ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,  &
                      ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,  &
-                     XZ,XZF,XDZ,XDZF,XU,XTKE,XT,XQ,XLMO,     &
-                     XLM,XLEPS,XP,ZAVG_USTAR,                &
+                     TCP%XZ,TCP%XZF,TCP%XDZ,TCP%XDZF,TCP%XU,TCP%XTKE,TCP%XT,TCP%XQ,TCP%XLMO,     &
+                     TCP%XLM,TCP%XLEPS,TCP%XP,ZAVG_USTAR,                &
                      ZALFAU,ZBETAU,ZALFAT,ZBETAT,ZALFAQ,ZBETAQ)
 !
   ZPEW_A_COEF_LOWCAN = - ZALFAU / PRHOA
@@ -735,10 +696,10 @@ ELSE              ! no canopy case
 !
 !* Without SBL scheme, canyon air is assumed at mid height
   ZU_LOWCAN=ZU_CANYON
-  ZT_LOWCAN=XT_CANYON
-  ZQ_LOWCAN=XQ_CANYON
-  ZT_CANYON=XT_CANYON
-  ZQ_CANYON=XQ_CANYON
+  ZT_LOWCAN=T%XT_CANYON
+  ZQ_LOWCAN=T%XQ_CANYON
+  ZT_CANYON=T%XT_CANYON
+  ZQ_CANYON=T%XQ_CANYON
   ZUREF    =PUREF
   ZZREF    =PZREF
   ZTA      =PTA
@@ -757,15 +718,15 @@ ZEXNA     (:) = (ZPA(:)/XP00)**(XRD/XCPD)
 ! Over Urban surfaces/towns:
 !--------------------------------------------------------------------------------------
 !
-DO JTEB_PATCH=1,NTEB_PATCH
+DO JTEB_PATCH=1,TOP%NTEB_PATCH
  CALL GOTO_TEB(JTEB_PATCH)
 !
 ZT_CAN=ZT_CANYON
 ZQ_CAN=ZQ_CANYON
 !
-IF (LCANOPY) THEN
-  XT_CANYON(:) = ZT_CANYON(:)
-  XQ_CANYON(:) = ZQ_CANYON(:)
+IF (TOP%LCANOPY) THEN
+  T%XT_CANYON(:) = ZT_CANYON(:)
+  T%XQ_CANYON(:) = ZQ_CANYON(:)
 END IF
 !
 ZLESNOW_ROOF(:) = 0.
@@ -776,38 +737,38 @@ ZG_GREENROOF_ROOF(:) = 0.
 ! Call the physical routines of TEB (including gardens & greenroofs)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL TEB_GARDEN      (LGARDEN, LGREENROOF, LSOLAR_PANEL,                              &
-                      CZ0H, CIMPLICIT_WIND, CROAD_DIR, CWALL_OPT,                      &
-                      TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
+ CALL TEB_GARDEN      (TOP%LGARDEN, TOP%LGREENROOF, TOP%LSOLAR_PANEL,                              &
+                      TOP%CZ0H, CIMPLICIT_WIND, TOP%CROAD_DIR, TOP%CWALL_OPT,                      &
+                      TOP%TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &
-                      XTI_BLD,                                                         &
-                      XT_ROOF, XT_ROAD, XT_WALL_A, XT_WALL_B, XWS_ROOF,XWS_ROAD,       &
-                      TSNOW_ROOF%SCHEME,                                               &
-                      TSNOW_ROOF%WSNOW(:,:,1), TSNOW_ROOF%T(:,:,1),                    &
-                      TSNOW_ROOF%RHO(:,:,1), TSNOW_ROOF%ALB(:,1),                      &
-                      TSNOW_ROOF%TS(:,1), TSNOW_ROOF%EMIS(:,1),                        &
-                      TSNOW_ROAD%SCHEME,                                               &
-                      TSNOW_ROAD%WSNOW(:,:,1), TSNOW_ROAD%T(:,:,1),                    &
-                      TSNOW_ROAD%RHO(:,:,1), TSNOW_ROAD%ALB(:,1),                      &
-                      TSNOW_ROAD%TS(:,1), TSNOW_ROAD%EMIS(:,1),                        &
+                      B%XTI_BLD,                                                         &
+                      T%XT_ROOF, T%XT_ROAD, T%XT_WALL_A, T%XT_WALL_B, T%XWS_ROOF,T%XWS_ROAD,       &
+                      T%TSNOW_ROOF%SCHEME,                                               &
+                      T%TSNOW_ROOF%WSNOW(:,:,1), T%TSNOW_ROOF%T(:,:,1),                    &
+                      T%TSNOW_ROOF%RHO(:,:,1), T%TSNOW_ROOF%ALB(:,1),                      &
+                      T%TSNOW_ROOF%TS(:,1), T%TSNOW_ROOF%EMIS(:,1),                        &
+                      T%TSNOW_ROAD%SCHEME,                                               &
+                      T%TSNOW_ROAD%WSNOW(:,:,1), T%TSNOW_ROAD%T(:,:,1),                    &
+                      T%TSNOW_ROAD%RHO(:,:,1), T%TSNOW_ROAD%ALB(:,1),                      &
+                      T%TSNOW_ROAD%TS(:,1), T%TSNOW_ROAD%EMIS(:,1),                        &
                       ZPEW_A_COEF, ZPEW_B_COEF,                                        &
                       ZPEW_A_COEF_LOWCAN, ZPEW_B_COEF_LOWCAN,                          &
                       PPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, PRHOA, PCO2,                   &
                       PLW, ZDIR_SWB, ZSCA_SWB, PSW_BANDS, KSW, PZENITH, PAZIM,         &
                       PRAIN, PSNOW, ZZREF, ZUREF, ZUA,                                 &
-                      ZH_TRAFFIC, ZLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,              &
+                      ZH_TRAFFIC, ZLE_TRAFFIC, T%XH_INDUSTRY, T%XLE_INDUSTRY,              &
                       PTSTEP,                                                          &
-                      XZ0_TOWN,                                                        &
-                      XBLD, XGARDEN, XROAD_DIR, XROAD, XGREENROOF,                     &
-                      XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO,                         &
-                      XROAD_O_GRND, XGARDEN_O_GRND, XWALL_O_GRND,                      &
-                      XALB_ROOF, XEMIS_ROOF,                                           &
-                      XHC_ROOF,XTC_ROOF,XD_ROOF,                                       &
-                      XALB_ROAD, XEMIS_ROAD, XSVF_ROAD,                                &
-                      XHC_ROAD,XTC_ROAD,XD_ROAD,                                       &
-                      XALB_WALL, XEMIS_WALL, XSVF_WALL,                                &
-                      XSVF_GARDEN,                                                     &
-                      XHC_WALL,XTC_WALL,XD_WALL,                                       &
+                      T%XZ0_TOWN,                                                        &
+                      T%XBLD, T%XGARDEN, T%XROAD_DIR, T%XROAD, T%XGREENROOF,                     &
+                      T%XBLD_HEIGHT, T%XWALL_O_HOR, T%XCAN_HW_RATIO,                         &
+                      T%XROAD_O_GRND, T%XGARDEN_O_GRND, T%XWALL_O_GRND,                      &
+                      T%XALB_ROOF, T%XEMIS_ROOF,                                           &
+                      T%XHC_ROOF,T%XTC_ROOF,T%XD_ROOF,                                       &
+                      T%XALB_ROAD, T%XEMIS_ROAD, T%XSVF_ROAD,                                &
+                      T%XHC_ROAD,T%XTC_ROAD,T%XD_ROAD,                                       &
+                      T%XALB_WALL, T%XEMIS_WALL, T%XSVF_WALL,                                &
+                      T%XSVF_GARDEN,                                                     &
+                      T%XHC_WALL,T%XTC_WALL,T%XD_WALL,                                       &
                       ZRN_ROOF, ZH_ROOF, ZLE_ROOF, ZLEW_ROOF, ZGFLUX_ROOF,             &
                       ZRUNOFF_ROOF,                                                    &
                       ZRN_ROAD, ZH_ROAD, ZLE_ROAD, ZLEW_ROAD, ZGFLUX_ROAD,             &
@@ -842,37 +803,37 @@ ZG_GREENROOF_ROOF(:) = 0.
                       ZABS_SW_GARDEN,ZABS_LW_GARDEN,                                   &
                       ZABS_SW_GREENROOF,ZABS_LW_GREENROOF, ZG_GREENROOF_ROOF,          &
                       ZRUNOFF_GREENROOF, ZDRAIN_GREENROOF,                             &
-                      ZIRRIG_GREENROOF, CCOOL_COIL, XF_WATER_COND, CHEAT_COIL,CNATVENT,&
-                      KDAY, XAUX_MAX, XT_FLOOR, XT_MASS, ZH_BLD_COOL,                  &
+                      ZIRRIG_GREENROOF, BOP%CCOOL_COIL, B%XF_WATER_COND, BOP%CHEAT_COIL,B%CNATVENT,&
+                      KDAY, B%XAUX_MAX, B%XT_FLOOR, B%XT_MASS, ZH_BLD_COOL,                  &
                       ZT_BLD_COOL, ZH_BLD_HEAT, ZLE_BLD_COOL, ZLE_BLD_HEAT, ZH_WASTE,  &
-                      ZLE_WASTE, XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT, XQIN, XQIN_FRAD,&
-                      XQIN_FLAT, XGR, XEFF_HEAT, XINF, XTCOOL_TARGET,                  &
-                      XTHEAT_TARGET, XHR_TARGET, XT_WIN2, XQI_BLD, XV_VENT,            &
-                      XCAP_SYS_HEAT, XCAP_SYS_RAT, XT_ADP, XM_SYS_RAT, XCOP_RAT,       &
+                      ZLE_WASTE, B%XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT, B%XQIN, B%XQIN_FRAD,&
+                      B%XQIN_FLAT, B%XGR, B%XEFF_HEAT, B%XINF, B%XTCOOL_TARGET,                  &
+                      B%XTHEAT_TARGET, B%XHR_TARGET, B%XT_WIN2, B%XQI_BLD, B%XV_VENT,            &
+                      B%XCAP_SYS_HEAT, B%XCAP_SYS_RAT, B%XT_ADP, B%XM_SYS_RAT, B%XCOP_RAT,       &
                       ZCAP_SYS, ZM_SYS, ZCOP, ZQ_SYS, ZT_SYS, ZTR_SW_WIN, ZFAN_POWER,  &
-                      XHC_FLOOR, XTC_FLOOR, XD_FLOOR, XT_WIN1, ZABS_SW_WIN,            &
-                      ZABS_LW_WIN, XSHGC, XSHGC_SH, XUGG_WIN, XALB_WIN, XABS_WIN,      &
+                      B%XHC_FLOOR, B%XTC_FLOOR, B%XD_FLOOR, B%XT_WIN1, ZABS_SW_WIN,            &
+                      ZABS_LW_WIN, B%XSHGC, B%XSHGC_SH, B%XUGG_WIN, B%XALB_WIN, B%XABS_WIN,      &
                       ZEMIT_LW_FAC, ZEMIT_LW_GRND, ZT_RAD_IND, ZREF_SW_GRND,           &
-                      ZREF_SW_FAC, ZHU_BLD, PTIME, LSHADE, LSHAD_DAY, LNATVENT_NIGHT,  &
-                      CBEM, XN_FLOOR, XWALL_O_BLD, XGLAZ_O_BLD, XMASS_O_BLD,           &
-                      XFLOOR_HW_RATIO,                                                 &
-                      XF_FLOOR_MASS, XF_FLOOR_WALL, XF_FLOOR_WIN,                      &
-                      XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS,                      &
-                      XF_WALL_WIN, XF_WIN_FLOOR, XF_WIN_MASS, XF_WIN_WALL,             &
-                      XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN, LCANOPY, XTRAN_WIN,    &
-                      CCH_BEM, XROUGH_ROOF, XROUGH_WALL, XF_WIN_WIN,                   &
-                      LPAR_RD_IRRIG, XRD_START_MONTH, XRD_END_MONTH,                   &
-                      XRD_START_HOUR, XRD_END_HOUR, XRD_24H_IRRIG, ZIRRIG_ROAD,        &
-                      XEMIS_PANEL, XALB_PANEL, XEFF_PANEL, XFRAC_PANEL, XRESIDENTIAL,  &
+                      ZREF_SW_FAC, ZHU_BLD, PTIME, B%LSHADE, B%LSHAD_DAY, B%LNATVENT_NIGHT,  &
+                      TOP%CBEM, B%XN_FLOOR, T%XWALL_O_BLD, B%XGLAZ_O_BLD, B%XMASS_O_BLD,           &
+                      B%XFLOOR_HW_RATIO,                                                 &
+                      B%XF_FLOOR_MASS, B%XF_FLOOR_WALL, B%XF_FLOOR_WIN,                      &
+                      B%XF_FLOOR_ROOF, B%XF_WALL_FLOOR, B%XF_WALL_MASS,                      &
+                      B%XF_WALL_WIN, B%XF_WIN_FLOOR, B%XF_WIN_MASS, B%XF_WIN_WALL,             &
+                      B%XF_MASS_FLOOR, B%XF_MASS_WALL, B%XF_MASS_WIN, TOP%LCANOPY, B%XTRAN_WIN,    &
+                      TOP%CCH_BEM, T%XROUGH_ROOF, T%XROUGH_WALL, B%XF_WIN_WIN,                   &
+                      TIR%LPAR_RD_IRRIG, TIR%XRD_START_MONTH, TIR%XRD_END_MONTH,                   &
+                      TIR%XRD_START_HOUR, TIR%XRD_END_HOUR, TIR%XRD_24H_IRRIG, ZIRRIG_ROAD,        &
+                      TPN%XEMIS_PANEL, TPN%XALB_PANEL, TPN%XEFF_PANEL, TPN%XFRAC_PANEL, T%XRESIDENTIAL,  &
                       ZTHER_PROD_PANEL, ZPHOT_PROD_PANEL, ZPROD_PANEL,                 &
                       ZTHER_PROD_BLD  , ZPHOT_PROD_BLD  , ZPROD_BLD  ,                 &
-                      XTHER_PRODC_DAY, ZH_PANEL, ZRN_PANEL,                            &
-                      XDT_RES, XDT_OFF,                                                &
+                      TPN%XTHER_PRODC_DAY, ZH_PANEL, ZRN_PANEL,                            &
+                      T%XDT_RES, T%XDT_OFF,                                                &
                       ZCUR_TCOOL_TARGET, ZCUR_THEAT_TARGET, ZCUR_QIN                   )
 
 
 !
-IF (.NOT. LCANOPY) THEN
+IF (.NOT. TOP%LCANOPY) THEN
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_T_CANYON,ZT_CAN)
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_Q_CANYON,ZQ_CAN)
 !
@@ -930,7 +891,7 @@ ZTRAD_PATCH(:,JTEB_PATCH) = ZTRAD
 !
 !* warning: aerodynamical resistance does not yet take into account gardens
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_RESA_TOWN,1./ZRESA_TOWN)
-IF (JTEB_PATCH==NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
+IF (JTEB_PATCH==TOP%NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
 !
 !-------------------------------------------------------------------------------------
 ! Diagnostics on each patch
@@ -975,7 +936,7 @@ IF (JTEB_PATCH==NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
 ! Computes averaged parameters necessary for UTCI
 !-------------------------------------------------------------------------------------
 !
-IF (N2M >0 .AND. LUTCI) THEN
+IF (DGT%N2M >0 .AND. DGUT%LUTCI) THEN
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_REF_SW_GRND ,ZREF_SW_GRND )
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_REF_SW_FAC  ,ZREF_SW_FAC  )
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_SCA_SW      ,ZSCA_SW      )
@@ -983,15 +944,15 @@ IF (N2M >0 .AND. LUTCI) THEN
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_EMIT_LW_FAC ,ZEMIT_LW_FAC )
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_EMIT_LW_GRND,ZEMIT_LW_GRND)
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_T_RAD_IND   ,ZT_RAD_IND   )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_TI_BLD      ,XTI_BLD      )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_QI_BLD      ,XQI_BLD      )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_TI_BLD      ,B%XTI_BLD      )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_QI_BLD      ,B%XQI_BLD      )
 END IF
 !
 !-------------------------------------------------------------------------------------
 ! Use of the canopy version of TEB
 !-------------------------------------------------------------------------------------
 !
-IF (LCANOPY) THEN
+IF (TOP%LCANOPY) THEN
 !-------------------------------------------------------------------------------------
 ! Town averaged quantities to force canopy atmospheric layers
 !-------------------------------------------------------------------------------------
@@ -1000,21 +961,21 @@ IF (LCANOPY) THEN
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_UW_ROOF ,ZUW_ROOF)
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_ROOF ,ZDUWDU_ROOF)
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WALL ,0.5*(ZH_WALL_A+ZH_WALL_B))
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+XH_INDUSTRY))
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+XLE_INDUSTRY)/XLVTT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+T%XH_INDUSTRY))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+T%XLE_INDUSTRY)/XLVTT)
 !
 !-------------------------------------------------------------------------------------
 ! Computes the impact of canopy and surfaces on air
 !-------------------------------------------------------------------------------------
 !
-ZAC_GRND    (:) = (XROAD(:)*ZAC_ROAD    (:) + XGARDEN(:)*ZAC_GARDEN    (:)) / (XROAD(:)+XGARDEN(:))
-ZAC_GRND_WAT(:) = (XROAD(:)*ZAC_ROAD_WAT(:) + XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (XROAD(:)+XGARDEN(:))
+ZAC_GRND    (:) = (T%XROAD(:)*ZAC_ROAD    (:) + T%XGARDEN(:)*ZAC_GARDEN    (:)) / (T%XROAD(:)+T%XGARDEN(:))
+ZAC_GRND_WAT(:) = (T%XROAD(:)*ZAC_ROAD_WAT(:) + T%XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (T%XROAD(:)+T%XGARDEN(:))
 !
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND     ,ZAC_GRND    )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND_WAT ,ZAC_GRND_WAT)
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_U ,ZUW_GRND * (1.-XBLD))
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_T ,ZH_GRND  * (1.-XBLD)/XCPD/PRHOA)
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_Q ,ZLE_GRND * (1.-XBLD)/XLVTT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_U ,ZUW_GRND * (1.-T%XBLD))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_T ,ZH_GRND  * (1.-T%XBLD)/XCPD/PRHOA)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_Q ,ZLE_GRND * (1.-T%XBLD)/XLVTT)
 !
 
 END IF
@@ -1028,14 +989,14 @@ END DO
 !* Evolution of canopy air if canopy option is active
 !-------------------------------------------------------------------------------------
 !
-IF (LCANOPY) THEN
+IF (TOP%LCANOPY) THEN
 !
 !-------------------------------------------------------------------------------------
 !* Impact of TEB fluxes on the air
 !-------------------------------------------------------------------------------------
 !
- CALL TEB_CANOPY(KI,NLVL,XZ,XZF,XDZ,XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
-                PPA,PRHOA,XU,                                                         &
+ CALL TEB_CANOPY(KI,TCP%NLVL,TCP%XZ,TCP%XZF,TCP%XDZ,TCP%XDZF,ZAVG_BLD,ZAVG_BLD_HEIGHT,ZAVG_WALL_O_HOR,     &
+                PPA,PRHOA,TCP%XU,                                                         &
                 ZAVG_DUWDU_GRND, ZAVG_UW_ROOF, ZAVG_DUWDU_ROOF,                       &
                 ZAVG_H_WALL,ZAVG_H_ROOF,ZAVG_E_ROOF,ZAVG_AC_GRND,ZAVG_AC_GRND_WAT,    &
                 ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ)
@@ -1044,12 +1005,12 @@ IF (LCANOPY) THEN
 !* Evolution of canopy air due to these impacts
 !-------------------------------------------------------------------------------------
 !
- CALL CANOPY_EVOL(KI,NLVL,PTSTEP,2,                                            &
+ CALL CANOPY_EVOL(KI,TCP%NLVL,PTSTEP,2,                                            &
                  ZL,ZWIND,PTA,PQA,PPA,PRHOA,                                  &
                  ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,                                  &
                  ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                       &
                  ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                       &
-                 XZ,XZF,XDZ,XDZF,XU,XTKE,XT,XQ,XLMO,XLM,XLEPS,XP,             &
+                 TCP%XZ,TCP%XZF,TCP%XDZ,TCP%XDZF,TCP%XU,TCP%XTKE,TCP%XT,TCP%XQ,TCP%XLMO,TCP%XLM,TCP%XLEPS,TCP%XP,             &
                  ZAVG_USTAR,                                                  &
                  ZALFAU,ZBETAU,ZALFAT,ZBETAT,ZALFAQ,ZBETAQ                    )
 !
@@ -1090,7 +1051,7 @@ END IF
 !for ALB and EMIS
 !-------------------------------------------------------------------------------------
 !
- CALL AVERAGE_RAD(XTEB_PATCH,                                              &
+ CALL AVERAGE_RAD(TOP%XTEB_PATCH,                                              &
                  ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTRAD_PATCH,&
                  PDIR_ALB,       PSCA_ALB,       PEMIS,       PTRAD       )
 !
@@ -1103,7 +1064,7 @@ END IF
 PTSURF (:) = PTRAD         (:) ! Should be the surface effective temperature; not radative
 PZ0    (:) = ZAVG_Z0_TOWN  (:) ! Should account for ISBA (greenroof and garden) Z0
 PZ0H   (:) = PZ0 (:) / 200.    ! Should account for ISBA (greenroof and garden) Z0
-PQSURF (:) = XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
+PQSURF (:) = T%XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
 !
 !-------------------------------------------------------------------------------------
 ! Scalar fluxes:
@@ -1112,72 +1073,72 @@ PQSURF (:) = XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) 
 ZAVG_USTAR    (:) = SQRT(SQRT(PSFU**2+PSFV**2))
 !
 !
-IF (NBEQ>0) THEN
-  IF (CCH_DRY_DEP == "WES89") THEN
+IF (CHT%NBEQ>0) THEN
+  IF (CHT%CCH_DRY_DEP == "WES89") THEN
     CALL CH_DEP_TOWN(ZAVG_RESA_TOWN,  ZAVG_USTAR, PTA, PTRAD, ZAVG_WALL_O_HOR,&
-                     PSV(:,NSV_CHSBEG:NSV_CHSEND),        &
-                     CSV(NSV_CHSBEG:NSV_CHSEND),             &
-                     XDEP(:,1:NBEQ)  )
+                     PSV(:,CHT%NSV_CHSBEG:CHT%NSV_CHSEND),        &
+                     CHT%CSV(CHT%NSV_CHSBEG:CHT%NSV_CHSEND),             &
+                     CHT%XDEP(:,1:CHT%NBEQ)  )
    
-    DO JI=NSV_CHSBEG,NSV_CHSEND
+    DO JI=CHT%NSV_CHSBEG,CHT%NSV_CHSEND
 !cdir nodep
       DO JJ=1,SIZE(PSFTS,1)
-        PSFTS(JJ,JI) = - PSV(JJ,JI) * XDEP(JJ,JI-NSV_CHSBEG+1)
+        PSFTS(JJ,JI) = - PSV(JJ,JI) * CHT%XDEP(JJ,JI-CHT%NSV_CHSBEG+1)
       ENDDO
     ENDDO
 
-    IF (NAEREQ > 0 ) THEN
-      CALL CH_AER_DEP(PSV(:,NSV_AERBEG:NSV_AEREND),&
-                         PSFTS(:,NSV_AERBEG:NSV_AEREND),&
+    IF (CHT%NAEREQ > 0 ) THEN
+      CALL CH_AER_DEP(PSV(:,CHT%NSV_AERBEG:CHT%NSV_AEREND),&
+                         PSFTS(:,CHT%NSV_AERBEG:CHT%NSV_AEREND),&
                          ZAVG_USTAR,ZAVG_RESA_TOWN,PTA,PRHOA)   
     END IF
 
   ELSE
-    DO JI=NSV_CHSBEG,NSV_CHSEND
+    DO JI=CHT%NSV_CHSBEG,CHT%NSV_CHSEND
       PSFTS(:,JI) =0.
     ENDDO
-    IF(NSV_AERBEG.LT.NSV_AEREND) THEN
-      DO JI=NSV_AERBEG,NSV_AEREND
+    IF(CHT%NSV_AERBEG.LT.CHT%NSV_AEREND) THEN
+      DO JI=CHT%NSV_AERBEG,CHT%NSV_AEREND
         PSFTS(:,JI) =0.
       ENDDO
     ENDIF
   ENDIF
 ENDIF
 
-IF (NDSTEQ>0) THEN
+IF (CHT%NDSTEQ>0) THEN
   ! Blindage à enlever lorsque que TEB aura été corrigé
   ZUSTAR(:)     = MIN(ZUSTAR(:), 10.)
   ZRESA_TOWN(:) = MAX(ZRESA_TOWN(:), 10.)
   !
-  CALL DSLT_DEP(PSV(:,NSV_DSTBEG:NSV_DSTEND), PSFTS(:,NSV_DSTBEG:NSV_DSTEND),   &
-                ZUSTAR, ZRESA_TOWN, PTA, PRHOA, XEMISSIG_DST, XEMISRADIUS_DST,  &
+  CALL DSLT_DEP(PSV(:,CHT%NSV_DSTBEG:CHT%NSV_DSTEND), PSFTS(:,CHT%NSV_DSTBEG:CHT%NSV_DSTEND),   &
+                ZUSTAR, ZRESA_TOWN, PTA, PRHOA, DST%XEMISSIG_DST, DST%XEMISRADIUS_DST,  &
                 JPMODE_DST, XDENSITY_DST, XMOLARWEIGHT_DST, ZCONVERTFACM0_DST,  &
                 ZCONVERTFACM6_DST, ZCONVERTFACM3_DST, LVARSIG_DST, LRGFIX_DST,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,NSV_DSTBEG:NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,CHT%NSV_DSTBEG:CHT%NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
-    XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
-    XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
+    DST%XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
+    DST%XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
     NDSTMDE,                        &
     ZCONVERTFACM0_DST,              &
     ZCONVERTFACM6_DST,              &
     ZCONVERTFACM3_DST,              &
     LVARSIG_DST, LRGFIX_DST         )  
 ENDIF
-IF (NSLTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,NSV_SLTBEG:NSV_SLTEND), PSFTS(:,NSV_SLTBEG:NSV_SLTEND),   &
-                ZUSTAR, ZRESA_TOWN, PTA, PRHOA, XEMISSIG_SLT, XEMISRADIUS_SLT,  &
+IF (CHT%NSLTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,CHT%NSV_SLTBEG:CHT%NSV_SLTEND), PSFTS(:,CHT%NSV_SLTBEG:CHT%NSV_SLTEND),   &
+                ZUSTAR, ZRESA_TOWN, PTA, PRHOA, SLT%XEMISSIG_SLT, SLT%XEMISRADIUS_SLT,  &
                 JPMODE_SLT, XDENSITY_SLT, XMOLARWEIGHT_SLT, ZCONVERTFACM0_SLT,  &
                 ZCONVERTFACM6_SLT, ZCONVERTFACM3_SLT, LVARSIG_SLT, LRGFIX_SLT,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,NSV_SLTBEG:NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,CHT%NSV_SLTBEG:CHT%NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
-    XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
-    XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
+    SLT%XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
+    SLT%XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
     NSLTMDE,                        &
     ZCONVERTFACM0_SLT,              &
     ZCONVERTFACM6_SLT,              &
@@ -1189,7 +1150,7 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_TEB_n(LCANOPY, PTA, PTRAD, ZQA, PPA, PPS, PRHOA,              &
+ CALL DIAG_INLINE_TEB_n(TOP%LCANOPY, PTA, PTRAD, ZQA, PPA, PPS, PRHOA,              &
                        PU, PV, ZWIND, PZREF, PUREF,                            &
                        ZAVG_CD, ZAVG_CDN, ZAVG_RI, ZAVG_CH, ZAVG_Z0_TOWN,      &
                        PTRAD, PEMIS, PDIR_ALB, PSCA_ALB,                       &
@@ -1201,11 +1162,11 @@ ENDIF
 ! Stores Canyon air and humidity if historical option of TEB is active
 !-------------------------------------------------------------------------------------
 !
-IF (.NOT. LCANOPY) THEN
-  DO JTEB_PATCH=1,NTEB_PATCH
+IF (.NOT. TOP%LCANOPY) THEN
+  DO JTEB_PATCH=1,TOP%NTEB_PATCH
     CALL GOTO_TEB(JTEB_PATCH)
-    XT_CANYON(:) = ZAVG_T_CANYON(:)
-    XQ_CANYON(:) = ZAVG_Q_CANYON(:)
+    T%XT_CANYON(:) = ZAVG_T_CANYON(:)
+    T%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
   END DO
 END IF
 !          
@@ -1213,30 +1174,30 @@ END IF
 ! Thermal confort index
 !-------------------------------------------------------------------------------------
 !
-IF (LUTCI .AND. N2M >0) THEN
+IF (DGUT%LUTCI .AND. DGT%N2M >0) THEN
   DO JJ=1,KI
-    IF (XZON10M(JJ)/=XUNDEF) THEN
-      ZU_UTCI(JJ) = SQRT(XZON10M(JJ)**2+XMER10M(JJ)**2)
+    IF (DGT%XZON10M(JJ)/=XUNDEF) THEN
+      ZU_UTCI(JJ) = SQRT(DGT%XZON10M(JJ)**2+DGT%XMER10M(JJ)**2)
     ELSE
       ZU_UTCI(JJ) = ZWIND(JJ)
     ENDIF
   ENDDO
- CALL UTCI_TEB(XT_CANYON, XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND,&
+ CALL UTCI_TEB(T%XT_CANYON, T%XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND,&
      ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC, ZAVG_EMIT_LW_GRND, PLW,   &
-     ZAVG_T_RAD_IND, XBLD, XBLD_HEIGHT, XWALL_O_HOR, XUTCI_IN, XUTCI_OUTSUN,         &
-     XUTCI_OUTSHADE, XTRAD_SUN, XTRAD_SHADE                                      )
- CALL UTCIC_STRESS(PTSTEP,XUTCI_IN      ,XUTCIC_IN      )
- CALL UTCIC_STRESS(PTSTEP,XUTCI_OUTSUN  ,XUTCIC_OUTSUN  )
- CALL UTCIC_STRESS(PTSTEP,XUTCI_OUTSHADE,XUTCIC_OUTSHADE)
-ELSE IF (LUTCI) THEN
-  XUTCI_IN(:) = XUNDEF
-  XUTCI_OUTSUN(:) = XUNDEF
-  XUTCI_OUTSHADE(:) = XUNDEF
-  XTRAD_SUN(:) = XUNDEF
-  XTRAD_SHADE(:) = XUNDEF
-  XUTCIC_IN(:,:) = XUNDEF
-  XUTCIC_OUTSUN(:,:) = XUNDEF
-  XUTCIC_OUTSHADE(:,:) = XUNDEF
+     ZAVG_T_RAD_IND, T%XBLD, T%XBLD_HEIGHT, T%XWALL_O_HOR, DGUT%XUTCI_IN, DGUT%XUTCI_OUTSUN,         &
+     DGUT%XUTCI_OUTSHADE, DGUT%XTRAD_SUN, DGUT%XTRAD_SHADE                                      )
+ CALL UTCIC_STRESS(PTSTEP,DGUT%XUTCI_IN      ,DGUT%XUTCIC_IN      )
+ CALL UTCIC_STRESS(PTSTEP,DGUT%XUTCI_OUTSUN  ,DGUT%XUTCIC_OUTSUN  )
+ CALL UTCIC_STRESS(PTSTEP,DGUT%XUTCI_OUTSHADE,DGUT%XUTCIC_OUTSHADE)
+ELSE IF (DGUT%LUTCI) THEN
+  DGUT%XUTCI_IN(:) = XUNDEF
+  DGUT%XUTCI_OUTSUN(:) = XUNDEF
+  DGUT%XUTCI_OUTSHADE(:) = XUNDEF
+  DGUT%XTRAD_SUN(:) = XUNDEF
+  DGUT%XTRAD_SHADE(:) = XUNDEF
+  DGUT%XUTCIC_IN(:,:) = XUNDEF
+  DGUT%XUTCIC_OUTSUN(:,:) = XUNDEF
+  DGUT%XUTCIC_OUTSHADE(:,:) = XUNDEF
 ENDIF
 
 !
@@ -1250,7 +1211,7 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PAVG
 REAL, DIMENSION(:), INTENT(IN)    :: PFIELD
 !
 IF (JTEB_PATCH==1) PAVG = 0.
-PAVG = PAVG + XTEB_PATCH(:,JP) * PFIELD(:)
+PAVG = PAVG + TOP%XTEB_PATCH(:,JP) * PFIELD(:)
 !
 END SUBROUTINE ADD_PATCH_CONTRIB
 !-------------------------------------------------------------------------------------

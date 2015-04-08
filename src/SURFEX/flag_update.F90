@@ -36,8 +36,8 @@
 !              ------------
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
-USE MODD_DIAG_SURF_ATM_n,ONLY : LPROVAR_TO_DIAG, LSELECT
-USE MODD_DIAG_ISBA_n,    ONLY : LPGD
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -60,9 +60,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FLAG_UPDATE',0,ZHOOK_HANDLE)
 LNOWRITE_CANOPY = ONOWRITE_CANOPY
-LPGD            = OPGD
-LPROVAR_TO_DIAG = OPROVAR_TO_DIAG
-LSELECT         = OSELECT
+DGI%LPGD            = OPGD
+DGU%LPROVAR_TO_DIAG = OPROVAR_TO_DIAG
+DGU%LSELECT         = OSELECT
 IF (LHOOK) CALL DR_HOOK('FLAG_UPDATE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

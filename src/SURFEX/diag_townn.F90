@@ -37,7 +37,7 @@ SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
 
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : CTOWN
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT, XLSTT, XLVTT
 !
 USE MODI_DIAG_TEB_n
@@ -108,7 +108,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
-IF (CTOWN=='TEB   ') THEN
+IF (U%CTOWN=='TEB   ') THEN
   CALL DIAG_TEB_n(HPROGRAM,                                           &
                     PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,      &
                     PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -152,7 +152,7 @@ IF (CTOWN=='TEB   ') THEN
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
-ELSE IF (CTOWN=='FLUX  ') THEN
+ELSE IF (U%CTOWN=='FLUX  ') THEN
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
   PEVAP    = XUNDEF
@@ -194,7 +194,7 @@ ELSE IF (CTOWN=='FLUX  ') THEN
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF
   PWIND10M_MAX = XUNDEF
-ELSE IF (CTOWN=='NONE  ') THEN
+ELSE IF (U%CTOWN=='NONE  ') THEN
   PRN      = XUNDEF
   PH       = XUNDEF
   PLE      = XUNDEF

@@ -22,37 +22,15 @@ SUBROUTINE HVAC_AUTOSIZE(KI,KLUOUT)
 !               ------------
 !
 !
-USE MODD_BEM_OPTION_n, ONLY : NFLOOR_LAYER, LAUTOSIZE
-USE MODD_BEM_n, ONLY : XHC_FLOOR, XTC_FLOOR, XD_FLOOR,                     &
-                       XTCOOL_TARGET, XTHEAT_TARGET, XF_WASTE_CAN,         &
-                       XEFF_HEAT, XQIN, XQIN_FRAD, XQIN_FLAT, XSHGC,       &
-                       XSHGC_SH,XU_WIN, XGR, XFLOOR_HEIGHT, XINF,          &
-                       XHR_TARGET, XV_VENT, XCAP_SYS_HEAT,                 &
-                       XCAP_SYS_RAT, XT_ADP, XM_SYS_RAT, XCOP_RAT,         &
-                       XALB_WIN, XABS_WIN, XT_SIZE_MAX, XT_SIZE_MIN,       &
-                       XUGG_WIN, XN_FLOOR, XGLAZ_O_BLD, XMASS_O_BLD,       &
-                       XFLOOR_HW_RATIO, XF_FLOOR_MASS, XF_FLOOR_WALL,      &
-                       XF_FLOOR_WIN, XF_FLOOR_ROOF, XF_WALL_FLOOR,         &
-                       XF_WALL_MASS, XF_WALL_WIN, XF_WIN_FLOOR,            &
-                       XF_WIN_MASS, XF_WIN_WALL, XF_MASS_FLOOR,            &
-                       XF_MASS_WALL, XF_MASS_WIN, XTRAN_WIN, XF_WIN_WIN
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_BEM_n, ONLY : B => BEM
 
-USE MODD_TEB_OPTION_n, ONLY : NROOF_LAYER, NWALL_LAYER, NROAD_LAYER,       &
-                       CROAD_DIR, CWALL_OPT, TTIME
-USE MODD_TEB_n,        ONLY : XGARDEN,                                     &
-                       XBLD, XROAD, XCAN_HW_RATIO, XBLD_HEIGHT,            &
-                       XWALL_O_HOR, XWALL_O_GRND, XWALL_O_BLD, XZ0_TOWN,   &
-                       XSVF_ROAD, XSVF_GARDEN, XSVF_WALL,                  &
-                       XROAD_DIR,                                          &
-                       XALB_ROOF, XEMIS_ROOF, XHC_ROOF, XTC_ROOF, XD_ROOF, &
-                       XALB_ROAD, XEMIS_ROAD, XHC_ROAD, XTC_ROAD, XD_ROAD, &
-                       XALB_WALL, XEMIS_WALL, XHC_WALL, XTC_WALL, XD_WALL, &
-                       XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY, &
-                       XROUGH_ROOF, XROUGH_WALL, XGREENROOF
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
 
 
 USE MODD_CSTS,            ONLY : XCPD, XPI, XP00, XRD, XSTEFAN
-USE MODD_TEB_GRID_n,      ONLY : XLAT, XLON
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 !
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 !
@@ -185,12 +163,12 @@ REAL, DIMENSION(KI) :: ZREF_SW_GRND
 REAL, DIMENSION(KI) :: ZREF_SW_FAC
 REAL,DIMENSION(KI) :: ZT1    ! intermediate variable
 REAL,DIMENSION(KI) :: ZTN    ! intermediate variable
-REAL,DIMENSION(KI,NROAD_LAYER ) :: ZT_ROAD    ! road layers temperatures
-REAL,DIMENSION(KI,NROOF_LAYER) :: ZT_ROOF    ! roof layers temperatures
-REAL,DIMENSION(KI,NWALL_LAYER) :: ZT_WALL_A  ! wall layers temperatures
-REAL,DIMENSION(KI,NWALL_LAYER) :: ZT_WALL_B  ! wall layers temperatures
-REAL,DIMENSION(KI,NFLOOR_LAYER ) :: ZT_FLOOR   ! building floor temperature
-REAL,DIMENSION(KI,NFLOOR_LAYER ) :: ZT_MASS    ! building mass temperature
+REAL,DIMENSION(KI,TOP%NROAD_LAYER ) :: ZT_ROAD    ! road layers temperatures
+REAL,DIMENSION(KI,TOP%NROOF_LAYER) :: ZT_ROOF    ! roof layers temperatures
+REAL,DIMENSION(KI,TOP%NWALL_LAYER) :: ZT_WALL_A  ! wall layers temperatures
+REAL,DIMENSION(KI,TOP%NWALL_LAYER) :: ZT_WALL_B  ! wall layers temperatures
+REAL,DIMENSION(KI,BOP%NFLOOR_LAYER ) :: ZT_FLOOR   ! building floor temperature
+REAL,DIMENSION(KI,BOP%NFLOOR_LAYER ) :: ZT_MASS    ! building mass temperature
 REAL, DIMENSION(KI) :: ZTS_GARDEN
 REAL, DIMENSION(KI) :: ZT_WIN1
 REAL, DIMENSION(KI) :: ZLW_WA_TO_WB   ! longwave exchange coefficients
@@ -379,9 +357,9 @@ ZT_SKY = 253.15
 !
 !
 !    Initialization
-XM_SYS_RAT    = 0.
-XCAP_SYS_RAT  = 0.
-XCAP_SYS_HEAT = 0.
+B%XM_SYS_RAT    = 0.
+B%XCAP_SYS_RAT  = 0.
+B%XCAP_SYS_HEAT = 0.
 ZLW_RAD= 300.
 !
 !   Non-used parameters
@@ -458,35 +436,35 @@ YHEAT_COIL = 'IDEAL '
 YNATVENT(:) = 'NONE'
 ZF_WATER_COND(:) = 0.
 ZRHOA = 1.30
-ZTOUT_EQ(:) = (XT_SIZE_MIN(:) + ZT_SKY(:))/2.
+ZTOUT_EQ(:) = (B%XT_SIZE_MIN(:) + ZT_SKY(:))/2.
 !
 ZU_ROOF(:) = 0.0
-DO JJ=1,NROOF_LAYER
-  ZU_ROOF(:) = ZU_ROOF(:) + XD_ROOF(:,JJ)/XTC_ROOF(:,JJ)
+DO JJ=1,TOP%NROOF_LAYER
+  ZU_ROOF(:) = ZU_ROOF(:) + T%XD_ROOF(:,JJ)/T%XTC_ROOF(:,JJ)
 END DO
 ZU_ROOF(:) = ZU_ROOF(:) + 1./10. + 1./25.         
 ZU_ROOF(:) = 1. / ZU_ROOF(:)
 !
 ZU_WALL(:) = 0.0
-DO JJ=1,NWALL_LAYER
-  ZU_WALL(:) = ZU_WALL(:) + XD_WALL(:,JJ)/XTC_WALL(:,JJ)
+DO JJ=1,TOP%NWALL_LAYER
+  ZU_WALL(:) = ZU_WALL(:) + T%XD_WALL(:,JJ)/T%XTC_WALL(:,JJ)
 END DO
 ZU_WALL(:) = ZU_WALL(:) + 1./10. + 1./25.         
 ZU_WALL(:) = 1. / ZU_WALL(:)
 !
 !   Heating Coil Capacity [W m-2(bld)]
-XCAP_SYS_HEAT(:) = ZU_WALL(:) * XWALL_O_BLD(:) * (XTHEAT_TARGET(:) - ZTOUT_EQ(:)) &
-                 + XU_WIN(:)  * XGLAZ_O_BLD(:)  * (XTHEAT_TARGET(:) - ZTOUT_EQ(:)) &
-                 + ZU_ROOF(:)              * (XTHEAT_TARGET(:) - ZTOUT_EQ(:)) &
-                 - XQIN(:) * XBLD_HEIGHT(:) / XFLOOR_HEIGHT(:)*             &
-                   (1 - XQIN_FLAT(:))                                        &
-                 + XINF(:) * XBLD_HEIGHT(:) / 3600* ZRHOA(:) * XCPD *       &
-                   (XTHEAT_TARGET(:) - XT_SIZE_MIN(:)) &
-                 + XV_VENT(:) * XBLD_HEIGHT(:) / 3600* ZRHOA(:) * XCPD *    &
-                   (XTHEAT_TARGET(:) - XT_SIZE_MIN(:))
+B%XCAP_SYS_HEAT(:) = ZU_WALL(:) * T%XWALL_O_BLD(:) * (B%XTHEAT_TARGET(:) - ZTOUT_EQ(:)) &
+                 + B%XU_WIN(:)  * B%XGLAZ_O_BLD(:)  * (B%XTHEAT_TARGET(:) - ZTOUT_EQ(:)) &
+                 + ZU_ROOF(:)              * (B%XTHEAT_TARGET(:) - ZTOUT_EQ(:)) &
+                 - B%XQIN(:) * T%XBLD_HEIGHT(:) / B%XFLOOR_HEIGHT(:)*             &
+                   (1 - B%XQIN_FLAT(:))                                        &
+                 + B%XINF(:) * T%XBLD_HEIGHT(:) / 3600* ZRHOA(:) * XCPD *       &
+                   (B%XTHEAT_TARGET(:) - B%XT_SIZE_MIN(:)) &
+                 + B%XV_VENT(:) * T%XBLD_HEIGHT(:) / 3600* ZRHOA(:) * XCPD *    &
+                   (B%XTHEAT_TARGET(:) - B%XT_SIZE_MIN(:))
 !
 !   Rated air flow rate [kg s-1 m-2(bld)]
-XM_SYS_RAT(:)   = XCAP_SYS_HEAT(:)/XCPD/(323.15 - XTHEAT_TARGET(:))
+B%XM_SYS_RAT(:)   = B%XCAP_SYS_HEAT(:)/XCPD/(323.15 - B%XTHEAT_TARGET(:))
 !
 !
 !*      B.     Autosize of the cooling system
@@ -495,32 +473,32 @@ XM_SYS_RAT(:)   = XCAP_SYS_HEAT(:)/XCPD/(323.15 - XTHEAT_TARGET(:))
 ZRHOA = 1.15
 !    Initial values
 ! initial value for air temperature and outdoor wall/roof/window/road temperature
-ZT_CANYON(:) = 10.7/2 * SIN(2*XPI/(24*3600) * (ZTIME+16*3600)) + (XT_SIZE_MAX(:)-10.7/2)
+ZT_CANYON(:) = 10.7/2 * SIN(2*XPI/(24*3600) * (ZTIME+16*3600)) + (B%XT_SIZE_MAX(:)-10.7/2)
 !! !ZTI_BLD   = 297.16 ! indoor air temperature
 DO JJ=1,KI
-    ZTI_BLD(JJ) = MAX(XTHEAT_TARGET(JJ),ZT_CANYON(JJ)) ! indoor air temperature
+    ZTI_BLD(JJ) = MAX(B%XTHEAT_TARGET(JJ),ZT_CANYON(JJ)) ! indoor air temperature
 ENDDO
-ZT_ROOF  (:,NROOF_LAYER)   = ZTI_BLD(:)   ! roof layers temperatures
-ZT_WALL_A(:,NWALL_LAYER)   = ZTI_BLD(:)   ! wall layers temperatures
-DO JJ=1,NFLOOR_LAYER
+ZT_ROOF  (:,TOP%NROOF_LAYER)   = ZTI_BLD(:)   ! roof layers temperatures
+ZT_WALL_A(:,TOP%NWALL_LAYER)   = ZTI_BLD(:)   ! wall layers temperatures
+DO JJ=1,BOP%NFLOOR_LAYER
    ZT_FLOOR(:,JJ)  = ZTI_BLD(:) ! building floor temperature
    ZT_MASS(:,JJ)   = ZTI_BLD(:) ! building mass temperature
 ENDDO
 
 !ROAD
-DO JJ=1,NROAD_LAYER
+DO JJ=1,TOP%NROAD_LAYER
    ZT_ROAD(:,JJ) = ZT_CANYON(:)
 ENDDO
 !ROOF
 ZT_ROOF(:,1) = ZT_CANYON(:)
 ZT1(:)=ZT_ROOF(:,1)
-ZTN(:)=ZT_ROOF(:,NROOF_LAYER)
-IF (NROOF_LAYER .GT. 2) CALL INTERP_PROFTWALL(ZT1, ZTN, XD_ROOF, ZT_ROOF)
+ZTN(:)=ZT_ROOF(:,TOP%NROOF_LAYER)
+IF (TOP%NROOF_LAYER .GT. 2) CALL INTERP_PROFTWALL(ZT1, ZTN, T%XD_ROOF, ZT_ROOF)
 !WALL
 ZT_WALL_A(:,1) = ZT_CANYON(:)
 ZT1(:)=ZT_WALL_A(:,1)
-ZTN(:)=ZT_WALL_A(:,NWALL_LAYER)
-IF (NWALL_LAYER .GT. 2) CALL INTERP_PROFTWALL(ZT1, ZTN, XD_WALL, ZT_WALL_A)
+ZTN(:)=ZT_WALL_A(:,TOP%NWALL_LAYER)
+IF (TOP%NWALL_LAYER .GT. 2) CALL INTERP_PROFTWALL(ZT1, ZTN, T%XD_WALL, ZT_WALL_A)
 ZT_WALL_B = ZT_WALL_A
 !OUTDOOR WINDOW TEMPERATURE
 ZT_WIN1(:) = ZT_CANYON(:)
@@ -533,7 +511,7 @@ ZT_SYS = ZTI_BLD
 ZQ_SYS = ZQI_BLD
 !
 !! GREGOIRE 13/03
-ZROAD         (:) = XROAD(:)+XGARDEN(:)
+ZROAD         (:) = T%XROAD(:)+T%XGARDEN(:)
 ZGARDEN       (:) = 0.
 ZALB_GARDEN   (:) = 0.
 ZALB_GREENROOF(:) = 0.
@@ -558,14 +536,14 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !
 !   Daily outdoor air temperature cycle
     ZT_CANYON(:) = 10.7/2 * SIN(2*XPI/(24*3600) * (ZTIME+16*3600))  &
-              + (XT_SIZE_MAX(:)-10.7/2)
+              + (B%XT_SIZE_MAX(:)-10.7/2)
     ZTA(:) = ZT_CANYON(:)
 !
 !
 !*      B.1     Solar radiation
 !               ---------------
 !
-    CALL SUNPOS(ISIZE_OMP, JPYEAR, IMONTH, IDAY, ZTIME, XLON, XLAT, ZTSUN, ZZENITH, ZAZIM)
+    CALL SUNPOS(ISIZE_OMP, JPYEAR, IMONTH, IDAY, ZTIME, TG%XLON, TG%XLAT, ZTSUN, ZZENITH, ZAZIM)
 !
     CALL SW_DAYCYCLE(KI, ZZENITH, ZTOT_SW)
 !
@@ -579,18 +557,18 @@ DO JFORC_STEP= 1,INB_STEP_ATM
     END WHERE
 
 !
-    CALL URBAN_SOLAR_ABS(YBEM, CROAD_DIR, CWALL_OPT,               &
+    CALL URBAN_SOLAR_ABS(YBEM, TOP%CROAD_DIR, TOP%CWALL_OPT,               &
                      ZDIR_SW, ZSCA_SW, ZZENITH, ZAZIM,             &
-                     XBLD, ZGARDEN, XROAD_DIR, XROAD, XGREENROOF,  &
-                     XWALL_O_HOR, XCAN_HW_RATIO,                   &
-                     XALB_ROOF,                                    &
-                     XALB_ROAD, XSVF_ROAD, XALB_WALL, XSVF_WALL,   &
+                     T%XBLD, ZGARDEN, T%XROAD_DIR, T%XROAD, T%XGREENROOF,  &
+                     T%XWALL_O_HOR, T%XCAN_HW_RATIO,                   &
+                     T%XALB_ROOF,                                    &
+                     T%XALB_ROAD, T%XSVF_ROAD, T%XALB_WALL, T%XSVF_WALL,   &
                      ZFRAC_PANEL, ZALB_PANEL,                      &
                      ZALB_GARDEN, ZSVF_GARDEN,                     &
                      ZALB_GREENROOF,                               &
                      ZASNOW_ROOF, ZASNOW_ROAD,                     &
                      ZDN_ROOF, ZDF_ROOF, ZDN_ROAD, ZDF_ROAD,       &
-                     XGR, XABS_WIN, XSHGC, XSHGC_SH, XALB_WIN,     &                     
+                     B%XGR, B%XABS_WIN, B%XSHGC, B%XSHGC_SH, B%XALB_WIN,     &                     
                      ZABS_SW_ROOF, ZABS_SW_ROAD,                   &
                      ZABS_SW_WALL_A, ZABS_SW_WALL_B,               &
                      ZABS_SW_GARDEN, ZABS_SW_GREENROOF,            &
@@ -601,7 +579,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
                      ZREC_SW_GARDEN, ZREC_SW_ROOF,                 &
                      ZDIR_ALB_TOWN,ZSCA_ALB_TOWN,                  &
                      ZSW_RAD_GARDEN, ZABS_SW_WIN, ZREC_SW_WIN,     &
-                     XTRAN_WIN,                                    &
+                     B%XTRAN_WIN,                                    &
                      ZREF_SW_GRND, ZREF_SW_FAC, ZTR_SW_WIN,        &
                      ZE_SHADING, GSHAD_DAY, GSHADE                 )
 !
@@ -609,9 +587,9 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !*      B.2     LW properties
 !               -------------
 !
-   CALL URBAN_LW_COEF(XGR, XBLD, ZLW_RAD,                                &
-                      XEMIS_ROAD, XSVF_ROAD, XEMIS_WALL, XSVF_WALL,      &
-                      ZEMIS_GARDEN, XROAD, ZGARDEN,                      &
+   CALL URBAN_LW_COEF(B%XGR, T%XBLD, ZLW_RAD,                                &
+                      T%XEMIS_ROAD, T%XSVF_ROAD, T%XEMIS_WALL, T%XSVF_WALL,      &
+                      ZEMIS_GARDEN, T%XROAD, ZGARDEN,                      &
                       ZESNOW_ROAD,                                       &
                       ZTSSNOW_ROAD, ZT_WALL_A(:,1), ZT_WALL_B(:,1),      &
                       ZT_ROAD(:,1), ZTS_GARDEN, ZT_WIN1,                 &  
@@ -630,8 +608,8 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !*      B.3     TEB simulation
 !               -------------
 !
-    CALL TEB  (HZ0H, HIMPLICIT_WIND, CWALL_OPT, YBEM,                 &
-             TTIME, ZTSUN,                                            &
+    CALL TEB  (HZ0H, HIMPLICIT_WIND, TOP%CWALL_OPT, YBEM,                 &
+             TOP%TTIME, ZTSUN,                                            &
              ZT_CANYON, ZQ_CANYON, ZU_CANYON,                         &
              ZT_CANYON, ZQ_CANYON, ZU_CANYON, ZZ_LOWCAN, ZTI_BLD,     &
              ZT_ROOF, ZT_ROAD, ZT_WALL_A, ZT_WALL_B,                  &
@@ -644,15 +622,15 @@ DO JFORC_STEP= 1,INB_STEP_ATM
              ZPEW_A_COEF, ZPEW_B_COEF,                                &
              ZPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, ZRHOA, ZLW_RAD,        &
              ZRR, ZSR, ZZREF, ZZREF, ZU_CANYON,                       &
-             XH_TRAFFIC, XLE_TRAFFIC, XH_INDUSTRY, XLE_INDUSTRY,      &
-             PPTSTEP, XZ0_TOWN, XBLD, ZGARDEN, XROAD, XGREENROOF,     &
-             XBLD_HEIGHT, XWALL_O_HOR, XCAN_HW_RATIO, XWALL_O_GRND,   &
+             T%XH_TRAFFIC, T%XLE_TRAFFIC, T%XH_INDUSTRY, T%XLE_INDUSTRY,      &
+             PPTSTEP, T%XZ0_TOWN, T%XBLD, ZGARDEN, T%XROAD, T%XGREENROOF,     &
+             T%XBLD_HEIGHT, T%XWALL_O_HOR, T%XCAN_HW_RATIO, T%XWALL_O_GRND,   &
              ZDF_ROOF, ZDN_ROOF, ZDF_ROAD,                            &
              ZDN_ROAD, ZQSAT_ROOF, ZQSAT_ROAD, ZDELT_ROOF, ZDELT_ROAD,&
-             XEMIS_ROOF, XHC_ROOF, XTC_ROOF, XD_ROOF,                 &
-             XEMIS_ROAD, XHC_ROAD, XTC_ROAD,                          &
-             XD_ROAD, XEMIS_WALL, ZTS_GARDEN,                         &
-             XHC_WALL, XTC_WALL, XD_WALL, ZRN_ROOF, ZH_ROOF, ZLE_ROOF,&
+             T%XEMIS_ROOF, T%XHC_ROOF, T%XTC_ROOF, T%XD_ROOF,                 &
+             T%XEMIS_ROAD, T%XHC_ROAD, T%XTC_ROAD,                          &
+             T%XD_ROAD, T%XEMIS_WALL, ZTS_GARDEN,                         &
+             T%XHC_WALL, T%XTC_WALL, T%XD_WALL, ZRN_ROOF, ZH_ROOF, ZLE_ROOF,&
              ZLEW_ROOF, ZGFLUX_ROOF, ZRUNOFF_ROOF,                    &
              ZRN_GREENROOF, ZH_GREENROOF, ZLE_GREENROOF,              &
              ZGFLUX_GREENROOF, ZUW_GREENROOF,                         &
@@ -690,24 +668,24 @@ DO JFORC_STEP= 1,INB_STEP_ATM
              ZLW_R_TO_WIN, ZLW_S_TO_WIN, ZLW_WIN_TO_WA, ZLW_WIN_TO_WB,&
              ZLW_WIN_TO_R, ZLW_WIN_TO_NR,                             &
              YNATVENT,                                                &
-             YCOOL_COIL, ZF_WATER_COND, YHEAT_COIL, LAUTOSIZE,        &
+             YCOOL_COIL, ZF_WATER_COND, YHEAT_COIL, BOP%LAUTOSIZE,        &
              IDAY, ZAUX_MAX, ZT_FLOOR, ZT_MASS, ZH_BLD_COOL,          &
              ZT_BLD_COOL, ZH_BLD_HEAT, ZLE_BLD_COOL, ZLE_BLD_HEAT,    &
-             ZH_WASTE, ZLE_WASTE, XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT,&
-             XQIN, XQIN_FRAD, XQIN_FLAT, XGR, XEFF_HEAT,              &
-             XINF, XTCOOL_TARGET, XTHEAT_TARGET, XHR_TARGET, ZT_WIN2, &
-             ZQI_BLD, XV_VENT, XCAP_SYS_HEAT, XCAP_SYS_RAT, XT_ADP,   &
-             XM_SYS_RAT, XCOP_RAT, ZCAP_SYS, ZM_SYS, ZCOP, ZQ_SYS,    &
-             ZT_SYS, ZTR_SW_WIN, ZFAN_POWER, XHC_FLOOR, XTC_FLOOR,    &
-             XD_FLOOR, ZT_WIN1, ZABS_SW_WIN, ZABS_LW_WIN,             &
-             XUGG_WIN, ZEMIT_LW_FAC,                                  &
+             ZH_WASTE, ZLE_WASTE, B%XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT,&
+             B%XQIN, B%XQIN_FRAD, B%XQIN_FLAT, B%XGR, B%XEFF_HEAT,              &
+             B%XINF, B%XTCOOL_TARGET, B%XTHEAT_TARGET, B%XHR_TARGET, ZT_WIN2, &
+             ZQI_BLD, B%XV_VENT, B%XCAP_SYS_HEAT, B%XCAP_SYS_RAT, B%XT_ADP,   &
+             B%XM_SYS_RAT, B%XCOP_RAT, ZCAP_SYS, ZM_SYS, ZCOP, ZQ_SYS,    &
+             ZT_SYS, ZTR_SW_WIN, ZFAN_POWER, B%XHC_FLOOR, B%XTC_FLOOR,    &
+             B%XD_FLOOR, ZT_WIN1, ZABS_SW_WIN, ZABS_LW_WIN,             &
+             B%XUGG_WIN, ZEMIT_LW_FAC,                                  &
              ZEMIT_LW_ROAD, ZT_RAD_IND, ZHU_BLD, ZTIME, ZE_SHADING,    &
-             GNATVENT_NIGHT(:), XN_FLOOR, XWALL_O_BLD, XGLAZ_O_BLD,    &
-             XMASS_O_BLD, XFLOOR_HW_RATIO, XF_FLOOR_MASS, XF_FLOOR_WALL, &
-             XF_FLOOR_WIN, XF_FLOOR_ROOF, XF_WALL_FLOOR, XF_WALL_MASS, &
-             XF_WALL_WIN, XF_WIN_FLOOR, XF_WIN_MASS, XF_WIN_WALL,      &
-             XF_MASS_FLOOR, XF_MASS_WALL, XF_MASS_WIN, GCANOPY, YCH_BEM, &
-             XROUGH_ROOF, XROUGH_WALL, XF_WIN_WIN,                     &
+             GNATVENT_NIGHT(:), B%XN_FLOOR, T%XWALL_O_BLD, B%XGLAZ_O_BLD,    &
+             B%XMASS_O_BLD, B%XFLOOR_HW_RATIO, B%XF_FLOOR_MASS, B%XF_FLOOR_WALL, &
+             B%XF_FLOOR_WIN, B%XF_FLOOR_ROOF, B%XF_WALL_FLOOR, B%XF_WALL_MASS, &
+             B%XF_WALL_WIN, B%XF_WIN_FLOOR, B%XF_WIN_MASS, B%XF_WIN_WALL,      &
+             B%XF_MASS_FLOOR, B%XF_MASS_WALL, B%XF_MASS_WIN, GCANOPY, YCH_BEM, &
+             T%XROUGH_ROOF, T%XROUGH_WALL, B%XF_WIN_WIN,                     &
              GPAR_RD_IRRIG, ZRD_START_MONTH, ZRD_END_MONTH,            &
              ZRD_START_HOUR, ZRD_END_HOUR, ZRD_24H_IRRIG, ZIRRIG_ROAD  )
 ! 
@@ -733,14 +711,14 @@ WRITE(KLUOUT,*) '    --------------------------------'
 WRITE(KLUOUT,*) '      HVAC AUTOSIZE CALCULATIONS '
 WRITE(KLUOUT,*) ' '
 WRITE(KLUOUT,*) '    Rated mass flow rate:'
-WRITE(KLUOUT,*) '    ',MAXVAL(XM_SYS_RAT), 'kg s-1 m-2(bld)'
-WRITE(KLUOUT,*) '    ',MINVAL(XM_SYS_RAT), 'kg s-1 m-2(bld)'
+WRITE(KLUOUT,*) '    ',MAXVAL(B%XM_SYS_RAT), 'kg s-1 m-2(bld)'
+WRITE(KLUOUT,*) '    ',MINVAL(B%XM_SYS_RAT), 'kg s-1 m-2(bld)'
 WRITE(KLUOUT,*) '    Rated cooling system capacity:'
-WRITE(KLUOUT,*) '    ',MAXVAL(XCAP_SYS_RAT), 'W m-2(bld)'
-WRITE(KLUOUT,*) '    ',MINVAL(XCAP_SYS_RAT), 'W m-2(bld)'
+WRITE(KLUOUT,*) '    ',MAXVAL(B%XCAP_SYS_RAT), 'W m-2(bld)'
+WRITE(KLUOUT,*) '    ',MINVAL(B%XCAP_SYS_RAT), 'W m-2(bld)'
 WRITE(KLUOUT,*) '    Rated heating sysem capacity:'
-WRITE(KLUOUT,*) '    ',MAXVAL(XCAP_SYS_HEAT), 'W m-2(bld)'
-WRITE(KLUOUT,*) '    ',MINVAL(XCAP_SYS_HEAT), 'W m-2(bld)'
+WRITE(KLUOUT,*) '    ',MAXVAL(B%XCAP_SYS_HEAT), 'W m-2(bld)'
+WRITE(KLUOUT,*) '    ',MINVAL(B%XCAP_SYS_HEAT), 'W m-2(bld)'
 WRITE(KLUOUT,*) '    --------------------------------'
 WRITE(KLUOUT,*) ' '
 IF (LHOOK) CALL DR_HOOK('HVAC_AUTOSIZE',1,ZHOOK_HANDLE)

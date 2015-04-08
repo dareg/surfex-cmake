@@ -39,12 +39,7 @@
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_RN, XAVG_H, XAVG_LE, XAVG_GFLUX, &
-                                   XAVG_T2M, XAVG_Q2M, XAVG_HU2M,        &
-                                   XAVG_ZON10M, XAVG_MER10M, XAVG_CD,    &
-                                   LSURF_BUDGET, N2M, XAVG_LEI, LCOEF,   &
-                                   XAVG_LWD, XAVG_LWU, XAVG_SWD,         &
-                                   XAVG_SWU, XAVG_EVAP, XAVG_SUBL
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -84,16 +79,16 @@ IF (LHOOK) CALL DR_HOOK('GET_FLUX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LSURF_BUDGET)      THEN 
-        PRN       = XAVG_RN      
-        PH        = XAVG_H  
-        PLE       = XAVG_LE 
-        PLEI      = XAVG_LEI 
-        PGFLUX    = XAVG_GFLUX 
-        PSURFLWNET= XAVG_LWD-XAVG_LWU
-        PSURFSWNET= XAVG_SWD-XAVG_SWU
-        PEVAP     = XAVG_EVAP
-        PSUBL     = XAVG_SUBL
+IF (DGU%LSURF_BUDGET)      THEN 
+        PRN       = DGU%XAVG_RN      
+        PH        = DGU%XAVG_H  
+        PLE       = DGU%XAVG_LE 
+        PLEI      = DGU%XAVG_LEI 
+        PGFLUX    = DGU%XAVG_GFLUX 
+        PSURFLWNET= DGU%XAVG_LWD-DGU%XAVG_LWU
+        PSURFSWNET= DGU%XAVG_SWD-DGU%XAVG_SWU
+        PEVAP     = DGU%XAVG_EVAP
+        PSUBL     = DGU%XAVG_SUBL
    ELSE 
         PRN       = XUNDEF
         PH        = XUNDEF
@@ -106,12 +101,12 @@ IF (LSURF_BUDGET)      THEN
         PSUBL     = XUNDEF        
 ENDIF           
 !
-IF (N2M>0)      THEN 
-        PT2M      = XAVG_T2M
-        PQ2M      = XAVG_Q2M
-        PHU2M     = XAVG_HU2M
-        PZON10M   = XAVG_ZON10M
-        PMER10M   = XAVG_MER10M
+IF (DGU%N2M>0)      THEN 
+        PT2M      = DGU%XAVG_T2M
+        PQ2M      = DGU%XAVG_Q2M
+        PHU2M     = DGU%XAVG_HU2M
+        PZON10M   = DGU%XAVG_ZON10M
+        PMER10M   = DGU%XAVG_MER10M
    ELSE 
         PT2M     = XUNDEF
         PQ2M     = XUNDEF
@@ -120,8 +115,8 @@ IF (N2M>0)      THEN
         PMER10M  = XUNDEF
 ENDIF   
 !
-IF (LCOEF) THEN
-  PCD      = XAVG_CD
+IF (DGU%LCOEF) THEN
+  PCD      = DGU%XAVG_CD
 ELSE
   PCD      = XUNDEF
 ENDIF

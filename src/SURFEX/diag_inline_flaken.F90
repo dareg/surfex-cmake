@@ -38,16 +38,8 @@
 USE MODD_CSTS,         ONLY : XTT
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_SFX_OASIS,    ONLY : LCPL_LAKE
-USE MODD_FLAKE_n,      ONLY : LSBL
-USE MODD_DIAG_FLAKE_n, ONLY : N2M, LSURF_BUDGET, LCOEF, LSURF_VARS,   &
-                                  XT2M, XQ2M, XHU2M, XZON10M, XMER10M,  &
-                                  XRN, XH, XLE, XLEI, XGFLUX, XRI, XCD, &
-                                  XCH, XCE, XZ0, XZ0H, XQS, XSWD, XSWU, &
-                                  XLWD, XLWU, XSWBD, XSWBU, XFMU, XFMV, &
-                                  LSURF_BUDGETC, XT2M_MIN, XT2M_MAX,    &
-                                  XDIAG_TS, XHU2M_MIN, XHU2M_MAX,       &
-                                  XWIND10M, XWIND10M_MAX, XEVAP, XSUBL, &
-                                  XALBT, XSWE
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -112,98 +104,98 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_FLAKE_N',0,ZHOOK_HANDLE)
 !
-XDIAG_TS(:) = PTS(:)
+DGF%XDIAG_TS(:) = PTS(:)
 !
-IF (.NOT. LSBL) THEN
+IF (.NOT. F%LSBL) THEN
 !
-  IF (N2M==1) THEN
+  IF (DGF%N2M==1) THEN
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
                      PSFTH, PSFTQ, PSFZON, PSFMER,                       &
-                     XT2M, XQ2M, XHU2M, XZON10M, XMER10M                       )  
-  ELSE IF (N2M==2) THEN
+                     DGF%XT2M, DGF%XQ2M, DGF%XHU2M, DGF%XZON10M, DGF%XMER10M                       )  
+  ELSE IF (DGF%N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                   PCD, PCH, PRI,                   &
                   PTS, PHU, PZ0H, ZH,              &
-                  XT2M, XQ2M, XHU2M                )  
+                  DGF%XT2M, DGF%XQ2M, DGF%XHU2M                )  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,             &
                     PCD, PCDN, PRI, ZH,            &
-                    XZON10M, XMER10M               )  
+                    DGF%XZON10M, DGF%XMER10M               )  
   END IF
 !
-  IF (N2M>=1) THEN
+  IF (DGF%N2M>=1) THEN
     !
-    XT2M_MIN(:) = MIN(XT2M_MIN(:),XT2M(:))
-    XT2M_MAX(:) = MAX(XT2M_MAX(:),XT2M(:))
+    DGF%XT2M_MIN(:) = MIN(DGF%XT2M_MIN(:),DGF%XT2M(:))
+    DGF%XT2M_MAX(:) = MAX(DGF%XT2M_MAX(:),DGF%XT2M(:))
     !
-    XHU2M_MIN(:) = MIN(XHU2M_MIN(:),XHU2M(:))
-    XHU2M_MAX(:) = MAX(XHU2M_MAX(:),XHU2M(:))
+    DGF%XHU2M_MIN(:) = MIN(DGF%XHU2M_MIN(:),DGF%XHU2M(:))
+    DGF%XHU2M_MAX(:) = MAX(DGF%XHU2M_MAX(:),DGF%XHU2M(:))
     !
-    XWIND10M(:) = SQRT(XZON10M(:)**2+XMER10M(:)**2)
-    XWIND10M_MAX(:) = MAX(XWIND10M_MAX(:),XWIND10M(:))
+    DGF%XWIND10M(:) = SQRT(DGF%XZON10M(:)**2+DGF%XMER10M(:)**2)
+    DGF%XWIND10M_MAX(:) = MAX(DGF%XWIND10M_MAX(:),DGF%XWIND10M(:))
     !
     !* Richardson number
-    XRI = PRI
+    DGF%XRI = PRI
     !
   ENDIF
 !
 ELSE
   !
-  IF (N2M>=1) THEN
-    XT2M    = XUNDEF
-    XQ2M    = XUNDEF
-    XHU2M   = XUNDEF
-    XZON10M = XUNDEF
-    XMER10M = XUNDEF
-    XRI     = PRI
+  IF (DGF%N2M>=1) THEN
+    DGF%XT2M    = XUNDEF
+    DGF%XQ2M    = XUNDEF
+    DGF%XHU2M   = XUNDEF
+    DGF%XZON10M = XUNDEF
+    DGF%XMER10M = XUNDEF
+    DGF%XRI     = PRI
   ENDIF
 ENDIF
 !
-IF (LSURF_BUDGET.OR.LSURF_BUDGETC) THEN
+IF (DGF%LSURF_BUDGET.OR.DGF%LSURF_BUDGETC) THEN
   !
-  XLE  (:) = PLE  (:)
-  XLEI (:) = PLEI (:)
-  XEVAP(:) = PSFTQ(:)
-  XSUBL(:) = PSUBL(:)
-  XALBT(:) = PALB (:)
-  XSWE (:) = PSWE (:)
+  DGF%XLE  (:) = PLE  (:)
+  DGF%XLEI (:) = PLEI (:)
+  DGF%XEVAP(:) = PSFTQ(:)
+  DGF%XSUBL(:) = PSUBL(:)
+  DGF%XALBT(:) = PALB (:)
+  DGF%XSWE (:) = PSWE (:)
   !
   CALL  DIAG_SURF_BUDGET_FLAKE ( PRHOA, PSFTH,                          &
                                   PDIR_SW, PSCA_SW, PLW,                &
                                   PDIR_ALB, PSCA_ALB, PLWUP,            &
-                                  PSFZON, PSFMER, XLE, XRN, XH, XGFLUX, &
-                                  XSWD, XSWU, XSWBD, XSWBU, XLWD, XLWU, &
-                                  XFMU, XFMV )  
+                                  PSFZON, PSFMER, DGF%XLE, DGF%XRN, DGF%XH, DGF%XGFLUX, &
+                                  DGF%XSWD, DGF%XSWU, DGF%XSWBD, DGF%XSWBU, DGF%XLWD, DGF%XLWU, &
+                                  DGF%XFMU, DGF%XFMV )  
   !
 END IF
 !
-IF(LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_FLAKE(PTSTEP, XRN, XH, XLE, XLEI, XGFLUX,  &
-                                 XSWD, XSWU, XLWD, XLWU, XFMU, XFMV,&
-                                 XEVAP, XSUBL                       )  
+IF(DGF%LSURF_BUDGETC)THEN
+  CALL DIAG_SURF_BUDGETC_FLAKE(PTSTEP, DGF%XRN, DGF%XH, DGF%XLE, DGF%XLEI, DGF%XGFLUX,  &
+                                 DGF%XSWD, DGF%XSWU, DGF%XLWD, DGF%XLWU, DGF%XFMU, DGF%XFMV,&
+                                 DGF%XEVAP, DGF%XSUBL                       )  
 ENDIF
 !
-IF (LCOEF) THEN
+IF (DGF%LCOEF) THEN
   !
   !* Transfer coefficients
   !
-  XCD = PCD
-  XCH = PCH
-  XCE = PCH
+  DGF%XCD = PCD
+  DGF%XCH = PCH
+  DGF%XCE = PCH
   !
   !* Roughness lengths
   !
-  XZ0  = PZ0
-  XZ0H = PZ0H
+  DGF%XZ0  = PZ0
+  DGF%XZ0H = PZ0H
   !
 END IF
 !
-IF (LSURF_VARS) THEN
+IF (DGF%LSURF_VARS) THEN
   !
   !* Humidity at saturation
   !
-  XQS = PQSAT
+  DGF%XQS = PQSAT
   !
 END IF
 !

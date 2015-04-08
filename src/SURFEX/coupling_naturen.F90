@@ -33,7 +33,7 @@ SUBROUTINE COUPLING_NATURE_n(HPROGRAM, HCOUPLING, PTIMEC,                       
 !!      P. Le Moigne 03/2015 tsz0 time management
 !!--------------------------------------------------------------------
 !
-USE MODD_SURF_ATM_n, ONLY : CNATURE
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -124,7 +124,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_NATURE_N',0,ZHOOK_HANDLE)
-IF (CNATURE=='ISBA  ') THEN
+IF (U%CNATURE=='ISBA  ') THEN
   CALL COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                                             &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI,KSV,KSW,                                                                 &
@@ -136,7 +136,7 @@ IF (CNATURE=='ISBA  ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CNATURE=='TSZ0  ') THEN
+ELSE IF (U%CNATURE=='TSZ0  ') THEN
   CALL COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                                  &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIMEC,                                        &
                  KI,KSV,KSW,                                                                 &
@@ -148,7 +148,7 @@ ELSE IF (CNATURE=='TSZ0  ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CNATURE=='FLUX  ') THEN
+ELSE IF (U%CNATURE=='FLUX  ') THEN
   CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI,KSV,KSW,                                                                 &
@@ -160,7 +160,7 @@ ELSE IF (CNATURE=='FLUX  ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CNATURE=='NONE  ') THEN
+ELSE IF (U%CNATURE=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.
   PSFTS = 0.

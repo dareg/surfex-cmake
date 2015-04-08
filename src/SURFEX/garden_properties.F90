@@ -31,14 +31,10 @@
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE MODD_TEB_VEG_n,         ONLY : CISBA, LTR_ML
-USE MODD_TEB_GARDEN_PGD_n,  ONLY : XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,      &
-                                   XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : XVEG, XLAI, XZ0, XEMIS,                &
-                                       XALBNIR, XALBVIS, XALBUV
-USE MODD_TEB_GARDEN_n,      ONLY : TSNOW, XTG, XPSN, XPSNV, XPSNG, XPSNV_A,   &
-                                   XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,     &
-                                   XSNOWFREE_ALB  
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
 !
 USE MODI_ISBA_PROPERTIES
 USE MODI_FLAG_TEB_GARDEN_n
@@ -103,26 +99,26 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !*      2.     Computes several properties of gardens
 !              --------------------------------------
 !
- CALL ISBA_PROPERTIES(CISBA, LTR_ML, TSNOW, 1,                            &
+ CALL ISBA_PROPERTIES(TVG%CISBA, TVG%LTR_ML, TGD%TSNOW, 1,                            &
                      PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                   &
-                     XALBNIR(:), XALBVIS(:), XALBUV(:),                  &
-                     XALBNIR_VEG(:), XALBVIS_VEG(:), XALBUV_VEG(:),      &
-                     XALBNIR_SOIL(:), XALBVIS_SOIL(:), XALBUV_SOIL(:),   &
-                     XVEG(:), XLAI(:), XZ0(:), XEMIS(:),XTG(:,1),          &
+                     TGDPE%XALBNIR(:), TGDPE%XALBVIS(:), TGDPE%XALBUV(:),                  &
+                     TGDP%XALBNIR_VEG(:), TGDP%XALBVIS_VEG(:), TGDP%XALBUV_VEG(:),      &
+                     TGDP%XALBNIR_SOIL(:), TGDP%XALBVIS_SOIL(:), TGDP%XALBUV_SOIL(:),   &
+                     TGDPE%XVEG(:), TGDPE%XLAI(:), TGDPE%XZ0(:), TGDPE%XEMIS(:),TGD%XTG(:,1),          &
                      ZASNOW, ZANOSNOW, ZESNOW, ZENOSNOW, ZTSSNOW, ZTSNOSNOW,      &
-                     XSNOWFREE_ALB_VEG, XSNOWFREE_ALB_SOIL,                       &
+                     TGD%XSNOWFREE_ALB_VEG, TGD%XSNOWFREE_ALB_SOIL,                       &
                      ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, ZALBVIS_TSOIL,    &
-                     XPSN(:), XPSNV_A(:), XPSNG(:), XPSNV(:)          )  
+                     TGD%XPSN(:), TGD%XPSNV_A(:), TGD%XPSNG(:), TGD%XPSNV(:)          )  
 !
-XSNOWFREE_ALB = ZANOSNOW
+TGD%XSNOWFREE_ALB = ZANOSNOW
 !
 !* averaged albedo
-PALB =  XPSN(:) * ZASNOW              + (1.-XPSN(:)) * ZANOSNOW
+PALB =  TGD%XPSN(:) * ZASNOW              + (1.-TGD%XPSN(:)) * ZANOSNOW
 !* averaged emissivity
-PEMIS=  XPSN(:) * ZESNOW              + (1.-XPSN(:)) * ZENOSNOW
+PEMIS=  TGD%XPSN(:) * ZESNOW              + (1.-TGD%XPSN(:)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
-PTS  =((XPSN(:) * ZESNOW * ZTSSNOW**4 + (1.-XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+PTS  =((TGD%XPSN(:) * ZESNOW * ZTSSNOW**4 + (1.-TGD%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 !
 IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
 IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)

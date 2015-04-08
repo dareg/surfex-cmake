@@ -40,14 +40,8 @@
 USE MODD_CSTS, ONLY           : XPI, XTTSI, XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
-USE MODD_SEAFLUX_n,      ONLY : LHANDLE_SIC, CSEAICE_SCHEME,   &
-                                TGLT, XSST, XSIC,              &
-                                LINTERPOL_SIC, CINTERPOL_SIC,  &
-                                LINTERPOL_SIT, CINTERPOL_SIT,  &
-                                XSIC_MTH, XSIT_MTH,            &
-                                XFSIC, XFSIT, XSEABATHY, TTIME,&
-                                XTICE, XICE_ALB, XUMER, XVMER
-USE MODD_SEAFLUX_GRID_n, ONLY : XLAT, XLON, XMESH_SIZE
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 USE MODD_WATER_PAR,      ONLY : XALBSEAICE
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
@@ -99,16 +93,16 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',0,ZHOOK_HANDLE)
 !
-IF (.NOT.LHANDLE_SIC) THEN 
-   ALLOCATE(XSIC(0))
+IF (.NOT.S%LHANDLE_SIC) THEN 
+   ALLOCATE(S%XSIC(0))
    IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',1,ZHOOK_HANDLE)
    RETURN
 ENDIF
 !
 nx=KLU
 !
-ALLOCATE(XSIC(KLU))
-XSIC(:)=XUNDEF
+ALLOCATE(S%XSIC(KLU))
+S%XSIC(:)=XUNDEF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -116,29 +110,29 @@ XSIC(:)=XUNDEF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-IF(LINTERPOL_SIC)THEN
+IF(S%LINTERPOL_SIC)THEN
    !
-   ALLOCATE(XFSIC(KLU))
+   ALLOCATE(S%XFSIC(KLU))
    !
    ! Precedent, Current and Next Monthly SIC
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SIC
-   IF(CINTERPOL_SIC=='ANNUAL')INMTH=14
+   IF(S%CINTERPOL_SIC=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIC_MTH(KLU,INMTH))
+   ALLOCATE(S%XSIC_MTH(KLU,INMTH))
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIC_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(HPROGRAM,YRECFM,XSIC_MTH(:,JMTH),IRESP)
-      CALL CHECK_SEAICE(YRECFM,XSIC_MTH(:,JMTH))
+      CALL READ_SURF(HPROGRAM,YRECFM,S%XSIC_MTH(:,JMTH),IRESP)
+      CALL CHECK_SEAICE(YRECFM,S%XSIC_MTH(:,JMTH))
    ENDDO
    !
-   CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'C',XFSIC)
+   CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
    !
 ELSE
    ! 
-   ALLOCATE(XFSIC(0))
-   ALLOCATE(XSIC_MTH(0,0))
+   ALLOCATE(S%XFSIC(0))
+   ALLOCATE(S%XSIC_MTH(0,0))
    !
 ENDIF
 !
@@ -148,25 +142,25 @@ ENDIF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-CALL READ_SURF(HPROGRAM,'SEAICE_SCHEM',CSEAICE_SCHEME,IRESP)
+CALL READ_SURF(HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP)
 !
-IF (TRIM(CSEAICE_SCHEME) == 'GELATO' .AND. (NBLOCKTOT>1)) THEN 
+IF (TRIM(S%CSEAICE_SCHEME) == 'GELATO' .AND. (NBLOCKTOT>1)) THEN 
     CALL ABOR1_SFX("READ_SEAICE_n: GELATO CANNOT YET RUN MULTI-THREAD")
 ENDIF
 !
-IF (TRIM(CSEAICE_SCHEME) == 'NONE' ) THEN
-   IF (LINTERPOL_SIC ) THEN
-      XTICE=XSST
-      XSIC=XFSIC
-      XICE_ALB=XALBSEAICE           
+IF (TRIM(S%CSEAICE_SCHEME) == 'NONE' ) THEN
+   IF (S%LINTERPOL_SIC ) THEN
+      S%XTICE=S%XSST
+      S%XSIC=S%XFSIC
+      S%XICE_ALB=XALBSEAICE           
       IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',1,ZHOOK_HANDLE)
       RETURN
    ELSE
       CALL ABOR1_SFX("READ_SEAICE_n: MUST HAVE CINTERPOL_SIC /= NONE WITH CSEAICE_SCHEME == NONE ") 
    ENDIF
 ELSE 
-   IF (TRIM(CSEAICE_SCHEME) /= 'GELATO') THEN 
-      WRITE(KLUOUT,*)'READ_SEAICE_n:CSEAICE_SCHEME read in PREP, ',CSEAICE_SCHEME,', is not yet handled'
+   IF (TRIM(S%CSEAICE_SCHEME) /= 'GELATO') THEN 
+      WRITE(KLUOUT,*)'READ_SEAICE_n:CSEAICE_SCHEME read in PREP, ',S%CSEAICE_SCHEME,', is not yet handled'
       CALL ABOR1_SFX("READ_SEAICE_n:CAN ONLY HANDLE GELATO SEAICE MODEL YET (and not the one quoted in PREP)") 
    ENDIF
 ENDIF
@@ -194,7 +188,7 @@ nxglo=max(nxglo,1)
 !
 ny=1
 nyglo=1
-CALL GLTOOLS_ALLOC(TGLT)
+CALL GLTOOLS_ALLOC(S%TGLT)
 !
 !*       0.     Check dimensions : number of layers and ice categories
 !
@@ -211,7 +205,7 @@ END IF
 !
 !*       1.     (Semi-)prognostic fields with only space dimension(s) :
 !
-CALL READ_SURF(HPROGRAM,'ICEUSTAR',TGLT%ust(:,1),IRESP)
+CALL READ_SURF(HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
 !
 !*       2.     Prognostic fields with space and ice-category dimension(s) :
 !
@@ -219,23 +213,23 @@ DO JK=1,nt
    WRITE(YLVL,'(I2)') JK
    YCATEG='_'//ADJUSTL(YLVL)
    ! .. Read sea ice age for type JK
-   CALL READ_SURF(HPROGRAM,'ICEAGE'//YCATEG,TGLT%sit(JK,:,1)%age,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEAGE'//YCATEG,S%TGLT%sit(JK,:,1)%age,IRESP)
    ! .. Read melt pond volume for type JK
-   CALL READ_SURF(HPROGRAM,'ICEVMP'//YCATEG,TGLT%sit(JK,:,1)%vmp,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEVMP'//YCATEG,S%TGLT%sit(JK,:,1)%vmp,IRESP)
    ! .. Read sea ice surface albedo for type JK
-   CALL READ_SURF(HPROGRAM,'ICEASN'//YCATEG,TGLT%sit(JK,:,1)%asn,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEASN'//YCATEG,S%TGLT%sit(JK,:,1)%asn,IRESP)
    ! .. Read sea ice fraction for type JK
-   CALL READ_SURF(HPROGRAM,'ICEFSI'//YCATEG, TGLT%sit(JK,:,1)%fsi,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEFSI'//YCATEG, S%TGLT%sit(JK,:,1)%fsi,IRESP)
    ! .. Read sea ice thickness for type JK
-   CALL READ_SURF(HPROGRAM,'ICEHSI'//YCATEG, TGLT%sit(JK,:,1)%hsi,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEHSI'//YCATEG, S%TGLT%sit(JK,:,1)%hsi,IRESP)
    ! .. Read sea ice salinity for type JK
-   CALL READ_SURF(HPROGRAM,'ICESSI'//YCATEG, TGLT%sit(JK,:,1)%ssi,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICESSI'//YCATEG, S%TGLT%sit(JK,:,1)%ssi,IRESP)
    ! .. Read sea ice surface temperature for type JK
-   CALL READ_SURF(HPROGRAM,'ICETSF'//YCATEG, TGLT%sit(JK,:,1)%tsf,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICETSF'//YCATEG, S%TGLT%sit(JK,:,1)%tsf,IRESP)
    ! .. Read snow thickness for type JK
-   CALL READ_SURF(HPROGRAM,'ICEHSN'//YCATEG, TGLT%sit(JK,:,1)%hsn,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEHSN'//YCATEG, S%TGLT%sit(JK,:,1)%hsn,IRESP)
    ! .. Read snow density for type JK
-   CALL READ_SURF(HPROGRAM,'ICERSN'//YCATEG, TGLT%sit(JK,:,1)%rsn,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICERSN'//YCATEG, S%TGLT%sit(JK,:,1)%rsn,IRESP)
    !
    !*       3.     Prognostic fields with space, ice-category and layer dimensions :
    !
@@ -243,16 +237,16 @@ DO JK=1,nt
       WRITE(YLVL,'(I2)') JL
       YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)   
       ! .. Read sea ice vertical gltools_enthalpy profile for type JK and level JL  
-      CALL READ_SURF(HPROGRAM,'ICEH'//YLEVEL, TGLT%sil(JL,JK,:,1)%ent,IRESP)
+      CALL READ_SURF(HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP)
    END DO
 END DO
 !
 !    4.  Compute ice class existence boolean from ice fractions:
 !
-WHERE ( TGLT%sit(:,:,1)%fsi<epsil1 )
-   TGLT%sit(:,:,1)%esi = .FALSE. 
+WHERE ( S%TGLT%sit(:,:,1)%fsi<epsil1 )
+   S%TGLT%sit(:,:,1)%esi = .FALSE. 
 ELSEWHERE 
-   TGLT%sit(:,:,1)%esi = .TRUE. 
+   S%TGLT%sit(:,:,1)%esi = .TRUE. 
 ENDWHERE
 !
 !    4.1 Run original Gelato checks on values read in restart
@@ -261,15 +255,15 @@ ENDWHERE
 !
 DO JX=1,nx
    DO JL=1,nt 
-      IF ( TGLT%sit(JL,JX,1)%fsi<0. ) THEN
+      IF ( S%TGLT%sit(JL,JX,1)%fsi<0. ) THEN
          WRITE(KLUOUT,*)  &
               '**** WARNING **** Correcting problem in ice conc. < 0 at i=',  &
               1,' j=',JX,' k=',JL
-         TGLT%sit(JL,JX,1)%fsi = 0.
+         S%TGLT%sit(JL,JX,1)%fsi = 0.
       ENDIF
    END DO
    !
-   zfsit = SUM( TGLT%sit(:,JX,1)%fsi )
+   zfsit = SUM( S%TGLT%sit(:,JX,1)%fsi )
    !
    ! .. Detect total concentrations that exceed unity
    !
@@ -277,15 +271,15 @@ DO JX=1,nx
       WRITE(KLUOUT,*)  &
            '**** WARNING **** Correcting problem in total ice conc. >1 at i=',  &
            1,' j=',JX,' fsi=',zfsit
-      TGLT%sit(:,JX,1)%fsi = TGLT%sit(:,JX,1)%fsi / zfsit
+      S%TGLT%sit(:,JX,1)%fsi = S%TGLT%sit(:,JX,1)%fsi / zfsit
    ENDIF
    !
    ! .. Detect non zero concentrations but zero thickness (no consequence) 
    !
-   WHERE( TGLT%sit(:,JX,1)%fsi>epsil1 .AND. TGLT%sit(:,JX,1)%hsi<epsil1)
-      TGLT%sit(:,JX,1)%fsi=0.
-      TGLT%sit(:,JX,1)%hsi=0.
-      TGLT%sit(:,JX,1)%hsn=0.
+   WHERE( S%TGLT%sit(:,JX,1)%fsi>epsil1 .AND. S%TGLT%sit(:,JX,1)%hsi<epsil1)
+      S%TGLT%sit(:,JX,1)%fsi=0.
+      S%TGLT%sit(:,JX,1)%hsi=0.
+      S%TGLT%sit(:,JX,1)%hsn=0.
    ENDWHERE
    !
 END DO
@@ -294,29 +288,29 @@ END DO
 !
 !    All points of Surfex 1D grid in seaflux are sea points
 !
-TGLT%dom(:,1)%tmk=1
-TGLT%dom(:,1)%imk=1
+S%TGLT%dom(:,1)%tmk=1
+S%TGLT%dom(:,1)%imk=1
 !
 !    Masks for U- and V- grid point are not used
 !
-TGLT%dom(:,1)%umk=1
-TGLT%dom(:,1)%vmk=1
+S%TGLT%dom(:,1)%umk=1
+S%TGLT%dom(:,1)%vmk=1
 !
 !    lat,lon,srf are inherited from seaflux grid
 !
-TGLT%dom(:,1)%lon=XLON(:)*XPI/180.
-TGLT%dom(:,1)%lat=XLAT(:)*XPI/180.
+S%TGLT%dom(:,1)%lon=SG%XLON(:)*XPI/180.
+S%TGLT%dom(:,1)%lat=SG%XLAT(:)*XPI/180.
 !
 !    Except in Gelato dynamics, mesh lengths are used only to compute mesh area
 !    Hence, a simple setting can be used
 !
-TGLT%dom(:,1)%dxc=XMESH_SIZE(:)**0.5
-TGLT%dom(:,1)%dyc=TGLT%dom(:,1)%dxc
-TGLT%dom(:,1)%srf=XMESH_SIZE(:)
+S%TGLT%dom(:,1)%dxc=SG%XMESH_SIZE(:)**0.5
+S%TGLT%dom(:,1)%dyc=S%TGLT%dom(:,1)%dxc
+S%TGLT%dom(:,1)%srf=SG%XMESH_SIZE(:)
 !
 !    Surface of local and global ocean domain (ghost points are masked out)
 !
-xdomsrf = SUM( TGLT%dom(:,1)%srf, MASK=(TGLT%dom(:,1)%tmk==1) )
+xdomsrf = SUM( S%TGLT%dom(:,1)%srf, MASK=(S%TGLT%dom(:,1)%tmk==1) )
 xdomsrf_g = xdomsrf
 #if ! defined in_arpege
 CALL mpp_sum(xdomsrf_g) 
@@ -327,57 +321,57 @@ xdomsrf_g = MAX(xdomsrf_g, 1.e-9)
 !
 !    7. Initalize Gelato time parameters
 !
-TGLT%ind%beg=1
+S%TGLT%ind%beg=1
 !
 !   Dummy high value for end time. Implies only that Gelato won't output 
 !   its own format of run-long averaged diagnostics (which are useless 
 !   in Surfex diags logic) 
 !
-TGLT%ind%end=50000000 
+S%TGLT%ind%end=50000000 
 !
 !   8. Initalize Gelato bathymetry - change sign w.r.t Surfex
 !
-TGLT%bat(:,1)=-XSEABATHY
+S%TGLT%bat(:,1)=-S%XSEABATHY
 !
 !
 !* Sea ice thickness nudging data
 !
-IF(LINTERPOL_SIT)THEN
+IF(S%LINTERPOL_SIT)THEN
    !
-   ALLOCATE(XFSIT(KLU))
+   ALLOCATE(S%XFSIT(KLU))
    !  
    ! Precedent, Current and Next Monthly SIT
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SIT
-   IF(TRIM(CINTERPOL_SIT)=='ANNUAL')INMTH=14
+   IF(TRIM(S%CINTERPOL_SIT)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIT_MTH(KLU,INMTH))
+   ALLOCATE(S%XSIT_MTH(KLU,INMTH))
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIT_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(HPROGRAM,YRECFM,XSIT_MTH(:,JMTH),IRESP)
-      CALL CHECK_SEAICE(YRECFM,XSIT_MTH(:,JMTH))
+      CALL READ_SURF(HPROGRAM,YRECFM,S%XSIT_MTH(:,JMTH),IRESP)
+      CALL CHECK_SEAICE(YRECFM,S%XSIT_MTH(:,JMTH))
    ENDDO
    !
-   CALL INTERPOL_SST_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,'H',XFSIT)
+   CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
    !
 ELSE
    ! 
-   ALLOCATE(XFSIT(0))
-   ALLOCATE(XSIT_MTH(0,0))
+   ALLOCATE(S%XFSIT(0))
+   ALLOCATE(S%XSIT_MTH(0,0))
    !
 ENDIF
 !
 !! Initialize the coupling variables with 'snapshot' prognostic variables
 ! (for now, averaged over ice categories)  
 !
-CALL GLT_SNDATMF( TGLT, XTTSI - XTT )
-XSIC(:)     = TGLT%ice_atm(1,:,1)%fsi 
-XTICE(:)    = TGLT%ice_atm(1,:,1)%tsf 
-XICE_ALB(:) = TGLT%ice_atm(1,:,1)%alb 
+CALL GLT_SNDATMF( S%TGLT, XTTSI - XTT )
+S%XSIC(:)     = S%TGLT%ice_atm(1,:,1)%fsi 
+S%XTICE(:)    = S%TGLT%ice_atm(1,:,1)%tsf 
+S%XICE_ALB(:) = S%TGLT%ice_atm(1,:,1)%alb 
 !
 ! Must init ocean mixed layer temp with sensible value for getting correct diag for time step=0
-TGLT%oce_all(:,1)%tml=XSST(:)
+S%TGLT%oce_all(:,1)%tml=S%XSST(:)
 !
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',1,ZHOOK_HANDLE)
 !
@@ -387,7 +381,7 @@ CONTAINS
 !
 SUBROUTINE CHECK_SEAICE(HFIELD,PFIELD)
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : XLON, XLAT
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 IMPLICIT NONE
 !
@@ -410,7 +404,7 @@ DO JI=1,KLU
    IF(PFIELD(JI)>ZMAX.OR.PFIELD(JI)<ZMIN)THEN
       IERRC=IERRC+1
       WRITE(KLUOUT,*)'PROBLEM FIELD '//TRIM(HFIELD)//' =',PFIELD(JI),&
-                     'NOT REALISTIC AT LOCATION (LAT/LON)',XLAT(JI),XLON(JI)
+                     'NOT REALISTIC AT LOCATION (LAT/LON)',SG%XLAT(JI),SG%XLON(JI)
    ENDIF
 ENDDO
 !         

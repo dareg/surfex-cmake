@@ -38,7 +38,7 @@
 !
 USE MODD_PGD_GRID,       ONLY : NL
 !
-USE MODD_SURF_ATM_n,     ONLY : XNATURE
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, &
                                 XMIN_WORK, XMAX_WORK,     &
@@ -47,8 +47,7 @@ USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, &
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
-USE MODD_ISBA_n,         ONLY : CISBA,LCTI,XTI_MIN,XTI_MAX, &
-                                XTI_MEAN,XTI_STD,XTI_SKEW
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_SGH_PAR,        ONLY : XREGP, XREGA
 !
@@ -119,17 +118,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX',0,ZHOOK_HANDLE)
 IF(LEN_TRIM(HCTI)==0)THEN
 !
-  ALLOCATE(XTI_MIN (0))
-  ALLOCATE(XTI_MAX (0))
-  ALLOCATE(XTI_MEAN(0))
-  ALLOCATE(XTI_STD (0))
-  ALLOCATE(XTI_SKEW(0))
+  ALLOCATE(I%XTI_MIN (0))
+  ALLOCATE(I%XTI_MAX (0))
+  ALLOCATE(I%XTI_MEAN(0))
+  ALLOCATE(I%XTI_STD (0))
+  ALLOCATE(I%XTI_SKEW(0))
 !        
 !-------------------------------------------------------------------------------
 ELSE
 !-------------------------------------------------------------------------------
 !
-  LCTI = .TRUE.
+  I%LCTI = .TRUE.
 !
 !*    2.      Find LUOUT
 !             ----------
@@ -143,17 +142,17 @@ ELSE
 !*    3.      Allocations of statistics arrays
 !             --------------------------------
 !
-  ALLOCATE(XTI_MIN (KLU))
-  ALLOCATE(XTI_MAX (KLU))
-  ALLOCATE(XTI_MEAN(KLU))
-  ALLOCATE(XTI_STD (KLU))
-  ALLOCATE(XTI_SKEW(KLU))
+  ALLOCATE(I%XTI_MIN (KLU))
+  ALLOCATE(I%XTI_MAX (KLU))
+  ALLOCATE(I%XTI_MEAN(KLU))
+  ALLOCATE(I%XTI_STD (KLU))
+  ALLOCATE(I%XTI_SKEW(KLU))
 !
-  XTI_MIN (:) = XUNDEF
-  XTI_MAX (:) = XUNDEF
-  XTI_MEAN(:) = XUNDEF
-  XTI_STD (:) = XUNDEF
-  XTI_SKEW(:) = XUNDEF
+  I%XTI_MIN (:) = XUNDEF
+  I%XTI_MAX (:) = XUNDEF
+  I%XTI_MEAN(:) = XUNDEF
+  I%XTI_STD (:) = XUNDEF
+  I%XTI_SKEW(:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -255,7 +254,7 @@ ELSE
           NSIZE     (:) = 0
      ENDWHERE 
 !
-     WHERE(XNATURE(:)>0.0.AND.XSKEW_WORK(:)<=-8.0)
+     WHERE(U%XNATURE(:)>0.0.AND.XSKEW_WORK(:)<=-8.0)
           XMIN_WORK (:) = XUNDEF
           XMAX_WORK (:) = XUNDEF
           XMEAN_WORK(:) = XUNDEF
@@ -264,7 +263,7 @@ ELSE
           NSIZE     (:) = 0
      ENDWHERE             
 !
-     WHERE(XNATURE(:)==0.)
+     WHERE(U%XNATURE(:)==0.)
           XMIN_WORK (:) = XUNDEF
           XMAX_WORK (:) = XUNDEF
           XMEAN_WORK(:) = XUNDEF
@@ -365,10 +364,10 @@ ELSE
     ALLOCATE(ZLAT(NL))
     CALL GET_GRID_COORD(ILUOUT,PY=ZLAT)
 !
-    WHERE (XNATURE(:)==0..AND.NSIZE(:)==0) NSIZE(:) = -1
+    WHERE (U%XNATURE(:)==0..AND.NSIZE(:)==0) NSIZE(:) = -1
 !
 !   No Antarctic
-    WHERE(XNATURE(:)>0..AND.ZLAT(:)<-60.)
+    WHERE(U%XNATURE(:)>0..AND.ZLAT(:)<-60.)
           XMIN_WORK (:) = XUNDEF
           XMAX_WORK (:) = XUNDEF
           XMEAN_WORK(:) = XUNDEF
@@ -397,11 +396,11 @@ ELSE
 !*    11.     Asign parameters
 !             ----------------
 !
-  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,XTI_MIN)
-  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,XTI_MAX)
-  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,XTI_MEAN)
-  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,XTI_STD)
-  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,XTI_SKEW)
+  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,I%XTI_MIN)
+  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,I%XTI_MAX)
+  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,I%XTI_MEAN)
+  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,I%XTI_STD)
+  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,I%XTI_SKEW)
 !  
 !-------------------------------------------------------------------------------
 !

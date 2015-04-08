@@ -25,7 +25,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!     C. Lebeaupin  *Météo-France* 
+!!     C. Lebeaupin  *MÃ©tÃ©o-France* 
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -48,19 +48,16 @@
 !
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
-USE MODD_SEAFLUX_n, ONLY : XSEABATHY
-USE MODD_OCEAN_n
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_OCEAN_n, ONLY : O => OCEAN
 USE MODD_OCEAN_GRID_n
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 ! Module containing relaxation fields
-USE MODD_OCEAN_REL_n , ONLY : XSEAT_REL, XSEAS_REL, XTAU_REL, &
-                            LREL_CUR, LREL_TS, &
-                            XQCORR, LFLX_CORR, LDIAPYCNAL,&
-                            XSEAU_REL, XSEAV_REL
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
-USE MODD_SEAFLUX_GRID_n, ONLY :  XLAT
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -80,14 +77,14 @@ REAL, DIMENSION(:)  ,INTENT(OUT)    :: PSEATEMP! sea surface temperature (K)
 !*      0.2    declarations of local variables
 !
  COMPLEX, DIMENSION(NOCKMIN:NOCKMAX,2) :: ZUC           ! vecteur vent en ecriture complexe
- COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAI, ZBI, ZCI     !matrices pour resolution numérique
- COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAU, ZBU, ZCU, ZYU !matrices pour resolution numérique
+ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAI, ZBI, ZCI     !matrices pour resolution numÃ©rique
+ COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZAU, ZBU, ZCU, ZYU !matrices pour resolution numÃ©rique
  COMPLEX, DIMENSION(NOCKMIN:NOCKMAX) :: ZOMU,ZWU
 !
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT, ZSEAS, ZSEAE, ZSEAV, ZSEAU
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZSEAT_REL, ZSEAS_REL, ZSEAV_REL, ZSEAU_REL
 !
-REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZA, ZB, ZC, ZA2, ZB2, ZC2, ZYT, ZYS, ZYE        !matrices pour resolution numérique
+REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ZA, ZB, ZC, ZA2, ZB2, ZC2, ZYT, ZYS, ZYE        !matrices pour resolution numÃ©rique
 !
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVT,ADVS !advection horiz. temperature and salinity
 REAL, DIMENSION(NOCKMIN:NOCKMAX) :: ADVU,ADVV !advection horiz. of current
@@ -226,7 +223,7 @@ DO JPT=1,SIZE(PFSOL)
   IKHML=1
 !
   !simplified variables inside this loop
-  ZLAT    = XLAT   (JPT)
+  ZLAT    = SG%XLAT   (JPT)
   ZFSOL   = PFSOL  (JPT)
   ZFNSOL  = PFNSOL (JPT)
   ZSFTEAU = PSFTEAU(JPT)
@@ -237,20 +234,20 @@ DO JPT=1,SIZE(PFSOL)
 
   ZSEAHMO=0.
   DO J=IUP-1,IBOT
-    ZSEAT(J) = XSEAT(JPT,J)
-    ZSEAS(J) = XSEAS(JPT,J)
-    ZSEAU(J) = XSEAU(JPT,J)
-    ZSEAV(J) = XSEAV(JPT,J)    
-    ZSEAE(J) = XSEAE(JPT,J)
+    ZSEAT(J) = O%XSEAT(JPT,J)
+    ZSEAS(J) = O%XSEAS(JPT,J)
+    ZSEAU(J) = O%XSEAU(JPT,J)
+    ZSEAV(J) = O%XSEAV(JPT,J)    
+    ZSEAE(J) = O%XSEAE(JPT,J)
     !
-    ZSEAU_REL(J) = XSEAU_REL(JPT,J)
-    ZSEAV_REL(J) = XSEAV_REL(JPT,J)
-    ZSEAT_REL(J) = XSEAT_REL(JPT,J)
-    ZSEAS_REL(J) = XSEAS_REL(JPT,J)
+    ZSEAU_REL(J) = OR%XSEAU_REL(JPT,J)
+    ZSEAV_REL(J) = OR%XSEAV_REL(JPT,J)
+    ZSEAT_REL(J) = OR%XSEAT_REL(JPT,J)
+    ZSEAS_REL(J) = OR%XSEAS_REL(JPT,J)
     !
     IF (J>=IUP .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO = ZSEAHMO-XDZ1(J)
   ENDDO
-  XSEAHMO(JPT) = ZSEAHMO
+  O%XSEAHMO(JPT) = ZSEAHMO
 
  !precalculation of DRHO
   DO J=IUP-1,IBOT
@@ -299,7 +296,7 @@ DO JPT=1,SIZE(PFSOL)
   ENDDO
 
   !! Modif PP - HG : flag diapycnal
-  IF (LDIAPYCNAL) THEN
+  IF (OR%LDIAPYCNAL) THEN
     !
     DO J=IKHML,IBOT-1
       ZDRHODZ=(ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
@@ -310,10 +307,10 @@ DO JPT=1,SIZE(PFSOL)
       ELSE
         ZRICH = -ZALG*ZDRHODZ/(ZDU**2+ZDV**2)/XK4(J)
       ENDIF  
-!coefficient de mélange aux ondes internes
+!coefficient de mÃ©lange aux ondes internes
       ZKMEWM(J)=1.E-3
       ZKMEWS(J)=1.E-4
-!coefficient de mélange du au cisaillement
+!coefficient de mÃ©lange du au cisaillement
       IF(ZRICH>0.7) THEN
         ZKMES(J) = 0.
       ELSEIF(ZRICH>=0.) THEN
@@ -398,30 +395,30 @@ DO JPT=1,SIZE(PFSOL)
 !!              -------------------------------------------
 !
   DO J=IUP,IBOT
-    IF (LREL_CUR) THEN
-      ZUDTREL(J) =  - (ZSEAU(J)-ZSEAU_REL(J))  / XTAU_REL 
-      ZVDTREL(J) =  - (ZSEAV(J)-ZSEAV_REL(J))  / XTAU_REL 
+    IF (OR%LREL_CUR) THEN
+      ZUDTREL(J) =  - (ZSEAU(J)-ZSEAU_REL(J))  / OR%XTAU_REL 
+      ZVDTREL(J) =  - (ZSEAV(J)-ZSEAV_REL(J))  / OR%XTAU_REL 
     ENDIF
     ! flux solaire
     ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
   ENDDO
 !
-  IF (LREL_TS) THEN
+  IF (OR%LREL_TS) THEN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! RELAXATION IS MADE INSTEAD OF FLUX CORRECTION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
     DO J=IUP,IBOT
       ! flux non solaire
-      ZTDTREL(J) =  - (ZSEAT(J)-ZSEAT_REL(J)) / XTAU_REL
-      ZSDTREL(J) =  - (ZSEAS(J)-ZSEAS_REL(J)) / XTAU_REL
+      ZTDTREL(J) =  - (ZSEAT(J)-ZSEAT_REL(J)) / OR%XTAU_REL
+      ZSDTREL(J) =  - (ZSEAS(J)-ZSEAS_REL(J)) / OR%XTAU_REL
     ENDDO
   ENDIF
 !
-  IF (LFLX_CORR) THEN
+  IF (OR%LFLX_CORR) THEN
     ! NO relaxation
     ! Barnier correction on surface fluxes          
     ! flux non solaire corrige
-    ZTDTREL(IUP) =  XQCORR *(ZSEAT_REL(IUP)-ZSEAT(IUP)) / (XRHOSW*XCPSW)
+    ZTDTREL(IUP) =  OR%XQCORR *(ZSEAT_REL(IUP)-ZSEAT(IUP)) / (XRHOSW*XCPSW)
     ZFNSOL = ZFNSOL + ZTDTREL(IUP)
   ENDIF
 !
@@ -466,15 +463,15 @@ DO JPT=1,SIZE(PFSOL)
 
     ZYT(J)    = ZSEAT(J) + XOCEAN_TSTEP * (ZDTFSOL(J) + ADVT(J)) 
     ZYS(J)    = ZSEAS(J) + XOCEAN_TSTEP * (             ADVS(J))  
-    IF (LREL_TS) THEN
-      IF (.NOT.LFLX_CORR) ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZTDTREL(J)
+    IF (OR%LREL_TS) THEN
+      IF (.NOT.OR%LFLX_CORR) ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZTDTREL(J)
       ZYS(J) = ZYS(J) + XOCEAN_TSTEP * ZSDTREL(J)
     ENDIF
     
     ZUC(J,1)  = ZSEAU(J)*(1.,0.) + ZSEAV(J)*(0.,1.)
     ZYU(J)    = ZUC(J,1) + XOCEAN_TSTEP * (ZUC(J,1)*ZF*(1.-XGAMA)*(0.,-1.) + ADVU(J)*(1.,0.) + ADVV(J)*(0.,1.))
     ! damping on current if LREL_CUR=T in explicit scheme
-    IF (LREL_CUR) ZYU(J) = ZYU(J) + XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.) + ZVDTREL(J)*(0.,1.))  
+    IF (OR%LREL_CUR) ZYU(J) = ZYU(J) + XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.) + ZVDTREL(J)*(0.,1.))  
 
     IF (J<IBOT) THEN
       ZDRHODZ   = (ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
@@ -541,7 +538,7 @@ DO JPT=1,SIZE(PFSOL)
 !!       3.     New oceanic profiles
 !!              --------------------
 !!
-  IF (LPROGSST) XSEATEND(JPT) = (ZT(IUP)-ZSEAT(IUP)) / XOCEAN_TSTEP
+  IF (O%LPROGSST) O%XSEATEND(JPT) = (ZT(IUP)-ZSEAT(IUP)) / XOCEAN_TSTEP
   ZSEAT(NOCKMIN)  = ZT(IUP)
   ZSEAS(NOCKMIN)  = ZS(IUP)  
   ZSEAU(NOCKMIN)  = ZU(IUP)
@@ -550,7 +547,7 @@ DO JPT=1,SIZE(PFSOL)
 
   !bathymetrie
   DO J=IUP,IBOT
-    IF (XSEABATH(JPT,J)==0.) THEN
+    IF (O%XSEABATH(JPT,J)==0.) THEN
       ZSEAT(J)  = ZSEAT(J-1) 
       ZSEAS(J)  = ZSEAS(J-1)            
       ZSEAU(J)  = ZSEAU(J-1)
@@ -564,22 +561,22 @@ DO JPT=1,SIZE(PFSOL)
   PSEATEMP(JPT) = ZSEATEMP
 !
   DO J=IUP,IBOT
-    XLE   (JPT,J) = ZLE   (J)
-    XLK   (JPT,J) = ZLE   (J)
-    XKMEL (JPT,J) = ZKMEL (J)
-    XKMELM(JPT,J) = ZKMELM(J)
+    O%XLE   (JPT,J) = ZLE   (J)
+    O%XLK   (JPT,J) = ZLE   (J)
+    O%XKMEL (JPT,J) = ZKMEL (J)
+    O%XKMELM(JPT,J) = ZKMELM(J)
   ENDDO
 
   DO J=IUP-1,IBOT
-    XSEAT(JPT,J) = ZSEAT(J)
-    XSEAS(JPT,J) = ZSEAS(J)
-    XSEAU(JPT,J) = ZSEAU(J)
-    XSEAV(JPT,J) = ZSEAV(J)
-    XSEAE(JPT,J) = ZSEAE(J)
-    XDTFSOL(JPT,J) = ZDTFSOL(J)
+    O%XSEAT(JPT,J) = ZSEAT(J)
+    O%XSEAS(JPT,J) = ZSEAS(J)
+    O%XSEAU(JPT,J) = ZSEAU(J)
+    O%XSEAV(JPT,J) = ZSEAV(J)
+    O%XSEAE(JPT,J) = ZSEAE(J)
+    O%XDTFSOL(JPT,J) = ZDTFSOL(J)
   ENDDO
 
-  XDTFNSOL(JPT) = ZDTFNSOL
+  O%XDTFNSOL(JPT) = ZDTFNSOL
 
 ENDDO
 !  

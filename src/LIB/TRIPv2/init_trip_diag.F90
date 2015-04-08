@@ -33,7 +33,7 @@ USE MODD_TRIP_OASIS, ONLY : LCPL_LAND
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, LNCPRINT
 !
-USE MODD_TRIP_DIAG
+USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -272,11 +272,11 @@ ENDIF
 !
 ! * Allocate and initialyse diagnostic variables
 !
-CALL ALLOC_DIAG(TDIAG)
+CALL ALLOC_DIAG(TPDG%TDIAG)
 !
 ! * Allocate and initialyse run mean diagnostic variables
 !
-CALL ALLOC_DIAG(TDIAG_RUN)
+CALL ALLOC_DIAG(TPDG%TDIAG_RUN)
 !
 ! * Create netcdf file
 !

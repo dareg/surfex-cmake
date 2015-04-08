@@ -44,7 +44,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CTOWN
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 !
@@ -100,17 +100,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TOWN_N',0,ZHOOK_HANDLE)
-IF (CTOWN=='NONE  ') THEN
+IF (U%CTOWN=='NONE  ') THEN
   PDIR_ALB=0.
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
   PTSURF  =XTT
-ELSE IF (CTOWN=='FLUX  ') THEN
+ELSE IF (U%CTOWN=='FLUX  ') THEN
   CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
-ELSE IF (CTOWN=='TEB   ') THEN
+ELSE IF (U%CTOWN=='TEB   ') THEN
   CALL INIT_TEB_n(HPROGRAM,HINIT,                               &
                     KI,KSV,KSW,HSV,PCO2,PRHOA,                    &
                     PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &

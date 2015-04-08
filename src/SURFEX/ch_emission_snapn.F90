@@ -27,10 +27,7 @@
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 USE MODD_CSTS,        ONLY: XDAY
-USE MODD_CH_SNAP_n,   ONLY: NEMIS_SNAP, XEMIS_FIELDS, NEMIS_NBR,     &
-                            XEMIS_FIELDS_SNAP, XCONVERSION,          &
-                            XSNAP_MONTHLY, XSNAP_DAILY, XSNAP_HOURLY,&
-                            CCONVERSION, CSNAP_TIME_REF, XDELTA_LEGAL_TIME
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 !
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_SUBSTRACT_TO_DATE_SURF
@@ -88,7 +85,7 @@ IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N',0,ZHOOK_HANDLE)
 !*  1.  Updates Conversion Factor (may depends on air density)
 !       ------------------------------------------------------
 !
- CALL CH_CONVERSION_FACTOR(CCONVERSION,PRHOA(:))
+ CALL CH_CONVERSION_FACTOR(CHN%CCONVERSION,PRHOA(:))
 !
 !------------------------------------------------------------------------------
 !
@@ -101,7 +98,7 @@ IDAY  (:,1)=KDAY
 IMONTH(:,1)=KMONTH
 IYEAR (:,1)=KYEAR
 !
-SELECT CASE (CSNAP_TIME_REF)
+SELECT CASE (CHN%CSNAP_TIME_REF)
   CASE ('UTC  ')
     ZTIME0(:)=PSIMTIME
   CASE ('SOLAR')
@@ -124,7 +121,7 @@ SELECT CASE (CSNAP_TIME_REF)
     ENDDO
     
   CASE ('LEGAL')
-    ZTIME0(:)=PSIMTIME + XDELTA_LEGAL_TIME(:) * 3600.
+    ZTIME0(:)=PSIMTIME + CHN%XDELTA_LEGAL_TIME(:) * 3600.
     DO JI=1,KSIZE
       CALL ADD_FORECAST_TO_DATE_SURF(IYEAR(JI,1),IMONTH(JI,1),IDAY(JI,1),ZTIME0(JI))
       CALL SUBSTRACT_TO_DATE_SURF   (IYEAR(JI,1),IMONTH(JI,1),IDAY(JI,1),ZTIME0(JI))
@@ -159,23 +156,23 @@ IHOUR(:,2)=NINT(ZTIME(:,2))/3600
 !*  3.  Emission at the begining of the current hour
 !       --------------------------------------------
 !
-XEMIS_FIELDS(:,:)=0.
+CHN%XEMIS_FIELDS(:,:)=0.
 !
-DO JSPEC=1,NEMIS_NBR
+DO JSPEC=1,CHN%NEMIS_NBR
   !
   ZE(:,:) = 0.
   !
-  DO JSNAP=1,NEMIS_SNAP
+  DO JSNAP=1,CHN%NEMIS_SNAP
     !
     DO JT=1,2
       !
       DO JI=1,KSIZE
         !
-        ZE(JI,JT) = ZE(JI,JT) +  XEMIS_FIELDS_SNAP(JI,JSNAP,JSPEC) &
-                      *XSNAP_MONTHLY(IMONTH(JI,JT)  ,JSNAP,JSPEC) &
-                      *XSNAP_DAILY  (IDOW  (JI,JT)  ,JSNAP,JSPEC) &
-                      *XSNAP_HOURLY (IHOUR (JI,JT)+1,JSNAP,JSPEC) &
-                      *XCONVERSION(JI)
+        ZE(JI,JT) = ZE(JI,JT) +  CHN%XEMIS_FIELDS_SNAP(JI,JSNAP,JSPEC) &
+                      *CHN%XSNAP_MONTHLY(IMONTH(JI,JT)  ,JSNAP,JSPEC) &
+                      *CHN%XSNAP_DAILY  (IDOW  (JI,JT)  ,JSNAP,JSPEC) &
+                      *CHN%XSNAP_HOURLY (IHOUR (JI,JT)+1,JSNAP,JSPEC) &
+                      *CHN%XCONVERSION(JI)
       ENDDO
       !
     ENDDO
@@ -185,7 +182,7 @@ DO JSPEC=1,NEMIS_NBR
 !*  5.  Temporal interpolation within the current hour
 !       ----------------------------------------------
 !
-  XEMIS_FIELDS(:,JSPEC) = ZE(:,1) + (ZE(:,2)-ZE(:,1))/3600.*(ZTIME0(:)-IHOUR(:,1)*3600.)
+  CHN%XEMIS_FIELDS(:,JSPEC) = ZE(:,1) + (ZE(:,2)-ZE(:,1))/3600.*(ZTIME0(:)-IHOUR(:,1)*3600.)
 
 END DO
 !

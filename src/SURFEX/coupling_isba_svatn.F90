@@ -36,7 +36,7 @@ SUBROUTINE COUPLING_ISBA_SVAT_n(HPROGRAM, HCOUPLING,                            
 !!     B. Decharme  04/2013 new coupling variables and init local variables
 !!-------------------------------------------------------------------
 !
-USE MODD_ISBA_n,     ONLY : XTSTEP
+USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -156,14 +156,14 @@ IF (HCOUPLING=='I') THEN
   ZTSTEP=PTSTEP
 !
 !* same timestep as atmospheric timestep as default
-ELSE IF (XTSTEP==XUNDEF) THEN
+ELSE IF (I%XTSTEP==XUNDEF) THEN
   IT=1
   ZT=1.
   ZTSTEP=PTSTEP
 !
 !* case of specified SVAT time-step
 ELSE
-  IT=MAX(NINT(PTSTEP/XTSTEP),1)
+  IT=MAX(NINT(PTSTEP/I%XTSTEP),1)
   ZT=FLOAT(IT)
   ZTSTEP=PTSTEP/ZT
 ENDIF

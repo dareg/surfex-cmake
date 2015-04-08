@@ -36,11 +36,8 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODN_PREP_WATFLUX
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
-USE MODD_WATFLUX_n,      ONLY : XZ0, XTS, LSBL, &
-                                  LINTERPOL_TS,  &
-                                  CINTERPOL_TS,  &
-                                  XTS_MTH  
-USE MODD_WATFLUX_GRID_n, ONLY : CGRID, XGRID_PAR, XLAT, XLON
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -74,7 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL PREP_OUTPUT_GRID(ILUOUT,CGRID,XGRID_PAR,XLAT,XLON)
+ CALL PREP_OUTPUT_GRID(ILUOUT,WG%CGRID,WG%XGRID_PAR,WG%XLAT,WG%XLON)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -91,8 +88,8 @@ IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',0,ZHOOK_HANDLE)
 !
 !*      2.2    Roughness
 !
-ALLOCATE(XZ0(SIZE(XTS)))
-XZ0 = 0.001
+ALLOCATE(W%XZ0(SIZE(W%XTS)))
+W%XZ0 = 0.001
 !
 !-------------------------------------------------------------------------------------
  CALL CLEAN_PREP_OUTPUT_GRID
@@ -109,21 +106,21 @@ DEALLOCATE(XZS_LS)
 !
 !*      4.     Preparation of optional interpolation of monthly ts water
 !
-LINTERPOL_TS=.FALSE.
-IF(CINTERPOL_TS/='NONE  ')THEN
-  LINTERPOL_TS=.TRUE.
+W%LINTERPOL_TS=.FALSE.
+IF(W%CINTERPOL_TS/='NONE  ')THEN
+  W%LINTERPOL_TS=.TRUE.
 ENDIF
 !
-IF(LINTERPOL_TS)THEN
+IF(W%LINTERPOL_TS)THEN
 !
 ! Precedent, Current and Next Monthly TS water
   INMTH=3
 ! Precedent, Current and Next Annual Monthly TS water
-  IF(CINTERPOL_TS=='ANNUAL')INMTH=14
+  IF(W%CINTERPOL_TS=='ANNUAL')INMTH=14
 !
-  ALLOCATE(XTS_MTH(SIZE(XTS),INMTH))
+  ALLOCATE(W%XTS_MTH(SIZE(W%XTS),INMTH))
   DO JMTH=1,INMTH
-     XTS_MTH(:,JMTH)=XTS(:)
+     W%XTS_MTH(:,JMTH)=W%XTS(:)
   ENDDO
 !
 ENDIF
@@ -132,8 +129,8 @@ ENDIF
 !
 !*      5.     Preparation of SBL air variables
 !
-LSBL = LWAT_SBL
-IF (LSBL) CALL PREP_WATFLUX_SBL()
+W%LSBL = LWAT_SBL
+IF (W%LSBL) CALL PREP_WATFLUX_SBL()
 IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -31,9 +31,9 @@ USE MODN_TRIP,       ONLY : CGROUNDW, CVIT, LFLOOD
 !
 USE MODD_TRIP_PAR,   ONLY : XRHOLW
 !
-USE MODD_TRIP_GRID,  ONLY : TGRID
-USE MODD_TRIP,       ONLY : TTRIP
-USE MODD_TRIP_DIAG,  ONLY : TDIAG
+USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+USE MODD_TRIP, ONLY : TP => TRIP
+USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -78,67 +78,67 @@ IF (LHOOK) CALL DR_HOOK('TRIP_DIAG',0,ZHOOK_HANDLE)
 ! * Actualisation of river discharge diags
 !       
 PDISCHARGE (:,:) = PDISCHARGE (:,:) + PSOUT(:,:) * PTSTEP          ![kg]
-TDIAG%XQDIS(:,:) = TDIAG%XQDIS(:,:) + PSOUT(:,:) * PTSTEP / XRHOLW ![m3]
+TPDG%TDIAG%XQDIS(:,:) = TPDG%TDIAG%XQDIS(:,:) + PSOUT(:,:) * PTSTEP / XRHOLW ![m3]
 !
 ! * Actualisation of input total flux in the river   
 !   
 IF(LDIAG_MISC)THEN
-  TDIAG%XQIN(:,:) = TDIAG%XQIN (:,:) + PSIN (:,:) * PTSTEP / XRHOLW
+  TPDG%TDIAG%XQIN(:,:) = TPDG%TDIAG%XQIN (:,:) + PSIN (:,:) * PTSTEP / XRHOLW
 ENDIF
 !
 ! * Actualisation of input surface runoff and drainage (or recharge)
 !
 IF(LCPL_LAND.AND.LDIAG_MISC)THEN
-  TDIAG%XRUNOFF(:,:) = TDIAG%XRUNOFF(:,:) + PRUNOFF(:,:) * PTSTEP / TGRID%XAREA(:,:)
-  TDIAG%XDRAIN (:,:) = TDIAG%XDRAIN (:,:) + PDRAIN (:,:) * PTSTEP / TGRID%XAREA(:,:)
+  TPDG%TDIAG%XRUNOFF(:,:) = TPDG%TDIAG%XRUNOFF(:,:) + PRUNOFF(:,:) * PTSTEP / TPG%XAREA(:,:)
+  TPDG%TDIAG%XDRAIN (:,:) = TPDG%TDIAG%XDRAIN (:,:) + PDRAIN (:,:) * PTSTEP / TPG%XAREA(:,:)
 ENDIF
 !
 ! * Actualisation of stream reservoir
 !
-TDIAG%XSURF_STO(:,:) = TDIAG%XSURF_STO(:,:) + TTRIP%XSURF_STO(:,:) * PTSTEP / TGRID%XAREA(:,:)
+TPDG%TDIAG%XSURF_STO(:,:) = TPDG%TDIAG%XSURF_STO(:,:) + TP%XSURF_STO(:,:) * PTSTEP / TPG%XAREA(:,:)
 !
 ! * Actualisation of variable velocity diagnostic variables   
 !
 IF(CVIT=='VAR')THEN
-   TDIAG%XVEL(:,:) = TDIAG%XVEL(:,:) + PVEL(:,:) * PTSTEP
-   TDIAG%XHS (:,:) = TDIAG%XHS (:,:) + PHS (:,:) * PTSTEP
+   TPDG%TDIAG%XVEL(:,:) = TPDG%TDIAG%XVEL(:,:) + PVEL(:,:) * PTSTEP
+   TPDG%TDIAG%XHS (:,:) = TPDG%TDIAG%XHS (:,:) + PHS (:,:) * PTSTEP
 ENDIF
 !
 ! * Actualisation of groundwater diagnostic variables   
 !   
 IF(CGROUNDW/='DEF')THEN
-  TDIAG%XQGF(:,:) = TDIAG%XQGF(:,:) + (PGOUT(:,:)+PGNEG(:,:)) * PTSTEP / XRHOLW
+  TPDG%TDIAG%XQGF(:,:) = TPDG%TDIAG%XQGF(:,:) + (PGOUT(:,:)+PGNEG(:,:)) * PTSTEP / XRHOLW
 ENDIF
 !  
 IF(CGROUNDW=='CST')THEN        
-  TDIAG%XGROUND_STO(:,:) = TDIAG%XGROUND_STO(:,:) + TTRIP%XGROUND_STO(:,:) * PTSTEP / TGRID%XAREA(:,:)
+  TPDG%TDIAG%XGROUND_STO(:,:) = TPDG%TDIAG%XGROUND_STO(:,:) + TP%XGROUND_STO(:,:) * PTSTEP / TPG%XAREA(:,:)
 ELSEIF(CGROUNDW=='DIF')THEN
-  TDIAG%XHGROUND(:,:) = TDIAG%XHGROUND(:,:) + TTRIP%XHGROUND (:,:) * PTSTEP
-  TDIAG%XWTD    (:,:) = TDIAG%XWTD    (:,:) + PWTD           (:,:) * PTSTEP
-  TDIAG%XFWTD   (:,:) = TDIAG%XFWTD   (:,:) + PFWTD          (:,:) * PTSTEP
+  TPDG%TDIAG%XHGROUND(:,:) = TPDG%TDIAG%XHGROUND(:,:) + TP%XHGROUND (:,:) * PTSTEP
+  TPDG%TDIAG%XWTD    (:,:) = TPDG%TDIAG%XWTD    (:,:) + PWTD           (:,:) * PTSTEP
+  TPDG%TDIAG%XFWTD   (:,:) = TPDG%TDIAG%XFWTD   (:,:) + PFWTD          (:,:) * PTSTEP
   IF(LDIAG_MISC)THEN
-    TDIAG%XWTDRIV (:,:) = TDIAG%XWTDRIV (:,:) + PWTDRIV (:,:) * PTSTEP
-    TDIAG%XWTDELEV(:,:) = TDIAG%XWTDELEV(:,:) + PWTDELEV(:,:) * PTSTEP
-    TDIAG%XQGCELL (:,:) = TDIAG%XQGCELL (:,:) + PQGCELL (:,:) * PTSTEP / XRHOLW
-    TDIAG%XHGHS   (:,:) = TDIAG%XHGHS   (:,:) + PHGHS   (:,:) * PTSTEP
+    TPDG%TDIAG%XWTDRIV (:,:) = TPDG%TDIAG%XWTDRIV (:,:) + PWTDRIV (:,:) * PTSTEP
+    TPDG%TDIAG%XWTDELEV(:,:) = TPDG%TDIAG%XWTDELEV(:,:) + PWTDELEV(:,:) * PTSTEP
+    TPDG%TDIAG%XQGCELL (:,:) = TPDG%TDIAG%XQGCELL (:,:) + PQGCELL (:,:) * PTSTEP / XRHOLW
+    TPDG%TDIAG%XHGHS   (:,:) = TPDG%TDIAG%XHGHS   (:,:) + PHGHS   (:,:) * PTSTEP
   ENDIF 
 ENDIF
 !
 ! * Actualisation of flooding scheme diagnostic variables   
 !
 IF(LFLOOD)THEN          
-   TDIAG%XFLOOD_STO(:,:) = TDIAG%XFLOOD_STO(:,:) + TTRIP%XFLOOD_STO(:,:) * PTSTEP / TGRID%XAREA(:,:)
-   TDIAG%XFF       (:,:) = TDIAG%XFF       (:,:) + TTRIP%XFFLOOD   (:,:) * PTSTEP
-   TDIAG%XHF       (:,:) = TDIAG%XHF       (:,:) + TTRIP%XHFLOOD   (:,:) * PTSTEP
+   TPDG%TDIAG%XFLOOD_STO(:,:) = TPDG%TDIAG%XFLOOD_STO(:,:) + TP%XFLOOD_STO(:,:) * PTSTEP / TPG%XAREA(:,:)
+   TPDG%TDIAG%XFF       (:,:) = TPDG%TDIAG%XFF       (:,:) + TP%XFFLOOD   (:,:) * PTSTEP
+   TPDG%TDIAG%XHF       (:,:) = TPDG%TDIAG%XHF       (:,:) + TP%XHFLOOD   (:,:) * PTSTEP
    IF(LDIAG_MISC)THEN
-     TDIAG%XQFR   (:,:) = TDIAG%XQFR   (:,:) + PQFR            (:,:) * PTSTEP / XRHOLW
-     TDIAG%XQRF   (:,:) = TDIAG%XQRF   (:,:) + PQRF            (:,:) * PTSTEP / XRHOLW
-     TDIAG%XVFIN  (:,:) = TDIAG%XVFIN  (:,:) + PVFIN           (:,:) * PTSTEP
-     TDIAG%XVFOUT (:,:) = TDIAG%XVFOUT (:,:) + PVFOUT          (:,:) * PTSTEP
-     TDIAG%XWF    (:,:) = TDIAG%XWF    (:,:) + TTRIP%XWFLOOD   (:,:) * PTSTEP
-     TDIAG%XLF    (:,:) = TDIAG%XLF    (:,:) + TTRIP%XFLOOD_LEN(:,:) * PTSTEP
-     TDIAG%XHSF   (:,:) = TDIAG%XHSF   (:,:) + PHSF            (:,:) * PTSTEP
-     TDIAG%XSOURCE(:,:) = TDIAG%XSOURCE(:,:) + PSRC_FLOOD      (:,:) * PTSTEP / TGRID%XAREA(:,:)
+     TPDG%TDIAG%XQFR   (:,:) = TPDG%TDIAG%XQFR   (:,:) + PQFR            (:,:) * PTSTEP / XRHOLW
+     TPDG%TDIAG%XQRF   (:,:) = TPDG%TDIAG%XQRF   (:,:) + PQRF            (:,:) * PTSTEP / XRHOLW
+     TPDG%TDIAG%XVFIN  (:,:) = TPDG%TDIAG%XVFIN  (:,:) + PVFIN           (:,:) * PTSTEP
+     TPDG%TDIAG%XVFOUT (:,:) = TPDG%TDIAG%XVFOUT (:,:) + PVFOUT          (:,:) * PTSTEP
+     TPDG%TDIAG%XWF    (:,:) = TPDG%TDIAG%XWF    (:,:) + TP%XWFLOOD   (:,:) * PTSTEP
+     TPDG%TDIAG%XLF    (:,:) = TPDG%TDIAG%XLF    (:,:) + TP%XFLOOD_LEN(:,:) * PTSTEP
+     TPDG%TDIAG%XHSF   (:,:) = TPDG%TDIAG%XHSF   (:,:) + PHSF            (:,:) * PTSTEP
+     TPDG%TDIAG%XSOURCE(:,:) = TPDG%TDIAG%XSOURCE(:,:) + PSRC_FLOOD      (:,:) * PTSTEP / TPG%XAREA(:,:)
    ENDIF  
 ENDIF
 !

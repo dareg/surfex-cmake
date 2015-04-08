@@ -50,9 +50,7 @@ USE MODD_SURFEX_OMP,     ONLY : IDC
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
-USE MODD_DATA_COVER_n,   ONLY : XDATA_NATURE_n => XDATA_NATURE, &
-                                XDATA_GARDEN_n => XDATA_GARDEN, &
-                                XDATA_VEGTYPE_n=> XDATA_VEGTYPE
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER, &
                                   XDATA_LAI, XDATA_VEGTYPE, XDATA_H_TREE,           &
@@ -113,7 +111,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
-USE MODD_SURF_ATM_n,     ONLY : LGARDEN
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODE_POS_SURF
 !
@@ -2216,7 +2214,7 @@ ENDIF
 !            ------------------------------------------------------------------------------
 !
  CALL ARRANGE_COVER(XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
-                    XDATA_GARDEN,LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
+                    XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
 !-------------------------------------------------------------------------------
 !
@@ -2230,7 +2228,7 @@ ENDIF
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
- CALL INI_DATA_PARAM(XDATA_VEGTYPE_n, PSURF=XDATA_NATURE_n, PSURF2=XDATA_GARDEN_n, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+ CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                                   PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                                   PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &

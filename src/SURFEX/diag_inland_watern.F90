@@ -36,7 +36,7 @@ SUBROUTINE DIAG_INLAND_WATER_n(HPROGRAM,                                        
 
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : CWATER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 
 USE MODI_DIAG_WATFLUX_n
 USE MODI_DIAG_FLAKE_n
@@ -107,7 +107,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLAND_WATER_N',0,ZHOOK_HANDLE)
-IF (CWATER=='WATFLX') THEN
+IF (U%CWATER=='WATFLX') THEN
   CALL DIAG_WATFLUX_n(HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -116,7 +116,7 @@ IF (CWATER=='WATFLX') THEN
                         PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
-ELSE IF (CWATER=='FLAKE ') THEN
+ELSE IF (U%CWATER=='FLAKE ') THEN
   CALL DIAG_FLAKE_n(HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -126,7 +126,7 @@ ELSE IF (CWATER=='FLAKE ') THEN
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )  
 !
-ELSE IF (CWATER=='FLUX  ') THEN
+ELSE IF (U%CWATER=='FLUX  ') THEN
   CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
   PEVAP    = XUNDEF
@@ -168,7 +168,7 @@ ELSE IF (CWATER=='FLUX  ') THEN
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF
   PWIND10M_MAX = XUNDEF  
-ELSE IF (CWATER=='NONE  ') THEN
+ELSE IF (U%CWATER=='NONE  ') THEN
   PRN      = XUNDEF
   PH       = XUNDEF
   PLE      = XUNDEF

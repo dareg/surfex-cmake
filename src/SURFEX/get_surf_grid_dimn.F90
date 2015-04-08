@@ -28,7 +28,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -52,9 +52,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',0,ZHOOK_HANDLE)
-HGRID = CGRID
+HGRID = UG%CGRID
 !
- CALL GET_GRID_DIM(CGRID,NGRID_PAR,XGRID_PAR,ORECT,KDIM1,KDIM2)
+ CALL GET_GRID_DIM(UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR,ORECT,KDIM1,KDIM2)
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

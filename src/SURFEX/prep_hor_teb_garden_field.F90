@@ -38,14 +38,13 @@ USE MODD_PREP_TEB_GARDEN, ONLY : XGRID_SOIL, NGRID_LEVEL,                  &
                                  XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, &
                                  XAGESNOW_GD, XASNOW_GD, LSNOW_IDEAL_GD
 
-USE MODD_TEB_OPTION_n,    ONLY : TTIME
-USE MODD_TEB_VEG_n,       ONLY : CISBA
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : NGROUND_LAYER
-USE MODD_TEB_GARDEN_PGD_n,ONLY : XVEGTYPE, XDG, XWWILT, XWFC,              &
-                                 XROOTFRAC, XWSAT
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : XLAI
-USE MODD_TEB_GARDEN_n,    ONLY : XWG, XWGI, XTG, XWR, TSNOW
-USE MODD_TEB_GRID_n,      ONLY : XLAT, XLON
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 USE MODD_SURF_PAR,        ONLY : XUNDEF
@@ -121,13 +120,13 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GARDEN_FIELD',0,ZHOOK_HANDLE)
 !
 CMASK = 'TOWN  '
 !
-INI=SIZE(XLAT)
+INI=SIZE(TG%XLAT)
 !-------------------------------------------------------------------------------------
 !
 !*      2.     Snow variables case?
 !
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TSNOW%SCHEME,TSNOW%NLAYER,YFILE_SNOW,&
+  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TGD%TSNOW%SCHEME,TGD%TSNOW%NLAYER,YFILE_SNOW,&
         YFILETYPE_SNOW,YFILEPGD_SNOW,YFILEPGDTYPE_SNOW,GUNIF_SNOW)
   IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE_SNOW)==0.AND.LEN_TRIM(YFILETYPE_SNOW)==0)THEN
     !IF(LEN_TRIM(YFILE)/=0.AND.LEN_TRIM(YFILETYPE)/=0)THEN
@@ -144,21 +143,21 @@ IF (HSURF=='SN_VEG ') THEN
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_GD)))
-  ALLOCATE(ZPATCH(SIZE(XVEGTYPE,1),1))
-  ALLOCATE(ZVEGTYPE_PATCH (SIZE(XVEGTYPE,1),SIZE(XVEGTYPE,2),1))
+  ALLOCATE(ZPATCH(SIZE(TGDP%XVEGTYPE,1),1))
+  ALLOCATE(ZVEGTYPE_PATCH (SIZE(TGDP%XVEGTYPE,1),SIZE(TGDP%XVEGTYPE,2),1))
   !
   ZPATCH=1.
-  ZVEGTYPE_PATCH(:,:,1) = XVEGTYPE(:,:)
+  ZVEGTYPE_PATCH(:,:,1) = TGDP%XVEGTYPE(:,:)
   CALL PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &
                             ILUOUT,GUNIF_SNOW,1,            &
-                            INI,TSNOW, TTIME,               &
+                            INI,TGD%TSNOW, TOP%TTIME,               &
                             XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
                             XLWCSNOW_GD, XASNOW_GD,         &
                             LSNOW_IDEAL_GD, ZSG1SNOW,       &
                             ZSG2SNOW, ZHISTSNOW, XAGESNOW_GD,  &
-                            XVEGTYPE,ZVEGTYPE_PATCH, ZPATCH )
+                            TGDP%XVEGTYPE,ZVEGTYPE_PATCH, ZPATCH )
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)  
@@ -198,7 +197,7 @@ ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
 !
 DO JPATCH = 1, SIZE(ZFIELDIN,3)
   ZFIELD=ZFIELDIN(:,:,JPATCH)
-  IF (INP==NVEGTYPE) LINTERP = (XVEGTYPE(:,JPATCH) > 0.)
+  IF (INP==NVEGTYPE) LINTERP = (TGDP%XVEGTYPE(:,JPATCH) > 0.)
   CALL HOR_INTERPOL(ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
   LINTERP = .TRUE.
 END DO
@@ -220,10 +219,10 @@ ALLOCATE(ZSUM (SIZE(ZFIELDOUTV,1)))
 ZW = 0.
 !
 DO JLAYER=1,SIZE(ZW,2)
-  ZSUM(:) = SUM(XVEGTYPE(:,:),2,ZFIELDOUTV(:,JLAYER,:)/=XUNDEF)
+  ZSUM(:) = SUM(TGDP%XVEGTYPE(:,:),2,ZFIELDOUTV(:,JLAYER,:)/=XUNDEF)
   DO JVEGTYPE=1,NVEGTYPE
     WHERE (ZFIELDOUTV(:,JLAYER,JVEGTYPE)/=XUNDEF) 
-      ZW(:,JLAYER) = ZW(:,JLAYER) + XVEGTYPE(:,JVEGTYPE) * ZFIELDOUTV(:,JLAYER,JVEGTYPE) / ZSUM(:)
+      ZW(:,JLAYER) = ZW(:,JLAYER) + TGDP%XVEGTYPE(:,JVEGTYPE) * ZFIELDOUTV(:,JLAYER,JVEGTYPE) / ZSUM(:)
     END WHERE
   END DO
   DO JI=1,SIZE(ZW,1)
@@ -241,66 +240,66 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WG     ') 
-  ALLOCATE(ZF (SIZE(ZFIELDOUTV,1),NGROUND_LAYER))
+  ALLOCATE(ZF (SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,XDG,ZF)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,TGDP%XDG,ZF)
   !
   !* retrieves soil water content from soil relative humidity
-  ALLOCATE(XWG(SIZE(ZFIELDOUTV,1),NGROUND_LAYER))
-  XWG(:,:) = XWWILT + ZF(:,:) * (XWFC-XWWILT)
-  XWG(:,:) = MAX(MIN(XWG(:,:),XWSAT),XWGMIN)
+  ALLOCATE(TGD%XWG(SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
+  TGD%XWG(:,:) = TGDP%XWWILT + ZF(:,:) * (TGDP%XWFC-TGDP%XWWILT)
+  TGD%XWG(:,:) = MAX(MIN(TGD%XWG(:,:),TGDP%XWSAT),XWGMIN)
   !
-  WHERE(ZF(:,:)==XUNDEF)XWG(:,:)=XUNDEF
+  WHERE(ZF(:,:)==XUNDEF)TGD%XWG(:,:)=XUNDEF
   !
   DEALLOCATE(ZF)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WGI    ')
-  ALLOCATE(ZF (SIZE(ZFIELDOUTV,1),NGROUND_LAYER))
+  ALLOCATE(ZF (SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,XDG,ZF)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,TGDP%XDG,ZF)
   !
   !* retrieves soil ice content from soil relative humidity
-  ALLOCATE(XWGI(SIZE(ZFIELDOUTV,1),NGROUND_LAYER))
-  XWGI(:,:) = ZF(:,:) * XWSAT
-  XWGI(:,:) = MAX(MIN(XWGI(:,:),XWSAT),0.)
+  ALLOCATE(TGD%XWGI(SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
+  TGD%XWGI(:,:) = ZF(:,:) * TGDP%XWSAT
+  TGD%XWGI(:,:) = MAX(MIN(TGD%XWGI(:,:),TGDP%XWSAT),0.)
   !
-  WHERE(ZF(:,:)==XUNDEF)XWGI(:,:)=XUNDEF
+  WHERE(ZF(:,:)==XUNDEF)TGD%XWGI(:,:)=XUNDEF
   !
   DEALLOCATE(ZF)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TG     ') 
-  IWORK=NGROUND_LAYER
-  ALLOCATE(XTG(SIZE(ZFIELDOUTV,1),IWORK))
-  ALLOCATE(ZDG(SIZE(XDG,1),IWORK))
-  IF (CISBA=='2-L'.OR.CISBA=='3-L') THEN
+  IWORK=TGDO%NGROUND_LAYER
+  ALLOCATE(TGD%XTG(SIZE(ZFIELDOUTV,1),IWORK))
+  ALLOCATE(ZDG(SIZE(TGDP%XDG,1),IWORK))
+  IF (TVG%CISBA=='2-L'.OR.TVG%CISBA=='3-L') THEN
     ZDG(:,1) = 0.01
     ZDG(:,2) = 0.40   ! deep temperature for force-restore taken at 20cm
-    IF(CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used
+    IF(TVG%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used
   ELSE
     !* diffusion method, the soil grid is the same as for humidity
-    ZDG(:,:) = XDG(:,:)
+    ZDG(:,:) = TGDP%XDG(:,:)
   END IF
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,XTG)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,TGD%XTG)
   DEALLOCATE(ZDG)
   !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WR     ') 
-  ALLOCATE(XWR(SIZE(ZFIELDOUTV,1)))
-  XWR(:) = ZW(:,1)
+  ALLOCATE(TGD%XWR(SIZE(ZFIELDOUTV,1)))
+  TGD%XWR(:) = ZW(:,1)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LAI    ') 
   !* LAI is updated only if present and pertinent (evolutive LAI) in input file
 
-   WHERE (ZW(:,1)/=XUNDEF) XLAI(:) = ZW(:,1)
+   WHERE (ZW(:,1)/=XUNDEF) TGDPE%XLAI(:) = ZW(:,1)
   !
 END SELECT
 !
@@ -346,7 +345,7 @@ IF (SIZE(PT1,2)==3) THEN
 !* 1. case with only 3 input levels (typically coming from 'UNIF')
 !     -----------------------------
 !
-  IF (CISBA=='2-L' .OR. CISBA=='3-L') THEN
+  IF (TVG%CISBA=='2-L' .OR. TVG%CISBA=='3-L') THEN
     !* Possible LTEMP_ARP case
     IF(SIZE(PT2,2)>3)THEN
        ILAYER1=3
@@ -364,17 +363,17 @@ IF (SIZE(PT1,2)==3) THEN
        ENDDO
     ENDIF
 !    
-  ELSEIF(CISBA=='DIF')THEN
+  ELSEIF(TVG%CISBA=='DIF')THEN
        !surface layer (generally 0.01m imposed)
        PT2(:,1) = PT1(:,1) 
        !deep layers
-       DO JL=2,NGROUND_LAYER
+       DO JL=2,TGDO%NGROUND_LAYER
           PT2(:,JL) = PT1(:,3)
        END DO
        !if root layers
        DO JI=1,SIZE(PT1,1)
-          DO JL=2,NGROUND_LAYER
-             IF(XROOTFRAC(JI,JL)<=1.0)THEN 
+          DO JL=2,TGDO%NGROUND_LAYER
+             IF(TGDP%XROOTFRAC(JI,JL)<=1.0)THEN 
                 PT2(JI,JL) = PT1(JI,2)
                 EXIT
              ENDIF

@@ -38,13 +38,9 @@
 !            -----------
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_TEB_OPTION_n,   ONLY : XCOVER, LCOVER, XZS,                   &
-                                NROAD_LAYER, NWALL_LAYER, NROOF_LAYER, &
-                                LECOCLIMAP, LGARDEN, NTEB_PATCH,       &
-                                CBLD_ATYPE, CBEM, LGREENROOF, LHYDRO,  &
-                                LSOLAR_PANEL
-USE MODD_BEM_OPTION_n,   ONLY : NFLOOR_LAYER, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE
-USE MODD_TEB_GRID_n,     ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 !
 USE MODI_GET_SURF_SIZE_n
 USE MODI_PACK_PGD
@@ -87,32 +83,32 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_TEB',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 
-NROOF_LAYER  = 5
-NROAD_LAYER  = 5
-NWALL_LAYER  = 5
-NFLOOR_LAYER = 5
+TOP%NROOF_LAYER  = 5
+TOP%NROAD_LAYER  = 5
+TOP%NWALL_LAYER  = 5
+BOP%NFLOOR_LAYER = 5
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
- CALL READ_NAM_PGD_TEB(HPROGRAM,NTEB_PATCH,CBEM,CCOOL_COIL,CHEAT_COIL,LAUTOSIZE,&
-                      NROAD_LAYER,NROOF_LAYER,NWALL_LAYER,NFLOOR_LAYER,        &
-                      LGREENROOF,LHYDRO,LSOLAR_PANEL                           )
+ CALL READ_NAM_PGD_TEB(HPROGRAM,TOP%NTEB_PATCH,TOP%CBEM,BOP%CCOOL_COIL,BOP%CHEAT_COIL,BOP%LAUTOSIZE,&
+                      TOP%NROAD_LAYER,TOP%NROOF_LAYER,TOP%NWALL_LAYER,BOP%NFLOOR_LAYER,        &
+                      TOP%LGREENROOF,TOP%LHYDRO,TOP%LSOLAR_PANEL                           )
 !
 !-------------------------------------------------------------------------------
 !
 !*    3.      Coherence of options
 !             --------------------
 !
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CBLD',CBEM,'DEF','BEM ')
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CCOOL_COIL',CCOOL_COIL,'IDEAL ','DXCOIL')
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CHEAT_COIL',CHEAT_COIL,'IDEAL ','FINCAP')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CBLD',TOP%CBEM,'DEF','BEM ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CCOOL_COIL',BOP%CCOOL_COIL,'IDEAL ','DXCOIL')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CHEAT_COIL',BOP%CHEAT_COIL,'IDEAL ','FINCAP')
 !
 IF (.NOT. OGARDEN) THEN
-  IF (LGREENROOF) CALL ABOR1_SFX('ERROR: You cannot activate LGREENROOF if LGARDEN is FALSE')
-  IF (LHYDRO    ) CALL ABOR1_SFX('ERROR: You cannot activate LHYDRO     if LGARDEN is FALSE')
+  IF (TOP%LGREENROOF) CALL ABOR1_SFX('ERROR: You cannot activate LGREENROOF if LGARDEN is FALSE')
+  IF (TOP%LHYDRO    ) CALL ABOR1_SFX('ERROR: You cannot activate LHYDRO     if LGARDEN is FALSE')
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -120,27 +116,27 @@ ENDIF
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('TOWN  ',NDIM)
+ CALL GET_SURF_SIZE_n('TOWN  ',TG%NDIM)
 !
-ALLOCATE(LCOVER     (JPCOVER))
-ALLOCATE(XCOVER     (NDIM,JPCOVER))
-ALLOCATE(XZS        (NDIM))
-ALLOCATE(XLAT       (NDIM))
-ALLOCATE(XLON       (NDIM))
-ALLOCATE(XMESH_SIZE (NDIM))
+ALLOCATE(TOP%LCOVER     (JPCOVER))
+ALLOCATE(TOP%XCOVER     (TG%NDIM,JPCOVER))
+ALLOCATE(TOP%XZS        (TG%NDIM))
+ALLOCATE(TG%XLAT       (TG%NDIM))
+ALLOCATE(TG%XLON       (TG%NDIM))
+ALLOCATE(TG%XMESH_SIZE (TG%NDIM))
 !
  CALL PACK_PGD(HPROGRAM, 'TOWN  ',                    &
-                CGRID,  XGRID_PAR,                   &
-                LCOVER, XCOVER, XZS,                 &
-                XLAT, XLON, XMESH_SIZE               )  
+                TG%CGRID,  TG%XGRID_PAR,                   &
+                TOP%LCOVER, TOP%XCOVER, TOP%XZS,                 &
+                TG%XLAT, TG%XLON, TG%XMESH_SIZE               )  
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.      TEB specific fields
 !             -------------------
 !
-LECOCLIMAP = OECOCLIMAP
- CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,LGREENROOF,CBLD_ATYPE)
+TOP%LECOCLIMAP = OECOCLIMAP
+ CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,TOP%LGREENROOF,TOP%CBLD_ATYPE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -155,16 +151,16 @@ IF (OECOCLIMAP) CALL WRITE_COVER_TEX_TEB
 !*    7.      Case of urban green areas (and hydrology)
 !             -----------------------------------------
 !
-LGARDEN       = OGARDEN
+TOP%LGARDEN       = OGARDEN
 !
-IF (LGARDEN) CALL PGD_TEB_VEG(HPROGRAM)
+IF (TOP%LGARDEN) CALL PGD_TEB_VEG(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*    8.      Case of Building Energy Model
 !             -----------------------------
 !
-IF (CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(HPROGRAM,LAUTOSIZE)
+IF (TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(HPROGRAM,BOP%LAUTOSIZE)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB',1,ZHOOK_HANDLE)
 !

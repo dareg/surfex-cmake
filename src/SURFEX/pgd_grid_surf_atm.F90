@@ -37,8 +37,7 @@
 USE MODD_SURF_PAR,        ONLY : NVERSION, NBUGFIX
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_PGD_GRID,        ONLY : LLATLONMASK, NL
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR, &
-                                 XLAT, XLON, XMESH_SIZE, XJPDIR
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODI_PGD_GRID
 USE MODI_INI_CSTS
@@ -82,7 +81,7 @@ CPROGNAME=HPROGRAM
 !*    2.      Initialisation of output grid
 !             -----------------------------
 !
- CALL PGD_GRID        (HPROGRAM,HFILE,HFILETYPE,OGRID,CGRID,NGRID_PAR,XGRID_PAR)
+ CALL PGD_GRID        (HPROGRAM,HFILE,HFILETYPE,OGRID,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 ! 
 !
 !-------------------------------------------------------------------------------

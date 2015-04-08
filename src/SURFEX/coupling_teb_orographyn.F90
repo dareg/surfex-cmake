@@ -38,7 +38,7 @@ SUBROUTINE COUPLING_TEB_OROGRAPHY_n(HPROGRAM, HCOUPLING,                        
 !
 USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_CSTS,    ONLY : XCPD, XRD, XP00
-USE MODD_TEB_OPTION_n,  ONLY : XZS
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -156,7 +156,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,TOP%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -183,7 +183,7 @@ ENDIF
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
                  PTSUN, PZENITH, PAZIM,                                                      &
-                 PZREF, PUREF, XZS, PU, PV, ZQA, ZTA, ZRHOA,PSV, PCO2, HSV,                  &
+                 PZREF, PUREF, TOP%XZS, PU, PV, ZQA, ZTA, ZRHOA,PSV, PCO2, HSV,                  &
                  ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &

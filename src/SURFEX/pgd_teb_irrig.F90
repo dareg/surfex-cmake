@@ -36,11 +36,8 @@
 !            -----------
 !
 USE MODD_SURF_PAR,          ONLY : XUNDEF
-USE MODD_TEB_GRID_n,        ONLY : NDIM
-USE MODD_TEB_IRRIG_n,       ONLY : LPAR_GD_IRRIG, LPAR_GR_IRRIG, LPAR_RD_IRRIG,                                 &
-                                   XGD_START_MONTH, XGD_END_MONTH, XGD_START_HOUR, XGD_END_HOUR, XGD_24H_IRRIG, &
-                                   XRD_START_MONTH, XRD_END_MONTH, XRD_START_HOUR, XRD_END_HOUR, XRD_24H_IRRIG, &
-                                   XGR_START_MONTH, XGR_END_MONTH, XGR_START_HOUR, XGR_END_HOUR, XGR_24H_IRRIG
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
 !
 USE MODD_PGDWORK,           ONLY : CATYPE
 !
@@ -254,7 +251,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_TEB_IRRIG)
 !*    3.      Coherence check for gardens
 !             ---------------------------
 !
-LPAR_GD_IRRIG =     (XUNIF_GD_START_MONTH /= XUNDEF .OR. LEN_TRIM(CFNAM_GD_START_MONTH) >0 )&
+TIR%LPAR_GD_IRRIG =     (XUNIF_GD_START_MONTH /= XUNDEF .OR. LEN_TRIM(CFNAM_GD_START_MONTH) >0 )&
               .AND. (XUNIF_GD_END_MONTH   /= XUNDEF .OR. LEN_TRIM(CFNAM_GD_END_MONTH  ) >0 )&
               .AND. (XUNIF_GD_START_HOUR  /= XUNDEF .OR. LEN_TRIM(CFNAM_GD_START_HOUR ) >0 )&
               .AND. (XUNIF_GD_END_HOUR    /= XUNDEF .OR. LEN_TRIM(CFNAM_GD_END_HOUR   ) >0 )&
@@ -266,20 +263,20 @@ GNO_PAR_GD_IRRIG =  (XUNIF_GD_START_MONTH == XUNDEF .AND. LEN_TRIM(CFNAM_GD_STAR
               .AND. (XUNIF_GD_END_HOUR    == XUNDEF .AND. LEN_TRIM(CFNAM_GD_END_HOUR   )==0 )&
               .AND. (XUNIF_GD_24H_IRRIG   == XUNDEF .AND. LEN_TRIM(CFNAM_GD_24h_IRRIG  )==0 )
 
-IF ( .NOT. LPAR_GD_IRRIG .AND. .NOT. GNO_PAR_GD_IRRIG) THEN
+IF ( .NOT. TIR%LPAR_GD_IRRIG .AND. .NOT. GNO_PAR_GD_IRRIG) THEN
   WRITE(ILUOUT,*) ' Error for prescription of irrigation in gardens '
   WRITE(ILUOUT,*) ' You need to specify the five parameters ... or none. '
   CALL ABOR1_SFX( 'Namelist NAM_DATA_TEB_IRRIG: you need to specify ALL of parameters for GARDEN or NONE of them')
 END IF
 !
 !-------------------------------------------------------------------------------
-IF (LPAR_GD_IRRIG) THEN
+IF (TIR%LPAR_GD_IRRIG) THEN
 !
-ALLOCATE(XGD_START_MONTH   (NDIM        ))
-ALLOCATE(XGD_END_MONTH     (NDIM        ))
-ALLOCATE(XGD_START_HOUR    (NDIM        ))
-ALLOCATE(XGD_END_HOUR      (NDIM        ))
-ALLOCATE(XGD_24H_IRRIG     (NDIM        ))
+ALLOCATE(TIR%XGD_START_MONTH   (TG%NDIM        ))
+ALLOCATE(TIR%XGD_END_MONTH     (TG%NDIM        ))
+ALLOCATE(TIR%XGD_START_HOUR    (TG%NDIM        ))
+ALLOCATE(TIR%XGD_END_HOUR      (TG%NDIM        ))
+ALLOCATE(TIR%XGD_24H_IRRIG     (TG%NDIM        ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -289,16 +286,16 @@ ALLOCATE(XGD_24H_IRRIG     (NDIM        ))
 CATYPE = 'MAJ'
 !
  CALL PGD_FIELD(HPROGRAM,'GD_START_MONTH : start month for irrigation of gardens','TWN',CFNAM_GD_START_MONTH,   &
-                 CFTYP_GD_START_MONTH,XUNIF_GD_START_MONTH,XGD_START_MONTH(:))  
+                 CFTYP_GD_START_MONTH,XUNIF_GD_START_MONTH,TIR%XGD_START_MONTH(:))  
  CALL PGD_FIELD(HPROGRAM,'GD_END_MONTH   : end   month for irrigation of gardens','TWN',CFNAM_GD_END_MONTH,     &
-                 CFTYP_GD_END_MONTH  ,XUNIF_GD_END_MONTH  ,XGD_END_MONTH  (:))  
+                 CFTYP_GD_END_MONTH  ,XUNIF_GD_END_MONTH  ,TIR%XGD_END_MONTH  (:))  
  CALL PGD_FIELD(HPROGRAM,'GD_START_HOUR  : start HOUR  for irrigation of gardens','TWN',CFNAM_GD_START_HOUR ,   &
-                 CFTYP_GD_START_HOUR ,XUNIF_GD_START_HOUR ,XGD_START_HOUR (:))  
+                 CFTYP_GD_START_HOUR ,XUNIF_GD_START_HOUR ,TIR%XGD_START_HOUR (:))  
  CALL PGD_FIELD(HPROGRAM,'GD_END_HOUR    : end   HOUR  for irrigation of gardens','TWN',CFNAM_GD_END_HOUR ,     &
-                 CFTYP_GD_END_HOUR   ,XUNIF_GD_END_HOUR   ,XGD_END_HOUR   (:))  
+                 CFTYP_GD_END_HOUR   ,XUNIF_GD_END_HOUR   ,TIR%XGD_END_HOUR   (:))  
 CATYPE = 'ARI'
  CALL PGD_FIELD(HPROGRAM,'GD_24H_IRRIG   : total irrigation over 24h for gardens','TWN',CFNAM_GD_24H_IRRIG ,    &
-                 CFTYP_GD_24H_IRRIG  ,XUNIF_GD_24H_IRRIG  ,XGD_24H_IRRIG  (:))  
+                 CFTYP_GD_24H_IRRIG  ,XUNIF_GD_24H_IRRIG  ,TIR%XGD_24H_IRRIG  (:))  
 !
 !
 END IF
@@ -307,7 +304,7 @@ END IF
 !*    5.      Coherence check for greenroofs
 !             ------------------------------
 !
-LPAR_GR_IRRIG =     (XUNIF_GR_START_MONTH /= XUNDEF .OR. LEN_TRIM(CFNAM_GR_START_MONTH) >0 )&
+TIR%LPAR_GR_IRRIG =     (XUNIF_GR_START_MONTH /= XUNDEF .OR. LEN_TRIM(CFNAM_GR_START_MONTH) >0 )&
               .AND. (XUNIF_GR_END_MONTH   /= XUNDEF .OR. LEN_TRIM(CFNAM_GR_END_MONTH  ) >0 )&
               .AND. (XUNIF_GR_START_HOUR  /= XUNDEF .OR. LEN_TRIM(CFNAM_GR_START_HOUR ) >0 )&
               .AND. (XUNIF_GR_END_HOUR    /= XUNDEF .OR. LEN_TRIM(CFNAM_GR_END_HOUR   ) >0 )&
@@ -319,20 +316,20 @@ GNO_PAR_GR_IRRIG =  (XUNIF_GR_START_MONTH == XUNDEF .AND. LEN_TRIM(CFNAM_GR_STAR
               .AND. (XUNIF_GR_END_HOUR    == XUNDEF .AND. LEN_TRIM(CFNAM_GR_END_HOUR   )==0 )&
               .AND. (XUNIF_GR_24H_IRRIG   == XUNDEF .AND. LEN_TRIM(CFNAM_GR_24h_IRRIG  )==0 )
 
-IF ( .NOT. LPAR_GR_IRRIG .AND. .NOT. GNO_PAR_GR_IRRIG) THEN
+IF ( .NOT. TIR%LPAR_GR_IRRIG .AND. .NOT. GNO_PAR_GR_IRRIG) THEN
   WRITE(ILUOUT,*) ' Error for prescription of irrigation in greenroofs '
   WRITE(ILUOUT,*) ' You need to specify the five parameters ... or none. '
   CALL ABOR1_SFX( 'Namelist NAM_DATA_TEB_IRRIG: you need to specify ALL of parameters for GREENROOFS or NONE of them')
 END IF
 !
 !-------------------------------------------------------------------------------
-IF (LPAR_GR_IRRIG) THEN
+IF (TIR%LPAR_GR_IRRIG) THEN
 !
-ALLOCATE(XGR_START_MONTH   (NDIM        ))
-ALLOCATE(XGR_END_MONTH     (NDIM        ))
-ALLOCATE(XGR_START_HOUR    (NDIM        ))
-ALLOCATE(XGR_END_HOUR      (NDIM        ))
-ALLOCATE(XGR_24H_IRRIG     (NDIM        ))
+ALLOCATE(TIR%XGR_START_MONTH   (TG%NDIM        ))
+ALLOCATE(TIR%XGR_END_MONTH     (TG%NDIM        ))
+ALLOCATE(TIR%XGR_START_HOUR    (TG%NDIM        ))
+ALLOCATE(TIR%XGR_END_HOUR      (TG%NDIM        ))
+ALLOCATE(TIR%XGR_24H_IRRIG     (TG%NDIM        ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -342,16 +339,16 @@ ALLOCATE(XGR_24H_IRRIG     (NDIM        ))
 CATYPE = 'MAJ'
 !
  CALL PGD_FIELD(HPROGRAM,'GR_START_MONTH : start month for irrigation of greenroofs','TWN',CFNAM_GR_START_MONTH,   &
-                 CFTYP_GR_START_MONTH,XUNIF_GR_START_MONTH,XGR_START_MONTH(:))  
+                 CFTYP_GR_START_MONTH,XUNIF_GR_START_MONTH,TIR%XGR_START_MONTH(:))  
  CALL PGD_FIELD(HPROGRAM,'GR_END_MONTH   : end   month for irrigation of greenroofs','TWN',CFNAM_GR_END_MONTH,     &
-                 CFTYP_GR_END_MONTH  ,XUNIF_GR_END_MONTH  ,XGR_END_MONTH  (:))  
+                 CFTYP_GR_END_MONTH  ,XUNIF_GR_END_MONTH  ,TIR%XGR_END_MONTH  (:))  
  CALL PGD_FIELD(HPROGRAM,'GR_START_HOUR  : start HOUR  for irrigation of greenroofs','TWN',CFNAM_GR_START_HOUR ,   &
-                 CFTYP_GR_START_HOUR ,XUNIF_GR_START_HOUR ,XGR_START_HOUR (:))  
+                 CFTYP_GR_START_HOUR ,XUNIF_GR_START_HOUR ,TIR%XGR_START_HOUR (:))  
  CALL PGD_FIELD(HPROGRAM,'GR_END_HOUR    : end   HOUR  for irrigation of greenroofs','TWN',CFNAM_GR_END_HOUR ,     &
-                 CFTYP_GR_END_HOUR   ,XUNIF_GR_END_HOUR   ,XGR_END_HOUR   (:))  
+                 CFTYP_GR_END_HOUR   ,XUNIF_GR_END_HOUR   ,TIR%XGR_END_HOUR   (:))  
 CATYPE = 'ARI'
  CALL PGD_FIELD(HPROGRAM,'GR_24H_IRRIG   : total irrigation over 24h for greenroofs','TWN',CFNAM_GR_24H_IRRIG ,    &
-                 CFTYP_GR_24H_IRRIG  ,XUNIF_GR_24H_IRRIG  ,XGR_24H_IRRIG  (:))  
+                 CFTYP_GR_24H_IRRIG  ,XUNIF_GR_24H_IRRIG  ,TIR%XGR_24H_IRRIG  (:))  
 !
 END IF
 !-------------------------------------------------------------------------------
@@ -359,7 +356,7 @@ END IF
 !*    7.      Coherence check for roads
 !             -------------------------
 !
-LPAR_RD_IRRIG =     (XUNIF_RD_START_MONTH /= XUNDEF .OR. LEN_TRIM(CFNAM_RD_START_MONTH) >0 )&
+TIR%LPAR_RD_IRRIG =     (XUNIF_RD_START_MONTH /= XUNDEF .OR. LEN_TRIM(CFNAM_RD_START_MONTH) >0 )&
               .AND. (XUNIF_RD_END_MONTH   /= XUNDEF .OR. LEN_TRIM(CFNAM_RD_END_MONTH  ) >0 )&
               .AND. (XUNIF_RD_START_HOUR  /= XUNDEF .OR. LEN_TRIM(CFNAM_RD_START_HOUR ) >0 )&
               .AND. (XUNIF_RD_END_HOUR    /= XUNDEF .OR. LEN_TRIM(CFNAM_RD_END_HOUR   ) >0 )&
@@ -371,20 +368,20 @@ GNO_PAR_RD_IRRIG =  (XUNIF_RD_START_MONTH == XUNDEF .AND. LEN_TRIM(CFNAM_RD_STAR
               .AND. (XUNIF_RD_END_HOUR    == XUNDEF .AND. LEN_TRIM(CFNAM_RD_END_HOUR   )==0 )&
               .AND. (XUNIF_RD_24H_IRRIG   == XUNDEF .AND. LEN_TRIM(CFNAM_RD_24h_IRRIG  )==0 )
 
-IF ( .NOT. LPAR_RD_IRRIG .AND. .NOT. GNO_PAR_RD_IRRIG) THEN
+IF ( .NOT. TIR%LPAR_RD_IRRIG .AND. .NOT. GNO_PAR_RD_IRRIG) THEN
   WRITE(ILUOUT,*) ' Error for prescription of irrigation on roads '
   WRITE(ILUOUT,*) ' You need to specify the five parameters ... or none. '
   CALL ABOR1_SFX( 'Namelist NAM_DATA_TEB_IRRIG: you need to specify ALL of parameters for ROADS or NONE of them')
 END IF
 !
 !-------------------------------------------------------------------------------
-IF (LPAR_RD_IRRIG) THEN
+IF (TIR%LPAR_RD_IRRIG) THEN
 !
-ALLOCATE(XRD_START_MONTH   (NDIM        ))
-ALLOCATE(XRD_END_MONTH     (NDIM        ))
-ALLOCATE(XRD_START_HOUR    (NDIM        ))
-ALLOCATE(XRD_END_HOUR      (NDIM        ))
-ALLOCATE(XRD_24H_IRRIG     (NDIM        ))
+ALLOCATE(TIR%XRD_START_MONTH   (TG%NDIM        ))
+ALLOCATE(TIR%XRD_END_MONTH     (TG%NDIM        ))
+ALLOCATE(TIR%XRD_START_HOUR    (TG%NDIM        ))
+ALLOCATE(TIR%XRD_END_HOUR      (TG%NDIM        ))
+ALLOCATE(TIR%XRD_24H_IRRIG     (TG%NDIM        ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -394,16 +391,16 @@ ALLOCATE(XRD_24H_IRRIG     (NDIM        ))
 CATYPE = 'MAJ'
 !
  CALL PGD_FIELD(HPROGRAM,'RD_START_MONTH : start month for irrigation of roads','TWN',CFNAM_RD_START_MONTH,   &
-                 CFTYP_RD_START_MONTH,XUNIF_RD_START_MONTH,XRD_START_MONTH(:))  
+                 CFTYP_RD_START_MONTH,XUNIF_RD_START_MONTH,TIR%XRD_START_MONTH(:))  
  CALL PGD_FIELD(HPROGRAM,'RD_END_MONTH   : end   month for irrigation of roads','TWN',CFNAM_RD_END_MONTH,     &
-                 CFTYP_RD_END_MONTH  ,XUNIF_RD_END_MONTH  ,XRD_END_MONTH  (:))  
+                 CFTYP_RD_END_MONTH  ,XUNIF_RD_END_MONTH  ,TIR%XRD_END_MONTH  (:))  
  CALL PGD_FIELD(HPROGRAM,'RD_START_HOUR  : start HOUR  for irrigation of roads','TWN',CFNAM_RD_START_HOUR ,   &
-                 CFTYP_RD_START_HOUR ,XUNIF_RD_START_HOUR ,XRD_START_HOUR (:))  
+                 CFTYP_RD_START_HOUR ,XUNIF_RD_START_HOUR ,TIR%XRD_START_HOUR (:))  
  CALL PGD_FIELD(HPROGRAM,'RD_END_HOUR    : end   HOUR  for irrigation of roads','TWN',CFNAM_RD_END_HOUR ,     &
-                 CFTYP_RD_END_HOUR   ,XUNIF_RD_END_HOUR   ,XRD_END_HOUR   (:))  
+                 CFTYP_RD_END_HOUR   ,XUNIF_RD_END_HOUR   ,TIR%XRD_END_HOUR   (:))  
 CATYPE = 'ARI'
  CALL PGD_FIELD(HPROGRAM,'RD_24H_IRRIG   : total irrigation over 24h for roads','TWN',CFNAM_RD_24H_IRRIG ,    &
-                 CFTYP_RD_24H_IRRIG  ,XUNIF_RD_24H_IRRIG  ,XRD_24H_IRRIG  (:))  
+                 CFTYP_RD_24H_IRRIG  ,XUNIF_RD_24H_IRRIG  ,TIR%XRD_24H_IRRIG  (:))  
 !
 END IF
 !

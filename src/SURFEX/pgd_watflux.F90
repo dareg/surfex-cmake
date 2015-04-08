@@ -36,8 +36,8 @@
 !            -----------
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_WATFLUX_n,       ONLY : XCOVER, LCOVER, XZS
-USE MODD_WATFLUX_GRID_n,  ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 !
 USE MODI_GET_SURF_SIZE_n
 USE MODI_PACK_PGD
@@ -84,18 +84,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',0,ZHOOK_HANDLE)
- CALL GET_SURF_SIZE_n('WATER ',NDIM)
+ CALL GET_SURF_SIZE_n('WATER ',WG%NDIM)
 !
-ALLOCATE(LCOVER     (JPCOVER))
-ALLOCATE(XZS        (NDIM))
-ALLOCATE(XLAT       (NDIM))
-ALLOCATE(XLON       (NDIM))
-ALLOCATE(XMESH_SIZE (NDIM))
+ALLOCATE(W%LCOVER     (JPCOVER))
+ALLOCATE(W%XZS        (WG%NDIM))
+ALLOCATE(WG%XLAT       (WG%NDIM))
+ALLOCATE(WG%XLON       (WG%NDIM))
+ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
 !
  CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
-                CGRID,  XGRID_PAR,                     &
-                LCOVER, XCOVER, XZS,                   &
-                XLAT, XLON, XMESH_SIZE                 )  
+                WG%CGRID,  WG%XGRID_PAR,                     &
+                W%LCOVER, W%XCOVER, W%XZS,                   &
+                WG%XLAT, WG%XLON, WG%XMESH_SIZE                 )  
 !
 !-------------------------------------------------------------------------------
  CALL WRITE_COVER_TEX_WATER

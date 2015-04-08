@@ -28,12 +28,7 @@
 !!      S.Senesi    01/2014  Add fluxes on seaice
 !!------------------------------------------------------------------
 ! 
-USE MODD_DIAG_SEAFLUX_n, ONLY : XRNC, XHC, XLEC, XLEC_ICE, XGFLUXC, XSWDC,  &
-                                  XSWUC, XLWDC, XLWUC, XFMUC, XFMVC,     &
-                                  XEVAPC, XSUBLC,                        &
-                                  XRNC_ICE, XHC_ICE, XGFLUXC_ICE,        &
-                                  XSWUC_ICE, XLWUC_ICE, XFMUC_ICE,       &
-                                  XFMVC_ICE
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -79,67 +74,67 @@ IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_SEA',0,ZHOOK_HANDLE)
 !
 !* total incoming and outgoing SW
 !
-XSWDC(:) = XSWDC(:) + PSWD(:) * PTSTEP
-XSWUC(:) = XSWUC(:) + PSWU(:) * PTSTEP
+DGS%XSWDC(:) = DGS%XSWDC(:) + PSWD(:) * PTSTEP
+DGS%XSWUC(:) = DGS%XSWUC(:) + PSWU(:) * PTSTEP
 !
 !*incoming outgoing LW
 !
-XLWDC(:) = XLWDC(:) + PLWD(:) * PTSTEP
-XLWUC(:) = XLWUC(:) + PLWU(:) * PTSTEP
+DGS%XLWDC(:) = DGS%XLWDC(:) + PLWD(:) * PTSTEP
+DGS%XLWUC(:) = DGS%XLWUC(:) + PLWU(:) * PTSTEP
 !
 !* net radiation
 !
-XRNC(:) = XRNC(:) + PRN(:) * PTSTEP
+DGS%XRNC(:) = DGS%XRNC(:) + PRN(:) * PTSTEP
 !
 !* sensible heat flux
 !
-XHC(:) = XHC(:) + PH(:) * PTSTEP 
+DGS%XHC(:) = DGS%XHC(:) + PH(:) * PTSTEP 
 !
 !* latent heat flux (J/m2)
 !
-XLEC    (:) = XLEC    (:) + PLE    (:) * PTSTEP 
-XLEC_ICE(:) = XLEC_ICE(:) + PLE_ICE(:) * PTSTEP 
+DGS%XLEC    (:) = DGS%XLEC    (:) + PLE    (:) * PTSTEP 
+DGS%XLEC_ICE(:) = DGS%XLEC_ICE(:) + PLE_ICE(:) * PTSTEP 
 !
 !* evaporation and sublimation (kg/m2)
 !
-XEVAPC(:) = XEVAPC(:) + PEVAP(:) * PTSTEP
-XSUBLC(:) = XSUBLC(:) + PSUBL(:) * PTSTEP
+DGS%XEVAPC(:) = DGS%XEVAPC(:) + PEVAP(:) * PTSTEP
+DGS%XSUBLC(:) = DGS%XSUBLC(:) + PSUBL(:) * PTSTEP
 !
 !* storage flux
 !
-XGFLUXC(:) = XGFLUXC(:) + PGFLUX(:) * PTSTEP
+DGS%XGFLUXC(:) = DGS%XGFLUXC(:) + PGFLUX(:) * PTSTEP
 !
 !* wind stress
 !
-XFMUC(:) = XFMUC(:) + PFMU(:) * PTSTEP 
-XFMVC(:) = XFMVC(:) + PFMV(:) * PTSTEP
+DGS%XFMUC(:) = DGS%XFMUC(:) + PFMU(:) * PTSTEP 
+DGS%XFMVC(:) = DGS%XFMVC(:) + PFMV(:) * PTSTEP
 !
 IF (OHANDLE_SIC) THEN
 !
 !* total incoming and outgoing SW
 !
-   XSWUC_ICE(:) = XSWUC_ICE(:) + PSWU_ICE(:) * PTSTEP
+   DGS%XSWUC_ICE(:) = DGS%XSWUC_ICE(:) + PSWU_ICE(:) * PTSTEP
 !
 !*incoming outgoing LW
 !
-   XLWUC_ICE(:) = XLWUC_ICE(:) + PLWU_ICE(:) * PTSTEP
+   DGS%XLWUC_ICE(:) = DGS%XLWUC_ICE(:) + PLWU_ICE(:) * PTSTEP
 !
 !* net radiation
 !
-   XRNC_ICE(:) = XRNC_ICE(:) + PRN_ICE(:) * PTSTEP
+   DGS%XRNC_ICE(:) = DGS%XRNC_ICE(:) + PRN_ICE(:) * PTSTEP
 !
 !* sensible heat flux
 !
-   XHC_ICE(:) = XHC_ICE(:) + PH_ICE(:) * PTSTEP 
+   DGS%XHC_ICE(:) = DGS%XHC_ICE(:) + PH_ICE(:) * PTSTEP 
 !
 !* storage flux
 !
-   XGFLUXC_ICE(:) = XGFLUXC_ICE(:) + PGFLUX_ICE(:) * PTSTEP 
+   DGS%XGFLUXC_ICE(:) = DGS%XGFLUXC_ICE(:) + PGFLUX_ICE(:) * PTSTEP 
 !
 !* wind stress
 !
-   XFMUC(:) = XFMUC(:) + PFMU(:) * PTSTEP 
-   XFMVC(:) = XFMVC(:) + PFMV(:) * PTSTEP
+   DGS%XFMUC(:) = DGS%XFMUC(:) + PFMU(:) * PTSTEP 
+   DGS%XFMVC(:) = DGS%XFMVC(:) + PFMV(:) * PTSTEP
 !        
 ENDIF
 !

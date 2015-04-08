@@ -26,7 +26,7 @@ MODULE MODE_CRODEBUG
 !!      Modification M Lafaysse 03/10/2012 : add energy balance control
 !--------------------------------------------------------------------------------
 !
-USE MODD_ISBA_n,       ONLY : TSNOW
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 IMPLICIT NONE
 !
@@ -62,7 +62,7 @@ SUBROUTINE INIT_CRODEBUG()
  CHARACTER(6) :: YCROCUS_DEBUG_POINT
  CHARACTER(12) :: YCROCUS_DEBUG_LAT,YCROCUS_DEBUG_LON
 !
-IF (TSNOW%SCHEME=='CRO') THEN
+IF (I%TSNOW%SCHEME=='CRO') THEN
   !
   CALL GETENV("CROCUS_INFO",YCROCUS_INFO)
   SELECT CASE (YCROCUS_INFO)

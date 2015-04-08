@@ -37,7 +37,7 @@
 !              ------------
 !
 USE MODD_SURF_ATM,   ONLY : LCPL_GCM
-USE MODD_SURF_ATM_n, ONLY : XRAIN, XSNOW, XZ0, XZ0H, XQSURF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -73,18 +73,18 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF(LCPL_GCM) THEN
 !
-  IF(SIZE(PZ0)/=SIZE(XZ0H))THEN
+  IF(SIZE(PZ0)/=SIZE(U%XZ0H))THEN
     WRITE(ILUOUT,*)'try to get Z0 field from atmospheric model, but size is not correct'
     WRITE(ILUOUT,*)'size of field expected by the atmospheric model (PZ0) :', SIZE(PZ0)
-    WRITE(ILUOUT,*)'size of field in SURFEX                         (XZ0) :', SIZE(XZ0)
+    WRITE(ILUOUT,*)'size of field in SURFEX                         (XZ0) :', SIZE(U%XZ0)
     CALL ABOR1_SFX('GET_CPL_GCMN: PZ0 ARGUMENT SIZE /= XZ0 MODULE SIZE')
   ENDIF
 !
-  PRAIN (:) = XRAIN
-  PSNOW (:) = XSNOW
-  PZ0   (:) = XZ0
-  PZ0H  (:) = XZ0H
-  PQSURF(:) = XQSURF
+  PRAIN (:) = U%XRAIN
+  PSNOW (:) = U%XSNOW
+  PZ0   (:) = U%XZ0
+  PZ0H  (:) = U%XZ0H
+  PQSURF(:) = U%XQSURF
 !
 ELSE
 !

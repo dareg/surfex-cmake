@@ -24,7 +24,7 @@ SUBROUTINE PREP_VER_SEAFLUX
 !!------------------------------------------------------------------
 !
 !
-USE MODD_SEAFLUX_n,   ONLY : XZS, XSST 
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX 
 USE MODD_PREP,   ONLY : XZS_LS, XT_CLIM_GRAD
 !
 !
@@ -47,7 +47,7 @@ IMPLICIT NONE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('PREP_VER_SEAFLUX',0,ZHOOK_HANDLE)
-XSST = XSST  + XT_CLIM_GRAD  * (XZS - XZS_LS)
+S%XSST = S%XSST  + XT_CLIM_GRAD  * (S%XZS - XZS_LS)
 IF (LHOOK) CALL DR_HOOK('PREP_VER_SEAFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -33,7 +33,7 @@ SUBROUTINE ISBA_BUDGET(HISBA, HSNOW_ISBA, OGLACIER, PTSTEP,    &
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XRHOLW
 !     
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : LWATER_BUDGET
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -124,7 +124,7 @@ ENDIF
 !*      2.0    Comptut isba water budget in kg/m2/s
 !       -------------------------------------------
 !
-IF(LWATER_BUDGET)THEN
+IF(DGEI%LWATER_BUDGET)THEN
 !
 ! total swe at t in kg/m2
   ZSWE_T(:)=0.0

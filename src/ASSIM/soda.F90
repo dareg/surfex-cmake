@@ -50,10 +50,10 @@ USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 USE MODD_SURF_CONF, ONLY : CSOFTWARE
 USE MODD_SURF_PAR,  ONLY : XUNDEF,NUNDEF
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : XLON, XLAT
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
-USE MODD_SURF_ATM_n, ONLY : NSIZE_NATURE, NSIZE_FULL
-USE MODD_ISBA_n,     ONLY : NPATCH, XWG, XTG, XLAI, XBIOMASS, XRESP_BIOMASS
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
                        NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU, XI,  &
@@ -418,11 +418,11 @@ DO ISTEP = 1,NBOUTPUT
     IF ( CASSIM_ISBA=='EKF  ' ) THEN
       !
       IF ( ISTEP==1 .AND. NIPERT==INBPERT ) THEN
-        ALLOCATE(XLAI_PASS(NSIZE_NATURE,NPATCH)) 
-        ALLOCATE(XBIO_PASS(NSIZE_NATURE,NPATCH))     
-        ALLOCATE(XI       (NSIZE_NATURE,NPATCH,NVAR    ))
-        ALLOCATE(XF       (NSIZE_NATURE,NPATCH,NVAR+1,NVAR    ))
-        ALLOCATE(XF_PATCH (NSIZE_NATURE,NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
+        ALLOCATE(XLAI_PASS(U%NSIZE_NATURE,I%NPATCH)) 
+        ALLOCATE(XBIO_PASS(U%NSIZE_NATURE,I%NPATCH))     
+        ALLOCATE(XI       (U%NSIZE_NATURE,I%NPATCH,NVAR    ))
+        ALLOCATE(XF       (U%NSIZE_NATURE,I%NPATCH,NVAR+1,NVAR    ))
+        ALLOCATE(XF_PATCH (U%NSIZE_NATURE,I%NPATCH,NVAR+1,NOBSTYPE*NBOUTPUT))
       ENDIF
       !
       IF ( NIPERT<INBPERT ) THEN
@@ -436,9 +436,9 @@ DO ISTEP = 1,NBOUTPUT
             CASE("HU2M")
               XF_PATCH(:,:,NIPERT,IIOBS) = XAHU2M_ISBA(:,:)
             CASE("WG1")
-              XF_PATCH(:,:,NIPERT,IIOBS) = XWG(:,1,:)
+              XF_PATCH(:,:,NIPERT,IIOBS) = I%XWG(:,1,:)
             CASE("LAI")
-              XF_PATCH(:,:,NIPERT,IIOBS) = XLAI(:,:)
+              XF_PATCH(:,:,NIPERT,IIOBS) = I%XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
           END SELECT
@@ -448,15 +448,15 @@ DO ISTEP = 1,NBOUTPUT
         DO JL = 1,NVAR
           SELECT CASE (TRIM(CVAR(JL)))
             CASE("TG1")
-              XF(:,:,NIPERT,JL) = XTG(:,1,:)
+              XF(:,:,NIPERT,JL) = I%XTG(:,1,:)
             CASE("TG2")
-              XF(:,:,NIPERT,JL) = XTG(:,2,:)
+              XF(:,:,NIPERT,JL) = I%XTG(:,2,:)
             CASE("WG1")
-              XF(:,:,NIPERT,JL) = XWG(:,1,:)
+              XF(:,:,NIPERT,JL) = I%XWG(:,1,:)
             CASE("WG2")
-              XF(:,:,NIPERT,JL) = XWG(:,2,:)
+              XF(:,:,NIPERT,JL) = I%XWG(:,2,:)
             CASE("LAI")
-              XF(:,:,NIPERT,JL) = XLAI(:,:)
+              XF(:,:,NIPERT,JL) = I%XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA_!")
           END SELECT
@@ -464,25 +464,25 @@ DO ISTEP = 1,NBOUTPUT
         !
         IF ( NIPERT==1 ) THEN
           !
-          IF ( NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
+          IF ( I%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
             CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF with NPATCH=1!")
           ENDIF
           SELECT CASE (TRIM(CBIO))
             CASE("BIOMA1","BIOMASS1")
-              XBIO_PASS(:,:) = XBIOMASS(:,1,:)
+              XBIO_PASS(:,:) = I%XBIOMASS(:,1,:)
             CASE("BIOMA2","BIOMASS2")
-              XBIO_PASS(:,:) = XBIOMASS(:,2,:)
+              XBIO_PASS(:,:) = I%XBIOMASS(:,2,:)
             CASE("RESPI1","RESP_BIOM1")
-              XBIO_PASS(:,:) = XRESP_BIOMASS(:,1,:)
+              XBIO_PASS(:,:) = I%XRESP_BIOMASS(:,1,:)
             CASE("RESPI2","RESP_BIOM2")
-              XBIO_PASS(:,:) = XRESP_BIOMASS(:,2,:)
+              XBIO_PASS(:,:) = I%XRESP_BIOMASS(:,2,:)
             CASE("LAI")
-              XBIO_PASS(:,:) = XLAI(:,:)
+              XBIO_PASS(:,:) = I%XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
           END SELECT
           !
-          XLAI_PASS(:,:) = XLAI(:,:)          
+          XLAI_PASS(:,:) = I%XLAI(:,:)          
           !
         ENDIF
         !
@@ -491,15 +491,15 @@ DO ISTEP = 1,NBOUTPUT
         DO JL = 1,NVAR
           SELECT CASE (TRIM(CVAR(JL)))
             CASE("TG1")
-              XI(:,:,JL) = XTG(:,1,:)
+              XI(:,:,JL) = I%XTG(:,1,:)
             CASE("TG2")
-              XI(:,:,JL) = XTG(:,2,:)
+              XI(:,:,JL) = I%XTG(:,2,:)
             CASE("WG1")
-              XI(:,:,JL) = XWG(:,1,:)
+              XI(:,:,JL) = I%XWG(:,1,:)
             CASE("WG2")
-              XI(:,:,JL) = XWG(:,2,:)
+              XI(:,:,JL) = I%XWG(:,2,:)
             CASE("LAI")
-              XI(:,:,JL) = XLAI(:,:)
+              XI(:,:,JL) = I%XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
           END SELECT
@@ -513,7 +513,7 @@ DO ISTEP = 1,NBOUTPUT
   !
   IF ( CASSIM_ISBA=="EKF  " ) THEN
     !
-    IF (ISTEP==1) ALLOCATE(XYO(NSIZE_NATURE,NOBSTYPE*NBOUTPUT))
+    IF (ISTEP==1) ALLOCATE(XYO(U%NSIZE_NATURE,NOBSTYPE*NBOUTPUT))
     !
     IF ( LOBSFILE ) THEN
       !
@@ -522,7 +522,7 @@ DO ISTEP = 1,NBOUTPUT
       OPEN(UNIT=55,FILE=TRIM(YMFILE)//".DAT",FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
       IF ( ISTAT==0 ) THEN
         !   If it exists, read observations
-        DO JI = 1,NSIZE_NATURE
+        DO JI = 1,U%NSIZE_NATURE
           READ (55,*)  (XYO(JI,NOBS+JJ),JJ=1,NOBSTYPE)
         ENDDO
         NOBS = NOBS + NOBSTYPE      
@@ -545,7 +545,7 @@ IF ( NOBS==0 .AND. CASSIM_ISBA=="EKF  " ) THEN
   CALL ABOR1_SFX("SODA: No observations read for LAI in OBS file - stop")
 ENDIF
 !
- CALL GET_SIZE_FULL_n(CSURF_FILETYPE,INI,NSIZE_FULL)
+ CALL GET_SIZE_FULL_n(CSURF_FILETYPE,INI,U%NSIZE_FULL)
 !
 WRITE(*,*) "READING input files..."
 ! Normal reading of needed FA fields
@@ -648,7 +648,7 @@ CDNOMC     = 'climat'                  ! new frame name
  CALL IO_BUFF_CLEAN_n
 WRITE(*,*) 'READ CLIMATOLOGY OK'
 
- CALL ASSIM_SET_SST(NSIZE_FULL,ZLSM,ZSST,ZSIC,YTEST)
+ CALL ASSIM_SET_SST(U%NSIZE_FULL,ZLSM,ZSST,ZSIC,YTEST)
 
 IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
 
@@ -657,8 +657,8 @@ GD_MASKEXT(:) = .FALSE.
 !
 ALLOCATE(ZLON(INI))
 ALLOCATE(ZLAT(INI))
-ZLON(:) = XLON(:)
-ZLAT(:) = XLAT(:)        
+ZLON(:) = UG%XLON(:)
+ZLAT(:) = UG%XLAT(:)        
 !
 GLKEEPEXTZONE = .TRUE.
 !

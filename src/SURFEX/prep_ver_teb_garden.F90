@@ -26,11 +26,11 @@ SUBROUTINE PREP_VER_TEB_GARDEN
 !
 
 !
-USE MODD_TEB_OPTION_n,   ONLY : XZS
-USE MODD_TEB_VEG_n,      ONLY : CISBA
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : NGROUND_LAYER
-USE MODD_TEB_GARDEN_PGD_n,    ONLY : XWSAT, XDG
-USE MODD_TEB_GARDEN_n,   ONLY : XTG, XWG, XWGI, TSNOW
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PREP,           ONLY : XZS_LS, XT_CLIM_GRAD
@@ -70,66 +70,66 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.0    Ice content climatologic gradient
 !
 IF (LHOOK) CALL DR_HOOK('PREP_VER_TEB_GARDEN',0,ZHOOK_HANDLE)
-ALLOCATE(ZWGI_CLIM_GRAD (SIZE(XWG,1),SIZE(XWG,2)))
+ALLOCATE(ZWGI_CLIM_GRAD (SIZE(TGD%XWG,1),SIZE(TGD%XWG,2)))
 !
-ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - XDG(:,:) / ZH0 )
+ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - TGDP%XDG(:,:) / ZH0 )
 !-------------------------------------------------------------------------------------
 !
 !*      1.1    Temperature profile
 !
-ALLOCATE(ZTG_LS(SIZE(XTG,1),SIZE(XTG,2)))
-ZTG_LS(:,:) = XTG(:,:)
+ALLOCATE(ZTG_LS(SIZE(TGD%XTG,1),SIZE(TGD%XTG,2)))
+ZTG_LS(:,:) = TGD%XTG(:,:)
 !
-DO JL=1,SIZE(XTG,2)
-  WHERE(XTG(:,JL)/=XUNDEF) &
-    XTG(:,JL) = XTG(:,JL) + XT_CLIM_GRAD  * (XZS - XZS_LS)  
+DO JL=1,SIZE(TGD%XTG,2)
+  WHERE(TGD%XTG(:,JL)/=XUNDEF) &
+    TGD%XTG(:,JL) = TGD%XTG(:,JL) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
 END DO
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.2    Water and ice in the soil
 !
-ALLOCATE(ZZSFREEZE      (SIZE(XWG,1)))
-ALLOCATE(ZWGTOT         (SIZE(XWG,1)))
-ALLOCATE(ZDW            (SIZE(XWG,1)))
+ALLOCATE(ZZSFREEZE      (SIZE(TGD%XWG,1)))
+ALLOCATE(ZWGTOT         (SIZE(TGD%XWG,1)))
+ALLOCATE(ZDW            (SIZE(TGD%XWG,1)))
 !
 !* general case
 !
-IWORK=SIZE(XTG,2)
+IWORK=SIZE(TGD%XTG,2)
 !
 DO JL=1,IWORK
   !
   ZDW(:) = 0.
   ! altitude where deep soil freezes (diurnal surface response is not treated)
-  ZZSFREEZE(:) = XZS + (XTT - XTG(:,JL)) / XT_CLIM_GRAD
+  ZZSFREEZE(:) = TOP%XZS + (XTT - TGD%XTG(:,JL)) / XT_CLIM_GRAD
   !
-  WHERE(XTG(:,JL)/=XUNDEF) 
+  WHERE(TGD%XTG(:,JL)/=XUNDEF) 
     !
     WHERE (ZTG_LS(:,JL) < XTT)
       !
-      WHERE (XZS <= XZS_LS)
+      WHERE (TOP%XZS <= XZS_LS)
         !
-        WHERE (XZS > ZZSFREEZE) 
-          ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (XZS - XZS_LS)
+        WHERE (TOP%XZS > ZZSFREEZE) 
+          ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (TOP%XZS - XZS_LS)
         ELSEWHERE
-          ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (ZZSFREEZE - XZS_LS) + ZGRADX * (XZS - ZZSFREEZE)
+          ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (ZZSFREEZE - XZS_LS) + ZGRADX * (TOP%XZS - ZZSFREEZE)
         ENDWHERE
         !
       ELSEWHERE
         !
-        ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (XZS - XZS_LS)
+        ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (TOP%XZS - XZS_LS)
         !
       ENDWHERE
       !
     ELSEWHERE
       !
-      WHERE (XZS <= XZS_LS)
+      WHERE (TOP%XZS <= XZS_LS)
         !
-        ZDW(:) = ZGRADX * (XZS - XZS_LS)
+        ZDW(:) = ZGRADX * (TOP%XZS - XZS_LS)
         !
       ELSEWHERE
         !
-        ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (XZS - ZZSFREEZE)
+        ZDW(:) = ZWGI_CLIM_GRAD(:,JL) * (TOP%XZS - ZZSFREEZE)
         !
       END WHERE
       !
@@ -137,29 +137,29 @@ DO JL=1,IWORK
     !
     ZWGTOT(:) = XUNDEF
     !
-    WHERE(XWG(:,JL)/=XUNDEF)         
-      ZWGTOT(:) = XWG(:,JL) + XWGI(:,JL)
+    WHERE(TGD%XWG(:,JL)/=XUNDEF)         
+      ZWGTOT(:) = TGD%XWG(:,JL) + TGD%XWGI(:,JL)
     ENDWHERE        
     !
-    WHERE(XWG(:,JL)/=XUNDEF)      
-      XWGI(:,JL) = XWGI(:,JL) + ZDW(:)
-      XWG (:,JL) = XWG (:,JL) - ZDW(:)
+    WHERE(TGD%XWG(:,JL)/=XUNDEF)      
+      TGD%XWGI(:,JL) = TGD%XWGI(:,JL) + ZDW(:)
+      TGD%XWG (:,JL) = TGD%XWG (:,JL) - ZDW(:)
     ENDWHERE
     !
-    WHERE (XWGI(:,JL) < 0..AND.XWGI(:,JL)/=XUNDEF) 
-      XWGI(:,JL) = 0.
-      XWG (:,JL) = ZWGTOT(:)
+    WHERE (TGD%XWGI(:,JL) < 0..AND.TGD%XWGI(:,JL)/=XUNDEF) 
+      TGD%XWGI(:,JL) = 0.
+      TGD%XWG (:,JL) = ZWGTOT(:)
     END WHERE
     !
-    WHERE (XWG(:,JL) < XWGMIN.AND.XWG(:,JL)/=XUNDEF)
-      XWG (:,JL) = XWGMIN
-      XWGI(:,JL) = ZWGTOT(:) - XWGMIN
+    WHERE (TGD%XWG(:,JL) < XWGMIN.AND.TGD%XWG(:,JL)/=XUNDEF)
+      TGD%XWG (:,JL) = XWGMIN
+      TGD%XWGI(:,JL) = ZWGTOT(:) - XWGMIN
     END WHERE
     !
-    WHERE(XWGI(:,JL) > 0..AND.XWGI(:,JL)/=XUNDEF)
-      XTG(:,JL) = MIN(XTT,XTG(:,JL))
+    WHERE(TGD%XWGI(:,JL) > 0..AND.TGD%XWGI(:,JL)/=XUNDEF)
+      TGD%XTG(:,JL) = MIN(XTT,TGD%XTG(:,JL))
     ELSEWHERE
-      XTG(:,JL) = MAX(XTT,XTG(:,JL))
+      TGD%XTG(:,JL) = MAX(XTT,TGD%XTG(:,JL))
     ENDWHERE
     !
   ENDWHERE
@@ -168,11 +168,11 @@ END DO
 !
 !* limits in force-restore case
 !
-IF (CISBA=='3-L') THEN 
-  WHERE (XWGI(:,3) /= XUNDEF)
-    XWG (:,3) = XWG(:,3)+XWGI(:,3)
-    XWGI(:,3) = 0.
-    XTG (:,3) = ZTG_LS(:,3)
+IF (TVG%CISBA=='3-L') THEN 
+  WHERE (TGD%XWGI(:,3) /= XUNDEF)
+    TGD%XWG (:,3) = TGD%XWG(:,3)+TGD%XWGI(:,3)
+    TGD%XWGI(:,3) = 0.
+    TGD%XTG (:,3) = ZTG_LS(:,3)
   END WHERE
 END IF
 !
@@ -182,9 +182,9 @@ DEALLOCATE(ZWGTOT   )
 DEALLOCATE(ZDW      )
 !
 !* masks where fields are not defined
-WHERE (XTG(:,1:SIZE(XWG,2)) == XUNDEF)
-  XWG (:,:) = XUNDEF
-  XWGI(:,:) = XUNDEF
+WHERE (TGD%XTG(:,1:SIZE(TGD%XWG,2)) == XUNDEF)
+  TGD%XWG (:,:) = XUNDEF
+  TGD%XWGI(:,:) = XUNDEF
 END WHERE
 !
 !-------------------------------------------------------------------------------------
@@ -192,12 +192,12 @@ END WHERE
 !*      1.4    Snow variables
 !
 !* vertical shift
-IF (CISBA=='DIF') THEN
-  IDEEP_SOIL = NGROUND_LAYER
+IF (TVG%CISBA=='DIF') THEN
+  IDEEP_SOIL = TGDO%NGROUND_LAYER
 ELSE
   IDEEP_SOIL = 2
 END IF
- CALL PREP_VER_SNOW(TSNOW,XZS_LS,XZS,SPREAD(ZTG_LS,3,1),SPREAD(XTG,3,1),IDEEP_SOIL)
+ CALL PREP_VER_SNOW(TGD%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),SPREAD(TGD%XTG,3,1),IDEEP_SOIL)
 !
 !-------------------------------------------------------------------------------------
 !

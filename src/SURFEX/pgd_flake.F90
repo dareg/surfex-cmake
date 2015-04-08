@@ -39,16 +39,11 @@
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_FLAKE_n,        ONLY : XCOVER, LCOVER, XZS, &
-                                  XWATER_DEPTH  , &
-                                  XWATER_FETCH  , &
-                                  XT_BS         , &
-                                  XDEPTH_BS     , &
-                                  XEXTCOEF_WATER    
+USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
 USE MODD_PGDWORK,        ONLY : CATYPE
 !
-USE MODD_FLAKE_GRID_n,   ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
 !
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
@@ -171,25 +166,25 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_FLAKE)
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('WATER ',NDIM)
+ CALL GET_SURF_SIZE_n('WATER ',FG%NDIM)
 !
-ALLOCATE(LCOVER     (JPCOVER))
-ALLOCATE(XZS        (NDIM))
-ALLOCATE(XLAT       (NDIM))
-ALLOCATE(XLON       (NDIM))
-ALLOCATE(XMESH_SIZE (NDIM))
+ALLOCATE(F%LCOVER     (JPCOVER))
+ALLOCATE(F%XZS        (FG%NDIM))
+ALLOCATE(FG%XLAT       (FG%NDIM))
+ALLOCATE(FG%XLON       (FG%NDIM))
+ALLOCATE(FG%XMESH_SIZE (FG%NDIM))
 !
  CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
-                CGRID,  XGRID_PAR,                     &
-                LCOVER, XCOVER, XZS,                   &
-                XLAT, XLON, XMESH_SIZE                 )  
+                FG%CGRID,  FG%XGRID_PAR,                     &
+                F%LCOVER, F%XCOVER, F%XZS,                   &
+                FG%XLAT, FG%XLON, FG%XMESH_SIZE                 )  
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.      Water depth
 !             -----------
 !
-ALLOCATE(XWATER_DEPTH  (NDIM)) 
+ALLOCATE(F%XWATER_DEPTH  (FG%NDIM)) 
 !
 IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT') THEN
   !      
@@ -198,8 +193,8 @@ IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT
      WRITE(ILUOUT,*)'add YWATER_DEPTH_STATUS="GlobalLakeStatus" in NAM_DATA_FLAKE'
      CALL ABOR1_SFX('PGD_FLAKE: STATUS INPUT FILE NAME NOT SET')
   ELSEIF (TRIM(YWATER_DEPTH_STATUS)==TRIM(CSTATUSLDB)) THEN
-     ALLOCATE(IWATER_STATUS  (NDIM))       
-     CALL TREAT_GLOBAL_LAKE_DEPTH(HPROGRAM,XWATER_DEPTH(:),IWATER_STATUS(:))
+     ALLOCATE(IWATER_STATUS  (FG%NDIM))       
+     CALL TREAT_GLOBAL_LAKE_DEPTH(HPROGRAM,F%XWATER_DEPTH(:),IWATER_STATUS(:))
   ELSE
      WRITE(ILUOUT,*)'Wrong name for Depth Status file :',' expected: ',TRIM(CSTATUSLDB),' input: ',TRIM(YWATER_DEPTH_STATUS)
      CALL ABOR1_SFX('PGD_FLAKE: WRONG STATUS INPUT FILE NAME')
@@ -221,11 +216,11 @@ ELSE
   ENDIF
   !
   CATYPE='INV'
-  CALL PGD_FIELD(HPROGRAM,'water depth','WAT',YWATER_DEPTH,YWATER_DEPTHFILETYPE,XUNIF_WATER_DEPTH,XWATER_DEPTH(:))
+  CALL PGD_FIELD(HPROGRAM,'water depth','WAT',YWATER_DEPTH,YWATER_DEPTHFILETYPE,XUNIF_WATER_DEPTH,F%XWATER_DEPTH(:))
   !
 ENDIF
 !
-XWATER_DEPTH(:) = MIN (XWATER_DEPTH(:),XMAX_DEPTH)
+F%XWATER_DEPTH(:) = MIN (F%XWATER_DEPTH(:),XMAX_DEPTH)
 WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
 !
 !-------------------------------------------------------------------------------
@@ -233,42 +228,42 @@ WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
 !*    6.      Wind fetch
 !             ----------
 !
-ALLOCATE(XWATER_FETCH  (NDIM)) 
+ALLOCATE(F%XWATER_FETCH  (FG%NDIM)) 
 !
 CATYPE='ARI'
-CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,XWATER_FETCH(:))
+CALL PGD_FIELD(HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,F%XWATER_FETCH(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*    7.      Sediments bottom temperature
 !             ----------------------------
 !
-ALLOCATE(XT_BS         (NDIM)) 
+ALLOCATE(F%XT_BS         (FG%NDIM)) 
 !
 CATYPE='ARI'
-CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,XT_BS(:))
+CALL PGD_FIELD(HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,F%XT_BS(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*    8.      Depth of sediments layer
 !             ------------------------
 !
-ALLOCATE(XDEPTH_BS     (NDIM)) 
+ALLOCATE(F%XDEPTH_BS     (FG%NDIM)) 
 !
 CATYPE='INV'
-CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,XDEPTH_BS(:))
+CALL PGD_FIELD(HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,F%XDEPTH_BS(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*    9.      Water extinction coefficient
 !             ----------------------------
 
-ALLOCATE(XEXTCOEF_WATER(NDIM)) 
+ALLOCATE(F%XEXTCOEF_WATER(FG%NDIM)) 
 !
 CATYPE='ARI'
 CALL PGD_FIELD(HPROGRAM,'water extinction coefficient','WAT', &
                  YEXTCOEF_WATER,YEXTCOEF_WATERFILETYPE,XUNIF_EXTCOEF_WATER, &
-                 XEXTCOEF_WATER(:))  
+                 F%XEXTCOEF_WATER(:))  
 !
 !-------------------------------------------------------------------------------
 !

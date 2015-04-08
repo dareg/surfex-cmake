@@ -31,11 +31,7 @@ USE MODI_GET_TYPE_DIM_N
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
 USE MODN_PREP_SEAFLUX,   ONLY : CPREP_SEAICE_SCHEME => CSEAICE_SCHEME
-USE MODD_SEAFLUX_n,      ONLY : CSEAICE_SCHEME,LHANDLE_SIC, TGLT, & 
-                                XSIC,                             &
-                                LINTERPOL_SIC, CINTERPOL_SIC,     &
-                                LINTERPOL_SIT, CINTERPOL_SIT,     &
-                                XSIC_MTH, XSIT_MTH
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODI_PREP_HOR_SEAFLUX_FIELD
 !
 USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo 
@@ -76,18 +72,18 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !*      1.     Interpret namelist
 !
-CSEAICE_SCHEME=CPREP_SEAICE_SCHEME
+S%CSEAICE_SCHEME=CPREP_SEAICE_SCHEME
 !
-LHANDLE_SIC = .FALSE.
-IF(TRIM(CSEAICE_SCHEME)/='NONE' .OR. TRIM(CINTERPOL_SIC)/='NONE' )THEN
-  LHANDLE_SIC=.TRUE.
+S%LHANDLE_SIC = .FALSE.
+IF(TRIM(S%CSEAICE_SCHEME)/='NONE' .OR. TRIM(S%CINTERPOL_SIC)/='NONE' )THEN
+  S%LHANDLE_SIC=.TRUE.
 ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
 !*      2.     Reading and horizontal interpolations of Seaice cover
 !
-IF (LHANDLE_SIC) THEN 
+IF (S%LHANDLE_SIC) THEN 
    CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
@@ -96,39 +92,39 @@ ENDIF
 !*      3.     Optional preparation of interpolation of monthly sea ice cover and sea 
 !              ice thickness 
 !
-LINTERPOL_SIC=.FALSE.
-IF(TRIM(CINTERPOL_SIC)/='NONE')THEN
-   LINTERPOL_SIC=.TRUE.
+S%LINTERPOL_SIC=.FALSE.
+IF(TRIM(S%CINTERPOL_SIC)/='NONE')THEN
+   S%LINTERPOL_SIC=.TRUE.
 ENDIF
 !
-IF(TRIM(CINTERPOL_SIT)/='NONE')THEN
-   LINTERPOL_SIT=.TRUE.
+IF(TRIM(S%CINTERPOL_SIT)/='NONE')THEN
+   S%LINTERPOL_SIT=.TRUE.
 ENDIF
 !
-IF(LINTERPOL_SIC)THEN
+IF(S%LINTERPOL_SIC)THEN
    !
    ! Precedent, Current and Next Monthly SIC
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SIC
-   IF(TRIM(CINTERPOL_SIC)=='ANNUAL')INMTH=14
+   IF(TRIM(S%CINTERPOL_SIC)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIC_MTH(SIZE(XSIC),INMTH))
+   ALLOCATE(S%XSIC_MTH(SIZE(S%XSIC),INMTH))
    DO JMTH=1,INMTH
-      XSIC_MTH(:,JMTH)=XSIC(:)
+      S%XSIC_MTH(:,JMTH)=S%XSIC(:)
    ENDDO
 !
 ENDIF
 !
-IF(LINTERPOL_SIT)THEN
+IF(S%LINTERPOL_SIT)THEN
    !
    ! Precedent, Current and Next Monthly SIT
    INMTH=3
    ! Precedent, Current and Next Annual Monthly SIT
-   IF(TRIM(CINTERPOL_SIT)=='ANNUAL')INMTH=14
+   IF(TRIM(S%CINTERPOL_SIT)=='ANNUAL')INMTH=14
    !
-   ALLOCATE(XSIT_MTH(SIZE(XSIC),INMTH))
+   ALLOCATE(S%XSIT_MTH(SIZE(S%XSIC),INMTH))
    DO JMTH=1,INMTH
-      XSIT_MTH(:,JMTH)=XUNDEF
+      S%XSIT_MTH(:,JMTH)=XUNDEF
    ENDDO
 !
 ENDIF
@@ -142,37 +138,37 @@ CALL GET_TYPE_DIM_n('SEA   ',nx)
 ny=1
 nyglo=1
 nxglo=nx
-CALL GLTOOLS_ALLOC(TGLT)
+CALL GLTOOLS_ALLOC(S%TGLT)
 !
 !*       G1    Prognostic fields with only space dimension(s) :
 !
-TGLT%ust(:,1)=0.
+S%TGLT%ust(:,1)=0.
 !
 !*       G2     Prognostic fields with space and ice-category dimension(s) :
 !
 ! sea ice age 
-TGLT%sit(:,:,1)%age=0.
+S%TGLT%sit(:,:,1)%age=0.
 ! melt pond volume 
-TGLT%sit(:,:,1)%vmp=0.
+S%TGLT%sit(:,:,1)%vmp=0.
 ! sea ice surface albedo 
-TGLT%sit(:,:,1)%asn=0.
+S%TGLT%sit(:,:,1)%asn=0.
 ! sea ice fraction 
-TGLT%sit(:,:,1)%fsi=0.
+S%TGLT%sit(:,:,1)%fsi=0.
 ! sea ice thickness 
-TGLT%sit(:,:,1)%hsi=1.*TGLT%sit(:,:,1)%fsi
+S%TGLT%sit(:,:,1)%hsi=1.*S%TGLT%sit(:,:,1)%fsi
 ! sea ice salinity 
-TGLT%sit(:,:,1)%ssi=0.
+S%TGLT%sit(:,:,1)%ssi=0.
 ! sea ice surface temperature 
-TGLT%sit(:,:,1)%tsf=260.
+S%TGLT%sit(:,:,1)%tsf=260.
 ! snow thickness 
-TGLT%sit(:,:,1)%hsn=0.
+S%TGLT%sit(:,:,1)%hsn=0.
 ! snow density 
-TGLT%sit(:,:,1)%rsn=100.
+S%TGLT%sit(:,:,1)%rsn=100.
 !
 !*       G3     Prognostic fields with space, ice-category and layer dimensions :
 !
 ! sea ice vertical gltools_enthalpy profile for all types and levels
-TGLT%sil(:,:,:,1)%ent=-1000. 
+S%TGLT%sil(:,:,:,1)%ent=-1000. 
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',1,ZHOOK_HANDLE)
 !

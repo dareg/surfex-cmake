@@ -26,8 +26,8 @@ USE MODD_TRIP_PAR,   ONLY : XRHOLW
 USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
                             LCPL_FLOOD, LCPL_CALVSEA
 !
-USE MODD_TRIP_GRID, ONLY : TGRID
-USE MODD_TRIP,      ONLY : TTRIP
+USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,19 +57,19 @@ IF (LHOOK) CALL DR_HOOK('TRIP_DIAG_CPL_ESM',0,ZHOOK_HANDLE)
 ! River discharges to ocean [kg/m2]
 !
 IF(LCPL_SEA)THEN
-  WHERE(TGRID%NGRCN(:,:)==9.OR.TGRID%NGRCN(:,:)==12)
-    TTRIP%XCPL_RIVDIS(:,:) = TTRIP%XCPL_RIVDIS(:,:) + PDISCHARGE(:,:) / TGRID%XAREA(:,:)
+  WHERE(TPG%NGRCN(:,:)==9.OR.TPG%NGRCN(:,:)==12)
+    TP%XCPL_RIVDIS(:,:) = TP%XCPL_RIVDIS(:,:) + PDISCHARGE(:,:) / TPG%XAREA(:,:)
   ENDWHERE
 ENDIF
 !
 ! Calving flux over greenland and antarctica [kg/m2]
 !
 IF(LCPL_CALVSEA)THEN
-  WHERE(TGRID%GMASK_GRE(:,:))
-    TTRIP%XCPL_CALVGRE(:,:) = TTRIP%XCPL_CALVGRE(:,:) + PCALVING(:,:) * PTSTEP_RUN / TGRID%XAREA(:,:)
+  WHERE(TPG%GMASK_GRE(:,:))
+    TP%XCPL_CALVGRE(:,:) = TP%XCPL_CALVGRE(:,:) + PCALVING(:,:) * PTSTEP_RUN / TPG%XAREA(:,:)
   ENDWHERE
-  WHERE(TGRID%GMASK_ANT(:,:))
-    TTRIP%XCPL_CALVANT(:,:) = TTRIP%XCPL_CALVANT(:,:) + PCALVING(:,:) * PTSTEP_RUN / TGRID%XAREA(:,:)
+  WHERE(TPG%GMASK_ANT(:,:))
+    TP%XCPL_CALVANT(:,:) = TP%XCPL_CALVANT(:,:) + PCALVING(:,:) * PTSTEP_RUN / TPG%XAREA(:,:)
   ENDWHERE
 ENDIF
 !
@@ -83,17 +83,17 @@ IF(LCPL_LAND)THEN
 ! Water table depth and fraction of water table to rise
 !
   IF(LCPL_GW)THEN
-    WHERE(TGRID%GMASK_GW(:,:))
-          TTRIP%XCPL_WTD (:,:) = MAX(PWTD(:,:),0.0)
-          TTRIP%XCPL_FWTD(:,:) = PFWTD(:,:)
+    WHERE(TPG%GMASK_GW(:,:))
+          TP%XCPL_WTD (:,:) = MAX(PWTD(:,:),0.0)
+          TP%XCPL_FWTD(:,:) = PFWTD(:,:)
     ENDWHERE
   ENDIF
 !
 ! Flood fraction [-] and potential infiltration [kg/m2]
 !       
   IF(LCPL_FLOOD)THEN
-    TTRIP%XCPL_FFLOOD (:,:) = TTRIP%XFFLOOD    (:,:)
-    TTRIP%XCPL_PIFLOOD(:,:) = TTRIP%XFLOOD_STO (:,:) / TGRID%XAREA(:,:)
+    TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
+    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)
   ENDIF
 !  
 ENDIF

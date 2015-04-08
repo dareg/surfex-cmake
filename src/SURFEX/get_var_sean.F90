@@ -37,7 +37,7 @@
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY   : XZ0, XZ0H, XQS, LSURF_VARS, LCOEF
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -66,14 +66,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_SEA_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LSURF_VARS) THEN 
-        PQS      = XQS      
+IF (DGS%LSURF_VARS) THEN 
+        PQS      = DGS%XQS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (LCOEF) THEN 
-        PZ0      = XZ0      
-        PZ0H     = XZ0H
+IF (DGS%LCOEF) THEN 
+        PZ0      = DGS%XZ0      
+        PZ0H     = DGS%XZ0H
    ELSE 
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF      

@@ -32,7 +32,7 @@ SUBROUTINE COUPLING_TOWN_n(HPROGRAM, HCOUPLING, PTIMEC,                         
 !!      B. Decharme  04/2013 new coupling variables
 !!------------------------------------------------------------------
 !
-USE MODD_SURF_ATM_n, ONLY : CTOWN
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT, XCPD, XRD, XP00
 !
 ! 
@@ -127,7 +127,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_TOWN_N',0,ZHOOK_HANDLE)
 !
-IF (CTOWN=='TEB   ') THEN 
+IF (U%CTOWN=='TEB   ') THEN 
   CALL COUPLING_TEB_OROGRAPHY_n(HPROGRAM, HCOUPLING,                                       &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
@@ -139,7 +139,7 @@ IF (CTOWN=='TEB   ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CTOWN=='FLUX  ') THEN
+ELSE IF (U%CTOWN=='FLUX  ') THEN
   CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
@@ -151,7 +151,7 @@ ELSE IF (CTOWN=='FLUX  ') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
-ELSE IF (CTOWN=='NONE  ') THEN
+ELSE IF (U%CTOWN=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.
   PSFTS = 0.

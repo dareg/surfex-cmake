@@ -42,14 +42,12 @@
 !
 USE MODD_PGD_GRID,          ONLY : NL
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
-USE MODD_TEB_OPTION_n,      ONLY : XCOVER, LCOVER, XZS,                     &
-                                   LECOCLIMAP, LGREENROOF, LHYDRO
-USE MODD_TEB_VEG_n,         ONLY : NNBIOMASS,                               &
-                                   CISBA, CPHOTO, CPEDOTF, LTR_ML
-USE MODD_TEB_GARDEN_OPTION_n,ONLY: NGROUND_LAYER, XSOILGRID
-USE MODD_TEB_GARDEN_PGD_n,   ONLY: XCLAY, XSAND, XRUNOFFB, XWDRAIN
-USE MODD_TEB_GRID_n,        ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
-USE MODD_DATA_TEB_GARDEN_n, ONLY : NTIME
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
@@ -147,10 +145,10 @@ IF (LHOOK) CALL DR_HOOK('PGD_TEB_VEG',0,ZHOOK_HANDLE)
 !*    1.      Reading of namelist NAM_ISBA for general options of vegetation
 !             --------------------------------------------------------------
 !
-NGROUND_LAYER = 0
-CISBA         = '   '
-CPEDOTF       = '   '
-CPHOTO        = '   '
+TGDO%NGROUND_LAYER = 0
+TVG%CISBA         = '   '
+TVG%CPEDOTF       = '   '
+TVG%CPHOTO        = '   '
 !
 CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
                        YISBA, YPEDOTF, YPHOTO,  GTR_ML, ZRM_PATCH,              &
@@ -165,51 +163,51 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,        &
                        XUNIF_FERT                                               )  
 !
-NGROUND_LAYER = IGROUND_LAYER
-CISBA         = YISBA
-CPEDOTF       = YPEDOTF
-CPHOTO        = YPHOTO
-LTR_ML        = GTR_ML
+TGDO%NGROUND_LAYER = IGROUND_LAYER
+TVG%CISBA         = YISBA
+TVG%CPEDOTF       = YPEDOTF
+TVG%CPHOTO        = YPHOTO
+TVG%LTR_ML        = GTR_ML
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Coherence of options
 !             --------------------
 !
-  CALL TEST_NAM_VAR_SURF(ILUOUT,'CISBA',CISBA,'2-L','3-L','DIF')
-  CALL TEST_NAM_VAR_SURF(ILUOUT,'CPEDOTF',CPEDOTF,'CH78','CO84')
-  CALL TEST_NAM_VAR_SURF(ILUOUT,'CPHOTO',CPHOTO,'NON','AGS','LAI','AST','LST','NIT','NCB')
+  CALL TEST_NAM_VAR_SURF(ILUOUT,'CISBA',TVG%CISBA,'2-L','3-L','DIF')
+  CALL TEST_NAM_VAR_SURF(ILUOUT,'CPEDOTF',TVG%CPEDOTF,'CH78','CO84')
+  CALL TEST_NAM_VAR_SURF(ILUOUT,'CPHOTO',TVG%CPHOTO,'NON','AGS','LAI','AST','LST','NIT','NCB')
   !
-  IF (CPHOTO=='NCB') THEN
-    CPHOTO = 'NIT'
+  IF (TVG%CPHOTO=='NCB') THEN
+    TVG%CPHOTO = 'NIT'
     WRITE(ILUOUT,*) '****************************************************************'
     WRITE(ILUOUT,*) '* FOR GARDENS, AGS OPTION HAS BEEN CHANGED FROM "NCB" TO "NIT" *'
     WRITE(ILUOUT,*) '****************************************************************'
   END IF
 !
-  SELECT CASE (CISBA)
+  SELECT CASE (TVG%CISBA)
     CASE ('2-L')
-      NGROUND_LAYER = 2
-      CPEDOTF       ='CH78'       
+      TGDO%NGROUND_LAYER = 2
+      TVG%CPEDOTF       ='CH78'       
       WRITE(ILUOUT,*) '*****************************************'
-      WRITE(ILUOUT,*) '* With option CISBA = ',CISBA,'         *'
+      WRITE(ILUOUT,*) '* With option CISBA = ',TVG%CISBA,'         *'
       WRITE(ILUOUT,*) '* the number of soil layers is set to 2 *'
       WRITE(ILUOUT,*) '* theta(psi) function = Brook and Corey *'
       WRITE(ILUOUT,*) '* Pedo transfert function = CH78        *'          
       WRITE(ILUOUT,*) '*****************************************'
     CASE ('3-L')
-      NGROUND_LAYER = 3
-      CPEDOTF       ='CH78'         
+      TGDO%NGROUND_LAYER = 3
+      TVG%CPEDOTF       ='CH78'         
       WRITE(ILUOUT,*) '*****************************************'
-      WRITE(ILUOUT,*) '* With option CISBA = ',CISBA,'         *'
+      WRITE(ILUOUT,*) '* With option CISBA = ',TVG%CISBA,'         *'
       WRITE(ILUOUT,*) '* the number of soil layers is set to 3 *'
       WRITE(ILUOUT,*) '* theta(psi) function = Brook and Corey *'
       WRITE(ILUOUT,*) '* Pedo transfert function = CH78        *'        
       WRITE(ILUOUT,*) '*****************************************'
     CASE ('DIF')
-      IF(NGROUND_LAYER==NUNDEF)THEN
-        IF(LECOCLIMAP)THEN
-          NGROUND_LAYER=NOPTIMLAYER
+      IF(TGDO%NGROUND_LAYER==NUNDEF)THEN
+        IF(TOP%LECOCLIMAP)THEN
+          TGDO%NGROUND_LAYER=NOPTIMLAYER
         ELSE
           WRITE(ILUOUT,*) '****************************************'
           WRITE(ILUOUT,*) '* Number of ground layer not specified *'
@@ -218,12 +216,12 @@ LTR_ML        = GTR_ML
         ENDIF
       ENDIF
 ! 
-      ALLOCATE(XSOILGRID(NGROUND_LAYER))
-      XSOILGRID(:)=XUNDEF
-      XSOILGRID(:)=ZSOILGRID(1:NGROUND_LAYER) 
+      ALLOCATE(TGDO%XSOILGRID(TGDO%NGROUND_LAYER))
+      TGDO%XSOILGRID(:)=XUNDEF
+      TGDO%XSOILGRID(:)=ZSOILGRID(1:TGDO%NGROUND_LAYER) 
       IF(ALL(ZSOILGRID(:)==XUNDEF))THEN
-        IF(LECOCLIMAP) XSOILGRID(1:NGROUND_LAYER)=XOPTIMGRID(1:NGROUND_LAYER)
-      ELSEIF(COUNT(XSOILGRID/=XUNDEF)/=NGROUND_LAYER)THEN
+        IF(TOP%LECOCLIMAP) TGDO%XSOILGRID(1:TGDO%NGROUND_LAYER)=XOPTIMGRID(1:TGDO%NGROUND_LAYER)
+      ELSEIF(COUNT(TGDO%XSOILGRID/=XUNDEF)/=TGDO%NGROUND_LAYER)THEN
         WRITE(ILUOUT,*) '********************************************************'
         WRITE(ILUOUT,*) '* Soil grid reference values /= number of ground layer *'
         WRITE(ILUOUT,*) '********************************************************'
@@ -231,25 +229,25 @@ LTR_ML        = GTR_ML
       ENDIF
 !
       WRITE(ILUOUT,*) '*****************************************'
-      WRITE(ILUOUT,*) '* Option CISBA            = ',CISBA
-      WRITE(ILUOUT,*) '* Pedo transfert function = ',CPEDOTF    
-      WRITE(ILUOUT,*) '* Number of soil layers   = ',NGROUND_LAYER
-      IF(LECOCLIMAP)THEN
-        WRITE(ILUOUT,*) '* Soil layers grid (m)    = ',XSOILGRID(1:NGROUND_LAYER)
+      WRITE(ILUOUT,*) '* Option CISBA            = ',TVG%CISBA
+      WRITE(ILUOUT,*) '* Pedo transfert function = ',TVG%CPEDOTF    
+      WRITE(ILUOUT,*) '* Number of soil layers   = ',TGDO%NGROUND_LAYER
+      IF(TOP%LECOCLIMAP)THEN
+        WRITE(ILUOUT,*) '* Soil layers grid (m)    = ',TGDO%XSOILGRID(1:TGDO%NGROUND_LAYER)
       ENDIF
       WRITE(ILUOUT,*) '*****************************************' 
 
   END SELECT
 !
-  SELECT CASE (CPHOTO)
+  SELECT CASE (TVG%CPHOTO)
     CASE ('AGS','LAI','AST','LST')
-      NNBIOMASS = 1
+      TVG%NNBIOMASS = 1
     CASE ('NIT')
-      NNBIOMASS = 3
+      TVG%NNBIOMASS = 3
   END SELECT
   WRITE(ILUOUT,*) '*****************************************'
-  WRITE(ILUOUT,*) '* With option CPHOTO = ',CPHOTO,'               *'
-  WRITE(ILUOUT,*) '* the number of biomass pools is set to ', NNBIOMASS
+  WRITE(ILUOUT,*) '* With option CPHOTO = ',TVG%CPHOTO,'               *'
+  WRITE(ILUOUT,*) '* the number of biomass pools is set to ', TVG%NNBIOMASS
   WRITE(ILUOUT,*) '*****************************************'
 !
 !-------------------------------------------------------------------------------
@@ -257,7 +255,7 @@ LTR_ML        = GTR_ML
 !*    3.      Sand fraction
 !             -------------
 !
-ALLOCATE(XSAND(NDIM,NGROUND_LAYER))
+ALLOCATE(TGDP%XSAND(TG%NDIM,TGDO%NGROUND_LAYER))
 !
 IF(LIMP_SAND)THEN
 !
@@ -265,54 +263,54 @@ IF(LIMP_SAND)THEN
 !
 ELSE
 !
- CALL PGD_FIELD(HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,XSAND(:,1))
+ CALL PGD_FIELD(HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,TGDP%XSAND(:,1))
 ENDIF
 !
-DO JLAYER=1,NGROUND_LAYER
-  XSAND(:,JLAYER) = XSAND(:,1)
+DO JLAYER=1,TGDO%NGROUND_LAYER
+  TGDP%XSAND(:,JLAYER) = TGDP%XSAND(:,1)
 END DO
 !-------------------------------------------------------------------------------
 !
 !*    4.      Clay fraction
 !             -------------
 !
-ALLOCATE(XCLAY(NDIM,NGROUND_LAYER))
+ALLOCATE(TGDP%XCLAY(TG%NDIM,TGDO%NGROUND_LAYER))
 !
 IF(LIMP_CLAY)THEN
 !
   CALL ABOR1_SFX('PGD_TEB_VEG: LIMP_SAND IS NOT CONSISTENT WITH TEB_GARDEN')
 !
 ELSE
- CALL PGD_FIELD(HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,XCLAY(:,1))
+ CALL PGD_FIELD(HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,TGDP%XCLAY(:,1))
 ENDIF
 !
-DO JLAYER=1,NGROUND_LAYER
-  XCLAY(:,JLAYER) = XCLAY(:,1)
+DO JLAYER=1,TGDO%NGROUND_LAYER
+  TGDP%XCLAY(:,JLAYER) = TGDP%XCLAY(:,1)
 END DO
 !-------------------------------------------------------------------------------
 !
 !*    5.      Subgrid runoff 
 !             --------------
 !
-ALLOCATE(XRUNOFFB(NDIM))
+ALLOCATE(TGDP%XRUNOFFB(TG%NDIM))
  CALL PGD_FIELD                                                                              &
-       (HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,XRUNOFFB(:))  
+       (HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,TGDP%XRUNOFFB(:))  
 !
 !-------------------------------------------------------------------------------
 !
 !*    6.      Drainage coefficient
 !             --------------------
 !
-ALLOCATE(XWDRAIN(NDIM))
+ALLOCATE(TGDP%XWDRAIN(TG%NDIM))
  CALL PGD_FIELD                                                                              &
-       (HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,XWDRAIN(:))  
+       (HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,TGDP%XWDRAIN(:))  
 !
 !-------------------------------------------------------------------------------
 !
 !*    7.      Interpolation of GARDEN physiographic fields
 !             --------------------------------------------
 !
-NTIME = 12
+DTGD%NTIME = 12
  CALL PGD_TEB_GARDEN_PAR(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -320,7 +318,7 @@ NTIME = 12
 !*    8.      Case of greenroofs
 !             ------------------
 !
-IF (LGREENROOF) CALL PGD_TEB_GREENROOF(HPROGRAM)
+IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -334,7 +332,7 @@ CALL PGD_TEB_IRRIG(HPROGRAM)
 !*    9.      Case of urban hydrology
 !             -----------------------
 !
-IF (LHYDRO) print*," CALL PGD_TEB_URBHYDRO(HPROGRAM,LECOCLIMAP)"
+IF (TOP%LHYDRO) print*," CALL PGD_TEB_URBHYDRO(HPROGRAM,LECOCLIMAP)"
 !
 !-------------------------------------------------------------------------------
 !

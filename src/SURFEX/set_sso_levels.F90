@@ -26,7 +26,7 @@ SUBROUTINE SET_SSO_LEVELS(KDIM)
 !!      E. Martin   01/2012 XUNDEF fields are no more written in PREP file
 !!------------------------------------------------------------------
 !
-USE MODD_SSO_CANOPY_n,   ONLY : NLVL, XZ, XU, XTKE
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -53,13 +53,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------
 !
 IF (LHOOK) CALL DR_HOOK('SET_SSO_LEVELS',0,ZHOOK_HANDLE)
-NLVL = 6
+SSCP%NLVL = 6
 !
 !*      2.    height of half levels (where turbulent fluxes will be)
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(KDIM,NLVL))
+ALLOCATE(ZZF(KDIM,SSCP%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1
 ZZF(:,3) = 3.
@@ -67,25 +67,25 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(XZ(KDIM,NLVL))
-DO JLAYER=1,NLVL-1
-  XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
+ALLOCATE(SSCP%XZ(KDIM,SSCP%NLVL))
+DO JLAYER=1,SSCP%NLVL-1
+  SSCP%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO
-XZ(:,NLVL) = 1.5 * ZZF(:,NLVL) - 0.5 * ZZF(:,NLVL-1)
+SSCP%XZ(:,SSCP%NLVL) = 1.5 * ZZF(:,SSCP%NLVL) - 0.5 * ZZF(:,SSCP%NLVL-1)
 !
 DEALLOCATE(ZZF)
 !
 !*      3.    wind in canopy (m/s)
 !             --------------
 !
-ALLOCATE(XU(KDIM,NLVL))
-XU(:,:) = XUNDEF
+ALLOCATE(SSCP%XU(KDIM,SSCP%NLVL))
+SSCP%XU(:,:) = XUNDEF
 !
 !*      4.    Tke in canopy (m2/s2)
 !             -------------
 !
-ALLOCATE(XTKE(KDIM,NLVL))
-XTKE(:,:) = XUNDEF
+ALLOCATE(SSCP%XTKE(KDIM,SSCP%NLVL))
+SSCP%XTKE(:,:) = XUNDEF
 !
 IF (LHOOK) CALL DR_HOOK('SET_SSO_LEVELS',1,ZHOOK_HANDLE)
 !

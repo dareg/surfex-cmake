@@ -23,7 +23,7 @@ SUBROUTINE SSO_BELJAARS04(KI,KLVL,PZ,PSSO_STDEV,PU,PFORC_U,PDFORC_UDU)
 !!      Original    07/2006
 !!---------------------------------------------------------------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : XCOEFBE
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -80,7 +80,7 @@ C_AVAR    = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT**C_N1)   ! (unit: m^{1+C_N2}  =  
 !
 ZSSO_DRAG = 0.
 DO JL=1,KLVL
-  ZSSO_DRAG (:,JL) = XCOEFBE * C_ALPHA * C_BETA * C_COR * C_CMD * 2.109 * EXP( -(PZ(:,JL)/1500.)**1.5) &
+  ZSSO_DRAG (:,JL) = USS%XCOEFBE * C_ALPHA * C_BETA * C_COR * C_CMD * 2.109 * EXP( -(PZ(:,JL)/1500.)**1.5) &
     * C_AVAR * PSSO_STDEV(:)**2 * PZ(:,JL)**(-1.2)
 END DO
 !

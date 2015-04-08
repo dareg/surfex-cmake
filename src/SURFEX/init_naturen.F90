@@ -44,7 +44,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CNATURE
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
 !
@@ -100,17 +100,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_NATURE_N',0,ZHOOK_HANDLE)
-IF (CNATURE=='NONE  ') THEN
+IF (U%CNATURE=='NONE  ') THEN
   PDIR_ALB=0.
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
   PTSURF  =XTT
-ELSE IF (CNATURE=='FLUX  ') THEN
+ELSE IF (U%CNATURE=='FLUX  ') THEN
   CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
-ELSE IF (CNATURE=='ISBA  ' .OR. CNATURE=='TSZ0') THEN
+ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
   CALL INIT_ISBA_n(HPROGRAM,HINIT,OLAND_USE,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                      PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                      PEMIS,PTSRAD,PTSURF,                          &

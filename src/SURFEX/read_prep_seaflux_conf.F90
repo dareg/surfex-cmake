@@ -45,7 +45,7 @@ USE MODI_OCEAN_MERCATORVERGRID
 !
 USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, &
                               XSST_UNIF, XSSS_UNIF, XSIC_UNIF
-USE MODD_OCEAN_n, ONLY : LMERCATOR
+USE MODD_OCEAN_n, ONLY : O => OCEAN
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -161,7 +161,7 @@ END IF
 !* If 1D coupling: ocean variables initializing
 !  --------------------------------------------
 !
-IF (LMERCATOR) THEN
+IF (O%LMERCATOR) THEN
   WRITE(KLUOUT,*) 'LMERCATOR=T : initializing oceanic vertical grid'
   CALL OCEAN_MERCATORVERGRID
 END IF

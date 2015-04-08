@@ -44,10 +44,9 @@ SUBROUTINE COUPLING_DST_n(  &
 !
 USE MODD_CSTS, ONLY : XRD                      ! [J/K/kg] The universal gas constant  
        
-USE MODD_PACK_ISBA, ONLY : XP_VEGTYPE_PATCH    ! Fraction of all vegtypes for all patches  
+USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA    ! Fraction of all vegtypes for all patches  
 
-USE MODD_DST_n, ONLY :  NR_PATCH_DST, NVT_DST, &
-                        XMSS_FRC_SRC, Z0_EROD_DST, NSIZE_PATCH_DST  
+USE MODD_DST_n, ONLY : DST => DST
 USE MODD_DST_SURF
 
 USE MODI_SURFACE_CD
@@ -107,11 +106,11 @@ ZSFDST_TILE(:,:,:)=0.d0
 DO JVEG=1,NVEGNO_DST
 
   !Jump out of loop if no dust emitter points
-  IF (NSIZE_PATCH_DST(JVEG,KPATCH)==0) CYCLE
+  IF (DST%NSIZE_PATCH_DST(JVEG,KPATCH)==0) CYCLE
 
    CALL TREAT_SURF(  &
-      NSIZE_PATCH_DST(JVEG,KPATCH),  &!I[idx] number of dust emitter points in patch
-      NR_PATCH_DST(:,JVEG,KPATCH)    &!I[idx] index translator from patch to dustemitter
+      DST%NSIZE_PATCH_DST(JVEG,KPATCH),  &!I[idx] number of dust emitter points in patch
+      DST%NR_PATCH_DST(:,JVEG,KPATCH)    &!I[idx] index translator from patch to dustemitter
             )  
    
 ENDDO  !Loop on dust emitter vegetation
@@ -208,7 +207,7 @@ DO JJ=1,KSIZE
 ENDDO
 !
 !Manipulate some variables since we assume dust emission occurs over flat surface
-ZP_Z0_EROD(:) = Z0_EROD_DST(JVEG)   !Set z0 to roughness of erodible surface
+ZP_Z0_EROD(:) = DST%Z0_EROD_DST(JVEG)   !Set z0 to roughness of erodible surface
 !
 IF (JVEG ==1) THEN
   ZP_DST_EROD(:) = 1.
@@ -364,7 +363,7 @@ IF (CEMISPARAM_DST == "EXPLI" .OR. CEMISPARAM_DST == "AMMA ") THEN
 
 ELSE 
   DO JMODE = 1,NDSTMDE
-    ZP_MSS_FRC_SRC(:,JORDER_DST(JMODE)) = XMSS_FRC_SRC(JMODE)
+    ZP_MSS_FRC_SRC(:,JORDER_DST(JMODE)) = DST%XMSS_FRC_SRC(JMODE)
   ENDDO
 END IF
 
@@ -431,13 +430,13 @@ DO JMODE=1,NDSTMDE
                
       !Get sum of vegetation fraction in this patch
       !fxm: VERY BAD LOOP ORDER
-      VEGFRAC_IN_PATCH = SUM(XP_VEGTYPE_PATCH(II,:))
+      VEGFRAC_IN_PATCH = SUM(PKI%XP_VEGTYPE_PATCH(II,:))
                
       !Get production of flux by adding up the contribution 
       !from the different tiles (here, "tiles" are dust emitter surfaces)
       PSFDST(II,JSV_IDX) = PSFDST(II,JSV_IDX)                  & ![kg/m^2_{patch}/sec] dust flux per patch 
                            + (ZSFDST_TILE(II,JJ,JMODE)         & ![kg/m^2_{emittersurface}/sec] Dust flux per surface area of dust emitter surface
-                           * XP_VEGTYPE_PATCH(II,NVT_DST(JJ))  & ![frc] m^2_{emittersurface}/m^2_{nature}
+                           * PKI%XP_VEGTYPE_PATCH(II,DST%NVT_DST(JJ))  & ![frc] m^2_{emittersurface}/m^2_{nature}
                            / VEGFRAC_IN_PATCH )                  ![frc] m^2_{patch}/m^2_{nature}  
     ENDDO !loop on point in patch
   ENDDO    !loop on different dust emitter surfaces

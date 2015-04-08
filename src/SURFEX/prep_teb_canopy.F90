@@ -27,8 +27,8 @@ SUBROUTINE PREP_TEB_CANOPY()
 !!------------------------------------------------------------------
 !
 !
-USE MODD_TEB_GRID_n,     ONLY : NDIM
-USE MODD_TEB_CANOPY_n,   ONLY : NLVL, XZ
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -52,13 +52,13 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_CANOPY',0,ZHOOK_HANDLE)
 !*      1.    number of levels (MUST be at least equal to 2)
 !             ----------------
 !
-NLVL = 6
+TCP%NLVL = 6
 !
 !*      2.    height of half levels (where turbulent fluxes will be)
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(NDIM,NLVL))
+ALLOCATE(ZZF(TG%NDIM,TCP%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1.
 ZZF(:,3) = 3.
@@ -66,11 +66,11 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(XZ(NDIM,NLVL))
-DO JLAYER=1,NLVL-1
-  XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
+ALLOCATE(TCP%XZ(TG%NDIM,TCP%NLVL))
+DO JLAYER=1,TCP%NLVL-1
+  TCP%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO
-XZ(:,NLVL) = 1.5 * ZZF(:,NLVL) - 0.5 * ZZF(:,NLVL-1)
+TCP%XZ(:,TCP%NLVL) = 1.5 * ZZF(:,TCP%NLVL) - 0.5 * ZZF(:,TCP%NLVL-1)
 !
 DEALLOCATE(ZZF)
 !

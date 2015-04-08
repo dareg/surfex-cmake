@@ -39,7 +39,7 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, HCOUPLING,                       
 !
 USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_CSTS,    ONLY : XSTEFAN, XCPD, XRD, XP00
-USE MODD_ISBA_n,  ONLY : XSSO_SLOPE, XEMIS_NAT, XTSRAD_NAT, XZS
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
 !
@@ -170,7 +170,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,I%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -226,7 +226,7 @@ ELSE
 !
 !  The subgrid slope comes from the XSSO_SLOPE field.
 !
-   Z3D_TOT_SURF(:) = SQRT(1.+XSSO_SLOPE(:)**2)
+   Z3D_TOT_SURF(:) = SQRT(1.+I%XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
 !
 !  number of spectral shortwave bands
@@ -249,7 +249,7 @@ ELSE
 !  incoming LW radiation per m2 of actual surface
 !
    ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
-          + XSTEFAN*XEMIS_NAT(:)*XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
+          + XSTEFAN*I%XEMIS_NAT(:)*I%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !  liquid precipitation per m2 of actual surface
 !

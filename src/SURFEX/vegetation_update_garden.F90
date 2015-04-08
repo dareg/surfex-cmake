@@ -39,23 +39,12 @@
 !               ------------
 !
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
-USE MODD_TEB_OPTION_n,      ONLY: XCOVER, LCOVER
-USE MODD_TEB_n,             ONLY: XGARDEN
-USE MODD_TEB_VEG_n,         ONLY: CISBA, CPHOTO, CALBEDO, LTR_ML
-USE MODD_TEB_GARDEN_OPTION_n,    ONLY: LPAR_GARDEN
-USE MODD_TEB_GARDEN_PGD_EVOL_n,  ONLY: XEMIS, XVEG, XLAI, XZ0, &
-                                       XALBNIR, XALBVIS, XALBUV
-USE MODD_TEB_GARDEN_PGD_n,       ONLY: LSTRESS,                            &
-                                  XWRMAX_CF, XRSMIN,                       &
-                                  XGAMMA, XCV, XRGL,                       &
-                                  XGMES,                                   &
-                                  XBSLAI, XLAIMIN, XSEFOLD,                &
-                                  XF2I, XGC,                               &
-                                  XCE_NITRO, XCF_NITRO, XCNA_NITRO,        &
-                                  XRE25,                                   &
-                                  XALBNIR_VEG, XALBVIS_VEG, XALBUV_VEG,    &
-                                  XALBNIR_SOIL, XALBVIS_SOIL, XALBUV_SOIL, &
-                                  XDMAX
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
 
 
   
@@ -158,43 +147,43 @@ ZHO2JM = 0.
 !
 !* vegetation parameters to update
 !
-ZVEG(:,1) = XVEG
-ZZ0(:,1) = XZ0
-ZALBNIR(:,1) = XALBNIR
-ZALBVIS(:,1) = XALBVIS
-ZALBUV(:,1) = XALBUV
-ZEMIS(:,1) = XEMIS
-ZRSMIN(:,1) = XRSMIN
-ZGAMMA(:,1) = XGAMMA
-ZWRMAX_CF(:,1) = XWRMAX_CF
-ZRGL(:,1) = XRGL
-ZCV(:,1) = XCV
-ZGMES(:,1) = XGMES
-ZBSLAI(:,1) = XBSLAI
-ZLAIMIN(:,1) = XLAIMIN
-ZSEFOLD(:,1) = XSEFOLD
-ZGC(:,1) = XGC
-ZDMAX(:,1) = XDMAX
-ZF2I(:,1) = XF2I
-GSTRESS(:,1) = LSTRESS
-ZALBNIR_VEG(:,1) = XALBNIR_VEG
-ZALBVIS_VEG(:,1) = XALBVIS_VEG
-ZALBUV_VEG(:,1) = XALBUV_VEG
-ZALBNIR_SOIL(:,1) = XALBNIR_SOIL
-ZALBVIS_SOIL(:,1) = XALBVIS_SOIL
-ZALBUV_SOIL(:,1) = XALBUV_SOIL
-ZCE_NITRO(:,1) = XCE_NITRO
-ZCF_NITRO(:,1) = XCF_NITRO
-ZCNA_NITRO(:,1) = XCNA_NITRO
+ZVEG(:,1) = TGDPE%XVEG
+ZZ0(:,1) = TGDPE%XZ0
+ZALBNIR(:,1) = TGDPE%XALBNIR
+ZALBVIS(:,1) = TGDPE%XALBVIS
+ZALBUV(:,1) = TGDPE%XALBUV
+ZEMIS(:,1) = TGDPE%XEMIS
+ZRSMIN(:,1) = TGDP%XRSMIN
+ZGAMMA(:,1) = TGDP%XGAMMA
+ZWRMAX_CF(:,1) = TGDP%XWRMAX_CF
+ZRGL(:,1) = TGDP%XRGL
+ZCV(:,1) = TGDP%XCV
+ZGMES(:,1) = TGDP%XGMES
+ZBSLAI(:,1) = TGDP%XBSLAI
+ZLAIMIN(:,1) = TGDP%XLAIMIN
+ZSEFOLD(:,1) = TGDP%XSEFOLD
+ZGC(:,1) = TGDP%XGC
+ZDMAX(:,1) = TGDP%XDMAX
+ZF2I(:,1) = TGDP%XF2I
+GSTRESS(:,1) = TGDP%LSTRESS
+ZALBNIR_VEG(:,1) = TGDP%XALBNIR_VEG
+ZALBVIS_VEG(:,1) = TGDP%XALBVIS_VEG
+ZALBUV_VEG(:,1) = TGDP%XALBUV_VEG
+ZALBNIR_SOIL(:,1) = TGDP%XALBNIR_SOIL
+ZALBVIS_SOIL(:,1) = TGDP%XALBVIS_SOIL
+ZALBUV_SOIL(:,1) = TGDP%XALBUV_SOIL
+ZCE_NITRO(:,1) = TGDP%XCE_NITRO
+ZCF_NITRO(:,1) = TGDP%XCF_NITRO
+ZCNA_NITRO(:,1) = TGDP%XCNA_NITRO
 ! --------------------------------------------------------------------------------------
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
 GUPDATED=.FALSE.
-IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE(PTSTEP,TPTIME,XCOVER,LCOVER,                 &
-                         CISBA,(.NOT. LPAR_GARDEN), CPHOTO, .FALSE.,     &
-                         LTR_ML, 'GRD',                                  &
+IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
+     CALL VEGETATION_UPDATE(PTSTEP,TPTIME,TOP%XCOVER,TOP%LCOVER,                 &
+                         TVG%CISBA,(.NOT. TGDO%LPAR_GARDEN), TVG%CPHOTO, .FALSE.,     &
+                         TVG%LTR_ML, 'GRD',                                  &
                          ZLAI,ZVEG,ZZ0,                                  &
                          ZALBNIR,ZALBVIS,ZALBUV,ZEMIS,                   &
                          ZRSMIN,ZGAMMA,ZWRMAX_CF,                        &
@@ -204,45 +193,45 @@ IF (CPHOTO=='NON' .OR. CPHOTO=='AGS' .OR. CPHOTO=='AST') THEN
                          ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,                    &
                          ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM,                    &
                          ZZ0EFFIP,ZZ0EFFIM,ZZ0EFFJP,ZZ0EFFJM,            &
-                         CALBEDO, ZALBNIR_VEG, ZALBVIS_VEG, ZALBUV_VEG,  &
+                         TVG%CALBEDO, ZALBNIR_VEG, ZALBVIS_VEG, ZALBUV_VEG,  &
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
                          TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
                          ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
                          ZRSMINGV, ZWRMAX_CFGV,                          &
                          ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
-                         GUPDATED, OABSENT=(XGARDEN==0.)                 )
+                         GUPDATED, OABSENT=(T%XGARDEN==0.)                 )
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-XVEG = ZVEG(:,1)
-XZ0 = ZZ0(:,1)
-XALBNIR = ZALBNIR(:,1)
-XALBVIS = ZALBVIS(:,1)
-XALBUV = ZALBUV(:,1)
-XEMIS = ZEMIS(:,1)
-XRSMIN = ZRSMIN(:,1)
-XGAMMA = ZGAMMA(:,1)
-XWRMAX_CF = ZWRMAX_CF(:,1)
-XRGL = ZRGL(:,1)
-XCV = ZCV(:,1)
-XGMES = ZGMES(:,1)
-XBSLAI = ZBSLAI(:,1)
-XLAIMIN = ZLAIMIN(:,1)
-XSEFOLD = ZSEFOLD(:,1)
-XGC = ZGC(:,1)
-XDMAX = ZDMAX(:,1)
-XF2I = ZF2I(:,1)
-LSTRESS = GSTRESS(:,1)
-XALBNIR_VEG = ZALBNIR_VEG(:,1)
-XALBVIS_VEG = ZALBVIS_VEG(:,1)
-XALBUV_VEG = ZALBUV_VEG(:,1)
-XALBNIR_SOIL = ZALBNIR_SOIL(:,1)
-XALBVIS_SOIL = ZALBVIS_SOIL(:,1)
-XALBUV_SOIL = ZALBUV_SOIL(:,1)
-XCE_NITRO = ZCE_NITRO(:,1)
-XCF_NITRO = ZCF_NITRO(:,1)
-XCNA_NITRO = ZCNA_NITRO(:,1)
+TGDPE%XVEG = ZVEG(:,1)
+TGDPE%XZ0 = ZZ0(:,1)
+TGDPE%XALBNIR = ZALBNIR(:,1)
+TGDPE%XALBVIS = ZALBVIS(:,1)
+TGDPE%XALBUV = ZALBUV(:,1)
+TGDPE%XEMIS = ZEMIS(:,1)
+TGDP%XRSMIN = ZRSMIN(:,1)
+TGDP%XGAMMA = ZGAMMA(:,1)
+TGDP%XWRMAX_CF = ZWRMAX_CF(:,1)
+TGDP%XRGL = ZRGL(:,1)
+TGDP%XCV = ZCV(:,1)
+TGDP%XGMES = ZGMES(:,1)
+TGDP%XBSLAI = ZBSLAI(:,1)
+TGDP%XLAIMIN = ZLAIMIN(:,1)
+TGDP%XSEFOLD = ZSEFOLD(:,1)
+TGDP%XGC = ZGC(:,1)
+TGDP%XDMAX = ZDMAX(:,1)
+TGDP%XF2I = ZF2I(:,1)
+TGDP%LSTRESS = GSTRESS(:,1)
+TGDP%XALBNIR_VEG = ZALBNIR_VEG(:,1)
+TGDP%XALBVIS_VEG = ZALBVIS_VEG(:,1)
+TGDP%XALBUV_VEG = ZALBUV_VEG(:,1)
+TGDP%XALBNIR_SOIL = ZALBNIR_SOIL(:,1)
+TGDP%XALBVIS_SOIL = ZALBVIS_SOIL(:,1)
+TGDP%XALBUV_SOIL = ZALBUV_SOIL(:,1)
+TGDP%XCE_NITRO = ZCE_NITRO(:,1)
+TGDP%XCF_NITRO = ZCF_NITRO(:,1)
+TGDP%XCNA_NITRO = ZCNA_NITRO(:,1)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE_GARDEN',1,ZHOOK_HANDLE)

@@ -33,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : CREC, NREC
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -53,8 +53,8 @@ IMPLICIT NONE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('IO_BUFF_CLEAN_N',0,ZHOOK_HANDLE)
-CREC='                '
-NREC=0
+IOB%CREC='                '
+IOB%NREC=0
 IF (LHOOK) CALL DR_HOOK('IO_BUFF_CLEAN_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

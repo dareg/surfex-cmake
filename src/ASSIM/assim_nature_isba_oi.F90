@@ -35,8 +35,7 @@ USE MODD_ASSIM,           ONLY : LOBSWG, NITRAD, NPRINTLEV, NECHGU, XRD1, XRSCAL
                                  XRTHR_QC, XSIGWGB, XSIGWGO, XSIGWGO_MAX, XAT2M_ISBA, &
                                  XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA
 !
-USE MODD_ISBA_n,          ONLY : XTG, XWG, XWGI, XSAND, XCLAY, TSNOW, XRSMIN,    &
-                                 XDG, XLAI, XVEG, TTIME
+USE MODD_ISBA_n, ONLY : I => ISBA
 
 USE YOMHOOK,              ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,             ONLY : JPRB
@@ -119,10 +118,10 @@ NITRAD = NECHGU*1800
 !
 !   Time initializations 
 !
-IYEAR  = TTIME%TDATE%YEAR
-IMONTH = TTIME%TDATE%MONTH
-IDAY   = TTIME%TDATE%DAY
-ISSSSS = TTIME%TIME
+IYEAR  = I%TTIME%TDATE%YEAR
+IMONTH = I%TTIME%TDATE%MONTH
+IDAY   = I%TTIME%TDATE%DAY
+ISSSSS = I%TTIME%TIME
 IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 !
@@ -141,26 +140,26 @@ JP = 1
 JL = 1
 !
 !
-ZSAB  (:) = XSAND(:,JP)*100.
-ZARG  (:) = XCLAY(:,JP)*100.
+ZSAB  (:) = I%XSAND(:,JP)*100.
+ZARG  (:) = I%XCLAY(:,JP)*100.
 !
-ZTS0  (:) = XTG  (:,1,JP)
-ZTP0  (:) = XTG  (:,2,JP)
+ZTS0  (:) = I%XTG  (:,1,JP)
+ZTP0  (:) = I%XTG  (:,2,JP)
 !
-ZWS0  (:) = XWG  (:,1,JP)
-ZWP0  (:) = XWG  (:,2,JP)
-ZTL0  (:) = XWGI (:,2,JP)
+ZWS0  (:) = I%XWG  (:,1,JP)
+ZWP0  (:) = I%XWG  (:,2,JP)
+ZTL0  (:) = I%XWGI (:,2,JP)
 !
-ZSNS0(:) = TSNOW%WSNOW(:,JL,JP)
+ZSNS0(:) = I%TSNOW%WSNOW(:,JL,JP)
 ZSNS (:) = ZSNS0(:)
 !
 ZTCLS (:) = XAT2M_ISBA   (:,JP)
 ZHCLS (:) = XAHU2M_ISBA  (:,JP)
 !
-ZD2   (:) = XDG   (:,2,JP)
-ZRSMIN(:) = XRSMIN(:,JP)
-ZLAI  (:) = XLAI  (:,JP)
-ZVEG  (:) = XVEG  (:,JP)
+ZD2   (:) = I%XDG   (:,2,JP)
+ZRSMIN(:) = I%XRSMIN(:,JP)
+ZLAI  (:) = I%XLAI  (:,JP)
+ZVEG  (:) = I%XVEG  (:,JP)
 !
 ZUCLS(:) = PUCLS(:)
 ZVCLS(:) = PVCLS(:)
@@ -334,11 +333,11 @@ WRITE(*,*) 'Mean TL increments over NATURE ',SUM(ZTLINC)/KI
 WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
-XWG (:,1,JP) = ZWS0(:)
-XWG (:,2,JP) = ZWP0(:)
-XTG (:,1,JP) = ZTS0(:)
-XTG (:,2,JP) = ZTP0(:)
-XWGI(:,2,JP) = ZTL0(:)
+I%XWG (:,1,JP) = ZWS0(:)
+I%XWG (:,2,JP) = ZWP0(:)
+I%XTG (:,1,JP) = ZTS0(:)
+I%XTG (:,2,JP) = ZTP0(:)
+I%XWGI(:,2,JP) = ZTL0(:)
 
 !
 ! -------------------------------------------------------------------------------------

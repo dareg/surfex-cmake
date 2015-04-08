@@ -27,7 +27,7 @@
 !*       0.    DECLARATIONS
 !
 USE MODD_CSTS,       ONLY : XAVOGADRO, XMD
-USE MODD_CH_SNAP_n,  ONLY : XCONVERSION
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -48,14 +48,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('CH_CONVERSION_FACTOR',0,ZHOOK_HANDLE)
 !
 ! determine the conversion factor
-XCONVERSION(:) = 1.
+CHN%XCONVERSION(:) = 1.
 SELECT CASE (HCONVERSION)
   CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
-    XCONVERSION(:) = XAVOGADRO * PRHOA(:) / XMD
+    CHN%XCONVERSION(:) = XAVOGADRO * PRHOA(:) / XMD
   CASE ('CON') ! flux given in molecules/cm2/s, conversion to molec/m2/s 
-    XCONVERSION(:) =  1E4
+    CHN%XCONVERSION(:) =  1E4
   CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s  
-    XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
+    CHN%XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
   CASE DEFAULT
     CALL ABOR1_SFX('CH_BUILDEMISSN: UNKNOWN CONVERSION FACTOR')
 END SELECT

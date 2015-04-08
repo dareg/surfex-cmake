@@ -41,21 +41,15 @@ USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XP00, XCPD, XRD, XAVOGADRO, XMD
 USE MODD_CO2V_PAR,       ONLY : XMCO2 
-USE MODD_SURF_ATM_GRID_n,ONLY : XLON
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_ATM,       ONLY : LCPL_GCM, XCO2UNCPL
-USE MODD_SURF_ATM_n,     ONLY : NDIM_SEA, NDIM_WATER, NDIM_TOWN, NDIM_NATURE, &
-                                NSIZE_SEA, NSIZE_WATER, NSIZE_TOWN, NSIZE_NATURE, &
-                                NR_SEA,    NR_WATER,    NR_TOWN,    NR_NATURE,    &
-                                XSEA,      XWATER,      XTOWN,      XNATURE,      &
-                                TTIME, NSIZE_FULL
-USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
-USE MODD_SV_n,           ONLY : NBEQ,NSV_CHSBEG,NSV_CHSEND, &
-                                NDSTEQ,NSV_DSTBEG,NSV_DSTEND,&
-                                NAEREQ,NSV_AERBEG,NSV_AEREND, CSV
+USE MODD_SV_n, ONLY : SV => SV
 !
-USE MODD_CH_SURF_n,      ONLY : LCH_SURF_EMIS, CCH_EMIS
-USE MODD_CH_EMIS_FIELD_n,ONLY : TSEMISS
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
 !
 USE MODD_SURFEX_MPI, ONLY : XTIME_SEA, XTIME_WATER, XTIME_NATURE, XTIME_TOWN
 !
@@ -213,18 +207,18 @@ END IF
 ! Time evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-TTIME%TIME = TTIME%TIME + PTSTEP
- CALL ADD_FORECAST_TO_DATE_SURF(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,TTIME%TIME)
+U%TTIME%TIME = U%TTIME%TIME + PTSTEP
+ CALL ADD_FORECAST_TO_DATE_SURF(U%TTIME%TDATE%YEAR,U%TTIME%TDATE%MONTH,U%TTIME%TDATE%DAY,U%TTIME%TIME)
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries: Tile related operations
 !-------------------------------------------------------------------------------------
 ! FLAGS for the various surfaces:
 !
-GSEA      = NDIM_SEA    >0
-GWATER    = NDIM_WATER  >0
-GTOWN     = NDIM_TOWN   >0
-GNATURE   = NDIM_NATURE >0
+GSEA      = U%NDIM_SEA    >0
+GWATER    = U%NDIM_WATER  >0
+GTOWN     = U%NDIM_TOWN   >0
+GNATURE   = U%NDIM_NATURE >0
 
 !
 ! Tile counter:
@@ -292,14 +286,14 @@ JTILE = JTILE + 1
 !
 IF(GSEA)THEN
 !
-  ZFRAC_TILE(:,JTILE) = XSEA(:)
+  ZFRAC_TILE(:,JTILE) = U%XSEA(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_SEA,NR_SEA)
+  CALL TREAT_SURF(JTILE,U%NSIZE_SEA,U%NR_SEA)
 !
 ENDIF
 !
 #ifdef SFX_MPI
-XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_SEA)
+XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,U%NSIZE_SEA)
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -311,14 +305,14 @@ JTILE = JTILE + 1
 !
 IF(GWATER)THEN
 !
-  ZFRAC_TILE(:,JTILE) = XWATER(:)
+  ZFRAC_TILE(:,JTILE) = U%XWATER(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_WATER,NR_WATER)
+  CALL TREAT_SURF(JTILE,U%NSIZE_WATER,U%NR_WATER)
 !
 ENDIF 
 !
 #ifdef SFX_MPI
-XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_WATER)
+XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,U%NSIZE_WATER)
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -330,14 +324,14 @@ JTILE = JTILE + 1
 !
 IF(GNATURE)THEN
 !
-  ZFRAC_TILE(:,JTILE) = XNATURE(:)
+  ZFRAC_TILE(:,JTILE) = U%XNATURE(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_NATURE,NR_NATURE)
+  CALL TREAT_SURF(JTILE,U%NSIZE_NATURE,U%NR_NATURE)
 !
 ENDIF 
 !
 #ifdef SFX_MPI
-XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_NATURE)
+XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,U%NSIZE_NATURE)
 XTIME0 = MPI_WTIME()
 #endif
 !
@@ -349,14 +343,14 @@ JTILE = JTILE + 1
 !
 IF(GTOWN)THEN
 !
-  ZFRAC_TILE(:,JTILE) = XTOWN(:)
+  ZFRAC_TILE(:,JTILE) = U%XTOWN(:)
 !
-  CALL TREAT_SURF(JTILE,NSIZE_TOWN,NR_TOWN)
+  CALL TREAT_SURF(JTILE,U%NSIZE_TOWN,U%NR_TOWN)
 !
 ENDIF 
 !
 #ifdef SFX_MPI
-XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
+XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,U%NSIZE_TOWN)
 #endif
 !
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -374,20 +368,20 @@ XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,NSIZE_TOWN)
 ! Chemical Emissions:                  
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF ((NBEQ > 0).AND.(LCH_SURF_EMIS)) THEN
-  IF (CCH_EMIS=='AGGR') THEN
-    IF (NSV_AEREND < 0)  THEN
-      IINDEXEND = NSV_CHSEND ! case only gas chemistry
+IF ((SV%NBEQ > 0).AND.(CHU%LCH_SURF_EMIS)) THEN
+  IF (CHU%CCH_EMIS=='AGGR') THEN
+    IF (SV%NSV_AEREND < 0)  THEN
+      IINDEXEND = SV%NSV_CHSEND ! case only gas chemistry
     ELSE
-      IINDEXEND = NSV_AEREND ! case aerosol + gas chemistry
+      IINDEXEND = SV%NSV_AEREND ! case aerosol + gas chemistry
     ENDIF
     INBTS=0
-    DO JI=1,SIZE(TSEMISS)
-      IF (SIZE(TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(TSEMISS(JI)%NETIMES)
+    DO JI=1,SIZE(CHE%TSEMISS)
+      IF (SIZE(CHE%TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(CHE%TSEMISS(JI)%NETIMES)
     ENDDO
-    CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
-  ELSE IF (CCH_EMIS=='SNAP') THEN
-    CALL CH_EMISSION_SNAP_n(HPROGRAM,NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,XLON)
+    CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+  ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
+    CALL CH_EMISSION_SNAP_n(HPROGRAM,U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,UG%XLON)
     CALL CH_EMISSION_TO_ATM_n(PSFTS,PRHOA)
   END IF
 END IF
@@ -401,7 +395,7 @@ WHERE(PSFTS(:,:)==XUNDEF)  PSFTS(:,:)=0.
 !               PSFCO2 in kgCO2/m2/s      = *Navogadro*1E3/Mco2(44g/mol) molecules/m2/s
 !
 DO JI=1,SIZE(PSV,2)
-  IF(TRIM(ADJUSTL(CSV(JI)))=="CO2") THEN
+  IF(TRIM(ADJUSTL(SV%CSV(JI)))=="CO2") THEN
     ! CO2 Flux (Antrop + biog) (molec*m2/s)
     PSFTS(:,JI) = PSFTS(:,JI) + PSFCO2(:)*PRHOA(:)*(XAVOGADRO/44.)*1E3
     ! CO2 Flux (Antrop + biog) (kgCO2/kgair*m/s)
@@ -436,10 +430,10 @@ IF(LCPL_GCM) CALL CPL_GCM_n(KI,PZ0=PZ0,PZ0H=PZ0H,PQSURF=PQSURF)
 !* adds friction due to subscale orography to momentum fluxes
 !  but only over continental area
 !
-IF (CROUGH=="Z01D" .OR. CROUGH=="Z04D") THEN
-  CALL SSO_Z0_FRICTION_n(XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
-ELSE IF (CROUGH=="BE04") THEN
-  CALL SSO_BE04_FRICTION_n(PTSTEP,XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+IF (USS%CROUGH=="Z01D" .OR. USS%CROUGH=="Z04D") THEN
+  CALL SSO_Z0_FRICTION_n(U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
+ELSE IF (USS%CROUGH=="BE04") THEN
+  CALL SSO_BE04_FRICTION_n(PTSTEP,U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -584,7 +578,7 @@ IF (KTILE==1) THEN
   !
   CALL COUPLING_SEA_n(HPROGRAM, HCOUPLING, PTIMEC,                                           &
               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-              NSIZE_SEA, KSV, KSW,                                                           &
+              U%NSIZE_SEA, KSV, KSW,                                                           &
               ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
               ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
               ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
@@ -598,7 +592,7 @@ ELSEIF (KTILE==2) THEN
   !
   CALL COUPLING_INLAND_WATER_n(HPROGRAM, HCOUPLING, PTIMEC,                                   &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-               NSIZE_WATER, KSV, KSW,                                                         &
+               U%NSIZE_WATER, KSV, KSW,                                                         &
                ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
                ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
                ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
@@ -612,7 +606,7 @@ ELSEIF (KTILE==3) THEN
   !
   CALL COUPLING_NATURE_n(HPROGRAM, HCOUPLING, PTIMEC,                                         &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-               NSIZE_NATURE, KSV, KSW,                                                        &
+               U%NSIZE_NATURE, KSV, KSW,                                                        &
                ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
                ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
                ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
@@ -626,7 +620,7 @@ ELSEIF (KTILE==4) THEN
   !
   CALL COUPLING_TOWN_n(HPROGRAM, HCOUPLING, PTIMEC,                                           &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-               NSIZE_TOWN, KSV, KSW,                                                          &
+               U%NSIZE_TOWN, KSV, KSW,                                                          &
                ZP_TSUN, ZP_ZENITH, ZP_AZIM,                                                   &
                ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
                ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &

@@ -36,7 +36,7 @@
 !
 USE MODI_GET_LUOUT
 !
-USE MODD_TEB_OPTION_n,     ONLY : XZS
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -65,13 +65,13 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_TOWN_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(TOP%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field over town                         (XZS) :', SIZE(XZS)
+  WRITE(ILUOUT,*) 'size of field over town                         (XZS) :', SIZE(TOP%XZS)
   CALL ABOR1_SFX('PUT_ZS_TOWNN: GET ZS FROM ATMOSPHERIC MODEL: SIZE NOT CORRECT')
 ELSE
-  XZS = PZS
+  TOP%XZS = PZS
 END IF
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_TOWN_N',1,ZHOOK_HANDLE)
 !
