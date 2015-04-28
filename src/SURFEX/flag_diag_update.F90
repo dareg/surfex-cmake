@@ -1,9 +1,9 @@
 !     #########
-      SUBROUTINE FLAG_DIAG_UPDATE(OFRAC, ODIAG_GRID, K2M, OSURF_BUDGET, ORAD_BUDGET, OCOEF,  &
-                                  OSURF_VARS, KBEQ, KDSTEQ, ODIAG_OCEAN, ODIAG_SEAICE,       &
-                                  OWATER_PROFILE,                                            &
-                                  OSURF_EVAP_BUDGET, OFLOOD,  OPGD_ISBA, OCH_NO_FLUX_ISBA,   &
-                                  OSURF_MISC_BUDGET_ISBA, OPGD_TEB, OSURF_MISC_BUDGET_TEB    )
+SUBROUTINE FLAG_DIAG_UPDATE(OFRAC, ODIAG_GRID, K2M, OSURF_BUDGET, ORAD_BUDGET, OCOEF,  &
+                            OSURF_VARS, KBEQ, KDSTEQ, ODIAG_OCEAN, ODIAG_SEAICE,       &
+                            OWATER_PROFILE,                                            &
+                            OSURF_EVAP_BUDGET, OFLOOD,  OPGD_ISBA, OCH_NO_FLUX_ISBA,   &
+                            OSURF_MISC_BUDGET_ISBA, OPGD_TEB, OSURF_MISC_BUDGET_TEB    )
 !     ############################################################
 !
 !!****  *FLAG_DIAG_UPDATE* - routine to modify selection of output fields
