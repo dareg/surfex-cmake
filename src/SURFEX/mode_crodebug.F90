@@ -26,8 +26,6 @@ MODULE MODE_CRODEBUG
 !!      Modification M Lafaysse 03/10/2012 : add energy balance control
 !--------------------------------------------------------------------------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-!
 IMPLICIT NONE
 !
 ! To stop simulation if mass/energy balances not closed
@@ -55,6 +53,8 @@ CONTAINS
 !
 SUBROUTINE INIT_CRODEBUG()
 ! Check environment variables to activate crocus debugging mode if required
+!
+USE MODD_ISBA_n, ONLY : I => ISBA
 !
  CHARACTER(1) :: YCROCUS_INFO,YCROCUS_DEBUG,YCROCUS_BALANCE
  CHARACTER(8) :: YCROCUS_DEBUG_TIME
