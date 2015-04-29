@@ -41,6 +41,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -521,7 +523,8 @@ END IF
  CALL READ_LECOCLIMAP(HPROGRAM,I%LECOCLIMAP)
 !
  CALL READ_PGD_ISBA_PAR_n(HPROGRAM,IG%NDIM,OLAND_USE)
-IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(HPROGRAM)
+IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(DTZ, &
+                                                  HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_ISBA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

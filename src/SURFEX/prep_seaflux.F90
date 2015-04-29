@@ -28,6 +28,8 @@ SUBROUTINE PREP_SEAFLUX(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+!
 USE MODI_PREP_HOR_SEAFLUX_FIELD
 USE MODI_PREP_VER_SEAFLUX
 USE MODI_PREP_OUTPUT_GRID
@@ -144,7 +146,7 @@ ENDIF
 !*      3.     Vertical interpolations of all variables
 !
 IF(LVERTSHIFT)THEN
-  CALL PREP_VER_SEAFLUX
+  CALL PREP_VER_SEAFLUX(S)
 ENDIF
 !
 DEALLOCATE(XZS_LS)
@@ -197,7 +199,7 @@ ENDIF
 !*      6.     Preparation of SBL air variables
 !
 !
-IF (S%LSBL) CALL PREP_SEAFLUX_SBL()
+IF (S%LSBL) CALL PREP_SEAFLUX_SBL(SG, SSB)
 !
 !-------------------------------------------------------------------------------------
 !

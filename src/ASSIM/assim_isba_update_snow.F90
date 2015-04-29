@@ -1,4 +1,5 @@
-SUBROUTINE ASSIM_ISBA_UPDATE_SNOW(HPROGRAM, KI, PSWE, PSWE_ORIG, OINITSNOW, OINC, HTEST )
+SUBROUTINE ASSIM_ISBA_UPDATE_SNOW (I, &
+                                   HPROGRAM, KI, PSWE, PSWE_ORIG, OINITSNOW, OINC, HTEST )
 
 ! ------------------------------------------------------------------------------------------
 !  *****************************************************************************************
@@ -9,11 +10,13 @@ SUBROUTINE ASSIM_ISBA_UPDATE_SNOW(HPROGRAM, KI, PSWE, PSWE_ORIG, OINITSNOW, OINC
 !
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_CSTS,        ONLY : XTT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_SNOW_PAR,    ONLY : XANSMIN, XANSMAX, XRHOSMIN, XRHOSMAX
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_ABOR1_SFX
 !
@@ -21,6 +24,9 @@ USE YOMHOOK,          ONLY : LHOOK,DR_HOOK
 USE PARKIND1,         ONLY : JPRB
 !
 IMPLICIT NONE
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN)    :: KI
 REAL, DIMENSION(KI), INTENT(IN)    :: PSWE

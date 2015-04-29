@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_DUMMY_n(HPROGRAM)
+      SUBROUTINE WRITESURF_DUMMY_n (DUU, &
+                                    HPROGRAM)
 !     ##########################################
 !
 !!****  *WRITESURF_DUMMY_n* - routine to write dummy surface fields
@@ -19,7 +20,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
+!
+!
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
 !
 USE MODI_WRITE_SURF
 !
@@ -31,6 +34,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DUMMY_SURF_FIELDS_t), INTENT(INOUT) :: DUU
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! 
 !

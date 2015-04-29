@@ -176,7 +176,8 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   XSFTS = 0.
 !
- CALL DIAG_IDEAL_INIT_n(KI,KSW)
+ CALL DIAG_IDEAL_INIT_n(DGL, &
+                        KI,KSW)
 !
 ENDIF
 !-------------------------------------------------------------------------------

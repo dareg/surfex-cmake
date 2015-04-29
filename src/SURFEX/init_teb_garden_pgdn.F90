@@ -35,6 +35,8 @@ SUBROUTINE INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSIO
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+!
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
@@ -109,7 +111,8 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_PGD_n',0,ZHOOK_HANDLE)
 !
 !* allocation of urban green area variables
 !
- CALL ALLOCATE_TEB_GARDEN_PGD(OREAD_PGD, KI, NVEGTYPE, TGDO%NGROUND_LAYER, NDIMTAB)  
+ CALL ALLOCATE_TEB_GARDEN_PGD(TGDPE, TGDP, &
+                              OREAD_PGD, KI, NVEGTYPE, TGDO%NGROUND_LAYER, NDIMTAB)  
 !
 !
 !*       2.1    Cover, soil and orographic fields:
@@ -132,7 +135,8 @@ END IF
 IF (.NOT. TGDO%LPAR_GARDEN) THEN
   CALL CONVERT_PATCH_GARDEN(KI,IDECADE)
 ELSE
- CALL INIT_FROM_DATA_GRDN_n(IDECADE,TVG%CPHOTO,                     &
+ CALL INIT_FROM_DATA_GRDN_n(DTGD, &
+                            IDECADE,TVG%CPHOTO,                     &
                             TGDPE%XVEG,                               &
                             TGDPE%XLAI,TGDP%XRSMIN,TGDP%XGAMMA,TGDP%XWRMAX_CF,       &
                             TGDP%XRGL,TGDP%XCV,TGDP%XDG,TGDP%XD_ICE,TGDPE%XZ0,TGDP%XZ0_O_Z0H,  &

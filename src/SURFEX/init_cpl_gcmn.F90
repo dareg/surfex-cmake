@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_CPL_GCM_n(HPROGRAM,HINIT)
+      SUBROUTINE INIT_CPL_GCM_n (U, &
+                                 HPROGRAM,HINIT)
 !     ########################################
 !
 !!****  *INIT_CPL_GCM_n* - routine to read  physical fields into  
@@ -44,7 +45,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_READ_SURF
 !
@@ -55,6 +58,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! choice of fields to initialize

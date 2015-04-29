@@ -24,6 +24,8 @@ SUBROUTINE ASSIM_SET_SST(KI,PITM,PSST,PSIC,HTEST)
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
@@ -101,7 +103,7 @@ IF ( LREAD_SST_FROM_FILE ) THEN
 !  Close SST_SIC file
 !
   CALL END_IO_SURF_n(YPROGRAM2)
-  CALL IO_BUFF_CLEAN_n
+  CALL IO_BUFF_CLEAN_n(IOB)
   WRITE(*,*) 'READ SST_SIC OK'
 
 ELSE

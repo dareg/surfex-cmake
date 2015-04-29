@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TEB_IRRIG_n(HPROGRAM)
+      SUBROUTINE READ_PGD_TEB_IRRIG_n (TG, TIR, &
+                                       HPROGRAM)
 !     ################################################
 !
 !!****  *READ_PGD_TEB_IRRIG_n* - reads ISBA physiographic fields
@@ -34,8 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
+!
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -48,6 +51,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

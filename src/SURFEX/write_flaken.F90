@@ -34,6 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+!
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODI_INIT_IO_SURF_n
@@ -68,9 +72,11 @@ IF (LHOOK) CALL DR_HOOK('WRITE_FLAKE_N',0,ZHOOK_HANDLE)
 !               ---------------------------
 !
  CALL WRITESURF_FLAKE_CONF_n(HPROGRAM)
- CALL WRITESURF_FLAKE_n(HPROGRAM)
+ CALL WRITESURF_FLAKE_n(F, &
+                        HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_FLAKE_SBL_n(HPROGRAM,HWRITE)
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_FLAKE_SBL_n(F, FSB, &
+                                                                      HPROGRAM,HWRITE)
 !
 !
 !-------------------------------------------------------------------------------

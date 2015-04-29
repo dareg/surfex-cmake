@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INTERPOL_NPTS(HPROGRAM,KLUOUT,KNPTS,KCODE,PX,PY,PFIELD)
+      SUBROUTINE INTERPOL_NPTS (UG, U, &
+                                HPROGRAM,KLUOUT,KNPTS,KCODE,PX,PY,PFIELD)
 !     #########################################################
 !
 !!**** *INTERPOL_NPTS* interpolates with ###ine f77 programs a 2D field
@@ -47,9 +48,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_GET_INTERP_HALO
 USE MODI_GET_NEAR_MESHES
@@ -62,6 +65,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),      INTENT(IN)     :: HPROGRAM ! host program
 INTEGER,               INTENT(IN)     :: KLUOUT   ! output listing

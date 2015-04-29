@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SIZE_FULL_n(HPROGRAM,KDIM_FULL,KSIZE_FULL)
+      SUBROUTINE GET_SIZE_FULL_n (U, &
+                                  HPROGRAM,KDIM_FULL,KSIZE_FULL)
 !     #######################################################
 !
 !!****  *GET_SIZE_FULL_n* - get number of points for this proc
@@ -33,10 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 !
 USE MODD_SURF_PAR,   ONLY : NUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_SURFEX_MPI, ONLY : NINDEX, NRANK, NPROC
 USE MODD_SURFEX_OMP, ONLY : NINDX1SFX, NINDX2SFX
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
 INTEGER         ,  INTENT(IN)  :: KDIM_FULL  ! total number of points

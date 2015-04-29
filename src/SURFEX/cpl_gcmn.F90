@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CPL_GCM_n(KI,PRAIN,PSNOW,PZ0,PZ0H,PQSURF)
+      SUBROUTINE CPL_GCM_n (U, &
+                            KI,PRAIN,PSNOW,PZ0,PZ0H,PQSURF)
 !     ####################################################
 !
 !!****  *CPL_GCM_n* - Save some phisical fields for ARPEGE/ALADIN run
@@ -31,7 +32,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -40,6 +43,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,             INTENT(IN)           :: KI       ! number of points
 !

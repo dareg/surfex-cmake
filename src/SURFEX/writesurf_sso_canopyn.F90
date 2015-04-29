@@ -1,5 +1,6 @@
 !     ####################################
-      SUBROUTINE WRITESURF_SSO_CANOPY_n(HPROGRAM,OWRITE)
+      SUBROUTINE WRITESURF_SSO_CANOPY_n (SSCP, &
+                                         HPROGRAM,OWRITE)
 !     ####################################
 !
 !!****  *WRITE_SSO_n* - writes SSO fields
@@ -36,7 +37,9 @@
 !
 !
 !
-USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+!
+!
+USE MODD_SSO_CANOPY_n, ONLY : SSO_CANOPY_t
 !
 USE MODI_WRITE_SURF
 !
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SSO_CANOPY_t), INTENT(INOUT) :: SSCP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 LOGICAL,           INTENT(IN)  :: OWRITE   ! flag to write canopy terms

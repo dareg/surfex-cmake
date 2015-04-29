@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_ISBA_n(HPROGRAM,                                               &
+SUBROUTINE DIAG_ISBA_n (DGEI, DGI, I, &
+                        HPROGRAM,                                               &
                          PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,    &
                          PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
                          PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
@@ -34,11 +35,13 @@ SUBROUTINE DIAG_ISBA_n(HPROGRAM,                                               &
 !!------------------------------------------------------------------
 !
 !
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 !                                  
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

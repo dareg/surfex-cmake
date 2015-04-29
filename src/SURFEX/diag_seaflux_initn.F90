@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_SEAFLUX_INIT_n(HPROGRAM,KLU,KSW)
+      SUBROUTINE DIAG_SEAFLUX_INIT_n (DGO, DGS, DGSI, DGU, S, &
+                                      HPROGRAM,KLU,KSW)
 !     #####################
 !
 !!****  *DIAG_SEAFLUX_INIT_n* - routine to initialize SEAFLUX diagnostic variables
@@ -37,20 +38,22 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 #endif
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA,LCPL_SEAICE
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 
 !                                
-USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
 !
-USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODI_READ_SURF
 !
@@ -62,6 +65,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
 INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_PERM_SNOW(TPSNOW,PTG,PPERM_SNOW_FRAC,KSNOW)
+SUBROUTINE PREP_PERM_SNOW (I, &
+                           TPSNOW,PTG,PPERM_SNOW_FRAC,KSNOW)
 !          ################################################
 !
 !
@@ -29,6 +30,9 @@ SUBROUTINE PREP_PERM_SNOW(TPSNOW,PTG,PPERM_SNOW_FRAC,KSNOW)
 !!------------------------------------------------------------------
 !
 
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_TYPE_SNOW
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
@@ -38,7 +42,6 @@ USE MODD_SNOW_PAR,       ONLY : XRHOSMAX, XANSMAX, XANSMIN, &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_SNOW_HEAT_TO_T_WLIQ
 USE MODI_SNOW_T_WLIQ_TO_HEAT
@@ -52,6 +55,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 TYPE(SURF_SNOW), INTENT(INOUT) :: TPSNOW            ! snow mantel characteristics
 REAL, DIMENSION(:,:),  INTENT(IN):: PTG             ! soil temperature for patch KSNOW

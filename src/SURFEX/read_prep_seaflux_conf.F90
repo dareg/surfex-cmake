@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PREP_SEAFLUX_CONF(HPROGRAM,HVAR,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE, &
+      SUBROUTINE READ_PREP_SEAFLUX_CONF (O, &
+                                         HPROGRAM,HVAR,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE, &
                                         HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KLUOUT,OUNIF)
 !     #######################################################
 !
@@ -38,6 +39,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+!
 USE MODN_PREP_SEAFLUX
 !
 USE MODI_READ_PREP_SURF_ATM_CONF
@@ -45,7 +49,6 @@ USE MODI_OCEAN_MERCATORVERGRID
 !
 USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, &
                               XSST_UNIF, XSSS_UNIF, XSIC_UNIF
-USE MODD_OCEAN_n, ONLY : O => OCEAN
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -59,6 +62,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated

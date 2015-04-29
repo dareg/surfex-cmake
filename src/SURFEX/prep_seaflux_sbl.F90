@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX_SBL()
+SUBROUTINE PREP_SEAFLUX_SBL (SG, SSB)
 !     #################################################################################
 !
 !!****  *PREP_SEAFLUX_SBL* - prepares SEAFLUX SBL fields
@@ -26,8 +26,10 @@ SUBROUTINE PREP_SEAFLUX_SBL()
 !!      E. Martin   01/2012 XUNDEF fields are no more written in PREP file
 !!------------------------------------------------------------------
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
-USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+!
+!
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -38,6 +40,10 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
 !
 INTEGER :: JLAYER
 !

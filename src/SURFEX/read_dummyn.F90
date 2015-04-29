@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_DUMMY_n(HPROGRAM)
+      SUBROUTINE READ_DUMMY_n (DUU, U, &
+                               HPROGRAM)
 !     #################################
 !
 !!****  *READ_DUMMY_n* - routine to READ dummy surface fields
@@ -19,8 +20,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_READ_SURF
 !
@@ -32,6 +35,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DUMMY_SURF_FIELDS_t), INTENT(INOUT) :: DUU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! 
 !

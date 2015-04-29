@@ -183,7 +183,7 @@ END IF
 !    4.    Computes LAI evolution for the chosen year
 !          ------------------------------------------
 !
- CALL ECOCLIMAP2_LAI
+ CALL ECOCLIMAP2_LAI(DTCO)
 IF (LHOOK) CALL DR_HOOK('PGD_ECOCLIMAP2_DATA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

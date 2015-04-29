@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SSO_n(HPROGRAM,KI,PSSO_SLOPE)
+      SUBROUTINE GET_SSO_n (USS, &
+                            HPROGRAM,KI,PSSO_SLOPE)
 !     ########################################
 !
 !!****  *GET_SSO_n* - routine to get some surface fields
@@ -33,9 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI          ! horizontal dim. of cover

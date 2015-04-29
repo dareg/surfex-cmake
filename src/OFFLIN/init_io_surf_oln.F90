@@ -29,6 +29,8 @@
 !             ------------
 !
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_OL_FILEID, ONLY : XVAR_TO_FILEOUT,         &
                            XID, XOUT,               &
                            XVAR_SURF, XID_SURF,     &
@@ -86,11 +88,13 @@ LMASK = .TRUE.
 IF (HACTION=='READ') THEN
   CALL READ_SURF('OFFLIN','DIM_FULL',IFULL,IRET)
 ELSE 
-  CALL GET_DIM_FULL_n(IFULL)
+  CALL GET_DIM_FULL_n(U, &
+                      IFULL)
 ENDIF
 !
 ! size by MPI task. NINDEX is supposed to be initialized at this step.  
- CALL GET_SIZE_FULL_n('OFFLIN',IFULL,ILU)
+ CALL GET_SIZE_FULL_n(U, &
+                      'OFFLIN',IFULL,ILU)
 !
 IL = ILU
  CALL GET_TYPE_DIM_n(HMASK,IL)

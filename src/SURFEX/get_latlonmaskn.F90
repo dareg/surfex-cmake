@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_LATLONMASK_n(OLATLONMASK,HGRID,PGRID_PAR,KGRID_PAR)
+      SUBROUTINE GET_LATLONMASK_n (UG, &
+                                   OLATLONMASK,HGRID,PGRID_PAR,KGRID_PAR)
 !     #######################################################
 !
 !!**** *GET_LATLONMASK_n* get the grid dimensions
@@ -28,8 +29,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !      
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODI_LATLONMASK
 !
 !
@@ -40,6 +43,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+!
  CHARACTER(LEN=10), INTENT(OUT)             ::  HGRID      
 REAL, DIMENSION(:), POINTER                ::  PGRID_PAR      
 INTEGER, INTENT(OUT)                       ::  KGRID_PAR      

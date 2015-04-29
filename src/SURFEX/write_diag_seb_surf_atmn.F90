@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_SURF_ATM_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_SURF_ATM_n (DGU, UG, &
+                                            HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_SURF_ATM_n* - writes surface diagnostics
@@ -32,9 +33,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODI_INIT_IO_SURF_n
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

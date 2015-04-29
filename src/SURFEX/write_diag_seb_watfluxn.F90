@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_WATFLUX_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_WATFLUX_n (CHW, DGU, DGW, &
+                                           HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_WATFLUX_n* - writes WATFLUX diagnostics
@@ -33,17 +34,19 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+!
 #ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
 #endif
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -57,6 +60,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

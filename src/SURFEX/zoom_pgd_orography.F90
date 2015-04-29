@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE ZOOM_PGD_OROGRAPHY(HPROGRAM,PSEA,PWATER,HINIFILE,HINIFILETYPE)
+      SUBROUTINE ZOOM_PGD_OROGRAPHY (UG, U, USS, &
+                                     HPROGRAM,PSEA,PWATER,HINIFILE,HINIFILETYPE)
 !     ###########################################################
 
 !!
@@ -35,9 +36,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_PREP,             ONLY : CINGRID_TYPE, CINTERP_TYPE, LINTERP
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 !
@@ -59,6 +62,11 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
 REAL, DIMENSION(:),   INTENT(IN)  :: PSEA        ! sea fraction

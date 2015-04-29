@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_WATFLUX_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_WATFLUX_n (WG, W, &
+                                          HPROGRAM)
 !     ###################################################
 !
 !!****  *WRITESURF_PGD_WATFLUX_n* - writes WATFLUX fields
@@ -34,8 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+!
+!
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
@@ -52,6 +55,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

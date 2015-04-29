@@ -35,6 +35,14 @@ SUBROUTINE DIAG_INLAND_WATER_n(HPROGRAM,                                        
 !
 
 !
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 
@@ -108,7 +116,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLAND_WATER_N',0,ZHOOK_HANDLE)
 IF (U%CWATER=='WATFLX') THEN
-  CALL DIAG_WATFLUX_n(HPROGRAM,                                           &
+  CALL DIAG_WATFLUX_n(DGW, W, &
+                      HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
@@ -117,7 +126,8 @@ IF (U%CWATER=='WATFLX') THEN
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL DIAG_FLAKE_n(HPROGRAM,                                           &
+  CALL DIAG_FLAKE_n(DGF, F, &
+                    HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
@@ -127,7 +137,8 @@ ELSE IF (U%CWATER=='FLAKE ') THEN
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )  
 !
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
+  CALL DIAG_IDEAL_n(DGL, &
+                    HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
   PEVAP    = XUNDEF
   PSUBL    = XUNDEF

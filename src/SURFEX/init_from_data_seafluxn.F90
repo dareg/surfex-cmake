@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_FROM_DATA_SEAFLUX_n(PSST)
+      SUBROUTINE INIT_FROM_DATA_SEAFLUX_n (DTS, &
+                                           PSST)
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* convert surface cover classes into secondary 
@@ -35,8 +36,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
 
 !
 !
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 !
 REAL, DIMENSION(:),   OPTIONAL, INTENT(OUT)   :: PSST
 !

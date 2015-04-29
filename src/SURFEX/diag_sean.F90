@@ -35,6 +35,11 @@ SUBROUTINE DIAG_SEA_n(HPROGRAM,                                           &
 !
 
 !
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -106,7 +111,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SEA_N',0,ZHOOK_HANDLE)
 IF (U%CSEA=='SEAFLX') THEN
-  CALL DIAG_SEAFLUX_n(HPROGRAM,                                           &
+  CALL DIAG_SEAFLUX_n(DGS, S, &
+                      HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
@@ -115,7 +121,8 @@ IF (U%CSEA=='SEAFLX') THEN
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 ELSEIF (U%CSEA=='FLUX') THEN
-  CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
+  CALL DIAG_IDEAL_n(DGL, &
+                    HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
   PEVAP    = XUNDEF
   PSUBL    = XUNDEF

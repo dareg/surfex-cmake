@@ -130,9 +130,11 @@ NMASKT(:,:) = NUNDEF
 ALLOCATE(NMASKT_PATCH(SIZE(I%XWG,1)))
 !
 IF (I%CISBA=='DIF') THEN
- CALL DG_DFTO3L(SIZE(I%XWG,1),ZDG_3L)
+ CALL DG_DFTO3L(I, PKI, &
+                SIZE(I%XWG,1),ZDG_3L)
 ELSEIF (I%CISBA=='3-L') THEN
- CALL AVG_PATCH_WG(SIZE(I%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
+ CALL AVG_PATCH_WG(I, PKI, &
+                   SIZE(I%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
 ENDIF
 ! la surface saturee, à l'initialisation est nulle, donc on initialise les lambdas de telle sorte qu'aucun pixel ne soit sature
 ALLOCATE(XKA_PRE (NNCAT,NMESHT))

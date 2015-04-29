@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE GET_ISBA_CONF_n(HISBA, KPATCH,KGROUND_LAYER,KSNOW_LAYER,KNBIOMASS,  &
+      SUBROUTINE GET_ISBA_CONF_n (I, &
+                                  HISBA, KPATCH,KGROUND_LAYER,KSNOW_LAYER,KNBIOMASS,  &
                                    KNLITTER, KNLITTLEVS, KNSOILCARB)  
 !     ########################################
 !
@@ -36,8 +37,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=3), INTENT(OUT) :: HISBA
 INTEGER, INTENT(OUT) :: KPATCH        ! number of patchs

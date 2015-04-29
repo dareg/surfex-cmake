@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_VAR_NATURE_n(HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW)
+      SUBROUTINE GET_VAR_NATURE_n (DGI, DGMI, &
+                                   HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW)
 !     ######################################################################
 !
 !!****  *GET_VAR_NATURE_n* - routine to get variables defined only over nature
@@ -35,11 +36,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,    ONLY   : XUNDEF
 !
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points

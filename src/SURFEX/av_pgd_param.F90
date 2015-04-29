@@ -1,5 +1,6 @@
 !     ################################################################
-      SUBROUTINE AV_PGD_PARAM(PFIELD,PVEGTYPE,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_PARAM (DTI, &
+                               PFIELD,PVEGTYPE,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PATCH_PGD* average for each surface patch a secondary physiographic 
@@ -51,8 +52,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,  &
                                 NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVEGTYPE,  &
                                 XCDREF
@@ -71,6 +74,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 !
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:), INTENT(IN)  :: PVEGTYPE  ! fraction of each cover class

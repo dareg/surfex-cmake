@@ -36,6 +36,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+!
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODI_WRITE_SURF
@@ -69,7 +72,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',0,ZHOOK_HANDLE)
 !
-CALL WRITESURF_OCEAN_n(HPROGRAM)
+CALL WRITESURF_OCEAN_n(O, OR, &
+                       HPROGRAM)
 !
 !*       2.     Sea-ice prognostic fields:
 !               --------------------------
@@ -79,7 +83,8 @@ CALL WRITESURF_OCEAN_n(HPROGRAM)
 YCOMMENT='flag to handle sea ice cover'
 CALL WRITE_SURF(HPROGRAM,'HANDLE_SIC',S%LHANDLE_SIC,IRESP,YCOMMENT)
 !
-IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(HPROGRAM)
+IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(S, &
+                                           HPROGRAM)
 !
 !
 !*       3.     Prognostic fields:

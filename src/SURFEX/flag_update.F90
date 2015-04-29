@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE FLAG_UPDATE(ONOWRITE_CANOPY,OPGD,OPROVAR_TO_DIAG,OSELECT)
+      SUBROUTINE FLAG_UPDATE (DGI, DGU, &
+                              ONOWRITE_CANOPY,OPGD,OPROVAR_TO_DIAG,OSELECT)
 !     ############################################################
 !
 !!****  *FLAG_UPDATE* - routine to modify selection of output fields
@@ -35,9 +36,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
 LOGICAL, INTENT(IN) :: ONOWRITE_CANOPY ! flag to (des)activate writing of canopy fields
 LOGICAL, INTENT(IN) :: OPGD            ! flag to (des)activate writing of pgd field

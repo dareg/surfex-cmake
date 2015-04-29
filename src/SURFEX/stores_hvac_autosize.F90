@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE STORES_HVAC_AUTOSIZE
+      SUBROUTINE STORES_HVAC_AUTOSIZE (B, BOP, DTB)
 !     #############################################################
 !
 !!****  *STORES_HVAC_AUTOSIZE* - routine to store the HVAC system
@@ -34,10 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
-USE MODD_BEM_n, ONLY : B => BEM
-USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
 !
+!
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
+USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 !
 USE MODI_ABOR1_SFX
 !
@@ -52,6 +54,11 @@ IMPLICIT NONE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
+!
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
+TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 !
 INTEGER :: IL
 !

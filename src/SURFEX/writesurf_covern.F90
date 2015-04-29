@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_COVER_n(HPROGRAM)
+      SUBROUTINE WRITESURF_COVER_n (U, &
+                                    HPROGRAM)
 !     #################################
 !
 !!****  *WRITESURF_COVER_n* - writes cover fields
@@ -29,7 +30,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

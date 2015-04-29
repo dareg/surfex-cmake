@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE AVERAGE2_COVER(HPROGRAM)
+      SUBROUTINE AVERAGE2_COVER (U, &
+                                 HPROGRAM)
 !     #########################
 !
 !!**** *AVERAGE2_COVER* computes the cover fractions
@@ -34,8 +35,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_PGDWORK,   ONLY : NSIZE, XSUMCOVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_PGD_GRID,       ONLY : CGRID
 !
@@ -48,6 +51,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
 !

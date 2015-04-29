@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_WATER (PTSTEP,PZON10M,PMER10M,PSFU,PSFV,   &
+       SUBROUTINE DIAG_CPL_ESM_WATER (W, &
+                                       PTSTEP,PZON10M,PMER10M,PSFU,PSFV,   &
                                         PSWD,PSWU,PGFLUX,PSFTQ,PRAIN,PSNOW, &
                                         PLW,PTICE,PSFTH_ICE,PSFTQ_ICE,      &
                                         PDIR_SW,PSCA_SW                     )  
@@ -27,10 +28,12 @@
 !!      Original    08/2009
 !!------------------------------------------------------------------
 !
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_CSTS,      ONLY : XSTEFAN, XLSTT
 USE MODD_WATER_PAR, ONLY : XEMISWATICE
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 ! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -39,6 +42,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
 REAL, DIMENSION(:), INTENT(IN) :: PZON10M   ! zonal wind

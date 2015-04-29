@@ -24,6 +24,9 @@ SUBROUTINE ASSIM_TOWN_n(HPROGRAM,KI,PT2M_O,HTEST)
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+!
 USE MODD_CSTS,          ONLY : XPI
 USE MODN_IO_OFFLINE,    ONLY : CSURF_FILETYPE
 !
@@ -57,7 +60,8 @@ IF (HTEST/='OK') THEN
 END IF
 
 IF (U%CTOWN=='TEB   ') THEN
-  CALL ASSIM_TEB_n(HPROGRAM,KI,PT2M_O,HTEST)
+  CALL ASSIM_TEB_n(U, T, TOP, &
+                   HPROGRAM,KI,PT2M_O,HTEST)
 ELSE
   WRITE(*,*) 'No assimilation done for scheme: ',TRIM(U%CTOWN)
 END IF

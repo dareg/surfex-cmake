@@ -1,5 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
+SUBROUTINE INIT_TEB_VEG_OPTIONS_n (CHT, DGMTO, TGDO, TVG, &
+                                   HPROGRAM)
 !#############################################################
 !
 !!****  *INIT_TEB_TEB_VEG_n* - routine to initialize ISBA
@@ -35,20 +36,22 @@ SUBROUTINE INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+!
 USE MODD_READ_NAMELIST,   ONLY : LNAM_READ
 !
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
-USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
 !
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
 
-USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB  
 
 USE MODD_DATA_COVER_PAR,  ONLY: NVEGTYPE
 USE MODD_SURF_PAR,        ONLY: XUNDEF, NUNDEF
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
 !
 USE MODD_ISBA_PAR,        ONLY : XOPTIMGRID
 !
@@ -69,6 +72,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
+TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
+TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
  CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 !

@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE DEALLOC_DIAG_SURF_ATM_n
+      SUBROUTINE DEALLOC_DIAG_SURF_ATM_n (DGU)
 !     #############################################################
 !
 !!    AUTHOR
@@ -16,7 +16,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -33,6 +35,9 @@ IMPLICIT NONE
 !
 !
 
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('DEALLOC_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)

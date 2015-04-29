@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_SEA (PTSTEP,PZON10M,PMER10M,PSFU,PSFV,     &
+       SUBROUTINE DIAG_CPL_ESM_SEA (S, &
+                                     PTSTEP,PZON10M,PMER10M,PSFU,PSFV,     &
                                       PSWD,PSWU,PGFLUX,PSFTQ,PRAIN,PSNOW, &
                                       PLW,PTICE,PSFTH_ICE,PSFTQ_ICE,      &
                                       PDIR_SW,PSCA_SW,PSWU_ICE,PLWU_ICE,  &
@@ -30,10 +31,12 @@
 !!                           for seaice are provided as inputs)
 !!------------------------------------------------------------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_CSTS,      ONLY : XSTEFAN, XLSTT
 USE MODD_WATER_PAR, ONLY : XEMISWATICE
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 ! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -42,6 +45,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
 REAL, DIMENSION(:), INTENT(IN) :: PZON10M   ! zonal wind

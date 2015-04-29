@@ -1,5 +1,6 @@
 !     ######
-SUBROUTINE TRIP_FORCING(KLUOUT,KLON,KLAT,KNB_TSTEP_RUN, &
+SUBROUTINE TRIP_FORCING (TPG, &
+                         KLUOUT,KLON,KLAT,KNB_TSTEP_RUN, &
                         PDRAIN,PRUNOFF,PSRC_FLOOD       )
 !######################################################################
 !
@@ -20,10 +21,12 @@ SUBROUTINE TRIP_FORCING(KLUOUT,KLON,KLAT,KNB_TSTEP_RUN, &
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODN_TRIP_RUN, ONLY : CFILE_FRC,CREADFRC,CDRAIN, &
                           CRUNOFF,LCUMFRC,CSRC_FLOOD
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 USE MODD_TRIP_PAR,ONLY : XUNDEF
 !
@@ -36,6 +39,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,                INTENT(IN)  :: KLUOUT
 INTEGER,                INTENT(IN)  :: KLON

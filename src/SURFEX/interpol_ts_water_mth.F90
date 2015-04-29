@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INTERPOL_TS_WATER_MTH(KYEAR,KMONTH,KDAY,PTS)
+      SUBROUTINE INTERPOL_TS_WATER_MTH (W, &
+                                        KYEAR,KMONTH,KDAY,PTS)
 !     #######################################################
 !
 !!****  *INTERPOL_TS_WATER_MTH* - Interpolation of monthly TS water
@@ -34,7 +35,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_INTERPOL_QUADRA
 !
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !*       0.1   Declaration of arguments
 !------------------------
 ! 
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
+!
 INTEGER, INTENT(IN ) :: KYEAR  ! year of date
 INTEGER, INTENT(IN ) :: KMONTH ! month of date
 INTEGER, INTENT(IN ) :: KDAY   ! day of date

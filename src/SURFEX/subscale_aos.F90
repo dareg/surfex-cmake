@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SUBSCALE_AOS(OZ0EFFI,OZ0EFFJ,PSEA)
+      SUBROUTINE SUBSCALE_AOS (UG, USS, &
+                               OZ0EFFI,OZ0EFFJ,PSEA)
 !     #############################################
 !
 !!*SUBSCALE_AOS  computes the sum of the ratio: (h'-h)/L when  h'/L >h/L  
@@ -34,10 +35,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_PGDWORK,        ONLY : NSSO, XSSQO, LSSQO
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR, NGRID_PAR
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE MODI_GET_ADJACENT_MESHES
 !
@@ -50,6 +53,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OZ0EFFI! .T. : the z0eff coefficients
 !                                            ! are computed at grid point

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SSO(OSSO,OSSO_ANIS,PSEA)
+      SUBROUTINE SSO (UG, USS, &
+                      OSSO,OSSO_ANIS,PSEA)
 !     #########################
 !
 !!*SSO  computes the SSO anisotropy, direction and slope
@@ -24,14 +25,16 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODI_GET_MESH_DIM
 USE MODI_GET_ADJACENT_MESHES
 !
 USE MODD_CSTS,           ONLY : XPI
 USE MODD_PGDWORK,        ONLY : NSSO, XSSQO, LSSQO
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR, NGRID_PAR
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -41,6 +44,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OSSO   ! .T. : the SSO coefficients
 !                                            ! are computed at grid point

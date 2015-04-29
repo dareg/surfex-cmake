@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE COARE30_FLUX(PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
+    SUBROUTINE COARE30_FLUX (S, &
+                             PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
             PVMOD,PZREF,PUREF,PPS,PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE,PRI,&
             PRESA,PRAIN,PZ0HSEA)  
 !     #######################################################################
@@ -55,12 +56,14 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, XPI, &
                             XLVTT, XCL, XCPD, XCPV, XRHOLW, XTT, &
                             XP00
 USE MODD_SURF_ATM,   ONLY : XVZ0CM
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_SURF_PAR,   ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_WATER_PAR
 !
@@ -81,6 +84,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PTA   ! air temperature at atm. level (K)
 REAL, DIMENSION(:), INTENT(IN)       :: PQA   ! air humidity at atm. level (kg/kg)

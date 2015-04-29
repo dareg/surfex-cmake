@@ -43,6 +43,8 @@ SUBROUTINE INIT_FLAKE_n(HPROGRAM,HINIT,                            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_CSTS,          ONLY : XTT, XPI, XOMEGA 
 !
 USE MODD_WATER_PAR,     ONLY : XALBWATICE, XALBWATSNOW
@@ -312,7 +314,8 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_FLAKE_INIT_n(HPROGRAM,ILU,KSW)
+ CALL DIAG_FLAKE_INIT_n(DGF, DGMF, DGU, F, &
+                        HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_CH_AGGR_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_CH_AGGR_n (CHE, &
+                                       HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_CH_AGGR_n* - writes surface chemical emissions diagnostics
@@ -28,8 +29,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
+!
 USE MODD_CSTS,        ONLY : XAVOGADRO
-USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -42,6 +45,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

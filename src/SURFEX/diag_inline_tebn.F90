@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_TEB_n (OCANOPY, PTA, PTS, PQA, PPA, PPS, PRHOA,                  &
+       SUBROUTINE DIAG_INLINE_TEB_n (DGT, TCP, T, &
+                                      OCANOPY, PTA, PTS, PQA, PPA, PPS, PRHOA,                  &
                                        PZONA, PMERA, PWIND, PHT, PHW,                          &
                                        PCD, PCDN, PRI, PCH, PZ0,                               &
                                        PTRAD, PEMIS, PDIR_ALB, PSCA_ALB,                       &
@@ -34,10 +35,12 @@
 
 !
 !
+!
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
+USE MODD_TEB_n, ONLY : TEB_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
 !
 USE MODI_CLS_WIND
 USE MODI_PARAM_CLS
@@ -53,6 +56,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 LOGICAL,            INTENT(IN)       :: OCANOPY  ! Flag for canopy
 REAL, DIMENSION(:), INTENT(IN)       :: PTA      ! atmospheric temperature

@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE GET_DATA_SEAFLUX_CONF_n(OSST_DATA, KTIME)  
+      SUBROUTINE GET_DATA_SEAFLUX_CONF_n (DTS, &
+                                          OSST_DATA, KTIME)  
 !     ########################################
 !
 !!****  *GET_DATA_SEAFLUX_CONF_n* - routine to get some ISBA fields
@@ -35,8 +36,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
 !
+!
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -45,6 +48,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 !
 LOGICAL, INTENT(OUT) :: OSST_DATA     ! number of patchs
 INTEGER, INTENT(OUT) :: KTIME ! number of ground layers

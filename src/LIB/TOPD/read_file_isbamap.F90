@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     ##########################
-      SUBROUTINE READ_FILE_ISBAMAP(KUNIT,PVAR,KI)
+      SUBROUTINE READ_FILE_ISBAMAP (UG, &
+                                    KUNIT,PVAR,KI)
 !     ##########################
 !
 !!
@@ -38,8 +39,10 @@
 !               ------------
 !
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODD_TOPODYN
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODE_GRIDTYPE_CONF_PROJ
@@ -54,6 +57,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER, INTENT(IN)             :: KUNIT  ! file unit
 REAL, DIMENSION(:), INTENT(OUT) :: PVAR   ! variable to write in the file

@@ -35,6 +35,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_DST_n, ONLY : DST => DST
+!
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODI_INIT_IO_SURF_n
@@ -72,9 +78,11 @@ IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',0,ZHOOK_HANDLE)
 !               ---------------------------
 !        
  CALL WRITESURF_ISBA_CONF_n(HPROGRAM)
- CALL WRITESURF_ISBA_n(HPROGRAM,OLAND_USE)
+ CALL WRITESURF_ISBA_n(CHI, DST, I, &
+                       HPROGRAM,OLAND_USE)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(HPROGRAM,HWRITE)
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(ICP, I, &
+                                                                        HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------
 !

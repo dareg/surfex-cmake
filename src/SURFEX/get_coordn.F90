@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_COORD_n(HPROGRAM,KI,PLON,PLAT)
+      SUBROUTINE GET_COORD_n (UG, &
+                              HPROGRAM,KI,PLON,PLAT)
 !     #############################################
 !
 !!****  *GET_COORD_n* - routine to get some surface fields
@@ -33,9 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI         ! horizontal dim. of cover

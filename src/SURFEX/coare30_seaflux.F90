@@ -34,7 +34,7 @@
 !!     
 !!    AUTHOR
 !!    ------
-!!     C. Lebeaupin  *Météo-France* 
+!!     C. Lebeaupin  *MÃ©tÃ©o-France* 
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -46,6 +46,8 @@
 !
 !*       0.     DECLARATIONS
 !               ------------
+!
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -220,7 +222,8 @@ ZW_Z0HSEA(:) = XUNDEF
 !
 IF (YTYPE=='W') THEN
   !
-  CALL COARE30_FLUX(ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,&
+  CALL COARE30_FLUX(S, &
+                    ZW_Z0SEA,ZW_TA,ZW_EXNA,ZW_RHOA,ZW_SST,ZW_EXNS,&
         ZW_QA,ZW_VMOD,ZW_ZREF,ZW_UREF,ZW_PS,ZW_QSAT,ZW_SFTH,ZW_SFTQ,ZW_USTAR,&
         ZW_CD,ZW_CDN,ZW_CH,ZW_CE,ZW_RI,ZW_RESA,ZW_RAIN,ZW_Z0HSEA)   
   !

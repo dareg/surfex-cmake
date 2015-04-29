@@ -1,5 +1,6 @@
 !     #################################################################################
-SUBROUTINE SET_SSO_LEVELS(KDIM)
+SUBROUTINE SET_SSO_LEVELS (SSCP, &
+                           KDIM)
 !     #################################################################################
 !
 !!****  *SET_SSO_LEVELS* - prepares SSO canopy fields
@@ -26,7 +27,9 @@ SUBROUTINE SET_SSO_LEVELS(KDIM)
 !!      E. Martin   01/2012 XUNDEF fields are no more written in PREP file
 !!------------------------------------------------------------------
 !
-USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+!
+USE MODD_SSO_CANOPY_n, ONLY : SSO_CANOPY_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -35,6 +38,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SSO_CANOPY_t), INTENT(INOUT) :: SSCP
 !
 INTEGER, INTENT(IN) :: KDIM ! 1D physical dimension
 

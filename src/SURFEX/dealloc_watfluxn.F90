@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_WATFLUX_n
+SUBROUTINE DEALLOC_WATFLUX_n (CHW, WG, W)
 !     #################################################################################
 !
 !!****  *DEALLOC_WATFLUX_n * - Deallocate all arrays
@@ -25,11 +25,13 @@ SUBROUTINE DEALLOC_WATFLUX_n
 !
 
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
 
 
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -44,6 +46,11 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------------
 !
 
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('DEALLOC_WATFLUX_N',0,ZHOOK_HANDLE)

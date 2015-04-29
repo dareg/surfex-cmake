@@ -42,6 +42,11 @@ SUBROUTINE PUT_SFXCPL_n(HPROGRAM,KI,KSW,PSW_BANDS,PZENITH, &
 !
 !
 !
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -118,7 +123,8 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_LAND)THEN
-  CALL PUT_SFX_LAND(ILUOUT,LCPL_GW,LCPL_FLOOD,PLAND_WTD(:),       &
+  CALL PUT_SFX_LAND(I, U, &
+                    ILUOUT,LCPL_GW,LCPL_FLOOD,PLAND_WTD(:),       &
                     PLAND_FWTD(:),PLAND_FFLOOD(:),PLAND_PIFLOOD(:))        
 ENDIF
 !
@@ -128,7 +134,8 @@ ENDIF
 !
 IF(LCPL_SEA)THEN
 !
-  CALL PUT_SFX_SEA(ILUOUT,LCPL_SEAICE,LWATER,PSEA_SST(:),PSEA_UCU(:),       &
+  CALL PUT_SFX_SEA(S, U, W, &
+                   ILUOUT,LCPL_SEAICE,LWATER,PSEA_SST(:),PSEA_UCU(:),       &
                    PSEA_VCU(:),PSEAICE_SIT(:),PSEAICE_CVR(:),PSEAICE_ALB(:) )
 !
 ENDIF

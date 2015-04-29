@@ -1,5 +1,6 @@
 !     #######################################################################
-      SUBROUTINE ISBA_SGH_UPDATE(HISBA,HRUNOFF,HRAIN,PRAIN,PMUF,PFSAT,PTOPQS)
+      SUBROUTINE ISBA_SGH_UPDATE (IG, I, &
+                                  HISBA,HRUNOFF,HRAIN,PRAIN,PMUF,PFSAT,PTOPQS)
 !     #######################################################################
 !
 !!****  *SGH_UPDATE*  
@@ -44,9 +45,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+!
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SGH_PAR,     ONLY : NDIMTAB, XMTOKM, XSTOHR, X001,      &
                              XMUREGP, XMUREGA
@@ -59,6 +62,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=*), INTENT(IN)     :: HISBA  ! type of ISBA version:
 !                                          ! '2-L' (default)

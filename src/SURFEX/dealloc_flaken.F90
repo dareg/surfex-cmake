@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_FLAKE_n
+SUBROUTINE DEALLOC_FLAKE_n (CHF, FG, F)
 !     #################################################################################
 !
 !!****  *DEALLOC_FLAKE_n * - Deallocate all arrays
@@ -26,11 +26,13 @@ SUBROUTINE DEALLOC_FLAKE_n
 !
 
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
-USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
-USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
 
 
+!
+!
+USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -45,6 +47,11 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------------
 !
 
+!
+TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('DEALLOC_FLAKE_N',0,ZHOOK_HANDLE)

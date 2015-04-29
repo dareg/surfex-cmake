@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_GRID_COORD(KLUOUT,PX,PY,KL,HGRID,PGRID_PAR)
+      SUBROUTINE GET_GRID_COORD (UG, U, &
+                                 KLUOUT,PX,PY,KL,HGRID,PGRID_PAR)
 !     #######################################
 !!
 !!    PURPOSE
@@ -36,9 +37,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -62,6 +65,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,                      INTENT(IN)  :: KLUOUT ! output listing logical unit
 REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PX     ! X natural coordinate in the projection

@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_INLAND_WATER_n(HPROGRAM,KI,PTS_IN,PITM,HTEST, &
+SUBROUTINE ASSIM_INLAND_WATER_n (I, U, WG, W, &
+                                 HPROGRAM,KI,PTS_IN,PITM,HTEST, &
                                 OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
@@ -26,13 +27,15 @@ SUBROUTINE ASSIM_INLAND_WATER_n(HPROGRAM,KI,PTS_IN,PITM,HTEST, &
 !!      Trygve Aspelien, Separating IO  06/2013
 !!--------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : NPRINTLEV,LEXTRAP_WATER,LWATERTG2
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
 !
@@ -42,6 +45,12 @@ USE MODI_OI_HOR_EXTRAPOL_SURF
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI

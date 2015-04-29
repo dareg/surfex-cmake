@@ -1,13 +1,16 @@
-SUBROUTINE INIT_DST(HPROGRAM,  &    ! Program calling unit
+SUBROUTINE INIT_DST (DST, U, &
+                     HPROGRAM,  &    ! Program calling unit
                   KSIZE_NATURE_P, & ! Number of nature points in a patch
                   KR_NATURE_P, &    ! Mask from patch --> nature vectors
                   KPATCH, &         ! Maximum number of patches
                   PVEGTYPE_PATCH  ) ! fraction (in a nature point) of a vegtype for a patch
 
-USE MODD_DST_n, ONLY : DST => DST
+!
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_DST_SURF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM   ! Number of nature points
 !
 USE MODI_GET_LUOUT
 USE MODI_GET_VEGTYPE_2_PATCH_MASK
@@ -19,6 +22,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !PASSED VARIABLES
+!
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6), INTENT(IN)      :: HPROGRAM              !Passing unit
 !
 INTEGER, DIMENSION(:), POINTER :: KSIZE_NATURE_P

@@ -37,6 +37,10 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+!
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XP00, XCPD, XRD, XAVOGADRO, XMD
@@ -379,10 +383,12 @@ IF ((SV%NBEQ > 0).AND.(CHU%LCH_SURF_EMIS)) THEN
     DO JI=1,SIZE(CHE%TSEMISS)
       IF (SIZE(CHE%TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(CHE%TSEMISS(JI)%NETIMES)
     ENDDO
-    CALL CH_EMISSION_FLUX_n(HPROGRAM,PTIME,PSFTS(:,SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+    CALL CH_EMISSION_FLUX_n(CHE, CHU, SV, &
+                            HPROGRAM,PTIME,PSFTS(:,SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
     CALL CH_EMISSION_SNAP_n(HPROGRAM,U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,UG%XLON)
-    CALL CH_EMISSION_TO_ATM_n(PSFTS,PRHOA)
+    CALL CH_EMISSION_TO_ATM_n(CHN, SV, &
+                              PSFTS,PRHOA)
   END IF
 END IF
 !
@@ -421,7 +427,8 @@ END DO
 !
 ! store these field to write in restart file (important for AGCM)
 !
-IF(LCPL_GCM) CALL CPL_GCM_n(KI,PZ0=PZ0,PZ0H=PZ0H,PQSURF=PQSURF)
+IF(LCPL_GCM) CALL CPL_GCM_n(U, &
+   KI,PZ0=PZ0,PZ0H=PZ0H,PQSURF=PQSURF)
 !
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Orographic friction
@@ -431,7 +438,8 @@ IF(LCPL_GCM) CALL CPL_GCM_n(KI,PZ0=PZ0,PZ0H=PZ0H,PQSURF=PQSURF)
 !  but only over continental area
 !
 IF (USS%CROUGH=="Z01D" .OR. USS%CROUGH=="Z04D") THEN
-  CALL SSO_Z0_FRICTION_n(U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
+  CALL SSO_Z0_FRICTION_n(USS, &
+                         U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
 ELSE IF (USS%CROUGH=="BE04") THEN
   CALL SSO_BE04_FRICTION_n(PTSTEP,U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 END IF
@@ -440,7 +448,8 @@ END IF
 ! Inline diagnostics for full surface
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
- CALL DIAG_INLINE_SURF_ATM_n(PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
+ CALL DIAG_INLINE_SURF_ATM_n(DGU, &
+                             PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',1,ZHOOK_HANDLE)
 !

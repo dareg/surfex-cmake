@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE UNPACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
+SUBROUTINE UNPACK_ISBA_PATCH_n (AG, I, PKI, &
+                                KMASK,KSIZE,KPATCH)
 !##############################################
 !
 !!****  *UNPACK_ISBA_PATCH_n* - unpacks ISBA prognostic variables
@@ -34,12 +35,14 @@ SUBROUTINE UNPACK_ISBA_PATCH_n(KMASK,KSIZE,KPATCH)
 !!
 !!------------------------------------------------------------------
 !
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
 
+!
+USE MODD_AGRI_n, ONLY : AGRI_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
+!
 USE MODD_AGRI,     ONLY :  LAGRIP
-USE MODD_AGRI_n, ONLY : AG => AGRI
 
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -48,6 +51,11 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(AGRI_t), INTENT(INOUT) :: AG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
 !
 INTEGER, INTENT(IN)               :: KSIZE, KPATCH
 !

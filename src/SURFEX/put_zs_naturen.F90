@@ -1,5 +1,6 @@
 !     ###########################################
-      SUBROUTINE PUT_ZS_NATURE_n(HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_NATURE_n (I, &
+                                  HPROGRAM,KI,PZS)
 !     ###########################################
 !
 !!****  *PUT_ZS_SURF_ATM_n* - routine to modify nature oropgraphy using atmospheric
@@ -34,9 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -48,6 +51,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_ISBA_PAR_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_ISBA_PAR_n (DTI, &
+                                           HPROGRAM)
 !     ################################################
 !
 !!****  *WRITESURF_PGD_ISBA_PAR_n* - writes ISBA physiographic fields
@@ -36,8 +37,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
   
+!
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 !
 USE MODI_WRITE_SURF
 !
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

@@ -1,7 +1,10 @@
-SUBROUTINE INIT_SLT(HPROGRAM  &! Program calling unit
+SUBROUTINE INIT_SLT (SLT, &
+                     HPROGRAM  &! Program calling unit
        )  
 
-USE MODD_SLT_n, ONLY : SLT => SLT
+!
+USE MODD_SLT_n, ONLY : SLT_t
+!
 USE MODD_SLT_SURF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -10,6 +13,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 
 !PASSED VARIABLES
+!
+TYPE(SLT_t), INTENT(INOUT) :: SLT
+!
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM              !Passing unit
 !
 !LOCAL VARIABLES

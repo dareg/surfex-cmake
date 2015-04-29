@@ -30,6 +30,8 @@ SUBROUTINE ASSIM_ISBA_n(HPROGRAM,KI,                                   &
 !!      Trygve Aspelien, Separating IO  06/2013
 !!--------------------------------------------------------------------
 !
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : CASSIM_ISBA,LAESNM,LEXTRAP_NATURE,NPRINTLEV
 !
@@ -112,7 +114,8 @@ IF ( CASSIM_ISBA == 'EKF  ' ) THEN
   ! Snow analysis/update
   IF (LAESNM) THEN
     WRITE(*,*) 'UPDATE SNOW FROM ANALYSED CANARI VALUES'
-    CALL ASSIM_ISBA_UPDATE_SNOW(HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.TRUE.,HTEST)
+    CALL ASSIM_ISBA_UPDATE_SNOW(I, &
+                                HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.TRUE.,HTEST)
   ELSE
     WRITE(*,*) 'SNOW IS NOT UPDATED FROM ANALYSED CANARI VALUES'
   ENDIF
@@ -125,13 +128,15 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
   ! Snow analysis/update. Store the original field in the surfex file
   IF (LAESNM) THEN
     WRITE(*,*) 'UPDATE SNOW FROM ANALYSED CANARI VALUES'
-    CALL ASSIM_ISBA_UPDATE_SNOW(HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.FALSE.,HTEST)
+    CALL ASSIM_ISBA_UPDATE_SNOW(I, &
+                                HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.FALSE.,HTEST)
   ELSE
     WRITE(*,*) 'SNOW IS NOT UPDATED FROM ANALYSED CANARI VALUES'
   ENDIF
   !
   ! Run OI for soil
-  CALL ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                                  &
+  CALL ASSIM_NATURE_ISBA_OI(I, &
+                            HPROGRAM, KI,                                  &
                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
                             PSWEC,     PTSC,     PUCLS, PVCLS,             &
@@ -141,7 +146,8 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
   ! Snow analysis/update (changed in oi_cacsts). Get the full increment
   IF (LAESNM) THEN
     WRITE(*,*) 'UPDATE SNOW FROM ANALYSED OI_CACSTS VALUES'
-    CALL ASSIM_ISBA_UPDATE_SNOW(HPROGRAM,KI,ZSWE,ZSWE_ORIG,.FALSE.,.TRUE.,HTEST)
+    CALL ASSIM_ISBA_UPDATE_SNOW(I, &
+                                HPROGRAM,KI,ZSWE,ZSWE_ORIG,.FALSE.,.TRUE.,HTEST)
   ELSE
     WRITE(*,*) 'SNOW IS NOT UPDATED FROM ANALYSED OI_CACSTS VALUES'
   ENDIF
@@ -262,7 +268,7 @@ IF (LAESNM) THEN
 ENDIF
 !
 !to be improved later - needed for surfex course
- CALL AVERAGE_DIAG_MISC_ISBA_n
+ CALL AVERAGE_DIAG_MISC_ISBA_n(DGMI, I)
  !
 IF (LHOOK) CALL DR_HOOK('ASSIM_ISBA_N',1,ZHOOK_HANDLE)
 !

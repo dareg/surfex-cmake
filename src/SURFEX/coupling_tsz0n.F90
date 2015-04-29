@@ -36,6 +36,8 @@ SUBROUTINE COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                 
 !!------------------------------------------------------------------
 !
 !
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,   ONLY : XP00, XRD, XCPD
 USE MODD_ISBA_n, ONLY : I => ISBA
@@ -147,7 +149,8 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',0,ZHOOK_HANDLE)
 !*      1.     Specified evolution of ISBA prognostic variables
 !              ------------------------------------------------
 !
- CALL TSZ0(PTIME, PTSTEP, I%XWFC, I%XTG, I%XWG)
+ CALL TSZ0(DTZ, &
+           PTIME, PTSTEP, I%XWFC, I%XTG, I%XWG)
 !
 !
 !*      2.     Saves the prognostic variables

@@ -506,7 +506,8 @@ IF (TGR%TSNOW%SCHEME=='3-L' .OR. TGR%TSNOW%SCHEME=='CRO') TGR%TSNOW%TS(:,1)=ZSNO
 ! --------------------------------------------------------------------------------------
 !
 IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE_GREENROOF(TPTIME,PTSTEP,ILU)
+     CALL VEGETATION_UPDATE_GREENROOF(TGRO, TGRPE, TGRP, T, TOP, TVG, &
+                                      TPTIME,PTSTEP,ILU)
 END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Vegetation evolution for interactive LAI

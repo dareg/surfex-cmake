@@ -48,6 +48,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
@@ -401,7 +403,8 @@ IF(.NOT.(S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
   DGSI%LDIAG_SEAICE=.FALSE.
 ENDIF
 !
-CALL DIAG_SEAFLUX_INIT_n(HPROGRAM,ILU,KSW)
+CALL DIAG_SEAFLUX_INIT_n(DGO, DGS, DGSI, DGU, S, &
+                         HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------
 !

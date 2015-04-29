@@ -1,5 +1,6 @@
 !     ######spl
-      SUBROUTINE INIT_TOP (HISBA, KLUOUT, PPATCH, PRUNOFFD,          &
+      SUBROUTINE INIT_TOP (I, &
+                            HISBA, KLUOUT, PPATCH, PRUNOFFD,          &
                            PWD0, PWSAT, PTI_MIN,                     &
                            PTI_MAX, PTI_MEAN, PTI_STD, PTI_SKEW,     &
                            PSOILWGHT, PTAB_FSAT, PTAB_WTOP,          &
@@ -34,8 +35,10 @@
 !
 !-------------------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,ONLY : XUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_SGH_PAR, ONLY : X2, X4, XREGP, XREGA
 !
@@ -53,6 +56,9 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=*), INTENT(IN)         :: HISBA   ! type of ISBA version:
 !                                               ! '2-L' (default)

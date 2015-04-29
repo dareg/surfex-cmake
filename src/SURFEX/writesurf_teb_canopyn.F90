@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_TEB_CANOPY_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITESURF_TEB_CANOPY_n (TCP, TOP, &
+                                         HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_TEB_n* - writes TEB fields
@@ -36,8 +37,10 @@
 !
 !
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+!
+USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_SURF_PAR       ,ONLY : XUNDEF
 !
 USE MODI_WRITE_SURF
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HWRITE   ! 'PREP' : does not write SBL XUNDEF fields

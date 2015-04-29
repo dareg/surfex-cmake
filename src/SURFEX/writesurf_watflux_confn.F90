@@ -33,6 +33,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+!
 USE MODN_WATFLUX_n
 !
 USE MODI_GET_DEFAULT_NAM_n
@@ -65,8 +69,8 @@ IF (ILUDES==0) RETURN
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_NAM_WATFLUXn
- CALL INIT_NAM_CH_WATFLUXn
+ CALL INIT_NAM_WATFLUXn(W)
+ CALL INIT_NAM_CH_WATFLUXn(CHW)
 !
 WRITE(UNIT=ILUDES,NML=NAM_WATFLUXn)
 WRITE(UNIT=ILUDES,NML=NAM_CH_WATFLUXn)

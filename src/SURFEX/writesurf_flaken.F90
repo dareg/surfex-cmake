@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_FLAKE_n(HPROGRAM)
+      SUBROUTINE WRITESURF_FLAKE_n (F, &
+                                    HPROGRAM)
 !     ########################################
 !
 !!****  *WRITESURF_FLAKE_n* - writes FLAKE fields
@@ -33,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODI_WRITE_SURF
 !
@@ -45,6 +48,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 

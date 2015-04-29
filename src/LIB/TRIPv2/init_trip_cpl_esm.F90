@@ -1,4 +1,5 @@
-SUBROUTINE INIT_TRIP_CPL_ESM(KLON,KLAT)  
+SUBROUTINE INIT_TRIP_CPL_ESM (TP, TPG, &
+                              KLON,KLAT)  
 !     ##################################
 !
 !!****  *INIT_TRIP_CPL_ESM*  
@@ -21,13 +22,15 @@ SUBROUTINE INIT_TRIP_CPL_ESM(KLON,KLAT)
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
                             LCPL_FLOOD, LCPL_CALVSEA
 !
 USE MODD_TRIP_PAR,  ONLY : XUNDEF
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
-USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE MODI_GWF_CPL_UPDATE
 !
@@ -37,6 +40,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN) :: KLON
 INTEGER, INTENT(IN) :: KLAT

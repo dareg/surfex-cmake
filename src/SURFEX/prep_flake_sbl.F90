@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_FLAKE_SBL()
+SUBROUTINE PREP_FLAKE_SBL (FG, FSB)
 !     #################################################################################
 !
 !!****  *PREP_FLAKE_SBL* - prepares FLAKE SBL fields
@@ -27,8 +27,10 @@ SUBROUTINE PREP_FLAKE_SBL()
 !!------------------------------------------------------------------
 !
 !
-USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
-USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+!
+!
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,6 +41,10 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
 !
 INTEGER :: JLAYER
 !

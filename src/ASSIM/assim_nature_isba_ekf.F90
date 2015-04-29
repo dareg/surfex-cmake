@@ -216,7 +216,8 @@ INQUIRE (FILE=TRIM(YBGFILE),EXIST=GBEXISTS)
 IF ( LBEV .AND. GBEXISTS ) THEN
   !
   ZB(:,:,:) = 0.
-  CALL B_BIG_LOOP("READ",YBGFILE,ZB)
+  CALL B_BIG_LOOP(I, &
+                  "READ",YBGFILE,ZB)
   IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read previous B matrix  ==>',ZB(1,1,1),NVAR
   !
 ELSEIF ( LBEV .OR. LBFIXED ) THEN
@@ -258,7 +259,8 @@ ELSEIF ( LBEV .OR. LBFIXED ) THEN
     ENDDO
     !
     ZB(:,:,:) = 0.
-    CALL B_BIG_LOOP("BUIL","",ZB,ZBLONG)
+    CALL B_BIG_LOOP(I, &
+                  "BUIL","",ZB,ZBLONG)
     IF ( NPRINTLEV > 0 ) WRITE(*,*) 'Initialized B'
     !
   ENDIF
@@ -359,7 +361,8 @@ IF ( LBEV ) THEN
   ! write out the LTM for the forward model
   ! Write out current B
   YBGFILE="BGROUNDout_LBEV."//YMYPROC
-  CALL B_BIG_LOOP("WRIT",YBGFILE,ZB)
+  CALL B_BIG_LOOP(I, &
+                  "WRIT",YBGFILE,ZB)
   IF ( NPRINTLEV > 0 ) THEN
     WRITE(*,*) 'store B matrix after TL evolution ==>',ZB(1,1,1)
     WRITE(*,*) 'writing out B'
@@ -604,7 +607,8 @@ ENDDO
 !
 ! Write out analysed B (for use in next cycle)
 YBGFILE = "BGROUNDout_ASSIM."//YMYPROC
-CALL B_BIG_LOOP("WRIT",YBGFILE,ZB)
+CALL B_BIG_LOOP(I, &
+                  "WRIT",YBGFILE,ZB)
 !
 IF ( NPRINTLEV > 0 ) THEN
   IOBSCOUNT = IOBSCOUNT / I%NPATCH / NVAR

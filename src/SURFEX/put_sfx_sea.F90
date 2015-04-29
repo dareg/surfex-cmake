@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PUT_SFX_SEA(KLUOUT,OCPL_SEAICE,OWATER,PSEA_SST,PSEA_UCU,        &
+      SUBROUTINE PUT_SFX_SEA (S, U, W, &
+                              KLUOUT,OCPL_SEAICE,OWATER,PSEA_SST,PSEA_UCU,        &
                              PSEA_VCU,PSEAICE_SIT,PSEAICE_CVR,PSEAICE_ALB )  
 !     ####################################################
 !
@@ -34,10 +35,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XTT, XTTS, XICEC
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_PACK_SAME_RANK
 USE MODI_ABOR1_SFX
@@ -49,6 +54,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 INTEGER,           INTENT(IN)  :: KLUOUT
 LOGICAL,           INTENT(IN)  :: OCPL_SEAICE
@@ -103,7 +113,6 @@ CONTAINS
 !
 SUBROUTINE TREAT_SEA(KLU)
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODI_PACK_SAME_RANK
 !
 IMPLICIT NONE
@@ -179,7 +188,6 @@ END SUBROUTINE TREAT_SEA
 !
 SUBROUTINE TREAT_WATER(KLU)
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
 IMPLICIT NONE
 !

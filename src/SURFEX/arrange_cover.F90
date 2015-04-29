@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE ARRANGE_COVER(PDATA_NATURE,PDATA_TOWN,PDATA_SEA,PDATA_WATER,PDATA_VEGTYPE, &
+      SUBROUTINE ARRANGE_COVER (DTCO, U, &
+                                PDATA_NATURE,PDATA_TOWN,PDATA_SEA,PDATA_WATER,PDATA_VEGTYPE, &
                                PDATA_GARDEN, OGARDEN, PDATA_BLD, PDATA_WALL_O_HOR           )
 !     #########################
 !
@@ -39,11 +40,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER,     ONLY : XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH, XDATA_DICE, &
                                 XDATA_LAI, XDATA_LAI_ALL_YEARS,                   &
                                 XDATA_ALB_VEG_NIR, XDATA_ALB_VEG_VIS,             &
@@ -59,6 +62,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PDATA_NATURE
 REAL, DIMENSION(:), INTENT(IN)  :: PDATA_TOWN

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
+SUBROUTINE UPDATE_RAD_ISBA_n (I, &
+                              OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
                                OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG, &
                                PALBNIR,PALBVIS,PALBUV,PEMIS,               &
                                PDIR_ALB_WITH_SNOW,PSCA_ALB_WITH_SNOW,PEMIST, &
@@ -34,9 +35,11 @@ SUBROUTINE UPDATE_RAD_ISBA_n(OFLOOD,HSNOW,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
 !!      P. Samuelsson 02/2012 MEB
 !!------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_TYPE_SNOW
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_CSTS,      ONLY : XTT
 USE MODD_SURF_PAR,  ONLY : XUNDEF
@@ -63,6 +66,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 LOGICAL,                INTENT(IN)   :: OFLOOD
  CHARACTER(LEN=*),       INTENT(IN)   :: HSNOW

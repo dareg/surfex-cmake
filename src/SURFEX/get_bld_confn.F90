@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE GET_BLD_CONF_n(ODATA_BLDTYPE, ODATA_BLD_AGE, ODATA_USETYPE, &
+      SUBROUTINE GET_BLD_CONF_n (BDD, DTT, &
+                                 ODATA_BLDTYPE, ODATA_BLD_AGE, ODATA_USETYPE, &
                 KDESC_ROOF_LAYER, KDESC_ROAD_LAYER, KDESC_WALL_LAYER, &
                 KDESC_FLOOR_LAYER, KDESC_CODE, KDESC_USE, KDESC_AGE, KDESC_BLD)  
 !     ########################################
@@ -37,8 +38,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
-USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+!
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
+USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -47,6 +50,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
+TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
 !
 LOGICAL, INTENT(OUT) :: ODATA_BLDTYPE
 LOGICAL, INTENT(OUT) :: ODATA_BLD_AGE

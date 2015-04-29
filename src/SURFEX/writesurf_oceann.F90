@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_OCEAN_n(HPROGRAM)
+      SUBROUTINE WRITESURF_OCEAN_n (O, OR, &
+                                    HPROGRAM)
 !     ########################################
 !
 !!****  *WRITE_OCEAN_n* - writes OCEAN fields
@@ -34,14 +35,16 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_OCEAN_n, ONLY : O => OCEAN
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
+!
 USE MODD_OCEAN_GRID_n
 !
 USE MODD_OCEAN_CSTS
 !
 USE MODI_WRITE_SURF
 !
-USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -50,6 +53,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 

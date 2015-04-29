@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE INI_DATA_PARAM_TEB(KTYPE,                                          &
+      SUBROUTINE INI_DATA_PARAM_TEB (BDD, &
+                                     KTYPE,                                          &
                                 PZ0_TOWN, PALB_ROOF, PALB_ROAD, PALB_WALL,          &
                                 PEMIS_ROOF, PEMIS_ROAD, PEMIS_WALL, PHC_ROOF,       &
                                 PHC_ROAD, PHC_WALL, PTC_ROOF, PTC_ROAD, PTC_WALL,   &
@@ -53,7 +54,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+!
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 !
 USE MODI_ABOR1_SFX
 !
@@ -65,6 +68,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !
 INTEGER, DIMENSION(:), INTENT(IN) :: KTYPE
 !

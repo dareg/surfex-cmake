@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_SEAF_PAR_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_SEAF_PAR_n (DTS, &
+                                           HPROGRAM)
 !     ################################################
 !
 !!****  *WRITESURF_PGD_SEAF_PAR_n* - writes SEAFLUX sst
@@ -34,8 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
 !
 USE MODI_WRITE_SURF
 !
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

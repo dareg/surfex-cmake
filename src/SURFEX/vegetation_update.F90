@@ -59,6 +59,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+!
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODI_INIT_ISBA_MIXPAR
@@ -220,11 +225,13 @@ ODUPDATED=.FALSE.
                               PALBUV_SOIL=PALBUV_SOIL )
       ENDIF
     ELSEIF (HSFTYPE=='GRD') THEN
-      CALL INIT_FROM_DATA_GRDN_n(IDECADE,HPHOTO,                                      &
+      CALL INIT_FROM_DATA_GRDN_n(DTGD, &
+                                 IDECADE,HPHOTO,                                      &
                        PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
      
     ELSEIF (HSFTYPE=='GNR') THEN
-      CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,HPHOTO,                                 &
+      CALL INIT_FROM_DATA_GREENROOF_n(DTGR, TGRO, &
+                                      IDECADE,HPHOTO,                                 &
                        PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
 
     ENDIF

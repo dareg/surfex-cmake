@@ -1,12 +1,15 @@
 !     #########
-      SUBROUTINE WRITESURF_SNAP_n(HPROGRAM)
+      SUBROUTINE WRITESURF_SNAP_n (CHN, &
+                                   HPROGRAM)
 !     #######################################################################
 !
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+!
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
 !
 USE MODI_GET_LUOUT
 USE MODI_WRITE_SURF
@@ -17,6 +20,9 @@ USE PARKIND1  ,ONLY : JPRB
 USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
  CHARACTER(LEN=6) :: HPROGRAM
 !

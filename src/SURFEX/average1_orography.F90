@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE AVERAGE1_OROGRAPHY(KLUOUT,KNBLINES,PLAT,PLON,PVALUE,PNODATA)
+      SUBROUTINE AVERAGE1_OROGRAPHY (USS, &
+                                     KLUOUT,KNBLINES,PLAT,PLON,PVALUE,PNODATA)
 !     #######################################################
 !
 !!**** *AVERAGE1_OROGRAPHY* computes the sum of orography, squared orography
@@ -36,8 +37,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_PGDWORK,       ONLY : XSUMVAL, XSUMVAL2, NSIZE, XSSQO, LSSQO, NSSO
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE MODI_GET_MESH_INDEX
 USE MODD_POINT_OVERLAY, ONLY : NOVMX
@@ -50,6 +53,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER,                 INTENT(IN)    :: KLUOUT
 INTEGER,                 INTENT(IN)    :: KNBLINES

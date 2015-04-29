@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_SEAFLUX
+SUBROUTINE PREP_VER_SEAFLUX (S)
 !     #################################################################################
 !
 !!****  *PREP_VER_SEAFLUX* - change in SEAFLUX variables due to altitude change
@@ -24,7 +24,9 @@ SUBROUTINE PREP_VER_SEAFLUX
 !!------------------------------------------------------------------
 !
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX 
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_PREP,   ONLY : XZS_LS, XT_CLIM_GRAD
 !
 !
@@ -44,6 +46,9 @@ IMPLICIT NONE
 !*      1.3    SST
 !
 
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('PREP_VER_SEAFLUX',0,ZHOOK_HANDLE)

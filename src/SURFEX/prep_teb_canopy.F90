@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_TEB_CANOPY()
+SUBROUTINE PREP_TEB_CANOPY (TCP, TG)
 !     #################################################################################
 !
 !!****  *PREP_TEB_CANOPY* - prepares TEB canopy fields
@@ -27,8 +27,10 @@ SUBROUTINE PREP_TEB_CANOPY()
 !!------------------------------------------------------------------
 !
 !
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+!
+!
+USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,6 +41,10 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !
 INTEGER :: JLAYER
 !

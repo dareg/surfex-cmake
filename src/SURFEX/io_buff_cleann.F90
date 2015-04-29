@@ -1,5 +1,5 @@
 !     #######################################################
-      SUBROUTINE IO_BUFF_CLEAN_n
+      SUBROUTINE IO_BUFF_CLEAN_n (IOB)
 !     #######################################################
 !
 !!****  *IO_BUFF_CLEAN_n* - routine to clean the I/O buffer
@@ -33,8 +33,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -50,6 +52,9 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('IO_BUFF_CLEAN_N',0,ZHOOK_HANDLE)

@@ -344,6 +344,8 @@ END SUBROUTINE WRITE_SURFX0_TIME_OL
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 !  
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_NPIO_WRITE, &
                             XTIME_COMM_WRITE, WLOG_MPI
 USE MODD_SURFEX_OMP, ONLY : CWORK0, NWORK0, NWORKVAR, NWORKB, NWORKDIMS, &
@@ -403,7 +405,8 @@ NWORKLEN(:) = 0
 CWORK0 = ""
 NWORKB=0
 !
- CALL IO_BUFF_n(HREC,'W',LWORK0)
+ CALL IO_BUFF_n(IOB, &
+                HREC,'W',LWORK0)
 !
 !$OMP END SINGLE
 !

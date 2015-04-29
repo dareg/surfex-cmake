@@ -39,6 +39,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -126,16 +128,19 @@ IF (PRESENT(PDIR)) PDIR = ZDIR
 !*    4.      Packing of fields
 !             -----------------
 !
- CALL GET_LCOVER_n(HPROGRAM,JPCOVER,GCOVER)
+ CALL GET_LCOVER_n(U, &
+                   HPROGRAM,JPCOVER,GCOVER)
 !
 ALLOCATE(PCOVER(SIZE(PLAT),COUNT(GCOVER)))
 !
 DO JCOVER=1,COUNT(GCOVER)
-  CALL GET_COVER_n(HPROGRAM,JCOVER,ZCOVER)
+  CALL GET_COVER_n(U, &
+                   HPROGRAM,JCOVER,ZCOVER)
   CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
 ENDDO
 
- CALL GET_ZS_n(HPROGRAM,NL,ZZS)
+ CALL GET_ZS_n(U, &
+               HPROGRAM,NL,ZZS)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !

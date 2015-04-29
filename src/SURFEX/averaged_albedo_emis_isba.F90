@@ -202,7 +202,8 @@ IF(PRESENT(PDIR_SW))THEN
 !
 ! For the case when MEB patch albedo is requested downweeling SW is needed
 !
-  CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
+  CALL UPDATE_RAD_ISBA_n(I, &
+                         OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
                          OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG,        &
                          PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH,             &
@@ -214,7 +215,8 @@ ELSE
 !
 ! For cases when MEB patch albedo is not requested no downweeling SW is needed
 !
-  CALL UPDATE_RAD_ISBA_n(OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
+  CALL UPDATE_RAD_ISBA_n(I, &
+                         OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
                          OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG,        &
                          PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH              )

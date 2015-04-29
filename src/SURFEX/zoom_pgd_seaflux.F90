@@ -150,7 +150,8 @@ DEALLOCATE(ZSEABATHY,ZWORK)
 ! reading of fields for SST_DATA
  CALL READ_SURF(HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
 !
-IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(HPROGRAM,INI,HDIR='A')
+IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTS, SG, &
+                                               HPROGRAM,INI,HDIR='A')
 !
 !============================================================
 !

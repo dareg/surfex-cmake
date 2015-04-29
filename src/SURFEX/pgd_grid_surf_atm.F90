@@ -34,6 +34,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURF_PAR,        ONLY : NVERSION, NBUGFIX
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_PGD_GRID,        ONLY : LLATLONMASK, NL
@@ -81,7 +83,8 @@ CPROGNAME=HPROGRAM
 !*    2.      Initialisation of output grid
 !             -----------------------------
 !
- CALL PGD_GRID        (HPROGRAM,HFILE,HFILETYPE,OGRID,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
+ CALL PGD_GRID(UG, U, &
+                       HPROGRAM,HFILE,HFILETYPE,OGRID,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 ! 
 !
 !-------------------------------------------------------------------------------

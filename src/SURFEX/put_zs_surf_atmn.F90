@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE PUT_ZS_SURF_ATM_n(HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_SURF_ATM_n (U, &
+                                    HPROGRAM,KI,PZS)
 !     ########################################
 !
 !!****  *PUT_ZS_SURF_ATM_n* - routine to modify surface oropgraphy using atmospheric
@@ -34,9 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -48,6 +51,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover

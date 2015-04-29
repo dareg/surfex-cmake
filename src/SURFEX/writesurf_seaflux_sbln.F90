@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_SEAFLUX_SBL_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITESURF_SEAFLUX_SBL_n (S, SSB, &
+                                          HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_SEAFLUX_n* - writes SEAFLUX fields
@@ -36,8 +37,10 @@
 !
 !
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+!
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
 !
 USE MODI_WRITE_SURF
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HWRITE   ! 'PREP' : does not write SBL XUNDEF fields

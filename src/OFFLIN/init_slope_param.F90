@@ -1,4 +1,5 @@
-SUBROUTINE INIT_SLOPE_PARAM(PZS,KI,PLAT)
+SUBROUTINE INIT_SLOPE_PARAM (UG, &
+                             PZS,KI,PLAT)
 !
 !!**** *INIT_SLOPE_PARAM
 !!                         Compute physiographic field necessary to account for
@@ -43,12 +44,14 @@ SUBROUTINE INIT_SLOPE_PARAM(PZS,KI,PLAT)
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODI_GET_MESH_DIM
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NSIZE, NINDEX, NSIZE_TASK
 
 USE MODD_SLOPE_EFFECT
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 IMPLICIT NONE
 !
@@ -58,6 +61,9 @@ INCLUDE "mpif.h"
 
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)

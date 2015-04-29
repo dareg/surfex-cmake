@@ -1,5 +1,6 @@
 !#############################
-SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
+SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n (DGEI, I, &
+                                     PTSTEP,PRAIN,PSNOW)
 !#############################
 !
 !
@@ -41,8 +42,10 @@ SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+!
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -50,6 +53,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 REAL,                  INTENT(IN) :: PTSTEP        ! time step (s)
 REAL,    DIMENSION(:), INTENT(IN) :: PRAIN         ! rainfall rate

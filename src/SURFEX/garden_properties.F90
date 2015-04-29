@@ -29,6 +29,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
@@ -93,7 +96,8 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GARDEN_n(1)
+ CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, TGDP, T, TVG, &
+                        1)
 !
 !
 !*      2.     Computes several properties of gardens

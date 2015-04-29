@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_WATFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                              &
+SUBROUTINE COUPLING_WATFLUX_OROG_n (DGW, W, WSB, &
+                                    HPROGRAM, HCOUPLING, PTIMEC,                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -36,11 +37,13 @@ SUBROUTINE COUPLING_WATFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                 
 !!                           improve forcing vertical shift
 !!-------------------------------------------------------------
 !
+!
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
+!
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -54,6 +57,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
+TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling

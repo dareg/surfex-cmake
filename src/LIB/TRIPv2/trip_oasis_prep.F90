@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE TRIP_OASIS_PREP(KLISTING,KLON,KLAT)
+SUBROUTINE TRIP_OASIS_PREP (TPG, &
+                            KLISTING,KLON,KLAT)
 !###############################################
 !
 !!****  *TRIP_OASIS_PREP* - Definitions for exchange of coupling fields
@@ -34,6 +35,9 @@ SUBROUTINE TRIP_OASIS_PREP(KLISTING,KLON,KLAT)
 !              ------------
 !
 !
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODN_TRIP_OASIS
 USE MODD_TRIP_OASIS
 !
@@ -42,7 +46,6 @@ USE MODD_TRIP_PAR, ONLY : NUNDEF
 USE MODD_TRIP_OASIS
 !
 USE MODE_TRIP_GRID
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 USE MODI_ABORT_TRIP
 USE MODI_GET_LONLAT_TRIP
@@ -58,6 +61,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN)    :: KLISTING 
 INTEGER, INTENT(IN)    :: KLON

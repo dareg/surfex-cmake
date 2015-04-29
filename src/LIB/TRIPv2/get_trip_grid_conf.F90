@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_TRIP_GRID_CONF(PLONMIN,PLONMAX,PLATMIN,PLATMAX,PRES,KLON,KLAT)
+      SUBROUTINE GET_TRIP_GRID_CONF (TPG, &
+                                     PLONMIN,PLONMAX,PLATMIN,PLATMAX,PRES,KLON,KLAT)
 !     #########################################
 !
 !!****  *GET_TRIP_GRID_CONF* - routine to get the TRIP grid configuration
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODE_TRIP_GRID
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 REAL,               INTENT(OUT) :: PLONMIN
 REAL,               INTENT(OUT) :: PLONMAX

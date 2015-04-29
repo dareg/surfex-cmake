@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_CH_SNAP_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_CH_SNAP_n (CHN, &
+                                       HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_CH_SNAP_n* - writes surface chemical emissions diagnostics
@@ -30,8 +31,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+!
 USE MODD_CSTS,        ONLY : XAVOGADRO
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

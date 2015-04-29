@@ -1150,7 +1150,8 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_TEB_n(TOP%LCANOPY, PTA, PTRAD, ZQA, PPA, PPS, PRHOA,              &
+ CALL DIAG_INLINE_TEB_n(DGT, TCP, T, &
+                        TOP%LCANOPY, PTA, PTRAD, ZQA, PPA, PPS, PRHOA,              &
                        PU, PV, ZWIND, PZREF, PUREF,                            &
                        ZAVG_CD, ZAVG_CDN, ZAVG_RI, ZAVG_CH, ZAVG_Z0_TOWN,      &
                        PTRAD, PEMIS, PDIR_ALB, PSCA_ALB,                       &

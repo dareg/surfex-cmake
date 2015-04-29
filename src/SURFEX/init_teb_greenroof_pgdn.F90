@@ -34,6 +34,8 @@ SUBROUTINE INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,OREAD_PGD, KI, KSV, HSV, KVER
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+!
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
@@ -133,7 +135,8 @@ IF (OREAD_PGD) &
 !
 !* allocation of green roofs variables
 !
- CALL ALLOCATE_TEB_GREENROOF_PGD(OREAD_PGD, KI, NVEGTYPE, TGRO%NLAYER_GR, NDIMTAB)
+ CALL ALLOCATE_TEB_GREENROOF_PGD(TGRPE, TGRP, &
+                                 OREAD_PGD, KI, NVEGTYPE, TGRO%NLAYER_GR, NDIMTAB)
 !
 !*       2.2    Physiographic data fields from land cover:
 !               -----------------------------------------
@@ -148,7 +151,8 @@ END IF
 IF (.NOT. TGRO%LPAR_GREENROOF) THEN
   CALL CONVERT_PATCH_TEB_GREENROOF(KI,IDECADE)
 ELSE
- CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,TVG%CPHOTO,                     &
+ CALL INIT_FROM_DATA_GREENROOF_n(DTGR, TGRO, &
+                                 IDECADE,TVG%CPHOTO,                     &
                                  TGRP%XOM_GR,                             &
                                  TGRP%XSAND_GR, TGRP%XCLAY_GR, TGRPE%XVEG,           &
                                  TGRPE%XLAI,TGRP%XRSMIN,TGRP%XGAMMA,TGRP%XWRMAX_CF,       &

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE TRIP_DIAG_RUN(KLISTING,KLON,KLAT,PRUNTIME)  
+      SUBROUTINE TRIP_DIAG_RUN (TPDG, TPG, &
+                                KLISTING,KLON,KLAT,PRUNTIME)  
 !     #####################################################
 !
 !!****  *TRIP_DIAG_RUN*  
@@ -22,12 +23,14 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODN_TRIP,       ONLY : CGROUNDW, CVIT, LFLOOD
 USE MODN_TRIP_RUN,   ONLY : LDIAG_MISC
 USE MODD_TRIP_OASIS, ONLY : LCPL_LAND
 !                           
-USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 USE MODE_RW_TRIP
 !
@@ -37,6 +40,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN)             :: KLISTING
 INTEGER, INTENT(IN)             :: KLON

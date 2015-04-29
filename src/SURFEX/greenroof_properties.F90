@@ -35,6 +35,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+!
 USE MODD_SURF_PAR,            ONLY : XUNDEF
 !
 USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
@@ -101,7 +104,8 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GREENROOF_n(1)
+ CALL FLAG_TEB_GREENROOF_n(TGR, TGRO, TGRPE, TGRP, T, TVG, &
+                           1)
 !
 !
 !*      2.     Computes several properties of green roofs

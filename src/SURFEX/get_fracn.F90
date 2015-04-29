@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_FRAC_n(HPROGRAM,KI,PSEA,PWATER,PNATURE,PTOWN)
+      SUBROUTINE GET_FRAC_n (U, &
+                             HPROGRAM,KI,PSEA,PWATER,PNATURE,PTOWN)
 !     ########################################
 !
 !!****  *GET_FRAC_n* - routine to get some surface fields
@@ -33,9 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)            :: HPROGRAM
 INTEGER,              INTENT(IN)            :: KI      ! number of points

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SFX_LAKE(PLAKE_EVAP,PLAKE_RAIN,PLAKE_SNOW)  
+      SUBROUTINE GET_SFX_LAKE (F, U, &
+                               PLAKE_EVAP,PLAKE_RAIN,PLAKE_SNOW)  
 !     ############################################################################
 !
 !!****  *GET_SFX_LAKE* - routine to get some variables from surfex to
@@ -33,11 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
 USE MODI_UNPACK_SAME_RANK
 !
@@ -48,6 +51,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_RAIN  ! Cumulated Rainfall rate           (kg/m2)

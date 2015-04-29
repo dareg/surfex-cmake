@@ -1,5 +1,6 @@
 !     ################################################################
-      SUBROUTINE FIX_MEB_VEG(KPATCH)
+      SUBROUTINE FIX_MEB_VEG (DTI, IG, I, &
+                              KPATCH)
 !     ################################################################
 !
 !!    PURPOSE
@@ -49,11 +50,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
 USE MODI_VEGTYPE_TO_PATCH 
 !
@@ -66,6 +69,11 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER, INTENT(IN) :: KPATCH
 !

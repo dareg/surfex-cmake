@@ -39,6 +39,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+!
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
 USE MODD_OCEAN_n, ONLY : O => OCEAN
@@ -142,7 +146,8 @@ IF (GCALLMIXT) THEN
      ZSFTEAU(:) = 0.
   END IF
 
-  CALL MIXTL_n(ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP)
+  CALL MIXTL_n(O, OR, SG, S, &
+               ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP)
 !
 !---------------------------------------------------------------------------
 !        3. Coupling with SURFEX by SST (and relative wind) evolution
@@ -155,7 +160,7 @@ IF (GCALLMIXT) THEN
 ENDIF
 !
 IF (GTIMEOK) THEN
-  CALL DIAG_INLINE_OCEAN_n
+  CALL DIAG_INLINE_OCEAN_n(DGO, O, S)
   O%NOCTCOUNT=O%NOCTCOUNT+1
 ENDIF
 !

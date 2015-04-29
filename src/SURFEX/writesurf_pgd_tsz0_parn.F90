@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_TSZ0_PAR_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TSZ0_PAR_n (DTZ, &
+                                           HPROGRAM)
 !     ################################################
 !
 !!****  *WRITESURF_PGD_TSZ0_PAR_n* - writes TSZ0 physiographic fields
@@ -35,7 +36,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0   
+!
+!
+USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 !
 USE MODI_WRITE_SURF
 !
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

@@ -36,6 +36,8 @@ SUBROUTINE WRITE_HEADER_FA(CFILETYPE,HWRITE)
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_GRID_CONF_PROJ,  ONLY : XLATC, XLONC
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
@@ -117,7 +119,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_HEADER_FA',0,ZHOOK_HANDLE)
- CALL IO_BUFF_CLEAN_n
+ CALL IO_BUFF_CLEAN_n(IOB)
 !
 ZRAD=XPI/180.0
 !

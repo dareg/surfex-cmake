@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_ISBA_CC_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+SUBROUTINE PREP_HOR_ISBA_CC_FIELD (IG, I, &
+                                   HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
 !!****  *PREP_HOR_ISBA_CC_FIELD* - reads, interpolates and prepares an ISBA-CC field
@@ -25,13 +26,15 @@ SUBROUTINE PREP_HOR_ISBA_CC_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,
 !!------------------------------------------------------------------
 !
 !
+!
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_CO2V_PAR,  ONLY : XCA_NIT, XCC_NIT
 !
 USE MODD_PREP,      ONLY : LINTERP, CMASK
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
 !
@@ -49,6 +52,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=8),   INTENT(IN)  :: HSURF     ! type of field

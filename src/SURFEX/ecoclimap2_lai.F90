@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE ECOCLIMAP2_LAI
+      SUBROUTINE ECOCLIMAP2_LAI (DTCO)
 !     #########################
 !
 !!**** *ECOCLIMAP2_LAI* initializes cover-field correspondance arrays
@@ -34,9 +34,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_LAI_ALL_YEARS, LCLIM_LAI, &
                                   NECO2_START_YEAR, NECO2_END_YEAR  
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
@@ -53,6 +55,9 @@ IMPLICIT NONE
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(36) :: ZLAI
 !

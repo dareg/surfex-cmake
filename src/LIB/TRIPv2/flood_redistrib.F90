@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE FLOOD_REDISTRIB(KLON,KLAT,PPFLOOD,PEFLOOD,PIFLOOD,PRESIDU)  
+      SUBROUTINE FLOOD_REDISTRIB (TP, TPG, &
+                                  KLON,KLAT,PPFLOOD,PEFLOOD,PIFLOOD,PRESIDU)  
 !     #####################################################################
 !
 !!****  *FLOOD_REDISTRIB*  
@@ -38,10 +39,12 @@
 !               ------------
 !
 !
+!
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODD_TRIP_PAR, ONLY : XUNDEF, XRHOLW
 !
-USE MODD_TRIP, ONLY : TP => TRIP
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 USE MODI_ABORT_TRIP
 !
@@ -51,6 +54,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN)               :: KLON
 INTEGER, INTENT(IN)               :: KLAT

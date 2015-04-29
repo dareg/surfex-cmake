@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_PGD_TEB_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_PGD_TEB_n (B, BOP, T, TOP, TPN, &
+                                       HPROGRAM)
 !     #########################################
 !
 !!****  *WRITE_DIAG_PGD_TEB_GARDEN_n* - writes the ISBA physiographic diagnostic fields
@@ -35,12 +36,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_TEB_PANEL_n, ONLY : TPN => TEB_PANEL
-USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
-USE MODD_BEM_n, ONLY : B => BEM
 
 !
 USE MODD_IO_SURF_FA, ONLY : LFANOCOMPACT, LPREP
@@ -57,6 +60,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

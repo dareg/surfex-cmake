@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_n(HPROGRAM)
+      SUBROUTINE WRITESURF_WATFLUX_n (W, &
+                                      HPROGRAM)
 !     ########################################
 !
 !!****  *WRITESURF_WATFLUX_n* - writes WATFLUX fields
@@ -33,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_WRITE_SURF
 !
@@ -45,6 +48,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 

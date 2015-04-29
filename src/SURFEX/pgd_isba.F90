@@ -45,6 +45,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : CATYPE
@@ -355,8 +357,10 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
 !*    5.      Packing of ISBA specific fields
 !             -------------------------------
 !
- CALL GET_AOS_n(HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
- CALL GET_SSO_n(HPROGRAM,NL,ZSSO_SLOPE)
+ CALL GET_AOS_n(USS, &
+                HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
+ CALL GET_SSO_n(USS, &
+                HPROGRAM,NL,ZSSO_SLOPE)
 !
  CALL PACK_PGD_ISBA(HPROGRAM,                                    &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &

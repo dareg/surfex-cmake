@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_TEB_INIT_n(HPROGRAM,KLU,KSW)
+      SUBROUTINE DIAG_TEB_INIT_n (DGT, DGUT, TOP, &
+                                  HPROGRAM,KLU,KSW)
 !     #####################
 !
 !!****  *DIAG_TEB_INIT_n* - routine to initialize TEB diagnostic variables
@@ -35,13 +36,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DIAG_UTCI_TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
 !
 USE MODD_UTCI,              ONLY : NUTCI_STRESS
-USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
 
 !
 USE MODI_READ_SURF
@@ -54,6 +57,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_UTCI_TEB_t), INTENT(INOUT) :: DGUT
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
 INTEGER, INTENT(IN) :: KSW   ! spectral bands

@@ -33,6 +33,14 @@ SUBROUTINE SFX_OASIS_SEND_OL(HPROGRAM,KI,PTIMEC,PSTEP_SURF,KSIZE_OMP)
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURFEX_OMP, ONLY :  NINDX1SFX, NINDX2SFX, NBLOCK, NBLOCKTOT, &
                              INIT_DIM, RESET_DIM
 !
@@ -195,7 +203,8 @@ IF(GSEND_LAND)THEN
 !
 ! * Get river output fields
 !
-  CALL GET_SFX_LAND(LCPL_GW,LCPL_FLOOD,LCPL_CALVING,                           &
+  CALL GET_SFX_LAND(I, U, &
+                    LCPL_GW,LCPL_FLOOD,LCPL_CALVING,                           &
                     ZLAND_RUNOFF (NINDX1SFX:NINDX2SFX),ZLAND_DRAIN   (NINDX1SFX:NINDX2SFX),&
                     ZLAND_CALVING(NINDX1SFX:NINDX2SFX),ZLAND_RECHARGE(NINDX1SFX:NINDX2SFX),&
                     ZLAND_PFLOOD (NINDX1SFX:NINDX2SFX),ZLAND_EFLOOD  (NINDX1SFX:NINDX2SFX),&
@@ -207,7 +216,8 @@ IF(GSEND_LAKE)THEN
 !
 ! * Get output fields
 !
-  CALL GET_SFX_LAKE(ZLAKE_EVAP(NINDX1SFX:NINDX2SFX),ZLAKE_RAIN(NINDX1SFX:NINDX2SFX), &
+  CALL GET_SFX_LAKE(F, U, &
+                    ZLAKE_EVAP(NINDX1SFX:NINDX2SFX),ZLAKE_RAIN(NINDX1SFX:NINDX2SFX), &
                     ZLAKE_SNOW(NINDX1SFX:NINDX2SFX)                            )
 !
 ENDIF
@@ -216,7 +226,8 @@ IF(GSEND_SEA)THEN
 !
 ! * Get sea output fields
 !
-  CALL GET_SFX_SEA(LCPL_SEAICE,LWATER,                                                                                    &
+  CALL GET_SFX_SEA(S, U, W, &
+                   LCPL_SEAICE,LWATER,                                                                                    &
                    ZSEA_FWSU   (NINDX1SFX:NINDX2SFX),ZSEA_FWSV   (NINDX1SFX:NINDX2SFX),ZSEA_HEAT   (NINDX1SFX:NINDX2SFX),&
                    ZSEA_SNET   (NINDX1SFX:NINDX2SFX),ZSEA_WIND   (NINDX1SFX:NINDX2SFX),ZSEA_FWSM   (NINDX1SFX:NINDX2SFX),&
                    ZSEA_EVAP   (NINDX1SFX:NINDX2SFX),ZSEA_RAIN   (NINDX1SFX:NINDX2SFX),ZSEA_SNOW   (NINDX1SFX:NINDX2SFX),&

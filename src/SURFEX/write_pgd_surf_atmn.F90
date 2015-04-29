@@ -34,6 +34,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+!
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+!
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_SURF_PAR,        ONLY : NVERSION, NBUGFIX
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
@@ -87,7 +96,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 CPROGNAME = HPROGRAM
 !
- CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+ CALL FLAG_UPDATE(DGI, DGU, &
+                  .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !*       1.     Configuration and cover fields:
 !               ------------------------------
@@ -123,9 +133,12 @@ ENDIF
 !
  CALL WRITE_GRID(HPROGRAM,UG%CGRID,UG%XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,IRESP,USS%XZ0EFFJPDIR)
 !
- CALL WRITESURF_COVER_n(HPROGRAM)
- CALL WRITESURF_SSO_n(HPROGRAM)
- CALL WRITESURF_DUMMY_n(HPROGRAM)
+ CALL WRITESURF_COVER_n(U, &
+                        HPROGRAM)
+ CALL WRITESURF_SSO_n(USS, &
+                      HPROGRAM)
+ CALL WRITESURF_DUMMY_n(DUU, &
+                        HPROGRAM)
 !
 YCOMMENT='CH_EMIS'
  CALL WRITE_SURF(HPROGRAM,'CH_EMIS',CHU%LCH_EMIS,IRESP,HCOMMENT=YCOMMENT)
@@ -137,9 +150,11 @@ END IF
 !
 IF (CHU%LCH_EMIS) THEN
   IF (CHU%CCH_EMIS=='AGGR') THEN
-    CALL WRITESURF_CH_EMIS_n(HPROGRAM)
+    CALL WRITESURF_CH_EMIS_n(CHE, &
+                             HPROGRAM)
   ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
-    CALL WRITESURF_SNAP_n(HPROGRAM)
+    CALL WRITESURF_SNAP_n(CHN, &
+                          HPROGRAM)
   ENDIF
 ENDIF
 !
@@ -151,25 +166,29 @@ ENDIF
 !*       2.     Sea
 !               ---
 !
-IF (U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(HPROGRAM)
+IF (U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(U, &
+                                       HPROGRAM)
 !
 !
 !*       3.     Inland water
 !               ------------
 !
-IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(HPROGRAM)
+IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(U, &
+                                                  HPROGRAM)
 !
 !
 !*       4.     Vegetation scheme
 !               -----------------
 !
-IF (U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(HPROGRAM)
+IF (U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(U, &
+                                             HPROGRAM)
 !
 !
 !*       5.     Urban scheme
 !               ------------
 !
-IF (U%NDIM_TOWN>0) CALL WRITE_PGD_TOWN_n(HPROGRAM)
+IF (U%NDIM_TOWN>0) CALL WRITE_PGD_TOWN_n(U, &
+                                         HPROGRAM)
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SURF_ATM_N',1,ZHOOK_HANDLE)

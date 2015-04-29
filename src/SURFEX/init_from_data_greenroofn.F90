@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_FROM_DATA_GREENROOF_n(KDECADE, HPHOTO,                              &
+      SUBROUTINE INIT_FROM_DATA_GREENROOF_n (DTGR, TGRO, &
+                                             KDECADE, HPHOTO,                              &
                                             POM_GR, PSAND_GR, PCLAY_GR, PVEG,             &
                                             PLAI,PRSMIN,PGAMMA,PWRMAX_CF,                 &
                                             PRGL,PCV,PDG,PD_ICE,PZ0,PZ0_O_Z0H,            &
@@ -46,10 +47,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
 
 !
+!
+!
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -58,6 +61,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
+TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
 !
 INTEGER,                INTENT(IN)    :: KDECADE
  CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis

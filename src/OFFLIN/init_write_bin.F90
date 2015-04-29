@@ -142,7 +142,8 @@ ELSE
       IFIELD=IFIELD+1
     ENDDO
   
-    CALL TEST_RECORD_LEN("ASCII ",HREC,LMATCH)
+    CALL TEST_RECORD_LEN(DGU, &
+                         "ASCII ",HREC,LMATCH)
 
     IF (.NOT. LMATCH ) THEN
 

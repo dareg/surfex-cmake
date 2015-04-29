@@ -1,12 +1,15 @@
 !     #######################
-      SUBROUTINE READ_ECO2_IRRIG(HPROGRAM)
+      SUBROUTINE READ_ECO2_IRRIG (DTCO, &
+                                  HPROGRAM)
 !     #######################
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODI_READ_SURF
 !
 USE MODD_DATA_COVER,     ONLY : TDATA_SEED, TDATA_REAP, XDATA_WATSUP, XDATA_IRRIG,&
                                   LDATA_IRRIG 
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NVT_IRR
 !
 !
@@ -17,6 +20,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
  CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
 !

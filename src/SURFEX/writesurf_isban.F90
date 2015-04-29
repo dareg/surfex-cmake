@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_ISBA_n(HPROGRAM,OLAND_USE)
+      SUBROUTINE WRITESURF_ISBA_n (CHI, DST, I, &
+                                   HPROGRAM,OLAND_USE)
 !     #####################################
 !
 !!****  *WRITESURF_ISBA_n* - writes ISBA prognostic fields
@@ -47,14 +48,16 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM
 !
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
-USE MODD_DST_n, ONLY : DST => DST
 USE MODD_DST_SURF
 !
 USE MODI_WRITE_SURF
@@ -68,6 +71,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 LOGICAL,           INTENT(IN)  :: OLAND_USE !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_FROM_DATA_GRDN_n(KDECADE, HPHOTO,                               &
+      SUBROUTINE INIT_FROM_DATA_GRDN_n (DTGD, &
+                                        KDECADE, HPHOTO,                               &
                                                PVEG,                                  &
                                                PLAI,PRSMIN,PGAMMA,PWRMAX_CF,          &
                                                PRGL,PCV,PDG,PD_ICE,PZ0,PZ0_O_Z0H,     &
@@ -47,9 +48,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
 
 !
+!
+!
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -58,6 +61,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
 !
 INTEGER,                INTENT(IN)    :: KDECADE
  CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis

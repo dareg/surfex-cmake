@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INTERPOL_SST_MTH(KYEAR,KMONTH,KDAY,HFLAG,POUT)
+      SUBROUTINE INTERPOL_SST_MTH (S, &
+                                   KYEAR,KMONTH,KDAY,HFLAG,POUT)
 !     #######################################################
 !
 !!****  *INTERPOL_SST_MTH* - Interpolation of monthly SST, SSS, SIT or SIC
@@ -35,7 +36,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODI_INTERPOL_QUADRA
 !
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !*       0.1   Declaration of arguments
 !------------------------
 ! 
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+!
 INTEGER,          INTENT(IN) :: KYEAR  ! year of date
 INTEGER,          INTENT(IN) :: KMONTH ! month of date
 INTEGER,          INTENT(IN) :: KDAY   ! day of date

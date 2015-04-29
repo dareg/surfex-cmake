@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE READ_NAM_TRIP_GRID(KLISTING)
+SUBROUTINE READ_NAM_TRIP_GRID (TPG, &
+                               KLISTING)
 !############################
 !
 !!****  *READ_NAM_TRIP_GRID* - routine to read in namelist the TRIP horizontal grid
@@ -33,7 +34,9 @@ SUBROUTINE READ_NAM_TRIP_GRID(KLISTING)
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODI_TRIP_POSNAM
 USE MODI_ABORT_TRIP
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN) :: KLISTING
 !

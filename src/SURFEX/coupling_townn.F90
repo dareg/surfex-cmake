@@ -32,6 +32,8 @@ SUBROUTINE COUPLING_TOWN_n(HPROGRAM, HCOUPLING, PTIMEC,                         
 !!      B. Decharme  04/2013 new coupling variables
 !!------------------------------------------------------------------
 !
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT, XCPD, XRD, XP00
 !
@@ -140,7 +142,8 @@ IF (U%CTOWN=='TEB   ') THEN
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                      &
+  CALL COUPLING_IDEAL_FLUX(DGL, &
+                           HPROGRAM, HCOUPLING, PTIMEC,                                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
                  PTSUN, PZENITH, PAZIM,                                                      &

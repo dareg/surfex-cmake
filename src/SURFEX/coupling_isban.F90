@@ -65,6 +65,18 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!-------------------------------------------------------------------
 !
+USE MODD_AGRI_n, ONLY : AG => AGRI
+!
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+!
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+!
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+!
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,         ONLY : XRD, XRV, XP00, XCPD, XPI, XAVOGADRO, XMD
@@ -370,20 +382,23 @@ ISWB = KSW
 !* irrigation
 !
 IF (LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT'.OR. I%CPHOTO=='NCB') ) THEN
-   CALL IRRIGATION_UPDATE(I%XIRRIG,PTSTEP,KMONTH,KDAY,PTIME,               &
+   CALL IRRIGATION_UPDATE(AG, &
+                          I%XIRRIG,PTSTEP,KMONTH,KDAY,PTIME,               &
                             I%TSEED(:,:)%TDATE%MONTH,I%TSEED(:,:)%TDATE%DAY,   &
                             I%TREAP(:,:)%TDATE%MONTH,I%TREAP(:,:)%TDATE%DAY    )  
 ENDIF
 !
 !* Actualization of the SGH variable (Fmu, Fsat)
 !
- CALL ISBA_SGH_UPDATE(I%CISBA,I%CRUNOFF,I%CRAIN,PRAIN,I%XMUF,I%XFSAT,I%XTOPQS)
+ CALL ISBA_SGH_UPDATE(IG, I, &
+                      I%CISBA,I%CRUNOFF,I%CRAIN,PRAIN,I%XMUF,I%XFSAT,I%XTOPQS)
 !
 !
 !* Actualization of deep soil characteristics
 !
 IF (LDEEPSOIL) THEN
-   CALL DEEPSOIL_UPDATE(I%TTIME%TDATE%MONTH)
+   CALL DEEPSOIL_UPDATE(I, &
+                        I%TTIME%TDATE%MONTH)
 ENDIF
 !
 !* Actualization of soil and wood carbon spinup
@@ -452,7 +467,8 @@ ENDDO PATCH_LOOP
 ! --------------------------------------------------------------------------------------
 !
 IF(I%LCPL_RRM)THEN
-  CALL DIAG_CPL_ESM_ISBA(PTSTEP,ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD, &
+  CALL DIAG_CPL_ESM_ISBA(IG, I, &
+                         PTSTEP,ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD, &
                            ZCPL_PFLOOD,ZCPL_IFLOOD,ZCPL_ICEFLUX     )  
 ENDIF
 !
@@ -537,7 +553,8 @@ ENDIF
 !the energy budget between surfex and the atmosphere
 !-------------------------------------------------------------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(I%LFLOOD, I%TSNOW%SCHEME, PZENITH2, PSW_BANDS,      &
+ CALL UPDATE_RAD_ISBA_n(I, &
+                        I%LFLOOD, I%TSNOW%SCHEME, PZENITH2, PSW_BANDS,      &
                        I%XVEG, I%XLAI, I%XZ0,                                 &
                        I%LMEB_PATCH,I%XLAIGV,I%XGNDLITTER,I%XZ0LITTER,I%XH_VEG,   &
                        I%XALBNIR, I%XALBVIS, I%XALBUV, I%XEMIS,                 &
@@ -558,15 +575,17 @@ PTRAD = I%XTSRAD_NAT
 !
 ! Any additional diagnostics (stored in MODD_DIAG_ISBA_n)
 !
- CALL AVERAGE_DIAG_ISBA_n(PUREF,PZREF,PSFCO2,PTRAD)
+ CALL AVERAGE_DIAG_ISBA_n(DGEI, DGI, I, &
+                          PUREF,PZREF,PSFCO2,PTRAD)
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
- CALL AVERAGE_DIAG_EVAP_ISBA_n(PTSTEP,PRAIN,PSNOW)
+ CALL AVERAGE_DIAG_EVAP_ISBA_n(DGEI, I, &
+                               PTSTEP,PRAIN,PSNOW)
 !
 ! Miscellaneous diagnostics (stored in MODD_DIAG_MISC_ISBA_n)
 !
- CALL AVERAGE_DIAG_MISC_ISBA_n
+ CALL AVERAGE_DIAG_MISC_ISBA_n(DGMI, I)
 !
 !--------------------------------------------------------------------------------------
 !
@@ -581,12 +600,14 @@ PTRAD = I%XTSRAD_NAT
 ! --------------------------------------------------------------------------------------
 !
 IF (CHI%NBEQ>0 .AND. CHI%LCH_BIO_FLUX) THEN
- CALL CH_BVOCEM_n(ZSW_FORBIO,PRHOA,PSFTS)
+ CALL CH_BVOCEM_n(CHI, GB, I, &
+                  ZSW_FORBIO,PRHOA,PSFTS)
 ENDIF
 !
 !SOILNOX
 IF (CHI%LCH_NO_FLUX) THEN
-  CALL SOILEMISNO_n(PU,PV)
+  CALL SOILEMISNO_n(GB, I, &
+                    PU,PV)
 ENDIF
 !
 !==========================================================================================
@@ -800,23 +821,28 @@ ENDIF
 !
 ! Pack ISBA input and prognostic variables (modd_isban) for each patch:
 !
- CALL PACK_ISBA_PATCH_GET_SIZE_n(JPATCH)
+ CALL PACK_ISBA_PATCH_GET_SIZE_n(I, PKI, &
+                                 JPATCH)
 !
- CALL PACK_DIAG_PATCH_GET_SIZE_n(JPATCH)
+ CALL PACK_DIAG_PATCH_GET_SIZE_n(DGEI, DGI, DGMI, I, PKDI, &
+                                 JPATCH)
 !
- CALL PACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)     
+ CALL PACK_ISBA_PATCH_n(AG, IG, I, PKI, &
+                        KMASK,KSIZE,JPATCH)     
 !
 ! Pack chemistry input and prognostic variables (modd_ch_isban) for each patch:
 !
 IF (CHI%NBEQ>0) THEN
   IF( CHI%CCH_DRY_DEP == "WES89") THEN
-    CALL PACK_CH_ISBA_PATCH_n(KMASK,KSIZE,I%NPATCH,JPATCH)     
+    CALL PACK_CH_ISBA_PATCH_n(CHI, PKCI, &
+                              KMASK,KSIZE,I%NPATCH,JPATCH)     
   END IF
 END IF
 !
 ! Allocate ISBA diagnostics for each patch:
 !
- CALL PACK_DIAG_PATCH_n(KSIZE,ISWB,JPATCH)     
+ CALL PACK_DIAG_PATCH_n(DGEI, DGI, DGMI, I, PKDI, &
+                        KSIZE,ISWB,JPATCH)     
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Cosine of the slope typically encoutered in the grid mesh (including subgrid orography)
@@ -862,7 +888,8 @@ ENDIF
 !
 !* effective roughness
 !
- CALL Z0EFF(I%CROUGH, GMEB, ZP_ALFA, ZP_ZREF, ZP_UREF, PKI%XP_Z0, PKI%XP_Z0REL, PKI%XP_PSN,   &
+ CALL Z0EFF(I, &
+            I%CROUGH, GMEB, ZP_ALFA, ZP_ZREF, ZP_UREF, PKI%XP_Z0, PKI%XP_Z0REL, PKI%XP_PSN,   &
      ZPALPHAN,PKI%XP_Z0LITTER, PKI%XP_SNOWSWE(:,1),                              &
      PKI%XP_Z0EFFIP,PKI%XP_Z0EFFIM,PKI%XP_Z0EFFJP,PKI%XP_Z0EFFJM, PKI%XP_FF, ZP_Z0FLOOD,     &
      PKI%XP_AOSIP,PKI%XP_AOSIM,PKI%XP_AOSJP,PKI%XP_AOSJM,                                &
@@ -905,7 +932,8 @@ ENDIF
 ! Intialize computation of ISBA water and energy budget
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL ISBA_BUDGET_INIT(I%CISBA,I%TSNOW%SCHEME,            &
+ CALL ISBA_BUDGET_INIT(DGEI, &
+                       I%CISBA,I%TSNOW%SCHEME,            &
                       PKI%XP_WG,PKI%XP_WGI,PKI%XP_WR,PKI%XP_SNOWSWE, &
                       PKI%XP_DG, PKI%XP_DZG, ZP_WG_INI,      &
                       ZP_WGI_INI, ZP_WR_INI,         &
@@ -974,7 +1002,8 @@ ZP_TRAD=PKDI%XP_TSRAD
 !
 IF(I%LGLACIER)THEN
 !           
-  CALL HYDRO_GLACIER(PTSTEP,ZP_SNOW,PKI%XP_SNOWRHO,PKI%XP_SNOWSWE,PKI%XP_ICE_STO,PKDI%XP_ICEFLUX)
+  CALL HYDRO_GLACIER(I, &
+                     PTSTEP,ZP_SNOW,PKI%XP_SNOWRHO,PKI%XP_SNOWSWE,PKI%XP_ICE_STO,PKDI%XP_ICEFLUX)
 !     
 ENDIF
 !
@@ -982,7 +1011,8 @@ ENDIF
 ! Calculation of ISBA water and energy budget (and time tendencies of each reservoir)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL ISBA_BUDGET(I%CISBA,I%TSNOW%SCHEME,I%LGLACIER,PTSTEP,          &
+CALL ISBA_BUDGET(DGEI, &
+                 I%CISBA,I%TSNOW%SCHEME,I%LGLACIER,PTSTEP,          &
                  PKI%XP_WG,PKI%XP_WGI,PKI%XP_WR,PKI%XP_SNOWSWE,PKI%XP_DG,PKI%XP_DZG,  & 
                  ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,ZP_SWE_INI,   &
                  ZP_RAIN,ZP_SNOW,PKDI%XP_EVAP,PKDI%XP_DRAIN,PKDI%XP_RUNOFF,  &
@@ -1117,7 +1147,7 @@ ENDIF
 IF(CHI%NDSTEQ>0)THEN
   IDST = CHI%NSV_DSTEND - CHI%NSV_DSTBEG + 1
 
-  CALL COUPLING_DST_n(                   &
+  CALL COUPLING_DST_n(DST, PKI, &
             HPROGRAM,                    &!I [char] Name of program
             KSIZE,      &!I [nbr] number of points in patch
             IDST,                        &!I [nbr] number of dust emissions variables
@@ -1220,7 +1250,8 @@ ENDIF !Check on CSLTYN
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_ISBA_n(ZP_TA, PKDI%XP_TS, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,       &
+ CALL DIAG_INLINE_ISBA_n(DGEI, DGI, I, PKDI, &
+                         ZP_TA, PKDI%XP_TS, ZP_QA, ZP_PA, ZP_PS, ZP_RHOA, ZP_U, ZP_V,       &
                           ZP_ZREF, ZP_UREF,                                            &
                           PKDI%XP_CD, PKDI%XP_CDN, PKDI%XP_CH, PKDI%XP_RI, PKDI%XP_HU, PKDI%XP_Z0_WITH_SNOW,         &
                           PKDI%XP_Z0H_WITH_SNOW, PKDI%XP_Z0EFF,                                  &
@@ -1246,13 +1277,15 @@ ZP_QSURF (:) = PKDI%XP_QS (:)
 ! Isba offline diagnostics for each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_EVAP_ISBA_n(I%CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA)
+ CALL DIAG_EVAP_ISBA_n(DGEI, DGI, I, PKDI, PKI, &
+                       I%CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Isba offline diagnostics for miscellaneous terms over each patch
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_MISC_ISBA_n(PTSTEP, I%CISBA, I%CPHOTO, I%TSNOW%SCHEME, LAGRIP, I%LTR_ML,    &
+ CALL DIAG_MISC_ISBA_n(DGMI, PKDI, &
+                       PTSTEP, I%CISBA, I%CPHOTO, I%TSNOW%SCHEME, LAGRIP, I%LTR_ML,    &
                       PTIME, KSIZE, JPATCH, KMASK, PKI%XP_THRESHOLD,              &
                       PKI%XP_PSN, PKI%XP_PSNG, PKI%XP_PSNV, PKI%XP_FF, PKI%XP_FFG, PKI%XP_FFV,        &
                       PKI%XP_WG, PKI%XP_WGI, PKI%XP_WFC, PKI%XP_WWILT, PKI%XP_SNOWSWE, PKI%XP_SNOWRHO,&
@@ -1263,7 +1296,8 @@ ZP_QSURF (:) = PKDI%XP_QS (:)
 
 !  (MUST be done BEFORE UNPACK_ISBA_PATCH, because of XP_LE)
 !
- CALL UNPACK_DIAG_PATCH_n(KMASK,KSIZE,I%NPATCH,JPATCH, &
+ CALL UNPACK_DIAG_PATCH_n(DGI, GB, I, PKDI, PKI, &
+                          KMASK,KSIZE,I%NPATCH,JPATCH, &
                            ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD,ZCPL_PFLOOD,           &
                            ZCPL_IFLOOD, ZCPL_ICEFLUX)  
 !
@@ -1271,13 +1305,15 @@ ZP_QSURF (:) = PKDI%XP_QS (:)
 !
 IF (CHI%NBEQ>0) THEN
   IF( CHI%CCH_DRY_DEP == "WES89") THEN
-    CALL UNPACK_CH_ISBA_PATCH_n(KMASK,KSIZE,I%NPATCH,JPATCH)     
+    CALL UNPACK_CH_ISBA_PATCH_n(CHI, PKCI, &
+                                KMASK,KSIZE,I%NPATCH,JPATCH)     
   END IF
 END IF
 !
 ! Unpack ISBA variables (modd_isban) for each patch:
 !
- CALL UNPACK_ISBA_PATCH_n(KMASK,KSIZE,JPATCH)
+ CALL UNPACK_ISBA_PATCH_n(AG, I, PKI, &
+                          KMASK,KSIZE,JPATCH)
 !
 !----------------------------------------------------------------------
 !

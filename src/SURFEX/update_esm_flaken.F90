@@ -1,5 +1,6 @@
 !     ############################################################
-      SUBROUTINE UPDATE_ESM_FLAKE_n(KI,KSW,PZENITH,PDIR_ALB,     &
+      SUBROUTINE UPDATE_ESM_FLAKE_n (F, &
+                                     KI,KSW,PZENITH,PDIR_ALB,     &
                                     PSCA_ALB,PEMIS,PTSRAD,PTSURF )
 !     ############################################################
 !
@@ -36,9 +37,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+!
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !                                
 USE MODI_UPDATE_RAD_FLAKE
 !
@@ -50,6 +53,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands

@@ -1,5 +1,6 @@
 !     #######################################################
-      SUBROUTINE GET_SURF_GRID_DIM_n(HGRID,ORECT,KDIM1,KDIM2)
+      SUBROUTINE GET_SURF_GRID_DIM_n (UG, &
+                                      HGRID,ORECT,KDIM1,KDIM2)
 !     #######################################################
 !
 !!**** *GET_SURF_GRID_DIM_n* get the grid mesh dimensions
@@ -28,8 +29,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,6 +42,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
  CHARACTER(LEN=10),               INTENT(OUT)   :: HGRID     ! grid type
 LOGICAL,                         INTENT(OUT)   :: ORECT     ! T if rectangular grid

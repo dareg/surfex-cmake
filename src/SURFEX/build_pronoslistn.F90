@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE BUILD_PRONOSLIST_n(KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
+      SUBROUTINE BUILD_PRONOSLIST_n (SV, &
+                                     KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
 !!    #######################################################################
 !!
 !!*** *BUILD_PRONOSLIST*
@@ -26,13 +27,15 @@
 !!
 !!    EXTERNAL
 !!    --------
+!
+USE MODD_SV_n, ONLY : SV_t
+!
 USE MODI_CH_OPEN_INPUTB
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_TYPE_EFUTIL
-USE MODD_SV_n, ONLY : SV => SV
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -46,6 +49,9 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
 INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
  CHARACTER(LEN=12), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species

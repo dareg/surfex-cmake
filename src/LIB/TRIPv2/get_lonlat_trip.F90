@@ -1,5 +1,6 @@
 !###############################################
- SUBROUTINE GET_LONLAT_TRIP(KLON,KLAT,PLON,PLAT)
+ SUBROUTINE GET_LONLAT_TRIP (TPG, &
+                             KLON,KLAT,PLON,PLAT)
 !###############################################
 !
 !!****  *GET_LONLAT_TRIP* - routine to get the TRIP longitude and latitude
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODE_TRIP_GRID
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,               INTENT(IN ) :: KLON
 INTEGER,               INTENT(IN ) :: KLAT

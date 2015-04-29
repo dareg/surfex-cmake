@@ -23,6 +23,8 @@ PROGRAM TRIP_PREP
 !!      Original    06/2008
 !!------------------------------------------------------------------
 !
+USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
 USE MODD_TRIP_LISTING
 !
 USE MODI_GOTO_TRIP
@@ -116,7 +118,8 @@ CALL INIT_TRIP_PAR
 !
 CALL READ_NAM_TRIP(NLISTING)
 !
-CALL READ_NAM_TRIP_GRID(NLISTING)
+CALL READ_NAM_TRIP_GRID(TPG, &
+                        NLISTING)
 !
 IF(GOASIS)THEN
   CALL TRIP_OASIS_READ_NAM(NLISTING)
@@ -129,7 +132,8 @@ ENDIF
 CALL PREP_TRIP_RUN(NYEAR,NMONTH,NDAY,XTIME,ILON,ILAT)
 !
 IF(GOASIS)THEN
-  CALL TRIP_OASIS_PREP(NLISTING,ILON,ILAT)
+  CALL TRIP_OASIS_PREP(TPG, &
+                       NLISTING,ILON,ILAT)
 ENDIF
 !
 ! --------------------------------------------------------------------------------------

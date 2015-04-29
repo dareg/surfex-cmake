@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_MESH_CORNER(KLUOUT,PCORNER_LAT,PCORNER_LON)
+      SUBROUTINE GET_MESH_CORNER (UG, &
+                                  KLUOUT,PCORNER_LAT,PCORNER_LON)
 !     ##############################################################
 !
 !!**** *GET_MESH_CORNER* get the grid cell corner for each (lat,lon)
@@ -28,7 +29,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODI_GET_MESH_CORNER_CONF_PROJ
 USE MODI_GET_MESH_CORNER_GAUSS
@@ -45,6 +48,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER,                         INTENT(IN)    :: KLUOUT      ! output listing
 REAL,    DIMENSION(:,:),         INTENT(OUT)   :: PCORNER_LAT ! Grid corner Latitude

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
+SUBROUTINE DIAG_IDEAL_n (DGL, &
+                         HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
 !     ###############################################################################
 !
 !!****  *DIAG_IDEAL_n * - Stores IDEAL_n diagnostics
@@ -25,8 +26,10 @@ SUBROUTINE DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
 !
 
 !
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+!
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -35,6 +38,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

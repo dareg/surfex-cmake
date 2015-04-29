@@ -33,6 +33,8 @@ SUBROUTINE INIT_TEB_GARDEN_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+!
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
@@ -118,7 +120,8 @@ IF (HINIT=='PRE') THEN
 ENDIF
 !-------------------------------------------------------------------------------
 !
- CALL ALLOCATE_TEB_GARDEN(KI, TGDO%NGROUND_LAYER)  
+ CALL ALLOCATE_TEB_GARDEN(TGD, TVG, &
+                          KI, TGDO%NGROUND_LAYER)  
 !
 !-------------------------------------------------------------------------------
 !
@@ -170,13 +173,15 @@ ELSE
   ELSE
     IDECADE = 1
   END IF
-  CALL INIT_FROM_DATA_GRDN_n(IDECADE,TVG%CPHOTO,              &
+  CALL INIT_FROM_DATA_GRDN_n(DTGD, &
+                             IDECADE,TVG%CPHOTO,              &
                                PALBNIR_SOIL=TGDP%XALBNIR_SOIL,   &
                                PALBVIS_SOIL=TGDP%XALBVIS_SOIL,   &
                                PALBUV_SOIL=TGDP%XALBUV_SOIL      )  
 END IF
 !
- CALL AVG_ALBEDO_EMIS_GARDEN(TVG%CALBEDO,                                   &
+ CALL AVG_ALBEDO_EMIS_GARDEN(TGD, &
+                             TVG%CALBEDO,                                   &
                                  TGDPE%XVEG,TGDPE%XZ0,TGDPE%XLAI,ZTG1,                     &
                                  PSW_BANDS,                              &
                                  TGDP%XALBNIR_VEG,TGDP%XALBVIS_VEG,TGDP%XALBUV_VEG,     &

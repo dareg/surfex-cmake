@@ -42,6 +42,8 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      P. Le Moigne 10/2014 Threshold on Cd when fluxes computed by FLake
 !!------------------------------------------------------------------------------
 !
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+!
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XLSTT, XKARMAN, XTT
@@ -466,7 +468,8 @@ ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_MISC_FLAKE_n(F%XT_WML,F%XT_BOT,F%XH_ML,F%XCT,F%XWATER_DEPTH)
+ CALL DIAG_MISC_FLAKE_n(DGMF, &
+                        F%XT_WML,F%XT_BOT,F%XH_ML,F%XCT,F%XWATER_DEPTH)
 !
 !-------------------------------------------------------------------------------
 !Physical properties see by the atmosphere in order to close the energy budget 

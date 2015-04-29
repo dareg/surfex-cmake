@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     #######################
-    SUBROUTINE MAKE_MASK_TOPD_TO_ISBA(KI)
+    SUBROUTINE MAKE_MASK_TOPD_TO_ISBA (UG, &
+                                       KI)
 !     #######################
 !
 !!****  *MAKE_MASK_TOPD_TO_ISBA(*  
@@ -40,6 +41,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODD_TOPODYN,       ONLY: NNCAT, NNYC, XY0, XDXT, NNXC,&
                                 XX0, XTOPD, XNUL, NLINE, NMESHT
 USE MODD_COUPLING_TOPD, ONLY: NMASKT
@@ -55,6 +59,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER, INTENT(IN) :: KI    ! Grid dimensions
 !
@@ -141,7 +148,6 @@ CONTAINS
 SUBROUTINE INIT_4POINTS(KDXM,PX1,PX2,PX3,PX4,PY1,PY2,PY3,PY4)
 !
 USE MODD_COUPLING_TOPD, ONLY: NIMAX, XXI, XYI
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID    
 USE MODE_GRIDTYPE_IGN
 !
 INTEGER, INTENT(IN) :: KDXM

@@ -1,4 +1,4 @@
-SUBROUTINE COUPLING_DST_n(  &
+SUBROUTINE COUPLING_DST_n (DST, PKI, &
        HPROGRAM,                 &!I [char] Type of ISBA version
        KI,                       &!I [nbr] number of points in patch
        KDST,                     &!I Number of dust emission variables
@@ -42,11 +42,13 @@ SUBROUTINE COUPLING_DST_n(  &
 !
 !!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !
+!
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
+!
 USE MODD_CSTS, ONLY : XRD                      ! [J/K/kg] The universal gas constant  
        
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA    ! Fraction of all vegtypes for all patches  
 
-USE MODD_DST_n, ONLY : DST => DST
 USE MODD_DST_SURF
 
 USE MODI_SURFACE_CD
@@ -62,6 +64,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 
 !INPUT
+!
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
+!
  CHARACTER(LEN=*), INTENT(IN)       :: HPROGRAM       !I Name of program
 INTEGER, INTENT(IN)                :: KI             !I Number of points in patch
 INTEGER, INTENT(IN)                :: KDST           !I Number of dust emission variables

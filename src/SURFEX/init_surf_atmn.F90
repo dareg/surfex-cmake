@@ -56,6 +56,8 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
+!
 USE MODD_SURF_ATM,       ONLY : XCO2UNCPL
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
@@ -367,14 +369,16 @@ ENDIF
 IF (.NOT. LCLIM_LAI .AND. U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
                      .AND. U%TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) DTCO%NYEAR=U%TTIME%TDATE%YEAR
  CALL INI_DATA_COVER
- CALL READ_ECO2_IRRIG(HPROGRAM)
+ CALL READ_ECO2_IRRIG(DTCO, &
+                      HPROGRAM)
 !
 !*       2.     Cover fields and grid:
 !               ---------------------
 !
 !        2.0. Get number of points on this proc
 !
- CALL GET_SIZE_FULL_n(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
+ CALL GET_SIZE_FULL_n(U, &
+                      HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
 !
 !        2.1. Read cover
 !
@@ -397,7 +401,8 @@ IF (.NOT. LZENITH) THEN
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
 !$OMP END PARALLEL
   ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
-  CALL GET_SIZES_PARALLEL(NBLOCKTOT,KI,0,ISIZE_OMP)
+  CALL GET_SIZES_PARALLEL(UG, U, &
+                          NBLOCKTOT,KI,0,ISIZE_OMP)
   CALL SUNPOS(ISIZE_OMP,KYEAR, KMONTH, KDAY, PTIME, UG%XLON, UG%XLAT, ZTSUN, ZZENITH, ZAZIM)
   DEALLOCATE(ISIZE_OMP)
 ENDIF
@@ -463,7 +468,8 @@ END IF
 !
 !*       2.5 Subgrid orography
 !
- CALL READ_SSO_n(HPROGRAM)
+ CALL READ_SSO_n(U, USS, &
+                 HPROGRAM)
 !
 !*       2.6 Orographic roughness length
 !
@@ -480,7 +486,8 @@ ALLOCATE(USS%XZ0REL  (U%NSIZE_FULL))
 !
 !*       2.7 Dummy fields
 !
- CALL READ_DUMMY_n(HPROGRAM)
+ CALL READ_DUMMY_n(DUU, U, &
+                   HPROGRAM)
 !
 !         End of IO
 !
@@ -498,7 +505,8 @@ ALLOCATE(USS%XZ0REL  (U%NSIZE_FULL))
 !
 !*       2.8 Allocations and Initialization of diagnostics
 !
-IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(HPROGRAM,KSW)
+IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(DGU, U, &
+                                             HPROGRAM,KSW)
 !
 !
 !*       Canopy fields if Beljaars et al 2004 parameterization is used
@@ -507,7 +515,8 @@ IF (USS%CROUGH=='BE04') CALL READ_SSO_CANOPY_n(HPROGRAM,HINIT)
 !
 !*       Physical fields need for ARPEGE/ALADIN climate run
 !
- CALL INIT_CPL_GCM_n(HPROGRAM,HINIT)
+ CALL INIT_CPL_GCM_n(U, &
+                     HPROGRAM,HINIT)
 !
 !         End of IO
 !

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_TEB
+SUBROUTINE PREP_VER_TEB (B, T, TOP)
 !     #################################################################################
 !
 !!****  *PREP_VER_TEB* - change in TEB variables due to altitude change
@@ -25,9 +25,11 @@ SUBROUTINE PREP_VER_TEB
 !
 
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_BEM_n, ONLY : B => BEM                          
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_PREP,   ONLY : XZS_LS, XT_CLIM_GRAD
 USE MODD_CSTS,   ONLY : XRD, XG, XP00
 !
@@ -44,6 +46,11 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 INTEGER                         :: JL        ! loop counter
 REAL, DIMENSION(:), ALLOCATABLE :: ZT0       ! estimated temperature at sea level

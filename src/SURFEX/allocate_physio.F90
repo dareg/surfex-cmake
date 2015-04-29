@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE ALLOCATE_PHYSIO(HPHOTO, HISBA, KLU, KVEGTYPE, KGROUND_LAYER, KPATCH, &
+    SUBROUTINE ALLOCATE_PHYSIO (I, &
+                                HPHOTO, HISBA, KLU, KVEGTYPE, KGROUND_LAYER, KPATCH, &
                                PVEGTYPE, PLAI, PVEG, PZ0, PEMIS, PDG, PD_ICE, &
                                PRSMIN, PGAMMA, PWRMAX_CF, PRGL, PCV, &
                                PZ0_O_Z0H, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
@@ -40,8 +41,10 @@
 !!      Original    xx/xxxx
 !!      Modified 10/2014 P. Samuelsson  MEB
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
@@ -49,6 +52,9 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !

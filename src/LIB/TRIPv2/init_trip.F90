@@ -166,7 +166,8 @@ ALLOCATE(ZLAT(KLAT))
 ZLON(:)=XUNDEF
 ZLAT(:)=XUNDEF
 !
-CALL GET_LONLAT_TRIP(KLON,KLAT,ZLON,ZLAT)
+CALL GET_LONLAT_TRIP(TPG, &
+                     KLON,KLAT,ZLON,ZLAT)
 !
 !-------------------------------------------------------------------------------
 ! * Check options
@@ -602,7 +603,8 @@ ENDIF
 ! * Initialize coupling variables
 !-------------------------------------------------------------------------------
 !
-CALL INIT_TRIP_CPL_ESM(KLON,KLAT)
+CALL INIT_TRIP_CPL_ESM(TP, TPG, &
+                       KLON,KLAT)
 !
 !-------------------------------------------------------------------------------
 !

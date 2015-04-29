@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SSO_n(HPROGRAM)
+      SUBROUTINE READ_SSO_n (U, USS, &
+                             HPROGRAM)
 !     ################################
 !
 !!****  *READ_SSO_n* - routine to read a file for
@@ -43,9 +44,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_READ_SURF
 !
@@ -58,6 +61,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

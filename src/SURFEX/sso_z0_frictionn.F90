@@ -1,5 +1,6 @@
 !     ################################################################################
-SUBROUTINE SSO_Z0_FRICTION_n(PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
+SUBROUTINE SSO_Z0_FRICTION_n (USS, &
+                              PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
 !     ################################################################################
 !
 !!****  *SSO_Z0_FRICTION_n * - Computes subgrid-scale orography friction
@@ -31,11 +32,13 @@ SUBROUTINE SSO_Z0_FRICTION_n(PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU
 !!      J. Escobar  05/2014 for bug with ifort/10, replace WHERE by IF
 !----------------------------------------------------------------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XKARMAN, XPI
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -43,6 +46,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PSEA      ! Sea fraction                          (-)
 REAL, DIMENSION(:), INTENT(IN)    :: PUREF     ! Wind forcing height                   (m)

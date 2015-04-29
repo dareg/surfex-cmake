@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_VAR_TOWN_n(HPROGRAM,KI,PQS,PZ0,PZ0H)
+      SUBROUTINE GET_VAR_TOWN_n (DGT, &
+                                 HPROGRAM,KI,PQS,PZ0,PZ0H)
 !     ###################################################
 !
 !!****  *GET_VAR_TOWN_n* - routine to get variables defined only over town
@@ -34,10 +35,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,   ONLY   : XUNDEF
 !
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points

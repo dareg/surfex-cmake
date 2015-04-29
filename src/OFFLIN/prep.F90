@@ -33,6 +33,11 @@ PROGRAM PREP
 !!
 !----------------------------------------------------------------------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODE_POS_SURF
 !
 USE MODD_SURFEX_OMP, ONLY : NWORK, NWORK2, XWORK, XWORK2, XWORK3, NBLOCKTOT, &
@@ -208,11 +213,11 @@ CALL GOTO_SURFEX(1,.TRUE.)
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
 !$OMP END PARALLEL
 !
- CALL IO_BUFF_CLEAN_n
+ CALL IO_BUFF_CLEAN_n(IOB)
  CALL INIT_PGD_SURF_ATM(CSURF_FILETYPE,'PRE',YATMFILE,YATMFILETYPE, &
                          IYEAR, IMONTH, IDAY, ZTIME            ) 
 !
- CALL IO_BUFF_CLEAN_n
+ CALL IO_BUFF_CLEAN_n(IOB)
  CALL PREP_SURF_ATM(CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 !*    3.      Preparation of SFX-OASIS grid, mask, areas files
@@ -225,7 +230,8 @@ ENDIF
 !*    4.      Store of surface physiographic fields
 !             -------------------------------------
 !
-CALL FLAG_UPDATE(.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+CALL FLAG_UPDATE(DGI, DGU, &
+                 .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !* opens the file
 IF (CSURF_FILETYPE=='FA    ') THEN
@@ -251,14 +257,14 @@ DO JNW = 1,INW
   IF (LWRITE_COORD) CALL GET_LONLAT_n(CSURF_FILETYPE)
   !
   !* writes into the file
-  CALL IO_BUFF_CLEAN_n
+  CALL IO_BUFF_CLEAN_n(IOB)
   !
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
   CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
   CALL WRITE_DIAG_SURF_ATM_n(CSURF_FILETYPE,'ALL')
   !
   LDEF = .FALSE.
-  CALL IO_BUFF_CLEAN_n  
+  CALL IO_BUFF_CLEAN_n(IOB)  
   !
 ENDDO
 !

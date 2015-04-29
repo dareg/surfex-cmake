@@ -2,8 +2,12 @@ MODULE MODI_INI_VAR_FROM_DATA
 !
 INTERFACE INI_VAR_FROM_DATA
 !
-SUBROUTINE INI_VAR_FROM_DATA_1D(HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
+SUBROUTINE INI_VAR_FROM_DATA_1D (DTI, &
+                                 HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
                                 HFTYP, PUNIF, PFIELD, OPRESENT)
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HATYPE
@@ -18,8 +22,12 @@ LOGICAL, INTENT(OUT) :: OPRESENT
 END SUBROUTINE INI_VAR_FROM_DATA_1D
 !
 !
-      SUBROUTINE INI_VAR_FROM_DATA_2D(HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
+      SUBROUTINE INI_VAR_FROM_DATA_2D (DTI, &
+                                       HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
                                       HFTYP, PUNIF, PFIELD_TIME, OPRESENT)
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 !                                         
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HATYPE
@@ -40,7 +48,8 @@ END MODULE MODI_INI_VAR_FROM_DATA
 !
 !
 !     #########
-      SUBROUTINE INI_VAR_FROM_DATA_1D(HPROGRAM, HATYPE, HNAME ,HTYPE, HFNAM, &
+      SUBROUTINE INI_VAR_FROM_DATA_1D (DTI, &
+                                 HPROGRAM, HATYPE, HNAME ,HTYPE, HFNAM, &
                                       HFTYP, PUNIF, PFIELD, OPRESENT)
 !     ##############################################################
 !
@@ -76,8 +85,10 @@ END MODULE MODI_INI_VAR_FROM_DATA
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
 USE MODI_INI_VAR_FROM_DATA_0D
 USE MODI_ABOR1_SFX
@@ -89,6 +100,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HATYPE
@@ -167,7 +181,8 @@ IF (LHOOK) &
 END SUBROUTINE INI_VAR_FROM_DATA_1D
 !
 !     #########
-      SUBROUTINE INI_VAR_FROM_DATA_2D(HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
+      SUBROUTINE INI_VAR_FROM_DATA_2D (DTI, &
+                                       HPROGRAM, HATYPE, HNAME, HTYPE, HFNAM, &
                                        HFTYP, PUNIF, PFIELD_TIME, OPRESENT)
 !     ##############################################################
 !
@@ -203,8 +218,10 @@ END SUBROUTINE INI_VAR_FROM_DATA_1D
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
 USE MODI_INI_VAR_FROM_DATA_0D
 USE MODI_PUT_IN_TIME
@@ -218,6 +235,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HATYPE

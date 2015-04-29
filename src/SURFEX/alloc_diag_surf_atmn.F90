@@ -1,5 +1,6 @@
 !     #############################################################
-      SUBROUTINE ALLOC_DIAG_SURF_ATM_n(HPROGRAM,KSW)
+      SUBROUTINE ALLOC_DIAG_SURF_ATM_n (DGU, U, &
+                                        HPROGRAM,KSW)
 !     #############################################################
 !
 !!    AUTHOR
@@ -18,10 +19,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
                                 
 
 !
@@ -34,6 +37,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                 INTENT(IN) :: KSW       ! number of short-wave spectral bands
 !

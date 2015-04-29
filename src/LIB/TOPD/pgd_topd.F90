@@ -35,6 +35,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,         ONLY : CCAT, NNCAT, XRTOP_D2, NMESHT, XDXT
 USE MODD_COUPLING_TOPD,   ONLY : LCOUPL_TOPD, NIMAX, NJMAX, &
@@ -305,7 +307,8 @@ IF (LCOUPL_TOPD) THEN
   !*      2.0     mask
   !               ----
   !***
-  CALL MAKE_MASK_TOPD_TO_ISBA(U%NDIM_FULL)
+  CALL MAKE_MASK_TOPD_TO_ISBA(UG, &
+                              U%NDIM_FULL)
   !
   ALLOCATE(NNPIX(U%NDIM_FULL))
   NNPIX(:) = NUNDEF
@@ -319,7 +322,8 @@ IF (LCOUPL_TOPD) THEN
   !
   !*        3.0 Compute Mean slope over each ISBA_MESH
 !            ----------------------------------------------------------------------
-CALL TOPD_TO_ISBA_SLOPE(U%NDIM_FULL)
+CALL TOPD_TO_ISBA_SLOPE(U, USS, &
+                        U%NDIM_FULL)
 !
 !*        4.0  Compute F and DC for each ISBA mesh
   !            ----------------------------------------------------------------------

@@ -24,6 +24,12 @@ PROGRAM TRIP_MASTER
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TRIP, ONLY : TP => TRIP
+!
+USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
+!
+USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
 USE MODD_TRIP_LISTING
 !
 USE MODN_TRIP_RUN, ONLY : LRESTART, LPRINT,   &
@@ -162,7 +168,8 @@ ENDIF
 !
 CALL GOTO_TRIP (1)
 !
-CALL READ_NAM_TRIP_GRID(NLISTING)
+CALL READ_NAM_TRIP_GRID(TPG, &
+                        NLISTING)
 !
 CALL INIT_TRIP(IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT,XTSTEP_RUN,XTSTEP_DIAG,LRESTART)
 !
@@ -204,10 +211,12 @@ CALL TRIP_RUN(GOASIS,                           &
 ! * 9. Store run mean diagnostic and write restart
 !-------------------------------------------------------------------------------
 !
-CALL TRIP_DIAG_RUN(NLISTING,ILON,ILAT,ZRUNTIME)
+CALL TRIP_DIAG_RUN(TPDG, TPG, &
+                   NLISTING,ILON,ILAT,ZRUNTIME)
 !
 IF(LRESTART)THEN
-   CALL TRIP_RESTART(NLISTING,IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT)
+   CALL TRIP_RESTART(TP, TPG, &
+                     NLISTING,IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT)
 ENDIF
 !
 ! --------------------------------------------------------------------------------------

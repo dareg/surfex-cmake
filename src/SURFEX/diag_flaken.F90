@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_FLAKE_n(HPROGRAM,                                                 &
+SUBROUTINE DIAG_FLAKE_n (DGF, F, &
+                         HPROGRAM,                                                 &
                             PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,    &
                             PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
                             PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
@@ -34,9 +35,11 @@ SUBROUTINE DIAG_FLAKE_n(HPROGRAM,                                               
 !
 
 !
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+!
 USE MODD_SURF_PAR,     ONLY : XUNDEF
-USE MODD_FLAKE_n, ONLY : F => FLAKE
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -45,6 +48,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

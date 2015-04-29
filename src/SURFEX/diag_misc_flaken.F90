@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_MISC_FLAKE_n(PT_WML,PT_BOT,PH_ML,PCT,PWATER_DEPTH)
+       SUBROUTINE DIAG_MISC_FLAKE_n (DGMF, &
+                                     PT_WML,PT_BOT,PH_ML,PCT,PWATER_DEPTH)
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-FLAKE_n * - additional diagnostics for FLake
@@ -25,7 +26,9 @@
 !
 !
 !
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+!
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+!
 USE MODD_SURF_PAR,           ONLY : XUNDEF
 !
 !
@@ -35,6 +38,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
 !
        REAL, DIMENSION(:), INTENT(IN) :: PT_WML       ! Mixed-layer temperature [K]
        REAL, DIMENSION(:), INTENT(IN) :: PT_BOT       ! Temperature at the water-bottom sediment 

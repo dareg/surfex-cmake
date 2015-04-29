@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_VAR_WATER_n(HPROGRAM,KI,HWATER,PQS,PZ0,PZ0H)
+      SUBROUTINE GET_VAR_WATER_n (DGF, DGW, &
+                                  HPROGRAM,KI,HWATER,PQS,PZ0,PZ0H)
 !     ###########################################################
 !
 !!****  *GET_VAR_WATER_n* - routine to get variables defined only over water
@@ -33,6 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
 !
@@ -44,6 +49,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
  CHARACTER(LEN=6),     INTENT(IN)     :: HWATER
@@ -74,7 +83,6 @@ CONTAINS
 !
 SUBROUTINE GET_VAR_WATFLX_n
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
 !-------------------------------------------------------------------------------
 
@@ -104,7 +112,6 @@ END SUBROUTINE GET_VAR_WATFLX_n
 !
 SUBROUTINE GET_VAR_FLAKE_n
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
 !-------------------------------------------------------------------------------
 

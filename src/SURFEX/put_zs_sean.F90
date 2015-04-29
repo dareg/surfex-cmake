@@ -1,5 +1,6 @@
 !     ######spl
-      SUBROUTINE PUT_ZS_SEA_n(HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_SEA_n (S, &
+                               HPROGRAM,KI,PZS)
 !     ###########################################
 !
 !!****  *PUT_ZS_SURF_ATM_n* - routine to modify nature oropgraphy using atmospheric
@@ -34,9 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover

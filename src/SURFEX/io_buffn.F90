@@ -1,5 +1,6 @@
 !     #######################################################
-      SUBROUTINE IO_BUFF_n(HREC,HACTION,OKNOWN)
+      SUBROUTINE IO_BUFF_n (IOB, &
+                            HREC,HACTION,OKNOWN)
 !     #######################################################
 !
 !!****  *IO_BUFF_n* - function to check if the field has already been read/written
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -43,6 +46,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! field to read or write
  CHARACTER(LEN=1),   INTENT(IN) :: HACTION  ! 'R' : file being read

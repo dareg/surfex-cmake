@@ -33,6 +33,8 @@ SUBROUTINE COUPLING_NATURE_n(HPROGRAM, HCOUPLING, PTIMEC,                       
 !!      P. Le Moigne 03/2015 tsz0 time management
 !!--------------------------------------------------------------------
 !
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -149,7 +151,8 @@ ELSE IF (U%CNATURE=='TSZ0  ') THEN
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
 ELSE IF (U%CNATURE=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                      &
+  CALL COUPLING_IDEAL_FLUX(DGL, &
+                           HPROGRAM, HCOUPLING, PTIMEC,                                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI,KSV,KSW,                                                                 &
                  PTSUN, PZENITH, PAZIM,                                                      &

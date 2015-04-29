@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_EMISSION_FLUX_n(HPROGRAM,PSIMTIME,PSFSV, PRHOA, PTSTEP, KNBTS_MAX)
+      SUBROUTINE CH_EMISSION_FLUX_n (CHE, CHU, SV, &
+                                     HPROGRAM,PSIMTIME,PSFSV, PRHOA, PTSTEP, KNBTS_MAX)
 !     ######################################################################
 !!
 !!***  *CH_EMISSION_FLUX_n* - 
@@ -29,11 +30,13 @@
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
-USE MODD_SV_n, ONLY : SV => SV
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+USE MODD_SV_n, ONLY : SV_t
+!
 USE MODD_TYPE_EFUTIL,      ONLY: EMISSVAR_T, PRONOSVAR_T
 USE MODD_CSTS,             ONLY: NDAYSEC
-USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
-USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
 !
 USE MODI_READ_SURF
 USE MODI_INIT_IO_SURF_n
@@ -57,6 +60,11 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
 REAL,               INTENT(IN)  :: PSIMTIME    ! time of simulation in sec UTC

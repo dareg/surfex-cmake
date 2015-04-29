@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_VAR_SEA_n(HPROGRAM,KI,PQS,PZ0,PZ0H)
+      SUBROUTINE GET_VAR_SEA_n (DGS, &
+                                HPROGRAM,KI,PQS,PZ0,PZ0H)
 !     ##################################################
 !
 !!****  *GET_VAR_SEA_n* - routine to get variables defined only over sea
@@ -34,10 +35,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n(KPATCH)
+SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n (I, PKI, &
+                                       KPATCH)
 !##############################################
 !
 !
@@ -36,18 +37,24 @@ SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n(KPATCH)
 !!
 !!------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
+!
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_AGRI,        ONLY : LAGRIP
 USE MODD_TREEDRAG,    ONLY : LTREEDRAG
 !
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
 !
 INTEGER, INTENT(IN)               :: KPATCH
 !

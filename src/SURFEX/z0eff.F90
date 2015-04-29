@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE Z0EFF(HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
+    SUBROUTINE Z0EFF (I, &
+                      HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
                       PPALPHAN,PZ0LITTER, PWSNOW,                               &
                       PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,PFF,PZ0_FLOOD,        &
                       PAOSIP,PAOSIM,PAOSJP,PAOSJM,PHO2IP,PHO2IM,PHO2JP,PHO2JM,  &
@@ -60,9 +61,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_CSTS,     ONLY : XPI, XG
 USE MODD_SNOW_PAR, ONLY : XZ0SN, XWCRN, XZ0HSN
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_SUBSCALE_Z0EFF
 USE MODD_SURF_ATM, ONLY : LALDZ0H
@@ -75,6 +78,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=*),   INTENT(IN)  :: HROUGH         ! type of roughness length
 LOGICAL, INTENT(IN)             :: OMEB           ! True = patch with multi-energy balance 
@@ -234,7 +240,7 @@ IF(OMEB)THEN
 !
 ! roughness length for heat over MEB vegetation part of path
   PZ0H_MEBV(:) = PZ0_MEBV(:)/PZ0_O_Z0H(:)
-! for nordic forest, z0h=z0m according to Mölder (tested in Hirlam):
+! for nordic forest, z0h=z0m according to M&#195;&#182;lder (tested in Hirlam):
 !
 ! PZ0H_MEBV(:) = PZ0_MEBV(:)   
 !

@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_SEAFLUX_n
+SUBROUTINE DEALLOC_SEAFLUX_n (CHS, SG, S)
 !     #################################################################################
 !
 !!****  *DEALLOC_SEAFLUX_n * - Deallocate all arrays
@@ -26,9 +26,11 @@ SUBROUTINE DEALLOC_SEAFLUX_n
 !!------------------------------------------------------------------
 !
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
-USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+!
+!
+USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODI_GLTOOLS_DEALLOC
 !
@@ -41,6 +43,11 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

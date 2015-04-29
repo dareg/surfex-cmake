@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEAFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                              &
+SUBROUTINE COUPLING_SEAFLUX_OROG_n (DGS, S, SSB, &
+                                    HPROGRAM, HCOUPLING, PTIMEC,                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -36,11 +37,13 @@ SUBROUTINE COUPLING_SEAFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                 
 !!                           improve forcing vertical shift
 !!-------------------------------------------------------------
 !
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
+!
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -54,6 +57,11 @@ USE MODI_COUPLING_SEAWAT_SBL_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling

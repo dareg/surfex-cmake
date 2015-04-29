@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     #####################
-      SUBROUTINE CONTROL_WATER_BUDGET_TOPD(PWGM,PWG,PDG,PMESH_SIZE,&
+      SUBROUTINE CONTROL_WATER_BUDGET_TOPD (I, U, &
+                                            PWGM,PWG,PDG,PMESH_SIZE,&
                                            PAVG_MESH_SIZE,PWSAT)
 !     #####################
 !
@@ -46,13 +47,15 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,         ONLY : XUNDEF, NUNDEF
 USE MODD_COUPLING_TOPD,    ONLY : XTOTBV_IN_MESH
 USE MODD_ISBA_PAR,         ONLY : XWGMIN
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODI_AVG_PATCH_WG
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODI_PACK_SAME_RANK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -63,6 +66,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWGM
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PWG

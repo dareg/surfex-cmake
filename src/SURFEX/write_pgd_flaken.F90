@@ -33,6 +33,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_FLAKE_n
 USE MODI_END_IO_SURF_n
@@ -62,7 +65,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_FLAKE_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_FLAKE_n(HPROGRAM)
+ CALL WRITESURF_PGD_FLAKE_n(FG, F, &
+                            HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

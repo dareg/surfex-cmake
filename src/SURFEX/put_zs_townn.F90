@@ -1,5 +1,6 @@
 !     #########################################
-      SUBROUTINE PUT_ZS_TOWN_n(HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_TOWN_n (TOP, &
+                                HPROGRAM,KI,PZS)
 !     #########################################
 !
 !!****  *PUT_ZS_SURF_ATM_n* - routine to modify town oropgraphy using atmospheric
@@ -34,9 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -48,6 +51,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover

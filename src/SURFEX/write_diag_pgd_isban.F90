@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_PGD_ISBA_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_PGD_ISBA_n (CHI, DGMI, I, &
+                                        HPROGRAM)
 !     #########################################
 !
 !!****  *WRITE_DIAG_PGD_ISBA_n* - writes the ISBA physiographic diagnostic fields
@@ -37,15 +38,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_AGRI,       ONLY : LAGRIP
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 !
 USE MODD_IO_SURF_FA, ONLY : LFANOCOMPACT, LPREP
 !
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -58,6 +61,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

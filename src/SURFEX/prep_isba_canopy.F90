@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_CANOPY()
+SUBROUTINE PREP_ISBA_CANOPY (ICP, IG)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_CANOPY* - prepares ISBA canopy fields
@@ -26,8 +26,10 @@ SUBROUTINE PREP_ISBA_CANOPY()
 !!      E. Martin   01/2012 XUNDEF fields are no more written in PREP file
 !!------------------------------------------------------------------
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+!
+!
+USE MODD_ISBA_CANOPY_n, ONLY : ISBA_CANOPY_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -38,6 +40,10 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(ISBA_CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 !
 INTEGER :: JLAYER
 !

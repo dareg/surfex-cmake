@@ -1,5 +1,6 @@
 !     ##############################################################
-      SUBROUTINE UPDATE_ESM_WATFLUX_n(KI,KSW,PZENITH,PDIR_ALB,     &
+      SUBROUTINE UPDATE_ESM_WATFLUX_n (W, &
+                                       KI,KSW,PZENITH,PDIR_ALB,     &
                                       PSCA_ALB,PEMIS,PTSRAD,PTSURF )
 !     ##############################################################
 !
@@ -37,9 +38,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !                                
 USE MODI_UPDATE_RAD_WATER
 !
@@ -51,6 +54,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands

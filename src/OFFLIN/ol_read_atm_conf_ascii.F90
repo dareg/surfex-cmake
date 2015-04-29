@@ -36,6 +36,8 @@ SUBROUTINE OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!      Modified by P. Le Moigne (04/2006): init_io_surf for nature
 !!                  with GTMSK to read dimensions.
 !==================================================================
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_COMM_READ, XTIME_NPIO_READ
@@ -153,7 +155,8 @@ PTIME  = TTIME%TIME
 !
 !*      4.    Geographical initialization
 !
- CALL GET_SIZE_FULL_n('OFFLIN ',IDIM_FULL,KNI) 
+ CALL GET_SIZE_FULL_n(U, &
+                      'OFFLIN ',IDIM_FULL,KNI) 
 !
 ALLOCATE(PLON (KNI))
 ALLOCATE(PLAT (KNI))

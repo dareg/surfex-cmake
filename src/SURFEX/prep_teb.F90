@@ -25,6 +25,10 @@ SUBROUTINE PREP_TEB(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_BEM_n, ONLY : B => BEM
+!
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+!
 USE MODI_PREP_HOR_TEB_FIELD
 USE MODI_PREP_VER_TEB
 USE MODI_PREP_OUTPUT_GRID
@@ -144,7 +148,7 @@ DO JPATCH=1,TOP%NTEB_PATCH
   !*      3.     Vertical interpolations of all variables
   !
   IF(LVERTSHIFT)THEN
-    CALL PREP_VER_TEB
+    CALL PREP_VER_TEB(B, T, TOP)
   ENDIF
   !
   !-------------------------------------------------------------------------------------
@@ -165,7 +169,7 @@ DEALLOCATE(XWSNOW_GR,XRSNOW_GR,XTSNOW_GR,XLWCSNOW_GR,XAGESNOW_GR)
 !*      5.     Preparation of canopy air variables
 !
 TOP%LCANOPY = LTEB_CANOPY
-IF (TOP%LCANOPY) CALL PREP_TEB_CANOPY()
+IF (TOP%LCANOPY) CALL PREP_TEB_CANOPY(TCP, TG)
 !
 DEALLOCATE(XZS_LS)
 !

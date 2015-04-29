@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_TEB_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_TEB_n (CHT, DGT, DGUT, &
+                                       HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_TEB_n* - writes TEB diagnostics
@@ -30,16 +31,18 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DIAG_UTCI_TEB_t
+!
 #ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
 #endif
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
 USE MODD_UTCI
-USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
                            
-USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB 
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -53,6 +56,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_UTCI_TEB_t), INTENT(INOUT) :: DGUT
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

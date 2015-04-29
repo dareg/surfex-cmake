@@ -43,6 +43,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
@@ -314,7 +316,8 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_WATFLUX_INIT_n(HPROGRAM,ILU,KSW)
+ CALL DIAG_WATFLUX_INIT_n(DGU, DGW, W, &
+                          HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------
 !

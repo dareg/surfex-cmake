@@ -498,7 +498,8 @@ ENDIF
 ! --------------------------------------------------------------------------------------
 !
 IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE_GARDEN(TPTIME,PTSTEP,ILU)  
+     CALL VEGETATION_UPDATE_GARDEN(TGDO, TGDPE, TGDP, T, TOP, TVG, &
+                                   TPTIME,PTSTEP,ILU)  
 END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Vegetation evolution for interactive LAI
@@ -549,7 +550,8 @@ END IF
 ! This way, these points are clearly flaged, and one will not try to interpret
 ! the values for those points
 !
- CALL FLAG_TEB_GARDEN_n(2)
+ CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, TGDP, T, TVG, &
+                        2)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !

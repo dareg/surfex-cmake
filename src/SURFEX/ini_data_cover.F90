@@ -2213,7 +2213,8 @@ ENDIF
 !*    9.     Arrange cover (optional nam_pgd_arrange_cover & option to use !gardens or not)
 !            ------------------------------------------------------------------------------
 !
- CALL ARRANGE_COVER(XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
+ CALL ARRANGE_COVER(DTCO, U, &
+                    XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
                     XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
 !-------------------------------------------------------------------------------
@@ -2221,7 +2222,7 @@ ENDIF
 !*   10.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
- CALL ECOCLIMAP2_LAI
+ CALL ECOCLIMAP2_LAI(DTCO)
 !
 !-------------------------------------------------------------------------------
 !

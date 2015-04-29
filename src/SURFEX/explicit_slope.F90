@@ -1,5 +1,6 @@
 !     #########################################################################
-SUBROUTINE EXPLICIT_SLOPE(PZS,PSSO_SLOPE)
+SUBROUTINE EXPLICIT_SLOPE (UG, &
+                           PZS,PSSO_SLOPE)
 !     #########################################################################
 !!    AUTHOR
 !!    ------
@@ -13,13 +14,18 @@ SUBROUTINE EXPLICIT_SLOPE(PZS,PSSO_SLOPE)
 !              ------------
 !
 
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODI_GET_GRID_DIM
 USE MODI_GET_MESH_DIM
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 
 IMPLICIT NONE
 !
 !*       0.1   DECLARATIONS OF DUMMY ARGUMENTS :
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+!
 REAL,DIMENSION(:),INTENT(IN)::PZS ! resolved model orography
 REAL,DIMENSION(:),INTENT(OUT)::PSSO_SLOPE ! resolved slope tangent
 

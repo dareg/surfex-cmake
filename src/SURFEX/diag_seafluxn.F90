@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_SEAFLUX_n(HPROGRAM,                                           &
+SUBROUTINE DIAG_SEAFLUX_n (DGS, S, &
+                           HPROGRAM,                                           &
                             PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                             PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                             PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
@@ -35,9 +36,11 @@ SUBROUTINE DIAG_SEAFLUX_n(HPROGRAM,                                           &
 !
 
 !
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -46,6 +49,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

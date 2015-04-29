@@ -1,6 +1,7 @@
 !
 !     ##########################
-      SUBROUTINE DG_DFTO3L(KI,PDG)
+      SUBROUTINE DG_DFTO3L (I, PKI, &
+                            KI,PDG)
 !     ##########################
 !
 !!
@@ -37,9 +38,11 @@
 !               ------------
 !
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
+!
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
 USE YOMHOOK   ,     ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,     ONLY : JPRB
 !
@@ -48,6 +51,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
+!
  INTEGER, INTENT(IN)               :: KI
  REAL, DIMENSION(:,:), INTENT(OUT) :: PDG
 !      

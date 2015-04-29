@@ -34,6 +34,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+!
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
@@ -80,7 +82,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
 END DO
 !     
  CALL GOTO_TEB(1)
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(HPROGRAM,HWRITE)
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(TCP, TOP, &
+                                                                       HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------
 !

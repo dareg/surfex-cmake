@@ -3,8 +3,12 @@
 !     ##################
 INTERFACE AV_PGD
 !
-      SUBROUTINE AV_PGD_2D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_2D (DTCO, &
+                            PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -18,8 +22,12 @@ INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PGD_2D
 !
-      SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD (DTCO, &
+                               PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct for each patch
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -33,8 +41,12 @@ INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PATCH_PGD
 !
-      SUBROUTINE AV_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_1D (DTCO, &
+                            PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:),     INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -48,8 +60,12 @@ INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !
 END SUBROUTINE AV_PGD_1D
 !
-      SUBROUTINE AV_PATCH_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD_1D (DTCO, &
+                                  PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
       
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct for each patch
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -85,7 +101,8 @@ END MODULE MODI_AV_PGD
 !
 !
 !     ################################################################
-      SUBROUTINE AV_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_1D (DTCO, &
+                            PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PGD* average a secondary physiographic variable from the
@@ -138,9 +155,11 @@ END MODULE MODI_AV_PGD
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER,     ONLY : XDATA_BLD_HEIGHT 
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
 !            
@@ -154,6 +173,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:),     INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:),   INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -416,7 +438,8 @@ END SUBROUTINE AV_PGD_1D
 !
 !
 !     ################################################################
-      SUBROUTINE AV_PATCH_PGD_1D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD_1D (DTCO, &
+                                  PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PATCH_PGD* average for each surface patch a secondary physiographic 
@@ -469,9 +492,11 @@ END SUBROUTINE AV_PGD_1D
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG, XDATA_LAI
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVEGTYPE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
 !
@@ -488,6 +513,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -820,7 +848,8 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_4',1,ZHOOK_HANDLE)
 END SUBROUTINE AV_PATCH_PGD_1D
 !
 !     ################################################################
-      SUBROUTINE AV_PGD_2D(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PGD_2D (DTCO, &
+                            PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PGD* average a secondary physiographic variable from the
@@ -873,8 +902,10 @@ END SUBROUTINE AV_PATCH_PGD_1D
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
 !
@@ -888,6 +919,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class
@@ -1121,7 +1155,8 @@ END SUBROUTINE AV_PGD_2D
 !
 !
 !     ################################################################
-      SUBROUTINE AV_PATCH_PGD(PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
+      SUBROUTINE AV_PATCH_PGD (DTCO, &
+                               PFIELD,PCOVER,PDATA,HSFTYPE,HATYPE,OCOVER,PDZ,KDECADE)
 !     ################################################################
 !
 !!**** *AV_PATCH_PGD* average for each surface patch a secondary physiographic 
@@ -1173,9 +1208,11 @@ END SUBROUTINE AV_PGD_2D
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG, XDATA_LAI  
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVEGTYPE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
 !
@@ -1192,6 +1229,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PCOVER  ! fraction of each cover class

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_MISC_TEB_n(HPROGRAM,KTEB_PATCH)
+      SUBROUTINE WRITE_DIAG_MISC_TEB_n (DGCT, DGMT, DGMTO, T, TOP, &
+                                        HPROGRAM,KTEB_PATCH)
 !     #################################
 !
 !!****  *WRITE_DIAG_MISC_TEB* - writes the TEB diagnostic fields
@@ -26,15 +27,17 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_END_IO_SURF_n
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
-USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
-USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB                                  
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -44,6 +47,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM   ! program calling
 INTEGER,           INTENT(IN)  :: KTEB_PATCH ! patch number being written

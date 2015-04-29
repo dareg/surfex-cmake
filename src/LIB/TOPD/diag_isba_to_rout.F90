@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     ############################
-      SUBROUTINE DIAG_ISBA_TO_ROUT(PVARC,PVARCP,PVARROUT)
+      SUBROUTINE DIAG_ISBA_TO_ROUT (UG, &
+                                    PVARC,PVARCP,PVARROUT)
 !     ############################
 !
 !!****  *DIAG_ISBA_TO_ROUT*  
@@ -42,7 +43,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODD_SURF_PAR,        ONLY: XUNDEF
 USE MODD_CSTS,            ONLY: XRHOLW
 USE MODD_TOPODYN, ONLY : XTOPD_STEP
@@ -56,6 +59,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 REAL,DIMENSION(:),INTENT(IN)        :: PVARC       ! Current time step cumulated diagnostic from SurfEx
 REAL,DIMENSION(:),INTENT(IN)        :: PVARCP      ! Previous time step cumulated diagnostic from SurfEx 

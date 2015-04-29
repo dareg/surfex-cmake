@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE GET_SSO_STDEV_n(HPROGRAM,KI,PSSO_STDEV)
+      SUBROUTINE GET_SSO_STDEV_n (USS, &
+                                  HPROGRAM,KI,PSSO_STDEV)
 !     ########################################
 !
 !!****  *GET_SSO_STDEV_n* - routine to get some surface fields
@@ -33,10 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -45,6 +48,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover

@@ -1,5 +1,6 @@
 !     ############################################################
-SUBROUTINE COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                  &
+SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
+                                HPROGRAM, HCOUPLING, PTIMEC,                                  &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -48,12 +49,14 @@ SUBROUTINE COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                     
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+!
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XPI, XLVTT, XDAY
 USE MODD_IDEAL_FLUX, ONLY : NFORCF, NFORCT, XSFTH, XSFTQ, XSFTS, XSFCO2, &
                             CUSTARTYPE, XUSTAR, XZ0, XALB, XEMIS, XTSRAD, &
                             XTIMEF, XTIMET 
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
 USE MODE_SBLS
 USE MODE_THERMOS
@@ -67,6 +70,9 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 ! 
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+!
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit

@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE MIXTL_n(PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
+    SUBROUTINE MIXTL_n (O, OR, SG, S, &
+                        PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
 !     #######################################################################
 !
 !!****  *MIXTLN (1D MODEL)*  
@@ -46,18 +47,20 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_OCEAN_n, ONLY : O => OCEAN
 USE MODD_OCEAN_GRID_n
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 ! Module containing relaxation fields
-USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -66,6 +69,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSOL   ! solar flux (W/m2)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFNSOL  ! non solar flux (W/m2)

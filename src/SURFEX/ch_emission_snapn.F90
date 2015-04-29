@@ -85,7 +85,8 @@ IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N',0,ZHOOK_HANDLE)
 !*  1.  Updates Conversion Factor (may depends on air density)
 !       ------------------------------------------------------
 !
- CALL CH_CONVERSION_FACTOR(CHN%CCONVERSION,PRHOA(:))
+ CALL CH_CONVERSION_FACTOR(CHN, &
+                           CHN%CCONVERSION,PRHOA(:))
 !
 !------------------------------------------------------------------------------
 !

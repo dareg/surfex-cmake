@@ -382,7 +382,8 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 !-------------------------------------------------------------------------------
 !  
 IF (W%LINTERPOL_TS.AND.MOD(W%TTIME%TIME,XDAY) == 0.) THEN
-   CALL INTERPOL_TS_WATER_MTH(W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TDATE%DAY,W%XTS)
+   CALL INTERPOL_TS_WATER_MTH(W, &
+                              W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TDATE%DAY,W%XTS)
 ENDIF
 !
 !-------------------------------------------------------------------------------

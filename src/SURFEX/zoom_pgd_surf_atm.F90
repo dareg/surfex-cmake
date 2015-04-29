@@ -35,6 +35,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
@@ -94,7 +96,8 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    2.      Initialisation of output grid and schemes
 !             -----------------------------------------
 !
- CALL PGD_GRID(HPROGRAM,HFILE,HFILETYPE,.TRUE.,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
+ CALL PGD_GRID(UG, U, &
+               HPROGRAM,HFILE,HFILETYPE,.TRUE.,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 !
  CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
  CALL READ_SURF(HINIFILETYPE,'SEA',   U%CSEA,   IRESP)
@@ -118,7 +121,8 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    4.      Orography
 !             ---------
 !
- CALL ZOOM_PGD_OROGRAPHY(HPROGRAM,U%XSEA,U%XWATER,HINIFILE,HINIFILETYPE)
+ CALL ZOOM_PGD_OROGRAPHY(UG, U, USS, &
+                         HPROGRAM,U%XSEA,U%XWATER,HINIFILE,HINIFILETYPE)
 !
 !_______________________________________________________________________________
 !

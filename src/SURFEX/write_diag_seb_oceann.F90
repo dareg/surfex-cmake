@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_OCEAN_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_OCEAN_n (DGO, O, &
+                                         HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_OCEAN_n* - write the oceanic diagnostic fields
@@ -27,8 +28,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_OCEAN_n, ONLY : O => OCEAN
-USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+!
+!
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+USE MODD_OCEAN_n, ONLY : OCEAN_t
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -42,6 +45,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
+TYPE(OCEAN_t), INTENT(INOUT) :: O
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

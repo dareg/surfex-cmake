@@ -1,6 +1,7 @@
 !
 !     ##########################
-      SUBROUTINE TOPD_TO_DF(KI,PWG)
+      SUBROUTINE TOPD_TO_DF (I, &
+                             KI,PWG)
 !     ##########################
 !
 !!
@@ -38,7 +39,9 @@
 !               ------------
 !
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,      ONLY : XUNDEF, NUNDEF
 USE MODD_COUPLING_TOPD, ONLY : XTOTBV_IN_MESH, XFRAC_D3
 USE MODD_ISBA_PAR,      ONLY : XWGMIN
@@ -50,6 +53,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
  INTEGER, INTENT(IN)              :: KI
  REAL, DIMENSION(:,:), INTENT(IN) :: PWG
 !      

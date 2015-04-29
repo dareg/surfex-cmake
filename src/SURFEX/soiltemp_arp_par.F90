@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SOILTEMP_ARP_PAR(HPROGRAM,OTEMP_ARP,KTEMPLAYER_ARP)
+      SUBROUTINE SOILTEMP_ARP_PAR (I, &
+                                   HPROGRAM,OTEMP_ARP,KTEMPLAYER_ARP)
 !     ##############################################################
 !
 !!**** *SOILTEMP_ARP_PAR* Impose special pseudo depth for "force-restore"
@@ -37,10 +38,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODN_SOILTEMP_ARP
 !
@@ -60,6 +63,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: OTEMP_ARP

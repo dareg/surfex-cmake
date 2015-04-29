@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE HYDRO_GLACIER (PTSTEP,PSR,PSNOWRHO,PSNOWSWE,PGLASTO,PICEFLUX)
+      SUBROUTINE HYDRO_GLACIER (I, &
+                                 PTSTEP,PSR,PSNOWRHO,PSNOWSWE,PGLASTO,PICEFLUX)
 !     ########################################################################
 !
 !!****  *HYDRO_GLACIER*  
@@ -39,8 +40,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_CSTS,     ONLY : XDAY
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX, XHGLA, XSNOWDMIN, XRHOSMAX_ES
 !
 !
@@ -50,6 +53,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 REAL, INTENT(IN)                     :: PTSTEP
 !                                       KTSTEP = timestep [s]

@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE SFX_OASIS_CHECK(KLUOUT)
+SUBROUTINE SFX_OASIS_CHECK (I, U, &
+                            KLUOUT)
 !###################################################
 !
 !!****  *SFX_OASIS_CHECK* - Definitions for exchange of coupling fields
@@ -33,9 +34,11 @@ SUBROUTINE SFX_OASIS_CHECK(KLUOUT)
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODN_SFX_OASIS, ONLY : CCALVING, LWATER
 USE MODD_SFX_OASIS, ONLY : LCPL_LAKE, LCPL_CALVING, LCPL_GW
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER, INTENT(IN) :: KLUOUT
 !

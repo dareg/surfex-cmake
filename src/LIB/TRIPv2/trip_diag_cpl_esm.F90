@@ -1,4 +1,5 @@
-SUBROUTINE TRIP_DIAG_CPL_ESM(PTSTEP_RUN,PDISCHARGE,PCALVING,PWTD,PFWTD)  
+SUBROUTINE TRIP_DIAG_CPL_ESM (TP, TPG, &
+                              PTSTEP_RUN,PDISCHARGE,PCALVING,PWTD,PFWTD)  
 !     #################################################################
 !
 !!****  *TRIP_DIAG_CPL_ESM*  
@@ -21,13 +22,15 @@ SUBROUTINE TRIP_DIAG_CPL_ESM(PTSTEP_RUN,PDISCHARGE,PCALVING,PWTD,PFWTD)
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODD_TRIP_PAR,   ONLY : XRHOLW
 !
 USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
                             LCPL_FLOOD, LCPL_CALVSEA
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
-USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -35,6 +38,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 REAL,                 INTENT(IN) :: PTSTEP_RUN !Run  timestep                   [s]
 REAL, DIMENSION(:,:), INTENT(IN) :: PDISCHARGE !Cumulated river discharges      [kg]

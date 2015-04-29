@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SFX_SEA(OCPL_SEAICE,OWATER,                       &
+      SUBROUTINE GET_SFX_SEA (S, U, W, &
+                              OCPL_SEAICE,OWATER,                       &
                               PSEA_FWSU,PSEA_FWSV,PSEA_HEAT,PSEA_SNET, &
                               PSEA_WIND,PSEA_FWSM,PSEA_EVAP,PSEA_RAIN, &
                               PSEA_SNOW,PSEA_WATF,                     &
@@ -37,13 +38,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
 USE MODI_UNPACK_SAME_RANK
 !
@@ -54,6 +57,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 LOGICAL,            INTENT(IN)  :: OCPL_SEAICE ! sea-ice / ocean key
 LOGICAL,            INTENT(IN)  :: OWATER      ! water included in sea smask

@@ -11,6 +11,8 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
 USE MODD_TRIP_PAR
 !
 USE MODI_GET_LAT_GWF
@@ -141,7 +143,8 @@ ZHDRAIN_RIV(:,:) = ZRIVERBED(:,:) + MIN(PHC_BED(:,:),ZHS(:,:))
 !
 ! * grid 
 !
-CALL GET_LAT_GWF(KLAT,ZGRID_RES,ZLAT)
+CALL GET_LAT_GWF(TPG, &
+                 KLAT,ZGRID_RES,ZLAT)
 !
 ! * Coefficients nappe/rivière
 !

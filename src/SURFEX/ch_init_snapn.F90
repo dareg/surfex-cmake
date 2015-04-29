@@ -25,6 +25,8 @@
 !
 !*       0.    DECLARATIONS
 !
+USE MODD_SV_n, ONLY : SV => SV
+!
 USE MODD_CSTS,       ONLY : XAVOGADRO, XMD
 USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_GET_LUOUT
@@ -180,12 +182,14 @@ CHN%CCONVERSION = YCONVERSION
 !
   ALLOCATE (CHN%XCONVERSION(KLU))
 ! determine the conversion factor
-  CALL CH_CONVERSION_FACTOR(CHN%CCONVERSION,PRHOA)
+  CALL CH_CONVERSION_FACTOR(CHN, &
+                            CHN%CCONVERSION,PRHOA)
 !
 !*      4.     List of emissions to be aggregated into atm. chemical species
 !              -------------------------------------------------------------
 !
-  CALL BUILD_PRONOSLIST_n(CHN%NEMIS_NBR,CHN%CEMIS_NAME,CHN%TSPRONOSLIST,KCH,ILUOUT,6)
+  CALL BUILD_PRONOSLIST_n(SV, &
+                          CHN%NEMIS_NBR,CHN%CEMIS_NAME,CHN%TSPRONOSLIST,KCH,ILUOUT,6)
 !
 !-------------------------------------------------------------------------------
 END IF

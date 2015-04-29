@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PUT_SFX_LAND(KLUOUT,OCPL_WTD,OCPL_FLOOD, &
+      SUBROUTINE PUT_SFX_LAND (I, U, &
+                               KLUOUT,OCPL_WTD,OCPL_FLOOD, &
                               PWTD,PFWTD,PFFLOOD,PPIFLOOD )  
 !     #####################################################
 !
@@ -33,11 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_PACK_SAME_RANK
 !
@@ -48,6 +51,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,           INTENT(IN)  :: KLUOUT
 LOGICAL,           INTENT(IN)  :: OCPL_WTD

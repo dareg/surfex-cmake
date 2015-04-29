@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_TEB_n(HPROGRAM,                                               &
+SUBROUTINE DIAG_TEB_n (DGT, TOP, &
+                       HPROGRAM,                                               &
                         PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,          &
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,       &
@@ -30,9 +31,11 @@ SUBROUTINE DIAG_TEB_n(HPROGRAM,                                               &
 !!------------------------------------------------------------------
 !
 !
+!
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
 ! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -41,6 +44,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

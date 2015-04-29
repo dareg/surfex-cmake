@@ -1,5 +1,5 @@
 !     #############################
-      SUBROUTINE AVERAGE_DIAG_MISC_ISBA_n
+      SUBROUTINE AVERAGE_DIAG_MISC_ISBA_n (DGMI, I)
 !     #############################
 !
 !
@@ -43,13 +43,15 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,         ONLY : XUNDEF, NUNDEF
 !
 USE MODD_CSTS,             ONLY : XRHOLW
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 !
 USE MODI_COMPUT_COLD_LAYERS_THICK
 !
@@ -57,6 +59,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER                         :: JJ        ! grid-cell loop counter
 INTEGER                         :: JPATCH    ! tile loop counter

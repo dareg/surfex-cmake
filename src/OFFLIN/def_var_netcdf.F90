@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DEF_VAR_NETCDF(KFILE_ID,HNAME,HLONG_NAME,KDIM_ID,HATT_TITLE,HATT_TEXT,KVAR_ID,KTYPE,KLEN)
+      SUBROUTINE DEF_VAR_NETCDF (DGU, &
+                                 KFILE_ID,HNAME,HLONG_NAME,KDIM_ID,HATT_TITLE,HATT_TEXT,KVAR_ID,KTYPE,KLEN)
 !
 !!
 !!    MODIFICATIONS
@@ -7,9 +8,11 @@
 !!      B. Decharme 07/2013 special case for time in netcdf output files
 !-------------------------------------------------------------------------------
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODD_IO_SURF_NC, ONLY : CFILEOUT_NC, NID_NC
 USE MODD_OL_FILEID,      ONLY : XVAR_TO_FILEOUT, XOUT
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
 !
@@ -19,6 +22,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 INCLUDE "netcdf.inc"
 
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+!
 INTEGER,               INTENT(IN) :: KFILE_ID
  CHARACTER(LEN=*),      INTENT(IN) :: HNAME
  CHARACTER(LEN=*),      INTENT(IN) :: HLONG_NAME

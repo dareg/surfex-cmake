@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_FLAKE
+SUBROUTINE PREP_VER_FLAKE (F)
 !     #################################################################################
 !
 !!****  *PREP_VER_FLAKE* - change in FLAKE var. due to altitude change
@@ -28,7 +28,9 @@ SUBROUTINE PREP_VER_FLAKE
 !
 
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE  
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODD_PREP,       ONLY : XZS_LS, XT_CLIM_GRAD
 !
@@ -40,6 +42,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZTS_LS ! large-scale water temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

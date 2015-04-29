@@ -104,7 +104,8 @@ END IF
 !* number of vertical levels
 !
 IF (.NOT. GCANOPY) THEN
-  CALL SET_SSO_LEVELS(ILU)
+  CALL SET_SSO_LEVELS(SSCP, &
+                      ILU)
 ELSE
   !
   YRECFM='SSO_CAN_LVL'

@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+!
 USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS 
 USE MODD_TEB_n, ONLY : T => TEB
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
@@ -222,7 +224,7 @@ IF (TOP%CBEM=='BEM' .AND. BOP%LAUTOSIZE) THEN
   CALL HVAC_AUTOSIZE(ILU,KLUOUT)
   !* stores the real systems characteristics in physiographic data 
   !  for further use
-  CALL STORES_HVAC_AUTOSIZE
+  CALL STORES_HVAC_AUTOSIZE(B, BOP, DTB)
 ENDIF
 !
 !-------------------------------------------------------------------------------

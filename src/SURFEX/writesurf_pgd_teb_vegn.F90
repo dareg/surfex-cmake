@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_VEG_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_VEG_n (DTGD, TGDO, TGDP, TVG, &
+                                          HPROGRAM)
 !     ###############################################
 !
 !!****  *WRITE_PGD_TEB_VEG_n* - writes ISBA fields describing urban gardens
@@ -34,10 +35,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
-USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD  
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+!
+!
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TEB_GARDEN_PGD_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
 !
 USE MODI_WRITE_SURF
 !
@@ -48,6 +51,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
+TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
+TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

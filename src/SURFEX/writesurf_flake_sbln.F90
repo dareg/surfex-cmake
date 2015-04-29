@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_FLAKE_SBL_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITESURF_FLAKE_SBL_n (F, FSB, &
+                                        HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_FLAKE_n* - writes FLAKE fields
@@ -36,8 +37,10 @@
 !
 !
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
-USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 !
 USE MODI_WRITE_SURF
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields

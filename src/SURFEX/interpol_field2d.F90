@@ -92,14 +92,16 @@ IF (PRESENT(PDEF)) ZDEF = PDEF
 !*    2.     Miscellaneous Initializations
 !            -----------------------------
 !
- CALL GET_GRID_COORD(KLUOUT,PX=ZX,PY=ZY)
+ CALL GET_GRID_COORD(UG, U, &
+                     KLUOUT,PX=ZX,PY=ZY)
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.     Interpolation with 3 nearest points
 !            -----------------------------------
 !
- CALL INTERPOL_NPTS(HPROGRAM,KLUOUT,INPTS,KCODE,ZX,ZY,PFIELD)
+ CALL INTERPOL_NPTS(UG, U, &
+                    HPROGRAM,KLUOUT,INPTS,KCODE,ZX,ZY,PFIELD)
 !
 !-------------------------------------------------------------------------------
 !

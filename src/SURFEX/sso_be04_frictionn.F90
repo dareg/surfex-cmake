@@ -148,7 +148,8 @@ ZFORC_E   (:,:) = 0.
 ZDFORC_EDE(:,:) = 0.
 !
 !* computes tendencies on wind and Tke due to subgridscale orography
- CALL SSO_BELJAARS04( INI,SSCP%NLVL,SSCP%XZ,ZSSO_STDEV,SSCP%XU,ZFORC_U,ZDFORC_UDU )
+ CALL SSO_BELJAARS04(USS, &
+                     INI,SSCP%NLVL,SSCP%XZ,ZSSO_STDEV,SSCP%XU,ZFORC_U,ZDFORC_UDU )
 !
 DO JLAYER=1,SSCP%NLVL
    DO JI=1,INI

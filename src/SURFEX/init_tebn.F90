@@ -43,6 +43,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB
+USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
+!
 USE MODD_IO_SURF_ASC,ONLY: CMASK
 USE MODD_SNOW_PAR, ONLY : XEMISSN
 !
@@ -277,7 +285,8 @@ END SELECT
 ILU = SIZE(TOP%XCOVER,1)
 !
 ALLOCATE(TOP%XTEB_PATCH(ILU,TOP%NTEB_PATCH))
- CALL CONVERT_TEB(TOP%XCOVER,TOP%XTEB_PATCH)
+ CALL CONVERT_TEB(TOP, &
+                  TOP%XCOVER,TOP%XTEB_PATCH)
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
  CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
@@ -430,7 +439,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
   !
     CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
     CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
-    IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(HPROGRAM)
+    IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(CHT, DGMTO, TGDO, TVG, &
+                                               HPROGRAM)
     CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,IBUGFIX,PCO2,PRHOA)
     ! Case of urban green roofs
     IF (TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,(JPATCH==1), &
@@ -446,7 +456,8 @@ END DO ! end of loop on TEB patches
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
  CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
- CALL READ_PGD_TEB_IRRIG_n(HPROGRAM)
+ CALL READ_PGD_TEB_IRRIG_n(TG, TIR, &
+                           HPROGRAM)
  CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -618,10 +629,12 @@ END IF
 !*      11.     Diagnostics:
 !               -----------
 !
- CALL DIAG_TEB_INIT_n(HPROGRAM,ILU,ISWB)
+ CALL DIAG_TEB_INIT_n(DGT, DGUT, TOP, &
+                      HPROGRAM,ILU,ISWB)
 DO JPATCH=1,TOP%NTEB_PATCH
   CALL GOTO_TEB(JPATCH)
-  CALL DIAG_MISC_TEB_INIT_n(HPROGRAM,ILU,ISWB)
+  CALL DIAG_MISC_TEB_INIT_n(DGCT, DGMT, DGMTO, TOP, &
+                            HPROGRAM,ILU,ISWB)
 END DO ! end of loop on patches
 !
 !-------------------------------------------------------------------------------

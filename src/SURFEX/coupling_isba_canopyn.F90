@@ -35,6 +35,8 @@ SUBROUTINE COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                          
 !!      B. Decharme  04/2013 new coupling variables
 !----------------------------------------------------------------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_CSTS,          ONLY : XCPD
 USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
@@ -270,7 +272,8 @@ IF (I%LCANOPY) THEN
     ENDDO
 !
 !* computes tendencies on wind and Tke due to canopy
-    CALL ISBA_CANOPY(KI,ICP%NLVL,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ZH,ZCANOPY_DENSITY,ICP%XU,ICP%XTKE,    &
+    CALL ISBA_CANOPY(I, &
+                     KI,ICP%NLVL,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ZH,ZCANOPY_DENSITY,ICP%XU,ICP%XTKE,    &
                     ZUW_GROUND, ZDUWDU_GROUND,                              &
                     ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE                   )
 !
@@ -282,7 +285,8 @@ IF (I%LCANOPY) THEN
   IF (I%CROUGH=='BE04') THEN
 !
 !* computes tendencies on wind and Tke due to subgridscale orography
-    CALL SSO_BELJAARS04(KI,ICP%NLVL,ICP%XZ,I%XSSO_STDEV,ICP%XU,ZFORC_U,ZDFORC_UDU )
+    CALL SSO_BELJAARS04(USS, &
+                        KI,ICP%NLVL,ICP%XZ,I%XSSO_STDEV,ICP%XU,ZFORC_U,ZDFORC_UDU )
 !
   ENDIF
 !
@@ -387,7 +391,8 @@ IF (I%LCANOPY_DRAG) THEN
   ENDDO
 
 !* computes tendencies on wind and Tke due to canopy and surface
-  CALL ISBA_CANOPY(KI,ICP%NLVL,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ZH,ZCANOPY_DENSITY,ICP%XU,ICP%XTKE,  &
+  CALL ISBA_CANOPY(I, &
+                     KI,ICP%NLVL,ICP%XZ,ICP%XZF,ICP%XDZ,ICP%XDZF,ZH,ZCANOPY_DENSITY,ICP%XU,ICP%XTKE,  &
                   ZUW_GROUND, ZDUWDU_GROUND,                            &
                   ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE                 )
 
@@ -399,7 +404,8 @@ END IF
 IF (I%CROUGH=='BE04') THEN
 !
 !* computes tendencies on wind and Tke due to subgridscale orography
-  CALL SSO_BELJAARS04(KI,ICP%NLVL,ICP%XZ,I%XSSO_STDEV,ICP%XU,ZFORC_U,ZDFORC_UDU     )
+  CALL SSO_BELJAARS04(USS, &
+                        KI,ICP%NLVL,ICP%XZ,I%XSSO_STDEV,ICP%XU,ZFORC_U,ZDFORC_UDU     )
 !
 ENDIF
 !

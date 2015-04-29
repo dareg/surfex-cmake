@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_CPL_GCM_n(HPROGRAM)
+      SUBROUTINE WRITESURF_CPL_GCM_n (U, &
+                                      HPROGRAM)
 !     #######################################
 !
 !!****  *WRITESURF_CPL_GCM_n* - routine to write physical fields into
@@ -40,8 +41,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_ATM,      ONLY : LCPL_GCM
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_WRITE_SURF
 !
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

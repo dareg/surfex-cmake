@@ -36,6 +36,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_PGD_GRID,       ONLY : NL
 !
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -362,7 +364,8 @@ ELSE
     WRITE(ILUOUT,*) '*********************************************'
 !
     ALLOCATE(ZLAT(NL))
-    CALL GET_GRID_COORD(ILUOUT,PY=ZLAT)
+    CALL GET_GRID_COORD(UG, U, &
+                        ILUOUT,PY=ZLAT)
 !
     WHERE (U%XNATURE(:)==0..AND.NSIZE(:)==0) NSIZE(:) = -1
 !

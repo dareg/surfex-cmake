@@ -1,5 +1,5 @@
 !     #######
-SUBROUTINE CLI_LAKE
+SUBROUTINE CLI_LAKE (FG, F)
 !     ###############
 !
 !!****  *CLI_LAKE* - prepares input for lake variables from climate data
@@ -25,8 +25,10 @@ SUBROUTINE CLI_LAKE
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODI_START_LAKE_OF
 !
@@ -39,6 +41,10 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 INTEGER :: JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

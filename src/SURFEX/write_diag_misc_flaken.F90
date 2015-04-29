@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_MISC_FLAKE_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_MISC_FLAKE_n (DGMF, &
+                                          HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_MISC_FLAKE* - writes the FLAKE miscellaneous diagnostic fields
@@ -27,10 +28,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,6 +42,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

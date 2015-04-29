@@ -32,6 +32,16 @@ SUBROUTINE COUPLING_INLAND_WATER_n(HPROGRAM, HCOUPLING, PTIMEC,                 
 !!      B. Decharme  04/2013 new coupling variables
 !----------------------------------------------------------------
 !
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -124,7 +134,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_INLAND_WATER_N',0,ZHOOK_HANDLE)
 IF (U%CWATER=='WATFLX') THEN
-  CALL COUPLING_WATFLUX_OROG_n(HPROGRAM, HCOUPLING, PTIMEC,                                 &
+  CALL COUPLING_WATFLUX_OROG_n(DGW, W, WSB, &
+                               HPROGRAM, HCOUPLING, PTIMEC,                                 &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
                  PTSUN, PZENITH, PZENITH2, PAZIM,                                           &
@@ -136,7 +147,8 @@ IF (U%CWATER=='WATFLX') THEN
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
                  'OK'                                                                       )  
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                     &
+  CALL COUPLING_IDEAL_FLUX(DGL, &
+                           HPROGRAM, HCOUPLING, PTIMEC,                                     &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
                  PTSUN, PZENITH, PAZIM,                                                     &
@@ -148,7 +160,8 @@ ELSE IF (U%CWATER=='FLUX  ') THEN
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
                  'OK'                                                                       )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL COUPLING_FLAKE_OROGRAPHY_n(HPROGRAM, HCOUPLING, PTIMEC,                              &
+  CALL COUPLING_FLAKE_OROGRAPHY_n(DGF, F, FSB, &
+                                  HPROGRAM, HCOUPLING, PTIMEC,                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
                  PTSUN, PZENITH, PZENITH2, PAZIM,                                           &

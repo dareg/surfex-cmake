@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE SST_UPDATE(PSST,TTIME)
+    SUBROUTINE SST_UPDATE (DTS, S, &
+                           PSST,TTIME)
 !   ###############################################################
 !!****  *SST_UPDATE*
 !!
@@ -38,9 +39,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
 USE MODI_TEMPORAL_DISTS
 USE MODI_TEMPORAL_LTS
 !
@@ -52,6 +55,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
 REAL,   DIMENSION(:), INTENT(INOUT) :: PSST    ! sst

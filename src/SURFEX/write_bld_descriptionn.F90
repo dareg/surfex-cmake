@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE WRITE_BLD_DESCRIPTION_n(HPROGRAM)
+      SUBROUTINE WRITE_BLD_DESCRIPTION_n (BDD, &
+                                          HPROGRAM)
 !     #########################
 !
 !!
@@ -34,7 +35,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+!
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 !
 USE MODI_WRITE_SURF
 USE MODI_ABOR1_SFX
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM
 !

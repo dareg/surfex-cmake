@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE TSZ0( PTIME, PTSTEP, PWFC, PTG, PWG )
+      SUBROUTINE TSZ0 (DTZ, &
+                       PTIME, PTSTEP, PWFC, PTG, PWG )
 !     ################################################################
 !
 !
@@ -45,9 +46,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
+!
 USE MODD_CSTS,       ONLY : XPI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -59,6 +62,9 @@ IMPLICIT NONE
 !
 !* general variables
 !  -----------------
+!
+TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
+!
 REAL,                   INTENT(IN)  :: PTIME      ! Current time
 REAL,                   INTENT(IN)  :: PTSTEP     ! timestep of the integration
 !

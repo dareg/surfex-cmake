@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_SBL_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITESURF_WATFLUX_SBL_n (W, WSB, &
+                                          HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_WATFLUX_n* - writes WATFLUX fields
@@ -36,8 +37,10 @@
 !
 !
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
 !
 USE MODI_WRITE_SURF
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
+TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HWRITE   ! 'PREP' : does not write SBL XUNDEF fields

@@ -1,5 +1,6 @@
 !     ###################################################################
-      SUBROUTINE UPDATE_ESM_SEAFLUX_n(KI,KSW,PZENITH,PDIR_ALB,     &
+      SUBROUTINE UPDATE_ESM_SEAFLUX_n (S, &
+                                       KI,KSW,PZENITH,PDIR_ALB,     &
                                       PSCA_ALB,PEMIS,PTSRAD,PTSURF )
 !     ##############################################################
 !
@@ -37,8 +38,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_CSTS,           ONLY : XTTS
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODI_UPDATE_RAD_SEA
 !
@@ -50,6 +53,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands

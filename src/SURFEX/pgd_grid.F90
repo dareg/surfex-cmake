@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_GRID(HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR)
+      SUBROUTINE PGD_GRID (UG, U, &
+                           HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -36,14 +37,16 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURFEX_MPI,     ONLY : NSIZE, NINDEX, NPIO, NRANK
 USE MODD_SURFEX_OMP,     ONLY : NINDX2SFX, NWORK, NWORK2, XWORK, XWORK2, XWORK3, &
                                 NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
 !
 USE MODD_PGD_GRID,       ONLY : NL, XGRID_PAR, NGRID_PAR, XMESHLENGTH
 USE MODN_PGD_GRID
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,           ONLY : XPI, XRADIUS
 !
 USE MODI_DEFAULT_GRID
@@ -67,6 +70,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
  CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! atmospheric file name

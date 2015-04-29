@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_IRRIG_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_IRRIG_n (TIR, &
+                                            HPROGRAM)
 !     ################################################
 !
 !!****  *WRITESURF_PGD_TEB_IRRIG_n* - writes TEB irrigation physiographic fields
@@ -34,7 +35,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
+!
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODI_WRITE_SURF
 !
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

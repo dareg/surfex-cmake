@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_TSZ0_PAR(HPROGRAM)
+      SUBROUTINE PGD_TSZ0_PAR (DTZ, &
+                               HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TSZ0_PAR* monitor for averaging and interpolations of sst
@@ -37,7 +38,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+!
+!
+USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -54,6 +57,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !

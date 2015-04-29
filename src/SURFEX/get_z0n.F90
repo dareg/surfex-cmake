@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_Z0_n(HPROGRAM,KI,PZ0,PZ0H)
+      SUBROUTINE GET_Z0_n (DGU, &
+                           HPROGRAM,KI,PZ0,PZ0H)
 !     #########################################
 !
 !!****  *GET_Z0_n* - routine to get roughness lengths
@@ -33,10 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points

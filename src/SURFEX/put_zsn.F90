@@ -32,6 +32,15 @@
 !!      P. Le Moigne 05/2007: write model orography over each tile
 !-------------------------------------------------------------------------------
 !      
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+!
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !*       0.    DECLARATIONS
@@ -74,7 +83,8 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_N',0,ZHOOK_HANDLE)
 !*       1. Full surface
 !           ------------
 !
- CALL PUT_ZS_SURF_ATM_n(HPROGRAM,KI,PZS)
+ CALL PUT_ZS_SURF_ATM_n(U, &
+                        HPROGRAM,KI,PZS)
 !
 !*       2. inland water
 !           ------------
@@ -117,7 +127,8 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_N:PACK_ZS',0,ZHOOK_HANDLE)
 IF (.NOT.ASSOCIATED(KMASK)) THEN
   ALLOCATE(KMASK (KSIZE))
   IF (KSIZE>0) THEN
-    CALL GET_SIZE_FULL_n(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
+    CALL GET_SIZE_FULL_n(U, &
+                         HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
     IF (YTYPE=='W') THEN
       CALL GET_1D_MASK( KSIZE, U%NSIZE_FULL, U%XWATER, KMASK)
     ELSEIF (YTYPE=='N') THEN
@@ -135,13 +146,17 @@ DO JJ=1,KSIZE
 ENDDO
 !
 IF (YTYPE=='W') THEN
-  CALL PUT_ZS_INLAND_WATER_n(HPROGRAM,KSIZE,ZP_ZS,U%CWATER)
+  CALL PUT_ZS_INLAND_WATER_n(F, W, &
+                             HPROGRAM,KSIZE,ZP_ZS,U%CWATER)
 ELSEIF (YTYPE=='N') THEN
-  CALL PUT_ZS_NATURE_n(HPROGRAM,KSIZE,ZP_ZS)
+  CALL PUT_ZS_NATURE_n(I, &
+                       HPROGRAM,KSIZE,ZP_ZS)
 ELSEIF (YTYPE=='T') THEN
-  CALL PUT_ZS_TOWN_n(HPROGRAM,KSIZE,ZP_ZS)
+  CALL PUT_ZS_TOWN_n(TOP, &
+                     HPROGRAM,KSIZE,ZP_ZS)
 ELSEIF (YTYPE=='S') THEN
-  CALL PUT_ZS_SEA_n(HPROGRAM,KSIZE,ZP_ZS)
+  CALL PUT_ZS_SEA_n(S, &
+                    HPROGRAM,KSIZE,ZP_ZS)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_N:PACK_ZS',1,ZHOOK_HANDLE)

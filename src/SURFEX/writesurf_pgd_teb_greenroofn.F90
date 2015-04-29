@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_GREENROOF_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_GREENROOF_n (TGRO, TGRP, &
+                                                HPROGRAM)
 !     ###############################################
 !
 !!****  *WRITESURF_PGD_TEB_GREENROOF_n* - writes ISBA fields describing urban greenroofs
@@ -34,8 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+!
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+!
 USE MODI_WRITE_SURF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -45,6 +48,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 

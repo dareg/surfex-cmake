@@ -38,6 +38,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
 USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, XSSQO, LSSQO, NSSO
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -223,7 +225,8 @@ IF (OZS) THEN
 !
   CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
   CALL READ_SURF(HFILETYPE,'DIM_FULL  ',IDIM_FULL,IRESP)
-  CALL GET_SIZE_FULL_n(HPROGRAM,IDIM_FULL,IZS)
+  CALL GET_SIZE_FULL_n(U, &
+                       HPROGRAM,IDIM_FULL,IZS)
   IF (IZS /= NL) THEN
     WRITE(ILUOUT,*) ' '
     WRITE(ILUOUT,*) '***********************************************************'
@@ -361,7 +364,8 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
   ENDIF     
 !   
   CALL READ_SURF(YFILETYPE,'ZS',U%XZS(:),IRESP) 
-  CALL READ_SSO_n(YFILETYPE)
+  CALL READ_SSO_n(U, USS, &
+                  YFILETYPE)
 !
   CALL END_IO_SURF_n(YFILETYPE)
 !
@@ -467,7 +471,8 @@ END SELECT
 !*   12.      Subgrid scale orography characteristics
 !             ---------------------------------------
 !
- CALL SSO(GSSO,GSSO_ANIS,PSEA)
+ CALL SSO(UG, USS, &
+          GSSO,GSSO_ANIS,PSEA)
 !
 IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GSSO(:))                 IFLAG(:) = 0
@@ -476,7 +481,8 @@ WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,USS%XSSO_DIR,  'subgrid orography direction',PDEF=0.)
 !
 IF (LEXPLICIT_SLOPE) THEN
-  CALL EXPLICIT_SLOPE(U%XZS,USS%XSSO_SLOPE) 
+  CALL EXPLICIT_SLOPE(UG, &
+                      U%XZS,USS%XSSO_SLOPE) 
 ELSEIF (LEN_TRIM(YSLOPE)==0) THEN
   CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,IFLAG,USS%XSSO_SLOPE,'subgrid orography slope',PDEF=0.)  
 END IF
@@ -504,7 +510,8 @@ END WHERE
 !*   13.      Subgrid scale orography roughness
 !             ---------------------------------
 !
- CALL SUBSCALE_AOS(GZ0EFFI,GZ0EFFJ,PSEA)
+ CALL SUBSCALE_AOS(UG, USS, &
+                   GZ0EFFI,GZ0EFFJ,PSEA)
 !
 IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GZ0EFFI(:))              IFLAG(:) = 0

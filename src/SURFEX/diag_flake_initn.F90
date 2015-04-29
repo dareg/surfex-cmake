@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_FLAKE_INIT_n(HPROGRAM,KLU,KSW)
+      SUBROUTINE DIAG_FLAKE_INIT_n (DGF, DGMF, DGU, F, &
+                                    HPROGRAM,KLU,KSW)
 !     #####################
 !
 !!****  *DIAG_FLAKE_INIT_n* - routine to initialize FLAKE diagnostic variables
@@ -35,15 +36,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_LAKE
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
 USE MODI_READ_SURF
 !
@@ -54,6 +57,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
 INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands

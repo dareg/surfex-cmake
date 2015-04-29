@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_EVAP_ISBA_n(HPHOTO,PTSTEP,KMASK,KSIZE,KPATCH,PRHOA)
+SUBROUTINE DIAG_EVAP_ISBA_n (DGEI, DGI, I, PKDI, PKI, &
+                             HPHOTO,PTSTEP,KMASK,KSIZE,KPATCH,PRHOA)
 !     ###############################################################################
 !
 !!****  *DIAG_EVAP-ISBA_n * - additional diagnostics for ISBA
@@ -30,15 +31,17 @@ SUBROUTINE DIAG_EVAP_ISBA_n(HPHOTO,PTSTEP,KMASK,KSIZE,KPATCH,PRHOA)
 !!      P Samuelsson   04/2012   MEB
 !!------------------------------------------------------------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
-USE MODD_PACK_DIAG_ISBA, ONLY : PKDI => PACK_DIAG_ISBA
 
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 !
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
+!
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
+USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -46,6 +49,13 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKDI
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
 !
  CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
 REAL,    INTENT(IN)               :: PTSTEP        ! time step

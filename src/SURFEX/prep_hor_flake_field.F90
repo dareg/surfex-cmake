@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_FLAKE_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,&
+SUBROUTINE PREP_HOR_FLAKE_FIELD (FG, F, &
+                                 HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,&
                                 HPGDFILE,HPGDFILETYPE,ONOVALUE)
 !     #################################################################################
 !
@@ -30,12 +31,14 @@ SUBROUTINE PREP_HOR_FLAKE_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,&
 !
 !
 !
+!
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+!
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_PREP,         ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, XLAT_OUT, XLON_OUT, &
                                XX_OUT, XY_OUT, CMASK
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
-USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
 !
 USE MODD_CSTS,       ONLY : XTT
 USE MODD_PREP_FLAKE, ONLY : LCLIM_LAKE
@@ -56,6 +59,10 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field

@@ -1,6 +1,7 @@
 !     #####################################################
 !      SUBROUTINE SOILEMISNO_n(PSW_FORBIO, PUA, PVA, KSV, HSV, PFLUX)
-      SUBROUTINE SOILEMISNO_n(PUA, PVA)
+      SUBROUTINE SOILEMISNO_n (GB, I, &
+                                PUA, PVA)
 !     #####################################################
 !!
 !!****** *SOILEMISNO*
@@ -49,9 +50,11 @@
 !       0. DECLARATIONS
 !          ------------
 !
+!
+USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_EMIS_NOX
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
 USE MODD_CSTS,       ONLY : XAVOGADRO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -63,6 +66,10 @@ IMPLICIT NONE
 !
 !
 !REAL, DIMENSION(:,:), INTENT(IN)              :: PSW_FORBIO
+!
+TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 REAL, DIMENSION(:), INTENT(IN)                :: PUA        ! wind module
 REAL, DIMENSION(:), INTENT(IN)                :: PVA
 !INTEGER,             INTENT(IN)               :: KSV       ! number of scalars

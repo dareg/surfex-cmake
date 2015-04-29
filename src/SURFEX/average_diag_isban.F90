@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG_ISBA_n(PHW,PHT,PSFCO2,PTRAD)
+      SUBROUTINE AVERAGE_DIAG_ISBA_n (DGEI, DGI, I, &
+                                      PHW,PHT,PSFCO2,PTRAD)
 !     #######################################
 !
 !
@@ -45,10 +46,12 @@
 !               ------------
 !
 !
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA                            
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,6 +60,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PHW    ! atmospheric level height for wind (m)
 REAL, DIMENSION(:), INTENT(IN)       :: PHT    ! atmospheric level height (m)

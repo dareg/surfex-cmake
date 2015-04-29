@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_WATFLUX_INIT_n(HPROGRAM,KLU,KSW)
+      SUBROUTINE DIAG_WATFLUX_INIT_n (DGU, DGW, W, &
+                                      HPROGRAM,KLU,KSW)
 !     #####################
 !
 !!****  *DIAG_WATFLUX_INIT_n* - routine to initialize WATFLUX diagnostic variables
@@ -34,15 +35,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
 #endif
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
 USE MODI_READ_SURF
 !
@@ -53,6 +56,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
 INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands

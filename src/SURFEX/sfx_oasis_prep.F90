@@ -118,14 +118,16 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_PREP',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(ILUOUT)
+CALL SFX_OASIS_CHECK(I, U, &
+                     ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*       2.     Get grid definition :
 !               ---------------------
 !
-CALL GET_MESH_CORNER(ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
+CALL GET_MESH_CORNER(UG, &
+                     ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 !
 ZLON(:,1)=UG%XLON(:)
 ZLAT(:,1)=UG%XLAT(:)

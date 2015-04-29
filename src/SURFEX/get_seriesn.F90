@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE GET_SERIES_n(HPROGRAM,KI,KS,PFIELD)
+      SUBROUTINE GET_SERIES_n (F, &
+                               HPROGRAM,KI,KS,PFIELD)
 !     ########################################
 !
 !!****  *GET_SERIES_n* - routine to get some surface fields
@@ -33,11 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+!
 USE MODI_GET_LUOUT
 USE MODI_UNPACK_SAME_RANK
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),       INTENT(IN)     :: HPROGRAM
 INTEGER,                INTENT(IN)     :: KI        ! Number of points

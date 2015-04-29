@@ -60,6 +60,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURFEX_OMP, ONLY : NWORK, NWORK2, XWORK, XWORK2, XWORK3, &
                             NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
 !
@@ -150,7 +154,8 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !
  CALL PGD_SURF_ATM(CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
- CALL PGD_OROG_FILTER(CSURF_FILETYPE)
+ CALL PGD_OROG_FILTER(U, &
+                      CSURF_FILETYPE)
 !
 !*    3.      writing of surface physiographic fields
 !             ---------------------------------------
@@ -171,13 +176,13 @@ DO JNW = 1,INW
   IF (LWRITE_COORD) CALL GET_LONLAT_n(CSURF_FILETYPE)
   !
   !* writing of the fields
- CALL IO_BUFF_CLEAN_n
+ CALL IO_BUFF_CLEAN_n(IOB)
   
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
   CALL WRITE_PGD_SURF_ATM_n(CSURF_FILETYPE)
   !
   LDEF = .FALSE.
-  CALL IO_BUFF_CLEAN_n  
+  CALL IO_BUFF_CLEAN_n(IOB)  
   !
 ENDDO
 !

@@ -58,6 +58,13 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+!
 USE MODD_SFX_OASIS,  ONLY : LCPL_LAND, LCPL_FLOOD, LCPL_GW, LCPL_CALVING
 !
 USE MODD_ISBA_n, ONLY : I => ISBA
@@ -190,7 +197,8 @@ ZWORK(:)   = XUNDEF
 !*       2.3    Physiographic data fields from land cover:
 !               -----------------------------------------
 !
- CALL ALLOCATE_PHYSIO(I%CPHOTO, I%CISBA, KI, NVEGTYPE, I%NGROUND_LAYER, I%NPATCH, &
+ CALL ALLOCATE_PHYSIO(I, &
+                      I%CPHOTO, I%CISBA, KI, NVEGTYPE, I%NGROUND_LAYER, I%NPATCH, &
                      I%XVEGTYPE, I%XLAI, I%XVEG, I%XZ0, I%XEMIS, I%XDG, I%XD_ICE,      &
                      I%XRSMIN, I%XGAMMA, I%XWRMAX_CF, I%XRGL, I%XCV,               &
                      I%XZ0_O_Z0H, I%XALBNIR_VEG, I%XALBVIS_VEG, I%XALBUV_VEG,    &
@@ -214,7 +222,8 @@ IDECADE2 = IDECADE
 !
 ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 IF (ISIZE_LMEB_PATCH>0)  THEN
-  CALL FIX_MEB_VEG(I%NPATCH)
+  CALL FIX_MEB_VEG(DTI, IG, I, &
+                   I%NPATCH)
 ENDIF
 !
  CALL CONVERT_PATCH_ISBA(I%CISBA,IDECADE,IDECADE2,I%XCOVER,I%LCOVER,I%CPHOTO,LAGRIP,   &
@@ -322,7 +331,8 @@ IF( I%CRUNOFF=='SGH ') THEN
 !
     WHERE(I%XCLAY(:,1)==XUNDEF.AND.I%XTI_MEAN(:)/=XUNDEF) I%XTI_MEAN(:)=XUNDEF
 !
-    CALL INIT_TOP (I%CISBA, ILUOUT, I%XPATCH, I%XRUNOFFD,          &
+    CALL INIT_TOP(I, &
+                   I%CISBA, ILUOUT, I%XPATCH, I%XRUNOFFD,          &
                    I%XWD0, I%XWSAT, I%XTI_MIN,                     &
                    I%XTI_MAX, I%XTI_MEAN, I%XTI_STD, I%XTI_SKEW,     &
                    I%XSOILWGHT, I%XTAB_FSAT, I%XTAB_WTOP,          &
@@ -553,7 +563,8 @@ ENDIF
 !*      7.     ISBA time-varying deep force-restore temperature initialization
 !              ---------------------------------------------------------------
 !
- CALL SOILTEMP_ARP_PAR(HPROGRAM,I%LTEMP_ARP,I%NTEMPLAYER_ARP)
+ CALL SOILTEMP_ARP_PAR(I, &
+                       HPROGRAM,I%LTEMP_ARP,I%NTEMPLAYER_ARP)
 !
 !-------------------------------------------------------------------------------
 !
@@ -702,7 +713,8 @@ PTSURF = ZTSURF_NAT
 !
 IF(I%NPATCH<=1) DGI%LPATCH_BUDGET=.FALSE.
 !
- CALL DIAG_ISBA_INIT_n(HPROGRAM,KI,KSW)
+ CALL DIAG_ISBA_INIT_n(CHI, DGEI, DGI, DGMI, DGU, GB, I, &
+                       HPROGRAM,KI,KSW)
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,5 +1,6 @@
 !     ######spl
-      SUBROUTINE CONVERT_TEB(PCOVER,PTEB_PATCH)
+      SUBROUTINE CONVERT_TEB (TOP, &
+                              PCOVER,PTEB_PATCH)
 !     ##############################################################
 !
 !!**** *CONVERT_TEB* initialisation of TEB parameters valid for all patches
@@ -35,9 +36,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
 USE MODI_INI_DATA_PARAM
 USE MODI_AV_PGD
@@ -51,6 +54,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
 !

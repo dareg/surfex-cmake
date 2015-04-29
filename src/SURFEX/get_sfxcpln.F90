@@ -41,6 +41,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -142,7 +147,8 @@ IF(LCPL_LAND)THEN
 !
 ! * Get land output fields
 !       
-  CALL GET_SFX_LAND(LCPL_GW,LCPL_FLOOD,LCPL_CALVING,    &
+  CALL GET_SFX_LAND(I, U, &
+                    LCPL_GW,LCPL_FLOOD,LCPL_CALVING,    &
                     ZRUNOFF,ZDRAIN,ZCALVING,ZRECHARGE,  &
                     ZPFLOOD,ZEFLOOD,ZIFLOOD             )
 !
@@ -177,7 +183,8 @@ IF(LCPL_SEA)THEN
 !
 ! * Get sea output fields
 !
-  CALL GET_SFX_SEA(LCPL_SEAICE,LWATER,                      &
+  CALL GET_SFX_SEA(S, U, W, &
+                   LCPL_SEAICE,LWATER,                      &
                    ZSEA_FWSU,ZSEA_FWSV,ZSEA_HEAT,ZSEA_SNET, &
                    ZSEA_WIND,ZSEA_FWSM,ZSEA_EVAP,ZSEA_RAIN, &
                    ZSEA_SNOW,ZSEA_WATF,                     &

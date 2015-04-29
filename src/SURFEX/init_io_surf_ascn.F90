@@ -31,6 +31,8 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NSIZE, NPIO
 !
 USE MODD_IO_SURF_ASC,ONLY: NUNIT,CFILEIN,CFILEOUT,NMASK,NLUOUT,NFULL,CMASK, &
@@ -100,7 +102,8 @@ ELSE
 !$OMP END SINGLE  
   ENDIF
   ! NFULL must be known in every case. 
-  CALL GET_DIM_FULL_n(NFULL)
+  CALL GET_DIM_FULL_n(U, &
+                      NFULL)
   CMASK = HMASK
 ENDIF
 !
@@ -114,7 +117,8 @@ ENDIF
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
- CALL GET_SIZE_FULL_n('ASCII ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n(U, &
+                      'ASCII ',NFULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU

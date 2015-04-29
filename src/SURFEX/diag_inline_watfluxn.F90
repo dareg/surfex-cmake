@@ -165,7 +165,8 @@ IF (DGW%LSURF_BUDGET.OR.DGW%LSURF_BUDGETC) THEN
 END IF
 !
 IF(DGW%LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_WATER(PTSTEP, DGW%XRN, DGW%XH, DGW%XLE, DGW%XLEI, DGW%XGFLUX,  &
+  CALL DIAG_SURF_BUDGETC_WATER(DGW, &
+                               PTSTEP, DGW%XRN, DGW%XH, DGW%XLE, DGW%XLEI, DGW%XGFLUX,  &
                                  DGW%XSWD, DGW%XSWU, DGW%XLWD, DGW%XLWU, DGW%XFMU, DGW%XFMV,&
                                  DGW%XEVAP, DGW%XSUBL                       )  
 ENDIF
@@ -197,7 +198,8 @@ ENDIF
 !
 IF (LCPL_SEA) THEN
 !
-  CALL DIAG_CPL_ESM_WATER(PTSTEP,DGW%XZON10M,DGW%XMER10M,DGW%XFMU,DGW%XFMV,  &
+  CALL DIAG_CPL_ESM_WATER(W, &
+                          PTSTEP,DGW%XZON10M,DGW%XMER10M,DGW%XFMU,DGW%XFMV,  &
                             DGW%XSWD,DGW%XSWU,DGW%XGFLUX,PSFTQ,PRAIN,      &
                             PSNOW,PLW,PTICE,PSFTH_ICE,         &
                             PSFTQ_ICE,PDIR_SW,PSCA_SW          )  

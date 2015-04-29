@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n(HPROGRAM, HCOUPLING, PTIMEC,                           &
+SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n (DGF, F, FSB, &
+                                       HPROGRAM, HCOUPLING, PTIMEC,                           &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -38,11 +39,13 @@ SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n(HPROGRAM, HCOUPLING, PTIMEC,              
 !!                           improve forcing vertical shift
 !!-------------------------------------------------------------
 !
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
+!
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00
-USE MODD_FLAKE_n, ONLY : F => FLAKE
-USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
 USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
@@ -56,6 +59,11 @@ USE MODI_COUPLING_SEAWAT_SBL_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling

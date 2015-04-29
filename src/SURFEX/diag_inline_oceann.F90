@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_OCEAN_n 
+       SUBROUTINE DIAG_INLINE_OCEAN_n (DGO, O, S) 
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_SEAFLUX_n * - computes diagnostics during SEAFLUX time-step
@@ -24,12 +24,14 @@
 !!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!------------------------------------------------------------------
 !
+!
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_OCEAN_CSTS
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_OCEAN_n, ONLY : O => OCEAN
 USE MODD_OCEAN_GRID_n
-USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 ! 
@@ -43,6 +45,11 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL, DIMENSION(SIZE(O%XSEAT(:,1)),NOCKMIN:NOCKMAX) :: ZSEADENS
 REAL, DIMENSION(SIZE(O%XSEAT(:,1))) :: ZRHO0,ZRHOCMO,ZDRHOX,ZTCMO

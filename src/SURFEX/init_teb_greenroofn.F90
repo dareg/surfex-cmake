@@ -33,6 +33,8 @@ SUBROUTINE INIT_TEB_GREENROOF_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+!
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
 !
@@ -119,7 +121,8 @@ IF (HINIT=='PRE') THEN
 ENDIF
 !-------------------------------------------------------------------------------
 !
- CALL ALLOCATE_TEB_GREENROOF(KI, TGRO%NLAYER_GR)  
+ CALL ALLOCATE_TEB_GREENROOF(TGR, TVG, &
+                             KI, TGRO%NLAYER_GR)  
 !
 !-------------------------------------------------------------------------------
 !
@@ -171,14 +174,16 @@ ELSE
   ELSE
     IDECADE = 1
   END IF
-  CALL INIT_FROM_DATA_GREENROOF_n(IDECADE,TVG%CPHOTO,              &
+  CALL INIT_FROM_DATA_GREENROOF_n(DTGR, TGRO, &
+                                  IDECADE,TVG%CPHOTO,              &
                                   PALBNIR_SOIL=TGRP%XALBNIR_SOIL,   &
                                   PALBVIS_SOIL=TGRP%XALBVIS_SOIL,   &
                                   PALBUV_SOIL=TGRP%XALBUV_SOIL      )  
 END IF
 !
 ! 
- CALL AVG_ALBEDO_EMIS_GREENROOF(TVG%CALBEDO,                                &
+ CALL AVG_ALBEDO_EMIS_GREENROOF(TGR, &
+                                TVG%CALBEDO,                                &
                                TGRPE%XVEG,TGRPE%XZ0,TGRPE%XLAI,ZTG1,                     &
                                PSW_BANDS,                              &
                                TGRP%XALBNIR_VEG,TGRP%XALBVIS_VEG,TGRP%XALBUV_VEG,     &

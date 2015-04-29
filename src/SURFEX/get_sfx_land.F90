@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SFX_LAND(OCPL_GW,OCPL_FLOOD,OCPL_CALVING,  &
+      SUBROUTINE GET_SFX_LAND (I, U, &
+                               OCPL_GW,OCPL_FLOOD,OCPL_CALVING,  &
                               PRUNOFF,PDRAIN,PCALVING,PRECHARGE, &
                               PPFLOOD,PEFLOOD,PIFLOOD            )  
 !     ###############################################################################
@@ -34,11 +35,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_UNPACK_SAME_RANK
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 LOGICAL,            INTENT(IN)  :: OCPL_GW     ! groundwater/surface key
 LOGICAL,            INTENT(IN)  :: OCPL_FLOOD   ! flood key

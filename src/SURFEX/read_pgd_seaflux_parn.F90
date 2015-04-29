@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_SEAFLUX_PAR_n(HPROGRAM,KSIZE,HDIR)
+      SUBROUTINE READ_PGD_SEAFLUX_PAR_n (DTS, SG, &
+                                         HPROGRAM,KSIZE,HDIR)
 !     ################################################
 !
 !!****  *READ_PGD_SEAFLUX_PAR_n* - reads SEAFLUX sst
@@ -34,9 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
 USE MODD_PREP,             ONLY : LINTERP
 !
 USE MODI_GET_LUOUT
@@ -50,6 +53,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER, INTENT(IN) :: KSIZE

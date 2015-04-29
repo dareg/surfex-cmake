@@ -38,6 +38,8 @@ SUBROUTINE OL_READ_ATM_CONF_NETCDF(HSURF_FILETYPE,                &
 !!      Modified by Matthieu Lafaysse 2012-11-12
 !==================================================================
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_COMM_READ, XTIME_NPIO_READ
@@ -137,7 +139,8 @@ PTIME  = TTIME%TIME
 !
 !*      5.    Geographical initialization
 !
- CALL GET_SIZE_FULL_n('OFFLIN ',IDIM_FULL,KNI) 
+ CALL GET_SIZE_FULL_n(U, &
+                      'OFFLIN ',IDIM_FULL,KNI) 
 !
 ALLOCATE(PLON(KNI))
 ALLOCATE(PLAT(KNI))

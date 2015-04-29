@@ -1,4 +1,4 @@
-SUBROUTINE COUPLING_SLT_n(  &
+SUBROUTINE COUPLING_SLT_n (SLT, &
       KI,                   &!I [nbr] number of sea points 
       KSLT,                 &!I [nbr] number of sea points 
       PWIND,                &!I Wind velocity
@@ -13,9 +13,11 @@ SUBROUTINE COUPLING_SLT_n(  &
 !-------
 ! P. Tulet
 !
+!
+USE MODD_SLT_n, ONLY : SLT_t
+!
 USE MODD_CSTS, ONLY : XAVOGADRO, XPI
 USE MODD_SLT_SURF
-USE MODD_SLT_n, ONLY : SLT => SLT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -23,6 +25,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !INPUT
+!
+TYPE(SLT_t), INTENT(INOUT) :: SLT
+!
 INTEGER, INTENT(IN)                :: KI             !I Number of sea points
 INTEGER, INTENT(IN)                :: KSLT           !I Number of sea salt emission variables
 REAL, DIMENSION(KI),      INTENT(IN)  :: PWIND       !I wind velocity

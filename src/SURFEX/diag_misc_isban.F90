@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_MISC_ISBA_n(PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
+SUBROUTINE DIAG_MISC_ISBA_n (DGMI, PKDI, &
+                             PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
                             PTIME, KSIZE, KPATCH, KMASK, PSEUIL,          &
                             PPSN, PPSNG, PPSNV, PFF, PFFG, PFFV,          &
                             PWG, PWGI, PWFC, PWWILT, PWSNOW, PRSNOW,      &
@@ -39,12 +40,14 @@ SUBROUTINE DIAG_MISC_ISBA_n(PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
 !!
 !!------------------------------------------------------------------
 !
+!
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
+!
 USE MODD_CSTS,       ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_PACK_DIAG_ISBA, ONLY : PKDI => PACK_DIAG_ISBA
 !                                     
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 USE MODD_TYPE_SNOW
 !
 USE MODI_COMPUT_COLD_LAYERS_THICK
@@ -55,6 +58,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKDI
 !
 REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
  CHARACTER(LEN=*), INTENT(IN)      :: HISBA         ! ISBA scheme

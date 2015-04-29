@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_ISBA_CANOPY_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITESURF_ISBA_CANOPY_n (ICP, I, &
+                                          HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_ISBA_n* - writes ISBA fields
@@ -36,8 +37,10 @@
 !
 !
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+!
+!
+USE MODD_ISBA_CANOPY_n, ONLY : ISBA_CANOPY_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODI_WRITE_SURF
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE ! 'PREP' : does not write SBL XUNDEF fields

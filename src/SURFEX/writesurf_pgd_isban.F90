@@ -43,6 +43,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+!
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_ISBA_n, ONLY : I => ISBA
 !
@@ -338,8 +342,10 @@ YCOMMENT='X_Y_TI_SKEW'
 ENDIF
 !
 !-------------------------------------------------------------------------------
- CALL WRITESURF_PGD_ISBA_PAR_n(HPROGRAM)
-IF (U%CNATURE=='TSZ0') CALL WRITESURF_PGD_TSZ0_PAR_n(HPROGRAM)
+ CALL WRITESURF_PGD_ISBA_PAR_n(DTI, &
+                               HPROGRAM)
+IF (U%CNATURE=='TSZ0') CALL WRITESURF_PGD_TSZ0_PAR_n(DTZ, &
+                                                     HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_ISBA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

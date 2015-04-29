@@ -1,5 +1,6 @@
 !!   ###############################
-     SUBROUTINE CH_BVOCEM_n(PSW_FORBIO,PRHOA,PSFTS)
+     SUBROUTINE CH_BVOCEM_n (CHI, GB, I, &
+                             PSW_FORBIO,PRHOA,PSFTS)
 !!   ###############################
 !!
 !!***  *BVOCEM*
@@ -25,23 +26,25 @@
 !!
 !!    EXTERNAL
 !!    --------
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODI_VEGTYPE_TO_PATCH
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
-USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG 
 USE MODD_BVOC_PAR
 USE MODD_CSTS,ONLY : XMD, XAVOGADRO
 USE MODD_CO2V_PAR
 USE MODD_SURF_PAR,ONLY:XUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_ISBA_PAR
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_TEBD, NVT_BONE, NVT_TRBE, &
                                 NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
                                 NVT_BOND, NVT_SHRB, NVT_BOGR, NVT_GRAS, & 
                                 NVT_TROG, NVT_PARK, NVT_C3, NVT_C4,     &
                                 NVT_IRR 
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
 !!
 !!
 !------------------------------------------------------------------------------
@@ -55,6 +58,11 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSW_FORBIO
 REAL, DIMENSION(:),   INTENT(IN)    :: PRHOA
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSFTS

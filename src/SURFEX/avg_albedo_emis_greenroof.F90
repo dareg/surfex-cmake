@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE AVG_ALBEDO_EMIS_GREENROOF(HALBEDO,         &
+      SUBROUTINE AVG_ALBEDO_EMIS_GREENROOF (TGR, &
+                                            HALBEDO,         &
                                  PVEG,PZ0,PLAI,PTG1,        &
                                  PSW_BANDS,                 &
                                  PALBNIR_VEG,PALBVIS_VEG,   &
@@ -50,6 +51,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
+!
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
 USE MODD_TYPE_SNOW
@@ -57,7 +61,6 @@ USE MODD_TYPE_SNOW
 USE MODD_SNOW_PAR,   ONLY : XEMISSN
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
 !
 USE MODI_ALBEDO
 USE MODI_ALBEDO_FROM_NIR_VIS
@@ -71,6 +74,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
 !
  CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 ! Albedo dependance with surface soil water content

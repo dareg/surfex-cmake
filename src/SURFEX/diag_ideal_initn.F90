@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_IDEAL_INIT_n(KLU,KSW)
+      SUBROUTINE DIAG_IDEAL_INIT_n (DGL, &
+                                    KLU,KSW)
 !     #####################
 !
 !!****  *DIAG_IDEAL_INIT_n* - routine to initialize IDEAL diagnostic variables
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
 INTEGER, INTENT(IN) :: KSW   ! spectral bands

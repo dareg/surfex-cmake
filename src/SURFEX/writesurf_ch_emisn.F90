@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_CH_EMIS_n(HPROGRAM)
+      SUBROUTINE WRITESURF_CH_EMIS_n (CHE, &
+                                      HPROGRAM)
 !     ##########################################################
 !
 !!****  *WRITESURF_CH_EMIS_n* - routine to write chemistry emission fields
@@ -19,7 +20,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
+!
 USE MODI_WRITE_SURF
 !
 !
@@ -32,6 +35,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA_SLOPE(KI)
+      SUBROUTINE TOPD_TO_ISBA_SLOPE (U, USS, &
+                                     KI)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -45,11 +46,13 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XTANB
 USE MODD_COUPLING_TOPD, ONLY : NMASKT,NNPIX
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 USE MODD_SURF_PAR,        ONLY : NUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -58,6 +61,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 !

@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE BUILD_EMISSTAB_n(HPROGRAM,KCH,HEMIS_GR_NAME, KNBTIMES,&
+       SUBROUTINE BUILD_EMISSTAB_n (CHU, &
+                                    HPROGRAM,KCH,HEMIS_GR_NAME, KNBTIMES,&
               KEMIS_GR_TIME,KOFFNDX,TPEMISS,KSIZE,KLUOUT, KVERB,PRHODREF)  
 !!    #####################################################################
 !!
@@ -27,6 +28,9 @@
 !!
 !!    EXTERNAL
 !!    --------
+!
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+!
 USE MODI_CH_OPEN_INPUTB
 USE MODI_READ_SURF
 !!
@@ -34,7 +38,6 @@ USE MODI_READ_SURF
 !!    ------------------
 USE MODD_TYPE_EFUTIL, ONLY : EMISSVAR_T
 USE MODD_CSTS,        ONLY : NDAYSEC, XMD, XAVOGADRO
-USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -48,6 +51,9 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
 !
  CHARACTER(LEN=6),                INTENT(IN) :: HPROGRAM   ! Program name
 INTEGER,                         INTENT(IN) :: KCH

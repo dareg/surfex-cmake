@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_SEAICE_n(HPROGRAM)
+      SUBROUTINE WRITESURF_SEAICE_n (S, &
+                                     HPROGRAM)
 !     #########################################
 !
 !!****  *WRITESURF_SEAICE_n* - write seaice scheme variables
@@ -36,7 +37,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_GLT_PARAM, ONLY : nl, nt
 USE MODD_TYPES_GLT,   ONLY : T_GLT
@@ -53,6 +56,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

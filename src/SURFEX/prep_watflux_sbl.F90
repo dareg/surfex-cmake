@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_WATFLUX_SBL()
+SUBROUTINE PREP_WATFLUX_SBL (WG, WSB)
 !     #################################################################################
 !
 !!****  *PREP_WATFLUX_SBL* - prepares WATFLUX SBL fields
@@ -27,8 +27,10 @@ SUBROUTINE PREP_WATFLUX_SBL()
 !!------------------------------------------------------------------
 !
 !
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
-USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
+!
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,6 +41,10 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
 !
 INTEGER :: JLAYER
 !

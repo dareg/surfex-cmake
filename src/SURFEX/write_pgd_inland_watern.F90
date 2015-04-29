@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_PGD_INLAND_WATER_n(HPROGRAM)
+      SUBROUTINE WRITE_PGD_INLAND_WATER_n (U, &
+                                           HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_INLAND_WATER_n* - routine to write pgd surface variables in their respective files
@@ -33,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_WRITE_PGD_WATFLUX_n
 USE MODI_WRITE_PGD_FLAKE_n
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

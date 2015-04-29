@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_FLAKE (PTSTEP,PRAIN,PSNOW,PSFTQ)  
+       SUBROUTINE DIAG_CPL_ESM_FLAKE (F, &
+                                       PTSTEP,PRAIN,PSNOW,PSFTQ)  
 !     #####################################################################
 !
 !!****  *DIAG_CPL_ESM_FLAKE * - Computes diagnostics over sea for 
@@ -24,7 +25,9 @@
 !!      Original    08/2009
 !!------------------------------------------------------------------
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -32,6 +35,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
 REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall

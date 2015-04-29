@@ -104,7 +104,8 @@ ZTSURF_PATCH (:,:) = I%XTG(:,1,:)
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(I%LFLOOD,I%TSNOW%SCHEME,PZENITH,PSW_BANDS,I%XVEG,I%XLAI,I%XZ0, &
+ CALL UPDATE_RAD_ISBA_n(I, &
+                        I%LFLOOD,I%TSNOW%SCHEME,PZENITH,PSW_BANDS,I%XVEG,I%XLAI,I%XZ0, &
                          I%LMEB_PATCH,I%XLAIGV,I%XGNDLITTER,I%XZ0LITTER,I%XH_VEG,      &
                          I%XALBNIR,I%XALBVIS,I%XALBUV,I%XEMIS,                       &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH           )

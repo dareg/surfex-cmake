@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_CONVERSION_FACTOR(HCONVERSION,PRHOA)
+      SUBROUTINE CH_CONVERSION_FACTOR (CHN, &
+                                       HCONVERSION,PRHOA)
 !     #######################################
 !
 !!****  *CH_CONVERSION_FACTOR
@@ -26,8 +27,10 @@
 !
 !*       0.    DECLARATIONS
 !
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+!
 USE MODD_CSTS,       ONLY : XAVOGADRO, XMD
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -37,6 +40,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
  CHARACTER(LEN=3),  INTENT(IN)  :: HCONVERSION ! Unit conversion code
 REAL, DIMENSION(:),INTENT(IN)  :: PRHOA       ! air density

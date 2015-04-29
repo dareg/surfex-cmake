@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE AVERAGE2_OROGRAPHY
+      SUBROUTINE AVERAGE2_OROGRAPHY (USS)
 !     #########################
 !
 !!**** *AVERAGE2_OROGRAPHY* computes the cover fractions
@@ -34,8 +34,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL, XSUMVAL2, LSSQO, XSSQO, NSSO
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -49,6 +51,9 @@ IMPLICIT NONE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER                  :: JL
 REAL,    DIMENSION(NSSO) :: ZMAXX

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_SEAICE_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_SEAICE_n (DGS, DGSI, DGU, S, &
+                                          HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_SEAICE_n* - write the seaice diagnostic fields
@@ -27,15 +28,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
-USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -47,6 +50,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE FLAG_TEB_GREENROOF_n(KFLAG)
+      SUBROUTINE FLAG_TEB_GREENROOF_n (TGR, TGRO, TGRPE, TGRP, T, TVG, &
+                                       KFLAG)
 !     ##################################
 !
 !!****  *FLAG_TEB_GREENROOF_n* - routine to flag ISBA variables where green roofs are
@@ -37,13 +38,15 @@
 !              ------------
 !
 !
+!
+USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+!
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
-USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
-USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -56,6 +59,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
+TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(TEB_GREENROOF_PGD_EVOL_t), INTENT(INOUT) :: TGRPE
+TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
 INTEGER, INTENT(IN) :: KFLAG ! 1 : to put physical values to run ISBA afterwards
 !                            ! 2 : to flag with XUNDEF value for points without green roof

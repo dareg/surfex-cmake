@@ -30,6 +30,8 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NPIO, NSIZE
 !
 USE MODD_SURF_PAR,   ONLY: NUNDEF
@@ -96,7 +98,8 @@ IF (HACTION == 'READ ') THEN
     NJU_SURF = NJU
    ENDIF
 ELSE
-  CALL GET_DIM_FULL_n(NFULL)
+  CALL GET_DIM_FULL_n(U, &
+                      NFULL)
 ENDIF
 !
 !
@@ -128,7 +131,8 @@ ENDIF
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
- CALL GET_SIZE_FULL_n('LFI   ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n(U, &
+                      'LFI   ',NFULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU

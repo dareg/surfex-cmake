@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE READ_PREP_FILE_DATE(HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
+SUBROUTINE READ_PREP_FILE_DATE (IOB, &
+                                HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
 !     #################################################################################
 !
 !!****  *READ_PREP_FILE_DATE* - reads the date for the surface
@@ -25,8 +26,10 @@ SUBROUTINE READ_PREP_FILE_DATE(HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
 !!------------------------------------------------------------------
 !
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODI_PREP_GRIB_GRID
 USE MODI_READ_BUFFER
@@ -42,6 +45,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file

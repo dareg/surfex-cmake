@@ -95,7 +95,8 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(ILUOUT)
+CALL SFX_OASIS_CHECK(I, U, &
+                     ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !

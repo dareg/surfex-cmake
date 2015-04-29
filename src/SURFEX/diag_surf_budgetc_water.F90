@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_WATER(PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
+       SUBROUTINE DIAG_SURF_BUDGETC_WATER (DGW, &
+                                           PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
                                             PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,&
                                             PEVAP, PSUBL                       )  
 !     #########################################################################
@@ -25,8 +26,10 @@
 !!      Original    08/2009
 !!------------------------------------------------------------------
 ! 
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
+!
+!
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -34,6 +37,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 !
 REAL,               INTENT(IN) :: PTSTEP    
 REAL, DIMENSION(:), INTENT(IN) :: PRN      ! net radiation                         (W/m2)

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE COTWOINIT_n(HPHOTO,PVEGTYPE,PGMES,PCO2,PGC,PDMAX,            &
+      SUBROUTINE COTWOINIT_n (I, &
+                              HPHOTO,PVEGTYPE,PGMES,PCO2,PGC,PDMAX,            &
                             PABC,PPOI,PANMAX,                                 &
                             PFZERO,PEPSO,PGAMM,PQDGAMM,PQDGMES,PT1GMES,       &
                             PT2GMES,PAMAX,PQDAMAX,PT1AMAX,PT2AMAX,PAH,PBH,    &
@@ -58,6 +59,9 @@
 !!
 !-------------------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_C3, NVT_C4, NVT_IRR, NVT_TROG,     &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,&
                                 NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVT_GRAS
@@ -67,7 +71,6 @@ USE MODD_CO2V_PAR,       ONLY : XTOPT, XFZERO1, XFZERO2, XFZEROTROP, XEPSO, XGAM
                                   XQDAMAX, XT1AMAX, XT2AMAX, XAH, XBH,            &
                                   XDSPOPT, XIAOPT, XAW, XBW, XMCO2, XMC, XTAU_WOOD  
 ! 
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODI_COTWO  
 !
 !*       0.     DECLARATIONS
@@ -81,6 +84,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=3),   INTENT(IN)   :: HPHOTO      ! type of photosynthesis
 REAL,DIMENSION(:,:),INTENT(IN)   :: PVEGTYPE

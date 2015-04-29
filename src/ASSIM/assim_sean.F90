@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
+SUBROUTINE ASSIM_SEA_n (SG, S, U, &
+                        HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
                        OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
@@ -26,12 +27,14 @@ SUBROUTINE ASSIM_SEA_n(HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
 !!      Trygve Aspelien, Separating IO  06/2013 
 !!--------------------------------------------------------------------
 !
+!
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_ASSIM,          ONLY : NPRINTLEV,LAESST,LEXTRAP_SEA
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
@@ -43,6 +46,11 @@ USE MODI_OI_HOR_EXTRAPOL_SURF
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI

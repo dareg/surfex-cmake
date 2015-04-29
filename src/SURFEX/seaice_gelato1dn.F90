@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE SEAICE_GELATO1D_n(HPROGRAM,PTIMEC, PTSTEP,TPGLT, PSST, PSSS, &
+    SUBROUTINE SEAICE_GELATO1D_n (S, &
+                                  HPROGRAM,PTIMEC, PTSTEP,TPGLT, PSST, PSSS, &
          PFSIC, PFSIT, PSIC, PTICE, PICE_ALB)
 !     #######################################################################
 !
@@ -50,9 +51,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_CSTS,ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_TYPES_GLT , ONLY : T_GLT
 USE MODD_GLT_PARAM , ONLY : XTSTEP=>DTT, LWG, LP1, LP2, LP3, LP4, LP5, &
                             CFSIDMP, CHSIDMP, XFSIDMPEFT, XHSIDMPEFT,  &
@@ -79,6 +82,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
 REAL,                INTENT(IN)       :: PTIMEC    ! current duration since start of the run (s)

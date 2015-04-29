@@ -1,5 +1,6 @@
 !     #################################################
-      SUBROUTINE PUT_ZS_INLAND_WATER_n(HPROGRAM,KI,PZS,HWATER)
+      SUBROUTINE PUT_ZS_INLAND_WATER_n (F, W, &
+                                        HPROGRAM,KI,PZS,HWATER)
 !     #################################################
 !
 !!****  *PUT_ZS_INLAND_WATER_n* - routine to modify inland water oropgraphy using atmospheric
@@ -34,6 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODI_GET_LUOUT
 !
 !
@@ -46,6 +51,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HWATER ! name of the scheme for inland water
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
@@ -74,7 +83,6 @@ CONTAINS
 !
 SUBROUTINE PUT_ZS_WATFLX_n
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
 !-------------------------------------------------------------------------------
 
@@ -101,7 +109,6 @@ END SUBROUTINE PUT_ZS_WATFLX_n
 !
 SUBROUTINE PUT_ZS_FLAKE_n
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
 !-------------------------------------------------------------------------------
 

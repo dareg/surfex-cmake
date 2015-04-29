@@ -1,4 +1,5 @@
-SUBROUTINE ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                     &
+SUBROUTINE ASSIM_NATURE_ISBA_OI (I, &
+                                 HPROGRAM, KI,                     &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,   PUCLS, PVCLS,   &
@@ -28,6 +29,9 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI(HPROGRAM, KI,                     &
 !   (06/2013)  : Separating IO (T. Aspelien)
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_CSTS,            ONLY : XDAY, XPI, XRHOLW, XLVTT, NDAYSEC
 USE MODD_SURF_PAR,        ONLY : XUNDEF 
 !
@@ -35,7 +39,6 @@ USE MODD_ASSIM,           ONLY : LOBSWG, NITRAD, NPRINTLEV, NECHGU, XRD1, XRSCAL
                                  XRTHR_QC, XSIGWGB, XSIGWGO, XSIGWGO_MAX, XAT2M_ISBA, &
                                  XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 
 USE YOMHOOK,              ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,             ONLY : JPRB
@@ -45,6 +48,9 @@ USE MODI_OI_BC_SOIL_MOISTURE
 USE MODI_OI_CACSTS
 !
 IMPLICIT NONE
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PRRCL

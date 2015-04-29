@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TEB_GARDEN_PAR_n(HPROGRAM)
+      SUBROUTINE READ_PGD_TEB_GARDEN_PAR_n (DTGD, TGDO, TGDP, TG, &
+                                            HPROGRAM)
 !     ################################################
 !
 !!****  *READ_PGD_TEB_GARDEN_PAR_n* - reads ISBA physiographic fields
@@ -37,6 +38,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TEB_GARDEN_PGD_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+!
 USE MODD_CSTS,              ONLY : XDAY
 USE MODD_SURF_PAR,          ONLY : XUNDEF
 USE MODD_ISBA_PAR,          ONLY : XOPTIMGRID, NOPTIMLAYER
@@ -45,10 +52,6 @@ USE MODD_DATA_COVER_PAR,    ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     &
                                      NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
                                      NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
                                      NVT_BOND, NVT_BOGR, NVT_SHRB, NVEGTYPE
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
-USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD  
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
 !
 USE MODI_READ_SURF
 USE MODI_VEG_FROM_LAI
@@ -67,6 +70,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
+TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
+TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

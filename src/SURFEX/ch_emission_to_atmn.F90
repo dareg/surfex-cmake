@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_EMISSION_TO_ATM_n(PSFSV,PRHOA)
+      SUBROUTINE CH_EMISSION_TO_ATM_n (CHN, SV, &
+                                       PSFSV,PRHOA)
 !     ######################################################################
 !!
 !!***  *CH_EMISSION_TO_ATM_n* - 
@@ -26,9 +27,11 @@
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 !!
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+USE MODD_SV_n, ONLY : SV_t
+!
 USE MODD_TYPE_EFUTIL
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
-USE MODD_SV_n, ONLY : SV => SV
 USE MODD_CHS_AEROSOL
 !
 USE MODI_CH_AER_EMISSION
@@ -45,6 +48,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
 REAL,             DIMENSION(:,:),INTENT(INOUT):: PSFSV  ! flux of     atmospheric scalar var.   (Mol/m2/s)
 REAL,             DIMENSION(:),  INTENT(IN)   :: PRHOA  ! Air density (kg/m3)

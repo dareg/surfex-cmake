@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_SEA (PTSTEP, PRN, PH, PLE, PLE_ICE, PGFLUX,&
+       SUBROUTINE DIAG_SURF_BUDGETC_SEA (DGS, &
+                                          PTSTEP, PRN, PH, PLE, PLE_ICE, PGFLUX,&
                                          PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,   &  
                                          PEVAP, PSUBL, OHANDLE_SIC,            &
                                          PRN_ICE, PH_ICE, PGFLUX_ICE,          &
@@ -28,8 +29,10 @@
 !!      S.Senesi    01/2014  Add fluxes on seaice
 !!------------------------------------------------------------------
 ! 
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
+!
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -37,6 +40,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
 !
 REAL,               INTENT(IN) :: PTSTEP    
 REAL, DIMENSION(:), INTENT(IN) :: PRN      ! net radiation                         (W/m2)

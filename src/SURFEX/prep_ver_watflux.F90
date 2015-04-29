@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_WATFLUX
+SUBROUTINE PREP_VER_WATFLUX (W)
 !     #################################################################################
 !
 !!****  *PREP_VER_WATFLUX* - change in WATFLUX var. due to altitude change
@@ -25,7 +25,9 @@ SUBROUTINE PREP_VER_WATFLUX
 !
 
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX 
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_PREP,       ONLY : XZS_LS, XT_CLIM_GRAD
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -39,6 +41,9 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZTS_LS ! large-scale water temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

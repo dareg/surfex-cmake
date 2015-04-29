@@ -459,7 +459,7 @@ ENDIF
 IF (CHS%NSLTEQ>0) THEN
   ISLT = CHS%NSV_SLTEND - CHS%NSV_SLTBEG + 1
 
-  CALL COUPLING_SLT_n(           &
+  CALL COUPLING_SLT_n(SLT, &
        SIZE(ZUSTAR,1),           & !I [nbr] number of sea point
        ISLT,                     & !I [nbr] number of sea salt variables
        ZWIND,                    & !I [m/s] wind velocity
@@ -542,7 +542,8 @@ ENDIF
 ! Daily update Sea surface salinity from monthly data
 !
 IF (S%LINTERPOL_SSS .AND. MOD(S%TTIME%TIME,XDAY) == 0.) THEN
-      CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'S',S%XSSS)
+      CALL INTERPOL_SST_MTH(S, &
+                            S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'S',S%XSSS)
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -553,17 +554,20 @@ IF (S%LHANDLE_SIC) THEN
    IF (S%LINTERPOL_SIC) THEN
       IF ((MOD(S%TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
       ! Daily update Sea Ice Cover constraint from monthly data
-         CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
+         CALL INTERPOL_SST_MTH(S, &
+                            S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
       ENDIF
    ENDIF
    IF (S%LINTERPOL_SIT) THEN
       IF ((MOD(S%TTIME%TIME,XDAY) == 0.) .OR. (PTIMEC <= PTSTEP )) THEN
       ! Daily update Sea Ice Thickness constraint from monthly data
-         CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
+         CALL INTERPOL_SST_MTH(S, &
+                            S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
       ENDIF
    ENDIF
    IF (S%CSEAICE_SCHEME=='GELATO') THEN
-      CALL SEAICE_GELATO1D_n(HPROGRAM,PTIMEC, PTSTEP, S%TGLT, S%XSST, S%XSSS, S%XFSIC, S%XFSIT, S%XSIC, S%XTICE, S%XICE_ALB)
+      CALL SEAICE_GELATO1D_n(S, &
+                             HPROGRAM,PTIMEC, PTSTEP, S%TGLT, S%XSST, S%XSSS, S%XFSIC, S%XFSIT, S%XSIC, S%XTICE, S%XICE_ALB)
    ENDIF
    ! Update of cell-averaged albedo, emissivity and radiative 
    ! temperature is done later
@@ -577,7 +581,8 @@ IF (O%LMERCATOR) THEN
    !
    ! Update SST reference profile for relaxation purpose
    IF (DTS%LSST_DATA) THEN
-      CALL SST_UPDATE(OR%XSEAT_REL(:,NOCKMIN+1), S%TTIME)
+      CALL SST_UPDATE(DTS, S, &
+                      OR%XSEAT_REL(:,NOCKMIN+1), S%TTIME)
       !
       ! Convert to degree C for ocean model
       OR%XSEAT_REL(:,NOCKMIN+1) = OR%XSEAT_REL(:,NOCKMIN+1) - XTT
@@ -591,13 +596,15 @@ ELSEIF(DTS%LSST_DATA)THEN
    !
    ! Imposed SST 
    !
-   CALL SST_UPDATE(S%XSST, S%TTIME)
+   CALL SST_UPDATE(DTS, S, &
+                      S%XSST, S%TTIME)
    !
 ELSEIF (S%LINTERPOL_SST.AND.MOD(S%TTIME%TIME,XDAY) == 0.) THEN
    !
    ! Imposed monthly SST 
    !
-   CALL INTERPOL_SST_MTH(S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'T',S%XSST)
+   CALL INTERPOL_SST_MTH(S, &
+                            S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'T',S%XSST)
    !
 ENDIF
 !

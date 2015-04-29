@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_SSO_n(HPROGRAM)
+      SUBROUTINE WRITESURF_SSO_n (USS, &
+                                  HPROGRAM)
 !     #################################
 !
 !!****  *WRITESURF_SSO_n* - writes orographic fields
@@ -29,7 +30,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_WRITE_SURF
 !
@@ -41,6 +44,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_SNOW_BUFFER(HPROGRAM,HSURF,KLUOUT,KLAYER,PFIELD)
+SUBROUTINE PREP_SNOW_BUFFER (IG, U, &
+                             HPROGRAM,HSURF,KLUOUT,KLAYER,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_SNOW_BUFFER* - prepares snow field from operational BUFFER
@@ -23,6 +24,10 @@ SUBROUTINE PREP_SNOW_BUFFER(HPROGRAM,HSURF,KLUOUT,KLAYER,PFIELD)
 !!      Original    03/2005
 !!------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODE_SNOW3L
 !
 USE MODE_READ_BUFFER
@@ -38,7 +43,6 @@ USE MODI_PACK_SAME_RANK
 USE MODI_UNPACK_SAME_RANK
 USE MODI_ABOR1_SFX
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_PREP_ISBA,      ONLY : LEXTRAP_SN
 USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW
@@ -47,7 +51,6 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_GRID_BUFFER,    ONLY : NNI
 USE MODD_SNOW_PAR,       ONLY : XANSMIN, XANSMAX, XRHOSMAX
 USE MODD_CSTS,           ONLY : XTT
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -56,6 +59,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=10),  INTENT(IN)   :: HSURF     ! type of field

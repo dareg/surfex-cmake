@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE DEEPSOIL_UPDATE(KMONTH)
+    SUBROUTINE DEEPSOIL_UPDATE (I, &
+                                KMONTH)
 !   ###############################################################
 !!****  *DEEPSOIL_UPDATE*
 !!
@@ -38,8 +39,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DEEPSOIL, ONLY : XTDEEP_CLI, XGAMMAT_CLI
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,              INTENT(IN)    :: KMONTH   ! current month
 !

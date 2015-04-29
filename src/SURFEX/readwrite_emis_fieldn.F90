@@ -1,10 +1,14 @@
 !     #########
-      SUBROUTINE READWRITE_EMIS_FIELD_n(HPROGRAM)
+      SUBROUTINE READWRITE_EMIS_FIELD_n (U, &
+                                         HPROGRAM)
 !     #######################################################################
 !
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_GET_LUOUT
 USE MODI_INIT_IO_SURF_n
@@ -12,7 +16,6 @@ USE MODI_END_IO_SURF_n
 USE MODI_READ_SURF
 USE MODI_WRITE_SURF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -21,6 +24,9 @@ USE PARKIND1  ,ONLY : JPRB
 USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6) :: HPROGRAM
 !

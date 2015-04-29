@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_TEB_n
+SUBROUTINE DEALLOC_TEB_n (B, BOP, CHT, DTT, TG, T, TOP, TPN)
 !     #################################################################################
 !
 !!****  *DEALLOC_TEB_n * - Deallocate all arrays
@@ -27,18 +27,20 @@ SUBROUTINE DEALLOC_TEB_n
 !
 
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_TEB_PANEL_n, ONLY : TPN => TEB_PANEL
 
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
 !
-USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
 !
-USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
-USE MODD_BEM_n, ONLY : B => BEM
 !
+!
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
+USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -53,6 +55,16 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------------
 !
 
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
+TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('DEALLOC_TEB_N',0,ZHOOK_HANDLE)

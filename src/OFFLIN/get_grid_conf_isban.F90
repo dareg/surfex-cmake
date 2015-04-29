@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_GRID_CONF_ISBA_n(PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
+      SUBROUTINE GET_GRID_CONF_ISBA_n (IG, &
+                                       PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
 !     #########################################
 !
 !!****  *GET_GRID_CONF_ISBA_n* - routine to get the ISBA grid configuration
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+!
 USE MODE_GRIDTYPE_LONLAT_REG
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID 
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 !
 REAL,               INTENT(OUT) :: PLONMIN
 REAL,               INTENT(OUT) :: PLONMAX

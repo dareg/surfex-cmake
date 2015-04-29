@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE IRRIGATION_UPDATE(PIRRIG, PTSTEP, KMONTH, KDAY,   &
+      SUBROUTINE IRRIGATION_UPDATE (AG, &
+                                    PIRRIG, PTSTEP, KMONTH, KDAY,   &
        PTIME,TSEEDMONTH,TSEEDDAY,TREAPMONTH,TREAPDAY) 
 !     ####################################################################
 !
@@ -34,13 +35,18 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_AGRI_n, ONLY : AGRI_t
+!
 USE MODD_AGRI,   ONLY   : JPSTAGE, XTHRESHOLD
-USE MODD_AGRI_n, ONLY : AG => AGRI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+TYPE(AGRI_t), INTENT(INOUT) :: AG
+!
 INTEGER, DIMENSION(:,:), INTENT(IN) :: TSEEDMONTH
 INTEGER, DIMENSION(:,:), INTENT(IN) :: TSEEDDAY
 INTEGER, DIMENSION(:,:), INTENT(IN) :: TREAPMONTH

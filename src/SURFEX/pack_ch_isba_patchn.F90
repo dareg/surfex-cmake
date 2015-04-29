@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PACK_CH_ISBA_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH)
+SUBROUTINE PACK_CH_ISBA_PATCH_n (CHI, PKCI, &
+                                 KMASK,KSIZE,KNPATCH,KPATCH)
 !##############################################
 !
 !
@@ -24,13 +25,19 @@ SUBROUTINE PACK_CH_ISBA_PATCH_n(KMASK,KSIZE,KNPATCH,KPATCH)
 !!      Original    01/2004
 !!------------------------------------------------------------------
 !
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
-USE MODD_PACK_CH_ISBA, ONLY : PKCI => PACK_CH_ISBA
+!
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_PACK_CH_ISBA, ONLY : PACK_CH_ISBA_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(PACK_CH_ISBA_t), INTENT(INOUT) :: PKCI
 !
 INTEGER, INTENT(IN)               :: KSIZE, KPATCH, KNPATCH
 !

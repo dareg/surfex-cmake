@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_ISBA
+SUBROUTINE PREP_VER_ISBA (I)
 !     #################################################################################
 !
 !!****  *PREP_VER_ISBA* - change in ISBA fields due to altitude change
@@ -27,7 +27,9 @@ SUBROUTINE PREP_VER_ISBA
 !
 
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PREP,           ONLY : XZS_LS, XT_CLIM_GRAD
@@ -47,6 +49,9 @@ IMPLICIT NONE
 !
 !
 !*      0.2    declarations of local variables
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER                         :: JL        ! loop counter on layers
 INTEGER                         :: JP        ! loop counter on patches
