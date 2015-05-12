@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_INLAND_WATER_n (I, U, WG, W, &
+SUBROUTINE ASSIM_INLAND_WATER_n (I, U, W, &
                                  HPROGRAM,KI,PTS_IN,PITM,HTEST, &
                                 OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
@@ -30,7 +30,6 @@ SUBROUTINE ASSIM_INLAND_WATER_n (I, U, WG, W, &
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -49,7 +48,6 @@ IMPLICIT NONE
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes

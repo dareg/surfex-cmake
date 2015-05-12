@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE SFX_OASIS_DEF_OL(HPROGRAM,HALG_MPI)
+SUBROUTINE SFX_OASIS_DEF_OL (U, &
+                             HPROGRAM,HALG_MPI)
 !#############################################
 !
 !!****  *SFX_OASIS_DEF_OL* - Offline driver for definitions for exchange of coupling fields
@@ -33,11 +34,13 @@ SUBROUTINE SFX_OASIS_DEF_OL(HPROGRAM,HALG_MPI)
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_SURFEX_MPI,     ONLY : NPROC, NRANK, NINDEX
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_SFX_OASIS_DEFINE
 !
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
 CHARACTER(LEN=4),   INTENT(IN)  :: HALG_MPI   ! decomposition algorithm

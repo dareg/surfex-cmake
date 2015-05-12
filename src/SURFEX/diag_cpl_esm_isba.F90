@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_CPL_ESM_ISBA (IG, I, &
+      SUBROUTINE DIAG_CPL_ESM_ISBA (I, &
                                     PTSTEP,PCPL_DRAIN,PCPL_RUNOFF,PCPL_EFLOOD, &
                                      PCPL_PFLOOD,PCPL_IFLOOD,PCPL_ICEFLUX         )  
 !     #####################################################################
@@ -41,7 +41,6 @@
 !
 !
 !
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -52,7 +51,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 REAL, INTENT(IN)                   :: PTSTEP

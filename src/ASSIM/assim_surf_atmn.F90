@@ -31,16 +31,13 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                       
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_TEB_n, ONLY : T => TEB
 !
 USE MODD_ASSIM,          ONLY : XAT2M_ISBA, XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, XAT2M_TEB, LAROME
 !
@@ -246,7 +243,7 @@ IF (KTILE==1) THEN
   WRITE(*,*) '*      ASSIMILATIONS FOR SEA POINTS         *'
   WRITE(*,*) '*********************************************'
  
-  CALL ASSIM_SEA_n(SG, S, U, &
+  CALL ASSIM_SEA_n(S, U, &
                     HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST,&
                     OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
@@ -255,7 +252,7 @@ ELSEIF (KTILE==2) THEN
   WRITE(*,*) '*********************************************'  
   WRITE(*,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
   WRITE(*,*) '*********************************************'
-  CALL ASSIM_INLAND_WATER_n(I, U, WG, W, &
+  CALL ASSIM_INLAND_WATER_n(I, U, W, &
                             HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
                             OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 

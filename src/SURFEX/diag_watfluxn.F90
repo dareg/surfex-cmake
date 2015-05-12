@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_WATFLUX_n (DGW, W, &
+SUBROUTINE DIAG_WATFLUX_n (DGW, &
                            HPROGRAM,                                               &
                             PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,    &
                             PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
@@ -37,7 +37,6 @@ SUBROUTINE DIAG_WATFLUX_n (DGW, W, &
 !
 !
 USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !                                
@@ -51,7 +50,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

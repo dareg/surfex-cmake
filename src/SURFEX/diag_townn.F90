@@ -37,7 +37,6 @@ SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
 
 !
 USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
 USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
@@ -114,7 +113,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
 IF (U%CTOWN=='TEB   ') THEN
-  CALL DIAG_TEB_n(DGT, TOP, &
+  CALL DIAG_TEB_n(DGT, &
                   HPROGRAM,                                           &
                     PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,      &
                     PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&

@@ -322,7 +322,7 @@ IF (LCOUPL_TOPD) THEN
   !
   !*        3.0 Compute Mean slope over each ISBA_MESH
 !            ----------------------------------------------------------------------
-CALL TOPD_TO_ISBA_SLOPE(U, USS, &
+CALL TOPD_TO_ISBA_SLOPE(USS, &
                         U%NDIM_FULL)
 !
 !*        4.0  Compute F and DC for each ISBA mesh

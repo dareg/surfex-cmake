@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_TEB_n (DGT, TOP, &
+SUBROUTINE DIAG_TEB_n (DGT, &
                        HPROGRAM,                                               &
                         PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,          &
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
@@ -33,7 +33,6 @@ SUBROUTINE DIAG_TEB_n (DGT, TOP, &
 !
 !
 USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
-USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 ! 
@@ -47,7 +46,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
-TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

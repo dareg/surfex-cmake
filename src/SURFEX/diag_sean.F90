@@ -36,7 +36,6 @@ SUBROUTINE DIAG_SEA_n(HPROGRAM,                                           &
 
 !
 USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
@@ -111,7 +110,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SEA_N',0,ZHOOK_HANDLE)
 IF (U%CSEA=='SEAFLX') THEN
-  CALL DIAG_SEAFLUX_n(DGS, S, &
+  CALL DIAG_SEAFLUX_n(DGS, &
                       HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&

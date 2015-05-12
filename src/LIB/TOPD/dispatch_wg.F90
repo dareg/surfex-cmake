@@ -1,6 +1,6 @@
 !
 !     ##########################
-      SUBROUTINE DISPATCH_WG (I, PKI, &
+      SUBROUTINE DISPATCH_WG (I, &
                               KI,PWG,PWGI,PDG)
 !     ##########################
 !
@@ -40,7 +40,6 @@
 !
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 USE MODD_ISBA_PAR,      ONLY : XWGMIN
@@ -56,7 +55,6 @@ IMPLICIT NONE
 
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
 !
  INTEGER, INTENT(IN)               :: KI
  REAL, DIMENSION(:,:), INTENT(IN) :: PWG

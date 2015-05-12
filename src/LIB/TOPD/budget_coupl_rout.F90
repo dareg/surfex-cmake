@@ -36,8 +36,6 @@
 !
 !*       0.     DECLARATIONS
 !               ------------
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
-!
 USE MODD_BUDGET_COUPL_ROUT ! contains all useful variables XB_*
 !
 USE MODD_TOPODYN,       ONLY : NNCAT, XQTOT, XTOPD_STEP, XQB_DR, XQB_RUN
@@ -48,7 +46,6 @@ USE MODD_CSTS,            ONLY : XRHOLW
 !
 USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID !ludo
 USE MODD_FORC_ATM,        ONLY : XSNOW       ,&! snow precipitation                    (kg/m2/s)
                                  XRAIN         ! liquid precipitation                  (kg/m2/s)
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -82,7 +79,7 @@ IF (LHOOK) CALL DR_HOOK('BUDGET_COUPL_ROUT',0,ZHOOK_HANDLE)
 !*       1.     Budget computation:
 !               ---------------
 IF (I%CISBA=='DIF') THEN
- CALL DG_DFTO3L(I, PKI, &
+ CALL DG_DFTO3L(I, &
                 SIZE(I%XWG,1),ZDG_3L)
  ZWG_3L(:,2)=DGMI%XFRD2_TWG(:)
  ZWG_3L(:,3)=DGMI%XFRD3_TWG(:)
@@ -90,7 +87,7 @@ IF (I%CISBA=='DIF') THEN
  ZWGI_3L(:,3)=DGMI%XFRD3_TWGI(:)
 
 ELSEIF (I%CISBA=='3-L') THEN
- CALL AVG_PATCH_WG(I, PKI, &
+ CALL AVG_PATCH_WG(I, &
                    SIZE(I%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
 ENDIF
 !

@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA_SLOPE (U, USS, &
+      SUBROUTINE TOPD_TO_ISBA_SLOPE (USS, &
                                      KI)
 !     ####################
 !
@@ -47,7 +47,6 @@
 !               ------------
 !
 !
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XTANB
@@ -63,7 +62,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions

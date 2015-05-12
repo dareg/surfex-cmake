@@ -96,7 +96,7 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, TGDP, T, TVG, &
+ CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, T, TVG, &
                         1)
 !
 !

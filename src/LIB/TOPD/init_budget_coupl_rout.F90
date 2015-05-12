@@ -57,8 +57,6 @@
 !               ------------
 !
       ! declarative modules
-USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
-!
 USE MODD_BUDGET_COUPL_ROUT ! contains all useful variables XB_*
 !
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XQTOT,&
@@ -101,7 +99,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_BUDGET_COUPL_ROUT',0,ZHOOK_HANDLE)
 INB_VAR=12
 
 IF (I%CISBA=='DIF') THEN
- CALL DG_DFTO3L(I, PKI, &
+ CALL DG_DFTO3L(I, &
                 SIZE(I%XWG,1),ZDG_3L)
  ZWG_3L(:,2)=DGMI%XFRD2_TWG(:)
  ZWG_3L(:,3)=DGMI%XFRD3_TWG(:)
@@ -109,7 +107,7 @@ IF (I%CISBA=='DIF') THEN
  ZWGI_3L(:,3)=DGMI%XFRD3_TWGI(:)
 
 ELSEIF (I%CISBA=='3-L') THEN
- CALL AVG_PATCH_WG(I, PKI, &
+ CALL AVG_PATCH_WG(I, &
                    SIZE(I%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
 ENDIF
 !

@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_TEB_n (B, BOP, CHT, DTT, TG, T, TOP, TPN)
+SUBROUTINE DEALLOC_TEB_n (B, CHT, DTT, TG, T, TOP, TPN)
 !     #################################################################################
 !
 !!****  *DEALLOC_TEB_n * - Deallocate all arrays
@@ -34,7 +34,6 @@ SUBROUTINE DEALLOC_TEB_n (B, BOP, CHT, DTT, TG, T, TOP, TPN)
 !
 !
 USE MODD_BEM_n, ONLY : BEM_t
-USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_CH_TEB_n, ONLY : CH_TEB_t
 USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
 USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
@@ -57,7 +56,6 @@ IMPLICIT NONE
 
 !
 TYPE(BEM_t), INTENT(INOUT) :: B
-TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
 TYPE(TEB_GRID_t), INTENT(INOUT) :: TG

@@ -65,9 +65,9 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!-------------------------------------------------------------------
 !
-USE MODD_AGRI_n, ONLY : AG => AGRI
-!
 USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+USE MODD_AGRI_n, ONLY : AG => AGRI
 !
 USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
 !
@@ -467,7 +467,7 @@ ENDDO PATCH_LOOP
 ! --------------------------------------------------------------------------------------
 !
 IF(I%LCPL_RRM)THEN
-  CALL DIAG_CPL_ESM_ISBA(IG, I, &
+  CALL DIAG_CPL_ESM_ISBA(I, &
                          PTSTEP,ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD, &
                            ZCPL_PFLOOD,ZCPL_IFLOOD,ZCPL_ICEFLUX     )  
 ENDIF

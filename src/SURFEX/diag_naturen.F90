@@ -38,7 +38,6 @@ SUBROUTINE DIAG_NATURE_n(HPROGRAM,                                              
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
@@ -115,7 +114,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('DIAG_NATURE_N',0,ZHOOK_HANDLE)
 IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0  ' ) THEN
 !        
-  CALL DIAG_ISBA_n(DGEI, DGI, I, &
+  CALL DIAG_ISBA_n(DGEI, DGI, &
                    HPROGRAM,                                              &
                      PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,   &
                      PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,   &

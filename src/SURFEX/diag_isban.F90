@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_ISBA_n (DGEI, DGI, I, &
+SUBROUTINE DIAG_ISBA_n (DGEI, DGI, &
                         HPROGRAM,                                               &
                          PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,    &
                          PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
@@ -38,7 +38,6 @@ SUBROUTINE DIAG_ISBA_n (DGEI, DGI, I, &
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 !                                  
@@ -54,7 +53,6 @@ IMPLICIT NONE
 !
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
 TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
-TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

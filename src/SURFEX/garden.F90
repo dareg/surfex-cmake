@@ -50,10 +50,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+!
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_CSTS,              ONLY: XCPD
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 USE MODD_TEB_n, ONLY : T => TEB
 USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
@@ -550,7 +551,7 @@ END IF
 ! This way, these points are clearly flaged, and one will not try to interpret
 ! the values for those points
 !
- CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, TGDP, T, TVG, &
+ CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, T, TVG, &
                         2)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

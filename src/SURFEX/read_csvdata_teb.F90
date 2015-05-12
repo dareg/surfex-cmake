@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE READ_CSVDATA_TEB (BOP, BDD, TOP, &
+      SUBROUTINE READ_CSVDATA_TEB (BDD, &
                                    HPROGRAM,HFILE)
 !     #########################
 !
@@ -36,9 +36,7 @@
 !            -----------
 !
 !
-USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
-USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_CSTS,     ONLY : XTT
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -60,9 +58,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
-TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=28), INTENT(IN) :: HFILE    ! file to read

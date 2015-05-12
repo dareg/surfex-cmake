@@ -104,7 +104,7 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GREENROOF_n(TGR, TGRO, TGRPE, TGRP, T, TVG, &
+ CALL FLAG_TEB_GREENROOF_n(TGR, TGRO, TGRPE, T, TVG, &
                            1)
 !
 !

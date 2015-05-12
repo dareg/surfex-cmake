@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SEA_n (SG, S, U, &
+SUBROUTINE ASSIM_SEA_n (S, U, &
                         HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
                        OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
@@ -28,7 +28,6 @@ SUBROUTINE ASSIM_SEA_n (SG, S, U, &
 !!--------------------------------------------------------------------
 !
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -48,7 +47,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !

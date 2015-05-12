@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_OCEAN_FIELD( HPROGRAM,                       &
+SUBROUTINE PREP_HOR_OCEAN_FIELD (O, OR, SG, &
+                                 HPROGRAM,                       &
                                  HFILE,HFILETYPE,KLUOUT,OUNIF,   &
                                  HSURF,HNCVARNAME                )
 !     #######################################################
@@ -26,14 +27,16 @@ SUBROUTINE PREP_HOR_OCEAN_FIELD( HPROGRAM,                       &
 !!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!------------------------------------------------------------------
 !
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+!
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_OCEAN_CSTS  ,   ONLY : NOCKMIN,NOCKMAX
-USE MODD_OCEAN_n, ONLY : O => OCEAN
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE, XLAT_OUT, XLON_OUT,&
                                 XX_OUT, XY_OUT
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
-USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
 USE MODI_PREP_OCEAN_UNIF
 USE MODI_PREP_OCEAN_NETCDF
@@ -48,6 +51,11 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name

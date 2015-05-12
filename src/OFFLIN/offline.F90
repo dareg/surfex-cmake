@@ -768,7 +768,8 @@ XTIME0 = MPI_WTIME()
 ! * SURFEX - OASIS  grid, partitions and local field definitions
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_DEF_OL(CSURF_FILETYPE,YALG_MPI)
+  CALL SFX_OASIS_DEF_OL(U, &
+                        CSURF_FILETYPE,YALG_MPI)
 ENDIF
 !
 ! --------------------------------------------------------------------------------------
