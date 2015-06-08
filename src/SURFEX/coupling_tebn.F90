@@ -40,6 +40,8 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!      B. Decharme  04/2013 new coupling variables
 !!---------------------------------------------------------------
 !
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_GOTO_PATCH
+!
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XLVTT, XPI, XKARMAN, XG
@@ -70,7 +72,7 @@ USE MODE_DSLT_SURF
 USE MODE_THERMOS
 USE MODE_SBLS
 !
-USE MODI_GOTO_TEB
+USE MODI_GOTO_WRAPPER_TEB_PATCH
 USE MODI_AVERAGE_RAD
 USE MODI_SM10
 USE MODI_ADD_FORECAST_TO_DATE_SURF
@@ -528,8 +530,8 @@ ZEND_TRAFFIC_TIME   = 64800.
 !
 WHERE(       PTSUN>ZBEGIN_TRAFFIC_TIME   &
       .AND.  PTSUN<ZEND_TRAFFIC_TIME     )
-  ZH_TRAFFIC  (:) = T%XH_TRAFFIC   (:)
-  ZLE_TRAFFIC (:) = T%XLE_TRAFFIC  (:)
+  ZH_TRAFFIC  (:) = T%CUR%XH_TRAFFIC   (:)
+  ZLE_TRAFFIC (:) = T%CUR%XLE_TRAFFIC  (:)
 ELSEWHERE
   ZH_TRAFFIC  (:) = 0.
   ZLE_TRAFFIC (:) = 0.   
@@ -543,12 +545,13 @@ END WHERE
 !-------------------------------------------------------------------------------------
 
 DO JTEB_PATCH=1,TOP%NTEB_PATCH
-  CALL GOTO_TEB(JTEB_PATCH)
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD,         T%XBLD         )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD_HEIGHT,  T%XBLD_HEIGHT  )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_WALL_O_HOR,  T%XWALL_O_HOR  )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CAN_HW_RATIO,T%XCAN_HW_RATIO)
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_Z0_TOWN,     T%XZ0_TOWN     )
+  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_PATCH)
+  CALL DIAG_MISC_TEB_GOTO_PATCH(JTEB_PATCH)
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD,         T%CUR%XBLD         )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_BLD_HEIGHT,  T%CUR%XBLD_HEIGHT  )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_WALL_O_HOR,  T%CUR%XWALL_O_HOR  )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_CAN_HW_RATIO,T%CUR%XCAN_HW_RATIO)
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_Z0_TOWN,     T%CUR%XZ0_TOWN     )
 END DO
 !
 IF (TOP%LCANOPY) THEN
@@ -568,8 +571,8 @@ IF (TOP%LCANOPY) THEN
       TCP%XT(:,JLAYER) = PTA(:)
       TCP%XQ(:,JLAYER) = PQA(:)
       TCP%XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
-              * LOG( (          2.* T%XBLD_HEIGHT(:)/3.) / T%XZ0_TOWN(:))   &
-              / LOG( (PUREF(:)+ 2.* T%XBLD_HEIGHT(:)/3.) / T%XZ0_TOWN(:))
+              * LOG( (          2.* T%CUR%XBLD_HEIGHT(:)/3.) / T%CUR%XZ0_TOWN(:))   &
+              / LOG( (PUREF(:)+ 2.* T%CUR%XBLD_HEIGHT(:)/3.) / T%CUR%XZ0_TOWN(:))
     END  DO
     TCP%XTKE(:,:) = 1.
   ENDIF
@@ -696,10 +699,10 @@ ELSE              ! no canopy case
 !
 !* Without SBL scheme, canyon air is assumed at mid height
   ZU_LOWCAN=ZU_CANYON
-  ZT_LOWCAN=T%XT_CANYON
-  ZQ_LOWCAN=T%XQ_CANYON
-  ZT_CANYON=T%XT_CANYON
-  ZQ_CANYON=T%XQ_CANYON
+  ZT_LOWCAN=T%CUR%XT_CANYON
+  ZQ_LOWCAN=T%CUR%XQ_CANYON
+  ZT_CANYON=T%CUR%XT_CANYON
+  ZQ_CANYON=T%CUR%XQ_CANYON
   ZUREF    =PUREF
   ZZREF    =PZREF
   ZTA      =PTA
@@ -719,14 +722,15 @@ ZEXNA     (:) = (ZPA(:)/XP00)**(XRD/XCPD)
 !--------------------------------------------------------------------------------------
 !
 DO JTEB_PATCH=1,TOP%NTEB_PATCH
- CALL GOTO_TEB(JTEB_PATCH)
+ CALL GOTO_WRAPPER_TEB_PATCH(JTEB_PATCH)
+ CALL DIAG_MISC_TEB_GOTO_PATCH(JTEB_PATCH)
 !
 ZT_CAN=ZT_CANYON
 ZQ_CAN=ZQ_CANYON
 !
 IF (TOP%LCANOPY) THEN
-  T%XT_CANYON(:) = ZT_CANYON(:)
-  T%XQ_CANYON(:) = ZQ_CANYON(:)
+  T%CUR%XT_CANYON(:) = ZT_CANYON(:)
+  T%CUR%XQ_CANYON(:) = ZQ_CANYON(:)
 END IF
 !
 ZLESNOW_ROOF(:) = 0.
@@ -741,34 +745,34 @@ ZG_GREENROOF_ROOF(:) = 0.
                       TOP%CZ0H, CIMPLICIT_WIND, TOP%CROAD_DIR, TOP%CWALL_OPT,                      &
                       TOP%TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &
-                      B%XTI_BLD,                                                         &
-                      T%XT_ROOF, T%XT_ROAD, T%XT_WALL_A, T%XT_WALL_B, T%XWS_ROOF,T%XWS_ROAD,       &
-                      T%TSNOW_ROOF%SCHEME,                                               &
-                      T%TSNOW_ROOF%WSNOW(:,:,1), T%TSNOW_ROOF%T(:,:,1),                    &
-                      T%TSNOW_ROOF%RHO(:,:,1), T%TSNOW_ROOF%ALB(:,1),                      &
-                      T%TSNOW_ROOF%TS(:,1), T%TSNOW_ROOF%EMIS(:,1),                        &
-                      T%TSNOW_ROAD%SCHEME,                                               &
-                      T%TSNOW_ROAD%WSNOW(:,:,1), T%TSNOW_ROAD%T(:,:,1),                    &
-                      T%TSNOW_ROAD%RHO(:,:,1), T%TSNOW_ROAD%ALB(:,1),                      &
-                      T%TSNOW_ROAD%TS(:,1), T%TSNOW_ROAD%EMIS(:,1),                        &
+                      B%CUR%XTI_BLD,                                                         &
+                      T%CUR%XT_ROOF, T%CUR%XT_ROAD, T%CUR%XT_WALL_A, T%CUR%XT_WALL_B, T%CUR%XWS_ROOF,T%CUR%XWS_ROAD,       &
+                      T%CUR%TSNOW_ROOF%SCHEME,                                               &
+                      T%CUR%TSNOW_ROOF%WSNOW(:,:,1), T%CUR%TSNOW_ROOF%T(:,:,1),                    &
+                      T%CUR%TSNOW_ROOF%RHO(:,:,1), T%CUR%TSNOW_ROOF%ALB(:,1),                      &
+                      T%CUR%TSNOW_ROOF%TS(:,1), T%CUR%TSNOW_ROOF%EMIS(:,1),                        &
+                      T%CUR%TSNOW_ROAD%SCHEME,                                               &
+                      T%CUR%TSNOW_ROAD%WSNOW(:,:,1), T%CUR%TSNOW_ROAD%T(:,:,1),                    &
+                      T%CUR%TSNOW_ROAD%RHO(:,:,1), T%CUR%TSNOW_ROAD%ALB(:,1),                      &
+                      T%CUR%TSNOW_ROAD%TS(:,1), T%CUR%TSNOW_ROAD%EMIS(:,1),                        &
                       ZPEW_A_COEF, ZPEW_B_COEF,                                        &
                       ZPEW_A_COEF_LOWCAN, ZPEW_B_COEF_LOWCAN,                          &
                       PPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, PRHOA, PCO2,                   &
                       PLW, ZDIR_SWB, ZSCA_SWB, PSW_BANDS, KSW, PZENITH, PAZIM,         &
                       PRAIN, PSNOW, ZZREF, ZUREF, ZUA,                                 &
-                      ZH_TRAFFIC, ZLE_TRAFFIC, T%XH_INDUSTRY, T%XLE_INDUSTRY,              &
+                      ZH_TRAFFIC, ZLE_TRAFFIC, T%CUR%XH_INDUSTRY, T%CUR%XLE_INDUSTRY,              &
                       PTSTEP,                                                          &
-                      T%XZ0_TOWN,                                                        &
-                      T%XBLD, T%XGARDEN, T%XROAD_DIR, T%XROAD, T%XGREENROOF,                     &
-                      T%XBLD_HEIGHT, T%XWALL_O_HOR, T%XCAN_HW_RATIO,                         &
-                      T%XROAD_O_GRND, T%XGARDEN_O_GRND, T%XWALL_O_GRND,                      &
-                      T%XALB_ROOF, T%XEMIS_ROOF,                                           &
-                      T%XHC_ROOF,T%XTC_ROOF,T%XD_ROOF,                                       &
-                      T%XALB_ROAD, T%XEMIS_ROAD, T%XSVF_ROAD,                                &
-                      T%XHC_ROAD,T%XTC_ROAD,T%XD_ROAD,                                       &
-                      T%XALB_WALL, T%XEMIS_WALL, T%XSVF_WALL,                                &
-                      T%XSVF_GARDEN,                                                     &
-                      T%XHC_WALL,T%XTC_WALL,T%XD_WALL,                                       &
+                      T%CUR%XZ0_TOWN,                                                        &
+                      T%CUR%XBLD, T%CUR%XGARDEN, T%CUR%XROAD_DIR, T%CUR%XROAD, T%CUR%XGREENROOF,                     &
+                      T%CUR%XBLD_HEIGHT, T%CUR%XWALL_O_HOR, T%CUR%XCAN_HW_RATIO,                         &
+                      T%CUR%XROAD_O_GRND, T%CUR%XGARDEN_O_GRND, T%CUR%XWALL_O_GRND,                      &
+                      T%CUR%XALB_ROOF, T%CUR%XEMIS_ROOF,                                           &
+                      T%CUR%XHC_ROOF,T%CUR%XTC_ROOF,T%CUR%XD_ROOF,                                       &
+                      T%CUR%XALB_ROAD, T%CUR%XEMIS_ROAD, T%CUR%XSVF_ROAD,                                &
+                      T%CUR%XHC_ROAD,T%CUR%XTC_ROAD,T%CUR%XD_ROAD,                                       &
+                      T%CUR%XALB_WALL, T%CUR%XEMIS_WALL, T%CUR%XSVF_WALL,                                &
+                      T%CUR%XSVF_GARDEN,                                                     &
+                      T%CUR%XHC_WALL,T%CUR%XTC_WALL,T%CUR%XD_WALL,                                       &
                       ZRN_ROOF, ZH_ROOF, ZLE_ROOF, ZLEW_ROOF, ZGFLUX_ROOF,             &
                       ZRUNOFF_ROOF,                                                    &
                       ZRN_ROAD, ZH_ROAD, ZLE_ROAD, ZLEW_ROAD, ZGFLUX_ROAD,             &
@@ -803,32 +807,32 @@ ZG_GREENROOF_ROOF(:) = 0.
                       ZABS_SW_GARDEN,ZABS_LW_GARDEN,                                   &
                       ZABS_SW_GREENROOF,ZABS_LW_GREENROOF, ZG_GREENROOF_ROOF,          &
                       ZRUNOFF_GREENROOF, ZDRAIN_GREENROOF,                             &
-                      ZIRRIG_GREENROOF, BOP%CCOOL_COIL, B%XF_WATER_COND, BOP%CHEAT_COIL,B%CNATVENT,&
-                      KDAY, B%XAUX_MAX, B%XT_FLOOR, B%XT_MASS, ZH_BLD_COOL,                  &
+                      ZIRRIG_GREENROOF, BOP%CCOOL_COIL, B%CUR%XF_WATER_COND, BOP%CHEAT_COIL,B%CUR%CNATVENT,&
+                      KDAY, B%CUR%XAUX_MAX, B%CUR%XT_FLOOR, B%CUR%XT_MASS, ZH_BLD_COOL,                  &
                       ZT_BLD_COOL, ZH_BLD_HEAT, ZLE_BLD_COOL, ZLE_BLD_HEAT, ZH_WASTE,  &
-                      ZLE_WASTE, B%XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT, B%XQIN, B%XQIN_FRAD,&
-                      B%XQIN_FLAT, B%XGR, B%XEFF_HEAT, B%XINF, B%XTCOOL_TARGET,                  &
-                      B%XTHEAT_TARGET, B%XHR_TARGET, B%XT_WIN2, B%XQI_BLD, B%XV_VENT,            &
-                      B%XCAP_SYS_HEAT, B%XCAP_SYS_RAT, B%XT_ADP, B%XM_SYS_RAT, B%XCOP_RAT,       &
+                      ZLE_WASTE, B%CUR%XF_WASTE_CAN, ZHVAC_COOL, ZHVAC_HEAT, B%CUR%XQIN, B%CUR%XQIN_FRAD,&
+                      B%CUR%XQIN_FLAT, B%CUR%XGR, B%CUR%XEFF_HEAT, B%CUR%XINF, B%CUR%XTCOOL_TARGET,                  &
+                      B%CUR%XTHEAT_TARGET, B%CUR%XHR_TARGET, B%CUR%XT_WIN2, B%CUR%XQI_BLD, B%CUR%XV_VENT,            &
+                      B%CUR%XCAP_SYS_HEAT, B%CUR%XCAP_SYS_RAT, B%CUR%XT_ADP, B%CUR%XM_SYS_RAT, B%CUR%XCOP_RAT,       &
                       ZCAP_SYS, ZM_SYS, ZCOP, ZQ_SYS, ZT_SYS, ZTR_SW_WIN, ZFAN_POWER,  &
-                      B%XHC_FLOOR, B%XTC_FLOOR, B%XD_FLOOR, B%XT_WIN1, ZABS_SW_WIN,            &
-                      ZABS_LW_WIN, B%XSHGC, B%XSHGC_SH, B%XUGG_WIN, B%XALB_WIN, B%XABS_WIN,      &
+                      B%CUR%XHC_FLOOR, B%CUR%XTC_FLOOR, B%CUR%XD_FLOOR, B%CUR%XT_WIN1, ZABS_SW_WIN,            &
+                      ZABS_LW_WIN, B%CUR%XSHGC, B%CUR%XSHGC_SH, B%CUR%XUGG_WIN, B%CUR%XALB_WIN, B%CUR%XABS_WIN,      &
                       ZEMIT_LW_FAC, ZEMIT_LW_GRND, ZT_RAD_IND, ZREF_SW_GRND,           &
-                      ZREF_SW_FAC, ZHU_BLD, PTIME, B%LSHADE, B%LSHAD_DAY, B%LNATVENT_NIGHT,  &
-                      TOP%CBEM, B%XN_FLOOR, T%XWALL_O_BLD, B%XGLAZ_O_BLD, B%XMASS_O_BLD,           &
-                      B%XFLOOR_HW_RATIO,                                                 &
-                      B%XF_FLOOR_MASS, B%XF_FLOOR_WALL, B%XF_FLOOR_WIN,                      &
-                      B%XF_FLOOR_ROOF, B%XF_WALL_FLOOR, B%XF_WALL_MASS,                      &
-                      B%XF_WALL_WIN, B%XF_WIN_FLOOR, B%XF_WIN_MASS, B%XF_WIN_WALL,             &
-                      B%XF_MASS_FLOOR, B%XF_MASS_WALL, B%XF_MASS_WIN, TOP%LCANOPY, B%XTRAN_WIN,    &
-                      TOP%CCH_BEM, T%XROUGH_ROOF, T%XROUGH_WALL, B%XF_WIN_WIN,                   &
+                      ZREF_SW_FAC, ZHU_BLD, PTIME, B%CUR%LSHADE, B%CUR%LSHAD_DAY, B%CUR%LNATVENT_NIGHT,  &
+                      TOP%CBEM, B%CUR%XN_FLOOR, T%CUR%XWALL_O_BLD, B%CUR%XGLAZ_O_BLD, B%CUR%XMASS_O_BLD,           &
+                      B%CUR%XFLOOR_HW_RATIO,                                                 &
+                      B%CUR%XF_FLOOR_MASS, B%CUR%XF_FLOOR_WALL, B%CUR%XF_FLOOR_WIN,                      &
+                      B%CUR%XF_FLOOR_ROOF, B%CUR%XF_WALL_FLOOR, B%CUR%XF_WALL_MASS,                      &
+                      B%CUR%XF_WALL_WIN, B%CUR%XF_WIN_FLOOR, B%CUR%XF_WIN_MASS, B%CUR%XF_WIN_WALL,             &
+                      B%CUR%XF_MASS_FLOOR, B%CUR%XF_MASS_WALL, B%CUR%XF_MASS_WIN, TOP%LCANOPY, B%CUR%XTRAN_WIN,    &
+                      TOP%CCH_BEM, T%CUR%XROUGH_ROOF, T%CUR%XROUGH_WALL, B%CUR%XF_WIN_WIN,                   &
                       TIR%LPAR_RD_IRRIG, TIR%XRD_START_MONTH, TIR%XRD_END_MONTH,                   &
                       TIR%XRD_START_HOUR, TIR%XRD_END_HOUR, TIR%XRD_24H_IRRIG, ZIRRIG_ROAD,        &
-                      TPN%XEMIS_PANEL, TPN%XALB_PANEL, TPN%XEFF_PANEL, TPN%XFRAC_PANEL, T%XRESIDENTIAL,  &
+                      TPN%XEMIS_PANEL, TPN%XALB_PANEL, TPN%XEFF_PANEL, TPN%XFRAC_PANEL, T%CUR%XRESIDENTIAL,  &
                       ZTHER_PROD_PANEL, ZPHOT_PROD_PANEL, ZPROD_PANEL,                 &
                       ZTHER_PROD_BLD  , ZPHOT_PROD_BLD  , ZPROD_BLD  ,                 &
                       TPN%XTHER_PRODC_DAY, ZH_PANEL, ZRN_PANEL,                            &
-                      T%XDT_RES, T%XDT_OFF,                                                &
+                      T%CUR%XDT_RES, T%CUR%XDT_OFF,                                                &
                       ZCUR_TCOOL_TARGET, ZCUR_THEAT_TARGET, ZCUR_QIN                   )
 
 
@@ -944,8 +948,8 @@ IF (DGT%N2M >0 .AND. DGUT%LUTCI) THEN
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_EMIT_LW_FAC ,ZEMIT_LW_FAC )
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_EMIT_LW_GRND,ZEMIT_LW_GRND)
   CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_T_RAD_IND   ,ZT_RAD_IND   )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_TI_BLD      ,B%XTI_BLD      )
-  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_QI_BLD      ,B%XQI_BLD      )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_TI_BLD      ,B%CUR%XTI_BLD      )
+  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_QI_BLD      ,B%CUR%XQI_BLD      )
 END IF
 !
 !-------------------------------------------------------------------------------------
@@ -961,21 +965,21 @@ IF (TOP%LCANOPY) THEN
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_UW_ROOF ,ZUW_ROOF)
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_ROOF ,ZDUWDU_ROOF)
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WALL ,0.5*(ZH_WALL_A+ZH_WALL_B))
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+T%XH_INDUSTRY))
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+T%XLE_INDUSTRY)/XLVTT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_ROOF ,(ZH_ROOF+T%CUR%XH_INDUSTRY))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_ROOF ,(ZLE_ROOF+T%CUR%XLE_INDUSTRY)/XLVTT)
 !
 !-------------------------------------------------------------------------------------
 ! Computes the impact of canopy and surfaces on air
 !-------------------------------------------------------------------------------------
 !
-ZAC_GRND    (:) = (T%XROAD(:)*ZAC_ROAD    (:) + T%XGARDEN(:)*ZAC_GARDEN    (:)) / (T%XROAD(:)+T%XGARDEN(:))
-ZAC_GRND_WAT(:) = (T%XROAD(:)*ZAC_ROAD_WAT(:) + T%XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (T%XROAD(:)+T%XGARDEN(:))
+ZAC_GRND    (:) = (T%CUR%XROAD(:)*ZAC_ROAD    (:) + T%CUR%XGARDEN(:)*ZAC_GARDEN    (:)) / (T%CUR%XROAD(:)+T%CUR%XGARDEN(:))
+ZAC_GRND_WAT(:) = (T%CUR%XROAD(:)*ZAC_ROAD_WAT(:) + T%CUR%XGARDEN(:)*ZAC_GARDEN_WAT(:)) / (T%CUR%XROAD(:)+T%CUR%XGARDEN(:))
 !
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND     ,ZAC_GRND    )
  CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_AC_GRND_WAT ,ZAC_GRND_WAT)
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_U ,ZUW_GRND * (1.-T%XBLD))
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_T ,ZH_GRND  * (1.-T%XBLD)/XCPD/PRHOA)
- CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_Q ,ZLE_GRND * (1.-T%XBLD)/XLVTT)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_U ,ZUW_GRND * (1.-T%CUR%XBLD))
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_T ,ZH_GRND  * (1.-T%CUR%XBLD)/XCPD/PRHOA)
+ CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZSFLUX_Q ,ZLE_GRND * (1.-T%CUR%XBLD)/XLVTT)
 !
 
 END IF
@@ -1064,7 +1068,7 @@ END IF
 PTSURF (:) = PTRAD         (:) ! Should be the surface effective temperature; not radative
 PZ0    (:) = ZAVG_Z0_TOWN  (:) ! Should account for ISBA (greenroof and garden) Z0
 PZ0H   (:) = PZ0 (:) / 200.    ! Should account for ISBA (greenroof and garden) Z0
-PQSURF (:) = T%XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
+PQSURF (:) = T%CUR%XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
 !
 !-------------------------------------------------------------------------------------
 ! Scalar fluxes:
@@ -1165,9 +1169,10 @@ ENDIF
 !
 IF (.NOT. TOP%LCANOPY) THEN
   DO JTEB_PATCH=1,TOP%NTEB_PATCH
-    CALL GOTO_TEB(JTEB_PATCH)
-    T%XT_CANYON(:) = ZAVG_T_CANYON(:)
-    T%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
+    CALL GOTO_WRAPPER_TEB_PATCH(JTEB_PATCH)
+    CALL DIAG_MISC_TEB_GOTO_PATCH(JTEB_PATCH)
+    T%CUR%XT_CANYON(:) = ZAVG_T_CANYON(:)
+    T%CUR%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
   END DO
 END IF
 !          
@@ -1183,9 +1188,9 @@ IF (DGUT%LUTCI .AND. DGT%N2M >0) THEN
       ZU_UTCI(JJ) = ZWIND(JJ)
     ENDIF
   ENDDO
- CALL UTCI_TEB(T%XT_CANYON, T%XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND,&
+ CALL UTCI_TEB(T%CUR%XT_CANYON, T%CUR%XQ_CANYON, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND,&
      ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC, ZAVG_EMIT_LW_GRND, PLW,   &
-     ZAVG_T_RAD_IND, T%XBLD, T%XBLD_HEIGHT, T%XWALL_O_HOR, DGUT%XUTCI_IN, DGUT%XUTCI_OUTSUN,         &
+     ZAVG_T_RAD_IND, T%CUR%XBLD, T%CUR%XBLD_HEIGHT, T%CUR%XWALL_O_HOR, DGUT%XUTCI_IN, DGUT%XUTCI_OUTSUN,         &
      DGUT%XUTCI_OUTSHADE, DGUT%XTRAD_SUN, DGUT%XTRAD_SHADE                                      )
  CALL UTCIC_STRESS(PTSTEP,DGUT%XUTCI_IN      ,DGUT%XUTCIC_IN      )
  CALL UTCIC_STRESS(PTSTEP,DGUT%XUTCI_OUTSUN  ,DGUT%XUTCIC_OUTSUN  )

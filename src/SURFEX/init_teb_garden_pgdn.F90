@@ -137,25 +137,25 @@ IF (.NOT. TGDO%LPAR_GARDEN) THEN
 ELSE
  CALL INIT_FROM_DATA_GRDN_n(DTGD, &
                             IDECADE,TVG%CPHOTO,                     &
-                            TGDPE%XVEG,                               &
-                            TGDPE%XLAI,TGDP%XRSMIN,TGDP%XGAMMA,TGDP%XWRMAX_CF,       &
-                            TGDP%XRGL,TGDP%XCV,TGDP%XDG,TGDP%XD_ICE,TGDPE%XZ0,TGDP%XZ0_O_Z0H,  &
+                            TGDPE%CUR%XVEG,                               &
+                            TGDPE%CUR%XLAI,TGDP%XRSMIN,TGDP%XGAMMA,TGDP%XWRMAX_CF,       &
+                            TGDP%XRGL,TGDP%XCV,TGDP%XDG,TGDP%XD_ICE,TGDPE%CUR%XZ0,TGDP%XZ0_O_Z0H,  &
                             TGDP%XALBNIR_VEG,TGDP%XALBVIS_VEG,            &
-                            TGDP%XALBUV_VEG,TGDPE%XEMIS,                   &
+                            TGDP%XALBUV_VEG,TGDPE%CUR%XEMIS,                   &
                             TGDP%XVEGTYPE,TGDP%XROOTFRAC,                 &
                             TGDP%XGMES,TGDP%XBSLAI,TGDP%XLAIMIN,TGDP%XSEFOLD,TGDP%XGC,   &
                             TGDP%XDMAX, TGDP%XF2I, TGDP%LSTRESS, TGDP%XH_TREE,TGDP%XRE25,&
                             TGDP%XCE_NITRO,TGDP%XCF_NITRO,TGDP%XCNA_NITRO      )  
 
   IF (TVG%CISBA=='DIF') THEN
-    WHERE(T%XGARDEN(:)/=0.)
+    WHERE(T%CUR%XGARDEN(:)/=0.)
       TGDP%NWG_LAYER(:)=TGDO%NGROUND_LAYER 
       TGDP%XDG2  (:)=0.0
       TGDP%XDROOT(:)=0.0
     ENDWHERE
     DO JLAYER=TGDO%NGROUND_LAYER,1,-1
       DO JILU=1,KI
-        IF(T%XGARDEN(JILU)/=0..AND.TGDP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
+        IF(T%CUR%XGARDEN(JILU)/=0..AND.TGDP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
           TGDP%XDG2  (JILU)=TGDP%XDG(JILU,JLAYER)
           TGDP%XDROOT(JILU)=TGDP%XDG(JILU,JLAYER)
         ENDIF
@@ -166,23 +166,23 @@ ELSE
 END IF
 !
 
-WHERE (T%XGARDEN(:)==0.)
-  TGDPE%XVEG(:)=0.
-  TGDPE%XLAI(:)=0.
+WHERE (T%CUR%XGARDEN(:)==0.)
+  TGDPE%CUR%XVEG(:)=0.
+  TGDPE%CUR%XLAI(:)=0.
   TGDP%XRSMIN(:)=40.
   TGDP%XGAMMA(:)=0.
   TGDP%XWRMAX_CF(:)=0.2
   TGDP%XRGL(:)=100.
   TGDP%XCV(:)=2.E-5
-  TGDPE%XZ0(:)=0.013
+  TGDPE%CUR%XZ0(:)=0.013
   TGDP%XZ0_O_Z0H(:)=10.
   TGDP%XALBNIR_VEG(:)=0.30
   TGDP%XALBVIS_VEG(:)=0.30
   TGDP%XALBUV_VEG(:)=0.06
-  TGDPE%XEMIS(:)=0.94
+  TGDPE%CUR%XEMIS(:)=0.94
 ENDWHERE  
 IF (TVG%CPHOTO/='NON') THEN
-  WHERE (T%XGARDEN(:)==0.)
+  WHERE (T%CUR%XGARDEN(:)==0.)
     TGDP%XGMES(:)=0.020
     TGDP%XBSLAI(:)=0.36
     TGDP%XLAIMIN(:)=0.3
@@ -192,12 +192,12 @@ IF (TVG%CPHOTO/='NON') THEN
     TGDP%XGC(:)=0.00025
   END WHERE
   IF (TVG%CPHOTO/='AGS' .AND. TVG%CPHOTO/='LAI') THEN
-    WHERE (T%XGARDEN(:)==0.) 
+    WHERE (T%CUR%XGARDEN(:)==0.) 
       TGDP%XDMAX(:)=0.1
       TGDP%XF2I(:)=0.3
     END WHERE
     IF (TVG%CPHOTO=='NIT' .OR. TVG%CPHOTO=='NCB') THEN
-      WHERE (T%XGARDEN(:)==0.)      
+      WHERE (T%CUR%XGARDEN(:)==0.)      
         TGDP%XCE_NITRO(:)=7.68
         TGDP%XCF_NITRO(:)=-4.33
         TGDP%XCNA_NITRO(:)=1.3
@@ -207,34 +207,34 @@ IF (TVG%CPHOTO/='NON') THEN
 ENDIF
 IF(TVG%CISBA/='DIF')THEN
   DO JLAYER=1,TGDO%NGROUND_LAYER
-    WHERE (T%XGARDEN(:)==0.)
+    WHERE (T%CUR%XGARDEN(:)==0.)
       TGDP%XDG(:,JLAYER)=0.2*JLAYER
     END WHERE
   ENDDO
 ELSE
-  WHERE (T%XGARDEN(:)==0.) 
+  WHERE (T%CUR%XGARDEN(:)==0.) 
     TGDP%XDG(:,1)=0.01
     TGDP%XDG(:,2)=0.04
     TGDP%XROOTFRAC(:,1)=0.
     TGDP%XROOTFRAC(:,2)=0.
   END WHERE        
   DO JLAYER=3,TGDO%NGROUND_LAYER
-    WHERE (T%XGARDEN(:)==0.)
+    WHERE (T%CUR%XGARDEN(:)==0.)
       TGDP%XDG(:,JLAYER)=0.1*(JLAYER-2)
       TGDP%XROOTFRAC(:,JLAYER)=0.
     END WHERE
   ENDDO               
-  WHERE (T%XGARDEN(:)==0.) 
+  WHERE (T%CUR%XGARDEN(:)==0.) 
     TGDP%NWG_LAYER(:)=TGDO%NGROUND_LAYER
     TGDP%XDROOT   (:)=0.0
     TGDP%XDG2     (:)=TGDP%XDG(:,TGDO%NGROUND_LAYER-1)
   ENDWHERE    
 ENDIF  
-WHERE (T%XGARDEN(:)==0.) 
+WHERE (T%CUR%XGARDEN(:)==0.) 
   TGDP%XD_ICE(:)=0.8*TGDP%XDG(:,2)
 END WHERE  
 DO JVEGTYPE=1,NVEGTYPE
-  WHERE (T%XGARDEN(:)==0.)
+  WHERE (T%CUR%XGARDEN(:)==0.)
     TGDP%XVEGTYPE(:,JVEGTYPE)=0.
     TGDP%XVEGTYPE(:,1)=1.
   END WHERE

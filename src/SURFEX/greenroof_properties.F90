@@ -112,30 +112,30 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
 !              ------------------------------------------
 !
 !
- CALL ISBA_PROPERTIES(TGRO%CISBA_GR, TGRO%LTR_ML_GR, TGR%TSNOW, 1,             &
+ CALL ISBA_PROPERTIES(TGRO%CISBA_GR, TGRO%LTR_ML_GR, TGR%CUR%TSNOW, 1,             &
                       PDIR_SW, PSCA_SW, PSW_BANDS, KSW,          &
-                      TGRPE%XALBNIR, TGRPE%XALBVIS, TGRPE%XALBUV,                  &
+                      TGRPE%CUR%XALBNIR, TGRPE%CUR%XALBVIS, TGRPE%CUR%XALBUV,                  &
                       TGRP%XALBNIR_VEG, TGRP%XALBVIS_VEG, TGRP%XALBUV_VEG,      &
                       TGRP%XALBNIR_SOIL, TGRP%XALBVIS_SOIL,                &
                       TGRP%XALBUV_SOIL,                               &
-                      TGRPE%XVEG, TGRPE%XLAI, TGRPE%XZ0, TGRPE%XEMIS, TGR%XTG(:,1),          &
+                      TGRPE%CUR%XVEG, TGRPE%CUR%XLAI, TGRPE%CUR%XZ0, TGRPE%CUR%XEMIS, TGR%CUR%XTG(:,1),          &
                       ZASNOW,ZANOSNOW,                           &
                       ZESNOW,ZENOSNOW,                           &
                       ZTSSNOW,ZTSNOSNOW,                         &
-                      TGR%XSNOWFREE_ALB_VEG, TGR%XSNOWFREE_ALB_SOIL,     &
+                      TGR%CUR%XSNOWFREE_ALB_VEG, TGR%CUR%XSNOWFREE_ALB_SOIL,     &
                       ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, &
                       ZALBVIS_TSOIL,                             &
-                      TGR%XPSN, TGR%XPSNV_A, TGR%XPSNG, TGR%XPSNV                )
+                      TGR%CUR%XPSN, TGR%CUR%XPSNV_A, TGR%CUR%XPSNG, TGR%CUR%XPSNV                )
 !
-TGR%XSNOWFREE_ALB = ZANOSNOW
+TGR%CUR%XSNOWFREE_ALB = ZANOSNOW
 !
 !* averaged albedo
-PALB =  TGR%XPSN(:)    * ZASNOW              + (1.-TGR%XPSN(:)) * ZANOSNOW
+PALB =  TGR%CUR%XPSN(:)    * ZASNOW              + (1.-TGR%CUR%XPSN(:)) * ZANOSNOW
 !* averaged emissivity
-PEMIS=  TGR%XPSN(:)    * ZESNOW              + (1.-TGR%XPSN(:)) * ZENOSNOW
+PEMIS=  TGR%CUR%XPSN(:)    * ZESNOW              + (1.-TGR%CUR%XPSN(:)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
-PTS  =((TGR%XPSN(:)    * ZESNOW * ZTSSNOW**4 + (1.-TGR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+PTS  =((TGR%CUR%XPSN(:)    * ZESNOW * ZTSSNOW**4 + (1.-TGR%CUR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 !
 IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
 IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)

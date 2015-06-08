@@ -150,22 +150,22 @@ ELSE
   !
   !* erases temperature and humidity 2m above roof level bu canyon air values
   !
-  DGT%XT2M  = T%XT_CANYON
-  DGT%XQ2M  = T%XQ_CANYON
+  DGT%XT2M  = T%CUR%XT_CANYON
+  DGT%XQ2M  = T%CUR%XQ_CANYON
   !
   !* Richardson number
   !
   DGT%XRI = PRI
-  DGT%XHU2M = MIN(T%XQ_CANYON /QSAT(T%XT_CANYON,PPA),1.)
+  DGT%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
  ELSE IF (DGT%N2M==2) THEN
   ZH(:)=10.
   CALL CLS_WIND(PZONA, PMERA, PHW,  &
                   PCD, PCDN, PRI, ZH, &
                   DGT%XZON10M, DGT%XMER10M    )  
-  DGT%XT2M  = T%XT_CANYON
-  DGT%XQ2M  = T%XQ_CANYON
+  DGT%XT2M  = T%CUR%XT_CANYON
+  DGT%XQ2M  = T%CUR%XQ_CANYON
   DGT%XRI   = PRI
-  DGT%XHU2M = MIN(T%XQ_CANYON /QSAT(T%XT_CANYON,PPA),1.)
+  DGT%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
  END IF
 END IF
 !
@@ -208,7 +208,7 @@ IF (DGT%LCOEF) THEN
 END IF
 !
 IF (DGT%LSURF_VARS) THEN
-  DGT%XQS    = T%XQ_CANYON
+  DGT%XQS    = T%CUR%XQ_CANYON
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

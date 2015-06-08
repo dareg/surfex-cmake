@@ -566,7 +566,7 @@ END IF
  CALL OL_WRITE_COORD(YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !
 !
-IF (DGT%LPGD .AND. ASSOCIATED(T%XBLD)) THEN
+IF (DGT%LPGD .AND. ASSOCIATED(T%CUR%XBLD)) THEN
 
   YFILE='TEB_PGD.OUT.nc'
   CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
@@ -947,20 +947,20 @@ DO JPATCH=1,TOP%NTEB_PATCH
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,ADJUSTL(YPATCH//'GD_RES'), 'GD_RES', IDDIM, YATT_TITLE, (/'(kg/m2)'/))
     !
-    DO JLAYER=1,TGD%TSNOW%NLAYER
+    DO JLAYER=1,TGD%CUR%TSNOW%NLAYER
       WRITE(YPAS,'(I3)') JLAYER; YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'WSN_GD'//YLVL, 'Gd_Snow_Water_Eq_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'Kg/m2'/))
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'RSN_GD'//YLVL, 'Gd_snow_density_layer_'//YLVL ,         IDDIM1, YATT_TITLE, (/'Kg/m3'/))
-      IF (TGD%TSNOW%SCHEME=='3-L' .OR. TGD%TSNOW%SCHEME=='CRO') THEN   
+      IF (TGD%CUR%TSNOW%SCHEME=='3-L' .OR. TGD%CUR%TSNOW%SCHEME=='CRO') THEN   
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'HSN_GD'//YLVL,  'Gd_snow_heat_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'J/m2'/))
       ELSE
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'TSN_GD'//YLVL,  'Gd_snow_temp_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'K'/))
       ENDIF
-      IF (TGD%TSNOW%SCHEME=='CRO') THEN   
+      IF (TGD%CUR%TSNOW%SCHEME=='CRO') THEN   
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SG1_GD'//YLVL, 'Gd_snow_grain_par1_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
         CALL DEF_VAR_NETCDF(DGU, &
@@ -1013,20 +1013,20 @@ DO JPATCH=1,TOP%NTEB_PATCH
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,ADJUSTL(YPATCH//'GR_RES'), 'GR_RES', IDDIM, YATT_TITLE, (/'(kg/m2)'/))
     !
-    DO JLAYER=1,TGR%TSNOW%NLAYER
+    DO JLAYER=1,TGR%CUR%TSNOW%NLAYER
       WRITE(YPAS,'(I3)') JLAYER; YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'WSN_GR'//YLVL, 'Gr_Snow_Water_Eq_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'Kg/m2'/))
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'RSN_GR'//YLVL, 'Gr_snow_density_layer_'//YLVL ,         IDDIM1, YATT_TITLE, (/'Kg/m3'/))
-      IF (TGR%TSNOW%SCHEME=='3-L' .OR. TGR%TSNOW%SCHEME=='CRO') THEN   
+      IF (TGR%CUR%TSNOW%SCHEME=='3-L' .OR. TGR%CUR%TSNOW%SCHEME=='CRO') THEN   
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'HSN_GR'//YLVL,  'Gr_snow_heat_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'J/m2'/))
       ELSE
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'TSN_GR'//YLVL,  'Gr_snow_temp_layer'//YLVL,              IDDIM1, YATT_TITLE, (/'K'/))
       ENDIF
-      IF (TGR%TSNOW%SCHEME=='CRO') THEN   
+      IF (TGR%CUR%TSNOW%SCHEME=='CRO') THEN   
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SG1_GR'//YLVL, 'Gr_snow_grain_par1_layer_'//YLVL, IDDIM1, YATT_TITLE, (/'-'/))
         CALL DEF_VAR_NETCDF(DGU, &

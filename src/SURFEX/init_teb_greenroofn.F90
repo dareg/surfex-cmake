@@ -111,9 +111,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GREENROOF_N',0,ZHOOK_HANDLE)
 !* initialization of snow scheme (TSNOW defined in MODD_TEB_GREENROOF_n)
 !
 IF (HINIT=='PRE') THEN
-   CALL READ_PREP_GREENROOF_SNOW(HPROGRAM,TGR%TSNOW%SCHEME,TGR%TSNOW%NLAYER)
+   CALL READ_PREP_GREENROOF_SNOW(HPROGRAM,TGR%CUR%TSNOW%SCHEME,TGR%CUR%TSNOW%NLAYER)
 !
-   IF (TGR%TSNOW%SCHEME.NE.'3-L' .AND. TGR%TSNOW%SCHEME.NE.'CRO' .AND. TGRO%CISBA_GR=='DIF') THEN
+   IF (TGR%CUR%TSNOW%SCHEME.NE.'3-L' .AND. TGR%CUR%TSNOW%SCHEME.NE.'CRO' .AND. TGRO%CISBA_GR=='DIF') THEN
     CALL ABOR1_SFX("INIT_TEB_GREENROOF_n: WITH CISBA_GR = DIF, CSNOW MUST BE 3-L OR CRO")
   ENDIF
   IF (LHOOK) CALL DR_HOOK('INIT_TEB_GREENROOF_N',1,ZHOOK_HANDLE)
@@ -152,15 +152,17 @@ ENDIF
   CALL READ_TEB_GREENROOF_n(HPROGRAM,YPATCH)
 !
 !
- CALL INIT_VEG_GARDEN_n(KI, TOP%LCANOPY, TVG%CROUGH, TGR%TSNOW, &
-                   TVG%CPHOTO, TGRP%XLAIMIN, TGRP%XH_TREE, TGRP%XVEGTYPE, TGRPE%XLAI, TGRPE%XZ0, TGRPE%XVEG, TGRPE%XEMIS, &
-                   TGRO%LTR_ML_GR, TGR%XFAPARC, TGR%XFAPIRC, TGR%XLAI_EFFC, TGR%XMUS, &
-                   TGRP%XALBNIR_SOIL, TGRP%XALBVIS_SOIL, TGRP%XALBUV_SOIL, TGRPE%XALBNIR, TGRPE%XALBVIS, TGRPE%XALBUV, &
-                   DGMTO%LSURF_DIAG_ALBEDO, TGR%XPSN, TGR%XPSNG, TGR%XPSNV, TGR%XPSNV_A, &
+ CALL INIT_VEG_GARDEN_n(KI, TOP%LCANOPY, TVG%CROUGH, TGR%CUR%TSNOW, &
+                   TVG%CPHOTO, TGRP%XLAIMIN, TGRP%XH_TREE, TGRP%XVEGTYPE, &
+                   TGRPE%CUR%XLAI, TGRPE%CUR%XZ0, TGRPE%CUR%XVEG, TGRPE%CUR%XEMIS, &
+                   TGRO%LTR_ML_GR, TGR%CUR%XFAPARC, TGR%CUR%XFAPIRC, TGR%CUR%XLAI_EFFC, TGR%CUR%XMUS, &
+                   TGRP%XALBNIR_SOIL, TGRP%XALBVIS_SOIL, TGRP%XALBUV_SOIL, &
+                   TGRPE%CUR%XALBNIR, TGRPE%CUR%XALBVIS, TGRPE%CUR%XALBUV, &
+                   DGMTO%LSURF_DIAG_ALBEDO, TGR%CUR%XPSN, TGR%CUR%XPSNG, TGR%CUR%XPSNV, TGR%CUR%XPSNV_A, &
                    ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTSRAD )
 !
-ZWG1(:) = TGR%XWG(:,1)
-ZTG1(:) = TGR%XTG(:,1)
+ZWG1(:) = TGR%CUR%XWG(:,1)
+ZTG1(:) = TGR%CUR%XTG(:,1)
 !
 IF (.NOT. TGRO%LPAR_GREENROOF) THEN
   CALL SOIL_ALBEDO(TVG%CALBEDO,                               &
@@ -184,13 +186,13 @@ END IF
 ! 
  CALL AVG_ALBEDO_EMIS_GREENROOF(TGR, &
                                 TVG%CALBEDO,                                &
-                               TGRPE%XVEG,TGRPE%XZ0,TGRPE%XLAI,ZTG1,                     &
+                               TGRPE%CUR%XVEG,TGRPE%CUR%XZ0,TGRPE%CUR%XLAI,ZTG1,                     &
                                PSW_BANDS,                              &
                                TGRP%XALBNIR_VEG,TGRP%XALBVIS_VEG,TGRP%XALBUV_VEG,     &
                                TGRP%XALBNIR_SOIL,TGRP%XALBVIS_SOIL,TGRP%XALBUV_SOIL,  &
-                               TGRPE%XEMIS,                                  &
-                               TGR%TSNOW,                                  &
-                               TGRPE%XALBNIR,TGRPE%XALBVIS,TGRPE%XALBUV,                 &
+                               TGRPE%CUR%XEMIS,                                  &
+                               TGR%CUR%TSNOW,                                  &
+                               TGRPE%CUR%XALBNIR,TGRPE%CUR%XALBVIS,TGRPE%CUR%XALBUV,                 &
                                ZDIR_ALB, ZSCA_ALB,                     &
                                ZEMIS,ZTSRAD                            )  
 !

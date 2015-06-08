@@ -32,9 +32,9 @@ IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GREENROOF',0,ZHOOK_HANDLE)
 !
 ! Averaged Surface radiative parameters:
 !
-ALLOCATE(TGR%XSNOWFREE_ALB           (KLU))
-ALLOCATE(TGR%XSNOWFREE_ALB_VEG       (KLU))
-ALLOCATE(TGR%XSNOWFREE_ALB_SOIL      (KLU))
+ALLOCATE(TGR%CUR%XSNOWFREE_ALB           (KLU))
+ALLOCATE(TGR%CUR%XSNOWFREE_ALB_VEG       (KLU))
+ALLOCATE(TGR%CUR%XSNOWFREE_ALB_SOIL      (KLU))
 !
 !-------------------------------------------------------------------------------
 !
@@ -42,23 +42,23 @@ ALLOCATE(TGR%XSNOWFREE_ALB_SOIL      (KLU))
 !
 ! - Soil and vegetation heat and water:
 !
-ALLOCATE(TGR%XWR                     (KLU                     )) 
-ALLOCATE(TGR%XTG                     (KLU,KLAYER_GR       )) 
-ALLOCATE(TGR%XWG                     (KLU,KLAYER_GR       )) 
-ALLOCATE(TGR%XWGI                    (KLU,KLAYER_GR       )) 
-ALLOCATE(TGR%XRESA                   (KLU                     )) 
+ALLOCATE(TGR%CUR%XWR                     (KLU                     )) 
+ALLOCATE(TGR%CUR%XTG                     (KLU,KLAYER_GR       )) 
+ALLOCATE(TGR%CUR%XWG                     (KLU,KLAYER_GR       )) 
+ALLOCATE(TGR%CUR%XWGI                    (KLU,KLAYER_GR       )) 
+ALLOCATE(TGR%CUR%XRESA                   (KLU                     )) 
 !
 ! - Vegetation: Ags Prognostic (YPHOTO = 'LAI', 'LST', 'AGS' or 'LST')
 !
-ALLOCATE(TGR%XAN                     (KLU                     )) 
-ALLOCATE(TGR%XANDAY                  (KLU                     )) 
-ALLOCATE(TGR%XANFM                   (KLU                     )) 
-ALLOCATE(TGR%XLE                     (KLU                     ))
+ALLOCATE(TGR%CUR%XAN                     (KLU                     )) 
+ALLOCATE(TGR%CUR%XANDAY                  (KLU                     )) 
+ALLOCATE(TGR%CUR%XANFM                   (KLU                     )) 
+ALLOCATE(TGR%CUR%XLE                     (KLU                     ))
 !
 ! - Vegetation (Ags 'NIT' 'NCB' option):
 !
-ALLOCATE(TGR%XBIOMASS                (KLU,TVG%NNBIOMASS           ))
-ALLOCATE(TGR%XRESP_BIOMASS           (KLU,TVG%NNBIOMASS           ))
+ALLOCATE(TGR%CUR%XBIOMASS                (KLU,TVG%NNBIOMASS           ))
+ALLOCATE(TGR%CUR%XRESP_BIOMASS           (KLU,TVG%NNBIOMASS           ))
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GREENROOF',1,ZHOOK_HANDLE)
 !

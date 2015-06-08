@@ -54,7 +54,7 @@ USE MODI_READ_SURF
 USE MODI_READ_PGD_TEB_PAR_n
 USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_CLEAN_PREP_OUTPUT_GRID
-USE MODI_GOTO_TEB
+USE MODI_GOTO_WRAPPER_TEB_PATCH
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -109,7 +109,7 @@ END IF
 !
  CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
 !
- CALL GOTO_TEB(1)
+ CALL GOTO_WRAPPER_TEB_PATCH(1)
 !-------------------------------------------------------------------------------
 !
 !*    2.      Number of points and packing of general fields
@@ -174,7 +174,7 @@ IF (TOP%CBEM/='DEF') THEN
 END IF
 !
 DO JPATCH=1,TOP%NTEB_PATCH
-  CALL GOTO_TEB(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
   CALL READ_PGD_TEB_PAR_n(HPROGRAM,INI,'A')
 !
 !------------------------------------------------------------------------------

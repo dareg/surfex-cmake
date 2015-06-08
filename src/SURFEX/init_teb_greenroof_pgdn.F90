@@ -154,24 +154,24 @@ ELSE
  CALL INIT_FROM_DATA_GREENROOF_n(DTGR, TGRO, &
                                  IDECADE,TVG%CPHOTO,                     &
                                  TGRP%XOM_GR,                             &
-                                 TGRP%XSAND_GR, TGRP%XCLAY_GR, TGRPE%XVEG,           &
-                                 TGRPE%XLAI,TGRP%XRSMIN,TGRP%XGAMMA,TGRP%XWRMAX_CF,       &
-                                 TGRP%XRGL,TGRP%XCV,TGRP%XDG,TGRP%XD_ICE,TGRPE%XZ0,TGRP%XZ0_O_Z0H,  &
+                                 TGRP%XSAND_GR, TGRP%XCLAY_GR, TGRPE%CUR%XVEG,           &
+                                 TGRPE%CUR%XLAI,TGRP%XRSMIN,TGRP%XGAMMA,TGRP%XWRMAX_CF,       &
+                                 TGRP%XRGL,TGRP%XCV,TGRP%XDG,TGRP%XD_ICE,TGRPE%CUR%XZ0,TGRP%XZ0_O_Z0H,  &
                                  TGRP%XALBNIR_VEG,TGRP%XALBVIS_VEG,            &
-                                 TGRP%XALBUV_VEG,TGRPE%XEMIS,                   &
+                                 TGRP%XALBUV_VEG,TGRPE%CUR%XEMIS,                   &
                                  TGRP%XVEGTYPE,TGRP%XROOTFRAC,                 &
                                  TGRP%XGMES,TGRP%XBSLAI,TGRP%XLAIMIN,TGRP%XSEFOLD,TGRP%XGC,   &
                                  TGRP%XDMAX, TGRP%XF2I, TGRP%LSTRESS, TGRP%XH_TREE,TGRP%XRE25,&
                                  TGRP%XCE_NITRO,TGRP%XCF_NITRO,TGRP%XCNA_NITRO      )  
   IF (TGRO%CISBA_GR=='DIF') THEN
-    WHERE(T%XGREENROOF(:)/=0.)
+    WHERE(T%CUR%XGREENROOF(:)/=0.)
       TGRP%NWG_LAYER(:)=TGRO%NLAYER_GR 
       TGRP%XDG2  (:)=0.0
       TGRP%XDROOT(:)=0.0
     ENDWHERE
     DO JLAYER=TGRO%NLAYER_GR,1,-1
       DO JILU=1,KI
-        IF(T%XGREENROOF(JILU)/=0..AND.TGRP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
+        IF(T%CUR%XGREENROOF(JILU)/=0..AND.TGRP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
           TGRP%XDG2  (JILU)=TGRP%XDG(JILU,JLAYER)
           TGRP%XDROOT(JILU)=TGRP%XDG(JILU,JLAYER)
         ENDIF
@@ -180,7 +180,7 @@ ELSE
   ENDIF
 END IF
 !
-WHERE (T%XGREENROOF(:)==0.)
+WHERE (T%CUR%XGREENROOF(:)==0.)
   ! GARDEN default values /may need changing for green roofs
   TGRP%XOM_GR     (:,1) = 0.5
   TGRP%XOM_GR     (:,2) = 0.5
@@ -188,22 +188,22 @@ WHERE (T%XGREENROOF(:)==0.)
   TGRP%XSAND_GR   (:,2) = 0.33
   TGRP%XCLAY_GR   (:,1) = 0.33
   TGRP%XCLAY_GR   (:,2) = 0.33
-  TGRPE%XVEG       (:  ) = 0.
-  TGRPE%XLAI       (:  ) = 0.
+  TGRPE%CUR%XVEG       (:  ) = 0.
+  TGRPE%CUR%XLAI       (:  ) = 0.
   TGRP%XRSMIN     (:  ) = 40.
   TGRP%XGAMMA     (:  ) = 0.
   TGRP%XWRMAX_CF  (:  ) = 0.2
   TGRP%XRGL       (:  ) = 100.
   TGRP%XCV        (:  ) = 2.E-5
-  TGRPE%XZ0        (:  ) = 0.013
+  TGRPE%CUR%XZ0        (:  ) = 0.013
   TGRP%XZ0_O_Z0H  (:  ) = 10.
   TGRP%XALBNIR_VEG(:  ) = 0.30
   TGRP%XALBVIS_VEG(:  ) = 0.30
   TGRP%XALBUV_VEG (:  ) = 0.06
-  TGRPE%XEMIS      (:  ) = 0.94
+  TGRPE%CUR%XEMIS      (:  ) = 0.94
 END WHERE
 IF (TVG%CPHOTO/='NON') THEN
-  WHERE (T%XGREENROOF(:)==0.)
+  WHERE (T%CUR%XGREENROOF(:)==0.)
     TGRP%XGMES      (:  ) = 0.020
     TGRP%XBSLAI     (:  ) = 0.36
     TGRP%XLAIMIN    (:  ) = 0.3
@@ -213,12 +213,12 @@ IF (TVG%CPHOTO/='NON') THEN
     TGRP%XGC        (:  ) = 0.00025
   END WHERE
   IF (TVG%CPHOTO/='AGS' .AND. TVG%CPHOTO/='LAI') THEN
-    WHERE (T%XGREENROOF(:)==0.)     
+    WHERE (T%CUR%XGREENROOF(:)==0.)     
       TGRP%XDMAX      (:  ) = 0.1
       TGRP%XF2I       (:  ) = 0.3
     END WHERE
     IF (TVG%CPHOTO=='NIT' .OR. TVG%CPHOTO=='NCB') THEN
-      WHERE (T%XGREENROOF(:)==0.)          
+      WHERE (T%CUR%XGREENROOF(:)==0.)          
         TGRP%XCE_NITRO  (:  ) = 7.68
         TGRP%XCF_NITRO  (:  ) = -4.33
         TGRP%XCNA_NITRO (:  ) = 1.3
@@ -228,34 +228,34 @@ IF (TVG%CPHOTO/='NON') THEN
 ENDIF  
 IF(TGRO%CISBA_GR/='DIF')THEN
   DO JLAYER=1,TGRO%NLAYER_GR
-    WHERE (T%XGREENROOF(:)==0.)
+    WHERE (T%CUR%XGREENROOF(:)==0.)
       TGRP%XDG(:,JLAYER)=0.2*JLAYER
     END WHERE
   ENDDO
 ELSE
-  WHERE (T%XGREENROOF(:)==0.) 
+  WHERE (T%CUR%XGREENROOF(:)==0.) 
     TGRP%XDG(:,1)=0.01
     TGRP%XDG(:,2)=0.04
     TGRP%XROOTFRAC(:,1)=0.
     TGRP%XROOTFRAC(:,2)=0.
   END WHERE        
   DO JLAYER=3,TGRO%NLAYER_GR
-    WHERE (T%XGREENROOF(:)==0.)
+    WHERE (T%CUR%XGREENROOF(:)==0.)
       TGRP%XDG(:,JLAYER)=0.1*(JLAYER-2)
       TGRP%XROOTFRAC(:,JLAYER)=0.
     END WHERE
   ENDDO               
-  WHERE (T%XGREENROOF(:)==0.) 
+  WHERE (T%CUR%XGREENROOF(:)==0.) 
     TGRP%NWG_LAYER(:)=TGRO%NLAYER_GR
     TGRP%XDROOT   (:)=0.0
     TGRP%XDG2     (:)=TGRP%XDG(:,TGRO%NLAYER_GR-1)
   ENDWHERE    
 ENDIF  
-WHERE (T%XGREENROOF(:)==0.) 
+WHERE (T%CUR%XGREENROOF(:)==0.) 
   TGRP%XD_ICE(:)=0.8*TGRP%XDG(:,2)
 END WHERE  
 DO JVEGTYPE=1,NVEGTYPE
-  WHERE (T%XGREENROOF(:)==0.)
+  WHERE (T%CUR%XGREENROOF(:)==0.)
     TGRP%XVEGTYPE(:,JVEGTYPE)=0.
     TGRP%XVEGTYPE(:,1)=1.
   END WHERE

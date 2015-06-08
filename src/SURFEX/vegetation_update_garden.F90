@@ -158,12 +158,12 @@ ZHO2JM = 0.
 !
 !* vegetation parameters to update
 !
-ZVEG(:,1) = TGDPE%XVEG
-ZZ0(:,1) = TGDPE%XZ0
-ZALBNIR(:,1) = TGDPE%XALBNIR
-ZALBVIS(:,1) = TGDPE%XALBVIS
-ZALBUV(:,1) = TGDPE%XALBUV
-ZEMIS(:,1) = TGDPE%XEMIS
+ZVEG(:,1) = TGDPE%CUR%XVEG
+ZZ0(:,1) = TGDPE%CUR%XZ0
+ZALBNIR(:,1) = TGDPE%CUR%XALBNIR
+ZALBVIS(:,1) = TGDPE%CUR%XALBVIS
+ZALBUV(:,1) = TGDPE%CUR%XALBUV
+ZEMIS(:,1) = TGDPE%CUR%XEMIS
 ZRSMIN(:,1) = TGDP%XRSMIN
 ZGAMMA(:,1) = TGDP%XGAMMA
 ZWRMAX_CF(:,1) = TGDP%XWRMAX_CF
@@ -211,16 +211,16 @@ IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
                          ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
                          ZRSMINGV, ZWRMAX_CFGV,                          &
                          ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
-                         GUPDATED, OABSENT=(T%XGARDEN==0.)                 )
+                         GUPDATED, OABSENT=(T%CUR%XGARDEN==0.)                 )
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TGDPE%XVEG = ZVEG(:,1)
-TGDPE%XZ0 = ZZ0(:,1)
-TGDPE%XALBNIR = ZALBNIR(:,1)
-TGDPE%XALBVIS = ZALBVIS(:,1)
-TGDPE%XALBUV = ZALBUV(:,1)
-TGDPE%XEMIS = ZEMIS(:,1)
+TGDPE%CUR%XVEG = ZVEG(:,1)
+TGDPE%CUR%XZ0 = ZZ0(:,1)
+TGDPE%CUR%XALBNIR = ZALBNIR(:,1)
+TGDPE%CUR%XALBVIS = ZALBVIS(:,1)
+TGDPE%CUR%XALBUV = ZALBUV(:,1)
+TGDPE%CUR%XEMIS = ZEMIS(:,1)
 TGDP%XRSMIN = ZRSMIN(:,1)
 TGDP%XGAMMA = ZGAMMA(:,1)
 TGDP%XWRMAX_CF = ZWRMAX_CF(:,1)

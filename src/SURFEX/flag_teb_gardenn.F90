@@ -103,37 +103,37 @@ ENDIF
 !     
   !
   DO JL1=1,TGDO%NGROUND_LAYER
-    WHERE (T%XGARDEN(:)==0.) 
-      TGD%XTG (:,JL1) = ZTG
-      TGD%XWG (:,JL1) = ZWG
-      TGD%XWGI(:,JL1) = ZDEF
+    WHERE (T%CUR%XGARDEN(:)==0.) 
+      TGD%CUR%XTG (:,JL1) = ZTG
+      TGD%CUR%XWG (:,JL1) = ZWG
+      TGD%CUR%XWGI(:,JL1) = ZDEF
     END WHERE
   END DO
   !
-  WHERE (T%XGARDEN(:)==0.) 
-    TGD%XWR  (:) = ZWR
-    TGD%XRESA(:) = ZRESA
+  WHERE (T%CUR%XGARDEN(:)==0.) 
+    TGD%CUR%XWR  (:) = ZWR
+    TGD%CUR%XRESA(:) = ZRESA
   END WHERE
   !
   IF (TVG%CPHOTO/='NON') THEN
     !
-    WHERE (T%XGARDEN(:)==0.)
-      TGD%XANFM (:) = ZANFM              
-      TGD%XAN   (:) = ZDEF
-      TGD%XANDAY(:) = ZDEF
-      TGD%XLE   (:) = ZDEF
+    WHERE (T%CUR%XGARDEN(:)==0.)
+      TGD%CUR%XANFM (:) = ZANFM              
+      TGD%CUR%XAN   (:) = ZDEF
+      TGD%CUR%XANDAY(:) = ZDEF
+      TGD%CUR%XLE   (:) = ZDEF
     END WHERE
     !
     IF (TVG%CPHOTO=='LAI' .OR. TVG%CPHOTO=='LST' .OR. TVG%CPHOTO=='NIT' .OR. TVG%CPHOTO=='NCB') THEN
       !
-      WHERE (T%XGARDEN(:)==0.) TGDPE%XLAI(:) = ZDEF
+      WHERE (T%CUR%XGARDEN(:)==0.) TGDPE%CUR%XLAI(:) = ZDEF
       !
     ELSE IF (TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
       !
-      DO JL1=1,SIZE(TGD%XBIOMASS,2)
-        WHERE (T%XGARDEN(:)==0.)
-          TGD%XBIOMASS     (:,JL1) = ZDEF
-          TGD%XRESP_BIOMASS(:,JL1) = ZDEF
+      DO JL1=1,SIZE(TGD%CUR%XBIOMASS,2)
+        WHERE (T%CUR%XGARDEN(:)==0.)
+          TGD%CUR%XBIOMASS     (:,JL1) = ZDEF
+          TGD%CUR%XRESP_BIOMASS(:,JL1) = ZDEF
         END WHERE
       END DO
       !
@@ -146,19 +146,19 @@ ENDIF
 !
 !* Flag snow characteristics
 !
- CALL FLAG_GR_SNOW(KFLAG,T%XGARDEN(:)==0.,TGD%TSNOW)
+ CALL FLAG_GR_SNOW(KFLAG,T%CUR%XGARDEN(:)==0.,TGD%CUR%TSNOW)
 !
 !
 !* snow-free characteristics
 !
 IF (KFLAG==1) THEN
-  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB      = 0.2
-  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_VEG  = 0.2
-  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_SOIL = 0.2
+  WHERE (T%CUR%XGARDEN==0.) TGD%CUR%XSNOWFREE_ALB      = 0.2
+  WHERE (T%CUR%XGARDEN==0.) TGD%CUR%XSNOWFREE_ALB_VEG  = 0.2
+  WHERE (T%CUR%XGARDEN==0.) TGD%CUR%XSNOWFREE_ALB_SOIL = 0.2
 ELSEIF (KFLAG==2) THEN
-  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB      = XUNDEF
-  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_VEG  = XUNDEF
-  WHERE (T%XGARDEN==0.) TGD%XSNOWFREE_ALB_SOIL = XUNDEF
+  WHERE (T%CUR%XGARDEN==0.) TGD%CUR%XSNOWFREE_ALB      = XUNDEF
+  WHERE (T%CUR%XGARDEN==0.) TGD%CUR%XSNOWFREE_ALB_VEG  = XUNDEF
+  WHERE (T%CUR%XGARDEN==0.) TGD%CUR%XSNOWFREE_ALB_SOIL = XUNDEF
 END IF
 !
 !-------------------------------------------------------------------------------

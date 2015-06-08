@@ -138,7 +138,7 @@ INI=SIZE(TG%XLAT)
 !*      2.     Snow variables case?
 !
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TGD%TSNOW%SCHEME,TGD%TSNOW%NLAYER,YFILE_SNOW,&
+  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TGD%CUR%TSNOW%SCHEME,TGD%CUR%TSNOW%NLAYER,YFILE_SNOW,&
         YFILETYPE_SNOW,YFILEPGD_SNOW,YFILEPGDTYPE_SNOW,GUNIF_SNOW)
   IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE_SNOW)==0.AND.LEN_TRIM(YFILETYPE_SNOW)==0)THEN
     !IF(LEN_TRIM(YFILE)/=0.AND.LEN_TRIM(YFILETYPE)/=0)THEN
@@ -164,7 +164,7 @@ IF (HSURF=='SN_VEG ') THEN
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &
                             ILUOUT,GUNIF_SNOW,1,            &
-                            INI,TGD%TSNOW, TOP%TTIME,               &
+                            INI,TGD%CUR%TSNOW, TOP%TTIME,               &
                             XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
                             XLWCSNOW_GD, XASNOW_GD,         &
                             LSNOW_IDEAL_GD, ZSG1SNOW,       &
@@ -258,11 +258,11 @@ SELECT CASE (HSURF)
   CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,TGDP%XDG,ZF)
   !
   !* retrieves soil water content from soil relative humidity
-  ALLOCATE(TGD%XWG(SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
-  TGD%XWG(:,:) = TGDP%XWWILT + ZF(:,:) * (TGDP%XWFC-TGDP%XWWILT)
-  TGD%XWG(:,:) = MAX(MIN(TGD%XWG(:,:),TGDP%XWSAT),XWGMIN)
+  ALLOCATE(TGD%CUR%XWG(SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
+  TGD%CUR%XWG(:,:) = TGDP%XWWILT + ZF(:,:) * (TGDP%XWFC-TGDP%XWWILT)
+  TGD%CUR%XWG(:,:) = MAX(MIN(TGD%CUR%XWG(:,:),TGDP%XWSAT),XWGMIN)
   !
-  WHERE(ZF(:,:)==XUNDEF)TGD%XWG(:,:)=XUNDEF
+  WHERE(ZF(:,:)==XUNDEF)TGD%CUR%XWG(:,:)=XUNDEF
   !
   DEALLOCATE(ZF)
   !
@@ -275,11 +275,11 @@ SELECT CASE (HSURF)
   CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,TGDP%XDG,ZF)
   !
   !* retrieves soil ice content from soil relative humidity
-  ALLOCATE(TGD%XWGI(SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
-  TGD%XWGI(:,:) = ZF(:,:) * TGDP%XWSAT
-  TGD%XWGI(:,:) = MAX(MIN(TGD%XWGI(:,:),TGDP%XWSAT),0.)
+  ALLOCATE(TGD%CUR%XWGI(SIZE(ZFIELDOUTV,1),TGDO%NGROUND_LAYER))
+  TGD%CUR%XWGI(:,:) = ZF(:,:) * TGDP%XWSAT
+  TGD%CUR%XWGI(:,:) = MAX(MIN(TGD%CUR%XWGI(:,:),TGDP%XWSAT),0.)
   !
-  WHERE(ZF(:,:)==XUNDEF)TGD%XWGI(:,:)=XUNDEF
+  WHERE(ZF(:,:)==XUNDEF)TGD%CUR%XWGI(:,:)=XUNDEF
   !
   DEALLOCATE(ZF)
   !
@@ -287,7 +287,7 @@ SELECT CASE (HSURF)
   !
  CASE('TG     ') 
   IWORK=TGDO%NGROUND_LAYER
-  ALLOCATE(TGD%XTG(SIZE(ZFIELDOUTV,1),IWORK))
+  ALLOCATE(TGD%CUR%XTG(SIZE(ZFIELDOUTV,1),IWORK))
   ALLOCATE(ZDG(SIZE(TGDP%XDG,1),IWORK))
   IF (TVG%CISBA=='2-L'.OR.TVG%CISBA=='3-L') THEN
     ZDG(:,1) = 0.01
@@ -297,21 +297,21 @@ SELECT CASE (HSURF)
     !* diffusion method, the soil grid is the same as for humidity
     ZDG(:,:) = TGDP%XDG(:,:)
   END IF
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,TGD%XTG)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,TGD%CUR%XTG)
   DEALLOCATE(ZDG)
   !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WR     ') 
-  ALLOCATE(TGD%XWR(SIZE(ZFIELDOUTV,1)))
-  TGD%XWR(:) = ZW(:,1)
+  ALLOCATE(TGD%CUR%XWR(SIZE(ZFIELDOUTV,1)))
+  TGD%CUR%XWR(:) = ZW(:,1)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LAI    ') 
   !* LAI is updated only if present and pertinent (evolutive LAI) in input file
 
-   WHERE (ZW(:,1)/=XUNDEF) TGDPE%XLAI(:) = ZW(:,1)
+   WHERE (ZW(:,1)/=XUNDEF) TGDPE%CUR%XLAI(:) = ZW(:,1)
   !
 END SELECT
 !

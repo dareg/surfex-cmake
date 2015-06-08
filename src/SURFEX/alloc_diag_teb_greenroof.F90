@@ -64,9 +64,9 @@ ALLOCATE(DGGR%XRESTORE                (KLU                     ))
 ALLOCATE(DGGR%XUSTAR                  (KLU                     )) 
 ALLOCATE(DGGR%XIACAN                  (KLU,3                   )) 
 !
-ALLOCATE(DGGR%XSNOWTEMP               (KLU,TGR%TSNOW%NLAYER        )) 
-ALLOCATE(DGGR%XSNOWLIQ                (KLU,TGR%TSNOW%NLAYER        )) 
-ALLOCATE(DGGR%XSNOWDZ                 (KLU,TGR%TSNOW%NLAYER        )) 
+ALLOCATE(DGGR%XSNOWTEMP               (KLU,TGR%CUR%TSNOW%NLAYER        )) 
+ALLOCATE(DGGR%XSNOWLIQ                (KLU,TGR%CUR%TSNOW%NLAYER        )) 
+ALLOCATE(DGGR%XSNOWDZ                 (KLU,TGR%CUR%TSNOW%NLAYER        )) 
 ALLOCATE(DGGR%XSNOWHMASS              (KLU                     )) 
 ALLOCATE(DGGR%XMELTADV                (KLU                     )) 
 !

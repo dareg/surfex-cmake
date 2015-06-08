@@ -145,22 +145,22 @@ PEMIS   (:)   = 0.
 PTSRAD  (:)   = 0.
 !   
 !
- CALL ISBA_SNOW_FRAC(TGR%TSNOW%SCHEME,                          &
-                    TGR%TSNOW%WSNOW(:,:,1), TGR%TSNOW%RHO(:,:,1),  &
-                    TGR%TSNOW%ALB  (:,1),                      &
+ CALL ISBA_SNOW_FRAC(TGR%CUR%TSNOW%SCHEME,                          &
+                    TGR%CUR%TSNOW%WSNOW(:,:,1), TGR%CUR%TSNOW%RHO(:,:,1),  &
+                    TGR%CUR%TSNOW%ALB  (:,1),                      &
                     PVEG(:), PLAI(:), PZ0(:),              &
-                    TGR%XPSN(:), TGR%XPSNV_A(:),                   &
-                    TGR%XPSNG(:), TGR%XPSNV(:) )  
+                    TGR%CUR%XPSN(:), TGR%CUR%XPSNV_A(:),                   &
+                    TGR%CUR%XPSNG(:), TGR%CUR%XPSNV(:) )  
 !
  WHERE (PVEG(:)/=XUNDEF)
 !
 ! albedo on this tile
 !
-    ZALBNIR(:) = (1.-TGR%XPSN(:))*PALBNIR_ECO(:) + TGR%XPSN(:) *TPSNOW%ALB(:,1)
+    ZALBNIR(:) = (1.-TGR%CUR%XPSN(:))*PALBNIR_ECO(:) + TGR%CUR%XPSN(:) *TPSNOW%ALB(:,1)
       
-    ZALBVIS(:) = (1.-TGR%XPSN(:))*PALBVIS_ECO(:) + TGR%XPSN(:) *TPSNOW%ALB(:,1)
+    ZALBVIS(:) = (1.-TGR%CUR%XPSN(:))*PALBVIS_ECO(:) + TGR%CUR%XPSN(:) *TPSNOW%ALB(:,1)
  
-    ZALBUV(:)  = (1.-TGR%XPSN(:))*PALBUV_ECO (:) + TGR%XPSN(:) *TPSNOW%ALB(:,1)
+    ZALBUV(:)  = (1.-TGR%CUR%XPSN(:))*PALBUV_ECO (:) + TGR%CUR%XPSN(:) *TPSNOW%ALB(:,1)
   END WHERE
 !
 !* albedo for each wavelength
@@ -171,7 +171,7 @@ PTSRAD  (:)   = 0.
 ! emissivity
 !
   WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PEMIS(:) = (1.-TGR%XPSN(:))*PEMIS_ECO(:) + TGR%XPSN(:) * XEMISSN  
+    PEMIS(:) = (1.-TGR%CUR%XPSN(:))*PEMIS_ECO(:) + TGR%CUR%XPSN(:) * XEMISSN  
   END WHERE
 !
 !* radiative surface temperature
@@ -180,8 +180,8 @@ PTSRAD  (:)   = 0.
     PTSRAD(:) = PTG1(:)
   ELSE IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
     WHERE (PEMIS_ECO(:)/=XUNDEF)
-      PTSRAD(:) = ( ( (1.-TGR%XPSN(:))*PEMIS(:)*PTG1(:)**4                           &
-                   +      TGR%XPSN(:) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
+      PTSRAD(:) = ( ( (1.-TGR%CUR%XPSN(:))*PEMIS(:)*PTG1(:)**4                           &
+                   +      TGR%CUR%XPSN(:) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
                          / PEMIS(:)**0.25  
     END WHERE
   END IF

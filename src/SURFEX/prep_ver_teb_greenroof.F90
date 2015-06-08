@@ -77,41 +77,41 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.0    Ice content climatologic gradient
 !
 IF (LHOOK) CALL DR_HOOK('PREP_VER_TEB_GREENROOF',0,ZHOOK_HANDLE)
-ALLOCATE(ZWGI_CLIM_GRAD (SIZE(TGR%XWG,1),SIZE(TGR%XWG,2)))
+ALLOCATE(ZWGI_CLIM_GRAD (SIZE(TGR%CUR%XWG,1),SIZE(TGR%CUR%XWG,2)))
 !
 ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - TGRP%XDG(:,:) / ZH0 )
 !-------------------------------------------------------------------------------------
 !
 !*      1.1    Temperature profile
 !
-ALLOCATE(ZTG_LS(SIZE(TGR%XTG,1),SIZE(TGR%XTG,2)))
-ZTG_LS(:,:) = TGR%XTG(:,:)
+ALLOCATE(ZTG_LS(SIZE(TGR%CUR%XTG,1),SIZE(TGR%CUR%XTG,2)))
+ZTG_LS(:,:) = TGR%CUR%XTG(:,:)
 !
-  DO JL=1,SIZE(TGR%XTG,2)
-    WHERE(TGR%XTG(:,JL)/=XUNDEF) &
-      TGR%XTG(:,JL) = TGR%XTG(:,JL) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
+  DO JL=1,SIZE(TGR%CUR%XTG,2)
+    WHERE(TGR%CUR%XTG(:,JL)/=XUNDEF) &
+      TGR%CUR%XTG(:,JL) = TGR%CUR%XTG(:,JL) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
   END DO
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.2    Water and ice in the soil
 !
-ALLOCATE(ZZSFREEZE      (SIZE(TGR%XWG,1)))
-ALLOCATE(ZWGTOT         (SIZE(TGR%XWG,1)))
-ALLOCATE(ZDW            (SIZE(TGR%XWG,1)))
+ALLOCATE(ZZSFREEZE      (SIZE(TGR%CUR%XWG,1)))
+ALLOCATE(ZWGTOT         (SIZE(TGR%CUR%XWG,1)))
+ALLOCATE(ZDW            (SIZE(TGR%CUR%XWG,1)))
 !
 !* general case
 !
-IWORK=SIZE(TGR%XTG,2)
+IWORK=SIZE(TGR%CUR%XTG,2)
 !
   !
   DO JL=1,IWORK
     !
     ZDW(:) = 0.
     ! altitude where deep soil freezes (diurnal surface response is not treated)
-    ZZSFREEZE(:) = TOP%XZS + (XTT - TGR%XTG(:,JL)) / XT_CLIM_GRAD
+    ZZSFREEZE(:) = TOP%XZS + (XTT - TGR%CUR%XTG(:,JL)) / XT_CLIM_GRAD
     !
-    WHERE(TGR%XTG(:,JL)/=XUNDEF) 
+    WHERE(TGR%CUR%XTG(:,JL)/=XUNDEF) 
       !
       WHERE (ZTG_LS(:,JL) < XTT)
         !
@@ -145,29 +145,29 @@ IWORK=SIZE(TGR%XTG,2)
       !
       ZWGTOT(:) = XUNDEF
       !
-      WHERE(TGR%XWG(:,JL)/=XUNDEF)         
-        ZWGTOT(:) = TGR%XWG(:,JL) + TGR%XWGI(:,JL)
+      WHERE(TGR%CUR%XWG(:,JL)/=XUNDEF)         
+        ZWGTOT(:) = TGR%CUR%XWG(:,JL) + TGR%CUR%XWGI(:,JL)
       ENDWHERE 
       !
-      WHERE(TGR%XWG(:,JL)/=XUNDEF)      
-        TGR%XWGI(:,JL) = TGR%XWGI(:,JL) + ZDW(:)
-        TGR%XWG (:,JL) = TGR%XWG (:,JL) - ZDW(:)
+      WHERE(TGR%CUR%XWG(:,JL)/=XUNDEF)      
+        TGR%CUR%XWGI(:,JL) = TGR%CUR%XWGI(:,JL) + ZDW(:)
+        TGR%CUR%XWG (:,JL) = TGR%CUR%XWG (:,JL) - ZDW(:)
       ENDWHERE      
       !
-      WHERE (TGR%XWGI(:,JL) < 0..AND.TGR%XWGI(:,JL)/=XUNDEF) 
-        TGR%XWGI(:,JL) = 0.
-        TGR%XWG (:,JL) = ZWGTOT(:)
+      WHERE (TGR%CUR%XWGI(:,JL) < 0..AND.TGR%CUR%XWGI(:,JL)/=XUNDEF) 
+        TGR%CUR%XWGI(:,JL) = 0.
+        TGR%CUR%XWG (:,JL) = ZWGTOT(:)
       END WHERE
       !
-      WHERE (TGR%XWG(:,JL) < XWGMIN.AND.TGR%XWG(:,JL)/=XUNDEF)
-        TGR%XWG (:,JL) = XWGMIN
-        TGR%XWGI(:,JL) = ZWGTOT(:) - XWGMIN
+      WHERE (TGR%CUR%XWG(:,JL) < XWGMIN.AND.TGR%CUR%XWG(:,JL)/=XUNDEF)
+        TGR%CUR%XWG (:,JL) = XWGMIN
+        TGR%CUR%XWGI(:,JL) = ZWGTOT(:) - XWGMIN
       END WHERE
       !
-      WHERE(TGR%XWGI(:,JL) > 0..AND.TGR%XWGI(:,JL)/=XUNDEF)
-        TGR%XTG(:,JL) = MIN(XTT,TGR%XTG(:,JL))
+      WHERE(TGR%CUR%XWGI(:,JL) > 0..AND.TGR%CUR%XWGI(:,JL)/=XUNDEF)
+        TGR%CUR%XTG(:,JL) = MIN(XTT,TGR%CUR%XTG(:,JL))
       ELSEWHERE
-        TGR%XTG(:,JL) = MAX(XTT,TGR%XTG(:,JL))
+        TGR%CUR%XTG(:,JL) = MAX(XTT,TGR%CUR%XTG(:,JL))
       ENDWHERE
       !
     ENDWHERE
@@ -182,15 +182,15 @@ DEALLOCATE(ZWGTOT        )
 DEALLOCATE(ZDW           )
 !
 !* masks where fields are not defined
-WHERE (TGR%XTG(:,1:SIZE(TGR%XWG,2)) == XUNDEF)
-  TGR%XWG (:,:) = XUNDEF
-  TGR%XWGI(:,:) = XUNDEF
+WHERE (TGR%CUR%XTG(:,1:SIZE(TGR%CUR%XWG,2)) == XUNDEF)
+  TGR%CUR%XWG (:,:) = XUNDEF
+  TGR%CUR%XWGI(:,:) = XUNDEF
 END WHERE
 !
 !-------------------------------------------------------------------------------------
 !
 IDEEP_SOIL = TGRO%NLAYER_GR
- CALL PREP_VER_SNOW(TGR%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),SPREAD(TGR%XTG,3,1),IDEEP_SOIL)
+ CALL PREP_VER_SNOW(TGR%CUR%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),SPREAD(TGR%CUR%XTG,3,1),IDEEP_SOIL)
 !
 !-------------------------------------------------------------------------------------
 !

@@ -32,10 +32,10 @@ IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GREENROOF_PGD',0,ZHOOK_HANDLE)
 !
 ! - Physiographic field that can evolve prognostically
 !
-ALLOCATE(TGRPE%XLAI                    (KLU                     ))
-ALLOCATE(TGRPE%XVEG                    (KLU                     )) 
-ALLOCATE(TGRPE%XEMIS                   (KLU                     )) 
-ALLOCATE(TGRPE%XZ0                     (KLU                     )) 
+ALLOCATE(TGRPE%CUR%XLAI                    (KLU                     ))
+ALLOCATE(TGRPE%CUR%XVEG                    (KLU                     )) 
+ALLOCATE(TGRPE%CUR%XEMIS                   (KLU                     )) 
+ALLOCATE(TGRPE%CUR%XZ0                     (KLU                     )) 
 !
 ! - vegetation:
 !

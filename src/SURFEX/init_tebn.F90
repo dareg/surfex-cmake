@@ -43,6 +43,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_GOTO_PATCH
+!
 USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
 !
@@ -100,7 +102,7 @@ USE MODI_READ_NAM_PREP_TEB_n
 USE MODI_INIT_CHEMICAL_n
 USE MODI_GARDEN_PROPERTIES
 USE MODI_HVAC_AUTOSIZE
-USE MODI_GOTO_TEB
+USE MODI_GOTO_WRAPPER_TEB_PATCH
 !
 USE MODI_INIT_TEB_GARDEN_n
 USE MODI_INIT_TEB_GARDEN_PGD_n
@@ -209,7 +211,7 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_TEB(TOP%CZ0H,TOP%XTSTEP,TOP%XOUT_TSTEP, TOP%CCH_BEM, T%XDT_RES, T%XDT_OFF)
+ CALL DEFAULT_TEB(TOP%CZ0H,TOP%XTSTEP,TOP%XOUT_TSTEP, TOP%CCH_BEM, T%CUR%XDT_RES, T%CUR%XDT_OFF)
  CALL DEFAULT_CH_DEP(CHT%CCH_DRY_DEP)
  CALL DEFAULT_DIAG_TEB(DGT%N2M,DGT%LSURF_BUDGET,DGT%L2M_MIN_ZS,DGT%LRAD_BUDGET,DGT%LCOEF,DGT%LSURF_VARS, &
                        DGMTO%LSURF_MISC_BUDGET,DGMTO%LSURF_DIAG_ALBEDO,DGUT%LUTCI,DGT%LPGD,DGT%LPGD_FIX,DGT%XDIAG_TSTEP)  
@@ -229,9 +231,9 @@ ENDIF
 !
 IF (HINIT=='PRE') THEN
   DO JPATCH=1,TOP%NTEB_PATCH
-    CALL GOTO_TEB(JPATCH)
-    CALL READ_PREP_TEB_SNOW(HPROGRAM,T%TSNOW_ROOF%SCHEME,T%TSNOW_ROOF%NLAYER, &
-                                     T%TSNOW_ROAD%SCHEME,T%TSNOW_ROAD%NLAYER)
+    CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+    CALL READ_PREP_TEB_SNOW(HPROGRAM,T%CUR%TSNOW_ROOF%SCHEME,T%CUR%TSNOW_ROOF%NLAYER, &
+                                     T%CUR%TSNOW_ROAD%SCHEME,T%CUR%TSNOW_ROAD%NLAYER)
   END DO
 ENDIF
 !
@@ -310,54 +312,55 @@ END IF
 !
 DO JPATCH=1,TOP%NTEB_PATCH
 
-  CALL GOTO_TEB(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+  CALL DIAG_MISC_TEB_GOTO_PATCH(JPATCH)
   !-----------------------------------------------------------------------------------
   !
   !*       3.     Physiographic data fields from land cover:
   !               -----------------------------------------
   !
-  ALLOCATE(T%XZ0_TOWN     (ILU))
-  ALLOCATE(T%XALB_ROOF    (ILU))
-  ALLOCATE(T%XEMIS_ROOF   (ILU))
-  ALLOCATE(T%XALB_ROAD    (ILU))
-  ALLOCATE(T%XEMIS_ROAD   (ILU))
-  ALLOCATE(T%XALB_WALL    (ILU))
-  ALLOCATE(T%XEMIS_WALL   (ILU))
-  ALLOCATE(T%XBLD         (ILU))
-  ALLOCATE(T%XROAD_DIR    (ILU))
-  ALLOCATE(T%XROAD        (ILU))
-  ALLOCATE(T%XBLD_HEIGHT  (ILU))
-  ALLOCATE(T%XWALL_O_HOR  (ILU))
-  ALLOCATE(T%XCAN_HW_RATIO(ILU))
-  ALLOCATE(T%XROAD_O_GRND(ILU))
-  ALLOCATE(T%XGARDEN_O_GRND(ILU))
-  ALLOCATE(T%XWALL_O_GRND(ILU))
-  ALLOCATE(T%XWALL_O_BLD(ILU))
-  ALLOCATE(T%XH_TRAFFIC   (ILU))
-  ALLOCATE(T%XLE_TRAFFIC  (ILU))
-  ALLOCATE(T%XH_INDUSTRY  (ILU))
-  ALLOCATE(T%XLE_INDUSTRY (ILU))
-  ALLOCATE(T%XHC_ROOF     (ILU,TOP%NROOF_LAYER))
-  ALLOCATE(T%XTC_ROOF     (ILU,TOP%NROOF_LAYER))
-  ALLOCATE(T%XD_ROOF      (ILU,TOP%NROOF_LAYER))
-  ALLOCATE(T%XHC_ROAD     (ILU,TOP%NROAD_LAYER))
-  ALLOCATE(T%XTC_ROAD     (ILU,TOP%NROAD_LAYER))
-  ALLOCATE(T%XD_ROAD      (ILU,TOP%NROAD_LAYER))
-  ALLOCATE(T%XHC_WALL     (ILU,TOP%NWALL_LAYER))
-  ALLOCATE(T%XTC_WALL     (ILU,TOP%NWALL_LAYER))
-  ALLOCATE(T%XD_WALL      (ILU,TOP%NWALL_LAYER))
-  ALLOCATE(T%XROUGH_ROOF      (ILU))
-  ALLOCATE(T%XROUGH_WALL      (ILU))
-  ALLOCATE(T%XRESIDENTIAL     (ILU))
-  ALLOCATE(T%XGREENROOF       (ILU))
-  ALLOCATE(T%XGARDEN          (ILU))
+  ALLOCATE(T%CUR%XZ0_TOWN     (ILU))
+  ALLOCATE(T%CUR%XALB_ROOF    (ILU))
+  ALLOCATE(T%CUR%XEMIS_ROOF   (ILU))
+  ALLOCATE(T%CUR%XALB_ROAD    (ILU))
+  ALLOCATE(T%CUR%XEMIS_ROAD   (ILU))
+  ALLOCATE(T%CUR%XALB_WALL    (ILU))
+  ALLOCATE(T%CUR%XEMIS_WALL   (ILU))
+  ALLOCATE(T%CUR%XBLD         (ILU))
+  ALLOCATE(T%CUR%XROAD_DIR    (ILU))
+  ALLOCATE(T%CUR%XROAD        (ILU))
+  ALLOCATE(T%CUR%XBLD_HEIGHT  (ILU))
+  ALLOCATE(T%CUR%XWALL_O_HOR  (ILU))
+  ALLOCATE(T%CUR%XCAN_HW_RATIO(ILU))
+  ALLOCATE(T%CUR%XROAD_O_GRND(ILU))
+  ALLOCATE(T%CUR%XGARDEN_O_GRND(ILU))
+  ALLOCATE(T%CUR%XWALL_O_GRND(ILU))
+  ALLOCATE(T%CUR%XWALL_O_BLD(ILU))
+  ALLOCATE(T%CUR%XH_TRAFFIC   (ILU))
+  ALLOCATE(T%CUR%XLE_TRAFFIC  (ILU))
+  ALLOCATE(T%CUR%XH_INDUSTRY  (ILU))
+  ALLOCATE(T%CUR%XLE_INDUSTRY (ILU))
+  ALLOCATE(T%CUR%XHC_ROOF     (ILU,TOP%NROOF_LAYER))
+  ALLOCATE(T%CUR%XTC_ROOF     (ILU,TOP%NROOF_LAYER))
+  ALLOCATE(T%CUR%XD_ROOF      (ILU,TOP%NROOF_LAYER))
+  ALLOCATE(T%CUR%XHC_ROAD     (ILU,TOP%NROAD_LAYER))
+  ALLOCATE(T%CUR%XTC_ROAD     (ILU,TOP%NROAD_LAYER))
+  ALLOCATE(T%CUR%XD_ROAD      (ILU,TOP%NROAD_LAYER))
+  ALLOCATE(T%CUR%XHC_WALL     (ILU,TOP%NWALL_LAYER))
+  ALLOCATE(T%CUR%XTC_WALL     (ILU,TOP%NWALL_LAYER))
+  ALLOCATE(T%CUR%XD_WALL      (ILU,TOP%NWALL_LAYER))
+  ALLOCATE(T%CUR%XROUGH_ROOF      (ILU))
+  ALLOCATE(T%CUR%XROUGH_WALL      (ILU))
+  ALLOCATE(T%CUR%XRESIDENTIAL     (ILU))
+  ALLOCATE(T%CUR%XGREENROOF       (ILU))
+  ALLOCATE(T%CUR%XGARDEN          (ILU))
   ALLOCATE(TPN%XEMIS_PANEL      (ILU))
   ALLOCATE(TPN%XALB_PANEL       (ILU))
   ALLOCATE(TPN%XEFF_PANEL       (ILU))
   ALLOCATE(TPN%XFRAC_PANEL      (ILU))
   !
-  T%XROAD_DIR(:) = 0.
-  T%XROAD    (:) = 0.
+  T%CUR%XROAD_DIR(:) = 0.
+  T%CUR%XROAD    (:) = 0.
   !
   ZDEF_ROAD_DIR = 0.
   IF (TOP%CROAD_DIR/='UNIF') THEN
@@ -368,28 +371,28 @@ DO JPATCH=1,TOP%NTEB_PATCH
   END IF
   !
   CALL CONVERT_PATCH_TEB(TOP%XCOVER, TOP%LCOVER, ZDEF_ROAD_DIR,                          &
-                      PZ0_TOWN=T%XZ0_TOWN,                                         &
-                      PALB_ROOF=T%XALB_ROOF,                                       &
-                      PEMIS_ROOF=T%XEMIS_ROOF,PHC_ROOF=T%XHC_ROOF,PTC_ROOF=T%XTC_ROOF, &
-                      PD_ROOF=T%XD_ROOF,                                           &
-                      PALB_ROAD=T%XALB_ROAD,                                       &
-                      PEMIS_ROAD=T%XEMIS_ROAD,PHC_ROAD=T%XHC_ROAD,PTC_ROAD=T%XTC_ROAD, &
-                      PD_ROAD=T%XD_ROAD,                                           &
-                      PALB_WALL=T%XALB_WALL,                                       &
-                      PEMIS_WALL=T%XEMIS_WALL,PHC_WALL=T%XHC_WALL,PTC_WALL=T%XTC_WALL, &
-                      PD_WALL=T%XD_WALL,                                           &
-                      PBLD_HEIGHT=T%XBLD_HEIGHT,                                   &
-                      PWALL_O_HOR=T%XWALL_O_HOR,PBLD=T%XBLD, PROAD_DIR=T%XROAD_DIR,    &
-                      PGARDEN=T%XGARDEN,                                           &
-                      PH_TRAFFIC=T%XH_TRAFFIC, PLE_TRAFFIC=T%XLE_TRAFFIC,            &
-                      PH_INDUSTRY=T%XH_INDUSTRY, PLE_INDUSTRY=T%XLE_INDUSTRY,        &
-                      PROUGH_ROOF = T%XROUGH_ROOF, PROUGH_WALL = T%XROUGH_WALL,      &
-                      PRESIDENTIAL = T%XRESIDENTIAL,                               &
-                      PGREENROOF = T%XGREENROOF,                                   &
+                      PZ0_TOWN=T%CUR%XZ0_TOWN,                                         &
+                      PALB_ROOF=T%CUR%XALB_ROOF,                                       &
+                      PEMIS_ROOF=T%CUR%XEMIS_ROOF,PHC_ROOF=T%CUR%XHC_ROOF,PTC_ROOF=T%CUR%XTC_ROOF, &
+                      PD_ROOF=T%CUR%XD_ROOF,                                           &
+                      PALB_ROAD=T%CUR%XALB_ROAD,                                       &
+                      PEMIS_ROAD=T%CUR%XEMIS_ROAD,PHC_ROAD=T%CUR%XHC_ROAD,PTC_ROAD=T%CUR%XTC_ROAD, &
+                      PD_ROAD=T%CUR%XD_ROAD,                                           &
+                      PALB_WALL=T%CUR%XALB_WALL,                                       &
+                      PEMIS_WALL=T%CUR%XEMIS_WALL,PHC_WALL=T%CUR%XHC_WALL,PTC_WALL=T%CUR%XTC_WALL, &
+                      PD_WALL=T%CUR%XD_WALL,                                           &
+                      PBLD_HEIGHT=T%CUR%XBLD_HEIGHT,                                   &
+                      PWALL_O_HOR=T%CUR%XWALL_O_HOR,PBLD=T%CUR%XBLD, PROAD_DIR=T%CUR%XROAD_DIR,    &
+                      PGARDEN=T%CUR%XGARDEN,                                           &
+                      PH_TRAFFIC=T%CUR%XH_TRAFFIC, PLE_TRAFFIC=T%CUR%XLE_TRAFFIC,            &
+                      PH_INDUSTRY=T%CUR%XH_INDUSTRY, PLE_INDUSTRY=T%CUR%XLE_INDUSTRY,        &
+                      PROUGH_ROOF = T%CUR%XROUGH_ROOF, PROUGH_WALL = T%CUR%XROUGH_WALL,      &
+                      PRESIDENTIAL = T%CUR%XRESIDENTIAL,                               &
+                      PGREENROOF = T%CUR%XGREENROOF,                                   &
                       PEMIS_PANEL=TPN%XEMIS_PANEL, PALB_PANEL=TPN%XALB_PANEL,            &
                       PEFF_PANEL=TPN%XEFF_PANEL, PFRAC_PANEL=TPN%XFRAC_PANEL             )
   !
-  IF (.NOT. TOP%LGREENROOF .AND. MAXVAL(T%XGREENROOF)>0. ) THEN !<== A paralleliser pour un stop propre
+  IF (.NOT. TOP%LGREENROOF .AND. MAXVAL(T%CUR%XGREENROOF)>0. ) THEN !<== A paralleliser pour un stop propre
     WRITE(ILUOUT,*) 'You choose NOT to have greenroofs, BUT your greenroof fraction is not zero'
     WRITE(ILUOUT,*) 'Please activate the greenroof option (and rerun the SURFEX suite from the PGD step)'
     WRITE(ILUOUT,*) 'Or be sure NOT to have any greenroofs in your area'
@@ -408,18 +411,18 @@ DO JPATCH=1,TOP%NTEB_PATCH
   !*       5.     Sky-view-factors:
   !               ----------------
   !
-  ALLOCATE(T%XSVF_ROAD  (ILU))
-  ALLOCATE(T%XSVF_GARDEN(ILU))
-  ALLOCATE(T%XSVF_WALL  (ILU))
+  ALLOCATE(T%CUR%XSVF_ROAD  (ILU))
+  ALLOCATE(T%CUR%XSVF_GARDEN(ILU))
+  ALLOCATE(T%CUR%XSVF_WALL  (ILU))
   !
-  ALLOCATE(B%XGR          (ILU))
-  ALLOCATE(B%XALB_WIN     (ILU))
-  ALLOCATE(B%XF_WASTE_CAN (ILU))
+  ALLOCATE(B%CUR%XGR          (ILU))
+  ALLOCATE(B%CUR%XALB_WIN     (ILU))
+  ALLOCATE(B%CUR%XF_WASTE_CAN (ILU))
   !
   !
-  CALL TEB_MORPHO(HPROGRAM, T%XBLD, T%XWALL_O_HOR, T%XGARDEN, T%XBLD_HEIGHT, T%XROAD, T%XROAD_O_GRND, &
-                T%XGARDEN_O_GRND, T%XWALL_O_GRND, T%XCAN_HW_RATIO, T%XSVF_ROAD, T%XSVF_GARDEN,    &
-                T%XSVF_WALL, T%XZ0_TOWN, T%XWALL_O_BLD, T%XH_TRAFFIC, T%XLE_TRAFFIC               )
+  CALL TEB_MORPHO(HPROGRAM, T%CUR%XBLD, T%CUR%XWALL_O_HOR, T%CUR%XGARDEN, T%CUR%XBLD_HEIGHT, T%CUR%XROAD, T%CUR%XROAD_O_GRND, &
+                T%CUR%XGARDEN_O_GRND, T%CUR%XWALL_O_GRND, T%CUR%XCAN_HW_RATIO, T%CUR%XSVF_ROAD, T%CUR%XSVF_GARDEN,    &
+                T%CUR%XSVF_WALL, T%CUR%XZ0_TOWN, T%CUR%XWALL_O_BLD, T%CUR%XH_TRAFFIC, T%CUR%XLE_TRAFFIC               )
                 !
   !-------------------------------------------------------------------------------
   !
@@ -485,21 +488,22 @@ END IF
 !               -------------------
 !
 DO JPATCH=1,TOP%NTEB_PATCH
-  CALL GOTO_TEB(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+  CALL DIAG_MISC_TEB_GOTO_PATCH(JPATCH)
 !
 !* TEB fields
   CALL READ_TEB_n(HPROGRAM,JPATCH)
 !
-  ALLOCATE(T%XAC_ROOF    (ILU))
-  ALLOCATE(T%XAC_ROAD    (ILU))
-  ALLOCATE(T%XAC_WALL    (ILU))
-  ALLOCATE(T%XAC_TOP     (ILU))
-  ALLOCATE(T%XAC_ROOF_WAT(ILU))
-  ALLOCATE(T%XAC_ROAD_WAT(ILU))
-  ALLOCATE(T%XQSAT_ROOF  (ILU))
-  ALLOCATE(T%XQSAT_ROAD  (ILU))
-  ALLOCATE(T%XDELT_ROOF  (ILU))
-  ALLOCATE(T%XDELT_ROAD  (ILU))
+  ALLOCATE(T%CUR%XAC_ROOF    (ILU))
+  ALLOCATE(T%CUR%XAC_ROAD    (ILU))
+  ALLOCATE(T%CUR%XAC_WALL    (ILU))
+  ALLOCATE(T%CUR%XAC_TOP     (ILU))
+  ALLOCATE(T%CUR%XAC_ROOF_WAT(ILU))
+  ALLOCATE(T%CUR%XAC_ROAD_WAT(ILU))
+  ALLOCATE(T%CUR%XQSAT_ROOF  (ILU))
+  ALLOCATE(T%CUR%XQSAT_ROAD  (ILU))
+  ALLOCATE(T%CUR%XDELT_ROOF  (ILU))
+  ALLOCATE(T%CUR%XDELT_ROAD  (ILU))
 !
 !* Case of urban green areas
   IF (TOP%LGARDEN) THEN
@@ -517,8 +521,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
 !
 !* snow long-wave properties (not initialized in read_gr_snow)
 !
-  CALL INIT_SNOW_LW(XEMISSN,T%TSNOW_ROOF)
-  CALL INIT_SNOW_LW(XEMISSN,T%TSNOW_ROAD)
+  CALL INIT_SNOW_LW(XEMISSN,T%CUR%TSNOW_ROOF)
+  CALL INIT_SNOW_LW(XEMISSN,T%CUR%TSNOW_ROAD)
 !
   IF (TOP%LGARDEN) THEN
     ZDIR_SW=0. ! night as first guess for albedo computation
@@ -544,20 +548,20 @@ DO JPATCH=1,TOP%NTEB_PATCH
 !
 !* averaged albedo, emissivity and radiative temperature
 !
-  CALL AVERAGED_TSRAD_TEB(T%XEMIS_ROOF,T%XT_ROOF(:,1),       &
-                        T%XEMIS_ROAD,T%XT_ROAD(:,1),       &
-                        T%XEMIS_WALL,                    &
-                        T%XT_WALL_A(:,1),                &
-                        T%XT_WALL_B(:,1),                &
+  CALL AVERAGED_TSRAD_TEB(T%CUR%XEMIS_ROOF,T%CUR%XT_ROOF(:,1),       &
+                        T%CUR%XEMIS_ROAD,T%CUR%XT_ROAD(:,1),       &
+                        T%CUR%XEMIS_WALL,                    &
+                        T%CUR%XT_WALL_A(:,1),                &
+                        T%CUR%XT_WALL_B(:,1),                &
                         ZEMIS_GARDEN, ZTS_GARDEN,      &
                         ZEMIS_GREENROOF, ZTS_GREENROOF,&
-                        T%TSNOW_ROOF,T%TSNOW_ROAD,         &
-                        T%XROAD, T%XGREENROOF, T%XGARDEN,    &
-                        T%XBLD,T%XWALL_O_HOR,              &
-                        T%XSVF_ROAD,T%XSVF_WALL,           &
-                        T%XSVF_GARDEN,                   &
-                        PEMIS,PTSRAD, B%XT_WIN1,         &
-                        B%XGR                            )
+                        T%CUR%TSNOW_ROOF,T%CUR%TSNOW_ROAD,         &
+                        T%CUR%XROAD, T%CUR%XGREENROOF, T%CUR%XGARDEN,    &
+                        T%CUR%XBLD,T%CUR%XWALL_O_HOR,              &
+                        T%CUR%XSVF_ROAD,T%CUR%XSVF_WALL,           &
+                        T%CUR%XSVF_GARDEN,                   &
+                        PEMIS,PTSRAD, B%CUR%XT_WIN1,         &
+                        B%CUR%XGR                            )
 !
 !
 !*       9.     Visible and near-infra-red Radiative fields:
@@ -567,18 +571,18 @@ DO JPATCH=1,TOP%NTEB_PATCH
   ALLOCATE(ZSCA_ALB(ILU))
 !
   CALL AVERAGED_ALBEDO_TEB(TOP%CBEM,TOP%CROAD_DIR,TOP%CWALL_OPT,PZENITH,PAZIM, &
-                       T%XBLD, T%XGARDEN, T%XROAD_DIR, T%XROAD, T%XGREENROOF,&
+                       T%CUR%XBLD, T%CUR%XGARDEN, T%CUR%XROAD_DIR, T%CUR%XROAD, T%CUR%XGREENROOF,&
                        TPN%XFRAC_PANEL, TPN%XALB_PANEL,                    &
-                       T%XWALL_O_HOR, T%XCAN_HW_RATIO,                 &
-                       T%XALB_ROOF,                                  &
-                       T%XALB_ROAD, T%XSVF_ROAD,                       &
-                       T%XALB_WALL, T%XSVF_WALL,                       &
-                       ZALB_GARDEN, T%XSVF_GARDEN,                   &
+                       T%CUR%XWALL_O_HOR, T%CUR%XCAN_HW_RATIO,                 &
+                       T%CUR%XALB_ROOF,                                  &
+                       T%CUR%XALB_ROAD, T%CUR%XSVF_ROAD,                       &
+                       T%CUR%XALB_WALL, T%CUR%XSVF_WALL,                       &
+                       ZALB_GARDEN, T%CUR%XSVF_GARDEN,                   &
                        ZALB_GREENROOF,                             &
-                       T%TSNOW_ROOF, T%TSNOW_ROAD,                     &
-                       B%XGR, B%XSHGC, B%XSHGC_SH, B%XABS_WIN, B%XALB_WIN,   &
-                       B%LSHAD_DAY,                                  &
-                       ZDIR_ALB, ZSCA_ALB, B%XTRAN_WIN               )  
+                       T%CUR%TSNOW_ROOF, T%CUR%TSNOW_ROAD,                     &
+                       B%CUR%XGR, B%CUR%XSHGC, B%CUR%XSHGC_SH, B%CUR%XABS_WIN, B%CUR%XALB_WIN,   &
+                       B%CUR%LSHAD_DAY,                                  &
+                       ZDIR_ALB, ZSCA_ALB, B%CUR%XTRAN_WIN               )  
 
   ISWB=SIZE(PSW_BANDS)
   DO JSWB=1,ISWB
@@ -630,7 +634,8 @@ END IF
  CALL DIAG_TEB_INIT_n(DGT, DGUT, &
                       HPROGRAM,ILU,ISWB)
 DO JPATCH=1,TOP%NTEB_PATCH
-  CALL GOTO_TEB(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+  CALL DIAG_MISC_TEB_GOTO_PATCH(JPATCH)
   CALL DIAG_MISC_TEB_INIT_n(DGCT, DGMT, DGMTO, TOP, &
                             HPROGRAM,ILU,ISWB)
 END DO ! end of loop on patches

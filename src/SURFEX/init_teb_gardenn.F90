@@ -110,9 +110,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_N',0,ZHOOK_HANDLE)
 !* initialization of snow scheme (TSNOW defined in MODD_TEB_GARDEN_n)
 !
 IF (HINIT=='PRE') THEN
-  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TGD%TSNOW%SCHEME,TGD%TSNOW%NLAYER)
+  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TGD%CUR%TSNOW%SCHEME,TGD%CUR%TSNOW%NLAYER)
 !
-  IF (TGD%TSNOW%SCHEME.NE.'3-L' .AND. TGD%TSNOW%SCHEME.NE.'CRO' .AND. TVG%CISBA=='DIF') THEN
+  IF (TGD%CUR%TSNOW%SCHEME.NE.'3-L' .AND. TGD%CUR%TSNOW%SCHEME.NE.'CRO' .AND. TVG%CISBA=='DIF') THEN
     CALL ABOR1_SFX("INIT_TEB_GARDEN_n: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
   ENDIF
   IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_N',1,ZHOOK_HANDLE)
@@ -151,15 +151,17 @@ ENDIF
   CALL READ_TEB_GARDEN_n(HPROGRAM,YPATCH)
 !
 !
- CALL INIT_VEG_GARDEN_n(KI, TOP%LCANOPY, TVG%CROUGH, TGD%TSNOW, &
-                   TVG%CPHOTO, TGDP%XLAIMIN, TGDP%XH_TREE, TGDP%XVEGTYPE, TGDPE%XLAI, TGDPE%XZ0, TGDPE%XVEG, TGDPE%XEMIS, &
-                   TVG%LTR_ML, TGD%XFAPARC, TGD%XFAPIRC, TGD%XLAI_EFFC, TGD%XMUS, &
-                   TGDP%XALBNIR_SOIL, TGDP%XALBVIS_SOIL, TGDP%XALBUV_SOIL, TGDPE%XALBNIR, TGDPE%XALBVIS, TGDPE%XALBUV, &
-                   DGMTO%LSURF_DIAG_ALBEDO, TGD%XPSN, TGD%XPSNG, TGD%XPSNV, TGD%XPSNV_A, &
+ CALL INIT_VEG_GARDEN_n(KI, TOP%LCANOPY, TVG%CROUGH, TGD%CUR%TSNOW, &
+                   TVG%CPHOTO, TGDP%XLAIMIN, TGDP%XH_TREE, TGDP%XVEGTYPE, TGDPE%CUR%XLAI, &
+                   TGDPE%CUR%XZ0, TGDPE%CUR%XVEG, TGDPE%CUR%XEMIS, &
+                   TVG%LTR_ML, TGD%CUR%XFAPARC, TGD%CUR%XFAPIRC, TGD%CUR%XLAI_EFFC, TGD%CUR%XMUS, &
+                   TGDP%XALBNIR_SOIL, TGDP%XALBVIS_SOIL, TGDP%XALBUV_SOIL, TGDPE%CUR%XALBNIR, &
+                   TGDPE%CUR%XALBVIS, TGDPE%CUR%XALBUV, &
+                   DGMTO%LSURF_DIAG_ALBEDO, TGD%CUR%XPSN, TGD%CUR%XPSNG, TGD%CUR%XPSNV, TGD%CUR%XPSNV_A, &
                    ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTSRAD )
 !
-ZWG1(:) = TGD%XWG(:,1)
-ZTG1(:) = TGD%XTG(:,1)
+ZWG1(:) = TGD%CUR%XWG(:,1)
+ZTG1(:) = TGD%CUR%XTG(:,1)
 !
 IF (.NOT. TGDO%LPAR_GARDEN) THEN
   CALL SOIL_ALBEDO(TVG%CALBEDO,                               &
@@ -182,13 +184,13 @@ END IF
 !
  CALL AVG_ALBEDO_EMIS_GARDEN(TGD, &
                              TVG%CALBEDO,                                   &
-                                 TGDPE%XVEG,TGDPE%XZ0,TGDPE%XLAI,ZTG1,                     &
+                                 TGDPE%CUR%XVEG,TGDPE%CUR%XZ0,TGDPE%CUR%XLAI,ZTG1,                     &
                                  PSW_BANDS,                              &
                                  TGDP%XALBNIR_VEG,TGDP%XALBVIS_VEG,TGDP%XALBUV_VEG,     &
                                  TGDP%XALBNIR_SOIL,TGDP%XALBVIS_SOIL,TGDP%XALBUV_SOIL,  &
-                                 TGDPE%XEMIS,                                  &
-                                 TGD%TSNOW,                                  &
-                                 TGDPE%XALBNIR,TGDPE%XALBVIS,TGDPE%XALBUV,                 &
+                                 TGDPE%CUR%XEMIS,                                  &
+                                 TGD%CUR%TSNOW,                                  &
+                                 TGDPE%CUR%XALBNIR,TGDPE%CUR%XALBVIS,TGDPE%CUR%XALBUV,                 &
                                  ZDIR_ALB, ZSCA_ALB,                     &
                                  ZEMIS,ZTSRAD                            )  
 !
