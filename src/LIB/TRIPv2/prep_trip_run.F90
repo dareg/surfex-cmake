@@ -343,11 +343,13 @@ ENDIF
 !
 YTITLE    = 'TRIP parameters for a run'
 YTIMEUNIT = '-'
-CALL INIT_PARAM_TRIP(NLISTING,YFILE_PARAM,ILON,ILAT,YTITLE,YTIMEUNIT)
+CALL INIT_PARAM_TRIP(TPG, &
+                     NLISTING,YFILE_PARAM,ILON,ILAT,YTITLE,YTIMEUNIT)
 !
 YTITLE   ='TRIP prep historical variable'
 YTIMEUNIT='-'
-CALL INIT_RESTART_TRIP(NLISTING,YFILE_PREP,ILON,ILAT,YTITLE,YTIMEUNIT,.FALSE.)
+CALL INIT_RESTART_TRIP(TPG, &
+                       NLISTING,YFILE_PREP,ILON,ILAT,YTITLE,YTIMEUNIT,.FALSE.)
 !
 !-------------------------------------------------------------------------------
 ! * Compute the mask of the run

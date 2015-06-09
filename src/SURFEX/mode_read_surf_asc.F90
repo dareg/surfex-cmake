@@ -54,10 +54,13 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX0_ASC(HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFX0_ASC (IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -74,6 +77,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
@@ -114,12 +120,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX1_ASC(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFX1_ASC (IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *READX1* - routine to fill a real 1D array for the externalised surface 
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
@@ -143,6 +152,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT)  :: PFIELD   ! array containing the data field
@@ -259,13 +271,16 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX1_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX2_ASC(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFX2_ASC (IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *READX2* - routine to fill a real 2D array for the externalised surface 
 !
 
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0, XWORKD2, NWORKB, CWORK0, LWORK0
 !
@@ -289,6 +304,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
@@ -406,12 +424,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX2_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX2_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN0_ASC(HREC,KFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFN0_ASC (IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -428,6 +449,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
@@ -468,12 +492,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFN0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN1_ASC(HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFN1_ASC (IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
@@ -497,6 +524,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
@@ -613,12 +643,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFN1_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFC0_ASC(HREC,HFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFC0_ASC (IOB, &
+                                  HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READC0* - routine to read a character
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -635,6 +668,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
@@ -674,12 +710,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFC0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL0_ASC(HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFL0_ASC (IOB, &
+                                  HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READL0* - routine to read a logical
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -696,6 +735,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
@@ -735,12 +777,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFL0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL1_ASC(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFL1_ASC (IOB, &
+                                  HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *READL1* - routine to read a logical array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0, LWORKD, NWORKB, CWORK0
 !
@@ -763,6 +808,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:),  INTENT(OUT) :: OFIELD   ! array containing the data field
@@ -842,12 +890,15 @@ END SUBROUTINE READ_SURFL1_ASC
 !
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT0_ASC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFT0_ASC (IOB, &
+                                  HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT0* - routine to read a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURFEX_OMP, ONLY : LWORK0, NBLOCK
@@ -865,6 +916,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
@@ -920,12 +974,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFT0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT1_ASC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFT1_ASC (IOB, &
+                                  HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT2* - routine to read a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURFEX_OMP, ONLY : LWORK0, NBLOCK
@@ -943,6 +1000,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
@@ -996,12 +1056,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFT1_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT2_ASC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFT2_ASC (IOB, &
+                                  HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT2* - routine to read a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -1018,6 +1081,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KYEAR    ! year

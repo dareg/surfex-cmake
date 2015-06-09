@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_WRITE_TXT(HREC,OWFL)
+      SUBROUTINE INIT_WRITE_TXT (DGU, &
+                                 HREC,OWFL)
 !     ######################
 !
 !!****  *INIT_WRITE_TXT_n* Initialize array name to be written and associated
@@ -28,9 +29,11 @@
 !             ------------
 !
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODD_IO_SURF_TXT,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_TXT,  ONLY:NUNIT0, NVAR, CVAR, CVARN, JPVAR, NIND
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODI_ABOR1_SFX
 USE MODI_TEST_RECORD_LEN
@@ -39,6 +42,9 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 LOGICAL,             INTENT(INOUT)  :: OWFL

@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_FLAKE_n (PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
+       SUBROUTINE DIAG_INLINE_FLAKE_n (DGF, F, &
+                                        PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
                                          PMERA, PHT, PHW, PRAIN, PSNOW,                &
                                          PCD, PCDN, PCH, PRI, PHU, PZ0,                &
                                          PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
@@ -35,11 +36,13 @@
 
 !
 !
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+!
 USE MODD_CSTS,         ONLY : XTT
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_SFX_OASIS,    ONLY : LCPL_LAKE
-USE MODD_FLAKE_n, ONLY : F => FLAKE
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -55,6 +58,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL              , INTENT(IN) :: PTSTEP ! atmospheric time-step (s)
 REAL, DIMENSION(:), INTENT(IN) :: PTA    ! atmospheric temperature

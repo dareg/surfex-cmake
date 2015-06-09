@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_DEFAULT_IDEAL_n(HPROGRAM)
+      SUBROUTINE READ_DEFAULT_IDEAL_n (DGL, &
+                                       HPROGRAM)
 !     #############################################################
 !
 !!****  *READ_IDEAL_CONF* - routine to read the configuration for IDEAL
@@ -34,7 +35,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -54,6 +57,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 !

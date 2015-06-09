@@ -21,6 +21,12 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
@@ -440,6 +446,10 @@ IF (NRANK==NPIO) THEN
   !
 ENDIF
 !
+!     Allocations of Surfex Types
+ CALL ALLOC_SURFEX(1)
+!
+!     Reading all namelist (also assimilation)
  CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
 !
 !*      0.5.   Reads SFX - OASIS coupling namelists
@@ -485,9 +495,8 @@ XTIME0 = MPI_WTIME()
 IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('CONF ',CFORCING_FILETYPE,'R')
 IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !
-!*     0.2.    Allocations of Surfex Types
+!*     0.2.    Goto model of Surfex Types
 !
- CALL ALLOC_SURFEX(1)
  CALL GOTO_SURFEX(1,.TRUE.)
 !
 !       splitting of the grid
@@ -981,7 +990,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Send fields to other models proc by proc
-     CALL SFX_OASIS_SEND_OL(CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF,ISIZE_OMP)
+     CALL SFX_OASIS_SEND_OL(F, I, S, U, W, &
+                            CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF,ISIZE_OMP)
     ENDIF
     !
     ZTIME = ZTIME + XTSTEP_SURF
@@ -1122,7 +1132,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
             IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
             IDATEF(7:11) = 0
             IF (CSURF_FILETYPE/='FA    ') THEN
-              CALL WRITE_HEADER_FA(CSURF_FILETYPE,'ALL')
+              CALL WRITE_HEADER_FA(IOB, UG, &
+                                   CSURF_FILETYPE,'ALL')
             ELSE
               CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
             ENDIF
@@ -1396,7 +1407,8 @@ IF ( LRESTART ) THEN
     !
   ENDIF
   !
-  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) CALL PREP_RESTART_COUPL_TOPD(CSURF_FILETYPE,INI)
+  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) CALL PREP_RESTART_COUPL_TOPD(UG, U, &
+                                                                                 CSURF_FILETYPE,INI)
   !
 END IF
 !
@@ -1439,7 +1451,8 @@ IF ( LINQUIRE ) THEN
   ALLOCATE( ZZS        ( INI ) )
   !
   ISERIES = 0
-  CALL GET_SURF_VAR_n(CSURF_FILETYPE,INI,ISERIES,PSEA=ZSEA,PWATER=ZWATER,PNATURE=ZNATURE,PTOWN=ZTOWN, &
+  CALL GET_SURF_VAR_n(DGF, DGI, DGMI, DGS, DGU, DGT, DGW, F, UG, U, USS, &
+                      CSURF_FILETYPE,INI,ISERIES,PSEA=ZSEA,PWATER=ZWATER,PNATURE=ZNATURE,PTOWN=ZTOWN, &
                         PT2M=ZT2M,PQ2M=ZQ2M,PQS=ZQS,PZ0=ZZ0,PZ0H=ZZ0H,PZ0EFF=ZZ0EFF,PQS_SEA=ZQS_SEA,  &
                         PQS_WATER=ZQS_WATER,PQS_NATURE=ZQS_NATURE,PQS_TOWN=ZQS_TOWN,                  &
                         PPSNG=ZPSNG,PPSNV=ZPSNV,PZS=ZZS                                         )  

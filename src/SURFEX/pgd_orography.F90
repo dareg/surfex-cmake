@@ -385,7 +385,8 @@ END IF
 !*    6.      Averages the field
 !             ------------------
 !
- CALL TREAT_FIELD(HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS,  &
+ CALL TREAT_FIELD(UG, U, USS, &
+                  HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS,  &
                    'ZS                  '                     )  
 !
 DEALLOCATE(XSUMVAL  )

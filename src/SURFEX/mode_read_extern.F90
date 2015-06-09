@@ -28,6 +28,8 @@ CONTAINS
                                    KPATCH,PSOILGRID,PDEPTH,KVERSION,KWG_LAYER          )
 !     #######################
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_READ_SURF_ISBA_PAR_n
@@ -149,7 +151,8 @@ IF (GECOCLIMAP) THEN
   !
   !* computes soil layers
   !  
-  CALL CONVERT_COVER_ISBA(HISBA,1,ZCOVER,GCOVER,'   ',HNAT,PSOILGRID=PSOILGRID, &
+  CALL CONVERT_COVER_ISBA(DTCO, I, &
+                          HISBA,1,ZCOVER,GCOVER,'   ',HNAT,PSOILGRID=PSOILGRID, &
                           PPERM=ZPERM,PDG=PDEPTH,KWG_LAYER=KWG_LAYER             )
   !
   DEALLOCATE(ZCOVER)

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SFXCPL_n(HPROGRAM,KI,PRUI,PWIND,PFWSU,PFWSV,PSNET, &
+      SUBROUTINE GET_SFXCPL_n (I, S, U, W, &
+                               HPROGRAM,KI,PRUI,PWIND,PFWSU,PFWSV,PSNET, &
                                 PHEAT,PEVAP,PRAIN,PSNOW,PICEFLUX,PFWSM,   &
                                 PHEAT_ICE,PEVAP_ICE,PSNET_ICE)  
 !     ###################################################################
@@ -41,13 +42,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODN_SFX_OASIS,  ONLY : LWATER
 USE MODD_SFX_OASIS,  ONLY : LCPL_LAND, LCPL_CALVING, LCPL_GW, &
@@ -67,6 +70,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! number of points

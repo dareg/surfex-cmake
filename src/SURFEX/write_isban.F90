@@ -35,6 +35,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+!
 USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
 USE MODD_DST_n, ONLY : DST => DST
 !
@@ -77,7 +81,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !        
- CALL WRITESURF_ISBA_CONF_n(HPROGRAM)
+ CALL WRITESURF_ISBA_CONF_n(CHI, DGEI, DGI, DGMI, I, &
+                            HPROGRAM)
  CALL WRITESURF_ISBA_n(CHI, DST, I, &
                        HPROGRAM,OLAND_USE)
 !

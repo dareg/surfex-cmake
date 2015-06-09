@@ -4,6 +4,11 @@ SUBROUTINE READ_NAMELISTS_FLAKE_n(HPROGRAM, HINIT)
 !
 !---------------------------    
 !
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
 USE MODN_FLAKE_n
 !
 USE MODI_DEFAULT_FLAKE
@@ -36,9 +41,11 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_FLAKE_N',0,ZHOOK_HANDLE)
                          LWATER_PROFILE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP,  &
                          XZWAT_PROFILE             )  
 !
- CALL READ_DEFAULT_FLAKE_n(HPROGRAM)
+ CALL READ_DEFAULT_FLAKE_n(CHF, DGF, DGMF, F, &
+                           HPROGRAM)
 !
- CALL READ_FLAKE_CONF_n(HPROGRAM)
+ CALL READ_FLAKE_CONF_n(CHF, DGF, DGMF, F, &
+                        HPROGRAM)
 !
 !----------------------------------------------------------------------------
 !

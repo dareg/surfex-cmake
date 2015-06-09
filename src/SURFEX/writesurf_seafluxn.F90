@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_SEAFLUX_n(HPROGRAM)
+      SUBROUTINE WRITESURF_SEAFLUX_n (O, OR, S, &
+                                      HPROGRAM)
 !     ########################################
 !
 !!****  *WRITE_SEAFLUX_n* - writes SEAFLUX fields
@@ -36,10 +37,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_OCEAN_n, ONLY : O => OCEAN
-USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITESURF_OCEAN_n
@@ -52,6 +55,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 

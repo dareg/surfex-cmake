@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SET_SST(KI,PITM,PSST,PSIC,HTEST)
+SUBROUTINE ASSIM_SET_SST (IOB, S, U, &
+                          KI,PITM,PSST,PSIC,HTEST)
 
 !     ###############################################################################
 !
@@ -24,10 +25,12 @@ SUBROUTINE ASSIM_SET_SST(KI,PITM,PSST,PSIC,HTEST)
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_ASSIM,         ONLY : LECSST, LREAD_SST_FROM_FILE
 USE MODD_SURF_PAR,      ONLY : XUNDEF
@@ -49,6 +52,11 @@ USE PARKIND1,           ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,            INTENT(IN)  :: KI
 REAL,DIMENSION(KI), INTENT(IN)  :: PITM

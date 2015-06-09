@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CONVERT_PATCH_ISBA(HISBA,KDECADE,KDECADE2,PCOVER,OCOVER,&
+      SUBROUTINE CONVERT_PATCH_ISBA (DTCO, DTI, I, &
+                                     HISBA,KDECADE,KDECADE2,PCOVER,OCOVER,&
                                   HPHOTO,OAGRIP,OPERM,OTR_ML,HSFTYPE,    &
                                   PVEG,PLAI,PRSMIN,PGAMMA,PWRMAX_CF,     &
                                   PRGL,PCV,PSOILGRID,PDG,KWG_LAYER,      &
@@ -60,13 +61,16 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW
 !
 USE MODD_TYPE_DATE_SURF
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                &
                                 XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
                                 XDATA_EMIS_ECO, XDATA_GAMMA, XDATA_CV,  &
@@ -94,7 +98,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                &
                                 XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,   &
                                 XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN
 !   
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
@@ -109,6 +112,11 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 INTEGER,                INTENT(IN)    :: KDECADE

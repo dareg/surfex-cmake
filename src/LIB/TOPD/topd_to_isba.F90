@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA(KI,KSTEP,GTOPD)
+      SUBROUTINE TOPD_TO_ISBA (I, UG, U, &
+                               KI,KSTEP,GTOPD)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -47,6 +48,11 @@
 !               ------------
 !
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODI_UNPACK_SAME_RANK
 !
 USE MODI_WRITE_FILE_ISBAMAP
@@ -59,10 +65,7 @@ USE MODD_COUPLING_TOPD,   ONLY : XWG_FULL, XDTOPT, XWTOPT, XWSUPSAT,&
                                  NMASKT, XTOTBV_IN_MESH, NNPIX,&
                                  NFREQ_MAPS_WG, XBV_IN_MESH,NNBV_IN_MESH
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_PAR,        ONLY : XUNDEF,NUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -72,6 +75,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 INTEGER, INTENT(IN)                 :: KSTEP   ! Topodyn current time step

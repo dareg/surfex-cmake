@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CO2_TEB_GREENROOF_INIT_n(PCO2)
+      SUBROUTINE CO2_TEB_GREENROOF_INIT_n (I, TGRP, TVG, &
+                                           PCO2)
 !     #####################
 !
 !!****  *CO2_TEB_GREENROOF_INIT_n* - routine to initialize ISBA-AGS variables
@@ -42,11 +43,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
 USE MODI_COTWOINIT_n
@@ -59,6 +62,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
 REAL, DIMENSION(:), INTENT(IN) :: PCO2 ! air CO2 concentration (kg/kg)
 !

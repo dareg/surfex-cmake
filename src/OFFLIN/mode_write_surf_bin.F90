@@ -193,6 +193,10 @@ END SUBROUTINE WRITE_SURFC0_BIN
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_BIN,        ONLY : NMASK, NFULL, CMASK
@@ -242,7 +246,8 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP SINGLE
   !  
-  CALL INIT_WRITE_BIN(HREC,1,LWFL)
+  CALL INIT_WRITE_BIN(DGU, U, &
+                      HREC,1,LWFL)
   !
   IF (LWFL) THEN 
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
@@ -267,6 +272,10 @@ END SUBROUTINE WRITE_SURFX1_BIN
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
+!
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -317,7 +326,8 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP SINGLE
   !
-  CALL INIT_WRITE_BIN(HREC,SIZE(PFIELD,2),LWFL)
+  CALL INIT_WRITE_BIN(DGU, U, &
+                      HREC,SIZE(PFIELD,2),LWFL)
   !
   IF (LWFL) THEN
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK

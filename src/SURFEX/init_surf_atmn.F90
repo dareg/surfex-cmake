@@ -56,6 +56,12 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+!
 USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
 !
 USE MODD_SURF_ATM,       ONLY : XCO2UNCPL
@@ -260,14 +266,16 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_SURF_ATM_n(HPROGRAM)
+ CALL READ_DEFAULT_SURF_ATM_n(CHU, DGU, USS, &
+                              HPROGRAM)
 !
 !*       1.     Reading of configuration
 !               ------------------------
 !
 !        1.1. general options (diagnostics, etc...)
 !
- CALL READ_SURF_ATM_CONF_n(HPROGRAM)
+ CALL READ_SURF_ATM_CONF_n(CHU, DGU, USS, &
+                           HPROGRAM)
 !
 IF(XCO2UNCPL/=XUNDEF)THEN
   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
@@ -297,7 +305,8 @@ SELECT CASE (HINIT)
                               DGU%LPROVAR_TO_DIAG)  
     ! preparation of fields  (date not present in PGD file)
     IF (LNAM_READ) CALL READ_NAM_PREP_SURF_n(HPROGRAM)
-    CALL READ_SURF_ATM_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,U%TTIME)
+    CALL READ_SURF_ATM_DATE(IOB, &
+                            HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,U%TTIME)
 
   CASE DEFAULT
     CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
@@ -368,7 +377,7 @@ ENDIF
  CALL READ_LCLIM_LAI(HPROGRAM,LCLIM_LAI)
 IF (.NOT. LCLIM_LAI .AND. U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
                      .AND. U%TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) DTCO%NYEAR=U%TTIME%TDATE%YEAR
- CALL INI_DATA_COVER
+ CALL INI_DATA_COVER(DTCO, U)
  CALL READ_ECO2_IRRIG(DTCO, &
                       HPROGRAM)
 !
@@ -444,9 +453,11 @@ IF (CHU%LCH_EMIS) THEN
     !
     IF (CHU%LCH_SURF_EMIS) THEN
       IF (CHU%CCH_EMIS=='AGGR') THEN
-        CALL CH_INIT_EMISSION_n(HPROGRAM,U%NSIZE_FULL,ICH,PRHOA) 
+        CALL CH_INIT_EMISSION_n(CHE, CHU, SV, &
+                                HPROGRAM,U%NSIZE_FULL,ICH,PRHOA) 
       ELSE
-        CALL CH_INIT_SNAP_n(HPROGRAM,U%NSIZE_FULL,HINIT,ICH,PRHOA)
+        CALL CH_INIT_SNAP_n(CHN, SV, &
+                            HPROGRAM,U%NSIZE_FULL,HINIT,ICH,PRHOA)
       END IF
     ENDIF
     CALL CLOSE_NAMELIST(HPROGRAM,ICH)

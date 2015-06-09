@@ -1,4 +1,5 @@
-SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI, PT2M, PHU2M, HTEST)
+SUBROUTINE ASSIM_NATURE_ISBA_EKF (I, &
+                                  HPROGRAM, KI, PT2M, PHU2M, HTEST)
 
 ! -----------------------------------------------------------------------------
 !
@@ -19,6 +20,9 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI, PT2M, PHU2M, HTEST)
   
 ! -----------------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XSIGMA, CBIO, XI,        &
                                XF_PATCH, XF, COBS, XSCALE_QLAI,  LOBSFILE, XALPH,  &
@@ -27,7 +31,6 @@ USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNC
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 #ifdef SFX_ARO
 USE YOMMP,              ONLY : MYPROC 
@@ -44,6 +47,9 @@ USE MODE_EKF
 ! -----------------------------------------------------------
 !
 IMPLICIT NONE
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI

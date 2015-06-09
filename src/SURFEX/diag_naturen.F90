@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_NATURE_n(HPROGRAM,                                              &
+SUBROUTINE DIAG_NATURE_n (DGEI, DGL, DGI, U, &
+                          HPROGRAM,                                              &
                            PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,   &
                            PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,   &
                            PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, PFMU, PFMV,      &
@@ -36,13 +37,15 @@ SUBROUTINE DIAG_NATURE_n(HPROGRAM,                                              
 !
 
 !
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_DIAG_ISBA_n
 USE MODI_DIAG_IDEAL_n
@@ -54,6 +57,12 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

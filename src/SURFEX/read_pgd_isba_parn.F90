@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_ISBA_PAR_n(HPROGRAM,KSIZE,OLAND_USE,HDIR)
+      SUBROUTINE READ_PGD_ISBA_PAR_n (DTI, IG, I, &
+                                      HPROGRAM,KSIZE,OLAND_USE,HDIR)
 !     ################################################
 !
 !!****  *READ_PGD_ISBA_PAR_n* - reads ISBA physiographic fields                     
@@ -35,12 +36,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_PREP,           ONLY : LINTERP
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
@@ -54,6 +57,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER,           INTENT(IN)  :: KSIZE

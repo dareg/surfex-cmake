@@ -95,12 +95,15 @@ END SUBROUTINE SFX_FA_VERSION
 !----------------------------------------------------------------------------
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX0_FA(HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFX0_FA (IOB, &
+                                 HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READX0* - routine to read a real scalar
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -117,6 +120,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
@@ -458,12 +464,15 @@ END SUBROUTINE READ_SURFX2_FA
 !----------------------------------------------------------------------------
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN0_FA(HREC,KFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFN0_FA (IOB, &
+                                 HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -480,6 +489,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
@@ -523,12 +535,15 @@ END SUBROUTINE READ_SURFN0_FA
 !----------------------------------------------------------------------------
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN1_FA(HREC,KL,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFN1_FA (IOB, &
+                                 HREC,KL,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *READN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ, & 
                             WLOG_MPI
@@ -553,6 +568,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),       INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
@@ -675,12 +693,15 @@ END SUBROUTINE READ_SURFN1_FA
 !----------------------------------------------------------------------------
 !
 !     #############################################################
-      SUBROUTINE READ_SURFC0_FA(HREC,HFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFC0_FA (IOB, &
+                                 HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READC0* - routine to read a character
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -697,6 +718,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),   INTENT(IN)  :: HREC      ! name of the article to be read
 CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
@@ -742,12 +766,15 @@ END SUBROUTINE READ_SURFC0_FA
 !
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL0_FA(HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFL0_FA (IOB, &
+                                 HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READL0* - routine to read a logical
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -764,6 +791,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
@@ -807,12 +837,15 @@ END SUBROUTINE READ_SURFL0_FA
 !
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL1_FA(HREC,KL,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFL1_FA (IOB, &
+                                 HREC,KL,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *READL1* - routine to read a logical array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0, LWORKD, NWORKB, CWORK0
 !
@@ -836,6 +869,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),       INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN)  :: KL       ! number of points
@@ -919,12 +955,15 @@ END SUBROUTINE READ_SURFL1_FA
 !----------------------------------------------------------------------------
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT0_FA(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFT0_FA (IOB, &
+                                 HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT0* - routine to read a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -941,6 +980,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),  INTENT(IN)   :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
@@ -1005,12 +1047,15 @@ END SUBROUTINE READ_SURFT0_FA
 !----------------------------------------------------------------------------
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT2_FA(HREC,KL1,KL2,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE READ_SURFT2_FA (IOB, &
+                                 HREC,KL1,KL2,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT2* - routine to read a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -1028,6 +1073,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER                                  :: KL1, KL2

@@ -34,6 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+!
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+!
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
 !
@@ -72,8 +79,10 @@ IF (LHOOK) CALL DR_HOOK('WRITE_SEAFLUX_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_SEAFLUX_CONF_n(HPROGRAM)
- CALL WRITESURF_SEAFLUX_n(HPROGRAM)
+ CALL WRITESURF_SEAFLUX_CONF_n(CHS, DGO, DGSI, O, S, &
+                               HPROGRAM)
+ CALL WRITESURF_SEAFLUX_n(O, OR, S, &
+                          HPROGRAM)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_SEAFLUX_SBL_n(S, SSB, &
                                                                         HPROGRAM,HWRITE)

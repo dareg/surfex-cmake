@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SEAFLUX_CONF_n(HPROGRAM)
+      SUBROUTINE READ_SEAFLUX_CONF_n (CHS, DGO, DGS, DGSI, O, S, &
+                                      HPROGRAM)
 !     #############################################################
 !
 !!****  *READ_SEAFLUX_CONF* - routine to read the configuration for SEAFLUX
@@ -37,16 +38,18 @@
 !              ------------
 !
 !
-USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
 !
-USE MODD_OCEAN_n, ONLY : O => OCEAN
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
 !
-USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
 !
-USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+!
+!
+USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -71,6 +74,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 !

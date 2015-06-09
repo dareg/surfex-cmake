@@ -34,6 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+!
 USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
 !
 USE MODD_FLAKE_n, ONLY : F => FLAKE
@@ -71,7 +74,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_FLAKE_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_FLAKE_CONF_n(HPROGRAM)
+ CALL WRITESURF_FLAKE_CONF_n(CHF, DGMF, F, &
+                             HPROGRAM)
  CALL WRITESURF_FLAKE_n(F, &
                         HPROGRAM)
 !

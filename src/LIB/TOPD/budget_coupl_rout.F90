@@ -1,6 +1,7 @@
 
 !     ##########################
-      SUBROUTINE BUDGET_COUPL_ROUT(KNI,KFORC_STEP)
+      SUBROUTINE BUDGET_COUPL_ROUT (DGEI, DGMI, I, U, &
+                                    KNI,KFORC_STEP)
 !     ##########################
 !
 !!
@@ -36,6 +37,12 @@
 !
 !*       0.     DECLARATIONS
 !               ------------
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_BUDGET_COUPL_ROUT ! contains all useful variables XB_*
 !
 USE MODD_TOPODYN,       ONLY : NNCAT, XQTOT, XTOPD_STEP, XQB_DR, XQB_RUN
@@ -44,12 +51,8 @@ USE MODD_COUPLING_TOPD, ONLY : XRUNOFF_TOP, XRUN_TOROUT, XDR_TOROUT, XATOP
 USE MODD_SURF_PAR
 USE MODD_CSTS,            ONLY : XRHOLW
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 USE MODD_FORC_ATM,        ONLY : XSNOW       ,&! snow precipitation                    (kg/m2/s)
                                  XRAIN         ! liquid precipitation                  (kg/m2/s)
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 !
 USE MODI_UNPACK_SAME_RANK
 USE MODI_PACK_SAME_RANK 
@@ -63,6 +66,12 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 INTEGER, INTENT(IN)           :: KNI        ! expected physical size of full surface array
 INTEGER, INTENT(IN)           :: KFORC_STEP ! time step
 !

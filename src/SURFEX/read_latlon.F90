@@ -34,6 +34,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_PGD_GRID,   ONLY : XMESHLENGTH
 !
 USE MODI_GET_LUOUT
@@ -180,7 +182,8 @@ DO JLINE=1,INBLINE
 !*   10.     Call to the adequate subroutine (point by point treatment)
 !            ----------------------------------------------------------
 !
-    CALL PT_BY_PT_TREATMENT(ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&
+    CALL PT_BY_PT_TREATMENT(USS, &
+                            ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&
                               HSUBROUTINE                                              )  
 !
 !-------------------------------------------------------------------------------

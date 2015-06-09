@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE TREAT_FIELD(HPROGRAM,HSCHEME,HFILETYPE,    &
+      SUBROUTINE TREAT_FIELD (UG, U, USS, &
+                              HPROGRAM,HSCHEME,HFILETYPE,    &
                               HSUBROUTINE,HFILENAME,HFIELD,   &
                               PPGDARRAY,HSFTYPE               )  
 !     ##############################################################
@@ -44,9 +45,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_DIRECT
@@ -60,7 +64,6 @@ USE MODI_READ_PGD_NETCDF
 
 USE MODI_AVERAGE2_MESH
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -79,6 +82,11 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated

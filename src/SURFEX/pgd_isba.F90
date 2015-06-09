@@ -45,6 +45,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
@@ -654,7 +657,8 @@ I%LECOCLIMAP = OECOCLIMAP
 !
 !-------------------------------------------------------------------------------
 !
- CALL PGD_TOPD(HPROGRAM)
+ CALL PGD_TOPD(I, UG, U, USS, &
+               HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

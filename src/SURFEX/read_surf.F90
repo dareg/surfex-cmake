@@ -197,6 +197,8 @@ END MODULE MODI_READ_SURF
       SUBROUTINE READ_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
 !
@@ -291,11 +293,13 @@ IF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ELSEIF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURF0_ASC(YREC,XWORK0,NWORKB,CWORKB)
+      CALL READ_SURF0_ASC(IOB, &
+                          YREC,XWORK0,NWORKB,CWORKB)
 #endif
     ELSEIF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-      CALL READ_SURF0_FA(YREC,XWORK0,NWORKB,CWORKB)
+      CALL READ_SURF0_FA(IOB, &
+                         YREC,XWORK0,NWORKB,CWORKB)
 #endif
     ELSEIF (HPROGRAM=='NC    ') THEN
 #ifdef SFX_NC
@@ -338,6 +342,8 @@ END SUBROUTINE READ_SURFX0
 !     #############################################################
       SUBROUTINE READ_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -422,7 +428,8 @@ ENDIF
 !
 IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-  CALL READ_SURFN_ASC(YREC,PFIELD,KRESP,YCOMMENT,YDIR)
+  CALL READ_SURFN_ASC(IOB, &
+                      YREC,PFIELD,KRESP,YCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -440,6 +447,8 @@ END SUBROUTINE READ_SURFX1
 !     #############################################################
       SUBROUTINE READ_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -525,7 +534,8 @@ ENDIF
 !
 IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-  CALL READ_SURFN_ASC(YREC,PFIELD,KRESP,YCOMMENT,YDIR)
+  CALL READ_SURFN_ASC(IOB, &
+                      YREC,PFIELD,KRESP,YCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -613,6 +623,8 @@ END SUBROUTINE READ_SURFX3
 !     #############################################################
       SUBROUTINE READ_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -717,13 +729,15 @@ IF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
     !
     IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURF0_ASC(YREC,NWORK0,NWORKB,CWORKB)
+      CALL READ_SURF0_ASC(IOB, &
+                          YREC,NWORK0,NWORKB,CWORKB)
 #endif
     ENDIF
     !
     IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-      CALL READ_SURF0_FA(YREC,NWORK0,NWORKB,CWORKB)
+      CALL READ_SURF0_FA(IOB, &
+                         YREC,NWORK0,NWORKB,CWORKB)
 #endif
     ENDIF
     !
@@ -762,6 +776,8 @@ END SUBROUTINE READ_SURFN0
 !     #############################################################
       SUBROUTINE READ_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -846,13 +862,15 @@ ENDIF
 !
 IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-  CALL READ_SURFN_ASC(YREC,KFIELD,KRESP,YCOMMENT,YDIR)
+  CALL READ_SURFN_ASC(IOB, &
+                      YREC,KFIELD,KRESP,YCOMMENT,YDIR)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-  CALL READ_SURFN_FA(YREC,IL,KFIELD,KRESP,YCOMMENT,YDIR)
+  CALL READ_SURFN_FA(IOB, &
+                     YREC,IL,KFIELD,KRESP,YCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -864,6 +882,8 @@ END SUBROUTINE READ_SURFN1
 !     #############################################################
       SUBROUTINE READ_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -958,11 +978,13 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURF0_ASC(YREC,CWORK0(1:40),NWORKB,CWORKB)
+      CALL READ_SURF0_ASC(IOB, &
+                          YREC,CWORK0(1:40),NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-      CALL READ_SURF0_FA(YREC,CWORK0(1:40),NWORKB,CWORKB)
+      CALL READ_SURF0_FA(IOB, &
+                         YREC,CWORK0(1:40),NWORKB,CWORKB)
 #endif
     ENDIF
     !  
@@ -1001,6 +1023,8 @@ END SUBROUTINE READ_SURFC0
 !     #############################################################
       SUBROUTINE READ_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1095,11 +1119,13 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURF0_ASC(YREC,LWORK0,NWORKB,CWORKB)
+      CALL READ_SURF0_ASC(IOB, &
+                          YREC,LWORK0,NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-      CALL READ_SURF0_FA(YREC,LWORK0,NWORKB,CWORKB)
+      CALL READ_SURF0_FA(IOB, &
+                         YREC,LWORK0,NWORKB,CWORKB)
 #endif
     ENDIF
     !
@@ -1138,6 +1164,8 @@ END SUBROUTINE READ_SURFL0
 !     #############################################################
       SUBROUTINE READ_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1212,11 +1240,13 @@ ELSE IF (HPROGRAM=='NC    ') THEN
 #endif
 ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-  CALL READ_SURFN_ASC(YREC,OFIELD,KRESP,YCOMMENT,YDIR)
+  CALL READ_SURFN_ASC(IOB, &
+                      YREC,OFIELD,KRESP,YCOMMENT,YDIR)
 #endif
 ELSE IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-  CALL READ_SURFN_FA(YREC,IL,OFIELD,KRESP,YCOMMENT,YDIR)
+  CALL READ_SURFN_FA(IOB, &
+                     YREC,IL,OFIELD,KRESP,YCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -1228,6 +1258,8 @@ END SUBROUTINE READ_SURFL1
 !     #############################################################
       SUBROUTINE READ_SURFT0(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1334,11 +1366,13 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURFT_ASC(YREC,NWORKD(1),NWORKD(2),NWORKD(3),XWORK0,NWORKB,CWORKB)
+      CALL READ_SURFT_ASC(IOB, &
+                          YREC,NWORKD(1),NWORKD(2),NWORKD(3),XWORK0,NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-      CALL READ_SURFT_FA(YREC,NWORKD(1),NWORKD(2),NWORKD(3),XWORK0,NWORKB,CWORKB)
+      CALL READ_SURFT_FA(IOB, &
+                         YREC,NWORKD(1),NWORKD(2),NWORKD(3),XWORK0,NWORKB,CWORKB)
 #endif
     ENDIF
     !
@@ -1400,6 +1434,8 @@ END SUBROUTINE READ_SURFT0
 !     #############################################################
       SUBROUTINE READ_SURFT1(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1494,7 +1530,8 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
       CALL ABOR1_SFX('READ_SURFT1: NOT AVAILABLE FOR FA')      
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURFT_ASC(YREC,NWORKD2(:,1),NWORKD2(:,2),NWORKD2(:,3),XWORKD,NWORKB,CWORKB)
+      CALL READ_SURFT_ASC(IOB, &
+                          YREC,NWORKD2(:,1),NWORKD2(:,2),NWORKD2(:,3),XWORKD,NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='LFI   ') THEN
 #ifdef SFX_LFI
@@ -1562,6 +1599,8 @@ END SUBROUTINE READ_SURFT1
 !     #############################################################
       SUBROUTINE READ_SURFT2(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1656,12 +1695,14 @@ ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. &
 #endif
     ELSE IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-      CALL READ_SURFT_ASC(YREC,NWORKD3(:,:,1),NWORKD3(:,:,2),NWORKD3(:,:,3),&
+      CALL READ_SURFT_ASC(IOB, &
+                          YREC,NWORKD3(:,:,1),NWORKD3(:,:,2),NWORKD3(:,:,3),&
         XWORKD2,NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='FA    ') THEN
 #ifdef SFX_FA
-      CALL READ_SURFT_FA(YREC,IL1,IL2,NWORKD3(:,:,1),NWORKD3(:,:,2),NWORKD3(:,:,3),&
+      CALL READ_SURFT_FA(IOB, &
+                         YREC,IL1,IL2,NWORKD3(:,:,1),NWORKD3(:,:,2),NWORKD3(:,:,3),&
         XWORKD2,NWORKB,CWORKB)
 #endif
     ELSE IF (HPROGRAM=='NC    ') THEN

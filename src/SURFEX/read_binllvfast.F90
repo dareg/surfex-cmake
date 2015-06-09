@@ -28,6 +28,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
 !
@@ -111,7 +113,8 @@ END DO
 !     
 IF (ICPT > 0) THEN
   ZLLVWORK=>ZLLV(:,1:ICPT)
-  CALL PT_BY_PT_TREATMENT(ILUOUT,ZLLVWORK(1,:),ZLLVWORK(2,:),ZLLVWORK(3,:),HSUBROUTINE)
+  CALL PT_BY_PT_TREATMENT(USS, &
+                          ILUOUT,ZLLVWORK(1,:),ZLLVWORK(2,:),ZLLVWORK(3,:),HSUBROUTINE)
 END IF
 !
 !----------------------------------------------------------------------------

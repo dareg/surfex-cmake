@@ -23,6 +23,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
 !
 USE MODI_PT_BY_PT_TREATMENT
@@ -103,7 +105,8 @@ DO JLOOP=1,SIZE(ZVALU)
 !*    5.     Call to the adequate subroutine (point by point treatment)
 !            ----------------------------------------------------------
 ! 
-  CALL PT_BY_PT_TREATMENT(ILUOUT,  (/ ZLAT /) , (/ ZLON /) , (/ ZVALUE /) , &
+  CALL PT_BY_PT_TREATMENT(USS, &
+                          ILUOUT,  (/ ZLAT /) , (/ ZLON /) , (/ ZVALUE /) , &
                             HSUBROUTINE                                       )  
 !
 !-------------------------------------------------------------------------------

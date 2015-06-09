@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CONVERT_COVER_FRAC   (PCOVER, OCOVER,           &
+      SUBROUTINE CONVERT_COVER_FRAC (DTCO, &
+                                        PCOVER, OCOVER,           &
                                          PSEA,PNATURE,PTOWN,PWATER   )  
 !     ##############################################################
 !
@@ -36,8 +37,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
 USE MODI_AV_PGD
 !
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER

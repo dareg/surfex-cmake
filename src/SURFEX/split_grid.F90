@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE SPLIT_GRID(HPROGRAM)
+      SUBROUTINE SPLIT_GRID (UG, U, &
+                             HPROGRAM)
 !     ###########################################################
 !!
 !!    PURPOSE
@@ -34,8 +35,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_SPLIT_GRID_CONF_PROJ
 USE MODI_SPLIT_GRID_CARTESIAN
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CONVERT_COVER_CH_ISBA   (PCOVER,OCOVER,PSOILRC_SO2,PSOILRC_O3)
+      SUBROUTINE CONVERT_COVER_CH_ISBA (DTCO, &
+                                           PCOVER,OCOVER,PSOILRC_SO2,PSOILRC_O3)
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* convert surface cover classes into secondary 
@@ -36,7 +37,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_SOILRC_SO2, XDATA_SOILRC_O3 
 !
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER

@@ -33,6 +33,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_ISBA_n
 USE MODI_END_IO_SURF_n
@@ -63,7 +69,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_ISBA_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_ISBA_n(HPROGRAM)
+ CALL WRITESURF_PGD_ISBA_n(DTI, DTZ, IG, I, U, &
+                           HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

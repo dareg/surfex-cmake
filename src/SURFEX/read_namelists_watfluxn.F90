@@ -4,6 +4,10 @@ SUBROUTINE READ_NAMELISTS_WATFLUX_n(HPROGRAM,HINIT)
 !
 ! --------------------------------------------------------------------------
 !
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
 USE MODN_WATFLUX_n
 !
 USE MODI_DEFAULT_WATFLUX
@@ -35,9 +39,11 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_WATFLUX_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_DIAG_WATFLUX(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
                            LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP        )
 !
- CALL READ_DEFAULT_WATFLUX_n(HPROGRAM)
+ CALL READ_DEFAULT_WATFLUX_n(CHW, DGW, W, &
+                             HPROGRAM)
 !
- CALL READ_WATFLUX_CONF_n(HPROGRAM)
+ CALL READ_WATFLUX_CONF_n(CHW, DGW, W, &
+                          HPROGRAM)
 !
 !----------------------------------------------------------------------------
 !

@@ -36,6 +36,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODD_PGD_GRID,       ONLY : NL
@@ -240,7 +242,8 @@ ELSE
      YFIELD      = 'CTI'
      YSCHEME     = 'SURF  '
      YSUBROUTINE = 'A_CTI '
-     CALL TREAT_FIELD(HPROGRAM,YSCHEME,HCTIFILETYPE,YSUBROUTINE,HCTI,YFIELD)
+     CALL TREAT_FIELD(UG, U, USS, &
+                      HPROGRAM,YSCHEME,HCTIFILETYPE,YSUBROUTINE,HCTI,YFIELD)
 !
 !-------------------------------------------------------------------------------
 !

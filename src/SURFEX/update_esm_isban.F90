@@ -1,5 +1,6 @@
 !     ################################################################
-      SUBROUTINE UPDATE_ESM_ISBA_n(KI,KSW,PZENITH,PSW_BANDS,PDIR_ALB,& 
+      SUBROUTINE UPDATE_ESM_ISBA_n (I, &
+                                    KI,KSW,PZENITH,PSW_BANDS,PDIR_ALB,& 
                                    PSCA_ALB,PEMIS,PTSRAD,PTSURF      )
 !     ################################################################
 !
@@ -39,9 +40,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_TYPE_SNOW
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_AVERAGE_RAD
 USE MODI_AVERAGE_TSURF
@@ -55,6 +58,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands

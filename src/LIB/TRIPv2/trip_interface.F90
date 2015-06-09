@@ -164,7 +164,8 @@ CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
 !               --------------------------
 !
 IF(CGROUNDW=='DIF')THEN
-  CALL GWF(KLON,KLAT,OPRINT,PTSTEP_RUN,XTSTEP,          &
+  CALL GWF(TPG, &
+           KLON,KLAT,OPRINT,PTSTEP_RUN,XTSTEP,          &
            TPG%GMASK_GW,TP%XNUM_AQUI,ZDRAIN,       &
            TPG%XLEN,TP%XWIDTH,TP%XHC_BED,       &
            TP%XTOPO_RIV,TP%XTAUG,TPG%XAREA,     &

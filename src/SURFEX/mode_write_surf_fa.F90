@@ -20,12 +20,15 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX0_FA(HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFX0_FA (IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  * - routine to write a real scalar
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -42,6 +45,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 REAL,               INTENT(IN) :: PFIELD   ! the real scalar to be read
@@ -85,12 +91,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN0_FA(HREC,KFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFN0_FA (IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  * - routine to write an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -107,6 +116,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN) :: KFIELD   ! the integer to be read
@@ -150,12 +162,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL0_FA(HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFL0_FA (IOB, &
+                                  HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  * - routine to write a logical
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -172,6 +187,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(IN) :: OFIELD   ! array containing the data field
@@ -215,12 +233,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFC0_FA(HREC,HFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFC0_FA (IOB, &
+                                  HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  * - routine to write a character
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -237,6 +258,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
@@ -282,12 +306,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_FA(HREC,KL,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_FA (IOB, &
+                                  HREC,KL,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE, WLOG_MPI
 !
@@ -311,6 +338,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN) :: KL       ! number of points
@@ -396,12 +426,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_FA(HREC,KL1,KL2,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_FA (IOB, &
+                                  HREC,KL1,KL2,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -425,6 +458,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN) :: KL1      ! number of points
@@ -519,12 +555,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX2_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1_FA(HREC,KL,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFN1_FA (IOB, &
+                                  HREC,KL,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to write an integer array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -548,6 +587,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN) :: KL       ! number of points
@@ -624,12 +666,15 @@ RETURN
 END SUBROUTINE WRITE_SURFN1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL1_FA(HREC,KL,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFL1_FA (IOB, &
+                                  HREC,KL,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to write a logical array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -652,6 +697,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN) :: KL       ! number of points
@@ -719,12 +767,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL1_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT0_FA(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT0_FA (IOB, &
+                                  HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  * - routine to write a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -741,6 +792,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
@@ -811,12 +865,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT2_FA(HREC,KL1,KL2,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT2_FA (IOB, &
+                                  HREC,KL1,KL2,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  * - routine to write a date
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -840,6 +897,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                      INTENT(IN) :: KL1      ! number of points

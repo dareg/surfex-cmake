@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE SFX_OASIS_DEFINE(HPROGRAM,KNPTS,KPARAL)
+SUBROUTINE SFX_OASIS_DEFINE (I, U, &
+                             HPROGRAM,KNPTS,KPARAL)
 !###################################################
 !
 !!****  *SFX_OASIS_DEFINE* - Definitions for exchange of coupling fields
@@ -33,8 +34,10 @@ SUBROUTINE SFX_OASIS_DEFINE(HPROGRAM,KNPTS,KPARAL)
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,  ONLY : NUNDEF
 !
@@ -56,6 +59,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
 INTEGER,                 INTENT(IN) :: KNPTS  ! Number of grid point on this proc

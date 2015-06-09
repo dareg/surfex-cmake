@@ -367,7 +367,8 @@ XDR_TOROUT (:,:) = 0.
 !
 IF (HPROGRAM=='POST  ') GOTO 20
 !
-IF (LSTOCK_TOPD) CALL RESTART_COUPL_TOPD(HPROGRAM,KI)
+IF (LSTOCK_TOPD) CALL RESTART_COUPL_TOPD(UG, U, &
+                                         HPROGRAM,KI)
 !
 !*      7.0     deallocate
 !               ----------

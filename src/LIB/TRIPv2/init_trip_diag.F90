@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_TRIP_DIAG (KLISTING,HFILE,KLON,KLAT,HTITLE,HTIMEUNIT,OTIME)
+      SUBROUTINE INIT_TRIP_DIAG (TPDG, TPG, &
+                                  KLISTING,HFILE,KLON,KLAT,HTITLE,HTIMEUNIT,OTIME)
 !     #######################################################################
 !
 !!****  *INIT_TRIP_DIAG*  
@@ -24,7 +25,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
+!
+USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODE_TRIP_NETCDF
 !
@@ -35,7 +39,6 @@ USE MODD_TRIP_OASIS, ONLY : LCPL_LAND
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, LNCPRINT
 !
-USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
  CHARACTER(LEN=*), INTENT(IN) :: HFILE, HTITLE, HTIMEUNIT
 !

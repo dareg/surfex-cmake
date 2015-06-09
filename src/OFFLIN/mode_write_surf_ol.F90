@@ -341,12 +341,15 @@ END SUBROUTINE WRITE_TIME_DIM
 END SUBROUTINE WRITE_SURFX0_TIME_OL
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_OL(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_OL (IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 !  
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_NPIO_WRITE, &
                             XTIME_COMM_WRITE, WLOG_MPI
@@ -371,6 +374,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -812,10 +818,13 @@ END SUBROUTINE WRITE_DATAX2_OL
 END SUBROUTINE WRITE_SURFX2_OL
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1_OL(HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFN1_OL (IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -823,6 +832,8 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -840,7 +851,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFN1_OL',0,ZHOOK_HANDLE)
 !
 ZFIELD=FLOAT(KFIELD)
- CALL WRITE_SURFX1_OL(HREC,ZFIELD,KRESP,HCOMMENT,HDIR)
+ CALL WRITE_SURFX1_OL(IOB, &
+                      HREC,ZFIELD,KRESP,HCOMMENT,HDIR)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFN1_OL',1,ZHOOK_HANDLE)
 !

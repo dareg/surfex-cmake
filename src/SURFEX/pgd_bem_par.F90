@@ -1,5 +1,6 @@
 !     ##########################################
-      SUBROUTINE PGD_BEM_PAR(HPROGRAM,OAUTOSIZE)
+      SUBROUTINE PGD_BEM_PAR (DTB, DTI, TG, &
+                              HPROGRAM,OAUTOSIZE)
 !     ##########################################
 !
 !!**** *PGD_BEM_PAR* monitor for averaging and interpolations of BEM input data
@@ -37,11 +38,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+!
+!
+USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -60,6 +63,11 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! Type of program
 LOGICAL,          INTENT(IN) :: OAUTOSIZE    ! T for automatic determination

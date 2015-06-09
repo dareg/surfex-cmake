@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_DEFAULT_WATFLUX_n(HPROGRAM)
+      SUBROUTINE READ_DEFAULT_WATFLUX_n (CHW, DGW, W, &
+                                         HPROGRAM)
 !     #############################################################
 !
 !!****  *READ_WATFLUX_CONF* - routine to read the configuration for WATFLUX
@@ -33,11 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -57,6 +60,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 

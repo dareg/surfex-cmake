@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE, HFORCING_FILETYPE,  &
+SUBROUTINE OL_READ_ATM_CONF_ASCII (U, &
+                                    HSURF_FILETYPE, HFORCING_FILETYPE,  &
                                      PDURATION, PTSTEP_FORC, KNI, &
                                      KYEAR, KMONTH, KDAY, PTIME,  &
                                      PLAT, PLON, PZS,             &
@@ -36,7 +37,9 @@ SUBROUTINE OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!      Modified by P. Le Moigne (04/2006): init_io_surf for nature
 !!                  with GTMSK to read dimensions.
 !==================================================================
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -63,6 +66,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
  CHARACTER(LEN=6), INTENT(IN)  :: HFORCING_FILETYPE

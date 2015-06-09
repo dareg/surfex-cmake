@@ -33,6 +33,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+!
 USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
 !
 USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS 
@@ -149,7 +157,8 @@ CASE("BEM")
 !----------
 
   B%CUR%XAUX_MAX(:) = 5.
-  CALL CONVERT_PATCH_TEB(TOP%XCOVER,TOP%LCOVER,0.,                                            &
+  CALL CONVERT_PATCH_TEB(BDD, DTB, DTCO, DTT, TOP, &
+                         TOP%XCOVER,TOP%LCOVER,0.,                                            &
                       PHC_FLOOR=B%CUR%XHC_FLOOR, PTC_FLOOR=B%CUR%XTC_FLOOR, PD_FLOOR=B%CUR%XD_FLOOR,    &
                       PTCOOL_TARGET=B%CUR%XTCOOL_TARGET, PTHEAT_TARGET=B%CUR%XTHEAT_TARGET,       &
                       PF_WASTE_CAN=B%CUR%XF_WASTE_CAN, PEFF_HEAT=B%CUR%XEFF_HEAT, PQIN=B%CUR%XQIN,      &
@@ -221,7 +230,8 @@ END SELECT
 !*       8.     Building HVAC automatic sizing:
 !               -------------------------------  
 IF (TOP%CBEM=='BEM' .AND. BOP%LAUTOSIZE) THEN
-  CALL HVAC_AUTOSIZE(ILU,KLUOUT)
+  CALL HVAC_AUTOSIZE(B, BOP, UG, U, TG, T, TOP, &
+                     ILU,KLUOUT)
   !* stores the real systems characteristics in physiographic data 
   !  for further use
   CALL STORES_HVAC_AUTOSIZE(B, BOP, DTB)

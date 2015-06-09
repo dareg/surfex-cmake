@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TEB_PAR_n(HPROGRAM,KNI,HDIRIN)
+      SUBROUTINE READ_PGD_TEB_PAR_n (BDD, DTB, DTT, TG, TOP, &
+                                     HPROGRAM,KNI,HDIRIN)
 !     ################################################
 !
 !!****  *READ_PGD_TEB_PAR_n* - reads ISBA physiographic fields
@@ -35,13 +36,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 !
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
 
-USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+!
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
+USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
+USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODI_READ_SURF
 USE MODI_READ_BLD_DESCRIPTION_n
@@ -56,6 +59,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
+TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
+TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER,           INTENT(IN)  :: KNI      ! size of the new domain

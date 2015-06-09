@@ -148,9 +148,11 @@ IF (LNAM_READ) THEN
 ENDIF
 !        1.2. Defaults from file header
 !    
- CALL READ_DEFAULT_TEB_VEG_n(HPROGRAM)
+ CALL READ_DEFAULT_TEB_VEG_n(CHT, TVG, &
+                             HPROGRAM)
 !
- CALL READ_TEB_VEG_CONF_n(HPROGRAM)
+ CALL READ_TEB_VEG_CONF_n(CHT, TVG, &
+                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 TVG%CRESPSL = 'DEF'

@@ -33,6 +33,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_SEAFLUX_n
 USE MODI_END_IO_SURF_n
@@ -64,7 +68,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SEAFLUX_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_SEAFLUX_n(HPROGRAM)
+ CALL WRITESURF_PGD_SEAFLUX_n(DTS, SG, S, &
+                              HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

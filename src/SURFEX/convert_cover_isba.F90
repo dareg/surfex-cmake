@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CONVERT_COVER_ISBA   (HISBA,KDECADE,PCOVER,OCOVER,HPHOTO,   &
+      SUBROUTINE CONVERT_COVER_ISBA (DTCO, I, &
+                                        HISBA,KDECADE,PCOVER,OCOVER,HPHOTO,   &
                                          HSFTYPE,PVEG,                       &
                                          PLAI,PRSMIN,PGAMMA,PWRMAX_CF,       &
                                          PRGL,PCV,PSOILGRID,PPERM,           &
@@ -56,7 +57,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
                                   XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
                                   XDATA_EMIS_ECO, XDATA_GAMMA, XDATA_CV,  &
@@ -87,7 +91,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER, NVT_NO, NVT_ROCK, NVT_SNOW
 USE MODD_TYPE_DATE_SURF
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_AV_PGD
 !
@@ -99,6 +102,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 INTEGER,                INTENT(IN)    :: KDECADE
@@ -529,7 +536,6 @@ SUBROUTINE SET_COVER_DG(KNI,KGROUND,KPATCH,LPERM,LDG2,LDROOT,LWG_LAYER,LROOTFRAC
                         LROOTFRACGV                                               )
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
 USE MODD_REPROD_OPER,    ONLY : CDGAVG, CDGDIF
 !

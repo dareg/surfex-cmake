@@ -42,6 +42,8 @@ SUBROUTINE OI_CONTROL (      &
 !
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
@@ -227,7 +229,7 @@ XRSCALDW = REAL(NECHGU)/6.0_JPRB
 !  half assimilation window in sec
 NITRAD   = NECHGU*1800
 
-CALL INI_DATA_COVER
+CALL INI_DATA_COVER(DTCO, U)
 
 !   File handling definition
 
@@ -321,7 +323,8 @@ ALLOCATE(U%XNATURE(ISIZE))
 ALLOCATE(U%XWATER (ISIZE))
 ALLOCATE(U%XTOWN  (ISIZE))
 
-CALL CONVERT_COVER_FRAC(U%XCOVER,U%LCOVER,U%XSEA,U%XNATURE,U%XTOWN,U%XWATER)
+CALL CONVERT_COVER_FRAC(DTCO, &
+                        U%XCOVER,U%LCOVER,U%XSEA,U%XNATURE,U%XTOWN,U%XWATER)
 
 U%NSIZE_NATURE = COUNT(U%XNATURE(:) > 0.0)
 U%NSIZE_TOWN   = COUNT(U%XTOWN(:)   > 0.0)

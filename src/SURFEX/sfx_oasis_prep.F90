@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE SFX_OASIS_PREP(HPROGRAM)
+SUBROUTINE SFX_OASIS_PREP (I, UG, U, &
+                           HPROGRAM)
 !###################################################
 !
 !!****  *SFX_OASIS_PREP* - Prepare grid areas and mask file for SFX-OASIS coupling
@@ -33,13 +34,15 @@ SUBROUTINE SFX_OASIS_PREP(HPROGRAM)
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODN_SFX_OASIS
 USE MODD_SFX_OASIS
@@ -61,6 +64,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
 !

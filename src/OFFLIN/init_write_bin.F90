@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_WRITE_BIN(HREC,KPATCH,OWFL)
+      SUBROUTINE INIT_WRITE_BIN (DGU, U, &
+                                 HREC,KPATCH,OWFL)
 !     ######################
 !
 !!****  *INIT_WRITE_BIN_n* Initialize array name to be written and associated
@@ -28,10 +29,12 @@
 !             ------------
 !
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_IO_SURF_BIN,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_BIN,  ONLY:NUNIT0, NVAR, CVAR, JPVAR, NIND
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODI_ABOR1_SFX
 USE MODI_TEST_RECORD_LEN
@@ -40,6 +43,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 INTEGER,             INTENT(IN)     :: KPATCH    

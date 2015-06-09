@@ -37,6 +37,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+!
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+!
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
@@ -136,7 +142,8 @@ ALLOCATE(TG%XMESH_SIZE (TG%NDIM))
 !             -------------------
 !
 TOP%LECOCLIMAP = OECOCLIMAP
- CALL PGD_TEB_PAR(HPROGRAM,OGARDEN,TOP%LGREENROOF,TOP%CBLD_ATYPE)
+ CALL PGD_TEB_PAR(BDD, DTI, DTT, TG, &
+                  HPROGRAM,OGARDEN,TOP%LGREENROOF,TOP%CBLD_ATYPE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -160,7 +167,8 @@ IF (TOP%LGARDEN) CALL PGD_TEB_VEG(HPROGRAM)
 !*    8.      Case of Building Energy Model
 !             -----------------------------
 !
-IF (TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(HPROGRAM,BOP%LAUTOSIZE)
+IF (TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(DTB, DTI, TG, &
+                                          HPROGRAM,BOP%LAUTOSIZE)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB',1,ZHOOK_HANDLE)
 !

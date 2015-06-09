@@ -1,6 +1,7 @@
 !
 !#############################################
-SUBROUTINE WRITE_HEADER_FA(CFILETYPE,HWRITE)
+SUBROUTINE WRITE_HEADER_FA (IOB, UG, &
+                            CFILETYPE,HWRITE)
 !#############################################
 !
 !!    PURPOSE
@@ -36,10 +37,12 @@ SUBROUTINE WRITE_HEADER_FA(CFILETYPE,HWRITE)
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODD_GRID_CONF_PROJ,  ONLY : XLATC, XLONC
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODD_IO_SURF_FA
 !
@@ -63,6 +66,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE       ! 'PGD' : only physiographic fields are written
  CHARACTER(LEN=6),    INTENT(IN)  :: CFILETYPE    ! 'FA' could also be 'LFI' in future developments

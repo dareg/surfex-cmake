@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE UPDATE_DATA_COVER(KYEAR)
+      SUBROUTINE UPDATE_DATA_COVER (DTCO, DTI, IG, I, &
+                                    KYEAR)
 !     #########################
 !
 !!**** *INI_DATA_COVER* initializes cover-field correspondance arrays
@@ -35,11 +36,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DATA_COVER,     ONLY :   XDATA_LAI, XDATA_H_TREE, &
                                   XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_EMIS_ECO, &
                                   XDATA_LAIGV, XDATA_Z0LITTER, XDATA_H_VEG, XDATA_LAIMIN
@@ -56,6 +59,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,             INTENT(IN)    :: KYEAR        ! new year
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

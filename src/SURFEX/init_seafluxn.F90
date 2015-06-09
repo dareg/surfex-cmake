@@ -48,6 +48,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
@@ -190,12 +194,14 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_SEAFLUX_n(HPROGRAM)
+ CALL READ_DEFAULT_SEAFLUX_n(CHS, DGO, DGS, DGSI, O, S, &
+                             HPROGRAM)
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
- CALL READ_SEAFLUX_CONF_n(HPROGRAM)
+ CALL READ_SEAFLUX_CONF_n(CHS, DGO, DGS, DGSI, O, S, &
+                          HPROGRAM)
 !
 S%LINTERPOL_SST=.FALSE.
 S%LINTERPOL_SSS=.FALSE.
@@ -243,7 +249,8 @@ SELECT CASE (HINIT)
     CALL PREP_CTRL_SEAFLUX(DGS%N2M,DGS%LSURF_BUDGET,DGS%L2M_MIN_ZS,DGS%LRAD_BUDGET,DGS%LCOEF,DGS%LSURF_VARS,&
                              DGO%LDIAG_OCEAN,DGSI%LDIAG_SEAICE,ILUOUT,DGS%LSURF_BUDGETC ) 
     IF (LNAM_READ) CALL READ_NAM_PREP_SEAFLUX_n(HPROGRAM)      
-    CALL READ_SEAFLUX_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,S%TTIME)
+    CALL READ_SEAFLUX_DATE(IOB, O, &
+                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,S%TTIME)
 !
   CASE DEFAULT
 !
@@ -348,7 +355,8 @@ ENDIF
 !
 !*       4.     Seaice prognostic variables and forcings :
 !
-CALL READ_SEAICE_n(HPROGRAM,ILU,ILUOUT)
+CALL READ_SEAICE_n(SG, S, &
+                   HPROGRAM,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !

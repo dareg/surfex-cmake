@@ -43,6 +43,9 @@ SUBROUTINE PREP_ISBA(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
 !
 USE MODI_PREP_HOR_ISBA_FIELD
@@ -138,7 +141,8 @@ ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL PREP_OUTPUT_GRID(ILUOUT,IG%CGRID,IG%XGRID_PAR,IG%XLAT,IG%XLON)
+ CALL PREP_OUTPUT_GRID(UG, U, &
+                       ILUOUT,IG%CGRID,IG%XGRID_PAR,IG%XLAT,IG%XLON)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -333,7 +337,8 @@ ALLOCATE(I%XDIR_ALB_WITH_SNOW(SIZE(I%XLAI,1),1,SIZE(I%XLAI,2)))
 ALLOCATE(I%XSCA_ALB_WITH_SNOW(SIZE(I%XLAI,1),1,SIZE(I%XLAI,2)))
 I%XDIR_ALB_WITH_SNOW = 0.0
 I%XSCA_ALB_WITH_SNOW = 0.0
-CALL AVERAGED_ALBEDO_EMIS_ISBA(.FALSE., I%CALBEDO, ZZENITH,                &
+CALL AVERAGED_ALBEDO_EMIS_ISBA(I, &
+                               .FALSE., I%CALBEDO, ZZENITH,                &
                                  I%XVEG,I%XZ0,I%XLAI,                          &
                                  I%LMEB_PATCH,I%XGNDLITTER,I%XZ0LITTER,I%XLAIGV, &
                                  I%XZF_TALLVEG, I%XH_VEG, I%XTV,               &

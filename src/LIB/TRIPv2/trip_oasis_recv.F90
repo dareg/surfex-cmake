@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE TRIP_OASIS_RECV(KLISTING,KLON,KLAT,PTIMEC,PRUNOFF,  & 
+SUBROUTINE TRIP_OASIS_RECV (TP, TPG, &
+                            KLISTING,KLON,KLAT,PTIMEC,PRUNOFF,  & 
                            PDRAIN,PCALVING,PRECHARGE,PSRC_FLOOD)
 !#############################################################################
 !
@@ -34,14 +35,16 @@ SUBROUTINE TRIP_OASIS_RECV(KLISTING,KLON,KLAT,PTIMEC,PRUNOFF,  &
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TRIP, ONLY : TP => TRIP
+!
+!
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_PAR,   ONLY : XUNDEF
 !
 USE MODN_TRIP_OASIS, ONLY : XTSTEP_CPL_LAND
 USE MODD_TRIP_OASIS
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 USE MODI_FLOOD_REDISTRIB
 !
@@ -56,6 +59,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN)               :: KLISTING
 INTEGER, INTENT(IN)               :: KLON

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SEAFLUX_DATE(HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
+      SUBROUTINE READ_SEAFLUX_DATE (IOB, O, &
+                                    HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
                                      KYEAR,KMONTH,KDAY,PTIME,TPTIME)  
 !     #######################################################
 !
@@ -35,9 +36,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_OCEAN_n, ONLY : O => OCEAN
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_OCEAN_n, ONLY : OCEAN_t
 !
 USE MODD_TYPE_DATE_SURF
 USE MODD_SURF_PAR,       ONLY : NUNDEF, XUNDEF
@@ -57,6 +60,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(OCEAN_t), INTENT(INOUT) :: O
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'

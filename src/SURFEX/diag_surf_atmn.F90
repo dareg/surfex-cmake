@@ -28,6 +28,17 @@ SUBROUTINE DIAG_SURF_ATM_n(HPROGRAM)
 !
 
 !
+USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+!
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
@@ -305,7 +316,8 @@ IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:TREAT_SURF',0,ZHOOK_HANDLE)
 !
 IF (KTILE==1) THEN
   !
-  CALL DIAG_SEA_n(HPROGRAM,                             &
+  CALL DIAG_SEA_n(DGL, DGS, U, &
+                  HPROGRAM,                             &
                   ZP_RN, ZP_H, ZP_LE, ZP_LEI, ZP_GFLUX, &
                   ZP_RI, ZP_CD, ZP_CH, ZP_CE,           &
                   ZP_QS, ZP_Z0, ZP_Z0H,                 &
@@ -323,7 +335,8 @@ IF (KTILE==1) THEN
   !
 ELSEIF (KTILE==2) THEN
   !
-  CALL DIAG_INLAND_WATER_n(HPROGRAM,                            &
+  CALL DIAG_INLAND_WATER_n(DGF, DGL, DGW, U, &
+                           HPROGRAM,                            &
                            ZP_RN, ZP_H, ZP_LE, ZP_LEI, ZP_GFLUX,&
                            ZP_RI, ZP_CD, ZP_CH, ZP_CE,          &
                            ZP_QS, ZP_Z0, ZP_Z0H,                &
@@ -341,7 +354,8 @@ ELSEIF (KTILE==2) THEN
   !
 ELSEIF (KTILE==3) THEN
   !
-  CALL DIAG_NATURE_n(HPROGRAM,                            &
+  CALL DIAG_NATURE_n(DGEI, DGL, DGI, U, &
+                     HPROGRAM,                            &
                      ZP_RN, ZP_H, ZP_LE, ZP_LEI, ZP_GFLUX,&
                      ZP_RI, ZP_CD, ZP_CH, ZP_CE,          &
                      ZP_QS, ZP_Z0, ZP_Z0H,                &
@@ -359,7 +373,8 @@ ELSEIF (KTILE==3) THEN
   !
 ELSEIF (KTILE==4) THEN
   !
-  CALL DIAG_TOWN_n(HPROGRAM,                            &
+  CALL DIAG_TOWN_n(DGL, DGT, U, &
+                   HPROGRAM,                            &
                    ZP_RN, ZP_H, ZP_LE, ZP_LEI, ZP_GFLUX,&
                    ZP_RI, ZP_CD, ZP_CH, ZP_CE,          &
                    ZP_QS, ZP_Z0, ZP_Z0H,                &

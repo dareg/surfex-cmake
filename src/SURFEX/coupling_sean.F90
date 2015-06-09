@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEA_n(HPROGRAM, HCOUPLING, PTIMEC,                                       &
+SUBROUTINE COUPLING_SEA_n (DGL, DGS, S, SSB, U, &
+                           HPROGRAM, HCOUPLING, PTIMEC,                                       &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM,PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,           &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -32,13 +33,15 @@ SUBROUTINE COUPLING_SEA_n(HPROGRAM, HCOUPLING, PTIMEC,                          
 !!      B. Decharme  04/2013 new coupling variables
 !!-----------------------------------------------------------------------
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_CSTS,       ONLY : XTT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -51,6 +54,13 @@ USE MODI_COUPLING_SEAFLUX_OROG_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling

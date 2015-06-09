@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_TOWN_n(HPROGRAM,KI,PT2M_O,HTEST)
+SUBROUTINE ASSIM_TOWN_n (U, T, TOP, &
+                         HPROGRAM,KI,PT2M_O,HTEST)
 
 !     ###############################################################################
 !
@@ -24,13 +25,15 @@ SUBROUTINE ASSIM_TOWN_n(HPROGRAM,KI,PT2M_O,HTEST)
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_CSTS,          ONLY : XPI
 USE MODN_IO_OFFLINE,    ONLY : CSURF_FILETYPE
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE YOMHOOK,            ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,           ONLY : JPRB
@@ -41,6 +44,11 @@ USE MODI_ASSIM_TEB_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI

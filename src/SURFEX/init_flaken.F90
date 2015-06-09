@@ -43,6 +43,8 @@ SUBROUTINE INIT_FLAKE_n(HPROGRAM,HINIT,                            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODD_CSTS,          ONLY : XTT, XPI, XOMEGA 
@@ -176,13 +178,15 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_FLAKE_n(HPROGRAM)
+ CALL READ_DEFAULT_FLAKE_n(CHF, DGF, DGMF, F, &
+                           HPROGRAM)
 
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
- CALL READ_FLAKE_CONF_n(HPROGRAM)
+ CALL READ_FLAKE_CONF_n(CHF, DGF, DGMF, F, &
+                        HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -201,7 +205,8 @@ SELECT CASE (HINIT)
     CALL PREP_CTRL_FLAKE(DGF%N2M,DGF%LSURF_BUDGET,DGF%L2M_MIN_ZS,DGF%LRAD_BUDGET,DGF%LCOEF,DGF%LSURF_VARS,&
                              ILUOUT,DGMF%LWATER_PROFILE,DGF%LSURF_BUDGETC) 
     IF (LNAM_READ) CALL READ_NAM_PREP_FLAKE_n(HPROGRAM)                            
-    CALL READ_FLAKE_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,F%TTIME)
+    CALL READ_FLAKE_DATE(IOB, &
+                         HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,F%TTIME)
 
   CASE DEFAULT
     CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','FLAKE ','READ ')

@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE MOD1D_n(HPROGRAM,PTIME,PEMIS,PDIR_ALB,PSCA_ALB,PLW,PSCA_SW,&
+    SUBROUTINE MOD1D_n (DGO, O, OR, SG, S, &
+                        HPROGRAM,PTIME,PEMIS,PDIR_ALB,PSCA_ALB,PLW,PSCA_SW,&
                        PDIR_SW, PSFTH,PSFTQ,PSFU,PSFV,PRAIN,PSST )           
 !     #######################################################################
 !
@@ -39,20 +40,22 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
-USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
-USE MODD_OCEAN_n, ONLY : O => OCEAN
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODI_MIXTL_n
 USE MODI_DIAG_INLINE_OCEAN_n
 !
-USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 USE MODI_GET_LUOUT
 !
 !
@@ -63,6 +66,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
 REAL                ,INTENT(IN)       :: PTIME   ! current time since midnight in second

@@ -1,4 +1,5 @@
-SUBROUTINE OL_DEFINE_DIM(HPROGRAM, KLUOUT, KNI, KDIM1, HUNIT1, HUNIT2, &
+SUBROUTINE OL_DEFINE_DIM (UG, U, &
+                          HPROGRAM, KLUOUT, KNI, KDIM1, HUNIT1, HUNIT2, &
                          PX, PY, KDIMS, KDDIM, HNAME_DIM, KNPATCH)
 !     #######################################################
 !!****  *OL_DEFINE_DIM* - 
@@ -31,9 +32,11 @@ SUBROUTINE OL_DEFINE_DIM(HPROGRAM, KLUOUT, KNI, KDIM1, HUNIT1, HUNIT2, &
 !!      07/2011     add specific computation for IGN grid (B. Decharme)
 !-------------------------------------------------------------------------------                         
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_IO_SURF_OL, ONLY: NMASK_IGN
 !
 USE MODN_IO_OFFLINE, ONLY : LWRITE_COORD
@@ -48,6 +51,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 include 'netcdf.inc'
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)    :: HPROGRAM
 INTEGER, INTENT(IN)              :: KLUOUT

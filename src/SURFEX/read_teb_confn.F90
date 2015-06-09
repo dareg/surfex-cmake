@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_TEB_CONF_n(HPROGRAM)
+      SUBROUTINE READ_TEB_CONF_n (CHT, DGMTO, DGT, DGUT, T, TOP, &
+                                  HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_TEB_CONF* - routine to read the configuration for TEB
@@ -35,15 +36,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_n, ONLY : T => TEB
 !
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
-USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
 !
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
-USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+!
+!
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DIAG_UTCI_TEB_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -67,6 +70,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
+TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_UTCI_TEB_t), INTENT(INOUT) :: DGUT
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 

@@ -39,6 +39,8 @@ SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                      
 !!      B. Decharme  04/2013 new coupling variables
 !!----------------------------------------------------------------------------
 !
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+!
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XTT, XDAY, XTTS
@@ -371,7 +373,8 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 ! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_INLINE_WATFLUX_n(PTSTEP,PTA, W%XTS, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
+ CALL DIAG_INLINE_WATFLUX_n(DGW, W, &
+                            PTSTEP,PTA, W%XTS, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
                              PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, W%XZ0, ZZ0H, ZQSAT,     &
                              PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,       &
                              ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD, PRAIN, PSNOW,        &

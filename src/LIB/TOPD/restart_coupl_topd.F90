@@ -1,5 +1,6 @@
 !######
-SUBROUTINE RESTART_COUPL_TOPD(HPROGRAM,KI)
+SUBROUTINE RESTART_COUPL_TOPD (UG, U, &
+                               HPROGRAM,KI)
 !###################################################################
 !
 !!****  *RESTART_COUPL_TOPDn*  
@@ -23,10 +24,12 @@ SUBROUTINE RESTART_COUPL_TOPD(HPROGRAM,KI)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : XUNDEF,NUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 !
 USE MODD_TOPD_PAR, ONLY : NUNIT
@@ -54,6 +57,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension

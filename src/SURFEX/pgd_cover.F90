@@ -41,6 +41,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR, NGRID_PAR
 USE MODD_PGDWORK,        ONLY : XSUMCOVER, NSIZE
@@ -254,7 +260,8 @@ ELSE
 !
   NSIZE    (:)   = 0.
   XSUMCOVER(:,:) = 0.
-  CALL TREAT_FIELD(HPROGRAM,'SURF  ',YFILETYPE,'A_COVR',YCOVER,  &
+  CALL TREAT_FIELD(UG, U, USS, &
+                   HPROGRAM,'SURF  ',YFILETYPE,'A_COVR',YCOVER,  &
                      'COVER               '                      ) 
 
 !
@@ -262,7 +269,8 @@ ELSE
 !             ---------------------------------------------------------------------------------------
 !
   WRITE(YFIELD,FMT='(A)') 'covers'
-  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,U%XCOVER(:,:),YFIELD)
+  CALL INTERPOL_FIELD2D(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,U%XCOVER(:,:),YFIELD)
 !
 !-------------------------------------------------------------------------------
 !
@@ -466,7 +474,8 @@ IF(.NOT.LIMP_COVER)THEN
 !
   IF (IECO2/=0) THEN
     IF ( SUM_ON_ALL_PROCS(HPROGRAM,CGRID,ANY(U%XCOVER(:,IECO2:)>0.,DIM=2),'COV' ) >0 ) &
-      CALL PGD_ECOCLIMAP2_DATA(HPROGRAM)
+      CALL PGD_ECOCLIMAP2_DATA(DTCO, &
+                               HPROGRAM)
   ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -483,7 +492,8 @@ IF (.NOT.ASSOCIATED(U%XSEA)) THEN
   ALLOCATE(U%XWATER (NL))
   ALLOCATE(U%XNATURE(NL))
   ALLOCATE(U%XTOWN  (NL))
-  CALL CONVERT_COVER_FRAC(U%XCOVER,U%LCOVER,U%XSEA,U%XNATURE,U%XTOWN,U%XWATER)
+  CALL CONVERT_COVER_FRAC(DTCO, &
+                          U%XCOVER,U%LCOVER,U%XSEA,U%XNATURE,U%XTOWN,U%XWATER)
 
 ELSE
   !
@@ -497,7 +507,8 @@ ELSE
   ALLOCATE(ZWATER (NL))
   ALLOCATE(ZNATURE(NL))
   ALLOCATE(ZTOWN  (NL))
-  CALL CONVERT_COVER_FRAC(U%XCOVER,U%LCOVER,ZSEA,ZNATURE,ZTOWN,ZWATER)
+  CALL CONVERT_COVER_FRAC(DTCO, &
+                          U%XCOVER,U%LCOVER,ZSEA,ZNATURE,ZTOWN,ZWATER)
   !
   CALL FIT_COVERS(XDATA_NATURE,U%XNATURE,4,ICOVER,IC_NAT)
   CALL FIT_COVERS(XDATA_TOWN,U%XTOWN,7,ICOVER,IC_TWN)
@@ -537,7 +548,8 @@ ELSE
       EXIT
     ENDIF
   ENDDO
-  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_NATURE(:,:),YFIELD,ZDEF)  
+  CALL INTERPOL_FIELD2D(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_NATURE(:,:),YFIELD,ZDEF)  
 !
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -557,7 +569,8 @@ ELSE
       EXIT
     ENDIF
   ENDDO  
-  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN (:,:),YFIELD,ZDEF) 
+  CALL INTERPOL_FIELD2D(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN (:,:),YFIELD,ZDEF) 
 
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -584,7 +597,8 @@ ELSE
       EXIT
     ENDIF
   ENDDO    
-  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_WATER (:,:),YFIELD,PDEF=ZDEF)
+  CALL INTERPOL_FIELD2D(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_WATER (:,:),YFIELD,PDEF=ZDEF)
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
   WRITE(ILUOUT,FMT=*) &
@@ -610,7 +624,8 @@ ELSE
       EXIT
     ENDIF
   ENDDO    
-  CALL INTERPOL_FIELD2D(HPROGRAM,ILUOUT,NSIZE,ZCOVER_SEA (:,:),YFIELD,PDEF=ZDEF)
+  CALL INTERPOL_FIELD2D(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_SEA (:,:),YFIELD,PDEF=ZDEF)
   !
   U%XCOVER(:,:) = U%XCOVER(:,:) + 0.001 * ( ZCOVER_NATURE(:,:) + ZCOVER_TOWN(:,:) + &
                                         ZCOVER_WATER (:,:) + ZCOVER_SEA (:,:) )

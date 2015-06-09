@@ -121,7 +121,8 @@ IF ( CASSIM_ISBA == 'EKF  ' ) THEN
   ENDIF
   !
   ! Run EKF for soil
-  CALL ASSIM_NATURE_ISBA_EKF(HPROGRAM, KI, PT2M, PHU2M, HTEST)
+  CALL ASSIM_NATURE_ISBA_EKF(I, &
+                             HPROGRAM, KI, PT2M, PHU2M, HTEST)
   !
 ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
   !

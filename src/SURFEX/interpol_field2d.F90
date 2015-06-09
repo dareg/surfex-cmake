@@ -1,5 +1,6 @@
 !     ################################################
-      SUBROUTINE INTERPOL_FIELD2D(HPROGRAM,KLUOUT,KCODE,PFIELD,HFIELD,PDEF,KNPTS)
+      SUBROUTINE INTERPOL_FIELD2D (UG, U, &
+                                   HPROGRAM,KLUOUT,KCODE,PFIELD,HFIELD,PDEF,KNPTS)
 !     ################################################
 !
 !!**** *INTERPOL_FIELD* initializes coordinate system for spline interpolation
@@ -32,10 +33,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODI_GET_GRID_COORD
 USE MODI_INTERPOL_NPTS
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),        INTENT(IN)   :: HPROGRAM ! host program
 INTEGER,                 INTENT(IN)   :: KLUOUT   ! output listing

@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE SSO_BE04_FRICTION_n(PTSTEP,PSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+SUBROUTINE SSO_BE04_FRICTION_n (SSCP, USS, &
+                                PTSTEP,PSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 !     ###############################################################################
 !
 !!****  *SSO_BE04_FRICTION_n * - Computes subgrid-scale orography friction
@@ -28,12 +29,14 @@ SUBROUTINE SSO_BE04_FRICTION_n(PTSTEP,PSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 !----------------------------------------------------------------
 !
 !
+!
+USE MODD_SSO_CANOPY_n, ONLY : SSO_CANOPY_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 USE MODD_CANOPY_TURB,    ONLY : XALPSBL
 USE MODD_CSTS,           ONLY : XKARMAN
 !
-USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -45,6 +48,10 @@ USE MODI_SSO_BELJAARS04
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SSO_CANOPY_t), INTENT(INOUT) :: SSCP
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 REAL,               INTENT(IN)    :: PTSTEP    ! time step
 REAL, DIMENSION(:), INTENT(IN)    :: PSEA      ! Sea fraction                          (-)

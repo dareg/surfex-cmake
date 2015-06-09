@@ -39,6 +39,9 @@
 !
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODE_WRITE_COVER_TEX
 
 USE MODI_CONVERT_COVER_ISBA
@@ -121,13 +124,15 @@ GCOVER(:) = .TRUE.
 !ocl scalar
 !
 DO JJ=1,12
-  CALL CONVERT_COVER_ISBA(HISBA,3*JJ-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
+  CALL CONVERT_COVER_ISBA(DTCO, I, &
+                          HISBA,3*JJ-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
                             PVEG=ZVEG(:,:,JJ), PLAI=ZLAI(:,:,JJ),            &
                             PZ0=ZZ0VEG(:,:,JJ), PEMIS_ECO=ZEMIS_ECO(:,:,JJ), &
                             PF2I=ZF2I(:,:,JJ),OSTRESS=GSTRESS(:,:,JJ)        )  
 END DO
 
- CALL CONVERT_COVER_ISBA(HISBA,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
+ CALL CONVERT_COVER_ISBA(DTCO, I, &
+                          HISBA,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
                         PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &

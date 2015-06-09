@@ -119,8 +119,10 @@ ENDIF
 !*       0.2    configuration
 !               -------------
 !
- CALL READ_DEFAULT_IDEAL_n(HPROGRAM)
- CALL READ_IDEAL_CONF_n(HPROGRAM)
+ CALL READ_DEFAULT_IDEAL_n(DGL, &
+                           HPROGRAM)
+ CALL READ_IDEAL_CONF_n(DGL, &
+                        HPROGRAM)
 !
 IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 

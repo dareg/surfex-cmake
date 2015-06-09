@@ -36,6 +36,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+!
 USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
 !
 USE MODD_WATFLUX_n, ONLY : W => WATFLUX
@@ -73,7 +75,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_WATFLUX_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_WATFLUX_CONF_n(HPROGRAM)
+ CALL WRITESURF_WATFLUX_CONF_n(CHW, W, &
+                               HPROGRAM)
  CALL WRITESURF_WATFLUX_n(W, &
                           HPROGRAM)
 !

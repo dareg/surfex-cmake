@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE PGD_ECOCLIMAP2_DATA(HPROGRAM)
+      SUBROUTINE PGD_ECOCLIMAP2_DATA (DTCO, &
+                                      HPROGRAM)
 !     #########################
 !
 !!**** *PGD_ECOCLIMAP2_DATA* initializes cover-field correspondance arrays
@@ -35,9 +36,11 @@
 !*    0.     DECLARATION
 !            -----------
 
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER,     ONLY : TDATA_SEED, TDATA_REAP, XDATA_WATSUP, XDATA_IRRIG,&
                                   LDATA_IRRIG, XDATA_VEGTYPE, LCLIM_LAI  
 
@@ -65,6 +68,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !

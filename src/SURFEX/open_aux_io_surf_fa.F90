@@ -1,5 +1,6 @@
 !     #######################################################
-      SUBROUTINE OPEN_AUX_IO_SURF_FA(HFILE,HFILETYPE,HMASK)
+      SUBROUTINE OPEN_AUX_IO_SURF_FA (IOB, &
+                                      HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -33,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_FA,ONLY:NUNIT_FA,NLUOUT,NFULL,NMASK,CMASK,IVERBFA,CDNOMC
 USE MODI_GET_LUOUT
@@ -53,6 +56,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program

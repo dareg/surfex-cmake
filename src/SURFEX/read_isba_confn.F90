@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_ISBA_CONF_n(HPROGRAM)
+      SUBROUTINE READ_ISBA_CONF_n (CHI, DGEI, DGI, DGMI, I, &
+                                   HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_ISBA_CONF* - routine to read the configuration for ISBA
@@ -40,13 +41,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
-USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
 !
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+!
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -71,6 +74,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 

@@ -59,6 +59,12 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
 USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
 !
@@ -191,9 +197,12 @@ ODUPDATED=.FALSE.
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
-      CALL UPDATE_DATA_COVER(TTIME%TDATE%YEAR)  
-      IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,HPHOTO,HSFTYPE)
-      CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
+      CALL UPDATE_DATA_COVER(DTCO, DTI, IG, I, &
+                             TTIME%TDATE%YEAR)  
+      IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(DTCO, DTI, IG, I, &
+                                                HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,HPHOTO,HSFTYPE)
+      CALL CONVERT_PATCH_ISBA(DTCO, DTI, I, &
+                              HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
                            HPHOTO,OAGRIP,.FALSE.,OTR_ML,HSFTYPE, &
                            PVEG=PVEG,PLAI=PLAI,PRSMIN=PRSMIN,    &
                            PGAMMA=PGAMMA, PWRMAX_CF=PWRMAX_CF,   &
@@ -218,7 +227,8 @@ ODUPDATED=.FALSE.
                            PLAIGV=PLAIGV,PZ0LITTER=PZ0LITTER,    &
                            PH_VEG=PH_VEG                         )
       IF ( HALBEDO=='CM13') THEN
-        CALL CONVERT_PATCH_ISBA(HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
+        CALL CONVERT_PATCH_ISBA(DTCO, DTI, I, &
+                              HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
                               HPHOTO,OAGRIP,.FALSE.,OTR_ML,HSFTYPE, &
                               PALBNIR_SOIL=PALBNIR_SOIL, &
                               PALBVIS_SOIL=PALBVIS_SOIL, &

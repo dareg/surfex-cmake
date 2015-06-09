@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SURF_ATM_CONF_n(HPROGRAM)
+      SUBROUTINE READ_SURF_ATM_CONF_n (CHU, DGU, USS, &
+                                       HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_SURF_ATM_CONF* - reads the general configuration for surface
@@ -33,11 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
-USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+!
+!
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -58,6 +61,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling GROUND
 !

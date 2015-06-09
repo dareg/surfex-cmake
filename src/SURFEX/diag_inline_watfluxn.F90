@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_WATFLUX_n (PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
+       SUBROUTINE DIAG_INLINE_WATFLUX_n (DGW, W, &
+                                          PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
                                            PMERA, PHT, PHW, PCD, PCDN, PCH, PRI, PHU, PZ0, &
                                            PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,      &
                                            PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,      &
@@ -35,11 +36,13 @@
 
 !
 !
+!
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -55,6 +58,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL,               INTENT(IN) :: PTSTEP ! atmospheric time-step                 (s)
 REAL, DIMENSION(:), INTENT(IN) :: PTA    ! atmospheric temperature

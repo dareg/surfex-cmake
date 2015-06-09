@@ -36,6 +36,8 @@ SUBROUTINE OL_READ_ATM_CONF(HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!      Modified by P. Le Moigne (04/2006): init_io_surf for nature
 !!                  with GTMSK to read dimensions.
 !==================================================================
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODI_OL_READ_ATM_CONF_NETCDF
 USE MODI_OL_READ_ATM_CONF_ASCII
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
@@ -64,7 +66,8 @@ CPROGNAME = HSURF_FILETYPE
 !
 IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
- CALL OL_READ_ATM_CONF_NETCDF(HSURF_FILETYPE,                     &
+ CALL OL_READ_ATM_CONF_NETCDF(U, &
+                              HSURF_FILETYPE,                     &
                                 PDURATION,                          &
                                 PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
                                 KDAY, PTIME, PLAT, PLON,            &
@@ -72,7 +75,8 @@ IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
 ELSE IF (HFORCING_FILETYPE == 'ASCII ' .OR. HFORCING_FILETYPE == 'BINARY') THEN
 !
- CALL OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE,HFORCING_FILETYPE,   &
+ CALL OL_READ_ATM_CONF_ASCII(U, &
+                              HSURF_FILETYPE,HFORCING_FILETYPE,   &
                                 PDURATION,                          &
                                 PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
                                 KDAY, PTIME, PLAT, PLON,            &

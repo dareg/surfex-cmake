@@ -1,5 +1,6 @@
 !     ###################################################################
-      SUBROUTINE GWF (KLON,KLAT,OPRINT,PTSTEP_RUN,PTSTEP,OMASK,PNUM_AQUI, &
+      SUBROUTINE GWF (TPG, &
+                       KLON,KLAT,OPRINT,PTSTEP_RUN,PTSTEP,OMASK,PNUM_AQUI, &
                       PDRAIN,PLEN,PWIDTH,PHC_BED,PTOPO_RIV,PTAUG,         &
                       PAREA,PELEV,PTRANS,PWEFF,PTABGW_F,PTABGW_H,         &
                       PSURF_STO,PHGROUND,PHG_OLD,PQGCELL,PWTD,PFWTD,      &
@@ -11,7 +12,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_PAR
 !
@@ -27,6 +30,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,              INTENT(IN)    :: KLON
 INTEGER,              INTENT(IN)    :: KLAT

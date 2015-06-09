@@ -40,6 +40,10 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!      B. Decharme  04/2013 new coupling variables
 !!---------------------------------------------------------------
 !
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB
+USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
+!
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_GOTO_PATCH
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
@@ -901,7 +905,8 @@ IF (JTEB_PATCH==TOP%NTEB_PATCH) ZAVG_RESA_TOWN = 1./ZAVG_RESA_TOWN
 ! Diagnostics on each patch
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_MISC_TEB_n(PTSTEP, ZDQS_TOWN, ZQF_BLD, ZQF_TOWN, ZFLX_BLD,           &
+ CALL DIAG_MISC_TEB_n(DGCT, DGMT, DGMTO, TOP, &
+                      PTSTEP, ZDQS_TOWN, ZQF_BLD, ZQF_TOWN, ZFLX_BLD,           &
                      ZRUNOFF_TOWN,                                             &
                      ZRN_ROAD, ZH_ROAD, ZLE_ROAD, ZGFLUX_ROAD,                 &
                      ZRUNOFF_ROAD, ZIRRIG_ROAD,                                &

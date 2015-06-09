@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CO2_INIT_n(HPHOTO, KSIZE_NATURE_P, KR_NATURE_P, PVEGTYPE_PATCH, &
+      SUBROUTINE CO2_INIT_n (I, &
+                             HPHOTO, KSIZE_NATURE_P, KR_NATURE_P, PVEGTYPE_PATCH, &
                             PCO2, PGMES, PGC, PDMAX, PABC, PPOI, PANMAX, &
                             PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,      &
                             PT1GMES, PT2GMES, PAMAX, PQDAMAX,            &
@@ -47,7 +48,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
@@ -61,6 +64,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
 INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_NATURE_P

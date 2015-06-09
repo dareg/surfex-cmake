@@ -24,6 +24,8 @@ SUBROUTINE READ_PGD_NETCDF(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD,PFIELD)
 !!------------------------------------------------------------------
 !
 
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODI_ABOR1_SFX
 
 USE MODE_READ_CDF, ONLY :HANDLE_ERR_CDF
@@ -122,7 +124,8 @@ ELSE
     !*    5.     Call to the adequate subroutine (point by point treatment)
     !            ----------------------------------------------------------
     !     
-    CALL PT_BY_PT_TREATMENT(ILUOUT,  (/ ZLAT2D(JPOINT)/) , (/ZLON2D(JPOINT)/) , (/ ZFIELD(JPOINT)/) , &
+    CALL PT_BY_PT_TREATMENT(USS, &
+                            ILUOUT,  (/ ZLAT2D(JPOINT)/) , (/ZLON2D(JPOINT)/) , (/ ZFIELD(JPOINT)/) , &
       HSUBROUTINE                                       )  
 
   ENDDO

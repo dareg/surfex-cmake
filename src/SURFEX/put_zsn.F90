@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE PUT_ZS_n(HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_n (F, I, S, U, TOP, W, &
+                           HPROGRAM,KI,PZS)
 !     ########################################
 !
 !!****  *PUT_ZS_n* - routine to modify surface oropgraphy of each tile using atmospheric
@@ -32,20 +33,22 @@
 !!      P. Le Moigne 05/2007: write model orography over each tile
 !-------------------------------------------------------------------------------
 !      
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -66,6 +69,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover

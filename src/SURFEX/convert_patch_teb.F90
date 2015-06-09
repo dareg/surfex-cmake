@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CONVERT_PATCH_TEB(PCOVER,OCOVER,PDEF_ROAD_DIR,        &
+      SUBROUTINE CONVERT_PATCH_TEB (BDD, DTB, DTCO, DTT, TOP, &
+                                    PCOVER,OCOVER,PDEF_ROAD_DIR,        &
                                    PZ0_TOWN,                           &
                                    PALB_ROOF,                          &
                                    PEMIS_ROOF,PHC_ROOF,PTC_ROOF,       &
@@ -67,9 +68,15 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
+USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER_PAR, ONLY : NDATA_ROAD_LAYER, NDATA_WALL_LAYER,               &
                                 NDATA_ROOF_LAYER, NDATA_FLOOR_LAYER
 USE MODD_DATA_COVER,     ONLY : XDATA_Z0_TOWN, XDATA_ALB_ROOF,                    &
@@ -93,11 +100,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_Z0_TOWN, XDATA_ALB_ROOF,                  
                                 XDATA_ROUGH_WALL, XDATA_RESIDENTIAL,XDATA_FRAC_GR,&
                                 XDATA_EMIS_PANEL,XDATA_ALB_PANEL, XDATA_EFF_PANEL,&
                                 XDATA_FRAC_PANEL
-USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
-USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 !
 USE MODI_THERMAL_LAYERS_CONF
 USE MODI_INI_DATA_PARAM_TEB
@@ -112,6 +115,13 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
+TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:),  INTENT(IN)    :: OCOVER

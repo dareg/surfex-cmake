@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
+SUBROUTINE DIAG_TOWN_n (DGL, DGT, U, &
+                        HPROGRAM,                                           &
                          PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                          PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                          PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, PFMU, PFMV,   &
@@ -36,12 +37,14 @@ SUBROUTINE DIAG_TOWN_n(HPROGRAM,                                           &
 !
 
 !
-USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT, XLSTT, XLVTT
 !
 USE MODI_DIAG_TEB_n
@@ -53,6 +56,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !

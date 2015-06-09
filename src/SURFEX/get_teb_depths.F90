@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_TEB_DEPTHS(HFILEPGD, HFILEPGDTYPE, PD_ROOF, PD_ROAD, PD_WALL, PD_FLOOR)
+      SUBROUTINE GET_TEB_DEPTHS (DTCO, &
+                                 HFILEPGD, HFILEPGDTYPE, PD_ROOF, PD_ROAD, PD_WALL, PD_FLOOR)
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* 
@@ -34,7 +35,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_D_ROOF, XDATA_D_ROAD, XDATA_D_WALL, XDATA_D_FLOOR
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NDATA_ROOF_LAYER, NDATA_ROAD_LAYER, &
@@ -58,6 +61,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
 CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file

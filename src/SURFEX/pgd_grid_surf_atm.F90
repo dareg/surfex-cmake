@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE PGD_GRID_SURF_ATM(HPROGRAM,HFILE,HFILETYPE,OGRID)
+      SUBROUTINE PGD_GRID_SURF_ATM (UG, U, &
+                                    HPROGRAM,HFILE,HFILETYPE,OGRID)
 !     ###########################################################
 !!
 !!    PURPOSE
@@ -34,12 +35,14 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : NVERSION, NBUGFIX
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_PGD_GRID,        ONLY : LLATLONMASK, NL
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODI_PGD_GRID
 USE MODI_INI_CSTS
@@ -54,6 +57,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name

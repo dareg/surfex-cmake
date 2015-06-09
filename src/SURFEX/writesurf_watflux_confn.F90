@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_CONF_n(HPROGRAM)
+      SUBROUTINE WRITESURF_WATFLUX_CONF_n (CHW, W, &
+                                           HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_WATFLUX_CONF* - routine to read the configuration for WATFLUX
@@ -33,9 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODN_WATFLUX_n
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling WATFLUX
 

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA(OFLOOD, HALBEDO, &
+      SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA (I, &
+                                            OFLOOD, HALBEDO, &
                                  PZENITH,PVEG,PZ0,PLAI,     &
                                  OMEB_PATCH,PGNDLITTER,     &
                                  PZ0LITTER,PLAIGV,          &
@@ -55,11 +56,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
 USE MODD_TYPE_SNOW
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_CSTS,      ONLY : XSTEFAN
 USE MODE_MEB,       ONLY : MEBPALPHAN
 !
@@ -76,6 +79,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 LOGICAL,                INTENT(IN)   :: OFLOOD
  CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE WRITE_DIAG_WATFLUX_n(HPROGRAM,HWRITE)
+SUBROUTINE WRITE_DIAG_WATFLUX_n (CHW, DGU, DGW, W, &
+                                 HPROGRAM,HWRITE)
 !     ###############################################################################
 !
 !!****  *WRITE_DIAG_WATFLUX_n * - diagnostics for lakes
@@ -25,12 +26,14 @@ SUBROUTINE WRITE_DIAG_WATFLUX_n(HPROGRAM,HWRITE)
 !
 
 !
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
 !
 USE MODI_WRITE_DIAG_SEB_WATFLUX_n
 ! 
@@ -41,6 +44,12 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HWRITE   ! 'PGD' : only physiographic fields are written

@@ -1,6 +1,7 @@
 !-------------------------------------------------------------------------------
 !     #############################################################
-      SUBROUTINE PGD_TOPD(HPROGRAM)
+      SUBROUTINE PGD_TOPD (I, UG, U, USS, &
+                           HPROGRAM)
 !     #############################################################
 !
 !!****  *PGD_TOPD* - routine to determine the masks that permit to couple ISBA grid with Topmodel one
@@ -35,7 +36,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,         ONLY : CCAT, NNCAT, XRTOP_D2, NMESHT, XDXT
@@ -45,10 +51,7 @@ USE MODD_COUPLING_TOPD,   ONLY : LCOUPL_TOPD, NIMAX, NJMAX, &
 USE MODD_DUMMY_EXP_PROFILE, ONLY : XF_PARAM_BV, XC_DEPTH_RATIO_BV
 !
 USE MODD_SURF_PAR,          ONLY : NUNDEF
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID  !mll: ajout CGRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODE_GRIDTYPE_CONF_PROJ
 USE MODE_GRIDTYPE_LONLAT_REG
@@ -72,6 +75,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
 !

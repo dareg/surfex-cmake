@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_SNOW_FIELD( HPROGRAM,                       &
+SUBROUTINE PREP_HOR_SNOW_FIELD (IG, U, &
+                                HPROGRAM,                       &
                                 HFILE,HFILETYPE,                &
                                 HFILEPGD,HFILEPGDTYPE,          &
                                 KLUOUT,OUNIF,HSNSURF,KPATCH,    &
@@ -39,8 +40,10 @@ SUBROUTINE PREP_HOR_SNOW_FIELD( HPROGRAM,                       &
 !!                            new init for ES
 !!------------------------------------------------------------------
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
@@ -70,6 +73,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name

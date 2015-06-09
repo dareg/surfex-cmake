@@ -56,6 +56,8 @@
 !!
 !!    EXTERNAL
 !!    --------
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODI_CH_OPEN_INPUTB  ! open the general purpose ASCII input file
 USE MODI_CONVERT_COVER_CH_ISBA
 !
@@ -122,7 +124,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     ALLOCATE(CHI%XSOILRC_SO2(KLU,I%NPATCH))
     ALLOCATE(CHI%XSOILRC_O3(KLU,I%NPATCH))
 
-    CALL CONVERT_COVER_CH_ISBA(I%XCOVER,I%LCOVER,CHI%XSOILRC_SO2,CHI%XSOILRC_O3)
+    CALL CONVERT_COVER_CH_ISBA(DTCO, &
+                               I%XCOVER,I%LCOVER,CHI%XSOILRC_SO2,CHI%XSOILRC_O3)
     !
     !---------------------------------------------------------------------------
     !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_TEB_VEG_CONF_n(HPROGRAM)
+      SUBROUTINE READ_TEB_VEG_CONF_n (CHT, TVG, &
+                                      HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_TEB_VEG_CONF* - routine to read the configuration for VEG
@@ -38,9 +39,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
 !
-USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+!
+!
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -64,6 +67,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 

@@ -2,7 +2,7 @@
 @PROCESS NOOPTIMIZE
 #endif
 !     #########################
-      SUBROUTINE INI_DATA_COVER
+      SUBROUTINE INI_DATA_COVER (DTCO, U)
 !     #########################
 !
 !!**** *INI_DATA_COVER* initializes cover-field correspondance arrays
@@ -42,6 +42,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_SURFEX_MPI,     ONLY : WLOG_MPI
@@ -50,7 +54,6 @@ USE MODD_SURFEX_OMP,     ONLY : IDC
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER, &
                                   XDATA_LAI, XDATA_VEGTYPE, XDATA_H_TREE,           &
@@ -111,7 +114,6 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODE_POS_SURF
 !
@@ -176,6 +178,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------

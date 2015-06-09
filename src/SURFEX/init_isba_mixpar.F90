@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_ISBA_MIXPAR(HISBA,KDECADE,KDECADE2,PCOVER,OCOVER,HPHOTO,HSFTYPE)
+      SUBROUTINE INIT_ISBA_MIXPAR (DTCO, DTI, IG, I, &
+                                   HISBA,KDECADE,KDECADE2,PCOVER,OCOVER,HPHOTO,HSFTYPE)
 !     ##############################################################
 !
 !!**** *INIT_ISBA_MIXPAR* 
@@ -42,14 +43,16 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEG,         &
                                 XDATA_IRRIG, XDATA_WATSUP
 !     
@@ -63,6 +66,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=*), INTENT(IN)          :: HISBA 
 INTEGER,                INTENT(IN)    :: KDECADE

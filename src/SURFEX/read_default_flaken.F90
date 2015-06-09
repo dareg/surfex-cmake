@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_DEFAULT_FLAKE_n(HPROGRAM)
+      SUBROUTINE READ_DEFAULT_FLAKE_n (CHF, DGF, DGMF, F, &
+                                       HPROGRAM)
 !     #############################################################
 !
 !!****  *READ_FLAKE_CONF* - routine to read the configuration for FLAKE
@@ -34,13 +35,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
 !
-USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+!
+!
+USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -61,6 +64,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 

@@ -22,14 +22,17 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX0_NC(HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFX0_NC (DGU, IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEX0* - routine to read a real scalar
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LDEF
 !
@@ -47,6 +50,10 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,               INTENT(IN)  :: PFIELD   ! the real scalar to be read
@@ -99,14 +106,17 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFX0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN0_NC(HREC,KFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFN0_NC (DGU, IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC,LDEF
 !
@@ -124,6 +134,10 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -178,14 +192,17 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFN0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFC0_NC(HREC,HFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFC0_NC (DGU, IOB, &
+                                  HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEC0* - routine to read a STRING
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LDEF
 !
@@ -203,6 +220,10 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD   ! the integer scalar to be read
@@ -260,14 +281,17 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFC0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL0_NC(HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFL0_NC (DGU, IOB, &
+                                  HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEL0* - routine to read a logical
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC,LDEF
 !
@@ -287,6 +311,10 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,             INTENT(IN) :: OFIELD   ! array containing the data field
@@ -349,14 +377,17 @@ END SUBROUTINE WRITE_SURFL0_NC
 !
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_NC(HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX1_NC (DGU, IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 ! 
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -381,6 +412,10 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -589,14 +624,17 @@ END SUBROUTINE WRITE_DATAX1_NC
 END SUBROUTINE WRITE_SURFX1_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_NC(HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX2_NC (DGU, IOB, &
+                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -621,6 +659,10 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),    INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN) :: PFIELD   ! array containing the data field
@@ -833,14 +875,17 @@ END SUBROUTINE WRITE_DATAX2_NC
 END SUBROUTINE WRITE_SURFX2_NC
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1_NC(HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFN1_NC (DGU, IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -865,6 +910,10 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -1065,14 +1114,17 @@ END SUBROUTINE WRITE_SURFN1_NC
 !
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN2_NC(HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFN2_NC (DGU, IOB, &
+                                  HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -1097,6 +1149,10 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -1305,14 +1361,17 @@ END SUBROUTINE WRITE_DATAN2_NC
 END SUBROUTINE WRITE_SURFN2_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL1_NC(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFL1_NC (DGU, IOB, &
+                                  HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *WRITEL1* - routine to read a logical array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
@@ -1338,6 +1397,10 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(IN) :: OFIELD   ! array containing the data field
@@ -1436,14 +1499,17 @@ END SUBROUTINE WRITE_SURFL1_NC
 !
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT0_NC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT0_NC (DGU, IOB, &
+                                  HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN, LDEF
 !
@@ -1461,6 +1527,10 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
@@ -1556,10 +1626,14 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFT0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT0_NC
 !
 !     #############################################################
-      SUBROUTINE    WRITE_SURFT1_NC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE    WRITE_SURFT1_NC (DGU, IOB, &
+                                     HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN
 !
@@ -1571,6 +1645,9 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(IN)  :: KYEAR    ! year
@@ -1608,23 +1685,31 @@ DO JWRK=1,4
   !
   IF (JRET==0) THEN
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN1_NC(YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN1_NC(DGU, IOB, &
+                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN1_NC(YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN1_NC(DGU, IOB, &
+                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN1_NC(YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN1_NC(DGU, IOB, &
+                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX1_NC(YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFX1_NC(DGU, IOB, &
+                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ENDIF
   ELSE
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN1_NC(YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN1_NC(DGU, IOB, &
+                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN1_NC(YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN1_NC(DGU, IOB, &
+                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN1_NC(YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN1_NC(DGU, IOB, &
+                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX1_NC(YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFX1_NC(DGU, IOB, &
+                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
     ENDIF
   ENDIF    
   !
@@ -1643,10 +1728,14 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFT1_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT1_NC
 !
 !     #############################################################
-      SUBROUTINE    WRITE_SURFT2_NC(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE    WRITE_SURFT2_NC (DGU, IOB, &
+                                     HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN
 !
@@ -1658,6 +1747,9 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KYEAR    ! year
@@ -1695,23 +1787,31 @@ DO JWRK=1,4
   !
   IF (JRET==0) THEN
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN2_NC(YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN2_NC(DGU, IOB, &
+                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN2_NC(YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN2_NC(DGU, IOB, &
+                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN2_NC(YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN2_NC(DGU, IOB, &
+                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX2_NC(YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFX2_NC(DGU, IOB, &
+                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ENDIF
   ELSE
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN2_NC(YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN2_NC(DGU, IOB, &
+                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN2_NC(YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN2_NC(DGU, IOB, &
+                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN2_NC(YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN2_NC(DGU, IOB, &
+                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX2_NC(YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFX2_NC(DGU, IOB, &
+                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
     ENDIF
   ENDIF          
   !

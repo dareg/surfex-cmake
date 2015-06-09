@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PREP_OUTPUT_GRID(KLUOUT,HGRID,PGRID_PAR,PLAT,PLON)
+      SUBROUTINE PREP_OUTPUT_GRID (UG, U, &
+                                   KLUOUT,HGRID,PGRID_PAR,PLAT,PLON)
 !     #######################################
 !!
 !!    PURPOSE
@@ -34,8 +35,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_GET_GRID_COORD
 !
@@ -49,6 +52,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,           INTENT(IN)  :: KLUOUT     ! output listing logical unit
  CHARACTER(LEN=10), INTENT(IN)  :: HGRID      ! grid type

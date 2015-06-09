@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_INIT_SNAP_n(HPROGRAM,KLU,HINIT,KCH,PRHOA)
+      SUBROUTINE CH_INIT_SNAP_n (CHN, SV, &
+                                 HPROGRAM,KLU,HINIT,KCH,PRHOA)
 !     #######################################
 !
 !!****  *CH_INIT_EMIISION_TEMP_n* - routine to initialize chemical emissions data structure
@@ -25,10 +26,12 @@
 !
 !*       0.    DECLARATIONS
 !
-USE MODD_SV_n, ONLY : SV => SV
+!
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+USE MODD_SV_n, ONLY : SV_t
 !
 USE MODD_CSTS,       ONLY : XAVOGADRO, XMD
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
 USE MODI_ABOR1_SFX
@@ -43,6 +46,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
 INTEGER,           INTENT(IN)  :: KLU      ! number of points

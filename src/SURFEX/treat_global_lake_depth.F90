@@ -35,6 +35,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : XTNG, NSIZE
@@ -101,7 +104,8 @@ ALLOCATE(XTNG      (NL,NGRADDEPTH_LDB))
 NSIZE  (:) = 0.
 XTNG   (:,:) = 0.
 !
- CALL TREAT_FIELD(HPROGRAM,'SURF  ','DIRECT','A_LDBD', CLAKELDB,   &
+ CALL TREAT_FIELD(UG, U, USS, &
+                  HPROGRAM,'SURF  ','DIRECT','A_LDBD', CLAKELDB,   &
                  'water depth         ',ZDEPTH,'WAT'              ) 
 !
 DEALLOCATE(XTNG)
@@ -110,7 +114,8 @@ ALLOCATE(XTNG      (NL,NGRADSTATUS_LDB))
 NSIZE  (:) = 0.
 XTNG   (:,:) = 0.
 !
- CALL TREAT_FIELD(HPROGRAM,'SURF  ','DIRECT','A_LDBS', CSTATUSLDB,  &
+ CALL TREAT_FIELD(UG, U, USS, &
+                  HPROGRAM,'SURF  ','DIRECT','A_LDBS', CSTATUSLDB,  &
                  'water status        ',ZSTATUS,'WAT'              )
 !
 ISTATUS = NINT(ZSTATUS)

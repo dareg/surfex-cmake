@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_INIT_EMISSION_n(HPROGRAM,KLU,KCH,PRHOA)
+      SUBROUTINE CH_INIT_EMISSION_n (CHE, CHU, SV, &
+                                     HPROGRAM,KLU,KCH,PRHOA)
 !     #######################################
 !
 !!****  *CH_INIT_EMIISION_n* - routine to initialize chemical emissions data structure
@@ -27,11 +28,13 @@
 !
 !*       0.    DECLARATIONS
 !
-USE MODD_SV_n, ONLY : SV => SV
 !
-USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
 !
-USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+!
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+USE MODD_SV_n, ONLY : SV_t
 !
 USE MODI_GET_LUOUT
 USE MODI_BUILD_EMISSTAB_n
@@ -47,6 +50,11 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
+!
+!
+TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
 INTEGER,           INTENT(IN)  :: KLU      ! number of points

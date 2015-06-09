@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PT_BY_PT_TREATMENT(KLUOUT,PLAT,PLON,PVALUE,HSUBROUTINE,KNBLINES,PNODATA)
+      SUBROUTINE PT_BY_PT_TREATMENT (USS, &
+                                     KLUOUT,PLAT,PLON,PVALUE,HSUBROUTINE,KNBLINES,PNODATA)
 !     ###################################################################
 !
 !!**** *PT_BY_PT_TREATMENT* 
@@ -36,7 +37,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_AVERAGE1_COVER
 USE MODI_AVERAGE1_OROGRAPHY
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER,           INTENT(IN) :: KLUOUT
 REAL,DIMENSION(:), INTENT(IN) :: PLAT

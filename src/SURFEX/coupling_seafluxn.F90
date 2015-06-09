@@ -47,6 +47,12 @@ SUBROUTINE COUPLING_SEAFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                      
 !!                                       
 !!---------------------------------------------------------------------
 !
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+!
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XTT, XTTS, XTTSI, XDAY
@@ -357,7 +363,8 @@ SELECT CASE (S%CSEA_FLUX)
                       ZCD, ZCDN, ZCH, ZCE, ZRI, ZRESA_SEA, ZZ0H,      &
                       S%LPERTFLUX, S%XPERTFLUX, S%CSEA_FLUX                 )
   CASE ('COARE3')
-    CALL COARE30_SEAFLUX(S%XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,          &
+    CALL COARE30_SEAFLUX(S, &
+                         S%XZ0, ZMASK, ISIZE_WATER, ISIZE_ICE,          &
                       PTA, ZEXNA ,PRHOA, ZSST, ZEXNS, ZQA, PRAIN,     &
                       PSNOW,                                          &
                       ZWIND, PZREF, PUREF,                            &
@@ -507,7 +514,8 @@ ENDIF
 ! Inline diagnostics at time t for SST and TRAD
 !-------------------------------------------------------------------------------
 !
-CALL DIAG_INLINE_SEAFLUX_n(PTSTEP, PTA, S%XSST, ZQA, PPA, PPS, PRHOA, PU, &
+CALL DIAG_INLINE_SEAFLUX_n(DGS, DGSI, S, &
+                           PTSTEP, PTA, S%XSST, ZQA, PPA, PPS, PRHOA, PU, &
      PV, PZREF, PUREF, ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU,       &
      S%XZ0, ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,            &
      PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB, S%XICE_ALB,   &
@@ -586,7 +594,8 @@ IF (O%LMERCATOR) THEN
       OR%XSEAT_REL(:,NOCKMIN+1) = OR%XSEAT_REL(:,NOCKMIN+1) - XTT
    ENDIF
    !
-   CALL MOD1D_n(HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
+   CALL MOD1D_n(DGO, O, OR, SG, S, &
+                HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
                 PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
                 PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:),S%XSST(:))
    !

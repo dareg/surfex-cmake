@@ -37,6 +37,8 @@ PROGRAM SODA
 !  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
 !----------------------------------------------------------------------------
 !
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
@@ -260,12 +262,13 @@ CLUOUT_NC = ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
  CALL GET_LUOUT(CSURF_FILETYPE,ILUOUT)
 OPEN(UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 
+! Allocation of Surfex Types
+CALL ALLOC_SURFEX(1)
 
 ! Reading all namelist (also assimilation)
 CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'ALL',.FALSE.)
 
 ! Go to SURFEX
-CALL ALLOC_SURFEX(1)
 CALL GOTO_SURFEX(1,.TRUE.)
 !
 ! Setting input files read from namelist
@@ -669,7 +672,8 @@ CDNOMC     = 'climat'                  ! new frame name
  CALL IO_BUFF_CLEAN_n(IOB)
 WRITE(*,*) 'READ CLIMATOLOGY OK'
 
- CALL ASSIM_SET_SST(U%NSIZE_FULL,ZLSM,ZSST,ZSIC,YTEST)
+ CALL ASSIM_SET_SST(IOB, S, U, &
+                    U%NSIZE_FULL,ZLSM,ZSST,ZSIC,YTEST)
 
 IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
 

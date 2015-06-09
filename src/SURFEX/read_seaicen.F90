@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SEAICE_n(HPROGRAM,KLU,KLUOUT)
+      SUBROUTINE READ_SEAICE_n (SG, S, &
+                                HPROGRAM,KLU,KLUOUT)
 !     #########################################
 !
 !!****  *READ_SEAICE_n* - read seaice scheme variables
@@ -37,11 +38,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
 USE MODD_CSTS, ONLY           : XPI, XTTSI, XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 USE MODD_WATER_PAR,      ONLY : XALBSEAICE
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
@@ -65,6 +68,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KLU      ! number of sea patch point
@@ -383,7 +390,6 @@ CONTAINS
 !
 SUBROUTINE CHECK_SEAICE(HFIELD,PFIELD)
 !
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 IMPLICIT NONE
 !

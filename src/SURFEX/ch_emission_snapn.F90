@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_EMISSION_SNAP_n(HPROGRAM,KSIZE,PSIMTIME,PSUNTIME, &
+      SUBROUTINE CH_EMISSION_SNAP_n (CHN, &
+                                     HPROGRAM,KSIZE,PSIMTIME,PSUNTIME, &
                                     KYEAR,KMONTH,KDAY,PRHOA,PLON      )
 !     ######################################################################
 !!
@@ -26,8 +27,10 @@
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+!
 USE MODD_CSTS,        ONLY: XDAY
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 !
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_SUBSTRACT_TO_DATE_SURF
@@ -44,6 +47,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
  CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM! program calling surf. schemes
 INTEGER,                INTENT(IN)  :: KSIZE   ! number of points

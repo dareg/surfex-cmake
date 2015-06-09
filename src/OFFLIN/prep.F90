@@ -33,6 +33,9 @@ PROGRAM PREP
 !!
 !----------------------------------------------------------------------------
 !
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
@@ -144,6 +147,7 @@ IF(LOASIS)THEN
 ENDIF
 #endif
 !
+!    Allocations of Surfex Types
 CALL ALLOC_SURFEX(1)
 !
 CSOFTWARE='PREP'
@@ -194,6 +198,7 @@ CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
 !
 CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !
+! Reading all namelist (also assimilation)
 CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'PRE',.FALSE.)
 !
 !*      1.4.   Reads SFX - OASIS coupling namelists
@@ -201,7 +206,7 @@ CALL READ_ALL_NAMELISTS(CSURF_FILETYPE,'PRE',.FALSE.)
 !
 CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF,'PRE')
 !
-!*      1.5.   Allocations of Surfex Types
+!*      1.5.   Goto model of Surfex Types
 !              ---------------------------
 !
 CALL GOTO_SURFEX(1,.TRUE.)
@@ -224,7 +229,8 @@ CALL GOTO_SURFEX(1,.TRUE.)
 !             ------------------------------------------------
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_PREP(CSURF_FILETYPE)
+  CALL SFX_OASIS_PREP(I, UG, U, &
+                      CSURF_FILETYPE)
 ENDIF
 !
 !*    4.      Store of surface physiographic fields

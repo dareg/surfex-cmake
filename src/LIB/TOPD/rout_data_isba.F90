@@ -46,6 +46,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODI_GET_LUOUT
@@ -101,7 +105,8 @@ ZDRAINC_FULL  (:) = 0.
 ZDRAINC_FULLM (:) = 0.
 ZDRAIN_ISBA   (:) = 0.
 ZDRAIN_TOPD (:,:) = 0.
-IF (KSTEP==1 .AND. LBUDGET_TOPD) CALL INIT_BUDGET_COUPL_ROUT(KI)
+IF (KSTEP==1 .AND. LBUDGET_TOPD) CALL INIT_BUDGET_COUPL_ROUT(DGEI, DGMI, IG, I, U, &
+                                                             KI)
 !
 !    Runoff on TOPODYN grid
 !   ---------------------------------------

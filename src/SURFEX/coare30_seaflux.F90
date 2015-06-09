@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE COARE30_SEAFLUX(PZ0SEA,PMASK,KSIZE_WATER,KSIZE_ICE,     &
+    SUBROUTINE COARE30_SEAFLUX (S, &
+                                PZ0SEA,PMASK,KSIZE_WATER,KSIZE_ICE,     &
                                 PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,        & 
                                 PRAIN,PSNOW,PVMOD,PZREF,PUREF,PPS,     &
                                 OHANDLE_SIC,PQSAT,PSFTH,PSFTQ,PUSTAR,  &
@@ -47,7 +48,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -60,6 +63,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 LOGICAL,            INTENT(IN)   :: OHANDLE_SIC  ! Do we weight seaice and open sea fluxes
 !

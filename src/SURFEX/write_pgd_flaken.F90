@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_PGD_FLAKE_n(HPROGRAM)
+      SUBROUTINE WRITE_PGD_FLAKE_n (FG, F, &
+                                    HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_FLAKE_n* - routine to write pgd surface variables in their respective files
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_FLAKE_n
@@ -48,6 +51,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

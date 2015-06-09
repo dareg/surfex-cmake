@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_MISC_TEB_n(PTSTEP, PDQS_TOWN,PQF_BLD,PQF_TOWN, PFLX_BLD,             &
+       SUBROUTINE DIAG_MISC_TEB_n (DGCT, DGMT, DGMTO, TOP, &
+                                   PTSTEP, PDQS_TOWN,PQF_BLD,PQF_TOWN, PFLX_BLD,             &
                                     PRUNOFF_TOWN,                                           &
                                     PRN_ROAD, PH_ROAD, PLE_ROAD, PGFLUX_ROAD,               &
                                     PRUNOFF_ROAD, PIRRIG_ROAD,                              &
@@ -59,12 +60,14 @@
 !
 !
 !
-USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB
 !
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
-USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
 !
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS 
+!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODI_CUMUL_DIAG_TEB_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -73,6 +76,12 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
        REAL,               INTENT(IN) :: PTSTEP            ! time step
        REAL, DIMENSION(:), INTENT(IN) :: PQF_BLD           ! domestic heating

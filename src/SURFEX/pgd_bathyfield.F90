@@ -36,6 +36,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE
@@ -114,7 +117,8 @@ IF (LEN_TRIM(HFILE)/=0) THEN
   YFIELD = '                    '
   YFIELD = HFIELD(1:MIN(LEN(HFIELD),20))
 !
-  CALL TREAT_BATHYFIELD(HPROGRAM,'SURF  ',HFILETYPE,'A_MESH',HFILE, HNCVARNAME,&
+  CALL TREAT_BATHYFIELD(UG, U, USS, &
+                        HPROGRAM,'SURF  ',HFILETYPE,'A_MESH',HFILE, HNCVARNAME,&
                      YFIELD,PFIELD,HAREA                           )  
 !
 !-------------------------------------------------------------------------------

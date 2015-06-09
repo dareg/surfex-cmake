@@ -31,6 +31,9 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                       
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+!
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
 USE MODD_ISBA_n, ONLY : I => ISBA
@@ -273,7 +276,8 @@ ELSEIF (KTILE==4) THEN
   WRITE(*,*) '*********************************************'  
   WRITE(*,*) '*      ASSIMILATIONS FOR URBAN POINTS       *'
   WRITE(*,*) '*********************************************'
-  CALL ASSIM_TOWN_n(HPROGRAM,KSIZE,ZP_PT2M,HTEST)
+  CALL ASSIM_TOWN_n(U, T, TOP, &
+                    HPROGRAM,KSIZE,ZP_PT2M,HTEST)
   
 ENDIF
 

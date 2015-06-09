@@ -36,6 +36,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK, XMESHLENGTH
 !
 USE MODD_ARCH, ONLY : LITTLE_ENDIAN_ARCH
@@ -462,7 +464,8 @@ DO
 !            ----------------------------------------------------------
 !
           IF (IWORK>0) &
-            CALL PT_BY_PT_TREATMENT(ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
+            CALL PT_BY_PT_TREATMENT(USS, &
+                                    ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
                                     ZVALUE_WORK(1:IWORK),                          &
                                     HSUBROUTINE                                    )  
 !

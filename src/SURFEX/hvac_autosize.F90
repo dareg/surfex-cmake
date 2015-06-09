@@ -1,5 +1,6 @@
 !     #############################################################
-SUBROUTINE HVAC_AUTOSIZE(KI,KLUOUT)
+SUBROUTINE HVAC_AUTOSIZE (B, BOP, UG, U, TG, T, TOP, &
+                          KI,KLUOUT)
 !     #############################################################
 !!
 !!    PURPOSE
@@ -22,18 +23,20 @@ SUBROUTINE HVAC_AUTOSIZE(KI,KLUOUT)
 !               ------------
 !
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
-USE MODD_BEM_n, ONLY : B => BEM
-
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_n, ONLY : T => TEB
 
 
+
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+!
 USE MODD_CSTS,            ONLY : XCPD, XPI, XP00, XRD, XSTEFAN
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 !
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 !
@@ -59,6 +62,15 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 INTEGER,       INTENT(IN)    :: KI     ! number of points
 INTEGER,       INTENT(IN)    :: KLUOUT ! output listing logical unit

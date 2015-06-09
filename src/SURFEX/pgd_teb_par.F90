@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_TEB_PAR(HPROGRAM,OGARDEN,OGREENROOF,HBLD_ATYPE)
+      SUBROUTINE PGD_TEB_PAR (BDD, DTI, DTT, TG, &
+                              HPROGRAM,OGARDEN,OGREENROOF,HBLD_ATYPE)
 !     ##############################################################
 !
 !!**** *PGD_TEB_PAR* monitor for averaging and interpolations of cover fractions
@@ -40,13 +41,15 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
-USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+!
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -69,6 +72,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(IN)    :: OGARDEN      ! T if urban green areas

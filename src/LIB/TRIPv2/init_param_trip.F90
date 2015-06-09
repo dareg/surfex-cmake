@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_PARAM_TRIP (KLISTING,HFILE,KLON,KLAT,HTITLE,HTIMEUNIT)
+      SUBROUTINE INIT_PARAM_TRIP (TPG, &
+                                   KLISTING,HFILE,KLON,KLAT,HTITLE,HTIMEUNIT)
 !     #######################################################################
 !
 !!****  *INIT_PARAM_TRIP*  
@@ -24,7 +25,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
+!
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODE_TRIP_NETCDF
 !
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 CHARACTER(LEN=*), INTENT(IN) :: HFILE, HTITLE, HTIMEUNIT
 !

@@ -35,6 +35,8 @@ SUBROUTINE SFX_OASIS_DEF_OL (U, &
 !              ------------
 !
 !
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -149,7 +151,8 @@ DEALLOCATE(ISEG_OFFSET)
 !*       2.     Put definitions for exchange of coupling fields :
 !               -------------------------------------------------
 !
-CALL SFX_OASIS_DEFINE(HPROGRAM,INPTS,IPARAL)
+CALL SFX_OASIS_DEFINE(I, U, &
+                      HPROGRAM,INPTS,IPARAL)
 !
 DEALLOCATE(IPARAL)
 !

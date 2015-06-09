@@ -4,6 +4,10 @@ SUBROUTINE READ_NAMELISTS_SURF_n(HPROGRAM,HINIT)
 !
 !---------------------------    
 !
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODN_SURF_ATM_n
 !
 USE MODN_SSO_n
@@ -44,9 +48,11 @@ CALL DEFAULT_DIAG_SURF_ATM(N2M,LT2MMW,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET, &
                             LRESET_BUDGETC,LSELECT, LPROVAR_TO_DIAG, &
                             LDIAG_GRID,LFRAC, XDIAG_TSTEP, CSELECT   )   
 !      
- CALL READ_DEFAULT_SURF_ATM_n(HPROGRAM) 
+ CALL READ_DEFAULT_SURF_ATM_n(CHU, DGU, USS, &
+                              HPROGRAM) 
 !
- CALL READ_SURF_ATM_CONF_n(HPROGRAM)    
+ CALL READ_SURF_ATM_CONF_n(CHU, DGU, USS, &
+                           HPROGRAM)    
 !       
 !---------------------------------------------------------------------------
 !PREP

@@ -60,6 +60,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
@@ -148,9 +150,11 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
 !
- CALL PGD_GRID_SURF_ATM(CSURF_FILETYPE,'                            ','      ',.FALSE.)
+ CALL PGD_GRID_SURF_ATM(UG, U, &
+                        CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
- CALL SPLIT_GRID('OFFLIN')
+ CALL SPLIT_GRID(UG, U, &
+                 'OFFLIN')
 !
  CALL PGD_SURF_ATM(CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
@@ -163,7 +167,8 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !* building of the header for the opening of the file in case of Arpege file
 IF (CSURF_FILETYPE=='FA    ') THEN
   LFANOCOMPACT = .TRUE.
-  CALL WRITE_HEADER_FA(CSURF_FILETYPE,'PGD') 
+  CALL WRITE_HEADER_FA(IOB, UG, &
+                       CSURF_FILETYPE,'PGD') 
 END IF
 !
 LDEF = .TRUE.

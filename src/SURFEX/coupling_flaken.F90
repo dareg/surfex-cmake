@@ -42,6 +42,8 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      P. Le Moigne 10/2014 Threshold on Cd when fluxes computed by FLake
 !!------------------------------------------------------------------------------
 !
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+!
 USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
@@ -459,7 +461,8 @@ IF (F%CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake cod
 !
 ENDIF
 !
- CALL DIAG_INLINE_FLAKE_n(PTSTEP, PTA, F%XTS, ZQA, PPA, PPS, PRHOA, PU,        &
+ CALL DIAG_INLINE_FLAKE_n(DGF, F, &
+                          PTSTEP, PTA, F%XTS, ZQA, PPA, PPS, PRHOA, PU,        &
                             PV, PZREF, PUREF, PRAIN, PSNOW,                  &
                             ZCD, ZCDN, ZCH, ZRI, ZHU, F%XZ0,                   &
                             ZZ0H, ZQSAT, PSFTH, PSFTQ, PSFU, PSFV,           &

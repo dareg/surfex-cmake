@@ -41,6 +41,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+!
 USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
 !
 USE MODD_TYPE_DATE_SURF
@@ -522,7 +524,8 @@ END IF
 !
  CALL READ_LECOCLIMAP(HPROGRAM,I%LECOCLIMAP)
 !
- CALL READ_PGD_ISBA_PAR_n(HPROGRAM,IG%NDIM,OLAND_USE)
+ CALL READ_PGD_ISBA_PAR_n(DTI, IG, I, &
+                          HPROGRAM,IG%NDIM,OLAND_USE)
 IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(DTZ, &
                                                   HPROGRAM)
 !

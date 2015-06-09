@@ -37,6 +37,20 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+!
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
@@ -386,7 +400,8 @@ IF ((SV%NBEQ > 0).AND.(CHU%LCH_SURF_EMIS)) THEN
     CALL CH_EMISSION_FLUX_n(CHE, CHU, SV, &
                             HPROGRAM,PTIME,PSFTS(:,SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
-    CALL CH_EMISSION_SNAP_n(HPROGRAM,U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,UG%XLON)
+    CALL CH_EMISSION_SNAP_n(CHN, &
+                            HPROGRAM,U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,UG%XLON)
     CALL CH_EMISSION_TO_ATM_n(CHN, SV, &
                               PSFTS,PRHOA)
   END IF
@@ -441,7 +456,8 @@ IF (USS%CROUGH=="Z01D" .OR. USS%CROUGH=="Z04D") THEN
   CALL SSO_Z0_FRICTION_n(USS, &
                          U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
 ELSE IF (USS%CROUGH=="BE04") THEN
-  CALL SSO_BE04_FRICTION_n(PTSTEP,U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+  CALL SSO_BE04_FRICTION_n(SSCP, USS, &
+                           PTSTEP,U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -585,7 +601,8 @@ ENDDO
 !
 IF (KTILE==1) THEN
   !
-  CALL COUPLING_SEA_n(HPROGRAM, HCOUPLING, PTIMEC,                                           &
+  CALL COUPLING_SEA_n(DGL, DGS, S, SSB, U, &
+                      HPROGRAM, HCOUPLING, PTIMEC,                                           &
               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
               U%NSIZE_SEA, KSV, KSW,                                                           &
               ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
@@ -599,7 +616,8 @@ IF (KTILE==1) THEN
   !
 ELSEIF (KTILE==2) THEN
   !
-  CALL COUPLING_INLAND_WATER_n(HPROGRAM, HCOUPLING, PTIMEC,                                   &
+  CALL COUPLING_INLAND_WATER_n(DGF, DGL, DGW, F, FSB, U, W, WSB, &
+                               HPROGRAM, HCOUPLING, PTIMEC,                                   &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                U%NSIZE_WATER, KSV, KSW,                                                         &
                ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &

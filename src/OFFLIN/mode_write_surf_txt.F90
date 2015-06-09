@@ -181,6 +181,8 @@ END SUBROUTINE WRITE_SURFL0_TXT
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
 USE MODD_IO_SURF_TXT,        ONLY : NMASK, NFULL, CMASK
@@ -236,7 +238,8 @@ IF (NRANK==NPIO) THEN
   !
 !$OMP SINGLE
   !
-  CALL INIT_WRITE_TXT(HREC,LWFL)
+  CALL INIT_WRITE_TXT(DGU, &
+                      HREC,LWFL)
   !
   IF (LWFL) WRITE(NIND,FMT='(50D14.6)',IOSTAT=KRESP) ZWORK(1:ISIZE)
   !
@@ -259,6 +262,8 @@ END SUBROUTINE WRITE_SURFX1_TXT
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -315,7 +320,8 @@ IF (NRANK==NPIO) THEN
   !  
 !$OMP SINGLE
   !  
-  CALL INIT_WRITE_TXT(HREC,LWFL)
+  CALL INIT_WRITE_TXT(DGU, &
+                      HREC,LWFL)
   !
   IF (LWFL) WRITE(NIND,FMT='(50D14.6)',IOSTAT=KRESP) ZWORK(1:ISIZE,:)
   !
