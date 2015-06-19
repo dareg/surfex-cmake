@@ -26,6 +26,9 @@ SUBROUTINE PREP_TEB_GREENROOF_ASCLLV(HPROGRAM,HSURF,KLUOUT,PFIELD)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODD_PREP,              ONLY : CINTERP_TYPE
@@ -71,11 +74,13 @@ CATYPE = 'ARI'
 !
 !*      1.    get full dimension of grid
 !
- CALL GET_TYPE_DIM_n('FULL  ',NL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'FULL  ',NL)
 !
 !*      2.    get nature dimension
 !
- CALL GET_TYPE_DIM_n('TOWN  ',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'TOWN  ',IL)
 !
 ALLOCATE(ZFIELD(IL,3))
 !

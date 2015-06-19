@@ -41,6 +41,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURFEX_MPI, ONLY : NPROC
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 !
@@ -98,7 +102,8 @@ IF (LCOUPL_TOPD) THEN
   !         4.   Initialises variables nedded for coupling with Topmodel
   !              -------------------------------------------------------
   !
-  CALL INIT_COUPL_TOPD(HPROGRAM,KI)
+  CALL INIT_COUPL_TOPD(DGEI, I, UG, U, &
+                       HPROGRAM,KI)
   !
   WRITE(ILUOUT,*) 'Couplage avec TOPMODEL active'
   !

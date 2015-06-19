@@ -37,6 +37,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
 !
@@ -122,7 +125,8 @@ ENDIF
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('TOWN  ',TG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'TOWN  ',TG%NDIM)
 !
 ALLOCATE(TOP%LCOVER     (JPCOVER))
 ALLOCATE(TOP%XCOVER     (TG%NDIM,JPCOVER))

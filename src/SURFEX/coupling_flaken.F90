@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                         &
+SUBROUTINE COUPLING_FLAKE_n (CHF, DGF, DGMF, DST, F, SLT, &
+                             HPROGRAM, HCOUPLING,                                         &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH,       &
                  PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, &
                  HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,          &
@@ -42,23 +43,25 @@ SUBROUTINE COUPLING_FLAKE_n(HPROGRAM, HCOUPLING,                                
 !!      P. Le Moigne 10/2014 Threshold on Cd when fluxes computed by FLake
 !!------------------------------------------------------------------------------
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
 !
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+!
+!
+USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_SLT_n, ONLY : SLT_t
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XLSTT, XKARMAN, XTT
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 !                          
-USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
 !
 USE MODD_SLT_SURF
 USE MODD_DST_SURF
-USE MODD_SLT_n, ONLY : SLT => SLT
-USE MODD_DST_n, ONLY : DST => DST
 !
 USE MODE_DSLT_SURF
 USE MODE_THERMOS
@@ -82,6 +85,14 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling

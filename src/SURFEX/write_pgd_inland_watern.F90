@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_PGD_INLAND_WATER_n (U, &
+      SUBROUTINE WRITE_PGD_INLAND_WATER_n (FG, F, WG, W, &
+                                            U, &
                                            HPROGRAM)
 !     ####################################
 !
@@ -36,11 +37,13 @@
 !
 !
 !
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
-USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -56,6 +59,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !

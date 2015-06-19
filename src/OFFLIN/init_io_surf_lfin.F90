@@ -30,6 +30,10 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NPIO, NSIZE
@@ -87,7 +91,8 @@ IF (HACTION == 'READ ') THEN
 !$OMP END SINGLE    
     CFILE_LFI = CFILEIN_LFI
   ENDIF
-  CALL READ_SURF('LFI   ','DIM_FULL',NFULL,IRET,HDIR='A')
+  CALL READ_SURF(IOB, &
+                 'LFI   ','DIM_FULL',NFULL,IRET,HDIR='A')
   IF (HMASK == 'FULL  ') THEN
     NFULL_SURF = NFULL
     NIB_SURF = NIB
@@ -136,7 +141,8 @@ ENDIF
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(HMASK,IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     HMASK,IL)
  CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !------------------------------------------------------------------------------

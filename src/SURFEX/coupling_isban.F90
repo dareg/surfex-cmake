@@ -65,6 +65,13 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!-------------------------------------------------------------------
 !
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+!
 USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
 USE MODD_AGRI_n, ONLY : AG => AGRI
@@ -480,7 +487,8 @@ ENDIF
 !
 LUPDATED=.FALSE.
 IF ((I%CPHOTO=='NON' .OR. I%CPHOTO=='AGS' .OR. I%CPHOTO=='AST') .AND. I%LVEGUPD) THEN
-     CALL VEGETATION_UPDATE(PTSTEP,I%TTIME,I%XCOVER, I%LCOVER,                 &
+     CALL VEGETATION_UPDATE(DTCO, DTI, DTGD, DTGR, IG, I, TGRO, &
+                            PTSTEP,I%TTIME,I%XCOVER, I%LCOVER,                 &
                          I%CISBA,I%LECOCLIMAP,I%CPHOTO,LAGRIP,I%LTR_ML,'NAT',    &
                          I%XLAI,I%XVEG,I%XZ0,                                  &
                          I%XALBNIR,I%XALBVIS,I%XALBUV,I%XEMIS,                   &
@@ -501,7 +509,8 @@ IF ((I%CPHOTO=='NON' .OR. I%CPHOTO=='AGS' .OR. I%CPHOTO=='AST') .AND. I%LVEGUPD)
 !
 ELSEIF ((I%CPHOTO=='LAI'.OR.I%CPHOTO=='LST'.OR.I%CPHOTO=='NIT'.OR.I%CPHOTO=='NCB').AND.I%LVEGUPD) THEN
 !
-  CALL ALBEDO_VEG_UPDATE(PTSTEP,I%TTIME,I%XCOVER, I%LCOVER,                    &
+  CALL ALBEDO_VEG_UPDATE(DTCO, DTI, IG, I, &
+                         PTSTEP,I%TTIME,I%XCOVER, I%LCOVER,                    &
                          I%CISBA,I%LECOCLIMAP,I%CPHOTO,LAGRIP,I%LTR_ML,'NAT',    &
                          I%XVEG,I%XALBNIR,I%XALBVIS,I%XALBUV,                    &
                          I%CALBEDO, I%XALBNIR_VEG, I%XALBVIS_VEG, I%XALBUV_VEG,  &

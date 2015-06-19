@@ -34,6 +34,8 @@
 !*      0. DECLARATIONS
 !          ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODI_READ_SURF
 USE MODI_PREP_GRID_CONF_PROJ
 USE MODI_PREP_GRID_CARTESIAN
@@ -68,7 +70,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      ------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_EXTERN',0,ZHOOK_HANDLE)
- CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRIDTYPE,IRESP)
+ CALL READ_SURF(IOB, &
+                HFILETYPE,'GRID_TYPE',HGRIDTYPE,IRESP)
 !
 !-----------------------------------------------------------------------
 !

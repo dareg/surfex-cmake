@@ -31,6 +31,10 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NSIZE, NPIO
@@ -87,7 +91,8 @@ IF (HACTION == 'READ ') THEN
   ! NFULL must be known even if HMASK/=FULL because it's no longer 
   ! updated in init_io_surf_maskn.
   CMASK = 'FULL ' 
-  CALL READ_SURF('ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
+  CALL READ_SURF(IOB, &
+                 'ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
   CMASK = HMASK
 ELSE
   IF (NRANK==NPIO) THEN
@@ -122,7 +127,8 @@ ENDIF
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(HMASK,IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     HMASK,IL)
  CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !$OMP BARRIER

@@ -176,12 +176,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_TXT:WRITE_SURFL0_TXT',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL0_TXT
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_TXT(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_TXT (DGU, &
+                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -201,6 +204,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -258,12 +264,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_TXT:WRITE_SURFX1_TXT',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_TXT
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_TXT(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_TXT (DGU, &
+                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -283,6 +292,9 @@ INCLUDE "mpif.h"
 #endif
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field

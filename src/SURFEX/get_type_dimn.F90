@@ -1,5 +1,6 @@
 !     #####################################
-      SUBROUTINE GET_TYPE_DIM_n(HTYPE,KDIM)
+      SUBROUTINE GET_TYPE_DIM_n (DTCO, U, &
+                                 HTYPE,KDIM)
 !     #####################################
 !
 !!****  *GET_TYPE_DIM_n* - routine to get the number of point for any surface type
@@ -26,9 +27,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_CONVERT_COVER_FRAC
 !
@@ -40,6 +43,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)      :: HTYPE    ! Type of surface
 INTEGER,           INTENT(INOUT)   :: KDIM     ! size of the mask

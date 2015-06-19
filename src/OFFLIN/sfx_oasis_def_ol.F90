@@ -1,5 +1,6 @@
 !#########
-SUBROUTINE SFX_OASIS_DEF_OL (U, &
+SUBROUTINE SFX_OASIS_DEF_OL (I, &
+                              U, &
                              HPROGRAM,HALG_MPI)
 !#############################################
 !
@@ -35,7 +36,9 @@ SUBROUTINE SFX_OASIS_DEF_OL (U, &
 !              ------------
 !
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -58,6 +61,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !

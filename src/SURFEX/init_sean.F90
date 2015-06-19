@@ -41,6 +41,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -102,7 +104,8 @@ IF (U%CSEA=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CSEA=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
+  CALL INIT_IDEAL_FLUX(DGL, &
+                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CSEA=='SEAFLX') THEN

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_DIRECT(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
+      SUBROUTINE READ_DIRECT (USS, &
+                              HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
 !     #########################################################
 !
 !!**** *READ_DIRECT1* reads a latlon file and call treatment subroutine
@@ -36,7 +37,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK, XMESHLENGTH
 !
@@ -65,6 +68,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_SURF_SIZE_n(HTYPE,KL)
+      SUBROUTINE GET_SURF_SIZE_n (DTCO, U, &
+                                  HTYPE,KL)
 !     #####################################################
 !
 !!****  *GET_SURF_SIZE_n* - routine to define the masks between all surface 
@@ -27,9 +28,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_CONVERT_COVER_FRAC
 !
@@ -41,6 +44,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=*),  INTENT(IN)    :: HTYPE    ! Type of surface
 INTEGER,           INTENT(OUT)   :: KL       ! number of points of this surface type

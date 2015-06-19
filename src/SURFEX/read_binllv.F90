@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_BINLLV(HPROGRAM,HSUBROUTINE,HFILENAME)
+      SUBROUTINE READ_BINLLV (USS, &
+                              HPROGRAM,HSUBROUTINE,HFILENAME)
 !     ##############################################################
 !
 !!**** *READ_BINLLV* reads a binary latlonvalue file and call treatment 
@@ -24,7 +25,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
 !
@@ -41,6 +44,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call

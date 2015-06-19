@@ -40,6 +40,17 @@ SUBROUTINE COUPLING_TEB_n(HPROGRAM, HCOUPLING,                                  
 !!      B. Decharme  04/2013 new coupling variables
 !!---------------------------------------------------------------
 !
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+!
 USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB
 USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
 USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
@@ -745,7 +756,8 @@ ZG_GREENROOF_ROOF(:) = 0.
 ! Call the physical routines of TEB (including gardens & greenroofs)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL TEB_GARDEN      (TOP%LGARDEN, TOP%LGREENROOF, TOP%LSOLAR_PANEL,                              &
+ CALL TEB_GARDEN(TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, TIR, T, TOP, TVG, &
+                       TOP%LGARDEN, TOP%LGREENROOF, TOP%LSOLAR_PANEL,                              &
                       TOP%CZ0H, CIMPLICIT_WIND, TOP%CROAD_DIR, TOP%CWALL_OPT,                      &
                       TOP%TTIME, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON,                         &
                       ZT_LOWCAN, ZQ_LOWCAN, ZU_LOWCAN, ZZ_LOWCAN,                      &

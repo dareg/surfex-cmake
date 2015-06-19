@@ -1,5 +1,6 @@
 !     ############################################################
-      SUBROUTINE INIT_IDEAL_FLUX(HPROGRAM,HINIT,                            &
+      SUBROUTINE INIT_IDEAL_FLUX (DGL, &
+                                  HPROGRAM,HINIT,                            &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
                                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
@@ -47,12 +48,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+!
 USE MODD_IDEAL_FLUX, ONLY : XSFTS, XALB, XEMIS
 USE MODN_IDEAL_FLUX
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 
 USE MODI_DIAG_IDEAL_INIT_n
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
 USE MODI_READ_IDEAL_CONF_n
 USE MODI_READ_DEFAULT_IDEAL_n
 USE MODI_PREP_CTRL_IDEAL
@@ -67,6 +70,9 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 ! 
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+!
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 INTEGER,                          INTENT(IN)  :: KI        ! number of points

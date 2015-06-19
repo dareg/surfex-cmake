@@ -34,6 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
 USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 !
 USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
@@ -173,7 +178,8 @@ IF (U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(U, &
 !*       3.     Inland water
 !               ------------
 !
-IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(U, &
+IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(FG, F, WG, W, &
+                                                  U, &
                                                   HPROGRAM)
 !
 !

@@ -24,6 +24,14 @@ SUBROUTINE PREP_SEAICE(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_GET_LUOUT
 USE MODI_GET_TYPE_DIM_N
@@ -84,7 +92,8 @@ ENDIF
 !*      2.     Reading and horizontal interpolations of Seaice cover
 !
 IF (S%LHANDLE_SIC) THEN 
-   CALL PREP_HOR_SEAFLUX_FIELD(HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+   CALL PREP_HOR_SEAFLUX_FIELD(DTS, O, OR, SG, S, &
+                               HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -134,7 +143,8 @@ ENDIF
 !
 !WRITE(ILUOUT,*) ' NO FILE PROVIDED FOR SEAICE MODEL PROGNOSTIC FIELDS  -> Creating a default initial state for Gelato'
 !
-CALL GET_TYPE_DIM_n('SEA   ',nx)
+CALL GET_TYPE_DIM_n(DTCO, U, &
+                    'SEA   ',nx)
 ny=1
 nyglo=1
 nxglo=nx

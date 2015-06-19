@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_INIT_DEP_ISBA_n(KCH,KLUOUT,HSV,KLU)
+      SUBROUTINE CH_INIT_DEP_ISBA_n (CHI, DTCO, I, &
+                                     KCH,KLUOUT,HSV,KLU)
 !!    ##################################################
 !!
 !!*** *CH_INIT_DEP_ISBA_n*
@@ -56,15 +57,17 @@
 !!
 !!    EXTERNAL
 !!    --------
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODI_CH_OPEN_INPUTB  ! open the general purpose ASCII input file
 USE MODI_CONVERT_COVER_CH_ISBA
 !
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
 USE MODD_CH_ISBA,        ONLY: XRCCLAYSO2, XRCCLAYO3, XRCSANDSO2, XRCSANDO3, &
                                  XRCSNOWSO2, XRCSNOWO3, XLANDREXT  
-USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_CH_SURF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !!
@@ -81,6 +84,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 INTEGER,                         INTENT(IN)  :: KCH      ! chemistry input file
 INTEGER,                         INTENT(IN)  :: KLUOUT   ! output listing channel
  CHARACTER(LEN=6), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species

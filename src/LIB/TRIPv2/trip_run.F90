@@ -26,6 +26,8 @@ SUBROUTINE TRIP_RUN(OOASIS,                           &
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
+!
 USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
@@ -142,7 +144,8 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
 !
 ! * TRIP PHYSIC CALL
 !
-   CALL TRIP_INTERFACE(KLISTING,KLON,KLAT,PTIME,LPRINT, &
+   CALL TRIP_INTERFACE(TPDG, TP, TPG, &
+                       KLISTING,KLON,KLAT,PTIME,LPRINT, &
                        JNB_TSTEP_RUN,JNB_TSTEP_DIAG,    &
                        XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,  &
                        ZDRAIN,ZCALVING,ZRECHARGE,       &

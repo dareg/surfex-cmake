@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_WATFLUX_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITE_WATFLUX_n (CHW, DGU, W, WSB, &
+                                  HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_WATFLUX_n* - routine to write surface variables in their respective files
@@ -36,14 +37,16 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
 !
-USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_WATFLUX_n
 USE MODI_WRITESURF_WATFLUX_CONF_n
@@ -58,6 +61,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
+TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields

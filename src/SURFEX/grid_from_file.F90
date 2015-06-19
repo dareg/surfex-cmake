@@ -34,6 +34,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_READ_GRIDTYPE
 USE MODI_CLOSE_AUX_IO_SURF
@@ -85,21 +87,24 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !*       2.    Opening of the file
 !              -------------------
 !
- CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(IOB, &
+                       HFILE,HFILETYPE,'FULL  ')
 !
 !---------------------------------------------------------------------------
 !
 !*       3.    Number of points in this file
 !              -----------------------------
 !
- CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP)
+ CALL READ_SURF(IOB, &
+                HFILETYPE,'DIM_FULL  ',KL,IRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       4.    Grid type
 !              ---------
 !
- CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRID,IRESP)
+ CALL READ_SURF(IOB, &
+                HFILETYPE,'GRID_TYPE',HGRID,IRESP)
 !
 !---------------------------------------------------------------------------
 !

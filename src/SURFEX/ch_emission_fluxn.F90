@@ -31,6 +31,8 @@
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
 USE MODD_SV_n, ONLY : SV_t
@@ -209,7 +211,8 @@ DO JI=1,SIZE(CHE%TSEMISS)
         IF (IVERB >= 6)&
                WRITE (ILUOUT,*) 'READ emission :',TRIM(YRECFM),&
                ', SIZE(ZWORK)=',SIZE(ZWORK,1),INBTS 
-        CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,1:INBTS),IRESP)
+        CALL READ_SURF(IOB, &
+                       HPROGRAM,YRECFM,ZWORK(:,1:INBTS),IRESP)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
         WHERE(ZWORK(:,1:INBTS) == 999.)

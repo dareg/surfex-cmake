@@ -171,7 +171,8 @@ CALL GOTO_TRIP (1)
 CALL READ_NAM_TRIP_GRID(TPG, &
                         NLISTING)
 !
-CALL INIT_TRIP(IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT,XTSTEP_RUN,XTSTEP_DIAG,LRESTART)
+CALL INIT_TRIP(TPDG, TP, TPG, &
+               IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT,XTSTEP_RUN,XTSTEP_DIAG,LRESTART)
 !
 ! --------------------------------------------------------------------------------------
 ! * 5. TRIP - OASIS  grid, partitions and local field definitions

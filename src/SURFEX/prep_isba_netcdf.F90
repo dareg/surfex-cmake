@@ -24,6 +24,9 @@ SUBROUTINE PREP_ISBA_NETCDF(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !!      J.Escobar   11/2013  Add USE MODI_GET_TYPE_DIM_n
 !!------------------------------------------------------------------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 !
 USE MODI_ABOR1_SFX
@@ -79,7 +82,8 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_NETCDF',0,ZHOOK_HANDLE)
 
 !*      1.    get nature dimension
 !
- CALL GET_TYPE_DIM_n('NATURE',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'NATURE',IL)
 !
 !*      2.     Reading of field
 !              ----------------

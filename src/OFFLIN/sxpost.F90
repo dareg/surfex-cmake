@@ -7,6 +7,8 @@
 !!
 !-------------------------------------------------------------------------------
 !        
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
         USE MODD_IO_SURF_ASC
         USE MODD_SURF_PAR
         USE MODI_READ_SURF
@@ -99,9 +101,12 @@
 
         CALL INIT_IO_SURF_n('ASCII ','FULL  ','SURF  ','READ ')
 
-        CALL READ_SURF('ASCII ','DIM_FULL', INI, IRET)
-        CALL READ_SURF('ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
-        CALL READ_SURF('ASCII ','DIM_NATURE', INI_N, IRET)        
+        CALL READ_SURF(IOB, &
+                       'ASCII ','DIM_FULL', INI, IRET)
+        CALL READ_SURF(IOB, &
+                       'ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
+        CALL READ_SURF(IOB, &
+                       'ASCII ','DIM_NATURE', INI_N, IRET)        
            
         CALL END_IO_SURF_n('ASCII ')
 
@@ -110,7 +115,8 @@
         IF (INI_N.NE.0) THEN
           CALL INIT_IO_SURF_n('ASCII ','NATURE','SURF  ','READ ')
 
-          CALL READ_SURF('ASCII ','PATCH_NUMBER', IPATCH, IRET)
+          CALL READ_SURF(IOB, &
+                       'ASCII ','PATCH_NUMBER', IPATCH, IRET)
 
           CALL END_IO_SURF_n('ASCII ')
         ENDIF

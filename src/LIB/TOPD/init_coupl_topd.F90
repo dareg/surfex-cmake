@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     #######################
-      SUBROUTINE INIT_COUPL_TOPD(HPROGRAM,KI)
+      SUBROUTINE INIT_COUPL_TOPD (DGEI, I, UG, U, &
+                                  HPROGRAM,KI)
 !     #######################
 !
 !!****  *INIT_COUPL_TOPD*  
@@ -49,6 +50,12 @@
 !               ------------
 !
 ! Modules
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_COUPLING_TOPD, ONLY : XWSTOPI, XWFCTOPI, XDTOPI, XAS_NATURE, XATOP,&
                                  XCSTOPI, XWTOPT, XAVG_RUNOFFCM, XAVG_DRAINCM,&
                                  XDTOPT, XKA_PRE, XKAC_PRE, NMASKI, XDMAXFC, &
@@ -63,11 +70,7 @@ USE MODD_TOPODYN,       ONLY : NNCAT, XMPARA, XCSTOPT, NMESHT, XDXT,&
                                  NNMC, XRTOP_D2, NNB_TOPD_STEP,  XDMAXT
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF, NUNDEF
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
 
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 ! Interfaces
 USE MODI_GET_LUOUT
@@ -87,6 +90,12 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=*), INTENT(IN) :: HPROGRAM    ! 
 INTEGER, INTENT(IN)          :: KI          ! Grid dimensions

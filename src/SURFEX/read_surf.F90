@@ -39,8 +39,12 @@ MODULE MODI_READ_SURF
 !
   INTERFACE READ_SURF
 !
-     SUBROUTINE READ_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFX0 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 REAL, INTENT(OUT) :: PFIELD            ! real scalar to be read
@@ -50,8 +54,12 @@ INTEGER,INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem app
 !
 END SUBROUTINE READ_SURFX0
 !
-     SUBROUTINE READ_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFX1 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT) ::PFIELD ! array containing the data field  
@@ -63,8 +71,12 @@ INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem app
 !                                                   ! '-' : no horizontal dim.
 END SUBROUTINE READ_SURFX1
 !
-     SUBROUTINE READ_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFX2 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
@@ -78,8 +90,12 @@ END SUBROUTINE READ_SURFX2
 !
 !RJ: interface to READ_SURFX2COV moved out
 !
-     SUBROUTINE READ_SURFX3(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFX3 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM      ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC          ! name of the article to be read
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
@@ -91,8 +107,12 @@ INTEGER, INTENT(OUT) :: KRESP                 ! KRESP  : return-code if a proble
 !                                                   ! '-' : no horizontal dim.
 END SUBROUTINE READ_SURFX3
 !
-     SUBROUTINE READ_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFN0 (IOB, &
+                             HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER, INTENT(OUT) :: KFIELD           ! integer to be read  
@@ -102,8 +122,12 @@ INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem app
 !
 END SUBROUTINE READ_SURFN0
 !
-     SUBROUTINE READ_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFN1 (IOB, &
+                             HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD ! integer to be read  
@@ -115,8 +139,12 @@ INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem
 !                                                   ! '-' : no horizontal dim.
 END SUBROUTINE READ_SURFN1
 !
-     SUBROUTINE READ_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT,HDIR)
+     SUBROUTINE READ_SURFC0 (IOB, &
+                             HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM   ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC       ! name of the article to be read
  CHARACTER(LEN=*), INTENT(OUT) :: HFIELD    ! caracter to be read  
@@ -126,8 +154,12 @@ INTEGER, INTENT(OUT) :: KRESP              ! KRESP  : return-code if a problem a
 !
 END SUBROUTINE READ_SURFC0
 !
-      SUBROUTINE READ_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFL0 (IOB, &
+                              HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, INTENT(OUT)         :: OFIELD   ! array containing the data field
@@ -137,8 +169,12 @@ INTEGER, INTENT(OUT) :: KRESP            ! KRESP  : return-code if a problem app
 !
 END SUBROUTINE READ_SURFL0
 !
-      SUBROUTINE READ_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFL1 (IOB, &
+                              HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD ! array containing the data field  
@@ -150,9 +186,13 @@ INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem
 !                                                   ! '-' : no horizontal dim.
 END SUBROUTINE READ_SURFL1
 !
-      SUBROUTINE READ_SURFT0(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFT0 (IOB, &
+                              HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+!
 !
 USE MODD_TYPE_DATE_SURF
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC      ! name of the article to be read
@@ -163,9 +203,13 @@ INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem ap
 !
 END SUBROUTINE READ_SURFT0
 !
-      SUBROUTINE READ_SURFT1(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFT1 (IOB, &
+                              HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+!
 !
 USE MODD_TYPE_DATE_SURF
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC     ! name of the article to be read
@@ -176,9 +220,13 @@ INTEGER, INTENT(OUT) :: KRESP ! KRESP  : return-code if a problem appears
 !
 END SUBROUTINE READ_SURFT1
 !
-      SUBROUTINE READ_SURFT2(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFT2 (IOB, &
+                              HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+!
 !
 USE MODD_TYPE_DATE_SURF
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*), INTENT(IN) ::HREC      ! name of the article to be read
@@ -194,10 +242,13 @@ END INTERFACE
 END MODULE MODI_READ_SURF
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFX0 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -229,6 +280,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -340,10 +394,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFX0',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX0
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFX1 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -372,6 +429,9 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
  CHARACTER(LEN=*), INTENT(IN) :: HREC      ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP             ! KRESP  : return-code if a problem appears
@@ -445,10 +505,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFX1',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX1
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFX2 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -477,6 +540,9 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
  CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem appears
@@ -551,8 +617,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFX2',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX2
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX3(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFX3 (IOB, &
+                             HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
+!
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -566,6 +637,9 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM      ! calling program
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
  CHARACTER(LEN=*), INTENT(IN) :: HREC          ! name of the article to be read
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP                 ! KRESP  : return-code if a problem appears
@@ -621,10 +695,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFX3',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX3
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFN0 (IOB, &
+                             HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -656,6 +733,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -774,10 +854,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFN0',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFN0
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFN1 (IOB, &
+                             HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -806,6 +889,9 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
  CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD ! the integer to be read  
 INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem appears
@@ -880,10 +966,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFN1',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFN1
 
 !     #############################################################
-      SUBROUTINE READ_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFC0 (IOB, &
+                             HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -915,6 +1004,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1021,10 +1113,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFC0',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFC0
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFL0 (IOB, &
+                              HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1056,6 +1151,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1162,10 +1260,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFL0',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFL0
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFL1 (IOB, &
+                              HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1194,6 +1295,9 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
  CHARACTER(LEN=*), INTENT(IN) :: HREC         ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OFIELD ! array containing the data field  
 INTEGER, INTENT(OUT) :: KRESP                ! KRESP  : return-code if a problem appears
@@ -1256,10 +1360,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFL1',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFL1
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT0(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFT0 (IOB, &
+                              HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1295,6 +1402,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1432,10 +1542,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFT0',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFT0
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT1(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFT1 (IOB, &
+                              HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1466,6 +1579,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1597,10 +1713,13 @@ IF (LHOOK) CALL DR_HOOK('MODI_READ_SURF:READ_SURFT1',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFT1
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT2(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURFT2 (IOB, &
+                              HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
@@ -1631,6 +1750,9 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 !
 !*      0.1   Declarations of arguments
 !

@@ -37,6 +37,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
@@ -146,7 +148,8 @@ ALLOCATE(UG%XJPDIR(U%NSIZE_FULL))
 !             -------------
 !
  CALL PGD_FRAC(HPROGRAM,U%LECOCLIMAP)
-IF (U%LECOCLIMAP) CALL PGD_COVER(HPROGRAM,LRM_RIVER)
+IF (U%LECOCLIMAP) CALL PGD_COVER(DTCO, UG, U, USS, &
+                                 HPROGRAM,LRM_RIVER)
 !
 !-------------------------------------------------------------------------------
 !

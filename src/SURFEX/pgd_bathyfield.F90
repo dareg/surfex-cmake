@@ -145,7 +145,8 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    5.      Interpolation if some points are not initialized (no data for these points)
 !             ------------------------------------------------
 !
-  CALL INTERPOL_FIELD(HPROGRAM,ILUOUT,NSIZE,PFIELD(:),HFIELD)
+  CALL INTERPOL_FIELD(UG, U, &
+                      HPROGRAM,ILUOUT,NSIZE,PFIELD(:),HFIELD)
 !
   DO JLOOP=1,SIZE(PFIELD)
    PFIELD(JLOOP)=MIN(PFIELD(JLOOP),-1.)

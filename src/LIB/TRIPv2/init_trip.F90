@@ -1,5 +1,6 @@
 !####################################################################################
-SUBROUTINE INIT_TRIP (KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,PTSTEP_RUN,PTSTEP_DIAG,ORESTART)
+SUBROUTINE INIT_TRIP (TPDG, TP, TPG, &
+                       KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,PTSTEP_RUN,PTSTEP_DIAG,ORESTART)
 !####################################################################################
 !
 !!****  *INIT_TRIP*  
@@ -39,7 +40,11 @@ SUBROUTINE INIT_TRIP (KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,PTSTEP_RUN,PTSTEP_DIAG,O
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
+!
+!
+USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
                       XCVEL, XRATMED, XTSTEP
@@ -47,8 +52,6 @@ USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
-USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE MODE_TRIP_GRID
 USE MODE_TRIP_INIT
@@ -70,6 +73,11 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,          INTENT(OUT) :: KYEAR   !date UTC
 INTEGER,          INTENT(OUT) :: KMONTH  !date UTC

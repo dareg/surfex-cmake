@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PREP_TRIP_RUN(KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT)
+      SUBROUTINE PREP_TRIP_RUN (TP, TPG, &
+                                KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT)
 !     ####################
 !
 !!****  *PREP_TRIP_RUN*  
@@ -38,6 +39,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
                       XCVEL, XRATMED, XTSTEP,  &
                       XTAUG_UNIF
@@ -45,8 +50,6 @@ USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
-USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE MODE_TRIP_INIT
 USE MODE_RW_TRIP
@@ -65,6 +68,10 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,          INTENT(IN) :: KYEAR   !date UTC
 INTEGER,          INTENT(IN) :: KMONTH  !date UTC

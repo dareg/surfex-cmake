@@ -37,6 +37,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -101,14 +105,16 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !  Their value must be defined as XUNDEF.
 !
 !
- CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(IOB, &
+                       HINIFILE,HINIFILETYPE,'FULL  ')
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('SEA   ',SG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'SEA   ',SG%NDIM)
 !
 ALLOCATE(S%LCOVER     (JPCOVER))
 ALLOCATE(S%XZS        (SG%NDIM))
@@ -141,7 +147,8 @@ LINTERP(:) = .TRUE.
 !              -----------------
 !
 ALLOCATE(ZSEABATHY(INI,1))
- CALL READ_SURF(HPROGRAM,'BATHY',ZSEABATHY(:,1),IRESP,HDIR='A')
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'BATHY',ZSEABATHY(:,1),IRESP,HDIR='A')
 !
 ALLOCATE(ZWORK(SG%NDIM,1))
  CALL HOR_INTERPOL(ILUOUT,ZSEABATHY(:,1:1),ZWORK(:,1:1)) 
@@ -152,7 +159,8 @@ DEALLOCATE(ZSEABATHY,ZWORK)
 !============================================================
 ! G. TANGUY 03/2009
 ! reading of fields for SST_DATA
- CALL READ_SURF(HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
 !
 IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTS, SG, &
                                                HPROGRAM,INI,HDIR='A')

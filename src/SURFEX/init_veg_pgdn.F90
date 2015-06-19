@@ -61,6 +61,9 @@ SUBROUTINE INIT_VEG_PGD_n(HPROGRAM, HSURF, KLUOUT, KI, KPATCH, KGROUND_LAYER, KM
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_SLT_n, ONLY : SLT => SLT
@@ -472,7 +475,8 @@ IF (KSV /= 0) THEN
     ! contains explicitely modules from ISBAn. It should be cleaned in a future
     ! version.
     CALL OPEN_NAMELIST(HPROGRAM, ICH, HFILE=HCHEM_SURF_FILE)
-    CALL CH_INIT_DEP_ISBA_n(ICH, KLUOUT, HSVO, KI)
+    CALL CH_INIT_DEP_ISBA_n(CHI, DTCO, I, &
+                            ICH, KLUOUT, HSVO, KI)
     CALL CLOSE_NAMELIST(HPROGRAM, ICH)
   END IF
   !

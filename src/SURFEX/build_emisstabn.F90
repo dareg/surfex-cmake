@@ -29,6 +29,8 @@
 !!    EXTERNAL
 !!    --------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
 !
 USE MODI_CH_OPEN_INPUTB
@@ -152,7 +154,8 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
     ALLOCATE(TPEMISS(JSPEC)%XEMISDATA(KSIZE,INBTS))
 ! Read file for emission data
     YRECFM='E_'//TRIM(TPEMISS(JSPEC)%CNAME)
-    CALL READ_SURF(HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
+    CALL READ_SURF(IOB, &
+                   HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
 ! and apply conversion

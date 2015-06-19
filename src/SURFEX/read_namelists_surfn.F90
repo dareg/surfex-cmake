@@ -1,12 +1,15 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_SURF_n(HPROGRAM,HINIT)
+SUBROUTINE READ_NAMELISTS_SURF_n (CHU, DGU, USS, &
+                                  HPROGRAM,HINIT)
 !     #######################################################
 !
 !---------------------------    
 !
-USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODN_SURF_ATM_n
 !
@@ -31,6 +34,11 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize

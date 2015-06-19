@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_IO_SURF_NC,ONLY: NMASK,NFULL,CMASK, NLUOUT, &
                             CFILEIN_NC, NID_NC, NFULL_AUX 
 USE MODI_GET_LUOUT
@@ -78,7 +80,8 @@ ENDIF
 !
 CMASK = HMASK
 CFILEIN_NC = YFILE
- CALL READ_SURF('NC    ','DIM_FULL',ILU,IRET)
+ CALL READ_SURF(IOB, &
+                'NC    ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------

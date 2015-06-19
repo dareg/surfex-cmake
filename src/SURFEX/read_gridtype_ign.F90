@@ -34,6 +34,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
 USE MODI_GET_XYALL_IGN
@@ -86,18 +88,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
- CALL READ_SURF(HPROGRAM,'LAMBERT',ILAMBERT,KRESP,HDIR=HDIR)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'LAMBERT',ILAMBERT,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
 !
- CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !

@@ -1,10 +1,13 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_IDEAL_n(HPROGRAM)
+SUBROUTINE READ_NAMELISTS_IDEAL_n (DGL, &
+                                   HPROGRAM)
 !     #######################################################
 !
 !--------------------------------------------------------------------------
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
 USE MODN_IDEAL_n
 !
@@ -17,6 +20,9 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

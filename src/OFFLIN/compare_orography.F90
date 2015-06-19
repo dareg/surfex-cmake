@@ -24,6 +24,8 @@ SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
 !!      P. Le Moigne   *Meteo France*
 !!
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_READ_SURF
 USE MODI_END_IO_SURF_n
@@ -60,7 +62,8 @@ CPROGNAME = HPROGRAM
 !  orography from initial file
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
  CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
- CALL READ_SURF(HPROGRAM,'ZS', ZS1, IRET)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,'ZS', ZS1, IRET)
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !

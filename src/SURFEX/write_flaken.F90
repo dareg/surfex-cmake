@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_FLAKE_n(HPROGRAM,HWRITE)
+      SUBROUTINE WRITE_FLAKE_n (CHF, DGMF, DGU, F, FSB, &
+                                HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_FLAKE_n* - routine to write surface variables in their respective files
@@ -34,15 +35,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
 !
-USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_FLAKE_n
 USE MODI_WRITESURF_FLAKE_SBL_n
@@ -57,6 +60,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields

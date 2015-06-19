@@ -33,6 +33,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
@@ -75,7 +78,8 @@ IF (LHOOK) CALL DR_HOOK('GET_LONLAT_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
- CALL GET_SURF_SIZE_n('FULL', INI)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'FULL', INI)
 !
 ALLOCATE(ZLON(INI))
 ALLOCATE(ZLAT(INI))

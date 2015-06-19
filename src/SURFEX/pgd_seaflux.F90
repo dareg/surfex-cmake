@@ -36,6 +36,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_DATA_COVER_PAR,  ONLY : JPCOVER
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
@@ -109,7 +112,8 @@ IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !*    5.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('SEA   ',SG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'SEA   ',SG%NDIM)
 !
 ALLOCATE(S%LCOVER     (JPCOVER))
 ALLOCATE(S%XZS        (SG%NDIM))

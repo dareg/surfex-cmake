@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE OPEN_AUX_IO_SURF(HFILE,HFILETYPE,HMASK)
+      SUBROUTINE OPEN_AUX_IO_SURF (IOB, &
+                                   HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF* - chooses the routine to OPENialize IO
@@ -36,7 +37,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -69,6 +72,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program

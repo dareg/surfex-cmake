@@ -300,6 +300,8 @@ END SUBROUTINE WRITE_SURFX0
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
@@ -390,13 +392,15 @@ ENDIF
 !
 IF (HPROGRAM=='TEXTE ') THEN
 #ifdef SFX_TXT
-  CALL WRITE_SURFX_TXT(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  CALL WRITE_SURFX_TXT(DGU, &
+                       YREC,PFIELD,KRESP,HCOMMENT,YDIR)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='BINARY') THEN
 #ifdef SFX_BIN
-  CALL WRITE_SURFX_BIN(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  CALL WRITE_SURFX_BIN(DGU, U, &
+                       YREC,PFIELD,KRESP,HCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -442,6 +446,8 @@ END SUBROUTINE WRITE_SURFX1
 !     #############################################################
 !
 !!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
+!
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
@@ -534,13 +540,15 @@ ENDIF
 !
 IF (HPROGRAM=='TEXTE ') THEN
 #ifdef SFX_TXT
-  CALL WRITE_SURFX_TXT(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  CALL WRITE_SURFX_TXT(DGU, &
+                       YREC,PFIELD,KRESP,HCOMMENT,YDIR)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='BINARY') THEN
 #ifdef SFX_BIN
-  CALL WRITE_SURFX_BIN(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+  CALL WRITE_SURFX_BIN(DGU, U, &
+                       YREC,PFIELD,KRESP,HCOMMENT,YDIR)
 #endif
 ENDIF
 !

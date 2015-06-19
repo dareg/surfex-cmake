@@ -11,6 +11,8 @@ CONTAINS
       SUBROUTINE READ_SURF_COV(HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
 USE MODI_READ_SURF, ONLY : READ_SURF
@@ -75,7 +77,8 @@ ELSE
 !RJ: xundef is done for whole array above, to ensure status INTENT(OUT)
 !RJ     PFIELD(:,JCOVER)=0.
     !
-    CALL READ_SURF(HPROGRAM,YREC,PFIELD(:,JCOVER),KRESP,YCOMMENT,YDIR)
+    CALL READ_SURF(IOB, &
+                   HPROGRAM,YREC,PFIELD(:,JCOVER),KRESP,YCOMMENT,YDIR)
     !
   END DO
   !

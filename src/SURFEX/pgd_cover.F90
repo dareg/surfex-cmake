@@ -1,6 +1,7 @@
 
 !     #########
-      SUBROUTINE PGD_COVER(HPROGRAM,ORM_RIVER)
+      SUBROUTINE PGD_COVER (DTCO, UG, U, USS, &
+                            HPROGRAM,ORM_RIVER)
 !     ##############################################################
 !
 !!**** *PGD_COVER* monitor for averaging and interpolations of cover fractions
@@ -41,18 +42,20 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR, NGRID_PAR
 USE MODD_PGDWORK,        ONLY : XSUMCOVER, NSIZE
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA, XDATA_NATURE, XDATA_WATER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_GET_LUOUT
 USE MODE_GRIDTYPE_GAUSS
@@ -93,6 +96,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: ORM_RIVER    ! delete river coverage (default = false)

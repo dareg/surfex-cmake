@@ -1,5 +1,6 @@
 !#################################################################################
-SUBROUTINE READ_PGD_NETCDF(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD,PFIELD)
+SUBROUTINE READ_PGD_NETCDF (USS, &
+                            HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD,PFIELD)
 !#################################################################################
 !
 !!****  *READ_PGD_NETCDF* - read data from NETCDF files during PGD (altitude)
@@ -24,7 +25,9 @@ SUBROUTINE READ_PGD_NETCDF(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD,PFIELD)
 !!------------------------------------------------------------------
 !
 
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_ABOR1_SFX
 
@@ -43,6 +46,9 @@ INCLUDE 'netcdf.inc'
 !*      0.1    declarations of arguments
 !
 
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+!
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
  CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call

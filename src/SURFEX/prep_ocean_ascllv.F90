@@ -35,6 +35,9 @@ SUBROUTINE PREP_OCEAN_ASCLLV(HPROGRAM,HSURF,HFILE, &
 !!      J.Escobar   11/2013   Add USE MODI_ABOR1_SFX and USE MODI_GET_SURF_MASK_N
 !!------------------------------------------------------------------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODD_PREP,       ONLY : CINTERP_TYPE, CINGRID_TYPE
@@ -88,10 +91,12 @@ IF (LHOOK) CALL DR_HOOK('PREP_OCEAN_ASCLLV',0,ZHOOK_HANDLE)
 CINGRID_TYPE='CONF PROJ '
 
 !*      1.    get full dimension of grid
- CALL GET_TYPE_DIM_n('FULL  ',NL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'FULL  ',NL)
 !*      2.    get Ocean dimension
 !
- CALL GET_TYPE_DIM_n('SEA   ',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'SEA   ',IL)
 
 !*      3.    get grid informations known over full grid
 !
@@ -164,7 +169,8 @@ CINTERP_TYPE='NONE  '
 !
 
 YMASK = 'SEA   '
- CALL GET_TYPE_DIM_n(YMASK,IDIM)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     YMASK,IDIM)
 WRITE(KLUOUT,*) "IDIM (dim sea) =", IDIM
 
 ALLOCATE(PFIELD(1:IDIM,1:SIZE(ZFIELD,2),1:SIZE(ZFIELD,3)))
@@ -176,7 +182,8 @@ ENDIF
 
 ALLOCATE(IMASK(IDIM))
 ILU=0
- CALL GET_SURF_MASK_n(YMASK,IDIM,IMASK,ILU,KLUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, &
+                      YMASK,IDIM,IMASK,ILU,KLUOUT)
 DO JK=1,NOCKMAX
   CALL PACK_SAME_RANK(IMASK,ZFIELD(:,JK,1),PFIELD(:,JK,1))
 END DO

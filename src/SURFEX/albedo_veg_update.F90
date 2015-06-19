@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE ALBEDO_VEG_UPDATE(PTSTEP,TTIME,PCOVER,OCOVER,          &
+    SUBROUTINE ALBEDO_VEG_UPDATE (DTCO, DTI, IG, I, &
+                                  PTSTEP,TTIME,PCOVER,OCOVER,          &
                        HISBA,OECOCLIMAP,HPHOTO,OAGRIP,OTR_ML,HSFTYPE, &
                        PVEG,PALBNIR,PALBVIS,PALBUV,                   &
                        HALBEDO, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
@@ -43,11 +44,13 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -64,6 +67,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time

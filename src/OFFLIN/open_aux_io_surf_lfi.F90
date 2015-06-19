@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_IO_SURF_LFI,ONLY:CLUOUT_LFI,NMASK,NFULL,CMASK, NLUOUT, &
                             CFILE_LFI, NUNIT_LFI, NFULL_AUX,&
                             NIB,NIE,NIU,NJB,NJE,NJU, NFULL_AUX, &
@@ -71,7 +73,8 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
 !
 CMASK = HMASK
 CFILE_LFI=HFILE
- CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET)
+ CALL READ_SURF(IOB, &
+                'LFI   ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------

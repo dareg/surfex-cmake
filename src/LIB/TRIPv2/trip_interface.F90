@@ -1,5 +1,6 @@
 !#################################################################
-SUBROUTINE TRIP_INTERFACE (KLISTING,KLON,KLAT,PTIME,OPRINT, &
+SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
+                            KLISTING,KLON,KLAT,PTIME,OPRINT, &
                            KNB_TSTEP_RUN,KNB_TSTEP_DIAG,    &
                            PTSTEP_RUN,PTSTEP_DIAG,PRUNOFF,  &
                            PDRAIN,PCALVING,PRECHARGE,       &
@@ -31,15 +32,17 @@ SUBROUTINE TRIP_INTERFACE (KLISTING,KLON,KLAT,PTIME,OPRINT, &
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
+!
+!
+USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP_RUN,  ONLY : LDIAG_MISC
 !
 USE MODN_TRIP,      ONLY : CGROUNDW, LFLOOD, XTSTEP
 !
 USE MODD_TRIP_PAR,  ONLY : XRHOLW, XUNDEF
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
-USE MODD_TRIP, ONLY : TP => TRIP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -61,6 +64,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,              INTENT(IN)    :: KLISTING       !Output file id
 INTEGER,              INTENT(IN)    :: KLON           !Number of longitude

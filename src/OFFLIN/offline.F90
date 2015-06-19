@@ -21,6 +21,8 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+!
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
@@ -522,7 +524,8 @@ XTIME0 = MPI_WTIME()
 !
 !       configuration of run
 !
- CALL OL_READ_ATM_CONF(CSURF_FILETYPE, CFORCING_FILETYPE,            &
+ CALL OL_READ_ATM_CONF(U, &
+                       CSURF_FILETYPE, CFORCING_FILETYPE,            &
                       ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
                       ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF     )
 !
@@ -777,7 +780,8 @@ XTIME0 = MPI_WTIME()
 ! * SURFEX - OASIS  grid, partitions and local field definitions
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_DEF_OL(U, &
+  CALL SFX_OASIS_DEF_OL(I, &
+                        U, &
                         CSURF_FILETYPE,YALG_MPI)
 ENDIF
 !
@@ -1183,7 +1187,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL DIAG_SURF_ATM_n(CTIMESERIES_FILETYPE)
+        CALL DIAG_SURF_ATM_n(DGEI, DGF, DGL, DGI, DGS, DGU, DGT, DGW, U, USS, &
+                             CTIMESERIES_FILETYPE)
 #ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()

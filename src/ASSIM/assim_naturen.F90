@@ -29,6 +29,10 @@ SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,        ONLY : JPRB
@@ -77,7 +81,8 @@ END IF
 !
 IF (U%CNATURE=='ISBA  ') THEN
   !
-  CALL ASSIM_ISBA_n(HPROGRAM,KI,                                    &
+  CALL ASSIM_ISBA_n(DGMI, IG, I, U, &
+                    HPROGRAM,KI,                                    &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
                     PSWEC,     PTSC,     PUCLS, PVCLS,              &

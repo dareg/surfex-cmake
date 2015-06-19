@@ -39,6 +39,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
@@ -102,10 +104,12 @@ IF (LHOOK) CALL DR_HOOK('PACK_PGD',0,ZHOOK_HANDLE)
 !*    1.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_TYPE_DIM_n(HSURF,IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     HSURF,IL)
 ALLOCATE(IMASK(IL))
 ILU=0
- CALL GET_SURF_MASK_n(HSURF,IL,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, &
+                      HSURF,IL,IMASK,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !

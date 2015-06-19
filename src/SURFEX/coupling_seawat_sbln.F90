@@ -39,6 +39,27 @@ SUBROUTINE COUPLING_SEAWAT_SBL_n(HPROGRAM, HCOUPLING,  PTIMEC, HSURF,           
 !!      B. Decharme  04/2013 new coupling variables
 !----------------------------------------------------------------
 !
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_SLT_n, ONLY : SLT => SLT
+!
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD
 ! 
@@ -312,7 +333,8 @@ END IF
 !              ------------
 !
 IF (HSURF=='S') THEN
-  CALL COUPLING_SEAFLUX_n(HPROGRAM, GCOUPLING, PTIMEC,                                     &
+  CALL COUPLING_SEAFLUX_n(CHS, DTS, DGO, DGS, DGSI, DST, O, OR, SG, S, SLT, &
+                          HPROGRAM, GCOUPLING, PTIMEC,                                     &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
@@ -324,7 +346,8 @@ IF (HSURF=='S') THEN
              ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
              'OK'                                                                          )
 ELSEIF (HSURF=='W') THEN
-  CALL COUPLING_WATFLUX_n(HPROGRAM, GCOUPLING, PTIMEC,                                     &
+  CALL COUPLING_WATFLUX_n(CHW, DGW, DST, SLT, W, &
+                          HPROGRAM, GCOUPLING, PTIMEC,                                     &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
@@ -336,7 +359,8 @@ ELSEIF (HSURF=='W') THEN
              ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
              'OK'                                                                          )
 ELSEIF (HSURF=='F') THEN
-  CALL COUPLING_FLAKE_n(HPROGRAM, GCOUPLING,                                                &
+  CALL COUPLING_FLAKE_n(CHF, DGF, DGMF, DST, F, SLT, &
+                        HPROGRAM, GCOUPLING,                                                &
               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
               KI, KSV, KSW,                                                                 &
               PTSUN, PZENITH, PZENITH2, PAZIM,                                              &

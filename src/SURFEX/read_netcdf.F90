@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_NETCDF(HPROGRAM,HSUBROUTINE,HFILENAME,HNCVARNAME)
+      SUBROUTINE READ_NETCDF (USS, &
+                              HPROGRAM,HSUBROUTINE,HFILENAME,HNCVARNAME)
 !     ##############################################################
 !
 !!**** *READ_NETCDF* reads a netcdf file and copy lat/lon/val then call treatment 
@@ -23,7 +24,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
 !
@@ -39,6 +42,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call

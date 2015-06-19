@@ -23,6 +23,8 @@ PROGRAM TRIP_PREP
 !!      Original    06/2008
 !!------------------------------------------------------------------
 !
+USE MODD_TRIP, ONLY : TP => TRIP
+!
 USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
 !
 USE MODD_TRIP_LISTING
@@ -129,7 +131,8 @@ ENDIF
 !* 4. TRIP parameters preparation
 ! --------------------------------------------------------------------------------------
 !
-CALL PREP_TRIP_RUN(NYEAR,NMONTH,NDAY,XTIME,ILON,ILAT)
+CALL PREP_TRIP_RUN(TP, TPG, &
+                   NYEAR,NMONTH,NDAY,XTIME,ILON,ILAT)
 !
 IF(GOASIS)THEN
   CALL TRIP_OASIS_PREP(TPG, &

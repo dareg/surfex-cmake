@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                                   &
+SUBROUTINE COUPLING_WATFLUX_n (CHW, DGW, DST, SLT, W, &
+                               HPROGRAM, HCOUPLING, PTIMEC,                                   &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -39,7 +40,13 @@ SUBROUTINE COUPLING_WATFLUX_n(HPROGRAM, HCOUPLING, PTIMEC,                      
 !!      B. Decharme  04/2013 new coupling variables
 !!----------------------------------------------------------------------------
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_SLT_n, ONLY : SLT_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
@@ -48,8 +55,6 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SFX_OASIS,  ONLY : LCPL_SEAICE
 USE MODD_WATER_PAR
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
 !
 USE MODI_WATER_FLUX
 USE MODI_ADD_FORECAST_TO_DATE_SURF
@@ -61,8 +66,6 @@ USE MODI_UPDATE_RAD_WATER
 USE MODI_INTERPOL_TS_WATER_MTH
 !
 USE MODE_DSLT_SURF
-USE MODD_SLT_n, ONLY : SLT => SLT
-USE MODD_DST_n, ONLY : DST => DST
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 !
@@ -76,6 +79,13 @@ USE MODI_COUPLING_ICEFLUX_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(SLT_t), INTENT(INOUT) :: SLT
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling

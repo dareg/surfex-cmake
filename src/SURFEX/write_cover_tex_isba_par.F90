@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_COVER_TEX_ISBA_PAR(KPATCH,KLAYER,HISBA,HPHOTO,PSOILGRID)
+      SUBROUTINE WRITE_COVER_TEX_ISBA_PAR (DTCO, I, &
+                                           KPATCH,KLAYER,HISBA,HPHOTO,PSOILGRID)
 !     ##########################
 !
 !!**** *WRITE_COVER_TEX* writes the ISBA data arrays into a tex file
@@ -39,8 +40,10 @@
 !
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_ISBA_n, ONLY : I => ISBA
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODE_WRITE_COVER_TEX
 
@@ -61,6 +64,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,          INTENT(IN) :: KPATCH! number of patch
 INTEGER,          INTENT(IN) :: KLAYER! number of soil layers

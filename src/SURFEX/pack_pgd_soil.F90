@@ -36,6 +36,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_ISBA_n, ONLY : I => ISBA
 USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
@@ -77,10 +80,12 @@ IF (LHOOK) CALL DR_HOOK('PACK_PGD_SOIL',0,ZHOOK_HANDLE)
 !*    1.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_TYPE_DIM_n('NATURE',IG%NDIM)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'NATURE',IG%NDIM)
 ALLOCATE(IMASK(IG%NDIM))
 ILU=0
- CALL GET_SURF_MASK_n('NATURE',IG%NDIM,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, &
+                      'NATURE',IG%NDIM,IMASK,ILU,ILUOUT)
 !
 !
 !-------------------------------------------------------------------------------

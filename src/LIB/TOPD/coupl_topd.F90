@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     #####################
-      SUBROUTINE COUPL_TOPD(HPROGRAM,HSTEP,KI,KSTEP)
+      SUBROUTINE COUPL_TOPD (DGEI, DGMI, IG, I, UG, U, &
+                             HPROGRAM,HSTEP,KI,KSTEP)
 !     #####################
 !
 !!****  *COUPL_TOPD*  
@@ -52,7 +53,14 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,        ONLY   : NNCAT, NMESHT, NNMC, XMPARA, XDMAXT
@@ -63,13 +71,8 @@ USE MODD_COUPLING_TOPD,  ONLY   : XWG_FULL, XDTOPI, XKAC_PRE, XDTOPT, XWTOPT, XW
                                   NFREQ_MAPS_ASAT, XAVG_RUNOFFCM,&
                                   XAVG_DRAINCM, LBUDGET_TOPD
                                   !
-USE MODD_ISBA_n, ONLY : I => ISBA
 
 USE MODD_CSTS,             ONLY : XRHOLW, XRHOLI
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_PAR,         ONLY : XUNDEF, NUNDEF
 USE MODD_ISBA_PAR,         ONLY : XWGMIN
 
@@ -102,6 +105,14 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM ! program calling surf. schemes
 CHARACTER(LEN=*), INTENT(IN) :: HSTEP  ! atmospheric loop index

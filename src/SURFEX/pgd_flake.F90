@@ -36,6 +36,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -166,7 +169,8 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_FLAKE)
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('WATER ',FG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'WATER ',FG%NDIM)
 !
 ALLOCATE(F%LCOVER     (JPCOVER))
 ALLOCATE(F%XZS        (FG%NDIM))
