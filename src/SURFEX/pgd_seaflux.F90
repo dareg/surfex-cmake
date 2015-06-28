@@ -121,12 +121,14 @@ ALLOCATE(SG%XLAT       (SG%NDIM))
 ALLOCATE(SG%XLON       (SG%NDIM))
 ALLOCATE(SG%XMESH_SIZE (SG%NDIM))
 !
- CALL PACK_PGD(HPROGRAM, 'SEA   ',                    &
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'SEA   ',                    &
                 SG%CGRID,  SG%XGRID_PAR,                     &
                 S%LCOVER, S%XCOVER, S%XZS,                   &
                 SG%XLAT, SG%XLON, SG%XMESH_SIZE                 )  
 !
- CALL PACK_PGD_SEAFLUX(HPROGRAM, ZSEABATHY)
+ CALL PACK_PGD_SEAFLUX(DTCO, SG, S, U, &
+                       HPROGRAM, ZSEABATHY)
 !
  CALL PGD_SEAFLUX_PAR(HPROGRAM,DTS%LSST_DATA)
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',1,ZHOOK_HANDLE)

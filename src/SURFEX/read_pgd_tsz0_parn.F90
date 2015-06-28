@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TSZ0_PAR_n (DTZ, &
+      SUBROUTINE READ_PGD_TSZ0_PAR_n (IOB, &
+                                       DTZ, &
                                       HPROGRAM)
 !     ################################################
 !
@@ -38,7 +39,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 !
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 !

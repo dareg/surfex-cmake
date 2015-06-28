@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
+SUBROUTINE COMPARE_OROGRAPHY (IOB, &
+                               HPROGRAM, OSURFZS, PDELT_ZSMAX              )
 !**************************************************************************
 !
 !!    PURPOSE
@@ -24,7 +25,9 @@ SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
 !!      P. Le Moigne   *Meteo France*
 !!
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_READ_SURF
@@ -44,6 +47,9 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 ! global variables
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
  CHARACTER(LEN=6)    ,INTENT(IN)  :: HPROGRAM
 REAL                ,INTENT(IN)  :: PDELT_ZSMAX
 LOGICAL             ,INTENT(IN)  :: OSURFZS

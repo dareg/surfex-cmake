@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_FLAKE_INIT_n (DGF, DGMF, DGU, F, &
+      SUBROUTINE DIAG_FLAKE_INIT_n (IOB, &
+                                     DGF, DGMF, DGU, F, &
                                     HPROGRAM,KLU,KSW)
 !     #####################
 !
@@ -37,7 +38,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
 USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
@@ -60,6 +63,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
 TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF

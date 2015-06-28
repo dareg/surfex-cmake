@@ -1,5 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
+SUBROUTINE ASSIM_NATURE_n (DGMI, IG, I, U, &
+                           HPROGRAM,KI,                                    &
                           PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
                           PSWEC,     PTSC,   PUCLS, PVCLS,                &
@@ -29,11 +30,13 @@ SUBROUTINE ASSIM_NATURE_n(HPROGRAM,KI,                                    &
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,        ONLY : JPRB
 !
@@ -43,6 +46,12 @@ USE MODI_ASSIM_ISBA_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI

@@ -372,7 +372,8 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
 !   
   CALL READ_SURF(IOB, &
                  YFILETYPE,'ZS',U%XZS(:),IRESP) 
-  CALL READ_SSO_n(U, USS, &
+  CALL READ_SSO_n(IOB, &
+                  U, USS, &
                   YFILETYPE)
 !
   CALL END_IO_SURF_n(YFILETYPE)

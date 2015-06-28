@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_SEAFLUX_PAR_n (DTS, SG, &
+      SUBROUTINE READ_PGD_SEAFLUX_PAR_n (IOB, &
+                                          DTS, SG, &
                                          HPROGRAM,KSIZE,HDIR)
 !     ################################################
 !
@@ -36,7 +37,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
 USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
@@ -56,6 +59,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG

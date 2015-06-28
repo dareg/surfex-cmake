@@ -56,6 +56,8 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
@@ -382,16 +384,21 @@ ENDIF
                    HPROGRAM,'DIM_WATER ',U%NDIM_WATER, IRESP)
  CALL READ_SURF(IOB, &
                    HPROGRAM,'DIM_TOWN  ',U%NDIM_TOWN,  IRESP)
- CALL READ_LECOCLIMAP(HPROGRAM,U%LECOCLIMAP)
- CALL READ_ARRANGE_COVER(HPROGRAM,U%LWATER_TO_NATURE,U%LTOWN_TO_ROCK)
- CALL READ_COVER_GARDEN(HPROGRAM,U%LGARDEN)
+ CALL READ_LECOCLIMAP(IOB, &
+                      HPROGRAM,U%LECOCLIMAP)
+ CALL READ_ARRANGE_COVER(IOB, &
+                         HPROGRAM,U%LWATER_TO_NATURE,U%LTOWN_TO_ROCK)
+ CALL READ_COVER_GARDEN(IOB, &
+                        HPROGRAM,U%LGARDEN)
 !
 !* reads if climatological LAI is used or not for ecoclimap2. If not, looks for year to be used.
- CALL READ_LCLIM_LAI(HPROGRAM,LCLIM_LAI)
+ CALL READ_LCLIM_LAI(IOB, &
+                     HPROGRAM,LCLIM_LAI)
 IF (.NOT. LCLIM_LAI .AND. U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
                      .AND. U%TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) DTCO%NYEAR=U%TTIME%TDATE%YEAR
  CALL INI_DATA_COVER(DTCO, U)
- CALL READ_ECO2_IRRIG(DTCO, &
+ CALL READ_ECO2_IRRIG(IOB, &
+                      DTCO, &
                       HPROGRAM)
 !
 !*       2.     Cover fields and grid:
@@ -412,7 +419,8 @@ ALLOCATE(UG%XLAT       (U%NSIZE_FULL))
 ALLOCATE(UG%XLON       (U%NSIZE_FULL))
 ALLOCATE(UG%XMESH_SIZE (U%NSIZE_FULL))
 ALLOCATE(USS%XZ0EFFJPDIR(U%NSIZE_FULL))
- CALL READ_GRID(HPROGRAM,UG%CGRID,UG%XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,IRESP,USS%XZ0EFFJPDIR)
+ CALL READ_GRID(IOB, &
+                HPROGRAM,UG%CGRID,UG%XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,IRESP,USS%XZ0EFFJPDIR)
 UG%NGRID_PAR=SIZE(UG%XGRID_PAR)
 !
 !        2.3. Initialize zenith and azimuth angles if not done yet
@@ -423,7 +431,8 @@ IF (.NOT. LZENITH) THEN
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
 !$OMP END PARALLEL
   ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
-  CALL GET_SIZES_PARALLEL(UG, U, &
+  CALL GET_SIZES_PARALLEL(IOB, &
+                          UG, U, &
                           NBLOCKTOT,KI,0,ISIZE_OMP)
   CALL SUNPOS(ISIZE_OMP,KYEAR, KMONTH, KDAY, PTIME, UG%XLON, UG%XLAT, ZTSUN, ZZENITH, ZAZIM)
   DEALLOCATE(ISIZE_OMP)
@@ -471,7 +480,8 @@ IF (CHU%LCH_EMIS) THEN
         CALL CH_INIT_EMISSION_n(CHE, CHU, SV, &
                                 HPROGRAM,U%NSIZE_FULL,ICH,PRHOA) 
       ELSE
-        CALL CH_INIT_SNAP_n(CHN, SV, &
+        CALL CH_INIT_SNAP_n(IOB, &
+                            CHN, SV, &
                             HPROGRAM,U%NSIZE_FULL,HINIT,ICH,PRHOA)
       END IF
     ENDIF
@@ -494,7 +504,8 @@ END IF
 !
 !*       2.5 Subgrid orography
 !
- CALL READ_SSO_n(U, USS, &
+ CALL READ_SSO_n(IOB, &
+                 U, USS, &
                  HPROGRAM)
 !
 !*       2.6 Orographic roughness length
@@ -512,7 +523,8 @@ ALLOCATE(USS%XZ0REL  (U%NSIZE_FULL))
 !
 !*       2.7 Dummy fields
 !
- CALL READ_DUMMY_n(DUU, U, &
+ CALL READ_DUMMY_n(IOB, &
+                   DUU, U, &
                    HPROGRAM)
 !
 !         End of IO
@@ -531,17 +543,20 @@ ALLOCATE(USS%XZ0REL  (U%NSIZE_FULL))
 !
 !*       2.8 Allocations and Initialization of diagnostics
 !
-IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(DGU, U, &
+IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(IOB, &
+                                             DGU, U, &
                                              HPROGRAM,KSW)
 !
 !
 !*       Canopy fields if Beljaars et al 2004 parameterization is used
 !
-IF (USS%CROUGH=='BE04') CALL READ_SSO_CANOPY_n(HPROGRAM,HINIT)
+IF (USS%CROUGH=='BE04') CALL READ_SSO_CANOPY_n(DTCO, IOB, SSCP, U, &
+                                               HPROGRAM,HINIT)
 !
 !*       Physical fields need for ARPEGE/ALADIN climate run
 !
- CALL INIT_CPL_GCM_n(U, &
+ CALL INIT_CPL_GCM_n(IOB, &
+                     U, &
                      HPROGRAM,HINIT)
 !
 !         End of IO

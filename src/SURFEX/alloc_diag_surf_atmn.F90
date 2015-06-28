@@ -1,5 +1,6 @@
 !     #############################################################
-      SUBROUTINE ALLOC_DIAG_SURF_ATM_n (DGU, U, &
+      SUBROUTINE ALLOC_DIAG_SURF_ATM_n (IOB, &
+                                         DGU, U, &
                                         HPROGRAM,KSW)
 !     #############################################################
 !
@@ -20,7 +21,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -39,6 +42,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U

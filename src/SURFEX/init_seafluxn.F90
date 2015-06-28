@@ -48,6 +48,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
@@ -294,7 +300,8 @@ END IF
 !*       2.     Prognostic fields:
 !               ----------------
 !
- CALL READ_SEAFLUX_n(HPROGRAM,ILUOUT)
+ CALL READ_SEAFLUX_n(DTCO, IOB, SG, S, U, &
+                     HPROGRAM,ILUOUT)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -306,7 +313,8 @@ END IF
 !*       2.1    Ocean fields:
 !               -------------
 !
- CALL READ_OCEAN_n(HPROGRAM)
+ CALL READ_OCEAN_n(DTCO, IOB, O, OR, U, &
+                   HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -356,7 +364,8 @@ ENDIF
 !
 !*       4.     Seaice prognostic variables and forcings :
 !
-CALL READ_SEAICE_n(SG, S, &
+CALL READ_SEAICE_n(IOB, &
+                   SG, S, &
                    HPROGRAM,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
@@ -382,7 +391,8 @@ ENDIF
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_SEAFLUX_SBL_n(HPROGRAM)
+ CALL READ_SEAFLUX_SBL_n(DTCO, IOB, S, SSB, U, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -412,7 +422,8 @@ IF(.NOT.(S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
   DGSI%LDIAG_SEAICE=.FALSE.
 ENDIF
 !
-CALL DIAG_SEAFLUX_INIT_n(DGO, DGS, DGSI, DGU, S, &
+CALL DIAG_SEAFLUX_INIT_n(IOB, &
+                         DGO, DGS, DGSI, DGU, S, &
                          HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

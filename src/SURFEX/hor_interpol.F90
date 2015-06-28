@@ -25,6 +25,9 @@ SUBROUTINE HOR_INTERPOL(KLUOUT,PFIELDIN,PFIELDOUT)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 !
 USE MODI_HOR_INTERPOL_GAUSS
@@ -113,7 +116,8 @@ SELECT CASE (CINTERP_TYPE)
 !              ------------------------------
 !
   CASE('BUFFER')
-    CALL HOR_INTERPOL_BUFFER(KLUOUT,PFIELDIN,PFIELDOUT)
+    CALL HOR_INTERPOL_BUFFER(DTCO, U, &
+                             KLUOUT,PFIELDIN,PFIELDOUT)
 
 !
 !*      4.     no interpolation

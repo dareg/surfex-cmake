@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_FLAKE_n(HPROGRAM)
+      SUBROUTINE READ_FLAKE_n (DTCO, F, IOB, U, &
+                               HPROGRAM)
 !     #########################################
 !
 !!****  *READ_FLAKE_n* - reads FLAKE variables
@@ -34,14 +35,16 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
 
 
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_READ_SURF
 !
@@ -55,6 +58,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

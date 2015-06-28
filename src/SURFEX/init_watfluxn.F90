@@ -43,6 +43,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
@@ -251,7 +256,8 @@ END IF
 !*       2.     Prognostic and cover fields:
 !               ---------------------------
 !
- CALL READ_WATFLUX_n(HPROGRAM)
+ CALL READ_WATFLUX_n(DTCO, IOB, U, W, &
+                     HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -295,7 +301,8 @@ PTSURF(:) = W%XTS(:)
 !*       5.     SBL air fields:
 !               --------------
 !
- CALL READ_WATFLUX_SBL_n(HPROGRAM)
+ CALL READ_WATFLUX_SBL_n(DTCO, IOB, U, W, WSB, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -322,7 +329,8 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_WATFLUX_INIT_n(DGU, DGW, W, &
+ CALL DIAG_WATFLUX_INIT_n(IOB, &
+                          DGU, DGW, W, &
                           HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

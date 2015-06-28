@@ -203,7 +203,8 @@ ENDIF
 ! * 7. Read and prepare drainage and runoff if offline
 ! --------------------------------------------------------------------------------------
 !
-CALL TRIP_RUN(GOASIS,                           &
+CALL TRIP_RUN(TPDG, TP, TPG, &
+              GOASIS,                           &
               NLISTING,ILON,ILAT,INB_TSTEP_RUN, &
               ZRUNTIME,ILON_OL,ILAT_OL,INB_OL,  &
               IYEAR,IMONTH,IDAY,ZTIME           )

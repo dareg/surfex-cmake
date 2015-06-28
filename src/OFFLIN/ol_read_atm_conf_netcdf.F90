@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF_NETCDF (U, &
+SUBROUTINE OL_READ_ATM_CONF_NETCDF (IOB, &
+                                     U, &
                                     HSURF_FILETYPE,                &
                                      PDURATION, PTSTEP_FORC, KNI, &
                                      KYEAR, KMONTH, KDAY, PTIME,  &
@@ -41,7 +42,9 @@ SUBROUTINE OL_READ_ATM_CONF_NETCDF (U, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -68,6 +71,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !

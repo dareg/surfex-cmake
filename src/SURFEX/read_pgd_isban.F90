@@ -258,7 +258,8 @@ ALLOCATE(I%LCOVER(JPCOVER))
  CALL READ_LCOVER(HPROGRAM,I%LCOVER)
 !
 ALLOCATE(I%XCOVER(IG%NDIM,COUNT(I%LCOVER)))
- CALL READ_SURF_COV(HPROGRAM,'COVER',I%XCOVER(:,:),I%LCOVER,IRESP)
+ CALL READ_SURF_COV(IOB, &
+                    HPROGRAM,'COVER',I%XCOVER(:,:),I%LCOVER,IRESP)
 !
 !*       3.2    Orography :
 !               ---------
@@ -276,7 +277,8 @@ ALLOCATE(IG%XLAT       (IG%NDIM))
 ALLOCATE(IG%XLON       (IG%NDIM))
 ALLOCATE(IG%XMESH_SIZE (IG%NDIM))
 ALLOCATE(I%XZ0EFFJPDIR(IG%NDIM))
- CALL READ_GRID(HPROGRAM,IG%CGRID,IG%XGRID_PAR,IG%XLAT,IG%XLON,IG%XMESH_SIZE,IRESP,I%XZ0EFFJPDIR)
+ CALL READ_GRID(IOB, &
+                HPROGRAM,IG%CGRID,IG%XGRID_PAR,IG%XLAT,IG%XLON,IG%XMESH_SIZE,IRESP,I%XZ0EFFJPDIR)
 !
 !* clay fraction : attention, seul un niveau est present dans le fichier
 !* on rempli tout les niveaux de  XCLAY avec les valeurs du fichiers
@@ -575,11 +577,13 @@ END IF
 !*       4.     Physiographic data fields not to be computed by ecoclimap
 !               ---------------------------------------------------------
 !
- CALL READ_LECOCLIMAP(HPROGRAM,I%LECOCLIMAP)
+ CALL READ_LECOCLIMAP(IOB, &
+                      HPROGRAM,I%LECOCLIMAP)
 !
  CALL READ_PGD_ISBA_PAR_n(DTI, IG, I, &
                           HPROGRAM,IG%NDIM,OLAND_USE)
-IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(DTZ, &
+IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(IOB, &
+                                                  DTZ, &
                                                   HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_ISBA_N',1,ZHOOK_HANDLE)

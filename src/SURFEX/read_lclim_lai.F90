@@ -1,8 +1,11 @@
 !     #######################
-      SUBROUTINE READ_LCLIM_LAI(HPROGRAM,OCLIM_LAI)
+      SUBROUTINE READ_LCLIM_LAI (IOB, &
+                                 HPROGRAM,OCLIM_LAI)
 !     #######################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -14,6 +17,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
 LOGICAL,              INTENT(OUT)   :: OCLIM_LAI ! flag for use of climatologic LAI

@@ -1,5 +1,6 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_LONLAT_REG(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
+      SUBROUTINE READ_GRIDTYPE_LONLAT_REG (IOB, &
+                                           HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
 !!****  *READ_GRIDTYPE_LONLAT_REG* - routine to initialise the horizontal grid
@@ -33,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -50,6 +53,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR

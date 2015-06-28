@@ -145,7 +145,8 @@ ELSEIF (IVERSION>=7) THEN
     YRECFM='L_USETYPE'
     CALL READ_SURF(IOB, &
                 HPROGRAM,YRECFM,DTT%LDATA_USETYPE,IRESP)
-    IF (DTT%LDATA_BLDTYPE .OR. DTT%LDATA_BLD_AGE .OR. DTT%LDATA_USETYPE) CALL READ_BLD_DESCRIPTION_n(BDD, &
+    IF (DTT%LDATA_BLDTYPE .OR. DTT%LDATA_BLD_AGE .OR. DTT%LDATA_USETYPE) CALL READ_BLD_DESCRIPTION_n(IOB, &
+                                                                                                     BDD, &
                                                                                                      HPROGRAM)
   ENDIF
   YRECFM='L_Z0_TOWN'

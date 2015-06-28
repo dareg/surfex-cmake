@@ -65,6 +65,8 @@ SUBROUTINE COUPLING_ISBA_n(HPROGRAM, HCOUPLING,                                 
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!-------------------------------------------------------------------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
 USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
 USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
@@ -598,7 +600,8 @@ PTRAD = I%XTSRAD_NAT
 !
 !--------------------------------------------------------------------------------------
 !
- CALL COUPLING_SURF_TOPD(HPROGRAM,U%NDIM_FULL)
+ CALL COUPLING_SURF_TOPD(DGEI, DGMI, IG, I, UG, U, &
+                         HPROGRAM,U%NDIM_FULL)
 !
 ! --------------------------------------------------------------------------------------
 ! Snow/Flood fractions, albedo and emissivity update :

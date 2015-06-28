@@ -53,6 +53,14 @@
 !
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+!
 USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
 USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
 USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TEB_GARDEN_PGD_EVOL_t
@@ -513,7 +521,8 @@ ENDIF
 ! --------------------------------------------------------------------------------------
 !
 IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE_GARDEN(TGDO, TGDPE, TGDP, T, TOP, TVG, &
+     CALL VEGETATION_UPDATE_GARDEN(DTCO, DTI, DTGD, DTGR, IG, I, TGRO, &
+                                   TGDO, TGDPE, TGDP, T, TOP, TVG, &
                                    TPTIME,PTSTEP,ILU)  
 END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

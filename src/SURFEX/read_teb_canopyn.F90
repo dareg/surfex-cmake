@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_TEB_CANOPY_n(HPROGRAM)
+      SUBROUTINE READ_TEB_CANOPY_n (DTCO, IOB, U, TCP, TOP, &
+                                    HPROGRAM)
 !     #########################################
 !
 !!****  *READ_TEB_CANOPY_n* - reads TEB fields
@@ -35,14 +36,16 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
-USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
 !
 USE MODI_READ_SURF
 USE MODI_CANOPY_GRID
@@ -55,6 +58,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

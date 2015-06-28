@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE READ_BLD_DESCRIPTION_n (BDD, &
+      SUBROUTINE READ_BLD_DESCRIPTION_n (IOB, &
+                                          BDD, &
                                          HPROGRAM)
 !     #########################
 !
@@ -37,7 +38,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 !
@@ -53,6 +56,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !

@@ -28,6 +28,8 @@ SUBROUTINE HVAC_AUTOSIZE (B, BOP, UG, U, TG, T, TOP, &
 
 
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -541,11 +543,13 @@ INBLOCKTOT=NBLOCKTOT
 !RJ: next one prevents double split in OMP parallel region
 !$ IF(OMP_IN_PARALLEL()) INBLOCKTOT=1
 ALLOCATE(ISIZE_OMP(0:INBLOCKTOT-1))
- CALL GET_SIZES_PARALLEL(UG, U, &
+ CALL GET_SIZES_PARALLEL(IOB, &
+                         UG, U, &
                          INBLOCKTOT,KI,0,ISIZE_OMP)
 #else
 ALLOCATE(ISIZE_OMP(0:0))
- CALL GET_SIZES_PARALLEL(UG, U, &
+ CALL GET_SIZES_PARALLEL(IOB, &
+                         UG, U, &
                          1,KI,0,ISIZE_OMP)
 #endif
 

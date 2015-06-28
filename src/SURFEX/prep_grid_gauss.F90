@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PREP_GRID_GAUSS(HFILETYPE,HINTERP_TYPE,KNI)
+      SUBROUTINE PREP_GRID_GAUSS (IOB, &
+                                  HFILETYPE,HINTERP_TYPE,KNI)
 !     ##########################################################################
 !
 !!****  *PREP_GRID_GAUSS* - reads EXTERNALIZED Surface grid.
@@ -36,7 +37,9 @@
 !*      0. DECLARATIONS
 !          ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !* 0.1. Declaration of arguments
 !       ------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
  CHARACTER(LEN=6),  INTENT(OUT)   :: HINTERP_TYPE ! Grid type

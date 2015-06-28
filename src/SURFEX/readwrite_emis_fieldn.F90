@@ -8,6 +8,8 @@
 !*       0.    DECLARATIONS
 !
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -72,7 +74,8 @@ IF (IRESP/=0) THEN
 END IF
 !
  CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
- CALL WRITE_SURF(HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
+ CALL WRITE_SURF(DGU, IOB, U, &
+                 HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
  CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -89,7 +92,8 @@ IF (IRESP/=0) THEN
 END IF
 !
  CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
- CALL WRITE_SURF(HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
+ CALL WRITE_SURF(DGU, IOB, U, &
+                 HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
  CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -107,7 +111,8 @@ DO JSPEC=1,IEMISPEC_NBR
   READ(YCOMMENT,'(A3,24x,I5)') YSURF, IEMISPEC_NTIMES
   !
   CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
-  CALL WRITE_SURF(HPROGRAM,YRECFM,YEMISPEC_NAME,IRESP,YCOMMENT)
+  CALL WRITE_SURF(DGU, IOB, U, &
+                 HPROGRAM,YRECFM,YEMISPEC_NAME,IRESP,YCOMMENT)
   CALL END_IO_SURF_n(HPROGRAM)
 !  
 !-------------------------------------------------------------------------------
@@ -128,7 +133,8 @@ DO JSPEC=1,IEMISPEC_NBR
   END IF
   !
   CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
-  CALL WRITE_SURF(HPROGRAM,YRECFM,ZWORK,IRESP,YCOMMENT)
+  CALL WRITE_SURF(DGU, IOB, U, &
+                 HPROGRAM,YRECFM,ZWORK,IRESP,YCOMMENT)
   CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -144,7 +150,8 @@ DO JSPEC=1,IEMISPEC_NBR
   END IF
 
   CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
-  CALL WRITE_SURF(HPROGRAM,YRECFM,ITIMES,IRESP,YCOMMENT,'-')
+  CALL WRITE_SURF(DGU, IOB, U, &
+                 HPROGRAM,YRECFM,ITIMES,IRESP,YCOMMENT,'-')
   CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------

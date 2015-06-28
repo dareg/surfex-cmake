@@ -32,6 +32,10 @@ SUBROUTINE PREP_HOR_ISBA_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPG
 !!      P Samuelsson 10/2014, MEB
 !!------------------------------------------------------------------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_PREP,     ONLY : XZS_LS, LINTERP, CMASK
@@ -137,7 +141,8 @@ IF (HSURF=='SN_VEG ') THEN
        IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0
     ENDIF
   ENDIF
-  CALL PREP_HOR_SNOW_FIELDS(HPROGRAM, HSURF,                     &
+  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+                            HPROGRAM, HSURF,                     &
                             YFILE_SNOW, YFILETYPE_SNOW,          &
                             YFILEPGD_SNOW, YFILEPGDTYPE_SNOW,    &
                             ILUOUT, GUNIF_SNOW, I%NPATCH,          &
@@ -175,7 +180,8 @@ ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_ISBA_BUFFER(IG, U, &
                          HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='NETCDF') THEN
-   CALL PREP_ISBA_NETCDF(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
+   CALL PREP_ISBA_NETCDF(DTCO, U, &
+                         HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
 ELSE
    CALL ABOR1_SFX('PREP_HOR_ISBA_FIELD: data file type not supported : '//YFILETYPE)
 END IF

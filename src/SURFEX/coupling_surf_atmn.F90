@@ -37,6 +37,8 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
 !
 USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
@@ -397,7 +399,8 @@ IF ((SV%NBEQ > 0).AND.(CHU%LCH_SURF_EMIS)) THEN
     DO JI=1,SIZE(CHE%TSEMISS)
       IF (SIZE(CHE%TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(CHE%TSEMISS(JI)%NETIMES)
     ENDDO
-    CALL CH_EMISSION_FLUX_n(CHE, CHU, SV, &
+    CALL CH_EMISSION_FLUX_n(IOB, &
+                            CHE, CHU, SV, &
                             HPROGRAM,PTIME,PSFTS(:,SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
     CALL CH_EMISSION_SNAP_n(CHN, &

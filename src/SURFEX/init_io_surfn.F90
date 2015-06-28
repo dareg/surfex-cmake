@@ -36,6 +36,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 #ifdef SFX_ASC
 USE MODI_INIT_IO_SURF_ASC_n
 #endif
@@ -119,7 +123,8 @@ ENDIF
 !
 IF (HPROGRAM=='FA    ' ) THEN
 #ifdef SFX_FA
-  CALL INIT_IO_SURF_FA_n(HPROGRAM,HMASK,HACTION)
+  CALL INIT_IO_SURF_FA_n(DTCO, IOB, U, &
+                         HPROGRAM,HMASK,HACTION)
 #endif
 ENDIF
 !

@@ -201,13 +201,15 @@ ELSE
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
   ALLOCATE(ZPAR_D(ILU,IDATA_LAYER))
   !* reading of the cover to obtain the thickness of layers
-  CALL OLD_NAME(HFILEPGDTYPE,'COVER_LIST      ',YRECFM)
+  CALL OLD_NAME(IOB, &
+                HFILEPGDTYPE,'COVER_LIST      ',YRECFM)
   CALL READ_SURF(IOB, &
                HFILEPGDTYPE,YRECFM,GCOVER(:),IRESP,HDIR='-')
   !* reading of the cover fractions
   ALLOCATE(ZCOVER(ILU,COUNT(GCOVER)))
   YRECFM='COVER'
-  CALL READ_SURF_COV(HFILEPGDTYPE,YRECFM,ZCOVER(:,:),GCOVER,IRESP,HDIR='A')
+  CALL READ_SURF_COV(IOB, &
+                     HFILEPGDTYPE,YRECFM,ZCOVER(:,:),GCOVER,IRESP,HDIR='A')
   !
   !* deduces the depths of each layer
   DO JLAYER=1,IDATA_LAYER

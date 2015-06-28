@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_WATFLUX_INIT_n (DGU, DGW, W, &
+      SUBROUTINE DIAG_WATFLUX_INIT_n (IOB, &
+                                       DGU, DGW, W, &
                                       HPROGRAM,KLU,KSW)
 !     #####################
 !
@@ -36,11 +37,13 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
@@ -59,6 +62,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW

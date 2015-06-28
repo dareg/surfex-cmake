@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE BUILD_EMISSTAB_n (CHU, &
+       SUBROUTINE BUILD_EMISSTAB_n (IOB, &
+                                     CHU, &
                                     HPROGRAM,KCH,HEMIS_GR_NAME, KNBTIMES,&
               KEMIS_GR_TIME,KOFFNDX,TPEMISS,KSIZE,KLUOUT, KVERB,PRHODREF)  
 !!    #####################################################################
@@ -29,7 +30,9 @@
 !!    EXTERNAL
 !!    --------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
 !
@@ -54,6 +57,9 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
 !

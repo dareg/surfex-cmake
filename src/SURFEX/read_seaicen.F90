@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SEAICE_n (SG, S, &
+      SUBROUTINE READ_SEAICE_n (IOB, &
+                                 SG, S, &
                                 HPROGRAM,KLU,KLUOUT)
 !     #########################################
 !
@@ -39,7 +40,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
@@ -71,6 +74,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S

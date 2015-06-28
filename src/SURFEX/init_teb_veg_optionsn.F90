@@ -1,5 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_TEB_VEG_OPTIONS_n (CHT, DGMTO, TGDO, TVG, &
+SUBROUTINE INIT_TEB_VEG_OPTIONS_n (IOB, &
+                                    CHT, DGMTO, TGDO, TVG, &
                                    HPROGRAM)
 !#############################################################
 !
@@ -37,7 +38,9 @@ SUBROUTINE INIT_TEB_VEG_OPTIONS_n (CHT, DGMTO, TGDO, TVG, &
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_CH_TEB_n, ONLY : CH_TEB_t
 USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
@@ -75,6 +78,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
 TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO

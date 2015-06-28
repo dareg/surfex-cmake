@@ -1,4 +1,5 @@
-SUBROUTINE GET_SIZES_PARALLEL (UG, U, &
+SUBROUTINE GET_SIZES_PARALLEL (IOB, &
+                                UG, U, &
                                KPROC,KSIZE,KPROCMIN,KSIZE_TASK,OSHADOWS)
 !
 !
@@ -8,10 +9,12 @@ SUBROUTINE GET_SIZES_PARALLEL (UG, U, &
 ! For shadows routines, we need strictly rectangular subdomains
 
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 #ifdef SFX_OL
 USE MODD_SLOPE_EFFECT, ONLY : NIX,NIY
@@ -29,6 +32,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U

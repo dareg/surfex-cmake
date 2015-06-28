@@ -60,6 +60,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -178,7 +180,8 @@ IF (CSURF_FILETYPE=="NC    ") INW = 2
 !
 DO JNW = 1,INW
   !
-  IF (LWRITE_COORD) CALL GET_LONLAT_n(CSURF_FILETYPE)
+  IF (LWRITE_COORD) CALL GET_LONLAT_n(DTCO, IOB, UG, U, &
+                                      CSURF_FILETYPE)
   !
   !* writing of the fields
  CALL IO_BUFF_CLEAN_n(IOB)

@@ -43,6 +43,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+!
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -300,7 +302,8 @@ END SELECT
 !
 !         Reading of the fields
 !
- CALL READ_COVER_GARDEN(HPROGRAM,TOP%LGARDEN)
+ CALL READ_COVER_GARDEN(IOB, &
+                        HPROGRAM,TOP%LGARDEN)
 !
  CALL READ_PGD_TEB_n(HPROGRAM)
 !
@@ -472,7 +475,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
   !
     CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
     CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
-    IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(CHT, DGMTO, TGDO, TVG, &
+    IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(IOB, &
+                                               CHT, DGMTO, TGDO, TVG, &
                                                HPROGRAM)
     CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,IBUGFIX,PCO2,PRHOA)
     ! Case of urban green roofs
@@ -489,7 +493,8 @@ END DO ! end of loop on TEB patches
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
  CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
- CALL READ_PGD_TEB_IRRIG_n(TG, TIR, &
+ CALL READ_PGD_TEB_IRRIG_n(IOB, &
+                           TG, TIR, &
                            HPROGRAM)
  CALL END_IO_SURF_n(HPROGRAM)
 !
@@ -658,7 +663,8 @@ END IF
 !*       7.     Canopy air fields:
 !               ------------------
 !
- CALL READ_TEB_CANOPY_n(HPROGRAM)
+ CALL READ_TEB_CANOPY_n(DTCO, IOB, U, TCP, TOP, &
+                        HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

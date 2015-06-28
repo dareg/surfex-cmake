@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_PGD_SEA_n (U, &
+      SUBROUTINE WRITE_PGD_SEA_n (DTS, SG, S, &
+                                   U, &
                                   HPROGRAM)
 !     ####################################
 !
@@ -36,9 +37,11 @@
 !
 !
 !
-USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -53,6 +56,11 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_GR_SNOW(HPROGRAM,HSURFTYPE,HPREFIX,     &
+      SUBROUTINE READ_GR_SNOW (IOB, &
+                               HPROGRAM,HSURFTYPE,HPREFIX,     &
                               KLU,KPATCH,TPSNOW,HDIR,KVERSION,KBUGFIX)  
 !     ##########################################################
 !
@@ -40,7 +41,9 @@
 !
 !*       0.    DECLARATIONS
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_SNOW
 !
@@ -57,6 +60,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)           :: HPROGRAM  ! calling program
  CHARACTER (LEN=*),  INTENT(IN)           :: HSURFTYPE ! generic name used for

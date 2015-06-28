@@ -26,6 +26,10 @@ SUBROUTINE PREP_HOR_TEB_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGD
 !!------------------------------------------------------------------
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, XLAT_OUT, XLON_OUT, &
                           XX_OUT, XY_OUT, CMASK
 USE MODD_PREP_TEB, ONLY : XGRID_ROOF, XGRID_ROAD, XGRID_WALL, XGRID_FLOOR, LSNOW_IDEAL_TEB, &
@@ -109,7 +113,8 @@ IF (HSURF=='SN_ROOF') THEN
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROOF)))                                 
-  CALL PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,              &
+  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+                            HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &
                             ILUOUT,GUNIF,1,              &
@@ -134,7 +139,8 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROAD)))                                   
-  CALL PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,              &
+  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+                            HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &                            
                             ILUOUT,GUNIF,1,              &

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE OLD_NAME(HPROGRAM,HRECIN,HRECOUT)
+      SUBROUTINE OLD_NAME (IOB, &
+                           HPROGRAM,HRECIN,HRECOUT)
 !     #######################################################
 !
 !!****  *OLD_NAME* - get the old name of a field for reading in an old SURFEX file
@@ -35,7 +36,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
  CHARACTER(LEN=12), INTENT(IN)  :: HRECIN   ! name of field to be read

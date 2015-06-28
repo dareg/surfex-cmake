@@ -1,10 +1,13 @@
 !     #######################
-      SUBROUTINE READ_SURF_ISBA_PAR_n (I, &
+      SUBROUTINE READ_SURF_ISBA_PAR_n (IOB, &
+                                        I, &
                                        HPROGRAM,HREC,KLUOUT,KSIZE,PFIELD,KRESP,KVERSION,HCOMMENT,HDIR)
 !     #######################
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
@@ -20,6 +23,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !

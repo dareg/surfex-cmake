@@ -151,7 +151,8 @@ END IF
 !
 !IF (LPAR_GREENROOF) CALL READ_PGD_TEB_GREENROOF_PAR_n(HPROGRAM)
 !
- CALL READ_PGD_TEB_GREENROOF_PAR_n(DTGR, TGRO, TG, &
+ CALL READ_PGD_TEB_GREENROOF_PAR_n(IOB, &
+                                                       DTGR, TGRO, TG, &
                                                        HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_N',1,ZHOOK_HANDLE)

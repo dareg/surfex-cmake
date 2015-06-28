@@ -143,7 +143,8 @@ IF (ILU>NSIZE) NSIZE = ILU
 IL = ILU
  CALL GET_TYPE_DIM_n(DTCO, U, &
                      HMASK,IL)
- CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, &
+                          HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

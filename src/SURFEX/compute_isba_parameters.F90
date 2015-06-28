@@ -58,6 +58,10 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -255,7 +259,8 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_VEG_PGD_n(HPROGRAM, 'NATURE', ILUOUT, KI, I%NPATCH, I%NGROUND_LAYER,      &
+CALL INIT_VEG_PGD_n(CHI, DTCO, DST, I, SLT, U, &
+                    HPROGRAM, 'NATURE', ILUOUT, KI, I%NPATCH, I%NGROUND_LAYER,      &
                     I%TTIME%TDATE%MONTH,                                          &
                     I%XVEGTYPE, I%XPATCH, I%XVEGTYPE_PATCH, I%NSIZE_NATURE_P,           &
                     I%NR_NATURE_P, I%XRM_PATCH,                                     &
@@ -618,7 +623,8 @@ END IF
 !*      12.     Canopy air fields:
 !               -----------------
 !
- CALL READ_ISBA_CANOPY_n(HPROGRAM)
+ CALL READ_ISBA_CANOPY_n(DTCO, IOB, ICP, I, U, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -726,12 +732,14 @@ PTSURF = ZTSURF_NAT
 !
 IF(I%NPATCH<=1) DGI%LPATCH_BUDGET=.FALSE.
 !
- CALL DIAG_ISBA_INIT_n(CHI, DGEI, DGI, DGMI, DGU, GB, I, &
+ CALL DIAG_ISBA_INIT_n(IOB, &
+                       CHI, DGEI, DGI, DGMI, DGU, GB, I, &
                        HPROGRAM,KI,KSW)
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_SURF_TOPD(HPROGRAM,U%NDIM_FULL)
+ CALL INIT_SURF_TOPD(DGEI, I, UG, U, &
+                     HPROGRAM,U%NDIM_FULL)
 !
 !-------------------------------------------------------------------------------
 !

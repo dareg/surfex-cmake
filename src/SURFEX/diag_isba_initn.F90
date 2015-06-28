@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE DIAG_ISBA_INIT_n (CHI, DGEI, DGI, DGMI, DGU, GB, I, &
+      SUBROUTINE DIAG_ISBA_INIT_n (IOB, &
+                                    CHI, DGEI, DGI, DGMI, DGU, GB, I, &
                                    HPROGRAM,KLU,KSW)
 !     #####################
 !
@@ -57,7 +58,6 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
@@ -66,6 +66,9 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
 USE MODD_ISBA_n, ONLY : ISBA_t
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
@@ -88,6 +91,9 @@ IMPLICIT NONE
 !*       0.01   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI

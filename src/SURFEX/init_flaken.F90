@@ -43,6 +43,11 @@ SUBROUTINE INIT_FLAKE_n(HPROGRAM,HINIT,                            &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
@@ -249,7 +254,8 @@ END IF
 !
  CALL INIT_IO_SURF_n(HPROGRAM,'WATER ','FLAKE ','READ ')
 !
- CALL READ_FLAKE_n(HPROGRAM)
+ CALL READ_FLAKE_n(DTCO, F, IOB, U, &
+                   HPROGRAM)
 !
 ILU = SIZE(F%XCOVER,1)
 !
@@ -293,7 +299,8 @@ PTSURF(:) = F%XTS(:)
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_FLAKE_SBL_n(HPROGRAM)
+ CALL READ_FLAKE_SBL_n(DTCO, F, FSB, IOB, U, &
+                       HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -320,7 +327,8 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_FLAKE_INIT_n(DGF, DGMF, DGU, F, &
+ CALL DIAG_FLAKE_INIT_n(IOB, &
+                        DGF, DGMF, DGU, F, &
                         HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

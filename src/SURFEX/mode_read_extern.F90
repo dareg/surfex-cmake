@@ -118,7 +118,8 @@ CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
 IF (HNAT=='NAT') THEN
   CALL OPEN_AUX_IO_SURF(IOB, &
                       HFILE,HPROGRAM,'FULL  ')
-  CALL READ_LECOCLIMAP(HPROGRAM,GECOCLIMAP)
+  CALL READ_LECOCLIMAP(IOB, &
+                       HPROGRAM,GECOCLIMAP)
   CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
 ELSE
   CALL OPEN_AUX_IO_SURF(IOB, &
@@ -162,13 +163,15 @@ IF (GECOCLIMAP) THEN
   !
   !* reading of the cover to obtain the depth of inter-layers
   !
-  CALL OLD_NAME(HPROGRAM,'COVER_LIST      ',YRECFM)
+  CALL OLD_NAME(IOB, &
+                HPROGRAM,'COVER_LIST      ',YRECFM)
   CALL READ_SURF(IOB, &
                HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
   !
   ALLOCATE(ZCOVER(KNI,COUNT(GCOVER)))
   YRECFM='COVER'
-  CALL READ_SURF_COV(HPROGRAM,YRECFM,ZCOVER(:,:),GCOVER(:),IRESP,HDIR='A')
+  CALL READ_SURF_COV(IOB, &
+                     HPROGRAM,YRECFM,ZCOVER(:,:),GCOVER(:),IRESP,HDIR='A')
   !
   !* computes soil layers
   !  
@@ -209,7 +212,8 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
     DO JLAYER=1,KLAYER
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A4,I1.1)') 'D_DG',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A4,I2.2)') 'D_DG',JLAYER
-      CALL READ_SURF_ISBA_PAR_n(I, &
+      CALL READ_SURF_ISBA_PAR_n(IOB, &
+                                I, &
                                 HPROGRAM,YRECFM,KLUOUT,KNI,ZWORK,IRESP,IVERSION,HDIR='A')
       DO JPATCH=1,KPATCH
         PDEPTH(:,JLAYER,JPATCH) = ZWORK(:,JPATCH)
@@ -232,7 +236,8 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       YRECFM2='D_GROUND_DETPH'
       IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='D_GROUND_DPT'
       ALLOCATE(ZGROUND_DEPTH(KNI,KPATCH))
-      CALL READ_SURF_ISBA_PAR_n(I, &
+      CALL READ_SURF_ISBA_PAR_n(IOB, &
+                                I, &
                                 HPROGRAM,YRECFM2,KLUOUT,KNI,ZGROUND_DEPTH(:,:),IRESP,IVERSION,HDIR='A')
       !
       DO JPATCH=1,KPATCH
@@ -283,15 +288,18 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !---------------------------------------------------------------------------------------
 !
 !     #######################
-      SUBROUTINE READ_EXTERN_ISBA(HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
+      SUBROUTINE READ_EXTERN_ISBA (DTCO, IOB, I, &
+                                   HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                                   KLUOUT,KNI,HFIELD,HNAME,PFIELD,PDEPTH,OKEY)
 !     #######################
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 !
@@ -302,6 +310,11 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=28),    INTENT(IN)  :: HFILE     ! name of file
 CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE ! type of input file

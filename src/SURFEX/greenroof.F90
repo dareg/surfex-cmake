@@ -56,6 +56,13 @@
 !               ------------
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
 USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
 USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
@@ -520,7 +527,8 @@ IF (TGR%CUR%TSNOW%SCHEME=='3-L' .OR. TGR%CUR%TSNOW%SCHEME=='CRO') TGR%CUR%TSNOW%
 ! --------------------------------------------------------------------------------------
 !
 IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE_GREENROOF(TGRO, TGRPE, TGRP, T, TOP, TVG, &
+     CALL VEGETATION_UPDATE_GREENROOF(DTCO, DTI, DTGD, DTGR, IG, I, &
+                                      TGRO, TGRPE, TGRP, T, TOP, TVG, &
                                       TPTIME,PTSTEP,ILU)
 END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

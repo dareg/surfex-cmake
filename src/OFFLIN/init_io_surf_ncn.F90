@@ -214,7 +214,8 @@ IL = ILU
  CALL GET_TYPE_DIM_n(DTCO, U, &
                      HMASK,IL)
 !
- CALL INIT_IO_SURF_MASK_n(HMASK, IL, ILUOUT, ILU, NMASK)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, &
+                          HMASK, IL, ILUOUT, ILU, NMASK)
 !
 CMASK = HMASK
 !

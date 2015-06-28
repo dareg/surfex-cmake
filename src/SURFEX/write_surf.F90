@@ -11,7 +11,17 @@ MODULE MODI_WRITE_SURF
 !
   INTERFACE WRITE_SURF
 !
-     SUBROUTINE WRITE_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT)
+     SUBROUTINE WRITE_SURFX0 (DGU, IOB, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! calling program
  CHARACTER(LEN=*),  INTENT(IN) :: HREC     ! name of the article to be written
 REAL,              INTENT(IN) :: PFIELD   ! real scalar to be written
@@ -20,7 +30,17 @@ INTEGER,           INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem ap
 !
 END SUBROUTINE WRITE_SURFX0
 !
-     SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+     SUBROUTINE WRITE_SURFX1 (DGU, IOB, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:), INTENT(IN)  :: PFIELD   ! array containing the data field
@@ -33,7 +53,17 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
  CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX1
 !
-     SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+     SUBROUTINE WRITE_SURFX2 (DGU, IOB, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
@@ -48,7 +78,17 @@ END SUBROUTINE WRITE_SURFX2
 !
 !RJ: interface to WRITE_SURFX2COV moved out
 !
-     SUBROUTINE WRITE_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
+     SUBROUTINE WRITE_SURFN0 (DGU, IOB, U, &
+                              HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER,            INTENT(IN)  :: KFIELD   ! integer to be written
@@ -57,7 +97,17 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 END SUBROUTINE WRITE_SURFN0
 !
-     SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+     SUBROUTINE WRITE_SURFN1 (DGU, IOB, U, &
+                              HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER, DIMENSION(:), INTENT(IN)  :: KFIELD   ! integer to be written
@@ -70,7 +120,17 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
  CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFN1
 !
-     SUBROUTINE WRITE_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
+     SUBROUTINE WRITE_SURFC0 (DGU, IOB, U, &
+                              HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),    INTENT(IN)  :: HREC     ! name of the article to be written
  CHARACTER(LEN=*),    INTENT(IN)  :: HFIELD   ! caracter to be written
@@ -79,7 +139,17 @@ INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem
 !
 END SUBROUTINE WRITE_SURFC0
 !
-      SUBROUTINE WRITE_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFL0 (DGU, IOB, U, &
+                               HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL,            INTENT(IN)  :: OFIELD   ! array containing the data field
@@ -88,7 +158,17 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 END SUBROUTINE WRITE_SURFL0
 !
-      SUBROUTINE WRITE_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFL1 (DGU, IOB, U, &
+                               HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OFIELD   ! array containing the data field
@@ -100,9 +180,18 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             ! '-' : no horizontal dim.
 END SUBROUTINE WRITE_SURFL1
 !
-      SUBROUTINE WRITE_SURFT0(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT0 (DGU, IOB, U, &
+                               HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
 !
 USE MODD_TYPE_DATE_SURF
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
@@ -112,9 +201,18 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 END SUBROUTINE WRITE_SURFT0
 !
-      SUBROUTINE WRITE_SURFT1(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT1 (DGU, IOB, U, &
+                               HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
 !
 USE MODD_TYPE_DATE_SURF
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
@@ -124,9 +222,18 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 END SUBROUTINE WRITE_SURFT1
 !
-      SUBROUTINE WRITE_SURFT2(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT2 (DGU, IOB, U, &
+                               HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
 !
 USE MODD_TYPE_DATE_SURF
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
@@ -141,14 +248,19 @@ END INTERFACE
 END MODULE MODI_WRITE_SURF
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX0(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFX0 (DGU, IOB, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEX0* - routine to write a real scalar
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -187,6 +299,11 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -295,16 +412,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX1 (DGU, IOB, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -342,6 +462,11 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:), INTENT(IN)  :: PFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -442,16 +567,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX1',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2(HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX2 (DGU, IOB, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -489,6 +617,11 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
 INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -590,14 +723,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX2
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN0(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFN0 (DGU, IOB, U, &
+                              HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to write an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -636,6 +774,11 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -741,14 +884,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1(HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFN1 (DGU, IOB, U, &
+                              HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to write an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -786,6 +934,11 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 INTEGER, DIMENSION(:), INTENT(IN)  :: KFIELD   ! integer to be written
 INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -884,14 +1037,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN1',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN1
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFC0(HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFC0 (DGU, IOB, U, &
+                              HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEC0* - routine to write an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -930,6 +1088,11 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1036,14 +1199,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFC0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL0(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFL0 (DGU, IOB, U, &
+                               HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEL0* - routine to write a logical
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1082,6 +1250,11 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1186,14 +1359,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFL0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL0
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL1(HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFL1 (DGU, IOB, U, &
+                               HPROGRAM,HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *WRITEL1* - routine to write a logical array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -1231,6 +1409,11 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6),      INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be written
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OFIELD   ! array containing the data field
 INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -1322,14 +1505,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFL1',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL1
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT0(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT0 (DGU, IOB, U, &
+                               HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to write a MESO-NH date_time scalar
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -1370,6 +1558,11 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*      0.1   Declarations of arguments
 !
@@ -1483,14 +1676,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFT0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT0
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT1(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT1 (DGU, IOB, U, &
+                               HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *READT2* - routine to read a MESO-NH date_time array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 USE MODD_TYPE_DATE_SURF
@@ -1519,6 +1717,11 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME), DIMENSION(:), INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
@@ -1602,14 +1805,19 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFT1',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT1
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT2(HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT2 (DGU, IOB, U, &
+                               HPROGRAM,HREC,TFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET2* - routine to write a MESO-NH date_time array
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 USE MODD_TYPE_DATE_SURF
@@ -1644,6 +1852,11 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be written
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN)  :: TFIELD   ! array containing the data field
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears

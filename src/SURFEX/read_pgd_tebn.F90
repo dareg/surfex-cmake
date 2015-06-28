@@ -198,7 +198,8 @@ ALLOCATE(TOP%LCOVER(JPCOVER))
  CALL READ_LCOVER(HPROGRAM,TOP%LCOVER)
 !
 ALLOCATE(TOP%XCOVER(TG%NDIM,COUNT(TOP%LCOVER)))
- CALL READ_SURF_COV(HPROGRAM,'COVER',TOP%XCOVER(:,:),TOP%LCOVER,IRESP)
+ CALL READ_SURF_COV(IOB, &
+                    HPROGRAM,'COVER',TOP%XCOVER(:,:),TOP%LCOVER,IRESP)
 !
 !* orography
 !
@@ -213,7 +214,8 @@ YRECFM='ZS'
 ALLOCATE(TG%XLAT      (TG%NDIM))
 ALLOCATE(TG%XLON      (TG%NDIM))
 ALLOCATE(TG%XMESH_SIZE(TG%NDIM))
- CALL READ_GRID(HPROGRAM,TG%CGRID,TG%XGRID_PAR,TG%XLAT,TG%XLON,TG%XMESH_SIZE,IRESP)
+ CALL READ_GRID(IOB, &
+                HPROGRAM,TG%CGRID,TG%XGRID_PAR,TG%XLAT,TG%XLON,TG%XMESH_SIZE,IRESP)
 !
 !
 !-------------------------------------------------------------------------------
@@ -221,7 +223,8 @@ ALLOCATE(TG%XMESH_SIZE(TG%NDIM))
 !*       4.     Physiographic data fields not to be computed by ecoclimap
 !               ---------------------------------------------------------
 !
- CALL READ_LECOCLIMAP(HPROGRAM,TOP%LECOCLIMAP)
+ CALL READ_LECOCLIMAP(IOB, &
+                      HPROGRAM,TOP%LECOCLIMAP)
 !
  CALL READ_PGD_TEB_PAR_n(BDD, DTB, DTT, TG, TOP, &
                          HPROGRAM,TG%NDIM,'-')

@@ -35,6 +35,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_PGDWORK,       ONLY : CATYPE
@@ -82,15 +84,20 @@ IF (HFTYP.EQ.'FA    ' .OR. HFTYP.EQ.'ASCII ' .OR. HFTYP.EQ.'LFI   ') THEN
   OPRESENT=.TRUE.
   SELECT CASE (HTYPE)
     CASE ('LAN')
-      CALL READ_FROM_SURFEX_FILE(HFTYP,HFNAM,'SURF  ','      ',PFIELD)
+      CALL READ_FROM_SURFEX_FILE(IOB, &
+                                 HFTYP,HFNAM,'SURF  ','      ',PFIELD)
     CASE ('TWN')
-      CALL READ_FROM_SURFEX_FILE(HFTYP,HFNAM,'TOWN  ','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(IOB, &
+                                 HFTYP,HFNAM,'TOWN  ','      ',PFIELD)              
     CASE ('NAT')
-      CALL READ_FROM_SURFEX_FILE(HFTYP,HFNAM,'NATURE','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(IOB, &
+                                 HFTYP,HFNAM,'NATURE','      ',PFIELD)              
     CASE ('SEA')
-      CALL READ_FROM_SURFEX_FILE(HFTYP,HFNAM,'SEA   ','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(IOB, &
+                                 HFTYP,HFNAM,'SEA   ','      ',PFIELD)              
     CASE ('WAT')
-      CALL READ_FROM_SURFEX_FILE(HFTYP,HFNAM,'WATER ','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(IOB, &
+                                 HFTYP,HFNAM,'WATER ','      ',PFIELD)              
    END SELECT
 
 ELSE

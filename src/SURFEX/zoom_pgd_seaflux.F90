@@ -122,7 +122,8 @@ ALLOCATE(SG%XLAT       (SG%NDIM))
 ALLOCATE(SG%XLON       (SG%NDIM))
 ALLOCATE(SG%XMESH_SIZE (SG%NDIM))
 !
- CALL PACK_PGD(HPROGRAM, 'SEA   ',                      &
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'SEA   ',                      &
                 SG%CGRID,  SG%XGRID_PAR, S%LCOVER,             &
                 S%XCOVER, S%XZS,                           &
                 SG%XLAT, SG%XLON, SG%XMESH_SIZE                 )  
@@ -162,7 +163,8 @@ DEALLOCATE(ZSEABATHY,ZWORK)
  CALL READ_SURF(IOB, &
                 HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
 !
-IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTS, SG, &
+IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(IOB, &
+                                               DTS, SG, &
                                                HPROGRAM,INI,HDIR='A')
 !
 !============================================================

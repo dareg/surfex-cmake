@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PACK_PGD_SOIL(HPROGRAM, PSAND, PCLAY, PRUNOFFB, PWDRAIN)
+      SUBROUTINE PACK_PGD_SOIL (DTCO, IG, I, U, &
+                                HPROGRAM, PSAND, PCLAY, PRUNOFFB, PWDRAIN)
 !     ##############################################################
 !
 !!**** *PACK_PGD_SOIL* packs ISBA physiographic fields from all surface points to ISBA points
@@ -36,11 +37,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_PACK_SAME_RANK
 !
@@ -56,6 +59,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
 REAL,    DIMENSION(:,:), INTENT(IN) :: PSAND     ! sand   on all surface points

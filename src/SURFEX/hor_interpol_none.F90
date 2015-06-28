@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE HOR_INTERPOL_NONE(KLUOUT,PFIELDIN,PFIELDOUT)
+SUBROUTINE HOR_INTERPOL_NONE (DTCO, U, &
+                              KLUOUT,PFIELDIN,PFIELDOUT)
 !     #################################################################################
 !
 !!****  *HOR_INTERPOL_NONE * - Only extrapolation
@@ -25,8 +26,10 @@ SUBROUTINE HOR_INTERPOL_NONE(KLUOUT,PFIELDIN,PFIELDOUT)
 !
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_PREP,       ONLY : XLAT_OUT, XLON_OUT, CMASK
 !
@@ -44,6 +47,10 @@ USE MODI_GET_SURF_MASK_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL, POINTER, DIMENSION(:,:)   :: PFIELDIN  ! field to interpolate horizontally

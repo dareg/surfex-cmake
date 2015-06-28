@@ -39,6 +39,8 @@ SUBROUTINE OL_READ_ATM_CONF (U, &
 !==================================================================
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_OL_READ_ATM_CONF_NETCDF
@@ -72,7 +74,8 @@ CPROGNAME = HSURF_FILETYPE
 !
 IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
- CALL OL_READ_ATM_CONF_NETCDF(U, &
+ CALL OL_READ_ATM_CONF_NETCDF(IOB, &
+                              U, &
                               HSURF_FILETYPE,                     &
                                 PDURATION,                          &
                                 PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
@@ -81,7 +84,8 @@ IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
 ELSE IF (HFORCING_FILETYPE == 'ASCII ' .OR. HFORCING_FILETYPE == 'BINARY') THEN
 !
- CALL OL_READ_ATM_CONF_ASCII(U, &
+ CALL OL_READ_ATM_CONF_ASCII(IOB, &
+                             U, &
                               HSURF_FILETYPE,HFORCING_FILETYPE,   &
                                 PDURATION,                          &
                                 PTSTEP_FORC, KNI, KYEAR,KMONTH,     &

@@ -31,6 +31,9 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                       
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
 USE MODD_TEB_n, ONLY : T => TEB
 USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
@@ -264,7 +267,8 @@ ELSEIF (KTILE==3) THEN
   WRITE(*,*) '*********************************************'  
   WRITE(*,*) '*      ASSIMILATIONS FOR NATURE POINTS      *'
   WRITE(*,*) '*********************************************'
-  CALL ASSIM_NATURE_n(HPROGRAM,KSIZE,                                             &
+  CALL ASSIM_NATURE_n(DGMI, IG, I, U, &
+                      HPROGRAM,KSIZE,                                             &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
                       ZP_PSWEC,     ZP_PTSC,   ZP_UCLS, ZP_VCLS,                  &

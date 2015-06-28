@@ -8,10 +8,13 @@ PUBLIC :: READ_SURF_COV
 CONTAINS
 
 !     #############################################################
-      SUBROUTINE READ_SURF_COV(HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURF_COV (IOB, &
+                                HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -26,6 +29,9 @@ USE PARKIND1 ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read

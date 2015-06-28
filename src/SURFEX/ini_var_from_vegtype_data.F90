@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INI_VAR_FROM_VEGTYPE_DATA(HPROGRAM,ILUOUT,HNAME,PFIELD,PDEF)
+      SUBROUTINE INI_VAR_FROM_VEGTYPE_DATA (DTCO, DTI, UG, U, &
+                                            HPROGRAM,ILUOUT,HNAME,PFIELD,PDEF)
 !     ##############################################################
 !!
 !!    PURPOSE
@@ -31,13 +32,15 @@
 !!*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : XUNDEF
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_GET_SURF_MASK_n
 USE MODI_INTERPOL_FIELD
@@ -51,6 +54,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM  ! host model
 INTEGER,                      INTENT(IN   ) :: ILUOUT

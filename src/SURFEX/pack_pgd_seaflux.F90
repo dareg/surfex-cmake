@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PACK_PGD_SEAFLUX(HPROGRAM,PSEABATHY)
+      SUBROUTINE PACK_PGD_SEAFLUX (DTCO, SG, S, U, &
+                                   HPROGRAM,PSEABATHY)
 !     ##############################################################
 !
 !!**** *PACK_PGD_SEAFLUX* packs SEAFLUX physiographic fields from all surface points to SEAFLUX points
@@ -36,11 +37,13 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
-USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_PACK_SAME_RANK
 !
@@ -56,6 +59,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
 REAL,    DIMENSION(:),   INTENT(IN) :: PSEABATHY ! bathymetry

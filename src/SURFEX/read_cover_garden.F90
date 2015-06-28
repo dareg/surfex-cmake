@@ -1,8 +1,11 @@
 !     ######################################################################
-      SUBROUTINE READ_COVER_GARDEN(HPROGRAM,OGARDEN,HDIR)
+      SUBROUTINE READ_COVER_GARDEN (IOB, &
+                                    HPROGRAM,OGARDEN,HDIR)
 !     ######################################################################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -14,6 +17,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 LOGICAL,           INTENT(OUT) :: OGARDEN   ! T: Definition of urban green areas

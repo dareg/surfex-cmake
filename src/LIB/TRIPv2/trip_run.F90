@@ -1,4 +1,5 @@
-SUBROUTINE TRIP_RUN(OOASIS,                           &
+SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
+                     OOASIS,                           &
                     KLISTING,KLON,KLAT,KNB_TSTEP_RUN, &
                     PRUNTIME,KLON_OL,KLAT_OL,KNB_OL,  &
                     KYEAR,KMONTH,KDAY,PTIME           )
@@ -26,11 +27,13 @@ SUBROUTINE TRIP_RUN(OOASIS,                           &
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
 !
-USE MODD_TRIP, ONLY : TP => TRIP
 !
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+!
+!
+USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
+USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_LISTING
 !
@@ -54,6 +57,11 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
+TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 LOGICAL, INTENT(IN)  :: OOASIS        ! Oasis coupling or not
 INTEGER, INTENT(IN)  :: KLISTING      ! Listing ID

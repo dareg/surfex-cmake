@@ -1,5 +1,6 @@
 !     #################################################################################
-SUBROUTINE PREP_OCEAN_ASCLLV(HPROGRAM,HSURF,HFILE, & 
+SUBROUTINE PREP_OCEAN_ASCLLV (DTCO, UG, U, &
+                              HPROGRAM,HSURF,HFILE, & 
      &                       KLUOUT,PFIELD)
 !     #################################################################################
 !
@@ -35,10 +36,12 @@ SUBROUTINE PREP_OCEAN_ASCLLV(HPROGRAM,HSURF,HFILE, &
 !!      J.Escobar   11/2013   Add USE MODI_ABOR1_SFX and USE MODI_GET_SURF_MASK_N
 !!------------------------------------------------------------------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_PREP,       ONLY : CINTERP_TYPE, CINGRID_TYPE
 USE MODD_PGD_GRID,       ONLY : NL,LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR
@@ -60,6 +63,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field

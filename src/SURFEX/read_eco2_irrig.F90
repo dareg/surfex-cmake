@@ -1,10 +1,13 @@
 !     #######################
-      SUBROUTINE READ_ECO2_IRRIG (DTCO, &
+      SUBROUTINE READ_ECO2_IRRIG (IOB, &
+                                   DTCO, &
                                   HPROGRAM)
 !     #######################
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
@@ -23,6 +26,9 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !

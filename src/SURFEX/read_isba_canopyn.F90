@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_ISBA_CANOPY_n(HPROGRAM)
+      SUBROUTINE READ_ISBA_CANOPY_n (DTCO, IOB, ICP, I, U, &
+                                     HPROGRAM)
 !     #########################################
 !
 !!****  *READ_ISBA_CANOPY_n* - reads ISBA fields
@@ -35,15 +36,17 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_ISBA_CANOPY_n, ONLY : ISBA_CANOPY_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : XUNDEF
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
 !
 USE MODI_READ_SURF
 USE MODI_CANOPY_GRID
@@ -56,6 +59,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(ISBA_CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

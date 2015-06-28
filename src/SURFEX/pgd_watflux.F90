@@ -96,7 +96,8 @@ ALLOCATE(WG%XLAT       (WG%NDIM))
 ALLOCATE(WG%XLON       (WG%NDIM))
 ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
 !
- CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'WATER ',                    &
                 WG%CGRID,  WG%XGRID_PAR,                     &
                 W%LCOVER, W%XCOVER, W%XZS,                   &
                 WG%XLAT, WG%XLON, WG%XMESH_SIZE                 )  

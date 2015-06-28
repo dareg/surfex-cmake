@@ -355,7 +355,8 @@ ALLOCATE(IG%XLON       (ILU))
 ALLOCATE(IG%XMESH_SIZE (ILU))
 ALLOCATE(I%XZ0EFFJPDIR(ILU))
 !
- CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'NATURE',                    &
                 IG%CGRID,  IG%XGRID_PAR,                     &
                 I%LCOVER, I%XCOVER, I%XZS,                   &
                 IG%XLAT, IG%XLON, IG%XMESH_SIZE, I%XZ0EFFJPDIR    )  
@@ -370,7 +371,8 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
  CALL GET_SSO_n(USS, &
                 HPROGRAM,NL,ZSSO_SLOPE)
 !
- CALL PACK_PGD_ISBA(HPROGRAM,                                    &
+ CALL PACK_PGD_ISBA(DTCO, IG, I, U, &
+                    HPROGRAM,                                    &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
                      ZSSO_SLOPE                                   )  

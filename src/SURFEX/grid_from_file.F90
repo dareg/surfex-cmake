@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GRID_FROM_FILE(HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL)
+      SUBROUTINE GRID_FROM_FILE (IOB, &
+                                 HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -34,7 +35,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_READ_GRIDTYPE
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
  CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! file name

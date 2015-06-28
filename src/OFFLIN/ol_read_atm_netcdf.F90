@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM_NETCDF (HSURF_FILETYPE,                            &
+SUBROUTINE OL_READ_ATM_NETCDF (IOB, &
+                                HSURF_FILETYPE,                            &
                                  PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,   &
                                  PRAIN,PPS,PCO2,PDIR                        )  
 !**************************************************************************
@@ -42,7 +43,9 @@ SUBROUTINE OL_READ_ATM_NETCDF (HSURF_FILETYPE,                            &
 
 !          
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_OL, ONLY : XCOUNT
 USE MODI_READ_SURF
@@ -54,6 +57,9 @@ IMPLICIT NONE
 !
 !
 ! global variables
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 REAL, DIMENSION(:,:),INTENT(OUT) :: PTA
 REAL, DIMENSION(:,:),INTENT(OUT) :: PQA
 REAL, DIMENSION(:,:),INTENT(OUT) :: PWIND

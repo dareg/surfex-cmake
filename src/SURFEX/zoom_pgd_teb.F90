@@ -137,7 +137,8 @@ ALLOCATE(TG%XLAT       (ILU))
 ALLOCATE(TG%XLON       (ILU))
 ALLOCATE(TG%XMESH_SIZE (ILU))
 !
- CALL PACK_PGD(HPROGRAM, 'TOWN  ',                      &
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'TOWN  ',                      &
                 TG%CGRID,  TG%XGRID_PAR,                     &
                 TOP%LCOVER, TOP%XCOVER, TOP%XZS,                   &
                 TG%XLAT, TG%XLON, TG%XMESH_SIZE                 )  

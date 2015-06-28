@@ -165,7 +165,8 @@ ELSE
   TGDO%LPAR_GARDEN = .FALSE.
 ENDIF
 !
-IF (TGDO%LPAR_GARDEN) CALL READ_PGD_TEB_GARDEN_PAR_n(DTGD, TGDO, TGDP, TG, &
+IF (TGDO%LPAR_GARDEN) CALL READ_PGD_TEB_GARDEN_PAR_n(IOB, &
+                                                     DTGD, TGDO, TGDP, TG, &
                                                      HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GARDEN_N',1,ZHOOK_HANDLE)
 !

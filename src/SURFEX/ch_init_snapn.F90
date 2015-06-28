@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_INIT_SNAP_n (CHN, SV, &
+      SUBROUTINE CH_INIT_SNAP_n (IOB, &
+                                  CHN, SV, &
                                  HPROGRAM,KLU,HINIT,KCH,PRHOA)
 !     #######################################
 !
@@ -28,7 +29,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
 USE MODD_SV_n, ONLY : SV_t
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 TYPE(SV_t), INTENT(INOUT) :: SV

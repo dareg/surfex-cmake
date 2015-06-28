@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_GRID(HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR)
+      SUBROUTINE READ_GRID (IOB, &
+                            HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR)
 !     #########################################
 !
 !!****  *READ_GRID* - routine to initialise the horizontal grid of a scheme
@@ -33,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
@@ -48,6 +51,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
  CHARACTER(LEN=10),  INTENT(OUT) :: HGRID      ! type of horizontal grid

@@ -41,6 +41,8 @@ SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
 !!                            file and from initial file
 !!      B. Decharme  01/2009: Optional, limitation of Qair (<= Qsat(tair))
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_IO_SURF_OL, ONLY : XSTART,XCOUNT,XSTRIDE,LPARTR
 !         
@@ -95,7 +97,8 @@ LPARTR=.TRUE.
 ! read data
 !
 IF      (HFORCING_FILETYPE == 'NETCDF') THEN
-  CALL OL_READ_ATM_NETCDF (HSURF_FILETYPE,                                   &
+  CALL OL_READ_ATM_NETCDF(IOB, &
+                           HSURF_FILETYPE,                                   &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
                            PCO2,PDIR                                         )  
 ELSE IF (HFORCING_FILETYPE == 'ASCII ') THEN

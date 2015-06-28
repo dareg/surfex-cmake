@@ -222,7 +222,8 @@ END IF
 !
 !* snow mantel
 !
- CALL READ_GR_SNOW(HPROGRAM,'VEG','     ',ILU,I%NPATCH,I%TSNOW  )
+ CALL READ_GR_SNOW(IOB, &
+                   HPROGRAM,'VEG','     ',ILU,I%NPATCH,I%TSNOW  )
 !
 YRECFM='VERSION'
  CALL READ_SURF(IOB, &

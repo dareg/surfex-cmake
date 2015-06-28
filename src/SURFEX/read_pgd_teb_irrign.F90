@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TEB_IRRIG_n (TG, TIR, &
+      SUBROUTINE READ_PGD_TEB_IRRIG_n (IOB, &
+                                        TG, TIR, &
                                        HPROGRAM)
 !     ################################################
 !
@@ -37,7 +38,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
@@ -54,6 +57,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR

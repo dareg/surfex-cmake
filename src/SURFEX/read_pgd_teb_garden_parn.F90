@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TEB_GARDEN_PAR_n (DTGD, TGDO, TGDP, TG, &
+      SUBROUTINE READ_PGD_TEB_GARDEN_PAR_n (IOB, &
+                                             DTGD, TGDO, TGDP, TG, &
                                             HPROGRAM)
 !     ################################################
 !
@@ -39,7 +40,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
 USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
@@ -73,6 +76,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
 TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO

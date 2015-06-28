@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,              &
+SUBROUTINE PREP_HOR_SNOW_FIELDS (IOB, IG, U, &
+                                 HPROGRAM,HSURF,              &
                                 HFILE,HFILETYPE,             &
                                 HFILEPGD,HFILEPGDTYPE,       &
                                 KLUOUT,OUNIF,KPATCH,         &
@@ -37,10 +38,12 @@ SUBROUTINE PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,              &
 !!      B. Decharme 04/2014, Init permsnow
 !!------------------------------------------------------------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
@@ -63,6 +66,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field

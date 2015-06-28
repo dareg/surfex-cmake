@@ -1,5 +1,6 @@
 !     #########################################
-      SUBROUTINE READ_SSO_CANOPY_n(HPROGRAM,HINIT)
+      SUBROUTINE READ_SSO_CANOPY_n (DTCO, IOB, SSCP, U, &
+                                    HPROGRAM,HINIT)
 !     #########################################
 !
 !!****  *READ_SSO_CANOPY_n* - reads SSO fields
@@ -36,13 +37,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SSO_CANOPY_n, ONLY : SSO_CANOPY_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : XUNDEF
-USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
 !
 USE MODI_READ_SURF
 USE MODI_SET_SSO_LEVELS
@@ -56,6 +59,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SSO_CANOPY_t), INTENT(INOUT) :: SSCP
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! choice of fields to initialize

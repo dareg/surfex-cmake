@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_TEB_GREENROOF_PAR_n (DTGR, TGRO, TG, &
+      SUBROUTINE READ_PGD_TEB_GREENROOF_PAR_n (IOB, &
+                                                DTGR, TGRO, TG, &
                                                HPROGRAM)
 !     ################################################
 !
@@ -38,7 +39,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
 USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
@@ -66,6 +69,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
 TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO

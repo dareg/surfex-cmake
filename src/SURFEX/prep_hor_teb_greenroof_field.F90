@@ -27,6 +27,10 @@ SUBROUTINE PREP_HOR_TEB_GREENROOF_FIELD(HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPG
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_PREP,               ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,          &
                                     XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT,          &
                                     LINTERP, CMASK
@@ -144,7 +148,8 @@ IF (HSURF=='SN_VEG ') THEN
   !
   ZPATCH=1.
   ZVEGTYPE_PATCH(:,:,1) = TGRP%XVEGTYPE(:,:)
-  CALL PREP_HOR_SNOW_FIELDS(HPROGRAM,HSURF,                 &
+  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+                            HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &
                             ILUOUT,GUNIF_SNOW, 1,           &
