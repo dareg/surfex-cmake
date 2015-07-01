@@ -41,6 +41,9 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -86,10 +89,12 @@ IF (LHOOK) CALL DR_HOOK('WRITE_WATFLUX_N',0,ZHOOK_HANDLE)
 !
  CALL WRITESURF_WATFLUX_CONF_n(CHW, W, &
                                HPROGRAM)
- CALL WRITESURF_WATFLUX_n(W, &
+ CALL WRITESURF_WATFLUX_n(DGU, IOB, U, &
+                          W, &
                           HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_WATFLUX_SBL_n(W, WSB, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_WATFLUX_SBL_n(DGU, IOB, U, &
+                                                                        W, WSB, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_BATHYFIELD(HPROGRAM,HFIELD,HAREA,HFILE,HFILETYPE,&
+      SUBROUTINE PGD_BATHYFIELD (UG, U, USS, &
+                                 HPROGRAM,HFIELD,HAREA,HFILE,HFILETYPE,&
                                   HNCVARNAME,PUNIF,PFIELD)  
 !     ##############################################################
 !
@@ -36,13 +37,15 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODI_GET_LUOUT
 USE MODI_TREAT_BATHYFIELD
@@ -57,6 +60,11 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
  CHARACTER(LEN=*),  INTENT(IN) :: HFIELD    ! field name for prints

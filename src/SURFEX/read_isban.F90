@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_ISBA_n(HPROGRAM)
+      SUBROUTINE READ_ISBA_n (DTCO, IOB, I, U, &
+                              HPROGRAM)
 !     ##################################
 !
 !!****  *READ_ISBA_n* - routine to initialise ISBA variables
@@ -46,13 +47,15 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
-USE MODD_ISBA_n, ONLY : I => ISBA
 !                          
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
                               & XAZON10M_ISBA,XAMER10M_ISBA,NIPERT,NVAR, &
@@ -75,6 +78,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

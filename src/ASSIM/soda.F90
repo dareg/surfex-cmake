@@ -37,6 +37,8 @@ PROGRAM SODA
 !  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
 !----------------------------------------------------------------------------
 !
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
 USE MODD_BEM_n, ONLY : B => BEM
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
@@ -737,7 +739,8 @@ ZLAT(:) = UG%XLAT(:)
 GLKEEPEXTZONE = .TRUE.
 !
 WRITE(*,*) 'PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...'
- CALL ASSIM_SURF_ATM_n(CSURF_FILETYPE,INI,   &
+ CALL ASSIM_SURF_ATM_n(DGMI, IG, I, S, U, T, TOP, W, &
+                       CSURF_FILETYPE,INI,   &
                       ZCON_RAIN,  ZSTRAT_RAIN, ZCON_SNOW, ZSTRAT_SNOW, &
                       ZCLOUDS,    ZLSM,        ZEVAPTR,   ZEVAP,       &
                       ZSWEC,      ZTSC,       &

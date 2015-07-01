@@ -84,7 +84,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',0,ZHOOK_HANDLE)
 !
-CALL WRITESURF_OCEAN_n(O, OR, &
+CALL WRITESURF_OCEAN_n(DGU, IOB, U, &
+                       O, OR, &
                        HPROGRAM)
 !
 !*       2.     Sea-ice prognostic fields:
@@ -96,7 +97,8 @@ YCOMMENT='flag to handle sea ice cover'
 CALL WRITE_SURF(DGU, IOB, U, &
                 HPROGRAM,'HANDLE_SIC',S%LHANDLE_SIC,IRESP,YCOMMENT)
 !
-IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(S, &
+IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(DGU, IOB, U, &
+                                           S, &
                                            HPROGRAM)
 !
 !

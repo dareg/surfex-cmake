@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_SBL_n (W, WSB, &
+      SUBROUTINE WRITESURF_WATFLUX_SBL_n (DGU, IOB, U, &
+                                           W, WSB, &
                                           HPROGRAM,HWRITE)
 !     ####################################
 !
@@ -39,9 +40,11 @@
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
@@ -57,6 +60,11 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB

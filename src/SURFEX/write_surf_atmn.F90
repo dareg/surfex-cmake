@@ -171,10 +171,12 @@ DGU%LSELECT=LSAVE_SELECT
  CALL WRITESURF_ATM_CONF_n(CHU, DGU, USS, &
                            HPROGRAM)
 !
-IF (HWRITE/='PRE') CALL WRITESURF_SSO_CANOPY_n(SSCP, &
+IF (HWRITE/='PRE') CALL WRITESURF_SSO_CANOPY_n(DGU, IOB, U, &
+                                               SSCP, &
                                                          HPROGRAM,(USS%CROUGH=='BE04' .AND. .NOT. LNOWRITE_CANOPY))
 !
- CALL WRITESURF_CPL_GCM_n(U, &
+ CALL WRITESURF_CPL_GCM_n(DGU, IOB, &
+                          U, &
                           HPROGRAM)
 !
 YCOMMENT='flag for accumulated variables'

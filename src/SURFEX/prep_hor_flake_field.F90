@@ -32,6 +32,9 @@ SUBROUTINE PREP_HOR_FLAKE_FIELD (FG, F, &
 !
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
@@ -132,11 +135,13 @@ IF (.NOT. GDEFAULT) THEN
 !Impossible to interpolate lake profiles, only the lake surface temperature! 
 !But in uniform case and 1 point case
   IF(GUNIF .OR. SIZE(FG%XLAT).EQ.1) THEN
-    CALL HOR_INTERPOL(ILUOUT,ZFIELDIN,ZFIELDOUT)
+    CALL HOR_INTERPOL(DTCO, U, &
+                      ILUOUT,ZFIELDIN,ZFIELDOUT)
   ELSE IF(HSURF(1:2)=='ZS' .OR. HSURF(1:2)=='TS') THEN
     WRITE(ILUOUT,*) "WARNING! Impossible to interpolate lake profiles in horisontal!"
     WRITE(ILUOUT,*) "So, interoplate only surface temperature and start from lakes mixed down to the bottom"
-    CALL HOR_INTERPOL(ILUOUT,ZFIELDIN,ZFIELDOUT)
+    CALL HOR_INTERPOL(DTCO, U, &
+                      ILUOUT,ZFIELDIN,ZFIELDOUT)
   END IF
 !
 !*      5.     Return to historical variable

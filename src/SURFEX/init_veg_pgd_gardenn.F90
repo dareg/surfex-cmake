@@ -1,5 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_VEG_PGD_GARDEN_n(HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,        &
+SUBROUTINE INIT_VEG_PGD_GARDEN_n (CHI, DTCO, DST, I, SLT, U, &
+                                  HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,        &
                         PVEGTYPE, PTDEEP, PGAMMAT, HPHOTO, HINIT, OTR_ML, HRUNOFF,  &
                         KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
                         PGMES, PGC, PDMAX, PANMAX, PFZERO, PEPSO, PGAMM, PQDGAMM,   &
@@ -53,12 +54,14 @@ SUBROUTINE INIT_VEG_PGD_GARDEN_n(HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,   
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_DST_n, ONLY : DST => DST
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_SLT_n, ONLY : SLT => SLT
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SLT_n, ONLY : SLT_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_INIT_VEG_PGD_n
 !
@@ -69,6 +72,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SLT_t), INTENT(INOUT) :: SLT
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER, INTENT(IN)  :: KLUOUT

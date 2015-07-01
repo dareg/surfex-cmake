@@ -1,4 +1,5 @@
-SUBROUTINE EXTRAPOL_FIELDS(HPROGRAM,KLUOUT)
+SUBROUTINE EXTRAPOL_FIELDS (DTCO, DTI, IG, I, UG, U, &
+                            HPROGRAM,KLUOUT)
 !!
 !!    PURPOSE
 !!    -------
@@ -32,27 +33,28 @@ SUBROUTINE EXTRAPOL_FIELDS(HPROGRAM,KLUOUT)
 !!
 !!    DECLARATIONS
 !!
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_REPROD_OPER,    ONLY : CDGDIF, CDGAVG
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_n, ONLY : I => ISBA 
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                                &
                                 XDATA_IRRIG, XDATA_WATSUP,                              &
                                 XDATA_GARDEN, XDATA_NATURE,                             &
                                 XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,                   &
                                 XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN
 !                                
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !                                
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODI_AV_PGD
 USE MODI_INI_VAR_FROM_VEGTYPE_DATA
@@ -64,6 +66,14 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM  ! host program
 INTEGER,                INTENT(IN)    :: KLUOUT

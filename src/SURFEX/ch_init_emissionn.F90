@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_INIT_EMISSION_n (CHE, CHU, SV, &
+      SUBROUTINE CH_INIT_EMISSION_n (IOB, &
+                                      CHE, CHU, SV, &
                                      HPROGRAM,KLU,KCH,PRHOA)
 !     #######################################
 !
@@ -32,7 +33,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
@@ -53,6 +56,9 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 TYPE(CH_SURF_t), INTENT(INOUT) :: CHU

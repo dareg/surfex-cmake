@@ -37,6 +37,8 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -90,7 +92,8 @@ CPROGNAME=HPROGRAM
 !*    2.      Initialisation of output grid
 !             -----------------------------
 !
- CALL PGD_GRID(UG, U, &
+ CALL PGD_GRID(IOB, &
+               UG, U, &
                        HPROGRAM,HFILE,HFILETYPE,OGRID,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 ! 
 !

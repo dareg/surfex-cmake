@@ -100,7 +100,8 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    2.      Initialisation of output grid and schemes
 !             -----------------------------------------
 !
- CALL PGD_GRID(UG, U, &
+ CALL PGD_GRID(IOB, &
+               UG, U, &
                HPROGRAM,HFILE,HFILETYPE,.TRUE.,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 !
  CALL OPEN_AUX_IO_SURF(IOB, &

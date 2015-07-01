@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_GR_SNOW(HPROGRAM,HSURFTYPE,HPREFIX,TPSNOW  )
+      SUBROUTINE WRITESURF_GR_SNOW (DGU, IOB, U, &
+                                    HPROGRAM,HSURFTYPE,HPREFIX,TPSNOW  )
 !     ##########################################################
 !
 !!****  *WRITESURF_GR_SNOW* - routine to write snow surface fields
@@ -37,9 +38,11 @@
 !
 !*       0.    DECLARATIONS
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_SNOW
@@ -54,6 +57,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program
  CHARACTER (LEN=*),  INTENT(IN) :: HSURFTYPE  ! generic name used for

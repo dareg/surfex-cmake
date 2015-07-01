@@ -124,7 +124,8 @@ IF (DTT%LDATA_USETYPE) THEN
   DEALLOCATE(ZWORK)
 ENDIF
 !
-IF (DTT%LDATA_BLDTYPE .OR. DTT%LDATA_BLD_AGE .OR. DTT%LDATA_USETYPE) CALL WRITE_BLD_DESCRIPTION_n(BDD, &
+IF (DTT%LDATA_BLDTYPE .OR. DTT%LDATA_BLD_AGE .OR. DTT%LDATA_USETYPE) CALL WRITE_BLD_DESCRIPTION_n(DGU, IOB, U, &
+                                                                                                  BDD, &
                                                                                                   HPROGRAM)
 !
 YRECFM='L_Z0_TOWN'
@@ -974,7 +975,8 @@ ENDIF
 !*      Irrigation of gardens or greenroofs
 !       -----------------------------------
 !
-CALL WRITESURF_PGD_TEB_IRRIG_n(TIR, &
+CALL WRITESURF_PGD_TEB_IRRIG_n(DGU, IOB, U, &
+                               TIR, &
                                HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_PAR_N',1,ZHOOK_HANDLE)

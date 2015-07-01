@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_VEG_n (DTGD, TGDO, TGDP, TVG, &
+      SUBROUTINE WRITESURF_PGD_TEB_VEG_n (DGU, IOB, U, &
+                                           DTGD, TGDO, TGDP, TVG, &
                                           HPROGRAM)
 !     ###############################################
 !
@@ -37,9 +38,11 @@
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
 USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
@@ -56,6 +59,11 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
 TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO

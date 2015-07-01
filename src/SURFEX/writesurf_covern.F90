@@ -87,7 +87,8 @@ YCOMMENT='(LOGICAL LIST)'
                  HPROGRAM,YRECFM,U%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 YCOMMENT='COVER FIELDS'
- CALL WRITE_SURF_COV(HPROGRAM,'COVER',U%XCOVER(:,:),U%LCOVER,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF_COV(DGU, IOB, U, &
+                     HPROGRAM,'COVER',U%XCOVER(:,:),U%LCOVER,IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !

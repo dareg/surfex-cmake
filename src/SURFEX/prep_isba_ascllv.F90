@@ -24,6 +24,8 @@ SUBROUTINE PREP_ISBA_ASCLLV(HPROGRAM,HSURF,KLUOUT,PFIELD)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -96,11 +98,14 @@ SELECT CASE(HSURF)
 !
   CASE('WG     ')
 
-    CALL PGD_FIELD(HPROGRAM,'HUG_SURF: relative humidity','NAT',CFILE_HUG_SURF,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'HUG_SURF: relative humidity','NAT',CFILE_HUG_SURF,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,1))  
-    CALL PGD_FIELD(HPROGRAM,'HUG_ROOT: relative humidity','NAT',CFILE_HUG_ROOT,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'HUG_ROOT: relative humidity','NAT',CFILE_HUG_ROOT,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,2))  
-    CALL PGD_FIELD(HPROGRAM,'HUG_DEEP: relative humidity','NAT',CFILE_HUG_DEEP,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'HUG_DEEP: relative humidity','NAT',CFILE_HUG_DEEP,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,3))  
 
     ALLOCATE(PFIELD(IL,3,NVEGTYPE))
@@ -114,11 +119,14 @@ SELECT CASE(HSURF)
 
   CASE('TG     ')
 
-    CALL PGD_FIELD(HPROGRAM,'TG_SURF: temperature','NAT',CFILE_TG_SURF,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'TG_SURF: temperature','NAT',CFILE_TG_SURF,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,1))  
-    CALL PGD_FIELD(HPROGRAM,'TG_ROOT: temperature','NAT',CFILE_TG_ROOT,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'TG_ROOT: temperature','NAT',CFILE_TG_ROOT,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,2))  
-    CALL PGD_FIELD(HPROGRAM,'TG_DEEP: temperature','NAT',CFILE_TG_DEEP,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'TG_DEEP: temperature','NAT',CFILE_TG_DEEP,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,3))  
 
     ALLOCATE(PFIELD(IL,3,NVEGTYPE))

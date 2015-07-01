@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PREP_GRID_EXTERN(HFILETYPE,KLUOUT,HGRIDTYPE,HINTERP_TYPE,KNI)
+      SUBROUTINE PREP_GRID_EXTERN (IOB, &
+                                   HFILETYPE,KLUOUT,HGRIDTYPE,HINTERP_TYPE,KNI)
 !     ##########################################################################
 !
 !!****  *PREP_GRID_EXTERN* - reads EXTERNALIZED Surface grid.
@@ -34,7 +35,9 @@
 !*      0. DECLARATIONS
 !          ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_PREP_GRID_CONF_PROJ
@@ -51,6 +54,9 @@ IMPLICIT NONE
 !
 !* 0.1. Declaration of arguments
 !       ------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
 INTEGER,           INTENT(IN)    :: KLUOUT       ! logical unit of output listing

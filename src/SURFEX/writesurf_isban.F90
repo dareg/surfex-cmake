@@ -191,7 +191,8 @@ END IF
 !
 !* snow mantel
 !
- CALL WRITESURF_GR_SNOW(HPROGRAM,'VEG','     ',I%TSNOW)
+ CALL WRITESURF_GR_SNOW(DGU, IOB, U, &
+                        HPROGRAM,'VEG','     ',I%TSNOW)
 !
 !
 !* key and/or field usefull to make an external prep

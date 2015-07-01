@@ -117,10 +117,12 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !*       5.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
+ CALL READ_GRIDTYPE(IOB, &
+                    HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
 !
 ALLOCATE(PGRID_PAR(KGRID_PAR))
- CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
+ CALL READ_GRIDTYPE(IOB, &
+                    HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
 !
 !---------------------------------------------------------------------------
 !

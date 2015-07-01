@@ -293,10 +293,12 @@ YCOMMENT='TI_ROAD (K)'
 !* snow mantel
 !
 YRECFM='RF'
- CALL WRITESURF_GR_SNOW(HPROGRAM,YRECFM,YPATCH,T%CUR%TSNOW_ROOF  )
+ CALL WRITESURF_GR_SNOW(DGU, IOB, U, &
+                        HPROGRAM,YRECFM,YPATCH,T%CUR%TSNOW_ROOF  )
 !
 YRECFM='RD'
- CALL WRITESURF_GR_SNOW(HPROGRAM,YRECFM,YPATCH,T%CUR%TSNOW_ROAD  )
+ CALL WRITESURF_GR_SNOW(DGU, IOB, U, &
+                        HPROGRAM,YRECFM,YPATCH,T%CUR%TSNOW_ROAD  )
 !
 !-------------------------------------------------------------------------------
 !

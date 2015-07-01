@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_WATFLUX(HPROGRAM)
+      SUBROUTINE PGD_WATFLUX (DTCO, U, WG, W, &
+                              HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_WATFLUX* monitor for averaging and interpolations of WATFLUX physiographic fields
@@ -35,12 +36,14 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 !
 USE MODI_GET_SURF_SIZE_n
 USE MODI_PACK_PGD
@@ -55,6 +58,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

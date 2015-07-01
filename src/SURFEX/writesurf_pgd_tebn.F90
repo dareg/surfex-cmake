@@ -218,12 +218,14 @@ YCOMMENT=YRECFM
 !
 ! * ISBA fields specific to urban gardens
 !
- CALL WRITESURF_PGD_TEB_VEG_n(DTGD, TGDO, TGDP, TVG, &
+ CALL WRITESURF_PGD_TEB_VEG_n(DGU, IOB, U, &
+                              DTGD, TGDO, TGDP, TVG, &
                               HPROGRAM)
 !
 ! * ISBA fields specific to urban greenroofs
 !
-IF (TOP%LGREENROOF) CALL WRITESURF_PGD_TEB_GREENROOF_n(TGRO, TGRP, &
+IF (TOP%LGREENROOF) CALL WRITESURF_PGD_TEB_GREENROOF_n(DGU, IOB, U, &
+                                                       TGRO, TGRP, &
                                                        HPROGRAM)
 !
 ENDIF
@@ -241,7 +243,8 @@ YCOMMENT='(LOGICAL LIST)'
                  HPROGRAM,YRECFM,TOP%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 YCOMMENT='COVER FIELDS'
- CALL WRITE_SURF_COV(HPROGRAM,'COVER',TOP%XCOVER(:,:),TOP%LCOVER,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF_COV(DGU, IOB, U, &
+                     HPROGRAM,'COVER',TOP%XCOVER(:,:),TOP%LCOVER,IRESP,HCOMMENT=YCOMMENT)
 !
 !* orography
 !

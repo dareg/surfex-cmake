@@ -40,6 +40,8 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
@@ -246,7 +248,8 @@ END SELECT
 !*       8.     Building HVAC automatic sizing:
 !               -------------------------------  
 IF (TOP%CBEM=='BEM' .AND. BOP%LAUTOSIZE) THEN
-  CALL HVAC_AUTOSIZE(B, BOP, UG, U, TG, T, TOP, &
+  CALL HVAC_AUTOSIZE(IOB, &
+                     B, BOP, UG, U, TG, T, TOP, &
                      ILU,KLUOUT)
   !* stores the real systems characteristics in physiographic data 
   !  for further use

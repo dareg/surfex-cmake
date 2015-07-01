@@ -1,5 +1,6 @@
 !     #############################################################
-SUBROUTINE HVAC_AUTOSIZE (B, BOP, UG, U, TG, T, TOP, &
+SUBROUTINE HVAC_AUTOSIZE (IOB, &
+                           B, BOP, UG, U, TG, T, TOP, &
                           KI,KLUOUT)
 !     #############################################################
 !!
@@ -28,7 +29,9 @@ SUBROUTINE HVAC_AUTOSIZE (B, BOP, UG, U, TG, T, TOP, &
 
 
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
@@ -65,6 +68,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP

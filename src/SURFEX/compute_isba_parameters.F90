@@ -596,7 +596,8 @@ CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
 !*      10.     Prognostic and semi-prognostic fields
 !               -------------------------------------
 !
- CALL READ_ISBA_n(HPROGRAM)
+ CALL READ_ISBA_n(DTCO, IOB, I, U, &
+                  HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -615,7 +616,8 @@ ENDIF
 !               -------------------------------------
 !
 IF (OLAND_USE) THEN
-   CALL INIT_ISBA_LANDUSE(HPROGRAM)  
+   CALL INIT_ISBA_LANDUSE(DTCO, IG, I, UG, U, &
+                          HPROGRAM)  
 END IF
 !
 !-------------------------------------------------------------------------------

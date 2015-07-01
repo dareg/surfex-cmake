@@ -1,5 +1,6 @@
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                               &
+SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
+                             HPROGRAM, KI,                                               &
                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,             &
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
                             PSWEC,     PTSC,                                            &
@@ -31,19 +32,21 @@ SUBROUTINE ASSIM_SURF_ATM_n(HPROGRAM, KI,                                       
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
-USE MODD_TEB_n, ONLY : T => TEB
-USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+!
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_ASSIM,          ONLY : XAT2M_ISBA, XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, XAT2M_TEB, LAROME
 !
@@ -66,6 +69,16 @@ USE PARKIND1,            ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI

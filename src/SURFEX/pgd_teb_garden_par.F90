@@ -35,6 +35,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
 USE MODD_SURF_PAR,          ONLY : XUNDEF
 USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
@@ -230,29 +235,35 @@ TGDP%CTYPE_NVEG = CTYP_GARDEN_NVEG
 !
 CATYPE = 'ARI'
 !
- CALL PGD_FIELD(HPROGRAM,'FRAC_HVEG: fraction of high vegetation','TWN',CFNAM_FRAC_HVEG,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'FRAC_HVEG: fraction of high vegetation','TWN',CFNAM_FRAC_HVEG,   &
                  CFTYP_FRAC_HVEG,XUNIF_FRAC_HVEG,DTGD%XDATA_FRAC_HVEG(:))  
 !
- CALL PGD_FIELD(HPROGRAM,'FRAC_LVEG: fraction of low vegetation' ,'TWN',CFNAM_FRAC_LVEG,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'FRAC_LVEG: fraction of low vegetation' ,'TWN',CFNAM_FRAC_LVEG,   &
                  CFTYP_FRAC_LVEG,XUNIF_FRAC_LVEG,DTGD%XDATA_FRAC_LVEG(:))  
 !
- CALL PGD_FIELD(HPROGRAM,'FRAC_NVEG: fraction of bare soil'      ,'TWN',CFNAM_FRAC_NVEG,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'FRAC_NVEG: fraction of bare soil'      ,'TWN',CFNAM_FRAC_NVEG,   &
                  CFTYP_FRAC_NVEG,XUNIF_FRAC_NVEG,DTGD%XDATA_FRAC_NVEG(:))  
 !
 !
 DO JTIME=1,DTGD%NTIME
 !
- CALL PGD_FIELD(HPROGRAM,'LAI_HVEG: LAI of high vegetation','TWN',CFNAM_LAI_HVEG(JTIME),  &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'LAI_HVEG: LAI of high vegetation','TWN',CFNAM_LAI_HVEG(JTIME),  &
                   CFTYP_LAI_HVEG(JTIME),XUNIF_LAI_HVEG(JTIME),DTGD%XDATA_LAI_HVEG(:,JTIME))  
 !
- CALL PGD_FIELD(HPROGRAM,'LAI_LVEG: LAI of low  vegetation','TWN',CFNAM_LAI_LVEG(JTIME),  &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'LAI_LVEG: LAI of low  vegetation','TWN',CFNAM_LAI_LVEG(JTIME),  &
                   CFTYP_LAI_LVEG(JTIME),XUNIF_LAI_LVEG(JTIME),DTGD%XDATA_LAI_LVEG(:,JTIME))  
 !
 !
 ENDDO
 !
 !
- CALL PGD_FIELD(HPROGRAM,'H_HVEG: height of trees','TWN',CFNAM_H_HVEG,                     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'H_HVEG: height of trees','TWN',CFNAM_H_HVEG,                     &
                  CFTYP_H_HVEG,XUNIF_H_HVEG,DTGD%XDATA_H_HVEG(:))  
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN_PAR',1,ZHOOK_HANDLE)
 !

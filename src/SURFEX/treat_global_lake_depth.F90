@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE TREAT_GLOBAL_LAKE_DEPTH(HPROGRAM,PDEPTH,KSTATUS)
+      SUBROUTINE TREAT_GLOBAL_LAKE_DEPTH (DTCO, UG, U, USS, &
+                                          HPROGRAM,PDEPTH,KSTATUS)
 !     ##############################################################
 !
 !!**** *TREAT_GLOBAL_LAKE_DEPTH* monitor for averaging and interpolations of ISBA physiographic fields
@@ -35,15 +36,17 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_PGDWORK,        ONLY : XTNG, NSIZE
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB, NGRADDEPTH_LDB, NGRADSTATUS_LDB 
 !
 USE MODI_GET_LUOUT
@@ -61,6 +64,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
 REAL, DIMENSION(:),INTENT(OUT):: PDEPTH    ! physiographic field

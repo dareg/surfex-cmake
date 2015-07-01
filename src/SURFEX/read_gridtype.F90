@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_GRIDTYPE(HPROGRAM,HGRID,KGRID_PAR,KLU,OREAD,PGRID_PAR,KRESP,HDIR)
+      SUBROUTINE READ_GRIDTYPE (IOB, &
+                                HPROGRAM,HGRID,KGRID_PAR,KLU,OREAD,PGRID_PAR,KRESP,HDIR)
 !     #########################################
 !
 !!****  *READ_GRID* - routine to initialise the horizontal grid of a scheme
@@ -36,7 +37,9 @@
 !              ------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -58,6 +61,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM   ! calling program
  CHARACTER(LEN=10),            INTENT(IN)    :: HGRID      ! type of horizontal grid

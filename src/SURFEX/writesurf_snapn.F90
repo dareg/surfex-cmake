@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_SNAP_n (CHN, &
+      SUBROUTINE WRITESURF_SNAP_n (DGU, IOB, U, &
+                                    CHN, &
                                    HPROGRAM)
 !     #######################################################################
 !
@@ -9,9 +10,11 @@
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
 !
@@ -25,6 +28,11 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !

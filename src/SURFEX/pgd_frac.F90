@@ -37,6 +37,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL, CGRID
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -194,25 +198,29 @@ IF ((LEN_TRIM(CFNAM_SEA)/=0 .OR. XUNIF_SEA/=XUNDEF) .AND. (LEN_TRIM(CFNAM_WATER)
 
     CATYPE = 'ARI'
     IF (XUNIF_SEA==XUNDEF) THEN
-      CALL PGD_FIELD(HPROGRAM,'XSEA: sea fraction      ','ALL', CFNAM_SEA   , &
+      CALL PGD_FIELD(DTCO, UG, U, USS, &
+                     HPROGRAM,'XSEA: sea fraction      ','ALL', CFNAM_SEA   , &
                     CFTYP_SEA   , XUNIF_SEA   , U%XSEA(:)   )  
     ELSE                 
       U%XSEA(:) = XUNIF_SEA
     ENDIF
     IF (XUNIF_WATER==XUNDEF) THEN
-      CALL PGD_FIELD(HPROGRAM,'XWATER: water fraction  ','ALL', CFNAM_WATER , &
+      CALL PGD_FIELD(DTCO, UG, U, USS, &
+                     HPROGRAM,'XWATER: water fraction  ','ALL', CFNAM_WATER , &
                     CFTYP_WATER , XUNIF_WATER , U%XWATER(:) )  
     ELSE                    
       U%XWATER(:) = XUNIF_WATER
     ENDIF
     IF (XUNIF_NATURE==XUNDEF) THEN
-      CALL PGD_FIELD(HPROGRAM,'XNATURE: nature fraction','ALL', CFNAM_NATURE, &
+      CALL PGD_FIELD(DTCO, UG, U, USS, &
+                     HPROGRAM,'XNATURE: nature fraction','ALL', CFNAM_NATURE, &
                     CFTYP_NATURE, XUNIF_NATURE, U%XNATURE(:))  
     ELSE                    
       U%XNATURE(:) = XUNIF_NATURE
     ENDIF
     IF (XUNIF_TOWN==XUNDEF) THEN
-      CALL PGD_FIELD(HPROGRAM,'XTOWN: town fraction    ','ALL', CFNAM_TOWN  , &
+      CALL PGD_FIELD(DTCO, UG, U, USS, &
+                     HPROGRAM,'XTOWN: town fraction    ','ALL', CFNAM_TOWN  , &
                     CFTYP_TOWN  , XUNIF_TOWN  , U%XTOWN(:)  )  
     ELSE                    
       U%XTOWN(:) = XUNIF_TOWN

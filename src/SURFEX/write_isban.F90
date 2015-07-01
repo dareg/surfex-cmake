@@ -40,6 +40,9 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
@@ -99,7 +102,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',0,ZHOOK_HANDLE)
  CALL WRITESURF_ISBA_n(CHI, DST, I, &
                        HPROGRAM,OLAND_USE)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(ICP, I, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(DGU, IOB, U, &
+                                                                        ICP, I, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

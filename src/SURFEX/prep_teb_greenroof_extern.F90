@@ -118,7 +118,8 @@ GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+CALL PREP_GRID_EXTERN(IOB, &
+                      HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !* reads if TEB fields exist in the input file
 CALL TOWN_PRESENCE(IOB, &

@@ -160,16 +160,19 @@ YCOMMENT='(-)'
  CALL WRITE_SURF(DGU, IOB, U, &
                  HPROGRAM,'GARDEN',U%LGARDEN,IRESP,YCOMMENT)
 IF (HPROGRAM.NE.'BINARY' .AND. HPROGRAM.NE.'TEXTE ') THEN
-   CALL WRITE_ECOCLIMAP2_DATA(HPROGRAM)
+   CALL WRITE_ECOCLIMAP2_DATA(DGU, IOB, U, &
+                              HPROGRAM)
 ENDIF
 !
  CALL WRITE_GRID(HPROGRAM,UG%CGRID,UG%XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,IRESP,USS%XZ0EFFJPDIR)
 !
  CALL WRITESURF_COVER_n(U, &
                         HPROGRAM)
- CALL WRITESURF_SSO_n(USS, &
+ CALL WRITESURF_SSO_n(DGU, IOB, U, &
+                      USS, &
                       HPROGRAM)
- CALL WRITESURF_DUMMY_n(DUU, &
+ CALL WRITESURF_DUMMY_n(DGU, IOB, U, &
+                        DUU, &
                         HPROGRAM)
 !
 YCOMMENT='CH_EMIS'
@@ -184,10 +187,12 @@ END IF
 !
 IF (CHU%LCH_EMIS) THEN
   IF (CHU%CCH_EMIS=='AGGR') THEN
-    CALL WRITESURF_CH_EMIS_n(CHE, &
+    CALL WRITESURF_CH_EMIS_n(DGU, IOB, U, &
+                             CHE, &
                              HPROGRAM)
   ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
-    CALL WRITESURF_SNAP_n(CHN, &
+    CALL WRITESURF_SNAP_n(DGU, IOB, U, &
+                          CHN, &
                           HPROGRAM)
   ENDIF
 ENDIF

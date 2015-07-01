@@ -35,6 +35,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_SURF_PAR,          ONLY : XUNDEF
 USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
 USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
@@ -285,16 +290,21 @@ ALLOCATE(TIR%XGD_24H_IRRIG     (TG%NDIM        ))
 !
 CATYPE = 'MAJ'
 !
- CALL PGD_FIELD(HPROGRAM,'GD_START_MONTH : start month for irrigation of gardens','TWN',CFNAM_GD_START_MONTH,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GD_START_MONTH : start month for irrigation of gardens','TWN',CFNAM_GD_START_MONTH,   &
                  CFTYP_GD_START_MONTH,XUNIF_GD_START_MONTH,TIR%XGD_START_MONTH(:))  
- CALL PGD_FIELD(HPROGRAM,'GD_END_MONTH   : end   month for irrigation of gardens','TWN',CFNAM_GD_END_MONTH,     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GD_END_MONTH   : end   month for irrigation of gardens','TWN',CFNAM_GD_END_MONTH,     &
                  CFTYP_GD_END_MONTH  ,XUNIF_GD_END_MONTH  ,TIR%XGD_END_MONTH  (:))  
- CALL PGD_FIELD(HPROGRAM,'GD_START_HOUR  : start HOUR  for irrigation of gardens','TWN',CFNAM_GD_START_HOUR ,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GD_START_HOUR  : start HOUR  for irrigation of gardens','TWN',CFNAM_GD_START_HOUR ,   &
                  CFTYP_GD_START_HOUR ,XUNIF_GD_START_HOUR ,TIR%XGD_START_HOUR (:))  
- CALL PGD_FIELD(HPROGRAM,'GD_END_HOUR    : end   HOUR  for irrigation of gardens','TWN',CFNAM_GD_END_HOUR ,     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GD_END_HOUR    : end   HOUR  for irrigation of gardens','TWN',CFNAM_GD_END_HOUR ,     &
                  CFTYP_GD_END_HOUR   ,XUNIF_GD_END_HOUR   ,TIR%XGD_END_HOUR   (:))  
 CATYPE = 'ARI'
- CALL PGD_FIELD(HPROGRAM,'GD_24H_IRRIG   : total irrigation over 24h for gardens','TWN',CFNAM_GD_24H_IRRIG ,    &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GD_24H_IRRIG   : total irrigation over 24h for gardens','TWN',CFNAM_GD_24H_IRRIG ,    &
                  CFTYP_GD_24H_IRRIG  ,XUNIF_GD_24H_IRRIG  ,TIR%XGD_24H_IRRIG  (:))  
 !
 !
@@ -338,16 +348,21 @@ ALLOCATE(TIR%XGR_24H_IRRIG     (TG%NDIM        ))
 !
 CATYPE = 'MAJ'
 !
- CALL PGD_FIELD(HPROGRAM,'GR_START_MONTH : start month for irrigation of greenroofs','TWN',CFNAM_GR_START_MONTH,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GR_START_MONTH : start month for irrigation of greenroofs','TWN',CFNAM_GR_START_MONTH,   &
                  CFTYP_GR_START_MONTH,XUNIF_GR_START_MONTH,TIR%XGR_START_MONTH(:))  
- CALL PGD_FIELD(HPROGRAM,'GR_END_MONTH   : end   month for irrigation of greenroofs','TWN',CFNAM_GR_END_MONTH,     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GR_END_MONTH   : end   month for irrigation of greenroofs','TWN',CFNAM_GR_END_MONTH,     &
                  CFTYP_GR_END_MONTH  ,XUNIF_GR_END_MONTH  ,TIR%XGR_END_MONTH  (:))  
- CALL PGD_FIELD(HPROGRAM,'GR_START_HOUR  : start HOUR  for irrigation of greenroofs','TWN',CFNAM_GR_START_HOUR ,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GR_START_HOUR  : start HOUR  for irrigation of greenroofs','TWN',CFNAM_GR_START_HOUR ,   &
                  CFTYP_GR_START_HOUR ,XUNIF_GR_START_HOUR ,TIR%XGR_START_HOUR (:))  
- CALL PGD_FIELD(HPROGRAM,'GR_END_HOUR    : end   HOUR  for irrigation of greenroofs','TWN',CFNAM_GR_END_HOUR ,     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GR_END_HOUR    : end   HOUR  for irrigation of greenroofs','TWN',CFNAM_GR_END_HOUR ,     &
                  CFTYP_GR_END_HOUR   ,XUNIF_GR_END_HOUR   ,TIR%XGR_END_HOUR   (:))  
 CATYPE = 'ARI'
- CALL PGD_FIELD(HPROGRAM,'GR_24H_IRRIG   : total irrigation over 24h for greenroofs','TWN',CFNAM_GR_24H_IRRIG ,    &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'GR_24H_IRRIG   : total irrigation over 24h for greenroofs','TWN',CFNAM_GR_24H_IRRIG ,    &
                  CFTYP_GR_24H_IRRIG  ,XUNIF_GR_24H_IRRIG  ,TIR%XGR_24H_IRRIG  (:))  
 !
 END IF
@@ -390,16 +405,21 @@ ALLOCATE(TIR%XRD_24H_IRRIG     (TG%NDIM        ))
 !
 CATYPE = 'MAJ'
 !
- CALL PGD_FIELD(HPROGRAM,'RD_START_MONTH : start month for irrigation of roads','TWN',CFNAM_RD_START_MONTH,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'RD_START_MONTH : start month for irrigation of roads','TWN',CFNAM_RD_START_MONTH,   &
                  CFTYP_RD_START_MONTH,XUNIF_RD_START_MONTH,TIR%XRD_START_MONTH(:))  
- CALL PGD_FIELD(HPROGRAM,'RD_END_MONTH   : end   month for irrigation of roads','TWN',CFNAM_RD_END_MONTH,     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'RD_END_MONTH   : end   month for irrigation of roads','TWN',CFNAM_RD_END_MONTH,     &
                  CFTYP_RD_END_MONTH  ,XUNIF_RD_END_MONTH  ,TIR%XRD_END_MONTH  (:))  
- CALL PGD_FIELD(HPROGRAM,'RD_START_HOUR  : start HOUR  for irrigation of roads','TWN',CFNAM_RD_START_HOUR ,   &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'RD_START_HOUR  : start HOUR  for irrigation of roads','TWN',CFNAM_RD_START_HOUR ,   &
                  CFTYP_RD_START_HOUR ,XUNIF_RD_START_HOUR ,TIR%XRD_START_HOUR (:))  
- CALL PGD_FIELD(HPROGRAM,'RD_END_HOUR    : end   HOUR  for irrigation of roads','TWN',CFNAM_RD_END_HOUR ,     &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'RD_END_HOUR    : end   HOUR  for irrigation of roads','TWN',CFNAM_RD_END_HOUR ,     &
                  CFTYP_RD_END_HOUR   ,XUNIF_RD_END_HOUR   ,TIR%XRD_END_HOUR   (:))  
 CATYPE = 'ARI'
- CALL PGD_FIELD(HPROGRAM,'RD_24H_IRRIG   : total irrigation over 24h for roads','TWN',CFNAM_RD_24H_IRRIG ,    &
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'RD_24H_IRRIG   : total irrigation over 24h for roads','TWN',CFNAM_RD_24H_IRRIG ,    &
                  CFTYP_RD_24H_IRRIG  ,XUNIF_RD_24H_IRRIG  ,TIR%XRD_24H_IRRIG  (:))  
 !
 END IF

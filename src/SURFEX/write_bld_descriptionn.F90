@@ -1,5 +1,6 @@
 !     #########################
-      SUBROUTINE WRITE_BLD_DESCRIPTION_n (BDD, &
+      SUBROUTINE WRITE_BLD_DESCRIPTION_n (DGU, IOB, U, &
+                                           BDD, &
                                           HPROGRAM)
 !     #########################
 !
@@ -37,9 +38,11 @@
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 !
@@ -55,6 +58,11 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !

@@ -35,6 +35,25 @@ SUBROUTINE COUPLING_ISBA_CANOPY_n(HPROGRAM, HCOUPLING,                          
 !!      B. Decharme  04/2013 new coupling variables
 !----------------------------------------------------------------
 !
+USE MODD_AGRI_n, ONLY : AG => AGRI
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_PACK_CH_ISBA, ONLY : PKCI => PACK_CH_ISBA
+USE MODD_PACK_DIAG_ISBA, ONLY : PKDI => PACK_DIAG_ISBA
+USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
+USE MODD_SLT_n, ONLY : SLT => SLT
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+!
 USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE MODD_CSTS,          ONLY : XCPD
@@ -345,7 +364,8 @@ END IF
 !*      2.     Call of ISBA
 !              ------------
 !
- CALL COUPLING_ISBA_n(HPROGRAM, GCOUPLING,                                                 &
+ CALL COUPLING_ISBA_n(AG, CHI, DTCO, DTI, DTGD, DTGR, DGEI, DGI, DGMI, DST, GB, IG, I, PKCI, PKDI, PKI, SLT, UG, U, TGRO, &
+                      HPROGRAM, GCOUPLING,                                                 &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
              PTSUN, PZENITH, PZENITH2,                                                     &

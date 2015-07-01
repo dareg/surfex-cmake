@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_BIN_n(HMASK,HACTION)
+      SUBROUTINE INIT_IO_SURF_BIN_n (DTCO, U, &
+                                     HMASK,HACTION)
 !     ######################
 !
 !!****  *INIT_IO_SURF_BIN_n* Keep in memory the output files
@@ -25,9 +26,11 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_IO_SURF_BIN, ONLY : NMASK, NFULL, CMASK
 !
@@ -42,6 +45,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 !
 IMPLICIT NONE
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
  CHARACTER(LEN=5),  INTENT(IN)  :: HACTION    

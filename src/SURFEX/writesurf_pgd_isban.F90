@@ -203,7 +203,8 @@ YCOMMENT='(LOGICAL LIST)'
                  HPROGRAM,YRECFM,I%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 YCOMMENT='COVER FIELDS'
- CALL WRITE_SURF_COV(HPROGRAM,'COVER',I%XCOVER(:,:),I%LCOVER,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF_COV(DGU, IOB, U, &
+                     HPROGRAM,'COVER',I%XCOVER(:,:),I%LCOVER,IRESP,HCOMMENT=YCOMMENT)
 !
 !* orography
 !
@@ -398,9 +399,11 @@ YCOMMENT='X_Y_TI_SKEW'
 ENDIF
 !
 !-------------------------------------------------------------------------------
- CALL WRITESURF_PGD_ISBA_PAR_n(DTI, &
+ CALL WRITESURF_PGD_ISBA_PAR_n(DGU, IOB, U, &
+                               DTI, &
                                HPROGRAM)
-IF (U%CNATURE=='TSZ0') CALL WRITESURF_PGD_TSZ0_PAR_n(DTZ, &
+IF (U%CNATURE=='TSZ0') CALL WRITESURF_PGD_TSZ0_PAR_n(DGU, IOB, U, &
+                                                     DTZ, &
                                                      HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_ISBA_N',1,ZHOOK_HANDLE)

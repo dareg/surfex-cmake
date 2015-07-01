@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
+SUBROUTINE OL_READ_ATM (IOB, &
+                         HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
                           PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
                           PCO2,PDIR,OLIMIT_QAIR                             )  
 !**************************************************************************
@@ -41,7 +42,9 @@ SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
 !!                            file and from initial file
 !!      B. Decharme  01/2009: Optional, limitation of Qair (<= Qsat(tair))
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_IO_SURF_OL, ONLY : XSTART,XCOUNT,XSTRIDE,LPARTR
@@ -61,6 +64,9 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 ! global variables
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PTA !K
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PQA
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PWIND

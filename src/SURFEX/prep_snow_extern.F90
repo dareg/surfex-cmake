@@ -182,7 +182,8 @@ END IF
 CALL OPEN_AUX_IO_SURF(IOB, &
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+CALL PREP_GRID_EXTERN(IOB, &
+                      HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !-------------------------------------------------------------------------------------
 !

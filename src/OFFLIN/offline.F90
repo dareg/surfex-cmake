@@ -548,7 +548,8 @@ XTIME0 = MPI_WTIME()
 !
 !       configuration of run
 !
- CALL OL_READ_ATM_CONF(U, &
+ CALL OL_READ_ATM_CONF(IOB, &
+                       U, &
                        CSURF_FILETYPE, CFORCING_FILETYPE,            &
                       ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
                       ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF     )
@@ -684,7 +685,8 @@ XTIME0 = MPI_WTIME()
 !
 IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
- CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, 1,             &
+ CALL OL_READ_ATM(IOB, &
+                  CSURF_FILETYPE, CFORCING_FILETYPE, 1,             &
                    ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
                    ZCO2,ZDIR,LLIMIT_QAIR                           ) 
 !
@@ -860,7 +862,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZCO2(:,IDMAX)=ZCO2(:,SIZE(ZTA,2))
       ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
     ENDIF
-    CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, JFORC_STEP,    &
+    CALL OL_READ_ATM(IOB, &
+                  CSURF_FILETYPE, CFORCING_FILETYPE, JFORC_STEP,    &
                      ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX), &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),&

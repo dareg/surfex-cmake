@@ -39,6 +39,9 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_CH_TEB_n, ONLY : CH_TEB_t
@@ -126,7 +129,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
 END DO
 !     
  CALL GOTO_WRAPPER_TEB_PATCH(1)
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(TCP, TOP, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(DGU, IOB, U, &
+                                                                       TCP, TOP, &
                                                                        HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

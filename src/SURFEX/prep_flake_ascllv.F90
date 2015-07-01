@@ -24,6 +24,8 @@ SUBROUTINE PREP_FLAKE_ASCLLV(HPROGRAM,HSURF,KLUOUT,PFIELD)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -89,7 +91,8 @@ SELECT CASE(HSURF)
 
   CASE('TS     ')
 
-    CALL PGD_FIELD(HPROGRAM,'TS_WATER: temperature','WAT',CFILE_FLAKE,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'TS_WATER: temperature','WAT',CFILE_FLAKE,   &
                         CTYPE,XUNDEF,ZFIELD(:))  
 
     ALLOCATE(PFIELD(IL,1))

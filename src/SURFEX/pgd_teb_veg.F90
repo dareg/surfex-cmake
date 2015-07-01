@@ -40,6 +40,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_PGD_GRID,          ONLY : NL
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
 USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
@@ -263,7 +268,8 @@ IF(LIMP_SAND)THEN
 !
 ELSE
 !
- CALL PGD_FIELD(HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,TGDP%XSAND(:,1))
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,TGDP%XSAND(:,1))
 ENDIF
 !
 DO JLAYER=1,TGDO%NGROUND_LAYER
@@ -281,7 +287,8 @@ IF(LIMP_CLAY)THEN
   CALL ABOR1_SFX('PGD_TEB_VEG: LIMP_SAND IS NOT CONSISTENT WITH TEB_GARDEN')
 !
 ELSE
- CALL PGD_FIELD(HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,TGDP%XCLAY(:,1))
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,TGDP%XCLAY(:,1))
 ENDIF
 !
 DO JLAYER=1,TGDO%NGROUND_LAYER
@@ -293,8 +300,8 @@ END DO
 !             --------------
 !
 ALLOCATE(TGDP%XRUNOFFB(TG%NDIM))
- CALL PGD_FIELD                                                                              &
-       (HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,TGDP%XRUNOFFB(:))  
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,TGDP%XRUNOFFB(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -302,8 +309,8 @@ ALLOCATE(TGDP%XRUNOFFB(TG%NDIM))
 !             --------------------
 !
 ALLOCATE(TGDP%XWDRAIN(TG%NDIM))
- CALL PGD_FIELD                                                                              &
-       (HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,TGDP%XWDRAIN(:))  
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
+                HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,TGDP%XWDRAIN(:))
 !
 !-------------------------------------------------------------------------------
 !

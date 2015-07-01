@@ -39,6 +39,9 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
 USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
@@ -86,10 +89,12 @@ IF (LHOOK) CALL DR_HOOK('WRITE_FLAKE_N',0,ZHOOK_HANDLE)
 !
  CALL WRITESURF_FLAKE_CONF_n(CHF, DGMF, F, &
                              HPROGRAM)
- CALL WRITESURF_FLAKE_n(F, &
+ CALL WRITESURF_FLAKE_n(DGU, IOB, U, &
+                        F, &
                         HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_FLAKE_SBL_n(F, FSB, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_FLAKE_SBL_n(DGU, IOB, U, &
+                                                                      F, FSB, &
                                                                       HPROGRAM,HWRITE)
 !
 !

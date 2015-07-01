@@ -36,6 +36,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -105,7 +108,8 @@ IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !*    4.      Bathymetry
 !             ----------
 !
- CALL PGD_BATHYFIELD(HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
+ CALL PGD_BATHYFIELD(UG, U, USS, &
+                     HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
        YNCVARNAME,XUNIF_SEABATHY,ZSEABATHY(:))  
 !-------------------------------------------------------------------------------
 !

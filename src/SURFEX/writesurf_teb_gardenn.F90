@@ -195,7 +195,8 @@ YCOMMENT='X_Y_GD_RESA (s/m)'
 !* snow mantel
 !
 YRECFM='GD'
- CALL WRITESURF_GR_SNOW(HPROGRAM,YRECFM,HPATCH,TGD%CUR%TSNOW)
+ CALL WRITESURF_GR_SNOW(DGU, IOB, U, &
+                        HPROGRAM,YRECFM,HPATCH,TGD%CUR%TSNOW)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_GARDEN_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

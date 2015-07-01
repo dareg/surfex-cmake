@@ -39,6 +39,9 @@
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
 USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
 USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
@@ -97,7 +100,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_SEAFLUX_N',0,ZHOOK_HANDLE)
  CALL WRITESURF_SEAFLUX_n(O, OR, S, &
                           HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_SEAFLUX_SBL_n(S, SSB, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_SEAFLUX_SBL_n(DGU, IOB, U, &
+                                                                        S, SSB, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------
