@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_TEB_DEPTHS (DTCO, &
+      SUBROUTINE GET_TEB_DEPTHS (IOB, &
+                                  DTCO, &
                                  HFILEPGD, HFILEPGDTYPE, PD_ROOF, PD_ROAD, PD_WALL, PD_FLOOR)
 !     ##############################################################
 !
@@ -37,7 +38,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
@@ -64,6 +67,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !

@@ -33,6 +33,8 @@ CONTAINS
 !
 !
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_n, ONLY : ISBA_t
@@ -212,7 +214,8 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
     DO JLAYER=1,KLAYER
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A4,I1.1)') 'D_DG',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A4,I2.2)') 'D_DG',JLAYER
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,KLUOUT,KNI,ZWORK,IRESP,IVERSION,HDIR='A')
       DO JPATCH=1,KPATCH
@@ -236,7 +239,8 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       YRECFM2='D_GROUND_DETPH'
       IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='D_GROUND_DPT'
       ALLOCATE(ZGROUND_DEPTH(KNI,KPATCH))
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM2,KLUOUT,KNI,ZGROUND_DEPTH(:,:),IRESP,IVERSION,HDIR='A')
       !

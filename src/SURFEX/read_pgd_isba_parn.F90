@@ -504,7 +504,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_VEG(IG%NDIM,DTI%NTIME,NVEGTYPE))           
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A7,I2.2)') 'D_VEG_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_VEG(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)       
@@ -515,7 +516,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_LAI(IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A7,I2.2)') 'D_LAI_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_LAI(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -526,7 +528,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_LAIGV(IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A9,I2.2)') 'D_LAIGV_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_LAIGV(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -537,7 +540,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_H_VEG(IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A9,I2.2)') 'D_H_VEG_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_H_VEG(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -548,7 +552,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_GNDLITTER(IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A7,I2.2)') 'D_GNDLITTER',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_GNDLITTER(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -559,7 +564,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_Z0        (IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A6,I2.2)') 'D_Z0_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_Z0(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -570,7 +576,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_Z0LITTER        (IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A8,I2.2)') 'D_Z0LITTER_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_Z0LITTER(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -581,7 +588,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_EMIS      (IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A8,I2.2)') 'D_EMIS_T',JTIME
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_EMIS(:,JTIME,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -591,7 +599,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_RSMIN) THEN
     ALLOCATE(DTI%XPAR_RSMIN     (IG%NDIM,NVEGTYPE))
     YRECFM='D_RSMIN'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_RSMIN(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -600,7 +609,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_RSMINGV) THEN
     ALLOCATE(DTI%XPAR_RSMINGV     (IG%NDIM,NVEGTYPE))
     YRECFM='D_RSMINGV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_RSMINGV(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -609,7 +619,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_GAMMA) THEN
     ALLOCATE(DTI%XPAR_GAMMA     (IG%NDIM,NVEGTYPE))
     YRECFM='D_GAMMA'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_GAMMA(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -618,7 +629,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_GAMMAGV) THEN
     ALLOCATE(DTI%XPAR_GAMMAGV     (IG%NDIM,NVEGTYPE))
     YRECFM='D_GAMMAGV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_GAMMAGV(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -627,7 +639,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_WRMAX_CF) THEN
     ALLOCATE(DTI%XPAR_WRMAX_CF  (IG%NDIM,NVEGTYPE))
     YRECFM='D_WRMAX_CF'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_WRMAX_CF(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -636,7 +649,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_WRMAX_CFGV) THEN
     ALLOCATE(DTI%XPAR_WRMAX_CFGV  (IG%NDIM,NVEGTYPE))
     YRECFM='D_WRMAX_CFGV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_WRMAX_CFGV(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -645,7 +659,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_RGL) THEN
     ALLOCATE(DTI%XPAR_RGL       (IG%NDIM,NVEGTYPE))
     YRECFM='D_RGL'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_RGL(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -654,7 +669,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_RGLGV) THEN
     ALLOCATE(DTI%XPAR_RGLGV       (IG%NDIM,NVEGTYPE))
     YRECFM='D_RGLGV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_RGLGV(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -663,7 +679,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ZF_TALLVEG) THEN
     ALLOCATE(DTI%XPAR_ZF_TALLVEG       (IG%NDIM,NVEGTYPE))
     YRECFM='D_ZF_TALLVEG'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ZF_TALLVEG(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -672,7 +689,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_CV) THEN
     ALLOCATE(DTI%XPAR_CV        (IG%NDIM,NVEGTYPE))
     YRECFM='D_CV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_CV(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -681,7 +699,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_Z0_O_Z0H) THEN
     ALLOCATE(DTI%XPAR_Z0_O_Z0H  (IG%NDIM,NVEGTYPE))
     YRECFM='D_Z0_O_Z0H'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_Z0_O_Z0H(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -693,7 +712,8 @@ IF (.NOT.OLAND_USE) THEN
     DO JLAYER=1,SIZE(DTI%XPAR_DG,2)
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A4,I1.1)') 'D_DG',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A4,I2.2)') 'D_DG',JLAYER
-      CALL READ_SURF_ISBA_PAR_n(IOB, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,ZWORK,IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -710,7 +730,8 @@ IF (.NOT.OLAND_USE) THEN
     DO JLAYER=1,SIZE(DTI%XPAR_ROOTFRAC,2)
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A10,I1.1)') 'D_ROOTFRAC',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A10,I2.2)') 'D_ROOTFRAC',JLAYER
-        CALL READ_SURF_ISBA_PAR_n(IOB, &
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,ZWORK,IRESP,IVERSION,&
                                   HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -727,7 +748,8 @@ IF (.NOT.OLAND_USE) THEN
     DO JLAYER=1,SIZE(DTI%XPAR_ROOTFRACGV,2)
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A10,I1.1)') 'D_RTFRACGV',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A10,I2.2)') 'D_RTFRACGV',JLAYER
-        CALL READ_SURF_ISBA_PAR_n(IOB, &
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,ZWORK,IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -741,7 +763,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_DICE) THEN
     ALLOCATE(DTI%XPAR_DICE      (IG%NDIM,NVEGTYPE))
     YRECFM='D_DICE'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_DICE(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -751,7 +774,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_GROUND_DEPTH(IG%NDIM,NVEGTYPE))
     YRECFM2='D_GROUND_DEPTH'
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='D_GROUND_DPT'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM2,ILUOUT,KSIZE,DTI%XPAR_GROUND_DEPTH(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -760,7 +784,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ROOT_DEPTH) THEN
     ALLOCATE(DTI%XPAR_ROOT_DEPTH(IG%NDIM,NVEGTYPE))
     YRECFM='D_ROOT_DEPTH'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ROOT_DEPTH(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -769,7 +794,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ROOT_DEPTHGV) THEN
     ALLOCATE(DTI%XPAR_ROOT_DEPTHGV(IG%NDIM,NVEGTYPE))
     YRECFM='D_RT_DEPTHGV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ROOT_DEPTHGV(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -778,7 +804,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ROOT_EXTINCTION) THEN
     ALLOCATE(DTI%XPAR_ROOT_EXTINCTION(IG%NDIM,NVEGTYPE))
     YRECFM='D_ROOT_EXT'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ROOT_EXTINCTION(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -787,7 +814,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ROOT_EXTINCTIONGV) THEN
     ALLOCATE(DTI%XPAR_ROOT_EXTINCTIONGV(IG%NDIM,NVEGTYPE))
     YRECFM='D_RT_EXTGV'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ROOT_EXTINCTIONGV(:,:),IRESP,IVERSION,&
                                 HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -796,7 +824,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ROOT_LIN) THEN
     ALLOCATE(DTI%XPAR_ROOT_LIN(IG%NDIM,NVEGTYPE))
     YRECFM='D_ROOT_LIN'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ROOT_LIN(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -805,7 +834,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ALBNIR_VEG) THEN
     ALLOCATE(DTI%XPAR_ALBNIR_VEG(IG%NDIM,NVEGTYPE))
     YRECFM='D_ALBNIR_VEG'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ALBNIR_VEG(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -814,7 +844,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ALBVIS_VEG) THEN
     ALLOCATE(DTI%XPAR_ALBVIS_VEG(IG%NDIM,NVEGTYPE))
     YRECFM='D_ALBVIS_VEG'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ALBVIS_VEG(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -823,7 +854,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ALBUV_VEG) THEN
     ALLOCATE(DTI%XPAR_ALBUV_VEG (IG%NDIM,NVEGTYPE))
     YRECFM='D_ALBUV_VEG'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ALBUV_VEG(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -832,7 +864,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ALBNIR_SOIL) THEN
     ALLOCATE(DTI%XPAR_ALBNIR_SOIL(IG%NDIM,NVEGTYPE))
     YRECFM='D_ALBNIR_SOI'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ALBNIR_SOIL(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -841,7 +874,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ALBVIS_SOIL) THEN
     ALLOCATE(DTI%XPAR_ALBVIS_SOIL(IG%NDIM,NVEGTYPE))
     YRECFM='D_ALBVIS_SOI'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ALBVIS_SOIL(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -850,7 +884,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_ALBUV_SOIL) THEN
     ALLOCATE(DTI%XPAR_ALBUV_SOIL (IG%NDIM,NVEGTYPE))
     YRECFM='D_ALBUV_SOI'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_ALBUV_SOIL(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -859,7 +894,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_GMES) THEN
     ALLOCATE(DTI%XPAR_GMES      (IG%NDIM,NVEGTYPE))
     YRECFM='D_GMES'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_GMES(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -868,7 +904,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_BSLAI) THEN
     ALLOCATE(DTI%XPAR_BSLAI     (IG%NDIM,NVEGTYPE))
     YRECFM='D_BSLAI'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_BSLAI(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -877,7 +914,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_LAIMIN) THEN
     ALLOCATE(DTI%XPAR_LAIMIN    (IG%NDIM,NVEGTYPE))
     YRECFM='D_LAIMIN'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_LAIMIN(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -886,7 +924,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_SEFOLD) THEN
     ALLOCATE(DTI%XPAR_SEFOLD    (IG%NDIM,NVEGTYPE))
     YRECFM='D_SEFOLD'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_SEFOLD(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -895,7 +934,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_GC) THEN
     ALLOCATE(DTI%XPAR_GC        (IG%NDIM,NVEGTYPE))
     YRECFM='D_GC'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_GC(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -904,7 +944,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_DMAX) THEN
     ALLOCATE(DTI%XPAR_DMAX      (IG%NDIM,NVEGTYPE))
     YRECFM='D_DMAX'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_DMAX(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -913,7 +954,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_F2I) THEN
     ALLOCATE(DTI%XPAR_F2I       (IG%NDIM,NVEGTYPE))
     YRECFM='D_F2I'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_F2I(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -923,7 +965,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%LPAR_STRESS   (IG%NDIM,NVEGTYPE))
     ALLOCATE(ZWORK(SIZE(DTI%LPAR_STRESS,1),SIZE(DTI%LPAR_STRESS,2)))
     YRECFM='D_STRESS'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,ZWORK(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -935,7 +978,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_H_TREE) THEN
     ALLOCATE(DTI%XPAR_H_TREE    (IG%NDIM,NVEGTYPE))
     YRECFM='D_H_TREE'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_H_TREE(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -944,7 +988,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_RE25) THEN
     ALLOCATE(DTI%XPAR_RE25      (IG%NDIM,NVEGTYPE))
     YRECFM='D_RE25'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_RE25(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -953,7 +998,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_CE_NITRO) THEN
     ALLOCATE(DTI%XPAR_CE_NITRO  (IG%NDIM,NVEGTYPE))
     YRECFM='D_CE_NITRO'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_CE_NITRO(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -962,7 +1008,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_CF_NITRO) THEN
     ALLOCATE(DTI%XPAR_CF_NITRO  (IG%NDIM,NVEGTYPE))
     YRECFM='D_CF_NITRO'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_CF_NITRO(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -971,7 +1018,8 @@ IF (.NOT.OLAND_USE) THEN
   IF (DTI%LDATA_CNA_NITRO) THEN
     ALLOCATE(DTI%XPAR_CNA_NITRO (IG%NDIM,NVEGTYPE))
     YRECFM='D_CNA_NITRO'
-    CALL READ_SURF_ISBA_PAR_n(IOB, &
+    CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_CNA_NITRO(:,:),IRESP,IVERSION,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -981,7 +1029,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_IRRIG     (IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A9,I2.2)') 'D_IRRIG_T',JTIME
-        CALL READ_SURF_ISBA_PAR_n(IOB, &
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_IRRIG(:,JTIME,:),IRESP,IVERSION,&
                                   HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -992,7 +1041,8 @@ IF (.NOT.OLAND_USE) THEN
     ALLOCATE(DTI%XPAR_WATSUP     (IG%NDIM,DTI%NTIME,NVEGTYPE))
     DO JTIME=1,ITIME
       WRITE(YRECFM,FMT='(A10,I2.2)') 'D_WATSUP_T',JTIME
-        CALL READ_SURF_ISBA_PAR_n(IOB, &
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, &
+                                IOB, &
                                 I, &
                                 HPROGRAM,YRECFM,ILUOUT,KSIZE,DTI%XPAR_WATSUP(:,JTIME,:),IRESP,IVERSION,&
                                   HCOMMENT=YCOMMENT,HDIR=YDIR)

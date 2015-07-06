@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_ISBA_PAR(HPROGRAM)
+      SUBROUTINE PGD_ISBA_PAR (DTCO, DTI, IG, I, UG, U, &
+                               HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_ISBA_PAR* monitor for averaging and interpolations of cover fractions
@@ -39,15 +40,17 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -67,6 +70,14 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !

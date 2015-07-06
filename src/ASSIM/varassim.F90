@@ -18,6 +18,50 @@ PROGRAM VARASSIM
 ! New formulation of the B matrix to ensure its positive definiteness
 ! -----------------------------------------------------------------------------
 !
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SV_n, ONLY : SV => SV
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 !
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -144,7 +188,7 @@ INCLUDE 'mpif.h'
  REAL,DIMENSION(:,:,:),ALLOCATABLE          :: IdKH
  REAL,DIMENSION(:,:),ALLOCATABLE            :: ZX,ZB,ZP
  REAL,DIMENSION(:,:),ALLOCATABLE            :: YOWR
- INTEGER                                    :: I,J,JJ,K,KK,L
+ INTEGER                                    :: JI,J,JJ,K,KK,L
  LOGICAL                                    :: LPRT                      ! Running VARASSIM in a perturbation mode
  LOGICAL                                    :: LSIM                      ! Running VARASSIM in a reading mode
  LOGICAL                                    :: LBEV                      ! Running VARASSIM to evolve B
@@ -267,12 +311,12 @@ NNCV(:) = 0
 !
 ! select relevant control vars
  J = 1
- DO I = 1,NVARMAX
-  IF (NNCV(I) == 1 .AND. J <= NVAR ) THEN
-   TPRT(J) = XTPRT_M(I)
-   XSIGMA(J) = XSIGMA_M(I)
-   XVAR(J) = CVAR_M(I)
-   PREFIX(J) = CPREFIX_M(I)
+ DO JI = 1,NVARMAX
+  IF (NNCV(JI) == 1 .AND. J <= NVAR ) THEN
+   TPRT(J) = XTPRT_M(JI)
+   XSIGMA(J) = XSIGMA_M(JI)
+   XVAR(J) = CVAR_M(JI)
+   PREFIX(J) = CPREFIX_M(JI)
    J = J + 1
   ENDIF
  ENDDO
@@ -298,7 +342,11 @@ NNCV(:) = 0
 !
 !   Read grid dimension for allocation
 !
- CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'FULL  ','SURF  ','READ ')
 !
 !   Find current time
 !
@@ -308,7 +356,11 @@ print *, 'Time from PREP file : ', TTIME
 !
  CALL END_IO_SURF_n(YPROGRAM)
  CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'FULL  ','SURF  ','READ ')
 !
 !   Reading grid characteristics to perform nature mask
 !
@@ -352,7 +404,8 @@ ENDIF
 !
  CALL GET_SIZE_FULL_n(U, &
                       YPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
- CALL READ_COVER_n(YPROGRAM)
+ CALL READ_COVER_n(DTCO, IOB, U, &
+                   YPROGRAM)
  CALL END_IO_SURF_n(YPROGRAM)
 !
 !   Perform masks (only nature used)
@@ -373,7 +426,11 @@ ENDIF
 !   Read number of patches
 !
  CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ')
- CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','READ ')
  CALL READ_SURF(IOB, &
                 YPROGRAM,'PATCH_NUMBER',PATCH_NUMBER,IRESP)
 !
@@ -394,16 +451,20 @@ ENDIF
 ! 
  CALL END_IO_SURF_n(YPROGRAM)
  CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','READ ')
 !
  XOBS_M(1) = 'WG1'
  XOBS_M(2) = 'LAI'
 !
  J = 1
- DO I = 1,NOBSMAX
-  IF (NNCO(I) == 1 .AND. J <= NOBSTYPE ) THEN
-   ERROBS(J) = XERROBS_M(I)
-   XOBS(J) = XOBS_M(I)
+ DO JI = 1,NOBSMAX
+  IF (NNCO(JI) == 1 .AND. J <= NOBSTYPE ) THEN
+   ERROBS(J) = XERROBS_M(JI)
+   XOBS(J) = XOBS_M(JI)
    J = J + 1
   ENDIF
  ENDDO
@@ -444,7 +505,11 @@ ALLOCATE(LPATCH(U%NSIZE_NATURE,PATCH_NUMBER))
  CALL END_IO_SURF_n(YPROGRAM)
  CALL IO_BUFF_CLEAN_n(IOB)
  CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')
- CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','READ ')
  IF (PATCH_NUMBER > 1) THEN
    CALL READ_SURF(IOB, &
                 YPROGRAM,'PATCH',XPATCH,IRESP)
@@ -454,10 +519,10 @@ ALLOCATE(LPATCH(U%NSIZE_NATURE,PATCH_NUMBER))
 !
 LPATCH(:,:) = .FALSE.
 !
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-         IF (XPATCH(I,J) > 0.0) THEN
-           LPATCH(I,J) = .TRUE.
+         IF (XPATCH(JI,J) > 0.0) THEN
+           LPATCH(JI,J) = .TRUE.
          ENDIF
      ENDDO
    ENDDO
@@ -467,10 +532,10 @@ LPATCH(:,:) = .FALSE.
  ALLOCATE(SMSAT(U%NSIZE_NATURE)) 
  ALLOCATE(B(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
 !
- DO I=1,U%NSIZE_NATURE
-  COFSWI(I)=0.001*(89.0467*((100.*ZCLAY(I))**0.3496)-37.1342*((100.*ZCLAY(I))**0.5))
-  SMSAT(I)=0.001*(-1.08*100*ZSAND(I)+494.305) 
-  WILT(I)=0.001*37.1342*((100.*ZCLAY(I))**0.5)
+ DO JI=1,U%NSIZE_NATURE
+  COFSWI(JI)=0.001*(89.0467*((100.*ZCLAY(JI))**0.3496)-37.1342*((100.*ZCLAY(JI))**0.5))
+  SMSAT(JI)=0.001*(-1.08*100*ZSAND(JI)+494.305) 
+  WILT(JI)=0.001*37.1342*((100.*ZCLAY(JI))**0.5)
  ENDDO
 !
 !   Frequency of assimilation cycling and data availability
@@ -504,24 +569,28 @@ LPATCH(:,:) = .FALSE.
    PRINT *,'   ------------------------------------'
 ! read in control variable
    CFILEOUT='SURFOUT.txt'
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-       IF (XI(I,J,NIVAR).NE.XUNDEF) THEN                                 ! check whether values are undefined
-          VECT(I,J) = XI(I,J,NIVAR) + TPRT(NIVAR)*XI(I,J,NIVAR) 
+       IF (XI(JI,J,NIVAR).NE.XUNDEF) THEN                                 ! check whether values are undefined
+          VECT(JI,J) = XI(JI,J,NIVAR) + TPRT(NIVAR)*XI(JI,J,NIVAR) 
        ELSE
-          VECT(I,J) = XI(I,J,NIVAR)
+          VECT(JI,J) = XI(JI,J,NIVAR)
        ENDIF
-       IF (XI(I,J,NIVAR).NE.XUNDEF .AND. XVAR(NIVAR).EQ.'LAI') THEN
-          ZBIO_OUT(I,J) = ZBIO_PASS(I,J) + TPRT(NIVAR)*ZBIO_PASS(I,J)
+       IF (XI(JI,J,NIVAR).NE.XUNDEF .AND. XVAR(NIVAR).EQ.'LAI') THEN
+          ZBIO_OUT(JI,J) = ZBIO_PASS(JI,J) + TPRT(NIVAR)*ZBIO_PASS(JI,J)
        ELSE
-          ZBIO_OUT(I,J) = ZBIO_PASS(I,J)
+          ZBIO_OUT(JI,J) = ZBIO_PASS(JI,J)
        ENDIF
      ENDDO
    ENDDO
 
    CALL END_IO_SURF_n(YPROGRAM)
    CALL IO_BUFF_CLEAN_n(IOB)
-   CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','WRITE')
+   CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','WRITE')
    CALL WRITE_SURF(DGU, IOB, U, &
                    YPROGRAM,XVAR(NIVAR),VECT,IRESP,HCOMMENT=PREFIX(NIVAR))
    IF (XVAR(NIVAR).EQ.'LAI') THEN
@@ -533,10 +602,10 @@ LPATCH(:,:) = .FALSE.
 !
 ! write out perturbation
    OPEN (unit=111,file='PERTURB',status='unknown',IOSTAT=istat)
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-       IF (XI(I,J,NIVAR).NE.XUNDEF) THEN
-         WRITE (111,*) TPRT(NIVAR)*XI(I,J,NIVAR)
+       IF (XI(JI,J,NIVAR).NE.XUNDEF) THEN
+         WRITE (111,*) TPRT(NIVAR)*XI(JI,J,NIVAR)
        ELSE
          WRITE (111,*) 1.0
        ENDIF
@@ -548,14 +617,14 @@ LPATCH(:,:) = .FALSE.
 !
    B(:,:,:) = 0.0
    DO L=1,NVAR
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
          IF (XVAR(L) .EQ. 'WG1' .OR. XVAR(L) .EQ. 'WG2') THEN
-          B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*COFSWI(I)*COFSWI(I)
+          B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*COFSWI(JI)*COFSWI(JI)
          ELSEIF (XVAR(L) .EQ. 'LAI') THEN 
-          B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)!*LAI_PASS(I,J)*LAI_PASS(I,J)
+          B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)!*LAI_PASS(I,J)*LAI_PASS(I,J)
          ELSE
-           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)
+           B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)
          ENDIF
        ENDDO
      ENDDO
@@ -566,12 +635,12 @@ LPATCH(:,:) = .FALSE.
    IF (istat .NE. 0) THEN
      STOP 'BGROUNDin0 already written'
    ELSE
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
          DO JJ=1,PATCH_NUMBER
            DO L=1,NVAR
              DO K=1,NVAR
-               WRITE (111,*) B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1))
+               WRITE (111,*) B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1))
              ENDDO
            ENDDO
          ENDDO
@@ -607,7 +676,11 @@ LPATCH(:,:) = .FALSE.
    CALL END_IO_SURF_n(YPROGRAM)
    CALL IO_BUFF_CLEAN_n(IOB)
    CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')
-   CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
+   CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','READ ')
 !
    ALLOCATE(SIMOBS(U%NSIZE_NATURE,PATCH_NUMBER,NOBSTYPE))
    ALLOCATE(SIMMOD(U%NSIZE_NATURE,PATCH_NUMBER,NVAR))
@@ -622,22 +695,22 @@ LPATCH(:,:) = .FALSE.
        ALLOCATE(XWG2(U%NSIZE_NATURE,PATCH_NUMBER))
        OPEN(UNIT=111,FILE='mxwg2.dat',FORM='FORMATTED',STATUS='OLD',IOSTAT=istat)
        IF (ISTAT.EQ.0) THEN
-         DO I=1,U%NSIZE_NATURE
+         DO JI=1,U%NSIZE_NATURE
            DO J=1,PATCH_NUMBER
-             READ(111,*) MWG2(I,J),XWG2(I,J)
-             WG2MIN = MWG2(I,J)
-             SCALE_SWI = XWG2(I,J) - MWG2(I,J)
-             IF( LPATCH(I,J).AND. SCALE_SWI > 1.0E-6 ) THEN
-               SIMOBS(I,J,K)=(SIMOBS(I,J,K)*COFSWI(I)+WILT(I)-WG2MIN)/SCALE_SWI
+             READ(111,*) MWG2(JI,J),XWG2(JI,J)
+             WG2MIN = MWG2(JI,J)
+             SCALE_SWI = XWG2(JI,J) - MWG2(JI,J)
+             IF( LPATCH(JI,J).AND. SCALE_SWI > 1.0E-6 ) THEN
+               SIMOBS(JI,J,K)=(SIMOBS(JI,J,K)*COFSWI(JI)+WILT(JI)-WG2MIN)/SCALE_SWI
              ENDIF
            ENDDO
          ENDDO
          CLOSE(111)
        ELSE
          PRINT *, 'No mxwg2.dat file, use namelist given WG2min and scale values'
-         DO I=1,U%NSIZE_NATURE
+         DO JI=1,U%NSIZE_NATURE
            DO J=1,PATCH_NUMBER
-             SIMOBS(I,J,K)=(SIMOBS(I,J,K)*COFSWI(I)+WILT(I)-WG2MIN)/SCALE_SWI
+             SIMOBS(JI,J,K)=(SIMOBS(JI,J,K)*COFSWI(JI)+WILT(JI)-WG2MIN)/SCALE_SWI
            ENDDO
          ENDDO
        ENDIF
@@ -649,24 +722,28 @@ LPATCH(:,:) = .FALSE.
    CALL END_IO_SURF_n(YPROGRAM)
    CALL IO_BUFF_CLEAN_n(IOB)
    CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')
-   CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
+   CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','READ ')
 !
    OPEN (unit=111,file='OBSIMU',status='unknown')
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-       WRITE (111,*) (SIMOBS(I,J,K),K = 1,NOBSTYPE)
+       WRITE (111,*) (SIMOBS(JI,J,K),K = 1,NOBSTYPE)
      ENDDO
    ENDDO
    CLOSE(111)
 !
-   DO I = 1, NVAR
+   DO JI = 1, NVAR
      CALL READ_SURF(IOB, &
-                YPROGRAM,XVAR(I),SIMMOD(:,:,I),IRESP)
+                YPROGRAM,XVAR(JI),SIMMOD(:,:,JI),IRESP)
    ENDDO
    OPEN (unit=111,file='MDSIMU',status='unknown',IOSTAT=istat)
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-       WRITE (111,*) (SIMMOD(I,J,L),L=1,NVAR)
+       WRITE (111,*) (SIMMOD(JI,J,L),L=1,NVAR)
      ENDDO  
    ENDDO
    CLOSE(111)
@@ -704,10 +781,10 @@ LPATCH(:,:) = .FALSE.
   OPEN (unit=111,file='BGROUNDin',status='old',IOSTAT=istat)
   DO L=1,NVAR   ! control variable (x at previous time step)
      DO K=1,NVAR
-       DO I=1,U%NSIZE_NATURE
+       DO JI=1,U%NSIZE_NATURE
          DO J=1,PATCH_NUMBER
            DO JJ=1,PATCH_NUMBER
-             READ (111,*) B(I,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
+             READ (111,*) B(JI,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
            ENDDO
          ENDDO
        ENDDO
@@ -724,9 +801,9 @@ LPATCH(:,:) = .FALSE.
      NMFILE_CANARI='MDSIMU_PERT_'//LCHAR//'_'
      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,NMFILE_CANARI)
      OPEN(UNIT=111,FILE=TRIM(NMFILE_CANARI)//".DAT",FORM='FORMATTED',STATUS='OLD')
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER 
-         READ(111,*) (XF(I,J,L+1,K),K=1,NVAR)
+         READ(111,*) (XF(JI,J,L+1,K),K=1,NVAR)
        ENDDO
      ENDDO
      CLOSE(111)
@@ -738,9 +815,9 @@ LPATCH(:,:) = .FALSE.
    NMFILE_CANARI='MDSIMU_REFR_'
    CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,NMFILE_CANARI)
    OPEN(UNIT=111,FILE=TRIM(NMFILE_CANARI)//".DAT",FORM='FORMATTED',STATUS='OLD')
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-       READ(111,*) (XF(I,J,1,K),K=1,NVAR)
+       READ(111,*) (XF(JI,J,1,K),K=1,NVAR)
      ENDDO
    ENDDO
    CLOSE(111)
@@ -753,9 +830,9 @@ LPATCH(:,:) = .FALSE.
      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,NMFILE_CANARI)
      PRINT *, 'read in PERTURBation: ', NMFILE_CANARI(1:LEN_TRIM(NMFILE_CANARI))
      OPEN(UNIT=111,FILE=TRIM(NMFILE_CANARI)//".DAT",FORM='FORMATTED',STATUS='OLD')
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
-         READ(111,*) ZEPS(I,J,L)
+         READ(111,*) ZEPS(JI,J,L)
        ENDDO
      ENDDO
      CLOSE(111)
@@ -766,13 +843,13 @@ LPATCH(:,:) = .FALSE.
 LTM(:,:,:) = 0.0
 DO L=1,NVAR    ! control variable (x at previous time step)
   DO K=1,NVAR
-    DO I=1,U%NSIZE_NATURE 
+    DO JI=1,U%NSIZE_NATURE 
       DO J=1,PATCH_NUMBER 
-           IF (LPATCH(I,J) .AND. XF(I,J,L+1,K).NE.XUNDEF .AND. XF(I,J,1,K).NE.XUNDEF ) THEN
+           IF (LPATCH(JI,J) .AND. XF(JI,J,L+1,K).NE.XUNDEF .AND. XF(JI,J,1,K).NE.XUNDEF ) THEN
              ! Jacobian of fwd model
-             LTM(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)) = (XF(I,J,L+1,K) - XF(I,J,1,K))/ZEPS(I,J,L)
-             LTM(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)) = max(-0.1, LTM(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)))! impose upper/lower limits 
-             LTM(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)) = min(1.0, LTM(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)))
+             LTM(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)) = (XF(JI,J,L+1,K) - XF(JI,J,1,K))/ZEPS(JI,J,L)
+             LTM(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)) = max(-0.1, LTM(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)))! impose upper/lower limits 
+             LTM(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)) = min(1.0, LTM(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1)))
            ENDIF
          ENDDO
        ENDDO
@@ -781,8 +858,8 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 !
 ! e) evolve B 
 !
-   DO I=1,U%NSIZE_NATURE
-     B(I,:,:)=MATMUL(LTM(I,:,:),MATMUL(B(I,:,:),TRANSPOSE(LTM(I,:,:))))
+   DO JI=1,U%NSIZE_NATURE
+     B(JI,:,:)=MATMUL(LTM(JI,:,:),MATMUL(B(JI,:,:),TRANSPOSE(LTM(JI,:,:))))
    ENDDO
 !
 ! write out the LTM for the forward model
@@ -791,9 +868,9 @@ DO L=1,NVAR    ! control variable (x at previous time step)
      DO K=1,NVAR 
        LFNAME='LTM_del'//XVAR(K)//'_del'//XVAR(L)
        OPEN(UNIT=111,FILE=LFNAME,FORM='FORMATTED',STATUS='UNKNOWN',ACCESS='APPEND')
-       DO I=1,U%NSIZE_NATURE
+       DO JI=1,U%NSIZE_NATURE
          DO J=1,PATCH_NUMBER
-           WRITE (111,*) LTM(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1))
+           WRITE (111,*) LTM(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(K-1))
          ENDDO
        ENDDO
        CLOSE(111)
@@ -806,10 +883,10 @@ DO L=1,NVAR    ! control variable (x at previous time step)
   OPEN (unit=111,file='BGROUNDout',status='unknown')
   DO L=1,NVAR
     DO K=1,NVAR
-      DO I=1,U%NSIZE_NATURE
+      DO JI=1,U%NSIZE_NATURE
         DO J=1,PATCH_NUMBER
            DO JJ=1,PATCH_NUMBER
-             WRITE (111,*)  B(I,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
+             WRITE (111,*)  B(JI,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
            ENDDO
          ENDDO
        ENDDO
@@ -878,7 +955,11 @@ DO L=1,NVAR    ! control variable (x at previous time step)
  CALL END_IO_SURF_n(YPROGRAM)
  CALL IO_BUFF_CLEAN_n(IOB)
  CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP')
- CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','READ ')
  IF (PATCH_NUMBER > 1) THEN
    CALL READ_SURF(IOB, &
                 YPROGRAM,'PATCH',XPATCH,IRESP)
@@ -936,9 +1017,9 @@ DO L=1,NVAR    ! control variable (x at previous time step)
      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,NMFILE_CANARI)
      PRINT *, 'read in PERTURBation for H: ', NMFILE_CANARI(1:LEN_TRIM(NMFILE_CANARI))//".DAT"
      OPEN(UNIT=111,FILE=TRIM(NMFILE_CANARI)//".DAT",FORM='FORMATTED',STATUS='OLD')
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
-         READ(111,*) ZEPS(I,J,L)
+         READ(111,*) ZEPS(JI,J,L)
        ENDDO
      ENDDO
      CLOSE(111)
@@ -965,8 +1046,8 @@ DO L=1,NVAR    ! control variable (x at previous time step)
    NOBS=NOBS+NOBSTYPE 
 !
 !   If it exists, read observations
-   DO I=1,U%NSIZE_NATURE
-     READ (ILOBS,*)  (YO(I,J),J=1,NOBSTYPE)
+   DO JI=1,U%NSIZE_NATURE
+     READ (ILOBS,*)  (YO(JI,J),J=1,NOBSTYPE)
    ENDDO
    PRINT *,'read in obs: ', YO(1,:), NOBS
 !
@@ -979,9 +1060,9 @@ DO L=1,NVAR    ! control variable (x at previous time step)
      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,NMFILE_CANARI)
      PRINT *, '--> read in ptbd forecasts for H: ', NMFILE_CANARI(1:LEN_TRIM(NMFILE_CANARI))//".DAT"
      OPEN(UNIT=111,FILE=TRIM(NMFILE_CANARI)//".DAT",FORM='FORMATTED',STATUS='OLD')
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
-         READ(111,*) (YF_PATCH(I,J,L+1,K+NOBS-NOBSTYPE),K=1,NOBSTYPE)
+         READ(111,*) (YF_PATCH(JI,J,L+1,K+NOBS-NOBSTYPE),K=1,NOBSTYPE)
        ENDDO
      ENDDO
      CLOSE(111)
@@ -992,9 +1073,9 @@ DO L=1,NVAR    ! control variable (x at previous time step)
    PRINT *, '--> read in refr forecasts for H: ', NMFILE_CANARI(1:LEN_TRIM(NMFILE_CANARI))//".DAT"
    OPEN(UNIT=111,FILE=TRIM(NMFILE_CANARI)//".DAT",FORM='FORMATTED',STATUS='OLD')
 !
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
-       READ(111,*) (YF_PATCH(I,J,1,K+NOBS-NOBSTYPE),K=1,NOBSTYPE)
+       READ(111,*) (YF_PATCH(JI,J,1,K+NOBS-NOBSTYPE),K=1,NOBSTYPE)
      ENDDO
    ENDDO
    CLOSE(111)
@@ -1004,12 +1085,12 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 !
 !  Mean simulated obs averaged over tiles
 !
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER
        DO K=1,NOBS
          DO L=1,NVAR+1
-           IF (YF_PATCH(I,J,L,K).NE.XUNDEF) THEN
-             YF(I,L,K) = YF(I,L,K) + XPATCH(I,J)*YF_PATCH(I,J,L,K)
+           IF (YF_PATCH(JI,J,L,K).NE.XUNDEF) THEN
+             YF(JI,L,K) = YF(JI,L,K) + XPATCH(JI,J)*YF_PATCH(JI,J,L,K)
            ENDIF
          ENDDO
        ENDDO
@@ -1027,15 +1108,15 @@ DO L=1,NVAR    ! control variable (x at previous time step)
  IDAY   = TTIME%TDATE%DAY
  ZTIME  = TTIME%TIME
 
- DO I=1,U%NSIZE_NATURE
+ DO JI=1,U%NSIZE_NATURE
    DO K=1,NOBS
      IF (XOBS(K) .EQ. 'LAI') THEN
-            R(I,K,K) = ERROBS(K)*ERROBS(K)*YO(I,K)*YO(I,K)
+            R(JI,K,K) = ERROBS(K)*ERROBS(K)*YO(JI,K)*YO(JI,K)
      ELSEIF (XOBS(K) .EQ. 'WG1') THEN
 !  convert R for wg1 from SWI to abs value
-       R(I,K,K) = ERROBS(K)*ERROBS(K)*COFSWI(I)*COFSWI(I) 
+       R(JI,K,K) = ERROBS(K)*ERROBS(K)*COFSWI(JI)*COFSWI(JI) 
      ELSE
-       R(I,K,K) = ERROBS(K)*ERROBS(K)
+       R(JI,K,K) = ERROBS(K)*ERROBS(K)
      ENDIF
    ENDDO
  ENDDO
@@ -1043,10 +1124,10 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 ! WRITE OUT OBS AND YERROR FOR DIAGNOSTIC PURPOSES
 !
  OPEN (unit=111,file='OBSERRORout',status='unknown',IOSTAT=istat)
- WRITE (111,*) (R(I,:,:), I=1,U%NSIZE_NATURE)
+ WRITE (111,*) (R(JI,:,:), JI=1,U%NSIZE_NATURE)
  CLOSE(111)
  OPEN (unit=111,file='OBSout',status='unknown',IOSTAT=istat)
- WRITE (111,*) (YO(I,:), I=1,U%NSIZE_NATURE)
+ WRITE (111,*) (YO(JI,:), JI=1,U%NSIZE_NATURE)
  CLOSE(111)
 !--------------------------------------------------------------------
 !
@@ -1055,14 +1136,14 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 !--------------------------------------------------------------------
  IF (LBFIXED) THEN 
    DO L=1,NVAR
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
          IF (XVAR(L) .EQ. 'WG1' .OR. XVAR(L) .EQ. 'WG2') THEN
-           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*COFSWI(I)*COFSWI(I)
+           B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*COFSWI(JI)*COFSWI(JI)
          ELSEIF (XVAR(L) .EQ. 'LAI') THEN
-           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*LAI_PASS(I,J)*LAI_PASS(I,J)
+           B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)*LAI_PASS(JI,J)*LAI_PASS(JI,J)
          ELSE
-           B(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)
+           B(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSIGMA(L)*XSIGMA(L)
          ENDIF
        ENDDO
      ENDDO
@@ -1072,14 +1153,14 @@ DO L=1,NVAR    ! control variable (x at previous time step)
 ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
    Q(:,:,:) = 0.0
    DO L=1,NVAR
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
            IF (XVAR(L) .EQ. 'WG2' .OR. XVAR(L) .EQ. 'WG1') THEN
-             Q(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)*COFSWI(I)*COFSWI(I)
+             Q(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)*COFSWI(JI)*COFSWI(JI)
            ELSEIF (XVAR(L) .EQ. 'LAI') THEN
-             Q(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_QLAI*XSCALE_QLAI*XSIGMA(L)*XSIGMA(L)
+             Q(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_QLAI*XSCALE_QLAI*XSIGMA(L)*XSIGMA(L)
           ELSE
-             Q(I,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)
+             Q(JI,J+PATCH_NUMBER*(L-1),J+PATCH_NUMBER*(L-1)) = XSCALE_Q*XSCALE_Q*XSIGMA(L)*XSIGMA(L)
            ENDIF
        ENDDO
      ENDDO
@@ -1090,10 +1171,10 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  OPEN (unit=111,file='BGROUNDin',status='old',IOSTAT=istat)
  DO L=1,NVAR
    DO K=1,NVAR
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
          DO JJ=1,PATCH_NUMBER
-            READ (111,*) B(I,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
+            READ (111,*) B(JI,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
          ENDDO
        ENDDO
      ENDDO
@@ -1113,9 +1194,9 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
 !
    CALL READ_SURF(IOB, &
                 YPROGRAM,'WGI1', FROZ(:,:),IRESP)
-   DO I=1,U%NSIZE_NATURE
-     IF ( minval(FROZ(I,:)) .GT. 0) THEN 
-         YO(I,:)=999.0
+   DO JI=1,U%NSIZE_NATURE
+     IF ( minval(FROZ(JI,:)) .GT. 0) THEN 
+         YO(JI,:)=999.0
      ENDIF
    ENDDO
 !
@@ -1127,18 +1208,18 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  print *
  DO K=1,NOBS
  DO L=1,NVAR
-   DO I=1,U%NSIZE_NATURE
+   DO JI=1,U%NSIZE_NATURE
      DO J=1,PATCH_NUMBER  
-           HOWR(I,K,J+PATCH_NUMBER*(L-1)) = XPATCH(I,J)*(YF_PATCH(I,J,L+1,K) - YF_PATCH(I,J,1,K))/ZEPS(I,J,L) 
-            IF(YO(I,K) .NE. 999.0) THEN
-              HO(I,K,J+PATCH_NUMBER*(L-1)) = XPATCH(I,J)*(YF_PATCH(I,J,L+1,K) - YF_PATCH(I,J,1,K))/ZEPS(I,J,L)  ! Jacobian of obs operator
-              HO(I,K,J+PATCH_NUMBER*(L-1)) = max(-0.1,HO(I,K,J+PATCH_NUMBER*(L-1)))
-              HO(I,K,J+PATCH_NUMBER*(L-1)) = min(1.0, HO(I,K,J+PATCH_NUMBER*(L-1)))
-              ZB(I,K) = YO(I,K) - YF(I,1,K)                                                    ! innovation vector
+           HOWR(JI,K,J+PATCH_NUMBER*(L-1)) = XPATCH(JI,J)*(YF_PATCH(JI,J,L+1,K) - YF_PATCH(JI,J,1,K))/ZEPS(JI,J,L) 
+            IF(YO(JI,K) .NE. 999.0) THEN
+              HO(JI,K,J+PATCH_NUMBER*(L-1)) = XPATCH(JI,J)*(YF_PATCH(JI,J,L+1,K) - YF_PATCH(JI,J,1,K))/ZEPS(JI,J,L)  ! Jacobian of obs operator
+              HO(JI,K,J+PATCH_NUMBER*(L-1)) = max(-0.1,HO(JI,K,J+PATCH_NUMBER*(L-1)))
+              HO(JI,K,J+PATCH_NUMBER*(L-1)) = min(1.0, HO(JI,K,J+PATCH_NUMBER*(L-1)))
+              ZB(JI,K) = YO(JI,K) - YF(JI,1,K)                                                    ! innovation vector
               OBSCOUNT = OBSCOUNT + 1
             ELSE  
-             HO(I,K,J+PATCH_NUMBER*(L-1)) = 0.0
-             ZB(I,K) = 0.0 
+             HO(JI,K,J+PATCH_NUMBER*(L-1)) = 0.0
+             ZB(JI,K) = 0.0 
             ENDIF
           ENDDO
      ENDDO
@@ -1148,8 +1229,8 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
 ! *** Write innovations in ASCII file ***
 !
  OPEN (unit=111,file='INNOV',status='unknown',IOSTAT=istat)
- DO I=1,U%NSIZE_NATURE
-     WRITE(111,*) (ZB(I,K),K=1,NOBS)
+ DO JI=1,U%NSIZE_NATURE
+     WRITE(111,*) (ZB(JI,K),K=1,NOBS)
  ENDDO
  CLOSE(UNIT=111)
 
@@ -1162,26 +1243,26 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  PRINT *,'PERFORMING ANALYSIS'
 
 
- DO I=1,U%NSIZE_NATURE 
-    HOT(I,:,:) = TRANSPOSE(HO(I,:,:)) 
-    K1(I,:,:) = MATMUL(HO(I,:,:),MATMUL(B(I,:,:),HOT(I,:,:))) + R(I,:,:)
-    CALL CHOLDC(NOBS,K1(I,:,:),ZP(I,:))                                       ! Cholesky decomposition (1)
-    CALL CHOLSL(NOBS,K1(I,:,:),ZP(I,:),ZB(I,:),ZX(I,:))                       ! Cholesky decomposition (2)
-    XINCR(I,:) = MATMUL(B(I,:,:),MATMUL(HOT(I,:,:),ZX(I,:)))
+ DO JI=1,U%NSIZE_NATURE 
+    HOT(JI,:,:) = TRANSPOSE(HO(JI,:,:)) 
+    K1(JI,:,:) = MATMUL(HO(JI,:,:),MATMUL(B(JI,:,:),HOT(JI,:,:))) + R(JI,:,:)
+    CALL CHOLDC(NOBS,K1(JI,:,:),ZP(JI,:))                                       ! Cholesky decomposition (1)
+    CALL CHOLSL(NOBS,K1(JI,:,:),ZP(JI,:),ZB(JI,:),ZX(JI,:))                       ! Cholesky decomposition (2)
+    XINCR(JI,:) = MATMUL(B(JI,:,:),MATMUL(HOT(JI,:,:),ZX(JI,:)))
     DO L=1,NVAR 
        IF (XVAR(L).EQ.'LAI') THEN
          DO J=1,PATCH_NUMBER
-            XINCR(I,J+PATCH_NUMBER*(L-1)) = MAX( XINCR(I,J+PATCH_NUMBER*(L-1)), XVLAIMIN(J) - XI(I,J,L) )
-            XI(I,J,L) = XI(I,J,L) + XINCR(I,J+PATCH_NUMBER*(L-1))
-            ZBIO_PASS(I,J) = ZBIO_PASS(I,J) + XINCR(I,J+PATCH_NUMBER*(L-1))*XALPH(J)
+            XINCR(JI,J+PATCH_NUMBER*(L-1)) = MAX( XINCR(JI,J+PATCH_NUMBER*(L-1)), XVLAIMIN(J) - XI(JI,J,L) )
+            XI(JI,J,L) = XI(JI,J,L) + XINCR(JI,J+PATCH_NUMBER*(L-1))
+            ZBIO_PASS(JI,J) = ZBIO_PASS(JI,J) + XINCR(JI,J+PATCH_NUMBER*(L-1))*XALPH(J)
          ENDDO 
        ELSE
          DO J=1,PATCH_NUMBER           
-            if (XI(I,J,L)+ XINCR(I,J+PATCH_NUMBER*(L-1)) .LT. 0) then
-                 XINCR(I,J+PATCH_NUMBER*(L-1))=0 
+            if (XI(JI,J,L)+ XINCR(JI,J+PATCH_NUMBER*(L-1)) .LT. 0) then
+                 XINCR(JI,J+PATCH_NUMBER*(L-1))=0 
                 !XINCR(I,J+PATCH_NUMBER*(L-1))= MAX( XINCR(I,J+PATCH_NUMBER*(L-1)), 0 - XI(I,J,L) )
             endif
-                XI(I,J,L) = XI(I,J,L) + XINCR(I,J+PATCH_NUMBER*(L-1))
+                XI(JI,J,L) = XI(JI,J,L) + XINCR(JI,J+PATCH_NUMBER*(L-1))
           ENDDO
        ENDIF
      ENDDO
@@ -1190,9 +1271,9 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
 ! *** Write analysis results in ASCII file ***
 !
  OPEN (unit=111,file='ANAL_INCR',status='unknown',IOSTAT=istat)
- DO I=1,U%NSIZE_NATURE
+ DO JI=1,U%NSIZE_NATURE
    DO J=1,PATCH_NUMBER
-     WRITE(111,*) (XI(I,J,L),L=1,NVAR), (XINCR(I,J+PATCH_NUMBER*(L-1)),L=1,NVAR)
+     WRITE(111,*) (XI(JI,J,L),L=1,NVAR), (XINCR(JI,J+PATCH_NUMBER*(L-1)),L=1,NVAR)
    ENDDO
  ENDDO
  CLOSE(UNIT=111)
@@ -1202,7 +1283,11 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  CALL END_IO_SURF_n(YPROGRAM)
  CALL IO_BUFF_CLEAN_n(IOB)
 ! CFILEOUT='PREP'
- CALL INIT_IO_SURF_n(YPROGRAM,'NATURE','ISBA  ','WRITE')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM,'NATURE','ISBA  ','WRITE')
  CALL IO_BUFF_CLEAN_n(IOB)
  DO L = 1,NVAR
    CALL WRITE_SURF(DGU, IOB, U, &
@@ -1219,14 +1304,14 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
 ! Ba = (I-KH)Bf
 ! K = BfHT{K1}**-1
 !
- DO I=1,U%NSIZE_NATURE
+ DO JI=1,U%NSIZE_NATURE
        !K1 = (R+H.B.HT) (calculate inverse -> output goes to K1)
-       CALL INVERSE_MATRIX(NOBS,K1(I,:,:),ZP(I,:))
-       GAIN(I,:,:) = MATMUL(B(I,:,:),MATMUL(HOT(I,:,:),K1(I,:,:)))
-       KH(I,:,:) = MATMUL(GAIN(I,:,:),HO(I,:,:))
-       IdKH(I,:,:) = IDENT - KH(I,:,:) 
-       KRK(I,:,:) = MATMUL(GAIN(I,:,:),MATMUL(R(I,:,:),TRANSPOSE(GAIN(I,:,:))))
-       IF (.NOT.LBFIXED)  B(I,:,:) = MATMUL(IdKH(I,:,:),MATMUL(B(I,:,:),TRANSPOSE(IdKH(I,:,:))))+KRK(I,:,:)
+       CALL INVERSE_MATRIX(NOBS,K1(JI,:,:),ZP(JI,:))
+       GAIN(JI,:,:) = MATMUL(B(JI,:,:),MATMUL(HOT(JI,:,:),K1(JI,:,:)))
+       KH(JI,:,:) = MATMUL(GAIN(JI,:,:),HO(JI,:,:))
+       IdKH(JI,:,:) = IDENT - KH(JI,:,:) 
+       KRK(JI,:,:) = MATMUL(GAIN(JI,:,:),MATMUL(R(JI,:,:),TRANSPOSE(GAIN(JI,:,:))))
+       IF (.NOT.LBFIXED)  B(JI,:,:) = MATMUL(IdKH(JI,:,:),MATMUL(B(JI,:,:),TRANSPOSE(IdKH(JI,:,:))))+KRK(JI,:,:)
  ENDDO
 !
 ! Write out analysed B (for use in next cycle)
@@ -1234,10 +1319,10 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
  OPEN (unit=111,file='BGROUNDout',status='unknown',IOSTAT=istat)
  DO L=1,NVAR
    DO K=1,NVAR
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
          DO JJ=1,PATCH_NUMBER
-           WRITE (111,*) B(I,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
+           WRITE (111,*) B(JI,J+PATCH_NUMBER*(L-1),JJ+PATCH_NUMBER*(K-1))
          ENDDO
        ENDDO
      ENDDO
@@ -1252,9 +1337,9 @@ ALLOCATE(Q(U%NSIZE_NATURE,PATCH_NUMBER*NVAR,PATCH_NUMBER*NVAR))
      WRITE(LCHAR,'(I1)') K
      HFNAME='HO_'//XVAR(L)//'_v'//LCHAR
      OPEN(UNIT=111,FILE=HFNAME,FORM='FORMATTED',STATUS='NEW',IOSTAT=istat)
-     DO I=1,U%NSIZE_NATURE
+     DO JI=1,U%NSIZE_NATURE
        DO J=1,PATCH_NUMBER
-         WRITE(111,*) HOWR(I,K,J+PATCH_NUMBER*(L-1)),GAIN(I,J+PATCH_NUMBER*(L-1),K)
+         WRITE(111,*) HOWR(JI,K,J+PATCH_NUMBER*(L-1)),GAIN(JI,J+PATCH_NUMBER*(L-1),K)
        ENDDO
      ENDDO
      CLOSE(111)

@@ -29,6 +29,10 @@ SUBROUTINE PREP_HOR_OCEAN_FIELDS (O, OR, SG, S, &
 !
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
 USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
@@ -81,25 +85,29 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_OCEAN_FIELDS',0,ZHOOK_HANDLE)
 YSURF='TEMP_OC'
 YNCVARNAME='temperature'
- CALL PREP_HOR_OCEAN_FIELD(O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
+                           O, OR, SG, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 !*      4.     Treatment of oceanic salinity
 YSURF='SALT_OC'
 YNCVARNAME='salinity'
- CALL PREP_HOR_OCEAN_FIELD(O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
+                           O, OR, SG, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 !*      5.     Treatment of oceanic current
 YSURF='UCUR_OC'
 YNCVARNAME='u'
- CALL PREP_HOR_OCEAN_FIELD(O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
+                           O, OR, SG, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 YSURF='VCUR_OC'
 YNCVARNAME='v'
- CALL PREP_HOR_OCEAN_FIELD(O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
+                           O, OR, SG, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !

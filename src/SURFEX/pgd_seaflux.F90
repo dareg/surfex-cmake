@@ -134,7 +134,8 @@ ALLOCATE(SG%XMESH_SIZE (SG%NDIM))
  CALL PACK_PGD_SEAFLUX(DTCO, SG, S, U, &
                        HPROGRAM, ZSEABATHY)
 !
- CALL PGD_SEAFLUX_PAR(HPROGRAM,DTS%LSST_DATA)
+ CALL PGD_SEAFLUX_PAR(DTCO, DTS, SG, UG, U, USS, &
+                      HPROGRAM,DTS%LSST_DATA)
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

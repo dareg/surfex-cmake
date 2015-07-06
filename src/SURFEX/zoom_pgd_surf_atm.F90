@@ -125,14 +125,16 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    3.      surface cover
 !             -------------
 !
- CALL ZOOM_PGD_COVER(HPROGRAM,HINIFILE,HINIFILETYPE,U%LECOCLIMAP)
+ CALL ZOOM_PGD_COVER(DTCO, IOB, UG, U, &
+                     HPROGRAM,HINIFILE,HINIFILETYPE,U%LECOCLIMAP)
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Orography
 !             ---------
 !
- CALL ZOOM_PGD_OROGRAPHY(UG, U, USS, &
+ CALL ZOOM_PGD_OROGRAPHY(DTCO, IOB, &
+                         UG, U, USS, &
                          HPROGRAM,U%XSEA,U%XWATER,HINIFILE,HINIFILETYPE)
 !
 !_______________________________________________________________________________

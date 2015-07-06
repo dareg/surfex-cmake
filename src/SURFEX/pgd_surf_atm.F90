@@ -37,6 +37,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
+!
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+!
 USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
 !
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -147,7 +153,8 @@ ALLOCATE(UG%XJPDIR(U%NSIZE_FULL))
 !*    3.      surface cover
 !             -------------
 !
- CALL PGD_FRAC(HPROGRAM,U%LECOCLIMAP)
+ CALL PGD_FRAC(DTCO, UG, U, USS, &
+               HPROGRAM,U%LECOCLIMAP)
 IF (U%LECOCLIMAP) CALL PGD_COVER(DTCO, UG, U, USS, &
                                  HPROGRAM,LRM_RIVER)
 !
@@ -188,7 +195,8 @@ IF (U%NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)
 !*    9.      Dummy fields
 !             ------------
 !
- CALL PGD_DUMMY(HPROGRAM)
+ CALL PGD_DUMMY(DTCO, DUU, UG, U, USS, &
+                HPROGRAM)
 !_______________________________________________________________________________
 !
 !*   10.      Chemical Emission fields
@@ -196,9 +204,11 @@ IF (U%NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)
 !
  CALL READ_NAM_PGD_CHEMISTRY(HPROGRAM,CHU%CCH_EMIS)
 IF (CHU%CCH_EMIS=='SNAP') THEN
-  CALL PGD_CHEMISTRY_SNAP(HPROGRAM,CHU%LCH_EMIS)
+  CALL PGD_CHEMISTRY_SNAP(CHN, DTCO, UG, U, USS, &
+                          HPROGRAM,CHU%LCH_EMIS)
 ELSE IF (CHU%CCH_EMIS=='AGGR') THEN
-  CALL PGD_CHEMISTRY(HPROGRAM,CHU%LCH_EMIS)
+  CALL PGD_CHEMISTRY(CHE, DTCO, UG, U, USS, &
+                     HPROGRAM,CHU%LCH_EMIS)
 ENDIF
 !_______________________________________________________________________________
 !

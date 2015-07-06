@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_OCEAN_FIELD (O, OR, SG, &
+SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, &
+                                  O, OR, SG, &
                                  HPROGRAM,                       &
                                  HFILE,HFILETYPE,KLUOUT,OUNIF,   &
                                  HSURF,HNCVARNAME                )
@@ -28,9 +29,11 @@ SUBROUTINE PREP_HOR_OCEAN_FIELD (O, OR, SG, &
 !!------------------------------------------------------------------
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
@@ -56,6 +59,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR

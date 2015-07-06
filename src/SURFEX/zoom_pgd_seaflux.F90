@@ -165,7 +165,8 @@ DEALLOCATE(ZSEABATHY,ZWORK)
  CALL READ_SURF(IOB, &
                 HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
 !
-IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(IOB, &
+IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTCO, U, &
+                                               IOB, &
                                                DTS, SG, &
                                                HPROGRAM,INI,HDIR='A')
 !

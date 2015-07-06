@@ -37,6 +37,20 @@ PROGRAM SODA
 !  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
 !----------------------------------------------------------------------------
 !
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
 USE MODD_BEM_n, ONLY : B => BEM
@@ -340,7 +354,11 @@ IYEAR    = NUNDEF
 IMONTH   = NUNDEF
 IDAY     = NUNDEF
 ZTIME    = XUNDEF
- CALL INIT_IO_SURF_n(CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
  CALL READ_SURF(IOB, &
                 CSURF_FILETYPE,'DIM_FULL  ',INI,  IRESP)
  CALL READ_SURF(IOB, &
@@ -632,7 +650,11 @@ IF (CASSIM_ISBA=="OI   " .OR. .NOT.LOBSFILE) THEN
   CDNOMC     = 'oimain'                  ! new frame name
 #endif
   !  Open FA file (LAM version with extension zone)
-  CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+  CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM2,'EXTZON','SURF  ','READ ')
   !
   !  Read model forecast quantities
   IF (LAROME) THEN  
@@ -683,7 +705,11 @@ CFILEIN_FA = 'CANARI'        ! input CANARI analysis
 CDNOMC     = 'canari'                  ! new frame name
 #endif
 !  Open FA file 
- CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM2,'EXTZON','SURF  ','READ ')
 
 !  Read CANARI analysis
  CALL READ_SURF(IOB, &
@@ -710,7 +736,11 @@ CFILEIN_FA = 'clim_isba'               ! input climatology
 CDNOMC     = 'climat'                  ! new frame name
 #endif
 !  Open FA file 
- CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM2,'EXTZON','SURF  ','READ ')
 
 !  Read climatology file
  CALL READ_SURF(IOB, &

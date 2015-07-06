@@ -102,7 +102,8 @@ YCOMMENT='ZS'
 !
 !* latitude, longitude
 !
- CALL WRITE_GRID(HPROGRAM,WG%CGRID,WG%XGRID_PAR,WG%XLAT,WG%XLON,WG%XMESH_SIZE,IRESP)
+ CALL WRITE_GRID(DGU, IOB, U, &
+                 HPROGRAM,WG%CGRID,WG%XGRID_PAR,WG%XLAT,WG%XLON,WG%XMESH_SIZE,IRESP)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

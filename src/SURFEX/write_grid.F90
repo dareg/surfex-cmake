@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_GRID(HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR,HDIR)
+      SUBROUTINE WRITE_GRID (DGU, IOB, U, &
+                             HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR,HDIR)
 !     #########################################
 !
 !!****  *WRITE_GRID* - routine to write the horizontal grid of a scheme
@@ -34,9 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_WRITE_SURF
 !
@@ -62,6 +65,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
  CHARACTER(LEN=10),  INTENT(IN)  :: HGRID      ! type of horizontal grid

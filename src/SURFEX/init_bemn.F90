@@ -1,5 +1,6 @@
 !     #############################################################
-      SUBROUTINE INIT_BEM_n (B, BOP, BDD, DTB, DTCO, DTT, UG, U, TG, T, TOP, &
+      SUBROUTINE INIT_BEM_n (IOB, &
+                              B, BOP, BDD, DTB, DTCO, DTT, UG, U, TG, T, TOP, &
                              KLUOUT)
 !     #############################################################
 !
@@ -40,7 +41,9 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
@@ -70,6 +73,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP

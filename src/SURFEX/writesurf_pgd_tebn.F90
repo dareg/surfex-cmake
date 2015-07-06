@@ -35,6 +35,12 @@
 !              ------------
 !
 !
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
 USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -255,10 +261,12 @@ YCOMMENT='ZS'
 !
 !* latitude, longitude
 !
- CALL WRITE_GRID(HPROGRAM,TG%CGRID,TG%XGRID_PAR,TG%XLAT,TG%XLON,TG%XMESH_SIZE,IRESP)
+ CALL WRITE_GRID(DGU, IOB, U, &
+                 HPROGRAM,TG%CGRID,TG%XGRID_PAR,TG%XLAT,TG%XLON,TG%XMESH_SIZE,IRESP)
 !
 !-------------------------------------------------------------------------------
- CALL WRITESURF_PGD_TEB_PAR_n(HPROGRAM)
+ CALL WRITESURF_PGD_TEB_PAR_n(BDD, DTB, DTGD, DTGR, DTT, DGU, IOB, U, TGDO, TGDP, TGRO, TIR, TOP, &
+                              HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

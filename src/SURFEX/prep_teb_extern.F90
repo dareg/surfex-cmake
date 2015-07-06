@@ -140,7 +140,8 @@ ELSE
 !
   IF (GTEB) THEN
 !
-    CALL READ_TEB_PATCH(HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
+    CALL READ_TEB_PATCH(IOB, &
+                        HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
     CALL GET_CURRENT_TEB_PATCH(ICURRENT_PATCH)
     YPATCH='   '
     IF (ITEB_PATCH>1) THEN
@@ -177,19 +178,26 @@ ELSE
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
       !
       ALLOCATE(ZD(INI,ILAYER))
-      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD)
-      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD)
-      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD)
-      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(IOB, &
+                                               DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD)
       !
       CALL OPEN_AUX_IO_SURF(IOB, &

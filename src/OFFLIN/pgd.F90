@@ -152,7 +152,8 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
 !
- CALL PGD_GRID_SURF_ATM(UG, U, &
+ CALL PGD_GRID_SURF_ATM(IOB, &
+                        UG, U, &
                         CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
  CALL SPLIT_GRID(UG, U, &

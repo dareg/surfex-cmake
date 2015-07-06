@@ -40,6 +40,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
@@ -318,7 +320,8 @@ ALLOCATE(TGDP%XWDRAIN(TG%NDIM))
 !             --------------------------------------------
 !
 DTGD%NTIME = 12
- CALL PGD_TEB_GARDEN_PAR(HPROGRAM)
+ CALL PGD_TEB_GARDEN_PAR(DTCO, DTGD, UG, U, USS, TGDO, TGDP, TG, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -332,7 +335,8 @@ IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(HPROGRAM)
 !*    9.      Irrigation of gardens and greenroofs
 !             ------------------------------------
 !
-CALL PGD_TEB_IRRIG(HPROGRAM)
+CALL PGD_TEB_IRRIG(DTCO, UG, U, USS, TG, TIR, &
+                   HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_TEB_IRRIG(HPROGRAM)
+      SUBROUTINE PGD_TEB_IRRIG (DTCO, UG, U, USS, TG, TIR, &
+                                HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB_IRRIG* monitor for averaging and interpolations of cover fractions
@@ -35,14 +36,16 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODD_SURF_PAR,          ONLY : XUNDEF
-USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
-USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
 !
 USE MODD_PGDWORK,           ONLY : CATYPE
 !
@@ -62,6 +65,14 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !

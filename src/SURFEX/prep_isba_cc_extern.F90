@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_ISBA_CC_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD,OPREP_AGS)
+SUBROUTINE PREP_ISBA_CC_EXTERN (IOB, &
+                                HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD,OPREP_AGS)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_CC_EXTERN* - initializes ISBA-CC fields from external isba field
@@ -24,7 +25,9 @@ SUBROUTINE PREP_ISBA_CC_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDT
 !!      B. Decharme  04/2014, external init with FA files
 !!------------------------------------------------------------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODE_READ_EXTERN
 !
@@ -44,6 +47,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=8),   INTENT(IN)  :: HSURF     ! type of field

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SET_VEGTYPES_FRACTIONS(HPROGRAM)
+      SUBROUTINE SET_VEGTYPES_FRACTIONS (DTCO, DTI, IOB, IG, I, UG, U, &
+                                         HPROGRAM)
 !     ##############################################################
 !
 !!**** *SET_VEGTYPES_FRACTIONS* monitor for averaging and interpolations of cover fractions
@@ -40,19 +41,21 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_OL_FILEID, ONLY : XVAR_TO_FILEIN
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
 #ifdef SFX_ASC
 USE MODI_SET_SURFEX_FILE_NAME_ASC
@@ -90,6 +93,15 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !

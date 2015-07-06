@@ -37,6 +37,43 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
+USE MODD_BEM_n, ONLY : B => BEM
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB
+USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
+USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_PANEL_n, ONLY : TPN => TEB_PANEL
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+!
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_SLT_n, ONLY : SLT => SLT
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
@@ -604,7 +641,8 @@ ENDDO
 !
 IF (KTILE==1) THEN
   !
-  CALL COUPLING_SEA_n(DGL, DGS, S, SSB, U, &
+  CALL COUPLING_SEA_n(CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGSI, DGW, DST, F, O, OR, SG, SLT, W, &
+                      DGL, DGS, S, SSB, U, &
                       HPROGRAM, HCOUPLING, PTIMEC,                                           &
               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
               U%NSIZE_SEA, KSV, KSW,                                                           &
@@ -619,7 +657,8 @@ IF (KTILE==1) THEN
   !
 ELSEIF (KTILE==2) THEN
   !
-  CALL COUPLING_INLAND_WATER_n(DGF, DGL, DGW, F, FSB, U, W, WSB, &
+  CALL COUPLING_INLAND_WATER_n(CHF, CHS, CHW, DTS, DGMF, DGO, DGS, DGSI, DST, O, OR, SG, S, SLT, &
+                               DGF, DGL, DGW, F, FSB, U, W, WSB, &
                                HPROGRAM, HCOUPLING, PTIMEC,                                   &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                U%NSIZE_WATER, KSV, KSW,                                                         &
@@ -648,7 +687,9 @@ ELSEIF (KTILE==3) THEN
   !
 ELSEIF (KTILE==4) THEN
   !
-  CALL COUPLING_TOWN_n(HPROGRAM, HCOUPLING, PTIMEC,                                           &
+  CALL COUPLING_TOWN_n(B, BOP, CHT, DGCT, DGL, DGMT, DGMTO, DGT, DGUT, DST, SLT, U, &
+                       TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, &
+                       HPROGRAM, HCOUPLING, PTIMEC,                                           &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                U%NSIZE_TOWN, KSV, KSW,                                                          &
                ZP_TSUN, ZP_ZENITH, ZP_AZIM,                                                   &

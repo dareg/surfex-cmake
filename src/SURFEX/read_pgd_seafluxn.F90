@@ -140,7 +140,8 @@ ELSE
                 HPROGRAM,YRECFM,DTS%LSST_DATA,IRESP)
 END IF
 !
-IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(IOB, &
+IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTCO, U, &
+                                               IOB, &
                                                DTS, SG, &
                                                HPROGRAM,SG%NDIM)
 IF (LHOOK) CALL DR_HOOK('READ_PGD_SEAFLUX_N',1,ZHOOK_HANDLE)

@@ -42,6 +42,25 @@ SUBROUTINE OI_CONTROL (      &
 !
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SV_n, ONLY : SV => SV
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
 USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
 USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
@@ -274,7 +293,11 @@ ENDIF
 
 !   Read grid dimension for allocation
 
-CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM,'FULL  ','SURF  ','READ ')
 
 !   Find current time
 
@@ -293,7 +316,11 @@ IF (NSSSSS > NDAYSEC) NSSSSS = NSSSSS - NDAYSEC
 
 CALL END_IO_SURF_n(YPROGRAM)
 CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM,'FULL  ','SURF  ','READ ')
 
 CALL READ_SURF(IOB, &
                YPROGRAM,'SEA   ',U%CSEA   ,IRESP)
@@ -308,7 +335,11 @@ CALL READ_SURF(IOB, &
                YPROGRAM,'DIM_FULL  ',U%NDIM_FULL,  IRESP)
 NINDX2SFX = U%NDIM_FULL
 CALL END_IO_SURF_n(YPROGRAM)
-CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM,'FULL  ','SURF  ','READ ')
 
 CALL READ_SURF(IOB, &
                YPROGRAM,'DIM_SEA   ',U%NDIM_SEA,   IRESP)
@@ -358,7 +389,8 @@ CALL READ_SURF(IOB, &
 CALL READ_SURF(IOB, &
                YPROGRAM,'ZS',        ZALT,  IRESP)
 
-CALL READ_COVER_n(YPROGRAM)
+CALL READ_COVER_n(DTCO, IOB, U, &
+                  YPROGRAM)
 
 !   Perform masks (only nature used)
 
@@ -417,7 +449,11 @@ ALLOCATE (ZSST(ISIZE))
 
 CALL END_IO_SURF_n(YPROGRAM)
 CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM,'FULL  ','SURF  ','READ ')
 
 IF (U%NSIZE_NATURE>0 .AND. U%CNATURE/='NONE') THEN
   CALL READ_SURF(IOB, &
@@ -568,7 +604,11 @@ IF (.NOT. LDINLINE) THEN
   CFILEIN_FA_SAVE  = CFILEIN_FA
 #endif
 !  Open FA file (LAM version with extension zone)
-  CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+  CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM2,'EXTZON','SURF  ','READ ')
 ENDIF
 
 !  Read model forecast quantities
@@ -644,7 +684,11 @@ IF (.NOT. LDINLINE) THEN
   CFILEIN_FA_SAVE  = CFILEIN_FA
 #endif
 !  Open FA file 
-  CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+  CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM2,'EXTZON','SURF  ','READ ')
 ENDIF
 
 IF (LDINLINE) THEN
@@ -708,7 +752,11 @@ IF (.NOT. LDINLINE) THEN
   CDNOMC     = 'climat'                  ! new frame name
 #endif
 !  Open FA file 
-  CALL INIT_IO_SURF_n(YPROGRAM2,'EXTZON','SURF  ','READ ')
+  CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM2,'EXTZON','SURF  ','READ ')
 ENDIF
 
 IF (LDINLINE) THEN
@@ -1072,7 +1120,11 @@ ENDIF
 
  CALL FLAG_UPDATE(DGI, DGU, &
                   .FALSE.,.FALSE.,.TRUE.,.FALSE.)
- CALL INIT_IO_SURF_n(YPROGRAM,'FULL  ','SURF  ','WRITE')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    YPROGRAM,'FULL  ','SURF  ','WRITE')
 
 IF (LDINLINE) THEN
 #ifdef SFX_ARO

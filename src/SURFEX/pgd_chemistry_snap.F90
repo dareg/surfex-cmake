@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_CHEMISTRY_SNAP(HPROGRAM,OCH_EMIS)
+      SUBROUTINE PGD_CHEMISTRY_SNAP (CHN, DTCO, UG, U, USS, &
+                                     HPROGRAM,OCH_EMIS)
 !     ##############################################################
 !
 !!**** *PGD_CHEMISTRY_SNAP* monitor for averaging and interpolations of physiographic fields
@@ -36,16 +37,18 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGDWORK,            ONLY : CATYPE
 USE MODD_SURF_PAR,           ONLY : XUNDEF
 USE MODD_PGD_GRID,           ONLY : NL
 USE MODD_CH_SURF,            ONLY : JPEMISMAX_S, JPSNAPMAX
-USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -65,6 +68,13 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: OCH_EMIS     ! emission flag

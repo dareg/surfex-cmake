@@ -200,7 +200,8 @@ END IF
 !
 DO JPATCH=1,TOP%NTEB_PATCH
   CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
-  CALL READ_PGD_TEB_PAR_n(BDD, DTB, DTT, TG, TOP, &
+  CALL READ_PGD_TEB_PAR_n(DTCO, IOB, U, &
+                          BDD, DTB, DTT, TG, TOP, &
                           HPROGRAM,INI,'A')
 !
 !------------------------------------------------------------------------------

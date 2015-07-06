@@ -355,11 +355,13 @@ END IF
 !            ------------------
 !
 ! Gardens
-IF (TOP%LGARDEN) CALL WRITESURF_TEB_GARDEN_n(TGD, TGDO, TGDPE, TVG, &
+IF (TOP%LGARDEN) CALL WRITESURF_TEB_GARDEN_n(DGU, IOB, U, &
+                                             TGD, TGDO, TGDPE, TVG, &
                                              HPROGRAM,YPATCH)
 !
 ! Grenn roofs
-IF (TOP%LGREENROOF) CALL WRITESURF_TEB_GREENROOF_n(TGR, TGRO, TGRPE, TVG, &
+IF (TOP%LGREENROOF) CALL WRITESURF_TEB_GREENROOF_n(DGU, IOB, U, &
+                                                   TGR, TGRO, TGRPE, TVG, &
                                                    HPROGRAM,YPATCH)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_N',1,ZHOOK_HANDLE)

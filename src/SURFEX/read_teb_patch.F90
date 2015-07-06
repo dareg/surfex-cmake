@@ -1,8 +1,11 @@
 !     #######################
-      SUBROUTINE READ_TEB_PATCH(HFILEPGD,HFILEPGDTYPE,KTEB_PATCH)
+      SUBROUTINE READ_TEB_PATCH (IOB, &
+                                 HFILEPGD,HFILEPGDTYPE,KTEB_PATCH)
 !     #######################
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_TOWN_PRESENCE
@@ -17,6 +20,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
 CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of file

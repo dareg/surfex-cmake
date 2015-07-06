@@ -43,6 +43,45 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_GR_BIOG_GREENROOF_n, ONLY : GBGR => GR_BIOG_GREENROOF
+!
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+!
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_GR_BIOG_GARDEN_n, ONLY : GBGD => GR_BIOG_GARDEN
+USE MODD_SLT_n, ONLY : SLT => SLT
+!
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_SV_n, ONLY : SV => SV
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
 !
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
@@ -280,7 +319,11 @@ SELECT CASE (HINIT)
                        HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,TOP%TTIME)
 
   CASE DEFAULT
-    CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+    CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')
     CALL READ_SURF(IOB, &
                    HPROGRAM,'DTCUR',TOP%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
@@ -293,7 +336,11 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
  CALL READ_SURF(IOB, &
                    HPROGRAM,'VERSION',IVERSION,IRESP)
@@ -318,7 +365,11 @@ ALLOCATE(TOP%XTEB_PATCH(ILU,TOP%NTEB_PATCH))
                   TOP%XCOVER,TOP%XTEB_PATCH)
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
- CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
  CALL READ_SURF(IOB, &
                    HPROGRAM,'VERSION',IVERSION,IRESP)
@@ -463,7 +514,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
   !*       6.     Building Energy Model
   !               ---------------------
   !
-  CALL INIT_BEM_n(B, BOP, BDD, DTB, DTCO, DTT, UG, U, TG, T, TOP, &
+  CALL INIT_BEM_n(IOB, &
+                  B, BOP, BDD, DTB, DTCO, DTT, UG, U, TG, T, TOP, &
                   ILUOUT)
   !
   !-------------------------------------------------------------------------------
@@ -474,14 +526,20 @@ DO JPATCH=1,TOP%NTEB_PATCH
   IF (TOP%LGARDEN) THEN
   !
     CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-    CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
+    CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')     
     IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(IOB, &
                                                CHT, DGMTO, TGDO, TVG, &
                                                HPROGRAM)
-    CALL INIT_TEB_GARDEN_PGD_n(HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,IBUGFIX,PCO2,PRHOA)
+    CALL INIT_TEB_GARDEN_PGD_n(CHI, CHT, DTCO, DTI, DTGD, DST, GBGD, IOB, I, SLT, U, TGDO, TGDPE, TGDP, TG, T, TOP, TVG, &
+                               HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,IBUGFIX,PCO2,PRHOA)
     ! Case of urban green roofs
-    IF (TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(HPROGRAM,HINIT,(JPATCH==1), &
-                                                  KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+    IF (TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(CHI, CHT, DTCO, DTI, DTGR, DST, GBGR, IOB, I, SLT, U, &
+                                                      TGRO, TGRPE, TGRP, TG, T, TOP, TVG, &
+                                                      HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,PCO2,PRHOA)
     CALL END_IO_SURF_n(HPROGRAM)
     !
   ENDIF
@@ -492,7 +550,11 @@ END DO ! end of loop on TEB patches
 !* Read irrigation parameters for TEB
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')     
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')     
  CALL READ_PGD_TEB_IRRIG_n(IOB, &
                            TG, TIR, &
                            HPROGRAM)
@@ -512,7 +574,11 @@ END IF
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
- CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
 !*       9.     Prognostic fields:
 !               -----------------
@@ -548,7 +614,8 @@ DO JPATCH=1,TOP%NTEB_PATCH
 !    CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')       
     CALL INIT_TEB_GARDEN_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
   ! Case of urban green roofs
-    IF (TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_n(HPROGRAM,HINIT,KI,KSV,PSW_BANDS)
+    IF (TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_n(DTCO, DTGR, DGMTO, IOB, U, TGR, TGRO, TGRPE, TGRP, TOP, TVG, &
+                                                  HPROGRAM,HINIT,KI,KSV,PSW_BANDS)
 !    CALL END_IO_SURF_n(HPROGRAM)
   ENDIF
 !-------------------------------------------------------------------------------

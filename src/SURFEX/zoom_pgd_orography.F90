@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE ZOOM_PGD_OROGRAPHY (UG, U, USS, &
+      SUBROUTINE ZOOM_PGD_OROGRAPHY (DTCO, IOB, &
+                                      UG, U, USS, &
                                      HPROGRAM,PSEA,PWATER,HINIFILE,HINIFILETYPE)
 !     ###########################################################
 
@@ -37,9 +38,11 @@
 !            -----------
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -67,6 +70,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
