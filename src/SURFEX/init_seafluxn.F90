@@ -323,7 +323,8 @@ END SELECT
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(HPROGRAM)
+ CALL READ_PGD_SEAFLUX_n(DTCO, DTS, IOB, SG, S, U, &
+                         HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name

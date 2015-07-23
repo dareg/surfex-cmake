@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_ISBA_PAR_n (DTI, IG, I, &
+      SUBROUTINE READ_PGD_ISBA_PAR_n (DTCO, IOB, U, &
+                                       DTI, IG, I, &
                                       HPROGRAM,KSIZE,OLAND_USE,HDIR)
 !     ################################################
 !
@@ -37,10 +38,12 @@
 !              ------------
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
@@ -63,6 +66,11 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG

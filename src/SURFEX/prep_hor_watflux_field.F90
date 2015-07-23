@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_WATFLUX_FIELD (WG, W, &
+SUBROUTINE PREP_HOR_WATFLUX_FIELD (DTCO, IOB, U, &
+                                    WG, W, &
                                    HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -28,10 +29,12 @@ SUBROUTINE PREP_HOR_WATFLUX_FIELD (WG, W, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -55,6 +58,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W

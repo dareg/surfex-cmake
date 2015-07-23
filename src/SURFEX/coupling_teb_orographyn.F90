@@ -39,6 +39,13 @@ SUBROUTINE COUPLING_TEB_OROGRAPHY_n (B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, 
 !!-------------------------------------------------------------
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_CH_TEB_n, ONLY : CH_TEB_t
@@ -234,7 +241,8 @@ ELSE
 !
 ENDIF
 !
- CALL COUPLING_TEB_n(B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, DST, SLT, &
+ CALL COUPLING_TEB_n(DTCO, DTI, DTGD, DTGR, IG, I, &
+                     B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, DST, SLT, &
                      TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, &
                      HPROGRAM, HCOUPLING,                                                   &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &

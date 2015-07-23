@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_ISBA_n (DTI, DTZ, IG, I, U, &
+      SUBROUTINE WRITESURF_PGD_ISBA_n (DGU, IOB, &
+                                        DTI, DTZ, IG, I, U, &
                                        HPROGRAM)
 !     ################################################
 !
@@ -49,8 +50,10 @@
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
@@ -75,6 +78,10 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ

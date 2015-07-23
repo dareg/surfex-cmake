@@ -35,6 +35,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -157,7 +162,8 @@ IF (U%NDIM_TOWN>0)                                 &
 !             ------------------------------------------
 !
 IF (U%NDIM_WATER>0)                                 &
-  CALL ZOOM_PGD_INLAND_WATER(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP)  
+  CALL ZOOM_PGD_INLAND_WATER(DTCO, FG, F, UG, U, USS, WG, W, &
+                             HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme

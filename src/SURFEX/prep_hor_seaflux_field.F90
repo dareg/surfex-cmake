@@ -32,6 +32,8 @@ SUBROUTINE PREP_HOR_SEAFLUX_FIELD (DTS, O, OR, SG, S, &
 !
 !
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -148,7 +150,8 @@ SELECT CASE (HSURF)
   END IF
   IF (O%LMERCATOR) THEN
     ! Preparing input for ocean 1D model
-    CALL PREP_HOR_OCEAN_FIELDS(O, OR, SG, S, &
+    CALL PREP_HOR_OCEAN_FIELDS(DTCO, UG, U, &
+                               O, OR, SG, S, &
                                HPROGRAM,HSURF,YFILE,YFILETYPE,ILUOUT,GUNIF)
   ENDIF
  CASE('SSS    ')

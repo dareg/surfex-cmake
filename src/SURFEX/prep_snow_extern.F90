@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_SNOW_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
+SUBROUTINE PREP_SNOW_EXTERN (IOB, &
+                             HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                             KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER)
 !     #################################################################################
 !
@@ -37,7 +38,9 @@ SUBROUTINE PREP_SNOW_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE
 !-------------------------------------------------------------------------------
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
@@ -68,6 +71,9 @@ USE MODI_READ_TEB_PATCH
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=10),  INTENT(IN)  :: HSURF     ! type of field

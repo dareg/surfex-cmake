@@ -40,6 +40,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+!
 USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
 !
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -328,7 +332,8 @@ DTGD%NTIME = 12
 !*    8.      Case of greenroofs
 !             ------------------
 !
-IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(HPROGRAM)
+IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(DTCO, DTGR, UG, U, USS, TGRO, TGRP, TG, &
+                                           HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

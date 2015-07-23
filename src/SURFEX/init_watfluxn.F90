@@ -43,6 +43,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+!
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
@@ -274,7 +276,8 @@ END SELECT
 !
 !         Reading of the fields
 !
- CALL READ_PGD_WATFLUX_n(HPROGRAM)
+ CALL READ_PGD_WATFLUX_n(DTCO, IOB, U, WG, W, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

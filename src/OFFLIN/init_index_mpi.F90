@@ -324,7 +324,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_INDEX_MPI:SET_NB_POINTS_LIN',0,ZHOOK_HANDLE)
 !
- CALL GET_SIZES_PARALLEL(IOB, &
+ CALL GET_SIZES_PARALLEL(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                                DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
+                                SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                         IOB, &
                          UG, U, &
                          KPROC,KSIZE,KPROCMIN,ISIZE_TASK,OSHADOWS)
 !
@@ -380,7 +384,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_INDEX_MPI:SET_NB_POINTS_ADJ',0,ZHOOK_HANDLE)
 !
- CALL GET_SIZES_PARALLEL(IOB, &
+ CALL GET_SIZES_PARALLEL(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                                DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
+                                SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                         IOB, &
                          UG, U, &
                          KPROC,KSIZE,NPIO,ISIZE_TASK,OSHADOWS)
 !

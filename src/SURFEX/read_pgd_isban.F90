@@ -630,7 +630,8 @@ END IF
  CALL READ_LECOCLIMAP(IOB, &
                       HPROGRAM,I%LECOCLIMAP)
 !
- CALL READ_PGD_ISBA_PAR_n(DTI, IG, I, &
+ CALL READ_PGD_ISBA_PAR_n(DTCO, IOB, U, &
+                          DTI, IG, I, &
                           HPROGRAM,IG%NDIM,OLAND_USE)
 IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(IOB, &
                                                   DTZ, &

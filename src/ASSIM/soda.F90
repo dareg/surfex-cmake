@@ -37,6 +37,10 @@ PROGRAM SODA
 !  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
 !----------------------------------------------------------------------------
 !
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+!
 USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
@@ -753,7 +757,11 @@ CDNOMC     = 'climat'                  ! new frame name
  CALL IO_BUFF_CLEAN_n(IOB)
 WRITE(*,*) 'READ CLIMATOLOGY OK'
 
- CALL ASSIM_SET_SST(IOB, S, U, &
+ CALL ASSIM_SET_SST(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                           DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                           DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, SSB, UG, &
+                           SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    IOB, S, U, &
                     U%NSIZE_FULL,ZLSM,ZSST,ZSIC,YTEST)
 
 IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
@@ -856,7 +864,13 @@ LDEF = .TRUE.
 #endif
 DO JNW = 1,INW
   CALL IO_BUFF_CLEAN_n(IOB)
-  CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+  CALL WRITE_SURF_ATM_n(B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                                   DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                   DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                   ICP, I, O, OR, S, SSB, SSCP, UG, U, USS, SV, &
+                                   TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
+                                   W, WSB, &
+                        CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
   CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                              DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
                              F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &
@@ -904,7 +918,13 @@ DO JNW = 1,INW
                         GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
   ! 
   ! Store results from assimilation
-  CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+  CALL WRITE_SURF_ATM_n(B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                                   DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                   DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                   ICP, I, O, OR, S, SSB, SSCP, UG, U, USS, SV, &
+                                   TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
+                                   W, WSB, &
+                        CSURF_FILETYPE,'ALL',LLAND_USE)
   CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                              DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
                              F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &

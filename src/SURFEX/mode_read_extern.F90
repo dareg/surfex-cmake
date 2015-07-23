@@ -24,7 +24,8 @@ CONTAINS
 !---------------------------------------------------------------------------------------
 !
 !     #######################
-      SUBROUTINE READ_EXTERN_DEPTH (DTCO, IOB, I, &
+      SUBROUTINE READ_EXTERN_DEPTH (U, &
+                                     DTCO, IOB, I, &
                                     HFILE,HPROGRAM,KLUOUT,HISBA,HNAT,HFIELD,KNI,KLAYER, &
                                    KPATCH,PSOILGRID,PDEPTH,KVERSION,KWG_LAYER          )
 !     #######################
@@ -33,7 +34,9 @@ CONTAINS
 !
 !
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
@@ -52,6 +55,9 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
@@ -300,6 +306,8 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !
 !
 !
+!
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
@@ -594,7 +602,8 @@ IF ((HFIELD=='TG    ') .AND. (YISBA=='2-L' .OR. YISBA=='3-L')) THEN
 ELSE
   YNAT='NAT'
   IF (GTEB) YNAT='GRD'
-  CALL READ_EXTERN_DEPTH(DTCO, IOB, I, &
+  CALL READ_EXTERN_DEPTH(U, &
+                         DTCO, IOB, I, &
                          HFILEPGD,HFILEPGDTYPE,KLUOUT,YISBA,YNAT,HFIELD,KNI,  &
                          ILAYER,IPATCH,ZSOILGRID,PDEPTH,IVERSION,IWG_LAYER)
 END IF

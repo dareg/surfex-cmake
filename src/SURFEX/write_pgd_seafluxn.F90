@@ -126,7 +126,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SEAFLUX_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_SEAFLUX_n(DTS, SG, S, &
+ CALL WRITESURF_PGD_SEAFLUX_n(DGU, IOB, U, &
+                              DTS, SG, S, &
                               HPROGRAM)
 !
 !-------------------------------------------------------------------------------

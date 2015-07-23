@@ -128,7 +128,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_ISBA_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_ISBA_n(DTI, DTZ, IG, I, U, &
+ CALL WRITESURF_PGD_ISBA_n(DGU, IOB, &
+                           DTI, DTZ, IG, I, U, &
                            HPROGRAM)
 !
 !-------------------------------------------------------------------------------

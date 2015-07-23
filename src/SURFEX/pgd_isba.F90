@@ -427,7 +427,12 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
 !*    6.      Topographic index for TOPMODEL
 !             ------------------------------
 !
- CALL PGD_TOPO_INDEX(HPROGRAM,ILU,YCTI,YCTIFILETYPE,LIMP_CTI)
+ CALL PGD_TOPO_INDEX(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                 DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                                 DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, &
+                                 SSB, UG, U, USS, SV, TCP, TGD, TGDO, TGR, TGRO, T, &
+                                 TOP, TVG, W, WSB, &
+                     HPROGRAM,ILU,YCTI,YCTIFILETYPE,LIMP_CTI)
 !
 !-------------------------------------------------------------------------------
 !

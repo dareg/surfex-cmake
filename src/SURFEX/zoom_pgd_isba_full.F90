@@ -285,7 +285,8 @@ DEALLOCATE(ZOUTW)
 !
  CALL GET_TYPE_DIM_n(DTCO, U, &
                      'NATURE',IG%NDIM)
- CALL READ_PGD_ISBA_PAR_n(DTI, IG, I, &
+ CALL READ_PGD_ISBA_PAR_n(DTCO, IOB, U, &
+                          DTI, IG, I, &
                           HPROGRAM,INI,.FALSE.,HDIR='A')
 !
  CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)

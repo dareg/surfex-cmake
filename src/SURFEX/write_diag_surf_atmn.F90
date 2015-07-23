@@ -210,15 +210,30 @@ IF (DGU%XDIAG_TSTEP==XUNDEF .OR. ABS(NINT(U%TTIME%TIME/DGU%XDIAG_TSTEP)*DGU%XDIA
     CALL END_IO_SURF_n(HPROGRAM)
   END IF
   !
-  IF (HWRITE/='PGD'.AND.DGU%LDIAG_GRID) CALL WRITE_DIAG_SEB_SURF_ATM_n(DGU, UG, &
+  IF (HWRITE/='PGD'.AND.DGU%LDIAG_GRID) CALL WRITE_DIAG_SEB_SURF_ATM_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                             DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGT, &
+                                             DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, SSB, &
+                                             U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, &
+                                             WSB, &
+                                                                       DGU, UG, &
                                                                        HPROGRAM)
   !
   IF (CHU%LCH_EMIS .AND. SV%NBEQ>0 .AND. CHU%LCH_SURF_EMIS) THEN
     IF (CHU%CCH_EMIS=='AGGR') THEN 
-      CALL WRITE_DIAG_CH_AGGR_n(CHE, &
+      CALL WRITE_DIAG_CH_AGGR_n(BOP, BDD, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, SSB, &
+                                        UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
+                                        W, WSB, &
+                                CHE, &
                                 HPROGRAM)
     ELSE IF (CHU%CCH_EMIS=='SNAP') THEN
-      CALL WRITE_DIAG_CH_SNAP_n(CHN, &
+      CALL WRITE_DIAG_CH_SNAP_n(BOP, BDD, CHE, CHI, CHS, CHU, CHT, CHW, DTCO, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, SSB, &
+                                        UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
+                                        W, WSB, &
+                                CHN, &
                                 HPROGRAM)
     END IF
   END IF

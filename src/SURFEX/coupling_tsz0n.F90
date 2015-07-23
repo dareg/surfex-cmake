@@ -36,6 +36,28 @@ SUBROUTINE COUPLING_TSZ0_n(HPROGRAM, HCOUPLING,                                 
 !!------------------------------------------------------------------
 !
 !
+USE MODD_AGRI_n, ONLY : AG => AGRI
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_PACK_CH_ISBA, ONLY : PKCI => PACK_CH_ISBA
+USE MODD_PACK_DIAG_ISBA, ONLY : PKDI => PACK_DIAG_ISBA
+USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
+USE MODD_SLT_n, ONLY : SLT => SLT
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+!
 USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -173,7 +195,9 @@ END IF
 !*      3.     Call to surface scheme
 !              ----------------------
 !
- CALL COUPLING_ISBA_OROGRAPHY_n(HPROGRAM, 'E',                                              &
+ CALL COUPLING_ISBA_OROGRAPHY_n(AG, CHI, DTCO, DTI, DTGD, DTGR, DGEI, DGI, DGMI, DST, GB, &
+                                      ICP, IG, I, PKCI, PKDI, PKI, SLT, UG, U, USS, TGRO, &
+                                HPROGRAM, 'E',                                              &
                  0.001, KYEAR, KMONTH, KDAY, PTIME,                                          &
                  KI, KSV, KSW,                                                               &
                  PTSUN, PZENITH, PZENITH2, PAZIM,                                            &

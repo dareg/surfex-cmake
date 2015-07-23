@@ -43,6 +43,9 @@ SUBROUTINE PREP_ISBA(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
 USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
@@ -396,7 +399,8 @@ ELSEIF (I%CPHOTO == 'LAI' .OR. I%CPHOTO == 'LST') THEN
 !
 ELSEIF (I%CPHOTO == 'NIT' .OR. I%CPHOTO == 'NCB') THEN
 !
-   CALL PREP_HOR_ISBA_CC_FIELD(IG, I, &
+   CALL PREP_HOR_ISBA_CC_FIELD(DTCO, IOB, U, &
+                               IG, I, &
                                HPROGRAM,'BIOMASS ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)   
 !
 ENDIF
@@ -409,17 +413,20 @@ IF (I%CRESPSL == 'CNT') THEN
 !
 !*      8.1    Litter
 !
- CALL PREP_HOR_ISBA_CC_FIELD(IG, I, &
+ CALL PREP_HOR_ISBA_CC_FIELD(DTCO, IOB, U, &
+                               IG, I, &
                                HPROGRAM,'LITTER  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      8.2    Soil carbon
 !
- CALL PREP_HOR_ISBA_CC_FIELD(IG, I, &
+ CALL PREP_HOR_ISBA_CC_FIELD(DTCO, IOB, U, &
+                               IG, I, &
                                HPROGRAM,'SOILCARB',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      8.2    lignin
 !
- CALL PREP_HOR_ISBA_CC_FIELD(IG, I, &
+ CALL PREP_HOR_ISBA_CC_FIELD(DTCO, IOB, U, &
+                               IG, I, &
                                HPROGRAM,'LIGNIN  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 ENDIF

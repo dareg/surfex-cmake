@@ -352,7 +352,8 @@ END SELECT
  CALL READ_COVER_GARDEN(IOB, &
                         HPROGRAM,TOP%LGARDEN)
 !
- CALL READ_PGD_TEB_n(HPROGRAM)
+ CALL READ_PGD_TEB_n(BOP, BDD, DTB, DTCO, DTT, IOB, U, TG, TOP, &
+                     HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
 ! 
@@ -595,7 +596,12 @@ DO JPATCH=1,TOP%NTEB_PATCH
   CALL DIAG_MISC_TEB_GOTO_PATCH(JPATCH)
 !
 !* TEB fields
-  CALL READ_TEB_n(HPROGRAM,JPATCH)
+  CALL READ_TEB_n(B, BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, &
+                             DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, &
+                             DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, &
+                             S, SSB, UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, &
+                             TOP, TPN, TVG, W, WSB, &
+                  HPROGRAM,JPATCH)
 !
   ALLOCATE(T%CUR%XAC_ROOF    (ILU))
   ALLOCATE(T%CUR%XAC_ROAD    (ILU))

@@ -280,7 +280,8 @@ END SELECT
 !
 !         Reading of the fields
 !
- CALL READ_PGD_FLAKE_n(HPROGRAM)
+ CALL READ_PGD_FLAKE_n(DTCO, FG, F, IOB, U, &
+                       HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name

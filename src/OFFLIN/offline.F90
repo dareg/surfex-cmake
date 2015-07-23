@@ -21,6 +21,24 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_BEM_n, ONLY : B => BEM
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
@@ -619,7 +637,12 @@ XUREF = ZUREF
 !
 !       compare orography
 !
- CALL COMPARE_OROGRAPHY(IOB, &
+ CALL COMPARE_OROGRAPHY(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                               DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                               DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
+                               UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
+                               W, WSB, &
+                        IOB, &
                          CSURF_FILETYPE, LSET_FORC_ZS, XDELTA_OROG)
 !
 !       miscellaneous initialization
@@ -628,7 +651,11 @@ ICOUNT = 0
 ZTIMEC = 0.
 !
 ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
- CALL GET_SIZES_PARALLEL(IOB, &
+ CALL GET_SIZES_PARALLEL(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                                DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
+                                SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                         IOB, &
                          UG, U, &
                          NBLOCKTOT,INI,0,ISIZE_OMP, GSHADOWS)
  CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME, ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
@@ -722,7 +749,11 @@ XTIME = (MPI_WTIME() - XTIME0)
  CALL ALLOC_SURFEX(NBLOCKTOT)
 !
 ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
- CALL GET_SIZES_PARALLEL(IOB, &
+ CALL GET_SIZES_PARALLEL(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                                DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
+                                SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                         IOB, &
                          UG, U, &
                          NBLOCKTOT,INI,NPIO,ISIZE_OMP, GSHADOWS)
 DO J=0,NBLOCKTOT-1
@@ -1212,7 +1243,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifdef SFX_MPI
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL WRITE_SURF_ATM_n(CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+        CALL WRITE_SURF_ATM_n(B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                                   DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                   DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                   ICP, I, O, OR, S, SSB, SSCP, UG, U, USS, SV, &
+                                   TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
+                                   W, WSB, &
+                              CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
@@ -1422,7 +1459,13 @@ IF ( LRESTART ) THEN
                           GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
     !
     !* writes into the file
-    CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'ALL',LLAND_USE)
+    CALL WRITE_SURF_ATM_n(B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                                   DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                   DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                   ICP, I, O, OR, S, SSB, SSCP, UG, U, USS, SV, &
+                                   TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
+                                   W, WSB, &
+                              CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
        CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                                   DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &

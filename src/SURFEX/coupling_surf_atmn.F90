@@ -37,6 +37,18 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_BEM_n, ONLY : B => BEM
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
@@ -436,7 +448,11 @@ IF ((SV%NBEQ > 0).AND.(CHU%LCH_SURF_EMIS)) THEN
     DO JI=1,SIZE(CHE%TSEMISS)
       IF (SIZE(CHE%TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(CHE%TSEMISS(JI)%NETIMES)
     ENDDO
-    CALL CH_EMISSION_FLUX_n(IOB, &
+    CALL CH_EMISSION_FLUX_n(BOP, BDD, CHI, CHS, CHN, CHT, CHW, DTCO, DTS, DTT, DTZ, &
+                                      DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, &
+                                      DGW, F, FSB, GB, ICP, I, O, S, SSB, UG, U, &
+                                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                            IOB, &
                             CHE, CHU, SV, &
                             HPROGRAM,PTIME,PSFTS(:,SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (CHU%CCH_EMIS=='SNAP') THEN

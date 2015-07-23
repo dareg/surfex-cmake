@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PGD_WATFLUX_n(HPROGRAM)
+      SUBROUTINE READ_PGD_WATFLUX_n (DTCO, IOB, U, WG, W, &
+                                     HPROGRAM)
 !     #########################################
 !
 !!****  *READ_PGD_WATFLUX_n* - read WATFLUX physiographic fields
@@ -34,16 +35,18 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
-USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 !
 USE MODE_READ_SURF_COV, ONLY : READ_SURF_COV
 !
@@ -61,6 +64,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !

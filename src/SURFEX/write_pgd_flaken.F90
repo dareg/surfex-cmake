@@ -123,7 +123,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_FLAKE_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_FLAKE_n(FG, F, &
+ CALL WRITESURF_PGD_FLAKE_n(DGU, IOB, U, &
+                            FG, F, &
                             HPROGRAM)
 !
 !-------------------------------------------------------------------------------

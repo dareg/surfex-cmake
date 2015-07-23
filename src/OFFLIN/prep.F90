@@ -33,6 +33,23 @@ PROGRAM PREP
 !!
 !----------------------------------------------------------------------------
 !
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_BEM_n, ONLY : B => BEM
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
@@ -306,14 +323,24 @@ IF (CSURF_FILETYPE=="NC    ") INW = 2
 !
 DO JNW = 1,INW
   !
-  IF (LWRITE_COORD) CALL GET_LONLAT_n(DTCO, IOB, UG, U, &
+  IF (LWRITE_COORD) CALL GET_LONLAT_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                                      DTCO, IOB, UG, U, &
                                       CSURF_FILETYPE)
   !
   !* writes into the file
   CALL IO_BUFF_CLEAN_n(IOB)
   !
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
-  CALL WRITE_SURF_ATM_n(CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
+  CALL WRITE_SURF_ATM_n(B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                                   DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                   DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                   ICP, I, O, OR, S, SSB, SSCP, UG, U, USS, SV, &
+                                   TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
+                                   W, WSB, &
+                        CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
   CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                              DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
                              F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &

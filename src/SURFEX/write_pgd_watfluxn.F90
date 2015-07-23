@@ -123,7 +123,8 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_WATFLUX_n(WG, W, &
+ CALL WRITESURF_PGD_WATFLUX_n(DGU, IOB, U, &
+                              WG, W, &
                               HPROGRAM)
 !
 !-------------------------------------------------------------------------------
