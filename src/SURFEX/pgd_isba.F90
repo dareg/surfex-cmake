@@ -748,7 +748,8 @@ ALLOCATE(I%XWDRAIN(ILU))
 !
 I%LECOCLIMAP = OECOCLIMAP
 !
- CALL PGD_ISBA_PAR(DTCO, DTI, IG, I, UG, U, &
+ CALL PGD_ISBA_PAR(IOB, USS, &
+                   DTCO, DTI, IG, I, UG, U, &
                    HPROGRAM)
 !
 !-------------------------------------------------------------------------------

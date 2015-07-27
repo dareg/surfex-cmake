@@ -25,6 +25,8 @@ SUBROUTINE PREP_ISBA_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE
 !!------------------------------------------------------------------
 !
 !
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_ISBA_n, ONLY : I => ISBA
 !
@@ -128,7 +130,8 @@ SELECT CASE(HSURF)
   CASE('TG    ','WG    ','WGI   ')
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !* reading of the profile and its depth definition
-     CALL READ_EXTERN_ISBA(DTCO, IOB, I, &
+     CALL READ_EXTERN_ISBA(U, &
+                           DTCO, IOB, I, &
                            HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                            KLUOUT,INI,HSURF,HSURF,ZFIELD,ZD,OKEY)
 ! 

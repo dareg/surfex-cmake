@@ -618,7 +618,12 @@ DO JPATCH=1,TOP%NTEB_PATCH
   IF (TOP%LGARDEN) THEN
 !    CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! change input file name to pgd name
 !    CALL INIT_IO_SURF_n(HPROGRAM,'TOWN  ','TEB   ','READ ')       
-    CALL INIT_TEB_GARDEN_n(HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
+    CALL INIT_TEB_GARDEN_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                              DTGD, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, &
+                              DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, &
+                              S, SSB, UG, U, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, &
+                              TGRO, T, TOP, TVG, W, WSB, &
+                           HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
   ! Case of urban green roofs
     IF (TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_n(DTCO, DTGR, DGMTO, IOB, U, TGR, TGRO, TGRPE, TGRP, TOP, TVG, &
                                                   HPROGRAM,HINIT,KI,KSV,PSW_BANDS)

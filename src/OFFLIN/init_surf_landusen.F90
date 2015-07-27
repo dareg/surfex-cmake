@@ -230,7 +230,11 @@ DEALLOCATE(ZWORK)
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
- CALL SET_VEGTYPES_FRACTIONS(DTCO, DTI, IOB, IG, I, UG, U, &
+ CALL SET_VEGTYPES_FRACTIONS(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                          DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                          DGUT, DGW, F, FSB, GB, ICP, O, S, SSB, SV, TCP, &
+                                          TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                             DTCO, DTI, IOB, IG, I, UG, U, &
                              HPROGRAM)
 !
 !* re-initialize ISBA with new parameters

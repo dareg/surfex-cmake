@@ -44,6 +44,48 @@
 !
 !
 !
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_SV_n, ONLY : SV => SV
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
@@ -549,7 +591,11 @@ ENDIF
 !* building's type
 ZUNIF = XUNDEF
 IF (NUNIF_BLDTYPE/=NUNDEF) ZUNIF=FLOAT(NUNIF_BLDTYPE)
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'MAJ','BLDTYPE    ','TWN', CFNAM_BLDTYPE,CFTYP_BLDTYPE,ZUNIF,&
         ZWORK(:),DTT%LDATA_BLDTYPE )
 IF (.NOT. DTT%LDATA_BLDTYPE) THEN
@@ -561,7 +607,11 @@ END IF
 !* building's age
 ZUNIF = XUNDEF
 IF (NUNIF_BLD_AGE/=NUNDEF) ZUNIF=FLOAT(NUNIF_BLD_AGE)
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','BLD_AGE    ','TWN', CFNAM_BLD_AGE,CFTYP_BLD_AGE,ZUNIF,&
         ZWORK(:),DTT%LDATA_BLD_AGE )
 IF (.NOT. DTT%LDATA_BLD_AGE) THEN
@@ -593,7 +643,11 @@ END IF
 !* building's use
 ZUNIF = XUNDEF
 IF (NUNIF_USETYPE/=NUNDEF) ZUNIF=FLOAT(NUNIF_USETYPE)
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'MAJ','USETYPE    ','TWN', CFNAM_USETYPE,CFTYP_USETYPE,ZUNIF,&
         ZWORK(:),DTT%LDATA_USETYPE )
 IF (.NOT. DTT%LDATA_USETYPE) THEN
@@ -610,31 +664,55 @@ IF (ASSOCIATED(DTT%NPAR_BLDTYPE)) DTT%NPAR_BLDCODE(:) = BLDCODE(BDD, DTT%NPAR_BL
 !
 !
 !* other building parameters
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','BLD        ','TWN', CFNAM_BLD,CFTYP_BLD,XUNIF_BLD,DTT%XPAR_BLD,DTT%LDATA_BLD )
 IF (.NOT.DTT%LDATA_BLD) DEALLOCATE(DTT%XPAR_BLD)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','BLD_HEIGHT ','TWN',CFNAM_BLD_HEIGHT,CFTYP_BLD_HEIGHT,XUNIF_BLD_HEIGHT,&
         DTT%XPAR_BLD_HEIGHT,DTT%LDATA_BLD_HEIGHT)
 IF (.NOT.DTT%LDATA_BLD_HEIGHT) DEALLOCATE(DTT%XPAR_BLD_HEIGHT)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','WALL_O_HOR ','TWN',CFNAM_WALL_O_HOR,CFTYP_WALL_O_HOR,XUNIF_WALL_O_HOR,&
         DTT%XPAR_WALL_O_HOR,DTT%LDATA_WALL_O_HOR)
 IF (.NOT.DTT%LDATA_WALL_O_HOR) DEALLOCATE(DTT%XPAR_WALL_O_HOR)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'CDN','Z0_TOWN    ','TWN',CFNAM_Z0_TOWN,CFTYP_Z0_TOWN,XUNIF_Z0_TOWN,&
         DTT%XPAR_Z0_TOWN,DTT%LDATA_Z0_TOWN)
 IF (.NOT.DTT%LDATA_Z0_TOWN) DEALLOCATE(DTT%XPAR_Z0_TOWN)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'ALB_ROOF   ','TWN',CFNAM_ALB_ROOF,CFTYP_ALB_ROOF,XUNIF_ALB_ROOF  ,&
         DTT%XPAR_ALB_ROOF,DTT%LDATA_ALB_ROOF)
 IF (.NOT.DTT%LDATA_ALB_ROOF) DEALLOCATE(DTT%XPAR_ALB_ROOF)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'EMIS_ROOF  ','TWN',CFNAM_EMIS_ROOF,CFTYP_EMIS_ROOF,XUNIF_EMIS_ROOF ,&
         DTT%XPAR_EMIS_ROOF,DTT%LDATA_EMIS_ROOF)
 IF (.NOT.DTT%LDATA_EMIS_ROOF) DEALLOCATE(DTT%XPAR_EMIS_ROOF)
@@ -657,12 +735,20 @@ IF (.NOT.DTT%LDATA_TC_ROOF) DEALLOCATE(DTT%XPAR_TC_ROOF)
                  XUNIF_D_ROOF  ,DTT%XPAR_D_ROOF , DTT%LDATA_D_ROOF ) 
 IF (.NOT.DTT%LDATA_D_ROOF) DEALLOCATE(DTT%XPAR_D_ROOF)
 ! 
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','ALB_ROAD   ','TWN',CFNAM_ALB_ROAD  ,CFTYP_ALB_ROAD  ,XUNIF_ALB_ROAD  ,&
         DTT%XPAR_ALB_ROAD, DTT%LDATA_ALB_ROAD  )
 IF (.NOT.DTT%LDATA_ALB_ROAD) DEALLOCATE(DTT%XPAR_ALB_ROAD)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','EMIS_ROAD  ','TWN',CFNAM_EMIS_ROAD ,CFTYP_EMIS_ROAD ,XUNIF_EMIS_ROAD ,&
         DTT%XPAR_EMIS_ROAD, DTT%LDATA_EMIS_ROAD )
 IF (.NOT.DTT%LDATA_EMIS_ROAD) DEALLOCATE(DTT%XPAR_EMIS_ROAD)
@@ -685,12 +771,20 @@ IF (.NOT.DTT%LDATA_TC_ROAD) DEALLOCATE(DTT%XPAR_TC_ROAD)
                    XUNIF_D_ROAD  ,DTT%XPAR_D_ROAD , DTT%LDATA_D_ROAD  )
 IF (.NOT.DTT%LDATA_D_ROAD) DEALLOCATE(DTT%XPAR_D_ROAD)
 !  
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'ALB_WALL   ','TWN',CFNAM_ALB_WALL  ,CFTYP_ALB_WALL  ,XUNIF_ALB_WALL  ,&
         DTT%XPAR_ALB_WALL, DTT%LDATA_ALB_WALL   )
 IF (.NOT.DTT%LDATA_ALB_WALL) DEALLOCATE(DTT%XPAR_ALB_WALL)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'EMIS_WALL  ','TWN',CFNAM_EMIS_WALL ,CFTYP_EMIS_WALL ,XUNIF_EMIS_WALL ,&
         DTT%XPAR_EMIS_WALL, DTT%LDATA_EMIS_WALL  )
 IF (.NOT.DTT%LDATA_EMIS_WALL) DEALLOCATE(DTT%XPAR_EMIS_WALL)
@@ -713,37 +807,65 @@ IF (.NOT.DTT%LDATA_TC_WALL) DEALLOCATE(DTT%XPAR_TC_WALL)
                    XUNIF_D_WALL  ,DTT%XPAR_D_WALL , DTT%LDATA_D_WALL  ) 
 IF (.NOT.DTT%LDATA_D_WALL) DEALLOCATE(DTT%XPAR_D_WALL)
 ! 
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','H_TRAFFIC  ','TWN',CFNAM_H_TRAFFIC  ,CFTYP_H_TRAFFIC  ,XUNIF_H_TRAFFIC  ,&
         DTT%XPAR_H_TRAFFIC, DTT%LDATA_H_TRAFFIC   )
 IF (.NOT.DTT%LDATA_H_TRAFFIC) DEALLOCATE(DTT%XPAR_H_TRAFFIC)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','LE_TRAFFIC ','TWN',CFNAM_LE_TRAFFIC ,CFTYP_LE_TRAFFIC ,XUNIF_LE_TRAFFIC ,&
         DTT%XPAR_LE_TRAFFIC, DTT%LDATA_LE_TRAFFIC  )
 IF (.NOT.DTT%LDATA_LE_TRAFFIC) DEALLOCATE(DTT%XPAR_LE_TRAFFIC)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','H_INDUSTRY ','TWN',CFNAM_H_INDUSTRY ,CFTYP_H_INDUSTRY ,XUNIF_H_INDUSTRY ,&
         DTT%XPAR_H_INDUSTRY, DTT%LDATA_H_INDUSTRY  )
 IF (.NOT.DTT%LDATA_H_INDUSTRY) DEALLOCATE(DTT%XPAR_H_INDUSTRY)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','LE_INDUSTRY','TWN',CFNAM_LE_INDUSTRY,CFTYP_LE_INDUSTRY,XUNIF_LE_INDUSTRY,&
         DTT%XPAR_LE_INDUSTRY, DTT%LDATA_LE_INDUSTRY )
 IF (.NOT.DTT%LDATA_LE_INDUSTRY) DEALLOCATE(DTT%XPAR_LE_INDUSTRY)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'ROUGH_ROOF','TWN',CFNAM_ROUGH_ROOF,CFTYP_ROUGH_ROOF,XUNIF_ROUGH_ROOF ,&
         DTT%XPAR_ROUGH_ROOF,DTT%LDATA_ROUGH_ROOF)
 IF (.NOT.DTT%LDATA_ROUGH_ROOF) DEALLOCATE(DTT%XPAR_ROUGH_ROOF)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'ROUGH_WALL','TWN',CFNAM_ROUGH_WALL,CFTYP_ROUGH_WALL,XUNIF_ROUGH_WALL ,&
         DTT%XPAR_ROUGH_WALL,DTT%LDATA_ROUGH_WALL)
 IF (.NOT.DTT%LDATA_ROUGH_WALL) DEALLOCATE(DTT%XPAR_ROUGH_WALL)
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'RESIDENTIAL','TWN',CFNAM_RESIDENTIAL,CFTYP_RESIDENTIAL,XUNIF_RESIDENTIAL ,&
         DTT%XPAR_RESIDENTIAL,DTT%LDATA_RESIDENTIAL)
 IF (.NOT.DTT%LDATA_RESIDENTIAL) DEALLOCATE(DTT%XPAR_RESIDENTIAL)
@@ -759,7 +881,11 @@ IF (.NOT.DTT%LDATA_RESIDENTIAL) DEALLOCATE(DTT%XPAR_RESIDENTIAL)
 !
 !* road directions
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','ROAD_DIR   ','TWN',CFNAM_ROAD_DIR  ,CFTYP_ROAD_DIR    ,XUNIF_ROAD_DIR   ,&
         DTT%XPAR_ROAD_DIR, DTT%LDATA_ROAD_DIR    )
 IF (.NOT.DTT%LDATA_ROAD_DIR) DEALLOCATE(DTT%XPAR_ROAD_DIR)
@@ -768,19 +894,35 @@ IF (.NOT.DTT%LDATA_ROAD_DIR) DEALLOCATE(DTT%XPAR_ROAD_DIR)
 !
 !* solar panels
 !
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','EMIS_PANEL ','BLD',CFNAM_EMIS_PANEL,CFTYP_EMIS_PANEL,XUNIF_EMIS_PANEL,&
        DTT%XPAR_EMIS_PANEL, DTT%LDATA_EMIS_PANEL    )
 IF (.NOT.DTT%LDATA_EMIS_PANEL) DEALLOCATE(DTT%XPAR_EMIS_PANEL)
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','ALB_PANEL  ','BLD',CFNAM_ALB_PANEL ,CFTYP_ALB_PANEL ,XUNIF_ALB_PANEL ,&
        DTT%XPAR_ALB_PANEL , DTT%LDATA_ALB_PANEL     )
 IF (.NOT.DTT%LDATA_ALB_PANEL ) DEALLOCATE(DTT%XPAR_ALB_PANEL )
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','EFF_PANEL  ','BLD',CFNAM_EFF_PANEL ,CFTYP_EFF_PANEL ,XUNIF_EFF_PANEL ,&
        DTT%XPAR_EFF_PANEL , DTT%LDATA_EFF_PANEL     )
 IF (.NOT.DTT%LDATA_EFF_PANEL ) DEALLOCATE(DTT%XPAR_EFF_PANEL )
- CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','FRAC_PANEL ','BLD',CFNAM_FRAC_PANEL,CFTYP_FRAC_PANEL,XUNIF_FRAC_PANEL,&
        DTT%XPAR_FRAC_PANEL, DTT%LDATA_FRAC_PANEL    )
 IF (.NOT.DTT%LDATA_FRAC_PANEL) DEALLOCATE(DTT%XPAR_FRAC_PANEL)
@@ -790,7 +932,11 @@ IF (.NOT.DTT%LDATA_FRAC_PANEL) DEALLOCATE(DTT%XPAR_FRAC_PANEL)
 !* greenroof fraction
 !
 IF (OGREENROOF) THEN
-  CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+  CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,CBLD_ATYPE,'GREENROOF','BLD',CFNAM_GREENROOF,CFTYP_GREENROOF,XUNIF_GREENROOF ,&
         DTT%XPAR_GREENROOF,DTT%LDATA_GREENROOF)
   IF (.NOT.DTT%LDATA_GREENROOF) DEALLOCATE(DTT%XPAR_GREENROOF)
@@ -815,7 +961,11 @@ END IF
 !* gardens
 !
 IF (OGARDEN) THEN
-  CALL INI_VAR_FROM_DATA_0D(DTCO, IOB, UG, U, USS, &
+  CALL INI_VAR_FROM_DATA_0D(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                        DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                        TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                           DTCO, IOB, UG, U, USS, &
                            HPROGRAM,'ARI','GARDEN     ','TWN',CFNAM_GARDEN    ,CFTYP_GARDEN    ,XUNIF_GARDEN    ,&
         DTT%XPAR_GARDEN, DTT%LDATA_GARDEN    )
   IF (.NOT.DTT%LDATA_GARDEN) DEALLOCATE(DTT%XPAR_GARDEN)

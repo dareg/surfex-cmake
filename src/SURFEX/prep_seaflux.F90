@@ -34,6 +34,8 @@ SUBROUTINE PREP_SEAFLUX (DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
 !
 !
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
 USE MODD_OCEAN_n, ONLY : OCEAN_t
@@ -126,18 +128,21 @@ OR%LDIAPYCNAL = LDIAPYC
 !
 !*      2.0    Large scale orography
 !
-CALL PREP_HOR_SEAFLUX_FIELD(DTS, O, OR, SG, S, &
+CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
+                            DTS, O, OR, SG, S, &
                             HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.1    Temperature
 !
-CALL PREP_HOR_SEAFLUX_FIELD(DTS, O, OR, SG, S, &
+CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
+                            DTS, O, OR, SG, S, &
                             HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.2    Salinity
 !
 
-CALL PREP_HOR_SEAFLUX_FIELD(DTS, O, OR, SG, S, &
+CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
+                            DTS, O, OR, SG, S, &
                             HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.3   Sea-ice

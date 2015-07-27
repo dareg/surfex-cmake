@@ -280,21 +280,33 @@ END IF
 !*       3.     Sea
 !               ---
 !
-IF (U%NDIM_SEA>0) CALL WRITE_SEA_n(CHS, DGO, DGSI, DGU, O, OR, S, SSB, U, &
+IF (U%NDIM_SEA>0) CALL WRITE_SEA_n(BOP, BDD, CHE, CHI, CHN, CHU, CHT, CHW, DTCO, DTS, DTT, &
+                               DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGS, DGT, DGUT, DGW, F, &
+                               FSB, GB, IOB, ICP, I, UG, SV, TCP, TGD, TGDO, TGR, &
+                               TGRO, T, TOP, TVG, W, WSB, &
+                                   CHS, DGO, DGSI, DGU, O, OR, S, SSB, U, &
                                    HPROGRAM,HWRITE)
 !
 !
 !*       4.     Inland water
 !               ------------
 !
-IF (U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(CHF, CHW, DGMF, DGU, F, FSB, U, W, WSB, &
+IF (U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, DTCO, DTS, DTT, &
+                                        DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGT, DGUT, &
+                                        DGW, GB, IOB, ICP, I, O, S, SSB, UG, SV, TCP, &
+                                        TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
+                                              CHF, CHW, DGMF, DGU, F, FSB, U, W, WSB, &
                                               HPROGRAM,HWRITE)
 !
 !
 !*       5.     Vegetation scheme
 !               -----------------
 !
-IF (U%NDIM_NATURE>0) CALL WRITE_NATURE_n(CHI, DGEI, DGI, DGMI, DGU, DST, ICP, I, U, &
+IF (U%NDIM_NATURE>0) CALL WRITE_NATURE_n(BOP, BDD, CHE, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, DTT, &
+                                  DTZ, DGF, DGMTO, DGO, DGS, DGSI, DGT, DGUT, DGW, F, FSB, &
+                                  GB, IOB, O, S, SSB, UG, SV, TCP, TGD, TGDO, TGR, &
+                                  TGRO, T, TOP, TVG, W, WSB, &
+                                         CHI, DGEI, DGI, DGMI, DGU, DST, ICP, I, U, &
                                          HPROGRAM,HWRITE,OLAND_USE)
 !
 !

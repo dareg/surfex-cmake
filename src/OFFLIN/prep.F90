@@ -341,7 +341,9 @@ DO JNW = 1,INW
                                    TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
                                    W, WSB, &
                         CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
-  CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+  CALL WRITE_DIAG_SURF_ATM_n(BDD, DTCO, DTS, DTT, DTZ, FSB, IOB, ICP, O, SSB, TCP, &
+                                   TGD, TGDO, TGR, TGRO, WSB, &
+                             B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                              DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
                              F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &
                              CSURF_FILETYPE,'ALL')

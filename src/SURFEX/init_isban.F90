@@ -385,7 +385,12 @@ END SELECT
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
- CALL READ_PGD_ISBA_n(HPROGRAM,OLAND_USE)
+ CALL READ_PGD_ISBA_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTI, &
+                                  DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, &
+                                  DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, IG, I, &
+                                  O, S, SSB, UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, &
+                                  T, TOP, TVG, W, WSB, &
+                      HPROGRAM,OLAND_USE)
 !
 ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !

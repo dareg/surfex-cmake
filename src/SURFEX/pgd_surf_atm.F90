@@ -37,6 +37,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
 USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
 USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
 !
@@ -243,7 +245,8 @@ IF (U%NDIM_WATER>0) CALL PGD_INLAND_WATER(DTCO, FG, F, UG, U, USS, WG, W, &
 !*    8.      Additionnal fields for sea scheme
 !             ---------------------------------
 !
-IF (U%NDIM_SEA>0) CALL PGD_SEA(HPROGRAM)  
+IF (U%NDIM_SEA>0) CALL PGD_SEA(DTCO, DTS, SG, S, UG, U, USS, &
+                               HPROGRAM)  
 !
 !_______________________________________________________________________________
 !

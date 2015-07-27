@@ -293,7 +293,12 @@ NNCV(:) = 0
  CALL CLOSE_NAMELIST(CPROGNAME,ILUNAM)
 !
  CALL GOTO_SURFEX(1,.TRUE.)
- CALL INIT_INDEX_MPI(CPROGNAME, 'LIN ', 0., .FALSE.)
+ CALL INIT_INDEX_MPI(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                           DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                           DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, &
+                           SSB, UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, &
+                           TVG, W, WSB, &
+                     CPROGNAME, 'LIN ', 0., .FALSE.)
 !
 !      0.4 Allocate arrays depending on the control vector dimension
 !

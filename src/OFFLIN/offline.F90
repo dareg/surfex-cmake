@@ -546,7 +546,12 @@ IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !       splitting of the grid
 !
 GSHADOWS = LSHADOWS_SLOPE .OR. LSHADOWS_OTHER
-CALL INIT_INDEX_MPI(CSURF_FILETYPE, YALG_MPI, XIO_FRAC, GSHADOWS)
+CALL INIT_INDEX_MPI(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                           DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                           DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, &
+                           SSB, UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, &
+                           TVG, W, WSB, &
+                    CSURF_FILETYPE, YALG_MPI, XIO_FRAC, GSHADOWS)
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ init_index ',PLOG=XTIME_NPIO_READ)
@@ -566,7 +571,12 @@ XTIME0 = MPI_WTIME()
 !
 !       configuration of run
 !
- CALL OL_READ_ATM_CONF(IOB, &
+ CALL OL_READ_ATM_CONF(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                              DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                              DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
+                              UG, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, &
+                              WSB, &
+                       IOB, &
                        U, &
                        CSURF_FILETYPE, CFORCING_FILETYPE,            &
                       ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
@@ -1260,7 +1270,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+        CALL WRITE_DIAG_SURF_ATM_n(BDD, DTCO, DTS, DTT, DTZ, FSB, IOB, ICP, O, SSB, TCP, &
+                                   TGD, TGDO, TGR, TGRO, WSB, &
+                                   B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                                    DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
                                    F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &
                                    CTIMESERIES_FILETYPE,'ALL')
@@ -1467,7 +1479,9 @@ IF ( LRESTART ) THEN
                                    W, WSB, &
                               CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
-       CALL WRITE_DIAG_SURF_ATM_n(B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+       CALL WRITE_DIAG_SURF_ATM_n(BDD, DTCO, DTS, DTT, DTZ, FSB, IOB, ICP, O, SSB, TCP, &
+                                   TGD, TGDO, TGR, TGRO, WSB, &
+                                   B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
                                   DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
                                   F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &
                                    CSURF_FILETYPE,'ALL')

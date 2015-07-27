@@ -35,6 +35,20 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+!
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+!
 USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
 USE MODD_FLAKE_n, ONLY : F => FLAKE
 USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
@@ -155,7 +169,9 @@ IF (U%NDIM_NATURE>0)                                 &
 !             ----------------------------------
 !
 IF (U%NDIM_TOWN>0)                                 &
-  CALL ZOOM_PGD_TOWN(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP,U%LGARDEN)  
+  CALL ZOOM_PGD_TOWN(BOP, BDD, DTB, DTCO, DTT, IOB, UG, U, TGDO, TGDP, TG, &
+                                TOP, TVG, &
+                     HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP,U%LGARDEN)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
@@ -170,7 +186,8 @@ IF (U%NDIM_WATER>0)                                 &
 !             ---------------------------------
 !
 IF (U%NDIM_SEA>0)                                 &
-  CALL ZOOM_PGD_SEA(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)  
+  CALL ZOOM_PGD_SEA(DTCO, DTS, IOB, SG, S, UG, U, &
+                    HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)  
 !
 !_______________________________________________________________________________
 !

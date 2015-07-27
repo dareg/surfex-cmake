@@ -298,7 +298,8 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !---------------------------------------------------------------------------------------
 !
 !     #######################
-      SUBROUTINE READ_EXTERN_ISBA (DTCO, IOB, I, &
+      SUBROUTINE READ_EXTERN_ISBA (U, &
+                                    DTCO, IOB, I, &
                                    HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                                   KLUOUT,KNI,HFIELD,HNAME,PFIELD,PDEPTH,OKEY)
 !     #######################
@@ -307,7 +308,9 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !
 !
 !
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
@@ -323,6 +326,9 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB

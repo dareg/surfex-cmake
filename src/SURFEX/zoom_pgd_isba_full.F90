@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_ISBA_FULL(HPROGRAM,HINIFILE,HINIFILETYPE)
+      SUBROUTINE ZOOM_PGD_ISBA_FULL (CHI, DTCO, DTI, IOB, IG, I, UG, U, &
+                                     HPROGRAM,HINIFILE,HINIFILETYPE)
 !     ###########################################################
 
 !!
@@ -39,18 +40,20 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 !
-USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
-USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA                                  
-USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_PREP,             ONLY : CINGRID_TYPE, CINTERP_TYPE, LINTERP
 !
 USE MODI_GET_LUOUT
@@ -72,6 +75,16 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM     ! program calling
  CHARACTER(LEN=28),      INTENT(IN)  :: HINIFILE     ! input atmospheric file name

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_ISBA_PAR (DTCO, DTI, IG, I, UG, U, &
+      SUBROUTINE PGD_ISBA_PAR (IOB, USS, &
+                                DTCO, DTI, IG, I, UG, U, &
                                HPROGRAM)
 !     ##############################################################
 !
@@ -42,8 +43,10 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
@@ -74,6 +77,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
