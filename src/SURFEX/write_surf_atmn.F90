@@ -313,7 +313,10 @@ IF (U%NDIM_NATURE>0) CALL WRITE_NATURE_n(BOP, BDD, CHE, CHS, CHN, CHU, CHT, CHW,
 !*       6.     Urban scheme
 !               ------------
 !
-IF (U%NDIM_TOWN>0) CALL WRITE_TOWN_n(B, BOP, CHT, DTT, DGMTO, DGU, DGT, DGUT, U, &
+IF (U%NDIM_TOWN>0) CALL WRITE_TOWN_n(BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
+                                DGF, DGI, DGMI, DGO, DGS, DGSI, DGW, F, FSB, GB, IOB, &
+                                ICP, I, O, S, SSB, UG, SV, W, WSB, &
+                                     B, BOP, CHT, DTT, DGMTO, DGU, DGT, DGUT, U, &
                                      TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
                                      HPROGRAM,HWRITE)
 IF (LHOOK) CALL DR_HOOK('WRITE_SURF_ATM_N',1,ZHOOK_HANDLE)

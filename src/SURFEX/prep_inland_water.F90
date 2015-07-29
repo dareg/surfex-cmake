@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_INLAND_WATER (FG, F, FSB, UG, U, WG, W, WSB, &
+SUBROUTINE PREP_INLAND_WATER (DTCO, IOB, USS, &
+                               FG, F, FSB, UG, U, WG, W, WSB, &
                               HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -29,9 +30,11 @@ SUBROUTINE PREP_INLAND_WATER (FG, F, FSB, UG, U, WG, W, WSB, &
 !
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
@@ -52,6 +55,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
 TYPE(FLAKE_t), INTENT(INOUT) :: F

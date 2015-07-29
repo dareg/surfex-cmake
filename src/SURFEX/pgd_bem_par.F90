@@ -472,19 +472,31 @@ IF (.NOT.DTB%LDATA_SHADE) DEALLOCATE(DTB%XPAR_SHADE)
         DTB%XPAR_NATVENT, DTB%LDATA_NATVENT )
 IF (.NOT.DTB%LDATA_NATVENT) DEALLOCATE(DTB%XPAR_NATVENT)
 !
- CALL INI_VAR_FROM_DATA(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                  DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                  DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                  TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        DTCO, IOB, UG, U, USS, &
                         DTI, &
                         HPROGRAM,'INV','HC_FLOOR  ','TWN',CFNAM_HC_FLOOR,CFTYP_HC_FLOOR, &
         XUNIF_HC_FLOOR,DTB%XPAR_HC_FLOOR,DTB%LDATA_HC_FLOOR )
 IF (.NOT.DTB%LDATA_HC_FLOOR) DEALLOCATE(DTB%XPAR_HC_FLOOR)
 !
- CALL INI_VAR_FROM_DATA(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                  DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                  DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                  TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        DTCO, IOB, UG, U, USS, &
                         DTI, &
                         HPROGRAM,'ARI','TC_FLOOR  ','TWN',CFNAM_TC_FLOOR,CFTYP_TC_FLOOR, &
                  XUNIF_TC_FLOOR ,DTB%XPAR_TC_FLOOR, DTB%LDATA_TC_FLOOR )
 IF (.NOT.DTB%LDATA_TC_FLOOR) DEALLOCATE(DTB%XPAR_TC_FLOOR)
 !
- CALL INI_VAR_FROM_DATA(DTCO, IOB, UG, U, USS, &
+ CALL INI_VAR_FROM_DATA(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                  DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                  DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                  TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                        DTCO, IOB, UG, U, USS, &
                         DTI, &
                         HPROGRAM,'ARI','D_FLOOR   ','TWN',CFNAM_D_FLOOR,CFTYP_D_FLOOR, &
                  XUNIF_D_FLOOR  ,DTB%XPAR_D_FLOOR , DTB%LDATA_D_FLOOR )

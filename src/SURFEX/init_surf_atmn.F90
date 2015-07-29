@@ -56,6 +56,15 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+!
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+!
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
@@ -679,7 +688,12 @@ ZFRAC_TILE(:,JTILE) = U%XSEA(:)
 !
 ! initialization
 IF (U%NDIM_SEA>0) &
-  CALL INIT_SEA_n(HPROGRAM,HINIT,U%NSIZE_SEA,KSV,KSW,                  &
+  CALL INIT_SEA_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                             DTT, DTZ, DGEI, DGF, DGL, DGI, DGMI, DGMTO, DGO, DGS, DGSI, &
+                             DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, &
+                             OR, SG, S, SSB, UG, U, SV, TCP, TGD, TGDO, TGR, &
+                             TGRO, T, TOP, TVG, W, WSB, &
+                  HPROGRAM,HINIT,U%NSIZE_SEA,KSV,KSW,                  &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                   ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
@@ -706,7 +720,12 @@ ZFRAC_TILE(:,JTILE) = U%XWATER(:)
 !
 ! initialization
 IF (U%NDIM_WATER>0) &
-  CALL INIT_INLAND_WATER_n(HPROGRAM,HINIT,U%NSIZE_WATER,KSV,KSW,                &
+  CALL INIT_INLAND_WATER_n(BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, &
+                                      DTS, DTT, DTZ, DGEI, DGF, DGL, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                      DGS, DGSI, DGU, DGT, DGUT, DGW, FG, F, FSB, GB, IOB, &
+                                      ICP, I, O, S, SSB, UG, U, SV, TCP, TGD, TGDO, &
+                                      TGR, TGRO, T, TOP, TVG, WG, W, WSB, &
+                           HPROGRAM,HINIT,U%NSIZE_WATER,KSV,KSW,                &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                            ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &

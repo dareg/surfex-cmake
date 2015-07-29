@@ -26,6 +26,9 @@ SUBROUTINE PREP_SURF_ATM(HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 
 !
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+!
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
 USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
 USE MODD_OCEAN_n, ONLY : O => OCEAN
@@ -114,7 +117,8 @@ IF(U%NDIM_SEA>0) CALL PREP_SEA(DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
 ! INLAND WATER Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(U%NDIM_WATER>0) CALL PREP_INLAND_WATER(FG, F, FSB, UG, U, WG, W, WSB, &
+IF(U%NDIM_WATER>0) CALL PREP_INLAND_WATER(DTCO, IOB, USS, &
+   FG, F, FSB, UG, U, WG, W, WSB, &
    HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_SEAICE (DTCO, DTS, O, OR, SG, S, U, &
+SUBROUTINE PREP_SEAICE (IOB, UG, &
+                         DTCO, DTS, O, OR, SG, S, U, &
                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -28,8 +29,10 @@ SUBROUTINE PREP_SEAICE (DTCO, DTS, O, OR, SG, S, U, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
-USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
@@ -58,6 +61,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS

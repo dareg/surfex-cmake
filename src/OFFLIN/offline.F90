@@ -21,6 +21,11 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
+USE MODD_AGRI_n, ONLY : AG => AGRI
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_SLT_n, ONLY : SLT => SLT
+!
 USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
 USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
@@ -830,7 +835,12 @@ XTIME_COMM_READ = 0.
 !
 !   Land use or/and vegetation dynamic
 !                  
- CALL INIT_SURF_LANDUSE_n(CSURF_FILETYPE,YINIT,LLAND_USE,             &
+ CALL INIT_SURF_LANDUSE_n(AG, BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, &
+                                DTI, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, &
+                                DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, ICP, &
+                                IG, I, O, S, SSB, SLT, UG, U, SV, TCP, TGD, &
+                                TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                          CSURF_FILETYPE,YINIT,LLAND_USE,             &
                        INI, NSCAL, IBANDS,                           &
                        CSV,XCO2(NINDX1SFX:NINDX2SFX),XRHOA(NINDX1SFX:NINDX2SFX), &
                        XZENITH(NINDX1SFX:NINDX2SFX),XAZIM(NINDX1SFX:NINDX2SFX),  &

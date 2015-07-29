@@ -198,13 +198,29 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
 CPROGNAME = HPROGRAM
 !
-IF (U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(CHS, DGO, DGS, DGSI, DGU, S, U, &
+IF (U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(BOP, BDD, CHE, CHI, CHN, CHU, CHT, CHW, DTCO, DTS, DTT, &
+                              DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGT, DGUT, DGW, F, FSB, &
+                              GB, IOB, ICP, I, O, SSB, UG, SV, TCP, TGD, TGDO, &
+                              TGR, TGRO, T, TOP, TVG, W, WSB, &
+                                            CHS, DGO, DGS, DGSI, DGU, S, U, &
                                                      HPROGRAM,HWRITE)
-IF (U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(CHF, CHW, DGF, DGMF, DGU, DGW, F, U, W, &
+IF (U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, DTCO, DTS, DTT, &
+                                       DTZ, DGEI, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGT, DGUT, FSB, &
+                                       GB, IOB, ICP, I, O, S, SSB, UG, SV, TCP, TGD, &
+                                       TGDO, TGR, TGRO, T, TOP, TVG, WSB, &
+                                                     CHF, CHW, DGF, DGMF, DGU, DGW, F, U, W, &
                                                      HPROGRAM,HWRITE)
-IF (U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(CHI, DGEI, DGI, DGMI, DGU, DST, GB, I, U, &
+IF (U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(BOP, BDD, CHE, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, DTT, &
+                                 DTZ, DGF, DGMTO, DGO, DGS, DGSI, DGT, DGUT, DGW, F, FSB, &
+                                 IOB, ICP, O, S, SSB, UG, SV, TCP, TGD, TGDO, TGR, &
+                                 TGRO, T, TOP, TVG, W, WSB, &
+                                               CHI, DGEI, DGI, DGMI, DGU, DST, GB, I, U, &
                                                      HPROGRAM,HWRITE)
-IF (U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, U, TGDPE, TGDP, T, TOP, TPN, TVG, &
+IF (U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTT, DTZ, &
+                               DGEI, DGF, DGI, DGMI, DGO, DGS, DGSI, DGU, DGW, F, FSB, &
+                               GB, IOB, ICP, I, O, S, SSB, UG, SV, TCP, TGD, &
+                               TGDO, TGR, TGRO, W, WSB, &
+                                             B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, U, TGDPE, TGDP, T, TOP, TPN, TVG, &
                                                      HPROGRAM,HWRITE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

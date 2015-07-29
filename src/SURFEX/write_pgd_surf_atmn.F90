@@ -49,6 +49,14 @@
 !
 !
 !
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
@@ -308,7 +316,11 @@ ENDIF
 !*       2.     Sea
 !               ---
 !
-IF (U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(DTS, SG, S, &
+IF (U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTT, &
+                                   DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                   DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, SSB, UG, &
+                                   SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                                   DTS, SG, S, &
                                        U, &
                                        HPROGRAM)
 !
@@ -316,7 +328,11 @@ IF (U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(DTS, SG, S, &
 !*       3.     Inland water
 !               ------------
 !
-IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(FG, F, WG, W, &
+IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                            DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                                            DGT, DGUT, DGW, FSB, GB, IOB, ICP, I, O, S, SSB, &
+                                            UG, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, WSB, &
+                                            FG, F, WG, W, &
                                                   U, &
                                                   HPROGRAM)
 !
@@ -324,7 +340,11 @@ IF (U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(FG, F, WG, W, &
 !*       4.     Vegetation scheme
 !               -----------------
 !
-IF (U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(DTI, DTZ, IG, I, &
+IF (U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                                      DTT, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                      DGUT, DGW, F, FSB, GB, IOB, ICP, O, S, SSB, UG, &
+                                      SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                                      DTI, DTZ, IG, I, &
                                              U, &
                                              HPROGRAM)
 !
@@ -332,7 +352,12 @@ IF (U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(DTI, DTZ, IG, I, &
 !*       5.     Urban scheme
 !               ------------
 !
-IF (U%NDIM_TOWN>0) CALL WRITE_PGD_TOWN_n(U, &
+IF (U%NDIM_TOWN>0) CALL WRITE_PGD_TOWN_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTB, DTCO, &
+                                    DTS, DTGD, DTGR, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, &
+                                    DGS, DGSI, DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, &
+                                    I, O, S, SSB, UG, SV, TCP, TGD, TGDO, TGDP, TGR, &
+                                    TGRO, TGRP, TG, TIR, T, TOP, TVG, W, WSB, &
+                                         U, &
                                          HPROGRAM)
 !
 !

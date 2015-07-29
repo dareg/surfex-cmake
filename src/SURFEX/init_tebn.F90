@@ -515,7 +515,11 @@ DO JPATCH=1,TOP%NTEB_PATCH
   !*       6.     Building Energy Model
   !               ---------------------
   !
-  CALL INIT_BEM_n(IOB, &
+  CALL INIT_BEM_n(CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTZ, DGEI, DGF, &
+                              DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, F, &
+                              FSB, GB, ICP, I, O, S, SSB, SV, TCP, TGD, TGDO, &
+                              TGR, TGRO, TVG, W, WSB, &
+                  IOB, &
                   B, BOP, BDD, DTB, DTCO, DTT, UG, U, TG, T, TOP, &
                   ILUOUT)
   !

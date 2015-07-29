@@ -37,6 +37,15 @@ SUBROUTINE COUPLING_SURF_ATM_n(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
 !!-------------------------------------------------------------
 !
+USE MODD_AGRI_n, ONLY : AG => AGRI
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_PACK_CH_ISBA, ONLY : PKCI => PACK_CH_ISBA
+USE MODD_PACK_DIAG_ISBA, ONLY : PKDI => PACK_DIAG_ISBA
+USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
+!
 USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
 USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
@@ -689,7 +698,10 @@ ELSEIF (KTILE==2) THEN
   !
 ELSEIF (KTILE==3) THEN
   !
-  CALL COUPLING_NATURE_n(HPROGRAM, HCOUPLING, PTIMEC,                                         &
+  CALL COUPLING_NATURE_n(AG, CHI, DTCO, DTI, DTGD, DTGR, DTZ, DGEI, DGL, DGI, DGMI, &
+                              DST, GB, ICP, IG, I, PKCI, PKDI, PKI, SLT, UG, U, &
+                              USS, TGRO, &
+                         HPROGRAM, HCOUPLING, PTIMEC,                                         &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                U%NSIZE_NATURE, KSV, KSW,                                                        &
                ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
@@ -703,7 +715,8 @@ ELSEIF (KTILE==3) THEN
   !
 ELSEIF (KTILE==4) THEN
   !
-  CALL COUPLING_TOWN_n(B, BOP, CHT, DGCT, DGL, DGMT, DGMTO, DGT, DGUT, DST, SLT, U, &
+  CALL COUPLING_TOWN_n(DTCO, DTI, DTGD, DTGR, IG, I, &
+                       B, BOP, CHT, DGCT, DGL, DGMT, DGMTO, DGT, DGUT, DST, SLT, U, &
                        TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, &
                        HPROGRAM, HCOUPLING, PTIMEC,                                           &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
