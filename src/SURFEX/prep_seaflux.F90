@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX (DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
+SUBROUTINE PREP_SEAFLUX (IOB, &
+                          DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
                          HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -34,7 +35,9 @@ SUBROUTINE PREP_SEAFLUX (DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
@@ -68,6 +71,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS

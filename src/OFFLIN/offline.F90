@@ -21,6 +21,16 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_PACK_CH_ISBA, ONLY : PKCI => PACK_CH_ISBA
+USE MODD_PACK_DIAG_ISBA, ONLY : PKDI => PACK_DIAG_ISBA
+USE MODD_PACK_ISBA, ONLY : PKI => PACK_ISBA
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
 USE MODD_AGRI_n, ONLY : AG => AGRI
 USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
@@ -1036,7 +1046,14 @@ DO JFORC_STEP=1,INB_STEP_ATM
       XZS_THREAD,XZS_XY_THREAD, XSLOPANG_THREAD,XSLOPAZI_THREAD,XSURF_TRIANGLE_THREAD)
     END IF
     !
-    CALL COUPLING_SURF_ATM_n(CSURF_FILETYPE, 'E', ZTIMEC,                    &
+    CALL COUPLING_SURF_ATM_n(AG, B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, &
+                                CHW, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, DGF, &
+                                DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                DGUT, DGW, DST, F, FSB, GB, IOB, ICP, IG, I, O, &
+                                OR, PKCI, PKDI, PKI, SG, S, SSB, SLT, SSCP, UG, U, &
+                                USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, &
+                                TG, TIR, T, TOP, TPN, TVG, W, WSB, &
+                             CSURF_FILETYPE, 'E', ZTIMEC,                    &
            XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, NSCAL, IBANDS, &
            XTSUN(NINDX1SFX:NINDX2SFX), XZENITH(NINDX1SFX:NINDX2SFX),         &
            XZENITH2(NINDX1SFX:NINDX2SFX), XAZIM(NINDX1SFX:NINDX2SFX),        &

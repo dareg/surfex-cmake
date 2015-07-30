@@ -56,6 +56,12 @@ SUBROUTINE INIT_SURF_ATM_n(HPROGRAM,HINIT, OLAND_USE,                   &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_AGRI_n, ONLY : AG => AGRI
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_SLT_n, ONLY : SLT => SLT
+!
 USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
 USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
@@ -751,7 +757,12 @@ ZFRAC_TILE(:,JTILE) = U%XNATURE(:)
 !
 ! initialization
 IF (U%NDIM_NATURE>0) &
-  CALL INIT_NATURE_n(HPROGRAM,HINIT,OLAND_USE,U%NSIZE_NATURE,KSV,KSW,     &
+  CALL INIT_NATURE_n(AG, BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, &
+                                  DTI, DTS, DTT, DTZ, DGEI, DGF, DGL, DGI, DGMI, DGMTO, DGO, &
+                                  DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                  ICP, IG, I, O, S, SSB, SLT, UG, U, SV, TCP, &
+                                  TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     HPROGRAM,HINIT,OLAND_USE,U%NSIZE_NATURE,KSV,KSW,     &
                      HSV,ZP_CO2,ZP_RHOA,                                &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                      ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &

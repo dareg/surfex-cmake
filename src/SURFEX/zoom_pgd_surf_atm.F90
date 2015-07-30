@@ -35,6 +35,11 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_ISBA_n, ONLY : I => ISBA
+!
 USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
 USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
 USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
@@ -162,7 +167,8 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !             ------------------------------------
 !
 IF (U%NDIM_NATURE>0)                                 &
-  CALL ZOOM_PGD_NATURE(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP)  
+  CALL ZOOM_PGD_NATURE(CHI, DTCO, DTI, IOB, IG, I, UG, U, USS, &
+                       HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme

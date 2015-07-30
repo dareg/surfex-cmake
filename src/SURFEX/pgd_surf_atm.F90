@@ -37,6 +37,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+!
 USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
 !
 USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
@@ -226,7 +229,12 @@ IF (U%LECOCLIMAP) CALL PGD_COVER(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DT
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (U%NDIM_NATURE>0) CALL PGD_NATURE(HPROGRAM,U%LECOCLIMAP)  
+IF (U%NDIM_NATURE>0) CALL PGD_NATURE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTI, &
+                             DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, &
+                             DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, IG, I, &
+                             O, S, SSB, UG, U, USS, SV, TCP, TGD, TGDO, TGR, &
+                             TGRO, T, TOP, TVG, W, WSB, &
+                                     HPROGRAM,U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme

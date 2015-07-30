@@ -807,7 +807,11 @@ ALLOCATE(I%XWDRAIN(ILU))
 !
 I%LECOCLIMAP = OECOCLIMAP
 !
- CALL PGD_ISBA_PAR(IOB, USS, &
+ CALL PGD_ISBA_PAR(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                DGUT, DGW, F, FSB, GB, ICP, O, S, SSB, SV, TCP, &
+                                TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                   IOB, USS, &
                    DTCO, DTI, IG, I, UG, U, &
                    HPROGRAM)
 !
