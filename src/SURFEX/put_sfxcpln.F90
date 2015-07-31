@@ -42,6 +42,8 @@ SUBROUTINE PUT_SFXCPL_n(HPROGRAM,KI,KSW,PSW_BANDS,PZENITH, &
 !
 !
 !
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
 USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
@@ -145,7 +147,8 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_SEA.OR.LCPL_FLOOD)THEN
-  CALL UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,    &
+  CALL UPDATE_ESM_SURF_ATM_n(F, I, S, U, W, &
+                             HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,    &
                              PTSRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )
 ENDIF
 !

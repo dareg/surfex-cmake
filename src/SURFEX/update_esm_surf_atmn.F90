@@ -1,5 +1,6 @@
 !     #################################################################################
-SUBROUTINE UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
+SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, I, S, U, W, &
+                                  HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
                                    PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )  
 !     #################################################################################
 !
@@ -28,16 +29,18 @@ SUBROUTINE UPDATE_ESM_SURF_ATM_n(HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
 !!      B. Decharme 06/2013 new coupling variables
 !!-------------------------------------------------------------
 !
-USE MODD_ISBA_n, ONLY : I => ISBA
 !
-USE MODD_WATFLUX_n, ONLY : W => WATFLUX
 !
-USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
 !
-USE MODD_FLAKE_n, ONLY : F => FLAKE
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
 !
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 !
@@ -58,6 +61,13 @@ USE MODI_UPDATE_ESM_FLAKE_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                INTENT(IN)  :: KI        ! number of points

@@ -110,7 +110,8 @@ ENDIF
 ! SEA Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(U%NDIM_SEA>0) CALL PREP_SEA(DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
+IF(U%NDIM_SEA>0) CALL PREP_SEA(IOB, &
+   DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
    HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
