@@ -21,6 +21,13 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! -------------------------------------------------
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_GR_BIOG_GARDEN_n, ONLY : GBGD => GR_BIOG_GARDEN
+USE MODD_GR_BIOG_GREENROOF_n, ONLY : GBGR => GR_BIOG_GREENROOF
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+!
 USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
 USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
 USE MODD_PACK_CH_ISBA, ONLY : PKCI => PACK_CH_ISBA
@@ -805,7 +812,14 @@ ELSE
   CALL GOTO_SURFEX(NBLOCK,.TRUE.)
 ENDIF
 !
- CALL INIT_SURF_ATM_n(CSURF_FILETYPE, YINIT, LLAND_USE,                      &
+ CALL INIT_SURF_ATM_n(AG, B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, &
+                            CHW, DTB, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, &
+                            DGF, DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, &
+                            DGT, DGUT, DGW, DST, DUU, FG, F, FSB, GBGD, GBGR, GB, &
+                            IOB, ICP, IG, I, O, OR, SG, S, SSB, SLT, SSCP, &
+                            UG, U, USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, &
+                            TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, WG, W, WSB, &
+                            CSURF_FILETYPE, YINIT, LLAND_USE,                      &
                      INKPROMA, NSCAL, IBANDS,                               &
                      CSV,XCO2(NINDX1SFX:NINDX2SFX),XRHOA(NINDX1SFX:NINDX2SFX),          &
                      XZENITH(NINDX1SFX:NINDX2SFX),XAZIM(NINDX1SFX:NINDX2SFX),XSW_BANDS, &

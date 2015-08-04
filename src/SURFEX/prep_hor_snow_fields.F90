@@ -41,6 +41,8 @@ SUBROUTINE PREP_HOR_SNOW_FIELDS (IOB, IG, U, &
 !
 !
 !
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -188,7 +190,8 @@ ENDIF
 ALLOCATE(ZW(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='WWW'//HSURF
-CALL PREP_HOR_SNOW_FIELD(IG, U, &
+CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE,  &
                          KLUOUT, OUNIF, YSNSURF, KPATCH, KL, TPSNOW, TPTIME,  &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,&
@@ -204,7 +207,8 @@ CALL PREP_HOR_SNOW_FIELD(IG, U, &
 ALLOCATE(ZD(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='DEP'//HSURF
-CALL PREP_HOR_SNOW_FIELD(IG, U, &
+CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE,  &
                          KLUOUT, OUNIF, YSNSURF, KPATCH, KL, TPSNOW, TPTIME,  &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,&
@@ -246,7 +250,8 @@ ENDIF
 !
 !* density profile
 YSNSURF='RHO'//HSURF
-CALL PREP_HOR_SNOW_FIELD(IG, U, &
+CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,           &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,         &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,     &
@@ -317,7 +322,8 @@ ENDIF
 !
 !* albedo
 YSNSURF='ALB'//HSURF
- CALL PREP_HOR_SNOW_FIELD(IG, U, &
+ CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,         &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
@@ -330,7 +336,8 @@ IF (TPSNOW%SCHEME/='D95') THEN
   !
   !* heat in snowpack profile
   YSNSURF='HEA'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(IG, U, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,          &
                            KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
                            PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
@@ -345,7 +352,8 @@ IF (TPSNOW%SCHEME=='CRO'.OR. TPSNOW%SCHEME=='3-L') THEN
   !
   !* age in snowpack profile
   YSNSURF='AGE'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(IG, U, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
@@ -369,7 +377,8 @@ ENDIF
 IF (TPSNOW%SCHEME=='CRO') THEN
   !
   YSNSURF='SG1'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(IG, U, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
@@ -379,7 +388,8 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
   YSNSURF='SG2'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(IG, U, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
@@ -389,7 +399,8 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
   YSNSURF='HIS'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(IG, U, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+                         IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &

@@ -37,6 +37,14 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+!
 USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
 USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
 !
@@ -240,7 +248,13 @@ IF (U%NDIM_NATURE>0) CALL PGD_NATURE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
-IF (U%NDIM_TOWN>0) CALL PGD_TOWN(HPROGRAM,U%LECOCLIMAP,U%LGARDEN)  
+IF (U%NDIM_TOWN>0) CALL PGD_TOWN(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTB, DTCO, &
+                           DTI, DTS, DTGD, DTGR, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, &
+                           DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, F, FSB, GB, IOB, &
+                           ICP, I, O, S, SSB, UG, U, USS, SV, TCP, TGD, &
+                           TGDO, TGDP, TGR, TGRO, TGRP, TG, TIR, T, TOP, TVG, W, &
+                           WSB, &
+                                 HPROGRAM,U%LECOCLIMAP,U%LGARDEN)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
