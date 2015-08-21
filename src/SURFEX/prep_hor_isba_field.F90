@@ -144,7 +144,8 @@ IF (HSURF=='SN_VEG ') THEN
        IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0
     ENDIF
   ENDIF
-  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+  CALL PREP_HOR_SNOW_FIELDS(DTCO, &
+                            IOB, IG, U, &
                             HPROGRAM, HSURF,                     &
                             YFILE_SNOW, YFILETYPE_SNOW,          &
                             YFILEPGD_SNOW, YFILEPGDTYPE_SNOW,    &

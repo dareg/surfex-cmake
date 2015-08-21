@@ -129,7 +129,8 @@ IF (HSURF=='SN_ROOF') THEN
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROOF)))                                 
-  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+  CALL PREP_HOR_SNOW_FIELDS(DTCO, &
+                            IOB, IG, U, &
                             HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &
@@ -155,7 +156,8 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROAD)))                                   
-  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+  CALL PREP_HOR_SNOW_FIELDS(DTCO, &
+                            IOB, IG, U, &
                             HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &                            

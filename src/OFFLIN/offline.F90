@@ -1028,7 +1028,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Receive fields to other models proc by proc
-     CALL SFX_OASIS_RECV_OL(CSURF_FILETYPE,INI,IBANDS,ZTIMEC,       &
+     CALL SFX_OASIS_RECV_OL(F, I, S, U, W, &
+                            CSURF_FILETYPE,INI,IBANDS,ZTIMEC,       &
                             XTSTEP_SURF,ISIZE_OMP,XZENITH,XSW_BANDS,&
                             XTSRAD,XDIR_ALB,XSCA_ALB,XEMIS,XTSURF   )
     ENDIF

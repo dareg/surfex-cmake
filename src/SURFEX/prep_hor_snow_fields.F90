@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_SNOW_FIELDS (IOB, IG, U, &
+SUBROUTINE PREP_HOR_SNOW_FIELDS (DTCO, &
+                                  IOB, IG, U, &
                                  HPROGRAM,HSURF,              &
                                 HFILE,HFILETYPE,             &
                                 HFILEPGD,HFILEPGDTYPE,       &
@@ -41,7 +42,9 @@ SUBROUTINE PREP_HOR_SNOW_FIELDS (IOB, IG, U, &
 !
 !
 !
-USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
@@ -69,6 +72,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG

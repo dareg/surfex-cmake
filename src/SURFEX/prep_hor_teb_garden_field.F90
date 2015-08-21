@@ -183,7 +183,8 @@ IF (HSURF=='SN_VEG ') THEN
   !
   ZPATCH=1.
   ZVEGTYPE_PATCH(:,:,1) = TGDP%XVEGTYPE(:,:)
-  CALL PREP_HOR_SNOW_FIELDS(IOB, IG, U, &
+  CALL PREP_HOR_SNOW_FIELDS(DTCO, &
+                            IOB, IG, U, &
                             HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &

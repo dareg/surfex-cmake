@@ -219,7 +219,13 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
  CALL SPLIT_GRID(UG, U, &
                  'OFFLIN')
 !
- CALL PGD_SURF_ATM(CSURF_FILETYPE,'                            ','      ',.FALSE.)
+ CALL PGD_SURF_ATM(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTB, DTCO, &
+                               DTI, DTS, DTGD, DTGR, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, &
+                               DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DUU, FG, F, FSB, &
+                               GB, IOB, ICP, IG, I, O, SG, S, SSB, UG, U, &
+                               USS, SV, TCP, TGD, TGDO, TGDP, TGR, TGRO, TGRP, TG, TIR, &
+                               T, TOP, TVG, WG, W, WSB, &
+                   CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
  CALL PGD_OROG_FILTER(U, &
                       CSURF_FILETYPE)
