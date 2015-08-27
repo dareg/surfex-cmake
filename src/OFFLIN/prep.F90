@@ -310,7 +310,11 @@ CALL GOTO_SURFEX(1,.TRUE.)
                          IYEAR, IMONTH, IDAY, ZTIME            ) 
 !
  CALL IO_BUFF_CLEAN_n(IOB)
- CALL PREP_SURF_ATM(CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+ CALL PREP_SURF_ATM(B, BOP, DTCO, DTS, FG, F, FSB, IOB, ICP, IG, I, &
+                          O, OR, SG, S, SSB, UG, U, USS, TCP, TGD, TGDO, &
+                          TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, T, TOP, TVG, WG, &
+                          W, WSB, &
+                    CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 !*    3.      Preparation of SFX-OASIS grid, mask, areas files
 !             ------------------------------------------------
