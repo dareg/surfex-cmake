@@ -46,6 +46,8 @@ USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
+USE MODD_SURFEX_MPI,  ONLY : NRANK, NPIO
+!
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 !
 USE MODD_ASSIM,          ONLY : XAT2M_ISBA, XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, XAT2M_TEB, LAROME
@@ -257,10 +259,12 @@ DO JJ=1,KSIZE
 ENDDO
 
 IF (KTILE==1) THEN
- 
-  WRITE(*,*) '*********************************************'
-  WRITE(*,*) '*      ASSIMILATIONS FOR SEA POINTS         *'
-  WRITE(*,*) '*********************************************'
+  
+  IF (NRANK==NPIO) THEN 
+    WRITE(*,*) '*********************************************'
+    WRITE(*,*) '*      ASSIMILATIONS FOR SEA POINTS         *'
+    WRITE(*,*) '*********************************************'
+  ENDIF
  
   CALL ASSIM_SEA_n(S, U, &
                     HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST,&
@@ -268,18 +272,24 @@ IF (KTILE==1) THEN
 
 ELSEIF (KTILE==2) THEN
   
-  WRITE(*,*) '*********************************************'  
-  WRITE(*,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
-  WRITE(*,*) '*********************************************'
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) '*********************************************'  
+    WRITE(*,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
+    WRITE(*,*) '*********************************************'
+  ENDIF
+
   CALL ASSIM_INLAND_WATER_n(I, U, W, &
                             HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
                             OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
 ELSEIF (KTILE==3) THEN
   
-  WRITE(*,*) '*********************************************'  
-  WRITE(*,*) '*      ASSIMILATIONS FOR NATURE POINTS      *'
-  WRITE(*,*) '*********************************************'
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) '*********************************************'  
+    WRITE(*,*) '*      ASSIMILATIONS FOR NATURE POINTS      *'
+    WRITE(*,*) '*********************************************'
+  ENDIF
+
   CALL ASSIM_NATURE_n(DGMI, IG, I, U, &
                       HPROGRAM,KSIZE,                                             &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
@@ -290,9 +300,12 @@ ELSEIF (KTILE==3) THEN
   
 ELSEIF (KTILE==4) THEN
   
-  WRITE(*,*) '*********************************************'  
-  WRITE(*,*) '*      ASSIMILATIONS FOR URBAN POINTS       *'
-  WRITE(*,*) '*********************************************'
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) '*********************************************'  
+    WRITE(*,*) '*      ASSIMILATIONS FOR URBAN POINTS       *'
+    WRITE(*,*) '*********************************************'
+  ENDIF
+
   CALL ASSIM_TOWN_n(U, T, TOP, &
                     HPROGRAM,KSIZE,ZP_PT2M,HTEST)
   

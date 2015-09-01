@@ -24,12 +24,6 @@ SUBROUTINE DEALLOC_ISBA_n (CHI, DTI, GB, IG, I)
 !!      P Samuelsson 10/2014  MEB
 !!------------------------------------------------------------------
 !
-
-!
-
-!                             
-!
-!
 !
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
@@ -270,6 +264,9 @@ IF(ASSOCIATED(DTI%XPAR_CNA_NITRO  )) DEALLOCATE(DTI%XPAR_CNA_NITRO  )
 IF(ASSOCIATED(DTI%LPAR_STRESS     )) DEALLOCATE(DTI%LPAR_STRESS     )
 IF(ASSOCIATED(DTI%XPAR_IRRIG      )) DEALLOCATE(DTI%XPAR_IRRIG      )
 IF(ASSOCIATED(DTI%XPAR_WATSUP     )) DEALLOCATE(DTI%XPAR_WATSUP     )
+!
+IF(ASSOCIATED(I%XRED_NOISE      )) I%XRED_NOISE=>NULL()
+!
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DEALLOC_ISBA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

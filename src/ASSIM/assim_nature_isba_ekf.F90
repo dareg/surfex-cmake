@@ -23,9 +23,11 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF (I, &
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
-USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, NNCO, NVAR, NNCV, &
+USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
+!
+USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, XQCOBS, NNCO, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XSIGMA, CBIO, XI,        &
-                               XF_PATCH, XF, COBS, XSCALE_QLAI,  LOBSFILE, XALPH,  &
+                               XF_PATCH, XF, COBS, XSCALE_QLAI, LOBSFILE, XALPH,    &
                                NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS,      &
                                NOBS, XYO
 ! 
@@ -100,7 +102,6 @@ REAL,DIMENSION(NOBSTYPE*NBOUTPUT) :: ZX,ZB2,ZP
 REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZKRK
 REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZIDKH
 REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZIDENT          ! identitiy matrix, used for Ba
-REAL,DIMENSION(I%NPATCH*NVAR) :: ZXINCR
 !
 REAL,DIMENSION(I%NPATCH) :: ZVLAIMIN
 !
@@ -132,7 +133,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_NATURE_ISBA_EKF: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-IF ( NPRINTLEV>0 ) THEN
+IF ( NPRINTLEV>0  .AND. NRANK==NPIO ) THEN
   WRITE(*,*)
   WRITE(*,*) '   --------------------------'
   WRITE(*,*) '   |   ENTERING  VARASSIM   |'
@@ -147,12 +148,12 @@ ELSE
   IMYPROC = 1
 ENDIF
 #else
-IMYPROC = 1
+IMYPROC = NRANK+1
 #endif
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF ( NPRINTLEV > 0 ) WRITE(*,*) 'number of patches =',I%NPATCH
+IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
 !
 !############################# INITIALISATIONS ###############################
 !
@@ -161,11 +162,12 @@ IF ( NPRINTLEV > 0 ) WRITE(*,*) 'number of patches =',I%NPATCH
 !   using same clay fraction in both layers
 !   Read SAND fraction to compute the saturation for conversion of ERS SWI
 !
-DO JI=1,KI
-  ZCOFSWI(JI) = 0.001 * (89.0467 * ((100.*I%XCLAY(JI,1))**0.3496) - 37.1342*((100.*I%XCLAY(JI,1))**0.5))
+ CALL COFSWI(I%XCLAY(:,1),ZCOFSWI)
+ !
+!DO JI=1,KI
   !ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
   !ZWILT  (I) = 0.001 * 37.1342 * ((100.*XCLAY(I,1))**0.5) 
-ENDDO
+!ENDDO
 !
 ! Set control variables
 ZIDENT(:,:) = 0.                   ! identity matrix
@@ -191,10 +193,10 @@ DO JL = 1,NVAR
     !
     DO JI = 1,KI
       DO JJ = 1,I%NPATCH
-        IF ( XLAI_PASS(JI,JJ)/=XUNDEF ) THEN
+        IF ( XLAI_PASS(JI,JJ)/=XUNDEF .AND. XLAI_PASS(JI,JJ)>=2. ) THEN
           ZCOEF(JI,JJ,JL) = XLAI_PASS(JI,JJ)*XLAI_PASS(JI,JJ)
         ELSE 
-          ZCOEF(JI,JJ,JL) = 0.
+          ZCOEF(JI,JJ,JL) = 0.4*0.4/(XSIGMA(JL)*XSIGMA(JL))
         ENDIF
       ENDDO
     ENDDO
@@ -279,15 +281,17 @@ ENDIF
 IF ( LBEV ) THEN
   !
 !//////////////////////TO WRITE LTM/////////////////////////////////////
-  IUNIT = 110
-  DO JL=1,NVAR
-    DO JK=1,NVAR
-      IUNIT = IUNIT + 1
-      WRITE(YCHAR,'(I1)') JK
-      YLFNAME='LTM_del'//TRIM(CVAR(JK))//'_del'//TRIM(CVAR(JL))//"."//YMYPROC
-      OPEN(UNIT=IUNIT,FILE=YLFNAME,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='APPEND')
+  IF (NPRINTLEV>0) THEN
+    IUNIT = 110
+    DO JL=1,NVAR
+      DO JK=1,NVAR
+        IUNIT = IUNIT + 1
+        WRITE(YCHAR,'(I1)') JK
+        YLFNAME='LTM_del'//TRIM(CVAR(JK))//'_del'//TRIM(CVAR(JL))//"."//YMYPROC
+        OPEN(UNIT=IUNIT,FILE=YLFNAME,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='APPEND')
+      ENDDO
     ENDDO
-  ENDDO
+  ENDIF
 !/////////////////////TO WRITE LTM////////////////////////////////////////
   DO JI = 1,KI
     !
@@ -312,22 +316,24 @@ IF ( LBEV ) THEN
             !
           ENDIF
           !
-          WRITE (IUNIT,*) ZLTM(L1,K1)
+          IF (NPRINTLEV>0) WRITE (IUNIT,*) ZLTM(L1,K1)
           !
         ENDDO
       ENDDO
     ENDDO
     !
-!//////////////////////TO WRITE LTM/////////////////////////////////////      
-    IUNIT = 110
-    DO JL=1,NVAR
-      DO JK=1,NVAR
-        IUNIT = IUNIT + 1
-        CLOSE(IUNIT)
+!//////////////////////TO WRITE LTM/////////////////////////////////////   
+    IF (NPRINTLEV>0) THEN
+      IUNIT = 110
+      DO JL=1,NVAR
+        DO JK=1,NVAR
+          IUNIT = IUNIT + 1
+          CLOSE(IUNIT)
+        ENDDO
       ENDDO
-    ENDDO
-!//////////////////////TO WRITE LTM/////////////////////////////////////      
-    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'LTM d(wg2)/d(wg2)', ZLTM(1,1)
+      !//////////////////////TO WRITE LTM/////////////////////////////////////
+      WRITE(*,*) 'LTM d(wg2)/d(wg2)', ZLTM(1,1)
+    ENDIF
     !
     ! evolve B 
     ZB(JI,:,:) = MATMUL(ZLTM(:,:),MATMUL(ZB(JI,:,:),TRANSPOSE(ZLTM(:,:))))
@@ -365,10 +371,10 @@ IF ( LBEV ) THEN
   !
   ! write out the LTM for the forward model
   ! Write out current B
-  YBGFILE="BGROUNDout_LBEV."//YMYPROC
-  CALL B_BIG_LOOP(I, &
-                  "WRIT",YBGFILE,ZB)
-  IF ( NPRINTLEV > 0 ) THEN
+  IF (NPRINTLEV>0) THEN
+    YBGFILE="BGROUNDout_LBEV."//YMYPROC
+    CALL B_BIG_LOOP(I, &
+                    "WRIT",YBGFILE,ZB)
     WRITE(*,*) 'store B matrix after TL evolution ==>',ZB(1,1,1)
     WRITE(*,*) 'writing out B'
   ENDIF
@@ -416,41 +422,43 @@ DO ISTEP=1,NBOUTPUT
 ENDDO 
 !
 !//////////////////////TO WRITE OBS/////////////////////////////////////
-OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
+IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
 DO JI = 1,KI
   IF ( MINVAL(I%XWGI(JI,1,:))>0. ) THEN
     XYO (JI,:) = XUNDEF
     IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',JI,' REMOVED'
   ENDIF
-  WRITE (111,*) XYO(JI,:)
+  IF ( NPRINTLEV > 0 ) WRITE (111,*) XYO(JI,:)
 ENDDO
-CLOSE(111)
+IF ( NPRINTLEV > 0 ) CLOSE(111)
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 !
 !############################# ANALYSIS ###############################
 !
 IF ( NPRINTLEV > 0 ) THEN
-  WRITE(*,*) 'calculating jacobians',NOBS
-  WRITE(*,*) ' and then PERFORMING ANALYSIS'
-ENDIF
-!
-!//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
-! WRITE OUT OBS AND YERROR FOR DIAGNOSTIC PURPOSES
-OPEN (UNIT=111,FILE='OBSERRORout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
-! *** Write innovations in ASCII file ***
-OPEN (unit=112,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
-! Write analysis results and increments in ASCII file
-OPEN (unit=113,file='ANAL_INCR.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
-! **** Write out the observation operator + Gain matrix ****
-IUNIT = 113
-DO JL = 1,NVAR
-  DO JK=1,NOBSTYPE
-    IUNIT = IUNIT + 1
-    WRITE(YCHAR,'(I1)') JK
-    YFNAME='HO_'//CVAR(JL)//'_v'//YCHAR
-    OPEN(UNIT=IUNIT,FILE=YFNAME,FORM='FORMATTED',STATUS='UNKNOWN',IOSTAT=ISTAT)
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) 'calculating jacobians',NOBS
+    WRITE(*,*) ' and then PERFORMING ANALYSIS'
+  ENDIF
+  !
+  !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
+  ! WRITE OUT OBS AND YERROR FOR DIAGNOSTIC PURPOSES
+  OPEN (UNIT=111,FILE='OBSERRORout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
+  ! *** Write innovations in ASCII file ***
+  OPEN (unit=112,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
+  ! Write analysis results and increments in ASCII file
+  OPEN (unit=113,file='ANAL_INCR.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
+  ! **** Write out the observation operator + Gain matrix ****
+  IUNIT = 113
+  DO JL = 1,NVAR
+    DO JK=1,NOBSTYPE
+      IUNIT = IUNIT + 1
+      WRITE(YCHAR,'(I1)') JK
+      YFNAME='HO_'//CVAR(JL)//'_v'//YCHAR
+      OPEN(UNIT=IUNIT,FILE=YFNAME,FORM='FORMATTED',STATUS='UNKNOWN',IOSTAT=ISTAT)
+    ENDDO
   ENDDO
-ENDDO
+ENDIF
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
 !
 IF (I%NPATCH==12) THEN
@@ -458,6 +466,9 @@ IF (I%NPATCH==12) THEN
 ELSE
   ZVLAIMIN = (/0.3/)
 ENDIF
+!
+ALLOCATE(I%XINCR(KI,I%NPATCH*NVAR))
+I%XINCR(:,:) = 0.
 !
 IOBSCOUNT = 0
 DO JI=1,KI
@@ -495,6 +506,11 @@ DO JI=1,KI
         ZR(K1,K1) = ZR(K1,K1) * ZCOFSWI(JI)*ZCOFSWI(JI)
       ENDIF
       !
+      ! Apply quality control
+      IF ( ( ABS( XYO(JI,K1)-ZYF(1,JK) ) > XQCOBS(JK) ) .OR. (ZR(K1,K1) .LT. 0 ) ) THEN 
+        XYO(JI,K1) = 999.0
+      ENDIF
+      !      
 !--------------------- CALCULATE JACOBIANS ------------------         
       DO JL=1,NVAR
         DO JJ=1,I%NPATCH
@@ -524,22 +540,23 @@ DO JI=1,KI
     ENDDO
     !
   ENDDO
-  
-  WRITE(111,*) ZR(:,:)
-  WRITE(112,*) ZB2(:)
+  !
+  IF ( NPRINTLEV > 0 ) THEN
+    WRITE(111,*) ZR(:,:)
+    WRITE(112,*) ZB2(:)
+  ENDIF
   
 !---------------******  SOIL ANALYSIS *******--------------------------
   ZHOT(:,:) = 0.
   ZK1(:,:) = 0.
   ZP(:) = 0.
   ZX(:) = 0.
-  ZXINCR(:) = 0.
   !
   ZHOT(:,:) = TRANSPOSE(ZHO(:,:))
   ZK1 (:,:) = MATMUL(ZHO(:,:),MATMUL(ZB(JI,:,:),ZHOT(:,:))) + ZR(:,:)
   CALL CHOLDC(NOBSTYPE,ZK1(:,:),ZP(:))                         ! Cholesky decomposition (1)
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
-  ZXINCR(:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
+  I%XINCR(JI,:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
   DO JL=1,NVAR
     DO JJ=1,I%NPATCH
       !
@@ -547,13 +564,13 @@ DO JI=1,KI
       !
       ! Update the modified values
       IF ( TRIM(CVAR(JL))=="LAI" ) THEN
-        ZXINCR(L1) = MAX( ZXINCR(L1), ZVLAIMIN(JJ)-XF(JI,JJ,1,JL) )
-        XBIO_PASS(JI,JJ) = XBIO_PASS(JI,JJ) + ZXINCR(L1)*XALPH(JJ)
-      ELSEIF ( XF(JI,JJ,1,JL)+ZXINCR(L1)<0. ) THEN
-        ZXINCR(L1) = 0.
+        I%XINCR(JI,L1) = MAX( I%XINCR(JI,L1), ZVLAIMIN(JJ)-XF(JI,JJ,1,JL) )
+        XBIO_PASS(JI,JJ) = XBIO_PASS(JI,JJ) + I%XINCR(JI,L1)*XALPH(JJ)
+      ELSEIF ( XF(JI,JJ,1,JL)+I%XINCR(JI,L1)<0. ) THEN
+        I%XINCR(JI,L1) = 0.
       ENDIF
       !
-      XF(JI,JJ,1,JL) = XF(JI,JJ,1,JL) + ZXINCR(L1)
+      XF(JI,JJ,1,JL) = XF(JI,JJ,1,JL) + I%XINCR(JI,L1)
       !
       ! For no only warn if we have negative values.
       IF ( NPRINTLEV > 0 ) THEN
@@ -562,11 +579,12 @@ DO JI=1,KI
       !
     ENDDO
   ENDDO
-  
-  DO JJ=1,I%NPATCH
-    WRITE(113,*) (XF(JI,JJ,1,JL),JL=1,NVAR), (ZXINCR(JJ+I%NPATCH*(JL-1)),JL=1,NVAR)
-  ENDDO
-  
+  !
+  IF ( NPRINTLEV > 0 ) THEN
+    DO JJ=1,I%NPATCH
+      WRITE(113,*) (XF(JI,JJ,1,JL),JL=1,NVAR), (I%XINCR(JI,JJ+I%NPATCH*(JL-1)),JL=1,NVAR)
+    ENDDO
+  ENDIF
   
 !--------------------ANALYSIS OF B (FOR USE IN NEXT CYCLE)-------------------
   ! Ba = (I-KH)Bf(I-KH)t+KRKt
@@ -584,44 +602,52 @@ DO JI=1,KI
   ZKRK (:,:) = MATMUL(ZGAIN(:,:),MATMUL(ZR(:,:),TRANSPOSE(ZGAIN(:,:))))
   IF (.NOT.LBFIXED)  ZB(JI,:,:) = MATMUL(ZIDKH(:,:),MATMUL(ZB(JI,:,:),TRANSPOSE(ZIDKH(:,:)))) + ZKRK(:,:)
   
-  IUNIT = 113
-  DO JL = 1,NVAR
-    DO JK = 1,NOBSTYPE
-      IUNIT = IUNIT + 1
-      DO JJ=1,I%NPATCH
-        WRITE(IUNIT,*) ZHOWR(JK,JJ+I%NPATCH*(JL-1)),ZGAIN(JJ+I%NPATCH*(JL-1),JK)
+  IF ( NPRINTLEV > 0 ) THEN
+    IUNIT = 113
+    DO JL = 1,NVAR
+      DO JK = 1,NOBSTYPE
+        IUNIT = IUNIT + 1
+        DO JJ=1,I%NPATCH
+          WRITE(IUNIT,*) ZHOWR(JK,JJ+I%NPATCH*(JL-1)),ZGAIN(JJ+I%NPATCH*(JL-1),JK)
+        ENDDO
       ENDDO
     ENDDO
-  ENDDO
+  ENDIF
   !  
 ENDDO
 !
 !
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
-CLOSE(111)
-CLOSE(112)
-CLOSE(113)
-IUNIT = 113
-DO JL = 1,NVAR
-  DO JK = 1,NOBSTYPE
-    IUNIT = IUNIT + 1
-    CLOSE(IUNIT)
+IF ( NPRINTLEV > 0 ) THEN
+  CLOSE(111)
+  CLOSE(112)
+  CLOSE(113)
+  IUNIT = 113
+  DO JL = 1,NVAR
+    DO JK = 1,NOBSTYPE
+      IUNIT = IUNIT + 1
+      CLOSE(IUNIT)
+    ENDDO
   ENDDO
-ENDDO
+ENDIF
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
 !
-! Write out analysed B (for use in next cycle)
-YBGFILE = "BGROUNDout_ASSIM."//YMYPROC
-CALL B_BIG_LOOP(I, &
-                  "WRIT",YBGFILE,ZB)
+IF (LBEV .OR. NPRINTLEV>0) THEN
+  ! Write out analysed B (for use in next cycle)
+  YBGFILE = "BGROUNDout_ASSIM."//YMYPROC
+  CALL B_BIG_LOOP(I, &
+                    "WRIT",YBGFILE,ZB)
+ENDIF
 !
 IF ( NPRINTLEV > 0 ) THEN
   IOBSCOUNT = IOBSCOUNT / I%NPATCH / NVAR
-  WRITE(*,*)
-  WRITE(*,*) '   ---------------------------------------'
-  WRITE(*,*) '   |   EXITING VARASSIM AFTER ANALYSIS   |'
-  WRITE(*,*) '   ---------------------------------------'
-  WRITE(*,*)
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*)
+    WRITE(*,*) '   ---------------------------------------'
+    WRITE(*,*) '   |   EXITING VARASSIM AFTER ANALYSIS   |'
+    WRITE(*,*) '   ---------------------------------------'
+    WRITE(*,*)
+  ENDIF
   WRITE(*,*) 'Number of assimilated observations =',IOBSCOUNT
   WRITE(*,*)
 ENDIF

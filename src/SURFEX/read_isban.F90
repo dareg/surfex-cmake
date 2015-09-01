@@ -58,8 +58,9 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 !                          
 USE MODD_ASSIM,          ONLY : LASSIM,CASSIM_ISBA,XAT2M_ISBA,XAHU2M_ISBA,&
-                              & XAZON10M_ISBA,XAMER10M_ISBA,NIPERT,NVAR, &
-                              & COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR,CBIO
+                                XAZON10M_ISBA,XAMER10M_ISBA,NIFIC,NVAR, &
+                                COBS,NOBSTYPE,CVAR,LPRT,XTPRT,NIVAR,CBIO, &
+                                XADDINFL,NENS,XSIGMA,NIE
 !                                
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_SNOW_PAR,       ONLY : XZ0SN
@@ -68,11 +69,14 @@ USE MODI_READ_SURF
 !
 USE MODI_READ_GR_SNOW
 USE MODI_ABOR1_SFX
+USE MODI_IO_BUFF_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_GET_TYPE_DIM_n
+USE MODE_RANDOM
+USE MODE_EKF
 !
 IMPLICIT NONE
 !
@@ -97,11 +101,17 @@ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
 CHARACTER(LEN=4)  :: YLVL
 !
+REAL, DIMENSION(:,:,:),ALLOCATABLE :: ZLAI
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
+REAL, DIMENSION(:), ALLOCATABLE :: ZCOFSWI
+!
+REAL,DIMENSION(I%NPATCH) :: ZVLAIMIN
+REAL :: ZCOEF
 !
 INTEGER :: IWORK   ! Work integer
 !
 INTEGER :: JP, JL, JNBIOMASS, JNLITTER, JNSOILCARB, JNLITTLEVS  ! loop counter on layers
+INTEGER :: JVAR, JI
 !
 INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX
@@ -109,6 +119,8 @@ INTEGER           :: IIVAR
 INTEGER           :: IOBS
 INTEGER           :: IBSUP
 INTEGER           :: ISIZE_LMEB_PATCH
+!
+LOGICAL :: GKNOWN
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -137,6 +149,16 @@ ELSE
   IWORK=2 !Only 2 temperature layer in ISBA-FR
 ENDIF
 !
+IF ( TRIM(CASSIM_ISBA)=="ENKF") THEN
+  ALLOCATE(I%XRED_NOISE(ILU,I%NPATCH,NVAR))
+  I%XRED_NOISE(:,:,:) = 0.
+  ALLOCATE(ZCOFSWI(ILU))
+  CALL COFSWI(I%XCLAY(:,1),ZCOFSWI)
+ELSE
+  ALLOCATE(I%XRED_NOISE(0,0,0))
+  ALLOCATE(ZCOFSWI(0))
+ENDIF
+!
 ALLOCATE(I%XTG(ILU,IWORK,I%NPATCH))
 I%XTG(:,:,:)=XUNDEF
 !
@@ -149,7 +171,8 @@ DO JL=1,IWORK
 END DO
 !
 ! Perturb value if requested
-IF ( LPRT ) THEN
+IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
+  !
   DO JL=1,IWORK
   ! read in control variable
     IF ( (TRIM(CVAR(NIVAR))=="TG1" .AND. JL==1) .OR. &
@@ -159,6 +182,11 @@ IF ( LPRT ) THEN
       ENDWHERE
     ENDIF
   END DO
+  !
+ELSEIF ( TRIM(CASSIM_ISBA)=="ENKF" .AND. NIE<NENS+1 ) THEN
+  !
+  CALL MAKE_ENS_ENKF(IWORK,ILU,"TG ",ZCOFSWI,I%XTG,I%XRED_NOISE)
+  !
 ENDIF
 !
 !
@@ -179,7 +207,8 @@ DO JL=1,I%NGROUND_LAYER
 END DO
 !
 ! Perturb value if requested
-IF ( LPRT ) THEN
+IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
+   !
    DO JL=1,I%NGROUND_LAYER
     ! read in control variable
     IF ( (TRIM(CVAR(NIVAR))=="WG1" .AND. JL==1) .OR. & 
@@ -189,6 +218,11 @@ IF ( LPRT ) THEN
       ENDWHERE
     ENDIF
    END DO
+   !
+ELSEIF ( TRIM(CASSIM_ISBA)=="ENKF" .AND. NIE<NENS+1 ) THEN
+  !
+  CALL MAKE_ENS_ENKF(IWORK,ILU,"WG ",ZCOFSWI,I%XWG,I%XRED_NOISE)
+  !
 ENDIF
 !
 IF(I%CISBA=='DIF')THEN
@@ -219,13 +253,31 @@ IF (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NC
   YRECFM = 'LAI'
   CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,I%XLAI(:,:),IRESP)
-  IF ( LPRT ) THEN
+  IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
+    !
     ! read in control variable
     IF ( TRIM(CVAR(NIVAR))=="LAI" ) THEN
       WHERE ( I%XLAI(:,:)/=XUNDEF ) 
         I%XLAI(:,:) = I%XLAI(:,:) + XTPRT(NIVAR)*I%XLAI(:,:)
       ENDWHERE
     ENDIF
+    !
+  ELSEIF ( TRIM(CASSIM_ISBA)=="ENKF" .AND. NIE<NENS+1 ) THEN
+    !
+    IF (I%NPATCH==12) THEN
+      ZVLAIMIN = (/0.3,0.3,0.3,0.3,1.0,1.0,0.3,0.3,0.3,0.3,0.3,0.3/)
+    ELSE
+      ZVLAIMIN = (/0.3/)
+    ENDIF
+    !
+    ALLOCATE(ZLAI(ILU,1,I%NPATCH))
+    ZLAI(:,1,:) = I%XLAI(:,:)
+    CALL MAKE_ENS_ENKF(1,ILU,"LAI",ZCOFSWI,ZLAI,I%XRED_NOISE)
+    DO JP = 1,I%NPATCH
+      I%XLAI(:,JP) = MAX(ZVLAIMIN(JP),ZLAI(:,1,JP))
+    ENDDO
+    DEALLOCATE(ZLAI)
+    !    
   ENDIF  
 END IF
 !
@@ -389,13 +441,28 @@ ELSEIF (I%CPHOTO=='NIT'.OR.I%CPHOTO=='NCB') THEN
     ENDIF
     CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-    IF ( LPRT ) THEN
+    IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
       ! read in control variable
       IF ( TRIM(CVAR(NIVAR)) == "LAI" .AND. TRIM(CBIO)==TRIM(YRECFM) ) THEN
         WHERE ( ZWORK(:,:)/=XUNDEF ) 
           ZWORK(:,:) = ZWORK(:,:) + XTPRT(NIVAR)*ZWORK(:,:)
         ENDWHERE
       ENDIF
+    ELSEIF ( TRIM(CASSIM_ISBA)=="ENKF" .AND. NIE<NENS+1 .AND. .NOT.LASSIM ) THEN
+      !
+      IF ( TRIM(CBIO)==TRIM(YRECFM) ) THEN
+        DO JVAR = 1,NVAR
+          IF (TRIM(CVAR(JVAR)) == "LAI") THEN
+            DO JI = 1,ILU
+              DO JP = 1,I%NPATCH
+                ZWORK(JI,JP) = ZWORK(JI,JP) + XADDINFL(JVAR)*RANDOM_NORMAL()
+              ENDDO
+            ENDDO
+            EXIT
+          ENDIF
+        ENDDO
+      ENDIF
+      !      
     ENDIF     
     I%XBIOMASS(:,JNBIOMASS,:)=ZWORK
   END DO
@@ -413,18 +480,35 @@ ELSEIF (I%CPHOTO=='NIT'.OR.I%CPHOTO=='NCB') THEN
     ENDIF    
     CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-    IF ( LPRT ) THEN
+    IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
       ! read in control variable
       IF ( TRIM(CVAR(NIVAR)) == "LAI" .AND. TRIM(CBIO)==TRIM(YRECFM) ) THEN
         WHERE ( ZWORK(:,:)/=XUNDEF ) 
           ZWORK(:,:) = ZWORK(:,:) + XTPRT(NIVAR)*ZWORK(:,:)
         ENDWHERE
+    ELSEIF ( TRIM(CASSIM_ISBA)=="ENKF" .AND. NIE<NENS+1 .AND. .NOT.LASSIM ) THEN
+      !
+      IF ( TRIM(CBIO)==TRIM(YRECFM) ) THEN
+        DO JVAR = 1,NVAR
+          IF (TRIM(CVAR(JVAR)) == "LAI") THEN
+            DO JI = 1,ILU
+              DO JP = 1,I%NPATCH
+                ZWORK(JI,JP) = ZWORK(JI,JP) + XADDINFL(JVAR)*RANDOM_NORMAL()
+              ENDDO
+            ENDDO
+            EXIT
+          ENDIF
+        ENDDO
+      ENDIF
+      !  
       ENDIF
     ENDIF      
     I%XRESP_BIOMASS(:,JNBIOMASS,:)=ZWORK
   END DO
   !
 ENDIF
+!
+DEALLOCATE(ZCOFSWI)
 !
 !*       6. Soil carbon
 !
@@ -474,50 +558,48 @@ IF ( LASSIM ) THEN
     IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
     XAT2M_ISBA=XUNDEF
     YRECFM='T2M'
+    CALL IO_BUFF_n(IOB,YRECFM,'R',GKNOWN)
     CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
 
     IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,1))
     XAHU2M_ISBA=XUNDEF
     YRECFM='HU2M'
+    CALL IO_BUFF_n(IOB,YRECFM,'R',GKNOWN)
     CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
 
     IF ( .NOT. ALLOCATED(XAZON10M_ISBA)) ALLOCATE(XAZON10M_ISBA(ILU,1))
     XAZON10M_ISBA=XUNDEF
     YRECFM='ZON10M'
+    CALL IO_BUFF_n(IOB,YRECFM,'R',GKNOWN)
     CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,XAZON10M_ISBA(:,1),IRESP)
 
     IF ( .NOT. ALLOCATED(XAMER10M_ISBA)) ALLOCATE(XAMER10M_ISBA(ILU,1))
     XAMER10M_ISBA=XUNDEF
     YRECFM='MER10M'
+    CALL IO_BUFF_n(IOB,YRECFM,'R',GKNOWN)
     CALL READ_SURF(IOB, &
                  HPROGRAM,YRECFM,XAMER10M_ISBA(:,1),IRESP)
-  ELSEIF ( NIPERT/=NVAR+2 ) THEN
+  ELSEIF ( NIFIC/=NVAR+2 ) THEN
     ! Diagnostic fields for EKF assimilation ("observations")
     DO IOBS = 1,NOBSTYPE
      SELECT CASE (TRIM(COBS(IOBS)))
        CASE("T2M")
-         IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,I%NPATCH))
+         IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
          XAT2M_ISBA=XUNDEF
-         IF (I%NPATCH>1) THEN
-           YRECFM='T2M_P'
-         ELSE
-           YRECFM='T2M_ISBA'
-         ENDIF
+         YRECFM='T2M'
+         CALL IO_BUFF_n(IOB,YRECFM,'R',GKNOWN)
          CALL READ_SURF(IOB, &
-                 HPROGRAM,YRECFM,XAT2M_ISBA(:,:),IRESP)
+                 HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
        CASE("HU2M")
-         IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,I%NPATCH))
+         IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,1))
          XAHU2M_ISBA=XUNDEF
-         IF (I%NPATCH>1) THEN
-           YRECFM='HU2M_P'
-         ELSE
-           YRECFM='HU2M_ISBA'
-         ENDIF
+         YRECFM='HU2M'
+         CALL IO_BUFF_n(IOB,YRECFM,'R',GKNOWN)
          CALL READ_SURF(IOB, &
-                 HPROGRAM,YRECFM,XAHU2M_ISBA(:,:),IRESP)
+                 HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
        CASE("WG1")
          ! This is already read above
        CASE("LAI")
@@ -528,11 +610,128 @@ IF ( LASSIM ) THEN
     ENDDO
   ENDIF
 ENDIF
-
-!
 !
 DEALLOCATE(ZWORK)
+!
 IF (LHOOK) CALL DR_HOOK('READ_ISBA_N',1,ZHOOK_HANDLE)
+!
+CONTAINS
+!
+SUBROUTINE MAKE_ENS_ENKF(KWORK,KLU,HREC,PCOFSWI,PVAR,PRED_NOISE)
+!
+USE MODD_ASSIM, ONLY : LENS_GEN, XADDTIMECORR, XADDINFL, XASSIM_WINH
+!
+USE MODI_ADD_NOISE
+USE MODE_RANDOM
+!
+IMPLICIT NONE
+!
+INTEGER, INTENT(IN) :: KWORK
+INTEGER, INTENT(IN) :: KLU
+ CHARACTER(LEN=3), INTENT(IN) :: HREC
+REAL, DIMENSION(:), INTENT(IN) :: PCOFSWI
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PVAR
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PRED_NOISE
+!
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=4) :: YLVL
+ CHARACTER(LEN=3) :: YVAR
+REAL :: ZWHITE_NOISE, ZVAR0
+INTEGER :: JL, JI, JP, IVAR
+LOGICAL :: GPASS
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('READ_ISBA_N:MAKE_ENS_ENKF',0,ZHOOK_HANDLE)
+!
+!
+DO JL=1,KWORK
+  !
+  IF (KWORK>1) THEN
+    WRITE(YLVL,'(I4)') JL
+    YRECFM = TRIM(HREC)//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+  ELSE
+    YRECFM = TRIM(HREC)
+  ENDIF
+  !
+  IVAR = 0
+  DO JVAR = 1,NVAR
+    GPASS = ( TRIM(CVAR(JVAR))==TRIM(YRECFM) )
+    IF (GPASS) THEN
+      IVAR = JVAR
+      EXIT
+    ENDIF
+  ENDDO
+  !
+  IF ( GPASS ) THEN
+    !
+    IF (XADDINFL(IVAR)>0.) THEN
+      !
+      IF (LASSIM) THEN
+        !
+        WRITE(YVAR,'(I3)') IVAR
+        YRECFM='RED_NOISE'//ADJUSTL(YVAR(:LEN_TRIM(YVAR)))
+        CALL READ_SURF(IOB,HPROGRAM,YRECFM,PRED_NOISE(:,:,IVAR),IRESP)
+        !
+      ELSEIF (.NOT.LENS_GEN .AND. XADDTIMECORR(IVAR)>0. ) THEN
+        !
+        WRITE(YVAR,'(I3)') IVAR
+        YRECFM='RED_NOISE'//ADJUSTL(YVAR(:LEN_TRIM(YVAR)))
+        CALL READ_SURF(IOB,HPROGRAM,YRECFM,PRED_NOISE(:,:,IVAR),IRESP)
+        !
+        DO JI = 1,KLU
+          DO JP = 1,I%NPATCH
+            ZWHITE_NOISE = XADDINFL(IVAR)*PCOFSWI(JI)*RANDOM_NORMAL()
+            CALL ADD_NOISE(XADDTIMECORR(IVAR),XASSIM_WINH,ZWHITE_NOISE,PRED_NOISE(JI,JP,IVAR))
+         ENDDO
+         ENDDO
+        !
+        ZCOEF = XASSIM_WINH/24.
+        !
+      ELSE
+        !
+        DO JI = 1,ILU
+          DO JP = 1,I%NPATCH 
+            PRED_NOISE(JI,JP,IVAR) = XADDINFL(IVAR)*PCOFSWI(JI)*RANDOM_NORMAL()
+          ENDDO
+        ENDDO
+        !
+        ZCOEF = 1. 
+        !
+      ENDIF
+      !
+      IF (.NOT.LASSIM) THEN
+        !
+        DO JI = 1,ILU
+          DO JP = 1,I%NPATCH
+            IF ( PVAR(JI,JL,JP)/=XUNDEF ) THEN
+              !
+              ZVAR0 = PVAR(JI,JL,JP)
+              !
+              PVAR(JI,JL,JP) = PVAR(JI,JL,JP) + ZCOEF * PRED_NOISE(JI,JP,IVAR)
+              !
+              IF (PVAR(JI,JL,JP) < 0.) THEN
+                IF (LENS_GEN) THEN
+                  PVAR(JI,JL,JP) = ABS(PVAR(JI,JL,JP))
+                ELSE
+                  PVAR(JI,JL,JP) = ZVAR0
+                ENDIF
+              ENDIF
+            ENDIF
+          ENDDO
+        ENDDO
+        !
+      ENDIF
+      !
+    ENDIF
+    !
+  ENDIF
+  !
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('READ_ISBA_N:MAKE_ENS_ENKF',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE MAKE_ENS_ENKF
 !
 !-------------------------------------------------------------------------------
 !

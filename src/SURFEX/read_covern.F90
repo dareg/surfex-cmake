@@ -45,12 +45,11 @@
 !              ------------
 !
 !
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_ASSIM, ONLY : LASSIM, LREAD_ALL
 !
 USE MODD_DATA_COVER_PAR, ONLY : NBARE_SOIL, JPCOVER
 !
@@ -83,6 +82,8 @@ INTEGER           :: IRESP          ! Error code after redding
 ! 
 INTEGER           :: IVERSION       ! surface version
 !
+LOGICAL :: GREAD_ALL
+!
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -96,6 +97,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               -------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_COVER_N',0,ZHOOK_HANDLE)
+!
+IF (LASSIM) THEN
+  GREAD_ALL = LREAD_ALL
+  LREAD_ALL = .TRUE.
+ENDIF
 !
 YRECFM='VERSION'
  CALL READ_SURF(IOB, &
@@ -142,6 +148,9 @@ ALLOCATE(U%XZS(U%NSIZE_FULL))
 YRECFM='ZS'
  CALL READ_SURF(IOB, &
                 HPROGRAM,YRECFM,U%XZS(:),IRESP)
+!
+IF (LASSIM) LREAD_ALL = GREAD_ALL
+!
 IF (LHOOK) CALL DR_HOOK('READ_COVER_N',1,ZHOOK_HANDLE)
 !
 !

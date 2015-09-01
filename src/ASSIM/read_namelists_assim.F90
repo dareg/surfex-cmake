@@ -10,9 +10,12 @@ USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,LAROME,LECS
                                  NBOUTPUT,NECHGU,XRCLIMCA,XRCLISST,XSIGH2MO,XSIGT2MO,&
                                  XSIGWGO,XSIGWGB,XSIGW2B,LOBSWG,LOBS2M,LIMVEG,       &
                                  XSPRECIP2,XRTHR_QC,XSIGWGO_MAX,XRSCAL_JAC,LPRT,LSIM,&
-                                 LBEV,LBFIXED,NOBSTYPE,LOBSFILE,XERROBS_M,NNCO,NIVAR,&
-                                 NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,XTPRT_M,NNCV,        &
-                                 XSCALE_Q,XSCALE_QLAI,CBIO,CPREFIX_BIO,XALPH
+                                 LBEV,LBFIXED,NOBSTYPE,LOBSFILE,XERROBS_M,XQCOBS_M,  &
+                                 NNCO,NIVAR,NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,XTPRT_M,  &
+                                 NNCV,XSCALE_Q,XSCALE_QLAI,CBIO,CPREFIX_BIO,XALPH,   &
+                                 NENS,NIE,XINFL_M,XADDINFL_M,XASSIM_WINH,            &
+                                 XADDTIMECORR_M,LENS_GEN,LPB_CORRELATIONS,           &
+                                 LPERTURBATION_RUN,LBIAS_CORRECTION,LENKF,LDENKF
 !
 USE MODI_DEFAULT_ASSIM
 USE MODI_READ_ASSIM_CONF
@@ -39,10 +42,14 @@ CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,     &
                    XSIGWGB,XSIGW2B,LOBSWG,LOBS2M,LIMVEG,    &
                    XSPRECIP2,XRTHR_QC,XSIGWGO_MAX,          &
                    XRSCAL_JAC,LPRT,LSIM,LBEV,LBFIXED,       &
-                   NOBSTYPE,LOBSFILE,XERROBS_M,NNCO,NIVAR,  &
-                   NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,XTPRT_M,  &
-                   NNCV,XSCALE_Q,XSCALE_QLAI,CBIO,          &
-                   CPREFIX_BIO,XALPH)
+                   NOBSTYPE,LOBSFILE,XERROBS_M,XQCOBS_M,    &
+                   NNCO,NIVAR,NVAR,CVAR_M,CPREFIX_M,        &
+                   XSIGMA_M,XTPRT_M,NNCV,XSCALE_Q,          &
+                   XSCALE_QLAI,CBIO,CPREFIX_BIO,XALPH,      &
+                   NENS,NIE,XINFL_M,XADDINFL_M,XASSIM_WINH, &
+                   XADDTIMECORR_M,LENS_GEN,LPB_CORRELATIONS,&
+                   LPERTURBATION_RUN,LBIAS_CORRECTION,      &
+                   LENKF,LDENKF )
 !
 ! Set default assimilations values/constants
 CALL INI_ASSIM

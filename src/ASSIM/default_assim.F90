@@ -8,10 +8,14 @@
                                PSIGWGB,PSIGW2B,OOBSWG,OOBS2M,OIMVEG,    &
                                PSPRECIP2,PRTHR_QC,PSIGWGO_MAX,          &
                                PRSCAL_JAC,OPRT,OSIM,OBEV,OBFIXED,       &
-                               KOBSTYPE,OOBSFILE,PERROBS_M,KNCO,KIVAR,  &
-                               KVAR,HVAR_M,HPREFIX_M,PSIGMA_M,PTPRT_M,  &
-                               KNCV,PSCALE_Q,PSCALE_QLAI,HBIO,          &
-                               HPREFIX_BIO,PALPH)
+                               KOBSTYPE,OOBSFILE,PERROBS_M,PQCOBS_M,    &
+                               KNCO,KIVAR,KVAR,HVAR_M,HPREFIX_M,        &
+                               PSIGMA_M,PTPRT_M,KNCV,PSCALE_Q,          &
+                               PSCALE_QLAI,HBIO,HPREFIX_BIO,PALPH,      &
+                               KENS,KIE,PINFL_M,PADDINFL_M, PASSIM_WINH,&
+                               PADDTIMECORR_M,OENS_GEN,OPB_CORRELATIONS,&
+                               OPERTURBATION_RUN,OBIAS_CORRECTION,      &
+                               OENKF,ODENKF )
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA assimilation scheme
@@ -95,6 +99,7 @@ LOGICAL,           INTENT(OUT) :: OBFIXED
 INTEGER,             INTENT(OUT) :: KOBSTYPE
 LOGICAL,             INTENT(OUT) :: OOBSFILE
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PERROBS_M
+REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PQCOBS_M
 INTEGER, DIMENSION(NOBSMAX), INTENT(OUT) :: KNCO
 !
 INTEGER,           INTENT(OUT) :: KIVAR
@@ -109,6 +114,19 @@ REAL,                INTENT(OUT) :: PSCALE_QLAI
 CHARACTER(LEN=12),   INTENT(OUT) :: HBIO
 CHARACTER(LEN=100),  INTENT(OUT) :: HPREFIX_BIO
 REAL, DIMENSION(12), INTENT(OUT) :: PALPH
+!
+INTEGER, INTENT(OUT) :: KENS
+INTEGER, INTENT(OUT) :: KIE
+REAL, INTENT(OUT) :: PASSIM_WINH
+REAL, DIMENSION(NVARMAX),INTENT(OUT) :: PINFL_M
+REAL, DIMENSION(NVARMAX),INTENT(OUT) :: PADDINFL_M
+REAL, DIMENSION(NVARMAX),INTENT(OUT) :: PADDTIMECORR_M
+LOGICAL, INTENT(OUT) :: OENKF
+LOGICAL, INTENT(OUT) :: ODENKF
+LOGICAL, INTENT(OUT) :: OENS_GEN
+LOGICAL, INTENT(OUT) :: OPB_CORRELATIONS
+LOGICAL, INTENT(OUT) :: OPERTURBATION_RUN
+LOGICAL, INTENT(OUT) :: OBIAS_CORRECTION
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -164,6 +182,7 @@ OBFIXED = .FALSE.
 KOBSTYPE = 2
 OOBSFILE = .FALSE.
 PERROBS_M = (/1.0,0.1,0.4,0.2/)
+PQCOBS_M = (/999.,999.,999.,999./)
 KNCO = (/1,1,0,0/)
 !
 KIVAR = 1
@@ -179,6 +198,19 @@ HBIO = "BIOMA1"
 HPREFIX_BIO = ""
 PALPH = (/0., 0., 0., 0.08203445, 0.07496252, 0.06846970, 0.06771856, 0.09744689, &
           0.09744689, 0.07164350, 0.17686594, 0.07164350/)
+!
+KENS = 1
+KIE = 0
+PASSIM_WINH = 24
+PINFL_M = (/0.,0.,0.,0.,0./)
+PADDINFL_M = (/0.,0.,0.,0.,0./)
+PADDTIMECORR_M = (/0.,0.,0.,0.,0./)
+OENKF = .FALSE.
+ODENKF = .FALSE.
+OENS_GEN = .TRUE.
+OPB_CORRELATIONS = .FALSE.
+OPERTURBATION_RUN = .FALSE.
+OBIAS_CORRECTION = .FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_ASSIM',1,ZHOOK_HANDLE)
 !

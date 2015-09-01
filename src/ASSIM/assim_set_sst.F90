@@ -29,11 +29,6 @@ SUBROUTINE ASSIM_SET_SST (BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
-!
-!
-!
-!
-!
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
@@ -82,6 +77,8 @@ USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_ASSIM,         ONLY : LECSST, LREAD_SST_FROM_FILE
 USE MODD_SURF_PAR,      ONLY : XUNDEF
@@ -177,6 +174,11 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SET_SST: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
+IF (U%CSEA=="NONE") THEN
+  IF (LHOOK) CALL DR_HOOK('ASSIM_SET_SST_N',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
+!
 PSIC(:) = 0.
 !
 IF ( LREAD_SST_FROM_FILE ) THEN
@@ -188,7 +190,7 @@ IF ( LREAD_SST_FROM_FILE ) THEN
 #ifdef SFX_FA
   CFILEIN_FA = 'SST_SIC'        ! input SST and SIC analysis  
   CDNOMC     = 'CADRE SST'      ! new frame name 
-  WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
+  IF (NRANK==NPIO) WRITE(*,*) 'READING SST FROM ',TRIM(CFILEIN_FA)
 #endif
 !
 !  Open FA file
@@ -215,7 +217,7 @@ IF ( LREAD_SST_FROM_FILE ) THEN
 !
   CALL END_IO_SURF_n(YPROGRAM2)
   CALL IO_BUFF_CLEAN_n(IOB)
-  WRITE(*,*) 'READ SST_SIC OK'
+  IF (NRANK==NPIO) WRITE(*,*) 'READ SST_SIC OK'
 
 ELSE
   !
@@ -233,15 +235,19 @@ ZFMAX = MAXVAL(PSST)
 ZFMEAN = SUM(PSST)/FLOAT(KI)
 !
 IF ( LECSST ) THEN
-  WRITE(*,*) '  ECMWF_SST_SIC'
-  WRITE(*,'("  SURFSEA.TEMPERA - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) '  ECMWF_SST_SIC'
+    WRITE(*,'("  SURFSEA.TEMPERA - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
+  ENDIF
   ! Replace -9999. with UNDEF
   WHERE ( PSST(:)< 0. )
     PSST(:) = XUNDEF
   ENDWHERE
 ELSE
-  WRITE(*,*) '  Boundary file'
-  WRITE(*,'("  SURFTEMPERATURE - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) '  Boundary file'
+    WRITE(*,'("  SURFTEMPERATURE - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
+  ENDIF
   ! To avoid surface temperatures influenced by land, NATURE points are replaced with UNDEF
   WHERE ( PITM(:)>0.5 )
     PSST(:) = XUNDEF
@@ -251,9 +257,11 @@ ENDIF
 ZFMIN = MINVAL(PSST)
 ZFMAX = MAXVAL(PSST)
 ZFMEAN = SUM(PSST)/FLOAT(KI)
-WRITE(*,*) '  Replaced land by UNDEF '
-WRITE(*,'("  SST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
-
+IF (NRANK==NPIO) THEN
+  WRITE(*,*) '  Replaced land by UNDEF '
+  WRITE(*,'("  SST            - min, mean, max: ",3E13.4)') ZFMIN, ZFMEAN, ZFMAX
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('ASSIM_SET_SST',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

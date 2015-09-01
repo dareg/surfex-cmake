@@ -683,7 +683,13 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !
 !-------------------------------------------------------------------------------
 !
-
+!  - Assimilation: ENKF
+!
+  REAL, POINTER, DIMENSION(:,:,:)     :: XRED_NOISE
+  REAL, POINTER, DIMENSION(:,:)     :: XINCR
+!
+!-------------------------------------------------------------------------------
+!
 END TYPE ISBA_t
 
 TYPE(ISBA_t), ALLOCATABLE, TARGET, SAVE :: ISBA_MODEL(:)
@@ -910,6 +916,7 @@ DO J=1,KMODEL
   NULLIFY(ISBA_MODEL(J)%XPERTCV)
   NULLIFY(ISBA_MODEL(J)%XPERTALB)
   NULLIFY(ISBA_MODEL(J)%XPERTZ0)
+  NULLIFY(ISBA_MODEL(J)%XRED_NOISE)
   !
   NULLIFY(ISBA_MODEL(J)%XGNDLITTER)
   NULLIFY(ISBA_MODEL(J)%XRGLGV)

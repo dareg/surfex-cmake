@@ -43,6 +43,7 @@ USE MODI_READ_SURF
 USE MODI_LATLON_GRID
 USE MODI_READ_GRIDTYPE
 !
+USE MODD_ASSIM, ONLY : LREAD_ALL, LASSIM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -67,6 +68,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDIR ! heading of main axis of grid
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+LOGICAL :: GREAD_ALL
 INTEGER :: IGRID_PAR
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -76,6 +78,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -----------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRID',0,ZHOOK_HANDLE)
+!
+IF (LASSIM) THEN
+  GREAD_ALL = LREAD_ALL
+  LREAD_ALL = .TRUE.
+ENDIF
+!
  CALL READ_SURF(IOB, &
                 HPROGRAM,'GRID_TYPE',HGRID,KRESP)
 !
@@ -123,6 +131,9 @@ SELECT CASE (HGRID)
     END IF
 
 END SELECT
+!
+IF (LASSIM) LREAD_ALL = GREAD_ALL
+!
 IF (LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
 !
 !---------------------------------------------------------------------------

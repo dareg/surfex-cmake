@@ -105,7 +105,8 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
-!                                 
+!
+USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR
 !                                 
 USE MODD_AGRI,            ONLY :   LAGRIP
 !
@@ -178,12 +179,13 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
+ CHARACTER(LEN=1) :: YVAR
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
-INTEGER           :: JLAYER, JJ, IDEPTH
+INTEGER           :: JLAYER, JJ, IDEPTH, JVAR
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -679,7 +681,21 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
                   HPROGRAM,YRECFM,DGMI%XDLAI_EFFC(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF
-  !  
+  ! 
+  IF (LASSIM .AND. CASSIM_ISBA=="EKF  ") THEN
+    !
+    DO JVAR = 1,NVAR
+      WRITE(YVAR,FMT='(I1.1)') JVAR
+      YRECFM="ANAL_INCR"//YVAR
+      YCOMMENT="by patch"
+      CALL WRITE_SURF(DGU, IOB, U, &
+                      HPROGRAM,YRECFM,I%XINCR(:,I%NPATCH*(JVAR-1)+1:I%NPATCH*JVAR),IRESP,HCOMMENT=YCOMMENT)
+    ENDDO
+    !
+    DEALLOCATE(I%XINCR)
+    !
+  ENDIF
+  !
 ENDIF
 !         End of IO
 !

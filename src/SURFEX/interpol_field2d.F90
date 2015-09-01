@@ -132,12 +132,12 @@ IF (IERR1>0 .OR. IERR2>0) THEN
   IF (IERR2>0) THEN
     WRITE(KLUOUT,*) ' Number of points that could not be interpolated : ', &
                       IERR2
-    IF (PRESENT(PDEF)) THEN
+    IF (ZDEF(JLOOP)/=XUNDEF) THEN
       DO JLOOP=1,SIZE(PFIELD,2)
         WHERE(KCODE(:)==-4)
-          PFIELD(:,JLOOP)=PDEF(JLOOP)
+          PFIELD(:,JLOOP)=ZDEF(JLOOP)
         END WHERE
-        WRITE(KLUOUT,*) ' For these points, the default value (',PDEF(JLOOP),') is set.'
+        WRITE(KLUOUT,*) ' For these points, the default value (',ZDEF(JLOOP),') is set.'
       END DO
     ELSE
       WRITE(KLUOUT,*) ' Please provide data with better resolution'

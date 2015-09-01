@@ -38,6 +38,7 @@ IMPLICIT NONE
  LOGICAL                               :: LASSIM               ! Assimilation or not
                                                                !'.TRUE.'
                                                                !'.FALSE.'
+ LOGICAL                               :: LREAD_ALL = .TRUE.
  LOGICAL                               :: LAROME               ! If reading AROME fields
  LOGICAL                               :: LECSST               ! Use ECMWF SST
  LOGICAL                               :: LAESST               ! SST analysis performed
@@ -61,28 +62,30 @@ IMPLICIT NONE
  INTEGER                               :: NOBSTYPE
  INTEGER                               :: NOBS
  INTEGER                               :: NIPERT 
+ INTEGER                               :: NIFIC
  INTEGER                               :: NIVAR                ! counter for ctnrl vars
  INTEGER                               :: NVAR                 ! number of cntrl vars
  INTEGER                               :: NBOUTPUT  
  INTEGER                               :: NPRINTLEV            ! Verbosity 
 
- CHARACTER(LEN=12)                     :: CBIO                 ! Name of Biomass variable
- CHARACTER(LEN=100)                    :: CPREFIX_BIO          ! The prefix of the Biomass variable 
- CHARACTER(LEN=5)                      :: CASSIM_ISBA          ! OI/EKF
- CHARACTER(LEN=5)                      :: CASSIM               ! type of correction
  CHARACTER(LEN=3),DIMENSION(NVARMAX)   :: CVAR_M               ! X is ctrl
                                                                ! 'PLUS ' (default)
                                                                ! 'AVERA'            
                                                                ! '2DVAR'
- CHARACTER(LEN=100),DIMENSION(NVARMAX) :: CPREFIX_M            ! The prefix of the control variables (in PREP.txt file) (max dim)                          
+ CHARACTER(LEN=100),DIMENSION(NVARMAX) :: CPREFIX_M            ! The prefix of the control variables (in PREP.txt file) (max dim)      
  CHARACTER(LEN=10),DIMENSION(:), ALLOCATABLE  :: COBS          ! Identifier for simulated observations
  CHARACTER(LEN=3),DIMENSION(:), ALLOCATABLE   :: CVAR          ! Identifier for control variable
+ CHARACTER(LEN=12)                     :: CBIO                 ! Name of Biomass variable
+ CHARACTER(LEN=100)                    :: CPREFIX_BIO          ! The prefix of the Biomass variable 
+ CHARACTER(LEN=5)                      :: CASSIM_ISBA          ! OI/EKF
+ CHARACTER(LEN=5)                      :: CASSIM               ! type of correction
 
-REAL,DIMENSION(12)                     :: XALPH
+ REAL,DIMENSION(12)                     :: XALPH
  REAL,DIMENSION(NVARMAX)               :: XTPRT_M              ! The perturbation amplitude (max dim)
  REAL,DIMENSION(NVARMAX)               :: XSIGMA_M             ! covariance of background errors if B is fixed (max dim)
 !                                                              ! covariance of model errors if B evolving (max dim)
  REAL,DIMENSION(NOBSMAX)               :: XERROBS_M            ! Observational standard deviation
+ REAL,DIMENSION(NOBSMAX)               :: XQCOBS_M 
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF_PATCH             ! vector of model observations (for each pacth)
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF                   ! Vector of forecast control variables 
  REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XI 
@@ -97,10 +100,26 @@ REAL,DIMENSION(12)                     :: XALPH
  REAL,DIMENSION(:),ALLOCATABLE         :: XTPRT           ! The perturbation amplitude
  REAL,DIMENSION(:),ALLOCATABLE         :: XSIGMA          ! covariance of background errors if B is fixed
                                                           ! covariance of model errors if B evolving  
- REAL,DIMENSION(:),ALLOCATABLE         :: XERROBS
+ REAL,DIMENSION(:),ALLOCATABLE         :: XERROBS 
+ REAL,DIMENSION(:),ALLOCATABLE         :: XQCOBS
  REAL                                  :: XSCALE_Q        ! scaling factor of Q matrix w.r.t. the initial B
  REAL                                  :: XSCALE_QLAI
-
+!
+INTEGER :: NENS
+INTEGER :: NIE
+REAL :: XASSIM_WINH
+REAL, DIMENSION(NVARMAX) :: XINFL_M
+REAL, DIMENSION(NVARMAX) :: XADDINFL_M
+REAL, DIMENSION(NVARMAX) :: XADDTIMECORR_M
+REAL, DIMENSION(:), ALLOCATABLE :: XINFL
+REAL, DIMENSION(:), ALLOCATABLE :: XADDINFL
+REAL, DIMENSION(:), ALLOCATABLE :: XADDTIMECORR
+LOGICAL :: LENKF
+LOGICAL :: LDENKF
+LOGICAL :: LENS_GEN
+LOGICAL :: LPB_CORRELATIONS
+LOGICAL :: LPERTURBATION_RUN
+LOGICAL :: LBIAS_CORRECTION
 !
 ! Constants and options of the soil OI analysis
 !

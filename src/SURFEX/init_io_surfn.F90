@@ -245,7 +245,7 @@ ENDIF
 !
 IF (HPROGRAM=='NC    ' ) THEN
 #ifdef SFX_NC
-  CALL INIT_IO_SURF_NC_n(BDD, CHE, CHN, CHU, DTCO, DTS, DTT, DTZ, IOB, I, UG, U, &
+  CALL INIT_IO_SURF_NC_n(BDD, CHE, CHN, CHU, DTCO, DTS, DTT, DTZ, IOB, I, UG, U, DGU, &
                          HMASK,HACTION)
 #endif
 ENDIF
