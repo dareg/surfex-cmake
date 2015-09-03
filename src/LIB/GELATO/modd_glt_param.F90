@@ -134,30 +134,24 @@ CHARACTER(10) ::  &
 ! 1.2. Damping and restoring
 ! -------------------------
 !
-!  - cfsidmp    : sea ice fraction damping
-!       cfsidmp='NONE'  --> no sea ice fraction damping
-!       cfsidmp='MULTI' --> multi-category damping
-!       cfsidmp='MONO'  --> mono-category damping
+!  - cfsidmp    : sea ice fraction constraint
+!       cfsidmp='NONE'       --> no sea ice fraction constraint
+!       cfsidmp='DAMP'       --> damp
+!       cfsidmp='PRESCRIBE'  --> prescribe
 !  - xfsidmpeft : sea ice fraction damping e-folding time (in days)
-!  - chsidmp    : sea ice thickness damping
-!       chsidmp='NONE'     --> no sea ice thickness damping
-!       chsidmp='MULTI'    --> multi-category damping
-!       chsidmp='MONO_ADD' --> the thickness of all ice categories is changed 
-!         by the same value (h_i => h_i + add) 
-!       chsidmp='MONO_FAC' --> the thickness of all ice categories is modified 
-!         by the same factor (h_i => h_i * fac)
+!  - chsidmp    : sea ice thickness constraint
+!       chsidmp='NONE'       --> no sea ice thickness constraint
+!       chsidmp='DAMP_ADD'   --> damp (thickness of all ice categories is 
+!         modified by the same value: h_i => h_i + add)
+!       chsidmp='DAMP_FAC'   --> damp (thickness of all ice categories is 
+!         modified by the same factor: h_i => h_i * fac)
+!       chsidmp='PRESCRIBE'  --> prescribe
 !  - xhsidmpeft : sea ice thickness damping e-folding time (in days)
-!  - ctsfdmp    : sea ice surface temperature damping (exclude open water)
-!       ctsfdmp='NONE'  --> no sea ice surface temperature damping
-!       ctsfdmp='MULTI' --> multi-category damping
-!       ctsfdmp='MONO'  --> mono-category damping (the surface temperature of 
-!         every ice category is constrained towards the same temperature)
-!  - xtsfdmpeft : marine mean surface temperature damping e-folding time (in days)
 !
 CHARACTER(20) ::  &
-  cfsidmp, chsidmp, ctsfdmp
+  cfsidmp, chsidmp
 REAL ::  &
-  xfsidmpeft, xhsidmpeft, xtsfdmpeft
+  xfsidmpeft, xhsidmpeft
 !
 !
 ! 1.3. Diagnostics glt_output

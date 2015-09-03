@@ -35,8 +35,9 @@
 !!                             useless parameters
 !!      A.L. Gibelin 04/2009 : add parameters for PHOTO='NCB'
 !!      A.L. Gibelin 06/2009 : add parameters for RESPSL='CNT'
-!!      B. Decahrme  05/2012 : Add XCC_NITRO and XBIOMASST_LIM (optimization)
+!!      B. Decharme  05/2012 : Add XCC_NITRO and XBIOMASST_LIM (optimization)
 !!      R. Alkama    05/2012 : parameters for 19 vegtype rather than 12
+!!Seferian & Delire  06/2015 : updating XAMAX peding on TRY database Kattge et al. GCB 2011 
 !!
 !-------------------------------------------------------------------------------
 !
@@ -260,12 +261,18 @@ REAL, PARAMETER, DIMENSION(19) :: XPARAM = &
 (/ 0., 0., 0., 2.56, 1.81, 1.81, 1.48, 1.48, 1.48, 1.81, 1.81, 1.81, 2.56, 2.56, 1.81, 2.56, &
   1.81, 1.81, 2.56 /)
 !
-! Leaf photosynthetic capacity (kgCO2 m-2 s-1)
-! Modified parameter for tropical forests. Only change: PFT=6 from Domingues et al, 2011.
-! Other values: 2.2E-6 for C3 PFTs, 1.7E-6 for C4 PFTs, 1. for soil, rock, ice (should be undef)
+! Kronecker flag for nitrogen dilution hypothesis (based on Yin et al., 2002)
+REAL, PARAMETER, DIMENSION(19) :: XDILUDEC = &
+(/ 0., 0., 0., 1., 0., 0., 1., 1., 1., 1., 1., 0., 1., 0., 0., 1., 1., 0., 1. /)
+!
+! Maximum Leaf photosynthetic capacity (kgCO2 m-2 s-1)
+! Modified according to Kattge et al., 2009 median Vcmax at 25C  values
+! For C3 PFTs : Ammax = Vcmax / 2.     (Jacobs, p 150)
+! For C4 PFTs : Ammax = Vcmax
+! Units : [Vcmax]=micromols_CO2 m-2 s-1, [Ammax]=kgCO2 m-2 s-1 --> [Ammax] = [Vcmax] * 44e-3 * 1e-6
 REAL, PARAMETER, DIMENSION(19) :: XAMAX   = &
-(/ 1., 1., 1., 2.2E-6, 2.2E-6, 0.36E-6, 2.2E-6, 1.7E-6, 1.7E-6, 2.2E-6, 1.7E-6, 2.2E-6, &
-   2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6, 2.2E-6/)
+(/ 1., 1., 1., 1.3E-6, 1.4E-6, 0.64E-6, 2.2E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, &
+   0.9E-6, 1.3E-6, 1.4E-6, 1.3E-6, 0.9E-6, 1.7E-6, 1.2E-6/)
 !                                       
 END MODULE MODD_CO2V_PAR
 

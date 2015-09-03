@@ -33,7 +33,7 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 ! =======================================================================
-! ======================= MODULE modi_glt_constrain_r =======================
+! ====================== MODULE modi_glt_constrain_r ====================
 ! =======================================================================
 !
 ! Goal:
@@ -46,11 +46,17 @@
 ! Method:
 ! -------
 !    Newtonian damping. This method does not ensure energy is conserved.
+! Note that prescribing sea ice concentration and thickness can lead to
+! conflicts if constraints are contradictory (e.g. constraining 
+! thickness to 1m but concentration to 0). Note that we chose to constrain
+! sea ice concentration last (seen as more important...)
 !
 ! Created : 2012/03 (D. Salas y Melia) 
-! Modified: No
+! Modified: 2015/07 (D. Salas y Melia) Complete rewriting; suppress 
+!   multi-category damping, and add the possibility to prescribe sea ice 
+!   fraction and/or thickness. 
 ! 
-! -------------------- BEGIN MODULE modi_glt_constrain_r --------------------
+! ------------------ BEGIN MODULE modi_glt_constrain_r ------------------
 !
 !THXS_SFX!MODULE modi_glt_constrain_r
 !THXS_SFX!INTERFACE
@@ -79,7 +85,7 @@
 !
 !
 ! -----------------------------------------------------------------------
-! ---------------------- SUBROUTINE glt_constrain_r -------------------------
+! ---------------------- SUBROUTINE glt_constrain_r ---------------------
 !
 !
 SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
@@ -106,192 +112,81 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
   TYPE(t_sit), DIMENSION(ntd,np), INTENT(in) ::  &
         tpsit_d
 !
+  LOGICAL ::  &
+        gcontinue
   INTEGER, PARAMETER ::  &
         ppcent=0.01
   INTEGER ::  &
-        jk
-  CHARACTER(5) ::  &
-        ydmp
-  CHARACTER(300) ::  &
-        ymess
+        jk,jp
+  REAL ::  &
+        zmin,zdhsit,zfsit0
   REAL, DIMENSION(np) ::  &
-        zwork,zwork2,zfsit,zhsit0,zdhsit,zdhsit0,zfac,zfacfsi,  &
-        zenti0,zents0,zenti,zents
+        zdamp,zwork,zfsit_i,zhsit_i,zfac,zfacfsi,  &
+        zenti_i,zents_i,zenti_f,zents_f
   REAL, DIMENSION(nt,np) ::  &
-        zfsi,zhsi,zhsinew
+        zfsi,zhsi,zfsinew,zhsinew
 !
 !
 !
 ! 1. Initialization
 ! ==================
 !
-! These error checks are now probably unnecessary, since ntd is now
-! defined from cnflxin, and after a check in readnam.
+! .. Initial snow and ice enthalpy
 !
-!! .. Get first dimension of the constraint (to now if we apply mono or 
-!! multi-category damping). Mono-category damping (i.e. we have e.g. just 
-!! one thickness data per grid point) is applied if the first dimension 
-!! of tpsit_d is found to be 1. Else, if the first dimension is equal to
-!! nt (number of ice thicknesses), every category is constrained to the 
-!! data concerning the same category.
-!!
-!! .. Error on the number of categories in the damping data
-!!
-!  IF ( ntd /=1 .AND. ntd /= nt ) THEN
-!    WRITE( ymess, FMT='("First dimension of the damping array tpsit_d  &
-!      & provided to glt_gelato routine = ",I2,". Should be equal to nt =",I2,  &
-!      & "or equal to 1." )' ) ntd,nt
-!    CALL gltools_glterr( 'constrain_r', TRIM(ymess), 'STOP' )
-!  ENDIF
-!!
-!! .. Conflict between parameters in gltpar and input data dimensions
-!!
-!  IF ( cfsidmp(1:4)=='MONO' .OR. &
-!       chsidmp(1:4)=='MONO' .OR. &
-!       ctsfdmp(1:4)=='MONO' ) THEN
-!    IF ( ntd > 1 ) THEN
-!      WRITE( ymess, FMT='("First dimension of the damping array tpsit_d&
-!        & provided to glt_gelato routine = ",I2," is > 1 and suggests&
-!        & multi-category restoring. Not consistent with cfsidmp = ",A, &
-!        & ", chsidmp = ",A, " and ctsfdmp = ",A," . Check this." )' )  &
-!        ntd, TRIM(cfsidmp), TRIM(chsidmp), TRIM(ctsfdmp)
-!      CALL gltools_glterr( 'constrain_r', TRIM(ymess), 'STOP' )
-!    ELSE IF ( ntd == 1 .AND. nt == 1 ) THEN
-!      WRITE( ymess, FMT='("First dimension of the damping array tpsit_d&
-!        & provided to glt_gelato routine = 1, is equal to the number of&
-!        & ice categories nt. Multi-category restoring can be applied.&
-!        & Forcing cfsidmp, chsidmp and ctsfdmp to MULTI." )' )
-!      CALL gltools_glterr( 'constrain_r', TRIM(ymess), 'WARN' )
-!    ENDIF
-!  ENDIF
-!  IF ( cfsidmp(1:5)=='MULTI' .OR. &
-!       chsidmp(1:5)=='MULTI' .OR. &
-!       ctsfdmp(1:5)=='MULTI' ) THEN
-!    IF ( ntd == 1 .AND. nt > 1 ) THEN
-!      WRITE( ymess, FMT='("First dimension of the damping array tpsit_d&
-!        & provided to glt_gelato routine = 1, not equal to the number of&
-!        & ice categories nt = ",I2, ". Multi-category restoring cannot&
-!        & be applied. Not consistent with cfsidmp = ",A, &
-!        & ", chsidmp = ",A, " and ctsfdmp = ",A," . Check this." )' )  &
-!        nt, TRIM(cfsidmp), TRIM(chsidmp), TRIM(ctsfdmp)
-!      CALL gltools_glterr( 'constrain_r', TRIM(ymess), 'STOP' )
-!    ENDIF
-!  ENDIF
+  CALL glt_aventh( tpsit,tpsil,zenti_i,zents_i )
 !
-! .. Initial snow and ice gltools_enthalpy
+! .. Global initializations
 !
-  CALL glt_aventh( tpsit,tpsil,zenti0,zents0 )
-!
-! .. Initialize various fields
-!
-  zhsinew(:,:) = 0.
+  tpdia(:)%dci = 0.
 !
 !
-! 2. Mono-category damping
-! =========================
 !
-  IF ( ntd /= nt .OR. ( nt == 1 .AND. ntd == 1 ) ) THEN
+! 2. Damp sea ice thickness
+! ==========================
 !
-! .. Total sea ice concentration
+  IF ( chsidmp(1:4)=='DAMP' .OR. TRIM(chsidmp)=='PRESCRIBE' ) THEN
 !
-    zfsit(:) = SUM( tpsit(:,:)%fsi,DIM=1 )
+! Initial state
 !
+    zfsinew(:,:) = tpsit(:,:)%fsi
+    zhsinew(:,:) = tpsit(:,:)%hsi
+    zfsit_i(:) = SUM( tpsit(:,:)%fsi,DIM=1 )  ! sea ice total concentration
+    zhsit_i(:) = glt_avhicem_r( tpsit )     ! sea ice mean thickness
 !
-! 2.1. Damp sea ice concentration 
-! --------------------------------
+! These arrays need to be initialized here but also in the sea ice
+! concentration section
 !
-!   Note that concentration should be damped before thickness 
-! (if both are damped)
-!
-    IF ( cfsidmp(1:4)=='MONO' ) THEN
-!
-!   We assume here that if we modify sea ice concentration, we do not 
-! want to change current sea ice thickness.
-!  - If total sea ice concentration zfsit is more than epsil1=1.e-10, 
-! we modify the thicknesses of all ice categories to conserve volume.
-!  - If total sea ice concentration is less than epsil1, we consider 
-! there was no sea ice at all initially, meaning that we must create
-! new sea ice from nothing.
-!
-      IF ( (SIZE(tpsit_d(1,:)%fsi) > 0) .AND. &
-           ( MINVAL( tpsit_d(1,:)%fsi ) < 0. .OR.  &
-           MAXVAL( tpsit_d(1,:)%fsi ) > 1. )) THEN
-        CALL gltools_glterr( 'constrain_r',  &
-          'Wrong ice concentration damping data &
-        & (all values should be between 0 and 1).','STOP' )
-      ENDIF
-!
-      zwork(:) = dtt / ( xfsidmpeft*xday2sec ) *  &
-        ( MIN(tpsit_d(1,:)%fsi,xfsimax) - zfsit(:) )
-!
-      DO jk=1,nt
-        WHERE ( zfsit(:)>epsil1 )
-          ! Finally, we do not want to conserve seaice volume  ....
-          ! tpsit(jk,:)%hsi = tpsit(jk,:)%hsi * tpsit(jk,:)%fsi / (tpsit(jk,:)%fsi + zwork(:))
-          tpsit(jk,:)%fsi = tpsit(jk,:)%fsi + zwork(:) 
-        ENDWHERE
-        WHERE ( tpsit(jk,:)%fsi > xfsimax )
-          ! tpsit(jk,:)%hsi = tpsit(jk,:)%hsi * tpsit(jk,:)%fsi / xfsimax
-          tpsit(jk,:)%fsi = xfsimax
-        ENDWHERE
-        if (lp4) print*,"applying SIC constraint ",tpsit_d(1,:)%fsi, ' on zfsit=',zfsit(:),&
-             " delta=", zwork(:), 'output value for category ',jk,'=', tpsit(jk,:)%fsi
-      END DO
-!
-! If zfsit<=epsil1, the concentration of every category tpsit(jk,:)<=epsil1.
-! In particular, the thinnet category has a concentration <=epsil1. If new
-! ice has to appear here, we decide to increase only the concentration of the 
-! thinnest category, and to assign it a small thickness, in order to limit 
-! the ice volume change.
-!
-      zfsi(:,:) = 0.
-      zhsi(:,:) = 0.
-      WHERE ( zfsit(:)<=epsil1 )
-        zfsi(1,:) = dtt / ( xfsidmpeft*xday2sec ) *  &
-        ( MIN(tpsit_d(1,:)%fsi,xfsimax) - zfsit(:) )
-!          ( tpsit_d(1,:)%fsi - zfsit(:) )
-        zhsi(1,:) = xhsimin
-      ENDWHERE
-!
-! This routine will be active only where zfsi(:,:)>=epsil1 and tpsit(:,:)<epsil1
-!
-      CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
-!
-    ENDIF
-!
-!
-! 2.2. Damp sea ice thickness
-! ----------------------------
-!
-    IF ( TRIM(chsidmp)=='MONO_ADD' .OR. TRIM(chsidmp)=='MONO_FAC' ) THEN
-!
-! .. Compute average sea ice thickness over categories
-!
-      zhsit0(:) = glt_avhicem_r( tpsit )
-
+    zfsi(:,:) = 0.
+    zhsi(:,:) = 0.
 !
 ! .. Check thickness data toward which we would like to restore
 !
-      IF ( (SIZE(tpsit_d(1,:)%hsi) > 0) .AND. &
-           (MAXVAL( tpsit_d(1,:)%hsi ) < -1.) ) THEN 
-        CALL gltools_glterr( 'constrain_r',  &
-          'Wrong ice thickness damping data (all %hsi < -1).','STOP' )
+    IF ( (SIZE(tpsit_d(1,:)%hsi) > 0) .AND. &
+         (MAXVAL( tpsit_d(1,:)%hsi ) < -1.) ) THEN 
+      CALL gltools_glterr( 'constrain_r',  &
+        'Wrong ice thickness damping data (all %hsi < -1).','STOP' )
+    ENDIF
+!
+    DO jp=1,np
+!
+! .. Compute sea ice thickness change (damping case)
+!
+      IF ( chsidmp(1:4)=='DAMP' ) THEN
+        zdhsit = dtt / ( xhsidmpeft*xday2sec ) *  &
+          ( tpsit_d(1,jp)%hsi - zhsit_i(jp) )
+      ELSE IF ( TRIM(chsidmp)=='PRESCRIBE' ) THEN
+        zdhsit = tpsit_d(1,jp)%hsi - zhsit_i(jp)
       ENDIF
 !
-! .. Damp sea ice thickness
-!
-      zdhsit0(:) = dtt / ( xhsidmpeft*xday2sec ) *  &
-        ( tpsit_d(1,:)%hsi - zhsit0(:) )
-!      zdhsit0(:) = dtt / ( xhsidmpeft*xday2sec ) *  &
-!        ( tpsit_d(1,:)%hsi - zhsit0(:) ) / AMAX1( zfsit(:),xfsic )
+      IF ( zfsit_i(jp)>epsil1 ) THEN
 !
 !
-! 2.2.1. First method: add the same correction to all categories
-! ...............................................................
+! 2.1. Method #1: add the same correction to all categories
+! ----------------------------------------------------------
 !
 ! .. Now, modify the thickness of the ice categories to modify the mean
 ! ice thickness by zdhsit. Note the contribution of a dynamic bias should 
-! be proportional to the thickness of every category. This won't be the 
+! be proportional to the thickness of every category. This will not be the 
 ! case at all for thermodynamic biases (due to e.g. an atmospheric radiative 
 ! bias or an ocean temperature bias). In more detail (examples):
 !   - ocean heat flux bias: affects all ice categories in the same way
@@ -299,184 +194,212 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 ! to the inverse of ice thickness)
 !   - SW radiative bias: tends to affect all ice categories in the same way
 !
-      IF ( TRIM(chsidmp)=='MONO_ADD' ) THEN
-!
 ! .. Update ice thickness
 !
-        WHERE( tpsit(:,:)%fsi>epsil1 )
-          zhsinew(:,:) = AMAX1(  &
-            tpsit(:,:)%hsi + SPREAD( zdhsit0(:),1,nt ), 0. )
-        ELSEWHERE
-          zhsinew(:,:) = 0.
-        ENDWHERE
+        IF ( TRIM(chsidmp)=='DAMP_ADD' .OR. TRIM(chsidmp)=='PRESCRIBE') THEN
+          gcontinue = .TRUE.
+          zfsit0 = zfsit_i(jp)
+          jk=0
+          DO WHILE( gcontinue .AND. jk<=5 )
+            jk=jk+1
+            zmin = MINVAL(zhsinew(:,jp),MASK=zfsinew(:,jp)>epsil1)
+! First case: sea thickness is uniformly increased to meet the constraint
+! (no problem), or sea ice thickness that is uniformly removed is less than
+! minimum thickness for all categories.
+            IF ( zdhsit/zfsit0+zmin>0. ) THEN 
+              WHERE( zfsinew(:,jp)>epsil1 )
+                zhsinew(:,jp) = zhsinew(:,jp) + zdhsit/zfsit0
+              ENDWHERE
+              gcontinue = .FALSE.
+! Second case: first, uniformly remove zmin to all categories, then remove
+! more ice to the remaining categories, until the constraint is met.
+            ELSE
+              WHERE( zfsinew(:,jp)>epsil1 )
+                zhsinew(:,jp) = zhsinew(:,jp)-zmin
+              ENDWHERE  
+              zdhsit = zdhsit+zmin*zfsit0
+            ENDIF
+            WHERE ( zhsinew(:,jp)<epsil1 ) 
+              zfsinew(:,jp)=0.
+            ENDWHERE
+            zfsit0 = SUM( zfsinew(:,jp) )
+          END DO
 !
-        WHERE( tpsit(:,:)%hsi>epsil1 .AND. zhsinew(:,:)<=epsil1 )
-          tpsit(:,:)%esi = .FALSE. 
-        ENDWHERE
-!
-!        DO jk=1,nt
-!
-! .. Collect all negative volumes (if any)
-!
-!          WHERE( zhsinew(jk,:)<0. ) 
-!            zdhsit(:) = zhsinew(jk,:)*tpsit(jk,:)%fsi
-!            zhsinew(jk,:) = 0.
-!          ELSEWHERE
-!            zdhsit(:) = 0.
-!          ENDWHERE
-! The residual correction cannot be taken into account if the thickest 
-! category has 0 thickness ! (however, apart from possible numerical 
-! problems, this cannot happen)
-!          IF ( jk<nt ) THEN
-!            zwork(:) = SUM( tpsit(jk+1:nt,:)%fsi, DIM=1 ) 
-!            WHERE( zwork(:)>epsil1 )
-!              zwork2(:) = zdhsit(:) / zwork(:)
-!            ELSEWHERE
-!              zwork2(:) = 0.
-!            ENDWHERE
-!            zhsinew(jk+1:nt,:) = zhsinew(jk+1:nt,:) +  &
-!              SPREAD( zwork2(:), 1, nt-jk )
-!          ENDIF
-!        END DO
-!
-! Case without initial sea ice and damping to positive ice thickness
-        zfsi(:,:) = 0.
-        zhsi(:,:) = 0.
-        WHERE ( zfsit(:)<=epsil1 )
-          zfsi(1,:) = xfsic
-          zhsi(1,:) = dtt / ( xhsidmpeft*xday2sec ) * tpsit_d(1,:)%hsi
-!          zhsi(1,:) = dtt / ( xhsidmpeft*xday2sec ) *  &
-!            tpsit_d(1,:)%hsi / zfsi(1,:)
-        ENDWHERE
-!
-        tpsit(:,:)%hsi = zhsinew(:,:)
-!
-! This routine will be active only where zfsi(:,:)>=epsil1 and tpsit(:,:)<epsil1
-!
-        CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
+          WHERE ( tpsit(:,jp)%hsi>epsil1 .AND. zhsinew(:,jp)<=epsil1 )
+            tpsit(:,jp)%esi = .FALSE. 
+          ENDWHERE
 !
 !
+! 2.2. Method #2: multiply all thicknesses by a factor
+! -----------------------------------------------------
 !
-! 2.2.2. Correction of all ice thicknesses by the same factor
-! ............................................................
-!
-      ELSE IF ( TRIM(chsidmp)=='MONO_FAC' ) THEN
-!
-!write(145)'dhsit'
-!write(145)zdhsit0
-!close(145)
-!
-        zfac(:) = 1.
-        WHERE( zhsit0(:)>epsil1 )
-          zfac(:) = 1. + zdhsit0(:)/zhsit0(:)
-        ENDWHERE
+        ELSE IF ( TRIM(chsidmp)=='DAMP_FAC' ) THEN
+          zfac(jp) = 1.
+          IF ( zhsit_i(jp)>epsil1 ) THEN
+            zfac(jp) = 1. + zdhsit/zhsit_i(jp)
+          ENDIF
 !
 ! Define a multiplicative factor for sea ice concentration (to help reducing or 
 ! increasing sea ice thickness)
-        zfacfsi(:) = 1.
-        WHERE( ABS(zfac(:)-1.) > ppcent )
-! Low values of the factor: decrease sea ice concentration to contribute to reducing 
-! mean sea ice thickness
-          WHERE( zfac(:) < 1.-ppcent )
-            zfacfsi(:) = zfac(:)/(1.-ppcent)
-            zfac(:) = 1.-ppcent
-! High values of the factor: increase very low sea ice concentrations, but not more than 0.15
-          ELSEWHERE
-            WHERE( zfsit(:)>epsil1 .AND. zfsit(:)<xfsic )
-              zfacfsi(:) = EXP( dtt/(3.*xday2sec)*LOG( xfsic/zfsit(:) ) )
-              zfac(:) = AMIN1( zfac(:)/zfacfsi(:),1.+ppcent )
-            ENDWHERE
-          ENDWHERE
-        ENDWHERE
+          zfacfsi(jp) = 1.
+          IF ( ABS(zfac(jp)-1.) > ppcent ) THEN
+! Low values of the factor: decrease sea ice concentration to contribute to 
+! reducing mean sea ice thickness
+            IF ( zfac(jp) < 1.-ppcent ) THEN
+              zfacfsi(jp) = zfac(jp)/(1.-ppcent)
+              zfac(jp) = 1.-ppcent
+! High values of the factor: increase very low sea ice concentrations, 
+! but not more than 0.15
+            ELSE
+              IF ( zfsit_i(jp)<xfsic ) THEN
+                zfacfsi(jp) = EXP( dtt/(3.*xday2sec)*LOG( xfsic/zfsit_i(jp) ) )
+                zfac(jp) = AMIN1( zfac(jp)/zfacfsi(jp),1.+ppcent )
+              ENDIF
+            ENDIF
+          ENDIF
 !
-! We do not want to modify sea ice thickness by more than 1%, in order to avoid runaway 
-! thickness of categories
-        DO jk=1,nt
-          WHERE ( zfsit(:)>epsil1 )
-            tpsit(jk,:)%fsi = tpsit(jk,:)%fsi*zfacfsi(:)
-            WHERE ( zfsit(:)>epsil1 )
-              zhsinew(jk,:) = zfac(:) * tpsit(jk,:)%hsi
-            ENDWHERE
-          ENDWHERE
-        END DO
+! We do not want to modify sea ice thickness by more than 1%, in order to 
+! avoid runaway thickness of categories
+          zfsinew(:,jp) = zfacfsi(jp) * tpsit(:,jp)%fsi
+          zhsinew(:,jp) = zfac(jp) * tpsit(:,jp)%hsi
+        ENDIF
 !
-! Case without initial sea ice and damping to positive ice thickness
-        zfsi(:,:) = 0.
-        zhsi(:,:) = 0.
-        WHERE ( zfsit(:)<=epsil1 )
-          zfsi(1,:) = xfsic
-          zhsi(1,:) = dtt / ( xhsidmpeft*xday2sec ) *  &
-            tpsit_d(1,:)%hsi / zfsi(1,:)
-        ENDWHERE
+      ELSE    ! IF zfsit_i(jp)<=epsil1
+!
+! Case without initial sea ice: DAMP_ADD or DAMP_FAC plays no role
+        zfsi(1,jp) = xfsic
+        zhsi(1,jp) = zdhsit / xfsic
+      ENDIF
+    END DO   ! Loop on jp
+!
+    tpsit(:,:)%hsi = zhsinew(:,:)
+    tpsit(:,:)%fsi = zfsinew(:,:)
 !
 ! This routine will be active only where zfsi(:,:)>=epsil1 and tpsit(:,:)<epsil1
 !
-        CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
+    CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
 !
-        tpsit(:,:)%hsi = zhsinew(:,:)
+! Add rate of change of sea ice mass due to thickness constraint
 !
+    tpdia(:)%dci = tpdia(:)%dci +  &
+      rhoice * ( glt_avhicem_r(tpsit) - zhsit_i(:) ) / dtt
 !
-     ENDIF
-!
-    ELSE
-       IF (TRIM(chsidmp) /= 'NONE') THEN
-!
-! 2.2.3. Wrong chsidmp option
-! ............................
-!
-! Attention si h_init = 0 et dhsit0>0: décider: regarder dans quelle
-! cat tombe la nouvelle thickness, initialiser tout le reste (%tsf,tpsil)
-       WRITE( ymess,FMT='("Wrong value for chsidmp = ",A)' ) chsidmp
-       CALL gltools_glterr( 'constrain_r',TRIM(ymess), 'STOP' )
-    ENDIF
   ENDIF
 !
 !
-! 2.3. Sea ice temperature
-! -------------------------
 !
-    IF ( ctsfdmp(1:4)=='MONO' ) THEN
-      WRITE(noutlu,*) , 'Constraining seaice temperature is not yet implemented'
+! 3. Damp/prescribe sea ice concentration
+! ========================================
+!
+!   Note that concentration should be damped before thickness 
+! (if both are damped)
+!
+!   We assume here that we modify sea ice concentrations, without  
+! conserving total, nor per-category, ice volume.
+!   If total sea ice concentration is less than epsil1=1.e-10, we consider
+! there was no sea ice at all initially, meaning that we must create
+! new sea ice from nothing.
+!
+  IF ( TRIM(cfsidmp)=='DAMP' .OR. TRIM(cfsidmp)=='PRESCRIBE' ) THEN
+!
+! Initial state
+!
+    zfsinew(:,:) = tpsit(:,:)%fsi
+    zhsinew(:,:) = tpsit(:,:)%hsi
+    zfsit_i(:) = SUM( tpsit(:,:)%fsi,DIM=1 )  ! sea ice total concentration
+    zhsit_i(:) = glt_avhicem_r( tpsit )     ! sea ice mean thickness
+!
+! These arrays need to be initialized here but also in the sea ice thickness
+! damping section
+!
+    zfsi(:,:) = 0.
+    zhsi(:,:) = 0.
+!
+! .. Check concentration data toward which we would like to restore
+!
+    IF ( (SIZE(tpsit_d(1,:)%fsi) > 0) .AND. &
+         ( MINVAL( tpsit_d(1,:)%fsi ) < 0. .OR.  &
+         MAXVAL( tpsit_d(1,:)%fsi ) > 1. )) THEN
+      CALL gltools_glterr( 'constrain_r',  &
+        'Wrong ice concentration damping data &
+        & (probably given in % instead of fraction of unity).','STOP' )
     ENDIF
+    DO jp=1,np
 !
+      IF ( zfsit_i(jp)>epsil1 ) THEN
+!      
+! .. Case 1: total sea ice fraction > epsil1
 !
+        IF ( TRIM(cfsidmp)=='DAMP' ) THEN
+          zdamp(jp) = dtt / ( xfsidmpeft*xday2sec ) *  &
+            ( MIN(tpsit_d(1,jp)%fsi,xfsimax) - zfsit_i(jp) )
 !
-! 3. Multi-category damping
-! ==========================
+          DO jk=1,nt
+            tpsit(jk,jp)%fsi = tpsit(jk,jp)%fsi *  &
+              ( 1. + zdamp(jp) / zfsit_i(jp) )
+! Conserve sea ice volume
+            tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi /  &
+              ( 1. + zdamp(jp) / zfsit_i(jp) )
+          END DO 
 !
-! If ntd = nt, even if nt = 1 : multi-category damping
+        ELSE IF ( TRIM(cfsidmp)=='PRESCRIBE' ) THEN
+          zwork(jp) = MAX(  &
+            MIN(tpsit_d(1,jp)%fsi,xfsimax) / zfsit_i(jp), epsil1 )
+          DO jk=1,nt
+            tpsit(jk,jp)%fsi = tpsit(jk,jp)%fsi * zwork(jp)
+! Conserve sea ice volume
+            tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi / zwork(jp)
+          END DO
 !
-  ELSE       
+        ENDIF 
 !
+      ELSE ! IF zfsit_i(jp)<=epsil1
 !
-! 3.1. Damp sea ice concentration 
-! --------------------------------
+! .. Case 2: total sea ice fraction <= epsil1
 !
-    IF ( cfsidmp(1:5) == 'MULTI' ) THEN
-! ATTENTION AUX CAS OU %FSI INITIAL = 0 => NEWICE.
-      tpsit(:,:)%fsi = dtt / ( xfsidmpeft*xday2sec ) *  &
-        ( tpsit_d(:,:)%fsi - tpsit(:,:)%fsi )
-    ENDIF
+! If zfsit_i<=epsil1, the concentration of every category tpsit(jk,:)<=epsil1.
+! In particular, the thinnest category has a concentration <=epsil1. If new
+! ice has to appear here, we decide to increase only the concentration of the 
+! thinnest category, and to assign it a small thickness, in order to limit 
+! the ice volume change.
+! Note that if this concentration constraint is not consistent with the 
+! thickness constraint (e.g. hsi_d = 0. but fsi_d /= 0.), we choose to respect 
+! the concentration constraint but not the thickness constraint.
 !
+        IF ( TRIM(cfsidmp)=='DAMP' ) THEN
+          zfsi(1,jp) = dtt / ( xfsidmpeft*xday2sec ) *  &
+            ( MIN(tpsit_d(1,jp)%fsi,xfsimax) - zfsit_i(jp) )
+        ELSE IF ( TRIM(cfsidmp)=='PRESCRIBE' ) THEN
+          zfsi(1,jp) = MIN(tpsit_d(1,jp)%fsi,xfsimax)
+        ENDIF
+        zhsi(1,jp) = xhsimin
 !
-! 3.2. Damp sea ice thickness
-! ----------------------------
+      ENDIF
 !
-    IF ( chsidmp(1:5) == 'MULTI' ) THEN
-! ATTENTION AUX CAS OU %FSI INITIAL = 0 => NEWICE.
-      tpsit(:,:)%hsi = dtt / ( xhsidmpeft*xday2sec ) *  &
-        ( tpsit_d(:,:)%hsi - tpsit(:,:)%hsi )
-    ENDIF
+    END DO   ! Loop on jp
 !
+! This routine will be active only where zfsi(:,:)>=epsil1 and tpsit(:,:)<epsil1
 !
-! 3.3. Damp sea ice temperature
-! ------------------------------
+    CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
 !
-    IF ( ctsfdmp(1:5) == 'MULTI' ) THEN
-! ATTENTION AUX CAS OU %FSI INITIAL = 0 => NEWICE.
-      tpsit(:,:)%tsf = dtt / ( xtsfdmpeft*xday2sec ) *  &
-        ( tpsit_d(:,:)%tsf - tpsit(:,:)%tsf )
-    ENDIF
+! We want to make sure that the new total sea ice concentration does not
+! exceed xfsimax
+!
+    zwork(:) = SUM( tpsit(:,:)%fsi,DIM=1 )
+    DO jk=1,nt
+      WHERE ( zwork(:) > xfsimax )
+        tpsit(jk,:)%fsi = tpsit(jk,:)%fsi * xfsimax / zwork(:)
+      ENDWHERE
+    END DO
+!
+! Add rate of change of sea ice mass due to ice concentration constraint
+!
+    tpdia(:)%dci = tpdia(:)%dci +  &
+      rhoice * ( glt_avhicem_r(tpsit) - zhsit_i(:) ) / dtt
+!
+! Diagnose constraint
+!
+   tpdia(:)%cst = 100.*tpsit_d(1,:)%fsi
 !
   ENDIF
 !
@@ -485,27 +408,13 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 ! 4. Final operations
 ! ====================
 !
-!WRITE(noutlu,*) ,glt_avhicem_r( tpsit )
-!WRITE(noutlu,*) ,zhsit0
-!WRITE(noutlu,*) ,glt_avhicem_r( tpsit )-zhsit0(:)
-!WRITE(noutlu,*) ,zdhsit0
-!  IF ( SUM( glt_avhicem_r( tpsit )-zhsit0(:)-zdhsit0(:) )>epsil5 ) THEN
-!      CALL gltools_glterr( 'constrain_r',  &
-!        'Thickness damping not conform to specifications.', 'STOP' )
-!  ENDIF
-!
-! .. Diagnostic for change in snow+ice gltools_enthalpy due to damping/restoring
+! .. Diagnose changes in snow/ice enthalpy due to damping/restoring 
 ! (there is no separation of the effects of the different operations)
 !
-! Final snow and ice gltools_enthalpy
-!
-  CALL glt_aventh( tpsit,tpsil,zenti,zents )
-!
-! Diagnostic
-!
-  tpdia(:)%dmp = ( zenti+zents-zenti0-zents0 ) / dtt
+  CALL glt_aventh( tpsit,tpsil,zenti_f,zents_f )
+  tpdia(:)%dmp = ( zenti_f+zents_f-zenti_i-zents_i ) / dtt
 !
 END SUBROUTINE glt_constrain_r
 !
-! --------------------- END SUBROUTINE glt_constrain_r ----------------------
+! ------------------- END SUBROUTINE glt_constrain_r --------------------
 ! -----------------------------------------------------------------------

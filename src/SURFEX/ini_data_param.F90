@@ -54,6 +54,8 @@
 !!    R. Alkama      05/12 : Add 7 new vegtype (19 rather than 12)
 !!    B. Decharme    05/13 : new param for equatorial forest
 !!    P. Samuelsson  10/14 : Multi-energy balance (MEB)
+!!Seferian & Delire  06/15 : Updating Nitrogen content and coef (PCF,PCNA) and 
+!                            mesophyl conductance based on TRY database (Kattge et al., GCB 2011) and Jacobs Thesis
 !!
 !----------------------------------------------------------------------------
 !
@@ -324,6 +326,14 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !-------------------------------------------------------------------------------
 !*    7.11   mesophyll conductance (m s-1)
 !            -----------------------------
+!            Uptdated values using Kattge et al. 2009 median values of Vcmax at 25C
+!            (For TRBE, used median + 1 standard deviation)
+!            For C3 PFTs : 
+!              gmes = Vcmax / (gamma + Kc*(1 + O2/Ko))    
+!              from Jacobs eq [A8.5] and Farquhar, 1980 eq 42 : gm = dA/dC estimated at Ci=Gamma 
+!            For C4 grass : Vcmax_C4 = Vcmax_C3
+!                   crop :  Vcmax_C4 = Vcmax_C3 * 1.7 / 2.2   (Jacobs ratio between C3 and C4)   
+!            --------------------------------------------------------------------
     IF (PRESENT(PGMES)) THEN
       PGMES(JLOOP,:)=0.020
       IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGMES(JLOOP,NVT_TEBD)= 0.001
@@ -348,27 +358,28 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !
     IF (PRESENT(PGMES_ST)) THEN
       PGMES_ST(JLOOP,:)=0.003
-      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGMES_ST(JLOOP,NVT_TEBD)= 0.003
-      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PGMES_ST(JLOOP,NVT_TRBD)= 0.003
-      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PGMES_ST(JLOOP,NVT_TEBE)= 0.003
-      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PGMES_ST(JLOOP,NVT_BOBD)= 0.003
-      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PGMES_ST(JLOOP,NVT_SHRB)= 0.003
-      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PGMES_ST(JLOOP,NVT_BONE)= 0.002
-      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PGMES_ST(JLOOP,NVT_TENE)= 0.002
-      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PGMES_ST(JLOOP,NVT_BOND)= 0.002
-      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PGMES_ST(JLOOP,NVT_TRBE)= 0.002       
-      IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.001
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGMES_ST(JLOOP,NVT_TEBD)= 0.0018
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PGMES_ST(JLOOP,NVT_TRBD)= 0.0012
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PGMES_ST(JLOOP,NVT_TEBE)= 0.0019
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PGMES_ST(JLOOP,NVT_BOBD)= 0.0018
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PGMES_ST(JLOOP,NVT_SHRB)= 0.0016
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PGMES_ST(JLOOP,NVT_BONE)= 0.0019
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PGMES_ST(JLOOP,NVT_TENE)= 0.0019
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PGMES_ST(JLOOP,NVT_BOND)= 0.0012
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PGMES_ST(JLOOP,NVT_TRBE)= 0.0012
       IF(GAGRI_TO_GRASS)THEN
-        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.001
-        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.001
+        IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.0024
+        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.0024
+        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.0024
       ELSE
-        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.009
-        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.009
+        IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.003
+        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.017
+        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.017
       ENDIF
-      IF(PTYPE(JLOOP,NVT_GRAS)>0. ) PGMES_ST(JLOOP,NVT_GRAS )= 0.001
-      IF(PTYPE(JLOOP,NVT_BOGR)>0. ) PGMES_ST(JLOOP,NVT_BOGR )= 0.001
-      IF(PTYPE(JLOOP,NVT_TROG)>0. ) PGMES_ST(JLOOP,NVT_TROG )= 0.006
-      IF(PTYPE(JLOOP,NVT_PARK)>0. ) PGMES_ST(JLOOP,NVT_PARK )= 0.001
+      IF(PTYPE(JLOOP,NVT_GRAS)>0. ) PGMES_ST(JLOOP,NVT_GRAS )= 0.0024
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. ) PGMES_ST(JLOOP,NVT_BOGR )= 0.0024
+      IF(PTYPE(JLOOP,NVT_TROG)>0. ) PGMES_ST(JLOOP,NVT_TROG )= 0.017
+      IF(PTYPE(JLOOP,NVT_PARK)>0. ) PGMES_ST(JLOOP,NVT_PARK )= 0.0024
     ENDIF    
 !-------------------------------------------------------------------------------
 !*    7.11   Ecosystem Respiration (kg m-2 s-1)
@@ -585,7 +596,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !
 !*    7.16   Fraction of ground litter coverage
 !            ----------------------------------
-!
+! 	 
     IF (PRESENT(PGNDLITTER)) THEN
       PGNDLITTER (JLOOP,:,:) = 0.
       IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBD) = 0.95
@@ -665,8 +676,13 @@ DO JLOOP=1,SIZE(PTYPE,1)
       PWRMAX_CFGV (JLOOP,:) = 0.2
     ENDIF   
 !------------------------------------------------------------------------
-!*    2.20   leaf aera ratio sensitivity to nitrogen concentration
-!            ----------
+!*    2.20   specific leaf area sensitivity to nitrogen concentration
+!            -----------------------------
+!            corresponds to "e" in (eq 1) from Gibelin et al, 2006 
+!            SLA = f + e * Nm   with SLA = specific leaf area
+!            kept values from Gibelin et al 2006 
+!            -----------------------------------------------------
+!
     IF (PRESENT(PCE_NITRO)) THEN
       PCE_NITRO(JLOOP,:)=7.68
       IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PCE_NITRO(JLOOP,NVT_TEBD)= 4.83
@@ -695,16 +711,22 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !-------------------------------------------------------------------------------
 !*    2.21   lethal minimum value of leaf area ratio
 !            ----------
+!            intercept of SLA = f + e * Nm  from Gibelin et al, 2006 (eq 1)
+!            kept Gibelin et al values for grasses and crops
+!            used TRY database (Kattge et al., 2011) median values for trees                    
+!            with SLA and Nm from TRY and "e" (PCE_NITRO) from Gibelin et al 2006 
+!            used Domingues 2011 for TRBE SLA.
+!            ------------------------------------------------------
     IF (PRESENT(PCF_NITRO)) THEN
       PCF_NITRO(JLOOP,:)=-4.33
-      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PCF_NITRO(JLOOP,NVT_TEBD)= 2.53
-      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PCF_NITRO(JLOOP,NVT_TRBD)= 2.53
-      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PCF_NITRO(JLOOP,NVT_TEBE)= 2.53
-      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PCF_NITRO(JLOOP,NVT_BOBD)= 2.53
-      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PCF_NITRO(JLOOP,NVT_SHRB)= 2.53
-      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PCF_NITRO(JLOOP,NVT_BONE)= -0.24
-      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PCF_NITRO(JLOOP,NVT_TENE)= -0.24
-      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PCF_NITRO(JLOOP,NVT_BOND)= -0.24
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PCF_NITRO(JLOOP,NVT_TEBD)= 5.11
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PCF_NITRO(JLOOP,NVT_TRBD)= 5.11
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PCF_NITRO(JLOOP,NVT_TEBE)= 0.17
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PCF_NITRO(JLOOP,NVT_BOBD)= 5.11
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PCF_NITRO(JLOOP,NVT_SHRB)= 4.98
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PCF_NITRO(JLOOP,NVT_BONE)= -0.87
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PCF_NITRO(JLOOP,NVT_TENE)= -0.87
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PCF_NITRO(JLOOP,NVT_BOND)= 0.68
       IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PCF_NITRO(JLOOP,NVT_TRBE)= 0.12 ! obtained using f = SLA - e*Nm 
                                                                      ! with SLA = 8.33 m2/kg_DM (Domingues 2011), Nm=1.7% (TRY)
       IF(GAGRI_TO_GRASS)THEN
@@ -717,31 +739,38 @@ DO JLOOP=1,SIZE(PTYPE,1)
         IF(PTYPE(JLOOP,NVT_IRR )>0. )  PCF_NITRO(JLOOP,NVT_IRR )= -4.33
       ENDIF
       IF(PTYPE(JLOOP,NVT_GRAS)>0. )  PCF_NITRO(JLOOP,NVT_GRAS)= 6.73
-      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PCF_NITRO(JLOOP,NVT_BOGR)= 6.73      
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PCF_NITRO(JLOOP,NVT_BOGR)= 6.73    
       IF(PTYPE(JLOOP,NVT_PARK)>0. )  PCF_NITRO(JLOOP,NVT_PARK)= 6.73
     ENDIF    
 !-------------------------------------------------------------------------------
-!*    2.22   nitrogen concentration of active biomass (assimilated to N
-!            concentration of leaf biomass following Gibelin)
+!*    2.22   nitrogen concentration of leaf biomass
 !            ----------
+!            kept Gibelin et al 2006 values for grasses and crops
+!            Nm from TRY database (Kattge et al. GCB 2011) median values for tree PFTs
+!            Nm in mg_N/g_DM and PCNA_NITRO in % --> PCNA_NITRO = Nm * 0.1 
+!            --------------------------------------------------
     IF (PRESENT(PCNA_NITRO)) THEN
       PCNA_NITRO(JLOOP,:)=1.3
-      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PCNA_NITRO(JLOOP,NVT_TEBD)= 2.0
-      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PCNA_NITRO(JLOOP,NVT_TRBD)= 2.0
-      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PCNA_NITRO(JLOOP,NVT_TEBE)= 2.0
-      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PCNA_NITRO(JLOOP,NVT_BOBD)= 2.0
-      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PCNA_NITRO(JLOOP,NVT_SHRB)= 2.0
-      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PCNA_NITRO(JLOOP,NVT_BONE)= 2.8
-      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PCNA_NITRO(JLOOP,NVT_TENE)= 2.8
-      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PCNA_NITRO(JLOOP,NVT_BOND)= 2.8
-      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PCNA_NITRO(JLOOP,NVT_TRBE)= 1.7  !TRY database Kattge et al. GCB 2011, Nm=16.89 mg_N/g_DM = 1.7%
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PCNA_NITRO(JLOOP,NVT_TEBD)= 2.13
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PCNA_NITRO(JLOOP,NVT_TRBD)= 2.13
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PCNA_NITRO(JLOOP,NVT_TEBE)= 1.69
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PCNA_NITRO(JLOOP,NVT_BOBD)= 2.13
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PCNA_NITRO(JLOOP,NVT_SHRB)= 2.15
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PCNA_NITRO(JLOOP,NVT_BONE)= 1.21
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PCNA_NITRO(JLOOP,NVT_TENE)= 1.21
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PCNA_NITRO(JLOOP,NVT_BOND)= 1.94
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PCNA_NITRO(JLOOP,NVT_TRBE)= 1.7 
       IF(GAGRI_TO_GRASS)THEN
         IF(PTYPE(JLOOP,NVT_C4  )>0. )  PCNA_NITRO(JLOOP,NVT_C4  )= 1.3
         IF(PTYPE(JLOOP,NVT_IRR )>0. )  PCNA_NITRO(JLOOP,NVT_IRR) = 1.3
       ELSE
         IF(PTYPE(JLOOP,NVT_C4  )>0. )  PCNA_NITRO(JLOOP,NVT_C4  )= 1.9
         IF(PTYPE(JLOOP,NVT_IRR )>0. )  PCNA_NITRO(JLOOP,NVT_IRR) = 1.9
-      ENDIF    
+      ENDIF
+      IF(PTYPE(JLOOP,NVT_C3  )>0. )  PCNA_NITRO(JLOOP,NVT_C3  )= 1.3
+      IF(PTYPE(JLOOP,NVT_GRAS)>0. )  PCNA_NITRO(JLOOP,NVT_GRAS)= 1.3 
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PCNA_NITRO(JLOOP,NVT_BOGR)= 1.3
+      IF(PTYPE(JLOOP,NVT_PARK)>0. )  PCNA_NITRO(JLOOP,NVT_PARK)= 1.3
     ENDIF    
 !-------------------------------------------------------------------------------
 !*    7.15   Jackson (1996) coefficient for cumulative root fraction

@@ -1,9 +1,10 @@
 !     #########
-      SUBROUTINE INTERPOL_QUADRA(PDAT,PNDAT,PVAL0,PVAL1,PVAL2,POUT)
+      SUBROUTINE INTERPOL_LINEAR(PDAT,PNDAT,PVAL0,PVAL1,PVAL2,POUT)
 !     #############################################################
 !
-!!**** *INTERPOL_QUADRA* Quadractic interpolation between 3 month, especially
-!!                       relevant to conserv the SST (or other) monthly mean value.
+!!**** *INTERPOL_LINEAR* Linear interpolation between 3 month.
+!!                       Current value is reached evry 16 of each month,
+!!                       except in February every 15.
 !!
 !!
 !!    PURPOSE
@@ -30,15 +31,12 @@
 !!    MODIFICATION
 !!    ------------
 !!
-!!    Original    08/2009
-!!    18-11-2010 by F. Chauvin  : bugfix for temporal interpolation coeff.
+!!    Original    07/2015
 !!
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
-!
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -59,63 +57,43 @@ REAL, DIMENSION(:),      INTENT(OUT)   :: POUT    ! Interpolated value
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL, DIMENSION(SIZE(PVAL0)) :: ZMID1   ! Mid point between t-1 and t
-REAL, DIMENSION(SIZE(PVAL0)) :: ZMID2   ! Mid point between t+1 and t
-REAL, DIMENSION(SIZE(PVAL0)) :: ZA      ! Interpolation coef
-REAL, DIMENSION(SIZE(PVAL0)) :: ZB      ! Interpolation coef
-REAL, DIMENSION(SIZE(PVAL0)) :: ZC      ! Interpolation coef
-!
-REAL                         :: ZSCARRE ! Quadratic coef
-REAL                         :: ZSUM    ! Quadratic coef
-!
-INTEGER                      :: JDAT, INDAT
+REAL         :: ZA, ZFACT0, ZFACT1, ZFACT2
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('INTERPOL_QUADRA',0,ZHOOK_HANDLE)
+!*    0.     Allocation
+!            ----------
+!
+IF (LHOOK) CALL DR_HOOK('INTERPOL_LINEAR',0,ZHOOK_HANDLE)
 !
 !*    1.     Initialization
 !            --------------
 !
-ZSCARRE = 0.0
-ZSUM    = 0.0
+IF(MOD(PNDAT,2.0)/=0.0)THEN
+  ZA=1.0
+ELSE
+  ZA=2.0
+ENDIF
 !
-INDAT = INT(PNDAT)
-!
-DO JDAT=1,INDAT
-   ZSCARRE = ZSCARRE + REAL(JDAT*JDAT)
-   ZSUM    = ZSUM    + REAL(JDAT)
-ENDDO
-!
-!*    2.     Mid points
-!            ----------
-! 
-ZMID1(:) = 0.5 * (PVAL1(:)+PVAL0(:))
-ZMID2(:) = 0.5 * (PVAL1(:)+PVAL2(:))
-!
-!
-!*    3.     Coef calculation
+!*    2.     Coef calculation
 !            ----------------
 !
-ZA(:) = ((PVAL1(:)-ZMID1(:))*PNDAT - (ZMID2(:)-ZMID1(:))*(ZSUM-PNDAT)/PNDAT) &
-      / ((ZSCARRE-PNDAT)-(ZSUM-PNDAT)*(PNDAT+2.0))
-!
-ZB(:) = ((ZMID2(:)-ZMID1(:)) - (PNDAT*(PNDAT+2.0) * ZA(:))) / PNDAT
-!
-ZC(:) = ZMID1(:) - ZA(:) - ZB(:)
+ZFACT0=MAX(1.0-(PDAT*2.0+PNDAT-ZA)/(PNDAT*2.0),0.0)
+ZFACT1=(2.0*PNDAT-ABS(2.0*PDAT-PNDAT-ZA))/(PNDAT*2.0)
+ZFACT2=MAX(1.0-((PNDAT+ZA-PDAT)*2.0+PNDAT-ZA)/(PNDAT*2.0),0.0)
 !
 !*    3.     Final calculation
 !            -----------------
 !
-POUT(:) = ZA(:) * PDAT**2 + ZB(:) * PDAT + ZC(:)
+POUT(:) = PVAL0(:)*ZFACT0+PVAL1(:)*ZFACT1+PVAL2(:)*ZFACT2
 !
 !*    4.     End
 !            ---
 !
-IF (LHOOK) CALL DR_HOOK('INTERPOL_QUADRA',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_LINEAR',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-END SUBROUTINE INTERPOL_QUADRA
+END SUBROUTINE INTERPOL_LINEAR

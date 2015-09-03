@@ -42,9 +42,7 @@ CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff
 CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
 CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge
 CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux
-CHARACTER(LEN=8) :: CPFLOOD     = '        '   ! Floodplains recipitation interception
-CHARACTER(LEN=8) :: CEFLOOD     = '        '   ! Floodplains evaporation 
-CHARACTER(LEN=8) :: CIFLOOD     = '        '   ! Floodplains infiltration
+CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
 !
 ! Output variables
 !
@@ -72,8 +70,7 @@ CHARACTER(LEN=8) :: CCALVANT = '        '   ! Calving flux over antarctica
 !
 NAMELIST/NAM_TRIP_LAND_CPL/XTSTEP_CPL_LAND,CRUNOFF,CDRAIN, &
                            CFFLOOD,CPIFLOOD,CWTD,CFWTD,    &
-                           CRECHARGE,CCALVING,CPFLOOD,     &
-                           CEFLOOD,CIFLOOD
+                           CRECHARGE,CCALVING,CSRCFLOOD
 !
 !
 !*       2.    NAMELISTS TRIP COUPLED WITH A OCEANIC GENERAL CIRCULATION MODEL

@@ -30,6 +30,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    28/01/10
+!!      Modified    07/2015   B. Decharme : new linear interpolation
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,7 +41,9 @@
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_INTERPOL_QUADRA
+USE MODI_INTERPOL_LINEAR
 !
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -62,9 +65,15 @@ REAL, DIMENSION(:), INTENT(OUT) :: PTS   ! Water surface temperature at time t
 !*       0.2   Declaration of local variables
 !              ------------------------------
 !
-REAL    :: ZDAT,ZNDAT
-INTEGER :: IMTH1,IMTH2,IMTH3
-INTEGER :: INDAYS ! number of days in KMONTH
+REAL            :: ZDAT   ! current day in the current month
+REAL            :: ZNDAT  ! number of days in the current month
+INTEGER         :: IMTH0  ! previous month
+INTEGER         :: IMTH1  ! current month 
+INTEGER         :: IMTH2  ! next month
+INTEGER         :: INDAYS ! number of days in KMONTH
+!
+INTEGER         :: IDELTA
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -94,16 +103,28 @@ END SELECT
 ZDAT = REAL(KDAY)
 ZNDAT= REAL(INDAYS)
 !
-! The current month correspond to the indice 2 (or KMONTH+1 if ANNUAL)
+! The current month correspond to the indice 2 (or 3 if next month))
 !
-IF(W%CINTERPOL_TS=='MONTH ')THEN
-  CALL INTERPOL_QUADRA(ZDAT,ZNDAT,W%XTS_MTH(:,1),W%XTS_MTH(:,2),W%XTS_MTH(:,3),PTS)
+IF (KMONTH==W%TZTIME%TDATE%MONTH) THEN 
+   IDELTA=0
 ELSE
-  IMTH1=KMONTH
-  IMTH2=KMONTH+1
-  IMTH3=KMONTH+2
-  CALL INTERPOL_QUADRA(ZDAT,ZNDAT,W%XTS_MTH(:,IMTH1),W%XTS_MTH(:,IMTH2),W%XTS_MTH(:,IMTH3),PTS)
+   IDELTA=1
+END IF
+!
+IMTH0=1+IDELTA
+IMTH1=2+IDELTA
+IMTH2=3+IDELTA
+!
+IF(W%CINTERPOL_TS=='QUADRA')THEN
+  CALL INTERPOL_QUADRA(ZDAT,ZNDAT,W%XTS_MTH(:,IMTH0),W%XTS_MTH(:,IMTH1),W%XTS_MTH(:,IMTH2),PTS)
+ELSEIF(W%CINTERPOL_TS=='LINEAR')THEN
+  CALL INTERPOL_LINEAR(ZDAT,ZNDAT,W%XTS_MTH(:,IMTH0),W%XTS_MTH(:,IMTH1),W%XTS_MTH(:,IMTH2),PTS)
+ELSEIF(W%CINTERPOL_TS=='UNIF')THEN
+  PTS(:) = W%XTS_MTH(:,IMTH1)
+ELSE
+  CALL ABOR1_SFX('INTERPOL_TS_WATER_MTH: interpolation method not supported')
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('INTERPOL_TS_WATER_MTH',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

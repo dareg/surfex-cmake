@@ -182,7 +182,7 @@ IF(OFLOOD)THEN
 !        
    CALL TRIP_SURFACE_FLOOD(KLISTING,PTSTEP,OPRINT,OMASK_FLD,        &
                            PTAB_F,PTAB_H,PTAB_VF,PLEN,PAREA,        &
-                           PSLOPEBED,PWIDTH,PN_FLOOD,PHC_BED,       &
+                           PWIDTH,PN_FLOOD,PHC_BED,                 &
                            PSURF_STO,PFLOOD_STO,PSOURCE,            &
                            ZFLOOD_STO2,PHFLOOD,PFFLOOD,PFLOOD_LEN,  &
                            PWFLOOD,PQFR,PQRF,PVFIN,PVFOUT,PHSF,     &

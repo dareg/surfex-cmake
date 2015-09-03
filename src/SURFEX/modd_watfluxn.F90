@@ -46,8 +46,8 @@ TYPE WATFLUX_t
 !                                          ! F: no atmospheric layers below forcing level
   CHARACTER(LEN=4)              :: CWAT_ALB ! type of albedo
 !
-  LOGICAL                       :: LINTERPOL_TS ! Quadratic interpotalation of monthly TS
-  CHARACTER(LEN=6)              :: CINTERPOL_TS ! Quadratic interpotalation of monthly TS
+  LOGICAL                       :: LINTERPOL_TS ! Interpotalation of monthly TS
+  CHARACTER(LEN=6)              :: CINTERPOL_TS ! Interpotalation of monthly TS
 !
 ! Inland water:
 !
@@ -78,6 +78,7 @@ TYPE WATFLUX_t
 ! Date:
 !
   TYPE (DATE_TIME)                  :: TTIME         ! current date and time
+  TYPE (DATE_TIME)                  :: TZTIME  
 !
 ! Time-step:
 !

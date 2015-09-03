@@ -98,10 +98,14 @@ ALLOCATE(W%XTS(ILU))
 !
 IF(W%LINTERPOL_TS)THEN
 !
-! Precedent, Current and Next Monthly SST
-  INMTH=3
-! Precedent, Current and Next Annual Monthly SST
-  IF(W%CINTERPOL_TS=='ANNUAL')INMTH=14
+!  Initialize current Month
+   W%TZTIME%TDATE%YEAR  = W%TTIME%TDATE%YEAR
+   W%TZTIME%TDATE%MONTH = W%TTIME%TDATE%MONTH
+   W%TZTIME%TDATE%DAY   = W%TTIME%TDATE%DAY
+   W%TZTIME%TIME        = W%TTIME%TIME
+
+! Precedent, Current, Next, and Second-next Monthly SST
+  INMTH=4
 !
   ALLOCATE(W%XTS_MTH(SIZE(W%XTS),INMTH))
   DO JMTH=1,INMTH

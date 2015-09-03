@@ -48,6 +48,7 @@
 !     B. Decharme       07/2013 - SNOW3LGRID cleanning 
 !                                 New algorithm to compute snow grid for 6-L or 12-L
 !     A. Boone          10/2014 - Added snow thermal conductivity routines
+!     B. Decharme       01/2015 - Added optical snow grain size diameter
 !----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -116,6 +117,12 @@ END INTERFACE
 !
 INTERFACE SNOW3LTHRM
   MODULE PROCEDURE SNOW3LTHRM
+END INTERFACE
+!
+INTERFACE SNOW3LDOPT
+  MODULE PROCEDURE SNOW3LDOPT_2D
+  MODULE PROCEDURE SNOW3LDOPT_1D
+  MODULE PROCEDURE SNOW3LDOPT_0D
 END INTERFACE
 !
 INTERFACE SNOW3LALB
@@ -910,10 +917,8 @@ REAL, PARAMETER                   ::  ZDZN1=0.1
 REAL, PARAMETER                   ::  ZDZN2=0.5
 REAL, PARAMETER                   ::  ZDZN3=1.0
 !
-REAL, PARAMETER                   ::  ZCOEF1 = 0.1
-REAL, PARAMETER                   ::  ZCOEF2 = 2.5
-REAL, PARAMETER                   ::  ZCOEF3 = 0.5
-REAL, PARAMETER                   ::  ZCOEF4 = 2.0
+REAL, PARAMETER                   ::  ZCOEF1 = 0.5
+REAL, PARAMETER                   ::  ZCOEF2 = 1.5
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -980,10 +985,10 @@ ELSEIF(INLVLS == 6)THEN
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID(:) = PSNOWDZ_OLD(:,1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:,1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) < ZCOEF1 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) > ZCOEF2 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:,6) < ZCOEF1 * MIN(ZDZN1,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,6) > ZCOEF4 * MIN(ZDZN1,PSNOW(:)/INLVLS)
+               & PSNOWDZ_OLD(:,6) > ZCOEF2 * MIN(ZDZN1,PSNOW(:)/INLVLS)
   ENDIF
 !
   WHERE(GREGRID(:))  
@@ -1017,10 +1022,10 @@ ELSEIF(INLVLS == 9)THEN
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID(:) = PSNOWDZ_OLD(:,1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:,1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,9) < ZCOEF3 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,9) > ZCOEF4 * MIN(ZDZN0,PSNOW(:)/INLVLS) 
+               & PSNOWDZ_OLD(:,2) < ZCOEF1 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,2) > ZCOEF2 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,9) < ZCOEF1 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,9) > ZCOEF2 * MIN(ZDZN0,PSNOW(:)/INLVLS) 
   ENDIF
 !             
   WHERE(GREGRID(:))  
@@ -1058,10 +1063,10 @@ ELSEIF(INLVLS == 12)THEN
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID(:) = PSNOWDZ_OLD(:, 1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:, 1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:, 2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:, 2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,12) < ZCOEF3 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,12) > ZCOEF4 * MIN(ZDZN0,PSNOW(:)/INLVLS) 
+               & PSNOWDZ_OLD(:, 2) < ZCOEF1 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:, 2) > ZCOEF2 * MIN(ZDZ2 ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,12) < ZCOEF1 * MIN(ZDZN0,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,12) > ZCOEF2 * MIN(ZDZN0,PSNOW(:)/INLVLS) 
   ENDIF
 !             
   WHERE(GREGRID(:))  
@@ -1114,10 +1119,10 @@ ELSE !(INLVLS>=10 and /=12)
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID(:) = PSNOWDZ_OLD(:,     1) < ZCOEF1 * MIN(ZDZ1         ,PSNOW(:)/INLVLS) .OR. &
                & PSNOWDZ_OLD(:,     1) > ZCOEF2 * MIN(ZDZ1         ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,     2) < ZCOEF3 * MIN(ZDZ2         ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,     2) > ZCOEF4 * MIN(ZDZ2         ,PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,INLVLS) < ZCOEF3 * MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) .OR. &
-               & PSNOWDZ_OLD(:,INLVLS) > ZCOEF4 * MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
+               & PSNOWDZ_OLD(:,     2) < ZCOEF1 * MIN(ZDZ2         ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,     2) > ZCOEF2 * MIN(ZDZ2         ,PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,INLVLS) < ZCOEF1 * MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) .OR. &
+               & PSNOWDZ_OLD(:,INLVLS) > ZCOEF2 * MIN(0.05*PSNOW(:),PSNOW(:)/INLVLS) 
   ENDIF
 !
   WHERE(GREGRID(:))  
@@ -1223,10 +1228,8 @@ REAL, PARAMETER                   ::  ZDZN1=0.1
 REAL, PARAMETER                   ::  ZDZN2=0.5
 REAL, PARAMETER                   ::  ZDZN3=1.0
 !
-REAL, PARAMETER                   ::  ZCOEF1 = 0.1
-REAL, PARAMETER                   ::  ZCOEF2 = 2.5
-REAL, PARAMETER                   ::  ZCOEF3 = 0.5
-REAL, PARAMETER                   ::  ZCOEF4 = 2.0
+REAL, PARAMETER                   ::  ZCOEF1 = 0.5
+REAL, PARAMETER                   ::  ZCOEF2 = 1.5
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1289,10 +1292,10 @@ ELSEIF(INLVLS == 6)THEN
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID    = PSNOWDZ_OLD(1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) < ZCOEF1 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) > ZCOEF2 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(6) < ZCOEF1 * MIN(ZDZN1,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(6) > ZCOEF4 * MIN(ZDZN1,PSNOW/INLVLS)
+               & PSNOWDZ_OLD(6) > ZCOEF2 * MIN(ZDZN1,PSNOW/INLVLS)
   ENDIF
 !
   IF(GREGRID)THEN
@@ -1326,10 +1329,10 @@ ELSEIF(INLVLS == 9)THEN
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID    = PSNOWDZ_OLD(1) < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(1) > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(2) < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(2) > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(9) < ZCOEF3 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(9) > ZCOEF4 * MIN(ZDZN0,PSNOW/INLVLS) 
+               & PSNOWDZ_OLD(2) < ZCOEF1 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2) > ZCOEF2 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(9) < ZCOEF1 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(9) > ZCOEF2 * MIN(ZDZN0,PSNOW/INLVLS) 
   ENDIF
 !             
   IF(GREGRID)THEN
@@ -1367,10 +1370,10 @@ ELSEIF(INLVLS == 12)THEN
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID    = PSNOWDZ_OLD(1)  < ZCOEF1 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(1)  > ZCOEF2 * MIN(ZDZ1 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(2)  < ZCOEF3 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(2)  > ZCOEF4 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(12) < ZCOEF3 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(12) > ZCOEF4 * MIN(ZDZN0,PSNOW/INLVLS) 
+               & PSNOWDZ_OLD(2)  < ZCOEF1 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(2)  > ZCOEF2 * MIN(ZDZ2 ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(12) < ZCOEF1 * MIN(ZDZN0,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(12) > ZCOEF2 * MIN(ZDZN0,PSNOW/INLVLS) 
   ENDIF
 !
   IF (GREGRID)THEN
@@ -1419,10 +1422,10 @@ ELSE
   IF(PRESENT(PSNOWDZ_OLD))THEN
     GREGRID    = PSNOWDZ_OLD(     1) < ZCOEF1 * MIN(ZDZ1      ,PSNOW/INLVLS) .OR. &
                & PSNOWDZ_OLD(     1) > ZCOEF2 * MIN(ZDZ1      ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(     2) < ZCOEF3 * MIN(ZDZ2      ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(     2) > ZCOEF4 * MIN(ZDZ2      ,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(INLVLS) < ZCOEF3 * MIN(0.05*PSNOW,PSNOW/INLVLS) .OR. &
-               & PSNOWDZ_OLD(INLVLS) > ZCOEF4 * MIN(0.05*PSNOW,PSNOW/INLVLS) 
+               & PSNOWDZ_OLD(     2) < ZCOEF1 * MIN(ZDZ2      ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(     2) > ZCOEF2 * MIN(ZDZ2      ,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(INLVLS) < ZCOEF1 * MIN(0.05*PSNOW,PSNOW/INLVLS) .OR. &
+               & PSNOWDZ_OLD(INLVLS) > ZCOEF2 * MIN(0.05*PSNOW,PSNOW/INLVLS) 
   ENDIF
 !
   IF (GREGRID)THEN
@@ -1472,9 +1475,9 @@ REAL, DIMENSION(:), INTENT(IN)  :: PSNOWDZN,PSNOWDZ,PSNOWRHO,PSNOWDDZ
 REAL, DIMENSION(:), INTENT(IN)  :: PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST 
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN                                              
 !
-INTEGER, INTENT(IN) :: KL1  ! Indice couche de référence (i)
+INTEGER, INTENT(IN) :: KL1  ! Indice couche de reference (i)
 INTEGER, INTENT(IN) :: KL2 ! Indice de la couche (i-1 ou i+1) dont une 
-                                ! partie est aggrégée à la couche (i)
+                                ! partie est aggregee à la couche (i)
 !
 !       0.2 declaration of local variables
 !        
@@ -2041,7 +2044,7 @@ END SUBROUTINE GET_DIAM
 !####################################################################
 !####################################################################
 !####################################################################
-      FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC) RESULT(PCOEF)
+FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC,PDSGRAIN) RESULT(PCOEF)
 !
 !!    PURPOSE
 !!    -------
@@ -2054,8 +2057,7 @@ END SUBROUTINE GET_DIAM
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA1,XVBETA2, &
-                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN,     &          
-                          XDSGRAIN_MAX,XSNOW_AGRAIN,XSNOW_BGRAIN
+                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2069,14 +2071,16 @@ REAL,               INTENT(IN)                   :: PSNOWDZ         ! layer thic
 REAL,               INTENT(IN)                   :: PZENITH         ! zenith angle    (rad)
 REAL,               INTENT(IN)                   :: PPERMSNOWFRAC   ! permanent snow fraction (-)
 REAL, DIMENSION(:), INTENT(IN)                   :: PSPECTRALALBEDO ! spectral albedo (-)
+REAL,               INTENT(IN)                   :: PDSGRAIN        ! Snow optical grain diameter (m)
 !
 REAL                                             :: PCOEF           ! -
 !
 !*      0.2    declarations of local variables
 !
-REAL                                             :: ZWORK, ZDSGRAIN, ZPROJLAT,                  &
-                                                    ZBETA1, ZBETA2, ZBETA3,                     &
-                                                    ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
+REAL                                             :: ZWORK, ZPROJLAT,                  &
+                                                    ZBETA1, ZBETA2, ZBETA3,           &
+                                                    ZOPTICALPATH1, ZOPTICALPATH2,     &
+                                                    ZOPTICALPATH3
 !
 REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
 !
@@ -2089,13 +2093,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_0D',0,ZHOOK_HANDLE)
 ZPROJLAT         = (1.0-PPERMSNOWFRAC)+PPERMSNOWFRAC/ &
                    MAX(XMINCOSZEN,COS(PZENITH))
 !
-! Snow grain size (m):
-!
-ZDSGRAIN         = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO**4))
-!
 ! Extinction coefficient:
 !
-ZWORK            = SQRT(ZDSGRAIN)
+ZWORK            = SQRT(PDSGRAIN)
 ZBETA1           = MAX(XVBETA1*PSNOWRHO/ZWORK,XVBETA2)
 ZBETA2           = MAX(XVBETA3*PSNOWRHO/ZWORK,XVBETA4)
 ZBETA3           = XVBETA5
@@ -2121,7 +2121,7 @@ END FUNCTION SNOW3LRADABS_0D
 !####################################################################
 !####################################################################
 !####################################################################
-      FUNCTION SNOW3LRADABS_1D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC) RESULT(PCOEF)
+FUNCTION SNOW3LRADABS_1D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC,PDSGRAIN) RESULT(PCOEF)
 !
 !!    PURPOSE
 !!    -------
@@ -2134,8 +2134,7 @@ END FUNCTION SNOW3LRADABS_0D
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA1,XVBETA2, &
-                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN,     &          
-                          XDSGRAIN_MAX,XSNOW_AGRAIN,XSNOW_BGRAIN
+                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2149,14 +2148,16 @@ REAL, DIMENSION(:),   INTENT(IN)                 :: PSNOWDZ         ! layer thic
 REAL, DIMENSION(:),   INTENT(IN)                 :: PZENITH         ! zenith angle    (rad)
 REAL, DIMENSION(:),   INTENT(IN)                 :: PPERMSNOWFRAC   ! permanent snow fraction (-)
 REAL, DIMENSION(:,:), INTENT(IN)                 :: PSPECTRALALBEDO ! spectral albedo (-)
+REAL, DIMENSION(:),   INTENT(IN)                 :: PDSGRAIN        ! Snow optical grain diameter (m)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO))                  :: PCOEF           ! -
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSNOWRHO))                  :: ZWORK, ZDSGRAIN, ZPROJLAT,                  &
-                                                    ZBETA1, ZBETA2, ZBETA3,                     &
-                                                    ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
+REAL, DIMENSION(SIZE(PSNOWRHO))                  :: ZWORK, ZPROJLAT,                  &
+                                                    ZBETA1, ZBETA2, ZBETA3,           &
+                                                    ZOPTICALPATH1, ZOPTICALPATH2,     &
+                                                    ZOPTICALPATH3
 !
 REAL(KIND=JPRB)                                  :: ZHOOK_HANDLE
 !
@@ -2169,13 +2170,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_1D',0,ZHOOK_HANDLE)
 ZPROJLAT(:)         = (1.0-PPERMSNOWFRAC(:))+PPERMSNOWFRAC(:)/ &
                       MAX(XMINCOSZEN,COS(PZENITH(:)))
 !
-! Snow grain size (m):
-!
-ZDSGRAIN(:)         = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:)**4))
-!
 ! Extinction coefficient:
 !
-ZWORK(:)            = SQRT(ZDSGRAIN(:))
+ZWORK(:)            = SQRT(PDSGRAIN(:))
 ZBETA1(:)           = MAX(XVBETA1*PSNOWRHO(:)/ZWORK(:),XVBETA2)
 ZBETA2(:)           = MAX(XVBETA3*PSNOWRHO(:)/ZWORK(:),XVBETA4)
 ZBETA3(:)           = XVBETA5
@@ -2201,7 +2198,7 @@ END FUNCTION SNOW3LRADABS_1D
 !####################################################################
 !####################################################################
 !####################################################################
-      FUNCTION SNOW3LRADABS_2D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC) RESULT(PCOEF)
+FUNCTION SNOW3LRADABS_2D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC,PDSGRAIN) RESULT(PCOEF)
 !
 !!    PURPOSE
 !!    -------
@@ -2214,8 +2211,7 @@ END FUNCTION SNOW3LRADABS_1D
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA1,XVBETA2, &
-                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN,     &          
-                          XDSGRAIN_MAX,XSNOW_AGRAIN,XSNOW_BGRAIN
+                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2229,14 +2225,16 @@ REAL, DIMENSION(:,:),   INTENT(IN)                 :: PSNOWDZ         ! layer th
 REAL, DIMENSION(:,:),   INTENT(IN)                 :: PZENITH         ! zenith angle    (rad)
 REAL, DIMENSION(:,:),   INTENT(IN)                 :: PPERMSNOWFRAC   ! permanent snow fraction (-)
 REAL, DIMENSION(:,:,:), INTENT(IN)                 :: PSPECTRALALBEDO ! spectral albedo (-)
+REAL, DIMENSION(:,:),   INTENT(IN)                 :: PDSGRAIN        ! Snow optical grain diameter (m)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PCOEF           ! -
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZWORK, ZDSGRAIN, ZPROJLAT,                  &
-                                                      ZBETA1, ZBETA2, ZBETA3,                     &
-                                                      ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZWORK, ZPROJLAT,                  &
+                                                      ZBETA1, ZBETA2, ZBETA3,           &
+                                                      ZOPTICALPATH1, ZOPTICALPATH2,     &
+                                                      ZOPTICALPATH3
 !
 REAL(KIND=JPRB)                                    :: ZHOOK_HANDLE
 !
@@ -2249,13 +2247,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_2D',0,ZHOOK_HANDLE)
 ZPROJLAT(:,:)         = (1.0-PPERMSNOWFRAC(:,:))+PPERMSNOWFRAC(:,:)/ &
                         MAX(XMINCOSZEN,COS(PZENITH(:,:)))
 !
-! Snow grain size (m):
-!
-ZDSGRAIN(:,:)         = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:,:)**4))
-!
 ! Extinction coefficient:
 !
-ZWORK(:,:)            = SQRT(ZDSGRAIN(:,:))
+ZWORK(:,:)            = SQRT(PDSGRAIN(:,:))
 ZBETA1(:,:)           = MAX(XVBETA1*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA2)
 ZBETA2(:,:)           = MAX(XVBETA3*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA4)
 ZBETA3(:,:)           = XVBETA5
@@ -2286,8 +2280,9 @@ END FUNCTION SNOW3LRADABS_2D
 !!    PURPOSE
 !!    -------
 !     Calculate snow thermal conductivity from
-!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
-!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
+!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579 (vapor) 
+!     and Yen, 1981, CRREL Rep 81-10 (snow)
+!     or Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
 !
 !
 USE MODD_CSTS,     ONLY : XP00, XCONDI, XRHOLW
@@ -2360,8 +2355,121 @@ END SUBROUTINE SNOW3LTHRM
 !####################################################################
 !####################################################################
 !####################################################################
+FUNCTION SNOW3LDOPT_2D(PSNOWRHO,PSNOWAGE) RESULT(PDOPT)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the optical grain diameter.
+!
+USE MODD_SNOW_PAR, ONLY : XDSGRAIN_MAX,XSNOW_AGRAIN, & 
+                          XSNOW_BGRAIN,XSNOW_CGRAIN
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:,:), INTENT(IN)                   :: PSNOWRHO,PSNOWAGE
+!
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PDOPT
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZAGE
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSRHO4
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDOPT_2D',0,ZHOOK_HANDLE)
+!
+ZAGE(:,:) = MIN(15.,PSNOWAGE(:,:))
+!
+ZSRHO4(:,:) = PSNOWRHO(:,:)*PSNOWRHO(:,:)*PSNOWRHO(:,:)*PSNOWRHO(:,:)
+!
+PDOPT(:,:) = MIN(XDSGRAIN_MAX,XSNOW_AGRAIN+XSNOW_BGRAIN*ZSRHO4(:,:)+XSNOW_CGRAIN*ZAGE(:,:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDOPT_2D',1,ZHOOK_HANDLE)
+!
+END FUNCTION SNOW3LDOPT_2D
+!####################################################################
+FUNCTION SNOW3LDOPT_1D(PSNOWRHO,PSNOWAGE) RESULT(PDOPT)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the optical grain diameter.
+!
+USE MODD_SNOW_PAR, ONLY : XDSGRAIN_MAX,XSNOW_AGRAIN, & 
+                          XSNOW_BGRAIN,XSNOW_CGRAIN
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)  :: PSNOWRHO,PSNOWAGE
+!
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: PDOPT
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZAGE
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZSRHO4
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDOPT_1D',0,ZHOOK_HANDLE)
+!
+ZAGE(:) = MIN(15.,PSNOWAGE(:))
+!
+ZSRHO4(:) = PSNOWRHO(:)*PSNOWRHO(:)*PSNOWRHO(:)*PSNOWRHO(:)
+!
+PDOPT(:) = MIN(XDSGRAIN_MAX,XSNOW_AGRAIN+XSNOW_BGRAIN*ZSRHO4(:)+XSNOW_CGRAIN*ZAGE(:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDOPT_1D',1,ZHOOK_HANDLE)
+!
+END FUNCTION SNOW3LDOPT_1D
+!####################################################################
+FUNCTION SNOW3LDOPT_0D(PSNOWRHO,PSNOWAGE) RESULT(PDOPT)
+!
+!!    PURPOSE
+!!    -------
+!     Calculate the optical grain diameter.
+!
+USE MODD_SNOW_PAR, ONLY : XDSGRAIN_MAX,XSNOW_AGRAIN, & 
+                          XSNOW_BGRAIN,XSNOW_CGRAIN
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, INTENT(IN)  :: PSNOWRHO,PSNOWAGE
+!
+REAL :: PDOPT
+REAL :: ZAGE
+REAL :: ZSRHO4
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDOPT_0D',0,ZHOOK_HANDLE)
+!
+ZAGE = MIN(15.,PSNOWAGE)
+!
+ZSRHO4 = PSNOWRHO*PSNOWRHO*PSNOWRHO*PSNOWRHO
+!
+PDOPT = MIN(XDSGRAIN_MAX,XSNOW_AGRAIN+XSNOW_BGRAIN*ZSRHO4+XSNOW_CGRAIN*ZAGE)
+!
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDOPT_0D',1,ZHOOK_HANDLE)
+!
+END FUNCTION SNOW3LDOPT_0D
+!####################################################################
+!####################################################################
+!####################################################################
 SUBROUTINE SNOW3LALB(PALBEDOSC,PSPECTRALALBEDO,PSNOWRHO,PSNOWAGE,   &
-                     PPERMSNOWFRAC,PPS )  
+                     PPERMSNOWFRAC,PPS)  
 !
 !!    PURPOSE
 !!    -------
@@ -2374,8 +2482,7 @@ USE MODD_SNOW_PAR, ONLY : XVAGING_GLACIER, XVAGING_NOGLACIER,     &
                           XVALB2,XVALB3,XVALB4,XVALB5,XVALB6,     &
                           XVALB7,XVALB8,XVALB9,XVALB10,XVALB11,   &
                           XVDIOP1,XVRPRE1,XVRPRE2,XVPRES1,        &
-                          XVW1,XVW2,XVSPEC1,XVSPEC2,XVSPEC3,      &
-                          XDSGRAIN_MAX, XSNOW_AGRAIN, XSNOW_BGRAIN
+                          XVW1,XVW2,XVSPEC1,XVSPEC2,XVSPEC3
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -2392,16 +2499,12 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS
 REAL, DIMENSION(:),   INTENT(INOUT) :: PALBEDOSC
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSPECTRALALBEDO
 !
-!
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER                 :: ZALBNIR1 = 0.3
 REAL, PARAMETER                 :: ZALBNIR2 = 0.0
 !
-REAL, PARAMETER                 :: ZCGLA      = 100.
-REAL, PARAMETER                 :: ZVAGING_IR = 10.
-!
-REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZNVAGE, ZNVAGE2, ZDIAM,  &
+REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZVAGING, ZDIAM, ZAGE,  &
                                    ZWORK, ZPRES_EFFECT
 !
 REAL, DIMENSION(SIZE(PSNOWRHO)) :: ZALB1, ZALB2, ZALB3
@@ -2416,43 +2519,46 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LALB',0,ZHOOK_HANDLE)
 ! ------------------
 !
 !Snow age effect parameter for Visible (small over glacier)
-ZNVAGE(:)=XVAGING_GLACIER*PPERMSNOWFRAC(:) + XVAGING_NOGLACIER*(1.0-PPERMSNOWFRAC(:))
-!
-!Snow age effect parameter for Infra-red (negligible over glacier)
-ZNVAGE2(:)=ZCGLA*XVAGING_GLACIER*PPERMSNOWFRAC(:) + ZVAGING_IR*(1.0-PPERMSNOWFRAC(:))
+ZVAGING(:)=XVAGING_GLACIER*PPERMSNOWFRAC(:) + XVAGING_NOGLACIER*(1.0-PPERMSNOWFRAC(:))
 !
 !Atm pression effect parameter on albedo
 ZPRES_EFFECT(:) = XVALB10*MIN(MAX(PPS(:)/XVPRES1,XVRPRE1),XVRPRE2)
 !
-! 1. Snow grain size :
-! --------------------
+! 1. Snow optical grain diameter :
+! --------------------------------
 !
-ZDIAM(:) = MIN(XDSGRAIN_MAX, XSNOW_AGRAIN + XSNOW_BGRAIN*(PSNOWRHO(:)**4))
+!Snow optical diameter do not depend on snow age over glacier or polar regions
+ZAGE(:) = (1.0-PPERMSNOWFRAC(:))*PSNOWAGE(:)
 !
-! 3. spectral albedo over 3 bands :
+ZDIAM(:) = SNOW3LDOPT(PSNOWRHO(:),ZAGE(:))
+!
+! 2. spectral albedo over 3 bands :
 ! ---------------------------------
+!
+!Snow age effect limited to 1 year
+ZAGE(:) = MIN(365.,PSNOWAGE(:))
 !
 ZWORK(:)=SQRT(ZDIAM(:))
 !
 ! Visible
 ZALB1(:)=MIN(XVALB4,XVALB2-XVALB3*ZWORK(:))
-ZALB1(:)=MAX(XVALB11,ZALB1(:)-ZPRES_EFFECT(:)*PSNOWAGE(:)/ZNVAGE(:))
+ZALB1(:)=MAX(XVALB11,ZALB1(:)-ZPRES_EFFECT(:)*ZAGE(:)/ZVAGING(:))
 !
 ! near Infra-red 1
 ZALB2(:)=XVALB5-XVALB6*ZWORK(:)
-ZALB2(:)=MAX(ZALBNIR1,ZALB2(:)-ZPRES_EFFECT(:)*PSNOWAGE(:)/ZNVAGE2(:))
+ZALB2(:)=MAX(ZALBNIR1,ZALB2(:))
 !
 ! near Infra-red 2
 ZDIAM(:)=MIN(XVDIOP1,ZDIAM(:))
 ZWORK(:)=SQRT(ZDIAM(:))
 ZALB3(:)=XVALB7*ZDIAM(:)-XVALB8*ZWORK(:)+XVALB9
-ZALB3(:)=MAX(ZALBNIR2,ZALB3(:)-ZPRES_EFFECT(:)*PSNOWAGE(:)/ZNVAGE2(:))
+ZALB3(:)=MAX(ZALBNIR2,ZALB3(:))
 !
 PSPECTRALALBEDO(:,1)=ZALB1(:)
 PSPECTRALALBEDO(:,2)=ZALB2(:)
 PSPECTRALALBEDO(:,3)=ZALB3(:)
 !
-! 4. total albedo :
+! 3. total albedo :
 ! -----------------
 !
 PALBEDOSC(:)=XVSPEC1*ZALB1(:)+XVSPEC2*ZALB2(:)+XVSPEC3*ZALB3(:)
@@ -2465,6 +2571,5 @@ END SUBROUTINE SNOW3LALB
 !####################################################################
 !####################################################################
 !####################################################################
-
 END MODULE MODE_SNOW3L
 

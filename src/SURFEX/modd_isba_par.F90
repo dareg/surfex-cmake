@@ -25,6 +25,7 @@
 !!      (A.Boone)      21/11/11 add Rsmax
 !!      (S.Gollvik)    20/02/12 add XFLXMAX
 !!      (A.Boone)      20/02/12 add ISBA-MEB parameters
+!!     (B. Decharme)      07/15 Add numerical adjustement for F2 soilstress function
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -57,6 +58,10 @@ REAL, PARAMETER       :: XRS_MAX   = 5000.
 ! Factor to restore explicit Cv value (DIF option)
 !
 REAL, PARAMETER       :: XCVHEATF  = 0.20 
+!
+! Numerical factor to prevent division by 0 for F2 soilstress function
+!
+REAL, PARAMETER       :: XDENOM_MIN  = 1.E-12 
 !
 !--------------------------------------------------------------------------------
 ! Soil:

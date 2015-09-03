@@ -221,7 +221,7 @@ IF ( nnflxin==0 ) THEN
     ALLOCATE( tpglt%ice_atm(nnflxin,nx,ny) )
 ENDIF
 !
-ALLOCATE( tpglt%sit_d(ntd,nx,ny) )
+IF ( ntd/=0 ) ALLOCATE( tpglt%sit_d(ntd,nx,ny) )
 !
 IF ( ndynami==1 ) THEN
     ALLOCATE( tpglt%evp(nx,ny) ) 

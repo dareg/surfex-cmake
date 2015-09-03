@@ -86,13 +86,14 @@
 !!                                         water table / surface coupling
 !!                  02/2013  (C. de Munck) specified irrigation rate of ground added
 !!                  10/2014  (A. Boone)    MEB added
+!!                  07/15    (B. Decharme) Numerical adjustement for F2 soilstress function
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT, XLMTT
-USE MODD_ISBA_PAR,  ONLY : XWGMIN
+USE MODD_ISBA_PAR,  ONLY : XWGMIN, XDENOM_MIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
 #ifdef TOPD
@@ -342,8 +343,9 @@ REAL, DIMENSION(SIZE(PVEG))     :: ZDWGI1, ZDWGI2, ZKSFC_IVEG
 !                                               volumetric ice content time tendency
 !                                      ZKSFC_IVEG = non-dimensional vegetation insolation coefficient
 !
-REAL, DIMENSION(SIZE(PVEG))    :: ZWGI_EXCESS
-!                                      ZWGI_EXCESS = Soil ice excess water content
+REAL, DIMENSION(SIZE(PVEG))    :: ZWGI_EXCESS, ZF2
+!                                 ZWGI_EXCESS = Soil ice excess water content
+!                                 ZF2         = Soilstress function for transpiration
 !
 REAL, DIMENSION(SIZE(PWG,1),SIZE(PWG,2)) :: ZQSAT, ZQSATI, ZTI, ZPS
 !                                           For specific humidity at saturation computation (ISBA-DIF)
@@ -367,6 +369,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO',0,ZHOOK_HANDLE)
+!
 JDT    = 0
 INDT   = 0
 ZTSTEP = 0.0
@@ -396,6 +399,8 @@ PQSB   (:)       = 0.
 PDELPHASEG(:)    = 0.0
 PDELPHASEG_SFC(:)= 0.0
 ZWGI0(:,:)       = 0.0
+!
+ZF2(:) = MAX(XDENOM_MIN,PF2(:))
 !
 ! Initialize evaporation components: variable definitions
 ! depend on snow or explicit canopy scheme:
@@ -635,7 +640,7 @@ IF (HISBA=='DIF') THEN
   ZPG     (:) =  ZPG    (:)        / XRHOLW
   ZEVAPCOR(:) = PEVAPCOR(:)        / XRHOLW
   ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*XLVTT)
-  ZLETR   (:) = (ZLETR  (:)/PF2(:))/(XRHOLW*XLVTT)
+  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*XLVTT)
   ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*XLSTT)
 !
   DO JDT = 1,INDT

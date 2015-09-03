@@ -33,6 +33,8 @@ SUBROUTINE SFX_OASIS_END
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SFX_OASIS, ONLY : LOASIS
+!
 #ifdef SFXOASIS
 USE MOD_OASIS
 #endif
@@ -52,12 +54,14 @@ INTEGER                    :: IERR   ! Error info
 #ifdef SFXOASIS
 !-------------------------------------------------------------------------------
 !
-CALL OASIS_TERMINATE(IERR)
-IF (IERR/=OASIS_OK) THEN
-   WRITE(*,'(A)'   )'Error OASIS terminate'
-   WRITE(*,'(A,I4)')'Return code from oasis_terminate : ',IERR
-   CALL ABORT
-   STOP
+IF(LOASIS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arome
+  CALL OASIS_TERMINATE(IERR)
+  IF (IERR/=OASIS_OK) THEN
+     WRITE(*,'(A)'   )'Error OASIS terminate'
+     WRITE(*,'(A,I4)')'Return code from oasis_terminate : ',IERR
+     CALL ABORT
+     STOP
+  ENDIF
 ENDIF
 !
 !-------------------------------------------------------------------------------

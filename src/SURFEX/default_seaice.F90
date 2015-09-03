@@ -49,7 +49,7 @@ USE MODI_GET_LUOUT
 !
 USE MODD_GLT_PARAM,  ONLY :  nmkinit, nrstout, nrstgl4, nthermo, ndynami, nadvect, ntimers, &
      ndyncor, ncdlssh, niceage, nicesal, nmponds, nsnwrad, nleviti, nsalflx, nextqoc,       &
-     nicesub, cnflxin, cfsidmp, xfsidmpeft, chsidmp, xhsidmpeft, ctsfdmp, xtsfdmpeft,       &
+     nicesub, cnflxin, cfsidmp, xfsidmpeft, chsidmp, xhsidmpeft,                            &
      cdiafmt, cdialev, dttave , navedia, ninsdia, ndiamax, nsavinp,                         &
      nsavout, nupdbud, nprinto, nprlast, cn_grdname, rn_htopoc, nidate , niter,             &
      dtt, nt, thick, nilay, nslay, xh0 , xh1 , xh2 , xh3 , xh4 , ntstp , ndte  , xfsimax,   &
@@ -97,7 +97,7 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 HINTERPOL_SIC = "NONE"
 HINTERPOL_SIT = "NONE"
-PFREEZING_SST = -1.8 ! C
+PFREEZING_SST = -1.8 ! Celsius degree
 PSEAICE_TSTEP = XUNDEF
 PSIC_EFOLDING_TIME = 0 ! in days; 0 means no relaxation
 PSIT_EFOLDING_TIME = 0 ! in days; 0 means no relaxation
@@ -226,32 +226,24 @@ cnflxin = 'double'
 ! 2. Damping and restoring
 ! -------------------------
 !
-!  - cfsidmp    : sea ice fraction damping
-!       cfsidmp='NONE'  --> no sea ice fraction damping
-!       cfsidmp='MULTI' --> multi-category damping
-!       cfsidmp='MONO'  --> mono-category damping
+!  - cfsidmp    : sea ice fraction constraint
+!       cfsidmp='NONE'       --> no sea ice fraction constraint
+!       cfsidmp='DAMP'       --> damp
+!       cfsidmp='PRESCRIBE'  --> prescribe
 !  - xfsidmpeft : sea ice fraction damping e-folding time (in days)
-!  - chsidmp    : sea ice thickness damping
-!       chsidmp='NONE'     --> no sea ice thickness damping
-!       chsidmp='MULTI'    --> multi-category damping
-!       chsidmp='MONO_ADD' --> the thickness of all ice categories is changed 
-!         by the same value (h_i => h_i + add) 
-!       chsidmp='MONO_FAC' --> the thickness of all ice categories is modified 
-!         by the same factor (h_i => h_i * fac)
+!  - chsidmp    : sea ice thickness constraint
+!       chsidmp='NONE'       --> no sea ice thickness constraint
+!       chsidmp='DAMP_ADD'   --> damp (thickness of all ice categories is 
+!         modified by the same value: h_i => h_i + add)
+!       chsidmp='DAMP_FAC'   --> damp (thickness of all ice categories is 
+!         modified by the same factor: h_i => h_i * fac)
+!       chsidmp='PRESCRIBE'  --> prescribe
 !  - xhsidmpeft : sea ice thickness damping e-folding time (in days)
-!  - ctsfdmp    : sea ice surface temperature damping (exclude open water)
-!       ctsfdmp='NONE'  --> no sea ice surface temperature damping
-!       ctsfdmp='MULTI' --> multi-category damping
-!       ctsfdmp='MONO'  --> mono-category damping (the surface temperature of 
-!         every ice category is constrained towards the same temperature)
-!  - xtsfdmpeft : marine mean surface temperature damping e-folding time (in days)
 !
-cfsidmp='MONO'
-xfsidmpeft=30.
-chsidmp='MONO_ADD'
-xhsidmpeft=30.
-ctsfdmp='NONE'
-xtsfdmpeft=10.
+cfsidmp='NONE'
+xfsidmpeft=0.
+chsidmp='NONE'
+xhsidmpeft=0.
 !
 !
 ! 3. Diagnostics output
@@ -486,8 +478,6 @@ ntimlu = 201
 !  - ciopath    : path for input/output fields to gelato routine
 !
 ciopath = '.'
-
-!CALL gltools_readnam(.FALSE.,ILUOUT)    
 
 IF (LHOOK) CALL DR_HOOK('DEFAULT_SEAICE',1,ZHOOK_HANDLE)
 !

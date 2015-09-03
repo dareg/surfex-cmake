@@ -34,7 +34,9 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    23/04/2013 
-!-------------------------------------------------------------------------------
+!
+!      B. Decharme 07/2015 - Modification to deal with E-zone points in Arome/Aladin
+!-----------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
@@ -117,8 +119,16 @@ DO JP = 1, INP
 !
 ENDDO
 !
-PZ0 (:) = PUREF(:) * EXP( - SQRT(1./ZWORK_Z0 (:)) )
-PZ0H(:) = PZREF(:) * EXP( - SQRT(1./ZWORK_Z0H(:)) )
+
+DO JI = 1, INI
+ IF(ZWORK_Z0(JI) /= 0 ) then
+   PZ0 (JI) = PUREF(JI) * EXP( - SQRT(1./ZWORK_Z0 (JI)) )
+   PZ0H(JI) = PZREF(JI) * EXP( - SQRT(1./ZWORK_Z0H(JI)) )
+ ELSE
+   PZ0 (JI) = XUNDEF
+   PZ0H(JI) = XUNDEF
+ ENDIF
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_PHY',1,ZHOOK_HANDLE)
 

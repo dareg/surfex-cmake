@@ -117,11 +117,11 @@ CALL POSNAM(ILUNAM,'NAM_SFX_LAND_CPL',GFOUND,ILUOUT)
 IF (GFOUND) THEN
    READ(UNIT=ILUNAM,NML=NAM_SFX_LAND_CPL)
 ELSE
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(ILUOUT,*)'NAM_SFX_LAND_CPL not found : Surfex not coupled with river routing'
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'NAM_SFX_LAND_CPL not found : Surfex land not coupled with river routing'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 ENDIF
 !
 CALL POSNAM(ILUNAM,'NAM_SFX_SEA_CPL',GFOUND,ILUOUT)
@@ -129,11 +129,23 @@ CALL POSNAM(ILUNAM,'NAM_SFX_SEA_CPL',GFOUND,ILUOUT)
 IF (GFOUND) THEN
    READ(UNIT=ILUNAM,NML=NAM_SFX_SEA_CPL)
 ELSE
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(ILUOUT,*)'NAM_SFX_SEA_CPL not found : Surfex not coupled with ocean model'
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'NAM_SFX_SEA_CPL not found : Surfex sea not coupled with ocean model'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+ENDIF
+!
+CALL POSNAM(ILUNAM,'NAM_SFX_LAKE_CPL',GFOUND,ILUOUT)
+!
+IF (GFOUND) THEN
+   READ(UNIT=ILUNAM,NML=NAM_SFX_LAKE_CPL)
+ELSE
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'NAM_SFX_LAKE_CPL not found : Surfex lake not coupled with ocean model'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 ENDIF
 !
 CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
@@ -226,8 +238,7 @@ IF(LCPL_LAND)THEN
 !
 ! Particular case due to floodplains coupling
 !    
-  IF(LEN_TRIM(CPFLOOD)>0.OR.LEN_TRIM(CEFLOOD)>0.OR.LEN_TRIM(CIFLOOD)>0.OR. &
-     LEN_TRIM(CFFLOOD)>0.OR.LEN_TRIM(CPIFLOOD)>0)THEN
+  IF(LEN_TRIM(CSRCFLOOD)>0.OR.LEN_TRIM(CFFLOOD)>0.OR.LEN_TRIM(CPIFLOOD)>0)THEN
     LCPL_FLOOD = .TRUE.
   ENDIF
 !
@@ -235,17 +246,9 @@ IF(LCPL_LAND)THEN
 !
 !   Output variable
 !
-    YKEY  ='CPFLOOD'
-    YCOMMENT='flood precip interception'
-    CALL CHECK_FIELD(CPFLOOD,YKEY,YCOMMENT,YLAND,KOUT)
-!
-    YKEY  ='CEFLOOD'
-    YCOMMENT='flood evaporation'
-    CALL CHECK_FIELD(CPFLOOD,YKEY,YCOMMENT,YLAND,KOUT)
-!
-    YKEY  ='CIFLOOD'
-    YCOMMENT='flood infiltration'
-    CALL CHECK_FIELD(CPFLOOD,YKEY,YCOMMENT,YLAND,KOUT)
+    YKEY  ='CSRCFLOOD'
+    YCOMMENT='flood freshwater flux'
+    CALL CHECK_FIELD(CSRCFLOOD,YKEY,YCOMMENT,YLAND,KOUT)
 !
 !   Input variable
 !
@@ -291,6 +294,10 @@ IF(LCPL_LAKE)THEN
   YKEY  ='CLAKE_SNOW'
   YCOMMENT='Snowfall rate'
   CALL CHECK_FIELD(CLAKE_SNOW,YKEY,YCOMMENT,YLAKE,KOUT)
+!
+  YKEY  ='CLAKE_WATF'
+  YCOMMENT='Freshwater flux'
+  CALL CHECK_FIELD(CLAKE_WATF,YKEY,YCOMMENT,YLAKE,KOUT)
 !
 ENDIF
 !
@@ -444,11 +451,11 @@ IF(LEN_TRIM(HFIELD)==0)THEN
   ENDIF
 !
   SELECT CASE (HTYP)
-     CASE('land')
+     CASE(YLAND)
           YNAMELIST='NAM_SFX_LAND_CPL'
-     CASE('ocean')
+     CASE(YSEA)
           YNAMELIST='NAM_SFX_SEA_CPL'
-     CASE('lake')
+     CASE(YLAKE)
           YNAMELIST='NAM_SFX_LAKE_CPL'          
      CASE DEFAULT
           CALL ABOR1_SFX('SFX_OASIS_READ_NAM: TYPE NOT SUPPORTED OR IMPLEMENTD : '//TRIM(HTYP))               
@@ -463,7 +470,7 @@ IF(LEN_TRIM(HFIELD)==0)THEN
 ! For oceanic coupling do not stop the model if a field from surfex to ocean is
 ! not  done because many particular case can be used
 !
-  IF(KID==0.AND.HTYP=='ocean')THEN
+  IF(KID==0.AND.HTYP/=YLAND)THEN
     LSTOP=.FALSE.
   ELSE
     LSTOP=.TRUE.

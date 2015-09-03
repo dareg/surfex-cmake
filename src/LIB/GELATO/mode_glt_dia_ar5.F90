@@ -63,7 +63,9 @@ SUBROUTINE wridia_ar5( tpglt )
 #if ! defined in_surfex
   USE modi_gltools_dynami
 #endif
+#if ! defined in_arpege
   USE lib_mpp
+#endif
   USE mode_glt_stats
   USE MODI_GLTOOLS_GLTERR
   IMPLICIT none
@@ -975,6 +977,20 @@ SUBROUTINE wridia_ar5( tpglt )
       zwork2(:,:) = tzdia(:,:)%dsi
       CALL gltools_outdia( tzind,tznam,tzdom,zwork2,zcumdia )
 !
+! Weighted sea ice mass change - constraint only [ kg.m-2.s-1 ]
+      tznam = t_def(  &
+        "Rate of Change of Sea Ice Mass due to Constraint",  &
+        "rate_of_change_of_sea_ice_mass_due_to_constraint",  & 
+        "dmicedmp", "kg.m-2.s-1", "T", "SCALAR" )
+      zwork2(:,:) = tzdia(:,:)%dci
+!
+! Sea ice concentration constraint [% ]
+      tznam = t_def(  &
+        "Sea Ice Concentration Constraint",  &
+        "sea_ice_concentration_traint",  & 
+        "siccnst", "%", "T", "SCALAR" )
+      zwork2(:,:) = tzdia(:,:)%cst
+!
 !*Ex-SIDMWIIW
 ! Weighted ice FW content change field - glt_thermo only [ kg.m-2.s-1 ]
       tznam = t_def(  &
@@ -1145,6 +1161,7 @@ SUBROUTINE wridia_ar5( tpglt )
 !   - sea ice area
 !   - sea ice volume
 ! No need to mask the ghost points, since tzdom%srf = 0 for ghost points
+#if ! defined in_arpege
   zsrf(:,:) = tzdom(:,:)%srf * FLOAT(tzdom(:,:)%imk)
 !
 ! .. Sea ice extent, north and south
@@ -1267,7 +1284,6 @@ SUBROUTINE wridia_ar5( tpglt )
       znorthb = -rhoice*znorthb
 !
   ENDIF
-#endif
 !
 !
 ! 3.2. Write totals to diagnostic file
@@ -1367,6 +1383,8 @@ SUBROUTINE wridia_ar5( tpglt )
       CALL gltools_outdia( tzind,tznam,tzdom,znorthb,zcumdia0 )
 !
   ENDIF
+#endif
+#endif
 !
 !
 ! 3.3. Print out some important statistics to outzut file

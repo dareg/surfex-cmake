@@ -164,10 +164,10 @@ ELSE
   !
   ELSE IF (HALB=='TA96' .OR. HALB=='MK10' .OR. HALB=='RS14') THEN
     !* Taylor et al 1996
-    WHERE (PSST(:)>=PTT) PDIR_ALB(:) = ZALBDIR(:)
     !
     WHERE (PSST(:)>=PTT)
     !* open water
+      PDIR_ALB  (:) = ZALBDIR(:)
       PSCA_ALB  (:) = ZALBSCA(:)
       PEMIS     (:) = XEMISWAT
     ELSEWHERE

@@ -46,12 +46,14 @@
 !!                             GPP is calculated in cotwores.f90 and cotworestress.f90
 !!      B. Decharme   2012   : optimization
 !!      C. Delire     2014   : Assuming a nitrogen profile with an exctinction coefficient 
+!!      B. Decharme   07/15  : Bug = Add numerical adjustement for very dry soil 
 !!      
 !!
 !-------------------------------------------------------------------------------
 !
 USE MODD_CSTS,     ONLY : XMV, XMD, XRHOLW
 USE MODD_CO2V_PAR, ONLY : XRDCF, XAIRTOH2O, XCO2TOH2O, XCONDSTMIN
+USE MODD_ISBA_PAR, ONLY : XDENOM_MIN
 !
 !*       0.     DECLARATIONS
 !               ------------
@@ -101,10 +103,11 @@ REAL, DIMENSION(:),  INTENT(OUT) :: PAN, PGS, PRD
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(SIZE(PAN)) :: ZFMIN, ZDRAP, ZF
+REAL, DIMENSION(SIZE(PAN)) :: ZFMIN, ZDRAP, ZF, ZWORK
 !                                       ZFMIN = minimum f factor
 !                                       ZDRAP = ratio Ds/Dmax
 !                                       ZF    = factor related to diffusion
+!                                       ZWORK = work array
 !
 REAL, DIMENSION(SIZE(PAN)) :: ZCSP, ZCI, ZCMIN, ZAMIN  
 !                                       ZCSP    = atmospheric concentration 
@@ -131,13 +134,15 @@ REAL, DIMENSION(SIZE(PAN)) :: ZGSC, ZGS
 !                                       ZGS     = cuticular conductance (m s-1)
 !
 INTEGER :: JJ, ITER
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('COTWO',0,ZHOOK_HANDLE)
 !
 !*       X.     COMPUTE PRELIMINARY QUANITIES NEEDED FOR CO2 MODEL
 !               --------------------------------------------------
-!
-IF (LHOOK) CALL DR_HOOK('COTWO',0,ZHOOK_HANDLE)
 !
 DO JJ = 1, SIZE(PAN) 
   !
@@ -147,12 +152,14 @@ DO JJ = 1, SIZE(PAN)
   !                                                          Equation #s in 
   !                                                          Jacob's Thesis:
   !
+  ZWORK(JJ) = MAX(PGC(JJ)+PGMEST(JJ),XDENOM_MIN)
+  !  
   ! Eq. 3.21
-  ZFMIN(JJ) = PGC(JJ)/(PGC(JJ)+PGMEST(JJ))                          ! fmin
+  ZFMIN(JJ) = PGC(JJ)/ZWORK(JJ) ! fmin
   ! fmin <= f0, and so f <= f0
   ZFMIN(JJ) = MIN(ZFMIN(JJ),PFZERO(JJ))
   ! fmin > 0, and so PCI > PGAMMT
-  ZFMIN(JJ) = MAX(ZFMIN(JJ),1.E-10)
+  ZFMIN(JJ) = MAX(ZFMIN(JJ),XDENOM_MIN)
   !
   ! f from specific humidity deficit ds (g kg-1)
   !
@@ -171,7 +178,7 @@ DO JJ = 1, SIZE(PAN)
   !
   !
   ! Eq. 3.23
-  ZCMIN(JJ) = (PGC(JJ)*ZCSP(JJ) + PGMEST(JJ)*PGAMMT(JJ))/(PGMEST(JJ)+PGC(JJ))  
+  ZCMIN(JJ) = (PGC(JJ)*ZCSP(JJ) + PGMEST(JJ)*PGAMMT(JJ))/ZWORK(JJ) 
   !
   ! residual photosynthesis rate (kgCO2 kgAir-1 m s-1)
   !
@@ -199,7 +206,7 @@ DO JJ = 1, SIZE(PAN)
   !
   ZEPS(JJ)   = PEPSO(JJ)*(ZCI(JJ) - PGAMMT(JJ))/(ZCI(JJ) + 2.0*PGAMMT(JJ))
   !
-  IF (ZAM(JJ).NE.0.) THEN
+  IF (ZAM(JJ)/=0.) THEN
     PAN(JJ) = (ZAM(JJ) + PRD(JJ))*( 1.0 - EXP(-ZEPS(JJ)*PIA(JJ) &
                /(ZAM(JJ) + PRD(JJ))) ) - PRD(JJ)  
   ELSE
@@ -208,7 +215,7 @@ DO JJ = 1, SIZE(PAN)
   PAN(JJ) = MAX(-PRD(JJ),PAN(JJ))
   !
   ! Eq. 3.28
-  IF (ZAM(JJ).NE.0.) THEN
+  IF (ZAM(JJ)/=0.) THEN
     ZAGR(JJ) = (PAN(JJ) + PRD(JJ))/(ZAM(JJ) + PRD(JJ))   
   ELSE
     ZAGR(JJ)=0.
@@ -259,6 +266,11 @@ ENDDO
 ! Eq. 3.16
 PGS(:) = XCO2TOH2O*ZGSC(:) + PGC(:)
 !
-IF (LHOOK) CALL DR_HOOK('COTWO',1,ZHOOK_HANDLE)
+! Prevent numerical artefact in plant transpiration when
+! soilstress is maximum (F2 = 0.0)
 !
+PGS(:) = PGS(:) * MIN(1.0,PF2(:)/XDENOM_MIN)
+!
+IF (LHOOK) CALL DR_HOOK('COTWO',1,ZHOOK_HANDLE)
+!	
 END SUBROUTINE COTWO

@@ -1,6 +1,6 @@
 SUBROUTINE TRIP_SURFACE_FLOOD (KLISTING,PTSTEP,OPRINT,OMASK_FLD,        &
                                PTAB_F,PTAB_H,PTAB_VF,PLEN,PAREA,        &
-                               PSLOPEBED,PWIDTH,PN_FLOOD,PHC,           &
+                               PWIDTH,PN_FLOOD,PHC,                     &
                                PSURF_STO,PFLOOD_STO,PSOURCE,            &
                                PFLOOD_STO2,PHFLOOD,PFFLOOD,PFLOOD_LEN,  &
                                PWFLOOD,PQFR,PQRF,PVFIN,PVFOUT,PHSF,     &
@@ -70,7 +70,6 @@ REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_VF ! Flood volume array
 !
 REAL,DIMENSION(:,:), INTENT(IN)      :: PLEN       ! river length       [m] 
 REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m²]
-REAL,DIMENSION(:,:), INTENT(IN)      :: PSLOPEBED  ! river bed slopes             [m/m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PWIDTH     ! river widths                 [m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PN_FLOOD   ! Manning coeficient over floodplains   [-] (0.1)
 REAL,DIMENSION(:,:), INTENT(IN)      :: PHC        ! River bed depth              [m]
@@ -267,7 +266,7 @@ IF(OPRINT)THEN
            PFOUT_ALL  = PFOUT_ALL  + PQFR       (JLON,JLAT) / PAREA(JLON,JLAT)
            PSOURCE_ALL= PSOURCE_ALL+ PSOURCE    (JLON,JLAT) / PAREA(JLON,JLAT)
            PHF_ALL    = PHF_ALL    + PHFLOOD    (JLON,JLAT) * PAREA(JLON,JLAT)
-           PFF_ALL    = PFF_ALL    + PHFLOOD    (JLON,JLAT) * PAREA(JLON,JLAT)
+           PFF_ALL    = PFF_ALL    + PFFLOOD    (JLON,JLAT) * PAREA(JLON,JLAT)
            ZAREA      = ZAREA      + PAREA      (JLON,JLAT)
         ENDIF
     ENDDO

@@ -68,10 +68,14 @@ SUBROUTINE COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                   &
 !!      R. Alkama      04/12 : add 6 new tree vegtype (9 instead 3)
 !!      C. Delire      01/14 : vertical profile of dark respiration for tropical forest 
 !!                             (GTROP)   with Carrer radiative transfer (OTR_ML = T)               
+!!Seferian & Delire  06/2015 : generalization of (i) linear water-stress reponse
+!                              and (ii) exponential decrease of autothrophic respiration to all woody PFTs
+!!      B. Decharme    07/15 : Suppress some numerical adjustement for F2 
+!!
 !-------------------------------------------------------------------------------
 !
 USE MODD_CSTS,           ONLY : XMD, XTT, XLVTT
-USE MODD_ISBA_PAR,       ONLY : XRS_MAX
+USE MODD_ISBA_PAR,       ONLY : XRS_MAX, XDENOM_MIN
 USE MODD_CO2V_PAR,       ONLY : XPARCF, XMCO2, XDMAX_AGS,       &
                                 XDMAXX, XDMAXN, XAW, XBW, XASW                              
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_TRBE, NVT_BONE,   &
@@ -179,11 +183,11 @@ REAL,DIMENSION(:),  INTENT(INOUT) :: PABC, PAN, PANDAY, PRS, PANFM, PGPP
 !                                    PABC  = Carrer radiative transfer: normalized heigh of considered layer (bottom=0, top=1)
 !                                            Calvet radiative transfer: abcissa of the 3-points Gaussian quadrature 
 !                                                (Goudriaan, Agric&For.Meteor, 38,1986)                                            
-!                                    PAN   = Net assimilation of CO2
+!                                    PAN   = Net assimilation of CO2 (kg_CO2/kg_air * m/s)
 !                                    PANDAY= cumulated daily net assimilation of CO2 (kgCO2/m2/day)
 !                                    PRS   = stomatal resistance
 !                                    PANFM = maximum leaf assimilation
-!                                    PGPP  = Gross Primary Production
+!                                    PGPP  = Gross Primary Production (kg_CO2/kg_air * m/s)
 !
 REAL,DIMENSION(:),    INTENT(OUT) :: PANF
 !                                    PANF  = total assimilation over canopy
@@ -193,8 +197,7 @@ REAL,DIMENSION(:),    INTENT(OUT) :: PRESP_LEAF
 !
 !*      0.2    declarations of local variables
 !
-REAL, PARAMETER                :: ZDENOM_MIN  = 1.E-6 ! minimum denominator to prevent division by 0
-REAL, PARAMETER                :: ZRS_MIN     = 1.E-4 ! minimum canopy resistance (s m-1)
+REAL, PARAMETER                :: ZRS_MIN     = 1.E-4  ! minimum canopy resistance (s m-1)
 !
 INTEGER                     :: JINT, JJ ! index for loops
 !
@@ -308,7 +311,7 @@ ELSEIF (HPHOTO=='AST' .OR. HPHOTO=='LST' .OR. HPHOTO=='NIT' .OR. HPHOTO=='NCB') 
   GHERB(:) = (PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBE) + PVEGTYPE(:,NVT_BONE)   &
              +PVEGTYPE(:,NVT_TRBD) + PVEGTYPE(:,NVT_TEBE) + PVEGTYPE(:,NVT_TENE)   & 
              +PVEGTYPE(:,NVT_BOBD) + PVEGTYPE(:,NVT_BOND) + PVEGTYPE(:,NVT_SHRB)<0.5)
-  GWOOD      (:) = (.NOT.GHERB (:).AND.(.NOT.GTROP(:)))
+  GWOOD      (:) = (.NOT.GHERB (:))
   GF2_INF_F2I(:) = (PF2(:)<PF2I(:))
   !
   ! -HERBACEOUS-
@@ -360,12 +363,9 @@ ELSEIF (HPHOTO=='AST' .OR. HPHOTO=='LST' .OR. HPHOTO=='NIT' .OR. HPHOTO=='NCB') 
     ZGMESTN(:) = ZGMESTN(:)*PF2(:)/PF2I(:)
   ENDWHERE
   !
-  WHERE (GWOOD(:).AND.GF2_INF_F2I(:).AND.OSTRESSDEF(:)) 
-    ZGMESTN(:) = MAX( 1.0E-10, ZGMESTN(:) )
-  ENDWHERE
-  !
   WHERE(GWOOD(:))
-    ZFZERON(:) = (XASW - LOG(ZGMESTN(:)*1000.))/XBW
+    ZWORK  (:) = MAX( XDENOM_MIN, ZGMESTN(:) )
+    ZFZERON(:) = (XASW - LOG(ZWORK(:)*1000.))/XBW
   ENDWHERE
   !
   WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.OSTRESSDEF(:))
@@ -472,7 +472,7 @@ DO JINT = 1, SIZE(PABC)
   ZLAITOP(:) = 0.
   ZZLAI  (:) = 1.
   IF (OTR_ML) THEN
-    WHERE(GTROP(:))  
+    WHERE(GWOOD(:))  
       ZLAITOP(:) = (1.-(PABC(JINT)+ZABC)/2.)*ZLAI(:)
       ZZLAI(:) = ZLAI(:)
     ENDWHERE
@@ -537,8 +537,10 @@ ZXTGS(:) = ZTGS(:)*ZLAI(:)
 !
 ! Canopy resistance from Ags:
 !
-PRS(:) = MIN( 1.0/(ZXTGS(:)+ZDENOM_MIN), XRS_MAX)
+PRS(:) = MIN( 1.0/(ZXTGS(:)+XDENOM_MIN), XRS_MAX)
+!
 PRS(:) = MAX( PRS(:), ZRS_MIN)
+!
 IF (LHOOK) CALL DR_HOOK('COTWORES',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE COTWORES

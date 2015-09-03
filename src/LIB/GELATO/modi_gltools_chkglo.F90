@@ -33,20 +33,23 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 ! =======================================================================
-! ====================== MODULE modi_gltools_chkglo =======================
+! ====================== MODULE modi_gltools_chkglo =====================
 ! =======================================================================
 !
 ! Goal:
 ! -----
 !   This module contains a subroutine that prints sea ice surface,  
 ! extent and volume separately in both hemispheres. Note these results
-! are printed only if nprinto flag is greater or equal to 1.
+! are printed only if nprinto flag is greater or equal to 2.
+!   Note that mpp_sum (invoke all procs) cannot be used e.g. under 
+! condition lp2==.TRUE. Hence we use nprinto.
 !
 ! Created : 1999 (D. Salas y Melia)
 !           Repeated code doing that throughout the model is written in
 !           a more standard form and only once in the present routine. 
+! Modified: 2012/07 (D. Salas y Melia) parallelism
 !
-! ------------------- BEGIN MODULE modi_gltools_chkglo --------------------
+! ------------------- BEGIN MODULE modi_gltools_chkglo ------------------
 
 !THXS_SFX!MODULE modi_gltools_chkglo
 !THXS_SFX!INTERFACE 
@@ -65,11 +68,11 @@
 !THXS_SFX!END INTERFACE
 !THXS_SFX!END MODULE modi_gltools_chkglo
 
-! -------------------- END MODULE modi_gltools_chkglo ---------------------
+! -------------------- END MODULE modi_gltools_chkglo -------------------
 
 
 ! -----------------------------------------------------------------------
-! ------------------------- SUBROUTINE gltools_chkglo ---------------------------
+! --------------------- SUBROUTINE gltools_chkglo -----------------------
 
 ! * Subroutine used to check global sea ice extent, area and volume in 
 ! both hemispheres.
@@ -79,7 +82,9 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit)
   USE modd_glt_const_thm
   USE modd_types_glt
   USE modd_glt_param
+#if ! defined in_arpege
   USE lib_mpp
+#endif
   IMPLICIT NONE
 !
   CHARACTER(*), INTENT(in) ::  &
@@ -101,11 +106,11 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit)
 ! 1. Initializations
 ! ==================
 !
-  IF ( nprinto>=1 ) THEN
+  IF ( nprinto>=2 ) THEN
 !
 ! .. Print message
 !
-      IF(lwg) THEN
+      IF (lwg) THEN
         WRITE(noutlu,*) ' ' 
         WRITE(noutlu,*) ' **** gltools_chkglo ****' 
         WRITE(noutlu,*) omsg
@@ -157,8 +162,6 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit)
 !
       zehn = SUM( zsrf(:,:), MASK=(ghnorth(:,:).AND.zfsit(:,:)>xfsic) ) / 1.e+12
       zehs = SUM( zsrf(:,:), MASK=(ghsouth(:,:).AND.zfsit(:,:)>xfsic) ) / 1.e+12
-      CALL mpp_sum( zehn )
-      CALL mpp_sum( zehs )
 !
 !
 ! 2.2. Sea ice area (in millions of km2)
@@ -166,8 +169,6 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit)
 !
       zshn = SUM( zsrf(:,:)*zfsit(:,:), MASK=ghnorth(:,:) ) / 1.e+12
       zshs = SUM( zsrf(:,:)*zfsit(:,:), MASK=ghsouth(:,:) ) / 1.e+12
-      CALL mpp_sum( zshn )
-      CALL mpp_sum( zshs )
 !
 !
 ! 2.3. Sea ice volume  
@@ -175,20 +176,27 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit)
 !
       zvhn = SUM( zsrf(:,:)*zhsiw(:,:), MASK=ghnorth(:,:) ) / 1.e+12
       zvhs = SUM( zsrf(:,:)*zhsiw(:,:), MASK=ghsouth(:,:) ) / 1.e+12
-      CALL mpp_sum( zvhn )
-      CALL mpp_sum( zvhs )
 !
 !
 !
 ! 3. Write totals to glt_output file
 ! ==============================
 !
-      IF(lwg) THEN
+#if ! defined in_arpege
+      CALL mpp_sum( zehn )
+      CALL mpp_sum( zehs )
+      CALL mpp_sum( zshn )
+      CALL mpp_sum( zshs )
+      CALL mpp_sum( zvhn )
+      CALL mpp_sum( zvhs )
+!
+      IF (lwg) THEN
         WRITE(noutlu,*) '                              North        South'
         WRITE(noutlu,1000) zshn,zshs
         WRITE(noutlu,1100) zehn,zehs
         WRITE(noutlu,1200) zvhn,zvhs
       ENDIF
+#endif
 !
   ENDIF 
 !

@@ -71,7 +71,9 @@ SUBROUTINE gltools_wrivai_2d  &
   USE mode_gltools_mpi
   USE mode_gltools_bound
 #else
+#if ! defined in_arpege
   USE MODI_GATHER_AND_WRITE_MPI
+#endif
 #endif
   IMPLICIT NONE
 !
@@ -162,7 +164,9 @@ SUBROUTINE gltools_wrivai_2d  &
 #if ! defined in_surfex
       CALL gather2d( zwork,zwork_g )
 #else
+#if ! defined in_arpege 
       CALL gather_and_write_mpi( zwork,zwork_g )
+#endif
 #endif
       DEALLOCATE( zwork)
 !

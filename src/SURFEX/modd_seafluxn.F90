@@ -53,14 +53,14 @@ TYPE SEAFLUX_t
   CHARACTER(LEN=6)              :: CSEAICE_SCHEME! Name of the seaice scheme 
   REAL, POINTER, DIMENSION(:)   :: XSEABATHY   ! bathymetry
 !
-  LOGICAL                       :: LINTERPOL_SST ! Quadratic interpolation of monthly SST
-  CHARACTER(LEN=6)              :: CINTERPOL_SST ! Quadratic interpolation of monthly SST
-  LOGICAL                       :: LINTERPOL_SSS ! Quadratic interpolation of monthly SSS
-  CHARACTER(LEN=6)              :: CINTERPOL_SSS ! Quadratic interpolation of monthly SSS
-  LOGICAL                       :: LINTERPOL_SIC ! Quadratic interpolation of monthly SIC
-  CHARACTER(LEN=6)              :: CINTERPOL_SIC ! Quadratic interpolation of monthly SIC
-  LOGICAL                       :: LINTERPOL_SIT ! Quadratic interpolation of monthly SIT
-  CHARACTER(LEN=6)              :: CINTERPOL_SIT ! Quadratic interpolation of monthly SIT
+  LOGICAL                       :: LINTERPOL_SST ! Interpolation of monthly SST
+  CHARACTER(LEN=6)              :: CINTERPOL_SST ! Interpolation method of monthly SST
+  LOGICAL                       :: LINTERPOL_SSS ! Interpolation of monthly SSS
+  CHARACTER(LEN=6)              :: CINTERPOL_SSS ! Interpolation method of monthly SSS
+  LOGICAL                       :: LINTERPOL_SIC ! Interpolation of monthly SIC
+  CHARACTER(LEN=6)              :: CINTERPOL_SIC ! Interpolation method of monthly SIC
+  LOGICAL                       :: LINTERPOL_SIT ! Interpolation of monthly SIT
+  CHARACTER(LEN=6)              :: CINTERPOL_SIT ! Interpolation method of monthly SIT
   REAL                          :: XFREEZING_SST ! Value marking frozen sea in SST data
   REAL                          :: XSIC_EFOLDING_TIME ! For damping of SIC (days)
   REAL                          :: XSIT_EFOLDING_TIME ! For damping of SIT (days)
@@ -124,7 +124,7 @@ TYPE SEAFLUX_t
 !
 ! Sea-ice :
 !
-  TYPE(T_GLT)                        :: TGLT ! Sea-ice state , diagnostics and auxilliaries
+  TYPE(T_GLT), POINTER                  :: TGLT ! Sea-ice state , diagnostics and auxilliaries
                                              ! for the case of embedded Gelato Seaice model
 !
 ! Date:

@@ -33,7 +33,7 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 ! =======================================================================
-! ========================= MODULE modi_glt_thermo ==========================
+! ======================= MODULE modi_glt_thermo ========================
 ! =======================================================================
 !
 !
@@ -64,6 +64,8 @@
 !           Input now consists of fields defined on subdomains
 ! Modified: 2012/11 (D. Salas y Melia)
 !           Sea ice damping
+! Modified: 2015/07 (D. Salas y Melia)
+!           Sea ice damping has been externalized from thermo_r routine
 !
 ! -------------------- BEGIN MODULE modi_glt_thermo -------------------------
 
@@ -241,22 +243,6 @@ SUBROUTINE glt_thermo  &
   ENDWHERE
 !
   gsel(:,:) = ( isel(:,:)==1 )
-!  do jj=1,ny
-!    do ji=1,nx
-!      ind(1,ji,jj) = ji
-!      ind(2,ji,jj) = jj
-!    end do
-!  end do
-!write(noutlu,*)'lat = ',tpdom(1,290)%lat
-!write(noutlu,*)'isel = ',isel(1,290)
-!write(noutlu,*)'zfsit = ',zfsit(1,290)
-!write(noutlu,*)'tpmxl%tml = ',tpmxl(1,290)%tml
-!call flush(noutlu)
-!write(noutlu,*)'min tml = ',minval(tpmxl%tml)
-!write(noutlu,*)'max tml = ',maxval(tpmxl%tml)
-!write(noutlu,*)'min fsi = ',minval(zfsit)
-!write(noutlu,*)'max fsi = ',maxval(zfsit)
-!call flush(noutlu)
 ! 
 !
 ! 2.2. Pack all fields and allocate reduced grid arrays
@@ -270,7 +256,7 @@ SUBROUTINE glt_thermo  &
     WRITE(noutlu,*)  &
       '**********************************************************'
     WRITE(noutlu,*) 'REDUCED GRID:'
-    WRITE(noutlu,1000) gelato_myrank, np, nx, ny, nx*ny
+    WRITE(noutlu,1000) gelato_myrank, np, nx*ny, nx, ny
     WRITE(noutlu,*)  &
       '**********************************************************'
   ENDIF
@@ -494,18 +480,22 @@ SUBROUTINE glt_thermo  &
 ! 2.5. Thermodynamics on the reduced grid
 ! ----------------------------------------
 !
-    IF ( PRESENT(tpsit_d) ) THEN
-      CALL glt_thermo_r  &
-        ( tzdom_r,zustar_r,tzmxl_r,tzatm_r,tzblkw_r,tzblki_r,tzbud_r,tzdia_r,  &
-        tztfl_r,tzsit_r,tzsil_r,tpsit_d=tzsit_d_r )
-    ELSE
+    IF ( nthermo==1 ) THEN
       CALL glt_thermo_r  &
         ( tzdom_r,zustar_r,tzmxl_r,tzatm_r,tzblkw_r,tzblki_r,tzbud_r,tzdia_r,  &
         tztfl_r,tzsit_r,tzsil_r )
     ENDIF
 !
 !
-! 2.6. From reduced to global grid arrays
+! 2.6. Apply the constraint
+! --------------------------
+!
+    IF ( ntd==1 ) THEN
+      CALL glt_constrain_r( tzdom_r,tzmxl_r,tzsit_r,tzsil_r,tzdia_r,tzsit_d_r )
+    ENDIF
+!
+!
+! 2.7. From reduced to global grid arrays
 ! ----------------------------------------
 !
 ! .. Energy budget 
@@ -525,6 +515,8 @@ SUBROUTINE glt_thermo  &
     tzdia0(:,:)%dsa = 0.
     tzdia0(:,:)%dsn = 0.
     tzdia0(:,:)%dsi = 0.
+    tzdia0(:,:)%dci = 0.
+    tzdia0(:,:)%cst = 0.
     tzdia0(:,:)%dwi = 0.
     tzdia0(:,:)%lip = 0.
     tzdia0(:,:)%lsi = 0.
@@ -572,6 +564,8 @@ SUBROUTINE glt_thermo  &
     tpdia%dsa = UNPACK( tzdia_r%dsa,gsel,tzdia0%dsa )
     tpdia%dsn = UNPACK( tzdia_r%dsn,gsel,tzdia0%dsn )
     tpdia%dsi = UNPACK( tzdia_r%dsi,gsel,tzdia0%dsi )
+    tpdia%dci = UNPACK( tzdia_r%dci,gsel,tzdia0%dci )
+    tpdia%cst = UNPACK( tzdia_r%cst,gsel,tzdia0%cst )
     tpdia%dwi = UNPACK( tzdia_r%dwi,gsel,tzdia0%dwi )
     tpdia%lip = UNPACK( tzdia_r%lip,gsel,tzdia0%lip )
     tpdia%lsi = UNPACK( tzdia_r%lsi,gsel,tzdia0%lsi )

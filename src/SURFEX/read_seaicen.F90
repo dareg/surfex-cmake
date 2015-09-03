@@ -53,11 +53,14 @@ USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 USE MODD_WATER_PAR,      ONLY : XALBSEAICE
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
-USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo, xdomsrf, xdomsrf_g, nprinto
+USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo, xdomsrf, &
+                           xdomsrf_g, nprinto, CFSIDMP, CHSIDMP,  &
+                           XFSIDMPEFT, XHSIDMPEFT, ntd
 USE MODD_GLT_CONST_THM, ONLY : epsil1
+USE LIB_MPP,            ONLY : MPP_SUM
 USE MODI_GLT_SNDATMF
 USE MODI_GLTOOLS_ALLOC
-USE LIB_MPP, ONLY : MPP_SUM
+USE MODI_GLTOOLS_READNAM
 !
 USE MODI_READ_SURF
 USE MODI_INTERPOL_SST_MTH
@@ -129,10 +132,8 @@ IF(S%LINTERPOL_SIC)THEN
    !
    ALLOCATE(S%XFSIC(KLU))
    !
-   ! Precedent, Current and Next Monthly SIC
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SIC
-   IF(S%CINTERPOL_SIC=='ANNUAL')INMTH=14
+   !Precedent, Current, Next, and Second-next Monthly SIC
+   INMTH=4   
    !
    ALLOCATE(S%XSIC_MTH(KLU,INMTH))
    DO JMTH=1,INMTH
@@ -145,6 +146,10 @@ IF(S%LINTERPOL_SIC)THEN
    !
    CALL INTERPOL_SST_MTH(S, &
                          S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
+   !
+   IF (ANY(S%XFSIC(:)>1.0).OR.ANY(S%XFSIC(:)<0.0)) THEN
+     CALL ABOR1_SFX('READ_SEAICE_n: FSIC should be >=0 and <=1') 
+   ENDIF                 
    !
 ELSE
    ! 
@@ -202,7 +207,32 @@ ENDIF
 nxglo=max(nxglo,1)
 #endif
 !
+! Use convention XSIC_EFOLDING_TIME=0 for avoiding any relaxation 
+! toward SIC observation and impose it.
+!
+IF(S%LINTERPOL_SIC)THEN
+  IF (S%XSIC_EFOLDING_TIME==0.0) THEN 
+     CFSIDMP='PRESCRIBE'
+  ELSE
+     CFSIDMP='DAMP'
+     XFSIDMPEFT=S%XSIC_EFOLDING_TIME 
+  ENDIF
+ENDIF
+!
+IF(S%LINTERPOL_SIT)THEN
+  IF (S%XSIT_EFOLDING_TIME==0.0) THEN 
+     CHSIDMP='PRESCRIBE'
+  ELSE
+     CHSIDMP='DAMP_FAC'
+     XHSIDMPEFT= S%XSIT_EFOLDING_TIME 
+  ENDIF
+ENDIF
+!
 !* Physical dimensions are set for Gelato , as a 1D field (second dimension is degenerated)
+!
+! Supersedes Gelato hard defaults with a Gelato genuine namelist 
+! if available (for Gelato wizzards !)
+CALL GLTOOLS_READNAM(.FALSE.,KLUOUT)  
 !
 ny=1
 nyglo=1
@@ -370,11 +400,9 @@ S%TGLT%bat(:,1)=-S%XSEABATHY
 IF(S%LINTERPOL_SIT)THEN
    !
    ALLOCATE(S%XFSIT(KLU))
-   !  
-   ! Precedent, Current and Next Monthly SIT
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SIT
-   IF(TRIM(S%CINTERPOL_SIT)=='ANNUAL')INMTH=14
+   !
+   !Precedent, Current, Next, and Second-next Monthly SIT
+   INMTH=4   
    !
    ALLOCATE(S%XSIT_MTH(KLU,INMTH))
    DO JMTH=1,INMTH
@@ -427,7 +455,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n:CHECK_SEAICE',0,ZHOOK_HANDLE)
 !
-ZMIN=0.0
+ZMIN=-1.0E10
 ZMAX=1.0E10
 !
 IERRC=0

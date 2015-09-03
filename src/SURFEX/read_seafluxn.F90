@@ -108,9 +108,8 @@ ALLOCATE(S%XSST(ILU))
 !
 IF(S%LINTERPOL_SST)THEN
 !
-! Precedent, Current and Next Monthly/annual SST
-  INMTH=3
-  IF(TRIM(S%CINTERPOL_SST)=='ANNUAL')INMTH=14
+! Precedent, Current, Next, and Second-next Monthly SST
+  INMTH=4
 !
   ALLOCATE(S%XSST_MTH(SIZE(S%XSST),INMTH))
   DO JMTH=1,INMTH
@@ -177,10 +176,8 @@ S%XSSS(:)=0.0
 !
 IF(S%LINTERPOL_SSS)THEN
    !
-   ! Precedent, Current and Next Monthly/Annual SSS
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SSS
-   IF(TRIM(S%CINTERPOL_SSS)=='ANNUAL')INMTH=14
+   ! Precedent, Current, Next, and Second-next Monthly SSS
+   INMTH=4
    !
    ALLOCATE(S%XSSS_MTH(ILU,INMTH))
    DO JMTH=1,INMTH
@@ -250,7 +247,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_SEAFLUX_N:CHECK_SEA',0,ZHOOK_HANDLE)
 !
-ZMIN=0.0
+ZMIN=-1.0E10
 ZMAX=1.0E10
 !
 IERRC=0

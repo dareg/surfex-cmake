@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE GET_SFX_LAKE (F, U, &
-                               PLAKE_EVAP,PLAKE_RAIN,PLAKE_SNOW)  
+                               PLAKE_EVAP,PLAKE_RAIN,PLAKE_SNOW,PLAKE_WATF)  
 !     ############################################################################
 !
 !!****  *GET_SFX_LAKE* - routine to get some variables from surfex to
@@ -59,6 +59,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_SNOW  ! Cumulated Snowfall rate           (kg/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_WATF  ! Cumulated Net water flux          (kg/m2)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -75,6 +76,7 @@ IF (LHOOK) CALL DR_HOOK('GET_SFX_LAKE',0,ZHOOK_HANDLE)
 PLAKE_EVAP (:) = XUNDEF
 PLAKE_RAIN (:) = XUNDEF
 PLAKE_SNOW (:) = XUNDEF
+PLAKE_WATF (:) = XUNDEF
 !
 !*       2.0   Get variable over lake
 !              ----------------------
@@ -87,6 +89,8 @@ IF(U%NSIZE_WATER>0)THEN
   F%XCPL_FLAKE_EVAP(:) = 0.0
   F%XCPL_FLAKE_RAIN(:) = 0.0
   F%XCPL_FLAKE_SNOW(:) = 0.0
+!
+  PLAKE_WATF(:) =  PLAKE_RAIN(:) + PLAKE_SNOW(:) - PLAKE_EVAP(:)
 !
 ENDIF
 !

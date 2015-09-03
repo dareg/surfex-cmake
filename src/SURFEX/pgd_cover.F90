@@ -39,7 +39,7 @@
 !!    B. Decharme  06/2009  remove lack and sea as the user want
 !!    B. Decharme  07/2009  compatibility between Surfex and Orca (Nemo) grid (Earth Model)
 !!    B. Decharme  07/2012  if sea or water imposed to 1 in a grid cell: no extrapolation
-!!    B. Decharme  02/2014  Add LRM_RIVER
+!!    B. Decharme  02/2014  Add LRM_RIVER and remove lake over antarctica
 !!
 !----------------------------------------------------------------------------
 !
@@ -252,6 +252,8 @@ LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another 
 LOGICAL                  :: GPRESENT
 !
 LOGICAL                  :: LRM_RIVER   ! delete inland river coverage. Default is false
+!
+REAL, PARAMETER          :: ZLAT_ANT_WATER = -60. ! Lattitude limit to delete lake over antarctica
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -513,7 +515,7 @@ ELSE
     IF (CGRID=='LONLAT REG') CALL GET_GRIDTYPE_LONLAT_REG(XGRID_PAR,PLAT=ZLAT)
 !
       DO JL=1,SIZE(NSEA)
-        IF (IMASK_SEA(JL)/=0) THEN
+        IF (IMASK_SEA(JL)/=0.AND.IPERMSNOW/=0) THEN
           WHERE(ZLAT(:)<XLAT_ANT.AND.U%XCOVER(:,IMASK_SEA(JL))>0.0)
             U%XCOVER(:,IPERMSNOW) = 1.0
             U%XCOVER(:,IMASK_SEA(JL))  = 0.0
@@ -522,8 +524,8 @@ ELSE
       ENDDO
 
       DO JL=1,SIZE(NWATER)
-        IF (IMASK_WATER(JL)/=0) THEN
-          WHERE(ZLAT(:)<XLAT_ANT.AND.U%XCOVER(:,IMASK_WATER(JL))>0.0)
+        IF (IMASK_WATER(JL)/=0.AND.IPERMSNOW/=0) THEN
+          WHERE(ZLAT(:)<ZLAT_ANT_WATER.AND.U%XCOVER(:,IMASK_WATER(JL))>0.0)
             U%XCOVER(:,IPERMSNOW)  = 1.0
             U%XCOVER(:,IMASK_WATER(JL)) = 0.0
           ENDWHERE

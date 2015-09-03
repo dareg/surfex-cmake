@@ -65,7 +65,6 @@ USE MODI_GET_SFX_LAKE
 USE MODI_GET_SFX_SEA
 !
 USE MODI_GET_LUOUT
-!RJ: missing modi
 USE MODI_SFX_OASIS_SEND
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -105,13 +104,12 @@ REAL, DIMENSION(KI)   :: ZLAND_RUNOFF    ! Cumulated Surface runoff             
 REAL, DIMENSION(KI)   :: ZLAND_DRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(KI)   :: ZLAND_CALVING   ! Cumulated Calving flux               (kg/m2)
 REAL, DIMENSION(KI)   :: ZLAND_RECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
-REAL, DIMENSION(KI)   :: ZLAND_PFLOOD    ! Cumulated flood precip interception  (kg/m2)
-REAL, DIMENSION(KI)   :: ZLAND_EFLOOD    ! Cumulated floodplains evaporation    (kg/m2)
-REAL, DIMENSION(KI)   :: ZLAND_IFLOOD    ! Cumulated floodplains infiltration   (kg/m2)
+REAL, DIMENSION(KI)   :: ZLAND_WATFLD    ! Cumulated net freshwater rate        (kg/m2)
 !
 REAL, DIMENSION(KI)   :: ZLAKE_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(KI)   :: ZLAKE_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(KI)   :: ZLAKE_SNOW  ! Cumulated Snowfall rate           (kg/m2)
+REAL, DIMENSION(KI)   :: ZLAKE_WATF  ! Cumulated net freshwater rate     (kg/m2)
 !
 REAL, DIMENSION(KI)   :: ZSEA_FWSU  ! Cumulated zonal wind stress       (Pa.s)
 REAL, DIMENSION(KI)   :: ZSEA_FWSV  ! Cumulated meridian wind stress    (Pa.s)
@@ -160,15 +158,14 @@ IF(GSEND_LAND)THEN
   ZLAND_DRAIN   (:) = XUNDEF
   ZLAND_CALVING (:) = XUNDEF
   ZLAND_RECHARGE(:) = XUNDEF
-  ZLAND_PFLOOD  (:) = XUNDEF
-  ZLAND_EFLOOD  (:) = XUNDEF
-  ZLAND_IFLOOD  (:) = XUNDEF
+  ZLAND_WATFLD  (:) = XUNDEF  
 ENDIF
 !
 IF(GSEND_LAKE)THEN
   ZLAKE_EVAP (:) = XUNDEF
   ZLAKE_RAIN (:) = XUNDEF
   ZLAKE_SNOW (:) = XUNDEF
+  ZSEA_WATF  (:) = XUNDEF  
 ENDIF
 !
 IF(GSEND_SEA)THEN
@@ -217,8 +214,7 @@ IF(GSEND_LAND)THEN
                     LCPL_GW,LCPL_FLOOD,LCPL_CALVING,                           &
                     ZLAND_RUNOFF (NINDX1SFX:NINDX2SFX),ZLAND_DRAIN   (NINDX1SFX:NINDX2SFX),&
                     ZLAND_CALVING(NINDX1SFX:NINDX2SFX),ZLAND_RECHARGE(NINDX1SFX:NINDX2SFX),&
-                    ZLAND_PFLOOD (NINDX1SFX:NINDX2SFX),ZLAND_EFLOOD  (NINDX1SFX:NINDX2SFX),&
-                    ZLAND_IFLOOD (NINDX1SFX:NINDX2SFX)                               )
+                    ZLAND_WATFLD (NINDX1SFX:NINDX2SFX))
 !
 ENDIF
 !
@@ -228,7 +224,7 @@ IF(GSEND_LAKE)THEN
 !
   CALL GET_SFX_LAKE(F, U, &
                     ZLAKE_EVAP(NINDX1SFX:NINDX2SFX),ZLAKE_RAIN(NINDX1SFX:NINDX2SFX), &
-                    ZLAKE_SNOW(NINDX1SFX:NINDX2SFX)                            )
+                    ZLAKE_SNOW(NINDX1SFX:NINDX2SFX),ZLAKE_WATF(NINDX1SFX:NINDX2SFX) )
 !
 ENDIF
 !
@@ -259,8 +255,8 @@ IF(GSEND_LAND.OR.GSEND_LAKE.OR.GSEND_SEA)THEN
 !
   CALL SFX_OASIS_SEND(ILUOUT,KI,IDATE,GSEND_LAND,GSEND_LAKE,GSEND_SEA,      &
                       ZLAND_RUNOFF,ZLAND_DRAIN,ZLAND_CALVING,ZLAND_RECHARGE,&
-                      ZLAND_PFLOOD,ZLAND_EFLOOD,ZLAND_IFLOOD,               &
-                      ZLAKE_EVAP,ZLAKE_RAIN,ZLAKE_SNOW,                     &
+                      ZLAND_WATFLD,                                         &
+                      ZLAKE_EVAP,ZLAKE_RAIN,ZLAKE_SNOW,ZLAKE_WATF,          &
                       ZSEA_FWSU,ZSEA_FWSV,ZSEA_HEAT,ZSEA_SNET,ZSEA_WIND,    &
                       ZSEA_FWSM,ZSEA_EVAP,ZSEA_RAIN,ZSEA_SNOW,ZSEA_WATF,    &
                       ZSEAICE_HEAT,ZSEAICE_SNET,ZSEAICE_EVAP                )

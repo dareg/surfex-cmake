@@ -123,6 +123,15 @@ IF(LCPL_SEA)THEN
   ENDWHERE 
 ENDIF
 !
+IF(LCPL_CALVSEA)THEN
+  WHERE(TPG%GMASK_GRE(:,:))
+    TP%XCPL_CALVGRE(:,:) = 0.0
+  ENDWHERE 
+  WHERE(TPG%GMASK_ANT(:,:))
+    TP%XCPL_CALVANT(:,:) = 0.0
+  ENDWHERE 
+ENDIF
+!
 IF(LCPL_LAND)THEN
 !
 ! Water table depth and fraction of water table to rise

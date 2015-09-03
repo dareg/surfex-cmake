@@ -53,9 +53,7 @@ INTEGER             :: NRUNOFF_ID    ! Surface runoff id
 INTEGER             :: NDRAIN_ID     ! Drainage id
 INTEGER             :: NRECHARGE_ID  ! Groundwater recharge id
 INTEGER             :: NCALVING_ID   ! Calving flux id
-INTEGER             :: NPFLOOD_ID    ! Floodplains precipitation interception id
-INTEGER             :: NEFLOOD_ID    ! Floodplains evaporation id
-INTEGER             :: NIFLOOD_ID    ! Floodplains infiltration id
+INTEGER             :: NSRCFLOOD_ID  ! Floodplains freshwater flux id
 !
 ! Output variables
 !

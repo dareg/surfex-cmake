@@ -14,7 +14,8 @@
                                PZ0EFFIP, PZ0EFFIM, PZ0EFFJP, PZ0EFFJM,    &
                                PLAI, PVEG, PZ0, PALBNIR, PALBVIS, PALBUV, &
                                PEMIS, PANFM, PANDAY, PBIOMASS, PRESP_BIOMASS,&
-                               PRESP_BIOMASS_INST, PINCREASE, PTURNOVER )  
+                               PRESP_BIOMASS_INST, PINCREASE, PTURNOVER,  &
+                               PSWDIR)  
 !   ###############################################################
 !!****  *VEGETATION EVOL*
 !!
@@ -55,6 +56,8 @@
 !!      D. Carrer    01/2012 : representation of nitrogen dilution fct of CO2 (from Calvet et al. 2008)
 !!      B. Decharme  05/2012 : Optimization and ISBA-DIF coupling
 !!      C. Delire    01/2014 : IBIS respiration for tropical evergreen
+!!      R. Seferian  05/2015 : expanding of Nitrogen dilution option to the complete formulation proposed by Yin et al. GCB 2002 
+!!Seferian & Delire  06/2015 : accouting for living woody biomass respiration (expanding work of E Joetzjer to all woody PFTs) 
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -62,7 +65,7 @@
 !
 USE MODD_CO2V_PAR,       ONLY : XMC, XMCO2, XPCCO2, XRESPFACTOR_NIT,       &
                                 XCOEFF_MAINT_RESP_ZERO, XSLOPE_MAINT_RESP, &
-                                XPARAM                   
+                                XPARAM, XPARCF, XDILUDEC
 USE MODD_CSTS,           ONLY : XDAY, XTT, XMD
 !
 USE MODI_ALBEDO
@@ -74,8 +77,12 @@ USE MODI_VEG_FROM_LAI
 USE MODI_Z0V_FROM_LAI
 USE MODI_SUBSCALE_Z0EFF
 USE MODD_TYPE_DATE_SURF
-USE MODD_DATA_COVER_PAR, ONLY : NVT_TRBE, NVT_C3, NVT_C4, &
+USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_TRBE, NVT_BONE,   &
+                                NVT_TRBD, NVT_TEBE, NVT_TENE,   &
+                                NVT_BOBD, NVT_BOND, NVT_SHRB,   &
+                                NVT_TRBE, NVT_C3, NVT_C4,       &
                                 NVT_IRR, NVT_GRAS
+!
 USE MODD_SURF_PAR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -182,6 +189,8 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PRESP_BIOMASS_INST ! instantaneous respir
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PINCREASE          ! increment of biomass (gC m-2 s-1)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PTURNOVER          ! biomass turnover going into litter (gC m-2 s-1)
 !
+REAL, DIMENSION(:),   INTENT(IN),   OPTIONAL :: PSWDIR    ! Global incoming shortwave radiation (W m-2)
+!
 !*      0.2    declarations of local parameter
 !
 REAL, PARAMETER                   :: ZCOEF1 = 10.0
@@ -197,10 +206,15 @@ REAL, PARAMETER                   :: ZNDAY     =365.
 REAL, PARAMETER                   :: ZCDILU1 = -0.048
 REAL, PARAMETER                   :: ZCDILU2 = 6.3
 REAL, PARAMETER                   :: ZCDILU3 = 371.
+! Required for Yin et al., nitrogen dilu param
+REAL, PARAMETER                   :: ZPHOTON    = 2.010402e-3 ! conversion coef for W m-2 in photon m-2
+REAL, PARAMETER                   :: ZDEPTH_VEG = 0.40        !Depth in meters for daily temperature
+REAL, PARAMETER                   :: ZTEMP_VEG  = 23.         !Average temperature of the vegetation
+REAL, PARAMETER                   :: ZDECIDUS   = 0.75        !Coef for decidus trees
 !
 !*      0.3    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PRESP_BIOMASS,1),SIZE(PRESP_BIOMASS,2)) :: ZRESP_BIOMASS_LAST ! biomass at t-1 (kg/m2/s)
+REAL, DIMENSION(SIZE(PRESP_BIOMASS,1),SIZE(PRESP_BIOMASS,2)) :: ZRESP_BIOMASS_LAST ! biomass at t-1 (kg_DM/m2/day)
 REAL,    DIMENSION(SIZE(PLAI))    :: ZBIOMASS_LEAF   ! temporary leaf biomass 
 REAL,    DIMENSION(SIZE(PLAI))    :: ZBSLAI_NITRO    ! (Calvet et al. 2008) ratio of biomass to LAI
                                                      ! with representation of nitrogen dilution
@@ -216,12 +230,15 @@ REAL, DIMENSION(SIZE(PTG,1))      :: ZTG_SOIL     ! soil temperature   (C)
 REAL, DIMENSION(SIZE(PTG,1))      :: ZDG_SOIL     ! soil depth for DIF (m)
 REAL                              :: ZWGHT_SOIL   ! Weight for DIF (m)
 !
-LOGICAL, DIMENSION(SIZE(PLAI))    :: GTROP
+LOGICAL, DIMENSION(SIZE(PLAI))    :: GWOOD,GHERB
 LOGICAL, DIMENSION(SIZE(PLAI))    :: GMASK_AGRI
 LOGICAL                           :: GMASK
 INTEGER                           :: INI, INL, JI, JL, IDEPTH, JTYPE
 !
-REAL,    DIMENSION(SIZE(PVEGTYPE,2)) :: ZPARAM_TYPE
+REAL,    DIMENSION(SIZE(PVEGTYPE,1),SIZE(PVEGTYPE,2)) :: ZPARAM_TYPE
+!
+! * Azote
+REAL,    DIMENSION(SIZE(PLAI)) :: ZFERT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -237,10 +254,14 @@ INL=SIZE(PTG,2)
 !
 ZLOG2 = LOG(2.0)
 !
-ZTG_SOIL (:) = 0.0
+ZTG_SOIL(:) = 0.0
+ZTG_VEG (:) = 0.0
 !
-!Only for tropical forests
-GTROP (:) = (PVEGTYPE(:,NVT_TRBE) > 0.8)
+! Define herbaceous and woody patches
+GHERB(:) = ( PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBE) + PVEGTYPE(:,NVT_BONE)    &
+&          + PVEGTYPE(:,NVT_TRBD) + PVEGTYPE(:,NVT_TEBE) + PVEGTYPE(:,NVT_TENE)    &
+&          + PVEGTYPE(:,NVT_BOBD) + PVEGTYPE(:,NVT_BOND) + PVEGTYPE(:,NVT_SHRB)<0.5)
+GWOOD(:) = (.NOT.GHERB (:))
 !
 ! Mask where vegetation evolution is performed (just before solar midnight)
 GMASK = ( PTIME - PTSTEP < 0. ) .AND. ( PTIME >= 0. )
@@ -276,25 +297,44 @@ IF (GMASK) THEN
     ZBSLAI_NITRO(:  ) = PBSLAI_NITRO(:)  
 !
     IF(ONITRO_DILU)THEN
-!     Representation of nitrogen dilution fct of CO2 (Calvet et al. 2008)
-      ZPARAM_TYPE(:)=XPARAM(:)
-      IF(OAGRI_TO_GRASS)THEN
-        !All crops to grass
-        ZPARAM_TYPE(NVT_C3 )=XPARAM(NVT_GRAS)
-        ZPARAM_TYPE(NVT_C4 )=XPARAM(NVT_GRAS)
-        ZPARAM_TYPE(NVT_IRR)=XPARAM(NVT_GRAS)
+!
+!     * Compute Vegetation temperature
+!       We use the temperature of the second layer of the soil (<40cm)
+!       since the parametrization employs a daily temperature
+!
+      IF(HISBA/='DIF')THEN        
+        ZTG_VEG(:) = PTG(:,2)
+      ELSE       
+        DO JI=1,INI
+           IDEPTH=KWG_LAYER(JI)
+           ZDG_SOIL(JI)=MIN(ZDEPTH_VEG,PDG(JI,IDEPTH))
+        ENDDO  
+        DO JL=1,INL
+           DO JI=1,INI     
+              ZWGHT_SOIL=MIN(PDZG(JI,JL),MAX(0.0,ZDG_SOIL(JI)-PDG(JI,JL)+PDZG(JI,JL)))        
+              ZTG_VEG(JI)=ZTG_VEG(JI)+PTG(JI,JL)*ZWGHT_SOIL/ZDG_SOIL(JI)
+           ENDDO
+        ENDDO 
       ENDIF
-      ZPARAM(:)=0.0
+!
+      ZPARAM(:) = 0.0
+      ZFERT (:) = 0.0
       DO JTYPE=1,SIZE(PVEGTYPE,2)
-         DO JI = 1,INI
-            ZPARAM(JI) = ZPARAM(JI) + ZPARAM_TYPE(JTYPE) * PVEGTYPE(JI,JTYPE)
-         ENDDO
-      ENDDO    
+        DO JI = 1,INI
+            ZPARAM_TYPE(JI,JTYPE) = XDILUDEC(JTYPE) * (ZDECIDUS + 1.1 * ZPHOTON * XPARCF * PSWDIR(JI)       &
+                                  + (ZTG_VEG(JI)-XTT)/ZTEMP_VEG - 0.33 * ZFERT(JI))                         &
+                                  + (1 - XDILUDEC(JTYPE)) * (           1.1 * ZPHOTON * XPARCF * PSWDIR(JI) &
+                                  + (ZTG_VEG(JI)-XTT)/ZTEMP_VEG - 0.33 * ZFERT(JI))
+            ZPARAM(JI) = ZPARAM(JI) + ZPARAM_TYPE(JI,JTYPE) * PVEGTYPE(JI,JTYPE)
+        ENDDO 
+      ENDDO  
+
       WHERE((PCE_NITRO(:)*PCNA_NITRO(:)+PCF_NITRO(:))/=0.0.AND.PCNA_NITRO(:)/=0.0)
             ZCO2        (:) = P_CO2(:)*(XMD/(1.E-6*XMCO2))  ! (ppmm ->  ppm)
-            ZCNA_NITRO  (:) = PCNA_NITRO(:)*EXP(ZCDILU1*EXP(ZPARAM(:)-PCNA_NITRO(:)/ZCDILU2)*ALOG(ZCO2(:)/ZCDILU3))
+            ZCNA_NITRO  (:) = PCNA_NITRO(:)*EXP(ZCDILU1*EXP(ZPARAM(:)-PCNA_NITRO(:)/ZCDILU2)*ALOG(MAX(1.,ZCO2(:)/ZCDILU3)))
             ZBSLAI_NITRO(:) = 1. / (PCE_NITRO(:)*ZCNA_NITRO(:)+PCF_NITRO(:))
       ENDWHERE
+!
     ENDIF
 !    
     IF(ANY(PLAI(:)/=XUNDEF))THEN
@@ -339,7 +379,7 @@ IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB') THEN
   !
   ! * Respiration of structural biomass pools
   !
-  WHERE(GTROP(:))
+  WHERE(GWOOD(:))
   ! IBIS respiration with either respiration factor rwood=0.0125 - otherwise rroot=1.25 
   ! (Kucharik et al, 2000, eq 6-8) Soil temp in K         
     PRESP_BIOMASS(:,2) = PRESP_BIOMASS(:,2) + PBIOMASS(:,2) * PTSTEP &
@@ -364,7 +404,7 @@ IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB') THEN
         XCOEFF_MAINT_RESP_ZERO * (1. + XSLOPE_MAINT_RESP*(ZTG_VEG(:)-XTT))) * PTSTEP  
     PRESP_BIOMASS(:,3) = MIN(PRESP_BIOMASS(:,3), PBIOMASS(:,3))
     ! 
-    WHERE(GTROP(:))
+    WHERE(GWOOD(:))
     ! Resp IBIS (Soil temp in K)
       PRESP_BIOMASS(:,4) = PRESP_BIOMASS(:,4) + PBIOMASS(:,4) * PTSTEP &
                                               * MAX(0.,ZROOT_IBIS * EXP(ZCIBIS1*(ZCIBIS2-1./ZTG_SOIL(:)))/(ZNDAY*XDAY))
@@ -375,7 +415,7 @@ IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB') THEN
     !
     PRESP_BIOMASS(:,4) = MIN(PRESP_BIOMASS(:,4), PBIOMASS(:,4))
     !
-    WHERE(GTROP(:))
+    WHERE( (GWOOD(:)).AND.(PBIOMASS(:,5)>0.) )
     ! IBIS estimation of sapwood fraction based on the height of tree, sapspeed and 
     ! max transpiration rates. Conversion from DM to C. To be changed with DGVM.  (Soil temp in K)        
       ZHTREE(:) = 2.5*0.75*(PBIOMASS(:,1)+PBIOMASS(:,2)+PBIOMASS(:,3)+PBIOMASS(:,4)+PBIOMASS(:,5)+PBIOMASS(:,6))*0.4

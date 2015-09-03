@@ -132,7 +132,7 @@ REAL    :: ZLONMIN   ! minimum longitude (degrees)
 REAL    :: ZLONMAX   ! maximum longitude (degrees)
 REAL    :: ZLATMIN   ! minimum latitude  (degrees)
 REAL    :: ZLATMAX   ! maximum latitude  (degrees)
-REAL    :: ZGRID_RES ! 1deg or 0.5deg resolution
+REAL    :: ZGRID_RES ! 1° or 0.5° resolution
 !
 INTEGER :: ILON,ILAT
 INTEGER :: ILON_G, ILON_DEB, ILON_END
@@ -201,7 +201,7 @@ CALL GET_LONLAT_TRIP(TPG, &
 !
 IF(ZGRID_RES==1.0)THEN
 !
-  WRITE(NLISTING,*)'! 1deg by 1deg TRIP run !!!'
+  WRITE(NLISTING,*)'! 1° by 1° TRIP run !!!'
 !
   ILON_G = 360
   ILAT_G = 180
@@ -212,7 +212,7 @@ IF(ZGRID_RES==1.0)THEN
 !
 ELSEIF(ZGRID_RES==0.5)THEN
 !
-  WRITE(NLISTING,*)'! 0.5deg by 0.5deg TRIP run !!!'
+  WRITE(NLISTING,*)'! 0.5° by 0.5° TRIP run !!!'
 !
   ILON_G = 720
   ILAT_G = 360
@@ -224,7 +224,7 @@ ELSEIF(ZGRID_RES==0.5)THEN
 !
 ELSEIF(ZGRID_RES < 0.09)THEN
 !
-  WRITE(NLISTING,*)'!!! 1/12deg by 1/12deg TRIP run (FRANCE) !!!'
+  WRITE(NLISTING,*)'!!! 1/12° by 1/12° TRIP run (FRANCE) !!!'
 !
   ILON_G = 180
   ILAT_G = 108
@@ -237,15 +237,15 @@ ELSEIF(ZGRID_RES < 0.09)THEN
   YFILE_GW_READ = YFILE_GW_12D  
 !
   IF(XRATMED==1.4)THEN
-     WRITE(NLISTING,*)'! meandering ratio is the same than at 1deg resolution   !!!'
-     WRITE(NLISTING,*)'! change XRATMED in namelist                             !!!'
+     WRITE(NLISTING,*)'! meandering ratio is the same than at 1° resolution   !!!'   
+     WRITE(NLISTING,*)'! change XRATMED in namelist                           !!!'           
      CALL ABORT_TRIP('PREP_TRIP_RUN: meandering ratio not good')
   ENDIF 
 !
 ELSE
 !
-  WRITE(NLISTING,*)'! The resolution of the TRIP run is not good       !!!'
-  WRITE(NLISTING,*)'! Should be 1deg or 0.5deg or 1/12 deg over France !!!'
+  WRITE(NLISTING,*)'! The resolution of the TRIP run is not good !!!'   
+  WRITE(NLISTING,*)'! Should be 1° or 0.5° or 1/12 ° over France !!!'
   CALL ABORT_TRIP('PREP_TRIP_RUN: resolution of the TRIP run is not good')
 !  
 ENDIF
@@ -515,11 +515,11 @@ ZGREEN_ANT(:,:) = ZREAD(ILON_DEB:ILON_END,ILAT_DEB:ILAT_END)
 CALL WRITE_TRIP(NLISTING,YFILE_PARAM,YVAR,TPG%GMASK,ZGREEN_ANT)
 DO JLAT=1,ILAT
    DO JLON=1,ILON
-      IF(ZGREEN_ANT(JLON,JLAT)>0.0.AND.(ZLAT(JLAT)<0.0))THEN
+     IF(ZREAD(JLON,JLAT)==2.0)THEN
           TPG%GMASK_ANT(JLON,JLAT)=.TRUE.
-      ELSEIF(ZGREEN_ANT(JLON,JLAT)>0.0.AND.(ZLAT(JLAT)>=0.0))THEN
+     ELSEIF(ZREAD(JLON,JLAT)==1.0)THEN          
           TPG%GMASK_GRE(JLON,JLAT)=.TRUE.
-      ENDIF
+     ENDIF
    ENDDO
 ENDDO
 !

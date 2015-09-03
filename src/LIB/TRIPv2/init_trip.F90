@@ -123,7 +123,7 @@ REAL    :: ZLONMIN   ! minimum longitude (degrees)
 REAL    :: ZLONMAX   ! maximum longitude (degrees)
 REAL    :: ZLATMIN   ! minimum latitude  (degrees)
 REAL    :: ZLATMAX   ! maximum latitude  (degrees)
-REAL    :: ZGRID_RES ! 1deg or 0.5deg resolution
+REAL    :: ZGRID_RES ! 1° or 0.5° resolution
 !
 INTEGER :: IWORK, IFLOOD, INI, JLON, JLAT
 !
@@ -238,12 +238,12 @@ IF(MOD(PTSTEP_DIAG,XTSTEP)*MOD(XTSTEP,PTSTEP_DIAG)/=0.)THEN
   CALL ABORT_TRIP('INIT_TRIP: PTSTEP_DIAG and XTSTEP are not good !!!')
 ENDIF
 !
-WRITE(NLISTING,*)'! ',ZGRID_RES,'deg TRIP run !!!'
+WRITE(NLISTING,*)'! ',ZGRID_RES,'° TRIP run !!!'
 !
 IF(ZGRID_RES<0.5.AND.XRATMED==1.4)THEN
-     WRITE(NLISTING,*)'! meandering ratio is 1.4 at 0.5deg or 1deg resolution !!!'
-     WRITE(NLISTING,*)'! for other resolution change XRATMED in namelist      !!!'
-     CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5deg or 1deg resolution !!!')
+     WRITE(NLISTING,*)'! meandering ratio is 1.4 at 0.5° or 1° resolution !!!'   
+     WRITE(NLISTING,*)'! for other resolution change XRATMED in namelist  !!!' 
+     CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5° or 1° resolution !!!')
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -393,11 +393,11 @@ YVAR ='GREEN_ANT'
 CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
 DO JLAT=1,KLAT
    DO JLON=1,KLON
-      IF(ZREAD(JLON,JLAT)>0.0.AND.(ZLAT(JLAT)<0.0))THEN
+     IF(ZREAD(JLON,JLAT)==2.0)THEN
           TPG%GMASK_ANT(JLON,JLAT)=.TRUE.
-      ELSEIF(ZREAD(JLON,JLAT)>0.0.AND.(ZLAT(JLAT)>=0.0))THEN
+     ELSEIF(ZREAD(JLON,JLAT)==1.0)THEN
           TPG%GMASK_GRE(JLON,JLAT)=.TRUE.
-      ENDIF
+     ENDIF
    ENDDO
 ENDDO
 !
@@ -569,6 +569,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 ALLOCATE(ZHSTREAM(KLON,KLAT))
+ZHSTREAM(:,:) = 0.0
 !
 IF(CVIT == 'VAR')THEN       
 !
@@ -627,7 +628,8 @@ WRITE(NLISTING,*)''
 WRITE(NLISTING,*)'MEANDERING RATIO FIXED TO      ',XRATMED
 WRITE(NLISTING,*)'CELL LENGTH MIN, MAX (km):     ',MINVAL(TPG%XLEN/1.E3, TPG%GMASK),  &
                                                    MAXVAL(TPG%XLEN/1.E3, TPG%GMASK)
-WRITE(NLISTING,*)'CELL AREA MIN, MAX (km2):      ',MINVAL(TPG%XAREA/1.E6,TPG%GMASK),  &
+
+WRITE(NLISTING,*)'CELL AREA MIN, MAX (km²):      ',MINVAL(TPG%XAREA/1.E6,TPG%GMASK),  &
                                                    MAXVAL(TPG%XAREA/1.E6,TPG%GMASK)
 WRITE(NLISTING,*)''
 IF(CGROUNDW=='CST')THEN

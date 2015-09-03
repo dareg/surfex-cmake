@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE FLOOD_REDISTRIB (TP, TPG, &
-                                  KLON,KLAT,PPFLOOD,PEFLOOD,PIFLOOD,PRESIDU)  
+                                  KLON,KLAT,PREAD,PSRC_FLOOD,PRESIDU)  
 !     #####################################################################
 !
 !!****  *FLOOD_REDISTRIB*  
@@ -62,37 +62,27 @@ TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 INTEGER, INTENT(IN)               :: KLON
 INTEGER, INTENT(IN)               :: KLAT
 !
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PPFLOOD ![kg/m2]
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PEFLOOD ![kg/m2]
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PIFLOOD ![kg/m2]
+REAL, DIMENSION(:,:), INTENT(IN ) :: PREAD      ![kg/m2/s]
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSRC_FLOOD ![kg/m2/s]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PRESIDU
 !
 !
 !*      0.2    declarations of local variables
 !
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_P_IN
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_E_IN
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_I_IN
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_P_OUT
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_E_OUT
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_I_OUT
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_P_FACTOR
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_E_FACTOR
-REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_I_FACTOR
+REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_IN
+REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_OUT
+REAL,    DIMENSION(TPG%NBASMAX) :: ZBAS_FACTOR
 INTEGER, DIMENSION(TPG%NBASMAX) :: IBAS_NCELL
 !
-REAL,    DIMENSION(KLON,KLAT) :: ZPFLD_OUT
-REAL,    DIMENSION(KLON,KLAT) :: ZEFLD_OUT
-REAL,    DIMENSION(KLON,KLAT) :: ZIFLD_OUT
+REAL,    DIMENSION(KLON,KLAT) :: ZOUT
 INTEGER, DIMENSION(KLON,KLAT) :: ILOC_FLOOD_IN
 INTEGER, DIMENSION(KLON,KLAT) :: ILOC_FLUXE_IN
+LOGICAL, DIMENSION(KLON,KLAT) :: GCOLLOCATED
 !
 REAL :: ZFLOOD_AREA
 REAL :: ZTOT_AREA
 REAL :: ZRESIDU
-REAL :: ZP_IN,ZP_OUT
-REAL :: ZE_IN,ZE_OUT
-REAL :: ZI_IN,ZI_OUT
+REAL :: ZREAD_IN,ZREAD_OUT
 !
 LOGICAL :: GRETURN
 !
@@ -108,7 +98,10 @@ IF (LHOOK) CALL DR_HOOK('FLOOD_REDISTRIB',0,ZHOOK_HANDLE)
 ! * Init
 !-------------------------------------------------------------------------------
 !
-PRESIDU(:,:)=0.0
+PRESIDU   (:,:) = 0.0
+PSRC_FLOOD(:,:) = 0.0
+!
+GRETURN=.FALSE.
 !
 !-------------------------------------------------------------------------------
 ! * Redistribution or not ?
@@ -120,20 +113,12 @@ ELSEWHERE
   ILOC_FLOOD_IN(:,:)=0
 ENDWHERE
 !
-WHERE(TPG%GMASK(:,:).AND.(PPFLOOD(:,:)/=0.0.OR.PEFLOOD(:,:)/=0.0.OR.PIFLOOD(:,:)/=0.0))
+WHERE(TPG%GMASK(:,:).AND.PREAD(:,:)/=0.0)
   ILOC_FLUXE_IN(:,:)=1
 ELSEWHERE
   ILOC_FLUXE_IN(:,:)=0
 ENDWHERE
 !
-GRETURN=.TRUE.
-DO JLAT=1,KLAT
-   DO JLON=1,KLON
-      IF(ILOC_FLUXE_IN(JLON,JLAT)==1.AND.ILOC_FLOOD_IN(JLON,JLAT)==0)THEN
-        GRETURN=.FALSE.
-      ENDIF
-   ENDDO
-ENDDO
 !
 !-------------------------------------------------------------------------------
 ! * If floodplains at t and fluxes at t-1 are well co-localized : return
@@ -142,6 +127,28 @@ ENDDO
 IF(GRETURN)THEN
   IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
   RETURN
+ENDIF
+!
+IF(ALL(ILOC_FLUXE_IN(:,:)==0))THEN
+!
+   GRETURN=.TRUE.
+!
+ELSE
+!        
+   DO JLAT=1,KLAT
+      DO JLON=1,KLON
+         IF(ILOC_FLUXE_IN(JLON,JLAT)==ILOC_FLOOD_IN(JLON,JLAT))THEN
+           GCOLLOCATED(JLON,JLAT)=.TRUE.
+         ELSE
+           GCOLLOCATED(JLON,JLAT)=.FALSE.
+         ENDIF
+      ENDDO
+   ENDDO
+!
+   IF(ALL(GCOLLOCATED(:,:)))THEN
+     GRETURN=.TRUE.
+   ENDIF
+!
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -170,18 +177,14 @@ IF(ZFLOOD_AREA==0.0)THEN
   DO JLAT=1,KLAT
      DO JLON=1,KLON
         IF(TPG%GMASK(JLON,JLAT))THEN
-          ZTOT_AREA = ZTOT_AREA +                    TPG%XAREA(JLON,JLAT)
-          ZRESIDU   = ZRESIDU   + PPFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT) &
-                                - PEFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT) &
-                                - PIFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
+          ZTOT_AREA = ZTOT_AREA +                  TPG%XAREA(JLON,JLAT)
+          ZRESIDU   = ZRESIDU   + PREAD(JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg/s]
         ENDIF
      ENDDO
   ENDDO
 !
-  PRESIDU(:,:) = ZRESIDU / ZTOT_AREA ![kg/m2]
-  PPFLOOD(:,:) = 0.0
-  PEFLOOD(:,:) = 0.0
-  PIFLOOD(:,:) = 0.0
+  PRESIDU(:,:) = ZRESIDU * TPG%XAREA(:,:) / ZTOT_AREA ![kg/s]
+  PSRC_FLOOD(:,:) = 0.0  
 !
   IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
   RETURN
@@ -192,69 +195,44 @@ ENDIF
 ! * If flooded areas at time t, redistribute the redidue over each basin
 !-------------------------------------------------------------------------------
 !
-ZPFLD_OUT(:,:) = 0.0
-ZEFLD_OUT(:,:) = 0.0
-ZIFLD_OUT(:,:) = 0.0
+ZOUT(:,:) = 0.0
 !
 WHERE(TPG%GMASK(:,:).AND.TP%XFFLOOD(:,:)>0.0)
-   ZPFLD_OUT(:,:) = PPFLOOD(:,:)
-   ZEFLD_OUT(:,:) = PEFLOOD(:,:)
-   ZIFLD_OUT(:,:) = PIFLOOD(:,:)
+  ZOUT(:,:) = PREAD(:,:)
 ENDWHERE
 !
 ! Basin redistribution
 !
-ZBAS_P_IN(:)=0.0
-ZBAS_E_IN(:)=0.0
-ZBAS_I_IN(:)=0.0
+ZBAS_IN   (:) = 0.0
+ZBAS_OUT  (:) = 0.0
+IBAS_NCELL(:) = 0
 !
-ZBAS_P_OUT(:)=0.0
-ZBAS_E_OUT(:)=0.0
-ZBAS_I_OUT(:)=0.0
-!
-IBAS_NCELL(:)=0
-!
-DO JBAS=TPG%NBASMIN,TPG%NBASMAX
-   DO JLAT=1,KLAT
-      DO JLON=1,KLON
-         IF(TPG%NBASID(JLON,JLAT)==JBAS)THEN
-            IF(TP%XFFLOOD(JLON,JLAT)>0.0)THEN
-              IBAS_NCELL(JBAS)=IBAS_NCELL(JBAS)+1.0
-              ZBAS_P_OUT(JBAS)=ZBAS_P_OUT(JBAS)+PPFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
-              ZBAS_E_OUT(JBAS)=ZBAS_E_OUT(JBAS)+PEFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
-              ZBAS_I_OUT(JBAS)=ZBAS_I_OUT(JBAS)+PIFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
-            ENDIF
-            ZBAS_P_IN (JBAS)=ZBAS_P_IN(JBAS)+PPFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
-            ZBAS_E_IN (JBAS)=ZBAS_E_IN(JBAS)+PEFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
-            ZBAS_I_IN (JBAS)=ZBAS_I_IN(JBAS)+PIFLOOD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
-         ENDIF
-      ENDDO
+DO JLAT=1,KLAT
+   DO JLON=1,KLON
+      JBAS=TPG%NBASID(JLON,JLAT)
+      IF(JBAS>0)THEN
+        ZBAS_IN(JBAS)=ZBAS_IN(JBAS)+PREAD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
+      ENDIF
+      IF(TP%XFFLOOD(JLON,JLAT)>0.0)THEN
+        IBAS_NCELL(JBAS)=IBAS_NCELL(JBAS)+1.0
+        ZBAS_OUT  (JBAS)=ZBAS_OUT  (JBAS)+PREAD(JLON,JLAT)*TPG%XAREA(JLON,JLAT)
+      ENDIF
    ENDDO
 ENDDO
 !
-ZBAS_P_FACTOR(:)=1.0
-ZBAS_E_FACTOR(:)=1.0
-ZBAS_I_FACTOR(:)=1.0
 !
-WHERE(IBAS_NCELL(:)>0.AND.ZBAS_P_OUT(:)/=0.0)
-  ZBAS_P_FACTOR(:)=ZBAS_P_FACTOR(:)+(ZBAS_P_IN(:)-ZBAS_P_OUT(:))/ZBAS_P_OUT(:)
-ENDWHERE
-WHERE(IBAS_NCELL(:)>0.AND.ZBAS_E_OUT(:)/=0.0)
-  ZBAS_E_FACTOR(:)=ZBAS_E_FACTOR(:)+(ZBAS_E_IN(:)-ZBAS_E_OUT(:))/ZBAS_E_OUT(:)
-ENDWHERE
-WHERE(IBAS_NCELL(:)>0.AND.ZBAS_I_OUT(:)/=0.0)
-  ZBAS_I_FACTOR(:)=ZBAS_I_FACTOR(:)+(ZBAS_I_IN(:)-ZBAS_I_OUT(:))/ZBAS_I_OUT(:)
+ZBAS_FACTOR(:)=1.0
+!
+WHERE(IBAS_NCELL(:)>0.AND.ZBAS_OUT(:)/=0.0)
+  ZBAS_FACTOR(:)=ZBAS_FACTOR(:)+(ZBAS_IN(:)-ZBAS_OUT(:))/ZBAS_OUT(:)
 ENDWHERE
 !
-DO JBAS=TPG%NBASMIN,TPG%NBASMAX
-     DO JLAT=1,KLAT
-        DO JLON=1,KLON
-           IF(TPG%NBASID(JLON,JLAT)==JBAS)THEN
-             ZPFLD_OUT(JLON,JLAT) = ZPFLD_OUT(JLON,JLAT) * ZBAS_P_FACTOR(JBAS)
-             ZEFLD_OUT(JLON,JLAT) = ZEFLD_OUT(JLON,JLAT) * ZBAS_E_FACTOR(JBAS)
-             ZIFLD_OUT(JLON,JLAT) = ZIFLD_OUT(JLON,JLAT) * ZBAS_I_FACTOR(JBAS)
-           ENDIF
-        ENDDO
+DO JLAT=1,KLAT
+   DO JLON=1,KLON
+      JBAS=TPG%NBASID(JLON,JLAT)
+      IF(JBAS>0)THEN
+        ZOUT(JLON,JLAT) = ZOUT(JLON,JLAT) * ZBAS_FACTOR(JBAS)
+      ENDIF
      ENDDO
 ENDDO
 !
@@ -262,35 +240,22 @@ ENDDO
 ! * Ensure final global conservation
 !-------------------------------------------------------------------------------
 !
-ZP_IN = 0.0
-ZE_IN = 0.0
-ZI_IN = 0.0
-!
-ZP_OUT = 0.0
-ZE_OUT = 0.0
-ZI_OUT = 0.0
+ZREAD_IN = 0.0
+ZREAD_OUT= 0.0
 !
 DO JLAT=1,KLAT
    DO JLON=1,KLON
       IF(TPG%GMASK(JLON,JLAT))THEN
-        ZP_IN  = ZP_IN  + PPFLOOD  (JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
-        ZE_IN  = ZE_IN  + PEFLOOD  (JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
-        ZI_IN  = ZI_IN  + PIFLOOD  (JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
-        ZP_OUT = ZP_OUT + ZPFLD_OUT(JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
-        ZE_OUT = ZE_OUT + ZEFLD_OUT(JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
-        ZI_OUT = ZI_OUT + ZIFLD_OUT(JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg]
+        ZREAD_IN  = ZREAD_IN  + PREAD(JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg/s]
+        ZREAD_OUT = ZREAD_OUT + ZOUT (JLON,JLAT)*TPG%XAREA(JLON,JLAT) ![kg/s]              
       ENDIF
    ENDDO
 ENDDO
 !
 WHERE(TPG%GMASK(:,:).AND.TP%XFFLOOD(:,:)>0.0)
-  PPFLOOD(:,:)=ZPFLD_OUT(:,:) + (ZP_IN-ZP_OUT)/ZFLOOD_AREA ![kg/m2]
-  PEFLOOD(:,:)=ZEFLD_OUT(:,:) + (ZE_IN-ZE_OUT)/ZFLOOD_AREA ![kg/m2]
-  PIFLOOD(:,:)=ZIFLD_OUT(:,:) + (ZI_IN-ZI_OUT)/ZFLOOD_AREA ![kg/m2]
+  PSRC_FLOOD(:,:) = ZOUT(:,:) + (ZREAD_IN-ZREAD_OUT)/ZFLOOD_AREA ![kg/m2/s]
 ELSEWHERE
-  PPFLOOD(:,:)=0.0
-  PEFLOOD(:,:)=0.0
-  PIFLOOD(:,:)=0.0
+  PSRC_FLOOD(:,:)=0.0        
 ENDWHERE
 !
 !-------------------------------------------------------------------------------

@@ -129,8 +129,8 @@ REAL, DIMENSION(SIZE(PDG,1))              ::  ZREFDEPTH,ZF_BCOEF,ZF_MPOTSAT,    
                                               ZF_WSAT,ZF_CONDSAT,ZF_WFC,        &
                                               ZF_WWILT, ZF_WD0, ZF_ANISO
 
-REAL :: ZA, ZB, ZLOG1, ZLOG2, ZLOG3, ZMOSS_DENSITY,  &
-        ZTOP, ZSUB, ZINF, ZFTOP, ZFSUB                                 
+REAL :: ZA, ZB, ZLOG1, ZLOG2, ZMOSS_DENSITY,  &
+        ZTOP, ZSUB, ZFTOP, ZFSUB                                 
 !
 REAL, DIMENSION(2) :: ZLOG_CONDSAT,ZLOG_BCOEF,ZLOG_MPOTSAT, &
                       ZLOG_WSAT,ZLOG_WFC,ZLOG_WWILT,ZLOG_WD0,&
@@ -148,10 +148,13 @@ INI=SIZE(PDG,1)
 INL=SIZE(PDG,2)
 INP=SIZE(PDG,3)
 !
-ZMASK    (:)  =0.0
+ZMASK   (:) = 0.0
+ZRHO_TOP(:) = 0.0
+ZRHO_SUB(:) = 0.0
+ZRHO_INF(:) = 0.0
 !
-ZDG_SOIL (:,:)=0.0
-ZRHO_SOC (:,:)=0.0
+ZDG_SOIL(:,:) = 0.0
+ZRHO_SOC(:,:) = 0.0
 !
 ZPEAT_RHO    (:,:  )=0.0
 ZPEAT_BCOEF  (:,:  )=0.0
@@ -210,20 +213,16 @@ ENDDO
 !
 ! Compute the SOC density distribution (kg.m-3)
 !
-ZLOG1=LOG(ZDGHWSD_TOP)
-ZLOG2=LOG(ZDGHWSD_SUB)
-ZLOG3=LOG(ZDGHWSD_INF)
+ZLOG1=LOG(ZDGHWSD_TOP/ZDGHWSD_SUB)
+ZLOG2=LOG(ZDGHWSD_INF/ZDGHWSD_SUB)
 DO JI=1,INI
    IF(ZMASK(JI)>0.0)THEN
      ZRHO_TOP(JI) = PSOC(JI,1)/ZDGHWSD_TOP
-     ZRHO_SUB(JI) = PSOC(JI,2)/(ZDGHWSD_SUB-ZDGHWSD_TOP)
+     ZRHO_SUB(JI) = PSOC(JI,2)/(ZDGHWSD_SUB-ZDGHWSD_TOP)           
      IF(ZRHO_TOP(JI)>ZRHO_SUB(JI))THEN
-       ZTOP         = PSOC(JI,1)
-       ZSUB         = PSOC(JI,1)+PSOC(JI,2)
-       ZA           = (LOG(ZTOP)-LOG(ZSUB))/(ZLOG1-ZLOG2)
-       ZB           = ZSUB/EXP(ZA*ZLOG2)
-       ZINF         = ZB*EXP(ZA*ZLOG3)
-       ZRHO_INF(JI) = (ZINF-ZSUB)/(ZDGHWSD_INF-ZDGHWSD_SUB)
+       ZB           = LOG(PSOC(JI,1)/(PSOC(JI,1)+PSOC(JI,2)))/ZLOG1
+       ZA           = (PSOC(JI,1)+PSOC(JI,2))/(ZDGHWSD_INF-ZDGHWSD_SUB)
+       ZRHO_INF(JI) = ZA*(EXP(ZB*ZLOG2)-1.0)
      ELSE
        ZRHO_INF(JI) = ZRHO_SUB(JI)
      ENDIF
@@ -337,8 +336,8 @@ DO JL=1,INL
        PFRACSOC (JI,JL  ) = MIN(1.0,ZRHO_SOC(JI,JL)/ZPEAT_RHO(JI,JL))   
 !      New soil thermal properties      
        PHCAPSOIL(JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PHCAPSOIL(JI,JL) + PFRACSOC(JI,JL)*XOMRHO*XOMSPH
-       PCONDDRY (JI,JL  ) = 1.0/((1.0-PFRACSOC(JI,JL))/PCONDDRY (JI,JL) + PFRACSOC(JI,JL)/XOMCONDDRY)
-       PCONDSLD (JI,JL  ) = 1.0/((1.0-PFRACSOC(JI,JL))/PCONDSLD (JI,JL) + PFRACSOC(JI,JL)/XOMCONDSLD)
+       PCONDDRY (JI,JL  ) = (PCONDDRY(JI,JL)**(1.0-PFRACSOC(JI,JL))) * (XOMCONDDRY**PFRACSOC(JI,JL))
+       PCONDSLD (JI,JL  ) = (PCONDSLD(JI,JL)**(1.0-PFRACSOC(JI,JL))) * (XOMCONDSLD**PFRACSOC(JI,JL))
 !      New soil hydraulic properties
        PBCOEF   (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PBCOEF   (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_BCOEF  (JI,JL)
        PMPOTSAT (JI,JL  ) = (1.0-PFRACSOC(JI,JL))*PMPOTSAT (JI,JL) + PFRACSOC(JI,JL)*ZPEAT_MPOTSAT(JI,JL)

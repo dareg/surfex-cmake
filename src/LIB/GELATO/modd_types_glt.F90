@@ -498,6 +498,12 @@ TYPE t_dia
 ! Sea ice mass change due to dynamic processes [kg.m-2.s-1]
   REAL ::  &
         ddi
+! Sea ice mass change due to the constraint [kg.m-2.s-1]
+  REAL ::  &
+        dci
+! Sea ice concentration for constraint [%] 
+  REAL ::  &
+        cst
 ! Sea ice fresh water content change for all glt_thermo processes [kg.m-2.s-1]
   REAL ::  &
         dwi

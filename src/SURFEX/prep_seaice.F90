@@ -45,6 +45,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_GET_LUOUT
 USE MODI_GET_TYPE_DIM_N
+USE MODI_GLTOOLS_READNAM
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
@@ -103,6 +104,9 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !*      1.     Interpret namelist
 !
 S%CSEAICE_SCHEME=CPREP_SEAICE_SCHEME
+IF ( S%CSEAICE_SCHEME == 'GELATO' ) THEN
+  CALL GLTOOLS_READNAM(.FALSE.,ILUOUT)
+ENDIF
 !
 S%LHANDLE_SIC = .FALSE.
 IF(TRIM(S%CSEAICE_SCHEME)/='NONE' .OR. TRIM(S%CINTERPOL_SIC)/='NONE' )THEN
@@ -135,10 +139,8 @@ ENDIF
 !
 IF(S%LINTERPOL_SIC)THEN
    !
-   ! Precedent, Current and Next Monthly SIC
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SIC
-   IF(TRIM(S%CINTERPOL_SIC)=='ANNUAL')INMTH=14
+   ! Precedent, Current, Next, and Second-next Monthly SIC
+   INMTH=4
    !
    ALLOCATE(S%XSIC_MTH(SIZE(S%XSIC),INMTH))
    DO JMTH=1,INMTH
@@ -149,10 +151,8 @@ ENDIF
 !
 IF(S%LINTERPOL_SIT)THEN
    !
-   ! Precedent, Current and Next Monthly SIT
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SIT
-   IF(TRIM(S%CINTERPOL_SIT)=='ANNUAL')INMTH=14
+   !Precedent, Current, Next, and Second-next Monthly SIT
+   INMTH=4
    !
    ALLOCATE(S%XSIT_MTH(SIZE(S%XSIC),INMTH))
    DO JMTH=1,INMTH
@@ -164,7 +164,6 @@ ENDIF
 !
 !*      Creating default initial state for Gelato 
 !
-!WRITE(ILUOUT,*) ' NO FILE PROVIDED FOR SEAICE MODEL PROGNOSTIC FIELDS  -> Creating a default initial state for Gelato'
 !
 CALL GET_TYPE_DIM_n(DTCO, U, &
                     'SEA   ',nx)

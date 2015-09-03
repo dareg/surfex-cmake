@@ -33,7 +33,7 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 ! =======================================================================
-! ======================== MODULE modi_glt_thermo_r =========================
+! ======================= MODULE modi_glt_thermo_r ======================
 ! =======================================================================
 !
 !
@@ -62,6 +62,12 @@
 !           functionalities to thermo_ice and gelato.
 ! Modified: 2009/06 (D. Salas y Melia)
 !           Reduced grid version 
+! Modified: 2015/06 (D. Salas y Melia)
+!           The constrain of sea ice with a climatology is now applied 
+!           after the thermodynamics (and outside the present routine). 
+!           If Gelato is activated in ARPEGE/Surfex, the atmospheric code 
+!           will therefore "see" surface conditions closer to the used 
+!           climatology.
 !
 ! ------------------- BEGIN MODULE modi_glt_thermo_r ------------------------
 
@@ -111,7 +117,7 @@
 !
 SUBROUTINE glt_thermo_r  &
   ( tpdom,pustar,tpmxl,tpatm,  &
-    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d )
+    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil )
 !
 !
 ! 1. DECLARATIONS
@@ -161,8 +167,6 @@ SUBROUTINE glt_thermo_r  &
         tpsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
         tpsil
-  TYPE(t_sit), DIMENSION(ntd,np), OPTIONAL, INTENT(in) ::  &
-        tpsit_d
 !
 !
 ! 1.3. Local variables declarations
@@ -222,13 +226,6 @@ SUBROUTINE glt_thermo_r  &
   tpdia(:)%dsa = SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi*tpsit(:,:)%ssi, DIM=1 )
 !
 !
-! 1.6. Damping / restoring of sea ice 
-! ------------------------------------
-!
-  IF ( PRESENT(tpsit_d) )  &
-    CALL glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
-!
-!
 !
 ! 2. LEADS THERMODYNAMICS
 ! =======================
@@ -275,7 +272,7 @@ SUBROUTINE glt_thermo_r  &
 ! ----------
 !
 ! .. Check sea ice model thermodynamics energy balance : compute the
-! total gltools_enthalpy, latent heat and stored heat of sea ice.
+! total enthalpy, latent heat and stored heat of sea ice.
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_thermo_lead_r / Before THERMO_ICE_R:',  &
@@ -328,13 +325,13 @@ SUBROUTINE glt_thermo_r  &
 ! 4.3. Compute some diagnostics
 ! ------------------------------
 !
-! This is done even if glt_updbud flag is off, to allow the computation
+! This is done even if updbud flag is off, to allow the computation
 ! of certain diagnostics if wished by the user. 
 !
   CALL glt_updbud_r( 0,'After THERMO_END_R:',  &
     tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud )
 !
-! Compute change in stored latent heat and gltools_enthalpy in sea ice/snow
+! Compute change in stored latent heat and enthalpy in sea ice/snow
 ! due to thermodynamic processes
 !
   tpdia(:)%the = ( tpbud(:)%enn - tpbud(:)%eni ) / dtt
@@ -369,8 +366,9 @@ SUBROUTINE glt_thermo_r  &
   CALL glt_aventh( tpsit,tpsil,tpdia%sie,tpdia%sne )
 !
 !
-! 4.4. Farewell message
-! ---------------------
+!
+! 6. FAREWELL MESSAGE
+! ====================
 !
   IF (lp1) THEN
     WRITE(noutlu,*) ' '
@@ -384,5 +382,5 @@ SUBROUTINE glt_thermo_r  &
 !
 END SUBROUTINE glt_thermo_r
 
-! ---------------------- END SUBROUTINE glt_thermo_r ------------------------
+! --------------------- END SUBROUTINE glt_thermo_r ---------------------
 ! -----------------------------------------------------------------------

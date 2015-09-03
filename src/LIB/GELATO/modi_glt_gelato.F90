@@ -80,7 +80,7 @@
 !
 !
 ! -----------------------------------------------------------------------
-! ------------------------- SUBROUTINE glt_gelato ---------------------------
+! ----------------------- SUBROUTINE glt_gelato -------------------------
 !
 SUBROUTINE glt_gelato( tpglt )
 !
@@ -212,23 +212,20 @@ CALL glt_updbud( 1,'Initial conditions:',  &
 ! 4. Sea ice and leads thermodynamics
 ! ====================================
 !
-IF ( nthermo==1 ) THEN
-!
-  IF ( ntd==0 ) THEN
+IF ( ntd==0 ) THEN
 !
 ! .. Thermodynamics without sea ice constraint
 !
-    CALL glt_thermo  &
-      ( tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
-      tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil )
-  ELSE
+  CALL glt_thermo  &
+    ( tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+    tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil )
+ELSE
 ! 
 ! .. Thermodynamics with sea ice constraint (no energy conservation)
 !
-    CALL glt_thermo  &
-      ( tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
-      tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil,tpsit_d=tpglt%sit_d )
-  ENDIF
+  CALL glt_thermo  &
+    ( tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+    tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil,tpsit_d=tpglt%sit_d )
 ENDIF
 !
 CALL gltools_timers('end thermo') 
@@ -242,5 +239,5 @@ ENDIF
 !
 END SUBROUTINE glt_gelato
 !
-! ======================== END SUBROUTINE glt_gelato ========================
+! ====================== END SUBROUTINE glt_gelato ======================
 ! =======================================================================

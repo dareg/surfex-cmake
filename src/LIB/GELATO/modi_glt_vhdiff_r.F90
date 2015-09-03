@@ -725,7 +725,7 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
   END DO         ! End of loop on grid cells
 !
 ! .. Change sign of pcondb
-  IF (lwg) THEN
+  IF (lp1) THEN
     ztot_ice_snow= np*nt+SUM(icv,MASK=icv<0)
     WRITE(noutlu,*)
     WRITE(noutlu,*) '                         ** WARNING **'

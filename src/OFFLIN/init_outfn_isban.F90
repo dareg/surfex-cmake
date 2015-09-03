@@ -942,7 +942,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   DO JLAYER=1,INLVLS
     WRITE(YPAS,'(I3)') JLAYER
     YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-    IF (I%TSNOW%SCHEME=='3-L') THEN  
+    IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN  
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SNOWTEMP'//YLVL,  'Snow_Temp_layer'//YLVL         , IDDIM, YATT_TITLE, (/'K'/))
       CALL DEF_VAR_NETCDF(DGU, &
@@ -999,7 +999,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     YATT = '-'
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'FFLOOD_ISBA'  ,'Potential_floodplain_grid-cell_fraction' ,JDIM,YATT_TITLE,YATT)
-    YATT (1)='kg/m2s'
+    YATT (1)='kg/m2'
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'PIFLOOD_ISBA' ,'Potential_floodplain_infiltration',JDIM,YATT_TITLE,YATT)     
   ENDIF
@@ -1561,7 +1561,7 @@ ELSEIF(DGI%LPGD)THEN
     WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'DG'//YLVL   ,'soil_depth_layer_'//YLVL ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
-    IF(I%NPATCH>1)THEN
+    IF(INPATCH>1)THEN
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'DG'//YLVL(:LEN_TRIM(YLVL))//'_ISBA', &
                           'averaged_soil_depth_layer_'//YLVL,IDDIM(1:1),YATT_TITLE,(/'m'/))
@@ -1587,7 +1587,7 @@ ELSEIF(DGI%LPGD)THEN
                       IFILE_ID,'RUNOFFD'   ,'Runoff_depth_in_ISBA-DIF'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'DTOT_DIF'  ,'Total_soil_depth_for_moisture_in_ISBA-DIF',IDDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
-    IF(I%NPATCH>1)THEN
+    IF(INPATCH>1)THEN
      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'DG2_DIF_ISBA','averaged_DG2_depth_in_ISBA-DIF'                    ,IDDIM(1:1),YATT_TITLE,(/'m'/))
      CALL DEF_VAR_NETCDF(DGU, &
@@ -1610,7 +1610,7 @@ ELSEIF(DGI%LPGD)THEN
       DO JLAYER=1,INLVLD
          WRITE(YPAS,'(I3)') JLAYER ; YLVL=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
          CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'FRACSOC'//YLVL,'SOC_fraction_layer_'//YLVL,IDDIM(1:1),YATT_TITLE,(/'-'/))
+                      IFILE_ID,'FRACSOC'//YLVL,'SOC_fraction_layer_'//YLVL,IDDIM(1:2),YATT_TITLE,(/'-'/))
       ENDDO
     ENDIF
   ENDIF
@@ -1621,11 +1621,20 @@ ELSEIF(DGI%LPGD)THEN
   ENDIF   
   !    
   DO JVEG=1,NVEGTYPE
-    WRITE(YPAS,'(i2)') JVEG 
-    YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-    CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'VEGTYPE_P'//YLVLV,'fraction_of_vegetation_type_'//YLVLV ,IDDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))
+     WRITE(YPAS,'(i2)') JVEG 
+     YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+     CALL DEF_VAR_NETCDF(DGU,&
+             IFILE_ID,'VEGTYPE'//YLVLV,'fraction_of_vegtype_in_the_grid_cell',IDDIM(1:1),YATT_TITLE,(/'-'/))
   ENDDO
+  !    
+  IF(INPATCH>1.AND.NVEGTYPE/=INPATCH)THEN
+    DO JVEG=1,NVEGTYPE
+      WRITE(YPAS,'(i2)') JVEG 
+      YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+      CALL DEF_VAR_NETCDF(DGU,&
+               IFILE_ID,'VEGTY_P'//YLVLV,'fraction_of_vegtype_in_each_patch'//YLVLV,IDDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))
+      ENDDO
+  ENDIF
   !
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'EMIS_ISBA'   ,'Emissivity_Of_Vegetation'           ,IDDIM,YATT_TITLE,YATT)

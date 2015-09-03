@@ -707,7 +707,7 @@ IF(LEN_TRIM(YPERM)/=0.OR.XUNIF_PERM/=XUNDEF)THEN
     CALL END_IO_SURF_n(YPERMFILETYPE)
   ELSE
     CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'permafrost','NAT',YPERM,YPERMFILETYPE,XUNIF_PERM,I%XPERM(:))
+                  HPROGRAM,'permafrost mask','NAT',YPERM,YPERMFILETYPE,XUNIF_PERM,I%XPERM(:))
   ENDIF
 !
 ELSE
@@ -717,7 +717,7 @@ ELSE
 !
 ENDIF
 !
-!*    11.     Permafrost distribution
+!*    11.     Groundwater bassin distribution
 !             -----------------------
 !
 IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
@@ -753,7 +753,7 @@ IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
     CALL END_IO_SURF_n(YGWFILETYPE)
   ELSE
     CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'permafrost','NAT',YGW,YGWFILETYPE,XUNIF_GW,I%XGW(:))
+                  HPROGRAM,'Groundwater bassin','NAT',YGW,YGWFILETYPE,XUNIF_GW,I%XGW(:))
   ENDIF
 !
 ELSE

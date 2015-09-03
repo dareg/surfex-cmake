@@ -512,6 +512,8 @@ SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia)
   tpdia(:,:)%ddn = 0.
   tpdia(:,:)%dsi = 0.
   tpdia(:,:)%ddi = 0.
+  tpdia(:,:)%dci = 0.
+  tpdia(:,:)%cst = 0.
   tpdia(:,:)%dwi = 0.
   tpdia(:,:)%lip = 0.
   tpdia(:,:)%lsi = 0.

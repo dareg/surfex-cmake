@@ -64,17 +64,8 @@ SUBROUTINE COUPLING_ISBA_n (AG, CHI, DTCO, DTI, DTGD, DTGR, DGEI, DGI, DGMI, DST
 !!                   07/2013 Surface / Water table depth coupling
 !!      P Samuelsson 10/2014 : MEB
 !!      P. LeMoigne  12/2014 EBA scheme update
+!!      R. Seferian  05/2015 : Add coupling fiels to vegetation_evol call
 !!-------------------------------------------------------------------
-!
-!
-!
-!
-!
-!
-!
-!
-!
-!
 !
 USE MODD_AGRI_n, ONLY : AGRI_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -239,7 +230,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizonta
 REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
-REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/kg)
+REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg_CO2/m3)
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -1093,7 +1084,10 @@ IF (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NC
                        PKI%XP_Z0EFFIM, PKI%XP_Z0EFFJP, PKI%XP_Z0EFFJM, PKI%XP_LAI, PKI%XP_VEG,        &
                        PKI%XP_Z0, PKI%XP_ALBNIR, PKI%XP_ALBVIS, PKI%XP_ALBUV, PKI%XP_EMIS,            &
                        PKI%XP_ANFM, PKI%XP_ANDAY, PKI%XP_BIOMASS, PKI%XP_RESP_BIOMASS,            &
-                       ZP_RESP_BIOMASS_INST, PKI%XP_INCREASE, PKI%XP_TURNOVER             )  
+                       ZP_RESP_BIOMASS_INST, PKI%XP_INCREASE, PKI%XP_TURNOVER, &
+                       ! add optional for accurate dependency to nitrogen
+                       ! limitation
+                        PSWDIR=ZP_GLOBAL_SW ) 
 END IF
 !
 !

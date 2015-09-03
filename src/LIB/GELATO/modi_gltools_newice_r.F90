@@ -128,7 +128,7 @@ SUBROUTINE gltools_newice_r  &
 ! ---------------------------------
 !
   INTEGER ::  &
-        jl,jk,jp, nbcorr
+        jl,jk,jp
   REAL, DIMENSION(nt,np) ::  &
         ztsf,zssi,zhsn,zrsn,zasn
   REAL, DIMENSION(nl,nt,np) ::  &
@@ -172,7 +172,7 @@ SUBROUTINE gltools_newice_r  &
     ENDWHERE
   ENDIF
 !
-! .. For gltools_enthalpy, assume that the temperature is equal to surface temperature
+! .. For enthalpy, assume that the temperature is equal to surface temperature
 ! over the vertical
   IF ( PRESENT(pent) ) THEN 
     zent(:,:,:) = pent(:,:,:)
@@ -188,17 +188,6 @@ SUBROUTINE gltools_newice_r  &
 !
 ! ..Sea ice 3D variables. 
 !
-  nbcorr=0
-  DO jp=1,np
-    DO jk=1,nt
-      IF ( pfsi(jk,jp)>=epsil1 .AND. tpsit(jk,jp)%fsi<=epsil1 ) THEN
-        if (lp2) write(noutlu,*), 'jk=',jk,'jp=',jp, 'CORRECTION'
-        nbcorr=nbcorr + 1
-      ENDIF 
-    END DO
-  END DO
-  if (lp1) write(noutlu,*), "newice : correction occurred on ",nbcorr, "grid cells"
-
   WHERE( pfsi(:,:)>=epsil1 .AND. tpsit(:,:)%fsi<=epsil1 )
     tpsit(:,:)%esi = .TRUE.
     tpsit(:,:)%age = 0.

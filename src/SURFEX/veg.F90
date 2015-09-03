@@ -49,12 +49,13 @@ SUBROUTINE VEG( PSW_RAD, PTA, PQA, PPS, PRGL, PLAI, PRSMIN,              &
 !!     (V. Masson)    28/08/98    add PF2 for Calvet (1998) CO2 computations
 !!     (V. Masson)    01/03/03    puts PF2 in a separate routine
 !!     (A. Boone)     21/1&/11    Rs_max in MODD_ISBA_PAR
+!!     (B. Decharme)     07/15    Add numerical adjustement for F2 soilstress function
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_PAR, ONLY : XRS_MAX
+USE MODD_ISBA_PAR, ONLY : XRS_MAX, XDENOM_MIN
 USE MODE_THERMOS
 !
 !
@@ -84,7 +85,7 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PRS      ! ground stomatal resistance
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSW_RAD)) :: ZF, ZF1, ZF3, ZF4
+REAL, DIMENSION(SIZE(PSW_RAD)) :: ZF, ZF1, ZF2, ZF3, ZF4
 !                                           temporary factors necessary to 
 !                                           calculate the surface stomatao resistance
 !
@@ -94,23 +95,39 @@ REAL, DIMENSION(SIZE(PSW_RAD)) :: ZQSAT
 !
 !*      0.3    declarations of local parameters:
 !
-REAL, PARAMETER                :: ZDENOM_MIN  = 1.E-6 ! minimum denominator: 
-!                                                     ! numerical factor to prevent division by 0
-REAL, PARAMETER                :: ZFACTR_MIN  = 1.E-3 ! minimum value for some parameters
-!                                                     ! to prevent from being too small 
-REAL, PARAMETER                :: ZRS_MIN     = 1.E-4 ! minimum canopy resistance (s m-1)
+REAL, PARAMETER                :: ZFACTR_MIN  = 1.E-3  ! minimum value for some parameters
+!                                                      ! to prevent from being too small 
+REAL, PARAMETER                :: ZRS_MIN     = 1.E-4  ! minimum canopy resistance (s m-1)
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('VEG',0,ZHOOK_HANDLE)
 !
 !*       1.     THE 'ZF1' FACTOR
 !               ---------------
 !                                      This factor measures the influence
 !                                      of the photosynthetically active radiation
 !
-IF (LHOOK) CALL DR_HOOK('VEG',0,ZHOOK_HANDLE)
-ZF(:)  = 0.55*2.*PSW_RAD(:) / (PRGL(:)+ ZDENOM_MIN ) / ( PLAI(:)+  ZDENOM_MIN )
+ZF(:)  = 0.55*2.*PSW_RAD(:) / (PRGL(:)+ XDENOM_MIN ) / ( PLAI(:)+  XDENOM_MIN )
+!
 ZF1(:) = ( ZF(:) + PRSMIN(:)/XRS_MAX) /( 1. + ZF(:) )
-ZF1(:) = MAX( ZF1(:), ZDENOM_MIN  )
+ZF1(:) = MAX( ZF1(:), XDENOM_MIN  )
+!
+!-------------------------------------------------------------------------------
+!
+!*       2.     THE 'ZF2' FACTOR
+!               ----------------
+!
+!               This factor takes into account the effect
+!               of the water stress on the surface
+!               resistance (see soilstress.F90)
+!
+! - For intermediate soils it ranges (F2_min =< F2 <= 1):
+!   where F2_min is a small numerical threshold
+!
+ZF2(:) = MAX(XDENOM_MIN,PF2(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -144,11 +161,12 @@ ZF4(:) = MAX( 1.0 - 0.0016*(298.15-PTA(:))**2, ZFACTR_MIN )
 ! use Jarvis-resistance (in standard ISBA version):
 ! otherwise use Jacobs/ISBA-Ags method (see routine COTWORES)
 !
-PRS(:) = PRSMIN(:) / ( PLAI(:)+ ZDENOM_MIN )          &
-            / ZF1(:) / PF2(:) /ZF3(:) / ZF4(:)  
+PRS(:) = PRSMIN(:) / ( PLAI(:)+ XDENOM_MIN )          &
+            / ZF1(:) / ZF2(:) /ZF3(:) / ZF4(:)  
 !
 PRS(:) = MIN( PRS(:), XRS_MAX)
 PRS(:) = MAX( PRS(:), ZRS_MIN)
+!
 IF (LHOOK) CALL DR_HOOK('VEG',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

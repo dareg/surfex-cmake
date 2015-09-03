@@ -42,6 +42,7 @@
 ! from those read.
 !
 ! Created : 2004/01 (D. Salas y Melia)
+! Modified: 2015/07 (S. Senesi & D. Salas y Melia) Insertion in Surfex
 !
 ! -------------------- BEGIN MODULE modi_gltools_readnam ------------------
 !
@@ -92,7 +93,7 @@ CHARACTER(1000) ::  &
 INTEGER ::  &
   iparlu,iok,infld,jl,icount, ierr
 LOGICAL :: &
-     LREAD  ! Will we try to read
+  gmandatory,gread
 INTEGER, DIMENSION(:), ALLOCATABLE ::  &
   ilistfound 
 REAL :: zjl
@@ -105,257 +106,261 @@ REAL :: zjl
 !  Init default values
 !
 dttave= 365. ! days 
-LREAD=.TRUE.
+gread=.TRUE.
 !
 !
 ! .. Try to open the parameter file
 !
 iparlu = 1
 !
+IF (PRESENT(hmandatory)) THEN
+  gmandatory = hmandatory
+ELSE
+  gmandatory = .TRUE.
+ENDIF
+!
 OPEN( UNIT=iparlu, FILE=TRIM(ADJUSTL(ypinpfile)), STATUS='OLD', &
-     FORM='FORMATTED' , ERR= 230, IOSTAT=ierr)
+  FORM='FORMATTED' , ERR= 230, IOSTAT=ierr)
 230 CONTINUE
 IF (ierr /= 0 ) THEN  ! File not found , or any other issue
-   IF (PRESENT(hmandatory) .AND. hmandatory) THEN
-      WRITE(*,*) "*** GELATO/readnam : issue opening gltpar "
-      WRITE(*,*) 'We stop.'
-      STOP
-   ELSE
-      LREAD=.FALSE.
-   ENDIF
+  IF ( gmandatory ) THEN
+    WRITE(*,*) "*** GELATO/readnam : issue opening gltpar "
+    WRITE(*,*) 'We stop.'
+    STOP
+  ELSE
+    gread=.FALSE.
+  ENDIF
 ENDIF
-
-IF (LREAD) THEN
+!
+IF (gread) THEN
 !
 !   WRITE(*,*) "*** GELATO/readnam : gltpar found"
 ! Code below is purposely not indented , for easy comparison with previous version
 !
 ! .. Introductory message
 !
-IF (lp1) WRITE(*,*) '       ----------------------------------------'
-IF (lp1) WRITE(*,*) '        glt_gelato : READING NAMELIST ' // TRIM(ADJUSTL(ypinpfile))
-IF (lp1) WRITE(*,*) '       ----------------------------------------'
+  IF (lp1) WRITE(*,*) '       ----------------------------------------'
+  IF (lp1) WRITE(*,*) '        glt_gelato : READING NAMELIST ' // TRIM(ADJUSTL(ypinpfile))
+  IF (lp1) WRITE(*,*) '       ----------------------------------------'
 !
 ! .. The list of all parameters available from glt_gelato 
 ! (for definitions of these parameters, see dmod_param)
 !
-yfldin=  &
-  'nmkinit nrstout nrstgl4 nthermo ndynami  &
+  yfldin=  &
+    'nmkinit nrstout nrstgl4 nthermo ndynami  &
 &  nadvect ntimers ndyncor ncdlssh niceage  &
 &  nicesal nmponds nsnwrad nleviti nsalflx  &
 &  nextqoc nicesub cnflxin' 
-yfldin=TRIM(yfldin) // ' ' //  &
-  'cfsidmp chsidmp ctsfdmp  &
-&  xfsidmpeft xhsidmpeft xtsfdmpeft'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'cdiafmt cdialev navedia ninsdia ndiamax  &
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'cfsidmp chsidmp  &
+&  xfsidmpeft xhsidmpeft'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'cdiafmt cdialev navedia ninsdia ndiamax  &
 &  cinsfld nsavinp nsavout nupdbud nprinto nprlast'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'nidate niter dtt'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'nt thick'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'nilay nslay xh0 xh1 xh2 xh3 xh4'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'ntstp ndte'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'xfsimax xicethcr xhsimin'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'alblc xlmelt xswhdfr albyngi albimlt albsmlt albsdry'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'ngrdlu nsavlu nrstlu n0vilu n0valu n2vilu n2valu nxvilu nxvalu  &
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'nidate niter dtt'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'nt thick'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'nilay nslay xh0 xh1 xh2 xh3 xh4'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'ntstp ndte'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'xfsimax xicethcr xhsimin'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'alblc xlmelt xswhdfr albyngi albimlt albsmlt albsdry'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'ngrdlu nsavlu nrstlu n0vilu n0valu n2vilu n2valu nxvilu nxvalu  &
 &  nibglu nspalu noutlu ntimlu'
-yfldin=TRIM(yfldin) // ' ' //  &
-  'ciopath'
+  yfldin=TRIM(yfldin) // ' ' //  &
+    'ciopath'
 !
 ! .. Initialize control arrays
 !
-infld=gltools_nwords( yfldin )
-ALLOCATE( ylistfld(infld) )
-ALLOCATE( ilistfound(infld) )
-ylistfld = gltools_strsplit(yfldin,infld)
-ilistfound = 0
+  infld=gltools_nwords( yfldin )
+  ALLOCATE( ylistfld(infld) )
+  ALLOCATE( ilistfound(infld) )
+  ylistfld = gltools_strsplit(yfldin,infld)
+  ilistfound = 0
 !
 !
 !
 ! 2. Read all model parameter
 ! ============================
 !
-iok=0
-icount=0
+  iok=0
+  icount=0
 !
-DO WHILE ( iok==0 ) 
-  CALL gltools_nextval( iparlu,ylistfld,ilistfound,iok,ypar,yval )
+  DO WHILE ( iok==0 ) 
+    CALL gltools_nextval( iparlu,ylistfld,ilistfound,iok,ypar,yval )
 !
 !
 ! 2.1. Options to run glt_gelato
 ! --------------------------
 !
-  SELECT CASE ( TRIM(ADJUSTL(ypar)) )
+    SELECT CASE ( TRIM(ADJUSTL(ypar)) )
 !
-  CASE('nmkinit') ; READ( yval,* ) nmkinit
-  CASE('nrstout') ; READ( yval,* ) nrstout
-  CASE('nrstgl4') ; READ( yval,* ) nrstgl4
-  CASE('nthermo') ; READ( yval,* ) nthermo
-  CASE('ndynami') ; READ( yval,* ) ndynami
-  CASE('nadvect') ; READ( yval,* ) nadvect
-  CASE('ntimers') ; READ( yval,* ) ntimers
-  CASE('ndyncor') ; READ( yval,* ) ndyncor
-  CASE('ncdlssh') ; READ( yval,* ) ncdlssh
-  CASE('niceage') ; READ( yval,* ) niceage
-  CASE('nicesal') ; READ( yval,* ) nicesal
-  CASE('nmponds') ; READ( yval,* ) nmponds
-  CASE('nsnwrad') ; READ( yval,* ) nsnwrad
-  CASE('nleviti') ; READ( yval,* ) nleviti
-  CASE('nsalflx') ; READ( yval,* ) nsalflx
-  CASE('nextqoc') ; READ( yval,* ) nextqoc
-  CASE('nicesub') ; READ( yval,* ) nicesub
-  CASE('cnflxin') ; READ( yval,* ) cnflxin
+    CASE('nmkinit') ; READ( yval,* ) nmkinit
+    CASE('nrstout') ; READ( yval,* ) nrstout
+    CASE('nrstgl4') ; READ( yval,* ) nrstgl4
+    CASE('nthermo') ; READ( yval,* ) nthermo
+    CASE('ndynami') ; READ( yval,* ) ndynami
+    CASE('nadvect') ; READ( yval,* ) nadvect
+    CASE('ntimers') ; READ( yval,* ) ntimers
+    CASE('ndyncor') ; READ( yval,* ) ndyncor
+    CASE('ncdlssh') ; READ( yval,* ) ncdlssh
+    CASE('niceage') ; READ( yval,* ) niceage
+    CASE('nicesal') ; READ( yval,* ) nicesal
+    CASE('nmponds') ; READ( yval,* ) nmponds
+    CASE('nsnwrad') ; READ( yval,* ) nsnwrad
+    CASE('nleviti') ; READ( yval,* ) nleviti
+    CASE('nsalflx') ; READ( yval,* ) nsalflx
+    CASE('nextqoc') ; READ( yval,* ) nextqoc
+    CASE('nicesub') ; READ( yval,* ) nicesub
+    CASE('cnflxin') ; READ( yval,* ) cnflxin
 !
 !
 ! 2.2. Damping and restoring
 ! ---------------------------
 !
-  CASE('cfsidmp')    ; READ( yval,*) cfsidmp
-  CASE('xfsidmpeft') ; READ( yval,*) xfsidmpeft
-  CASE('chsidmp')    ; READ( yval,*) chsidmp
-  CASE('xhsidmpeft') ; READ( yval,*) xhsidmpeft
-  CASE('ctsfdmp')    ; READ( yval,*) ctsfdmp
-  CASE('xtsfdmpeft') ; READ( yval,*) xtsfdmpeft
+    CASE('cfsidmp')    ; READ( yval,*) cfsidmp
+    CASE('xfsidmpeft') ; READ( yval,*) xfsidmpeft
+    CASE('chsidmp')    ; READ( yval,*) chsidmp
+    CASE('xhsidmpeft') ; READ( yval,*) xhsidmpeft
 !
 !
 ! 2.3. Diagnostics glt_output
 ! ------------------------
 !
-  CASE('cdiafmt') ; READ( yval,* ) cdiafmt
-  CASE('cdialev') ; READ( yval,* ) cdialev
-  CASE('dttave')  ; READ( yval,* ) dttave
-  CASE('navedia') ; READ( yval,* ) navedia
-  CASE('ninsdia') ; READ( yval,* ) ninsdia
-  CASE('ndiamax') ; READ( yval,* ) ndiamax 
-    ! Caller program (e.g. Surfex) may have already allocate cinsfld  
-    ! differently when settings Gelato hard defaults 
-    IF (ALLOCATED(cinsfld)) DEALLOCATE(cinsfld)
-    ALLOCATE( cinsfld(ndiamax) )
-    cinsfld(:) = ''
-  CASE('cinsfld') ; READ( yval,* ) yinsfld
-    IF ( ALLOCATED(cinsfld) ) THEN
-        icount = icount + 1
-        cinsfld(icount) = yinsfld
-      ELSE
-        GOTO 200
-    ENDIF
-  CASE('nsavinp') ; READ( yval,* ) nsavinp
-  CASE('nsavout') ; READ( yval,* ) nsavout
-  CASE('nupdbud') ; READ( yval,* ) nupdbud
-  CASE('nprinto') ; READ( yval,* ) nprinto
-  CASE('nprlast') ; READ( yval,* ) nprlast
+    CASE('cdiafmt') ; READ( yval,* ) cdiafmt
+    CASE('cdialev') ; READ( yval,* ) cdialev
+    CASE('dttave')  ; READ( yval,* ) dttave
+    CASE('navedia') ; READ( yval,* ) navedia
+    CASE('ninsdia') ; READ( yval,* ) ninsdia
+    CASE('ndiamax') ; READ( yval,* ) ndiamax 
+      ! Caller program (e.g. Surfex) may have already allocate cinsfld  
+      ! differently when settings Gelato hard defaults 
+      IF (ALLOCATED(cinsfld)) DEALLOCATE(cinsfld)
+      ALLOCATE( cinsfld(ndiamax) )
+      cinsfld(:) = ''
+    CASE('cinsfld') ; READ( yval,* ) yinsfld
+      IF ( ALLOCATED(cinsfld) ) THEN
+          icount = icount + 1
+          cinsfld(icount) = yinsfld
+        ELSE
+          GOTO 200
+      ENDIF
+    CASE('nsavinp') ; READ( yval,* ) nsavinp
+    CASE('nsavout') ; READ( yval,* ) nsavout
+    CASE('nupdbud') ; READ( yval,* ) nupdbud
+    CASE('nprinto') ; READ( yval,* ) nprinto
+    CASE('nprlast') ; READ( yval,* ) nprlast
 !
 !
 ! 2.4. Run date position and time step
 ! ------------------------------------
 !
-  CASE('nidate') ; READ( yval,* ) nidate
-  CASE('niter')  ; READ( yval,* ) niter
-  CASE('dtt')    ; READ( yval,* ) dtt
+    CASE('nidate') ; READ( yval,* ) nidate
+    CASE('niter')  ; READ( yval,* ) niter
+    CASE('dtt')    ; READ( yval,* ) dtt
 !
 !
 ! 2.5. Number of ice categories
 ! -----------------------------
 !
-  CASE('nt')    ; 
-     READ( yval,* ) nt ; 
-     ! Caller program (e.g. Surfex) may have already allocate thick  
-     ! differently when settings Gelato hard defaults 
-     IF (ALLOCATED(thick)) DEALLOCATE(thick)  
-     ALLOCATE( thick(nt+1) )
-  CASE('thick') 
-    IF ( ALLOCATED(thick) ) THEN
-        READ( yval,*,END=100 ) thick
-      ELSE
-        GOTO 100
-    ENDIF
+    CASE('nt')    ; 
+       READ( yval,* ) nt ; 
+       ! Caller program (e.g. Surfex) may have already allocate thick  
+       ! differently when settings Gelato hard defaults 
+       IF (ALLOCATED(thick)) DEALLOCATE(thick)  
+       ALLOCATE( thick(nt+1) )
+    CASE('thick') 
+      IF ( ALLOCATED(thick) ) THEN
+          READ( yval,*,END=100 ) thick
+        ELSE
+          GOTO 100
+      ENDIF
 !
 !
 ! 2.6. Number of layers in the ice-snow slab
 ! ------------------------------------------
 !
-  CASE('nilay') ; READ( yval,* ) nilay
-  CASE('nslay') ; READ( yval,* ) nslay
-  CASE('xh0')   ; READ( yval,* ) xh0
-  CASE('xh1')   ; READ( yval,* ) xh1
-  CASE('xh2')   ; READ( yval,* ) xh2
-  CASE('xh3')   ; READ( yval,* ) xh3
-  CASE('xh4')   ; READ( yval,* ) xh4
+    CASE('nilay') ; READ( yval,* ) nilay
+    CASE('nslay') ; READ( yval,* ) nslay
+    CASE('xh0')   ; READ( yval,* ) xh0
+    CASE('xh1')   ; READ( yval,* ) xh1
+    CASE('xh2')   ; READ( yval,* ) xh2
+    CASE('xh3')   ; READ( yval,* ) xh3
+    CASE('xh4')   ; READ( yval,* ) xh4
 !
 !
 ! 2.7. Elastic Viscous-Plastic sea ice rheology parameters
 ! ---------------------------------------------------------
 !
-  CASE('ntstp')    ; READ( yval,* ) ntstp
-  CASE('ndte')     ; READ( yval,* ) ndte
+    CASE('ntstp')    ; READ( yval,* ) ntstp
+    CASE('ndte')     ; READ( yval,* ) ndte
 !
 !
 ! 2.8. Limit Values for sea ice
 ! ------------------------------
 !
-  CASE('xfsimax')  ; READ( yval,* ) xfsimax
-  CASE('xicethcr') ; READ( yval,* ) xicethcr
-  CASE('xhsimin')  ; READ( yval,* ) xhsimin
+    CASE('xfsimax')  ; READ( yval,* ) xfsimax
+    CASE('xicethcr') ; READ( yval,* ) xicethcr
+    CASE('xhsimin')  ; READ( yval,* ) xhsimin
 !
 !
 ! 2.9. Parameterizations
 ! -----------------------
 !
-  CASE('alblc')    ; READ( yval,* ) alblc
-  CASE('xlmelt')   ; READ( yval,* ) xlmelt
-  CASE('xswhdfr')  ; READ( yval,* ) xswhdfr
-  CASE('albyngi')  ; READ( yval,* ) albyngi
-  CASE('albimlt')  ; READ( yval,* ) albimlt
-  CASE('albsmlt')  ; READ( yval,* ) albsmlt
-  CASE('albsdry')  ; READ( yval,* ) albsdry
+    CASE('alblc')    ; READ( yval,* ) alblc
+    CASE('xlmelt')   ; READ( yval,* ) xlmelt
+    CASE('xswhdfr')  ; READ( yval,* ) xswhdfr
+    CASE('albyngi')  ; READ( yval,* ) albyngi
+    CASE('albimlt')  ; READ( yval,* ) albimlt
+    CASE('albsmlt')  ; READ( yval,* ) albsmlt
+    CASE('albsdry')  ; READ( yval,* ) albsdry
 !
 !
 ! 2.10. Logical units
 ! --------------------
 !
-  CASE('ngrdlu') ; READ( yval,* ) ngrdlu
-  CASE('nsavlu') ; READ( yval,* ) nsavlu
-  CASE('nrstlu') ; READ( yval,* ) nrstlu
-  CASE('n0vilu') ; READ( yval,* ) n0vilu
-  CASE('n0valu') ; READ( yval,* ) n0valu
-  CASE('n2vilu') ; READ( yval,* ) n2vilu
-  CASE('n2valu') ; READ( yval,* ) n2valu
-  CASE('nxvilu') ; READ( yval,* ) nxvilu
-  CASE('nxvalu') ; READ( yval,* ) nxvalu
-  CASE('nibglu') ; READ( yval,* ) nibglu
-  CASE('nspalu') ; READ( yval,* ) nspalu
-  CASE('noutlu') ; READ( yval,* ) noutlu ; IF (PRESENT(KLUOUT)) noutlu=kluout
-  CASE('ntimlu') ; READ( yval,* ) ntimlu
+    CASE('ngrdlu') ; READ( yval,* ) ngrdlu
+    CASE('nsavlu') ; READ( yval,* ) nsavlu
+    CASE('nrstlu') ; READ( yval,* ) nrstlu
+    CASE('n0vilu') ; READ( yval,* ) n0vilu
+    CASE('n0valu') ; READ( yval,* ) n0valu
+    CASE('n2vilu') ; READ( yval,* ) n2vilu
+    CASE('n2valu') ; READ( yval,* ) n2valu
+    CASE('nxvilu') ; READ( yval,* ) nxvilu
+    CASE('nxvalu') ; READ( yval,* ) nxvalu
+    CASE('nibglu') ; READ( yval,* ) nibglu
+    CASE('nspalu') ; READ( yval,* ) nspalu
+    CASE('noutlu') ; READ( yval,* ) noutlu ; IF (PRESENT(KLUOUT)) noutlu=kluout
+    CASE('ntimlu') ; READ( yval,* ) ntimlu
 !
 !
 ! 2.11. Path to keep Gelato I/O fields
 ! -------------------------------------
 !
-  CASE('ciopath') ; READ( yval,* ) ciopath
+    CASE('ciopath') ; READ( yval,* ) ciopath
 !
 !
 ! 2.12. End of case select
 ! -------------------------
 !
-  CASE DEFAULT 
-    IF (lwg) WRITE(*,110) TRIM(ypar)
+    CASE DEFAULT 
+      IF (lwg) WRITE(*,110) TRIM(ypar)
 !
-  END SELECT 
-END DO
+    END SELECT 
+  END DO
 !
 !
 ! 2.13. Close the parameter file
 ! -------------------------------
 !
-CLOSE(1)
-DEALLOCATE( ilistfound )
-DEALLOCATE( ylistfld )
+  CLOSE(1)
+  DEALLOCATE( ilistfound )
+  DEALLOCATE( ylistfld )
 !
 ENDIF
 !
@@ -508,37 +513,37 @@ ntilay = ncat*nilyr
 !
 na = nt*( niceage+nicesal+nmponds )
 !
+!
+! 3.5. Parameters for constraint
+! -------------------------------
+!
+ntd=0        ! Will disable sit_d array allocation and use of constraint data
+IF ( TRIM(cfsidmp)=='DAMP' .OR. TRIM(cfsidmp)=='PRESCRIBE' ) THEN
+  ntd=1      ! Will enable sit_d array allocation and trigger constraint
+ELSE IF ( TRIM(cfsidmp)/='NONE' ) THEN
+  WRITE(*,*) "cfsidmp must be 'DAMP' or 'PRESCRIBE'" 
+  WRITE(*,*) " - You specified cfsidmp=" // TRIM(cfsidmp)
+  STOP
+ENDIF
+!
+IF ( TRIM(chsidmp)=='DAMP_ADD' .OR. TRIM(chsidmp)=='DAMP_FAC' .OR.  &
+     TRIM(chsidmp)=='PRESCRIBE' ) THEN
+  ntd=1
+ELSE IF ( TRIM(chsidmp)/='NONE' ) THEN
+  WRITE(*,*) "chsidmp must be 'DAMP_ADD', 'DAMP_FAC'' or 'PRESCRIBE'" 
+  WRITE(*,*) " - You specified chsidmp=" // TRIM(chsidmp)
+  STOP
+ENDIF
 RETURN
 !
 !
 !
-! 4. Error checks
-! ================
-!
-! 4.1. Damping
-! -------------
-!
-IF ( cfsidmp(1:4)=='MONO' .OR. &
-     chsidmp(1:4)=='MONO' .OR. &
-     ctsfdmp(1:4)=='MONO' ) THEN
-  IF ( cfsidmp(1:5)=='MULTI' .OR. &
-       chsidmp(1:5)=='MULTI' .OR. &
-       ctsfdmp(1:5)=='MULTI' ) THEN 
-    IF (lwg) THEN
-      WRITE(*,*) "Error. Impossible to mix 'MONO' and 'MULTI' contraints."
-      WRITE(*,*) "We stop."
-    ENDIF
-    STOP
-  ENDIF
-ENDIF
+! 4. Error messages
+! ==================
 !
 IF (lp1) WRITE(*,*) '        ---------------------------------------------------'
 IF (lp1) WRITE(*,*) '          gelato : READING OF gltpar INPUT FILE COMPLETED '
 IF (lp1) WRITE(*,*) '        ---------------------------------------------------'
-!
-!
-! 4.2. Error messages
-! --------------------
 !
 100 CONTINUE
 !

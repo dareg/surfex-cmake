@@ -31,16 +31,13 @@
 !!    -------------
 !!      Original    28/01/10
 !!      Modified    02/2014   S. Senesi : allow to work on SSS, SIT and SIC fields
+!!      Modified    07/2015   B. Decharme : new linear interpolation
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-!
-USE MODI_INTERPOL_QUADRA
 !
 USE MODI_ABOR1_SFX
 !
@@ -65,11 +62,14 @@ REAL, DIMENSION(:), INTENT(OUT) :: POUT   ! Sea surface temperature or salinity,
 !*       0.2   Declaration of local variables
 !              ------------------------------
 !
-REAL, DIMENSION(SIZE(POUT)) :: ZFIELD ! Field at time t 
-!
-REAL            :: ZDAT,ZNDAT
-INTEGER         :: IMTH1,IMTH2,IMTH3
+REAL            :: ZDAT   ! current day in the current month
+REAL            :: ZNDAT  ! number of days in the current month
+INTEGER         :: IMTH0  ! previous month
+INTEGER         :: IMTH1  ! current month 
+INTEGER         :: IMTH2  ! next month
 INTEGER         :: INDAYS ! number of days in KMONTH
+!
+INTEGER         :: IDELTA
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -103,35 +103,68 @@ END SELECT
 ZDAT = REAL(KDAY)
 ZNDAT= REAL(INDAYS)
 !
-! The current month correspond to index 2 (or KMONTH+1 if ANNUAL)
+! The current month correspond to the indice 2 (or 3 if next month)
 !
-IF (((HFLAG=='T').AND.(TRIM(S%CINTERPOL_SST)=='MONTH')) .OR. &
-    ((HFLAG=='S').AND.(TRIM(S%CINTERPOL_SSS)=='MONTH')) .OR. &
-    ((HFLAG=='H').AND.(TRIM(S%CINTERPOL_SIT)=='MONTH')) .OR. &
-    ((HFLAG=='C').AND.(TRIM(S%CINTERPOL_SIC)=='MONTH'))) THEN
-   IMTH1=1
-   IMTH2=2
-   IMTH3=3
+IF (KMONTH==S%TZTIME%TDATE%MONTH) THEN 
+   IDELTA=0
 ELSE
-  IMTH1=KMONTH
-  IMTH2=KMONTH+1
-  IMTH3=KMONTH+2
+   IDELTA=1
+END IF
+!
+IMTH0=1+IDELTA
+IMTH1=2+IDELTA
+IMTH2=3+IDELTA
+!
+IF (HFLAG =='T') THEN 
+   CALL INTERPOL_LOCAL(S%CINTERPOL_SST,S%XSST_MTH(:,IMTH0),S%XSST_MTH(:,IMTH1),S%XSST_MTH(:,IMTH2))
+ELSEIF (HFLAG =='S') THEN 
+   CALL INTERPOL_LOCAL(S%CINTERPOL_SSS,S%XSSS_MTH(:,IMTH0),S%XSSS_MTH(:,IMTH1),S%XSSS_MTH(:,IMTH2))
+   POUT(:) = MAX(0.0,POUT(:))
+ELSEIF (HFLAG =='H') THEN 
+   CALL INTERPOL_LOCAL(S%CINTERPOL_SIT,S%XSIT_MTH(:,IMTH0),S%XSIT_MTH(:,IMTH1),S%XSIT_MTH(:,IMTH2))
+   POUT(:) = MAX(0.0,POUT(:))
+ELSEIF (HFLAG =='C') THEN
+   CALL INTERPOL_LOCAL(S%CINTERPOL_SIC,S%XSIC_MTH(:,IMTH0),S%XSIC_MTH(:,IMTH1),S%XSIC_MTH(:,IMTH2))
+   POUT(:) = MAX(0.0,MIN(1.0,POUT(:)))
 ENDIF
-
-IF (HFLAG .EQ. 'T' ) THEN 
-   CALL INTERPOL_QUADRA(ZDAT,ZNDAT,S%XSST_MTH(:,IMTH1),S%XSST_MTH(:,IMTH2),S%XSST_MTH(:,IMTH3),ZFIELD)
-   POUT(:) = ZFIELD(:)
-ELSEIF (HFLAG .EQ. 'S' ) THEN 
-   CALL INTERPOL_QUADRA(ZDAT,ZNDAT,S%XSSS_MTH(:,IMTH1),S%XSSS_MTH(:,IMTH2),S%XSSS_MTH(:,IMTH3),ZFIELD)
-   POUT(:) = MAX(0.0,ZFIELD(:))
-ELSEIF (HFLAG .EQ. 'H' ) THEN 
-   CALL INTERPOL_QUADRA(ZDAT,ZNDAT,S%XSIT_MTH(:,IMTH1),S%XSIT_MTH(:,IMTH2),S%XSIT_MTH(:,IMTH3),ZFIELD)
-   POUT(:) = MAX(0.0,ZFIELD(:))
-ELSE ! SIC
-   CALL INTERPOL_QUADRA(ZDAT,ZNDAT,S%XSIC_MTH(:,IMTH1),S%XSIC_MTH(:,IMTH2),S%XSIC_MTH(:,IMTH3),ZFIELD)
-   POUT(:) = MAX(0.0,MIN(1.0,ZFIELD(:)))
-ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('INTERPOL_SST_MTH',1,ZHOOK_HANDLE)
+!
+!=======================================================================================
+!
+CONTAINS
+!
+!=======================================================================================
+!
+SUBROUTINE INTERPOL_LOCAL(HMETHOD,PMTH0,PMTH1,PMTH2)
+!
+USE MODI_INTERPOL_QUADRA
+USE MODI_INTERPOL_LINEAR
+!
+IMPLICIT NONE
+!
+CHARACTER(LEN=6),    INTENT(IN) :: HMETHOD
+REAL, DIMENSION(:) , INTENT(IN) :: PMTH0
+REAL, DIMENSION(:) , INTENT(IN) :: PMTH1
+REAL, DIMENSION(:) , INTENT(IN) :: PMTH2
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('INTERPOL_SST_MTH:INTERPOL_LOCAL',0,ZHOOK_HANDLE)
+!
+IF(HMETHOD=='QUADRA')THEN
+  CALL INTERPOL_QUADRA(ZDAT,ZNDAT,PMTH0,PMTH1,PMTH2,POUT)
+ELSEIF(HMETHOD=='LINEAR')THEN
+  CALL INTERPOL_LINEAR(ZDAT,ZNDAT,PMTH0,PMTH1,PMTH2,POUT)
+ELSEIF(HMETHOD=='UNIF')THEN
+  POUT(:) = PMTH1(:)
+ELSE
+  CALL ABOR1_SFX('INTERPOL_SST_MTH:INTERPOL_LOCAL: interpolation method not supported')
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('INTERPOL_SST_MTH:INTERPOL_LOCAL',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE INTERPOL_LOCAL
 !
 !-------------------------------------------------------------------------------
 !

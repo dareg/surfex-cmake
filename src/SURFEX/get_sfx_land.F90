@@ -2,7 +2,7 @@
       SUBROUTINE GET_SFX_LAND (I, U, &
                                OCPL_GW,OCPL_FLOOD,OCPL_CALVING,  &
                               PRUNOFF,PDRAIN,PCALVING,PRECHARGE, &
-                              PPFLOOD,PEFLOOD,PIFLOOD            )  
+                              PSRCFLOOD            )  
 !     ###############################################################################
 !
 !!****  *GET_SFX_LAND* - routine to get some land surface variables from surfex
@@ -65,12 +65,12 @@ REAL, DIMENSION(:), INTENT(OUT) :: PRUNOFF    ! Cumulated Surface runoff        
 REAL, DIMENSION(:), INTENT(OUT) :: PDRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCALVING   ! Cumulated Calving flux               (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PRECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PPFLOOD    ! Cumulated flood precip interception  (kg/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PEFLOOD    ! Cumulated flood evaporation          (kg/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PIFLOOD    ! Cumulated flood infiltration         (kg/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PSRCFLOOD  ! Cumulated freshwater flux            (kg/m2)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
+!
+REAL, DIMENSION(SIZE(I%XCPL_PFLOOD)) :: ZSRCFLOOD
 !
 REAL, DIMENSION(SIZE(PCALVING)) :: ZCALVING
 !
@@ -87,9 +87,7 @@ PRUNOFF  (:) = XUNDEF
 PDRAIN   (:) = XUNDEF
 PCALVING (:) = XUNDEF
 PRECHARGE(:) = XUNDEF
-PPFLOOD  (:) = XUNDEF
-PEFLOOD  (:) = XUNDEF
-PIFLOOD  (:) = XUNDEF
+PSRCFLOOD(:) = XUNDEF
 !
 !*       2.0   Get variable over nature
 !              ------------------------
@@ -126,12 +124,11 @@ IF(U%NSIZE_NATURE>0)THEN
 ! * floodplain source terms
 !
   IF(OCPL_FLOOD)THEN
-    CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XCPL_PFLOOD(:),PPFLOOD(:),XUNDEF)
-    CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XCPL_EFLOOD(:),PEFLOOD(:),XUNDEF)
-    CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XCPL_IFLOOD(:),PIFLOOD(:),XUNDEF)
+    ZSRCFLOOD  (:) = I%XCPL_PFLOOD(:)-I%XCPL_EFLOOD(:)-I%XCPL_IFLOOD(:)
     I%XCPL_PFLOOD(:) = 0.0
     I%XCPL_EFLOOD(:) = 0.0
     I%XCPL_IFLOOD(:) = 0.0
+    CALL UNPACK_SAME_RANK(U%NR_NATURE,ZSRCFLOOD(:),PSRCFLOOD(:),XUNDEF)
   ENDIF
 !
 ENDIF

@@ -37,6 +37,7 @@
 !!      Modified    11/2005 by P. Le Moigne: limit length of VEGTYPE_PATCH field names
 !!      Modified    11/2013 by B. Decharme : XPATCH now in writesurf_isban.F90
 !!      Modified    10/2014 by P. Samuelsson: MEB variables
+!!      Modified    06/2014 by B. Decharme : add XVEGTYPE
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -472,16 +473,33 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!* Fraction of each vegetation type for each patch
+!* Fraction of each vegetation type in the grid cell
 !
 DO JL=1,SIZE(I%XVEGTYPE_PATCH,2)
   WRITE(YPAS,'(I2)') JL 
   YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-  WRITE(YRECFM,FMT='(A9)') 'VEGTY_P'//YLVLV
-  YCOMMENT='fraction of each vegetation type for each patch'//' (-)'
+  WRITE(YRECFM,FMT='(A9)') 'VEGTYPE'//YLVLV
+  YCOMMENT='fraction of each vegetation type in the grid cell'//' (-)'
   CALL WRITE_SURF(DGU, IOB, U, &
-                  HPROGRAM,YRECFM,I%XVEGTYPE_PATCH(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%XVEGTYPE(:,JL),IRESP,HCOMMENT=YCOMMENT)
 END DO
+!-------------------------------------------------------------------------------
+!
+!* Fraction of each vegetation type for each patch
+!
+IF(I%NPATCH>1.AND.SIZE(I%XVEGTYPE_PATCH,2)/=SIZE(I%XVEGTYPE_PATCH,3))THEN
+!
+  DO JL=1,SIZE(I%XVEGTYPE_PATCH,2)
+    WRITE(YPAS,'(I2)') JL 
+    YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+    WRITE(YRECFM,FMT='(A9)') 'VEGTY_P'//YLVLV
+    YCOMMENT='fraction of each vegetation type in each patch'//' (-)'
+    CALL WRITE_SURF(DGU, IOB, U, &
+                    HPROGRAM,YRECFM,I%XVEGTYPE_PATCH(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
+  END DO
+!
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !* other surface parameters

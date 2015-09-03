@@ -75,7 +75,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSEA_FWSM  ! Cumulated wind stress           
 REAL, DIMENSION(:), INTENT(OUT) :: PSEA_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSEA_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSEA_SNOW  ! Cumulated Snowfall rate           (kg/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PSEA_WATF  ! Cumulated Net outgoing water flux (kg/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PSEA_WATF  ! Cumulated Net water flux (kg/m2)
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PSEAICE_HEAT ! Cumulated Sea-ice non solar net heat flux (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSEAICE_SNET ! Cumulated Sea-ice solar net heat flux     (J/m2)
@@ -224,12 +224,12 @@ IF (OWATER.AND.U%NSIZE_WATER>0) THEN
 ! 
 ENDIF
 !
-!*       4.0   Net outgoing water flux
+!*       4.0   Net water flux
 !              -----------------------
 !
 IF(U%NSIZE_SEA>0)THEN
 !
-  PSEA_WATF(:) = PSEA_EVAP(:) - PSEA_RAIN(:) - PSEA_SNOW(:)
+  PSEA_WATF(:) = PSEA_RAIN(:) + PSEA_SNOW(:) - PSEA_EVAP(:)
 !
 ENDIF
 !-------------------------------------------------------------------------------

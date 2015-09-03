@@ -730,8 +730,8 @@ REAL, DIMENSION(:),  INTENT(OUT) :: PHU_AGG  ! aggregated relative humidity
 !* diagnostic variables for Carbon assimilation
 !  --------------------------------------------
 !
-REAL, DIMENSION(:),   INTENT(INOUT) :: PAN      ! net CO2 assimilation
-REAL, DIMENSION(:),   INTENT(INOUT) :: PANDAY   ! daily net CO2 assimilation
+REAL, DIMENSION(:),   INTENT(INOUT) :: PAN      ! net CO2 assimilation ( kgCO2/kgair * m/s)
+REAL, DIMENSION(:),   INTENT(INOUT) :: PANDAY   ! daily net CO2 assimilation (kgCO2/m2/day)
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PRESP_BIOMASS_INST  ! instantaneous biomass respiration (kgCO2/kgair m/s)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PFAPARC   ! Fapar of vegetation (cumul)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PFAPIRC   ! Fapir of vegetation (cumul)

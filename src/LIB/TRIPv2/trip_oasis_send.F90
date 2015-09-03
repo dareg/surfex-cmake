@@ -8,6 +8,8 @@ SUBROUTINE TRIP_OASIS_SEND (TP, TPG, &
 !!    PURPOSE
 !!    -------
 !!
+!!    All fluxes are sent in kg/m2/s
+!!
 !!**  METHOD
 !!    ------
 !!
@@ -102,7 +104,7 @@ IF(LCPL_LAND.AND.MOD(PTIMEC,XTSTEP_CPL_LAND)==0.0)THEN
 !
   IF(LCPL_GW)THEN
 !          
-    YCOMMENT='Water table depth'
+    YCOMMENT='Water table depth' !m
     CALL OASIS_PUT(NWTD_ID,IDATE,TP%XCPL_WTD(:,:),IERR)
     CALL CHECK_TRIP_SEND(YCOMMENT)
 !          
@@ -116,13 +118,13 @@ IF(LCPL_LAND.AND.MOD(PTIMEC,XTSTEP_CPL_LAND)==0.0)THEN
 !
     LMASK(:,:) = TPG%GMASK(:,:)
 !
-    YCOMMENT='Flood fraction'
-    CALL MASK_TRIP(TP%XCPL_FFLOOD(:,:),ZWRITE(:,:),LMASK(:,:))
+    YCOMMENT='Flood fraction' !adim
+    CALL MASK_TRIP(TP%XCPL_FFLOOD(:,:),ZWRITE(:,:),LMASK(:,:),1.0)
     CALL OASIS_PUT(NFFLOOD_ID,IDATE,ZWRITE(:,:),IERR)
     CALL CHECK_TRIP_SEND(YCOMMENT)
 !          
-    YCOMMENT='Flood potential infiltration'
-    CALL MASK_TRIP(TP%XCPL_PIFLOOD(:,:),ZWRITE(:,:),LMASK(:,:))
+    YCOMMENT='Flood potential infiltration' !kg/m2/s
+    CALL MASK_TRIP(TP%XCPL_PIFLOOD(:,:),ZWRITE(:,:),LMASK(:,:),XTSTEP_CPL_LAND)
     CALL OASIS_PUT(NPIFLOOD_ID,IDATE,ZWRITE(:,:),IERR)
     CALL CHECK_TRIP_SEND(YCOMMENT)
 !
@@ -138,12 +140,12 @@ ENDIF
 !
 IF(LCPL_SEA.AND.MOD(PTIMEC,XTSTEP_CPL_SEA)==0.0)THEN
 !
-! * Send sea output fields
+! * Sea output fields
 !
   LMASK(:,:) = (TPG%NGRCN(:,:)==9.OR.TPG%NGRCN(:,:)==12)
 !
-  YCOMMENT='Discharge to ocean'
-  CALL MASK_TRIP(TP%XCPL_RIVDIS(:,:),ZWRITE(:,:),LMASK(:,:))
+  YCOMMENT='Discharge to ocean' !kg/m2/s
+  CALL MASK_TRIP(TP%XCPL_RIVDIS(:,:),ZWRITE(:,:),LMASK(:,:),XTSTEP_CPL_SEA)
   CALL OASIS_PUT(NRIVDIS_ID,IDATE,ZWRITE(:,:),IERR)
   CALL CHECK_TRIP_SEND(YCOMMENT)
 !
@@ -153,15 +155,15 @@ IF(LCPL_SEA.AND.MOD(PTIMEC,XTSTEP_CPL_SEA)==0.0)THEN
 !
     LMASK(:,:) = TPG%GMASK_GRE(:,:)
 !
-    YCOMMENT='Calving flux over greenland'
-    CALL MASK_TRIP(TP%XCPL_CALVGRE(:,:),ZWRITE(:,:),LMASK(:,:))
+    YCOMMENT='Calving flux over greenland' !kg/m2/s
+    CALL MASK_TRIP(TP%XCPL_CALVGRE(:,:),ZWRITE(:,:),LMASK(:,:),XTSTEP_CPL_SEA)
     CALL OASIS_PUT(NCALVGRE_ID,IDATE,ZWRITE(:,:),IERR)
     CALL CHECK_TRIP_SEND(YCOMMENT)
 !
     LMASK(:,:) = TPG%GMASK_ANT(:,:)
 !
-    YCOMMENT='Calving flux over antarctica'
-    CALL MASK_TRIP(TP%XCPL_CALVANT(:,:),ZWRITE(:,:),LMASK(:,:))
+    YCOMMENT='Calving flux over antarctica' !kg/m2/s
+    CALL MASK_TRIP(TP%XCPL_CALVANT(:,:),ZWRITE(:,:),LMASK(:,:),XTSTEP_CPL_SEA)
     CALL OASIS_PUT(NCALVANT_ID,IDATE,ZWRITE(:,:),IERR)
     CALL CHECK_TRIP_SEND(YCOMMENT)
 !
@@ -200,23 +202,25 @@ END SUBROUTINE CHECK_TRIP_SEND
 !
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE MASK_TRIP(PIN,POUT,OMASK)
+SUBROUTINE MASK_TRIP(PIN,POUT,OMASK,PDIV)
 !
 IMPLICIT NONE
 !
 REAL,    DIMENSION(:,:), INTENT(INOUT) :: PIN
 REAL,    DIMENSION(:,:), INTENT(OUT  ) :: POUT
 LOGICAL, DIMENSION(:,:), INTENT(IN   ) :: OMASK
+REAL                   , INTENT(IN   ) :: PDIV
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_SEND:MASK_TRIP',0,ZHOOK_HANDLE)
 !
+POUT(:,:) = XUNDEF
+!
 WHERE(OMASK(:,:)) 
-      POUT(:,:) = PIN(:,:)
+      POUT(:,:) = PIN(:,:)/PDIV
       PIN (:,:) = 0.0     
 ELSEWHERE
-      POUT(:,:) = XUNDEF
       PIN (:,:) = XUNDEF    
 ENDWHERE
 !

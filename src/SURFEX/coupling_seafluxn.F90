@@ -564,8 +564,11 @@ ENDIF
 ! Daily update Sea surface salinity from monthly data
 !
 IF (S%LINTERPOL_SSS .AND. MOD(S%TTIME%TIME,XDAY) == 0.) THEN
-      CALL INTERPOL_SST_MTH(S, &
+   CALL INTERPOL_SST_MTH(S, &
                             S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'S',S%XSSS)
+   IF (ANY(S%XSSS(:)<0.0)) THEN
+      CALL ABOR1_SFX('COUPLING_SEAFLUX_N: XSSS should be >=0') 
+   ENDIF                      
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -578,6 +581,9 @@ IF (S%LHANDLE_SIC) THEN
       ! Daily update Sea Ice Cover constraint from monthly data
          CALL INTERPOL_SST_MTH(S, &
                             S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
+         IF (ANY(S%XFSIC(:)>1.0).OR.ANY(S%XFSIC(:)<0.0)) THEN
+            CALL ABOR1_SFX('COUPLING_SEAFLUX_N: FSIC should be >=0 and <=1') 
+         ENDIF                    
       ENDIF
    ENDIF
    IF (S%LINTERPOL_SIT) THEN
@@ -585,6 +591,9 @@ IF (S%LHANDLE_SIC) THEN
       ! Daily update Sea Ice Thickness constraint from monthly data
          CALL INTERPOL_SST_MTH(S, &
                             S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
+         IF (ANY(S%XFSIT(:)<0.0)) THEN
+            CALL ABOR1_SFX('COUPLING_SEAFLUX_N: XFSIT should be >=0') 
+         ENDIF  
       ENDIF
    ENDIF
    IF (S%CSEAICE_SCHEME=='GELATO') THEN

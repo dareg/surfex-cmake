@@ -84,12 +84,12 @@ REAL, POINTER, DIMENSION(:,:,:) :: XTABGW_H       ! Topo height array
 REAL, POINTER, DIMENSION(:,:) :: XCPL_FWTD         ! grid-cell fraction of water table to rise
 REAL, POINTER, DIMENSION(:,:) :: XCPL_WTD          ! Water table depth            [m]
 !
-REAL, POINTER, DIMENSION(:,:) :: XCPL_RIVDIS       ! River discharges  [kg/m2]
 REAL, POINTER, DIMENSION(:,:) :: XCPL_FFLOOD       ! Flood fraction    [-]
 REAL, POINTER, DIMENSION(:,:) :: XCPL_PIFLOOD      ! Floodplains potential infiltration  [kg/m2]
 !
-REAL, POINTER, DIMENSION(:,:) :: XCPL_CALVGRE      ! Calving flux over greenland
-REAL, POINTER, DIMENSION(:,:) :: XCPL_CALVANT      ! Calving flux over antarctica
+REAL, POINTER, DIMENSION(:,:) :: XCPL_RIVDIS       ! River discharges             [kg/m2]
+REAL, POINTER, DIMENSION(:,:) :: XCPL_CALVGRE      ! Calving flux over greenland  [kg/m2]
+REAL, POINTER, DIMENSION(:,:) :: XCPL_CALVANT      ! Calving flux over antarctica [kg/m2]
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      B. Decharme   *Meteo France*
+!!	B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -39,8 +39,8 @@ IF (LHOOK) CALL DR_HOOK('INIT_TRIP_PAR',0,ZHOOK_HANDLE)
 NDIMTAB     = 100
 NUNDEF      = 1E+9
 !
-XVELMIN     = 0.1
-XHSMIN      = 1.E-9
+XVELMIN     = 0.025
+XHSMIN      = 0.01
 XUNDEF      = 1.0E+20
 XM          = 2.0/3.0
 XRHOLW      = 1000.0

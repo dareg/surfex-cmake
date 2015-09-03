@@ -58,7 +58,6 @@ USE MODD_CSTS,ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPES_GLT , ONLY : T_GLT
 USE MODD_GLT_PARAM , ONLY : XTSTEP=>DTT, LWG, LP1, LP2, LP3, LP4, LP5, &
-                            CFSIDMP, CHSIDMP, XFSIDMPEFT, XHSIDMPEFT,  &
                             NPRINTO, GELATO_DIM=>NX
 
 USE MODI_GLT_GELATO
@@ -191,25 +190,10 @@ LP3 = (LWG.AND.NPRINTO>=3)
 LP4 = (LWG.AND.NPRINTO>=4)
 LP5 = (LWG.AND.NPRINTO>=5)
 
-! Use convention XSIC_EFOLDING_TIME=0 for avoiding any relaxation toward SIC observation
-! (rather than adding a namelist parameter)
-! but LINTERPOL_SIC in not the right criterion, because nudging to implicit SIC is possible
-IF (S%XSIC_EFOLDING_TIME .LE. 1.e-10)   THEN 
-   CFSIDMP='NONE'
-ELSE
-   XFSIDMPEFT=S%XSIC_EFOLDING_TIME 
-ENDIF
-
-IF ((S%XSIT_EFOLDING_TIME .LE. 1.e-10 ) .OR. .NOT. S%LINTERPOL_SIT) THEN 
-   CHSIDMP='NONE'
-ELSE
-   XHSIDMPEFT= S%XSIT_EFOLDING_TIME 
-ENDIF
-
 DO JT=1,IT
    IF (SIZE(PSSS) > 0) THEN 
       TPGLT%oce_all(:,1)%tml=ZSST(:)
-      TPGLT%sit_d(1,:,1)%fsi=ZSIC(:)
+      IF (S%LINTERPOL_SIC) TPGLT%sit_d(1,:,1)%fsi=ZSIC(:)
       IF (S%LINTERPOL_SIT) TPGLT%sit_d(1,:,1)%hsi=PFSIT(:)
       ! Gelato will compute heat flux from ocean by itself, thanks to 
       ! imposed namelist parameter nextqoc=0 

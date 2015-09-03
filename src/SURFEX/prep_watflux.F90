@@ -143,10 +143,8 @@ ENDIF
 !
 IF(W%LINTERPOL_TS)THEN
 !
-! Precedent, Current and Next Monthly TS water
-  INMTH=3
-! Precedent, Current and Next Annual Monthly TS water
-  IF(W%CINTERPOL_TS=='ANNUAL')INMTH=14
+! Precedent, Current, Next, and Second-next Monthly TS water
+  INMTH=4
 !
   ALLOCATE(W%XTS_MTH(SIZE(W%XTS),INMTH))
   DO JMTH=1,INMTH

@@ -55,9 +55,7 @@ INTEGER             :: NRUNOFF_ID    ! Surface runoff id
 INTEGER             :: NDRAIN_ID     ! Drainage id
 INTEGER             :: NCALVING_ID   ! Calving flux id
 INTEGER             :: NRECHARGE_ID  ! Groundwater recharge id
-INTEGER             :: NPFLOOD_ID    ! Floodplains precipitation interception id
-INTEGER             :: NEFLOOD_ID    ! Floodplains evaporation id
-INTEGER             :: NIFLOOD_ID    ! Floodplains infiltration id
+INTEGER             :: NSRCFLOOD_ID  ! Floodplains freshwater flux id
 !
 ! Input variables
 !
@@ -79,6 +77,7 @@ LOGICAL             :: LCPL_LAKE    = .FALSE. ! Fields to/from surfex lake area
 INTEGER             :: NLAKE_EVAP_ID ! Evaporation id
 INTEGER             :: NLAKE_RAIN_ID ! Rainfall id
 INTEGER             :: NLAKE_SNOW_ID ! Snowfall id
+INTEGER             :: NLAKE_WATF_ID ! Freshwater id
 !
 !-------------------------------------------------------------------------------
 !

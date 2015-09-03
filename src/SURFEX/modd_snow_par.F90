@@ -187,6 +187,7 @@ REAL, PARAMETER       :: XSNOWRHOHOLD     = 200.0 ! (kg/m3)
 !
 REAL, PARAMETER       :: XSNOW_AGRAIN = 1.6e-4   ! (m)
 REAL, PARAMETER       :: XSNOW_BGRAIN = 1.1e-13  ! (m13/kg4)
+REAL, PARAMETER       :: XSNOW_CGRAIN = 0.5e-4   ! (m)
 REAL, PARAMETER       :: XDSGRAIN_MAX = 2.796e-3 ! m
 !
 !--------------------------------------------------------------------------------
@@ -201,6 +202,10 @@ REAL, PARAMETER :: XD1 = 1., XD2 = 3., XD3 = 4., XX = 99., &
 !
 ! for ageing effects:
 REAL, PARAMETER :: XVPRES1 = 87000.
+!
+! spectral bands
+!
+INTEGER, PARAMETER :: NSPEC_BAND_SNOW = 3
 !
 ! for spectral distribution and thickness effects
 REAL, PARAMETER :: XVSPEC1 = .71, XVSPEC2 = .21, XVSPEC3 = .08

@@ -33,16 +33,16 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 ! =======================================================================
-! ===================== MODULE modi_gltools_chkglo_r ======================
+! ===================== MODULE modi_gltools_chkglo_r ====================
 ! =======================================================================
 !
 ! Goal:
 ! -----
 !   This module contains a subroutine that prints sea ice surface,  
 ! extent and volume separately in both hemispheres. Note these results
-! are printed only if nprinto flag is greater or equal to 1.
-!   Note that MPI_ALLREDUCE (invoke all procs) cannot be used under 
-! condition lp1==.TRUE. Hence we use the nprinto==1 condition.
+! are printed only if nprinto flag is greater or equal to 2.
+!   Note that mpp_sum (invoke all procs) cannot be used e.g. under 
+! condition lp2==.TRUE. Hence we use nprinto.
 !
 ! Created : 1999 (D. Salas y Melia)
 !           Repeated code doing that throughout the model is written in
@@ -50,7 +50,7 @@
 ! Modified: 2009/06 (D. Salas y Melia) reduced grid
 ! Modified: 2012/07 (D. Salas y Melia) parallelism
 !
-! ------------------ BEGIN MODULE modi_gltools_chkglo_r -------------------
+! ------------------ BEGIN MODULE modi_gltools_chkglo_r -----------------
 
 !THXS_SFX!MODULE modi_gltools_chkglo_r
 !THXS_SFX!INTERFACE 
@@ -58,14 +58,6 @@
 !THXS_SFX!SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
 !THXS_SFX!  USE modd_types_glt
 !THXS_SFX!  USE modd_glt_param
-!THXS_SFX!#if ! defined in_surfex
-!THXS_SFX!  USE mpi
-!THXS_SFX!#else
-!THXS_SFX!#ifdef SFX_MPI
-!THXS_SFX!   !!  define mpp_min, mpp_max, mpp_sum for Surfex case with MPI
-!THXS_SFX!   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
-!THXS_SFX!#endif
-!THXS_SFX!#endif
 !THXS_SFX!  CHARACTER(*), INTENT(in) ::  &
 !THXS_SFX!        omsg
 !THXS_SFX!  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
@@ -77,11 +69,11 @@
 !THXS_SFX!END INTERFACE
 !THXS_SFX!END MODULE modi_gltools_chkglo_r
 
-! ------------------- END MODULE modi_gltools_chkglo_r --------------------
+! ------------------- END MODULE modi_gltools_chkglo_r ------------------
 
 
 ! -----------------------------------------------------------------------
-! ------------------------ SUBROUTINE gltools_chkglo_r --------------------------
+! -------------------- SUBROUTINE gltools_chkglo_r ----------------------
 
 ! * Subroutine used to check global sea ice extent, area and volume in 
 ! both hemispheres.
@@ -91,22 +83,10 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
   USE modd_glt_const_thm
   USE modd_types_glt
   USE modd_glt_param
-#if ! defined in_surfex
-  USE mpi
-  USE lib_mpp, only : mpi_comm_opa
-#else
-#ifdef SFX_MPI
-   !!  define mpp_min, mpp_max, mpp_sum for Surfex case with MPI
-   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
-#endif
+#if ! defined in_arpege
+  USE lib_mpp
 #endif
   IMPLICIT NONE
-
-#if defined in_surfex
-#ifdef SFX_MPI
-  INCLUDE "mpif.h"
-#endif
-#endif
 !
   CHARACTER(*), INTENT(in) ::  &
         omsg
@@ -121,17 +101,13 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
         zlatn0,zlats0,zehn,zehs,zshn,zshs,zvhn,zvhs 
   REAL, DIMENSION(np) ::  &
         zfsit,zhsiw
-  REAL :: &
-       the_sum ! used for summing diags among procs
-  INTEGER :: &
-       ierror ! mpi operations status
 !
 !
 !
 ! 1. Initializations
 ! ==================
 !
-  IF ( lp1 ) THEN
+  IF ( nprinto>=2 ) THEN
 !
 ! .. Print message
 !
@@ -193,35 +169,16 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
 !
 !
 !
-! 3. Write totals to glt_output file
+! 3. Write totals to output file
 ! ==============================
 !
-! Note that here, gelato_communicator should not be used. 
-! mpp_comm_opa, which is the group of processors we use for sea ice,
-! should be used instead.
-!
-#if !defined in_surfex || defined SFX_MPI
-      IF ( lmpp ) THEN
-         CALL MPI_ALLREDUCE(zshn,the_sum,1,mpi_double_precision,  &
-           mpi_sum, mpi_comm_opa,ierror) ; 
-         zshn=the_sum
-         CALL MPI_ALLREDUCE(zshs,the_sum,1,mpi_double_precision,  &
-           mpi_sum, mpi_comm_opa,ierror) ; 
-         zshs=the_sum
-         CALL MPI_ALLREDUCE(zehn,the_sum,1,mpi_double_precision,  &
-           mpi_sum, mpi_comm_opa,ierror) ; 
-         zehn=the_sum
-         CALL MPI_ALLREDUCE(zehs,the_sum,1,mpi_double_precision,  &
-           mpi_sum, mpi_comm_opa,ierror) ; 
-         zehs=the_sum
-         CALL MPI_ALLREDUCE(zvhn,the_sum,1,mpi_double_precision,  &
-           mpi_sum, mpi_comm_opa,ierror) ; 
-         zvhn=the_sum
-         CALL MPI_ALLREDUCE(zvhs,the_sum,1,mpi_double_precision,  &
-           mpi_sum, mpi_comm_opa,ierror) ; 
-         zvhs=the_sum
-      ENDIF
-#endif
+#if ! defined in_arpege
+      CALL mpp_sum( zshn )
+      CALL mpp_sum( zshs )
+      CALL mpp_sum( zehn )
+      CALL mpp_sum( zehs )
+      CALL mpp_sum( zvhn )
+      CALL mpp_sum( zvhs )
 !
       IF (lwg) THEN
         WRITE(noutlu,*) '                              North        South'
@@ -229,6 +186,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit)
         WRITE(noutlu,1100) zehn,zehs
         WRITE(noutlu,1200) zvhn,zvhs
       ENDIF
+#endif
 !
   ENDIF 
 !

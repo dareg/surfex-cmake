@@ -29,6 +29,7 @@
 !!      Original    08/2009
 !!      S.Senesi    01/2014  Adapt to embedded seaice scheme (SWU and LWU 
 !!                           for seaice are provided as inputs)
+!!      A.Voldoire  04/2015  Add LCPL_SEAICE test
 !!------------------------------------------------------------------
 !
 !
@@ -37,7 +38,7 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_CSTS,      ONLY : XSTEFAN, XLSTT
 USE MODD_WATER_PAR, ONLY : XEMISWATICE
 !
-! 
+USE MODD_SFX_OASIS, ONLY : LCPL_SEAICE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -117,39 +118,42 @@ S%XCPL_SEA_SNOW(:) = S%XCPL_SEA_SNOW(:) + PTSTEP * PSNOW(:)
 !-------------------------------------------------------------------------------------
 ! Ice flux
 !-------------------------------------------------------------------------------------
+IF (LCPL_SEAICE.OR.OSIC) THEN
 !
-INI  = SIZE(PDIR_SW,1)
-ISWB = SIZE(PDIR_SW,2)
+  INI  = SIZE(PDIR_SW,1)
+  ISWB = SIZE(PDIR_SW,2)
 !
 !* Solar net heat flux (J/m2)
 !
-IF (OSIC) THEN
-   ZSWU(:)=PSWU_ICE(:)
-ELSE
-   ZSWU(:)=0.0
-   DO JSWB=1,ISWB
+  IF (OSIC) THEN
+    ZSWU(:)=PSWU_ICE(:)
+  ELSE
+    ZSWU(:)=0.0
+    DO JSWB=1,ISWB
       DO JI=1,INI
          ZSWU(JI) = ZSWU(JI) + (PDIR_SW(JI,JSWB)+PSCA_SW(JI,JSWB)) * S%XICE_ALB(JI)
       ENDDO
-   ENDDO
-ENDIF
+    ENDDO
+  ENDIF
 !
-S%XCPL_SEAICE_SNET(:) = S%XCPL_SEAICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
+  S%XCPL_SEAICE_SNET(:) = S%XCPL_SEAICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-IF (OSIC) THEN
-   S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * &
+  IF (OSIC) THEN
+    S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * &
               ( PLW(:) - PLWU_ICE(:) - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:) )
-ELSE
-   ZTICE4(:)=PTICE(:)**4
-   S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &
+  ELSE
+    ZTICE4(:)=PTICE(:)**4
+    S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &
                                                          - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)      ) 
-ENDIF 
+  ENDIF 
 !
 !* Sublimation (kg/m2)
 !
-S%XCPL_SEAICE_EVAP(:) = S%XCPL_SEAICE_EVAP(:) + PTSTEP * PSFTQ_ICE(:)
+  S%XCPL_SEAICE_EVAP(:) = S%XCPL_SEAICE_EVAP(:) + PTSTEP * PSFTQ_ICE(:)
+!
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_SEA',1,ZHOOK_HANDLE)
 !

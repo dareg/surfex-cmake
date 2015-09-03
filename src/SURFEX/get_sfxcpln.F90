@@ -59,6 +59,7 @@ USE MODD_SFX_OASIS,  ONLY : LCPL_LAND, LCPL_CALVING, LCPL_GW, &
 USE MODI_GET_SFX_SEA
 USE MODI_GET_SFX_LAND
 USE MODI_ABOR1_SFX
+USE MODI_GET_LUOUT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -102,9 +103,7 @@ REAL, DIMENSION(KI)   :: ZRUNOFF    ! Cumulated Surface runoff             (kg/m
 REAL, DIMENSION(KI)   :: ZDRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(KI)   :: ZCALVING   ! Cumulated Calving flux               (kg/m2)
 REAL, DIMENSION(KI)   :: ZRECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
-REAL, DIMENSION(KI)   :: ZPFLOOD    ! Cumulated flood precip interception  (kg/m2)
-REAL, DIMENSION(KI)   :: ZEFLOOD    ! Cumulated floodplains evaporation    (kg/m2)
-REAL, DIMENSION(KI)   :: ZIFLOOD    ! Cumulated floodplains infiltration   (kg/m2)
+REAL, DIMENSION(KI)   :: ZSRCFLOOD  ! Cumulated flood freshwater flux      (kg/m2)
 !
 REAL, DIMENSION(KI)   :: ZSEA_FWSU  ! Cumulated zonal wind stress       (Pa.s)
 REAL, DIMENSION(KI)   :: ZSEA_FWSV  ! Cumulated meridian wind stress    (Pa.s)
@@ -115,7 +114,7 @@ REAL, DIMENSION(KI)   :: ZSEA_FWSM  ! Cumulated wind stress             (Pa.s)
 REAL, DIMENSION(KI)   :: ZSEA_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(KI)   :: ZSEA_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(KI)   :: ZSEA_SNOW  ! Cumulated Snowfall rate           (kg/m2)
-REAL, DIMENSION(KI)   :: ZSEA_WATF  ! Cumulated Snowfall rate           (kg/m2)
+REAL, DIMENSION(KI)   :: ZSEA_WATF  ! Cumulated freshwater flux         (kg/m2)
 !
 REAL, DIMENSION(KI)   :: ZSEAICE_HEAT ! Cumulated Sea-ice non solar net heat flux (J/m2)
 REAL, DIMENSION(KI)   :: ZSEAICE_SNET ! Cumulated Sea-ice solar net heat flux     (J/m2)
@@ -150,16 +149,14 @@ IF(LCPL_LAND)THEN
   ZDRAIN   (:) = XUNDEF
   ZCALVING (:) = XUNDEF
   ZRECHARGE(:) = XUNDEF
-  ZPFLOOD  (:) = XUNDEF
-  ZEFLOOD  (:) = XUNDEF
-  ZIFLOOD  (:) = XUNDEF
+  ZSRCFLOOD(:) = XUNDEF
 !
 ! * Get land output fields
 !       
   CALL GET_SFX_LAND(I, U, &
                     LCPL_GW,LCPL_FLOOD,LCPL_CALVING,    &
                     ZRUNOFF,ZDRAIN,ZCALVING,ZRECHARGE,  &
-                    ZPFLOOD,ZEFLOOD,ZIFLOOD             )
+                    ZSRCFLOOD             )
 !
 ! * Assign land output fields
 !        

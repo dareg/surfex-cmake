@@ -45,9 +45,7 @@ CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff
 CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
 CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux 
 CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge 
-CHARACTER(LEN=8) :: CPFLOOD     = '        '   ! Floodplains recipitation interception
-CHARACTER(LEN=8) :: CEFLOOD     = '        '   ! Floodplains evaporation 
-CHARACTER(LEN=8) :: CIFLOOD     = '        '   ! Floodplains infiltration 
+CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
 !
 ! Input variables
 !
@@ -67,6 +65,7 @@ CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion
 CHARACTER(LEN=8) :: CLAKE_EVAP  = '        '   ! Evaporation over lake area
 CHARACTER(LEN=8) :: CLAKE_RAIN  = '        '   ! Rainfall over lake area
 CHARACTER(LEN=8) :: CLAKE_SNOW  = '        '   ! Snowfall over lake area
+CHARACTER(LEN=8) :: CLAKE_WATF  = '        '   ! Net freshwater flux
 !
 !-------------------------------------------------------------------------------
 !
@@ -115,14 +114,14 @@ LOGICAL          :: LWATER = .FALSE.
 !
 NAMELIST/NAM_SFX_LAND_CPL/XTSTEP_CPL_LAND,                                &
                          CRUNOFF,CDRAIN,CCALVING,CRECHARGE,CWTD,CFWTD,    &
-                         CFFLOOD,CPIFLOOD,CPFLOOD,CEFLOOD,CIFLOOD
+                         CFFLOOD,CPIFLOOD,CSRCFLOOD
 !
 !
 !*       2.    NAMELISTS FOR LAKE FIELD
 !              ---------------------------------------------------------------
 !
-NAMELIST/NAM_SFX_LAKE_CPL/XTSTEP_CPL_LAKE,                 &
-                          CLAKE_EVAP,CLAKE_RAIN,CLAKE_SNOW
+NAMELIST/NAM_SFX_LAKE_CPL/XTSTEP_CPL_LAKE,                              &
+                          CLAKE_EVAP,CLAKE_RAIN,CLAKE_SNOW,CLAKE_WATF
 !
 !
 !*       3.    NAMELISTS FOR OCEANIC FIELD

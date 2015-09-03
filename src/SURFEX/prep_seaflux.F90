@@ -198,10 +198,8 @@ IF(TRIM(S%CINTERPOL_SST)/='NONE')THEN
 !
   S%LINTERPOL_SST=.TRUE.
 !
-! Precedent, Current and Next Monthly SST
-  INMTH=3
-! Precedent, Current and Next Annual Monthly SST
-  IF(TRIM(S%CINTERPOL_SST)=='ANNUAL')INMTH=14
+! Precedent, Current, Next, and Second-next Monthly SST
+  INMTH=4
 !
   ALLOCATE(S%XSST_MTH(SIZE(S%XSST),INMTH))
   DO JMTH=1,INMTH
@@ -220,10 +218,8 @@ IF(TRIM(S%CINTERPOL_SSS)/='NONE')THEN
 !
    S%LINTERPOL_SSS=.TRUE.
    !
-   ! Precedent, Current and Next Monthly SSS
-   INMTH=3
-   ! Precedent, Current and Next Annual Monthly SSS
-   IF(TRIM(S%CINTERPOL_SSS)=='ANNUAL')INMTH=14
+   ! Precedent, Current, Next, and Second-next Monthly SSS
+   INMTH=4
    !
    ALLOCATE(S%XSSS_MTH(SIZE(S%XSSS),INMTH))
    DO JMTH=1,INMTH

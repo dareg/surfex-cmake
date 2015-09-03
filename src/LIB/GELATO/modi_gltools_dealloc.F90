@@ -213,7 +213,7 @@ IF ( nnflxin==0 ) THEN
     DEALLOCATE( tpglt%ice_atm )
 ENDIF
 !
-DEALLOCATE( tpglt%sit_d )
+IF ( ntd/=0 ) DEALLOCATE( tpglt%sit_d )
 !
 #if ! defined in_surfex
 IF ( ndynami==1 ) THEN
