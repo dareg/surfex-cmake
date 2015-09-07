@@ -101,9 +101,9 @@ DO JL = 1,NVAR   ! control variable (x at previous time step)
           K1 = JJJ+I%NPATCH*(JK-1)
           !
           IF ( HACTION=="READ" ) THEN
-            READ (111,*) PTAB(JI,L1,K1)
+            READ (111) PTAB(JI,L1,K1)
           ELSEIF ( HACTION=="WRIT" ) THEN
-            WRITE(111,*) PTAB(JI,L1,K1)
+            WRITE(111) PTAB(JI,L1,K1)
           ELSE
             ICPT = ICPT+1
             PTAB(JI,L1,K1) = PTAB_IN(ICPT)
