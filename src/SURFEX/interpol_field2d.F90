@@ -132,7 +132,7 @@ IF (IERR1>0 .OR. IERR2>0) THEN
   IF (IERR2>0) THEN
     WRITE(KLUOUT,*) ' Number of points that could not be interpolated : ', &
                       IERR2
-    IF (ZDEF(JLOOP)/=XUNDEF) THEN
+    IF (ANY(ZDEF(:)/=XUNDEF)) THEN
       DO JLOOP=1,SIZE(PFIELD,2)
         WHERE(KCODE(:)==-4)
           PFIELD(:,JLOOP)=ZDEF(JLOOP)
