@@ -395,6 +395,9 @@ ELSE
   CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
 ENDIF
 !
+! Allocation of Surfex Types
+CALL ALLOC_SURFEX(1)
+!
 ! Reading all namelist (also assimilation)
 CALL READ_ALL_NAMELISTS(CHF, CHI, CHS, CHU, CHT, CHW, &
                         DGEI, DGF, DGL, DGI, DGMF, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
@@ -420,9 +423,6 @@ IF (NRANK==NPIO) THEN
 ENDIF
 !
 LREAD_ALL = .TRUE.
-!
-! Allocation of Surfex Types
-CALL ALLOC_SURFEX(1)
 !
 ! Go to SURFEX
 CALL GOTO_SURFEX(1,.TRUE.)
